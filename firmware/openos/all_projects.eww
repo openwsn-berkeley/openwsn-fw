@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\iar_projects\program_eui64.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_button.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_gyro.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_hybrid_arq.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_i2c_connnected_slaves.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_imu.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_imu_radio.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_large_range_accel.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_leds_xtal.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_magnetometer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_openwsn.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_radio.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_sensitive_accel_temperature.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_serial.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\test_timer.ewp</path>
+  </project>
+  <batchBuild/>
+</workspace>
+
+

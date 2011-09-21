@@ -1,0 +1,7 @@
+/**
+\defgroup ICMPv6RPL ICMPv6RPL
+
+\brief ICMPv6 RPL implementation
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+*/

@@ -1,0 +1,10 @@
+/**
+\defgroup IEEE802154E IEEE802154E
+
+\brief IEEE802.15.4e TSCH
+
+\author Branko Kerkez   <bkerkez@berkeley.edu>, March 2011
+\author Fabien Chraim   <chraim@eecs.berkeley.edu>, June 2011
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2011
+
+*/

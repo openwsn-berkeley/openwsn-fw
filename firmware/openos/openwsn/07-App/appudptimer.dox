@@ -1,0 +1,7 @@
+/**
+\defgroup AppUdpTimer AppUdpTimer
+
+\brief UDP Timer application
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+*/

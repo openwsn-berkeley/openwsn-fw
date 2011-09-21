@@ -1,0 +1,19 @@
+/******************************************************************************
+;   Description: This code sets the MCLK frequency to 8 MHz. It assumes a 32768 Hz 
+;                crystal is present at the LFXTL on the MSP430FG439 device
+;
+;   MSP430 Applications
+;   Texas Instruments Inc.
+;   August 2006
+;   Built with IAR Embedded Workbench Version: 3.41A
+;*******************************************************************************/
+#include  <msp430x43x.h>
+            public DCO
+	    RSEG CODE
+    
+DCO:
+SetupFLL2:  bis.b   #FN_4,&SCFI0            ; x2 DCO, 8MHz nominal DCO
+            bis.b   #DCOPLUS+XCAP14PF,&FLL_CTL0 ; DCO+, configure load caps
+            mov.b   #121,&SCFQCTL           ; (121+1) x 2 x 32768 = 7.99 MHz
+            ret                             ; Return from subroutine
+            END

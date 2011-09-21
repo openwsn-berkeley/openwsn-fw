@@ -1,0 +1,10 @@
+/**
+\defgroup AppUdpChannel AppUdpChannel
+
+\brief UDP application to change the channel of a mote.
+
+If the mote is connected to a computer, one can trigger this application,
+specifying the IPv6 address of a remote node.
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+*/

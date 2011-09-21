@@ -1,0 +1,7 @@
+/**
+\defgroup ICMPv6Echo ICMPv6Echo
+
+\brief ICMPv6 echo (ping) implementation
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+*/
