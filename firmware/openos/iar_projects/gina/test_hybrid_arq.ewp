@@ -320,15 +320,15 @@
         <option>
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\drivers</state>
-          <state>$PROJ_DIR$\..\openwsn</state>
-          <state>$PROJ_DIR$\..\openwsn\02a-MAC</state>
-          <state>$PROJ_DIR$\..\openwsn\02b-RES</state>
-          <state>$PROJ_DIR$\..\openwsn\03a-IPHC</state>
-          <state>$PROJ_DIR$\..\openwsn\03b-IPv6</state>
-          <state>$PROJ_DIR$\..\openwsn\04-TRAN</state>
-          <state>$PROJ_DIR$\..\openwsn\07-App</state>
-          <state>$PROJ_DIR$\..\openwsn\cross-layers</state>
+          <state>$PROJ_DIR$\..\..\drivers\gina</state>
+          <state>$PROJ_DIR$\..\..\openwsn</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02a-MAC</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02b-RES</state>
+          <state>$PROJ_DIR$\..\..\openwsn\03a-IPHC</state>
+          <state>$PROJ_DIR$\..\..\openwsn\03b-IPv6</state>
+          <state>$PROJ_DIR$\..\..\openwsn\04-TRAN</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App</state>
+          <state>$PROJ_DIR$\..\..\openwsn\cross-layers</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1888,22 +1888,22 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\drivers\button.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\button.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\gina.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\gina.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\leds.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\leds.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\radio.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\radio.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\scheduler.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\scheduler.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\spi.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\spi.c</name>
     </file>
   </group>
   <group>
@@ -1911,26 +1911,26 @@
     <group>
       <name>02a-MAC</name>
       <file>
-        <name>$PROJ_DIR$\..\openwsn\02a-MAC\IEEE802154.h</name>
+        <name>$PROJ_DIR$\..\..\openwsn\02a-MAC\IEEE802154.h</name>
       </file>
     </group>
     <group>
       <name>cross-layers</name>
       <file>
-        <name>$PROJ_DIR$\..\openwsn\cross-layers\idmanager.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\idmanager.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\openwsn\cross-layers\openqueue.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\openqueue.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\openwsn\cross-layers\openserial.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\openserial.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\openwsn\cross-layers\packetfunctions.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\packetfunctions.c</name>
       </file>
     </group>
     <file>
-      <name>$PROJ_DIR$\..\openwsn\openwsn.c</name>
+      <name>$PROJ_DIR$\..\..\openwsn\openwsn.c</name>
     </file>
   </group>
 </project>

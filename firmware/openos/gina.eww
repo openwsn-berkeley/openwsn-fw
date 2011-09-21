@@ -2,49 +2,49 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\iar_projects\program_eui64.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\program_eui64.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_button.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_button.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_gyro.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_gyro.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_hybrid_arq.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_hybrid_arq.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_i2c_connnected_slaves.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_i2c_connnected_slaves.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_imu.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_imu.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_imu_radio.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_imu_radio.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_large_range_accel.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_large_range_accel.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_leds_xtal.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_leds_xtal.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_magnetometer.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_magnetometer.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_openwsn.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_openwsn.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_radio.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_radio.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_sensitive_accel_temperature.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_sensitive_accel_temperature.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_serial.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_serial.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\test_timer.ewp</path>
+    <path>$WS_DIR$\iar_projects\gina\test_timer.ewp</path>
   </project>
   <batchBuild/>
 </workspace>

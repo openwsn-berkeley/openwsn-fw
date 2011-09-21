@@ -317,7 +317,7 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\drivers</state>
+          <state>$PROJ_DIR$\..\..\drivers\gina</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1776,7 +1776,7 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\drivers\pwm.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\pwm.c</name>
     </file>
   </group>
 </project>

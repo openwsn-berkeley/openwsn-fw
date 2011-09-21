@@ -1782,13 +1782,13 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\drivers\gina.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\gina.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\i2c.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\i2c.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\radio.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\radio.c</name>
     </file>
   </group>
 </project>

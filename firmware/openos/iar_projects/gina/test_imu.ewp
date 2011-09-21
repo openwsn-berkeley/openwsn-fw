@@ -318,10 +318,10 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\drivers</state>
-          <state>$PROJ_DIR$\..\openwsn</state>
-          <state>$PROJ_DIR$\..\openwsn\02a-MAC</state>
-          <state>$PROJ_DIR$\..\openwsn\cross-layers</state>
+          <state>$PROJ_DIR$\..\..\drivers\gina</state>
+          <state>$PROJ_DIR$\..\..\openwsn</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02a-MAC</state>
+          <state>$PROJ_DIR$\..\..\openwsn\cross-layers</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1881,25 +1881,25 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\drivers\gyro.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\gyro.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\i2c.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\i2c.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\large_range_accel.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\large_range_accel.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\magnetometer.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\magnetometer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\openwsn\openwsn.h</name>
+      <name>$PROJ_DIR$\..\..\openwsn\openwsn.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\scheduler.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\scheduler.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\drivers\sensitive_accel_temperature.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\sensitive_accel_temperature.c</name>
     </file>
   </group>
 </project>
