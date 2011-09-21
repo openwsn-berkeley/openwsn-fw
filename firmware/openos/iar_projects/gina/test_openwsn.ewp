@@ -654,7 +654,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>test_openwsn.d43</state>
+          <state>openwsn.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -848,7 +848,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>test_openwsn.a43</state>
+          <state>openwsn.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1885,7 +1885,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\test_openwsn.c</name>
+      <name>$PROJ_DIR$\openwsn.c</name>
     </file>
   </group>
   <group>

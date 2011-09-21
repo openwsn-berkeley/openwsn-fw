@@ -5,7 +5,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
 */
 
-#include "test_openwsn.h"
+#include "openwsn.h"
 //board
 #include "gina.h"
 #include "leds.h"
