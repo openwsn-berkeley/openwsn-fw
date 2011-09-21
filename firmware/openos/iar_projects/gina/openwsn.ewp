@@ -325,8 +325,8 @@
           <state>$PROJ_DIR$</state>
           <state>$PROJ_DIR$\..\..\drivers\gina</state>
           <state>$PROJ_DIR$\..\..\openwsn</state>
-          <state>$PROJ_DIR$\..\..\openwsn\02a-MAC</state>
-          <state>$PROJ_DIR$\..\..\openwsn\02b-RES</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02a-MAClow</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02b-MAChigh</state>
           <state>$PROJ_DIR$\..\..\openwsn\03a-IPHC</state>
           <state>$PROJ_DIR$\..\..\openwsn\03b-IPv6</state>
           <state>$PROJ_DIR$\..\..\openwsn\04-TRAN</state>
@@ -1930,24 +1930,24 @@
   <group>
     <name>openwsn</name>
     <group>
-      <name>02a-MAC</name>
+      <name>02a-MAClow</name>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\02a-MAC\IEEE802154.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\02a-MAC\IEEE802154E.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\02a-MAClow\IEEE802154E.c</name>
       </file>
     </group>
     <group>
-      <name>02b-RES</name>
+      <name>02b-MAChigh</name>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\02b-RES\neighbors.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\02b-RES\res.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\res.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\02b-RES\schedule.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\schedule.c</name>
       </file>
     </group>
     <group>
