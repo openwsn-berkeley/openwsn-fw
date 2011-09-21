@@ -1885,7 +1885,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\openwsn.c</name>
+      <name>$PROJ_DIR$\openwsn_proj.c</name>
     </file>
   </group>
   <group>
