@@ -323,7 +323,7 @@
         <option>
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\..\drivers\gina</state>
+          <state>$PROJ_DIR$\..\..\drivers\telosb</state>
           <state>$PROJ_DIR$\..\..\openwsn</state>
           <state>$PROJ_DIR$\..\..\openwsn\02a-MAClow</state>
           <state>$PROJ_DIR$\..\..\openwsn\02b-MAChigh</state>
@@ -1891,40 +1891,40 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\gina.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\telosb.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\gyro.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\gyro.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\i2c.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\i2c.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\ieee154etimer.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\ieee154etimer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\large_range_accel.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\large_range_accel.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\leds.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\leds.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\magnetometer.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\magnetometer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\radio.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\radio.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\scheduler.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\scheduler.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\sensitive_accel_temperature.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\sensitive_accel_temperature.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\spi.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\spi.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\timers.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\timers.c</name>
     </file>
   </group>
   <group>
@@ -2007,7 +2007,7 @@
         <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpecho.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpgina.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudptelosb.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpinject.c</name>

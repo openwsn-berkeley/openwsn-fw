@@ -317,7 +317,7 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\drivers\gina</state>
+          <state>$PROJ_DIR$\..\..\drivers\telosb</state>
           <state>$PROJ_DIR$\..\..\openwsn</state>
           <state>$PROJ_DIR$\..\..\openwsn\02a-MAC</state>
           <state>$PROJ_DIR$\..\..\openwsn\cross-layers</state>
@@ -1880,10 +1880,10 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\gina.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\telosb.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\leds.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\leds.c</name>
     </file>
   </group>
 </project>

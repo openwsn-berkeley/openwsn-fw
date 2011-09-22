@@ -319,7 +319,7 @@
         <option>
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\..\drivers\gina</state>
+          <state>$PROJ_DIR$\..\..\drivers\telosb</state>
           <state>$PROJ_DIR$\..\..\openwsn</state>
           <state>$PROJ_DIR$\..\..\openwsn\02a-MAC</state>
           <state>$PROJ_DIR$\..\..\openwsn\02b-RES</state>
@@ -1887,22 +1887,22 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\button.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\button.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\gina.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\telosb.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\leds.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\leds.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\radio.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\radio.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\scheduler.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\scheduler.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\spi.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\spi.c</name>
     </file>
   </group>
   <group>

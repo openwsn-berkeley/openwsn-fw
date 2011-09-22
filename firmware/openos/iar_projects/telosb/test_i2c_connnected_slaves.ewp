@@ -317,7 +317,7 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\drivers\gina</state>
+          <state>$PROJ_DIR$\..\..\drivers\telosb</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1877,7 +1877,7 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\i2c.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\i2c.c</name>
     </file>
   </group>
 </project>
