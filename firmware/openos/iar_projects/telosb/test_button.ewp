@@ -62,7 +62,7 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.h</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
@@ -1884,13 +1884,7 @@
       <name>$PROJ_DIR$\..\..\drivers\telosb\button.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\telosb.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\drivers\telosb\leds.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\scheduler.c</name>
     </file>
   </group>
 </project>
