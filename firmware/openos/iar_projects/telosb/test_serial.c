@@ -1,6 +1,6 @@
 /**
-\brief This is a standalone test program for serial communication between the GINA2.2b/c
-       and a computer using the breakout board.
+\brief This is a standalone test program for serial communication between the
+       TelosB and a computer.
 
 The digital UART interface is:
    - P3.7: A1_SOMI_RX
