@@ -6,28 +6,29 @@
 \{
 \addtogroup Leds
 \{
+
+On TelosB, the LEDs are connected to:
+   - P5.4: red LED   -> error
+   - P5.5: green LED -> radio
+   - P5.6: blue LED  -> sync
 */
 
-#include "msp430x26x.h"
+#include "msp430f1611.h"
 #include "stdint.h"
  
 //=========================== define ==========================================
 
-#define LED_RADIO_ON()       P2OUT |=  0x01; // yellow
-#define LED_RADIO_OFF()      P2OUT &= ~0x01;
-#define LED_RADIO_TOGGLE()   P2OUT ^=  0x01;
+#define LED_ERROR_ON()       P5OUT |=  0x10; // red
+#define LED_ERROR_OFF()      P5OUT &= ~0x10;
+#define LED_ERROR_TOGGLE()   P5OUT ^=  0x10;
 
-#define LED_SYNC_ON()        P2OUT |=  0x02; // green
-#define LED_SYNC_OFF()       P2OUT &= ~0x02;
-#define LED_SYNC_TOGGLE()    P2OUT ^=  0x02;
+#define LED_RADIO_ON()       P5OUT |=  0x20; // green
+#define LED_RADIO_OFF()      P5OUT &= ~0x20;
+#define LED_RADIO_TOGGLE()   P5OUT ^=  0x20;
 
-#define LED_D3_ON()          P2OUT |=  0x04; // orange
-#define LED_D3_OFF()         P2OUT &= ~0x04;
-#define LED_D3_TOGGLE()      P2OUT ^=  0x04;
-
-#define LED_ERROR_ON()       P2OUT |=  0x08; // red
-#define LED_ERROR_OFF()      P2OUT &= ~0x08;
-#define LED_ERROR_TOGGLE()   P2OUT ^=  0x08;
+#define LED_SYNC_ON()        P5OUT |=  0x40; // blue
+#define LED_SYNC_OFF()       P5OUT &= ~0x40;
+#define LED_SYNC_TOGGLE()    P5OUT ^=  0x40;
 
 //=========================== typedef =========================================
 
