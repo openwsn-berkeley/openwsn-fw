@@ -1782,7 +1782,7 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\gina.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\board.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\i2c.c</name>

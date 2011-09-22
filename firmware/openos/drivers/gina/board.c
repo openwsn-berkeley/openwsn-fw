@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
 */
 
-#include "gina.h"
+#include "board.h"
 #include "leds.h"
 
 #ifdef ISR_I2C

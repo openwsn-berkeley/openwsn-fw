@@ -1,4 +1,4 @@
-#include "gina_config.h"
+#include "board.h"
 #include "radio.h"
 #include "packetfunctions.h"
 #include "IEEE802154E.h"

@@ -7,7 +7,7 @@
 
 #include "openwsn.h"
 //board
-#include "gina.h"
+#include "board.h"
 #include "leds.h"
 //openwsn
 #include "openwsn.h"

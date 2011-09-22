@@ -1891,7 +1891,7 @@
       <name>$PROJ_DIR$\..\..\drivers\gina\button.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\gina.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\board.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\leds.c</name>
