@@ -1,0 +1,37 @@
+/**
+\defgroup Radio Radio
+
+\brief Radio driver for the Atmel AT86RF231 IEEE802.15.4 radio.
+
+This radio is one of the better IEEE802.15.4 radio on the market as of the time of market. It's energy consumption is low compared to others on the market (14mA in Tx@0dBm, 12.3mA in Rx) for a very good sensitivity (-101dBm). It also has a couple of very interesting features:
+
+\section antennaDiversity Antenna Diversity
+
+This radio has pins to connect two entirely different antennas. On GINA 2.2b/c, we connector those to an on-board chip antenna and a U.FL connector for an optional external antenna.
+
+You can use this diversity in two ways:
+- you can hardcode which antenna you use, by setting the <tt>RG_ANT_DIV</tt> register;
+- you can have the radio pick the best antenne for each packet.
+
+The way the second option works is as follows. Whenever the radio start hearing a preamble, it switches back-and-forth between the two antennas and monitor  the received signal strength on both. At the SFD, it elects the one which offers the best RSSI and sticks with that one for the rest of the packet.
+
+You can use this feature to:
+- combat multi-path fading by spacing the two antenna by ~3.5cm;
+- increase diversity by using two polarized antennas;
+- etc.
+
+\section highDataRate High data rate
+
+The IEEE802.15.4 PHY standard uses DSSS to convert a 2Mbps raw chip rate into a effective 250kbps data rate. This radio, however, allows you to disable this function and directly use the 2Mbps mode. This might be useful in very good links where DSSS might not be needed. Packets can be transmitted 8 times faster.
+
+\section dontlike What we don't like (so much)
+
+It's a bit annoying that the radio can not generate an interrupt when the SFD is transmitted.
+
+\section moreinfo More information
+
+- <a href="http://atmel.com/dyn/products/product_card.asp?part_id=4338">radio's homepage</a>
+- <a href="http://atmel.com/dyn/resources/prod_documents/doc8111.pdf">radio's datasheet</a>
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2011
+*/

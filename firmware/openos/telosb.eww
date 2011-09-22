@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\program_eui64.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_leds_xtal.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_button.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_timer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_serial.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_i2c_connnected_slaves.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_large_range_accel.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_sensitive_accel_temperature.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_gyro.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_magnetometer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_imu.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_radio.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_hybrid_arq.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\test_imu_radio.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\iar_projects\gina\openwsn.ewp</path>
+  </project>
+  <batchBuild/>
+</workspace>
+
+
