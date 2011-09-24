@@ -62,7 +62,7 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.h</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
@@ -105,15 +105,15 @@
         </option>
         <option>
           <name>GStackHeapOverride</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>GStackSize2</name>
-          <state>200</state>
+          <state>80</state>
         </option>
         <option>
           <name>GHeapSize2</name>
-          <state>200</state>
+          <state>80</state>
         </option>
         <option>
           <name>RadioDataModelType</name>
@@ -160,7 +160,8 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state></state>
+          <state>ISR_BUTTON</state>
+          <state>TEST_BUTTON</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -317,7 +318,10 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state></state>
+          <state>$PROJ_DIR$\..\..\drivers\telosb</state>
+          <state>$PROJ_DIR$\..\..\openwsn</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02a-MAC</state>
+          <state>$PROJ_DIR$\..\..\openwsn\cross-layers</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -640,7 +644,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>program_eui64.d43</state>
+          <state>test_clocks.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -674,7 +678,7 @@
         </option>
         <option>
           <name>XList</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>SegmentMap</name>
@@ -834,7 +838,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>program_eui64.a43</state>
+          <state>test_clocks.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -856,7 +860,7 @@
         </option>
         <option>
           <name>ListOutputFormat</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>BufferedTermOutput</name>
@@ -1868,9 +1872,21 @@
       <data/>
     </settings>
   </configuration>
-  <file>
-    <name>$PROJ_DIR$\program_eui64.c</name>
-  </file>
+  <group>
+    <name>application</name>
+    <file>
+      <name>$PROJ_DIR$\test_clocks.c</name>
+    </file>
+  </group>
+  <group>
+    <name>drivers</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\button.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\leds.c</name>
+    </file>
+  </group>
 </project>
 
 

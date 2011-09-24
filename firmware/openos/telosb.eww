@@ -2,7 +2,7 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\iar_projects\telosb\program_eui64.ewp</path>
+    <path>$WS_DIR$\iar_projects\telosb\test_clocks.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\iar_projects\telosb\test_leds_xtal.ewp</path>
@@ -11,13 +11,7 @@
     <path>$WS_DIR$\iar_projects\telosb\test_button.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_timer.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\iar_projects\telosb\test_serial.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_i2c_connnected_slaves.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\iar_projects\telosb\test_radio.ewp</path>
