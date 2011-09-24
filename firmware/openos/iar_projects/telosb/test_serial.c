@@ -22,28 +22,28 @@ void main(void)
     
   P3SEL     = 0xC0;                              // P3.6,7 = UART1TX/RX
   
-  //115200 baud, clocked from 8MHz SMCLK
-  ME2      |=  UTXE1 + URXE1;                    // Enable USART1 TXD/RXD
+  //115200 baud, clocked from 4.8MHz SMCLK
+  ME2      |=  UTXE1 + URXE1;                    // enable UART1 TX/RX
   UCTL1    |=  CHAR;                             // 8-bit character
-  UTCTL1   |=  SSEL1;                            // UCLK = SMCLK
+  UTCTL1   |=  SSEL1;                            // clocking from SMCLK
   UBR01     =  41;                               // 4.8MHz/115200 - 41.66
   UBR11     =  0x00;                             //
-  UMCTL1    =  0x4A;                             // Modulation
-  UCTL1    &= ~SWRST;                            // Initialize USART state machine
-  IE2      |=  URXIE1;                           // Enable USART1 RX interrupt
+  UMCTL1    =  0x4A;                             // modulation
+  UCTL1    &= ~SWRST;                            // clear UART1 reset bit
+  IE2      |=  URXIE1;                           // enable UART1 RX interrupt
   
   __bis_SR_register(LPM0_bits + GIE);            // sleep, leave interrupts on
 
   /*
   //9600 baud, clocked from 32kHz ACLK
-  ME2      |=  UTXE1 + URXE1;                    // Enable USART1 TXD/RXD
+  ME2      |=  UTXE1 + URXE1;                    // enable UART1 TX/RX
   UCTL1    |=  CHAR;                             // 8-bit character
-  UTCTL1   |=  SSEL0;                            // UCLK = ACLK
+  UTCTL1   |=  SSEL0;                            // clocking from ACLK
   UBR01     =  0x03;                             // 32k/9600 - 3.41
   UBR11     =  0x00;                             //
-  UMCTL1    =  0x4A;                             // Modulation
-  UCTL1    &= ~SWRST;                            // Initialize USART state machine
-  IE2      |=  URXIE1;                           // Enable USART1 RX interrupt
+  UMCTL1    =  0x4A;                             // modulation
+  UCTL1    &= ~SWRST;                            // clear UART1 reset bit
+  IE2      |=  URXIE1;                           // enable UART1 RX interrupt
   
   __bis_SR_register(LPM3_bits + GIE);            // sleep, leave interrupts and ACLK on
   */
