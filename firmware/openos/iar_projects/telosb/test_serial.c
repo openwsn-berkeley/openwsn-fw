@@ -1,64 +1,57 @@
-/**
+ /**
 \brief This is a standalone test program for serial communication between the
        TelosB and a computer.
 
 The digital UART interface is:
-   - P3.7: A1_SOMI_RX
-   - P3.8: A1_SOMI_TX
+   - P3.6: UART1TX
+   - P3.7: UART1RX
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
 */
 
-#include "msp430x26x.h"
-#include "stdint.h"
-#include "gina.h"
+#include "msp430f1611.h"
 #include "leds.h"
 
 void main(void)
 {
-  //configuring
-  gina_init();
+  WDTCTL  = WDTPW + WDTHOLD;                     // disable watchdog timer
+   
+  DCOCTL  = DCO0 | DCO1 | DCO2;                  // MCLK at ~8MHz
+  BCSCTL1 = RSEL0 | RSEL1 | RSEL2;               // MCLK at ~8MHz
+                                                 // by default, ACLK from 32kHz XTAL which is running
     
-  P3SEL     = 0xC0;                              // P3.6,7 = USCI_A1 TXD/RXD
+  P3SEL     = 0xC0;                              // P3.6,7 = UART1TX/RX
+  
+  //115200 baud, clocked from 8MHz SMCLK
+  ME2      |=  UTXE1 + URXE1;                    // Enable USART1 TXD/RXD
+  UCTL1    |=  CHAR;                             // 8-bit character
+  UTCTL1   |=  SSEL1;                            // UCLK = SMCLK
+  UBR01     =  41;                               // 4.8MHz/115200 - 41.66
+  UBR11     =  0x00;                             //
+  UMCTL1    =  0x4A;                             // Modulation
+  UCTL1    &= ~SWRST;                            // Initialize USART state machine
+  IE2      |=  URXIE1;                           // Enable USART1 RX interrupt
+  
+  __bis_SR_register(LPM0_bits + GIE);            // sleep, leave interrupts on
+
   /*
   //9600 baud, clocked from 32kHz ACLK
-  UCA1CTL1 |= UCSSEL_1;                          // CLK = ACLK
-  UCA1BR0   = 0x03;                              // 9600 baud if ACLK@32kHz
-  UCA1BR1   = 0x00;
-  UCA1MCTL  = UCBRS_3;                           // Modulation UCBRSx = 3
+  ME2      |=  UTXE1 + URXE1;                    // Enable USART1 TXD/RXD
+  UCTL1    |=  CHAR;                             // 8-bit character
+  UTCTL1   |=  SSEL0;                            // UCLK = ACLK
+  UBR01     =  0x03;                             // 32k/9600 - 3.41
+  UBR11     =  0x00;                             //
+  UMCTL1    =  0x4A;                             // Modulation
+  UCTL1    &= ~SWRST;                            // Initialize USART state machine
+  IE2      |=  URXIE1;                           // Enable USART1 RX interrupt
+  
+  __bis_SR_register(LPM3_bits + GIE);            // sleep, leave interrupts and ACLK on
   */
-  
-  //115200 baud, clocked from 16MHz SMCLK
-  UCA1CTL1 |= UCSSEL_2;                          // CLK = SMCL
-  UCA1BR0   = 0x8a;                              // 115200 baud if SMCLK@16MHz
-  UCA1BR1   = 0x00;
-  UCA1MCTL  = UCBRS_7;                           // Modulation UCBRSx = 7
-  
-  /*
-  //256000 baud, clocked from 16MHz SMCLK
-  UCA1CTL1 |= UCSSEL_2;                          // CLK = SMCL
-  UCA1BR0   = 0x3E;                              // 256000 baud if SMCLK@16MHz
-  UCA1BR1   = 0x00;
-  UCA1MCTL  = UCBRS_4;                           // Modulation UCBRSx = 4
-  */
-  
-  UCA1CTL1 &= ~UCSWRST;                          // Initialize USCI state machine
-  UC1IFG   &= ~(UCA1TXIFG | UCA1RXIFG);          // clear possible pending interrupts
-  UC1IE    |=  (UCA1RXIE  | UCA1TXIE);           // Enable USCI_A1 TX & RX interrupt
-  
-  __bis_SR_register(LPM4_bits + GIE);            // sleep, leave interrupts on
 }
 
-#pragma vector=USCIAB1RX_VECTOR
-__interrupt void USCI1RX_ISR(void)
+#pragma vector=USART1RX_VECTOR
+__interrupt void uart_ISR(void)
 {
-  UCA1TXBUF = UCA1RXBUF;                        // TX -> RXed character
-  leds_circular_shift();
-}
-
-#pragma vector=USCIAB1TX_VECTOR
-__interrupt void USCI1TX_ISR(void)
-{
-  UC1IFG &= ~UCA1TXIFG;
+  U1TXBUF = U1RXBUF;                             // TX -> RXed character
   leds_circular_shift();
 }
