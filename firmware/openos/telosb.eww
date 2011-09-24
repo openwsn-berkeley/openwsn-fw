@@ -20,28 +20,7 @@
     <path>$WS_DIR$\iar_projects\telosb\test_i2c_connnected_slaves.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_large_range_accel.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_sensitive_accel_temperature.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_gyro.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_magnetometer.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_imu.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\iar_projects\telosb\test_radio.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_hybrid_arq.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_imu_radio.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\iar_projects\telosb\openwsn.ewp</path>
