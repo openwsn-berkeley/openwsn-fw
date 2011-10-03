@@ -17,6 +17,8 @@
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
+#define KATIMEOUT                  200 // in slots: @10ms per slot -> 2 second
+#define DESYNCTIMEOUT              500 // in slots: @10ms per slot -> 5 seconds
 
 // the different states of the IEEE802.15.4e state machine
 enum ieee154e_state_enum {
