@@ -29,7 +29,7 @@ typedef struct {
    uint8_t          numRx;
    uint8_t          numTx;
    uint8_t          numTxACK;
-   uint32_t         asn;
+   asn_t            asn;
 } neighborRow_t;
 
 typedef struct {
@@ -46,11 +46,11 @@ typedef struct {
           void          neighbors_updateMyDAGrankAndNeighborPreference();
           void          neighbors_indicateRx(open_addr_t* l2_src,
                                              int8_t       rssi,
-                                             asn_t        asnTimestamp);
+                                             asn_t*       asnTimestamp);
           void          neighbors_indicateTx(open_addr_t* dest,
                                              uint8_t      numTxAttempts,
                                              bool         was_finally_acked,
-                                             asn_t        asnTimestamp);
+                                             asn_t*       asnTimestamp);
           open_addr_t*  neighbors_KaNeighbor();
           bool          neighbors_isStableNeighbor(open_addr_t* address);
 __monitor bool          neighbors_isPreferredParent(open_addr_t* address);

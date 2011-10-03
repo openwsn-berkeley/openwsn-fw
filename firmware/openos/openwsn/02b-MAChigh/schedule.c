@@ -41,7 +41,10 @@ void schedule_init() {
       schedule_vars.schedule[i].numRx                      = 0;
       schedule_vars.schedule[i].numTx                      = 0;
       schedule_vars.schedule[i].numTxACK                   = 0;
-      schedule_vars.schedule[i].asn                        = 0;
+      schedule_vars.schedule[i].asn.bytes0and1             = 0;
+      schedule_vars.schedule[i].asn.bytes2and3             = 0;
+      schedule_vars.schedule[i].asn.byte4                  = 0;
+      
    }
    
    //slot 0 is advertisement slot
@@ -256,15 +259,11 @@ bool debugPrint_schedule() {
 
 //=== from IEEE802154E
 
-__monitor cellType_t schedule_getType(asn_t asn_param) {
-   uint16_t slotOffset;
-   slotOffset = asn_param%SCHEDULELENGTH;
+__monitor cellType_t schedule_getType(uint16_t slotOffset) {
    return schedule_vars.schedule[slotOffset].type;
 }
 
-__monitor bool schedule_getOkToSend(asn_t asn_param) {
-   uint16_t slotOffset;
-   slotOffset = asn_param%SCHEDULELENGTH;
+__monitor bool schedule_getOkToSend(uint16_t slotOffset) {
    // decrement backoff of that slot
    if (schedule_vars.schedule[slotOffset].backoff>0) {
       schedule_vars.schedule[slotOffset].backoff--;
@@ -283,31 +282,23 @@ __monitor bool schedule_getOkToSend(asn_t asn_param) {
    }
 }
 
-__monitor void schedule_getNeighbor(asn_t asn_param, open_addr_t* addrToWrite) {
-   uint16_t slotOffset;
-   slotOffset = asn_param%SCHEDULELENGTH;
+__monitor void schedule_getNeighbor(uint16_t slotOffset, open_addr_t* addrToWrite) {
    memcpy(addrToWrite,&schedule_vars.schedule[slotOffset].neighbor,sizeof(open_addr_t));
 }
 
-__monitor channelOffset_t schedule_getChannelOffset(asn_t asn_param) {
-   uint16_t slotOffset;
-   slotOffset = asn_param%SCHEDULELENGTH;
+__monitor channelOffset_t schedule_getChannelOffset(uint16_t slotOffset) {
    return schedule_vars.schedule[slotOffset].channelOffset;
 }
 
-__monitor void schedule_indicateRx(asn_t asnTimestamp) {
-   uint16_t slotOffset;
-   slotOffset = asnTimestamp%SCHEDULELENGTH;
+__monitor void schedule_indicateRx(uint16_t slotOffset, asn_t* asnTimestamp) {
    schedule_vars.schedule[slotOffset].numRx++;
-   schedule_vars.schedule[slotOffset].asn=asnTimestamp;
+   memcpy(&schedule_vars.schedule[slotOffset].asn, asnTimestamp, sizeof(asn_t));
 }
 
-__monitor void schedule_indicateTx(asn_t   asnTimestamp,
-                                   bool    succesfullTx) {
-   uint16_t slotOffset;
-   
+__monitor void schedule_indicateTx(uint16_t slotOffset,
+                                   asn_t*   asnTimestamp,
+                                   bool     succesfullTx) {
    // update the slot's statistics
-   slotOffset = asnTimestamp%SCHEDULELENGTH;
    if (schedule_vars.schedule[slotOffset].numTx==0xFF) {
       schedule_vars.schedule[slotOffset].numTx/=2;
       schedule_vars.schedule[slotOffset].numTxACK/=2;
@@ -316,7 +307,7 @@ __monitor void schedule_indicateTx(asn_t   asnTimestamp,
    if (succesfullTx==TRUE) {
       schedule_vars.schedule[slotOffset].numTxACK++;
    }
-   schedule_vars.schedule[slotOffset].asn=asnTimestamp;
+   memcpy(&schedule_vars.schedule[slotOffset].asn, asnTimestamp, sizeof(asn_t));
    
    // update this slot's backoff parameters
    if (succesfullTx==TRUE) {

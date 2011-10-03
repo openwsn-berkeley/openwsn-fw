@@ -17,6 +17,7 @@
 typedef struct {
    // misc
    asn_t              asn;                  // current absolute slot number
+   uint16_t           slotOffset;           // current slot offset (equal to slotOffset)
    uint16_t           deSyncTimeout;        // how many slots left before looses sync
    bool               isSync;               // TRUE iff mote is synchronized to network
    // as shown on the chronogram
@@ -84,8 +85,9 @@ bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
 bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
 // ASN handling
-void     asnWrite(OpenQueueEntry_t* advFrame);
-uint16_t asnRead (OpenQueueEntry_t* advFrame);
+void     incrementAsnOffset();
+void     asnWriteToAdv(OpenQueueEntry_t* advFrame);
+void     asnStoreFromAdv(OpenQueueEntry_t* advFrame);
 // synchronization
 void     synchronizePacket(uint16_t timeReceived);
 void     synchronizeAck(int16_t timeCorrection);
@@ -97,7 +99,7 @@ void     notif_receive(OpenQueueEntry_t* packetReceived);
 void     resetStats();
 void     updateStats(int16_t timeCorrection);
 // misc
-uint8_t  calculateFrequency(asn_t asn, uint8_t channelOffset);
+uint8_t  calculateFrequency(uint8_t channelOffset);
 void     changeState(uint8_t newstate);
 void     endSlot();
 bool     debugPrint_asn();
@@ -118,7 +120,10 @@ void mac_init() {
    DEBUG_PIN_FSM_INIT();
    
    // initialize variables
-   ieee154e_vars.asn                        = 0;
+   ieee154e_vars.asn.byte4                  = 0;
+   ieee154e_vars.asn.bytes2and3             = 0;
+   ieee154e_vars.asn.bytes0and1             = 0;
+   ieee154e_vars.slotOffset                 = 0;
    ieee154e_vars.deSyncTimeout              = 0;
    if (idmanager_getIsDAGroot()==TRUE) {
       changeIsSync(TRUE);
@@ -142,8 +147,32 @@ void mac_init() {
 
 //=========================== public ==========================================
 
-__monitor asn_t ieee154e_getAsn() {
-   return ieee154e_vars.asn;
+/**
+/brief Difference between some older ASN and the current ASN.
+
+\param someASN [in] some ASN to compare to the current
+
+\returns The ASN difference, or 0xffff if more than 65535 different
+*/
+__monitor uint16_t ieee154e_asnDiff(asn_t* someASN) {
+   uint16_t diff;
+   
+   if (ieee154e_vars.asn.byte4 != someASN->byte4) {
+      return 0xffff;
+   }
+   
+   diff = 0;
+   if        (ieee154e_vars.asn.bytes2and3 == someASN->bytes2and3) {
+      return ieee154e_vars.asn.bytes0and1-someASN->bytes0and1;
+   } else if (ieee154e_vars.asn.bytes2and3-someASN->bytes2and3==1) {
+      diff  = ieee154e_vars.asn.bytes0and1;
+      diff += 0xffff-someASN->bytes0and1;
+      diff += 1;
+   } else {
+      diff = 0xffff;
+   }
+   
+   return diff;
 }
 
 //======= events
@@ -233,7 +262,7 @@ void isr_ieee154e_timer() {
          // log the error
          openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_TIMERFIRES,
                                (errorparameter_t)ieee154e_vars.state,
-                               (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                               (errorparameter_t)ieee154e_vars.slotOffset);
          // abort
          endSlot();
          break;
@@ -266,7 +295,7 @@ void ieee154e_startOfFrame(uint16_t capturedTime) {
             // log the error
             openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_NEWSLOT,
                                   (errorparameter_t)ieee154e_vars.state,
-                                  (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                                  (errorparameter_t)ieee154e_vars.slotOffset);
             // abort
             endSlot();
             break;
@@ -300,7 +329,7 @@ void ieee154e_endOfFrame(uint16_t capturedTime) {
             // log the error
             openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_ENDOFFRAME,
                                   (errorparameter_t)ieee154e_vars.state,
-                                  (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                                  (errorparameter_t)ieee154e_vars.slotOffset);
             // abort
             endSlot();
             break;
@@ -311,9 +340,14 @@ void ieee154e_endOfFrame(uint16_t capturedTime) {
 //======= misc
 
 bool debugPrint_asn() {
-   uint16_t output=0;
-   output = ieee154e_vars.asn;
-   openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(uint16_t));
+   uint8_t output[ADV_PAYLOAD_LENGTH];
+   
+   output[0]  = (ieee154e_vars.asn.bytes0and1     & 0xff);
+   output[1]  = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
+   output[2]  = (ieee154e_vars.asn.bytes2and3     & 0xff);
+   output[3]  = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
+   output[4]  =  ieee154e_vars.asn.byte4;
+   openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(output));
    return TRUE;
 }
 
@@ -360,7 +394,7 @@ inline void activity_synchronize_newSlot() {
    // we want to be able to receive and transmist serial even when not synchronized
    // take turns every other slot to send or receive
    openserial_stop();
-   if (ieee154e_vars.asn%2==0) {
+   if (ieee154e_vars.asn.byte4%2==0) {
       openserial_startOutput();
    } else {
       openserial_startInput();
@@ -458,10 +492,10 @@ inline void activity_synchronize_endOfFrame(uint16_t capturedTime) {
          radio_rfOff();
          
          // record the ASN from the ADV payload
-         ieee154e_vars.asn = asnRead(ieee154e_vars.dataReceived);
+         asnStoreFromAdv(ieee154e_vars.dataReceived);
          
          // toss the ADV payload
-         packetfunctions_tossHeader(ieee154e_vars.dataReceived,sizeof(asn_t));
+         packetfunctions_tossHeader(ieee154e_vars.dataReceived,ADV_PAYLOAD_LENGTH);
          
          // synchronize (for the first time) to the sender's ADV
          synchronizePacket(ieee154e_vars.syncCapturedTime);
@@ -471,7 +505,7 @@ inline void activity_synchronize_endOfFrame(uint16_t capturedTime) {
          
          // log the "error"
          openserial_printError(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
-                               (errorparameter_t)ieee154e_vars.asn,
+                               (errorparameter_t)ieee154e_vars.slotOffset,
                                (errorparameter_t)0);
          
          // send received ADV up the stack so RES can update statistics (synchronizing)
@@ -502,11 +536,11 @@ inline void activity_ti1ORri1() {
    open_addr_t neighbor;
    
    // increment ASN (do this first so debug pins are in sync)
-   ieee154e_vars.asn++;
+   incrementAsnOffset();
    
    // wiggle debug pins
    DEBUG_PIN_SLOT_TOGGLE();
-   if (ieee154e_vars.asn%SCHEDULELENGTH==0) {
+   if (ieee154e_vars.slotOffset==0) {
       DEBUG_PIN_FRAME_TOGGLE();
    }
    
@@ -519,7 +553,7 @@ inline void activity_ti1ORri1() {
          
          // log the error
          openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
-                               (errorparameter_t)ieee154e_vars.asn,
+                               (errorparameter_t)ieee154e_vars.slotOffset,
                                (errorparameter_t)0);
             
          // update the statistics
@@ -536,14 +570,14 @@ inline void activity_ti1ORri1() {
       // log the error
       openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
                             (errorparameter_t)ieee154e_vars.state,
-                            (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                            (errorparameter_t)ieee154e_vars.slotOffset);
       // abort
       endSlot();
       return;
    }
 
    // check the schedule to see what type of slot this is
-   cellType = schedule_getType(ieee154e_vars.asn);
+   cellType = schedule_getType(ieee154e_vars.slotOffset);
    switch (cellType) {
       case CELLTYPE_OFF:
          // stop using serial
@@ -569,7 +603,7 @@ inline void activity_ti1ORri1() {
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
             // fill in the ASN field of the ADV
-            asnWrite(ieee154e_vars.dataToSend);
+            asnWriteToAdv(ieee154e_vars.dataToSend);
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
@@ -581,8 +615,8 @@ inline void activity_ti1ORri1() {
          // stop using serial
          openserial_stop();
          // check whether we can send
-         if (schedule_getOkToSend(ieee154e_vars.asn)) {
-            schedule_getNeighbor(ieee154e_vars.asn,&neighbor);
+         if (schedule_getOkToSend(ieee154e_vars.slotOffset)) {
+            schedule_getNeighbor(ieee154e_vars.slotOffset,&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
          } else {
             ieee154e_vars.dataToSend = NULL;
@@ -629,7 +663,7 @@ inline void activity_ti1ORri1() {
          // log the error
          openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_CELLTYPE,
                                (errorparameter_t)cellType,
-                               (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                               (errorparameter_t)ieee154e_vars.slotOffset);
          // abort
          endSlot();
          break;
@@ -643,7 +677,7 @@ inline void activity_ti2() {
    changeState(S_TXDATAPREPARE);
 
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(ieee154e_vars.asn, schedule_getChannelOffset(ieee154e_vars.asn) );
+   frequency = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset));
 
    // configure the radio for that frequency
    radio_setFrequency(frequency);
@@ -665,7 +699,7 @@ inline void activity_tie1() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXTXDATAPREPARE_OVERFLOW,
                          (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                         (errorparameter_t)ieee154e_vars.slotOffset);
 
    // abort
    endSlot();
@@ -686,7 +720,7 @@ inline void activity_tie2() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOW,
                          (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                         (errorparameter_t)ieee154e_vars.slotOffset);
 
    // abort
    endSlot();
@@ -710,7 +744,7 @@ inline void activity_tie3() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                         (errorparameter_t)ieee154e_vars.slotOffset);
 
    // abort
    endSlot();
@@ -743,7 +777,7 @@ inline void activity_ti5(uint16_t capturedTime) {
       ieee154etimer_schedule(DURATION_tt5);
    } else {
       // indicate succesful Tx to schedule to keep statistics
-      schedule_indicateTx(ieee154e_vars.asn,TRUE);
+      schedule_indicateTx(ieee154e_vars.slotOffset,&ieee154e_vars.asn,TRUE);
       // indicate to upper later the packet was sent successfully
       notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
       // reset local variable
@@ -760,7 +794,7 @@ inline void activity_ti6() {
    changeState(S_RXACKPREPARE);
 
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(ieee154e_vars.asn, schedule_getChannelOffset(ieee154e_vars.asn));
+   frequency = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset));
 
    // configure the radio for that frequency
    radio_setFrequency(frequency);
@@ -779,7 +813,7 @@ inline void activity_tie4() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                         (errorparameter_t)ieee154e_vars.slotOffset);
 
    // abort
    endSlot();
@@ -798,7 +832,7 @@ inline void activity_ti7() {
 
 inline void activity_tie5() {
    // indicate transmit failed to schedule to keep stats
-   schedule_indicateTx(ieee154e_vars.asn,FALSE);
+   schedule_indicateTx(ieee154e_vars.slotOffset,&ieee154e_vars.asn,FALSE);
    
    // decrement transmits left counter
    ieee154e_vars.dataToSend->l2_retriesLeft--;
@@ -911,7 +945,7 @@ inline void activity_ti9(uint16_t capturedTime) {
          }
          
          // inform schedule of successful transmission
-         schedule_indicateTx(ieee154e_vars.asn,TRUE);
+         schedule_indicateTx(ieee154e_vars.slotOffset,&ieee154e_vars.asn,TRUE);
          
          // inform upper layer
          notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
@@ -940,7 +974,7 @@ inline void activity_ri2() {
    changeState(S_RXDATAPREPARE);
 
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(ieee154e_vars.asn, schedule_getChannelOffset(ieee154e_vars.asn) );
+   frequency = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset) );
 
    // configure the radio for that frequency
    radio_setFrequency(frequency);
@@ -959,7 +993,7 @@ inline void activity_rie1() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXDATAPREPARE_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                         (errorparameter_t)ieee154e_vars.slotOffset);
 
    // abort
    endSlot();
@@ -1002,7 +1036,7 @@ inline void activity_rie3() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                         (errorparameter_t)ieee154e_vars.slotOffset);
    
    // abort
    endSlot();
@@ -1071,17 +1105,10 @@ inline void activity_ri5(uint16_t capturedTime) {
       // if I just received a valid ADV, record the ASN and toss the payload
       if (isValidAdv(&ieee802514_header)==TRUE) {
          if (idmanager_getIsDAGroot()==FALSE) {
-            if (ieee154e_vars.asn != asnRead(ieee154e_vars.dataReceived)) {
-               // log the error
-               openserial_printError(COMPONENT_IEEE802154E,ERR_ASN_MISALIGNEMENT,
-                                     (errorparameter_t) 0,
-                                     (errorparameter_t)0);
-               // update the ASN to try to recover
-               ieee154e_vars.asn = asnRead(ieee154e_vars.dataReceived);
-            };
+            asnStoreFromAdv(ieee154e_vars.dataReceived);
          }
          // toss the ADV payload
-         packetfunctions_tossHeader(ieee154e_vars.dataReceived,sizeof(asn_t));
+         packetfunctions_tossHeader(ieee154e_vars.dataReceived,ADV_PAYLOAD_LENGTH);
       }
       
       // record the captured time
@@ -1174,7 +1201,7 @@ inline void activity_ri6() {
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
    
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(ieee154e_vars.asn, schedule_getChannelOffset(ieee154e_vars.asn) );
+   frequency = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset) );
    
    // configure the radio for that frequency
    radio_setFrequency(frequency);
@@ -1196,7 +1223,7 @@ inline void activity_rie4() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXTXACKPREPARE_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                         (errorparameter_t)ieee154e_vars.slotOffset);
    
    // abort
    endSlot();
@@ -1217,7 +1244,7 @@ inline void activity_rie5() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIOTX_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                         (errorparameter_t)ieee154e_vars.slotOffset);
    
    // abort
    endSlot();
@@ -1241,7 +1268,7 @@ inline void activity_rie6() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDACKDURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)ieee154e_vars.asn%SCHEDULELENGTH);
+                         (errorparameter_t)ieee154e_vars.slotOffset);
    
    // abort
    endSlot();
@@ -1291,7 +1318,7 @@ inline bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
    return ieee802514_header->valid==TRUE                                                              && \
           ieee802514_header->frameType==IEEE154_TYPE_BEACON                                           && \
           packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))        && \
-          ieee154e_vars.dataReceived->length==sizeof(IEEE802154E_ADV_ht);
+          ieee154e_vars.dataReceived->length==ADV_PAYLOAD_LENGTH;
 }
 
 /**
@@ -1349,17 +1376,41 @@ inline bool isValidAck(ieee802154_header_iht* ieee802514_header,
 
 //======= ASN handling
 
-inline void asnWrite(OpenQueueEntry_t* advFrame) {
-   ((IEEE802154E_ADV_ht*)(advFrame->l2_payload))->asn[0] = ieee154e_vars.asn/256;
-   ((IEEE802154E_ADV_ht*)(advFrame->l2_payload))->asn[1] = ieee154e_vars.asn%256;
+inline void incrementAsnOffset() {
+   // increment the asn
+   ieee154e_vars.asn.bytes0and1++;
+   if (ieee154e_vars.asn.bytes0and1==0) {
+      ieee154e_vars.asn.bytes2and3++;
+      if (ieee154e_vars.asn.bytes2and3==0) {
+         ieee154e_vars.asn.byte4++;
+      }
+   }
+   // increment the offset
+   ieee154e_vars.slotOffset = (ieee154e_vars.slotOffset+1)%SCHEDULELENGTH;
 }
 
-inline uint16_t asnRead(OpenQueueEntry_t* advFrame) {
-   uint16_t returnVal;
-   returnVal  = 0;
-   returnVal += 256*((IEEE802154E_ADV_ht*)(ieee154e_vars.dataReceived->payload))->asn[0];
-   returnVal +=     ((IEEE802154E_ADV_ht*)(ieee154e_vars.dataReceived->payload))->asn[1];
-   return returnVal;
+inline void asnWriteToAdv(OpenQueueEntry_t* advFrame) {
+   advFrame->l2_payload[0]        = (ieee154e_vars.asn.bytes0and1     & 0xff);
+   advFrame->l2_payload[1]        = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
+   advFrame->l2_payload[2]        = (ieee154e_vars.asn.bytes2and3     & 0xff);
+   advFrame->l2_payload[3]        = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
+   advFrame->l2_payload[4]        =  ieee154e_vars.asn.byte4;
+}
+
+inline void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
+   // store the ASN
+   ieee154e_vars.asn.bytes0and1   =     ieee154e_vars.dataReceived->payload[0]+
+                                    256*ieee154e_vars.dataReceived->payload[1];
+   ieee154e_vars.asn.bytes2and3   =     ieee154e_vars.dataReceived->payload[2]+
+                                    256*ieee154e_vars.dataReceived->payload[3];
+   ieee154e_vars.asn.byte4        =     ieee154e_vars.dataReceived->payload[4];
+   // determine the current slotOffset
+   /*
+   Note: this is a bit of a hack. Normally, slotOffset=ASN%slotlength. But since
+   the ADV is exchanged in slot 0, we know that we're currently at slotOffset==0
+   */
+   ieee154e_vars.slotOffset       = 0;
+   
 }
 
 //======= synchronization
@@ -1382,7 +1433,7 @@ void synchronizePacket(uint16_t timeReceived) {
       DEBUG_PIN_SLOT_TOGGLE();
       TACTL         &= ~TAIFG;
       newTaccr0     +=  TsSlotDuration;
-      ieee154e_vars.asn++;
+      incrementAsnOffset();
       DEBUG_PIN_SLOT_TOGGLE();
    }
    newTaccr0         =  (uint16_t)((int16_t)newTaccr0+timeCorrection);
@@ -1420,7 +1471,7 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, error_t error) {
    // record the outcome of the trasmission attempt
    packetSent->l2_sendDoneError   = error;
    // record the current ASN
-   packetSent->l2_asn             = ieee154e_vars.asn;
+   memcpy(&packetSent->l2_asn,&ieee154e_vars.asn,sizeof(asn_t));
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
    packetSent->owner              = COMPONENT_IEEE802154E_TO_RES;
@@ -1432,9 +1483,9 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, error_t error) {
 
 void notif_receive(OpenQueueEntry_t* packetReceived) {
    // record the current ASN
-   packetReceived->l2_asn         = ieee154e_vars.asn;
+   memcpy(&packetReceived->l2_asn, &ieee154e_vars.asn, sizeof(asn_t));
    // indicate reception to the schedule, to keep statistics
-   schedule_indicateRx(packetReceived->l2_asn);
+   schedule_indicateRx(ieee154e_vars.slotOffset,&packetReceived->l2_asn);
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_RES;
@@ -1469,7 +1520,7 @@ void updateStats(int16_t timeCorrection) {
 //======= misc
 
 /**
-\brief Calculates the frequency to transmit on, based on the 
+\brief Calculates the frequency channel to transmit on, based on the 
 absolute slot number and the channel offset of the requested slot.
 
 During normal operation, the frequency used is a function of the 
@@ -1482,14 +1533,13 @@ function return a constant channel number (between 11 and 26). This allows you
 to use a single-channel sniffer; but you can not schedule two links on two
 different channel offsets in the same slot.
 
-\param [in] asn Absolute Slot Number
 \param [in] channelOffset channel offset for the current slot
 
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
-inline uint8_t calculateFrequency(asn_t asn, uint8_t channelOffset) {
+inline uint8_t calculateFrequency(uint8_t channelOffset) {
    //return 11+(asn+channelOffset)%16;
-   //poipoi: no channel hopping
+   // poipoi: no channel hopping
    return 26;
 }
 
@@ -1570,7 +1620,7 @@ void endSlot() {
       // getting here means transmit failed
       
       // indicate Tx fail to schedule to update stats
-      schedule_indicateTx(ieee154e_vars.asn,FALSE);
+      schedule_indicateTx(ieee154e_vars.slotOffset,&ieee154e_vars.asn,FALSE);
       
       //decrement transmits left counter
       ieee154e_vars.dataToSend->l2_retriesLeft--;

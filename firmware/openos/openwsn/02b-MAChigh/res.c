@@ -77,12 +77,12 @@ void task_resNotifSendDone() {
       neighbors_indicateTx(&(msg->l2_nextORpreviousHop),
                            msg->l2_numTxAttempts,
                            TRUE,
-                           msg->l2_asn);
+                           &msg->l2_asn);
    } else {
       neighbors_indicateTx(&(msg->l2_nextORpreviousHop),
                            msg->l2_numTxAttempts,
                            FALSE,
-                           msg->l2_asn);
+                           &msg->l2_asn);
    }
    // send the packet to where it belongs
    if (msg->creator == COMPONENT_RES) {
@@ -119,7 +119,7 @@ void task_resNotifReceive() {
    // indicate reception (to update statistics)
    neighbors_indicateRx(&(msg->l2_nextORpreviousHop),
                         msg->l1_rssi,
-                        msg->l2_asn);
+                        &msg->l2_asn);
    
    // send the packet up the stack, if it qualifies
    switch (msg->l2_frameType) {
@@ -157,7 +157,7 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_res_fired() {
-   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%10;
+   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%3;
    if (res_vars.MacMgtTaskCounter==0) {
       sendAdv();
    } else {
@@ -234,12 +234,10 @@ inline void sendAdv() {
       adv->creator = COMPONENT_RES;
       adv->owner   = COMPONENT_RES;
       
-      // add ADV-specific header
-      packetfunctions_reserveHeaderSize(adv,sizeof(IEEE802154E_ADV_ht));
+      // reserve space for ADV-specific header
+      packetfunctions_reserveHeaderSize(adv, ADV_PAYLOAD_LENGTH);
       // the actual value of the current ASN will be written by the
       // IEEE802.15.4e when transmitting
-      ((IEEE802154E_ADV_ht*)(adv->payload))->asn[0] = 0x00;
-      ((IEEE802154E_ADV_ht*)(adv->payload))->asn[1] = 0x00;
       
       // some l2 information about this packet
       adv->l2_frameType                     = IEEE154_TYPE_BEACON;

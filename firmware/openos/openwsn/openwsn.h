@@ -15,11 +15,8 @@
 
 //=========================== define ==========================================
 
-// temporary
-// this is a temporary define which is used to test synchronization between three motes
-#define DEBUG_MOTEID_MASTER 0xb6
-#define DEBUG_MOTEID_2      0x99
-#define DEBUG_MOTEID_3      0x8b
+// enter the last byte of your mote's address if you want it to be an LBR
+#define DEBUG_MOTEID_MASTER 0x99
 
 // debug pins
 #define DEBUG_PIN_FRAME_INIT()    P4DIR |=  0x20 // P4.5
@@ -207,8 +204,8 @@ enum {
    ERR_ASN_MISALIGNEMENT               = 0x10, // impossible ASN in ADV
    ERR_WRONG_CELLTYPE                  = 0x11, // wrong celltype                    [Schedule,IEEE802154EP,OpenQueueP] arg1=type      
    ERR_IEEE154_UNSUPPORTED             = 0x12, // unsupported 802154 parameter      [IEEE802154EP] arg1=location arg2=param   
-   ERR_DESYNCHRONIZED                  = 0x13, // desynchronized                    [IEEE802154EP] arg1=asn
-   ERR_SYNCHRONIZED                    = 0x14, // synchronized                      [IEEE802154EP] arg1=asn
+   ERR_DESYNCHRONIZED                  = 0x13, // desynchronized                    [IEEE802154EP] arg1=slotOffset
+   ERR_SYNCHRONIZED                    = 0x14, // synchronized                      [IEEE802154EP] arg1=slotOffset
    ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x15, // wrong state in end of frame+sync
    ERR_WRONG_STATE_IN_STARTSLOT        = 0x16, // wrong state in startSlot          [IEEE802154EP]  arg1=state arg2=slotOffset
    ERR_WRONG_STATE_IN_TIMERFIRES       = 0x17, // wrong state in timer fires        [IEEE154E] arg1=state, arg2=slotOffset  
@@ -246,9 +243,14 @@ typedef uint16_t  shortnodeid_t;
 typedef uint64_t  longnodeid_t;
 typedef uint16_t  errorparameter_t;
 typedef uint8_t   dagrank_t;
-typedef uint16_t  asn_t;
 typedef uint8_t   error_t;
 #define bool uint8_t
+
+typedef struct {
+   uint8_t  byte4;
+   uint16_t bytes2and3;
+   uint16_t bytes0and1;
+} asn_t;
 
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint8_t type;

@@ -41,7 +41,7 @@ typedef struct {
    uint8_t         numRx;
    uint8_t         numTx;
    uint8_t         numTxACK;
-   uint32_t        asn;
+   asn_t           asn;
 } scheduleRow_t;
 
 typedef struct {
@@ -57,12 +57,14 @@ typedef struct {
           void            schedule_init();
           bool            debugPrint_schedule();
 // from IEEE802154E
-__monitor cellType_t      schedule_getType(asn_t asn_param);
-__monitor bool            schedule_getOkToSend(asn_t asn_param);
-__monitor void            schedule_getNeighbor(asn_t asn_param, open_addr_t* addrToWrite);
-__monitor channelOffset_t schedule_getChannelOffset(asn_t asn_param);
-__monitor void            schedule_indicateRx(asn_t    asnTimestamp);
-__monitor void            schedule_indicateTx(asn_t    asnTimestamp,
+__monitor cellType_t      schedule_getType(uint16_t slotOffset);
+__monitor bool            schedule_getOkToSend(uint16_t slotOffset);
+__monitor void            schedule_getNeighbor(uint16_t slotOffset, open_addr_t* addrToWrite);
+__monitor channelOffset_t schedule_getChannelOffset(uint16_t slotOffset);
+__monitor void            schedule_indicateRx(uint16_t slotOffset,
+                                              asn_t*   asnTimestamp);
+__monitor void            schedule_indicateTx(uint16_t slotOffset,
+                                              asn_t*   asnTimestamp,
                                               bool     succesfullTx);
 
 /**

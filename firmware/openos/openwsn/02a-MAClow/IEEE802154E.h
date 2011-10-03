@@ -102,10 +102,7 @@ typedef struct {
    uint8_t timeCorrection[2];
 } IEEE802154E_ACK_ht;
 
-//IEEE802.15.4E advertisement (ADV)
-typedef struct {
-   uint8_t asn[2];
-} IEEE802154E_ADV_ht;
+#define ADV_PAYLOAD_LENGTH 5
 
 //=========================== variables =======================================
 
@@ -113,19 +110,16 @@ typedef struct {
 
 
 // admin
-          void  mac_init();
-
+          void     mac_init();
 // public
-__monitor asn_t ieee154e_getAsn();
-
+__monitor uint16_t ieee154e_asnDiff(asn_t* someASN);
 // events
-          void  ieee154e_startOfFrame(uint16_t capturedTime);
-          void  ieee154e_endOfFrame(uint16_t capturedTime);
-
+          void     ieee154e_startOfFrame(uint16_t capturedTime);
+          void     ieee154e_endOfFrame(uint16_t capturedTime);
 // misc
-          bool  debugPrint_asn();
-          bool  debugPrint_isSync();
-          bool  debugPrint_macStats();
+          bool     debugPrint_asn();
+          bool     debugPrint_isSync();
+          bool     debugPrint_macStats();
 
 /**
 \}

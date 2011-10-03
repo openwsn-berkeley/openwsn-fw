@@ -20,7 +20,7 @@ neighbors_vars_t neighbors_vars;
 
 void registerNewNeighbor(open_addr_t* neighborID,
                          int8_t       rssi,
-                         asn_t        asnTimestamp);
+                         asn_t*       asnTimestamp);
 bool isNeighbor(open_addr_t* neighbor);
 void removeNeighbor(uint8_t neighborIndex);
 bool isThisRowMatching(open_addr_t* address,
@@ -48,7 +48,7 @@ void neighbors_receiveDIO(OpenQueueEntry_t* msg) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
             neighbors_vars.neighbors[i].DAGrank = *((uint8_t*)(msg->payload));
-            //poipoi: single hop
+            // poipoi: single hop
             if (neighbors_vars.neighbors[i].DAGrank==0x00) {
                neighbors_vars.neighbors[i].parentPreference=MAXPREFERENCE;
                if (neighbors_vars.neighbors[i].numTxACK==0) {
@@ -64,19 +64,19 @@ void neighbors_receiveDIO(OpenQueueEntry_t* msg) {
          }
       }
    }
-   //poipoi: single hop
+   // poipoi: single hop
    //neighbors_updateMyDAGrankAndNeighborPreference(); 
 }
 
 void neighbors_indicateRx(open_addr_t* l2_src,
                           int8_t       rssi,
-                          asn_t        asnTimestamp) {
+                          asn_t*       asnTimestamp) {
    uint8_t i=0;
    while (i<MAXNUMNEIGHBORS) {
       if (isThisRowMatching(l2_src,i)) {
          neighbors_vars.neighbors[i].numRx++;
          neighbors_vars.neighbors[i].rssi=rssi;
-         neighbors_vars.neighbors[i].asn=asnTimestamp;
+         memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
          if (neighbors_vars.neighbors[i].stableNeighbor==FALSE) {
             if (neighbors_vars.neighbors[i].rssi>BADNEIGHBORMAXRSSI) {
                neighbors_vars.neighbors[i].switchStabilityCounter++;
@@ -109,7 +109,7 @@ void neighbors_indicateRx(open_addr_t* l2_src,
 void neighbors_indicateTx(open_addr_t* dest,
                           uint8_t      numTxAttempts,
                           bool         was_finally_acked,
-                          asn_t        asnTimestamp) {
+                          asn_t*       asnTimestamp) {
    uint8_t i=0;
    if (packetfunctions_isBroadcastMulticast(dest)==FALSE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
@@ -121,7 +121,7 @@ void neighbors_indicateTx(open_addr_t* dest,
             neighbors_vars.neighbors[i].numTx += numTxAttempts;
             if (was_finally_acked==TRUE) {
                neighbors_vars.neighbors[i].numTxACK++;
-               neighbors_vars.neighbors[i].asn=asnTimestamp;
+               memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
             }
             return;
          }
@@ -151,7 +151,7 @@ open_addr_t* neighbors_KaNeighbor() {
    // scan through the neighbor table, and populate addrPreferred and addrOther
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==1) {
-         timeSinceHeard = ieee154e_getAsn()-neighbors_vars.neighbors[i].asn;
+         timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
          if (timeSinceHeard>KATIMEOUT) {
             // this neighbor needs to be KA'ed
             if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
@@ -268,7 +268,7 @@ bool debugPrint_neighbors() {
 
 void registerNewNeighbor(open_addr_t* address,
                          int8_t       rssi,
-                         asn_t        asnTimestamp) {
+                         asn_t*       asnTimestamp) {
    uint8_t  i,j;
    bool     iHaveAPreferedParent;
    // filter errors
@@ -294,7 +294,7 @@ void registerNewNeighbor(open_addr_t* address,
             neighbors_vars.neighbors[i].numRx                  = 1;
             neighbors_vars.neighbors[i].numTx                  = 0;
             neighbors_vars.neighbors[i].numTxACK               = 0;
-            neighbors_vars.neighbors[i].asn                    = asnTimestamp;
+            memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
             // do I already have a preferred parent ?
             iHaveAPreferedParent = FALSE;
             for (j=0;j<MAXNUMNEIGHBORS;j++) {
@@ -343,7 +343,9 @@ void removeNeighbor(uint8_t neighborIndex) {
    neighbors_vars.neighbors[neighborIndex].numRx                     = 0;
    neighbors_vars.neighbors[neighborIndex].numTx                     = 0;
    neighbors_vars.neighbors[neighborIndex].numTxACK                  = 0;
-   neighbors_vars.neighbors[neighborIndex].asn                       = 0;
+   neighbors_vars.neighbors[neighborIndex].asn.bytes0and1            = 0;
+   neighbors_vars.neighbors[neighborIndex].asn.bytes2and3            = 0;
+   neighbors_vars.neighbors[neighborIndex].asn.byte4                 = 0;
 }
 
 bool isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
