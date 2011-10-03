@@ -169,6 +169,9 @@ bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2)
          address_length = 2;
          break;
       case ADDR_64B:
+         // poipoi: spoofing 64-bit addresses
+         return (address_1->addr_64b[6]==address_2->addr_64b[6] &&
+                 address_1->addr_64b[7]==address_2->addr_64b[7]);
       case ADDR_PREFIX:
          address_length = 8;
          break;

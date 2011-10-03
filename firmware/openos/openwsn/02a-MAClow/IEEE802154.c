@@ -17,7 +17,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    //previousHop address (always 64-bit)
-   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),LITTLE_ENDIAN);
+   //packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),LITTLE_ENDIAN);
+   // poipoi: using 16-bit source address
+   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_16B),LITTLE_ENDIAN);
    //nextHop address
    if (packetfunctions_isBroadcastMulticast(nextHop)) { //broadcast address is always 16-bit
       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
@@ -25,6 +27,12 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
       *((uint8_t*)(msg->payload)) = 0xFF;
    } else {
+      // poipoi: using 16-bit destination address
+      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+      *((uint8_t*)(msg->payload)) = nextHop->addr_64b[6];
+      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+      *((uint8_t*)(msg->payload)) = nextHop->addr_64b[7];
+      /*
       switch (nextHop->type) {
          case ADDR_16B:
          case ADDR_64B:
@@ -35,6 +43,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                                   (errorparameter_t)nextHop->type,
                                   (errorparameter_t)1);
       }
+      */
    }
    //destpan
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),LITTLE_ENDIAN);
@@ -43,6 +52,10 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    *((uint8_t*)(msg->payload)) = sequenceNumber;
    //fcf (2nd byte)
    temp_8b              = 0;
+   // poipoi: 16-bit source/dest addresses
+   temp_8b             |= IEEE154_ADDR_SHORT              << IEEE154_FCF_DEST_ADDR_MODE;
+   temp_8b             |= IEEE154_ADDR_SHORT              << IEEE154_FCF_SRC_ADDR_MODE;
+   /*
    if (packetfunctions_isBroadcastMulticast(nextHop)) {
       temp_8b          |= IEEE154_ADDR_SHORT              << IEEE154_FCF_DEST_ADDR_MODE;
    } else {
@@ -56,6 +69,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       }
    }
    temp_8b             |= IEEE154_ADDR_EXT                << IEEE154_FCF_SRC_ADDR_MODE;
+   */
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)
@@ -147,6 +161,17 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                                      &ieee802514_header->dest,
                                      LITTLE_ENDIAN);
          ieee802514_header->headerLength += 2;
+         // poipoi: spoofing 64-bit destination address
+         ieee802514_header->dest.addr_64b[7] = ieee802514_header->dest.addr_64b[1];
+         ieee802514_header->dest.addr_64b[6] = ieee802514_header->dest.addr_64b[0];
+         ieee802514_header->dest.addr_64b[5] = 0x00;
+         ieee802514_header->dest.addr_64b[4] = 0x00;
+         ieee802514_header->dest.addr_64b[3] = 0x00;
+         ieee802514_header->dest.addr_64b[2] = 0x00;
+         ieee802514_header->dest.addr_64b[1] = 0x00;
+         ieee802514_header->dest.addr_64b[0] = 0x00;
+         ieee802514_header->dest.type        = ADDR_64B;
+         
          if (ieee802514_header->headerLength>msg->length) {  return; }
          break;
       case ADDR_64B:
@@ -168,6 +193,18 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                                      &ieee802514_header->src,
                                      LITTLE_ENDIAN);
          ieee802514_header->headerLength += 2;
+         
+         // poipoi: spoofing 64-bit source address
+         ieee802514_header->src.addr_64b[7] = ieee802514_header->src.addr_64b[1];
+         ieee802514_header->src.addr_64b[6] = ieee802514_header->src.addr_64b[0];
+         ieee802514_header->src.addr_64b[5] = 0x00;
+         ieee802514_header->src.addr_64b[4] = 0x00;
+         ieee802514_header->src.addr_64b[3] = 0x00;
+         ieee802514_header->src.addr_64b[2] = 0x00;
+         ieee802514_header->src.addr_64b[1] = 0x00;
+         ieee802514_header->src.addr_64b[0] = 0x00;
+         ieee802514_header->src.type        = ADDR_64B;
+         
          if (ieee802514_header->headerLength>msg->length) {  return; }
          break;
       case ADDR_64B:

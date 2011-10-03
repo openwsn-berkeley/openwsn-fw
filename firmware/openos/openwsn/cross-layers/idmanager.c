@@ -25,8 +25,8 @@ void idmanager_init() {
    idmanager_vars.isDAGroot            = FALSE;
    idmanager_vars.isBridge             = FALSE;
    idmanager_vars.myPANID.type         = ADDR_PANID;
-   idmanager_vars.myPANID.panid[0]     = 0xfa;
-   idmanager_vars.myPANID.panid[1]     = 0xce;
+   idmanager_vars.myPANID.panid[0]     = 0xca;
+   idmanager_vars.myPANID.panid[1]     = 0xfe;
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
    idmanager_vars.myPrefix.prefix[0]   = 0x00;
    idmanager_vars.myPrefix.prefix[1]   = 0x00;
