@@ -940,7 +940,7 @@ inline void activity_ti9(uint16_t capturedTime) {
          // resynchronize if I'm not a DAGroot and ACK from preferred parent
          if (idmanager_getIsDAGroot()==FALSE &&
              neighbors_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop)) ) {
-            timeCorrection = (int16_t)((ieee154e_vars.ackReceived->payload[1]<<8 | ieee154e_vars.ackReceived->payload[0])/US_PER_TICK);
+            timeCorrection = -(int16_t)((ieee154e_vars.ackReceived->payload[1]<<8 | ieee154e_vars.ackReceived->payload[0])/US_PER_TICK);
             synchronizeAck(timeCorrection);
          }
          
@@ -1184,8 +1184,8 @@ inline void activity_ri6() {
    
    // add the payload to the ACK (i.e. the timeCorrection)
    packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(IEEE802154E_ACK_ht));
-   ((IEEE802154E_ACK_ht*)(ieee154e_vars.ackToSend->payload))->timeCorrection[0] = ((US_PER_TICK*timeCorrection) >> 0) & 0xff;
-   ((IEEE802154E_ACK_ht*)(ieee154e_vars.ackToSend->payload))->timeCorrection[1] = ((US_PER_TICK*timeCorrection) >> 8) & 0xff;
+   ((IEEE802154E_ACK_ht*)(ieee154e_vars.ackToSend->payload))->timeCorrection[0] = ((-timeCorrection*US_PER_TICK) >> 0) & 0xff;
+   ((IEEE802154E_ACK_ht*)(ieee154e_vars.ackToSend->payload))->timeCorrection[1] = ((-timeCorrection*US_PER_TICK) >> 8) & 0xff;
    
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
@@ -1447,7 +1447,7 @@ void synchronizeAck(int16_t timeCorrection) {
    uint16_t newTaccr0;
    uint16_t currentTaccr0;
    // resynchronize
-   currentTaccr0        =  TACCR0;
+   currentTaccr0     =  TACCR0;
    newTaccr0         =  (uint16_t)((int16_t)currentTaccr0-timeCorrection);
    TACCR0            =  newTaccr0;
    ieee154e_vars.deSyncTimeout = DESYNCTIMEOUT;

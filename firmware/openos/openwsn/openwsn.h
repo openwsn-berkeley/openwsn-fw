@@ -61,8 +61,8 @@ enum {
 
 // de-synchronization timeouts
 enum {
-   DESYNCTIMEOUT                       = 3000, // in slots: @10ms per slot -> 30 seconds
-   KATIMEOUT                           = 2000, // in slots: @10ms per slot -> 20 second
+   DESYNCTIMEOUT                       = 500, // in slots: @10ms per slot -> 5 seconds
+   KATIMEOUT                           = 200, // in slots: @10ms per slot -> 2 second
 };
 
 // types of addresses
