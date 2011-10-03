@@ -102,7 +102,7 @@ enum ieee154e_atomicdurations_enum {
 
 //IEEE802.15.4E acknowledgement (ACK)
 typedef struct {
-   uint8_t timeCorrection[2];
+   int16_t timeCorrection;
 } IEEE802154E_ACK_ht;
 
 #define ADV_PAYLOAD_LENGTH 5
