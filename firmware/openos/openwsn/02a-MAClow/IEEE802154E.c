@@ -1190,7 +1190,10 @@ inline void activity_ri6() {
    
    // add the payload to the ACK (i.e. the timeCorrection)
    packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(IEEE802154E_ACK_ht));
-   ((IEEE802154E_ACK_ht*)(ieee154e_vars.ackToSend->payload))->timeCorrection = -timeCorrection*US_PER_TICK;
+   timeCorrection  = -timeCorrection;
+   timeCorrection *= US_PER_TICK;
+   ieee154e_vars.ackToSend->payload[0] = (uint8_t)((((uint16_t)timeCorrection)   ) & 0xff);
+   ieee154e_vars.ackToSend->payload[1] = (uint8_t)((((uint16_t)timeCorrection)>>8) & 0xff);
    
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
