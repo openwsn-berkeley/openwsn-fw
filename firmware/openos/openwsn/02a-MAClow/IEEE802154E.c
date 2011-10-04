@@ -874,6 +874,8 @@ inline void activity_tie6() {
 inline void activity_ti9(uint16_t capturedTime) {
    ieee802154_header_iht ieee802514_header;
    volatile int16_t  timeCorrection;
+   uint8_t byte0;
+   uint8_t byte1;
    
    // change state
    changeState(S_TXPROC);
@@ -940,7 +942,11 @@ inline void activity_ti9(uint16_t capturedTime) {
          // resynchronize if I'm not a DAGroot and ACK from preferred parent
          if (idmanager_getIsDAGroot()==FALSE &&
              neighbors_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop)) ) {
-            timeCorrection = -((((IEEE802154E_ACK_ht*)(ieee154e_vars.ackReceived->payload))->timeCorrection)/US_PER_TICK);
+            byte0 = ieee154e_vars.ackReceived->payload[0];
+            byte1 = ieee154e_vars.ackReceived->payload[1];
+            timeCorrection  = (int16_t)((uint16_t)byte1<<8 | (uint16_t)byte0);
+            timeCorrection /=  US_PER_TICK;
+            timeCorrection  = -timeCorrection;
             synchronizeAck(timeCorrection);
          }
          
@@ -1365,9 +1371,16 @@ A packet is a valid ACK if it satisfies the following conditions:
 */
 inline bool isValidAck(ieee802154_header_iht* ieee802514_header,
                        OpenQueueEntry_t*      packetSent) {
-   return ieee802514_header->valid==TRUE                                                           && \
+   /*return ieee802514_header->valid==TRUE                                                           && \
           ieee802514_header->frameType==IEEE154_TYPE_ACK                                           && \
           ieee802514_header->dsn==packetSent->l2_dsn                                               && \
+          packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))     && \
+          idmanager_isMyAddress(&ieee802514_header->dest)                                          && \
+          packetfunctions_sameAddress(&ieee802514_header->src,&packetSent->l2_nextORpreviousHop);
+   */
+   // poipoi don't check for seq num
+   return ieee802514_header->valid==TRUE                                                           && \
+          ieee802514_header->frameType==IEEE154_TYPE_ACK                                           && \
           packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))     && \
           idmanager_isMyAddress(&ieee802514_header->dest)                                          && \
           packetfunctions_sameAddress(&ieee802514_header->src,&packetSent->l2_nextORpreviousHop);
