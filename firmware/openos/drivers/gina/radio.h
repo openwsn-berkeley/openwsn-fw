@@ -67,6 +67,8 @@ enum radio_antennaselection_enum {
    RADIO_CHIP_ANTENNA             = 0x05,   /**< Use the on-board chip antenna. */
 };
 
+#define DELAYRXINT 8 // in 32kHz tickss -> 244us (measured 234 us)
+
 //=========================== typedef =========================================
 
 //=========================== variables =======================================

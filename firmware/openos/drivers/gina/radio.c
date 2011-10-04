@@ -324,7 +324,7 @@ void isr_radio() {
          // change state
          radio_vars.state = RADIOSTATE_RECEIVING;
          // call MAC layer
-         ieee154e_startOfFrame(capturedTime);
+         ieee154e_startOfFrame(capturedTime-DELAYRXINT);
          break;
       case AT_IRQ_TRX_END:
          // change state
