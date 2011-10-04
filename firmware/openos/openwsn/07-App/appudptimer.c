@@ -25,17 +25,19 @@ void appudptimer_init() {
    appudptimer_vars.delayCounter = 0;
    // all motes which are not the DAGroot publish data periodically
    if (idmanager_getIsDAGroot()==FALSE) {
-      timer_startPeriodic(TIMER_UDPTIMER,0xffff);// every 2 seconds
+      //poipoipoitimer_startPeriodic(TIMER_UDPTIMER,0xffff);// every 2 seconds
    }
 }
 
 void timer_appudptimer_fired() {
    OpenQueueEntry_t* pkt;
+   /*
    // send every 10s
    appudptimer_vars.delayCounter = (appudptimer_vars.delayCounter+1)%5;
    if (appudptimer_vars.delayCounter!=0) {
       return;
    }
+   */
    // only send a packet if I received a sendDone for the previous.
    // the packet might be stuck in the queue for a long time for
    // example while the mote is synchronizing

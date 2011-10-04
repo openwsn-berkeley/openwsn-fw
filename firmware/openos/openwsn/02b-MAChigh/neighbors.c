@@ -159,7 +159,8 @@ open_addr_t* neighbors_KaNeighbor() {
                addrPreferred = &(neighbors_vars.neighbors[i].addr_64b);
             } else {
                // its not a preferred parent
-               addrOther =     &(neighbors_vars.neighbors[i].addr_64b);
+               // poipoi: don't KA to non-preferred parent
+               //addrOther =     &(neighbors_vars.neighbors[i].addr_64b);
             }
          }
       }

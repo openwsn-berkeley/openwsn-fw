@@ -16,7 +16,7 @@
 //=========================== define ==========================================
 
 // enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER 0x99
+#define DEBUG_MOTEID_MASTER 0x94
 
 // debug pins
 #define DEBUG_PIN_FRAME_INIT()    P4DIR |=  0x20 // P4.5
