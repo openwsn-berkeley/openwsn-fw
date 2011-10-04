@@ -162,15 +162,19 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                                      LITTLE_ENDIAN);
          ieee802514_header->headerLength += 2;
          // poipoi: spoofing 64-bit destination address
-         ieee802514_header->dest.addr_64b[7] = ieee802514_header->dest.addr_64b[1];
-         ieee802514_header->dest.addr_64b[6] = ieee802514_header->dest.addr_64b[0];
-         ieee802514_header->dest.addr_64b[5] = 0x00;
-         ieee802514_header->dest.addr_64b[4] = 0x00;
-         ieee802514_header->dest.addr_64b[3] = 0x00;
-         ieee802514_header->dest.addr_64b[2] = 0x00;
-         ieee802514_header->dest.addr_64b[1] = 0x00;
-         ieee802514_header->dest.addr_64b[0] = 0x00;
-         ieee802514_header->dest.type        = ADDR_64B;
+         if        (idmanager_isMyAddress(&ieee802514_header->dest)==TRUE) {
+            memcpy(&ieee802514_header->dest,idmanager_getMyID(ADDR_64B),sizeof(open_addr_t));
+         } else if (packetfunctions_isBroadcastMulticast(&ieee802514_header->dest)==FALSE) {
+            ieee802514_header->dest.addr_64b[7] = ieee802514_header->dest.addr_64b[1];
+            ieee802514_header->dest.addr_64b[6] = ieee802514_header->dest.addr_64b[0];
+            ieee802514_header->dest.addr_64b[5] = 0x00;
+            ieee802514_header->dest.addr_64b[4] = 0x00;
+            ieee802514_header->dest.addr_64b[3] = 0x00;
+            ieee802514_header->dest.addr_64b[2] = 0x00;
+            ieee802514_header->dest.addr_64b[1] = 0x00;
+            ieee802514_header->dest.addr_64b[0] = 0x00;
+            ieee802514_header->dest.type        = ADDR_64B;
+         }
          
          if (ieee802514_header->headerLength>msg->length) {  return; }
          break;
