@@ -17,8 +17,8 @@
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define KATIMEOUT                  200 // in slots: @10ms per slot -> 2 second
-#define DESYNCTIMEOUT              500 // in slots: @10ms per slot -> 5 seconds
+#define KATIMEOUT                  500 // in slots: @10ms per slot ->  5 second
+#define DESYNCTIMEOUT             2000 // in slots: @10ms per slot -> 20 seconds
 
 // the different states of the IEEE802.15.4e state machine
 enum ieee154e_state_enum {
@@ -60,7 +60,7 @@ enum ieee154e_state_enum {
 enum ieee154e_atomicdurations_enum {
    // time-slot related
    TsTxOffset                =  66,    //  2000us
-   TsLongGT                  =  33,    //  1000us
+   TsLongGT                  =  43,    //  1300us
    TsTxAckDelay              =  66,    //  2000us
    TsShortGT                 =  16,    //   500us
    TsSlotDuration            = 327,    // 10000us (328 ticks, but counter counts one extra count, see datasheet)
