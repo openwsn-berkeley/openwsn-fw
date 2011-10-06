@@ -6,7 +6,6 @@
 */
 
 #include "openwsn.h"
-#include "scheduler.h"
 //l7
 #include "appudpsensor.h"
 #include "appudpprint.h"
@@ -83,7 +82,7 @@ void openwsn_init() {
    appudpchannel_init();
    appudpecho_init();
    //appudpheli_init(); remove heli application for now since we need TimerA for IEEE802.15.4e
-   appudpgina_init();
+   //appudpgina_init();
    appudpinject_init();
    appudptimer_init();
    appudpleds_init();

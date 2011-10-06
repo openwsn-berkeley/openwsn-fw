@@ -2006,9 +2006,6 @@
         <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpecho.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpgina.c</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpinject.c</name>
       </file>
       <file>

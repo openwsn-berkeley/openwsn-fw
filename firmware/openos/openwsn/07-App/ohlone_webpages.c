@@ -7,10 +7,12 @@
 #include "openwsn.h"
 #include "ohlone_webpages.h"
 
+/*
 #include "gyro.h"
 #include "large_range_accel.h"
 #include "magnetometer.h"
 #include "sensitive_accel_temperature.h"
+*/
 
 //=========================== variables =======================================
 
@@ -24,12 +26,14 @@ uint8_t  ohlone_insert4sensors(uint8_t *buffer, uint8_t *sensors);
 //=========================== public ==========================================
 
 void ohlone_webpages_init() {
+   /*
    if (*(&eui64+3)==0x09) {                      // this is a GINA board (not a basestation)
       gyro_init();
       large_range_accel_init();
       magnetometer_init();
       sensitive_accel_temperature_init();
    }
+   */
 }
 
 uint8_t ohlone_webpage(uint8_t *getRequest, uint16_t chunk, uint8_t *packet) {

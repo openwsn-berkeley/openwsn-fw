@@ -17,10 +17,13 @@
 // enter the last byte of your mote's address if you want it to be an LBR
 #define DEBUG_MOTEID_MASTER 0x94
 
-enum {
-   TRUE                                = 1,
-   FALSE                               = 0,
-};
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
 
 enum {
    E_SUCCESS                           = 0,          
