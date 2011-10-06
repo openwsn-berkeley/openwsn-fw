@@ -7,10 +7,11 @@
 #include "board.h"
 #include "leds.h"
 #include "msp430x26x.h"
-
-#ifdef ISR_I2C
+#include "timers.h"
+#include "ieee154etimer.h"
+#include "openserial.h"
+#include "radio.h"
 #include "i2c.h"
-#endif
 
 //=========================== variables =======================================
 
@@ -19,18 +20,25 @@
 //=========================== public ==========================================
 
 void board_init() {
-   WDTCTL  = WDTPW + WDTHOLD;                    // disable watchdog timer
-   BCSCTL1 = CALBC1_16MHZ;                       // MCLK at 16MHz
-   DCOCTL  = CALDCO_16MHZ;
-
-   P1OUT  &= ~0x06;                              // P1.1,2 low
-   P1DIR  |=  0x06;                              // P1.1,2 as output
+   // disable watchdog timer
+   WDTCTL  = WDTPW + WDTHOLD;
    
+   // clock MSP at 16MHz
+   BCSCTL1 = CALBC1_16MHZ;
+   DCOCTL  = CALDCO_16MHZ;
+   
+   // low-level drivers
    leds_init();
-#ifdef ISR_I2C
    i2c_init();
-#endif
-   __bis_SR_register(GIE);                       // set 'general interrupt enable' bit
+   timer_init();
+   ieee154etimer_init();
+   openserial_init();
+   
+   // high-level drivers
+   radio_init();
+   
+   // set 'general interrupt enable' bit
+   __bis_SR_register(GIE);
 }
 
 //=========================== private =========================================

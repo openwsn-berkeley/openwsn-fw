@@ -1,11 +1,5 @@
-//ISR_RADIO
 //ISR_BUTTON
-//ISR_TIMERS
 //ISR_SPI
-//ISR_I2C
-//ISR_SERIAL
-//ISR_ADC
-//OPENWSN_STACK
 
 #include "scheduler.h"
 #include "timers.h"
@@ -53,34 +47,22 @@ void scheduler_start() {
       while(scheduler_vars.num_tasks>0) {
          if        (isThereTask(TASKID_RESNOTIF_RX)==TRUE) {
             consumeTask(TASKID_RESNOTIF_RX);
-#ifdef OPENWSN_STACK
             task_resNotifReceive();
-#endif
          } else if (isThereTask(TASKID_RESNOTIF_TXDONE)==TRUE) {
             consumeTask(TASKID_RESNOTIF_TXDONE);
-#ifdef OPENWSN_STACK
             task_resNotifSendDone();
-#endif
          } else if (isThereTask(TASKID_RES)==TRUE) {
             consumeTask(TASKID_RES);
-#ifdef OPENWSN_STACK
             timer_res_fired();
-#endif
          } else if (isThereTask(TASKID_RPL)==TRUE) {
             consumeTask(TASKID_RPL);
-#ifdef OPENWSN_STACK
             timer_rpl_fired();
-#endif
          } else if (isThereTask(TASKID_TCP_TIMEOUT)==TRUE) {
             consumeTask(TASKID_TCP_TIMEOUT);
-#ifdef OPENWSN_STACK
             timer_tcp_fired();
-#endif
          } else if (isThereTask(TASKID_UDP_TIMER)==TRUE) {
             consumeTask(TASKID_UDP_TIMER);
-#ifdef OPENWSN_STACK
             timer_appudptimer_fired();
-#endif
          } else if (isThereTask(TASKID_TIMERB4)==TRUE) {
             consumeTask(TASKID_TIMERB4);
             // timer available, put your function here
@@ -130,9 +112,7 @@ __monitor void consumeTask(uint8_t taskId) {
 __interrupt void COMPARATORA_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-#ifdef OPENWSN_STACK
    __bic_SR_register_on_exit(CPUOFF);            // restart CPU
-#endif
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -158,7 +138,6 @@ __interrupt void PORT2_ISR (void) {
 __interrupt void TIMERB0_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-#ifdef ISR_TIMERS
    if (timers_vars.continuous[0]==TRUE) {
       TBCCR0 += timers_vars.period[0];           // continuous timer: schedule next instant
    } else {
@@ -167,7 +146,6 @@ __interrupt void TIMERB0_ISR (void) {
    }
    scheduler_push_task(TASKID_RES);              // post the corresponding task
    __bic_SR_register_on_exit(CPUOFF);            // restart CPU
-#endif
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -176,7 +154,6 @@ __interrupt void TIMERB0_ISR (void) {
 __interrupt void TIMERB1through6_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-#ifdef ISR_TIMERS
    uint16_t tbiv_temp = TBIV;                    // read only once because accessing TBIV resets it
    switch (tbiv_temp) {
       case 0x0002: // timerB CCR1
@@ -242,7 +219,6 @@ __interrupt void TIMERB1through6_ISR (void) {
       default:
          while(1);                               // this should not happen
    }
-#endif
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -254,9 +230,7 @@ __interrupt void TIMERB1through6_ISR (void) {
 __interrupt void TIMERA0_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-#ifdef OPENWSN_STACK
    isr_ieee154e_newSlot();
-#endif
    DEBUG_PIN_ISR_CLR();
 }
 */
@@ -266,7 +240,6 @@ __interrupt void TIMERA0_ISR (void) {
 __interrupt void TIMERA1and2_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-#ifdef OPENWSN_STACK
    uint16_t taiv_temp = TAIV;                    // read only once because accessing TAIV resets it
    switch (taiv_temp) {
       case 0x0002: // capture/compare CCR1
@@ -279,7 +252,6 @@ __interrupt void TIMERA1and2_ISR (void) {
       default:
          while(1);                               // this should not happen
    }
-#endif
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -287,13 +259,11 @@ __interrupt void TIMERA1and2_ISR (void) {
 __interrupt void PORT1_ISR (void) {
     CAPTURE_TIME();
     DEBUG_PIN_ISR_SET();
-#ifdef ISR_RADIO
    //interrupt from radio through IRQ_RF connected to P1.6
    if ((P1IFG & 0x40)!=0) {
       P1IFG &= ~0x40;                            // clear interrupt flag
       isr_radio();
    }
-#endif
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -310,17 +280,13 @@ __interrupt void PORT1_ISR (void) {
 __interrupt void USCIAB1TX_ISR(void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-#ifdef ISR_I2C
    if ( ((UC1IFG & UCB1TXIFG) && (UC1IE & UCB1TXIE)) ||
         ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ) {
       isr_i2c_tx(1);                         // implemented in I2C driver
    }
-#endif
-#ifdef ISR_SERIAL
    if ( (UC1IFG & UCA1TXIFG) && (UC1IE & UCA1TXIE) ){
       isr_openserial_tx();                       // implemented in serial driver
    }
-#endif
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -328,18 +294,13 @@ __interrupt void USCIAB1TX_ISR(void) {
 __interrupt void USCIAB1RX_ISR(void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-#ifdef ISR_I2C
    if ( ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ||
          (UCB1STAT & UCNACKIFG) ) {
       isr_i2c_rx(1);                             // implemented in I2C driver
    }
-#endif
-
-#ifdef ISR_SERIAL
    if ( (UC1IFG & UCA1RXIFG) && (UC1IE & UCA1RXIE) ){
       isr_openserial_rx();                  // implemented in serial driver
    }
-#endif
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -352,12 +313,10 @@ __interrupt void USCIAB0RX_ISR (void) {
       isr_spi_rx();                         // implemented in SPI driver
    }
 #endif
-#ifdef ISR_I2C
    if ( ((IFG2 & UCB0RXIFG) && (IE2 & UCB0RXIE)) ||
         (UCB0STAT & UCNACKIFG) ) {
       isr_i2c_rx(0);                             // implemented in I2C driver
    }
-#endif
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -369,9 +328,7 @@ __interrupt void USCIAB0RX_ISR (void) {
 __interrupt void ADC12_ISR (void) {
     CAPTURE_TIME();
     DEBUG_PIN_ISR_SET();
-#ifdef ISR_ADC
    ADC12IFG &= ~0x1F;                            // clear interrupt flags
    __bic_SR_register_on_exit(CPUOFF);            // restart CPU
-#endif
    DEBUG_PIN_ISR_CLR();
 }

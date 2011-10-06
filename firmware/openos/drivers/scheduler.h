@@ -44,38 +44,17 @@ enum {
 __monitor void scheduler_push_task(int8_t task_id);
 
 // interrupt handlers
-#ifdef OPENWSN_STACK
 void isr_ieee154e_newSlot();
-#endif
-#ifdef OPENWSN_STACK
 void isr_ieee154e_timer();
-#endif
-#ifdef ISR_ADC
 void isr_adc();
-#endif
 #ifdef ISR_GYRO
 void isr_gyro();
-#endif
-#ifdef ISR_RADIO
-void isr_radio();
 #endif
 #ifdef ISR_LARGE_RANGE_ACCEL
 void isr_large_range_accel();
 #endif
 #ifdef ISR_BUTTON
 void isr_button();
-#endif
-#ifdef ISR_SPIRX
-void isr_spirx();
-#endif
-#ifdef ISR_SPITX
-void isr_spitx();
-#endif
-#ifdef ISR_I2CRX
-void isr_i2crx();
-#endif
-#ifdef ISR_I2CTX
-void isr_i2ctx();
 #endif
 
 /**

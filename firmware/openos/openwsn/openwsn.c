@@ -7,7 +7,6 @@
 
 #include "openwsn.h"
 #include "scheduler.h"
-#ifdef OPENWSN_STACK
 //l7
 #include "appudpsensor.h"
 #include "appudpprint.h"
@@ -40,17 +39,10 @@
 #include "schedule.h"
 //l2a
 #include "IEEE802154E.h"
-//l1
-#include "radio.h"
 //cross-layer
 #include "idmanager.h"
 #include "openqueue.h"
-#include "openserial.h"
 #include "openrandom.h"
-//misc
-#include "ieee154etimer.h"
-#include "timers.h"
-#endif
 
 //=========================== variables =======================================
 
@@ -61,17 +53,10 @@ void openwsn_init();
 //=========================== public ==========================================
 
 void openwsn_init() {
-   scheduler_init();
-#ifdef OPENWSN_STACK
-   timer_init();
-   ieee154etimer_init();
    // cross-layer
-   idmanager_init();    // call first since initializes e.g. EUI64
+   idmanager_init(); // call first since initializes e.g. EUI64
    openqueue_init();
-   openserial_init();
    openrandom_init();
-   // 01-PHY
-   radio_init();
    // 02a-TSCH
    mac_init();
    // 02b-RES
@@ -104,7 +89,6 @@ void openwsn_init() {
    appudpleds_init();
    appudpprint_init();
    appudpsensor_init();
-#endif
 }
 
 //=========================== private =========================================

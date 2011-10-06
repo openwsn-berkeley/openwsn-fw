@@ -160,11 +160,6 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state>ISR_RADIO</state>
-          <state>ISR_TIMERS</state>
-          <state>ISR_SERIAL</state>
-          <state>ISR_I2C</state>
-          <state>ISR_ADC</state>
           <state>OPENWSN_STACK</state>
         </option>
         <option>

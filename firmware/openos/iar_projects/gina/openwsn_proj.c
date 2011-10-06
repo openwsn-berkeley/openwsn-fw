@@ -20,6 +20,7 @@
 
 void main(void) {
    board_init();
+   scheduler_init();
    openwsn_init();
    scheduler_start();
 }
