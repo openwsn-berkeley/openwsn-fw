@@ -1913,6 +1913,9 @@
       <name>$PROJ_DIR$\..\..\drivers\gina\magnetometer.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\openuart.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\radio.c</name>
     </file>
     <file>
