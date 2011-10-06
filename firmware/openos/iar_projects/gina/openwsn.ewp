@@ -323,15 +323,16 @@
         <option>
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\..\drivers\gina</state>
-          <state>$PROJ_DIR$\..\..\openwsn</state>
-          <state>$PROJ_DIR$\..\..\openwsn\02a-MAClow</state>
-          <state>$PROJ_DIR$\..\..\openwsn\02b-MAChigh</state>
-          <state>$PROJ_DIR$\..\..\openwsn\03a-IPHC</state>
-          <state>$PROJ_DIR$\..\..\openwsn\03b-IPv6</state>
-          <state>$PROJ_DIR$\..\..\openwsn\04-TRAN</state>
-          <state>$PROJ_DIR$\..\..\openwsn\07-App</state>
-          <state>$PROJ_DIR$\..\..\openwsn\cross-layers</state>
+          <state>$PROJ_DIR$\..\..\drivers\</state>
+          <state>$PROJ_DIR$\..\..\drivers\gina\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02a-MAClow\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\03a-IPHC\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\03b-IPv6\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\04-TRAN\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\cross-layers\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
