@@ -6,6 +6,7 @@
 
 #include "board.h"
 #include "leds.h"
+#include "msp430x26x.h"
 
 #ifdef ISR_I2C
 #include "i2c.h"

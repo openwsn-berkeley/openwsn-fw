@@ -1,4 +1,5 @@
 #include "leds.h"
+#include "msp430x26x.h"
 
 //=========================== variables =======================================
 
@@ -33,6 +34,59 @@ void leds_increment() {
    led_counter = ((P2OUT & 0x0f)+1);
    P2OUT &= ~0x0f; //all LEDs off
    P2OUT |=  led_counter & 0x0f; //LEDs on again
+}
+
+void leds_blink() {
+   int i = 0;
+   P2OUT ^= 0x0f;
+   while (--i);
+   P2OUT ^= 0x0f;
+   while (--i);
+   P2OUT ^= 0x0f;
+   while (--i);
+   P2OUT ^= 0x0f;
+}
+
+void leds_alloff() {
+   P2OUT &= ~0x0f;                               // turn off all 4 LEDs
+}
+
+void leds_setCombination(uint8_t combination) {
+   P2OUT &= ~0x0f;
+   P2OUT |= (0x0f & combination);
+}
+
+// yellow
+void led_radioLedOn() {
+   P2OUT |=  0x01;
+}
+void led_radioLedOff() {
+   P2OUT &= ~0x01;
+}
+void led_radioLedToggle() {
+   P2OUT ^=  0x01;
+}
+
+// green
+void led_syncLedOn() {
+   P2OUT |=  0x02;
+}
+void led_syncLedOff() {
+   P2OUT &= ~0x02;
+}
+void led_syncLedToggle() {
+   P2OUT ^=  0x02;
+}
+
+//red
+void led_errorLedOn() {
+   P2OUT |=  0x08;
+}
+void led_errorLedOff() {
+   P2OUT &= ~0x08;
+}
+void led_errorLedToggle() {
+   P2OUT ^=  0x08;
 }
 
 //=========================== private =========================================
