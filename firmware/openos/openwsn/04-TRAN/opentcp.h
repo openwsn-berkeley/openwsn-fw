@@ -1,5 +1,5 @@
-#ifndef __TCP_H
-#define __TCP_H
+#ifndef __OPENTCP_H
+#define __OPENTCP_H
 
 /**
 \addtogroup Transport
@@ -102,13 +102,13 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void     tcp_init();
-error_t  tcp_connect(open_addr_t* dest, uint16_t param_hisPort, uint16_t param_myPort);
-error_t  tcp_send(OpenQueueEntry_t* msg);
-void     tcp_sendDone(OpenQueueEntry_t* msg, error_t error);
-void     tcp_receive(OpenQueueEntry_t* msg);
-error_t  tcp_close();
-bool     tcp_debugPrint();
+void     opentcp_init();
+error_t  opentcp_connect(open_addr_t* dest, uint16_t param_hisPort, uint16_t param_myPort);
+error_t  opentcp_send(OpenQueueEntry_t* msg);
+void     opentcp_sendDone(OpenQueueEntry_t* msg, error_t error);
+void     opentcp_receive(OpenQueueEntry_t* msg);
+error_t  opentcp_close();
+bool     opentcp_debugPrint();
 
 /**
 \}

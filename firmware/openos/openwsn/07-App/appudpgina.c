@@ -6,7 +6,7 @@
 #include "magnetometer.h"
 #include "sensitive_accel_temperature.h"
 //openwsn stack
-#include "udp.h"
+#include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"
@@ -107,7 +107,7 @@ void appudpgina_send() {
    packetfunctions_reserveHeaderSize(packetToSend,10);
    sensitive_accel_temperature_get_measurement(&(packetToSend->payload[0]));
    //send packet
-   if ((udp_send(packetToSend))==E_FAIL) {
+   if ((openudp_send(packetToSend))==E_FAIL) {
       openqueue_freePacketBuffer(packetToSend);
       appudpgina_reset();
    }

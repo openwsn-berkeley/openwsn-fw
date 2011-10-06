@@ -1,6 +1,6 @@
 #include "openwsn.h"
 #include "appudpecho.h"
-#include "udp.h"
+#include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
 
@@ -22,7 +22,7 @@ void appudpecho_receive(OpenQueueEntry_t* msg) {
    temp_l4_destination_port           = msg->l4_destination_port;
    msg->l4_destination_port           = msg->l4_sourcePortORicmpv6Type;
    msg->l4_sourcePortORicmpv6Type     = temp_l4_destination_port;
-   if ((udp_send(msg))==E_FAIL) {
+   if ((openudp_send(msg))==E_FAIL) {
       openqueue_freePacketBuffer(msg);
    }
 }

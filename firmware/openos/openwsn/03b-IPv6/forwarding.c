@@ -7,8 +7,8 @@
 #include "packetfunctions.h"
 #include "neighbors.h"
 #include "icmpv6.h"
-#include "udp.h"
-#include "tcp.h"
+#include "openudp.h"
+#include "opentcp.h"
 
 //=========================== variables =======================================
 
@@ -34,10 +34,10 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, error_t error) {
    } else {//that was a packet coming from above
       switch(msg->l4_protocol) {
       case IANA_TCP:
-         tcp_sendDone(msg,error);
+         opentcp_sendDone(msg,error);
          break;
       case IANA_UDP:
-         udp_sendDone(msg,error);
+         openudp_sendDone(msg,error);
          break;
       case IANA_ICMPv6:
          icmpv6_sendDone(msg,error);
@@ -59,10 +59,10 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
       memcpy(&(msg->l3_destinationORsource),&ipv6_header.src,sizeof(open_addr_t));
       switch(msg->l4_protocol) {
       case IANA_TCP:
-         tcp_receive(msg);
+         opentcp_receive(msg);
          break;
       case IANA_UDP:
-         udp_receive(msg);
+         openudp_receive(msg);
          break;
       case IANA_ICMPv6:
          icmpv6_receive(msg);

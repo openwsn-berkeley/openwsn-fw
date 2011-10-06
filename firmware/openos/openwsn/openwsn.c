@@ -23,8 +23,8 @@
 #include "apptcpinject.h"
 #include "apptcpecho.h"
 //l4
-#include "udp.h"
-#include "tcp.h"
+#include "openudp.h"
+#include "opentcp.h"
 //l3b
 #include "icmpv6rpl.h"
 #include "icmpv6router.h"
@@ -46,7 +46,7 @@
 #include "idmanager.h"
 #include "openqueue.h"
 #include "openserial.h"
-#include "random.h"
+#include "openrandom.h"
 //misc
 #include "ieee154etimer.h"
 #include "timers.h"
@@ -69,7 +69,7 @@ void openwsn_init() {
    idmanager_init();    // call first since initializes e.g. EUI64
    openqueue_init();
    openserial_init();
-   random_init();
+   openrandom_init();
    // 01-PHY
    radio_init();
    // 02a-TSCH
@@ -88,8 +88,8 @@ void openwsn_init() {
    icmpv6router_init();
    icmpv6rpl_init();
    // 04-TRAN
-   tcp_init();
-   udp_init();
+   opentcp_init();
+   openudp_init();
    // 07-App
    apptcpecho_init();
    apptcpinject_init();

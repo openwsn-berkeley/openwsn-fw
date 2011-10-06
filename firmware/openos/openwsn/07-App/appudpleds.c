@@ -1,7 +1,7 @@
 #include "openwsn.h"
 #include "appudpleds.h"
 //openwsn stack
-#include "udp.h"
+#include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"

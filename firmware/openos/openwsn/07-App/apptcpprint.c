@@ -2,7 +2,7 @@
 #include "apptcpprint.h"
 #include "openserial.h"
 #include "openqueue.h"
-#include "tcp.h"
+#include "opentcp.h"
 
 //=========================== variables =======================================
 
@@ -20,7 +20,7 @@ bool apptcpprint_shouldIlisten(){
 void apptcpprint_receive(OpenQueueEntry_t* msg) {
    openserial_printData((uint8_t*)(msg->payload),msg->length);
    //close TCP session, but keep listening
-   tcp_close();
+   opentcp_close();
    openqueue_freePacketBuffer(msg);
 }
 

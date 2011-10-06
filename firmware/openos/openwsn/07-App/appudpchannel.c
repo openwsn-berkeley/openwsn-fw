@@ -3,7 +3,7 @@
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"
-#include "udp.h"
+#include "openudp.h"
 
 //=========================== variables =======================================
 
@@ -58,7 +58,7 @@ void appudpchannel_trigger() {
    packetfunctions_reserveHeaderSize(pkt,1);
    ((uint8_t*)pkt->payload)[0] = appudpchannel_vars.new_channel;
    //send packet
-   if ((udp_send(pkt))==E_FAIL) {
+   if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }
 }

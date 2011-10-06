@@ -1,6 +1,6 @@
 #include "openwsn.h"
 #include "appudptimer.h"
-#include "udp.h"
+#include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"
@@ -83,7 +83,7 @@ void timer_appudptimer_fired() {
       ((uint8_t*)pkt->payload)[4]                = 0x92;
       //memcpy(&pkt->payload[5],coapmsg,sizeof(coapmsg));
       //send packet
-      if ((udp_send(pkt))==E_FAIL) {
+      if ((openudp_send(pkt))==E_FAIL) {
          openqueue_freePacketBuffer(pkt);
          appudptimer_vars.busySending            = FALSE;
       } else {

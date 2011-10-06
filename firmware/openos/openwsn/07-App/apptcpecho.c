@@ -2,7 +2,7 @@
 #include "apptcpecho.h"
 #include "openqueue.h"
 #include "openserial.h"
-#include "tcp.h"
+#include "opentcp.h"
 
 //=========================== variables =======================================
 
@@ -26,7 +26,7 @@ void apptcpecho_receive(OpenQueueEntry_t* msg) {
    temp_l4_destination_port       = msg->l4_destination_port;
    msg->l4_destination_port       = msg->l4_sourcePortORicmpv6Type;
    msg->l4_sourcePortORicmpv6Type = temp_l4_destination_port;
-   if (tcp_send(msg)==E_FAIL) {
+   if (opentcp_send(msg)==E_FAIL) {
       openqueue_freePacketBuffer(msg);
    }
 }
@@ -39,7 +39,7 @@ void apptcpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
                             (errorparameter_t)0);
    }
    //close TCP session, but keep listening
-   tcp_close();
+   opentcp_close();
    openqueue_freePacketBuffer(msg);
 }
 

@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "tcp.h"
+#include "opentcp.h"
 #include "openserial.h"
 #include "openqueue.h"
 #include "forwarding.h"
@@ -35,11 +35,11 @@ void reset();
 
 //=========================== public ==========================================
 
-void tcp_init() {
+void opentcp_init() {
    reset();
 }
 
-error_t tcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16_t param_tcp_myPort) {
+error_t opentcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16_t param_tcp_myPort) {
    //[command] establishment
    OpenQueueEntry_t* tempPkt;
    if (tcp_vars.state!=TCP_STATE_CLOSED) {
@@ -73,7 +73,7 @@ error_t tcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16_t para
    return forwarding_send(tempPkt);
 }
 
-error_t tcp_send(OpenQueueEntry_t* msg) {             //[command] data
+error_t opentcp_send(OpenQueueEntry_t* msg) {             //[command] data
    msg->owner = COMPONENT_TCP;
    if (tcp_vars.state!=TCP_STATE_ESTABLISHED) {
       openserial_printError(COMPONENT_TCP,ERR_WRONG_TCP_STATE,
@@ -106,7 +106,7 @@ error_t tcp_send(OpenQueueEntry_t* msg) {             //[command] data
    return forwarding_send(tcp_vars.dataToSend);
 }
 
-void tcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void opentcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
    OpenQueueEntry_t* tempPkt;
    msg->owner = COMPONENT_TCP;
    switch (tcp_vars.state) {
@@ -229,7 +229,7 @@ void tcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
    }
 }
 
-void tcp_receive(OpenQueueEntry_t* msg) {
+void opentcp_receive(OpenQueueEntry_t* msg) {
    OpenQueueEntry_t* tempPkt;
    bool shouldIlisten;
    msg->owner                     = COMPONENT_TCP;
@@ -620,7 +620,7 @@ void tcp_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-error_t tcp_close() {    //[command] teardown
+error_t opentcp_close() {    //[command] teardown
    OpenQueueEntry_t* tempPkt;
    if (  tcp_vars.state==TCP_STATE_ALMOST_CLOSE_WAIT ||
          tcp_vars.state==TCP_STATE_CLOSE_WAIT        ||

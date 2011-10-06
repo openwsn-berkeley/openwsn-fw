@@ -11,7 +11,7 @@
 #include "iphc.h"
 #include "leds.h"
 #include "packetfunctions.h"
-#include "random.h"
+#include "openrandom.h"
 #include "schedule.h"
 
 //=========================== variables =======================================
@@ -34,7 +34,7 @@ void    sendKa();
 //=========================== public ==========================================
 
 void res_init() {
-   res_vars.periodMaintenance = 16384+random_get16b()%32768; // fires every 1 sec on average
+   res_vars.periodMaintenance = 16384+openrandom_get16b()%32768; // fires every 1 sec on average
    res_vars.busySending       = FALSE;
    res_vars.dsn               = 0;
    res_vars.MacMgtTaskCounter = 0;
@@ -91,7 +91,7 @@ void task_resNotifSendDone() {
       // I can send the next ADV or KA
       res_vars.busySending = FALSE;
       // restart a random timer
-      res_vars.periodMaintenance = 16384+random_get16b()%32768;
+      res_vars.periodMaintenance = 16384+openrandom_get16b()%32768;
       timer_startPeriodic(TIMER_RES,res_vars.periodMaintenance);
    } else {
       // send the rest up the stack

@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "udp.h"
+#include "openudp.h"
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "forwarding.h"
@@ -21,10 +21,10 @@
 
 //=========================== public ==========================================
 
-void udp_init() {
+void openudp_init() {
 }
 
-error_t udp_send(OpenQueueEntry_t* msg) {
+error_t openudp_send(OpenQueueEntry_t* msg) {
    msg->owner       = COMPONENT_UDP;
    msg->l4_protocol = IANA_UDP;
    msg->l4_payload  = msg->payload;
@@ -37,7 +37,7 @@ error_t udp_send(OpenQueueEntry_t* msg) {
    return forwarding_send(msg);
 }
 
-void udp_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
    msg->owner = COMPONENT_UDP;
    switch(msg->l4_sourcePortORicmpv6Type) {
       case WKP_UDP_CHANNEL:
@@ -77,7 +77,7 @@ void udp_sendDone(OpenQueueEntry_t* msg, error_t error) {
    }
 }
 
-void udp_receive(OpenQueueEntry_t* msg) {
+void openudp_receive(OpenQueueEntry_t* msg) {
    msg->owner                      = COMPONENT_UDP;
    msg->l4_sourcePortORicmpv6Type  = msg->payload[0]*256+msg->payload[1];
    msg->l4_destination_port        = msg->payload[2]*256+msg->payload[3];
@@ -120,7 +120,7 @@ void udp_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-bool udp_debugPrint() {
+bool openudp_debugPrint() {
    return FALSE;
 }
 

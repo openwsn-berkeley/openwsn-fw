@@ -1,5 +1,5 @@
-#ifndef __UDP_H
-#define __UDP_H
+#ifndef __OPENUDP_H
+#define __OPENUDP_H
 
 /**
 \addtogroup Transport
@@ -45,11 +45,11 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void    udp_init();
-error_t udp_send(OpenQueueEntry_t* msg);
-void    udp_sendDone(OpenQueueEntry_t* msg, error_t error);
-void    udp_receive(OpenQueueEntry_t* msg);
-bool    udp_debugPrint();
+void    openudp_init();
+error_t openudp_send(OpenQueueEntry_t* msg);
+void    openudp_sendDone(OpenQueueEntry_t* msg, error_t error);
+void    openudp_receive(OpenQueueEntry_t* msg);
+bool    openudp_debugPrint();
 
 /**
 \}

@@ -3,7 +3,7 @@
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
-#include "tcp.h"
+#include "opentcp.h"
 
 #include "ohlone_webpages.h"
 
@@ -47,7 +47,7 @@ void apptcpohlone_sendpkt() {
       // close TCP session, but keep listening
       apptcpohlone_vars.getRequest[0] = '/';
       apptcpohlone_vars.getRequest[1] = ' ';
-      tcp_close();
+      opentcp_close();
       return;
    }
 
@@ -56,7 +56,7 @@ void apptcpohlone_sendpkt() {
       openserial_printError(COMPONENT_APPTCPOHLONE,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      tcp_close();
+      opentcp_close();
       return;
    }
    apptcpohlone_vars.pkt->creator = COMPONENT_APPTCPOHLONE;
@@ -65,9 +65,9 @@ void apptcpohlone_sendpkt() {
    packetfunctions_reserveHeaderSize(apptcpohlone_vars.pkt, buffer_len);
    memcpy(apptcpohlone_vars.pkt->payload, buffer, buffer_len);
    
-   if ((tcp_send(apptcpohlone_vars.pkt))==E_FAIL) {
+   if ((opentcp_send(apptcpohlone_vars.pkt))==E_FAIL) {
       openqueue_freePacketBuffer(apptcpohlone_vars.pkt);
-      tcp_close();
+      opentcp_close();
    }
 
 }

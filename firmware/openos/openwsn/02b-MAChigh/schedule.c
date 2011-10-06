@@ -2,7 +2,7 @@
 #include "schedule.h"
 #include "openserial.h"
 #include "idmanager.h"
-#include "random.h"
+#include "openrandom.h"
 
 //=========================== variables =======================================
 
@@ -322,7 +322,7 @@ __monitor void schedule_indicateTx(uint16_t slotOffset,
       }
       // set the backoff to a random value in [0..2^BE]
       schedule_vars.schedule[slotOffset].backoff =
-         random_get16b()%(1<<schedule_vars.schedule[slotOffset].backoffExponent);
+         openrandom_get16b()%(1<<schedule_vars.schedule[slotOffset].backoffExponent);
    }
 }
 

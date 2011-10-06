@@ -2,7 +2,7 @@
 #include "apptcpinject.h"
 #include "openserial.h"
 #include "packetfunctions.h"
-#include "tcp.h"
+#include "opentcp.h"
 #include "openqueue.h"
 
 //=========================== variables =======================================
@@ -42,7 +42,7 @@ void apptcpinject_trigger() {
    memcpy(&(apptcpinject_vars.hisAddress.addr_128b[0]),&(input_buffer[0]),16);
    apptcpinject_vars.hisPort = packetfunctions_ntohs(&(input_buffer[16]));
    //connect
-   tcp_connect(&apptcpinject_vars.hisAddress,apptcpinject_vars.hisPort,WKP_TCP_INJECT);
+   opentcp_connect(&apptcpinject_vars.hisAddress,apptcpinject_vars.hisPort,WKP_TCP_INJECT);
 }
 
 void apptcpinject_connectDone(error_t error) {
@@ -67,7 +67,7 @@ void apptcpinject_connectDone(error_t error) {
       ((uint8_t*)apptcpinject_vars.pkt->payload)[3] = 'p';
       ((uint8_t*)apptcpinject_vars.pkt->payload)[4] = 'o';
       ((uint8_t*)apptcpinject_vars.pkt->payload)[5] = 'i';
-      if (tcp_send(apptcpinject_vars.pkt)==E_FAIL) {
+      if (opentcp_send(apptcpinject_vars.pkt)==E_FAIL) {
          openqueue_freePacketBuffer(apptcpinject_vars.pkt);
       }
       return;
@@ -81,7 +81,7 @@ void apptcpinject_sendDone(OpenQueueEntry_t* msg, error_t error) {
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }
-   tcp_close();
+   opentcp_close();
    openqueue_freePacketBuffer(msg);
 }
 

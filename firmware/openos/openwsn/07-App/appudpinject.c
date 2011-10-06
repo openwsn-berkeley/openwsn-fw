@@ -1,6 +1,6 @@
 #include "openwsn.h"
 #include "appudpinject.h"
-#include "udp.h"
+#include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"
@@ -49,7 +49,7 @@ void appudpinject_trigger() {
    ((uint8_t*)pkt->payload)[4]      = 'o';
    ((uint8_t*)pkt->payload)[5]      = 'i';
    //send packet
-   if ((udp_send(pkt))==E_FAIL) {
+   if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }
 }
