@@ -113,7 +113,7 @@ typedef struct {
 
 
 // admin
-          void     mac_init();
+          void     ieee154e_init();
 // public
 __monitor uint16_t ieee154e_asnDiff(asn_t* someASN);
 // events

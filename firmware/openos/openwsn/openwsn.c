@@ -57,7 +57,7 @@ void openwsn_init() {
    openqueue_init();
    openrandom_init();
    // 02a-TSCH
-   mac_init();
+   ieee154e_init();
    // 02b-RES
    schedule_init();
    res_init();

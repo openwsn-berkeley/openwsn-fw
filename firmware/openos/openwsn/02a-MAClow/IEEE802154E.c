@@ -114,7 +114,7 @@ bool     debugPrint_isSync();
 Call this function once before any other function in this module, possibly
 during boot-up.
 */
-void mac_init() {   
+void ieee154e_init() {   
    // initialize debug pins
    DEBUG_PIN_FRAME_INIT();
    DEBUG_PIN_SLOT_INIT();
