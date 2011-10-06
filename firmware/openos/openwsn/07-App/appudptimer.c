@@ -16,6 +16,8 @@ typedef struct {
 
 appudptimer_vars_t appudptimer_vars;
 
+const uint8_t coapmsg[] = "rdfh=dust</led>;title=\"LED\";rt=\"Actuator\"";
+
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
@@ -25,7 +27,7 @@ void appudptimer_init() {
    appudptimer_vars.delayCounter = 0;
    // all motes which are not the DAGroot publish data periodically
    if (idmanager_getIsDAGroot()==FALSE) {
-      //poipoipoitimer_startPeriodic(TIMER_UDPTIMER,0xffff);// every 2 seconds
+      timer_startPeriodic(TIMER_UDPTIMER,0xffff);// every 2 seconds
    }
 }
 
@@ -60,25 +62,26 @@ void timer_appudptimer_fired() {
       pkt->l3_destinationORsource.addr_128b[ 1]  = 0x01;
       pkt->l3_destinationORsource.addr_128b[ 2]  = 0x04;
       pkt->l3_destinationORsource.addr_128b[ 3]  = 0x70;
-      pkt->l3_destinationORsource.addr_128b[ 4]  = 0x81;
-      pkt->l3_destinationORsource.addr_128b[ 5]  = 0x9f;
+      pkt->l3_destinationORsource.addr_128b[ 4]  = 0x00;
+      pkt->l3_destinationORsource.addr_128b[ 5]  = 0x66;
       pkt->l3_destinationORsource.addr_128b[ 6]  = 0x00;
-      pkt->l3_destinationORsource.addr_128b[ 7]  = 0x01;
-      pkt->l3_destinationORsource.addr_128b[ 8]  = 0x14;
-      pkt->l3_destinationORsource.addr_128b[ 9]  = 0xf1;
-      pkt->l3_destinationORsource.addr_128b[10]  = 0xff;
-      pkt->l3_destinationORsource.addr_128b[11]  = 0xef;
-      pkt->l3_destinationORsource.addr_128b[12]  = 0xa4;
-      pkt->l3_destinationORsource.addr_128b[13]  = 0x4c;
-      pkt->l3_destinationORsource.addr_128b[14]  = 0x70;
-      pkt->l3_destinationORsource.addr_128b[15]  = 0xb5;
-      packetfunctions_reserveHeaderSize(pkt,6);
-      ((uint8_t*)pkt->payload)[0]                = 'p';
-      ((uint8_t*)pkt->payload)[1]                = 'o';
-      ((uint8_t*)pkt->payload)[2]                = 'i';
-      ((uint8_t*)pkt->payload)[3]                = 'p';
-      ((uint8_t*)pkt->payload)[4]                = 'o';
-      ((uint8_t*)pkt->payload)[5]                = 'i';
+      pkt->l3_destinationORsource.addr_128b[ 7]  = 0x19;
+      pkt->l3_destinationORsource.addr_128b[ 8]  = 0x00;
+      pkt->l3_destinationORsource.addr_128b[ 9]  = 0x00;
+      pkt->l3_destinationORsource.addr_128b[10]  = 0x00;
+      pkt->l3_destinationORsource.addr_128b[11]  = 0x00;
+      pkt->l3_destinationORsource.addr_128b[12]  = 0x00;
+      pkt->l3_destinationORsource.addr_128b[13]  = 0x00;
+      pkt->l3_destinationORsource.addr_128b[14]  = 0x00;
+      pkt->l3_destinationORsource.addr_128b[15]  = 0x02;
+      //packetfunctions_reserveHeaderSize(pkt,4+sizeof(coapmsg));
+      packetfunctions_reserveHeaderSize(pkt,4);
+      ((uint8_t*)pkt->payload)[0]                = 0x42;
+      ((uint8_t*)pkt->payload)[1]                = 0x02;
+      ((uint8_t*)pkt->payload)[2]                = 0xab;
+      ((uint8_t*)pkt->payload)[3]                = 0x14;
+      ((uint8_t*)pkt->payload)[4]                = 0x92;
+      //memcpy(&pkt->payload[5],coapmsg,sizeof(coapmsg));
       //send packet
       if ((udp_send(pkt))==E_FAIL) {
          openqueue_freePacketBuffer(pkt);

@@ -108,6 +108,7 @@ enum {
    WKP_UDP_DISCARD                     =    9,
    WKP_UDP_SENSOR                      = 2189,
    WKP_UDP_WARPWING                    = 2194,
+   WKP_UDP_COAP                        = 5683,
 };
 
 //status elements
