@@ -19,7 +19,7 @@
 #include "openserial.h"
 
 void main(void) {
-   gina_init();
+   board_init();
    openwsn_init();
    scheduler_start();
 }

@@ -18,7 +18,7 @@
 
 //=========================== public ==========================================
 
-void gina_init() {
+void board_init() {
    WDTCTL  = WDTPW + WDTHOLD;                    // disable watchdog timer
    BCSCTL1 = CALBC1_16MHZ;                       // MCLK at 16MHz
    DCOCTL  = CALDCO_16MHZ;
