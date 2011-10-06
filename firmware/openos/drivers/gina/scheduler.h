@@ -8,7 +8,6 @@
 \{
 */
 
-#include "msp430x26x.h"
 #include "stdint.h"
 #include "radio.h"
 
