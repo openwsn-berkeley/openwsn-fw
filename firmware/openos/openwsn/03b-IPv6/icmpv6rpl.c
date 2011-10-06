@@ -6,6 +6,7 @@
 #include "opentimers.h"
 #include "neighbors.h"
 #include "packetfunctions.h"
+#include "openrandom.h"
 
 //=========================== variables =======================================
 
@@ -19,8 +20,6 @@ typedef struct {
 
 icmpv6rpl_vars_t icmpv6rpl_vars;
 
-__no_init volatile uint8_t random_uint8 @ 0x10c0;
-
 //=========================== prototypes ======================================
 
 void sendDIO();
@@ -30,7 +29,7 @@ void sendDIO();
 void icmpv6rpl_init() {
    icmpv6rpl_vars.busySending = FALSE;
    icmpv6rpl_vars.seq         = 0;
-   icmpv6rpl_vars.periodDIO = 40000+(64*(*(&random_uint8)));       // pseudo-random
+   icmpv6rpl_vars.periodDIO = 40000+(64*(openrandom_get16b() & 0xff));       // pseudo-random
    icmpv6rpl_vars.all_routers_multicast.type = ADDR_128B;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[0]  = 0xff;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[1]  = 0x02;
@@ -94,7 +93,7 @@ void opentimers_rpl_fired() {
    if (icmpv6rpl_vars.delayDIO==0) {
       sendDIO();
       //set a new random periodDIO
-      icmpv6rpl_vars.periodDIO = 30000+(128*(*(&random_uint8)));       // pseudo-random
+      icmpv6rpl_vars.periodDIO = 40000+(64*(openrandom_get16b() & 0xff));       // pseudo-random
       opentimers_startPeriodic(TIMER_RPL,icmpv6rpl_vars.periodDIO);
    }
 }
