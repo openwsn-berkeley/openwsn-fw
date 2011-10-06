@@ -1,5 +1,5 @@
-#ifndef __TIMERS_H
-#define __TIMERS_H
+#ifndef __OPENTIMERS_H
+#define __OPENTIMERS_H
 
 /**
 \addtogroup drivers
@@ -29,23 +29,23 @@ enum {
 typedef struct {
    uint16_t period[TIMER_COUNT];
    bool     continuous[TIMER_COUNT];
-} timers_vars_t;
+} opentimers_vars_t;
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-void timer_init();
-void timer_start(uint8_t timer_id, uint16_t duration, bool continuous);
-void timer_startOneShot(uint8_t timer_id, uint16_t duration);
-void timer_startPeriodic(uint8_t timer_id, uint16_t duration);
-void timer_stop(uint8_t timer_id);
+void opentimers_init();
+void opentimers_start(uint8_t timer_id, uint16_t duration, bool continuous);
+void opentimers_startOneShot(uint8_t timer_id, uint16_t duration);
+void opentimers_startPeriodic(uint8_t timer_id, uint16_t duration);
+void opentimers_stop(uint8_t timer_id);
 
 // functions to call when timer fires
-void timer_res_fired();
-void timer_rpl_fired();
-void timer_tcp_fired();
-void timer_appudptimer_fired();
+void opentimers_res_fired();
+void opentimers_rpl_fired();
+void opentimers_tcp_fired();
+void opentimers_appudptimer_fired();
 
 /**
 \}

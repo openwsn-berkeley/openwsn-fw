@@ -4,7 +4,7 @@
 #include "openqueue.h"
 #include "forwarding.h"
 #include "packetfunctions.h"
-#include "timers.h"
+#include "opentimers.h"
 //TCP applications
 #include "apptcpecho.h"
 #include "apptcpinject.h"
@@ -659,7 +659,7 @@ bool tcp_debugPrint() {
 //======= timer
 
 //timer used to reset state when TCP state machine is stuck
-void timer_tcp_fired() {
+void opentimers_tcp_fired() {
    reset();
 }
 
@@ -733,8 +733,8 @@ void reset() {
 void tcp_change_state(uint8_t new_tcp_state) {
    tcp_vars.state = new_tcp_state;
    if (tcp_vars.state==TCP_STATE_CLOSED) {
-      timer_stop(TIMER_TCP);
+      opentimers_stop(TIMER_TCP);
    } else {
-      timer_startOneShot(TIMER_TCP,TCP_TIMEOUT);
+      opentimers_startOneShot(TIMER_TCP,TCP_TIMEOUT);
    }
 }

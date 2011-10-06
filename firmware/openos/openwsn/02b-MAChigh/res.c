@@ -6,7 +6,7 @@
 #include "IEEE802154E.h"
 #include "openqueue.h"
 #include "neighbors.h"
-#include "timers.h"
+#include "opentimers.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
 #include "leds.h"
@@ -38,7 +38,7 @@ void res_init() {
    res_vars.busySending       = FALSE;
    res_vars.dsn               = 0;
    res_vars.MacMgtTaskCounter = 0;
-   timer_startPeriodic(TIMER_RES,res_vars.periodMaintenance);
+   opentimers_startPeriodic(TIMER_RES,res_vars.periodMaintenance);
 }
 
 bool debugPrint_myDAGrank() {
@@ -92,7 +92,7 @@ void task_resNotifSendDone() {
       res_vars.busySending = FALSE;
       // restart a random timer
       res_vars.periodMaintenance = 16384+openrandom_get16b()%32768;
-      timer_startPeriodic(TIMER_RES,res_vars.periodMaintenance);
+      opentimers_startPeriodic(TIMER_RES,res_vars.periodMaintenance);
    } else {
       // send the rest up the stack
       iphc_sendDone(msg,msg->l2_sendDoneError);
@@ -156,7 +156,7 @@ has fired. This timer is set to fire every second, on average.
 
 The body of this function executes one of the MAC management task.
 */
-void timer_res_fired() {
+void opentimers_res_fired() {
    res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%2;
    if (idmanager_getMyID(ADDR_16B)->addr_16b[1]==DEBUG_MOTEID_MASTER) {
       if (res_vars.MacMgtTaskCounter==0) {
@@ -220,7 +220,7 @@ error_t res_send_internal(OpenQueueEntry_t* msg) {
 \brief Send an advertisement.
 
 This is one of the MAC managament tasks. This function inlines in the
-timer_res_fired() function, but is declared as a separate function for better
+opentimers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
 inline void sendAdv() {
@@ -263,7 +263,7 @@ inline void sendAdv() {
 \brief Send an keep-alive message, if nessary.
 
 This is one of the MAC managament tasks. This function inlines in the
-timer_res_fired() function, but is declared as a separate function for better
+opentimers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
 inline void sendKa() {

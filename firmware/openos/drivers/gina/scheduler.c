@@ -2,7 +2,7 @@
 //ISR_SPI
 
 #include "scheduler.h"
-#include "timers.h"
+#include "opentimers.h"
 #include "ieee154etimer.h"
 #include "IEEE802154E.h"
 #include "i2c.h"
@@ -19,7 +19,7 @@ typedef struct {
 
 scheduler_vars_t scheduler_vars;
 
-extern timers_vars_t timers_vars;
+extern opentimers_vars_t opentimers_vars;
 
 //=========================== prototypes ======================================
 
@@ -53,16 +53,16 @@ void scheduler_start() {
             task_resNotifSendDone();
          } else if (isThereTask(TASKID_RES)==TRUE) {
             consumeTask(TASKID_RES);
-            timer_res_fired();
+            opentimers_res_fired();
          } else if (isThereTask(TASKID_RPL)==TRUE) {
             consumeTask(TASKID_RPL);
-            timer_rpl_fired();
+            opentimers_rpl_fired();
          } else if (isThereTask(TASKID_TCP_TIMEOUT)==TRUE) {
             consumeTask(TASKID_TCP_TIMEOUT);
-            timer_tcp_fired();
+            opentimers_tcp_fired();
          } else if (isThereTask(TASKID_UDP_TIMER)==TRUE) {
             consumeTask(TASKID_UDP_TIMER);
-            timer_appudptimer_fired();
+            opentimers_appudptimer_fired();
          } else if (isThereTask(TASKID_TIMERB4)==TRUE) {
             consumeTask(TASKID_TIMERB4);
             // timer available, put your function here
@@ -138,8 +138,8 @@ __interrupt void PORT2_ISR (void) {
 __interrupt void TIMERB0_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-   if (timers_vars.continuous[0]==TRUE) {
-      TBCCR0 += timers_vars.period[0];           // continuous timer: schedule next instant
+   if (opentimers_vars.continuous[0]==TRUE) {
+      TBCCR0 += opentimers_vars.period[0];           // continuous timer: schedule next instant
    } else {
       TBCCTL0 = 0;                               // stop the timer
       TBCCR0  = 0;
@@ -157,8 +157,8 @@ __interrupt void TIMERB1through6_ISR (void) {
    uint16_t tbiv_temp = TBIV;                    // read only once because accessing TBIV resets it
    switch (tbiv_temp) {
       case 0x0002: // timerB CCR1
-         if (timers_vars.continuous[1]==TRUE) {
-            TBCCR1 += timers_vars.period[1];     // continuous timer: schedule next instant
+         if (opentimers_vars.continuous[1]==TRUE) {
+            TBCCR1 += opentimers_vars.period[1];     // continuous timer: schedule next instant
          } else {
             TBCCTL1 = 0;                         // stop the timer
             TBCCR1  = 0;
@@ -167,8 +167,8 @@ __interrupt void TIMERB1through6_ISR (void) {
          __bic_SR_register_on_exit(CPUOFF);      // restart CPU
          break;
       case 0x0004: // timerB CCR2
-         if (timers_vars.continuous[2]==TRUE) {
-            TBCCR2 += timers_vars.period[2];     // continuous timer: schedule next instant
+         if (opentimers_vars.continuous[2]==TRUE) {
+            TBCCR2 += opentimers_vars.period[2];     // continuous timer: schedule next instant
          } else {
             TBCCTL2 = 0;                         // stop the timer
             TBCCR2  = 0;
@@ -177,8 +177,8 @@ __interrupt void TIMERB1through6_ISR (void) {
          __bic_SR_register_on_exit(CPUOFF);      // restart CPU
          break;
       case 0x0006: // timerB CCR3
-         if (timers_vars.continuous[3]==TRUE) {
-            TBCCR3 += timers_vars.period[3];     // continuous timer: schedule next instant
+         if (opentimers_vars.continuous[3]==TRUE) {
+            TBCCR3 += opentimers_vars.period[3];     // continuous timer: schedule next instant
          } else {
             TBCCTL3 = 0;                         // stop the timer
             TBCCR3  = 0;
@@ -187,8 +187,8 @@ __interrupt void TIMERB1through6_ISR (void) {
          __bic_SR_register_on_exit(CPUOFF);      // restart CPU
          break;
       case 0x0008: // timerB CCR4
-         if (timers_vars.continuous[4]==TRUE) {
-            TBCCR4 += timers_vars.period[4];     // continuous timer: schedule next instant
+         if (opentimers_vars.continuous[4]==TRUE) {
+            TBCCR4 += opentimers_vars.period[4];     // continuous timer: schedule next instant
          } else {
             TBCCTL4 = 0;                         // stop the timer
             TBCCR4  = 0;
@@ -197,8 +197,8 @@ __interrupt void TIMERB1through6_ISR (void) {
          __bic_SR_register_on_exit(CPUOFF);      // restart CPU
          break;
       case 0x000A: // timerB CCR5
-         if (timers_vars.continuous[5]==TRUE) {
-            TBCCR5 += timers_vars.period[5];     // continuous timer: schedule next instant
+         if (opentimers_vars.continuous[5]==TRUE) {
+            TBCCR5 += opentimers_vars.period[5];     // continuous timer: schedule next instant
          } else {
             TBCCTL5 = 0;                         // stop the timer
             TBCCR5  = 0;
@@ -207,8 +207,8 @@ __interrupt void TIMERB1through6_ISR (void) {
          __bic_SR_register_on_exit(CPUOFF);      // restart CPU
          break;
       case 0x000C: // timerB CCR6
-         if (timers_vars.continuous[6]==TRUE) {
-            TBCCR6 += timers_vars.period[6];     // continuous timer: schedule next instant
+         if (opentimers_vars.continuous[6]==TRUE) {
+            TBCCR6 += opentimers_vars.period[6];     // continuous timer: schedule next instant
          } else {
             TBCCTL6 = 0;                         // stop the timer
             TBCCR6  = 0;

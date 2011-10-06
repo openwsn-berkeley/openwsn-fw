@@ -7,7 +7,7 @@
 #include "board.h"
 #include "leds.h"
 #include "msp430x26x.h"
-#include "timers.h"
+#include "opentimers.h"
 #include "ieee154etimer.h"
 #include "openserial.h"
 #include "radio.h"
@@ -30,7 +30,7 @@ void board_init() {
    // low-level drivers
    leds_init();
    i2c_init();
-   timer_init();
+   opentimers_init();
    ieee154etimer_init();
    openserial_init();
    

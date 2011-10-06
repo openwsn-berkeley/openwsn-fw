@@ -1911,6 +1911,9 @@
       <name>$PROJ_DIR$\..\..\drivers\gina\openserial.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\opentimers.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\radio.c</name>
     </file>
     <file>
@@ -1921,9 +1924,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\spi.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\timers.c</name>
     </file>
   </group>
   <group>

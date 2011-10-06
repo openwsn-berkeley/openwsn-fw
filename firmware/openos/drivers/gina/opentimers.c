@@ -1,19 +1,19 @@
 #include "msp430x26x.h"
-#include "timers.h"
+#include "opentimers.h"
 #include "scheduler.h"
 
 //=========================== variables =======================================
 
-timers_vars_t timers_vars;
+opentimers_vars_t opentimers_vars;
 
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
-void timer_init() {
+void opentimers_init() {
    uint8_t i;
    for(i=0;i<TIMER_COUNT;i++) {
-      timer_start(i, 0, FALSE);
+      opentimers_start(i, 0, FALSE);
    }
    
    BCSCTL3 |= LFXT1S_0;                          // source ACLK from 32kHz crystal
@@ -38,17 +38,17 @@ void timer_init() {
    TBCTL    = MC_2+TBSSEL_1;                     // continuous mode, using ACLK
 }
 
-void timer_startOneShot(uint8_t timer_id, uint16_t duration) {
-   timer_start(timer_id, duration, FALSE);
+void opentimers_startOneShot(uint8_t timer_id, uint16_t duration) {
+   opentimers_start(timer_id, duration, FALSE);
 }
 
-void timer_startPeriodic(uint8_t timer_id, uint16_t duration) {
-   timer_start(timer_id, duration, TRUE);
+void opentimers_startPeriodic(uint8_t timer_id, uint16_t duration) {
+   opentimers_start(timer_id, duration, TRUE);
 }
 
-void timer_stop(uint8_t timer_id) {
-   timers_vars.period[timer_id] = 0;
-   timers_vars.continuous[timer_id] = 0;
+void opentimers_stop(uint8_t timer_id) {
+   opentimers_vars.period[timer_id] = 0;
+   opentimers_vars.continuous[timer_id] = 0;
    switch(timer_id) {
       case 0:
          TBCCR0   =  0;
@@ -83,36 +83,36 @@ void timer_stop(uint8_t timer_id) {
 
 //=========================== private =========================================
 
-void timer_start(uint8_t timer_id, uint16_t duration, bool continuous) {
-   timers_vars.period[timer_id]     = duration;
-   timers_vars.continuous[timer_id] = continuous;
+void opentimers_start(uint8_t timer_id, uint16_t duration, bool continuous) {
+   opentimers_vars.period[timer_id]     = duration;
+   opentimers_vars.continuous[timer_id] = continuous;
    switch(timer_id) {
       case 0:
-         TBCCR0   = TBR+timers_vars.period[timer_id];
+         TBCCR0   = TBR+opentimers_vars.period[timer_id];
          TBCCTL0  = CCIE;
          break;
       case 1:
-         TBCCR1   = TBR+timers_vars.period[timer_id];
+         TBCCR1   = TBR+opentimers_vars.period[timer_id];
          TBCCTL1  = CCIE;
          break;
       case 2:
-         TBCCR2   = TBR+timers_vars.period[timer_id];
+         TBCCR2   = TBR+opentimers_vars.period[timer_id];
          TBCCTL2  = CCIE;
          break;
       case 3:
-         TBCCR3   = TBR+timers_vars.period[timer_id];
+         TBCCR3   = TBR+opentimers_vars.period[timer_id];
          TBCCTL3  = CCIE;
          break;
       case 4:
-         TBCCR4   = TBR+timers_vars.period[timer_id];
+         TBCCR4   = TBR+opentimers_vars.period[timer_id];
          TBCCTL4  = CCIE;
          break;
       case 5:
-         TBCCR5   = TBR+timers_vars.period[timer_id];
+         TBCCR5   = TBR+opentimers_vars.period[timer_id];
          TBCCTL5  = CCIE;
          break;
       case 6:
-         TBCCR6   = TBR+timers_vars.period[timer_id];
+         TBCCR6   = TBR+opentimers_vars.period[timer_id];
          TBCCTL6  = CCIE;
          break;
    }

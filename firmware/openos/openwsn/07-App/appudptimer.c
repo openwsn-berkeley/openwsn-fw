@@ -4,7 +4,7 @@
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"
-#include "timers.h"
+#include "opentimers.h"
 #include "idmanager.h"
 
 //=========================== variables =======================================
@@ -27,11 +27,11 @@ void appudptimer_init() {
    appudptimer_vars.delayCounter = 0;
    // all motes which are not the DAGroot publish data periodically
    if (idmanager_getIsDAGroot()==FALSE) {
-      timer_startPeriodic(TIMER_UDPTIMER,0xffff);// every 2 seconds
+      opentimers_startPeriodic(TIMER_UDPTIMER,0xffff);// every 2 seconds
    }
 }
 
-void timer_appudptimer_fired() {
+void opentimers_appudptimer_fired() {
    OpenQueueEntry_t* pkt;
    /*
    // send every 10s

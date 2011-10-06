@@ -3,7 +3,7 @@
 #include "icmpv6.h"
 #include "openserial.h"
 #include "openqueue.h"
-#include "timers.h"
+#include "opentimers.h"
 #include "neighbors.h"
 #include "packetfunctions.h"
 
@@ -48,7 +48,7 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.all_routers_multicast.addr_128b[13] = 0x00;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[14] = 0x00;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[15] = 0x02;
-   timer_startPeriodic(TIMER_RPL,icmpv6rpl_vars.periodDIO);
+   opentimers_startPeriodic(TIMER_RPL,icmpv6rpl_vars.periodDIO);
 }
 
 void icmpv6rpl_trigger() {
@@ -89,13 +89,13 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
 
 //======= timer
 
-void timer_rpl_fired() {
+void opentimers_rpl_fired() {
    icmpv6rpl_vars.delayDIO = (icmpv6rpl_vars.delayDIO+1)%5; //send on average every 10s
    if (icmpv6rpl_vars.delayDIO==0) {
       sendDIO();
       //set a new random periodDIO
       icmpv6rpl_vars.periodDIO = 30000+(128*(*(&random_uint8)));       // pseudo-random
-      timer_startPeriodic(TIMER_RPL,icmpv6rpl_vars.periodDIO);
+      opentimers_startPeriodic(TIMER_RPL,icmpv6rpl_vars.periodDIO);
    }
 }
 
