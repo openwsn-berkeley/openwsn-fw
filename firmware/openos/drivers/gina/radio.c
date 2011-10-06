@@ -6,6 +6,7 @@
 #include "spi.h"
 #include "openserial.h"
 #include "leds.h"
+#include "debugpins.h"
 
 //=========================== variables =======================================
 

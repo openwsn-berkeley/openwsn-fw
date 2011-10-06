@@ -14,6 +14,7 @@
 #include "i2c.h"
 #include "res.h"
 #include "openserial.h"
+#include "debugpins.h"
 
 //=========================== variables =======================================
 
