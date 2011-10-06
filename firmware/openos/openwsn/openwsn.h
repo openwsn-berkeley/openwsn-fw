@@ -15,7 +15,7 @@
 //=========================== define ==========================================
 
 // enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER 0x94
+#define DEBUG_MOTEID_MASTER 0x93
 
 #ifndef TRUE
 #define TRUE 1
