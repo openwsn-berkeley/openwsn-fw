@@ -38,62 +38,15 @@ uint8_t ohlone_webpage(uint8_t *getRequest, uint16_t chunk, uint8_t *packet) {
   uint8_t len = 0;
   uint8_t current_line = 0;
   current_line--;
-  uint8_t sensordata[10];
   
   HTTP_LINE("HTTP/1.1 200 OK\r\n\r\n");
   
   switch (*(getRequest + 1)) {
-  case 'h':
-    //         "<-- 10 --><-- 20 --><-- 30 --><-- 40 --><--7-->"
-    HTTP_LINE( "<html><head><title>Hi!</title></head>" );
-    HTTP_LINE( "<body><h1>:o</h1></body></html>" );
-    break;
-
-  case 't':
-    //         "<-- 10 --><-- 20 --><-- 30 --><-- 40 --><--7-->"
-    HTTP_LINE( "<html><head><title>The temp is:</title></head>" );
-    HTTP_LINE( "<body><h1>xxxxx</h1></body></html>" );
-
-    if (chunk == current_line)
-      sensitive_accel_temperature_get_measurement(sensordata);
-    HTTP_LINE_REPLACE16(10, (sensordata[8] << 8) + sensordata[9]);
     
-    break;
-
-  case 'l': 
-    large_range_accel_get_measurement(sensordata);
-    len += ohlone_insert3sensors(packet + len, sensordata);
-    break;
-
-  case 'm': 
-    magnetometer_get_measurement(sensordata);
-    len += ohlone_insert3sensors(packet + len, sensordata);
-    break;
-
-  case 's': 
-    if (*(getRequest + 2) == 'm') {
-      memcpy(packet + len, ":)", 2);
-      len += 2;
-    } else {
-      sensitive_accel_temperature_get_measurement(sensordata);
-      len += ohlone_insert4sensors(packet + len, sensordata);
-    }
-    break;                         
-
-  case 'g': 
-    gyro_get_measurement(sensordata);
-    len += ohlone_insert4sensors(packet + len, sensordata);
-    break;
-    
-  case 'f':
-    memcpy(packet + len, ":(", 2);
-    len += 2;
-    break;
-    
-  default:
-    memcpy(packet + len, "=P", 2);
-    len += 2;
-  }
+     default:
+        memcpy(packet + len, ":)", 2);
+       len += 2;
+     }
   
   return len;
 }
