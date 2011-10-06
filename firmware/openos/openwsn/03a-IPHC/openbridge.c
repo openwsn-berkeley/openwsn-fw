@@ -39,7 +39,7 @@ void openbridge_trigger() {
       packetfunctions_reserveHeaderSize(pkt,numDataBytes-8);
       memcpy(pkt->payload,&(input_buffer[8]),numDataBytes-8);
       //send
-      if ((iphc_sendFromBridge(pkt))==FAIL) {
+      if ((iphc_sendFromBridge(pkt))==E_FAIL) {
          openqueue_freePacketBuffer(pkt);
       }
    }

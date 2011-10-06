@@ -5,6 +5,7 @@
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"
+#include "msp430x26x.h"
 
 //=========================== variables =======================================
 

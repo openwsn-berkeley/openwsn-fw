@@ -9,7 +9,6 @@
 #define __OPENWSN_H
 
 //general
-#include "msp430x26x.h"
 #include "stdint.h"                              // needed for uin8_t, uint16_t
 #include <string.h>                              // needed for memcpy and memcmp
 
