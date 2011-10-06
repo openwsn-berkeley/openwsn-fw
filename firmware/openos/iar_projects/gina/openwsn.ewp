@@ -1913,7 +1913,7 @@
       <name>$PROJ_DIR$\..\..\drivers\gina\magnetometer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\openuart.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\openserial.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\radio.c</name>
@@ -2042,9 +2042,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\openwsn\cross-layers\openrandom.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\openserial.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\openwsn\cross-layers\packetfunctions.c</name>
