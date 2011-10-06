@@ -1980,10 +1980,10 @@
     <group>
       <name>04-TRAN</name>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\04-TRAN\tcp.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\04-TRAN\opentcp.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\04-TRAN\udp.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\04-TRAN\openudp.c</name>
       </file>
     </group>
     <group>
@@ -2037,13 +2037,13 @@
         <name>$PROJ_DIR$\..\..\openwsn\cross-layers\openqueue.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\openrandom.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\openwsn\cross-layers\openserial.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\openwsn\cross-layers\packetfunctions.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\random.c</name>
       </file>
     </group>
     <file>
