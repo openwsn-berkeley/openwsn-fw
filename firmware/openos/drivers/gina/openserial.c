@@ -13,9 +13,7 @@
 #include "openqueue.h"
 #include "tcpinject.h"
 #include "udpinject.h"
-#include "udpsensor.h"
 #include "openbridge.h"
-#include "udpchannel.h"
 #include "leds.h"
 #include "schedule.h"
 #include "msp430x26x.h"
@@ -268,13 +266,10 @@ void openserial_stop() {
             idmanager_triggerAboutBridge();
             break;
          case 'T': //Trigger TCPInject
-            apptcpinject_trigger();
+            tcpinject_trigger();
             break;
          case 'U': //Trigger UDPInject
-            appudpinject_trigger();
-            break;
-         case 'S': //Trigger UDPSensor
-            appudpsensor_trigger();
+            udpinject_trigger();
             break;
          case 'E': //Trigger ICMPv6Echo
             icmpv6echo_trigger();
@@ -287,9 +282,6 @@ void openserial_stop() {
             break;
          case 'D': //Trigger OpenBridge (called only by moteProbe)
             openbridge_trigger();
-            break;
-         case 'C': //Trigger AppUdpChannel
-            appudpchannel_trigger();
             break;
          default:
             openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,

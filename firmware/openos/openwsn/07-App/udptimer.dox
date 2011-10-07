@@ -1,5 +1,5 @@
 /**
-\defgroup AppUdpTimer AppUdpTimer
+\defgroup udpTimer udpTimer
 
 \brief UDP Timer application
 

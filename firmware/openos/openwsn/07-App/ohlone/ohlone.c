@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "tcpohlone.h"
+#include "ohlone.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
@@ -53,14 +53,14 @@ void ohlone_sendpkt() {
 
    ohlone_vars.pkt = openqueue_getFreePacketBuffer();
    if (ohlone_vars.pkt==NULL) {
-      openserial_printError(COMPONENT_APPTCPOHLONE,ERR_NO_FREE_PACKET_BUFFER,
+      openserial_printError(COMPONENT_OHLONE,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       opentcp_close();
       return;
    }
-   ohlone_vars.pkt->creator = COMPONENT_APPTCPOHLONE;
-   ohlone_vars.pkt->owner   = COMPONENT_APPTCPOHLONE;
+   ohlone_vars.pkt->creator = COMPONENT_OHLONE;
+   ohlone_vars.pkt->owner   = COMPONENT_OHLONE;
    
    packetfunctions_reserveHeaderSize(ohlone_vars.pkt, buffer_len);
    memcpy(ohlone_vars.pkt->payload, buffer, buffer_len);
@@ -99,9 +99,9 @@ void ohlone_receive(OpenQueueEntry_t* msg) {
 }
 
 void ohlone_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   msg->owner = COMPONENT_APPTCPOHLONE;
-   if (msg->creator!=COMPONENT_APPTCPOHLONE) {
-      openserial_printError(COMPONENT_APPTCPOHLONE,ERR_UNEXPECTED_SENDDONE,
+   msg->owner = COMPONENT_OHLONE;
+   if (msg->creator!=COMPONENT_OHLONE) {
+      openserial_printError(COMPONENT_OHLONE,ERR_UNEXPECTED_SENDDONE,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }

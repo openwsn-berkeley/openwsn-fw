@@ -1998,6 +1998,9 @@
       <name>07-App</name>
       <group>
         <name>heli</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
         <file>
           <name>$PROJ_DIR$\..\..\openwsn\07-App\heli\heli.c</name>
         </file>
@@ -2051,7 +2054,7 @@
         </file>
       </group>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudptimer.c</name>
+        <name>$PROJ_DIR$\..\..\openwsn\07-App\udptimer.c</name>
       </file>
     </group>
     <group>

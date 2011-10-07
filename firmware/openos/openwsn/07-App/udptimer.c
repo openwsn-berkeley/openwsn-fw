@@ -12,9 +12,9 @@
 typedef struct {
    bool       busySending;
    int8_t     delayCounter;
-} appudptimer_vars_t;
+} udptimer_vars_t;
 
-appudptimer_vars_t appudptimer_vars;
+udptimer_vars_t udptimer_vars;
 
 const uint8_t coapmsg[] = "rdfh=dust</led>;title=\"LED\";rt=\"Actuator\"";
 
@@ -22,38 +22,38 @@ const uint8_t coapmsg[] = "rdfh=dust</led>;title=\"LED\";rt=\"Actuator\"";
 
 //=========================== public ==========================================
 
-void appudptimer_init() {
-   appudptimer_vars.busySending  = FALSE;
-   appudptimer_vars.delayCounter = 0;
+void udptimer_init() {
+   udptimer_vars.busySending  = FALSE;
+   udptimer_vars.delayCounter = 0;
    // all motes which are not the DAGroot publish data periodically
    if (idmanager_getIsDAGroot()==FALSE) {
       //poipoiopentimers_startPeriodic(TIMER_UDPTIMER,0xffff);// every 2 seconds
    }
 }
 
-void opentimers_appudptimer_fired() {
+void opentimers_udptimer_fired() {
    OpenQueueEntry_t* pkt;
    /*
    // send every 10s
-   appudptimer_vars.delayCounter = (appudptimer_vars.delayCounter+1)%5;
-   if (appudptimer_vars.delayCounter!=0) {
+   udptimer_vars.delayCounter = (udptimer_vars.delayCounter+1)%5;
+   if (udptimer_vars.delayCounter!=0) {
       return;
    }
    */
    // only send a packet if I received a sendDone for the previous.
    // the packet might be stuck in the queue for a long time for
    // example while the mote is synchronizing
-   if (appudptimer_vars.busySending==FALSE) {
+   if (udptimer_vars.busySending==FALSE) {
       //prepare packet
       pkt = openqueue_getFreePacketBuffer();
       if (pkt==NULL) {
-         openserial_printError(COMPONENT_APPUDPTIMER,ERR_NO_FREE_PACKET_BUFFER,
+         openserial_printError(COMPONENT_UDPTIMER,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          return;
       }
-      pkt->creator                               = COMPONENT_APPUDPTIMER;
-      pkt->owner                                 = COMPONENT_APPUDPTIMER;
+      pkt->creator                               = COMPONENT_UDPTIMER;
+      pkt->owner                                 = COMPONENT_UDPTIMER;
       pkt->l4_protocol                           = IANA_UDP;
       pkt->l4_sourcePortORicmpv6Type             = WKP_UDP_TIMER;
       pkt->l4_destination_port                   = WKP_UDP_TIMER;
@@ -85,32 +85,32 @@ void opentimers_appudptimer_fired() {
       //send packet
       if ((openudp_send(pkt))==E_FAIL) {
          openqueue_freePacketBuffer(pkt);
-         appudptimer_vars.busySending            = FALSE;
+         udptimer_vars.busySending            = FALSE;
       } else {
-         appudptimer_vars.busySending            = TRUE;
+         udptimer_vars.busySending            = TRUE;
       }
    }
 }
 
-void appudptimer_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   msg->owner = COMPONENT_APPUDPTIMER;
-   if (msg->creator!=COMPONENT_APPUDPTIMER) {
-      openserial_printError(COMPONENT_APPUDPTIMER,ERR_UNEXPECTED_SENDDONE,
+void udptimer_sendDone(OpenQueueEntry_t* msg, error_t error) {
+   msg->owner = COMPONENT_UDPTIMER;
+   if (msg->creator!=COMPONENT_UDPTIMER) {
+      openserial_printError(COMPONENT_UDPTIMER,ERR_UNEXPECTED_SENDDONE,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }
    openqueue_freePacketBuffer(msg);
-   appudptimer_vars.busySending = FALSE;
+   udptimer_vars.busySending = FALSE;
 }
 
-void appudptimer_receive(OpenQueueEntry_t* msg) {
-   openserial_printError(COMPONENT_APPUDPTIMER,ERR_UNSPECIFIED,
+void udptimer_receive(OpenQueueEntry_t* msg) {
+   openserial_printError(COMPONENT_UDPTIMER,ERR_UNSPECIFIED,
                          (errorparameter_t)0,
                          (errorparameter_t)0);
    openqueue_freePacketBuffer(msg);
 }
 
-bool appudptimer_debugPrint() {
+bool udptimer_debugPrint() {
    return FALSE;
 }
 
