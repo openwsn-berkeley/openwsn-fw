@@ -13,7 +13,7 @@ void udpprint_init() {
 }
 
 void udpprint_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   openserial_printError(COMPONENT_APPUDPPRINT,ERR_UNEXPECTED_SENDDONE,
+   openserial_printError(COMPONENT_UDPPRINT,ERR_UNEXPECTED_SENDDONE,
                          (errorparameter_t)0,
                          (errorparameter_t)0);
    openqueue_freePacketBuffer(msg);

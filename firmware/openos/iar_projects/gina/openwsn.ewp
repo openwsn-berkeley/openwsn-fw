@@ -329,6 +329,7 @@
           <state>$PROJ_DIR$\..\..\openwsn\07-App\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\heli\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\imu\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\netleds\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpinject\</state>
@@ -2012,9 +2013,18 @@
         </file>
       </group>
       <group>
+        <name>netleds</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\netleds\netleds.c</name>
+        </file>
+      </group>
+      <group>
         <name>ohlone</name>
         <file>
           <name>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\ohlone.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\ohlone_webpages.c</name>
         </file>
       </group>
       <group>

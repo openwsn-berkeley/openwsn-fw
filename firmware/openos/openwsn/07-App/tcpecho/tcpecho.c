@@ -19,9 +19,9 @@ bool tcpecho_shouldIlisten() {
 
 void tcpecho_receive(OpenQueueEntry_t* msg) {
    uint16_t temp_l4_destination_port;
-   msg->owner   = COMPONENT_APPTCPECHO;
+   msg->owner   = COMPONENT_TCPECHO;
    //reply with the same OpenQueueEntry_t
-   msg->creator                   = COMPONENT_APPTCPECHO;
+   msg->creator                   = COMPONENT_TCPECHO;
    msg->l4_protocol               = IANA_TCP;
    temp_l4_destination_port       = msg->l4_destination_port;
    msg->l4_destination_port       = msg->l4_sourcePortORicmpv6Type;
@@ -32,9 +32,9 @@ void tcpecho_receive(OpenQueueEntry_t* msg) {
 }
 
 void tcpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   msg->owner = COMPONENT_APPTCPECHO;
-   if (msg->creator!=COMPONENT_APPTCPECHO) {
-      openserial_printError(COMPONENT_APPTCPECHO,ERR_UNEXPECTED_SENDDONE,
+   msg->owner = COMPONENT_TCPECHO;
+   if (msg->creator!=COMPONENT_TCPECHO) {
+      openserial_printError(COMPONENT_TCPECHO,ERR_UNEXPECTED_SENDDONE,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }

@@ -45,7 +45,7 @@ void opentimers_stop(uint8_t timer_id);
 void opentimers_res_fired();
 void opentimers_rpl_fired();
 void opentimers_tcp_fired();
-void opentimers_appudptimer_fired();
+void opentimers_udptimer_fired();
 
 /**
 \}

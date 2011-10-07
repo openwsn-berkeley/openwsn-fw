@@ -62,7 +62,7 @@ void scheduler_start() {
             opentimers_tcp_fired();
          } else if (isThereTask(TASKID_UDP_TIMER)==TRUE) {
             consumeTask(TASKID_UDP_TIMER);
-            opentimers_appudptimer_fired();
+            opentimers_udptimer_fired();
          } else if (isThereTask(TASKID_TIMERB4)==TRUE) {
             consumeTask(TASKID_TIMERB4);
             // timer available, put your function here

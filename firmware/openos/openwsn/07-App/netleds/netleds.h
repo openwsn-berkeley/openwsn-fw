@@ -1,10 +1,10 @@
-#ifndef __OHLONE_H
-#define __OHLONE_H
+#ifndef __NETLEDS_H
+#define __NETLEDS_H
 
 /**
 \addtogroup App
 \{
-\addtogroup ohlone
+\addtogroup netLeds
 \{
 */
 
@@ -16,12 +16,11 @@
 
 //=========================== prototypes ======================================
 
-void ohlone_init();
-bool ohlone_shouldIlisten();
-void ohlone_receive(OpenQueueEntry_t* msg);
-void ohlone_sendDone(OpenQueueEntry_t* msg, error_t error);
-void ohlone_connectDone(error_t error);
-bool ohlone_debugPrint();
+void netleds_init();
+void netleds_trigger();
+void netleds_sendDone(OpenQueueEntry_t* msg, error_t error);
+void netleds_receive(OpenQueueEntry_t* msg);
+bool netleds_debugPrint();
 
 /**
 \}

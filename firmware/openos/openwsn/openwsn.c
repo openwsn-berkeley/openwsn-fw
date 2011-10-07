@@ -7,19 +7,17 @@
 
 #include "openwsn.h"
 //l7
-#include "udpsensor.h"
-#include "udpprint.h"
-#include "udpleds.h"
-#include "udptimer.h"
-#include "udpinject.h"
-#include "udpgina.h"
-#include "udpheli.h"
-#include "udpecho.h"
-#include "udpchannel.h"
-#include "tcpprint.h"
-#include "tcpohlone.h"
-#include "tcpinject.h"
+#include "heli.h"
+#include "imu.h"
+#include "netleds.h"
+#include "ohlone.h"
 #include "tcpecho.h"
+#include "tcpinject.h"
+#include "tcpprint.h"
+#include "udpecho.h"
+#include "udpinject.h"
+#include "udpprint.h"
+#include "udptimer.h"
 //l4
 #include "openudp.h"
 #include "opentcp.h"
@@ -75,19 +73,17 @@ void openwsn_init() {
    opentcp_init();
    openudp_init();
    // 07-App
-   apptcpecho_init();
-   apptcpinject_init();
-   apptcpohlone_init();
-   apptcpprint_init();
-   appudpchannel_init();
-   appudpecho_init();
-   //appudpheli_init(); remove heli application for now since we need TimerA for IEEE802.15.4e
-   //appudpgina_init();
-   appudpinject_init();
-   appudptimer_init();
-   appudpleds_init();
-   appudpprint_init();
-   appudpsensor_init();
+   //heli_init();
+   //imu_init();
+   netleds_init();
+   ohlone_init();
+   tcpecho_init();
+   tcpinject_init();
+   tcpprint_init();
+   udpecho_init();
+   udpinject_init();
+   udpprint_init();
+   udptimer_init();
 }
 
 //=========================== private =========================================

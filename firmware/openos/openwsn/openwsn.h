@@ -64,22 +64,19 @@ enum {
 // well known ports (which we define)
 enum {
    //TCP
+   WKP_TCP_HTTP                        =   80,
    WKP_TCP_ECHO                        =    7,
    WKP_TCP_INJECT                      = 2188,
-   WKP_TCP_HTTP                        =   80,
    WKP_TCP_DISCARD                     =    9,
    //UDP
-   WKP_UDP_CHANNEL                     = 2191,
-   WKP_UDP_ECHO                        =    7,
-   WKP_UDP_GINA                        = 2190,
    WKP_UDP_HELI                        = 2192,
-   WKP_UDP_LEDS                        = 2193,
+   WKP_UDP_IMU                         = 2190,
+   WKP_UDP_NETLEDS                     = 2193,
+   WKP_UDP_ECHO                        =    7,
    WKP_UDP_INJECT                      = 2188,
-   WKP_UDP_TIMER                       = 2195,
    WKP_UDP_DISCARD                     =    9,
-   WKP_UDP_SENSOR                      = 2189,
-   WKP_UDP_WARPWING                    = 2194,
-   WKP_UDP_COAP                        = 5683,
+
+   WKP_UDP_TIMER                       = 2195,
 };
 
 //status elements

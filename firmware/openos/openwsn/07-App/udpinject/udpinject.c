@@ -21,7 +21,7 @@ void udpinject_trigger() {
    //get command from OpenSerial (16B IPv6 destination address, 2B destination port)
    number_bytes_from_input_buffer = openserial_getInputBuffer(&(input_buffer[0]),sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
-      openserial_printError(COMPONENT_APPUDPINJECT,ERR_INPUTBUFFER_LENGTH,
+      openserial_printError(COMPONENT_UDPINJECT,ERR_INPUTBUFFER_LENGTH,
                             (errorparameter_t)number_bytes_from_input_buffer,
                             (errorparameter_t)0);
       return;
@@ -29,13 +29,13 @@ void udpinject_trigger() {
    //prepare packet
    pkt = openqueue_getFreePacketBuffer();
    if (pkt==NULL) {
-      openserial_printError(COMPONENT_APPUDPINJECT,ERR_NO_FREE_PACKET_BUFFER,
+      openserial_printError(COMPONENT_UDPINJECT,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       return;
    }
-   pkt->creator                     = COMPONENT_APPUDPINJECT;
-   pkt->owner                       = COMPONENT_APPUDPINJECT;
+   pkt->creator                     = COMPONENT_UDPINJECT;
+   pkt->owner                       = COMPONENT_UDPINJECT;
    pkt->l4_protocol                 = IANA_UDP;
    pkt->l4_sourcePortORicmpv6Type   = WKP_UDP_INJECT;
    pkt->l4_destination_port         = packetfunctions_ntohs(&(input_buffer[16]));
@@ -55,9 +55,9 @@ void udpinject_trigger() {
 }
 
 void udpinject_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   msg->owner = COMPONENT_APPUDPINJECT;
-   if (msg->creator!=COMPONENT_APPUDPINJECT) {
-      openserial_printError(COMPONENT_APPUDPINJECT,ERR_UNEXPECTED_SENDDONE,
+   msg->owner = COMPONENT_UDPINJECT;
+   if (msg->creator!=COMPONENT_UDPINJECT) {
+      openserial_printError(COMPONENT_UDPINJECT,ERR_UNEXPECTED_SENDDONE,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }

@@ -15,9 +15,9 @@ void udpecho_init() {
 
 void udpecho_receive(OpenQueueEntry_t* msg) {
    uint16_t temp_l4_destination_port;
-   msg->owner   = COMPONENT_APPUDPECHO;
+   msg->owner   = COMPONENT_UDPECHO;
    //reply with the same OpenQueueEntry_t
-   msg->creator                       = COMPONENT_APPUDPECHO;
+   msg->creator                       = COMPONENT_UDPECHO;
    msg->l4_protocol                   = IANA_UDP;
    temp_l4_destination_port           = msg->l4_destination_port;
    msg->l4_destination_port           = msg->l4_sourcePortORicmpv6Type;
@@ -28,9 +28,9 @@ void udpecho_receive(OpenQueueEntry_t* msg) {
 }
 
 void udpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   msg->owner = COMPONENT_APPUDPECHO;
-   if (msg->creator!=COMPONENT_APPUDPECHO) {
-      openserial_printError(COMPONENT_APPUDPECHO,ERR_UNEXPECTED_SENDDONE,
+   msg->owner = COMPONENT_UDPECHO;
+   if (msg->creator!=COMPONENT_UDPECHO) {
+      openserial_printError(COMPONENT_UDPECHO,ERR_UNEXPECTED_SENDDONE,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }

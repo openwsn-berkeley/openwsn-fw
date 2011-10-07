@@ -33,7 +33,7 @@ void tcpinject_trigger() {
    //get command from OpenSerial (16B IPv6 destination address, 2B destination port)
    number_bytes_from_input_buffer = openserial_getInputBuffer(&(input_buffer[0]),sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
-      openserial_printError(COMPONENT_APPTCPINJECT,ERR_INPUTBUFFER_LENGTH,
+      openserial_printError(COMPONENT_TCPINJECT,ERR_INPUTBUFFER_LENGTH,
                             (errorparameter_t)number_bytes_from_input_buffer,
                             (errorparameter_t)0);
       return;
@@ -49,13 +49,13 @@ void tcpinject_connectDone(error_t error) {
    if (error==E_SUCCESS) {
       tcpinject_vars.pkt = openqueue_getFreePacketBuffer();
       if (tcpinject_vars.pkt==NULL) {
-         openserial_printError(COMPONENT_APPTCPINJECT,ERR_NO_FREE_PACKET_BUFFER,
+         openserial_printError(COMPONENT_TCPINJECT,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          return;
       }
-      tcpinject_vars.pkt->creator                      = COMPONENT_APPTCPINJECT;
-      tcpinject_vars.pkt->owner                        = COMPONENT_APPTCPINJECT;
+      tcpinject_vars.pkt->creator                      = COMPONENT_TCPINJECT;
+      tcpinject_vars.pkt->owner                        = COMPONENT_TCPINJECT;
       tcpinject_vars.pkt->l4_protocol                  = IANA_UDP;
       tcpinject_vars.pkt->l4_sourcePortORicmpv6Type    = WKP_TCP_INJECT;
       tcpinject_vars.pkt->l4_destination_port          = tcpinject_vars.hisPort;
@@ -75,9 +75,9 @@ void tcpinject_connectDone(error_t error) {
 }
 
 void tcpinject_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   msg->owner = COMPONENT_APPTCPINJECT;
-   if (msg->creator!=COMPONENT_APPTCPINJECT) {
-      openserial_printError(COMPONENT_APPTCPINJECT,ERR_UNEXPECTED_SENDDONE,
+   msg->owner = COMPONENT_TCPINJECT;
+   if (msg->creator!=COMPONENT_TCPINJECT) {
+      openserial_printError(COMPONENT_TCPINJECT,ERR_UNEXPECTED_SENDDONE,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }

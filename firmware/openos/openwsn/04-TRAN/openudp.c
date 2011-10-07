@@ -38,35 +38,29 @@ error_t openudp_send(OpenQueueEntry_t* msg) {
 void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
    msg->owner = COMPONENT_UDP;
    switch(msg->l4_sourcePortORicmpv6Type) {
-      case WKP_UDP_CHANNEL:
-         appudpchannel_sendDone(msg,error);
-         break;
-      case WKP_UDP_ECHO:
-         appudpecho_sendDone(msg,error);
-         break;
       /*    
-      case WKP_UDP_GINA:
-         appudpgina_sendDone(msg,error);
-         break;
-      remove heli application for now since we need TimerA for IEEE802.15.4e
       case WKP_UDP_HELI:
          appudpheli_sendDone(msg,error);
          break;
+      case WKP_UDP_IMU:
+         appudpgina_sendDone(msg,error);
+         break;
       */
-      case WKP_UDP_LEDS:
-         appudpleds_sendDone(msg,error);
+      case WKP_UDP_NETLEDS:
+         netleds_sendDone(msg,error);
+         break;
+      case WKP_UDP_ECHO:
+         udpecho_sendDone(msg,error);
          break;
       case WKP_UDP_INJECT:
-         appudpinject_sendDone(msg,error);
-         break;
-      case WKP_UDP_TIMER:
-         appudptimer_sendDone(msg,error);
+         udpinject_sendDone(msg,error);
          break;
       case WKP_UDP_DISCARD:
-         appudpprint_sendDone(msg,error);
+         udpprint_sendDone(msg,error);
          break;
-      case WKP_UDP_SENSOR:
-         appudpsensor_sendDone(msg,error);
+         
+      case WKP_UDP_TIMER:
+         udptimer_sendDone(msg,error);
          break;
       default:
          openserial_printError(COMPONENT_UDP,ERR_UNSUPPORTED_PORT_NUMBER,
@@ -121,35 +115,29 @@ void openudp_receive(OpenQueueEntry_t* msg) {
    }
    
    switch(msg->l4_destination_port) {
-      case WKP_UDP_CHANNEL:
-         appudpchannel_receive(msg);
-         break;
-      case WKP_UDP_ECHO:
-         appudpecho_receive(msg);
-         break;
       /* 
-      case WKP_UDP_GINA:
-         appudpgina_receive(msg);
-         break;
-      remove heli application for now since we need TimerA for IEEE802.15.4e
       case WKP_UDP_HELI:
          appudpheli_receive(msg);
          break;
+      case WKP_UDP_IMU:
+         imu_receive(msg);
+         break;
       */
-      case WKP_UDP_LEDS:
-         appudpleds_receive(msg);
+      case WKP_UDP_NETLEDS:
+         netleds_receive(msg);
+         break;
+      
+      case WKP_UDP_ECHO:
+         udpecho_receive(msg);
          break;
       case WKP_UDP_INJECT:
-         appudpinject_receive(msg);
-         break;
-      case WKP_UDP_TIMER:
-         appudptimer_receive(msg);
+         udpinject_receive(msg);
          break;
       case WKP_UDP_DISCARD:
-         appudpprint_receive(msg);
+         udpprint_receive(msg);
          break;
-      case WKP_UDP_SENSOR:
-         appudpsensor_receive(msg);
+      case WKP_UDP_TIMER:
+         udptimer_receive(msg);
          break;
       default:
          openserial_printError(COMPONENT_UDP,ERR_UNSUPPORTED_PORT_NUMBER,
