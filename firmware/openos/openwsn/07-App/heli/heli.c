@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "appudpheli.h"
+#include "heli.h"
 //openwsn stack
 #include "udp.h"
 #include "openqueue.h"
@@ -14,12 +14,12 @@
 
 //=========================== prototypes ======================================
 
-void appudpheli_setmotor(uint8_t which, uint16_t value);
-uint16_t appudpheli_threshold(uint16_t value);
+void heli_setmotor(uint8_t which, uint16_t value);
+uint16_t heli_threshold(uint16_t value);
 
 //=========================== public ==========================================
 
-void appudpheli_init() {
+void heli_init() {
    P1DIR   |= 0x0C;                              // P1.2,3 output
    P1SEL   |= 0x0C;                              // P1.2,3 in PWM mode
    TACTL    = TBSSEL_1 + ID_3 + MC_1;            // ACLK, count up to TACCR0
@@ -31,10 +31,10 @@ void appudpheli_init() {
 }
 
 //this is called when the corresponding button is pressed on the OpenVisualizer interface
-void appudpheli_trigger() {
+void heli_trigger() {
 }
 
-uint16_t appudpheli_threshold(uint16_t value) {
+uint16_t heli_threshold(uint16_t value) {
    /*if (value < MOTORMIN) { //causes warning because set to zero
       return MOTORMIN;
    }*/
@@ -45,31 +45,31 @@ uint16_t appudpheli_threshold(uint16_t value) {
 }
 
 //I just received a request
-void appudpheli_receive(OpenQueueEntry_t* msg) {
-   msg->owner = COMPONENT_APPUDPHELI;
+void heli_receive(OpenQueueEntry_t* msg) {
+   msg->owner = COMPONENT_HELI;
    if (msg->length==4) {
-      appudpheli_setmotor(1,appudpheli_threshold(packetfunctions_ntohs(&(msg->payload[0]))));
-      appudpheli_setmotor(2,appudpheli_threshold(packetfunctions_ntohs(&(msg->payload[2]))));
+      heli_setmotor(1,heli_threshold(packetfunctions_ntohs(&(msg->payload[0]))));
+      heli_setmotor(2,heli_threshold(packetfunctions_ntohs(&(msg->payload[2]))));
    }
    openqueue_freePacketBuffer(msg);
 }
 
 //I just sent a IMU packet, check I need to resend one
-void appudpheli_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   msg->owner = COMPONENT_APPUDPHELI;
-   if (msg->creator!=COMPONENT_APPUDPHELI) {
-      openserial_printError(COMPONENT_APPUDPHELI,ERR_SENDDONE_FOR_MSG_I_DID_NOT_SEND,0,0);
+void heli_sendDone(OpenQueueEntry_t* msg, error_t error) {
+   msg->owner = COMPONENT_HELI;
+   if (msg->creator!=COMPONENT_HELI) {
+      openserial_printError(COMPONENT_HELI,ERR_SENDDONE_FOR_MSG_I_DID_NOT_SEND,0,0);
    }
    openqueue_freePacketBuffer(msg);
 }
 
-bool appudpheli_debugPrint() {
+bool heli_debugPrint() {
    return FALSE;
 }
 
 //=========================== private =========================================
 
-void appudpheli_setmotor(uint8_t which, uint16_t value) {
+void heli_setmotor(uint8_t which, uint16_t value) {
    /*if (value < MOTORMIN) {
       value = MOTORMIN;
    }*/

@@ -1,10 +1,10 @@
-#ifndef __APPUDPGINA_H
-#define __APPUDPGINA_H
+#ifndef __IMU_H
+#define __IMU_H
 
 /**
 \addtogroup App
 \{
-\addtogroup AppUdpGina
+\addtogroup imu
 \{
 */
 
@@ -16,11 +16,11 @@
 
 //=========================== prototypes ======================================
 
-void appudpgina_init();
-void appudpgina_trigger();
-void appudpgina_sendDone(OpenQueueEntry_t* msg, error_t error);
-void appudpgina_receive(OpenQueueEntry_t* msg);
-bool appudpgina_debugPrint();
+void imu_init();
+void imu_trigger();
+void imu_sendDone(OpenQueueEntry_t* msg, error_t error);
+void imu_receive(OpenQueueEntry_t* msg);
+bool imu_debugPrint();
 
 /**
 \}

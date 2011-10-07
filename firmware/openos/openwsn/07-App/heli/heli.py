@@ -17,7 +17,7 @@ hisPort          = 2192
 motor1_command = 0
 motor2_command = 0
 
-print "Testing appudpheli..."
+print "Testing heli..."
 
 def heli_up():
    global motor1_command, motor2_command

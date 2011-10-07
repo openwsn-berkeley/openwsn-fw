@@ -327,6 +327,9 @@
           <state>$PROJ_DIR$\..\..\openwsn\03b-IPv6\</state>
           <state>$PROJ_DIR$\..\..\openwsn\04-TRAN\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\heli\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\imu\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpinject\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpprint\</state>
@@ -1994,6 +1997,24 @@
     <group>
       <name>07-App</name>
       <group>
+        <name>heli</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\heli\heli.c</name>
+        </file>
+      </group>
+      <group>
+        <name>imu</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\imu\imu.c</name>
+        </file>
+      </group>
+      <group>
+        <name>ohlone</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\ohlone.c</name>
+        </file>
+      </group>
+      <group>
         <name>tcpecho</name>
         <file>
           <name>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\tcpecho.c</name>
@@ -2030,22 +2051,7 @@
         </file>
       </group>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\apptcpohlone.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpchannel.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpleds.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpsensor.c</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\openwsn\07-App\appudptimer.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\ohlone_webpages.c</name>
       </file>
     </group>
     <group>

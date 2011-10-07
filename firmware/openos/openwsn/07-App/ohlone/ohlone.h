@@ -4,7 +4,7 @@
 /**
 \addtogroup App
 \{
-\addtogroup AppTcpOhlone
+\addtogroup ohlone
 \{
 */
 
@@ -16,12 +16,12 @@
 
 //=========================== prototypes ======================================
 
-void apptcpohlone_init();
-bool apptcpohlone_shouldIlisten();
-void apptcpohlone_receive(OpenQueueEntry_t* msg);
-void apptcpohlone_sendDone(OpenQueueEntry_t* msg, error_t error);
-void apptcpohlone_connectDone(error_t error);
-bool apptcpohlone_debugPrint();
+void ohlone_init();
+bool ohlone_shouldIlisten();
+void ohlone_receive(OpenQueueEntry_t* msg);
+void ohlone_sendDone(OpenQueueEntry_t* msg, error_t error);
+void ohlone_connectDone(error_t error);
+bool ohlone_debugPrint();
 
 /**
 \}

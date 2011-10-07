@@ -9,7 +9,7 @@ myPort           = 2158
 hisAddress       = '2001:470:1f05:dff:1415:9209:22b:51'
 hisPort          = 2190
 
-print "Testing appudpgina..."
+print "Testing imu..."
 
 socket_handler = socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
 socket_handler.settimeout(5)
