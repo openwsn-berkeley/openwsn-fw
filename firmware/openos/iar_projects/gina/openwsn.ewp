@@ -327,6 +327,12 @@
           <state>$PROJ_DIR$\..\..\openwsn\03b-IPv6\</state>
           <state>$PROJ_DIR$\..\..\openwsn\04-TRAN\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpinject\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpprint\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\udpecho\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\udpinject\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\udpprint\</state>
           <state>$PROJ_DIR$\..\..\openwsn\cross-layers\</state>
         </option>
         <option>
@@ -1987,32 +1993,50 @@
     </group>
     <group>
       <name>07-App</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\apptcpecho.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\apptcpinject.c</name>
-      </file>
+      <group>
+        <name>tcpecho</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\apptcpecho.c</name>
+        </file>
+      </group>
+      <group>
+        <name>tcpinject</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\tcpinject\apptcpinject.c</name>
+        </file>
+      </group>
+      <group>
+        <name>tcpprint</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\tcpprint\apptcpprint.c</name>
+        </file>
+      </group>
+      <group>
+        <name>udpecho</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\udpecho\appudpecho.c</name>
+        </file>
+      </group>
+      <group>
+        <name>udpinject</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\udpinject\appudpinject.c</name>
+        </file>
+      </group>
+      <group>
+        <name>udpprint</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\udpprint\appudpprint.c</name>
+        </file>
+      </group>
       <file>
         <name>$PROJ_DIR$\..\..\openwsn\07-App\apptcpohlone.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\apptcpprint.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpchannel.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpecho.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpinject.c</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpleds.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpprint.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpsensor.c</name>
