@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "apptcpecho.h"
+#include "tcpecho.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "opentcp.h"
@@ -10,14 +10,14 @@
 
 //=========================== public ==========================================
 
-void apptcpecho_init() {
+void tcpecho_init() {
 }
 
-bool apptcpecho_shouldIlisten() {
+bool tcpecho_shouldIlisten() {
    return TRUE;
 }
 
-void apptcpecho_receive(OpenQueueEntry_t* msg) {
+void tcpecho_receive(OpenQueueEntry_t* msg) {
    uint16_t temp_l4_destination_port;
    msg->owner   = COMPONENT_APPTCPECHO;
    //reply with the same OpenQueueEntry_t
@@ -31,7 +31,7 @@ void apptcpecho_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-void apptcpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void tcpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
    msg->owner = COMPONENT_APPTCPECHO;
    if (msg->creator!=COMPONENT_APPTCPECHO) {
       openserial_printError(COMPONENT_APPTCPECHO,ERR_UNEXPECTED_SENDDONE,
@@ -43,10 +43,10 @@ void apptcpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-void apptcpecho_connectDone() {
+void tcpecho_connectDone() {
 }
 
-bool apptcpecho_debugPrint() {
+bool tcpecho_debugPrint() {
    return FALSE;
 }
 

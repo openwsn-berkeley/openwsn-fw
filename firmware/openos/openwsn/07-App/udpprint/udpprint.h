@@ -1,10 +1,10 @@
-#ifndef __APPUDPPRINT_H
-#define __APPUDPPRINT_H
+#ifndef __UDPPRINT_H
+#define __UDPPRINT_H
 
 /**
 \addtogroup App
 \{
-\addtogroup AppUdpPrint
+\addtogroup udpPrint
 \{
 */
 
@@ -16,10 +16,10 @@
 
 //=========================== prototypes ======================================
 
-void appudpprint_init();
-void appudpprint_sendDone(OpenQueueEntry_t* msg, error_t error);
-void appudpprint_receive(OpenQueueEntry_t* msg);
-bool appudpprint_debugPrint();
+void udpprint_init();
+void udpprint_sendDone(OpenQueueEntry_t* msg, error_t error);
+void udpprint_receive(OpenQueueEntry_t* msg);
+bool udpprint_debugPrint();
 
 /**
 \}

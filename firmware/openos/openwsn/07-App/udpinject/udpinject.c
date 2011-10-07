@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "appudpinject.h"
+#include "udpinject.h"
 #include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
@@ -11,10 +11,10 @@
 
 //=========================== public ==========================================
 
-void appudpinject_init() {
+void udpinject_init() {
 }
 
-void appudpinject_trigger() {
+void udpinject_trigger() {
    OpenQueueEntry_t* pkt;
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer[18];
@@ -54,7 +54,7 @@ void appudpinject_trigger() {
    }
 }
 
-void appudpinject_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void udpinject_sendDone(OpenQueueEntry_t* msg, error_t error) {
    msg->owner = COMPONENT_APPUDPINJECT;
    if (msg->creator!=COMPONENT_APPUDPINJECT) {
       openserial_printError(COMPONENT_APPUDPINJECT,ERR_UNEXPECTED_SENDDONE,
@@ -64,11 +64,11 @@ void appudpinject_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-void appudpinject_receive(OpenQueueEntry_t* msg) {
+void udpinject_receive(OpenQueueEntry_t* msg) {
    openqueue_freePacketBuffer(msg);
 }
 
-bool appudpinject_debugPrint() {
+bool udpinject_debugPrint() {
    return FALSE;
 }
 

@@ -1,5 +1,5 @@
 /**
-\defgroup AppTcpEcho AppTcpEcho
+\defgroup tcpEcho tcpEcho
 
 \brief TCP Echo application
 

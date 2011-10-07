@@ -6,10 +6,10 @@
 #include "packetfunctions.h"
 #include "opentimers.h"
 //TCP applications
-#include "apptcpecho.h"
-#include "apptcpinject.h"
-#include "apptcpohlone.h"
-#include "apptcpprint.h"
+#include "tcpecho.h"
+#include "tcpinject.h"
+#include "tcpohlone.h"
+#include "tcpprint.h"
 
 //=========================== variables =======================================
 

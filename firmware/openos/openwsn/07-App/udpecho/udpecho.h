@@ -1,10 +1,10 @@
-#ifndef __APPUDPECHO_H
-#define __APPUDPECHO_H
+#ifndef __UDPECHO_H
+#define __UDPECHO_H
 
 /**
 \addtogroup App
 \{
-\addtogroup AppUdpEcho
+\addtogroup udpEcho
 \{
 */
 
@@ -16,10 +16,10 @@
 
 //=========================== prototypes ======================================
 
-void appudpecho_init();
-void appudpecho_receive(OpenQueueEntry_t* msg);
-void appudpecho_sendDone(OpenQueueEntry_t* msg, error_t error);
-bool appudpecho_debugPrint();
+void udpecho_init();
+void udpecho_receive(OpenQueueEntry_t* msg);
+void udpecho_sendDone(OpenQueueEntry_t* msg, error_t error);
+bool udpecho_debugPrint();
 
 /**
 \}

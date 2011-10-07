@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "appudpecho.h"
+#include "udpecho.h"
 #include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
@@ -10,10 +10,10 @@
 
 //=========================== public ==========================================
 
-void appudpecho_init() {
+void udpecho_init() {
 }
 
-void appudpecho_receive(OpenQueueEntry_t* msg) {
+void udpecho_receive(OpenQueueEntry_t* msg) {
    uint16_t temp_l4_destination_port;
    msg->owner   = COMPONENT_APPUDPECHO;
    //reply with the same OpenQueueEntry_t
@@ -27,7 +27,7 @@ void appudpecho_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-void appudpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void udpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
    msg->owner = COMPONENT_APPUDPECHO;
    if (msg->creator!=COMPONENT_APPUDPECHO) {
       openserial_printError(COMPONENT_APPUDPECHO,ERR_UNEXPECTED_SENDDONE,
@@ -37,7 +37,7 @@ void appudpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-bool appudpecho_debugPrint() {
+bool udpecho_debugPrint() {
    return FALSE;
 }
 

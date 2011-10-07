@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "appudptimer.h"
+#include "udptimer.h"
 #include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"

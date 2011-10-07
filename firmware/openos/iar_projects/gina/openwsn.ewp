@@ -1996,37 +1996,37 @@
       <group>
         <name>tcpecho</name>
         <file>
-          <name>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\apptcpecho.c</name>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\tcpecho.c</name>
         </file>
       </group>
       <group>
         <name>tcpinject</name>
         <file>
-          <name>$PROJ_DIR$\..\..\openwsn\07-App\tcpinject\apptcpinject.c</name>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\tcpinject\tcpinject.c</name>
         </file>
       </group>
       <group>
         <name>tcpprint</name>
         <file>
-          <name>$PROJ_DIR$\..\..\openwsn\07-App\tcpprint\apptcpprint.c</name>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\tcpprint\tcpprint.c</name>
         </file>
       </group>
       <group>
         <name>udpecho</name>
         <file>
-          <name>$PROJ_DIR$\..\..\openwsn\07-App\udpecho\appudpecho.c</name>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\udpecho\udpecho.c</name>
         </file>
       </group>
       <group>
         <name>udpinject</name>
         <file>
-          <name>$PROJ_DIR$\..\..\openwsn\07-App\udpinject\appudpinject.c</name>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\udpinject\udpinject.c</name>
         </file>
       </group>
       <group>
         <name>udpprint</name>
         <file>
-          <name>$PROJ_DIR$\..\..\openwsn\07-App\udpprint\appudpprint.c</name>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\udpprint\udpprint.c</name>
         </file>
       </group>
       <file>

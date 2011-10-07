@@ -1,10 +1,10 @@
-#ifndef __APPTCPPRINT_H
-#define __APPTCPPRINT_H
+#ifndef __TCPPRINT_H
+#define __TCPPRINT_H
 
 /**
 \addtogroup App
 \{
-\addtogroup AppTcpPrint
+\addtogroup tcpPrint
 \{
 */
 
@@ -16,12 +16,12 @@
 
 //=========================== prototypes ======================================
 
-void apptcpprint_init();
-bool apptcpprint_shouldIlisten();
-void apptcpprint_receive(OpenQueueEntry_t* msg);
-void apptcpprint_connectDone(error_t error);
-void apptcpprint_sendDone(OpenQueueEntry_t* msg, error_t error);
-bool apptcpprint_debugPrint();
+void tcpprint_init();
+bool tcpprint_shouldIlisten();
+void tcpprint_receive(OpenQueueEntry_t* msg);
+void tcpprint_connectDone(error_t error);
+void tcpprint_sendDone(OpenQueueEntry_t* msg, error_t error);
+bool tcpprint_debugPrint();
 
 /**
 \}

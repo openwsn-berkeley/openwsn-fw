@@ -6,7 +6,7 @@ myPort     = 21568
 hisAddress = 'aaaa:0:0:cafe:1415:9209:22c:ae'
 hisPort    = 7
 
-print "Testing AppUdpEcho..."
+print "Testing udpEcho..."
 
 socket_handler = socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
 socket_handler.settimeout(5)

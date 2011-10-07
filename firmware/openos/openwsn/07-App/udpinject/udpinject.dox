@@ -1,5 +1,5 @@
 /**
-\defgroup AppUdpInject AppUdpInject
+\defgroup udpInject udpInject
 
 \brief UDP Inject application
 

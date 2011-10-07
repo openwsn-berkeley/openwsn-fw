@@ -1,10 +1,10 @@
-#ifndef __APPUDPINJECT_H
-#define __APPUDPINJECT_H
+#ifndef __UDPINJECT_H
+#define __UDPINJECT_H
 
 /**
 \addtogroup App
 \{
-\addtogroup AppUdpInject
+\addtogroup udpInject
 \{
 */
 
@@ -16,11 +16,11 @@
 
 //=========================== prototypes ======================================
 
-void appudpinject_init();
-void appudpinject_trigger();
-void appudpinject_sendDone(OpenQueueEntry_t* msg, error_t error);
-void appudpinject_receive(OpenQueueEntry_t* msg);
-bool appudpinject_debugPrint();
+void udpinject_init();
+void udpinject_trigger();
+void udpinject_sendDone(OpenQueueEntry_t* msg, error_t error);
+void udpinject_receive(OpenQueueEntry_t* msg);
+bool udpinject_debugPrint();
 
 /**
 \}

@@ -1,5 +1,5 @@
 /**
-\defgroup AppUdpEcho AppUdpEcho
+\defgroup udpEcho udpEcho
 
 \brief UDP Echo application
 

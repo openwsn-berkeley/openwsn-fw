@@ -5,15 +5,15 @@
 #include "forwarding.h"
 #include "openqueue.h"
 //UDP applications
-#include "appudpchannel.h"
-#include "appudpecho.h"
-#include "appudpgina.h"
-#include "appudpheli.h"
-#include "appudpinject.h"
-#include "appudptimer.h"
-#include "appudpleds.h"
-#include "appudpprint.h"
-#include "appudpsensor.h"
+#include "udpchannel.h"
+#include "udpecho.h"
+#include "udpgina.h"
+#include "udpheli.h"
+#include "udpinject.h"
+#include "udptimer.h"
+#include "udpleds.h"
+#include "udpprint.h"
+#include "udpsensor.h"
 
 //=========================== variables =======================================
 

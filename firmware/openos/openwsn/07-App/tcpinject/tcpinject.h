@@ -1,10 +1,10 @@
-#ifndef __APPTCPINJECT_H
-#define __APPTCPINJECT_H
+#ifndef __TCPINJECT_H
+#define __TCPINJECT_H
 
 /**
 \addtogroup App
 \{
-\addtogroup AppTcpInject
+\addtogroup tcpInject
 \{
 */
 
@@ -16,13 +16,13 @@
 
 //=========================== prototypes ======================================
 
-void apptcpinject_init();
-bool apptcpinject_shouldIlisten();
-void apptcpinject_trigger();
-void apptcpinject_connectDone(error_t error);
-void apptcpinject_sendDone(OpenQueueEntry_t* msg, error_t error);
-void apptcpinject_receive(OpenQueueEntry_t* msg);
-bool apptcpinject_debugPrint();
+void tcpinject_init();
+bool tcpinject_shouldIlisten();
+void tcpinject_trigger();
+void tcpinject_connectDone(error_t error);
+void tcpinject_sendDone(OpenQueueEntry_t* msg, error_t error);
+void tcpinject_receive(OpenQueueEntry_t* msg);
+bool tcpinject_debugPrint();
 
 /**
 \}

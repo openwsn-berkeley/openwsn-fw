@@ -1,5 +1,5 @@
 /**
-\defgroup AppTcpInject AppTcpInject
+\defgroup tcpInject tcpInject
 
 \brief TCP Inject application
 
