@@ -395,7 +395,7 @@ inline void activity_synchronize_newSlot() {
    // we want to be able to receive and transmist serial even when not synchronized
    // take turns every other slot to send or receive
    openserial_stop();
-   if (ieee154e_vars.asn.byte4%2==0) {
+   if (ieee154e_vars.asn.byte4++%2==0) {
       openserial_startOutput();
    } else {
       openserial_startInput();
