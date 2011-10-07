@@ -79,10 +79,49 @@ void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
 }
 
 void openudp_receive(OpenQueueEntry_t* msg) {
+   uint8_t temp_8b;
+      
    msg->owner                      = COMPONENT_UDP;
-   msg->l4_sourcePortORicmpv6Type  = msg->payload[0]*256+msg->payload[1];
-   msg->l4_destination_port        = msg->payload[2]*256+msg->payload[3];
-   packetfunctions_tossHeader(msg,sizeof(udp_ht));
+   if (msg->l4_protocol_compressed==TRUE) {
+      // get the UDP header encoding byte
+      temp_8b = *((uint8_t*)(msg->payload));
+      packetfunctions_tossHeader(msg,sizeof(temp_8b));
+      switch (temp_8b & NHC_UDP_PORTS_MASK) {
+         case NHC_UDP_PORTS_INLINE:
+            // source port:         16 bits in-line
+            // dest port:           16 bits in-line
+            msg->l4_sourcePortORicmpv6Type  = msg->payload[0]*256+msg->payload[1];
+            msg->l4_destination_port        = msg->payload[2]*256+msg->payload[3];
+            packetfunctions_tossHeader(msg,2+2);
+            break;
+         case NHC_UDP_PORTS_16S_8D:
+            // source port:         16 bits in-line
+            // dest port:   0xf0  +  8 bits in-line
+            msg->l4_sourcePortORicmpv6Type  = msg->payload[0]*256+msg->payload[1];
+            msg->l4_destination_port        = 0xf000 +            msg->payload[2];
+            packetfunctions_tossHeader(msg,2+1);
+            break;
+         case NHC_UDP_PORTS_8S_8D:
+            // source port: 0xf0  +  8 bits in-line
+            // dest port:   0xf0  +  8 bits in-line
+            msg->l4_sourcePortORicmpv6Type  = 0xf000 +            msg->payload[0];
+            msg->l4_destination_port        = 0xf000 +            msg->payload[1];
+            packetfunctions_tossHeader(msg,1+1);
+            break;
+         case NHC_UDP_PORTS_4S_4D:
+            // source port: 0xf0b +  4 bits in-line
+            // dest port:   0xf0b +  4 bits in-line
+            msg->l4_sourcePortORicmpv6Type  = 0xf0b0 + (msg->payload[0] >> 4) & 0x0f;
+            msg->l4_destination_port        = 0xf0b0 + (msg->payload[0] >> 0) & 0x0f;
+            packetfunctions_tossHeader(msg,1);
+            break;
+      }
+   } else {
+      msg->l4_sourcePortORicmpv6Type  = msg->payload[0]*256+msg->payload[1];
+      msg->l4_destination_port        = msg->payload[2]*256+msg->payload[3];
+      packetfunctions_tossHeader(msg,sizeof(udp_ht));
+   }
+   
    switch(msg->l4_destination_port) {
       case WKP_UDP_CHANNEL:
          appudpchannel_receive(msg);

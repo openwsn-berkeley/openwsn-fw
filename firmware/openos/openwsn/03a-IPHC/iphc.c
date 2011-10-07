@@ -271,20 +271,21 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
 }
 
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
-   uint16_t temp_8b;
-   open_addr_t temp_addr_16b;
-   open_addr_t temp_addr_64b;
+   uint8_t         temp_8b;
+   open_addr_t     temp_addr_16b;
+   open_addr_t     temp_addr_64b;
    ipv6_header_iht ipv6_header;
-   uint8_t dispatch;
-   uint8_t tf;
-   bool    nh;
-   uint8_t hlim;
-   //bool    cid;
-   //bool    sac;
-   uint8_t sam;
-   bool    m;
-   //bool    dac;
-   uint8_t dam;
+   uint8_t         dispatch;
+   uint8_t         tf;
+   bool            nh;
+   uint8_t         hlim;
+   //bool            cid;
+   //bool            sac;
+   uint8_t         sam;
+   bool            m;
+   //bool          dac;
+   uint8_t         dam;
+   
    ipv6_header.header_length = 0;
    //header
    temp_8b   = *((uint8_t*)(msg->payload)+ipv6_header.header_length);
@@ -308,7 +309,7 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
       default:
          openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)5,
-                               (errorparameter_t)tf);
+                               (errorparameter_t)dispatch);
          break;
    }
    //flowlabel
@@ -337,11 +338,18 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
    //next header
    switch (nh) {
       case IPHC_NH_INLINE:
+         // Full 8 bits for Next Header are carried in-line
+         ipv6_header.next_header_compressed = FALSE;
          ipv6_header.next_header = *((uint8_t*)(msg->payload)+ipv6_header.header_length);
          ipv6_header.header_length += sizeof(uint8_t);
          break;
       case IPHC_NH_COMPRESSED:
-         //unsupported
+         // the Next header field is compressed and the next header is encoded
+         // using LOWPAN_NHC, which is discussed in Section 4.1 of RFC6282
+         // we don't parse anything here, but will look at the (compressed)
+         // next header after having parsed all address fields.
+         ipv6_header.next_header_compressed = TRUE;
+         break;
       default:
          openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)7,
@@ -416,8 +424,26 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
       default:
          openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)10,
-                               (errorparameter_t)sam);
+                               (errorparameter_t)dam);
          break;
+   }
+   /*
+   During the parsing of the nh field, we found that the next header was
+   compressed. we now identify which next (compressed) header this is, and
+   populate the ipv6_header.next_header field accordingly. It's the role of the
+   appropriate transport module to decompress the header.
+   */
+   if (ipv6_header.next_header_compressed==TRUE) {
+      temp_8b   = *((uint8_t*)(msg->payload)+ipv6_header.header_length);
+      if    ( (temp_8b & NHC_UDP_MASK) == NHC_UDP_ID) {
+         ipv6_header.next_header = IANA_UDP;
+      } else {
+         // the next header could be an IPv6 extension header, or misformed
+         ipv6_header.next_header = IANA_UNDEFINED;
+         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+                               (errorparameter_t)11,
+                               (errorparameter_t)ipv6_header.next_header);
+      }
    }
    // this is a temporary workaround for allowing multicast RAs to go through
    if (m==1 && dam==IPHC_DAM_ELIDED) {

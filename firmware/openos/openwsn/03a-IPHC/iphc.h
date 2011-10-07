@@ -39,6 +39,27 @@ enum IPHC_NH_enums {
    IPHC_NH_COMPRESSED        = 1,
 };
 
+enum NHC_enums {
+   // IPv6 Extension Header Encoding starts with b1110 xxxx
+   NHC_IPv6EXT_MASK          = 0xf0,          // b1111 0000
+   NHC_IPv6EXT_ID            = 0xe0,          // b1110 0000
+   // UDP Header Encoding            starts with b1111 0xxx
+   NHC_UDP_MASK              = 0xf8,          // b1111 1000
+   NHC_UDP_ID                = 0xf0,          // b1111 0000
+};
+
+enum NHC_UDP_enums {
+   NHC_UDP_C_MASK            = 0x40,
+   NHC_UDP_PORTS_MASK        = 0x03,
+};
+
+enum NHC_UDP_PORTS_enums {
+   NHC_UDP_PORTS_INLINE      = 0,
+   NHC_UDP_PORTS_16S_8D      = 1,
+   NHC_UDP_PORTS_8S_8D       = 2,
+   NHC_UDP_PORTS_4S_4D       = 3,
+};
+
 enum IPHC_HLIM_enums {
    IPHC_HLIM_INLINE          = 0,
    IPHC_HLIM_1               = 1,
@@ -85,6 +106,7 @@ enum IPHC_DAM_enums {
 typedef struct {
    uint8_t     traffic_class;
    uint32_t    flow_label;
+   bool        next_header_compressed;
    uint8_t     next_header;
    uint8_t     hop_limit;
    open_addr_t src;

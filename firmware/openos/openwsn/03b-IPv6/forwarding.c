@@ -54,23 +54,24 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, error_t error) {
 
 void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
    msg->owner = COMPONENT_FORWARDING;
-   msg->l4_protocol = ipv6_header.next_header;
+   msg->l4_protocol            = ipv6_header.next_header;
+   msg->l4_protocol_compressed = ipv6_header.next_header_compressed;
    if (idmanager_isMyAddress(&ipv6_header.dest) || packetfunctions_isBroadcastMulticast(&ipv6_header.dest)) {//for me
       memcpy(&(msg->l3_destinationORsource),&ipv6_header.src,sizeof(open_addr_t));
       switch(msg->l4_protocol) {
-      case IANA_TCP:
-         opentcp_receive(msg);
-         break;
-      case IANA_UDP:
-         openudp_receive(msg);
-         break;
-      case IANA_ICMPv6:
-         icmpv6_receive(msg);
-         break;
-      default:
-         openserial_printError(COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
-                               (errorparameter_t)msg->l4_protocol,
-                               (errorparameter_t)1);
+         case IANA_TCP:
+            opentcp_receive(msg);
+            break;
+         case IANA_UDP:
+            openudp_receive(msg);
+            break;
+         case IANA_ICMPv6:
+            icmpv6_receive(msg);
+            break;
+         default:
+            openserial_printError(COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
+                                  (errorparameter_t)msg->l4_protocol,
+                                  (errorparameter_t)1);
       }
    } else { //relay
       memcpy(&(msg->l3_destinationORsource),&ipv6_header.dest,sizeof(open_addr_t));//because initially contains source
