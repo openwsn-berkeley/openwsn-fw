@@ -364,8 +364,10 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
          break;
       case IPHC_HLIM_1:
          ipv6_header.hop_limit = 1;
+         break;
       case IPHC_HLIM_64:
          ipv6_header.hop_limit = 64;
+         break;
       case IPHC_HLIM_255:
          ipv6_header.hop_limit = 255;
          break;
