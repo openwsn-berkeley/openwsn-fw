@@ -12,14 +12,14 @@
 
 #define MAX_COAP_OPTIONS 3
 
-enum coap_types {
+typedef enum {
    COAP_TYPE_CON                       = 0,
    COAP_TYPE_NON                       = 1,
    COAP_TYPE_ACK                       = 2,
    COAP_TYPE_RES                       = 3,
-};
+} coap_type_t;
 
-enum coap_codes {
+typedef enum {
    COAP_CODE_EMPTY                     = 0,
    // request
    COAP_CODE_REQ_GET                   = 1,
@@ -50,9 +50,9 @@ enum coap_codes {
    COAP_CODE_RESP_UNAVAILABLE          = 163,
    COAP_CODE_RESP_GWTIMEOUT            = 164,
    COAP_CODE_RESP_PROXYINGNOTSUPP      = 165,
-};
+} coap_code_t;
 
-enum coap_options {
+typedef enum {
    COAP_OPTION_NONE                    =  0,
    COAP_OPTION_CONTENTTYPE             =  1,
    COAP_OPTION_MAXAGE                  =  2,
@@ -68,31 +68,35 @@ enum coap_options {
    COAP_OPTION_IFMATCH                 = 13,
    COAP_OPTION_URIQUERY                = 15,
    COAP_OPTION_IFNONEMATCH             = 21,
-};
+} coap_option_t;
 
-enum coap_media_types {
+typedef enum {
    COAP_MEDTYPE_TEXTPLAIN              =  0,
    COAP_MEDTYPE_APPLINKFORMAT          = 40,
    COAP_MEDTYPE_APPXML                 = 41,
    COAP_MEDTYPE_APPOCTETSTREAM         = 42,
    COAP_MEDTYPE_APPEXI                 = 47,
    COAP_MEDTYPE_APPJSON                = 50,
-};
+} coap_media_type_t;
 
 //=========================== typedef =========================================
 
 typedef struct {
-   uint8_t Ver;
-   uint8_t T;
-   uint8_t OC;
-   uint8_t Code;
-   uint8_t MessageId[2];
+   uint8_t*      Ver;
+} coap_registration_t;
+
+typedef struct {
+   uint8_t       Ver;
+   coap_type_t   T;
+   uint8_t       OC;
+   coap_code_t   Code;
+   uint8_t       MessageId[2];
 } coap_header_iht;
 
 typedef struct {
-   uint8_t  type;
-   uint8_t  length;
-   uint8_t* pValue;
+   coap_option_t type;
+   uint8_t       length;
+   uint8_t*      pValue;
 } coap_option_iht;
 
 //=========================== variables =======================================

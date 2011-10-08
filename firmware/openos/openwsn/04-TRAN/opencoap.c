@@ -23,26 +23,26 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    uint16_t         temp_l4_destination_port;
    uint8_t          i;
    uint8_t          index;
+   coap_option_t    last_option;
    
-   index = 0;
-   // initialize the options
-   for (i=0;i<MAX_COAP_OPTIONS;i++) {
-      options[i].type = COAP_OPTION_NONE;
-   }
-   // take ownership over the packet
-   msg->owner   = COMPONENT_OPENCOAP;
+   // take ownership over the received packet
+   msg->owner                = COMPONENT_OPENCOAP;
+   
+   //=== step 1. parse the packet
+   
    // parse the CoAP header and remove from packet
-   coap_header.Ver          = (msg->payload[index] & 0xc0) >> 6;
-   coap_header.T            = (msg->payload[index] & 0x30) >> 4;
-   coap_header.OC           = (msg->payload[index] & 0x0f);
+   index = 0;
+   coap_header.Ver           = (msg->payload[index] & 0xc0) >> 6;
+   coap_header.T             = (coap_type_t)((msg->payload[index] & 0x30) >> 4);
+   coap_header.OC            = (msg->payload[index] & 0x0f);
    index++;
-   coap_header.Code         = msg->payload[index];
+   coap_header.Code          = (coap_code_t)(msg->payload[index]);
    index++;
-   coap_header.MessageId[0] = msg->payload[index];
+   coap_header.MessageId[0]  = msg->payload[index];
    index++;
-   coap_header.MessageId[1] = msg->payload[index];
+   coap_header.MessageId[1]  = msg->payload[index];
    index++;
-   // filter unsupported
+   // reject unsupported header
    if (
          coap_header.Ver!=1 ||
          coap_header.OC>MAX_COAP_OPTIONS
@@ -53,16 +53,26 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       openqueue_freePacketBuffer(msg);
       return;
    }
-   // fill in the options
+   // initialize the options
    for (i=0;i<MAX_COAP_OPTIONS;i++) {
-      options[i].type   = (msg->payload[index] & 0xf0) >> 4;
-      options[i].length = (msg->payload[index] & 0x0f);
+      options[i].type = COAP_OPTION_NONE;
+   }
+   // fill in the options
+   last_option = COAP_OPTION_NONE;
+   for (i=0;i<coap_header.OC;i++) {
+      options[i].type        = (coap_option_t)((uint8_t)last_option+(uint8_t)((msg->payload[index] & 0xf0) >> 4));
+      last_option            = options[i].type;
+      options[i].length      = (msg->payload[index] & 0x0f);
       index++;
-      options[i].pValue = &(msg->payload[index]);
+      options[i].pValue      = &(msg->payload[index]);
       index += options[i].length;
    }
-   // is this ia well-known request?
-   if (coap_header.OC==2 &&
+   
+   //=== step 2. handle the packet
+   
+   // GET /.well-known/core
+   if (coap_header.Code==COAP_CODE_REQ_GET &&
+       coap_header.OC==2 &&
        memcmp(options[0].pValue,&coapwellknown_req_option0,sizeof(coapwellknown_req_option0)-1)==0 &&
        memcmp(options[1].pValue,&coapwellknown_req_option1,sizeof(coapwellknown_req_option1)-1)==0) {
       //reply with the same OpenQueueEntry_t
@@ -98,7 +108,10 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       if ((openudp_send(msg))==E_FAIL) {
          openqueue_freePacketBuffer(msg);
       }
+      
    } else {
+      // any other request
+      
       openqueue_freePacketBuffer(msg);
    } 
 }
