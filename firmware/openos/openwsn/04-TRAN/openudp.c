@@ -5,12 +5,14 @@
 #include "forwarding.h"
 #include "openqueue.h"
 //UDP applications
-#include "heli.h"
-#include "imu.h"
+#include "opencoap.h"
 #include "udpecho.h"
 #include "udpinject.h"
-#include "netleds.h"
 #include "udpprint.h"
+#include "heli.h"
+#include "imu.h"
+#include "netleds.h"
+
 #include "udptimer.h"
 
 //=========================== variables =======================================
@@ -23,7 +25,7 @@ void openudp_init() {
 }
 
 error_t openudp_send(OpenQueueEntry_t* msg) {
-   msg->owner       = COMPONENT_UDP;
+   msg->owner       = COMPONENT_OPENUDP;
    msg->l4_protocol = IANA_UDP;
    msg->l4_payload  = msg->payload;
    msg->l4_length   = msg->length;
@@ -36,8 +38,11 @@ error_t openudp_send(OpenQueueEntry_t* msg) {
 }
 
 void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   msg->owner = COMPONENT_UDP;
+   msg->owner = COMPONENT_OPENUDP;
    switch(msg->l4_sourcePortORicmpv6Type) {
+      case WKP_UDP_COAP:
+         opencoap_sendDone(msg,error);
+         break;
       /*    
       case WKP_UDP_HELI:
          appudpheli_sendDone(msg,error);
@@ -63,7 +68,7 @@ void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
          udptimer_sendDone(msg,error);
          break;
       default:
-         openserial_printError(COMPONENT_UDP,ERR_UNSUPPORTED_PORT_NUMBER,
+         openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
                                (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
                                (errorparameter_t)0);
          openqueue_freePacketBuffer(msg);         
@@ -73,7 +78,7 @@ void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
 void openudp_receive(OpenQueueEntry_t* msg) {
    uint8_t temp_8b;
       
-   msg->owner                      = COMPONENT_UDP;
+   msg->owner                      = COMPONENT_OPENUDP;
    if (msg->l4_protocol_compressed==TRUE) {
       // get the UDP header encoding byte
       temp_8b = *((uint8_t*)(msg->payload));
@@ -115,6 +120,9 @@ void openudp_receive(OpenQueueEntry_t* msg) {
    }
    
    switch(msg->l4_destination_port) {
+      case WKP_UDP_COAP:
+         opencoap_receive(msg);
+         break;
       /* 
       case WKP_UDP_HELI:
          appudpheli_receive(msg);
@@ -126,7 +134,6 @@ void openudp_receive(OpenQueueEntry_t* msg) {
       case WKP_UDP_NETLEDS:
          netleds_receive(msg);
          break;
-      
       case WKP_UDP_ECHO:
          udpecho_receive(msg);
          break;
@@ -140,7 +147,7 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          udptimer_receive(msg);
          break;
       default:
-         openserial_printError(COMPONENT_UDP,ERR_UNSUPPORTED_PORT_NUMBER,
+         openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
                                (errorparameter_t)msg->l4_destination_port,
                                (errorparameter_t)1);
          openqueue_freePacketBuffer(msg);         

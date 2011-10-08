@@ -69,6 +69,7 @@ enum {
    WKP_TCP_INJECT                      = 2188,
    WKP_TCP_DISCARD                     =    9,
    //UDP
+   WKP_UDP_COAP                        = 5683,
    WKP_UDP_HELI                        = 2192,
    WKP_UDP_IMU                         = 2190,
    WKP_UDP_NETLEDS                     = 2193,
@@ -96,50 +97,52 @@ enum {
 //component identifiers
 enum {
    COMPONENT_NULL                      = 0x00,
-   //l7
-   COMPONENT_HELI                      = 0x01,
-   COMPONENT_IMU                       = 0x02,
-   COMPONENT_NETLEDS                   = 0x03,
-   COMPONENT_OHLONE                    = 0x04,
-   //l7 test
-   COMPONENT_TCPECHO                   = 0x05,
-   COMPONENT_TCPINJECT                 = 0x06,
-   COMPONENT_TCPPRINT                  = 0x07,
-   COMPONENT_UDPECHO                   = 0x08,
-   COMPONENT_UDPINJECT                 = 0x09,
-   COMPONENT_UDPPRINT                  = 0x0a,
-
-   COMPONENT_UDPTIMER                  = 0x0b,
-   //l4
-   COMPONENT_TCP                       = 0x0c,             
-   COMPONENT_UDP                       = 0x0d,
-   //l3b
-   COMPONENT_FORWARDING                = 0x0e,
-   COMPONENT_ICMPv6                    = 0x0f,
-   COMPONENT_ICMPv6ECHO                = 0x10,
-   COMPONENT_ICMPv6ROUTER              = 0x11,
-   COMPONENT_ICMPv6RPL                 = 0x12,
-   //l3a
-   COMPONENT_OPENBRIDGE                = 0x13,
-   COMPONENT_IPHC                      = 0x14,
-   //l2b
-   COMPONENT_RES                       = 0x15,
-   COMPONENT_NEIGHBORS                 = 0x16,
-   COMPONENT_SCHEDULE                  = 0x17,
-   //l2b<->l2a ("virtual components")
-   COMPONENT_RES_TO_IEEE802154E        = 0x18,
-   COMPONENT_IEEE802154E_TO_RES        = 0x19,
-   //l2a
-   COMPONENT_IEEE802154                = 0x1a,
-   COMPONENT_IEEE802154E               = 0x1b,
-   //phy
-   COMPONENT_RADIO                     = 0x1c,
-   //cross-layer
-   COMPONENT_IDMANAGER                 = 0x1d,
-   COMPONENT_OPENQUEUE                 = 0x1e,
-   COMPONENT_OPENSERIAL                = 0x1f,
-   COMPONENT_PACKETFUNCTIONS           = 0x20,
-   COMPONENT_RANDOM                    = 0x21,
+   //cross-layers
+   COMPONENT_IDMANAGER                 = 0x01,
+   COMPONENT_OPENQUEUE                 = 0x02,
+   COMPONENT_OPENSERIAL                = 0x03,
+   COMPONENT_PACKETFUNCTIONS           = 0x04,
+   COMPONENT_RANDOM                    = 0x05,
+   //PHY
+   COMPONENT_RADIO                     = 0x06,
+   //MAClow
+   COMPONENT_IEEE802154                = 0x07,
+   COMPONENT_IEEE802154E               = 0x08,
+   //MAClow<->MAChigh ("virtual components")
+   COMPONENT_RES_TO_IEEE802154E        = 0x09,
+   COMPONENT_IEEE802154E_TO_RES        = 0x0a,
+   //MAChigh
+   COMPONENT_RES                       = 0x0b,
+   COMPONENT_NEIGHBORS                 = 0x0c,
+   COMPONENT_SCHEDULE                  = 0x0d,
+   //IPHC
+   COMPONENT_OPENBRIDGE                = 0x0e,
+   COMPONENT_IPHC                      = 0x0f,
+   //IPv6
+   COMPONENT_FORWARDING                = 0x10,
+   COMPONENT_ICMPv6                    = 0x11,
+   COMPONENT_ICMPv6ECHO                = 0x12,
+   COMPONENT_ICMPv6ROUTER              = 0x13,
+   COMPONENT_ICMPv6RPL                 = 0x14,
+   //TRAN
+   COMPONENT_OPENTCP                   = 0x15,             
+   COMPONENT_OPENUDP                   = 0x16,
+   COMPONENT_OPENCOAP                  = 0x17,
+   //App test
+   COMPONENT_TCPECHO                   = 0x18,
+   COMPONENT_TCPINJECT                 = 0x19,
+   COMPONENT_TCPPRINT                  = 0x1a,
+   COMPONENT_UDPECHO                   = 0x1b,
+   COMPONENT_UDPINJECT                 = 0x1c,
+   COMPONENT_UDPPRINT                  = 0x1d,
+   
+   //App
+   COMPONENT_HELI                      = 0x1e,
+   COMPONENT_IMU                       = 0x1f,
+   COMPONENT_NETLEDS                   = 0x20,
+   COMPONENT_OHLONE                    = 0x21,
+   
+   COMPONENT_UDPTIMER                  = 0x22,
 };
 
 //error codes

@@ -1989,6 +1989,9 @@
     <group>
       <name>04-TRAN</name>
       <file>
+        <name>$PROJ_DIR$\..\..\openwsn\04-TRAN\opencoap.c</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\openwsn\04-TRAN\opentcp.c</name>
       </file>
       <file>
