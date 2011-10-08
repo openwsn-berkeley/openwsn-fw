@@ -404,6 +404,8 @@ inline void activity_synchronize_newSlot() {
 
 inline void activity_synchronize_startOfFrame(uint16_t capturedTime) {
    
+   led_errorLedToggle();
+   
    // don't care about packet if I'm not listening
    if (ieee154e_vars.state!=S_SYNCLISTEN) {
       return;
@@ -1556,7 +1558,7 @@ different channel offsets in the same slot.
 inline uint8_t calculateFrequency(uint8_t channelOffset) {
    //return 11+(asn+channelOffset)%16;
    // poipoi: no channel hopping
-   return 26;
+   return 20;
 }
 
 /**

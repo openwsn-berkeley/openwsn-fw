@@ -80,11 +80,17 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       packetfunctions_reserveHeaderSize(msg,sizeof(coapwellknown_resp_payload)-1);
       memcpy(msg->payload,coapwellknown_resp_payload,sizeof(coapwellknown_resp_payload)-1);
       
+      // content-type option
+      packetfunctions_reserveHeaderSize(msg,2);
+      msg->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+                                         1;
+      msg->payload[1]                  = COAP_MEDTYPE_APPLINKFORMAT;
+      
       // header
       packetfunctions_reserveHeaderSize(msg,4);
       msg->payload[0]                  = (1 << 6)             |
                                          (COAP_TYPE_ACK << 4) |
-                                         0;
+                                         1;
       msg->payload[1]                  = COAP_CODE_RESP_CONTENT;
       msg->payload[2]                  = coap_header.MessageId[0];
       msg->payload[3]                  = coap_header.MessageId[1];
