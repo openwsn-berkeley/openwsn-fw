@@ -1558,7 +1558,7 @@ different channel offsets in the same slot.
 inline uint8_t calculateFrequency(uint8_t channelOffset) {
    //return 11+(asn+channelOffset)%16;
    // poipoi: no channel hopping
-   return 20;
+   return 18;
 }
 
 /**

@@ -19,6 +19,7 @@
 #include "udpprint.h"
 #include "udptimer.h"
 //l4
+#include "opencoap.h"
 #include "openudp.h"
 #include "opentcp.h"
 //l3b
@@ -72,6 +73,7 @@ void openwsn_init() {
    // 04-TRAN
    opentcp_init();
    openudp_init();
+   opencoap_init();
    // 07-App
    //heli_init();
    //imu_init();

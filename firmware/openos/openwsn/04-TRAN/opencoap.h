@@ -10,7 +10,9 @@
 
 //=========================== define ==========================================
 
-#define MAX_COAP_OPTIONS 3
+#define MAX_COAP_OPTIONS               3
+
+#define COAP_VERSION                   1
 
 typedef enum {
    COAP_TYPE_CON                       = 0,
@@ -82,10 +84,6 @@ typedef enum {
 //=========================== typedef =========================================
 
 typedef struct {
-   uint8_t*      Ver;
-} coap_registration_t;
-
-typedef struct {
    uint8_t       Ver;
    coap_type_t   T;
    uint8_t       OC;
@@ -99,11 +97,28 @@ typedef struct {
    uint8_t*      pValue;
 } coap_option_iht;
 
+typedef void (*callbackRx_t)(OpenQueueEntry_t* msg,
+                             coap_header_iht*  coap_header,
+                             coap_option_iht*  coap_options);
+
+typedef struct coap_resource_desc_t coap_resource_desc_t;
+struct coap_resource_desc_t {
+   uint8_t               path0len;
+   uint8_t*              path0val;
+   uint8_t               path1len;
+   uint8_t*              path1val;
+   bool                  messageIDused;
+   uint16_t              messageID;
+   callbackRx_t          callbackRx;
+   coap_resource_desc_t* next;
+};
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 void opencoap_init();
+void opencoap_register(coap_resource_desc_t* desc);
 void opencoap_receive(OpenQueueEntry_t* msg);
 void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error);
 
