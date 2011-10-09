@@ -27,9 +27,9 @@ coap_resource_desc_t rwellknown_desc;
 
 //=========================== prototype =======================================
 
-void rwellknown_receive(OpenQueueEntry_t* msg,
-                        coap_header_iht*  coap_header,
-                        coap_option_iht*  coap_options);
+error_t rwellknown_receive(OpenQueueEntry_t* msg,
+                           coap_header_iht*  coap_header,
+                           coap_option_iht*  coap_options);
 
 //=========================== public ==========================================
 
@@ -76,6 +76,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    coap_option_t             last_option;
    coap_resource_desc_t*     temp_desc;
    bool                      found;
+   error_t                   outcome;
    // local variables passed to the handlers (with msg)
    coap_header_iht           coap_header;
    coap_option_iht           coap_options[MAX_COAP_OPTIONS];
@@ -184,7 +185,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    //=== step 3. ask the resource to prepare response
    
    if (found==TRUE) {
-      temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
+      outcome = temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
    } else {
       // reset packet payload
       msg->payload                     = &(msg->packet[127]);
@@ -192,6 +193,15 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       // set the CoAP header
       coap_header.OC                   = 0;
       coap_header.Code                 = COAP_CODE_RESP_NOTFOUND;
+   }
+   
+   if (outcome==E_FAIL) {
+      // reset packet payload
+      msg->payload                     = &(msg->packet[127]);
+      msg->length                      = 0;
+      // set the CoAP header
+      coap_header.OC                   = 0;
+      coap_header.Code                 = COAP_CODE_RESP_BADREQ;
    }
    
    //=== step 4. send that packet back
@@ -260,9 +270,10 @@ void opentimers_coap_fired() {
 
 //=========================== private =========================================
 
-void rwellknown_receive(OpenQueueEntry_t* msg,
-                        coap_header_iht*  coap_header,
-                        coap_option_iht*  coap_options) {
+error_t rwellknown_receive(OpenQueueEntry_t* msg,
+                           coap_header_iht*  coap_header,
+                           coap_option_iht*  coap_options) {
+   error_t outcome;
    coap_resource_desc_t* temp_resource;
    
    if (coap_header->Code==COAP_CODE_REQ_GET) {
@@ -302,5 +313,10 @@ void rwellknown_receive(OpenQueueEntry_t* msg,
       // set the CoAP header
       coap_header->OC                  = 1;
       coap_header->Code                = COAP_CODE_RESP_CONTENT;
+      
+      outcome                          = E_SUCCESS;
+   } else {
+      outcome                          = E_FAIL;
    }
+   return outcome;
 }

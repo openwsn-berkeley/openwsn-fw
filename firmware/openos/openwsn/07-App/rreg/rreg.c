@@ -21,10 +21,10 @@ const uint8_t rreg_rdpath[] = "rd?h=poi";
 
 //=========================== prototypes ======================================
 
-void rreg_receive(OpenQueueEntry_t* msg,
-                  coap_header_iht*  coap_header,
-                  coap_option_iht*  coap_options);
-void rreg_timer();
+error_t rreg_receive(OpenQueueEntry_t* msg,
+                     coap_header_iht*  coap_header,
+                     coap_option_iht*  coap_options);
+void    rreg_timer();
 
 //=========================== public ==========================================
 
@@ -44,11 +44,15 @@ void rreg_init() {
 
 //=========================== private =========================================
 
-void rreg_receive(OpenQueueEntry_t* msg,
-                   coap_header_iht*  coap_header,
-                   coap_option_iht*  coap_options) {
+error_t rreg_receive(OpenQueueEntry_t* msg,
+                   coap_header_iht* coap_header,
+                   coap_option_iht* coap_options) {
+                      
+   error_t outcome;
    
    if (coap_header->Code==COAP_CODE_REQ_POST) {
+      // set delay to RREGPERIOD to gets triggered next time rreg_timer is called
+      rreg_vars.delay                  = RREGPERIOD;
       
       // reset packet payload
       msg->payload                     = &(msg->packet[127]);
@@ -58,8 +62,12 @@ void rreg_receive(OpenQueueEntry_t* msg,
       coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_VALID;
       
-      // TODO schedule to send a registration
+      outcome = E_SUCCESS;
+   } else {
+      outcome = E_FAIL;
    }
+   
+   return outcome;
 }
 
 void rreg_timer() {
@@ -122,6 +130,5 @@ void rreg_timer() {
          openqueue_freePacketBuffer(pkt);
       }
    }
-   
    return;
 }

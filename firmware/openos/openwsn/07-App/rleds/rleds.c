@@ -17,9 +17,9 @@ const uint8_t rleds_path0[]        = "led";
 
 //=========================== prototypes ======================================
 
-void rleds_receive(OpenQueueEntry_t* msg,
-                     coap_header_iht*  coap_header,
-                     coap_option_iht*  coap_options);
+error_t rleds_receive(OpenQueueEntry_t* msg,
+                      coap_header_iht*  coap_header,
+                      coap_option_iht*  coap_options);
 
 //=========================== public ==========================================
 
@@ -37,9 +37,10 @@ void rleds_init() {
 
 //=========================== private =========================================
 
-void rleds_receive(OpenQueueEntry_t* msg,
-                   coap_header_iht*  coap_header,
-                   coap_option_iht*  coap_options) {
+error_t rleds_receive(OpenQueueEntry_t* msg,
+                      coap_header_iht*  coap_header,
+                      coap_option_iht*  coap_options) {      
+   error_t outcome;
    
    if        (coap_header->Code==COAP_CODE_REQ_GET) {
       // reset packet payload
@@ -57,6 +58,8 @@ void rleds_receive(OpenQueueEntry_t* msg,
       // set the CoAP header
       coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CONTENT;
+      
+      outcome                          = E_SUCCESS;
    } else if (coap_header->Code==COAP_CODE_REQ_PUT) {
       
       // change the LED's state
@@ -73,5 +76,10 @@ void rleds_receive(OpenQueueEntry_t* msg,
       // set the CoAP header
       coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CHANGED;
+      
+      outcome                          = E_SUCCESS;
+   } else {
+      outcome                          = E_FAIL;
    }
+   return outcome;
 }
