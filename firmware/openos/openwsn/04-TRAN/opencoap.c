@@ -8,7 +8,11 @@
 //=========================== variables =======================================
 
 // general to the CoAP core
-coap_resource_desc_t* resources;
+typedef struct {
+   coap_resource_desc_t* resources;
+} opencoap_vars_t;
+
+opencoap_vars_t opencoap_vars;
 
 // specific the /.well-known/core path handler
 
@@ -26,7 +30,7 @@ void rwellknown_receive();
 
 void opencoap_init() {
    // initialize the resource linked list
-   resources                 = NULL;
+   opencoap_vars.resources     = NULL;
    
    // prepare the resource descriptor for the /.well-known/core path
    rwellknown_desc.path0len   = sizeof(rwellknown_path0)-1;
@@ -44,12 +48,12 @@ void opencoap_register(coap_resource_desc_t* desc) {
    // reset the messageIDused element
    desc->messageIDused = FALSE;
    
-   if (resources==NULL) {
-      resources = desc;
+   if (opencoap_vars.resources==NULL) {
+      opencoap_vars.resources = desc;
    }
    
    // add to the end of the resource linked list
-   last_elem = resources;
+   last_elem = opencoap_vars.resources;
    while (last_elem!=NULL) {
       last_elem = last_elem->next;
    }
@@ -119,7 +123,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       // this is a request: target resource is indicated as COAP_OPTION_LOCATIONPATH option(s)
       
       // find the resource which matches    
-      temp_desc = resources;
+      temp_desc = opencoap_vars.resources;
       while (found==FALSE) {
          if    (
                 coap_options[0].type==COAP_OPTION_URIPATH &&
@@ -223,7 +227,7 @@ void rwellknown_receive(OpenQueueEntry_t* msg, coap_header_iht* coap_header, coa
       msg->length                      = 0;
       
       // add CoAP payload
-      temp_resource = resources;
+      temp_resource = opencoap_vars.resources;
       while (temp_resource!=NULL) {
          packetfunctions_reserveHeaderSize(msg,1);
          msg->payload[0] = '>';
