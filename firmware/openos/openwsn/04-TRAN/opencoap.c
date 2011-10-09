@@ -4,6 +4,7 @@
 #include "openqueue.h"
 #include "openserial.h"
 #include "opentimers.h"
+#include "openrandom.h"
 #include "packetfunctions.h"
 #include "idmanager.h"
 
@@ -13,8 +14,8 @@
 typedef struct {
    coap_resource_desc_t* resources;
    bool                  busySending;
-   int8_t                delayCounter;
-   int16_t               messageID;
+   uint8_t               delayCounter;
+   uint16_t              messageID;
 } opencoap_vars_t;
 
 opencoap_vars_t opencoap_vars;
@@ -30,7 +31,7 @@ void opencoap_init() {
    opencoap_vars.resources     = NULL;
    
    // initialize the messageID
-   opencoap_vars.messageID     = 1000;
+   opencoap_vars.messageID     = openrandom_get16b();
    
    // start the timer
    if (idmanager_getIsDAGroot()==FALSE) {
@@ -290,8 +291,8 @@ void opencoap_register(coap_resource_desc_t* desc) {
 }
 
 error_t opencoap_send(OpenQueueEntry_t* msg) {
-   // increase the global messageID
-   opencoap_vars.messageID++;
+   // change the global messageID
+   opencoap_vars.messageID          = openrandom_get16b();
    // take ownership
    msg->owner                       = COMPONENT_OPENCOAP;
    // metadata
