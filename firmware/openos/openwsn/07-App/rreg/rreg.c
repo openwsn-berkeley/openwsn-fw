@@ -17,7 +17,6 @@ typedef struct {
 rreg_vars_t rreg_vars;
 
 const uint8_t rreg_path0[]  = "reg";
-const uint8_t rreg_testlink[]  = "</led>;if=\"actuator\";rt=\"ipso:light\";ct=\"0\"";
 
 //=========================== prototypes ======================================
 
@@ -95,8 +94,7 @@ void rreg_timer() {
       pkt->creator    = COMPONENT_RREG;
       pkt->owner      = COMPONENT_RREG;
       // CoAP payload
-      packetfunctions_reserveHeaderSize(pkt,sizeof(rreg_testlink)-1);
-      memcpy(pkt->payload,&rreg_testlink,sizeof(rreg_testlink)-1);
+      opencoap_writeLinks(pkt);
       // URI-query
       packetfunctions_reserveHeaderSize(pkt,5);
       pkt->payload[0] = 'h';
@@ -122,7 +120,8 @@ void rreg_timer() {
       // metadata
       pkt->l4_destination_port         = WKP_UDP_COAP;
       pkt->l3_destinationORsource.type = ADDR_128B;
-      
+      /*
+      // send RD registration to interop.ipso-alliance
       pkt->l3_destinationORsource.addr_128b[ 0] = 0x26;
       pkt->l3_destinationORsource.addr_128b[ 1] = 0x07;
       pkt->l3_destinationORsource.addr_128b[ 2] = 0xf7;
@@ -139,7 +138,9 @@ void rreg_timer() {
       pkt->l3_destinationORsource.addr_128b[13] = 0x00;
       pkt->l3_destinationORsource.addr_128b[14] = 0x0e;
       pkt->l3_destinationORsource.addr_128b[15] = 0x29;
+      */
       /*
+      // send RD registration to backup server
       pkt->l3_destinationORsource.addr_128b[ 0] = 0x2a;
       pkt->l3_destinationORsource.addr_128b[ 1] = 0x00;
       pkt->l3_destinationORsource.addr_128b[ 2] = 0xdd;
@@ -157,7 +158,7 @@ void rreg_timer() {
       pkt->l3_destinationORsource.addr_128b[14] = 0x0f;
       pkt->l3_destinationORsource.addr_128b[15] = 0x7b;
       */
-      /*
+      // send RD registration to local address
       pkt->l3_destinationORsource.addr_128b[ 0] = 0x20;
       pkt->l3_destinationORsource.addr_128b[ 1] = 0x01;
       pkt->l3_destinationORsource.addr_128b[ 2] = 0x04;
@@ -174,7 +175,6 @@ void rreg_timer() {
       pkt->l3_destinationORsource.addr_128b[13] = 0x5e;
       pkt->l3_destinationORsource.addr_128b[14] = 0xe2;
       pkt->l3_destinationORsource.addr_128b[15] = 0x99;
-      */
       // send
       if (opencoap_send(pkt)==E_FAIL) {
          openqueue_freePacketBuffer(pkt);
