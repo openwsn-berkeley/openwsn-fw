@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "netleds.h"
+#include "rleds.h"
 //openwsn stack
 #include "opencoap.h"
 #include "packetfunctions.h"
@@ -9,36 +9,36 @@
 
 typedef struct {
    coap_resource_desc_t desc;
-} netleds_vars_t;
+} rleds_vars_t;
 
-netleds_vars_t netleds_vars;
+rleds_vars_t rleds_vars;
 
 const uint8_t rleds_path0[]        = "led";
 
 //=========================== prototypes ======================================
 
-void netleds_receive(OpenQueueEntry_t* msg,
+void rleds_receive(OpenQueueEntry_t* msg,
                      coap_header_iht*  coap_header,
                      coap_option_iht*  coap_options);
 
 //=========================== public ==========================================
 
-void netleds_init() {
+void rleds_init() {
    // prepare the resource descriptor for the /.well-known/core path
-   netleds_vars.desc.path0len   = sizeof(rleds_path0)-1;
-   netleds_vars.desc.path0val   = (uint8_t*)(&rleds_path0);
-   netleds_vars.desc.path1len   = 0;
-   netleds_vars.desc.path1val   = NULL;
-   netleds_vars.desc.callbackRx = &netleds_receive;
+   rleds_vars.desc.path0len   = sizeof(rleds_path0)-1;
+   rleds_vars.desc.path0val   = (uint8_t*)(&rleds_path0);
+   rleds_vars.desc.path1len   = 0;
+   rleds_vars.desc.path1val   = NULL;
+   rleds_vars.desc.callbackRx = &rleds_receive;
    
-   opencoap_register(&netleds_vars.desc);
+   opencoap_register(&rleds_vars.desc);
 }
 
 //=========================== private =========================================
 
-void netleds_receive(OpenQueueEntry_t* msg,
-                     coap_header_iht*  coap_header,
-                     coap_option_iht*  coap_options) {
+void rleds_receive(OpenQueueEntry_t* msg,
+                   coap_header_iht*  coap_header,
+                   coap_option_iht*  coap_options) {
    
    if        (coap_header->Code==COAP_CODE_REQ_GET) {
       // reset packet payload

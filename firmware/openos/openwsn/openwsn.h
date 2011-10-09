@@ -138,7 +138,7 @@ enum {
    //App
    COMPONENT_HELI                      = 0x1e,
    COMPONENT_IMU                       = 0x1f,
-   COMPONENT_NETLEDS                   = 0x20,
+   COMPONENT_RLEDS                     = 0x20,
    COMPONENT_OHLONE                    = 0x21,
    
    COMPONENT_UDPTIMER                  = 0x22,

@@ -9,7 +9,7 @@
 //l7
 #include "heli.h"
 #include "imu.h"
-#include "netleds.h"
+#include "rleds.h"
 #include "ohlone.h"
 #include "tcpecho.h"
 #include "tcpinject.h"
@@ -77,7 +77,7 @@ void openwsn_init() {
    // 07-App
    //heli_init();
    //imu_init();
-   netleds_init();
+   rleds_init();
    ohlone_init();
    tcpecho_init();
    tcpinject_init();
