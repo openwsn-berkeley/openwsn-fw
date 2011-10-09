@@ -40,17 +40,37 @@ void netleds_receive(OpenQueueEntry_t* msg,
                      coap_header_iht*  coap_header,
                      coap_option_iht*  coap_options) {
    
-   if (coap_header->Code==COAP_CODE_REQ_GET) {
+   if        (coap_header->Code==COAP_CODE_REQ_GET) {
       // reset packet payload
       msg->payload                     = &(msg->packet[127]);
       msg->length                      = 0;
       
       // add CoAP payload
       packetfunctions_reserveHeaderSize(msg,1);
-      msg->payload[0]                  = '1';
+      if (led_errorIsOn()==TRUE) {
+         msg->payload[0]               = '1';
+      } else {
+         msg->payload[0]               = '0';
+      }
          
       // set the CoAP header
       coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CONTENT;
+   } else if (coap_header->Code==COAP_CODE_REQ_PUT) {
+      
+      // change the LED's state
+      if (msg->payload[0]=='1') {
+         led_errorLedOn();
+      } else {
+         led_errorLedOff();
+      }
+      
+      // reset packet payload
+      msg->payload                     = &(msg->packet[127]);
+      msg->length                      = 0;
+      
+      // set the CoAP header
+      coap_header->OC                  = 0;
+      coap_header->Code                = COAP_CODE_RESP_CHANGED;
    }
 }

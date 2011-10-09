@@ -8,6 +8,7 @@
 \{
 */
 
+#include "openwsn.h"
 #include "stdint.h"
  
 //=========================== define ==========================================
@@ -33,6 +34,7 @@ void led_syncLedToggle();
 void led_errorLedOn();
 void led_errorLedOff();
 void led_errorLedToggle();
+bool led_errorIsOn();
 
 /**
 \}

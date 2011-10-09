@@ -88,5 +88,14 @@ void led_errorLedOff() {
 void led_errorLedToggle() {
    P2OUT ^=  0x08;
 }
+bool led_errorIsOn() {
+   bool value;
+   if (P2OUT & 0x08) {
+      value = TRUE;
+   } else {
+      value = FALSE;
+   }
+   return value;
+}
 
 //=========================== private =========================================

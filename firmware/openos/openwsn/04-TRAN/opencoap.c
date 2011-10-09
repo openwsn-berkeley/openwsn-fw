@@ -116,6 +116,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       coap_options[i].pValue      = &(msg->payload[index]);
       index += coap_options[i].length;
    }
+   // remove the CoAP header+options
+   packetfunctions_tossHeader(msg,index);
    
    //=== step 2. find the resource to handle the packet
    
