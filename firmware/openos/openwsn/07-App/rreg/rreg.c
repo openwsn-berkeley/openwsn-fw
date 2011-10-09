@@ -25,17 +25,21 @@ error_t rreg_receive(OpenQueueEntry_t* msg,
                      coap_header_iht*  coap_header,
                      coap_option_iht*  coap_options);
 void    rreg_timer();
+void    rreg_sendDone(OpenQueueEntry_t* msg,
+                      error_t error);
 
 //=========================== public ==========================================
 
 void rreg_init() {
    // prepare the resource descriptor for the /.well-known/core path
-   rreg_vars.desc.path0len      = sizeof(rreg_path0)-1;
-   rreg_vars.desc.path0val      = (uint8_t*)(&rreg_path0);
-   rreg_vars.desc.path1len      = 0;
-   rreg_vars.desc.path1val      = NULL;
-   rreg_vars.desc.callbackRx    = &rreg_receive;
-   rreg_vars.desc.callbackTimer = rreg_timer;
+   rreg_vars.desc.path0len             = sizeof(rreg_path0)-1;
+   rreg_vars.desc.path0val             = (uint8_t*)(&rreg_path0);
+   rreg_vars.desc.path1len             = 0;
+   rreg_vars.desc.path1val             = NULL;
+   rreg_vars.desc.componentID          = COMPONENT_RREG;
+   rreg_vars.desc.callbackRx           = &rreg_receive;
+   rreg_vars.desc.callbackTimer        = rreg_timer;
+   rreg_vars.desc.callbackSendDone     = &rreg_sendDone;
    
    rreg_vars.delay              = 0;
    
@@ -87,6 +91,9 @@ void rreg_timer() {
          openqueue_freePacketBuffer(pkt);
          return;
       }
+      // take ownership over that packet
+      pkt->creator    = COMPONENT_RREG;
+      pkt->owner      = COMPONENT_RREG;
       // add CoAP payload
       packetfunctions_reserveHeaderSize(pkt,6);
       pkt->payload[0] = '<';
@@ -131,4 +138,8 @@ void rreg_timer() {
       }
    }
    return;
+}
+
+void rreg_sendDone(OpenQueueEntry_t* msg, error_t error) {
+   openqueue_freePacketBuffer(msg);
 }

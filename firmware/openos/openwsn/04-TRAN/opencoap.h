@@ -101,6 +101,7 @@ typedef error_t (*callbackRx_t)(OpenQueueEntry_t* msg,
                                 coap_header_iht*  coap_header,
                                 coap_option_iht*  coap_options);
 typedef void (*callbackTimer_t)(void);
+typedef void (*callbackSendDone_t)(OpenQueueEntry_t* msg, error_t error);
 
 typedef struct coap_resource_desc_t coap_resource_desc_t;
 struct coap_resource_desc_t {
@@ -109,9 +110,11 @@ struct coap_resource_desc_t {
    uint8_t               path1len;
    uint8_t*              path1val;
    bool                  messageIDused;
+   uint8_t               componentID;
    uint16_t              messageID;
    callbackRx_t          callbackRx;
    callbackTimer_t       callbackTimer;
+   callbackSendDone_t    callbackSendDone;
    coap_resource_desc_t* next;
 };
 

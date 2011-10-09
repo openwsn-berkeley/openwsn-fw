@@ -30,6 +30,8 @@ coap_resource_desc_t rwellknown_desc;
 error_t rwellknown_receive(OpenQueueEntry_t* msg,
                            coap_header_iht*  coap_header,
                            coap_option_iht*  coap_options);
+void    rwellknown_sendDone(OpenQueueEntry_t* msg,
+                            error_t error);
 
 //=========================== public ==========================================
 
@@ -41,11 +43,14 @@ void opencoap_init() {
    opentimers_startPeriodic(TIMER_COAP,0xffff);// every 2 seconds
    
    // prepare the resource descriptor for the /.well-known/core path
-   rwellknown_desc.path0len   = sizeof(rwellknown_path0)-1;
-   rwellknown_desc.path0val   = (uint8_t*)(&rwellknown_path0);
-   rwellknown_desc.path1len   = sizeof(rwellknown_path1)-1;
-   rwellknown_desc.path1val   = (uint8_t*)(&rwellknown_path1);
-   rwellknown_desc.callbackRx = &rwellknown_receive;
+   rwellknown_desc.path0len            = sizeof(rwellknown_path0)-1;
+   rwellknown_desc.path0val            = (uint8_t*)(&rwellknown_path0);
+   rwellknown_desc.path1len            = sizeof(rwellknown_path1)-1;
+   rwellknown_desc.path1val            = (uint8_t*)(&rwellknown_path1);
+   rwellknown_desc.componentID         = COMPONENT_OPENCOAP;
+   rwellknown_desc.callbackRx          = &rwellknown_receive;
+   rwellknown_desc.callbackTimer       = NULL;
+   rwellknown_desc.callbackSendDone    = &rwellknown_sendDone;
    
    opencoap_register(&rwellknown_desc);
 }
@@ -247,12 +252,25 @@ error_t opencoap_send(OpenQueueEntry_t* msg) {
 }
 
 void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {
+   coap_resource_desc_t* temp_resource;
+   
+   // take ownership over that packet
    msg->owner = COMPONENT_OPENCOAP;
-   if (msg->creator!=COMPONENT_OPENCOAP) {
-      openserial_printError(COMPONENT_OPENCOAP,ERR_UNEXPECTED_SENDDONE,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+   
+   // indicate sendDone to creator of that packet
+   temp_resource = opencoap_vars.resources;
+   while (temp_resource!=NULL) {
+      if (temp_resource->componentID==msg->creator &&
+          temp_resource->callbackSendDone!=NULL) {
+         temp_resource->callbackSendDone(msg,error);
+         return;
+      }
+      temp_resource = temp_resource->next;
    }
+   
+   openserial_printError(COMPONENT_OPENCOAP,ERR_UNEXPECTED_SENDDONE,
+                         (errorparameter_t)0,
+                         (errorparameter_t)0);
    openqueue_freePacketBuffer(msg);
 }
 
@@ -319,4 +337,8 @@ error_t rwellknown_receive(OpenQueueEntry_t* msg,
       outcome                          = E_FAIL;
    }
    return outcome;
+}
+
+void rwellknown_sendDone(OpenQueueEntry_t* msg, error_t error) {
+   openqueue_freePacketBuffer(msg);
 }

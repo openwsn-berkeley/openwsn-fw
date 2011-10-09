@@ -75,8 +75,6 @@ enum {
    WKP_UDP_ECHO                        =    7,
    WKP_UDP_INJECT                      = 2188,
    WKP_UDP_DISCARD                     =    9,
-
-   WKP_UDP_TIMER                       = 2195,
 };
 
 //status elements

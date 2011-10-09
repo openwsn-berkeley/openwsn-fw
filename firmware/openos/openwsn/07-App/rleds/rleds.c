@@ -1,9 +1,9 @@
 #include "openwsn.h"
 #include "rleds.h"
-//openwsn stack
 #include "opencoap.h"
 #include "packetfunctions.h"
 #include "leds.h"
+#include "openqueue.h"
 
 //=========================== variables =======================================
 
@@ -20,17 +20,21 @@ const uint8_t rleds_path0[]        = "led";
 error_t rleds_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options);
+void    rleds_sendDone(OpenQueueEntry_t* msg,
+                       error_t error);
 
 //=========================== public ==========================================
 
 void rleds_init() {
    // prepare the resource descriptor for the /.well-known/core path
-   rleds_vars.desc.path0len      = sizeof(rleds_path0)-1;
-   rleds_vars.desc.path0val      = (uint8_t*)(&rleds_path0);
-   rleds_vars.desc.path1len      = 0;
-   rleds_vars.desc.path1val      = NULL;
-   rleds_vars.desc.callbackRx    = &rleds_receive;
-   rleds_vars.desc.callbackTimer = NULL;
+   rleds_vars.desc.path0len            = sizeof(rleds_path0)-1;
+   rleds_vars.desc.path0val            = (uint8_t*)(&rleds_path0);
+   rleds_vars.desc.path1len            = 0;
+   rleds_vars.desc.path1val            = NULL;
+   rleds_vars.desc.componentID         = COMPONENT_RLEDS;
+   rleds_vars.desc.callbackRx          = &rleds_receive;
+   rleds_vars.desc.callbackTimer       = NULL;
+   rleds_vars.desc.callbackSendDone    = &rleds_sendDone;
    
    opencoap_register(&rleds_vars.desc);
 }
@@ -82,4 +86,8 @@ error_t rleds_receive(OpenQueueEntry_t* msg,
       outcome                          = E_FAIL;
    }
    return outcome;
+}
+
+void rleds_sendDone(OpenQueueEntry_t* msg, error_t error) {
+   openqueue_freePacketBuffer(msg);
 }
