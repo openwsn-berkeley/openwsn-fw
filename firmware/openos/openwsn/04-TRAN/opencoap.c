@@ -248,7 +248,11 @@ void rwellknown_receive(OpenQueueEntry_t* msg,
          memcpy(msg->payload,temp_resource->path0val,temp_resource->path0len);
          packetfunctions_reserveHeaderSize(msg,2);
          msg->payload[1] = '/';
-         msg->payload[0] = '<';         
+         msg->payload[0] = '<';
+         if (temp_resource->next!=NULL) {
+            packetfunctions_reserveHeaderSize(msg,1);
+            msg->payload[0] = ',';
+         }
          temp_resource = temp_resource->next;
       }
          
