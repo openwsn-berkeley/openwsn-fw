@@ -4,6 +4,7 @@
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
+#include "idmanager.h"
 
 //=========================== variables =======================================
 
@@ -16,7 +17,8 @@ typedef struct {
 
 rreg_vars_t rreg_vars;
 
-const uint8_t rreg_path0[]  = "reg";
+const uint8_t rreg_path0[]    = "reg";
+const uint8_t rreg_uriquery[] = "h=openwsn";
 
 //=========================== prototypes ======================================
 
@@ -26,6 +28,7 @@ error_t rreg_receive(OpenQueueEntry_t* msg,
 void    rreg_timer();
 void    rreg_sendDone(OpenQueueEntry_t* msg,
                       error_t error);
+uint8_t hexToAscii(uint8_t hex);
 
 //=========================== public ==========================================
 
@@ -75,6 +78,7 @@ error_t rreg_receive(OpenQueueEntry_t* msg,
 
 void rreg_timer() {
    OpenQueueEntry_t* pkt;
+   uint8_t           temp8b;
    
    rreg_vars.delay += 2;
    
@@ -96,15 +100,14 @@ void rreg_timer() {
       // CoAP payload
       opencoap_writeLinks(pkt);
       // URI-query
-      packetfunctions_reserveHeaderSize(pkt,5);
-      pkt->payload[0] = 'h';
-      pkt->payload[1] = '=';
-      pkt->payload[2] = 'p';
-      pkt->payload[3] = 'o';
-      pkt->payload[4] = 'i';
+      packetfunctions_reserveHeaderSize(pkt,sizeof(rreg_uriquery)-1+2);
+      memcpy(&pkt->payload[0],&rreg_uriquery,sizeof(rreg_uriquery)-1);
+      temp8b = idmanager_getMyID(ADDR_16B)->addr_16b[1];
+      pkt->payload[sizeof(rreg_uriquery)-1] = hexToAscii((temp8b>>4) & 0x0f);
+      pkt->payload[sizeof(rreg_uriquery)-0] = hexToAscii((temp8b>>0) & 0x0f);
       packetfunctions_reserveHeaderSize(pkt,1);
       pkt->payload[0] = (COAP_OPTION_URIQUERY-COAP_OPTION_URIPATH) << 4 |
-                        5;
+                        sizeof(rreg_uriquery)-1+2;
       // URI-path
       packetfunctions_reserveHeaderSize(pkt,2);
       pkt->payload[0] = 'r';
@@ -158,7 +161,7 @@ void rreg_timer() {
       pkt->l3_destinationORsource.addr_128b[14] = 0x0f;
       pkt->l3_destinationORsource.addr_128b[15] = 0x7b;
       */
-      // send RD registration to local address
+      // send RD registration to local address (for debug)
       pkt->l3_destinationORsource.addr_128b[ 0] = 0x20;
       pkt->l3_destinationORsource.addr_128b[ 1] = 0x01;
       pkt->l3_destinationORsource.addr_128b[ 2] = 0x04;
@@ -185,4 +188,12 @@ void rreg_timer() {
 
 void rreg_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
+}
+
+inline uint8_t hexToAscii(uint8_t hex) {
+   if (hex<=0 && hex>=9) {
+      return '0'+(hex-0x00);
+   } else {
+      return 'A'+(hex-0x0a);
+   }
 }
