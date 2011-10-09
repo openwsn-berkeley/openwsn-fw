@@ -1,10 +1,10 @@
-#ifndef __RLEDS_H
-#define __RLEDS_H
+#ifndef __RREG_H
+#define __RREG_H
 
 /**
 \addtogroup App
 \{
-\addtogroup netLeds
+\addtogroup rReg
 \{
 */
 
@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void rleds_init();
+void rreg_init();
 
 /**
 \}

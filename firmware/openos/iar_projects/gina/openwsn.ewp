@@ -330,6 +330,7 @@
           <state>$PROJ_DIR$\..\..\openwsn\07-App\heli\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\imu\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rleds\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rreg\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpinject\</state>
@@ -2028,6 +2029,12 @@
         <name>rleds</name>
         <file>
           <name>$PROJ_DIR$\..\..\openwsn\07-App\rleds\rleds.c</name>
+        </file>
+      </group>
+      <group>
+        <name>rreg</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\rreg\rreg.c</name>
         </file>
       </group>
       <group>
