@@ -14,6 +14,7 @@ typedef struct {
    coap_resource_desc_t* resources;
    bool                  busySending;
    int8_t                delayCounter;
+   int16_t               messageID;
 } opencoap_vars_t;
 
 opencoap_vars_t opencoap_vars;
@@ -188,6 +189,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       };
    } else {
       // this is a response: target resource is indicated by message ID
+      temp_desc = temp_desc;
    }
    
    //=== step 3. ask the resource to prepare response
@@ -236,6 +238,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
 }
 
 error_t opencoap_send(OpenQueueEntry_t* msg) {
+   // increase the global messageID
+   opencoap_vars.messageID++;
    // take ownership
    msg->owner                       = COMPONENT_OPENCOAP;
    // metadata
@@ -244,14 +248,12 @@ error_t opencoap_send(OpenQueueEntry_t* msg) {
    packetfunctions_reserveHeaderSize(msg,4);
    msg->payload[0]                  = (COAP_VERSION   << 6) |
                                       (COAP_TYPE_CON  << 4) |
-                                      (2              << 0);
+                                      (3              << 0);
    msg->payload[1]                  = COAP_CODE_REQ_POST;
-   msg->payload[2]                  = 0xab;
-   msg->payload[3]                  = 0xcd;
+   msg->payload[2]                  = (opencoap_vars.messageID>>8) & 0xff;
+   msg->payload[3]                  = (opencoap_vars.messageID>>0) & 0xff;
    
    return openudp_send(msg);
-   
-   
 }
 
 void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {

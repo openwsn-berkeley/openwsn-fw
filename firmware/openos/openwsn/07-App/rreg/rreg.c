@@ -7,17 +7,17 @@
 
 //=========================== variables =======================================
 
-#define RREGPERIOD        10
+#define RREGPERIOD       300
 
 typedef struct {
-   uint8_t              delay;
+   uint16_t             delay;
    coap_resource_desc_t desc;
 } rreg_vars_t;
 
 rreg_vars_t rreg_vars;
 
 const uint8_t rreg_path0[]  = "reg";
-const uint8_t rreg_rdpath[] = "rd?h=poi";
+const uint8_t rreg_testlink[]  = "</led>;if=\"actuator\";rt=\"ipso:light\";ct=\"0\"";
 
 //=========================== prototypes ======================================
 
@@ -94,20 +94,26 @@ void rreg_timer() {
       // take ownership over that packet
       pkt->creator    = COMPONENT_RREG;
       pkt->owner      = COMPONENT_RREG;
-      // add CoAP payload
-      packetfunctions_reserveHeaderSize(pkt,6);
-      pkt->payload[0] = '<';
-      pkt->payload[1] = '/';
+      // CoAP payload
+      packetfunctions_reserveHeaderSize(pkt,sizeof(rreg_testlink)-1);
+      memcpy(pkt->payload,&rreg_testlink,sizeof(rreg_testlink)-1);
+      // URI-query
+      packetfunctions_reserveHeaderSize(pkt,5);
+      pkt->payload[0] = 'h';
+      pkt->payload[1] = '=';
       pkt->payload[2] = 'p';
       pkt->payload[3] = 'o';
       pkt->payload[4] = 'i';
-      pkt->payload[5] = '>';
-      // add URI path option
-      packetfunctions_reserveHeaderSize(pkt,sizeof(rreg_rdpath)-1);
-      memcpy(pkt->payload,&rreg_rdpath,sizeof(rreg_rdpath)-1);
+      packetfunctions_reserveHeaderSize(pkt,1);
+      pkt->payload[0] = (COAP_OPTION_URIQUERY-COAP_OPTION_URIPATH) << 4 |
+                        5;
+      // URI-path
+      packetfunctions_reserveHeaderSize(pkt,2);
+      pkt->payload[0] = 'r';
+      pkt->payload[1] = 'd';
       packetfunctions_reserveHeaderSize(pkt,1);
       pkt->payload[0] = (COAP_OPTION_URIPATH-COAP_OPTION_CONTENTTYPE) << 4 |
-                        sizeof(rreg_rdpath)-1;
+                        2;
       // add content-type option
       packetfunctions_reserveHeaderSize(pkt,2);
       pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
@@ -116,6 +122,7 @@ void rreg_timer() {
       // metadata
       pkt->l4_destination_port         = WKP_UDP_COAP;
       pkt->l3_destinationORsource.type = ADDR_128B;
+      
       pkt->l3_destinationORsource.addr_128b[ 0] = 0x26;
       pkt->l3_destinationORsource.addr_128b[ 1] = 0x07;
       pkt->l3_destinationORsource.addr_128b[ 2] = 0xf7;
@@ -132,6 +139,42 @@ void rreg_timer() {
       pkt->l3_destinationORsource.addr_128b[13] = 0x00;
       pkt->l3_destinationORsource.addr_128b[14] = 0x0e;
       pkt->l3_destinationORsource.addr_128b[15] = 0x29;
+      /*
+      pkt->l3_destinationORsource.addr_128b[ 0] = 0x2a;
+      pkt->l3_destinationORsource.addr_128b[ 1] = 0x00;
+      pkt->l3_destinationORsource.addr_128b[ 2] = 0xdd;
+      pkt->l3_destinationORsource.addr_128b[ 3] = 0x80;
+      pkt->l3_destinationORsource.addr_128b[ 4] = 0x00;
+      pkt->l3_destinationORsource.addr_128b[ 5] = 0x3c;
+      pkt->l3_destinationORsource.addr_128b[ 6] = 0x00;
+      pkt->l3_destinationORsource.addr_128b[ 7] = 0x00;
+      pkt->l3_destinationORsource.addr_128b[ 8] = 0x00;
+      pkt->l3_destinationORsource.addr_128b[ 9] = 0x00;
+      pkt->l3_destinationORsource.addr_128b[10] = 0x00;
+      pkt->l3_destinationORsource.addr_128b[11] = 0x00;
+      pkt->l3_destinationORsource.addr_128b[12] = 0x00;
+      pkt->l3_destinationORsource.addr_128b[13] = 0x00;
+      pkt->l3_destinationORsource.addr_128b[14] = 0x0f;
+      pkt->l3_destinationORsource.addr_128b[15] = 0x7b;
+      */
+      /*
+      pkt->l3_destinationORsource.addr_128b[ 0] = 0x20;
+      pkt->l3_destinationORsource.addr_128b[ 1] = 0x01;
+      pkt->l3_destinationORsource.addr_128b[ 2] = 0x04;
+      pkt->l3_destinationORsource.addr_128b[ 3] = 0x70;
+      pkt->l3_destinationORsource.addr_128b[ 4] = 0x1f;
+      pkt->l3_destinationORsource.addr_128b[ 5] = 0x05;
+      pkt->l3_destinationORsource.addr_128b[ 6] = 0x19;
+      pkt->l3_destinationORsource.addr_128b[ 7] = 0x37;
+      pkt->l3_destinationORsource.addr_128b[ 8] = 0xa5;
+      pkt->l3_destinationORsource.addr_128b[ 9] = 0xfe;
+      pkt->l3_destinationORsource.addr_128b[10] = 0xc5;
+      pkt->l3_destinationORsource.addr_128b[11] = 0x5f;
+      pkt->l3_destinationORsource.addr_128b[12] = 0xf0;
+      pkt->l3_destinationORsource.addr_128b[13] = 0x5e;
+      pkt->l3_destinationORsource.addr_128b[14] = 0xe2;
+      pkt->l3_destinationORsource.addr_128b[15] = 0x99;
+      */
       // send
       if (opencoap_send(pkt)==E_FAIL) {
          openqueue_freePacketBuffer(pkt);
