@@ -25,11 +25,12 @@ void rleds_receive(OpenQueueEntry_t* msg,
 
 void rleds_init() {
    // prepare the resource descriptor for the /.well-known/core path
-   rleds_vars.desc.path0len   = sizeof(rleds_path0)-1;
-   rleds_vars.desc.path0val   = (uint8_t*)(&rleds_path0);
-   rleds_vars.desc.path1len   = 0;
-   rleds_vars.desc.path1val   = NULL;
-   rleds_vars.desc.callbackRx = &rleds_receive;
+   rleds_vars.desc.path0len      = sizeof(rleds_path0)-1;
+   rleds_vars.desc.path0val      = (uint8_t*)(&rleds_path0);
+   rleds_vars.desc.path1len      = 0;
+   rleds_vars.desc.path1val      = NULL;
+   rleds_vars.desc.callbackRx    = &rleds_receive;
+   rleds_vars.desc.callbackTimer = NULL;
    
    opencoap_register(&rleds_vars.desc);
 }

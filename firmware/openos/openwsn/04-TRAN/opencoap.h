@@ -100,6 +100,7 @@ typedef struct {
 typedef void (*callbackRx_t)(OpenQueueEntry_t* msg,
                              coap_header_iht*  coap_header,
                              coap_option_iht*  coap_options);
+typedef void (*callbackTimer_t)(void);
 
 typedef struct coap_resource_desc_t coap_resource_desc_t;
 struct coap_resource_desc_t {
@@ -110,6 +111,7 @@ struct coap_resource_desc_t {
    bool                  messageIDused;
    uint16_t              messageID;
    callbackRx_t          callbackRx;
+   callbackTimer_t       callbackTimer;
    coap_resource_desc_t* next;
 };
 
@@ -117,10 +119,11 @@ struct coap_resource_desc_t {
 
 //=========================== prototypes ======================================
 
-void opencoap_init();
-void opencoap_register(coap_resource_desc_t* desc);
-void opencoap_receive(OpenQueueEntry_t* msg);
-void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error);
+void    opencoap_init();
+void    opencoap_register(coap_resource_desc_t* desc);
+error_t opencoap_send(OpenQueueEntry_t* msg);
+void    opencoap_receive(OpenQueueEntry_t* msg);
+void    opencoap_sendDone(OpenQueueEntry_t* msg, error_t error);
 
 /**
 \}

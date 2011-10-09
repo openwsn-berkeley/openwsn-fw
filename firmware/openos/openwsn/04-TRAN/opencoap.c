@@ -217,6 +217,25 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    }
 }
 
+error_t opencoap_send(OpenQueueEntry_t* msg) {
+   // take ownership
+   msg->owner                       = COMPONENT_OPENCOAP;
+   // metadata
+   msg->l4_sourcePortORicmpv6Type   = WKP_UDP_COAP;
+   // fill in CoAP header
+   packetfunctions_reserveHeaderSize(msg,4);
+   msg->payload[0]                  = (COAP_VERSION   << 6) |
+                                      (COAP_TYPE_CON  << 4) |
+                                      (2              << 0);
+   msg->payload[1]                  = COAP_CODE_REQ_POST;
+   msg->payload[2]                  = 0xab;
+   msg->payload[3]                  = 0xcd;
+   
+   return openudp_send(msg);
+   
+   
+}
+
 void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {
    msg->owner = COMPONENT_OPENCOAP;
    if (msg->creator!=COMPONENT_OPENCOAP) {
@@ -228,9 +247,14 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {
 }
 
 void opentimers_coap_fired() {
-   opencoap_vars.delayCounter = (opencoap_vars.delayCounter+1)%5;
-   if (opencoap_vars.delayCounter!=0) {
-      return;
+   coap_resource_desc_t* temp_resource;
+   
+   temp_resource = opencoap_vars.resources;
+   while (temp_resource!=NULL) {
+      if (temp_resource->callbackTimer!=NULL) {
+         temp_resource->callbackTimer();
+      }
+      temp_resource = temp_resource->next;
    }
 }
 

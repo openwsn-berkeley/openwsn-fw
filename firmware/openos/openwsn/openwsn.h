@@ -134,12 +134,12 @@ enum {
    COMPONENT_UDPECHO                   = 0x1b,
    COMPONENT_UDPINJECT                 = 0x1c,
    COMPONENT_UDPPRINT                  = 0x1d,
-   
    //App
    COMPONENT_HELI                      = 0x1e,
    COMPONENT_IMU                       = 0x1f,
    COMPONENT_RLEDS                     = 0x20,
-   COMPONENT_OHLONE                    = 0x21,
+   COMPONENT_RREG                      = 0x21,
+   COMPONENT_OHLONE                    = 0x22,
 };
 
 //error codes
