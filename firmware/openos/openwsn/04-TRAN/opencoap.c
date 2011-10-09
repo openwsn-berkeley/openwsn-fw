@@ -215,15 +215,31 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {
 //=========================== private =========================================
 
 void rwellknown_receive(OpenQueueEntry_t* msg, coap_header_iht* coap_header, coap_option_iht* coap_options) {
+   coap_resource_desc_t* temp_resource;
+   
    if (coap_header->Code==COAP_CODE_REQ_GET) {
       // reset packet payload
       msg->payload                     = &(msg->packet[127]);
       msg->length                      = 0;
       
       // add CoAP payload
-      // TODO: add real payload
-      packetfunctions_reserveHeaderSize(msg,sizeof(rwellknown_resp_payload)-1);
-      memcpy(msg->payload,rwellknown_resp_payload,sizeof(rwellknown_resp_payload)-1);
+      temp_resource = resources;
+      while (temp_resource!=NULL) {
+         packetfunctions_reserveHeaderSize(msg,1);
+         msg->payload[0] = '>';
+         if (temp_resource->path1len>0) {
+            packetfunctions_reserveHeaderSize(msg,temp_resource->path1len);
+            memcpy(&msg->payload[0],temp_resource->path1val,temp_resource->path1len);
+            packetfunctions_reserveHeaderSize(msg,1);
+            msg->payload[0] = '/';
+         }
+         packetfunctions_reserveHeaderSize(msg,temp_resource->path0len);
+         memcpy(msg->payload,temp_resource->path0val,temp_resource->path0len);
+         packetfunctions_reserveHeaderSize(msg,2);
+         msg->payload[1] = '/';
+         msg->payload[0] = '<';         
+         temp_resource = temp_resource->next;
+      }
          
       // add return option
       packetfunctions_reserveHeaderSize(msg,2);
