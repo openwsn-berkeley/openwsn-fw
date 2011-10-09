@@ -140,8 +140,6 @@ enum {
    COMPONENT_IMU                       = 0x1f,
    COMPONENT_RLEDS                     = 0x20,
    COMPONENT_OHLONE                    = 0x21,
-   
-   COMPONENT_UDPTIMER                  = 0x22,
 };
 
 //error codes

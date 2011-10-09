@@ -18,7 +18,6 @@
 #include "udpecho.h"
 #include "udpinject.h"
 #include "udpprint.h"
-#include "udptimer.h"
 //l4
 #include "opencoap.h"
 #include "openudp.h"
@@ -87,7 +86,6 @@ void openwsn_init() {
    udpecho_init();
    udpinject_init();
    udpprint_init();
-   udptimer_init();
 }
 
 //=========================== private =========================================

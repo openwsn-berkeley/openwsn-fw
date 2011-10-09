@@ -60,9 +60,9 @@ void scheduler_start() {
          } else if (isThereTask(TASKID_TCP_TIMEOUT)==TRUE) {
             consumeTask(TASKID_TCP_TIMEOUT);
             opentimers_tcp_fired();
-         } else if (isThereTask(TASKID_UDP_TIMER)==TRUE) {
-            consumeTask(TASKID_UDP_TIMER);
-            opentimers_udptimer_fired();
+         } else if (isThereTask(TASKID_COAP)==TRUE) {
+            consumeTask(TASKID_COAP);
+            opentimers_coap_fired();
          } else if (isThereTask(TASKID_TIMERB4)==TRUE) {
             consumeTask(TASKID_TIMERB4);
             // timer available, put your function here
@@ -112,7 +112,7 @@ __monitor void consumeTask(uint8_t taskId) {
 __interrupt void COMPARATORA_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-   __bic_SR_register_on_exit(CPUOFF);            // restart CPU
+   __bic_SR_register_on_exit(CPUOFF);                 // restart CPU
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -125,9 +125,9 @@ __interrupt void PORT2_ISR (void) {
 #ifdef ISR_BUTTON
    //interrupt from button connected to P2.7
    if ((P2IFG & 0x80)!=0) {
-      P2IFG &= ~0x80;                            // clear interrupt flag
-      scheduler_push_task(ID_ISR_BUTTON);        // post task
-      __bic_SR_register_on_exit(CPUOFF);         // restart CPU
+      P2IFG &= ~0x80;                                 // clear interrupt flag
+      scheduler_push_task(ID_ISR_BUTTON);             // post task
+      __bic_SR_register_on_exit(CPUOFF);              // restart CPU
    }
 #endif
    DEBUG_PIN_ISR_CLR();
@@ -139,13 +139,13 @@ __interrupt void TIMERB0_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
    if (opentimers_vars.continuous[0]==TRUE) {
-      TBCCR0 += opentimers_vars.period[0];           // continuous timer: schedule next instant
+      TBCCR0 += opentimers_vars.period[0];            // continuous timer: schedule next instant
    } else {
-      TBCCTL0 = 0;                               // stop the timer
+      TBCCTL0 = 0;                                    // stop the timer
       TBCCR0  = 0;
    }
-   scheduler_push_task(TASKID_RES);              // post the corresponding task
-   __bic_SR_register_on_exit(CPUOFF);            // restart CPU
+   scheduler_push_task(TASKID_RES);                   // post the corresponding task
+   __bic_SR_register_on_exit(CPUOFF);                 // restart CPU
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -154,70 +154,70 @@ __interrupt void TIMERB0_ISR (void) {
 __interrupt void TIMERB1through6_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-   uint16_t tbiv_temp = TBIV;                    // read only once because accessing TBIV resets it
+   uint16_t tbiv_temp = TBIV;                         // read only once because accessing TBIV resets it
    switch (tbiv_temp) {
       case 0x0002: // timerB CCR1
          if (opentimers_vars.continuous[1]==TRUE) {
-            TBCCR1 += opentimers_vars.period[1];     // continuous timer: schedule next instant
+            TBCCR1 += opentimers_vars.period[1];      // continuous timer: schedule next instant
          } else {
-            TBCCTL1 = 0;                         // stop the timer
+            TBCCTL1 = 0;                              // stop the timer
             TBCCR1  = 0;
          }
-         scheduler_push_task(TASKID_RPL);        // post the corresponding task
-         __bic_SR_register_on_exit(CPUOFF);      // restart CPU
+         scheduler_push_task(TASKID_RPL);             // post the corresponding task
+         __bic_SR_register_on_exit(CPUOFF);           // restart CPU
          break;
       case 0x0004: // timerB CCR2
          if (opentimers_vars.continuous[2]==TRUE) {
-            TBCCR2 += opentimers_vars.period[2];     // continuous timer: schedule next instant
+            TBCCR2 += opentimers_vars.period[2];      // continuous timer: schedule next instant
          } else {
-            TBCCTL2 = 0;                         // stop the timer
+            TBCCTL2 = 0;                              // stop the timer
             TBCCR2  = 0;
          }
-         scheduler_push_task(TASKID_TCP_TIMEOUT);// post the corresponding task
-         __bic_SR_register_on_exit(CPUOFF);      // restart CPU
+         scheduler_push_task(TASKID_TCP_TIMEOUT);     // post the corresponding task
+         __bic_SR_register_on_exit(CPUOFF);           // restart CPU
          break;
       case 0x0006: // timerB CCR3
          if (opentimers_vars.continuous[3]==TRUE) {
-            TBCCR3 += opentimers_vars.period[3];     // continuous timer: schedule next instant
+            TBCCR3 += opentimers_vars.period[3];      // continuous timer: schedule next instant
          } else {
-            TBCCTL3 = 0;                         // stop the timer
+            TBCCTL3 = 0;                              // stop the timer
             TBCCR3  = 0;
          }
-         scheduler_push_task(TASKID_UDP_TIMER);  // post the corresponding task
-         __bic_SR_register_on_exit(CPUOFF);      // restart CPU
+         scheduler_push_task(TASKID_COAP);            // post the corresponding task
+         __bic_SR_register_on_exit(CPUOFF);           // restart CPU
          break;
       case 0x0008: // timerB CCR4
          if (opentimers_vars.continuous[4]==TRUE) {
-            TBCCR4 += opentimers_vars.period[4];     // continuous timer: schedule next instant
+            TBCCR4 += opentimers_vars.period[4];      // continuous timer: schedule next instant
          } else {
-            TBCCTL4 = 0;                         // stop the timer
+            TBCCTL4 = 0;                              // stop the timer
             TBCCR4  = 0;
          }
-         scheduler_push_task(TASKID_TIMERB4);    // post the corresponding task
-         __bic_SR_register_on_exit(CPUOFF);      // restart CPU
+         scheduler_push_task(TASKID_TIMERB4);         // post the corresponding task
+         __bic_SR_register_on_exit(CPUOFF);           // restart CPU
          break;
       case 0x000A: // timerB CCR5
          if (opentimers_vars.continuous[5]==TRUE) {
-            TBCCR5 += opentimers_vars.period[5];     // continuous timer: schedule next instant
+            TBCCR5 += opentimers_vars.period[5];      // continuous timer: schedule next instant
          } else {
-            TBCCTL5 = 0;                         // stop the timer
+            TBCCTL5 = 0;                              // stop the timer
             TBCCR5  = 0;
          }
-         scheduler_push_task(TASKID_TIMERB5);    // post the corresponding task
-         __bic_SR_register_on_exit(CPUOFF);      // restart CPU
+         scheduler_push_task(TASKID_TIMERB5);         // post the corresponding task
+         __bic_SR_register_on_exit(CPUOFF);           // restart CPU
          break;
       case 0x000C: // timerB CCR6
          if (opentimers_vars.continuous[6]==TRUE) {
-            TBCCR6 += opentimers_vars.period[6];     // continuous timer: schedule next instant
+            TBCCR6 += opentimers_vars.period[6];      // continuous timer: schedule next instant
          } else {
-            TBCCTL6 = 0;                         // stop the timer
+            TBCCTL6 = 0;                              // stop the timer
             TBCCR6  = 0;
          }
-         scheduler_push_task(TASKID_TIMERB6);    // post the corresponding task
-         __bic_SR_register_on_exit(CPUOFF);      // restart CPU
+         scheduler_push_task(TASKID_TIMERB6);         // post the corresponding task
+         __bic_SR_register_on_exit(CPUOFF);           // restart CPU
          break;
       default:
-         while(1);                               // this should not happen
+         while(1);                                    // this should not happen
    }
    DEBUG_PIN_ISR_CLR();
 }

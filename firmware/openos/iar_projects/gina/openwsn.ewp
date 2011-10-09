@@ -2073,9 +2073,6 @@
           <name>$PROJ_DIR$\..\..\openwsn\07-App\udpprint\udpprint.c</name>
         </file>
       </group>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\udptimer.c</name>
-      </file>
     </group>
     <group>
       <name>cross-layers</name>

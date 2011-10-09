@@ -3,6 +3,7 @@
 #include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
+#include "opentimers.h"
 #include "packetfunctions.h"
 
 //=========================== variables =======================================
@@ -10,6 +11,8 @@
 // general variable to the CoAP core
 typedef struct {
    coap_resource_desc_t* resources;
+   bool                  busySending;
+   int8_t                delayCounter;
 } opencoap_vars_t;
 
 opencoap_vars_t opencoap_vars;
@@ -33,6 +36,9 @@ void rwellknown_receive(OpenQueueEntry_t* msg,
 void opencoap_init() {
    // initialize the resource linked list
    opencoap_vars.resources     = NULL;
+   
+   // start the timer
+   opentimers_startPeriodic(TIMER_COAP,0xffff);// every 2 seconds
    
    // prepare the resource descriptor for the /.well-known/core path
    rwellknown_desc.path0len   = sizeof(rwellknown_path0)-1;
@@ -219,6 +225,13 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {
                             (errorparameter_t)0);
    }
    openqueue_freePacketBuffer(msg);
+}
+
+void opentimers_coap_fired() {
+   opencoap_vars.delayCounter = (opencoap_vars.delayCounter+1)%5;
+   if (opencoap_vars.delayCounter!=0) {
+      return;
+   }
 }
 
 //=========================== private =========================================

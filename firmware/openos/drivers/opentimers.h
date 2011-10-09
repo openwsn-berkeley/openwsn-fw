@@ -17,7 +17,7 @@ enum {
    TIMER_RES                 = 0,                // mapped onto timerB CCR0
    TIMER_RPL                 = 1,                // mapped onto timerB CCR1
    TIMER_TCP                 = 2,                // mapped onto timerB CCR2
-   TIMER_UDPTIMER            = 3,                // mapped onto timerB CCR3
+   TIMER_COAP                = 3,                // mapped onto timerB CCR3
    TIMER_B4                  = 4,                // mapped onto timerB CCR4
    TIMER_B5                  = 5,                // mapped onto timerB CCR5
    TIMER_B6                  = 6,                // mapped onto timerB CCR6
@@ -45,7 +45,7 @@ void opentimers_stop(uint8_t timer_id);
 void opentimers_res_fired();
 void opentimers_rpl_fired();
 void opentimers_tcp_fired();
-void opentimers_udptimer_fired();
+void opentimers_coap_fired();
 
 /**
 \}

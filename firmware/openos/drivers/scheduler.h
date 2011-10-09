@@ -21,7 +21,7 @@ enum {
    TASKID_RES                = 0x02, // scheduled by timerB CCR0 interrupt
    TASKID_RPL                = 0x03, // scheduled by timerB CCR1 interrupt
    TASKID_TCP_TIMEOUT        = 0x04, // scheduled by timerB CCR2 interrupt
-   TASKID_UDP_TIMER          = 0x05, // scheduled by timerB CCR3 interrupt
+   TASKID_COAP               = 0x05, // scheduled by timerB CCR3 interrupt
    TASKID_TIMERB4            = 0x06, // scheduled by timerB CCR4 interrupt
    TASKID_TIMERB5            = 0x07, // scheduled by timerB CCR5 interrupt
    TASKID_TIMERB6            = 0x08, // scheduled by timerB CCR6 interrupt

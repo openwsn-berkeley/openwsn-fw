@@ -12,8 +12,6 @@
 #include "heli.h"
 #include "imu.h"
 
-#include "udptimer.h"
-
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -60,9 +58,6 @@ void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
          udpprint_sendDone(msg,error);
          break;
          
-      case WKP_UDP_TIMER:
-         udptimer_sendDone(msg,error);
-         break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
                                (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
@@ -135,9 +130,6 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          break;
       case WKP_UDP_DISCARD:
          udpprint_receive(msg);
-         break;
-      case WKP_UDP_TIMER:
-         udptimer_receive(msg);
          break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
