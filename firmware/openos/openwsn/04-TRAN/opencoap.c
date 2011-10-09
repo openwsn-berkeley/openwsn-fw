@@ -19,12 +19,10 @@ typedef struct {
 
 opencoap_vars_t opencoap_vars;
 
-// specific the /.well-known/core path handler
-
+// /.well-known/core path handler
 const uint8_t rwellknown_path0[]        = ".well-known";
 const uint8_t rwellknown_path1[]        = "core";
 const uint8_t rwellknown_resp_payload[] = "</poipoi>";
-
 coap_resource_desc_t rwellknown_desc;
 
 //=========================== prototype =======================================
@@ -36,6 +34,8 @@ void    rwellknown_sendDone(OpenQueueEntry_t* msg,
                             error_t error);
 
 //=========================== public ==========================================
+
+//===== from stack
 
 void opencoap_init() {
    // initialize the resource linked list
@@ -57,25 +57,6 @@ void opencoap_init() {
    rwellknown_desc.callbackSendDone    = &rwellknown_sendDone;
    
    opencoap_register(&rwellknown_desc);
-}
-
-void opencoap_register(coap_resource_desc_t* desc) {
-   coap_resource_desc_t* last_elem;
-   
-   // reset the messageIDused element
-   desc->messageIDused = FALSE;
-   
-   if (opencoap_vars.resources==NULL) {
-      opencoap_vars.resources = desc;
-      return;
-   }
-   
-   // add to the end of the resource linked list
-   last_elem = opencoap_vars.resources;
-   while (last_elem->next!=NULL) {
-      last_elem = last_elem->next;
-   }
-   last_elem->next = desc;
 }
 
 void opencoap_receive(OpenQueueEntry_t* msg) {
@@ -237,25 +218,6 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-error_t opencoap_send(OpenQueueEntry_t* msg) {
-   // increase the global messageID
-   opencoap_vars.messageID++;
-   // take ownership
-   msg->owner                       = COMPONENT_OPENCOAP;
-   // metadata
-   msg->l4_sourcePortORicmpv6Type   = WKP_UDP_COAP;
-   // fill in CoAP header
-   packetfunctions_reserveHeaderSize(msg,4);
-   msg->payload[0]                  = (COAP_VERSION   << 6) |
-                                      (COAP_TYPE_CON  << 4) |
-                                      (3              << 0);
-   msg->payload[1]                  = COAP_CODE_REQ_POST;
-   msg->payload[2]                  = (opencoap_vars.messageID>>8) & 0xff;
-   msg->payload[3]                  = (opencoap_vars.messageID>>0) & 0xff;
-   
-   return openudp_send(msg);
-}
-
 void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {
    coap_resource_desc_t* temp_resource;
    
@@ -289,6 +251,46 @@ void opentimers_coap_fired() {
       }
       temp_resource = temp_resource->next;
    }
+}
+
+//===== from CoAP resources
+
+void opencoap_register(coap_resource_desc_t* desc) {
+   coap_resource_desc_t* last_elem;
+   
+   // reset the messageIDused element
+   desc->messageIDused = FALSE;
+   
+   if (opencoap_vars.resources==NULL) {
+      opencoap_vars.resources = desc;
+      return;
+   }
+   
+   // add to the end of the resource linked list
+   last_elem = opencoap_vars.resources;
+   while (last_elem->next!=NULL) {
+      last_elem = last_elem->next;
+   }
+   last_elem->next = desc;
+}
+
+error_t opencoap_send(OpenQueueEntry_t* msg) {
+   // increase the global messageID
+   opencoap_vars.messageID++;
+   // take ownership
+   msg->owner                       = COMPONENT_OPENCOAP;
+   // metadata
+   msg->l4_sourcePortORicmpv6Type   = WKP_UDP_COAP;
+   // fill in CoAP header
+   packetfunctions_reserveHeaderSize(msg,4);
+   msg->payload[0]                  = (COAP_VERSION   << 6) |
+                                      (COAP_TYPE_CON  << 4) |
+                                      (3              << 0);
+   msg->payload[1]                  = COAP_CODE_REQ_POST;
+   msg->payload[2]                  = (opencoap_vars.messageID>>8) & 0xff;
+   msg->payload[3]                  = (opencoap_vars.messageID>>0) & 0xff;
+   
+   return openudp_send(msg);
 }
 
 //=========================== private =========================================
