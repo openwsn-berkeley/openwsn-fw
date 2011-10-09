@@ -123,7 +123,6 @@ void rreg_timer() {
       // metadata
       pkt->l4_destination_port         = WKP_UDP_COAP;
       pkt->l3_destinationORsource.type = ADDR_128B;
-      /*
       // send RD registration to interop.ipso-alliance
       pkt->l3_destinationORsource.addr_128b[ 0] = 0x26;
       pkt->l3_destinationORsource.addr_128b[ 1] = 0x07;
@@ -141,7 +140,6 @@ void rreg_timer() {
       pkt->l3_destinationORsource.addr_128b[13] = 0x00;
       pkt->l3_destinationORsource.addr_128b[14] = 0x0e;
       pkt->l3_destinationORsource.addr_128b[15] = 0x29;
-      */
       /*
       // send RD registration to backup server
       pkt->l3_destinationORsource.addr_128b[ 0] = 0x2a;
@@ -161,6 +159,7 @@ void rreg_timer() {
       pkt->l3_destinationORsource.addr_128b[14] = 0x0f;
       pkt->l3_destinationORsource.addr_128b[15] = 0x7b;
       */
+      /*
       // send RD registration to local address (for debug)
       pkt->l3_destinationORsource.addr_128b[ 0] = 0x20;
       pkt->l3_destinationORsource.addr_128b[ 1] = 0x01;
@@ -178,6 +177,7 @@ void rreg_timer() {
       pkt->l3_destinationORsource.addr_128b[13] = 0x5e;
       pkt->l3_destinationORsource.addr_128b[14] = 0xe2;
       pkt->l3_destinationORsource.addr_128b[15] = 0x99;
+      */
       // send
       if (opencoap_send(pkt)==E_FAIL) {
          openqueue_freePacketBuffer(pkt);

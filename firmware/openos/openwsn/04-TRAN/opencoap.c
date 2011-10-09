@@ -29,6 +29,9 @@ void opencoap_init() {
    // initialize the resource linked list
    opencoap_vars.resources     = NULL;
    
+   // initialize the messageID
+   opencoap_vars.messageID     = 1000;
+   
    // start the timer
    if (idmanager_getIsDAGroot()==FALSE) {
       opentimers_startPeriodic(TIMER_COAP,0xffff);// every 2 seconds
