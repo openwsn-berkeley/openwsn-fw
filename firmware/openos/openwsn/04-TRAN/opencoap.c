@@ -5,6 +5,7 @@
 #include "openserial.h"
 #include "opentimers.h"
 #include "packetfunctions.h"
+#include "idmanager.h"
 
 //=========================== variables =======================================
 
@@ -40,7 +41,9 @@ void opencoap_init() {
    opencoap_vars.resources     = NULL;
    
    // start the timer
-   opentimers_startPeriodic(TIMER_COAP,0xffff);// every 2 seconds
+   if (idmanager_getIsDAGroot()==FALSE) {
+      opentimers_startPeriodic(TIMER_COAP,0xffff);// every 2 seconds
+   }
    
    // prepare the resource descriptor for the /.well-known/core path
    rwellknown_desc.path0len            = sizeof(rwellknown_path0)-1;
