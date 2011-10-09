@@ -209,7 +209,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       msg->length                      = 0;
       // set the CoAP header
       coap_header.OC                   = 0;
-      coap_header.Code                 = COAP_CODE_RESP_BADREQ;
+      coap_header.Code                 = COAP_CODE_RESP_METHODNOTALLOWED;
    }
    
    //=== step 4. send that packet back
