@@ -7,7 +7,7 @@
 
 //=========================== variables =======================================
 
-// general to the CoAP core
+// general variable to the CoAP core
 typedef struct {
    coap_resource_desc_t* resources;
 } opencoap_vars_t;
@@ -24,7 +24,9 @@ coap_resource_desc_t rwellknown_desc;
 
 //=========================== prototype =======================================
 
-void rwellknown_receive();
+void rwellknown_receive(OpenQueueEntry_t* msg,
+                        coap_header_iht*  coap_header,
+                        coap_option_iht*  coap_options);
 
 //=========================== public ==========================================
 
@@ -50,14 +52,15 @@ void opencoap_register(coap_resource_desc_t* desc) {
    
    if (opencoap_vars.resources==NULL) {
       opencoap_vars.resources = desc;
+      return;
    }
    
    // add to the end of the resource linked list
    last_elem = opencoap_vars.resources;
-   while (last_elem!=NULL) {
+   while (last_elem->next!=NULL) {
       last_elem = last_elem->next;
    }
-   last_elem = desc;
+   last_elem->next = desc;
 }
 
 void opencoap_receive(OpenQueueEntry_t* msg) {
@@ -144,8 +147,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                found = TRUE;
             };
          } else if (
-                coap_options[0].type==COAP_OPTION_LOCATIONPATH &&
-                temp_desc->path0len>0                          &&
+                coap_options[0].type==COAP_OPTION_URIPATH &&
+                temp_desc->path0len>0                     &&
                 temp_desc->path0val!=NULL
             ) {
             // resource has a path of form path0
@@ -218,7 +221,9 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {
 
 //=========================== private =========================================
 
-void rwellknown_receive(OpenQueueEntry_t* msg, coap_header_iht* coap_header, coap_option_iht* coap_options) {
+void rwellknown_receive(OpenQueueEntry_t* msg,
+                        coap_header_iht*  coap_header,
+                        coap_option_iht*  coap_options) {
    coap_resource_desc_t* temp_resource;
    
    if (coap_header->Code==COAP_CODE_REQ_GET) {

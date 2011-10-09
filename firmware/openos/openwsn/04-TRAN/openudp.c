@@ -11,7 +11,6 @@
 #include "udpprint.h"
 #include "heli.h"
 #include "imu.h"
-#include "netleds.h"
 
 #include "udptimer.h"
 
@@ -51,9 +50,6 @@ void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
          appudpgina_sendDone(msg,error);
          break;
       */
-      case WKP_UDP_NETLEDS:
-         netleds_sendDone(msg,error);
-         break;
       case WKP_UDP_ECHO:
          udpecho_sendDone(msg,error);
          break;
@@ -131,9 +127,6 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          imu_receive(msg);
          break;
       */
-      case WKP_UDP_NETLEDS:
-         netleds_receive(msg);
-         break;
       case WKP_UDP_ECHO:
          udpecho_receive(msg);
          break;

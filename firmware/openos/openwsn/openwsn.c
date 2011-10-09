@@ -73,7 +73,7 @@ void openwsn_init() {
    // 04-TRAN
    opentcp_init();
    openudp_init();
-   opencoap_init();
+   opencoap_init(); // initialize before any of the CoAP clients
    // 07-App
    //heli_init();
    //imu_init();

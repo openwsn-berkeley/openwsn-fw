@@ -72,7 +72,6 @@ enum {
    WKP_UDP_COAP                        = 5683,
    WKP_UDP_HELI                        = 2192,
    WKP_UDP_IMU                         = 2190,
-   WKP_UDP_NETLEDS                     = 2193,
    WKP_UDP_ECHO                        =    7,
    WKP_UDP_INJECT                      = 2188,
    WKP_UDP_DISCARD                     =    9,

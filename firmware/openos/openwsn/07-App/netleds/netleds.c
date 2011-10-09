@@ -1,47 +1,56 @@
 #include "openwsn.h"
 #include "netleds.h"
 //openwsn stack
-#include "openudp.h"
-#include "openqueue.h"
-#include "openserial.h"
+#include "opencoap.h"
 #include "packetfunctions.h"
 #include "leds.h"
 
 //=========================== variables =======================================
 
+typedef struct {
+   coap_resource_desc_t desc;
+} netleds_vars_t;
+
+netleds_vars_t netleds_vars;
+
+const uint8_t rleds_path0[]        = "led";
+
 //=========================== prototypes ======================================
+
+void netleds_receive(OpenQueueEntry_t* msg,
+                     coap_header_iht*  coap_header,
+                     coap_option_iht*  coap_options);
 
 //=========================== public ==========================================
 
 void netleds_init() {
-}
-
-//this is called when the corresponding button is pressed on the OpenVisualizer interface
-void netleds_trigger() {
-  leds_blink();
-}
-
-//I just received a request
-void netleds_receive(OpenQueueEntry_t* msg) {
-   msg->owner = COMPONENT_NETLEDS;
-   if (msg->length==1) {
-      leds_setCombination(msg->payload[0]);      // turn on a specified combination
-   }
-   openqueue_freePacketBuffer(msg);
-}
-
-void netleds_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   msg->owner = COMPONENT_NETLEDS;
-   if (msg->creator!=COMPONENT_NETLEDS) {
-      openserial_printError(COMPONENT_NETLEDS,ERR_UNEXPECTED_SENDDONE,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
-   }
-   openqueue_freePacketBuffer(msg);
-}
-
-bool netleds_debugPrint() {
-   return FALSE;
+   // prepare the resource descriptor for the /.well-known/core path
+   netleds_vars.desc.path0len   = sizeof(rleds_path0)-1;
+   netleds_vars.desc.path0val   = (uint8_t*)(&rleds_path0);
+   netleds_vars.desc.path1len   = 0;
+   netleds_vars.desc.path1val   = NULL;
+   netleds_vars.desc.callbackRx = &netleds_receive;
+   
+   opencoap_register(&netleds_vars.desc);
 }
 
 //=========================== private =========================================
+
+void netleds_receive(OpenQueueEntry_t* msg,
+                     coap_header_iht*  coap_header,
+                     coap_option_iht*  coap_options) {
+   
+   if (coap_header->Code==COAP_CODE_REQ_GET) {
+      // reset packet payload
+      msg->payload                     = &(msg->packet[127]);
+      msg->length                      = 0;
+      
+      // add CoAP payload
+      packetfunctions_reserveHeaderSize(msg,1);
+      msg->payload[0]                  = '1';
+         
+      // set the CoAP header
+      coap_header->OC                  = 0;
+      coap_header->Code                = COAP_CODE_RESP_CONTENT;
+   }
+}
