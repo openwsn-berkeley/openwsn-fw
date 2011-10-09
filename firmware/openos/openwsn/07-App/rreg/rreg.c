@@ -43,7 +43,8 @@ void rreg_init() {
    rreg_vars.desc.callbackTimer        = rreg_timer;
    rreg_vars.desc.callbackSendDone     = &rreg_sendDone;
    
-   rreg_vars.delay              = 0;
+   // register to the RD server 20s after boot-up
+   rreg_vars.delay                     = RREGPERIOD-20;
    
    opencoap_register(&rreg_vars.desc);
 }
