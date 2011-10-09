@@ -59,6 +59,8 @@ void neighbors_receiveDIO(OpenQueueEntry_t* msg) {
                if (idmanager_getIsDAGroot()==FALSE) {
                  neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
                }
+            } else {
+               neighbors_vars.neighbors[i].parentPreference=0;
             }
             break;
          }
