@@ -124,13 +124,14 @@ struct coap_resource_desc_t {
 //=========================== prototypes ======================================
 
 // from stack
-void    opencoap_init();
-void    opencoap_receive(OpenQueueEntry_t* msg);
-void    opencoap_sendDone(OpenQueueEntry_t* msg, error_t error);
+void     opencoap_init();
+void     opencoap_receive(OpenQueueEntry_t* msg);
+void     opencoap_sendDone(OpenQueueEntry_t* msg, error_t error);
 
 // from CoAP resources
-void    opencoap_register(coap_resource_desc_t* desc);
-error_t opencoap_send(OpenQueueEntry_t* msg);
+void     opencoap_writeLinks(OpenQueueEntry_t* msg);
+void     opencoap_register(coap_resource_desc_t* desc);
+error_t  opencoap_send(OpenQueueEntry_t* msg);
 
 /**
 \}

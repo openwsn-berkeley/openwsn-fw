@@ -19,19 +19,7 @@ typedef struct {
 
 opencoap_vars_t opencoap_vars;
 
-// /.well-known/core path handler
-const uint8_t rwellknown_path0[]        = ".well-known";
-const uint8_t rwellknown_path1[]        = "core";
-const uint8_t rwellknown_resp_payload[] = "</poipoi>";
-coap_resource_desc_t rwellknown_desc;
-
 //=========================== prototype =======================================
-
-error_t rwellknown_receive(OpenQueueEntry_t* msg,
-                           coap_header_iht*  coap_header,
-                           coap_option_iht*  coap_options);
-void    rwellknown_sendDone(OpenQueueEntry_t* msg,
-                            error_t error);
 
 //=========================== public ==========================================
 
@@ -45,18 +33,6 @@ void opencoap_init() {
    if (idmanager_getIsDAGroot()==FALSE) {
       opentimers_startPeriodic(TIMER_COAP,0xffff);// every 2 seconds
    }
-   
-   // prepare the resource descriptor for the /.well-known/core path
-   rwellknown_desc.path0len            = sizeof(rwellknown_path0)-1;
-   rwellknown_desc.path0val            = (uint8_t*)(&rwellknown_path0);
-   rwellknown_desc.path1len            = sizeof(rwellknown_path1)-1;
-   rwellknown_desc.path1val            = (uint8_t*)(&rwellknown_path1);
-   rwellknown_desc.componentID         = COMPONENT_OPENCOAP;
-   rwellknown_desc.callbackRx          = &rwellknown_receive;
-   rwellknown_desc.callbackTimer       = NULL;
-   rwellknown_desc.callbackSendDone    = &rwellknown_sendDone;
-   
-   opencoap_register(&rwellknown_desc);
 }
 
 void opencoap_receive(OpenQueueEntry_t* msg) {
@@ -198,7 +174,11 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    //=== step 4. send that packet back
    
    // fill in packet metadata
-   msg->creator                     = COMPONENT_OPENCOAP;
+   if (found==TRUE) {
+      msg->creator                  = temp_desc->componentID;
+   } else {
+      msg->creator                  = COMPONENT_OPENCOAP;
+   }
    msg->l4_protocol                 = IANA_UDP;
    temp_l4_destination_port         = msg->l4_destination_port;
    msg->l4_destination_port         = msg->l4_sourcePortORicmpv6Type;
@@ -225,6 +205,12 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {
    msg->owner = COMPONENT_OPENCOAP;
    
    // indicate sendDone to creator of that packet
+   //=== mine
+   if (msg->creator==COMPONENT_OPENCOAP) {
+      openqueue_freePacketBuffer(msg);
+      return;
+   }
+   //=== someone else's
    temp_resource = opencoap_vars.resources;
    while (temp_resource!=NULL) {
       if (temp_resource->componentID==msg->creator &&
@@ -254,6 +240,32 @@ void opentimers_coap_fired() {
 }
 
 //===== from CoAP resources
+
+void opencoap_writeLinks(OpenQueueEntry_t* msg) {
+   coap_resource_desc_t* temp_resource;
+   
+   temp_resource = opencoap_vars.resources;
+   while (temp_resource!=NULL) {
+      packetfunctions_reserveHeaderSize(msg,1);
+      msg->payload[0] = '>';
+      if (temp_resource->path1len>0) {
+         packetfunctions_reserveHeaderSize(msg,temp_resource->path1len);
+         memcpy(&msg->payload[0],temp_resource->path1val,temp_resource->path1len);
+         packetfunctions_reserveHeaderSize(msg,1);
+         msg->payload[0] = '/';
+      }
+      packetfunctions_reserveHeaderSize(msg,temp_resource->path0len);
+      memcpy(msg->payload,temp_resource->path0val,temp_resource->path0len);
+      packetfunctions_reserveHeaderSize(msg,2);
+      msg->payload[1] = '/';
+      msg->payload[0] = '<';
+      if (temp_resource->next!=NULL) {
+         packetfunctions_reserveHeaderSize(msg,1);
+         msg->payload[0] = ',';
+      }
+      temp_resource = temp_resource->next;
+   }
+}
 
 void opencoap_register(coap_resource_desc_t* desc) {
    coap_resource_desc_t* last_elem;
@@ -294,58 +306,3 @@ error_t opencoap_send(OpenQueueEntry_t* msg) {
 }
 
 //=========================== private =========================================
-
-error_t rwellknown_receive(OpenQueueEntry_t* msg,
-                           coap_header_iht*  coap_header,
-                           coap_option_iht*  coap_options) {
-   error_t outcome;
-   coap_resource_desc_t* temp_resource;
-   
-   if (coap_header->Code==COAP_CODE_REQ_GET) {
-      // reset packet payload
-      msg->payload                     = &(msg->packet[127]);
-      msg->length                      = 0;
-      
-      // add CoAP payload
-      temp_resource = opencoap_vars.resources;
-      while (temp_resource!=NULL) {
-         packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = '>';
-         if (temp_resource->path1len>0) {
-            packetfunctions_reserveHeaderSize(msg,temp_resource->path1len);
-            memcpy(&msg->payload[0],temp_resource->path1val,temp_resource->path1len);
-            packetfunctions_reserveHeaderSize(msg,1);
-            msg->payload[0] = '/';
-         }
-         packetfunctions_reserveHeaderSize(msg,temp_resource->path0len);
-         memcpy(msg->payload,temp_resource->path0val,temp_resource->path0len);
-         packetfunctions_reserveHeaderSize(msg,2);
-         msg->payload[1] = '/';
-         msg->payload[0] = '<';
-         if (temp_resource->next!=NULL) {
-            packetfunctions_reserveHeaderSize(msg,1);
-            msg->payload[0] = ',';
-         }
-         temp_resource = temp_resource->next;
-      }
-         
-      // add return option
-      packetfunctions_reserveHeaderSize(msg,2);
-      msg->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
-                                         1;
-      msg->payload[1]                  = COAP_MEDTYPE_APPLINKFORMAT;
-      
-      // set the CoAP header
-      coap_header->OC                  = 1;
-      coap_header->Code                = COAP_CODE_RESP_CONTENT;
-      
-      outcome                          = E_SUCCESS;
-   } else {
-      outcome                          = E_FAIL;
-   }
-   return outcome;
-}
-
-void rwellknown_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   openqueue_freePacketBuffer(msg);
-}
