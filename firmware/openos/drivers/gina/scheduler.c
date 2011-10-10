@@ -326,8 +326,8 @@ __interrupt void USCIAB0RX_ISR (void) {
 
 #pragma vector = ADC12_VECTOR
 __interrupt void ADC12_ISR (void) {
-    CAPTURE_TIME();
-    DEBUG_PIN_ISR_SET();
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
    ADC12IFG &= ~0x1F;                            // clear interrupt flags
    __bic_SR_register_on_exit(CPUOFF);            // restart CPU
    DEBUG_PIN_ISR_CLR();

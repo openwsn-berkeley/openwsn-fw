@@ -4,11 +4,18 @@
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
-#include "idmanager.h"
+#include "openrandom.h"
+#include "sensitive_accel_temperature.h"
+
+
+//=========================== defines =========================================
+
+/// inter-packet period (in seconds)
+#define RTEMPPERIOD     60
+
+const uint8_t rtemp_path0[] = "t";
 
 //=========================== variables =======================================
-
-#define RTEMPPERIOD       10
 
 typedef struct {
    uint16_t             delay;
@@ -16,8 +23,6 @@ typedef struct {
 } rtemp_vars_t;
 
 rtemp_vars_t rtemp_vars;
-
-const uint8_t rtemp_path0[]    = "temp";
 
 //=========================== prototypes ======================================
 
@@ -31,6 +36,9 @@ void    rtemp_sendDone(OpenQueueEntry_t* msg,
 //=========================== public ==========================================
 
 void rtemp_init() {
+   // startup the sensor
+   sensitive_accel_temperature_init();
+   
    // prepare the resource descriptor for the /temp path
    rtemp_vars.desc.path0len             = sizeof(rtemp_path0)-1;
    rtemp_vars.desc.path0val             = (uint8_t*)(&rtemp_path0);
@@ -41,7 +49,7 @@ void rtemp_init() {
    rtemp_vars.desc.callbackTimer        = rtemp_timer;
    rtemp_vars.desc.callbackSendDone     = &rtemp_sendDone;
    
-   rtemp_vars.delay                     = 0;
+   rtemp_vars.delay                     = openrandom_get16b()%RTEMPPERIOD;
    
    opencoap_register(&rtemp_vars.desc);
 }
@@ -49,25 +57,52 @@ void rtemp_init() {
 //=========================== private =========================================
 
 error_t rtemp_receive(OpenQueueEntry_t* msg,
-                   coap_header_iht* coap_header,
-                   coap_option_iht* coap_options) {
-                      
+                      coap_header_iht* coap_header,
+                      coap_option_iht* coap_options) {
    error_t outcome;
+   uint8_t rawdata[SENSITIVE_ACCEL_TEMPERATURE_DATALEN];
    
    if (coap_header->Code==COAP_CODE_REQ_POST) {
-      // set delay to RTEMPPERIOD to gets triggered next time rtemp_timer is called
-      rtemp_vars.delay                  = RTEMPPERIOD;
+      // start/stop the data generation to data server
+      
+      if (msg->payload[0]=='1') {
+         rtemp_vars.desc.callbackTimer = rtemp_timer;
+         rtemp_vars.delay              = openrandom_get16b()%RTEMPPERIOD;
+      } else {
+         rtemp_vars.desc.callbackTimer = NULL;
+      }
       
       // reset packet payload
       msg->payload                     = &(msg->packet[127]);
       msg->length                      = 0;
       
-      // set the CoAP header
+      // CoAP header
       coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_VALID;
       
       outcome = E_SUCCESS;
+   
+   } else if (coap_header->Code==COAP_CODE_REQ_GET) {
+      // return current sensor value
+      
+      // reset packet payload
+      msg->payload                     = &(msg->packet[127]);
+      msg->length                      = 0;
+      
+      // CoAP payload (2 bytes of temperature data)
+      packetfunctions_reserveHeaderSize(msg,2);
+      sensitive_accel_temperature_get_measurement(&rawdata[0]);
+      msg->payload[0] = rawdata[8];
+      msg->payload[1] = rawdata[9];
+         
+      // set the CoAP header
+      coap_header->OC                  = 0;
+      coap_header->Code                = COAP_CODE_RESP_CONTENT;
+      
+      outcome                          = E_SUCCESS;
+   
    } else {
+      // return an error message
       outcome = E_FAIL;
    }
    
@@ -78,6 +113,7 @@ void rtemp_timer() {
    OpenQueueEntry_t* pkt;
    error_t           outcome;
    uint8_t           numOptions;
+   uint8_t           rawdata[SENSITIVE_ACCEL_TEMPERATURE_DATALEN];
    
    rtemp_vars.delay += 2;
    
@@ -96,10 +132,18 @@ void rtemp_timer() {
       pkt->owner      = COMPONENT_RTEMP;
       // CoAP payload (2 bytes of temperature data)
       packetfunctions_reserveHeaderSize(pkt,2);
-      pkt->payload[0] = 0x12;
-      pkt->payload[1] = 0x34;
+      sensitive_accel_temperature_get_measurement(&rawdata[0]);
+      pkt->payload[0] = rawdata[8];
+      pkt->payload[1] = rawdata[9];
       numOptions = 0;
-      // add content-type option
+      // location-path option
+      packetfunctions_reserveHeaderSize(pkt,sizeof(rtemp_path0)-1);
+      memcpy(&pkt->payload[0],&rtemp_path0,sizeof(rtemp_path0)-1);
+      packetfunctions_reserveHeaderSize(pkt,1);
+      pkt->payload[0]                  = (COAP_OPTION_LOCATIONPATH-COAP_OPTION_CONTENTTYPE) << 4 |
+                                         sizeof(rtemp_path0)-1;
+      numOptions++;
+      // content-type option
       packetfunctions_reserveHeaderSize(pkt,2);
       pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
                                          1;
@@ -108,7 +152,7 @@ void rtemp_timer() {
       // metadata
       pkt->l4_destination_port         = WKP_UDP_COAP;
       pkt->l3_destinationORsource.type = ADDR_128B;
-      memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_local,16);
+      memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_motesEecs,16);
       // send
       outcome = opencoap_send(pkt,
                               COAP_TYPE_NON,
@@ -126,12 +170,4 @@ void rtemp_timer() {
 
 void rtemp_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
-}
-
-inline uint8_t hexToAscii(uint8_t hex) {
-   if (hex<0x0a) {
-      return '0'+(hex-0x00);
-   } else {
-      return 'A'+(hex-0x0a);
-   }
 }
