@@ -14,6 +14,11 @@
 
 //=========================== define ==========================================
 
+static const uint8_t infoStackName[] = "OpenWSN ";
+#define OPENWSN_VERSION_MAJOR 1
+#define OPENWSN_VERSION_MINOR 0
+#define OPENWSN_VERSION_PATCH 1
+
 // enter the last byte of your mote's address if you want it to be an LBR
 #define DEBUG_MOTEID_MASTER 0x93
 
@@ -141,6 +146,7 @@ enum {
    COMPONENT_RWELLKNOWN                = 0x23,
    COMPONENT_RT                        = 0x24,
    COMPONENT_RXL1                      = 0x25,
+   COMPONENT_RINFO                     = 0x26,
 };
 
 //error codes
