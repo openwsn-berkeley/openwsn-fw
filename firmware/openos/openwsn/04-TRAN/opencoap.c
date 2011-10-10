@@ -290,7 +290,10 @@ void opencoap_register(coap_resource_desc_t* desc) {
    last_elem->next = desc;
 }
 
-error_t opencoap_send(OpenQueueEntry_t* msg) {
+error_t opencoap_send(OpenQueueEntry_t* msg,
+                      coap_type_t       type,
+                      coap_code_t       code,
+                      uint8_t           numOptions) {
    // change the global messageID
    opencoap_vars.messageID          = openrandom_get16b();
    // take ownership
@@ -300,9 +303,9 @@ error_t opencoap_send(OpenQueueEntry_t* msg) {
    // fill in CoAP header
    packetfunctions_reserveHeaderSize(msg,4);
    msg->payload[0]                  = (COAP_VERSION   << 6) |
-                                      (COAP_TYPE_CON  << 4) |
-                                      (3              << 0);
-   msg->payload[1]                  = COAP_CODE_REQ_POST;
+                                      (type           << 4) |
+                                      (numOptions     << 0);
+   msg->payload[1]                  = code;
    msg->payload[2]                  = (opencoap_vars.messageID>>8) & 0xff;
    msg->payload[3]                  = (opencoap_vars.messageID>>0) & 0xff;
    

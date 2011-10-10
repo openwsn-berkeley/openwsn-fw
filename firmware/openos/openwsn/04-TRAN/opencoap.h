@@ -10,6 +10,14 @@
 
 //=========================== define ==========================================
 
+// IPv6 addresses of servers on the Internet
+static const uint8_t ipAddr_ipsoRD[]    = {0x26, 0x07, 0xf7, 0x40, 0x00, 0x00, 0x00, 0x3f, \
+                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0e, 0x29};
+static const uint8_t ipAddr_motesEecs[] = {0x20, 0x01, 0x04, 0x70, 0x00, 0x66, 0x00, 0x19, \
+                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02};
+static const uint8_t ipAddr_local[]     = {0x20, 0x01, 0x04, 0x70, 0x1f, 0x05, 0x19, 0x37, \
+                                           0x15, 0xcb, 0x41, 0x00, 0xbb, 0xf2, 0x02, 0xb3};
+
 /// the maxmum number of options in a RX'ed CoAP message
 #define MAX_COAP_OPTIONS               3
 
@@ -131,7 +139,10 @@ void     opencoap_sendDone(OpenQueueEntry_t* msg, error_t error);
 // from CoAP resources
 void     opencoap_writeLinks(OpenQueueEntry_t* msg);
 void     opencoap_register(coap_resource_desc_t* desc);
-error_t  opencoap_send(OpenQueueEntry_t* msg);
+error_t  opencoap_send(OpenQueueEntry_t* msg,
+                       coap_type_t       type,
+                       coap_code_t       code,
+                       uint8_t           numOptions);
 
 /**
 \}

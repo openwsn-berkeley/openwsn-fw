@@ -80,6 +80,8 @@ error_t rreg_receive(OpenQueueEntry_t* msg,
 void rreg_timer() {
    OpenQueueEntry_t* pkt;
    uint8_t           temp8b;
+   error_t           outcome;
+   uint8_t           numOptions;
    
    rreg_vars.delay += 2;
    
@@ -100,6 +102,7 @@ void rreg_timer() {
       pkt->owner      = COMPONENT_RREG;
       // CoAP payload
       opencoap_writeLinks(pkt);
+      numOptions = 0;
       // URI-query
       packetfunctions_reserveHeaderSize(pkt,sizeof(rreg_uriquery)-1+2);
       memcpy(&pkt->payload[0],&rreg_uriquery,sizeof(rreg_uriquery)-1);
@@ -109,6 +112,7 @@ void rreg_timer() {
       packetfunctions_reserveHeaderSize(pkt,1);
       pkt->payload[0] = (COAP_OPTION_URIQUERY-COAP_OPTION_URIPATH) << 4 |
                         sizeof(rreg_uriquery)-1+2;
+      numOptions++;
       // URI-path
       packetfunctions_reserveHeaderSize(pkt,2);
       pkt->payload[0] = 'r';
@@ -116,71 +120,24 @@ void rreg_timer() {
       packetfunctions_reserveHeaderSize(pkt,1);
       pkt->payload[0] = (COAP_OPTION_URIPATH-COAP_OPTION_CONTENTTYPE) << 4 |
                         2;
+      numOptions++;
       // add content-type option
       packetfunctions_reserveHeaderSize(pkt,2);
       pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
                                          1;
       pkt->payload[1]                  = COAP_MEDTYPE_APPLINKFORMAT;
+      numOptions++;
       // metadata
       pkt->l4_destination_port         = WKP_UDP_COAP;
       pkt->l3_destinationORsource.type = ADDR_128B;
-      // send RD registration to interop.ipso-alliance
-      pkt->l3_destinationORsource.addr_128b[ 0] = 0x26;
-      pkt->l3_destinationORsource.addr_128b[ 1] = 0x07;
-      pkt->l3_destinationORsource.addr_128b[ 2] = 0xf7;
-      pkt->l3_destinationORsource.addr_128b[ 3] = 0x40;
-      pkt->l3_destinationORsource.addr_128b[ 4] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[ 5] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[ 6] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[ 7] = 0x3f;
-      pkt->l3_destinationORsource.addr_128b[ 8] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[ 9] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[10] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[11] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[12] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[13] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[14] = 0x0e;
-      pkt->l3_destinationORsource.addr_128b[15] = 0x29;
-      /*
-      // send RD registration to backup server
-      pkt->l3_destinationORsource.addr_128b[ 0] = 0x2a;
-      pkt->l3_destinationORsource.addr_128b[ 1] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[ 2] = 0xdd;
-      pkt->l3_destinationORsource.addr_128b[ 3] = 0x80;
-      pkt->l3_destinationORsource.addr_128b[ 4] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[ 5] = 0x3c;
-      pkt->l3_destinationORsource.addr_128b[ 6] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[ 7] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[ 8] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[ 9] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[10] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[11] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[12] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[13] = 0x00;
-      pkt->l3_destinationORsource.addr_128b[14] = 0x0f;
-      pkt->l3_destinationORsource.addr_128b[15] = 0x7b;
-      */
-      /*
-      // send RD registration to local address (for debug)
-      pkt->l3_destinationORsource.addr_128b[ 0] = 0x20;
-      pkt->l3_destinationORsource.addr_128b[ 1] = 0x01;
-      pkt->l3_destinationORsource.addr_128b[ 2] = 0x04;
-      pkt->l3_destinationORsource.addr_128b[ 3] = 0x70;
-      pkt->l3_destinationORsource.addr_128b[ 4] = 0x1f;
-      pkt->l3_destinationORsource.addr_128b[ 5] = 0x05;
-      pkt->l3_destinationORsource.addr_128b[ 6] = 0x19;
-      pkt->l3_destinationORsource.addr_128b[ 7] = 0x37;
-      pkt->l3_destinationORsource.addr_128b[ 8] = 0xa5;
-      pkt->l3_destinationORsource.addr_128b[ 9] = 0xfe;
-      pkt->l3_destinationORsource.addr_128b[10] = 0xc5;
-      pkt->l3_destinationORsource.addr_128b[11] = 0x5f;
-      pkt->l3_destinationORsource.addr_128b[12] = 0xf0;
-      pkt->l3_destinationORsource.addr_128b[13] = 0x5e;
-      pkt->l3_destinationORsource.addr_128b[14] = 0xe2;
-      pkt->l3_destinationORsource.addr_128b[15] = 0x99;
-      */
+      memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_ipsoRD,16);
       // send
-      if (opencoap_send(pkt)==E_FAIL) {
+      outcome = opencoap_send(pkt,
+                              COAP_TYPE_CON,
+                              COAP_CODE_REQ_POST,
+                              numOptions);
+      // avoid overflowing the queue if fails
+      if (outcome==E_FAIL) {
          openqueue_freePacketBuffer(pkt);
       }
    }
