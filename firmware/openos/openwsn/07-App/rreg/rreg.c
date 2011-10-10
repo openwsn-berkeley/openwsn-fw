@@ -5,6 +5,7 @@
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "idmanager.h"
+#include "board.h"
 
 //=========================== variables =======================================
 
@@ -18,7 +19,6 @@ typedef struct {
 rreg_vars_t rreg_vars;
 
 const uint8_t rreg_path0[]    = "reg";
-const uint8_t rreg_uriquery[] = "h=openwsn";
 
 //=========================== prototypes ======================================
 

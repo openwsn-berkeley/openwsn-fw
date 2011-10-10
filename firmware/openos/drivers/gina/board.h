@@ -11,6 +11,7 @@
 
 //=========================== define ==========================================
 
+static const uint8_t rreg_uriquery[] = "h=ucb";
 static const uint8_t infoBoardname[] = "GINA";
 static const uint8_t infouCName[]    = "MSP430f2618";
 static const uint8_t infoRadioName[] = "AT86RF231";
