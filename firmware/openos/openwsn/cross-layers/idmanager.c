@@ -26,16 +26,16 @@ void idmanager_init() {
    idmanager_vars.isBridge             = FALSE;
    idmanager_vars.myPANID.type         = ADDR_PANID;
    idmanager_vars.myPANID.panid[0]     = 0x4e;
-   idmanager_vars.myPANID.panid[1]     = 0x30;//poipoi hardcoded
+   idmanager_vars.myPANID.panid[1]     = 0xff;//poipoi hardcoded
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
-   idmanager_vars.myPrefix.prefix[0]   = 0x20;
-   idmanager_vars.myPrefix.prefix[1]   = 0x01;
-   idmanager_vars.myPrefix.prefix[2]   = 0x04;
-   idmanager_vars.myPrefix.prefix[3]   = 0x70;
-   idmanager_vars.myPrefix.prefix[4]   = 0x81;
-   idmanager_vars.myPrefix.prefix[5]   = 0x9f;
-   idmanager_vars.myPrefix.prefix[6]   = 0x4e;
-   idmanager_vars.myPrefix.prefix[7]   = 0x30;//poipoi hardcoded 
+   idmanager_vars.myPrefix.prefix[0]   = 0x00;
+   idmanager_vars.myPrefix.prefix[1]   = 0x00;
+   idmanager_vars.myPrefix.prefix[2]   = 0x00;
+   idmanager_vars.myPrefix.prefix[3]   = 0x00;
+   idmanager_vars.myPrefix.prefix[4]   = 0x00;
+   idmanager_vars.myPrefix.prefix[5]   = 0x00;
+   idmanager_vars.myPrefix.prefix[6]   = 0x00;
+   idmanager_vars.myPrefix.prefix[7]   = 0x00;
    idmanager_vars.my64bID.type         = ADDR_64B;
    idmanager_vars.my64bID.addr_64b[0]  = *(&eui64+0);
    idmanager_vars.my64bID.addr_64b[1]  = *(&eui64+1);
@@ -47,7 +47,7 @@ void idmanager_init() {
    idmanager_vars.my64bID.addr_64b[7]  = *(&eui64+7);
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
    
-   // poipoi: DEBUG_MOTEID_MASTER is DAGroot and bridge
+   // DEBUG_MOTEID_MASTER is DAGroot and bridge
    if (idmanager_vars.my16bID.addr_16b[1]==DEBUG_MOTEID_MASTER) {
       idmanager_vars.isDAGroot         = TRUE;
       idmanager_vars.isBridge          = TRUE;

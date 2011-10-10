@@ -151,7 +151,7 @@ void rxl1_timer() {
       // metadata
       pkt->l4_destination_port         = WKP_UDP_COAP;
       pkt->l3_destinationORsource.type = ADDR_128B;
-      memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_local,16);
+      memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_motesEecs,16);
       // send
       outcome = opencoap_send(pkt,
                               COAP_TYPE_NON,
