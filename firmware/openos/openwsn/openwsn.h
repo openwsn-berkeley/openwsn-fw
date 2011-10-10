@@ -16,8 +16,8 @@
 
 static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_MAJOR 1
-#define OPENWSN_VERSION_MINOR 0
-#define OPENWSN_VERSION_PATCH 2
+#define OPENWSN_VERSION_MINOR 2
+#define OPENWSN_VERSION_PATCH 0
 
 // enter the last byte of your mote's address if you want it to be an LBR
 #define DEBUG_MOTEID_MASTER 0x93
