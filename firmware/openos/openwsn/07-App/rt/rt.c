@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "rtemp.h"
+#include "rt.h"
 #include "opencoap.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
@@ -11,52 +11,52 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in seconds)
-#define RTEMPPERIOD     60
+#define RTPERIOD     60
 
-const uint8_t rtemp_path0[] = "t";
+const uint8_t rt_path0[] = "t";
 
 //=========================== variables =======================================
 
 typedef struct {
    uint16_t             delay;
    coap_resource_desc_t desc;
-} rtemp_vars_t;
+} rt_vars_t;
 
-rtemp_vars_t rtemp_vars;
+rt_vars_t rt_vars;
 
 //=========================== prototypes ======================================
 
-error_t rtemp_receive(OpenQueueEntry_t* msg,
+error_t rt_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options);
-void    rtemp_timer();
-void    rtemp_sendDone(OpenQueueEntry_t* msg,
+void    rt_timer();
+void    rt_sendDone(OpenQueueEntry_t* msg,
                        error_t error);
 
 //=========================== public ==========================================
 
-void rtemp_init() {
+void rt_init() {
    // startup the sensor
    sensitive_accel_temperature_init();
    
    // prepare the resource descriptor for the /temp path
-   rtemp_vars.desc.path0len             = sizeof(rtemp_path0)-1;
-   rtemp_vars.desc.path0val             = (uint8_t*)(&rtemp_path0);
-   rtemp_vars.desc.path1len             = 0;
-   rtemp_vars.desc.path1val             = NULL;
-   rtemp_vars.desc.componentID          = COMPONENT_RTEMP;
-   rtemp_vars.desc.callbackRx           = &rtemp_receive;
-   rtemp_vars.desc.callbackTimer        = rtemp_timer;
-   rtemp_vars.desc.callbackSendDone     = &rtemp_sendDone;
+   rt_vars.desc.path0len             = sizeof(rt_path0)-1;
+   rt_vars.desc.path0val             = (uint8_t*)(&rt_path0);
+   rt_vars.desc.path1len             = 0;
+   rt_vars.desc.path1val             = NULL;
+   rt_vars.desc.componentID          = COMPONENT_RT;
+   rt_vars.desc.callbackRx           = &rt_receive;
+   rt_vars.desc.callbackTimer        = rt_timer;
+   rt_vars.desc.callbackSendDone     = &rt_sendDone;
    
-   rtemp_vars.delay                     = openrandom_get16b()%RTEMPPERIOD;
+   rt_vars.delay                     = openrandom_get16b()%RTPERIOD;
    
-   opencoap_register(&rtemp_vars.desc);
+   opencoap_register(&rt_vars.desc);
 }
 
 //=========================== private =========================================
 
-error_t rtemp_receive(OpenQueueEntry_t* msg,
+error_t rt_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
    error_t outcome;
@@ -66,10 +66,10 @@ error_t rtemp_receive(OpenQueueEntry_t* msg,
       // start/stop the data generation to data server
       
       if (msg->payload[0]=='1') {
-         rtemp_vars.desc.callbackTimer = rtemp_timer;
-         rtemp_vars.delay              = openrandom_get16b()%RTEMPPERIOD;
+         rt_vars.desc.callbackTimer = rt_timer;
+         rt_vars.delay              = openrandom_get16b()%RTPERIOD;
       } else {
-         rtemp_vars.desc.callbackTimer = NULL;
+         rt_vars.desc.callbackTimer = NULL;
       }
       
       // reset packet payload
@@ -109,27 +109,27 @@ error_t rtemp_receive(OpenQueueEntry_t* msg,
    return outcome;
 }
 
-void rtemp_timer() {
+void rt_timer() {
    OpenQueueEntry_t* pkt;
    error_t           outcome;
    uint8_t           numOptions;
    uint8_t           rawdata[SENSITIVE_ACCEL_TEMPERATURE_DATALEN];
    
-   rtemp_vars.delay += 2;
+   rt_vars.delay += 2;
    
-   if (rtemp_vars.delay>=RTEMPPERIOD) {
+   if (rt_vars.delay>=RTPERIOD) {
       // create a CoAP RD packet
       pkt = openqueue_getFreePacketBuffer();
       if (pkt==NULL) {
-         openserial_printError(COMPONENT_RTEMP,ERR_NO_FREE_PACKET_BUFFER,
+         openserial_printError(COMPONENT_RT,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          openqueue_freePacketBuffer(pkt);
          return;
       }
       // take ownership over that packet
-      pkt->creator    = COMPONENT_RTEMP;
-      pkt->owner      = COMPONENT_RTEMP;
+      pkt->creator    = COMPONENT_RT;
+      pkt->owner      = COMPONENT_RT;
       // CoAP payload (2 bytes of temperature data)
       packetfunctions_reserveHeaderSize(pkt,2);
       sensitive_accel_temperature_get_measurement(&rawdata[0]);
@@ -137,11 +137,11 @@ void rtemp_timer() {
       pkt->payload[1] = rawdata[9];
       numOptions = 0;
       // location-path option
-      packetfunctions_reserveHeaderSize(pkt,sizeof(rtemp_path0)-1);
-      memcpy(&pkt->payload[0],&rtemp_path0,sizeof(rtemp_path0)-1);
+      packetfunctions_reserveHeaderSize(pkt,sizeof(rt_path0)-1);
+      memcpy(&pkt->payload[0],&rt_path0,sizeof(rt_path0)-1);
       packetfunctions_reserveHeaderSize(pkt,1);
       pkt->payload[0]                  = (COAP_OPTION_LOCATIONPATH-COAP_OPTION_CONTENTTYPE) << 4 |
-                                         sizeof(rtemp_path0)-1;
+                                         sizeof(rt_path0)-1;
       numOptions++;
       // content-type option
       packetfunctions_reserveHeaderSize(pkt,2);
@@ -163,11 +163,11 @@ void rtemp_timer() {
          openqueue_freePacketBuffer(pkt);
       }
       // reset the timer
-      rtemp_vars.delay = 0;
+      rt_vars.delay = 0;
    }
    return;
 }
 
-void rtemp_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void rt_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }

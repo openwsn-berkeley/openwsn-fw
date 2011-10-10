@@ -332,7 +332,7 @@
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rleds\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rreg\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rwellknown\</state>
-          <state>$PROJ_DIR$\..\..\openwsn\07-App\rtemp\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rt\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rxl1\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\</state>
@@ -2041,9 +2041,9 @@
         </file>
       </group>
       <group>
-        <name>rtemp</name>
+        <name>rt</name>
         <file>
-          <name>$PROJ_DIR$\..\..\openwsn\07-App\rtemp\rtemp.c</name>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\rt\rt.c</name>
         </file>
       </group>
       <group>

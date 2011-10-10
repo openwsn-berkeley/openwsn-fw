@@ -8,7 +8,7 @@
 #include "openwsn.h"
 //l7
 #include "rxl1.h"
-#include "rtemp.h"
+#include "rt.h"
 #include "rwellknown.h"
 #include "rleds.h"
 #include "rreg.h"
@@ -81,7 +81,7 @@ void openwsn_init() {
    //heli_init();
    //imu_init();
    rxl1_init();
-   rtemp_init();
+   rt_init();
    rwellknown_init();
    rleds_init();
    rreg_init();

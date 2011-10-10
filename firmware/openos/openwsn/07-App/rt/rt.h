@@ -1,10 +1,10 @@
-#ifndef __RTEMP_H
-#define __RTEMP_H
+#ifndef __RT_H
+#define __RT_H
 
 /**
 \addtogroup App
 \{
-\addtogroup rTemp
+\addtogroup rT
 \{
 */
 
@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void rtemp_init();
+void rt_init();
 
 /**
 \}

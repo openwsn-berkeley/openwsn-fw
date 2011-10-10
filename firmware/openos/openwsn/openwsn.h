@@ -139,7 +139,7 @@ enum {
    COMPONENT_RLEDS                     = 0x21,
    COMPONENT_RREG                      = 0x22,
    COMPONENT_RWELLKNOWN                = 0x23,
-   COMPONENT_RTEMP                     = 0x24,
+   COMPONENT_RT                        = 0x24,
    COMPONENT_RXL1                      = 0x25,
 };
 
