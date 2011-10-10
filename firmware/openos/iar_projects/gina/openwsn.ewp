@@ -333,6 +333,7 @@
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rreg\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rwellknown\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rtemp\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rxl1\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpinject\</state>
@@ -2085,6 +2086,12 @@
         <name>udpprint</name>
         <file>
           <name>$PROJ_DIR$\..\..\openwsn\07-App\udpprint\udpprint.c</name>
+        </file>
+      </group>
+      <group>
+        <name>xl1</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\rxl1\rxl1.c</name>
         </file>
       </group>
     </group>

@@ -7,6 +7,7 @@
 
 #include "openwsn.h"
 //l7
+#include "rxl1.h"
 #include "rtemp.h"
 #include "rwellknown.h"
 #include "rleds.h"
@@ -79,6 +80,7 @@ void openwsn_init() {
    // 07-App
    //heli_init();
    //imu_init();
+   rxl1_init();
    rtemp_init();
    rwellknown_init();
    rleds_init();
