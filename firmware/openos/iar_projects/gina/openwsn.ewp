@@ -2016,6 +2016,9 @@
       </group>
       <group>
         <name>imu</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
         <file>
           <name>$PROJ_DIR$\..\..\openwsn\07-App\imu\imu.c</name>
         </file>

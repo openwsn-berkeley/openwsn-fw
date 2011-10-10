@@ -1,5 +1,6 @@
 #include "openwsn.h"
 #include "sensitive_accel_temperature.h"
+#include "msp430x26x.h"
 
 //=========================== variables =======================================
 
