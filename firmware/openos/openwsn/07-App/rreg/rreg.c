@@ -40,7 +40,7 @@ void rreg_init() {
    rreg_vars.desc.path1val             = NULL;
    rreg_vars.desc.componentID          = COMPONENT_RREG;
    rreg_vars.desc.callbackRx           = &rreg_receive;
-   rreg_vars.desc.callbackTimer        = rreg_timer;
+   rreg_vars.desc.callbackTimer        = &rreg_timer;
    rreg_vars.desc.callbackSendDone     = &rreg_sendDone;
    
    // register to the RD server 20s after boot-up

@@ -334,6 +334,7 @@
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rwellknown\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rt\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rinfo\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rheli\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\rxl1\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\</state>
           <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\</state>
@@ -2030,6 +2031,12 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\ohlone_webpages.c</name>
+        </file>
+      </group>
+      <group>
+        <name>rheli</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\openwsn\07-App\rheli\rheli.c</name>
         </file>
       </group>
       <group>
