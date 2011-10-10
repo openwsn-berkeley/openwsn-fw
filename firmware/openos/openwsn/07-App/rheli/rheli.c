@@ -2,10 +2,8 @@
 #include "rheli.h"
 #include "opencoap.h"
 #include "packetfunctions.h"
-#include "leds.h"
+#include "heli.h"
 #include "openqueue.h"
-
-#include "msp430x26x.h"
 
 //=========================== variables =======================================
 
@@ -29,9 +27,8 @@ void    rheli_sendDone(OpenQueueEntry_t* msg,
 //=========================== public ==========================================
 
 void rheli_init() {
-   // set pins P1.2,3 as output
-   P1OUT   &= ~0x0C;
-   P1DIR   |=  0x0C;
+   // initialize the heli drivers
+   heli_init();
    
    // prepare the resource descriptor
    rheli_vars.desc.path0len            = sizeof(rheli_path0)-1;
@@ -56,7 +53,7 @@ error_t rheli_receive(OpenQueueEntry_t* msg,
    if (coap_header->Code==COAP_CODE_REQ_POST) {
       
       // switch on the heli
-      P1OUT   |=  0x0C;
+      heli_on();
       
       // reset packet payload
       msg->payload                     = &(msg->packet[127]);
@@ -75,7 +72,7 @@ error_t rheli_receive(OpenQueueEntry_t* msg,
 
 void rheli_timer() {
    // switch off the heli
-   P1OUT   &= ~0x0C;
+   heli_off();
 }
 
 void rheli_sendDone(OpenQueueEntry_t* msg, error_t error) {

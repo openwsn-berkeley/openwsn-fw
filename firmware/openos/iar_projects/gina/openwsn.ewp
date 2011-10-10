@@ -1909,6 +1909,9 @@
       <name>$PROJ_DIR$\..\..\drivers\gina\gyro.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\heli.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\i2c.c</name>
     </file>
     <file>
