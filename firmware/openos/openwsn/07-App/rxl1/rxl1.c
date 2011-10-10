@@ -13,7 +13,7 @@
 /// inter-packet period (in seconds)
 #define RXL1PERIOD     60
 
-const uint8_t rxl1_path0[] = "xl1";
+const uint8_t rxl1_path0[] = "x";
 
 //=========================== variables =======================================
 

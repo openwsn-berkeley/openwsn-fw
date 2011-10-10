@@ -13,7 +13,7 @@ typedef struct {
 
 rleds_vars_t rleds_vars;
 
-const uint8_t rleds_path0[]        = "led";
+const uint8_t rleds_path0[]        = "l";
 
 //=========================== prototypes ======================================
 
