@@ -97,7 +97,7 @@ typedef struct {
    coap_type_t   T;
    uint8_t       OC;
    coap_code_t   Code;
-   uint8_t       MessageId[2];
+   uint16_t      MessageId;
 } coap_header_iht;
 
 typedef struct {

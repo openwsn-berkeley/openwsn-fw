@@ -64,10 +64,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    index++;
    coap_header.Code          = (coap_code_t)(msg->payload[index]);
    index++;
-   coap_header.MessageId[0]  = msg->payload[index];
-   index++;
-   coap_header.MessageId[1]  = msg->payload[index];
-   index++;
+   coap_header.MessageId     = msg->payload[index]*256+msg->payload[index+1];
+   index+=2;
    // reject unsupported header
    if (
          coap_header.Ver!=COAP_VERSION ||
@@ -150,7 +148,20 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       };
    } else {
       // this is a response: target resource is indicated by message ID
-      temp_desc = temp_desc;
+      
+      // find the resource which matches    
+      temp_desc = opencoap_vars.resources;
+      while (found==FALSE) {
+         //TODOpoipoipoi
+         // iterate to next resource
+         if (found==FALSE) {
+            if (temp_desc->next!=NULL) {
+               temp_desc = temp_desc->next;
+            } else {
+               break;
+            }
+         }
+      };
    }
    
    //=== step 3. ask the resource to prepare response
@@ -194,8 +205,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                                       (COAP_TYPE_ACK  << 4) |
                                       (coap_header.OC << 0);
    msg->payload[1]                  = coap_header.Code;
-   msg->payload[2]                  = coap_header.MessageId[0];
-   msg->payload[3]                  = coap_header.MessageId[1];
+   msg->payload[2]                  = coap_header.MessageId/256;
+   msg->payload[3]                  = coap_header.MessageId%256;
    
    if ((openudp_send(msg))==E_FAIL) {
       openqueue_freePacketBuffer(msg);

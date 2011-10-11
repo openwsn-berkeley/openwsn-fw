@@ -148,6 +148,7 @@ enum {
    COMPONENT_RXL1                      = 0x25,
    COMPONENT_RINFO                     = 0x26,
    COMPONENT_RHELI                     = 0x27,
+   COMPONENT_RRUBE                     = 0x28,
 };
 
 //error codes
