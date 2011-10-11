@@ -68,9 +68,11 @@ error_t rleds_receive(OpenQueueEntry_t* msg,
       
       // change the LED's state
       if (msg->payload[0]=='1') {
-         led_errorLedOn();
+         led_miscLedOn();
+      } else if (msg->payload[0]=='2') {
+         led_miscLedToggle();
       } else {
-         led_errorLedOff();
+         led_miscLedOff();
       }
       
       // reset packet payload
