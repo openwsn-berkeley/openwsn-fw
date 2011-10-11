@@ -289,7 +289,9 @@ void registerNewNeighbor(open_addr_t* address,
             // add this neighbor
             neighbors_vars.neighbors[i].used                   = TRUE;
             neighbors_vars.neighbors[i].parentPreference       = 0;
-            neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
+            //neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
+            // poipoi: all new neighbors are consider stable
+            neighbors_vars.neighbors[i].stableNeighbor         = TRUE;
             neighbors_vars.neighbors[i].switchStabilityCounter = 0;
             memcpy(&neighbors_vars.neighbors[i].addr_64b,  address, sizeof(open_addr_t));
             neighbors_vars.neighbors[i].DAGrank                = 255;
