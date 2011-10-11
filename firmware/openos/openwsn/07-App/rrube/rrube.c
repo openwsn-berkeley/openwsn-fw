@@ -133,7 +133,8 @@ void rrube_timer() {
       outcome = opencoap_send(pkt,
                               COAP_TYPE_NON,
                               COAP_CODE_REQ_PUT,
-                              numOptions);
+                              numOptions,
+                              &rrube_vars.desc);
       // avoid overflowing the queue if fails
       if (outcome==E_FAIL) {
          openqueue_freePacketBuffer(pkt);

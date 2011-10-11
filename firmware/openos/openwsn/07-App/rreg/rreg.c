@@ -58,6 +58,8 @@ error_t rreg_receive(OpenQueueEntry_t* msg,
    error_t outcome;
    
    if (coap_header->Code==COAP_CODE_REQ_POST) {
+      // request to register received
+      
       // set delay to RREGPERIOD to gets triggered next time rreg_timer is called
       rreg_vars.delay                  = RREGPERIOD;
       
@@ -70,6 +72,8 @@ error_t rreg_receive(OpenQueueEntry_t* msg,
       coap_header->Code                = COAP_CODE_RESP_VALID;
       
       outcome = E_SUCCESS;
+   } else if (coap_header->T==COAP_TYPE_ACK) {
+      // it worked!
    } else {
       outcome = E_FAIL;
    }
@@ -135,7 +139,8 @@ void rreg_timer() {
       outcome = opencoap_send(pkt,
                               COAP_TYPE_CON,
                               COAP_CODE_REQ_POST,
-                              numOptions);
+                              numOptions,
+                              &rreg_vars.desc);
       // avoid overflowing the queue if fails
       if (outcome==E_FAIL) {
          openqueue_freePacketBuffer(pkt);

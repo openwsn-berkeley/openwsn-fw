@@ -97,7 +97,7 @@ typedef struct {
    coap_type_t   T;
    uint8_t       OC;
    coap_code_t   Code;
-   uint16_t      MessageId;
+   uint16_t      messageID;
 } coap_header_iht;
 
 typedef struct {
@@ -118,7 +118,6 @@ struct coap_resource_desc_t {
    uint8_t*              path0val;
    uint8_t               path1len;
    uint8_t*              path1val;
-   bool                  messageIDused;
    uint8_t               componentID;
    uint16_t              messageID;
    callbackRx_t          callbackRx;
@@ -139,10 +138,11 @@ void     opencoap_sendDone(OpenQueueEntry_t* msg, error_t error);
 // from CoAP resources
 void     opencoap_writeLinks(OpenQueueEntry_t* msg);
 void     opencoap_register(coap_resource_desc_t* desc);
-error_t  opencoap_send(OpenQueueEntry_t* msg,
-                       coap_type_t       type,
-                       coap_code_t       code,
-                       uint8_t           numOptions);
+error_t  opencoap_send(OpenQueueEntry_t*     msg,
+                       coap_type_t           type,
+                       coap_code_t           code,
+                       uint8_t               numOptions,
+                       coap_resource_desc_t* descSender);
 
 /**
 \}

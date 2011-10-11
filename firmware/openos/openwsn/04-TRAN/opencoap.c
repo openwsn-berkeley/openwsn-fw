@@ -64,7 +64,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    index++;
    coap_header.Code          = (coap_code_t)(msg->payload[index]);
    index++;
-   coap_header.MessageId     = msg->payload[index]*256+msg->payload[index+1];
+   coap_header.messageID     = msg->payload[index]*256+msg->payload[index+1];
    index+=2;
    // reject unsupported header
    if (
@@ -152,7 +152,12 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       // find the resource which matches    
       temp_desc = opencoap_vars.resources;
       while (found==FALSE) {
-         //TODOpoipoipoi
+         if (coap_header.messageID==temp_desc->messageID) {
+            found=TRUE;
+            if (temp_desc->callbackRx!=NULL) {
+               temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
+            }
+         }
          // iterate to next resource
          if (found==FALSE) {
             if (temp_desc->next!=NULL) {
@@ -162,6 +167,9 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
             }
          }
       };
+      openqueue_freePacketBuffer(msg);
+      // stop here: will will not respond to a response
+      return;
    }
    
    //=== step 3. ask the resource to prepare response
@@ -205,8 +213,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                                       (COAP_TYPE_ACK  << 4) |
                                       (coap_header.OC << 0);
    msg->payload[1]                  = coap_header.Code;
-   msg->payload[2]                  = coap_header.MessageId/256;
-   msg->payload[3]                  = coap_header.MessageId%256;
+   msg->payload[2]                  = coap_header.messageID/256;
+   msg->payload[3]                  = coap_header.messageID%256;
    
    if ((openudp_send(msg))==E_FAIL) {
       openqueue_freePacketBuffer(msg);
@@ -285,9 +293,6 @@ void opencoap_writeLinks(OpenQueueEntry_t* msg) {
 void opencoap_register(coap_resource_desc_t* desc) {
    coap_resource_desc_t* last_elem;
    
-   // reset the messageIDused element
-   desc->messageIDused = FALSE;
-   
    if (opencoap_vars.resources==NULL) {
       opencoap_vars.resources = desc;
       return;
@@ -301,10 +306,11 @@ void opencoap_register(coap_resource_desc_t* desc) {
    last_elem->next = desc;
 }
 
-error_t opencoap_send(OpenQueueEntry_t* msg,
-                      coap_type_t       type,
-                      coap_code_t       code,
-                      uint8_t           numOptions) {
+error_t opencoap_send(OpenQueueEntry_t*     msg,
+                      coap_type_t           type,
+                      coap_code_t           code,
+                      uint8_t               numOptions,
+                      coap_resource_desc_t* descSender) {
    // change the global messageID
    opencoap_vars.messageID          = openrandom_get16b();
    // take ownership
@@ -319,7 +325,8 @@ error_t opencoap_send(OpenQueueEntry_t* msg,
    msg->payload[1]                  = code;
    msg->payload[2]                  = (opencoap_vars.messageID>>8) & 0xff;
    msg->payload[3]                  = (opencoap_vars.messageID>>0) & 0xff;
-   
+   // record the messageID with this sender
+   descSender->messageID            = opencoap_vars.messageID;
    return openudp_send(msg);
 }
 
