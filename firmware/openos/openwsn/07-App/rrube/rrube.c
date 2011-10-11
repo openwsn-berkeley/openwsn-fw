@@ -7,12 +7,16 @@
 #include "idmanager.h"
 #include "board.h"
 #include "heli.h"
+#include "leds.h"
 
 //=========================== defines =========================================
 
+static const uint8_t ipAddr_rubeServer[] = {0x24, 0x06, 0xa0, 0x00, 0xf0, 0xff, 0xff, 0xfe, \
+                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x43, 0xbf};
+
 typedef enum {
    RRUBE_ST_IDLE,
-   RRUBE_ST_POSTRXD,
+   RRUBE_ST_WAITTXPUT,
    RRUBE_ST_PUTRXD,
    RRUBE_ST_WAITACK,
 } rrube_state_t;
@@ -70,6 +74,10 @@ error_t rrube_receive(OpenQueueEntry_t* msg,
    
    if (rrube_vars.rrube_state==RRUBE_ST_IDLE &&
        coap_header->Code==COAP_CODE_REQ_POST) {
+      
+      // turn on LED
+      led_miscLedOn();
+         
       // record the next hop's address
       memcpy(&rrube_vars.nextHop.addr_128b[0],&msg->payload[0],16);
       
@@ -82,14 +90,40 @@ error_t rrube_receive(OpenQueueEntry_t* msg,
       coap_header->Code                = COAP_CODE_RESP_VALID;
       
       // advance state machine
-      rrube_vars.rrube_state           = RRUBE_ST_POSTRXD;
+      rrube_vars.rrube_state           = RRUBE_ST_WAITTXPUT;
       
       outcome = E_SUCCESS;
+
    } else if (rrube_vars.rrube_state==RRUBE_ST_IDLE &&
       coap_header->Code==COAP_CODE_REQ_PUT) {
-      heli_on();     
+   
+      // turn on LED
+      led_miscLedOn();
+      
+      // turn heli on
+      heli_on();
+      
+      // advance state machine
+      rrube_vars.rrube_state           = RRUBE_ST_PUTRXD;
+   
+   } else if (rrube_vars.rrube_state==RRUBE_ST_WAITACK &&
+              coap_header->T==COAP_TYPE_ACK) {
+      // record the next hop's address
+      memcpy(&rrube_vars.nextHop.addr_128b[0],&msg->payload[0],16);
+      
+      // advance state machine
+      rrube_vars.rrube_state           = RRUBE_ST_WAITTXPUT;
+      
+      outcome = E_SUCCESS;
+   
    } else {
+      // didn't expect that packet
+      
+      // reset state machine
       outcome = E_FAIL;
+      
+      // turn off LED
+      led_miscLedOff();
    }
    
    return outcome;
@@ -100,9 +134,10 @@ void rrube_timer() {
    uint8_t           numOptions;
    error_t           outcome;
    
+   // turn off heli
    heli_off();
    
-   if (rrube_vars.rrube_state == RRUBE_ST_POSTRXD) {
+   if (rrube_vars.rrube_state == RRUBE_ST_WAITTXPUT) {
       // I received a POST from the server, I need to send data to the next hop
       
       // create a CoAP RD packet
@@ -119,11 +154,11 @@ void rrube_timer() {
       pkt->owner      = COMPONENT_RRUBE;
       numOptions      = 0;
       // URI-path
-      packetfunctions_reserveHeaderSize(pkt,1);
-      pkt->payload[0] = 'g';
+      packetfunctions_reserveHeaderSize(pkt,sizeof(rrube_path0)-1);
+      memcpy(&pkt->payload[0],&rrube_path0,sizeof(rrube_path0)-1);
       packetfunctions_reserveHeaderSize(pkt,1);
       pkt->payload[0] = (COAP_OPTION_URIPATH) << 4 |
-                        2;
+                        sizeof(rrube_path0)-1;
       numOptions++;
       // metadata
       pkt->l4_destination_port         = WKP_UDP_COAP;
@@ -137,10 +172,64 @@ void rrube_timer() {
                               &rrube_vars.desc);
       // avoid overflowing the queue if fails
       if (outcome==E_FAIL) {
+         rrube_vars.rrube_state        = RRUBE_ST_IDLE;
          openqueue_freePacketBuffer(pkt);
       }
       // advance state machine
       rrube_vars.rrube_state           = RRUBE_ST_IDLE;
+      
+      // turn off LED
+      led_miscLedOff();
+  
+   } else if (rrube_vars.rrube_state == RRUBE_ST_PUTRXD) {
+      // I received a PUT from the previous hop, I need ask the server for the next address
+      
+      // create a CoAP RD packet
+      pkt = openqueue_getFreePacketBuffer();
+      if (pkt==NULL) {
+         openserial_printError(COMPONENT_RREG,ERR_NO_FREE_PACKET_BUFFER,
+                               (errorparameter_t)0,
+                               (errorparameter_t)0);
+         openqueue_freePacketBuffer(pkt);
+         return;
+      }
+      // take ownership over that packet
+      pkt->creator    = COMPONENT_RRUBE;
+      pkt->owner      = COMPONENT_RRUBE;
+      numOptions      = 0;
+      // URI-path
+      packetfunctions_reserveHeaderSize(pkt,sizeof(rrube_path0)-1);
+      memcpy(&pkt->payload[0],&rrube_path0,sizeof(rrube_path0)-1);
+      packetfunctions_reserveHeaderSize(pkt,1);
+      pkt->payload[0] = (COAP_OPTION_URIPATH) << 4 |
+                        sizeof(rrube_path0)-1;
+      numOptions++;
+      // metadata
+      pkt->l4_destination_port         = WKP_UDP_COAP;
+      pkt->l3_destinationORsource.type = ADDR_128B;
+      memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_rubeServer,16);
+      // send
+      outcome = opencoap_send(pkt,
+                              COAP_TYPE_CON,
+                              COAP_CODE_REQ_GET,
+                              numOptions,
+                              &rrube_vars.desc);
+      // avoid overflowing the queue if fails
+      if (outcome==E_FAIL) {
+         rrube_vars.rrube_state        = RRUBE_ST_IDLE;
+         openqueue_freePacketBuffer(pkt);
+      }
+      // advance state machine
+      rrube_vars.rrube_state           = RRUBE_ST_WAITACK;
+      
+   } else {
+      // timer expired while not in expected state
+      
+      // reset state machine
+      rrube_vars.rrube_state           = RRUBE_ST_IDLE;
+      
+      // turn off LED
+      led_miscLedOff();
    }
    return;
 }
