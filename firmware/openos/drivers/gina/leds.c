@@ -78,6 +78,17 @@ void led_syncLedToggle() {
    P2OUT ^=  0x02;
 }
 
+// orange
+void led_miscLedOn() {
+   P2OUT |=  0x04;
+}
+void led_miscLedOff() {
+   P2OUT &= ~0x04;
+}
+void led_miscLedToggle() {
+   P2OUT ^=  0x04;
+}
+
 //red
 void led_errorLedOn() {
    P2OUT |=  0x08;

@@ -28,9 +28,15 @@ void leds_setCombination(uint8_t combination);
 void led_radioLedOn();
 void led_radioLedOff();
 void led_radioLedToggle();
+
 void led_syncLedOn();
 void led_syncLedOff();
 void led_syncLedToggle();
+
+void led_miscLedOn();
+void led_miscLedOff();
+void led_miscLedToggle();
+
 void led_errorLedOn();
 void led_errorLedOff();
 void led_errorLedToggle();
