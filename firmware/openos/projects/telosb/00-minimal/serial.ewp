@@ -651,7 +651,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>test_serial.d43</state>
+          <state>serial.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -1887,18 +1887,9 @@
       <data/>
     </settings>
   </configuration>
-  <group>
-    <name>application</name>
-    <file>
-      <name>$PROJ_DIR$\test_serial.c</name>
-    </file>
-  </group>
-  <group>
-    <name>drivers</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\leds.c</name>
-    </file>
-  </group>
+  <file>
+    <name>$PROJ_DIR$\serial.c</name>
+  </file>
 </project>
 
 

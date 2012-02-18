@@ -42,21 +42,6 @@ int main(void) {
 // Port2 interrupt service routine
 #pragma vector=PORT2_VECTOR
 __interrupt void Port2_ISR (void) {
-   uint8_t leds_on;
-   
    P2IFG &= ~0x80;                               // clear interrupt flag
-   
-   // get LED state
-   leds_on  = (~P5OUT & 0x70) >> 4;
-   
-   // modify LED state
-   if (leds_on==0) {                             // if no LEDs on, switch on one
-      leds_on = 0x01;
-   } else {
-      leds_on += 1;
-   }
-   // apply updated LED state
-   leds_on <<= 4;                                // send back to position 4
-   P5OUT |=  (~leds_on & 0x70);                  // switch on the leds marked '1' in leds_on
-   P5OUT &= ~( leds_on & 0x70);                  // switch off the leds marked '0' in leds_on
+   P5OUT ^=  0x10;                               // toggle LED
 }

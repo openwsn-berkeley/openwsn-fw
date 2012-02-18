@@ -11,7 +11,7 @@
     <path>$WS_DIR$\projects\telosb\00-minimal\button.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\test_serial.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-minimal\serial.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\projects\telosb\test_radio.ewp</path>

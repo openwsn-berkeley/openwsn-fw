@@ -10,7 +10,7 @@ The digital UART interface is:
 */
 
 #include "msp430f1611.h"
-#include "leds.h"
+#include "stdint.h"
 
 void main(void)
 {
@@ -22,19 +22,6 @@ void main(void)
     
   P3SEL     = 0xC0;                              // P3.6,7 = UART1TX/RX
   
-  //115200 baud, clocked from 4.8MHz SMCLK
-  ME2      |=  UTXE1 + URXE1;                    // enable UART1 TX/RX
-  UCTL1    |=  CHAR;                             // 8-bit character
-  UTCTL1   |=  SSEL1;                            // clocking from SMCLK
-  UBR01     =  41;                               // 4.8MHz/115200 - 41.66
-  UBR11     =  0x00;                             //
-  UMCTL1    =  0x4A;                             // modulation
-  UCTL1    &= ~SWRST;                            // clear UART1 reset bit
-  IE2      |=  URXIE1;                           // enable UART1 RX interrupt
-  
-  __bis_SR_register(LPM0_bits + GIE);            // sleep, leave interrupts on
-
-  /*
   //9600 baud, clocked from 32kHz ACLK
   ME2      |=  UTXE1 + URXE1;                    // enable UART1 TX/RX
   UCTL1    |=  CHAR;                             // 8-bit character
@@ -46,27 +33,25 @@ void main(void)
   IE2      |=  URXIE1;                           // enable UART1 RX interrupt
   
   __bis_SR_register(LPM3_bits + GIE);            // sleep, leave interrupts and ACLK on
+  
+  /*
+  //115200 baud, clocked from 4.8MHz SMCLK
+  ME2      |=  UTXE1 + URXE1;                    // enable UART1 TX/RX
+  UCTL1    |=  CHAR;                             // 8-bit character
+  UTCTL1   |=  SSEL1;                            // clocking from SMCLK
+  UBR01     =  41;                               // 4.8MHz/115200 - 41.66
+  UBR11     =  0x00;                             //
+  UMCTL1    =  0x4A;                             // modulation
+  UCTL1    &= ~SWRST;                            // clear UART1 reset bit
+  IE2      |=  URXIE1;                           // enable UART1 RX interrupt
+  
+  __bis_SR_register(LPM0_bits + GIE);            // sleep, leave interrupts on
   */
 }
 
 #pragma vector=USART1RX_VECTOR
 __interrupt void uart_ISR(void)
 {
-   uint8_t leds_on;
-   
-   U1TXBUF = U1RXBUF;                             // TX -> RXed character
-    
-   // get LED state
-   leds_on  = (~P5OUT & 0x70) >> 4;
-   
-   // modify LED state
-   if (leds_on==0) {                             // if no LEDs on, switch on one
-      leds_on = 0x01;
-   } else {
-      leds_on += 1;
-   }
-   // apply updated LED state
-   leds_on <<= 4;                                // send back to position 4
-   P5OUT |=  (~leds_on & 0x70);                  // switch on the leds marked '1' in leds_on
-   P5OUT &= ~( leds_on & 0x70);                  // switch off the leds marked '0' in leds_on
+   U1TXBUF = U1RXBUF;                            // TX -> RXed character
+   P5OUT ^=  0x10;                               // toggle LED
 }
