@@ -2,7 +2,7 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_clocks.ewp</path>
+    <path>$WS_DIR$\iar_projects\telosb\0_min_clocks.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\iar_projects\telosb\test_leds_xtal.ewp</path>

@@ -58,11 +58,11 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.r43</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -652,7 +652,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>min_clocks.d43</state>
+          <state>0_min_clocks.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -846,7 +846,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>min_clocks.a43</state>
+          <state>0_min_clocks.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1888,21 +1888,9 @@
       <data/>
     </settings>
   </configuration>
-  <group>
-    <name>application</name>
-    <file>
-      <name>$PROJ_DIR$\min_clocks.c</name>
-    </file>
-  </group>
-  <group>
-    <name>drivers</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\button.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\leds.c</name>
-    </file>
-  </group>
+  <file>
+    <name>$PROJ_DIR$\0_min_clocks.c</name>
+  </file>
 </project>
 
 

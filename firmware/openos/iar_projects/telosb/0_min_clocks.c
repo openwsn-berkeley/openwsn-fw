@@ -3,7 +3,7 @@
 board.
 
 This is a minimal project, i.e. it is fully self-contained and does not
-rely on a external BSP, driver or OS-related files.
+rely on a external BSP, drivers or OS-related files.
 
 Download the program to a TelosB board, run it. It will output its
 clocks on the pins below. Note that these pins are connected to the
@@ -20,8 +20,8 @@ We measure an DCO frequency of 4.8MHz. Very low, indeed.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, September 2011
 */
 
-#include "min_clocks.h"
 #include "msp430f1611.h"
+#include "0_min_clocks.h"
 
 int main(void) {
    WDTCTL  = WDTPW + WDTHOLD;                    // disable watchdog timer
