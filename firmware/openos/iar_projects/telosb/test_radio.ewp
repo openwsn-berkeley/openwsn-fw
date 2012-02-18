@@ -10,9 +10,9 @@
     <debug>1</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>8</archiveVersion>
+      <archiveVersion>9</archiveVersion>
       <data>
-        <version>27</version>
+        <version>28</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -30,10 +30,6 @@
         <option>
           <name>ListPath</name>
           <state>Debug\List</state>
-        </option>
-        <option>
-          <name>PosIndCode</name>
-          <state>0</state>
         </option>
         <option>
           <name>Hardware Multiplier</name>
@@ -149,13 +145,21 @@
           <name>RadioL092ModelType</name>
           <state>0</state>
         </option>
+        <option>
+          <name>Ropi</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>NoRwDynamicInit</name>
+          <state>0</state>
+        </option>
       </data>
     </settings>
     <settings>
       <name>ICC430</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>32</version>
+        <version>33</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -286,10 +290,6 @@
         </option>
         <option>
           <name>CCLibConfigHeader</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>CPIC</name>
           <state>1</state>
         </option>
         <option>
@@ -451,6 +451,14 @@
         <option>
           <name>IccFloatSemantics</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>CROPI</name>
+          <state>1</state>
+        </option>
+        <option>
+          <name>CNoRwDynamicInit</name>
+          <state>1</state>
         </option>
       </data>
     </settings>
@@ -953,9 +961,9 @@
     <debug>0</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>8</archiveVersion>
+      <archiveVersion>9</archiveVersion>
       <data>
-        <version>27</version>
+        <version>28</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -973,10 +981,6 @@
         <option>
           <name>ListPath</name>
           <state>Release\List</state>
-        </option>
-        <option>
-          <name>PosIndCode</name>
-          <state>0</state>
         </option>
         <option>
           <name>Hardware Multiplier</name>
@@ -1092,13 +1096,21 @@
           <name>RadioL092ModelType</name>
           <state>0</state>
         </option>
+        <option>
+          <name>Ropi</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>NoRwDynamicInit</name>
+          <state>0</state>
+        </option>
       </data>
     </settings>
     <settings>
       <name>ICC430</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>32</version>
+        <version>33</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1228,10 +1240,6 @@
         </option>
         <option>
           <name>CCLibConfigHeader</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>CPIC</name>
           <state>1</state>
         </option>
         <option>
@@ -1384,6 +1392,14 @@
         <option>
           <name>IccFloatSemantics</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>CROPI</name>
+          <state>1</state>
+        </option>
+        <option>
+          <name>CNoRwDynamicInit</name>
+          <state>1</state>
         </option>
       </data>
     </settings>
@@ -1890,9 +1906,6 @@
       <name>$PROJ_DIR$\..\..\drivers\telosb\button.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\telosb.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\drivers\telosb\leds.c</name>
     </file>
     <file>
@@ -1903,6 +1916,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\telosb\spi.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\telosb\telosb.c</name>
     </file>
   </group>
   <group>
