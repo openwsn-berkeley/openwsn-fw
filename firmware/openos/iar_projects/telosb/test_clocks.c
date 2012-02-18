@@ -2,6 +2,9 @@
 \brief This is a standalone test program for the clocks on the TelosB
 board.
 
+This is a minimal project, i.e. it is fully self-contained and does not
+rely on a external BSP, driver or OS-related files.
+
 Download the program to a TelosB board, run it. It will output its
 clocks on the pins below. Note that these pins are connected to the
 LEDs, so they will blink (so fast you won't see it). Use a scope probe
@@ -17,7 +20,7 @@ We measure an DCO frequency of 4.8MHz. Very low, indeed.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, September 2011
 */
 
-#include "test_clocks.h"
+#include "min_clocks.h"
 #include "msp430f1611.h"
 
 int main(void) {

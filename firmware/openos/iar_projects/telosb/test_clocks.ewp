@@ -652,7 +652,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>test_clocks.d43</state>
+          <state>min_clocks.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -846,7 +846,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>test_clocks.a43</state>
+          <state>min_clocks.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1891,7 +1891,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\test_clocks.c</name>
+      <name>$PROJ_DIR$\min_clocks.c</name>
     </file>
   </group>
   <group>
