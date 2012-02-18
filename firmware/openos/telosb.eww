@@ -2,16 +2,16 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-minimal\clocks.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\clocks.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-minimal\leds_xtal.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\leds_xtal.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-minimal\button.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\button.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-minimal\serial.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\serial.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\projects\telosb\test_radio.ewp</path>
