@@ -8,7 +8,7 @@
     <path>$WS_DIR$\projects\telosb\00-minimal\leds_xtal.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\test_button.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-minimal\button.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\projects\telosb\test_serial.ewp</path>

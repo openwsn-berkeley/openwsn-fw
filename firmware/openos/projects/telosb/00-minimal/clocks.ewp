@@ -164,8 +164,7 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state>ISR_BUTTON</state>
-          <state>TEST_BUTTON</state>
+          <state></state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -318,10 +317,7 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\drivers\telosb</state>
-          <state>$PROJ_DIR$\..\..\openwsn</state>
-          <state>$PROJ_DIR$\..\..\openwsn\02a-MAC</state>
-          <state>$PROJ_DIR$\..\..\openwsn\cross-layers</state>
+          <state></state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
