@@ -58,7 +58,7 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.h</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
@@ -648,7 +648,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>test_leds_xtal.d43</state>
+          <state>leds_xtal.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -1884,18 +1884,9 @@
       <data/>
     </settings>
   </configuration>
-  <group>
-    <name>application</name>
-    <file>
-      <name>$PROJ_DIR$\test_leds_xtal.c</name>
-    </file>
-  </group>
-  <group>
-    <name>drivers</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\leds.c</name>
-    </file>
-  </group>
+  <file>
+    <name>$PROJ_DIR$\leds_xtal.c</name>
+  </file>
 </project>
 
 

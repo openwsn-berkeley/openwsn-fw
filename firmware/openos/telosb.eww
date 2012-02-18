@@ -5,7 +5,7 @@
     <path>$WS_DIR$\projects\telosb\00-minimal\clocks.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\test_leds_xtal.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-minimal\leds_xtal.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\projects\telosb\test_button.ewp</path>
