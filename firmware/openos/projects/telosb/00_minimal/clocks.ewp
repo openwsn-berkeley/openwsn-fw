@@ -652,7 +652,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>0_min_clocks.d43</state>
+          <state>clocks.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -846,7 +846,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>0_min_clocks.a43</state>
+          <state>clocks.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1889,7 +1889,7 @@
     </settings>
   </configuration>
   <file>
-    <name>$PROJ_DIR$\0_min_clocks.c</name>
+    <name>$PROJ_DIR$\clocks.c</name>
   </file>
 </project>
 

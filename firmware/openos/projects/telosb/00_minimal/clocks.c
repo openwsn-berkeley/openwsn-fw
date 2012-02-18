@@ -21,7 +21,7 @@ We measure an DCO frequency of 4.8MHz. Very low, indeed.
 */
 
 #include "msp430f1611.h"
-#include "0_min_clocks.h"
+#include "clocks.h"
 
 int main(void) {
    WDTCTL  = WDTPW + WDTHOLD;                    // disable watchdog timer

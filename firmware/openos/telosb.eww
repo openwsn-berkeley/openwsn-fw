@@ -2,22 +2,22 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\iar_projects\telosb\0_min_clocks.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00_minimal\clocks.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_leds_xtal.ewp</path>
+    <path>$WS_DIR$\projects\telosb\test_leds_xtal.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_button.ewp</path>
+    <path>$WS_DIR$\projects\telosb\test_button.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_serial.ewp</path>
+    <path>$WS_DIR$\projects\telosb\test_serial.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\telosb\test_radio.ewp</path>
+    <path>$WS_DIR$\projects\telosb\test_radio.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\iar_projects\telosb\openwsn.ewp</path>
+    <path>$WS_DIR$\projects\telosb\openwsn.ewp</path>
   </project>
   <batchBuild/>
 </workspace>
