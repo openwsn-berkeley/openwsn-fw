@@ -79,7 +79,7 @@ void spi_read_buffer(OpenQueueEntry_t* packet, uint8_t length) {
 //=========================== private =========================================
 
 #ifdef ISR_SPI
-// this implemetation uses interrupts to signal that a byte was sent
+// this implementation uses interrupts to signal that a byte was sent
 void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive) {
    __disable_interrupt();
    //register spi frame to send
