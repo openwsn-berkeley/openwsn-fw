@@ -648,7 +648,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>serial.d43</state>
+          <state>spi.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -842,7 +842,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>serial.a43</state>
+          <state>test_serial.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1885,7 +1885,7 @@
     </settings>
   </configuration>
   <file>
-    <name>$PROJ_DIR$\serial.c</name>
+    <name>$PROJ_DIR$\spi.c</name>
   </file>
 </project>
 

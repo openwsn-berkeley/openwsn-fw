@@ -14,6 +14,9 @@
     <path>$WS_DIR$\projects\telosb\00-standalone\serial.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\projects\telosb\00-standalone\spi.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\projects\telosb\test_radio.ewp</path>
   </project>
   <project>
