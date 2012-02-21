@@ -11,7 +11,7 @@
     <path>$WS_DIR$\projects\telosb\00-standalone\00std_button.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-standalone\00std_serial.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\00std_uart.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\projects\telosb\00-standalone\00std_spi.ewp</path>
