@@ -1885,7 +1885,7 @@
     </settings>
   </configuration>
   <file>
-    <name>$PROJ_DIR$\serial.c</name>
+    <name>$PROJ_DIR$\00std_uart.c</name>
   </file>
 </project>
 

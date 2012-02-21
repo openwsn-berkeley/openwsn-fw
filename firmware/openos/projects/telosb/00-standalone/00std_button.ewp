@@ -1885,7 +1885,7 @@
     </settings>
   </configuration>
   <file>
-    <name>$PROJ_DIR$\button.c</name>
+    <name>$PROJ_DIR$\00std_button.c</name>
   </file>
 </project>
 

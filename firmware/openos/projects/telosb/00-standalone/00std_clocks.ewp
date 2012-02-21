@@ -1885,7 +1885,7 @@
     </settings>
   </configuration>
   <file>
-    <name>$PROJ_DIR$\clocks.c</name>
+    <name>$PROJ_DIR$\00std_clocks.c</name>
   </file>
 </project>
 

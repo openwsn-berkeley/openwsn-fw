@@ -1899,10 +1899,25 @@
       <name>$PROJ_DIR$\..\..\..\bsp\board.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\cc2420.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\telosb\leds.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\leds.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\radio.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\radio.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\spi.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\spi.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\telosb\uart.c</name>

@@ -1885,7 +1885,7 @@
     </settings>
   </configuration>
   <file>
-    <name>$PROJ_DIR$\leds_xtal.c</name>
+    <name>$PROJ_DIR$\00std_leds_xtal.c</name>
   </file>
 </project>
 
