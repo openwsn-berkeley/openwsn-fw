@@ -8,8 +8,6 @@
 #include "board.h"
 #include "spi.h"
 
-#include "msp430f1611.h"//poipoi
-
 /**
 \brief The program starts executing here.
 */
