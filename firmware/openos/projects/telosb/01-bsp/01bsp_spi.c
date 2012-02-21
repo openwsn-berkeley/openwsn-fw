@@ -1,6 +1,8 @@
 /**
 \brief This program shows the use of the "spi" bsp module.
 
+
+
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
