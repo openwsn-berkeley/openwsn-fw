@@ -2,22 +2,22 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-standalone\clocks.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\00std_clocks.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-standalone\leds_xtal.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\00std_leds_xtal.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-standalone\button.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\00std_button.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-standalone\serial.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\00std_serial.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-standalone\spi.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\00std_spi.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\telosb\00-standalone\i2c.ewp</path>
+    <path>$WS_DIR$\projects\telosb\00-standalone\00std_i2c.ewp</path>
   </project>
   
   <project>
