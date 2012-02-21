@@ -9,6 +9,7 @@
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
+#include "radio.h"
 
 //=========================== variables =======================================
 
@@ -29,6 +30,7 @@ void board_init() {
    leds_init();
    uart_init();
    spi_init();
+   radio_init();
 }
 
 void board_sleep() {

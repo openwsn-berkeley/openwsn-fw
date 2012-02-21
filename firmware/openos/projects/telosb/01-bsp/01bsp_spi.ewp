@@ -1905,6 +1905,12 @@
       <name>$PROJ_DIR$\..\..\..\bsp\leds.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\radio.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\radio.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\telosb\spi.c</name>
     </file>
     <file>

@@ -25,8 +25,6 @@ spi_vars_t spi_vars;
 
 //=========================== prototypes ======================================
 
-void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive);
-
 //=========================== public ==========================================
 
 void spi_init() {
@@ -151,17 +149,19 @@ void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive) {
 //=========================== interrupt handlers ==============================
 
 #ifdef ISR_SPI
-//executed in ISR, called from scheduler.c
-void isr_spi_rx() {
-   *spi_vars.rx_buffer = UCA0RXBUF;
+#pragma vector = USART0RX_VECTOR
+__interrupt void spi_ISR (void) {
+   *spi_vars.rx_buffer       =  U0RXBUF;
    spi_vars.rx_buffer++;
    if (spi_vars.num_bytes>0) {
-      UCA0TXBUF = *spi_vars.tx_buffer;
+      // load up next character
+      U0TXBUF                = *spi_vars.tx_buffer;
       spi_vars.tx_buffer++;
       spi_vars.num_bytes--;
    } else {
-      P4OUT|=0x01;P4OUT|=0x40;                   // SPI CS (and P4.6) up
-      spi_vars.busy = 0;
+      // put CS signal high to signal end of transmission to slave
+      P4OUT                 &= ~0x04;
+      spi_vars.busy          =  0;
    }
 }
 #endif
