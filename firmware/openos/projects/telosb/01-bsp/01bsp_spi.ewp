@@ -318,6 +318,7 @@
         <option>
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$\..\..\..\bsp\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\telosb\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
