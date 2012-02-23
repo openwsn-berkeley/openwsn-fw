@@ -18,14 +18,14 @@
 //=========================== status byte =====================================
 
 typedef struct {
-   uint8_t res1:1;
-   uint8_t xosc16m_stable:1;
-   uint8_t tx_underflow:1;
-   uint8_t enc_busy:1;
-   uint8_t tx_active:1;
-   uint8_t lock:1;
+   uint8_t reserved_1:1;
    uint8_t rssi_valid:1;
-   uint8_t res2:1;
+   uint8_t lock:1;
+   uint8_t tx_active:1;
+   uint8_t enc_busy:1;
+   uint8_t tx_underflow:1;
+   uint8_t xosc16m_stable:1;
+   uint8_t reserved_2:1;
 } cc2420_status_t;
 
 //=========================== strobes =========================================
@@ -142,7 +142,12 @@ typedef struct {
 /// [R/W] Frequency Synthesizer Control and Status Register
 #define CC2420_FSCTRL_ADDR        0x18
 typedef struct {
-   uint16_t poipoi:1;
+   uint16_t FREQ:10;
+   uint16_t LOCK_STATUS:1;
+   uint16_t LOCK_LENGTH:1;
+   uint16_t CAL_RUNNING:1;
+   uint16_t CAL_DONE:1;
+   uint16_t LOCK_THR:2;
 } cc2420_FSCTRL_reg_t;
 
 /// [R/W] Security Control Register 0
@@ -263,7 +268,8 @@ typedef struct {
 /// [R  ] Finite State Machine State Status Register
 #define CC2420_FSMSTATE_ADDR      0x2c
 typedef struct {
-   uint16_t poipoi:1;
+   uint16_t FSM_CUR_STATE:6;
+   uint16_t reserved:10;
 } cc2420_FSMSTATE_reg_t;
 
 /// [R/W] ADC Test Register

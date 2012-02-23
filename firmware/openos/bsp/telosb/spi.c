@@ -88,7 +88,7 @@ void spi_init() {
 
 #ifdef ISR_SPI
 // implementation 1. use interrupts to signal that a byte was sent
-void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive) {
+void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive, uint8_t overwrite) {
    
    // disable interrupts
    __disable_interrupt();
@@ -104,7 +104,9 @@ void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive) {
    
    // send first byte
    U0TXBUF                   = *spi_vars.tx_buffer;
-   spi_vars.tx_buffer++;
+   if (overwrite==0) {
+      spi_vars.tx_buffer++;
+   }
    spi_vars.num_bytes--;
    
    // re-enable interrupts
@@ -112,7 +114,7 @@ void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive) {
 }
 #else
 // implementation 1. busy wait for each byte to be sent
-void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive) {
+void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive, uint8_t overwrite) {
    
    //register spi frame to send
    spi_vars.tx_buffer        =  spaceToSend;
@@ -134,13 +136,15 @@ void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive) {
       IFG1                  &= ~URXIFG0;
       // save the byte just received in the RX buffer
       *spi_vars.rx_buffer    =  U0RXBUF;
-      spi_vars.rx_buffer++;
+      if (overwrite==0) {
+         spi_vars.rx_buffer++;
+      }
       // one byte less to go
       spi_vars.num_bytes--;
    }
    
    // put CS signal high to signal end of transmission to slave
-   P4OUT                    &= ~0x04;
+   P4OUT                    |=  0x04;
 }
 #endif
 

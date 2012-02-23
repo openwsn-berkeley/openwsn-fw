@@ -27,9 +27,7 @@ int main(void)
    spi_tx_buffer[2]     =  0x00;                 // send a SNOP strobe just to get the reg value
    
    // retrieve radio manufacturer ID over SPI
-   spi_txrx(&(spi_tx_buffer[0]),sizeof(spi_tx_buffer),&(spi_rx_buffer[0]));
-   
-   temp_reg             = spi_rx_buffer[1]<<8 | spi_rx_buffer[2];
+   spi_txrx(&(spi_tx_buffer[0]),sizeof(spi_tx_buffer),&(spi_rx_buffer[0]),0);
    
    // go back to sleep
    board_sleep();

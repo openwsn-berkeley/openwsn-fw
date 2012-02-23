@@ -18,6 +18,6 @@
 //=========================== prototypes ======================================
 
 void    spi_init();
-void    spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive);
+void    spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive, uint8_t overwrite);
 
 #endif
