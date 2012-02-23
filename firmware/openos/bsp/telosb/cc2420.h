@@ -7,6 +7,14 @@
 #ifndef __CC2420_H
 #define __CC2420_H
 
+//=========================== spi flags =======================================
+
+#define CC2420_FLAG_READ          0x40
+#define CC2420_FLAG_WRITE         0x00
+
+#define CC2420_FLAG_RAM           0x80
+#define CC2420_FLAG_REG           0x00
+
 //=========================== status byte =====================================
 
 typedef struct {
@@ -39,12 +47,6 @@ typedef struct {
 #define CC2420_SAES               0x0e // [S  ] AES Stand alone encryption strobe
 
 //=========================== registers =======================================
-
-//===== 'functions'
-
-
-
-//===== address and structure
 
 /// [R/W] Main Control Register
 #define CC2420_MAIN_ADDR          0x10
