@@ -172,15 +172,15 @@ void radio_spiReadReg(uint8_t reg, cc2420_status_t* statusRead, uint8_t* regValu
 }
 
 void radio_spiWriteTxFifo(cc2420_status_t* statusRead, uint8_t* bufToWrite, uint8_t len) {
-   *(bufToWrite-1)      = (CC2420_FLAG_WRITE | CC2420_FLAG_RAM | CC2420_TXFIFO_ADDR);
+   *(bufToWrite-1)      = (CC2420_FLAG_WRITE | CC2420_FLAG_REG | CC2420_TXFIFO_ADDR);
    
-   spi_txrx(bufToWrite-1,len+2,(uint8_t*)statusRead,1);
+   spi_txrx(bufToWrite-1,len+3,(uint8_t*)statusRead,1);
 }
 
 void radio_spiReadRxFifo(cc2420_status_t* statusRead, uint8_t* bufRead, uint8_t* lenRead, uint8_t maxBufLen) {
    uint8_t              spi_tx_buffer[10];
    
-   spi_tx_buffer[0]     = (CC2420_FLAG_READ | CC2420_FLAG_RAM | CC2420_RXFIFO_ADDR);
+   spi_tx_buffer[0]     = (CC2420_FLAG_READ | CC2420_FLAG_REG | CC2420_RXFIFO_ADDR);
    spi_tx_buffer[1]     = 0;
    spi_tx_buffer[2]     = 0;
    
