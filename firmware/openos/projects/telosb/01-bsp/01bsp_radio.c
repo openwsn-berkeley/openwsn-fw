@@ -24,14 +24,14 @@ int main(void)
    board_init();
    
    // prepare packet
-   for (i=0;i<LENGTH_PACKET;i++) {
+   for (i=0;i<sizeof(packet);i++) {
       packet[i] = i;
    }
    
    // send packet
    radio_setFrequency(CHANNEL);
    radio_rfOn();
-   radio_loadPacket(&packet[0],LENGTH_PACKET);
+   radio_loadPacket(packet,sizeof(packet));
    radio_txEnable();
    radio_txNow();
    radio_rfOff();

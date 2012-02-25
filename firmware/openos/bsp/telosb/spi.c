@@ -164,11 +164,11 @@ void spi_txrx(uint8_t*     bufTx,
             }
             break;
          case SPI_BUFFER:
-            *spi_vars.bufRx    = U0RXBUF;
+            *spi_vars.bufRx       = U0RXBUF;
             spi_vars.bufRx++;
             break;
          case SPI_LASTBYTE:
-            *spi_vars.bufRx    = U0RXBUF;
+            *spi_vars.bufRx       = U0RXBUF;
             break;
       }
       // one byte less to go
