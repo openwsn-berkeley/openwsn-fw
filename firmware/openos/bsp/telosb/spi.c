@@ -16,11 +16,12 @@
 //=========================== variables =======================================
 
 typedef struct {
-   uint8_t*        bufTx;
-   uint8_t         lenbufTx;
-   uint8_t*        bufRx;
-   uint8_t         maxLenBufRx;
+   uint8_t*        pNextTxByte;
+   uint8_t         numTxedBytes;
+   uint8_t         txBytesLeft;
    spi_return_t    returnType;
+   uint8_t*        pNextRxByte;
+   uint8_t         maxRxBytes;
    spi_first_t     isFirst;
    spi_last_t      isLast;
    uint8_t         busy;
@@ -127,14 +128,13 @@ void spi_txrx(uint8_t*     bufTx,
               spi_first_t  isFirst,
               spi_last_t   isLast) {
    
-   uint8_t bytes_counter;
-   
    // register spi frame to send
-   spi_vars.bufTx            =  bufTx;
-   spi_vars.lenbufTx         =  lenbufTx;
+   spi_vars.pNextTxByte      =  bufTx;
+   spi_vars.numTxedBytes     =  0;
+   spi_vars.txBytesLeft      =  lenbufTx;
    spi_vars.returnType       =  returnType;
-   spi_vars.bufRx            =  bufRx;
-   spi_vars.maxLenBufRx      =  maxLenBufRx;
+   spi_vars.pNextRxByte      =  bufRx;
+   spi_vars.maxRxBytes       =  maxLenBufRx;
    spi_vars.isFirst          =  isFirst;
    spi_vars.isLast           =  isLast;
    
@@ -147,11 +147,10 @@ void spi_txrx(uint8_t*     bufTx,
    }
    
    // send all bytes
-   bytes_counter             =  0;
-   while (spi_vars.lenbufTx>0) {
+   while (spi_vars.txBytesLeft>0) {
       //write byte to TX buffer
-      U0TXBUF                = *spi_vars.bufTx;
-      spi_vars.bufTx++;
+      U0TXBUF                = *spi_vars.pNextTxByte;
+      spi_vars.pNextTxByte++;
       // busy wait on the interrupt flag
       while ((IFG1 & URXIFG0)==0);
       // clear the interrupt flag
@@ -159,27 +158,30 @@ void spi_txrx(uint8_t*     bufTx,
       // save the byte just received in the RX buffer
       switch (spi_vars.returnType) {
          case SPI_FIRSTBYTE:
-            if (bytes_counter==0) {
-               *spi_vars.bufRx    = U0RXBUF;
+            if (spi_vars.numTxedBytes==0) {
+               *spi_vars.pNextRxByte   = U0RXBUF;
             }
             break;
          case SPI_BUFFER:
-            *spi_vars.bufRx       = U0RXBUF;
-            spi_vars.bufRx++;
+            *spi_vars.pNextRxByte      = U0RXBUF;
+            spi_vars.pNextRxByte++;
             break;
          case SPI_LASTBYTE:
-            *spi_vars.bufRx       = U0RXBUF;
+            *spi_vars.pNextRxByte      = U0RXBUF;
             break;
       }
       // one byte less to go
-      spi_vars.lenbufTx--;
-      bytes_counter++;
+      spi_vars.numTxedBytes++;
+      spi_vars.txBytesLeft--;
    }
    
    // put CS signal high to signal end of transmission to slave
    if (spi_vars.isLast==SPI_LAST) {
       P4OUT                 |=  0x04;
    }
+   
+   // SPI is not busy anymore
+   spi_vars.busy             =  0;
 }
 #endif
 
