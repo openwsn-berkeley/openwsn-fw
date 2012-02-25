@@ -5,6 +5,7 @@
 */
 
 #include "msp430f1611.h"
+#include "string.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "spi.h"
@@ -34,6 +35,9 @@ spi_vars_t spi_vars;
 //=========================== public ==========================================
 
 void spi_init() {
+   // clear variables
+   memset(&spi_vars,0,sizeof(spi_vars_t));
+   
    // hold USART state machine in reset mode during configuration
    U0CTL      =  SWRST;                          // [b0] SWRST=1: Enabled. USART logic held in reset state
    
@@ -92,34 +96,6 @@ void spi_init() {
 #endif
 }
 
-#ifdef ISR_SPI
-// implementation 1. use interrupts to signal that a byte was sent
-void spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive, uint8_t overwrite) {
-   
-   // disable interrupts
-   __disable_interrupt();
-   
-   // register spi frame to send
-   spi_vars.tx_buffer        =  spaceToSend;
-   spi_vars.rx_buffer        =  spaceToReceive;
-   spi_vars.num_bytes        =  len;
-   spi_vars.busy             =  1;
-   
-   // lower CS signal to have slave listening
-   P4OUT                    &= ~0x04;
-   
-   // send first byte
-   U0TXBUF                   = *spi_vars.tx_buffer;
-   if (overwrite==0) {
-      spi_vars.tx_buffer++;
-   }
-   spi_vars.num_bytes--;
-   
-   // re-enable interrupts
-   __enable_interrupt();
-}
-#else
-// implementation 2. busy wait for each byte to be sent
 void spi_txrx(uint8_t*     bufTx,
               uint8_t      lenbufTx,
               spi_return_t returnType,
@@ -127,6 +103,11 @@ void spi_txrx(uint8_t*     bufTx,
               uint8_t      maxLenBufRx,
               spi_first_t  isFirst,
               spi_last_t   isLast) {
+
+#ifdef ISR_SPI
+   // disable interrupts
+   __disable_interrupt();
+#endif
    
    // register spi frame to send
    spi_vars.pNextTxByte      =  bufTx;
@@ -146,9 +127,25 @@ void spi_txrx(uint8_t*     bufTx,
       P4OUT                 &= ~0x04;
    }
    
+#ifdef ISR_SPI
+   // implementation 1. use interrupts to signal that a byte was sent
+   
+   // write next byte to TX buffer
+   U0TXBUF                = *spi_vars.pNextTxByte;
+   spi_vars.pNextTxByte++;
+   
+   // one byte less to go
+   spi_vars.numTxedBytes++;
+   spi_vars.txBytesLeft--;
+   
+   // re-enable interrupts
+   __enable_interrupt();
+#else
+   // implementation 2. busy wait for each byte to be sent
+   
    // send all bytes
    while (spi_vars.txBytesLeft>0) {
-      //write byte to TX buffer
+      // write next byte to TX buffer
       U0TXBUF                = *spi_vars.pNextTxByte;
       spi_vars.pNextTxByte++;
       // busy wait on the interrupt flag
@@ -182,8 +179,8 @@ void spi_txrx(uint8_t*     bufTx,
    
    // SPI is not busy anymore
    spi_vars.busy             =  0;
-}
 #endif
+}
 
 //=========================== private =========================================
 
@@ -192,17 +189,39 @@ void spi_txrx(uint8_t*     bufTx,
 #ifdef ISR_SPI
 #pragma vector = USART0RX_VECTOR
 __interrupt void spi_ISR (void) {
-   *spi_vars.rx_buffer       =  U0RXBUF;
-   spi_vars.rx_buffer++;
-   if (spi_vars.num_bytes>0) {
-      // load up next character
-      U0TXBUF                = *spi_vars.tx_buffer;
-      spi_vars.tx_buffer++;
-      spi_vars.num_bytes--;
+   
+   
+   // save the byte just received in the RX buffer
+   switch (spi_vars.returnType) {
+      case SPI_FIRSTBYTE:
+         if (spi_vars.numTxedBytes==0) {
+            *spi_vars.pNextRxByte   = U0RXBUF;
+         }
+         break;
+      case SPI_BUFFER:
+         *spi_vars.pNextRxByte      = U0RXBUF;
+         spi_vars.pNextRxByte++;
+         break;
+      case SPI_LASTBYTE:
+         *spi_vars.pNextRxByte      = U0RXBUF;
+         break;
+   }
+   
+   if (spi_vars.txBytesLeft>0) {
+      // write next byte to TX buffer
+      U0TXBUF                = *spi_vars.pNextTxByte;
+      spi_vars.pNextTxByte++;
+      // one byte less to go
+      spi_vars.numTxedBytes++;
+      spi_vars.txBytesLeft--;
    } else {
       // put CS signal high to signal end of transmission to slave
-      P4OUT                 &= ~0x04;
-      spi_vars.busy          =  0;
+      if (spi_vars.isLast==SPI_LAST) {
+         P4OUT                 |=  0x04;
+      }
+      
+      // SPI is not busy anymore
+      spi_vars.busy             =  0;
    }
 }
 #endif
