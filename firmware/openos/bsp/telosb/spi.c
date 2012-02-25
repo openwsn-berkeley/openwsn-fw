@@ -12,11 +12,10 @@
 
 //=========================== defines =========================================
 
-//#define ISR_SPI
-
 //=========================== variables =======================================
 
 typedef struct {
+   // information about the current transaction
    uint8_t*        pNextTxByte;
    uint8_t         numTxedBytes;
    uint8_t         txBytesLeft;
@@ -25,8 +24,12 @@ typedef struct {
    uint8_t         maxRxBytes;
    spi_first_t     isFirst;
    spi_last_t      isLast;
+   // state of the module
    uint8_t         busy;
+#ifdef SPI_IN_RTOS_MODE
+   // callback when module done
    spiCallback_t   callback;
+#endif
 } spi_vars_t;
 
 spi_vars_t spi_vars;
@@ -89,7 +92,7 @@ void spi_init() {
    U0CTL     &= ~SWRST;
    
    // enable interrupts via the IEx SFRs
-#ifdef ISR_SPI
+#ifdef SPI_IN_RTOS_MODE
    IE1       |=  URXIE0;                         // we only enable the SPI RX interrupt
                                                  // since TX and RX happen concurrently,
                                                  // i.e. an RX completion necessarily
@@ -97,9 +100,11 @@ void spi_init() {
 #endif
 }
 
+#ifdef SPI_IN_RTOS_MODE
 void spi_setCallback(spiCallback_t cb) {
    spi_vars.callback = cb;
 }
+#endif
 
 void spi_txrx(uint8_t*     bufTx,
               uint8_t      lenbufTx,
@@ -109,7 +114,7 @@ void spi_txrx(uint8_t*     bufTx,
               spi_first_t  isFirst,
               spi_last_t   isLast) {
 
-#ifdef ISR_SPI
+#ifdef SPI_IN_RTOS_MODE
    // disable interrupts
    __disable_interrupt();
 #endif
@@ -132,16 +137,11 @@ void spi_txrx(uint8_t*     bufTx,
       P4OUT                 &= ~0x04;
    }
    
-#ifdef ISR_SPI
-   // implementation 1. use interrupts to signal that a byte was sent
+#ifdef SPI_IN_RTOS_MODE
+   // implementation 1. use a callback function when transaction finishes
    
-   // write next byte to TX buffer
+   // write first byte to TX buffer
    U0TXBUF                = *spi_vars.pNextTxByte;
-   spi_vars.pNextTxByte++;
-   
-   // one byte less to go
-   spi_vars.numTxedBytes++;
-   spi_vars.txBytesLeft--;
    
    // re-enable interrupts
    __enable_interrupt();
@@ -152,7 +152,6 @@ void spi_txrx(uint8_t*     bufTx,
    while (spi_vars.txBytesLeft>0) {
       // write next byte to TX buffer
       U0TXBUF                = *spi_vars.pNextTxByte;
-      spi_vars.pNextTxByte++;
       // busy wait on the interrupt flag
       while ((IFG1 & URXIFG0)==0);
       // clear the interrupt flag
@@ -173,6 +172,7 @@ void spi_txrx(uint8_t*     bufTx,
             break;
       }
       // one byte less to go
+      spi_vars.pNextTxByte++;
       spi_vars.numTxedBytes++;
       spi_vars.txBytesLeft--;
    }
@@ -191,10 +191,9 @@ void spi_txrx(uint8_t*     bufTx,
 
 //=========================== interrupt handlers ==============================
 
-#ifdef ISR_SPI
+#ifdef SPI_IN_RTOS_MODE
 #pragma vector = USART0RX_VECTOR
 __interrupt void spi_ISR (void) {
-   
    
    // save the byte just received in the RX buffer
    switch (spi_vars.returnType) {
@@ -212,22 +211,22 @@ __interrupt void spi_ISR (void) {
          break;
    }
    
+   // one byte less to go
+   spi_vars.pNextTxByte++;
+   spi_vars.numTxedBytes++;
+   spi_vars.txBytesLeft--;
+   
    if (spi_vars.txBytesLeft>0) {
       // write next byte to TX buffer
       U0TXBUF                = *spi_vars.pNextTxByte;
-      spi_vars.pNextTxByte++;
-      // one byte less to go
-      spi_vars.numTxedBytes++;
-      spi_vars.txBytesLeft--;
    } else {
       // put CS signal high to signal end of transmission to slave
       if (spi_vars.isLast==SPI_LAST) {
          P4OUT                 |=  0x04;
       }
-      
       // SPI is not busy anymore
       spi_vars.busy             =  0;
-      
+      // signal SPI is done
       if (spi_vars.callback!=NULL) {
          spi_vars.callback();
       }

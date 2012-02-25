@@ -11,6 +11,21 @@
 
 //=========================== typedef =========================================
 
+/**
+The SPI module functions in two modes:
+- in "blocking" mode, all calls return only when the module is done. the CPU
+  is not available while the module is busy. This is the preferred method is
+  low-RAM system which can not run an RTOS
+- in "RTOS" mode, calls are returned after the module has started a
+  transaction. When the transaction is done, the module uses a callback
+  function to signal this to the caller. This frees up CPU time, allowing for
+  other operations to happen concurrently. This is the preferred method when an
+  RTOS is present.
+*/
+#define SPI_IN_RTOS_MODE
+
+//=========================== typedef =========================================
+
 typedef enum {
    SPI_FIRSTBYTE        = 0,
    SPI_BUFFER           = 1,
@@ -34,7 +49,9 @@ typedef void (*spiCallback_t)(void);
 //=========================== prototypes ======================================
 
 void    spi_init();
-void    spi_setCallback(spiCallback_t spiCallback);
+#ifdef SPI_IN_RTOS_MODE
+void    spi_setCallback(spiCallback_t cb);
+#endif
 void    spi_txrx(uint8_t*     bufTx,
                  uint8_t      lenbufTx,
                  spi_return_t returnType,
