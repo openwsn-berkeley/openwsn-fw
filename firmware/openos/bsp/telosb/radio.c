@@ -81,40 +81,19 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
 void radio_txEnable() {
    cc2420_status_t status;
    
-   radio_spiStrobe(CC2420_SRXON, &status);
-   
-   radio_spiStrobe(CC2420_SNOP, &status);
-   while (status.rssi_valid==1) {
-      radio_spiStrobe(CC2420_SNOP, &status);
-   }
-   /*
-   cc2420_status_t status;
-   
    radio_spiStrobe(CC2420_STXCAL, &status);
-   
    while (status.lock==0) {
       radio_spiStrobe(CC2420_SNOP, &status);
    }
-   */
 }
 
 void radio_txNow() {
    cc2420_status_t       status;
-   cc2420_FSCTRL_reg_t   cc2420_FSCTRL_reg;
-   cc2420_FSMSTATE_reg_t cc2420_FSMSTATE_reg;
-   
    radio_spiStrobe(CC2420_STXON, &status);
-   
    radio_spiStrobe(CC2420_SNOP, &status);
    while (status.tx_active==1) {
       radio_spiStrobe(CC2420_SNOP, &status);
    }
-   
-   radio_spiReadReg(CC2420_FSCTRL_ADDR,&status,(uint8_t*)&cc2420_FSCTRL_reg);
-   cc2420_FSCTRL_reg = cc2420_FSCTRL_reg;
-   
-   radio_spiReadReg(CC2420_FSMSTATE_ADDR,&status,(uint8_t*)&cc2420_FSMSTATE_reg);
-   cc2420_FSMSTATE_reg = cc2420_FSMSTATE_reg;
 }
 
 void radio_rxEnable() {
@@ -138,25 +117,33 @@ void radio_rfOff() {
 //=========================== private =========================================
 
 void radio_spiStrobe(uint8_t strobe, cc2420_status_t* statusRead) {
-   uint8_t              spi_tx_buffer[1];
-   uint8_t              spi_rx_buffer[1];
+   uint8_t  spi_tx_buffer[1];
    
    spi_tx_buffer[0]     = (CC2420_FLAG_WRITE | CC2420_FLAG_REG | strobe);
-   spi_txrx(&(spi_tx_buffer[0]),sizeof(spi_tx_buffer),&(spi_rx_buffer[0]), 0);
    
-   *statusRead          = *(cc2420_status_t*)&spi_rx_buffer[0];
+   spi_txrx(spi_tx_buffer,
+            sizeof(spi_tx_buffer),
+            SPI_FIRSTBYTE,
+            (uint8_t*)statusRead,
+            1,
+            SPI_FIRST,
+            SPI_LAST);
 }
 
 void radio_spiWriteReg(uint8_t reg, cc2420_status_t* statusRead, uint16_t regValueToWrite) {
    uint8_t              spi_tx_buffer[3];
-   uint8_t              spi_rx_buffer[3];
    
    spi_tx_buffer[0]     = (CC2420_FLAG_WRITE | CC2420_FLAG_REG | reg);
    spi_tx_buffer[1]     = regValueToWrite/256;
    spi_tx_buffer[2]     = regValueToWrite%256;
-   spi_txrx(&(spi_tx_buffer[0]),sizeof(spi_tx_buffer),&(spi_rx_buffer[0]), 0);
    
-   *statusRead          = *(cc2420_status_t*)&spi_rx_buffer[0];
+   spi_txrx(spi_tx_buffer,
+            sizeof(spi_tx_buffer),
+            SPI_FIRSTBYTE,
+            (uint8_t*)statusRead,
+            1,
+            SPI_FIRST,
+            SPI_LAST);
 }
 
 void radio_spiReadReg(uint8_t reg, cc2420_status_t* statusRead, uint8_t* regValueRead) {
@@ -164,9 +151,16 @@ void radio_spiReadReg(uint8_t reg, cc2420_status_t* statusRead, uint8_t* regValu
    uint8_t              spi_rx_buffer[3];
    
    spi_tx_buffer[0]     = (CC2420_FLAG_READ | CC2420_FLAG_REG | reg);
-   spi_tx_buffer[1]     = 0;
-   spi_tx_buffer[2]     = 0;
-   spi_txrx(&(spi_tx_buffer[0]),sizeof(spi_tx_buffer),&(spi_rx_buffer[0]), 0);
+   spi_tx_buffer[1]     = 0x00;
+   spi_tx_buffer[2]     = 0x00;
+   
+   spi_txrx(spi_tx_buffer,
+            sizeof(spi_tx_buffer),
+            SPI_BUFFER,
+            spi_rx_buffer,
+            sizeof(spi_rx_buffer),
+            SPI_FIRST,
+            SPI_LAST);
    
    *statusRead          = *(cc2420_status_t*)&spi_rx_buffer[0];
    *(regValueRead+0)    = spi_rx_buffer[2];
@@ -174,12 +168,32 @@ void radio_spiReadReg(uint8_t reg, cc2420_status_t* statusRead, uint8_t* regValu
 }
 
 void radio_spiWriteTxFifo(cc2420_status_t* statusRead, uint8_t* bufToWrite, uint8_t len) {
-   *(bufToWrite-1)      = (CC2420_FLAG_WRITE | CC2420_FLAG_REG | CC2420_TXFIFO_ADDR);
+   uint8_t              spi_tx_buffer[2];
    
-   spi_txrx(bufToWrite-1,len+3,(uint8_t*)statusRead,1);
+   // step 1. send SPI address and length byte
+   spi_tx_buffer[0]     = (CC2420_FLAG_WRITE | CC2420_FLAG_REG | CC2420_TXFIFO_ADDR);
+   spi_tx_buffer[1]     = len;
+   
+   spi_txrx(spi_tx_buffer,
+            sizeof(spi_tx_buffer),
+            SPI_FIRSTBYTE,
+            (uint8_t*)statusRead,
+            1,
+            SPI_FIRST,
+            SPI_NOTLAST);
+   
+   // step 2. send payload
+   spi_txrx(bufToWrite,
+            len,
+            SPI_LASTBYTE,
+            (uint8_t*)statusRead,
+            1,
+            SPI_NOTFIRST,
+            SPI_LAST);
 }
 
 void radio_spiReadRxFifo(cc2420_status_t* statusRead, uint8_t* bufRead, uint8_t* lenRead, uint8_t maxBufLen) {
+   /* poipoi
    uint8_t              spi_tx_buffer[10];
    
    spi_tx_buffer[0]     = (CC2420_FLAG_READ | CC2420_FLAG_REG | CC2420_RXFIFO_ADDR);
@@ -187,6 +201,7 @@ void radio_spiReadRxFifo(cc2420_status_t* statusRead, uint8_t* bufRead, uint8_t*
    spi_tx_buffer[2]     = 0;
    
    spi_txrx(&spi_tx_buffer[0],10,bufRead,0);
+   */
 }
 
 //=========================== interrupt handlers ==============================

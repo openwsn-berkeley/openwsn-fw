@@ -17,22 +17,21 @@
 */
 int main(void)
 {  
-   uint8_t packet[LENGTH_PACKET+2];
+   uint8_t packet[LENGTH_PACKET];
    uint8_t i;
    
    // initialize
    board_init();
    
    // prepare packet
-   packet[1] = LENGTH_PACKET;
    for (i=0;i<LENGTH_PACKET;i++) {
-      packet[i+2] = i;
+      packet[i] = i;
    }
    
    // send packet
    radio_setFrequency(CHANNEL);
    radio_rfOn();
-   radio_loadPacket(&packet[1],LENGTH_PACKET+2);
+   radio_loadPacket(&packet[0],LENGTH_PACKET);
    radio_txEnable();
    radio_txNow();
    radio_rfOff();

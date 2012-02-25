@@ -9,15 +9,35 @@
 
 #include "stdint.h"
 
-//=========================== define ==========================================
-
 //=========================== typedef =========================================
+
+typedef enum {
+   SPI_FIRSTBYTE        = 0,
+   SPI_BUFFER           = 1,
+   SPI_LASTBYTE         = 2,
+} spi_return_t;
+
+typedef enum {
+   SPI_NOTFIRST         = 0,
+   SPI_FIRST            = 1,
+} spi_first_t;
+
+typedef enum {
+   SPI_NOTLAST          = 0,
+   SPI_LAST             = 1,
+} spi_last_t;
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 void    spi_init();
-void    spi_txrx(uint8_t* spaceToSend, uint8_t len, uint8_t* spaceToReceive, uint8_t overwrite);
+void    spi_txrx(uint8_t*     bufTx,
+                 uint8_t      lenbufTx,
+                 spi_return_t returnType,
+                 uint8_t*     bufRx,
+                 uint8_t      maxLenBufRx,
+                 spi_first_t  isFirst,
+                 spi_last_t   isLast);
 
 #endif
