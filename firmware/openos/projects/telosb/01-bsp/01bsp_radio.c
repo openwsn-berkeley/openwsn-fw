@@ -10,7 +10,7 @@
 #include "leds.h"
 
 #define LENGTH_PACKET 100
-#define CHANNEL       26
+#define CHANNEL       11
 
 /**
 \brief The program starts executing here.
