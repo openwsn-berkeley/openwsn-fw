@@ -27,11 +27,14 @@ typedef enum {
    SPI_LAST             = 1,
 } spi_last_t;
 
+typedef void (*spiCallback_t)(void);
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 void    spi_init();
+void    spi_setCallback(spiCallback_t spiCallback);
 void    spi_txrx(uint8_t*     bufTx,
                  uint8_t      lenbufTx,
                  spi_return_t returnType,

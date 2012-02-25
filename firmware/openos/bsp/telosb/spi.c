@@ -26,6 +26,7 @@ typedef struct {
    spi_first_t     isFirst;
    spi_last_t      isLast;
    uint8_t         busy;
+   spiCallback_t   callback;
 } spi_vars_t;
 
 spi_vars_t spi_vars;
@@ -94,6 +95,10 @@ void spi_init() {
                                                  // i.e. an RX completion necessarily
                                                  // implies a TX completion.
 #endif
+}
+
+void spi_setCallback(spiCallback_t cb) {
+   spi_vars.callback = cb;
 }
 
 void spi_txrx(uint8_t*     bufTx,
@@ -222,6 +227,10 @@ __interrupt void spi_ISR (void) {
       
       // SPI is not busy anymore
       spi_vars.busy             =  0;
+      
+      if (spi_vars.callback!=NULL) {
+         spi_vars.callback();
+      }
    }
 }
 #endif
