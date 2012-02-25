@@ -19,7 +19,6 @@
   <project>
     <path>$WS_DIR$\projects\telosb\00-standalone\00std_i2c.ewp</path>
   </project>
-  
   <project>
     <path>$WS_DIR$\projects\telosb\01-bsp\01bsp_leds.ewp</path>
   </project>
@@ -31,13 +30,6 @@
   </project>
   <project>
     <path>$WS_DIR$\projects\telosb\01-bsp\01bsp_radio.ewp</path>
-  </project>
-  
-  <project>
-    <path>$WS_DIR$\projects\telosb\test_radio.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\projects\telosb\openwsn.ewp</path>
   </project>
   <batchBuild/>
 </workspace>
