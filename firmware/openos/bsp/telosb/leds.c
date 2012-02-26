@@ -16,52 +16,75 @@
 
 //=========================== public ==========================================
 
-void leds_init() {
+void    leds_init() {
    P5DIR     |=  0x70;                           // P5DIR = 0bx111xxxx for LEDs
    P5OUT     |=  0x70;                           // P2OUT = 0bx111xxxx, all LEDs off
 }
 
-void leds_error_on() {
+void    leds_error_on() {
    P5OUT     &= ~0x10;
 }
-void leds_error_off() {
+void    leds_error_off() {
    P5OUT     |=  0x10;
 }
-void leds_error_toggle() {
+void    leds_error_toggle() {
    P5OUT     ^=  0x10;
 }
+uint8_t leds_error_isOn() {
+   return (uint8_t)(P5OUT & 0x10)>>4;
+}
 
-void leds_radio_on() {
+void    leds_radio_on() {
    P5OUT     &= ~0x20;
 }
-void leds_radio_off() {
+void    leds_radio_off() {
    P5OUT     |=  0x20;
 }
-void leds_radio_toggle() {
+void    leds_radio_toggle() {
    P5OUT     ^=  0x20;
 }
+uint8_t leds_radio_isOn() {
+   return (uint8_t)(P5OUT & 0x20)>>5;
+}
 
-void leds_sync_on() {
+void    leds_sync_on() {
    P5OUT     &= ~0x40;
 }
-void leds_sync_off() {
+void    leds_sync_off() {
    P5OUT     |=  0x40;
 }
-void leds_sync_toggle() {
+void    leds_sync_toggle() {
    P5OUT     ^=  0x40;
 }
+uint8_t leds_sync_isOn() {
+   return (uint8_t)(P5OUT & 0x40)>>6;
+}
 
-void leds_all_on() {
+void    leds_debug_on() {
+   // TelosB doesn't have a debug LED :(
+}
+void    leds_debug_off() {
+   // TelosB doesn't have a debug LED :(
+}
+void    leds_debug_toggle() {
+   // TelosB doesn't have a debug LED :(
+}
+uint8_t leds_debug_isOn() {
+   // TelosB doesn't have a debug LED :(
+   return 0;
+}
+
+void    leds_all_on() {
    P5OUT     &= ~0x70;
 }
-void leds_all_off() {
+void    leds_all_off() {
    P5OUT     |=  0x70;
 }
-void leds_all_toggle() {
+void    leds_all_toggle() {
    P5OUT     ^=  0x70;
 }
 
-void leds_circular_shift() {
+void    leds_circular_shift() {
    uint8_t leds_on;
    // get LED state
    leds_on  = (~P5OUT & 0x70) >> 4;
@@ -81,7 +104,7 @@ void leds_circular_shift() {
    P5OUT &= ~( leds_on & 0x70);                  // switch off the leds marked '0' in leds_on
 }
 
-void leds_increment() {
+void    leds_increment() {
    uint8_t leds_on;
    // get LED state
    leds_on  = (~P5OUT & 0x70) >> 4;

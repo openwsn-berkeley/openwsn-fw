@@ -2,6 +2,9 @@
 
 <workspace>
   <project>
+    <path>$WS_DIR$\projects\gina\01-bsp\01bsp_leds.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\projects\gina\test_leds_xtal.ewp</path>
   </project>
   <project>

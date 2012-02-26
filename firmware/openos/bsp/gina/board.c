@@ -1,17 +1,12 @@
 /**
-\brief TelosB-specific definition of the "board" bsp module.
+\brief GINA-specific definition of the "board" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "msp430f1611.h"
+#include "msp430x26x.h"
 #include "board.h"
-// bsp modules
 #include "leds.h"
-#include "uart.h"
-#include "spi.h"
-#include "radio.h"
-#include "radiotimer.h"
 
 //=========================== variables =======================================
 
@@ -21,19 +16,14 @@
 
 void board_init() {
    // disable watchdog timer
-   WDTCTL     =  WDTPW + WDTHOLD;
+   WDTCTL  = WDTPW + WDTHOLD;
    
    // setup clock speed
-   DCOCTL     =  DCO0 | DCO1 | DCO2;             // MCLK at ~8MHz
-   BCSCTL1    =  RSEL0 | RSEL1 | RSEL2;          // MCLK at ~8MHz
-                                                 // by default, ACLK from 32kHz XTAL which is running
+   BCSCTL1 = CALBC1_16MHZ;                       // MCLK at ~16MHz
+   DCOCTL  = CALDCO_16MHZ;                       // MCLK at ~16MHz
    
    // initialize bsp modules
    leds_init();
-   uart_init();
-   spi_init();
-   radio_init();
-   radiotimer_init();
    
    // enable interrupts
    __bis_SR_register(GIE);

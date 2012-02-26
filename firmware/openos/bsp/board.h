@@ -1,5 +1,5 @@
 /**
-\brief Cross-platform declaration "board" bsp module.
+\brief GINA-specific definition of the "board" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */

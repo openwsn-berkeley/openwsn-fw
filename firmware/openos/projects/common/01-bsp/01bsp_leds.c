@@ -27,6 +27,9 @@ int main(void)
    leds_sync_on();
    leds_sync_off();
    leds_sync_toggle();
+   leds_debug_on();
+   leds_debug_off();
+   leds_debug_toggle();
    leds_sync_toggle();
    leds_circular_shift();
    
