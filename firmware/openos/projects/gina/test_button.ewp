@@ -318,10 +318,12 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\drivers\gina</state>
-          <state>$PROJ_DIR$\..\..\openwsn</state>
-          <state>$PROJ_DIR$\..\..\openwsn\02a-MAC</state>
-          <state>$PROJ_DIR$\..\..\openwsn\cross-layers</state>
+          <state>$PROJ_DIR$\..\..\drivers\</state>
+          <state>$PROJ_DIR$\..\..\drivers\gina\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02a-MAClow\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\cross-layers\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1881,10 +1883,10 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\button.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\board.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\board.c</name>
+      <name>$PROJ_DIR$\..\..\drivers\gina\button.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\leds.c</name>

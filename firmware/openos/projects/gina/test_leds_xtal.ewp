@@ -317,7 +317,9 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\drivers\gina</state>
+          <state>$PROJ_DIR$\..\..\drivers\</state>
+          <state>$PROJ_DIR$\..\..\drivers\gina\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>

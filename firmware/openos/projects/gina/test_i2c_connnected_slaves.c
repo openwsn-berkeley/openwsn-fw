@@ -56,7 +56,7 @@ void main(void)
    P1OUT |= 0x04;                                // P1.2 high
    for (current_address=1; current_address<128; current_address++) {
      P1OUT ^= 0x02;                              // toggle P1.1
-     connected[current_address] = i2c_slave_present(current_address);
+     connected[current_address] = i2c_slave_present(1,current_address);
      if (connected[current_address]==0x01) {
        P2OUT++;
      }

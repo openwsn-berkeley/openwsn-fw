@@ -11,13 +11,13 @@ The digital UART interface is:
 
 #include "msp430x26x.h"
 #include "stdint.h"
-#include "gina.h"
+#include "board.h"
 #include "leds.h"
 
 void main(void)
 {
   //configuring
-  gina_init();
+  board_init();
     
   P3SEL     = 0xC0;                              // P3.6,7 = USCI_A1 TXD/RXD
   /*

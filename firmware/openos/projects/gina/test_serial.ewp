@@ -317,10 +317,34 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\drivers\gina</state>
-          <state>$PROJ_DIR$\..\..\openwsn</state>
-          <state>$PROJ_DIR$\..\..\openwsn\02a-MAC</state>
-          <state>$PROJ_DIR$\..\..\openwsn\cross-layers</state>
+          <state>$PROJ_DIR$</state>
+          <state>$PROJ_DIR$\..\..\drivers\</state>
+          <state>$PROJ_DIR$\..\..\drivers\gina\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02a-MAClow\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\03a-IPHC\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\03b-IPv6\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\04-TRAN\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\heli\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\imu\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rleds\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rreg\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rwellknown\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rt\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rinfo\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rheli\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rxl1\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\rrube\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\ohlone\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpecho\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpinject\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\tcpprint\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\udpecho\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\udpinject\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\07-App\udpprint\</state>
+          <state>$PROJ_DIR$\..\..\openwsn\cross-layers\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1883,7 +1907,43 @@
       <name>$PROJ_DIR$\..\..\drivers\gina\board.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\i2c.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\i2c.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\ieee154etimer.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\ieee154etimer.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\leds.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\openserial.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\openserial.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\opentimers.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\opentimers.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\radio.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\radio.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\spi.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\drivers\gina\spi.h</name>
     </file>
   </group>
 </project>
