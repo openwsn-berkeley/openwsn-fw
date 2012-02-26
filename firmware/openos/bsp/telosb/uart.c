@@ -7,6 +7,7 @@
 #include "msp430f1611.h"
 #include "stdint.h"
 #include "stdio.h"
+#include "string.h"
 #include "uart.h"
 
 //=========================== defines =========================================
@@ -22,7 +23,8 @@ typedef struct {
    uint8_t*        rxBuf;
    uint8_t         rxBufLen;
    uint8_t         rxBufFillThres;
-   uint8_t*        rxBufPtr;
+   uint8_t*        rxBufWrPtr;
+   uint8_t*        rxBufRdPtr;
    uint8_t         rxBufFill;
    uart_rx_cbt     rx_cb;
 } uart_vars_t;
@@ -30,6 +32,8 @@ typedef struct {
 uart_vars_t uart_vars;
 
 //=========================== prototypes ======================================
+
+void reset_rxBuf();
 
 //=========================== public ==========================================
 
@@ -86,8 +90,7 @@ void uart_rxSetup(uint8_t*    rxBuf,
    uart_vars.rxBuf           = rxBuf;
    uart_vars.rxBufLen        = rxBufLen;
    uart_vars.rxBufFillThres  = rxBufFillThres;
-   uart_vars.rxBufPtr        = uart_vars.rxBuf ;
-   uart_vars.rxBufFill       = 0;
+   reset_rxBuf();
    uart_vars.rx_cb           = cb;
    
 }
@@ -98,12 +101,37 @@ void uart_rxStart() {
    IE2                      |=  URXIE1;
 }
 
+void uart_readBytes(uint8_t* buf, uint8_t numBytes) {
+   uint8_t i;
+   
+   for (i=0;i<numBytes;i++) {
+      // copy byte into receive buffer
+      *buf                   = *uart_vars.rxBufRdPtr;
+      // advance counters
+      buf++;
+      uart_vars.rxBufRdPtr++;
+      if (uart_vars.rxBufRdPtr>=uart_vars.rxBuf+uart_vars.rxBufLen) {
+         uart_vars.rxBufRdPtr= uart_vars.rxBuf;
+      }
+   }
+   
+   // reduce fill
+   uart_vars.rxBufFill      -= numBytes;
+}
+
 void uart_rxStop() {
    // disable UART1 RX interrupt
    IE2                      &= ~URXIE1;
 }
 
 //=========================== private =========================================
+
+void reset_rxBuf() {
+   uart_vars.rxBufWrPtr      = uart_vars.rxBuf;
+   uart_vars.rxBufRdPtr      = uart_vars.rxBuf;
+   uart_vars.rxBufFill       = 0;
+   
+}
 
 //=========================== interrupt handlers ==============================
 
@@ -131,11 +159,11 @@ __interrupt void usart1tx_VECTOR (void) {
 #pragma vector = USART1RX_VECTOR
 __interrupt void usart1rx_VECTOR (void) {
    // copy received by into buffer
-   *uart_vars.rxBufPtr       = URXIE1;
+   *uart_vars.rxBufWrPtr     = U1RXBUF;
    // shift pointer
-   uart_vars.rxBufPtr++;
-   if (uart_vars.rxBufPtr>uart_vars.rxBuf+uart_vars.rxBufLen) {
-      uart_vars.rxBufPtr     = uart_vars.rxBuf;
+   uart_vars.rxBufWrPtr++;
+   if (uart_vars.rxBufWrPtr>=uart_vars.rxBuf+uart_vars.rxBufLen) {
+      uart_vars.rxBufWrPtr   = uart_vars.rxBuf;
    }
    // increment fill
    uart_vars.rxBufFill++;
@@ -144,8 +172,7 @@ __interrupt void usart1rx_VECTOR (void) {
       // buffer has overflown
       
       // reset buffer
-      uart_vars.rxBufPtr        = uart_vars.rxBuf ;
-      uart_vars.rxBufFill       = 0;
+      reset_rxBuf();
       
       // call the callback
       if (uart_vars.rx_cb!=NULL) {

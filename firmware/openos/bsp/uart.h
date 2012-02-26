@@ -37,6 +37,7 @@ void uart_rxSetup(uint8_t*    rxBuf,
                   uint8_t     rxBufFillThres,
                   uart_rx_cbt cb);
 void uart_rxStart();
+void uart_readBytes(uint8_t* buf, uint8_t numBytes);
 void uart_rxStop();
 
 #endif

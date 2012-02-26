@@ -21,6 +21,7 @@ typedef struct {
    uint8_t uart_rxBuf[10];
    uint8_t uart_busyTx;
    uint8_t uart_rxBytes;
+   uint8_t rxBytes[5];
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -61,7 +62,7 @@ int main(void)
          board_sleep();
       }
       // read bytes from bsp module
-      
+      uart_readBytes(app_vars.rxBytes,sizeof(app_vars.rxBytes));
       // toggle LED for debug
       leds_sync_toggle();
    }
