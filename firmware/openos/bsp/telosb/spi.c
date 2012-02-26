@@ -28,7 +28,7 @@ typedef struct {
    uint8_t         busy;
 #ifdef SPI_IN_RTOS_MODE
    // callback when module done
-   spiCallback_t   callback;
+   spi_cbt         callback;
 #endif
 } spi_vars_t;
 
@@ -101,7 +101,7 @@ void spi_init() {
 }
 
 #ifdef SPI_IN_RTOS_MODE
-void spi_setCallback(spiCallback_t cb) {
+void spi_setCallback(spi_cbt cb) {
    spi_vars.callback = cb;
 }
 #endif

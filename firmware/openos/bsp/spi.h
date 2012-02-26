@@ -42,7 +42,7 @@ typedef enum {
    SPI_LAST             = 1,
 } spi_last_t;
 
-typedef void (*spiCallback_t)(void);
+typedef void (*spi_cbt)(void);
 
 //=========================== variables =======================================
 
@@ -50,7 +50,7 @@ typedef void (*spiCallback_t)(void);
 
 void    spi_init();
 #ifdef SPI_IN_RTOS_MODE
-void    spi_setCallback(spiCallback_t cb);
+void    spi_setCallback(spi_cbt cb);
 #endif
 void    spi_txrx(uint8_t*     bufTx,
                  uint8_t      lenbufTx,

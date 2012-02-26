@@ -17,11 +17,6 @@
 
 //=========================== variables =======================================
 
-void cb_radioTimerOverflows();
-void cb_radioTimerCompare();
-void cb_startFrame(uint16_t timestamp);
-void cb_endFrame(uint16_t timestamp);
-
 typedef struct {
    uint8_t radio_busy;
    uint8_t num_overflow;
@@ -31,6 +26,13 @@ typedef struct {
 } app_vars_t;
 
 app_vars_t app_vars;
+
+//=========================== prototypes ======================================
+
+void cb_radioTimerOverflows();
+void cb_radioTimerCompare();
+void cb_startFrame(uint16_t timestamp);
+void cb_endFrame(uint16_t timestamp);
 
 //=========================== main ============================================
 
