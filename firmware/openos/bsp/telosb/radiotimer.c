@@ -138,6 +138,8 @@ __interrupt void timerb1_ISR (void) {
          }
          break;
    }
+   
+   __bic_SR_register_on_exit(CPUOFF);  // restart CPU
 }
 
 

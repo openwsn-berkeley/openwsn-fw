@@ -66,7 +66,9 @@ int main(void)
    radio_txEnable();
    radio_txNow();
    app_vars.radio_busy = 1;
-   while (app_vars.radio_busy==1);
+   while (app_vars.radio_busy==1) {
+      board_sleep();
+   }
    radio_rfOff();
    led_radio_toggle();
    

@@ -193,7 +193,7 @@ void spi_txrx(uint8_t*     bufTx,
 
 #ifdef SPI_IN_RTOS_MODE
 #pragma vector = USART0RX_VECTOR
-__interrupt void spi_ISR (void) {
+__interrupt void uasrt0rx_ISR (void) {
    
    // save the byte just received in the RX buffer
    switch (spi_vars.returnType) {
@@ -231,5 +231,7 @@ __interrupt void spi_ISR (void) {
          spi_vars.callback();
       }
    }
+   
+   __bic_SR_register_on_exit(CPUOFF);  // restart CPU
 }
 #endif
