@@ -53,7 +53,7 @@ error_t rleds_receive(OpenQueueEntry_t* msg,
       
       // add CoAP payload
       packetfunctions_reserveHeaderSize(msg,1);
-      if (led_errorIsOn()==TRUE) {
+      if (leds_error_isOn()==1) {
          msg->payload[0]               = '1';
       } else {
          msg->payload[0]               = '0';
@@ -68,11 +68,11 @@ error_t rleds_receive(OpenQueueEntry_t* msg,
       
       // change the LED's state
       if (msg->payload[0]=='1') {
-         led_miscLedOn();
+         leds_debug_on();
       } else if (msg->payload[0]=='2') {
-         led_miscLedToggle();
+         leds_debug_toggle();
       } else {
-         led_miscLedOff();
+         leds_debug_off();
       }
       
       // reset packet payload

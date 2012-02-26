@@ -320,6 +320,8 @@
           <state>$PROJ_DIR$</state>
           <state>$PROJ_DIR$\..\..\drivers\</state>
           <state>$PROJ_DIR$\..\..\drivers\gina\</state>
+          <state>$PROJ_DIR$\..\..\bsp\</state>
+          <state>$PROJ_DIR$\..\..\bsp\gina\</state>
           <state>$PROJ_DIR$\..\..\openwsn\</state>
           <state>$PROJ_DIR$\..\..\openwsn\02a-MAClow\</state>
           <state>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\</state>
@@ -1902,6 +1904,15 @@
     </file>
   </group>
   <group>
+    <name>bsp</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\bsp\gina\leds.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\bsp\leds.h</name>
+    </file>
+  </group>
+  <group>
     <name>drivers</name>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\board.c</name>
@@ -1920,9 +1931,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\large_range_accel.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\leds.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\magnetometer.c</name>

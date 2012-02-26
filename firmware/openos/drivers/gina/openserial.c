@@ -96,7 +96,7 @@ error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t l
 error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
-   led_errorLedToggle();
+   leds_error_toggle();
    __disable_interrupt();
    openserial_vars.somethingInOutputBuffer=TRUE;
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble

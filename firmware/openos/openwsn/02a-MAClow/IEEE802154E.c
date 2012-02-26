@@ -1474,10 +1474,10 @@ void synchronizeAck(int16_t timeCorrection) {
 void changeIsSync(bool newIsSync) {
    ieee154e_vars.isSync = newIsSync;
    if (ieee154e_vars.isSync==TRUE) {
-      led_syncLedOn();
+      leds_sync_on();
       resetStats();
    } else {
-      led_syncLedOff();
+      leds_sync_off();
    }
 }
 

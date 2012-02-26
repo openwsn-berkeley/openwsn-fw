@@ -147,7 +147,7 @@ void radio_txEnable() {
    
    // wiggle debug pin
    DEBUG_PIN_RADIO_SET();
-   led_radioLedOn();
+   leds_radio_on();
    
    // turn on radio's PLL
    spi_write_register(RG_TRX_STATE, CMD_PLL_ON);
@@ -209,7 +209,7 @@ void radio_rxEnable() {
    
    // wiggle debug pin
    DEBUG_PIN_RADIO_SET();
-   led_radioLedOn();
+   leds_radio_on();
    
    //busy wait until radio status is PLL_ON
    while((spi_read_register(RG_TRX_STATUS) & 0x1F) != RX_ON);
@@ -295,7 +295,7 @@ void radio_rfOff() {
    
    // wiggle debug pin
    DEBUG_PIN_RADIO_CLR();
-   led_radioLedOff();
+   leds_radio_off();
    
    // change state
    radio_vars.state = RADIOSTATE_RFOFF;

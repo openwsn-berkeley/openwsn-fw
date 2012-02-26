@@ -76,7 +76,7 @@ error_t rrube_receive(OpenQueueEntry_t* msg,
        coap_header->Code==COAP_CODE_REQ_POST) {
       
       // turn on LED
-      led_miscLedOn();
+      leds_debug_on();
          
       // record the next hop's address
       memcpy(&rrube_vars.nextHop.addr_128b[0],&msg->payload[0],16);
@@ -98,7 +98,7 @@ error_t rrube_receive(OpenQueueEntry_t* msg,
       coap_header->Code==COAP_CODE_REQ_PUT) {
    
       // turn on LED
-      led_miscLedOn();
+      leds_debug_on();
       
       // turn heli on
       heli_on();
@@ -123,7 +123,7 @@ error_t rrube_receive(OpenQueueEntry_t* msg,
       outcome = E_FAIL;
       
       // turn off LED
-      led_miscLedOff();
+      leds_debug_off();
    }
    
    return outcome;
@@ -179,7 +179,7 @@ void rrube_timer() {
       rrube_vars.rrube_state           = RRUBE_ST_IDLE;
       
       // turn off LED
-      led_miscLedOff();
+      leds_debug_off();
   
    } else if (rrube_vars.rrube_state == RRUBE_ST_PUTRXD) {
       // I received a PUT from the previous hop, I need ask the server for the next address
@@ -229,7 +229,7 @@ void rrube_timer() {
       rrube_vars.rrube_state           = RRUBE_ST_IDLE;
       
       // turn off LED
-      led_miscLedOff();
+      leds_debug_off();
    }
    return;
 }
