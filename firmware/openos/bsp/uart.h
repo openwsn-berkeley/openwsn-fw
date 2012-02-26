@@ -15,6 +15,11 @@
 
 //=========================== typedef =========================================
 
+typedef enum {
+   UART_EVENT_THRES_REACHED  = 0,
+   UART_EVENT_OVERFLOW       = 0,
+} uart_event_t;
+
 typedef void (*uart_cbt)(void);
 
 //=========================== variables =======================================
@@ -22,8 +27,15 @@ typedef void (*uart_cbt)(void);
 //=========================== prototypes ======================================
 
 void uart_init();
-void uart_setTxDoneCb(uart_cbt cb);
-void uart_setRxThresholdCb(uart_cbt cb);
+// TX
+void uart_txSetup(uart_cbt cb);
 void uart_tx(uint8_t* txBuf, uint8_t txBufLen);
+// RX
+void uart_rxSetup(uint8_t* rxBuf,
+                  uint8_t  rxBufLen,
+                  uint8_t  rxBufFillThres,
+                  uart_cbt cb);
+void uart_rxStart();
+void uart_rxStop();
 
 #endif

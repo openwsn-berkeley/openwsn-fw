@@ -133,13 +133,16 @@ __interrupt void timerb1_ISR (void) {
       case 0x000c: // CCR6 fires
          break;
       case 0x000e: // timer overflow
-         if (radiotimer_vars.overflowCb!=NULL) {
-            radiotimer_vars.overflowCb();
-         }
          break;
    }
    
    __bic_SR_register_on_exit(CPUOFF);  // restart CPU
 }
 
+#pragma vector=TIMERB0_VECTOR
+__interrupt void timerb0_ISR (void) {
+   if (radiotimer_vars.overflowCb!=NULL) {
+      radiotimer_vars.overflowCb();
+   }
+}
 

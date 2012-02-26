@@ -6,8 +6,10 @@
 */
 
 #include "stdint.h"
+#include "stdio.h"
 #include "board.h"
 #include "uart.h"
+#include "leds.h"
 
 //=========================== defines =========================================
 
@@ -16,14 +18,15 @@ uint8_t stringToSend[] = "Hello World!";
 //=========================== variables =======================================
 
 typedef struct {
-   uint8_t uart_busy;
+   uint8_t uart_busyTx;
 } app_vars_t;
 
 app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_uartDone();
+void cb_uartTxDone();
+void cb_uartRxCb();
 
 //=========================== main ============================================
 
@@ -34,12 +37,19 @@ int main(void)
 {  
    board_init();
    
-   uart_setTxDoneCb(cb_uartDone);
+   // setup UART
+   uart_txSetup(cb_uartTxDone);
+   uart_rxSetup(NULL,
+                0,
+                0,
+                cb_uartRxCb);
+   uart_rxStart();
    
-   uart_tx(&stringToSend[0],sizeof(stringToSend));
+   uart_tx(stringToSend,sizeof(stringToSend));
    
-   app_vars.uart_busy = 1;
-   while (app_vars.uart_busy==1) {
+   app_vars.uart_busyTx = 1;
+   while (app_vars.uart_busyTx==1) {
+      board_sleep();
    }
    
    // go back to sleep
@@ -48,6 +58,10 @@ int main(void)
 
 //=========================== callbacks =======================================
 
-void cb_uartDone() {
-   app_vars.uart_busy = 0;
+void cb_uartTxDone() {
+   app_vars.uart_busyTx = 0;
+}
+
+void cb_uartRxCb() {
+   led_error_toggle();
 }

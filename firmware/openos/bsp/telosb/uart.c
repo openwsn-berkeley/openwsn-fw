@@ -19,9 +19,10 @@ typedef struct {
    uint8_t    txBufLen;
    uart_cbt   txDone_cb;
    // RX
-   uint8_t*   rxBuffer;
-   uint8_t    rxBytesReceived;
-   uint8_t    rxBytesTreshold;
+   uint8_t*   rxBuf;
+   uint8_t    rxBufLen;
+   uint8_t    rxBufFillThres;
+   uint8_t    rxBufFill;
    uart_cbt   rxThreshold_cb;
 } uart_vars_t;
 
@@ -32,36 +33,33 @@ uart_vars_t uart_vars;
 //=========================== public ==========================================
 
 void uart_init() {
-   P3SEL      =  0xC0;                           // P3.6,7 = UART1TX/RX
+   P3SEL                     =  0xC0;            // P3.6,7 = UART1TX/RX
    
-   UCTL1      =  SWRST;                          // hold UART1 module in reset
-   UCTL1     |=  CHAR;                           // 8-bit character
+   UCTL1                     =  SWRST;           // hold UART1 module in reset
+   UCTL1                    |=  CHAR;            // 8-bit character
    
 #ifdef UART_BAUDRATE_115200
    //115200 baud, clocked from 4.8MHz SMCLK
-   UTCTL1    |=  SSEL1;                          // clocking from SMCLK
-   UBR01      =  41;                             // 4.8MHz/115200 - 41.66
-   UBR11      =  0x00;                           //
-   UMCTL1     =  0x4A;                           // modulation
+   UTCTL1                   |=  SSEL1;           // clocking from SMCLK
+   UBR01                     =  41;              // 4.8MHz/115200 - 41.66
+   UBR11                     =  0x00;            //
+   UMCTL1                    =  0x4A;            // modulation
 #else
    //9600 baud, clocked from 32kHz ACLK
-   UTCTL1    |=  SSEL0;                          // clocking from ACLK
-   UBR01      =  0x03;                           // 32768/9600 = 3.41
-   UBR11      =  0x00;                           //
-   UMCTL1     =  0x4A;                           // modulation
+   UTCTL1                   |=  SSEL0;           // clocking from ACLK
+   UBR01                     =  0x03;            // 32768/9600 = 3.41
+   UBR11                     =  0x00;            //
+   UMCTL1                    =  0x4A;            // modulation
 #endif
    
-   ME2       |=  UTXE1 + URXE1;                  // enable UART1 TX/RX
-   UCTL1     &= ~SWRST;                          // clear UART1 reset bit
-   IE2       |=  UTXIE1 + URXIE1;                // enable UART1 TX/RX interrupt
+   ME2                      |=  UTXE1 + URXE1;   // enable UART1 TX/RX
+   UCTL1                    &= ~SWRST;           // clear UART1 reset bit
 }
 
-void uart_setTxDoneCb(uart_cbt cb) {
-   uart_vars.txDone_cb       = cb;
-}
+//===== TX
 
-void uart_setRxThresholdCb(uart_cbt cb) {
-   uart_vars.rxThreshold_cb  = cb;
+void uart_txSetup(uart_cbt cb) {
+   uart_vars.txDone_cb       = cb;               // register callback
 }
 
 void uart_tx(uint8_t* txBuf, uint8_t txBufLen) {
@@ -70,8 +68,36 @@ void uart_tx(uint8_t* txBuf, uint8_t txBufLen) {
    uart_vars.txBuf           = txBuf;
    uart_vars.txBufLen        = txBufLen;
    
+   // enable UART1 TX interrupt
+   IFG2                     &= ~UTXIFG1;
+   IE2                      |=  UTXIE1;
+   
    // send first byte
    U1TXBUF                   = *uart_vars.txBuf;
+}
+
+//===== RX
+
+void uart_rxSetup(uint8_t* rxBuf,
+                  uint8_t  rxBufLen,
+                  uint8_t  rxBufFillThres,
+                  uart_cbt cb) {
+   uart_vars.rxBuf           = rxBuf;
+   uart_vars.rxBufLen        = rxBufLen;
+   uart_vars.rxBufFillThres  = rxBufFillThres;
+   uart_vars.rxThreshold_cb  = cb;
+   uart_vars.rxBufFill       = 0;
+}
+
+void uart_rxStart() {
+   // enable UART1 RX interrupt
+   IFG2                     &= ~URXIFG1;
+   IE2                      |=  URXIE1;
+}
+
+void uart_rxStop() {
+   // disable UART1 RX interrupt
+   IE2                      &= ~URXIE1;
 }
 
 //=========================== private =========================================
@@ -86,15 +112,22 @@ __interrupt void usart1tx_VECTOR (void) {
    
    if (uart_vars.txBufLen>0) {
       // send next byte
-      U1TXBUF                   = *uart_vars.txBuf;
+      U1TXBUF                = *uart_vars.txBuf;
    } else {
       if (uart_vars.txDone_cb!=NULL) {
+         // disable UART1 TX interrupt
+         IE2                &= ~UTXIE1;
+         // call the callback
          uart_vars.txDone_cb();
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
       }
    }
 }
 
 #pragma vector = USART1RX_VECTOR
 __interrupt void usart1rx_VECTOR (void) {
-   P5OUT    ^=  0x10;                           // toggle LED
+   if (uart_vars.rxThreshold_cb!=NULL) {
+      uart_vars.rxThreshold_cb();
+   }
 }
