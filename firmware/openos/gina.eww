@@ -2,9 +2,6 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\projects\gina\program_eui64.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\projects\gina\test_leds_xtal.ewp</path>
   </project>
   <project>
@@ -42,6 +39,9 @@
   </project>
   <project>
     <path>$WS_DIR$\projects\gina\test_imu_radio.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\projects\gina\program_eui64.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\projects\gina\openwsn.ewp</path>
