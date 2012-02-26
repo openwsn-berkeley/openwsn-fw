@@ -30,10 +30,11 @@ void board_init() {
    // initialize bsp modules
    leds_init();
    uart_init();
-   //spi_init();
-   //radio_init();
-   //radiotimer_init();
+   spi_init();
+   radio_init();
+   radiotimer_init();
    
+   // enable interrupts
    __bis_SR_register(GIE);
 }
 
