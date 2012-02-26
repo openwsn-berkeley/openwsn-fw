@@ -236,7 +236,7 @@
         </option>
         <option>
           <name>RadioSoftwareBreakpointType</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>TargetSettlingtime</name>
@@ -602,7 +602,7 @@
         </option>
         <option>
           <name>RadioSoftwareBreakpointType</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>TargetSettlingtime</name>
