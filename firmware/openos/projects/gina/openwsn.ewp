@@ -323,6 +323,7 @@
           <state>$PROJ_DIR$\..\..\bsp\</state>
           <state>$PROJ_DIR$\..\..\bsp\gina\</state>
           <state>$PROJ_DIR$\..\..\openwsn\</state>
+          <state>$PROJ_DIR$\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\openwsn\02a-MAClow\</state>
           <state>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\</state>
           <state>$PROJ_DIR$\..\..\openwsn\03a-IPHC\</state>
@@ -1945,13 +1946,19 @@
       <name>$PROJ_DIR$\..\..\drivers\gina\radio.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\scheduler.c</name>
-    </file>
-    <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\sensitive_accel_temperature.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\spi.c</name>
+    </file>
+  </group>
+  <group>
+    <name>kernel</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\kernel\openos\scheduler.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\kernel\openos\scheduler.h</name>
     </file>
   </group>
   <group>
