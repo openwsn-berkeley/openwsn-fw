@@ -125,13 +125,6 @@ void radio_txNow() {
    radio_spiStrobe(CC2420_STXON, &radio_vars.radioStatusByte);
 }
 
-void radio_waitTxDone() {
-   radio_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
-   while (radio_vars.radioStatusByte.tx_active==1) {
-      radio_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
-   }
-}
-
 void radio_rxEnable() {
    // poipoi
 }

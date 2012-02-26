@@ -107,7 +107,7 @@ __interrupt void timerb1_ISR (void) {
    
    switch (tbiv_local) {
       case 0x0002: // CCR1 fires
-         if (TBCCR1 & CCI) {
+         if (TBCCTL1 & CCI) {
             // SFD pin is high: this was the start of a frame
             if (radiotimer_vars.startFrameCb!=NULL) {
                radiotimer_vars.startFrameCb(TBCCR1);
