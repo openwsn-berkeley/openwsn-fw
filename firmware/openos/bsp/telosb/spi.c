@@ -226,12 +226,14 @@ __interrupt void uasrt0rx_ISR (void) {
       }
       // SPI is not busy anymore
       spi_vars.busy             =  0;
-      // signal SPI is done
+      
+      // SPI is done!
       if (spi_vars.callback!=NULL) {
+         // call the callback
          spi_vars.callback();
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
       }
    }
-   
-   __bic_SR_register_on_exit(CPUOFF);  // restart CPU
 }
 #endif
