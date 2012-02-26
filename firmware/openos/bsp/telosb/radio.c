@@ -8,8 +8,8 @@
 #include "stdint.h"
 #include "string.h"
 #include "radio.h"
-#include "spi.h"
 #include "cc2420.h"
+#include "spi.h"
 
 //=========================== defines =========================================
 
