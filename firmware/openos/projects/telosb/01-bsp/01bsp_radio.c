@@ -34,6 +34,7 @@ int main(void)
    radio_loadPacket(packet,sizeof(packet));
    radio_txEnable();
    radio_txNow();
+   radio_waitTxDone();
    radio_rfOff();
    led_radio_toggle();
    
