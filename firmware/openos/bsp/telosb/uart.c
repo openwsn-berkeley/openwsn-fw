@@ -15,15 +15,16 @@
 
 typedef struct {
    // TX
-   uint8_t*   txBuf;
-   uint8_t    txBufLen;
-   uart_cbt   txDone_cb;
+   uint8_t*        txBuf;
+   uint8_t         txBufLen;
+   uart_txDone_cbt txDone_cb;
    // RX
-   uint8_t*   rxBuf;
-   uint8_t    rxBufLen;
-   uint8_t    rxBufFillThres;
-   uint8_t    rxBufFill;
-   uart_cbt   rxThreshold_cb;
+   uint8_t*        rxBuf;
+   uint8_t         rxBufLen;
+   uint8_t         rxBufFillThres;
+   uint8_t*        rxBufPtr;
+   uint8_t         rxBufFill;
+   uart_rx_cbt     rx_cb;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -58,7 +59,7 @@ void uart_init() {
 
 //===== TX
 
-void uart_txSetup(uart_cbt cb) {
+void uart_txSetup(uart_txDone_cbt cb) {
    uart_vars.txDone_cb       = cb;               // register callback
 }
 
@@ -78,15 +79,17 @@ void uart_tx(uint8_t* txBuf, uint8_t txBufLen) {
 
 //===== RX
 
-void uart_rxSetup(uint8_t* rxBuf,
-                  uint8_t  rxBufLen,
-                  uint8_t  rxBufFillThres,
-                  uart_cbt cb) {
+void uart_rxSetup(uint8_t*    rxBuf,
+                  uint8_t     rxBufLen,
+                  uint8_t     rxBufFillThres,
+                  uart_rx_cbt cb) {
    uart_vars.rxBuf           = rxBuf;
    uart_vars.rxBufLen        = rxBufLen;
    uart_vars.rxBufFillThres  = rxBufFillThres;
-   uart_vars.rxThreshold_cb  = cb;
+   uart_vars.rxBufPtr        = uart_vars.rxBuf ;
    uart_vars.rxBufFill       = 0;
+   uart_vars.rx_cb           = cb;
+   
 }
 
 void uart_rxStart() {
@@ -127,7 +130,38 @@ __interrupt void usart1tx_VECTOR (void) {
 
 #pragma vector = USART1RX_VECTOR
 __interrupt void usart1rx_VECTOR (void) {
-   if (uart_vars.rxThreshold_cb!=NULL) {
-      uart_vars.rxThreshold_cb();
+   // copy received by into buffer
+   *uart_vars.rxBufPtr       = URXIE1;
+   // shift pointer
+   uart_vars.rxBufPtr++;
+   if (uart_vars.rxBufPtr>uart_vars.rxBuf+uart_vars.rxBufLen) {
+      uart_vars.rxBufPtr     = uart_vars.rxBuf;
+   }
+   // increment fill
+   uart_vars.rxBufFill++;
+   // call the callback
+   if        (uart_vars.rxBufFill>=uart_vars.rxBufLen) {
+      // buffer has overflown
+      
+      // reset buffer
+      uart_vars.rxBufPtr        = uart_vars.rxBuf ;
+      uart_vars.rxBufFill       = 0;
+      
+      // call the callback
+      if (uart_vars.rx_cb!=NULL) {
+         uart_vars.rx_cb(UART_EVENT_OVERFLOW);
+      }
+      // make sure CPU restarts after leaving interrupt
+      __bic_SR_register_on_exit(CPUOFF);
+      
+   } else if (uart_vars.rxBufFill>=uart_vars.rxBufFillThres) {
+      // buffer above threshold
+      
+      // call the callback
+      if (uart_vars.rx_cb!=NULL) {
+         uart_vars.rx_cb(UART_EVENT_THRES);
+      }
+      // make sure CPU restarts after leaving interrupt
+      __bic_SR_register_on_exit(CPUOFF);
    }
 }

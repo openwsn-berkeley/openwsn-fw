@@ -74,8 +74,10 @@ int main(void)
    radio_rfOff();
    led_radio_toggle();
    
-   // go back to sleep
-   board_sleep();
+   // sleep
+   while(1) {
+      board_sleep();
+   }
 }
 
 //=========================== callbacks =======================================

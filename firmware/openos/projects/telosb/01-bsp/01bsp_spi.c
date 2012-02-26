@@ -35,6 +35,8 @@ int main(void)
             SPI_FIRST,
             SPI_LAST);
    
-   // go back to sleep
-   board_sleep();
+   // sleep
+   while(1) {
+      board_sleep();
+   }
 }
