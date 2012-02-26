@@ -10,6 +10,7 @@
 #include "radio.h"
 #include "cc2420.h"
 #include "spi.h"
+#include "radiotimer.h"
 
 //=========================== defines =========================================
 
@@ -42,6 +43,12 @@ void radio_init() {
    
    // reset radio
    radio_reset();
+   
+   radiotimer_start(0xffff);//poipoi
+}
+
+void radio_startTimer(uint16_t period) {
+   radiotimer_start(period);
 }
 
 void radio_reset() {

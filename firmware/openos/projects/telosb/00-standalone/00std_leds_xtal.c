@@ -29,19 +29,19 @@ The debug pins are:
 */
 int main(void)
 {
-   WDTCTL     = WDTPW + WDTHOLD;                 // disable watchdog timer
+   WDTCTL     =  WDTPW + WDTHOLD;                // disable watchdog timer
    
-   DCOCTL     = DCO0 | DCO1 | DCO2;              // MCLK at 8MHz
-   BCSCTL1    = RSEL0 | RSEL1 | RSEL2;           // MCLK at 8MHz
+   DCOCTL     =  DCO0 | DCO1 | DCO2;             // MCLK at 8MHz
+   BCSCTL1    =  RSEL0 | RSEL1 | RSEL2;          // MCLK at 8MHz
    
    P5DIR     |=  0x70;                           // P5DIR = 0bx111xxxx for LEDs
    P5OUT     |=  0x70;                           // P2OUT = 0bx111xxxx, all LEDs off
    
    P6DIR     |=  0x40;                           // P4DIR = 0bx1xxxxxx for debug
 
-   TACCTL0    = CCIE;                            // capture/compare interrupt enable
+   TACCTL0    =  CCIE;                           // capture/compare interrupt enable
    TACCR0     =  16000;                          // 16000@32kHz ~ 500ms
-   TACTL      = MC_1+TASSEL_1;                   // up mode, using ACLK
+   TACTL      =  MC_1+TASSEL_1;                  // up mode, using ACLK
 
    __bis_SR_register(GIE+LPM3_bits);             // sleep, but leave ACLK on
 }

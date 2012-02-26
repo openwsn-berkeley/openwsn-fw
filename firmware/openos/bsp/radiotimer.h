@@ -13,11 +13,15 @@
 
 //=========================== typedef =========================================
 
+typedef void (*radiotimer_overflow_cbt)();
+typedef void (*radiotimer_frame_cbt)(uint16_t timestamp);
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-void     radiotimer_init(uint16_t period);
+void     radiotimer_init();
+void     radiotimer_start(uint16_t period); 
 void     radiotimer_schedule(uint16_t offset);
 void     radiotimer_cancel();
 uint16_t radiotimer_getCapturedTime();

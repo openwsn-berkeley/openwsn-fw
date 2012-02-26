@@ -10,6 +10,7 @@
 #include "uart.h"
 #include "spi.h"
 #include "radio.h"
+#include "radiotimer.h"
 
 //=========================== variables =======================================
 
@@ -31,6 +32,7 @@ void board_init() {
    uart_init();
    spi_init();
    radio_init();
+   radiotimer_init();
 }
 
 void board_sleep() {
