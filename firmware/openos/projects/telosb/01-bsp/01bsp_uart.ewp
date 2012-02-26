@@ -690,7 +690,7 @@
         </option>
         <option>
           <name>ListSymbols</name>
-          <state>2</state>
+          <state>0</state>
         </option>
         <option>
           <name>PageLengthCheck</name>
@@ -790,7 +790,7 @@
         </option>
         <option>
           <name>ModuleSummary</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>XlinkStackSize</name>
@@ -1912,6 +1912,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\radio.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\radiotimer.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\radiotimer.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\telosb\spi.c</name>

@@ -648,7 +648,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>button.d43</state>
+          <state>00std_button.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -690,7 +690,7 @@
         </option>
         <option>
           <name>ListSymbols</name>
-          <state>2</state>
+          <state>0</state>
         </option>
         <option>
           <name>PageLengthCheck</name>
@@ -790,7 +790,7 @@
         </option>
         <option>
           <name>ModuleSummary</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>XlinkStackSize</name>
@@ -842,7 +842,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>test_button.a43</state>
+          <state>00std_button.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
