@@ -1872,7 +1872,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_uart.c</name>
+      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_uart.c</name>
     </file>
   </group>
   <group>
