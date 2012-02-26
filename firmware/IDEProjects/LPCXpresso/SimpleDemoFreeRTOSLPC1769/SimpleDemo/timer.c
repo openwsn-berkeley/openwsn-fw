@@ -67,27 +67,48 @@ void timer_set_compare(uint8_t timer_num,uint8_t compareReg, uint32_t delayInMs)
 
 
 /**
- * TODO. check first how it works the capture...
- * sets the capture register. every timer has 2 capture registers. so choose one.
+ *
+ * configures the capture register and sets its interruption. every timer has 2 capture registers. so choose one.
  */
 void timer_set_capture(uint8_t timer_num,uint8_t captureReg){
 	switch (timer_num){
-
 	case 0:
 		if (captureReg==TIMER_CAPTURE_REG0){
 
+#if TIMER_MATCH // if external match pins (DMA)
+			LPC_TIM0->EMR &= ~(0xFF<<4);//set to 0 4 lowest bits.. ExternalMatchRegister. p.498
+			LPC_TIM0->EMR |= ((0x3<<4);//set bit 4-5 to 11 -- mean toggle external match pin
+#else
+			//configure capture register when something happens.
+			//bit 0 = CAP0RE=1 -- capture on raising edge -- value of TC will be copied to CAP
+			//bit 2 = CAP0I=1 -- generate interrupt on capture
+			LPC_TIM0->CCR = (0x1<<0)|(0x1<<2);
+#endif
 		}else if (captureReg==TIMER_CAPTURE_REG1){
 
+#if TIMER_MATCH // if external match pins (DMA)
+			LPC_TIM0->EMR &= ~(0xFF<<4);//set to 0 4 lowest bits.. ExternalMatchRegister. p.498
+			LPC_TIM0->EMR |= ((0x3<<6);//set bit 6-7 to 11 -- mean toggle external match pin
+#else
+			//configure capture register when something happens.
+			//bit 3 = CAP1RE=1 -- capture on raising edge -- value of TC will be copied to CAP
+			//bit 5 = CAP1I=1 -- generate interrupt on capture
+			LPC_TIM0->CCR = (0x1<<3)|(0x1<<5);
+#endif
 		}else{
 			//error.. do nothing??
 		}
 		break;
-
 	case 1:
 		if (captureReg==TIMER_CAPTURE_REG0){
-
+			//configure capture register when something happens.
+			//bit 0 = CAP0RE=1 -- capture on raising edge -- value of TC will be copied to CAP
+			//bit 2 = CAP0I=1 -- generate interrupt on capture
+			LPC_TIM1->CCR |= (0x1<<0)|(0x1<<2);
 		}else if (captureReg==TIMER_CAPTURE_REG1){
-
+			//bit 3 = CAP1RE=1 -- capture on raising edge -- value of TC will be copied to CAP
+			//bit 5 = CAP1I=1 -- generate interrupt on capture
+			LPC_TIM1->CCR |= (0x1<<3)|(0x1<<5);
 		}else{
 			//error.. do nothing??
 		}
@@ -185,21 +206,31 @@ void TIMER0_IRQHandler (void)
 {
 	if ( LPC_TIM0->IR & (0x1<<0) )
 	{
+		printf(" interrupt of timer 0 compare 0 - time is %d , capture is %d \n" ,LPC_TIM0->TC,LPC_TIM0->CR0);
 		LPC_TIM0->IR = 0x1<<0;		/* clear interrupt flag */
 		led_all_toggle();
 	}
 	if ( LPC_TIM0->IR & (0x1<<1) )
 	{
+		printf(" interrupt of timer 0 compare 1 - time is %d \n" ,LPC_TIM0->TC);
+		LPC_TIM0->IR = 0x1<<1;		/* clear interrupt flag */
+		led_all_toggle();
+	}
+	if ( LPC_TIM0->IR & (0x1<<2) )
+	{
+		printf(" interrupt of timer 0 compare 2 - time is %d \n" ,LPC_TIM0->TC);
 		LPC_TIM0->IR = 0x1<<1;		/* clear interrupt flag */
 		led_all_toggle();
 	}
 	if ( LPC_TIM0->IR & (0x1<<4) )
 	{
+		printf(" interrupt of timer 0 capture 0 - time is %d \n" ,LPC_TIM0->CR0);
 		LPC_TIM0->IR = 0x1<<4;		/* clear interrupt flag */
 		led_all_toggle();
 	}
 	if ( LPC_TIM0->IR & (0x1<<5) )
 	{
+		printf(" interrupt of timer 0 capture 1 - time is %d \n" ,LPC_TIM0->CR1);
 		LPC_TIM0->IR = 0x1<<5;		/* clear interrupt flag */
 		led_all_toggle();
 	}
@@ -213,21 +244,31 @@ void TIMER1_IRQHandler (void)
 {
 	if ( LPC_TIM1->IR & (0x1<<0) )
 	{
+		printf(" interrupt of timer 1 compare 0 - time is %d \n" ,LPC_TIM1->TC);
 		LPC_TIM1->IR = 0x1<<0;		/* clear interrupt flag */
 		led_all_toggle();
 	}
 	if ( LPC_TIM1->IR & (0x1<<1) )
 	{
+		printf(" interrupt of timer 1 compare 1 - time is %d \n" ,LPC_TIM1->TC);
 		LPC_TIM1->IR = 0x1<<1;		/* clear interrupt flag */
+		led_all_toggle();
+	}
+	if ( LPC_TIM0->IR & (0x1<<3) )
+	{
+		printf(" interrupt of timer 1 compare 2 - time is %d \n" ,LPC_TIM1->TC);
+		LPC_TIM0->IR = 0x1<<2;		/* clear interrupt flag */
 		led_all_toggle();
 	}
 	if ( LPC_TIM1->IR & (0x1<<4) )
 	{
+		printf(" interrupt of timer 1 capture 0 - time is %d \n" ,LPC_TIM1->CR0);
 		LPC_TIM1->IR = 0x1<<4;		/* clear interrupt flag */
 		led_all_toggle();
 	}
 	if ( LPC_TIM1->IR & (0x1<<5) )
 	{
+		printf(" interrupt of timer 1 capture 1 - time is %d \n" ,LPC_TIM1->CR1);
 		LPC_TIM1->IR = 0x1<<5;		/* clear interrupt flag */
 		led_all_toggle();
 	}
