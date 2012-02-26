@@ -51,6 +51,22 @@ void radio_startTimer(uint16_t period) {
    radiotimer_start(period);
 }
 
+void radio_setOverflowCb(radiotimer_compare_cbt cb) {
+   radiotimer_setOverflowCb(cb);
+}
+
+void radio_setCompareCb(radiotimer_compare_cbt cb) {
+   radiotimer_setCompareCb(cb);
+}
+
+void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
+   radiotimer_setStartFrameCb(cb);
+}
+
+void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
+   radiotimer_setEndFrameCb(cb);
+}
+
 void radio_reset() {
    uint16_t              delay;
    
