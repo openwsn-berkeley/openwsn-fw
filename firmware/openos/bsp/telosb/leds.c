@@ -21,43 +21,43 @@ void leds_init() {
    P5OUT     |=  0x70;                           // P2OUT = 0bx111xxxx, all LEDs off
 }
 
-void led_error_on() {
+void leds_error_on() {
    P5OUT     &= ~0x10;
 }
-void led_error_off() {
+void leds_error_off() {
    P5OUT     |=  0x10;
 }
-void led_error_toggle() {
+void leds_error_toggle() {
    P5OUT     ^=  0x10;
 }
 
-void led_radio_on() {
+void leds_radio_on() {
    P5OUT     &= ~0x20;
 }
-void led_radio_off() {
+void leds_radio_off() {
    P5OUT     |=  0x20;
 }
-void led_radio_toggle() {
+void leds_radio_toggle() {
    P5OUT     ^=  0x20;
 }
 
-void led_sync_on() {
+void leds_sync_on() {
    P5OUT     &= ~0x40;
 }
-void led_sync_off() {
+void leds_sync_off() {
    P5OUT     |=  0x40;
 }
-void led_sync_toggle() {
+void leds_sync_toggle() {
    P5OUT     ^=  0x40;
 }
 
-void led_all_on() {
+void leds_all_on() {
    P5OUT     &= ~0x70;
 }
-void led_all_off() {
+void leds_all_off() {
    P5OUT     |=  0x70;
 }
-void led_all_toggle() {
+void leds_all_toggle() {
    P5OUT     ^=  0x70;
 }
 

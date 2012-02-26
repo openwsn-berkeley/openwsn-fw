@@ -63,7 +63,7 @@ int main(void)
       // read bytes from bsp module
       
       // toggle LED for debug
-      led_sync_toggle();
+      leds_sync_toggle();
    }
 }
 
@@ -75,9 +75,9 @@ void cb_uartTxDone() {
 
 void cb_uartRxCb(uart_event_t ev) {
    if (ev==UART_EVENT_THRES) {
-      led_radio_toggle();
+      leds_radio_toggle();
       app_vars.uart_rxBytes  = 1;
    } else {
-      led_error_toggle();
+      leds_error_toggle();
    }
 }

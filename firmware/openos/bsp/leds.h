@@ -17,21 +17,21 @@
 
 void leds_init();
 
-void led_error_on();
-void led_error_off();
-void led_error_toggle();
+void leds_error_on();
+void leds_error_off();
+void leds_error_toggle();
 
-void led_radio_on();
-void led_radio_off();
-void led_radio_toggle();
+void leds_radio_on();
+void leds_radio_off();
+void leds_radio_toggle();
 
-void led_sync_on();
-void led_sync_off();
-void led_sync_toggle();
+void leds_sync_on();
+void leds_sync_off();
+void leds_sync_toggle();
 
-void led_all_on();
-void led_all_off();
-void led_all_toggle();
+void leds_all_on();
+void leds_all_off();
+void leds_all_toggle();
 
 void leds_circular_shift();
 void leds_increment();

@@ -18,16 +18,16 @@ int main(void)
    
    board_init();
    
-   led_error_on();
-   led_error_off();
-   led_error_toggle();
-   led_radio_on();
-   led_radio_off();
-   led_radio_toggle();
-   led_sync_on();
-   led_sync_off();
-   led_sync_toggle();
-   led_sync_toggle();
+   leds_error_on();
+   leds_error_off();
+   leds_error_toggle();
+   leds_radio_on();
+   leds_radio_off();
+   leds_radio_toggle();
+   leds_sync_on();
+   leds_sync_off();
+   leds_sync_toggle();
+   leds_sync_toggle();
    leds_circular_shift();
    
    while (1) {
