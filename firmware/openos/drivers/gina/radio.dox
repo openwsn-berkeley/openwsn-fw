@@ -3,7 +3,7 @@
 
 \brief Radio driver for the Atmel AT86RF231 IEEE802.15.4 radio.
 
-This radio is one of the better IEEE802.15.4 radio on the market as of the time of market. It's energy consumption is low compared to others on the market (14mA in Tx@0dBm, 12.3mA in Rx) for a very good sensitivity (-101dBm). It also has a couple of very interesting features:
+This radio is one of the better IEEE802.15.4 radio on the market as of the time of writing. It's energy consumption is low compared to others on the market (14mA in Tx@0dBm, 12.3mA in Rx) for a very good sensitivity (-101dBm). It also has a couple of very interesting features:
 
 \section antennaDiversity Antenna Diversity
 
