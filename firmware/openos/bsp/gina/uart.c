@@ -1,5 +1,5 @@
 /**
-\brief TelosB-specific definition of the "uart" bsp module.
+\brief GINA-specific definition of the "uart" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
