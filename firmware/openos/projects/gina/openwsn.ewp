@@ -1907,6 +1907,15 @@
   <group>
     <name>bsp</name>
     <file>
+      <name>$PROJ_DIR$\..\..\bsp\gina\board.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\bsp\board.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\bsp\gina\board_info.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\bsp\gina\leds.c</name>
     </file>
     <file>
@@ -1915,9 +1924,6 @@
   </group>
   <group>
     <name>drivers</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\drivers\gina\board.c</name>
-    </file>
     <file>
       <name>$PROJ_DIR$\..\..\drivers\gina\gyro.c</name>
     </file>
