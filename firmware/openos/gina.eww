@@ -8,6 +8,9 @@
     <path>$WS_DIR$\projects\gina\00-standalone\00std_timers.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\projects\gina\00-standalone\00std_uart.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\projects\gina\01-bsp\01bsp_leds.ewp</path>
   </project>
   <project>

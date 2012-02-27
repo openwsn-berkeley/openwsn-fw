@@ -34,6 +34,9 @@ The digital UART interface is:
 #include "msp430f1611.h"
 #include "stdint.h"
 
+/**
+\brief The program starts executing here.
+*/
 void main(void)
 {
    WDTCTL     =  WDTPW + WDTHOLD;                // disable watchdog timer
@@ -73,6 +76,9 @@ void main(void)
 #endif  
 }
 
+/**
+\brief This function is called when the the UASRT1 module receives a byte.
+*/
 #pragma vector=USART1RX_VECTOR
 __interrupt void uart_ISR(void)
 {
