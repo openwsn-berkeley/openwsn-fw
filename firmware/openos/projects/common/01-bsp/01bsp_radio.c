@@ -1,6 +1,9 @@
 /**
 \brief This program shows the use of the "radio" bsp module.
 
+Since the bsp modules for different platforms have the same declaration, you
+can use this project with any platform.
+
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
@@ -12,8 +15,8 @@
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET 100
-#define CHANNEL       11
+#define LENGTH_PACKET 100    // maximum length if 127 bytes
+#define CHANNEL       11     // 2.405GHz
 
 //=========================== variables =======================================
 

@@ -62,7 +62,7 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
@@ -101,7 +101,7 @@
         </option>
         <option>
           <name>OGChipSelectMenu</name>
-          <state>MSP430F1611	MSP430F1611</state>
+          <state>MSP430F2618	MSP430F2618</state>
         </option>
         <option>
           <name>GStackHeapOverride</name>
@@ -318,7 +318,7 @@
         <option>
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$\..\..\..\bsp\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\telosb\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\gina\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1878,43 +1878,40 @@
   <group>
     <name>bsp</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\board.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\board.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\board.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\board_info.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\cc2420.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\leds.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\leds.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\leds.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\radio.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\radio.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\radio.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\radiotimer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\radiotimer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\radiotimer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\spi.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\spi.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\spi.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\uart.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\uart.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\uart.h</name>

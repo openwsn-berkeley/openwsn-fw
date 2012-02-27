@@ -1,6 +1,9 @@
 /**
 \brief This program shows the use of the "spi" bsp module.
 
+Since the bsp modules for different platforms have the same declaration, you
+can use this project with any platform.
+
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
