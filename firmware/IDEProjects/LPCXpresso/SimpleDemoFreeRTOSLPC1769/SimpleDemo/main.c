@@ -110,7 +110,7 @@ int main(void)
 	{
 		/* Start the two tasks as described in the accompanying application
 		note. */
-		xTaskCreate( prvQueueReceiveTask, ( signed char * ) "Rx", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
+		//xTaskCreate( prvQueueReceiveTask, ( signed char * ) "Rx", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_RECEIVE_TASK_PRIORITY, NULL );
 		xTaskCreate( prvQueueSendTask, ( signed char * ) "TX", configMINIMAL_STACK_SIZE, NULL, mainQUEUE_SEND_TASK_PRIORITY, NULL );
 
 		/* Start the tasks running. */
@@ -131,6 +131,11 @@ const unsigned long ulValueToSend = 100UL;
 
 	/* Initialise xNextWakeTime - this only needs to be done once. */
 	xNextWakeTime = xTaskGetTickCount();
+		//init the timer
+		timer_init(0);
+		timer_set_compare(0,TIMER_COMPARE_REG0, 250);//5 sec
+		timer_set_capture(0,TIMER_CAPTURE_REG0);
+		timer_enable(0);
 
 	for( ;; )
 	{
@@ -138,6 +143,8 @@ const unsigned long ulValueToSend = 100UL;
 		The block state is specified in ticks, the constant used converts ticks
 		to ms.  While in the blocked state this task will not consume any CPU
 		time. */
+
+
 		vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
 
 		/* Send to the queue - causing the queue receive task to flash its LED.
@@ -145,6 +152,7 @@ const unsigned long ulValueToSend = 100UL;
 		it shouldn't need to block as the queue should always be empty at this
 		point in the code. */
 		xQueueSend( xQueue, &ulValueToSend, 0 );
+
 	}
 }
 /*-----------------------------------------------------------*/
@@ -154,10 +162,10 @@ static void prvQueueReceiveTask( void *pvParameters )
 unsigned long ulReceivedValue;
 uint8_t timeron=0;
 
-timer_init(0);
-timer_set_compare(0,TIMER_COMPARE_REG0, 1000);
-timer_enable(0);
-timeron=1;
+//timer_init(0);
+//timer_set_compare(0,TIMER_COMPARE_REG0, 1000);
+//timer_enable(0);
+//timeron=1;
 	for( ;; )
 	{
 		/* Wait until something arrives in the queue - this task will block
@@ -171,10 +179,10 @@ timeron=1;
 		{
 			//prvToggleLED();
 		if (timeron==0){
-			timer_enable(0);
+		//	timer_enable(0);
 			timeron=1;
 		}else{
-			timer_disable(0);
+			//timer_disable(0);
 			timeron=0;
 		}
 
