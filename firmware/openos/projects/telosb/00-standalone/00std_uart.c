@@ -77,7 +77,7 @@ void main(void)
 }
 
 /**
-\brief This function is called when the the UASRT1 module receives a byte.
+\brief This function is called when the the UART module has received a byte.
 */
 #pragma vector=USART1RX_VECTOR
 __interrupt void uart_ISR(void)
