@@ -160,7 +160,7 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state>OPENWSN_STACK</state>
+          <state></state>
         </option>
         <option>
           <name>CCPreprocFile</name>
