@@ -165,28 +165,29 @@ __interrupt void USCIAB1RX_ISR (void) {
    }
    // increment fill
    uart_vars.rxBufFill++;
-   // call the callback
+   
    if        (uart_vars.rxBufFill>=uart_vars.rxBufLen) {
       // buffer has overflown
       
       // reset buffer
       reset_rxBuf();
       
-      // call the callback
+      
       if (uart_vars.rx_cb!=NULL) {
+         // call the callback
          uart_vars.rx_cb(UART_EVENT_OVERFLOW);
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
       }
-      // make sure CPU restarts after leaving interrupt
-      __bic_SR_register_on_exit(CPUOFF);
       
    } else if (uart_vars.rxBufFill>=uart_vars.rxBufFillThres) {
       // buffer above threshold
       
-      // call the callback
       if (uart_vars.rx_cb!=NULL) {
+         // call the callback
          uart_vars.rx_cb(UART_EVENT_THRES);
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
       }
-      // make sure CPU restarts after leaving interrupt
-      __bic_SR_register_on_exit(CPUOFF);
    }
 }
