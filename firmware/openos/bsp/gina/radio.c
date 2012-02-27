@@ -22,7 +22,8 @@ enum radio_antennaselection_enum {
 //=========================== variables =======================================
 
 typedef struct {
-   uint8_t         spiActive;
+   radiotimer_capture_cbt    startFrameCb;
+   radiotimer_capture_cbt    endFrameCb;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -33,16 +34,12 @@ void    radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting);
 uint8_t radio_spiReadReg(uint8_t reg_addr);
 void    radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t lenToWrite);
 void    radio_spiReadRxFifo(uint8_t* bufRead, uint8_t length);
-void    spiCallback(void);
 
 //=========================== public ==========================================
 
 void radio_init() {
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
-   
-   // tell spi driver to call me when done
-   spi_setCallback(&spiCallback);
    
    // initialize communication between MSP430 and radio
    //-- RF_SLP_TR_CNTL (P4.7) pin (output)
@@ -81,11 +78,11 @@ void radio_setCompareCb(radiotimer_compare_cbt cb) {
 }
 
 void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
-   radiotimer_setStartFrameCb(cb);
+   radio_vars.startFrameCb = cb;
 }
 
 void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
-   radiotimer_setEndFrameCb(cb);
+   radio_vars.endFrameCb = cb;
 }
 
 void radio_reset() {
@@ -183,7 +180,6 @@ void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
    spi_tx_buffer[0] = (0xC0 | reg_addr);        // turn addess in a 'reg write' address
    spi_tx_buffer[1] = reg_setting;
    
-   radio_vars.spiActive = 1;
    spi_txrx(spi_tx_buffer,
             sizeof(spi_tx_buffer),
             SPI_BUFFER,
@@ -191,7 +187,6 @@ void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
             sizeof(spi_rx_buffer),
             SPI_FIRST,
             SPI_LAST);
-   while (radio_vars.spiActive==1);
 }
 
 uint8_t radio_spiReadReg(uint8_t reg_addr) {
@@ -201,7 +196,6 @@ uint8_t radio_spiReadReg(uint8_t reg_addr) {
    spi_tx_buffer[0] = (0x80 | reg_addr);        // turn addess in a 'reg read' address
    spi_tx_buffer[1] = 0x00;                     // send a no_operation command just to get the reg value
    
-   radio_vars.spiActive = 1;
    spi_txrx(spi_tx_buffer,
             sizeof(spi_tx_buffer),
             SPI_BUFFER,
@@ -209,7 +203,6 @@ uint8_t radio_spiReadReg(uint8_t reg_addr) {
             sizeof(spi_rx_buffer),
             SPI_FIRST,
             SPI_LAST);
-   while (radio_vars.spiActive==1);
    
    return spi_rx_buffer[1];
 }
@@ -227,7 +220,6 @@ void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
    */
    uint8_t spi_rx_buffer[1+1+127];              // 1B SPI address, 1B length, max. 127B data
    
-   radio_vars.spiActive = 1;
    spi_txrx(bufToWrite,
             lenToWrite,
             SPI_BUFFER,
@@ -235,14 +227,12 @@ void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
             sizeof(spi_rx_buffer),
             SPI_FIRST,
             SPI_LAST);
-   while (radio_vars.spiActive==1);
 }
 
 void radio_spiReadRxFifo(uint8_t* bufRead, uint8_t length) {
    uint8_t spi_tx_buffer[1+1+127];              // 1B SPI address, 1B length, 127B data
    spi_tx_buffer[0] = 0x20;                     // spi address for 'read frame buffer'
    
-   radio_vars.spiActive = 1;
    spi_txrx(spi_tx_buffer,
             length,
             SPI_BUFFER,
@@ -250,12 +240,41 @@ void radio_spiReadRxFifo(uint8_t* bufRead, uint8_t length) {
             length,
             SPI_FIRST,
             SPI_LAST);
-   while (radio_vars.spiActive==1);
 }
 
 //=========================== callbacks =======================================
 
-void spiCallback(void)
-{
-   radio_vars.spiActive = 0;
+//=========================== interrupt handlers ==============================
+
+#pragma vector = PORT1_VECTOR
+__interrupt void PORT1_ISR (void) {
+   uint16_t capturedTime;
+   uint8_t  irq_status;
+   // clear interrupt flag
+   P1IFG &= ~0x40;
+   // capture the time
+   capturedTime = radiotimer_getCapturedTime();
+   // reading IRQ_STATUS causes IRQ_RF (P1.6) to go low
+   irq_status = radio_spiReadReg(RG_IRQ_STATUS);
+   switch (irq_status) {
+      case AT_IRQ_RX_START:
+         if (radio_vars.startFrameCb!=NULL) {
+            // call the callback
+            radio_vars.startFrameCb(capturedTime);
+            // make sure CPU restarts after leaving interrupt
+            __bic_SR_register_on_exit(CPUOFF);
+         }
+         break;
+      case AT_IRQ_TRX_END:
+         if (radio_vars.endFrameCb!=NULL) {
+            // call the callback
+            radio_vars.endFrameCb(capturedTime);
+            // make sure CPU restarts after leaving interrupt
+            __bic_SR_register_on_exit(CPUOFF);
+         }
+         break;
+      default:
+         while(1);
+         break;
+   }
 }

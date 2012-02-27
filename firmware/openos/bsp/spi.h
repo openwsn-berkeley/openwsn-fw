@@ -22,7 +22,7 @@ The SPI module functions in two modes:
   other operations to happen concurrently. This is the preferred method when an
   RTOS is present.
 */
-#define SPI_IN_RTOS_MODE
+//#define SPI_IN_RTOS_MODE
 
 //=========================== typedef =========================================
 

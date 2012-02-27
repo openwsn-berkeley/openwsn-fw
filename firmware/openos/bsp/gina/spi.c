@@ -163,7 +163,7 @@ void spi_txrx(uint8_t*     bufTx,
 
 #ifdef SPI_IN_RTOS_MODE
 #pragma vector = USCIAB0RX_VECTOR
-__interrupt void usciab0rx_ISR (void) {
+__interrupt void USCIAB0RX_ISR (void) {
    
    // save the byte just received in the RX buffer
    switch (spi_vars.returnType) {

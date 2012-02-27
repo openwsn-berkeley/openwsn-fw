@@ -134,7 +134,7 @@ void reset_rxBuf() {
 //=========================== interrupt handlers ==============================
 
 #pragma vector = USCIAB1TX_VECTOR
-__interrupt void usciab1tx_ISR (void) {
+__interrupt void USCIAB1TX_ISR (void) {
    // one byte less to go
    uart_vars.txBufLen--;
    uart_vars.txBuf++;
@@ -155,7 +155,7 @@ __interrupt void usciab1tx_ISR (void) {
 }
 
 #pragma vector = USCIAB1RX_VECTOR
-__interrupt void usciab1rx_ISR (void) {
+__interrupt void USCIAB1RX_ISR (void) {
    // copy received by into buffer
    *uart_vars.rxBufWrPtr     =  UCA1RXBUF;
    // shift pointer

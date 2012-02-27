@@ -14,8 +14,6 @@
 typedef struct {
    radiotimer_compare_cbt    overflowCb;
    radiotimer_compare_cbt    compareCb;
-   radiotimer_capture_cbt    startFrameCb;
-   radiotimer_capture_cbt    endFrameCb;
 } radiotimer_vars_t;
 
 radiotimer_vars_t radiotimer_vars;
@@ -38,11 +36,11 @@ void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
 }
 
 void radiotimer_setStartFrameCb(radiotimer_capture_cbt cb) {
-   radiotimer_vars.startFrameCb = cb;
+   while(1);
 }
 
 void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
-   radiotimer_vars.endFrameCb   = cb;
+   while(1);
 }
 
 void radiotimer_start(uint16_t period) {
@@ -93,53 +91,22 @@ inline uint16_t radiotimer_getCapturedTime() {
 
 //=========================== interrupt handlers ==============================
 
-/**
-\brief TimerB CCR1-6 interrupt service routine
-*/
-#pragma vector=TIMERB1_VECTOR
-__interrupt void timerb1_ISR (void) {
-   uint16_t tbiv_local;
-   
-   // reading TBIV returns the value of the highest pending interrupt flag
-   // and automatically resets that flags. We therefore copy its value to the
-   // tbiv_local local variable exactly once. If there is more than one 
-   // interrupt pending, we will reenter this function after having just left
-   // it.
-   tbiv_local = TBIV;
-   
-   switch (tbiv_local) {
-      case 0x0002: // CCR1 fires
-         if (TBCCTL1 & CCI) {
-            // SFD pin is high: this was the start of a frame
-            if (radiotimer_vars.startFrameCb!=NULL) {
-               radiotimer_vars.startFrameCb(TBCCR1);
-            }
-         } else {
-            // SFD pin is low: this was the end of a frame
-            if (radiotimer_vars.endFrameCb!=NULL) {
-               radiotimer_vars.endFrameCb(TBCCR1);
-            }
-         }
-         break;
-      case 0x0004: // CCR2 fires
+#pragma vector = TIMERA1_VECTOR
+__interrupt void TIMERA1_ISR (void) {
+   uint16_t taiv_temp = TAIV;                    // read only once because accessing TAIV resets it
+   switch (taiv_temp) {
+      case 0x0002: // capture/compare CCR1
          if (radiotimer_vars.compareCb!=NULL) {
             radiotimer_vars.compareCb();
          }
          break;
-      case 0x0006: // CCR3 fires
-         break;
-      case 0x0008: // CCR4 fires
-         break;
-      case 0x000a: // CCR5 fires
-         break;
-      case 0x000c: // CCR6 fires
-         break;
-      case 0x000e: // timer overflow
+      case 0x000a: // timer overflows
          if (radiotimer_vars.overflowCb!=NULL) {
             radiotimer_vars.overflowCb();
          }
          break;
+      case 0x0004: // capture/compare CCR2
+      default:
+         while(1);                               // this should not happen
    }
-   
-   __bic_SR_register_on_exit(CPUOFF);  // restart CPU
 }

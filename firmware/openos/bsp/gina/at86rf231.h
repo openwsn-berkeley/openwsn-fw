@@ -7,6 +7,23 @@
 
 //=========================== define ==========================================
 
+/**
+\brief Possible values for the status of the radio.
+
+After you get an interrupt from the radio, read the status register
+(<tt>RG_IRQ_STATUS</tt>) to know what type it is, amoung the following.
+*/
+enum radio_irqstatus_enum {
+   AT_IRQ_BAT_LOW                 = 0x80,   /**< Supply voltage below the programmed threshold. */
+   AT_IRQ_TRX_UR                  = 0x40,   /**< Frame buffer access violation. */
+   AT_IRQ_AMI                     = 0x20,   /**< Address matching. */
+   AT_IRQ_CCA_ED_DONE             = 0x10,   /**< End of a CCA or ED measurement. */
+   AT_IRQ_TRX_END                 = 0x08,   /**< Completion of a frame transmission/reception. */
+   AT_IRQ_RX_START                = 0x04,   /**< Start of a PSDU reception. */
+   AT_IRQ_PLL_UNLOCK              = 0x02,   /**< PLL unlock. */
+   AT_IRQ_PLL_LOCK                = 0x01,   /**< PLL lock. */
+};
+
 #define HAVE_REGISTER_MAP (1)
 /** Offset for register TRX_STATUS
  * @ingroup apiHalPHY230Reg
