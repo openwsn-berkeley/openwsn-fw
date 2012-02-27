@@ -66,7 +66,7 @@
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.r43</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -641,7 +641,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_leds.d43</state>
+          <state>01bsp_uart.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -707,7 +707,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F2618.xcl</state>
+          <state>$TOOLKIT_DIR$\CONFIG\lnk430F1611.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -835,7 +835,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_leds.a43</state>
+          <state>01bsp_uart.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1872,7 +1872,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_leds.c</name>
+      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_uart.c</name>
     </file>
   </group>
   <group>

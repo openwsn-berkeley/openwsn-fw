@@ -10,6 +10,7 @@ can use this project with any platform.
 
 #include "stdint.h"
 #include "stdio.h"
+// bsp modules required
 #include "board.h"
 #include "uart.h"
 #include "leds.h"

@@ -7,6 +7,7 @@
 #include "msp430x26x.h"
 #include "board.h"
 #include "leds.h"
+#include "uart.h"
 
 //=========================== variables =======================================
 
@@ -24,6 +25,7 @@ void board_init() {
    
    // initialize bsp modules
    leds_init();
+   uart_init();
    
    // enable interrupts
    __bis_SR_register(GIE);
