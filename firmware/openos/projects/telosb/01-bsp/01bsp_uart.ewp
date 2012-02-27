@@ -1884,6 +1884,9 @@
       <name>$PROJ_DIR$\..\..\..\bsp\board.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\board_info.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\telosb\cc2420.h</name>
     </file>
     <file>
