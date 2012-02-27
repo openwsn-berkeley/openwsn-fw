@@ -88,18 +88,18 @@ void leds_all_toggle() {
 }
 
 void leds_circular_shift() {
-  uint8_t temp_leds;
-  if ((P2OUT & 0x0F)==0) {                       // if no LEDs on, switch on first one
-    P2OUT |= 0x01;
-    return;
-  }
-  temp_leds = P2OUT & 0x0F;                      // retrieve current status of LEDs
-  temp_leds <<= 1;                               // shift by one position
-  if ((temp_leds & 0x10)!=0) {
-    temp_leds++;                                 // handle overflow
-  }
-  P2OUT |= temp_leds;                            // switch on the leds marked '1' in temp_leds
-  P2OUT &= ~(~temp_leds & 0x0F);                 // switch off the leds marked '0' in temp_leds
+   uint8_t temp_leds;
+   if ((P2OUT & 0x0F)==0) {                      // if no LEDs on, switch on first one
+      P2OUT |= 0x01;
+      return;
+   }
+   temp_leds = P2OUT & 0x0F;                     // retrieve current status of LEDs
+   temp_leds <<= 1;                              // shift by one position
+   if ((temp_leds & 0x10)!=0) {
+      temp_leds++;                               // handle overflow
+   }
+   P2OUT |= temp_leds;                           // switch on the leds marked '1' in temp_leds
+   P2OUT &= ~(~temp_leds & 0x0F);                // switch off the leds marked '0' in temp_leds
 }
 
 void leds_increment() {
