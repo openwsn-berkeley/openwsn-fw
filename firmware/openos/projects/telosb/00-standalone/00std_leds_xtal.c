@@ -50,7 +50,7 @@ int main(void)
 \brief This function is called when the TimerA interrupt fires.
 */
 #pragma vector=TIMERA0_VECTOR
-__interrupt void Timer_A_ISR (void) {
+__interrupt void timera0_ISR (void) {
    uint8_t leds_on;
    
    // get LED state
@@ -62,6 +62,7 @@ __interrupt void Timer_A_ISR (void) {
    } else {
       leds_on += 1;
    }
+   
    // apply updated LED state
    leds_on  <<=  4;                              // send back to position 4
    P5OUT     |=  (~leds_on & 0x70);              // switch on the leds marked '1' in leds_on
