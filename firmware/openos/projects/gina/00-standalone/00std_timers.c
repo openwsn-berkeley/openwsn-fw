@@ -4,12 +4,6 @@
 
 Download the program to a GINA board, run it.
 
-The digital outputs are:
-   - P2.0: red LED
-   - P2.1: green LED
-   - P2.2: blue LED
-   - P2.3: red LED
-
 The "inputs" are:
    - XIN, XOUT: 32768Hz crystal oscillator
 
@@ -18,13 +12,11 @@ The debug pins are:
    - P1.1 toggles when interrupt TIMERA0_VECTOR fires
    - P1.2 toggles when interrupt TIMERA0_VECTOR fires
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
 #include "msp430x26x.h"
 #include "stdint.h"
-#include "test_timer.h"
-#include "leds.h"
 
 #define TIMERA0_PERIOD 0x0180
 #define TIMERA1_PERIOD 0x0100
@@ -38,12 +30,10 @@ The debug pins are:
 #define TIMERB5_PERIOD 0x0538
 #define TIMERB6_PERIOD 0x0612
 
-int MAIN_TEST_TIMER(void) {
+int main(void) {
    WDTCTL  = WDTPW + WDTHOLD;                    // disable watchdog timer
    BCSCTL1 = CALBC1_16MHZ;                       // MCLK at 16MHz
    DCOCTL  = CALDCO_16MHZ;
-   
-   leds_init();
    
    P1DIR  |=  0x06;                              // P1DIR = 0bxxxxx11x for debug
    P5DIR  |=  0x40;                              // P5.6 to ouput ACLK (for debug)
@@ -90,7 +80,6 @@ int MAIN_TEST_TIMER(void) {
 #pragma vector=TIMERA0_VECTOR
 __interrupt void TIMERA0_ISR (void) {
    TACCR0 += TIMERA0_PERIOD;
-   leds_circular_shift();                        // circular-shift the LEDs
    __no_operation();
 }
 
