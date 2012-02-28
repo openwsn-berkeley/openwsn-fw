@@ -7,6 +7,8 @@ can use this project with any platform.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
+#include "msp430x26x.h"
+
 #include "stdint.h"
 #include "string.h"
 #include "board.h"
@@ -39,6 +41,8 @@ void cb_endFrame(uint16_t timestamp);
 
 //=========================== main ============================================
 
+uint8_t waitForTimer;
+
 /**
 \brief The program starts executing here.
 */
@@ -49,6 +53,12 @@ int main(void)
    
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));
+   
+   // poipoi
+   BCSCTL3   |=  LFXT1S_0;                       // ACLK sources from external 32kHz
+   TACCTL0    =  CCIE;                           // capture/compare interrupt enable
+   TACCR0     =  32768;                          // 32768 @ 832kHz  1000ms
+   TACTL      =  MC_1+TASSEL_1;                  // up mode, using ACLK
    
    // initialize board
    board_init();
@@ -64,22 +74,25 @@ int main(void)
       packet[i] = i;
    }
    
-   // send packet
-   radio_setFrequency(CHANNEL);
-   radio_rfOn();
-   radio_loadPacket(packet,sizeof(packet));
-   radio_txEnable();
-   radio_txNow();
-   app_vars.radio_busy = 1;
-   while (app_vars.radio_busy==1) {
-      board_sleep();
-   }
-   radio_rfOff();
-   leds_radio_toggle();
-   
-   // sleep
-   while(1) {
-      board_sleep();
+   while (1) {
+      
+      // send packet
+      radio_setFrequency(CHANNEL);
+      radio_rfOn();
+      radio_loadPacket(packet,sizeof(packet));
+      radio_txEnable();
+      radio_txNow();
+      app_vars.radio_busy = 1;
+      while (app_vars.radio_busy==1) {
+         board_sleep();
+      }
+      radio_rfOff();
+      
+      waitForTimer = 1;
+      while(waitForTimer==1) {
+         board_sleep();
+      }
+      leds_error_toggle();
    }
 }
 
@@ -100,4 +113,11 @@ void cb_startFrame(uint16_t timestamp) {
 void cb_endFrame(uint16_t timestamp) {
    app_vars.radio_busy = 0;
    app_vars.num_endFrame++;
+}
+
+// poipoi
+#pragma vector = TIMERA0_VECTOR
+__interrupt void TIMERA0_ISR (void) {
+   waitForTimer = 0;
+   __bic_SR_register_on_exit(CPUOFF);
 }

@@ -181,10 +181,12 @@ __interrupt void TIMERA1_ISR (void) {
 }
 */
 
+/* poipoi
 #pragma vector = TIMERA0_VECTOR
 __interrupt void TIMERA0_ISR (void) {
    while (1); // should never happen
 }
+*/
 
 #pragma vector = WDT_VECTOR
 __interrupt void WDT_ISR (void) {
