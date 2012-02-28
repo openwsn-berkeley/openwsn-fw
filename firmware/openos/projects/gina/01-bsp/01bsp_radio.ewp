@@ -66,7 +66,7 @@
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -707,7 +707,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F1611.xcl</state>
+          <state>$TOOLKIT_DIR$\CONFIG\lnk430F2618.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -1878,6 +1878,9 @@
   <group>
     <name>bsp</name>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\at86rf231.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\gina\board.c</name>
     </file>
     <file>
@@ -1909,6 +1912,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\spi.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\timer.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\timer.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\gina\uart.c</name>

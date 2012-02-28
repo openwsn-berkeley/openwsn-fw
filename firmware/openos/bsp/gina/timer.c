@@ -1,120 +1,229 @@
 #include "msp430x26x.h"
-#include "opentimers.h"
-#include "scheduler.h"
+#include "timers.h"
 
 //=========================== variables =======================================
 
-opentimers_vars_t opentimers_vars;
+typedef struct {
+   uint16_t        period[TIMER_COUNT];
+   timer_type_t    type[TIMER_COUNT];
+   timer_cbt       callback[TIMER_COUNT];
+} timers_vars_t;
+
+timers_vars_t timers_vars;
 
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
-void opentimers_init() {
-   uint8_t i;
-   for(i=0;i<TIMER_COUNT;i++) {
-      opentimers_start(i, 0, FALSE);
-   }
+void timers_init() {
    
-   BCSCTL3 |= LFXT1S_0;                          // source ACLK from 32kHz crystal
+   // clear local variables
+   memset(&timers_vars,0,sieof(timers_vars));
+   
+   // source ACLK from 32kHz crystal
+   BCSCTL3        |=  LFXT1S_0;
 
    //set CCRBx registers
-   TBCCTL0  = 0;
-   TBCCR0   = 0;
-   TBCCTL1  = 0;
-   TBCCR1   = 0;
-   TBCCTL2  = 0;
-   TBCCR2   = 0;
-   TBCCTL3  = 0;
-   TBCCR3   = 0;
-   TBCCTL4  = 0;
-   TBCCR4   = 0;
-   TBCCTL5  = 0;
-   TBCCR5   = 0;
-   TBCCTL6  = 0;
-   TBCCR6   = 0;
+   TBCCTL0         =  0;
+   TBCCR0          =  0;
+   TBCCTL1         =  0;
+   TBCCR1          =  0;
+   TBCCTL2         =  0;
+   TBCCR2          =  0;
+   TBCCTL3         =  0;
+   TBCCR3          =  0;
+   TBCCTL4         =  0;
+   TBCCR4          =  0;
+   TBCCTL5         =  0;
+   TBCCR5          =  0;
+   TBCCTL6         =  0;
+   TBCCR6          =  0;
 
-   //start TimerB on 32kHz ACLK
-   TBCTL    = MC_2+TBSSEL_1;                     // continuous mode, using ACLK
+   //start TimerB
+   TBCTL           =  MC_2+TBSSEL_1;             // continuous mode, from ACLK
 }
 
-void opentimers_startOneShot(uint8_t timer_id, uint16_t duration) {
-   opentimers_start(timer_id, duration, FALSE);
-}
-
-void opentimers_startPeriodic(uint8_t timer_id, uint16_t duration) {
-   opentimers_start(timer_id, duration, TRUE);
-}
-
-void opentimers_stop(uint8_t timer_id) {
-   opentimers_vars.period[timer_id] = 0;
-   opentimers_vars.continuous[timer_id] = 0;
-   switch(timer_id) {
+void timers_start(uint8_t      id,
+                  uint16_t     duration,
+                  timer_type_t type,
+                  timer_cbt    callback) {
+   
+   // register timer
+   timers_vars.period[id]    = duration;
+   timers_vars.type[id]      = type;
+   timers_vars.callback[id]  = callback;
+   
+   // play with HW registers
+   switch(id) {
       case 0:
-         TBCCR0   =  0;
-         TBCCTL0 &= ~CCIE;
+         TBCCR0    =  TBR+timers_vars.period[id];
+         TBCCTL0   =  CCIE;
          break;
       case 1:
-         TBCCR1   =  0;
-         TBCCTL1 &= ~CCIE;
+         TBCCR1    =  TBR+timers_vars.period[id];
+         TBCCTL1   =  CCIE;
          break;
       case 2:
-         TBCCR2   =  0;
-         TBCCTL2 &= ~CCIE;
+         TBCCR2    =  TBR+timers_vars.period[id];
+         TBCCTL2   =  CCIE;
          break;
       case 3:
-         TBCCR3   =  0;
-         TBCCTL3 &= ~CCIE;
+         TBCCR3    =  TBR+timers_vars.period[id];
+         TBCCTL3   =  CCIE;
          break;
       case 4:
-         TBCCR4   =  0;
-         TBCCTL4 &= ~CCIE;
+         TBCCR4    =  TBR+timers_vars.period[id];
+         TBCCTL4   =  CCIE;
          break;
       case 5:
-         TBCCR5   =  0;
-         TBCCTL5 &= ~CCIE;
+         TBCCR5    =  TBR+timers_vars.period[id];
+         TBCCTL5   =  CCIE;
          break;
       case 6:
-         TBCCR6   =  0;
-         TBCCTL6 &= ~CCIE;
+         TBCCR6    =  TBR+timers_vars.period[id];
+         TBCCTL6   =  CCIE;
+         break;
+   }
+}
+
+void timers_stop(uint8_t timer_id) {
+   
+   // unregister timer
+   timers_vars.period[id]    = 0;
+   timers_vars.type[id]      = 0;
+   timers_vars.callback[id]  = NULL;
+   
+   // play with HW registers
+   switch(timer_id) {
+      case 0:
+         TBCCR0    =  0;
+         TBCCTL0  &= ~CCIE;
+         break;
+      case 1:
+         TBCCR1    =  0;
+         TBCCTL1  &= ~CCIE;
+         break;
+      case 2:
+         TBCCR2    =  0;
+         TBCCTL2  &= ~CCIE;
+         break;
+      case 3:
+         TBCCR3    =  0;
+         TBCCTL3  &= ~CCIE;
+         break;
+      case 4:
+         TBCCR4    =  0;
+         TBCCTL4  &= ~CCIE;
+         break;
+      case 5:
+         TBCCR5    =  0;
+         TBCCTL5  &= ~CCIE;
+         break;
+      case 6:
+         TBCCR6    =  0;
+         TBCCTL6  &= ~CCIE;
          break;
    }
 }
 
 //=========================== private =========================================
 
-void opentimers_start(uint8_t timer_id, uint16_t duration, bool continuous) {
-   opentimers_vars.period[timer_id]     = duration;
-   opentimers_vars.continuous[timer_id] = continuous;
-   switch(timer_id) {
-      case 0:
-         TBCCR0   = TBR+opentimers_vars.period[timer_id];
-         TBCCTL0  = CCIE;
-         break;
-      case 1:
-         TBCCR1   = TBR+opentimers_vars.period[timer_id];
-         TBCCTL1  = CCIE;
-         break;
-      case 2:
-         TBCCR2   = TBR+opentimers_vars.period[timer_id];
-         TBCCTL2  = CCIE;
-         break;
-      case 3:
-         TBCCR3   = TBR+opentimers_vars.period[timer_id];
-         TBCCTL3  = CCIE;
-         break;
-      case 4:
-         TBCCR4   = TBR+opentimers_vars.period[timer_id];
-         TBCCTL4  = CCIE;
-         break;
-      case 5:
-         TBCCR5   = TBR+opentimers_vars.period[timer_id];
-         TBCCTL5  = CCIE;
-         break;
-      case 6:
-         TBCCR6   = TBR+opentimers_vars.period[timer_id];
-         TBCCTL6  = CCIE;
-         break;
+//=========================== interrup handlers ===============================
+
+// TimerB CCR0 interrupt service routine
+#pragma vector = TIMERB0_VECTOR
+__interrupt void TIMERB0_ISR (void) {
+   if (timers_vars.type[0]==TIMER_PERIODIC) {
+      TBCCR0           += timers_vars.period[0]; // continuous timer: schedule next instant
+   } else {
+      TBCCTL0           = 0;                     // stop the timer
+      TBCCR0            = 0;
    }
+   // call the callback
+   timers_vars.callback[0]();
+   // make sure CPU restarts after leaving interrupt
+   __bic_SR_register_on_exit(CPUOFF);
 }
 
+// TimerB CCR1-6 interrupt service routine
+#pragma vector = TIMERB1_VECTOR
+__interrupt void TIMERB1through6_ISR (void) {
+   uint16_t tbiv_temp   = TBIV;                  // read only once because accessing TBIV resets it
+   switch (tbiv_temp) {
+      case 0x0002: // timerB CCR1
+         if (timers_vars.type[1]==TIMER_PERIODIC) {
+            TBCCR1     += timers_vars.period[1]; // continuous timer: schedule next instant
+         } else {
+            TBCCTL1     = 0;                     // stop the timer
+            TBCCR1      = 0;
+         }
+         // call the callback
+         timers_vars.callback[poipoi]();
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
+         break;
+      case 0x0004: // timerB CCR2
+         if (timers_vars.type[2]==TIMER_PERIODIC) {
+            TBCCR2     += timers_vars.period[2]; // continuous timer: schedule next instant
+         } else {
+            TBCCTL2     = 0;                     // stop the timer
+            TBCCR2      = 0;
+         }
+         // call the callback
+         timers_vars.callback[poipoi]();
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
+         break;
+      case 0x0006: // timerB CCR3
+         if (timers_vars.type[3]==TIMER_PERIODIC) {
+            TBCCR3     += timers_vars.period[3]; // continuous timer: schedule next instant
+         } else {
+            TBCCTL3     = 0;                     // stop the timer
+            TBCCR3      = 0;
+         }
+         // call the callback
+         timers_vars.callback[poipoi]();
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
+         break;
+      case 0x0008: // timerB CCR4
+         if (timers_vars.type[4]==TIMER_PERIODIC) {
+            TBCCR4     += timers_vars.period[4]; // continuous timer: schedule next instant
+         } else {
+            TBCCTL4     = 0;                     // stop the timer
+            TBCCR4      = 0;
+         }
+         // call the callback
+         timers_vars.callback[poipoi]();
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
+         break;
+      case 0x000A: // timerB CCR5
+         if (timers_vars.type[5]==TIMER_PERIODIC) {
+            TBCCR5     += timers_vars.period[5]; // continuous timer: schedule next instant
+         } else {
+            TBCCTL5     = 0;                     // stop the timer
+            TBCCR5      = 0;
+         }
+         // call the callback
+         timers_vars.callback[poipoi]();
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
+         break;
+      case 0x000C: // timerB CCR6
+         if (timers_vars.type[6]==TIMER_PERIODIC) {
+            TBCCR6     += timers_vars.period[6]; // continuous timer: schedule next instant
+         } else {
+            TBCCTL6     = 0;                     // stop the timer
+            TBCCR6      = 0;
+         }
+         // call the callback
+         timers_vars.callback[poipoi]();
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
+         break;
+      default:
+         while(1);                               // this should not happen
+   }
+   DEBUG_PIN_ISR_CLR();
+}
