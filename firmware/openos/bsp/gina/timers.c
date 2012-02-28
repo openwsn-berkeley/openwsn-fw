@@ -1,3 +1,9 @@
+/**
+\brief GINA-specific definition of the "timers" bsp module.
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
+*/
+
 #include "msp430x26x.h"
 #include "string.h"
 #include "timers.h"
