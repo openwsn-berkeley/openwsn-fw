@@ -5,7 +5,7 @@
 */
 
 #include "stdint.h"
-#include "leds.h"
+#include <leds.h>
 #include "LPC17xx.h"
 
 
