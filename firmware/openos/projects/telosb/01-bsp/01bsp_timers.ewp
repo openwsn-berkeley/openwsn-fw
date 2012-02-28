@@ -10,9 +10,9 @@
     <debug>1</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>9</archiveVersion>
+      <archiveVersion>8</archiveVersion>
       <data>
-        <version>28</version>
+        <version>27</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -30,6 +30,10 @@
         <option>
           <name>ListPath</name>
           <state>Debug\List</state>
+        </option>
+        <option>
+          <name>PosIndCode</name>
+          <state>0</state>
         </option>
         <option>
           <name>Hardware Multiplier</name>
@@ -58,11 +62,11 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.h</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430xsfn.r43</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -101,15 +105,15 @@
         </option>
         <option>
           <name>GStackHeapOverride</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>GStackSize2</name>
-          <state>500</state>
+          <state>80</state>
         </option>
         <option>
           <name>GHeapSize2</name>
-          <state>500</state>
+          <state>80</state>
         </option>
         <option>
           <name>RadioDataModelType</name>
@@ -145,31 +149,18 @@
           <name>RadioL092ModelType</name>
           <state>0</state>
         </option>
-        <option>
-          <name>Ropi</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>NoRwDynamicInit</name>
-          <state>0</state>
-        </option>
       </data>
     </settings>
     <settings>
       <name>ICC430</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>33</version>
+        <version>32</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state>ISR_RADIO</state>
-          <state>ISR_TIMERS</state>
-          <state>ISR_SERIAL</state>
-          <state>ISR_I2C</state>
-          <state>ISR_ADC</state>
-          <state>OPENWSN_STACK</state>
+          <state></state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -297,6 +288,10 @@
           <state>1</state>
         </option>
         <option>
+          <name>CPIC</name>
+          <state>1</state>
+        </option>
+        <option>
           <name>IExtraOptionsCheck</name>
           <state>0</state>
         </option>
@@ -322,16 +317,8 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\..\drivers\telosb</state>
-          <state>$PROJ_DIR$\..\..\openwsn</state>
-          <state>$PROJ_DIR$\..\..\openwsn\02a-MAClow</state>
-          <state>$PROJ_DIR$\..\..\openwsn\02b-MAChigh</state>
-          <state>$PROJ_DIR$\..\..\openwsn\03a-IPHC</state>
-          <state>$PROJ_DIR$\..\..\openwsn\03b-IPv6</state>
-          <state>$PROJ_DIR$\..\..\openwsn\04-TRAN</state>
-          <state>$PROJ_DIR$\..\..\openwsn\07-App</state>
-          <state>$PROJ_DIR$\..\..\openwsn\cross-layers</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\telosb\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -455,14 +442,6 @@
         <option>
           <name>IccFloatSemantics</name>
           <state>0</state>
-        </option>
-        <option>
-          <name>CROPI</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>CNoRwDynamicInit</name>
-          <state>1</state>
         </option>
       </data>
     </settings>
@@ -662,7 +641,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>openwsn.d43</state>
+          <state>01bsp_radio.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -704,7 +683,7 @@
         </option>
         <option>
           <name>ListSymbols</name>
-          <state>2</state>
+          <state>0</state>
         </option>
         <option>
           <name>PageLengthCheck</name>
@@ -804,7 +783,7 @@
         </option>
         <option>
           <name>ModuleSummary</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>XlinkStackSize</name>
@@ -856,7 +835,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>openwsn.a43</state>
+          <state>01bsp_radio.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -965,9 +944,9 @@
     <debug>0</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>9</archiveVersion>
+      <archiveVersion>8</archiveVersion>
       <data>
-        <version>28</version>
+        <version>27</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -985,6 +964,10 @@
         <option>
           <name>ListPath</name>
           <state>Release\List</state>
+        </option>
+        <option>
+          <name>PosIndCode</name>
+          <state>0</state>
         </option>
         <option>
           <name>Hardware Multiplier</name>
@@ -1100,21 +1083,13 @@
           <name>RadioL092ModelType</name>
           <state>0</state>
         </option>
-        <option>
-          <name>Ropi</name>
-          <state>0</state>
-        </option>
-        <option>
-          <name>NoRwDynamicInit</name>
-          <state>0</state>
-        </option>
       </data>
     </settings>
     <settings>
       <name>ICC430</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>33</version>
+        <version>32</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1244,6 +1219,10 @@
         </option>
         <option>
           <name>CCLibConfigHeader</name>
+          <state>1</state>
+        </option>
+        <option>
+          <name>CPIC</name>
           <state>1</state>
         </option>
         <option>
@@ -1396,14 +1375,6 @@
         <option>
           <name>IccFloatSemantics</name>
           <state>0</state>
-        </option>
-        <option>
-          <name>CROPI</name>
-          <state>1</state>
-        </option>
-        <option>
-          <name>CNoRwDynamicInit</name>
-          <state>1</state>
         </option>
       </data>
     </settings>
@@ -1901,169 +1872,58 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\openwsn_proj.c</name>
+      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_timers.c</name>
     </file>
   </group>
   <group>
-    <name>drivers</name>
+    <name>bsp</name>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\gyro.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\board.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\i2c.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\board.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\ieee154etimer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\large_range_accel.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\cc2420.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\leds.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\leds.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\magnetometer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\leds.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\radio.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\radio.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\scheduler.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\radio.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\sensitive_accel_temperature.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\radiotimer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\spi.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\radiotimer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\telosb.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\spi.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\drivers\telosb\timers.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\spi.h</name>
     </file>
-  </group>
-  <group>
-    <name>openwsn</name>
-    <group>
-      <name>02a-MAClow</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\02a-MAClow\IEEE802154E.c</name>
-      </file>
-    </group>
-    <group>
-      <name>02b-MAChigh</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\neighbors.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\res.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\02b-MAChigh\schedule.c</name>
-      </file>
-    </group>
-    <group>
-      <name>03a-IPHC</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\03a-IPHC\iphc.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\03a-IPHC\openbridge.c</name>
-      </file>
-    </group>
-    <group>
-      <name>03b-IPv6</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\03b-IPv6\forwarding.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\03b-IPv6\icmpv6.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\03b-IPv6\icmpv6echo.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\03b-IPv6\icmpv6router.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\03b-IPv6\icmpv6rpl.c</name>
-      </file>
-    </group>
-    <group>
-      <name>04-TRAN</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\04-TRAN\tcp.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\04-TRAN\udp.c</name>
-      </file>
-    </group>
-    <group>
-      <name>07-App</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\apptcpecho.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\apptcpinject.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\apptcpohlone.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\apptcpprint.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpchannel.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpecho.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpinject.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpleds.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpprint.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudpsensor.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudptelosb.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\appudptimer.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\07-App\ohlone_webpages.c</name>
-      </file>
-    </group>
-    <group>
-      <name>cross-layers</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\idmanager.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\openqueue.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\openserial.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\packetfunctions.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\openwsn\cross-layers\random.c</name>
-      </file>
-    </group>
     <file>
-      <name>$PROJ_DIR$\..\..\openwsn\openwsn.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\timers.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\timers.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\uart.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\uart.h</name>
     </file>
   </group>
 </project>

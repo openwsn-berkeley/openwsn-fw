@@ -41,7 +41,7 @@
         </option>
         <option>
           <name>DynDriver</name>
-          <state>SIM430</state>
+          <state>430FET</state>
         </option>
         <option>
           <name>dDllSlave</name>
@@ -236,7 +236,7 @@
         </option>
         <option>
           <name>RadioSoftwareBreakpointType</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>TargetSettlingtime</name>
@@ -602,7 +602,7 @@
         </option>
         <option>
           <name>RadioSoftwareBreakpointType</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>TargetSettlingtime</name>
