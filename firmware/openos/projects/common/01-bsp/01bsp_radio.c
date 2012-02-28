@@ -46,8 +46,6 @@ void cb_timer();
 
 //=========================== main ============================================
 
-uint8_t waitForTimer;
-
 /**
 \brief The program starts executing here.
 */

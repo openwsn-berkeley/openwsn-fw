@@ -641,7 +641,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_radio.d43</state>
+          <state>01bsp_timers.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -1872,7 +1872,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_radio.c</name>
+      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_timers.c</name>
     </file>
   </group>
   <group>
