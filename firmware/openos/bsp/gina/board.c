@@ -149,20 +149,24 @@ __interrupt void PORT1_ISR (void) {
 }
 */
 
+/* // poipoi defined in OpenWSN
 #pragma vector = PORT2_VECTOR
 __interrupt void PORT2_ISR (void) {
    while (1); // should never happen
 }
+*/
 
 #pragma vector = RESERVED20_VECTOR
 __interrupt void RESERVED20_ISR (void) {
    while (1); // should never happen
 }
 
+/* // poipoi defined in OpenWSN
 #pragma vector = ADC12_VECTOR
 __interrupt void ADC12_ISR (void) {
    while (1); // should never happen
 }
+*/
 
 #pragma vector = USCIAB0TX_VECTOR
 __interrupt void USCIAB0TX_ISR (void) {
@@ -193,10 +197,12 @@ __interrupt void WDT_ISR (void) {
    while (1); // should never happen
 }
 
+/* // poipoi defined in OpenWSN
 #pragma vector = COMPARATORA_VECTOR
 __interrupt void COMPARATORA_ISR (void) {
    while (1); // should never happen
 }
+*/
 
 /* // defined in bsp module "timers"
 #pragma vector = TIMERB1_VECTOR
