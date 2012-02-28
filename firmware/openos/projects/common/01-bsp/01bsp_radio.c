@@ -15,8 +15,8 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET 100    // maximum length if 127 bytes
-#define CHANNEL       11     // 2.405GHz
+#define LENGTH_PACKET 48+LENGTH_CRC    // maximum length is 127 bytes
+#define CHANNEL       11               // 2.405GHz
 
 //=========================== variables =======================================
 

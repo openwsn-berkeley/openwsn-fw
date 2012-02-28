@@ -208,24 +208,26 @@ uint8_t radio_spiReadReg(uint8_t reg_addr) {
 }
 
 void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
-   // poipoi add SPI byte + len
-   /*
-   // add 1B length at the beginning (PHY header)
-   packetfunctions_reserveHeaderSize(packet,1);
-   packet->payload[0] = packet->length-1;   // length (not counting length field)
+   uint8_t spi_tx_buffer[2];
+   uint8_t spi_rx_buffer[1+1+127];               // 1B SPI address, 1B length, max. 127B data
    
-   // add 1B SPI address at the beginning (internally for SPI)
-   packetfunctions_reserveHeaderSize(packet,1);
-   packet->payload[0] = 0x60;
-   */
-   uint8_t spi_rx_buffer[1+1+127];              // 1B SPI address, 1B length, max. 127B data
+   spi_tx_buffer[0] = 0x60;                      // SPI destination address for TXFIFO
+   spi_tx_buffer[1] = lenToWrite;                // length byte
+   
+   spi_txrx(spi_tx_buffer,
+            sizeof(spi_tx_buffer),
+            SPI_BUFFER,
+            spi_rx_buffer,
+            sizeof(spi_rx_buffer),
+            SPI_FIRST,
+            SPI_NOTLAST);
    
    spi_txrx(bufToWrite,
             lenToWrite,
             SPI_BUFFER,
             spi_rx_buffer,
             sizeof(spi_rx_buffer),
-            SPI_FIRST,
+            SPI_NOTFIRST,
             SPI_LAST);
 }
 
