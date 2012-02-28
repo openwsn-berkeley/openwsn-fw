@@ -1,20 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>SimpleDemo</name>
+	<name>FreeRTOS_MPU_Library</name>
 	<comment></comment>
 	<projects>
 		<project>CMSISv2p00_LPC17xx</project>
-		<project>FreeRTOS_Library</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
 			<name>org.eclipse.cdt.managedbuilder.core.genmakebuilder</name>
 			<triggers>clean,full,incremental,</triggers>
 			<arguments>
-				<dictionary>
-					<key>?children?</key>
-					<value>?name?=outputEntries\|?children?=?name?=entry\\\\\\\|\\\|\||</value>
-				</dictionary>
 				<dictionary>
 					<key>?name?</key>
 					<value></value>
@@ -37,7 +32,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/Example16/Debug}</value>
+					<value>${workspace_loc:/FreeRTOS_Library/Debug}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>
@@ -84,11 +79,4 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
-	<linkedResources>
-		<link>
-			<name>bsp</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/bsp</locationURI>
-		</link>
-	</linkedResources>
 </projectDescription>
