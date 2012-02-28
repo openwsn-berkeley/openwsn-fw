@@ -1878,6 +1878,9 @@
   <group>
     <name>bsp</name>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\at86rf231.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\gina\board.c</name>
     </file>
     <file>
@@ -1912,6 +1915,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\spi.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\gina\timers.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\timers.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\gina\uart.c</name>
