@@ -1914,6 +1914,12 @@
       <name>$PROJ_DIR$\..\..\..\bsp\spi.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\telosb\timers.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\timers.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\telosb\uart.c</name>
     </file>
     <file>
