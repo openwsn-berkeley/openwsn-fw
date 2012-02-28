@@ -10,6 +10,7 @@
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
+#include "timers.h"
 #include "radio.h"
 #include "radiotimer.h"
 
@@ -32,6 +33,7 @@ void board_init() {
    leds_init();
    uart_init();
    spi_init();
+   timers_init();
    radio_init();
    radiotimer_init();
    
