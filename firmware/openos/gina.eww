@@ -20,6 +20,9 @@
     <path>$WS_DIR$\projects\gina\01-bsp\01bsp_spi.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\projects\gina\01-bsp\01bsp_timers.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\projects\gina\01-bsp\01bsp_radio.ewp</path>
   </project>
   <project>
