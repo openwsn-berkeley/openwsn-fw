@@ -3,7 +3,7 @@
 	<name>SimpleDemo</name>
 	<comment></comment>
 	<projects>
-		<project>CMSISv1p30_LPC17xx</project>
+		<project>CMSISv2p00_LPC17xx</project>
 		<project>FreeRTOS_Library</project>
 	</projects>
 	<buildSpec>
@@ -84,4 +84,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
+	<linkedResources>
+		<link>
+			<name>bsp</name>
+			<type>2</type>
+			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_lpc1769/openos/bsp</location>
+		</link>
+	</linkedResources>
 </projectDescription>
