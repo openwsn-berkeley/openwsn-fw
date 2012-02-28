@@ -11,8 +11,9 @@
 #include "string.h"
 #include "uart.h"
 
+
 //=========================== defines =========================================
-#define BUS_CLOCK 16000000
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -35,55 +36,42 @@ uart_vars_t uart_vars;
 //=========================== prototypes ======================================
 
 void reset_rxBuf();
-void SetSCIBaudRate(uint16_t baudRate);
+void SetSCIBaudRate(uint32_t baudRate);
 void sci2_PutChar(char send);
+void interrupt VectorNumber_Vsci2tx SCI2TX_int(void);
+void interrupt VectorNumber_Vsci2rx SCI2RX_ISR(void);
+
 
 //=========================== public ==========================================
 
-//adapted from Freescale example project USB_PHDC
-void SetSCIBaudRate(uint16_t baudRate)
-{
- uint_32 	baud_divisor;
- 
- /* Calculate baud settings */
- /* baud_divisor = clock_speed/ baudrate + 0.5 */
- 
- #ifdef  USER_CONFIG_BAUDRATE
-  baudRate = USER_CONFIG_BAUDRATE;
- #endif
- 
-  //error turn off serial
- baud_divisor = (BUS_CLOCK + (8 * (uint_32)baudRate)) / (16 * (uint_32)baudRate);  
- if (baud_divisor > 0x1fff) 
- {
-	 SCI2BDH = 0x00;
-	 SCI2BDL = 0x00;
- }else{
-     SCI2BDH = (uchar)((baud_divisor >> 8) & 0xFF);
-     SCI2BDL = (uchar)(baud_divisor & 0xFF);
- }
-
- return kUARTNoError;
-}
-
 void uart_init() {
 
+	SCI2C2 = 0x00;                       /* Disable the SCI2 module */
+	(void)(SCI2S1 == 0);                 /* Dummy read of the SCI2S1 registr to clear flags */
+	(void)(SCI2D == 0);                  /* Dummy read of the SCI2D registr to clear flags */
 	
+   //given a bus speed of 8.886857MHZ	
 #ifdef UART_BAUDRATE_115200
 	 /* Configure SCI baud rate = 115200 */
-	SetSCIBaudRate(115200);
+	SCI2BDH = 0x00; 
+	SCI2BDL = 5;  //baud=BUS_SPEED/(SCI2BDL*16)
 #else
-     /* Configure SCI baud rate = 9600  */
-	SetSCIBaudRate(9600);
+     /* Configure SCI baud rate = 9600 */	
+	SCI2BDH = 0x00; 
+	SCI2BDL = 58;  //baud=BUS_SPEED/(SCI2BDL*16)
 #endif
-   
-	  SCI2C1  = 0;
-	  SCI2C2  = 0x0C;
-	  SCI2S2  = 0x04;
-	  SCI2C2_RE = 0x1;
-	  SCI2C2_RIE = 0x1;
-	 //SCI2C2_TIE = 0x1;
+  
+    SCI2C1  = 0;
+	SCI2C2  = 0x0C;
+	SCI2S2  = 0x04;
+	SCI2C2_RE = 0x1;  //RX enable
+    SCI2C2_RIE = 0x0; //RX interupt disable, enable  in tx function    
+	SCI2C2_TE = 0x1;  //TX enable
+    SCI2C2_TIE = 0x0; //TX interupt disable, enable  in tx function  
 }
+
+
+
 
 //===== TX
 
@@ -95,10 +83,11 @@ void uart_txSetup(uart_txDone_cbt cb) {
 //adapted from Freescale example project USB_PHDC
 void sci2_PutChar(char send) 
 {
-  char dummy;
-  while(!SCI2S1_TDRE){};
-  dummy = (char)SCI2S1;
-  SCI2D  = (uint_8)send;    
+
+  while (!SCI2S1_TDRE);  /* ensure Tx data buffer empty */
+  SCI2D = send;			 
+  while (!SCI2S1_TC); /* wait for Tx complete */
+  
 }
 
 void uart_tx(uint8_t* txBuf, uint8_t txBufLen) {
@@ -107,11 +96,13 @@ void uart_tx(uint8_t* txBuf, uint8_t txBufLen) {
    uart_vars.txBuf           = txBuf;
    uart_vars.txBufLen        = txBufLen;
    
-   // enable UART TX interrupt -- poipoi
-   
+   // enable UART TX interrupt 
+   SCI2C2_TIE = 0x1;   
    // send first byte
    sci2_PutChar(*uart_vars.txBuf);
 }
+
+
 
 //===== RX
 
@@ -129,8 +120,7 @@ void uart_rxSetup(uint8_t*    rxBuf,
 
 void uart_rxStart() {
    // enable UART RX interrupt
-   UC1IFG                   &= ~UCA1RXIFG;
-   UC1IE                    |=  UCA1RXIE;
+   SCI2C2_RIE = 0x1;
 }
 
 void uart_readBytes(uint8_t* buf, uint8_t numBytes) {
@@ -153,7 +143,7 @@ void uart_readBytes(uint8_t* buf, uint8_t numBytes) {
 
 void uart_rxStop() {
    // disable UART1 RX interrupt
-   UC1IE                    &= ~UCA1RXIE;
+	SCI2C2_RIE = 0x0;
 }
 
 //=========================== private =========================================
@@ -167,31 +157,28 @@ void reset_rxBuf() {
 
 //=========================== interrupt handlers ==============================
 
-#pragma vector = USCIAB1TX_VECTOR
-__interrupt void USCIAB1TX_ISR (void) {
+void interrupt VectorNumber_Vsci2tx SCI2TX_int(void) {
    // one byte less to go
    uart_vars.txBufLen--;
    uart_vars.txBuf++;
    
    if (uart_vars.txBufLen>0) {
       // send next byte
-      UCA1TXBUF              = *uart_vars.txBuf;
+	   sci2_PutChar(*uart_vars.txBuf);
    } else {
       if (uart_vars.txDone_cb!=NULL) {
          // disable UART1 TX interrupt
-         UC1IE              &= ~UCA1TXIE;
+    	  SCI2C2_TIE = 0x0;
          // call the callback
          uart_vars.txDone_cb();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
-      }
+      }//poipoi
    }
 }
 
-#pragma vector = USCIAB1RX_VECTOR
-__interrupt void USCIAB1RX_ISR (void) {
+
+void interrupt VectorNumber_Vsci2rx SCI2RX_ISR(void){
    // copy received by into buffer
-   *uart_vars.rxBufWrPtr     =  UCA1RXBUF;
+   *uart_vars.rxBufWrPtr     =  SCI2D;
    // shift pointer
    uart_vars.rxBufWrPtr++;
    if (uart_vars.rxBufWrPtr>=uart_vars.rxBuf+uart_vars.rxBufLen) {
@@ -211,7 +198,6 @@ __interrupt void USCIAB1RX_ISR (void) {
          // call the callback
          uart_vars.rx_cb(UART_EVENT_OVERFLOW);
          // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
       }
       
    } else if (uart_vars.rxBufFill>=uart_vars.rxBufFillThres) {
@@ -220,46 +206,7 @@ __interrupt void USCIAB1RX_ISR (void) {
       if (uart_vars.rx_cb!=NULL) {
          // call the callback
          uart_vars.rx_cb(UART_EVENT_THRES);
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         
       }
    }
 }
-
-
-//////////////////////////////////////////////////NEW///////////////////////
-/******************************************************************************
-*
-*  SCI RX Interrupt
-*
-******************************************************************************/
-void interrupt VectorNumber_Vsci2tx SCI2TX_int(void){
-   int i;
-	// Tratamento da interrupção
-	(void)SCI2S1;		// Leitura do registrador SCI1S1 para analisar o estado da transmissão
-	(void)SCI2C3;		// Leitura do registrador SCI1C3 para limpar o bit de paridade (caso exista)
-
-   for (i=0;i<nrbytestx;i++)
-   {
-     while (!SCI2S1_TDRE);  /* ensure Tx data buffer empty */
-     SCI2D = txbuf[i];				// dado a mandar
-     //SCI1C2_TIE = 0;
-     //SCI2C2_TCIE = 1; 
-     while (!SCI2S1_TC); /* wait for Tx complete */
-   }
-
-   SCI2C2_TCIE = 0; 
- //  SCI1C2_RIE = 1;
-}
-
-//receive
-void interrupt SCI2TX_INTNUM SCI2RX_int(void){
-
-	// Tratamento da interrupção
-	(void)SCI2S1;		// Leitura do registrador SCI1S1 para analisar o estado da transmissão
-	(void)SCI2C3;		// Leitura do registrador SCI1C3 para limpar o bit de paridade (caso exista)
-
-      sci_Data = SCI2D;				// dado a mandar
-      sci_DataAvailable = sciDISPARA_1;	// existe dado pra mandar
-}
-////////////////////////////////////////////
