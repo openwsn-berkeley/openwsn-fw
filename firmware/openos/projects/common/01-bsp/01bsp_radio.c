@@ -14,16 +14,20 @@ can use this project with any platform.
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
+#include "timers.h"
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET 48+LENGTH_CRC    // maximum length is 127 bytes
-#define CHANNEL       11               // 2.405GHz
+#define LENGTH_PACKET   48+LENGTH_CRC  // maximum length is 127 bytes
+#define CHANNEL         11             // 2.405GHz
+#define TIMER_ID        0
+#define TIMER_DURATION  32768          // ~1s @ 32kHz    
 
 //=========================== variables =======================================
 
 typedef struct {
    uint8_t radio_busy;
+   uint8_t timer_busy;
    uint8_t num_overflow;
    uint8_t num_compare;
    uint8_t num_startFrame;
@@ -38,6 +42,7 @@ void cb_radioTimerOverflows();
 void cb_radioTimerCompare();
 void cb_startFrame(uint16_t timestamp);
 void cb_endFrame(uint16_t timestamp);
+void cb_timer();
 
 //=========================== main ============================================
 
@@ -54,12 +59,6 @@ int main(void)
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));
    
-   // poipoi
-   BCSCTL3   |=  LFXT1S_0;                       // ACLK sources from external 32kHz
-   TACCTL0    =  CCIE;                           // capture/compare interrupt enable
-   TACCR0     =  32768;                          // 32768 @ 832kHz  1000ms
-   TACTL      =  MC_1+TASSEL_1;                  // up mode, using ACLK
-   
    // initialize board
    board_init();
    
@@ -74,7 +73,15 @@ int main(void)
       packet[i] = i;
    }
    
+   // start timer
+   timers_start(TIMER_ID,
+                TIMER_DURATION,
+                TIMER_PERIODIC,
+                cb_timer);
+   
    while (1) {
+      
+      leds_radio_on();
       
       // send packet
       radio_setFrequency(CHANNEL);
@@ -88,11 +95,12 @@ int main(void)
       }
       radio_rfOff();
       
-      waitForTimer = 1;
-      while(waitForTimer==1) {
+      leds_radio_off();
+      
+      app_vars.timer_busy = 1;
+      while (app_vars.timer_busy==1) {
          board_sleep();
       }
-      leds_error_toggle();
    }
 }
 
@@ -115,9 +123,6 @@ void cb_endFrame(uint16_t timestamp) {
    app_vars.num_endFrame++;
 }
 
-// poipoi
-#pragma vector = TIMERA0_VECTOR
-__interrupt void TIMERA0_ISR (void) {
-   waitForTimer = 0;
-   __bic_SR_register_on_exit(CPUOFF);
+void cb_timer() {
+   app_vars.timer_busy = 0;
 }

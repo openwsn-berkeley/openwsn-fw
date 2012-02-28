@@ -1,5 +1,11 @@
 #include "msp430x26x.h"
+#include "string.h"
 #include "timers.h"
+#include "board.h"
+
+//=========================== defines =========================================
+
+#define TIMER_COUNT     7              // number of available timer;
 
 //=========================== variables =======================================
 
@@ -18,7 +24,7 @@ timers_vars_t timers_vars;
 void timers_init() {
    
    // clear local variables
-   memset(&timers_vars,0,sieof(timers_vars));
+   memset(&timers_vars,0,sizeof(timers_vars));
    
    // source ACLK from 32kHz crystal
    BCSCTL3        |=  LFXT1S_0;
@@ -86,15 +92,14 @@ void timers_start(uint8_t      id,
    }
 }
 
-void timers_stop(uint8_t timer_id) {
+void timers_stop(uint8_t id) {
    
    // unregister timer
    timers_vars.period[id]    = 0;
-   timers_vars.type[id]      = 0;
    timers_vars.callback[id]  = NULL;
    
    // play with HW registers
-   switch(timer_id) {
+   switch(id) {
       case 0:
          TBCCR0    =  0;
          TBCCTL0  &= ~CCIE;
@@ -147,7 +152,7 @@ __interrupt void TIMERB0_ISR (void) {
 
 // TimerB CCR1-6 interrupt service routine
 #pragma vector = TIMERB1_VECTOR
-__interrupt void TIMERB1through6_ISR (void) {
+__interrupt void TIMERB1_ISR (void) {
    uint16_t tbiv_temp   = TBIV;                  // read only once because accessing TBIV resets it
    switch (tbiv_temp) {
       case 0x0002: // timerB CCR1
@@ -158,7 +163,7 @@ __interrupt void TIMERB1through6_ISR (void) {
             TBCCR1      = 0;
          }
          // call the callback
-         timers_vars.callback[poipoi]();
+         timers_vars.callback[1]();
          // make sure CPU restarts after leaving interrupt
          __bic_SR_register_on_exit(CPUOFF);
          break;
@@ -170,7 +175,7 @@ __interrupt void TIMERB1through6_ISR (void) {
             TBCCR2      = 0;
          }
          // call the callback
-         timers_vars.callback[poipoi]();
+         timers_vars.callback[2]();
          // make sure CPU restarts after leaving interrupt
          __bic_SR_register_on_exit(CPUOFF);
          break;
@@ -182,7 +187,7 @@ __interrupt void TIMERB1through6_ISR (void) {
             TBCCR3      = 0;
          }
          // call the callback
-         timers_vars.callback[poipoi]();
+         timers_vars.callback[3]();
          // make sure CPU restarts after leaving interrupt
          __bic_SR_register_on_exit(CPUOFF);
          break;
@@ -194,7 +199,7 @@ __interrupt void TIMERB1through6_ISR (void) {
             TBCCR4      = 0;
          }
          // call the callback
-         timers_vars.callback[poipoi]();
+         timers_vars.callback[4]();
          // make sure CPU restarts after leaving interrupt
          __bic_SR_register_on_exit(CPUOFF);
          break;
@@ -206,7 +211,7 @@ __interrupt void TIMERB1through6_ISR (void) {
             TBCCR5      = 0;
          }
          // call the callback
-         timers_vars.callback[poipoi]();
+         timers_vars.callback[5]();
          // make sure CPU restarts after leaving interrupt
          __bic_SR_register_on_exit(CPUOFF);
          break;
@@ -218,12 +223,11 @@ __interrupt void TIMERB1through6_ISR (void) {
             TBCCR6      = 0;
          }
          // call the callback
-         timers_vars.callback[poipoi]();
+         timers_vars.callback[6]();
          // make sure CPU restarts after leaving interrupt
          __bic_SR_register_on_exit(CPUOFF);
          break;
       default:
          while(1);                               // this should not happen
    }
-   DEBUG_PIN_ISR_CLR();
 }

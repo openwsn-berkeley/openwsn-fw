@@ -10,6 +10,7 @@
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
+#include "timers.h"
 #include "radio.h"
 #include "radiotimer.h"
 
@@ -31,6 +32,7 @@ void board_init() {
    leds_init();
    uart_init();
    spi_init();
+   timers_init();
    radio_init();
    radiotimer_init();
    
@@ -181,12 +183,10 @@ __interrupt void TIMERA1_ISR (void) {
 }
 */
 
-/* poipoi
 #pragma vector = TIMERA0_VECTOR
 __interrupt void TIMERA0_ISR (void) {
    while (1); // should never happen
 }
-*/
 
 #pragma vector = WDT_VECTOR
 __interrupt void WDT_ISR (void) {
@@ -198,15 +198,19 @@ __interrupt void COMPARATORA_ISR (void) {
    while (1); // should never happen
 }
 
+/* // defined in bsp module "timers"
 #pragma vector = TIMERB1_VECTOR
 __interrupt void TIMERB1_ISR (void) {
    while (1); // should never happen
 }
+*/
 
+/* // defined in bsp module "timers"
 #pragma vector = TIMERB0_VECTOR
 __interrupt void TIMERB0_ISR (void) {
    while (1); // should never happen
 }
+*/
 
 #pragma vector = NMI_VECTOR
 __interrupt void NMI_ISR (void) {
