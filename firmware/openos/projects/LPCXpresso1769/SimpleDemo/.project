@@ -88,7 +88,7 @@
 		<link>
 			<name>bsp</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/bsp</locationURI>
+			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_lpc1769/openos/bsp</location>
 		</link>
 	</linkedResources>
 </projectDescription>
