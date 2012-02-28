@@ -44,6 +44,11 @@ void radio_init() {
 
    MC13192_RESET = 1;//turn radio ON
    
+   while (IRQSC_IRQF == 0);     //busy wait until radio is on
+   (void)radio_spiReadReg(0x24);// Clear MC13192 interrupts 
+   IRQACK();                   /* ACK the pending IRQ interrupt */
+   IRQPinEnable();             /* Pin Enable, IE, IRQ CLR, negative edge. */    
+   
    
    //PA: put the external PA in bypass mode:
     EN_PA1_DIR = 0;
@@ -52,23 +57,45 @@ void radio_init() {
     EN_PA2 = 1;
    
    //init routine:
+   
+/*   The newest version of the MC1321x now uses an updated transceiver device. 
+Although fully compliant with earlier versions of the transceiver, proper performance
+of the radio requires that the following modem registers be over-programmed: Register
+0x31 to 0xA0C0 Register 0x34 to 0xFEC6 These registers must be over-programmed for MC1321x
+devices in which the modem Chip_ID Register 0x2C reads 0x6800.*/
+
+   if(radio_spiReadReg(0x2C)==0x6800){
+     radio_spiWriteReg(0x31,0xA0C0);
+	 radio_spiWriteReg(0x34,0xFEC6);
+	 }
+
+   
+   
 	/* Please refer to document MC13192RM for hidden register initialization */
-   SPIDrvWrite(0x11,0x20FF);   /* Eliminate Unlock Conditions due to L01 */
-   SPIDrvWrite(0x1B,0x8000);   /* Disable TC1. */
-   SPIDrvWrite(0x1D,0x8000);   /* Disable TC2. */
-   SPIDrvWrite(0x1F,0x8000);   /* Disable TC3. */
-   SPIDrvWrite(0x21,0x8000);   /* Disable TC4. */
-   SPIDrvWrite(0x07,0x0E00);   /* Enable CLKo in Doze */
-   SPIDrvWrite(0x0C,0x0300);   /* IRQ pull-up disable. */
-   (void)SPIDrvRead(0x25);           /* Sets the reset indicator bit */
-   SPIDrvWrite(0x04,0xA08D);   /* New cal value */
-   SPIDrvWrite(0x08,0xFFF7);   /* Preferred injection */
-   SPIDrvWrite(0x05,0x8351);   /* Acoma, TC1, Doze, ATTN masks, LO1, CRC */
-   SPIDrvWrite(0x06,0x4720);   /* CCA, TX, RX, energy detect */
+   //radio_spiWriteReg(0x04,0xA08D);   /* cca stuff, not needed */
+   radio_spiWriteReg(0x05,0x0040);   /* no interrupts from this register */
+   radio_spiWriteReg(0x06,0x4310);   /* TX_end interrupt, RX_end interrupt, start in idle mode */
+   radio_spiWriteReg(0x07,0x4EC0);   /* Enable CLKo in Doze, ct bias enabled, dual port mode,  *///this registered used to send mote into doze mode
+   //(0x08,0xFFF7);   // Preferred injection; this is the default
+   //radio_spiWriteReg(0x09,0xF36B);   //default: clko enabled
+   //radio_spiWriteReg(0x0A,0x7E86);   //default: clko is 32.768kHz
+   //radio_spiWriteReg(0x0C,0x0380);   //default: IRQ pull-up enabled.
+   radio_spiWriteReg(0x11,0x20FF);   /* Eliminate Unlock Conditions due to L01 THIS IS WRITTEN BY FREESCALE AND UNDOCUMENTED IN THE DATASHEET!!!*/
+   radio_spiWriteReg(0x1B,0x8000);   /* Disable TC1. */
+   radio_spiWriteReg(0x1D,0x8000);   /* Disable TC2. */
+   radio_spiWriteReg(0x1F,0x8000);   /* Disable TC3. */
+   radio_spiWriteReg(0x21,0x8000);   /* Disable TC4. */
+   
+   
+   (void)radio_spiReadReg(0x25);           /* The RST_Ind Register 25 contains the reset indicator bit. Bit reset_ind is cleared during a reset and gets
+set if Register 25 is read after a reset and remains set */
+
+   
+
+   
  
     /* Read the status register to clear any undesired IRQs. */
-   (void)SPIDrvRead(0x24);           /* Clear the status register, if set */
-   gu8RTxMode = IDLE_MODE;     /* Update global to reflect MC13192 status */
+   (void)radio_spiReadReg(0x24);           /* Clear the status register, if set */
 	
 	//end init routine
    
@@ -80,7 +107,6 @@ void radio_init() {
  
 
    //busy wait until radio status is TRX_OFF
-   while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
    
    //radiotimer_start(0xffff);//poipoi
 }
@@ -135,9 +161,9 @@ void radio_txEnable() {
    stat_reg &= 0xfff8;
    stat_reg |= TX_MODE;
    //turn off LNA
-   MC13192_LNA_CTRL = LNA_OFF;
+   //MC13192_LNA_CTRL = LNA_OFF;
    //turn on PA
-   MC13192_PA_CTRL = PA_ON;
+   //MC13192_PA_CTRL = PA_ON;
    // put radio in reception mode
    radio_spiWriteReg(MODE_ADDR, stat_reg);
    while((radio_spiReadReg(STATUS_ADDR) & 0x8000)); // busy wait until pll locks
@@ -164,9 +190,9 @@ void radio_rxEnable() {
    stat_reg &= 0xfff8;
    stat_reg |= RX_MODE;
    //turn on LNA
-   MC13192_LNA_CTRL = LNA_ON;
+   //MC13192_LNA_CTRL = LNA_ON;
    //turn off PA
-   MC13192_PA_CTRL = PA_OFF;
+   //MC13192_PA_CTRL = PA_OFF;
    // put radio in reception mode
    radio_spiWriteReg(MODE_ADDR, stat_reg);
    MC13192_RTXEN = 1;//assert the signal to put radio in rx mode.
@@ -339,6 +365,7 @@ interrupt void IRQIsr(void){ //REVIEW poipoi prototype: interrupt void IRQIsr(vo
    // reading IRQ_STATUS causes IRQ_RF (P1.6) to go low
    irq_status = radio_spiReadReg(STATUS_ADDR);
    
+   //note: we may need to change the !=0 to !=1
    if((irq_status&RX_IRQ_MASK)!=0){
      if (radio_vars.endFrameCb!=NULL) {
 		 MC13192_RTXEN = 0;//deassert the signal to put radio in idle mode.
@@ -350,6 +377,7 @@ interrupt void IRQIsr(void){ //REVIEW poipoi prototype: interrupt void IRQIsr(vo
    
    }
    
+   //note: we may need to change the !=0 to !=1   
    if((irq_status&TX_IRQ_MASK)!=0){
      if (radio_vars.endFrameCb!=NULL) {
 		 MC13192_RTXEN = 0;//deassert the signal to put radio in idle mode.
