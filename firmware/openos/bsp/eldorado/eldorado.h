@@ -5,6 +5,7 @@
  
 /* includes */
 #include "mc13213.h" //uC
+#include "MC13192_regs.h"
 //#include "mc1392.h"  //radio
 /* Prototypes */
 void spi_init_before_clk_set();//called at the beginning when radio and uC communicate at ~200KHz
@@ -247,3 +248,28 @@ formats.
 
 #define PB_PRESSED 0
 
+
+
+
+
+//radio functions etc
+#ifdef LNA
+    #define MC13192_LNA_CTRL        PTBD_PTBD0
+    #define MC13192_LNA_CTRL_PORT   PTBDD_PTBDD0
+    #define LNA_ON                  1
+    #define LNA_OFF                 0
+#endif
+
+#define EN_PA1_DIR    PTCDD_PTCDD6 //pa1 enable pin
+#define EN_PA2_DIR    PTCDD_PTCDD7  //pa2 enable pin
+#define EN_PA1    PTCD_PTCD6   
+#define EN_PA2    PTCD_PTCD7  
+  
+#define IRQFLAG                     IRQSC_IRQF	 /*!< IRQ Flag*/
+#define IRQACK()                    IRQSC |= 0x04 /*!< IRQ Acknowledge enabled*/
+#define IRQInit()                   IRQSC = 0x14  /*!< Configures IRQ*/
+#define IRQPinEnable()              IRQSC = 0x16  /*!<Enables IRQ pin */
+#define IRQ_Disable()               IRQSC = 0x00;/*!< Set for negative edge. */
+#define MC13192_IRQ_Disable()       MC13192_IRQ_SOURCE = MC13192_IRQ_SOURCE & ~(0x06) /*!<Disables MC13192 transceiver */
+#define MC13192_IRQ_Enable()        MC13192_IRQ_SOURCE = MC13192_IRQ_SOURCE | (0x02)  /*!<Enables MC13192 transceiver */
+#define CLEAR_IRQ_FLAG()            IRQACK()	 /*!< Clears IRQ flag*/

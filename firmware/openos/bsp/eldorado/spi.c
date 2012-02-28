@@ -6,7 +6,7 @@
 
 #include "string.h"
 #include "stdio.h"
-#include "stdint.h"
+#include "PE_Types.h"
 #include "eldorado.h"
 #include "spi.h"
 
@@ -109,7 +109,7 @@ void spi_txrx(uint8_t*     bufTx,
 
 #ifdef SPI_IN_RTOS_MODE
    // disable interrupts
-	__DI();//poipoi syntax
+	MC13192_IRQ_Disable();
 #endif
    
    // register spi frame to send
@@ -127,7 +127,7 @@ void spi_txrx(uint8_t*     bufTx,
    
    // assert CS signal to have slave listening
    if (spi_vars.isFirst==SPI_FIRST) {
-	   AssertCE();
+	   MC13192_CE = 0;
    }
    
 
@@ -138,7 +138,7 @@ void spi_txrx(uint8_t*     bufTx,
    SPI1D                 = *spi_vars.pNextTxByte;
    
    // re-enable interrupts
-   __EI();//poipoi syntax
+   MC13192_IRQ_Enable();
 #else
    // implementation 2. busy wait for each byte to be sent
    
@@ -173,7 +173,7 @@ void spi_txrx(uint8_t*     bufTx,
    
    // put CS signal high to signal end of transmission to slave
    if (spi_vars.isLast==SPI_LAST) {
-	   DeAssertCE();
+	   MC13192_CE = 1;
    }
    
    // SPI is not busy anymore
@@ -222,7 +222,7 @@ void interrupt VectorNumber_Vspi1 SPI1_int(void){
    } else {
       // put CS signal high to signal end of transmission to slave
       if (spi_vars.isLast==SPI_LAST) {
-    	  DeAssertCE();
+    	  MC13192_CE = 1;
       }
       // SPI is not busy anymore
       spi_vars.busy          =  0;
