@@ -6,7 +6,7 @@
 
 #include "string.h"
 #include "stdio.h"
-#include "PE_Types.h"
+#include "stdint.h"
 #include "eldorado.h"
 #include "spi.h"
 
