@@ -256,6 +256,7 @@ void vPortSVCHandler( void )
 static void prvSVCHandler(	unsigned long *pulParam )
 {
 extern unsigned long *_API_end_of_text;
+extern unsigned long *_API_start_of_text;
 unsigned char ucSVCNumber;
 
 	/* The stack contains: r0, r1, r2, r3, r12, r14, the return address and
@@ -272,7 +273,7 @@ unsigned char ucSVCNumber;
 
 		case portSVC_RAISE_PRIVILEGE	:
 										    // make sure one of our own functions called this
-											if ( pulParam >= _API_end_of_text )
+											if ( pulParam >= _API_end_of_text || pulParam < _API_start_of_text )
 												break;
 
 											__asm volatile

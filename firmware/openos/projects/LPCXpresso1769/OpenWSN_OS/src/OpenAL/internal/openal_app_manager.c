@@ -31,6 +31,9 @@ typedef struct volatile_app_data_t {
 xSemaphoreHandle app_data_mutex;
 volatile_app_data_t openal_app_data[OPENAL_NUM_APPS];
 
+// Some other semaphores used by OpenAL
+xSemaphoreHandle pin_configuration_mutex;
+
 
 extern void * _API_end_of_text;
 
@@ -166,6 +169,7 @@ void openal_app_manager_init() {
 
 	app_data_mutex = xSemaphoreCreateMutex();
 	pin_registry_mutex = xSemaphoreCreateMutex();
+	pin_configuration_mutex = xSemaphoreCreateMutex();
 }
 
 

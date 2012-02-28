@@ -16,6 +16,7 @@
 #endif
 
 #include "FreeRTOS.h"
+#include "semphr.h"
 #include "task.h"
 
 #define APP_SLOT_EMPTY 0
@@ -40,19 +41,22 @@ typedef struct openal_pin_state_t {
 
 extern openal_pin_state_t openal_pin_registry[OPENMOTE_NUM_PINS];
 
+// other mutexes used by openAL
+extern xSemaphoreHandle pin_configuration_mutex;
+
 /*
  * Claim pin for current task
  */
-openal_error_code_t openal_claim_pin(char pin) ;
+openal_error_code_t openal_claim_pin(char pin)  OPENAL_LIB;
 
 /*
  * Check if current task is the owner of this pin
  */
-openal_error_code_t openal_check_owner(char pin);
+openal_error_code_t openal_check_owner(char pin) OPENAL_LIB;
 
 /*
  * Initialize openAL app manager
  */
-void openal_app_manager_init();
+void openal_app_manager_init() OPENAL_LIB;
 
 #endif /* OPENAL_APP_REGISTRY_H_ */

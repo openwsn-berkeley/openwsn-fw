@@ -53,11 +53,12 @@ SECTIONS
 		. = __privileged_functions_start__ + _Privileged_Functions_Region_Size;
 	
 		*(.text*)
+		_API_start_of_text = .;
 		KEEP(*(.openAL*))
+		_API_end_of_text = .;
 		*(.rodata*)
 	} > FLASH
 
-	_API_end_of_text = .;
 
 	/* for exception handling/unwind - some Newlib functions (in common with C++ and STDC++) use this. */
 	.ARM.extab : 
