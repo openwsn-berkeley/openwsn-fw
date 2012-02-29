@@ -16,13 +16,13 @@ The SPI module functions in two modes:
 - in "blocking" mode, all calls return only when the module is done. the CPU
   is not available while the module is busy. This is the preferred method is
   low-RAM system which can not run an RTOS
-- in "RTOS" mode, calls are returned after the module has started a
+- in "interrupt" mode, calls are returned after the module has started a
   transaction. When the transaction is done, the module uses a callback
   function to signal this to the caller. This frees up CPU time, allowing for
   other operations to happen concurrently. This is the preferred method when an
   RTOS is present.
 */
-#define SPI_IN_RTOS_MODE
+//#define SPI_IN_INTERRUPT_MODE
 
 //=========================== typedef =========================================
 
@@ -49,7 +49,7 @@ typedef void (*spi_cbt)(void);
 //=========================== prototypes ======================================
 
 void    spi_init();
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
 void    spi_setCallback(spi_cbt cb);
 #endif
 void    spi_txrx(uint8_t*     bufTx,

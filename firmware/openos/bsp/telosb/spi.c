@@ -26,7 +26,7 @@ typedef struct {
    spi_last_t      isLast;
    // state of the module
    uint8_t         busy;
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
    // callback when module done
    spi_cbt         callback;
 #endif
@@ -92,7 +92,7 @@ void spi_init() {
    U0CTL     &= ~SWRST;
    
    // enable interrupts via the IEx SFRs
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
    IE1       |=  URXIE0;                         // we only enable the SPI RX interrupt
                                                  // since TX and RX happen concurrently,
                                                  // i.e. an RX completion necessarily
@@ -100,7 +100,7 @@ void spi_init() {
 #endif
 }
 
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
 void spi_setCallback(spi_cbt cb) {
    spi_vars.callback = cb;
 }
@@ -114,7 +114,7 @@ void spi_txrx(uint8_t*     bufTx,
               spi_first_t  isFirst,
               spi_last_t   isLast) {
 
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
    // disable interrupts
    __disable_interrupt();
 #endif
@@ -137,7 +137,7 @@ void spi_txrx(uint8_t*     bufTx,
       P4OUT                 &= ~0x04;
    }
    
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
    // implementation 1. use a callback function when transaction finishes
    
    // write first byte to TX buffer
@@ -191,9 +191,9 @@ void spi_txrx(uint8_t*     bufTx,
 
 //=========================== interrupt handlers ==============================
 
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
 #pragma vector = USART0RX_VECTOR
-__interrupt void uasrt0rx_ISR (void) {
+__interrupt void USART0RX_ISR (void) {
    
    // save the byte just received in the RX buffer
    switch (spi_vars.returnType) {

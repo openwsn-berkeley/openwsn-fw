@@ -29,7 +29,7 @@ typedef struct {
    spi_last_t      isLast;
    // state of the module
    uint8_t         busy;
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
    // callback when module done
    spi_cbt         callback;
 #endif
@@ -76,7 +76,7 @@ void spi_init() {
 	                      */
    
    // enable interrupts via the IEx SFRs
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
 	    SPI1C1 = 0xD0;   /*  
 	    	                      *  0b11110000
 	    	                      *    ||||||||__ SPI serial data transfers start with MSB
@@ -92,7 +92,7 @@ void spi_init() {
 }
 
 
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
 void spi_setCallback(spi_cbt cb) {
    spi_vars.callback = cb;
 }
@@ -112,7 +112,7 @@ void spi_txrx(uint8_t*     bufTx,
 	   u8TempValue = SPI1S;
 	   u8TempValue = SPI1D;
 	   
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
    // disable interrupts
 	MC13192_IRQ_Disable();
 #endif
@@ -138,7 +138,7 @@ void spi_txrx(uint8_t*     bufTx,
    }
    
 
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
    // implementation 1. use a callback function when transaction finishes
    
    // write first byte to TX buffer
@@ -192,7 +192,7 @@ void spi_txrx(uint8_t*     bufTx,
 
 //=========================== interrupt handlers ==============================
 
-#ifdef SPI_IN_RTOS_MODE
+#ifdef SPI_IN_INTERRUPT_MODE
 //#pragma vector = VectorNumber_Vspi1
 //poipoi syntax
 void interrupt VectorNumber_Vspi1 SPI1_int(void){

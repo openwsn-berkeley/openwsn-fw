@@ -42,7 +42,7 @@ void board_init() {
 }
 
 void board_sleep() {
-   __bis_SR_register(GIE+LPM3_bits);             // sleep, but leave ACLK on
+   __bis_SR_register(GIE+LPM0_bits);             // sleep, but leave ACLK on
 }
 
 //=========================== private =========================================

@@ -7,8 +7,6 @@ can use this project with any platform.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
-#include "msp430x26x.h"
-
 #include "stdint.h"
 #include "string.h"
 #include "board.h"
@@ -77,7 +75,6 @@ int main(void)
                 TIMER_PERIODIC,
                 cb_timer);
    
-   radio_setFrequency(CHANNEL);
    radio_rfOn();
    
    while (1) {
@@ -85,6 +82,7 @@ int main(void)
       leds_radio_on();
       
       // send packet
+      radio_setFrequency(CHANNEL);
       radio_loadPacket(packet,sizeof(packet));
       radio_txEnable();
       radio_txNow();
