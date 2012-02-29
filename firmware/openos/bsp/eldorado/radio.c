@@ -207,18 +207,27 @@ void radio_rxNow() {
    // nothing to do
 }
 
-void radio_getReceivedFrame(uint8_t* bufRead, uint8_t* lenRead, uint8_t maxBufLen) {
+void radio_getReceivedFrame(uint8_t* bufRead,
+                            uint8_t* lenRead,
+                            uint8_t  maxBufLen,
+                                int* rssi,
+                            uint8_t* lqi,
+                            uint8_t* crc) {
+   uint16_t temp;
    uint8_t len;
    uint8_t junk;
-   len = radio_spiReadReg(RX_PKT_LEN);//Read the RX packet length 
-   len &= 0x007F;          /* Mask out all but the RX packet length */
+   temp = radio_spiReadReg(RX_PKT_LEN);//Read the RX packet length (includes CRC) //If the 2-byte CRC data is read. The byte order is reversed (last CRC byte isread first).
+   temp &= 0x007F;          /* Mask out all but the RX packet length */
+   len = temp[1];//LSB of the 16-bit register value
    junk = SPI1S;
-   junk = SPI1D;//as specified in the generated radio code
+   junk = SPI1D;//as specified in the generated radio code to remove any unwanted interrupts
   
    if (len>2 && len<=127) {
       // retrieve the whole packet (including 1B SPI address, 1B length, the packet, 1B LQI)
       radio_spiReadRxFifo(bufRead,len);
    }
+   
+   //modify this function with the new variables: lenRead, maxBufLen, rssi, lqi, crc: look in telos for examples.
 }
 
 void radio_rfOff() {// turn radio off
@@ -287,12 +296,12 @@ uint16_t radio_spiReadReg(uint8_t reg_addr) {
     u8TempValue = SPI1D;          //Clear receive data register. SPI entirely 
     
    
-    SPI1D = reg_addr;    // Dummy write.
+    SPI1D = reg_addr| 0x80;;    // Dummy write.
     while (!(SPI1S_SPRF));        // busywait
     ((uint8_t*)u16Data)[0] = SPI1D;               /* MSB */
     
     
-    SPI1D = reg_addr;    // Dummy write.
+    SPI1D = reg_addr| 0x80;;    // Dummy write.
     while (!(SPI1S_SPRF));        // busywait
     ((uint8_t*)u16Data)[1] = SPI1D;               /* LSB */
     
@@ -303,25 +312,29 @@ uint16_t radio_spiReadReg(uint8_t reg_addr) {
 }
 
 void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
-     uint8_t junk;
      uint8_t bufToWrite2[127+1]; 
      uint8_t spi_rx_buffer[127+1];
+	 uint8_t temp;//used as counter and as unused value
+	 uint16_t lenvalue = 0;//used because we need to write 16 bit values inside registers
+
+	 lenvalue[1] |= lenToWrite;//lsB of lenvalue is the length (this length already includes the two crc bytes)
      radio_spiWriteReg(TX_PKT_LEN, lenToWrite);/* Update the TX packet length field (2 extra bytes for CRC) */
-     junk = SPI1S;
-     junk = SPI1D;//as specified in the generated radio code
+     temp = SPI1S;
+     temp = SPI1D;//as specified in the generated radio code (removes interrupts and such)
      
-     //now check if we have an even number of bytes and update accordingly (the radio requires an even number)
+     lenToWrite -= 2;//we need not write two empty bytes to the radio like for other manufacturers.
+	 //now check if we have an even number of bytes and update accordingly (the radio requires an even number)
      if(lenToWrite&0x01)
        lenToWrite +=1;
      
 
-     //[lenToWrite+1];//recreate packet with TX_PKT address
+     //[lenToWrite+1];//recreate packet with TX_PKT spi register address (0x02)
      bufToWrite2[0] = TX_PKT;
-     for(junk=0;junk<lenToWrite;junk++)
-       bufToWrite2[junk+1] = bufToWrite[junk];
+     for(temp=0;temp<lenToWrite;temp++)
+       bufToWrite2[temp+1] = bufToWrite[temp];
          
-	   spi_txrx(bufToWrite,
-	            lenToWrite+1,
+	   spi_txrx(bufToWrite2,
+	            lenToWrite+1,//+1 because we need to account for the spi command
 	            SPI_BUFFER,
 	            spi_rx_buffer,
 	            sizeof(spi_rx_buffer),
@@ -335,14 +348,14 @@ void radio_spiReadRxFifo(uint8_t* bufRead, uint8_t length) {
   uint8_t junk;
   bool removeOneByte = 0;
   uint8_t spi_tx_buffer[127+1+2];//1byte for the address+2junk bytes+length
-  //now check if we have an even number of bytes and update accordingly (the radio requires an even number)
+  //now check if we have an even number of bytes and update accordingly (the radio requires an even number of reads)
      if(length&0x01){
       length +=1;
       removeOneByte = 1;   //need to remove the MSB of the last word
      }
 
   
-  spi_tx_buffer[0] = RX_PKT | 0x80;  /* SPI RX ram data register */
+  spi_tx_buffer[0] = RX_PKT | 0x80;  /* SPI RX ram data register; | 0x80 to specify it's a read */
   
   spi_txrx(spi_tx_buffer,
             length+1+2,
