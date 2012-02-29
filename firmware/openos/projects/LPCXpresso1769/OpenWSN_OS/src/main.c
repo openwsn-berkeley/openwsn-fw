@@ -23,10 +23,13 @@ __CRP const unsigned int CRP_WORD = CRP_NO_CRP ;
 // TODO: insert other include files here
 
 // TODO: insert other definitions and declarations here
+unsigned long f_cpu_awake = 100000000L;
+
 
 int main(void) {
 	
 	// TODO: insert code here
+
 
 	// Enter an infinite loop, just incrementing a counter
 	volatile static int i = 0 ;

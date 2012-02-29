@@ -135,7 +135,7 @@ static unsigned long prvGetMPURegionSizeSetting( unsigned long ulActualSizeInByt
  * if so raises the privilege level and returns false - otherwise does nothing
  * other than return true.
  */
-static portBASE_TYPE prvRaisePrivilege( void ) __attribute__(( naked ));
+portBASE_TYPE prvRaisePrivilege( void ) __attribute__(( naked ));
 
 /*
  * Standard FreeRTOS exception handlers.

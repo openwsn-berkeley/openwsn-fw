@@ -12,6 +12,7 @@
 
 #define OPENAL_LIB __attribute__((section(".openAL")))
 
+extern unsigned long f_cpu_awake;
 
 typedef unsigned int U32;
 typedef unsigned short U16;
@@ -35,5 +36,6 @@ typedef enum openal_error_code_t {
 extern portBASE_TYPE prvRaisePrivilege() __attribute__(( naked ));
 #define portRESET_PRIVILEGE( xRunningPrivileged ) if( xRunningPrivileged != pdTRUE ) __asm volatile ( " mrs r0, control \n orr r0, #1 \n msr control, r0" :::"r0" )
 #define prvIsPrivileged() (!(__get_CONTROL() & 0x1))
+
 
 #endif /* OPENAL_INTERNAL_COMMON_H_ */

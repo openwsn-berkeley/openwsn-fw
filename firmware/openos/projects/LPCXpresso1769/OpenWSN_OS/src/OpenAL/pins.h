@@ -10,7 +10,7 @@
 
 #include "internal/openal_internal_common.h"
 
-typedef enum pin_mode_t {
+typedef enum  {
 	INPUT,
 	OUTPUT,
 	ANALOG_INPUT,
@@ -18,24 +18,24 @@ typedef enum pin_mode_t {
 	PWM
 } pin_mode_t;
 
-typedef enum pin_value_t {
+typedef enum  {
 	LOW = 0,
 	HIGH = 1
 } pin_value_t;
 
-typedef enum pin_pullup_mode_t {
-	PULLUP,
-	PULLDOWN,
-	REPEATER,
-	NONE
+typedef enum  {
+	PULLUP = 0,
+	PULLDOWN = 3,
+	REPEATER = 1,
+	NONE = 2
 } pin_pullup_mode_t;
 
-typedef enum pin_opendrain_mode_t {
-	NORMAL,
-	OPENDRAIN
+typedef enum  {
+	NORMAL = 0,
+	OPENDRAIN = 1
 } pin_opendrain_mode_t;
 
-typedef enum pin_interrupt_mode_t {
+typedef enum  {
 	RISING,
 	FALLING,
 	BOTH
@@ -49,12 +49,15 @@ unsigned short pins_analogRead(char pin) OPENAL_LIB;
 void pins_analogWrite(char pin, unsigned short value) OPENAL_LIB;
 
 void pins_pwm_write(char pin, unsigned int duty_cycle) OPENAL_LIB;
-void pins_pwm_write_adv(char pin, unsigned int duty_cycle, unsigned int frequency) OPENAL_LIB;
+void pins_pwm_write_adv(char pin, float duty_cycle, float frequency) OPENAL_LIB;
 
 void pins_configure_pullups(char pin, pin_pullup_mode_t mode) OPENAL_LIB;
 void pins_configure_opendrain(char pin, pin_opendrain_mode_t mode) OPENAL_LIB;
 
 void pins_configure_interrupt(char pin, pin_interrupt_mode_t mode, void (*callback)(char pin, pin_interrupt_mode_t transition) ) OPENAL_LIB;
 void pins_clear_interrupt(char pin) OPENAL_LIB;
+
+// Interrupts defined by pins.h
+void ADC_IRQHandler();
 
 #endif /* PINS_H_ */

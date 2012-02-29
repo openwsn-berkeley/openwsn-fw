@@ -17,22 +17,14 @@ const app_registry_entry_t app_registry[OPENAL_NUM_APPS] ;
 xSemaphoreHandle pin_registry_mutex;
 openal_pin_state_t openal_pin_registry[OPENMOTE_NUM_PINS];
 
-typedef enum app_state_t {
-	STOPPED,
-	RUNNING,
-	RESTARTING
-} app_state_t;
-
-typedef struct volatile_app_data_t {
-	app_state_t state;
-	xTaskHandle handle;
-} volatile_app_data_t;
-
 xSemaphoreHandle app_data_mutex;
 volatile_app_data_t openal_app_data[OPENAL_NUM_APPS];
 
 // Some other semaphores used by OpenAL
 xSemaphoreHandle pin_configuration_mutex;
+xSemaphoreHandle adc_mutex;
+xSemaphoreHandle adc_conversion_semaphore;
+
 
 
 extern void * _API_end_of_text;
@@ -41,46 +33,57 @@ openal_error_code_t openal_claim_pin(char pin) {
 	xTaskHandle curTask;
 	openal_pin_state_t * pin_state;
 	char c;
+	openal_error_code_t error;
+	xSemaphoreTake(pin_registry_mutex, portMAX_DELAY); // Going to be modifying the pin registry
+	xSemaphoreTake(app_data_mutex, portMAX_DELAY);
 
 	// the pin parameter is 1-indexed
 	pin--;
 
 	// Not a proper pin
 	if ( pin < 0 || pin >= OPENMOTE_NUM_PINS || openmote_pin_gpio_bank[pin] == NOT_VALID_PIN) {
-		return INVALID_PIN;
+		error = INVALID_PIN;
+		goto fail;
 	}
 
 	curTask = xTaskGetCurrentTaskHandle();
 
-	xSemaphoreTake(pin_registry_mutex, portMAX_DELAY); // Going to be modifying the pin registry
 	pin_state = &openal_pin_registry[pin];
 
 	// Already claimed by this task
 	if ( pin_state->owner == curTask ) {
-		xSemaphoreGive(pin_registry_mutex);
-		return SUCCESS;
+		goto success;
 	}
 
-	xSemaphoreTake(app_data_mutex, portMAX_DELAY);
 	for ( c = 0; c < OPENAL_NUM_APPS; c++ ) {
 		if (openal_app_data[c].handle == curTask ) {
 			goto taskfound;
 		} else if ( openal_app_data[c].handle == pin_state->owner ) { // Already claimed by a higher-priority task
-			xSemaphoreGive((app_data_mutex));
-			xSemaphoreGive(pin_registry_mutex);
-			return PIN_ACCESS_DENIED;
+			error = PIN_ACCESS_DENIED;
+			goto fail;
 		}
 	}
-	xSemaphoreGive((app_data_mutex));
-	xSemaphoreGive(pin_registry_mutex);
-	return UNKNOWN_CALLER;
+	error = UNKNOWN_CALLER;
+	goto fail;
 
-	 // we got the pin!
 	taskfound:
-		pin_state->owner = curTask;
+		if ( app_registry[c].pin_permissions & (1<<pin) ) {
+			pin_state->owner = curTask;
+			goto success;
+		} else {
+			error = PIN_ACCESS_DENIED;
+			goto fail;
+		}
+
+	success:
 		xSemaphoreGive((app_data_mutex));
 		xSemaphoreGive(pin_registry_mutex);
 		return SUCCESS;
+
+	fail:
+		xSemaphoreGive((app_data_mutex));
+		xSemaphoreGive(pin_registry_mutex);
+		return error;
 }
 
 openal_error_code_t openal_check_owner(char pin) {
@@ -100,13 +103,6 @@ openal_error_code_t openal_check_owner(char pin) {
 	xSemaphoreGive(pin_registry_mutex);
 	return error;
 }
-
-void openal_release_pin(char pin) {
-	xTaskHandle curTask = xTaskGetCurrentTaskHandle();
-
-
-}
-
 
 void openal_kill_app(char app_no) {
 	char c ;
@@ -129,10 +125,11 @@ void openal_kill_app(char app_no) {
 		app_no = c ;
 	} else {
 		app_no--; // app numbers are 1-indexed
+		xSemaphoreTake(app_data_mutex, portMAX_DELAY);
+
 		if ( app_no < 0 || app_no >= OPENAL_NUM_APPS ) // invalid
 			return;
 
-		xSemaphoreTake(app_data_mutex, portMAX_DELAY);
 		curApp = &openal_app_data[app_no];
 
 		if ( curApp->handle != curTask && !prvIsPrivileged()) {
@@ -150,8 +147,9 @@ void openal_kill_app(char app_no) {
 	// release pins from use
 	xSemaphoreTake(pin_registry_mutex, portMAX_DELAY);
 	for (c = 0; c < OPENMOTE_NUM_PINS; c++) {
-		if ( openal_pin_registry[c].owner == curTask )
-			openal_release_pin( c + 1 );
+		if ( openal_pin_registry[c].owner == curTask ) {
+			openal_pin_registry[c].owner = NO_OWNER;
+		}
 	}
 	xSemaphoreGive(pin_registry_mutex);
 
@@ -170,6 +168,8 @@ void openal_app_manager_init() {
 	app_data_mutex = xSemaphoreCreateMutex();
 	pin_registry_mutex = xSemaphoreCreateMutex();
 	pin_configuration_mutex = xSemaphoreCreateMutex();
+	adc_mutex = xSemaphoreCreateMutex();
+	vSemaphoreCreateBinary(adc_conversion_semaphore);
 }
 
 
