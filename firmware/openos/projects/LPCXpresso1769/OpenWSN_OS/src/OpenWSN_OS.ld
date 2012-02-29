@@ -55,6 +55,7 @@ SECTIONS
 		*(.text*)
 		_API_start_of_text = .;
 		KEEP(*(.openAL*))
+		KEEP(*(.openAL_pubdata*))
 		_API_end_of_text = .;
 		*(.rodata*)
 	} > FLASH
@@ -97,6 +98,7 @@ SECTIONS
 		_data = .;	
 		*(vtable)
 		*(.data*)
+		*(.openAL_app_stacks*)
 		_edata = .;
 	} > SRAM
 

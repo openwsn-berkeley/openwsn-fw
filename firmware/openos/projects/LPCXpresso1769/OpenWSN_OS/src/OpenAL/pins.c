@@ -8,6 +8,7 @@
 
 #include "pins.h"
 #include "internal/openal_app_manager.h"
+#include "internal/openal_event_manager.h"
 #include "internal/openmote_pindefs.h"
 #include "FreeRTOS.h"
 #include "queue.h"
@@ -260,9 +261,32 @@ void pins_configure_opendrain(char pin, pin_opendrain_mode_t mode) {
 
 void pins_configure_interrupt(char pin, pin_interrupt_mode_t mode, void (*callback)(char pin, pin_interrupt_mode_t transition) ) {
 	portBASE_TYPE xRunningPrivileged;
-	if ( openal_check_owner(pin) == SUCCESS ) {
+	char cur_app, port, gp_pin;
+	if ( openal_check_owner(pin) == SUCCESS && (cur_app = openal_current_app()) != APP_NOT_FOUND ) {
+		pin--; // 1-index fix
+		port = openmote_pin_gpio_bank[pin];
+		gp_pin = openmote_pin_gpio_bit[pin];
+		if ( port != 0 && port != 2) { // not an interrupt-capable pin!
+			openal_kill_app(APP_CURRENT);
+			return;
+		}
 		xRunningPrivileged = prvRaisePrivilege();
-		//TODO: NOT IMPLEMENTED (wait for event system)
+		openal_GPIO_Listeners[pin] = cur_app;
+		openal_GPIO_Listener_type[pin] = mode;
+
+		if (mode == RISING || mode == BOTH ) {
+			if ( port == 2 )
+				LPC_GPIOINT->IO2IntEnR |= (1<<gp_pin);
+			else
+				LPC_GPIOINT->IO0IntEnR |= (1<<gp_pin);
+		}
+		if (mode == FALLING || mode == BOTH ) {
+			if ( port == 2 )
+				LPC_GPIOINT->IO2IntEnF |= (1<<gp_pin);
+			else
+				LPC_GPIOINT->IO0IntEnF |= (1<<gp_pin);
+		}
+
 		portRESET_PRIVILEGE(xRunningPrivileged);
 	} else {
 		openal_kill_app(APP_CURRENT);
@@ -271,25 +295,32 @@ void pins_configure_interrupt(char pin, pin_interrupt_mode_t mode, void (*callba
 
 void pins_clear_interrupt(char pin) {
 	portBASE_TYPE xRunningPrivileged;
+	char port, gp_pin;
 	if ( openal_check_owner(pin) == SUCCESS ) {
+		pin--; // 1-index fix
+		port = openmote_pin_gpio_bank[pin];
+		gp_pin = openmote_pin_gpio_bit[pin];
+		if ( port != 0 && port != 2) { // not an interrupt-capable pin!
+			openal_kill_app(APP_CURRENT);
+			return;
+		}
+
 		xRunningPrivileged = prvRaisePrivilege();
-		//TODO: NOT IMPLEMENTED
+		openal_GPIO_Listeners[pin] = APP_SLOT_EMPTY;
+		openal_GPIO_Listener_type[pin] = APP_SLOT_EMPTY;
+
+		if ( port == 2 ) {
+			LPC_GPIOINT->IO2IntEnR &= ~(1<<gp_pin);
+			LPC_GPIOINT->IO2IntEnF &= ~(1<<gp_pin);
+		}
+		else
+			LPC_GPIOINT->IO0IntEnR &= ~(1<<gp_pin);{
+			LPC_GPIOINT->IO0IntEnF &= ~(1<<gp_pin);
+		}
+
 		portRESET_PRIVILEGE(xRunningPrivileged);
 	} else {
 		openal_kill_app(APP_CURRENT);
 	}
 }
 
-/*
- *  Interrupts used by pins.c
- */
-void ADC_IRQHandler() {
-	static signed portBASE_TYPE xHigherPriorityTaskWoken;
-	xSemaphoreGiveFromISR(adc_conversion_semaphore, &xHigherPriorityTaskWoken);
-}
-
-// handles GPIO0 and GPIO2 interrupts
-void EINT3_IRQHandler() {
-
-
-}

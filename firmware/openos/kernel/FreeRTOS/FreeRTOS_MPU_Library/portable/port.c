@@ -938,6 +938,15 @@ portBASE_TYPE xRunningPrivileged = prvRaisePrivilege();
 }
 /*-----------------------------------------------------------*/
 
+void MPU_vQueueDelete( xQueueHandle pxQueue )
+{
+portBASE_TYPE xRunningPrivileged = prvRaisePrivilege();
+	vQueueDelete(pxQueue);
+	portRESET_PRIVILEGE( xRunningPrivileged );
+	return;
+}
+/*-----------------------------------------------------------*/
+
 signed portBASE_TYPE MPU_xQueueGenericSend( xQueueHandle xQueue, const void * const pvItemToQueue, portTickType xTicksToWait, portBASE_TYPE xCopyPosition )
 {
 signed portBASE_TYPE xReturn;

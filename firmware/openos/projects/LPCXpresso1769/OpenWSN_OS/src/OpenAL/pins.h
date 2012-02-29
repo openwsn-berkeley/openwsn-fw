@@ -57,7 +57,5 @@ void pins_configure_opendrain(char pin, pin_opendrain_mode_t mode) OPENAL_LIB;
 void pins_configure_interrupt(char pin, pin_interrupt_mode_t mode, void (*callback)(char pin, pin_interrupt_mode_t transition) ) OPENAL_LIB;
 void pins_clear_interrupt(char pin) OPENAL_LIB;
 
-// Interrupts defined by pins.h
-void ADC_IRQHandler();
 
 #endif /* PINS_H_ */

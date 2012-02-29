@@ -10,11 +10,7 @@
 
 #include "openal_internal_common.h"
 #include "openmote_pindefs.h"
-
-#ifndef PINS_H_
-#error "Please include pins.h before pin_registry.h"
-#endif
-
+#include "pins.h"
 #include "FreeRTOS.h"
 #include "semphr.h"
 #include "task.h"
@@ -61,7 +57,6 @@ extern openal_pin_state_t openal_pin_registry[OPENMOTE_NUM_PINS];
 // other mutexes used by openAL
 extern xSemaphoreHandle pin_configuration_mutex;
 extern xSemaphoreHandle adc_mutex;
-extern xSemaphoreHandle adc_conversion_semaphore;
 
 /*
  * Claim pin for current task
@@ -72,6 +67,18 @@ openal_error_code_t openal_claim_pin(char pin)  OPENAL_LIB;
  * Check if current task is the owner of this pin
  */
 openal_error_code_t openal_check_owner(char pin) OPENAL_LIB;
+
+/*
+ *  Get current app number
+ */
+#define APP_NOT_FOUND 0xFF
+char openal_current_app() OPENAL_LIB;
+
+/*
+ * Start an app ( must be privileged )
+ */
+void openal_start_app(char app_no) OPENAL_LIB;
+
 
 /*
  * Kill an app ( can only kill your own app if unprivileged )

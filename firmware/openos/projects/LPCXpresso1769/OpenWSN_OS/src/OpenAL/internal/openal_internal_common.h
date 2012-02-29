@@ -11,6 +11,7 @@
 #include "FreeRTOS.h"
 
 #define OPENAL_LIB __attribute__((section(".openAL")))
+#define OPENAL_PUBDATA __attribute__((section(".openAL_pubdata")))
 
 extern unsigned long f_cpu_awake;
 

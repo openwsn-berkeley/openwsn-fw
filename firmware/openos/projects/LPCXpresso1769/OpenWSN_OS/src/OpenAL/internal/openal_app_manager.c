@@ -8,9 +8,17 @@
 #include "pins.h"
 #include "openmote_pindefs.h"
 #include "openal_app_manager.h"
+#include "openal_event_manager.h"
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
+
+// Parameters for starting a task
+#define FREERTOS_APP_STACK_SIZE (4096/sizeof(size_t)) // 4KB of memory
+#define FREERTOS_APP_PRIORITY tskIDLE_PRIORITY
+
+// a huge block of memory for application stacks
+size_t app_stack_blocks[FREERTOS_APP_STACK_SIZE] __attribute__((section(".openAL_app_stacks")));
 
 const app_registry_entry_t app_registry[OPENAL_NUM_APPS] ;
 
@@ -23,11 +31,20 @@ volatile_app_data_t openal_app_data[OPENAL_NUM_APPS];
 // Some other semaphores used by OpenAL
 xSemaphoreHandle pin_configuration_mutex;
 xSemaphoreHandle adc_mutex;
-xSemaphoreHandle adc_conversion_semaphore;
 
 
 
 extern void * _API_end_of_text;
+
+char openal_current_app() {
+	xTaskHandle curTask = xTaskGetCurrentTaskHandle();
+	char c;
+	for ( c = 0; c < OPENAL_NUM_APPS; c++ ) {
+		if (curTask == openal_app_data[c].handle)
+			return c + 1; // 1 indexed
+	}
+	return APP_NOT_FOUND;
+}
 
 openal_error_code_t openal_claim_pin(char pin) {
 	xTaskHandle curTask;
@@ -104,38 +121,75 @@ openal_error_code_t openal_check_owner(char pin) {
 	return error;
 }
 
+void openal_start_app(char app_no) {
+	portBASE_TYPE retcode;
+	xTaskParameters new_task_params;
+
+	if ( !prvIsPrivileged() ) { // troublemaker!
+		openal_kill_app(APP_CURRENT);
+		return;
+	}
+
+	xSemaphoreTake(app_data_mutex, portMAX_DELAY);
+
+	app_no--;
+
+	if ( app_no < 0 || app_no >= OPENAL_NUM_APPS ||
+			app_registry[app_no].appID == APP_SLOT_EMPTY ||
+			openal_app_data[app_no].state == RUNNING ) { // invalid app to start
+		goto error;
+	}
+
+
+	new_task_params.pvTaskCode = NULL;
+	new_task_params.usStackDepth = FREERTOS_APP_STACK_SIZE;
+	new_task_params.pvParameters = NULL;
+	new_task_params.uxPriority = FREERTOS_APP_PRIORITY;
+	new_task_params.puxStackBuffer;
+	new_task_params.xRegions;
+
+
+	retcode = xTaskCreateRestricted(&new_task_params,&(openal_app_data[app_no].handle));
+	if ( retcode != pdPASS ) {
+		openal_app_data[app_no].handle = NULL;
+		goto error;
+	}
+
+	openal_event_queues[app_no] = xQueueCreate(OPENAL_EVENT_QUEUE_LEN, sizeof(event_response_t));
+
+	error:
+		xSemaphoreGive(app_data_mutex);
+		return;
+}
+
 void openal_kill_app(char app_no) {
 	char c ;
 	xTaskHandle curTask = xTaskGetCurrentTaskHandle();
 
+	xSemaphoreTake(app_data_mutex, portMAX_DELAY);
+
 	volatile_app_data_t * curApp;
 	if ( app_no == APP_CURRENT ) {
-		xSemaphoreTake(app_data_mutex, portMAX_DELAY);
-		for ( c = 0; c < OPENAL_NUM_APPS; c++ ) {
-			if ( openal_app_data[c].handle == curTask ) {
-				curApp = &openal_app_data[c];
-				break;
-			}
+
+		c = openal_current_app();
+		if ( c == APP_NOT_FOUND ) {
+			goto error;
 		}
 
-		if ( c >= OPENAL_NUM_APPS ) { // couldn't find current app?
-			xSemaphoreGive(app_data_mutex);
-			return;
-		}
+		c--; // app numbers are 1-indexed
+		curApp = &openal_app_data[c];
 		app_no = c ;
 	} else {
 		app_no--; // app numbers are 1-indexed
-		xSemaphoreTake(app_data_mutex, portMAX_DELAY);
 
 		if ( app_no < 0 || app_no >= OPENAL_NUM_APPS ) // invalid
-			return;
+			goto error;
 
 		curApp = &openal_app_data[app_no];
 
 		if ( curApp->handle != curTask && !prvIsPrivileged()) {
-			// You are only allowed to kill yourself if privileged
-			xSemaphoreGive(app_data_mutex);
-			return;
+			// You are only allowed to kill yourself if not privileged
+			goto error;
 		}
 	}
 
@@ -152,11 +206,16 @@ void openal_kill_app(char app_no) {
 		}
 	}
 	xSemaphoreGive(pin_registry_mutex);
-
+	vQueueDelete(openal_event_queues[app_no]);
 	vTaskDelete(curTask);
 
 	// should not reach here if this was called on current task
 	return;
+
+	error:
+		xSemaphoreGive(app_data_mutex);
+		return;
+
 }
 
 void openal_app_manager_init() {
@@ -169,7 +228,6 @@ void openal_app_manager_init() {
 	pin_registry_mutex = xSemaphoreCreateMutex();
 	pin_configuration_mutex = xSemaphoreCreateMutex();
 	adc_mutex = xSemaphoreCreateMutex();
-	vSemaphoreCreateBinary(adc_conversion_semaphore);
 }
 
 
