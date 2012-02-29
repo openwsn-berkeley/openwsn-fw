@@ -4,7 +4,7 @@
 \author Fabien Chraim <chraim@eecs.berkeley.edu>, February 2012.
 */
 
-#include "PE_Types.h"
+#include "stdint.h"
 #include "string.h"
 #include "radio.h"
 #include "eldorado.h"
@@ -33,22 +33,16 @@ void    radio_spiReadRxFifo(uint8_t* bufRead, uint8_t length);
 
 void radio_init() {
    //start fabien code:
-   MC13192_RESET_PULLUP = 0;//pullup resistor on the RST pin
+	uint8_t temp;
+   IRQInit();
+   //MC13192_RESET_PULLUP = 0;//pullup resistor on the RST pin
    MC13192_RESET_PORT = 1;//specify direction for RST pin
-   MC13192_CE = 1;  //chip enable (SPI)   
-   MC13192_ATTN = 1; //modem attenuation (used to send it to sleep mode for example)
-   MC13192_RTXEN = 0;//to enable RX or TX
    MC13192_CE_PORT = 1;
    MC13192_ATTN_PORT = 1;
    MC13192_RTXEN_PORT = 1;
-
-   MC13192_RESET = 1;//turn radio ON
-   
-   while (IRQSC_IRQF == 0);     //busy wait until radio is on
-   (void)radio_spiReadReg(0x24);// Clear MC13192 interrupts 
-   IRQACK();                   /* ACK the pending IRQ interrupt */
-   IRQPinEnable();             /* Pin Enable, IE, IRQ CLR, negative edge. */    
-   
+   MC13192_CE = 1;  //chip enable (SPI)   
+   MC13192_ATTN = 1; //modem attenuation (used to send it to sleep mode for example)
+   MC13192_RTXEN = 0;//to enable RX or TX
    
    //PA: put the external PA in bypass mode:
     EN_PA1_DIR = 0;
@@ -56,6 +50,16 @@ void radio_init() {
     EN_PA1 = 0;
     EN_PA2 = 1;
    
+    
+    
+    MC13192_RESET = 1;//turn radio ON
+    while (IRQSC_IRQF == 0);//busy wait until radio is on
+    (void)radio_spiReadReg(0x24);// Clear MC13192 interrupts 
+    IRQACK();                   /* ACK the pending IRQ interrupt */
+    IRQPinEnable();             /* Pin Enable, IE, IRQ CLR, negative edge. */
+    
+    
+    
    //init routine:
    
 /*   The newest version of the MC1321x now uses an updated transceiver device. 
@@ -110,7 +114,7 @@ set if Register 25 is read after a reset and remains set */
    
    //radiotimer_start(0xffff);//poipoi
 }
-
+/*
 void radio_startTimer(uint16_t period) {
    radiotimer_start(period);
 }
@@ -130,7 +134,7 @@ void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
 void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
    radio_vars.endFrameCb = cb;
 }
-
+*/
 void radio_reset() {
    PTDD_PTDD3 = 0;
    PTDD_PTDD3 = 1;//goes back to idle mode
@@ -241,58 +245,67 @@ void radio_rfOff() {// turn radio off
 
 void radio_spiWriteReg(uint8_t reg_addr, uint16_t reg_setting) {
    uint8_t u8TempValue=0;
+   
+   //clear interrupts
+   u8TempValue = SPI1S;
+   u8TempValue = SPI1D;
 
-  MC13192DisableInterrupts();   // Necessary to prevent double SPI access 
-  AssertCE();                   // Enables MC13192 SPI
+   MC13192_IRQ_Disable();   // Necessary to prevent double SPI access 
+  MC13192_CE = 0;                   // Enables MC13192 SPI
    
   SPI1D = reg_addr & 0x3F;      // Write the command   
   while (!(SPI1S_SPRF));        // busywait
   u8TempValue = SPI1D;          //Clear receive data register. SPI entirely 
 
-  SPI1D = ((UINT8)(u16Content >> 8));    /* Write MSB */       
+  SPI1D = ((uint8_t)(reg_setting >> 8));    /* Write MSB */       
   while (!(SPI1S_SPRF));         
   u8TempValue = SPI1D;         
   
   
-  SPI1D = ((UINT8)(u16Content & 0x00FF));    /* Write LSB */
+  SPI1D = ((uint8_t)(reg_setting & 0x00FF));    /* Write LSB */
   while (!(SPI1S_SPRF)); 
   u8TempValue = SPI1D;
   
-  DeAssertCE();
-  MC13192RestoreInterrupts();
+  MC13192_CE = 1;
+  MC13192_IRQ_Enable();
 }
 
 uint16_t radio_spiReadReg(uint8_t reg_addr) {
    uint8_t u8TempValue=0;
    uint16_t  u16Data=0;            /* u16Data[0] is MSB, u16Data[1] is LSB */
 
-
-    MC13192DisableInterrupts(); /* Necessary to prevent double SPI access */
-    AssertCE();                 /* Enables MC13192 SPI */
+   //clear interrupts
+   u8TempValue = SPI1S;
+   u8TempValue = SPI1D;
+   
+   MC13192_IRQ_Disable(); /* Necessary to prevent double SPI access */
+    MC13192_CE = 0;                 /* Enables MC13192 SPI */
     
     
-    SPI1D = ((u8Addr & 0x3f) | 0x80);      // Write the command   
+    SPI1D = ((reg_addr & 0x3f) | 0x80);      // Write the command   
     while (!(SPI1S_SPRF));        // busywait
     u8TempValue = SPI1D;          //Clear receive data register. SPI entirely 
     
    
-    SPISendChar(reg_addr );      // Dummy write.
+    SPI1D = reg_addr;    // Dummy write.
     while (!(SPI1S_SPRF));        // busywait
-    ((UINT8*)u16Data)[0] = SPI1D;               /* MSB */
+    ((uint8_t*)u16Data)[0] = SPI1D;               /* MSB */
     
     
-    SPISendChar(reg_addr );      // Dummy write.
+    SPI1D = reg_addr;    // Dummy write.
     while (!(SPI1S_SPRF));        // busywait
-    ((UINT8*)u16Data)[1] = SPI1D;               /* LSB */
+    ((uint8_t*)u16Data)[1] = SPI1D;               /* LSB */
     
     
-    DeAssertCE();                     /* Disables MC13192 SPI */
-    MC13192RestoreInterrupts();       /* Restore MC13192 interrupt status */
+    MC13192_CE = 1;                     /* Disables MC13192 SPI */
+    MC13192_IRQ_Enable();       /* Restore MC13192 interrupt status */
     return u16Data;
 }
 
 void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
      uint8_t junk;
+     uint8_t bufToWrite2[127+1]; 
+     uint8_t spi_rx_buffer[127+1];
      radio_spiWriteReg(TX_PKT_LEN, lenToWrite);/* Update the TX packet length field (2 extra bytes for CRC) */
      junk = SPI1S;
      junk = SPI1D;//as specified in the generated radio code
@@ -301,13 +314,12 @@ void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
      if(lenToWrite&0x01)
        lenToWrite +=1;
      
-     uint8_t bufToWrite2[lenToWrite+1];//recreate packet with TX_PKT address
+
+     //[lenToWrite+1];//recreate packet with TX_PKT address
      bufToWrite2[0] = TX_PKT;
      for(junk=0;junk<lenToWrite;junk++)
        bufToWrite2[junk+1] = bufToWrite[junk];
-       
-     
-     uint8_t spi_rx_buffer[lenToWrite+1];              // 1B SPI address + length	   
+         
 	   spi_txrx(bufToWrite,
 	            lenToWrite+1,
 	            SPI_BUFFER,
@@ -318,18 +330,18 @@ void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
                               
 }
 
-void radio_spiReadRxFifo(uint8_t* bufRead, uint16_t length) {
+void radio_spiReadRxFifo(uint8_t* bufRead, uint8_t length) {
 
   uint8_t junk;
   bool removeOneByte = 0;
-  
+  uint8_t spi_tx_buffer[127+1+2];//1byte for the address+2junk bytes+length
   //now check if we have an even number of bytes and update accordingly (the radio requires an even number)
      if(length&0x01){
       length +=1;
       removeOneByte = 1;   //need to remove the MSB of the last word
      }
 
-  uint8_t spi_tx_buffer[length+1+2];//1byte for the address+2junk bytes+length
+  
   spi_tx_buffer[0] = RX_PKT | 0x80;  /* SPI RX ram data register */
   
   spi_txrx(spi_tx_buffer,
@@ -342,7 +354,7 @@ void radio_spiReadRxFifo(uint8_t* bufRead, uint16_t length) {
    //now remove the first three bytes because they're junk        
    bufRead = bufRead + 3; //or should it be (&bufRead) = *bufRead + 3??? poipoi
    if(removeOneByte){
-    bufRead(length-1) = bufread(length);
+    bufRead[length-1] = bufRead[length];
     length-=1;
     //refer to the datasheet to know why this is needed (even number of bytes)    
    }
@@ -372,7 +384,7 @@ interrupt void IRQIsr(void){ //REVIEW poipoi prototype: interrupt void IRQIsr(vo
             // call the callback
             radio_vars.endFrameCb(capturedTime);
             // make sure CPU restarts after leaving interrupt
-            __bic_SR_register_on_exit(CPUOFF);
+            //poipoi
          }
    
    }
@@ -384,7 +396,7 @@ interrupt void IRQIsr(void){ //REVIEW poipoi prototype: interrupt void IRQIsr(vo
             // call the callback
             radio_vars.endFrameCb(capturedTime);
             // make sure CPU restarts after leaving interrupt
-            __bic_SR_register_on_exit(CPUOFF);
+            //poipoi
          }
    }
    

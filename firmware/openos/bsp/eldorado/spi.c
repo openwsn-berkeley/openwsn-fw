@@ -6,7 +6,7 @@
 
 #include "string.h"
 #include "stdio.h"
-#include "PE_Types.h"
+#include "stdint.h"
 #include "eldorado.h"
 #include "spi.h"
 
@@ -107,6 +107,11 @@ void spi_txrx(uint8_t*     bufTx,
               spi_last_t   isLast) {
 
 
+	   uint8_t u8TempValue;
+	   //clear interrupts
+	   u8TempValue = SPI1S;
+	   u8TempValue = SPI1D;
+	   
 #ifdef SPI_IN_RTOS_MODE
    // disable interrupts
 	MC13192_IRQ_Disable();
@@ -124,6 +129,8 @@ void spi_txrx(uint8_t*     bufTx,
    
    // SPI is now busy
    spi_vars.busy             =  1;
+   
+
    
    // assert CS signal to have slave listening
    if (spi_vars.isFirst==SPI_FIRST) {
@@ -190,7 +197,7 @@ void spi_txrx(uint8_t*     bufTx,
 //poipoi syntax
 void interrupt VectorNumber_Vspi1 SPI1_int(void){
 //__interrupt void USCIAB0RX_ISR (void) {
-   
+      uint8_t junk;
       // clear the interrupt flag
       junk = SPI1S;
    // save the byte just received in the RX buffer

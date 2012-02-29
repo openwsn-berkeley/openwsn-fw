@@ -8,11 +8,59 @@
 #include "MC13192_regs.h"
 //#include "mc1392.h"  //radio
 /* Prototypes */
-void spi_init_before_clk_set();//called at the beginning when radio and uC communicate at ~200KHz
+
+
 
 /*WatchdogDefinitions*/
 #define DisableWatchdog SOPT = 0x73;   // disable watchdog timer
 #define EnableWatchdog  SOPT = 0xf3;   // enable watchdog timer
+#define DEFAULT_SCI_PORT 1
+//#define ELDORADO_BOARD //specify the board
+
+
+/*radio IO info*/
+#define MC13192_CE              PTED_PTED2                
+#define MC13192_CE_PORT         PTEDD_PTEDD2                
+#define MC13192_ATTN            PTDD_PTDD0
+#define MC13192_ATTN_PORT       PTDDD_PTDDD0
+#define MC13192_RTXEN           PTDD_PTDD1
+#define MC13192_RTXEN_PORT      PTDDD_PTDDD1
+#define MC13192_RESET           PTDD_PTDD3
+#define MC13192_RESET_PORT      PTDDD_PTDDD3
+#define MC13192_RESET_PULLUP    PTDPE_PTDPE3
+#define MC13192_IRQ_SOURCE      IRQSC
+#define MC13192_IRQ_IE_BIT      IRQSC_IRQIE
+
+/* Modes defined for the transciever */
+#define IDLE_MODE               0x00		/*!< Idle mode */
+#define RX_MODE                 0x02		/*!< Receive mode */
+#define TX_MODE                 0x03		/*!< Trasmit mode */
+#define PULSE_TX_MODE           0x43		/*!< Pulse transmit mode */
+#define CCA_MODE                0x01		/*!< CCA mode */
+#define RX_MODE_WTO             0x80		/*!< Receive mode wto */
+#define HIBERNATE_MODE          0x81		/*!< Hibernate mode */
+#define DOZE_MODE               0x82		/*!< Doze mode */
+#define IDLE_MODE_DOZE          0x83		/*!< Idle mode doze */
+#define IDLE_MODE_ATTN          0x84		/*!< Idle mode attenuation */
+#define TIMEOUT                 0x85		/*!< Timeout */
+#define SYSTEM_RESET_MODE       0x86    /*!< Not implemented */
+#define MC13192_RESET_MODE      0x87    /*!< Not implemented */
+#define MC13192_CONFIG_MODE     0x88    /*!< Not implemented */
+#define RESET_DELAY             0x89    /*!< Set to 100ms    */
+
+#define TX_IRQ_MASK         0x0040  /*!< Transmit IRQ Mask */
+#define RAMERR_IRQ_MASK     0x4000  /*!< RAM add error IRQ Mask */
+#define RX_IRQ_MASK         0x0080  /*!< Receive IRQ Mask */
+#define ATTN_IRQ_MASK       0x0400  /*!< Attention IRQ Mask */
+#define CRC_VALID_MASK      0x0001  /*!< CRC valid Mask */
+#define TIMER1_IRQ_MASK     0x0100  /*!< Timer1 IRQ Mask */
+#define XCVR_SEQ_MASK       0xFFF8  /*!< Transceiver seq mask */
+#define LO_LOCK_IRQ_MASK    0x8000  /*!< Lo lock IRQ Mask */
+#define CCA_IRQ_MASK        0x0020  /*!< CCA IRQ Mask */
+#define DOZE_IRQ_MASK       0x0200  /*!< Doze IRQ Mask */
+#define RESET_BIT_MASK      0x0080  /*!< Reset bit Mask */
+#define CCA_BIT_MASK        0x0002
+
 
 /* Antenna Switch/PA can be implemented via the CT_Bias control line */
 /* See the MC1321x reference manual */
@@ -91,7 +139,7 @@ Define the SCI perameters
 /**************************************************************
 Define the LED perameters
 **************************************************************/
-#if ELDORADO_BOARD
+#ifdef ELDORADO_BOARD
 #define LED1				  PTAD_PTAD0
 #define LED1DIR				PTADD_PTADD0
 #define LED2			  	PTAD_PTAD1
