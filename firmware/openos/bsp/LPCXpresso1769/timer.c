@@ -208,31 +208,31 @@ void TIMER0_IRQHandler (void)
 	{
 		printf(" interrupt of timer 0 compare 0 - time is %d , capture is %d \n" ,LPC_TIM0->TC,LPC_TIM0->CR0);
 		LPC_TIM0->IR = 0x1<<0;		/* clear interrupt flag */
-		led_all_toggle();
+		leds_all_toggle();
 	}
 	if ( LPC_TIM0->IR & (0x1<<1) )
 	{
 		printf(" interrupt of timer 0 compare 1 - time is %d \n" ,LPC_TIM0->TC);
 		LPC_TIM0->IR = 0x1<<1;		/* clear interrupt flag */
-		led_all_toggle();
+		leds_all_toggle();
 	}
 	if ( LPC_TIM0->IR & (0x1<<2) )
 	{
 		printf(" interrupt of timer 0 compare 2 - time is %d \n" ,LPC_TIM0->TC);
 		LPC_TIM0->IR = 0x1<<1;		/* clear interrupt flag */
-		led_all_toggle();
+		leds_all_toggle();
 	}
 	if ( LPC_TIM0->IR & (0x1<<4) )
 	{
 		printf(" interrupt of timer 0 capture 0 - time is %d \n" ,LPC_TIM0->CR0);
 		LPC_TIM0->IR = 0x1<<4;		/* clear interrupt flag */
-		led_all_toggle();
+		leds_all_toggle();
 	}
 	if ( LPC_TIM0->IR & (0x1<<5) )
 	{
 		printf(" interrupt of timer 0 capture 1 - time is %d \n" ,LPC_TIM0->CR1);
 		LPC_TIM0->IR = 0x1<<5;		/* clear interrupt flag */
-		led_all_toggle();
+		leds_all_toggle();
 	}
 	return;
 }
@@ -246,31 +246,31 @@ void TIMER1_IRQHandler (void)
 	{
 		printf(" interrupt of timer 1 compare 0 - time is %d \n" ,LPC_TIM1->TC);
 		LPC_TIM1->IR = 0x1<<0;		/* clear interrupt flag */
-		led_all_toggle();
+		leds_all_toggle();
 	}
 	if ( LPC_TIM1->IR & (0x1<<1) )
 	{
 		printf(" interrupt of timer 1 compare 1 - time is %d \n" ,LPC_TIM1->TC);
 		LPC_TIM1->IR = 0x1<<1;		/* clear interrupt flag */
-		led_all_toggle();
+		leds_all_toggle();
 	}
 	if ( LPC_TIM0->IR & (0x1<<3) )
 	{
 		printf(" interrupt of timer 1 compare 2 - time is %d \n" ,LPC_TIM1->TC);
 		LPC_TIM0->IR = 0x1<<2;		/* clear interrupt flag */
-		led_all_toggle();
+		leds_all_toggle();
 	}
 	if ( LPC_TIM1->IR & (0x1<<4) )
 	{
 		printf(" interrupt of timer 1 capture 0 - time is %d \n" ,LPC_TIM1->CR0);
 		LPC_TIM1->IR = 0x1<<4;		/* clear interrupt flag */
-		led_all_toggle();
+		leds_all_toggle();
 	}
 	if ( LPC_TIM1->IR & (0x1<<5) )
 	{
 		printf(" interrupt of timer 1 capture 1 - time is %d \n" ,LPC_TIM1->CR1);
 		LPC_TIM1->IR = 0x1<<5;		/* clear interrupt flag */
-		led_all_toggle();
+		leds_all_toggle();
 	}
 	return;
 }

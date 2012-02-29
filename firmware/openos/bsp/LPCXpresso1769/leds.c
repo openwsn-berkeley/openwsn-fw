@@ -5,7 +5,7 @@
 */
 
 #include "stdint.h"
-#include <leds.h>
+#include "leds.h"
 #include "LPC17xx.h"
 
 
@@ -54,42 +54,42 @@ static void private_led_toggle(unsigned int ledbit){
 	LPC_GPIO0->FIOSET = ( ( ~ulLEDState ) & ( 1 << ledbit ) );//turn it on! does nothing if it is already on
 }
 
-void led_error_on() {
+void leds_error_on() {
 	private_led_on(redLED_BIT );
 }
-void led_error_off() {
+void leds_error_off() {
    private_led_off(redLED_BIT);
 }
-void led_error_toggle() {
+void leds_error_toggle() {
    private_led_toggle(redLED_BIT);
 }
-void led_radio_on() {
+void leds_radio_on() {
 	private_led_on(redLED_BIT);
 }
-void led_radio_off() {
+void leds_radio_off() {
 	private_led_off(redLED_BIT);
 }
-void led_radio_toggle() {
+void leds_radio_toggle() {
 	private_led_toggle(redLED_BIT);
 }
 
-void led_sync_on() {
+void leds_sync_on() {
 	private_led_on(redLED_BIT );
 }
-void led_sync_off() {
+void leds_sync_off() {
 	private_led_off(redLED_BIT);
 }
-void led_sync_toggle() {
+void leds_sync_toggle() {
 	private_led_toggle(redLED_BIT);
 }
 
-void led_all_on() {
+void leds_all_on() {
 	private_led_on(redLED_BIT);
 }
-void led_all_off() {
+void leds_all_off() {
 	private_led_off(redLED_BIT);
 }
-void led_all_toggle() {
+void leds_all_toggle() {
 	private_led_toggle(redLED_BIT);
 }
 
