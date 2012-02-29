@@ -77,13 +77,14 @@ int main(void)
                 TIMER_PERIODIC,
                 cb_timer);
    
+   radio_setFrequency(CHANNEL);
+   radio_rfOn();
+   
    while (1) {
       
       leds_radio_on();
       
       // send packet
-      radio_setFrequency(CHANNEL);
-      radio_rfOn();
       radio_loadPacket(packet,sizeof(packet));
       radio_txEnable();
       radio_txNow();
@@ -91,7 +92,6 @@ int main(void)
       while (app_vars.radio_busy==1) {
          board_sleep();
       }
-      radio_rfOff();
       
       leds_radio_off();
       
