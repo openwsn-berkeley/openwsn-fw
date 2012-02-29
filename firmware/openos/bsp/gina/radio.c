@@ -33,7 +33,10 @@ radio_vars_t radio_vars;
 void    radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting);
 uint8_t radio_spiReadReg(uint8_t reg_addr);
 void    radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t lenToWrite);
-void    radio_spiReadRxFifo(uint8_t* bufRead, uint8_t length);
+void    radio_spiReadRxFifo(uint8_t* pBufRead,
+                            uint8_t* pLenRead,
+                            uint8_t  maxBufLen,
+                            uint8_t* pLqi);
 
 //=========================== public ==========================================
 
@@ -53,7 +56,8 @@ void radio_init() {
    
    // configure the radio
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);    // turn radio off
-   radio_spiWriteReg(RG_IRQ_MASK, 0x0C);                  // tell radio to fire interrupt on TRX_END and RX_START
+   radio_spiWriteReg(RG_IRQ_MASK,
+                     (AT_IRQ_RX_START| AT_IRQ_TRX_END));  // tell radio to fire interrupt on TRX_END and RX_START
    radio_spiReadReg(RG_IRQ_STATUS);                       // deassert the interrupt pin (P1.6) in case is high
    radio_spiWriteReg(RG_ANT_DIV, RADIO_CHIP_ANTENNA);     // use chip antenna
 #define RG_TRX_CTRL_1 0x04
@@ -135,34 +139,29 @@ void radio_rxNow() {
    // nothing to do
 }
 
-void radio_getReceivedFrame(uint8_t* bufRead, uint8_t* lenRead, uint8_t maxBufLen) {
-   uint8_t len;
-   
-   /*
+void radio_getReceivedFrame(uint8_t* pBufRead,
+                            uint8_t* pLenRead,
+                            uint8_t  maxBufLen,
+                                int* pRssi,
+                            uint8_t* pLqi,
+                            uint8_t* pCrc) {
    uint8_t temp_reg_value;
-   // read whether CRC was is correct
-   temp_reg_value = radio_spiReadReg(RG_PHY_RSSI);
-   crc            = (temp_reg_value & 0x80)>>7;  // msb is whether packet passed CRC
    
-   // read the RSSI
-   // according to section 8.4.3 of the AT86RF231, the RSSI is calculate as:
+   //===== crc
+   temp_reg_value  = radio_spiReadReg(RG_PHY_RSSI);
+   *pCrc           = (temp_reg_value & 0x80)>>7;  // msb is whether packet passed CRC
+   
+   //===== rssi
+   // as per section 8.4.3 of the AT86RF231, the RSSI is calculate as:
    // -91 + ED [dBm]
-   temp_reg_value = radio_spiReadReg(RG_PHY_ED_LEVEL);
-   rssi           = -91 + temp_reg_value;
-   */
-   // copy packet from rx buffer in radio over SPI
-   radio_spiReadRxFifo(bufRead,2); // first read only 2 bytes to receive the length
-   len = bufRead[1];
-   if (len>2 && len<=127) {
-      // retrieve the whole packet (including 1B SPI address, 1B length, the packet, 1B LQI)
-      radio_spiReadRxFifo(bufRead,1+1+len+1);
-      // shift start by 2B (1B answer received when MSP sent SPI address + 1B length).
-      //writeToBuffer->payload += 2;
-      // read 1B "footer" (LQI) and store that information
-      //lqi = writeToBuffer->payload[writeToBuffer->length];
-      // toss CRC (2 last bytes)
-      //packetfunctions_tossFooter(writeToBuffer, 2);
-   }
+   temp_reg_value  = radio_spiReadReg(RG_PHY_ED_LEVEL);
+   *pRssi          = -91 + temp_reg_value;
+   
+   //===== packet
+   radio_spiReadRxFifo(pBufRead,
+                       pLenRead,
+                       maxBufLen,
+                       pLqi);
 }
 
 void radio_rfOff() {
@@ -231,17 +230,69 @@ void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
             SPI_LAST);
 }
 
-void radio_spiReadRxFifo(uint8_t* bufRead, uint8_t length) {
-   uint8_t spi_tx_buffer[1+1+127];              // 1B SPI address, 1B length, 127B data
-   spi_tx_buffer[0] = 0x20;                     // spi address for 'read frame buffer'
+
+
+void radio_spiReadRxFifo(uint8_t* pBufRead,
+                         uint8_t* pLenRead,
+                         uint8_t  maxBufLen,
+                         uint8_t* pLqi) {
+   // when reading the packet over SPI from the RX buffer, you get the following:
+   // - *[1B]     dummy byte because of SPI
+   // - *[1B]     length byte
+   // -  [0-125B] packet (excluding CRC)
+   // - *[2B]     CRC
+   // - *[1B]     LQI
+   uint8_t spi_tx_buffer[125];
+   uint8_t spi_rx_buffer[3];
    
+   spi_tx_buffer[0] = 0x20;
+   
+   // 2 first bytes
    spi_txrx(spi_tx_buffer,
-            length,
+            2,
             SPI_BUFFER,
-            bufRead,
-            length,
+            spi_rx_buffer,
+            sizeof(spi_rx_buffer),
             SPI_FIRST,
-            SPI_LAST);
+            SPI_NOTLAST);
+   
+   *pLenRead  = spi_rx_buffer[1];
+   
+   if (*pLenRead>2 && *pLenRead<=127) {
+      // valid length
+      
+      //read packet
+      spi_txrx(spi_tx_buffer,
+               *pLenRead,
+               SPI_BUFFER,
+               pBufRead,
+               125,
+               SPI_NOTFIRST,
+               SPI_NOTLAST);
+      
+      // CRC (2B) and LQI (1B)
+      spi_txrx(spi_tx_buffer,
+               2+1,
+               SPI_BUFFER,
+               spi_rx_buffer,
+               3,
+               SPI_NOTFIRST,
+               SPI_LAST);
+      
+      *pLqi   = spi_rx_buffer[2];
+      
+   } else {
+      // invalid length
+      
+      // read a just byte to close spi
+      spi_txrx(spi_tx_buffer,
+               1,
+               SPI_BUFFER,
+               spi_rx_buffer,
+               sizeof(spi_rx_buffer),
+               SPI_NOTFIRST,
+               SPI_LAST);
+   }
 }
 
 //=========================== callbacks =======================================
@@ -258,25 +309,22 @@ __interrupt void PORT1_ISR (void) {
    capturedTime = radiotimer_getCapturedTime();
    // reading IRQ_STATUS causes IRQ_RF (P1.6) to go low
    irq_status = radio_spiReadReg(RG_IRQ_STATUS);
-   switch (irq_status) {
-      case AT_IRQ_RX_START:
-         if (radio_vars.startFrameCb!=NULL) {
-            // call the callback
-            radio_vars.startFrameCb(capturedTime);
-            // make sure CPU restarts after leaving interrupt
-            __bic_SR_register_on_exit(CPUOFF);
-         }
-         break;
-      case AT_IRQ_TRX_END:
-         if (radio_vars.endFrameCb!=NULL) {
-            // call the callback
-            radio_vars.endFrameCb(capturedTime);
-            // make sure CPU restarts after leaving interrupt
-            __bic_SR_register_on_exit(CPUOFF);
-         }
-         break;
-      default:
-         while(1);
-         break;
+   // start of frame event
+   if (irq_status & AT_IRQ_RX_START) {
+      if (radio_vars.startFrameCb!=NULL) {
+         // call the callback
+         radio_vars.startFrameCb(capturedTime);
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
+      }
+   }
+   // end of frame event
+   if (irq_status & AT_IRQ_TRX_END) {
+      if (radio_vars.endFrameCb!=NULL) {
+         // call the callback
+         radio_vars.endFrameCb(capturedTime);
+         // make sure CPU restarts after leaving interrupt
+         __bic_SR_register_on_exit(CPUOFF);
+      }
    }
 }

@@ -7,6 +7,7 @@ can use this project with any platform.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
+#include "intrinsics.h"
 #include "stdint.h"
 #include "string.h"
 #include "board.h"
@@ -23,13 +24,35 @@ can use this project with any platform.
 
 //=========================== variables =======================================
 
+enum {
+   APP_FLAG_START_FRAME = 0x01,
+   APP_FLAG_END_FRAME   = 0x02,
+   APP_FLAG_TIMER       = 0x04,
+};
+
+typedef enum {
+   APP_STATE_TX         = 0x01,
+   APP_STATE_RX         = 0x02,
+} app_state_t;
+
 typedef struct {
-   uint8_t radio_busy;
-   uint8_t timer_busy;
-   uint8_t num_overflow;
-   uint8_t num_compare;
+   uint8_t num_radioTimerOverflows;
+   uint8_t num_radioTimerCompare;
    uint8_t num_startFrame;
    uint8_t num_endFrame;
+   uint8_t num_timer;
+} app_dbg_t;
+
+app_dbg_t app_dbg;
+
+typedef struct {
+   uint8_t     flags;
+   app_state_t state;
+   uint8_t     packet[LENGTH_PACKET];
+   uint8_t     rxpk_len;
+   int         rxpk_rssi;
+   uint8_t     rxpk_lqi;
+   uint8_t     rxpk_crc;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -49,7 +72,6 @@ void cb_timer();
 */
 int main(void)
 {  
-   uint8_t packet[LENGTH_PACKET];
    uint8_t i;
    
    // clear local variables
@@ -65,8 +87,8 @@ int main(void)
    radio_setEndFrameCb(cb_endFrame);
    
    // prepare packet
-   for (i=0;i<sizeof(packet);i++) {
-      packet[i] = i;
+   for (i=0;i<sizeof(app_vars.packet);i++) {
+      app_vars.packet[i] = i;
    }
    
    // start timer
@@ -75,27 +97,75 @@ int main(void)
                 TIMER_PERIODIC,
                 cb_timer);
    
+   // prepare radio
    radio_rfOn();
+   radio_setFrequency(CHANNEL);
+   
+   // switch in RX by default
+   radio_rxEnable();
+   app_vars.state = APP_STATE_RX;
    
    while (1) {
-      
-      leds_radio_on();
-      
-      // send packet
-      radio_setFrequency(CHANNEL);
-      radio_loadPacket(packet,sizeof(packet));
-      radio_txEnable();
-      radio_txNow();
-      app_vars.radio_busy = 1;
-      while (app_vars.radio_busy==1) {
+      // sleep while waiting for a flag to be set
+      while (app_vars.flags==0x00) {
          board_sleep();
       }
-      
-      leds_radio_off();
-      
-      app_vars.timer_busy = 1;
-      while (app_vars.timer_busy==1) {
-         board_sleep();
+      // handle and clear every flag
+      while (app_vars.flags) {
+         if (app_vars.flags & APP_FLAG_START_FRAME) {
+            // start of frame
+            
+            switch (app_vars.state) {
+               case APP_STATE_RX:
+                  // started receiving a packet
+                  leds_error_on();
+                  break;
+               case APP_STATE_TX:
+                  // started sending a packet
+                  leds_radio_on();
+                  break;
+            }
+            // clear flag
+            app_vars.flags &= ~APP_FLAG_START_FRAME;
+         }
+         
+         if (app_vars.flags & APP_FLAG_END_FRAME) {
+            // end of frame
+            
+            switch (app_vars.state) {
+               case APP_STATE_RX:
+                  // done receiving a packet
+                  
+                  // get packet from radio
+                  radio_getReceivedFrame(app_vars.packet,
+                                         &app_vars.rxpk_len,
+                                         sizeof(app_vars.packet),
+                                         &app_vars.rxpk_rssi,
+                                         &app_vars.rxpk_lqi,
+                                         &app_vars.rxpk_crc);
+                  
+                  leds_error_off();
+                  break;
+               case APP_STATE_TX:
+                  // done sending a packet
+                  
+                  // switch to RX mode
+                  radio_rxEnable();
+                  app_vars.state = APP_STATE_RX;
+                  
+                  leds_radio_off();
+                  break;
+            }
+            // clear flag
+            app_vars.flags &= ~APP_FLAG_END_FRAME;
+         }
+         
+         if (app_vars.flags & APP_FLAG_TIMER) {
+            // timer fired
+            
+            // clear flag
+            app_vars.flags &= ~APP_FLAG_TIMER;
+         }
       }
    }
 }
@@ -103,22 +173,30 @@ int main(void)
 //=========================== callbacks =======================================
 
 void cb_radioTimerOverflows() {
-   app_vars.num_overflow++;
+   app_dbg.num_radioTimerOverflows++;
 }
 
 void cb_radioTimerCompare() {
-   app_vars.num_compare++;
+   app_dbg.num_radioTimerCompare++;
 }
 
 void cb_startFrame(uint16_t timestamp) {
-   app_vars.num_startFrame++;
+   // set flag
+   app_vars.flags |= APP_FLAG_START_FRAME;
+   // update debug stats
+   app_dbg.num_startFrame++;
 }
 
 void cb_endFrame(uint16_t timestamp) {
-   app_vars.radio_busy = 0;
-   app_vars.num_endFrame++;
+   // set flag
+   app_vars.flags |= APP_FLAG_END_FRAME;
+   // update debug stats
+   app_dbg.num_endFrame++;
 }
 
 void cb_timer() {
-   app_vars.timer_busy = 0;
+   // set flag
+   app_vars.flags |= APP_FLAG_TIMER;
+   // update debug stats
+   app_dbg.num_timer++;
 }
