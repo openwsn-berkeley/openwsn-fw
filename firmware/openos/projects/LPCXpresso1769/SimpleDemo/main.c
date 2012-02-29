@@ -65,8 +65,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
-#include "leds.h"
 #include "timer.h"
+#include "uart.h"
+#include "leds.h"
 
 /* Priorities at which the tasks are created. */
 #define mainQUEUE_RECEIVE_TASK_PRIORITY		( tskIDLE_PRIORITY + 2 )
@@ -88,7 +89,8 @@ the queue empty. */
  */
 static void prvQueueReceiveTask( void *pvParameters );
 static void prvQueueSendTask( void *pvParameters );
-
+void cb_uartTxDone();
+void cb_uartRxCb(uart_event_t ev);
 /*
  * Simple function to toggle the LED on the LPCXpresso LPC17xx board.
  */
@@ -96,13 +98,23 @@ static void prvToggleLED( void );
 
 /* The queue used by both tasks. */
 static xQueueHandle xQueue = NULL;
+uint8_t stringToSend[] = "Hello World!";
 
+typedef struct {
+   uint8_t uart_rxBuf[10];
+   uint8_t uart_busyTx;
+   uint8_t uart_rxBytes;
+   uint8_t rxBytes[5];
+} app_vars_t;
+
+app_vars_t app_vars;
 /*-----------------------------------------------------------*/
 
 int main(void)
 {
 	/* Initialise P0_22 for the LED. */
 	leds_init();
+	uart_init();
 	/* Create the queue. */
 	xQueue = xQueueCreate( mainQUEUE_LENGTH, sizeof( unsigned long ) );
 
@@ -132,10 +144,37 @@ const unsigned long ulValueToSend = 100UL;
 	/* Initialise xNextWakeTime - this only needs to be done once. */
 	xNextWakeTime = xTaskGetTickCount();
 		//init the timer
-		timer_init(0);
-		timer_set_compare(0,TIMER_COMPARE_REG0, 250);//5 sec
-		timer_set_capture(0,TIMER_CAPTURE_REG0);
-		timer_enable(0);
+//		timer_init(0);
+//		timer_set_compare(0,TIMER_COMPARE_REG0, 250);//5 sec
+//		timer_set_capture(0,TIMER_CAPTURE_REG0);
+//		timer_enable(0);
+
+	  uart_txSetup(cb_uartTxDone);
+	   uart_rxSetup(app_vars.uart_rxBuf,
+	                sizeof(app_vars.uart_rxBuf),
+	                5,
+	                cb_uartRxCb);
+	   uart_rxStart();
+
+	   uart_tx(stringToSend,sizeof(stringToSend));
+
+	   app_vars.uart_busyTx = 1;
+	   while (app_vars.uart_busyTx==1) {
+		   vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
+	   }
+
+	   while(1) {
+	      // sleep until bytes received
+	      app_vars.uart_rxBytes  = 0;
+	      while (app_vars.uart_rxBytes==0) {
+	    	  vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
+	      }
+	      // read bytes from bsp module
+	      uart_readBytes(app_vars.rxBytes,sizeof(app_vars.rxBytes));
+	      // toggle LED for debug
+	     leds_all_toggle();
+
+	   }
 
 	for( ;; )
 	{
@@ -193,7 +232,18 @@ uint8_t timeron=0;
 
 static void prvToggleLED( void )
 {
-	led_all_toggle();
+	leds_all_toggle();
 }
 /*-----------------------------------------------------------*/
+void cb_uartTxDone() {
+   app_vars.uart_busyTx      = 0;
+}
 
+void cb_uartRxCb(uart_event_t ev) {
+   if (ev==UART_EVENT_THRES) {
+      leds_radio_toggle();
+      app_vars.uart_rxBytes  = 1;
+   } else {
+      leds_error_toggle();
+   }
+}
