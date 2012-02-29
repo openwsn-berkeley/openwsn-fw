@@ -6,16 +6,16 @@
 /* includes */
 #include "mc13213.h" //uC
 #include "MC13192_regs.h"
+#include <hidef.h>
 //#include "mc1392.h"  //radio
 /* Prototypes */
-
 
 
 /*WatchdogDefinitions*/
 #define DisableWatchdog SOPT = 0x73;   // disable watchdog timer
 #define EnableWatchdog  SOPT = 0xf3;   // enable watchdog timer
 #define DEFAULT_SCI_PORT 1
-//#define ELDORADO_BOARD //specify the board
+#define ELDORADO_BOARD //specify the board
 
 
 /*radio IO info*/
@@ -301,6 +301,9 @@ formats.
 
 
 //radio functions etc
+//isr
+__interrupt void IRQIsr(void);
+
 #ifdef LNA
     #define MC13192_LNA_CTRL        PTBD_PTBD0
     #define MC13192_LNA_CTRL_PORT   PTBDD_PTBDD0

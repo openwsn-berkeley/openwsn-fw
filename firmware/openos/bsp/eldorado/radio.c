@@ -10,6 +10,7 @@
 #include "eldorado.h"
 #include "spi.h"
 #include "radiotimer.h"
+#include <hidef.h>
 
 //=========================== defines =========================================
 
@@ -21,6 +22,8 @@ typedef struct {
 } radio_vars_t;
 
 radio_vars_t radio_vars;
+uint8_t counter; //declared as global because compiler is retarded
+uint16_t lenvalue;//same reasons
 
 //=========================== prototypes ======================================
 
@@ -35,7 +38,7 @@ void radio_init() {
    //start fabien code:
 	uint8_t temp;
    IRQInit();
-   //MC13192_RESET_PULLUP = 0;//pullup resistor on the RST pin
+   MC13192_RESET_PULLUP = 0;//pullup resistor on the RST pin
    MC13192_RESET_PORT = 1;//specify direction for RST pin
    MC13192_CE_PORT = 1;
    MC13192_ATTN_PORT = 1;
@@ -218,7 +221,7 @@ void radio_getReceivedFrame(uint8_t* bufRead,
    uint8_t junk;
    temp = radio_spiReadReg(RX_PKT_LEN);//Read the RX packet length (includes CRC) //If the 2-byte CRC data is read. The byte order is reversed (last CRC byte isread first).
    temp &= 0x007F;          /* Mask out all but the RX packet length */
-   len = temp[1];//LSB of the 16-bit register value
+   len = (uint8_t) temp;//LSB of the 16-bit register value
    junk = SPI1S;
    junk = SPI1D;//as specified in the generated radio code to remove any unwanted interrupts
   
@@ -275,8 +278,10 @@ void radio_spiWriteReg(uint8_t reg_addr, uint16_t reg_setting) {
   while (!(SPI1S_SPRF)); 
   u8TempValue = SPI1D;
   
+  
+  u8TempValue = SPI1S;//to remove interrupts?
   MC13192_CE = 1;
-  MC13192_IRQ_Enable();
+  //MC13192_IRQ_Enable();
 }
 
 uint16_t radio_spiReadReg(uint8_t reg_addr) {
@@ -305,20 +310,23 @@ uint16_t radio_spiReadReg(uint8_t reg_addr) {
     while (!(SPI1S_SPRF));        // busywait
     ((uint8_t*)u16Data)[1] = SPI1D;               /* LSB */
     
-    
+    u8TempValue = SPI1S;
     MC13192_CE = 1;                     /* Disables MC13192 SPI */
-    MC13192_IRQ_Enable();       /* Restore MC13192 interrupt status */
+    //MC13192_IRQ_Enable();       /* Restore MC13192 interrupt status */
     return u16Data;
 }
 
 void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
      uint8_t bufToWrite2[127+1]; 
      uint8_t spi_rx_buffer[127+1];
-	 uint8_t temp;//used as counter and as unused value
-	 uint16_t lenvalue = 0;//used because we need to write 16 bit values inside registers
-
-	 lenvalue[1] |= lenToWrite;//lsB of lenvalue is the length (this length already includes the two crc bytes)
-     radio_spiWriteReg(TX_PKT_LEN, lenToWrite);/* Update the TX packet length field (2 extra bytes for CRC) */
+	 uint8_t temp;//used as garbage value
+	 uint16_t lenvalue;//used because we need to write 16 bit values inside registers
+	 
+	 //the compiler is being stupid
+	 lenvalue = (uint16_t)(lenToWrite << 8);//lsB of lenvalue is the length (this length already includes the two crc bytes)
+	 lenvalue = lenvalue>>8;
+	 
+     radio_spiWriteReg(0x03, lenvalue);/*Choose RAM register 1; Update the TX packet length field (2 extra bytes for CRC) */
      temp = SPI1S;
      temp = SPI1D;//as specified in the generated radio code (removes interrupts and such)
      
@@ -330,16 +338,18 @@ void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
 
      //[lenToWrite+1];//recreate packet with TX_PKT spi register address (0x02)
      bufToWrite2[0] = TX_PKT;
-     for(temp=0;temp<lenToWrite;temp++)
-       bufToWrite2[temp+1] = bufToWrite[temp];
+     for(counter=0;counter<lenToWrite;counter++)
+       bufToWrite2[counter+1] = bufToWrite[counter];
          
-	   spi_txrx(bufToWrite2,
+	 spi_txrx(bufToWrite2,
 	            lenToWrite+1,//+1 because we need to account for the spi command
 	            SPI_BUFFER,
 	            spi_rx_buffer,
 	            sizeof(spi_rx_buffer),
 	            SPI_FIRST,
 	            SPI_LAST);
+	   
+	 //EnableInterrupts;
                               
 }
 
@@ -377,16 +387,15 @@ void radio_spiReadRxFifo(uint8_t* bufRead, uint8_t length) {
 
 //=========================== interrupt handlers ==============================
 
-//#pragma vector = PORT1_VECTOR
-//__interrupt void PORT1_ISR (void) {
-interrupt void IRQIsr(void){ //REVIEW poipoi prototype: interrupt void IRQIsr(void); maybe in eldorado.h
+ISR(IRQIsr){ 
+	//REVIEW poipoi prototype: interrupt void IRQIsr(void); maybe in eldorado.h
 
    uint16_t capturedTime;
    uint16_t  irq_status;
    // clear interrupt flag
    IRQSC |= 0x04;
    // capture the time
-   capturedTime = radiotimer_getCapturedTime();
+   //capturedTime = radiotimer_getCapturedTime();
    // reading IRQ_STATUS causes IRQ_RF (P1.6) to go low
    irq_status = radio_spiReadReg(STATUS_ADDR);
    
@@ -422,5 +431,5 @@ interrupt void IRQIsr(void){ //REVIEW poipoi prototype: interrupt void IRQIsr(vo
             __bic_SR_register_on_exit(CPUOFF);
          }
          break;
-  */
+ */ 
 }

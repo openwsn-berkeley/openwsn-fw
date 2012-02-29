@@ -191,11 +191,11 @@ void spi_txrx(uint8_t*     bufTx,
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
-
+//will probably throw an error if SPI_IN_INTERRUPT_MODE; Renato can fix like in radio.c
 #ifdef SPI_IN_INTERRUPT_MODE
 //#pragma vector = VectorNumber_Vspi1
 //poipoi syntax
-void interrupt VectorNumber_Vspi1 SPI1_int(void){
+ISR(SPI1_int){
 //__interrupt void USCIAB0RX_ISR (void) {
       uint8_t junk;
       // clear the interrupt flag
@@ -243,4 +243,11 @@ void interrupt VectorNumber_Vspi1 SPI1_int(void){
       }
    }
 }
+
+#else
+ISR(SPI1_int){
+	
+	
+}
+
 #endif
