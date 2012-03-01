@@ -1,5 +1,5 @@
 /*
-    FreeRTOS V6.1.0 - Copyright (C) 2010 Real Time Engineers Ltd.
+    FreeRTOS V7.0.1 - Copyright (C) 2010 Real Time Engineers Ltd.
 
     ***************************************************************************
     *                                                                         *
@@ -68,6 +68,8 @@
 #include "timer.h"
 #include "uart.h"
 #include "leds.h"
+#include "spi.h"
+
 
 /* Priorities at which the tasks are created. */
 #define mainQUEUE_RECEIVE_TASK_PRIORITY		( tskIDLE_PRIORITY + 2 )
@@ -112,8 +114,35 @@ app_vars_t app_vars;
 
 int main(void)
 {
-	/* Initialise P0_22 for the LED. */
-	leds_init();
+	   uint8_t              spi_tx_buffer[3];
+	   uint8_t              spi_rx_buffer[3];
+
+	   // initialize
+	   board_init();
+
+	   // prepare buffer to send over SPI
+	   spi_tx_buffer[0]     =  (0x40 | 0x1E);        // [b7]    RAM/Register : 0    (register)
+	                                                 // [b6]    Read/Write:    1    (read)
+	                                                 // [b5-0]  address:       0x1E (Manufacturer ID, Lower 16 Bit)
+	   spi_tx_buffer[1]     =  0x00;                 // send a SNOP strobe just to get the reg value
+	   spi_tx_buffer[2]     =  0x00;                 // send a SNOP strobe just to get the reg value
+
+	   // retrieve radio manufacturer ID over SPI
+	   spi_txrx(spi_tx_buffer,
+	            sizeof(spi_tx_buffer),
+	            SPI_BUFFER,
+	            spi_rx_buffer,
+	            sizeof(spi_rx_buffer),
+	            SPI_FIRST,
+	            SPI_LAST);
+
+	   // sleep
+	   while(1) {
+	      board_sleep();
+	   }
+
+
+
 	uart_init();
 	/* Create the queue. */
 	xQueue = xQueueCreate( mainQUEUE_LENGTH, sizeof( unsigned long ) );
@@ -160,14 +189,14 @@ const unsigned long ulValueToSend = 100UL;
 
 	   app_vars.uart_busyTx = 1;
 	   while (app_vars.uart_busyTx==1) {
-		   vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
+		 vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
 	   }
 
 	   while(1) {
 	      // sleep until bytes received
 	      app_vars.uart_rxBytes  = 0;
 	      while (app_vars.uart_rxBytes==0) {
-	    	  vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
+	    	 vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
 	      }
 	      // read bytes from bsp module
 	      uart_readBytes(app_vars.rxBytes,sizeof(app_vars.rxBytes));
@@ -200,7 +229,8 @@ static void prvQueueReceiveTask( void *pvParameters )
 {
 unsigned long ulReceivedValue;
 uint8_t timeron=0;
-
+portTickType xNextWakeTime;
+xNextWakeTime = xTaskGetTickCount();
 //timer_init(0);
 //timer_set_compare(0,TIMER_COMPARE_REG0, 1000);
 //timer_enable(0);
@@ -211,7 +241,7 @@ uint8_t timeron=0;
 		indefinitely provided INCLUDE_vTaskSuspend is set to 1 in
 		FreeRTOSConfig.h. */
 		xQueueReceive( xQueue, &ulReceivedValue, portMAX_DELAY );
-
+		vTaskDelayUntil( &xNextWakeTime, mainQUEUE_SEND_FREQUENCY_MS );
 		/*  To get here something must have been received from the queue, but
 		is it the expected value?  If it is, toggle the LED. */
 		if( ulReceivedValue == 100UL )
@@ -236,14 +266,20 @@ static void prvToggleLED( void )
 }
 /*-----------------------------------------------------------*/
 void cb_uartTxDone() {
+
+
    app_vars.uart_busyTx      = 0;
+
 }
 
 void cb_uartRxCb(uart_event_t ev) {
+
    if (ev==UART_EVENT_THRES) {
       leds_radio_toggle();
       app_vars.uart_rxBytes  = 1;
    } else {
       leds_error_toggle();
+
    }
+
 }
