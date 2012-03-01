@@ -111,11 +111,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
 
 void radio_txEnable() {
    /*
-   // I don't fully understand how this can be used.
-   radio_spiStrobe(CC2420_STXCAL, &radio_vars.radioStatusByte);
-   while (radio_vars.radioStatusByte.lock==0) {
-      radio_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
-   }
+   // I don't fully understand how the CC2420_STXCA the can be used.
    */
 }
 
@@ -223,16 +219,55 @@ void radio_spiWriteTxFifo(cc2420_status_t* statusRead, uint8_t* bufToWrite, uint
             SPI_LAST);
 }
 
-void radio_spiReadRxFifo(cc2420_status_t* statusRead, uint8_t* bufRead, uint8_t* lenRead, uint8_t maxBufLen) {
-   /* poipoi
-   uint8_t              spi_tx_buffer[10];
+void radio_spiReadRxFifo(cc2420_status_t* statusRead,
+                         uint8_t*         pBufRead,
+                         uint8_t*         pLenRead,
+                         uint8_t          maxBufLen) {
+   // when reading the packet over SPI from the RX buffer, you get the following:
+   // - *[1B]     dummy byte because of SPI
+   // - *[1B]     length byte
+   // -  [0-125B] packet (excluding CRC)
+   // - *[2B]     CRC
+   uint8_t spi_tx_buffer[125];
+   uint8_t spi_rx_buffer[3];
    
    spi_tx_buffer[0]     = (CC2420_FLAG_READ | CC2420_FLAG_REG | CC2420_RXFIFO_ADDR);
-   spi_tx_buffer[1]     = 0;
-   spi_tx_buffer[2]     = 0;
    
-   spi_txrx(&spi_tx_buffer[0],10,bufRead,0);
-   */
+   // 2 first bytes
+   spi_txrx(spi_tx_buffer,
+            2,
+            SPI_BUFFER,
+            spi_rx_buffer,
+            sizeof(spi_rx_buffer),
+            SPI_FIRST,
+            SPI_NOTLAST);
+   
+   *pLenRead  = spi_rx_buffer[1];
+   
+   if (*pLenRead>2 && *pLenRead<=127) {
+      // valid length
+      
+      //read packet
+      spi_txrx(spi_tx_buffer,
+               *pLenRead,
+               SPI_BUFFER,
+               pBufRead,
+               125,
+               SPI_NOTFIRST,
+               SPI_LAST);
+      
+   } else {
+      // invalid length
+      
+      // read a just byte to close spi
+      spi_txrx(spi_tx_buffer,
+               1,
+               SPI_BUFFER,
+               spi_rx_buffer,
+               sizeof(spi_rx_buffer),
+               SPI_NOTFIRST,
+               SPI_LAST);
+   }
 }
 
 //=========================== callbacks =======================================
