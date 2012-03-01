@@ -49,7 +49,7 @@ typedef struct {
    uint8_t     flags;
    app_state_t state;
    uint8_t     packet[LENGTH_PACKET];
-   uint8_t     rxpk_len;
+   uint8_t     packet_len;
    int         rxpk_rssi;
    uint8_t     rxpk_lqi;
    uint8_t     rxpk_crc;
@@ -80,14 +80,15 @@ int main(void)
    // initialize board
    board_init();
    
-   // add callback functions from radio
+   // add callback functions radio
    radio_setOverflowCb(cb_radioTimerOverflows);
    radio_setCompareCb(cb_radioTimerCompare);
    radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
    
    // prepare packet
-   for (i=0;i<sizeof(app_vars.packet);i++) {
+   app_vars.packet_len = sizeof(app_vars.packet);
+   for (i=0;i<app_vars.packet_len;i++) {
       app_vars.packet[i] = i;
    }
    
@@ -122,7 +123,7 @@ int main(void)
                   break;
                case APP_STATE_TX:
                   // started sending a packet
-                  leds_radio_on();
+                  leds_sync_on();
                   break;
             }
             // clear flag
@@ -138,7 +139,7 @@ int main(void)
                   
                   // get packet from radio
                   radio_getReceivedFrame(app_vars.packet,
-                                         &app_vars.rxpk_len,
+                                         &app_vars.packet_len,
                                          sizeof(app_vars.packet),
                                          &app_vars.rxpk_rssi,
                                          &app_vars.rxpk_lqi,
@@ -153,7 +154,7 @@ int main(void)
                   radio_rxEnable();
                   app_vars.state = APP_STATE_RX;
                   
-                  leds_radio_off();
+                  leds_sync_off();
                   break;
             }
             // clear flag
@@ -162,6 +163,18 @@ int main(void)
          
          if (app_vars.flags & APP_FLAG_TIMER) {
             // timer fired
+            
+            if (app_vars.state==APP_STATE_RX) {
+               // stop listening
+               radio_rfOff();
+               
+               // start transmitting packet
+               radio_loadPacket(app_vars.packet,app_vars.packet_len);
+               radio_txEnable();
+               radio_txNow();
+               
+               app_vars.state = APP_STATE_TX;
+            }
             
             // clear flag
             app_vars.flags &= ~APP_FLAG_TIMER;

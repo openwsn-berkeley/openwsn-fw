@@ -65,8 +65,6 @@ void radio_init() {
 
    //busy wait until radio status is TRX_OFF
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
-   
-   //radiotimer_start(0xffff);//poipoi
 }
 
 void radio_startTimer(uint16_t period) {
@@ -125,7 +123,10 @@ void radio_txNow() {
    // ieee154e_startOfFrame from here. This also means that software can never catch
    // a radio glitch by which #radio_txEnable would not be followed by a packet being
    // transmitted (I've never seen that).
-   //poipoiieee154e_startOfFrame(ieee154etimer_getCapturedTime());
+   if (radio_vars.startFrameCb!=NULL) {
+      // call the callback
+      radio_vars.startFrameCb(radiotimer_getCapturedTime());
+   }
 }
 
 void radio_rxEnable() {
