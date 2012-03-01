@@ -5,13 +5,19 @@
 */
 
 #include "spi.h"
+#include "ssp.h"
+
+
 void    spi_init(){
+	SSP0Init();
 
 }
 
-void    spi_setCallback(spi_cbt cb){
-
+#ifdef SPI_IN_RTOS_MODE
+void spi_setCallback(spi_cbt cb) {
+   ssp_setCallback(cb);
 }
+#endif
 
 void    spi_txrx(uint8_t*     bufTx,
                  uint8_t      lenbufTx,
@@ -20,6 +26,8 @@ void    spi_txrx(uint8_t*     bufTx,
                  uint8_t      maxLenBufRx,
                  spi_first_t  isFirst,
                  spi_last_t   isLast){
+
+	SSPTxRcv(0,bufTx,lenbufTx,returnType,bufRx,maxLenBufRx,isFirst,isFirst);
 
 
 

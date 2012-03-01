@@ -9,7 +9,8 @@
 #include "uart.h"
 #include "uart_config.h"
 #include "LPC17xx.h"
-
+#include "FreeRTOS.h"
+#include "task.h"
 
 //=========================== defines =========================================
 
@@ -45,10 +46,23 @@ static void private_rcv_data_now();
 
 void UART0_IRQHandler (void)
 {
+	portBASE_TYPE xHigherPriorityTaskWoken=pdFALSE;
 	uint8_t IIRValue, LSRValue;
 	uint8_t Dummy = Dummy;
 
 	IIRValue = LPC_UART0->IIR;
+	/* IIR register. clears the interrupt when read. p.303
+		 *  0b10000011
+		 *    ||||||||__ IntStatus - 0 if at least one pending interrupt. 1 otherwise.
+		 *    |||||||___ Interrupt id 011-RLS,010-RDA,110-CTI,001-THRE interrupt.
+		 *    ||||||____ Interrupt id 011-RLS,010-RDA,110-CTI,001-THRE interrupt.
+		 *    |||||_____ Interrupt id 011-RLS,010-RDA,110-CTI,001-THRE interrupt.
+		 *    ||||______ Reserved
+		 *    |||_______ Reserved
+		 *    ||________ Fifo Enable. copies of UnFCR[0]
+		 *    |_________ Fifo Enable. copies of UnFCR[0]
+		 */
+
 
 	IIRValue >>= 1;			/* skip pending bit in IIR */
 	IIRValue &= 0x07;			/* check bit 1~3, interrupt identification */
@@ -101,13 +115,15 @@ void UART0_IRQHandler (void)
 				LPC_UART0->THR = *uart_vars.txBuf;//write
 			} else {
 				if (uart_vars.txDone_cb!=NULL) {
-					// disable UART1 TX interrupt
+					// disable UART0 TX interrupt
+					//LPC_UART0->LCR &= ~0x80;
 					LPC_UART0->IER &=  ~IER_THRE;
 
 					// call the callback
 					uart_vars.txDone_cb();
 					// make sure CPU restarts after leaving interrupt
 					//TODO.. check that.
+					 portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 				}
 			}
 		}
@@ -128,6 +144,7 @@ void uart_init(){
 	uint32_t pclkdiv, pclk;
 
 #ifdef UART_BAUDRATE_115200
+	//baudrate=115200;
 	baudrate=115200;
 #else
 	baudrate=9600;
@@ -169,7 +186,7 @@ void uart_init(){
 	 */
 
 
-	LPC_UART0->FCR = 0x07;		/* Enable and reset TX and RX FIFO. page.305
+	LPC_UART0->FCR = 0x07;		/*0x07 Enable and reset TX and RX FIFO. page.305
 	 *  0b00000111
 	 *    ||||||||__ FIFO Enable (enables Rx Data Available interrupt)
 	 *    |||||||___ RX FIFO Reset
@@ -180,7 +197,9 @@ void uart_init(){
 	 *    ||________ RX Trigger low (for DMA)
 	 *    |_________ RX Trigger high
 	 */
+	LPC_UART0->FCR |= (0 << 6);// Set FIFO to trigger when at least 1 characters available (only needed if FIFO is enabled) - p.305, 00-means 1 char,01 - 4chars..
 	NVIC_EnableIRQ(UART0_IRQn);
+
 
 
 	return;
@@ -198,17 +217,16 @@ void uart_tx(uint8_t* txBuf, uint8_t txBufLen){
 	uart_vars.txBuf           = txBuf;
 	uart_vars.txBufLen        = txBufLen;
 
-	//TODO Check that as This enables RX and TX interrupts.
 	LPC_UART0->IER |=  IER_THRE | IER_RLS;	/* Enable UART0 interrupt
-	 *  0b00000111
-	 *    ||||||||__ RBR Interrupt Enable (enables Rx Data Available interrupt)
-	 *    |||||||___ THRE Interrupt
-	 *    ||||||____ Rx Line Status interrupt
-	 *    |||||_____ Reserved
-	 *    ||||______ Reserved
-	 *    |||_______ Reserved
-	 *    ||________ Reserved
-	 *    |_________ ABEOIntEn (Enables the end of auto-baud interrupt)*/
+			 *  0b00000111
+			 *    ||||||||__ RBR Interrupt Enable (enables Rx Data Available interrupt)
+			 *    |||||||___ THRE Interrupt
+			 *    ||||||____ Rx Line Status interrupt
+			 *    |||||_____ Reserved
+			 *    ||||______ Reserved
+			 *    |||_______ Reserved
+			 *    ||________ Reserved
+			 *    |_________ ABEOIntEn (Enables the end of auto-baud interrupt)*/
 
 	LPC_UART0->THR = *txBuf;//write first bit in the uart. on isr, write the next one
 
@@ -227,8 +245,8 @@ void uart_rxSetup(uint8_t*    rxBuf,uint8_t     rxBufLen, 	uint8_t     rxBufFill
 }
 
 void uart_rxStart(){
-	//TODO Check that as This enables RX and TX interrupts.
-	LPC_UART0->IER |= IER_RBR  | IER_RLS;	/* Enable UART0 interrupt
+
+	LPC_UART0->IER |= IER_RBR| IER_RLS;	/* Enable UART0 interrupt
 	 *  0b00000111
 	 *    ||||||||__ RBR Interrupt Enable (enables Rx Data Available interrupt)
 	 *    |||||||___ THRE Interrupt
@@ -278,7 +296,7 @@ void uart_rxStop(){
 //=========================== private =========================================
 
 static void private_rcv_data_now(){
-
+	portBASE_TYPE xHigherPriorityTaskWoken=pdFALSE;
 	// copy received by into buffer
 	*uart_vars.rxBufWrPtr     =  LPC_UART0->RBR;
 	// shift pointer
@@ -298,7 +316,7 @@ static void private_rcv_data_now(){
 			// call the callback
 			uart_vars.rx_cb(UART_EVENT_OVERFLOW);
 			// make sure CPU restarts after leaving interrupt
-			//TODO check that...
+			 portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 		}
 
 	} else if (uart_vars.rxBufFill>=uart_vars.rxBufFillThres) {
@@ -308,7 +326,7 @@ static void private_rcv_data_now(){
 			// call the callback
 			uart_vars.rx_cb(UART_EVENT_THRES);
 			// make sure CPU restarts after leaving interrupt
-			//TODO check that...
+			portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 		}
 	}
 
