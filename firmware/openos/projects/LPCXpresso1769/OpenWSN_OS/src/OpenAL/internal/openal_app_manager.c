@@ -14,11 +14,8 @@
 #include "semphr.h"
 
 // Parameters for starting a task
-#define FREERTOS_APP_STACK_SIZE (4096/sizeof(size_t)) // 4KB of memory
+#define FREERTOS_APP_STACK_SIZE (0x1000/sizeof(size_t)) // 4KB of memory
 #define FREERTOS_APP_PRIORITY tskIDLE_PRIORITY
-
-// a huge block of memory for application stacks
-size_t app_stack_blocks[FREERTOS_APP_STACK_SIZE] __attribute__((section(".openAL_app_stacks")));
 
 const app_registry_entry_t app_registry[OPENAL_NUM_APPS] ;
 

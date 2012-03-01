@@ -98,7 +98,6 @@ SECTIONS
 		_data = .;	
 		*(vtable)
 		*(.data*)
-		*(.openAL_app_stacks*)
 		_edata = .;
 	} > SRAM
 
