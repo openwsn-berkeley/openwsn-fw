@@ -209,7 +209,7 @@ void cb_endFrame(uint16_t timestamp) {
 
 void cb_timer() {
    // set flag
-   //poipoiapp_vars.flags |= APP_FLAG_TIMER;
+   app_vars.flags |= APP_FLAG_TIMER;
    // update debug stats
    app_dbg.num_timer++;
 }
