@@ -65,6 +65,8 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 void radio_reset() {
    uint16_t              delay;
    cc2420_MDMCTRL0_reg_t cc2420_MDMCTRL0_reg;
+   cc2420_TXCTRL_reg_t   cc2420_TXCTRL_reg;
+   cc2420_RXCTRL1_reg_t   cc2420_RXCTRL1_reg;
    
    // VREG pin
    P4DIR     |=  0x20;                           // P4.5 radio VREG enabled, output
@@ -93,6 +95,34 @@ void radio_reset() {
    radio_spiWriteReg(CC2420_MDMCTRL0_ADDR,
                      &radio_vars.radioStatusByte,
                      *(uint16_t*)&cc2420_MDMCTRL0_reg);
+   
+   // speed up time to TX
+   cc2420_TXCTRL_reg.PA_LEVEL               = 31;// max. TX power (~0dBm)
+   cc2420_TXCTRL_reg.reserved_w1            = 1;
+   cc2420_TXCTRL_reg.PA_CURRENT             = 3;
+   cc2420_TXCTRL_reg.TXMIX_CURRENT          = 0;
+   cc2420_TXCTRL_reg.TXMIX_CAP_ARRAY        = 0;
+   cc2420_TXCTRL_reg.TX_TURNAROUND          = 0; // faster STXON->SFD timing (128us)
+   cc2420_TXCTRL_reg.TXMIXBUF_CUR           = 2;
+   radio_spiWriteReg(CC2420_TXCTRL_ADDR,
+                     &radio_vars.radioStatusByte,
+                     *(uint16_t*)&cc2420_TXCTRL_reg);
+   
+   // apply correction recommended in datasheet
+   cc2420_RXCTRL1_reg.RXMIX_CURRENT         = 2;
+   cc2420_RXCTRL1_reg.RXMIX_VCM             = 1;
+   cc2420_RXCTRL1_reg.RXMIX_TAIL            = 1;
+   cc2420_RXCTRL1_reg.LNA_CAP_ARRAY         = 1;
+   cc2420_RXCTRL1_reg.MED_HGM               = 0;
+   cc2420_RXCTRL1_reg.HIGH_HGM              = 1;
+   cc2420_RXCTRL1_reg.MED_LOWGAIN           = 0;
+   cc2420_RXCTRL1_reg.LOW_LOWGAIN           = 1;
+   cc2420_RXCTRL1_reg.RXBPF_MIDCUR          = 0;
+   cc2420_RXCTRL1_reg.RXBPF_LOCUR           = 1; // use this setting as per datasheet
+   cc2420_RXCTRL1_reg.reserved_w0           = 0;
+   radio_spiWriteReg(CC2420_RXCTRL1_ADDR,
+                     &radio_vars.radioStatusByte,
+                     *(uint16_t*)&cc2420_RXCTRL1_reg);
 }
 
 void radio_setFrequency(uint8_t frequency) {
