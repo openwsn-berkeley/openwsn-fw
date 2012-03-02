@@ -141,7 +141,7 @@ void spi_txrx(uint8_t*     bufTx,
    // implementation 1. use a callback function when transaction finishes
    
    // write first byte to TX buffer
-   U0TXBUF                = *spi_vars.pNextTxByte;
+   U0TXBUF                   = *spi_vars.pNextTxByte;
    
    // re-enable interrupts
    __enable_interrupt();

@@ -87,10 +87,12 @@ int main(void)
    radio_setEndFrameCb(cb_endFrame);
    
    // prepare packet
+   /*
    app_vars.packet_len = sizeof(app_vars.packet);
    for (i=0;i<app_vars.packet_len;i++) {
       app_vars.packet[i] = i;
    }
+   */
    
    // start timer
    timers_start(TIMER_ID,
@@ -107,7 +109,7 @@ int main(void)
    app_vars.state = APP_STATE_RX;
    
    while (1) {
-      // sleep while waiting for a flag to be set
+      // sleep while waiting for at least one of the flags to be set
       while (app_vars.flags==0x00) {
          board_sleep();
       }
@@ -209,7 +211,7 @@ void cb_endFrame(uint16_t timestamp) {
 
 void cb_timer() {
    // set flag
-   app_vars.flags |= APP_FLAG_TIMER;
+   //poipoiapp_vars.flags |= APP_FLAG_TIMER;
    // update debug stats
    app_dbg.num_timer++;
 }

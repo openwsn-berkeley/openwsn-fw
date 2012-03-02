@@ -64,6 +64,7 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 
 void radio_reset() {
    uint16_t              delay;
+   cc2420_MDMCTRL0_reg_t cc2420_MDMCTRL0_reg;
    
    // VREG pin
    P4DIR     |=  0x20;                           // P4.5 radio VREG enabled, output
@@ -78,6 +79,20 @@ void radio_reset() {
    // reset high
    P4OUT     |=  0x40;                           // P4.6 radio reset, hold high
    for (delay=0xffff;delay>0;delay--);
+   
+   // disable address recognition
+   cc2420_MDMCTRL0_reg.PREAMBLE_LENGTH      = 2; // 3 leading zero's (IEEE802.15.4 compliant)
+   cc2420_MDMCTRL0_reg.AUTOACK              = 0;
+   cc2420_MDMCTRL0_reg.AUTOCRC              = 1;
+   cc2420_MDMCTRL0_reg.CCA_MODE             = 3;
+   cc2420_MDMCTRL0_reg.CCA_HYST             = 2;
+   cc2420_MDMCTRL0_reg.ADR_DECODE           = 0; // turn OFF address recognition
+   cc2420_MDMCTRL0_reg.PAN_COORDINATOR      = 0;
+   cc2420_MDMCTRL0_reg.RESERVED_FRAME_MODE  = 1; // accept all frame types
+   cc2420_MDMCTRL0_reg.reserved_w0          = 0;
+   radio_spiWriteReg(CC2420_MDMCTRL0_ADDR,
+                     &radio_vars.radioStatusByte,
+                     *(uint16_t*)&cc2420_MDMCTRL0_reg);
 }
 
 void radio_setFrequency(uint8_t frequency) {
@@ -120,11 +135,15 @@ void radio_txNow() {
 }
 
 void radio_rxEnable() {
-   // poipoi
+   radio_spiStrobe(CC2420_SRXON, &radio_vars.radioStatusByte);
+   radio_spiStrobe(CC2420_SFLUSHRX, &radio_vars.radioStatusByte);
+   while (radio_vars.radioStatusByte.rssi_valid==0) {
+      radio_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
+   }
 }
 
 void radio_rxNow() {
-   // poipoi
+   // nothing to do
 }
 
 void radio_getReceivedFrame(uint8_t* bufRead,
@@ -133,12 +152,14 @@ void radio_getReceivedFrame(uint8_t* bufRead,
                                 int* rssi,
                             uint8_t* lqi,
                             uint8_t* crc) {
-   // poipoi
+   // poipoi: CRC, RSSI and LQI TODO
    radio_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
 }
 
 void radio_rfOff() {
-   // poipoi
+   radio_spiStrobe(CC2420_SRFOFF, &radio_vars.radioStatusByte);
+   // todo wait until off
+   
 }
 
 //=========================== private =========================================
@@ -242,7 +263,8 @@ void radio_spiReadRxFifo(cc2420_status_t* statusRead,
             SPI_FIRST,
             SPI_NOTLAST);
    
-   *pLenRead  = spi_rx_buffer[1];
+   *statusRead          = *(cc2420_status_t*)&spi_rx_buffer[0];
+   *pLenRead            = spi_rx_buffer[1];
    
    if (*pLenRead>2 && *pLenRead<=127) {
       // valid length
