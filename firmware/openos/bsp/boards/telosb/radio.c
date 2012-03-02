@@ -69,7 +69,7 @@ void radio_reset() {
    cc2420_TXCTRL_reg_t   cc2420_TXCTRL_reg;
    cc2420_RXCTRL1_reg_t   cc2420_RXCTRL1_reg;
    
-   // VREG pin
+   // VREG high
    P4DIR     |=  0x20;                           // P4.5 radio VREG enabled, output
    P4OUT     |=  0x20;                           // P4.5 radio VREG enabled, hold high
    for (delay=0xffff;delay>0;delay--);           // max. VREG start-up time is 0.6ms
@@ -174,7 +174,7 @@ void radio_rxEnable() {
 }
 
 void radio_rxNow() {
-   // nothing to do
+   // nothing to do, the radio is already listening.
 }
 
 void radio_getReceivedFrame(uint8_t* bufRead,
@@ -198,7 +198,7 @@ void radio_getReceivedFrame(uint8_t* bufRead,
 
 void radio_rfOff() {
    radio_spiStrobe(CC2420_SRFOFF, &radio_vars.radioStatusByte);
-   // todo wait until off
+   // poipoi wait until off
    
 }
 
