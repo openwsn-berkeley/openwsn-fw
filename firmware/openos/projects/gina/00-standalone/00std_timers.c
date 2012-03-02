@@ -77,15 +77,15 @@ int main(void) {
 }
 
 // TimerA CCR0 interrupt service routine
-#pragma vector=TIMERA0_VECTOR
+#pragma vector = TIMERA0_VECTOR
 __interrupt void TIMERA0_ISR (void) {
    TACCR0 += TIMERA0_PERIOD;
    __no_operation();
 }
 
 // TimerA CCR1-2 interrupt service routine
-#pragma vector=TIMERA1_VECTOR
-__interrupt void TIMERA1and2_ISR (void) {
+#pragma vector = TIMERA1_VECTOR
+__interrupt void TIMERA1_ISR (void) {
    uint16_t taiv_temp = TAIV;                    // necessary because accessing TAIV resets it
    switch (taiv_temp) {
    case 0x0002:
@@ -102,15 +102,15 @@ __interrupt void TIMERA1and2_ISR (void) {
 }
 
 // TimerB CCR0 interrupt service routine
-#pragma vector=TIMERB0_VECTOR
+#pragma vector = TIMERB0_VECTOR
 __interrupt void TIMERB0_ISR (void) {
    TBCCR0 += TIMERB0_PERIOD;
    __no_operation();
 }
 
 // TimerB CCR1-6 interrupt service routine
-#pragma vector=TIMERB1_VECTOR
-__interrupt void TIMERB1thourgh6_ISR (void) {
+#pragma vector = TIMERB1_VECTOR
+__interrupt void TIMERB1_ISR (void) {
    uint16_t tbiv_temp = TBIV;                    // necessary because accessing TBIV resets it
    switch (tbiv_temp) {
    case 0x0002:

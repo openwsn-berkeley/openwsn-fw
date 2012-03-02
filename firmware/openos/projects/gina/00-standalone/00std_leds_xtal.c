@@ -53,8 +53,8 @@ int main(void)
 /**
 \brief This function is called when the TimerA interrupt fires.
 */
-#pragma vector=TIMERA0_VECTOR
-__interrupt void timera0_ISR (void) {
+#pragma vector = TIMERA0_VECTOR
+__interrupt void TIMERA0_ISR (void) {
    uint8_t temp_leds;
    
    // if no LEDs on, switch on first one

@@ -79,8 +79,8 @@ void main(void)
 /**
 \brief This function is called when the the UART module has received a byte.
 */
-#pragma vector=USART1RX_VECTOR
-__interrupt void uart_ISR(void)
+#pragma vector = USART1RX_VECTOR
+__interrupt void USART1RX_ISR (void)
 {
    U1TXBUF   =  U1RXBUF;                        // TX -> RXed character
    P5OUT    ^=  0x10;                           // toggle LED

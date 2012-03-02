@@ -46,3 +46,24 @@ void board_sleep() {
 }
 
 //=========================== private =========================================
+
+//=========================== interrupt handlers ==============================
+
+/*
+DACDMA_VECTOR
+PORT2_VECTOR
+USART1TX_VECTOR
+USART1RX_VECTOR
+PORT1_VECTOR
+TIMERA1_VECTOR
+TIMERA0_VECTOR
+ADC12_VECTOR
+USART0TX_VECTOR
+USART0RX_VECTOR
+WDT_VECTOR
+COMPARATORA_VECTOR
+TIMERB1_VECTOR
+TIMERB0_VECTOR
+NMI_VECTOR
+RESET_VECTOR
+*/

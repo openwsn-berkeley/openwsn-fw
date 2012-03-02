@@ -94,8 +94,8 @@ inline uint16_t radiotimer_getCapturedTime() {
 /**
 \brief TimerB CCR1-6 interrupt service routine
 */
-#pragma vector=TIMERB1_VECTOR
-__interrupt void timerb1_ISR (void) {
+#pragma vector = TIMERB1_VECTOR
+__interrupt void TIMERB1_ISR (void) {
    uint16_t tbiv_local;
    
    // reading TBIV returns the value of the highest pending interrupt flag

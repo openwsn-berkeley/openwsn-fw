@@ -45,8 +45,8 @@ int main(void) {
 /**
 \brief This function is called when the Port2 interrupt fires.
 */
-#pragma vector=PORT2_VECTOR
-__interrupt void Port2_ISR (void) {
+#pragma vector = PORT2_VECTOR
+__interrupt void PORT2_ISR (void) {
    P2IFG &= ~0x80;                               // clear the interrupt flag
    P5OUT ^=  0x10;                               // toggle LED
 }

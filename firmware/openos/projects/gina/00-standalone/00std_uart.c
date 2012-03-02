@@ -59,8 +59,8 @@ void main(void)
 /**
 \brief This function is called when the the UART module has received a byte.
 */
-#pragma vector=USCIAB1RX_VECTOR
-__interrupt void usciab1rx_ISR(void)
+#pragma vector = USCIAB1RX_VECTOR
+__interrupt void USCIAB1RX_ISR (void)
 {
    UCA1TXBUF  =  UCA1RXBUF;                      // TX -> RXed character
    P2OUT     ^=  0x02;                           // toggle green LED
@@ -69,8 +69,8 @@ __interrupt void usciab1rx_ISR(void)
 /**
 \brief This function is called when the the UART module ready to send next byte.
 */
-#pragma vector=USCIAB1TX_VECTOR
-__interrupt void usciab1tx_ISR(void)
+#pragma vector = USCIAB1TX_VECTOR
+__interrupt void USCIAB1TX_ISR (void)
 {
    UC1IFG    &= ~UCA1TXIFG;                      // clear interrupt flag
    P2OUT     ^=  0x08;                           // toggle red LED
