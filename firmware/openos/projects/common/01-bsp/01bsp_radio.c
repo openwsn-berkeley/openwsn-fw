@@ -87,12 +87,10 @@ int main(void)
    radio_setEndFrameCb(cb_endFrame);
    
    // prepare packet
-   /*
    app_vars.packet_len = sizeof(app_vars.packet);
    for (i=0;i<app_vars.packet_len;i++) {
       app_vars.packet[i] = i;
    }
-   */
    
    // start timer
    timers_start(TIMER_ID,
