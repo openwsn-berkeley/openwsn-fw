@@ -143,7 +143,7 @@ void radio_rxNow() {
 void radio_getReceivedFrame(uint8_t* pBufRead,
                             uint8_t* pLenRead,
                             uint8_t  maxBufLen,
-                                int* pRssi,
+                             int8_t* pRssi,
                             uint8_t* pLqi,
                             uint8_t* pCrc) {
    uint8_t temp_reg_value;
