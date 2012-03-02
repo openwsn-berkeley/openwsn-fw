@@ -319,6 +319,7 @@
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1872,7 +1873,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01-bsp\\01bsp_timers.c</name>
+      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_timers.c</name>
     </file>
   </group>
   <group>
@@ -1887,7 +1888,7 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\cc2420.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
@@ -1896,7 +1897,7 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radio.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
