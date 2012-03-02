@@ -319,6 +319,7 @@
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\gina\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1872,13 +1873,13 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01-bsp\\01bsp_radio.c</name>
+      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_radio.c</name>
     </file>
   </group>
   <group>
     <name>bsp</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\at86rf231.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\at86rf231.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board.c</name>
@@ -1896,7 +1897,7 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\radio.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\radio.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
