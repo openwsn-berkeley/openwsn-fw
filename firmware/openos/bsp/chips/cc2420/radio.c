@@ -1,5 +1,5 @@
 /**
-\brief TelosB-specific definition of the "radio" bsp module.
+\brief CC2420-specific definition of the "radio" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
