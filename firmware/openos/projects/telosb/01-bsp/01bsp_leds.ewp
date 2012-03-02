@@ -317,8 +317,8 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\..\bsp\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\telosb\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1872,58 +1872,58 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_leds.c</name>
+      <name>$PROJ_DIR$\..\..\common\01-bsp\\01bsp_leds.c</name>
     </file>
   </group>
   <group>
     <name>bsp</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\board.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\board.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\board_info.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\cc2420.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\cc2420.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\leds.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\leds.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\radio.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radio.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\radio.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\radiotimer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radiotimer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\radiotimer.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\spi.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\spi.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\spi.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\timers.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\timers.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\timers.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\timers.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\telosb\uart.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\uart.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\uart.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
     </file>
   </group>
 </project>
