@@ -317,8 +317,8 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\..\bsp\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\gina\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\gina\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1872,58 +1872,58 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_radio.c</name>
+      <name>$PROJ_DIR$\..\..\common\01-bsp\\01bsp_radio.c</name>
     </file>
   </group>
   <group>
     <name>bsp</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\gina\at86rf231.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\at86rf231.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\gina\board.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\board.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\gina\board_info.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\gina\leds.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\leds.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\leds.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\gina\radio.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\radio.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\radio.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\gina\radiotimer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\radiotimer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\radiotimer.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\gina\spi.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\spi.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\spi.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\gina\timers.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\timers.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\timers.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\timers.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\gina\uart.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\uart.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\uart.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
     </file>
   </group>
 </project>
