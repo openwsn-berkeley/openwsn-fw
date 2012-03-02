@@ -50,7 +50,7 @@ typedef struct {
    app_state_t state;
    uint8_t     packet[LENGTH_PACKET];
    uint8_t     packet_len;
-   int         rxpk_rssi;
+    int8_t     rxpk_rssi;
    uint8_t     rxpk_lqi;
    uint8_t     rxpk_crc;
 } app_vars_t;

@@ -39,7 +39,8 @@ void radio_init() {
    // reset radio
    radio_reset();
    
-   radiotimer_start(0xffff);//poipoi
+   // start radiotimer with dummy setting to activate SFD pin interrupt
+   radiotimer_start(0xffff);
 }
 
 void radio_startTimer(uint16_t period) {
@@ -179,11 +180,20 @@ void radio_rxNow() {
 void radio_getReceivedFrame(uint8_t* bufRead,
                             uint8_t* lenRead,
                             uint8_t  maxBufLen,
-                                int* rssi,
+                             int8_t* rssi,
                             uint8_t* lqi,
                             uint8_t* crc) {
-   // poipoi: CRC, RSSI and LQI TODO
+   // read the received packet from the RXFIFO
    radio_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
+   
+   // On reception, when MODEMCTRL0.AUTOCRC is set, the CC2420 replaces the
+   // received CRC by:
+   // - [1B] the rssi, a signed value. The actual value in dBm is that - 45.
+   // - [1B] whether CRC checked (bit 7) and LQI (bit 6-0)
+   *rssi  =  *(bufRead+*lenRead-2);
+   *rssi -= 45;
+   *crc   = ((*(bufRead+*lenRead-1))&0x80)>>7;
+   *lqi   =  (*(bufRead+*lenRead-1))&0x7f;
 }
 
 void radio_rfOff() {

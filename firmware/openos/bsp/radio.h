@@ -36,7 +36,7 @@ void radio_rxNow();
 void radio_getReceivedFrame(uint8_t* bufRead,
                             uint8_t* lenRead,
                             uint8_t  maxBufLen,
-                                int* rssi,
+                             int8_t* rssi,
                             uint8_t* lqi,
                             uint8_t* crc);
 void radio_rfOff();
