@@ -739,7 +739,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F149.xcl</state>
+          <state>$TOOLKIT_DIR$\CONFIG\lnk430F1611.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -867,7 +867,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>templproj.a43</state>
+          <state>03app_openwsn.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1962,6 +1962,12 @@
     </file>
   </group>
   <group>
+    <name>drivers</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\openserial.h</name>
+    </file>
+  </group>
+  <group>
     <name>kernel</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
@@ -2009,6 +2015,21 @@
       </file>
     </group>
     <group>
+      <name>03a-IPHC</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\iphc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\iphc.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\openbridge.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\openbridge.h</name>
+      </file>
+    </group>
+    <group>
       <name>03b-IPv6</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\forwarding.c</name>
@@ -2039,21 +2060,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.h</name>
-      </file>
-    </group>
-    <group>
-      <name>03a-IPHC</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\iphc.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\iphc.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\openbridge.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\openbridge.h</name>
       </file>
     </group>
     <group>
