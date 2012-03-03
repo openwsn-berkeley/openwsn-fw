@@ -2129,6 +2129,9 @@
       </group>
       <group>
         <name>rheli</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\rheli.c</name>
         </file>
@@ -2165,6 +2168,9 @@
       </group>
       <group>
         <name>rrube</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\rrube.c</name>
         </file>
@@ -2174,6 +2180,9 @@
       </group>
       <group>
         <name>rt</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\rt.c</name>
         </file>
@@ -2192,6 +2201,9 @@
       </group>
       <group>
         <name>rxl1</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\rxl1.c</name>
         </file>

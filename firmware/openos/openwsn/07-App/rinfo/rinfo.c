@@ -6,8 +6,6 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "board.h"
-#include "sensitive_accel_temperature.h"
-
 
 //=========================== defines =========================================
 
