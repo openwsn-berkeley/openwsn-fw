@@ -59,3 +59,38 @@ __interrupt void TIMERB1_ISR (void) {
       __bic_SR_register_on_exit(CPUOFF);  // restart CPU
    }
 }
+
+#pragma vector = USART0RX_VECTOR
+__interrupt void USART0RX_ISR (void) {
+   if (spi_isr()==1) {
+      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   }
+}
+
+#pragma vector = TIMERA0_VECTOR
+__interrupt void TIMERA0_ISR (void) {
+   if (timer_isr_0()==1) {
+      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   }
+}
+
+#pragma vector = TIMERA1_VECTOR
+__interrupt void TIMERA1_ISR (void) {
+   if (timer_isr_1()==1) {
+      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   }
+}
+
+#pragma vector = USART1TX_VECTOR
+__interrupt void USART1TX_ISR (void) {
+   if (uart_isr_tx()==1) {
+      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   }
+}
+
+#pragma vector = USART1RX_VECTOR
+__interrupt void USART1RX_ISR (void) {
+   if (uart_isr_rx()==1) {
+      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   }
+}

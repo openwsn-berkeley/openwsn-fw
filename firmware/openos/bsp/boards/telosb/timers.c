@@ -98,9 +98,7 @@ void timers_stop(uint8_t id) {
 
 //=========================== interrup handlers ===============================
 
-// TimerA CCR0 interrupt service routine
-#pragma vector = TIMERA0_VECTOR
-__interrupt void TIMERA0_ISR (void) {
+uint8_t timer_isr_0() {
    if (timers_vars.type[0]==TIMER_PERIODIC) {
       TACCR0           += timers_vars.period[0]; // continuous timer: schedule next instant
    } else {
@@ -109,13 +107,11 @@ __interrupt void TIMERA0_ISR (void) {
    }
    // call the callback
    timers_vars.callback[0]();
-   // make sure CPU restarts after leaving interrupt
-   __bic_SR_register_on_exit(CPUOFF);
+   // kick the OS
+   return 1;
 }
 
-// TimerA CCR1-2 interrupt service routine
-#pragma vector = TIMERA1_VECTOR
-__interrupt void TIMERA1_ISR (void) {
+uint8_t timer_isr_1() {
    uint16_t taiv_temp   = TAIV;                  // read only once because accessing TAIV resets it
    switch (taiv_temp) {
       case 0x0002: // timerA CCR1
@@ -127,8 +123,8 @@ __interrupt void TIMERA1_ISR (void) {
          }
          // call the callback
          timers_vars.callback[1]();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
          break;
       case 0x0004: // timerA CCR2
          if (timers_vars.type[2]==TIMER_PERIODIC) {
@@ -139,8 +135,8 @@ __interrupt void TIMERA1_ISR (void) {
          }
          // call the callback
          timers_vars.callback[2]();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
          break;
       default:
          while(1);                               // this should not happen
