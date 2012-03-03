@@ -94,8 +94,7 @@ inline uint16_t radiotimer_getCapturedTime() {
 /**
 \brief TimerB CCR1-6 interrupt service routine
 */
-#pragma vector = TIMERB1_VECTOR
-__interrupt void TIMERB1_ISR (void) {
+uint8_t radiotimer_isr() {
    uint16_t tbiv_local;
    
    // reading TBIV returns the value of the highest pending interrupt flag
@@ -111,17 +110,23 @@ __interrupt void TIMERB1_ISR (void) {
             // SFD pin is high: this was the start of a frame
             if (radiotimer_vars.startFrameCb!=NULL) {
                radiotimer_vars.startFrameCb(TBCCR1);
+               // kick the OS
+               return 1;
             }
          } else {
             // SFD pin is low: this was the end of a frame
             if (radiotimer_vars.endFrameCb!=NULL) {
                radiotimer_vars.endFrameCb(TBCCR1);
+               // kick the OS
+               return 1;
             }
          }
          break;
       case 0x0004: // CCR2 fires
          if (radiotimer_vars.compareCb!=NULL) {
             radiotimer_vars.compareCb();
+            // kick the OS
+            return 1;
          }
          break;
       case 0x0006: // CCR3 fires
@@ -135,9 +140,10 @@ __interrupt void TIMERB1_ISR (void) {
       case 0x000e: // timer overflow
          if (radiotimer_vars.overflowCb!=NULL) {
             radiotimer_vars.overflowCb();
+            // kick the OS
+            return 1;
          }
          break;
    }
-   
-   __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   return 0;
 }

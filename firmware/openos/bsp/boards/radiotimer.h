@@ -30,4 +30,6 @@ void     radiotimer_schedule(uint16_t offset);
 void     radiotimer_cancel();
 uint16_t radiotimer_getCapturedTime();
 
+uint8_t  radiotimer_isr();
+
 #endif
