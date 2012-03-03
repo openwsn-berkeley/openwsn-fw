@@ -1912,7 +1912,7 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\spi.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\timers.c</name>

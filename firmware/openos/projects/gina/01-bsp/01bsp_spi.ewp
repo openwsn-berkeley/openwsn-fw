@@ -1915,7 +1915,7 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\spi.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\timers.c</name>
