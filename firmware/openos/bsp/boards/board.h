@@ -11,6 +11,9 @@
 
 //=========================== define ==========================================
 
+//poipoi
+#define CAPTURE_TIME() 
+
 enum radio_antennaselection_enum {
    RADIO_UFL_ANTENNA              = 0x06, ///< Use the antenna connected by U.FL.
    RADIO_CHIP_ANTENNA             = 0x05, ///< Use the on-board chip antenna.

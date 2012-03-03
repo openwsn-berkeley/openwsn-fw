@@ -6,10 +6,12 @@
 
 #include "msp430x26x.h"
 #include "board.h"
+#include "debugpins.h"
 // bsp modules
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
+#include "i2c.h"
 #include "timers.h"
 #include "radio.h"
 #include "radiotimer.h"
@@ -57,7 +59,7 @@ void board_sleep() {
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
-/*
+
 #pragma vector = PORT1_VECTOR
 __interrupt void PORT1_ISR (void) {
    if (P1IFG & 0x40) {
@@ -138,4 +140,3 @@ __interrupt void USCIAB1RX_ISR(void) {
    }
    DEBUG_PIN_ISR_CLR();
 }
-*/

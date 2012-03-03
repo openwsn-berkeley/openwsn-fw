@@ -4,6 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
+#include "board.h"
 #include "scheduler.h"
 #include "radiotimer.h"
 #include "IEEE802154E.h"
@@ -79,7 +80,7 @@ __monitor void scheduler_push_task(task_cbt task_cb, task_prio_t prio) {
       taskContainer++;
    }
    if (taskContainer>&scheduler_vars.taskBuf[TASK_LIST_DEPTH-1]) {
-      // task list overflown
+      // task list has overflown
       while(1);
    }
    // fill that task container with this task
@@ -101,7 +102,7 @@ __monitor void scheduler_push_task(task_cbt task_cb, task_prio_t prio) {
 //=========================== interrupt handlers ==============================
 
 //======= interrupt which wakes up the scheduler from SW
-/*
+
 #pragma vector = COMPARATORA_VECTOR
 __interrupt void COMPARATORA_ISR (void) {
    CAPTURE_TIME();
@@ -149,4 +150,3 @@ __interrupt void ADC12_ISR (void) {
    __bic_SR_register_on_exit(CPUOFF);            // restart CPU
    DEBUG_PIN_ISR_CLR();
 }
-*/
