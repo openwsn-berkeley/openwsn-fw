@@ -1,3 +1,9 @@
+/**
+\brief OpenOS scheduler.
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
+*/
+
 #include "scheduler.h"
 #include "radiotimer.h"
 #include "IEEE802154E.h"

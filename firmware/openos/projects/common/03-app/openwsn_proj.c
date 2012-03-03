@@ -1,6 +1,5 @@
 /**
-\brief This project runs the full OpenWSN stack on the GINA2.2b/c and GINA
-       basestations platforms.
+\brief This project runs the full OpenWSN stack.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
 */
