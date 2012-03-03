@@ -26,6 +26,9 @@
     <path>$WS_DIR$\projects\gina\01-bsp\01bsp_radio.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\projects\gina\03-app\03app_openwsn.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\projects\gina\test_i2c_connnected_slaves.ewp</path>
   </project>
   <project>
