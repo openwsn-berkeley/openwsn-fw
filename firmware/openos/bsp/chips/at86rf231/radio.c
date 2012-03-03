@@ -73,7 +73,7 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 }
 
 void radio_reset() {
-   //poipoi
+   PORT_PIN_RADIO_RESET_LOW();
 }
 
 void radio_setFrequency(uint8_t frequency) {
@@ -82,7 +82,7 @@ void radio_setFrequency(uint8_t frequency) {
 }
 
 void radio_rfOn() {
-   //poipoi
+   PORT_PIN_RADIO_RESET_LOW();
 }
 
 void radio_loadPacket(uint8_t* packet, uint8_t len) {

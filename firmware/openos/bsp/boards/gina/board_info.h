@@ -15,6 +15,10 @@ to return the board's description.
 // [P4.7] radio SLP_TR_CNTL
 #define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH() P4OUT |=  0x80;
 #define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()  P4OUT &= ~0x80;
+// radio reset line
+// on GINA, the /RST line is not connected to the uC
+#define PORT_PIN_RADIO_RESET_HIGH()    // nothing
+#define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
 //=========================== typedef  ========================================
 

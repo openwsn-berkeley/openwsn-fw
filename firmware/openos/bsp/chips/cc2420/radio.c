@@ -195,7 +195,6 @@ void radio_getReceivedFrame(uint8_t* bufRead,
 void radio_rfOff() {
    radio_spiStrobe(CC2420_SRFOFF, &radio_vars.radioStatusByte);
    // poipoi wait until off
-   
 }
 
 //=========================== private =========================================
