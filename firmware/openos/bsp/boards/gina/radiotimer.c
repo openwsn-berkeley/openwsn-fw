@@ -91,28 +91,28 @@ inline uint16_t radiotimer_getCapturedTime() {
 
 //=========================== interrupt handlers ==============================
 
-#pragma vector = TIMERA1_VECTOR
-__interrupt void TIMERA1_ISR (void) {
+uint8_t radiotimer_isr() {
    uint16_t taiv_temp = TAIV;                    // read only once because accessing TAIV resets it
    switch (taiv_temp) {
       case 0x0002: // capture/compare CCR1
          if (radiotimer_vars.compareCb!=NULL) {
             // call the callback
             radiotimer_vars.compareCb();
-            // make sure CPU restarts after leaving interrupt
-            __bic_SR_register_on_exit(CPUOFF);
+            // kick the OS
+            return 1;
          }
          break;
       case 0x000a: // timer overflows
          if (radiotimer_vars.overflowCb!=NULL) {
             // call the callback
             radiotimer_vars.overflowCb();
-            // make sure CPU restarts after leaving interrupt
-            __bic_SR_register_on_exit(CPUOFF);
+            // kick the OS
+            return 1;
          }
          break;
       case 0x0004: // capture/compare CCR2
       default:
          while(1);                               // this should not happen
    }
+   return 0;
 }

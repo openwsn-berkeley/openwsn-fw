@@ -133,8 +133,7 @@ void reset_rxBuf() {
 
 //=========================== interrupt handlers ==============================
 
-#pragma vector = USCIAB1TX_VECTOR
-__interrupt void USCIAB1TX_ISR (void) {
+uint8_t uart_isr_tx() {
    // one byte less to go
    uart_vars.txBufLen--;
    uart_vars.txBuf++;
@@ -148,14 +147,14 @@ __interrupt void USCIAB1TX_ISR (void) {
          UC1IE              &= ~UCA1TXIE;
          // call the callback
          uart_vars.txDone_cb();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
       }
    }
+   return 0;
 }
 
-#pragma vector = USCIAB1RX_VECTOR
-__interrupt void USCIAB1RX_ISR (void) {
+uint8_t uart_isr_rx() {
    // copy received by into buffer
    *uart_vars.rxBufWrPtr     =  UCA1RXBUF;
    // shift pointer
@@ -176,8 +175,8 @@ __interrupt void USCIAB1RX_ISR (void) {
       if (uart_vars.rx_cb!=NULL) {
          // call the callback
          uart_vars.rx_cb(UART_EVENT_OVERFLOW);
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
       }
       
    } else if (uart_vars.rxBufFill>=uart_vars.rxBufFillThres) {
@@ -186,8 +185,9 @@ __interrupt void USCIAB1RX_ISR (void) {
       if (uart_vars.rx_cb!=NULL) {
          // call the callback
          uart_vars.rx_cb(UART_EVENT_THRES);
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
       }
    }
+   return 0;
 }

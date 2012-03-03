@@ -18,11 +18,14 @@ typedef void (*timer_cbt)(void);
 
 //=========================== prototypes ======================================
 
-void timers_init();
-void timers_start(uint8_t      id,
-                  uint16_t     duration,
-                  timer_type_t type,
-                  timer_cbt    callback);
-void timers_stop (uint8_t      id);
+void    timers_init();
+void    timers_start(uint8_t      id,
+                     uint16_t     duration,
+                     timer_type_t type,
+                     timer_cbt    callback);
+void    timers_stop(uint8_t      id);
+
+uint8_t timer_isr_0();
+uint8_t timer_isr_1();
 
 #endif

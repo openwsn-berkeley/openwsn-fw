@@ -58,100 +58,6 @@ void board_sleep() {
 
 //=========================== interrupt handlers ==============================
 
-#pragma vector = RESERVED0_VECTOR
-__interrupt void RESERVED0_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED1_VECTOR
-__interrupt void RESERVED1_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED2_VECTOR
-__interrupt void RESERVED2_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED3_VECTOR
-__interrupt void RESERVED3_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED4_VECTOR
-__interrupt void RESERVED4_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED5_VECTOR
-__interrupt void RESERVED5_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED6_VECTOR
-__interrupt void RESERVED6_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED7_VECTOR
-__interrupt void RESERVED7_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED8_VECTOR
-__interrupt void RESERVED8_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED9_VECTOR
-__interrupt void RESERVED9_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED10_VECTOR
-__interrupt void RESERVED10_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED11_VECTOR
-__interrupt void RESERVED11_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED12_VECTOR
-__interrupt void RESERVED12_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = RESERVED13_VECTOR
-__interrupt void RESERVED13_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = DAC12_VECTOR
-__interrupt void DAC12_ISR (void) {
-   while (1); // should never happen
-}
-
-#pragma vector = DMA_VECTOR
-__interrupt void DMA_ISR (void) {
-   while (1); // should never happen
-}
-
-/* // defined in bsp module "uart"
-#pragma vector = USCIAB1TX_VECTOR
-__interrupt void USCIAB1TX_ISR (void) {
-   while (1); // should never happen
-}
-*/
-
-/* // defined in bsp module "uart"
-#pragma vector = USCIAB1RX_VECTOR
-__interrupt void USCIAB1RX_ISR (void) {
-   while (1); // should never happen
-}
-*/
-
 #pragma vector = PORT1_VECTOR
 __interrupt void PORT1_ISR (void) {
    if (P1IFG & 0x40) {
@@ -164,83 +70,44 @@ __interrupt void PORT1_ISR (void) {
    }   
 }
 
-/* // poipoi defined in OpenWSN
-#pragma vector = PORT2_VECTOR
-__interrupt void PORT2_ISR (void) {
-   while (1); // should never happen
-}
-*/
-
-#pragma vector = RESERVED20_VECTOR
-__interrupt void RESERVED20_ISR (void) {
-   while (1); // should never happen
-}
-
-/* // poipoi defined in OpenWSN
-#pragma vector = ADC12_VECTOR
-__interrupt void ADC12_ISR (void) {
-   while (1); // should never happen
-}
-*/
-
-#pragma vector = USCIAB0TX_VECTOR
-__interrupt void USCIAB0TX_ISR (void) {
-   while (1); // should never happen
-}
-
-/* // defined in bsp module "spi"
-#pragma vector = USCIAB0RX_VECTOR
-__interrupt void USCIAB0RX_ISR (void) {
-   while (1); // should never happen
-}
-*/
-
-/* // defined in bsp module "radiotimer"
 #pragma vector = TIMERA1_VECTOR
 __interrupt void TIMERA1_ISR (void) {
-   while (1); // should never happen
-}
-*/
-
-#pragma vector = TIMERA0_VECTOR
-__interrupt void TIMERA0_ISR (void) {
-   while (1); // should never happen
+   if (radiotimer_isr()==1) {
+      __bic_SR_register_on_exit(CPUOFF);
+   }
 }
 
-#pragma vector = WDT_VECTOR
-__interrupt void WDT_ISR (void) {
-   while (1); // should never happen
+#pragma vector = USCIAB0RX_VECTOR
+__interrupt void USCIAB0RX_ISR (void) {
+   if (spi_isr()==1) {
+      __bic_SR_register_on_exit(CPUOFF);
+   }
 }
 
-/* // poipoi defined in OpenWSN
-#pragma vector = COMPARATORA_VECTOR
-__interrupt void COMPARATORA_ISR (void) {
-   while (1); // should never happen
-}
-*/
-
-/* // defined in bsp module "timers"
-#pragma vector = TIMERB1_VECTOR
-__interrupt void TIMERB1_ISR (void) {
-   while (1); // should never happen
-}
-*/
-
-/* // defined in bsp module "timers"
 #pragma vector = TIMERB0_VECTOR
 __interrupt void TIMERB0_ISR (void) {
-   while (1); // should never happen
-}
-*/
-
-#pragma vector = NMI_VECTOR
-__interrupt void NMI_ISR (void) {
-   while (1); // should never happen
+   if (timer_isr_0()==1) {
+      __bic_SR_register_on_exit(CPUOFF);
+   }
 }
 
-/* // can not be set?
-#pragma vector = RESET_VECTOR
-__interrupt void RESET_ISR (void) {
-   while (1); // should never happen
+#pragma vector = TIMERB1_VECTOR
+__interrupt void TIMERB1_ISR (void) {
+   if (timer_isr_1()==1) {
+      __bic_SR_register_on_exit(CPUOFF);
+   }
 }
-*/
+
+#pragma vector = USCIAB1TX_VECTOR
+__interrupt void USCIAB1TX_ISR (void) {
+   if (uart_isr_tx()==1) {
+      __bic_SR_register_on_exit(CPUOFF);
+   }
+}
+
+#pragma vector = USCIAB1RX_VECTOR
+__interrupt void USCIAB1RX_ISR (void) {
+   if (uart_isr_rx()==1) {
+      __bic_SR_register_on_exit(CPUOFF);
+   }
+}

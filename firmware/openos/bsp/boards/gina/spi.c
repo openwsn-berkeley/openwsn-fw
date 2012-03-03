@@ -161,10 +161,8 @@ void spi_txrx(uint8_t*     bufTx,
 
 //=========================== interrupt handlers ==============================
 
+uint8_t spi_isr() {
 #ifdef SPI_IN_INTERRUPT_MODE
-#pragma vector = USCIAB0RX_VECTOR
-__interrupt void USCIAB0RX_ISR (void) {
-   
    // save the byte just received in the RX buffer
    switch (spi_vars.returnType) {
       case SPI_FIRSTBYTE:
@@ -205,5 +203,7 @@ __interrupt void USCIAB0RX_ISR (void) {
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
-}
+#else
+   while(1);// this should never happen
 #endif
+}

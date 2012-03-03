@@ -139,11 +139,9 @@ void timers_stop(uint8_t id) {
 
 //=========================== private =========================================
 
-//=========================== interrup handlers ===============================
+//=========================== interrupt handlers ==============================
 
-// TimerB CCR0 interrupt service routine
-#pragma vector = TIMERB0_VECTOR
-__interrupt void TIMERB0_ISR (void) {
+uint8_t timer_isr_0() {
    if (timers_vars.type[0]==TIMER_PERIODIC) {
       TBCCR0           += timers_vars.period[0]; // continuous timer: schedule next instant
    } else {
@@ -152,13 +150,11 @@ __interrupt void TIMERB0_ISR (void) {
    }
    // call the callback
    timers_vars.callback[0]();
-   // make sure CPU restarts after leaving interrupt
-   __bic_SR_register_on_exit(CPUOFF);
+   // kick the OS
+   return 1;
 }
 
-// TimerB CCR1-6 interrupt service routine
-#pragma vector = TIMERB1_VECTOR
-__interrupt void TIMERB1_ISR (void) {
+uint8_t timer_isr_1() {
    uint16_t tbiv_temp   = TBIV;                  // read only once because accessing TBIV resets it
    switch (tbiv_temp) {
       case 0x0002: // timerB CCR1
@@ -170,8 +166,8 @@ __interrupt void TIMERB1_ISR (void) {
          }
          // call the callback
          timers_vars.callback[1]();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
          break;
       case 0x0004: // timerB CCR2
          if (timers_vars.type[2]==TIMER_PERIODIC) {
@@ -182,8 +178,8 @@ __interrupt void TIMERB1_ISR (void) {
          }
          // call the callback
          timers_vars.callback[2]();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
          break;
       case 0x0006: // timerB CCR3
          if (timers_vars.type[3]==TIMER_PERIODIC) {
@@ -194,8 +190,8 @@ __interrupt void TIMERB1_ISR (void) {
          }
          // call the callback
          timers_vars.callback[3]();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
          break;
       case 0x0008: // timerB CCR4
          if (timers_vars.type[4]==TIMER_PERIODIC) {
@@ -206,8 +202,8 @@ __interrupt void TIMERB1_ISR (void) {
          }
          // call the callback
          timers_vars.callback[4]();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
          break;
       case 0x000A: // timerB CCR5
          if (timers_vars.type[5]==TIMER_PERIODIC) {
@@ -218,8 +214,8 @@ __interrupt void TIMERB1_ISR (void) {
          }
          // call the callback
          timers_vars.callback[5]();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
          break;
       case 0x000C: // timerB CCR6
          if (timers_vars.type[6]==TIMER_PERIODIC) {
@@ -230,8 +226,8 @@ __interrupt void TIMERB1_ISR (void) {
          }
          // call the callback
          timers_vars.callback[6]();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
          break;
       default:
          while(1);                               // this should not happen
