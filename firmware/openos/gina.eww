@@ -55,9 +55,6 @@
   <project>
     <path>$WS_DIR$\projects\gina\program_eui64.ewp</path>
   </project>
-  <project>
-    <path>$WS_DIR$\projects\gina\openwsn.ewp</path>
-  </project>
   <batchBuild/>
 </workspace>
 
