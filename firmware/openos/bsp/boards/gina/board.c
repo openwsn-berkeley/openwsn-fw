@@ -57,7 +57,7 @@ void board_sleep() {
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
-
+/*
 #pragma vector = PORT1_VECTOR
 __interrupt void PORT1_ISR (void) {
    if (P1IFG & 0x40) {
@@ -79,9 +79,18 @@ __interrupt void TIMERA1_ISR (void) {
 
 #pragma vector = USCIAB0RX_VECTOR
 __interrupt void USCIAB0RX_ISR (void) {
-   if (spi_isr()==1) {
-      __bic_SR_register_on_exit(CPUOFF);
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+   if ( (IFG2 & UCA0RXIFG) && (IE2 & UCA0RXIE) ) {
+      if (spi_isr()==1) {
+         __bic_SR_register_on_exit(CPUOFF);
+      }
    }
+   if ( ((IFG2 & UCB0RXIFG) && (IE2 & UCB0RXIE)) ||
+        (UCB0STAT & UCNACKIFG) ) {
+      isr_i2c_rx(0);
+   }
+   DEBUG_PIN_ISR_CLR();
 }
 
 #pragma vector = TIMERB0_VECTOR
@@ -99,15 +108,34 @@ __interrupt void TIMERB1_ISR (void) {
 }
 
 #pragma vector = USCIAB1TX_VECTOR
-__interrupt void USCIAB1TX_ISR (void) {
-   if (uart_isr_tx()==1) {
-      __bic_SR_register_on_exit(CPUOFF);
+__interrupt void USCIAB1TX_ISR(void) {
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+   if ( ((UC1IFG & UCB1TXIFG) && (UC1IE & UCB1TXIE)) ||
+        ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ) {
+      isr_i2c_tx(1);                         // implemented in I2C driver
    }
+   if ( (UC1IFG & UCA1TXIFG) && (UC1IE & UCA1TXIE) ){
+      if (uart_isr_tx()==1) {
+         __bic_SR_register_on_exit(CPUOFF);
+      }
+   }
+   DEBUG_PIN_ISR_CLR();
 }
 
 #pragma vector = USCIAB1RX_VECTOR
-__interrupt void USCIAB1RX_ISR (void) {
-   if (uart_isr_rx()==1) {
-      __bic_SR_register_on_exit(CPUOFF);
+__interrupt void USCIAB1RX_ISR(void) {
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+   if ( ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ||
+         (UCB1STAT & UCNACKIFG) ) {
+      isr_i2c_rx(1);                             // implemented in I2C driver
    }
+   if ( (UC1IFG & UCA1RXIFG) && (UC1IE & UCA1RXIE) ){
+      if (uart_isr_rx()==1) {
+         __bic_SR_register_on_exit(CPUOFF);
+      }
+   }
+   DEBUG_PIN_ISR_CLR();
 }
+*/

@@ -3,10 +3,11 @@
 #include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
-#include "opentimers.h"
 #include "openrandom.h"
 #include "packetfunctions.h"
 #include "idmanager.h"
+#include "timers.h"
+#include "scheduler.h"
 
 //=========================== variables =======================================
 
@@ -22,6 +23,8 @@ opencoap_vars_t opencoap_vars;
 
 //=========================== prototype =======================================
 
+void icmpv6coap_timer_cb();
+
 //=========================== public ==========================================
 
 //===== from stack
@@ -35,7 +38,10 @@ void opencoap_init() {
    
    // start the timer
    if (idmanager_getIsDAGroot()==FALSE) {
-      opentimers_startPeriodic(TIMER_COAP,0xffff);// every 2 seconds
+      timers_start(TIMER_COAP,
+                   0xffff,
+                   TIMER_PERIODIC,
+                   icmpv6coap_timer_cb);
    }
 }
 
@@ -250,7 +256,7 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-void opentimers_coap_fired() {
+void timers_coap_fired() {
    coap_resource_desc_t* temp_resource;
    
    temp_resource = opencoap_vars.resources;
@@ -331,3 +337,7 @@ error_t opencoap_send(OpenQueueEntry_t*     msg,
 }
 
 //=========================== private =========================================
+
+void icmpv6coap_timer_cb() {
+   scheduler_push_task(timers_coap_fired,TASKPRIO_COAP);
+}

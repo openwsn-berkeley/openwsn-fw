@@ -4,7 +4,8 @@
 #include "openqueue.h"
 #include "forwarding.h"
 #include "packetfunctions.h"
-#include "opentimers.h"
+#include "timers.h"
+#include "scheduler.h"
 //TCP applications
 #include "ohlone.h"
 #include "tcpecho.h"
@@ -32,6 +33,7 @@ void prependTCPHeader(OpenQueueEntry_t* msg, bool ack, bool push, bool rst, bool
 bool containsControlBits(OpenQueueEntry_t* msg, uint8_t ack, uint8_t rst, uint8_t syn, uint8_t fin);
 void tcp_change_state(uint8_t new_state);
 void reset();
+void opentcp_timer_cb();
 
 //=========================== public ==========================================
 
@@ -659,7 +661,7 @@ bool tcp_debugPrint() {
 //======= timer
 
 //timer used to reset state when TCP state machine is stuck
-void opentimers_tcp_fired() {
+void timers_tcp_fired() {
    reset();
 }
 
@@ -733,8 +735,15 @@ void reset() {
 void tcp_change_state(uint8_t new_tcp_state) {
    tcp_vars.state = new_tcp_state;
    if (tcp_vars.state==TCP_STATE_CLOSED) {
-      opentimers_stop(TIMER_TCP);
+      timers_stop(TIMER_TCP);
    } else {
-      opentimers_startOneShot(TIMER_TCP,TCP_TIMEOUT);
+      timers_start(TIMER_TCP,
+                   TCP_TIMEOUT,
+                   TIMER_ONESHOT,
+                   opentcp_timer_cb);
    }
+}
+
+void opentcp_timer_cb() {
+   scheduler_push_task(timers_tcp_fired,TASKPRIO_TCP_TIMEOUT);
 }

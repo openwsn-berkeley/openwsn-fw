@@ -6,13 +6,14 @@
 #include "IEEE802154E.h"
 #include "openqueue.h"
 #include "neighbors.h"
-#include "opentimers.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
 #include "leds.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "schedule.h"
+#include "scheduler.h"
+#include "timers.h"
 
 //=========================== variables =======================================
 
@@ -30,6 +31,7 @@ res_vars_t res_vars;
 error_t res_send_internal(OpenQueueEntry_t* msg);
 void    sendAdv();
 void    sendKa();
+void    res_timer_cb();
 
 //=========================== public ==========================================
 
@@ -38,7 +40,10 @@ void res_init() {
    res_vars.busySending       = FALSE;
    res_vars.dsn               = 0;
    res_vars.MacMgtTaskCounter = 0;
-   opentimers_startPeriodic(TIMER_RES,res_vars.periodMaintenance);
+   timers_start(TIMER_RES,
+                res_vars.periodMaintenance,
+                TIMER_PERIODIC,
+                res_timer_cb);
 }
 
 bool debugPrint_myDAGrank() {
@@ -92,7 +97,10 @@ void task_resNotifSendDone() {
       res_vars.busySending = FALSE;
       // restart a random timer
       res_vars.periodMaintenance = 16384+openrandom_get16b()%32768;
-      opentimers_startPeriodic(TIMER_RES,res_vars.periodMaintenance);
+      timers_start(TIMER_RES,
+                   res_vars.periodMaintenance,
+                   TIMER_PERIODIC,
+                   res_timer_cb);
    } else {
       // send the rest up the stack
       iphc_sendDone(msg,msg->l2_sendDoneError);
@@ -156,7 +164,7 @@ has fired. This timer is set to fire every second, on average.
 
 The body of this function executes one of the MAC management task.
 */
-void opentimers_res_fired() {
+void timers_res_fired() {
    res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%2;
    if (idmanager_getMyID(ADDR_16B)->addr_16b[1]==DEBUG_MOTEID_MASTER) {
       if (res_vars.MacMgtTaskCounter==0) {
@@ -220,7 +228,7 @@ error_t res_send_internal(OpenQueueEntry_t* msg) {
 \brief Send an advertisement.
 
 This is one of the MAC managament tasks. This function inlines in the
-opentimers_res_fired() function, but is declared as a separate function for better
+timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
 inline void sendAdv() {
@@ -263,7 +271,7 @@ inline void sendAdv() {
 \brief Send an keep-alive message, if nessary.
 
 This is one of the MAC managament tasks. This function inlines in the
-opentimers_res_fired() function, but is declared as a separate function for better
+timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
 inline void sendKa() {
@@ -298,4 +306,8 @@ inline void sendKa() {
          res_vars.busySending = TRUE;
       }
    }
+}
+
+void res_timer_cb() {
+   scheduler_push_task(timers_res_fired,TASKPRIO_RES);
 }

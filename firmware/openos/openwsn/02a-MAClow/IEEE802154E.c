@@ -12,6 +12,7 @@
 #include "leds.h"
 #include "neighbors.h"
 #include "debugpins.h"
+#include "res.h"
 
 //=========================== variables =======================================
 
@@ -1492,7 +1493,7 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, error_t error) {
    // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
    packetSent->owner              = COMPONENT_IEEE802154E_TO_RES;
    // post RES's sendDone task
-   scheduler_push_task(TASKID_RESNOTIF_TXDONE);
+   scheduler_push_task(task_resNotifSendDone,TASKPRIO_RESNOTIF_TXDONE);
    // wake up the scheduler
    SCHEDULER_WAKEUP();
 }
@@ -1506,7 +1507,7 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_RES;
    // post RES's Receive task
-   scheduler_push_task(TASKID_RESNOTIF_RX);
+   scheduler_push_task(task_resNotifReceive,TASKPRIO_RESNOTIF_RX);
    // wake up the scheduler
    SCHEDULER_WAKEUP();
 }

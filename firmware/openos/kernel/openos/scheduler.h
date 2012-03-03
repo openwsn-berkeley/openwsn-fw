@@ -13,26 +13,26 @@
 
 //=========================== define ==========================================
 
-enum {
+typedef enum {
    // tasks trigger by radio
-   TASKID_RESNOTIF_RX        = 0x00, // scheduled by IEEE802.15.4e
-   TASKID_RESNOTIF_TXDONE    = 0x01, // scheduled by IEEE802.15.4e
+   TASKPRIO_RESNOTIF_RX        = 0x00, // scheduled by IEEE802.15.4e
+   TASKPRIO_RESNOTIF_TXDONE    = 0x01, // scheduled by IEEE802.15.4e
    // tasks triggered by timers
-   TASKID_RES                = 0x02, // scheduled by timerB CCR0 interrupt
-   TASKID_RPL                = 0x03, // scheduled by timerB CCR1 interrupt
-   TASKID_TCP_TIMEOUT        = 0x04, // scheduled by timerB CCR2 interrupt
-   TASKID_COAP               = 0x05, // scheduled by timerB CCR3 interrupt
-   TASKID_TIMERB4            = 0x06, // scheduled by timerB CCR4 interrupt
-   TASKID_TIMERB5            = 0x07, // scheduled by timerB CCR5 interrupt
-   TASKID_TIMERB6            = 0x08, // scheduled by timerB CCR6 interrupt
+   TASKPRIO_RES                = 0x02, // scheduled by timerB CCR0 interrupt
+   TASKPRIO_RPL                = 0x03, // scheduled by timerB CCR1 interrupt
+   TASKPRIO_TCP_TIMEOUT        = 0x04, // scheduled by timerB CCR2 interrupt
+   TASKPRIO_COAP               = 0x05, // scheduled by timerB CCR3 interrupt
    // tasks trigger by other interrupts
-   TASKID_BUTTON             = 0x09, // scheduled by P2.7 interrupt
-   MAX_NUM_TASKS             = 0x0a,
-};
+   TASKPRIO_BUTTON             = 0x06, // scheduled by P2.7 interrupt
+   TASKPRIO_MAX                = 0x07,
+} task_prio_t;
 
+#define TASK_LIST_DEPTH      10
 #define SCHEDULER_WAKEUP()   CACTL1 |= CAIFG
 
 //=========================== typedef =========================================
+
+typedef void (*task_cbt)(void);
 
 //=========================== variables =======================================
 
@@ -41,7 +41,7 @@ enum {
 // public functions
           void scheduler_init();
           void scheduler_start();
-__monitor void scheduler_push_task(int8_t task_id);
+__monitor void scheduler_push_task(task_cbt task_cb, task_prio_t prio);
 
 // interrupt handlers
 void isr_ieee154e_newSlot();

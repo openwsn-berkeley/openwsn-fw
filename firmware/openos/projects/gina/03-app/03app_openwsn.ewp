@@ -739,7 +739,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F149.xcl</state>
+          <state>$TOOLKIT_DIR$\CONFIG\lnk430F1611.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -867,7 +867,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>templproj.a43</state>
+          <state>03app_openwsn.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1910,6 +1910,9 @@
   <group>
     <name>bsp</name>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\at86rf231.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board.c</name>
     </file>
     <file>
@@ -1917,9 +1920,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.h</name>
@@ -1931,7 +1931,7 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\radio.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
@@ -1959,6 +1959,27 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
+    </file>
+  </group>
+  <group>
+    <name>drivers</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\gina\heli.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\heli.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\gina\openserial.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\openserial.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\gina\sensitive_accel_temperature.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\sensitive_accel_temperature.h</name>
     </file>
   </group>
   <group>

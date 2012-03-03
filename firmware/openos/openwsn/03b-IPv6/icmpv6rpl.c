@@ -3,10 +3,11 @@
 #include "icmpv6.h"
 #include "openserial.h"
 #include "openqueue.h"
-#include "opentimers.h"
 #include "neighbors.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
+#include "timers.h"
+#include "scheduler.h"
 
 //=========================== variables =======================================
 
@@ -23,6 +24,7 @@ icmpv6rpl_vars_t icmpv6rpl_vars;
 //=========================== prototypes ======================================
 
 void sendDIO();
+void icmpv6rpl_timer_cb();
 
 //=========================== public ==========================================
 
@@ -47,7 +49,10 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.all_routers_multicast.addr_128b[13] = 0x00;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[14] = 0x00;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[15] = 0x02;
-   opentimers_startPeriodic(TIMER_RPL,icmpv6rpl_vars.periodDIO);
+   timers_start(TIMER_RPL,
+                icmpv6rpl_vars.periodDIO,
+                TIMER_PERIODIC,
+                icmpv6rpl_timer_cb);
 }
 
 void icmpv6rpl_trigger() {
@@ -88,13 +93,16 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
 
 //======= timer
 
-void opentimers_rpl_fired() {
+void timers_rpl_fired() {
    icmpv6rpl_vars.delayDIO = (icmpv6rpl_vars.delayDIO+1)%5; //send on average every 10s
    if (icmpv6rpl_vars.delayDIO==0) {
       sendDIO();
       //set a new random periodDIO
       icmpv6rpl_vars.periodDIO = 40000+(64*(openrandom_get16b() & 0xff));       // pseudo-random
-      opentimers_startPeriodic(TIMER_RPL,icmpv6rpl_vars.periodDIO);
+      timers_start(TIMER_RPL,
+                   icmpv6rpl_vars.periodDIO,
+                   TIMER_PERIODIC,
+                   icmpv6rpl_timer_cb);
    }
 }
 
@@ -135,4 +143,8 @@ void sendDIO() {
          openqueue_freePacketBuffer(msg);
       }
    }
+}
+
+void icmpv6rpl_timer_cb() {
+   scheduler_push_task(timers_rpl_fired,TASKPRIO_RPL);
 }
