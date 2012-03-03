@@ -4,9 +4,9 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "msp430x26x.h"
 #include "stdint.h"
 #include "string.h"
+#include "board.h"
 #include "radio.h"
 #include "at86rf231.h"
 #include "spi.h"
@@ -43,16 +43,6 @@ void    radio_spiReadRxFifo(uint8_t* pBufRead,
 void radio_init() {
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
-   
-   // initialize communication between MSP430 and radio
-   //-- RF_SLP_TR_CNTL (P4.7) pin (output)
-   P4OUT  &= ~0x80;                              // set low
-   P4DIR  |=  0x80;                              // configure as output
-   //-- IRQ_RF (P1.6) pin (input)
-   P1OUT  &= ~0x40;                              // set low
-   P1DIR  &= ~0x40;                              // input direction
-   P1IES  &= ~0x40;                              // interrup when transition is low-to-high
-   P1IE   |=  0x40;                              // enable interrupt
    
    // configure the radio
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);    // turn radio off
@@ -112,9 +102,9 @@ void radio_txEnable() {
 }
 
 void radio_txNow() {
-   // send packet by pulsing the RF_SLP_TR_CNTL pin
-   P4OUT |=  0x80;
-   P4OUT &= ~0x80;
+   // send packet by pulsing the SLP_TR_CNTL pin
+   PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
+   PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
    
    // The AT86RF231 does not generate an interrupt when the radio transmits the
    // SFD, which messes up the MAC state machine. The danger is that, if we leave
@@ -300,12 +290,9 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
 
 //=========================== interrupt handlers ==============================
 
-#pragma vector = PORT1_VECTOR
-__interrupt void PORT1_ISR (void) {
+uint8_t radio_isr() {
    uint16_t capturedTime;
    uint8_t  irq_status;
-   // clear interrupt flag
-   P1IFG &= ~0x40;
    // capture the time
    capturedTime = radiotimer_getCapturedTime();
    // reading IRQ_STATUS causes IRQ_RF (P1.6) to go low
@@ -315,8 +302,8 @@ __interrupt void PORT1_ISR (void) {
       if (radio_vars.startFrameCb!=NULL) {
          // call the callback
          radio_vars.startFrameCb(capturedTime);
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
       }
    }
    // end of frame event
@@ -324,8 +311,9 @@ __interrupt void PORT1_ISR (void) {
       if (radio_vars.endFrameCb!=NULL) {
          // call the callback
          radio_vars.endFrameCb(capturedTime);
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         // kick the OS
+         return 1;
       }
    }
+   return 0;
 }

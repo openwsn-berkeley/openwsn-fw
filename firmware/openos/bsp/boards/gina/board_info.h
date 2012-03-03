@@ -8,6 +8,15 @@ to return the board's description.
 */
 
 #include "stdint.h"
+#include "msp430x26x.h"
+
+//=========================== defines =========================================
+
+// [P4.7] radio SLP_TR_CNTL
+#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH() P4OUT |=  0x80;
+#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()  P4OUT &= ~0x80;
+
+//=========================== typedef  ========================================
 
 //=========================== variables =======================================
 
