@@ -4,9 +4,9 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "msp430f1611.h"
 #include "stdint.h"
 #include "string.h"
+#include "board.h"
 #include "radio.h"
 #include "cc2420.h"
 #include "spi.h"
@@ -67,20 +67,18 @@ void radio_reset() {
    uint16_t              delay;
    cc2420_MDMCTRL0_reg_t cc2420_MDMCTRL0_reg;
    cc2420_TXCTRL_reg_t   cc2420_TXCTRL_reg;
-   cc2420_RXCTRL1_reg_t   cc2420_RXCTRL1_reg;
+   cc2420_RXCTRL1_reg_t  cc2420_RXCTRL1_reg;
    
-   // VREG high
-   P4DIR     |=  0x20;                           // P4.5 radio VREG enabled, output
-   P4OUT     |=  0x20;                           // P4.5 radio VREG enabled, hold high
+   // set radio VREG pin high
+   PORT_PIN_RADIO_VREG_HIGH();
    for (delay=0xffff;delay>0;delay--);           // max. VREG start-up time is 0.6ms
    
-   // reset low
-   P4DIR     |=  0x40;                           // P4.6 radio reset, output
-   P4OUT     &= ~0x40;                           // P4.6 radio reset, hold low
+   // set radio RESET pin low
+   PORT_PIN_RADIO_RESET_LOW();
    for (delay=0xffff;delay>0;delay--);
    
-   // reset high
-   P4OUT     |=  0x40;                           // P4.6 radio reset, hold high
+   // set radio RESET pin high
+   PORT_PIN_RADIO_RESET_HIGH();
    for (delay=0xffff;delay>0;delay--);
    
    // disable address recognition
@@ -156,9 +154,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
 }
 
 void radio_txEnable() {
-   /*
-   // I don't fully understand how the CC2420_STXCA the can be used.
-   */
+   // I don't fully understand how the CC2420_STXCA the can be used here.
 }
 
 void radio_txNow() {

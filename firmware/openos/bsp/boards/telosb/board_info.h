@@ -8,6 +8,16 @@ to return the board's description.
 */
 
 #include "stdint.h"
+#include "msp430f1611.h"
+
+//=========================== define ==========================================
+
+// [P4.5] radio VREG
+#define PORT_PIN_RADIO_VREG_HIGH()     P4OUT    |=  0x20;
+#define PORT_PIN_RADIO_VREG_LOW()      P4OUT    &= ~0x20;
+// [P4.6] radio RESET
+#define PORT_PIN_RADIO_RESET_HIGH()    P4OUT    |=  0x40;
+#define PORT_PIN_RADIO_RESET_LOW()     P4OUT    &= ~0x40;  
 
 //=========================== variables =======================================
 

@@ -29,6 +29,10 @@ void board_init() {
    BCSCTL1    =  RSEL0 | RSEL1 | RSEL2;          // MCLK at ~8MHz
                                                  // by default, ACLK from 32kHz XTAL which is running
    
+   // initialize pins
+   P4DIR     |=  0x20;                           // [P4.5] radio VREG:  output
+   P4DIR     |=  0x40;                           // [P4.6] radio reset: output
+   
    // initialize bsp modules
    leds_init();
    uart_init();

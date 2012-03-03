@@ -7,8 +7,6 @@ can use this project with any platform.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
-#include "msp430x26x.h"
-
 #include "stdint.h"
 #include "string.h"
 #include "board.h"
