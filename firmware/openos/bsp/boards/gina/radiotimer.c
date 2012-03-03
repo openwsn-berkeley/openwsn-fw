@@ -12,8 +12,8 @@
 //=========================== variables =======================================
 
 typedef struct {
-   radiotimer_compare_cbt    overflowCb;
-   radiotimer_compare_cbt    compareCb;
+   radiotimer_compare_cbt    overflow_cb;
+   radiotimer_compare_cbt    compare_cb;
 } radiotimer_vars_t;
 
 radiotimer_vars_t radiotimer_vars;
@@ -28,11 +28,11 @@ void radiotimer_init() {
 }
 
 void radiotimer_setOverflowCb(radiotimer_compare_cbt cb) {
-   radiotimer_vars.overflowCb     = cb;
+   radiotimer_vars.overflow_cb    = cb;
 }
 
 void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
-   radiotimer_vars.compareCb      = cb;
+   radiotimer_vars.compare_cb     = cb;
 }
 
 void radiotimer_setStartFrameCb(radiotimer_capture_cbt cb) {
@@ -95,17 +95,17 @@ uint8_t radiotimer_isr() {
    uint16_t taiv_temp = TAIV;                    // read only once because accessing TAIV resets it
    switch (taiv_temp) {
       case 0x0002: // capture/compare CCR1
-         if (radiotimer_vars.compareCb!=NULL) {
+         if (radiotimer_vars.compare_cb!=NULL) {
             // call the callback
-            radiotimer_vars.compareCb();
+            radiotimer_vars.compare_cb();
             // kick the OS
             return 1;
          }
          break;
       case 0x000a: // timer overflows
-         if (radiotimer_vars.overflowCb!=NULL) {
+         if (radiotimer_vars.overflow_cb!=NULL) {
             // call the callback
-            radiotimer_vars.overflowCb();
+            radiotimer_vars.overflow_cb();
             // kick the OS
             return 1;
          }

@@ -198,9 +198,9 @@ uint8_t spi_isr() {
       // SPI is done!
       if (spi_vars.callback!=NULL) {
          // call the callback
-         spi_vars.callback();
-         // make sure CPU restarts after leaving interrupt
-         __bic_SR_register_on_exit(CPUOFF);
+         spi_vars.spiDone_cb();
+         // kick the OS
+         return 1;
       }
    }
 #else

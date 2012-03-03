@@ -101,8 +101,8 @@ void spi_init() {
 }
 
 #ifdef SPI_IN_INTERRUPT_MODE
-void spi_setCallback(spi_cbt cb) {
-   spi_vars.callback = cb;
+void spi_setCb(spi_cbt cb) {
+   spi_vars.spi_cb = cb;
 }
 #endif
 
@@ -228,7 +228,7 @@ uint8_t spi_isr() {
       // SPI is done!
       if (spi_vars.callback!=NULL) {
          // call the callback
-         spi_vars.callback();
+         spi_vars.spi_cb();
          // kick the OS
          return 1;
       }

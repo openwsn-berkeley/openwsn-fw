@@ -50,7 +50,7 @@ typedef void (*spi_cbt)(void);
 
 void    spi_init();
 #ifdef SPI_IN_INTERRUPT_MODE
-void    spi_setCallback(spi_cbt cb);
+void    spi_setCb(spi_cbt cb);
 #endif
 void    spi_txrx(uint8_t*     bufTx,
                  uint8_t      lenbufTx,

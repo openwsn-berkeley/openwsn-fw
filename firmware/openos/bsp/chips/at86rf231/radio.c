@@ -14,16 +14,11 @@
 
 //=========================== defines =========================================
 
-enum radio_antennaselection_enum {
-   RADIO_UFL_ANTENNA              = 0x06,   /**< Use the antenna connected by U.FL. */
-   RADIO_CHIP_ANTENNA             = 0x05,   /**< Use the on-board chip antenna. */
-};
-
 //=========================== variables =======================================
 
 typedef struct {
-   radiotimer_capture_cbt    startFrameCb;
-   radiotimer_capture_cbt    endFrameCb;
+   radiotimer_capture_cbt    startFrame_cb;
+   radiotimer_capture_cbt    endFrame_cb;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -70,11 +65,11 @@ void radio_setCompareCb(radiotimer_compare_cbt cb) {
 }
 
 void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
-   radio_vars.startFrameCb = cb;
+   radio_vars.startFrame_cb = cb;
 }
 
 void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
-   radio_vars.endFrameCb = cb;
+   radio_vars.endFrame_cb = cb;
 }
 
 void radio_reset() {
@@ -113,9 +108,9 @@ void radio_txNow() {
    // ieee154e_startOfFrame from here. This also means that software can never catch
    // a radio glitch by which #radio_txEnable would not be followed by a packet being
    // transmitted (I've never seen that).
-   if (radio_vars.startFrameCb!=NULL) {
+   if (radio_vars.startFrame_cb!=NULL) {
       // call the callback
-      radio_vars.startFrameCb(radiotimer_getCapturedTime());
+      radio_vars.startFrame_cb(radiotimer_getCapturedTime());
    }
 }
 
@@ -299,18 +294,18 @@ uint8_t radio_isr() {
    irq_status = radio_spiReadReg(RG_IRQ_STATUS);
    // start of frame event
    if (irq_status & AT_IRQ_RX_START) {
-      if (radio_vars.startFrameCb!=NULL) {
+      if (radio_vars.startFrame_cb!=NULL) {
          // call the callback
-         radio_vars.startFrameCb(capturedTime);
+         radio_vars.startFrame_cb(capturedTime);
          // kick the OS
          return 1;
       }
    }
    // end of frame event
    if (irq_status & AT_IRQ_TRX_END) {
-      if (radio_vars.endFrameCb!=NULL) {
+      if (radio_vars.endFrame_cb!=NULL) {
          // call the callback
-         radio_vars.endFrameCb(capturedTime);
+         radio_vars.endFrame_cb(capturedTime);
          // kick the OS
          return 1;
       }

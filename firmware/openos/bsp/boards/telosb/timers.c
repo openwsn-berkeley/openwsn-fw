@@ -18,7 +18,7 @@
 typedef struct {
    uint16_t        period[TIMER_COUNT];
    timer_type_t    type[TIMER_COUNT];
-   timer_cbt       callback[TIMER_COUNT];
+   timer_cbt       timers_cb[TIMER_COUNT];
 } timers_vars_t;
 
 timers_vars_t timers_vars;
@@ -52,7 +52,7 @@ void timers_start(uint8_t      id,
    // register timer
    timers_vars.period[id]    = duration;
    timers_vars.type[id]      = type;
-   timers_vars.callback[id]  = callback;
+   timers_vars.timers_cb[id] = callback;
    
    // play with HW registers
    switch(id) {
@@ -75,7 +75,7 @@ void timers_stop(uint8_t id) {
    
    // unregister timer
    timers_vars.period[id]    = 0;
-   timers_vars.callback[id]  = NULL;
+   timers_vars.timers_cb[id] = NULL;
    
    // play with HW registers
    switch(id) {
@@ -106,7 +106,7 @@ uint8_t timer_isr_0() {
       TACCR0            = 0;
    }
    // call the callback
-   timers_vars.callback[0]();
+   timers_vars.timers_cb[0]();
    // kick the OS
    return 1;
 }
@@ -122,7 +122,7 @@ uint8_t timer_isr_1() {
             TACCR1      = 0;
          }
          // call the callback
-         timers_vars.callback[1]();
+         timers_vars.timers_cb[1]();
          // kick the OS
          return 1;
          break;
@@ -134,7 +134,7 @@ uint8_t timer_isr_1() {
             TACCR2      = 0;
          }
          // call the callback
-         timers_vars.callback[2]();
+         timers_vars.timers_cb[2]();
          // kick the OS
          return 1;
          break;
