@@ -34,6 +34,9 @@
   <project>
     <path>$WS_DIR$\projects\telosb\01-bsp\01bsp_radio.ewp</path>
   </project>
+  <project>
+    <path>$WS_DIR$\projects\telosb\03-app\03app_openwsn.ewp</path>
+  </project>
   <batchBuild/>
 </workspace>
 

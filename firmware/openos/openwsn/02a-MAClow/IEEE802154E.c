@@ -1,7 +1,7 @@
 #include "openwsn.h"
 #include "IEEE802154E.h"
 #include "radio.h"
-#include "ieee154etimer.h"
+#include "radiotimer.h"
 #include "IEEE802154.h"
 #include "openqueue.h"
 #include "idmanager.h"
@@ -143,7 +143,7 @@ void ieee154e_init() {
    ieee154e_stats.numDeSync                 = 0;
    
    // initialize (and start) IEEE802.15.4e timer
-   ieee154etimer_init();
+   radiotimer_init();
 }
 
 //=========================== public ==========================================
@@ -455,7 +455,7 @@ inline void activity_synchronize_endOfFrame(uint16_t capturedTime) {
    ieee154e_vars.dataReceived->owner   = COMPONENT_IEEE802154E;
    
    // retrieve the received data frame from the radio's Rx buffer
-   radio_getReceivedFrame(ieee154e_vars.dataReceived);
+   //poipoiradio_getReceivedFrame(ieee154e_vars.dataReceived);
    
    /*
    The do-while loop that follows is a little parsing trick.
@@ -597,7 +597,7 @@ inline void activity_ti1ORri1() {
             // change state
             changeState(S_RXDATAOFFSET);
             // arm rt1
-            ieee154etimer_schedule(DURATION_rt1);
+            radiotimer_schedule(DURATION_rt1);
          } else {                                // I will be sending an ADV
             // change state
             changeState(S_TXDATAOFFSET);
@@ -608,7 +608,7 @@ inline void activity_ti1ORri1() {
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
-            ieee154etimer_schedule(DURATION_tt1);
+            radiotimer_schedule(DURATION_tt1);
          }
          break;
       case CELLTYPE_TXRX:
@@ -630,7 +630,7 @@ inline void activity_ti1ORri1() {
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
-            ieee154etimer_schedule(DURATION_tt1);
+            radiotimer_schedule(DURATION_tt1);
          } else if (cellType==CELLTYPE_TX){
             // abort
             endSlot();
@@ -645,7 +645,7 @@ inline void activity_ti1ORri1() {
          // change state
          changeState(S_RXDATAOFFSET);
          // arm rt1
-         ieee154etimer_schedule(DURATION_rt1);
+         radiotimer_schedule(DURATION_rt1);
          break;
       case CELLTYPE_SERIALRX:
          // stop using serial
@@ -684,13 +684,13 @@ inline void activity_ti2() {
    radio_setFrequency(frequency);
 
    // load the packet in the radio's Tx buffer
-   radio_loadPacket(ieee154e_vars.dataToSend);
+   //poipoiradio_loadPacket(ieee154e_vars.dataToSend);
 
    // enable the radio in Tx mode. This does not send the packet.
    radio_txEnable();
 
    // arm tt2
-   ieee154etimer_schedule(DURATION_tt2);
+   radiotimer_schedule(DURATION_tt2);
 
    // change state
    changeState(S_TXDATAREADY);
@@ -711,7 +711,7 @@ inline void activity_ti3() {
    changeState(S_TXDATADELAY);
    
    // arm tt3
-   ieee154etimer_schedule(DURATION_tt3);
+   radiotimer_schedule(DURATION_tt3);
    
    // give the 'go' to transmit
    radio_txNow();
@@ -732,13 +732,13 @@ inline void activity_ti4(uint16_t capturedTime) {
    changeState(S_TXDATA);
 
    // cancel tt3
-   ieee154etimer_cancel();
+   radiotimer_cancel();
 
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
    
    // arm tt4
-   ieee154etimer_schedule(DURATION_tt4);
+   radiotimer_schedule(DURATION_tt4);
 }
 
 inline void activity_tie3() {
@@ -758,7 +758,7 @@ inline void activity_ti5(uint16_t capturedTime) {
    changeState(S_RXACKOFFSET);
    
    // cancel tt4
-   ieee154etimer_cancel();
+   radiotimer_cancel();
    
    // turn off the radio
    radio_rfOff();
@@ -775,7 +775,7 @@ inline void activity_ti5(uint16_t capturedTime) {
 
    if (listenForAck==TRUE) {
       // arm tt5
-      ieee154etimer_schedule(DURATION_tt5);
+      radiotimer_schedule(DURATION_tt5);
    } else {
       // indicate succesful Tx to schedule to keep statistics
       schedule_indicateTx(ieee154e_vars.slotOffset,&ieee154e_vars.asn,TRUE);
@@ -804,7 +804,7 @@ inline void activity_ti6() {
    radio_rxEnable();
 
    // arm tt6
-   ieee154etimer_schedule(DURATION_tt6);
+   radiotimer_schedule(DURATION_tt6);
    
    // change state
    changeState(S_RXACKREADY);
@@ -828,7 +828,7 @@ inline void activity_ti7() {
    radio_rxNow();
 
    // arm tt7
-   ieee154etimer_schedule(DURATION_tt7);
+   radiotimer_schedule(DURATION_tt7);
 }
 
 inline void activity_tie5() {
@@ -858,13 +858,13 @@ inline void activity_ti8(uint16_t capturedTime) {
    changeState(S_RXACK);
    
    // cancel tt7
-   ieee154etimer_cancel();
+   radiotimer_cancel();
 
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
 
    // arm tt8
-   ieee154etimer_schedule(DURATION_tt8);
+   radiotimer_schedule(DURATION_tt8);
 }
 
 inline void activity_tie6() {
@@ -882,7 +882,7 @@ inline void activity_ti9(uint16_t capturedTime) {
    changeState(S_TXPROC);
    
    // cancel tt8
-   ieee154etimer_cancel();
+   radiotimer_cancel();
    
    // turn off the radio
    radio_rfOff();
@@ -907,7 +907,7 @@ inline void activity_ti9(uint16_t capturedTime) {
    ieee154e_vars.ackReceived->owner   = COMPONENT_IEEE802154E;
    
    // retrieve the received ack frame from the radio's Rx buffer
-   radio_getReceivedFrame(ieee154e_vars.ackReceived);
+   //poipoiradio_getReceivedFrame(ieee154e_vars.ackReceived);
    
    /*
    The do-while loop that follows is a little parsing trick.
@@ -990,7 +990,7 @@ inline void activity_ri2() {
    radio_rxEnable();
 
    // arm rt2
-   ieee154etimer_schedule(DURATION_rt2);
+   radiotimer_schedule(DURATION_rt2);
 
    // change state
    changeState(S_RXDATAREADY);
@@ -1014,7 +1014,7 @@ inline void activity_ri3() {
    radio_rxNow();
 
    // arm rt3
-   ieee154etimer_schedule(DURATION_rt3);
+   radiotimer_schedule(DURATION_rt3);
 }
 
 inline void activity_rie2() {
@@ -1027,7 +1027,7 @@ inline void activity_ri4(uint16_t capturedTime) {
    changeState(S_RXDATA);
    
    // cancel rt3
-   ieee154etimer_cancel();
+   radiotimer_cancel();
 
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1036,7 +1036,7 @@ inline void activity_ri4(uint16_t capturedTime) {
    ieee154e_vars.syncCapturedTime = capturedTime;
 
    // arm rt4
-   ieee154etimer_schedule(DURATION_rt4);
+   radiotimer_schedule(DURATION_rt4);
 }
 
 inline void activity_rie3() {
@@ -1056,7 +1056,7 @@ inline void activity_ri5(uint16_t capturedTime) {
    changeState(S_TXACKOFFSET);
    
    // cancel rt4
-   ieee154etimer_cancel();
+   radiotimer_cancel();
    
    // turn off the radio
    radio_rfOff();
@@ -1078,7 +1078,7 @@ inline void activity_ri5(uint16_t capturedTime) {
    ieee154e_vars.dataReceived->owner   = COMPONENT_IEEE802154E;
    
    // retrieve the received data frame from the radio's Rx buffer
-   radio_getReceivedFrame(ieee154e_vars.dataReceived);
+   //poipoiradio_getReceivedFrame(ieee154e_vars.dataReceived);
 
    /*
    The do-while loop that follows is a little parsing trick.
@@ -1130,7 +1130,7 @@ inline void activity_ri5(uint16_t capturedTime) {
       // check if ack requested
       if (ieee802514_header.ackRequested==1) {
          // arm rt5
-         ieee154etimer_schedule(DURATION_rt5);
+         radiotimer_schedule(DURATION_rt5);
       } else {
          // synchronize to the received packet iif I'm not a DAGroot and this is my preferred parent
          if (idmanager_getIsDAGroot()==FALSE && neighbors_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
@@ -1216,13 +1216,13 @@ inline void activity_ri6() {
    radio_setFrequency(frequency);
    
    // load the packet in the radio's Tx buffer
-   radio_loadPacket(ieee154e_vars.ackToSend);
+   //poipoiradio_loadPacket(ieee154e_vars.ackToSend);
    
    // enable the radio in Tx mode. This does not send that packet.
    radio_txEnable();
    
    // arm rt6
-   ieee154etimer_schedule(DURATION_rt6);
+   radiotimer_schedule(DURATION_rt6);
    
    // change state
    changeState(S_TXACKREADY);
@@ -1243,7 +1243,7 @@ inline void activity_ri7() {
    changeState(S_TXACKDELAY);
    
    // arm rt7
-   ieee154etimer_schedule(DURATION_rt7);
+   radiotimer_schedule(DURATION_rt7);
    
    // give the 'go' to transmit
    radio_txNow();
@@ -1264,13 +1264,13 @@ inline void activity_ri8(uint16_t capturedTime) {
    changeState(S_TXACK);
    
    // cancel rt7
-   ieee154etimer_cancel();
+   radiotimer_cancel();
    
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
    
    // arm rt8
-   ieee154etimer_schedule(DURATION_rt8);
+   radiotimer_schedule(DURATION_rt8);
 }
 
 inline void activity_rie6() {
@@ -1288,7 +1288,7 @@ inline void activity_ri9(uint16_t capturedTime) {
    changeState(S_RXPROC);
    
    // cancel rt8
-   ieee154etimer_cancel();
+   radiotimer_cancel();
    
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1624,7 +1624,7 @@ void endSlot() {
    radio_rfOff();
    
    // clear any pending timer
-   ieee154etimer_cancel();
+   radiotimer_cancel();
    
    // reset capturedTimes
    ieee154e_vars.lastCapturedTime = 0;
