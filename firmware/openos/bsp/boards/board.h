@@ -11,7 +11,7 @@
 
 //=========================== define ==========================================
 
-//poipoi
+//poipoipoi
 #define CAPTURE_TIME() 
 
 enum radio_antennaselection_enum {

@@ -461,7 +461,13 @@ inline void activity_synchronize_endOfFrame(uint16_t capturedTime) {
    ieee154e_vars.dataReceived->owner   = COMPONENT_IEEE802154E;
    
    // retrieve the received data frame from the radio's Rx buffer
-   //poipoipoiradio_getReceivedFrame(ieee154e_vars.dataReceived);
+   ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[0]);
+   radio_getReceivedFrame( ieee154e_vars.dataReceived->payload,
+                          &ieee154e_vars.dataReceived->length,
+                          sizeof(ieee154e_vars.dataReceived->packet),
+                          &ieee154e_vars.dataReceived->l1_rssi,
+                          &ieee154e_vars.dataReceived->l1_lqi,
+                          &ieee154e_vars.dataReceived->l1_crc);
    
    /*
    The do-while loop that follows is a little parsing trick.
@@ -690,7 +696,8 @@ inline void activity_ti2() {
    radio_setFrequency(frequency);
 
    // load the packet in the radio's Tx buffer
-   //poipoipoiradio_loadPacket(ieee154e_vars.dataToSend);
+   radio_loadPacket(ieee154e_vars.dataToSend->payload,
+                    ieee154e_vars.dataToSend->length);
 
    // enable the radio in Tx mode. This does not send the packet.
    radio_txEnable();
@@ -913,7 +920,13 @@ inline void activity_ti9(uint16_t capturedTime) {
    ieee154e_vars.ackReceived->owner   = COMPONENT_IEEE802154E;
    
    // retrieve the received ack frame from the radio's Rx buffer
-   //poipoipoiradio_getReceivedFrame(ieee154e_vars.ackReceived);
+   ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[0]);
+   radio_getReceivedFrame( ieee154e_vars.ackReceived->payload,
+                          &ieee154e_vars.ackReceived->length,
+                          sizeof(ieee154e_vars.ackReceived->packet),
+                          &ieee154e_vars.ackReceived->l1_rssi,
+                          &ieee154e_vars.ackReceived->l1_lqi,
+                          &ieee154e_vars.ackReceived->l1_crc);
    
    /*
    The do-while loop that follows is a little parsing trick.
@@ -1084,7 +1097,13 @@ inline void activity_ri5(uint16_t capturedTime) {
    ieee154e_vars.dataReceived->owner   = COMPONENT_IEEE802154E;
    
    // retrieve the received data frame from the radio's Rx buffer
-   //poipoipoiradio_getReceivedFrame(ieee154e_vars.dataReceived);
+   ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[0]);
+   radio_getReceivedFrame( ieee154e_vars.dataReceived->payload,
+                          &ieee154e_vars.dataReceived->length,
+                          sizeof(ieee154e_vars.dataReceived->packet),
+                          &ieee154e_vars.dataReceived->l1_rssi,
+                          &ieee154e_vars.dataReceived->l1_lqi,
+                          &ieee154e_vars.dataReceived->l1_crc);
 
    /*
    The do-while loop that follows is a little parsing trick.
@@ -1222,7 +1241,8 @@ inline void activity_ri6() {
    radio_setFrequency(frequency);
    
    // load the packet in the radio's Tx buffer
-   //poipoipoiradio_loadPacket(ieee154e_vars.ackToSend);
+   radio_loadPacket(ieee154e_vars.ackToSend->payload,
+                    ieee154e_vars.ackToSend->length);
    
    // enable the radio in Tx mode. This does not send that packet.
    radio_txEnable();

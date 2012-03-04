@@ -1892,6 +1892,9 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\i2c.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\leds.c</name>
     </file>
     <file>
