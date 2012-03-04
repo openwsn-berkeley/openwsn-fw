@@ -52,10 +52,6 @@ void radio_init() {
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
 }
 
-void radio_startTimer(uint16_t period) {
-   radiotimer_start(period);
-}
-
 void radio_setOverflowCb(radiotimer_compare_cbt cb) {
    radiotimer_setOverflowCb(cb);
 }
@@ -70,6 +66,10 @@ void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
 
 void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
    radio_vars.endFrame_cb = cb;
+}
+
+void radio_startTimer(uint16_t period) {
+   radiotimer_start(period);
 }
 
 void radio_reset() {
