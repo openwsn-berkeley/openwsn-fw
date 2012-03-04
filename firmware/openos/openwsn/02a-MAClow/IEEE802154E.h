@@ -21,7 +21,7 @@
 #define DESYNCTIMEOUT             1500 // in slots: @10ms per slot -> 15 seconds
 
 // the different states of the IEEE802.15.4e state machine
-enum ieee154e_state_enum {
+typedef enum {
    S_SLEEP                   = 0x00,   // ready for next slot
    // synchronizing
    S_SYNCLISTEN              = 0x01,   // listened for packet to synchronize to network
@@ -51,7 +51,7 @@ enum ieee154e_state_enum {
    S_TXACKDELAY              = 0x17,   // 'go' signal given, waiting for SFD Tx ACK
    S_TXACK                   = 0x18,   // Tx ACK SFD received, sending bytes
    S_RXPROC                  = 0x19,   // processing received data
-};
+} ieee154e_state_t;
 
 // Atomic durations
 // expressed in 32kHz ticks:

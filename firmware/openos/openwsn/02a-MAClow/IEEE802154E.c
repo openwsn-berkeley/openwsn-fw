@@ -23,7 +23,7 @@ typedef struct {
    uint16_t           deSyncTimeout;        // how many slots left before looses sync
    bool               isSync;               // TRUE iff mote is synchronized to network
    // as shown on the chronogram
-   uint8_t            state;                // state of the FSM
+   ieee154e_state_t   state;                // state of the FSM
    OpenQueueEntry_t*  dataToSend;           // pointer to the data to send
    OpenQueueEntry_t*  dataReceived;         // pointer to the data received
    OpenQueueEntry_t*  ackToSend;            // pointer to the ack to send
@@ -33,6 +33,15 @@ typedef struct {
 } ieee154e_vars_t;
 
 ieee154e_vars_t ieee154e_vars;
+
+typedef struct {
+   uint16_t           num_newSlot;
+   uint16_t           num_timer;
+   uint16_t           num_startOfFrame;
+   uint16_t           num_endOfFrame;
+} ieee154e_dbg_t;
+
+ieee154e_dbg_t ieee154e_dbg;
 
 // these statistics are reset every time they are reported
 typedef struct {
@@ -102,7 +111,7 @@ void     resetStats();
 void     updateStats(int16_t timeCorrection);
 // misc
 uint8_t  calculateFrequency(uint8_t channelOffset);
-void     changeState(uint8_t newstate);
+void     changeState(ieee154e_state_t newstate);
 void     endSlot();
 bool     debugPrint_asn();
 bool     debugPrint_isSync();
@@ -122,23 +131,14 @@ void ieee154e_init() {
    DEBUG_PIN_FSM_INIT();
    
    // initialize variables
-   ieee154e_vars.asn.byte4                  = 0;
-   ieee154e_vars.asn.bytes2and3             = 0;
-   ieee154e_vars.asn.bytes0and1             = 0;
-   ieee154e_vars.slotOffset                 = 0;
-   ieee154e_vars.deSyncTimeout              = 0;
+   memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
+   memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
+   
    if (idmanager_getIsDAGroot()==TRUE) {
       changeIsSync(TRUE);
    } else {
       changeIsSync(FALSE);
    }
-   ieee154e_vars.state                      = S_SLEEP;
-   ieee154e_vars.dataToSend                 = NULL;
-   ieee154e_vars.dataReceived               = NULL;
-   ieee154e_vars.ackToSend                  = NULL;
-   ieee154e_vars.ackReceived                = NULL;
-   ieee154e_vars.lastCapturedTime           = 0;
-   ieee154e_vars.syncCapturedTime           = 0;
    
    resetStats();
    ieee154e_stats.numDeSync                 = 0;
@@ -196,6 +196,7 @@ void isr_ieee154e_newSlot() {
    } else {
       activity_ti1ORri1();
    }
+   ieee154e_dbg.num_newSlot++;
 }
 
 /**
@@ -274,6 +275,7 @@ void isr_ieee154e_timer() {
          endSlot();
          break;
    }
+   ieee154e_dbg.num_timer++;
 }
 
 /**
@@ -308,6 +310,7 @@ void ieee154e_startOfFrame(uint16_t capturedTime) {
             break;
       }
    }
+   ieee154e_dbg.num_startOfFrame++;
 }
 
 /**
@@ -342,6 +345,7 @@ void ieee154e_endOfFrame(uint16_t capturedTime) {
             break;
       }
    }
+   ieee154e_dbg.num_endOfFrame++;
 }
 
 //======= misc
@@ -462,12 +466,14 @@ inline void activity_synchronize_endOfFrame(uint16_t capturedTime) {
    
    // retrieve the received data frame from the radio's Rx buffer
    ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[0]);
-   radio_getReceivedFrame( ieee154e_vars.dataReceived->payload,
-                          &ieee154e_vars.dataReceived->length,
+   radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
+                                &ieee154e_vars.dataReceived->length,
                           sizeof(ieee154e_vars.dataReceived->packet),
-                          &ieee154e_vars.dataReceived->l1_rssi,
-                          &ieee154e_vars.dataReceived->l1_lqi,
-                          &ieee154e_vars.dataReceived->l1_crc);
+                                &ieee154e_vars.dataReceived->l1_rssi,
+                                &ieee154e_vars.dataReceived->l1_lqi,
+                                &ieee154e_vars.dataReceived->l1_crc);
+   // toss CRC (2 last bytes)
+   packetfunctions_tossFooter(   ieee154e_vars.dataReceived, 2);
    
    /*
    The do-while loop that follows is a little parsing trick.
@@ -921,12 +927,14 @@ inline void activity_ti9(uint16_t capturedTime) {
    
    // retrieve the received ack frame from the radio's Rx buffer
    ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[0]);
-   radio_getReceivedFrame( ieee154e_vars.ackReceived->payload,
-                          &ieee154e_vars.ackReceived->length,
+   radio_getReceivedFrame(       ieee154e_vars.ackReceived->payload,
+                                &ieee154e_vars.ackReceived->length,
                           sizeof(ieee154e_vars.ackReceived->packet),
-                          &ieee154e_vars.ackReceived->l1_rssi,
-                          &ieee154e_vars.ackReceived->l1_lqi,
-                          &ieee154e_vars.ackReceived->l1_crc);
+                                &ieee154e_vars.ackReceived->l1_rssi,
+                                &ieee154e_vars.ackReceived->l1_lqi,
+                                &ieee154e_vars.ackReceived->l1_crc);
+   // toss CRC (2 last bytes)
+   packetfunctions_tossFooter(   ieee154e_vars.ackReceived, 2);
    
    /*
    The do-while loop that follows is a little parsing trick.
@@ -1098,12 +1106,14 @@ inline void activity_ri5(uint16_t capturedTime) {
    
    // retrieve the received data frame from the radio's Rx buffer
    ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[0]);
-   radio_getReceivedFrame( ieee154e_vars.dataReceived->payload,
-                          &ieee154e_vars.dataReceived->length,
+   radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
+                                &ieee154e_vars.dataReceived->length,
                           sizeof(ieee154e_vars.dataReceived->packet),
-                          &ieee154e_vars.dataReceived->l1_rssi,
-                          &ieee154e_vars.dataReceived->l1_lqi,
-                          &ieee154e_vars.dataReceived->l1_crc);
+                                &ieee154e_vars.dataReceived->l1_rssi,
+                                &ieee154e_vars.dataReceived->l1_lqi,
+                                &ieee154e_vars.dataReceived->l1_crc);
+   // toss CRC (2 last bytes)
+   packetfunctions_tossFooter(   ieee154e_vars.dataReceived, 2);
 
    /*
    The do-while loop that follows is a little parsing trick.
@@ -1593,7 +1603,7 @@ this function toggles the FSM debug pin.
 
 \param [in] newstate The state the IEEE802.15.4e FSM is now in.
 */
-void changeState(uint8_t newstate) {
+void changeState(ieee154e_state_t newstate) {
    // update the state
    ieee154e_vars.state = newstate;
    // wiggle the FSM debug pin
