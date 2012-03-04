@@ -16,17 +16,26 @@
 //=========================== variables =======================================
 
 typedef struct task_llist_t {
-   task_cbt      task_cb;
-   task_prio_t   prio;
-   void*         next;
-} task_llist_t;
+   task_cbt             cb;
+   task_prio_t          prio;
+   void*                next;
+} taskList_item_t;
 
 typedef struct {
-   task_llist_t    taskBuf[TASK_LIST_DEPTH];
-   task_llist_t*   task_list;
+   taskList_item_t      taskBuf[TASK_LIST_DEPTH];
+   taskList_item_t*     task_list;
+   uint8_t              numTasksCur;
+   uint8_t              numTasksMax;
 } scheduler_vars_t;
 
 scheduler_vars_t scheduler_vars;
+
+typedef struct {
+   uint8_t              numTasksCur;
+   uint8_t              numTasksMax;
+} scheduler_dbg_t;
+
+scheduler_dbg_t scheduler_dbg;
 
 //=========================== prototypes ======================================
 
@@ -41,28 +50,32 @@ void scheduler_init() {
    
    // initialization module variables
    memset(&scheduler_vars,0,sizeof(scheduler_vars_t));
+   memset(&scheduler_dbg,0,sizeof(scheduler_dbg_t));
    
    // enable the comparatorA interrupt to SW can wake up the scheduler
    CACTL1 = CAIE;
 }
 
 void scheduler_start() {
-   task_llist_t* thisTask;
+   taskList_item_t* pThisTask;
    while (1) {
       while(scheduler_vars.task_list!=NULL) {
          // there is still at least one task in the linked-list of tasks
          
          // the task to execute is the one at the head of the queue
-         thisTask                 = scheduler_vars.task_list;
+         pThisTask                = scheduler_vars.task_list;
          
          // shift the queue by one task
-         scheduler_vars.task_list = thisTask->next;
+         scheduler_vars.task_list = pThisTask->next;
          
          // execute the current task
-         thisTask->task_cb();
+         pThisTask->cb();
          
          // free up this task container
-         thisTask->task_cb        = NULL;
+         pThisTask->cb            = NULL;
+         pThisTask->prio          = TASKPRIO_NONE;
+         pThisTask->next          = NULL;
+         scheduler_dbg.numTasksCur--;
       }
       DEBUG_PIN_TASK_CLR();
       __bis_SR_register(GIE+LPM3_bits);          // sleep, but leave interrupts and ACLK on 
@@ -70,12 +83,13 @@ void scheduler_start() {
    }
 }
 
-__monitor void scheduler_push_task(task_cbt task_cb, task_prio_t prio) {
-   task_llist_t* taskContainer;
-   task_llist_t* taskListWalker;
+__monitor void scheduler_push_task(task_cbt cb, task_prio_t prio) {
+   taskList_item_t*  taskContainer;
+   taskList_item_t** taskListWalker;
+   
    // find an empty task container
    taskContainer = &scheduler_vars.taskBuf[0];
-   while (taskContainer->task_cb!=NULL &&
+   while (taskContainer->cb!=NULL &&
           taskContainer<=&scheduler_vars.taskBuf[TASK_LIST_DEPTH-1]) {
       taskContainer++;
    }
@@ -84,17 +98,23 @@ __monitor void scheduler_push_task(task_cbt task_cb, task_prio_t prio) {
       while(1);
    }
    // fill that task container with this task
-   taskContainer->task_cb    = task_cb;
-   taskContainer->prio       = prio;
+   taskContainer->cb              = cb;
+   taskContainer->prio            = prio;
+   
    // find position in queue
-   taskListWalker = &scheduler_vars.taskBuf[0];
-   while (taskListWalker->prio<taskContainer->prio &&
-         taskListWalker->next!=NULL ) {
-      taskListWalker++;
+   taskListWalker                 = &scheduler_vars.task_list;
+   while (*taskListWalker!=NULL &&
+          (*taskListWalker)->prio < taskContainer->prio) {
+      taskListWalker              = (taskList_item_t**)&((*taskListWalker)->next);
    }
    // insert at that position
-   taskContainer->next       = taskListWalker->next;
-   taskListWalker->next      = taskContainer;
+   taskContainer->next            = *taskListWalker;
+   *taskListWalker                = taskContainer;
+   // maintain debug stats
+   scheduler_dbg.numTasksCur++;
+   if (scheduler_dbg.numTasksCur>scheduler_dbg.numTasksMax) {
+      scheduler_dbg.numTasksMax   = scheduler_dbg.numTasksCur;
+   }
 }
 
 //=========================== private =========================================
