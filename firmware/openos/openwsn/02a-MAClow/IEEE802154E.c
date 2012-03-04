@@ -13,6 +13,7 @@
 #include "neighbors.h"
 #include "debugpins.h"
 #include "res.h"
+#include "board.h"
 
 //=========================== variables =======================================
 
@@ -473,7 +474,7 @@ inline void activity_synchronize_endOfFrame(uint16_t capturedTime) {
                                 &ieee154e_vars.dataReceived->l1_lqi,
                                 &ieee154e_vars.dataReceived->l1_crc);
    // toss CRC (2 last bytes)
-   packetfunctions_tossFooter(   ieee154e_vars.dataReceived, 2);
+   packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
    
    /*
    The do-while loop that follows is a little parsing trick.
@@ -934,7 +935,7 @@ inline void activity_ti9(uint16_t capturedTime) {
                                 &ieee154e_vars.ackReceived->l1_lqi,
                                 &ieee154e_vars.ackReceived->l1_crc);
    // toss CRC (2 last bytes)
-   packetfunctions_tossFooter(   ieee154e_vars.ackReceived, 2);
+   packetfunctions_tossFooter(   ieee154e_vars.ackReceived, LENGTH_CRC);
    
    /*
    The do-while loop that follows is a little parsing trick.
@@ -1113,7 +1114,7 @@ inline void activity_ri5(uint16_t capturedTime) {
                                 &ieee154e_vars.dataReceived->l1_lqi,
                                 &ieee154e_vars.dataReceived->l1_crc);
    // toss CRC (2 last bytes)
-   packetfunctions_tossFooter(   ieee154e_vars.dataReceived, 2);
+   packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
 
    /*
    The do-while loop that follows is a little parsing trick.

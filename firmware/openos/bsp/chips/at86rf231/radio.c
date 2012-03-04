@@ -11,6 +11,8 @@
 #include "at86rf231.h"
 #include "spi.h"
 #include "radiotimer.h"
+#include "debugpins.h"
+#include "leds.h"
 
 //=========================== defines =========================================
 
@@ -19,6 +21,7 @@
 typedef struct {
    radiotimer_capture_cbt    startFrame_cb;
    radiotimer_capture_cbt    endFrame_cb;
+   radio_state_t             state;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -39,6 +42,9 @@ void radio_init() {
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
    
+   // change state
+   radio_vars.state          = RADIOSTATE_STOPPED;
+   
    // configure the radio
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);    // turn radio off
    radio_spiWriteReg(RG_IRQ_MASK,
@@ -50,6 +56,9 @@ void radio_init() {
 
    //busy wait until radio status is TRX_OFF
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
+   
+   // change state
+   radio_vars.state = RADIOSTATE_RFOFF;
 }
 
 void radio_setOverflowCb(radiotimer_compare_cbt cb) {
@@ -61,11 +70,11 @@ void radio_setCompareCb(radiotimer_compare_cbt cb) {
 }
 
 void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
-   radio_vars.startFrame_cb = cb;
+   radio_vars.startFrame_cb  = cb;
 }
 
 void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
-   radio_vars.endFrame_cb = cb;
+   radio_vars.endFrame_cb    = cb;
 }
 
 void radio_startTimer(uint16_t period) {
@@ -77,8 +86,14 @@ void radio_reset() {
 }
 
 void radio_setFrequency(uint8_t frequency) {
+   // change state
+   radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
+   
    // configure the radio to the right frequecy
    radio_spiWriteReg(RG_PHY_CC_CCA,0x20+frequency);
+   
+   // change state
+   radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
 void radio_rfOn() {
@@ -86,17 +101,36 @@ void radio_rfOn() {
 }
 
 void radio_loadPacket(uint8_t* packet, uint8_t len) {
+   // change state
+   radio_vars.state = RADIOSTATE_LOADING_PACKET;
+   
    // load packet in TXFIFO
    radio_spiWriteTxFifo(packet,len);
+   
+   // change state
+   radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
 
 void radio_txEnable() {
+   // change state
+   radio_vars.state = RADIOSTATE_ENABLING_TX;
+   
+   // wiggle debug pin
+   DEBUG_PIN_RADIO_SET();
+   leds_radio_on();
+   
    // turn on radio's PLL
    radio_spiWriteReg(RG_TRX_STATE, CMD_PLL_ON);
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != PLL_ON); // busy wait until done
+   
+   // change state
+   radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
 
 void radio_txNow() {
+   // change state
+   radio_vars.state = RADIOSTATE_TRANSMITTING;
+   
    // send packet by pulsing the SLP_TR_CNTL pin
    PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
    PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
@@ -115,10 +149,21 @@ void radio_txNow() {
 }
 
 void radio_rxEnable() {
+   // change state
+   radio_vars.state = RADIOSTATE_ENABLING_RX;
+   
    // put radio in reception mode
    radio_spiWriteReg(RG_TRX_STATE, CMD_RX_ON);
+   
+   // wiggle debug pin
+   DEBUG_PIN_RADIO_SET();
+   leds_radio_on();
+   
    //busy wait until radio status is PLL_ON
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != RX_ON);
+   
+   // change state
+   radio_vars.state = RADIOSTATE_LISTENING;
 }
 
 void radio_rxNow() {
@@ -151,9 +196,19 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 }
 
 void radio_rfOff() {
+   // change state
+   radio_vars.state = RADIOSTATE_TURNING_OFF;
+   
    // turn radio off
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF); // busy wait until done
+   
+   // wiggle debug pin
+   DEBUG_PIN_RADIO_CLR();
+   leds_radio_off();
+   
+   // change state
+   radio_vars.state = RADIOSTATE_RFOFF;
 }
 
 //=========================== private =========================================
@@ -294,6 +349,8 @@ uint8_t radio_isr() {
    irq_status = radio_spiReadReg(RG_IRQ_STATUS);
    // start of frame event
    if (irq_status & AT_IRQ_RX_START) {
+      // change state
+      radio_vars.state = RADIOSTATE_RECEIVING;
       if (radio_vars.startFrame_cb!=NULL) {
          // call the callback
          radio_vars.startFrame_cb(capturedTime);
@@ -303,6 +360,8 @@ uint8_t radio_isr() {
    }
    // end of frame event
    if (irq_status & AT_IRQ_TRX_END) {
+      // change state
+      radio_vars.state = RADIOSTATE_TXRX_DONE;
       if (radio_vars.endFrame_cb!=NULL) {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);

@@ -29,7 +29,6 @@ typedef enum {
 } task_prio_t;
 
 #define TASK_LIST_DEPTH      10
-#define SCHEDULER_WAKEUP()   CACTL1 |= CAIFG
 
 //=========================== typedef =========================================
 

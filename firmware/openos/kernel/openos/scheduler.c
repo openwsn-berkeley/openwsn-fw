@@ -52,8 +52,8 @@ void scheduler_init() {
    memset(&scheduler_vars,0,sizeof(scheduler_vars_t));
    memset(&scheduler_dbg,0,sizeof(scheduler_dbg_t));
    
-   // enable the comparatorA interrupt to SW can wake up the scheduler
-   CACTL1 = CAIE;
+   // enable the interrupt so SW can wake up the scheduler
+   SCHEDULER_ENABLE_INTERRUPT();
 }
 
 void scheduler_start() {
@@ -118,55 +118,3 @@ __monitor void scheduler_push_task(task_cbt cb, task_prio_t prio) {
 }
 
 //=========================== private =========================================
-
-//=========================== interrupt handlers ==============================
-
-//======= interrupt which wakes up the scheduler from SW
-
-#pragma vector = COMPARATORA_VECTOR
-__interrupt void COMPARATORA_ISR (void) {
-   CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
-   __bic_SR_register_on_exit(CPUOFF);                 // restart CPU
-   DEBUG_PIN_ISR_CLR();
-}
-
-//======= interrupts which post a task
-#pragma vector = PORT2_VECTOR
-__interrupt void PORT2_ISR (void) {
-   CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
-#ifdef ISR_BUTTON
-   //interrupt from button connected to P2.7
-   if ((P2IFG & 0x80)!=0) {
-      P2IFG &= ~0x80;                                 // clear interrupt flag
-      scheduler_push_task(ID_ISR_BUTTON);             // post task
-      __bic_SR_register_on_exit(CPUOFF);              // restart CPU
-   }
-#endif
-   DEBUG_PIN_ISR_CLR();
-}
-
-//======= interrupts handled directly in ISR mode
-
-// TimerA CCR0 interrupt service routine
-#pragma vector = TIMERA0_VECTOR
-__interrupt void TIMERA0_ISR (void) {
-   CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
-   isr_ieee154e_newSlot();
-   DEBUG_PIN_ISR_CLR();
-}
-
-//======= handled as CPUOFF
-
-// TODO: this is bad practice, should redo, even a busy wait is better
-
-#pragma vector = ADC12_VECTOR
-__interrupt void ADC12_ISR (void) {
-   CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
-   ADC12IFG &= ~0x1F;                            // clear interrupt flags
-   __bic_SR_register_on_exit(CPUOFF);            // restart CPU
-   DEBUG_PIN_ISR_CLR();
-}

@@ -12,14 +12,18 @@ to return the board's description.
 
 //=========================== defines =========================================
 
+// on GINA, we use the comparatorA interrupt for the OS
+#define SCHEDULER_WAKEUP()                  CACTL1 |= CAIFG
+#define SCHEDULER_ENABLE_INTERRUPT()        CACTL1  = CAIE
+
 // this is a workaround from the fact that the interrupt pin for the GINA radio
 // is not connected to a pin on the MSP which allows time capture.
 #define CAPTURE_TIME()  TACCTL2 |=  CCIS0;  \
                         TACCTL2 &= ~CCIS0;
 
 // [P4.7] radio SLP_TR_CNTL
-#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH() P4OUT |=  0x80;
-#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()  P4OUT &= ~0x80;
+#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()   P4OUT |=  0x80;
+#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()    P4OUT &= ~0x80;
 // radio reset line
 // on GINA, the /RST line is not connected to the uC
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
@@ -29,10 +33,10 @@ to return the board's description.
 
 //=========================== variables =======================================
 
-static const uint8_t rreg_uriquery[] = "h=ucb";
-static const uint8_t infoBoardname[] = "GINA";
-static const uint8_t infouCName[]    = "MSP430f2618";
-static const uint8_t infoRadioName[] = "AT86RF231";
+static const uint8_t rreg_uriquery[]        = "h=ucb";
+static const uint8_t infoBoardname[]        = "GINA";
+static const uint8_t infouCName[]           = "MSP430f2618";
+static const uint8_t infoRadioName[]        = "AT86RF231";
 
 //=========================== prototypes ======================================
 

@@ -66,7 +66,7 @@ __interrupt void PORT1_ISR (void) {
    DEBUG_PIN_ISR_SET();
    if (P1IFG & 0x40) {
       P1IFG &= ~0x40;
-      if (radio_isr()==1) {
+      if (radio_isr()==1) {                      // [P4.6] SFD pin
          __bic_SR_register_on_exit(CPUOFF);
       }
    } else {
@@ -127,7 +127,7 @@ __interrupt void USCIAB1TX_ISR(void) {
    DEBUG_PIN_ISR_SET();
    if ( ((UC1IFG & UCB1TXIFG) && (UC1IE & UCB1TXIE)) ||
         ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ) {
-      isr_i2c_tx(1);                         // implemented in I2C driver
+      isr_i2c_tx(1);                             // implemented in I2C driver
    }
    if ( (UC1IFG & UCA1TXIFG) && (UC1IE & UCA1TXIE) ){
       if (uart_isr_tx()==1) {
@@ -150,5 +150,40 @@ __interrupt void USCIAB1RX_ISR(void) {
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
+   DEBUG_PIN_ISR_CLR();
+}
+
+#pragma vector = COMPARATORA_VECTOR
+__interrupt void COMPARATORA_ISR (void) {
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+   __bic_SR_register_on_exit(CPUOFF);            // restart CPU
+   DEBUG_PIN_ISR_CLR();
+}
+
+#pragma vector = PORT2_VECTOR
+__interrupt void PORT2_ISR (void) {
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+#ifdef ISR_BUTTON
+   if ((P2IFG & 0x80)!=0) {                      // [P2.7] button
+      P2IFG &= ~0x80;                            // clear interrupt flag
+      scheduler_push_task(ID_ISR_BUTTON);        // post task
+      __bic_SR_register_on_exit(CPUOFF);         // restart CPU
+   }
+#endif
+   DEBUG_PIN_ISR_CLR();
+}
+
+//======= handled as CPUOFF
+
+// TODO: this is bad practice, should redo, even a busy wait is better
+
+#pragma vector = ADC12_VECTOR
+__interrupt void ADC12_ISR (void) {
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+   ADC12IFG &= ~0x1F;                            // clear interrupt flags
+   __bic_SR_register_on_exit(CPUOFF);            // restart CPU
    DEBUG_PIN_ISR_CLR();
 }
