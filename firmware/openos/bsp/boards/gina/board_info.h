@@ -12,6 +12,11 @@ to return the board's description.
 
 //=========================== defines =========================================
 
+// this is a workaround from the fact that the interrupt pin for the GINA radio
+// is not connected to a pin on the MSP which allows time capture.
+#define CAPTURE_TIME()  TACCTL2 |=  CCIS0;  \
+                        TACCTL2 &= ~CCIS0;
+
 // [P4.7] radio SLP_TR_CNTL
 #define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH() P4OUT |=  0x80;
 #define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()  P4OUT &= ~0x80;
