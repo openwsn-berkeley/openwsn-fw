@@ -47,6 +47,8 @@
 #include "idmanager.h"
 #include "openqueue.h"
 #include "openrandom.h"
+// drivers
+#include "openserial.h"
 
 //=========================== variables =======================================
 
@@ -57,6 +59,10 @@ void openwsn_init();
 //=========================== public ==========================================
 
 void openwsn_init() {
+   // drivers
+   openserial_init();
+   
+   // stack
    // cross-layer
    idmanager_init(); // call first since initializes e.g. EUI64
    openqueue_init();
