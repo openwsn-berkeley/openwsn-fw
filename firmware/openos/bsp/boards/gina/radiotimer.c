@@ -53,7 +53,7 @@ void radiotimer_start(uint16_t period) {
    // do not interrupt when counter reaches TACCR0!
    TACCR0   =  period;
    
-   // CCR1 in compare mode
+   // CCR1 in compare mode (disabled for now)
    TACCTL1  =  0;
    TACCR1   =  0;
    

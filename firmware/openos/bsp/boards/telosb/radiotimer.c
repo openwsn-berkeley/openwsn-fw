@@ -60,7 +60,7 @@ void radiotimer_start(uint16_t period) {
    TBCCTL1  =  CM_3+SCS+CAP+CCIE;
    TBCCR1   =  0;
    
-   // CCR2 in compare mode
+   // CCR2 in compare mode (disabled for now)
    TBCCTL2  =  0;
    TBCCR2   =  0;
    
@@ -87,18 +87,18 @@ uint16_t radiotimer_getPeriod() {
 
 void radiotimer_schedule(uint16_t offset) {
    // offset when to fire
-   TACCR2   =  offset;
+   TBCCR2   =  offset;
    
    // enable compare interrupt (this also cancels any pending interrupts)
-   TACCTL2  =  CCIE;
+   TBCCTL2  =  CCIE;
 }
 
 void radiotimer_cancel() {
    // reset compare value (also resets interrupt flag)
-   TACCR2   =  0;
+   TBCCR2   =  0;
    
    // disable compare interrupt
-   TACCTL2 &= ~CCIE;
+   TBCCTL2 &= ~CCIE;
 }
 
 //===== capture
