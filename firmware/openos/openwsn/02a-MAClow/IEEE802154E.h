@@ -70,7 +70,7 @@ enum ieee154e_atomicdurations_enum {
    maxRxDataPrepare          =  13,    //   400us (measured  82 us)
    maxTxAckPrepare           =  10,    //   305us (measured 260 us)
    // radio speed related
-   delayTx                   =   0,    //     0us (measured 0 us)    // between GO signal and SFD
+   delayTx                   =   6,    //   180us (measured 200 us)  // between GO signal and SFD
    delayRx                   =   0,    //     0us (can not measure!) // between GO signal and start listening
    // radio watchdog
    wdRadioTx                 =  33,    //  1000us (needs to be >delayTx)

@@ -43,28 +43,31 @@ typedef enum {
 
 //=========================== prototypes ======================================
 
-void    radio_init();
-void    radio_reset();
-void    radio_setOverflowCb(radiotimer_compare_cbt cb);
-void    radio_setCompareCb(radiotimer_compare_cbt cb);
-void    radio_setStartFrameCb(radiotimer_capture_cbt cb);
-void    radio_setEndFrameCb(radiotimer_capture_cbt cb);
-void    radio_startTimer(uint16_t period);
-void    radio_setFrequency(uint8_t frequency);
-void    radio_rfOn();
-void    radio_loadPacket(uint8_t* packet, uint8_t len);
-void    radio_txEnable();
-void    radio_txNow();
-void    radio_rxEnable();
-void    radio_rxNow();
-void    radio_getReceivedFrame(uint8_t* bufRead,
-                               uint8_t* lenRead,
-                               uint8_t  maxBufLen,
-                                int8_t* rssi,
-                               uint8_t* lqi,
-                               uint8_t* crc);
-void    radio_rfOff();
+void     radio_init();
+void     radio_reset();
+void     radio_setOverflowCb(radiotimer_compare_cbt cb);
+void     radio_setCompareCb(radiotimer_compare_cbt cb);
+void     radio_setStartFrameCb(radiotimer_capture_cbt cb);
+void     radio_setEndFrameCb(radiotimer_capture_cbt cb);
+void     radio_startTimer(uint16_t period);
+uint16_t radio_getTimerValue();
+void     radio_setTimerPeriod(uint16_t period);
+uint16_t radio_getTimerPeriod();
+void     radio_setFrequency(uint8_t frequency);
+void     radio_rfOn();
+void     radio_loadPacket(uint8_t* packet, uint8_t len);
+void     radio_txEnable();
+void     radio_txNow();
+void     radio_rxEnable();
+void     radio_rxNow();
+void     radio_getReceivedFrame(uint8_t* bufRead,
+                                uint8_t* lenRead,
+                                uint8_t  maxBufLen,
+                                 int8_t* rssi,
+                                uint8_t* lqi,
+                                uint8_t* crc);
+void     radio_rfOff();
 
-uint8_t radio_isr();
+uint8_t  radio_isr();
 
 #endif

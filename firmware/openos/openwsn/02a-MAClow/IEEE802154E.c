@@ -187,7 +187,7 @@ __monitor uint16_t ieee154e_asnDiff(asn_t* someASN) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
-   TACCR0 =  TsSlotDuration;
+   radio_setTimerPeriod(TsSlotDuration);
    if (ieee154e_vars.isSync==FALSE) {
       activity_synchronize_newSlot();
    } else {
@@ -1408,7 +1408,8 @@ A packet is a valid ACK if it satisfies the following conditions:
 */
 inline bool isValidAck(ieee802154_header_iht* ieee802514_header,
                        OpenQueueEntry_t*      packetSent) {
-   /*return ieee802514_header->valid==TRUE                                                           && \
+   /*
+   return ieee802514_header->valid==TRUE                                                           && \
           ieee802514_header->frameType==IEEE154_TYPE_ACK                                           && \
           ieee802514_header->dsn==packetSent->l2_dsn                                               && \
           packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))     && \
@@ -1466,38 +1467,37 @@ inline void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
 
 void synchronizePacket(uint16_t timeReceived) {
    int16_t  timeCorrection;
-   uint16_t newTaccr0;
-   uint16_t currentTar;
-   uint16_t currentTaccr0;
-   // record the current states of the TAR and TACCR0 registers
-   currentTar           =  TAR;
-   currentTaccr0        =  TACCR0;
-   // calculate new value for TACCR0
-   timeCorrection    =  (int16_t)((int16_t)timeReceived-(int16_t)TsTxOffset);
-   newTaccr0         =  TsSlotDuration;
+   uint16_t newPeriod;
+   uint16_t currentValue;
+   uint16_t currentPeriod;
+   // record the current timer value and period
+   currentValue                   =  radio_getTimerValue();
+   currentPeriod                  =  radio_getTimerPeriod();
+   // calculate new period
+   timeCorrection                 =  (int16_t)((int16_t)timeReceived-(int16_t)TsTxOffset);
+   newPeriod                      =  TsSlotDuration;
    // detect whether I'm too close to the edge of the slot, in that case,
    // skip a slot and increase the temporary slot length to be 2 slots long
-   if (currentTar<timeReceived ||
-       currentTaccr0-currentTar<RESYNCHRONIZATIONGUARD) {
-      TACTL         &= ~TAIFG;
-      newTaccr0     +=  TsSlotDuration;
+   if (currentValue<timeReceived ||
+       currentPeriod-currentValue<RESYNCHRONIZATIONGUARD) {
+      newPeriod                  +=  TsSlotDuration;
       incrementAsnOffset();
    }
-   newTaccr0         =  (uint16_t)((int16_t)newTaccr0+timeCorrection);
-   TACCR0            =  newTaccr0;
-   ieee154e_vars.deSyncTimeout = DESYNCTIMEOUT;
+   newPeriod                      =  (uint16_t)((int16_t)newPeriod+timeCorrection);
+   radio_setTimerPeriod(newPeriod);
+   ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    // update statistics
    updateStats(timeCorrection);
 }
 
 void synchronizeAck(int16_t timeCorrection) {
-   uint16_t newTaccr0;
-   uint16_t currentTaccr0;
+   uint16_t newPeriod;
+   uint16_t currentPeriod;
    // resynchronize
-   currentTaccr0     =  TACCR0;
-   newTaccr0         =  (uint16_t)((int16_t)currentTaccr0-timeCorrection);
-   TACCR0            =  newTaccr0;
-   ieee154e_vars.deSyncTimeout = DESYNCTIMEOUT;
+   currentPeriod                  =  radio_getTimerPeriod();
+   newPeriod                      =  (uint16_t)((int16_t)currentPeriod-timeCorrection);
+   radio_setTimerPeriod(newPeriod);
+   ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    // update statistics
    updateStats(timeCorrection);
 }

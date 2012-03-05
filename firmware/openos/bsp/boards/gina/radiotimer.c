@@ -67,6 +67,18 @@ void radiotimer_start(uint16_t period) {
    TACTL   |=  MC_1+TBSSEL_1;                    // up mode, clocked from ACLK
 }
 
+uint16_t radiotimer_getValue() {
+   return TAR;
+}
+
+void radiotimer_setPeriod(uint16_t period) {
+   TACCR0   =  period;
+}
+
+uint16_t radiotimer_getPeriod() {
+   return TACCR0;
+}
+
 void radiotimer_schedule(uint16_t offset) {
    // offset when to fire
    TACCR1   =  offset;

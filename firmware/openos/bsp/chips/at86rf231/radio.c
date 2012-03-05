@@ -81,6 +81,18 @@ void radio_startTimer(uint16_t period) {
    radiotimer_start(period);
 }
 
+uint16_t radio_getTimerValue() {
+   return radiotimer_getValue();
+}
+
+void radio_setTimerPeriod(uint16_t period) {
+   radiotimer_setPeriod(period);
+}
+
+uint16_t radio_getTimerPeriod() {
+   return radiotimer_getPeriod();
+}
+
 void radio_reset() {
    PORT_PIN_RADIO_RESET_LOW();
 }
