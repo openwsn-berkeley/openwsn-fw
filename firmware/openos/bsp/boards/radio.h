@@ -43,21 +43,28 @@ typedef enum {
 
 //=========================== prototypes ======================================
 
+// admin
 void     radio_init();
-void     radio_reset();
 void     radio_setOverflowCb(radiotimer_compare_cbt cb);
 void     radio_setCompareCb(radiotimer_compare_cbt cb);
 void     radio_setStartFrameCb(radiotimer_capture_cbt cb);
 void     radio_setEndFrameCb(radiotimer_capture_cbt cb);
+// reset
+void     radio_reset();
+// timer
 void     radio_startTimer(uint16_t period);
 uint16_t radio_getTimerValue();
 void     radio_setTimerPeriod(uint16_t period);
 uint16_t radio_getTimerPeriod();
+// RF admin
 void     radio_setFrequency(uint8_t frequency);
 void     radio_rfOn();
+void     radio_rfOff();
+// TX
 void     radio_loadPacket(uint8_t* packet, uint8_t len);
 void     radio_txEnable();
 void     radio_txNow();
+// RX
 void     radio_rxEnable();
 void     radio_rxNow();
 void     radio_getReceivedFrame(uint8_t* bufRead,
@@ -66,7 +73,6 @@ void     radio_getReceivedFrame(uint8_t* bufRead,
                                  int8_t* rssi,
                                 uint8_t* lqi,
                                 uint8_t* crc);
-void     radio_rfOff();
 
 uint8_t  radio_isr();
 

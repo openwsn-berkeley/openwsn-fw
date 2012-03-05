@@ -38,6 +38,8 @@ void    radio_spiReadRxFifo(uint8_t* pBufRead,
 
 //=========================== public ==========================================
 
+//===== admin
+
 void radio_init() {
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
@@ -58,7 +60,7 @@ void radio_init() {
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
    
    // change state
-   radio_vars.state = RADIOSTATE_RFOFF;
+   radio_vars.state          = RADIOSTATE_RFOFF;
 }
 
 void radio_setOverflowCb(radiotimer_compare_cbt cb) {
@@ -77,6 +79,14 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
    radio_vars.endFrame_cb    = cb;
 }
 
+//===== reset
+
+void radio_reset() {
+   PORT_PIN_RADIO_RESET_LOW();
+}
+
+//===== timer
+
 void radio_startTimer(uint16_t period) {
    radiotimer_start(period);
 }
@@ -93,9 +103,7 @@ uint16_t radio_getTimerPeriod() {
    return radiotimer_getPeriod();
 }
 
-void radio_reset() {
-   PORT_PIN_RADIO_RESET_LOW();
-}
+//===== RF admin
 
 void radio_setFrequency(uint8_t frequency) {
    // change state
@@ -111,6 +119,24 @@ void radio_setFrequency(uint8_t frequency) {
 void radio_rfOn() {
    PORT_PIN_RADIO_RESET_LOW();
 }
+
+void radio_rfOff() {
+   // change state
+   radio_vars.state = RADIOSTATE_TURNING_OFF;
+   
+   // turn radio off
+   radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);
+   while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF); // busy wait until done
+   
+   // wiggle debug pin
+   DEBUG_PIN_RADIO_CLR();
+   leds_radio_off();
+   
+   // change state
+   radio_vars.state = RADIOSTATE_RFOFF;
+}
+
+//===== TX
 
 void radio_loadPacket(uint8_t* packet, uint8_t len) {
    // change state
@@ -160,6 +186,8 @@ void radio_txNow() {
    }
 }
 
+//===== RX
+
 void radio_rxEnable() {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
@@ -171,7 +199,7 @@ void radio_rxEnable() {
    DEBUG_PIN_RADIO_SET();
    leds_radio_on();
    
-   //busy wait until radio status is PLL_ON
+   // busy wait until radio really listening
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != RX_ON);
    
    // change state
@@ -205,22 +233,6 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                        pLenRead,
                        maxBufLen,
                        pLqi);
-}
-
-void radio_rfOff() {
-   // change state
-   radio_vars.state = RADIOSTATE_TURNING_OFF;
-   
-   // turn radio off
-   radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);
-   while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF); // busy wait until done
-   
-   // wiggle debug pin
-   DEBUG_PIN_RADIO_CLR();
-   leds_radio_off();
-   
-   // change state
-   radio_vars.state = RADIOSTATE_RFOFF;
 }
 
 //=========================== private =========================================

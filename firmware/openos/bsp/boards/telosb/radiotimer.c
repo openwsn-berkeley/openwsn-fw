@@ -24,6 +24,8 @@ radiotimer_vars_t radiotimer_vars;
 
 //=========================== public ==========================================
 
+//===== admin
+
 void radiotimer_init() {
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
@@ -38,11 +40,11 @@ void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
 }
 
 void radiotimer_setStartFrameCb(radiotimer_capture_cbt cb) {
-   radiotimer_vars.startFrameCb = cb;
+   radiotimer_vars.startFrameCb   = cb;
 }
 
 void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
-   radiotimer_vars.endFrameCb   = cb;
+   radiotimer_vars.endFrameCb     = cb;
 }
 
 void radiotimer_start(uint16_t period) {
@@ -67,6 +69,22 @@ void radiotimer_start(uint16_t period) {
    TBCTL   |=  MC_1+TBSSEL_1;                    // up mode, clocked from ACLK
 }
 
+//===== direct access
+
+uint16_t radiotimer_getValue() {
+   return TBR;
+}
+
+void radiotimer_setPeriod(uint16_t period) {
+   TBCCR0   =  period;
+}
+
+uint16_t radiotimer_getPeriod() {
+   return TBCCR0;
+}
+
+//===== compare
+
 void radiotimer_schedule(uint16_t offset) {
    // offset when to fire
    TACCR2   =  offset;
@@ -83,8 +101,10 @@ void radiotimer_cancel() {
    TACCTL2 &= ~CCIE;
 }
 
+//===== capture
+
 inline uint16_t radiotimer_getCapturedTime() {
-   return TACCR1;
+   while(1);
 }
 
 //=========================== private =========================================
@@ -98,7 +118,7 @@ uint8_t radiotimer_isr() {
    uint16_t tbiv_local;
    
    // reading TBIV returns the value of the highest pending interrupt flag
-   // and automatically resets that flags. We therefore copy its value to the
+   // and automatically resets that flag. We therefore copy its value to the
    // tbiv_local local variable exactly once. If there is more than one 
    // interrupt pending, we will reenter this function after having just left
    // it.

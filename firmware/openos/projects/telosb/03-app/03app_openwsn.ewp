@@ -2089,18 +2089,6 @@
     <group>
       <name>07-App</name>
       <group>
-        <name>heli</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\heli.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\heli.h</name>
-        </file>
-      </group>
-      <group>
         <name>imu</name>
         <excluded>
           <configuration>Debug</configuration>
@@ -2197,18 +2185,6 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\rwellknown.h</name>
-        </file>
-      </group>
-      <group>
-        <name>rxl1</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\rxl1.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\rxl1.h</name>
         </file>
       </group>
       <group>

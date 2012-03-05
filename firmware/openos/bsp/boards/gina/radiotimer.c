@@ -22,6 +22,8 @@ radiotimer_vars_t radiotimer_vars;
 
 //=========================== public ==========================================
 
+//===== admin
+
 void radiotimer_init() {
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
@@ -67,6 +69,8 @@ void radiotimer_start(uint16_t period) {
    TACTL   |=  MC_1+TBSSEL_1;                    // up mode, clocked from ACLK
 }
 
+//===== direct access
+
 uint16_t radiotimer_getValue() {
    return TAR;
 }
@@ -78,6 +82,8 @@ void radiotimer_setPeriod(uint16_t period) {
 uint16_t radiotimer_getPeriod() {
    return TACCR0;
 }
+
+//===== compare
 
 void radiotimer_schedule(uint16_t offset) {
    // offset when to fire
@@ -94,6 +100,8 @@ void radiotimer_cancel() {
    // disable CCR1 interrupt
    TACCTL1 &= ~CCIE;
 }
+
+//===== capture
 
 inline uint16_t radiotimer_getCapturedTime() {
    return TAR;

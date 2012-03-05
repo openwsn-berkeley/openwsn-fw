@@ -20,17 +20,21 @@ typedef void (*radiotimer_capture_cbt)(uint16_t timestamp);
 
 //=========================== prototypes ======================================
 
+// admin
 void     radiotimer_init();
 void     radiotimer_setOverflowCb(radiotimer_compare_cbt cb);
 void     radiotimer_setCompareCb(radiotimer_compare_cbt cb);
 void     radiotimer_setStartFrameCb(radiotimer_capture_cbt cb);
 void     radiotimer_setEndFrameCb(radiotimer_capture_cbt cb);
 void     radiotimer_start(uint16_t period);
+// direct access
 uint16_t radiotimer_getValue();
 void     radiotimer_setPeriod(uint16_t period);
 uint16_t radiotimer_getPeriod();
+// compare
 void     radiotimer_schedule(uint16_t offset);
 void     radiotimer_cancel();
+// capture
 uint16_t radiotimer_getCapturedTime();
 
 uint8_t  radiotimer_isr();
