@@ -147,6 +147,9 @@ void ieee154e_init() {
    radio_setEndFrameCb(ieee154e_endOfFrame);
    // have the radio start its timer
    radio_startTimer(TsSlotDuration);
+   
+   // switch radio on
+   radio_rfOn();
 }
 
 //=========================== public ==========================================

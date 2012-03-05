@@ -21,6 +21,7 @@ void    leds_init() {
    P5OUT     |=  0x70;                           // P2OUT = 0bx111xxxx, all LEDs off
 }
 
+// red = LED1 = P5.4
 void    leds_error_on() {
    P5OUT     &= ~0x10;
 }
@@ -34,6 +35,7 @@ uint8_t leds_error_isOn() {
    return (uint8_t)(P5OUT & 0x10)>>4;
 }
 
+// green = LED2 = P5.5
 void    leds_radio_on() {
    P5OUT     &= ~0x20;
 }
@@ -47,6 +49,7 @@ uint8_t leds_radio_isOn() {
    return (uint8_t)(P5OUT & 0x20)>>5;
 }
 
+// blue = LED3 = P5.6
 void    leds_sync_on() {
    P5OUT     &= ~0x40;
 }
