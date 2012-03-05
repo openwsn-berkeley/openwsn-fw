@@ -279,7 +279,7 @@ void openserial_stop() {
    __disable_interrupt();
    temp_openserial_input_buffer_fill_level = openserial_vars.input_buffer_fill_level;
    __enable_interrupt();
-   UC1IE &= ~(UCA1RXIE | UCA1TXIE);              // disable USCI_A1 TX & RX interrupt
+   uart_rxStop();
    __disable_interrupt();
    openserial_vars.mode=MODE_OFF;
    __enable_interrupt();
