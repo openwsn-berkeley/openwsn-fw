@@ -39,7 +39,7 @@ void board_init() {
    P1DIR  &= ~0x40;                              // configure as low
    P1IES  &= ~0x40;                              // interrup when transition is low-to-high
    P1IE   |=  0x40;                              // enable interrupt
-   // debug pins
+   //-- debug pins
    DEBUG_PIN_FRAME_INIT();
    DEBUG_PIN_SLOT_INIT();
    DEBUG_PIN_FSM_INIT();

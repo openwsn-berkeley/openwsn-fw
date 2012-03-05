@@ -13,6 +13,7 @@
 #include "timers.h"
 #include "radio.h"
 #include "radiotimer.h"
+#include "debugpins.h"
 
 //=========================== variables =======================================
 
@@ -32,6 +33,13 @@ void board_init() {
    // initialize pins
    P4DIR     |=  0x20;                           // [P4.5] radio VREG:  output
    P4DIR     |=  0x40;                           // [P4.6] radio reset: output
+   //-- debug pins
+   DEBUG_PIN_FRAME_INIT();
+   DEBUG_PIN_SLOT_INIT();
+   DEBUG_PIN_FSM_INIT();
+   DEBUG_PIN_TASK_INIT();
+   DEBUG_PIN_ISR_INIT();
+   DEBUG_PIN_RADIO_INIT();
    
    // initialize bsp modules
    leds_init();
@@ -59,32 +67,40 @@ void board_sleep() {
 
 #pragma vector = USART1TX_VECTOR
 __interrupt void USART1TX_ISR (void) {
-   if (uart_isr_tx()==1) {
-      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   DEBUG_PIN_ISR_SET();
+   if (uart_isr_tx()==1) {                       // UART; TX
+      __bic_SR_register_on_exit(CPUOFF);
    }
+   DEBUG_PIN_ISR_CLR();
 }
 
 #pragma vector = USART1RX_VECTOR
 __interrupt void USART1RX_ISR (void) {
-   if (uart_isr_rx()==1) {
-      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   DEBUG_PIN_ISR_SET();
+   if (uart_isr_rx()==1) {                       // UART: RX
+      __bic_SR_register_on_exit(CPUOFF);
    }
+   DEBUG_PIN_ISR_CLR();
 }
 
 // PORT1_VECTOR
 
 #pragma vector = TIMERA1_VECTOR
 __interrupt void TIMERA1_ISR (void) {
-   if (timer_isr_1()==1) {
-      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   DEBUG_PIN_ISR_SET();
+   if (timer_isr_1()==1) {                       // timer: 1
+      __bic_SR_register_on_exit(CPUOFF);
    }
+   DEBUG_PIN_ISR_CLR();
 }
 
 #pragma vector = TIMERA0_VECTOR
 __interrupt void TIMERA0_ISR (void) {
-   if (timer_isr_0()==1) {
-      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   DEBUG_PIN_ISR_SET();
+   if (timer_isr_0()==1) {                       // timer: 0
+      __bic_SR_register_on_exit(CPUOFF);
    }
+   DEBUG_PIN_ISR_CLR();
 }
 
 // ADC12_VECTOR
@@ -93,20 +109,29 @@ __interrupt void TIMERA0_ISR (void) {
 
 #pragma vector = USART0RX_VECTOR
 __interrupt void USART0RX_ISR (void) {
-   if (spi_isr()==1) {
-      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   DEBUG_PIN_ISR_SET();
+   if (spi_isr()==1) {                           // SPI
+      __bic_SR_register_on_exit(CPUOFF);
    }
+   DEBUG_PIN_ISR_CLR();
 }
 
 // WDT_VECTOR
 
-// COMPARATORA_VECTOR
+#pragma vector = COMPARATORA_VECTOR
+__interrupt void COMPARATORA_ISR (void) {
+   DEBUG_PIN_ISR_SET();
+   __bic_SR_register_on_exit(CPUOFF);            // restart CPU
+   DEBUG_PIN_ISR_CLR();
+}
 
 #pragma vector = TIMERB1_VECTOR
 __interrupt void TIMERB1_ISR (void) {
-   if (radiotimer_isr()==1) {
-      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   DEBUG_PIN_ISR_SET();
+   if (radiotimer_isr()==1) {                    // radiotimer
+      __bic_SR_register_on_exit(CPUOFF);
    }
+   DEBUG_PIN_ISR_CLR();
 }
 
 // TIMERB0_VECTOR
