@@ -370,5 +370,5 @@ void cb_uartTxDone() {
 }
 
 void cb_uartRxDone(uart_event_t ev) {
-   //poipoipoi: no RX done yet
+   // poipoipoi: no RX done yet
 }

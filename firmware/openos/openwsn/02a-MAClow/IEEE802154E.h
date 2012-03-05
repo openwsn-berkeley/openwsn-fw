@@ -57,6 +57,7 @@ typedef enum {
 // expressed in 32kHz ticks:
 //    - ticks = duration_in_seconds * 32768
 //    - duration_in_seconds = ticks / 32768
+/*
 enum ieee154e_atomicdurations_enum {
    // time-slot related
    TsTxOffset                =  66,    //  2000us
@@ -77,6 +78,29 @@ enum ieee154e_atomicdurations_enum {
    wdDataDuration            = 164,    //  5000us (measured 4280us with max payload)
    wdAckDuration             =  98,    //  3000us (measured 1000us)
 };
+*/
+enum ieee154e_atomicdurations_enum {
+   // time-slot related
+   TsTxOffset                =  99,    //  3000us
+   TsLongGT                  =  43,    //  1300us
+   TsTxAckDelay              =  66,    //  2000us
+   TsShortGT                 =  16,    //   500us
+   TsSlotDuration            = 327,    // 10000us (328 ticks, but counter counts one extra count, see datasheet)
+   // execution speed related
+   maxTxDataPrepare          =  66,    //  2000us (measured 584 us)
+   maxRxAckPrepare           =  10,    //   305us (measured  64 us)
+   maxRxDataPrepare          =  33,    //  1000us (measured 440 us)
+   maxTxAckPrepare           =  10,    //   305us (measured 260 us)
+   // radio speed related
+   delayTx                   =   6,    //   180us (measured 200 us)  // between GO signal and SFD
+   delayRx                   =   0,    //     0us (can not measure!) // between GO signal and start listening
+   // radio watchdog
+   wdRadioTx                 =  33,    //  1000us (needs to be >delayTx)
+   wdDataDuration            = 164,    //  5000us (measured 4280us with max payload)
+   wdAckDuration             =  98,    //  3000us (measured 1000us)
+};
+
+
 
 // FSM timer durations (combinations of atomic durations)
 // TX
