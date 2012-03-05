@@ -53,33 +53,9 @@ void board_sleep() {
 
 //=========================== interrupt handlers ==============================
 
-#pragma vector = TIMERB1_VECTOR
-__interrupt void TIMERB1_ISR (void) {
-   if (radiotimer_isr()==1) {
-      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
-   }
-}
+// DACDMA_VECTOR
 
-#pragma vector = USART0RX_VECTOR
-__interrupt void USART0RX_ISR (void) {
-   if (spi_isr()==1) {
-      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
-   }
-}
-
-#pragma vector = TIMERA0_VECTOR
-__interrupt void TIMERA0_ISR (void) {
-   if (timer_isr_0()==1) {
-      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
-   }
-}
-
-#pragma vector = TIMERA1_VECTOR
-__interrupt void TIMERA1_ISR (void) {
-   if (timer_isr_1()==1) {
-      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
-   }
-}
+// PORT2_VECTOR
 
 #pragma vector = USART1TX_VECTOR
 __interrupt void USART1TX_ISR (void) {
@@ -94,3 +70,53 @@ __interrupt void USART1RX_ISR (void) {
       __bic_SR_register_on_exit(CPUOFF);  // restart CPU
    }
 }
+
+// PORT1_VECTOR
+
+#pragma vector = TIMERA1_VECTOR
+__interrupt void TIMERA1_ISR (void) {
+   if (timer_isr_1()==1) {
+      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   }
+}
+
+#pragma vector = TIMERA0_VECTOR
+__interrupt void TIMERA0_ISR (void) {
+   if (timer_isr_0()==1) {
+      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   }
+}
+
+// ADC12_VECTOR
+
+// USART0TX_VECTOR
+
+#pragma vector = USART0RX_VECTOR
+__interrupt void USART0RX_ISR (void) {
+   if (spi_isr()==1) {
+      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   }
+}
+
+// WDT_VECTOR
+
+// COMPARATORA_VECTOR
+
+#pragma vector = TIMERB1_VECTOR
+__interrupt void TIMERB1_ISR (void) {
+   if (radiotimer_isr()==1) {
+      __bic_SR_register_on_exit(CPUOFF);  // restart CPU
+   }
+}
+
+// TIMERB0_VECTOR
+
+// NMI_VECTOR
+
+
+
+
+
+
+
+
