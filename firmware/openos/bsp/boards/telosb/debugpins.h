@@ -14,10 +14,10 @@
 #define DEBUG_PIN_SLOT_CLR()      P6OUT &= ~0x80
 #define DEBUG_PIN_SLOT_SET()      P6OUT |=  0x80
 
-#define DEBUG_PIN_FSM_INIT()      P2DIR |=  0x04 // P2.3
-#define DEBUG_PIN_FSM_TOGGLE()    P2OUT ^=  0x04
-#define DEBUG_PIN_FSM_CLR()       P2OUT &= ~0x04
-#define DEBUG_PIN_FSM_SET()       P2OUT |=  0x04
+#define DEBUG_PIN_FSM_INIT()      P2DIR |=  0x08 // P2.3
+#define DEBUG_PIN_FSM_TOGGLE()    P2OUT ^=  0x08
+#define DEBUG_PIN_FSM_CLR()       P2OUT &= ~0x08
+#define DEBUG_PIN_FSM_SET()       P2OUT |=  0x08
 
 #define DEBUG_PIN_TASK_INIT()     P2DIR |=  0x40 // P2.6
 #define DEBUG_PIN_TASK_TOGGLE()   P2OUT ^=  0x40
