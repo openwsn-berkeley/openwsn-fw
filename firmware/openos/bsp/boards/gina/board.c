@@ -39,6 +39,13 @@ void board_init() {
    P1DIR  &= ~0x40;                              // configure as low
    P1IES  &= ~0x40;                              // interrup when transition is low-to-high
    P1IE   |=  0x40;                              // enable interrupt
+   // debug pins
+   DEBUG_PIN_FRAME_INIT();
+   DEBUG_PIN_SLOT_INIT();
+   DEBUG_PIN_FSM_INIT();
+   DEBUG_PIN_TASK_INIT();
+   DEBUG_PIN_ISR_INIT();
+   DEBUG_PIN_RADIO_INIT();
    
    // initialize bsp modules
    leds_init();
@@ -66,7 +73,7 @@ __interrupt void PORT1_ISR (void) {
    DEBUG_PIN_ISR_SET();
    if (P1IFG & 0x40) {
       P1IFG &= ~0x40;
-      if (radio_isr()==1) {                      // [P4.6] SFD pin
+      if (radio_isr()==1) {                      // radio:  SFD pin [P4.6]
          __bic_SR_register_on_exit(CPUOFF);
       }
    } else {
@@ -79,7 +86,7 @@ __interrupt void PORT1_ISR (void) {
 __interrupt void TIMERA1_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-   if (radiotimer_isr()==1) {
+   if (radiotimer_isr()==1) {                    // radiotimer
       __bic_SR_register_on_exit(CPUOFF);
    }
    DEBUG_PIN_ISR_CLR();
@@ -90,13 +97,13 @@ __interrupt void USCIAB0RX_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
    if ( (IFG2 & UCA0RXIFG) && (IE2 & UCA0RXIE) ) {
-      if (spi_isr()==1) {
+      if (spi_isr()==1) {                        // SPI
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
    if ( ((IFG2 & UCB0RXIFG) && (IE2 & UCB0RXIE)) ||
         (UCB0STAT & UCNACKIFG) ) {
-      isr_i2c_rx(0);
+      isr_i2c_rx(0);                             // I2C: RX, bus 0
    }
    DEBUG_PIN_ISR_CLR();
 }
@@ -105,7 +112,7 @@ __interrupt void USCIAB0RX_ISR (void) {
 __interrupt void TIMERB0_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-   if (timer_isr_0()==1) {
+   if (timer_isr_0()==1) {                       // timer: 0
       __bic_SR_register_on_exit(CPUOFF);
    }
    DEBUG_PIN_ISR_CLR();
@@ -115,7 +122,7 @@ __interrupt void TIMERB0_ISR (void) {
 __interrupt void TIMERB1_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-   if (timer_isr_1()==1) {
+   if (timer_isr_1()==1) {                       // timer: 1
       __bic_SR_register_on_exit(CPUOFF);
    }
    DEBUG_PIN_ISR_CLR();
@@ -127,10 +134,10 @@ __interrupt void USCIAB1TX_ISR(void) {
    DEBUG_PIN_ISR_SET();
    if ( ((UC1IFG & UCB1TXIFG) && (UC1IE & UCB1TXIE)) ||
         ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ) {
-      isr_i2c_tx(1);                             // implemented in I2C driver
+      isr_i2c_tx(1);                             // I2C: TX
    }
    if ( (UC1IFG & UCA1TXIFG) && (UC1IE & UCA1TXIE) ){
-      if (uart_isr_tx()==1) {
+      if (uart_isr_tx()==1) {                    // UART: TX
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
@@ -143,10 +150,10 @@ __interrupt void USCIAB1RX_ISR(void) {
    DEBUG_PIN_ISR_SET();
    if ( ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ||
          (UCB1STAT & UCNACKIFG) ) {
-      isr_i2c_rx(1);                             // implemented in I2C driver
+      isr_i2c_rx(1);                             // I2C: RX, bus 1
    }
    if ( (UC1IFG & UCA1RXIFG) && (UC1IE & UCA1RXIE) ){
-      if (uart_isr_rx()==1) {
+      if (uart_isr_rx()==1) {                    // UART: RX
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
@@ -166,24 +173,20 @@ __interrupt void PORT2_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
 #ifdef ISR_BUTTON
-   if ((P2IFG & 0x80)!=0) {                      // [P2.7] button
-      P2IFG &= ~0x80;                            // clear interrupt flag
-      scheduler_push_task(ID_ISR_BUTTON);        // post task
-      __bic_SR_register_on_exit(CPUOFF);         // restart CPU
+   if ((P2IFG & 0x80)!=0) {                      // button: [P2.7]
+      P2IFG &= ~0x80;
+      scheduler_push_task(ID_ISR_BUTTON);
+      __bic_SR_register_on_exit(CPUOFF);
    }
 #endif
    DEBUG_PIN_ISR_CLR();
 }
 
-//======= handled as CPUOFF
-
-// TODO: this is bad practice, should redo, even a busy wait is better
-
 #pragma vector = ADC12_VECTOR
 __interrupt void ADC12_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-   ADC12IFG &= ~0x1F;                            // clear interrupt flags
-   __bic_SR_register_on_exit(CPUOFF);            // restart CPU
+   ADC12IFG &= ~0x1F;
+   __bic_SR_register_on_exit(CPUOFF);
    DEBUG_PIN_ISR_CLR();
 }

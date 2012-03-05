@@ -125,11 +125,7 @@ bool     debugPrint_isSync();
 Call this function once before any other function in this module, possibly
 during boot-up.
 */
-void ieee154e_init() {   
-   // initialize debug pins
-   DEBUG_PIN_FRAME_INIT();
-   DEBUG_PIN_SLOT_INIT();
-   DEBUG_PIN_FSM_INIT();
+void ieee154e_init() {
    
    // initialize variables
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
@@ -1483,11 +1479,9 @@ void synchronizePacket(uint16_t timeReceived) {
    // skip a slot and increase the temporary slot length to be 2 slots long
    if (currentTar<timeReceived ||
        currentTaccr0-currentTar<RESYNCHRONIZATIONGUARD) {
-      DEBUG_PIN_SLOT_TOGGLE();
       TACTL         &= ~TAIFG;
       newTaccr0     +=  TsSlotDuration;
       incrementAsnOffset();
-      DEBUG_PIN_SLOT_TOGGLE();
    }
    newTaccr0         =  (uint16_t)((int16_t)newTaccr0+timeCorrection);
    TACCR0            =  newTaccr0;

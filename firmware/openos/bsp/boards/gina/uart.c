@@ -142,9 +142,9 @@ uint8_t uart_isr_tx() {
       // send next byte
       UCA1TXBUF              = *uart_vars.txBuf;
    } else {
+      // disable UART1 TX interrupt
+      UC1IE              &= ~UCA1TXIE;
       if (uart_vars.txDone_cb!=NULL) {
-         // disable UART1 TX interrupt
-         UC1IE              &= ~UCA1TXIE;
          // call the callback
          uart_vars.txDone_cb();
          // kick the OS

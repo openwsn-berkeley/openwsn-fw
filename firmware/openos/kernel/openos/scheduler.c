@@ -44,9 +44,6 @@ __monitor void    consumeTask(uint8_t taskId);
 //=========================== public ==========================================
 
 void scheduler_init() {   
-   // enable debug pins
-   DEBUG_PIN_TASK_INIT();
-   DEBUG_PIN_ISR_INIT();
    
    // initialization module variables
    memset(&scheduler_vars,0,sizeof(scheduler_vars_t));
