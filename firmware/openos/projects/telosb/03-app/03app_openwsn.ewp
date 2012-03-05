@@ -1964,7 +1964,7 @@
   <group>
     <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\telosb\openserial.c</name>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\openserial.h</name>

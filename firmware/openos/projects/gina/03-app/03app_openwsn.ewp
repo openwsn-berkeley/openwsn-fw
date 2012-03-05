@@ -1976,7 +1976,7 @@
       <name>$PROJ_DIR$\..\..\..\drivers\gina\heli.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\gina\openserial.c</name>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\openserial.h</name>
