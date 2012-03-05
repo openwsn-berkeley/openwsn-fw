@@ -67,66 +67,9 @@ void board_sleep() {
 
 //=========================== interrupt handlers ==============================
 
-#pragma vector = PORT1_VECTOR
-__interrupt void PORT1_ISR (void) {
-   CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
-   if (P1IFG & 0x40) {
-      P1IFG &= ~0x40;
-      if (radio_isr()==1) {                      // radio:  SFD pin [P4.6]
-         __bic_SR_register_on_exit(CPUOFF);
-      }
-   } else {
-      while (1); // should never happen
-   }
-   DEBUG_PIN_ISR_CLR();
-}
+// DAC12_VECTOR
 
-#pragma vector = TIMERA1_VECTOR
-__interrupt void TIMERA1_ISR (void) {
-   CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
-   if (radiotimer_isr()==1) {                    // radiotimer
-      __bic_SR_register_on_exit(CPUOFF);
-   }
-   DEBUG_PIN_ISR_CLR();
-}
-
-#pragma vector = USCIAB0RX_VECTOR
-__interrupt void USCIAB0RX_ISR (void) {
-   CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
-   if ( (IFG2 & UCA0RXIFG) && (IE2 & UCA0RXIE) ) {
-      if (spi_isr()==1) {                        // SPI
-         __bic_SR_register_on_exit(CPUOFF);
-      }
-   }
-   if ( ((IFG2 & UCB0RXIFG) && (IE2 & UCB0RXIE)) ||
-        (UCB0STAT & UCNACKIFG) ) {
-      isr_i2c_rx(0);                             // I2C: RX, bus 0
-   }
-   DEBUG_PIN_ISR_CLR();
-}
-
-#pragma vector = TIMERB0_VECTOR
-__interrupt void TIMERB0_ISR (void) {
-   CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
-   if (timer_isr_0()==1) {                       // timer: 0
-      __bic_SR_register_on_exit(CPUOFF);
-   }
-   DEBUG_PIN_ISR_CLR();
-}
-
-#pragma vector = TIMERB1_VECTOR
-__interrupt void TIMERB1_ISR (void) {
-   CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
-   if (timer_isr_1()==1) {                       // timer: 1
-      __bic_SR_register_on_exit(CPUOFF);
-   }
-   DEBUG_PIN_ISR_CLR();
-}
+// DMA_VECTOR
 
 #pragma vector = USCIAB1TX_VECTOR
 __interrupt void USCIAB1TX_ISR(void) {
@@ -160,11 +103,18 @@ __interrupt void USCIAB1RX_ISR(void) {
    DEBUG_PIN_ISR_CLR();
 }
 
-#pragma vector = COMPARATORA_VECTOR
-__interrupt void COMPARATORA_ISR (void) {
+#pragma vector = PORT1_VECTOR
+__interrupt void PORT1_ISR (void) {
    CAPTURE_TIME();
    DEBUG_PIN_ISR_SET();
-   __bic_SR_register_on_exit(CPUOFF);            // restart CPU
+   if (P1IFG & 0x40) {
+      P1IFG &= ~0x40;
+      if (radio_isr()==1) {                      // radio:  SFD pin [P4.6]
+         __bic_SR_register_on_exit(CPUOFF);
+      }
+   } else {
+      while (1); // should never happen
+   }
    DEBUG_PIN_ISR_CLR();
 }
 
@@ -190,3 +140,65 @@ __interrupt void ADC12_ISR (void) {
    __bic_SR_register_on_exit(CPUOFF);
    DEBUG_PIN_ISR_CLR();
 }
+
+// USCIAB0TX_VECTOR
+
+#pragma vector = USCIAB0RX_VECTOR
+__interrupt void USCIAB0RX_ISR (void) {
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+   if ( (IFG2 & UCA0RXIFG) && (IE2 & UCA0RXIE) ) {
+      if (spi_isr()==1) {                        // SPI
+         __bic_SR_register_on_exit(CPUOFF);
+      }
+   }
+   if ( ((IFG2 & UCB0RXIFG) && (IE2 & UCB0RXIE)) ||
+        (UCB0STAT & UCNACKIFG) ) {
+      isr_i2c_rx(0);                             // I2C: RX, bus 0
+   }
+   DEBUG_PIN_ISR_CLR();
+}
+
+#pragma vector = TIMERA1_VECTOR
+__interrupt void TIMERA1_ISR (void) {
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+   if (radiotimer_isr()==1) {                    // radiotimer
+      __bic_SR_register_on_exit(CPUOFF);
+   }
+   DEBUG_PIN_ISR_CLR();
+}
+
+// TIMERA0_VECTOR
+
+// WDT_VECTOR
+
+#pragma vector = COMPARATORA_VECTOR
+__interrupt void COMPARATORA_ISR (void) {
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+   __bic_SR_register_on_exit(CPUOFF);            // restart CPU
+   DEBUG_PIN_ISR_CLR();
+}
+
+#pragma vector = TIMERB1_VECTOR
+__interrupt void TIMERB1_ISR (void) {
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+   if (timer_isr_1()==1) {                       // timer: 1
+      __bic_SR_register_on_exit(CPUOFF);
+   }
+   DEBUG_PIN_ISR_CLR();
+}
+
+#pragma vector = TIMERB0_VECTOR
+__interrupt void TIMERB0_ISR (void) {
+   CAPTURE_TIME();
+   DEBUG_PIN_ISR_SET();
+   if (timer_isr_0()==1) {                       // timer: 0
+      __bic_SR_register_on_exit(CPUOFF);
+   }
+   DEBUG_PIN_ISR_CLR();
+}
+
+// NMI_VECTOR
