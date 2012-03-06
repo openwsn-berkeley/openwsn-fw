@@ -1,37 +1,93 @@
-#ifndef __DEBUGPINS_H
-#define __DEBUGPINS_H
+/**
+\brief TelosB-specific definition of the "debugpins" bsp module.
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
+*/
 
 #include "msp430f1611.h"
+#include "debugpins.h"
 
-// debug pins
-#define DEBUG_PIN_FRAME_INIT()    P6DIR |=  0x40 // P6.6
-#define DEBUG_PIN_FRAME_TOGGLE()  P6OUT ^=  0x40
-#define DEBUG_PIN_FRAME_CLR()     P6OUT &= ~0x40
-#define DEBUG_PIN_FRAME_SET()     P6OUT |=  0x40
+//=========================== defines =========================================
 
-#define DEBUG_PIN_SLOT_INIT()     P6DIR |=  0x80 // P6.7
-#define DEBUG_PIN_SLOT_TOGGLE()   P6OUT ^=  0x80
-#define DEBUG_PIN_SLOT_CLR()      P6OUT &= ~0x80
-#define DEBUG_PIN_SLOT_SET()      P6OUT |=  0x80
+//=========================== variables =======================================
 
-#define DEBUG_PIN_FSM_INIT()      P2DIR |=  0x08 // P2.3
-#define DEBUG_PIN_FSM_TOGGLE()    P2OUT ^=  0x08
-#define DEBUG_PIN_FSM_CLR()       P2OUT &= ~0x08
-#define DEBUG_PIN_FSM_SET()       P2OUT |=  0x08
+//=========================== prototypes ======================================
 
-#define DEBUG_PIN_TASK_INIT()     P2DIR |=  0x40 // P2.6
-#define DEBUG_PIN_TASK_TOGGLE()   P2OUT ^=  0x40
-#define DEBUG_PIN_TASK_CLR()      P2OUT &= ~0x40
-#define DEBUG_PIN_TASK_SET()      P2OUT |=  0x40
+//=========================== public ==========================================
 
-#define DEBUG_PIN_ISR_INIT()      P6DIR |=  0x01 // P6.0
-#define DEBUG_PIN_ISR_TOGGLE()    P6OUT ^=  0x01
-#define DEBUG_PIN_ISR_CLR()       P6OUT &= ~0x01
-#define DEBUG_PIN_ISR_SET()       P6OUT |=  0x01
+void debugpins_init() {
+   P6DIR |=  0x40;      // frame
+   P6DIR |=  0x80;      // slot
+   P2DIR |=  0x08;      // fsm
+   P2DIR |=  0x40;      // task
+   P6DIR |=  0x01;      // isr
+   P6DIR |=  0x02;      // radio
+}
 
-#define DEBUG_PIN_RADIO_INIT()    P6DIR |=  0x02 // P6.1
-#define DEBUG_PIN_RADIO_TOGGLE()  P6OUT ^=  0x02
-#define DEBUG_PIN_RADIO_CLR()     P6OUT &= ~0x02
-#define DEBUG_PIN_RADIO_SET()     P6OUT |=  0x02
+// P6.6
+void debugpins_frame_toggle() {
+   P6OUT ^=  0x40;
+}
+void debugpins_frame_clr() {
+   P6OUT &= ~0x40
+}
+void debugpins_frame_set() {
+   P6OUT |=  0x40
+}
 
-#endif
+// P6.7
+void debugpins_slot_toggle() {
+   P6OUT ^=  0x80;
+}
+void debugpins_slot_clr() {
+   P6OUT &= ~0x80;
+}
+void debugpins_slot_set() {
+   P6OUT |=  0x80;
+}
+
+// P2.3
+void debugpins_fsm_toggle() {
+   P2OUT ^=  0x08;
+}
+void debugpins_fsm_clr() {
+   P2OUT &= ~0x08;
+}
+void debugpins_fsm_set() {
+   P2OUT |=  0x08;
+}
+
+// P2.6
+void debugpins_task_toggle() {
+   P2OUT ^=  0x40;
+}
+void debugpins_task_clr() {
+   P2OUT &= ~0x40;
+}
+void debugpins_task_set() {
+   P2OUT |=  0x40;
+}
+
+// P6.0
+void debugpins_isr_toggle() {
+   P6OUT ^=  0x01;
+}
+void debugpins_isr_clr() {
+   P6OUT &= ~0x01;
+}
+void debugpins_isr_set() {
+   P6OUT |=  0x01;
+}
+
+// P6.1
+void debugpins_radio_toggle() {
+   P6OUT ^=  0x02;
+}
+void debugpins_radio_clr() {
+   P6OUT &= ~0x02;
+}
+void debugpins_radio_set() {
+   P6OUT |=  0x02;
+}
+
+//=========================== private =========================================

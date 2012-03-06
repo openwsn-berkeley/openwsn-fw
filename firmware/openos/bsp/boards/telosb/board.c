@@ -33,15 +33,9 @@ void board_init() {
    // initialize pins
    P4DIR     |=  0x20;                           // [P4.5] radio VREG:  output
    P4DIR     |=  0x40;                           // [P4.6] radio reset: output
-   //-- debug pins
-   DEBUG_PIN_FRAME_INIT();
-   DEBUG_PIN_SLOT_INIT();
-   DEBUG_PIN_FSM_INIT();
-   DEBUG_PIN_TASK_INIT();
-   DEBUG_PIN_ISR_INIT();
-   DEBUG_PIN_RADIO_INIT();
    
    // initialize bsp modules
+   debugpins_init();
    leds_init();
    uart_init();
    spi_init();

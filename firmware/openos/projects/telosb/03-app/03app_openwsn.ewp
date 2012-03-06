@@ -1922,7 +1922,10 @@
       <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
