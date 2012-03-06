@@ -192,7 +192,7 @@ void radio_rfOff() {
    // poipoipoi wait until off
    
    // wiggle debug pin
-   DEBUG_PIN_RADIO_CLR();
+   debugpins_radio_clr();
    leds_radio_off();
    
    // change state
@@ -217,7 +217,7 @@ void radio_txEnable() {
    radio_vars.state = RADIOSTATE_ENABLING_TX;
    
    // wiggle debug pin
-   DEBUG_PIN_RADIO_SET();
+   debugpins_radio_set();
    leds_radio_on();
    
    // I don't fully understand how the CC2420_STXCA the can be used here.
@@ -244,7 +244,7 @@ void radio_rxEnable() {
    radio_spiStrobe(CC2420_SFLUSHRX, &radio_vars.radioStatusByte);
    
    // wiggle debug pin
-   DEBUG_PIN_RADIO_SET();
+   debugpins_radio_set();
    leds_radio_on();
    
    // busy wait until radio really listening

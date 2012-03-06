@@ -74,9 +74,9 @@ void scheduler_start() {
          pThisTask->next          = NULL;
          scheduler_dbg.numTasksCur--;
       }
-      DEBUG_PIN_TASK_CLR();
+      debugpins_task_clr();
       __bis_SR_register(GIE+LPM3_bits);          // sleep, but leave interrupts and ACLK on 
-      DEBUG_PIN_TASK_SET();                      // IAR should halt here if nothing to do
+      debugpins_task_set();                      // IAR should halt here if nothing to do
    }
 }
 

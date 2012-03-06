@@ -68,7 +68,7 @@ void board_sleep() {
 #pragma vector = USCIAB1TX_VECTOR
 __interrupt void USCIAB1TX_ISR(void) {
    CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if ( ((UC1IFG & UCB1TXIFG) && (UC1IE & UCB1TXIE)) ||
         ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ) {
       isr_i2c_tx(1);                             // I2C: TX
@@ -78,13 +78,13 @@ __interrupt void USCIAB1TX_ISR(void) {
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 #pragma vector = USCIAB1RX_VECTOR
 __interrupt void USCIAB1RX_ISR(void) {
    CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if ( ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ||
          (UCB1STAT & UCNACKIFG) ) {
       isr_i2c_rx(1);                             // I2C: RX, bus 1
@@ -94,13 +94,13 @@ __interrupt void USCIAB1RX_ISR(void) {
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 #pragma vector = PORT1_VECTOR
 __interrupt void PORT1_ISR (void) {
    CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if (P1IFG & 0x40) {
       P1IFG &= ~0x40;
       if (radio_isr()==1) {                      // radio:  SFD pin [P4.6]
@@ -109,13 +109,13 @@ __interrupt void PORT1_ISR (void) {
    } else {
       while (1); // should never happen
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 #pragma vector = PORT2_VECTOR
 __interrupt void PORT2_ISR (void) {
    CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
 #ifdef ISR_BUTTON
    if ((P2IFG & 0x80)!=0) {                      // button: [P2.7]
       P2IFG &= ~0x80;
@@ -123,16 +123,16 @@ __interrupt void PORT2_ISR (void) {
       __bic_SR_register_on_exit(CPUOFF);
    }
 #endif
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 #pragma vector = ADC12_VECTOR
 __interrupt void ADC12_ISR (void) {
    CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    ADC12IFG &= ~0x1F;
    __bic_SR_register_on_exit(CPUOFF);
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 // USCIAB0TX_VECTOR
@@ -140,7 +140,7 @@ __interrupt void ADC12_ISR (void) {
 #pragma vector = USCIAB0RX_VECTOR
 __interrupt void USCIAB0RX_ISR (void) {
    CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if ( (IFG2 & UCA0RXIFG) && (IE2 & UCA0RXIE) ) {
       if (spi_isr()==1) {                        // SPI
          __bic_SR_register_on_exit(CPUOFF);
@@ -150,17 +150,17 @@ __interrupt void USCIAB0RX_ISR (void) {
         (UCB0STAT & UCNACKIFG) ) {
       isr_i2c_rx(0);                             // I2C: RX, bus 0
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 #pragma vector = TIMERA1_VECTOR
 __interrupt void TIMERA1_ISR (void) {
    CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if (radiotimer_isr()==1) {                    // radiotimer
       __bic_SR_register_on_exit(CPUOFF);
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 // TIMERA0_VECTOR
@@ -170,29 +170,29 @@ __interrupt void TIMERA1_ISR (void) {
 #pragma vector = COMPARATORA_VECTOR
 __interrupt void COMPARATORA_ISR (void) {
    CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    __bic_SR_register_on_exit(CPUOFF);            // restart CPU
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 #pragma vector = TIMERB1_VECTOR
 __interrupt void TIMERB1_ISR (void) {
    CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if (timer_isr_1()==1) {                       // timer: 1
       __bic_SR_register_on_exit(CPUOFF);
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 #pragma vector = TIMERB0_VECTOR
 __interrupt void TIMERB0_ISR (void) {
    CAPTURE_TIME();
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if (timer_isr_0()==1) {                       // timer: 0
       __bic_SR_register_on_exit(CPUOFF);
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 // NMI_VECTOR

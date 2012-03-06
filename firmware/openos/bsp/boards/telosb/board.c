@@ -61,40 +61,40 @@ void board_sleep() {
 
 #pragma vector = USART1TX_VECTOR
 __interrupt void USART1TX_ISR (void) {
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if (uart_isr_tx()==1) {                       // UART; TX
       __bic_SR_register_on_exit(CPUOFF);
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 #pragma vector = USART1RX_VECTOR
 __interrupt void USART1RX_ISR (void) {
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if (uart_isr_rx()==1) {                       // UART: RX
       __bic_SR_register_on_exit(CPUOFF);
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 // PORT1_VECTOR
 
 #pragma vector = TIMERA1_VECTOR
 __interrupt void TIMERA1_ISR (void) {
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if (timer_isr_1()==1) {                       // timer: 1
       __bic_SR_register_on_exit(CPUOFF);
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 #pragma vector = TIMERA0_VECTOR
 __interrupt void TIMERA0_ISR (void) {
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if (timer_isr_0()==1) {                       // timer: 0
       __bic_SR_register_on_exit(CPUOFF);
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 // ADC12_VECTOR
@@ -103,29 +103,29 @@ __interrupt void TIMERA0_ISR (void) {
 
 #pragma vector = USART0RX_VECTOR
 __interrupt void USART0RX_ISR (void) {
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if (spi_isr()==1) {                           // SPI
       __bic_SR_register_on_exit(CPUOFF);
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 // WDT_VECTOR
 
 #pragma vector = COMPARATORA_VECTOR
 __interrupt void COMPARATORA_ISR (void) {
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    __bic_SR_register_on_exit(CPUOFF);            // restart CPU
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 #pragma vector = TIMERB1_VECTOR
 __interrupt void TIMERB1_ISR (void) {
-   DEBUG_PIN_ISR_SET();
+   debugpins_isr_set();
    if (radiotimer_isr()==1) {                    // radiotimer
       __bic_SR_register_on_exit(CPUOFF);
    }
-   DEBUG_PIN_ISR_CLR();
+   debugpins_isr_clr();
 }
 
 // TIMERB0_VECTOR

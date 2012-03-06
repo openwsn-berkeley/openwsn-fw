@@ -558,9 +558,9 @@ inline void activity_ti1ORri1() {
    incrementAsnOffset();
    
    // wiggle debug pins
-   DEBUG_PIN_SLOT_TOGGLE();
+   debugpins_slot_toggle();
    if (ieee154e_vars.slotOffset==0) {
-      DEBUG_PIN_FRAME_TOGGLE();
+      debugpins_frame_toggle();
    }
    
    // desynchronize if needed
@@ -1608,11 +1608,11 @@ void changeState(ieee154e_state_t newstate) {
    switch (ieee154e_vars.state) {
       case S_SYNCLISTEN:
       case S_TXDATAOFFSET:
-         DEBUG_PIN_FSM_SET();
+         debugpins_fsm_set();
          break;
       case S_SLEEP:
       case S_RXDATAOFFSET:
-         DEBUG_PIN_FSM_CLR();
+         debugpins_fsm_clr();
          break;
       case S_SYNCRX:
       case S_SYNCPROC:
@@ -1636,7 +1636,7 @@ void changeState(ieee154e_state_t newstate) {
       case S_TXACKDELAY:
       case S_TXACK:
       case S_RXPROC:
-         DEBUG_PIN_FSM_TOGGLE();
+         debugpins_fsm_toggle();
          break;
    }
 }
