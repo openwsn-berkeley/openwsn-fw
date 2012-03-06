@@ -29,10 +29,10 @@ void debugpins_frame_toggle() {
    P6OUT ^=  0x40;
 }
 void debugpins_frame_clr() {
-   P6OUT &= ~0x40
+   P6OUT &= ~0x40;
 }
 void debugpins_frame_set() {
-   P6OUT |=  0x40
+   P6OUT |=  0x40;
 }
 
 // P6.7
