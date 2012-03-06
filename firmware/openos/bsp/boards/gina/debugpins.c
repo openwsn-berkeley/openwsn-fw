@@ -29,10 +29,10 @@ void debugpins_frame_toggle() {
    P4OUT ^=  0x20;
 }
 void debugpins_frame_clr() {
-   P4OUT &= ~0x20
+   P4OUT &= ~0x20;
 }
 void debugpins_frame_set() {
-   P4OUT |=  0x20
+   P4OUT |=  0x20;
 }
 
 // P4.1
