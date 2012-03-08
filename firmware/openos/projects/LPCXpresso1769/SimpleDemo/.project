@@ -86,9 +86,14 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>bsp</name>
+			<name>boards</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_lpc1769/openos/bsp</location>
+			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_lpc1769/openos/bsp/boards</location>
+		</link>
+		<link>
+			<name>chips</name>
+			<type>2</type>
+			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_lpc1769/openos/bsp/chips</location>
 		</link>
 	</linkedResources>
 </projectDescription>
