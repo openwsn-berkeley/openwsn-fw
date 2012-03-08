@@ -1,5 +1,5 @@
-#ifndef __TIMERS_H
-#define __TIMERS_H
+#ifndef __BSP_TIMERS_H
+#define __BSP_TIMERS_H
 
 #include "stdint.h"
 
@@ -18,8 +18,8 @@ enum {
 };
 
 typedef enum {
-   TIMER_PERIODIC,
-   TIMER_ONESHOT,
+   TIMER_PERIODIC  = 0,
+   TIMER_ONESHOT   = 1,
 } timer_type_t;
 
 //=========================== typedef =========================================

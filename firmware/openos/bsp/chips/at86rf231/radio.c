@@ -64,11 +64,11 @@ void radio_init() {
 }
 
 void radio_setOverflowCb(radiotimer_compare_cbt cb) {
-   radiotimer_setOverflowCb(cb);
+   //radiotimer_setOverflowCb(cb);
 }
 
 void radio_setCompareCb(radiotimer_compare_cbt cb) {
-   radiotimer_setCompareCb(cb);
+  // radiotimer_setCompareCb(cb);
 }
 
 void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
@@ -129,7 +129,7 @@ void radio_rfOff() {
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF); // busy wait until done
    
    // wiggle debug pin
-   debugpins_radio_clr();
+   //debugpins_radio_clr();
    leds_radio_off();
    
    // change state
@@ -154,7 +154,7 @@ void radio_txEnable() {
    radio_vars.state = RADIOSTATE_ENABLING_TX;
    
    // wiggle debug pin
-   debugpins_radio_set();
+   //debugpins_radio_set();
    leds_radio_on();
    
    // turn on radio's PLL
@@ -182,7 +182,7 @@ void radio_txNow() {
    // transmitted (I've never seen that).
    if (radio_vars.startFrame_cb!=NULL) {
       // call the callback
-      radio_vars.startFrame_cb(radiotimer_getCapturedTime());
+      //radio_vars.startFrame_cb(radiotimer_getCapturedTime());
    }
 }
 
@@ -196,7 +196,7 @@ void radio_rxEnable() {
    radio_spiWriteReg(RG_TRX_STATE, CMD_RX_ON);
    
    // wiggle debug pin
-   debugpins_radio_set();
+   //debugpins_radio_set();
    leds_radio_on();
    
    // busy wait until radio really listening

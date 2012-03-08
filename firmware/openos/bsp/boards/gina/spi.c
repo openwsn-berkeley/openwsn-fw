@@ -198,7 +198,7 @@ uint8_t spi_isr() {
       // SPI is done!
       if (spi_vars.callback!=NULL) {
          // call the callback
-         spi_vars.spiDone_cb();
+         spi_vars.callback();
          // kick the OS
          return 1;
       }
