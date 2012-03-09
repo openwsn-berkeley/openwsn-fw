@@ -280,11 +280,24 @@
 //
 // </e>
 */
-#define CLOCK_SETUP           1 //
+//#define OPENMOTE
+#define LPCXPRESSO1769
+
+#define CLOCK_SETUP           1
+
+#ifdef OPENMOTE
+#define SCS_Val               0x00000000 //0 for openmote
+#define CLKSRCSEL_Val         0x00000000 //0 for openmote
+#define PLL0CFG_Val           0x00020018  //lower bits 14:0 MSEL0=24 23-16 NSEL=2 pag 37. pag 41 has the equation.
+#endif
+
+#ifdef LPCXPRESSO1769
 #define SCS_Val               0x00000020 //0 for openmote
 #define CLKSRCSEL_Val         0x00000001 //0 for openmote
-#define PLL0_SETUP            1
 #define PLL0CFG_Val           0x00050063  //MSEL0=24 NSEL=2 pag 37. pag 41 has the equation.
+#endif
+
+#define PLL0_SETUP            1
 #define PLL1_SETUP            1
 #define PLL1CFG_Val           0x00000023
 #define CCLKCFG_Val           0x00000003
