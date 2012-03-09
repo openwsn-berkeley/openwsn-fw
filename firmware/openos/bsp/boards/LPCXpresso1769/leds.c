@@ -63,6 +63,7 @@ void leds_error_off() {
 void leds_error_toggle() {
    private_led_toggle(redLED_BIT);
 }
+
 void leds_radio_on() {
 	private_led_on(redLED_BIT);
 }
@@ -80,6 +81,16 @@ void leds_sync_off() {
 	private_led_off(redLED_BIT);
 }
 void leds_sync_toggle() {
+	private_led_toggle(redLED_BIT);
+}
+
+void leds_debug_on() {
+	private_led_on(redLED_BIT);
+}
+void leds_debug_off() {
+	private_led_off(redLED_BIT);
+}
+void leds_debug_toggle() {
 	private_led_toggle(redLED_BIT);
 }
 
