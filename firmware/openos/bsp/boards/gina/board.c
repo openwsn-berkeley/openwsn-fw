@@ -12,7 +12,7 @@
 #include "uart.h"
 #include "spi.h"
 #include "i2c.h"
-#include "timers.h"
+#include "bsp_timers.h"
 #include "radio.h"
 #include "radiotimer.h"
 
