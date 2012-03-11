@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>01bsp_leds</name>
+	<name>01bsp_timers</name>
 	<comment></comment>
 	<projects>
 		<project>CMSISv2p00_LPC17xx</project>
@@ -36,7 +36,7 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${workspace_loc:/01bsp_leds/Debug}</value>
+					<value>${workspace_loc:/01bsp_timers/Debug}</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.cleanBuildTarget</key>
@@ -86,9 +86,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>application/01bsp_leds.c</name>
+			<name>application/01bsp_timers.c</name>
 			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/common/01bsp_leds/01bsp_leds.c</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/common/01bsp_timers/01bsp_timers.c</locationURI>
 		</link>
 		<link>
 			<name>bsp/boards</name>
