@@ -2,34 +2,34 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\projects\gina\00std_eui64\00std_eui64.ewp</path>
+    <path>$WS_DIR$\00std_eui64\00std_eui64.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\gina\00std_leds_xtal\00std_leds_xtal.ewp</path>
+    <path>$WS_DIR$\00std_leds_xtal\00std_leds_xtal.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\gina\00std_timers\00std_timers.ewp</path>
+    <path>$WS_DIR$\00std_timers\00std_timers.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\gina\00std_uart\00std_uart.ewp</path>
+    <path>$WS_DIR$\00std_uart\00std_uart.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\gina\01bsp_leds\01bsp_leds.ewp</path>
+    <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\gina\01bsp_uart\01bsp_uart.ewp</path>
+    <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\gina\01bsp_spi\01bsp_spi.ewp</path>
+    <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\gina\01bsp_timers\01bsp_timers.ewp</path>
+    <path>$WS_DIR$\01bsp_timers\01bsp_timers.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\gina\01bsp_radio\01bsp_radio.ewp</path>
+    <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\projects\gina\03oos_openwsn\03oos_openwsn.ewp</path>
+    <path>$WS_DIR$\03oos_openwsn\03oos_openwsn.ewp</path>
   </project>
   <batchBuild/>
 </workspace>
