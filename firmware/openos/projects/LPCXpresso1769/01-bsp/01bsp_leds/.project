@@ -88,23 +88,23 @@
 		<link>
 			<name>application/01bsp_leds.c</name>
 			<type>1</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspaceOpenWSN/openos/projects/common/01-bsp/01bsp_leds.c</location>
+			<locationURI>PARENT-3-PROJECT_LOC/common/01-bsp/01bsp_leds.c</locationURI>
 		</link>
 		<link>
 			<name>bsp/boards</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspaceOpenWSN/openos/bsp/boards</location>
+			<locationURI>PARENT-4-PROJECT_LOC/bsp/boards/LPCXpresso1769</locationURI>
 		</link>
 		<link>
 			<name>bsp/chips</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspaceOpenWSN/openos/bsp/chips</location>
+			<locationURI>PARENT-4-PROJECT_LOC/bsp/chips/at86rf231</locationURI>
 		</link>
 	</linkedResources>
 	<filteredResources>
 		<filter>
 			<id>1331335940364</id>
-			<name>bsp/boards</name>
+			<name>boards</name>
 			<type>30</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
@@ -113,7 +113,7 @@
 		</filter>
 		<filter>
 			<id>1331335940391</id>
-			<name>bsp/boards</name>
+			<name>boards</name>
 			<type>30</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
@@ -122,7 +122,7 @@
 		</filter>
 		<filter>
 			<id>1331335940418</id>
-			<name>bsp/boards</name>
+			<name>boards</name>
 			<type>30</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
@@ -131,7 +131,7 @@
 		</filter>
 		<filter>
 			<id>1331336011428</id>
-			<name>bsp/chips</name>
+			<name>chips</name>
 			<type>30</type>
 			<matcher>
 				<id>org.eclipse.ui.ide.multiFilter</id>
