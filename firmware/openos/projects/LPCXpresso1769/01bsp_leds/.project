@@ -88,17 +88,17 @@
 		<link>
 			<name>application/01bsp_leds.c</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/common/01-bsp/01bsp_leds.c</locationURI>
+			<locationURI>PARENT-2-PROJECT_LOC/common/01bsp_leds/01bsp_leds.c</locationURI>
 		</link>
 		<link>
 			<name>bsp/boards</name>
 			<type>2</type>
-			<locationURI>PARENT-4-PROJECT_LOC/bsp/boards/LPCXpresso1769</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/LPCXpresso1769</locationURI>
 		</link>
 		<link>
 			<name>bsp/chips</name>
 			<type>2</type>
-			<locationURI>PARENT-4-PROJECT_LOC/bsp/chips/at86rf231</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/chips/at86rf231</locationURI>
 		</link>
 	</linkedResources>
 	<filteredResources>
