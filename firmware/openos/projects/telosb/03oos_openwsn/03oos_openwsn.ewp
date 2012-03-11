@@ -673,7 +673,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>03app_openwsn.d43</state>
+          <state>03oos_openwsn.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -1904,7 +1904,10 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03-app\openwsn_proj.c</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.h</name>
     </file>
   </group>
   <group>

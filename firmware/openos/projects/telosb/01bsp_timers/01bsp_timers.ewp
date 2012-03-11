@@ -1874,7 +1874,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01-bsp\01bsp_timers.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_timers\01bsp_timers.c</name>
     </file>
   </group>
   <group>
