@@ -2,7 +2,7 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\projects\gina\00std_eui64\program_eui64.ewp</path>
+    <path>$WS_DIR$\projects\gina\00std_eui64\00std_eui64.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\projects\gina\00std_leds_xtal\00std_leds_xtal.ewp</path>
