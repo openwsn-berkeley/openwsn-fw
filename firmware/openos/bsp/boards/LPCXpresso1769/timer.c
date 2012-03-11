@@ -14,14 +14,11 @@ extern void TIMER1_IRQHandler(void);
 static void private_prepareTimer0(void);
 static void private_prepareTimer1(void);
 
-
-
-//hooks to isr's
+//hooks to ISRs
 low_timer_hook timer_compare_isr_hook_0;
 low_timer_hook timer_compare_isr_hook_1;
 low_timer_hook timer_capture_isr_hook_0;
 low_timer_hook timer_capture_isr_hook_1;
-
 
 void timer_set_isr_compare_hook(uint8_t timer_num, low_timer_hook cbt){
 	switch (timer_num){

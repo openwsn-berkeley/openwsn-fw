@@ -3,14 +3,15 @@
 
 \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, February 2012.
  */
+
 #include "stdint.h"
 #include "stdio.h"
 #include "string.h"
 #include "uart.h"
 #include "uart_config.h"
 #include "LPC17xx.h"
-#include "FreeRTOS.h"
-#include "task.h"
+//#include "FreeRTOS.h"
+//#include "task.h"
 
 //=========================== defines =========================================
 
@@ -46,7 +47,7 @@ static void private_rcv_data_now();
 
 void UART0_IRQHandler (void)
 {
-	portBASE_TYPE xHigherPriorityTaskWoken=pdFALSE;
+	//poipoiportBASE_TYPE xHigherPriorityTaskWoken=pdFALSE;
 	uint8_t IIRValue, LSRValue;
 	uint8_t Dummy = Dummy;
 
@@ -123,7 +124,7 @@ void UART0_IRQHandler (void)
 					uart_vars.txDone_cb();
 					// make sure CPU restarts after leaving interrupt
 					//TODO.. check that.
-					 portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+					 //poipoiportEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 				}
 			}
 		}
@@ -296,7 +297,7 @@ void uart_rxStop(){
 //=========================== private =========================================
 
 static void private_rcv_data_now(){
-	portBASE_TYPE xHigherPriorityTaskWoken=pdFALSE;
+	//poipoiportBASE_TYPE xHigherPriorityTaskWoken=pdFALSE;
 	// copy received by into buffer
 	*uart_vars.rxBufWrPtr     =  LPC_UART0->RBR;
 	// shift pointer
@@ -316,7 +317,7 @@ static void private_rcv_data_now(){
 			// call the callback
 			uart_vars.rx_cb(UART_EVENT_OVERFLOW);
 			// make sure CPU restarts after leaving interrupt
-			 portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+			 //poipoiportEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 		}
 
 	} else if (uart_vars.rxBufFill>=uart_vars.rxBufFillThres) {
@@ -326,7 +327,7 @@ static void private_rcv_data_now(){
 			// call the callback
 			uart_vars.rx_cb(UART_EVENT_THRES);
 			// make sure CPU restarts after leaving interrupt
-			portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+			//poipoiportEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
 		}
 	}
 

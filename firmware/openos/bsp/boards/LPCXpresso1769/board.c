@@ -21,37 +21,34 @@
 
 void board_init() {
 
-	//call system_init from system_LPC17xx.c
-	SystemInit();
+   //call system_init from system_LPC17xx.c
+   SystemInit();
 
+   LPC_PINCON->PINSEL4     &= ~0x3<<6;          // set pinsel to GPIO pag 110 port 2.3
+   LPC_PINCON->PINSEL4     &= ~0x3<<8;          // P2.4
+   LPC_PINCON->PINSEL4     &= ~0x3<<10;         // P2.5
 
-	LPC_PINCON->PINSEL4 &= ~0x3<<6; //set pinsel to GPIO pag 110 port 2.3
-	LPC_PINCON->PINSEL4 &= ~0x3<<8; //port 2.4
-	LPC_PINCON->PINSEL4 &= ~0x3<<10;//port 2.5
+   LPC_GPIO2->FIODIR        |=  1<<3;            // P2.3 as SLP_TR -- set as output
+   LPC_GPIO2->FIODIR        |=  1<<4;            // P2.4 as Radio RST --set as output
+   LPC_GPIO2->FIODIR        &= ~1<<5;            // P2.5 as RADIO ISR --set as input
 
-	LPC_GPIO2->FIODIR 	|= 1<<3;	//P2.3 as SLP_TR -- set as output
-	LPC_GPIO2->FIODIR 	|= 1<<4;	//P2.4 as Radio RST --set as output
-	LPC_GPIO2->FIODIR 	&= ~1<<5;	//P2.5 as RADIO ISR --set as input
-
-	LPC_GPIOINT->IO2IntClr|= 1<<5;  //P2.5 clear interrupt.
-	LPC_GPIOINT->IO2IntEnR |= 1<<5; //P2.5 enable as interrupt when low to high
+   LPC_GPIOINT->IO2IntClr  |=  1<<5;            // P2.5 clear interrupt.
+   LPC_GPIOINT->IO2IntEnR  |=  1<<5;            // P2.5 enable as interrupt when low to high
 
 
    // initialize bsp modules
-  //debugpins_init();
+   //debugpins_init();
    leds_init();
-   uart_init();
-   spi_init();
-   radio_init();
-   // initialize bsp modules
-   timers_init();
- //  radio_init();
+   //uart_init();
+   //spi_init();
+   //radio_init();
+   //timers_init();
+   //radio_init();
    //radiotimer_init();
 }
 
 void board_sleep() {
-   //__bis_SR_register(GIE+LPM3_bits);             // sleep, but leave ACLK on
-	CLKPWR_Sleep();
+   CLKPWR_Sleep();
 }
 
 //=========================== private =========================================
