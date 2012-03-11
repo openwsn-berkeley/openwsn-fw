@@ -6,7 +6,7 @@
 #include "neighbors.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
-#include "timers.h"
+#include "bsp_timers.h"
 #include "scheduler.h"
 
 //=========================== variables =======================================

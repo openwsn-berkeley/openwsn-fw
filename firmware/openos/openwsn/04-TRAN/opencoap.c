@@ -6,7 +6,7 @@
 #include "openrandom.h"
 #include "packetfunctions.h"
 #include "idmanager.h"
-#include "timers.h"
+#include "bsp_timers.h"
 #include "scheduler.h"
 
 //=========================== variables =======================================

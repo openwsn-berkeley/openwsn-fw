@@ -4,7 +4,7 @@
 #include "openqueue.h"
 #include "forwarding.h"
 #include "packetfunctions.h"
-#include "timers.h"
+#include "bsp_timers.h"
 #include "scheduler.h"
 //TCP applications
 #include "ohlone.h"

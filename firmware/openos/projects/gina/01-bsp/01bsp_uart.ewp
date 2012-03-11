@@ -1892,6 +1892,18 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\bsp_timers.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timers.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\i2c.c</name>
     </file>
     <file>
@@ -1917,12 +1929,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\timers.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\timers.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\uart.c</name>

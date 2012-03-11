@@ -6,7 +6,7 @@
 
 #include "msp430f1611.h"
 #include "string.h"
-#include "timers.h"
+#include "bsp_timers.h"
 #include "board.h"
 
 //=========================== defines =========================================
