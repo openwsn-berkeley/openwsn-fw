@@ -52,7 +52,7 @@ enum {
    BOARD_VERSION_MSP1        = 0x0301,
 };
 
-#include "program_eui64.h"
+#include "00std_eui64.h"
 
 #ifdef BOARD_CALIBRATION
 

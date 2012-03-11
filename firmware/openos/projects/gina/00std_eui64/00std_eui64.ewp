@@ -640,7 +640,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>program_eui64.d43</state>
+          <state>00std_eui64.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -1869,7 +1869,10 @@
     </settings>
   </configuration>
   <file>
-    <name>$PROJ_DIR$\program_eui64.c</name>
+    <name>$PROJ_DIR$\00std_eui64.c</name>
+  </file>
+  <file>
+    <name>$PROJ_DIR$\00std_eui64.h</name>
   </file>
 </project>
 
