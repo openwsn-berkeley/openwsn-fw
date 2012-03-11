@@ -93,7 +93,7 @@
 		<link>
 			<name>bsp/boards</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/LPCXpresso1769</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/xpressohack</locationURI>
 		</link>
 		<link>
 			<name>bsp/chips</name>
