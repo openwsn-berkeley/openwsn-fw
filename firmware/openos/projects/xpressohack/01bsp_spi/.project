@@ -86,6 +86,11 @@
 	</natures>
 	<linkedResources>
 		<link>
+			<name>xpressohack</name>
+			<type>2</type>
+			<location>C:/Documents and Settings/twatteyne/Desktop/openwsn/firmware/openos/bsp/boards/xpressohack</location>
+		</link>
+		<link>
 			<name>application/01bsp_spi.c</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/common/01bsp_spi/01bsp_spi.c</locationURI>
