@@ -68,7 +68,7 @@
 									<listOptionValue builtIn="false" value="-Map=&quot;${BuildArtifactFileBaseName}.map&quot;"/>
 									<listOptionValue builtIn="false" value="--gc-sections"/>
 								</option>
-								<option id="com.crt.advproject.link.gcc.hdrlib.304389913" name="Use C library" superClass="com.crt.advproject.link.gcc.hdrlib" value="com.crt.advproject.gcc.link.hdrlib.codered.semihost" valueType="enumerated"/>
+								<option id="com.crt.advproject.link.gcc.hdrlib.304389913" name="Use C library" superClass="com.crt.advproject.link.gcc.hdrlib" value="com.crt.advproject.gcc.link.hdrlib.codered.none" valueType="enumerated"/>
 								<option id="gnu.c.link.option.libs.249443908" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="CMSISv2p00_LPC17xx"/>
 								</option>

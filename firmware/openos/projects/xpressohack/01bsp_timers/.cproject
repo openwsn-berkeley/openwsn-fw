@@ -68,7 +68,7 @@
 									<listOptionValue builtIn="false" value="-Map=&quot;${BuildArtifactFileBaseName}.map&quot;"/>
 									<listOptionValue builtIn="false" value="--gc-sections"/>
 								</option>
-								<option id="com.crt.advproject.link.gcc.hdrlib.304389913" name="Use C library" superClass="com.crt.advproject.link.gcc.hdrlib" value="com.crt.advproject.gcc.link.hdrlib.codered.semihost" valueType="enumerated"/>
+								<option id="com.crt.advproject.link.gcc.hdrlib.304389913" name="Use C library" superClass="com.crt.advproject.link.gcc.hdrlib" value="com.crt.advproject.gcc.link.hdrlib.codered.none" valueType="enumerated"/>
 								<option id="gnu.c.link.option.libs.249443908" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="CMSISv2p00_LPC17xx"/>
 								</option>
@@ -89,25 +89,10 @@
 							<inputType id="com.crt.advproject.compiler.input.1026089376" superClass="com.crt.advproject.compiler.input"/>
 						</tool>
 					</fileInfo>
-					<folderInfo id="com.crt.advproject.config.exe.debug.1018350706.1345686154" name="/" resourcePath="bsp/boards">
-						<toolChain id="com.crt.advproject.toolchain.exe.debug.1323305065" name="Code Red MCU Tools" superClass="com.crt.advproject.toolchain.exe.debug" unusedChildren="">
-							<tool id="com.crt.advproject.cpp.exe.debug.278062646" name="MCU C++ Compiler" superClass="com.crt.advproject.cpp.exe.debug.127906557"/>
-							<tool id="com.crt.advproject.gcc.exe.debug.1391957609" name="MCU C Compiler" superClass="com.crt.advproject.gcc.exe.debug.1576923164">
-								<inputType id="com.crt.advproject.compiler.input.966204897" superClass="com.crt.advproject.compiler.input"/>
-							</tool>
-							<tool id="com.crt.advproject.gas.exe.debug.854372029" name="MCU Assembler" superClass="com.crt.advproject.gas.exe.debug.1101948060">
-								<inputType id="com.crt.advproject.assembler.input.900082611" name="Additional Assembly Source Files" superClass="com.crt.advproject.assembler.input"/>
-							</tool>
-							<tool id="com.crt.advproject.link.cpp.exe.debug.353874384" name="MCU C++ Linker" superClass="com.crt.advproject.link.cpp.exe.debug.1249856053"/>
-							<tool id="com.crt.advproject.link.exe.debug.880663395" name="MCU Linker" superClass="com.crt.advproject.link.exe.debug.378364049"/>
-						</toolChain>
-					</folderInfo>
 					<sourceEntries>
 						<entry excluding="Debug/bsp/chips/at86rf231|Debug/bsp/boards/LPCXpresso1769|application|bsp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="application"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="bsp"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Debug/bsp/boards/LPCXpresso1769"/>
-						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="Debug/bsp/chips/at86rf231"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
