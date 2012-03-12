@@ -79,19 +79,32 @@ void spi_init(){
    configure the SPI CLK pin. PINSEL1[1:0], PINSEL1[3:2] and PINSEL1[5:4] are used
    to configure the pins SSEL, MISO and MOSI, respectively.*/
 
-   LPC_PINCON->PINSEL0 |= 0x2<<14;  //SCK1 - 0b10 at pin 14,15
-   //LPC_PINCON->PINSEL0 |= 0x2<<12;   //SSEL1 - 0b10 at pin 12,13 --used by SSP as Chip select.
-   LPC_PINCON->PINSEL0 |= 0x2<<18;   //MOSI1 -(Master out, slave in) - 0b10 at pin 18,19
-   LPC_PINCON->PINSEL0 |= 0x2<<16;   //MISO1 (Master in, slave out)- 0b10 at pin 16,17
+   // CLK
+   LPC_PINCON->PINSEL0 &= ~(0x3<<14);
+   LPC_PINCON->PINSEL0 |=   0x2<<14;  //SCK1 - 0b10 at pin 14,15
 
-   PORT_CS->FIODIR    |= 1<<2;   //P2.2 as CSn
+   //LPC_PINCON->PINSEL0 |= 0x2<<12;  //SSEL1 - 0b10 at pin 12,13 --used by SSP as Chip select.
+
+   // MOSI
+   LPC_PINCON->PINSEL0 &= ~(0x3<<18);
+   LPC_PINCON->PINSEL0 |=   0x2<<18;  //MOSI1 -(Master out, slave in) - 0b10 at pin 18,19
+
+   // MISO
+   LPC_PINCON->PINSEL0 &= ~(0x3<<16);
+   LPC_PINCON->PINSEL0 |=   0x2<<16;  //MISO1 (Master in, slave out)- 0b10 at pin 16,17
+
+   // CS
+   PORT_CS->FIODIR     |= 1<<2;   //P2.2 as CSn
+   PORT_CS->FIOSET     |= 1<<2;   //CSn high
 
    /*      4. Interrupts: The SPI interrupt flag is enabled using the S0SPINT[0] bit (Section 17.7.7).
       The SPI interrupt flag must be enabled in the NVIC, see Table 50.
     */
+   // TODO
+
    LPC_SPI->SPCR|=SPI_MSB|SPI_MST;// MSB first, master mode
-   LPC_SPI->SPCR&=~SPI_CPOL; //clock polarity high
-   LPC_SPI->SPCR&=~SPI_CPHA; //clock phase to 0
+   LPC_SPI->SPCR&=~SPI_CPOL;      //clock polarity high
+   LPC_SPI->SPCR&=~SPI_CPHA;      //clock phase to 0
 
    /*  0b111000XX
     *    ||||||||__ Reserved
@@ -164,12 +177,17 @@ void    spi_txrx(uint8_t*     bufTx,
 
    //    send all bytes
    while (spi_vars.txBytesLeft>0) {
-      // write next byte to TX buffer
-      LPC_SPI->SPDR              = *spi_vars.pNextTxByte;
+
+	  // write next byte to TX buffer
+      LPC_SPI->SPDR                 = *spi_vars.pNextTxByte;
+
       // busy wait on the interrupt flag
-      while ((LPC_SPI->SPSR & SPI_SPIF )==0);
+      while ( (LPC_SPI->SPSR & SPI_SPIF)!=0);
+
+      // busy wait on the interrupt flag
+      while ( (LPC_SPI->SPSR & SPI_SPIF)==0);
       // clear the interrupt flag
-      LPC_SPI-> SPINT                 |= 1;//cleared by writting 1 on this register.
+      LPC_SPI-> SPINT              |= 1;//cleared by writing 1 on this register.
       // save the byte just received in the RX buffer
       switch (spi_vars.returnType) {
       case SPI_FIRSTBYTE:
