@@ -21,9 +21,6 @@
 
 void board_init() {
 
-   //call system_init from system_LPC17xx.c
-   SystemInit();
-
    LPC_PINCON->PINSEL4     &= ~0x3<<6;          // set pinsel to GPIO pag 110 port 2.3
    LPC_PINCON->PINSEL4     &= ~0x3<<8;          // P2.4
    LPC_PINCON->PINSEL4     &= ~0x3<<10;         // P2.5
@@ -42,7 +39,7 @@ void board_init() {
    //uart_init();
    //spi_init();
    //radio_init();
-   //timers_init();
+   timers_init();
    //radio_init();
    //radiotimer_init();
 }

@@ -24,10 +24,12 @@ typedef struct {
 timers_vars_t timers_vars;
 
 //=========================== prototypes ======================================
+
 void timer_compare_isr_0(uint8_t reg);
 void timer_compare_isr_1(uint8_t reg);
 void timer_capture_isr_0(uint8_t reg);
 void timer_capture_isr_1(uint8_t reg);
+
 //=========================== public ==========================================
 
 void timers_init() {
@@ -57,34 +59,40 @@ void timers_start(uint8_t id, uint16_t duration, timer_type_t type, timer_cbt ca
 
    switch(id) {
       case 0:
-         current=timer_get_current_value(TIMER_NUM0);
-         timer_set_compare(TIMER_NUM0,TIMER_COMPARE_REG0,
-                         current+timers_vars.period[id]);
+         current = timer_get_current_value(TIMER_NUM0);
+         timer_set_compare(TIMER_NUM0,
+                           TIMER_COMPARE_REG0,
+                           current+timers_vars.period[id]*TIME_INTERVALmS);
          break;
       case 1:
-         current=timer_get_current_value(TIMER_NUM0);
-         timer_set_compare(TIMER_NUM0,TIMER_COMPARE_REG1,
-                         current+timers_vars.period[id]);
+         current = timer_get_current_value(TIMER_NUM0);
+         timer_set_compare(TIMER_NUM0,
+                           TIMER_COMPARE_REG1,
+                           current+timers_vars.period[id]*TIME_INTERVALmS);
          break;
       case 2:
-         current=timer_get_current_value(TIMER_NUM0);
-         timer_set_compare(TIMER_NUM0,TIMER_COMPARE_REG2,
-                         current+timers_vars.period[id]);
+         current = timer_get_current_value(TIMER_NUM0);
+         timer_set_compare(TIMER_NUM0,
+                           TIMER_COMPARE_REG2,
+                           current+timers_vars.period[id]*TIME_INTERVALmS);
          break;
       case 3:
-         current=timer_get_current_value(TIMER_NUM1);
-         timer_set_compare(TIMER_NUM1,TIMER_COMPARE_REG0,
-                         current+timers_vars.period[id]);
+         current = timer_get_current_value(TIMER_NUM1);
+         timer_set_compare(TIMER_NUM1,
+                           TIMER_COMPARE_REG0,
+                           current+timers_vars.period[id]*TIME_INTERVALmS);
          break;
       case 4:
-         current=timer_get_current_value(TIMER_NUM1);
-         timer_set_compare(TIMER_NUM1,TIMER_COMPARE_REG1,
-                         current+timers_vars.period[id]);
+         current = timer_get_current_value(TIMER_NUM1);
+         timer_set_compare(TIMER_NUM1,
+                           TIMER_COMPARE_REG1,
+                           current+timers_vars.period[id]*TIME_INTERVALmS);
          break;
       case 5:
-         current=timer_get_current_value(TIMER_NUM1);
-         timer_set_compare(TIMER_NUM1,TIMER_COMPARE_REG2,
-                         current+timers_vars.period[id]);
+         current = timer_get_current_value(TIMER_NUM1);
+         timer_set_compare(TIMER_NUM1,
+                           TIMER_COMPARE_REG2,
+                           current+timers_vars.period[id]*TIME_INTERVALmS);
          break;
    }
 }
@@ -123,7 +131,7 @@ void timers_stop(uint8_t id) {
 //=========================== interrupt handlers ==============================
 
 /**
-\brief this is the handler of TIMER_NUM0
+\brief Interrupt handler for TIMER_NUM0, compare
 */
 void timer_compare_isr_0(uint8_t reg) {
 
@@ -132,7 +140,8 @@ void timer_compare_isr_0(uint8_t reg) {
 
    if (timers_vars.type[id]==TIMER_PERIODIC) {
       current=timer_get_current_value(TIMER_NUM0);
-      timer_set_compare(TIMER_NUM0,reg,current+timers_vars.period[id]); // continuous timer: schedule next instant
+      // continuous timer: schedule next instant
+      timer_set_compare(TIMER_NUM0,reg,current+timers_vars.period[id]*TIME_INTERVALmS);
    } else {
       timer_reset_compare(TIMER_NUM0,reg);
    }
@@ -143,7 +152,7 @@ void timer_compare_isr_0(uint8_t reg) {
 }
 
 /**
-\brief This is the handler of TIMER_NUM1
+\brief Interrupt handler for TIMER_NUM1, compare
 */
 void timer_compare_isr_1(uint8_t reg) {
 
@@ -152,7 +161,8 @@ void timer_compare_isr_1(uint8_t reg) {
 
    if (timers_vars.type[id]==TIMER_PERIODIC) {
       current=timer_get_current_value(TIMER_NUM1);
-      timer_set_compare(TIMER_NUM1,reg,current+timers_vars.period[id]); // continuous timer: schedule next instant
+      // continuous timer: schedule next instant
+      timer_set_compare(TIMER_NUM1,reg,current+timers_vars.period[id]*TIME_INTERVALmS);
    } else {
       timer_reset_compare(TIMER_NUM1,reg);
    }
@@ -164,14 +174,14 @@ void timer_compare_isr_1(uint8_t reg) {
 
 
 /**
-\brief This is the handler for the capture register on TIMER_NUM0
+\brief Interrupt handler for TIMER_NUM0, capture
 */
 void timer_capture_isr_0(uint8_t reg) {
    // TODO
 }
 
 /**
-\brief This is the handler for the capture register on TIMER_NUM1
+\brief Interrupt handler for TIMER_NUM1, capture
 */
 void timer_capture_isr_1(uint8_t reg) {
    // TODO

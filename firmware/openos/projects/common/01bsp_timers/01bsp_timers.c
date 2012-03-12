@@ -46,19 +46,19 @@ int main(void)
    
    // start timer_0
    timers_start(0,
-                10000,
+                3000,
                 TIMER_PERIODIC,
                 cb_timer_0);
    
    // start timer_1
    timers_start(1,
-                20000,
+                5000,
                 TIMER_PERIODIC,
                 cb_timer_1);
    
    // start timer_2
    timers_start(2,
-                30000,
+                7000,
                 TIMER_PERIODIC,
                 cb_timer_2);
    
