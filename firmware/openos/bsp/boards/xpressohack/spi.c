@@ -26,7 +26,7 @@ The SPI is configured using the following registers: (page 401 of the manual)
 #define PORT_CS     LPC_GPIO2
 #define PIN_MASK_CS (1<<2)
 #define SPI_IE      (1<<7)
-#define SPI_MSB     (1<<6)
+#define SPI_LSB     (1<<6)
 #define SPI_MST     (1<<5)
 #define SPI_SPIF    (1<<7)//transfer complete flag
 #define SPI_CPOL    (1<<4)
@@ -69,8 +69,8 @@ void spi_init(){
    /*Clock: In the PCLKSEL0 register (Table 40), set bit PCLK_SPI. In master mode, the
    clock must be an even number greater than or equal to 8 (see Section 17.7.4).*/
 
-   CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SPI,CLKPWR_PCLKSEL_CCLK_DIV_4);//default clock
-
+  // CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_SPI,CLKPWR_PCLKSEL_CCLK_DIV_4);//default clock
+   LPC_SC->PCLKSEL0        |= (1<<16)|(1<<17);//cclk/8
    /* SPCCR clock prescale register, master mode min value 8*/
    LPC_SPI->SPCCR = 0x8;
 
@@ -79,30 +79,19 @@ void spi_init(){
    configure the SPI CLK pin. PINSEL1[1:0], PINSEL1[3:2] and PINSEL1[5:4] are used
    to configure the pins SSEL, MISO and MOSI, respectively.*/
 
-   // CLK
-   LPC_PINCON->PINSEL0 &= ~(0x3<<14);
-   LPC_PINCON->PINSEL0 |=   0x2<<14;  //SCK1 - 0b10 at pin 14,15
 
-   //LPC_PINCON->PINSEL0 |= 0x2<<12;  //SSEL1 - 0b10 at pin 12,13 --used by SSP as Chip select.
+    LPC_PINCON->PINSEL0     |= (1<<30)|(1<<31);  // SCK0  = P0.15
+   //	LPC_PINCON->PINSEL1     |= (1<<0 )|(1<<1 );  // SSEL0 = P0.16
+   	LPC_PINCON->PINSEL1     |= (1<<2 )|(1<<3 );  // MISO0 = P0.17
+   	LPC_PINCON->PINSEL1     |= (1<<4 )|(1<<5 );  // MOSI0 = P0.18
 
-   // MOSI
-   LPC_PINCON->PINSEL0 &= ~(0x3<<18);
-   LPC_PINCON->PINSEL0 |=   0x2<<18;  //MOSI1 -(Master out, slave in) - 0b10 at pin 18,19
 
-   // MISO
-   LPC_PINCON->PINSEL0 &= ~(0x3<<16);
-   LPC_PINCON->PINSEL0 |=   0x2<<16;  //MISO1 (Master in, slave out)- 0b10 at pin 16,17
+   	LPC_GPIO2->FIODIR       |= (1<<2); //CS set 2.2 as output
+    LPC_GPIO2->FIOSET   |= (1<<2); //set by default.
 
-   // CS
-   PORT_CS->FIODIR     |= 1<<2;   //P2.2 as CSn
-   PORT_CS->FIOSET     |= 1<<2;   //CSn high
 
-   /*      4. Interrupts: The SPI interrupt flag is enabled using the S0SPINT[0] bit (Section 17.7.7).
-      The SPI interrupt flag must be enabled in the NVIC, see Table 50.
-    */
-   // TODO
-
-   LPC_SPI->SPCR|=SPI_MSB|SPI_MST;// MSB first, master mode
+   LPC_SPI->SPCR|=SPI_MST;// master mode
+   LPC_SPI->SPCR&=~SPI_LSB; // MSB first,
    LPC_SPI->SPCR&=~SPI_CPOL;      //clock polarity high
    LPC_SPI->SPCR&=~SPI_CPHA;      //clock phase to 0
 
@@ -139,6 +128,7 @@ void    spi_txrx(uint8_t*     bufTx,
       spi_first_t  isFirst,
       spi_last_t   isLast){
 
+	uint32_t      spifreg;
 #ifdef SPI_IN_INTERRUPT_MODE
    // disable interrupts
    __disable_irq();
@@ -159,7 +149,7 @@ void    spi_txrx(uint8_t*     bufTx,
 
    // lower CS signal to have slave listening
    if (spi_vars.isFirst==SPI_FIRST) {
-      PORT_CS->FIOCLR                 |=1<<2;
+      LPC_GPIO2->FIOCLR   |= (1<<2);
    }
 
 #ifdef SPI_IN_INTERRUPT_MODE
@@ -182,12 +172,19 @@ void    spi_txrx(uint8_t*     bufTx,
       LPC_SPI->SPDR                 = *spi_vars.pNextTxByte;
 
       // busy wait on the interrupt flag
-      while ( (LPC_SPI->SPSR & SPI_SPIF)!=0);
+ //     while ( (LPC_SPI->SPSR & SPI_SPIF)!=0);
 
       // busy wait on the interrupt flag
       while ( (LPC_SPI->SPSR & SPI_SPIF)==0);
       // clear the interrupt flag
-      LPC_SPI-> SPINT              |= 1;//cleared by writing 1 on this register.
+      spifreg=  LPC_SPI->SPSR; //SPI transfer complete flag. When 1, this bit indicates when a SPI data  transfer is complete.
+      	  	  	  	  	  	   //When a master, this bit is set at the end of the last
+                               //cycle of the transfer. When a slave, this bit is set on the last data
+      	  	  	  	  	  	   //sampling edge of the SCK. This bit is cleared by first reading this
+      	  	  	  	  	  	   //register, then accessing the SPI Data Register.
+
+      LPC_SPI-> SPINT              |= 1;//interrupt cleared by writing 1 on this register.
+
       // save the byte just received in the RX buffer
       switch (spi_vars.returnType) {
       case SPI_FIRSTBYTE:
@@ -211,7 +208,7 @@ void    spi_txrx(uint8_t*     bufTx,
 
    // put CS signal high to signal end of transmission to slave
    if (spi_vars.isLast==SPI_LAST) {
-      PORT_CS->FIOSET                 |=1<<2;
+	   LPC_GPIO2->FIOSET   |= (1<<2);
    }
 
    // SPI is not busy anymore
