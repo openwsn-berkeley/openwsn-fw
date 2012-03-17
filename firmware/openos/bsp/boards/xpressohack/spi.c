@@ -93,7 +93,7 @@ void spi_init(){
 	// LPC_SC->PCLKSEL0        |= (1<<16)|(1<<17);//cclk/8
 
 	/* SPCCR clock prescale register, master mode min value 8*/
-	LPC_SPI->SPCCR = 0x64;
+	LPC_SPI->SPCCR = 0x8;
 
 	/*Pins: The SPI pins are configured using both PINSEL0 (Table 79) and PINSEL1
    (Table 80), as well as the PINMODE (Section 8.4) register. PINSEL0[31:30] is used to
