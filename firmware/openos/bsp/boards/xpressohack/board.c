@@ -21,25 +21,27 @@
 
 void board_init() {
 
-   LPC_PINCON->PINSEL4     &= ~0x3<<6;          // set pinsel to GPIO pag 110 port 2.3
+   LPC_PINCON->PINSEL4     &= ~0x3<<16;          // set pinsel to GPIO pag 110 port 2.8
    LPC_PINCON->PINSEL4     &= ~0x3<<8;          // P2.4
    LPC_PINCON->PINSEL4     &= ~0x3<<10;         // P2.5
 
-   LPC_GPIO2->FIODIR        |=  1<<3;            // P2.3 as SLP_TR -- set as output
+   LPC_GPIO2->FIODIR        |=  1<<8;            // P2.8 as SLP_TR -- set as output
    LPC_GPIO2->FIODIR        |=  1<<4;            // P2.4 as Radio RST --set as output
    LPC_GPIO2->FIODIR        &= ~1<<5;            // P2.5 as RADIO ISR --set as input
 
+
+   LPC_GPIO2->FIOCLR        |=  1<<8;           //clear slrptr
    LPC_GPIOINT->IO2IntClr  |=  1<<5;            // P2.5 clear interrupt.
    LPC_GPIOINT->IO2IntEnR  |=  1<<5;            // P2.5 enable as interrupt when low to high
 
 
    // initialize bsp modules
    leds_init();
-   //debugpins_init();
+   debugpins_init();
    timers_init();
    spi_init();
    //uart_init();
-   //radio_init();
+   radio_init();
    //radiotimer_init();
 }
 

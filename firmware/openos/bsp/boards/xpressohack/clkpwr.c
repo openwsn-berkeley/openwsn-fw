@@ -290,6 +290,31 @@ void CLKPWR_Sleep(void)
  **********************************************************************/
 void CLKPWR_DeepSleep(void)
 {
+
+	/*---------- Disable and disconnect the main PLL0 before enter into Deep-Sleep
+		 * or Power-Down mode <according to errata.lpc1768-16.March.2010> ------------
+		 * If the main PLL (PLL0) is enabled and connected before entering Deep Sleep or
+		 * Power-down modes, it will remain enabled and connected after the chip enters Deep
+		 * Sleep mode or Power-down mode causing the power consumption to be higher.
+		 */
+
+		/*
+		 * Work-around: In the software, user must disable and disconnect the main PLL (PLL0) before entering
+		 * Deep Sleep and Power-down modes to reduce the power consumption. This must be
+		 * done only if the main PLL (PLL0) was enabled and connected before entering Deep Sleep
+		 * mode or Power-down mode
+		 */
+
+//		LPC_SC->PLL0CON &= ~(1<<1); /* Disconnect the main PLL (PLL0) */
+//		LPC_SC->PLL0FEED = 0xAA; /* Feed */
+//		LPC_SC->PLL0FEED = 0x55; /* Feed */
+//		while ((LPC_SC->PLL0STAT & (1<<25)) != 0x00); /* Wait for main PLL (PLL0) to disconnect */
+//		LPC_SC->PLL0CON &= ~(1<<0); /* Turn off the main PLL (PLL0) */
+//		LPC_SC->PLL0FEED = 0xAA; /* Feed */
+//		LPC_SC->PLL0FEED = 0x55; /* Feed */
+//		while ((LPC_SC->PLL0STAT & (1<<24)) != 0x00); /* Wait for main PLL (PLL0) to shut down */
+		/*------------Then enter into PowerDown mode ----------------------------------*/
+
     /* Deep-Sleep Mode, set SLEEPDEEP bit */
 	SCB->SCR = 0x4;
 	LPC_SC->PCON = 0x8;
