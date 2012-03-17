@@ -16,7 +16,7 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   48+LENGTH_CRC  // maximum length is 127 bytes
+#define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL         11             // 2.405GHz
 #define TIMER_ID        0
 #define TIMER_DURATION  32768          // ~1s @ 32kHz
