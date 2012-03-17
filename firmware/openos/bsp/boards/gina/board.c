@@ -103,7 +103,7 @@ __interrupt void PORT1_ISR (void) {
    debugpins_isr_set();
    if (P1IFG & 0x40) {
       P1IFG &= ~0x40;
-      if (radio_isr()==1) {                      // radio:  SFD pin [P4.6]
+      if (radio_isr()==1) {                      // radio:  SFD pin [P1.6]
          __bic_SR_register_on_exit(CPUOFF);
       }
    } else {
