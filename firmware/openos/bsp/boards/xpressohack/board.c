@@ -12,6 +12,7 @@
 #include "radio.h"
 #include "bsp_timers.h"
 #include "clkpwr.h"
+#include "debugpins.h"
 
 //=========================== variables =======================================
 
@@ -33,7 +34,10 @@ void board_init() {
    LPC_PINCON->PINSEL4      &= ~0x3<<10;    // GPIO mode
    LPC_GPIO2->FIODIR        &= ~1<<5;       // set as input
    LPC_GPIOINT->IO2IntClr   |=  1<<5;       // clear possible pending interrupt
-   LPC_GPIOINT->IO2IntEnR   |=  1<<5;       // enable interrupt, low to high
+   LPC_GPIOINT->IO2IntEnR   |=  1<<5;       // enable interrupt, rising edge
+
+   // enable interrupts
+   NVIC_EnableIRQ(EINT3_IRQn);              // GPIOs
 
    // initialize bsp modules
    leds_init();
@@ -50,3 +54,14 @@ void board_sleep() {
 }
 
 //=========================== private =========================================
+
+//=========================== interrupt handlers ==============================
+
+// GPIOs
+// note: all GPIO interrupts, both port 0 and 2, trigger this same vector
+void EINT3_IRQHandler(void) {
+   if ((LPC_GPIOINT->IO2IntStatR) & (1<<5)) {
+      LPC_GPIOINT->IO2IntClr = (1<<5);
+      radio_isr();
+   }
+}

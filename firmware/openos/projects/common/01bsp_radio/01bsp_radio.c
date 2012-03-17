@@ -105,6 +105,9 @@ int main(void)
    radio_rxEnable();
    app_vars.state = APP_STATE_RX;
    
+   // start by a transmit
+   app_vars.flags |= APP_FLAG_TIMER;
+
    while (1) {
       // sleep while waiting for at least one of the flags to be set
       while (app_vars.flags==0x00) {
@@ -112,7 +115,8 @@ int main(void)
       }
       // handle and clear every flag
       while (app_vars.flags) {
-         if (app_vars.flags & APP_FLAG_START_FRAME) {
+
+    	  if (app_vars.flags & APP_FLAG_START_FRAME) {
             // start of frame
             
             switch (app_vars.state) {

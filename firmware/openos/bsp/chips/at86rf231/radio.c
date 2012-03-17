@@ -399,7 +399,7 @@ uint8_t radio_isr() {
    uint8_t  irq_status;
    // capture the time
    capturedTime = radiotimer_getCapturedTime();
-   // reading IRQ_STATUS causes IRQ_RF (P1.6) to go low
+   // reading IRQ_STATUS causes radio's IRQ pin to go low
    irq_status = radio_spiReadReg(RG_IRQ_STATUS);
    // start of frame event
    if (irq_status & AT_IRQ_RX_START) {
