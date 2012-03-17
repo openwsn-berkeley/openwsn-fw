@@ -11,10 +11,9 @@
 
 //=========================== define ==========================================
 
-// TIME_INTERVALmS is used to convert a passed parameter (in ms) into a 
-// compare value compatible with the timer's clock source. 
-// depends on the prescaler and clock configuration TICS_PER_SECOND
-#define TIME_INTERVALmS      1000
+// TIMER_to_32kHz is used to temporarily convert the 1MHz timer into what looks
+// like a 32kHz timer.
+#define TIMER_to_32kHz       30
 // ticks per second in the timer.
 #define TICS_PER_SECOND      1000000
 

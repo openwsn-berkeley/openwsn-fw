@@ -499,7 +499,10 @@ static void private_prepareTimer1()
          break;
    }
    
+   // Timer Control Register: reset counter
    LPC_TIM1->TCR   = 0x02;
+
+   // Prescale Register
    LPC_TIM1->PR    = pclk/TICS_PER_SECOND;
    //LPC_TIM1->MR0 = delayInMs * TIME_INTERVALmS;// N milliseconds x Number of tics a millisecond is.
    
