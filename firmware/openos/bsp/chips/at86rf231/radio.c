@@ -54,7 +54,7 @@ void radio_init() {
 
    radio_spiWriteReg(RG_IRQ_MASK,
                      (AT_IRQ_RX_START| AT_IRQ_TRX_END));  // tell radio to fire interrupt on TRX_END and RX_START
-   radio_spiReadReg(RG_IRQ_STATUS);                       // deassert the interrupt pin  in case is high
+   radio_spiReadReg(RG_IRQ_STATUS);                       // deassert the interrupt pin in case is high
    radio_spiWriteReg(RG_ANT_DIV, RADIO_CHIP_ANTENNA);     // use chip antenna
 
 #define RG_TRX_CTRL_1 0x04
