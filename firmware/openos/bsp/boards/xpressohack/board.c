@@ -21,19 +21,19 @@
 
 void board_init() {
 
-   LPC_PINCON->PINSEL4     &= ~0x3<<16;          // set pinsel to GPIO pag 110 port 2.8
-   LPC_PINCON->PINSEL4     &= ~0x3<<8;          // P2.4
-   LPC_PINCON->PINSEL4     &= ~0x3<<10;         // P2.5
-
-   LPC_GPIO2->FIODIR        |=  1<<8;            // P2.8 as SLP_TR -- set as output
-   LPC_GPIO2->FIODIR        |=  1<<4;            // P2.4 as Radio RST --set as output
-   LPC_GPIO2->FIODIR        &= ~1<<5;            // P2.5 as RADIO ISR --set as input
-
-
-   LPC_GPIO2->FIOCLR        |=  1<<8;           //clear slrptr
-   LPC_GPIOINT->IO2IntClr  |=  1<<5;            // P2.5 clear interrupt.
-   LPC_GPIOINT->IO2IntEnR  |=  1<<5;            // P2.5 enable as interrupt when low to high
-
+   //===== radio pins
+   // [P2.8] SLP_TR
+   LPC_PINCON->PINSEL4      &= ~0x3<<16;    // GPIO mode
+   LPC_GPIO2->FIODIR        |=  1<<8;       // set as output
+   LPC_GPIO2->FIOCLR        |=  1<<8;       // pull low
+   // [P2.4] RSTn
+   LPC_PINCON->PINSEL4      &= ~0x3<<8;     // GPIO mode
+   LPC_GPIO2->FIODIR        |=  1<<4;       // set as output
+   // [P2.5] ISR
+   LPC_PINCON->PINSEL4      &= ~0x3<<10;    // GPIO mode
+   LPC_GPIO2->FIODIR        &= ~1<<5;       // set as input
+   LPC_GPIOINT->IO2IntClr   |=  1<<5;       // clear possible pending interrupt
+   LPC_GPIOINT->IO2IntEnR   |=  1<<5;       // enable interrupt, low to high
 
    // initialize bsp modules
    leds_init();

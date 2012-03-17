@@ -100,14 +100,12 @@ void spi_init(){
    configure the SPI CLK pin. PINSEL1[1:0], PINSEL1[3:2] and PINSEL1[5:4] are used
    to configure the pins SSEL, MISO and MOSI, respectively.*/
 
-
-	LPC_PINCON->PINSEL0     |= (3<<30);  // SCK0  = P0.15
-	//	LPC_PINCON->PINSEL1     &= ~(3<<0) ;  // SSEL0 = P0.16 --- use it as gpio
-	LPC_PINCON->PINSEL1     |= (1<<2 )|(1<<3 );  // MISO0 = P0.17
-	LPC_PINCON->PINSEL1     |= (1<<4 )|(1<<5 );  // MOSI0 = P0.18
-
-	LPC_GPIO2->FIODIR       |= PIN_MASK_CS; //CS set 2.2 as output
-	LPC_GPIO2->FIOSET   |= PIN_MASK_CS; //set by default.
+    // configure pins
+	LPC_PINCON->PINSEL0     |= (3<<30);          // [P0.15] SCK0
+	LPC_PINCON->PINSEL1     |= (1<<2 )|(1<<3 );  // [P0.17] MISO0
+	LPC_PINCON->PINSEL1     |= (1<<4 )|(1<<5 );  // [P0.18] MOSI0
+	LPC_GPIO2->FIODIR       |= PIN_MASK_CS;      // [P2.2]  CS  - set as output
+	LPC_GPIO2->FIOSET       |= PIN_MASK_CS;      //             - set high
 
 	//the radio wants MSB, Master mode,CPOL=0 and CPHA=0
 	LPC_SPI->SPCR|=SPI_MST;// master mode
