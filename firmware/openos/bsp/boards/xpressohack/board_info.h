@@ -1,11 +1,11 @@
 /**
-\brief LPC1769-specific board information bsp module.
+ \brief LPC1769-specific board information bsp module.
 
-This module simply defines some strings describing the board, which CoAP uses
-to return the board's description.
+ This module simply defines some strings describing the board, which CoAP uses
+ to return the board's description.
 
-\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, February 2012.
-*/
+ \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, February 2012.
+ */
 
 #ifndef _BOARD_INFO_H
 #define _BOARD_INFO_H
@@ -17,22 +17,22 @@ to return the board's description.
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[] = "h=ucb";
-static const uint8_t infoBoardname[] = "LPCXpresso1769";
+static const uint8_t infoBoardname[] = "xpressohack";
 static const uint8_t infouCName[]    = "NXP LPC1769";
-static const uint8_t infoRadioName[] = "none";
+static const uint8_t infoRadioName[] = "AT86RF231";
 
 //=========================== defines =========================================
 
-//#define SPI_IN_INTERRUPT_MODE 0
-//#define SPI_IN_RTOS_MODE      0
+//#define SPI_IN_INTERRUPT_MODE
+//#define SPI_IN_RTOS_MODE
 
-// radio SLP_TR_CNTL
-#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()   LPC_GPIO2->FIOSET |=  1<<3; //P2.3
-#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()    LPC_GPIO2->FIOCLR |=  1<<3;
+// [P2.8] SLP_TR
+#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()   LPC_GPIO2->FIOSET |=  1<<8;
+#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()    LPC_GPIO2->FIOCLR |=  1<<8;
 
-// radio reset
-#define PORT_PIN_RADIO_RESET_HIGH()         LPC_GPIO2->FIOSET |=  1<<4; // P2.4
-#define PORT_PIN_RADIO_RESET_LOW()          LPC_GPIO2->FIOSET |=  1<<4;
+// [P2.4] radio RSTn
+#define PORT_PIN_RADIO_RESET_HIGH()         LPC_GPIO2->FIOSET |=  1<<4;
+#define PORT_PIN_RADIO_RESET_LOW()          LPC_GPIO2->FIOCLR |=  1<<4;
 
 //isr radio is GPIO 2.5
 
