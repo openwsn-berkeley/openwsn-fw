@@ -46,22 +46,22 @@ int main(void)
    
    // start timer_0
    timers_start(0,
-                3000,
+                10000,
                 TIMER_PERIODIC,
                 cb_timer_0);
    
-   // start timer_1
-   timers_start(1,
-                5000,
-                TIMER_PERIODIC,
-                cb_timer_1);
-   
-   // start timer_2
-   timers_start(2,
-                7000,
-                TIMER_PERIODIC,
-                cb_timer_2);
-   
+//   // start timer_1
+//   timers_start(1,
+//                5000,
+//                TIMER_PERIODIC,
+//                cb_timer_1);
+//
+//   // start timer_2
+//   timers_start(2,
+//                7000,
+//                TIMER_PERIODIC,
+//                cb_timer_2);
+//
    while (1) {
       board_sleep();
    }

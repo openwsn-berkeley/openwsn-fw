@@ -35,27 +35,31 @@ void    radio_spiReadRxFifo(uint8_t* pBufRead,
                             uint8_t* pLenRead,
                             uint8_t  maxBufLen,
                             uint8_t* pLqi);
-
+uint8_t radio_spiReadRadioInfo();//test function
 //=========================== public ==========================================
 
 //===== admin
 
 void radio_init() {
+	uint8_t radioId=0;
+	uint8_t count=0;
+
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
    
    // change state
    radio_vars.state          = RADIOSTATE_STOPPED;
-   
+
    // configure the radio
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);    // turn radio off
+
    radio_spiWriteReg(RG_IRQ_MASK,
                      (AT_IRQ_RX_START| AT_IRQ_TRX_END));  // tell radio to fire interrupt on TRX_END and RX_START
-   radio_spiReadReg(RG_IRQ_STATUS);                       // deassert the interrupt pin (P1.6) in case is high
+   radio_spiReadReg(RG_IRQ_STATUS);                       // deassert the interrupt pin  in case is high
    radio_spiWriteReg(RG_ANT_DIV, RADIO_CHIP_ANTENNA);     // use chip antenna
-#define RG_TRX_CTRL_1 0x04
-   radio_spiWriteReg(RG_TRX_CTRL_1, 0x20);                // have the radio calculate CRC   
 
+#define RG_TRX_CTRL_1 0x04
+   radio_spiWriteReg(RG_TRX_CTRL_1, 0x20);                // have the radio calculate CRC
    //busy wait until radio status is TRX_OFF
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
    
@@ -237,6 +241,35 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 
 //=========================== private =========================================
 
+
+uint8_t radio_spiReadRadioInfo(){
+		uint8_t              spi_tx_buffer[3];
+		uint8_t              spi_rx_buffer[3];
+		uint32_t              max=0;
+
+		// prepare buffer to send over SPI
+		spi_tx_buffer[0]     =  (0x80 | 0x1E);        // [b7]    Read/Write:    1    (read)
+		// [b6]    RAM/Register : 0    (register)
+		// [b5-0]  address:       0x1E (Manufacturer ID, Lower 16 Bit)
+		spi_tx_buffer[1]     =  0x00;                 // send a SNOP strobe just to get the reg value
+		spi_tx_buffer[2]     =  0x00;                 // send a SNOP strobe just to get the reg value
+
+		//  printf("command %u,%u,%u \n",spi_tx_buffer[0],spi_tx_buffer[1],spi_tx_buffer[2] );
+		// retrieve radio manufacturer ID over SPI
+		spi_txrx(spi_tx_buffer,
+				sizeof(spi_tx_buffer),
+				SPI_BUFFER,
+				spi_rx_buffer,
+				sizeof(spi_rx_buffer),
+				SPI_FIRST,
+				SPI_LAST);
+
+		return spi_rx_buffer[1];
+
+}
+
+
+
 void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
    uint8_t spi_tx_buffer[2];
    uint8_t spi_rx_buffer[2];
@@ -268,8 +301,11 @@ uint8_t radio_spiReadReg(uint8_t reg_addr) {
             SPI_FIRST,
             SPI_LAST);
    
-   return spi_rx_buffer[1];
+
+  return spi_rx_buffer[1];
 }
+
+/** for testing purposes, remove if not needed anymore**/
 
 void radio_spiWriteTxFifo(uint8_t* bufToWrite, uint8_t  lenToWrite) {
    uint8_t spi_tx_buffer[2];
