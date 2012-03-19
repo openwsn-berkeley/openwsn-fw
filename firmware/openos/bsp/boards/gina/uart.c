@@ -89,7 +89,7 @@ void uart_rxSetup(uint8_t*    rxBuf,
    uart_vars.rxBufLen        = rxBufLen;
    uart_vars.rxBufFillThres  = rxBufFillThres;
    reset_rxBuf();
-   uart_vars.rx_cb           = cb;
+   uart_vars.rx_cb           = cb;               // register callback
    
 }
 
@@ -128,7 +128,6 @@ void reset_rxBuf() {
    uart_vars.rxBufWrPtr      = uart_vars.rxBuf;
    uart_vars.rxBufRdPtr      = uart_vars.rxBuf;
    uart_vars.rxBufFill       = 0;
-   
 }
 
 //=========================== interrupt handlers ==============================
