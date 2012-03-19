@@ -351,6 +351,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\cross-layers\</state>
+          <state>$PROJ_DIR$\..\..\..\drivers\common</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -867,7 +868,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>03app_openwsn.a43</state>
+          <state>03oos_openwsn.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1973,7 +1974,7 @@
       <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\openserial.h</name>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
     </file>
   </group>
   <group>
