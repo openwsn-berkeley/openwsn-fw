@@ -1,6 +1,8 @@
 #ifndef __OPENSERIAL_H
 #define __OPENSERIAL_H
 
+#include "openwsn.h"
+
 /**
 \addtogroup cross-layers
 \{
