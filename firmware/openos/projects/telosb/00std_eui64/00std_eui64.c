@@ -1,6 +1,14 @@
 /**
-\brief This is a standalone test program for retrieve the unique identifier
+\brief This is a standalone test program for retrieving the unique identifier
       from the DS2411 chip on the TelosB.
+
+The datasheet of the chip at http://pdfserv.maxim-ic.com/en/ds/DS2411.pdf.
+
+Run the program, put a breakpoint a the last line of main(), and when you get
+there, watch variable eui. I contains the 64-bits read from the DS2411, i.e.
+- [1B] CRC8
+- [6B] unique 48-bit identifier
+- [1B] always 0x01
  
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
 */
