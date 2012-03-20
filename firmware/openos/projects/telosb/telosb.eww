@@ -5,6 +5,9 @@
     <path>$WS_DIR$\00std_clocks\00std_clocks.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\00std_eui64\00std_eui64.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\00std_leds_xtal\00std_leds_xtal.ewp</path>
   </project>
   <project>
