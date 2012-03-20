@@ -12,6 +12,8 @@ can use this project with any platform.
 #include "board.h"
 #include "leds.h"
 #include "bsp_timers.h"
+#include "debugpins.h"
+#include "radiotimer.h"
 
 //=========================== defines =========================================
 
@@ -35,7 +37,7 @@ void cb_timer_1();
 void cb_timer_2();
 
 //=========================== main ============================================
-
+uint32_t count=0;
 /**
 \brief The program starts executing here.
 */
@@ -44,11 +46,17 @@ int main(void)
    // initialize board
    board_init();
    
+   radiotimer_setOverflowCb(cb_timer_0);
+   radiotimer_setCompareCb(cb_timer_1);
+   //radiotimer_setPeriod(327);
+   radiotimer_start(327);
+   radiotimer_schedule(33);
+
    // start timer_0
-   timers_start(0,
-                10000,
+  /* timers_start(0,
+                1,
                 TIMER_PERIODIC,
-                cb_timer_0);
+                cb_timer_0);*/
    
 //   // start timer_1
 //   timers_start(1,
@@ -70,11 +78,17 @@ int main(void)
 //=========================== callbacks =======================================
 
 void cb_timer_0() {
-   leds_error_toggle();
+   //leds_error_toggle();
+	debugpins_frame_toggle();
+
 }
 
 void cb_timer_1() {
-   leds_radio_toggle();
+  // leds_radio_toggle();
+	debugpins_fsm_toggle();
+	count++;
+	if (count%2==0)	 radiotimer_schedule(66);
+	else radiotimer_schedule(11);
 }
 
 void cb_timer_2() {

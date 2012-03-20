@@ -291,21 +291,36 @@
 #define PLL0CFG_Val           0x00020018  //lower bits 14:0 MSEL0=24 23-16 NSEL=2 pag 37. pag 41 has the equation.
 #endif
 
-#ifdef LPCXPRESSO1769
+#ifdef LPCXPRESSO1769 //100Mhz using Main clock + PLL0
 #define SCS_Val               0x00000020 //0 for openmote
 #define CLKSRCSEL_Val         0x00000001 //0 for openmote
-#define PLL0CFG_Val           0x00050063  //MSEL0=24 NSEL=2 pag 37. pag 41 has the equation.
+#define PLL0CFG_Val           0x00050063
 #endif
 
+//#ifdef LPCXPRESSO1769 //120Mhz using Main clock + PLL0
+//#define SCS_Val               0x00000020  /* Enable main 12MHz osc.         */
+//#define CLKSRCSEL_Val         0x00000001 /* Clock source is main osc.      */
+//#define PLL0CFG_Val           0x0000000E  /* Fcco = 12*15*2 = 360MHz  */
+//#endif
+
+//#ifdef LPCXPRESSO1769        //100Mhz clock using RTC at 32khz input. Does not work..
+//#define SCS_Val               0x00000000 //0 as we are not using the main oscillator
+//#define CLKSRCSEL_Val         0x00000002 //RTC OScillator
+//#define PLL0CFG_Val           0x000235A5  //MSEL0=13732=0x35A5 NSEL=2 0x02 pag 45. pag 41 has the equation.
+//#endif
+
 #define PLL0_SETUP            1
-#define PLL1_SETUP            1
+#define PLL1_SETUP            1 //should be 1
 #define PLL1CFG_Val           0x00000023
-#define CCLKCFG_Val           0x00000003
+#define CCLKCFG_Val           0x00000003 //main clock for 100Mhz is 3, for 120 is 2, rtc at 100 is 2 (divided by 3)
 #define USBCLKCFG_Val         0x00000000
 #define PCLKSEL0_Val          0x00000000
 #define PCLKSEL1_Val          0x00000000
 #define PCONP_Val             0x042887DE
-#define CLKOUTCFG_Val         0x00000000
+#define CLKOUTCFG_Val         0x00000000 //should be 0 for the main clock at 100mhz -- for 120 0x130
+										 //For system test and development purposes, any one of several internal clocks may be
+										 //brought out on the CLKOUT function available on the P1.27 pin, page 66 has details.
+
 
 
 /*--------------------- Flash Accelerator Configuration ----------------------
@@ -321,7 +336,7 @@
 // </e>
 */
 #define FLASH_SETUP           1
-#define FLASHCFG_Val          0x00004000
+#define FLASHCFG_Val          0x00004000 //4 for 100Mhz  /* Flash access time 5 CPU cycles */
 
 /*
 //-------- <<< end of configuration section >>> ------------------------------
@@ -395,7 +410,7 @@
  *----------------------------------------------------------------------------*/
 #define XTAL        (12000000UL)        /* Oscillator frequency               */
 #define OSC_CLK     (      XTAL)        /* Main oscillator frequency          */
-#define RTC_CLK     (   32000UL)        /* RTC oscillator frequency           */
+#define RTC_CLK     (   32768UL)        /* RTC oscillator frequency           */
 #define IRC_OSC     ( 4000000UL)        /* Internal RC oscillator frequency   */
 
 
@@ -541,5 +556,6 @@ void SystemInit (void)
 
 #if (FLASH_SETUP == 1)                  /* Flash Accelerator Setup            */
   LPC_SC->FLASHCFG  = (LPC_SC->FLASHCFG & ~0x0000F000) | FLASHCFG_Val;
+ // LPC_SC->FLASHCFG  = FLASHCFG_Val;
 #endif
 }

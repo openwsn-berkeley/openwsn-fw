@@ -48,7 +48,7 @@ void board_init() {
    spi_init();
    //uart_init();
    radio_init();
-   //radiotimer_init();
+   radiotimer_init();
 }
 
 void board_sleep() {
@@ -64,6 +64,6 @@ void board_sleep() {
 void EINT3_IRQHandler(void) {
    if ((LPC_GPIOINT->IO2IntStatR) & (1<<5)) {
       LPC_GPIOINT->IO2IntClr = (1<<5);
-      radio_isr();
+    //  radio_isr();
    }
 }

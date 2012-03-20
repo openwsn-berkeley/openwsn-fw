@@ -26,6 +26,9 @@
 
 #define TIMER_NUM0           0
 #define TIMER_NUM1           3
+#define TIMER_NUM2           6
+#define TIMER_NUM3           9
+
 
 //=========================== typedef =========================================
 
@@ -45,6 +48,7 @@ void     timer_reset( uint8_t timer_num );
 void     timer_disable( uint8_t timer_num );
 uint32_t timer_get_current_value(uint8_t timer_num);
 void     timer_reset_compare(uint8_t timer_num,uint8_t compareReg);
+uint32_t timer_get_capture_value(uint8_t timer_num,uint8_t compareReg);
 
 void     timer_set_isr_compare_hook(uint8_t timer_num, low_timer_hook cbt);
 void     timer_set_isr_capture_hook(uint8_t timer_num, low_timer_hook cbt);
