@@ -11,12 +11,15 @@
 
 //=========================== variables =======================================
 
+// address is flash where GINA's EUI64 identifier is stored
+__no_init volatile uint8_t eui64 @ 0x10ee;
+
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
 void eui64_get(uint8_t* addressToWrite) {
-   memset(addressToWrite,0,8);
+   memcpy(addressToWrite,(void const*)&eui64,8);
 }
 
 //=========================== private =========================================
