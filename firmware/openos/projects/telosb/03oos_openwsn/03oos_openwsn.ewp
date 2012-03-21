@@ -1931,6 +1931,9 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\eui64.c</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
         </file>
         <file>
@@ -1951,6 +1954,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>

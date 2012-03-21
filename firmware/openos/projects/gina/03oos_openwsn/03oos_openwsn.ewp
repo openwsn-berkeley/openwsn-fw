@@ -1929,6 +1929,9 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\eui64.c</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\i2c.c</name>
         </file>
         <file>
@@ -1952,6 +1955,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
