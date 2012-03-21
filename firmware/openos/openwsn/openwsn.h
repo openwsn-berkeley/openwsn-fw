@@ -270,8 +270,6 @@ typedef struct {
 
 //=========================== variables =======================================
 
-__no_init volatile uint8_t eui64 @ 0x10ee;       // address is flash where the node's EUI64 identifier is stored
-
 //=========================== prototypes ======================================
 
 void openwsn_init();
