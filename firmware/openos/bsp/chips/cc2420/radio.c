@@ -48,7 +48,7 @@ void radio_init() {
    radio_reset();
    
    // change state
-   radio_vars.state = RADIOSTATE_RFOFF;
+   radio_vars.state          = RADIOSTATE_RFOFF;
    
    // start radiotimer with dummy setting to activate SFD pin interrupt
    radiotimer_start(0xffff);
