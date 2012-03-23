@@ -16,12 +16,12 @@
 //=========================== public ==========================================
 
 void debugpins_init() {
-   P6DIR |=  0x40;      // frame
-   P6DIR |=  0x80;      // slot
-   P2DIR |=  0x08;      // fsm
-   P2DIR |=  0x40;      // task
-   P6DIR |=  0x01;      // isr
-   P6DIR |=  0x02;      // radio
+   P6DIR |=  0x40;      // frame [P6.6]
+   P6DIR |=  0x80;      // slot  [P6.7]
+   P2DIR |=  0x08;      // fsm   [P2.3]
+   P2DIR |=  0x40;      // task  [P2.6]
+   P6DIR |=  0x01;      // isr   [P6.0]
+   P6DIR |=  0x02;      // radio [P6.1] 
 }
 
 // P6.6
