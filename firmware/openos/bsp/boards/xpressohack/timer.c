@@ -1,6 +1,9 @@
 /**
 \brief LPC17XX-specific definition of the "timer" bsp module.
 
+TIMER 0 and 1 are used by BSP timers
+TIMER 2 is virtualized to offer 100 timers.
+TIMER 3 is radiotimer
 \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, February 2012.
  */
 
@@ -612,9 +615,11 @@ uint32_t timer_get_capture_value(uint8_t timer_num,uint8_t captureReg){
 "implements" weak function in cr_startup_lpc17.c
 	 */
 	void TIMER2_IRQHandler (void) {
+
 		if ( LPC_TIM2->IR & (0x1<<0)) {
 			// clear interrupt flag
 			LPC_TIM2->IR = 0x1<<0;
+
 			// call the callback
 			timer_compare_isr_hook_2(TIMER_COMPARE_REG0);
 		}
@@ -858,8 +863,8 @@ Does NOT set the compare nor capture registers.
 		LPC_TIM2->TCR   = 0x02;
 
 		// Prescale Register we want 32768hz, pclk/8=12.5Mhz --> we need to set pclk to a multiple of 32768.
-		LPC_TIM2->PR    = pclk/TICS_PER_SECOND; //by now is 1M per second
-
+		//LPC_TIM2->PR    = pclk/TICS_PER_SECOND; //by now is 1M per second
+		 LPC_TIM2->PR=0x2FC;//at 100Mhz --> 32768 tics per second.
 		//LPC_TIM1->MR0 = delayInMs * TIME_INTERVALmS;// N milliseconds x Number of tics a millisecond is.
 		//if we want 32768 hz, we need to preescale the timer. If the freq of the mcu is 100Mhz, we need to
 		//clock the timer at cclk/8=12,5Mhz and then preescale at a value around 382 (17E)
@@ -867,7 +872,7 @@ Does NOT set the compare nor capture registers.
 		// (we do that in set compare function)
 
 		LPC_TIM2->IR    = 0xFF;
-		LPC_TIM2->MCR   = 0x01;
+		LPC_TIM2->MCR   |= 0x03;//reset the timer on match.
 
 		//3 = Interrupt & reset timer0 on match
 		//1 = Interrupt only, no reset of timer

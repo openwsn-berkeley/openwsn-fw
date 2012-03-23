@@ -13,6 +13,7 @@
 #include "bsp_timers.h"
 #include "clkpwr.h"
 #include "debugpins.h"
+#include "virtualized_timers.h"
 
 //=========================== variables =======================================
 
@@ -47,8 +48,9 @@ void board_init() {
    timers_init();
    spi_init();
    //uart_init();
-   radio_init();
+//   radio_init();
    radiotimer_init();
+   virtualized_timers_init();
 }
 
 void board_sleep() {

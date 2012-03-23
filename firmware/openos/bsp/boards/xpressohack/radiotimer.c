@@ -19,6 +19,7 @@ typedef struct {
    radiotimer_compare_cbt    overflow_cb;
    radiotimer_compare_cbt    compare_cb;
    uint16_t period;
+   uint32_t counter_slot_val; //timer value when the slot timer is set- references to the init of the slot
 } radiotimer_vars_t;
 
 radiotimer_vars_t radiotimer_vars;
@@ -72,6 +73,7 @@ uint16_t radiotimer_getValue() {
 
 void radiotimer_setPeriod(uint16_t period) {
 	radiotimer_vars.period=period;
+	radiotimer_vars.counter_slot_val=radiotimer_getValue();
 	timer_set_compare(TIMER_NUM3, TIMER_COMPARE_REG0,  period); //the period timer is controlled by the compare 0 register
 }
 //?? why is this needed?
@@ -83,10 +85,10 @@ uint16_t radiotimer_getPeriod() {
 //===== compare
 
 void radiotimer_schedule(uint16_t offset) {
-	uint32_t current=0;
+	uint32_t current=radiotimer_vars.counter_slot_val;//references to the init of the current time slot.
 	// offset when to fire
 	//get current
-	current=timer_get_current_value(TIMER_NUM3);
+	//current=timer_get_current_value(TIMER_NUM3);
 	timer_set_compare(TIMER_NUM3, TIMER_COMPARE_REG1,current + offset); //this is controlled by the compare 1 register
 
 }
@@ -111,7 +113,8 @@ void private_radio_timer_isr(uint8_t source) {
 	uint32_t current=0;
 	switch (source) {
 	case TIMER_COMPARE_REG0:
-		 current=timer_get_current_value(TIMER_NUM3);
+		 current=radiotimer_getValue();
+		 radiotimer_vars.counter_slot_val=current;//refresh init of the slot.
 		      // continuous timer: schedule next instant
 		 timer_set_compare(TIMER_NUM3,TIMER_COMPARE_REG0,current+radiotimer_vars.period);
 		if (radiotimer_vars.overflow_cb != NULL) {

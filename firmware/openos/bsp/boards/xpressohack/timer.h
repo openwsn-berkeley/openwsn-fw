@@ -16,6 +16,8 @@
 #define TIMER_to_32kHz       30
 // ticks per second in the timer.
 #define TICS_PER_SECOND      1000000
+//#define TICS_PER_MS          1000
+#define TICS_PER_MS          1//
 
 #define TIMER_COMPARE_REG0   0
 #define TIMER_COMPARE_REG1   1
