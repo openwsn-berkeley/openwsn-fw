@@ -11,6 +11,7 @@
 //#include "rheli.h"
 #include "rinfo.h"
 //#include "rxl1.h"
+#include "rex.h"
 //#include "rt.h"
 #include "rwellknown.h"
 #include "rleds.h"
@@ -94,6 +95,7 @@ void openwsn_init() {
    rinfo_init();
    //rxl1_init();
    //rt_init();
+   rex_init();
    rleds_init();
    rreg_init();
    rwellknown_init();
