@@ -26,8 +26,8 @@ void board_init() {
    WDTCTL     =  WDTPW + WDTHOLD;
    
    // setup clock speed
-   DCOCTL     =  DCO0 | DCO1 | DCO2;             // MCLK at ~8MHz
-   BCSCTL1    =  RSEL0 | RSEL1 | RSEL2;          // MCLK at ~8MHz
+   DCOCTL    |=  DCO0 | DCO1 | DCO2;             // MCLK at ~8MHz
+   BCSCTL1   |=  RSEL0 | RSEL1 | RSEL2;          // MCLK at ~8MHz
                                                  // by default, ACLK from 32kHz XTAL which is running
    
    // initialize pins
@@ -131,11 +131,4 @@ __interrupt void TIMERB1_ISR (void) {
 // TIMERB0_VECTOR
 
 // NMI_VECTOR
-
-
-
-
-
-
-
 
