@@ -65,10 +65,8 @@ void openserial_init() {
    openserial_vars.output_buffer_index_write = 0;
    openserial_vars.somethingInOutputBuffer   = FALSE;
    openserial_vars.mode = MODE_OFF;
-   
-   //also initialize board specific uart:
-   uart_init();
 }
+
 error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t length) {
    uint8_t counter;
    __disable_interrupt();
@@ -89,6 +87,7 @@ error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t l
    __enable_interrupt();
    return E_SUCCESS;
 }
+
 error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
@@ -113,6 +112,7 @@ error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
    __enable_interrupt();
    return E_SUCCESS;
 }
+
 error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    uint8_t counter;
    __disable_interrupt();
@@ -132,6 +132,7 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    __enable_interrupt();
    return E_SUCCESS;
 }
+
 uint8_t openserial_getNumDataBytes() {
    uint16_t temp_openserial_input_buffer_fill_level;
    __disable_interrupt();
@@ -139,6 +140,7 @@ uint8_t openserial_getNumDataBytes() {
    __enable_interrupt();
    return temp_openserial_input_buffer_fill_level;
 }
+
 uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
    uint8_t numBytesWritten;
    uint16_t temp_openserial_input_buffer_fill_level;
@@ -242,6 +244,7 @@ void openserial_startOutput() {
    }
    __enable_interrupt();
 }
+
 void openserial_stop() {
    uint16_t temp_openserial_input_buffer_fill_level;
    __disable_interrupt();
