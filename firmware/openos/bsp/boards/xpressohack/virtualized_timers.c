@@ -133,9 +133,10 @@ void virtualized_timer_compare_isr_0(uint8_t reg) {
 	uint32_t next_timeout;
 	uint32_t counterval;
 
-    timer_disable(TIMER_NUM2);
+   // timer_disable(TIMER_NUM2);
 	counterval=timer_get_current_value(TIMER_NUM2);
 	timer_reset(TIMER_NUM2);
+	timer_enable(TIMER_NUM2);
 	next_timeout=NULL_TIMEOUT;
 
 
@@ -146,8 +147,8 @@ void virtualized_timer_compare_isr_0(uint8_t reg) {
 			}
 			else {//this timer is not expired. just update its counter.
 				//the time of ISR is 57.25uS so I should compensate this time.
-				if (currentTimeout+1<m_timers[i].timer_remaining){
-					m_timers[i].timer_remaining -= (currentTimeout+1);//substract the amount elapsed to all timers (+correct time of isr)
+				if ((currentTimeout+(currentTimeout-counterval))+1<m_timers[i].timer_remaining){
+					m_timers[i].timer_remaining -= (currentTimeout+(currentTimeout-counterval));//substract the amount elapsed to all timers (+correct time of isr)
 				}else{
 					m_timers[i].timer_remaining=0;//set to zero as this timer also expired during the isr.
 					m_timers[i].fire=TRUE;//set as fired
@@ -186,7 +187,7 @@ void virtualized_timer_compare_isr_0(uint8_t reg) {
 	else {
 		running = FALSE;//no more timers.. then No running.
 	}
-	timer_enable(TIMER_NUM2);
+	//timer_enable(TIMER_NUM2);
 	debugpins_task_toggle();
 }
 
