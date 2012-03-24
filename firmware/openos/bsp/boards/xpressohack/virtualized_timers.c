@@ -55,7 +55,7 @@ uint8_t virtualized_timers_start(uint16_t duration, timer_type_t type, timer_cbt
 	uint8_t i=0;
 	uint8_t id=0;
 	uint32_t cval=0; //current counter value
-	//timer_disable(TIMER_NUM2);
+
 	//find first unused timer
 	for (i=0; i<NUM_TIMERS && TRUE == m_timers[i].isrunning; i++) {}
 
@@ -96,14 +96,25 @@ uint8_t virtualized_timers_start(uint16_t duration, timer_type_t type, timer_cbt
 }
 
 
+/*
+ * cancelling it is a matter of setting the timer to not running.
+ * if it was the nexttimeout, the isr will find another and also
+ * will substract the elapsed time to other running timers.
+ */
 void virtualized_timers_stop(uint8_t id){
-
+	uint8_t i=0;
+	Bool end=FALSE;
+	while ( i<NUM_TIMERS && !end ){
+		if (id==m_timers[i].id){
+			end=TRUE;
+			m_timers[i].isrunning=FALSE;
+		}
+	i++;
+	}
 }
 
 
-uint32_t virtualized_timers_get_current_value(uint8_t id){
-	return 0;
-}
+
 
 
 
@@ -116,11 +127,13 @@ uint32_t virtualized_timers_get_current_value(uint8_t id){
 
  */
 void virtualized_timer_compare_isr_0(uint8_t reg) {
+
+	debugpins_task_toggle();
 	uint8_t i=0;
 	uint32_t next_timeout;
 	uint32_t counterval;
 
-	timer_disable(TIMER_NUM2);
+    timer_disable(TIMER_NUM2);
 	counterval=timer_get_current_value(TIMER_NUM2);
 	timer_reset(TIMER_NUM2);
 	next_timeout=NULL_TIMEOUT;
@@ -130,17 +143,15 @@ void virtualized_timer_compare_isr_0(uint8_t reg) {
 		if(TRUE == m_timers[i].isrunning) {
 			if(currentTimeout >= m_timers[i].timer_remaining) {        /* If timeout ended               */
 				m_timers[i].fire=TRUE;//set as fired
-				if (m_timers[i].type==TIMER_ONESHOT){
-					//  m_timers[i].isrunning = FALSE;//close the timer... after executing the callback
-				}else{
-					//periodic!
-					m_timers[i].timer_remaining=m_timers[i].period;//will be selected next if applies below.
-					next_timeout = m_timers[i].timer_remaining;
-				}
 			}
 			else {//this timer is not expired. just update its counter.
 				//the time of ISR is 57.25uS so I should compensate this time.
-				m_timers[i].timer_remaining -= (currentTimeout+2);//substract the amount elapsed to all timers (+correct time of isr)
+				if (currentTimeout+1<m_timers[i].timer_remaining){
+					m_timers[i].timer_remaining -= (currentTimeout+1);//substract the amount elapsed to all timers (+correct time of isr)
+				}else{
+					m_timers[i].timer_remaining=0;//set to zero as this timer also expired during the isr.
+					m_timers[i].fire=TRUE;//set as fired
+				}
 			}
 		}
 	}//end for
@@ -152,7 +163,11 @@ void virtualized_timer_compare_isr_0(uint8_t reg) {
 			//the task to be executed goes through all timers and executes the functions.
 			m_timers[i].callback();
 			m_timers[i].fire=FALSE;//set already fired!
-			if (m_timers[i].type==TIMER_ONESHOT) m_timers[i].isrunning = FALSE;//close the timer.
+			if (m_timers[i].type==TIMER_ONESHOT) {
+				m_timers[i].isrunning = FALSE;//close the timer.
+			}else{//reset the period.
+				m_timers[i].timer_remaining=m_timers[i].period;//will be selected next if applies below.
+			}
 		}
 
 	}
@@ -172,6 +187,6 @@ void virtualized_timer_compare_isr_0(uint8_t reg) {
 		running = FALSE;//no more timers.. then No running.
 	}
 	timer_enable(TIMER_NUM2);
-
+	debugpins_task_toggle();
 }
 

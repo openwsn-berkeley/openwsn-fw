@@ -28,11 +28,8 @@ typedef struct
   } Timer_t;
 
 
-
-
   void virtualized_timers_init();
   uint8_t virtualized_timers_start(uint16_t duration, timer_type_t type, timer_cbt callback);
   void virtualized_timers_stop(uint8_t id);
-  uint32_t virtualized_timers_get_current_value(uint8_t id);
 
 #endif /* VIRTUALIZED_TIMERS_H_ */
