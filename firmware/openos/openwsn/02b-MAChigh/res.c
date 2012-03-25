@@ -13,7 +13,7 @@
 #include "openrandom.h"
 #include "schedule.h"
 #include "scheduler.h"
-#include "bsp_timers.h"
+#include "bsp_timer.h"
 #include "opentimers.h"
 
 //=========================== variables =======================================

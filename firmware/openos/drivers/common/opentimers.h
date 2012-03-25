@@ -8,7 +8,7 @@
 #define __OPENTIMERS_H
 
 #include "openwsn.h"
-#include "bsp_timers.h"
+#include "bsp_timer.h"
 
 //=========================== define ==========================================
 

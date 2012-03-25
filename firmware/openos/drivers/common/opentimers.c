@@ -10,7 +10,7 @@ at most MAX_NUM_TIMERS timers.
 #include "openwsn.h"
 #include "board_info.h"
 #include "opentimers.h"
-#include "bsp_timers.h"
+#include "bsp_timer.h"
 #include "string.h"
 
 //=========================== define ==========================================
@@ -53,7 +53,7 @@ void opentimers_init(){
       opentimers_vars.timersBuf[i].hasFired           = FALSE;
    }
 
-   bsp_timers_set_callback(opentimers_timer_callback);
+   bsp_timer_set_callback(opentimers_timer_callback);
 }
 
 /**
@@ -90,7 +90,7 @@ opentimer_id_t opentimers_start(uint16_t duration, timer_type_t type, opentimers
       // we found an unused timer
       
       id      = opentimers_vars.timersBuf[i].id;
-      cval    = bsp_timers_get_current_value(); //current time
+      cval    = bsp_timer_get_current_value(); //current time
 
       if (opentimers_vars.running==TRUE) {
          // at least one timer is running
@@ -102,7 +102,7 @@ opentimer_id_t opentimers_start(uint16_t duration, timer_type_t type, opentimers
             
             //set new timeout
             opentimers_vars.currentTimeout   = opentimers_vars.timersBuf[i].timer_remaining;
-            bsp_timers_set_compare(opentimers_vars.timersBuf[i].timer_remaining);
+            bsp_timer_set_compare(opentimers_vars.timersBuf[i].timer_remaining);
          } else {
             //not earlier. do nothing, will be inserted in the list below.
          }
@@ -111,7 +111,7 @@ opentimer_id_t opentimers_start(uint16_t duration, timer_type_t type, opentimers
 
          opentimers_vars.timersBuf[i].timer_remaining = duration*PORT_TICS_PER_MS;
          opentimers_vars.currentTimeout              = opentimers_vars.timersBuf[i].timer_remaining;
-         bsp_timers_set_compare(opentimers_vars.timersBuf[i].timer_remaining);
+         bsp_timer_set_compare(opentimers_vars.timersBuf[i].timer_remaining);
          opentimers_vars.running                     = TRUE; // at least one timer is running
 
       }
@@ -184,7 +184,7 @@ void opentimers_timer_callback() {
    uint32_t next_timeout;
    uint32_t counterval;
    
-   counterval=bsp_timers_get_current_value();
+   counterval=bsp_timer_get_current_value();
    //poipoitimer_reset(TIMER_NUM2);
    //poipoitimer_enable(TIMER_NUM2);
    next_timeout=NULL_TIMEOUT;
@@ -230,7 +230,7 @@ void opentimers_timer_callback() {
    //schedule the next timer as in the callback a new one can be added.
    if (NULL_TIMEOUT != next_timeout) {//there is another timer pending
       opentimers_vars.currentTimeout = next_timeout;
-      bsp_timers_set_compare(opentimers_vars.currentTimeout);//schedule it
+      bsp_timer_set_compare(opentimers_vars.currentTimeout);//schedule it
       opentimers_vars.running = TRUE;//we keep running
    }
    else {
