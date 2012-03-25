@@ -1924,7 +1924,7 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\bsp_timers.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\bsp_timer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</name>
@@ -1952,7 +1952,7 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timers.h</name>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>

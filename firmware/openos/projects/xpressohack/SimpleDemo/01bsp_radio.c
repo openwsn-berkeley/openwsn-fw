@@ -12,7 +12,7 @@ can use this project with any platform.
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
-#include "bsp_timers.h"
+#include "bsp_timer.h"
 
 //=========================== defines =========================================
 

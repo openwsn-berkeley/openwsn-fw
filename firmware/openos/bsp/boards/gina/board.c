@@ -12,7 +12,7 @@
 #include "uart.h"
 #include "spi.h"
 #include "i2c.h"
-#include "bsp_timers.h"
+#include "bsp_timer.h"
 #include "radio.h"
 #include "radiotimer.h"
 
@@ -45,7 +45,7 @@ void board_init() {
    leds_init();
    uart_init();
    spi_init();
-   bsp_timers_init();
+   bsp_timer_init();
    radio_init();
    radiotimer_init();
    

@@ -10,7 +10,7 @@
 #include "uart.h"
 #include "spi.h"
 #include "radio.h"
-#include "bsp_timers.h"
+#include "bsp_timer.h"
 #include "clkpwr.h"
 #include "debugpins.h"
 #include "virtualized_timers.h"

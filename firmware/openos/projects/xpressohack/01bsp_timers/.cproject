@@ -22,7 +22,7 @@
 					<folderInfo id="com.crt.advproject.config.exe.debug.1018350706." name="/" resourcePath="">
 						<toolChain id="com.crt.advproject.toolchain.exe.debug.1072957784" name="Code Red MCU Tools" superClass="com.crt.advproject.toolchain.exe.debug">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF" id="com.crt.advproject.platform.exe.debug.409807516" name="ARM-based MCU (Debug)" superClass="com.crt.advproject.platform.exe.debug"/>
-							<builder buildPath="${workspace_loc:/01bsp_timers/Debug}" id="com.crt.advproject.builder.exe.debug.1730272076" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.crt.advproject.builder.exe.debug">
+							<builder buildPath="${workspace_loc:/01bsp_timer/Debug}" id="com.crt.advproject.builder.exe.debug.1730272076" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.crt.advproject.builder.exe.debug">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
@@ -61,7 +61,7 @@
 							<tool id="com.crt.advproject.link.exe.debug.378364049" name="MCU Linker" superClass="com.crt.advproject.link.exe.debug">
 								<option id="com.crt.advproject.link.arch.1371626706" name="Architecture" superClass="com.crt.advproject.link.arch" value="com.crt.advproject.link.target.cm3" valueType="enumerated"/>
 								<option id="com.crt.advproject.link.thumb.1139775008" name="Thumb mode" superClass="com.crt.advproject.link.thumb" value="true" valueType="boolean"/>
-								<option id="com.crt.advproject.link.script.1156841587" name="Linker script" superClass="com.crt.advproject.link.script" value="&quot;01bsp_timers_Debug.ld&quot;" valueType="string"/>
+								<option id="com.crt.advproject.link.script.1156841587" name="Linker script" superClass="com.crt.advproject.link.script" value="&quot;01bsp_timer_Debug.ld&quot;" valueType="string"/>
 								<option id="com.crt.advproject.link.manage.712019530" name="Manage linker script" superClass="com.crt.advproject.link.manage" value="true" valueType="boolean"/>
 								<option id="gnu.c.link.option.nostdlibs.1645141614" name="No startup or default libs (-nostdlib)" superClass="gnu.c.link.option.nostdlibs" value="true" valueType="boolean"/>
 								<option id="gnu.c.link.option.other.1950357399" name="Other options (-Xlinker [option])" superClass="gnu.c.link.option.other" valueType="stringList">
@@ -910,7 +910,7 @@
 					<folderInfo id="com.crt.advproject.config.exe.release.583852110." name="/" resourcePath="">
 						<toolChain id="com.crt.advproject.toolchain.exe.release.1922253407" name="Code Red MCU Tools" superClass="com.crt.advproject.toolchain.exe.release">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.ELF;org.eclipse.cdt.core.GNU_ELF" id="com.crt.advproject.platform.exe.release.1415509789" name="ARM-based MCU (Release)" superClass="com.crt.advproject.platform.exe.release"/>
-							<builder buildPath="${workspace_loc:/01bsp_timers/Release}" id="com.crt.advproject.builder.exe.release.2013845300" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.crt.advproject.builder.exe.release"/>
+							<builder buildPath="${workspace_loc:/01bsp_timer/Release}" id="com.crt.advproject.builder.exe.release.2013845300" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="com.crt.advproject.builder.exe.release"/>
 							<tool id="com.crt.advproject.cpp.exe.release.296025173" name="MCU C++ Compiler" superClass="com.crt.advproject.cpp.exe.release"/>
 							<tool id="com.crt.advproject.gcc.exe.release.1486818131" name="MCU C Compiler" superClass="com.crt.advproject.gcc.exe.release">
 								<option id="com.crt.advproject.gcc.arch.741332528" name="Architecture" superClass="com.crt.advproject.gcc.arch" value="com.crt.advproject.gcc.target.cm3" valueType="enumerated"/>
@@ -940,7 +940,7 @@
 							<tool id="com.crt.advproject.link.exe.release.1984121897" name="MCU Linker" superClass="com.crt.advproject.link.exe.release">
 								<option id="com.crt.advproject.link.arch.415444890" name="Architecture" superClass="com.crt.advproject.link.arch" value="com.crt.advproject.link.target.cm3" valueType="enumerated"/>
 								<option id="com.crt.advproject.link.thumb.380452414" name="Thumb mode" superClass="com.crt.advproject.link.thumb" value="true" valueType="boolean"/>
-								<option id="com.crt.advproject.link.script.1805264193" name="Linker script" superClass="com.crt.advproject.link.script" value="&quot;01bsp_timers_Release.ld&quot;" valueType="string"/>
+								<option id="com.crt.advproject.link.script.1805264193" name="Linker script" superClass="com.crt.advproject.link.script" value="&quot;01bsp_timer_Release.ld&quot;" valueType="string"/>
 								<option id="com.crt.advproject.link.manage.780310994" name="Manage linker script" superClass="com.crt.advproject.link.manage" value="true" valueType="boolean"/>
 								<option id="gnu.c.link.option.nostdlibs.806940578" name="No startup or default libs (-nostdlib)" superClass="gnu.c.link.option.nostdlibs" value="true" valueType="boolean"/>
 								<option id="gnu.c.link.option.other.1589798481" name="Other options (-Xlinker [option])" superClass="gnu.c.link.option.other" valueType="stringList">
@@ -1770,7 +1770,7 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="01bsp_timers.com.crt.advproject.projecttype.exe.254344800" name="Executable" projectType="com.crt.advproject.projecttype.exe"/>
+		<project id="01bsp_timer.com.crt.advproject.projecttype.exe.254344800" name="Executable" projectType="com.crt.advproject.projecttype.exe"/>
 	</storageModule>
 	<storageModule moduleId="com.crt.config">
 		<projectStorage>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&#13;

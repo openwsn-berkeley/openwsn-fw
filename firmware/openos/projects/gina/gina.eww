@@ -23,7 +23,7 @@
     <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\01bsp_timers\01bsp_timers.ewp</path>
+    <path>$WS_DIR$\01bsp_timer\01bsp_timer.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>

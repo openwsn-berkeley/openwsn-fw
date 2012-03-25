@@ -1889,10 +1889,10 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\bsp_timers.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\bsp_timer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timers.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>

@@ -11,7 +11,7 @@ can use this project with any platform.
 #include "string.h"
 #include "board.h"
 #include "leds.h"
-#include "bsp_timers.h"
+#include "bsp_timer.h"
 #include "debugpins.h"
 #include "radiotimer.h"
 

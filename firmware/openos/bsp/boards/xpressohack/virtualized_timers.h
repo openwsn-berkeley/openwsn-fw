@@ -9,7 +9,7 @@
 #define VIRTUALIZED_TIMERS_H_
 
 #include "lpc_types.h"
-#include "bsp_timers.h"
+#include "bsp_timer.h"
 
 
 #define NUM_TIMERS 10 //10 is enough!

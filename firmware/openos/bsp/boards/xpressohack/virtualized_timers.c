@@ -5,7 +5,7 @@
  */
 #include "virtualized_timers.h"
 #include "timer.h"
-#include "bsp_timers.h"
+#include "bsp_timer.h"
 #include "string.h"
 #include "debugpins.h"
 

@@ -643,7 +643,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_timers.d43</state>
+          <state>01bsp_timer.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -1874,7 +1874,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_timers\01bsp_timers.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_timer\01bsp_timer.c</name>
     </file>
   </group>
   <group>
@@ -1892,10 +1892,10 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\bsp_timers.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\bsp_timer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timers.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</name>

@@ -57,7 +57,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
 
 void radiotimer_start(uint16_t period) {
    // source ACLK from 32kHz crystal
- //user bsp_timers.
+ //user bsp_timer.
 	 timer_init(TIMER_NUM3);
 	 timer_enable(TIMER_NUM3);
 	 radiotimer_setPeriod(period);
