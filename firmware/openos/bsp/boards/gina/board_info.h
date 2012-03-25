@@ -7,10 +7,15 @@ to return the board's description.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
+#ifndef __BOARD_INFO_H
+#define __BOARD_INFO_H
+
 #include "stdint.h"
 #include "msp430x26x.h"
 
 //=========================== defines =========================================
+
+//===== timer
 
 // on GINA, we use the comparatorA interrupt for the OS
 #define SCHEDULER_WAKEUP()                  CACTL1 |= CAIFG
@@ -21,6 +26,8 @@ to return the board's description.
 #define CAPTURE_TIME()  TACCTL2 |=  CCIS0;  \
                         TACCTL2 &= ~CCIS0;
 
+//===== pinout
+
 // [P4.7] radio SLP_TR_CNTL
 #define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()   P4OUT |=  0x80;
 #define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()    P4OUT &= ~0x80;
@@ -28,6 +35,20 @@ to return the board's description.
 // on GINA, the /RST line is not connected to the uC
 #define PORT_PIN_RADIO_RESET_HIGH()    // nothing
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
+
+//===== IEEE802154E timing
+
+// time-slot related
+#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+// execution speed related
+#define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
+#define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
+#define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
+#define PORT_maxTxAckPrepare                10    //  305us (measured 219us)
+// radio speed related
+#define PORT_delayTx                        6     //  183us (measured 219us)
+#define PORT_delayRx                        0     //    0us (can not measure)
+// radio watchdog
 
 //=========================== typedef  ========================================
 
@@ -43,3 +64,5 @@ static const uint8_t infoRadioName[]        = "AT86RF231";
 //=========================== public ==========================================
 
 //=========================== private =========================================
+
+#endif

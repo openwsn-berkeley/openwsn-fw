@@ -339,6 +339,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\</state>
@@ -2161,6 +2162,15 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone_webpages.h</name>
+        </file>
+      </group>
+      <group>
+        <name>rex</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\rex.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\rex.h</name>
         </file>
       </group>
       <group>

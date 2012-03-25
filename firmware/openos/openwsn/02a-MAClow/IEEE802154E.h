@@ -9,6 +9,7 @@
 */
 
 #include "openwsn.h"
+#include "board_info.h"
 
 //=========================== define ==========================================
 
@@ -81,23 +82,23 @@ enum ieee154e_atomicdurations_enum {
 */
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-   TsTxOffset                =  99,    //  3000us
-   TsLongGT                  =  43,    //  1300us
-   TsTxAckDelay              =  66,    //  2000us
-   TsShortGT                 =  16,    //   500us
-   TsSlotDuration            = 327,    // 10000us (328 ticks, but counter counts one extra count, see datasheet)
+   TsTxOffset                =  131,                  //  4000us
+   TsLongGT                  =   43,                  //  1300us
+   TsTxAckDelay              =  131,                  //  4000us
+   TsShortGT                 =   16,                  //   500us
+   TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
    // execution speed related
-   maxTxDataPrepare          =  66,    //  2000us (measured 584 us)
-   maxRxAckPrepare           =  10,    //   305us (measured  64 us)
-   maxRxDataPrepare          =  33,    //  1000us (measured 440 us)
-   maxTxAckPrepare           =  10,    //   305us (measured 260 us)
+   maxTxDataPrepare          =  PORT_maxTxDataPrepare,
+   maxRxAckPrepare           =  PORT_maxRxAckPrepare,
+   maxRxDataPrepare          =  PORT_maxRxDataPrepare,
+   maxTxAckPrepare           =  PORT_maxTxAckPrepare,
    // radio speed related
-   delayTx                   =   6,    //   180us (measured 200 us)  // between GO signal and SFD
-   delayRx                   =   0,    //     0us (can not measure!) // between GO signal and start listening
+   delayTx                   =  PORT_delayTx,         // between GO signal and SFD
+   delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =  33,    //  1000us (needs to be >delayTx)
-   wdDataDuration            = 164,    //  5000us (measured 4280us with max payload)
-   wdAckDuration             =  98,    //  3000us (measured 1000us)
+   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
+   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =   98,                  //  3000us (measured 1000us)
 };
 
 
