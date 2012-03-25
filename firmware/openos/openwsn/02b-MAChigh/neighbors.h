@@ -33,7 +33,7 @@ typedef struct {
 } neighborRow_t;
 
 typedef struct {
-   slotOffset_t    row;
+   uint8_t         row;
    neighborRow_t   neighborEntry;
 } debugNeighborEntry_t;
 
