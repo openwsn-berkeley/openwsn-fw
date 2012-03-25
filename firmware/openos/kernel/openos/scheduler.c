@@ -49,7 +49,7 @@ void scheduler_init() {
    memset(&scheduler_vars,0,sizeof(scheduler_vars_t));
    memset(&scheduler_dbg,0,sizeof(scheduler_dbg_t));
    
-   // enable the interrupt so SW can wake up the scheduler
+   // enable the scheduler's interrupt so SW can wake up the scheduler
    SCHEDULER_ENABLE_INTERRUPT();
 }
 
