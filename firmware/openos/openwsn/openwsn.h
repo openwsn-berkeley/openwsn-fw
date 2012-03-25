@@ -211,7 +211,6 @@ enum {
 
 //=========================== typedef =========================================
 
-typedef uint16_t  slotOffset_t;
 typedef uint16_t  shortnodeid_t;
 typedef uint64_t  longnodeid_t;
 typedef uint16_t  errorparameter_t;
