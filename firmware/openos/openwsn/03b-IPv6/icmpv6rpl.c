@@ -8,15 +8,17 @@
 #include "openrandom.h"
 #include "bsp_timers.h"
 #include "scheduler.h"
+#include "opentimers.h"
 
 //=========================== variables =======================================
 
 typedef struct {
-   uint16_t    periodDIO;
-   uint8_t     delayDIO;
-   open_addr_t all_routers_multicast;
-   bool        busySending;
-   uint16_t    seq;
+   uint16_t        periodDIO;
+   uint8_t         delayDIO;
+   open_addr_t     all_routers_multicast;
+   bool            busySending;
+   uint16_t        seq;
+   opentimer_id_t  timerId;
 } icmpv6rpl_vars_t;
 
 icmpv6rpl_vars_t icmpv6rpl_vars;
@@ -49,10 +51,9 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.all_routers_multicast.addr_128b[13] = 0x00;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[14] = 0x00;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[15] = 0x02;
-   timers_start(TIMER_RPL,
-                icmpv6rpl_vars.periodDIO,
-                TIMER_PERIODIC,
-                icmpv6rpl_timer_cb);
+   icmpv6rpl_vars.timerId = opentimers_start(icmpv6rpl_vars.periodDIO,
+                                             TIMER_PERIODIC,
+                                             icmpv6rpl_timer_cb);
 }
 
 void icmpv6rpl_trigger() {
@@ -99,10 +100,8 @@ void timers_rpl_fired() {
       sendDIO();
       //set a new random periodDIO
       icmpv6rpl_vars.periodDIO = 40000+(64*(openrandom_get16b() & 0xff));       // pseudo-random
-      timers_start(TIMER_RPL,
-                   icmpv6rpl_vars.periodDIO,
-                   TIMER_PERIODIC,
-                   icmpv6rpl_timer_cb);
+      opentimers_setPeriod(icmpv6rpl_vars.timerId,
+                           icmpv6rpl_vars.periodDIO);
    }
 }
 

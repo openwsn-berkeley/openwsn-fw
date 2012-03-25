@@ -6,6 +6,7 @@
 #include "packetfunctions.h"
 #include "bsp_timers.h"
 #include "scheduler.h"
+#include "opentimers.h"
 //TCP applications
 #include "ohlone.h"
 #include "tcpecho.h"
@@ -23,6 +24,7 @@ typedef struct {
    open_addr_t          hisIPv6Address;
    OpenQueueEntry_t*    dataToSend;
    OpenQueueEntry_t*    dataReceived;
+   opentimer_id_t       timerId;
 } tcp_vars_t;
 
 tcp_vars_t tcp_vars;
@@ -735,12 +737,11 @@ void reset() {
 void tcp_change_state(uint8_t new_tcp_state) {
    tcp_vars.state = new_tcp_state;
    if (tcp_vars.state==TCP_STATE_CLOSED) {
-      timers_stop(TIMER_TCP);
+      opentimers_stop(tcp_vars.timerId);
    } else {
-      timers_start(TIMER_TCP,
-                   TCP_TIMEOUT,
-                   TIMER_ONESHOT,
-                   opentcp_timer_cb);
+      tcp_vars.timerId = opentimers_start(TCP_TIMEOUT,
+                                          TIMER_ONESHOT,
+                                          opentcp_timer_cb);
    }
 }
 

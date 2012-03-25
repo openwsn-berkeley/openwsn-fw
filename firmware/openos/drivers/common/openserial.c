@@ -1,3 +1,9 @@
+/**
+\brief Definition of the "openserial" driver.
+
+\author Fabien Chraim <chraim@eecs.berkeley.edu>, March 2012.
+*/
+
 #include "board.h"
 #include "openwsn.h"
 #include "openserial.h"
@@ -17,7 +23,6 @@
 #include "openbridge.h"
 #include "leds.h"
 #include "schedule.h"
-//#include "msp430x26x.h"
 #include "uart.h"
 
 //=========================== variables =======================================

@@ -14,14 +14,16 @@
 #include "schedule.h"
 #include "scheduler.h"
 #include "bsp_timers.h"
+#include "opentimers.h"
 
 //=========================== variables =======================================
 
 typedef struct {
-   uint16_t periodMaintenance;
-   bool     busySending;          // TRUE when busy sending an advertisement or keep-alive
-   uint8_t  dsn;                  // current data sequence number
-   uint8_t  MacMgtTaskCounter;    // counter to determine what management task to do
+   uint16_t        periodMaintenance;
+   bool            busySending;          // TRUE when busy sending an advertisement or keep-alive
+   uint8_t         dsn;                  // current data sequence number
+   uint8_t         MacMgtTaskCounter;    // counter to determine what management task to do
+   opentimer_id_t  timerId;
 } res_vars_t;
 
 res_vars_t res_vars;
@@ -40,10 +42,9 @@ void res_init() {
    res_vars.busySending       = FALSE;
    res_vars.dsn               = 0;
    res_vars.MacMgtTaskCounter = 0;
-   timers_start(TIMER_RES,
-                res_vars.periodMaintenance,
-                TIMER_PERIODIC,
-                res_timer_cb);
+   res_vars.timerId = opentimers_start(res_vars.periodMaintenance,
+                                       TIMER_PERIODIC,
+                                       res_timer_cb);
 }
 
 bool debugPrint_myDAGrank() {
@@ -97,10 +98,9 @@ void task_resNotifSendDone() {
       res_vars.busySending = FALSE;
       // restart a random timer
       res_vars.periodMaintenance = 16384+openrandom_get16b()%32768;
-      timers_start(TIMER_RES,
-                   res_vars.periodMaintenance,
-                   TIMER_PERIODIC,
-                   res_timer_cb);
+      res_vars.timerId = opentimers_start(res_vars.periodMaintenance,
+                                          TIMER_PERIODIC,
+                                          res_timer_cb);
    } else {
       // send the rest up the stack
       iphc_sendDone(msg,msg->l2_sendDoneError);

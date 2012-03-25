@@ -45,7 +45,7 @@ void board_init() {
    leds_init();
    uart_init();
    spi_init();
-   timers_init();
+   bsp_timers_init();
    radio_init();
    radiotimer_init();
    
@@ -175,21 +175,13 @@ __interrupt void COMPARATORA_ISR (void) {
    debugpins_isr_clr();
 }
 
-#pragma vector = TIMERB1_VECTOR
-__interrupt void TIMERB1_ISR (void) {
-   CAPTURE_TIME();
-   debugpins_isr_set();
-   if (timer_isr_1()==1) {                       // timer: 1
-      __bic_SR_register_on_exit(CPUOFF);
-   }
-   debugpins_isr_clr();
-}
+// TIMERB1_VECTOR
 
 #pragma vector = TIMERB0_VECTOR
 __interrupt void TIMERB0_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   if (timer_isr_0()==1) {                       // timer: 0
+   if (bsp_timer_isr()==1) {                       // timer: 0
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();

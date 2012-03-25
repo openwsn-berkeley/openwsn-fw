@@ -1999,6 +1999,12 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
+    </file>
   </group>
   <group>
     <name>kernel</name>

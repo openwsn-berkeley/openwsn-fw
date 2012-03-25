@@ -7,6 +7,7 @@
 #include "packetfunctions.h"
 #include "idmanager.h"
 #include "bsp_timers.h"
+#include "opentimers.h"
 #include "scheduler.h"
 
 //=========================== variables =======================================
@@ -17,6 +18,7 @@ typedef struct {
    bool                  busySending;
    uint8_t               delayCounter;
    uint16_t              messageID;
+   opentimer_id_t        timerId;
 } opencoap_vars_t;
 
 opencoap_vars_t opencoap_vars;
@@ -38,10 +40,9 @@ void opencoap_init() {
    
    // start the timer
    if (idmanager_getIsDAGroot()==FALSE) {
-      timers_start(TIMER_COAP,
-                   0xffff,
-                   TIMER_PERIODIC,
-                   icmpv6coap_timer_cb);
+      opencoap_vars.timerId = opentimers_start(0xffff,
+                                               TIMER_PERIODIC,
+                                               icmpv6coap_timer_cb);
    }
 }
 

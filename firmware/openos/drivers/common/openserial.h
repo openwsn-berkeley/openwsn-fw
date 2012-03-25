@@ -1,3 +1,9 @@
+/**
+\brief Declaration of the "openserial" driver.
+
+\author Fabien Chraim <chraim@eecs.berkeley.edu>, March 2012.
+*/
+
 #ifndef __OPENSERIAL_H
 #define __OPENSERIAL_H
 
@@ -13,6 +19,7 @@
 //=========================== define ==========================================
 
 #define SERIAL_OUTPUT_BUFFER_SIZE 300
+
 //not more than 255 (length encoded in 1B)
 #define SERIAL_INPUT_BUFFER_SIZE  200
 
@@ -23,8 +30,6 @@ enum {
 };
 
 //=========================== typedef =========================================
-
-//=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
