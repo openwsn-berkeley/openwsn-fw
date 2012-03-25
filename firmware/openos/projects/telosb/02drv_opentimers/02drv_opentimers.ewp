@@ -321,6 +321,8 @@
           <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
+          <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -643,7 +645,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_leds.d43</state>
+          <state>02drv_opentimers.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -837,7 +839,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_leds.a43</state>
+          <state>01bsp_uart.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1874,70 +1876,94 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_leds\01bsp_leds.c</name>
+      <name>$PROJ_DIR$\..\..\common\02drv_opentimers\02drv_opentimers.c</name>
     </file>
   </group>
   <group>
     <name>bsp</name>
+    <group>
+      <name>boards</name>
+      <group>
+        <name>telosb</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\bsp_timer.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\eui64.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radiotimer.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\spi.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\uart.c</name>
+        </file>
+      </group>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
+      </file>
+    </group>
+    <group>
+      <name>chips</name>
+      <group>
+        <name>cc2420</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
+        </file>
+      </group>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
+      </file>
+    </group>
+  </group>
+  <group>
+    <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board.c</name>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\bsp_timer.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\eui64.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radiotimer.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\spi.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\uart.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
     </file>
   </group>
 </project>
