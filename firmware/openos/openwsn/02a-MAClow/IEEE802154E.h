@@ -18,8 +18,8 @@
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define KATIMEOUT                  500 // in slots: @10ms per slot ->  5 second
-#define DESYNCTIMEOUT             1500 // in slots: @10ms per slot -> 15 seconds
+#define KATIMEOUT                  500 // in slots: @15ms per slot ->  ~8 second
+#define DESYNCTIMEOUT             1500 // in slots: @15ms per slot -> ~23 seconds
 
 // the different states of the IEEE802.15.4e state machine
 typedef enum {

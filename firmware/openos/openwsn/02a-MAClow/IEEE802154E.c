@@ -20,7 +20,8 @@
 typedef struct {
    // misc
    asn_t              asn;                  // current absolute slot number
-   uint16_t           slotOffset;           // current slot offset (equal to slotOffset)
+   slotOffset_t       slotOffset;           // current slot offset
+   slotOffset_t       nextActiveSlotOffset; // next active slot offset
    uint16_t           deSyncTimeout;        // how many slots left before looses sync
    bool               isSync;               // TRUE iff mote is synchronized to network
    // as shown on the chronogram
@@ -551,7 +552,7 @@ inline void activity_synchronize_endOfFrame(uint16_t capturedTime) {
 //======= TX
 
 inline void activity_ti1ORri1() {
-   uint8_t cellType;
+   cellType_t  cellType;
    open_addr_t neighbor;
    
    // increment ASN (do this first so debug pins are in sync)
@@ -594,18 +595,30 @@ inline void activity_ti1ORri1() {
       endSlot();
       return;
    }
+   
+   if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
+      // this is the next active slot
+      
+      // advance the schedule
+      schedule_advanceSlot();
+      
+      // find the next one
+      ieee154e_vars.nextActiveSlotOffset    = schedule_getNextActiveSlotOffset();
+   } else {
+      // this is NOT the next active slot, abort
+      
+      // stop using serial
+      openserial_stop();
+      // abort the slot
+      endSlot();
+      //start outputing serial
+      openserial_startOutput();
+      return;
+   }
 
    // check the schedule to see what type of slot this is
-   cellType = schedule_getType(ieee154e_vars.slotOffset);
+   cellType = schedule_getType();
    switch (cellType) {
-      case CELLTYPE_OFF:
-         // stop using serial
-         openserial_stop();
-         // abort the slot
-         endSlot();
-         //start outputing serial
-         openserial_startOutput();
-         break;
       case CELLTYPE_ADV:
          // stop using serial
          openserial_stop();
@@ -634,8 +647,8 @@ inline void activity_ti1ORri1() {
          // stop using serial
          openserial_stop();
          // check whether we can send
-         if (schedule_getOkToSend(ieee154e_vars.slotOffset)) {
-            schedule_getNeighbor(ieee154e_vars.slotOffset,&neighbor);
+         if (schedule_getOkToSend()) {
+            schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
          } else {
             ieee154e_vars.dataToSend = NULL;
@@ -696,7 +709,7 @@ inline void activity_ti2() {
    changeState(S_TXDATAPREPARE);
 
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset));
+   frequency = calculateFrequency(schedule_getChannelOffset());
 
    // configure the radio for that frequency
    radio_setFrequency(frequency);
@@ -797,7 +810,7 @@ inline void activity_ti5(uint16_t capturedTime) {
       radiotimer_schedule(DURATION_tt5);
    } else {
       // indicate succesful Tx to schedule to keep statistics
-      schedule_indicateTx(ieee154e_vars.slotOffset,&ieee154e_vars.asn,TRUE);
+      schedule_indicateTx(&ieee154e_vars.asn,TRUE);
       // indicate to upper later the packet was sent successfully
       notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
       // reset local variable
@@ -814,7 +827,7 @@ inline void activity_ti6() {
    changeState(S_RXACKPREPARE);
 
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset));
+   frequency = calculateFrequency(schedule_getChannelOffset());
 
    // configure the radio for that frequency
    radio_setFrequency(frequency);
@@ -852,7 +865,7 @@ inline void activity_ti7() {
 
 inline void activity_tie5() {
    // indicate transmit failed to schedule to keep stats
-   schedule_indicateTx(ieee154e_vars.slotOffset,&ieee154e_vars.asn,FALSE);
+   schedule_indicateTx(&ieee154e_vars.asn,FALSE);
    
    // decrement transmits left counter
    ieee154e_vars.dataToSend->l2_retriesLeft--;
@@ -979,7 +992,7 @@ inline void activity_ti9(uint16_t capturedTime) {
          }
          
          // inform schedule of successful transmission
-         schedule_indicateTx(ieee154e_vars.slotOffset,&ieee154e_vars.asn,TRUE);
+         schedule_indicateTx(&ieee154e_vars.asn,TRUE);
          
          // inform upper layer
          notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
@@ -1008,7 +1021,7 @@ inline void activity_ri2() {
    changeState(S_RXDATAPREPARE);
 
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset) );
+   frequency = calculateFrequency(schedule_getChannelOffset());
 
    // configure the radio for that frequency
    radio_setFrequency(frequency);
@@ -1245,7 +1258,7 @@ inline void activity_ri6() {
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
    
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset) );
+   frequency = calculateFrequency(schedule_getChannelOffset());
    
    // configure the radio for that frequency
    radio_setFrequency(frequency);
@@ -1394,7 +1407,7 @@ inline bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
 }
 
 /**
-\brief Decides whether the packet I just received is a valid ACK
+\brief Decides whether the packet I just received is a valid ACK.
 
 A packet is a valid ACK if it satisfies the following conditions:
 - the IEEE802.15.4 header is valid
@@ -1407,7 +1420,7 @@ A packet is a valid ACK if it satisfies the following conditions:
 \param [in] ieee802514_header IEEE802.15.4 header of the packet I just received
 \param [in] packetSent points to the packet I just sent
 
-\returns TRUE if packet is a valid ACK, FALSE otherwise
+\returns TRUE if packet is a valid ACK, FALSE otherwise.
 */
 inline bool isValidAck(ieee802154_header_iht* ieee802514_header,
                        OpenQueueEntry_t*      packetSent) {
@@ -1439,7 +1452,7 @@ inline void incrementAsnOffset() {
       }
    }
    // increment the offset
-   ieee154e_vars.slotOffset = (ieee154e_vars.slotOffset+1)%SCHEDULELENGTH;
+   ieee154e_vars.slotOffset = (ieee154e_vars.slotOffset+1)%schedule_getFrameLength();
 }
 
 inline void asnWriteToAdv(OpenQueueEntry_t* advFrame) {
@@ -1451,19 +1464,22 @@ inline void asnWriteToAdv(OpenQueueEntry_t* advFrame) {
 }
 
 inline void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
+   
    // store the ASN
    ieee154e_vars.asn.bytes0and1   =     ieee154e_vars.dataReceived->payload[0]+
                                     256*ieee154e_vars.dataReceived->payload[1];
    ieee154e_vars.asn.bytes2and3   =     ieee154e_vars.dataReceived->payload[2]+
                                     256*ieee154e_vars.dataReceived->payload[3];
    ieee154e_vars.asn.byte4        =     ieee154e_vars.dataReceived->payload[4];
+   
    // determine the current slotOffset
    /*
    Note: this is a bit of a hack. Normally, slotOffset=ASN%slotlength. But since
    the ADV is exchanged in slot 0, we know that we're currently at slotOffset==0
    */
    ieee154e_vars.slotOffset       = 0;
-   
+   schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+   ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
 }
 
 //======= synchronization
@@ -1535,7 +1551,7 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    // record the current ASN
    memcpy(&packetReceived->l2_asn, &ieee154e_vars.asn, sizeof(asn_t));
    // indicate reception to the schedule, to keep statistics
-   schedule_indicateRx(ieee154e_vars.slotOffset,&packetReceived->l2_asn);
+   schedule_indicateRx(&packetReceived->l2_asn);
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_RES;
@@ -1670,7 +1686,7 @@ void endSlot() {
       // getting here means transmit failed
       
       // indicate Tx fail to schedule to update stats
-      schedule_indicateTx(ieee154e_vars.slotOffset,&ieee154e_vars.asn,FALSE);
+      schedule_indicateTx(&ieee154e_vars.asn,FALSE);
       
       //decrement transmits left counter
       ieee154e_vars.dataToSend->l2_retriesLeft--;
