@@ -1933,13 +1933,37 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\eui64.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\drivers\gina\gyro.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\drivers\gina\gyro.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\i2c.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\drivers\gina\large_range_accel.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\drivers\gina\large_range_accel.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\leds.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\drivers\gina\magnetometer.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\drivers\gina\magnetometer.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\radiotimer.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\drivers\gina\sensitive_accel_temperature.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\drivers\gina\sensitive_accel_temperature.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\spi.c</name>
