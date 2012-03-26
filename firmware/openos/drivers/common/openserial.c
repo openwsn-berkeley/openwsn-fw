@@ -6,6 +6,7 @@
 
 #include "board.h"
 #include "openwsn.h"
+#include "IEEE802154E.h"
 #include "openserial.h"
 #include "neighbors.h"
 #include "res.h"
