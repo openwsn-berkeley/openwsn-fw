@@ -12,7 +12,9 @@
 
 //=========================== define ==========================================
 
+/// The number of timer that can run concurrently
 #define MAX_NUM_TIMERS            10
+
 #define TOO_MANY_TIMERS_ERROR     255
 
 typedef void (*opentimers_cbt)(void);
@@ -20,20 +22,19 @@ typedef void (*opentimers_cbt)(void);
 //=========================== typedef =========================================
 
 typedef enum {
-   TIMER_PERIODIC  = 0,
-   TIMER_ONESHOT   = 1,
+   TIMER_PERIODIC,
+   TIMER_ONESHOT,
 } timer_type_t;
 
 #define opentimer_id_t uint8_t
 
 typedef struct {
-   opentimer_id_t  id;                 // unique ID of the timer
-   uint32_t        period;             // timeout, in ms
-   uint32_t        timer_remaining;    // time remaining before elapses
-   timer_type_t    type;               // periodic or one-shot
-   bool            isrunning;          // is running?
-   opentimers_cbt  callback;           // function to call when elapses
-   bool            hasFired;           // whether the callback has to be called
+   PORT_TIMER_WIDTH     period_ticks;       // period, in ticks
+   PORT_TIMER_WIDTH     ticks_remaining;    // ticks remaining before elapses
+   timer_type_t         type;               // periodic or one-shot
+   bool                 isrunning;          // is running?
+   opentimers_cbt       callback;           // function to call when elapses
+   bool                 hasExpired;         // whether the callback has to be called
 } opentimers_t;
 
 //=========================== prototypes ======================================

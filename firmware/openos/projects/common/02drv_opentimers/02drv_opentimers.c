@@ -17,6 +17,10 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
+#define APP_DLY_TIMER0_ms   400
+#define APP_DLY_TIMER1_ms   800
+#define APP_DLY_TIMER2_ms  1600
+
 //=========================== variables =======================================
 
 /*
@@ -29,9 +33,9 @@ app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
+void cb_timer0();
 void cb_timer1();
 void cb_timer2();
-void cb_timer3();
 
 //=========================== main ============================================
 
@@ -42,19 +46,33 @@ int main(void) {
    board_init();
    opentimers_init();
    
+   opentimers_start(APP_DLY_TIMER0_ms,
+                    TIMER_PERIODIC,
+                    cb_timer0);
    
+   opentimers_start(APP_DLY_TIMER1_ms,
+                    TIMER_PERIODIC,
+                    cb_timer1);
+   
+   opentimers_start(APP_DLY_TIMER2_ms,
+                    TIMER_PERIODIC,
+                    cb_timer2);
+   
+   while(1) {
+      board_sleep();
+   }
 }
 
 //=========================== callbacks =======================================
 
-void cb_timer1() {
+void cb_timer0() {
    leds_error_toggle();
 }
 
-void cb_timer2() {
+void cb_timer1() {
    leds_radio_toggle();
 }
 
-void cb_timer3() {
+void cb_timer2() {
    leds_sync_toggle();
 }

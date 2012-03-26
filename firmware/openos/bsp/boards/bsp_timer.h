@@ -20,11 +20,11 @@ typedef void (*bsp_timer_cbt)(void);
 
 //=========================== prototypes ======================================
 
-void               bsp_timer_init();
-void               bsp_timer_set_callback(bsp_timer_cbt cb);
-void               bsp_timer_set_compare(uint16_t compareValue);
-void               bsp_timer_cancel_compare();
-PORT_TIMER_WIDTH   bsp_timer_get_current_value();
+void    bsp_timer_init();
+void    bsp_timer_set_callback(bsp_timer_cbt cb);
+void    bsp_timer_reset();
+void    bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks);
+void    bsp_timer_cancel_schedule();
 
 uint8_t bsp_timer_isr();
 
