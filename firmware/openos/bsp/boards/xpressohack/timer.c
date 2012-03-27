@@ -872,7 +872,7 @@ Does NOT set the compare nor capture registers.
 		// (we do that in set compare function)
 
 		LPC_TIM2->IR    = 0xFF;
-		LPC_TIM2->MCR   |= 0x03;//reset the timer on match.
+		LPC_TIM2->MCR   |= 0x3;//reset the timer on match.
 
 		//3 = Interrupt & reset timer0 on match
 		//1 = Interrupt only, no reset of timer

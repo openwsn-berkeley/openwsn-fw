@@ -14,6 +14,7 @@
 #include "LPC17xx.h"
 #include "lpc_types.h"
 
+#define PORT_TIMER_WIDTH                    uint32_t
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[] = "h=ucb";
@@ -26,15 +27,24 @@ static const uint8_t infoRadioName[] = "AT86RF231";
 //#define SPI_IN_INTERRUPT_MODE
 //#define SPI_IN_RTOS_MODE
 
-// [P2.8] SLP_TR
+// SLP_TR [P1.22]
+#ifdef OPENMOTE
+#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()   LPC_GPIO1->FIOSET |=  1<<22;
+#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()    LPC_GPIO1->FIOCLR |=  1<<22;
+#endif
+
+// SLP_TR [P2.8]
+#ifdef LPCXPRESSO1769
 #define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()   LPC_GPIO2->FIOSET |=  1<<8;
 #define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()    LPC_GPIO2->FIOCLR |=  1<<8;
+#endif
 
-// [P2.4] radio RSTn
-#define PORT_PIN_RADIO_RESET_HIGH()         LPC_GPIO2->FIOSET |=  1<<4;
-#define PORT_PIN_RADIO_RESET_LOW()          LPC_GPIO2->FIOCLR |=  1<<4;
 
-//isr radio is GPIO 2.5
+// [P2.4] radio RSTn [P0.17]
+#define PORT_PIN_RADIO_RESET_HIGH()         LPC_GPIO0->FIOSET |=  1<<17;
+#define PORT_PIN_RADIO_RESET_LOW()          LPC_GPIO0->FIOCLR |=  1<<17;
+
+//isr radio is GPIO  P0.22
 
 //===== peripheral fw library configuratoin definitions
 

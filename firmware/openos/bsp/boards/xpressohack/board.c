@@ -13,7 +13,7 @@
 #include "bsp_timer.h"
 #include "clkpwr.h"
 #include "debugpins.h"
-#include "virtualized_timers.h"
+#include "radiotimer.h"
 
 //=========================== variables =======================================
 
@@ -26,31 +26,39 @@ extern void EINT3_IRQHandler(void);
 void board_init() {
 
    //===== radio pins
-   // [P2.8] SLP_TR
-   LPC_PINCON->PINSEL4      &= ~0x3<<16;    // GPIO mode
-   LPC_GPIO2->FIODIR        |=  1<<8;       // set as output
-   LPC_GPIO2->FIOCLR        |=  1<<8;       // pull low
-   // [P2.4] RSTn
-   LPC_PINCON->PINSEL4      &= ~0x3<<8;     // GPIO mode
-   LPC_GPIO2->FIODIR        |=  1<<4;       // set as output
-   // [P2.5] ISR
-   LPC_PINCON->PINSEL4      &= ~0x3<<10;    // GPIO mode
-   LPC_GPIO2->FIODIR        &= ~1<<5;       // set as input
-   LPC_GPIOINT->IO2IntClr   |=  1<<5;       // clear possible pending interrupt
-   LPC_GPIOINT->IO2IntEnR   |=  1<<5;       // enable interrupt, rising edge
+   // OpenMote SLP_TR [P1.22]
+#ifdef OPENMOTE
+	LPC_PINCON->PINSEL3      &= ~0x3<<12;    // GPIO mode
+	LPC_GPIO1->FIODIR        |=  1<<22;       // set as output
+    LPC_GPIO1->FIOCLR        |=  1<<22;       // pull low
+#endif
+    //LPCXpresso is [P2.8]
+#ifdef LPCXPRESSO1769
+	   LPC_PINCON->PINSEL4      &= ~0x3<<16;    // GPIO mode
+	   LPC_GPIO2->FIODIR        |=  1<<8;       // set as output
+	   LPC_GPIO2->FIOCLR        |=  1<<8;       // pull low
+#endif
+
+   // [P0.17] RSTn
+   LPC_PINCON->PINSEL1      &= ~0x3<<2;     // GPIO mode
+   LPC_GPIO0->FIODIR        |=  1<<17;       // set as output
+   // [P0.22] ISR
+   LPC_PINCON->PINSEL1      &= ~0x3<<12;    // GPIO mode
+   LPC_GPIO0->FIODIR        &= ~1<<22;       // set as input
+   LPC_GPIOINT->IO0IntClr   |=  1<<22;       // clear possible pending interrupt
+   LPC_GPIOINT->IO0IntEnR   |=  1<<22;       // enable interrupt, rising edge
 
    // enable interrupts
-   NVIC_EnableIRQ(EINT3_IRQn);              // GPIOs
+   NVIC_EnableIRQ(EINT3_IRQn);              // GPIOs -- check that..
 
-   // initialize bsp modules
-   leds_init();
    debugpins_init();
-   timers_init();
-   spi_init();
-   //uart_init();
-//   radio_init();
-   radiotimer_init();
-   virtualized_timers_init();
+     leds_init();
+     uart_init();
+     spi_init();
+  //   i2c_init();
+     bsp_timer_init();
+  //   radio_init();
+     radiotimer_init();
 }
 
 void board_sleep() {
@@ -64,8 +72,8 @@ void board_sleep() {
 // GPIOs
 // note: all GPIO interrupts, both port 0 and 2, trigger this same vector
 void EINT3_IRQHandler(void) {
-   if ((LPC_GPIOINT->IO2IntStatR) & (1<<5)) {
-      LPC_GPIOINT->IO2IntClr = (1<<5);
+   if ((LPC_GPIOINT->IO0IntStatR) & (1<<22)) {
+      LPC_GPIOINT->IO0IntClr = (1<<22);
     //  radio_isr();
    }
 }

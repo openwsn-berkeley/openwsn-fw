@@ -8,181 +8,133 @@
 #include "timer.h"
 #include "bsp_timer.h"
 #include "board.h"
+#include "board_info.h"
 
-//=========================== defines =========================================
-
-#define TIMER_COUNT     6              // number of available timer;
-
-//=========================== variables =======================================
 
 typedef struct {
-   uint16_t        period[TIMER_COUNT];
-   timer_type_t    type[TIMER_COUNT];
-   timer_cbt       timers_cb[TIMER_COUNT];
-} timers_vars_t;
+   bsp_timer_cbt    cb;
+   PORT_TIMER_WIDTH last_compare_value;
+} bsp_timer_vars_t;
 
-timers_vars_t timers_vars;
+bsp_timer_vars_t bsp_timer_vars;
 
 //=========================== prototypes ======================================
-
-void timer_compare_isr_0(uint8_t reg);
-void timer_compare_isr_1(uint8_t reg);
-void timer_capture_isr_0(uint8_t reg);
-void timer_capture_isr_1(uint8_t reg);
+void timer_compare_isr_2(uint8_t reg);
+void timer_capture_isr_2(uint8_t reg);
 
 //=========================== public ==========================================
 
-void timers_init() {
+/**
+\brief Initialize this module.
+
+This functions starts the timer, i.e. the counter increments, but doesn't set
+any compare registers, so no interrupt will fire.
+*/
+void bsp_timer_init() {
 
    // clear local variables
-   memset(&timers_vars,0,sizeof(timers_vars));
+   memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
 
-   //set timer hooks.
-   timer_set_isr_compare_hook(TIMER_NUM0,timer_compare_isr_0);
-   timer_set_isr_compare_hook(TIMER_NUM1,timer_compare_isr_1);
-   timer_set_isr_capture_hook(TIMER_NUM0,timer_capture_isr_0);
-   timer_set_isr_capture_hook(TIMER_NUM1,timer_capture_isr_1);
+   timer_set_isr_compare_hook(TIMER_NUM2,bsp_timer_isr);
+   timer_set_isr_capture_hook(TIMER_NUM2,bsp_timer_isr);
 
-   timer_init(TIMER_NUM0);
-   timer_init(TIMER_NUM1);
-   timer_enable(TIMER_NUM0);
-   timer_enable(TIMER_NUM1);
+   timer_init(TIMER_NUM2);
+   timer_enable(TIMER_NUM2);
+
 }
 
-void timers_start(uint8_t id, uint16_t duration, timer_type_t type, timer_cbt callback) {
-   uint32_t current=0;
+/**
+\brief Register a callback.
 
-   // register timer
-   timers_vars.period[id]    = duration;
-   timers_vars.type[id]      = type;
-   timers_vars.timers_cb[id] = callback;
+\param cb The function to be called when a compare event happens.
+*/
+void bsp_timer_set_callback(bsp_timer_cbt cb) {
+   bsp_timer_vars.cb   = cb;
+}
 
-   switch(id) {
-      case 0:
-         current = timer_get_current_value(TIMER_NUM0);
-         timer_set_compare(TIMER_NUM0,
-                           TIMER_COMPARE_REG0,
-                           current+timers_vars.period[id]*TIMER_to_32kHz);
-         break;
-      case 1:
-         current = timer_get_current_value(TIMER_NUM0);
-         timer_set_compare(TIMER_NUM0,
-                           TIMER_COMPARE_REG1,
-                           current+timers_vars.period[id]*TIMER_to_32kHz);
-         break;
-      case 2:
-         current = timer_get_current_value(TIMER_NUM0);
-         timer_set_compare(TIMER_NUM0,
-                           TIMER_COMPARE_REG2,
-                           current+timers_vars.period[id]*TIMER_to_32kHz);
-         break;
-      case 3:
-         current = timer_get_current_value(TIMER_NUM1);
-         timer_set_compare(TIMER_NUM1,
-                           TIMER_COMPARE_REG0,
-                           current+timers_vars.period[id]*TIMER_to_32kHz);
-         break;
-      case 4:
-         current = timer_get_current_value(TIMER_NUM1);
-         timer_set_compare(TIMER_NUM1,
-                           TIMER_COMPARE_REG1,
-                           current+timers_vars.period[id]*TIMER_to_32kHz);
-         break;
-      case 5:
-         current = timer_get_current_value(TIMER_NUM1);
-         timer_set_compare(TIMER_NUM1,
-                           TIMER_COMPARE_REG2,
-                           current+timers_vars.period[id]*TIMER_to_32kHz);
-         break;
+/**
+\brief Reset the timer.
+
+This function does not stop the timer, it rather resets the value of the
+counter, and cancels a possible pending compare event.
+*/
+void bsp_timer_reset() {
+
+	timer_reset_compare(TIMER_NUM2,TIMER_COMPARE_REG0);
+	timer_reset(TIMER_NUM2);
+
+   // record last timer compare value
+   bsp_timer_vars.last_compare_value =  0;
+}
+
+/**
+\brief Schedule the callback to be called in some specified time.
+
+The delay is expressed relative to the last compare event. It doesn't matter
+how long it took to call this function after the last compare, the timer will
+expire precisely delayTicks after the last one.
+
+The only possible problem is that it took so long to call this function that
+the delay specified is shorter than the time already elapsed since the last
+compare. In that case, this function triggers the interrupt to fire right away.
+
+This means that the interrupt may fire a bit off, but this inaccuracy does not
+propagate to subsequent timers.
+
+\param delayTicks Number of ticks before the timer expired, relative to the
+                  last compare event.
+*/
+void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
+   PORT_TIMER_WIDTH newCompareValue;
+   PORT_TIMER_WIDTH temp_last_compare_value;
+   PORT_TIMER_WIDTH current_value;
+
+   temp_last_compare_value = bsp_timer_vars.last_compare_value;
+
+   newCompareValue      =  bsp_timer_vars.last_compare_value+delayTicks;
+   bsp_timer_vars.last_compare_value   =  newCompareValue;
+
+   current_value=timer_get_current_value(TIMER_NUM2);
+   if (delayTicks<current_value-temp_last_compare_value) {
+      // we're already too late, schedule the ISR right now manually
+
+      // setting the interrupt flag triggers an interrupt
+      // TODO .. look how.
+   } else {
+      // this is the normal case, have timer expire at newCompareValue
+	  timer_set_compare(TIMER_NUM2,TIMER_COMPARE_REG0,newCompareValue);
+	  timer_enable(TIMER_NUM2); //in case not enabled
    }
 }
 
-void timers_stop(uint8_t id) {
-
-   // unregister timer
-   timers_vars.period[id]    = 0;
-   timers_vars.timers_cb[id] = NULL;
-
-   // play with HW registers
-   switch(id) {
-      case 0:
-         timer_reset_compare(TIMER_NUM0,TIMER_COMPARE_REG0);
-         break;
-      case 1:
-         timer_reset_compare(TIMER_NUM0,TIMER_COMPARE_REG1);
-         break;
-      case 2:
-         timer_reset_compare(TIMER_NUM0,TIMER_COMPARE_REG2);
-         break;
-      case 3:
-         timer_reset_compare(TIMER_NUM1,TIMER_COMPARE_REG0);
-         break;
-      case 4:
-         timer_reset_compare(TIMER_NUM1,TIMER_COMPARE_REG1);
-         break;
-      case 5:
-         timer_reset_compare(TIMER_NUM1,TIMER_COMPARE_REG2);
-         break;
-   }
+/**
+\brief Cancel a running compare.
+*/
+void bsp_timer_cancel_schedule() {
+	timer_reset_compare(TIMER_NUM2,TIMER_COMPARE_REG0);
+	timer_disable(TIMER_NUM2);
 }
 
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
 
-/**
-\brief Interrupt handler for TIMER_NUM0, compare
-*/
-void timer_compare_isr_0(uint8_t reg) {
-
-   uint8_t id=TIMER_NUM0+reg;
-   uint32_t current=0;
-
-   if (timers_vars.type[id]==TIMER_PERIODIC) {
-      current=timer_get_current_value(TIMER_NUM0);
-      // continuous timer: schedule next instant
-      timer_set_compare(TIMER_NUM0,reg,current+timers_vars.period[id]*TIMER_to_32kHz);
-   } else {
-      timer_reset_compare(TIMER_NUM0,reg);
-   }
+uint8_t bsp_timer_isr() {
    // call the callback
-   timers_vars.timers_cb[id]();
+   bsp_timer_vars.cb();
    // kick the OS
-   // TODO
+   return 1;
 }
 
-/**
-\brief Interrupt handler for TIMER_NUM1, compare
-*/
-void timer_compare_isr_1(uint8_t reg) {
-
-   uint8_t id=TIMER_NUM1+reg;
-   uint32_t current=0;
-
-   if (timers_vars.type[id]==TIMER_PERIODIC) {
-      current=timer_get_current_value(TIMER_NUM1);
-      // continuous timer: schedule next instant
-      timer_set_compare(TIMER_NUM1,reg,current+timers_vars.period[id]*TIMER_to_32kHz);
-   } else {
-      timer_reset_compare(TIMER_NUM1,reg);
-   }
-   // call the callback
-   timers_vars.timers_cb[id]();
-   // kick the OS
-   // TODO
+void timer_compare_isr_2(uint8_t reg){
+	if (reg==TIMER_COMPARE_REG0){
+		bsp_timer_isr();
+	}else{
+		//error!
+		while(1);
+	}
 }
 
-
-/**
-\brief Interrupt handler for TIMER_NUM0, capture
-*/
-void timer_capture_isr_0(uint8_t reg) {
-   // TODO
-}
-
-/**
-\brief Interrupt handler for TIMER_NUM1, capture
-*/
-void timer_capture_isr_1(uint8_t reg) {
-   // TODO
+void timer_capture_isr_2(uint8_t reg){
+	//do nothing
 }
