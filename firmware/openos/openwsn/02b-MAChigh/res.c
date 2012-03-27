@@ -38,7 +38,7 @@ void    res_timer_cb();
 //=========================== public ==========================================
 
 void res_init() {
-   res_vars.periodMaintenance = 16384+openrandom_get16b()%32768; // fires every 1 sec on average
+   res_vars.periodMaintenance = 1700+(openrandom_get16b()&0xff); // fires every 1 sec on average
    res_vars.busySending       = FALSE;
    res_vars.dsn               = 0;
    res_vars.MacMgtTaskCounter = 0;
@@ -97,10 +97,9 @@ void task_resNotifSendDone() {
       // I can send the next ADV or KA
       res_vars.busySending = FALSE;
       // restart a random timer
-      res_vars.periodMaintenance = 16384+openrandom_get16b()%32768;
-      res_vars.timerId = opentimers_start(res_vars.periodMaintenance,
-                                          TIMER_PERIODIC,
-                                          res_timer_cb);
+      res_vars.periodMaintenance = 1700+(openrandom_get16b()&0xff);
+      opentimers_setPeriod(res_vars.timerId,
+                           res_vars.periodMaintenance);
    } else {
       // send the rest up the stack
       iphc_sendDone(msg,msg->l2_sendDoneError);

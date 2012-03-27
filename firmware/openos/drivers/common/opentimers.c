@@ -115,8 +115,8 @@ opentimer_id_t opentimers_start(uint16_t duration, timer_type_t type, opentimers
 \brief Replace the period of a running timer.
 */
 void  opentimers_setPeriod(opentimer_id_t id,
-                           uint16_t       newPeriod) {
-   opentimers_vars.timersBuf[id].period_ticks = newPeriod;
+                           uint16_t       newDuration) {
+   opentimers_vars.timersBuf[id].period_ticks = newDuration*PORT_TICS_PER_MS;
 }
 
 /**

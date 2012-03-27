@@ -33,7 +33,6 @@ void icmpv6rpl_timer_cb();
 void icmpv6rpl_init() {
    icmpv6rpl_vars.busySending = FALSE;
    icmpv6rpl_vars.seq         = 0;
-   icmpv6rpl_vars.periodDIO = 40000+(64*(openrandom_get16b() & 0xff));       // pseudo-random
    icmpv6rpl_vars.all_routers_multicast.type = ADDR_128B;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[0]  = 0xff;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[1]  = 0x02;
@@ -51,9 +50,10 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.all_routers_multicast.addr_128b[13] = 0x00;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[14] = 0x00;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[15] = 0x02;
-   icmpv6rpl_vars.timerId = opentimers_start(icmpv6rpl_vars.periodDIO,
-                                             TIMER_PERIODIC,
-                                             icmpv6rpl_timer_cb);
+   icmpv6rpl_vars.periodDIO  = 1700+(openrandom_get16b()&0xff);       // pseudo-random
+   icmpv6rpl_vars.timerId    = opentimers_start(icmpv6rpl_vars.periodDIO,
+                                                TIMER_PERIODIC,
+                                                icmpv6rpl_timer_cb);
 }
 
 void icmpv6rpl_trigger() {
@@ -99,7 +99,7 @@ void timers_rpl_fired() {
    if (icmpv6rpl_vars.delayDIO==0) {
       sendDIO();
       //set a new random periodDIO
-      icmpv6rpl_vars.periodDIO = 40000+(64*(openrandom_get16b() & 0xff));       // pseudo-random
+      icmpv6rpl_vars.periodDIO = 1700+(openrandom_get16b()&0xff);       // pseudo-random
       opentimers_setPeriod(icmpv6rpl_vars.timerId,
                            icmpv6rpl_vars.periodDIO);
    }

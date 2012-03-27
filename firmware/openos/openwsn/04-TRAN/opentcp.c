@@ -24,6 +24,7 @@ typedef struct {
    open_addr_t          hisIPv6Address;
    OpenQueueEntry_t*    dataToSend;
    OpenQueueEntry_t*    dataReceived;
+   bool                 timerStarted;
    opentimer_id_t       timerId;
 } tcp_vars_t;
 
@@ -40,6 +41,10 @@ void opentcp_timer_cb();
 //=========================== public ==========================================
 
 void opentcp_init() {
+   // reset local variables
+   memset(&tcp_vars,0,sizeof(tcp_vars_t));
+      
+   // reset state machine
    reset();
 }
 
@@ -737,11 +742,17 @@ void reset() {
 void tcp_change_state(uint8_t new_tcp_state) {
    tcp_vars.state = new_tcp_state;
    if (tcp_vars.state==TCP_STATE_CLOSED) {
-      opentimers_stop(tcp_vars.timerId);
+      if (tcp_vars.timerStarted==TRUE) {
+         opentimers_stop(tcp_vars.timerId);
+      }
    } else {
-      tcp_vars.timerId = opentimers_start(TCP_TIMEOUT,
-                                          TIMER_ONESHOT,
-                                          opentcp_timer_cb);
+      if (tcp_vars.timerStarted==FALSE) {
+         tcp_vars.timerId = opentimers_start(TCP_TIMEOUT,
+                                             TIMER_ONESHOT,
+                                             opentcp_timer_cb);
+         tcp_vars.timerStarted=TRUE;
+      }
+      
    }
 }
 

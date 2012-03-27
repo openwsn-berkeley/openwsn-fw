@@ -40,7 +40,7 @@ void opencoap_init() {
    
    // start the timer
    if (idmanager_getIsDAGroot()==FALSE) {
-      opencoap_vars.timerId = opentimers_start(0xffff,
+      opencoap_vars.timerId = opentimers_start(1000,
                                                TIMER_PERIODIC,
                                                icmpv6coap_timer_cb);
    }

@@ -48,6 +48,7 @@
 #include "idmanager.h"
 #include "openqueue.h"
 #include "openrandom.h"
+#include "opentimers.h"
 // drivers
 #include "openserial.h"
 
@@ -68,6 +69,7 @@ void openwsn_init() {
    idmanager_init(); // call first since initializes e.g. EUI64
    openqueue_init();
    openrandom_init();
+   opentimers_init();
    // 02a-TSCH
    ieee154e_init();
    // 02b-RES

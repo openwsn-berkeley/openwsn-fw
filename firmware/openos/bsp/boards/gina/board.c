@@ -57,10 +57,12 @@ void board_init() {
    radiotimer_init();
    
    //turn sensors off
+   /*
    gyro_disable();
    large_range_accel_disable();
    magnetometer_disable();
    sensitive_accel_temperature_disable();
+   */
    
    // enable interrupts
    __bis_SR_register(GIE);

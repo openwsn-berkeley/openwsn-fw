@@ -12,7 +12,7 @@
 
 enum {
    TCP_INITIAL_SEQNUM             = 100,
-   TCP_TIMEOUT                    = 0xFFFE, //~2s at 32kHz
+   TCP_TIMEOUT                    = 1500, //in ms
 };
 
 enum TCP_STATE_enums {
