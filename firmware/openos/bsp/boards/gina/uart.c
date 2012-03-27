@@ -9,15 +9,27 @@
 #include "stdio.h"
 #include "string.h"
 #include "uart.h"
-#include "openserial.h"
 
 //=========================== defines =========================================
+
 //=========================== variables =======================================
+
+typedef struct {
+   uart_tx_cbt txCb;
+   uart_rx_cbt rxCb;
+} uart_vars_t;
+
+uart_vars_t uart_vars;
+
 //=========================== prototypes ======================================
+
 //=========================== public ==========================================
 
 void uart_init() {
-  //initialize UART openserial_vars.mode
+   // reset local variables
+   memset(&uart_vars,0,sizeof(uart_vars_t));
+   
+   //initialize UART openserial_vars.mode
    P3SEL    |=  0xC0;                             // P3.6,7 = USCI_A1 TXD/RXD
    UCA1CTL1 |=  UCSSEL_2;                         // CLK = SMCL
    UCA1BR0   =  0x8a;                             // 115200 baud if SMCLK@16MHz
@@ -28,6 +40,10 @@ void uart_init() {
    //UC1IE    |=  (UCA1RXIE  | UCA1TXIE);           // Enable USCI_A1 TX & RX interrupt  
 }
 
+void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
+   uart_vars.txCb = txCb;
+   uart_vars.rxCb = rxCb;
+}
 
 void    uart_enableInterrupts(){
   UC1IE    |=  (UCA1RXIE  | UCA1TXIE);  
@@ -57,12 +73,12 @@ uint8_t uart_readByte(){
 
 uint8_t uart_isr_tx() {
    uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
-   isr_openserial_tx();
+   uart_vars.txCb();
    return 0;
 }
 
 uint8_t uart_isr_rx() {
    uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
-   isr_openserial_rx();
+   uart_vars.rxCb();
    return 0;
 }

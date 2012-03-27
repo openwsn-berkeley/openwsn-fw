@@ -15,12 +15,13 @@
 #include "bsp_timer.h"
 #include "radio.h"
 #include "radiotimer.h"
-//sensors
+/*
+// sensors
 #include "gyro.h"
 #include "large_range_accel.h"
 #include "magnetometer.h"
 #include "sensitive_accel_temperature.h"
-
+*/
 
 //=========================== variables =======================================
 

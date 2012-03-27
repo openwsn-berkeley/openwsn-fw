@@ -70,6 +70,10 @@ void openserial_init() {
    openserial_vars.output_buffer_index_write = 0;
    openserial_vars.somethingInOutputBuffer   = FALSE;
    openserial_vars.mode = MODE_OFF;
+   
+   // set callbacks
+   uart_setCallbacks(isr_openserial_tx,
+                     isr_openserial_rx);
 }
 
 error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t length) {

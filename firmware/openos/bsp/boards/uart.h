@@ -20,16 +20,15 @@ typedef enum {
    UART_EVENT_OVERFLOW,
 } uart_event_t;
 
-typedef void (*uart_txDone_cbt)(void);
-typedef void (*uart_rx_cbt)(uart_event_t ev);
+typedef void (*uart_tx_cbt)();
+typedef void (*uart_rx_cbt)();
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 void    uart_init();
-
-//added by fabien:
+void    uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb);
 void    uart_enableInterrupts();
 void    uart_disableInterrupts();
 void    uart_clearRxInterrupts();

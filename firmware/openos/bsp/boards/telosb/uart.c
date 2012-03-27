@@ -15,6 +15,13 @@
 
 //=========================== variables =======================================
 
+typedef struct {
+   uart_tx_cbt txCb;
+   uart_rx_cbt rxCb;
+} uart_vars_t;
+
+uart_vars_t uart_vars;
+
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
@@ -33,6 +40,11 @@ void uart_init() {
    
    ME2                      |=  UTXE1 + URXE1;   // enable UART1 TX/RX
    UCTL1                    &= ~SWRST;           // clear UART1 reset bit
+}
+
+void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
+   uart_vars.txCb = txCb;
+   uart_vars.rxCb = rxCb;
 }
 
 void    uart_enableInterrupts(){
@@ -65,12 +77,12 @@ uint8_t uart_readByte(){
 
 uint8_t uart_isr_tx() {
    uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
-   isr_openserial_tx();
+   uart_vars.txCb();
    return 0;
 }
 
 uint8_t uart_isr_rx() {
    uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
-   isr_openserial_rx();
+   uart_vars.rxCb();
    return 0;
 }
