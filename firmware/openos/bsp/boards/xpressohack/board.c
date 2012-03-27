@@ -15,6 +15,16 @@
 #include "debugpins.h"
 #include "radiotimer.h"
 
+//#ifndef LPCXPRESSO1769
+//#define LPCXPRESSO1769
+//#endif
+
+#ifndef OPENMOTE
+#define OPENMOTE
+#endif
+
+
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -53,11 +63,11 @@ void board_init() {
 
    debugpins_init();
      leds_init();
-     uart_init();
+   //  uart_init();
      spi_init();
   //   i2c_init();
      bsp_timer_init();
-  //   radio_init();
+   //  radio_init();
      radiotimer_init();
 }
 

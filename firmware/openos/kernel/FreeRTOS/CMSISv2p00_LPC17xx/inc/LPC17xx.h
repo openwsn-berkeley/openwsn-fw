@@ -27,6 +27,16 @@
 #ifndef __LPC17xx_H__
 #define __LPC17xx_H__
 
+
+//#ifndef LPCXPRESSO1769
+//#define LPCXPRESSO1769
+//#endif
+
+#ifndef OPENMOTE
+#define OPENMOTE
+#endif
+
+
 /*
  * ==========================================================================
  * ---------- Interrupt Number Definition -----------------------------------

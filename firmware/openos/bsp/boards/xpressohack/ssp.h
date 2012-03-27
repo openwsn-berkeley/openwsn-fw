@@ -24,8 +24,8 @@
  * @{
  */
 
-#ifndef LPC17XX_SSP_H_
-#define LPC17XX_SSP_H_
+#ifndef _SSP_H_
+#define _SSP_H_
 
 /* Includes ------------------------------------------------------------------- */
 #include "LPC17xx.h"

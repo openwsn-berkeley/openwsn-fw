@@ -41,12 +41,20 @@ This SPI operational mode is commonly known as "SPI mode 0".
 
  */
 
+
+
 #include "spi.h"
 #include "board.h"
 #include "clkpwr.h"
 #include "LPC17xx.h"
+#include "ssp_spi_wrapper.h"
 
-#define PIN_MASK_CS (1<<2)
+#ifndef SSP_ENABLED
+#define SSP_ENABLED
+#endif
+
+//#define PIN_MASK_CS (1<<2)
+#define PIN_MASK_CS (1<<6)
 #define SPI_IE      (1<<7)
 #define SPI_LSB     (1<<6)
 #define SPI_MST     (1<<5)
@@ -54,6 +62,7 @@ This SPI operational mode is commonly known as "SPI mode 0".
 #define SPI_CPOL    (1<<4)
 #define SPI_CPHA    (1<<3)
 //=========================== variables =======================================
+
 
 typedef struct {
 	// information about the current transaction
@@ -81,7 +90,7 @@ extern  void  SPI_IRQHandler(void);
 //=========================== public ==========================================
 
 void spi_init(){
-
+#ifdef SPI_ENABLED
 	/*Power: In the PCONP register (Table 46), set bit PCSPI.*/
 
 	CLKPWR_ConfigPPWR(CLKPWR_PCONP_PCSPI,ENABLE);
@@ -101,11 +110,18 @@ void spi_init(){
    to configure the pins SSEL, MISO and MOSI, respectively.*/
 
     // configure pins
-	LPC_PINCON->PINSEL0     |= (3<<30);          // [P0.15] SCK0
+	LPC_PINCON->PINSEL1     |= (3<<30);          // [P0.15] SCK0
 	LPC_PINCON->PINSEL1     |= (1<<2 )|(1<<3 );  // [P0.17] MISO0
 	LPC_PINCON->PINSEL1     |= (1<<4 )|(1<<5 );  // [P0.18] MOSI0
-	LPC_GPIO2->FIODIR       |= PIN_MASK_CS;      // [P2.2]  CS  - set as output
-	LPC_GPIO2->FIOSET       |= PIN_MASK_CS;      //             - set high
+
+	LPC_PINCON->PINSEL0     &= ~(3)<<12;  //  [P0.6] CS as GPIO
+
+	LPC_GPIO0->FIODIR       |= PIN_MASK_CS;
+	LPC_GPIO0->FIOSET       |= PIN_MASK_CS;      //             - set high
+
+	//LPC_GPIO2->FIODIR       |= PIN_MASK_CS;      // [P2.2]  CS  - set as output [P0.6]  SSEL1  - set as output
+
+	//LPC_GPIO2->FIOSET       |= PIN_MASK_CS;      //             - set high
 
 	//the radio wants MSB, Master mode,CPOL=0 and CPHA=0
 	LPC_SPI->SPCR|=SPI_MST;// master mode
@@ -130,6 +146,10 @@ void spi_init(){
 #ifdef SPI_IN_INTERRUPT_MODE
 	LPC_SPI->SPCR|=SPI_IE; //enable interrupt if interrupt mode on.
 #endif
+#endif
+#ifdef SSP_ENABLED
+	ssp_spi_init();
+#endif
 }
 
 
@@ -147,7 +167,7 @@ void    spi_txrx(uint8_t*     bufTx,
 		uint8_t      maxLenBufRx,
 		spi_first_t  isFirst,
 		spi_last_t   isLast){
-
+#ifdef SPI_ENABLED
 	uint32_t      spifreg;
 #ifdef SPI_IN_INTERRUPT_MODE
 	// disable interrupts
@@ -173,7 +193,8 @@ void    spi_txrx(uint8_t*     bufTx,
 
 	// lower CS signal to have slave listening
 	if (spi_vars.isFirst==SPI_FIRST) {
-		LPC_GPIO2->FIOCLR   |= PIN_MASK_CS;
+	//	LPC_GPIO2->FIOCLR   |= PIN_MASK_CS;
+		LPC_GPIO0->FIOCLR   |= PIN_MASK_CS;
 	}
 
 #ifdef SPI_IN_INTERRUPT_MODE
@@ -221,7 +242,8 @@ void    spi_txrx(uint8_t*     bufTx,
 
 	// put CS signal high to signal end of transmission to slave
 	if (spi_vars.isLast==SPI_LAST) {
-		LPC_GPIO2->FIOSET   |= PIN_MASK_CS;
+		//LPC_GPIO2->FIOSET   |= PIN_MASK_CS;
+		LPC_GPIO0->FIOSET   |= PIN_MASK_CS;
 	}
 
 	// SPI is not busy anymore
@@ -290,4 +312,10 @@ void    spi_txrx(uint8_t*     bufTx,
 		while(1);// this should never happen
 #endif
 	}
+#endif //SSP_ENABLED
+#ifdef SSP_ENABLED
+
+	 ssp_spi_txrx(bufTx, lenbufTx, returnType, bufRx, maxLenBufRx, isFirst,  isLast);
+#endif //SSP_ENABLED
+
 }

@@ -26,8 +26,9 @@
 #include "ssp.h"
 #include "clkpwr.h"
 #include "board.h"
+#include "board_info.h"
 
-
+#define _SSP
 #ifdef _SSP
 
 /* Public Functions ----------------------------------------------------------- */
@@ -48,7 +49,6 @@ static void setSSPclock (LPC_SSP_TypeDef *SSPx, uint32_t target_clock)
 {
     uint32_t prescale, cr0_div, cmp_clk, ssp_clk;
 
-    CHECK_PARAM(PARAM_SSPx(SSPx));
 
     /* The SSP clock is derived from the (main system oscillator / 2),
        so compute the best divider from that clock */
@@ -110,7 +110,7 @@ void SSP_Init(LPC_SSP_TypeDef *SSPx, SSP_CFG_Type *SSP_ConfigStruct)
 {
 	uint32_t tmp;
 
-	CHECK_PARAM(PARAM_SSPx(SSPx));
+
 
 	if(SSPx == LPC_SSP0) {
 		/* Set up clock and power for SSP0 module */
@@ -149,7 +149,6 @@ void SSP_Init(LPC_SSP_TypeDef *SSPx, SSP_CFG_Type *SSP_ConfigStruct)
  **********************************************************************/
 void SSP_DeInit(LPC_SSP_TypeDef* SSPx)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
 
 	if (SSPx == LPC_SSP0){
 		/* Set up clock and power for SSP0 module */
@@ -173,7 +172,7 @@ void SSP_DeInit(LPC_SSP_TypeDef* SSPx)
 *******************************************************************************/
 uint8_t SSP_GetDataSize(LPC_SSP_TypeDef* SSPx)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
+
 	return (SSPx->CR0 & (0xF));
 }
 
@@ -192,7 +191,7 @@ uint8_t SSP_GetDataSize(LPC_SSP_TypeDef* SSPx)
 void SSP_ConfigStructInit(SSP_CFG_Type *SSP_InitStruct)
 {
 	SSP_InitStruct->CPHA = SSP_CPHA_FIRST;
-	SSP_InitStruct->CPOL = SSP_CPOL_HI;
+	SSP_InitStruct->CPOL = SSP_CPOL_HI;//SSP_CPOL_HI
 	SSP_InitStruct->ClockRate = 1000000;
 	SSP_InitStruct->Databit = SSP_DATABIT_8;
 	SSP_InitStruct->Mode = SSP_MASTER_MODE;
@@ -210,8 +209,6 @@ void SSP_ConfigStructInit(SSP_CFG_Type *SSP_InitStruct)
  **********************************************************************/
 void SSP_Cmd(LPC_SSP_TypeDef* SSPx, FunctionalState NewState)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
-	CHECK_PARAM(PARAM_FUNCTIONALSTATE(NewState));
 
 	if (NewState == ENABLE)
 	{
@@ -235,8 +232,7 @@ void SSP_Cmd(LPC_SSP_TypeDef* SSPx, FunctionalState NewState)
  **********************************************************************/
 void SSP_LoopBackCmd(LPC_SSP_TypeDef* SSPx, FunctionalState NewState)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
-	CHECK_PARAM(PARAM_FUNCTIONALSTATE(NewState));
+
 
 	if (NewState == ENABLE)
 	{
@@ -263,8 +259,7 @@ void SSP_LoopBackCmd(LPC_SSP_TypeDef* SSPx, FunctionalState NewState)
  **********************************************************************/
 void SSP_SlaveOutputCmd(LPC_SSP_TypeDef* SSPx, FunctionalState NewState)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
-	CHECK_PARAM(PARAM_FUNCTIONALSTATE(NewState));
+
 
 	if (NewState == ENABLE)
 	{
@@ -289,7 +284,7 @@ void SSP_SlaveOutputCmd(LPC_SSP_TypeDef* SSPx, FunctionalState NewState)
  **********************************************************************/
 void SSP_SendData(LPC_SSP_TypeDef* SSPx, uint16_t Data)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
+
 
 	SSPx->DR = SSP_DR_BITMASK(Data);
 }
@@ -305,7 +300,7 @@ void SSP_SendData(LPC_SSP_TypeDef* SSPx, uint16_t Data)
  **********************************************************************/
 uint16_t SSP_ReceiveData(LPC_SSP_TypeDef* SSPx)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
+
 
 	return ((uint16_t) (SSP_DR_BITMASK(SSPx->DR)));
 }
@@ -340,6 +335,7 @@ int32_t SSP_ReadWrite (LPC_SSP_TypeDef *SSPx, SSP_DATA_SETUP_Type *dataCfg, \
     dataCfg->rx_cnt = 0;
     dataCfg->tx_cnt = 0;
     dataCfg->status = 0;
+
 
 
 	/* Clear all remaining data in RX FIFO */
@@ -513,8 +509,7 @@ int32_t SSP_ReadWrite (LPC_SSP_TypeDef *SSPx, SSP_DATA_SETUP_Type *dataCfg, \
  **********************************************************************/
 FlagStatus SSP_GetStatus(LPC_SSP_TypeDef* SSPx, uint32_t FlagType)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
-	CHECK_PARAM(PARAM_SSP_STAT(FlagType));
+
 
 	return ((SSPx->SR & FlagType) ? SET : RESET);
 }
@@ -537,7 +532,6 @@ FlagStatus SSP_GetStatus(LPC_SSP_TypeDef* SSPx, uint32_t FlagType)
  **********************************************************************/
 void SSP_IntConfig(LPC_SSP_TypeDef *SSPx, uint32_t IntType, FunctionalState NewState)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
 
 	if (NewState == ENABLE)
 	{
@@ -566,8 +560,6 @@ void SSP_IntConfig(LPC_SSP_TypeDef *SSPx, uint32_t IntType, FunctionalState NewS
  **********************************************************************/
 IntStatus SSP_GetRawIntStatus(LPC_SSP_TypeDef *SSPx, uint32_t RawIntType)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
-	CHECK_PARAM(PARAM_SSP_INTSTAT_RAW(RawIntType));
 
 	return ((SSPx->RIS & RawIntType) ? SET : RESET);
 }
@@ -581,7 +573,7 @@ IntStatus SSP_GetRawIntStatus(LPC_SSP_TypeDef *SSPx, uint32_t RawIntType)
  **********************************************************************/
 uint32_t SSP_GetRawIntStatusReg(LPC_SSP_TypeDef *SSPx)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
+
 	return (SSPx->RIS);
 }
 
@@ -602,8 +594,6 @@ uint32_t SSP_GetRawIntStatusReg(LPC_SSP_TypeDef *SSPx)
  **********************************************************************/
 IntStatus SSP_GetIntStatus (LPC_SSP_TypeDef *SSPx, uint32_t IntType)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
-	CHECK_PARAM(PARAM_SSP_INTSTAT(IntType));
 
 	return ((SSPx->MIS & IntType) ? SET :RESET);
 }
@@ -622,9 +612,6 @@ IntStatus SSP_GetIntStatus (LPC_SSP_TypeDef *SSPx, uint32_t IntType)
  **********************************************************************/
 void SSP_ClearIntPending(LPC_SSP_TypeDef *SSPx, uint32_t IntType)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
-	CHECK_PARAM(PARAM_SSP_INTCLR(IntType));
-
 	SSPx->ICR = IntType;
 }
 
@@ -644,9 +631,6 @@ void SSP_ClearIntPending(LPC_SSP_TypeDef *SSPx, uint32_t IntType)
  **********************************************************************/
 void SSP_DMACmd(LPC_SSP_TypeDef *SSPx, uint32_t DMAMode, FunctionalState NewState)
 {
-	CHECK_PARAM(PARAM_SSPx(SSPx));
-	CHECK_PARAM(PARAM_SSP_DMA(DMAMode));
-	CHECK_PARAM(PARAM_FUNCTIONALSTATE(NewState));
 
 	if (NewState == ENABLE)
 	{

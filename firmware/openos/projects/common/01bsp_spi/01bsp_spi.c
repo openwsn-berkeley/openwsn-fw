@@ -32,6 +32,7 @@ int main(void)
 
 	//  printf("command %u,%u,%u \n",spi_tx_buffer[0],spi_tx_buffer[1],spi_tx_buffer[2] );
 	// retrieve radio manufacturer ID over SPI
+	while (1){
 	spi_txrx(spi_tx_buffer,
 			sizeof(spi_tx_buffer),
 			SPI_BUFFER,
@@ -39,6 +40,7 @@ int main(void)
 			sizeof(spi_rx_buffer),
 			SPI_FIRST,
 			SPI_LAST);
+	}
 	max=0;
 	//printf("manufacturer id %u,%u,%u \n",spi_rx_buffer[0],spi_rx_buffer[1],spi_rx_buffer[2] );
 

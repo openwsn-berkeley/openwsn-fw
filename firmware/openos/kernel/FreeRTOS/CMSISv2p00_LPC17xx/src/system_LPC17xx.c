@@ -280,15 +280,14 @@
 //
 // </e>
 */
-//#define OPENMOTE
-#define LPCXPRESSO1769
+
 
 #define CLOCK_SETUP           1
 
 #ifdef OPENMOTE
 #define SCS_Val               0x00000000 //0 for openmote
-#define CLKSRCSEL_Val         0x00000000 //0 for openmote
-#define PLL0CFG_Val           0x00020018  //lower bits 14:0 MSEL0=24 23-16 NSEL=2 pag 37. pag 41 has the equation.
+#define CLKSRCSEL_Val         0x00000000 //0 for openmote -- we want 100mhz
+#define PLL0CFG_Val           0x0001004A  //lower bits 14:0 MSEL0=75-1=74 23-16 NSEL=2-1=1 pag 37. pag 41 has the equation.
 #endif
 
 #ifdef LPCXPRESSO1769 //100Mhz using Main clock + PLL0
@@ -310,9 +309,15 @@
 //#endif
 
 #define PLL0_SETUP            1
-#define PLL1_SETUP            1 //should be 1
+#define PLL1_SETUP            0 //should be 1
 #define PLL1CFG_Val           0x00000023
+
+#ifdef OPENMOTE
+#define CCLKCFG_Val           0x00000002 //main clock for 100Mhz is 3, for 120 is 2, rtc at 100 is 2 (divided by 3)
+#else LPCXPRESSO1769
 #define CCLKCFG_Val           0x00000003 //main clock for 100Mhz is 3, for 120 is 2, rtc at 100 is 2 (divided by 3)
+#endif
+
 #define USBCLKCFG_Val         0x00000000
 #define PCLKSEL0_Val          0x00000000
 #define PCLKSEL1_Val          0x00000000
