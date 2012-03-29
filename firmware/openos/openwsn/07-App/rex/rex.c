@@ -4,6 +4,7 @@
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
+#include "ADC_Channel.h"
 
 //=========================== defines =========================================
 
@@ -66,6 +67,20 @@ void rex_timer() {
    
    rex_vars.delay += 2;
    
+   uint16_t       x_int       = 0;
+   uint16_t*      p_x_int     = &x_int;
+   uint16_t       sum         = 0;
+   uint16_t       avg         = 0;
+   uint8_t        N_avg       = 10;
+   
+   for (int i = 0; i < N_avg; i++)
+   {
+     ADC_getvoltage(p_x_int);
+     sum += x_int;
+   }
+   avg = sum/N_avg;
+
+   
    if (rex_vars.delay>=REXPERIOD) {
       // create a CoAP RD packet
       pkt = openqueue_getFreePacketBuffer();
@@ -84,6 +99,7 @@ void rex_timer() {
       for (i=0;i<PAYLOADLEN;i++) {
          pkt->payload[i] = i;
       }
+           
       numOptions = 0;
       // location-path option
       packetfunctions_reserveHeaderSize(pkt,sizeof(rex_path0)-1);

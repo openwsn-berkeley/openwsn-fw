@@ -15,13 +15,13 @@
 #include "bsp_timer.h"
 #include "radio.h"
 #include "radiotimer.h"
-/*
+
 // sensors
 #include "gyro.h"
 #include "large_range_accel.h"
 #include "magnetometer.h"
 #include "sensitive_accel_temperature.h"
-*/
+/**/
 
 //=========================== variables =======================================
 
@@ -56,14 +56,15 @@ void board_init() {
    bsp_timer_init();
    radio_init();
    radiotimer_init();
+   ADC_init();
    
    //turn sensors off
    /*
    gyro_disable();
-   large_range_accel_disable();
+   /*large_range_accel_disable();
    magnetometer_disable();
    sensitive_accel_temperature_disable();
-   */
+   /**/
    
    // enable interrupts
    __bis_SR_register(GIE);

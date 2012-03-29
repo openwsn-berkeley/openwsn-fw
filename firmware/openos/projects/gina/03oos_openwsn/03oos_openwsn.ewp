@@ -2035,6 +2035,12 @@
     </group>
     <group>
       <name>gina</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\gina\ADC_Channel.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\gina\ADC_Channel.h</name>
+      </file>
     </group>
   </group>
   <group>
