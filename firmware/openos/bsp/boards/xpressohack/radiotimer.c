@@ -12,6 +12,7 @@ The capture register is used to capture counter value at different moments, e.g 
 #include "string.h"
 #include "radiotimer.h"
 #include "timer.h"
+#include "LPC17xx.h"
 
 //pin 0.23 is cap0 for capture.
 

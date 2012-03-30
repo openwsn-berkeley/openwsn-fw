@@ -6,7 +6,11 @@ Bridge between L2.5 and L2 used to set the schedule in neighbours using the info
  \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, March 2012.
  */
 
+#ifndef __CFRES_H
+#define __CFRES_H
 
 #include "rsvp.h"
 
 void updateSchedule(rsvp_label_object_t* label);
+
+#endif

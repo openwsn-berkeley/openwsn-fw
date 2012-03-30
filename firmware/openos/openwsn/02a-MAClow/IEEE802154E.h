@@ -118,7 +118,7 @@ typedef struct {
 // admin
           void     ieee154e_init();
 // public
-__monitor uint16_t ieee154e_asnDiff(asn_t* someASN);
+          uint16_t ieee154e_asnDiff(asn_t* someASN);
 // events
           void     ieee154e_startOfFrame(uint16_t capturedTime);
           void     ieee154e_endOfFrame(uint16_t capturedTime);

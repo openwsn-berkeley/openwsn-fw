@@ -16,3 +16,4 @@ uint8_t linkcost_calcRSSI();
 //other metrics can be used.
 
 
+#endif

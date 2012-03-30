@@ -60,23 +60,23 @@ typedef struct {
           void            schedule_init();
           bool            debugPrint_schedule();
 // from uRES
-__monitor void            schedule_setFrameLength(frameLength_t newFrameLength);
-__monitor void            schedule_addActiveSlot(slotOffset_t    slotOffset,
+          void            schedule_setFrameLength(frameLength_t newFrameLength);
+          void            schedule_addActiveSlot(slotOffset_t    slotOffset,
                                                  cellType_t      type,
                                                  bool            shared,
                                                  uint8_t         channelOffset,
                                                  open_addr_t*    neighbor);
 // from IEEE802154E
-__monitor void            schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
-__monitor void            schedule_advanceSlot();
-__monitor slotOffset_t    schedule_getNextActiveSlotOffset();
-__monitor frameLength_t   schedule_getFrameLength();
-__monitor cellType_t      schedule_getType();
-__monitor void            schedule_getNeighbor(open_addr_t* addrToWrite);
-__monitor channelOffset_t schedule_getChannelOffset();
-__monitor bool            schedule_getOkToSend();
-__monitor void            schedule_indicateRx(asn_t*   asnTimestamp);
-__monitor void            schedule_indicateTx(asn_t*   asnTimestamp,
+ void            schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
+ void            schedule_advanceSlot();
+ slotOffset_t    schedule_getNextActiveSlotOffset();
+ frameLength_t   schedule_getFrameLength();
+ cellType_t      schedule_getType();
+ void            schedule_getNeighbor(open_addr_t* addrToWrite);
+ channelOffset_t schedule_getChannelOffset();
+ bool            schedule_getOkToSend();
+ void            schedule_indicateRx(asn_t*   asnTimestamp);
+ void            schedule_indicateTx(asn_t*   asnTimestamp,
                                               bool     succesfullTx);
 
 /**

@@ -10,6 +10,11 @@ RSVP_Msg
  \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, March 2012.
  */
 
+#ifndef __RSVP_H
+#define __RSVP_H
+
+#include "stdint.h"
+
 //general header of any rsvp message
 typedef struct{
 	uint8_t version_flags;//4 high bit version, 4 low flags
@@ -33,7 +38,7 @@ typedef struct{
 }cycle_table_tuple_t;
 
 typedef struct{
-     cycle_table_tuple_t cycles[];
+     cycle_table_tuple_t cycles[10];
 }rsvp_trans_cycle_table_t;
 
 typedef struct{
@@ -58,23 +63,21 @@ typedef struct{
     rsvp_enhanced_mode_tuple_t ehmode;
 }rsvp_sender_llnspec_t;
 
-typedef struct{
 
-};
 
 
 //reservation request message. Includes QoS requirements. Some required objects are omitted by now.
 typedef struct{
-rsvp_header_t header;
+	rsvp_msg_header_t header;
 rsvp_sender_llnspec_t sender_llnspec;
 }rsvp_path_msg_t;
 
 //downstream message including the label information. Some required objects are omitted by now.
 typedef struct{
-	rsvp_header_t header;
+	rsvp_msg_header_t header;
 	rsvp_label_object_t label;
 }rsvp_resv_msg_t;
 
 
-
+#endif
 

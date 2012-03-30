@@ -41,7 +41,7 @@ typedef void (*task_cbt)(void);
 // public functions
           void scheduler_init();
           void scheduler_start();
-__monitor void scheduler_push_task(task_cbt task_cb, task_prio_t prio);
+          void scheduler_push_task(task_cbt task_cb, task_prio_t prio);
 
 // interrupt handlers
 void isr_ieee154e_newSlot();

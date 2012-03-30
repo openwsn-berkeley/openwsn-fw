@@ -78,7 +78,7 @@ void openserial_init() {
 
 error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t length) {
    uint8_t counter;
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    openserial_vars.somethingInOutputBuffer=TRUE;
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
@@ -93,7 +93,7 @@ error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t l
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';                  //postamble
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    return E_SUCCESS;
 }
 
@@ -101,7 +101,7 @@ error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
    leds_error_toggle();
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    openserial_vars.somethingInOutputBuffer=TRUE;
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
@@ -118,13 +118,13 @@ error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';                  //postamble
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    return E_SUCCESS;
 }
 
 error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    uint8_t counter;
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    openserial_vars.somethingInOutputBuffer=TRUE;
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
@@ -138,24 +138,24 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';                  //postamble
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    return E_SUCCESS;
 }
 
 uint8_t openserial_getNumDataBytes() {
    uint16_t temp_openserial_input_buffer_fill_level;
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    temp_openserial_input_buffer_fill_level = openserial_vars.input_buffer_fill_level;
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    return temp_openserial_input_buffer_fill_level;
 }
 
 uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
    uint8_t numBytesWritten;
    uint16_t temp_openserial_input_buffer_fill_level;
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    temp_openserial_input_buffer_fill_level = openserial_vars.input_buffer_fill_level;
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    if (maxNumBytes<temp_openserial_input_buffer_fill_level) {
       openserial_printError(COMPONENT_OPENSERIAL,ERR_GETDATA_ASKS_TOO_FEW_BYTES,
                             (errorparameter_t)maxNumBytes,
@@ -165,9 +165,9 @@ uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
       numBytesWritten = temp_openserial_input_buffer_fill_level;
       memcpy(bufferToWrite,&(openserial_vars.input_buffer[0]),numBytesWritten);
    }
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    openserial_vars.input_buffer_fill_level=0;
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    return numBytesWritten;
 }
 
@@ -182,22 +182,22 @@ void openserial_startInput() {
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();          // clear possible pending interrupts
    uart_enableInterrupts();           // Enable USCI_A1 TX & RX interrupt
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    openserial_vars.mode                  = MODE_INPUT;
    openserial_vars.input_command_index   = 0;
    openserial_vars.ready_receive_command = FALSE;
    openserial_vars.ready_receive_length  = FALSE;
    uart_writeByte(openserial_vars.input_command[openserial_vars.input_command_index]);
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
 }
 
 void openserial_startOutput() {
    //schedule a task to get new status in the output buffer
    uint8_t temp_openserial_debugPrintCounter; //to avoid many atomics
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    openserial_vars.debugPrintCounter=(openserial_vars.debugPrintCounter+1)%STATUS_MAX;
    temp_openserial_debugPrintCounter = openserial_vars.debugPrintCounter;
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    switch (temp_openserial_debugPrintCounter) {
       case STATUS_ISSYNC:
          if (debugPrint_isSync()==TRUE) {
@@ -236,38 +236,38 @@ void openserial_startOutput() {
             break;
          }
       default:
-         __disable_interrupt();
+         DISABLE_INTERRUPTS();
          openserial_vars.debugPrintCounter=0;
-         __enable_interrupt();
+         ENABLE_INTERRUPTS();
    }
    //print out what's in the buffer now
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();          // clear possible pending interrupts
    uart_enableInterrupts();           // Enable USCI_A1 TX & RX interrupt
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    openserial_vars.mode=MODE_OUTPUT;
    if (openserial_vars.somethingInOutputBuffer) {
       uart_writeByte(openserial_vars.output_buffer[output_buffer_index_read_increment()]);
    } else {
       openserial_stop();
    }
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
 }
 
 void openserial_stop() {
    uint16_t temp_openserial_input_buffer_fill_level;
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    temp_openserial_input_buffer_fill_level = openserial_vars.input_buffer_fill_level;
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    uart_disableInterrupts();              // disable USCI_A1 TX & RX interrupt
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    openserial_vars.mode=MODE_OFF;
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    if (temp_openserial_input_buffer_fill_level>0) {
       uint8_t temp_openserial_received_command;
-      __disable_interrupt();
+      DISABLE_INTERRUPTS();
       temp_openserial_received_command = openserial_vars.received_command;
-      __enable_interrupt();
+      ENABLE_INTERRUPTS();
       switch (temp_openserial_received_command) {
          case 'R': //Trigger IDManager about isRoot
             idmanager_triggerAboutRoot();
@@ -297,9 +297,9 @@ void openserial_stop() {
             openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
                                   (errorparameter_t)temp_openserial_received_command,
                                   (errorparameter_t)0);
-            __disable_interrupt();
+            DISABLE_INTERRUPTS();
             openserial_vars.input_buffer_fill_level = 0;
-            __enable_interrupt();
+            ENABLE_INTERRUPTS();
             break;
       }
    }
@@ -307,10 +307,10 @@ void openserial_stop() {
 
 bool debugPrint_outBufferIndexes() {
    uint16_t temp_buffer[2];
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    temp_buffer[0] = openserial_vars.output_buffer_index_write;
    temp_buffer[1] = openserial_vars.output_buffer_index_read;
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    openserial_printStatus(STATUS_OUTBUFFERINDEXES,(uint8_t*)temp_buffer,sizeof(temp_buffer));
    return TRUE;
 }
@@ -318,18 +318,18 @@ bool debugPrint_outBufferIndexes() {
 //=========================== private =========================================
 
 uint16_t output_buffer_index_write_increment() {
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    openserial_vars.output_buffer_index_write=(openserial_vars.output_buffer_index_write+1)%SERIAL_OUTPUT_BUFFER_SIZE;
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    return openserial_vars.output_buffer_index_write;  
 }
 
 uint16_t output_buffer_index_read_increment() {
    uint16_t temp_openserial_output_buffer_index_read;
-   __disable_interrupt();
+   DISABLE_INTERRUPTS();
    openserial_vars.output_buffer_index_read=(openserial_vars.output_buffer_index_read+1)%SERIAL_OUTPUT_BUFFER_SIZE;
    temp_openserial_output_buffer_index_read = openserial_vars.output_buffer_index_read;
-   __enable_interrupt();
+   ENABLE_INTERRUPTS();
    return temp_openserial_output_buffer_index_read;
 }
 

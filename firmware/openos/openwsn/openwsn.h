@@ -11,6 +11,7 @@
 //general
 #include "stdint.h"                              // needed for uin8_t, uint16_t
 #include <string.h>                              // needed for memcpy and memcmp
+#include "board_info.h"
 
 //=========================== define ==========================================
 

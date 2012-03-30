@@ -53,7 +53,7 @@ typedef struct {
                                              asn_t*       asnTimestamp);
           open_addr_t*  neighbors_KaNeighbor();
           bool          neighbors_isStableNeighbor(open_addr_t* address);
-__monitor bool          neighbors_isPreferredParent(open_addr_t* address);
+          bool          neighbors_isPreferredParent(open_addr_t* address);
           dagrank_t     neighbors_getMyDAGrank();
           uint8_t       neighbors_getNumNeighbors();
           void          neighbors_getPreferredParent(open_addr_t* addressToWrite,

@@ -2,9 +2,9 @@
 
 
 //calculate link cost based on ETX.
-uint8_t linkcost_calcETX(uint8_t numTX, uint8_t numTXACK){
+uint8_t linkcost_calcETX(uint8_t numTx, uint8_t numTxACK){
 
-	return(uint8_t)((((float)numTx)/((float)numTxACK))*10.0);
+	return (uint8_t)((((float)numTx)/((float)numTxACK))*10.0);
 
 }
 

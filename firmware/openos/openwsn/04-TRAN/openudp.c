@@ -9,7 +9,7 @@
 #include "udpecho.h"
 #include "udpinject.h"
 #include "udpprint.h"
-#include "heli.h"
+//#include "heli.h"
 //#include "imu.h"
 
 //=========================== variables =======================================

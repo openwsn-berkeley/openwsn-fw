@@ -23,9 +23,33 @@
 //#endif
 
 #define PORT_TIMER_WIDTH                    uint32_t
+#define PORT_TICS_PER_MS                    33
+
 //P0.23 is CAP3.0 (capture register for the radio timer)
 #define CAPTURE_TIME()   LPC_GPIO0->FIOSET        |=  1<<23;  \
                          LPC_GPIO0->FIOCLR        |=  1<<23;
+
+#define DISABLE_INTERRUPTS() __disable_irq();
+#define ENABLE_INTERRUPTS() __enable_irq();
+
+#define SCHEDULER_WAKEUP()                  //do nothing
+#define SCHEDULER_ENABLE_INTERRUPT()        //do nothing.
+
+
+//===== IEEE802154E timing
+
+// time-slot related
+#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+// execution speed related
+#define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
+#define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
+#define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
+#define PORT_maxTxAckPrepare                10    //  305us (measured 219us)
+// radio speed related
+#define PORT_delayTx                        7     //  214us (measured 219us)
+#define PORT_delayRx                        0     //    0us (can not measure)
+// radio watchdog
+
 
 //=========================== variables =======================================
 

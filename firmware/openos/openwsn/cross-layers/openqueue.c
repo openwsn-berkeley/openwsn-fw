@@ -39,19 +39,22 @@ bool debugPrint_queue() {
 
 //======= called by any component
 
-__monitor OpenQueueEntry_t* openqueue_getFreePacketBuffer() {
+ OpenQueueEntry_t* openqueue_getFreePacketBuffer() {
    uint8_t i;
+   DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
          return &openqueue_vars.queue[i];
       }
    }
+   ENABLE_INTERRUPTS();
    return NULL;
 }
 
-__monitor error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
+ error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    uint8_t i;
+   DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (&openqueue_vars.queue[i]==pkt) {
          if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
@@ -61,6 +64,7 @@ __monitor error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
                                   (errorparameter_t)0);
          }
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         ENABLE_INTERRUPTS();
          return E_SUCCESS;
       }
    }
@@ -68,51 +72,62 @@ __monitor error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_ERROR,
                          (errorparameter_t)0,
                          (errorparameter_t)0);
+   ENABLE_INTERRUPTS();
    return E_FAIL;
 }
 
-__monitor void openqueue_removeAllOwnedBy(uint8_t owner) {
+ void openqueue_removeAllOwnedBy(uint8_t owner) {
    uint8_t i;
+   DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].owner==owner) {
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
       }
    }
+   ENABLE_INTERRUPTS();
 }
 
 //======= called by RES
 
-__monitor OpenQueueEntry_t* openqueue_resGetSentPacket() {
+ OpenQueueEntry_t* openqueue_resGetSentPacket() {
    uint8_t i;
+   DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_RES &&
           openqueue_vars.queue[i].creator!=COMPONENT_IEEE802154E) {
+    	 ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
       }
    }
+   ENABLE_INTERRUPTS();
    return NULL;
 }
 
-__monitor OpenQueueEntry_t* openqueue_resGetReceivedPacket() {
+ OpenQueueEntry_t* openqueue_resGetReceivedPacket() {
    uint8_t i;
+   DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_RES &&
           openqueue_vars.queue[i].creator==COMPONENT_IEEE802154E) {
-         return &openqueue_vars.queue[i];
+    	  ENABLE_INTERRUPTS();
+    	  return &openqueue_vars.queue[i];
       }
    }
+   ENABLE_INTERRUPTS();
    return NULL;
 }
 
 //======= called by IEEE80215E
 
-__monitor OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
+ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    uint8_t i;
+   DISABLE_INTERRUPTS();
    if (toNeighbor->type==ADDR_64B) {
       // a neighbor is specified, look for a packet unicast to that neigbhbor
       for (i=0;i<QUEUELENGTH;i++) {
          if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
             packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
+        	 ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
       }
@@ -128,22 +143,27 @@ __monitor OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) 
                 )
              )
             ) {
+        	 ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
       }
    }
+   ENABLE_INTERRUPTS();
    return NULL;
 }
 
-__monitor OpenQueueEntry_t* openqueue_macGetAdvPacket() {
+ OpenQueueEntry_t* openqueue_macGetAdvPacket() {
    uint8_t i;
+   DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
           openqueue_vars.queue[i].creator==COMPONENT_RES              &&
           packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))) {
+    	 ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
       }
    }
+   ENABLE_INTERRUPTS();
    return NULL;
 }
 

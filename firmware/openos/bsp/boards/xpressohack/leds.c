@@ -19,6 +19,7 @@
 static void private_led_on(unsigned int ledbit);
 static void private_led_off(unsigned int ledbit);
 static void private_led_toggle(unsigned int ledbit);
+static uint8_t private_led_isOn(unsigned int ledbit);
 
 //=========================== public ==========================================
 
@@ -39,6 +40,9 @@ void leds_error_off() {
 void leds_error_toggle() {
    private_led_toggle(redLED_BIT);
 }
+uint8_t leds_error_isOn(){
+	private_led_isOn(redLED_BIT);
+}
 
 void leds_radio_on() {
    private_led_on(redLED_BIT);
@@ -50,6 +54,10 @@ void leds_radio_toggle() {
    private_led_toggle(redLED_BIT);
 }
 
+uint8_t leds_radio_isOn(){
+	private_led_isOn(redLED_BIT);
+}
+
 void leds_sync_on() {
    private_led_on(redLED_BIT );
 }
@@ -58,6 +66,9 @@ void leds_sync_off() {
 }
 void leds_sync_toggle() {
    private_led_toggle(redLED_BIT);
+}
+uint8_t leds_sync_isOn(){
+	private_led_isOn(redLED_BIT);
 }
 
 void leds_debug_on() {
@@ -69,6 +80,9 @@ void leds_debug_off() {
 void leds_debug_toggle() {
    private_led_toggle(redLED_BIT);
 }
+uint8_t leds_debug_isOn(){
+	private_led_isOn(redLED_BIT);
+}
 
 void leds_all_on() {
    private_led_on(redLED_BIT);
@@ -78,6 +92,9 @@ void leds_all_off() {
 }
 void leds_all_toggle() {
    private_led_toggle(redLED_BIT);
+}
+uint8_t leds_all_isOn(){
+	private_led_isOn(redLED_BIT);
 }
 
 void leds_circular_shift() {
@@ -89,6 +106,13 @@ void leds_increment() {
 }
 
 //=========================== private =========================================
+
+static uint8_t private_led_isOn(unsigned int ledbit){
+	unsigned long ulLEDState;
+	ulLEDState = LPC_GPIO0->FIOPIN;//get led state
+	return  (ulLEDState&1<<ledbit) ;//check led state
+}
+
 
 static void private_led_on(unsigned int ledbit){
    unsigned long ulLEDState;

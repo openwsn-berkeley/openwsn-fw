@@ -5,8 +5,17 @@
  \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, March 2012.
  */
 
+#ifndef __GMPLS_H
+#define __GMPLS_H
+
+#include "openwsn.h"
+#include "openqueue.h"
+
+
 void    mpls_init();
 // from upper layer
 error_t mpls_send(OpenQueueEntry_t *msg);
 // from lower layer
 void    mpls_receive(OpenQueueEntry_t* msg);
+
+#endif

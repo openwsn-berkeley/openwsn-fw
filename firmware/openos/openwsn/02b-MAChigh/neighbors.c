@@ -55,7 +55,7 @@ void neighbors_receiveDIO(OpenQueueEntry_t* msg) {
                if (neighbors_vars.neighbors[i].numTxACK==0) {
                   temp_linkCost=15; //TODO: evaluate using RSSI?
                } else {
-                  temp_linkCost=linkcost_calcETX(neighbors_vars.neighbors[i],neighbors_vars.neighbors[i].numTxACK);
+                  temp_linkCost=linkcost_calcETX(neighbors_vars.neighbors[i].numTx,neighbors_vars.neighbors[i].numTxACK);
                }
                if (idmanager_getIsDAGroot()==FALSE) {
                  neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
@@ -200,13 +200,16 @@ bool neighbors_isStableNeighbor(open_addr_t* address) {
    return FALSE;
 }
 
-__monitor bool neighbors_isPreferredParent(open_addr_t* address) {
+ bool neighbors_isPreferredParent(open_addr_t* address) {
    uint8_t i;
+   DISABLE_INTERRUPTS();
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (isThisRowMatching(address,i) && neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
+    	  ENABLE_INTERRUPTS();
          return TRUE;
       }
    }
+   ENABLE_INTERRUPTS();
    return FALSE;
 }
 

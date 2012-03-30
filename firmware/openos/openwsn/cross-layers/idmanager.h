@@ -27,17 +27,17 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-          void         idmanager_init();
-__monitor bool         idmanager_getIsDAGroot();
-__monitor void         idmanager_setIsDAGroot(bool newRole);
-          bool         idmanager_getIsBridge();
-          void         idmanager_setIsBridge(bool newRole);
-__monitor open_addr_t* idmanager_getMyID(uint8_t type);
-__monitor error_t      idmanager_setMyID(open_addr_t* newID);
-__monitor bool         idmanager_isMyAddress(open_addr_t* addr);
-          void         idmanager_triggerAboutBridge();
-          void         idmanager_triggerAboutRoot();
-          bool         debugPrint_id();
+		void         idmanager_init();
+		bool         idmanager_getIsDAGroot();
+		void         idmanager_setIsDAGroot(bool newRole);
+		bool         idmanager_getIsBridge();
+		void         idmanager_setIsBridge(bool newRole);
+		open_addr_t* idmanager_getMyID(uint8_t type);
+		error_t      idmanager_setMyID(open_addr_t* newID);
+		bool         idmanager_isMyAddress(open_addr_t* addr);
+		void         idmanager_triggerAboutBridge();
+		void         idmanager_triggerAboutRoot();
+		bool         debugPrint_id();
 
 /**
 \}

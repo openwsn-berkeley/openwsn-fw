@@ -12,6 +12,7 @@
 #include "res.h"
 #include "openserial.h"
 #include "debugpins.h"
+#include "board.h"
 
 //=========================== variables =======================================
 
@@ -39,7 +40,7 @@ scheduler_dbg_t scheduler_dbg;
 
 //=========================== prototypes ======================================
 
-__monitor void    consumeTask(uint8_t taskId);
+ void    consumeTask(uint8_t taskId);
 
 //=========================== public ==========================================
 
@@ -75,14 +76,16 @@ void scheduler_start() {
          scheduler_dbg.numTasksCur--;
       }
       debugpins_task_clr();
-      __bis_SR_register(GIE+LPM3_bits);          // sleep, but leave interrupts and ACLK on 
+    // __bis_SR_register(GIE+LPM3_bits);          // sleep, but leave interrupts and ACLK on
+       board_sleep(); //darth.vader -- should be lpm3 instead of lpm0.
       debugpins_task_set();                      // IAR should halt here if nothing to do
    }
 }
 
-__monitor void scheduler_push_task(task_cbt cb, task_prio_t prio) {
+ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
    taskList_item_t*  taskContainer;
    taskList_item_t** taskListWalker;
+   DISABLE_INTERRUPTS();
    
    // find an empty task container
    taskContainer = &scheduler_vars.taskBuf[0];
@@ -112,6 +115,7 @@ __monitor void scheduler_push_task(task_cbt cb, task_prio_t prio) {
    if (scheduler_dbg.numTasksCur>scheduler_dbg.numTasksMax) {
       scheduler_dbg.numTasksMax   = scheduler_dbg.numTasksCur;
    }
+   ENABLE_INTERRUPTS();
 }
 
 //=========================== private =========================================
