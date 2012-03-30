@@ -5,6 +5,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "IEEE802154E.h"
+#include "linkcost.h"
 
 //=========================== variables =======================================
 
@@ -54,7 +55,7 @@ void neighbors_receiveDIO(OpenQueueEntry_t* msg) {
                if (neighbors_vars.neighbors[i].numTxACK==0) {
                   temp_linkCost=15; //TODO: evaluate using RSSI?
                } else {
-                  temp_linkCost=(uint8_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*10.0);
+                  temp_linkCost=linkcost_calcETX(neighbors_vars.neighbors[i],neighbors_vars.neighbors[i].numTxACK);
                }
                if (idmanager_getIsDAGroot()==FALSE) {
                  neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;

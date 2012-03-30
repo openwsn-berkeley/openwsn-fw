@@ -14,7 +14,19 @@
 #include "LPC17xx.h"
 #include "lpc_types.h"
 
+#ifndef LPCXPRESSO1769
+#define LPCXPRESSO1769
+#endif
+//
+//#ifndef OPENMOTE
+//#define OPENMOTE
+//#endif
+
 #define PORT_TIMER_WIDTH                    uint32_t
+//P0.23 is CAP3.0 (capture register for the radio timer)
+#define CAPTURE_TIME()   LPC_GPIO0->FIOSET        |=  1<<23;  \
+                         LPC_GPIO0->FIOCLR        |=  1<<23;
+
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[] = "h=ucb";
@@ -23,6 +35,8 @@ static const uint8_t infouCName[]    = "NXP LPC1769";
 static const uint8_t infoRadioName[] = "AT86RF231";
 
 //=========================== defines =========================================
+
+
 
 //#define SPI_IN_INTERRUPT_MODE
 //#define SPI_IN_RTOS_MODE

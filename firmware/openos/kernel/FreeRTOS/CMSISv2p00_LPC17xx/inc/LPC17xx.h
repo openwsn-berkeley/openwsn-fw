@@ -28,13 +28,13 @@
 #define __LPC17xx_H__
 
 
-//#ifndef LPCXPRESSO1769
-//#define LPCXPRESSO1769
-//#endif
-
-#ifndef OPENMOTE
-#define OPENMOTE
+#ifndef LPCXPRESSO1769
+#define LPCXPRESSO1769
 #endif
+
+//#ifndef OPENMOTE
+//#define OPENMOTE
+//#endif
 
 
 /*

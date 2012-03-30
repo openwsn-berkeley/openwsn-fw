@@ -6,6 +6,7 @@
 
 #include "LPC17xx.h"
 #include "board.h"
+#include "board_info.h"
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
@@ -15,13 +16,7 @@
 #include "debugpins.h"
 #include "radiotimer.h"
 
-//#ifndef LPCXPRESSO1769
-//#define LPCXPRESSO1769
-//#endif
 
-#ifndef OPENMOTE
-#define OPENMOTE
-#endif
 
 
 
@@ -61,13 +56,13 @@ void board_init() {
    // enable interrupts
    NVIC_EnableIRQ(EINT3_IRQn);              // GPIOs -- check that..
 
-   debugpins_init();
+     debugpins_init();
      leds_init();
-   //  uart_init();
+     uart_init();
      spi_init();
   //   i2c_init();
      bsp_timer_init();
-   //  radio_init();
+     radio_init();
      radiotimer_init();
 }
 
@@ -84,6 +79,10 @@ void board_sleep() {
 void EINT3_IRQHandler(void) {
    if ((LPC_GPIOINT->IO0IntStatR) & (1<<22)) {
       LPC_GPIOINT->IO0IntClr = (1<<22);
+      //capture timer
+
+
+
     //  radio_isr();
    }
 }

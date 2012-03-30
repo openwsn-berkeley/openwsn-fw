@@ -13,6 +13,8 @@ The capture register is used to capture counter value at different moments, e.g 
 #include "radiotimer.h"
 #include "timer.h"
 
+//pin 0.23 is cap0 for capture.
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -60,8 +62,12 @@ void radiotimer_start(uint16_t period) {
  //user bsp_timer.
 	 timer_init(TIMER_NUM3);
 	 timer_enable(TIMER_NUM3);
-	 radiotimer_setPeriod(period);
+	 LPC_PINCON->PINSEL1      |= 0x3<<14;      // CAP3.0 mode
+	 LPC_GPIO0->FIODIR        |=  1<<23;       // set as output
+	 LPC_GPIO0->FIOCLR        |=  1<<23;       // set to 0
 
+	 timer_set_capture(TIMER_NUM3,TIMER_CAPTURE_REG0);//configures capture register so that when pin cap3.0 is toggled a capture is triggered (raising edge)- (cap3.0 is in)
+	 radiotimer_setPeriod(period);
 }
 
 //===== direct access
