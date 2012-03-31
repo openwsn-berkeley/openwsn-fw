@@ -15,6 +15,8 @@ RSVP_Msg
 
 #include "stdint.h"
 
+#define RSVP_MAX_SCHED 10 //max cycles combinations that can be transported.
+
 //general header of any rsvp message
 typedef struct{
 	uint8_t version_flags;//4 high bit version, 4 low flags
@@ -38,7 +40,7 @@ typedef struct{
 }cycle_table_tuple_t;
 
 typedef struct{
-     cycle_table_tuple_t cycles[10];
+     cycle_table_tuple_t cycles[RSVP_MAX_SCHED];
 }rsvp_trans_cycle_table_t;
 
 typedef struct{
