@@ -10,6 +10,7 @@ Bridge between L2.5 and L2 used to set the schedule in neighbours using the info
 #define __CFRES_H
 
 #include "rsvp.h"
+#include "neighbors.h"
 
 void updateSchedule(rsvp_label_object_t* label,open_addr_t* neighbor);
 

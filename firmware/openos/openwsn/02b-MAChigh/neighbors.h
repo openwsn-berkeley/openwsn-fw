@@ -7,7 +7,7 @@
 \addtogroup Neighbors
 \{
 */
-
+#include "openwsn.h"
 //=========================== define ==========================================
 
 #define MAXNUMNEIGHBORS            10

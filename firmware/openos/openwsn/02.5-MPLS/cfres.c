@@ -24,13 +24,13 @@ void updateSchedule(rsvp_label_object_t* label,open_addr_t* neighbor){
 	uint8_t delay=label->level;
 	uint8_t ordering=label->ordering;
 	uint8_t freq_offset=label->freq_offset;
-	rsvp_trans_cycle_tuple* cycle_table=label->cycles[0];
+	cycle_table_tuple_t* cycle_table=&(label->cycle_table.cycles[0]);
 	uint8_t num_participants;
 	uint8_t num_cycles;
 
 	while (i<RSVP_MAX_SCHED){
-		num_participants=*(cycle_table+i).num_participants;
-		num_cycles=*(cycle_table+i).num_cycles;
+		num_participants=(*(cycle_table+i)).num_participants;
+		num_cycles=(*(cycle_table+i)).num_cycles;
 
 		if (ordering<=num_participants){
 			//something to schedule. the schedule is set at slots separated by number of participants*2 slots
