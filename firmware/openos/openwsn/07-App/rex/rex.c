@@ -9,7 +9,7 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in seconds)
-#define REXPERIOD     1
+#define REXPERIOD     5
 #define PAYLOADLEN    62
 
 const uint8_t rex_path0[] = "rex";
@@ -79,7 +79,6 @@ void rex_timer() {
      sum += x_int;
    }
    avg = sum/N_avg;
-
    
    if (rex_vars.delay>=REXPERIOD) {
       // create a CoAP RD packet
@@ -99,6 +98,9 @@ void rex_timer() {
       for (i=0;i<PAYLOADLEN;i++) {
          pkt->payload[i] = i;
       }
+      avg = openrandom_get16b();
+      pkt->payload[0] = (avg>>8)&0xff;
+      pkt->payload[1] = (avg>>0)&0xff;
            
       numOptions = 0;
       // location-path option
