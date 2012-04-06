@@ -97,7 +97,7 @@ void openwsn_init() {
    rinfo_init();
    //rxl1_init();
    //rt_init();
- //  rex_init();
+   rex_init();
    rleds_init();
    rreg_init();
    rwellknown_init();
