@@ -166,12 +166,13 @@ void ieee154e_init() {
    uint16_t diff;
    DISABLE_INTERRUPTS();
    if (ieee154e_vars.asn.byte4 != someASN->byte4) {
-      return 0xffff;
+	   ENABLE_INTERRUPTS();
+	   return 0xffff;
    }
    
    diff = 0;
    if        (ieee154e_vars.asn.bytes2and3 == someASN->bytes2and3) {
-	   ENABLE_INTERRUPTS();
+	  ENABLE_INTERRUPTS();
       return ieee154e_vars.asn.bytes0and1-someASN->bytes0and1;
    } else if (ieee154e_vars.asn.bytes2and3-someASN->bytes2and3==1) {
       diff  = ieee154e_vars.asn.bytes0and1;

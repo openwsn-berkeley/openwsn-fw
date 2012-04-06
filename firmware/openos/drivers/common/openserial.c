@@ -79,6 +79,7 @@ void openserial_init() {
 error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t length) {
    uint8_t counter;
    DISABLE_INTERRUPTS();
+
    openserial_vars.somethingInOutputBuffer=TRUE;
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
@@ -94,6 +95,7 @@ error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t l
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
    ENABLE_INTERRUPTS();
+
    return E_SUCCESS;
 }
 
@@ -102,6 +104,7 @@ error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg2) {
    leds_error_toggle();
    DISABLE_INTERRUPTS();
+
    openserial_vars.somethingInOutputBuffer=TRUE;
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
@@ -119,12 +122,14 @@ error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
    ENABLE_INTERRUPTS();
+
    return E_SUCCESS;
 }
 
 error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    uint8_t counter;
    DISABLE_INTERRUPTS();
+
    openserial_vars.somethingInOutputBuffer=TRUE;
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
@@ -139,14 +144,17 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
    ENABLE_INTERRUPTS();
+
    return E_SUCCESS;
 }
 
 uint8_t openserial_getNumDataBytes() {
    uint16_t temp_openserial_input_buffer_fill_level;
    DISABLE_INTERRUPTS();
+
    temp_openserial_input_buffer_fill_level = openserial_vars.input_buffer_fill_level;
    ENABLE_INTERRUPTS();
+
    return temp_openserial_input_buffer_fill_level;
 }
 
