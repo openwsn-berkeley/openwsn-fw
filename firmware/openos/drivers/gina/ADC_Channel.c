@@ -1,3 +1,4 @@
+#include "openwsn.h"
 #include "ADC_Channel.h"
 #include "math.h"
 
@@ -51,22 +52,9 @@ void ADC_getvoltage(uint16_t* spaceToWrite) {
     ADC12CTL0 |= ADC12SC;                         // start conversion
     __bis_SR_register(CPUOFF+GIE);                // turn off CPU, but leave on interrupts
     
-    uint8_t junk;
-    //junk = (uint8_t)((uint16_t)(ADC12MEM0&0xFF00)>>8);
-    //junk = (uint8_t)((uint16_t)(ADC12MEM0&0x00FF));
-    junk = (uint8_t)((uint16_t)(ADC12MEM1&0xFF00)>>8);
-    junk = (uint8_t)((uint16_t)(ADC12MEM1&0x00FF));
-    junk = (uint8_t)((uint16_t)(ADC12MEM2&0xFF00)>>8);
-    junk = (uint8_t)((uint16_t)(ADC12MEM2&0x00FF));
-    junk = (uint8_t)((uint16_t)(ADC12MEM3&0xFF00)>>8);
-    junk = (uint8_t)((uint16_t)(ADC12MEM3&0x00FF));
-    junk = (uint8_t)((uint16_t)(ADC12MEM4&0xFF00)>>8);
-    junk = (uint8_t)((uint16_t)(ADC12MEM4&0x00FF));
-    
     spaceToWrite[0] = ADC12MEM0;
     
-  } 
-  else {
+  } else {
     for (i=0;i<2;i++) {
       spaceToWrite[i] = 0;
     }
