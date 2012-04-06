@@ -21,6 +21,7 @@
 #include "large_range_accel.h"
 #include "magnetometer.h"
 #include "sensitive_accel_temperature.h"
+#include "ADC_Channel.h"
 /**/
 
 //=========================== variables =======================================
@@ -61,10 +62,10 @@ void board_init() {
    //turn sensors off
    /*
    gyro_disable();
-   /*large_range_accel_disable();
+   large_range_accel_disable();
    magnetometer_disable();
    sensitive_accel_temperature_disable();
-   /**/
+   */
    
    // enable interrupts
    __bis_SR_register(GIE);
