@@ -10,13 +10,15 @@
 #ifndef _BOARD_INFO_H
 #define _BOARD_INFO_H
 
+#include "string.h"
+
 #include "stdint.h"
 #include "LPC17xx.h"
 #include "lpc_types.h"
 
-#ifndef LPCXPRESSO1769
-#define LPCXPRESSO1769
-#endif
+//#ifndef LPCXPRESSO1769
+//#define LPCXPRESSO1769
+//#endif
 //
 //#ifndef OPENMOTE
 //#define OPENMOTE
@@ -30,7 +32,10 @@
                          LPC_GPIO0->FIOCLR        |=  1<<23;
 
 #define DISABLE_INTERRUPTS() __disable_irq();
+
 #define ENABLE_INTERRUPTS() __enable_irq();
+
+
 
 #define SCHEDULER_WAKEUP()                  //do nothing
 #define SCHEDULER_ENABLE_INTERRUPT()        //do nothing.

@@ -15,225 +15,180 @@
 #include "uart_config.h"
 #include "LPC17xx.h"
 #include "clkpwr.h"
+#include "lpc17xx_uart.h"
+#include "lpc17xx_pinsel.h"
 
 //=========================== defines =========================================
 
 //=========================== variables =======================================
 
 typedef struct {
-   uart_tx_cbt txCb;
-   uart_rx_cbt rxCb;
+	uart_tx_cbt txCb;
+	uart_rx_cbt rxCb;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
 
 //=========================== prototypes ======================================
-extern void UART0_IRQHandler (void); //weak function defined in cr_startup_lpc17.c
-static void private_determinePCLK(uint32_t pclkdiv, uint32_t *pclk);
+//extern void UART0_IRQHandler (void); //weak function defined in cr_startup_lpc17.c
 
 
+//static void uart_set_divisors(uint32_t baudrate);
 //=========================== public ==========================================
 
 void uart_init() {
-    uint32_t baudrate;
-	uint32_t Fdiv;
-	uint32_t pclkdiv, pclk;
 
-	// reset local variables
-	memset(&uart_vars,0,sizeof(uart_vars_t));
+	//UART Configuration structure variable
+	UART_CFG_Type UARTConfigStruct;
+	// UART FIFO configuration Struct variable
+	UART_FIFO_CFG_Type UARTFIFOConfigStruct;
+	// Pin configuration for UART0
+	PINSEL_CFG_Type PinCfg;
 
-#ifdef UART_BAUDRATE_115200
-	baudrate=115200;
-#else
-	baudrate=9600;
-#endif
-
-	LPC_PINCON->PINSEL0 &= ~0x000000F0;
-	LPC_PINCON->PINSEL0 |= 0x00000050;  /* RxD0 is P0.3 and TxD0 is P0.2 */
-	/* By default, the PCLKSELx value is zero, thus, the PCLK for
-		all the peripherals is 1/4 of the SystemCoreClock. */
-	/* Bit 6~7 is for UART0 */
-	pclkdiv = (LPC_SC->PCLKSEL0 >> 6) & 0x03;
-
-	CLKPWR_SetPCLKDiv(CLKPWR_PCLKSEL_UART0,CLKPWR_PCLKSEL_CCLK_DIV_4);//default clock
+	uint32_t tmp;
 
 
-	LPC_UART0->LCR = 0x83;		/* DLAB=1 , 8 bits, no Parity, 1 Stop bit
-	 *  0b10000011
-	 *    ||||||||__ Word Length select low
-	 *    |||||||___ Word Length select high (set to 11 --> 8bit char length)
-	 *    ||||||____ Stop bit select (0=1stop bit, 1=2 stop bits)
-	 *    |||||_____ Parity enable (0=disable parity generation and check, 1=enable it)
-	 *    ||||______ Parity select low
-	 *    |||_______ Parity select high
-	 *    ||________ Break Control
-	 *    |_________ Divisor Latch DLAB = 0
+	/*
+	 * Initialize UART0 pin connect
 	 */
-	Fdiv = ( pclk / 16 ) / baudrate ;	/*baud rate */
-	LPC_UART0->DLM = Fdiv / 256; /*higher 8 bits of the divisor -- divides pclk in order to get the desired baudrate. see p.301.*/
-	LPC_UART0->DLL = Fdiv % 256; /*lower 8 bits of the divisor*/
-	LPC_UART0->LCR = 0x03;		/* UART line control register DLAB = 0 set after configuring baudrate. See manual p.298.
-	 *  0b00000011
-	 *    ||||||||__ Word Length select low
-	 *    |||||||___ Word Length select high (set to 11 --> 8bit char length)
-	 *    ||||||____ Stop bit select (0=1stop bit, 1=2 stop bits)
-	 *    |||||_____ Parity enable (0=disable parity generation and check, 1=enable it)
-	 *    ||||______ Parity select low
-	 *    |||_______ Parity select high
-	 *    ||________ Break Control
-	 *    |_________ Divisor Latch DLAB = 0
-	 */
+	PinCfg.Funcnum = 1;
+	PinCfg.OpenDrain = 0;
+	PinCfg.Pinmode = 0;
+	PinCfg.Pinnum = 2;
+	PinCfg.Portnum = 0;
+	PINSEL_ConfigPin(&PinCfg);
+	PinCfg.Pinnum = 3;
+	PINSEL_ConfigPin(&PinCfg);
 
-	LPC_UART0->FCR = 0x07;		/*0x07 Enable and reset TX and RX FIFO. page.305
-	 *  0b00000111
-	 *    ||||||||__ FIFO Enable (enables Rx Data Available interrupt)
-	 *    |||||||___ RX FIFO Reset
-	 *    ||||||____ TX FIFO Reset
-	 *    |||||_____ DMA Mode Select - see section 14.4.6.1
-	 *    ||||______ Reserved
-	 *    |||_______ Reserved
-	 *    ||________ RX Trigger low (for DMA)
-	 *    |_________ RX Trigger high
+
+	/* Initialize UART Configuration parameter structure to default state:
+	 * Baudrate = 9600bps
+	 * 8 data bit
+	 * 1 Stop bit
+	 * None parity
 	 */
-	LPC_UART0->FCR |= (0 << 6);// Set FIFO to trigger when at least 1 characters available (only needed if FIFO is enabled) - p.305, 00-means 1 char,01 - 4chars..
+	UART_ConfigStructInit(&UARTConfigStruct);
+
+	// Initialize UART0 peripheral with given to corresponding parameter
+	UART_Init((LPC_UART_TypeDef *)LPC_UART0, &UARTConfigStruct);
+
+
+	/* Initialize FIFOConfigStruct to default state:
+	 * 				- FIFO_DMAMode = DISABLE
+	 * 				- FIFO_Level = UART_FIFO_TRGLEV0
+	 * 				- FIFO_ResetRxBuf = ENABLE
+	 * 				- FIFO_ResetTxBuf = ENABLE
+	 * 				- FIFO_State = ENABLE
+	 */
+	UART_FIFOConfigStructInit(&UARTFIFOConfigStruct);
+
+	// Initialize FIFO for UART0 peripheral
+	UART_FIFOConfig((LPC_UART_TypeDef *)LPC_UART0, &UARTFIFOConfigStruct);
+
+
+	// Enable UART Transmit
+	UART_TxCmd((LPC_UART_TypeDef *)LPC_UART0, ENABLE);
+
+	/* Enable UART Rx interrupt */
+	UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_RBR, ENABLE);
+	/* Enable UART line status interrupt */
+	UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_RLS, ENABLE);
+	UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_THRE, ENABLE);
+	/*
+	 * Do not enable transmit interrupt here, since it is handled by
+	 * UART_Send() function, just to reset Tx Interrupt state for the
+	 * first time
+	 */
 	NVIC_EnableIRQ(UART0_IRQn);
 
-	return;
 }
 
+
+
+
+
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
-   uart_vars.txCb = txCb;
-   uart_vars.rxCb = rxCb;
+	uart_vars.txCb = txCb;
+	uart_vars.rxCb = rxCb;
 }
 
 void    uart_enableInterrupts(){
-	LPC_UART0->IER |= IER_THRE|IER_RBR| IER_RLS;	/* Enable UART0 interrupt
-		 *  0b00000111
-		 *    ||||||||__ RBR Interrupt Enable (enables Rx Data Available interrupt)
-		 *    |||||||___ THRE Interrupt
-		 *    ||||||____ Rx Line Status interrupt
-		 *    |||||_____ Reserved
-		 *    ||||______ Reserved
-		 *    |||_______ Reserved
-		 *    ||________ Reserved
-		 *    |_________ ABEOIntEn (Enables the end of auto-baud interrupt)*/
+	UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_THRE, ENABLE);
+	UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_RBR, ENABLE);
 }
 
 void    uart_disableInterrupts(){
-  LPC_UART0->IER &= ~IER_RBR;	/* Disables rx UART0 interrupt*/
-  LPC_UART0->IER &= ~IER_THRE;	/* Disables tx UART0 interrupt*/
-  LPC_UART0->IER &= ~IER_RLS;	/* Disables line Status UART0 interrupt
-
-		 *  0b00000111
-		 *    ||||||||__ RBR Interrupt Enable (enables Rx Data Available interrupt)
-		 *    |||||||___ THRE Interrupt
-		 *    ||||||____ Rx Line Status interrupt
-		 *    |||||_____ Reserved
-		 *    ||||______ Reserved
-		 *    |||_______ Reserved
-		 *    ||________ Reserved
-		 *    |_________ ABEOIntEn (Enables the end of auto-baud interrupt)
-		 */
+	UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_THRE, DISABLE);
+	UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_RBR, DISABLE);
 }
 
 void    uart_clearRxInterrupts(){
-//do nothing, are done in the isr to read the line status.
+	//do nothing, are done in the isr to read the line status.
 }
 
 void    uart_clearTxInterrupts(){
-//do nothing, are done in the isr to read the line status.
+	//do nothing, are done in the isr to read the line status.
 }
 
 void    uart_writeByte(uint8_t byteToWrite){
-	LPC_UART0->THR = byteToWrite;//write
+	//UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_THRE, DISABLE);
+	//UART_Send((LPC_UART_TypeDef *)LPC_UART0,&byteToWrite,1,NONE_BLOCKING);
+	UART_SendByte((LPC_UART_TypeDef *)LPC_UART0,byteToWrite);
+	//LPC_UART0->/*DLIER.*/THR |=byteToWrite;
+	while (UART_CheckBusy((LPC_UART_TypeDef *)LPC_UART0));
+	//UART_IntConfig((LPC_UART_TypeDef *)LPC_UART0, UART_INTCFG_THRE, ENABLE);
 }
 
 uint8_t uart_readByte(){
-  return LPC_UART0->RBR;
+	uint8_t byteToRCV;
+	byteToRCV=UART_Receive((LPC_UART_TypeDef *)LPC_UART0,&byteToRCV,1,NONE_BLOCKING);
+	return byteToRCV;
 }
 
 //=========================== interrupt handlers ==============================
 
 uint8_t uart_isr_tx() {
-   uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.txCb();
-   return 0;
+	uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
+	uart_vars.txCb();
+	return 0;
 }
 
 uint8_t uart_isr_rx() {
-   uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.rxCb();
-   return 0;
+	uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
+	uart_vars.rxCb();
+	return 0;
 }
-
 
 
 void UART0_IRQHandler (void)
 {
-	//poipoiportBASE_TYPE xHigherPriorityTaskWoken=pdFALSE;
-	uint8_t IIRValue, LSRValue;
-	uint8_t Dummy = Dummy;
+	uint32_t intsrc, tmp, tmp1;
 
-	IIRValue = LPC_UART0->IIR;
-	/* IIR register. clears the interrupt when read. p.303
-		 *  0b10000011
-		 *    ||||||||__ IntStatus - 0 if at least one pending interrupt. 1 otherwise.
-		 *    |||||||___ Interrupt id 011-RLS,010-RDA,110-CTI,001-THRE interrupt.
-		 *    ||||||____ Interrupt id 011-RLS,010-RDA,110-CTI,001-THRE interrupt.
-		 *    |||||_____ Interrupt id 011-RLS,010-RDA,110-CTI,001-THRE interrupt.
-		 *    ||||______ Reserved
-		 *    |||_______ Reserved
-		 *    ||________ Fifo Enable. copies of UnFCR[0]
-		 *    |_________ Fifo Enable. copies of UnFCR[0]
-		 */
+	/* Determine the interrupt source */
+	intsrc = UART_GetIntId((LPC_UART_TypeDef *)LPC_UART0);
+	tmp = intsrc & UART_IIR_INTID_MASK;
 
-
-	IIRValue >>= 1;			/* skip pending bit in IIR */
-	IIRValue &= 0x07;			/* check bit 1~3, interrupt identification */
-	if ( IIRValue == IIR_RLS )		/* Receive Line Status */
-	{
-		LSRValue = LPC_UART0->LSR;
-		/* Receive Line Status */
-		if ( LSRValue & (LSR_OE|LSR_PE|LSR_FE|LSR_RXFE|LSR_BI) )
-		{
-			/* There are errors or break interrupt */
-			/* Read LSR will clear the interrupt */
-			Dummy = LPC_UART0->RBR;		/* Dummy read on RX to clear
-							interrupt, then bail out */
-			return;
-		}
-		if ( LSRValue & LSR_RDR )	/* Receive Data Ready */
-		{
-			/* If no error on RLS, normal ready, save into the data buffer. */
-			/* Note: read RBR will clear the interrupt */
-			uart_isr_rx();//call isr rx wrapper.
-
+	// Receive Line Status
+	if (tmp == UART_IIR_INTID_RLS){
+		// Check line status
+		tmp1 = UART_GetLineStatus((LPC_UART_TypeDef *)LPC_UART0);
+		// Mask out the Receive Ready and Transmit Holding empty status
+		tmp1 &= (UART_LSR_OE | UART_LSR_PE | UART_LSR_FE \
+				| UART_LSR_BI | UART_LSR_RXFE);
+		// If any error exist
+		if (tmp1) {
+			while (1);
 		}
 	}
-	else if ( IIRValue == IIR_RDA )	/* Receive Data Available */
-	{
-		/* Receive Data Available */
-		uart_isr_rx();//call isr rx wrapper.
+
+	// Receive Data Available or Character time-out
+	if ((tmp == UART_IIR_INTID_RDA) || (tmp == UART_IIR_INTID_CTI)){
+		uart_isr_rx();
 	}
-	else if ( IIRValue == IIR_CTI )	/* Character timeout indicator */
-	{
-		/* Character Time-out indicator */
-     	//do nothing.
-	}
-	else if ( IIRValue == IIR_THRE )	/* THRE, transmit holding register empty */
-	{
-		/* THRE interrupt */
-		LSRValue = LPC_UART0->LSR;		/* Check status in the LSR to see if
-									valid data in U0THR or not */
-		if ( LSRValue & LSR_THRE )
-		{
-			//call the isr tx wrapper.
-			uart_isr_tx();
-		}
-		else
-		{
-			//not ready yet.. nothing to do??
-		}
+
+	// Transmit Holding Empty
+	if (tmp == UART_IIR_INTID_THRE){
+		uart_isr_tx();
 	}
 }
 

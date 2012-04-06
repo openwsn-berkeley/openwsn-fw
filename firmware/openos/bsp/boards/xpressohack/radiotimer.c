@@ -13,6 +13,7 @@ The capture register is used to capture counter value at different moments, e.g 
 #include "radiotimer.h"
 #include "timer.h"
 #include "LPC17xx.h"
+#include "board.h"
 
 //pin 0.23 is cap0 for capture.
 
@@ -21,7 +22,7 @@ The capture register is used to capture counter value at different moments, e.g 
 typedef struct {
    radiotimer_compare_cbt    overflow_cb;
    radiotimer_compare_cbt    compare_cb;
-   uint16_t period;
+   uint32_t period;
    uint32_t counter_slot_val; //timer value when the slot timer is set- references to the init of the slot
 } radiotimer_vars_t;
 
@@ -58,7 +59,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
    while(1);
 }
 
-void radiotimer_start(uint16_t period) {
+void radiotimer_start(PORT_TIMER_WIDTH period) {
    // source ACLK from 32kHz crystal
  //user bsp_timer.
 	 timer_init(TIMER_NUM3);
@@ -73,30 +74,30 @@ void radiotimer_start(uint16_t period) {
 
 //===== direct access
 
-uint16_t radiotimer_getValue() {
+PORT_TIMER_WIDTH radiotimer_getValue() {
    return timer_get_current_value(TIMER_NUM3);
 }
 //period is in ms???
 
-void radiotimer_setPeriod(uint16_t period) {
-	radiotimer_vars.period=period;
+void radiotimer_setPeriod(PORT_TIMER_WIDTH period) {
+	radiotimer_vars.period=(PORT_TIMER_WIDTH)period;
 	radiotimer_vars.counter_slot_val=radiotimer_getValue();
-	timer_set_compare(TIMER_NUM3, TIMER_COMPARE_REG0,  period); //the period timer is controlled by the compare 0 register
+	timer_set_compare(TIMER_NUM3, TIMER_COMPARE_REG0,  radiotimer_vars.counter_slot_val+period); //the period timer is controlled by the compare 0 register
 }
 //?? why is this needed?
 
-uint16_t radiotimer_getPeriod() {
-   return radiotimer_vars.period;
+PORT_TIMER_WIDTH radiotimer_getPeriod() {
+   return (PORT_TIMER_WIDTH)radiotimer_vars.period;
 }
 
 //===== compare
 
-void radiotimer_schedule(uint16_t offset) {
+void radiotimer_schedule(PORT_TIMER_WIDTH offset) {
 	uint32_t current=radiotimer_vars.counter_slot_val;//references to the init of the current time slot.
 	// offset when to fire
 	//get current
 	//current=timer_get_current_value(TIMER_NUM3);
-	timer_set_compare(TIMER_NUM3, TIMER_COMPARE_REG1,current + offset); //this is controlled by the compare 1 register
+	timer_set_compare(TIMER_NUM3, TIMER_COMPARE_REG1,current + (uint32_t)offset); //this is controlled by the compare 1 register
 
 }
 
@@ -108,7 +109,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline uint16_t radiotimer_getCapturedTime() {
+inline PORT_TIMER_WIDTH radiotimer_getCapturedTime() {
    return timer_get_capture_value(TIMER_NUM3,TIMER_CAPTURE_REG0);
 }
 
@@ -120,10 +121,10 @@ void private_radio_timer_isr(uint8_t source) {
 	uint32_t current=0;
 	switch (source) {
 	case TIMER_COMPARE_REG0:
-		 current=radiotimer_getValue();
-		 radiotimer_vars.counter_slot_val=current;//refresh init of the slot.
-		      // continuous timer: schedule next instant
-		 timer_set_compare(TIMER_NUM3,TIMER_COMPARE_REG0,current+radiotimer_vars.period);
+		// current=radiotimer_getValue();
+		// radiotimer_vars.counter_slot_val=current;//refresh init of the slot.
+	    // continuous timer: schedule next instant
+	//	 timer_set_compare(TIMER_NUM3,TIMER_COMPARE_REG0,current+radiotimer_vars.period);
 		if (radiotimer_vars.overflow_cb != NULL) {
 			// call the callback
 			radiotimer_vars.overflow_cb();

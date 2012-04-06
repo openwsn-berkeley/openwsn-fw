@@ -9,6 +9,7 @@
 #include "LPC17xx.h"
 #include "ssp.h"
 #include "spi.h"
+#include "lpc17xx_pinsel.h"
 
 #define SPI_SCK_PIN          7        /* Clock       */
 #define SPI_SSEL_PIN         6        /* CS-Select    */
@@ -19,13 +20,35 @@
 
 void    ssp_spi_init(){
 	SSP_CFG_Type SSP_ConfigStruct;
+	PINSEL_CFG_Type PinCfg;
+
 	SSP_ConfigStructInit(&SSP_ConfigStruct);
 
+	/*
+		 * Initialize SPI pin connect
+		 * P0.7 - SCK;
+		 * P0.6 - SSEL
+		 * P0.8 - MISO
+		 * P0.9 - MOSI
+		 */
 
-	LPC_PINCON->PINSEL0 |= 0x2<<14; //SCK1 [P0.7]
-	LPC_PINCON->PINSEL0 |= 0x2<<16;  // [P0.8] MISO1
-	LPC_PINCON->PINSEL0 |= 0x2<<18;	//MOSI1 [P0.9]
-    LPC_PINCON->PINSEL0     &= ~(0x3)<<12;  //  [P0.6] SSEL1 as GPIO. auto ssp does not work because it toggles cs between bytes.
+	    PinCfg.Funcnum = 2;
+		PinCfg.OpenDrain = 0;
+		PinCfg.Pinmode = 0;
+		PinCfg.Portnum = 0;
+		PinCfg.Pinnum = 7;
+		PINSEL_ConfigPin(&PinCfg);
+		PinCfg.Pinnum = 8;
+		PINSEL_ConfigPin(&PinCfg);
+		PinCfg.Pinnum = 9;
+		PINSEL_ConfigPin(&PinCfg);
+
+
+	//LPC_PINCON->PINSEL0 |= 0x2<<14; //SCK1 [P0.7]
+	//LPC_PINCON->PINSEL0 |= 0x2<<16;  // [P0.8] MISO1
+	//LPC_PINCON->PINSEL0 |= 0x2<<18;	//MOSI1 [P0.9]
+
+    LPC_PINCON->PINSEL0     &= ~(0x3<<12);  //  [P0.6] SSEL1 as GPIO. auto ssp does not work because it toggles cs between bytes.
 
     LPC_GPIO0->FIODIR |= (1 << SPI_SCK_PIN) | (1 << SPI_MOSI_PIN) | (1 << SPI_SSEL_PIN);
     LPC_GPIO0->FIODIR &= ~(1 << SPI_MISO_PIN);

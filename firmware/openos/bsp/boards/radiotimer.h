@@ -8,13 +8,14 @@
 #define __RADIOTIMER_H
 
 #include "stdint.h"
+#include "board.h"
 
 //=========================== define ==========================================
 
 //=========================== typedef =========================================
 
 typedef void (*radiotimer_compare_cbt)();
-typedef void (*radiotimer_capture_cbt)(uint16_t timestamp);
+typedef void (*radiotimer_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 
 //=========================== variables =======================================
 
@@ -26,16 +27,16 @@ void     radiotimer_setOverflowCb(radiotimer_compare_cbt cb);
 void     radiotimer_setCompareCb(radiotimer_compare_cbt cb);
 void     radiotimer_setStartFrameCb(radiotimer_capture_cbt cb);
 void     radiotimer_setEndFrameCb(radiotimer_capture_cbt cb);
-void     radiotimer_start(uint16_t period);
+void     radiotimer_start(PORT_TIMER_WIDTH period);
 // direct access
-uint16_t radiotimer_getValue();
-void     radiotimer_setPeriod(uint16_t period);
-uint16_t radiotimer_getPeriod();
+PORT_TIMER_WIDTH radiotimer_getValue();
+void     radiotimer_setPeriod(PORT_TIMER_WIDTH period);
+PORT_TIMER_WIDTH radiotimer_getPeriod();
 // compare
-void     radiotimer_schedule(uint16_t offset);
+void     radiotimer_schedule(PORT_TIMER_WIDTH offset);
 void     radiotimer_cancel();
 // capture
-uint16_t radiotimer_getCapturedTime();
+PORT_TIMER_WIDTH radiotimer_getCapturedTime();
 
 
 uint8_t  radiotimer_isr();

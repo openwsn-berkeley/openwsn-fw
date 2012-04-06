@@ -11,6 +11,7 @@ TIMER 3 is radiotimer
 #include "timer.h"
 #include "LPC17xx.h"
 #include "leds.h"
+#include "board.h"
 
 //=========================== defines =========================================
 
@@ -228,6 +229,7 @@ void timer_set_compare(uint8_t  timer_num,
 			LPC_TIM3->MCR   |=  1<<0;
 			// set Match Register 0 value
 			LPC_TIM3->MR0    =  delayInTicks;
+
 		} else if (compareReg==TIMER_COMPARE_REG1) {
 			//interrupt when MR1 matches the value in the TC
 			LPC_TIM3->MCR   |=  1<<3;
@@ -660,12 +662,14 @@ uint32_t timer_get_capture_value(uint8_t timer_num,uint8_t captureReg){
 void TIMER3_IRQHandler (void) {
 		if ( LPC_TIM3->IR & (0x1<<0)) {
 			// clear interrupt flag
+			CAPTURE_TIME();
 			LPC_TIM3->IR = 0x1<<0;
 			// call the callback
 			timer_compare_isr_hook_3(TIMER_COMPARE_REG0);
 		}
 		if ( LPC_TIM3->IR & (0x1<<1) ) {
 			// clear interrupt flag
+			CAPTURE_TIME();
 			LPC_TIM3->IR = 0x1<<1;
 			// call the callback
 			timer_compare_isr_hook_3(TIMER_COMPARE_REG1);
