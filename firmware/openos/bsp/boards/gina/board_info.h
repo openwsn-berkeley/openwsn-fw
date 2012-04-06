@@ -15,6 +15,9 @@ to return the board's description.
 
 //=========================== defines =========================================
 
+#define ENABLE_INTERRUPTS()     __enable_interrupt()
+#define DISABLE_INTERRUPTS()    __disable_interrupt()
+
 //===== timer
 
 #define PORT_TIMER_WIDTH                    uint16_t
