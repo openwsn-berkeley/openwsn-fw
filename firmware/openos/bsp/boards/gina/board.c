@@ -15,6 +15,7 @@
 #include "bsp_timer.h"
 #include "radio.h"
 #include "radiotimer.h"
+#include "eui64.h"
 
 // sensors
 #include "gyro.h"
@@ -31,6 +32,8 @@
 //=========================== public ==========================================
 
 void board_init() {
+   uint8_t eui[8];
+   
    // disable watchdog timer
    WDTCTL  = WDTPW + WDTHOLD;
    
@@ -59,20 +62,28 @@ void board_init() {
    radiotimer_init();
    ADC_init();
    
-   //turn sensors off
-   /*
-   gyro_disable();
-   large_range_accel_disable();
-   magnetometer_disable();
-   sensitive_accel_temperature_disable();
-   */
-   
    // enable interrupts
    __bis_SR_register(GIE);
+   
+   //turn sensors off, if this is a gina (not a basestation)
+   eui64_get(eui);
+   if (eui[3]==0x09) {
+     //first initialize them
+     gyro_init();
+     large_range_accel_init();
+     magnetometer_init();
+     sensitive_accel_temperature_init();
+     
+     //then turn them off
+     gyro_disable();
+     large_range_accel_disable();
+     magnetometer_disable();
+     sensitive_accel_temperature_disable();
+   }
 }
 
 void board_sleep() {
-   __bis_SR_register(GIE+LPM0_bits);             // sleep, but leave ACLK on
+   __bis_SR_register(GIE+LPM3_bits);             // sleep, but leave ACLK on
 }
 
 //=========================== private =========================================
