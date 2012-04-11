@@ -216,7 +216,7 @@ void schedule_advanceSlot() {
 
 slotOffset_t schedule_getNextActiveSlotOffset() {
 	DISABLE_INTERRUPTS();
-	scheduleEntry_t* res=((scheduleEntry_t*)(schedule_vars.currentScheduleEntry->next))->slotOffset;
+	slotOffset_t res=((scheduleEntry_t*)(schedule_vars.currentScheduleEntry->next))->slotOffset;
 	// return next active slot's slotOffset
 	ENABLE_INTERRUPTS();
 	return res;
