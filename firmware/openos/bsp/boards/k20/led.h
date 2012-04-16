@@ -63,6 +63,12 @@ void LED_Dir_Out(void);
   #define LED2_OFF (GPIOC_PCOR = (1<<9))
   #define LED3_OFF (GPIOC_PCOR = (1<<10))
 
+  #define LED0_IS_ON ((GPIOC_PSOR & (1<<7))>>7)
+  #define LED1_IS_ON ((GPIOC_PSOR & (1<<8))>>8)
+  #define LED2_IS_ON ((GPIOC_PSOR & (1<<9))>>9)
+  #define LED3_IS_ON ((GPIOC_PSOR & (1<<10))>>10)
+ 
+
 #endif
 
 #endif
