@@ -231,8 +231,9 @@ frameLength_t schedule_getFrameLength() {
 	DISABLE_INTERRUPTS();
 	frameLength_t res;
 	res= schedule_vars.frameLength;
+        ENABLE_INTERRUPTS();
 	return res;
-	ENABLE_INTERRUPTS();
+	
 }
 
 /**
@@ -245,6 +246,7 @@ frameLength_t schedule_getFrameLength() {
 	 DISABLE_INTERRUPTS();
 	 res= schedule_vars.currentScheduleEntry->type;
 	 ENABLE_INTERRUPTS();
+         return res;
 }
 
 /**
