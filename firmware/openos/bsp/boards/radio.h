@@ -52,10 +52,10 @@ void     radio_setEndFrameCb(radiotimer_capture_cbt cb);
 // reset
 void     radio_reset();
 // timer
-void     radio_startTimer(uint16_t period);
-uint16_t radio_getTimerValue();
-void     radio_setTimerPeriod(uint16_t period);
-uint16_t radio_getTimerPeriod();
+void     radio_startTimer(PORT_TIMER_WIDTH period);
+PORT_TIMER_WIDTH radio_getTimerValue();
+void     radio_setTimerPeriod(PORT_TIMER_WIDTH period);
+PORT_TIMER_WIDTH radio_getTimerPeriod();
 // RF admin
 void     radio_setFrequency(uint8_t frequency);
 void     radio_rfOn();
