@@ -11,29 +11,27 @@
 #define _BOARD_INFO_H
 
 #include "string.h"
-
+#include "debugpins.h"
 #include "stdint.h"
 #include "LPC17xx.h"
 #include "lpc_types.h"
 
-//#ifndef LPCXPRESSO1769
-//#define LPCXPRESSO1769
-//#endif
-//
-//#ifndef OPENMOTE
-//#define OPENMOTE
-//#endif
 
 #define PORT_TIMER_WIDTH                    uint32_t
+#define PORT_SIGNED_INT_WIDTH               int32_t
 #define PORT_TICS_PER_MS                    33
 
 //P0.23 is CAP3.0 (capture register for the radio timer)
-#define CAPTURE_TIME()   LPC_GPIO0->FIOSET        |=  1<<23;  \
-                         LPC_GPIO0->FIOCLR        |=  1<<23;
+#define CAPTURE_TIME()   LPC_GPIO0->FIOSET        |=  CAPTURE_PIN_MASK;  \
+                         LPC_GPIO0->FIOCLR        |=  CAPTURE_PIN_MASK;
 
-#define DISABLE_INTERRUPTS() __disable_irq();
+#define CAPTURE_PIN_MASK 1<<15  //GPIO P0.15 to capture
 
-#define ENABLE_INTERRUPTS() __enable_irq();
+#define DISABLE_INTERRUPTS() __disable_irq(); \
+							 debugpins_isr_set();
+
+#define ENABLE_INTERRUPTS() __enable_irq(); \
+	                         debugpins_isr_clr();
 
 
 
@@ -74,18 +72,23 @@ static const uint8_t infoRadioName[] = "AT86RF231";
 #ifdef OPENMOTE
 #define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()   LPC_GPIO1->FIOSET |=  1<<22;
 #define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()    LPC_GPIO1->FIOCLR |=  1<<22;
+#define RADIO_ISR_MASK 0x1<<22
 #endif
 
 // SLP_TR [P2.8]
 #ifdef LPCXPRESSO1769
 #define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()   LPC_GPIO2->FIOSET |=  1<<8;
 #define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()    LPC_GPIO2->FIOCLR |=  1<<8;
+#define RADIO_ISR_MASK 0x1<<21
 #endif
 
 
 // [P2.4] radio RSTn [P0.17]
-#define PORT_PIN_RADIO_RESET_HIGH()         LPC_GPIO0->FIOSET |=  1<<17;
-#define PORT_PIN_RADIO_RESET_LOW()          LPC_GPIO0->FIOCLR |=  1<<17;
+//#define PORT_PIN_RADIO_RESET_HIGH()         LPC_GPIO0->FIOSET |=  1<<17;
+//#define PORT_PIN_RADIO_RESET_LOW()          LPC_GPIO0->FIOCLR |=  1<<17;
+
+#define PORT_PIN_RADIO_RESET_HIGH()         LPC_GPIO0->FIOCLR |=  1<<17; //as Radio RST is negated it is cleared here
+#define PORT_PIN_RADIO_RESET_LOW()          LPC_GPIO0->FIOSET |=  1<<17;
 
 //isr radio is GPIO  P0.22
 

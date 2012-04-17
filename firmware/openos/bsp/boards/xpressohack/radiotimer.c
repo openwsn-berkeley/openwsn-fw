@@ -8,8 +8,7 @@ The capture register is used to capture counter value at different moments, e.g 
 \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, March 2012.
 */
 
-#include "stdio.h"
-#include "string.h"
+
 #include "radiotimer.h"
 #include "timer.h"
 #include "LPC17xx.h"
@@ -65,8 +64,8 @@ void radiotimer_start(PORT_TIMER_WIDTH period) {
 	 timer_init(TIMER_NUM3);
 	 timer_enable(TIMER_NUM3);
 	 LPC_PINCON->PINSEL1      |= 0x3<<14;      // CAP3.0 mode
-	 LPC_GPIO0->FIODIR        |=  1<<23;       // set as output
-	 LPC_GPIO0->FIOCLR        |=  1<<23;       // set to 0
+	// LPC_GPIO0->FIODIR        |=  1<<23;       // set as output
+	// LPC_GPIO0->FIOCLR        |=  1<<23;       // set to 0
 
 	 timer_set_capture(TIMER_NUM3,TIMER_CAPTURE_REG0);//configures capture register so that when pin cap3.0 is toggled a capture is triggered (raising edge)- (cap3.0 is in)
 	 radiotimer_setPeriod(period);
@@ -81,10 +80,14 @@ PORT_TIMER_WIDTH radiotimer_getValue() {
 
 void radiotimer_setPeriod(PORT_TIMER_WIDTH period) {
 	radiotimer_vars.period=(PORT_TIMER_WIDTH)period;
-	radiotimer_vars.counter_slot_val=radiotimer_getValue();
+	timer_reset(TIMER_NUM3);
+	timer_enable(TIMER_NUM3);
+	radiotimer_vars.counter_slot_val=radiotimer_getValue(); //it is 0 always. remove that..
 	timer_set_compare(TIMER_NUM3, TIMER_COMPARE_REG0,  radiotimer_vars.counter_slot_val+period); //the period timer is controlled by the compare 0 register
 }
-//?? why is this needed?
+
+
+
 
 PORT_TIMER_WIDTH radiotimer_getPeriod() {
    return (PORT_TIMER_WIDTH)radiotimer_vars.period;
@@ -93,24 +96,29 @@ PORT_TIMER_WIDTH radiotimer_getPeriod() {
 //===== compare
 
 void radiotimer_schedule(PORT_TIMER_WIDTH offset) {
-	uint32_t current=radiotimer_vars.counter_slot_val;//references to the init of the current time slot.
+	uint32_t cur;
+	PORT_TIMER_WIDTH current=radiotimer_vars.counter_slot_val;//references to the init of the current time slot.
 	// offset when to fire
 	//get current
-	//current=timer_get_current_value(TIMER_NUM3);
-	timer_set_compare(TIMER_NUM3, TIMER_COMPARE_REG1,current + (uint32_t)offset); //this is controlled by the compare 1 register
+	cur=current + offset;
+	timer_set_compare(TIMER_NUM3, TIMER_COMPARE_REG1,cur); //this is controlled by the compare 1 register
 
 }
 
 void radiotimer_cancel() {
    // reset the timer.
-	timer_reset(TIMER_NUM3);
+	timer_reset_compare(TIMER_NUM3,TIMER_COMPARE_REG1);//cancel any pending timer driven by reg1 (not by the period compare register)
 
 }
 
 //===== capture
 
 inline PORT_TIMER_WIDTH radiotimer_getCapturedTime() {
-   return timer_get_capture_value(TIMER_NUM3,TIMER_CAPTURE_REG0);
+	PORT_TIMER_WIDTH wi;
+	PORT_TIMER_WIDTH wa;
+	wa=timer_get_capture_value(TIMER_NUM3,TIMER_CAPTURE_REG0);
+	wi= wa-radiotimer_vars.counter_slot_val;//w.r.t init of the super slot -- as timer is reset now, counter val is 0 always.
+	return wi;
 }
 
 //=========================== private =========================================
@@ -121,17 +129,12 @@ void private_radio_timer_isr(uint8_t source) {
 	uint32_t current=0;
 	switch (source) {
 	case TIMER_COMPARE_REG0:
-		// current=radiotimer_getValue();
-		// radiotimer_vars.counter_slot_val=current;//refresh init of the slot.
-	    // continuous timer: schedule next instant
-	//	 timer_set_compare(TIMER_NUM3,TIMER_COMPARE_REG0,current+radiotimer_vars.period);
 		if (radiotimer_vars.overflow_cb != NULL) {
 			// call the callback
 			radiotimer_vars.overflow_cb();
 			// kick the OS
 			return ;
 		}
-
 		break;
 	case TIMER_COMPARE_REG1:
 		if (radiotimer_vars.compare_cb != NULL) {
@@ -141,6 +144,7 @@ void private_radio_timer_isr(uint8_t source) {
 			return ;
 		}
 		break;
+
 	default:
 		while (1);
 	}

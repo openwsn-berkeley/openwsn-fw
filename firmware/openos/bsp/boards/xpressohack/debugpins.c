@@ -21,7 +21,7 @@
 #endif
 
 #ifdef LPCXPRESSO1769
-#define FRAME_PIN 23
+#define FRAME_PIN 16
 #define SLOT_PIN 24
 #define FSM_PIN 25
 #define TASK_PIN 26
@@ -73,7 +73,7 @@ void debugpins_init() {
 
 #ifdef LPCXPRESSO1769
 	// configure as GPIO (see pinsel, page 108)
-	LPC_PINCON->PINSEL1     &= ~0x3<<14;          // P0.23
+	LPC_PINCON->PINSEL1     &= ~0x3<<0;          // P0.16
 	LPC_PINCON->PINSEL1     &= ~0x3<<16;          // P0.24
 	LPC_PINCON->PINSEL1     &= ~0x3<<18;         // P0.25
 	LPC_PINCON->PINSEL1     &= ~0x3<<20;         // P0.26

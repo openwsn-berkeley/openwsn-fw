@@ -420,7 +420,8 @@ void timer_set_capture(uint8_t timer_num,uint8_t captureReg) {
 			//configure capture register when something happens.
 			//bit 0 = CAP0RE=1 -- capture on raising edge -- value of TC will be copied to CAP
 			//bit 2 = CAP0I=1 -- generate interrupt on capture
-			LPC_TIM3->CCR   |=  (0x1<<0)|(0x1<<2);
+			//LPC_TIM3->CCR   |=  (0x1<<0)|(0x1<<2);
+			LPC_TIM3->CCR   |=  (0x1<<0);//capture on rising, not interrupt.
 		} else if (captureReg==TIMER_CAPTURE_REG1){
 			//bit 3 = CAP1RE=1 -- capture on raising edge -- value of TC will be copied to CAP
 			//bit 5 = CAP1I=1 -- generate interrupt on capture
@@ -670,6 +671,7 @@ void TIMER3_IRQHandler (void) {
 		if ( LPC_TIM3->IR & (0x1<<1) ) {
 			// clear interrupt flag
 			CAPTURE_TIME();
+
 			LPC_TIM3->IR = 0x1<<1;
 			// call the callback
 			timer_compare_isr_hook_3(TIMER_COMPARE_REG1);

@@ -99,7 +99,11 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
       // we're already too late, schedule the ISR right now manually
 
       // setting the interrupt flag triggers an interrupt
-      // TODO .. look how.
+      // TODO .. check that this works correctly.
+
+	   timer_set_compare(TIMER_NUM2,TIMER_COMPARE_REG0,delayTicks+current_value);
+	   timer_enable(TIMER_NUM2); //in case not enabled
+	   //
    } else {
       // this is the normal case, have timer expire at newCompareValue
 	  timer_set_compare(TIMER_NUM2,TIMER_COMPARE_REG0,newCompareValue);
