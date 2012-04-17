@@ -14,6 +14,10 @@ to return the board's description.
 #include "msp430f1611.h"
 
 //=========================== define ==========================================
+//processor scpecific
+
+#define ENABLE_INTERRUPTS()     __enable_interrupt()
+#define DISABLE_INTERRUPTS()    __disable_interrupt()
 
 //===== timer
 
