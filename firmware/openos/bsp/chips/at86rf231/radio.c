@@ -90,19 +90,20 @@ void radio_reset() {
 
 //===== timer
 
-void radio_startTimer(uint16_t period) {
+void radio_startTimer(PORT_TIMER_WIDTH period) {
    radiotimer_start(period);
 }
 
-uint16_t radio_getTimerValue() {
+PORT_TIMER_WIDTH radio_getTimerValue() {
    return radiotimer_getValue();
 }
 
-void radio_setTimerPeriod(uint16_t period) {
+void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
+
    radiotimer_setPeriod(period);
 }
 
-uint16_t radio_getTimerPeriod() {
+PORT_TIMER_WIDTH radio_getTimerPeriod() {
    return radiotimer_getPeriod();
 }
 
@@ -126,9 +127,10 @@ void radio_rfOn() {
 void radio_rfOff() {
    // change state
    radio_vars.state = RADIOSTATE_TURNING_OFF;
-   
+   radio_spiReadReg(RG_TRX_STATUS);
    // turn radio off
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);
+   //radio_spiWriteReg(RG_TRX_STATE, CMD_TRX_OFF);
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF); // busy wait until done
    
    // wiggle debug pin
@@ -395,7 +397,7 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
 //=========================== interrupt handlers ==============================
 
 uint8_t radio_isr() {
-   uint16_t capturedTime;
+   PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status;
    // capture the time
    capturedTime = radiotimer_getCapturedTime();
