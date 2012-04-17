@@ -14,6 +14,7 @@
 #include "debugpins.h"
 #include "res.h"
 #include "board.h"
+#include "stdlib.h"
 
 //=========================== variables =======================================
 
@@ -22,7 +23,7 @@ typedef struct {
    asn_t              asn;                  // current absolute slot number
    slotOffset_t       slotOffset;           // current slot offset
    slotOffset_t       nextActiveSlotOffset; // next active slot offset
-   uint16_t           deSyncTimeout;        // how many slots left before looses sync
+   PORT_TIMER_WIDTH           deSyncTimeout;        // how many slots left before looses sync
    bool               isSync;               // TRUE iff mote is synchronized to network
    // as shown on the chronogram
    ieee154e_state_t   state;                // state of the FSM
@@ -30,17 +31,17 @@ typedef struct {
    OpenQueueEntry_t*  dataReceived;         // pointer to the data received
    OpenQueueEntry_t*  ackToSend;            // pointer to the ack to send
    OpenQueueEntry_t*  ackReceived;          // pointer to the ack received
-   uint16_t           lastCapturedTime;     // last captured time
-   uint16_t           syncCapturedTime;     // captured time used to sync
+   PORT_TIMER_WIDTH           lastCapturedTime;     // last captured time
+   PORT_TIMER_WIDTH           syncCapturedTime;     // captured time used to sync
 } ieee154e_vars_t;
 
 ieee154e_vars_t ieee154e_vars;
 
 typedef struct {
-   uint16_t           num_newSlot;
-   uint16_t           num_timer;
-   uint16_t           num_startOfFrame;
-   uint16_t           num_endOfFrame;
+   PORT_TIMER_WIDTH           num_newSlot;
+   PORT_TIMER_WIDTH           num_timer;
+   PORT_TIMER_WIDTH           num_startOfFrame;
+   PORT_TIMER_WIDTH           num_endOfFrame;
 } ieee154e_dbg_t;
 
 ieee154e_dbg_t ieee154e_dbg;
@@ -48,8 +49,8 @@ ieee154e_dbg_t ieee154e_dbg;
 // these statistics are reset every time they are reported
 typedef struct {
    uint8_t            syncCounter;          // how many times we synchronized
-   int16_t            minCorrection;        // minimum time correction
-   int16_t            maxCorrection;        // maximum time correction
+   PORT_SIGNED_INT_WIDTH            minCorrection;        // minimum time correction
+   PORT_SIGNED_INT_WIDTH            maxCorrection;        // maximum time correction
    uint8_t            numDeSync;            // number of times a desync happened
 } ieee154e_stats_t;
 
@@ -59,39 +60,39 @@ ieee154e_stats_t ieee154e_stats;
 
 // SYNCHRONIZING
 void     activity_synchronize_newSlot();
-void     activity_synchronize_startOfFrame(uint16_t capturedTime);
-void     activity_synchronize_endOfFrame(uint16_t capturedTime);
+void     activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime);
+void     activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 // TX
 void     activity_ti1ORri1();
 void     activity_ti2();
 void     activity_tie1();
 void     activity_ti3();
 void     activity_tie2();
-void     activity_ti4(uint16_t capturedTime);
+void     activity_ti4(PORT_TIMER_WIDTH capturedTime);
 void     activity_tie3();
-void     activity_ti5(uint16_t capturedTime);
+void     activity_ti5(PORT_TIMER_WIDTH capturedTime);
 void     activity_ti6();
 void     activity_tie4();
 void     activity_ti7();
 void     activity_tie5();
-void     activity_ti8(uint16_t capturedTime);
+void     activity_ti8(PORT_TIMER_WIDTH capturedTime);
 void     activity_tie6();
-void     activity_ti9(uint16_t capturedTime);
+void     activity_ti9(PORT_TIMER_WIDTH capturedTime);
 // RX
 void     activity_ri2();
 void     activity_rie1();
 void     activity_ri3();
 void     activity_rie2();
-void     activity_ri4(uint16_t capturedTime);
+void     activity_ri4(PORT_TIMER_WIDTH capturedTime);
 void     activity_rie3();
-void     activity_ri5(uint16_t capturedTime);
+void     activity_ri5(PORT_TIMER_WIDTH capturedTime);
 void     activity_ri6();
 void     activity_rie4();
 void     activity_ri7();
 void     activity_rie5();
-void     activity_ri8(uint16_t capturedTime);
+void     activity_ri8(PORT_TIMER_WIDTH capturedTime);
 void     activity_rie6();
-void     activity_ri9(uint16_t capturedTime);
+void     activity_ri9(PORT_TIMER_WIDTH capturedTime);
 // frame validity check
 bool     isValidAdv(ieee802154_header_iht*     ieee802514_header);
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
@@ -102,15 +103,15 @@ void     incrementAsnOffset();
 void     asnWriteToAdv(OpenQueueEntry_t* advFrame);
 void     asnStoreFromAdv(OpenQueueEntry_t* advFrame);
 // synchronization
-void     synchronizePacket(uint16_t timeReceived);
-void     synchronizeAck(int16_t timeCorrection);
+void     synchronizePacket(PORT_TIMER_WIDTH timeReceived);
+void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
 void     changeIsSync(bool newIsSync);
 // notifying upper layer
 void     notif_sendDone(OpenQueueEntry_t* packetSent, error_t error);
 void     notif_receive(OpenQueueEntry_t* packetReceived);
 // statistics
 void     resetStats();
-void     updateStats(int16_t timeCorrection);
+void     updateStats(PORT_SIGNED_INT_WIDTH timeCorrection);
 // misc
 uint8_t  calculateFrequency(uint8_t channelOffset);
 void     changeState(ieee154e_state_t newstate);
@@ -162,8 +163,8 @@ void ieee154e_init() {
 
 \returns The ASN difference, or 0xffff if more than 65535 different
 */
- uint16_t ieee154e_asnDiff(asn_t* someASN) {
-   uint16_t diff;
+ PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
+   PORT_TIMER_WIDTH diff;
    DISABLE_INTERRUPTS();
    if (ieee154e_vars.asn.byte4 != someASN->byte4) {
 	   ENABLE_INTERRUPTS();
@@ -194,6 +195,7 @@ This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
    radio_setTimerPeriod(TsSlotDuration);
+   debugpins_slot_toggle();
    if (ieee154e_vars.isSync==FALSE) {
       activity_synchronize_newSlot();
    } else {
@@ -286,7 +288,7 @@ void isr_ieee154e_timer() {
 
 This function executes in ISR mode.
 */
-void ieee154e_startOfFrame(uint16_t capturedTime) {
+void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
    if (ieee154e_vars.isSync==FALSE) {
       activity_synchronize_startOfFrame(capturedTime);
    } else {
@@ -321,7 +323,7 @@ void ieee154e_startOfFrame(uint16_t capturedTime) {
 
 This function executes in ISR mode.
 */
-void ieee154e_endOfFrame(uint16_t capturedTime) {
+void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
    if (ieee154e_vars.isSync==FALSE) {
       activity_synchronize_endOfFrame(capturedTime);
    } else {
@@ -415,7 +417,7 @@ inline void activity_synchronize_newSlot() {
    }
 }
 
-inline void activity_synchronize_startOfFrame(uint16_t capturedTime) {
+inline void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
    
    // don't care about packet if I'm not listening
    if (ieee154e_vars.state!=S_SYNCLISTEN) {
@@ -435,7 +437,7 @@ inline void activity_synchronize_startOfFrame(uint16_t capturedTime) {
    ieee154e_vars.syncCapturedTime = capturedTime;
 }
 
-inline void activity_synchronize_endOfFrame(uint16_t capturedTime) {
+inline void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    
    // check state
@@ -524,7 +526,8 @@ inline void activity_synchronize_endOfFrame(uint16_t capturedTime) {
          
          // declare synchronized
          changeIsSync(TRUE);
-         
+      //  printf("Synch set to TRUE %d \n ",radiotimer_getPeriod());
+
          // log the "error"
          openserial_printError(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
                                (errorparameter_t)ieee154e_vars.slotOffset,
@@ -561,7 +564,7 @@ inline void activity_ti1ORri1() {
    incrementAsnOffset();
    
    // wiggle debug pins
-   debugpins_slot_toggle();
+   //debugpins_slot_toggle();
    if (ieee154e_vars.slotOffset==0) {
       debugpins_frame_toggle();
    }
@@ -608,7 +611,6 @@ inline void activity_ti1ORri1() {
       ieee154e_vars.nextActiveSlotOffset    = schedule_getNextActiveSlotOffset();
    } else {
       // this is NOT the next active slot, abort
-      
       // stop using serial
       openserial_stop();
       // abort the slot
@@ -761,7 +763,7 @@ inline void activity_tie2() {
    endSlot();
 }
 
-inline void activity_ti4(uint16_t capturedTime) {
+inline void activity_ti4(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_TXDATA);
 
@@ -785,7 +787,7 @@ inline void activity_tie3() {
    endSlot();
 }
 
-inline void activity_ti5(uint16_t capturedTime) {
+inline void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
    bool listenForAck;
    
    // change state
@@ -887,7 +889,7 @@ inline void activity_tie5() {
    endSlot();
 }
 
-inline void activity_ti8(uint16_t capturedTime) {
+inline void activity_ti8(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_RXACK);
    
@@ -906,9 +908,9 @@ inline void activity_tie6() {
    endSlot();
 }
 
-inline void activity_ti9(uint16_t capturedTime) {
+inline void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
-   volatile int16_t  timeCorrection;
+   volatile PORT_SIGNED_INT_WIDTH  timeCorrection;
    uint8_t byte0;
    uint8_t byte1;
    
@@ -987,7 +989,7 @@ inline void activity_ti9(uint16_t capturedTime) {
              neighbors_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop)) ) {
             byte0 = ieee154e_vars.ackReceived->payload[0];
             byte1 = ieee154e_vars.ackReceived->payload[1];
-            timeCorrection  = (int16_t)((uint16_t)byte1<<8 | (uint16_t)byte0);
+            timeCorrection  = (PORT_SIGNED_INT_WIDTH)((PORT_TIMER_WIDTH)byte1<<8 | (PORT_TIMER_WIDTH)byte0);
             timeCorrection /=  US_PER_TICK;
             timeCorrection  = -timeCorrection;
             synchronizeAck(timeCorrection);
@@ -1064,7 +1066,7 @@ inline void activity_rie2() {
    endSlot();
 }
 
-inline void activity_ri4(uint16_t capturedTime) {
+inline void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_RXDATA);
    
@@ -1091,7 +1093,7 @@ inline void activity_rie3() {
    endSlot();
 }
 
-inline void activity_ri5(uint16_t capturedTime) {
+inline void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    
    // change state
@@ -1210,7 +1212,7 @@ inline void activity_ri5(uint16_t capturedTime) {
 }
 
 inline void activity_ri6() {
-   int16_t timeCorrection;
+   PORT_SIGNED_INT_WIDTH timeCorrection;
    uint8_t frequency;
    
    // change state
@@ -1237,14 +1239,14 @@ inline void activity_ri6() {
    ieee154e_vars.ackToSend->owner   = COMPONENT_IEEE802154E;
    
    // calculate the time timeCorrection
-   timeCorrection = (int16_t)((int16_t)ieee154e_vars.syncCapturedTime-(int16_t)TsTxOffset);
+   timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
    
    // add the payload to the ACK (i.e. the timeCorrection)
    packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(IEEE802154E_ACK_ht));
    timeCorrection  = -timeCorrection;
    timeCorrection *= US_PER_TICK;
-   ieee154e_vars.ackToSend->payload[0] = (uint8_t)((((uint16_t)timeCorrection)   ) & 0xff);
-   ieee154e_vars.ackToSend->payload[1] = (uint8_t)((((uint16_t)timeCorrection)>>8) & 0xff);
+   ieee154e_vars.ackToSend->payload[0] = (uint8_t)((((PORT_TIMER_WIDTH)timeCorrection)   ) & 0xff);
+   ieee154e_vars.ackToSend->payload[1] = (uint8_t)((((PORT_TIMER_WIDTH)timeCorrection)>>8) & 0xff);
    
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
@@ -1310,7 +1312,7 @@ inline void activity_rie5() {
    endSlot();
 }
 
-inline void activity_ri8(uint16_t capturedTime) {
+inline void activity_ri8(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_TXACK);
    
@@ -1334,7 +1336,7 @@ inline void activity_rie6() {
    endSlot();
 }
 
-inline void activity_ri9(uint16_t capturedTime) {
+inline void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_RXPROC);
    
@@ -1455,6 +1457,9 @@ inline void incrementAsnOffset() {
    }
    // increment the offset
    ieee154e_vars.slotOffset = (ieee154e_vars.slotOffset+1)%schedule_getFrameLength();
+   if (ieee154e_vars.slotOffset%2==0){
+	 //  printf("SlotOffset %d \n", ieee154e_vars.slotOffset);
+   }
 }
 
 inline void asnWriteToAdv(OpenQueueEntry_t* advFrame) {
@@ -1486,37 +1491,37 @@ inline void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
 
 //======= synchronization
 
-void synchronizePacket(uint16_t timeReceived) {
-   int16_t  timeCorrection;
-   uint16_t newPeriod;
-   uint16_t currentValue;
-   uint16_t currentPeriod;
+void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
+   PORT_SIGNED_INT_WIDTH  timeCorrection;
+   PORT_TIMER_WIDTH newPeriod;
+   PORT_TIMER_WIDTH currentValue;
+   PORT_TIMER_WIDTH currentPeriod;
    // record the current timer value and period
    currentValue                   =  radio_getTimerValue();
    currentPeriod                  =  radio_getTimerPeriod();
    // calculate new period
-   timeCorrection                 =  (int16_t)((int16_t)timeReceived-(int16_t)TsTxOffset);
+   timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
    newPeriod                      =  TsSlotDuration;
    // detect whether I'm too close to the edge of the slot, in that case,
    // skip a slot and increase the temporary slot length to be 2 slots long
-   if (currentValue<timeReceived ||
-       currentPeriod-currentValue<RESYNCHRONIZATIONGUARD) {
+   if (currentValue<timeReceived || currentPeriod-currentValue<RESYNCHRONIZATIONGUARD) {
       newPeriod                  +=  TsSlotDuration;
       incrementAsnOffset();
    }
-   newPeriod                      =  (uint16_t)((int16_t)newPeriod+timeCorrection);
+   newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)newPeriod+timeCorrection);
    radio_setTimerPeriod(newPeriod);
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
+//printf("new period set %d %\n",newPeriod );
    // update statistics
    updateStats(timeCorrection);
 }
 
-void synchronizeAck(int16_t timeCorrection) {
-   uint16_t newPeriod;
-   uint16_t currentPeriod;
+void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
+   PORT_TIMER_WIDTH newPeriod;
+   PORT_TIMER_WIDTH currentPeriod;
    // resynchronize
    currentPeriod                  =  radio_getTimerPeriod();
-   newPeriod                      =  (uint16_t)((int16_t)currentPeriod-timeCorrection);
+   newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod-timeCorrection);
    radio_setTimerPeriod(newPeriod);
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    // update statistics
@@ -1525,6 +1530,7 @@ void synchronizeAck(int16_t timeCorrection) {
 
 void changeIsSync(bool newIsSync) {
    ieee154e_vars.isSync = newIsSync;
+
    if (ieee154e_vars.isSync==TRUE) {
       leds_sync_on();
       resetStats();
@@ -1572,7 +1578,7 @@ inline void resetStats() {
    // do not reset the number of de-synchronizations
 }
 
-void updateStats(int16_t timeCorrection) {
+void updateStats(PORT_SIGNED_INT_WIDTH timeCorrection) {
    
    ieee154e_stats.syncCounter++;
    

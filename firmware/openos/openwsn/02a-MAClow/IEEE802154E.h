@@ -105,7 +105,7 @@ enum ieee154e_atomicdurations_enum {
 
 //IEEE802.15.4E acknowledgement (ACK)
 typedef struct {
-   int16_t timeCorrection;
+   PORT_SIGNED_INT_WIDTH timeCorrection;
 } IEEE802154E_ACK_ht;
 
 #define ADV_PAYLOAD_LENGTH 5
@@ -118,10 +118,10 @@ typedef struct {
 // admin
           void     ieee154e_init();
 // public
-          uint16_t ieee154e_asnDiff(asn_t* someASN);
+          PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN);
 // events
-          void     ieee154e_startOfFrame(uint16_t capturedTime);
-          void     ieee154e_endOfFrame(uint16_t capturedTime);
+          void     ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
+          void     ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 // misc
           bool     debugPrint_asn();
           bool     debugPrint_isSync();
