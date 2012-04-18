@@ -49,7 +49,7 @@ void lptmr_init(uint8_t clock_source)
 {
     SIM_SCGC5 |= SIM_SCGC5_LPTIMER_MASK;//power the timer
     SIM_SOPT1 |= SIM_SOPT1_OSC32KSEL(2); // ERCLK32 is RTC OSC CLOCK 32khz
-    OSC_CR |= OSC_CR_ERCLKEN_MASK;//select the correct timer
+    OSC_CR |= OSC_CR_ERCLKEN_MASK|OSC_CR_EREFSTEN_MASK;//select the correct timer
     
     LPTMR0_PSR = ( LPTMR_PSR_PRESCALE(0) // 0000 is div 2
                  | LPTMR_PSR_PBYP_MASK  // external osc feeds directly to LPT
