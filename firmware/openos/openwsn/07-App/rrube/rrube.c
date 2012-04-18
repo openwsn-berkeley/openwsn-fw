@@ -1,6 +1,7 @@
 #include "openwsn.h"
 #include "rrube.h"
 #include "opencoap.h"
+#include "opentimers.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
@@ -27,6 +28,7 @@ typedef struct {
    rrube_state_t        rrube_state;
    coap_resource_desc_t desc;
    open_addr_t          nextHop;
+   opentimer_id_t  timerId;
 } rrube_vars_t;
 
 rrube_vars_t rrube_vars;
@@ -58,10 +60,12 @@ void rrube_init() {
    rrube_vars.desc.path1val             = NULL;
    rrube_vars.desc.componentID          = COMPONENT_RRUBE;
    rrube_vars.desc.callbackRx           = &rrube_receive;
-   rrube_vars.desc.callbackTimer        = &rrube_timer;
    rrube_vars.desc.callbackSendDone     = &rrube_sendDone;
    
    opencoap_register(&rrube_vars.desc);
+   rrube_vars.timerId    = opentimers_start(1000,
+                                           TIMER_PERIODIC,
+                                           rrube_timer);
 }
 
 //=========================== private =========================================

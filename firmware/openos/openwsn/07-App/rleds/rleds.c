@@ -33,7 +33,6 @@ void rleds_init() {
    rleds_vars.desc.path1val            = NULL;
    rleds_vars.desc.componentID         = COMPONENT_RLEDS;
    rleds_vars.desc.callbackRx          = &rleds_receive;
-   rleds_vars.desc.callbackTimer       = NULL;
    rleds_vars.desc.callbackSendDone    = &rleds_sendDone;
    
    opencoap_register(&rleds_vars.desc);

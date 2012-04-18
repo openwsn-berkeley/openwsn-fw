@@ -71,7 +71,7 @@ The timer works as follows:
          timer could be started.
 \returns TOO_MANY_TIMERS_ERROR if the timer could NOT be started.
 */
-opentimer_id_t opentimers_start(uint16_t duration, timer_type_t type, opentimers_cbt callback) {
+opentimer_id_t opentimers_start(uint32_t duration, timer_type_t type, opentimers_cbt callback) {
    
    uint8_t  id;
    
@@ -83,13 +83,19 @@ opentimer_id_t opentimers_start(uint16_t duration, timer_type_t type, opentimers
       
       // register the timer
       opentimers_vars.timersBuf[id].period_ticks      = duration*PORT_TICS_PER_MS;
-      opentimers_vars.timersBuf[id].ticks_remaining   = duration*PORT_TICS_PER_MS;
+      opentimers_vars.timersBuf[id].wraps_remaining   = (duration*PORT_TICS_PER_MS/MAX_TICKS_IN_SINGLE_CLOCK);//65535=maxValue of uint16_t
+      //if the number of ticks falls below a 16bit value, use it, otherwise set to max 16bit value
+      if(opentimers_vars.timersBuf[id].wraps_remaining==0)                                                
+         opentimers_vars.timersBuf[id].ticks_remaining   = duration*PORT_TICS_PER_MS;
+      else
+         opentimers_vars.timersBuf[id].ticks_remaining = MAX_TICKS_IN_SINGLE_CLOCK;
+                                                         
       opentimers_vars.timersBuf[id].type              = type;
       opentimers_vars.timersBuf[id].isrunning         = TRUE;
       opentimers_vars.timersBuf[id].callback          = callback;
       opentimers_vars.timersBuf[id].hasExpired        = FALSE;
       
-      // re-schedule the running timer, it needed
+      // re-schedule the running timer, if needed
       if (
             (opentimers_vars.running==FALSE)
             ||
@@ -115,8 +121,14 @@ opentimer_id_t opentimers_start(uint16_t duration, timer_type_t type, opentimers
 \brief Replace the period of a running timer.
 */
 void  opentimers_setPeriod(opentimer_id_t id,
-                           uint16_t       newDuration) {
-   opentimers_vars.timersBuf[id].period_ticks = newDuration*PORT_TICS_PER_MS;
+                           uint32_t       newDuration) {
+      opentimers_vars.timersBuf[id].period_ticks      = newDuration*PORT_TICS_PER_MS;
+      opentimers_vars.timersBuf[id].wraps_remaining   = (newDuration*PORT_TICS_PER_MS/MAX_TICKS_IN_SINGLE_CLOCK);//65535=maxValue of uint16_t
+      
+      if(opentimers_vars.timersBuf[id].wraps_remaining==0)                                                
+         opentimers_vars.timersBuf[id].ticks_remaining   = newDuration*PORT_TICS_PER_MS;
+      else
+         opentimers_vars.timersBuf[id].ticks_remaining = MAX_TICKS_IN_SINGLE_CLOCK;
 }
 
 /**
@@ -128,6 +140,16 @@ timer to expire.
 void opentimers_stop(opentimer_id_t id) {
    opentimers_vars.timersBuf[id].isrunning=FALSE;
 }
+
+/**
+\brief Stop a running timer.
+
+Sets the timer to " running".
+*/
+void opentimers_restart(opentimer_id_t id) {
+   opentimers_vars.timersBuf[id].isrunning=TRUE;
+}
+
 
 //=========================== private =========================================
 
@@ -152,9 +174,19 @@ void opentimers_timer_callback() {
          
          if(opentimers_vars.currentTimeout >= opentimers_vars.timersBuf[id].ticks_remaining) {
             // this timer has expired
-            
-            // declare as so
-            opentimers_vars.timersBuf[id].hasExpired  = TRUE;
+            //check to see if we have completed the whole timer, or we're just wrapping around the max 16bit value
+            if(opentimers_vars.timersBuf[id].wraps_remaining == 0){
+               // declare as so
+               opentimers_vars.timersBuf[id].hasExpired  = TRUE;
+            }else{
+               opentimers_vars.timersBuf[id].wraps_remaining--;
+               if(opentimers_vars.timersBuf[id].wraps_remaining == 0){
+                  //if we have fully wrapped around, then set the remainring ticks to the modulus of the total ticks and the max clock value
+                  opentimers_vars.timersBuf[id].ticks_remaining = (opentimers_vars.timersBuf[id].period_ticks) % MAX_TICKS_IN_SINGLE_CLOCK;
+               }else{
+                  opentimers_vars.timersBuf[id].ticks_remaining = MAX_TICKS_IN_SINGLE_CLOCK;
+               }
+            }
          } else {
             // this timer is not expired
             
@@ -174,7 +206,13 @@ void opentimers_timer_callback() {
          
          // reload the timer, if applicable
          if (opentimers_vars.timersBuf[id].type==TIMER_PERIODIC) {
-            opentimers_vars.timersBuf[id].ticks_remaining=opentimers_vars.timersBuf[id].period_ticks;
+            opentimers_vars.timersBuf[id].wraps_remaining   = (opentimers_vars.timersBuf[id].period_ticks/MAX_TICKS_IN_SINGLE_CLOCK);//65535=maxValue of uint16_t
+            //if the number of ticks falls below a 16bit value, use it, otherwise set to max 16bit value
+            if(opentimers_vars.timersBuf[id].wraps_remaining==0)                                                
+               opentimers_vars.timersBuf[id].ticks_remaining   = opentimers_vars.timersBuf[id].period_ticks;
+            else
+               opentimers_vars.timersBuf[id].ticks_remaining = MAX_TICKS_IN_SINGLE_CLOCK;
+            
          } else {
             opentimers_vars.timersBuf[id].isrunning   = FALSE;
          }

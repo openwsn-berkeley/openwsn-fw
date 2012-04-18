@@ -258,15 +258,7 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, error_t error) {
 }
 
 void timers_coap_fired() {
-   coap_resource_desc_t* temp_resource;
-   
-   temp_resource = opencoap_vars.resources;
-   while (temp_resource!=NULL) {
-      if (temp_resource->callbackTimer!=NULL) {
-         temp_resource->callbackTimer();
-      }
-      temp_resource = temp_resource->next;
-   }
+   //do something here if necessary
 }
 
 //===== from CoAP resources
@@ -339,6 +331,7 @@ error_t opencoap_send(OpenQueueEntry_t*     msg,
 
 //=========================== private =========================================
 
+//bkpoipoi
 void icmpv6coap_timer_cb() {
    scheduler_push_task(timers_coap_fired,TASKPRIO_COAP);
 }

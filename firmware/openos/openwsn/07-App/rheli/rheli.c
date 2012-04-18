@@ -1,5 +1,6 @@
 #include "openwsn.h"
 #include "rheli.h"
+#include "opentimers.h"
 #include "opencoap.h"
 #include "packetfunctions.h"
 #include "heli.h"
@@ -9,6 +10,7 @@
 
 typedef struct {
    coap_resource_desc_t desc;
+   opentimer_id_t  timerId;
 } rheli_vars_t;
 
 rheli_vars_t rheli_vars;
@@ -37,10 +39,12 @@ void rheli_init() {
    rheli_vars.desc.path1val            = NULL;
    rheli_vars.desc.componentID         = COMPONENT_RHELI;
    rheli_vars.desc.callbackRx          = &rheli_receive;
-   rheli_vars.desc.callbackTimer       = &rheli_timer;
    rheli_vars.desc.callbackSendDone    = &rheli_sendDone;
    
    opencoap_register(&rheli_vars.desc);
+   rheli_vars.timerId    = opentimers_start(1000,
+                                            TIMER_PERIODIC,
+                                            rheli_timer);
 }
 
 //=========================== private =========================================

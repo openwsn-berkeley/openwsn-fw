@@ -121,7 +121,6 @@ struct coap_resource_desc_t {
    uint8_t               componentID;
    uint16_t              messageID;
    callbackRx_t          callbackRx;
-   callbackTimer_t       callbackTimer;
    callbackSendDone_t    callbackSendDone;
    coap_resource_desc_t* next;
 };

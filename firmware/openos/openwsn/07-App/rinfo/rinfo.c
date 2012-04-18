@@ -37,7 +37,6 @@ void rinfo_init() {
    rinfo_vars.desc.path1val             = NULL;
    rinfo_vars.desc.componentID          = COMPONENT_RINFO;
    rinfo_vars.desc.callbackRx           = &rinfo_receive;
-   rinfo_vars.desc.callbackTimer        = NULL;
    rinfo_vars.desc.callbackSendDone     = &rinfo_sendDone;
    
    opencoap_register(&rinfo_vars.desc);

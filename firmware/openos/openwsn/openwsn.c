@@ -11,7 +11,7 @@
 //#include "rheli.h"
 #include "rinfo.h"
 //#include "rxl1.h"
-//#include "rex.h"
+#include "rex.h"
 //#include "rt.h"
 #include "rwellknown.h"
 #include "rleds.h"

@@ -35,7 +35,6 @@ void rwellknown_init() {
    rwellknown_vars.desc.path1val            = (uint8_t*)(&rwellknown_path1);
    rwellknown_vars.desc.componentID         = COMPONENT_RWELLKNOWN;
    rwellknown_vars.desc.callbackRx          = &rwellknown_receive;
-   rwellknown_vars.desc.callbackTimer       = NULL;
    rwellknown_vars.desc.callbackSendDone    = &rwellknown_sendDone;
    
    opencoap_register(&rwellknown_vars.desc);

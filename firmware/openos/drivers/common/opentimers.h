@@ -14,6 +14,7 @@
 
 /// The number of timer that can run concurrently
 #define MAX_NUM_TIMERS            10
+#define MAX_TICKS_IN_SINGLE_CLOCK 65535
 
 #define TOO_MANY_TIMERS_ERROR     255
 
@@ -29,8 +30,10 @@ typedef enum {
 #define opentimer_id_t uint8_t
 
 typedef struct {
-   PORT_TIMER_WIDTH     period_ticks;       // period, in ticks
+   uint32_t             period_ticks;       // total number of clock ticks
    PORT_TIMER_WIDTH     ticks_remaining;    // ticks remaining before elapses
+   uint16_t             wraps_remaining;    // the clock register is 16 bit, and can't count beyond 32k...
+                                            // so period_ticks = wraps_remaining*(32k or uint16_t)
    timer_type_t         type;               // periodic or one-shot
    bool                 isrunning;          // is running?
    opentimers_cbt       callback;           // function to call when elapses
@@ -40,11 +43,12 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void           opentimers_init();
-opentimer_id_t opentimers_start(uint16_t       duration,
+opentimer_id_t opentimers_start(uint32_t       duration,
                                 timer_type_t   type,
                                 opentimers_cbt callback);
 void           opentimers_setPeriod(opentimer_id_t id,
-                                    uint16_t       newPeriod);
+                                    uint32_t       newPeriod);
 void           opentimers_stop(opentimer_id_t id);
+void           opentimers_restart(opentimer_id_t id);
 
 #endif
