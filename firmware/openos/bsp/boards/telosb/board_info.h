@@ -22,6 +22,7 @@ to return the board's description.
 //===== timer
 
 #define PORT_TIMER_WIDTH                    uint16_t
+#define PORT_SIGNED_INT_WIDTH               int16_t
 #define PORT_TICS_PER_MS                    33
 
 // on TelosB, we use the comparatorA interrupt for the OS
