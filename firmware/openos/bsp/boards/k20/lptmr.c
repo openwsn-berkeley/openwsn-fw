@@ -46,10 +46,25 @@ void lptmr_set_isr_compare_hook(low_timer_hook cbt){
 *******************************************************************************/
 
 void lptmr_init(uint8_t clock_source)
-{
-    SIM_SCGC5 |= SIM_SCGC5_LPTIMER_MASK;//power the timer
-    SIM_SOPT1 |= SIM_SOPT1_OSC32KSEL(2); // ERCLK32 is RTC OSC CLOCK 32khz
-    OSC_CR |= OSC_CR_ERCLKEN_MASK|OSC_CR_EREFSTEN_MASK;//select the correct timer
+{  
+	    SIM_SCGC5 |= SIM_SCGC5_LPTIMER_MASK;//power the timer
+	
+        SIM_SCGC6|=SIM_SCGC6_RTC_MASK; //Enable RTC registers
+	    RTC_CR|=RTC_CR_OSCE_MASK;      //Turn on RTC oscillator
+	    //SIM_SOPT1|=SIM_SOPT1_OSC32KSEL_MASK;  //Select RTC OSC as source for ERCLK32K
+	    SIM_SOPT1 &= ~(3<<18);//clear osc32ksel
+	    SIM_SOPT1 |=SIM_SOPT1_OSC32KSEL(2); //select rtc 32khz
+	   //printf("SIM_SOPT1 %x\n",SIM_SOPT1);
+
+      
+   
+        
+        // SIM_SCGC6 |= SIM_SCGC6_RTC_MASK;
+    //SIM_SOPT1 |= SIM_SOPT1_OSC32KSEL(2); // ERCLK32 is RTC OSC CLOCK 32khz
+   //OSC_CR |= OSC_CR_ERCLKEN_MASK|OSC_CR_EREFSTEN_MASK;//select the correct timer
+//    RTC_CR |= RTC_CR_OSCE_MASK |
+//                 RTC_CR_CLKO_MASK |
+//                 RTC_CR_SC8P_MASK  ;
     
     LPTMR0_PSR = ( LPTMR_PSR_PRESCALE(0) // 0000 is div 2
                  | LPTMR_PSR_PBYP_MASK  // external osc feeds directly to LPT

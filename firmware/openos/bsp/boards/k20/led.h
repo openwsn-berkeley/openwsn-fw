@@ -7,6 +7,8 @@
 void GPIO_Init(void);
 void LEDs_On(void);
 void LED_Dir_Out(void);
+void GPIO_DeInit(void);
+
 
 #ifdef CPU_MK60N512VMD100
 
@@ -36,14 +38,14 @@ void LED_Dir_Out(void);
 
 #elif (defined(MCU_MK20D7))
   #define ENABLE_GPIO_CLOCKS (SIM_SCGC5 |= (SIM_SCGC5_PORTC_MASK))
-  
+  #define DISABLE_GPIO_CLOCKS (SIM_SCGC5 &= ~(SIM_SCGC5_PORTC_MASK))
   /* TWR-K20D72M GPIO for LED configuration 
   *		Diode D7 - PTC7
   *		Diode D8 - PTC8
   *		Diode D9 - PTC9
   * 	Diode D10 - PTC10
   */
-  #define LED0_EN (PORTC_PCR7 = PORT_PCR_MUX(1))	
+  #define LED0_EN (PORTC_PCR7 = PORT_PCR_MUX(1))	//set as gpio
   #define LED1_EN (PORTC_PCR8 = PORT_PCR_MUX(1))
   #define LED2_EN (PORTC_PCR9 = PORT_PCR_MUX(1))
   #define LED3_EN (PORTC_PCR10 = PORT_PCR_MUX(1))

@@ -14,8 +14,21 @@ void GPIO_Init(void)
   LED2_EN;
   LED3_EN;
 
-  LEDs_On();
+ // LEDs_On();
   LED_Dir_Out();
+}
+
+void GPIO_DeInit(void)
+{
+  
+	  LED0_OFF;
+	  LED1_OFF;
+	  LED2_OFF;
+	  LED3_OFF;
+	  
+  DISABLE_GPIO_CLOCKS;
+  
+
 }
 
 void LED_Dir_Out(void)
@@ -38,9 +51,12 @@ void LEDs_On(void)
   GPIOB_PDOR &= ~(1<<11);
   GPIOC_PDOR &= ~((1<<7)|(1<<8)|(1<<9));
 #elif (defined(MCU_MK20D7))
-  GPIOC_PDOR &= ~((1<<9)|(1<<10));	
-  GPIOC_PDOR |= (1<<7)|(1<<8);	
+  GPIOC_PDOR &= ~((1<<9)|(1<<10));
+  GPIOC_PDOR |= ((1<<7)|(1<<8));	
 #endif
 }
+
+
+
 
 

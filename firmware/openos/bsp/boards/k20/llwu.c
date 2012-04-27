@@ -11,15 +11,22 @@
 
 #include "derivative.h"
 #include "llwu.h"
-#include "mcg.h"
+//#include "mcg.h"
 #include "uart.h"
-#include "rcm.h"
+
 
 extern int re_init_clk;
 extern int mcg_clk_hz;
 extern int mcg_clk_khz;
 extern int core_clk_khz;
 
+
+
+void llwu_init(void)
+{   //SIM_SCGC4 |= SIM_SCGC4_LLWU_MASK; //power llwu
+    enable_irq(LLWU_IRQ_NUM);
+    llwu_configure(0x0/*no pin*/, LLWU_PIN_DIS, LLWU_ME_WUME0_MASK);//lptmr is wume0 manual page 76
+}
 
 /*******************************************************************************
 *
@@ -65,7 +72,7 @@ void llwu_reset_enable(void)
 */
 void llwu_configure(unsigned int pin_en, unsigned char rise_fall, unsigned char module_en )
 {
-    uint8 temp;
+    uint8_t temp;
 
     temp = LLWU_PE1;
     if( pin_en & 0x0001)
@@ -177,17 +184,17 @@ void llwu_configure(unsigned int pin_en, unsigned char rise_fall, unsigned char 
 
     LLWU_ME = module_en;  //Set up modules to wakeup up
 
-    printf("LLWU PE1   = 0x%02X,    ",   (LLWU_PE1)) ;
-    printf("LLWU PE2   = 0x%02X\n",      (LLWU_PE2)) ;
-    printf("LLWU PE3   = 0x%02X,    ",   (LLWU_PE3)) ;
-    printf("LLWU PE4   = 0x%02X\n",      (LLWU_PE4)) ;
-    printf("LLWU ME    = 0x%02X,    ",    (LLWU_ME)) ;
-    printf("LLWU F1    = 0x%02X\n",       (LLWU_F1)) ;
-    printf("LLWU F2    = 0x%02X,    ",    (LLWU_F2)) ;
-    printf("LLWU F3    = 0x%02X\n",       (LLWU_F3)) ;
-    printf("LLWU FILT1 = 0x%02X,    ", (LLWU_FILT1)) ;
-    printf("LLWU FILT2 = 0x%02X\n",    (LLWU_FILT2)) ;
-    printf("LLWU RST   = 0x%02X\n",      (LLWU_RST)) ;
+//    printf("LLWU PE1   = 0x%02X,    ",   (LLWU_PE1)) ;
+//    printf("LLWU PE2   = 0x%02X\n",      (LLWU_PE2)) ;
+//    printf("LLWU PE3   = 0x%02X,    ",   (LLWU_PE3)) ;
+//    printf("LLWU PE4   = 0x%02X\n",      (LLWU_PE4)) ;
+//    printf("LLWU ME    = 0x%02X,    ",    (LLWU_ME)) ;
+//    printf("LLWU F1    = 0x%02X\n",       (LLWU_F1)) ;
+//    printf("LLWU F2    = 0x%02X,    ",    (LLWU_F2)) ;
+//    printf("LLWU F3    = 0x%02X\n",       (LLWU_F3)) ;
+//    printf("LLWU FILT1 = 0x%02X,    ", (LLWU_FILT1)) ;
+//    printf("LLWU FILT2 = 0x%02X\n",    (LLWU_FILT2)) ;
+//    printf("LLWU RST   = 0x%02X\n",      (LLWU_RST)) ;
       //function ends
 }
 
@@ -201,7 +208,7 @@ void llwu_configure(unsigned int pin_en, unsigned char rise_fall, unsigned char 
 void llwu_configure_filter(unsigned int wu_pin_num, unsigned char filter_en, unsigned char rise_fall )
 {
    //wu_pin_num is the pin number to be written to FILTSEL.  wu_pin_num is not the same as pin_en.
-    uint8 temp;
+    uint8_t temp;
 
     printf("\nEnabling Filter %x on WU Pin %x for WU sense %x \n",filter_en, wu_pin_num, rise_fall);
 
@@ -314,8 +321,8 @@ void llwu_isr(void)
    if (LLWU_F2 & LLWU_F2_WUF15_MASK) {
 //       printf("[LLWU ISR] UART0\n");
        SIM_SCGC5 |= SIM_SCGC5_PORTD_MASK; // turn on port D ajj per alister
-       ch = uart_getchar(UART0_BASE_PTR);
-       out_char(ch);
+   //    ch = uart_getchar(UART0_BASE_PTR);
+     //  out_char(ch);
        LLWU_F2 |= LLWU_F2_WUF15_MASK;   // write one to clear the flag
        PORTD_PCR6  |= PORT_PCR_ISF_MASK  ;   //  clear Flag if there
    }

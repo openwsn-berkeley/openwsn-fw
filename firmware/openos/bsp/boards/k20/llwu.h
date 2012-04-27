@@ -28,7 +28,7 @@
 
 void llwu_reset_enable(void);
 void llwu_configure(unsigned int pin_en, unsigned char rise_fall, unsigned char module_en);
-void llwu_isr(void);
+extern void llwu_isr(void);
 void llwu_configure_filter(unsigned int wu_pin_num, unsigned char filter_en, unsigned char rise_fall ); 
 
 #endif /* __LLWU_COMMON_H__ */
