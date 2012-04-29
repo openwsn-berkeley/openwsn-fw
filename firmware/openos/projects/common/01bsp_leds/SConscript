@@ -2,15 +2,25 @@ import os
 
 Import('env')
 
-thisEnv = env.Clone()
+localEnv = env.Clone()
 
-thisEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'),
-                            os.path.join('#','firmware','openos','bsp','boards','pc'),
-                          ],
-              )
+localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'),
+                             os.path.join('#','firmware','openos','bsp','boards','pc'),
+                           ],
+                )
+localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc'),
+                           ],
+                )
 
-source_files = ['01bsp_leds.c',
-                Glob(os.path.join('#','firmware','openos','bsp','boards','pc','*.c')),
-               ]
+library_files = [
+                   'libbsppc.lib',
+                ]
+source_files =  ['01bsp_leds.c',
+                ]
 
-thisEnv.Program(target='poipoipoi',source=source_files)
+bsp_leds = localEnv.Program(
+                    target  = 'bsp_leds',
+                    source  = source_files,
+                    LIBS    = library_files,
+                    )
+Alias('bsp_leds', bsp_leds)
