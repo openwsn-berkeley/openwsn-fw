@@ -8,9 +8,23 @@ localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'
                            ],
                )
 
-source_files = [Glob('*.c'),
+libbsppc_source = [Glob('*.c'),
                ]
 
 libbsppc = localEnv.Library(target='libbsppc',
-                            source=source_files)
+                            source=libbsppc_source)
 Alias('libbsppc', libbsppc)
+
+
+client_sources  =  ['engine_client.c','tcp_port.c']
+client_libs =   [
+                   'ws2_32.lib',
+                   'user32.lib',
+                ]
+
+engine_client = localEnv.Program(
+                    target  = 'engine_client',
+                    source  = client_sources,
+                    LIBS    = client_libs,
+                    )
+Alias('engine_client', engine_client)
