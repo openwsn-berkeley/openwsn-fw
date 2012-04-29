@@ -2,29 +2,32 @@ import os
 
 Import('env')
 
-localEnv = env.Clone()
+#============================ libbsppc ========================================
+libbsppc_env = env.Clone()
 
-localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'),
-                           ],
-               )
+libbsppc_env.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'),
+                               ],
+                   )
 
 libbsppc_source = [Glob('*.c'),
                ]
 
-libbsppc = localEnv.Library(target='libbsppc',
+libbsppc = libbsppc_env.Library(target='libbsppc',
                             source=libbsppc_source)
 Alias('libbsppc', libbsppc)
 
+#============================ opensim_client ==================================
+opensim_client_env = env.Clone()
 
-client_sources  =  ['engine_client.c','tcp_port.c']
-client_libs =   [
-                   'ws2_32.lib',
-                   'user32.lib',
-                ]
+opensim_client_sources  =  ['opensim_client.c','tcp_port.c']
+opensim_client_libs     =  [
+                     'ws2_32.lib',
+                     'user32.lib',
+                   ]
 
-engine_client = localEnv.Program(
-                    target  = 'engine_client',
-                    source  = client_sources,
-                    LIBS    = client_libs,
+opensim_client = opensim_client_env.Program(
+                    target  = 'opensim_client',
+                    source  = opensim_client_sources,
+                    LIBS    = opensim_client_libs,
                     )
-Alias('engine_client', engine_client)
+Alias('opensim_client', opensim_client)
