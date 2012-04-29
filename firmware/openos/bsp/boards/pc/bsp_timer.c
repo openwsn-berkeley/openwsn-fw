@@ -33,6 +33,7 @@ void bsp_timer_init() {
    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
    // poipoipoi stub
+   printf("TODO bsp_timer_init\r\n");
 }
 
 /**
@@ -52,6 +53,7 @@ counter, and cancels a possible pending compare event.
 */
 void bsp_timer_reset() {
    // poipoipoi stub
+   printf("TODO bsp_timer_reset\r\n");
 }
 
 /**
@@ -73,6 +75,7 @@ propagate to subsequent timers.
 */
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    // poipoipoi stub
+   printf("TODO bsp_timer_scheduleIn\r\n");
 }
 
 /**
@@ -80,6 +83,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 */
 void bsp_timer_cancel_schedule() {
    // poipoipoi stub
+   printf("TODO bsp_timer_cancel_schedule\r\n");
 }
 
 //=========================== private =========================================

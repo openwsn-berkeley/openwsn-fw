@@ -17,6 +17,7 @@
 
 void eui64_get(uint8_t* addressToWrite) {
    // poipoipoi stub
+   printf("TODO eui64_get\r\n");
 }
 
 //=========================== private =========================================

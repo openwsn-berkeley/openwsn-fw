@@ -22,10 +22,12 @@
 
 void board_init() {
    // poipoipoi stub
+   printf("TODO board_init\r\n");
 }
 
 void board_sleep() {
    // poipoipoi stub
+   printf("TODO board_sleep\r\n");
 }
 
 //=========================== private =========================================
