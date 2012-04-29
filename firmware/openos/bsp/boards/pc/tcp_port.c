@@ -34,10 +34,8 @@ SOCKET tcp_port_connect(char* server_name, unsigned short server_port) {
    
    // prepare server name
    if (isalpha(server_name[0])) {
-      printf("poipoi1\n");
       hp = gethostbyname(server_name);
    } else {
-      printf("poipoi2\n");
       addr = inet_addr(server_name);
       hp = gethostbyaddr((char*)&addr,4,AF_INET);
    }

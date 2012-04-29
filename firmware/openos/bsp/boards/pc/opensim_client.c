@@ -23,7 +23,7 @@ void Usage(char* progname) {
 }
 
 int main(int argc, char **argv) {
-   char                 Buffer[128];
+   char                 Buffer[12];
    unsigned short       server_port;
    char*                server_name;
    int                  loopflag;
@@ -38,7 +38,7 @@ int main(int argc, char **argv) {
    numloops        =  5;
 
    // print banner
-   printf("OpenSim client - OpenWSN project, UC Berkeley, April 2012");
+   printf("OpenSim client\r\n\r\n");
    
    // filter parameters passed
    if (argc >1) {
@@ -68,13 +68,14 @@ int main(int argc, char **argv) {
    while(numloops>0) {
       
       // send to server
-      wsprintf(Buffer,"This is a test message");
+      wsprintf(Buffer,"poipoipoipoi");
       retval = send(conn_socket, Buffer, sizeof(Buffer), 0);
       if (retval == SOCKET_ERROR) {
          fprintf(stderr,"ERROR: send() failed (error=%d)\n", WSAGetLastError());
          WSACleanup();
          return -1;
       }
+      printf("poipoi sent");
 
       // receive from server
       retval = recv(conn_socket, Buffer, sizeof(Buffer), 0);
