@@ -37,6 +37,9 @@ int main(int argc, char **argv) {
    server_port     =  DEFAULT_SERVER_PORT;
    numloops        =  5;
 
+   // print banner
+   printf("OpenSim client - OpenWSN project, UC Berkeley, April 2012");
+   
    // filter parameters passed
    if (argc >1) {
       for(i=1; i<argc; i++) {
