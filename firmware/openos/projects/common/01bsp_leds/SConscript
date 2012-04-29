@@ -1,0 +1,16 @@
+import os
+
+Import('env')
+
+thisEnv = env.Clone()
+
+thisEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'),
+                            os.path.join('#','firmware','openos','bsp','boards','pc'),
+                          ],
+              )
+
+source_files = ['01bsp_leds.c',
+                Glob(os.path.join('#','firmware','openos','bsp','boards','pc','*.c')),
+               ]
+
+thisEnv.Program(target='poipoipoi',source=source_files)
