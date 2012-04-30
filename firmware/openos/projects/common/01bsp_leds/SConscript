@@ -14,8 +14,12 @@ localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards'
 
 library_files = [
                    'libbsppc.lib',
+                   'ws2_32.lib',
+                   'user32.lib',
                 ]
 source_files =  ['01bsp_leds.c',
+                 os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
+                 os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),
                 ]
 
 bsp_leds = localEnv.Program(

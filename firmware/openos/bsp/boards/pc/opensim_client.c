@@ -1,5 +1,5 @@
 /**
-\brief Client program to the OpenSim engine
+\brief Client program to the OpenSim server.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
 */
@@ -9,28 +9,31 @@
 #include <stdio.h>
 #include <string.h>
 #include "tcp_port.h"
+#include "opensim_client.h"
 
-#define DEFAULT_SERVER_NAME "localhost"
-#define DEFAULT_SERVER_PORT 14159
+//=========================== variables =======================================
 
-void Usage(char* progname) {
-   fprintf(stderr,"Usage: %s -n [server_address name/IP address] -p [port_num] -l [iterations]\n", progname);
-   fprintf(stderr,"Where:\n\tprotocol is one of TCP or UDP\n");
-   fprintf(stderr,"\t- server_address is the IP address or name of server_address\n");
-   fprintf(stderr,"\t- port_num is the port to listen on\n");
-   WSACleanup();
-   exit(1);
-}
+typedef struct {
+   char    txBuffer[OPENCLIENT_BUFSIZE];
+   char    rxBuffer[OPENCLIENT_BUFSIZE];
+   SOCKET  conn_socket;
+} opensim_client_vars_t;
+
+opensim_client_vars_t opensim_client_vars;
+
+//=========================== prototypes ======================================
+
+void printUsage(char* progname);
+
+//=========================== main ============================================
 
 int main(int argc, char **argv) {
-   char                 Buffer[12];
    unsigned short       server_port;
    char*                server_name;
    int                  loopflag;
    int                  i;
    int                  loopcount;
    int                  numloops;
-   SOCKET               conn_socket;
    int                  retval;
    
    server_name     =  DEFAULT_SERVER_NAME;
@@ -52,52 +55,109 @@ int main(int argc, char **argv) {
                   server_port = atoi(argv[++i]);
                   break;
                default:
-                  Usage(argv[0]);
+                  printUsage(argv[0]);
                   break;
             }
          } else {
-            Usage(argv[0]);
+            printUsage(argv[0]);
          }
       }
    }
    
    // connect to the server
-   conn_socket = tcp_port_connect(server_name, server_port);
+   opensim_client_vars.conn_socket = tcp_port_connect(server_name, server_port);
    
-   // send some data
-   while(numloops>0) {
+   // wait for command from the server
+   while(1) {
       
-      // send to server
-      wsprintf(Buffer,"poipoipoipoi");
-      retval = send(conn_socket, Buffer, sizeof(Buffer), 0);
-      if (retval == SOCKET_ERROR) {
-         fprintf(stderr,"ERROR: send() failed (error=%d)\n", WSAGetLastError());
-         WSACleanup();
-         return -1;
-      }
-      printf("poipoi sent");
-
-      // receive from server
-      retval = recv(conn_socket, Buffer, sizeof(Buffer), 0);
+      // receive command from server
+      retval = recv(opensim_client_vars.conn_socket,
+                    opensim_client_vars.rxBuffer,
+                    sizeof(opensim_client_vars.rxBuffer),
+                    0);
       if (retval==SOCKET_ERROR) {
          fprintf(stderr,"ERROR: recv() failed (error=%d)\n", WSAGetLastError());
-         closesocket(conn_socket);
+         closesocket(opensim_client_vars.conn_socket);
          WSACleanup();
          return -1;
       }
       if (retval == 0) {
          printf("WARNING: server closed connection.\n");
-         closesocket(conn_socket);
+         closesocket(opensim_client_vars.conn_socket);
          WSACleanup();
          return -1;
       }
-      printf("INFO: Received %d bytes, data \"%s\" from server_address.\n", retval, Buffer);
-      
-      // decrement number of loops
-      numloops--;
+      printf("INFO: Received %d bytes, data \"%s\"\n",
+                   retval,
+                   opensim_client_vars.rxBuffer);
+                   
+      mote_main();
    }
    
-   closesocket(conn_socket);
+   closesocket(opensim_client_vars.conn_socket);
    WSACleanup();
    return 0;
+}
+
+//=========================== public ==========================================
+
+int opensim_client_send(int* pTxData,
+                        int  txDataLength,
+                        int* pRxBuffer,
+                        int  maxRxBufferLength) {
+   int retval;
+   
+   // send command to OpenSim server
+   retval = send(opensim_client_vars.conn_socket,
+                 pTxData,
+                 txDataLength,
+                 0);
+   if (retval == SOCKET_ERROR) {
+      fprintf(stderr,"ERROR: send() failed (error=%d)\n", WSAGetLastError());
+      WSACleanup();
+      exit(1);
+   }
+   printf("command sent\r\n");
+   
+   // wait for reply
+   retval = recv(opensim_client_vars.conn_socket,
+                 opensim_client_vars.rxBuffer,
+                 sizeof(opensim_client_vars.rxBuffer),
+                 0);
+   if (retval==SOCKET_ERROR) {
+      fprintf(stderr,"FATAL: recv failed (error=%d)\n", WSAGetLastError());
+      closesocket(opensim_client_vars.conn_socket);
+      WSACleanup();
+      exit(1);
+   }
+   if (retval==0) {
+      fprintf(stderr,"FATAL: server closed connection.\n");
+      closesocket(opensim_client_vars.conn_socket);
+      WSACleanup();
+      exit(1);
+   }
+   if (retval>maxRxBufferLength) {
+      fprintf(stderr,"FATAL: expected at most %d bytes, got %d.\n",maxRxBufferLength,retval);
+      closesocket(opensim_client_vars.conn_socket);
+      WSACleanup();
+      exit(1);
+   }
+   
+   // copy reply in pRxBuffer
+   memcpy(pRxBuffer,opensim_client_vars.rxBuffer,retval);
+   
+   printf("INFO: received %d bytes\n",retval);
+   printf("ack received\r\n");
+   return 0;
+}
+
+//=========================== private =========================================
+
+void printUsage(char* progname) {
+   fprintf(stderr,"printUsage: %s -n [server_address name/IP address] -p [port_num] -l [iterations]\n", progname);
+   fprintf(stderr,"Where:\n\tprotocol is one of TCP or UDP\n");
+   fprintf(stderr,"\t- server_address is the IP address or name of server_address\n");
+   fprintf(stderr,"\t- port_num is the port to listen on\n");
+   WSACleanup();
+   exit(1);
 }

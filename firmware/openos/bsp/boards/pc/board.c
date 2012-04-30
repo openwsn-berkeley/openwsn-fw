@@ -13,6 +13,8 @@
 #include "radio.h"
 #include "radiotimer.h"
 #include "eui64.h"
+// OpenSim environment
+#include "opensim_client.h"
 
 //=========================== variables =======================================
 
@@ -21,13 +23,11 @@
 //=========================== public ==========================================
 
 void board_init() {
-   // poipoipoi stub
-   printf("TODO board_init\r\n");
+   //poipoiopensim_client_send(0);
 }
 
 void board_sleep() {
-   // poipoipoi stub
-   printf("TODO board_sleep\r\n");
+   //poipoiopensim_client_send(1);
 }
 
 //=========================== private =========================================
