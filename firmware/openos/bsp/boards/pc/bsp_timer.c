@@ -19,6 +19,12 @@ bsp_timer_vars_t bsp_timer_vars;
 
 //=========================== prototypes ======================================
 
+//=========================== callbacks =======================================
+
+void bsp_timer_set_callback(bsp_timer_cbt cb) {
+   bsp_timer_vars.cb   = cb;
+}
+
 //=========================== public ==========================================
 
 void bsp_timer_init() {
@@ -28,10 +34,6 @@ void bsp_timer_init() {
    
    // poipoipoi stub
    printf("TODO bsp_timer_init\r\n");
-}
-
-void bsp_timer_set_callback(bsp_timer_cbt cb) {
-   bsp_timer_vars.cb   = cb;
 }
 
 void bsp_timer_reset() {

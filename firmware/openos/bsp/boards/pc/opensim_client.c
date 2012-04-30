@@ -107,7 +107,7 @@ int opensim_client_send(int* pTxData,
                         int  maxRxBufferLength) {
    int retval;
    
-   // send command to OpenSim server
+   // send command to server
    retval = send(opensim_client_vars.conn_socket,
                  pTxData,
                  txDataLength,
@@ -119,7 +119,7 @@ int opensim_client_send(int* pTxData,
    }
    printf("command sent\r\n");
    
-   // wait for reply
+   // wait for reply from server
    retval = recv(opensim_client_vars.conn_socket,
                  opensim_client_vars.rxBuffer,
                  sizeof(opensim_client_vars.rxBuffer),
