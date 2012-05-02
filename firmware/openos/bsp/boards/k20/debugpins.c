@@ -44,54 +44,59 @@ void debugpins_init() {
 	 PORTC_PCR15 = PORT_PCR_MUX(1);
 	 
 	 //set as output
-	 GPIOC_PDDR = 1<<FRAME_PIN;
-	 GPIOC_PDDR = 1<<SLOT_PIN;
-	 GPIOC_PDDR = 1<<FSM_PIN;
-	 GPIOC_PDDR = 1<<TASK_PIN;
+	 GPIOC_PDDR |= 1<<FRAME_PIN;
+	 GPIOC_PDDR |= 1<<SLOT_PIN;
+	 GPIOC_PDDR |= 1<<FSM_PIN;
+	 GPIOC_PDDR |= 1<<TASK_PIN;
+	 
+//	 GPIOC_PDOR |= 1<<FRAME_PIN;
+//	 GPIOC_PDOR |= 1<<SLOT_PIN;
+//	 GPIOC_PDOR |= 1<<FSM_PIN;
+//	 GPIOC_PDOR |= 1<<TASK_PIN;
 }
 
 void debugpins_frame_toggle() {
 	//toggle
-	GPIOC_PTOR = 1<<FRAME_PIN;
+	GPIOC_PTOR |= 1<<FRAME_PIN;
 }
 void debugpins_frame_clr() {
      //clear
-	GPIOC_PCOR = 1<<FRAME_PIN;
+	GPIOC_PCOR |= 1<<FRAME_PIN;
 }
 void debugpins_frame_set() {
 	 //set
-	GPIOC_PSOR = 1<<FRAME_PIN;
+	GPIOC_PSOR |= 1<<FRAME_PIN;
 }
 
 void debugpins_slot_toggle() {
-	GPIOC_PTOR = 1<<SLOT_PIN;
+	GPIOC_PTOR |= 1<<SLOT_PIN;
 
 }
 void debugpins_slot_clr() {
-	GPIOC_PCOR = 1<<SLOT_PIN;
+	GPIOC_PCOR |= 1<<SLOT_PIN;
 }
 void debugpins_slot_set() {
-	GPIOC_PSOR = 1<<SLOT_PIN;
+	GPIOC_PSOR |= 1<<SLOT_PIN;
 }
 
 void debugpins_fsm_toggle() {
-	GPIOC_PTOR = 1<<FSM_PIN;
+	GPIOC_PTOR |= 1<<FSM_PIN;
 }
 void debugpins_fsm_clr() {
-	GPIOC_PCOR = 1<<FSM_PIN;
+	GPIOC_PCOR |= 1<<FSM_PIN;
 }
 void debugpins_fsm_set() {
-	GPIOC_PSOR = 1<<FSM_PIN;
+	GPIOC_PSOR |= 1<<FSM_PIN;
 }
 
 void debugpins_task_toggle() {
-	GPIOC_PTOR = 1<<TASK_PIN;
+	GPIOC_PTOR |= 1<<TASK_PIN;
 }
 void debugpins_task_clr() {
-	GPIOC_PCOR = 1<<TASK_PIN;
+	GPIOC_PCOR |= 1<<TASK_PIN;
 }
 void debugpins_task_set() {
-	GPIOC_PSOR = 1<<TASK_PIN;
+	GPIOC_PSOR |= 1<<TASK_PIN;
 }
 
 void debugpins_isr_toggle() {

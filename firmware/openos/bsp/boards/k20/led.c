@@ -39,7 +39,7 @@ void LED_Dir_Out(void)
   GPIOB_POER = (1<<11);
   GPIOC_POER = ((1<<7)|(1<<8)|(1<<9));
 #elif (defined(MCU_MK20D7))
-  GPIOC_PDDR = ((1<<7)|(1<<8)|(1<<9)|(1<<10));
+  GPIOC_PDDR |= ((1<<7)|(1<<8)|(1<<9)|(1<<10));
 #endif
 }
 
