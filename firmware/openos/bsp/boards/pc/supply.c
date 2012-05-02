@@ -50,6 +50,8 @@ void supply_rootFunction() {
                                   rxPacketType);
       opensim_client_abort();
    }
+   
+   mote_main();
 }
 
 //=========================== interrupt handlers ==============================
