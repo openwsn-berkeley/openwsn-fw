@@ -17,7 +17,7 @@ can use this project with any platform.
 /**
 \brief The program starts executing here.
 */
-int mote_main(void)
+int main(void)
 {
    uint16_t delay;
    

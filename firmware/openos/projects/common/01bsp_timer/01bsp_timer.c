@@ -41,7 +41,8 @@ uint32_t count=0;
 /**
 \brief The program starts executing here.
 */
-int mote_main(void) {
+int main(void)
+{  
    // initialize board
    board_init();
    
