@@ -17,6 +17,7 @@ libbsppc_source = ['board.c',
                    'radio.c',
                    'radiotimer.c',
                    'uart.c',
+                   'supply.c',
                   ]
 
 libbsppc = libbsppc_env.Library(target='libbsppc',

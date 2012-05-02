@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "supply.h"
 #include "tcp_port.h"
 #include "opensim_client.h"
 
@@ -67,88 +68,130 @@ int main(int argc, char **argv) {
    // connect to the server
    opensim_client_vars.conn_socket = tcp_port_connect(server_name, server_port);
    
-   // wait for command from the server
-   while(1) {
-      
-      // receive command from server
-      retval = recv(opensim_client_vars.conn_socket,
-                    opensim_client_vars.rxBuffer,
-                    sizeof(opensim_client_vars.rxBuffer),
-                    0);
-      if (retval==SOCKET_ERROR) {
-         fprintf(stderr,"ERROR: recv() failed (error=%d)\n", WSAGetLastError());
-         closesocket(opensim_client_vars.conn_socket);
-         WSACleanup();
-         return -1;
-      }
-      if (retval == 0) {
-         printf("WARNING: server closed connection.\n");
-         closesocket(opensim_client_vars.conn_socket);
-         WSACleanup();
-         return -1;
-      }
-      printf("INFO: Received %d bytes, data \"%s\"\n",
-                   retval,
-                   opensim_client_vars.rxBuffer);
-                   
-      mote_main();
-   }
+   supply_init();
    
-   closesocket(opensim_client_vars.conn_socket);
-   WSACleanup();
-   return 0;
+   while(1) {
+      supply_rootFunction();
+   }
 }
 
 //=========================== public ==========================================
 
-int opensim_client_send(int* pTxData,
-                        int  txDataLength,
-                        int* pRxBuffer,
-                        int  maxRxBufferLength) {
+void opensim_client_send(int  txPacketType,
+                         int* txPacketParamsBuf,
+                         int  txPacketParamsLength) {
    int retval;
+   
+   // filter errors
+   if (txPacketType>0xff || txPacketType<0) {
+      fprintf(stderr,"ERROR: invalid packet type %d\n",txPacketType);
+      opensim_client_abort();
+   }
+   if (txPacketParamsLength+1>sizeof(opensim_client_vars.txBuffer)) {
+      fprintf(stderr,"ERROR: too many bytes to send: got %d, expected at most %d\n",
+                             txPacketParamsLength+1,
+                             sizeof(opensim_client_vars.txBuffer));
+      opensim_client_abort();
+   }
+   
+   // prepare txbuffer
+   opensim_client_vars.txBuffer[0] = txPacketType;
+   memcpy(&opensim_client_vars.txBuffer[1],txPacketParamsBuf,txPacketParamsLength);
    
    // send command to server
    retval = send(opensim_client_vars.conn_socket,
-                 pTxData,
-                 txDataLength,
+                 opensim_client_vars.txBuffer,
+                 txPacketParamsLength+1,
                  0);
    if (retval == SOCKET_ERROR) {
       fprintf(stderr,"ERROR: send() failed (error=%d)\n", WSAGetLastError());
-      WSACleanup();
-      exit(1);
+      opensim_client_abort();
    }
    printf("command sent\r\n");
+}
+
+void opensim_client_waitForPacket(int* rxPacketType,
+                                  int* rxPacketParamsBuf,
+                                  int  rxPacketParamsMaxLength,
+                                  int* rxPacketParamsLength) {
+   int retval;
    
-   // wait for reply from server
+   // this blocks while waiting for a packet
    retval = recv(opensim_client_vars.conn_socket,
                  opensim_client_vars.rxBuffer,
                  sizeof(opensim_client_vars.rxBuffer),
                  0);
+   
+   // filter errors
    if (retval==SOCKET_ERROR) {
-      fprintf(stderr,"FATAL: recv failed (error=%d)\n", WSAGetLastError());
-      closesocket(opensim_client_vars.conn_socket);
-      WSACleanup();
-      exit(1);
+      fprintf(stderr,"ERROR: recv() failed (error=%d)\n", WSAGetLastError());
+      opensim_client_abort();
    }
-   if (retval==0) {
-      fprintf(stderr,"FATAL: server closed connection.\n");
-      closesocket(opensim_client_vars.conn_socket);
-      WSACleanup();
-      exit(1);
+   if (retval == 0) {
+      printf("WARNING: server closed connection.\n");
+      opensim_client_abort();
    }
-   if (retval>maxRxBufferLength) {
-      fprintf(stderr,"FATAL: expected at most %d bytes, got %d.\n",maxRxBufferLength,retval);
-      closesocket(opensim_client_vars.conn_socket);
-      WSACleanup();
-      exit(1);
+   if (retval>rxPacketParamsMaxLength+1) {
+      fprintf(stderr,"ERROR: received %d bytes, expected at most %d\n",
+                                  retval-1,
+                                  rxPacketParamsMaxLength);
+      opensim_client_abort();
    }
    
-   // copy reply in pRxBuffer
-   memcpy(pRxBuffer,opensim_client_vars.rxBuffer,retval);
+   printf("INFO: Received %d bytes, data \"%s\"\n",
+                retval,
+                opensim_client_vars.rxBuffer);
    
-   printf("INFO: received %d bytes\n",retval);
-   printf("ack received\r\n");
-   return 0;
+   // copy packet type to rxPacketType
+   *rxPacketType = opensim_client_vars.rxBuffer[0];
+   
+   // copy params type to rxPacketParamsBuf
+   if (rxPacketParamsMaxLength>0) {
+      memcpy(rxPacketParamsBuf,&opensim_client_vars.rxBuffer[1],retval-1);
+   }
+   
+   // indicate number of bytes written
+   *rxPacketParamsLength = retval-1;
+}
+
+void opensim_client_sendAndWaitForAck(int  txPacketType,
+                                      int* txPacketParamsBuf,
+                                      int  txPacketParamsLength,
+                                      int* rxPacketParamsBuf,
+                                      int  rxPacketParamsExpectedLength) {
+   int rxPacketType;
+   int rxPacketParamsLength;
+   
+   // send packet
+   opensim_client_send(txPacketType,
+                       txPacketParamsBuf,
+                       txPacketParamsLength);
+   
+   // wait for ACK
+   opensim_client_waitForPacket(&rxPacketType,
+                                rxPacketParamsBuf,
+                                rxPacketParamsExpectedLength,
+                                &rxPacketParamsLength);
+   
+   // filter errors
+   if (rxPacketType!=txPacketType) {
+      fprintf(stderr,"ERROR: wrong ACK's packet type: for %d, expected %d\n",
+                              rxPacketType,
+                              txPacketType);
+      opensim_client_abort();
+   }
+   if (rxPacketParamsLength!=rxPacketParamsExpectedLength) {
+      fprintf(stderr,"ERROR: wrong ACK length: got %d bytes, expected %d\n",
+                              rxPacketParamsLength,
+                              rxPacketParamsExpectedLength);
+      opensim_client_abort();
+   }
+}
+
+void opensim_client_abort() {
+   closesocket(opensim_client_vars.conn_socket);
+   WSACleanup();
+   exit(1);
 }
 
 //=========================== private =========================================
@@ -158,6 +201,5 @@ void printUsage(char* progname) {
    fprintf(stderr,"Where:\n\tprotocol is one of TCP or UDP\n");
    fprintf(stderr,"\t- server_address is the IP address or name of server_address\n");
    fprintf(stderr,"\t- port_num is the port to listen on\n");
-   WSACleanup();
-   exit(1);
+   opensim_client_abort();
 }

@@ -7,6 +7,8 @@
 #ifndef __OPENSIM_PROTO_H
 #define __OPENSIM_PROTO_H
 
+#include "stdint.h"
+
 //=========================== define ==========================================
 
 //=========================== enums ===========================================
@@ -23,7 +25,7 @@ typedef enum {
    // bsp_timer
    OPENSIM_CMD_bsp_timer_init               = 2,
    OPENSIM_CMD_bsp_timer_reset              = 3,
-   OPENSIM_CMD_bsp_timer_scheduleIn         = 4,
+   OPENSIM_CMD_bsp_timer_scheduleIn         = 4, // param
    OPENSIM_CMD_bsp_timer_cancel_schedule    = 5,
    // debugpins
    OPENSIM_CMD_debugpins_init               = 6,
@@ -107,22 +109,22 @@ typedef enum {
    //===== from server to client
    // board
    // bsp_timer
-   OPENSIM_CMD_bsp_timer_isr                = 100
+   OPENSIM_CMD_bsp_timer_isr                = 100,
    // debugpins
    // eui64
    // leds
    // radio
-   OPENSIM_CMD_radio_isr_startFrame         = 101
-   OPENSIM_CMD_radio_isr_endFrame           = 102
+   OPENSIM_CMD_radio_isr_startFrame         = 101,
+   OPENSIM_CMD_radio_isr_endFrame           = 102,
    // radiotimer
-   OPENSIM_CMD_radiotimer_isr_compare       = 103
-   OPENSIM_CMD_radiotimer_isr_overflow      = 104
+   OPENSIM_CMD_radiotimer_isr_compare       = 103,
+   OPENSIM_CMD_radiotimer_isr_overflow      = 104,
    // uart
-   OPENSIM_CMD_uart_isr_tx                  = 105
-   OPENSIM_CMD_uart_isr_rx                  = 106
+   OPENSIM_CMD_uart_isr_tx                  = 105,
+   OPENSIM_CMD_uart_isr_rx                  = 106,
    // supply
    OPENSIM_CMD_supply_on                    = 107,
-   OPENSIM_CMD_supply_off                   = 108,
+   OPENSIM_CMD_supply_off                   = 108
 } opensim_command_t;
 
 //=========================== typedef =========================================

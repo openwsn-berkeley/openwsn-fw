@@ -17,9 +17,21 @@
 
 //=========================== prototypes ======================================
 
-int opensim_client_send(void* pTxData,
-                        int   txDataLength,
-                        void* pRxBuffer,
-                        int   maxRxBufferLength);
+void opensim_client_send(int  txPacketType,
+                         int* txPacketParamsBuf,
+                         int  txPacketParamsLength);
+
+void opensim_client_waitForPacket(int* rxPacketType,
+                                  int* rxPacketParamsBuf,
+                                  int  rxPacketParamsMaxLength,
+                                  int* rxPacketParamsLength);
+
+void opensim_client_sendAndWaitForAck(int  txPacketType,
+                                      int* txPacketParamsBuf,
+                                      int  txPacketParamsLength,
+                                      int* rxPacketParamsBuf,
+                                      int  rxPacketParamsExpectedLength);
+
+void opensim_client_abort();
 
 #endif
