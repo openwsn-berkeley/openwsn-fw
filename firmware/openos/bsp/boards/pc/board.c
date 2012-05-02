@@ -15,6 +15,7 @@
 #include "eui64.h"
 // OpenSim environment
 #include "opensim_client.h"
+#include "opensim_proto.h"
 
 //=========================== variables =======================================
 
@@ -23,11 +24,21 @@
 //=========================== public ==========================================
 
 void board_init() {
-   //poipoiopensim_client_send(0);
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_board_init,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void board_sleep() {
-   //poipoiopensim_client_send(1);
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_board_sleep,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 //=========================== private =========================================

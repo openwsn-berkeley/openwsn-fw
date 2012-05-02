@@ -109,7 +109,7 @@ void opensim_client_send(int  txPacketType,
       fprintf(stderr,"[opensim_client] ERROR: send() failed (error=%d)\n", WSAGetLastError());
       opensim_client_abort();
    }
-   printf("[opensim_client] DEBUG: command %d sent\r\n",txPacketType);
+   printf("[opensim_client] DEBUG: sent %d\r\n",txPacketType);
 }
 
 void opensim_client_waitForPacket(int* rxPacketType,
@@ -140,7 +140,7 @@ void opensim_client_waitForPacket(int* rxPacketType,
       opensim_client_abort();
    }
    
-   printf("[opensim_client] INFO: Received command %d\n",(int)opensim_client_vars.rxBuffer[0]);
+   printf("[opensim_client] DEBUG: received %d\n",(int)opensim_client_vars.rxBuffer[0]);
    
    // copy packet type to rxPacketType
    *rxPacketType = opensim_client_vars.rxBuffer[0];
