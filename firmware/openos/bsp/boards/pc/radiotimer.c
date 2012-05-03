@@ -118,6 +118,7 @@ void radiotimer_schedule(uint16_t offset) {
 }
 
 void radiotimer_cancel() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_radiotimer_cancel,
                                     0,

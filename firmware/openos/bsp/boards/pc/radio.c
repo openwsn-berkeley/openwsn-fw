@@ -179,6 +179,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
 }
 
 void radio_txEnable() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_txEnable,
                                     0,
@@ -188,6 +189,7 @@ void radio_txEnable() {
 }
 
 void radio_txNow() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_txNow,
                                     0,
@@ -199,6 +201,7 @@ void radio_txNow() {
 //===== RX
 
 void radio_rxEnable() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_rxEnable,
                                     0,
@@ -208,6 +211,7 @@ void radio_rxEnable() {
 }
 
 void radio_rxNow() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_rxNow,
                                     0,

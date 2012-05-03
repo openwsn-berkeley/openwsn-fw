@@ -15,7 +15,8 @@
 
 //=========================== public ==========================================
 
-void    leds_init() {
+void leds_init() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_init,
                                     0,
@@ -24,7 +25,8 @@ void    leds_init() {
                                     0);
 }
 
-void    leds_error_on() {
+void leds_error_on() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_error_on,
                                     0,
@@ -32,7 +34,8 @@ void    leds_error_on() {
                                     0,
                                     0);
 }
-void    leds_error_off() {
+void leds_error_off() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_error_off,
                                     0,
@@ -40,7 +43,8 @@ void    leds_error_off() {
                                     0,
                                     0);
 }
-void    leds_error_toggle() {
+void leds_error_toggle() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_error_toggle,
                                     0,
@@ -61,7 +65,8 @@ uint8_t leds_error_isOn() {
    return replparams.isOn;
 }
 
-void    leds_radio_on() {
+void leds_radio_on() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_radio_on,
                                     0,
@@ -69,7 +74,8 @@ void    leds_radio_on() {
                                     0,
                                     0);
 }
-void    leds_radio_off() {
+void leds_radio_off() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_radio_off,
                                     0,
@@ -77,7 +83,8 @@ void    leds_radio_off() {
                                     0,
                                     0);
 }
-void    leds_radio_toggle() {
+void leds_radio_toggle() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_radio_toggle,
                                     0,
@@ -99,7 +106,8 @@ uint8_t leds_radio_isOn() {
 }
 
 // green
-void    leds_sync_on() {
+void leds_sync_on() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_sync_on,
                                     0,
@@ -107,7 +115,8 @@ void    leds_sync_on() {
                                     0,
                                     0);
 }
-void    leds_sync_off() {
+void leds_sync_off() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_sync_off,
                                     0,
@@ -115,7 +124,8 @@ void    leds_sync_off() {
                                     0,
                                     0);
 }
-void    leds_sync_toggle() {
+void leds_sync_toggle() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_sync_toggle,
                                     0,
@@ -137,7 +147,8 @@ uint8_t leds_sync_isOn() {
 }
 
 // yellow
-void    leds_debug_on() {
+void leds_debug_on() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_debug_on,
                                     0,
@@ -145,7 +156,8 @@ void    leds_debug_on() {
                                     0,
                                     0);
 }
-void    leds_debug_off() {
+void leds_debug_off() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_debug_off,
                                     0,
@@ -153,7 +165,8 @@ void    leds_debug_off() {
                                     0,
                                     0);
 }
-void    leds_debug_toggle() {
+void leds_debug_toggle() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_debug_toggle,
                                     0,
@@ -175,6 +188,7 @@ uint8_t leds_debug_isOn() {
 }
 
 void leds_all_on() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_all_on,
                                     0,
@@ -183,6 +197,7 @@ void leds_all_on() {
                                     0);
 }
 void leds_all_off() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_all_off,
                                     0,
@@ -191,6 +206,7 @@ void leds_all_off() {
                                     0);
 }
 void leds_all_toggle() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_all_toggle,
                                     0,
@@ -200,6 +216,7 @@ void leds_all_toggle() {
 }
 
 void leds_circular_shift() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_circular_shift,
                                     0,
@@ -209,6 +226,7 @@ void leds_circular_shift() {
 }
 
 void leds_increment() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_increment,
                                     0,

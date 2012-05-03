@@ -42,6 +42,7 @@ void bsp_timer_init() {
 }
 
 void bsp_timer_reset() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_reset,
                                     0,
@@ -57,7 +58,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    reqparams.delayTicks = delayTicks;
    
    // send request to server and get reply
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_reset,
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_scheduleIn,
                                     &reqparams,
                                     sizeof(opensim_requ_bsp_timer_scheduleIn_t),
                                     0,
@@ -65,6 +66,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 }
 
 void bsp_timer_cancel_schedule() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_cancel_schedule,
                                     0,

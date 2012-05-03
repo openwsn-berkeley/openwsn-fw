@@ -42,7 +42,7 @@ void uart_init() {
                                     0);
 }
 
-void    uart_enableInterrupts(){
+void uart_enableInterrupts(){
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_enableInterrupts,
@@ -52,7 +52,7 @@ void    uart_enableInterrupts(){
                                     0);
 }
 
-void    uart_disableInterrupts(){
+void uart_disableInterrupts(){
   
   // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_disableInterrupts,
@@ -62,7 +62,7 @@ void    uart_disableInterrupts(){
                                     0);
 }
 
-void    uart_clearRxInterrupts(){
+void uart_clearRxInterrupts(){
   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_clearRxInterrupts,
@@ -72,7 +72,7 @@ void    uart_clearRxInterrupts(){
                                     0);
 }
 
-void    uart_clearTxInterrupts(){
+void uart_clearTxInterrupts(){
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_clearTxInterrupts,
@@ -82,7 +82,7 @@ void    uart_clearTxInterrupts(){
                                     0);
 }
 
-void    uart_writeByte(uint8_t byteToWrite){
+void uart_writeByte(uint8_t byteToWrite){
   opensim_requ_uart_writeByte_t requparams;
    
    // prepare params

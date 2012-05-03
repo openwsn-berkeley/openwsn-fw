@@ -24,6 +24,7 @@
 //=========================== public ==========================================
 
 void board_init() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_board_init,
                                     0,
@@ -33,6 +34,7 @@ void board_init() {
 }
 
 void board_sleep() {
+   
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_board_sleep,
                                     0,

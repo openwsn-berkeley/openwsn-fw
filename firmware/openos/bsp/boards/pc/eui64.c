@@ -19,7 +19,7 @@ void eui64_get(uint8_t* addressToWrite) {
    opensim_repl_eui64_get_t replparams;
    
    // send request to server and get reply
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_reset,
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_eui64_get,
                                     0,
                                     0,
                                     &replparams,
