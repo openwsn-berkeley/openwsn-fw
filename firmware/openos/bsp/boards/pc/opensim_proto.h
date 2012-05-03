@@ -284,26 +284,18 @@ typedef struct {
 } opensim_repl_radiotimer_getCapturedTime_t;
 //=== uart
 // init
-typedef opensim_requ_hdr_t   opensim_requ_uart_init_t;
-typedef opensim_repl_hdr_t   opensim_repl_uart_init_t;
 // enableInterrupts
-typedef opensim_requ_hdr_t   opensim_requ_uart_enableInterrupts_t;
-typedef opensim_repl_hdr_t   opensim_repl_uart_enableInterrupts_t;
 // disableInterrupts
-typedef opensim_requ_hdr_t   opensim_requ_uart_disableInterrupts_t;
-typedef opensim_repl_hdr_t   opensim_repl_uart_disableInterrupts_t;
 // clearRxInterrupts
-typedef opensim_requ_hdr_t   opensim_requ_uart_clearRxInterrupts_t;
-typedef opensim_repl_hdr_t   opensim_repl_uart_clearRxInterrupts_t;
 // clearTxInterrupts
-typedef opensim_requ_hdr_t   opensim_requ_uart_clearTxInterrupts_t;
-typedef opensim_repl_hdr_t   opensim_repl_uart_clearTxInterrupts_t;
 // writeByte
-typedef opensim_requ_hdr_t   opensim_requ_uart_writeByte_t;
-typedef opensim_repl_hdr_t   opensim_repl_uart_writeByte_t;
+typedef struct {
+   uint8_t byteToWrite;
+} opensim_requ_uart_writeByte_t;
 // readByte
-typedef opensim_requ_hdr_t   opensim_requ_uart_readByte_t;
-typedef opensim_repl_hdr_t   opensim_repl_uart_readByte_t;
+typedef struct {
+   uint8_t byteRead;
+} opensim_repl_uart_readByte_t;
 
 //=========================== prototypes ======================================
 

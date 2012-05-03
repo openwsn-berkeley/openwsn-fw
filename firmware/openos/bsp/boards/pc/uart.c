@@ -19,46 +19,93 @@ uart_vars_t uart_vars;
 
 //=========================== prototypes ======================================
 
-//=========================== public ==========================================
-
-void uart_init() {
-   // poipoipoi stub
-   printf("TODO uart_init\r\n");
-}
+//=========================== callbacks =======================================
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
    uart_vars.txCb = txCb;
    uart_vars.rxCb = rxCb;
 }
 
+//=========================== public ==========================================
+
+void uart_init() {
+   
+   // clear local variables
+   memset(&uart_vars,0,sizeof(uart_vars_t));
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_init,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
+}
+
 void    uart_enableInterrupts(){
-  // poipoipoi stub
-  printf("TODO uart_enableInterrupts\r\n");
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_enableInterrupts,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void    uart_disableInterrupts(){
-  // poipoipoi stub
-  printf("TODO uart_disableInterrupts\r\n");
+  
+  // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_disableInterrupts,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void    uart_clearRxInterrupts(){
-  // poipoipoi stub
-  printf("TODO uart_clearRxInterrupts\r\n");
+  
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_clearRxInterrupts,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void    uart_clearTxInterrupts(){
-  // poipoipoi stub
-  printf("TODO uart_clearTxInterrupts\r\n");
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_clearTxInterrupts,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void    uart_writeByte(uint8_t byteToWrite){
-  // poipoipoi stub
-  printf("TODO uart_writeByte\r\n");
+  opensim_requ_uart_writeByte_t requparams;
+   
+   // prepare params
+   requparams.byteToWrite = byteToWrite;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_writeByte,
+                                    &requparams,
+                                    sizeof(opensim_requ_uart_writeByte_t),
+                                    0,
+                                    0);
 }
 
 uint8_t uart_readByte(){
-  // poipoipoi stub
-  printf("TODO uart_readByte\r\n");
+   opensim_repl_uart_readByte_t replparams;
+
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_readByte,
+                                    0,
+                                    0,
+                                    &replparams,
+                                    sizeof(opensim_repl_uart_readByte_t));
+   
+   return replparams.byteRead;
 }
 
 //=========================== interrupt handlers ==============================
