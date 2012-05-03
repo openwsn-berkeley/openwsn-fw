@@ -15,11 +15,18 @@ localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','drivers','com
                            ],
                 )
 
-library_files = [
+
+if localEnv['PLATFORM'] == 'win32':
+	library_files = [
                    'libdrivers.lib',
                    'libbsppc.lib',
                    'ws2_32.lib',
                    'user32.lib',
+                ]
+else:
+	library_files = [
+				   'libdrivers.a',
+                   'libbsppc.a'
                 ]
 source_files =  ['02drv_opentimers.c',
                  os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),

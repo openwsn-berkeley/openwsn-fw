@@ -8,7 +8,7 @@
 #define __TCP_PORT_H
 
 //=========================== define ==========================================
-
+#define LINUX
 #ifdef LINUX //the socket object does not exist in linux. it is an int pointing to the socket fd
 typedef int SOCKET;
 #define INVALID_SOCKET -1

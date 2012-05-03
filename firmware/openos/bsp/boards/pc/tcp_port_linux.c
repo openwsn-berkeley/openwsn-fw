@@ -53,7 +53,7 @@ SOCKET tcp_port_connect(char* server_name, unsigned short portno) {
 		
 		
 	if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) {
-		   fprintf(stderr,"ERROR: could not connect to server_address (error=%d)\n");
+		   fprintf(stderr,"ERROR: could not connect to server_address\n");
 		   exit(1);
 	}
 	return sockfd;

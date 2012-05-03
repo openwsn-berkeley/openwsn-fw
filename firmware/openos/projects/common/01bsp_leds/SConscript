@@ -11,16 +11,20 @@ localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'
 localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc'),
                            ],
                 )
-
-library_files = [
+if localEnv['PLATFORM'] == 'win32':
+	library_files = [
                    'libbsppc.lib',
                    'ws2_32.lib',
                    'user32.lib',
                 ]
-source_files =  ['01bsp_leds.c',
-                 os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
-                 os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),
+	source_files =  ['01bsp_leds.c',os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),]
+
+else:
+	library_files = [
+                   'libbsppc.a'
                 ]
+	source_files =  ['01bsp_leds.c',os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client_linux.c'),os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port_linux.c'),]            
+
 
 bsp_leds = localEnv.Program(
                     target  = '01bsp_leds',

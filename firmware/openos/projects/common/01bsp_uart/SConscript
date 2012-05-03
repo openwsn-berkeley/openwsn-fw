@@ -12,11 +12,17 @@ localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards'
                            ],
                 )
 
-library_files = [
+if localEnv['PLATFORM'] == 'win32':
+	library_files = [
                    'libbsppc.lib',
                    'ws2_32.lib',
                    'user32.lib',
                 ]
+else:
+	library_files = [
+                   'libbsppc.a'
+                ]
+                
 source_files =  ['01bsp_uart.c',
                  os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
                  os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),

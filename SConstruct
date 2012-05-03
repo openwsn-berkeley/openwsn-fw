@@ -1,11 +1,14 @@
+
+platform = ARGUMENTS.get('OS', Platform())
 env = Environment()
+print env.Dump()
 
 # the directory everything is built in
 buildDir = 'build/'
 
 # some help text printed when SCons is called with '--help' parameter
 Help('''
-Build OpenWSN!
+Build OpenWSN! Platform()
 ''')
 
 # by default, no target is specified

@@ -110,7 +110,7 @@ void opensim_client_send(int  txPacketType,
                  txPacketParamsLength+1,
                  0);
    if (retval == SOCKET_ERROR) {
-      fprintf(stderr,"[opensim_client] ERROR: send() failed (error=%d)\n", WSAGetLastError());
+      fprintf(stderr,"[opensim_client] ERROR: send() failed (error)\n");
       opensim_client_abort();
    }
    printf("[opensim_client] DEBUG: sent %d\r\n",txPacketType);
@@ -130,7 +130,7 @@ void opensim_client_waitForPacket(int* rxPacketType,
    
    // filter errors
    if (retval==SOCKET_ERROR) {
-      fprintf(stderr,"[opensim_client] ERROR: received failed (error=%d)\n", WSAGetLastError());
+      fprintf(stderr,"[opensim_client] ERROR: received failed (error)\n");
       opensim_client_abort();
    }
    if (retval == 0) {
