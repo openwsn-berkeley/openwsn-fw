@@ -49,16 +49,16 @@ void    leds_error_toggle() {
                                     0);
 }
 uint8_t leds_error_isOn() {
-   uint8_t isOn;
+   opensim_repl_error_isOn_t replparams;
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_error_isOn,
                                     0,
                                     0,
-                                    &isOn,
-                                    1);
+                                    &replparams,
+                                    sizeof(opensim_repl_error_isOn_t));
    
-   return isOn;
+   return replparams.isOn;
 }
 
 void    leds_radio_on() {
@@ -86,16 +86,16 @@ void    leds_radio_toggle() {
                                     0);
 }
 uint8_t leds_radio_isOn() {
-   uint8_t isOn;
+   opensim_repl_radio_isOn_t replparams;
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_radio_isOn,
                                     0,
                                     0,
-                                    &isOn,
-                                    1);
+                                    &replparams,
+                                    sizeof(opensim_repl_radio_isOn_t));
    
-   return isOn;
+   return replparams.isOn;
 }
 
 // green
@@ -124,16 +124,16 @@ void    leds_sync_toggle() {
                                     0);
 }
 uint8_t leds_sync_isOn() {
-   uint8_t isOn;
+   opensim_repl_sync_isOn_t replparams;
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_sync_isOn,
                                     0,
                                     0,
-                                    &isOn,
-                                    1);
+                                    &replparams,
+                                    sizeof(opensim_repl_sync_isOn_t));
    
-   return isOn;
+   return replparams.isOn;
 }
 
 // yellow
@@ -162,16 +162,16 @@ void    leds_debug_toggle() {
                                     0);
 }
 uint8_t leds_debug_isOn() {
-   uint8_t isOn;
+   opensim_repl_debug_isOn_t replparams;
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_debug_isOn,
                                     0,
                                     0,
-                                    &isOn,
-                                    1);
+                                    &replparams,
+                                    sizeof(opensim_repl_debug_isOn_t));
    
-   return isOn;
+   return replparams.isOn;
 }
 
 void leds_all_on() {

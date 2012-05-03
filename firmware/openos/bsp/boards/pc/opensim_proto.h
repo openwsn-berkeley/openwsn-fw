@@ -177,117 +177,84 @@ typedef struct {
 } opensim_repl_eui64_get_t;
 //=== leds
 // init
-typedef opensim_requ_hdr_t   opensim_requ_leds_init_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_init_t;
 // error_on
-typedef opensim_requ_hdr_t   opensim_requ_leds_error_on_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_error_on_t;
 // error_off
-typedef opensim_requ_hdr_t   opensim_requ_leds_error_off_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_error_off_t;
 // error_toggle
-typedef opensim_requ_hdr_t   opensim_requ_leds_error_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_error_toggle_t;
 // error_isOn
-typedef opensim_requ_hdr_t   opensim_requ_leds_error_isOn_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_error_isOn_t;
+typedef struct {
+   uint8_t isOn;
+} opensim_repl_error_isOn_t;
 // radio_on
-typedef opensim_requ_hdr_t   opensim_requ_leds_radio_on_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_radio_on_t;
 // radio_off
-typedef opensim_requ_hdr_t   opensim_requ_leds_radio_off_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_radio_off_t;
 // radio_toggle
-typedef opensim_requ_hdr_t   opensim_requ_leds_radio_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_radio_toggle_t;
 // radio_isOn
-typedef opensim_requ_hdr_t   opensim_requ_leds_radio_isOn_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_radio_isOn_t;
+typedef struct {
+   uint8_t isOn;
+} opensim_repl_radio_isOn_t;
 // sync_on
-typedef opensim_requ_hdr_t   opensim_requ_leds_sync_on_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_sync_on_t;
 // sync_off
-typedef opensim_requ_hdr_t   opensim_requ_leds_sync_off_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_sync_off_t;
 // sync_toggle
-typedef opensim_requ_hdr_t   opensim_requ_leds_sync_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_sync_toggle_t;
 // sync_isOn
-typedef opensim_requ_hdr_t   opensim_requ_leds_sync_isOn_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_sync_isOn_t;
+typedef struct {
+   uint8_t isOn;
+} opensim_repl_sync_isOn_t;
 // debug_on
-typedef opensim_requ_hdr_t   opensim_requ_leds_debug_on_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_debug_on_t;
 // debug_off
-typedef opensim_requ_hdr_t   opensim_requ_leds_debug_off_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_debug_off_t;
 // debug_toggle
-typedef opensim_requ_hdr_t   opensim_requ_leds_debug_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_debug_toggle_t;
 // debug_isOn
-typedef opensim_requ_hdr_t   opensim_requ_leds_debug_isOn_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_debug_isOn_t;
+typedef struct {
+   uint8_t isOn;
+} opensim_repl_debug_isOn_t;
 // all_on
-typedef opensim_requ_hdr_t   opensim_requ_leds_all_on_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_all_on_t;
 // all_off
-typedef opensim_requ_hdr_t   opensim_requ_leds_all_off_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_all_off_t;
 // all_toggle
-typedef opensim_requ_hdr_t   opensim_requ_leds_all_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_all_toggle_t;
 // circular_shift
-typedef opensim_requ_hdr_t   opensim_requ_leds_circular_shift_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_circular_shift_t;
 // increment
-typedef opensim_requ_hdr_t   opensim_requ_leds_increment_t;
-typedef opensim_repl_hdr_t   opensim_repl_leds_increment_t;
 //=== radio
 // init
-typedef opensim_requ_hdr_t   opensim_requ_radio_init_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_init_t;
 // reset
-typedef opensim_requ_hdr_t   opensim_requ_radio_reset_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_reset_t;
 // startTimer
-typedef opensim_requ_hdr_t   opensim_requ_radio_startTimer_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_startTimer_t;
+typedef struct {
+   PORT_TIMER_WIDTH period;
+} opensim_requ_radio_startTimer_t;
 // getTimerValue
-typedef opensim_requ_hdr_t   opensim_requ_radio_getTimerValue_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_getTimerValue_t;
+typedef struct {
+   PORT_TIMER_WIDTH value;
+} opensim_repl_radio_getTimerValue_t;
 // setTimerPeriod
-typedef opensim_requ_hdr_t   opensim_requ_radio_setTimerPeriod_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_setTimerPeriod_t;
+typedef struct {
+   PORT_TIMER_WIDTH period;
+} opensim_requ_radio_setTimerPeriod_t;
 // getTimerPeriod
-typedef opensim_requ_hdr_t   opensim_requ_adio_getTimerPeriod_t;
-typedef opensim_repl_hdr_t   opensim_repl_adio_getTimerPeriod_t;
+typedef struct {
+   PORT_TIMER_WIDTH value;
+} opensim_repl_radio_getTimerPeriod_t;
 // setFrequency
-typedef opensim_requ_hdr_t   opensim_requ_radio_setFrequency_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_setFrequency_t;
+typedef struct {
+   uint8_t frequency;
+} opensim_requ_radio_setFrequency_t;
 // rfOn
-typedef opensim_requ_hdr_t   opensim_requ_radio_rfOn_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_rfOn_t;
 // rfOff
-typedef opensim_requ_hdr_t   opensim_requ_radio_rfOff_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_rfOff_t;
 // loadPacket
-typedef opensim_requ_hdr_t   opensim_requ_radio_loadPacket_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_loadPacket_t;
+typedef struct {
+   uint8_t len;
+   uint8_t txBuffer[128];
+} opensim_requ_radio_loadPacket_t;
 // txEnable
-typedef opensim_requ_hdr_t   opensim_requ_radio_txEnable_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_txEnable_t;
 // txNow
-typedef opensim_requ_hdr_t   opensim_requ_radio_txNow_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_txNow_t;
 // rxEnable
-typedef opensim_requ_hdr_t   opensim_requ_radio_rxEnable_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_rxEnable_t;
 // rxNow
-typedef opensim_requ_hdr_t   opensim_requ_radio_rxNow_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_rxNow_t;
 // getReceivedFrame
-typedef opensim_requ_hdr_t   opensim_requ_radio_getReceivedFrame_t;
-typedef opensim_repl_hdr_t   opensim_repl_radio_getReceivedFrame_t;
+typedef struct {
+   uint8_t maxBufLen;
+} opensim_requ_radio_getReceivedFrame_t;
+typedef struct {
+   uint8_t rxBuffer[128];
+   uint8_t len;
+    int8_t rssi;
+   uint8_t lqi;
+   uint8_t crc;
+} opensim_repl_radio_getReceivedFrame_t;
 //=== radiotimer
 // init
 typedef opensim_requ_hdr_t   opensim_requ_radiotimer_init_t;

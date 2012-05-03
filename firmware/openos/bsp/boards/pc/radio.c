@@ -5,6 +5,7 @@
 */
 
 #include "radio.h"
+#include "opensim_proto.h"
 
 //=========================== defines =========================================
 
@@ -13,12 +14,32 @@
 typedef struct {
    radiotimer_capture_cbt    startFrame_cb;
    radiotimer_capture_cbt    endFrame_cb;
+   radiotimer_compare_cbt    overflow_cb;
+   radiotimer_compare_cbt    compare_cb;
    radio_state_t             state;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
 
 //=========================== prototypes ======================================
+
+//=========================== callbacks =======================================
+
+void radio_setOverflowCb(radiotimer_compare_cbt cb) {
+   radio_vars.overflow_cb    = cb;
+}
+
+void radio_setCompareCb(radiotimer_compare_cbt cb) {
+   radio_vars.compare_cb     = cb;
+}
+
+void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
+   radio_vars.startFrame_cb  = cb;
+}
+
+void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
+   radio_vars.endFrame_cb    = cb;
+}
 
 //=========================== public ==========================================
 
@@ -29,103 +50,170 @@ void radio_init() {
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
    
-   // poipoipoi stub
-   printf("TODO radio_init\r\n");
-}
-
-void radio_setOverflowCb(radiotimer_compare_cbt cb) {
-   // poipoipoi stub
-   printf("TODO radio_setOverflowCb\r\n");
-}
-
-void radio_setCompareCb(radiotimer_compare_cbt cb) {
-   // poipoipoi stub
-   printf("TODO radio_setCompareCb\r\n");
-}
-
-void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
-   // poipoipoi stub
-   printf("TODO radio_setStartFrameCb\r\n");
-}
-
-void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
-   // poipoipoi stub
-   printf("TODO radio_setEndFrameCb\r\n");
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_init,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 //===== reset
 
 void radio_reset() {
-   // poipoipoi stub
-   printf("TODO radio_reset\r\n");
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_reset,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 //===== timer
 
 void radio_startTimer(PORT_TIMER_WIDTH period) {
-   // poipoipoi stub
-   printf("TODO radio_startTimer\r\n");
+   opensim_requ_radio_startTimer_t requparams;
+   
+   // prepare request
+   requparams.period = period;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_startTimer,
+                                    requparams,
+                                    sizeof(opensim_requ_radio_startTimer_t),
+                                    0,
+                                    0);
 }
 
 PORT_TIMER_WIDTH radio_getTimerValue() {
-   // poipoipoi stub
-   printf("TODO radio_getTimerValue\r\n");
+   opensim_repl_radio_getTimerValue_t replparams;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_getTimerValue,
+                                    0,
+                                    0,
+                                    &replparams,
+                                    sizeof(opensim_repl_radio_getTimerValue_t));
+                                    
+   return replparams.value;
 }
 
 void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
-   // poipoipoi stub
-   printf("TODO radio_setTimerPeriod\r\n");
+   opensim_requ_radio_setTimerPeriod_t requparams;
+   
+   // prepare request
+   requparams.period = period;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_setTimerPeriod,
+                                    requparams,
+                                    sizeof(opensim_requ_radio_setTimerPeriod_t),
+                                    0,
+                                    0);
 }
 
 PORT_TIMER_WIDTH radio_getTimerPeriod() {
-   // poipoipoi stub
-   printf("TODO radio_getTimerPeriod\r\n");
+   opensim_repl_radio_getTimerPeriod_t replparams;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_getTimerPeriod,
+                                    0,
+                                    0,
+                                    &replparams,
+                                    sizeof(opensim_repl_radio_getTimerPeriod_t));
+                                    
+   return replparams.value;
 }
 
 //===== RF admin
 
 void radio_setFrequency(uint8_t frequency) {
-   // poipoipoi stub
-   printf("TODO radio_setFrequency\r\n");
+   opensim_requ_radio_setFrequency_t requparams;
+   
+   // prepare request
+   requparams.frequency = frequency;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_setFrequency,
+                                    requparams,
+                                    sizeof(opensim_requ_radio_setFrequency_t),
+                                    0,
+                                    0);
 }
 
 void radio_rfOn() {
-   // poipoipoi stub
-   printf("TODO radio_rfOn\r\n");
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_rfOn,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void radio_rfOff() {
-   // poipoipoi stub
-   printf("TODO radio_rfOff\r\n");
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_rfOff,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 //===== TX
 
 void radio_loadPacket(uint8_t* packet, uint8_t len) {
-   // poipoipoi stub
-   printf("TODO radio_loadPacket\r\n");
+   opensim_requ_radio_loadPacket_t requparams;
+   
+   requparams.len = len;
+   memcpy(requparams.txBuffer,packet,len);
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_loadPacket,
+                                    &radio_loadPacket,
+                                    requparams.len+1,
+                                    0,
+                                    0);
 }
 
 void radio_txEnable() {
-   // poipoipoi stub
-   printf("TODO radio_txEnable\r\n");
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_txEnable,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void radio_txNow() {
-   // poipoipoi stub
-   printf("TODO radio_txNow\r\n");
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_txNow,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 //===== RX
 
 void radio_rxEnable() {
-   // poipoipoi stub
-   printf("TODO radio_rxEnable\r\n");
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_rxEnable,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void radio_rxNow() {
-   // poipoipoi stub
-   printf("TODO radio_rxNow\r\n");
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_rxNow,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void radio_getReceivedFrame(uint8_t* pBufRead,
@@ -134,8 +222,22 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                              int8_t* pRssi,
                             uint8_t* pLqi,
                             uint8_t* pCrc) {
-   // poipoipoi stub
-   printf("TODO radio_getReceivedFrame\r\n");
+   opensim_requ_radio_getReceivedFrame_t requparams;
+   opensim_repl_radio_getReceivedFrame_t replparams;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_getReceivedFrame,
+                                    &requparams,
+                                    sizeof(opensim_requ_radio_getReceivedFrame_t),
+                                    &replparams,
+                                    sizeof(opensim_repl_radio_getReceivedFrame_t));
+   
+   // write return values
+   memcpy(pBufRead,replparams.rxBuffer,replparams.len);
+   *pLenRead = replparams.len;
+   *pRssi    = replparams.rssi;
+   *pLqi     = replparams.lqi;
+   *pCrc     = replparams.crc;
 }
 
 //=========================== private =========================================
