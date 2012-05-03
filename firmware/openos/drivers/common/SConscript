@@ -1,0 +1,28 @@
+import os
+
+Import('env')
+
+libdrivers_env = env.Clone()
+
+libdrivers_env.Append(CPPPATH =  [ os.path.join('#','firmware','openos','openwsn'),
+                                   os.path.join('#','firmware','openos','openwsn','02a-MAClow'),
+                                   os.path.join('#','firmware','openos','openwsn','02b-MAChigh'),
+                                   os.path.join('#','firmware','openos','openwsn','03a-IPHC'),
+                                   os.path.join('#','firmware','openos','openwsn','03b-IPv6'),
+                                   os.path.join('#','firmware','openos','openwsn','04-TRAN'),
+                                   os.path.join('#','firmware','openos','openwsn','07-App','tcpinject'),
+                                   os.path.join('#','firmware','openos','openwsn','07-App','udpinject'),
+                                   os.path.join('#','firmware','openos','openwsn','cross-layers'),
+                                   os.path.join('#','firmware','openos','drivers','common'),
+                                   os.path.join('#','firmware','openos','bsp','boards'),
+                                   os.path.join('#','firmware','openos','bsp','boards','pc'),
+                                 ],
+                     )
+
+libdrivers_source = ['openserial.c',
+                     'opentimers.c',
+                    ]
+
+libdrivers = libdrivers_env.Library(target='libdrivers',
+                                    source=libdrivers_source)
+Alias('libdrivers', libdrivers)

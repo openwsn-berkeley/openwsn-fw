@@ -19,13 +19,17 @@ SConscript('firmware/openos/projects/common/01bsp_leds/SConscript',
            )
 
 SConscript('firmware/openos/projects/common/01bsp_timer/SConscript',
-           #variant_dir = buildDir+'firmware/openos/projects/common/01bsp_timer/',
            exports     = {'env':env},
-           #duplicate   = 0,
+           )
+
+SConscript('firmware/openos/projects/common/02drv_opentimers/SConscript',
+           exports     = {'env':env},
+           )
+
+SConscript('firmware/openos/drivers/common/SConscript',
+           exports     = {'env':env},
            )
 
 SConscript('firmware/openos/bsp/boards/pc/SConscript',
-           #variant_dir = buildDir+'firmware/openos/bsp/boards/pc/',
            exports     = {'env':env},
-           #duplicate   = 0,
            )

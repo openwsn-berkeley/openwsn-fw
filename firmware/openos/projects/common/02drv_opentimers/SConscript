@@ -1,0 +1,34 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','openwsn'),
+                             os.path.join('#','firmware','openos','drivers','common'),
+                             os.path.join('#','firmware','openos','bsp','boards'),
+                             os.path.join('#','firmware','openos','bsp','boards','pc'),
+                           ],
+                )
+localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','drivers','common'),
+                             os.path.join('#','firmware','openos','bsp','boards','pc'),
+                           ],
+                )
+
+library_files = [
+                   'libdrivers.lib',
+                   'libbsppc.lib',
+                   'ws2_32.lib',
+                   'user32.lib',
+                ]
+source_files =  ['02drv_opentimers.c',
+                 os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
+                 os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),
+                ]
+
+drv_opentimers = localEnv.Program(
+                target  = 'drv_opentimers',
+                source  = source_files,
+                LIBS    = library_files,
+                )
+Alias('drv_opentimers', drv_opentimers)

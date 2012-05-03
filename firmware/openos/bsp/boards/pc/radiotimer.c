@@ -19,15 +19,7 @@ radiotimer_vars_t radiotimer_vars;
 
 //=========================== public ==========================================
 
-//===== admin
-
-void radiotimer_init() {
-   // clear local variables
-   memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
-   
-   // poipoipoi stub
-   printf("TODO radiotimer_init\r\n");
-}
+//===== callback
 
 void radiotimer_setOverflowCb(radiotimer_compare_cbt cb) {
    // poipoipoi stub
@@ -37,6 +29,16 @@ void radiotimer_setOverflowCb(radiotimer_compare_cbt cb) {
 void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
    // poipoipoi stub
    printf("TODO radiotimer_setCompareCb\r\n");
+}
+
+//===== admin
+
+void radiotimer_init() {
+   // clear local variables
+   memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
+   
+   // poipoipoi stub
+   printf("TODO radiotimer_init\r\n");
 }
 
 void radiotimer_setStartFrameCb(radiotimer_capture_cbt cb) {
