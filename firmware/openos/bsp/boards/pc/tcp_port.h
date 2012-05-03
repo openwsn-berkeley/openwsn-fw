@@ -9,6 +9,12 @@
 
 //=========================== define ==========================================
 
+#ifdef LINUX //the socket object does not exist in linux. it is an int pointing to the socket fd
+typedef int SOCKET;
+#define INVALID_SOCKET -1
+#define SOCKET_ERROR   -1
+#define closesocket(s) close(s);
+#endif
 //=========================== typedef =========================================
 
 //=========================== variables =======================================
