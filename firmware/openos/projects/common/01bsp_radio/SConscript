@@ -17,14 +17,14 @@ library_files = [
                    'ws2_32.lib',
                    'user32.lib',
                 ]
-source_files =  ['01bsp_timer.c',
+source_files =  ['01bsp_radio.c',
                  os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
                  os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),
                 ]
 
-bsp_timer = localEnv.Program(
-                    target  = '01bsp_timer',
+bsp_radio = localEnv.Program(
+                    target  = '01bsp_radio',
                     source  = source_files,
                     LIBS    = library_files,
                     )
-Alias('bsp_timer', bsp_timer)
+Alias('bsp_radio', bsp_radio)

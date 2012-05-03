@@ -17,8 +17,7 @@ can use this project with any platform.
 /**
 \brief The program starts executing here.
 */
-int main(void)
-{
+int mote_main(void) {
    uint16_t delay;
    
    board_init();
@@ -41,5 +40,7 @@ int main(void)
    while (1) {
       for (delay=0xffff;delay>0;delay--);
       leds_increment();
+      for (delay=0xffff;delay>0;delay--);
+      leds_circular_shift();
    }
 }

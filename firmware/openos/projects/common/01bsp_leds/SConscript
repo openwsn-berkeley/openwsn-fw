@@ -23,7 +23,7 @@ source_files =  ['01bsp_leds.c',
                 ]
 
 bsp_leds = localEnv.Program(
-                    target  = 'bsp_leds',
+                    target  = '01bsp_leds',
                     source  = source_files,
                     LIBS    = library_files,
                     )
