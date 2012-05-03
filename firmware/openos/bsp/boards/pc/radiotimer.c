@@ -5,6 +5,7 @@
 */
 
 #include "radiotimer.h"
+#include "opensim_proto.h"
 
 //=========================== variables =======================================
 
@@ -17,79 +18,127 @@ radiotimer_vars_t radiotimer_vars;
 
 //=========================== prototypes ======================================
 
-//=========================== public ==========================================
-
-//===== callback
+//=========================== callback ========================================
 
 void radiotimer_setOverflowCb(radiotimer_compare_cbt cb) {
-   // poipoipoi stub
-   printf("TODO radiotimer_setOverflowCb\r\n");
+   radiotimer_vars.overflow_cb = cb;
 }
 
 void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
-   // poipoipoi stub
-   printf("TODO radiotimer_setCompareCb\r\n");
+   radiotimer_vars.compare_cb = cb;
 }
+
+//=========================== public ==========================================
 
 //===== admin
 
 void radiotimer_init() {
+   
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
    
-   // poipoipoi stub
-   printf("TODO radiotimer_init\r\n");
-}
-
-void radiotimer_setStartFrameCb(radiotimer_capture_cbt cb) {
-   // poipoipoi stub
-   printf("TODO radiotimer_setStartFrameCb\r\n");
-}
-
-void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
-   // poipoipoi stub
-   printf("TODO radiotimer_setEndFrameCb\r\n");
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radiotimer_init,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void radiotimer_start(uint16_t period) {
-   // poipoipoi stub
-   printf("TODO radiotimer_start\r\n");
+   opensim_requ_radiotimer_start_t requparams;
+   
+   // prepare params
+   requparams.period = period;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radiotimer_start,
+                                    &requparams,
+                                    sizeof(opensim_requ_radiotimer_start_t),
+                                    0,
+                                    0);
 }
 
 //===== direct access
 
 uint16_t radiotimer_getValue() {
-   // poipoipoi stub
-   printf("TODO radiotimer_getValue\r\n");
+   opensim_repl_radiotimer_getValue_t replparams;
+
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radiotimer_getValue,
+                                    0,
+                                    0,
+                                    &replparams,
+                                    sizeof(opensim_repl_radiotimer_getValue_t));
+   
+   return replparams.value;
 }
 
 void radiotimer_setPeriod(uint16_t period) {
-   // poipoipoi stub
-   printf("TODO radiotimer_setPeriod\r\n");
+   opensim_requ_radiotimer_setPeriod_t requparams;
+   
+   // prepare params
+   requparams.period = period;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radiotimer_setPeriod,
+                                    &requparams,
+                                    sizeof(opensim_requ_radiotimer_setPeriod_t),
+                                    0,
+                                    0);
 }
 
 uint16_t radiotimer_getPeriod() {
-   // poipoipoi stub
-   printf("TODO radiotimer_getPeriod\r\n");
+   opensim_repl_radiotimer_getPeriod_t replparams;
+
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radiotimer_getPeriod,
+                                    0,
+                                    0,
+                                    &replparams,
+                                    sizeof(opensim_repl_radiotimer_getPeriod_t));
+   
+   return replparams.period;
 }
 
 //===== compare
 
 void radiotimer_schedule(uint16_t offset) {
-   // poipoipoi stub
-   printf("TODO radiotimer_schedule\r\n");
+   opensim_requ_radiotimer_schedule_t requparams;
+   
+   // prepare params
+   requparams.offset = offset;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radiotimer_schedule,
+                                    &requparams,
+                                    sizeof(opensim_requ_radiotimer_schedule_t),
+                                    0,
+                                    0);
 }
 
 void radiotimer_cancel() {
-   // poipoipoi stub
-   printf("TODO radiotimer_cancel\r\n");
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radiotimer_cancel,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 //===== capture
 
 uint16_t radiotimer_getCapturedTime() {
-   // poipoipoi stub
-   printf("TODO radiotimer_getCapturedTime\r\n");
+   opensim_repl_radiotimer_getCapturedTime_t replparams;
+
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radiotimer_getCapturedTime,
+                                    0,
+                                    0,
+                                    &replparams,
+                                    sizeof(opensim_repl_radiotimer_getCapturedTime_t));
+   
+   return replparams.capturedTime;
 }
 
 //=========================== private =========================================

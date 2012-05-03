@@ -257,29 +257,31 @@ typedef struct {
 } opensim_repl_radio_getReceivedFrame_t;
 //=== radiotimer
 // init
-typedef opensim_requ_hdr_t   opensim_requ_radiotimer_init_t;
-typedef opensim_repl_hdr_t   opensim_repl_radiotimer_init_t;
 // start
-typedef opensim_requ_hdr_t   opensim_requ_radiotimer_start_t;
-typedef opensim_repl_hdr_t   opensim_repl_radiotimer_start_t;
+typedef struct {
+   uint16_t period;
+} opensim_requ_radiotimer_start_t;
 // getValue
-typedef opensim_requ_hdr_t   opensim_requ_radiotimer_getValue_t;
-typedef opensim_repl_hdr_t   opensim_repl_radiotimer_getValue_t;
+typedef struct {
+   uint16_t value;
+} opensim_repl_radiotimer_getValue_t;
 // setPeriod
-typedef opensim_requ_hdr_t   opensim_requ_radiotimer_setPeriod_t;
-typedef opensim_repl_hdr_t   opensim_repl_radiotimer_setPeriod_t;
+typedef struct {
+   uint16_t period;
+} opensim_requ_radiotimer_setPeriod_t;
 // getPeriod
-typedef opensim_requ_hdr_t   opensim_requ_radiotimer_getPeriod_t;
-typedef opensim_repl_hdr_t   opensim_repl_radiotimer_getPeriod_t;
+typedef struct {
+   uint16_t period;
+} opensim_repl_radiotimer_getPeriod_t;
 // schedule
-typedef opensim_requ_hdr_t   opensim_requ_radiotimer_schedule_t;
-typedef opensim_repl_hdr_t   opensim_repl_radiotimer_schedule_t;
+typedef struct {
+   uint16_t offset;
+} opensim_requ_radiotimer_schedule_t;
 // cancel
-typedef opensim_requ_hdr_t   opensim_requ_radiotimer_cancel_t;
-typedef opensim_repl_hdr_t   opensim_repl_radiotimer_cancel_t;
 // getCapturedTime
-typedef opensim_requ_hdr_t   opensim_requ_radiotimer_getCapturedTime_t;
-typedef opensim_repl_hdr_t   opensim_repl_radiotimer_getCapturedTime_t;
+typedef struct {
+   uint16_t capturedTime;
+} opensim_repl_radiotimer_getCapturedTime_t;
 //=== uart
 // init
 typedef opensim_requ_hdr_t   opensim_requ_uart_init_t;
