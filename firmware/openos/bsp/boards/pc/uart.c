@@ -42,7 +42,7 @@ void uart_init() {
                                     0);
 }
 
-void uart_enableInterrupts(){
+void uart_enableInterrupts() {
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_uart_enableInterrupts,
