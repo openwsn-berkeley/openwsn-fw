@@ -26,7 +26,7 @@ typedef enum {
    // bsp_timer
    OPENSIM_CMD_bsp_timer_init               = 2,
    OPENSIM_CMD_bsp_timer_reset              = 3,
-   OPENSIM_CMD_bsp_timer_scheduleIn         = 4, // param
+   OPENSIM_CMD_bsp_timer_scheduleIn         = 4,
    OPENSIM_CMD_bsp_timer_cancel_schedule    = 5,
    // debugpins
    OPENSIM_CMD_debugpins_init               = 6,
@@ -49,25 +49,25 @@ typedef enum {
    OPENSIM_CMD_debugpins_radio_clr          = 23,
    OPENSIM_CMD_debugpins_radio_set          = 24,
    // eui64
-   OPENSIM_CMD_eui64_get                    = 25, // requires answer
+   OPENSIM_CMD_eui64_get                    = 25,
    // leds
    OPENSIM_CMD_leds_init                    = 26,
    OPENSIM_CMD_leds_error_on                = 27,
    OPENSIM_CMD_leds_error_off               = 28,
    OPENSIM_CMD_leds_error_toggle            = 29,
-   OPENSIM_CMD_leds_error_isOn              = 30, // requires answer
+   OPENSIM_CMD_leds_error_isOn              = 30,
    OPENSIM_CMD_leds_radio_on                = 31,
    OPENSIM_CMD_leds_radio_off               = 32,
    OPENSIM_CMD_leds_radio_toggle            = 33,
-   OPENSIM_CMD_leds_radio_isOn              = 34, // requires answer
+   OPENSIM_CMD_leds_radio_isOn              = 34,
    OPENSIM_CMD_leds_sync_on                 = 35,
    OPENSIM_CMD_leds_sync_off                = 36,
    OPENSIM_CMD_leds_sync_toggle             = 37,
-   OPENSIM_CMD_leds_sync_isOn               = 38, // requires answer
+   OPENSIM_CMD_leds_sync_isOn               = 38,
    OPENSIM_CMD_leds_debug_on                = 39,
    OPENSIM_CMD_leds_debug_off               = 40,
    OPENSIM_CMD_leds_debug_toggle            = 41,
-   OPENSIM_CMD_leds_debug_isOn              = 42, // requires answer
+   OPENSIM_CMD_leds_debug_isOn              = 42,
    OPENSIM_CMD_leds_all_on                  = 43,
    OPENSIM_CMD_leds_all_off                 = 44,
    OPENSIM_CMD_leds_all_toggle              = 45,
@@ -77,9 +77,9 @@ typedef enum {
    OPENSIM_CMD_radio_init                   = 48,
    OPENSIM_CMD_radio_reset                  = 49,
    OPENSIM_CMD_radio_startTimer             = 50,
-   OPENSIM_CMD_radio_getTimerValue          = 51, // requires answer
+   OPENSIM_CMD_radio_getTimerValue          = 51,
    OPENSIM_CMD_radio_setTimerPeriod         = 52,
-   OPENSIM_CMD_radio_getTimerPeriod         = 53, // requires answer
+   OPENSIM_CMD_radio_getTimerPeriod         = 53,
    OPENSIM_CMD_radio_setFrequency           = 54,
    OPENSIM_CMD_radio_rfOn                   = 55,
    OPENSIM_CMD_radio_rfOff                  = 56,
@@ -88,16 +88,16 @@ typedef enum {
    OPENSIM_CMD_radio_txNow                  = 59,
    OPENSIM_CMD_radio_rxEnable               = 60,
    OPENSIM_CMD_radio_rxNow                  = 61,
-   OPENSIM_CMD_radio_getReceivedFrame       = 62, // requires answer
+   OPENSIM_CMD_radio_getReceivedFrame       = 62,
    // radiotimer
    OPENSIM_CMD_radiotimer_init              = 63,
    OPENSIM_CMD_radiotimer_start             = 64,
-   OPENSIM_CMD_radiotimer_getValue          = 65, // requires answer
+   OPENSIM_CMD_radiotimer_getValue          = 65,
    OPENSIM_CMD_radiotimer_setPeriod         = 66,
-   OPENSIM_CMD_radiotimer_getPeriod         = 67, // requires answer
+   OPENSIM_CMD_radiotimer_getPeriod         = 67,
    OPENSIM_CMD_radiotimer_schedule          = 68,
    OPENSIM_CMD_radiotimer_cancel            = 69,
-   OPENSIM_CMD_radiotimer_getCapturedTime   = 70, // requires answer
+   OPENSIM_CMD_radiotimer_getCapturedTime   = 70,
    // uart
    OPENSIM_CMD_uart_init                    = 71,
    OPENSIM_CMD_uart_enableInterrupts        = 72,
@@ -105,7 +105,7 @@ typedef enum {
    OPENSIM_CMD_uart_clearRxInterrupts       = 74,
    OPENSIM_CMD_uart_clearTxInterrupts       = 75,
    OPENSIM_CMD_uart_writeByte               = 76,
-   OPENSIM_CMD_uart_readByte                = 77, // requires answer
+   OPENSIM_CMD_uart_readByte                = 77,
    // supply
    //===== from server to client
    // board
@@ -126,7 +126,7 @@ typedef enum {
    // supply
    OPENSIM_CMD_supply_on                    = 107,
    OPENSIM_CMD_supply_off                   = 108
-} opensim_command_t;
+} opensim_commandId_t;
 
 //=========================== typedef =========================================
 
