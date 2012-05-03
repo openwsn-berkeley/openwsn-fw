@@ -7,6 +7,7 @@
 #ifndef __OPENSIM_PROTO_H
 #define __OPENSIM_PROTO_H
 
+#include "board_info.h"
 #include "stdint.h"
 
 //=========================== define ==========================================
@@ -139,22 +140,15 @@ typedef struct {
 
 //=== board
 // init
-typedef opensim_requ_hdr_t   opensim_requ_board_init_t;
-typedef opensim_repl_hdr_t   opensim_repl_board_init_t;
 // sleep
-typedef opensim_requ_hdr_t   opensim_requ_board_sleep_t;
-typedef opensim_repl_hdr_t   opensim_repl_board_sleep_t;
 
 //=== bsp_timer
 // init
-typedef opensim_requ_hdr_t   opensim_requ_bsp_timer_init_t;
-typedef opensim_repl_hdr_t   opensim_repl_bsp_timer_init_t;
 // reset
-typedef opensim_requ_hdr_t   opensim_requ_bsp_timer_reset_t;
-typedef opensim_repl_hdr_t   opensim_repl_bsp_timer_reset_t;
 // scheduleIn
-typedef opensim_requ_hdr_t   opensim_requ_bsp_timer_scheduleIn_t;
-typedef opensim_repl_hdr_t   opensim_repl_bsp_timer_scheduleIn_t;
+typedef struct {
+   PORT_TIMER_WIDTH delayTicks;
+} opensim_requ_bsp_timer_scheduleIn_t;
 // cancel_schedule
 typedef opensim_requ_hdr_t   opensim_requ_bsp_timer_cancel_schedule_t;
 typedef opensim_repl_hdr_t   opensim_repl_bsp_timer_cancel_schedule_t;

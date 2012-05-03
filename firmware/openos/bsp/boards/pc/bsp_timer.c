@@ -5,6 +5,7 @@
 */
 
 #include "bsp_timer.h"
+#include "opensim_proto.h"
 
 //=========================== defines =========================================
 
@@ -32,23 +33,44 @@ void bsp_timer_init() {
    // clear local variables
    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
-   // poipoipoi stub
-   printf("TODO bsp_timer_init\r\n");
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_init,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void bsp_timer_reset() {
-   // poipoipoi stub
-   printf("TODO bsp_timer_reset\r\n");
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_reset,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
-   // poipoipoi stub
-   printf("TODO bsp_timer_scheduleIn\r\n");
+   opensim_requ_bsp_timer_scheduleIn_t reqparams;
+   
+   // prepare params
+   reqparams.delayTicks = delayTicks;
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_reset,
+                                    &reqparams,
+                                    sizeof(opensim_requ_bsp_timer_scheduleIn_t),
+                                    0,
+                                    0);
 }
 
 void bsp_timer_cancel_schedule() {
-   // poipoipoi stub
-   printf("TODO bsp_timer_cancel_schedule\r\n");
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_cancel_schedule,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
 }
 
 //=========================== private =========================================
