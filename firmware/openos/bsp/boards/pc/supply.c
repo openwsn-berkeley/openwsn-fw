@@ -36,7 +36,7 @@ void supply_rootFunction() {
    int rxPacketType;
    int rxPktParamsLength;
    
-   printf("Mote ready to be booted\r\n");
+   printf("Waiting for boot\r\n");
    
    // wait for the supply to switch on
    opensim_client_waitForPacket(&rxPacketType,
