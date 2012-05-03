@@ -150,70 +150,31 @@ typedef struct {
    PORT_TIMER_WIDTH delayTicks;
 } opensim_requ_bsp_timer_scheduleIn_t;
 // cancel_schedule
-typedef opensim_requ_hdr_t   opensim_requ_bsp_timer_cancel_schedule_t;
-typedef opensim_repl_hdr_t   opensim_repl_bsp_timer_cancel_schedule_t;
 //=== debugpins
 // init
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_init_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_init_t;
 // frame_toggle
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_frame_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_frame_toggle_t;
 // frame_clr
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_frame_clr_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_frame_clr_t;
 // frame_set
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_frame_set_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_frame_set_t;
 // slot_toggle
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_slot_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_slot_toggle_t;
 // slot_clr
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_slot_clr_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_slot_clr_t;
 // slot_set
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_slot_set_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_slot_set_t;
 // fsm_toggle
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_fsm_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_fsm_toggle_t;
 // fsm_clr
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_fsm_clr_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_fsm_clr_t;
 // fsm_set
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_fsm_set_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_fsm_set_t;
 // task_toggle
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_task_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_task_toggle_t;
 // task_clr
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_task_clr_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_task_clr_t;
 // task_set
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_task_set_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_task_set_t;
 // isr_toggle
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_isr_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_isr_toggle_t;
 // isr_clr
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_isr_clr_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_isr_clr_t;
 // isr_set
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_isr_set_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_isr_set_t;
 // radio_toggle
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_radio_toggle_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_radio_toggle_t;
 // radio_clr
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_radio_clr_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_radio_clr_t;
 // radio_set
-typedef opensim_requ_hdr_t   opensim_requ_debugpins_radio_set_t;
-typedef opensim_repl_hdr_t   opensim_repl_debugpins_radio_set_t;
 //=== eui64
 // get
-typedef opensim_requ_hdr_t   opensim_requ_eui64_get_t;
-typedef opensim_repl_hdr_t   opensim_repl_eui64_get_t;
+typedef struct {
+   uint8_t eui64[8];
+} opensim_repl_eui64_get_t;
 //=== leds
 // init
 typedef opensim_requ_hdr_t   opensim_requ_leds_init_t;
