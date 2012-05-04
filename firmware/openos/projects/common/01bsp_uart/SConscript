@@ -12,25 +12,32 @@ localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards'
                            ],
                 )
 
+source_files =  [
+                    '01bsp_uart.c',
+                ]
 if localEnv['PLATFORM'] == 'win32':
-	library_files = [
-                   'libbsppc.lib',
-                   'ws2_32.lib',
-                   'user32.lib',
-                ]
+    library_files = [
+                       'libbsppc.lib',
+                       'ws2_32.lib',
+                       'user32.lib',
+                    ]
+    source_files += [
+                        os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
+                        os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),
+                    ]
+
 else:
-	library_files = [
+    library_files = [
                    'libbsppc.a'
-                ]
-                
-source_files =  ['01bsp_uart.c',
-                 os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
-                 os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),
-                ]
+                    ]
+    source_files += [
+                        os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client_linux.c'),
+                        os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port_linux.c'),
+                    ]
 
 bsp_uart = localEnv.Program(
                     target  = '01bsp_uart',
                     source  = source_files,
                     LIBS    = library_files,
                     )
-Alias('bsp_uart', bsp_uart)
+Alias('01bsp_uart', bsp_uart)
