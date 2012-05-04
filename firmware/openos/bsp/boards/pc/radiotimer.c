@@ -142,4 +142,15 @@ uint16_t radiotimer_getCapturedTime() {
    return replparams.capturedTime;
 }
 
+//=========================== interrupt handlers ==============================
+
+void radiotimer_intr_compare() {
+   radiotimer_vars.compare_cb();
+}
+
+void radiotimer_intr_overflow() {
+   radiotimer_vars.overflow_cb();
+}
+
 //=========================== private =========================================
+

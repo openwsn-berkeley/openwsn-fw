@@ -25,6 +25,7 @@ else:
                 
 source_files =  ['01bsp_timer.c',
                  os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
+                 os.path.join('#','firmware','openos','bsp','boards','pc','opensim_cmdHandler.c'),
                  os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),
                 ]
 

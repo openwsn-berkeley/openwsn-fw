@@ -88,9 +88,9 @@ void opensim_client_send(int  txPacketType,
       opensim_client_abort();
    }
    if (txPacketParamsLength+1>sizeof(opensim_client_vars.txBuffer)) {
-      fprintf(stderr,"[opensim_client] ERROR: too many bytes to send: got %d, expected at most %d\n",
-                             txPacketParamsLength+1,
-                             sizeof(opensim_client_vars.txBuffer));
+      fprintf(stderr,"[opensim_client] ERROR: too many bytes to send: expected at most %d, got %d\n",
+                             sizeof(opensim_client_vars.txBuffer),
+                             txPacketParamsLength+1);
       opensim_client_abort();
    }
    
@@ -134,9 +134,9 @@ void opensim_client_waitForPacket(int* rxPacketType,
       opensim_client_abort();
    }
    if (retval>rxPacketParamsMaxLength+1) {
-      fprintf(stderr,"[opensim_client] ERROR: received %d bytes, expected at most %d\n",
-                                  retval-1,
-                                  rxPacketParamsMaxLength);
+      fprintf(stderr,"[opensim_client] ERROR: expected at most %d bytes, received %d\n",
+                                  rxPacketParamsMaxLength,
+                                  retval-1);
       opensim_client_abort();
    }
    
@@ -175,15 +175,15 @@ void opensim_client_sendAndWaitForAck(int  txPacketType,
    
    // filter errors
    if (rxPacketType!=txPacketType) {
-      fprintf(stderr,"[opensim_client] ERROR: wrong ACK's packet type: for %d, expected %d\n",
-                              rxPacketType,
-                              txPacketType);
+      fprintf(stderr,"[opensim_client] ERROR: wrong ACK's packet type: expected %d, got %d\n",
+                              txPacketType,
+                              rxPacketType);
       opensim_client_abort();
    }
    if (rxPacketParamsLength!=rxPacketParamsExpectedLength) {
-      fprintf(stderr,"[opensim_client] ERROR: wrong ACK length: got %d bytes, expected %d\n",
-                              rxPacketParamsLength,
-                              rxPacketParamsExpectedLength);
+      fprintf(stderr,"[opensim_client] ERROR: wrong ACK length: expected %d bytes, got %d\n",
+                              rxPacketParamsExpectedLength,
+                              rxPacketParamsLength);
       opensim_client_abort();
    }
 }
