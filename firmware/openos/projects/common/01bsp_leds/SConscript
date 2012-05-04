@@ -14,6 +14,7 @@ localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards'
 
 source_files =  [
                     '01bsp_leds.c',
+                    os.path.join('#','firmware','openos','bsp','boards','pc','opensim_cmdHandler.c'),
                 ]
 if localEnv['PLATFORM'] == 'win32':
     library_files = [

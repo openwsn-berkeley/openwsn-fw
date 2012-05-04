@@ -14,6 +14,7 @@ localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards'
 
 source_files =  [
                     '01bsp_radio.c',
+                    os.path.join('#','firmware','openos','bsp','boards','pc','opensim_cmdHandler.c'),
                 ]
 if localEnv['PLATFORM'] == 'win32':
     library_files = [
@@ -40,4 +41,4 @@ bsp_radio = localEnv.Program(
                     source  = source_files,
                     LIBS    = library_files,
                     )
-Alias('01bsp_radio', bsp_radio)
+Alias('bsp_radio', bsp_radio)
