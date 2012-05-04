@@ -7,7 +7,7 @@
 #include "debugpins.h"
 #include "board.h"
 
-#define LPCXPRESSO1769
+
 
 //=========================== defines =========================================
 

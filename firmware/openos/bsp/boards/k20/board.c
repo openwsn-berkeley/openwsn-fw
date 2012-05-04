@@ -48,7 +48,6 @@ void board_init() {
 	mcgmode= what_mcg_mode();
 	
 	
-	
 	//ENABLE_GPIO_CLOCKS;
 
 	llwu_init();
@@ -57,6 +56,7 @@ void board_init() {
 	leds_init();
 	bsp_timer_init();
 	uart_init();
+	spi_init();
 	leds_all_off();
 
 }
@@ -109,9 +109,9 @@ void sysinit(){
 
 void board_sleep() {
 	uint8_t op_mode;
-	//enter_wait();
-   // PORTA_PCR2 |= PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;//JTAG_TDO    
 	enter_wait();
+//    PORTA_PCR2 |= PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;//JTAG_TDO    
+//	enter_lls();
 	op_mode = what_mcg_mode();
 	if(op_mode==PBE)
 	{
