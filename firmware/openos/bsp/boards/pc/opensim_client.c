@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
 */
 
-#include <winsock2.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -127,6 +127,7 @@ void opensim_client_waitForPacket(int* rxPacketType,
    // filter errors
    if (retval==SOCKET_ERROR) {
       fprintf(stderr,"[opensim_client] ERROR: received failed (error=%d)\n", WSAGetLastError());
+
       opensim_client_abort();
    }
    if (retval == 0) {

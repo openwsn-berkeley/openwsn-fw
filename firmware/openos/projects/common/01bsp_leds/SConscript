@@ -8,15 +8,19 @@ localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'
                              os.path.join('#','firmware','openos','bsp','boards','pc'),
                            ],
                 )
-localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc'),
-                           ],
-                )
+
 
 source_files =  [
                     '01bsp_leds.c',
                     os.path.join('#','firmware','openos','bsp','boards','pc','opensim_cmdHandler.c'),
                 ]
 if localEnv['PLATFORM'] == 'win32':
+    localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc','win'),
+                           ],
+                )
+    localEnv.Append(CPPPATH =  [  os.path.join('#','firmware','openos','bsp','boards','pc','win'),
+                           ],
+                ) 
     library_files = [
                        'libbsppc.lib',
                        'ws2_32.lib',
@@ -24,16 +28,22 @@ if localEnv['PLATFORM'] == 'win32':
                     ]
     source_files += [
                         os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
-                        os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),
+                        os.path.join('#','firmware','openos','bsp','boards','pc','win','tcp_port_win.c'),
                     ]
 
 else:
+    localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc','linux'),
+                           ],
+                )
+    localEnv.Append(CPPPATH =  [  os.path.join('#','firmware','openos','bsp','boards','pc','linux'),
+                           ],
+                ) 
     library_files = [
                    'libbsppc.a'
                     ]
     source_files += [
-                        os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client_linux.c'),
-                        os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port_linux.c'),
+                        os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
+                        os.path.join('#','firmware','openos','bsp','boards','pc','linux','tcp_port_linux.c'),
                     ]
 
 bsp_leds = localEnv.Program(

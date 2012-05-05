@@ -13,7 +13,7 @@
 #include <netdb.h> 
 #include "tcp_port.h"
 
-#define LINUX
+
 
 SOCKET tcp_port_connect(char* server_name, unsigned short portno) {
    int                  sockfd;
