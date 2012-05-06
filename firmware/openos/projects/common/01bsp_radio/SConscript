@@ -7,35 +7,29 @@ localEnv = env.Clone()
 localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'),
                              os.path.join('#','firmware','openos','bsp','boards','pc'),
                            ],
-                )
+               )
 localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc'),
                            ],
-                )
+               )
 
 source_files =  [
                     '01bsp_radio.c',
-                    os.path.join('#','firmware','openos','bsp','boards','pc','opensim_cmdHandler.c'),
                 ]
-if localEnv['PLATFORM'] == 'win32':
-    library_files = [
-                       'libbsppc.lib',
-                       'ws2_32.lib',
-                       'user32.lib',
+if localEnv['PLATFORM']=='win32':
+    localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc','win'),
+                               ],
+                   ) 
+    library_files = [   'libbsppc.lib',
+                        'ws2_32.lib',
+                        'user32.lib',
                     ]
-    source_files += [
-                        os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client.c'),
-                        os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port.c'),
+elif localEnv['PLATFORM'] == 'posix':
+    localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc','linux'),
+                               ],
+                   ) 
+    library_files = [   'libbsppc.a'
                     ]
-
-else:
-    library_files = [
-                   'libbsppc.a'
-                    ]
-    source_files += [
-                        os.path.join('#','firmware','openos','bsp','boards','pc','opensim_client_linux.c'),
-                        os.path.join('#','firmware','openos','bsp','boards','pc','tcp_port_linux.c'),
-                    ]
-
+                 
 bsp_radio = localEnv.Program(
                     target  = '01bsp_radio',
                     source  = source_files,
