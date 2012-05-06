@@ -51,7 +51,7 @@ void rxl1_init() {
    
    //we start a timer, but just to get a timer ID, we stop it immediately
    rxl1_vars.timerId    = opentimers_start(openrandom_get16b()%RXL1PERIOD,
-                                          TIMER_PERIODIC,
+                                          TIMER_PERIODIC,TIME_MS,
                                           rxl1_timer);
    opentimers_stop(rxl1_vars.timerId);
    

@@ -7,8 +7,10 @@
 
 #include "radiotimer.h"
 #include "board.h"
-
+#include "opentimers.h"
 //pin 0.23 is cap0 for capture.
+
+#define RADIO_TIMER_NOT_SET 0xFF
 
 //=========================== variables =======================================
 
@@ -16,13 +18,15 @@ typedef struct {
    radiotimer_compare_cbt    overflow_cb;
    radiotimer_compare_cbt    compare_cb;
    uint32_t period;
-   uint32_t counter_slot_val; //timer value when the slot timer is set- references to the init of the slot
+   uint8_t period_timer_id;//id of the opentimer used for period 
+   uint8_t offset_timer_id;//id of the opentimer used for offsets within the slot.
 } radiotimer_vars_t;
 
 radiotimer_vars_t radiotimer_vars;
 
 //=========================== prototypes ======================================
-void private_radio_timer_isr(uint8_t source);
+void private_radiotimer_period_cb(void);
+void private_radiotimer_offset_cb(void);
 //=========================== public ==========================================
 
 //===== admin
@@ -30,9 +34,8 @@ void private_radio_timer_isr(uint8_t source);
 void radiotimer_init() {
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
-
-
-
+   radiotimer_vars.offset_timer_id=RADIO_TIMER_NOT_SET;
+   radiotimer_vars.period_timer_id=RADIO_TIMER_NOT_SET;
 }
 
 void radiotimer_setOverflowCb(radiotimer_compare_cbt cb) {
@@ -52,7 +55,11 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
 }
 
 void radiotimer_start(PORT_TIMER_WIDTH period) {
- 
+	if (radiotimer_vars.period_timer_id!=RADIO_TIMER_NOT_SET){
+	 opentimers_stop(radiotimer_vars.period_timer_id);//stop it.	
+	}
+	radiotimer_vars.period=period;
+	radiotimer_vars.period_timer_id=opentimers_start(period,TIMER_ONESHOT,TIME_TICS,private_radiotimer_period_cb);
 }
 
 //===== direct access
@@ -63,7 +70,9 @@ PORT_TIMER_WIDTH radiotimer_getValue() {
 //period is in ms???
 
 void radiotimer_setPeriod(PORT_TIMER_WIDTH period) {
-	
+	opentimers_stop(radiotimer_vars.period_timer_id);
+	radiotimer_vars.period=period;
+	radiotimer_vars.period_timer_id=opentimers_start(period,TIMER_ONESHOT,TIME_TICS,private_radiotimer_offset_cb);
 }
 
 
@@ -76,13 +85,20 @@ PORT_TIMER_WIDTH radiotimer_getPeriod() {
 //===== compare
 
 void radiotimer_schedule(PORT_TIMER_WIDTH offset) {
-	
+   radiotimer_vars.offset_timer_id=opentimers_start(offset,TIMER_ONESHOT,TIME_TICS,private_radiotimer_period_cb);	
 }
 
 void radiotimer_cancel() {
    // reset the timer.
-	
+if (radiotimer_vars.offset_timer_id!=RADIO_TIMER_NOT_SET){
+	opentimers_stop(radiotimer_vars.offset_timer_id);
+	radiotimer_vars.offset_timer_id=RADIO_TIMER_NOT_SET;
+}
 
+if (radiotimer_vars.period_timer_id!=RADIO_TIMER_NOT_SET){
+	opentimers_stop(radiotimer_vars.period_timer_id);
+	radiotimer_vars.period_timer_id=RADIO_TIMER_NOT_SET;
+}
 }
 
 //===== capture
@@ -97,28 +113,15 @@ inline PORT_TIMER_WIDTH radiotimer_getCapturedTime() {
 
 //=========================== interrupt handlers ==============================
 
-void private_radio_timer_isr(uint8_t source) {
-	uint32_t current=0;
-//	switch (source) {
-//	case TIMER_COMPARE_REG0:
-//		if (radiotimer_vars.overflow_cb != NULL) {
-//			// call the callback
-//			radiotimer_vars.overflow_cb();
-//			// kick the OS
-//			return ;
-//		}
-//		break;
-//	case TIMER_COMPARE_REG1:
-//		if (radiotimer_vars.compare_cb != NULL) {
-//			// call the callback
-//			radiotimer_vars.compare_cb();
-//			// kick the OS
-//			return ;
-//		}
-//		break;
-//
-//	default:
-//		while (1);
-//	}
-	return ;
+
+void private_radiotimer_period_cb(void){
+	//call overflow c
+	radiotimer_vars.overflow_cb();
+	radiotimer_vars.period_timer_id=RADIO_TIMER_NOT_SET;//it is one shot. so declare it as not set
+	
+}
+void private_radiotimer_offset_cb(void){
+	radiotimer_vars.compare_cb();
+	radiotimer_vars.offset_timer_id=RADIO_TIMER_NOT_SET;//it is one shot. so declare it as not set
+	
 }

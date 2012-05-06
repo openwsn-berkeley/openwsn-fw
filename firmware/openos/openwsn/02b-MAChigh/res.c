@@ -43,7 +43,7 @@ void res_init() {
    res_vars.dsn               = 0;
    res_vars.MacMgtTaskCounter = 0;
    res_vars.timerId = opentimers_start(res_vars.periodMaintenance,
-                                       TIMER_PERIODIC,
+                                       TIMER_PERIODIC,TIME_MS,
                                        res_timer_cb);
 }
 

@@ -25,7 +25,13 @@ typedef void (*opentimers_cbt)(void);
 typedef enum {
    TIMER_PERIODIC,
    TIMER_ONESHOT,
-} timer_type_t;
+}timer_type_t;
+
+/*the time can be in tics or in ms*/
+typedef enum {
+   TIME_MS,
+   TIME_TICS,
+}time_type_t;
 
 #define opentimer_id_t uint8_t
 
@@ -45,9 +51,9 @@ typedef struct {
 void           opentimers_init();
 opentimer_id_t opentimers_start(uint32_t       duration,
                                 timer_type_t   type,
+                                time_type_t timetype,
                                 opentimers_cbt callback);
-void           opentimers_setPeriod(opentimer_id_t id,
-                                    uint32_t       newPeriod);
+void           opentimers_setPeriod(opentimer_id_t id,time_type_t timetype, uint32_t       newPeriod);
 void           opentimers_stop(opentimer_id_t id);
 void           opentimers_restart(opentimer_id_t id);
 

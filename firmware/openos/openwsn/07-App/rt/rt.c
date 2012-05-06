@@ -51,7 +51,7 @@ void rt_init() {
    
 
    rt_vars.timerId    = opentimers_start(openrandom_get16b()%RTPERIOD,
-                                          TIMER_PERIODIC,
+                                          TIMER_PERIODIC,TIME_MS,
                                           rt_timer);
    opencoap_register(&rt_vars.desc);
 }

@@ -52,7 +52,7 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.all_routers_multicast.addr_128b[15] = 0x02;
    icmpv6rpl_vars.periodDIO  = 1700+(openrandom_get16b()&0xff);       // pseudo-random
    icmpv6rpl_vars.timerId    = opentimers_start(icmpv6rpl_vars.periodDIO,
-                                                TIMER_PERIODIC,
+                                                TIMER_PERIODIC,TIME_MS,
                                                 icmpv6rpl_timer_cb);
 }
 

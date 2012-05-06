@@ -47,15 +47,15 @@ int mote_main(void) {
    opentimers_init();
    
    opentimers_start(APP_DLY_TIMER0_ms,
-                    TIMER_PERIODIC,
+                    TIMER_PERIODIC,TIME_MS,
                     cb_timer0);
    
    opentimers_start(APP_DLY_TIMER1_ms,
-                    TIMER_PERIODIC,
+                    TIMER_PERIODIC,TIME_MS,
                     cb_timer1);
    
    opentimers_start(APP_DLY_TIMER2_ms,
-                    TIMER_PERIODIC,
+                    TIMER_PERIODIC,TIME_MS,
                     cb_timer2);
    
    while(1) {

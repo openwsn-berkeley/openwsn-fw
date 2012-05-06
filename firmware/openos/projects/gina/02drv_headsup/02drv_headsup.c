@@ -78,7 +78,7 @@ int main(void) {
    
    // start the timer
    opentimers_start(APP_DLY_TIMER_ms,
-                    TIMER_PERIODIC,
+                    TIMER_PERIODIC,TIME_MS,
                     cb_timer);
       
    while(1) {

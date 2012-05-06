@@ -64,7 +64,7 @@ void rrube_init() {
    
    opencoap_register(&rrube_vars.desc);
    rrube_vars.timerId    = opentimers_start(1000,
-                                           TIMER_PERIODIC,
+                                           TIMER_PERIODIC,TIME_MS,
                                            rrube_timer);
 }
 

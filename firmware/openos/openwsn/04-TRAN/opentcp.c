@@ -748,7 +748,7 @@ void tcp_change_state(uint8_t new_tcp_state) {
    } else {
       if (tcp_vars.timerStarted==FALSE) {
          tcp_vars.timerId = opentimers_start(TCP_TIMEOUT,
-                                             TIMER_ONESHOT,
+                                             TIMER_ONESHOT,TIME_MS,
                                              opentcp_timer_cb);
          tcp_vars.timerStarted=TRUE;
       }

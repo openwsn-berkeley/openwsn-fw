@@ -43,7 +43,7 @@ void rheli_init() {
    
    opencoap_register(&rheli_vars.desc);
    rheli_vars.timerId    = opentimers_start(1000,
-                                            TIMER_PERIODIC,
+                                            TIMER_PERIODIC,TIME_MS,
                                             rheli_timer);
 }
 

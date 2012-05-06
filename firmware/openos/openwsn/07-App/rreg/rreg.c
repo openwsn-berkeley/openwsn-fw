@@ -49,7 +49,7 @@ void rreg_init() {
    opencoap_register(&rreg_vars.desc);
    // register to the RD server every 30s
    rreg_vars.timerId    = opentimers_start(RREGPERIOD,
-                                          TIMER_PERIODIC,
+                                          TIMER_PERIODIC,TIME_MS,
                                           rreg_timer);
 }
 

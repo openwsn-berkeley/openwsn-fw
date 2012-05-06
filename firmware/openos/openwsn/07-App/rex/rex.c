@@ -51,7 +51,7 @@ void rex_init() {
    
    opencoap_register(&rex_vars.desc);
    rex_vars.timerId    = opentimers_start(REXPERIOD,
-                                                TIMER_PERIODIC,
+                                                TIMER_PERIODIC,TIME_MS,
                                                 rex_timer_cb);
 }
 
