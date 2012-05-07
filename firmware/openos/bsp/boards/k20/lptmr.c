@@ -61,9 +61,9 @@ void lptmr_init(uint8_t clock_source)
     LPTMR0_CSR =(  LPTMR_CSR_TCF_MASK   // Clear any pending interrupt
                  //| LPTMR_CSR_TIE_MASK   // LPT interrupt enabled
                  | LPTMR_CSR_TPS(0)     //TMR pin select
-                 |~LPTMR_CSR_TPP_MASK   //TMR Pin polarity
-                 |~LPTMR_CSR_TFC_MASK   // Timer Free running counter is reset whenever TMR counter equals compare
-                 |~LPTMR_CSR_TMS_MASK   //LPTMR as Timer
+                 |!LPTMR_CSR_TPP_MASK   //TMR Pin polarity
+                 |LPTMR_CSR_TFC_MASK   // Timer Free running counter is reset only on overflow ( not whenever TMR counter equals compare)
+                 |!LPTMR_CSR_TMS_MASK   //LPTMR as Timer
                 );
     //register interrupt
     //done hardcoded in the vector table in kinetis_sysinit.c

@@ -81,8 +81,8 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 
    temp_last_compare_value = bsp_timer_vars.last_compare_value;
 
-   //newCompareValue      =  bsp_timer_vars.last_compare_value+delayTicks;
-   newCompareValue      =  delayTicks;
+   newCompareValue      =  bsp_timer_vars.last_compare_value+delayTicks;
+   //newCompareValue      =  delayTicks;
    bsp_timer_vars.last_compare_value   =  newCompareValue;
 
    current_value=lptmr_get_current_value();
@@ -105,6 +105,11 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 void bsp_timer_cancel_schedule() {
 	lptmr_reset_compare();
 	lptmr_disable();
+}
+
+
+PORT_TIMER_WIDTH bsp_timer_get_currentValue(){
+	return lptmr_get_current_value();
 }
 
 //=========================== private =========================================

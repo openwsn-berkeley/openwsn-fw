@@ -65,14 +65,14 @@ void radiotimer_start(PORT_TIMER_WIDTH period) {
 //===== direct access
 
 PORT_TIMER_WIDTH radiotimer_getValue() {
-   return 0;
+	return opentimers_get_currentValue(radiotimer_vars.period_timer_id,TIME_TICS);
 }
 //period is in ms???
 
 void radiotimer_setPeriod(PORT_TIMER_WIDTH period) {
-	opentimers_stop(radiotimer_vars.period_timer_id);
+	//opentimers_stop(radiotimer_vars.period_timer_id);
 	radiotimer_vars.period=period;
-	radiotimer_vars.period_timer_id=opentimers_start(period,TIMER_ONESHOT,TIME_TICS,private_radiotimer_offset_cb);
+	radiotimer_vars.period_timer_id=opentimers_start(period,TIMER_ONESHOT,TIME_TICS,private_radiotimer_period_cb);
 }
 
 
@@ -85,7 +85,7 @@ PORT_TIMER_WIDTH radiotimer_getPeriod() {
 //===== compare
 
 void radiotimer_schedule(PORT_TIMER_WIDTH offset) {
-   radiotimer_vars.offset_timer_id=opentimers_start(offset,TIMER_ONESHOT,TIME_TICS,private_radiotimer_period_cb);	
+   radiotimer_vars.offset_timer_id=opentimers_start(offset,TIMER_ONESHOT,TIME_TICS,private_radiotimer_offset_cb);	
 }
 
 void radiotimer_cancel() {
@@ -104,9 +104,7 @@ if (radiotimer_vars.period_timer_id!=RADIO_TIMER_NOT_SET){
 //===== capture
 
 inline PORT_TIMER_WIDTH radiotimer_getCapturedTime() {
-	PORT_TIMER_WIDTH wi;
-	PORT_TIMER_WIDTH wa;
-	return wi;
+	return opentimers_get_currentValue(radiotimer_vars.period_timer_id,TIME_TICS);
 }
 
 //=========================== private =========================================
@@ -117,11 +115,11 @@ inline PORT_TIMER_WIDTH radiotimer_getCapturedTime() {
 void private_radiotimer_period_cb(void){
 	//call overflow c
 	radiotimer_vars.overflow_cb();
-	radiotimer_vars.period_timer_id=RADIO_TIMER_NOT_SET;//it is one shot. so declare it as not set
+	//radiotimer_vars.period_timer_id=RADIO_TIMER_NOT_SET;//it is one shot. so declare it as not set
 	
 }
 void private_radiotimer_offset_cb(void){
 	radiotimer_vars.compare_cb();
-	radiotimer_vars.offset_timer_id=RADIO_TIMER_NOT_SET;//it is one shot. so declare it as not set
+//	radiotimer_vars.offset_timer_id=RADIO_TIMER_NOT_SET;//it is one shot. so declare it as not set
 	
 }

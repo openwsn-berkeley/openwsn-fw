@@ -18,6 +18,8 @@
 
 #define TOO_MANY_TIMERS_ERROR     255
 
+#define opentimer_id_t uint8_t
+
 typedef void (*opentimers_cbt)(void);
 
 //=========================== typedef =========================================
@@ -33,7 +35,7 @@ typedef enum {
    TIME_TICS,
 }time_type_t;
 
-#define opentimer_id_t uint8_t
+
 
 typedef struct {
    uint32_t             period_ticks;       // total number of clock ticks
@@ -44,6 +46,7 @@ typedef struct {
    bool                 isrunning;          // is running?
    opentimers_cbt       callback;           // function to call when elapses
    bool                 hasExpired;         // whether the callback has to be called
+   PORT_TIMER_WIDTH     init_time;          // time when this timer was started (in tics of the counter)
 } opentimers_t;
 
 //=========================== prototypes ======================================
@@ -56,5 +59,7 @@ opentimer_id_t opentimers_start(uint32_t       duration,
 void           opentimers_setPeriod(opentimer_id_t id,time_type_t timetype, uint32_t       newPeriod);
 void           opentimers_stop(opentimer_id_t id);
 void           opentimers_restart(opentimer_id_t id);
+
+uint32_t       opentimers_get_currentValue(opentimer_id_t id,time_type_t typet);
 
 #endif
