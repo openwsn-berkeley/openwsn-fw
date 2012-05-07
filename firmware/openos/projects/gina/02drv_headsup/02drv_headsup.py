@@ -7,6 +7,9 @@ import Tkinter
 import math
 import winsound
 import time
+import os
+if os.name=='nt':
+   import _winreg as winreg
 
 class DataHandler(object):
     
@@ -143,7 +146,7 @@ class MoteHandler(threading.Thread):
     #======================== public ==========================================
     
     def run(self):
-        serialHandler = serial.Serial('COM36',baudrate=115200)
+        serialHandler = serial.Serial(self._findSerialPortsNames()[0],baudrate=115200)
         state         = "WAIT_HEADER"
         numdelimiter  = 0
         while True:
@@ -172,7 +175,7 @@ class MoteHandler(threading.Thread):
     
     #======================== helpers =========================================
     
-    def findSerialPortsNames():
+    def _findSerialPortsNames(self):
         serialport_names = []
         if (os.name=='nt' or os.name=='posix'):
             path = 'HARDWARE\\DEVICEMAP\\SERIALCOMM'
