@@ -29,6 +29,9 @@
     <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\02drv_headsup\02drv_headsup.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\02drv_opentimers\02drv_opentimers.ewp</path>
   </project>
   <project>
