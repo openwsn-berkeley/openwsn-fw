@@ -23,10 +23,10 @@
     <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\01bsp_timer\01bsp_timer.ewp</path>
+    <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>
+    <path>$WS_DIR$\01bsp_radiotimer\01bsp_radiotimer.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\02drv_headsup\02drv_headsup.ewp</path>
