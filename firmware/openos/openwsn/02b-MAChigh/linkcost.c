@@ -1,6 +1,5 @@
 #include "linkcost.h"
 
-
 //calculate link cost based on ETX.
 uint8_t linkcost_calcETX(uint8_t numTx, uint8_t numTxACK){
 
