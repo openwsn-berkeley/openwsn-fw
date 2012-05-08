@@ -28,6 +28,12 @@ int periph_clk_khz;
 void sysinit();
 //=========================== public ==========================================
 
+
+extern int mote_main(void);
+int main(void) {
+   return mote_main();
+}
+
 void board_init() {
 	uint8_t mcgmode=0;
 	//enable all port clocks.
@@ -110,9 +116,9 @@ void sysinit(){
 
 void board_sleep() {
 	uint8_t op_mode;
-	enter_wait();
+	//enter_wait();
 //    PORTA_PCR2 |= PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;//JTAG_TDO    
-//	enter_lls();
+	enter_wait();
 	op_mode = what_mcg_mode();
 	if(op_mode==PBE)
 	{

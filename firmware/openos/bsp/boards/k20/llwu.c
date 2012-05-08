@@ -243,19 +243,10 @@ void llwu_configure_filter(unsigned int wu_pin_num, unsigned char filter_en, uns
 *******************************************************************************/
 void llwu_isr(void)
 {
-  char  ch;
+//  char  ch;
 
-//  GPIOE_PSOR = 0x04000000;             // set Port E 26 indicate wakeup - set it in llwu_isr
-//  GPIOE_PCOR = 0x04000000;             // clear Port E 26 indicating sleep
-//  GPIOE_PSOR = 0x04000000;             // set Port E 26 indicate wakeup - set it in llwu_isr
-//  GPIOE_PCOR = 0x04000000;             // clear Port E 26 indicating  wakeup from sleep
-//   GPIOB_PSOR = 0x00080000;             // set Port B19
-//   GPIOB_PCOR = 0x00080000;             // clear Port B19
-//   GPIOB_PSOR = 0x00080000;             // set Port B19
-//   GPIOB_PCOR = 0x00080000;             // clear Port B19
-
-//  outsrs();
-//   printf("[LLWU ISR]\n");
+  
+  
    if (LLWU_F1 & LLWU_F1_WUF0_MASK) {
        LLWU_F1 |= LLWU_F1_WUF0_MASK;   // write one to clear the flag
 //       printf("\n[LLWU ISR]  ****WUF0 was set *****\r\n");

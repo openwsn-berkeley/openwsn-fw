@@ -25,6 +25,12 @@ extern void EINT3_IRQHandler(void);
 
 //=========================== public ==========================================
 
+
+extern int mote_main(void);
+int main(void) {
+   return mote_main();
+}
+
 void board_init() {
 
 	//===== radio pins
