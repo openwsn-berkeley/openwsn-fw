@@ -75,8 +75,7 @@ error_t rxl1_receive(OpenQueueEntry_t* msg,
          
       } else {
          //stop timer
-         ropentimers_stop(rxl1_vars.timerId);
-            
+         opentimers_stop(rxl1_vars.timerId);   
       }
       
       // reset packet payload
