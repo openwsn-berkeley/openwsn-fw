@@ -12,7 +12,6 @@ can use this project with any platform.
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
-#include "bsp_timer.h"
 
 //=========================== defines =========================================
 
@@ -62,15 +61,13 @@ void cb_radioTimerOverflows();
 void cb_radioTimerCompare();
 void cb_startFrame(uint16_t timestamp);
 void cb_endFrame(uint16_t timestamp);
-void cb_timer();
 
 //=========================== main ============================================
 
 /**
 \brief The program starts executing here.
 */
-int main(void)
-{  
+int mote_main(void) {
    uint8_t i;
    
    // clear local variables
@@ -90,12 +87,6 @@ int main(void)
    for (i=0;i<app_vars.packet_len;i++) {
       app_vars.packet[i] = i;
    }
-   
-   // start timer
-   timers_start(TIMER_ID,
-                TIMER_DURATION,
-                TIMER_PERIODIC,
-                cb_timer);
    
    // prepare radio
    radio_rfOn();
@@ -208,11 +199,4 @@ void cb_endFrame(uint16_t timestamp) {
    app_vars.flags |= APP_FLAG_END_FRAME;
    // update debug stats
    app_dbg.num_endFrame++;
-}
-
-void cb_timer() {
-   // set flag
-   app_vars.flags |= APP_FLAG_TIMER;
-   // update debug stats
-   app_dbg.num_timer++;
 }
