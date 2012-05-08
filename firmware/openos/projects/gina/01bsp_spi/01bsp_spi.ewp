@@ -1904,6 +1904,12 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\eui64.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\i2c.c</name>
     </file>
     <file>
