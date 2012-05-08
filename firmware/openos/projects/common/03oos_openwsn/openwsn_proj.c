@@ -17,9 +17,10 @@
 #include "idmanager.h"
 #include "openserial.h"
 
-void main(void) {
+int mote_main(void) {
    board_init();
    scheduler_init();
    openwsn_init();
    scheduler_start();
+   return 0; // this line should never be reached
 }
