@@ -18,18 +18,25 @@
 #include "eui64.h"
 
 // sensors
+/*
 #include "gyro.h"
 #include "large_range_accel.h"
 #include "magnetometer.h"
 #include "sensitive_accel_temperature.h"
 #include "ADC_Channel.h"
-/**/
+*/
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
+extern int mote_main(void);
+
 //=========================== public ==========================================
+
+int main(void) {
+   return mote_main();
+}
 
 void board_init() {
    uint8_t eui[8];
@@ -60,7 +67,7 @@ void board_init() {
    bsp_timer_init();
    radio_init();
    radiotimer_init();
-   ADC_init();
+   //ADC_init();
    
    // enable interrupts
    __bis_SR_register(GIE);
@@ -69,16 +76,16 @@ void board_init() {
    eui64_get(eui);
    if (eui[3]==0x09) {
      //first initialize them
-     gyro_init();
-     large_range_accel_init();
-     magnetometer_init();
-     sensitive_accel_temperature_init();
+     //gyro_init();
+     //large_range_accel_init();
+     //magnetometer_init();
+     //sensitive_accel_temperature_init();
      
      //then turn them off
-     gyro_disable();
-     large_range_accel_disable();
-     magnetometer_disable();
-     sensitive_accel_temperature_disable();
+     //gyro_disable();
+     //large_range_accel_disable();
+     //magnetometer_disable();
+     //sensitive_accel_temperature_disable();
    }
 }
 
