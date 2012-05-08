@@ -13,7 +13,7 @@ localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards'
                )
 
 source_files =  [
-                    '01bsp_timer.c',
+                    '01bsp_radiotimer.c',
                 ]
 if localEnv['PLATFORM']=='win32':
     localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc','win'),
@@ -30,9 +30,9 @@ elif localEnv['PLATFORM'] == 'posix':
     library_files = [   'libbsppc.a'
                     ]
                  
-bsp_timer = localEnv.Program(
-                    target  = '01bsp_timer',
+bsp_radiotimer = localEnv.Program(
+                    target  = '01bsp_radiotimer',
                     source  = source_files,
                     LIBS    = library_files,
                     )
-Alias('bsp_timer', bsp_timer)
+Alias('bsp_radiotimer', bsp_radiotimer)

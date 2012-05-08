@@ -21,7 +21,7 @@ SConscript('firmware/openos/projects/common/01bsp_radio/SConscript',
            exports     = {'env':env},
            )
 
-SConscript('firmware/openos/projects/common/01bsp_timer/SConscript',
+SConscript('firmware/openos/projects/common/01bsp_radiotimer/SConscript',
            exports     = {'env':env},
            )
 SConscript('firmware/openos/projects/common/01bsp_uart/SConscript',
