@@ -40,8 +40,7 @@ void cb_uartRxCb(uart_event_t ev);
 /**
 \brief The program starts executing here.
 */
-int main(void)
-{  
+int mote_main(void) {
    board_init();
    
    // setup UART
