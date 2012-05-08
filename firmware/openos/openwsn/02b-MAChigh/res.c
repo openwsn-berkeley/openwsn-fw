@@ -99,6 +99,7 @@ void task_resNotifSendDone() {
       // restart a random timer
       res_vars.periodMaintenance = 1700+(openrandom_get16b()&0xff);
       opentimers_setPeriod(res_vars.timerId,
+                           TIME_MS,
                            res_vars.periodMaintenance);
    } else {
       // send the rest up the stack

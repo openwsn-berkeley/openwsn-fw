@@ -101,6 +101,7 @@ void timers_rpl_fired() {
       //set a new random periodDIO
       icmpv6rpl_vars.periodDIO = 1700+(openrandom_get16b()&0xff);       // pseudo-random
       opentimers_setPeriod(icmpv6rpl_vars.timerId,
+                           TIME_MS,
                            icmpv6rpl_vars.periodDIO);
    }
 }
