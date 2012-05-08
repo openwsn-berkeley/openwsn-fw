@@ -57,7 +57,7 @@ void cb_uart_rx();
 /**
 \brief The program starts executing here.
 */
-int main(void) {
+int mote_main(void) {
    
    // clear local variables
    memset(&app_dbg, 0,sizeof(app_dbg_t) );
