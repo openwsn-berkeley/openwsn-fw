@@ -10,6 +10,7 @@ can use this project with any platform.
 
 #include "stdint.h"
 #include "stdio.h"
+#include "string.h"
 // bsp modules required
 #include "board.h"
 #include "uart.h"
@@ -22,10 +23,7 @@ uint8_t stringToSend[] = "Hello World!";
 //=========================== variables =======================================
 
 typedef struct {
-   uint8_t uart_rxBuf[10];
-   uint8_t uart_busyTx;
-   uint8_t uart_rxBytes;
-   uint8_t rxBytes[5];
+   uint8_t uart_lastTxByte;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -33,7 +31,7 @@ app_vars_t app_vars;
 //=========================== prototypes ======================================
 
 void cb_uartTxDone();
-void cb_uartRxCb(uart_event_t ev);
+void cb_uartRxCb();
 
 //=========================== main ============================================
 
@@ -43,45 +41,40 @@ void cb_uartRxCb(uart_event_t ev);
 int mote_main(void) {
    board_init();
    
+   // clear local variable
+   memset(&app_vars,0,sizeof(app_vars_t));
+   
    // setup UART
-   uart_txSetup(cb_uartTxDone);
-   uart_rxSetup(app_vars.uart_rxBuf,
-                sizeof(app_vars.uart_rxBuf),
-                5,
-                cb_uartRxCb);
-   uart_rxStart();
+   uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
+   uart_enableInterrupts();
    
-   uart_tx(stringToSend,sizeof(stringToSend));
-   
-   app_vars.uart_busyTx = 1;
-   while (app_vars.uart_busyTx==1) {
-      board_sleep();
-   }
+   // send stringToSend over UART
+   app_vars.uart_lastTxByte = 0;
+   uart_writeByte(stringToSend[app_vars.uart_lastTxByte]);
    
    while(1) {
-      // sleep until bytes received
-      app_vars.uart_rxBytes  = 0;
-      while (app_vars.uart_rxBytes==0) {
-         board_sleep();
-      }
-      // read bytes from bsp module
-      uart_readBytes(app_vars.rxBytes,sizeof(app_vars.rxBytes));
-      // toggle LED for debug
-      leds_sync_toggle();
+      board_sleep();
    }
 }
 
 //=========================== callbacks =======================================
 
 void cb_uartTxDone() {
-   app_vars.uart_busyTx      = 0;
+   app_vars.uart_lastTxByte++;
+   if (app_vars.uart_lastTxByte<sizeof(stringToSend)) {
+      uart_writeByte(stringToSend[app_vars.uart_lastTxByte]);
+   }
 }
 
-void cb_uartRxCb(uart_event_t ev) {
-   if (ev==UART_EVENT_THRES) {
-      leds_radio_toggle();
-      app_vars.uart_rxBytes  = 1;
-   } else {
-      leds_error_toggle();
-   }
+void cb_uartRxCb() {
+   uint8_t byte;
+   
+   // toggle LED
+   leds_debug_toggle();
+   
+   // read received byte
+   byte = uart_readByte();
+   
+   // echo that byte over serial
+   uart_writeByte(byte);
 }
