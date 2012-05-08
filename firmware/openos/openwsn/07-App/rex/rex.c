@@ -5,6 +5,7 @@
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
+#include "openrandom.h"
 #include "scheduler.h"
 #include "ADC_Channel.h"
 
