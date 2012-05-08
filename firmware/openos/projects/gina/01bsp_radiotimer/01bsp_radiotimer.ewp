@@ -643,7 +643,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_timer.d43</state>
+          <state>01bsp_radiotimer.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -837,7 +837,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_radio.a43</state>
+          <state>01bsp_radiotimer.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1874,7 +1874,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_timer\01bsp_timer.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</name>
     </file>
   </group>
   <group>
@@ -1902,6 +1902,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\eui64.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\i2c.c</name>
