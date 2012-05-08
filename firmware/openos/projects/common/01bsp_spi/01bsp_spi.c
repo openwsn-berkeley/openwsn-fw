@@ -29,7 +29,6 @@ int mote_main(void) {
    spi_tx_buffer[2]     =  0x00;                 // send a SNOP strobe just to get the reg value
    
    // retrieve radio manufacturer ID over SPI
-   while (1){
    spi_txrx(spi_tx_buffer,
          sizeof(spi_tx_buffer),
          SPI_BUFFER,
@@ -37,7 +36,6 @@ int mote_main(void) {
          sizeof(spi_rx_buffer),
          SPI_FIRST,
          SPI_LAST);
-   }
    
    // sleep
    while(1) {
