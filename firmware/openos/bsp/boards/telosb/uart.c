@@ -9,7 +9,6 @@
 #include "stdio.h"
 #include "string.h"
 #include "uart.h"
-#include "openserial.h"
 
 //=========================== defines =========================================
 
