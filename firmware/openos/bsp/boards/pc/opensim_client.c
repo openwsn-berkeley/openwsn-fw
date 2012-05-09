@@ -141,7 +141,8 @@ void opensim_client_waitForPacket(int* rxPacketType,
       opensim_client_abort();
    }
    
-   printf("[opensim_client] DEBUG: received %d\n",(int)opensim_client_vars.rxBuffer[0]);
+   printf("[opensim_client] DEBUG: received %d (%d bytes)\n",(int)opensim_client_vars.rxBuffer[0],
+                                                              retval-1);
    
    // copy packet type to rxPacketType
    *rxPacketType = opensim_client_vars.rxBuffer[0];

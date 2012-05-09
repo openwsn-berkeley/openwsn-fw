@@ -80,7 +80,7 @@ void radio_startTimer(PORT_TIMER_WIDTH period) {
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_startTimer,
-                                    requparams,
+                                    &requparams,
                                     sizeof(opensim_requ_radio_startTimer_t),
                                     0,
                                     0);
@@ -107,7 +107,7 @@ void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_setTimerPeriod,
-                                    requparams,
+                                    &requparams,
                                     sizeof(opensim_requ_radio_setTimerPeriod_t),
                                     0,
                                     0);
@@ -136,7 +136,7 @@ void radio_setFrequency(uint8_t frequency) {
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_setFrequency,
-                                    requparams,
+                                    &requparams,
                                     sizeof(opensim_requ_radio_setFrequency_t),
                                     0,
                                     0);
