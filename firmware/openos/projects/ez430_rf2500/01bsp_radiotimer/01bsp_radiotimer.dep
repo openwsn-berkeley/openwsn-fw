@@ -6,6 +6,32 @@
   <configuration>
     <name>Debug</name>
     <outputs>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board_info.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdio.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\i2c.r43</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\xencoding_limits.h</file>
+      <file>$PROJ_DIR$\..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</file>
+      <file>$TOOLKIT_DIR$\lib\dlib\dl430fn.r43</file>
+      <file>$TOOLKIT_DIR$\lib\dlib\dl430fn.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\yvals.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdint.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\bsp_timer.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\eui64.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\board.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\radiotimer.pbi</file>
+      <file>$PROJ_DIR$\Debug\Exe\01bsp_radiotimer.d43</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\spi.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Threads.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Product.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\i2c.pbi</file>
+      <file>$TOOLKIT_DIR$\config\lnk430F2274.xcl</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Defaults.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\radiotimer.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart.r43</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ystdio.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\01bsp_radiotimer.r43</file>
       <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\bsp_timer.c</file>
       <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\debugpins.c</file>
       <file>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</file>
@@ -25,14 +51,7 @@
       <file>$PROJ_DIR$\Debug\Obj\01bsp_radiotimer.pbi</file>
       <file>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</file>
       <file>$PROJ_DIR$\Debug\Obj\01bsp_radiotimer.pbd</file>
-      <file>$TOOLKIT_DIR$\inc\dlib\c\ysizet.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\board.r43</file>
-      <file>$PROJ_DIR$\Debug\Obj\bsp_timer.pbi</file>
-      <file>$PROJ_DIR$\Debug\Obj\debugpins.pbi</file>
       <file>$PROJ_DIR$\Debug\Obj\debugpins.r43</file>
-      <file>$TOOLKIT_DIR$\inc\dlib\c\stdio.h</file>
-      <file>$TOOLKIT_DIR$\inc\dlib\c\xencoding_limits.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\i2c.r43</file>
       <file>$PROJ_DIR$\Debug\Obj\leds.r43</file>
       <file>$PROJ_DIR$\Debug\Obj\leds.pbi</file>
       <file>$PROJ_DIR$\Debug\Obj\eui64.pbi</file>
@@ -42,51 +61,96 @@
       <file>$TOOLKIT_DIR$\inc\io430.h</file>
       <file>$TOOLKIT_DIR$\inc\dlib\c\ycheck.h</file>
       <file>$TOOLKIT_DIR$\inc\io430x22x4.h</file>
-      <file>$TOOLKIT_DIR$\lib\dlib\dl430fn.r43</file>
-      <file>$TOOLKIT_DIR$\lib\dlib\dl430fn.h</file>
-      <file>$TOOLKIT_DIR$\inc\dlib\c\yvals.h</file>
-      <file>$TOOLKIT_DIR$\inc\dlib\c\stdint.h</file>
-      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board_info.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\eui64.r43</file>
-      <file>$PROJ_DIR$\Debug\Obj\bsp_timer.r43</file>
-      <file>$PROJ_DIR$\Debug\Obj\board.pbi</file>
-      <file>$PROJ_DIR$\Debug\Obj\radiotimer.pbi</file>
-      <file>$PROJ_DIR$\Debug\Exe\01bsp_radiotimer.d43</file>
-      <file>$PROJ_DIR$\Debug\Obj\uart.pbi</file>
-      <file>$PROJ_DIR$\Debug\Obj\spi.pbi</file>
-      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Threads.h</file>
-      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Product.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\i2c.pbi</file>
-      <file>$TOOLKIT_DIR$\config\lnk430F2274.xcl</file>
-      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Defaults.h</file>
-      <file>$PROJ_DIR$\Debug\Obj\radiotimer.r43</file>
-      <file>$PROJ_DIR$\Debug\Obj\uart.r43</file>
-      <file>$TOOLKIT_DIR$\inc\dlib\c\ystdio.h</file>
-      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board.c</file>
-      <file>$PROJ_DIR$\..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</file>
-      <file>$PROJ_DIR$\Debug\Obj\01bsp_radiotimer.r43</file>
       <file>$PROJ_DIR$\..\..\..\bsp\boards\board.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\debugpins.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\bsp_timer.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\board.r43</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ysizet.h</file>
     </outputs>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\bsp_timer.c</name>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 14</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board.c</name>
       <outputs>
         <tool>
           <name>ICC430</name>
-          <file> 42</file>
+          <file> 58</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 21</file>
+          <file> 12</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>ICC430</name>
-          <file> 33 35 31 32 34 38 52 37 49 25 48 19 2 39 40 59</file>
+          <file> 52 54 50 55 1 9 53 8 21 7 18 4 17 30 36 43 41 34 28 37 38</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 33 35 31 32 34 38 52 49 25 48 19 40 39</file>
+          <file> 52 54 50 55 1 9 53 8 21 18 4 17 30 36 43 41 34 28 37 38</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 25</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 42</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 9 53 8 21 7 18 4 17 51 59 55 1 52 54 50 30 38</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 9 53 8 21 18 4 17 51 59 55 1 52 54 50 30 38</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Exe\01bsp_radiotimer.d43</name>
+      <inputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 20 25 58 10 45 11 3 46 22 49 23 6</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\bsp_timer.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 10</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 57</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 52 54 50 51 53 8 21 7 18 4 17 59 28 9 1 55</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 52 54 50 51 53 8 21 18 4 17 59 28 9 1 55</file>
         </tool>
       </inputs>
     </file>
@@ -95,21 +159,21 @@
       <outputs>
         <tool>
           <name>ICC430</name>
-          <file> 23</file>
+          <file> 45</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 22</file>
+          <file> 56</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>ICC430</name>
-          <file> 33 35 31 4</file>
+          <file> 52 54 50 30</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 33 35 31</file>
+          <file> 52 54 50 30</file>
         </tool>
       </inputs>
     </file>
@@ -118,21 +182,21 @@
       <outputs>
         <tool>
           <name>ICC430</name>
-          <file> 41</file>
+          <file> 11</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 29</file>
+          <file> 48</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>ICC430</name>
-          <file> 32 34 38 52 37 49 25 48 19 6 39</file>
+          <file> 51 53 8 21 7 18 4 17 59 32 9</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 32 34 38 52 49 25 48 19</file>
+          <file> 51 53 8 21 18 4 17 59 32 9</file>
         </tool>
       </inputs>
     </file>
@@ -141,21 +205,21 @@
       <outputs>
         <tool>
           <name>ICC430</name>
-          <file> 26</file>
+          <file> 3</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 50</file>
+          <file> 19</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>ICC430</name>
-          <file> 33 35 31 8 39 34 38 52 37 49 25 48</file>
+          <file> 52 54 50 34 9 53 8 21 7 18 4 17</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 33 35 31</file>
+          <file> 52 54 50 34 9 53 8 21 18 4 17</file>
         </tool>
       </inputs>
     </file>
@@ -164,53 +228,7 @@
       <outputs>
         <tool>
           <name>ICC430</name>
-          <file> 27</file>
-        </tool>
-        <tool>
-          <name>BICOMP</name>
-          <file> 28</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>ICC430</name>
-          <file> 33 35 31 39 34 38 52 37 49 25 48 10</file>
-        </tool>
-        <tool>
-          <name>BICOMP</name>
-          <file> 33 35 31 39 34 38 52 49 25 48</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\radiotimer.c</name>
-      <outputs>
-        <tool>
-          <name>ICC430</name>
-          <file> 53</file>
-        </tool>
-        <tool>
-          <name>BICOMP</name>
-          <file> 44</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>ICC430</name>
-          <file> 33 35 31 24 34 38 52 37 49 25 48 19 55 32 12 39 59 40</file>
-        </tool>
-        <tool>
-          <name>BICOMP</name>
-          <file> 33 35 31 24 34 38 52 49 25 48 19 55 32</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\spi.c</name>
-      <outputs>
-        <tool>
-          <name>ICC430</name>
-          <file> 30</file>
+          <file> 46</file>
         </tool>
         <tool>
           <name>BICOMP</name>
@@ -220,93 +238,43 @@
       <inputs>
         <tool>
           <name>ICC430</name>
-          <file> 33 35 31 32 34 38 52 37 49 25 48 19 24 55 39 15</file>
+          <file> 52 54 50 9 53 8 21 7 18 4 17 36</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 33 35 31 32 34 38 52 49 25 48 19 24 55 39</file>
+          <file> 52 54 50 9 53 8 21 18 4 17 36</file>
         </tool>
       </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\uart.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\radiotimer.c</name>
       <outputs>
         <tool>
           <name>ICC430</name>
-          <file> 54</file>
+          <file> 22</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 46</file>
+          <file> 13</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
           <name>ICC430</name>
-          <file> 33 35 31 39 34 38 52 37 49 25 48 24 19 55 32 17</file>
+          <file> 52 54 50 2 53 8 21 7 18 4 17 59 24 51 38 9 55 1</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 33 35 31 39 34 38 52 49 25 48 24 19 55 32</file>
+          <file> 52 54 50 2 53 8 21 18 4 17 59 24 51 38 9 55 1</file>
         </tool>
       </inputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\Debug\Obj\01bsp_radiotimer.pbd</name>
-      <inputs>
-        <tool>
-          <name>BILINK</name>
-          <file> 16 43 21 22 29 50 28 44 47 46</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\Debug\Exe\01bsp_radiotimer.d43</name>
-      <inputs>
-        <tool>
-          <name>XLINK</name>
-          <file> 51 58 20 42 23 41 26 27 53 30 54 36</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>[ROOT_NODE]</name>
-      <outputs>
-        <tool>
-          <name>XLINK</name>
-          <file> 45</file>
-        </tool>
-      </outputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\spi.c</name>
       <outputs>
         <tool>
           <name>ICC430</name>
-          <file> 20</file>
-        </tool>
-        <tool>
-          <name>BICOMP</name>
-          <file> 43</file>
-        </tool>
-      </outputs>
-      <inputs>
-        <tool>
-          <name>ICC430</name>
-          <file> 33 35 31 59 40 39 34 38 52 37 49 25 48 4 10 17 15 8 2 11 12</file>
-        </tool>
-        <tool>
-          <name>BICOMP</name>
-          <file> 33 35 31</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</name>
-      <outputs>
-        <tool>
-          <name>ICC430</name>
-          <file> 58</file>
+          <file> 49</file>
         </tool>
         <tool>
           <name>BICOMP</name>
@@ -316,14 +284,54 @@
       <inputs>
         <tool>
           <name>ICC430</name>
-          <file> 39 34 38 52 37 49 25 48 32 19 59 40 33 35 31 4 12</file>
+          <file> 52 54 50 51 53 8 21 7 18 4 17 59 2 24 9 41</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 39 34 38 52 49 25 48 32 19</file>
+          <file> 52 54 50 51 53 8 21 18 4 17 59 2 24 9 41</file>
         </tool>
       </inputs>
     </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\uart.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 15</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 52 54 50 9 53 8 21 7 18 4 17 2 59 24 51 43</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 52 54 50 9 53 8 21 18 4 17 2 59 24 51 43</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Obj\01bsp_radiotimer.pbd</name>
+      <inputs>
+        <tool>
+          <name>BILINK</name>
+          <file> 42 12 57 56 48 19 47 13 16 15</file>
+        </tool>
+      </inputs>
+    </file>
+    <forcedrebuild>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board.c</name>
+      <tool>ICC430</tool>
+    </forcedrebuild>
+    <forcedrebuild>
+      <name>$PROJ_DIR$\..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</name>
+      <tool>ICC430</tool>
+    </forcedrebuild>
     <forcedrebuild>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\bsp_timer.c</name>
       <tool>ICC430</tool>
@@ -354,14 +362,6 @@
     </forcedrebuild>
     <forcedrebuild>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\uart.c</name>
-      <tool>ICC430</tool>
-    </forcedrebuild>
-    <forcedrebuild>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board.c</name>
-      <tool>ICC430</tool>
-    </forcedrebuild>
-    <forcedrebuild>
-      <name>$PROJ_DIR$\..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</name>
       <tool>ICC430</tool>
     </forcedrebuild>
   </configuration>
