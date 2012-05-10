@@ -27,6 +27,9 @@ SConscript('firmware/openos/drivers/common/SConscript',
 
 #===== projects
 # bsp
+SConscript('firmware/openos/projects/common/01bsp_bsp_timer/SConscript',
+           exports     = {'env':env},
+           )
 SConscript('firmware/openos/projects/common/01bsp_leds/SConscript',
            exports     = {'env':env},
            )
