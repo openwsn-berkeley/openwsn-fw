@@ -2,7 +2,6 @@
 \brief eZ430-RF2500-specific definition of the "board" bsp module.
 
 \author Chuang Qian <cqian@berkeley.edu>, April 2012.
-
 */
 
 #include "io430.h"
@@ -16,17 +15,16 @@
 #include "radio.h"
 #include "radiotimer.h"
 
-/*
-// sensors
-#include "gyro.h"
-#include "large_range_accel.h"
-#include "magnetometer.h"
-#include "sensitive_accel_temperature.h"
-*/
-
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
+
+//=========================== main ============================================
+
+extern int mote_main(void);
+int main(void) {
+   return mote_main();
+}
 
 //=========================== public ==========================================
 
