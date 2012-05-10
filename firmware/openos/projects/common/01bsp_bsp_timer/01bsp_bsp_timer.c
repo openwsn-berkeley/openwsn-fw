@@ -11,6 +11,7 @@ can use this project with any platform.
 #include "string.h"
 #include "board.h"
 #include "debugpins.h"
+#include "leds.h"
 #include "bsp_timer.h"
 
 //=========================== defines =========================================
@@ -50,6 +51,9 @@ int mote_main(void)
 void cb_compare() {
    // toggle pin
    debugpins_fsm_toggle();
+   
+   // toggle led
+   leds_error_toggle();
    
    // increment counter
    app_vars.num_compare++;
