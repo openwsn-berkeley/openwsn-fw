@@ -1,7 +1,7 @@
 /**
 \brief eZ430-RF2500-specific definition of the "board" bsp module.
 
-\author Chuang Qian <cqian@berkeley.edu>, April 2012.
+\author Chuang Qian <cqian@berkeley.edu>, May 2012.
 */
 
 #include "io430.h"
