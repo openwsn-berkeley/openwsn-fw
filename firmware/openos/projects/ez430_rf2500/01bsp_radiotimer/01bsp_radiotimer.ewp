@@ -317,9 +317,9 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>D:\D files\research\openos\bsp\boards</state>
-          <state>D:\D files\research\openos\bsp\boards\ez430_rf2500</state>
-          <state>D:\D files\research\openos\bsp\chips</state>
+          <state>..\..\..\bsp\boards</state>
+          <state>..\..\..\bsp\boards\ez430_rf2500</state>
+          <state>..\..\..\bsp\chips</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1888,6 +1888,9 @@
   </configuration>
   <group>
     <name>application</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</name>
+    </file>
   </group>
   <group>
     <name>bsp</name>
