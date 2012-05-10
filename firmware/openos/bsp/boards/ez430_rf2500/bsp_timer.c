@@ -122,6 +122,15 @@ void bsp_timer_cancel_schedule() {
    TBCCTL0             &= ~CCIE;
 }
 
+/**
+\brief Return the current value of the timer's counter.
+
+\returns The current value of the timer's counter.
+*/
+PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
+   return TBR;
+}
+
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================

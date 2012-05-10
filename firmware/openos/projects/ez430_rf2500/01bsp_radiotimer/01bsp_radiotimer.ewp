@@ -317,9 +317,9 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>..\..\..\bsp\boards</state>
-          <state>..\..\..\bsp\boards\ez430_rf2500</state>
-          <state>..\..\..\bsp\chips</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
