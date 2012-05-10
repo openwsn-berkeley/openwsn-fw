@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>2894486905</fileChecksum>
+  <configuration>
+    <name>Debug</name>
+    <outputs>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\board.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board.c</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdio.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ystdio.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ycheck.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\yvals.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\string.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Defaults.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ysizet.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Product.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\xencoding_limits.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdint.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Threads.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\debugpins.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\bsp_timer.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\board.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\i2c.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\board.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\eui64.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\i2c.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart.r43</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board_info.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\bsp_timer.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\debugpins.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\eui64.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\i2c.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\leds.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\radiotimer.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\spi.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\uart.c</file>
+      <file>$PROJ_DIR$\Debug\Obj\debugpins.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\eui64.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\leds.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\radiotimer.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\spi.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\leds.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\bsp_timer.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\spi.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\radiotimer.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\main.r43</file>
+      <file>$TOOLKIT_DIR$\inc\io430.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\01bsp_debugpins.pbd</file>
+      <file>$TOOLKIT_DIR$\lib\dlib\dl430fn.h</file>
+      <file>$TOOLKIT_DIR$\inc\io430x22x4.h</file>
+      <file>$TOOLKIT_DIR$\config\lnk430F2274.xcl</file>
+      <file>$PROJ_DIR$\main.c</file>
+      <file>$PROJ_DIR$\Debug\Exe\01bsp_debugpins.d43</file>
+      <file>$PROJ_DIR$\Debug\Obj\main.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\intrinsics.h</file>
+      <file>$TOOLKIT_DIR$\lib\dlib\dl430fn.r43</file>
+      <file>$TOOLKIT_DIR$\inc\io430x14x.h</file>
+    </outputs>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 15</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 17</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50 53 58 0 21 11 4 5 7 9 10 12 24 30 37 36 28 22 32 33</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 50 53 58 0 21 11 4 5 7 52 9 10 12 24 30 37 36 28 22 32 33</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 56</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\bsp_timer.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 46</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 14</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50 53 58 6 4 5 7 9 10 12 8 22 11 21 0</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 50 53 58 6 4 5 7 52 9 10 12 8 22 11 21 0</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\debugpins.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 13</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 39</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50 53 58 24</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 50 53 58 24</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\eui64.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 18</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 40</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 6 4 5 7 9 10 12 8 26 11</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 6 4 5 7 52 9 10 12 8 26 11</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\i2c.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 19</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 16</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50 53 58 28 11 4 5 7 9 10 12</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 50 53 58 28 11 4 5 7 52 9 10 12</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\leds.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 45</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 41</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50 53 58 11 4 5 7 9 10 12 30</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 50 53 58 11 4 5 7 52 9 10 12 30</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\radiotimer.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 42</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 48</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50 53 58 2 4 5 7 9 10 12 8 3 6 33 11</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 50 53 58 2 4 5 7 52 9 10 12 8 3 6 33 11</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\spi.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 44</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 47</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50 53 58 6 4 5 7 9 10 12 8 2 3 11 36</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 50 53 58 6 4 5 7 52 9 10 12 8 2 3 11 36</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\uart.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 43</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 20</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50 53 58 11 4 5 7 9 10 12 2 8 3 6 37</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 50 53 58 11 4 5 7 52 9 10 12 2 8 3 6 37</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Obj\01bsp_debugpins.pbd</name>
+      <inputs>
+        <tool>
+          <name>BILINK</name>
+          <file> 15 46 13 18 19 45 42 44 43</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\main.c</name>
+      <outputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 57</file>
+        </tool>
+        <tool>
+          <name>ICC430</name>
+          <file> 49</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 50 60 58</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Exe\01bsp_debugpins.d43</name>
+      <inputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 54 17 14 39 40 16 41 48 47 20 59</file>
+        </tool>
+      </inputs>
+    </file>
+    <forcedrebuild>
+      <name>[MULTI_TOOL]</name>
+      <tool>XLINK</tool>
+    </forcedrebuild>
+  </configuration>
+  <configuration>
+    <name>Release</name>
+    <outputs/>
+    <forcedrebuild>
+      <name>[MULTI_TOOL]</name>
+      <tool>XLINK</tool>
+    </forcedrebuild>
+  </configuration>
+</project>
+
+
