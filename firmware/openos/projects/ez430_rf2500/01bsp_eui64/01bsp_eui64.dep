@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>4123523985</fileChecksum>
+  <configuration>
+    <name>Debug</name>
+    <outputs>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\board.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board_info.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\bsp_timer.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\debugpins.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\eui64.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\i2c.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\leds.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\radiotimer.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\spi.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\uart.c</file>
+    </outputs>
+    <forcedrebuild>
+      <name>[MULTI_TOOL]</name>
+      <tool>XLINK</tool>
+    </forcedrebuild>
+  </configuration>
+  <configuration>
+    <name>Release</name>
+    <outputs/>
+    <forcedrebuild>
+      <name>[MULTI_TOOL]</name>
+      <tool>XLINK</tool>
+    </forcedrebuild>
+  </configuration>
+</project>
+
+
