@@ -11,6 +11,7 @@ can use this project with any platform.
 #include "string.h"
 #include "board.h"
 #include "debugpins.h"
+#include "leds.h"
 #include "radiotimer.h"
 
 //=========================== defines =========================================
@@ -55,6 +56,9 @@ void cb_overflow() {
    // toggle pin
    debugpins_frame_toggle();
    
+   // toggle sync led
+   leds_sync_toggle();
+   
    // increment counter
    app_vars.num_overflow++;
 }
@@ -62,6 +66,9 @@ void cb_overflow() {
 void cb_compare() {
    // toggle pin
    debugpins_fsm_toggle();
+   
+   // toggle debug led
+   leds_debug_toggle();
    
    // increment counter
    app_vars.num_compare++;

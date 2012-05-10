@@ -52,7 +52,7 @@ void cb_compare() {
    // toggle pin
    debugpins_fsm_toggle();
    
-   // toggle led
+   // toggle error led
    leds_error_toggle();
    
    // increment counter
