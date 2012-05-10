@@ -716,7 +716,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F149.xcl</state>
+          <state>$TOOLKIT_DIR$\CONFIG\lnk430F2274.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -844,7 +844,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>templproj.a43</state>
+          <state>01bsp_uart.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1889,7 +1889,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\01bsp_uart.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_uart\01bsp_uart.c</name>
     </file>
   </group>
   <group>
@@ -1922,6 +1922,9 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\i2c.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\leds.c</name>
     </file>
     <file>
@@ -1935,6 +1938,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\spi.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\uart.c</name>
