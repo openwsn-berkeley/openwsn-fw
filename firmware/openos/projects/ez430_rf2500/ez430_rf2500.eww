@@ -2,9 +2,6 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\01bsp_board\01bsp_board.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\01bsp_debugpins\01bsp_debugpins.ewp</path>
   </project>
   <project>
