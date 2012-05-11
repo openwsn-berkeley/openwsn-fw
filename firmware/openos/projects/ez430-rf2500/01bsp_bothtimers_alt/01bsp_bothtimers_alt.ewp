@@ -651,7 +651,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_bsp_timer_alt.d43</state>
+          <state>01bsp_bothtimers_alt.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -1890,7 +1890,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_bsp_timer\01bsp_bsp_timer.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_bothtimers\01bsp_bothtimers.c</name>
     </file>
   </group>
   <group>
