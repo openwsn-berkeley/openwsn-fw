@@ -318,7 +318,7 @@
         <option>
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$\..\..\..\bsp\boards</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips</state>
         </option>
         <option>
@@ -1895,37 +1895,34 @@
   <group>
     <name>bsp</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\board.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\board_info.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\bsp_timer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\bsp_timer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\debugpins.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\debugpins.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\eui64.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\eui64.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\i2c.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\leds.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\leds.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
@@ -1934,16 +1931,16 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\radiotimer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\radiotimer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\spi.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\spi.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\uart.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430_rf2500\uart.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
