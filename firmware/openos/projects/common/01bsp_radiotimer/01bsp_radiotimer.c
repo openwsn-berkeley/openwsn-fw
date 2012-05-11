@@ -57,7 +57,7 @@ void cb_overflow() {
    debugpins_frame_toggle();
    
    // toggle sync led
-   leds_sync_toggle();
+   leds_error_toggle();
    
    // increment counter
    app_vars.num_overflow++;
@@ -68,7 +68,7 @@ void cb_compare() {
    debugpins_fsm_toggle();
    
    // toggle debug led
-   leds_debug_toggle();
+   leds_radio_toggle();
    
    // increment counter
    app_vars.num_compare++;
