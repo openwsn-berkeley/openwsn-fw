@@ -650,7 +650,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_bsp_timer.d43</state>
+          <state>01bsp_bsp_timer_alt.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -844,7 +844,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_bsp_timer.a43</state>
+          <state>01bsp_bsp_timer_alt.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1894,6 +1894,24 @@
   </group>
   <group>
     <name>bsp</name>
+    <group>
+      <name>alt_timers</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\alt_timers\bsp_timer.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\alt_timers\lptmr.c</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\alt_timers\lptmr.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\alt_timers\radiotimer.c</name>
+      </file>
+    </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\board.c</name>
     </file>
@@ -1902,9 +1920,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\board_info.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\bsp_timer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
@@ -1935,9 +1950,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\radiotimer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>

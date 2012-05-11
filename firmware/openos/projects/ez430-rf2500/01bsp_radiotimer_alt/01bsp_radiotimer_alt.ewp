@@ -1906,6 +1906,9 @@
         </excluded>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\alt_timers\lptmr.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\alt_timers\radiotimer.c</name>
       </file>
     </group>
