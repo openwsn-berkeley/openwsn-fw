@@ -67,7 +67,7 @@ uint16_t radiotimer_getPeriod() {
 //===== compare
 
 void radiotimer_schedule(uint16_t offset) {
-   lptimer_radiotimer_getPeriod(offset);
+   lptimer_radiotimer_schedule(offset);
 }
 
 void radiotimer_cancel() {
