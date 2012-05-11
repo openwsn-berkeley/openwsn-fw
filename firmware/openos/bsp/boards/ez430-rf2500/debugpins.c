@@ -18,7 +18,7 @@
 
 void debugpins_init() {
    P2DIR |=  0x01;      // frame
-   P2DIR |=  0x02 ;      // slot
+   P2DIR |=  0x02;      // slot
    P2DIR |=  0x04;      // fsm
    P2DIR |=  0x08;      // task
    P2DIR |=  0x10;      // isr
@@ -82,11 +82,11 @@ void debugpins_isr_set() {
 
 // P4.3
 void debugpins_radio_toggle() {
-   P4OUT ^=  0x20;
+   P4OUT ^=  0x08;
 }
 void debugpins_radio_clr() {
-   P4OUT &= ~0x20;
+   P4OUT &= ~0x08;
 }
 void debugpins_radio_set() {
-   P4OUT |=  0x20;
+   P4OUT |=  0x08;
 }

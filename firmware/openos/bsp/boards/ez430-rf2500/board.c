@@ -10,7 +10,7 @@
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
-#include "i2c.h"
+//#include "i2c.h"
 #include "bsp_timer.h"
 #include "radio.h"
 #include "radiotimer.h"
@@ -41,12 +41,12 @@ void board_init() {
    //P4OUT  &= ~0x80;                              // set low
    //P4DIR  |=  0x80;                              // configure as output
    
+   
    // initialize bsp modules
    debugpins_init();
    leds_init();
    uart_init();
    spi_init();
-   i2c_init();
    bsp_timer_init();
    //radio_init();
    radiotimer_init();
@@ -73,10 +73,11 @@ void board_sleep() {
 __interrupt void USCIAB0TX_ISR(void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   if ( ((UC0IFG & UCB0TXIFG) && (UC0IE & UCB0TXIE)) ||
+/*   if ( ((UC0IFG & UCB0TXIFG) && (UC0IE & UCB0TXIE)) ||  // No I2c on eZ430-rf2500
         ((UC0IFG & UCB0RXIFG) && (UC0IE & UCB0RXIE)) ) {
-      isr_i2c_tx(1);                             // I2C: TX
+      isr_i2c_tx(1);                             // I2C: TX  
    }
+*/
    if ( (UC0IFG & UCA0TXIFG) && (UC0IE & UCA0TXIE) ){
       if (uart_isr_tx()==1) {                    // UART: TX
          __bic_SR_register_on_exit(CPUOFF);
@@ -89,10 +90,11 @@ __interrupt void USCIAB0TX_ISR(void) {
 __interrupt void USCIAB0RX_ISR(void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   if ( ((UC0IFG & UCB0RXIFG) && (UC0IE & UCB0RXIE)) ||
+/*   if ( ((UC0IFG & UCB0RXIFG) && (UC0IE & UCB0RXIE)) || // No I2c on eZ430-rf2500
          (UCB0STAT & UCNACKIFG) ) {
       isr_i2c_rx(1);                             // I2C: RX, bus 1
    }
+*/
    if ( (UC0IFG & UCA0RXIFG) && (UC0IE & UCA0RXIE) ){
       if (uart_isr_rx()==1) {                    // UART: RX
          __bic_SR_register_on_exit(CPUOFF);
