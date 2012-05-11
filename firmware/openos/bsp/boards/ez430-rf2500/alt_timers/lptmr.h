@@ -1,48 +1,45 @@
-#ifndef __LPTMR_H__
-#define __LPTMR_H__
+/**
+\brief A BSP timer module which abstracts away the "bsp_timer" and "radiotimer"
+       modules behind a single timer.
 
-#include <board_info.h>
-/********************************************************************/
-/* Miscellaneous defined */
+\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2012.
+*/
 
-#define LPTMR_USE_IRCLK 0 
-#define LPTMR_USE_LPOCLK 1
-#define LPTMR_USE_ERCLK32 2
-#define LPTMR_USE_OSCERCLK 3
+#ifndef __LPTMR_H
+#define __LPTMR_H
 
+#include "bsp_timer.h"
+#include "radiotimer.h"
 
-typedef uint8_t (*lptmr_cbt)(void);
+//=========================== define ==========================================
 
-typedef enum{
-	LPTMR_BSP_COMPARE = 0,
-	LPTMR_RADIO_OVERFLOW,
-	LPTMR_RADIO_COMPARE,
-	LPTMR_BSP_MAX	
-}lptmr_source_t;
+//=========================== typedef =========================================
 
+//=========================== variables =======================================
 
-/* Function prototypes */
+//=========================== prototypes ======================================
 
-extern void lptmr_isr(void);
+// admin
+void               lptimer_init();
+// from bsp_timer
+void               lptimer_bsp_timer_set_callback(bsp_timer_cbt cb);
+void               lptimer_bsp_timer_reset();
+void               lptimer_bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks);
+void               lptimer_bsp_timer_cancel_schedule();
+PORT_TIMER_WIDTH   lptimer_bsp_timer_get_currentValue();
+// from radiotimer
+void               lptimer_radiotimer_setOverflowCb(radiotimer_compare_cbt cb);
+void               lptimer_radiotimer_setCompareCb(radiotimer_compare_cbt cb);
+void               lptimer_radiotimer_setStartFrameCb(radiotimer_capture_cbt cb);
+void               lptimer_radiotimer_setEndFrameCb(radiotimer_capture_cbt cb);
+void               lptimer_radiotimer_start(uint16_t period);
+uint16_t           lptimer_radiotimer_getValue();
+void               lptimer_radiotimer_setPeriod(uint16_t period);
+uint16_t           lptimer_radiotimer_getPeriod();
+void               lptimer_radiotimer_schedule(uint16_t offset);
+void               lptimer_radiotimer_cancel();
+uint16_t           lptimer_radiotimer_getCapturedTime();
 
-void lptmr_init(uint8_t clock_source);
-void lptmr_set_isr_callback (lptmr_source_t type,lptmr_cbt cb);
-
-void lptmr_disable();
-PORT_TIMER_WIDTH lptmr_get_current_value();
-void lptmr_enable();
-void lptmr_reset_counter();
-
-void lptmr_set_compare_bsp(PORT_TIMER_WIDTH count);
-void lptmr_set_compare_radio(PORT_TIMER_WIDTH count);
-void lptmr_set_overflow_radio(PORT_TIMER_WIDTH count);
-
-
-void lptmr_reset_compare_bsp();
-void lptmr_reset_compare_radio();
-void lptmr_reset_overflow_radio();
-/********************************************************************/
-
-#endif /* __LPTMR_H__ */
+#endif
 
 

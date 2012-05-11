@@ -317,6 +317,7 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
+          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips</state>
@@ -1901,9 +1902,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\alt_timers\lptmr.c</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\alt_timers\lptmr.h</name>
