@@ -8,9 +8,6 @@
     <path>$WS_DIR$\01bsp_eui64\01bsp_eui64.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\01bsp_i2c\01bsp_i2c.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
   </project>
   <project>
@@ -20,10 +17,10 @@
     <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\02drv_opentimers\02drv_opentimers.ewp</path>
+    <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
+    <path>$WS_DIR$\02drv_opentimers\02drv_opentimers.ewp</path>
   </project>
   <batchBuild/>
 </workspace>
