@@ -17,10 +17,10 @@
     <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\02drv_opentimers\02drv_opentimers.ewp</path>
+    <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
+    <path>$WS_DIR$\02drv_opentimers\02drv_opentimers.ewp</path>
   </project>
   <batchBuild/>
 </workspace>
