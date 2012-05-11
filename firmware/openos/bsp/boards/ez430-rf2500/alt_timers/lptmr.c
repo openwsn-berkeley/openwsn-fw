@@ -46,6 +46,8 @@ typedef struct {
    // radiotimers-specific variables
    uint16_t                   radiotimer_period;
    uint16_t                   radiotimer_compare_offset;
+   // bsp-timer-specific variables
+   uint16_t                   bsp_total;//total time of the scheduled bsp timer (relative value)
 } lptmr_vars_t;
 
 lptmr_vars_t lptmr_vars;
@@ -82,11 +84,27 @@ void lptimer_bsp_timer_set_callback(bsp_timer_cbt cb) {
    lptmr_vars.callback[LPTMR_SRC_BSP_TIMER] = cb;
 }
 
+/*
+ * clear the hardware timer and the current data structures. So resets everything.
+ */
 void lptimer_bsp_timer_reset() {
-   // TODO
+	
+   TACCR0               =  0;
+   TACCTL0              =  0;
+   // reset timer
+   TAR                  = 0;
+   // record last timer compare value
+   memset(&lptmr_vars,0,sizeof(lptmr_vars_t));
+   
 }
 
+/**
+ * schedules the next bsp timer in delayTics.
+ */
 void lptimer_bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
+   //keep tics
+   lptmr_vars.bsp_total=delayTicks;
+   
    // set the compare value (since last one)
    lptmr_vars.compareVal[LPTMR_SRC_BSP_TIMER]   += delayTicks;
    
@@ -96,14 +114,31 @@ void lptimer_bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    // reschedule
    lptmr_reschedule();
 }
-
+/**
+ * cancels the bsp timer. 
+ * sets it to not running and schedules any other running timer
+ */
 void lptimer_bsp_timer_cancel_schedule() {
-   // TODO
+   //clear total tics.
+   lptmr_vars.bsp_total=0;	
+    
+   //clear the compare value   
+   lptmr_vars.compareVal[LPTMR_SRC_BSP_TIMER]   = 0;
+	   
+   // I'm not using this timer
+   lptmr_vars.isArmed[LPTMR_SRC_BSP_TIMER]  = FALSE;
+   
+   // reschedule
+   lptmr_reschedule();
 }
 
+/**
+ * timers are relative to the last compare 
+ * the elapsed time should be total -(compareVal-current)
+ * 
+ */
 PORT_TIMER_WIDTH lptimer_bsp_timer_get_currentValue() {
-   // TODO
-   return 0;
+   return lptmr_vars.bsp_total - (lptmr_vars.compareVal[LPTMR_SRC_BSP_TIMER] - lptimer_hwGetValue());
 }
 
 //===== from radiotimer
@@ -314,6 +349,9 @@ uint8_t radiotimer_isr() {
       lptmr_dbg.num_late_schedule++;
       
       // TODO [Xavi: fill in here]
+      
+      //set the interrupt flag so it is executed immediatelly.
+      
    }
    
    // kick the OS
