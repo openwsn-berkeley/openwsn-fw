@@ -313,7 +313,7 @@ uint8_t radiotimer_isr() {
       // update debug statistics
       lptmr_dbg.num_late_schedule++;
       
-      // TODO
+      // TODO [Xavi: fill in here]
    }
    
    // kick the OS
