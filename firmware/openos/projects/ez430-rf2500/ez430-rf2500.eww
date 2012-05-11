@@ -2,6 +2,9 @@
 
 <workspace>
   <project>
+    <path>$WS_DIR$\01bsp_bsp_timer\01bsp_bsp_timer.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_debugpins\01bsp_debugpins.ewp</path>
   </project>
   <project>
