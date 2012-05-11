@@ -40,8 +40,8 @@ void bsp_timer_init() {
    // clear local variables
    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
-   // source ACLK from 32kHz crystal
-   BCSCTL3             |=  LFXT1S_0;
+   // source ACLK from 10kHz DCO
+   BCSCTL3 |= LFXT1S_2;
 
    //set CCRB0 registers
    TBCCTL0              =  0;
