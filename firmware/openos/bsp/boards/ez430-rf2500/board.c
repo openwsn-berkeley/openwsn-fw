@@ -41,7 +41,6 @@ void board_init() {
    //P4OUT  &= ~0x80;                              // set low
    //P4DIR  |=  0x80;                              // configure as output
    
-   
    // initialize bsp modules
    debugpins_init();
    leds_init();
