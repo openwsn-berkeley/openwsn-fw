@@ -14,6 +14,9 @@
     <path>$WS_DIR$\01bsp_radiotimer\01bsp_radiotimer.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\01bsp_radiotimer_alt\01bsp_radiotimer_alt.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>
   </project>
   <project>
