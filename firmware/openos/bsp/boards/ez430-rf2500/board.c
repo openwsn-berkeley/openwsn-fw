@@ -10,7 +10,6 @@
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
-//#include "i2c.h"
 #include "bsp_timer.h"
 #include "radio.h"
 #include "radiotimer.h"

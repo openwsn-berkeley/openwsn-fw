@@ -650,7 +650,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_bothtimers.d43</state>
+          <state>01bsp_radiotimer.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -844,7 +844,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_bsp_timer.a43</state>
+          <state>01bsp_radiotimer.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1889,7 +1889,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_bothtimers\01bsp_bothtimers.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</name>
     </file>
   </group>
   <group>
@@ -1920,6 +1920,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\ez430-rf2500\leds.c</name>

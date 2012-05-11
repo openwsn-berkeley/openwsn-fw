@@ -47,8 +47,8 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
 }
 
 void radiotimer_start(uint16_t period) {
-   // source ACLK from 32kHz crystal
-   BCSCTL3 |= LFXT1S_0;
+   // source ACLK from 10kHz DCO
+   BCSCTL3 |= LFXT1S_2;
    
    // CCR0 contains max value of counter (slot length)
    // do not interrupt when counter reaches TACCR0!
@@ -67,7 +67,7 @@ void radiotimer_start(uint16_t period) {
    
    // start counting
    TACTL    =  TAIE;                             // interrupt when counter resets
-   TACTL   |=  MC_1+TBSSEL_1;                    // up mode, clocked from ACLK
+   TACTL   |=  MC_1+TASSEL_1;                    // up mode, clocked from ACLK
 }
 
 //===== direct access
