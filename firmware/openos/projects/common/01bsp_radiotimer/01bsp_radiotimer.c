@@ -40,10 +40,14 @@ int mote_main(void)
    // initialize board
    board_init();
    
+   // switch radio LED on
+   leds_radio_on();
+   
+   // prepare radiotimer
    radiotimer_setOverflowCb(cb_overflow);
    radiotimer_setCompareCb(cb_compare);
-   radiotimer_start(0xffff);      // 0xffff @32kHz = 2s
-   radiotimer_schedule(0x7fff);   // 0x7fff @32kHz = 1s
+   radiotimer_start(0x7fff);      // @32kHz = 1000ms
+   radiotimer_schedule(0xfff);    // @32kHz =  125ms
    
    while (1) {
       board_sleep();
@@ -56,8 +60,8 @@ void cb_overflow() {
    // toggle pin
    debugpins_frame_toggle();
    
-   // toggle sync led
-   leds_error_toggle();
+   // switch radio LED on
+   leds_radio_on();
    
    // increment counter
    app_vars.num_overflow++;
@@ -67,8 +71,8 @@ void cb_compare() {
    // toggle pin
    debugpins_fsm_toggle();
    
-   // toggle debug led
-   leds_radio_toggle();
+   // switch radio LED off
+   leds_radio_off();
    
    // increment counter
    app_vars.num_compare++;

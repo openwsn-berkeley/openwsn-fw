@@ -16,6 +16,8 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
+#define BSP_TIMER_PERIOD     0x7fff // @32kHz = 1s
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -39,7 +41,7 @@ int mote_main(void)
    board_init();
    
    bsp_timer_set_callback(cb_compare);
-   bsp_timer_scheduleIn(0x7fff);   // 0x7fff @32kHz = 1s
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    
    while (1) {
       board_sleep();
@@ -59,5 +61,5 @@ void cb_compare() {
    app_vars.num_compare++;
    
    // schedule again
-   bsp_timer_scheduleIn(0x7fff);   // 0x7fff @32kHz = 1s
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
 }
