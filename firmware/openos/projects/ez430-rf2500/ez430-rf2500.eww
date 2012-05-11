@@ -5,6 +5,9 @@
     <path>$WS_DIR$\01bsp_bothtimers\01bsp_bothtimers.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\01bsp_bothtimers_alt\01bsp_bothtimers_alt.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_bsp_timer\01bsp_bsp_timer.ewp</path>
   </project>
   <project>
