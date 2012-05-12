@@ -42,6 +42,7 @@ void               lptimer_radiotimer_schedule(uint16_t offset);
 void               lptimer_radiotimer_cancel();
 uint16_t           lptimer_radiotimer_getCapturedTime();
 
+
 #endif
 
 
