@@ -5,7 +5,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2012.
 */
 
-#include "io430.h"
+//#include "io430.h"
 #include "string.h"
 #include "bsp_timer.h"
 #include "board.h"

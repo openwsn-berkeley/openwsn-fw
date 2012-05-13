@@ -94,7 +94,7 @@ void cb_compare() {
    // toggle pin
    debugpins_fsm_toggle();
    
-   // switch radio LED off
+   // toggle radio LED
    leds_radio_toggle();
    
    // schedule a next compare, if applicable

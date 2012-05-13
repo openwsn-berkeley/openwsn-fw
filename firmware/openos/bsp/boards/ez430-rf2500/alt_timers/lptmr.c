@@ -34,22 +34,23 @@ lptmr_dbg_t lptmr_dbg;
 
 typedef struct {
    // admin
-   bool                       initialized;
-   uint16_t                   currentTime; // the current "theoretical" time
+   bool                      initialized;
+   uint16_t                  currentTime;        // current "theoretical" time
+   uint16_t                  nextCurrentTime;    // next "theoretical" time
    // callbacks
-   radiotimer_capture_cbt     radiotimer_startFrame_cb;
-   radiotimer_capture_cbt     radiotimer_endFrame_cb;
+   radiotimer_capture_cbt    radiotimer_startFrame_cb;
+   radiotimer_capture_cbt    radiotimer_endFrame_cb;
    // timer values
-   lptmr_cbt                  callback[LPTMR_SRC_MAX];
-   bool                       isArmed[LPTMR_SRC_MAX];
-   uint16_t                   compareVal[LPTMR_SRC_MAX];
-   lptmr_src_t                nextToFire;
+   lptmr_cbt                 callback[LPTMR_SRC_MAX];
+   bool                      isArmed[LPTMR_SRC_MAX];
+   uint16_t                  compareVal[LPTMR_SRC_MAX];
+   lptmr_src_t               nextToFire;
    // radiotimers-specific variables
-   uint16_t                   radiotimer_period;
-   uint16_t                   radiotimer_compare_offset;
-   uint16_t                   radiotimer_previous_compareVal;
+   uint16_t                  radiotimer_period;
+   uint16_t                  radiotimer_overflow_previousVal;
+   uint16_t                  radiotimer_compare_offset;
    // bsp-timer-specific variables
-   uint16_t                   bsp_timer_total;//total time of the scheduled bsp timer (relative value)
+   uint16_t                  bsp_timer_total;    // total time of the scheduled bsp timer (relative value)
 } lptmr_vars_t;
 
 lptmr_vars_t lptmr_vars;
@@ -62,6 +63,7 @@ void     lptmr_hwTimerInit();
 void     lptimer_hwTimerSchedule(uint16_t val);
 uint16_t lptimer_hwGetValue();
 //void     lptmr_reschedule_in_period();
+
 //=========================== public ==========================================
 
 //===== admin
@@ -71,11 +73,6 @@ void lptimer_init() {
    if (lptmr_vars.initialized==FALSE) {
       // clear module variables
       memset(&lptmr_vars,0,sizeof(lptmr_vars_t));
-      
-      // theoretical time is now 0
-      lptmr_vars.currentTime = 0;
-      
-      lptmr_vars.radiotimer_previous_compareVal = 0;
       
       // start the HW timer
       lptmr_hwTimerInit();
@@ -94,8 +91,7 @@ void lptimer_bsp_timer_set_callback(bsp_timer_cbt cb) {
  * clear the hardware timer and the current data structures. So resets everything.
  */
 void lptimer_bsp_timer_reset() {
-  lptimer_bsp_timer_cancel_schedule();
-   
+   lptimer_bsp_timer_cancel_schedule();
 }
 
 /**
@@ -114,6 +110,7 @@ void lptimer_bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    // reschedule
    lptmr_reschedule();
 }
+
 /**
  * cancels the bsp timer. 
  * sets it to not running and schedules any other running timer
@@ -160,16 +157,16 @@ void lptimer_radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
 
 void lptimer_radiotimer_start(uint16_t period) {
    // remember the period
-   lptmr_vars.radiotimer_period = period;
+   lptmr_vars.radiotimer_period                            = period;
 
-   //keep previous value == init time for this timer.
-   lptmr_vars.radiotimer_previous_compareVal=lptimer_hwGetValue();//lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW];
+   // remember previous overflow value
+   lptmr_vars.radiotimer_overflow_previousVal              = lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW];
 
-   // set the compare value (since last one)
-   lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW] += lptmr_vars.radiotimer_period;
+   // update the timer value (calculated as one period since the last one)
+   lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW]   += lptmr_vars.radiotimer_period;
    
    // I'm using this timer
-   lptmr_vars.isArmed[LPTMR_SRC_RADIOTIMER_OVERFLOW]     = TRUE;
+   lptmr_vars.isArmed[LPTMR_SRC_RADIOTIMER_OVERFLOW]       = TRUE;
    
    // reschedule
    lptmr_reschedule();
@@ -187,7 +184,7 @@ void lptimer_radiotimer_setPeriod(uint16_t period) {
    //do we want to replace the current one or in contrast just set the new compare value relative to the previous one?
    
    //keep previous value == init time for this timer.
-   lptmr_vars.radiotimer_previous_compareVal=lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW];
+   lptmr_vars.radiotimer_overflow_previousVal=lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW];
    
    //set the timeout in the future.
    lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW] += lptmr_vars.radiotimer_period;
@@ -205,24 +202,20 @@ uint16_t lptimer_radiotimer_getPeriod() {
 
 void lptimer_radiotimer_schedule(uint16_t offset) {
   
-   // remember the offset set
-   lptmr_vars.radiotimer_compare_offset = offset;
+   // remember the offset
+   lptmr_vars.radiotimer_compare_offset                    = offset;
    
-   // set the compare value since last *overflow*
-   //lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_COMPARE]  = lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW]+ \
-                                                          lptmr_vars.radiotimer_compare_offset;
-   //set timeout at init of the period + offset.
-   lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_COMPARE]  = lptmr_vars.radiotimer_previous_compareVal + lptmr_vars.radiotimer_compare_offset;
+   // set the compare value since previous *overflow*
+   lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_COMPARE]     = lptmr_vars.radiotimer_overflow_previousVal + \
+                                                             lptmr_vars.radiotimer_compare_offset;
    
    // I'm using this timer
-   lptmr_vars.isArmed[LPTMR_SRC_RADIOTIMER_COMPARE]     = TRUE;
+   lptmr_vars.isArmed[LPTMR_SRC_RADIOTIMER_COMPARE]        = TRUE;
    
-   //debug_current_val=lptimer_hwGetValue();
    // reschedule
    lptmr_reschedule();
-//  lptmr_reschedule_in_period();
-   
 }
+
 /**
  * cancels the compare timer, not the period of the radiotimer.
  * sets it to not running and reschedules.
@@ -306,7 +299,7 @@ uint16_t lptmr_reschedule() {
    // load that timer, if found
    if (found==TRUE) {
       lptimer_hwTimerSchedule(valToLoad);
-      lptmr_vars.currentTime = valToLoad;
+      lptmr_vars.nextCurrentTime = valToLoad;
    }
    
    // return in how long the timer will fire
@@ -315,8 +308,9 @@ uint16_t lptmr_reschedule() {
 
 //===== dealing with the HW timer
 void lptmr_hwTimerInit() {
-   // source ACLK from 10kHz DCO
-   BCSCTL3 |= LFXT1S_2;
+   
+   // ACLK sources from external 32kHz
+   BCSCTL3 |= LFXT1S_0;
    
    // disable all compares
    TACCTL0  =  0;
@@ -338,7 +332,7 @@ void lptmr_hwTimerInit() {
 }
 
 void lptimer_hwTimerSchedule(uint16_t val) {
-   // when to fire
+   // load when to fire
    TACCR1   =  val;
    
    // enable interrupt
@@ -364,6 +358,9 @@ uint8_t radiotimer_isr() {
    // remember what time it is now
    startTime = lptimer_hwGetValue();
    
+   // update the current theoretical time
+   lptmr_vars.currentTime    = lptmr_vars.nextCurrentTime;
+   
    // remember the timer which just fired
    timerJustFired = lptmr_vars.nextToFire;
    
@@ -378,15 +375,15 @@ uint8_t radiotimer_isr() {
          // update debug stats
          lptmr_dbg.num_radiotimer_overflow++;
          //keep previous value
-         lptmr_vars.radiotimer_previous_compareVal=lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW];
+         lptmr_vars.radiotimer_overflow_previousVal=lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW];
          // this is a periodic timer, reschedule automatically
          lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_OVERFLOW] += lptmr_vars.radiotimer_period;
          break;
       case LPTMR_SRC_RADIOTIMER_COMPARE:
          // update debug stats
          lptmr_dbg.num_radiotimer_compare++;
-         // reschedule automatically after *overflow* -- why that?? radiotimer compare is not periodic. Only the overflow is periodic.
-      //   lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_COMPARE]  = lptmr_vars.radiotimer_previous_compareVal+ \
+         // reschedule automatically after *overflow*
+         lptmr_vars.compareVal[LPTMR_SRC_RADIOTIMER_COMPARE]  = lptmr_vars.radiotimer_overflow_previousVal+ \
                                                                 lptmr_vars.radiotimer_compare_offset;
 
          break;
@@ -396,18 +393,18 @@ uint8_t radiotimer_isr() {
    }
    
    // NOTE: by the time you get here, currentTime already contains the current
-   //       "theoretical" time. It was simply written in the lptmr_reschedule()
+   //       "theoretical" time. It was written in the lptmr_reschedule()
    //       function.
    
-      // schedule the next operation
-
+   // schedule the next operation
    timeToInterrupt = lptmr_reschedule();
-   // call the callback
+   
+   // call the callback of the timer that just fired
    lptmr_vars.callback[timerJustFired]();
    
    // make sure I'm not late for my next schedule -- 
-   //TODO this is not good as it is executing a lot of code in isr mode.
-   //some uC can set the ISR pin and force the isr by software. Some other doesn't.
+   // TODO this is not good as it is executing a lot of code in isr mode.
+   // some uC can set the ISR pin and force the isr by software. Some other doesn't.
    endTime=lptimer_hwGetValue();
    while ((endTime-startTime)>timeToInterrupt) {
       // I've already passed the interrupt I was supposed to schedule
@@ -415,11 +412,11 @@ uint8_t radiotimer_isr() {
       // update debug statistics
       lptmr_dbg.num_late_schedule++;
       
-      // TACCTL0          |=  CCIFG;//interrupt again
+      // TACCTL0            |=  CCIFG;//interrupt again
       //set the interrupt flag so it is executed immediatelly or schedule it just right now + 1tic.
-      lptmr_vars.callback[lptmr_vars.nextToFire]();//call the callback
-      timeToInterrupt = lptmr_reschedule();
-      endTime=lptimer_hwGetValue();
+      lptmr_vars.callback[lptmr_vars.nextToFire](); //call the callback
+      timeToInterrupt        = lptmr_reschedule();
+      endTime                = lptimer_hwGetValue();
    }
    
    // kick the OS
