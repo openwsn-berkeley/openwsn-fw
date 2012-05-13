@@ -18,21 +18,33 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD     0x7fff // @32kHz = 1s
+#define BSP_TIMER_PERIOD               0x8000
+#define RADIOTIMER_OVERFLOW_PERIOD     0x8000
+#define RADIOTIMER_COMPARE_PERIOD      0x1000
+#define RADIOTIMER_NUM_COMPARES             4
 
 //=========================== variables =======================================
 
 typedef struct {
-   uint16_t num_compare;
+   uint8_t  radiotimer_num_compares_left;
+   uint16_t radiotimer_last_compare_val;
 } app_vars_t;
 
 app_vars_t app_vars;
 
+typedef struct {
+   uint16_t bsp_timer_num_compare;
+   uint16_t radiotimer_num_overflow;
+   uint16_t radiotimer_num_compare;
+} app_dbg_t;
+
+app_dbg_t app_dbg;
+
 //=========================== prototypes ======================================
 
-void cb_bsp_timer_compare();
-void cb_radiotimer_overflow();
-void cb_radiotimer_compare();
+void bsp_timer_cb_compare();
+void radiotimer_cb_overflow();
+void radiotimer_cb_compare();
 
 //=========================== main ============================================
 
@@ -44,17 +56,26 @@ int mote_main(void)
    // initialize board
    board_init();
    
+   // switch radio LED on
+   leds_radio_on();
+   
    // prepare bsp_timer
-   bsp_timer_set_callback(cb_bsp_timer_compare);
+   bsp_timer_set_callback(bsp_timer_cb_compare);
+   
+   // prepare radiotimer
+   radiotimer_setOverflowCb(radiotimer_cb_overflow);
+   radiotimer_setCompareCb(radiotimer_cb_compare);
+   
+   // kick off first bsp_timer compare
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    
-   // prepare radiotimer
-   radiotimer_setOverflowCb(cb_radiotimer_overflow);
-   radiotimer_setCompareCb(cb_radiotimer_compare);
-   radiotimer_start(0x7fff);      // @32kHz = 1000ms
-   radiotimer_schedule(0xfff);    // @32kHz =  125ms
+   // start periodic radiotimer overflow
+   radiotimer_start(RADIOTIMER_OVERFLOW_PERIOD);
    
-   // prepare radiotimer
+   // kick off first radiotimer compare
+   app_vars.radiotimer_num_compares_left  = RADIOTIMER_NUM_COMPARES-1;
+   app_vars.radiotimer_last_compare_val   = RADIOTIMER_COMPARE_PERIOD;
+   radiotimer_schedule(app_vars.radiotimer_last_compare_val);
    
    while (1) {
       board_sleep();
@@ -63,32 +84,53 @@ int mote_main(void)
 
 //=========================== callbacks =======================================
 
-void cb_bsp_timer_compare() {
+void bsp_timer_cb_compare() {
    // toggle pin
    debugpins_fsm_toggle();
    
    // toggle error led
-   leds_error_toggle();
+   leds_sync_toggle();
    
    // increment counter
-   app_vars.num_compare++;
+   app_dbg.bsp_timer_num_compare++;
    
    // schedule again
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
 }
 
-void cb_radiotimer_overflow() {
+void radiotimer_cb_overflow() {
    // toggle pin
    debugpins_frame_toggle();
    
    // switch radio LED on
-   leds_radio_on();
+   leds_error_toggle();
+   leds_radio_off();
+   
+   // reset the counter for number of remaining compares
+   app_vars.radiotimer_num_compares_left  = RADIOTIMER_NUM_COMPARES;
+   app_vars.radiotimer_last_compare_val   = RADIOTIMER_COMPARE_PERIOD;
+   radiotimer_schedule(app_vars.radiotimer_last_compare_val);
+   
+   // increment debug counter
+   app_dbg.radiotimer_num_overflow++;
 }
 
-void cb_radiotimer_compare() {
+void radiotimer_cb_compare() {
    // toggle pin
    debugpins_fsm_toggle();
    
-   // switch radio LED off
-   leds_radio_off();
+   // toggle radio LED
+   leds_radio_toggle();
+   
+   // schedule a next compare, if applicable
+   app_vars.radiotimer_last_compare_val += RADIOTIMER_COMPARE_PERIOD;
+   app_vars.radiotimer_num_compares_left--;
+   if (app_vars.radiotimer_num_compares_left>0) {
+      radiotimer_schedule(app_vars.radiotimer_last_compare_val);
+   } else {
+      radiotimer_cancel();
+   }
+   
+   // increment debug counter
+   app_dbg.radiotimer_num_compare++;
 }
