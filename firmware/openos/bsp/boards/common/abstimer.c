@@ -322,72 +322,80 @@ uint8_t bsp_timer_isr() {
 }
 
 uint8_t radiotimer_isr() {
-   uint16_t    startTime,endTime;  // the value of the timer when this function starts running
-   uint16_t    timeToInterrupt;
-   abstimer_src_t timerJustFired;
+   uint8_t         i;                       // iterator
+   uint16_t        startTime;               // the value of the timer when this function starts running
+   uint16_t        timeToNextInterrupt;
+   uint8_t         bitmapInterruptsFired;
    
    // remember what time it is now
-   startTime = sctimer_getValue();
+   startTime                 = sctimer_getValue();
    
    // update the current theoretical time
-   abstimer_vars.currentTime    = abstimer_vars.nextCurrentTime;
+   abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
    
-   // remember the timer which just fired
-   timerJustFired = abstimer_vars.nextToFire;
+   //===== step 1. Find out which interrupts just fired
    
-   // if applicable, reschedule timers automatically
-   switch (timerJustFired) {
-      case ABSTIMER_SRC_BSP_TIMER:
-         // update debug stats
-         abstimer_dbg.num_bsp_timer++;
-         // no automatic rescheduling
-         break;
-      case ABSTIMER_SRC_RADIOTIMER_OVERFLOW:
-         // update debug stats
-         abstimer_dbg.num_radiotimer_overflow++;
-         //keep previous value
-         abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-         // this is a periodic timer, reschedule automatically
-         abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW] += abstimer_vars.radiotimer_period;
-         break;
-      case ABSTIMER_SRC_RADIOTIMER_COMPARE:
-         // update debug stats
-         abstimer_dbg.num_radiotimer_compare++;
-         // reschedule automatically after *overflow*
-         abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]  = abstimer_vars.radiotimer_overflow_previousVal+ \
-                                                                abstimer_vars.radiotimer_compare_offset;
-
-         break;
-      default:
-         // this should never happen
-         while(1);
+   // Note: we store the list of interrupts which fired in an 8-bit bitmap
+   bitmapInterruptsFired = 0;
+   for (i=0;i<ABSTIMER_SRC_MAX;i++) {
+      if (
+            (abstimer_vars.isArmed[i]==TRUE) &&
+            (abstimer_vars.compareVal[i]==abstimer_vars.currentTime)
+         ) {
+         bitmapInterruptsFired |= (1<<i);
+      }
    }
    
-   // NOTE: by the time you get here, currentTime already contains the current
-   //       "theoretical" time. It was written in the abstimer_reschedule()
-   //       function.
+   // make sure at least one timer fired
+   if (bitmapInterruptsFired==0) {
+      while(1);
+   }
    
-   // schedule the next operation
-   timeToInterrupt = abstimer_reschedule();
+   //==== step 2. Reschedule the timers which fired and need to be rescheduled
    
-   // call the callback of the timer that just fired
-   abstimer_vars.callback[timerJustFired]();
+   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_BSP_TIMER)) {
+      // update debug stats
+      abstimer_dbg.num_bsp_timer++;
+      // no automatic rescheduling
+   }
+   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW)) {
+      // update debug stats
+      abstimer_dbg.num_radiotimer_overflow++;
+      //keep previous value
+      abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
+      // this is a periodic timer, reschedule automatically
+      abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW] += abstimer_vars.radiotimer_period;
+   }
+   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_COMPARE)) {
+      // update debug stats
+         abstimer_dbg.num_radiotimer_compare++;
+         // reschedule automatically after *overflow*
+         abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]  = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]+ \
+                                                                      abstimer_vars.radiotimer_compare_offset;
+   }
    
-   // make sure I'm not late for my next schedule -- 
-   // TODO this is not good as it is executing a lot of code in isr mode.
-   // some uC can set the ISR pin and force the isr by software. Some other doesn't.
-   endTime=sctimer_getValue();
-   while ((endTime-startTime)>timeToInterrupt) {
+   //===== step 3. call the callbacks of the timers that just fired
+   
+   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_BSP_TIMER)) {
+      abstimer_vars.callback[ABSTIMER_SRC_BSP_TIMER]();
+   }
+   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW)) {
+      abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]();
+   }
+   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_COMPARE)) {
+      abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_COMPARE]();
+   }
+   
+   //===== step 4. schedule the next operation
+   
+   timeToNextInterrupt       = abstimer_reschedule();
+   
+   //===== step 5. make sure I'm not late for my next schedule
+   while ((sctimer_getValue()-startTime)>timeToNextInterrupt) {
       // I've already passed the interrupt I was supposed to schedule
       
       // update debug statistics
       abstimer_dbg.num_late_schedule++;
-      
-      // TACCTL0            |=  CCIFG;//interrupt again
-      //set the interrupt flag so it is executed immediatelly or schedule it just right now + 1tic.
-      abstimer_vars.callback[abstimer_vars.nextToFire](); //call the callback
-      timeToInterrupt        = abstimer_reschedule();
-      endTime                = sctimer_getValue();
    }
    
    // kick the OS
