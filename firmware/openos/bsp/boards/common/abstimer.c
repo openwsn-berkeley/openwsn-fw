@@ -9,6 +9,7 @@
 #include "openwsn.h"
 #include "bsp_timer.h"
 #include "radiotimer.h"
+#include "sctimer.h"
 
 //=========================== defines =========================================
 
@@ -60,9 +61,9 @@ abstimer_vars_t abstimer_vars;
 
 void     abstimer_init();
 uint16_t abstimer_reschedule();
-void     abstimer_hwTimerInit();
-void     abstimer_hwTimerSchedule(uint16_t val);
-uint16_t abstimer_hwGetValue();
+void     sctimer_init();
+void     sctimer_schedule(uint16_t val);
+uint16_t sctimer_getValue();
 //void   abstimer_reschedule_in_period();
 
 //=========================== public ==========================================
@@ -124,7 +125,7 @@ void bsp_timer_cancel_schedule() {
  * 
  */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
-   return abstimer_vars.bsp_timer_total - (abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER] - abstimer_hwGetValue());
+   return abstimer_vars.bsp_timer_total - (abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER] - sctimer_getValue());
 }
 
 //===== from radiotimer
@@ -240,7 +241,7 @@ void abstimer_init() {
       memset(&abstimer_vars,0,sizeof(abstimer_vars_t));
       
       // start the HW timer
-      abstimer_hwTimerInit();
+      sctimer_init();
       
       // declare as initialized
       abstimer_vars.initialized = TRUE;
@@ -254,14 +255,14 @@ void abstimer_init() {
 //   uint16_t valToLoad;  // the value to eventually load in the compare register
 //   uint16_t now;
 //  
-//   now = abstimer_hwGetValue();
+//   now = sctimer_getValue();
 //   
 //   // find the timer closest in time to now
 //   if (abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_COMPARE]==TRUE) {
 //        if( abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]-now<abstimer_vars.currentTime - now){//this timeout is earlier than current timeout.
 //            valToLoad              = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE];
 //            abstimer_vars.nextToFire  = ABSTIMER_SRC_RADIOTIMER_COMPARE;
-//            abstimer_hwTimerSchedule(valToLoad);
+//            sctimer_schedule(valToLoad);
 //            abstimer_vars.currentTime = valToLoad;
 //         }
 //      }
@@ -278,7 +279,7 @@ uint16_t abstimer_reschedule() {
    uint16_t minDist;    // the minimem distance amoung all timers
   
   // uint16_t now;
-  // now = abstimer_hwGetValue();
+  // now = sctimer_getValue();
    
    minDist = 0xffff;
    
@@ -305,49 +306,12 @@ uint16_t abstimer_reschedule() {
    
    // load that timer, if found
    if (found==TRUE) {
-      abstimer_hwTimerSchedule(valToLoad);
+      sctimer_schedule(valToLoad);
       abstimer_vars.nextCurrentTime = valToLoad;
    }
    
    // return in how long the timer will fire
    return minDist;
-}
-
-//===== dealing with the HW timer
-void abstimer_hwTimerInit() {
-   
-   // ACLK sources from external 32kHz
-   BCSCTL3 |= LFXT1S_0;
-   
-   // disable all compares
-   TACCTL0  =  0;
-   TACCR0   =  0;
-   
-   // CCR1 in compare mode (disabled for now)
-   TACCTL1  =  0;
-   TACCR1   =  0;
-   
-   // CCR2 in capture mode
-   TACCTL2  =  0;
-   TACCR2   =  0;
-   
-   // reset couter
-   TAR      =  0;
-   
-   // start counting
-   TACTL    =  MC_2+TASSEL_1;                    // continuous mode, clocked from ACLK
-}
-
-void abstimer_hwTimerSchedule(uint16_t val) {
-   // load when to fire
-   TACCR1   =  val;
-   
-   // enable interrupt
-   TACCTL1  =  CCIE;
-}
-
-uint16_t abstimer_hwGetValue() {
-   return TAR;
 }
 
 //=========================== interrupts ======================================
@@ -363,7 +327,7 @@ uint8_t radiotimer_isr() {
    abstimer_src_t timerJustFired;
    
    // remember what time it is now
-   startTime = abstimer_hwGetValue();
+   startTime = sctimer_getValue();
    
    // update the current theoretical time
    abstimer_vars.currentTime    = abstimer_vars.nextCurrentTime;
@@ -412,7 +376,7 @@ uint8_t radiotimer_isr() {
    // make sure I'm not late for my next schedule -- 
    // TODO this is not good as it is executing a lot of code in isr mode.
    // some uC can set the ISR pin and force the isr by software. Some other doesn't.
-   endTime=abstimer_hwGetValue();
+   endTime=sctimer_getValue();
    while ((endTime-startTime)>timeToInterrupt) {
       // I've already passed the interrupt I was supposed to schedule
       
@@ -423,7 +387,7 @@ uint8_t radiotimer_isr() {
       //set the interrupt flag so it is executed immediatelly or schedule it just right now + 1tic.
       abstimer_vars.callback[abstimer_vars.nextToFire](); //call the callback
       timeToInterrupt        = abstimer_reschedule();
-      endTime                = abstimer_hwGetValue();
+      endTime                = sctimer_getValue();
    }
    
    // kick the OS
