@@ -1,15 +1,11 @@
 /**
-\brief A BSP timer module which abstracts away the "bsp_timer" and "radiotimer"
-       modules behind a single timer.
-
-This module abstracts everything away behind timerA on the MSP430, using only
-one compare register.
+\brief A BSP module which abstracts away the "bsp_timer" and "radiotimer"
+       modules behind the "sctimer".
 
 \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2012.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2012.
 */
 
-#include "lptmr.h"
 #include "openwsn.h"
 
 //=========================== defines =========================================
