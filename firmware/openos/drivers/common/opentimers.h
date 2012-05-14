@@ -46,7 +46,6 @@ typedef struct {
    bool                 isrunning;          // is running?
    opentimers_cbt       callback;           // function to call when elapses
    bool                 hasExpired;         // whether the callback has to be called
-   PORT_TIMER_WIDTH     init_time;          // time when this timer was started (in tics of the counter)
 } opentimers_t;
 
 //=========================== prototypes ======================================
@@ -59,7 +58,5 @@ opentimer_id_t opentimers_start(uint32_t       duration,
 void           opentimers_setPeriod(opentimer_id_t id,time_type_t timetype, uint32_t       newPeriod);
 void           opentimers_stop(opentimer_id_t id);
 void           opentimers_restart(opentimer_id_t id);
-
-uint32_t       opentimers_get_currentValue(opentimer_id_t id,time_type_t typet);
 
 #endif

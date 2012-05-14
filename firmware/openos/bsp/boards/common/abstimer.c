@@ -13,7 +13,7 @@
 
 //=========================== defines =========================================
 
-#define ABSTIMER_GUARD_TICKS 2
+#define ABSTIMER_GUARD_TICKS 0
 
 typedef void (*abstimer_cbt)(void);
 
@@ -295,6 +295,7 @@ uint8_t radiotimer_isr() {
    uint8_t         i;                       // iterator
    uint16_t        timeSpent;
    uint8_t         bitmapInterruptsFired;
+   uint16_t        calc;
    
    // update the current theoretical time
    abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
@@ -381,10 +382,12 @@ uint8_t radiotimer_isr() {
       // verify that, for each timer, that duration doesn't exceed how much time is left
       bitmapInterruptsFired = 0;
       for (i=0;i<ABSTIMER_SRC_MAX;i++) {
-         if (
-               (abstimer_vars.isArmed[i]==TRUE) &&
-               (timeSpent>(abstimer_vars.compareVal[i]-abstimer_vars.currentTime))
-            ) {
+    	 
+    	  //calculate distance to next timeout
+    	 calc=(uint16_t)abstimer_vars.compareVal[i]-(uint16_t)abstimer_vars.currentTime; 
+         
+    	 if ((abstimer_vars.isArmed[i]==TRUE) && (timeSpent>calc)) {
+        	 
             // this interrupt needs to be serviced now
             bitmapInterruptsFired |= (1<<i);
                

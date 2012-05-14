@@ -7,7 +7,9 @@
 #include "debugpins.h"
 #include "board.h"
 
-
+/*
+ * Check pag 220 of the manual for available GPIOs
+ */
 
 //=========================== defines =========================================
 
@@ -15,16 +17,16 @@
 #define SLOT_PIN 13
 #define FSM_PIN 14
 #define TASK_PIN 15
-#define ISR_PIN 0 //none
-#define RADIO_PIN 0 //none
+#define ISR_PIN 5  //PTC5
+#define RADIO_PIN 6 //PTC6
 
 //PTC12,13,14,15
 //GPIO14 = A50
 //GPIO15= A51
 //GPIO16= A52
 //GPIO17 = A53
-
-
+//TWRPI_GPIO4 PTD5
+//TWRPI_GPIO1 PTC6
 
 //=========================== variables =======================================
 
@@ -42,17 +44,16 @@ void debugpins_init() {
 	 PORTC_PCR13 = PORT_PCR_MUX(1);
 	 PORTC_PCR14 = PORT_PCR_MUX(1);
 	 PORTC_PCR15 = PORT_PCR_MUX(1);
-	 
+	 PORTD_PCR5  = PORT_PCR_MUX(1);
+	 PORTC_PCR6  = PORT_PCR_MUX(1);
+		 
 	 //set as output
 	 GPIOC_PDDR |= 1<<FRAME_PIN;
 	 GPIOC_PDDR |= 1<<SLOT_PIN;
 	 GPIOC_PDDR |= 1<<FSM_PIN;
 	 GPIOC_PDDR |= 1<<TASK_PIN;
-	 
-//	 GPIOC_PDOR |= 1<<FRAME_PIN;
-//	 GPIOC_PDOR |= 1<<SLOT_PIN;
-//	 GPIOC_PDOR |= 1<<FSM_PIN;
-//	 GPIOC_PDOR |= 1<<TASK_PIN;
+	 GPIOD_PDDR |= 1<<ISR_PIN;
+	 GPIOC_PDDR |= 1<<RADIO_PIN;
 }
 
 void debugpins_frame_toggle() {
@@ -100,21 +101,23 @@ void debugpins_task_set() {
 }
 
 void debugpins_isr_toggle() {
+	GPIOD_PTOR |= 1<<ISR_PIN;
+	
 }
 void debugpins_isr_clr() {
-
+	GPIOD_PCOR |= 1<<ISR_PIN;
 }
 void debugpins_isr_set() {
-
+	GPIOD_PSOR |= 1<<ISR_PIN;
 }
 
 void debugpins_radio_toggle() {
-
+	GPIOC_PTOR |= 1<<RADIO_PIN;
 }
 void debugpins_radio_clr() {
-
+	GPIOC_PCOR |= 1<<RADIO_PIN;
 }
 void debugpins_radio_set() {
-
+	GPIOC_PSOR |= 1<<RADIO_PIN;
 }
 

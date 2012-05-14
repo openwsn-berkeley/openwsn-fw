@@ -24,6 +24,7 @@ typedef struct {
 } opentimers_vars_t;
 
 opentimers_vars_t opentimers_vars;
+//uint32_t counter; //counts the elapsed time.
 
 //=========================== prototypes ======================================
 
@@ -48,7 +49,6 @@ void opentimers_init(){
 		opentimers_vars.timersBuf[i].isrunning          = FALSE;
 		opentimers_vars.timersBuf[i].callback           = NULL;
 		opentimers_vars.timersBuf[i].hasExpired         = FALSE;
-		opentimers_vars.timersBuf[i].init_time          =0;
 	}
 
 	// set callback for bsp_timers module
@@ -119,7 +119,6 @@ opentimer_id_t opentimers_start(uint32_t duration, timer_type_t type,time_type_t
 			if (opentimers_vars.running==FALSE) {
 				bsp_timer_reset();
 			}
-			opentimers_vars.timersBuf[id].init_time=bsp_timer_get_currentValue();//keep init time.
 			bsp_timer_scheduleIn(opentimers_vars.timersBuf[id].ticks_remaining);
 		}
 
@@ -156,27 +155,6 @@ void  opentimers_setPeriod(opentimer_id_t id,time_type_t timetype,uint32_t newDu
 }
 
 /**
-\brief gets the elapsed time since this timer was started.
-
- */
-uint32_t opentimers_get_currentValue(opentimer_id_t id,time_type_t typet){
-	uint16_t elapsed;
-	uint16_t totalwraps;
-	elapsed=bsp_timer_get_currentValue()-opentimers_vars.timersBuf[id].init_time ;
-    totalwraps=(opentimers_vars.timersBuf[id].period_ticks/MAX_TICKS_IN_SINGLE_CLOCK);
-	totalwraps-=opentimers_vars.timersBuf[id].wraps_remaining; 
-	elapsed+=opentimers_vars.timersBuf[id].period_ticks%MAX_TICKS_IN_SINGLE_CLOCK;//add the time that does not complete a wrap.
-	if (typet==TIME_MS){
-       return ((totalwraps*MAX_TICKS_IN_SINGLE_CLOCK)+elapsed)/PORT_TICS_PER_MS;		
-	}else if (typet==TIME_TICS){
-	   return (totalwraps*MAX_TICKS_IN_SINGLE_CLOCK)+elapsed;
-	}else{
-		while (1);//should never happen.
-	}
-}
-
-
-/**
 \brief Stop a running timer.
 
 Sets the timer to "not running". the system recovers even if this was the next
@@ -192,7 +170,6 @@ void opentimers_stop(opentimer_id_t id) {
 Sets the timer to " running".
  */
 void opentimers_restart(opentimer_id_t id) {
-	opentimers_vars.timersBuf[id].init_time=bsp_timer_get_currentValue();
 	opentimers_vars.timersBuf[id].isrunning=TRUE;
 }
 
@@ -213,7 +190,6 @@ void opentimers_timer_callback() {
 	opentimer_id_t   id,minid;
 	PORT_TIMER_WIDTH min_timeout;
 	bool             found;
-    
     
 	// step 1. Identify expired timers
 	for(id=0; id<MAX_NUM_TIMERS; id++) {
@@ -239,7 +215,7 @@ void opentimers_timer_callback() {
 
 				// update its counter
 				opentimers_vars.timersBuf[id].ticks_remaining -= opentimers_vars.currentTimeout;
-			}
+			}	
 		}
 	}
 
@@ -253,7 +229,6 @@ void opentimers_timer_callback() {
 
 			// reload the timer, if applicable
 			if (opentimers_vars.timersBuf[id].type==TIMER_PERIODIC) {
-				opentimers_vars.timersBuf[id].init_time=bsp_timer_get_currentValue();//set new init time.
 				opentimers_vars.timersBuf[id].wraps_remaining   = (opentimers_vars.timersBuf[id].period_ticks/MAX_TICKS_IN_SINGLE_CLOCK);//65535=maxValue of uint16_t
 				//if the number of ticks falls below a 16bit value, use it, otherwise set to max 16bit value
 				if(opentimers_vars.timersBuf[id].wraps_remaining==0)                                                
@@ -263,7 +238,6 @@ void opentimers_timer_callback() {
 
 			} else {
 				opentimers_vars.timersBuf[id].isrunning   = FALSE;
-				opentimers_vars.timersBuf[id].init_time   =0;//set init time to 0
 			}
 		}
 
@@ -291,11 +265,11 @@ void opentimers_timer_callback() {
 	if (found==TRUE) {
 		// at least one timer pending
 		opentimers_vars.currentTimeout = min_timeout;
-		opentimers_vars.timersBuf[minid].init_time=bsp_timer_get_currentValue();
+		//opentimers_vars.timersBuf[minid].init_time=bsp_timer_get_currentValue();
+	//	printf("init_time id %d, %d\n",minid,opentimers_vars.timersBuf[minid].init_time);
 		bsp_timer_scheduleIn(opentimers_vars.currentTimeout);
 	} else {
 		// no more timers pending
-		opentimers_vars.timersBuf[minid].init_time=0;
 		opentimers_vars.running = FALSE;
 	}
 }
