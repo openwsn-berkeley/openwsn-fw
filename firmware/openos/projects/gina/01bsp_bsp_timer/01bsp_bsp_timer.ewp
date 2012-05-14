@@ -1909,6 +1909,9 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\sctimer.c</name>
+          <excluded>
+            <configuration>Debug</configuration>
+          </excluded>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\spi.c</name>

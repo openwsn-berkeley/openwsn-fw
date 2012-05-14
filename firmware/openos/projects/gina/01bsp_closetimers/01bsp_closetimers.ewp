@@ -837,7 +837,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_bsp_timer.a43</state>
+          <state>01bsp_closetimers.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1909,6 +1909,9 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\sctimer.c</name>
+          <excluded>
+            <configuration>Debug</configuration>
+          </excluded>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\spi.c</name>
