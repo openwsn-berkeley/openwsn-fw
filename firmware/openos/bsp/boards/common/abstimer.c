@@ -66,7 +66,6 @@ uint16_t abstimer_reschedule();
 void     sctimer_init();
 void     sctimer_schedule(uint16_t val);
 uint16_t sctimer_getValue();
-//void   abstimer_reschedule_in_period();
 
 //=========================== public ==========================================
 
@@ -169,16 +168,13 @@ void radiotimer_start(uint16_t period) {
    abstimer_reschedule();
 }
 
+//this is the elapsed time in this period (now - previous val)  
 uint16_t radiotimer_getValue() {
-   return 0;
-   // TODO
+   return sctimer_getValue()-abstimer_vars.radiotimer_overflow_previousVal;
 }
 
 void radiotimer_setPeriod(uint16_t period) {
    abstimer_vars.radiotimer_period=period;
-   
-   //what to do here? -- the set period can be set in any moment, even in a middle of n execution.
-   //do we want to replace the current one or in contrast just set the new compare value relative to the previous one?
    
    //keep previous value == init time for this timer.
    abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
@@ -213,23 +209,16 @@ void radiotimer_schedule(uint16_t offset) {
    abstimer_reschedule();
 }
 
-/**
- * cancels the compare timer, not the period of the radiotimer.
- * sets it to not running and reschedules.
- **/
+
 void radiotimer_cancel() {
    abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_COMPARE]       = FALSE;
 
    abstimer_reschedule();
 }
 
-/**
-  think on that. this has to return the current value of the  radiotimer compare timer 
-  that is relative to the period timer.
-**/
+//the current value as we do not have a capture register.
 uint16_t radiotimer_getCapturedTime() {
-   return 0;
-   // TODO
+   return radiotimer_getValue();
 }
 
 //=========================== private =========================================
@@ -251,24 +240,6 @@ void abstimer_init() {
 }
 
 //===== rescheduling
-//void abstimer_reschedule_in_period() {
-//   // the goal here is to take the next compare time,
-//   // i.e. the one with the smallest difference to currentTime which is armed
-//   uint16_t valToLoad;  // the value to eventually load in the compare register
-//   uint16_t now;
-//  
-//   now = sctimer_getValue();
-//   
-//   // find the timer closest in time to now
-//   if (abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_COMPARE]==TRUE) {
-//        if( abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]-now<abstimer_vars.currentTime - now){//this timeout is earlier than current timeout.
-//            valToLoad              = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE];
-//            abstimer_vars.nextToFire  = ABSTIMER_SRC_RADIOTIMER_COMPARE;
-//            sctimer_schedule(valToLoad);
-//            abstimer_vars.currentTime = valToLoad;
-//         }
-//      }
-//}
 
 uint16_t abstimer_reschedule() {
    // the goal here is to take the next compare time,
@@ -279,9 +250,6 @@ uint16_t abstimer_reschedule() {
    uint16_t valToLoad;  // the value to eventually load in the compare register
    uint16_t thisDist;   // the distance in the future of this timer
    uint16_t minDist;    // the minimem distance amoung all timers
-  
-  // uint16_t now;
-  // now = sctimer_getValue();
    
    minDist = 0xffff;
    
@@ -289,10 +257,6 @@ uint16_t abstimer_reschedule() {
    found = FALSE;
    for (i=0;i<ABSTIMER_SRC_MAX;i++) {
       if (abstimer_vars.isArmed[i]==TRUE) {
-        //attention! this is not correct, whenever a radiocompare is set, this does not work.
-        // the radio compare is scheduled always before the end of the period. currenttime is
-        //represents the end of the period so in this case the distance will be a complete wrap of
-        // the timer. so will be scheduled the last one when probably is the next one to expire.
         thisDist = abstimer_vars.compareVal[i]-abstimer_vars.currentTime;
          if (
                 found==FALSE ||
@@ -368,9 +332,9 @@ uint8_t radiotimer_isr() {
       }
       if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_COMPARE)) {
          // update debug stats
-            abstimer_dbg.num_radiotimer_compare++;
-            // reschedule automatically after *overflow*
-            abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]  = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]+ \
+         abstimer_dbg.num_radiotimer_compare++;
+         // reschedule automatically after *overflow*
+         abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]  = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]+ \
                                                                          abstimer_vars.radiotimer_compare_offset;
       }
       
@@ -424,7 +388,7 @@ uint8_t radiotimer_isr() {
             abstimer_dbg.num_late_schedule++;
          }
       }
-   }
+   }//end loop
    
    // kick the OS
    return 1;
