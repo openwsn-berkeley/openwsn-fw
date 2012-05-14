@@ -76,7 +76,7 @@ void bsp_timer_init() {
 }
 
 void bsp_timer_set_callback(bsp_timer_cbt cb) {
-   abstimer_vars.callback[ABSTIMER_SRC_BSP_TIMER] = cb;
+   abstimer_vars.callback[ABSTIMER_SRC_BSP_TIMER]     = cb;
 }
 
 /*
@@ -91,13 +91,13 @@ void bsp_timer_reset() {
  */
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    //keep tics
-   abstimer_vars.bsp_timer_total=delayTicks;
+   abstimer_vars.bsp_timer_total                      = delayTicks;
    
    // set the compare value (since last one)
-   abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]   += delayTicks;
+   abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]  += delayTicks;
    
    // I'm using this timer
-   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]  = TRUE;
+   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]      = TRUE;
    
    // reschedule
    abstimer_reschedule();
@@ -109,13 +109,13 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
  */
 void bsp_timer_cancel_schedule() {
    //clear total tics.
-   abstimer_vars.bsp_timer_total=0;	
+   abstimer_vars.bsp_timer_total                      = 0;	
     
    //clear the compare value   
    abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]   = 0;
 	   
    // I'm not using this timer
-   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]  = FALSE;
+   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]      = FALSE;
    
    // reschedule
    abstimer_reschedule();
@@ -136,34 +136,34 @@ void radiotimer_init() {
 }
 
 void radiotimer_setOverflowCb(radiotimer_compare_cbt cb) {
-   abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_OVERFLOW] = cb;
+   abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]     = cb;
 }
 
 void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
-   abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_COMPARE] = cb;
+   abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_COMPARE]      = cb;
 }
 
 void radiotimer_setStartFrameCb(radiotimer_capture_cbt cb) {
-   abstimer_vars.radiotimer_startFrame_cb = cb;
+   abstimer_vars.radiotimer_startFrame_cb                       = cb;
 }
 
 void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
-   abstimer_vars.radiotimer_endFrame_cb = cb;
+   abstimer_vars.radiotimer_endFrame_cb                         = cb;
 }
 
 void radiotimer_start(uint16_t period) {
    
    // remember the period
-   abstimer_vars.radiotimer_period                            = period;
+   abstimer_vars.radiotimer_period                              = period;
 
    // remember previous overflow value
-   abstimer_vars.radiotimer_overflow_previousVal              = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
+   abstimer_vars.radiotimer_overflow_previousVal                = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
 
    // update the timer value (calculated as one period since the last one)
-   abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]   += abstimer_vars.radiotimer_period;
+   abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
    
    // I'm using this timer
-   abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]       = TRUE;
+   abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]      = TRUE;
    
    // reschedule
    abstimer_reschedule();
@@ -184,10 +184,10 @@ void radiotimer_setPeriod(uint16_t period) {
    abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
    
    //set the timeout in the future.
-   abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW] += abstimer_vars.radiotimer_period;
+   abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
    
    // I'm using this timer
-   abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]     = TRUE;
+   abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]      = TRUE;
    
    // reschedule
    abstimer_reschedule();
@@ -200,14 +200,14 @@ uint16_t radiotimer_getPeriod() {
 void radiotimer_schedule(uint16_t offset) {
   
    // remember the offset
-   abstimer_vars.radiotimer_compare_offset                    = offset;
+   abstimer_vars.radiotimer_compare_offset                      = offset;
    
    // set the compare value since previous *overflow*
-   abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]     = abstimer_vars.radiotimer_overflow_previousVal + \
-                                                             abstimer_vars.radiotimer_compare_offset;
+   abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]    = abstimer_vars.radiotimer_overflow_previousVal + \
+                                                                  abstimer_vars.radiotimer_compare_offset;
    
    // I'm using this timer
-   abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_COMPARE]        = TRUE;
+   abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_COMPARE]       = TRUE;
    
    // reschedule
    abstimer_reschedule();
@@ -218,7 +218,7 @@ void radiotimer_schedule(uint16_t offset) {
  * sets it to not running and reschedules.
  **/
 void radiotimer_cancel() {
-   abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_COMPARE]     = FALSE;
+   abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_COMPARE]       = FALSE;
 
    abstimer_reschedule();
 }
@@ -298,10 +298,10 @@ uint16_t abstimer_reschedule() {
                 found==FALSE ||
                 thisDist<minDist
              ) {
-            valToLoad              = abstimer_vars.compareVal[i];
-            minDist                = thisDist;
-            found                  = TRUE;
-            abstimer_vars.nextToFire  = (abstimer_src_t)i;
+            valToLoad                  = abstimer_vars.compareVal[i];
+            minDist                    = thisDist;
+            found                      = TRUE;
+            abstimer_vars.nextToFire   = (abstimer_src_t)i;
          }
       }
    }
@@ -309,7 +309,7 @@ uint16_t abstimer_reschedule() {
    // load that timer, if found
    if (found==TRUE) {
       sctimer_schedule(valToLoad);
-      abstimer_vars.nextCurrentTime = valToLoad;
+      abstimer_vars.nextCurrentTime    = valToLoad;
    }
    
    // return in how long the timer will fire
