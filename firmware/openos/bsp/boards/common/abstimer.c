@@ -13,6 +13,8 @@
 
 //=========================== defines =========================================
 
+#define ABSTIMER_GUARD_TICKS 2
+
 typedef void (*abstimer_cbt)(void);
 
 //=========================== variables =======================================
@@ -323,12 +325,8 @@ uint8_t bsp_timer_isr() {
 
 uint8_t radiotimer_isr() {
    uint8_t         i;                       // iterator
-   uint16_t        startTime;               // the value of the timer when this function starts running
-   uint16_t        timeToNextInterrupt;
+   uint16_t        timeSpent;
    uint8_t         bitmapInterruptsFired;
-   
-   // remember what time it is now
-   startTime                 = sctimer_getValue();
    
    // update the current theoretical time
    abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
@@ -351,51 +349,81 @@ uint8_t radiotimer_isr() {
       while(1);
    }
    
-   //==== step 2. Reschedule the timers which fired and need to be rescheduled
+   while (bitmapInterruptsFired!=0) {
    
-   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_BSP_TIMER)) {
-      // update debug stats
-      abstimer_dbg.num_bsp_timer++;
-      // no automatic rescheduling
-   }
-   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW)) {
-      // update debug stats
-      abstimer_dbg.num_radiotimer_overflow++;
-      //keep previous value
-      abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-      // this is a periodic timer, reschedule automatically
-      abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW] += abstimer_vars.radiotimer_period;
-   }
-   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_COMPARE)) {
-      // update debug stats
-         abstimer_dbg.num_radiotimer_compare++;
-         // reschedule automatically after *overflow*
-         abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]  = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]+ \
-                                                                      abstimer_vars.radiotimer_compare_offset;
-   }
-   
-   //===== step 3. call the callbacks of the timers that just fired
-   
-   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_BSP_TIMER)) {
-      abstimer_vars.callback[ABSTIMER_SRC_BSP_TIMER]();
-   }
-   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW)) {
-      abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]();
-   }
-   if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_COMPARE)) {
-      abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_COMPARE]();
-   }
-   
-   //===== step 4. schedule the next operation
-   
-   timeToNextInterrupt       = abstimer_reschedule();
-   
-   //===== step 5. make sure I'm not late for my next schedule
-   while ((sctimer_getValue()-startTime)>timeToNextInterrupt) {
-      // I've already passed the interrupt I was supposed to schedule
+      //==== step 2. Reschedule the timers which fired and need to be rescheduled
       
-      // update debug statistics
-      abstimer_dbg.num_late_schedule++;
+      if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_BSP_TIMER)) {
+         // update debug stats
+         abstimer_dbg.num_bsp_timer++;
+         // no automatic rescheduling
+      }
+      if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW)) {
+         // update debug stats
+         abstimer_dbg.num_radiotimer_overflow++;
+         //keep previous value
+         abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
+         // this is a periodic timer, reschedule automatically
+         abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW] += abstimer_vars.radiotimer_period;
+      }
+      if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_COMPARE)) {
+         // update debug stats
+            abstimer_dbg.num_radiotimer_compare++;
+            // reschedule automatically after *overflow*
+            abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]  = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]+ \
+                                                                         abstimer_vars.radiotimer_compare_offset;
+      }
+      
+      //===== step 3. call the callbacks of the timers that just fired
+      
+      if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_BSP_TIMER)) {
+         // call the callback
+         abstimer_vars.callback[ABSTIMER_SRC_BSP_TIMER]();
+         // clear the interrupt flag
+         bitmapInterruptsFired &= ~(1<<ABSTIMER_SRC_BSP_TIMER);
+      }
+      if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW)) {
+         // call the callback
+         abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]();
+         // clear the interrupt flag
+         bitmapInterruptsFired &= ~(1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW);
+      }
+      if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_COMPARE)) {
+         // call the callback
+         abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_COMPARE]();
+         // clear the interrupt flag
+         bitmapInterruptsFired &= ~(1<<ABSTIMER_SRC_RADIOTIMER_COMPARE);
+      }
+      
+      // make sure all interrupts have been handled
+      if (bitmapInterruptsFired!=0) {
+         while(1);
+      }
+      
+      //===== step 4. schedule the next operation
+      
+      abstimer_reschedule();
+      
+      //===== step 5. make sure I'm not late for my next schedule
+      
+      // evaluate how much time has passed since theoretical currentTime
+      // (over estimate by ABSTIMER_GUARD_TICKS)
+      timeSpent = sctimer_getValue()-abstimer_vars.currentTime+ABSTIMER_GUARD_TICKS;
+      
+      // verify that, for each timer, that duration doesn't exceed how much time is left
+      bitmapInterruptsFired = 0;
+      for (i=0;i<ABSTIMER_SRC_MAX;i++) {
+         if (
+               (abstimer_vars.isArmed[i]==TRUE) &&
+               (timeSpent>(abstimer_vars.compareVal[i]-abstimer_vars.currentTime))
+            ) {
+            // this interrupt needs to be serviced now
+            bitmapInterruptsFired |= (1<<i);
+               
+            // update debug statistics
+            abstimer_dbg.num_late_schedule++;
+         }
+      }
    }
    
    // kick the OS
