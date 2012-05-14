@@ -76,7 +76,7 @@ void bsp_timer_init() {
 }
 
 void bsp_timer_set_callback(bsp_timer_cbt cb) {
-   abstimer_vars.callback[ABSTIMER_SRC_BSP_TIMER]     = cb;
+   abstimer_vars.callback[ABSTIMER_SRC_BSP_TIMER]               = cb;
 }
 
 /*
@@ -91,13 +91,13 @@ void bsp_timer_reset() {
  */
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    //keep tics
-   abstimer_vars.bsp_timer_total                      = delayTicks;
+   abstimer_vars.bsp_timer_total                                = delayTicks;
    
    // set the compare value (since last one)
-   abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]  += delayTicks;
+   abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]            += delayTicks;
    
    // I'm using this timer
-   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]      = TRUE;
+   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]                = TRUE;
    
    // reschedule
    abstimer_reschedule();
@@ -109,13 +109,13 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
  */
 void bsp_timer_cancel_schedule() {
    //clear total tics.
-   abstimer_vars.bsp_timer_total                      = 0;	
+   abstimer_vars.bsp_timer_total                                = 0;
     
    //clear the compare value   
-   abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]   = 0;
+   abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]             = 0;
 	   
    // I'm not using this timer
-   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]      = FALSE;
+   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]                = FALSE;
    
    // reschedule
    abstimer_reschedule();
