@@ -1970,6 +1970,9 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
       </file>
     </group>
+    <group>
+      <name>chips</name>
+    </group>
   </group>
 </project>
 
