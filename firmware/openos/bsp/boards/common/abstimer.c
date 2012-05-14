@@ -234,6 +234,10 @@ void abstimer_init() {
       // start the HW timer
       sctimer_init();
       
+      //set callback in case the hardware timer needs it. IAR based projects use pragma to bind it.
+      
+      sctimer_setCb(radiotimer_isr);
+      
       // declare as initialized
       abstimer_vars.initialized = TRUE;
    }
