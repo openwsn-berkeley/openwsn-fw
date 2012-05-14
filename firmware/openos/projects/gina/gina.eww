@@ -26,6 +26,12 @@
     <path>$WS_DIR$\01bsp_bsp_timer_alt\01bsp_bsp_timer_alt.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\01bsp_closetimers\01bsp_closetimers.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_closetimers_alt\01bsp_closetimers_alt.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
   </project>
   <project>
