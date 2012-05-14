@@ -1889,7 +1889,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\01bsp_debugpins.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_debugpins\01bsp_debugpins.c</name>
     </file>
   </group>
   <group>
