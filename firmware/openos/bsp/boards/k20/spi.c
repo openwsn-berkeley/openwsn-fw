@@ -56,7 +56,7 @@ void spi_init() {
 	uint8_t     pasc;
 	uint8_t     cssck;
 	uint8_t     pcssck;
- 
+
 	memset(&spi_vars,0,sizeof(spi_vars_t));
 	if(periph_clk_khz < SPI_SPEED_KHZ){                            
 		return;//error
@@ -79,31 +79,23 @@ void spi_init() {
 		return;
 	}
 
-
-	//init clock?? TODO
+	//init clock
 	SIM_SCGC6 |= (SIM_SCGC6_SPI0_MASK);//power SPI0
 
-	// configure SPI-related pins //??TODO
+	// configure SPI-related pins 
 	PORTD_PCR0 = PORT_PCR_MUX(2);//CS0
 	PORTD_PCR1 = PORT_PCR_MUX(2);//CLK 
 	PORTD_PCR2 = PORT_PCR_MUX(2);//MOSI 
 	PORTD_PCR3 = PORT_PCR_MUX(2);//MISO
-	
-//	PORTD_PCR0 |= PORT_PCR_DSE_MASK;//DSE high in CS0 as it is output
-//	PORTD_PCR1 |= PORT_PCR_DSE_MASK;//DSE high in CLK as it is output
-//	PORTD_PCR2 |= PORT_PCR_DSE_MASK;//DSE high in MOSI as it is output
-//	//not in MISO as it is input.
-	
-	
-	
+
 	SPI0_MCR   = SPI_MCR_MSTR_MASK | SPI_MCR_DIS_RXF_MASK |  /* Configure SPI as master. Disable rx/tx fifos. Set */
 			SPI_MCR_DIS_TXF_MASK | SPI_MCR_ROOE_MASK |  /* overwrite incoming data. Set state to STOPPED.    */ 
 			SPI_MCR_HALT_MASK |
 			SPI_MCR_PCSIS_MASK;                         /* Chipselects inactive high                         */
 
-	 /* SPI0_TCR: SPI_TCNT=0 */
+	/* SPI0_TCR: SPI_TCNT=0 */
 	SPI0_TCR = (uint32_t)0x00UL;     
-	 /* SPI0_RSER: TCF_RE=0,EOQF_RE=0,TFUF_RE=0,TFFF_RE=0,TFFF_DIRS=0,RFOF_RE=0,RFDF_RE=0,RFDF_DIRS=0 */
+	/* SPI0_RSER: TCF_RE=0,EOQF_RE=0,TFUF_RE=0,TFFF_RE=0,TFFF_DIRS=0,RFOF_RE=0,RFDF_RE=0,RFDF_DIRS=0 */
 	SPI0_RSER  = (uint32_t)0x00UL;                               /* Disable interrupts and DMA.                       */
 	/* Configure exclusive port CTAR                     */
 	SPI0_CTAR0 |= SPI_CTAR_FMSZ(8-1)     | /* See note #1                                       */
@@ -121,8 +113,8 @@ void spi_init() {
 	SPI0_SR       = SPI_SR_EOQF_MASK|SPI_SR_TCF_MASK|SPI_SR_TFUF_MASK|SPI_SR_TFFF_MASK|SPI_SR_RFOF_MASK|SPI_SR_RFDF_MASK;             
 	/* Set RUNNING state.                                */
 	SPI0_MCR    &= ~SPI_MCR_HALT_MASK; /* SPI0_MCR: HALT=0 */
- 
-       
+
+
 	// enable interrupts via the IEx SFRs
 #ifdef SPI_IN_INTERRUPT_MODE
 	//TODO                      // we only enable the SPI RX interrupt
@@ -145,9 +137,9 @@ void spi_txrx(uint8_t*     bufTx,
 		uint8_t      maxLenBufRx,
 		spi_first_t  isFirst,
 		spi_last_t   isLast) {
-	 
+
 	uint32_t  cont_trans_mask;
-	 
+
 #ifdef SPI_IN_INTERRUPT_MODE
 	// disable interrupts
 	__disable_interrupt();
@@ -175,31 +167,30 @@ void spi_txrx(uint8_t*     bufTx,
 	// implementation 1. use a callback function when transaction finishes
 
 	// write first byte to TX buffer
-	UCA0TXBUF                 = *spi_vars.pNextTxByte;
+	SPI0_PUSHR                 = *spi_vars.pNextTxByte;
 
 	// re-enable interrupts
 	__enable_interrupt();
 #else
 	// implementation 2. busy wait for each byte to be sent
-    /* Decide whether to return PCSn signals to inactive.   */
-    cont_trans_mask = TRUE == spi_vars.isLast ? 0x00000000u : SPI_PUSHR_CONT_MASK;
+	/* Decide whether to return PCSn signals to inactive.   */
+	cont_trans_mask = TRUE == spi_vars.isLast ? 0x00000000u : SPI_PUSHR_CONT_MASK;
 	// send all bytes
 	while (spi_vars.txBytesLeft>0) {
 		// write next byte to TX buffer
 		while (! (SPI0_SR & SPI_SR_TFFF_MASK)) { };           /* wait write buffer not full flag                      */
 		SPI0_SR    = SPI_SR_RFOF_MASK | SPI_SR_TCF_MASK       /* Clear all flags.                                     */
-		                  | SPI_SR_TFFF_MASK | SPI_SR_RFDF_MASK;
+				| SPI_SR_TFFF_MASK | SPI_SR_RFDF_MASK;
 
 		SPI0_PUSHR = SPI_PUSHR_CTAS(0)   /* Transmit data.                                       */
-		                   | cont_trans_mask
-		                   | SPI_PUSHR_PCS(0) 
-		                   | *spi_vars.pNextTxByte;        
-		
-		    while (! (SPI0_SR & SPI_SR_TCF_MASK)) {}
-		    while (! (SPI0_SR & SPI_SR_RFDF_MASK)) {}             /* wait read buffer not empty flag                      */
-		    
-		    
-		    
+		                		   | cont_trans_mask
+		                		   | SPI_PUSHR_PCS(0) 
+		                		   | *spi_vars.pNextTxByte;        
+
+		while (! (SPI0_SR & SPI_SR_TCF_MASK)) {}
+		while (! (SPI0_SR & SPI_SR_RFDF_MASK)) {}             /* wait read buffer not empty flag                      */
+
+
 		// save the byte just received in the RX buffer
 		switch (spi_vars.returnType) {
 		case SPI_FIRSTBYTE:
@@ -223,7 +214,7 @@ void spi_txrx(uint8_t*     bufTx,
 
 	// put CS signal high to signal end of transmission to slave
 	if (spi_vars.isLast==SPI_LAST) {
-	//	P4OUT                 |=  0x01;
+		//	P4OUT                 |=  0x01;
 	}
 
 	// SPI is not busy anymore
@@ -241,15 +232,15 @@ uint8_t spi_isr() {
 	switch (spi_vars.returnType) {
 	case SPI_FIRSTBYTE:
 		if (spi_vars.numTxedBytes==0) {
-			*spi_vars.pNextRxByte = UCA0RXBUF;
+			*spi_vars.pNextRxByte = SPI0_POPR;
 		}
 		break;
 	case SPI_BUFFER:
-		*spi_vars.pNextRxByte    = UCA0RXBUF;
+		*spi_vars.pNextRxByte    = SPI0_POPR;
 		spi_vars.pNextRxByte++;
 		break;
 	case SPI_LASTBYTE:
-		*spi_vars.pNextRxByte    = UCA0RXBUF;
+		*spi_vars.pNextRxByte    = SPI0_POPR;
 		break;
 	}
 
@@ -260,11 +251,11 @@ uint8_t spi_isr() {
 
 	if (spi_vars.txBytesLeft>0) {
 		// write next byte to TX buffer
-		UCA0TXBUF              = *spi_vars.pNextTxByte;
+		SPI0_PUSHR              = *spi_vars.pNextTxByte;
 	} else {
 		// put CS signal high to signal end of transmission to slave
 		if (spi_vars.isLast==SPI_LAST) {
-			P4OUT              |=  0x01;
+			//TODO
 		}
 		// SPI is not busy anymore
 		spi_vars.busy          =  0;

@@ -67,8 +67,11 @@ static const uint8_t infoRadioName[] = "AT86RF231";
  MK20D72 NVIC isr numbers - pag 65-68 manual.
  */
 #define LLWU_IRQ_NUM                             21
+#define SPI0_IRQ_NUM                             26
 #define UART1_IRQ_NUM                            47 //see page 67 of the manual
 #define LPTMR_IRQ_NUM                            85
+
+
 
 /*
    ISR prototypes
@@ -77,6 +80,6 @@ static const uint8_t infoRadioName[] = "AT86RF231";
 void lptmr_isr(void);
 void llwu_isr(void);
 void uart_isr(void);
-
+extern uint8_t spi_isr(void);  //defined in spi.h. for compatibility reasons is kept there.
 
 #endif /* _BOARD_INFO_H */
