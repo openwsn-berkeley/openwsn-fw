@@ -13,8 +13,8 @@
 
 
 typedef struct {
-   uart_tx_cbt txCb;
-   uart_rx_cbt rxCb;
+	uart_tx_cbt txCb;
+	uart_rx_cbt rxCb;
 } uart_vars_t;
 
 
@@ -22,10 +22,10 @@ uart_vars_t uart_vars;
 
 
 void private_uart_init (UART_MemMapPtr uartch, int sysclk, int baud);
+extern void uart_isr(void);
+
+
 extern  core_clk_khz;
-
-
-
 /********************************************************************/
 /*
  * Initialize the UART for 8N1 operation, interrupts disabled, and
@@ -42,92 +42,97 @@ extern  core_clk_khz;
  */
 void private_uart_init (UART_MemMapPtr uartch, int sysclk, int baud)
 {
-    uint16_t sbr, brfa;
-    uint8_t temp;
-    
-	/* Enable the clock to the selected UART */    
-    if(uartch == UART0_BASE_PTR)
-		SIM_SCGC4 |= SIM_SCGC4_UART0_MASK;
-    else
-    	if (uartch == UART1_BASE_PTR)
-			SIM_SCGC4 |= SIM_SCGC4_UART1_MASK;
-    	else
-    		if (uartch == UART2_BASE_PTR)
-    			SIM_SCGC4 |= SIM_SCGC4_UART2_MASK;
-    		else
-    			if(uartch == UART3_BASE_PTR)
-    				SIM_SCGC4 |= SIM_SCGC4_UART3_MASK;
-    			else
-    				if(uartch == UART4_BASE_PTR)
-    					SIM_SCGC1 |= SIM_SCGC1_UART4_MASK;					
-                                
-    /* Make sure that the transmitter and receiver are disabled while we 
-     * change settings.
-     */
-    UART_C2_REG(uartch) &= ~(UART_C2_TE_MASK
-				| UART_C2_RE_MASK );
+	uint16_t sbr, brfa;
+	uint8_t temp,txsize;
 
-    /* Configure the UART for 8-bit mode, no parity */
-    UART_C1_REG(uartch) = 0;	/* We need all default settings, so entire register is cleared */
-    
-    /* Calculate baud settings */
-    sbr = (uint16_t)((sysclk*1000)/(baud * 16));
-        
-    /* Save off the current value of the UARTx_BDH except for the SBR field */
-    temp = UART_BDH_REG(uartch) & ~(UART_BDH_SBR(0x1F));
-    
-    UART_BDH_REG(uartch) = temp |  UART_BDH_SBR(((sbr & 0x1F00) >> 8));
-    UART_BDL_REG(uartch) = (uint8_t)(sbr & UART_BDL_SBR_MASK);
-    
-    /* Determine if a fractional divider is needed to get closer to the baud rate */
-    brfa = (((sysclk*32000)/(baud * 16)) - (sbr * 32));
-    
-    /* Save off the current value of the UARTx_C4 register except for the BRFA field */
-    temp = UART_C4_REG(uartch) & ~(UART_C4_BRFA(0x1F));
-    
-    UART_C4_REG(uartch) = temp |  UART_C4_BRFA(brfa);    
-    
-    enable_irq(INT_UART1_RX_TX);
-    
-    /* Enable receiver and transmitter */
-	UART_C2_REG(uartch) |= (UART_C2_TE_MASK| UART_C2_RE_MASK );
-	
-	
+	/* Enable the clock to the selected UART */    
+	if(uartch == UART0_BASE_PTR)
+		SIM_SCGC4 |= SIM_SCGC4_UART0_MASK;
+	else
+		if (uartch == UART1_BASE_PTR)
+			SIM_SCGC4 |= SIM_SCGC4_UART1_MASK;
+		else
+			if (uartch == UART2_BASE_PTR)
+				SIM_SCGC4 |= SIM_SCGC4_UART2_MASK;
+			else
+				if(uartch == UART3_BASE_PTR)
+					SIM_SCGC4 |= SIM_SCGC4_UART3_MASK;
+				else
+					if(uartch == UART4_BASE_PTR)
+						SIM_SCGC1 |= SIM_SCGC1_UART4_MASK;					
+
+	/* Make sure that the transmitter and receiver are disabled while we 
+	 * change settings.
+	 */
+	UART_C2_REG(uartch) &= ~(UART_C2_TE_MASK| UART_C2_RE_MASK );
+
+	/* Configure the UART for 8-bit mode, no parity */
+	UART_C1_REG(uartch) = 0;	/* We need all default settings, so entire register is cleared */
+	UART_C3_REG(uartch) = 0;
+
+	/* Calculate baud settings */
+	sbr = (uint16_t)((sysclk*1000)/(baud * 16));
+
+	/* Save off the current value of the UARTx_BDH except for the SBR field */
+	temp = UART_BDH_REG(uartch) & ~(UART_BDH_SBR(0x1F));
+
+	UART_BDH_REG(uartch) = temp |  UART_BDH_SBR(((sbr & 0x1F00) >> 8));
+	UART_BDL_REG(uartch) = (uint8_t)(sbr & UART_BDL_SBR_MASK);
+
+	/* Determine if a fractional divider is needed to get closer to the baud rate */
+	brfa = (((sysclk*32000)/(baud * 16)) - (sbr * 32));
+
+	/* Save off the current value of the UARTx_C4 register except for the BRFA field */
+	temp = UART_C4_REG(uartch) & ~(UART_C4_BRFA(0x1F));
+
+	UART_C4_REG(uartch) = temp |  UART_C4_BRFA(brfa);  
+
+	UART_C5_REG(uartch) = 0; //use interrupt not dma.
+
+
+	/* set watermark in the almost full TX buffer */
+	if ((( UART_PFIFO_REG(uartch) & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT) == 0) {
+		/* 1 dataword in D */
+		UART_TWFIFO_REG(uartch) = UART_TWFIFO_TXWATER(0);
+	}
+	else {
+		txsize = 1 << (((UART_PFIFO_REG(uartch)& UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT) + 1);
+		/* watermark for TX buffer generates interrupts below & equal to watermark */
+		txsize-=1;
+		UART_TWFIFO_REG(uartch) = UART_TWFIFO_TXWATER(txsize);
+	}
+
+
+	UART_RWFIFO_REG(uartch) |= UART_RWFIFO_RXWATER(1); //rx buffer is 1 byte
+
+	UART_CFIFO_REG(uartch)   |=UART_CFIFO_RXFLUSH_MASK|UART_CFIFO_TXFLUSH_MASK; //flush buffers
+
+	UART_PFIFO_REG(uartch)   |= UART_PFIFO_RXFE_MASK; //enable fifo
+	UART_PFIFO_REG(uartch)   |= UART_PFIFO_TXFE_MASK; //enable fifo
+
+	UART_S1_REG(uartch);//clear isr flags
+
+	//see page 67 of the manual
+	enable_irq(UART1_IRQ_NUM);
+
+	/* Enable receiver and transmitter */
+	UART_C2_REG(uartch) |= (UART_C2_TE_MASK| UART_C2_RE_MASK /*|UART_C2_TCIE_MASK|UART_C2_ILIE_MASK*/);
 }
 
 
 void uart_init ( )
 {
-	 
-	 memset(&uart_vars,0,sizeof(uart_vars_t));
-	 
-	 PORTE_PCR0 = PORT_PCR_MUX(0x3); // UART is alt3 function for this pin
-	 	
-	   		/* Enable the UART1_RXD function on PTE1 */
-	 PORTE_PCR1 = PORT_PCR_MUX(0x3); // UART is alt3 function for this pin
-	 
-	 
-	 private_uart_init(UART1_BASE_PTR,core_clk_khz,115200);
-}
-/********************************************************************/
-/*
- * Wait for a character to be received on the specified UART
- *
- * Parameters:
- *  channel      UART channel to read from
- *
- * Return Values:
- *  the received character
- */
-char uart_getchar (UART_MemMapPtr channel)
-{
-    /* Wait until character has been received */
-    while (!(UART_S1_REG(channel) & UART_S1_RDRF_MASK));
-    
-    /* Return the 8-bit data from the receiver */
-    return UART_D_REG(channel);
-}
 
+	memset(&uart_vars,0,sizeof(uart_vars_t));
+
+	PORTE_PCR0 = PORT_PCR_MUX(0x3); // UART is alt3 function for this pin
+
+	/* Enable the UART1_RXD function on PTE1 */
+	PORTE_PCR1 = PORT_PCR_MUX(0x3); // UART is alt3 function for this pin
+
+
+	private_uart_init(UART1_BASE_PTR,core_clk_khz,BAUD_RATE);
+}
 
 
 
@@ -137,8 +142,8 @@ char uart_getchar (UART_MemMapPtr channel)
 
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
-   uart_vars.txCb = txCb;
-   uart_vars.rxCb = rxCb;
+	uart_vars.txCb = txCb;
+	uart_vars.rxCb = rxCb;
 }
 
 void    uart_enableInterrupts(){
@@ -152,36 +157,38 @@ void    uart_disableInterrupts(){
 }
 
 void    uart_clearRxInterrupts(){
-    /* Wait until character has been received */
- //   while (!(UART_S1_REG(channel) & UART_S1_RDRF_MASK));//Receive Data Register Full Flag
-
+	/* Wait until character has been received */
+	//   while (!(UART_S1_REG(channel) & UART_S1_RDRF_MASK));//Receive Data Register Full Flag
 }
 
 void    uart_clearTxInterrupts(){
 	// while(!(UART_S1_REG(channel) & UART_S1_TDRE_MASK));//Transmit Data Register Empty Flag
-//done at the isr.
+	//done at the isr.
 }
 
-void    uart_writeByte(uint8_t byteToWrite){
+void uart_writeByte(uint8_t byteToWrite){
+	while(!(UART_S1_REG(UART1_BASE_PTR) & UART_S1_TC_MASK));
 	UART_D_REG(UART1_BASE_PTR) = byteToWrite;
+	// uart_isr_tx();
 }
 
 uint8_t uart_readByte(){
-  return UART_D_REG(UART1_BASE_PTR);
+	while (!(UART_S1_REG(UART1_BASE_PTR) & UART_S1_RDRF_MASK));
+	return  UART_D_REG(UART1_BASE_PTR); 
 }
 
 //=========================== interrupt handlers ==============================
 
 uint8_t uart_isr_tx() {
-   uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.txCb();
-   return 0;
+	uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
+	uart_vars.txCb();
+	return 0;
 }
 
 uint8_t uart_isr_rx() {
-   uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.rxCb();
-   return 0;
+	uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
+	uart_vars.rxCb();
+	return 0;
 }
 
 
@@ -189,16 +196,16 @@ void uart_isr(void)
 {
 	uint32_t reg=UART_S1_REG(UART1_BASE_PTR);
 	//this clears the interrupt so now we have to see which one is:
-	
+
 	//Receive Data Register Full Flag
 	if (reg>>UART_S1_RDRF_SHIFT & 0x1){
 		//rx
 		uart_isr_rx();
-		
 	}else if (reg>>UART_S1_TDRE_SHIFT & 0x1){
+		//tx
 		uart_isr_tx();
 	}else{
 		while(1); //to check what other isr happened.
 	}
-	
+
 }

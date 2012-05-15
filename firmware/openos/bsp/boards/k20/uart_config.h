@@ -7,5 +7,6 @@
 #ifndef UART_CONFIG_H_
 #define UART_CONFIG_H_
 
+#define BAUD_RATE 115200
 
 #endif /* UART_CONFIG_H_ */
