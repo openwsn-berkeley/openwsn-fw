@@ -59,7 +59,7 @@ void board_init() {
 	bsp_timer_init();
 	uart_init();
 	radiotimer_init();
-	//spi_init();
+	spi_init();
 	leds_all_off();
 }
 

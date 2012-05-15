@@ -60,6 +60,23 @@ static const uint8_t infoRadioName[] = "AT86RF231";
 
 //  radio RSTn 
 #define PORT_PIN_RADIO_RESET_HIGH()       
-#define PORT_PIN_RADIO_RESET_LOW()        
+#define PORT_PIN_RADIO_RESET_LOW()     
+
+
+/*
+ MK20D72 NVIC isr numbers - pag 65-68 manual.
+ */
+#define LLWU_IRQ_NUM                             21
+#define UART1_IRQ_NUM                            47 //see page 67 of the manual
+#define LPTMR_IRQ_NUM                            85
+
+/*
+   ISR prototypes
+ */
+
+void lptmr_isr(void);
+void llwu_isr(void);
+void uart_isr(void);
+
 
 #endif /* _BOARD_INFO_H */
