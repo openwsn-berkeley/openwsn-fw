@@ -7,7 +7,7 @@
 
 #include "derivative.h"
 #include "mcg.h"
-#include "lptmr.h"
+
 
 // global variables
 extern int core_clk_khz;
