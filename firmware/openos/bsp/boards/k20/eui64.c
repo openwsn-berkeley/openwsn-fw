@@ -14,7 +14,7 @@
 /**
  * Note that the UID provided by k20 is a 128 bytes unique identifier. 
  * The uid is constructed here by appending the fixed openwsn id numbers 14b 15b 92b with the lowest 8 bytes
- * mid low UID register and the 4 bytes of the Low UID register. This combination can lead to a non unique number.
+ * mid low UID register and the four  8 bytes groups of the Low UID register. This combination can lead to a non unique number.
  */
 
 void eui64_get(uint8_t* addressToWrite){
