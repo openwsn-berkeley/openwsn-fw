@@ -24,10 +24,23 @@ SConscript('firmware/openos/bsp/boards/pc/SConscript',
 SConscript('firmware/openos/drivers/common/SConscript',
            exports     = {'env':env},
            )
+# kernel
+SConscript('firmware/openos/kernel/openos/SConscript',
+           exports     = {'env':env},
+           )
 
 #===== projects
 # bsp
+SConscript('firmware/openos/projects/common/01bsp_bothtimers/SConscript',
+           exports     = {'env':env},
+           )
 SConscript('firmware/openos/projects/common/01bsp_bsp_timer/SConscript',
+           exports     = {'env':env},
+           )
+SConscript('firmware/openos/projects/common/01bsp_closetimers/SConscript',
+           exports     = {'env':env},
+           )
+SConscript('firmware/openos/projects/common/01bsp_debugpins/SConscript',
            exports     = {'env':env},
            )
 SConscript('firmware/openos/projects/common/01bsp_leds/SConscript',
@@ -46,9 +59,7 @@ SConscript('firmware/openos/projects/common/01bsp_uart/SConscript',
 SConscript('firmware/openos/projects/common/02drv_opentimers/SConscript',
            exports     = {'env':env},
            )
-'''
-# OpenOS
+# openos
 SConscript('firmware/openos/projects/common/03oos_openwsn/SConscript',
            exports     = {'env':env},
            )
-'''
