@@ -16,10 +16,10 @@
 #define PORT_TICS_PER_MS                    33
 
 
-#define CAPTURE_TIME()   
-#define DISABLE_INTERRUPTS() 
+#define CAPTURE_TIME()   //the timer does not have a capture register so do nothing
+#define DISABLE_INTERRUPTS() DisableInterrupts
 
-#define ENABLE_INTERRUPTS() 
+#define ENABLE_INTERRUPTS() EnableInterrupts
 
 
 
