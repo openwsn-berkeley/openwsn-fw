@@ -1,0 +1,8 @@
+/**
+\defgroup Scheduler Scheduler
+
+\brief Minimal FCFS scheduler for the GINA2.2b/c board.
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+\author Ankur Mehta <mehtank@eecs.berkeley.edu>, October 2010
+*/

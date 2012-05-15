@@ -1,0 +1,7 @@
+/**
+\defgroup ICMPv6 ICMPv6
+
+\brief ICMPv6 common definitions
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+*/

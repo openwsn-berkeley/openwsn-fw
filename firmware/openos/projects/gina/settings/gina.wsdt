@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<Workspace>
+  <ConfigDictionary>
+    
+    
+    
+  <CurrentConfigs><Project>00std_eui64/Debug</Project><Project>00std_leds_xtal/Debug</Project><Project>00std_timers/Debug</Project><Project>00std_uart/Debug</Project><Project>01bsp_radio/Debug</Project><Project>03oos_openwsn/Debug</Project><Project>02drv_opentimers/Debug</Project><Project>01bsp_leds/Debug</Project><Project>01bsp_uart/Debug</Project><Project>01bsp_spi/Debug</Project><Project>01bsp_timer/Debug</Project></CurrentConfigs><CurrentProj>03oos_openwsn</CurrentProj><OverviewSelected>1</OverviewSelected></ConfigDictionary>
+  <Desktop>
+    <Static>
+      <Workspace>
+        <ColumnWidths>
+          
+          
+          
+          
+        <Column0>234</Column0><Column1>6</Column1><Column2>27</Column2><Column3>0</Column3></ColumnWidths>
+      </Workspace>
+    <Build><ColumnWidth0>20</ColumnWidth0><ColumnWidth1>981</ColumnWidth1><ColumnWidth2>261</ColumnWidth2><ColumnWidth3>65</ColumnWidth3></Build><TerminalIO/><Find-in-Files><ColumnWidth0>632</ColumnWidth0><ColumnWidth1>67</ColumnWidth1><ColumnWidth2>806</ColumnWidth2></Find-in-Files><Debug-Log><ColumnWidth0>20</ColumnWidth0><ColumnWidth1>1308</ColumnWidth1></Debug-Log></Static>
+    <Windows>
+      
+    <Wnd0>
+        <Tabs>
+          <Tab>
+            <Identity>TabID-20925-30839</Identity>
+            <TabName>Workspace</TabName>
+            <Factory>Workspace</Factory>
+            <Session>
+              
+            <NodeDict><ExpandedNode>00std_eui64</ExpandedNode><ExpandedNode>&lt;ws&gt;</ExpandedNode><ExpandedNode>&lt;ws&gt;/03oos_openwsn</ExpandedNode><ExpandedNode>&lt;ws&gt;/03oos_openwsn/bsp</ExpandedNode><ExpandedNode>&lt;ws&gt;/03oos_openwsn/openwsn</ExpandedNode><ExpandedNode>&lt;ws&gt;/03oos_openwsn/openwsn/02a-MAClow</ExpandedNode><ExpandedNode>&lt;ws&gt;/03oos_openwsn/openwsn/02b-MAChigh</ExpandedNode></NodeDict></Session>
+          </Tab>
+        </Tabs>
+        
+      <SelectedTab>0</SelectedTab></Wnd0><Wnd1><Tabs><Tab><Identity>TabID-24843-23951</Identity><TabName>Build</TabName><Factory>Build</Factory><Session/></Tab><Tab><Identity>TabID-13885-21146</Identity><TabName>Find in Files</TabName><Factory>Find-in-Files</Factory><Session/></Tab><Tab><Identity>TabID-8135-26371</Identity><TabName>Debug Log</TabName><Factory>Debug-Log</Factory><Session/></Tab></Tabs><SelectedTab>0</SelectedTab></Wnd1></Windows>
+    <Editor>
+      
+      
+      
+      
+    <Pane><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\bsp\boards\gina\debugpins.c</Filename><XPos>0</XPos><YPos>79</YPos><SelStart>1705</SelStart><SelEnd>1705</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\openwsn\07-App\rex\rex.c</Filename><XPos>0</XPos><YPos>6</YPos><SelStart>402</SelStart><SelEnd>403</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\common\03oos_openwsn\openwsn_proj.c</Filename><XPos>0</XPos><YPos>7</YPos><SelStart>393</SelStart><SelEnd>393</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\..\..\..\..\..\..\Program Files (x86)\IAR Systems\Embedded Workbench 6.0\430\inc\msp430x26x.h</Filename><XPos>0</XPos><YPos>347</YPos><SelStart>16767</SelStart><SelEnd>16767</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\drivers\gina\ADC_Channel.c</Filename><XPos>0</XPos><YPos>42</YPos><SelStart>1811</SelStart><SelEnd>1811</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\openwsn\02a-MAClow\IEEE802154E.c</Filename><XPos>0</XPos><YPos>397</YPos><SelStart>12002</SelStart><SelEnd>12002</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\bsp\chips\at86rf231\radio.c</Filename><XPos>0</XPos><YPos>153</YPos><SelStart>4767</SelStart><SelEnd>4767</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\bsp\boards\gina\board.c</Filename><XPos>0</XPos><YPos>66</YPos><SelStart>1882</SelStart><SelEnd>1882</SelEnd></Tab><ActiveTab>7</ActiveTab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\bsp\chips\at86rf231\at86rf231.h</Filename><XPos>0</XPos><YPos>36</YPos><SelStart>1846</SelStart><SelEnd>1846</SelEnd></Tab><Tab><Factory>TextEditor</Factory><Filename>$WS_DIR$\..\..\drivers\gina\sensitive_accel_temperature.c</Filename><XPos>0</XPos><YPos>36</YPos><SelStart>2080</SelStart><SelEnd>2080</SelEnd></Tab></Pane><ActivePane>0</ActivePane><Sizes><Pane><X>1000000</X><Y>1000000</Y></Pane></Sizes><SplitMode>1</SplitMode></Editor>
+    <Positions>
+      
+      
+      
+      
+      
+    <Top><Row0><Sizes><Toolbar-0027ee78><key>iaridepm.enu1</key></Toolbar-0027ee78></Sizes></Row0><Row1><Sizes/></Row1><Row2><Sizes/></Row2><Row3><Sizes/></Row3><Row4><Sizes/></Row4><Row5><Sizes/></Row5><Row6><Sizes/></Row6><Row7><Sizes/></Row7><Row8><Sizes/></Row8><Row9><Sizes/></Row9><Row10><Sizes/></Row10><Row11><Sizes/></Row11><Row12><Sizes/></Row12><Row13><Sizes/></Row13><Row14><Sizes/></Row14><Row15><Sizes/></Row15><Row16><Sizes/></Row16><Row17><Sizes/></Row17></Top><Left><Row0><Sizes><Wnd0><Rect><Top>-2</Top><Left>-2</Left><Bottom>401</Bottom><Right>303</Right><x>-2</x><y>-2</y><xscreen>242</xscreen><yscreen>255</yscreen><sizeHorzCX>177160</sizeHorzCX><sizeHorzCY>371720</sizeHorzCY><sizeVertCX>223280</sizeVertCX><sizeVertCY>587464</sizeVertCY></Rect></Wnd0></Sizes></Row0></Left><Right><Row0><Sizes/></Row0></Right><Bottom><Row0><Sizes><Wnd1><Rect><Top>-2</Top><Left>-2</Left><Bottom>241</Bottom><Right>1368</Right><x>-2</x><y>-2</y><xscreen>1370</xscreen><yscreen>243</yscreen><sizeHorzCX>1002928</sizeHorzCX><sizeHorzCY>354227</sizeHorzCY><sizeVertCX>177160</sizeVertCX><sizeVertCY>371720</sizeVertCY></Rect></Wnd1></Sizes></Row0></Bottom><Float><Sizes/></Float></Positions>
+  </Desktop>
+</Workspace>
+
+

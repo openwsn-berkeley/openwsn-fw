@@ -1,0 +1,21 @@
+/**
+\defgroup Timers Timers
+
+\brief Driver for the general purpose timers.
+
+This file drives all timers off of TimerB clocked from the 32kHz crystal, in
+continuous mode.
+
+It's a really simple implementation, in which each module which needs a timer
+is assigned one of the 7 TimerB compare registers. This means that at most 7
+modules can be assigned a timer.
+
+When we'll need more, we'll have implement some software fanciness which will
+run all timer off of a single compare register, offer dynamic timer creation,
+etc, etc.
+
+For now, KISS.
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+\author Ankur Mehta <mehtank@eecs.berkeley.edu>, October 2010
+*/

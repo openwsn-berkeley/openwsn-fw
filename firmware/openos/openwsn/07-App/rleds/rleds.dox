@@ -1,0 +1,7 @@
+/**
+\defgroup netLeds netLeds
+
+\brief UDP LEDs application
+
+\author Ankur Mehta <mehtank@eecs.berkeley.edu>, September 2010
+*/

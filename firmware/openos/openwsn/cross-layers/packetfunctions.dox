@@ -1,0 +1,7 @@
+/**
+\defgroup PacketFunctions PacketFunctions
+
+\brief A library of functions useful for manipulating packets and addresses
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+*/

@@ -1,0 +1,8 @@
+/**
+\defgroup Heli Heli
+
+\brief UDP Helicopter application
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, September 2010
+\author Ankur Mehta <mehtank@eecs.berkeley.edu>, September 2010
+*/

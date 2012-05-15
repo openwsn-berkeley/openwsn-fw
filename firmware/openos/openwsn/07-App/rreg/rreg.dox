@@ -1,0 +1,7 @@
+/**
+\defgroup rReg rReg
+
+\brief CoAP RD registration application
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, October 2011
+*/

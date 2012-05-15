@@ -1,0 +1,8 @@
+/**
+\defgroup IEEE802154 IEEE802154
+
+\brief IEEE802.15.4 header manipulation funtions
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2011
+
+*/

@@ -1,0 +1,980 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<html>
+<head>
+<title>XLINK Map File for "C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Exe\03oos_openwsn"</title>
+</head>
+<body bgcolor="#dde2a0" text=black>
+<h2 align=center>XLINK Map File for "C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Exe\03oos_openwsn"</h2>
+<h3 align=center>IAR Universal Linker V5.2.1.11</h3>
+<h4 align=center>Copyright (C) 1987-2011 IAR Systems AB.</h4>
+
+<B>Warning[w6]: </B>Type conflict for external/entry "ADC_enable", in module rex against external/entry in module ADC_Channel; function return types are different; different basic types<BR>
+<PRE>
+  /* In module rex: */
+  /* K&R Function, args 0, attr 0 */
+  int (__cc_version2 ADC_enable)();
+  /* In module ADC_Channel: */
+  /* K&R Function, args 0, attr 0 */
+  void (__cc_version2 ADC_enable)();
+</PRE>
+<p align=center>
+<a href="#Invocation Map">Invocation</a>
+&nbsp;&nbsp;<a href="#Program Entry">Program Entry</a>
+&nbsp;&nbsp;<a href="#Module Summary">Module Summary</a>
+&nbsp;&nbsp;<a href="#Segments in Address Order">Segment Map</a>
+&nbsp;&nbsp;<a href="#Memory Summary">Memory Summary</a>
+<p><hr>
+<p><a name="Invocation Map"></a><table>
+<tr valign=top>
+  <td><font size=2><b>Link&nbsp;time</font></b>
+  <td><font size=2>10/May/2012  22:59:42</font>
+<tr valign=top>
+  <td><font size=2><b>Target&nbsp;CPU</font></b>
+  <td><font size=2>MSP430</font>
+<tr valign=top>
+  <td><font size=2><b>List&nbsp;file</font></b>
+  <td><font size=2>C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\List\03oos_openwsn.html</font>
+<tr valign=top>
+  <td><font size=2><b>Output&nbsp;file&nbsp;1</font></b>
+  <td><font size=2>C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Exe\03oos_openwsn.d43</font>
+<tr valign=top>
+  <td><font size=2><b></font></b>
+  <td><font size=2>Format: debug</font>
+<tr valign=top>
+  <td><font size=2><b></font></b>
+  <td><font size=2>UBROF version 10.0.6</font>
+<tr valign=top>
+  <td><font size=2><b></font></b>
+  <td><font size=2>Using library modules for C-SPY (-rt)</font>
+<tr valign=top>
+  <td><font size=2><b>Command&nbsp;line</font></b>
+  <td><font size=2></font>
+<code>C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\ADC_Channel.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\IEEE802154.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\IEEE802154E.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\board.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\bsp_timer.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\debugpins.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\eui64.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\forwarding.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\gyro.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\i2c.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\icmpv6.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\icmpv6echo.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\icmpv6router.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\icmpv6rpl.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\idmanager.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\iphc.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\large_range_accel.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\leds.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\linkcost.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\magnetometer.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\neighbors.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\ohlone.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\ohlone_webpages.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\openbridge.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\opencoap.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\openqueue.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\openrandom.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\openserial.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\opentcp.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\opentimers.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\openudp.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\openwsn.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\openwsn_proj.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\packetfunctions.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\radio.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\radiotimer.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\res.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\rex.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\rheli.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\rinfo.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\rleds.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\rreg.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\rrube.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\rt.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\rwellknown.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\rxl1.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\schedule.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\scheduler.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\sensitive_accel_temperature.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\spi.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\tcpecho.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\tcpinject.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\tcpprint.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\uart.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\udpecho.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\udpinject.r43
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Obj\udpprint.r43
+<b>-o</b>
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\Exe\03oos_openwsn.d43
+<b>-l</b>
+C:\Users\David\Desktop\Trunk\firmware\openos\projects\gina\03oos_openwsn\Debug\List\03oos_openwsn.html
+<b>-x</b>snh
+<b>"-</b>"C:\Program Files (x86)\IAR Systems\Embedded Workbench 6.0\430\LIB\"
+<b>-f</b>
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 6.0\430\CONFIG\lnk430F2618.xcl"
+( <b>-c</b>msp430
+<b>-Q</b>CODE_I=CODE_ID
+<b>-Z</b>(DATA)DATA16_I,DATA16_Z,DATA16_N,DATA16_HEAP+_DATA16_HEAP_SIZE=1100-30FF
+<b>-Z</b>(DATA)CODE_I
+<b>-Z</b>(DATA)DATA20_I,DATA20_Z,DATA20_N,DATA20_HEAP+_DATA20_HEAP_SIZE
+<b>-Z</b>(DATA)CSTACK+_STACK_SIZE#
+<b>-Z</b>(CONST)INFO=1000-10FF
+<b>-Z</b>(CONST)INFOA=10C0-10FF
+<b>-Z</b>(CONST)INFOB=1080-10BF
+<b>-Z</b>(CONST)INFOC=1040-107F
+<b>-Z</b>(CONST)INFOD=1000-103F
+<b>-Z</b>(CODE)CSTART,ISR_CODE=3100-FFBF
+<b>-Z</b>(CONST)DATA16_C,DATA16_ID,DIFUNCT,CHECKSUM=3100-FFBF
+<b>-P</b>(CODE)CODE=3100-FFBF,10000-1FFFF
+<b>-Z</b>(CODE)CODE_ID
+<b>-Z</b>(CONST)DATA20_C,DATA20_ID=3100-FFBF,10000-1FFFF
+<b>-Z</b>(CODE)INTVEC=FFC0-FFFF
+<b>-Z</b>(CODE)RESET=FFFE-FFFF
+) <b>-f</b>
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 6.0\430\config\multiplier.xcl"
+( <b>-e</b>?Mul8Hw=?Mul8
+<b>-e</b>?Mul16Hw=?Mul16
+<b>-e</b>?Mul16to32uHw=?Mul16to32u
+<b>-e</b>?Mul16to32sHw=?Mul16to32s
+<b>-e</b>?Mul32Hw=?Mul32
+<b>-e</b>_Mul64iHw=_Mul64i
+<b>-e</b>_Mul32u32uto64iHw=_Mul32u32uto64i
+<b>-e</b>?Mul32fHw=_Mul32f
+<b>-e</b>_Mul64fHwPtr=_Mul64fPtr
+) <b>-D</b>_STACK_SIZE=50
+<b>-r</b>t
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 6.0\430\LIB\DLIB\dl430xsfn.r43"
+<b>-e</b>_PrintfLarge=_Printf
+<b>-e</b>_ScanfLarge=_Scanf
+<b>-D</b>_DATA16_HEAP_SIZE=50
+<b>-s</b>
+__program_start
+<b>-D</b>_DATA20_HEAP_SIZE=50
+</code>
+</table>
+
+
+
+<p><hr><a name="Program Entry"></a><p>
+       Program entry at :           3100  Relocatable, from module : ?cstart
+
+
+<p><hr><p>
+<a name="Runtime Model"></a>
+<table bgcolor="#c0c0" border=1 cellpadding=2>
+<tr>
+  <th align=center colspan=2><font size=4><B>Runtime Model</B>
+</font>
+<tr>
+  <th><font size=2>Attribute</font>
+  <th><font size=2>Value</font>
+<tr valign=top>
+  <td><font size=2>__Heap_Handler</font>
+  <td><font size=2>Basic</font>
+<tr valign=top>
+  <td><font size=2>__SystemLibrary</font>
+  <td><font size=2>DLib</font>
+<tr valign=top>
+  <td><font size=2>__core</font>
+  <td><font size=2>430X</font>
+<tr valign=top>
+  <td><font size=2>__data_model</font>
+  <td><font size=2>small</font>
+<tr valign=top>
+  <td><font size=2>__dlib_file_descriptor</font>
+  <td><font size=2>0</font>
+<tr valign=top>
+  <td><font size=2>__dlib_full_locale_support</font>
+  <td><font size=2>0</font>
+<tr valign=top>
+  <td><font size=2>__double_size</font>
+  <td><font size=2>32</font>
+<tr valign=top>
+  <td><font size=2>__pic</font>
+  <td><font size=2>no</font>
+<tr valign=top>
+  <td><font size=2>__reg_r4</font>
+  <td><font size=2>free</font>
+<tr valign=top>
+  <td><font size=2>__reg_r5</font>
+  <td><font size=2>free</font>
+<tr valign=top>
+  <td><font size=2>__rt_version</font>
+  <td><font size=2>3</font>
+</table>
+<p><hr><p>
+<h2><a name="Automatic Symbol Redirections">Automatic Symbol Redirections</a></h2>
+
+
+
+
+
+<p><hr><p>
+<h2><a name="Module Summary">Module Summary</a></h2>
+
+
+<table bgcolor="#d0d0d0" border=1 cellpadding=2>
+<tr>
+<th align=left valign=top><font size=2>Module</font></th>
+<th align=right valign=top><font size=2>CODE</font></th>
+<th colspan=2 valign=top><font size=2>DATA</font></th>
+<th align=right valign=top><font size=2>CONST</font></th>
+</tr>
+<tr>
+<td valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>(Rel)</font></td>
+<td align=right valign=top><font size=2>(Rel)</font></td>
+<td align=right valign=top><font size=2>(Abs)</font></td>
+<td align=right valign=top><font size=2>(Rel)</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?Cast32f32i</font></td>
+<td align=right valign=top><font size=2>146</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?CopyMemoryBytes</font></td>
+<td align=right valign=top><font size=2>16</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?CopyMemoryWords</font></td>
+<td align=right valign=top><font size=2>16</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?DivMod32u</font></td>
+<td align=right valign=top><font size=2>56</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?DivMod816s</font></td>
+<td align=right valign=top><font size=2>52</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?DivMod816u</font></td>
+<td align=right valign=top><font size=2>28</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?FLT_Extract</font></td>
+<td align=right valign=top><font size=2>76</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?IndCallR15</font></td>
+<td align=right valign=top><font size=2>4</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?IndCallR9</font></td>
+<td align=right valign=top><font size=2>4</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?Mul32Hw</font></td>
+<td align=right valign=top><font size=2>48</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?Mul32fHw</font></td>
+<td align=right valign=top><font size=2>306</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?__dbg_break</font></td>
+<td align=right valign=top><font size=2>2</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?__exit</font></td>
+<td align=right valign=top><font size=2>22</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?_exit</font></td>
+<td align=right valign=top><font size=2>4</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?cstart</font></td>
+<td align=right valign=top><font size=2>24</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?exit</font></td>
+<td align=right valign=top><font size=2>4</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?memcmp</font></td>
+<td align=right valign=top><font size=2>32</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?memcpy</font></td>
+<td align=right valign=top><font size=2>18</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?memset</font></td>
+<td align=right valign=top><font size=2>18</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?memzero</font></td>
+<td align=right valign=top><font size=2>18</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>?reset_vector</font></td>
+<td align=right valign=top><font size=2>2</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>ADC_Channel<br>&nbsp;&nbsp;+&nbsp;shared</font></td>
+<td align=right valign=top><font size=2>268</font></td>
+<td align=right valign=top><font size=2>1</font></td>
+<td align=right valign=top><font size=2>35<br>21</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>IEEE802154</font></td>
+<td align=right valign=top><font size=2>872</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>IEEE802154E<br>&nbsp;&nbsp;+&nbsp;shared</font></td>
+<td align=right valign=top><font size=2>4&nbsp;466</font></td>
+<td align=right valign=top><font size=2>42</font></td>
+<td align=right valign=top><font size=2><br>1</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>_Cast32fto32u</font></td>
+<td align=right valign=top><font size=2>12</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>_Div32f</font></td>
+<td align=right valign=top><font size=2>304</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>board<br>&nbsp;&nbsp;+&nbsp;shared<br>&nbsp;&nbsp;+&nbsp;common</font></td>
+<td align=right valign=top><font size=2>594<br>60</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>11<br>12</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>bsp_timer<br>&nbsp;&nbsp;+&nbsp;shared</font></td>
+<td align=right valign=top><font size=2>114</font></td>
+<td align=right valign=top><font size=2>6</font></td>
+<td align=right valign=top><font size=2>8<br>1</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>debugpins</font></td>
+<td align=right valign=top><font size=2>90</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>eui64</font></td>
+<td align=right valign=top><font size=2>10</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>1</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>forwarding</font></td>
+<td align=right valign=top><font size=2>440</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>gyro</font></td>
+<td align=right valign=top><font size=2>94</font></td>
+<td align=right valign=top><font size=2>7</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>i2c<br>&nbsp;&nbsp;+&nbsp;shared</font></td>
+<td align=right valign=top><font size=2>580</font></td>
+<td align=right valign=top><font size=2>65</font></td>
+<td align=right valign=top><font size=2>23<br>1</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>icmpv6</font></td>
+<td align=right valign=top><font size=2>214</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>icmpv6echo</font></td>
+<td align=right valign=top><font size=2>598</font></td>
+<td align=right valign=top><font size=2>20</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>icmpv6router</font></td>
+<td align=right valign=top><font size=2>482</font></td>
+<td align=right valign=top><font size=2>20</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>icmpv6rpl</font></td>
+<td align=right valign=top><font size=2>530</font></td>
+<td align=right valign=top><font size=2>26</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>idmanager</font></td>
+<td align=right valign=top><font size=2>844</font></td>
+<td align=right valign=top><font size=2>70</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>iphc</font></td>
+<td align=right valign=top><font size=2>1&nbsp;934</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>large_range_accel<br>&nbsp;&nbsp;+&nbsp;shared</font></td>
+<td align=right valign=top><font size=2>76</font></td>
+<td align=right valign=top><font size=2>3</font></td>
+<td align=right valign=top><font size=2>1<br>1</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>leds</font></td>
+<td align=right valign=top><font size=2>62</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>2</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>linkcost</font></td>
+<td align=right valign=top><font size=2>60</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>magnetometer</font></td>
+<td align=right valign=top><font size=2>76</font></td>
+<td align=right valign=top><font size=2>8</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>neighbors</font></td>
+<td align=right valign=top><font size=2>1&nbsp;654</font></td>
+<td align=right valign=top><font size=2>322</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>ohlone</font></td>
+<td align=right valign=top><font size=2>388</font></td>
+<td align=right valign=top><font size=2>54</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>10</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>ohlone_webpages</font></td>
+<td align=right valign=top><font size=2>60</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>23</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>openbridge</font></td>
+<td align=right valign=top><font size=2>216</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>opencoap</font></td>
+<td align=right valign=top><font size=2>1&nbsp;258</font></td>
+<td align=right valign=top><font size=2>8</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>openqueue</font></td>
+<td align=right valign=top><font size=2>976</font></td>
+<td align=right valign=top><font size=2>1&nbsp;960</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>openrandom</font></td>
+<td align=right valign=top><font size=2>104</font></td>
+<td align=right valign=top><font size=2>2</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>openserial</font></td>
+<td align=right valign=top><font size=2>1&nbsp;434</font></td>
+<td align=right valign=top><font size=2>524</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>opentcp</font></td>
+<td align=right valign=top><font size=2>3&nbsp;752</font></td>
+<td align=right valign=top><font size=2>38</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>opentimers</font></td>
+<td align=right valign=top><font size=2>756</font></td>
+<td align=right valign=top><font size=2>164</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>openudp</font></td>
+<td align=right valign=top><font size=2>628</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>openwsn</font></td>
+<td align=right valign=top><font size=2>116</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>openwsn_proj</font></td>
+<td align=right valign=top><font size=2>16</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>packetfunctions</font></td>
+<td align=right valign=top><font size=2>1&nbsp;574</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>radio</font></td>
+<td align=right valign=top><font size=2>1&nbsp;008</font></td>
+<td align=right valign=top><font size=2>10</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>radiotimer</font></td>
+<td align=right valign=top><font size=2>184</font></td>
+<td align=right valign=top><font size=2>8</font></td>
+<td align=right valign=top><font size=2>14</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>res</font></td>
+<td align=right valign=top><font size=2>728</font></td>
+<td align=right valign=top><font size=2>6</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>rex</font></td>
+<td align=right valign=top><font size=2>418</font></td>
+<td align=right valign=top><font size=2>58</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>20</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>rinfo</font></td>
+<td align=right valign=top><font size=2>308</font></td>
+<td align=right valign=top><font size=2>22</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>38</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>rleds</font></td>
+<td align=right valign=top><font size=2>220</font></td>
+<td align=right valign=top><font size=2>22</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>2</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>rwellknown</font></td>
+<td align=right valign=top><font size=2>144</font></td>
+<td align=right valign=top><font size=2>22</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>17</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>schedule</font></td>
+<td align=right valign=top><font size=2>1&nbsp;070</font></td>
+<td align=right valign=top><font size=2>332</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>scheduler</font></td>
+<td align=right valign=top><font size=2>210</font></td>
+<td align=right valign=top><font size=2>86</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>sensitive_accel_temperature</font></td>
+<td align=right valign=top><font size=2>14</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>1</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>spi</font></td>
+<td align=right valign=top><font size=2>242</font></td>
+<td align=right valign=top><font size=2>12</font></td>
+<td align=right valign=top><font size=2>6</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>tcpecho</font></td>
+<td align=right valign=top><font size=2>112</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>tcpinject</font></td>
+<td align=right valign=top><font size=2>372</font></td>
+<td align=right valign=top><font size=2>22</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>tcpprint</font></td>
+<td align=right valign=top><font size=2>40</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>uart</font></td>
+<td align=right valign=top><font size=2>128</font></td>
+<td align=right valign=top><font size=2>8</font></td>
+<td align=right valign=top><font size=2>6</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>udpecho</font></td>
+<td align=right valign=top><font size=2>102</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>udpinject</font></td>
+<td align=right valign=top><font size=2>272</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>udpprint</font></td>
+<td align=right valign=top><font size=2>58</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>N/A&nbsp;(command&nbsp;line)</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>80</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<td valign=top><font size=2>N/A&nbsp;(alignment)</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+<td align=right valign=top><font size=2>&nbsp;</font></td>
+</tr>
+<tr>
+<th align=left valign=top><font size=2>Total:<br>&nbsp;&nbsp;+&nbsp;common</font></th>
+<th align=right valign=top><font size=2>32&nbsp;178<br>60</font></th>
+<th align=right valign=top><font size=2>4&nbsp;028</font></th>
+<th align=right valign=top><font size=2>145</font></th>
+<th align=right valign=top><font size=2>110</font></th>
+</tr>
+</table>
+<p><hr><p>
+<a name="Segments in Address Order"></a>
+<table bgcolor="#bbbb00" border=1 cellpadding=2>
+<tr>
+  <th align=center colspan=7><font size=4><B>Segments in Address Order</B>
+</font>
+<tr>
+  <th><font size=2>Segment</font>
+  <th><font size=2>Space</font>
+  <th><font size=2>Start</font>
+  <th><font size=2>End</font>
+  <th><font size=2>Size</font>
+  <th><font size=2>Kind</font>
+  <th><font size=2>Align</font>
+<tr valign=top>
+  <td rowspan=28 ><font size=2>DATA16_AN</font>
+  <td rowspan=28 ><font size=2></font>
+  <td align=center colspan=2><font size=2>0001 - 0001</font>
+  <td align=right><font size=2>1</font>
+  <td rowspan=28 ><font size=2>Relative</font>
+  <td align=center><font size=2>0</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0003 - 0003</font>
+  <td align=right><font size=2>1</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0006 - 0007</font>
+  <td align=right><font size=2>2</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>001B - 001B</font>
+  <td align=right><font size=2>1</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>001D - 001E</font>
+  <td align=right><font size=2>2</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0021 - 0025</font>
+  <td align=right><font size=2>5</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0029 - 002A</font>
+  <td align=right><font size=2>2</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0031 - 0033</font>
+  <td align=right><font size=2>3</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0035 - 0037</font>
+  <td align=right><font size=2>3</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0053 - 0053</font>
+  <td align=right><font size=2>1</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0056 - 0057</font>
+  <td align=right><font size=2>2</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0059 - 0059</font>
+  <td align=right><font size=2>1</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0060 - 0063</font>
+  <td align=right><font size=2>4</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0066 - 006F</font>
+  <td align=right><font size=2>A</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0080 - 008F</font>
+  <td align=right><font size=2>10</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>00D1 - 00D4</font>
+  <td align=right><font size=2>4</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>00D6 - 00DF</font>
+  <td align=right><font size=2>A</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0118 - 011B</font>
+  <td align=right><font size=2>4</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0120 - 0121</font>
+  <td align=right><font size=2>2</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>012E - 012F</font>
+  <td align=right><font size=2>2</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0140 - 0161</font>
+  <td align=right><font size=2>22</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0164 - 0167</font>
+  <td align=right><font size=2>4</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0170 - 0177</font>
+  <td align=right><font size=2>8</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>017C - 0183</font>
+  <td align=right><font size=2>8</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>0190 - 0193</font>
+  <td align=right><font size=2>4</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>01A0 - 01A7</font>
+  <td align=right><font size=2>8</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>10EE - 10EE</font>
+  <td align=right><font size=2>1</font>
+<tr valign=top>
+  <td align=center colspan=2><font size=2>10F8 - 10F9</font>
+  <td align=right><font size=2>2</font>
+<tr valign=top>
+  <td rowspan=1 ><font size=2>DATA16_I</font>
+  <td rowspan=1 ><font size=2></font>
+  <td align=center colspan=2><font size=2>1100 </font>
+  <td align=right><font size=2></font>
+  <td rowspan=1 ><font size=2>Predefined</font>
+  <td align=center><font size=2>0</font>
+<tr valign=top>
+  <td rowspan=1 ><font size=2>DATA16_Z</font>
+  <td rowspan=1 ><font size=2></font>
+  <td align=center colspan=2><font size=2>1100 - 206B</font>
+  <td align=right><font size=2>F6C</font>
+  <td rowspan=1 ><font size=2>Relative</font>
+  <td align=center><font size=2>1</font>
+<tr valign=top>
+  <td rowspan=1 ><font size=2>CSTACK</font>
+  <td rowspan=1 ><font size=2></font>
+  <td align=center colspan=2><font size=2>30B0 - 30FF</font>
+  <td align=right><font size=2>50</font>
+  <td rowspan=1 ><font size=2>Relative</font>
+  <td align=center><font size=2>1</font>
+<tr valign=top>
+  <td rowspan=1 ><font size=2>CSTART</font>
+  <td rowspan=1 ><font size=2></font>
+  <td align=center colspan=2><font size=2>3100 - 3117</font>
+  <td align=right><font size=2>18</font>
+  <td rowspan=1 ><font size=2>Relative</font>
+  <td align=center><font size=2>1</font>
+<tr valign=top>
+  <td rowspan=1 ><font size=2>ISR_CODE</font>
+  <td rowspan=1 ><font size=2></font>
+  <td align=center colspan=2><font size=2>3118 - 32D3</font>
+  <td align=right><font size=2>1BC</font>
+  <td rowspan=1 ><font size=2>Relative</font>
+  <td align=center><font size=2>1</font>
+<tr valign=top>
+  <td rowspan=1 ><font size=2>DATA16_C</font>
+  <td rowspan=1 ><font size=2></font>
+  <td align=center colspan=2><font size=2>32D4 - 3341</font>
+  <td align=right><font size=2>6E</font>
+  <td rowspan=1 ><font size=2>Relative</font>
+  <td align=center><font size=2>0</font>
+<tr valign=top>
+  <td rowspan=1 ><font size=2>&lt;CODE&gt; 1</font>
+  <td rowspan=1 ><font size=2></font>
+  <td align=center colspan=2><font size=2>3342 - AF1D</font>
+  <td align=right><font size=2>7BDC</font>
+  <td rowspan=1 ><font size=2>Relative</font>
+  <td align=center><font size=2>1</font>
+<tr valign=top>
+  <td rowspan=1 ><font size=2>INTVEC</font>
+  <td rowspan=1 ><font size=2></font>
+  <td align=center colspan=2><font size=2>FFC0 - FFFB</font>
+  <td align=right><font size=2>3C</font>
+  <td rowspan=1 ><font size=2>Common</font>
+  <td align=center><font size=2>1</font>
+<tr valign=top>
+  <td rowspan=1 ><font size=2>RESET</font>
+  <td rowspan=1 ><font size=2></font>
+  <td align=center colspan=2><font size=2>FFFE - FFFF</font>
+  <td align=right><font size=2>2</font>
+  <td rowspan=1 ><font size=2>Relative</font>
+  <td align=center><font size=2>1</font>
+</table>
+
+<hr>
+
+<p><a name="Memory Summary"></a><table>
+
+<table >
+<tr>
+<td align=right valign=top>32&nbsp;238</td>
+<td valign=top>bytes</td>
+<td valign=top>of</td>
+<td valign=top>CODE</td>
+<td valign=top>memory</td>
+</tr>
+<tr>
+<td align=right valign=top>4&nbsp;028</td>
+<td valign=top>bytes</td>
+<td valign=top>of</td>
+<td valign=top>DATA</td>
+<td valign=top>memory</td>
+<td valign=top>(+</td>
+<td align=right valign=top>145</td>
+<td valign=top>absolute</td>
+<td valign=top>)</td>
+</tr>
+<tr>
+<td align=right valign=top>110</td>
+<td valign=top>bytes</td>
+<td valign=top>of</td>
+<td valign=top>CONST</td>
+<td valign=top>memory</td>
+</tr>
+</table>
+
+Errors: none
+Warnings: 1
+
