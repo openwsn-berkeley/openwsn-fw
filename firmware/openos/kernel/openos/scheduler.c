@@ -6,13 +6,13 @@
 
 #include "board.h"
 #include "scheduler.h"
-#include "radiotimer.h"
-#include "IEEE802154E.h"
-#include "i2c.h"
-#include "res.h"
-#include "openserial.h"
-#include "debugpins.h"
-#include "board.h"
+//#include "radiotimer.h"
+//#include "IEEE802154E.h"
+//#include "i2c.h"
+//#include "res.h"
+//#include "openserial.h"
+//#include "debugpins.h"
+//#include "board.h"
 
 //=========================== variables =======================================
 
