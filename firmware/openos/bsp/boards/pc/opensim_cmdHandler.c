@@ -8,6 +8,7 @@
 #include "opensim_cmdHandler.h"
 #include "opensim_proto.h"
 // bsp
+#include "bsp_timer.h"
 #include "radiotimer.h"
 
 //=========================== variables =======================================
@@ -28,8 +29,7 @@ void opensim_cmdHandler_handle(int  cmdType,
                                int* paramBuf) {
    switch (cmdType) {
       case OPENSIM_CMD_bsp_timer_isr:
-         fprintf(stderr,"[opensim_cmdHandler] FATAL: OPENSIM_CMD_bsp_timer_isr not implemented\n");
-         exit(1);
+         bsp_timer_isr();
          break;
       case OPENSIM_CMD_radio_isr_startFrame:
          fprintf(stderr,"[opensim_cmdHandler] FATAL: OPENSIM_CMD_radio_isr_startFrame not implemented\n");

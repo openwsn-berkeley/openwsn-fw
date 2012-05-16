@@ -90,3 +90,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
+
+void bsp_timer_isr() {
+   bsp_timer_vars.cb();
+}
