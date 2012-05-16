@@ -93,9 +93,7 @@ void bsp_timer_cb_compare() {
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    
    // wait a bit
-   for (delay=0;delay<ISR_DELAY;delay++) {
-      __no_operation();
-   }
+   for (delay=0;delay<ISR_DELAY;delay++);
 }
 
 void radiotimer_cb_overflow() {
@@ -111,9 +109,7 @@ void radiotimer_cb_overflow() {
    app_dbg.radiotimer_num_overflow++;
    
    // wait a bit
-   for (delay=0;delay<ISR_DELAY;delay++) {
-      __no_operation();
-   }
+   for (delay=0;delay<ISR_DELAY;delay++);
 }
 
 void radiotimer_cb_compare() {
