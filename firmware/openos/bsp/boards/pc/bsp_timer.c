@@ -75,6 +75,18 @@ void bsp_timer_cancel_schedule() {
                                     0);
 }
 
+PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
+   opensim_repl_bsp_timer_get_currentValue_t replparams;
+
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_get_currentValue,
+                                    0,
+                                    0,
+                                    &replparams,
+                                    sizeof(opensim_repl_bsp_timer_get_currentValue_t));
+   
+   return replparams.value;
+}
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
