@@ -11,8 +11,8 @@
 
 //=========================== defines =========================================
 
-#define ENABLE_INTERRUPTS()     __enable_interrupt()
-#define DISABLE_INTERRUPTS()    __disable_interrupt()
+#define ENABLE_INTERRUPTS()                 
+#define DISABLE_INTERRUPTS()                
 
 //===== timer
 
@@ -21,8 +21,8 @@
 #define PORT_TICS_PER_MS                    33
 
 // on GINA, we use the comparatorA interrupt for the OS
-#define SCHEDULER_WAKEUP()                  CACTL1 |= CAIFG
-#define SCHEDULER_ENABLE_INTERRUPT()        CACTL1  = CAIE
+#define SCHEDULER_WAKEUP()                  
+#define SCHEDULER_ENABLE_INTERRUPT()        
 
 // this is a workaround from the fact that the interrupt pin for the GINA radio
 // is not connected to a pin on the MSP which allows time capture.
