@@ -83,11 +83,11 @@ void spi_init() {
 	SIM_SCGC6 |= (SIM_SCGC6_SPI0_MASK);//power SPI0
 
 	// configure SPI-related pins 
-	PORTD_PCR0 = PORT_PCR_MUX(2);//CS0
-	PORTD_PCR1 = PORT_PCR_MUX(2);//CLK 
-	PORTD_PCR2 = PORT_PCR_MUX(2);//MOSI 
-	PORTD_PCR3 = PORT_PCR_MUX(2);//MISO
-
+	PORTD_PCR0 = PORT_PCR_MUX(2);//CS0 -- PTD0
+	PORTD_PCR1 = PORT_PCR_MUX(2);//CLK -- PTD1
+	PORTD_PCR2 = PORT_PCR_MUX(2);//MOSI -- PTD2
+	PORTD_PCR3 = PORT_PCR_MUX(2);//MISO-- PTD3
+	
 	SPI0_MCR   = SPI_MCR_MSTR_MASK | SPI_MCR_DIS_RXF_MASK |  /* Configure SPI as master. Disable rx/tx fifos. Set */
 			SPI_MCR_DIS_TXF_MASK | SPI_MCR_ROOE_MASK |  /* overwrite incoming data. Set state to STOPPED.    */ 
 			SPI_MCR_HALT_MASK |

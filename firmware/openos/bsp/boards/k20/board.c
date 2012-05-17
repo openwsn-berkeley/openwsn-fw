@@ -47,13 +47,12 @@ void board_init() {
 
 	sysinit();//enables pll
 
-	/*Enable ALLS operation mode. This is a write once register*/  
+	/*Enable ALLS operation mode. This is a write once register -- lowest power mode with memory retention*/  
 	SMC_PMPROT |= SMC_PMPROT_ALLS_MASK;
 
 	mcgmode= what_mcg_mode();
 
 	llwu_init();//low leakage unit init
-
 	debugpins_init();
 	leds_init();
 	bsp_timer_init();
@@ -61,6 +60,25 @@ void board_init() {
 	radiotimer_init();
 	spi_init();
 	leds_all_off();
+	
+	//init all pins for the radio
+	
+	//SLPTR
+	PORTD_PCR4 = PORT_PCR_MUX(1);// -- PTD4 used as gpio for slptr
+	GPIOD_PDDR |= 1<<RADIO_SLPTR_PIN; //set as output
+	GPIOD_PCOR |= 1<<RADIO_SLPTR_PIN; //set to low
+	
+	//RADIO RST
+	PORTC_PCR10 = PORT_PCR_MUX(1);// -- PTC10 used as gpio for radio rst
+	GPIOC_PDDR |= 1<<RADIO_RST_PIN; //set as output
+	PORT_PIN_RADIO_RESET_LOW();//activate the radio.
+	
+	//ISR pin.
+	PORTE_PCR25 = PORT_PCR_MUX(1);// -- PTE25 used as gpio for radio isr
+	GPIOE_PDDR &= ~1<<RADIO_ISR_PIN; //set as input ==0
+	PORTE_PCR25 |= PORT_PCR_IRQC(9); //interrupt on raising edge. page 249 of the manual.	
+	
+	enable_irq(RADIO_EXTERNAL_PORT_IRQ_NUM);//enable the irq. The function is mapped to the vector at position 107 (see manual page 69). The vector is in kinetis_sysinit.c
 }
 
 
@@ -125,4 +143,13 @@ void board_sleep() {
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
-
+// GPIOs
+// note: all GPIO interrupts, both port 0 and 2, trigger this same vector
+void radio_external_port_e_isr(void) {
+	
+	if ((PORTE_ISFR) & (RADIO_ISR_MASK)) {
+		PORTE_ISFR|=RADIO_ISR_MASK;  //Clear ISR flags
+		//capture timer
+		radio_isr();
+	}
+}

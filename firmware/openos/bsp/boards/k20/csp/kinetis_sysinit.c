@@ -169,7 +169,7 @@ static __declspec(vectortable) tVectorTable __vect_table = { /* Interrupt vector
    (tIsrFunc)UNASSIGNED_ISR,                               /* 104 (0x000001A0) (prior: -) */
    (tIsrFunc)UNASSIGNED_ISR,                               /* 105 (0x000001A4) (prior: -) */
    (tIsrFunc)UNASSIGNED_ISR,                               /* 106 (0x000001A8) (prior: -) */
-   (tIsrFunc)UNASSIGNED_ISR,                               /* 107 (0x000001AC) (prior: -) */
+   (tIsrFunc)radio_external_port_e_isr,                               /* 107 (0x000001AC) (prior: -) */
    (tIsrFunc)UNASSIGNED_ISR,                               /* 108 (0x000001B0) (prior: -) */
    (tIsrFunc)UNASSIGNED_ISR,                               /* 109 (0x000001B4) (prior: -) */
    (tIsrFunc)UNASSIGNED_ISR,                               /* 110 (0x000001B8) (prior: -) */
