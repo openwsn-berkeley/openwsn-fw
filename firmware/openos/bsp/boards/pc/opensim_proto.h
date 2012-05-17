@@ -139,6 +139,8 @@ typedef struct {
    uint8_t    rc;
 } opensim_repl_hdr_t;
 
+//--------------------------- from client to server ---------------------------
+
 //=== board
 // init
 // sleep
@@ -155,6 +157,7 @@ typedef struct {
 typedef struct {
    uint16_t value;
 } opensim_repl_bsp_timer_get_currentValue_t;
+
 //=== debugpins
 // init
 // frame_toggle
@@ -175,11 +178,13 @@ typedef struct {
 // radio_toggle
 // radio_clr
 // radio_set
+
 //=== eui64
 // get
 typedef struct {
    uint8_t eui64[8];
 } opensim_repl_eui64_get_t;
+
 //=== leds
 // init
 // error_on
@@ -215,6 +220,7 @@ typedef struct {
 // all_toggle
 // circular_shift
 // increment
+
 //=== radio
 // init
 // reset
@@ -260,6 +266,7 @@ typedef struct {
    uint8_t lqi;
    uint8_t crc;
 } opensim_repl_radio_getReceivedFrame_t;
+
 //=== radiotimer
 // init
 // start
@@ -287,6 +294,7 @@ typedef struct {
 typedef struct {
    uint16_t capturedTime;
 } opensim_repl_radiotimer_getCapturedTime_t;
+
 //=== uart
 // init
 // enableInterrupts
@@ -301,6 +309,16 @@ typedef struct {
 typedef struct {
    uint8_t byteRead;
 } opensim_repl_uart_readByte_t;
+
+//--------------------------- from client to server ---------------------------
+
+typedef struct {
+   uint16_t capturedTime;
+} opensim_intr_radio_startOfFrame_t;
+typedef struct {
+   uint16_t capturedTime;
+} opensim_intr_radio_endOfFrame_t;
+
 
 //=========================== prototypes ======================================
 

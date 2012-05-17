@@ -27,17 +27,29 @@ opensim_cmdHandler_vars_t opensim_cmdHandler_vars;
 void opensim_cmdHandler_handle(int  cmdType,
                                int  paramLen,
                                int* paramBuf) {
+   
+   opensim_intr_radio_startOfFrame_t* radio_startOfFrame;
+   opensim_intr_radio_endOfFrame_t*   radio_endOfFrame;
+   
    switch (cmdType) {
       case OPENSIM_CMD_bsp_timer_isr:
          bsp_timer_isr();
          break;
       case OPENSIM_CMD_radio_isr_startFrame:
-         fprintf(stderr,"[opensim_cmdHandler] FATAL: OPENSIM_CMD_radio_isr_startFrame not implemented\n");
-         exit(1);
+         if (paramLen!=sizeof(opensim_intr_radio_startOfFrame_t)) {
+            fprintf(stderr,"[opensim_cmdHandler] FATAL: wrong param length in OPENSIM_CMD_radio_isr_startFrame\n");
+            exit(1);
+         }
+         radio_startOfFrame = (opensim_intr_radio_startOfFrame_t*)paramBuf;
+         radio_intr_startOfFrame(radio_startOfFrame->capturedTime);
          break;
       case OPENSIM_CMD_radio_isr_endFrame:
-         fprintf(stderr,"[opensim_cmdHandler] FATAL: OPENSIM_CMD_radio_isr_endFrame not implemented\n");
-         exit(1);
+         if (paramLen!=sizeof(opensim_intr_radio_endOfFrame_t)) {
+            fprintf(stderr,"[opensim_cmdHandler] FATAL: wrong param length in OPENSIM_CMD_radio_isr_startFrame\n");
+            exit(1);
+         }
+         radio_endOfFrame = (opensim_intr_radio_endOfFrame_t*)paramBuf;
+         radio_intr_endOfFrame(radio_endOfFrame->capturedTime);
          break;
       case OPENSIM_CMD_radiotimer_isr_compare:
          radiotimer_intr_compare();

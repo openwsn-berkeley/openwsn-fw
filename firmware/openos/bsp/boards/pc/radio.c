@@ -244,4 +244,14 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
    *pCrc     = replparams.crc;
 }
 
+//=========================== interrupts ======================================
+
+void radio_intr_startOfFrame(uint16_t capturedTime) {
+   radio_vars.startFrame_cb(capturedTime);
+}
+
+void radio_intr_endOfFrame(uint16_t capturedTime) {
+   radio_vars.endFrame_cb(capturedTime);
+}
+
 //=========================== private =========================================
