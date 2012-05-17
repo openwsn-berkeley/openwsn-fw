@@ -72,6 +72,7 @@ void board_init() {
 	PORTC_PCR10 = PORT_PCR_MUX(1);// -- PTC10 used as gpio for radio rst
 	GPIOC_PDDR |= 1<<RADIO_RST_PIN; //set as output
 	PORT_PIN_RADIO_RESET_LOW();//activate the radio.
+		
 	
 	//ISR pin.
 	PORTE_PCR25 = PORT_PCR_MUX(1);// -- PTE25 used as gpio for radio isr
