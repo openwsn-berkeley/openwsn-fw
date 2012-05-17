@@ -25,6 +25,8 @@
 //=========================== public ==========================================
 
 void board_init() {
+
+   bsp_timer_init();
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_board_init,
