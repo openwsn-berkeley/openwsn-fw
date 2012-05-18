@@ -27,6 +27,7 @@ void icmpv6echo_init() {
 void icmpv6echo_trigger() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer[16];
+   OpenQueueEntry_t* msg;
    //get command from OpenSerial (16B IPv6 destination address)
    number_bytes_from_input_buffer = openserial_getInputBuffer(&(input_buffer[0]),sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
@@ -44,7 +45,7 @@ void icmpv6echo_trigger() {
                             (errorparameter_t)0);
    } else {
       icmpv6echo_vars.busySending = TRUE;
-      OpenQueueEntry_t* msg;
+      
       msg = openqueue_getFreePacketBuffer();
       if (msg==NULL) {
          openserial_printError(COMPONENT_ICMPv6ECHO,ERR_NO_FREE_PACKET_BUFFER,
