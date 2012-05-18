@@ -12,9 +12,10 @@
 
 #include "derivative.h"
 
-#define PORT_TIMER_WIDTH                    uint16_t
-#define PORT_TICS_PER_MS                    33
 
+#define PORT_TICS_PER_MS                    33
+#define PORT_TIMER_WIDTH                    uint16_t
+#define PORT_SIGNED_INT_WIDTH               int16_t
 
 #define CAPTURE_TIME()   //the timer does not have a capture register so do nothing
 #define DISABLE_INTERRUPTS() DisableInterrupts
@@ -53,17 +54,17 @@ static const uint8_t infoRadioName[] = "AT86RF231";
 
 
 
-// SLP_TR 
+// SLP_TR PTB3 -- pin B51
 
-#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()  GPIOC_PSOR |= RADIO_SLPTR_MASK //set
-#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()   GPIOC_PCOR |= RADIO_SLPTR_MASK //clear
+#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()  GPIOB_PSOR |= RADIO_SLPTR_MASK //set
+#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()   GPIOB_PCOR |= RADIO_SLPTR_MASK //clear
 
-//  radio RSTn 
-#define PORT_PIN_RADIO_RESET_HIGH()     GPIOC_PCOR |= 1<<RADIO_RST_PIN; //clear as it is inverted. 
-#define PORT_PIN_RADIO_RESET_LOW()     	GPIOC_PSOR |= 1<<RADIO_RST_PIN; //set to high (as radio pin is inverted so this means no reset.)
+//  radio RSTn PTC10
+#define PORT_PIN_RADIO_RESET_HIGH()     GPIOC_PCOR |= RADIO_RST_MASK; //clear as it is inverted. 
+#define PORT_PIN_RADIO_RESET_LOW()     	GPIOC_PSOR |= RADIO_RST_MASK; //set to high (as radio pin is inverted so this means no reset.)
 
 
-#define RADIO_SLPTR_PIN 4 //PTD4
+#define RADIO_SLPTR_PIN 3 //PTB4
 #define RADIO_SLPTR_MASK (1<<RADIO_SLPTR_PIN)
 #define RADIO_ISR_PIN 25  //PTE25
 #define RADIO_ISR_MASK (1<<RADIO_ISR_PIN)
