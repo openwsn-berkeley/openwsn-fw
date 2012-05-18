@@ -83,12 +83,12 @@ void ohlone_receive(OpenQueueEntry_t* msg) {
    uint8_t payload_index;
    
    for (payload_index=0;payload_index<msg->length-3;payload_index++) {
-      if (ohlone_check4chars(msg->payload+payload_index, "GET "))
+      if (ohlone_check4chars(msg->payload+payload_index,(unsigned char *) "GET "))
          memcpy(ohlone_vars.getRequest, 
                 msg->payload + payload_index + 4, 
                 msg->length - payload_index - 4);
 
-      if (ohlone_check4chars(msg->payload+payload_index, "\r\n\r\n")) {
+      if (ohlone_check4chars(msg->payload+payload_index, (unsigned char *)"\r\n\r\n")) {
          ohlone_vars.httpChunk = 0;
          ohlone_sendpkt();
          return;
