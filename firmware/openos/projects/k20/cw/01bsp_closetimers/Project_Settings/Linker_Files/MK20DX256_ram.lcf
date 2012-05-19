@@ -1,0 +1,48 @@
+# Default linker command file.
+MEMORY {
+m_interrupts  (RX) : ORIGIN = 0x1FFF8000, LENGTH = 0x000001BC
+m_text        (RX) : ORIGIN = 0x1FFF81C0, LENGTH = 0x00010000-0x000001BC
+m_data        (RW) : ORIGIN = AFTER(m_text), LENGTH = 0x00010000
+}
+
+KEEP_SECTION { .vectortable }
+
+SECTIONS {
+
+.interrupts :
+{
+    __vector_table = .;
+    * (.vectortable)
+    . = ALIGN (0x4);
+} > m_interrupts
+
+.app_text: {
+	ALIGNALL(4);
+   	* (.init)	
+   	* (.text)
+		.= ALIGN(0x8) ;
+} > m_text
+.app_data: {
+   	* (.rodata)
+   	* (.sdata)
+   	* (.data)
+		.= ALIGN(0x4) ;
+   	*(.ARM.extab)
+		.= ALIGN(0x4) ;
+       __exception_table_start__ = .;
+   	EXCEPTION
+       __exception_table_end__ = .;
+		.= ALIGN(0x4) ;
+       __sinit__ = .;
+   	STATICINIT
+		.= ALIGN(0x4) ;
+		__START_BSS = .;
+		* (.bss)
+		__END_BSS = .;
+		.= ALIGN(0x8) ;
+} > m_data
+__S_romp = 0;
+__SP_INIT = . + 0x00004000;
+__heap_addr = __SP_INIT;
+__heap_size = 0x00004000;
+}
