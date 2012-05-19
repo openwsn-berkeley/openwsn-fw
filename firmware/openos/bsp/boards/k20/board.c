@@ -38,7 +38,10 @@ int main(void) {
 
 void board_init() {
 	uint8_t mcgmode=0;
-	//enable all port clocks.
+	
+		uint8_t eui[8];
+	
+		//enable all port clocks.
 	SIM_SCGC5 |= (SIM_SCGC5_PORTA_MASK
 			| SIM_SCGC5_PORTB_MASK
 			| SIM_SCGC5_PORTC_MASK
