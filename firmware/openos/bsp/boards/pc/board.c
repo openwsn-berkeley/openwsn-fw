@@ -26,7 +26,13 @@
 
 void board_init() {
 
+   // initialize bsp modules
+   debugpins_init();
+   leds_init();
+   uart_init();
    bsp_timer_init();
+   radio_init();
+   radiotimer_init();
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_board_init,
