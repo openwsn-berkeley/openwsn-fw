@@ -12,13 +12,14 @@ can use this project with any platform.
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
+#include "bsp_timer.h"
 
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL         26             // 2.480GHz
 #define TIMER_ID        0
-#define TIMER_DURATION  32768          // ~1s @ 32kHz
+#define TIMER_PERIOD    32768          // 1s @ 32kHz
 
 //=========================== variables =======================================
 
@@ -61,6 +62,7 @@ void cb_radioTimerOverflows();
 void cb_radioTimerCompare();
 void cb_startFrame(uint16_t timestamp);
 void cb_endFrame(uint16_t timestamp);
+void cb_timer();
 
 //=========================== main ============================================
 
@@ -87,6 +89,10 @@ int mote_main(void) {
    for (i=0;i<app_vars.packet_len;i++) {
       app_vars.packet[i] = i;
    }
+   
+   // start bsp timer
+   bsp_timer_set_callback(cb_timer);
+   bsp_timer_scheduleIn(TIMER_PERIOD);
    
    // prepare radio
    radio_rfOn();
@@ -199,4 +205,13 @@ void cb_endFrame(uint16_t timestamp) {
    app_vars.flags |= APP_FLAG_END_FRAME;
    // update debug stats
    app_dbg.num_endFrame++;
+}
+
+void cb_timer() {
+   // set flag
+   app_vars.flags |= APP_FLAG_TIMER;
+   // update debug stats
+   app_dbg.num_timer++;
+   // schedule again
+   bsp_timer_scheduleIn(TIMER_PERIOD);
 }
