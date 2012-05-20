@@ -6,6 +6,7 @@
 
 #include "board.h"
 #include "scheduler.h"
+#include "openwsn.h"
 //#include "radiotimer.h"
 //#include "IEEE802154E.h"
 //#include "i2c.h"
