@@ -4,20 +4,41 @@ Import('env')
 
 localEnv = env.Clone()
 
-localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','openwsn'),
-                             os.path.join('#','firmware','openos','drivers','common'),
+localEnv.Append(CPPPATH =  [ # bsp 
                              os.path.join('#','firmware','openos','bsp','boards'),
                              os.path.join('#','firmware','openos','bsp','boards','pc'),
+                             # kernel
+                             os.path.join('#','firmware','openos','kernel','openos'),
+                             # drivers
+                             os.path.join('#','firmware','openos','drivers','common'),
+                             # stack
+                             os.path.join('#','firmware','openos','openwsn'),
+                             os.path.join('#','firmware','openos','openwsn','02.5-MPLS'),
+                             os.path.join('#','firmware','openos','openwsn','02a-MAClow'),
+                             os.path.join('#','firmware','openos','openwsn','02b-MAChigh'),
+                             os.path.join('#','firmware','openos','openwsn','03a-IPHC'),
+                             os.path.join('#','firmware','openos','openwsn','03b-IPv6'),
+                             os.path.join('#','firmware','openos','openwsn','04-TRAN'),
+                             os.path.join('#','firmware','openos','openwsn','07-App'),
+                             os.path.join('#','firmware','openos','openwsn','cross-layers'),
                            ],
                 )
-localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','drivers','common'),
+localEnv.Append(LIBPATH =  [ # bsp
                              os.path.join('#','firmware','openos','bsp','boards','pc'),
+                             # kernel
+                             os.path.join('#','firmware','openos','kernel','openos'),
+                             # drivers
+                             os.path.join('#','firmware','openos','drivers','common'),
+                             # stack
+                             os.path.join('#','firmware','openos','openwsn'),
                            ],
                 )
 
 
 if localEnv['PLATFORM'] == 'win32':
     library_files = [
+                        'libopenstack.lib',
+                        'libopenos.lib',
                         'libdrivers.lib',
                         'libbsppc.lib',
                         'ws2_32.lib',
@@ -25,6 +46,8 @@ if localEnv['PLATFORM'] == 'win32':
                     ]
 else:
     library_files = [
+                        'libopenstack.a',
+                        'libopenos.a',
                         'libdrivers.a',
                         'libbsppc.a'
                     ]

@@ -20,12 +20,16 @@ Default(None)
 SConscript('firmware/openos/bsp/boards/pc/SConscript',
            exports     = {'env':env},
            )
+# kernel
+SConscript('firmware/openos/kernel/openos/SConscript',
+           exports     = {'env':env},
+           )
 # drivers
 SConscript('firmware/openos/drivers/common/SConscript',
            exports     = {'env':env},
            )
-# kernel
-SConscript('firmware/openos/kernel/openos/SConscript',
+# openstack
+SConscript('firmware/openos/openwsn/SConscript',
            exports     = {'env':env},
            )
 
