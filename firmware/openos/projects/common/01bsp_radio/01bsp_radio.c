@@ -58,11 +58,12 @@ app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_radioTimerOverflows();
-void cb_radioTimerCompare();
-void cb_startFrame(uint16_t timestamp);
-void cb_endFrame(uint16_t timestamp);
-void cb_timer();
+uint16_t getRandomPeriod();
+void     cb_radioTimerOverflows();
+void     cb_radioTimerCompare();
+void     cb_startFrame(uint16_t timestamp);
+void     cb_endFrame(uint16_t timestamp);
+void     cb_timer();
 
 //=========================== main ============================================
 
