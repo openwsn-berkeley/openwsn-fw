@@ -155,7 +155,7 @@ void rreg_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-inline uint8_t hexToAscii(uint8_t hex) {
+port_INLINE uint8_t hexToAscii(uint8_t hex) {
    if (hex<0x0a) {
       return '0'+(hex-0x00);
    } else {

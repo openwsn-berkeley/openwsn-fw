@@ -10,6 +10,10 @@
 
 #include "PE_Types.h"
 
+//=========================== defines =========================================
+
+#define port_INLINE                         inline
+
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[] = "h=usp";

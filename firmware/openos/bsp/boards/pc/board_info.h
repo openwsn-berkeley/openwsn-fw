@@ -11,8 +11,10 @@
 
 //=========================== defines =========================================
 
-#define ENABLE_INTERRUPTS()                 
-#define DISABLE_INTERRUPTS()                
+#define port_INLINE                         
+
+#define ENABLE_INTERRUPTS()                 ;
+#define DISABLE_INTERRUPTS()                ;
 
 //===== timer
 

@@ -384,7 +384,7 @@ bool debugPrint_macStats() {
 
 //======= SYNCHRONIZING
 
-inline void activity_synchronize_newSlot() {
+port_INLINE void activity_synchronize_newSlot() {
    // I'm in the middle of receiving a packet
    if (ieee154e_vars.state==S_SYNCRX) {
       return;
@@ -417,7 +417,7 @@ inline void activity_synchronize_newSlot() {
    }
 }
 
-inline void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
    
    // don't care about packet if I'm not listening
    if (ieee154e_vars.state!=S_SYNCLISTEN) {
@@ -437,7 +437,7 @@ inline void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
    ieee154e_vars.syncCapturedTime = capturedTime;
 }
 
-inline void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    
    // check state
@@ -556,7 +556,7 @@ inline void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
 
 //======= TX
 
-inline void activity_ti1ORri1() {
+port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
    open_addr_t neighbor;
    
@@ -706,7 +706,7 @@ inline void activity_ti1ORri1() {
    }
 }
 
-inline void activity_ti2() {
+port_INLINE void activity_ti2() {
    uint8_t frequency;
    
    // change state
@@ -732,7 +732,7 @@ inline void activity_ti2() {
    changeState(S_TXDATAREADY);
 }
 
-inline void activity_tie1() {
+port_INLINE void activity_tie1() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXTXDATAPREPARE_OVERFLOW,
                          (errorparameter_t)ieee154e_vars.state,
@@ -742,7 +742,7 @@ inline void activity_tie1() {
    endSlot();
 }
 
-inline void activity_ti3() {
+port_INLINE void activity_ti3() {
    // change state
    changeState(S_TXDATADELAY);
    
@@ -753,7 +753,7 @@ inline void activity_ti3() {
    radio_txNow();
 }
 
-inline void activity_tie2() {
+port_INLINE void activity_tie2() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOW,
                          (errorparameter_t)ieee154e_vars.state,
@@ -763,7 +763,7 @@ inline void activity_tie2() {
    endSlot();
 }
 
-inline void activity_ti4(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti4(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_TXDATA);
 
@@ -777,7 +777,7 @@ inline void activity_ti4(PORT_TIMER_WIDTH capturedTime) {
    radiotimer_schedule(DURATION_tt4);
 }
 
-inline void activity_tie3() {
+port_INLINE void activity_tie3() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -787,7 +787,7 @@ inline void activity_tie3() {
    endSlot();
 }
 
-inline void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
    bool listenForAck;
    
    // change state
@@ -824,7 +824,7 @@ inline void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
    }
 }
 
-inline void activity_ti6() {
+port_INLINE void activity_ti6() {
    uint8_t frequency;
    
    // change state
@@ -846,7 +846,7 @@ inline void activity_ti6() {
    changeState(S_RXACKREADY);
 }
 
-inline void activity_tie4() {
+port_INLINE void activity_tie4() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -856,7 +856,7 @@ inline void activity_tie4() {
    endSlot();
 }
 
-inline void activity_ti7() {
+port_INLINE void activity_ti7() {
    // change state
    changeState(S_RXACKLISTEN);
 
@@ -867,7 +867,7 @@ inline void activity_ti7() {
    radiotimer_schedule(DURATION_tt7);
 }
 
-inline void activity_tie5() {
+port_INLINE void activity_tie5() {
    // indicate transmit failed to schedule to keep stats
    schedule_indicateTx(&ieee154e_vars.asn,FALSE);
    
@@ -889,7 +889,7 @@ inline void activity_tie5() {
    endSlot();
 }
 
-inline void activity_ti8(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti8(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_RXACK);
    
@@ -903,12 +903,12 @@ inline void activity_ti8(PORT_TIMER_WIDTH capturedTime) {
    radiotimer_schedule(DURATION_tt8);
 }
 
-inline void activity_tie6() {
+port_INLINE void activity_tie6() {
    // abort
    endSlot();
 }
 
-inline void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    volatile PORT_SIGNED_INT_WIDTH  timeCorrection;
    uint8_t byte0;
@@ -1018,7 +1018,7 @@ inline void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
 
 //======= RX
 
-inline void activity_ri2() {
+port_INLINE void activity_ri2() {
    uint8_t frequency;
    
    // change state
@@ -1040,7 +1040,7 @@ inline void activity_ri2() {
    changeState(S_RXDATAREADY);
 }
 
-inline void activity_rie1() {
+port_INLINE void activity_rie1() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXDATAPREPARE_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -1050,7 +1050,7 @@ inline void activity_rie1() {
    endSlot();
 }
 
-inline void activity_ri3() {
+port_INLINE void activity_ri3() {
    // change state
    changeState(S_RXDATALISTEN);
 
@@ -1061,12 +1061,12 @@ inline void activity_ri3() {
    radiotimer_schedule(DURATION_rt3);
 }
 
-inline void activity_rie2() {
+port_INLINE void activity_rie2() {
    // abort
    endSlot();
 }
 
-inline void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_RXDATA);
    
@@ -1083,7 +1083,7 @@ inline void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
    radiotimer_schedule(DURATION_rt4);
 }
 
-inline void activity_rie3() {
+port_INLINE void activity_rie3() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -1093,7 +1093,7 @@ inline void activity_rie3() {
    endSlot();
 }
 
-inline void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    
    // change state
@@ -1211,7 +1211,7 @@ inline void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    endSlot();
 }
 
-inline void activity_ri6() {
+port_INLINE void activity_ri6() {
    PORT_SIGNED_INT_WIDTH timeCorrection;
    uint8_t frequency;
    
@@ -1281,7 +1281,7 @@ inline void activity_ri6() {
    changeState(S_TXACKREADY);
 }
 
-inline void activity_rie4() {
+port_INLINE void activity_rie4() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXTXACKPREPARE_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -1291,7 +1291,7 @@ inline void activity_rie4() {
    endSlot();
 }
 
-inline void activity_ri7() {
+port_INLINE void activity_ri7() {
    // change state
    changeState(S_TXACKDELAY);
    
@@ -1302,7 +1302,7 @@ inline void activity_ri7() {
    radio_txNow();
 }
 
-inline void activity_rie5() {
+port_INLINE void activity_rie5() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIOTX_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -1312,7 +1312,7 @@ inline void activity_rie5() {
    endSlot();
 }
 
-inline void activity_ri8(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri8(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_TXACK);
    
@@ -1326,7 +1326,7 @@ inline void activity_ri8(PORT_TIMER_WIDTH capturedTime) {
    radiotimer_schedule(DURATION_rt8);
 }
 
-inline void activity_rie6() {
+port_INLINE void activity_rie6() {
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDACKDURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -1336,7 +1336,7 @@ inline void activity_rie6() {
    endSlot();
 }
 
-inline void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
    // change state
    changeState(S_RXPROC);
    
@@ -1376,7 +1376,7 @@ inline void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
 
 \returns TRUE if packet is a valid ADV, FALSE otherwise
 */
-inline bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
+port_INLINE bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
    return ieee802514_header->valid==TRUE                                                              && \
           ieee802514_header->frameType==IEEE154_TYPE_BEACON                                           && \
           packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))        && \
@@ -1397,7 +1397,7 @@ A valid Rx frame satisfies the following constraints:
 
 \returns TRUE if packet is valid received frame, FALSE otherwise
 */
-inline bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
+port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
    return ieee802514_header->valid==TRUE                                                           && \
           (
              ieee802514_header->frameType==IEEE154_TYPE_DATA                   ||
@@ -1426,7 +1426,7 @@ A packet is a valid ACK if it satisfies the following conditions:
 
 \returns TRUE if packet is a valid ACK, FALSE otherwise.
 */
-inline bool isValidAck(ieee802154_header_iht* ieee802514_header,
+port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header,
                        OpenQueueEntry_t*      packetSent) {
    /*
    return ieee802514_header->valid==TRUE                                                           && \
@@ -1446,7 +1446,7 @@ inline bool isValidAck(ieee802154_header_iht* ieee802514_header,
 
 //======= ASN handling
 
-inline void incrementAsnOffset() {
+port_INLINE void incrementAsnOffset() {
    // increment the asn
    ieee154e_vars.asn.bytes0and1++;
    if (ieee154e_vars.asn.bytes0and1==0) {
@@ -1462,7 +1462,7 @@ inline void incrementAsnOffset() {
    }
 }
 
-inline void asnWriteToAdv(OpenQueueEntry_t* advFrame) {
+port_INLINE void asnWriteToAdv(OpenQueueEntry_t* advFrame) {
    advFrame->l2_payload[0]        = (ieee154e_vars.asn.bytes0and1     & 0xff);
    advFrame->l2_payload[1]        = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
    advFrame->l2_payload[2]        = (ieee154e_vars.asn.bytes2and3     & 0xff);
@@ -1470,7 +1470,7 @@ inline void asnWriteToAdv(OpenQueueEntry_t* advFrame) {
    advFrame->l2_payload[4]        =  ieee154e_vars.asn.byte4;
 }
 
-inline void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
+port_INLINE void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
    
    // store the ASN
    ieee154e_vars.asn.bytes0and1   =     ieee154e_vars.dataReceived->payload[0]+
@@ -1571,7 +1571,7 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
 
 //======= stats
 
-inline void resetStats() {
+port_INLINE void resetStats() {
    ieee154e_stats.syncCounter     =    0;
    ieee154e_stats.minCorrection   =  127;
    ieee154e_stats.maxCorrection   = -127;
@@ -1611,7 +1611,7 @@ different channel offsets in the same slot.
 
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
-inline uint8_t calculateFrequency(uint8_t channelOffset) {
+port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    //return 11+(asn+channelOffset)%16;
    // poipoi: no channel hopping
    return 26;

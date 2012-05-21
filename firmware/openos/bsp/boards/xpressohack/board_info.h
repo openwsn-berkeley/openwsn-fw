@@ -16,6 +16,9 @@
 #include "LPC17xx.h"
 #include "lpc_types.h"
 
+//=========================== defines =========================================
+
+#define port_INLINE                         inline
 
 #define PORT_TIMER_WIDTH                    uint32_t
 #define PORT_SIGNED_INT_WIDTH               int32_t
@@ -28,10 +31,10 @@
 #define CAPTURE_PIN_MASK 1<<15  //GPIO P0.15 to capture
 
 #define DISABLE_INTERRUPTS() __disable_irq(); \
-							 debugpins_isr_set();
+                      debugpins_isr_set();
 
 #define ENABLE_INTERRUPTS() __enable_irq(); \
-	                         debugpins_isr_clr();
+                            debugpins_isr_clr();
 
 
 

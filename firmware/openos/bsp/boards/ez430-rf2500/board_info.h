@@ -14,8 +14,9 @@ to return the board's description.
 #include "stdint.h"
 #include "io430.h"
 
-
 //=========================== defines =========================================
+
+#define port_INLINE                         inline
 
 //===== timer
 

@@ -231,7 +231,7 @@ This is one of the MAC managament tasks. This function inlines in the
 timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
-inline void sendAdv() {
+port_INLINE void sendAdv() {
    OpenQueueEntry_t* adv;
    // only send a packet if I received a sendDone for the previous.
    // the packet might be stuck in the queue for a long time for
@@ -274,7 +274,7 @@ This is one of the MAC managament tasks. This function inlines in the
 timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
-inline void sendKa() {
+port_INLINE void sendKa() {
    OpenQueueEntry_t* kaPkt;
    open_addr_t*      kaNeighAddr;
    

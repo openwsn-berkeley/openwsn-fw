@@ -43,17 +43,55 @@ localEnv.Append(CPPPATH =  [ # bsp
                )
                    
 source_files = [os.path.join('#','firmware','openos','openwsn','openwsn.c'),
-                # 02a-MAClow
+                #=== 02a-MAClow
                 os.path.join('#','firmware','openos','openwsn','02a-MAClow','IEEE802154.c'),
                 os.path.join('#','firmware','openos','openwsn','02a-MAClow','IEEE802154E.c'),
-                # 02b-MAChigh
-                # 02.5-MPLS
-                os.path.join('#','firmware','openos','openwsn','openwsn.c'),
-                # 03a-IPHC
-                # 03b-IPv6
-                # 04-TRAN
-                # 07-App
-                # cross-layers
+                #=== 02b-MAChigh
+                os.path.join('#','firmware','openos','openwsn','02b-MAChigh','linkcost.c'),
+                os.path.join('#','firmware','openos','openwsn','02b-MAChigh','neighbors.c'),
+                os.path.join('#','firmware','openos','openwsn','02b-MAChigh','res.c'),
+                os.path.join('#','firmware','openos','openwsn','02b-MAChigh','schedule.c'),
+                #=== 02.5-MPLS
+                # TODO
+                #=== 03a-IPHC
+                os.path.join('#','firmware','openos','openwsn','03a-IPHC','iphc.c'),
+                os.path.join('#','firmware','openos','openwsn','03a-IPHC','openbridge.c'),
+                #=== 03b-IPv6
+                os.path.join('#','firmware','openos','openwsn','03b-IPv6','forwarding.c'),
+                os.path.join('#','firmware','openos','openwsn','03b-IPv6','icmpv6.c'),
+                os.path.join('#','firmware','openos','openwsn','03b-IPv6','icmpv6echo.c'),
+                os.path.join('#','firmware','openos','openwsn','03b-IPv6','icmpv6router.c'),
+                os.path.join('#','firmware','openos','openwsn','03b-IPv6','icmpv6rpl.c'),
+                #=== 04-TRAN
+                os.path.join('#','firmware','openos','openwsn','04-TRAN','opencoap.c'),
+                os.path.join('#','firmware','openos','openwsn','04-TRAN','opentcp.c'),
+                os.path.join('#','firmware','openos','openwsn','04-TRAN','openudp.c'),
+                os.path.join('#','firmware','openos','openwsn','04-TRAN','rsvp.c'),
+                #=== 07-App
+                #os.path.join('#','firmware','openos','openwsn','07-App','heli','heli.c'),
+                #os.path.join('#','firmware','openos','openwsn','07-App','imu','imu.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','ohlone','ohlone.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','ohlone','ohlone_webpages.c'),
+                #os.path.join('#','firmware','openos','openwsn','07-App','rex','rex.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','rheli','rheli.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','rinfo','rinfo.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','rleds','rleds.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','rreg','rreg.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','rrube','rrube.c'),
+                #os.path.join('#','firmware','openos','openwsn','07-App','rt','rt.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','rwellknown','rwellknown.c'),
+                #os.path.join('#','firmware','openos','openwsn','07-App','rxl1','rxl1.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','tcpecho','tcpecho.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','tcpinject','tcpinject.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','tcpprint','tcpprint.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','udpecho','udpecho.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','udpinject','udpinject.c'),
+                os.path.join('#','firmware','openos','openwsn','07-App','udpprint','udpprint.c'),
+                #=== cross-layers
+                os.path.join('#','firmware','openos','openwsn','cross-layers','idmanager.c'),
+                os.path.join('#','firmware','openos','openwsn','cross-layers','openqueue.c'),
+                os.path.join('#','firmware','openos','openwsn','cross-layers','openrandom.c'),
+                os.path.join('#','firmware','openos','openwsn','cross-layers','packetfunctions.c'),
                ]
 
 libopenstack = localEnv.Library(target='libopenstack',

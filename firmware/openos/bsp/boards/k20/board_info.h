@@ -12,6 +12,9 @@
 
 #include "derivative.h"
 
+//=========================== defines =========================================
+
+#define port_INLINE                         inline
 
 #define PORT_TICS_PER_MS                    33
 #define PORT_TIMER_WIDTH                    uint16_t
@@ -61,7 +64,7 @@ static const uint8_t infoRadioName[] = "AT86RF231";
 
 //  radio RSTn PTC10
 #define PORT_PIN_RADIO_RESET_HIGH()     GPIOC_PCOR |= RADIO_RST_MASK; //clear as it is inverted. 
-#define PORT_PIN_RADIO_RESET_LOW()     	GPIOC_PSOR |= RADIO_RST_MASK; //set to high (as radio pin is inverted so this means no reset.)
+#define PORT_PIN_RADIO_RESET_LOW()        GPIOC_PSOR |= RADIO_RST_MASK; //set to high (as radio pin is inverted so this means no reset.)
 
 
 #define RADIO_SLPTR_PIN 3 //PTB4
