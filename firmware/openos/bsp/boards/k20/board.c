@@ -1,7 +1,7 @@
 /**
-\brief LPC17XX-specific definition of the "board" bsp module.
+\brief K20-specific definition of the "board" bsp module.
 
-\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, February 2012.
+\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2012.
  */
 
 #include "board.h"
@@ -38,9 +38,7 @@ int main(void) {
 
 void board_init() {
 	uint8_t mcgmode=0;
-	
-		uint8_t eui[8];
-	
+		
 		//enable all port clocks.
 	SIM_SCGC5 |= (SIM_SCGC5_PORTA_MASK
 			| SIM_SCGC5_PORTB_MASK

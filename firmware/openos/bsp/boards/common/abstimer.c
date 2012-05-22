@@ -174,19 +174,26 @@ uint16_t radiotimer_getValue() {
 }
 
 void radiotimer_setPeriod(uint16_t period) {
-   abstimer_vars.radiotimer_period=period;
-   
+	
+  uint16_t oldperiod=abstimer_vars.radiotimer_period;
+
+  abstimer_vars.radiotimer_period=period;
+  
+  abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  -= oldperiod;
+  
+  abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
+    
    //keep previous value == init time for this timer.
-   abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
+  // abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
    
    //set the timeout in the future.
-   abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
+   //abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
    
    // I'm using this timer
-   abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]      = TRUE;
+   //abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]      = TRUE;
    
    // reschedule
-   abstimer_reschedule();
+   //abstimer_reschedule();
 }
 
 uint16_t radiotimer_getPeriod() {
