@@ -256,9 +256,6 @@ typedef struct {
 // rxNow
 // getReceivedFrame
 typedef struct {
-   uint8_t maxBufLen;
-} opensim_requ_radio_getReceivedFrame_t;
-typedef struct {
    uint8_t rxBuffer[128];
    uint8_t len;
     int8_t rssi;

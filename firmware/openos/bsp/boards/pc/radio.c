@@ -223,18 +223,25 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                              int8_t* pRssi,
                             uint8_t* pLqi,
                             uint8_t* pCrc) {
-   opensim_requ_radio_getReceivedFrame_t requparams;
+   uint8_t numBytesToWrite;
+   
    opensim_repl_radio_getReceivedFrame_t replparams;
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_getReceivedFrame,
-                                    &requparams,
-                                    sizeof(opensim_requ_radio_getReceivedFrame_t),
+                                    0,
+                                    0,
                                     &replparams,
                                     sizeof(opensim_repl_radio_getReceivedFrame_t));
    
+   if (maxBufLen>replparams.len) {
+      numBytesToWrite=replparams.len;
+   } else {
+      numBytesToWrite=maxBufLen;
+   }
+   
    // write return values
-   memcpy(pBufRead,replparams.rxBuffer,replparams.len);
+   memcpy(pBufRead,replparams.rxBuffer,numBytesToWrite);
    *pLenRead = replparams.len;
    *pRssi    = replparams.rssi;
    *pLqi     = replparams.lqi;
