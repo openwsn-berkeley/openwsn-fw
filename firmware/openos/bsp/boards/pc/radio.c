@@ -14,8 +14,6 @@
 typedef struct {
    radiotimer_capture_cbt    startFrame_cb;
    radiotimer_capture_cbt    endFrame_cb;
-   radiotimer_compare_cbt    overflow_cb;
-   radiotimer_compare_cbt    compare_cb;
    radio_state_t             state;
 } radio_vars_t;
 
@@ -26,11 +24,11 @@ radio_vars_t radio_vars;
 //=========================== callbacks =======================================
 
 void radio_setOverflowCb(radiotimer_compare_cbt cb) {
-   radio_vars.overflow_cb    = cb;
+   radiotimer_setOverflowCb(cb);
 }
 
 void radio_setCompareCb(radiotimer_compare_cbt cb) {
-   radio_vars.compare_cb     = cb;
+   radiotimer_setCompareCb(cb);
 }
 
 void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
