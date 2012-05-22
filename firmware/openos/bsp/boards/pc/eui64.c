@@ -24,6 +24,9 @@ void eui64_get(uint8_t* addressToWrite) {
                                     0,
                                     &replparams,
                                     sizeof(opensim_repl_eui64_get_t));
+                                    
+   // copy into addressToWrite
+   memcpy(addressToWrite,replparams.eui64,8);
 }
 
 //=========================== private =========================================
