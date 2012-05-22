@@ -12,6 +12,10 @@
 #include "tcp_port.h"
 #include "opensim_client.h"
 
+//=========================== defines =========================================
+
+//#define PRINT_ACTIVITY
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -109,7 +113,9 @@ void opensim_client_send(int  txPacketType,
       fprintf(stderr,"[opensim_client] ERROR: send() failed (error=%d)\n", WSAGetLastError());
       opensim_client_abort();
    }
+#ifdef PRINT_ACTIVITY
    printf("[opensim_client] DEBUG: sent %d\r\n",txPacketType);
+#endif
 }
 
 void opensim_client_waitForPacket(int* rxPacketType,
@@ -140,9 +146,10 @@ void opensim_client_waitForPacket(int* rxPacketType,
                                   retval-1);
       opensim_client_abort();
    }
-   
+#ifdef PRINT_ACTIVITY   
    printf("[opensim_client] DEBUG: received %d (%d bytes)\n",(int)opensim_client_vars.rxBuffer[0],
                                                               retval-1);
+#endif
    
    // copy packet type to rxPacketType
    *rxPacketType = opensim_client_vars.rxBuffer[0];
