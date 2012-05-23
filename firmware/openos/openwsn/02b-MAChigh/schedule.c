@@ -219,7 +219,7 @@ slotOffset_t schedule_getNextActiveSlotOffset() {
    
    // return next active slot's slotOffset
    DISABLE_INTERRUPTS();
-   res = ((scheduleEntry_t*)(schedule_vars.currentScheduleEntry->next))->slotOffset
+   res = ((scheduleEntry_t*)(schedule_vars.currentScheduleEntry->next))->slotOffset;
    ENABLE_INTERRUPTS();
    
    return res;
