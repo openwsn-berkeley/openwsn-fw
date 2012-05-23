@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>01bsp_debugpins</name>
+	<name>01bsp_bothtimers</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -69,9 +69,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>Sources/01bsp_debugpins.c</name>
+			<name>Sources/01bsp_bothtimers.c</name>
 			<type>1</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/projects/common/01bsp_debugpins/01bsp_debugpins.c</location>
+			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/projects/common/01bsp_bothtimers/01bsp_bothtimers.c</location>
 		</link>
 		<link>
 			<name>Sources/boards</name>

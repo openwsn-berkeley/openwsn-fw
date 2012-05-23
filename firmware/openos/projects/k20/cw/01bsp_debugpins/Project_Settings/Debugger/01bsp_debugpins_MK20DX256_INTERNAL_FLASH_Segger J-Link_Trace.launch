@@ -112,10 +112,10 @@
 <booleanAttribute key="org.eclipse.cdt.launch.ENABLE_RESTORE_WATCHPOINTS" value="true"/>
 <booleanAttribute key="org.eclipse.cdt.launch.ENABLE_VARIABLE_BOOKKEEPING" value="false"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="MK20DX256_INTERNAL_FLASH/01bsp_all.afx"/>
-<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="openos"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="01bsp_debugpins"/>
 <stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value="com.freescale.arm.cdt.toolchain.config.arm.release.242548011"/>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/openos"/>
+<listEntry value="/01bsp_debugpins"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="4"/>
