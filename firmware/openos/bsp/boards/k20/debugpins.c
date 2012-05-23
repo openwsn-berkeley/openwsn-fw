@@ -27,7 +27,7 @@
 //TWRPI_GPIO4 PTD5
 //TWRPI_GPIO1 PTC6
 
-#define FRAME_PIN 7 //PTC7 B21
+#define FRAME_PIN 7 //PTD7 B34 -- is SPI0.. so need another one. using PTD7 instead. -- B34
 #define SLOT_PIN 20 //PTB20 B23
 #define FSM_PIN 26  //PTE26 B25
 #define TASK_PIN 0 //PTB0 B27
@@ -63,7 +63,7 @@ void debugpins_init() {
 //	 GPIOD_PDDR |= 1<<ISR_PIN;
 //	 GPIOC_PDDR |= 1<<RADIO_PIN;
 	 
-	 PORTC_PCR7 = PORT_PCR_MUX(1);
+	 PORTD_PCR7 = PORT_PCR_MUX(1);
 	 PORTB_PCR20 = PORT_PCR_MUX(1);
 	 PORTE_PCR26 = PORT_PCR_MUX(1);
 	 PORTB_PCR0 = PORT_PCR_MUX(1);
@@ -71,7 +71,7 @@ void debugpins_init() {
 	 PORTA_PCR14  = PORT_PCR_MUX(1);
 
 	 //set as output
-	 GPIOC_PDDR |= 1<<FRAME_PIN;
+	 GPIOD_PDDR |= 1<<FRAME_PIN;
 	 GPIOB_PDDR |= 1<<SLOT_PIN;
 	 GPIOE_PDDR |= 1<<FSM_PIN;
 	 GPIOB_PDDR |= 1<<TASK_PIN;
@@ -82,15 +82,15 @@ void debugpins_init() {
 
 void debugpins_frame_toggle() {
 	//toggle
-	GPIOC_PTOR |= 1<<FRAME_PIN;
+	GPIOD_PTOR |= 1<<FRAME_PIN;
 }
 void debugpins_frame_clr() {
      //clear
-	GPIOC_PCOR |= 1<<FRAME_PIN;
+	GPIOD_PCOR |= 1<<FRAME_PIN;
 }
 void debugpins_frame_set() {
 	 //set
-	GPIOC_PSOR |= 1<<FRAME_PIN;
+	GPIOD_PSOR |= 1<<FRAME_PIN;
 }
 
 void debugpins_slot_toggle() {

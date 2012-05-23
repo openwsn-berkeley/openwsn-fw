@@ -37,6 +37,7 @@ int main(void) {
 }
 
 void board_init() {
+	uint8_t i;
 	uint8_t mcgmode=0;
 		
 		//enable all port clocks.
@@ -54,14 +55,13 @@ void board_init() {
 	mcgmode= what_mcg_mode();
 
 
-
 	//init all pins for the radio
 	//SLPTR
 	PORTB_PCR3 = PORT_PCR_MUX(1);// -- PTD4 used as gpio for slptr
 	GPIOB_PDDR |= RADIO_SLPTR_MASK; //set as output
 	//set to low
 	PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
-
+	
 	//RADIO RST
 	PORTC_PCR10 = PORT_PCR_MUX(1);// -- PTC10 used as gpio for radio rst
 	GPIOC_PDDR |= RADIO_RST_MASK; //set as output
@@ -85,7 +85,6 @@ void board_init() {
 	spi_init();	
 	radio_init();
 	leds_all_off();
-
 }
 
 

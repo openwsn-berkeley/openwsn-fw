@@ -13,7 +13,7 @@
 
 //=========================== defines =========================================
 
-#define ABSTIMER_GUARD_TICKS 0
+#define ABSTIMER_GUARD_TICKS 3
 
 typedef void (*abstimer_cbt)(void);
 
@@ -183,17 +183,11 @@ void radiotimer_setPeriod(uint16_t period) {
   
   abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
     
-   //keep previous value == init time for this timer.
-  // abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-   
-   //set the timeout in the future.
-   //abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
-   
-   // I'm using this timer
-   //abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]      = TRUE;
-   
+  debugpins_isr_set();
+  debugpins_isr_clr();
+  
    // reschedule
-   //abstimer_reschedule();
+   // abstimer_reschedule();
 }
 
 uint16_t radiotimer_getPeriod() {
@@ -306,6 +300,7 @@ uint8_t radiotimer_isr() {
    
    // update the current theoretical time
    abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
+      
    
    //===== step 1. Find out which interrupts just fired
    
@@ -384,7 +379,9 @@ uint8_t radiotimer_isr() {
       
       // evaluate how much time has passed since theoretical currentTime
       // (over estimate by ABSTIMER_GUARD_TICKS)
-      timeSpent = sctimer_getValue()-abstimer_vars.currentTime+ABSTIMER_GUARD_TICKS;
+      timeSpent = sctimer_getValue();
+      timeSpent -= abstimer_vars.currentTime;
+      timeSpent += ABSTIMER_GUARD_TICKS;
       
       // verify that, for each timer, that duration doesn't exceed how much time is left
       bitmapInterruptsFired = 0;
@@ -403,7 +400,7 @@ uint8_t radiotimer_isr() {
          }
       }
    }//end loop
-   
+ 
    // kick the OS
    return 1;
 }
