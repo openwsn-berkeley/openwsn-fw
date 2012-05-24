@@ -58,5 +58,9 @@ void sctimer_setCb(sctimer_cbt cb){
 //does nothing as it is done by IAR -- look at board.c
 }
 
-
+void sctimer_clearISR(){
+   uint16_t        taiv;
+        
+   taiv=TAIV;//read taiv to clear the flags.
+}
 //=========================== private =========================================

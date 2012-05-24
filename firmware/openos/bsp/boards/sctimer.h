@@ -25,5 +25,6 @@ void sctimer_init();
 void sctimer_schedule(uint16_t val);
 uint16_t sctimer_getValue();
 void sctimer_setCb(sctimer_cbt cb);
+void sctimer_clearISR();
 
 #endif

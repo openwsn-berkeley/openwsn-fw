@@ -186,16 +186,16 @@ uint16_t radiotimer_getValue() {
 
 void radiotimer_setPeriod(uint16_t period) {
 
-	//  uint16_t oldperiod=abstimer_vars.radiotimer_period;
+	uint16_t oldperiod=abstimer_vars.radiotimer_period;
 
 	abstimer_vars.radiotimer_period=period;
 	//TODO  
 	abstimer_dbg.last_period_val=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];//debug -- keep old value
 
-	// abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  -= oldperiod;
+	abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  -= oldperiod;
 
-	//  abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-	//  abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
+	abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
+	abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
 	//TODO  
 	abstimer_dbg.new_period_val=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]; //debug -- keep new value
 
@@ -203,7 +203,7 @@ void radiotimer_setPeriod(uint16_t period) {
 	debugpins_isr_clr();
 
 	// reschedule
-	// abstimer_dbg.mindist=abstimer_reschedule();
+	 abstimer_dbg.mindist=abstimer_reschedule();
 }
 
 uint16_t radiotimer_getPeriod() {
@@ -316,7 +316,11 @@ uint8_t radiotimer_isr() {
 	bool            update;
 	uint16_t        min;
 
-	// update the current theoretical time
+        sctimer_clearISR();
+        
+        debugpins_isr_toggle();
+	
+        // update the current theoretical time
 	abstimer_dbg.real_counter_val  =sctimer_getValue();
 	abstimer_dbg.counterVal_initISR=   abstimer_vars.currentTime;
 
@@ -343,7 +347,8 @@ uint8_t radiotimer_isr() {
 
 	// make sure at least one timer fired
 	if (bitmapInterruptsFired==0) {
-		while(1);
+          while(1); 
+          //return 1;
 	}
 
 	abstimer_dbg.num_loops=0;
