@@ -4,6 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
 */
 
+#include <string.h>
 #include "bsp_timer.h"
 #include "opensim_proto.h"
 
@@ -31,7 +32,7 @@ void bsp_timer_set_callback(bsp_timer_cbt cb) {
 void bsp_timer_init() {
    
    // clear local variables
-   memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
+   memset((void*)&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
    // send request to server and get reply
    opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_init,
