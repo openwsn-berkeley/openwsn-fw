@@ -92,6 +92,6 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 
 //=========================== interrupt handlers ==============================
 
-void bsp_timer_isr() {
+uint8_t bsp_timer_isr() {
    bsp_timer_vars.cb();
 }
