@@ -248,6 +248,7 @@ typedef struct {
 // rfOff
 // loadPacket
 typedef struct {
+   uint8_t len;
    uint8_t txBuffer[127];
 } opensim_requ_radio_loadPacket_t;
 // txEnable

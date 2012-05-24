@@ -12,6 +12,8 @@
 
 SOCKET tcp_port_connect(char* server_name, unsigned short server_port) {
    int                  retval;
+   int flag;
+   int result;
    struct hostent*      hp;
    unsigned int         addr;
    struct sockaddr_in   server_address;
@@ -55,6 +57,18 @@ SOCKET tcp_port_connect(char* server_name, unsigned short server_port) {
    conn_socket = socket(AF_INET,SOCK_STREAM,0);
    if (conn_socket<0) {
       fprintf(stderr,"ERROR: could not open socket (error=%d)\n", WSAGetLastError());
+      WSACleanup();
+      exit(1);
+   }
+   
+   flag = 1;
+   result = setsockopt(conn_socket,
+                       IPPROTO_TCP,
+                       TCP_NODELAY,
+                       (char*)&flag,
+                       sizeof(int));
+   if (result<0) {
+      fprintf(stderr,"ERROR: could not disable Nagle's algorithm (error=%d)\n", WSAGetLastError());
       WSACleanup();
       exit(1);
    }

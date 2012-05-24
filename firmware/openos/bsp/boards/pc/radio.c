@@ -165,6 +165,7 @@ void radio_rfOff() {
 void radio_loadPacket(uint8_t* packet, uint8_t len) {
    opensim_requ_radio_loadPacket_t requparams;
    
+   requparams.len = len;
    memcpy(requparams.txBuffer,packet,len);
    
    // send request to server and get reply
