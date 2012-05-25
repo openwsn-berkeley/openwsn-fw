@@ -38,9 +38,11 @@ typedef struct {
 	uint16_t                  mindist;//next timer distance when setPeriod is executed
 	uint16_t                  num_loops;
 	uint16_t                  timeSpent;
+	uint16_t                  timeSpent2;
 	uint16_t                  distance2Next[ABSTIMER_SRC_MAX];
 	abstimer_src_t            last_function_call;
-	uint16_t 			     counterVal_initISR;
+        abstimer_src_t            current_function_call;
+	uint16_t 	          counterVal_initISR;
 
 } abstimer_dbg_t;
 
@@ -295,7 +297,9 @@ uint16_t abstimer_reschedule() {
 	if (found==TRUE) {
 		sctimer_schedule(valToLoad);
 		abstimer_vars.nextCurrentTime    = valToLoad;
-	}
+	}else{
+          while(1);
+        }
 
 	// return in how long the timer will fire
 	return minDist;
@@ -314,7 +318,7 @@ uint8_t radiotimer_isr() {
 	uint8_t         bitmapInterruptsFired;
 	uint16_t        calc,real_counter_val_new;
 	bool            update;
-	uint16_t        min;
+	uint16_t        min,dummy;
 
         sctimer_clearISR();
         
@@ -331,7 +335,7 @@ uint8_t radiotimer_isr() {
 		real_counter_val_new  = sctimer_getValue();
 		while(1);
 	}
-
+  abstimer_dbg.current_function_call=abstimer_vars.nextToFire;
 	//===== step 1. Find out which interrupts just fired
 
 	// Note: we store the list of interrupts which fired in an 8-bit bitmap
@@ -342,6 +346,7 @@ uint8_t radiotimer_isr() {
 				(abstimer_vars.compareVal[i]==abstimer_vars.currentTime)
 		) {
 			bitmapInterruptsFired |= (1<<i);
+                        abstimer_dbg.current_function_call=i;
 		}
 	}
 
@@ -354,7 +359,7 @@ uint8_t radiotimer_isr() {
 	abstimer_dbg.num_loops=0;
 
 	while (bitmapInterruptsFired!=0) {
-		abstimer_dbg.num_loops++;
+		
 		abstimer_dbg.inloop_real_counter_val=sctimer_getValue();
 
 		//==== step 2. Reschedule the timers which fired and need to be rescheduled
@@ -382,7 +387,7 @@ uint8_t radiotimer_isr() {
 			abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]  = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]+ \
 					abstimer_vars.radiotimer_compare_offset;
 
-			abstimer_dbg.last_function_call=ABSTIMER_SRC_RADIOTIMER_OVERFLOW;
+			abstimer_dbg.last_function_call=ABSTIMER_SRC_RADIOTIMER_COMPARE;
 		}
 
 		//===== step 3. call the callbacks of the timers that just fired
@@ -422,7 +427,8 @@ uint8_t radiotimer_isr() {
 		timeSpent = sctimer_getValue(); 
 		timeSpent2 =(uint16_t)timeSpent - (uint16_t)abstimer_vars.currentTime;   
 		timeSpent2 += ABSTIMER_GUARD_TICKS;
-		abstimer_dbg.timeSpent=timeSpent2;
+		abstimer_dbg.timeSpent=timeSpent;
+                abstimer_dbg.timeSpent2=timeSpent2;
 
 		if (timeSpent2 >600){
 			while(1);
@@ -452,13 +458,19 @@ uint8_t radiotimer_isr() {
 				abstimer_vars.nextCurrentTime=abstimer_vars.compareVal[i];  
 				// update debug statistics
 				abstimer_dbg.num_late_schedule++;
+                                abstimer_dbg.current_function_call=i;
+                                
 			}
 		}
 		if (bitmapInterruptsFired!=0) {
+                  if (abstimer_dbg.current_function_call==ABSTIMER_SRC_RADIOTIMER_OVERFLOW){
+                    dummy++;
+                  }
 			abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
 		}
+                abstimer_dbg.num_loops++;
 	}//end loop
-
+        abstimer_dbg.num_loops=0;
 	// kick the OS
 	return 1;
 }
