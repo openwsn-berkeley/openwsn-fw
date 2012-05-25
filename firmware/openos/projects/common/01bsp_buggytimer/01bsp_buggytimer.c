@@ -33,8 +33,9 @@ app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_compare();
-
+void cb_bsp_compare();
+void cb_radiotimer_period();
+void cb_radiotimer_compare();
 //=========================== main ============================================
 
 /**
@@ -45,7 +46,7 @@ int mote_main(void)
    // initialize board
    board_init();
    
-   bsp_timer_set_callback(cb_compare);
+   bsp_timer_set_callback(cb_bsp_compare);
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    
    radiotimer_setCompareCb(cb_radiotimer_compare);
