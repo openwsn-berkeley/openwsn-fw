@@ -59,8 +59,8 @@ void sctimer_setCb(sctimer_cbt cb){
 }
 
 void sctimer_clearISR(){
-   uint16_t        taiv;
+   uint16_t  taiv;
         
-   taiv=TAIV;//read taiv to clear the flags.
+   taiv = TAIV;//read taiv to clear the flags.
 }
 //=========================== private =========================================

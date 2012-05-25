@@ -10,6 +10,7 @@
 #include "bsp_timer.h"
 #include "radiotimer.h"
 #include "sctimer.h"
+#include "debugpins.h"
 
 //=========================== defines =========================================
 
