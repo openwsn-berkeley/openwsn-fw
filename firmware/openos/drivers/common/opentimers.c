@@ -187,7 +187,7 @@ to expire.
  */
 void opentimers_timer_callback() {
 
-	opentimer_id_t   id,minid;
+	opentimer_id_t   id;
 	PORT_TIMER_WIDTH min_timeout;
 	bool             found;
     
@@ -245,7 +245,6 @@ void opentimers_timer_callback() {
 
 	// step 3. find the minimum remaining timeout among running timers
 	found = FALSE;
-	minid=0;
 	for(id=0;id<MAX_NUM_TIMERS;id++) {
 		if (
 				opentimers_vars.timersBuf[id].isrunning==TRUE &&
@@ -257,7 +256,6 @@ void opentimers_timer_callback() {
 		) {
 			min_timeout    = opentimers_vars.timersBuf[id].ticks_remaining;
 			found          = TRUE;
-			minid=id;
 		}
 	}
 
@@ -265,8 +263,6 @@ void opentimers_timer_callback() {
 	if (found==TRUE) {
 		// at least one timer pending
 		opentimers_vars.currentTimeout = min_timeout;
-		//opentimers_vars.timersBuf[minid].init_time=bsp_timer_get_currentValue();
-	//	printf("init_time id %d, %d\n",minid,opentimers_vars.timersBuf[minid].init_time);
 		bsp_timer_scheduleIn(opentimers_vars.currentTimeout);
 	} else {
 		// no more timers pending
