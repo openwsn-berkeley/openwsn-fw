@@ -64,6 +64,9 @@
   <project>
     <path>$WS_DIR$\03oos_openwsn\03oos_openwsn.ewp</path>
   </project>
+  <project>
+    <path>$WS_DIR$\03oos_openwsn_alt\03oos_openwsn_alt.ewp</path>
+  </project>
   <batchBuild/>
 </workspace>
 
