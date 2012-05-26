@@ -32,19 +32,6 @@ typedef struct {
 	uint16_t                  num_radiotimer_overflow;
 	uint16_t                  num_radiotimer_compare;
 	uint16_t                  num_late_schedule;
-	uint16_t                  last_period_val;
-	uint16_t                  new_period_val;
-	uint16_t                  real_counter_val;
-	uint16_t                  inloop_real_counter_val;
-	uint16_t                  mindist;//next timer distance when setPeriod is executed
-	uint16_t                  num_loops;
-	uint16_t                  timeSpent;
-	uint16_t                  timeSpent2;
-	uint16_t                  distance2Next[ABSTIMER_SRC_MAX];
-	abstimer_src_t            last_function_call;
-        abstimer_src_t            current_function_call;
-	uint16_t 	          counterVal_initISR;
-
 } abstimer_dbg_t;
 
 abstimer_dbg_t abstimer_dbg;
@@ -192,36 +179,31 @@ void radiotimer_setPeriod(uint16_t period) {
 	uint16_t oldperiod=abstimer_vars.radiotimer_period;
 
 	abstimer_vars.radiotimer_period=period;
-	//TODO  
-	abstimer_dbg.last_period_val=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];//debug -- keep old value
 
+        //correct the period in that current slot. so remove the current period
 	abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  -= oldperiod;
 
-	abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-	abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
-	//TODO  
-	abstimer_dbg.new_period_val=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]; //debug -- keep new value
-
-	debugpins_isr_set();
-	debugpins_isr_clr();
+        //keep init time          
+        abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
+	//set new period
+        abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
 
 	// reschedule
-	 abstimer_dbg.mindist=abstimer_reschedule();
+	abstimer_reschedule();
 }
 
 uint16_t radiotimer_getPeriod() {
-	return abstimer_vars.radiotimer_period;
+	return abstimer_vars.radiotimer_period; 
 }
 
 void radiotimer_schedule(uint16_t offset) {
-
-	// remember the offset
+       // remember the offset
 	abstimer_vars.radiotimer_compare_offset                      = offset;
-
+       
 	// set the compare value since previous *overflow*
 	abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]    = abstimer_vars.radiotimer_overflow_previousVal + \
 			abstimer_vars.radiotimer_compare_offset;
-
+          
 	// I'm using this timer
 	abstimer_vars.isArmed[ABSTIMER_SRC_RADIOTIMER_COMPARE]       = TRUE;
 
@@ -299,7 +281,7 @@ uint16_t abstimer_reschedule() {
 		sctimer_schedule(valToLoad);
 		abstimer_vars.nextCurrentTime    = valToLoad;
 	}else{
-          while(1);
+            while(1);
         }
 
 	// return in how long the timer will fire
@@ -319,57 +301,49 @@ uint8_t radiotimer_isr() {
 	uint8_t         bitmapInterruptsFired;
 	uint16_t        calc,real_counter_val_new;
 	bool            update;
-	uint16_t        min,dummy;
+	uint16_t        min;
 
         sctimer_clearISR();
         
         debugpins_isr_toggle();
 	
         // update the current theoretical time
-	abstimer_dbg.real_counter_val  =sctimer_getValue();
-	abstimer_dbg.counterVal_initISR=   abstimer_vars.currentTime;
+	real_counter_val_new  =sctimer_getValue();
 
 	abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
 
 
-	if (abstimer_dbg.real_counter_val<abstimer_vars.currentTime) {
-		real_counter_val_new  = sctimer_getValue();
+	if (real_counter_val_new<abstimer_vars.currentTime) {
 		while(1);
 	}
-  abstimer_dbg.current_function_call=abstimer_vars.nextToFire;
+
 	//===== step 1. Find out which interrupts just fired
 
 	// Note: we store the list of interrupts which fired in an 8-bit bitmap
 	bitmapInterruptsFired = 0;
-	for (i=0;i<ABSTIMER_SRC_MAX;i++) {
+	
+        for (i=0;i<ABSTIMER_SRC_MAX;i++) {
 		if (
 				(abstimer_vars.isArmed[i]==TRUE) &&
 				(abstimer_vars.compareVal[i]==abstimer_vars.currentTime)
 		) {
 			bitmapInterruptsFired |= (1<<i);
-                        abstimer_dbg.current_function_call=i;
-		}
+        	}
 	}
 
 	// make sure at least one timer fired
 	if (bitmapInterruptsFired==0) {
           while(1); 
-          //return 1;
 	}
-
-	abstimer_dbg.num_loops=0;
 
 	while (bitmapInterruptsFired!=0) {
 		
-		abstimer_dbg.inloop_real_counter_val=sctimer_getValue();
-
-		//==== step 2. Reschedule the timers which fired and need to be rescheduled
+	//==== step 2. Reschedule the timers which fired and need to be rescheduled
 
 		if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_BSP_TIMER)) {
 			// update debug stats
 			abstimer_dbg.num_bsp_timer++;
-			// no automatic rescheduling
-			abstimer_dbg.last_function_call=ABSTIMER_SRC_BSP_TIMER;
+			// no automatic rescheduling	
 		}
 		if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW)) {
 			// update debug stats
@@ -378,9 +352,7 @@ uint8_t radiotimer_isr() {
 			abstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
 			// this is a periodic timer, reschedule automatically
 			abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW] += abstimer_vars.radiotimer_period;
-
-			abstimer_dbg.last_function_call=ABSTIMER_SRC_RADIOTIMER_OVERFLOW;
-		}
+        	}
 		if (bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_COMPARE)) {
 			// update debug stats
 			abstimer_dbg.num_radiotimer_compare++;
@@ -388,7 +360,6 @@ uint8_t radiotimer_isr() {
 			abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]  = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]+ \
 					abstimer_vars.radiotimer_compare_offset;
 
-			abstimer_dbg.last_function_call=ABSTIMER_SRC_RADIOTIMER_COMPARE;
 		}
 
 		//===== step 3. call the callbacks of the timers that just fired
@@ -428,16 +399,12 @@ uint8_t radiotimer_isr() {
 		timeSpent = sctimer_getValue(); 
 		timeSpent2 =(uint16_t)timeSpent - (uint16_t)abstimer_vars.currentTime;   
 		timeSpent2 += ABSTIMER_GUARD_TICKS;
-		abstimer_dbg.timeSpent=timeSpent;
-                abstimer_dbg.timeSpent2=timeSpent2;
-
+	
+//debug
 		if (timeSpent2 >600){
 			while(1);
 		}
-		//TODO! the problem is around here. when there are some close timers, the currentTime is not updated but the real time elapses,so this 
-		//difference at every loop becomes higher meaning that timeSpent (wraps up) becomes a big number such as 65XXX and then all timers are below that one so it loops here
-		//for some time causing to push too many tasks into the scheduler queue.
-		//
+		
 		// verify that, for each timer, that duration doesn't exceed how much time is left
 		bitmapInterruptsFired = 0;
 
@@ -447,31 +414,25 @@ uint8_t radiotimer_isr() {
 
 			//calculate distance to next timeout
 			calc=(uint16_t)abstimer_vars.compareVal[i]-(uint16_t)abstimer_vars.currentTime; 
-			abstimer_dbg.distance2Next[i]=calc;
-
-			if ((abstimer_vars.isArmed[i]==TRUE) &&	(timeSpent2>calc) && calc<min) {
-
+			
+                        if ((abstimer_vars.isArmed[i]==TRUE) &&	(timeSpent2>calc) && (calc<min)) {
 				min=calc;//this is the nearest in time
-
 				// this interrupt needs to be serviced now
 				bitmapInterruptsFired = (1<<i);
 				//update the next timeout value
 				abstimer_vars.nextCurrentTime=abstimer_vars.compareVal[i];  
 				// update debug statistics
 				abstimer_dbg.num_late_schedule++;
-                                abstimer_dbg.current_function_call=i;
-                                
 			}
 		}
 		if (bitmapInterruptsFired!=0) {
-                  if (abstimer_dbg.current_function_call==ABSTIMER_SRC_RADIOTIMER_OVERFLOW){
-                    dummy++;
-                  }
-			abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
+                 abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;   
+                 if (abstimer_vars.nextToFire==ABSTIMER_SRC_RADIOTIMER_COMPARE){
+                  abstimer_vars.currentTime +=0;      //to debug
+                }
 		}
-                abstimer_dbg.num_loops++;
+                
 	}//end loop
-        abstimer_dbg.num_loops=0;
 	// kick the OS
 	return 1;
 }
