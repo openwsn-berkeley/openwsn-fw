@@ -32,6 +32,11 @@ typedef struct {
 	uint16_t num_radiotimer_overflow;
 	uint16_t num_radiotimer_compare;
 	uint16_t num_late_schedule;
+	uint16_t isr_time;
+	uint16_t isr_time_last;
+	abstimer_cbt max_callback[ABSTIMER_SRC_MAX];
+	uint16_t isr_max_times;
+	uint16_t isr_late_max;
 } abstimer_dbg_t;
 
 abstimer_dbg_t abstimer_dbg;
@@ -308,19 +313,22 @@ uint8_t bsp_timer_isr() {
 
 uint8_t radiotimer_isr() {
 	volatile uint8_t i, j, min_exec; // iterator
-	volatile uint16_t now, timeSpent;
-	volatile uint16_t calc;
+	volatile uint16_t now, timeSpent,dbg_init_time,dbg_end_time;
+	volatile uint16_t calc,max,max2;
 	volatile uint16_t min;
 	volatile bool late[ABSTIMER_SRC_MAX]; //all that are late
 	volatile uint16_t distance[ABSTIMER_SRC_MAX]; //the distance to the current time when they are late
 	volatile bool exists, end;
 	volatile bool tobefired[ABSTIMER_SRC_MAX];//those that need to be fired now.
-
+	volatile abstimer_cbt currentcall[ABSTIMER_SRC_MAX];
+	
+	max=0;
+	max2=0;
 	sctimer_clearISR();
 	debugpins_isr_toggle();
 
 	now = sctimer_getValue();
-
+    
 	// update the current theoretical time
 	abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
 
@@ -361,6 +369,9 @@ uint8_t radiotimer_isr() {
 		if ((abstimer_vars.isArmed[i] == TRUE) && (tobefired[i] == TRUE)) {
 			abstimer_vars.nextToFire[i] = FALSE; //fired.
 			abstimer_vars.callback[i]();
+			currentcall[i]=abstimer_vars.callback[i];
+		}else{
+			currentcall[i]=0;
 		}
 	}
 
@@ -419,19 +430,40 @@ uint8_t radiotimer_isr() {
 		}
 		//call callback in order
 		if (exists==TRUE){
+			dbg_init_time=sctimer_getValue();
 			abstimer_vars.nextCurrentTime=abstimer_vars.compareVal[min_exec];
 			abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
 			abstimer_vars.nextToFire[min_exec] = FALSE;
 			abstimer_vars.callback[min_exec]();
 			late[min_exec]=FALSE;
 			exists=FALSE;
-			abstimer_reschedule();		
+			abstimer_reschedule();
+			dbg_end_time=sctimer_getValue();
+			
+
+			max2=(uint16_t)dbg_end_time-(uint16_t)dbg_init_time;
+			if (max2>=abstimer_dbg.isr_late_max){
+				abstimer_dbg.isr_late_max=max2;
+			}
+			
+			//TODO .. this execution may take a lot of time so maybe this makes some other timers to be missed.
 		}
 	}
 
 	//reschedule as callbacks may be reset some timers.
 	//abstimer_reschedule();
 
+	//get maximum isr time to see if the guard time is enough or to big.
+	max=((uint16_t)sctimer_getValue()-(uint16_t)now);
+	abstimer_dbg.isr_time_last=max;//debug.
+	
+	if (max>=abstimer_dbg.isr_time){
+		abstimer_dbg.isr_time=max;//debug.
+		abstimer_dbg.isr_max_times++;//debug.
+		for (i=0;i<ABSTIMER_SRC_MAX;i++){
+			abstimer_dbg.max_callback[i]=currentcall[i];
+		}
+	}
 	// kick the OS
 	return 1;
 }
