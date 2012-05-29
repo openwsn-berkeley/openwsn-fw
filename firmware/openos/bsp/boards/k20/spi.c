@@ -126,7 +126,7 @@ void spi_init() {
 	// assumming core cpu at 72Mhz and peripheral clk at 36Mhz
 	// 1.8Mhz --> pbr=7--> SPI_CTAR_PBR(3) and 	br=16 -->SPI_CTAR_BR(4)
 	// 6 Mhz  --> pbr=5--> SPI_CTAR_PBR(2) and  br=8 -->SPI_CTAR_BR(3)
-	SPI0_CTAR0 = (SPI_CTAR_DBR_MASK | SPI_CTAR_FMSZ(8-1) | SPI_CTAR_PDT(0) | SPI_CTAR_BR(4)|SPI_CTAR_PBR(3) ); 
+	SPI0_CTAR0 = (SPI_CTAR_DBR_MASK | SPI_CTAR_FMSZ(8-1) | SPI_CTAR_PDT(0) | SPI_CTAR_BR(3)|SPI_CTAR_PBR(2) ); 
 	
 	
 	SPI0_SR       = SPI_SR_EOQF_MASK|SPI_SR_TCF_MASK|SPI_SR_TFUF_MASK|SPI_SR_TFFF_MASK|SPI_SR_RFOF_MASK|SPI_SR_RFDF_MASK;             
