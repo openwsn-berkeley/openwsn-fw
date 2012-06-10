@@ -41,7 +41,7 @@
         </option>
         <option>
           <name>DynDriver</name>
-          <state>430FET</state>
+          <state>SIM430</state>
         </option>
         <option>
           <name>dDllSlave</name>
@@ -57,7 +57,7 @@
         </option>
         <option>
           <name>DdfFileName</name>
-          <state>$TOOLKIT_DIR$\config\MSP430F1611.ddf</state>
+          <state>$TOOLKIT_DIR$\config\MSP430F2618.ddf</state>
         </option>
         <option>
           <name>ProcTMS</name>
