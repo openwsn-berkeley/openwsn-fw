@@ -13,6 +13,8 @@ to return the board's description.
 
 #include "stdint.h"
 #include "io430.h"
+#include "string.h"
+
 
 //=========================== defines =========================================
 

@@ -4,8 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "stdint.h"
-#include "string.h"
+
 #include "board.h"
 #include "radio.h"
 #include "at86rf231.h"
@@ -399,6 +398,8 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
 uint8_t radio_isr() {
    PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status;
+   
+   
    // capture the time
    capturedTime = radiotimer_getCapturedTime();
    // reading IRQ_STATUS causes radio's IRQ pin to go low
@@ -425,5 +426,6 @@ uint8_t radio_isr() {
          return 1;
       }
    }
+   
    return 0;
 }

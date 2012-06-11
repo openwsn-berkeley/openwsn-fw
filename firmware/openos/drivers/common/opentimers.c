@@ -11,7 +11,6 @@ at most MAX_NUM_TIMERS timers.
 #include "board_info.h"
 #include "opentimers.h"
 #include "bsp_timer.h"
-#include "string.h"
 
 //=========================== define ==========================================
 

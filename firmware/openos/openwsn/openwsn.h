@@ -9,8 +9,8 @@
 #define __OPENWSN_H
 
 //general
-#include "stdint.h"                              // needed for uin8_t, uint16_t
-#include <string.h>                              // needed for memcpy and memcmp
+#include <stdint.h>                              // needed for uin8_t, uint16_t
+//#include "string.h"                              // needed for memcpy and memcmp <-- now in board.info
 #include "board_info.h"
 
 //=========================== define ==========================================
@@ -21,7 +21,8 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_PATCH 1
 
 // enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER 0xa2
+#define DEBUG_MOTEID_MASTER 0x33
+
 
 #ifndef TRUE
 #define TRUE 1

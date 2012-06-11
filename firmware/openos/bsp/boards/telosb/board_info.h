@@ -12,6 +12,7 @@ to return the board's description.
 
 #include "stdint.h"
 #include "msp430f1611.h"
+#include "string.h"
 
 //=========================== define ==========================================
 //processor scpecific

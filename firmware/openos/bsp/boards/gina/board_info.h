@@ -12,6 +12,7 @@ to return the board's description.
 
 #include "stdint.h"
 #include "msp430x26x.h"
+#include "string.h"
 
 //=========================== defines =========================================
 

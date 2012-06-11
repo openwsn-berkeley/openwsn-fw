@@ -9,7 +9,7 @@
 #define BOARD_INFO_H_
 
 #include "PE_Types.h"
-
+#include "string.h"
 //=========================== defines =========================================
 
 #define port_INLINE                         inline

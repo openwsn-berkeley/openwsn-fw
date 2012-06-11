@@ -212,13 +212,13 @@ This function executes in ISR mode, when the FSM timer fires.
 void isr_ieee154e_timer() {
    switch (ieee154e_vars.state) {
       case S_TXDATAOFFSET:
-         activity_ti2();
+    	  activity_ti2();
          break;
       case S_TXDATAPREPARE:
-         activity_tie1();
+    	  activity_tie1();
          break;
       case S_TXDATAREADY:
-         activity_ti3();
+    	  activity_ti3();
          break;
       case S_TXDATADELAY:
          activity_tie2();
@@ -227,7 +227,7 @@ void isr_ieee154e_timer() {
          activity_tie3();
          break;
       case S_RXACKOFFSET:
-         activity_ti6();
+    	  activity_ti6();
          break;
       case S_RXACKPREPARE:
          activity_tie4();
@@ -242,13 +242,13 @@ void isr_ieee154e_timer() {
          activity_tie6();
          break;
       case S_RXDATAOFFSET:
-         activity_ri2();
+    	 activity_ri2(); 
          break;
       case S_RXDATAPREPARE:
          activity_rie1();
          break;
       case S_RXDATAREADY:
-         activity_ri3();
+    	  activity_ri3();
          break;
       case S_RXDATALISTEN:
          activity_rie2();
@@ -256,14 +256,14 @@ void isr_ieee154e_timer() {
       case S_RXDATA:
          activity_rie3();
          break;
-      case S_TXACKOFFSET:
-         activity_ri6();
+      case S_TXACKOFFSET: 
+    	  activity_ri6();
          break;
       case S_TXACKPREPARE:
          activity_rie4();
          break;
       case S_TXACKREADY:
-         activity_ri7();
+    	 activity_ri7();
          break;
       case S_TXACKDELAY:
          activity_rie5();
@@ -272,12 +272,16 @@ void isr_ieee154e_timer() {
          activity_rie6();
          break;
       default:
-         // log the error
+    
+
+    	  // log the error
          openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_TIMERFIRES,
                                (errorparameter_t)ieee154e_vars.state,
                                (errorparameter_t)ieee154e_vars.slotOffset);
          // abort
          endSlot();
+    
+
          break;
    }
    ieee154e_dbg.num_timer++;
@@ -567,6 +571,7 @@ port_INLINE void activity_ti1ORri1() {
    //debugpins_slot_toggle();
    if (ieee154e_vars.slotOffset==0) {
       debugpins_frame_toggle();
+      //debugpins_radio_toggle();
    }
    
    // desynchronize if needed

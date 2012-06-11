@@ -8,6 +8,7 @@
 #define __BOARD_INFO_H
 
 #include "stdint.h"
+#include "string.h"
 
 //=========================== defines =========================================
 
