@@ -81,77 +81,72 @@
 		<link>
 			<name>Sources/openos</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/kernel/openos</location>
+			<locationURI>WORKSPACE_LOC/openos/kernel/openos</locationURI>
 		</link>
 		<link>
 			<name>Sources/openwsn</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/openwsn</location>
+			<locationURI>WORKSPACE_LOC/openos/openwsn</locationURI>
 		</link>
 		<link>
 			<name>Sources/application/openwsn_proj.c</name>
 			<type>1</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/projects/common/03oos_openwsn/openwsn_proj.c</location>
+			<locationURI>WORKSPACE_LOC/openos/projects/common/03oos_openwsn/openwsn_proj.c</locationURI>
 		</link>
 		<link>
 			<name>Sources/application/openwsn_proj.h</name>
 			<type>1</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/projects/common/03oos_openwsn/openwsn_proj.h</location>
+			<locationURI>WORKSPACE_LOC/openos/projects/common/03oos_openwsn/openwsn_proj.h</locationURI>
 		</link>
 		<link>
 			<name>Sources/chips/at86rf231</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/chips/at86rf231</location>
+			<locationURI>WORKSPACE_LOC/openos/bsp/chips/at86rf231</locationURI>
 		</link>
 		<link>
 			<name>Sources/chips/i2c.h</name>
 			<type>1</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/chips/i2c.h</location>
+			<locationURI>WORKSPACE_LOC/openos/bsp/chips/i2c.h</locationURI>
 		</link>
 		<link>
 			<name>Sources/chips/spi.h</name>
 			<type>1</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/chips/spi.h</location>
+			<locationURI>WORKSPACE_LOC/openos/bsp/chips/spi.h</locationURI>
 		</link>
 		<link>
 			<name>Sources/drivers/common</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/drivers/common</location>
+			<locationURI>WORKSPACE_LOC/openos/drivers/common</locationURI>
 		</link>
 		<link>
 			<name>Sources/k20/bsp</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/boards/k20/bsp</location>
+			<locationURI>WORKSPACE_LOC/openos/bsp/boards/k20/bsp</locationURI>
 		</link>
 		<link>
 			<name>Sources/k20/bsp_ext</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/boards/k20/bsp_ext</location>
+			<locationURI>WORKSPACE_LOC/openos/bsp/boards/k20/bsp_ext</locationURI>
 		</link>
 		<link>
 			<name>Sources/k20/common</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/boards/k20/common</location>
+			<locationURI>WORKSPACE_LOC/openos/bsp/boards/k20/common</locationURI>
 		</link>
 		<link>
 			<name>Sources/k20/cpu</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/boards/k20/cpu</location>
+			<locationURI>WORKSPACE_LOC/openos/bsp/boards/k20/cpu</locationURI>
 		</link>
 		<link>
 			<name>Sources/k20/cw</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/boards/k20/cw</location>
+			<locationURI>WORKSPACE_LOC/openos/bsp/boards/k20/cw</locationURI>
 		</link>
 		<link>
 			<name>Sources/k20/platforms</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/boards/k20/platforms</location>
-		</link>
-		<link>
-			<name>Sources/k20/spi.h</name>
-			<type>1</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/chips/spi.h</location>
+			<locationURI>WORKSPACE_LOC/openos/bsp/boards/k20/platforms</locationURI>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/abstimer.c</name>
