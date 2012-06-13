@@ -53,7 +53,6 @@ uint16_t sctimer_getValue() {
    return TAR;
 }
 
-
 void sctimer_setCb(sctimer_cbt cb){
 //does nothing as it is done by IAR -- look at board.c
 }
