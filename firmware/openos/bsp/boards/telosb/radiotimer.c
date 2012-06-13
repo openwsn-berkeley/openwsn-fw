@@ -54,7 +54,7 @@ void radiotimer_start(uint16_t period) {
    
    // CCR0 contains period of counter
    // do not interrupt when counter reaches TBCCR0, but when it resets
-   TBCCR0   =  period;
+   TBCCR0   =  period-1;
    
    // CCR1 in capture mode
    TBCCTL1  =  CM_3+SCS+CAP+CCIE;
