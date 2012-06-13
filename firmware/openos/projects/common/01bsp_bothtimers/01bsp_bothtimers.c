@@ -18,10 +18,11 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD               0x8000
-#define RADIOTIMER_OVERFLOW_PERIOD     0x8000
-#define RADIOTIMER_COMPARE_PERIOD      0x1000
-#define RADIOTIMER_NUM_COMPARES             4
+#define BSP_TIMER_PERIOD                  0x100
+#define RADIOTIMER_OVERFLOW_PERIOD        0x100
+#define RADIOTIMER_COMPARE_PERIOD             4
+#define RADIOTIMER_NUM_COMPARES               4
+#define ISR_DELAY                           250
 
 //=========================== variables =======================================
 
@@ -86,7 +87,7 @@ int mote_main(void)
 
 void bsp_timer_cb_compare() {
    // toggle pin
-   debugpins_fsm_toggle();
+   debugpins_frame_toggle();
    
    // toggle error led
    leds_sync_toggle();
@@ -99,8 +100,10 @@ void bsp_timer_cb_compare() {
 }
 
 void radiotimer_cb_overflow() {
+   volatile uint16_t delay;
+   
    // toggle pin
-   debugpins_frame_toggle();
+   debugpins_slot_toggle();
    
    // switch radio LED on
    leds_error_toggle();
@@ -113,6 +116,9 @@ void radiotimer_cb_overflow() {
    
    // increment debug counter
    app_dbg.radiotimer_num_overflow++;
+   
+   // wait a bit
+   for (delay=0;delay<ISR_DELAY;delay++);
 }
 
 void radiotimer_cb_compare() {
