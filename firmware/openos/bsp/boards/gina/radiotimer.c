@@ -51,7 +51,7 @@ void radiotimer_start(uint16_t period) {
    
    // CCR0 contains max value of counter (slot length)
    // do not interrupt when counter reaches TACCR0!
-   TACCR0   =  period-1;
+   TACCR0   =  period;
    
    // CCR1 in compare mode (disabled for now)
    TACCTL1  =  0;

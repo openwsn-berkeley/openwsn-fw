@@ -178,7 +178,7 @@ void radiotimer_setPeriod(uint16_t period) {
 
    uint16_t oldperiod=abstimer_vars.radiotimer_period;
 
-   abstimer_vars.radiotimer_period=period;
+   abstimer_vars.radiotimer_period=period+1;
 
    // correct the period in that current slot. so remove the current period
    abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  -= oldperiod;

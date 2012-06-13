@@ -99,8 +99,16 @@ void board_sleep() {
 //=========================== interrupt handlers ==============================
 
 // DAC12_VECTOR
+#pragma vector = DAC12_VECTOR
+__interrupt void DAC12_ISR (void) {
+   while(1);
+}
 
 // DMA_VECTOR
+#pragma vector = DMA_VECTOR
+__interrupt void DMA_ISR (void) {
+   while(1);
+}
 
 #pragma vector = USCIAB1TX_VECTOR
 __interrupt void USCIAB1TX_ISR(void) {
@@ -173,6 +181,10 @@ __interrupt void ADC12_ISR (void) {
 }
 
 // USCIAB0TX_VECTOR
+#pragma vector = USCIAB0TX_VECTOR
+__interrupt void USCIAB0TX_ISR (void) {
+   while(1);
+}
 
 #pragma vector = USCIAB0RX_VECTOR
 __interrupt void USCIAB0RX_ISR (void) {
@@ -201,8 +213,16 @@ __interrupt void TIMERA1_ISR (void) {
 }
 
 // TIMERA0_VECTOR
+#pragma vector = TIMERA0_VECTOR
+__interrupt void TIMERA0_ISR (void) {
+   while(1);
+}
 
 // WDT_VECTOR
+#pragma vector = WDT_VECTOR
+__interrupt void WDT_ISR (void) {
+   while(1);
+}
 
 #pragma vector = COMPARATORA_VECTOR
 __interrupt void COMPARATORA_ISR (void) {
@@ -213,6 +233,10 @@ __interrupt void COMPARATORA_ISR (void) {
 }
 
 // TIMERB1_VECTOR
+#pragma vector = TIMERB1_VECTOR
+__interrupt void TIMERB1_ISR (void) {
+   while(1);
+}
 
 #pragma vector = TIMERB0_VECTOR
 __interrupt void TIMERB0_ISR (void) {
@@ -225,3 +249,7 @@ __interrupt void TIMERB0_ISR (void) {
 }
 
 // NMI_VECTOR
+#pragma vector = NMI_VECTOR
+__interrupt void NMI_ISR (void) {
+   while(1);
+}
