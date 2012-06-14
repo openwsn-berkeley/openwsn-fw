@@ -70,6 +70,8 @@ void debugpins_init() {
 	 PORTB_PCR2  = PORT_PCR_MUX(1);
 	 PORTA_PCR14  = PORT_PCR_MUX(1);
 
+	// GPIOB_PDOR |=1<<SLOT_PIN;//set as 1 -- this is to test the reset pin, we need to drive a 0 and clear to reset. 
+	 	 
 	 //set as output
 	 GPIOD_PDDR |= 1<<FRAME_PIN;
 	 GPIOB_PDDR |= 1<<SLOT_PIN;

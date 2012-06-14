@@ -13,6 +13,6 @@
 /* This function sends the status of the SRS register to the terminal*/
 void outSRS(void);
 void outsrs(void);  // outputs to E26 and C19
-
+void software_reset();//reset by software.
 /********************************************************************/
 #endif /* __RCM_H__ */

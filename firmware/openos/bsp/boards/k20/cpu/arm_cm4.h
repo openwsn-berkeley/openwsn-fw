@@ -22,7 +22,7 @@ void write_vtor (int);
 void enable_irq (int);
 void disable_irq (int);
 void set_irq_priority (int, int);
-
+void signal_irq (int irq);
 /***********************************************************************/
   /*!< Macro to enable all interrupts. */
 #define EnableInterrupts asm(" CPSIE i");

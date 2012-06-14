@@ -44,6 +44,7 @@ void board_init() {
    
    // disable watchdog timer
    WDTCTL  = WDTPW + WDTHOLD;
+
    
    // setup clock speed
    BCSCTL1 = CALBC1_16MHZ;                       // MCLK at ~16MHz

@@ -175,3 +175,30 @@ void set_irq_priority (int irq, int prio)
 }
 /***********************************************************************/
 
+
+void signal_irq (int irq)
+{
+      
+	 int div;
+	    
+	    /* Make sure that the IRQ is an allowable number. Right now up to 91 is 
+	     * used.
+	     */
+	    if (irq > 91) while(1);
+	     //   printf("\nERR! Invalid IRQ value passed to disable irq function!\n");
+	    
+	    /* Determine which of the NVICICERs corresponds to the irq */
+	    div = irq/32;
+	    
+	    switch (div)
+	    {
+	    	case 0x0:
+	               NVICISPR0 |= 1 << (irq%32);
+	              break;
+	    	case 0x1:
+	              NVICISPR1 |= 1 << (irq%32);
+	              break;
+	    	case 0x2:
+	              NVICISPR2 |= 1 << (irq%32);
+	              break;
+	    }}

@@ -7,6 +7,18 @@
 #include "common.h"
 #include "rcm.h"
 
+
+
+void software_reset(){
+	uint32_t temp_AIRCR=SCB_AIRCR;
+	temp_AIRCR &= 0x0000FFFF; //DES mask of the top 16-bits
+	temp_AIRCR |= 0x05FA0000; //idem to temp_AIRCR|=SCB_AIRCR_VECTKEY(0xFA05);
+	temp_AIRCR |=SCB_AIRCR_SYSRESETREQ_MASK; //appl request to reset
+	SCB_AIRCR = temp_AIRCR; //reboot.
+}
+
+
+
 /* OutSRS routine - checks the value in the SRS registers and sends
  * messages to the terminal announcing the status at the start of the 
  * code.

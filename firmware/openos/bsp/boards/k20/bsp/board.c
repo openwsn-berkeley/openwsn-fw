@@ -11,11 +11,13 @@
 #include "bsp_timer.h"
 #include "smc.h"
 #include "mcg.h"
+#include "rcm.h"
 
 //=========================== variables =======================================
 extern int mcg_clk_hz;
 
 //=========================== prototypes ======================================
+
 //=========================== public ==========================================
 
 extern int mote_main(void);
@@ -31,8 +33,8 @@ void board_init() {
 			| SIM_SCGC5_PORTC_MASK
 			| SIM_SCGC5_PORTD_MASK
 			| SIM_SCGC5_PORTE_MASK );
-
-
+   
+		
 	//init all pins for the radio
 	//SLPTR
 	PORTB_PCR3 = PORT_PCR_MUX(1);// -- PTB3 used as gpio for slptr
@@ -64,6 +66,7 @@ void board_init() {
 	spi_init();	
 	radio_init();
 	leds_all_off();
+	
 }
 
 
@@ -71,9 +74,8 @@ void board_sleep() {
 	uint8_t op_mode;
 	clk_monitor_0(OFF);//turn off clock monitors so the freq can be changed without causing a reset
 	PORTA_PCR2 |= PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;//JTAG_TDO -- disconnect jtag before entering deep sleep.    
-	enter_lls();
-	//enter_wait();
-	//enter_wait();
+	//enter_lls();
+	enter_wait();
 	clk_monitor_0(ON);//enable it again.
 }
 
@@ -92,9 +94,11 @@ void board_sleep() {
  * 
  */
 void radio_external_port_c_isr(void) {
+	uint32_t portc;
 	debugpins_isr_set();
+	portc=PORTC_ISFR;
 	 //reconfigure..	
-	SIM_SCGC5 |= SIM_SCGC5_PORTC_MASK;
+	//SIM_SCGC5 |= SIM_SCGC5_PORTC_MASK;
 	if ((PORTC_ISFR) & (RADIO_ISR_MASK)) {
 		
 		PORTC_PCR5 |= PORT_PCR_ISF_MASK;    //clear flag
@@ -102,8 +106,11 @@ void radio_external_port_c_isr(void) {
 		radio_isr();
 	}else{
 		while(1);
+		//radio_isr();
 	}		   
 	debugpins_isr_clr();
 }
+
+
 
 

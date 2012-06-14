@@ -272,7 +272,8 @@ debugpins_radio_set();
 //   }
   if (LLWU_F2 & LLWU_F2_WUF9_MASK) {
        LLWU_F2 |= LLWU_F2_WUF9_MASK;   // write one to clear the flag -- radio isr (ptc5 external interrupt)
-   	   radio_isr();
+   	  // signal_irq(RADIO_EXTERNAL_PORT_IRQ_NUM);//activate nvic irq.
+       radio_isr();
   }
 //   if (LLWU_F2 & LLWU_F2_WUF10_MASK) {
 ////       printf("\n [LLWU ISR] ****WUF10 was set *****\r\n");
