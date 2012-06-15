@@ -168,7 +168,7 @@ void ieee154e_init() {
    DISABLE_INTERRUPTS();
    if (ieee154e_vars.asn.byte4 != someASN->byte4) {
 	   ENABLE_INTERRUPTS();
-	   return 0xffff;
+	   return (PORT_TIMER_WIDTH)0xFFFFFFFF;;
    }
    
    diff = 0;
@@ -180,7 +180,7 @@ void ieee154e_init() {
       diff += 0xffff-someASN->bytes0and1;
       diff += 1;
    } else {
-      diff = 0xffff;
+      diff = (PORT_TIMER_WIDTH)0xFFFFFFFF;;
    }
    ENABLE_INTERRUPTS();
    return diff;
