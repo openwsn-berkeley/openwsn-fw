@@ -26,6 +26,7 @@
 #include "ADC_Channel.h"
 */
 
+#define ISR_BUTTON 1
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -59,6 +60,16 @@ void board_init() {
    P1DIR  &= ~0x40;                              // configure as low
    P1IES  &= ~0x40;                              // interrup when transition is low-to-high
    P1IE   |=  0x40;                              // enable interrupt
+   
+   
+#ifdef ISR_BUTTON
+   //p2.7 button
+   P2DIR |= 0x80; // Set P2.7 to output direction
+   P2IE |= 0x80; // P2.7 interrupt enabled
+   P1IES |= 0x80; // P2.7 Hi/lo edge 
+   P1IFG &= ~0x80; // P2.7 IFG cleared
+#endif
+
    
    // initialize bsp modules
    debugpins_init();
