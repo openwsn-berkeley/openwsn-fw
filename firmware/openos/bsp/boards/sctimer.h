@@ -10,6 +10,7 @@
 #define __SCTIMER_H
 
 #include "stdint.h"
+#include "board.h"
 
 //=========================== define ==========================================
 

@@ -5,9 +5,9 @@
  * Assumes the MCG mode is in the default FEI mode out of reset
  */
 
-#include "common.h"
 #include "mcg.h"
-#include "lptmr.h"
+#include "common.h"
+
 
 // global variables
 extern int core_clk_khz;
