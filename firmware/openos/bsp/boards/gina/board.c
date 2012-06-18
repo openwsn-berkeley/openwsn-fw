@@ -64,7 +64,7 @@ void board_init() {
    
 #ifdef ISR_BUTTON
    //p2.7 button
-   P2DIR |= 0x80; // Set P2.7 to output direction
+   P2DIR &= ~0x80; // Set P2.7 to output direction
    P2IE |= 0x80; // P2.7 interrupt enabled
    P2IES |= 0x80; // P2.7 Hi/lo edge 
    P2IFG &= ~0x80; // P2.7 IFG cleared
