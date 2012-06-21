@@ -84,7 +84,7 @@ void hdlcserial_send(uint8_t* str, uint16_t len){
   hdlc_tx_char_str[len-1] = 0x7E;
   
   tx_index = 0;//reset the send index
-  uart_clearTxInterrupts();//if the buffer is free, it will interrupt right after
+  uart_writeByte(hdlc_tx_char_str[tx_index++]);//write the first byte
 }
 
 void hdlcserial_setcb(hdlc_rx_cbt rxCb){
