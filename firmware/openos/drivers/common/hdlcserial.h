@@ -10,26 +10,27 @@
 #define HDLC_MAX_LEN 300
 typedef enum HDLC_STATE_T {
   HDLC_STATE_RECEIVING,
-  HDLC_STATE_DONE_RECEIVING} hdlc_state_t; 
+  HDLC_STATE_DONE_RECEIVING} hdlc_state_t;
+typedef void (*hdlc_rx_cbt)();
 
 
 //variables
-volatile int hdlc_num_chars_left; // current # of chars remaining to TX
-volatile char hdlc_tx_char_str[HDLC_MAX_LEN];           // pointer to remaining chars to tx
-char hdlc_buffer[HDLC_MAX_LEN];
-char hdlc_index;
-char hdlc_len;
-volatile char hdlc_numflags;//for header
-volatile char hdlc_packetsum;
-uint16_t crc16;
-uint8_t tx_index;//used in isr_hdlc_tx to index the array
-char isStuffing;//used in isr_hdlc_rx to account for stuffing
-hdlc_state_t hdlc_state;
+//volatile int hdlc_num_chars_left; // current # of chars remaining to TX
+//volatile char hdlc_tx_char_str[HDLC_MAX_LEN];           // pointer to remaining chars to tx
+//char hdlc_buffer[HDLC_MAX_LEN];
+//char hdlc_index;
+//char hdlc_len;
+//volatile char hdlc_numflags;//for header
+//volatile char hdlc_packetsum;
+//uint16_t crc16;
+//uint8_t tx_index;//used in isr_hdlc_tx to index the array
+//char isStuffing;//used in isr_hdlc_rx to account for stuffing
+//hdlc_state_t hdlc_state;
 
 
 //prototypes
 void hdlcserial_init();
-void hdlcserial_setcb(bla);//poipoi
+void hdlcserial_setcb(hdlc_rx_cbt rxCb);
 void hdlcserial_send(uint8_t* str, uint16_t len);
 //no need for an hdlcserial_receive function; it's not like we can say 
 //"receive now"; the bytes arrive and when the packet is formed, the callback

@@ -1,7 +1,23 @@
 #include "hdlcserial.h"
 #include "board.h"
-#include "schedule.h"
+//#include "schedule.h"
 #include "uart.h"
+
+//callback variable
+hdlc_rx_cbt hdlcrxCb;
+
+//variables
+uint16_t crc16;
+char hdlc_buffer[HDLC_MAX_LEN];
+char hdlc_index;
+char hdlc_len;
+volatile int hdlc_num_chars_left; // current # of chars remaining to TX
+volatile char hdlc_numflags;//for header
+volatile char hdlc_packetsum;
+hdlc_state_t hdlc_state;
+volatile char hdlc_tx_char_str[HDLC_MAX_LEN];           // pointer to remaining chars to tx
+uint8_t tx_index;//used in isr_hdlc_tx to index the array
+char isStuffing;//used in isr_hdlc_rx to account for stuffing
 
 //====prototypes=================
 char fcs_calc(char *buffer,char length,uint16_t crc);
@@ -71,7 +87,9 @@ void hdlcserial_send(uint8_t* str, uint16_t len){
   uart_clearTxInterrupts();//if the buffer is free, it will interrupt right after
 }
 
-void hdlcserial_setcb(bla){}//poipoi
+void hdlcserial_setcb(hdlc_rx_cbt rxCb){
+  hdlcrxCb = rxCb;
+}
 
 
 //============interrupt handlers===
@@ -98,8 +116,9 @@ void    isr_hdlcserial_rx(){
     hdlc_state = HDLC_STATE_DONE_RECEIVING;
     //hdlc_index--;//because we increased it more than enough
     crc16 = hdlc_buffer[hdlc_index - 2] + (hdlc_buffer[hdlc_index-1] <<8);
-    if (hdlc_fcs_calc(hdlc_buffer,hdlc_index,crc16))
-      //push the callback to the scheduler
+    if (fcs_calc(hdlc_buffer,hdlc_index,crc16))
+      //push the callback to the scheduler or just call it
+      hdlcrxCb();
   }
   
   //the next 3 lines enables removing stuffed bytes on the fly
