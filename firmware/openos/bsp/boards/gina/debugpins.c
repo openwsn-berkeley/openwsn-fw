@@ -17,11 +17,18 @@
 
 void debugpins_init() {
    P4DIR |=  0x20;      // frame
-   P4DIR |=  0x02 ;      // slot
+   P4DIR |=  0x02 ;     // slot
    P4DIR |=  0x04;      // fsm
    P4DIR |=  0x08;      // task
    P4DIR |=  0x10;      // isr
    P1DIR |=  0x02;      // radio
+   
+   debugpins_frame_clr();
+   debugpins_slot_clr();
+   debugpins_fsm_clr();
+   debugpins_task_clr();
+   debugpins_isr_clr();
+   debugpins_radio_clr();
 }
 
 // P4.5
