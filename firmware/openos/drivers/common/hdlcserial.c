@@ -16,7 +16,7 @@ volatile char hdlc_numflags;//for header
 volatile char hdlc_packetsum;
 hdlc_state_t hdlc_state;
 volatile char hdlc_tx_char_str[HDLC_MAX_LEN];           // pointer to remaining chars to tx
-uint8_t tx_index;//used in isr_hdlc_tx to index the array
+uint8_t tx_index_hdlc;//used in isr_hdlc_tx to index the array
 char isStuffing;//used in isr_hdlc_rx to account for stuffing
 
 //====prototypes=================
@@ -33,7 +33,7 @@ void hdlcserial_init(){
   hdlc_numflags = 0;
   //  hdlc_packetsum = 0;
   isStuffing = 0x00;
-  tx_index = 0;
+  tx_index_hdlc = 0;
   hdlc_num_chars_left = 0;
   uart_enableInterrupts();
 }
@@ -43,17 +43,21 @@ void hdlcserial_send(uint8_t* str, uint16_t len){
   //compute crc:
   uint16_t    fcs = 0;
   uint8_t length = len;
+  uint8_t count,i,c;
+  uint8_t crc1;
+    uint8_t crc2;
+    uint8_t stuff_count,index;
+  
   fcs = (uint16_t) 0xffff;
-  for(uint8_t count=0;count <length;count++)
+  for( count=0;count <length;count++)
     fcs = fcs_fcs16(fcs, str[count]);
   fcs = ~fcs;//one's complement
   
   //prepare packet for transmission:
   //first count the number of bytes to stuff
-  uint8_t stuff_count = 0;
-  for (uint8_t i=0;i<len;i++) if((str[i] == 0x7E) || (str[i] == 0x7D)) stuff_count++;
-  uint8_t crc1;
-  uint8_t crc2;
+  stuff_count = 0;
+  for ( i=0;i<len;i++) if((str[i] == 0x7E) || (str[i] == 0x7D)) stuff_count++;
+  
   crc1 = fcs;
   crc2 = fcs>>8;
   if ((crc1 == 0x7E) || (crc1 == 0x7D)) stuff_count++;
@@ -65,9 +69,9 @@ void hdlcserial_send(uint8_t* str, uint16_t len){
   //now fill hdlc_tx_char with the bytes to send.
   //perform byte stuffing
   hdlc_num_chars_left = len;  
-  uint8_t index=1;
+   index=1;
   hdlc_tx_char_str[0] = 0x7E; //first delimiter
-  for (uint8_t c=0;c<length+2;c++){//length+2 for crc
+  for ( c=0;c<length+2;c++){//length+2 for crc
     if (str[c]==0x7E){
       str[index] = 0x7D;
       str[index+1] = 0x5E;
@@ -83,8 +87,8 @@ void hdlcserial_send(uint8_t* str, uint16_t len){
   }
   hdlc_tx_char_str[len-1] = 0x7E;
   
-  tx_index = 0;//reset the send index
-  uart_writeByte(hdlc_tx_char_str[tx_index++]);//write the first byte
+  tx_index_hdlc = 0;//reset the send index
+  uart_writeByte(hdlc_tx_char_str[tx_index_hdlc++]);//write the first byte
 }
 
 void hdlcserial_setcb(hdlc_rx_cbt rxCb){
@@ -129,8 +133,8 @@ void    isr_hdlcserial_rx(){
 
 
 void    isr_hdlcserial_tx(){
-  if (tx_index<hdlc_num_chars_left) {
-    uart_writeByte(hdlc_tx_char_str[tx_index++]);
+  if (tx_index_hdlc<hdlc_num_chars_left) {
+    uart_writeByte(hdlc_tx_char_str[tx_index_hdlc++]);
     uart_clearTxInterrupts();//I really am not comfortable putting this. I think the hardware takes care of it.
   } else{
     hdlc_num_chars_left = 0;
@@ -138,9 +142,11 @@ void    isr_hdlcserial_tx(){
 }
 //============private===============
 char fcs_calc(char *buffer,char length,uint16_t crc){//change function to bool?
-  uint16_t    fcs = 0;
+  uint16_t    fcs;
+  uint8_t count;
+ 
   fcs = (uint16_t) 0xffff;
-  for (uint8_t count=0;count<length-2;count++)
+  for ( count=0;count<length-2;count++)
     fcs = fcs_fcs16(fcs, buffer[count]);
   return ((~fcs) == crc); /* add 1's complement then compare*/
 }
