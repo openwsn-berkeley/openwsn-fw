@@ -18,15 +18,13 @@
 #include "eui64.h"
 
 // sensors
-/*
-#include "gyro.h"
-#include "large_range_accel.h"
-#include "magnetometer.h"
-#include "sensitive_accel_temperature.h"
-#include "ADC_Channel.h"
-*/
+//#include "gyro.h"
+//#include "large_range_accel.h"
+//#include "magnetometer.h"
+//#include "sensitive_accel_temperature.h"
+//#include "ADC_Channel.h"
 
-#define ISR_BUTTON 1
+//#define ISR_BUTTON 1
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -45,11 +43,13 @@ void board_init() {
    
    // disable watchdog timer
    WDTCTL  = WDTPW + WDTHOLD;
-
    
    // setup clock speed
    BCSCTL1 = CALBC1_16MHZ;                       // MCLK at ~16MHz
    DCOCTL  = CALDCO_16MHZ;                       // MCLK at ~16MHz
+   
+   // enable flash access violation NMIs
+   IE1 |= ACCVIE;
    
    // initialize pins
    //-- radio RF_SLP_TR_CNTL (P4.7)
@@ -61,7 +61,6 @@ void board_init() {
    P1IES  &= ~0x40;                              // interrup when transition is low-to-high
    P1IE   |=  0x40;                              // enable interrupt
    
-   
 #ifdef ISR_BUTTON
    //p2.7 button
    P2DIR &= ~0x80; // Set P2.7 to output direction
@@ -69,7 +68,6 @@ void board_init() {
    P2IES |= 0x80; // P2.7 Hi/lo edge 
    P2IFG &= ~0x80; // P2.7 IFG cleared
 #endif
-
    
    // initialize bsp modules
    debugpins_init();
@@ -88,13 +86,13 @@ void board_init() {
    //turn sensors off, if this is a gina (not a basestation)
    eui64_get(eui);
    if (eui[3]==0x09) {
-     //first initialize them
+     // first initialize them
      //gyro_init();
      //large_range_accel_init();
      //magnetometer_init();
      //sensitive_accel_temperature_init();
      
-     //then turn them off
+     // then turn them off
      //gyro_disable();
      //large_range_accel_disable();
      //magnetometer_disable();
@@ -110,16 +108,20 @@ void board_sleep() {
 
 //=========================== interrupt handlers ==============================
 
-// DAC12_VECTOR
 #pragma vector = DAC12_VECTOR
 __interrupt void DAC12_ISR (void) {
+   CAPTURE_TIME();
+   debugpins_isr_set();
    while(1);
+   debugpins_isr_clr();
 }
 
-// DMA_VECTOR
 #pragma vector = DMA_VECTOR
 __interrupt void DMA_ISR (void) {
+   CAPTURE_TIME();
+   debugpins_isr_set();
    while(1);
+   debugpins_isr_clr();
 }
 
 #pragma vector = USCIAB1TX_VECTOR
@@ -178,7 +180,11 @@ __interrupt void PORT2_ISR (void) {
       P2IFG &= ~0x80;
       scheduler_push_task(ID_ISR_BUTTON);
       __bic_SR_register_on_exit(CPUOFF);
+   } else {
+      while (1); // should never happen
    }
+#else
+   while(1); // should never happen
 #endif
    debugpins_isr_clr();
 }
@@ -192,10 +198,12 @@ __interrupt void ADC12_ISR (void) {
    debugpins_isr_clr();
 }
 
-// USCIAB0TX_VECTOR
 #pragma vector = USCIAB0TX_VECTOR
 __interrupt void USCIAB0TX_ISR (void) {
+   CAPTURE_TIME();
+   debugpins_isr_set();
    while(1);
+   debugpins_isr_clr();
 }
 
 #pragma vector = USCIAB0RX_VECTOR
@@ -218,22 +226,26 @@ __interrupt void USCIAB0RX_ISR (void) {
 __interrupt void TIMERA1_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
+   debugpins_isr_clr();
    if (radiotimer_isr()==1) {                    // radiotimer
       __bic_SR_register_on_exit(CPUOFF);
    }
+}
+
+#pragma vector = TIMERA0_VECTOR
+__interrupt void TIMERA0_ISR (void) {
+   CAPTURE_TIME();
+   debugpins_isr_set();
+   while(1);
    debugpins_isr_clr();
 }
 
-// TIMERA0_VECTOR
-#pragma vector = TIMERA0_VECTOR
-__interrupt void TIMERA0_ISR (void) {
-   while(1);
-}
-
-// WDT_VECTOR
 #pragma vector = WDT_VECTOR
 __interrupt void WDT_ISR (void) {
+   CAPTURE_TIME();
+   debugpins_isr_set();
    while(1);
+   debugpins_isr_clr();
 }
 
 #pragma vector = COMPARATORA_VECTOR
@@ -244,10 +256,12 @@ __interrupt void COMPARATORA_ISR (void) {
    debugpins_isr_clr();
 }
 
-// TIMERB1_VECTOR
 #pragma vector = TIMERB1_VECTOR
 __interrupt void TIMERB1_ISR (void) {
+   CAPTURE_TIME();
+   debugpins_isr_set();
    while(1);
+   debugpins_isr_clr();
 }
 
 #pragma vector = TIMERB0_VECTOR
@@ -260,8 +274,11 @@ __interrupt void TIMERB0_ISR (void) {
    debugpins_isr_clr();
 }
 
-// NMI_VECTOR
 #pragma vector = NMI_VECTOR
 __interrupt void NMI_ISR (void) {
+   CAPTURE_TIME();
+   debugpins_isr_set();
+   debugpins_frame_set();
    while(1);
+   debugpins_isr_clr();
 }
