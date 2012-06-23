@@ -18,8 +18,10 @@ to return the board's description.
 
 #define port_INLINE                         inline
 
-#define ENABLE_INTERRUPTS()     __enable_interrupt()
-#define DISABLE_INTERRUPTS()    __disable_interrupt()
+#define INTERRUPT_DECLARATION() istate_t s;
+#define DISABLE_INTERRUPTS()    s = __get_interrupt_state(); \
+                                __disable_interrupt();
+#define ENABLE_INTERRUPTS()     __set_interrupt_state(s);
 
 //===== timer
 
