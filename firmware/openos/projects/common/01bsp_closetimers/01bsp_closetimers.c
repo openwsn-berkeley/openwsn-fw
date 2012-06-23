@@ -23,7 +23,7 @@ can use this project with any platform.
 
 #define BSP_TIMER_PERIOD               0x800
 #define RADIOTIMER_OVERFLOW_PERIOD     0x801
-#define ISR_DELAY                      1000
+#define ISR_DELAY                      2000
 
 //=========================== variables =======================================
 
