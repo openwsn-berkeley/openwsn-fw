@@ -98,7 +98,6 @@ PORT_TIMER_WIDTH radio_getTimerValue() {
 }
 
 void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
-
    radiotimer_setPeriod(period);
 }
 
@@ -133,7 +132,7 @@ void radio_rfOff() {
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF); // busy wait until done
    
    // wiggle debug pin
-   debugpins_radio_clr();
+   //poipoidebugpins_radio_clr();
    leds_radio_off();
    
    // change state
@@ -413,6 +412,8 @@ uint8_t radio_isr() {
          radio_vars.startFrame_cb(capturedTime);
          // kick the OS
          return 1;
+      } else {
+         while(1);
       }
    }
    // end of frame event
@@ -424,6 +425,8 @@ uint8_t radio_isr() {
          radio_vars.endFrame_cb(capturedTime);
          // kick the OS
          return 1;
+      } else {
+         while(1);
       }
    }
    
