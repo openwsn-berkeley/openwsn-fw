@@ -71,8 +71,7 @@ void scheduler_start() {
          scheduler_dbg.numTasksCur--;
       }
       debugpins_task_clr();
-    // __bis_SR_register(GIE+LPM3_bits);          // sleep, but leave interrupts and ACLK on
-       board_sleep(); //darth.vader -- should be lpm3 instead of lpm0.
+      board_sleep();
       debugpins_task_set();                      // IAR should halt here if nothing to do
    }
 }
@@ -80,6 +79,8 @@ void scheduler_start() {
  void scheduler_push_task(task_cbt cb, task_prio_t prio) {
    taskList_item_t*  taskContainer;
    taskList_item_t** taskListWalker;
+   INTERRUPT_DECLARATION();
+   
    DISABLE_INTERRUPTS();
    
    // find an empty task container
