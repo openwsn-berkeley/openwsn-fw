@@ -202,6 +202,7 @@ bool neighbors_isStableNeighbor(open_addr_t* address) {
 
  bool neighbors_isPreferredParent(open_addr_t* address) {
    uint8_t i;
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (isThisRowMatching(address,i) && neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
