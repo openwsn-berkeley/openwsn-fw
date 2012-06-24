@@ -165,6 +165,7 @@ void ieee154e_init() {
 */
  PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
    PORT_TIMER_WIDTH diff;
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (ieee154e_vars.asn.byte4 != someASN->byte4) {
 	   ENABLE_INTERRUPTS();
