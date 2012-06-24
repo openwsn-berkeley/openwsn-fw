@@ -111,6 +111,7 @@ bool debugPrint_schedule() {
 \param newFrameLength The new frame length.
  */
 void schedule_setFrameLength(frameLength_t newFrameLength) {
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    schedule_vars.frameLength = newFrameLength;
    ENABLE_INTERRUPTS();
@@ -129,7 +130,7 @@ void schedule_addActiveSlot(slotOffset_t    slotOffset,
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
    scheduleEntry_t* nextSlotWalker;
-
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
    // find an empty schedule entry container
@@ -200,6 +201,7 @@ void schedule_addActiveSlot(slotOffset_t    slotOffset,
 //=== from IEEE802154E: reading the schedule and updating statistics
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    while (schedule_vars.currentScheduleEntry->slotOffset!=targetSlotOffset) {
       schedule_advanceSlot();
@@ -208,6 +210,7 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 }
 
 void schedule_advanceSlot() {
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    // advance to next active slot
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
@@ -216,6 +219,7 @@ void schedule_advanceSlot() {
 
 slotOffset_t schedule_getNextActiveSlotOffset() {
    slotOffset_t res;   
+   INTERRUPT_DECLARATION();
    
    // return next active slot's slotOffset
    DISABLE_INTERRUPTS();
@@ -232,6 +236,7 @@ slotOffset_t schedule_getNextActiveSlotOffset() {
  */
 frameLength_t schedule_getFrameLength() {
    frameLength_t res;
+   INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
    res= schedule_vars.frameLength;
@@ -248,6 +253,7 @@ frameLength_t schedule_getFrameLength() {
  */
  cellType_t schedule_getType() {
     cellType_t res;
+    INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
     res= schedule_vars.currentScheduleEntry->type;
     ENABLE_INTERRUPTS();
@@ -260,6 +266,7 @@ frameLength_t schedule_getFrameLength() {
 \returns The neighbor associated wit the current schedule entry.
  */
  void schedule_getNeighbor(open_addr_t* addrToWrite) {
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    memcpy(addrToWrite,&(schedule_vars.currentScheduleEntry->neighbor),sizeof(open_addr_t));
    ENABLE_INTERRUPTS();
@@ -272,6 +279,7 @@ frameLength_t schedule_getFrameLength() {
  */
 channelOffset_t schedule_getChannelOffset() {
    channelOffset_t res;
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    res= schedule_vars.currentScheduleEntry->channelOffset;
    ENABLE_INTERRUPTS();
@@ -288,6 +296,7 @@ the backoff counter and returns TRUE only if it hits 0.
 \returns TRUE if it is OK to send on this slot, FALSE otherwise.
  */
 bool schedule_getOkToSend() {
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    // decrement backoff of that slot
    if (schedule_vars.currentScheduleEntry->backoff>0) {
@@ -313,6 +322,7 @@ bool schedule_getOkToSend() {
 \brief Indicate the reception of a packet.
  */
 void schedule_indicateRx(asn_t* asnTimestamp) {
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    // increment usage statistics
    schedule_vars.currentScheduleEntry->numRx++;
@@ -326,8 +336,10 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
 \brief Indicate the transmission of a packet.
  */
  void schedule_indicateTx(asn_t*   asnTimestamp,
-      bool     succesfullTx) {
-    DISABLE_INTERRUPTS();
+   bool     succesfullTx) {
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
    // increment usage statistics
    if (schedule_vars.currentScheduleEntry->numTx==0xFF) {
       schedule_vars.currentScheduleEntry->numTx/=2;
