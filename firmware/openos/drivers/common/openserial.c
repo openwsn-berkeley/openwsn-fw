@@ -78,6 +78,7 @@ void openserial_init() {
 
 error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t length) {
    uint8_t counter;
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
    openserial_vars.somethingInOutputBuffer=TRUE;
@@ -103,6 +104,7 @@ error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
    leds_error_toggle();
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
    openserial_vars.somethingInOutputBuffer=TRUE;
@@ -128,6 +130,7 @@ error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
 
 error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    uint8_t counter;
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
    openserial_vars.somethingInOutputBuffer=TRUE;
@@ -150,6 +153,7 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
 
 uint8_t openserial_getNumDataBytes() {
    uint16_t temp_openserial_input_buffer_fill_level;
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
    temp_openserial_input_buffer_fill_level = openserial_vars.input_buffer_fill_level;
@@ -161,6 +165,7 @@ uint8_t openserial_getNumDataBytes() {
 uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
    uint8_t numBytesWritten;
    uint16_t temp_openserial_input_buffer_fill_level;
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    temp_openserial_input_buffer_fill_level = openserial_vars.input_buffer_fill_level;
    ENABLE_INTERRUPTS();
@@ -190,6 +195,7 @@ void openserial_startInput() {
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();          // clear possible pending interrupts
    uart_enableInterrupts();           // Enable USCI_A1 TX & RX interrupt
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    openserial_vars.mode                  = MODE_INPUT;
    openserial_vars.input_command_index   = 0;
@@ -202,6 +208,7 @@ void openserial_startInput() {
 void openserial_startOutput() {
    //schedule a task to get new status in the output buffer
    uint8_t temp_openserial_debugPrintCounter; //to avoid many atomics
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    openserial_vars.debugPrintCounter=(openserial_vars.debugPrintCounter+1)%STATUS_MAX;
    temp_openserial_debugPrintCounter = openserial_vars.debugPrintCounter;
@@ -264,6 +271,7 @@ void openserial_startOutput() {
 
 void openserial_stop() {
    uint16_t temp_openserial_input_buffer_fill_level;
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    temp_openserial_input_buffer_fill_level = openserial_vars.input_buffer_fill_level;
    ENABLE_INTERRUPTS();
@@ -315,6 +323,7 @@ void openserial_stop() {
 
 bool debugPrint_outBufferIndexes() {
    uint16_t temp_buffer[2];
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    temp_buffer[0] = openserial_vars.output_buffer_index_write;
    temp_buffer[1] = openserial_vars.output_buffer_index_read;
@@ -326,6 +335,7 @@ bool debugPrint_outBufferIndexes() {
 //=========================== private =========================================
 
 uint16_t output_buffer_index_write_increment() {
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    openserial_vars.output_buffer_index_write=(openserial_vars.output_buffer_index_write+1)%SERIAL_OUTPUT_BUFFER_SIZE;
    ENABLE_INTERRUPTS();
@@ -334,6 +344,7 @@ uint16_t output_buffer_index_write_increment() {
 
 uint16_t output_buffer_index_read_increment() {
    uint16_t temp_openserial_output_buffer_index_read;
+   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    openserial_vars.output_buffer_index_read=(openserial_vars.output_buffer_index_read+1)%SERIAL_OUTPUT_BUFFER_SIZE;
    temp_openserial_output_buffer_index_read = openserial_vars.output_buffer_index_read;
