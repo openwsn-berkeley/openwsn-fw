@@ -59,6 +59,7 @@ typedef struct {
           void          neighbors_getPreferredParent(open_addr_t* addressToWrite,
                                                      uint8_t addr_type);
           bool          debugPrint_neighbors();
+          void          neighbors_getAll(neighborRow_t *nlist);
 
 /**
 \}

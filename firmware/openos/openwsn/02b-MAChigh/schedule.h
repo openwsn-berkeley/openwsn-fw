@@ -78,6 +78,7 @@ typedef struct {
  void            schedule_indicateRx(asn_t*   asnTimestamp);
  void            schedule_indicateTx(asn_t*   asnTimestamp,
                                               bool     succesfullTx);
+ void            scheduleBuf_getAll(scheduleEntry_t *blist);
 
 /**
 \}

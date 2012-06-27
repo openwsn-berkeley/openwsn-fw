@@ -272,6 +272,14 @@ bool debugPrint_neighbors() {
    return TRUE;
 }
 
+/**
+// The functio below returns a direct pointer to the neighbor table. Modifying 
+this structure means you are modifying the neighbor table. Be careful when using
+the pointer and try only to read from the table
+*/
+void neighbors_getAll(neighborRow_t *nlist){
+ nlist=&neighbors_vars.neighbors[0];
+}
 //=========================== private =========================================
 
 void registerNewNeighbor(open_addr_t* address,
