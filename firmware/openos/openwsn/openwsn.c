@@ -7,6 +7,7 @@
 
 #include "openwsn.h"
 //l7
+#include "layerdebug.h"
 //#include "rrube.h"
 //#include "rheli.h"
 #include "rinfo.h"
@@ -98,6 +99,7 @@ void openwsn_init() {
    //rxl1_init();
    //rt_init();
    //rex_init();
+   layerdebug_init();
 
    rleds_init();
    rreg_init();
