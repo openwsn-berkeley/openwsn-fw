@@ -1,0 +1,128 @@
+## ###################################################################
+##
+## * Bootloader interrupt vector =                            0x0000_0000 to 0x0000_03FF  // 1024 bytes for static isr vector.
+## * Flash protection and security registers =                0x0000_0400 to 0x0000_040F 
+## * Bootloader Flash (47Kb) =                                0x0000_0410 to 0x0000_BFFF
+## * App interrupt vector =                                   0x0000_C000 to 0x0000_C3FF //1024 bytes
+## * App Flash protection and security registers (not used) = 0x0000_C400 to 0x0000_C40F
+## * App Flash (206kb) =                                      0x0000_C410 to 0x0003_FFFF
+## * Redirected interrupt vector in RAM =                     0x1FFF_8000 to 0x1FFF_83FF //1024bytes
+## * RAM available  =                                         0x1FFF_8400 to 0x2000_8000 // 63kb
+## 
+## Apps then need the following linker file configuration (Starting at C000 instead of 0000)
+##  
+## MEMORY {
+##	 interrupts  (RX) : ORIGIN = 0x0000C000, LENGTH = 0x000003ff #1024 bytes
+## 	 code        (RX) : ORIGIN = 0x0000C410, LENGTH = 0x0003FBF0  #all flash except the first 1kb
+##   data        (RW) : ORIGIN = 0x1FFF8400, LENGTH = 0x0000FC00 #63kb ram because the first one is kept for the vector isr in ram.
+##   cfmprotrom  (RX) : ORIGIN = 0x00000400, LENGTH = 0x0000010 # 16bytes protected area.
+## }
+##
+##
+##
+## ###################################################################
+
+KEEP_SECTION { .vectortable }
+KEEP_SECTION { .cfmconfig }
+
+MEMORY {
+  interrupts  (RX) : ORIGIN = 0x00000000, LENGTH = 0x000003ff #1024 bytes
+  code        (RX) : ORIGIN = 0x00000410, LENGTH = 0x0003FBF0  #all flash except the first 1kb
+  data        (RW) : ORIGIN = 0x1FFF8000, LENGTH = 0x0000FC00 #63kb ram -- 1kb is kept for isr vector in ram.
+  cfmprotrom  (RX) : ORIGIN = 0x00000400, LENGTH = 0x0000010 # 16bytes protected area.
+}
+
+SECTIONS {
+  # Heap and Stack sizes definition
+  __heap_size = 0x2000;
+  ___stack_size = 0xA000;
+
+  .interrupts :
+  {
+    ___VECTOR_RAM = .;
+    * (.vectortable)
+    . = ALIGN (0x4);
+  } > interrupts
+
+  .cfmprotect :
+  {
+    *(.cfmconfig)
+    . = ALIGN (0x4);
+  } > cfmprotrom
+
+  .text :
+  {
+    * (.text)
+    . = ALIGN(0x4);
+    * (.rodata)
+    . = ALIGN(0x4);
+    ___ROM_AT = .;
+    ___DATA_ROM = .;
+  } > code
+
+  .data : AT(___ROM_AT)
+  {
+    ___DATA_RAM = .;
+    * (.ARM.extab)
+    . = ALIGN(0x4);
+    __exception_table_start__ = .;
+    EXCEPTION
+    __exception_table_end__   = .;
+
+    __sinit__ = .;
+      STATICINIT
+
+    ___DATA_START =.;
+    * (.data)
+    . = ALIGN (0x4);
+    ___DATA_END   =.;
+
+    __SDATA_START =.;
+    * (.sdata)
+    . = ALIGN (0x4);
+    __SDATA_END = .;
+
+    __SDA_BASE = .;
+    . = ALIGN(0x4);
+  } > data
+
+  .bss :
+  {
+    __START_SBSS = .;
+    * (.sbss)
+    *(SCOMMON)
+    __END_SBSS = .;
+
+    __START_BSS = .;
+    * (.bss)
+    * (COMMON)
+    __END_BSS = .;
+    . = ALIGN(0x4);
+  } >> data
+
+
+  ___HEAP_START = .;
+  ___HEAP_END = ___HEAP_START + __heap_size;
+  ___SP_END = ___HEAP_END;
+  ___SP_INIT = ___SP_END + ___stack_size;
+
+  __heap_addr = ___HEAP_START;
+  __heap_size = ___HEAP_END -  ___HEAP_START;
+  __SP_INIT = ___SP_INIT;
+  _SP_INIT = __SP_INIT;
+  __HEAP_START = __heap_addr;
+  __mem_limit = ___HEAP_END;
+  __stack_safety = 16;
+
+  _romp_at = ___ROM_AT + SIZEOF(.data);
+  .romp : AT(_romp_at)
+  {
+    __S_romp = _romp_at;
+    WRITEW(___ROM_AT);
+    WRITEW(ADDR(.data));
+    WRITEW(SIZEOF(.data));
+    WRITEW(0);
+    WRITEW(0);
+    WRITEW(0);
+  }
+}
