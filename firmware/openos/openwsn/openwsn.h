@@ -21,7 +21,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_PATCH 1
 
 // enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER 0x10
+#define DEBUG_MOTEID_MASTER 0x00
 
 
 #ifndef TRUE
@@ -66,6 +66,7 @@ enum {
    IANA_ICMPv6_RA_PREFIX_INFORMATION   =    3,
    IANA_ICMPv6_RPL                     =  155,
    IANA_ICMPv6_RPL_DIO                 = 0x01,
+   IANA_RSVP                           = 46,
 };
 
 // well known ports (which we define)
@@ -139,20 +140,22 @@ enum {
    COMPONENT_UDPECHO                   = 0x1b,
    COMPONENT_UDPINJECT                 = 0x1c,
    COMPONENT_UDPPRINT                  = 0x1d,
+   COMPONENT_RSVP                      = 0x1e,
    //App
-   COMPONENT_OHLONE                    = 0x1e,
-   COMPONENT_HELI                      = 0x1f,
-   COMPONENT_IMU                       = 0x20,
-   COMPONENT_RLEDS                     = 0x21,
-   COMPONENT_RREG                      = 0x22,
-   COMPONENT_RWELLKNOWN                = 0x23,
-   COMPONENT_RT                        = 0x24,
-   COMPONENT_REX                       = 0x25,
-   COMPONENT_RXL1                      = 0x26,
-   COMPONENT_RINFO                     = 0x27,
-   COMPONENT_RHELI                     = 0x28,
-   COMPONENT_RRUBE                     = 0x29,
-   COMPONENT_LAYERDEBUG                = 0x2a,
+   COMPONENT_OHLONE                    = 0x1f,
+   COMPONENT_HELI                      = 0x20,
+   COMPONENT_IMU                       = 0x21,
+   COMPONENT_RLEDS                     = 0x22,
+   COMPONENT_RREG                      = 0x23,
+   COMPONENT_RWELLKNOWN                = 0x24,
+   COMPONENT_RT                        = 0x25,
+   COMPONENT_REX                       = 0x26,
+   COMPONENT_RXL1                      = 0x27,
+   COMPONENT_RINFO                     = 0x28,
+   COMPONENT_RHELI                     = 0x29,
+   COMPONENT_RRUBE                     = 0x2a,
+   COMPONENT_LAYERDEBUG                = 0x2b,
+                         
 };
 
 //error codes
