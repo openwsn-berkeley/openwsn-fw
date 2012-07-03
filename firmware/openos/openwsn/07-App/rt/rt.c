@@ -12,7 +12,7 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in mseconds)
-#define RTPERIOD     60000
+#define RTPERIOD     20000
 
 const uint8_t rt_path0[] = "t";
 

@@ -13,7 +13,7 @@
 #include "rinfo.h"
 //#include "rxl1.h"
 #include "rex.h"
-//#include "rt.h"
+#include "rt.h"
 #include "rwellknown.h"
 #include "rleds.h"
 #include "rreg.h"
@@ -91,26 +91,30 @@ void openwsn_init() {
    openudp_init();
    opencoap_init(); // initialize before any of the CoAP clients
    // 07-App
-   //heli_init();
-   //imu_init();
-   //rrube_init();
-   //rheli_init();
-   rinfo_init();
-   //rxl1_init();
-   //rt_init();
-   //rex_init();
-   //layerdebug_init();
-
-   rleds_init();
-   rreg_init();
+   
+   // CoAP
    rwellknown_init();
+   rreg_init();
+   rinfo_init();
+   rleds_init();
+   rt_init();
+   //rex_init();
+   //rheli_init();
+   //rrube_init();
+   //rxl1_init();
+   //layerdebug_init();
+   //UDP
+   udpecho_init();
+   udpinject_init();
+   udpprint_init();
+   // TCP
    ohlone_init();
    tcpecho_init();
    tcpinject_init();
    tcpprint_init();
-   udpecho_init();
-   udpinject_init();
-   udpprint_init();
+   // misc.
+   //heli_init();
+   //imu_init();
 }
 
 //=========================== private =========================================
