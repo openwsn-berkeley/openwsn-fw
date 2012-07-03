@@ -83,6 +83,7 @@ enum {
    WKP_UDP_ECHO                        =    7,
    WKP_UDP_INJECT                      = 2188,
    WKP_UDP_DISCARD                     =    9,
+   WKP_UDP_RAND                        = 61000,
 };
 
 //status elements
@@ -155,7 +156,7 @@ enum {
    COMPONENT_RHELI                     = 0x29,
    COMPONENT_RRUBE                     = 0x2a,
    COMPONENT_LAYERDEBUG                = 0x2b,
-                         
+   COMPONENT_UDPRAND                   = 0x2c,
 };
 
 //error codes

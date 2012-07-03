@@ -26,6 +26,7 @@
 #include "udpecho.h"
 #include "udpinject.h"
 #include "udpprint.h"
+#include "udprand.h"
 //l4
 #include "opencoap.h"
 #include "openudp.h"
@@ -107,6 +108,7 @@ void openwsn_init() {
    udpecho_init();
    udpinject_init();
    udpprint_init();
+   udprand_init();
    // TCP
    ohlone_init();
    tcpecho_init();

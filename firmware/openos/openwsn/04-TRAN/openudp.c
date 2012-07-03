@@ -9,6 +9,7 @@
 #include "udpecho.h"
 #include "udpinject.h"
 #include "udpprint.h"
+#include "udprand.h"
 //#include "heli.h"
 //#include "imu.h"
 
@@ -56,6 +57,9 @@ void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
          break;
       case WKP_UDP_DISCARD:
          udpprint_sendDone(msg,error);
+         break;
+      case WKP_UDP_RAND:
+         udprand_sendDone(msg,error);
          break;
          
       default:
@@ -130,6 +134,9 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          break;
       case WKP_UDP_DISCARD:
          udpprint_receive(msg);
+         break;
+      case WKP_UDP_RAND:
+         udprand_receive(msg);
          break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
