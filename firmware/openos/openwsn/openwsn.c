@@ -99,7 +99,7 @@ void openwsn_init() {
    //rxl1_init();
    //rt_init();
    //rex_init();
-   layerdebug_init();
+   //layerdebug_init();
 
    rleds_init();
    rreg_init();
