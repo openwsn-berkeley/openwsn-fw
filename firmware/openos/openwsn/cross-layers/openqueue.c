@@ -46,6 +46,7 @@ bool debugPrint_queue() {
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
+         ENABLE_INTERRUPTS(); 
          return &openqueue_vars.queue[i];
       }
    }
