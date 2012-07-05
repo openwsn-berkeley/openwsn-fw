@@ -1,10 +1,14 @@
+
+/**
+\brief Low level led macros.
+
+\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2012.
+ */
+
+
 #include "led.h"
 
-/********************************************************************************
- *   GPIO_Init: Initializes GPIO controlling LED
- * Notes:
- *    - 
- ********************************************************************************/
+
 void GPIO_Init(void)
 {
   ENABLE_GPIO_CLOCKS;

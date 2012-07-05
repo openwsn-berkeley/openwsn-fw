@@ -1,9 +1,7 @@
-/*
- * File:        uart.c
- * Purpose:     Provide common UART routines for serial IO
- *
- * Notes:       
- *              
+/**
+\brief K20-specific definition of the "uart" bsp module.
+
+\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2012.
  */
 
 #include "common.h"
@@ -45,7 +43,7 @@ void private_uart_init (UART_MemMapPtr uartch, int sysclk, int baud)
 {
 	uint16_t sbr, brfa;
 	uint8_t temp,txsize,shiftval;
-    uint32_t  pFIFO; 
+	uint32_t  pFIFO; 
 	/* Enable the clock to the selected UART */    
 	if(uartch == UART0_BASE_PTR)
 		SIM_SCGC4 |= SIM_SCGC4_UART0_MASK;
@@ -91,28 +89,28 @@ void private_uart_init (UART_MemMapPtr uartch, int sysclk, int baud)
 	UART_C5_REG(uartch) = 0; //use interrupt not dma.
 
 
-//	/* set watermark in the almost full TX buffer */
-//	if ((( UART_PFIFO_REG(uartch) & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT) == 0) {
-//		/* 1 dataword in D */
-//		UART_TWFIFO_REG(uartch) = UART_TWFIFO_TXWATER(0);
-//	}
-//	else {
-//		pFIFO=UART_PFIFO_REG(uartch) & UART_PFIFO_TXFIFOSIZE_MASK;
-//		shiftval=(((pFIFO) >> UART_PFIFO_TXFIFOSIZE_SHIFT) + 1);
-//		txsize = 1 << shiftval;
-//    /* watermark for TX buffer generates interrupts below & equal to watermark */
-//		txsize -= 1;
-//        UART_TWFIFO_REG(uartch) = UART_TWFIFO_TXWATER(txsize);
-//    
-//	}
+	//	/* set watermark in the almost full TX buffer */
+	//	if ((( UART_PFIFO_REG(uartch) & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT) == 0) {
+	//		/* 1 dataword in D */
+	//		UART_TWFIFO_REG(uartch) = UART_TWFIFO_TXWATER(0);
+	//	}
+	//	else {
+	//		pFIFO=UART_PFIFO_REG(uartch) & UART_PFIFO_TXFIFOSIZE_MASK;
+	//		shiftval=(((pFIFO) >> UART_PFIFO_TXFIFOSIZE_SHIFT) + 1);
+	//		txsize = 1 << shiftval;
+	//    /* watermark for TX buffer generates interrupts below & equal to watermark */
+	//		txsize -= 1;
+	//        UART_TWFIFO_REG(uartch) = UART_TWFIFO_TXWATER(txsize);
+	//    
+	//	}
 
 
 	UART_RWFIFO_REG(uartch) |= UART_RWFIFO_RXWATER(1); //rx buffer is 1 byte
 
-//	UART_CFIFO_REG(uartch)   |=UART_CFIFO_RXFLUSH_MASK|UART_CFIFO_TXFLUSH_MASK; //flush buffers
+	//	UART_CFIFO_REG(uartch)   |=UART_CFIFO_RXFLUSH_MASK|UART_CFIFO_TXFLUSH_MASK; //flush buffers
 
-//	UART_PFIFO_REG(uartch)   |= UART_PFIFO_RXFE_MASK; //enable fifo
-//	UART_PFIFO_REG(uartch)   |= UART_PFIFO_TXFE_MASK; //enable fifo
+	//	UART_PFIFO_REG(uartch)   |= UART_PFIFO_RXFE_MASK; //enable fifo
+	//	UART_PFIFO_REG(uartch)   |= UART_PFIFO_TXFE_MASK; //enable fifo
 
 	UART_S1_REG(uartch);//clear isr flags
 
@@ -152,31 +150,26 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
 
 void    uart_enableInterrupts(){
 	UART_C2_REG(UART1_BASE_PTR)|=UART_C2_RIE_MASK|UART_C2_TIE_MASK/*|UART_C2_TCIE_MASK/*|UART_C2_ILIE_MASK*/;
-	//UART1_C2|=UART_C2_RIE_MASK|UART_C2_TIE_MASK;
 }
 
 void    uart_disableInterrupts(){
 	UART_C2_REG(UART1_BASE_PTR)&=~(UART_C2_RIE_MASK|UART_C2_TIE_MASK/*|UART_C2_TCIE_MASK/*|UART_C2_ILIE_MASK*/);
-	//UART1_C2 &=~(UART_C2_RIE_MASK|UART_C2_TIE_MASK);
 }
 
 void    uart_clearRxInterrupts(){
-	/* Wait until character has been received */
-	//   while (!(UART_S1_REG(channel) & UART_S1_RDRF_MASK));//Receive Data Register Full Flag
+	/* this is done when reading status*/	
 }
 
 void    uart_clearTxInterrupts(){
-	// while(!(UART_S1_REG(channel) & UART_S1_TDRE_MASK));//Transmit Data Register Empty Flag
-	//done at the isr.
+	/* this is done when reading status*/	
 }
 
 void uart_writeByte(uint8_t byteToWrite){
 	while(!(UART_S1_REG(UART1_BASE_PTR) &  UART_S1_TC_MASK));	//wait tx complete flag
-	//while(!(UART_S1_REG(UART1_BASE_PTR) &  UART_S1_TDRE_MASK));
+
 	UART_D_REG(UART1_BASE_PTR) = byteToWrite;
-	
+
 	UART_C2_REG(UART1_BASE_PTR)|=UART_C2_TIE_MASK;//enable interrupts
-	//UART_CFIFO_REG(UART1_BASE_PTR)   |=UART_CFIFO_TXFLUSH_MASK; //flush buffers
 
 }
 
@@ -203,8 +196,8 @@ uint8_t uart_isr_rx() {
 void uart_isr(void)
 {
 	uint32_t reg;
-	 debugpins_isr_set();
-	
+	debugpins_isr_set();
+
 	reg=UART_S1_REG(UART1_BASE_PTR);
 	//this clears the interrupt so now we have to see which one is:
 
@@ -220,5 +213,5 @@ void uart_isr(void)
 		//while(1); //to check what other isr happened.
 	}
 
-	 debugpins_isr_clr();
+	debugpins_isr_clr();
 }

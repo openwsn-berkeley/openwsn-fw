@@ -7,7 +7,7 @@
 #include "spi.h"
 #include "board.h"
 #include "common.h"
-//#include "openwsn.h"
+
 
 
 //=========================== defines =========================================
@@ -63,28 +63,28 @@ void spi_init() {
 	uint8_t     pcssck;
 
 	memset(&spi_vars,0,sizeof(spi_vars_t));
-	
+
 	//this coded is intended for dynamic SPI bus speed configuration. Needs testing.
-//	if(periph_clk_khz < SPI_SPEED_KHZ){                            
-//		return;//error
-//	}
-//	clk_div  = periph_clk_khz / SPI_SPEED_KHZ;     
-//
-//	if(periph_clk_khz%SPI_SPEED_KHZ != 0){                                /* See Note 2.d                                     */
-//		clk_div = clk_div + 1;
-//	}
-//
-//	if(private_spi_findBaudRate( periph_clk_khz,  &br,  &pbr,  &dbr) == FALSE){
-//		return;
-//	}
-//
-//	if (private_spi_calcDelayParams(periph_clk_khz, SPI_INTERDATA_DELAY, &asc, &pasc) == FALSE){
-//		return;
-//	}
-//
-//	if (private_spi_calcDelayParams(periph_clk_khz, SPI_SETUP_DELAY, &cssck, &pcssck) == FALSE){
-//		return;
-//	}
+	//	if(periph_clk_khz < SPI_SPEED_KHZ){                            
+	//		return;//error
+	//	}
+	//	clk_div  = periph_clk_khz / SPI_SPEED_KHZ;     
+	//
+	//	if(periph_clk_khz%SPI_SPEED_KHZ != 0){                                /* See Note 2.d                                     */
+	//		clk_div = clk_div + 1;
+	//	}
+	//
+	//	if(private_spi_findBaudRate( periph_clk_khz,  &br,  &pbr,  &dbr) == FALSE){
+	//		return;
+	//	}
+	//
+	//	if (private_spi_calcDelayParams(periph_clk_khz, SPI_INTERDATA_DELAY, &asc, &pasc) == FALSE){
+	//		return;
+	//	}
+	//
+	//	if (private_spi_calcDelayParams(periph_clk_khz, SPI_SETUP_DELAY, &cssck, &pcssck) == FALSE){
+	//		return;
+	//	}
 
 	//init clock
 	SIM_SCGC6 |= (SIM_SCGC6_SPI0_MASK);//power SPI0
@@ -94,11 +94,11 @@ void spi_init() {
 	PORTD_PCR1 = PORT_PCR_MUX(2);//CLK -- PTD1
 	PORTD_PCR2 = PORT_PCR_MUX(2);//MOSI -- PTD2
 	PORTD_PCR3 = PORT_PCR_MUX(2);//MISO-- PTD3
-	
-	 GPIOD_PDDR |= SPI_CS_PIN_MASK;//CS0 -- as output gpio
-		
-	 GPIOD_PSOR |=SPI_CS_PIN_MASK;//set cs
-	 				 
+
+	GPIOD_PDDR |= SPI_CS_PIN_MASK;//CS0 -- as output gpio
+
+	GPIOD_PSOR |=SPI_CS_PIN_MASK;//set cs
+
 	SPI0_MCR   = SPI_MCR_MSTR_MASK | SPI_MCR_DIS_RXF_MASK |  /* Configure SPI as master. Disable rx/tx fifos. Set */
 			SPI_MCR_DIS_TXF_MASK | SPI_MCR_ROOE_MASK |  /* overwrite incoming data. Set state to STOPPED.    */ 
 			SPI_MCR_HALT_MASK |
@@ -111,26 +111,26 @@ void spi_init() {
 
 	//this coded is intended for dynamic SPI bus speed configuration. Needs testing.
 	/* Configure exclusive port CTAR                     */
-//	SPI0_CTAR0 |= SPI_CTAR_FMSZ(8-1)     | /*                                      */
-//			SPI_CTAR_DBR_MASK   | /* Configure clock                                   */
-//			SPI_CTAR_BR(br)        |
-//			SPI_CTAR_PBR(pbr)      |
-//			SPI_CTAR_PASC(pasc)    | /* Inter-data delay                                  */
-//			SPI_CTAR_ASC(asc)      |
-//			SPI_CTAR_PCSSCK(pcssck)| /* Setup delay                                       */
-//			SPI_CTAR_CSSCK(cssck)  |
-//			/* Configure CPOL and CPHA with parameter values     */
-//			((SPI_DEFAULT_CPOL << SPI_CTAR_CPOL_SHIFT) && SPI_CTAR_CPOL_MASK) |
-//			((SPI_DEFAULT_CPHA << SPI_CTAR_CPHA_SHIFT) && SPI_CTAR_CPHA_MASK);
+	//	SPI0_CTAR0 |= SPI_CTAR_FMSZ(8-1)     | /*                                      */
+	//			SPI_CTAR_DBR_MASK   | /* Configure clock                                   */
+	//			SPI_CTAR_BR(br)        |
+	//			SPI_CTAR_PBR(pbr)      |
+	//			SPI_CTAR_PASC(pasc)    | /* Inter-data delay                                  */
+	//			SPI_CTAR_ASC(asc)      |
+	//			SPI_CTAR_PCSSCK(pcssck)| /* Setup delay                                       */
+	//			SPI_CTAR_CSSCK(cssck)  |
+	//			/* Configure CPOL and CPHA with parameter values     */
+	//			((SPI_DEFAULT_CPOL << SPI_CTAR_CPOL_SHIFT) && SPI_CTAR_CPOL_MASK) |
+	//			((SPI_DEFAULT_CPHA << SPI_CTAR_CPHA_SHIFT) && SPI_CTAR_CPHA_MASK);
 
-	
+
 	//acceptable values for spi bus when talking with the radio are: (in case dynamic configuration is used please remove that.)
 	// assumming core cpu at 72Mhz and peripheral clk at 36Mhz
 	// 1.8Mhz --> pbr=7--> SPI_CTAR_PBR(3) and 	br=16 -->SPI_CTAR_BR(4)
 	// 6 Mhz  --> pbr=5--> SPI_CTAR_PBR(2) and  br=8 -->SPI_CTAR_BR(3)
 	SPI0_CTAR0 = (SPI_CTAR_DBR_MASK | SPI_CTAR_FMSZ(8-1) | SPI_CTAR_PDT(0) | SPI_CTAR_BR(3)|SPI_CTAR_PBR(2) ); 
-	
-	
+
+
 	SPI0_SR       = SPI_SR_EOQF_MASK|SPI_SR_TCF_MASK|SPI_SR_TFUF_MASK|SPI_SR_TFFF_MASK|SPI_SR_RFOF_MASK|SPI_SR_RFDF_MASK;             
 	/* Set RUNNING state.                                */
 	SPI0_MCR    &= ~SPI_MCR_HALT_MASK; /* SPI0_MCR: HALT=0 */
@@ -161,7 +161,7 @@ void spi_txrx(uint8_t*     bufTx,
 
 	uint32_t  cont_trans_mask;
 
-	
+
 #ifdef SPI_IN_INTERRUPT_MODE
 	// disable interrupts
 	__disable_interrupt();
@@ -205,9 +205,9 @@ void spi_txrx(uint8_t*     bufTx,
 				| SPI_SR_TFFF_MASK | SPI_SR_RFDF_MASK;
 
 		SPI0_PUSHR = SPI_PUSHR_CTAS(0)   /* Transmit data.      use ctar0                                 */
-		                		   | SPI_PUSHR_CONT_MASK //1 Keep PCSn signals asserted between transfers.
-		                		   | SPI_PUSHR_PCS(0)  //negate the pcs signal.
-		                		   | *spi_vars.pNextTxByte;        
+		                				   | SPI_PUSHR_CONT_MASK //1 Keep PCSn signals asserted between transfers.
+		                				   | SPI_PUSHR_PCS(0)  //negate the pcs signal.
+		                				   | *spi_vars.pNextTxByte;        
 
 		while (! (SPI0_SR & SPI_SR_TCF_MASK)) {}
 		while (! (SPI0_SR & SPI_SR_RFDF_MASK)) {}             /* wait read buffer not empty flag                      */

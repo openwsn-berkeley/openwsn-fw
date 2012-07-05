@@ -13,19 +13,6 @@
 
 //=========================== defines =========================================
 
-//#define FRAME_PIN 12
-//#define SLOT_PIN 13
-//#define FSM_PIN 14
-//#define TASK_PIN 15
-//#define ISR_PIN 5  //PTC5
-//#define RADIO_PIN 6 //PTC6
-//PTC12,13,14,15
-//GPIO14 = A50
-//GPIO15= A51
-//GPIO16= A52
-//GPIO17 = A53
-//TWRPI_GPIO4 PTD5
-//TWRPI_GPIO1 PTC6
 
 #define FRAME_PIN 4 //PTD4 B40 
 #define SLOT_PIN 20 //PTB20 B23
@@ -47,31 +34,13 @@ void debugpins_init() {
 	// enable PORTC clock
 	 SIM_SCGC5 |= SIM_SCGC5_PORTC_MASK;
 	 
-	 // set pin as gpio, default to be input
-//	 PORTC_PCR12 = PORT_PCR_MUX(1);
-//	 PORTC_PCR13 = PORT_PCR_MUX(1);
-//	 PORTC_PCR14 = PORT_PCR_MUX(1);
-//	 PORTC_PCR15 = PORT_PCR_MUX(1);
-//	 PORTD_PCR5  = PORT_PCR_MUX(1);
-//	 PORTC_PCR6  = PORT_PCR_MUX(1);
-//		 
-//	 //set as output
-//	 GPIOC_PDDR |= 1<<FRAME_PIN;
-//	 GPIOC_PDDR |= 1<<SLOT_PIN;
-//	 GPIOC_PDDR |= 1<<FSM_PIN;
-//	 GPIOC_PDDR |= 1<<TASK_PIN;
-//	 GPIOD_PDDR |= 1<<ISR_PIN;
-//	 GPIOC_PDDR |= 1<<RADIO_PIN;
-	 
 	 PORTD_PCR4 = PORT_PCR_MUX(1);
 	 PORTB_PCR20 = PORT_PCR_MUX(1);
 	 PORTE_PCR26 = PORT_PCR_MUX(1);
 	 PORTB_PCR0 = PORT_PCR_MUX(1);
 	 PORTB_PCR2  = PORT_PCR_MUX(1);
 	 PORTA_PCR14  = PORT_PCR_MUX(1);
-
-	// GPIOB_PDOR |=1<<SLOT_PIN;//set as 1 -- this is to test the reset pin, we need to drive a 0 and clear to reset. 
-	 	 
+ 	 
 	 //set as output
 	 GPIOD_PDDR |= 1<<FRAME_PIN;
 	 GPIOB_PDDR |= 1<<SLOT_PIN;

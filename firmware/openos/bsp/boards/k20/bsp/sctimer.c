@@ -48,7 +48,7 @@ void sctimer_init() {
 			| !LPTMR_CSR_TPP_MASK //TMR Pin polarity
 			| LPTMR_CSR_TFC_MASK // Timer Free running counter is reset only on overflow ( not whenever TMR counter equals compare)
 			| !LPTMR_CSR_TMS_MASK //LPTMR as Timer
-			);
+	);
 	//register interrupt
 	//done hardcoded in the vector table in kinetis_sysinit.c
 
@@ -77,12 +77,12 @@ uint16_t sctimer_getValue() {
 
 	//manual says to read two times and check that the value is the same. However, 
 	//freescale code examples only read this once.
-//		LPTMR0_CNR = 0x0;
-//		while ((nextval=(LPTMR0_CNR ))!=val) {
-//			LPTMR0_CNR = 0x0;
-//			val= LPTMR0_CNR ;
-//			LPTMR0_CNR = 0x0;
-//		}
+	//		LPTMR0_CNR = 0x0;
+	//		while ((nextval=(LPTMR0_CNR ))!=val) {
+	//			LPTMR0_CNR = 0x0;
+	//			val= LPTMR0_CNR ;
+	//			LPTMR0_CNR = 0x0;
+	//		}
 	return val;
 }
 
@@ -91,9 +91,9 @@ void sctimer_setCb(sctimer_cbt cb) {
 }
 
 void lptmr_isr(void) {
-	 debugpins_isr_set();
-	 callback();
-	 debugpins_isr_clr();
+	debugpins_isr_set();
+	callback();
+	debugpins_isr_clr();
 	//clear flags.
 	//LPTMR0_CSR |= ( /*LPTMR_CSR_TEN_MASK |*/LPTMR_CSR_TIE_MASK| LPTMR_CSR_TCF_MASK);
 }

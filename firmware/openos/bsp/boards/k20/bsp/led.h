@@ -1,5 +1,12 @@
+/**
+\brief Low level led macros.
+
+\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2012.
+ */
+
 #ifndef __LED_H
 #define __LED_H
+
 
 #include "common.h"
 

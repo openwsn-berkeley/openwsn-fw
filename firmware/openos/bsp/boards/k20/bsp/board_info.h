@@ -22,6 +22,8 @@
 #define PORT_SIGNED_INT_WIDTH               int16_t
 
 #define CAPTURE_TIME()   //the timer does not have a capture register so do nothing
+
+#define INTERRUPT_DECLARATION()    //do nothing by now.
 #define DISABLE_INTERRUPTS() DisableInterrupts
 
 #define ENABLE_INTERRUPTS() EnableInterrupts

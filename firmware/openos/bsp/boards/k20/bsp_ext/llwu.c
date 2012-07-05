@@ -1,13 +1,8 @@
-/*!
- * \file    llwu.c
- * \brief   common LLWU routines
- *
- * This file defines the functions/interrupt handlers/macros used for LLWU to be used as wakeup source.
- * And some common initializations.
- *
- * \version $Revision: 1.0 $
- * \author  Philip Drake(rxaa60)
- ***/
+
+ /**
+\brief K20-specific definition of the "LLWU" bsp module. Revision of Philip Drake(rxaa60) version.
+\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2012.
+*/
 
 #include "common.h"
 #include "llwu.h"
@@ -198,7 +193,7 @@ void llwu_configure_filter(unsigned int wu_pin_num, unsigned char filter_en, uns
    //wu_pin_num is the pin number to be written to FILTSEL.  wu_pin_num is not the same as pin_en.
     uint8_t temp;
 
-    //  \nEnabling Filter %x on WU Pin %x for WU sense %x \n",filter_en, wu_pin_num, rise_fall);
+    //Enabling Filter %x on WU Pin %x for WU sense %x \n",filter_en, wu_pin_num, rise_fall);
 
      temp = 0;
      //first clear filter values and clear flag by writing a 1
@@ -218,7 +213,7 @@ void llwu_configure_filter(unsigned int wu_pin_num, unsigned char filter_en, uns
          LLWU_FILT2 = temp;
      }else
      {
-    	 //  \nError - invalid filter number %x\n",filter_en);
+    	 //Error - invalid filter number %x\n",filter_en);
      }
 }
 
@@ -227,6 +222,7 @@ void llwu_configure_filter(unsigned int wu_pin_num, unsigned char filter_en, uns
 *
 *   PROCEDURE NAME:
 *       llwu_isr - Interrupt handler for LLWU
+*       the commented code is kept as an example for future alternative wake up sources.
 *
 *******************************************************************************/
 void llwu_isr(void)
@@ -273,7 +269,8 @@ debugpins_radio_set();
   if (LLWU_F2 & LLWU_F2_WUF9_MASK) {
        LLWU_F2 |= LLWU_F2_WUF9_MASK;   // write one to clear the flag -- radio isr (ptc5 external interrupt)
    	  // signal_irq(RADIO_EXTERNAL_PORT_IRQ_NUM);//activate nvic irq.
-       radio_isr();
+       radio_isr(); //instead of that, the isr of that port can be set in the NVIC and there handle the 
+       //corresponding action after clearing the LLWU_F2 WUF9 flag. (hence not clearing it here)
   }
 //   if (LLWU_F2 & LLWU_F2_WUF10_MASK) {
 ////       printf("\n [LLWU ISR] ****WUF10 was set *****\r\n");
