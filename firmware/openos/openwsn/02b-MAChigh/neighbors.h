@@ -37,6 +37,16 @@ typedef struct {
    neighborRow_t   neighborEntry;
 } debugNeighborEntry_t;
 
+//this structure is used by layer debug app to debug through the network.
+typedef struct{
+   uint8_t last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
+   int8_t rssi; //SIGNED!
+   uint8_t parentPreference;
+   uint8_t DAGrank;
+   uint8_t asn_low; 
+   uint8_t asn_high;
+}netDebugNeigborEntry_t;
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -58,9 +68,11 @@ typedef struct {
           uint8_t       neighbors_getNumNeighbors();
           void          neighbors_getPreferredParent(open_addr_t* addressToWrite,
                                                      uint8_t addr_type);
+          //debug
           bool          debugPrint_neighbors();
-          void          neighbors_getAll(neighborRow_t *nlist);
-
+          void          neighbors_getAll(neighborRow_t *nlist);//deprecated
+          void          neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist);
+          uint8_t       neighbors_getNumberOfNeigbors(); 
 /**
 \}
 \}

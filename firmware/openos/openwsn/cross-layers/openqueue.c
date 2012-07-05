@@ -100,8 +100,8 @@ bool debugPrint_queue() {
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_RES &&
           openqueue_vars.queue[i].creator!=COMPONENT_IEEE802154E) {
-    	 ENABLE_INTERRUPTS();
-         return &openqueue_vars.queue[i];
+    	  ENABLE_INTERRUPTS();
+          return &openqueue_vars.queue[i];
       }
    }
    ENABLE_INTERRUPTS();
@@ -134,7 +134,7 @@ bool debugPrint_queue() {
       for (i=0;i<QUEUELENGTH;i++) {
          if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
             packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
-        	 ENABLE_INTERRUPTS();
+            ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
       }
@@ -150,7 +150,7 @@ bool debugPrint_queue() {
                 )
              )
             ) {
-        	 ENABLE_INTERRUPTS();
+            ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
       }
@@ -167,8 +167,8 @@ bool debugPrint_queue() {
       if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
           openqueue_vars.queue[i].creator==COMPONENT_RES              &&
           packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))) {
-    	 ENABLE_INTERRUPTS();
-         return &openqueue_vars.queue[i];
+    	  ENABLE_INTERRUPTS();
+          return &openqueue_vars.queue[i];
       }
    }
    ENABLE_INTERRUPTS();

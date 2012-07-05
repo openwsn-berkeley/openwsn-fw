@@ -280,6 +280,36 @@ the pointer and try only to read from the table
 void neighbors_getAll(neighborRow_t *nlist){
  nlist=&neighbors_vars.neighbors[0];
 }
+//returns a list of debug info and its size
+void neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist ){
+  uint8_t j,size;
+  
+  size=0;
+  for(j=0;j<MAXNUMNEIGHBORS;j++) {
+     if(neighbors_vars.neighbors[j].used) {
+       schlist[size].last_addr_byte = neighbors_vars.neighbors[j].addr_64b.addr_16b[1];//last byte of the address; poipoi could be [0]; endianness
+       schlist[size].rssi = neighbors_vars.neighbors[j].rssi;
+       schlist[size].parentPreference = neighbors_vars.neighbors[j].parentPreference;
+       schlist[size].DAGrank = neighbors_vars.neighbors[j].DAGrank;
+       schlist[size].asn_low = (neighbors_vars.neighbors[j].asn.bytes0and1>>8)&0xff;
+       schlist[size].asn_high = (neighbors_vars.neighbors[j].asn.bytes0and1>>0)&0xff;
+       size++;//one more neighbour.
+     }
+   }  
+}
+
+uint8_t  neighbors_getNumberOfNeigbors(){
+uint8_t j,size;
+  size=0;
+  for(j=0;j<MAXNUMNEIGHBORS;j++) {
+     if(neighbors_vars.neighbors[j].used) {
+       size++;
+     }
+   }  
+  return size;
+}
+  
+
 //=========================== private =========================================
 
 void registerNewNeighbor(open_addr_t* address,

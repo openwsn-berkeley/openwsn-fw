@@ -16,6 +16,7 @@
 #define MINBE           2    // min backoff exponent, used in shared TX slots
 #define MAXBE           4    // max backoff exponent, used in shared TX slots
 
+ 
 //=========================== typedef =========================================
 
 typedef uint8_t    channelOffset_t;
@@ -46,6 +47,15 @@ typedef struct {
    asn_t           lastUsedAsn;
    void*           next;
 } scheduleEntry_t;
+
+//used to debug through ipv6 pkt. 4Bytes per neigbour
+typedef struct {
+   uint8_t last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
+   uint8_t slotOffset;
+   uint8_t channelOffset;
+}netDebugScheduleEntry_t;
+
+
 
 typedef struct {
    uint8_t         row;
@@ -79,6 +89,7 @@ typedef struct {
  void            schedule_indicateTx(asn_t*   asnTimestamp,
                                               bool     succesfullTx);
  void            scheduleBuf_getAll(scheduleEntry_t *blist);
+ void            schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist);
 
 /**
 \}

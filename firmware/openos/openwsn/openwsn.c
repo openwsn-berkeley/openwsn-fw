@@ -99,16 +99,16 @@ void openwsn_init() {
    rinfo_init();
    rleds_init();
    rt_init();
-   //rex_init();
+ //  rex_init();
    //rheli_init();
    //rrube_init();
    //rxl1_init();
-   //layerdebug_init();
+   layerdebug_init();
    //UDP
    udpecho_init();
    udpinject_init();
    udpprint_init();
-   udprand_init();
+  // udprand_init();
    // TCP
    ohlone_init();
    tcpecho_init();
