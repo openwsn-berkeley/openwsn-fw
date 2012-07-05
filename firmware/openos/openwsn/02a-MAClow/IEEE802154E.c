@@ -361,13 +361,10 @@ void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
 //======= misc
 
 bool debugPrint_asn() {
-   uint8_t output[ADV_PAYLOAD_LENGTH];
-   
-   output[0]  = (ieee154e_vars.asn.bytes0and1     & 0xff);
-   output[1]  = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
-   output[2]  = (ieee154e_vars.asn.bytes2and3     & 0xff);
-   output[3]  = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
-   output[4]  =  ieee154e_vars.asn.byte4;
+   asn_t output;
+   output.byte4         =  ieee154e_vars.asn.byte4;
+   output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
+   output.bytes0and1    =  ieee154e_vars.asn.bytes0and1;
    openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(output));
    return TRUE;
 }
