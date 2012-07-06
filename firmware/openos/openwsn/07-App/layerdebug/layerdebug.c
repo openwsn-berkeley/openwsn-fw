@@ -17,12 +17,12 @@
 /// inter-packet period (in ms)
 #define DEBUGPERIODNBS    11000
 #define DEBUGPERIODSCH    7000
-#define MAXPAYLOADLEN    80
+#define MAXPAYLOADLEN     80
 
 
 
-const uint8_t sch_layerdebug_path0[] = "d_s"; // debug/scheduling
-const uint8_t nbs_layerdebug_path0[] = "d_n"; // debug/neighbours
+const uint8_t schedule_layerdebug_path0[] = "d_s"; // debug/scheduling
+const uint8_t neighbors_layerdebug_path0[] = "d_n"; // debug/neighbours
 //=========================== variables =======================================
 
 typedef struct {
@@ -36,15 +36,20 @@ layerdebug_vars_t layerdebug_vars;
 
 //=========================== prototypes ======================================
 
-error_t layerdebug_receive(OpenQueueEntry_t* msg,
+error_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
 
-void    layerdebug_timer_sch_cb();
-void    layerdebug_timer_nbs_cb();
 
-void    layerdebug_task_sch_cb();
-void    layerdebug_task_nbs_cb();
+error_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
+                    coap_header_iht*  coap_header,
+                    coap_option_iht*  coap_options);
+
+void    layerdebug_timer_schedule_cb();
+void    layerdebug_timer_neighbors_cb();
+
+void    layerdebug_task_schedule_cb();
+void    layerdebug_task_neighbors_cb();
 
 void    layerdebug_sendDone(OpenQueueEntry_t* msg,
                        error_t error);
@@ -54,34 +59,34 @@ void    layerdebug_sendDone(OpenQueueEntry_t* msg,
 void layerdebug_init() {
    
    // prepare the resource descriptor for the /sch layerdebug path
-   layerdebug_vars.schdesc.path0len             = sizeof(sch_layerdebug_path0)-1;
-   layerdebug_vars.schdesc.path0val             = (uint8_t*)(&sch_layerdebug_path0);
+   layerdebug_vars.schdesc.path0len             = sizeof(schedule_layerdebug_path0)-1;
+   layerdebug_vars.schdesc.path0val             = (uint8_t*)(&schedule_layerdebug_path0);
    layerdebug_vars.schdesc.path1len             = 0;
    layerdebug_vars.schdesc.path1val             = NULL;
    layerdebug_vars.schdesc.componentID          = COMPONENT_LAYERDEBUG;
-   layerdebug_vars.schdesc.callbackRx           = &layerdebug_receive;
+   layerdebug_vars.schdesc.callbackRx           = &layerdebug_schedule_receive;
    layerdebug_vars.schdesc.callbackSendDone     = &layerdebug_sendDone;
    opencoap_register(&layerdebug_vars.schdesc);
    
     
    layerdebug_vars.schtimerId    = opentimers_start(DEBUGPERIODSCH,
                                                 TIMER_PERIODIC,TIME_MS,
-                                                layerdebug_timer_sch_cb);  
+                                                layerdebug_timer_schedule_cb);  
    
    
    // prepare the resource descriptor for the /nbs layerdebug path
-   layerdebug_vars.nbsdesc.path0len             = sizeof(sch_layerdebug_path0)-1;
-   layerdebug_vars.nbsdesc.path0val             = (uint8_t*)(&sch_layerdebug_path0);
+   layerdebug_vars.nbsdesc.path0len             = sizeof(schedule_layerdebug_path0)-1;
+   layerdebug_vars.nbsdesc.path0val             = (uint8_t*)(&schedule_layerdebug_path0);
    layerdebug_vars.nbsdesc.path1len             = 0;
    layerdebug_vars.nbsdesc.path1val             = NULL;
    layerdebug_vars.nbsdesc.componentID          = COMPONENT_LAYERDEBUG;
-   layerdebug_vars.nbsdesc.callbackRx           = &layerdebug_receive;
+   layerdebug_vars.nbsdesc.callbackRx           = &layerdebug_neighbors_receive;
    layerdebug_vars.nbsdesc.callbackSendDone     = &layerdebug_sendDone;
    opencoap_register(&layerdebug_vars.nbsdesc);
    
    layerdebug_vars.nbstimerId    = opentimers_start(DEBUGPERIODNBS,
                                                 TIMER_PERIODIC,TIME_MS,
-                                                layerdebug_timer_nbs_cb);  
+                                                layerdebug_timer_neighbors_cb);  
   
 }
 
@@ -91,16 +96,16 @@ void layerdebug_init() {
 
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
-void layerdebug_timer_sch_cb(){
-   scheduler_push_task(layerdebug_task_sch_cb,TASKPRIO_COAP);
+void layerdebug_timer_schedule_cb(){
+   scheduler_push_task(layerdebug_task_schedule_cb,TASKPRIO_COAP);
 }
 
-void layerdebug_timer_nbs_cb(){
-   scheduler_push_task(layerdebug_task_nbs_cb,TASKPRIO_COAP);
+void layerdebug_timer_neighbors_cb(){
+   scheduler_push_task(layerdebug_task_neighbors_cb,TASKPRIO_COAP);
 }
 
 //schedule stats
-void layerdebug_task_sch_cb() {
+void layerdebug_task_schedule_cb() {
    OpenQueueEntry_t* pkt;
    error_t           outcome;
    uint8_t           numOptions;
@@ -122,7 +127,7 @@ void layerdebug_task_sch_cb() {
    size=sizeof(netDebugScheduleEntry_t)*MAXACTIVESLOTS;
    packetfunctions_reserveHeaderSize(pkt,size);//reserve for some schedule entries
    //get the schedule information from the mac layer 
-   schedule_getNetDebugInfo((netDebugScheduleEntry_t*)pkt->payload);
+   schedule_getNetDebugInfo((netDebugScheduleEntry_t*)pkt->payload,MAXPAYLOADLEN-1);
 
   
    packetfunctions_reserveHeaderSize(pkt,1);//reserve for the size of schedule entries
@@ -131,11 +136,11 @@ void layerdebug_task_sch_cb() {
    
    numOptions = 0;
    // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(sch_layerdebug_path0)-1);
-   memcpy(&pkt->payload[0],&sch_layerdebug_path0,sizeof(sch_layerdebug_path0)-1);
+   packetfunctions_reserveHeaderSize(pkt,sizeof(schedule_layerdebug_path0)-1);
+   memcpy(&pkt->payload[0],&schedule_layerdebug_path0,sizeof(schedule_layerdebug_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
    pkt->payload[0]                  = (COAP_OPTION_LOCATIONPATH-COAP_OPTION_CONTENTTYPE) << 4 |
-      sizeof(sch_layerdebug_path0)-1;
+      sizeof(schedule_layerdebug_path0)-1;
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
@@ -162,7 +167,7 @@ void layerdebug_task_sch_cb() {
 }
 
 //neighbours stats
-void layerdebug_task_nbs_cb() {
+void layerdebug_task_neighbors_cb() {
   
    OpenQueueEntry_t* pkt;
    error_t           outcome;
@@ -183,10 +188,10 @@ void layerdebug_task_nbs_cb() {
    pkt->owner      = COMPONENT_LAYERDEBUG;
    // CoAP payload
 
-   size=neighbors_getNumberOfNeigbors(); //compute the number of neigbours sent   
+   size=neighbors_getNumberOfNeighbors(); //compute the number of neigbours sent   
    packetfunctions_reserveHeaderSize(pkt,size*sizeof(netDebugNeigborEntry_t));//reserve for the size of schedule entries
   
-   neighbors_getNetDebugInfo((netDebugNeigborEntry_t*) pkt->payload);
+   neighbors_getNetDebugInfo((netDebugNeigborEntry_t*) pkt->payload,MAXPAYLOADLEN-1);
    
    //now we know the size of the neihbours. Put it on the packet.
    packetfunctions_reserveHeaderSize(pkt,1);//reserve for the size of neighbours entries
@@ -195,11 +200,11 @@ void layerdebug_task_nbs_cb() {
    //coap options
    numOptions = 0;
    // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(nbs_layerdebug_path0)-1);
-   memcpy(&pkt->payload[0],&nbs_layerdebug_path0,sizeof(nbs_layerdebug_path0)-1);
+   packetfunctions_reserveHeaderSize(pkt,sizeof(neighbors_layerdebug_path0)-1);
+   memcpy(&pkt->payload[0],&neighbors_layerdebug_path0,sizeof(neighbors_layerdebug_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
    pkt->payload[0]                  = (COAP_OPTION_LOCATIONPATH-COAP_OPTION_CONTENTTYPE) << 4 |
-      sizeof(nbs_layerdebug_path0)-1;
+      sizeof(neighbors_layerdebug_path0)-1;
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
@@ -230,7 +235,7 @@ void layerdebug_sendDone(OpenQueueEntry_t* msg, error_t error) {
 }
 
 
-error_t layerdebug_receive(OpenQueueEntry_t* msg,
+error_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
    error_t outcome;
@@ -247,10 +252,47 @@ error_t layerdebug_receive(OpenQueueEntry_t* msg,
       size=sizeof(netDebugScheduleEntry_t)*MAXACTIVESLOTS;
       packetfunctions_reserveHeaderSize(msg,size);//reserve for some schedule entries
       //get the schedule information from the mac layer 
-      schedule_getNetDebugInfo((netDebugScheduleEntry_t*)msg->payload);
+      schedule_getNetDebugInfo((netDebugScheduleEntry_t*)msg->payload,MAXPAYLOADLEN-1);
 
       packetfunctions_reserveHeaderSize(msg,1);//reserve for the size of schedule entries
       msg->payload[0] = MAXACTIVESLOTS;
+           
+      // set the CoAP header
+      coap_header->OC                  = 0;
+      coap_header->Code                = COAP_CODE_RESP_CONTENT;
+      
+      outcome                          = E_SUCCESS;
+   
+   } else {
+      // return an error message
+      outcome = E_FAIL;
+   }
+   
+   return outcome;
+}
+
+error_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
+                      coap_header_iht* coap_header,
+                      coap_option_iht* coap_options) {
+   error_t outcome;
+   uint8_t size;
+  
+   
+  if (coap_header->Code==COAP_CODE_REQ_GET) {
+      // return current schedule value
+      
+      // reset packet payload
+      msg->payload                     = &(msg->packet[127]);
+      msg->length                      = 0;
+           
+      size=neighbors_getNumberOfNeighbors(); //compute the number of neigbours sent   
+      packetfunctions_reserveHeaderSize(msg,size*sizeof(netDebugNeigborEntry_t));//reserve for the size of schedule entries
+  
+      neighbors_getNetDebugInfo((netDebugNeigborEntry_t*) msg->payload,MAXPAYLOADLEN-1);
+    
+     //now we know the size of the neihbours. Put it on the packet.
+      packetfunctions_reserveHeaderSize(msg,1);//reserve for the size of neighbours entries
+      msg->payload[0] = size;
            
       // set the CoAP header
       coap_header->OC                  = 0;

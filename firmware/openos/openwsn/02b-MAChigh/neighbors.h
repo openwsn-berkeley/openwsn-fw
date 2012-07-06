@@ -71,8 +71,8 @@ typedef struct{
           //debug
           bool          debugPrint_neighbors();
           void          neighbors_getAll(neighborRow_t *nlist);//deprecated
-          void          neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist);
-          uint8_t       neighbors_getNumberOfNeigbors(); 
+          void          neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes);
+          uint8_t       neighbors_getNumberOfNeighbors(); 
 /**
 \}
 \}

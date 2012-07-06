@@ -280,8 +280,10 @@ the pointer and try only to read from the table
 void neighbors_getAll(neighborRow_t *nlist){
  nlist=&neighbors_vars.neighbors[0];
 }
-//returns a list of debug info and its size
-void neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist ){
+
+/*returns a list of debug info
+TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.*/
+void neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes ){
   uint8_t j,size;
   
   size=0;
@@ -298,8 +300,10 @@ void neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist ){
    }  
 }
 
-uint8_t  neighbors_getNumberOfNeigbors(){
-uint8_t j,size;
+
+//returns the number of neighbors
+uint8_t  neighbors_getNumberOfNeighbors(){
+  uint8_t j,size;
   size=0;
   for(j=0;j<MAXNUMNEIGHBORS;j++) {
      if(neighbors_vars.neighbors[j].used) {

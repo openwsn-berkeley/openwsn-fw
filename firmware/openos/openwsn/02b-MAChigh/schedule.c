@@ -380,19 +380,16 @@ void scheduleBuf_getAll(scheduleEntry_t *blist){
  blist=&schedule_vars.scheduleBuf[0];
 }
 
-void schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist){
+//TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.
+void schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist, uint8_t maxbytes){
   
   uint8_t i;
   for (i=0;i<MAXACTIVESLOTS;i++){
    schlist[i].last_addr_byte=schedule_vars.scheduleBuf[i].neighbor.addr_16b[1];
    schlist[i].slotOffset=(uint8_t)schedule_vars.scheduleBuf[i].slotOffset&0xFF;
    schlist[i].channelOffset=schedule_vars.scheduleBuf[i].channelOffset;
-//   schlist[i].last_addr_byte=0x00;
-//   schlist[i].slotOffset=0x00; //only the last 8bytes
-//   schlist[i].channelOffset=0x00;
-   
   }    
-  
+
 }
 //=========================== private =========================================
 

@@ -48,7 +48,7 @@ typedef struct {
    void*           next;
 } scheduleEntry_t;
 
-//used to debug through ipv6 pkt. 4Bytes per neigbour
+//used to debug through ipv6 pkt. 
 typedef struct {
    uint8_t last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
    uint8_t slotOffset;
@@ -89,7 +89,7 @@ typedef struct {
  void            schedule_indicateTx(asn_t*   asnTimestamp,
                                               bool     succesfullTx);
  void            scheduleBuf_getAll(scheduleEntry_t *blist);
- void            schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist);
+ void            schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist,uint8_t maxbytes);
 
 /**
 \}
