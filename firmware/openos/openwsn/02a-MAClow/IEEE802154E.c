@@ -23,7 +23,7 @@ typedef struct {
    asn_t              asn;                  // current absolute slot number
    slotOffset_t       slotOffset;           // current slot offset
    slotOffset_t       nextActiveSlotOffset; // next active slot offset
-   PORT_TIMER_WIDTH           deSyncTimeout;        // how many slots left before looses sync
+   PORT_TIMER_WIDTH   deSyncTimeout;        // how many slots left before looses sync
    bool               isSync;               // TRUE iff mote is synchronized to network
    // as shown on the chronogram
    ieee154e_state_t   state;                // state of the FSM
@@ -31,8 +31,12 @@ typedef struct {
    OpenQueueEntry_t*  dataReceived;         // pointer to the data received
    OpenQueueEntry_t*  ackToSend;            // pointer to the ack to send
    OpenQueueEntry_t*  ackReceived;          // pointer to the ack received
-   PORT_TIMER_WIDTH           lastCapturedTime;     // last captured time
-   PORT_TIMER_WIDTH           syncCapturedTime;     // captured time used to sync
+   PORT_TIMER_WIDTH   lastCapturedTime;     // last captured time
+   PORT_TIMER_WIDTH   syncCapturedTime;     // captured time used to sync
+   //channel hopping
+   uint8_t            freq;
+   uint8_t            asnOffset; //eliminating the need for ASN?
+   
 } ieee154e_vars_t;
 
 ieee154e_vars_t ieee154e_vars;
@@ -173,8 +177,8 @@ void ieee154e_init() {
    }
    
    diff = 0;
-   if        (ieee154e_vars.asn.bytes2and3 == someASN->bytes2and3) {
-	  ENABLE_INTERRUPTS();
+   if (ieee154e_vars.asn.bytes2and3 == someASN->bytes2and3) {
+      ENABLE_INTERRUPTS();
       return ieee154e_vars.asn.bytes0and1-someASN->bytes0and1;
    } else if (ieee154e_vars.asn.bytes2and3-someASN->bytes2and3==1) {
       diff  = ieee154e_vars.asn.bytes0and1;
@@ -404,6 +408,9 @@ port_INLINE void activity_synchronize_newSlot() {
       // configure the radio to listen to the default synchronizing channel
       radio_setFrequency(SYNCHRONIZING_CHANNEL);
       
+      // update record of current channel
+      ieee154e_vars.freq = SYNCHRONIZING_CHANNEL;
+
       // switch on the radio in Rx mode.
       radio_rxEnable();
       radio_rxNow();
@@ -716,11 +723,13 @@ port_INLINE void activity_ti2() {
    changeState(S_TXDATAPREPARE);
 
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(schedule_getChannelOffset());
+   //frequency = calculateFrequency(schedule_getChannelOffset());
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset)); /* BBK */
 
    // configure the radio for that frequency
-   radio_setFrequency(frequency);
-
+   //radio_setFrequency(frequency);
+   radio_setFrequency(ieee154e_vars.freq); /* BBK */
+   
    // load the packet in the radio's Tx buffer
    radio_loadPacket(ieee154e_vars.dataToSend->payload,
                     ieee154e_vars.dataToSend->length);
@@ -834,11 +843,12 @@ port_INLINE void activity_ti6() {
    changeState(S_RXACKPREPARE);
 
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(schedule_getChannelOffset());
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset)); /* BBK */
 
    // configure the radio for that frequency
-   radio_setFrequency(frequency);
-
+   //radio_setFrequency(frequency);
+   radio_setFrequency(ieee154e_vars.freq); /* BBK */
+   
    // enable the radio in Rx mode. The radio is not actively listening yet.
    radio_rxEnable();
 
@@ -1028,11 +1038,12 @@ port_INLINE void activity_ri2() {
    changeState(S_RXDATAPREPARE);
 
    // calculate the frequency to transmit on
-   frequency = calculateFrequency(schedule_getChannelOffset());
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset)); /* BBK */
 
    // configure the radio for that frequency
-   radio_setFrequency(frequency);
-
+   //radio_setFrequency(frequency);
+   radio_setFrequency(ieee154e_vars.freq); /* BBK */
+   
    // enable the radio in Rx mode. The radio does not actively listen yet.
    radio_rxEnable();
 
@@ -1264,12 +1275,14 @@ port_INLINE void activity_ri6() {
    // space for 2-byte CRC
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
    
-   // calculate the frequency to transmit on
-   frequency = calculateFrequency(schedule_getChannelOffset());
-   
+    // calculate the frequency to transmit on
+   //frequency = calculateFrequency(schedule_getChannelOffset());
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset)); /* BBK */
+
    // configure the radio for that frequency
-   radio_setFrequency(frequency);
-   
+   //radio_setFrequency(frequency);
+   radio_setFrequency(ieee154e_vars.freq); /* BBK */
+
    // load the packet in the radio's Tx buffer
    radio_loadPacket(ieee154e_vars.ackToSend->payload,
                     ieee154e_vars.ackToSend->length);
@@ -1460,6 +1473,10 @@ port_INLINE void incrementAsnOffset() {
    }
    // increment the offset
    ieee154e_vars.slotOffset = (ieee154e_vars.slotOffset+1)%schedule_getFrameLength();
+   
+   /* BBK */
+   ieee154e_vars.asnOffset = (ieee154e_vars.asnOffset+1)%16;
+
    if (ieee154e_vars.slotOffset%2==0){
 	 //  printf("SlotOffset %d \n", ieee154e_vars.slotOffset);
    }
@@ -1490,6 +1507,10 @@ port_INLINE void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
    ieee154e_vars.slotOffset       = 0;
    schedule_syncSlotOffset(ieee154e_vars.slotOffset);
    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+   
+   /* BBK */
+   // infer the asnOffset based on the fact ieee154e_vars.freq = 11 + (asnOffset + slotOffset)%16
+   ieee154e_vars.asnOffset = ieee154e_vars.freq - 11 ;
 }
 
 //======= synchronization
@@ -1619,7 +1640,9 @@ different channel offsets in the same slot.
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    //return 11+(asn+channelOffset)%16;
    // poipoi: no channel hopping
-   return 26;
+   //return 26;
+   return 11+(ieee154e_vars.asnOffset+ieee154e_vars.slotOffset)%16;
+
 }
 
 /**

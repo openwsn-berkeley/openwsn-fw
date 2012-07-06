@@ -101,6 +101,7 @@ enum {
 };
 
 //component identifiers
+//the order is important because
 enum {
    COMPONENT_NULL                      = 0x00,
    //cross-layers
@@ -114,6 +115,11 @@ enum {
    //MAClow
    COMPONENT_IEEE802154                = 0x07,
    COMPONENT_IEEE802154E               = 0x08,
+   
+   //All components with higher component id than COMPONENT_IEEE802154E
+   //won't be able to get free packets from the queue 
+   //when the mote is not synch
+   
    //MAClow<->MAChigh ("virtual components")
    COMPONENT_RES_TO_IEEE802154E        = 0x09,
    COMPONENT_IEEE802154E_TO_RES        = 0x0a,
