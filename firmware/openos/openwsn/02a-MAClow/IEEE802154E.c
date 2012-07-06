@@ -46,6 +46,10 @@ typedef struct {
    PORT_TIMER_WIDTH           num_timer;
    PORT_TIMER_WIDTH           num_startOfFrame;
    PORT_TIMER_WIDTH           num_endOfFrame;
+//vader
+   uint8_t debasn[20];
+   uint8_t index;
+//vader
 } ieee154e_dbg_t;
 
 ieee154e_dbg_t ieee154e_dbg;
@@ -1641,8 +1645,12 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    //return 11+(asn+channelOffset)%16;
    // poipoi: no channel hopping
    //return 26;
-   return 11+(ieee154e_vars.asnOffset+ieee154e_vars.slotOffset)%16;
-
+  uint8_t freq=0;
+  freq= 11+(ieee154e_vars.asnOffset+ieee154e_vars.slotOffset)%16;
+  //vader
+  ieee154e_dbg.debasn[(ieee154e_dbg.index++)%16]=  ieee154e_vars.asnOffset;
+  //vader
+  return freq;
 }
 
 /**
