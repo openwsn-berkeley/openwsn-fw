@@ -112,7 +112,7 @@ void layerdebug_task_schedule_cb() {
    uint8_t           size;
 
    // create a CoAP RD packet
-   pkt = openqueue_getFreePacketBuffer();
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_LAYERDEBUG);
    if (pkt==NULL) {
       openserial_printError(COMPONENT_LAYERDEBUG,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
@@ -175,7 +175,7 @@ void layerdebug_task_neighbors_cb() {
    uint8_t           size;
    
    // create a CoAP RD packet
-   pkt = openqueue_getFreePacketBuffer();
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_LAYERDEBUG);
    if (pkt==NULL) {
       openserial_printError(COMPONENT_LAYERDEBUG,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,

@@ -456,7 +456,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
    changeState(S_SYNCPROC);
    
    // get a buffer to put the (received) frame in
-   ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer();
+   ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
    if (ieee154e_vars.dataReceived==NULL) {
       // log the error
       openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
@@ -930,7 +930,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
    ieee154e_vars.lastCapturedTime = capturedTime;
    
    // get a buffer to put the (received) ACK in
-   ieee154e_vars.ackReceived = openqueue_getFreePacketBuffer();
+   ieee154e_vars.ackReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
    if (ieee154e_vars.ackReceived==NULL) {
       // log the error
       openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
@@ -1109,7 +1109,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    radio_rfOff();
    
    // get a buffer to put the (received) data in
-   ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer();
+   ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
    if (ieee154e_vars.dataReceived==NULL) {
       // log the error
       openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
@@ -1222,7 +1222,7 @@ port_INLINE void activity_ri6() {
    changeState(S_TXACKPREPARE);
    
    // get a buffer to put the ack to send in
-   ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer();
+   ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
    if (ieee154e_vars.ackToSend==NULL) {
       // log the error
       openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
@@ -1539,6 +1539,8 @@ void changeIsSync(bool newIsSync) {
       resetStats();
    } else {
       leds_sync_off();
+      //TODO, this is a workaround as while it is not synch the queue does not reset, so it keeps growing.
+      openqueue_removeAll();//reset the queue to avoid filling it while it is not connected.
    }
 }
 
@@ -1742,4 +1744,9 @@ void endSlot() {
    
    // change state
    changeState(S_SLEEP);
+}
+
+
+bool ieee154e_isSynch(){
+  return ieee154e_vars.isSync;
 }

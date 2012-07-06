@@ -37,7 +37,7 @@ void udprand_timer() {
    OpenQueueEntry_t* pkt;
    
    //prepare packet
-   pkt = openqueue_getFreePacketBuffer();
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPRAND);
    if (pkt==NULL) {
       openserial_printError(COMPONENT_UDPRAND,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,

@@ -95,7 +95,7 @@ void rreg_timer() {
    
 
    // create a CoAP RD packet
-   pkt = openqueue_getFreePacketBuffer();
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_RREG);
    if (pkt==NULL) {
       openserial_printError(COMPONENT_RREG,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
