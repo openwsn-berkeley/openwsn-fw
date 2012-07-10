@@ -34,8 +34,8 @@ typedef struct {
    PORT_TIMER_WIDTH   lastCapturedTime;     // last captured time
    PORT_TIMER_WIDTH   syncCapturedTime;     // captured time used to sync
    //channel hopping
-   uint8_t            freq;
-   uint8_t            asnOffset; //eliminating the need for ASN?
+   uint8_t            freq;                 // channel of the current slot
+   uint8_t            asnOffset;            
    
 } ieee154e_vars_t;
 
@@ -46,10 +46,6 @@ typedef struct {
    PORT_TIMER_WIDTH           num_timer;
    PORT_TIMER_WIDTH           num_startOfFrame;
    PORT_TIMER_WIDTH           num_endOfFrame;
-//vader
-   uint8_t debasn[20];
-   uint8_t index;
-//vader
 } ieee154e_dbg_t;
 
 ieee154e_dbg_t ieee154e_dbg;
@@ -721,18 +717,15 @@ port_INLINE void activity_ti1ORri1() {
 }
 
 port_INLINE void activity_ti2() {
-   uint8_t frequency;
-   
    // change state
    changeState(S_TXDATAPREPARE);
 
    // calculate the frequency to transmit on
-   //frequency = calculateFrequency(schedule_getChannelOffset());
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset)); /* BBK */
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(schedule_getChannelOffset()));
 
    // configure the radio for that frequency
    //radio_setFrequency(frequency);
-   radio_setFrequency(ieee154e_vars.freq); /* BBK */
+   radio_setFrequency(ieee154e_vars.freq);
    
    // load the packet in the radio's Tx buffer
    radio_loadPacket(ieee154e_vars.dataToSend->payload,
@@ -841,17 +834,15 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
 }
 
 port_INLINE void activity_ti6() {
-   uint8_t frequency;
-   
    // change state
    changeState(S_RXACKPREPARE);
 
    // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset)); /* BBK */
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(schedule_getChannelOffset()));
 
    // configure the radio for that frequency
    //radio_setFrequency(frequency);
-   radio_setFrequency(ieee154e_vars.freq); /* BBK */
+   radio_setFrequency(ieee154e_vars.freq);
    
    // enable the radio in Rx mode. The radio is not actively listening yet.
    radio_rxEnable();
@@ -1036,17 +1027,15 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
 //======= RX
 
 port_INLINE void activity_ri2() {
-   uint8_t frequency;
-   
    // change state
    changeState(S_RXDATAPREPARE);
 
    // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset)); /* BBK */
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(schedule_getChannelOffset()));
 
    // configure the radio for that frequency
    //radio_setFrequency(frequency);
-   radio_setFrequency(ieee154e_vars.freq); /* BBK */
+   radio_setFrequency(ieee154e_vars.freq);
    
    // enable the radio in Rx mode. The radio does not actively listen yet.
    radio_rxEnable();
@@ -1231,7 +1220,6 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
 
 port_INLINE void activity_ri6() {
    PORT_SIGNED_INT_WIDTH timeCorrection;
-   uint8_t frequency;
    
    // change state
    changeState(S_TXACKPREPARE);
@@ -1280,12 +1268,11 @@ port_INLINE void activity_ri6() {
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
    
     // calculate the frequency to transmit on
-   //frequency = calculateFrequency(schedule_getChannelOffset());
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(ieee154e_vars.slotOffset)); /* BBK */
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(schedule_getChannelOffset()));
 
    // configure the radio for that frequency
    //radio_setFrequency(frequency);
-   radio_setFrequency(ieee154e_vars.freq); /* BBK */
+   radio_setFrequency(ieee154e_vars.freq);
 
    // load the packet in the radio's Tx buffer
    radio_loadPacket(ieee154e_vars.ackToSend->payload,
@@ -1475,10 +1462,9 @@ port_INLINE void incrementAsnOffset() {
          ieee154e_vars.asn.byte4++;
       }
    }
-   // increment the offset
+   // increment the offsets
    ieee154e_vars.slotOffset = (ieee154e_vars.slotOffset+1)%schedule_getFrameLength();
    
-   /* BBK */
    ieee154e_vars.asnOffset = (ieee154e_vars.asnOffset+1)%16;
 
    if (ieee154e_vars.slotOffset%2==0){
@@ -1512,8 +1498,10 @@ port_INLINE void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
    schedule_syncSlotOffset(ieee154e_vars.slotOffset);
    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
    
-   /* BBK */
-   // infer the asnOffset based on the fact ieee154e_vars.freq = 11 + (asnOffset + slotOffset)%16
+   /* 
+   infer the asnOffset based on the fact that
+   ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
+   */
    ieee154e_vars.asnOffset = ieee154e_vars.freq - 11 ;
 }
 
@@ -1645,12 +1633,8 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    //return 11+(asn+channelOffset)%16;
    // poipoi: no channel hopping
    //return 26;
-  uint8_t freq=0;
-  freq= 11+(ieee154e_vars.asnOffset+ieee154e_vars.slotOffset)%16;
-  //vader
-  ieee154e_dbg.debasn[(ieee154e_dbg.index++)%16]=  ieee154e_vars.asnOffset;
-  //vader
-  return freq;
+  
+   return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
 
 /**
