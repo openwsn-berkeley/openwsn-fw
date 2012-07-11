@@ -46,6 +46,9 @@ typedef struct {
    PORT_TIMER_WIDTH           num_timer;
    PORT_TIMER_WIDTH           num_startOfFrame;
    PORT_TIMER_WIDTH           num_endOfFrame;
+   //pdu - channel hopping debug
+   uint8_t  chanCtr[16]; //it counts the usage of each channel
+   //pdu
 } ieee154e_dbg_t;
 
 ieee154e_dbg_t ieee154e_dbg;
@@ -721,7 +724,7 @@ port_INLINE void activity_ti2() {
    changeState(S_TXDATAPREPARE);
 
    // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(schedule_getChannelOffset()));
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
 
    // configure the radio for that frequency
    //radio_setFrequency(frequency);
@@ -838,7 +841,7 @@ port_INLINE void activity_ti6() {
    changeState(S_RXACKPREPARE);
 
    // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(schedule_getChannelOffset()));
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
 
    // configure the radio for that frequency
    //radio_setFrequency(frequency);
@@ -1031,7 +1034,7 @@ port_INLINE void activity_ri2() {
    changeState(S_RXDATAPREPARE);
 
    // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(schedule_getChannelOffset()));
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
 
    // configure the radio for that frequency
    //radio_setFrequency(frequency);
@@ -1268,7 +1271,7 @@ port_INLINE void activity_ri6() {
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
    
     // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset(schedule_getChannelOffset()));
+   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
 
    // configure the radio for that frequency
    //radio_setFrequency(frequency);
@@ -1502,7 +1505,7 @@ port_INLINE void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
    infer the asnOffset based on the fact that
    ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
    */
-   ieee154e_vars.asnOffset = ieee154e_vars.freq - 11 ;
+   ieee154e_vars.asnOffset = ieee154e_vars.freq - 11 - schedule_getChannelOffset();
 }
 
 //======= synchronization
@@ -1632,9 +1635,20 @@ different channel offsets in the same slot.
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    //return 11+(asn+channelOffset)%16;
    // poipoi: no channel hopping
-   //return 26;
+   //return 26;  
   
-   return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
+   //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
+  
+   uint8_t temp = 11+(ieee154e_vars.asnOffset+channelOffset)%16;
+  
+   //pdu - update channel counter
+   if(ieee154e_dbg.chanCtr[temp-11]==255)
+      ieee154e_dbg.chanCtr[temp-11]=10;
+   else
+      ieee154e_dbg.chanCtr[temp-11]++;
+   //pdu
+   
+   return temp;
 }
 
 /**
