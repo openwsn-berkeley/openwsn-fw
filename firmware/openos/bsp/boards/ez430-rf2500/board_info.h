@@ -20,6 +20,9 @@ to return the board's description.
 
 #define port_INLINE                         inline
 
+#define PRAGMA(x)  _Pragma(#x)
+#define PACK(x)     pack(x)
+
 //===== timer
 
 #define PORT_TIMER_WIDTH                    uint16_t

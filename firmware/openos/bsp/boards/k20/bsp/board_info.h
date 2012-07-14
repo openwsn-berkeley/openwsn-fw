@@ -17,6 +17,10 @@
 
 #define port_INLINE                         inline
 
+#define PRAGMA(x)  _Pragma(#x)
+#define PACK(x)     pack(x)
+
+
 #define PORT_TICS_PER_MS                    33
 #define PORT_TIMER_WIDTH                    uint16_t
 #define PORT_SIGNED_INT_WIDTH               int16_t

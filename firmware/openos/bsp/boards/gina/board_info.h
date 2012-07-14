@@ -18,6 +18,14 @@ to return the board's description.
 
 #define port_INLINE                         inline
 
+#define PRAGMA(x)  _Pragma(#x)
+#define PACK(x)     pack(x)
+
+//TODO in case previous declaration fails in certain compilers. Remove this 
+//one if it works with GNU GCC
+//#define PACK_START  _Pragma("pack(1)")
+//#define PACK_END    _Pragma("pack()")
+
 #define INTERRUPT_DECLARATION() istate_t s;
 #define DISABLE_INTERRUPTS()    s = __get_interrupt_state(); \
                                 __disable_interrupt();
