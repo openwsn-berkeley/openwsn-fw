@@ -54,12 +54,14 @@ typedef struct {
 ieee154e_dbg_t ieee154e_dbg;
 
 // these statistics are reset every time they are reported
+PRAGMA(pack(1));
 typedef struct {
    uint8_t            syncCounter;          // how many times we synchronized
    PORT_SIGNED_INT_WIDTH            minCorrection;        // minimum time correction
    PORT_SIGNED_INT_WIDTH            maxCorrection;        // maximum time correction
    uint8_t            numDeSync;            // number of times a desync happened
 } ieee154e_stats_t;
+PRAGMA(pack());
 
 ieee154e_stats_t ieee154e_stats;
 
@@ -1635,7 +1637,7 @@ different channel offsets in the same slot.
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    //return 11+(asn+channelOffset)%16;
    // poipoi: no channel hopping
-   //return 26;  
+   // return 26;  
   
    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
   

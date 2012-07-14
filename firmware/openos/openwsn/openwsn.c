@@ -7,6 +7,7 @@
 
 #include "openwsn.h"
 //l7
+#include "bbk.h"
 #include "layerdebug.h"
 //#include "rrube.h"
 //#include "rheli.h"
@@ -54,6 +55,7 @@
 // drivers
 #include "openserial.h"
 
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -94,16 +96,17 @@ void openwsn_init() {
    // 07-App
    
    // CoAP
-   rwellknown_init();
-   rreg_init();
-   rinfo_init();
-   rleds_init();
-   rt_init();
+  // rwellknown_init();
+  // rreg_init();
+  // rinfo_init();
+  // rleds_init();
+  // rt_init();
  //  rex_init();
    //rheli_init();
    //rrube_init();
    //rxl1_init();
    layerdebug_init();
+   //bbk_init();
    //UDP
    udpecho_init();
    udpinject_init();

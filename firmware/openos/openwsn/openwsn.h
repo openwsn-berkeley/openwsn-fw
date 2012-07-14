@@ -231,11 +231,13 @@ typedef uint8_t   dagrank_t;
 typedef uint8_t   error_t;
 #define bool uint8_t
 
+PRAGMA(pack(1));
 typedef struct {
    uint8_t  byte4;
    uint16_t bytes2and3;
    uint16_t bytes0and1;
 } asn_t;
+PRAGMA(pack());
 
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint8_t type;

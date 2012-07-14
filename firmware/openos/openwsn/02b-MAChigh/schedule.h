@@ -33,6 +33,7 @@ typedef enum {
    CELLTYPE_MORESERIALRX     = 6
 } cellType_t;
 
+PRAGMA(pack(1));
 typedef struct {
    slotOffset_t    slotOffset;
    cellType_t      type;
@@ -47,21 +48,24 @@ typedef struct {
    asn_t           lastUsedAsn;
    void*           next;
 } scheduleEntry_t;
+PRAGMA(pack());
 
 //used to debug through ipv6 pkt. 
+
+PRAGMA(pack(1));
 typedef struct {
    uint8_t last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
    uint8_t slotOffset;
    uint8_t channelOffset;
 }netDebugScheduleEntry_t;
+PRAGMA(pack());
 
-
-
+PRAGMA(pack(1));
 typedef struct {
    uint8_t         row;
    scheduleEntry_t scheduleEntry;
 } debugScheduleEntry_t;
-
+PRAGMA(pack());
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================

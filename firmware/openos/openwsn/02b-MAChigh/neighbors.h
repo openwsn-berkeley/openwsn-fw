@@ -8,6 +8,7 @@
 \{
 */
 #include "openwsn.h"
+
 //=========================== define ==========================================
 
 #define MAXNUMNEIGHBORS            10
@@ -17,7 +18,7 @@
 #define SWITCHSTABILITYTHRESHOLD    3
 
 //=========================== typedef =========================================
-
+PRAGMA(pack(1));
 typedef struct {
    bool             used;
    uint8_t          parentPreference;
@@ -31,22 +32,25 @@ typedef struct {
    uint8_t          numTxACK;
    asn_t            asn;
 } neighborRow_t;
+PRAGMA(pack());
 
+PRAGMA(pack(1));
 typedef struct {
    uint8_t         row;
    neighborRow_t   neighborEntry;
 } debugNeighborEntry_t;
-
+PRAGMA(pack());
 //this structure is used by layer debug app to debug through the network.
+
+PRAGMA(pack(1));
 typedef struct{
    uint8_t last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
    int8_t rssi; //SIGNED!
    uint8_t parentPreference;
    uint8_t DAGrank;
-   uint8_t asn_low; 
-   uint8_t asn_high;
+   uint16_t asn; 
 }netDebugNeigborEntry_t;
-
+PRAGMA(pack());
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================

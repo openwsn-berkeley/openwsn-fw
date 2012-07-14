@@ -111,7 +111,7 @@ void bbk_task_cb() {
    // metadata
    pkt->l4_destination_port         = WKP_UDP_COAP;
    pkt->l3_destinationORsource.type = ADDR_128B;
-   memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_motesEecs,16);
+   memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_local,16);
    
    // send
    if(bbk_vars.sequence<SAMPLE)
