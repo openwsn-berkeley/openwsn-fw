@@ -239,6 +239,7 @@ typedef struct {
 } asn_t;
 PRAGMA(pack());
 
+PRAGMA(pack(1));
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint8_t type;
    union {
@@ -249,6 +250,7 @@ typedef struct {                                 // always written big endian, i
       uint8_t prefix[8];
    };
 } open_addr_t;
+PRAGMA(pack());
 
 typedef struct {
    //admin
