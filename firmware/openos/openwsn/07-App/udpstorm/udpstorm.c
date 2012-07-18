@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "bbk.h"
+#include "udpstorm.h"
 #include "opencoap.h"
 #include "opentimers.h"
 #include "openqueue.h"
@@ -13,10 +13,10 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in ms)
-#define BBKPERIOD    1000
-#define SAMPLE  300
+#define UDPSTORMPERIOD            1000
+#define SAMPLE                    300
 
-const uint8_t bbk_path0[] = "bbk";
+const uint8_t udpstorm_path0[] =  "ust";
 //=========================== variables =======================================
 
 typedef struct {
@@ -24,54 +24,54 @@ typedef struct {
    opentimer_id_t  timerId;
    uint32_t  sequence;
    uint32_t  rate;
-} bbk_vars_t;
+} udpstorm_vars_t;
 
-bbk_vars_t bbk_vars;
+udpstorm_vars_t udpstorm_vars;
 
 //=========================== prototypes ======================================
 
-error_t bbk_receive(OpenQueueEntry_t* msg,
+error_t udpstorm_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
-void    bbk_timer_cb();
-void    bbk_task_cb();
-void    bbk_sendDone(OpenQueueEntry_t* msg,
+void    udpstorm_timer_cb();
+void    udpstorm_task_cb();
+void    udpstorm_sendDone(OpenQueueEntry_t* msg,
                        error_t error);
 
 //=========================== public ==========================================
 
-void bbk_init() {
-   // prepare the resource descriptor for the /bbk path
-   bbk_vars.desc.path0len             = sizeof(bbk_path0)-1;
-   bbk_vars.desc.path0val             = (uint8_t*)(&bbk_path0);
-   bbk_vars.desc.path1len             = 0;
-   bbk_vars.desc.path1val             = NULL;
-   bbk_vars.desc.componentID          = 0xcc; //just a number
-   bbk_vars.desc.callbackRx           = &bbk_receive;
-   bbk_vars.desc.callbackSendDone     = &bbk_sendDone;
+void udpstorm_init() {
+   // prepare the resource descriptor for the /ust path
+   udpstorm_vars.desc.path0len             = sizeof(udpstorm_path0)-1;
+   udpstorm_vars.desc.path0val             = (uint8_t*)(&udpstorm_path0);
+   udpstorm_vars.desc.path1len             = 0;
+   udpstorm_vars.desc.path1val             = NULL;
+   udpstorm_vars.desc.componentID          = 0xcc; //just a number
+   udpstorm_vars.desc.callbackRx           = &udpstorm_receive;
+   udpstorm_vars.desc.callbackSendDone     = &udpstorm_sendDone;
    
-   opencoap_register(&bbk_vars.desc);
-   bbk_vars.timerId    = opentimers_start(BBKPERIOD,
+   opencoap_register(&udpstorm_vars.desc);
+   udpstorm_vars.timerId     = opentimers_start(UDPSTORMPERIOD,
                                                 TIMER_PERIODIC,TIME_MS,
-                                                bbk_timer_cb);
-   bbk_vars.sequence  = 0;
+                                                udpstorm_timer_cb);
+   udpstorm_vars.sequence    = 0;
 }
 
 //=========================== private =========================================
 
-error_t bbk_receive(OpenQueueEntry_t* msg,
-                      coap_header_iht* coap_header,
-                      coap_option_iht* coap_options) {
+error_t udpstorm_receive(OpenQueueEntry_t* msg,
+                         coap_header_iht* coap_header,
+                         coap_option_iht* coap_options) {
    return E_FAIL;
 }
 
 //timer fired, but we don't want to execute task in ISR mode
-//instead, push task to scheduler with COAP priority, and let scheduler take care of it
-void bbk_timer_cb(){
-   scheduler_push_task(bbk_task_cb,TASKPRIO_COAP);
+//instead, push task to scheduler with CoAP priority, and let scheduler take care of it
+void udpstorm_timer_cb(){
+   scheduler_push_task(udpstorm_task_cb,TASKPRIO_COAP);
 }
 
-void bbk_task_cb() {
+void udpstorm_task_cb() {
    OpenQueueEntry_t* pkt;
    error_t           outcome;
    uint8_t           numOptions;
@@ -96,11 +96,11 @@ void bbk_task_cb() {
    
    numOptions = 0;
    // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(bbk_path0)-1);
-   memcpy(&pkt->payload[0],&bbk_path0,sizeof(bbk_path0)-1);
+   packetfunctions_reserveHeaderSize(pkt,sizeof(udpstorm_path0)-1);
+   memcpy(&pkt->payload[0],&udpstorm_path0,sizeof(udpstorm_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
    pkt->payload[0]                  = (COAP_OPTION_LOCATIONPATH-COAP_OPTION_CONTENTTYPE) << 4 |
-      sizeof(bbk_path0)-1;
+      sizeof(udpstorm_path0)-1;
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
@@ -114,17 +114,17 @@ void bbk_task_cb() {
    memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_local,16);
    
    // send
-   if(bbk_vars.sequence<SAMPLE)
+   if(udpstorm_vars.sequence<SAMPLE)
    {
-      bbk_vars.sequence++;
+      udpstorm_vars.sequence++;
       outcome = opencoap_send(pkt,
                            COAP_TYPE_NON,
                            COAP_CODE_REQ_PUT,
                            numOptions,
-                           &bbk_vars.desc);
+                           &udpstorm_vars.desc);
    }
    else{
-      opentimers_stop(bbk_vars.timerId);
+      opentimers_stop(udpstorm_vars.timerId);
       openqueue_freePacketBuffer(pkt);
    }
    
@@ -136,13 +136,13 @@ void bbk_task_cb() {
    return;
 }
 
-void bbk_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void udpstorm_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
 void construct_demo(demo_t* data) {
-        data->seq[0] = (uint8_t)((bbk_vars.sequence & 0xff000000)>>24);
-        data->seq[1] = (uint8_t)((bbk_vars.sequence & 0x00ff0000)>>16);
-        data->seq[2] = (uint8_t)((bbk_vars.sequence & 0x0000ff00)>>8);
-        data->seq[3] = (uint8_t)(bbk_vars.sequence & 0x00000000ff);
+        data->seq[0] = (uint8_t)((udpstorm_vars.sequence & 0xff000000)>>24);
+        data->seq[1] = (uint8_t)((udpstorm_vars.sequence & 0x00ff0000)>>16);
+        data->seq[2] = (uint8_t)((udpstorm_vars.sequence & 0x0000ff00)>>8);
+        data->seq[3] = (uint8_t)(udpstorm_vars.sequence & 0x00000000ff);
 }

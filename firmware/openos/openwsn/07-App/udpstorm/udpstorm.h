@@ -1,5 +1,5 @@
-#ifndef __BBK_H
-#define __BBK_H
+#ifndef __UDPSTORM_H
+#define __UDPSTORM_H
 
 /**
 \addtogroup App
@@ -21,8 +21,8 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void bbk_init();
-void    construct_demo(demo_t*);
+void udpstorm_init();
+void construct_demo(demo_t*);
 /**
 \}
 \}

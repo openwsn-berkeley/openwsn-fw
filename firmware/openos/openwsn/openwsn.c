@@ -7,7 +7,6 @@
 
 #include "openwsn.h"
 //l7
-#include "bbk.h"
 #include "layerdebug.h"
 //#include "rrube.h"
 //#include "rheli.h"
@@ -28,6 +27,7 @@
 #include "udpinject.h"
 #include "udpprint.h"
 #include "udprand.h"
+#include "udpstorm.h"
 //l4
 #include "opencoap.h"
 #include "openudp.h"
@@ -94,30 +94,29 @@ void openwsn_init() {
    openudp_init();
    opencoap_init(); // initialize before any of the CoAP clients
    // 07-App
-   
-   // CoAP
-  // rwellknown_init();
-  // rreg_init();
-  // rinfo_init();
-  // rleds_init();
-  // rt_init();
- //  rex_init();
+   //--CoAP
+   //rwellknown_init();
+   //rreg_init();
+   //rinfo_init();
+   //rleds_init();
+   //rt_init();
+   //rex_init();
    //rheli_init();
    //rrube_init();
    //rxl1_init();
    layerdebug_init();
-   bbk_init();
-   //UDP
+   //--UDP
    udpecho_init();
    udpinject_init();
    udpprint_init();
-  // udprand_init();
-   // TCP
+   //udprand_init();
+   udpstorm_init();
+   //--TCP
    ohlone_init();
    tcpecho_init();
    tcpinject_init();
    tcpprint_init();
-   // misc.
+   //--misc
    //heli_init();
    //imu_init();
 }
