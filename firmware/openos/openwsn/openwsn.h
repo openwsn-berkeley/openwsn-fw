@@ -163,6 +163,7 @@ enum {
    COMPONENT_RRUBE                     = 0x2a,
    COMPONENT_LAYERDEBUG                = 0x2b,
    COMPONENT_UDPRAND                   = 0x2c,
+   COMPONENT_UDPSTORM                  = 0x2d,
 };
 
 //error codes
