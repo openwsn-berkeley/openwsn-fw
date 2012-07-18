@@ -273,32 +273,34 @@ bool debugPrint_neighbors() {
 }
 
 /**
-// The functio below returns a direct pointer to the neighbor table. Modifying 
-this structure means you are modifying the neighbor table. Be careful when using
-the pointer and try only to read from the table
+\brief Return a direct pointer to the neighbor table.
+
+\note Modifying  this structure means you are modifying the neighbor table.
+      Be careful when using the pointer; only read from the table.
 */
-void neighbors_getAll(neighborRow_t *nlist){
- nlist=&neighbors_vars.neighbors[0];
+void neighbors_getAll(neighborRow_t* nlist){
+   nlist = &neighbors_vars.neighbors[0];
 }
 
 /*returns a list of debug info
 TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.*/
 void neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes ){
   uint8_t j,size;
-
   size=0;
+  
   for(j=0;j<MAXNUMNEIGHBORS;j++) {
      if(neighbors_vars.neighbors[j].used) {
        schlist[size].last_addr_byte = neighbors_vars.neighbors[j].addr_64b.addr_64b[7];//last byte of the address; poipoi could be [0]; endianness
        schlist[size].rssi = neighbors_vars.neighbors[j].rssi;
        schlist[size].parentPreference = neighbors_vars.neighbors[j].parentPreference;
        schlist[size].DAGrank = neighbors_vars.neighbors[j].DAGrank;
-       memcpy(&schlist[size].asn,  &neighbors_vars.neighbors[j].asn.bytes0and1, sizeof(neighbors_vars.neighbors[j].asn.bytes0and1));
+       memcpy(&schlist[size].asn,
+              &neighbors_vars.neighbors[j].asn.bytes0and1,
+              sizeof(neighbors_vars.neighbors[j].asn.bytes0and1));
        size++;//one more neighbour.
      }
    }  
 }
-
 
 //returns the number of neighbors
 uint8_t  neighbors_getNumberOfNeighbors(){

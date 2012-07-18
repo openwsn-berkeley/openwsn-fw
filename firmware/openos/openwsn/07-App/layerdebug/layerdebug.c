@@ -19,17 +19,15 @@
 #define DEBUGPERIODSCH    7000
 #define MAXPAYLOADLEN     80
 
-
-
-const uint8_t schedule_layerdebug_path0[] = "d_s"; // debug/scheduling
+const uint8_t schedule_layerdebug_path0[]  = "d_s"; // debug/scheduling
 const uint8_t neighbors_layerdebug_path0[] = "d_n"; // debug/neighbours
 //=========================== variables =======================================
 
 typedef struct {
-   coap_resource_desc_t schdesc;//descriptor for shedule table
-   coap_resource_desc_t nbsdesc;//descriptor for neigbour table
-   opentimer_id_t  schtimerId;//schedule timer
-   opentimer_id_t  nbstimerId;//neigbour timer
+   coap_resource_desc_t schdesc;    ///< descriptor for shedule table
+   coap_resource_desc_t nbsdesc;    ///< descriptor for neigbour table
+   opentimer_id_t       schtimerId; ///< schedule timer
+   opentimer_id_t       nbstimerId; ///< neigbour timer
 } layerdebug_vars_t;
 
 layerdebug_vars_t layerdebug_vars;
@@ -58,7 +56,7 @@ void    layerdebug_sendDone(OpenQueueEntry_t* msg,
 
 void layerdebug_init() {
    
-   // prepare the resource descriptor for the /sch layerdebug path
+   // prepare the resource descriptor for the scheduling path
    layerdebug_vars.schdesc.path0len             = sizeof(schedule_layerdebug_path0)-1;
    layerdebug_vars.schdesc.path0val             = (uint8_t*)(&schedule_layerdebug_path0);
    layerdebug_vars.schdesc.path1len             = 0;
@@ -67,14 +65,12 @@ void layerdebug_init() {
    layerdebug_vars.schdesc.callbackRx           = &layerdebug_schedule_receive;
    layerdebug_vars.schdesc.callbackSendDone     = &layerdebug_sendDone;
    opencoap_register(&layerdebug_vars.schdesc);
-   
     
-   layerdebug_vars.schtimerId    = opentimers_start(DEBUGPERIODSCH,
-                                                TIMER_PERIODIC,TIME_MS,
-                                                layerdebug_timer_schedule_cb);  
+   layerdebug_vars.schtimerId     = opentimers_start(DEBUGPERIODSCH,
+                                                     TIMER_PERIODIC,TIME_MS,
+                                                     layerdebug_timer_schedule_cb);
    
-   
-   // prepare the resource descriptor for the /nbs layerdebug path
+   // prepare the resource descriptor for the neighbors path
    layerdebug_vars.nbsdesc.path0len             = sizeof(schedule_layerdebug_path0)-1;
    layerdebug_vars.nbsdesc.path0val             = (uint8_t*)(&schedule_layerdebug_path0);
    layerdebug_vars.nbsdesc.path1len             = 0;
@@ -84,15 +80,12 @@ void layerdebug_init() {
    layerdebug_vars.nbsdesc.callbackSendDone     = &layerdebug_sendDone;
    opencoap_register(&layerdebug_vars.nbsdesc);
    
-   layerdebug_vars.nbstimerId    = opentimers_start(DEBUGPERIODNBS,
-                                                TIMER_PERIODIC,TIME_MS,
-                                                layerdebug_timer_neighbors_cb);  
-  
+   layerdebug_vars.nbstimerId     = opentimers_start(DEBUGPERIODNBS,
+                                                     TIMER_PERIODIC,TIME_MS,
+                                                     layerdebug_timer_neighbors_cb);
 }
 
 //=========================== private =========================================
-
-
 
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
