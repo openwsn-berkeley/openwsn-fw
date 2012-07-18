@@ -333,6 +333,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\bbk\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>
@@ -2169,6 +2170,15 @@
     </group>
     <group>
       <name>07-App</name>
+      <group>
+        <name>bbk</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\bbk\bbk.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\bbk\bbk.h</name>
+        </file>
+      </group>
       <group>
         <name>heli</name>
         <excluded>
