@@ -112,16 +112,14 @@ void board_sleep() {
 __interrupt void DAC12_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   while(1);
-   debugpins_isr_clr();
+   while(1); // should never happen
 }
 
 #pragma vector = DMA_VECTOR
 __interrupt void DMA_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   while(1);
-   debugpins_isr_clr();
+   while(1); // should never happen
 }
 
 #pragma vector = USCIAB1TX_VECTOR
@@ -183,10 +181,10 @@ __interrupt void PORT2_ISR (void) {
    } else {
       while (1); // should never happen
    }
+   debugpins_isr_clr();
 #else
    while(1); // should never happen
 #endif
-   debugpins_isr_clr();
 }
 
 #pragma vector = ADC12_VECTOR
@@ -202,8 +200,7 @@ __interrupt void ADC12_ISR (void) {
 __interrupt void USCIAB0TX_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   while(1);
-   debugpins_isr_clr();
+   while(1); // should never happen
 }
 
 #pragma vector = USCIAB0RX_VECTOR
@@ -236,16 +233,14 @@ __interrupt void TIMERA1_ISR (void) {
 __interrupt void TIMERA0_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   while(1);
-   debugpins_isr_clr();
+   while(1); // should never happen
 }
 
 #pragma vector = WDT_VECTOR
 __interrupt void WDT_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   while(1);
-   debugpins_isr_clr();
+   while(1); // should never happen
 }
 
 #pragma vector = COMPARATORA_VECTOR
@@ -260,8 +255,7 @@ __interrupt void COMPARATORA_ISR (void) {
 __interrupt void TIMERB1_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   while(1);
-   debugpins_isr_clr();
+   while(1); // should never happen
 }
 
 #pragma vector = TIMERB0_VECTOR
@@ -279,6 +273,5 @@ __interrupt void NMI_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
    debugpins_frame_set();
-   while(1);
-   debugpins_isr_clr();
+   while(1); // should never happen
 }
