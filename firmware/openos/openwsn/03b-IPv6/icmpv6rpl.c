@@ -117,6 +117,7 @@ void sendDIO() {
          openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
+         icmpv6rpl_vars.busySending = FALSE;
          return;
       }
       //admin
