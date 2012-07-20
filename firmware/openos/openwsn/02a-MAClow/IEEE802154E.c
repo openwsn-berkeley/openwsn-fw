@@ -769,7 +769,7 @@ port_INLINE void activity_ti3() {
 
 port_INLINE void activity_tie2() {
    // log the error
-   openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOW,
+   openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
                          (errorparameter_t)ieee154e_vars.slotOffset);
 

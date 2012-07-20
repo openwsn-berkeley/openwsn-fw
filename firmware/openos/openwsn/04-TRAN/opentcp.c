@@ -148,7 +148,7 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                      (errorparameter_t)tcp_vars.myPort,
-                                     (errorparameter_t)2);
+                                     (errorparameter_t)0);
                break;
          }
          break;
@@ -176,7 +176,7 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                      (errorparameter_t)tcp_vars.myPort,
-                                     (errorparameter_t)0);
+                                     (errorparameter_t)1);
                openqueue_freePacketBuffer(msg);
                tcp_vars.dataReceived = NULL;
                break;
@@ -281,7 +281,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                      (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
-                                     (errorparameter_t)3);
+                                     (errorparameter_t)2);
                shouldIlisten = FALSE;
                break;
          }
@@ -463,7 +463,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
                default:
                   openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                         (errorparameter_t)tcp_vars.myPort,
-                                        (errorparameter_t)0);
+                                        (errorparameter_t)3);
                   break;
             }
             tcp_vars.dataToSend = NULL;
@@ -486,7 +486,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
                default:
                   openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                         (errorparameter_t)tcp_vars.myPort,
-                                        (errorparameter_t)0);
+                                        (errorparameter_t)4);
                   break;
             }
             tcp_vars.dataToSend = NULL;

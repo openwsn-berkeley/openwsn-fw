@@ -104,7 +104,7 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
          if (reply==NULL) {
             openserial_printError(COMPONENT_ICMPv6ECHO,ERR_NO_FREE_PACKET_BUFFER,
                                   (errorparameter_t)1,
-                                  (errorparameter_t)1);
+                                  (errorparameter_t)0);
             openqueue_freePacketBuffer(msg);
             return;
          }
@@ -139,7 +139,7 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
       default:
          openserial_printError(COMPONENT_ICMPv6ECHO,ERR_UNSUPPORTED_ICMPV6_TYPE,
                                (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
-                               (errorparameter_t)0);
+                               (errorparameter_t)2);
          openqueue_freePacketBuffer(msg);
          break;
    }
