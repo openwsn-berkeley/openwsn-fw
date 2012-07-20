@@ -51,6 +51,7 @@ void icmpv6echo_trigger() {
          openserial_printError(COMPONENT_ICMPv6ECHO,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
+         icmpv6echo_vars.busySending = FALSE;
          return;
       }
       //admin
