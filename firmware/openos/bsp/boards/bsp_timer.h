@@ -9,8 +9,9 @@
 
 #include "stdint.h"
 #include "board_info.h"
-
 //=========================== define ==========================================
+
+#define TIM2_COUNT ((PORT_TIMER_WIDTH)0xFFFFFFFF)
 
 //=========================== typedef =========================================
 

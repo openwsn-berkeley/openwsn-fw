@@ -112,7 +112,7 @@ void sendDIO() {
    OpenQueueEntry_t* msg;
    if (icmpv6rpl_vars.busySending==FALSE) {
       icmpv6rpl_vars.busySending = TRUE;
-      msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
+      msg = openqueue_getFreePacketBuffer();
       if (msg==NULL) {
          openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,

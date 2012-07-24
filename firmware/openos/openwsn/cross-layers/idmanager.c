@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "eui64.h"
+//#include "eui64.h"
 #include "idmanager.h"
 #include "packetfunctions.h"
 #include "openserial.h"
@@ -38,7 +38,17 @@ void idmanager_init() {
    idmanager_vars.myPrefix.prefix[6]   = 0x00;
    idmanager_vars.myPrefix.prefix[7]   = 0x00;
    idmanager_vars.my64bID.type         = ADDR_64B;
-   eui64_get(idmanager_vars.my64bID.addr_64b);
+   //eui64_get(idmanager_vars.my64bID.addr_64b);
+   //for test
+   idmanager_vars.my64bID.addr_64b[0] = 14;
+   idmanager_vars.my64bID.addr_64b[1] = 15;
+   idmanager_vars.my64bID.addr_64b[2] = 92;
+   idmanager_vars.my64bID.addr_64b[3] = 0x09;
+   idmanager_vars.my64bID.addr_64b[4] = 0x02;
+   idmanager_vars.my64bID.addr_64b[5] = 0x2c;
+   idmanager_vars.my64bID.addr_64b[6] = 0x00;
+   idmanager_vars.my64bID.addr_64b[7] = 0xac;
+   
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
 
    // DEBUG_MOTEID_MASTER is DAGroot and bridge

@@ -7,7 +7,7 @@
 #ifndef __RADIO_H
 #define __RADIO_H
 
-#include "radiotimer.h"
+#include "rtc_timer.h"
 
 //=========================== define ==========================================
 
@@ -75,5 +75,7 @@ void     radio_getReceivedFrame(uint8_t* bufRead,
                                 uint8_t* crc);
 
 uint8_t  radio_isr();
+
+uint8_t radio_spiReadRadioInfo();
 
 #endif

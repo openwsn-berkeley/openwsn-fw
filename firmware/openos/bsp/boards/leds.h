@@ -44,6 +44,6 @@ void    leds_all_off();
 void    leds_all_toggle();
 
 void    leds_circular_shift();
-void    leds_increment();
+void    Delay(void);
 
 #endif

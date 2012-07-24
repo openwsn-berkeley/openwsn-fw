@@ -1,0 +1,406 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>908757689</fileChecksum>
+  <configuration>
+    <name>Debug</name>
+    <outputs>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_gpio.o</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_flash.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_dma.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_exti.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_lib.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ysizet.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_gpio.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\xencoding_limits.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_adc.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ystdio.h</file>
+      <file>$TOOLKIT_DIR$\lib\rt7M_tl.a</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_rtc.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_nvic.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_vector.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_systick.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\ycheck.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Product_string.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_rcc.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_usart.o</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\ewarm\cortexm3_macro.s</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_it.o</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_it.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_pwr.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_sdio.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\leds.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\yvals.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\leds.pbi</file>
+      <file>$PROJ_DIR$\Debug\Exe\00std_uart01_dante.out</file>
+      <file>$PROJ_DIR$\Debug\Exe\00std_uart01_dante.hex</file>
+      <file>$TOOLKIT_DIR$\lib\dl7M_tln.a</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_type.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_nvic.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdint.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_lib.o</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_can.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_dac.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_lib.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\c\string.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\cortexm3_macro.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_tim.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_spi.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\stdio.h</file>
+      <file>$TOOLKIT_DIR$\lib\m7M_tl.a</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart01_test.o</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_map.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\ewarm\stm32f10x_flash.icf</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart01_test.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_usart.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_flash.o</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_bkp.h</file>
+      <file>$TOOLKIT_DIR$\lib\shb_l.a</file>
+      <file>$PROJ_DIR$\Debug\Obj\00std_uart01_dante.pbd</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_gpio.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart.o</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_wwdg.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_rcc.o</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Defaults.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_fsmc.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Config_Normal.h</file>
+      <file>$TOOLKIT_DIR$\inc\c\DLib_Threads.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_dbgmcu.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\cortexm3_macro.o</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_crc.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_rcc.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_usart.pbi</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_i2c.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_flash.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\stm32f10x_iwdg.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_vector.o</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\configure\stm32f10x_it.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\configure\stm32f10x_conf.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\configure\stm32f10x_it.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\uart.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</file>
+      <file>$PROJ_DIR$\..\..\common\uart01_test\uart01_test.c</file>
+      <file>$PROJ_DIR$\Debug\Obj\stm32f10x_nvic.o</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\ewarm\stm32f10x_vector.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_lib.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_nvic.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_rcc.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_usart.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\leds.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_gpio.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_flash.c</file>
+    </outputs>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 29</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\ewarm\cortexm3_macro.s</name>
+      <outputs>
+        <tool>
+          <name>AARM</name>
+          <file> 63</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Exe\00std_uart01_dante.out</name>
+      <outputs>
+        <tool>
+          <name>OBJCOPY</name>
+          <file> 30</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ILINK</name>
+          <file> 47 63 26 50 0 22 35 77 57 20 70 55 45 52 11 44 31</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Obj\00std_uart01_dante.pbd</name>
+      <inputs>
+        <tool>
+          <name>BILINK</name>
+          <file> 28 1 6 23 38 33 19 66 15 8 48</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\configure\stm32f10x_it.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 22</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 23</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 73 4 46 72 32 40 9 51 36 64 37 62 2 3 68 59 54 67 69 14 24 65 12 25 42 16 41 49 56 75 34 17 27 58 60 13 7 61 84</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 73 4 46 72 32 40 9 51 36 64 37 62 2 3 68 59 54 67 69 14 24 65 12 25 42 16 41 49 56 75 84</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\uart.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 55</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 8</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 54 46 72 32 40 65 14 49 34 17 27 58 60 13 7 61 43 5 10 39 18 75 84</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 54 46 72 32 40 65 14 49 75 84</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\uart01_test\uart01_test.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 45</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 48</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 4 46 72 32 40 9 51 36 64 37 62 2 3 68 59 54 67 69 14 24 65 12 25 42 16 41 49 56 75 34 17 27 58 60 13 7 61 84</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 4 46 72 32 40 9 51 36 64 37 62 2 3 68 59 54 67 69 14 24 65 12 25 42 16 41 49 56 75 84</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\ewarm\stm32f10x_vector.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 70</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 15</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 4 46 72 32 40 9 51 36 64 37 62 2 3 68 59 54 67 69 14 24 65 12 25 42 16 41 49 56 73</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 4 46 72 32 40 9 51 36 64 37 62 2 3 68 59 54 67 69 14 24 65 12 25 42 16 41 49 56 73</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_lib.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 35</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 38</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 4 46 72 32 40 9 51 36 64 37 62 2 3 68 59 54 67 69 14 24 65 12 25 42 16 41 49 56</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 4 46 72 32 40 9 51 36 64 37 62 2 3 68 59 54 67 69 14 24 65 12 25 42 16 41 49 56</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_nvic.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 77</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 33</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 14 46 72 32 40</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 14 46 72 32 40</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_rcc.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 57</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 19</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 65 46 72 32 40</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 65 46 72 32 40</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_usart.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 20</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 66</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 49 46 72 32 40 65</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 49 46 72 32 40 65</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\leds.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 26</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 28</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 54 46 72 32 40 65 34 17 27 58 60 13 7 61 84</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 54 46 72 32 40 65 84</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_gpio.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 0</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 6</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 54 46 72 32 40 65</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 54 46 72 32 40 65</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_flash.c</name>
+      <outputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 50</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 1</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICCARM</name>
+          <file> 68 46 72 32 40</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 68 46 72 32 40</file>
+        </tool>
+      </inputs>
+    </file>
+    <forcedrebuild>
+      <name>[REBUILD_ALL]</name>
+    </forcedrebuild>
+  </configuration>
+  <configuration>
+    <name>Release</name>
+    <outputs/>
+    <forcedrebuild>
+      <name>[MULTI_TOOL]</name>
+      <tool>ILINK</tool>
+    </forcedrebuild>
+  </configuration>
+</project>
+
+
