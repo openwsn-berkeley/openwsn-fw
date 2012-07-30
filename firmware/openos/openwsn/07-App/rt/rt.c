@@ -12,7 +12,7 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in mseconds)
-#define RTPERIOD     20000
+#define RTPERIOD     60000
 
 const uint8_t rt_path0[] = "t";
 
@@ -118,7 +118,7 @@ void rt_timer() {
    
    
    // create a CoAP RD packet
-   pkt = openqueue_getFreePacketBuffer(COMPONENT_RT);
+   pkt = openqueue_getFreePacketBuffer();
    if (pkt==NULL) {
       openserial_printError(COMPONENT_RT,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,

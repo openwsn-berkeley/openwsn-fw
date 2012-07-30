@@ -238,7 +238,7 @@ port_INLINE void sendAdv() {
    // example while the mote is synchronizing
    if (res_vars.busySending==FALSE) {
       // get a free packet buffer
-      adv = openqueue_getFreePacketBuffer(COMPONENT_RES);
+      adv = openqueue_getFreePacketBuffer();
       if (adv==NULL) {
          openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
@@ -285,14 +285,13 @@ port_INLINE void sendKa() {
       kaNeighAddr = neighbors_KaNeighbor();
       if (kaNeighAddr!=NULL) {
          // get a free packet buffer
-         kaPkt = openqueue_getFreePacketBuffer(COMPONENT_RES);
+         kaPkt = openqueue_getFreePacketBuffer();
          if (kaPkt==NULL) {
             openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
                                   (errorparameter_t)0,
                                   (errorparameter_t)0);
             return;
          }
-         
          // declare ownership over that packet
          kaPkt->creator = COMPONENT_RES;
          kaPkt->owner   = COMPONENT_RES;

@@ -46,12 +46,11 @@ void icmpv6echo_trigger() {
    } else {
       icmpv6echo_vars.busySending = TRUE;
       
-      msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6ECHO);
+      msg = openqueue_getFreePacketBuffer();
       if (msg==NULL) {
          openserial_printError(COMPONENT_ICMPv6ECHO,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
-         icmpv6echo_vars.busySending = FALSE;
          return;
       }
       //admin
@@ -100,11 +99,11 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          // get a new openqueuEntry_t for the echo reply
-         reply = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6ECHO);
+         reply = openqueue_getFreePacketBuffer();
          if (reply==NULL) {
             openserial_printError(COMPONENT_ICMPv6ECHO,ERR_NO_FREE_PACKET_BUFFER,
                                   (errorparameter_t)1,
-                                  (errorparameter_t)0);
+                                  (errorparameter_t)1);
             openqueue_freePacketBuffer(msg);
             return;
          }
@@ -139,7 +138,7 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
       default:
          openserial_printError(COMPONENT_ICMPv6ECHO,ERR_UNSUPPORTED_ICMPV6_TYPE,
                                (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
-                               (errorparameter_t)2);
+                               (errorparameter_t)0);
          openqueue_freePacketBuffer(msg);
          break;
    }

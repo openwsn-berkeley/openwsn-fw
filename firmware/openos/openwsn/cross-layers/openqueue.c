@@ -2,7 +2,6 @@
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"
-#include "IEEE802154E.h"
 
 //=========================== variables =======================================
 
@@ -40,21 +39,13 @@ bool debugPrint_queue() {
 
 //======= called by any component
 
- OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
+ OpenQueueEntry_t* openqueue_getFreePacketBuffer() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   //enable only allocation of free buffers to MAC layer in case we are not sync
-   if (ieee154e_isSynch()==FALSE && creator > COMPONENT_IEEE802154E){
-     ENABLE_INTERRUPTS();
-     return NULL;
-   }
-   //in synch or mac layer request
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
-         openqueue_vars.queue[i].creator=creator;
-         ENABLE_INTERRUPTS(); 
          return &openqueue_vars.queue[i];
       }
    }
@@ -99,11 +90,6 @@ bool debugPrint_queue() {
    ENABLE_INTERRUPTS();
 }
 
-
-void openqueue_removeAll(){
-  openqueue_init();//hide it is an init.
-}
-
 //======= called by RES
 
  OpenQueueEntry_t* openqueue_resGetSentPacket() {
@@ -113,8 +99,8 @@ void openqueue_removeAll(){
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_RES &&
           openqueue_vars.queue[i].creator!=COMPONENT_IEEE802154E) {
-    	  ENABLE_INTERRUPTS();
-          return &openqueue_vars.queue[i];
+    	 ENABLE_INTERRUPTS();
+         return &openqueue_vars.queue[i];
       }
    }
    ENABLE_INTERRUPTS();
@@ -147,7 +133,7 @@ void openqueue_removeAll(){
       for (i=0;i<QUEUELENGTH;i++) {
          if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
             packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
-            ENABLE_INTERRUPTS();
+        	 ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
       }
@@ -163,7 +149,7 @@ void openqueue_removeAll(){
                 )
              )
             ) {
-            ENABLE_INTERRUPTS();
+        	 ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
       }
@@ -180,8 +166,8 @@ void openqueue_removeAll(){
       if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
           openqueue_vars.queue[i].creator==COMPONENT_RES              &&
           packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))) {
-    	  ENABLE_INTERRUPTS();
-          return &openqueue_vars.queue[i];
+    	 ENABLE_INTERRUPTS();
+         return &openqueue_vars.queue[i];
       }
    }
    ENABLE_INTERRUPTS();

@@ -61,7 +61,7 @@ error_t opentcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16_t 
    tcp_vars.hisPort = param_tcp_hisPort;
    memcpy(&tcp_vars.hisIPv6Address,dest,sizeof(open_addr_t));
    //I receive command 'connect', I send SYNC
-   tempPkt = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+   tempPkt = openqueue_getFreePacketBuffer();
    if (tempPkt==NULL) {
       openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
@@ -148,7 +148,7 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                      (errorparameter_t)tcp_vars.myPort,
-                                     (errorparameter_t)0);
+                                     (errorparameter_t)2);
                break;
          }
          break;
@@ -176,7 +176,7 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                      (errorparameter_t)tcp_vars.myPort,
-                                     (errorparameter_t)1);
+                                     (errorparameter_t)0);
                openqueue_freePacketBuffer(msg);
                tcp_vars.dataReceived = NULL;
                break;
@@ -204,7 +204,7 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
          openqueue_freePacketBuffer(msg);
          tcp_change_state(TCP_STATE_CLOSE_WAIT);
          //I send FIN+ACK
-         tempPkt = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+         tempPkt = openqueue_getFreePacketBuffer();
          if (tempPkt==NULL) {
             openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                                   (errorparameter_t)0,
@@ -281,7 +281,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                      (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
-                                     (errorparameter_t)2);
+                                     (errorparameter_t)3);
                shouldIlisten = FALSE;
                break;
          }
@@ -291,7 +291,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
                   tcp_vars.hisNextSeqNum = (packetfunctions_ntohl((uint8_t*)&(((tcp_ht*)msg->payload)->sequence_number)))+1;
                   tcp_vars.hisPort       = msg->l4_sourcePortORicmpv6Type;
                   memcpy(&tcp_vars.hisIPv6Address,&(msg->l3_destinationORsource),sizeof(open_addr_t));
-                  tempPkt       = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+                  tempPkt       = openqueue_getFreePacketBuffer();
                   if (tempPkt==NULL) {
                      openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                                            (errorparameter_t)0,
@@ -324,7 +324,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
          if (containsControlBits(msg,TCP_ACK_YES,TCP_RST_NO,TCP_SYN_YES,TCP_FIN_NO)) {
             //I receive SYN+ACK, I send ACK
             tcp_vars.hisNextSeqNum = (packetfunctions_ntohl((uint8_t*)&(((tcp_ht*)msg->payload)->sequence_number)))+1;
-            tempPkt = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+            tempPkt = openqueue_getFreePacketBuffer();
             if (tempPkt==NULL) {
                openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                                      (errorparameter_t)0,
@@ -346,7 +346,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
          } else if (containsControlBits(msg,TCP_ACK_NO,TCP_RST_NO,TCP_SYN_YES,TCP_FIN_NO)) {
             //I receive SYN, I send SYN+ACK
             tcp_vars.hisNextSeqNum = (packetfunctions_ntohl((uint8_t*)&(((tcp_ht*)msg->payload)->sequence_number)))+1;
-            tempPkt       = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+            tempPkt       = openqueue_getFreePacketBuffer();
             if (tempPkt==NULL) {
                openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                                      (errorparameter_t)0,
@@ -392,7 +392,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
          if (containsControlBits(msg,TCP_ACK_WHATEVER,TCP_RST_NO,TCP_SYN_NO,TCP_FIN_YES)) {
             //I receive FIN[+ACK], I send ACK
             tcp_vars.hisNextSeqNum = (packetfunctions_ntohl((uint8_t*)&(((tcp_ht*)msg->payload)->sequence_number)))+msg->length-sizeof(tcp_ht)+1;
-            tempPkt = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+            tempPkt = openqueue_getFreePacketBuffer();
             if (tempPkt==NULL) {
                openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                                      (errorparameter_t)0,
@@ -414,7 +414,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
          } else if (containsControlBits(msg,TCP_ACK_WHATEVER,TCP_RST_NO,TCP_SYN_NO,TCP_FIN_NO)) {
             //I receive data, I send ACK
             tcp_vars.hisNextSeqNum = (packetfunctions_ntohl((uint8_t*)&(((tcp_ht*)msg->payload)->sequence_number)))+msg->length-sizeof(tcp_ht);
-            tempPkt = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+            tempPkt = openqueue_getFreePacketBuffer();
             if (tempPkt==NULL) {
                openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                                      (errorparameter_t)0,
@@ -463,7 +463,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
                default:
                   openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                         (errorparameter_t)tcp_vars.myPort,
-                                        (errorparameter_t)3);
+                                        (errorparameter_t)0);
                   break;
             }
             tcp_vars.dataToSend = NULL;
@@ -486,12 +486,12 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
                default:
                   openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                         (errorparameter_t)tcp_vars.myPort,
-                                        (errorparameter_t)4);
+                                        (errorparameter_t)0);
                   break;
             }
             tcp_vars.dataToSend = NULL;
             tcp_vars.hisNextSeqNum = (packetfunctions_ntohl((uint8_t*)&(((tcp_ht*)msg->payload)->sequence_number)))+msg->length-sizeof(tcp_ht)+1;
-            tempPkt = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+            tempPkt = openqueue_getFreePacketBuffer();
             if (tempPkt==NULL) {
                openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                                      (errorparameter_t)0,
@@ -523,7 +523,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
          if (containsControlBits(msg,TCP_ACK_NO,TCP_RST_NO,TCP_SYN_NO,TCP_FIN_YES)) {
             //I receive FIN, I send ACK
             tcp_vars.hisNextSeqNum = (packetfunctions_ntohl((uint8_t*)&(((tcp_ht*)msg->payload)->sequence_number)))+1;
-            tempPkt = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+            tempPkt = openqueue_getFreePacketBuffer();
             if (tempPkt==NULL) {
                openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                                      (errorparameter_t)0,
@@ -545,7 +545,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
          } else if (containsControlBits(msg,TCP_ACK_YES,TCP_RST_NO,TCP_SYN_NO,TCP_FIN_YES)) {
             //I receive FIN+ACK, I send ACK
             tcp_vars.hisNextSeqNum = (packetfunctions_ntohl((uint8_t*)&(((tcp_ht*)msg->payload)->sequence_number)))+1;
-            tempPkt = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+            tempPkt = openqueue_getFreePacketBuffer();
             if (tempPkt==NULL) {
                openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                                      (errorparameter_t)0,
@@ -580,7 +580,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
          if (containsControlBits(msg,TCP_ACK_WHATEVER,TCP_RST_NO,TCP_SYN_NO,TCP_FIN_YES)) {
             //I receive FIN[+ACK], I send ACK
             tcp_vars.hisNextSeqNum = (packetfunctions_ntohl((uint8_t*)&(((tcp_ht*)msg->payload)->sequence_number)))+1;
-            tempPkt = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+            tempPkt = openqueue_getFreePacketBuffer();
             if (tempPkt==NULL) {
                openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                                      (errorparameter_t)0,
@@ -640,7 +640,7 @@ error_t opentcp_close() {    //[command] teardown
       return E_SUCCESS;
    }
    //I receive command 'close', I send FIN+ACK
-   tempPkt = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
+   tempPkt = openqueue_getFreePacketBuffer();
    if (tempPkt==NULL) {
       openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,

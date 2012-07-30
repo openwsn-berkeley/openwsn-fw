@@ -8,7 +8,6 @@
 \{
 */
 #include "openwsn.h"
-
 //=========================== define ==========================================
 
 #define MAXNUMNEIGHBORS            10
@@ -18,7 +17,7 @@
 #define SWITCHSTABILITYTHRESHOLD    3
 
 //=========================== typedef =========================================
-PRAGMA(pack(1));
+
 typedef struct {
    bool             used;
    uint8_t          parentPreference;
@@ -32,25 +31,12 @@ typedef struct {
    uint8_t          numTxACK;
    asn_t            asn;
 } neighborRow_t;
-PRAGMA(pack());
 
-PRAGMA(pack(1));
 typedef struct {
    uint8_t         row;
    neighborRow_t   neighborEntry;
 } debugNeighborEntry_t;
-PRAGMA(pack());
-//this structure is used by layer debug app to debug through the network.
 
-PRAGMA(pack(1));
-typedef struct{
-   uint8_t last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
-   int8_t rssi; //SIGNED!
-   uint8_t parentPreference;
-   uint8_t DAGrank;
-   uint16_t asn; 
-}netDebugNeigborEntry_t;
-PRAGMA(pack());
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -72,11 +58,8 @@ PRAGMA(pack());
           uint8_t       neighbors_getNumNeighbors();
           void          neighbors_getPreferredParent(open_addr_t* addressToWrite,
                                                      uint8_t addr_type);
-          //debug
           bool          debugPrint_neighbors();
-          void          neighbors_getAll(neighborRow_t *nlist);//deprecated
-          void          neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes);
-          uint8_t       neighbors_getNumberOfNeighbors(); 
+
 /**
 \}
 \}

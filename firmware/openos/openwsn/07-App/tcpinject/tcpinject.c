@@ -47,7 +47,7 @@ void tcpinject_trigger() {
 
 void tcpinject_connectDone(error_t error) {
    if (error==E_SUCCESS) {
-      tcpinject_vars.pkt = openqueue_getFreePacketBuffer(COMPONENT_TCPINJECT);
+      tcpinject_vars.pkt = openqueue_getFreePacketBuffer();
       if (tcpinject_vars.pkt==NULL) {
          openserial_printError(COMPONENT_TCPINJECT,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,

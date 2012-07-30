@@ -22,7 +22,7 @@ void openbridge_trigger() {
    numDataBytes = openserial_getNumDataBytes();
    openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
    if (idmanager_getIsBridge()==TRUE && numDataBytes>0) {
-      pkt = openqueue_getFreePacketBuffer(COMPONENT_OPENBRIDGE);
+      pkt = openqueue_getFreePacketBuffer();
       if (pkt==NULL) {
          openserial_printError(COMPONENT_OPENBRIDGE,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
