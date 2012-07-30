@@ -371,6 +371,26 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
    ENABLE_INTERRUPTS();
 }
 
+/**
+// The functio below returns a direct pointer to the scheduleBuf. Modifying 
+this structure means you are modifying the scheduleBuf. Be careful when using
+the pointer and try only to read from the buffer
+*/
+void scheduleBuf_getAll(scheduleEntry_t *blist){
+ blist=&schedule_vars.scheduleBuf[0];
+}
+
+//TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.
+void schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist, uint8_t maxbytes){
+  
+  uint8_t i;
+  for (i=0;i<MAXACTIVESLOTS;i++){
+   schlist[i].last_addr_byte=schedule_vars.scheduleBuf[i].neighbor.addr_64b[7];
+   schlist[i].slotOffset=(uint8_t)schedule_vars.scheduleBuf[i].slotOffset&0xFF;
+   schlist[i].channelOffset=schedule_vars.scheduleBuf[i].channelOffset;
+  }    
+
+}
 //=========================== private =========================================
 
 void schedule_resetEntry(scheduleEntry_t* pScheduleEntry) {

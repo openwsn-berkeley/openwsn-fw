@@ -27,7 +27,7 @@ void udpinject_trigger() {
       return;
    };
    //prepare packet
-   pkt = openqueue_getFreePacketBuffer();
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPINJECT);
    if (pkt==NULL) {
       openserial_printError(COMPONENT_UDPINJECT,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,

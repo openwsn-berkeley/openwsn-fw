@@ -91,7 +91,7 @@ void rex_task_cb() {
    
    
    // create a CoAP RD packet
-   pkt = openqueue_getFreePacketBuffer();
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_REX);
    if (pkt==NULL) {
       openserial_printError(COMPONENT_REX,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,

@@ -145,7 +145,7 @@ void rrube_timer() {
       // I received a POST from the server, I need to send data to the next hop
       
       // create a CoAP RD packet
-      pkt = openqueue_getFreePacketBuffer();
+      pkt = openqueue_getFreePacketBuffer(COMPONENT_RREG);
       if (pkt==NULL) {
          openserial_printError(COMPONENT_RREG,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
@@ -189,7 +189,7 @@ void rrube_timer() {
       // I received a PUT from the previous hop, I need ask the server for the next address
       
       // create a CoAP RD packet
-      pkt = openqueue_getFreePacketBuffer();
+      pkt = openqueue_getFreePacketBuffer(COMPONENT_RREG);
       if (pkt==NULL) {
          openserial_printError(COMPONENT_RREG,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,

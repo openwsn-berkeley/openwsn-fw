@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\003oos_openwsn_dante\00300s_openwsn_dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_it_dante\00std_it_dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_leds_dante\00std_leds_dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_radio_dante\00std_radio.dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_radiotimer_dante\00std_radiotimer_dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_spi_dante\00std_spi_dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_sysTick_dante\00std_sysTick_dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_timer_dante\00std_timer_dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_uart_dante\00std_uart_dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_radio_Debug\01bsp_radio.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\02drv_opentimers_dante\02drv_opentimer_dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_bothtimer_dante\bothtimer_dante.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_RTC_timer_Debug\RTC_timer.ewp</path>
+  </project>
+  <batchBuild/>
+</workspace>
+
+

@@ -122,7 +122,7 @@ void rxl1_timer() {
    
    
    // create a CoAP RD packet
-   pkt = openqueue_getFreePacketBuffer();
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_RXL1);
    if (pkt==NULL) {
       openserial_printError(COMPONENT_RXL1,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,

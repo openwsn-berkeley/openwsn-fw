@@ -7,12 +7,13 @@
 
 #include "openwsn.h"
 //l7
+#include "layerdebug.h"
 //#include "rrube.h"
 //#include "rheli.h"
 #include "rinfo.h"
 //#include "rxl1.h"
 #include "rex.h"
-//#include "rt.h"
+#include "rt.h"
 #include "rwellknown.h"
 #include "rleds.h"
 #include "rreg.h"
@@ -25,6 +26,8 @@
 #include "udpecho.h"
 #include "udpinject.h"
 #include "udpprint.h"
+//#include "udprand.h"
+//#include "udpstorm.h"
 //l4
 #include "opencoap.h"
 #include "openudp.h"
@@ -52,6 +55,7 @@
 // drivers
 #include "openserial.h"
 
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -76,7 +80,6 @@ void openwsn_init() {
    schedule_init();
    res_init();
    neighbors_init();
-
    // 03a-IPHC
    openbridge_init();
    iphc_init();
@@ -91,26 +94,31 @@ void openwsn_init() {
    openudp_init();
    opencoap_init(); // initialize before any of the CoAP clients
    // 07-App
-   //heli_init();
-   //imu_init();
-   //rrube_init();
-   //rheli_init();
-   rinfo_init();
-   //rxl1_init();
+   //--CoAP
+   //rwellknown_init();
+   //rreg_init();
+   //rinfo_init();
+   //rleds_init();
    //rt_init();
    //rex_init();
-
-   rleds_init();
-   rreg_init();
-   rwellknown_init();
+   //rheli_init();
+   //rrube_init();
+   //rxl1_init();
+   layerdebug_init();
+   //--UDP
+   udpecho_init();
+   udpinject_init();
+   udpprint_init();
+   //udprand_init();
+   udpstorm_init();
+   //--TCP
    ohlone_init();
    tcpecho_init();
    tcpinject_init();
    tcpprint_init();
-   udpecho_init();
-   udpinject_init();
-   udpprint_init();
-
+   //--misc
+   //heli_init();
+   //imu_init();
 }
 
 //=========================== private =========================================

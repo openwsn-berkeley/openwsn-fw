@@ -47,11 +47,12 @@ void icmpv6router_trigger() {
    } else {
       icmpv6router_vars.busySending = TRUE;
       
-      msg = openqueue_getFreePacketBuffer();
+      msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6ROUTER);
       if (msg==NULL) {
          openserial_printError(COMPONENT_ICMPv6ROUTER,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
+         icmpv6router_vars.busySending = FALSE;
          return;
       }
       //admin

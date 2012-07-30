@@ -51,7 +51,7 @@ void ohlone_sendpkt() {
       return;
    }
 
-   ohlone_vars.pkt = openqueue_getFreePacketBuffer();
+   ohlone_vars.pkt = openqueue_getFreePacketBuffer(COMPONENT_OHLONE);
    if (ohlone_vars.pkt==NULL) {
       openserial_printError(COMPONENT_OHLONE,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,

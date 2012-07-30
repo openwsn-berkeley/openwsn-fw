@@ -33,6 +33,25 @@ where:
    =!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
 */
 
+/* 
+   =!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
+   Some additional notes that might be useful:
+   Due to some unclear reasons (possibly imperfection of debugger's driver or the mote itself),
+   occassionally running this program using IAR cannot correctly set the content of INFO flash.
+   If you happen to encouter such a problem, the following practise may be worth trying:
+
+   1. Compile the program in IAR as usual
+   2. Download and install the FET-Pro430 Lite Software from http://www.elprotronic.com/download.html
+   3. Manually write the flash by firstly choosing the project code (00std_eui64.txt) and then click 
+      "write flash" (you may need to erase the flash if asked by the software to do so).
+   4. Restart the FET-Pro430 and check the flash content by clicking "Read/copy".
+
+   Hint: if you are forced to perform the above steps it probably mean something is unstable about
+   the driver/hardware. So expect to repeat the writing / reading more than once to get the correct
+   outcome.
+   =!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!=!
+*/
+
 #include "msp430x26x.h"
 #include "stdint.h"
 
