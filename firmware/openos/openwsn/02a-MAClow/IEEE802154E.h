@@ -119,6 +119,7 @@ typedef struct {
           void     ieee154e_init();
 // public
           PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN);
+          bool     ieee154e_isSynch();
 // events
           void     ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
           void     ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);

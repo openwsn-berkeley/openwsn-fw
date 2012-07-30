@@ -46,7 +46,7 @@ void icmpv6echo_trigger() {
    } else {
       icmpv6echo_vars.busySending = TRUE;
       
-      msg = openqueue_getFreePacketBuffer();
+      msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6ECHO);
       if (msg==NULL) {
          openserial_printError(COMPONENT_ICMPv6ECHO,ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
@@ -100,7 +100,7 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          // get a new openqueuEntry_t for the echo reply
-         reply = openqueue_getFreePacketBuffer();
+         reply = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6ECHO);
          if (reply==NULL) {
             openserial_printError(COMPONENT_ICMPv6ECHO,ERR_NO_FREE_PACKET_BUFFER,
                                   (errorparameter_t)1,

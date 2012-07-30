@@ -33,8 +33,8 @@ void    uart_enableInterrupts();
 void    uart_disableInterrupts();
 void    uart_clearRxInterrupts();
 void    uart_clearTxInterrupts();
-void    uart_writeByte(uint16_t byteToWrite);
-uint16_t uart_readByte();
+void    uart_writeByte(uint8_t byteToWrite);
+uint8_t uart_readByte();
 
 uint8_t uart_isr_tx();
 uint8_t uart_isr_rx();
