@@ -42,8 +42,12 @@ void LED_Dir_Out(void)
 #elif (defined(CPU_MK40N512VMD100))
   GPIOB_POER = (1<<11);
   GPIOC_POER = ((1<<7)|(1<<8)|(1<<9));
-#elif (defined(MCU_MK20D7))
+#elif (defined(MCU_MK20D7)||defined(MCU_MK20DZ10))
+#ifdef TOWER_K20
   GPIOC_PDDR |= ((1<<7)|(1<<8)|(1<<9)|(1<<10));
+#elif OPENMOTE_K20
+  GPIOB_PDDR |= ((1<<2)|(1<<3)|(1<<10)|(1<<11));
+#endif
 #endif
 }
 
@@ -55,8 +59,12 @@ void LEDs_On(void)
   GPIOB_PDOR &= ~(1<<11);
   GPIOC_PDOR &= ~((1<<7)|(1<<8)|(1<<9));
 #elif (defined(MCU_MK20D7))
+#ifdef TOWER_K20
   GPIOC_PDOR &= ~((1<<9)|(1<<10));
-  GPIOC_PDOR |= ((1<<7)|(1<<8));	
+  GPIOC_PDOR |= ((1<<7)|(1<<8));
+#elif OPENMOTE_K20
+  GPIOC_PDOR &= ~((1<<2)|(1<<3)|(1<<10)|(1<<11));
+#endif 
 #endif
 }
 

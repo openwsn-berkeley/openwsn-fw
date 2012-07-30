@@ -77,9 +77,14 @@ void enter_wait(void)
  */
 void enter_stop(void)
 {
+#ifdef TOWER_K20
     /* Set the STOPM field to 0b000 for normal STOP mode - Need to retain state of LPWUI bit 8 */
     SMC_PMCTRL =  SMC_PMCTRL_STOPM(0);           // set STOPM = 0b000
     stop();
+#elif OPENMOTE_K20
+    MC_PMCTRL =  MC_PMCTRL_LPLLSM(0);           // set STOPM = 0b000
+    stop();
+#endif
 }
 /********************************************************************/
 /* VLPR mode entry routine. Puts the processor into very low power
@@ -100,7 +105,7 @@ void enter_stop(void)
  */
 void enter_vlpr(char lpwui_value)
 {
-   
+#ifdef TOWER_K20
   if ((SMC_PMSTAT & SMC_PMSTAT_PMSTAT_MASK)== 4){
     	 printf(" \n[enter_vlpr] Already in VLPR Mode ! ");
          return;
@@ -133,6 +138,10 @@ void enter_vlpr(char lpwui_value)
          while((SMC_PMSTAT & SMC_PMSTAT_PMSTAT_MASK) != 4){
     	 printf(" \n[enter_vlpr] HALT PMSTAT does not indicate in VLPR Mode ! ");
          }
+         
+#elif OPENMOTE_K20
+         //TODO
+#endif         
 }
 /********************************************************************/
 /* VLPR mode exit routine. Puts the processor into normal run mode
@@ -149,7 +158,8 @@ void enter_vlpr(char lpwui_value)
  */
 void exit_vlpr(void)
 {
-    /* check to make sure in VLPR before exiting    */
+#ifdef TOWER_K20
+	/* check to make sure in VLPR before exiting    */
     if  ((SMC_PMSTAT & SMC_PMSTAT_PMSTAT_MASK)== 4) {
       
        /* Clear RUNM */
@@ -164,6 +174,10 @@ void exit_vlpr(void)
        
     }  //if in VLPR mode
      // else if not in VLPR ignore call
+    
+#elif OPENMOTE_K20
+         //TODO
+#endif  
 }
 /********************************************************************/
 /* VLPS mode entry routine. Puts the processor into VLPS mode directly
@@ -186,6 +200,7 @@ void exit_vlpr(void)
  */
 void enter_vlps(char lpwui_value)
 {
+#ifdef TOWER_K20	
     /* Write to PMPROT to allow VLPS power modes */
     SMC_PMPROT = SMC_PMPROT_AVLP_MASK;   // write oneif not all set make sure all enabled
                                        //this write-once bit allows the MCU to enter the
@@ -202,9 +217,12 @@ void enter_vlps(char lpwui_value)
      }
     printf("[enter_vlps]SMC_PMCTRL   = %#02X \r\n", (SMC_PMCTRL))  ;
     printf("                                  ")  ;
-
     /* Now execute the stop instruction to go into VLPS */
-    stop();
+      stop();
+#elif OPENMOTE_K20
+         //TODO
+#endif  
+  
 }
 /********************************************************************/
 /* LLS mode entry routine. Puts the processor into LLS mode from
@@ -227,13 +245,24 @@ void enter_vlps(char lpwui_value)
  */
 void enter_lls(void)
 {
-    /* Write to PMPROT to allow LLS power modes */
+#ifdef TOWER_K20	
+	/* Write to PMPROT to allow LLS power modes */
     SMC_PMPROT = SMC_PMPROT_ALLS_MASK;   //this write-once bit allows the MCU to enter the
                                        //LLS low power mode
     /* Set the LPLLSM field to 0b011 for LLS mode  */
     SMC_PMCTRL = SMC_PMCTRL_STOPM(0x3) ; 
     /* Now execute the stop instruction to go into LLS */
     stop();
+#elif OPENMOTE_K20
+    /* Write to PMPROT to allow LLS power modes */
+        MC_PMPROT = MC_PMPROT_ALLS_MASK;   //this write-once bit allows the MCU to enter the
+                                           //LLS low power mode
+        /* Set the LPLLSM field to 0b011 for LLS mode  */
+        MC_PMCTRL = MC_PMCTRL_LPLLSM(0x3) ; 
+        /* Now execute the stop instruction to go into LLS */
+        stop();    
+#endif    
+    
 }
 /********************************************************************/
 /* VLLS3 mode entry routine. Puts the processor into VLLS3 mode from
@@ -256,6 +285,7 @@ void enter_lls(void)
  */
 void enter_vlls3(void)
 {
+#ifdef TOWER_K20
     /* Write to PMPROT to allow VLLS3 power modes */
     SMC_PMPROT = SMC_PMPROT_AVLLS_MASK;
         
@@ -266,6 +296,10 @@ void enter_vlls3(void)
 
     /* Now execute the stop instruction to go into VLLS3 */
     stop();
+    
+#elif OPENMOTE_K20
+    //TODO
+#endif 
 }
 /********************************************************************/
 /* VLLS2 mode entry routine. Puts the processor into VLLS2 mode from
@@ -288,6 +322,7 @@ void enter_vlls3(void)
  */
 void enter_vlls2(void)
 {
+#ifdef TOWER_K20
     /* Write to PMPROT to allow VLLS2 power modes */
     SMC_PMPROT = SMC_PMPROT_AVLLS_MASK;
         
@@ -298,6 +333,9 @@ void enter_vlls2(void)
         
     /* Now execute the stop instruction to go into VLLS2 */
     stop();
+#elif OPENMOTE_K20
+    //TODO
+#endif 
 }
 /********************************************************************/
 /* VLLS1 mode entry routine. Puts the processor into VLLS1 mode from
@@ -320,7 +358,8 @@ void enter_vlls2(void)
  */
 void enter_vlls1(void)
 {
-    /* Write to PMPROT to allow all possible power modes */
+#ifdef TOWER_K20
+	/* Write to PMPROT to allow all possible power modes */
     SMC_PMPROT = SMC_PMPROT_AVLLS_MASK;
     /* Set the VLLSM field to 0b100 for VLLS1 mode - Need to retain state of LPWUI bit 8 */
     SMC_PMCTRL =  SMC_PMCTRL_STOPM(0x4) ;
@@ -329,6 +368,9 @@ void enter_vlls1(void)
        
     /* Now execute the stop instruction to go into VLLS1 */
     stop();
+#elif OPENMOTE_K20
+    //TODO
+#endif 
 }
 /********************************************************************/
 /* Enable low power wake up on interrupt. This function can be used
@@ -346,8 +388,12 @@ void enter_vlls1(void)
 
 void enable_lpwui(void)
 {
+#ifdef TOWER_K20
     SMC_PMCTRL |= SMC_PMCTRL_LPWUI_MASK;
     printf("[enable_lpwui]SMC_PMCTRL   = %#02X \r\n", (SMC_PMCTRL))  ;
+#elif OPENMOTE_K20
+    MC_PMCTRL |= MC_PMCTRL_LPWUI_MASK;
+#endif 
 }
 /********************************************************************/
 /* Disable low power wake up on interrupt. This function can be used
@@ -362,8 +408,12 @@ void enable_lpwui(void)
  */
 void disable_lpwui(void)
 {
-    SMC_PMCTRL &= ~SMC_PMCTRL_LPWUI_MASK;
-    printf("[disable_lpwui]SMC_PMCTRL   = %#02X \r\n", (SMC_PMCTRL))  ;
+	#ifdef TOWER_K20
+    	SMC_PMCTRL &= ~SMC_PMCTRL_LPWUI_MASK;
+    	printf("[disable_lpwui]SMC_PMCTRL   = %#02X \r\n", (SMC_PMCTRL))  ;
+	#elif OPENMOTE_K20
+    	MC_PMCTRL &= ~MC_PMCTRL_LPWUI_MASK;
+	#endif 
 }
 
 /********************************************************************/

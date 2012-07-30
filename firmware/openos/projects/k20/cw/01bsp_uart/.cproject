@@ -23,7 +23,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="afx" artifactName="01bsp_all" buildProperties="" cleanCommand="&quot;${system:ECLIPSE_HOME}/../gnu/bin/rm&quot; -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;com.freescale.core.ide.cdt.errorParsers.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.MwarmErrorParser" id="com.freescale.arm.cdt.toolchain.config.arm.release.1323884273" name="MK20DX256_INTERNAL_RAM" parent="com.freescale.arm.cdt.toolchain.config.arm.release">
+				<configuration artifactExtension="afx" artifactName="01bsp_all" buildProperties="" buildReferences="true" buildReferencingConfigurations="false" cleanCommand="&quot;${system:ECLIPSE_HOME}/../gnu/bin/rm&quot; -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;com.freescale.core.ide.cdt.errorParsers.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.MwarmErrorParser" id="com.freescale.arm.cdt.toolchain.config.arm.release.1323884273" name="MK20DX256_INTERNAL_RAM" parent="com.freescale.arm.cdt.toolchain.config.arm.release" produceBuildErrorsWithMissingReferences="true">
 					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.1323884273." name="/" resourcePath="">
 						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.2142097892" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release">
 							<targetPlatform id="com.freescale.arm.cdt.toolchain.targetplatform.1804431355" isAbstract="false" name="ARM Target Platform" superClass="com.freescale.arm.cdt.toolchain.targetplatform"/>
@@ -69,8 +69,22 @@
 							</inputType>
 						</tool>
 					</fileInfo>
+					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.1323884273.619151324" name="/" resourcePath="Sources/boards">
+						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.1043656389" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release" unusedChildren="">
+							<targetPlatform id="com.freescale.arm.cdt.toolchain.targetplatform" isAbstract="false" name="ARM Target Platform" superClass="com.freescale.arm.cdt.toolchain.targetplatform"/>
+							<tool id="com.freescale.arm.cdt.toolchain.linker.2083791117" name="ARM Linker" superClass="com.freescale.arm.cdt.toolchain.linker.167417532"/>
+							<tool id="com.freescale.arm.cdt.toolchain.compiler.1834093940" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.839467700">
+								<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.1882126785" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+							</tool>
+							<tool id="com.freescale.arm.cdt.toolchain.assembler.93176719" name="ARM Assembler" superClass="com.freescale.arm.cdt.toolchain.assembler.1355001599">
+								<inputType id="com.freescale.arm.cdt.toolchain.armAsm.input.1186021634" name="ARM Assembler Input" superClass="com.freescale.arm.cdt.toolchain.armAsm.input"/>
+							</tool>
+							<tool id="com.freescale.arm.cdt.toolchain.preproc.538185319" name="ARM Preprocessor" superClass="com.freescale.arm.cdt.toolchain.preproc.1357303339"/>
+							<tool id="com.freescale.arm.cdt.toolchain.disassembler.869468960" name="ARM Disassembler" superClass="com.freescale.arm.cdt.toolchain.disassembler.1697524987"/>
+						</toolChain>
+					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Project_Settings/Linker_Files/MK20DX256_flash.lcf|Sources/boards/eldorado/|Sources/boards/ez430-rf2500/|Sources/boards/gina/|Sources/boards/pc/|Sources/boards/telosb/|Sources/boards/xpressohack/|Sources/chips/cc2420/|Sources/openwsn/02.5-MPLS/|Sources/openwsn/02a-MAClow/|Sources/openwsn/02b-MAChigh/|Sources/openwsn/03a-IPHC/|Sources/openwsn/03b-IPv6/|Sources/openwsn/04-TRAN/|Sources/openwsn/07-App/|Sources/openwsn/cross-layers/|Sources/openwsn/openwsn.c|Sources/openwsn/openwsn.dox" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="Project_Settings/Linker_Files/MK20DX256_flash.lcf|Sources/boards/eldorado/|Sources/boards/ez430-rf2500/|Sources/boards/gina/|Sources/boards/pc/|Sources/boards/telosb/|Sources/boards/xpressohack/|Sources/chips/cc2420/|Sources/openwsn/02.5-MPLS/|Sources/openwsn/02a-MAClow/|Sources/openwsn/02b-MAChigh/|Sources/openwsn/03a-IPHC/|Sources/openwsn/03b-IPv6/|Sources/openwsn/04-TRAN/|Sources/openwsn/07-App/|Sources/openwsn/cross-layers/|Sources/openwsn/openwsn.c|Sources/openwsn/openwsn.dox|Sources/boards/derfmega/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -657,6 +671,7 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+			<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 		</cconfiguration>
 		<cconfiguration id="com.freescale.arm.cdt.toolchain.config.arm.release.242548011">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.freescale.arm.cdt.toolchain.config.arm.release.242548011" moduleId="org.eclipse.cdt.core.settings" name="MK20DX256_INTERNAL_FLASH">
@@ -1312,6 +1327,7 @@
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
 			<storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
 			<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
+			<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">

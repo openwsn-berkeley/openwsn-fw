@@ -19,15 +19,15 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildArguments</key>
-					<value>-j8</value>
+					<value>-j6</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>
-					<value>${system:ECLIPSE_HOME}/../gnu/bin/make</value>
+					<value>${system:ECLIPSE_HOME}/../gnu/bin/mingw32-make</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
-					<value>${ProjDirPath}/MK20DX256_INTERNAL_RAM</value>
+					<value>${ProjDirPath}/MK20DX256_INTERNAL_FLASH</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.contents</key>
@@ -71,22 +71,22 @@
 		<link>
 			<name>Sources/01bsp_spi.c</name>
 			<type>1</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/projects/common/01bsp_spi/01bsp_spi.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/projects/common/01bsp_spi/01bsp_spi.c</location>
 		</link>
 		<link>
 			<name>Sources/boards</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/boards</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards</location>
 		</link>
 		<link>
 			<name>Sources/chips</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/chips</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/chips</location>
 		</link>
 		<link>
 			<name>Sources/openwsn</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/openwsn</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/openwsn</location>
 		</link>
 	</linkedResources>
 </projectDescription>

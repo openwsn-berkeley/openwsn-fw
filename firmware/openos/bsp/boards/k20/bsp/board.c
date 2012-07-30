@@ -10,7 +10,7 @@
 #include "led.h"
 #include "bsp_timer.h"
 #include "smc.h"
-#include "mcg.h"
+//#include "mcg.h"
 #include "rcm.h"
 
 //=========================== variables =======================================
@@ -37,16 +37,28 @@ void board_init() {
 		
 	//init all pins for the radio
 	//SLPTR
+#ifdef TOWER_K20
 	PORTB_PCR3 = PORT_PCR_MUX(1);// -- PTB3 used as gpio for slptr
 	GPIOB_PDDR |= RADIO_SLPTR_MASK; //set as output
-	//set to low
-	PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
 
 	//RADIO RST -- TODO in the TWR change it to another pin! this is one of the leds.
 	PORTC_PCR10 = PORT_PCR_MUX(1);// -- PTC10 used as gpio for radio rst
 	GPIOC_PDDR |= RADIO_RST_MASK; //set as output
-	PORT_PIN_RADIO_RESET_LOW();//activate the radio.
 	
+	
+#elif OPENMOTE_K20
+	    PORTD_PCR4 = PORT_PCR_MUX(1);// -- PTD4 used as gpio for slptr
+		GPIOD_PDDR |= RADIO_SLPTR_MASK; //set as output
+		
+		//RADIO RST 
+		PORTD_PCR5 = PORT_PCR_MUX(1);// -- PTD5 used as gpio for radio rst
+		GPIOD_PDDR |= RADIO_RST_MASK; //set as output
+	
+#endif	
+	
+	PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
+	PORT_PIN_RADIO_RESET_HIGH();//reset the radio
+	PORT_PIN_RADIO_RESET_LOW();//activate the radio.
 	//ptc5 .. ptc5 is pin 62, irq A
 	enable_irq(RADIO_EXTERNAL_PORT_IRQ_NUM);//enable the irq. The function is mapped to the vector at position 105 (see manual page 69). The vector is in isr.h
 		
@@ -66,6 +78,7 @@ void board_init() {
 	spi_init();	
 	radio_init();
 	leds_all_off();
+	leds_radio_on();
 	
 }
 

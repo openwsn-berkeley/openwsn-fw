@@ -16,7 +16,10 @@ extern int core_clk_khz;
 
 
 void llwu_init(void)
-{   //SIM_SCGC4 |= SIM_SCGC4_LLWU_MASK; //power llwu, in k20 is always powered as there isn't a register to power it.
+{   
+#ifdef OPENMOTE_K20
+	SIM_SCGC4 |= SIM_SCGC4_LLWU_MASK; //power llwu, in k20 72Mhz is always powered as there isn't a register to power it. in k20 100Mhz needs to be clocked.
+#endif	
     enable_irq(LLWU_IRQ_NUM);
     /*0x0200|0x0001 == LLWU_PE3_WUPE9 is radio isr and LLWU_PE1_WUPE0 is UART RX */
     llwu_configure( 0x0200|0x0001, LLWU_PIN_RISING, LLWU_ME_WUME0_MASK);//lptmr is wume0 manual page 76       
@@ -30,8 +33,10 @@ void llwu_init(void)
 *******************************************************************************/
 void llwu_reset_enable(void)
 {
+#ifdef TOWER_K20
 	// printf(" LLWU Reset pin enabled as wakeup source from Low power modes \n");
     LLWU_RST = LLWU_RST_LLRSTE_MASK;   //no reset filter for now
+#endif    
 }
 
 
@@ -197,6 +202,7 @@ void llwu_configure_filter(unsigned int wu_pin_num, unsigned char filter_en, uns
 
      temp = 0;
      //first clear filter values and clear flag by writing a 1
+#ifdef TOWER_K20
      LLWU_FILT1 = LLWU_FILT1_FILTF_MASK;
      LLWU_FILT2 = LLWU_FILT2_FILTF_MASK;
 
@@ -215,6 +221,9 @@ void llwu_configure_filter(unsigned int wu_pin_num, unsigned char filter_en, uns
      {
     	 //Error - invalid filter number %x\n",filter_en);
      }
+#endif
+     
+     
 }
 
 

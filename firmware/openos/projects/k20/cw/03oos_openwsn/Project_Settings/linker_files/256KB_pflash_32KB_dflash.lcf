@@ -59,6 +59,6 @@ SECTIONS
 		.					= . + (1 * 1024);
 		__BOOT_STACK_ADDRESS = .;
     } > ram
-	
+	__SP_INIT = .;
 	___BOOT_STACK_ADDRESS = __BOOT_STACK_ADDRESS;
 }

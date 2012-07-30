@@ -32,25 +32,25 @@ void start(void)
         printf("\n\n");
         
 	/* Determine the last cause(s) of reset */
-	if (RCM_SRS1 & RCM_SRS1_SW_MASK)
-		printf("Software Reset\n");
-	if (RCM_SRS1 & RCM_SRS1_LOCKUP_MASK)
-		printf("Core Lockup Event Reset\n");
-	if (RCM_SRS1 & RCM_SRS1_JTAG_MASK)
-		printf("JTAG Reset\n");
-	
-	if (RCM_SRS0 & RCM_SRS0_POR_MASK)
-		printf("Power-on Reset\n");
-	if (RCM_SRS0 & RCM_SRS0_PIN_MASK)
-		printf("External Pin Reset\n");
-	if (RCM_SRS0 & RCM_SRS0_WDOG_MASK)
-		printf("Watchdog(COP) Reset\n");
-	if (RCM_SRS0 & RCM_SRS0_LOC_MASK)
-		printf("Loss of Clock Reset\n");
-	if (RCM_SRS0 & RCM_SRS0_LVD_MASK)
-		printf("Low-voltage Detect Reset\n");
-	if (RCM_SRS0 & RCM_SRS0_WAKEUP_MASK)
-		printf("LLWU Reset\n");	
+//	if (RCM_SRS1 & RCM_SRS1_SW_MASK)
+//		printf("Software Reset\n");
+//	if (RCM_SRS1 & RCM_SRS1_LOCKUP_MASK)
+//		printf("Core Lockup Event Reset\n");
+//	if (RCM_SRS1 & RCM_SRS1_JTAG_MASK)
+//		printf("JTAG Reset\n");
+//	
+//	if (RCM_SRS0 & RCM_SRS0_POR_MASK)
+//		printf("Power-on Reset\n");
+//	if (RCM_SRS0 & RCM_SRS0_PIN_MASK)
+//		printf("External Pin Reset\n");
+//	if (RCM_SRS0 & RCM_SRS0_WDOG_MASK)
+//		printf("Watchdog(COP) Reset\n");
+//	if (RCM_SRS0 & RCM_SRS0_LOC_MASK)
+//		printf("Loss of Clock Reset\n");
+//	if (RCM_SRS0 & RCM_SRS0_LVD_MASK)
+//		printf("Low-voltage Detect Reset\n");
+//	if (RCM_SRS0 & RCM_SRS0_WAKEUP_MASK)
+//		printf("LLWU Reset\n");	
 
 	/* Determine specific Kinetis device and revision */
 	cpu_identify();

@@ -64,7 +64,7 @@ static const uint8_t infoRadioName[] = "AT86RF231";
 
 
 // SLP_TR PTB3 -- pin B51
-
+#ifdef TOWER_K20
 #define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()  GPIOB_PSOR |= RADIO_SLPTR_MASK //set
 #define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()   GPIOB_PCOR |= RADIO_SLPTR_MASK //clear
 
@@ -79,6 +79,24 @@ static const uint8_t infoRadioName[] = "AT86RF231";
 #define RADIO_ISR_MASK (1<<RADIO_ISR_PIN)
 #define RADIO_RST_PIN 10 //PTC10 -- TODO change that pin as it is a led. 
 #define RADIO_RST_MASK (1<<RADIO_RST_PIN)
+
+#elif OPENMOTE_K20
+#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()  GPIOD_PSOR |= RADIO_SLPTR_MASK //set
+#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()   GPIOD_PCOR |= RADIO_SLPTR_MASK //clear
+
+//  radio RSTn PTD5
+#define PORT_PIN_RADIO_RESET_HIGH()       GPIOD_PCOR |= RADIO_RST_MASK; //clear as it is inverted. 
+#define PORT_PIN_RADIO_RESET_LOW()        GPIOD_PSOR |= RADIO_RST_MASK; //set to high (as radio pin is inverted so this means no reset.)
+
+
+#define RADIO_SLPTR_PIN 4 //PTD4
+#define RADIO_SLPTR_MASK (1<<RADIO_SLPTR_PIN)
+#define RADIO_ISR_PIN 5  //PTC5
+#define RADIO_ISR_MASK (1<<RADIO_ISR_PIN)
+#define RADIO_RST_PIN 5 //PTD5  
+#define RADIO_RST_MASK (1<<RADIO_RST_PIN)
+
+#endif
 
 /*
  MK20D72 NVIC isr numbers - pag 65-68 manual.

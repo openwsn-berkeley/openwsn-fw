@@ -58,6 +58,7 @@ extern char drs_val, dmx32_val;
  *
  * Return value : PLL frequency (Hz) divided by 2 or error code
  */
+#ifdef TOWER_K20
 
 int pll_init(int crystal_val, unsigned char hgo_val, unsigned char erefs_val, signed char prdiv_val, signed char vdiv_val, unsigned char mcgout_select)
 {
@@ -239,7 +240,7 @@ int pee_pbe(int crystal_val)
 // Check MCG is in PEE mode
   if (!((((MCG_S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) == 0x3) && // check CLKS mux has selcted PLL output
       (!(MCG_S & MCG_S_IREFST_MASK)) &&                               // check FLL ref is external ref clk
-      (MCG_S & MCG_S_PLLST_MASK)))                                    // check PLLS mux has selected PLL 
+      (MCG_S & MCG_S_PLLST0_MASK)))                                    // check PLLS mux has selected PLL 
   {
     return 0x8;                                                       // return error code
   } 
@@ -1878,7 +1879,7 @@ unsigned char atc(unsigned char irc_select, int irc_freq, int mcg_out_freq)
 }// atc
 
 
-
+#endif
 
 int fll_freq(int fll_ref)
 {
@@ -2009,6 +2010,9 @@ unsigned char what_mcg_mode(void)
 } // what_mcg_mode
 
 
+
+
+
 /********************************************************************/
 /* Functon name : clk_monitor_0
  *
@@ -2034,160 +2038,5 @@ void clk_monitor_0(unsigned char en_dis)
   }
 }    // end clk_monitor_0
 
-/*
-int fei_pee(int crystal_val, unsigned char hgo_val, unsigned char erefs_val, signed char prdiv_val, signed char vdiv_val)
-{
-  unsigned char frdiv_val;
-  unsigned char temp_reg;
-  unsigned char prdiv, vdiv;
-  short i;
-  int ref_freq;
-  int pll_freq;
-
-// check if in FEI mode
-  if (!((((MCG_S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) == 0x0) && // check CLKS mux has selcted FLL output
-      (MCG_S & MCG_S_IREFST_MASK) &&                                  // check FLL ref is internal ref clk
-      (!(MCG_S & MCG_S_PLLST_MASK))))                                 // check PLLS mux has selected FLL
-  {
-    return 0x1;                                                     // return error code
-  }
-
-// check external frequency is less than the maximum frequency
-  if  (crystal_val > 50000000) {return 0x21;}
-
-// check crystal frequency is within spec. if crystal osc is being used as PLL ref
-  if (erefs_val)
-  {
-    if ((crystal_val < 8000000) || (crystal_val > 32000000)) {return 0x22;} // return 1 if one of the available crystal options is not available
-  }
-
-// make sure HGO will never be greater than 1. Could return an error instead if desired.
-  if (hgo_val > 0)
-  {
-    hgo_val = 1; // force hgo_val to 1 if > 0
-  }
-
-// Check PLL divider settings are within spec.
-  if ((prdiv_val < 1) || (prdiv_val > 8)) {return 0x41;}
-  if ((vdiv_val < 16) || (vdiv_val > 47)) {return 0x42;}
-
-// Check PLL reference clock frequency is within spec.
-  ref_freq = crystal_val / prdiv_val;
-  if ((ref_freq < 8000000) || (ref_freq > 32000000)) {return 0x43;}
-
-// Check PLL output frequency is within spec.
-  pll_freq = (crystal_val / prdiv_val) * vdiv_val;
-  if ((pll_freq < 180000000) || (pll_freq > 360000000)) {return 0x45;}
-
-// configure the MCG_C2 register
-// the RANGE value is determined by the external frequency. Since the RANGE parameter affects the FRDIV divide value
-// it still needs to be set correctly even if the oscillator is not being used
-  if (crystal_val <= 40000)
-  {
-    MCG_C2 = MCG_C2_RANGE(0) | (hgo_val << MCG_C2_HGO_SHIFT) | (erefs_val << MCG_C2_EREFS_SHIFT);
-  }
-  else if (crystal_val <= 8000000)
-  {
-    MCG_C2 = MCG_C2_RANGE(1) | (hgo_val << MCG_C2_HGO_SHIFT) | (erefs_val << MCG_C2_EREFS_SHIFT);
-  }
-  else
-  {
-    MCG_C2 = MCG_C2_RANGE(2) | (hgo_val << MCG_C2_HGO_SHIFT) | (erefs_val << MCG_C2_EREFS_SHIFT);
-  }
-
-// determine FRDIV based on reference clock frequency
-// since the external frequency has already been checked only the maximum frequency for each FRDIV value needs to be compared here.
-  if (crystal_val <= 1250000) {frdiv_val = 0;}
-  else if (crystal_val <= 2500000) {frdiv_val = 1;}
-  else if (crystal_val <= 5000000) {frdiv_val = 2;}
-  else if (crystal_val <= 10000000) {frdiv_val = 3;}
-  else if (crystal_val <= 20000000) {frdiv_val = 4;}
-  else {frdiv_val = 5;}
-
-// Select external oscillator and Reference Divider and clear IREFS to start ext osc
-// If IRCLK is required it must be enabled outside of this driver, existing state will be maintained
-// CLKS=2, FRDIV=frdiv_val, IREFS=0, IRCLKEN=0, IREFSTEN=0
-  temp_reg = MCG_C1;
-  temp_reg &= ~(MCG_C1_CLKS_MASK | MCG_C1_FRDIV_MASK | MCG_C1_IREFS_MASK); // Clear values in these fields
-  temp_reg = MCG_C1_CLKS(2) | MCG_C1_FRDIV(frdiv_val); // Set the required CLKS and FRDIV values
-  MCG_C1 = temp_reg;
-
-// if the external oscillator is used need to wait for OSCINIT to set
-  if (erefs_val)
-  {
-    for (i = 0 ; i < 10000 ; i++)
-    {
-      if (MCG_S & MCG_S_OSCINIT_MASK) break; // jump out early if OSCINIT sets before loop finishes
-    }
-    if (!(MCG_S & MCG_S_OSCINIT_MASK)) return 0x23; // check bit is really set and return with error if not set
-  }
-
-// wait for Reference clock Status bit to clear
-  for (i = 0 ; i < 2000 ; i++)
-  {
-    if (!(MCG_S & MCG_S_IREFST_MASK)) break; // jump out early if IREFST clears before loop finishes
-  }
-  if (MCG_S & MCG_S_IREFST_MASK) return 0x11; // check bit is really clear and return with error if not set
-
-// Wait for clock status bits to show clock source is ext ref clk
-  for (i = 0 ; i < 2000 ; i++)
-  {
-    if (((MCG_S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) == 0x2) break; // jump out early if CLKST shows EXT CLK slected before loop finishes
-  }
-  if (((MCG_S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 0x2) return 0x1A; // check EXT CLK is really selected and return with error if not
-
-// Now in FBE
-// It is recommended that the clock monitor is enabled when using an external clock as the clock source/reference.
-// It is enabled here but can be removed if this is not required.
-  MCG_C6 |= MCG_C6_CME_MASK;
-
-// Configure MCG_C5
-// If the PLL is to run in STOP mode then the PLLSTEN bit needs to be OR'ed in here or in user code.
-  temp_reg = MCG_C5;
-  temp_reg &= ~MCG_C5_PRDIV_MASK;
-  temp_reg |= MCG_C5_PRDIV(prdiv_val - 1);    //set PLL ref divider
-  MCG_C5 = temp_reg;
-
-// Configure MCG_C6
-// The PLLS bit is set to enable the PLL, MCGOUT still sourced from ext ref clk
-// The loss of lock interrupt can be enabled by seperately OR'ing in the LOLIE bit in MCG_C6
-  temp_reg = MCG_C6; // store present C6 value
-  temp_reg &= ~MCG_C6_VDIV_MASK; // clear VDIV settings
-  temp_reg |= MCG_C6_PLLS_MASK | MCG_C6_VDIV(vdiv_val - 24); // write new VDIV and enable PLL
-  MCG_C6 = temp_reg; // update MCG_C6
-
-// wait for PLLST status bit to set
-  for (i = 0 ; i < 2000 ; i++)
-  {
-    if (MCG_S & MCG_S_PLLST_MASK) break; // jump out early if PLLST sets before loop finishes
-  }
-  if (!(MCG_S & MCG_S_PLLST_MASK)) return 0x16; // check bit is really set and return with error if not set
-
-// Wait for LOCK bit to set
-  for (i = 0 ; i < 2000 ; i++)
-  {
-    if (MCG_S & MCG_S_LOCK_MASK) break; // jump out early if LOCK sets before loop finishes
-  }
-  if (!(MCG_S & MCG_S_LOCK_MASK)) return 0x44; // check bit is really set and return with error if not set
-
-// now in PBE
-
-  MCG_C1 &= ~MCG_C1_CLKS_MASK; // clear CLKS to switch CLKS mux to select PLL as MCG_OUT
-
-// Wait for clock status bits to update
-  for (i = 0 ; i < 2000 ; i++)
-  {
-    if (((MCG_S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) == 0x3) break; // jump out early if CLKST = 3 before loop finishes
-  }
-  if (((MCG_S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) != 0x3) return 0x1B; // check CLKST is set correctly and return with error if not
-
-// Use actual PLL settings to calculate PLL frequency
-  prdiv = ((MCG_C5 & MCG_C5_PRDIV_MASK) + 1);
-  vdiv = ((MCG_C6 & MCG_C6_VDIV_MASK) + 24);
-
-// Now in PEE
-  return (((crystal_val / prdiv) * vdiv) / 2); //MCGOUT equals PLL output frequency/2
-} // fei_pee
-*/
 
 

@@ -18,7 +18,7 @@ void software_reset(){
 }
 
 
-
+#ifdef TOWER_K20
 /* OutSRS routine - checks the value in the SRS registers and sends
  * messages to the terminal announcing the status at the start of the 
  * code.
@@ -179,3 +179,4 @@ void outsrs(void){
  	GPIOC_PCOR = 0x04000000;   // output SRS1 done
        
 }
+#endif

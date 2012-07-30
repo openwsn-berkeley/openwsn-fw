@@ -33,9 +33,13 @@ void sctimer_init() {
 
 	SIM_SCGC6 |= SIM_SCGC6_RTC_MASK; //Enable RTC registers
 	RTC_CR |= RTC_CR_OSCE_MASK; //Turn on RTC oscillator
+#ifdef TOWER_K20
 	SIM_SOPT1 &= ~(3 << 18);//clear osc32ksel
 	SIM_SOPT1 |= SIM_SOPT1_OSC32KSEL(2); //select rtc 32khz
-
+#elif OPENMOTE_K20
+	SIM_SOPT1 &= ~(1 << SIM_SOPT1_OSC32KSEL_SHIFT);//clear osc32ksel
+	SIM_SOPT1 |= SIM_SOPT1_OSC32KSEL_MASK; //select rtc 32khz
+#endif	
 	sctimer_clear_registers();
 
 	LPTMR0_PSR |= (LPTMR_PSR_PRESCALE(0) // 0000 is div 2

@@ -38,7 +38,7 @@ void rsvp_qos_request(uint8_t bandwith, uint16_t refresh_period, open_addr_t des
 	   error_t           outcome;
 	   uint8_t           i,j;
 	  
-	   pkt = openqueue_getFreePacketBuffer();
+	   pkt = openqueue_getFreePacketBuffer(COMPONENT_RSVP);
 	   if (pkt==NULL) {
 	      openserial_printError(COMPONENT_RSVP,ERR_NO_FREE_PACKET_BUFFER,
 	                            (errorparameter_t)0,

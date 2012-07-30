@@ -299,7 +299,7 @@ void default_isr(void)
    #define VECTORNUM                     (*(volatile uint8_t*)(0xE000ED04))
 
    vec=VECTORNUM;
-   printf("%d",VECTORNUM);
+//printf("%d",VECTORNUM);
    return;
 }
 /******************************************************************************/

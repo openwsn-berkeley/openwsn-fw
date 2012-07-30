@@ -5,6 +5,9 @@
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="com.freescale.arm.cdt.toolchain.config.arm.release.761304532">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.freescale.arm.cdt.toolchain.config.arm.release.761304532" moduleId="org.eclipse.cdt.core.settings" name="MK20DX256_INTERNAL_RAM">
+				<macros>
+					<stringMacro name="OPENOS_LOC" type="VALUE_TEXT" value="C:\Users\xvilajosana\Documents\workspaces\openwsn\firmware\openos\"/>
+				</macros>
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.managedbuilder.core.ManagedBuildManager" point="org.eclipse.cdt.core.ScannerInfoProvider"/>
@@ -673,6 +676,9 @@
 		</cconfiguration>
 		<cconfiguration id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068" moduleId="org.eclipse.cdt.core.settings" name="MK20DX256_INTERNAL_FLASH">
+				<macros>
+					<stringMacro name="OPENOS_LOC" type="VALUE_TEXT" value="C:\Users\xvilajosana\Documents\workspaces\openwsn\firmware\openos\"/>
+				</macros>
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.managedbuilder.core.ManagedBuildManager" point="org.eclipse.cdt.core.ScannerInfoProvider"/>
@@ -691,7 +697,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="afx" artifactName="openwsn" buildProperties="" cleanCommand="&quot;${system:ECLIPSE_HOME}/../gnu/bin/rm&quot; -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;com.freescale.core.ide.cdt.errorParsers.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.MwarmErrorParser" id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068" name="MK20DX256_INTERNAL_FLASH" parent="com.freescale.arm.cdt.toolchain.config.arm.release">
+				<configuration artifactExtension="afx" artifactName="openwsn" buildProperties="" buildReferences="true" buildReferencingConfigurations="false" cleanCommand="&quot;${system:ECLIPSE_HOME}/../gnu/bin/rm&quot; -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;com.freescale.core.ide.cdt.errorParsers.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.MwarmErrorParser" id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068" name="MK20DX256_INTERNAL_FLASH" parent="com.freescale.arm.cdt.toolchain.config.arm.release" produceBuildErrorsWithMissingReferences="true">
 					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068." name="/" resourcePath="">
 						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.2135404663" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release">
 							<option id="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119" name="Model" superClass="com.freescale.arm.cdt.toolchain.sharedoption.model" value="com.freescale.arm.cdt.toolchain.sharedoption.model.c9x" valueType="enumerated"/>
@@ -701,13 +707,16 @@
 								<option id="com.freescale.arm.cdt.toolchain.linker.libraries.libSearch.184210399" name="Library Search Paths" superClass="com.freescale.arm.cdt.toolchain.linker.libraries.libSearch" valueType="stringList">
 									<listOptionValue builtIn="false" value="&quot;${MCUToolsBaseDir}/ARM_EABI_Support/ewl/lib&quot;"/>
 								</option>
-								<option id="com.freescale.arm.cdt.toolchain.linker.commandFile.157866562" name="Linker Command File" superClass="com.freescale.arm.cdt.toolchain.linker.commandFile" value="${ProjDirPath}/Project_Settings/linker_files/256KB_pflash_32KB_dflash.lcf" valueType="string"/>
+								<option id="com.freescale.arm.cdt.toolchain.linker.commandFile.157866562" name="Linker Command File" superClass="com.freescale.arm.cdt.toolchain.linker.commandFile" value="C:\Users\xvilajosana\Documents\workspaces\openwsn\firmware\openos\projects\k20\cw\03oos_openwsn\Project_Settings\linker_files\256KB_pflash_32KB_dflash.lcf" valueType="string"/>
 								<option id="com.freescale.arm.cdt.toolchain.linker.entryPoint.888958262" name="Entry Point" superClass="com.freescale.arm.cdt.toolchain.linker.entryPoint" value="__startup" valueType="string"/>
 								<option id="com.freescale.arm.cdt.toolchain.linker.forceActive.2042630953" name="Force Active Symbols" superClass="com.freescale.arm.cdt.toolchain.linker.forceActive" valueType="stringList">
 									<listOptionValue builtIn="false" value="__vector_table"/>
 								</option>
 								<option id="com.freescale.arm.cdt.toolchain.linker.generateMapFile.1852536322" name="Generate Link Map" superClass="com.freescale.arm.cdt.toolchain.linker.generateMapFile" value="true" valueType="boolean"/>
 								<option id="com.freescale.arm.cdt.toolchain.linker.mapKeep.2144137132" name="Keep Map on Failure" superClass="com.freescale.arm.cdt.toolchain.linker.mapKeep" value="false" valueType="boolean"/>
+								<option id="com.freescale.arm.cdt.toolchain.linker.suppressLinkWarnings.32283196" name="Suppress Link Warnings" superClass="com.freescale.arm.cdt.toolchain.linker.suppressLinkWarnings" value="false" valueType="boolean"/>
+								<option id="com.freescale.arm.cdt.toolchain.linker.generateSRecord.482730866" name="Generate S-Record File" superClass="com.freescale.arm.cdt.toolchain.linker.generateSRecord" value="true" valueType="boolean"/>
+								<option id="com.freescale.arm.cdt.toolchain.linker.projectType.824751108" name="Output Type" superClass="com.freescale.arm.cdt.toolchain.linker.projectType" value="com.freescale.arm.cdt.toolchain.linker.projectType.application" valueType="enumerated"/>
 								<inputType id="com.freescale.arm.cdt.toolchain.linker.input.1718082342" name="ARM Linker Input" superClass="com.freescale.arm.cdt.toolchain.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -717,46 +726,47 @@
 							<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler">
 								<option id="com.freescale.arm.cdt.toolchain.armCpp.input.userIncludes.205583644" name="Include User Search Paths (-i)" superClass="com.freescale.arm.cdt.toolchain.armCpp.input.userIncludes" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Project_Headers&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/boards/k20/common}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/boards/k20/cw}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/boards/k20/cpu}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/boards}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/boards/common}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/boards/k20/bsp}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/boards/k20/bsp_ext}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/boards/k20/platforms}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/boards/k20/cpu/headers}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/chips}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/bsp/chips/at86rf231}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/drivers/common}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/kernel/openos}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/02a-MAClow}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/02b-MAChigh}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/02c-MPLS}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/03a-IPHC}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/03b-IPv6}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/04-TRAN}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/heli}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/imu}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/ohlone}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/rex}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/rheli}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/rinfo}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/rleds}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/rreg}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/rrube}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/rt}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/rwellknown}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/rxl1}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/tcpecho}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/tcpinject}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/tcpprint}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/udpecho}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/udpinject}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/07-App/udpprint}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn/cross-layers}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\k20\common&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\k20\cw&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\k20\cpu&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\common&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\k20\bsp&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\k20\bsp_ext&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\k20\platforms&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\k20\cpu\headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\chips&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\chips\at86rf231&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\drivers\common&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\kernel\openos&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\02a-MAClow&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\02b-MAChigh&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\02c-MPLS&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\03a-IPHC&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\03b-IPv6&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\04-TRAN&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\heli&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\imu&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\ohlone&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\rex&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\rheli&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\rinfo&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\rleds&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\rreg&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\rrube&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\rt&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\rwellknown&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\rxl1&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\tcpecho&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\tcpinject&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\tcpprint&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udpecho&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udpinject&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\layerdebug&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udpprint&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\cross-layers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Sources/application}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${MCUToolsBaseDir}/ARM_EABI_Support/ewl/EWL_C/include&quot;"/>
 								</option>
@@ -832,6 +842,21 @@
 							</tool>
 							<tool id="com.freescale.arm.cdt.toolchain.preproc.115069" name="ARM Preprocessor" superClass="com.freescale.arm.cdt.toolchain.preproc.1327579727"/>
 							<tool id="com.freescale.arm.cdt.toolchain.disassembler.933563237" name="ARM Disassembler" superClass="com.freescale.arm.cdt.toolchain.disassembler.1970859907"/>
+						</toolChain>
+					</folderInfo>
+					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1002257415" name="/" resourcePath="Sources/openos">
+						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.68676536" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release" unusedChildren="">
+							<option id="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119.1922588229" name="Model" superClass="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119"/>
+							<targetPlatform id="com.freescale.arm.cdt.toolchain.targetplatform" isAbstract="false" name="ARM Target Platform" superClass="com.freescale.arm.cdt.toolchain.targetplatform"/>
+							<tool id="com.freescale.arm.cdt.toolchain.linker.38955380" name="ARM Linker" superClass="com.freescale.arm.cdt.toolchain.linker.1218070654"/>
+							<tool id="com.freescale.arm.cdt.toolchain.compiler.1014513703" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+								<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.525092918" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+							</tool>
+							<tool id="com.freescale.arm.cdt.toolchain.assembler.870495679" name="ARM Assembler" superClass="com.freescale.arm.cdt.toolchain.assembler.1235350250">
+								<inputType id="com.freescale.arm.cdt.toolchain.armAsm.input.1605596471" name="ARM Assembler Input" superClass="com.freescale.arm.cdt.toolchain.armAsm.input"/>
+							</tool>
+							<tool id="com.freescale.arm.cdt.toolchain.preproc.1410480092" name="ARM Preprocessor" superClass="com.freescale.arm.cdt.toolchain.preproc.1327579727"/>
+							<tool id="com.freescale.arm.cdt.toolchain.disassembler.1477012143" name="ARM Disassembler" superClass="com.freescale.arm.cdt.toolchain.disassembler.1970859907"/>
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>

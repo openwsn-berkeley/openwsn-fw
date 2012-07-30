@@ -333,6 +333,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\bbk\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>

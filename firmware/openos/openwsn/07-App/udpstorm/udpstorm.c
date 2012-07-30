@@ -7,7 +7,7 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "scheduler.h"
-#include "ADC_Channel.h"
+//#include "ADC_Channel.h"
 #include "IEEE802154E.h"
 
 //=========================== defines =========================================

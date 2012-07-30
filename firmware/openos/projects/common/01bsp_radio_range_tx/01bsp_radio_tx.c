@@ -17,7 +17,7 @@ can use this project with any platform.
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
-#define CHANNEL         26            // 2.480GHz
+#define CHANNEL         15            // 2.480GHz
 #define TIMER_ID        0
 #define TIMER_PERIOD    32768          // 1s @ 32kHz
 
@@ -102,7 +102,9 @@ int mote_main(void) {
    // start transmitting packet
    leds_radio_off();
    leds_sync_on();
-   for (i=0;i<255;i++) {
+   //for (i=0;i<255;i++) {
+   while(1){
+      i=i%255;
       app_vars.packet_num=i;
       app_vars.packet[0]=i;//set the packet number.
       radio_loadPacket(app_vars.packet,app_vars.packet_len);
@@ -110,11 +112,9 @@ int mote_main(void) {
       radio_txNow();
       app_vars.lock=1;//get semaphore unitl tx done
       while ( app_vars.lock);
-      for (j=0;j<0xFFFF;j++);
-              leds_circular_shift();
-            for (j=0;j<0xFFFF;j++);
-                      leds_circular_shift();
-                        for (j=0;j<0xFFFF;j++);
+      for (j=0;j<0xFFFF;j++); //small wait
+      leds_circular_shift();
+     
 //      app_vars.lock=1;//get semaphore
 //      bsp_timer_scheduleIn(327);//1ms
 //    

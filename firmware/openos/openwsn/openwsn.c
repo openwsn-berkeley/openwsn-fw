@@ -26,8 +26,8 @@
 #include "udpecho.h"
 #include "udpinject.h"
 #include "udpprint.h"
-#include "udprand.h"
-#include "udpstorm.h"
+//#include "udprand.h"
+//#include "udpstorm.h"
 //l4
 #include "opencoap.h"
 #include "openudp.h"

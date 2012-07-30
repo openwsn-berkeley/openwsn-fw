@@ -26,6 +26,9 @@
  * Include the platform specific header file 
  */
 
+#define OPENMOTE_K20 1
+
+
 #if (defined(TWR_K20D72M))
   #include "tower.h"
 #else
@@ -36,8 +39,11 @@
  * Include the cpu specific header file 
  */
 #if (defined(MCU_MK20DZ72))
- // #include "MK51D7.h"
-	#include "MK20D7.h"
+	#if (defined(TOWER_K20))
+		#include "MK20D7.h"
+    #elif (defined (OPENMOTE_K20))
+        #include "MK20DZ10.h"
+    #endif 
 #elif (defined(MCU_MK40DZ72))
   #include "MK51D7.h"
 #elif (defined(MCU_MK50DZ72))
