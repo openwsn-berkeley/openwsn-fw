@@ -181,7 +181,7 @@ void layerdebug_task_neighbors_cb() {
    pkt->owner      = COMPONENT_LAYERDEBUG;
    // CoAP payload
 
-   size=neighbors_getNumberOfNeighbors(); //compute the number of neigbours sent   
+   size=neighbors_getNumNeighbors(); //compute the number of neigbours sent   
    packetfunctions_reserveHeaderSize(pkt,size*sizeof(netDebugNeigborEntry_t));//reserve for the size of schedule entries
   
    neighbors_getNetDebugInfo((netDebugNeigborEntry_t*) pkt->payload,MAXPAYLOADLEN-1);
@@ -278,7 +278,7 @@ error_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
       msg->payload                     = &(msg->packet[127]);
       msg->length                      = 0;
            
-      size=neighbors_getNumberOfNeighbors(); //compute the number of neigbours sent   
+      size=neighbors_getNumNeighbors(); //compute the number of neigbours sent   
       packetfunctions_reserveHeaderSize(msg,size*sizeof(netDebugNeigborEntry_t));//reserve for the size of schedule entries
   
       neighbors_getNetDebugInfo((netDebugNeigborEntry_t*) msg->payload,MAXPAYLOADLEN-1);
