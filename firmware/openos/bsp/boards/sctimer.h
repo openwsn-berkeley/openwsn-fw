@@ -23,6 +23,7 @@ typedef uint8_t (*sctimer_cbt)(void);
 //=========================== prototypes ======================================
 
 void sctimer_init();
+void sctimer_stop();
 void sctimer_schedule(PORT_TIMER_WIDTH val);
 PORT_TIMER_WIDTH sctimer_getValue();
 void sctimer_setCb(sctimer_cbt cb);

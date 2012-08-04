@@ -97,12 +97,11 @@ void spi_init() {
 
 	GPIOD_PDDR |= SPI_CS_PIN_MASK;//CS0 -- as output gpio
 
-	GPIOD_PSOR |=SPI_CS_PIN_MASK;//set cs
+	GPIOD_PSOR |= SPI_CS_PIN_MASK;//set cs
 
 	SPI0_MCR   = SPI_MCR_MSTR_MASK | SPI_MCR_DIS_RXF_MASK |  /* Configure SPI as master. Disable rx/tx fifos. Set */
 			SPI_MCR_DIS_TXF_MASK | SPI_MCR_ROOE_MASK |  /* overwrite incoming data. Set state to STOPPED.    */ 
-			SPI_MCR_HALT_MASK |
-			SPI_MCR_PCSIS(1);                         /* Chipselects inactive high                         */
+			SPI_MCR_HALT_MASK |	SPI_MCR_PCSIS(1);                         /* Chipselects inactive high        using PCS0         */
 
 	/* SPI0_TCR: SPI_TCNT=0 */
 	SPI0_TCR = (uint32_t)0x00UL;     
@@ -128,10 +127,11 @@ void spi_init() {
 	// assumming core cpu at 72Mhz and peripheral clk at 36Mhz
 	// 1.8Mhz --> pbr=7--> SPI_CTAR_PBR(3) and 	br=16 -->SPI_CTAR_BR(4)
 	// 6 Mhz  --> pbr=5--> SPI_CTAR_PBR(2) and  br=8 -->SPI_CTAR_BR(3)
-	SPI0_CTAR0 = (SPI_CTAR_DBR_MASK | SPI_CTAR_FMSZ(8-1) | SPI_CTAR_PDT(0) | SPI_CTAR_BR(3)|SPI_CTAR_PBR(2) ); 
+	SPI0_CTAR0 = (SPI_CTAR_DBR_MASK | SPI_CTAR_FMSZ(8-1) | SPI_CTAR_PDT(0) | SPI_CTAR_BR(4)|SPI_CTAR_PBR(3) ); 
 
 
 	SPI0_SR       = SPI_SR_EOQF_MASK|SPI_SR_TCF_MASK|SPI_SR_TFUF_MASK|SPI_SR_TFFF_MASK|SPI_SR_RFOF_MASK|SPI_SR_RFDF_MASK;             
+	//SPI0_SR       = SPI_SR_EOQF_MASK;
 	/* Set RUNNING state.                                */
 	SPI0_MCR    &= ~SPI_MCR_HALT_MASK; /* SPI0_MCR: HALT=0 */
 
@@ -183,6 +183,7 @@ void spi_txrx(uint8_t*     bufTx,
 	// lower CS signal to have slave listening
 	if (spi_vars.isFirst==SPI_FIRST) {
 		GPIOD_PCOR |=SPI_CS_PIN_MASK;//clear cs
+		//cont_trans_mask=SPI_PUSHR_CONT_MASK;
 	}
 
 #ifdef SPI_IN_INTERRUPT_MODE
@@ -204,10 +205,13 @@ void spi_txrx(uint8_t*     bufTx,
 		SPI0_SR    = SPI_SR_RFOF_MASK | SPI_SR_TCF_MASK       /* Clear all flags.                                     */
 				| SPI_SR_TFFF_MASK | SPI_SR_RFDF_MASK;
 
+//		if (spi_vars.txBytesLeft==1 && spi_vars.isLast==SPI_LAST){
+//			cont_trans_mask=0x00000000u;
+//		}
 		SPI0_PUSHR = SPI_PUSHR_CTAS(0)   /* Transmit data.      use ctar0                                 */
-		                				   | SPI_PUSHR_CONT_MASK //1 Keep PCSn signals asserted between transfers.
-		                				   | SPI_PUSHR_PCS(0)  //negate the pcs signal.
-		                				   | *spi_vars.pNextTxByte;        
+					 | SPI_PUSHR_CONT_MASK //1 Keep PCSn signals asserted between transfers.
+		             | SPI_PUSHR_PCS(0)  //negate the pcs signal.
+		             | *spi_vars.pNextTxByte;        
 
 		while (! (SPI0_SR & SPI_SR_TCF_MASK)) {}
 		while (! (SPI0_SR & SPI_SR_RFDF_MASK)) {}             /* wait read buffer not empty flag                      */
@@ -237,6 +241,7 @@ void spi_txrx(uint8_t*     bufTx,
 	// put CS signal high to signal end of transmission to slave
 	if (spi_vars.isLast==SPI_LAST) {
 		GPIOD_PSOR |=SPI_CS_PIN_MASK;//set cs
+		//cont_trans_mask=0x00000000u;
 	}
 
 	// SPI is not busy anymore

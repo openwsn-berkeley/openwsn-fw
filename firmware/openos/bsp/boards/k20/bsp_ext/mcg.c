@@ -240,7 +240,7 @@ int pee_pbe(int crystal_val)
 // Check MCG is in PEE mode
   if (!((((MCG_S & MCG_S_CLKST_MASK) >> MCG_S_CLKST_SHIFT) == 0x3) && // check CLKS mux has selcted PLL output
       (!(MCG_S & MCG_S_IREFST_MASK)) &&                               // check FLL ref is external ref clk
-      (MCG_S & MCG_S_PLLST0_MASK)))                                    // check PLLS mux has selected PLL 
+      (MCG_S & MCG_S_PLLST_MASK)))                                    // check PLLS mux has selected PLL 
   {
     return 0x8;                                                       // return error code
   } 

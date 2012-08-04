@@ -18,10 +18,10 @@
 #include "eui64.h"
 
 // sensors
-#include "gyro.h"
-#include "large_range_accel.h"
-#include "magnetometer.h"
-#include "sensitive_accel_temperature.h"
+//#include "gyro.h"
+//#include "large_range_accel.h"
+//#include "magnetometer.h"
+//#include "sensitive_accel_temperature.h"
 //#include "ADC_Channel.h"
 
 //#define ISR_BUTTON 1
@@ -87,16 +87,16 @@ void board_init() {
    eui64_get(eui);
    if (eui[3]==0x09) {
       // first initialize them
-      gyro_init();
-      large_range_accel_init();
-      magnetometer_init();
-      sensitive_accel_temperature_init();
-     
-      // then turn them off
-      gyro_disable();
-      large_range_accel_disable();
-      magnetometer_disable();
-      sensitive_accel_temperature_disable();
+//      gyro_init();
+//      large_range_accel_init();
+//      magnetometer_init();
+//      sensitive_accel_temperature_init();
+//     
+//      // then turn them off
+//      gyro_disable();
+//      large_range_accel_disable();
+//      magnetometer_disable();
+//      sensitive_accel_temperature_disable();
    }
 }
 

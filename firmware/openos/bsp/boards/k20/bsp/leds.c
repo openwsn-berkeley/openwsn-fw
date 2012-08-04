@@ -23,7 +23,7 @@ void leds_deinit() {
 	GPIO_DeInit();
 }
 
-// red
+// red led3
 void    leds_error_on() {
 	LED1_ON;  
 }
@@ -37,7 +37,7 @@ uint8_t leds_error_isOn() {
 	return LED1_IS_ON;
 }
 
-// orange
+// orange led 1
 void    leds_radio_on() {
 	LED3_ON;
 }
@@ -51,7 +51,7 @@ uint8_t leds_radio_isOn() {
  return LED3_IS_ON;
 }
 
-// green
+// green led2
 void    leds_sync_on() {
 	LED2_ON;
 }
@@ -65,7 +65,7 @@ uint8_t leds_sync_isOn() {
 	return LED2_IS_ON;
 }
 
-// yellow
+// yellow led 4
 void    leds_debug_on() {
 	LED0_ON;
 }

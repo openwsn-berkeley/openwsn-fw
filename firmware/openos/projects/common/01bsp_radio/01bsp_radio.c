@@ -7,19 +7,19 @@ can use this project with any platform.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
-#include "stdint.h"
-#include "string.h"
+
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
 #include "bsp_timer.h"
+
 
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL         26             // 2.480GHz
 #define TIMER_ID        0
-#define TIMER_PERIOD    32768          // 1s @ 32kHz
+#define TIMER_PERIOD    65535          // 2s @ 32kHz
 
 //=========================== variables =======================================
 
@@ -78,7 +78,7 @@ int mote_main(void) {
    
    // initialize board
    board_init();
-   
+ 
    // add callback functions radio
    radio_setOverflowCb(cb_radioTimerOverflows);
    radio_setCompareCb(cb_radioTimerCompare);
@@ -88,9 +88,9 @@ int mote_main(void) {
    // prepare packet
    app_vars.packet_len = sizeof(app_vars.packet);
    for (i=0;i<app_vars.packet_len;i++) {
-      app_vars.packet[i] = i;
+      app_vars.packet[i] = ID;
    }
-   
+
    // start bsp timer
    bsp_timer_set_callback(cb_timer);
    bsp_timer_scheduleIn(TIMER_PERIOD);
@@ -137,7 +137,10 @@ int mote_main(void) {
             switch (app_vars.state) {
                case APP_STATE_RX:
                   // done receiving a packet
-                  
+            	   app_vars.packet_len = sizeof(app_vars.packet);
+            	     for (i=0;i<app_vars.packet_len;i++) {
+            	        app_vars.packet[i] = 0;
+            	     }
                   // get packet from radio
                   radio_getReceivedFrame(app_vars.packet,
                                          &app_vars.packet_len,
@@ -168,6 +171,11 @@ int mote_main(void) {
             if (app_vars.state==APP_STATE_RX) {
                // stop listening
                radio_rfOff();
+               // prepare packet
+               app_vars.packet_len = sizeof(app_vars.packet);
+               for (i=0;i<app_vars.packet_len;i++) {
+                  app_vars.packet[i] = ID;
+               }
                
                // start transmitting packet
                radio_loadPacket(app_vars.packet,app_vars.packet_len);

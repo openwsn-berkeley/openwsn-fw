@@ -39,6 +39,13 @@ int mote_main(void) {
    
    // sleep
    while(1) {
-      board_sleep();
+    //  board_sleep();
+	   spi_txrx(spi_tx_buffer,
+	           sizeof(spi_tx_buffer),
+	           SPI_BUFFER,
+	           spi_rx_buffer,
+	           sizeof(spi_rx_buffer),
+	           SPI_FIRST,
+	           SPI_LAST);
    }
 }

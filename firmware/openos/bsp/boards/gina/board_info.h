@@ -14,6 +14,7 @@ to return the board's description.
 #include "msp430x26x.h"
 #include "string.h"
 
+#define ID 0xAA
 //=========================== defines =========================================
 
 #define port_INLINE                         inline

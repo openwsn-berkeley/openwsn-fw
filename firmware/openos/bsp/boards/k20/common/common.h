@@ -27,6 +27,7 @@
  */
 
 #define OPENMOTE_K20 1
+//#define TOWER_K20 1
 
 
 #if (defined(TWR_K20D72M))

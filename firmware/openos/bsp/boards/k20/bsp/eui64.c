@@ -39,7 +39,8 @@ void eui64_get(uint8_t* addressToWrite){
 	//
 	aux=euiML;//last byte of the Mid low eui
 	*addressToWrite=(uint8_t)((aux>>0) & 0x000000FF);
-
+	addressToWrite++;
+	
 	aux=euiL;//all 4 bytes of the low eui
 	*addressToWrite=(uint8_t)((aux>>24) & 0x000000FF);
 	addressToWrite++;
@@ -48,6 +49,6 @@ void eui64_get(uint8_t* addressToWrite){
 	*addressToWrite=(uint8_t)((aux>>8) & 0x000000FF);
 	addressToWrite++;
 	*addressToWrite=(uint8_t)((aux>>0) & 0x000000FF);
-	addressToWrite++;
+	//addressToWrite++;
 
 }

@@ -27,14 +27,15 @@ int main(void) {
 }
 
 void board_init() {
+	uint16_t i,j;
 	//enable all port clocks.
 	SIM_SCGC5 |= (SIM_SCGC5_PORTA_MASK
 			| SIM_SCGC5_PORTB_MASK
 			| SIM_SCGC5_PORTC_MASK
 			| SIM_SCGC5_PORTD_MASK
 			| SIM_SCGC5_PORTE_MASK );
-   
-		
+
+
 	//init all pins for the radio
 	//SLPTR
 #ifdef TOWER_K20
@@ -42,26 +43,37 @@ void board_init() {
 	GPIOB_PDDR |= RADIO_SLPTR_MASK; //set as output
 
 	//RADIO RST -- TODO in the TWR change it to another pin! this is one of the leds.
-	PORTC_PCR10 = PORT_PCR_MUX(1);// -- PTC10 used as gpio for radio rst
+	PORTC_PCR9 = PORT_PCR_MUX(1);// -- PTC9 used as gpio for radio rst
 	GPIOC_PDDR |= RADIO_RST_MASK; //set as output
-	
-	
+
+
 #elif OPENMOTE_K20
-	    PORTD_PCR4 = PORT_PCR_MUX(1);// -- PTD4 used as gpio for slptr
-		GPIOD_PDDR |= RADIO_SLPTR_MASK; //set as output
-		
-		//RADIO RST 
-		PORTD_PCR5 = PORT_PCR_MUX(1);// -- PTD5 used as gpio for radio rst
-		GPIOD_PDDR |= RADIO_RST_MASK; //set as output
-	
+	PORTD_PCR4 = PORT_PCR_MUX(1);// -- PTD4 used as gpio for slptr
+	GPIOD_PDDR |= RADIO_SLPTR_MASK; //set as output
+
+	//RADIO RST 
+	PORTD_PCR5 = PORT_PCR_MUX(1);// -- PTD5 used as gpio for radio rst
+	GPIOD_PDDR |= RADIO_RST_MASK; //set as output
+
 #endif	
+
 	
-	PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
-	PORT_PIN_RADIO_RESET_HIGH();//reset the radio
+	
+//	PORT_PIN_RADIO_RESET_HIGH();//reset the radio
+//	for (i=0;i<0xFFFF;i++){// delay for reset.
+//		for (j=0;j<0xF;j++);// delay for reset.
+//	}
 	PORT_PIN_RADIO_RESET_LOW();//activate the radio.
+//	for (i=0;i<0xFFFF;i++){// delay for reset.
+//			for (j=0;j<0xFF;j++);// delay for reset.
+//		}
+	
+//	PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
+	PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
+	
 	//ptc5 .. ptc5 is pin 62, irq A
 	enable_irq(RADIO_EXTERNAL_PORT_IRQ_NUM);//enable the irq. The function is mapped to the vector at position 105 (see manual page 69). The vector is in isr.h
-		
+
 	//external port radio_isr.
 	PORTC_PCR5 = PORT_PCR_MUX(1);// -- PTC5 used as gpio for radio isr through llwu
 	GPIOC_PDDR &= ~1<<RADIO_ISR_PIN; //set as input ==0
@@ -69,7 +81,7 @@ void board_init() {
 	PORTC_PCR5 |= PORT_PCR_ISF_MASK; //clear any pending interrupt.
 
 	llwu_init();//low leakage unit init - to recover from deep sleep
-	
+
 	debugpins_init();
 	leds_init();
 	bsp_timer_init();
@@ -78,8 +90,14 @@ void board_init() {
 	spi_init();	
 	radio_init();
 	leds_all_off();
+	leds_sync_on();
 	leds_radio_on();
-	
+	leds_debug_on();
+	leds_error_on();
+	leds_all_off();
+	debugpins_fsm_clr();
+		
+
 }
 
 
@@ -110,13 +128,14 @@ void radio_external_port_c_isr(void) {
 	uint32_t portc;
 	debugpins_isr_set();
 	portc=PORTC_ISFR;
-	 //reconfigure..	
+	//reconfigure..	
 	//SIM_SCGC5 |= SIM_SCGC5_PORTC_MASK;
 	if ((PORTC_ISFR) & (RADIO_ISR_MASK)) {
-		
+
 		PORTC_PCR5 |= PORT_PCR_ISF_MASK;    //clear flag
 		PORTC_ISFR |= RADIO_ISR_MASK; //clear isr flag
 		radio_isr();
+		leds_debug_toggle();
 	}else{
 		while(1);
 		//radio_isr();

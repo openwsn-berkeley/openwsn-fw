@@ -14,6 +14,7 @@
 #include <stdint.h>
 
 //=========================== defines =========================================
+#define ID 0x45
 
 #define port_INLINE                         inline
 
@@ -68,16 +69,16 @@ static const uint8_t infoRadioName[] = "AT86RF231";
 #define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()  GPIOB_PSOR |= RADIO_SLPTR_MASK //set
 #define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()   GPIOB_PCOR |= RADIO_SLPTR_MASK //clear
 
-//  radio RSTn PTC10
+//  radio RSTn PTC8
 #define PORT_PIN_RADIO_RESET_HIGH()     GPIOC_PCOR |= RADIO_RST_MASK; //clear as it is inverted. 
-#define PORT_PIN_RADIO_RESET_LOW()        GPIOC_PSOR |= RADIO_RST_MASK; //set to high (as radio pin is inverted so this means no reset.)
+#define PORT_PIN_RADIO_RESET_LOW()      GPIOC_PSOR |= RADIO_RST_MASK; //set to high (as radio pin is inverted so this means no reset.)
 
 
 #define RADIO_SLPTR_PIN 3 //PTB4
 #define RADIO_SLPTR_MASK (1<<RADIO_SLPTR_PIN)
 #define RADIO_ISR_PIN 5  //PTC5
 #define RADIO_ISR_MASK (1<<RADIO_ISR_PIN)
-#define RADIO_RST_PIN 10 //PTC10 -- TODO change that pin as it is a led. 
+#define RADIO_RST_PIN 9 //PTC9 
 #define RADIO_RST_MASK (1<<RADIO_RST_PIN)
 
 #elif OPENMOTE_K20

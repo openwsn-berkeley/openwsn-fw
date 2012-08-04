@@ -48,6 +48,10 @@ typedef struct {
    PORT_TIMER_WIDTH           num_endOfFrame;
    //pdu - channel hopping debug
    uint8_t  chanCtr[16]; //it counts the usage of each channel
+
+   uint8_t synckack;
+   uint8_t synckpkt;
+   uint8_t numADV;
    //pdu
 } ieee154e_dbg_t;
 
@@ -60,6 +64,8 @@ typedef struct {
    PORT_SIGNED_INT_WIDTH            minCorrection;        // minimum time correction
    PORT_SIGNED_INT_WIDTH            maxCorrection;        // maximum time correction
    uint8_t            numDeSync;            // number of times a desync happened
+   PORT_SIGNED_INT_WIDTH   correction[10];
+   uint8_t num_sync;
 } ieee154e_stats_t;
 PRAGMA(pack());
 
@@ -205,6 +211,7 @@ This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
    radio_setTimerPeriod(TsSlotDuration);
+   
    debugpins_slot_toggle();
    if (ieee154e_vars.isSync==FALSE) {
       activity_synchronize_newSlot();
@@ -525,7 +532,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       
       // if I just received a valid ADV, handle
       if (isValidAdv(&ieee802514_header)==TRUE) {
-         
+         ieee154e_dbg.numADV++;
          // turn off the radio
          radio_rfOff();
          
@@ -590,7 +597,7 @@ port_INLINE void activity_ti1ORri1() {
       if (ieee154e_vars.deSyncTimeout==0) {
          // declare myself desynchronized
          changeIsSync(FALSE);
-         
+        
          // log the error
          openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
                                (errorparameter_t)ieee154e_vars.slotOffset,
@@ -1508,6 +1515,8 @@ port_INLINE void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
    ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
    */
    ieee154e_vars.asnOffset = ieee154e_vars.freq - 11 - schedule_getChannelOffset();
+   
+
 }
 
 //======= synchronization
@@ -1534,6 +1543,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
 //printf("new period set %d %\n",newPeriod );
    // update statistics
+   ieee154e_dbg.synckpkt++;
    updateStats(timeCorrection);
 }
 
@@ -1546,6 +1556,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    radio_setTimerPeriod(newPeriod);
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    // update statistics
+   ieee154e_dbg.synckack++;
    updateStats(timeCorrection);
 }
 
@@ -1602,9 +1613,11 @@ port_INLINE void resetStats() {
 }
 
 void updateStats(PORT_SIGNED_INT_WIDTH timeCorrection) {
-   
-   ieee154e_stats.syncCounter++;
-   
+    ieee154e_stats.correction[ieee154e_stats.num_sync%10]=timeCorrection;
+    ieee154e_stats.num_sync++;
+    
+    ieee154e_stats.syncCounter++;
+
    if (timeCorrection<ieee154e_stats.minCorrection) {
      ieee154e_stats.minCorrection = timeCorrection;
    }
@@ -1669,6 +1682,7 @@ void changeState(ieee154e_state_t newstate) {
       case S_SYNCLISTEN:
       case S_TXDATAOFFSET:
          debugpins_fsm_set();
+       //  debugpins_frame_toggle();
          break;
       case S_SLEEP:
       case S_RXDATAOFFSET:
