@@ -56,7 +56,7 @@ where:
 #include "stdint.h"
 
 //===== start editing according to the label printed on the board =============
-#define LABEL_00E1
+#define LABEL_00F0
 //===== stop editing ==========================================================
 
 enum {
