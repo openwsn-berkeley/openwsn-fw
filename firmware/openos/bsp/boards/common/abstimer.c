@@ -32,11 +32,6 @@ typedef struct {
    uint16_t                  num_radiotimer_overflow;
    uint16_t                  num_radiotimer_compare;
    uint16_t                  num_late_schedule;
-   uint16_t                  num_radiotimer_isr;
-   uint16_t                  radiotimer_overflow_prev[10];
-   uint8_t                   rt_count;
-   uint16_t                  radiotimer_period[10];
-   uint8_t                   rp_count;
 } abstimer_dbg_t;
 
 abstimer_dbg_t abstimer_dbg;
@@ -58,7 +53,6 @@ typedef struct {
    uint16_t                  bsp_timer_total;    // total time of the scheduled bsp timer (relative value)
    //poipio
    uint8_t  bitmapInterruptsFired;
-   uint16_t  poipoiLoop;
 } abstimer_vars_t;
 
 abstimer_vars_t abstimer_vars;
@@ -165,12 +159,6 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 
    // remember previous overflow value
    abstimer_vars.radiotimer_overflow_previousVal                = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-
-   
-    //debug XV 
-    abstimer_dbg.radiotimer_overflow_prev[abstimer_dbg.rt_count%10]= abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-    abstimer_dbg.rt_count++;
-   
    
    // update the timer value (calculated as one period since the last one)
    abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
@@ -194,33 +182,15 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 }
 
  void radiotimer_setPeriod(uint16_t period) {
-
-   uint16_t oldperiod;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-
-   //debug xv
-   abstimer_dbg.radiotimer_period[ abstimer_dbg.rp_count%10]=period;
-   abstimer_dbg.rp_count++;
-   
-   //oldperiod = abstimer_vars.radiotimer_period;
    //why??
    abstimer_vars.radiotimer_period=period+1;
 
-   // correct the period in that current slot. so remove the current period
-  // abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  -= oldperiod;
-
-   // keep init time          
-   //poipoiabstimer_vars.radiotimer_overflow_previousVal=abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-
-   // set new period
-//   abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  += abstimer_vars.radiotimer_period;
-   //DEBUG XV.. try to solve bug.. 
    abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]  = abstimer_vars.radiotimer_overflow_previousVal + abstimer_vars.radiotimer_period;
    // reschedule
    abstimer_reschedule();
-   ENABLE_INTERRUPTS();
-   
+   ENABLE_INTERRUPTS();  
 }
 
  uint16_t radiotimer_getPeriod() {
@@ -335,19 +305,10 @@ uint8_t radiotimer_isr() {
    uint16_t        calc;
    uint16_t        min;
    uint16_t        tempcompare;
-
-   uint16_t taiv_temp = TAIV;                    // read only once because accessing TAIV resets it
-   if (taiv_temp!=2) {
-      while(1);                               // this should not happen
-   }
    
    sctimer_clearISR();
    
-   abstimer_dbg.num_radiotimer_isr++;
-   
    debugpins_radio_set();
-   
-   abstimer_vars.poipoiLoop=0;
    
    // update the current theoretical time
    abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
@@ -377,8 +338,6 @@ uint8_t radiotimer_isr() {
    
    while (abstimer_vars.bitmapInterruptsFired!=0) {
       
-      abstimer_vars.poipoiLoop++;
-      
       while (abstimer_vars.bitmapInterruptsFired!=0) {
          if       (abstimer_vars.bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW)) {
             
@@ -388,18 +347,9 @@ uint8_t radiotimer_isr() {
             // keep previous value poipoi
             abstimer_vars.radiotimer_overflow_previousVal = \
                           abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-           //debug XV 
-            abstimer_dbg.radiotimer_overflow_prev[abstimer_dbg.rt_count%10]= abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-            abstimer_dbg.rt_count++;
-            
             // remember compare val
             tempcompare = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-
-//TODO .. here the bug needs to be solved.            
-//debug XV -- set previous val to now so if the callbacks schedules a new one this is relative to now
-//             and not to the previous
-//            
-            
+      
             // call the callback
             abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]();
             
@@ -415,14 +365,6 @@ uint8_t radiotimer_isr() {
                
                // poipoipoi
                //poipoiabstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]  += abstimer_vars.radiotimer_period;
-            }else{
-              //it has changed in the callback this is because the current slot is a sync slot and now we are executing
-              //the end of the slot callback and newSlot has been invoked. Note that if this happens, we are setting a timer in 
-              //the past as the setPeriod has removed current value and added the new one that can be in the past.
-              //debug
-              while(0);
-              
-              
             }
                      
             // clear the interrupt flag

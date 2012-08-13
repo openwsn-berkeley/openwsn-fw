@@ -119,3 +119,8 @@ void sctimer_clear_registers() {
 	LPTMR0_PSR = 0x00;
 	LPTMR0_CMR = 0x00;
 }
+
+
+void sctimer_stop() {
+ //do nothing by now.
+}

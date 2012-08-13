@@ -20,7 +20,7 @@
 typedef struct {
    radiotimer_capture_cbt    startFrame_cb;
    radiotimer_capture_cbt    endFrame_cb;
-   radio_state_t             state;
+   radio_state_t             state; 
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -47,18 +47,18 @@ void radio_init() {
    
    // change state
    radio_vars.state          = RADIOSTATE_STOPPED;
-
+  
    // configure the radio
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);    // turn radio off
-
+  
    radio_spiWriteReg(RG_IRQ_MASK,
                      (AT_IRQ_RX_START| AT_IRQ_TRX_END));  // tell radio to fire interrupt on TRX_END and RX_START
    radio_spiReadReg(RG_IRQ_STATUS);                       // deassert the interrupt pin in case is high
    radio_spiWriteReg(RG_ANT_DIV, RADIO_CHIP_ANTENNA);     // use chip antenna
-
 #define RG_TRX_CTRL_1 0x04
    radio_spiWriteReg(RG_TRX_CTRL_1, 0x20);                // have the radio calculate CRC
    //busy wait until radio status is TRX_OFF
+  
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
    
    // change state
@@ -169,6 +169,7 @@ void radio_txEnable() {
 }
 
 void radio_txNow() {
+   PORT_TIMER_WIDTH val;
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
    
@@ -185,7 +186,8 @@ void radio_txNow() {
    // transmitted (I've never seen that).
    if (radio_vars.startFrame_cb!=NULL) {
       // call the callback
-      radio_vars.startFrame_cb(radiotimer_getCapturedTime());
+      val=radiotimer_getCapturedTime();
+      radio_vars.startFrame_cb(val);
    }
 }
 
@@ -261,7 +263,7 @@ uint8_t radio_spiReadRadioInfo(){
          SPI_FIRST,
          SPI_LAST);
 
-   return spi_rx_buffer[1];
+   return spi_rx_buffer[2];
 }
 
 void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
@@ -403,6 +405,7 @@ uint8_t radio_isr() {
    capturedTime = radiotimer_getCapturedTime();
    // reading IRQ_STATUS causes radio's IRQ pin to go low
    irq_status = radio_spiReadReg(RG_IRQ_STATUS);
+    
    // start of frame event
    if (irq_status & AT_IRQ_RX_START) {
       // change state

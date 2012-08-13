@@ -46,13 +46,6 @@ typedef struct {
    PORT_TIMER_WIDTH           num_timer;
    PORT_TIMER_WIDTH           num_startOfFrame;
    PORT_TIMER_WIDTH           num_endOfFrame;
-   //pdu - channel hopping debug
-   uint8_t  chanCtr[16]; //it counts the usage of each channel
-
-   uint8_t synckack;
-   uint8_t synckpkt;
-   uint8_t numADV;
-   //pdu
 } ieee154e_dbg_t;
 
 ieee154e_dbg_t ieee154e_dbg;
@@ -64,8 +57,7 @@ typedef struct {
    PORT_SIGNED_INT_WIDTH            minCorrection;        // minimum time correction
    PORT_SIGNED_INT_WIDTH            maxCorrection;        // maximum time correction
    uint8_t            numDeSync;            // number of times a desync happened
-   PORT_SIGNED_INT_WIDTH   correction[10];
-   uint8_t num_sync;
+   uint8_t            num_sync;
 } ieee154e_stats_t;
 PRAGMA(pack());
 
@@ -211,7 +203,6 @@ This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
    radio_setTimerPeriod(TsSlotDuration);
-   
    debugpins_slot_toggle();
    if (ieee154e_vars.isSync==FALSE) {
       activity_synchronize_newSlot();
@@ -311,16 +302,16 @@ This function executes in ISR mode.
 */
 void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
    if (ieee154e_vars.isSync==FALSE) {
-      activity_synchronize_startOfFrame(capturedTime);
+     activity_synchronize_startOfFrame(capturedTime);
    } else {
       switch (ieee154e_vars.state) {
-         case S_TXDATADELAY:
+         case S_TXDATADELAY:   
             activity_ti4(capturedTime);
             break;
          case S_RXACKLISTEN:
             activity_ti8(capturedTime);
             break;
-         case S_RXDATALISTEN:
+         case S_RXDATALISTEN:      
             activity_ri4(capturedTime);
             break;
          case S_TXACKDELAY:
@@ -532,7 +523,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       
       // if I just received a valid ADV, handle
       if (isValidAdv(&ieee802514_header)==TRUE) {
-         ieee154e_dbg.numADV++;
          // turn off the radio
          radio_rfOff();
          
@@ -1256,7 +1246,7 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->creator = COMPONENT_IEEE802154E;
    ieee154e_vars.ackToSend->owner   = COMPONENT_IEEE802154E;
    
-   // calculate the time timeCorrection
+   // calculate the time timeCorrection (this is the time when the packet arrive w.r.t the time it should be.
    timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
    
    // add the payload to the ACK (i.e. the timeCorrection)
@@ -1541,9 +1531,6 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
    newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)newPeriod+timeCorrection);
    radio_setTimerPeriod(newPeriod);
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
-//printf("new period set %d %\n",newPeriod );
-   // update statistics
-   ieee154e_dbg.synckpkt++;
    updateStats(timeCorrection);
 }
 
@@ -1555,8 +1542,6 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod-timeCorrection);
    radio_setTimerPeriod(newPeriod);
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
-   // update statistics
-   ieee154e_dbg.synckack++;
    updateStats(timeCorrection);
 }
 
@@ -1613,9 +1598,6 @@ port_INLINE void resetStats() {
 }
 
 void updateStats(PORT_SIGNED_INT_WIDTH timeCorrection) {
-    ieee154e_stats.correction[ieee154e_stats.num_sync%10]=timeCorrection;
-    ieee154e_stats.num_sync++;
-    
     ieee154e_stats.syncCounter++;
 
    if (timeCorrection<ieee154e_stats.minCorrection) {
@@ -1648,21 +1630,10 @@ different channel offsets in the same slot.
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
-   //return 11+(asn+channelOffset)%16;
    // poipoi: no channel hopping
-   // return 26;  
-  
+   // return 26;    
    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
-  
    uint8_t temp = 11+(ieee154e_vars.asnOffset+channelOffset)%16;
-  
-   //pdu - update channel counter
-   if(ieee154e_dbg.chanCtr[temp-11]==255)
-      ieee154e_dbg.chanCtr[temp-11]=10;
-   else
-      ieee154e_dbg.chanCtr[temp-11]++;
-   //pdu
-   
    return temp;
 }
 
