@@ -75,18 +75,18 @@ void sctimer_schedule(uint16_t val) {
 }
 
 uint16_t sctimer_getValue() {
-	uint16_t val, nextval;
+	volatile uint16_t val, nextval;
 	LPTMR0_CNR = 0x0;
 	val = LPTMR0_CNR ;
 
 	//manual says to read two times and check that the value is the same. However, 
 	//freescale code examples only read this once.
-	//		LPTMR0_CNR = 0x0;
-	//		while ((nextval=(LPTMR0_CNR ))!=val) {
-	//			LPTMR0_CNR = 0x0;
-	//			val= LPTMR0_CNR ;
-	//			LPTMR0_CNR = 0x0;
-	//		}
+//	LPTMR0_CNR = 0x0;
+//	while ((nextval=(LPTMR0_CNR ))!=val) {
+//		LPTMR0_CNR = 0x0;
+//		val= LPTMR0_CNR ;
+//		LPTMR0_CNR = 0x0;
+//	}
 	return val;
 }
 
