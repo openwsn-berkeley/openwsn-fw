@@ -9,7 +9,8 @@
 #include "udpecho.h"
 #include "udpinject.h"
 #include "udpprint.h"
-//#include "udprand.h"
+#include "udprand.h"
+#include "udpstorm.h"
 //#include "heli.h"
 //#include "imu.h"
 
