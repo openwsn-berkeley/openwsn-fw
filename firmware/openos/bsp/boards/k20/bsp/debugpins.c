@@ -213,9 +213,9 @@ void debugpins_radio_clr() {
 
 void debugpins_radio_set() {
 #ifdef TOWER_K20	
-	GPIOA_PCOR |= 1<<RADIO_PIN;
+	GPIOA_PSOR |= 1<<RADIO_PIN;
 #elif OPENMOTE_K20
-	GPIOB_PCOR |= 1<<RADIO_PIN;
+	GPIOB_PSOR |= 1<<RADIO_PIN;
 #endif
 }
 

@@ -57,8 +57,7 @@ void board_init() {
 
 #endif	
 
-	
-	
+
 //	PORT_PIN_RADIO_RESET_HIGH();//reset the radio
 //	for (i=0;i<0xFFFF;i++){// delay for reset.
 //		for (j=0;j<0xF;j++);// delay for reset.
@@ -68,7 +67,6 @@ void board_init() {
 //			for (j=0;j<0xFF;j++);// delay for reset.
 //		}
 	
-//	PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
 	PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
 	
 	//ptc5 .. ptc5 is pin 62, irq A
@@ -96,8 +94,6 @@ void board_init() {
 	leds_error_on();
 	leds_all_off();
 	debugpins_fsm_clr();
-		
-
 }
 
 
@@ -128,8 +124,6 @@ void radio_external_port_c_isr(void) {
 	uint32_t portc;
 	debugpins_isr_set();
 	portc=PORTC_ISFR;
-	//reconfigure..	
-	//SIM_SCGC5 |= SIM_SCGC5_PORTC_MASK;
 	if ((PORTC_ISFR) & (RADIO_ISR_MASK)) {
 
 		PORTC_PCR5 |= PORT_PCR_ISF_MASK;    //clear flag

@@ -237,7 +237,7 @@ void llwu_configure_filter(unsigned int wu_pin_num, unsigned char filter_en, uns
 void llwu_isr(void)
 {
 
-debugpins_radio_set();
+//debugpins_radio_set();
 
 //   if (LLWU_F1 & LLWU_F1_WUF0_MASK) {
 //       LLWU_F1 |= LLWU_F1_WUF0_MASK;   // write one to clear the flag -- UART RX flag
@@ -359,6 +359,6 @@ debugpins_radio_set();
 	   LLWU_F2 = 0xFF;            // clear wakeup flags
 	   LLWU_F3 = 0xFF;            // clear wakeup flags
 	
-   debugpins_radio_clr();
+   //debugpins_radio_clr();
 
 }
