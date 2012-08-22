@@ -57,7 +57,6 @@ typedef struct {
    PORT_SIGNED_INT_WIDTH            minCorrection;        // minimum time correction
    PORT_SIGNED_INT_WIDTH            maxCorrection;        // maximum time correction
    uint8_t            numDeSync;            // number of times a desync happened
-   uint8_t            num_sync;
 } ieee154e_stats_t;
 PRAGMA(pack());
 

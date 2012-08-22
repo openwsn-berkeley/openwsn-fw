@@ -89,28 +89,28 @@ void private_uart_init (UART_MemMapPtr uartch, int sysclk, int baud)
 	UART_C5_REG(uartch) = 0; //use interrupt not dma.
 
 
-	//	/* set watermark in the almost full TX buffer */
-	//	if ((( UART_PFIFO_REG(uartch) & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT) == 0) {
-	//		/* 1 dataword in D */
-	//		UART_TWFIFO_REG(uartch) = UART_TWFIFO_TXWATER(0);
-	//	}
-	//	else {
-	//		pFIFO=UART_PFIFO_REG(uartch) & UART_PFIFO_TXFIFOSIZE_MASK;
-	//		shiftval=(((pFIFO) >> UART_PFIFO_TXFIFOSIZE_SHIFT) + 1);
-	//		txsize = 1 << shiftval;
-	//    /* watermark for TX buffer generates interrupts below & equal to watermark */
-	//		txsize -= 1;
-	//        UART_TWFIFO_REG(uartch) = UART_TWFIFO_TXWATER(txsize);
-	//    
-	//	}
+		/* set watermark in the almost full TX buffer */
+		if ((( UART_PFIFO_REG(uartch) & UART_PFIFO_TXFIFOSIZE_MASK) >> UART_PFIFO_TXFIFOSIZE_SHIFT) == 0) {
+			/* 1 dataword in D */
+			UART_TWFIFO_REG(uartch) = UART_TWFIFO_TXWATER(0);
+		}
+		else {
+			pFIFO=UART_PFIFO_REG(uartch) & UART_PFIFO_TXFIFOSIZE_MASK;
+			shiftval=(((pFIFO) >> UART_PFIFO_TXFIFOSIZE_SHIFT) + 1);
+			txsize = 1 << shiftval;
+	    /* watermark for TX buffer generates interrupts below & equal to watermark */
+			txsize -= 1;
+	        UART_TWFIFO_REG(uartch) = UART_TWFIFO_TXWATER(txsize);
+	    
+		}
 
 
 	UART_RWFIFO_REG(uartch) |= UART_RWFIFO_RXWATER(1); //rx buffer is 1 byte
 
-	//	UART_CFIFO_REG(uartch)   |=UART_CFIFO_RXFLUSH_MASK|UART_CFIFO_TXFLUSH_MASK; //flush buffers
+	UART_CFIFO_REG(uartch)   |=UART_CFIFO_RXFLUSH_MASK|UART_CFIFO_TXFLUSH_MASK; //flush buffers
 
-	//	UART_PFIFO_REG(uartch)   |= UART_PFIFO_RXFE_MASK; //enable fifo
-	//	UART_PFIFO_REG(uartch)   |= UART_PFIFO_TXFE_MASK; //enable fifo
+		UART_PFIFO_REG(uartch)   |= UART_PFIFO_RXFE_MASK; //enable fifo
+		UART_PFIFO_REG(uartch)   |= UART_PFIFO_TXFE_MASK; //enable fifo
 
 	UART_S1_REG(uartch);//clear isr flags
 
@@ -149,11 +149,11 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
 }
 
 void    uart_enableInterrupts(){
-	UART_C2_REG(UART1_BASE_PTR)|=UART_C2_RIE_MASK|UART_C2_TIE_MASK/*|UART_C2_TCIE_MASK/*|UART_C2_ILIE_MASK*/;
+	UART_C2_REG(UART1_BASE_PTR)|=UART_C2_RIE_MASK/*|UART_C2_TIE_MASK/*|UART_C2_TCIE_MASK/*|UART_C2_ILIE_MASK*/;
 }
 
 void    uart_disableInterrupts(){
-	UART_C2_REG(UART1_BASE_PTR)&=~(UART_C2_RIE_MASK|UART_C2_TIE_MASK/*|UART_C2_TCIE_MASK/*|UART_C2_ILIE_MASK*/);
+	UART_C2_REG(UART1_BASE_PTR)&=~(UART_C2_RIE_MASK/*|UART_C2_TIE_MASK/*|UART_C2_TCIE_MASK/*|UART_C2_ILIE_MASK*/);
 }
 
 void    uart_clearRxInterrupts(){
@@ -165,7 +165,7 @@ void    uart_clearTxInterrupts(){
 }
 
 void uart_writeByte(uint8_t byteToWrite){
-	while(!(UART_S1_REG(UART1_BASE_PTR) &  UART_S1_TC_MASK));	//wait tx complete flag
+	while(!(UART_S1_REG(UART1_BASE_PTR) &  UART_S1_TDRE_MASK));	//wait tx complete flag
 
 	UART_D_REG(UART1_BASE_PTR) = byteToWrite;
 
@@ -200,18 +200,20 @@ void uart_isr(void)
 
 	reg=UART_S1_REG(UART1_BASE_PTR);
 	//this clears the interrupt so now we have to see which one is:
-
-	//Receive Data Register Full Flag
-	if (reg>>UART_S1_RDRF_SHIFT & 0x1){
+	if (reg & UART_S1_TDRE_MASK){
+		uart_isr_tx();
+		UART_C2_REG(UART1_BASE_PTR)&=~(UART_C2_TIE_MASK/*|UART_C2_TCIE_MASK*/);//disable interrupts
+		// tx complete isr.
+	}
+	if (reg & UART_S1_TC_MASK){
+		
+	}
+	
+   //Receive Data Register Full Flag
+	if (reg & UART_S1_RDRF_MASK){
 		//rx
 		uart_isr_rx();
-	}else if (reg>>UART_S1_TDRE_SHIFT & 0x1){
-		//tx
-		UART_C2_REG(UART1_BASE_PTR)&=~(UART_C2_TIE_MASK/*|UART_C2_TCIE_MASK*/);//disable interrupts
-		uart_isr_tx();
-	}else{
-		//while(1); //to check what other isr happened.
 	}
-
+	UART_CFIFO_REG(UART1_BASE_PTR)   |=UART_CFIFO_RXFLUSH_MASK|UART_CFIFO_TXFLUSH_MASK; //flush buffers
 	debugpins_isr_clr();
 }

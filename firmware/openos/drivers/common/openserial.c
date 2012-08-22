@@ -152,7 +152,7 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
 }
 
 uint8_t openserial_getNumDataBytes() {
-   uint16_t temp_openserial_input_buffer_fill_level;
+   uint16_t temp_openserial_input_buffer_fill_level=0;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
@@ -163,7 +163,7 @@ uint8_t openserial_getNumDataBytes() {
 }
 
 uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
-   uint8_t numBytesWritten;
+   uint8_t numBytesWritten=0;
    uint16_t temp_openserial_input_buffer_fill_level;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -343,7 +343,7 @@ uint16_t output_buffer_index_write_increment() {
 }
 
 uint16_t output_buffer_index_read_increment() {
-   uint16_t temp_openserial_output_buffer_index_read;
+   uint16_t temp_openserial_output_buffer_index_read=0;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    openserial_vars.output_buffer_index_read=(openserial_vars.output_buffer_index_read+1)%SERIAL_OUTPUT_BUFFER_SIZE;

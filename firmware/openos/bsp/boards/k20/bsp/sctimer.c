@@ -19,7 +19,7 @@
 //=========================== variables =======================================
 
 sctimer_cbt callback;//callback to call when the isr expires.
-
+uint16_t unexpected_isr;// see isr function below.
 //=========================== prototypes ======================================
 
 extern void lptmr_isr(void);
@@ -28,7 +28,7 @@ void sctimer_clear_registers();
 //=========================== public ==========================================
 
 void sctimer_init() {
-
+	
 	SIM_SCGC5 |= SIM_SCGC5_LPTIMER_MASK;//power the timer
 
 	SIM_SCGC6 |= SIM_SCGC6_RTC_MASK; //Enable RTC registers
@@ -56,9 +56,9 @@ void sctimer_init() {
 	//register interrupt
 	//done hardcoded in the vector table in kinetis_sysinit.c
 
-
+	unexpected_isr=0;
 	enable_irq(85/*LPTMR_IRQ_NUM*/);
-	LPTMR0_CSR |= LPTMR_CSR_TEN_MASK; //Turn on LPT and start counting
+	LPTMR0_CSR |= LPTMR_CSR_TEN_MASK| LPTMR_CSR_TCF_MASK; //Turn on LPT and start counting
 }
 
 /**
@@ -71,7 +71,7 @@ void sctimer_init() {
 
 void sctimer_schedule(uint16_t val) {
 	LPTMR0_CMR = LPTMR_CMR_COMPARE(val); //Set compare value
-	LPTMR0_CSR |= LPTMR_CSR_TIE_MASK;//enable interrupts
+	LPTMR0_CSR |= LPTMR_CSR_TIE_MASK| LPTMR_CSR_TCF_MASK;//enable interrupts
 }
 
 uint16_t sctimer_getValue() {
@@ -95,18 +95,30 @@ void sctimer_setCb(sctimer_cbt cb) {
 }
 
 void lptmr_isr(void) {
+	volatile uint16_t val;
 	debugpins_isr_set();
-	callback();
-	debugpins_isr_clr();
-	//clear flags.
-	//LPTMR0_CSR |= ( /*LPTMR_CSR_TEN_MASK |*/LPTMR_CSR_TIE_MASK| LPTMR_CSR_TCF_MASK);
+	 //write before read counter
+	 LPTMR0_CNR = 0x0;
+     val = LPTMR0_CNR ;//read counter
+	 if ( (val == LPTMR0_CMR&LPTMR_CMR_COMPARE_MASK) || (val ==(LPTMR0_CMR&LPTMR_CMR_COMPARE_MASK)+ 1)) {
+	    callback();// what happens if we are close to the next tic and get value returns the next tic??
+	 }else {
+		 //This should never happen, however for some reason, the TCF flag of the LPTMR is set
+		 //but the compare and the counter does not match, so an interrupt is triggered.
+		 //this can be caused by modifying the compare while the timer is running, although i am not sure.
+		 //this work around makes everything work fine but this BUG needs to be further investigated.
+		 unexpected_isr++; 
+		 //Cler flags.
+		 LPTMR0_CSR |= ( /*LPTMR_CSR_TEN_MASK |*/LPTMR_CSR_TIE_MASK
+		 			| LPTMR_CSR_TCF_MASK);
+	 }
+	 debugpins_isr_clr();
 }
 
 
 void sctimer_clearISR(){
 	//do nothing.. is done at the end.
-	LPTMR0_CSR |= ( /*LPTMR_CSR_TEN_MASK |*/LPTMR_CSR_TIE_MASK
-			| LPTMR_CSR_TCF_MASK);
+	LPTMR0_CSR |= ( /*LPTMR_CSR_TEN_MASK |*/LPTMR_CSR_TIE_MASK| LPTMR_CSR_TCF_MASK);
 }
 //=========================== private =========================================
 
