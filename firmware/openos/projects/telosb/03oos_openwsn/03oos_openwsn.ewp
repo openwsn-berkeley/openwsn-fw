@@ -354,6 +354,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\cross-layers\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common</state>
         </option>

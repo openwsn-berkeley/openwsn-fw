@@ -7,7 +7,7 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "scheduler.h"
-#include "ADC_Channel.h"
+//#include "ADC_Channel.h"
 
 //=========================== defines =========================================
 
@@ -84,7 +84,8 @@ void rex_task_cb() {
    
    for (int i = 0; i < N_avg; i++)
    {
-     ADC_getvoltage(p_x_int);
+     //ADC_getvoltage(p_x_int);
+      
      sum += x_int;
    }
    avg = sum/N_avg;
