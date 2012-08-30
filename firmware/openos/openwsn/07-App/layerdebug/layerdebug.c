@@ -110,7 +110,6 @@ void layerdebug_task_schedule_cb() {
       openserial_printError(COMPONENT_LAYERDEBUG,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      openqueue_freePacketBuffer(pkt);
       return;
    }
    // take ownership over that packet
@@ -173,7 +172,6 @@ void layerdebug_task_neighbors_cb() {
       openserial_printError(COMPONENT_LAYERDEBUG,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      openqueue_freePacketBuffer(pkt);
       return;
    }
    // take ownership over that packet
