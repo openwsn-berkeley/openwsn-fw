@@ -371,15 +371,6 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
    ENABLE_INTERRUPTS();
 }
 
-/**
-// The functio below returns a direct pointer to the scheduleBuf. Modifying 
-this structure means you are modifying the scheduleBuf. Be careful when using
-the pointer and try only to read from the buffer
-*/
-void scheduleBuf_getAll(scheduleEntry_t *blist){
- blist=&schedule_vars.scheduleBuf[0];
-}
-
 //TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.
 void schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist, uint8_t maxbytes){
   
