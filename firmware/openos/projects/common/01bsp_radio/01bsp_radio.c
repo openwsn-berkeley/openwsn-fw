@@ -16,10 +16,10 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
-#define CHANNEL         26             // 2.480GHz
-#define TIMER_ID        0
-#define TIMER_PERIOD    65535          // 2s @ 32kHz
+#define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
+#define CHANNEL         26             ///< 2.480GHz
+#define TIMER_PERIOD    65535          ///< 2s @ 32kHz
+#define ID              0xab           ///< byte sent in the packets
 
 //=========================== variables =======================================
 
@@ -171,6 +171,7 @@ int mote_main(void) {
             if (app_vars.state==APP_STATE_RX) {
                // stop listening
                radio_rfOff();
+               
                // prepare packet
                app_vars.packet_len = sizeof(app_vars.packet);
                for (i=0;i<app_vars.packet_len;i++) {

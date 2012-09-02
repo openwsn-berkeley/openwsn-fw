@@ -91,7 +91,7 @@ __interrupt void USART1RX_ISR (void) {
 #pragma vector = TIMERA0_VECTOR
 __interrupt void TIMERA0_ISR (void) {
    debugpins_isr_set();
-   if (bsp_timer_isr()==1) {                       // timer: 0
+   if (bsp_timer_isr()==1) {                     // timer: 0
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
