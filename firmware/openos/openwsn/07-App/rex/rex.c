@@ -77,7 +77,7 @@ void rex_task_cb() {
    uint8_t           i;
    
    uint16_t       x_int       = 0;
-   uint16_t*      p_x_int     = &x_int;
+   //uint16_t*      p_x_int     = &x_int;
    uint16_t       sum         = 0;
    uint16_t       avg         = 0;
    uint8_t        N_avg       = 10;
