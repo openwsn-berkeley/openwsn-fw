@@ -272,16 +272,6 @@ bool debugPrint_neighbors() {
    return TRUE;
 }
 
-/**
-\brief Return a direct pointer to the neighbor table.
-
-\note Modifying  this structure means you are modifying the neighbor table.
-      Be careful when using the pointer; only read from the table.
-*/
-void neighbors_getAll(neighborRow_t* nlist){
-   nlist = &neighbors_vars.neighbors[0];
-}
-
 /*returns a list of debug info
 TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.*/
 void neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes ){

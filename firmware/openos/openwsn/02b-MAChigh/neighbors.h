@@ -74,7 +74,6 @@ PRAGMA(pack());
                                                      uint8_t addr_type);
           //debug
           bool          debugPrint_neighbors();
-          void          neighbors_getAll(neighborRow_t *nlist);//deprecated
           void          neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes);
           uint8_t       neighbors_getNumberOfNeighbors(); 
 /**
