@@ -104,7 +104,7 @@ void owchip_geteui(uint8_t* eui) {          // >= 6000us
       
       if(ow_reset()) {
          ow_write_byte(0x33); //read rom
-         for(byte=id+7; byte!=id-1; byte--) {
+         for(byte=id+7; byte>=id; byte--) {
             crc = crc8_byte( crc, *byte=ow_read_byte() );
          }
          if(crc==0) {
