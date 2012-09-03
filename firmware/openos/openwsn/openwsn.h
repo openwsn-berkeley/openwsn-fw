@@ -37,7 +37,7 @@ enum {
 };
 
 // types of addresses
-enum {
+typedef enum {
    ADDR_NONE                           = 0,
    ADDR_16B                            = 1,
    ADDR_64B                            = 2,
@@ -45,7 +45,7 @@ enum {
    ADDR_PANID                          = 4,
    ADDR_PREFIX                         = 5,
    ADDR_ANYCAST                        = 6,
-};
+} open_addr_type_t;
 
 enum {
    LITTLE_ENDIAN                       = TRUE,
@@ -241,7 +241,7 @@ PRAGMA(pack());
 
 PRAGMA(pack(1));
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
-   uint8_t type;
+   open_addr_type_t type;
    union {
       uint8_t addr_16b[2];
       uint8_t addr_64b[8];
