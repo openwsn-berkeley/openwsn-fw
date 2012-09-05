@@ -1,0 +1,1757 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<project>
+  <fileVersion>2</fileVersion>
+  <fileChecksum>1610927599</fileChecksum>
+  <configuration>
+    <name>Debug</name>
+    <outputs>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\large_range_accel.c</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\large_range_accel.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\gina\leds.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\gina\sctimer.c</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\magnetometer.c</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\magnetometer.h</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\sensitive_accel_temperature.c</file>
+      <file>$PROJ_DIR$\Debug\Exe\02drv_bothtimers_openserial_alt.d43</file>
+      <file>$PROJ_DIR$\Debug\Obj\02drv_bothtimers_openserial_alt.pbd</file>
+      <file>$PROJ_DIR$\Debug\List\02drv_bothtimers_openserial_alt.html</file>
+      <file>$PROJ_DIR$\Debug\Obj\rheli.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\rrube.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\idmanager.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\large_range_accel.pbi</file>
+      <file>$TOOLKIT_DIR$\lib\dlib\dl430xsfn.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\ADC_Channel.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\openqueue.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\rt.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\icmpv6echo.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\forwarding.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\icmpv6rpl.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\opencoap.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\intrinsics.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\tcpinject.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\opentcp.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\msp430x26x.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\udpecho.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\openudp.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\ohlone_webpages.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\ohlone.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\in430.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\tcpinject.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\rreg.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\rleds.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\rxl1.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\openqueue.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\udpprint.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\openwsn.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ystdio.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6echo.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6echo.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opencoap.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opencoap.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opentcp.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opentcp.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\openudp.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\openudp.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\rleds.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\IEEE802154E.r43</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\heli.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\openudp.r43</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdlib.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\icmpv6rpl.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\icmpv6echo.r43</file>
+      <file>$TOOLKIT_DIR$\config\lnk430F2618.xcl</file>
+      <file>$PROJ_DIR$\Debug\Obj\ohlone.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\opentcp.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\scheduler.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\openserial.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\debugpins.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\res.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\spi.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\eui64.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\IEEE802154.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\leds.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\sensitive_accel_temperature.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\openwsn_proj.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\udprand.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\rex.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\rheli.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\udpecho.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\tcpprint.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\rt.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\rinfo.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\rrube.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdio.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\openrandom.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\xtgmath.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\math.h</file>
+      <file>$TOOLKIT_DIR$\lib\dlib\dl430xsfn.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ymath.h</file>
+      <file>$PROJ_DIR$\Debug\List\03oos_openwsn_alt.html</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ycheck.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\board.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\udpinject.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\large_range_accel.r43</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\yvals.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\abstimer.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\udpinject.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\rwellknown.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\tcpecho.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\i2c.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\sctimer.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\magnetometer.r43</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Threads.h</file>
+      <file>$PROJ_DIR$\Debug\Exe\03oos_openwsn_alt.d43</file>
+      <file>$PROJ_DIR$\Debug\Obj\packetfunctions.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\idmanager.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\icmpv6router.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\openbridge.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\tcpecho.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\forwarding.r43</file>
+      <file>$PROJ_DIR$\Debug\Exe\03oos_openwsn_alt.ulp</file>
+      <file>$PROJ_DIR$\..\..\common\02drv_bothtimers_openserial_alt\02drv_bothtimers_openserial_alt.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\rreg.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\rreg.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\rrube.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\rrube.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\rt.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\rt.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\rwellknown.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\rwellknown.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\rxl1.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\rxl1.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\tcpecho.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\tcpecho.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\tcpinject.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\tcpinject.h</file>
+      <file>$PROJ_DIR$\..\..\common\01bsp_bothtimers\01bsp_bothtimers.c</file>
+      <file>$PROJ_DIR$\Debug\Obj\01bsp_bothtimers.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\02drv_bothtimers_openserial_alt.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\01bsp_bothtimers.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\02drv_bothtimers_openserial_alt.r43</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone_webpages.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone_webpages.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\rex.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\rex.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\rheli.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\rheli.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\rinfo.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\rinfo.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\rleds.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\rleds.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\tcpprint.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\tcpprint.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\udpecho\udpecho.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\udpecho\udpecho.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\udpinject.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\udpinject.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\udpprint.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\udpprint.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\udpstorm.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\udpstorm.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\layerdebug.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\layerdebug.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\udprand.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\udprand.h</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\sensitive_accel_temperature.h</file>
+      <file>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\common\abstimer.c</file>
+      <file>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\gina\eui64.c</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\gyro.h</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\gyro.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\gina\i2c.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\gina\board.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\gina\board_info.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\rex.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\rinfo.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\radio.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\i2c.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\layerdebug.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\icmpv6.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\openwsn_proj.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\udpprint.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\gyro.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\packetfunctions.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\board.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\eui64.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\openrandom.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\openwsn.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\opentimers.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\udpstorm.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\neighbors.r43</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\stdint.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\udpstorm.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\gyro.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\rxl1.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\scheduler.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\sensitive_accel_temperature.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\sctimer.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\openserial.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\opencoap.r43</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\xencoding_limits.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\cross-layers\idmanager.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\cross-layers\idmanager.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openqueue.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openqueue.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openrandom.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openrandom.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\cross-layers\packetfunctions.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\cross-layers\packetfunctions.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\openwsn.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\openwsn.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\linkcost.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\rwellknown.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\iphc.r43</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Product.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\tcpprint.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\rreg.r43</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\string.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\leds.pbi</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\DLib_Defaults.h</file>
+      <file>$TOOLKIT_DIR$\inc\dlib\c\ysizet.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\udprand.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\debugpins.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\spi.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\layerdebug.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\magnetometer.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\abstimer.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\ohlone_webpages.r43</file>
+      <file>$TOOLKIT_DIR$\config\multiplier.xcl</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\ADC_Channel.c</file>
+      <file>$PROJ_DIR$\..\..\..\drivers\gina\ADC_Channel.h</file>
+      <file>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</file>
+      <file>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\linkcost.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\linkcost.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\iphc.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\iphc.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\openbridge.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\openbridge.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\forwarding.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\forwarding.h</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6.c</file>
+      <file>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\opentimers.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\IEEE802154.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\ADC_Channel.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\IEEE802154E.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\openbridge.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\icmpv6router.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\iphc.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\res.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\icmpv6.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\linkcost.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\neighbors.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\schedule.pbi</file>
+      <file>$PROJ_DIR$\Debug\Obj\schedule.r43</file>
+      <file>$PROJ_DIR$\Debug\Obj\radio.r43</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\gina\spi.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\gina\uart.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\board.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\at86rf231.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\radio.c</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</file>
+      <file>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</file>
+    </outputs>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\gina\large_range_accel.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 91</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 13</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 1 276</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 1 276</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\leds.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 69</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 211</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 25 30 22 183 88 92 212 84 207 193 100 270</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 25 30 22 183 88 92 212 84 207 193 100 270</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\sctimer.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 98</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 189</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 87 183 88 92 212 84 207 193 100 266 165 25 30 22 210 213</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 87 183 88 92 212 84 207 193 100 266 165 25 30 22 210 213</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\gina\magnetometer.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 99</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 218</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 5 276</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 5 276</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\gina\sensitive_accel_temperature.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 70</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 188</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 155</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 155</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Exe\02drv_bothtimers_openserial_alt.d43</name>
+      <outputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 9</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 58 221 128 15 68 52 93 89 63 67 107 185 97 171 57 104 56 12 206 91 217 69 204 99 182 59 220 105 192 16 178 62 60 180 54 179 175 263 64 166 10 167 51 209 11 17 205 186 262 61 98 70 66 106 23 208 65 26 90 173 214 184 14</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6echo.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 57</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 18</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 40 249 223 197 231 201</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 40 249 223 197 231 201</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 104</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 255</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 42 249 223 197 231 201 195</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 42 249 223 197 231 201 195</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 56</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 20</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 44 249 223 197 231 237 201 199 267 229 271 272 266 225</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 44 249 223 197 231 237 201 199 267 229 271 272 266 225</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opencoap.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 192</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 21</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 46 50 197 231 223 199 201 195 267 225 229 271 272 266</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 46 50 197 231 223 199 201 195 267 225 229 271 272 266</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opentcp.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 60</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 24</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 48 223 197 231 247 243 201 267 229 271 272 266 225 130 121 123 142</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 48 223 197 231 247 243 201 267 229 271 272 266 225 130 121 123 142</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\openudp.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 54</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 27</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 50 223 201 247 243 197 231 46 144 146 148</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 50 223 201 247 243 197 231 46 144 146 148</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Exe\03oos_openwsn_alt.d43</name>
+      <inputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 58 221 15 68 52 93 89 63 67 107 185 97 171 57 104 56 12 206 91 217 69 204 99 182 59 220 105 192 16 178 62 60 180 54 179 71 175 263 64 166 10 167 51 209 11 17 205 186 262 61 98 70 66 106 23 208 65 26 90 173 214 184 14</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\02drv_bothtimers_openserial_alt\02drv_bothtimers_openserial_alt.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 128</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 126</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 266 165 183 88 92 212 84 207 193 100 25 30 22 210 213 268 270 267 272 223 203 225</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\rreg.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 209</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 32</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 111 225 267 46 197 231 201 223 195 266 229 271 272</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 111 225 267 46 197 231 201 223 195 266 229 271 272</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\rrube.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 11</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 79</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 113 46 225 267 197 231 201 223 195 266 53 270</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 113 46 225 267 197 231 201 223 195 266 53 270</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\rt.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 17</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 77</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 115 225 267 46 197 231 201 223 199 155</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 115 225 267 46 197 231 201 223 199 155</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\rwellknown.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 205</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 95</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 117 46 197 231 201 223</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 117 46 197 231 201 223</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\rxl1.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 186</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 34</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 119 225 267 46 197 231 201 223 199 155</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 119 225 267 46 197 231 201 223 199 155</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\tcpecho.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 106</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 96</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 121 197 231 223 48</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 121 197 231 223 48</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\tcpinject.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 23</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 31</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 123 223 201 48 197 231</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 123 223 201 48 197 231</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\01bsp_bothtimers\01bsp_bothtimers.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 125</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 127</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 266 165 183 88 92 212 84 207 193 100 25 30 22 210 213 268 270 267 272</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 266 165 183 88 92 212 84 207 193 100 25 30 22 210 213 268 270 267 272</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 59</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 29</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 130 197 231 201 223 48 132</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 130 197 231 201 223 48 132</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone_webpages.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 220</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 28</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 132</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 132</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\rex.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 166</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 73</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 134 46 225 267 197 231 201 223 199 229 271 272 266</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 134 46 225 267 197 231 201 223 199 229 271 272 266</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\rheli.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 10</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 74</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 136 225 267 46 201 53 197 231</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 136 225 267 46 201 53 197 231</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\rinfo.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 167</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 78</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 138 46 197 231 201 223 199 266</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 138 46 197 231 201 223 199 266</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\rleds.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 51</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 33</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 140 46 201 270 197 231</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 140 46 201 270 197 231</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\tcpprint.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 208</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 76</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 142 223 197 231 48</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 142 223 197 231 48</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpecho\udpecho.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 26</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 75</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 144 50 197 231 223</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 144 50 197 231 223</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\udpinject.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 90</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 94</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 146 50 197 231 223 201</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 146 50 197 231 223 201</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\udpprint.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 173</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 36</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 148 197 231 223</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 148 197 231 223</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\udpstorm.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 184</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 181</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 150 46 225 267 197 231 201 223 199 229 271 272 266 233</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 150 46 225 267 197 231 201 223 199 229 271 272 266 233</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\layerdebug.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 217</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 170</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 152 46 225 267 197 231 201 223 199 229 271 272 266 237 241</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 152 46 225 267 197 231 201 223 199 229 271 272 266 237 241</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\udprand.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 214</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 72</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 154 50 197 231 223 201 225 267 199 46</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 154 50 197 231 223 201 225 267 199 46</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 71</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 172</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 266 270 229 271 272 201 197 231 233 195 223</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 266 270 229 271 272 201 197 231 233 195 223</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\common\abstimer.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 93</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 219</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 267 272 266 87 268</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 267 272 266 87 268</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 63</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 215</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 25 30 22 268</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 25 30 22 268</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\eui64.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 67</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 177</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 210 88 92 212 84 207 193 100 213 269 183</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 210 88 92 212 84 207 193 100 213 269 183</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\gina\gyro.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 185</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 174</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 161 276</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 161 276</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\i2c.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 97</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 169</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 25 30 22 276 183 88 92 212 84 207 193 100</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 25 30 22 276 183 88 92 212 84 207 193 100</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 89</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 176</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 25 30 22 266 165 183 88 92 212 84 207 193 100 210 213 268 270 273 277 276 267 271 272 269</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 25 30 22 266 165 183 88 92 212 84 207 193 100 210 213 268 270 273 277 276 267 271 272 269</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\idmanager.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 12</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 103</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 269 195 201 223 237</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 269 195 201 223 237</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openqueue.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 16</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 35</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 197 231 223 201 233</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 197 231 223 201 233</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openrandom.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 178</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 81</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 199 195</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 199 195</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\packetfunctions.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 175</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 102</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 201 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 223 195</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 201 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 223 195</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\openwsn.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 179</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 37</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 223 195 197 231 199 225 267 233 241 239 237 245 243 247 249 40 42 44 48 50 46 121 123 142 130 144 146 140 115 134</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 223 195 197 231 199 225 267 233 241 239 237 245 243 247 249 40 42 44 48 50 46 121 123 142 130 144 146 140 115 134</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 62</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 191</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 266 165 183 88 92 212 84 207 193 100 25 30 22 210 213 203 233 223 237 239 243 247 249 40 42 44 195 197 231 123 146 245 270 241 273</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 266 165 183 88 92 212 84 207 193 100 25 30 22 210 213 203 233 223 237 239 243 247 249 40 42 44 195 197 231 123 146 245 270 241 273</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 180</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 250</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 225 267</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 225 267</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\gina\ADC_Channel.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 15</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 252</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 227 83 85 82</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 227 83 85 82</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 61</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 187</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 266 165 183 88 92 212 84 207 193 100 25 30 22 210 213 229 271 272 203 268</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 266 165 183 88 92 212 84 207 193 100 25 30 22 210 213 229 271 272 203 268</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 68</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 251</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 231 201 195 223</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 231 201 195 223</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 52</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 253</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 233 271 272 266 231 197 195 223 241 201 229 270 237 268 239 55</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 233 271 272 266 231 197 195 223 241 201 229 270 237 268 239 55</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\linkcost.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 204</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 259</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 235 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 235 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 182</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 260</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 237 197 231 201 195 223 233 235</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 237 197 231 201 195 223 233 235</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 64</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 257</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 239 195 223 231 233 197 237 243 270 201 199 241 229 271 272 266 267 225</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 239 195 223 231 233 197 237 243 270 201 199 241 229 271 272 266 267 225</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 262</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 261</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 241 223 195 199</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 241 223 195 199</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\iphc.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 206</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 256</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 243 201 195 223 239 247 237 245</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\openbridge.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 105</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 254</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 245 223 201 243 195 197 231</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 245 223 201 243 195 197 231</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\forwarding.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 107</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 19</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 247 243 197 231 223 195 201 237 249 50 48</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 247 243 197 231 223 195 201 237 249 50 48</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 171</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 258</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 249 40 42 44 247 243 197 231 223</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 203 183 88 92 212 84 207 193 100 165 25 30 22 210 213 249 40 42 44 247 243 197 231 223</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\spi.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 66</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 216</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 25 30 22 210 88 92 212 84 207 193 100 213 80 38 183 277</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 25 30 22 210 88 92 212 84 207 193 100 213 80 38 183 277</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\uart.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 65</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 190</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 25 30 22 183 88 92 212 84 207 193 100 80 213 38 210 273</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 25 30 22 183 88 92 212 84 207 193 100 80 213 38 210 273</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\radio.c</name>
+      <outputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 263</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 168</file>
+        </tool>
+      </outputs>
+      <inputs>
+        <tool>
+          <name>ICC430</name>
+          <file> 266 165 183 88 92 212 84 207 193 100 25 30 22 210 213 271 272 274 277 268 270</file>
+        </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 266 165 183 88 92 212 84 207 193 100 25 30 22 210 213 271 272 274 277 268 270</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 7 9</file>
+        </tool>
+        <tool>
+          <name>ULP430</name>
+          <file> 108</file>
+        </tool>
+      </outputs>
+    </file>
+  </configuration>
+  <configuration>
+    <name>Release</name>
+    <outputs/>
+    <forcedrebuild>
+      <name>[MULTI_TOOL]</name>
+      <tool>XLINK</tool>
+    </forcedrebuild>
+    <forcedrebuild>
+      <name>[REBUILD_ALL]</name>
+    </forcedrebuild>
+  </configuration>
+</project>
+
+
