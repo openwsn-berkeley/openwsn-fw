@@ -476,14 +476,14 @@ uint8_t radiotimer_isr() {
 		}
 		if (abstimer_vars.bitmapInterruptsFired!=0) {
 			//xavi db
-			if (abstimer_dbg.count_late<10){//get first 100
+			//if (abstimer_dbg.count_late<10){//get first 100
 				abstimer_dbg.consecutive_late_array_sctimerVal[abstimer_dbg.count_late%10]=now;
 				abstimer_dbg.consecutive_late_array_currentTime[abstimer_dbg.count_late%10]=abstimer_vars.currentTime ;
 				abstimer_dbg.consecutive_late_array_nextCurrentTime[abstimer_dbg.count_late%10]=abstimer_vars.nextCurrentTime;
 				abstimer_dbg.consecutive_late_array_distanceNext[abstimer_dbg.count_late%10]=min;
 				abstimer_dbg.consecutive_late_array_timeSpent[abstimer_dbg.count_late%10]=timeSpent;
 				abstimer_dbg.consecutive_late_type[abstimer_dbg.count_late%10]=abstimer_vars.bitmapInterruptsFired;
-			}
+			//}
 			abstimer_dbg.count_late++;
 
 			//two or more timers are close so we need to execute the callback of the nearest one, 
