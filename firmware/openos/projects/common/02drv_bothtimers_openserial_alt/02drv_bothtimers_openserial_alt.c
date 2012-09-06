@@ -148,8 +148,8 @@ void radiotimer_cb_compare() {
    app_vars.radiotimer_num_compares_left--;
    if (app_vars.radiotimer_num_compares_left>0) {
       radiotimer_schedule(app_vars.radiotimer_last_compare_val);
+      if (app_vars.radiotimer_num_compares_left==2) openserial_printData(app_vars.data, sizeof(app_vars.data));
    } else {
-      openserial_printData(app_vars.data, sizeof(app_vars.data));
       radiotimer_cancel();
    }
    
