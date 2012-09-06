@@ -97,7 +97,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    
    temp_last_compare_value = bsp_timer_vars.last_compare_value;
    
-   newCompareValue      =  bsp_timer_vars.last_compare_value+delayTicks;
+   newCompareValue      =  bsp_timer_vars.last_compare_value+delayTicks+1;
    bsp_timer_vars.last_compare_value   =  newCompareValue;
    
    if (delayTicks<TBR-temp_last_compare_value) {

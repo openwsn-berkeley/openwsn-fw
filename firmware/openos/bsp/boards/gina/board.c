@@ -223,10 +223,11 @@ __interrupt void USCIAB0RX_ISR (void) {
 __interrupt void TIMERA1_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   debugpins_isr_clr();
+   
    if (radiotimer_isr()==1) {                    // radiotimer
       __bic_SR_register_on_exit(CPUOFF);
    }
+   debugpins_isr_clr();
 }
 
 #pragma vector = TIMERA0_VECTOR
