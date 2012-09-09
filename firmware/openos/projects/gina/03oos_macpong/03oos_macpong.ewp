@@ -1909,10 +1909,10 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_macpong\openwsn_proj.c</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_macpong\03oos_macpong.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_macpong\openwsn_proj.h</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_macpong\03oos_macpong.h</name>
     </file>
   </group>
   <group>
@@ -2102,6 +2102,9 @@
     </group>
     <group>
       <name>03a-IPHC</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\iphc.c</name>
       </file>
@@ -2117,6 +2120,9 @@
     </group>
     <group>
       <name>03b-IPv6</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\forwarding.c</name>
       </file>
@@ -2150,6 +2156,9 @@
     </group>
     <group>
       <name>04-TRAN</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opencoap.c</name>
       </file>
@@ -2171,6 +2180,9 @@
     </group>
     <group>
       <name>07-App</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
       <group>
         <name>heli</name>
         <excluded>

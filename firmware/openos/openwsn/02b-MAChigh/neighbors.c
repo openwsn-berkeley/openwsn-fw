@@ -303,7 +303,6 @@ uint8_t  neighbors_getNumberOfNeighbors(){
    }  
   return size;
 }
-  
 
 //=========================== private =========================================
 
