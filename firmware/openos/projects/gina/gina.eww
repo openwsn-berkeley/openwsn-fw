@@ -62,6 +62,9 @@
     <path>$WS_DIR$\02drv_opentimers_alt\02drv_opentimers_alt.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\03oos_macpong\03oos_macpong.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\03oos_openwsn\03oos_openwsn.ewp</path>
   </project>
   <project>

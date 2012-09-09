@@ -123,10 +123,10 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
 \param newFrameLength The new frame length.
  */
 void schedule_addActiveSlot(slotOffset_t    slotOffset,
-      cellType_t      type,
-      bool            shared,
-      uint8_t         channelOffset,
-      open_addr_t*    neighbor) {
+                            cellType_t      type,
+                            bool            shared,
+                            uint8_t         channelOffset,
+                            open_addr_t*    neighbor) {
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
    scheduleEntry_t* nextSlotWalker;

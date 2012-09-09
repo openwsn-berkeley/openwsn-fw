@@ -678,7 +678,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>03oos_openwsn.d43</state>
+          <state>03oos_macpong.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -872,7 +872,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>03oos_openwsn.a43</state>
+          <state>03oos_macpong.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1909,10 +1909,10 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.c</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_macpong\openwsn_proj.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.h</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_macpong\openwsn_proj.h</name>
     </file>
   </group>
   <group>

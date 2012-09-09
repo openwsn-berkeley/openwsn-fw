@@ -331,7 +331,6 @@ error_t opencoap_send(OpenQueueEntry_t*     msg,
 
 //=========================== private =========================================
 
-//bkpoipoi
 void icmpv6coap_timer_cb() {
    scheduler_push_task(timers_coap_fired,TASKPRIO_COAP);
 }
