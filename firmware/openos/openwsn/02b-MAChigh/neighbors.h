@@ -66,6 +66,7 @@ PRAGMA(pack());
                                              bool         was_finally_acked,
                                              asn_t*       asnTimestamp);
           open_addr_t*  neighbors_KaNeighbor();
+          open_addr_t*  neighbors_getAddr(uint8_t neighboIdx);
           bool          neighbors_isStableNeighbor(open_addr_t* address);
           bool          neighbors_isPreferredParent(open_addr_t* address);
           dagrank_t     neighbors_getMyDAGrank();

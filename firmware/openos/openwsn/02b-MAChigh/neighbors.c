@@ -178,6 +178,10 @@ open_addr_t* neighbors_KaNeighbor() {
    }
 }
 
+open_addr_t*  neighbors_getAddr(uint8_t neighboIdx) {
+   return &neighbors_vars.neighbors[neighboIdx].addr_64b;
+}
+
 bool neighbors_isStableNeighbor(open_addr_t* address) {
    uint8_t i;
    open_addr_t temp_addr_64b;
