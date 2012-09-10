@@ -1909,10 +1909,10 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_macpong_alt\03oos_macpong_alt.c</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_macpong\03oos_macpong.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_macpong_alt\03oos_macpong_alt.h</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_macpong\03oos_macpong.h</name>
     </file>
   </group>
   <group>
