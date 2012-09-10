@@ -1920,6 +1920,12 @@
     <group>
       <name>boards</name>
       <group>
+        <name>common</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\abstimer.c</name>
+        </file>
+      </group>
+      <group>
         <name>gina</name>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\board.c</name>
@@ -1929,6 +1935,9 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\bsp_timer.c</name>
+          <excluded>
+            <configuration>Debug</configuration>
+          </excluded>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\debugpins.c</name>
@@ -1962,6 +1971,12 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\radiotimer.c</name>
+          <excluded>
+            <configuration>Debug</configuration>
+          </excluded>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\gina\sctimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\drivers\gina\sensitive_accel_temperature.c</name>
