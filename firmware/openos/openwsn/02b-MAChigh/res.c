@@ -166,7 +166,7 @@ The body of this function executes one of the MAC management task.
 */
 void timers_res_fired() {
    res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%2;
-   if (idmanager_getMyID(ADDR_16B)->addr_16b[1]==DEBUG_MOTEID_MASTER) {
+   if (idmanager_getIsDAGroot()==TRUE) {
       if (res_vars.MacMgtTaskCounter==0) {
          sendAdv();
       } else {
