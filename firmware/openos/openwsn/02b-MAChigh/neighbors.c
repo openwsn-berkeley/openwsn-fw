@@ -50,25 +50,25 @@ void neighbors_receiveDIO(OpenQueueEntry_t* msg) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
             neighbors_vars.neighbors[i].DAGrank = *((uint8_t*)(msg->payload));
             // poipoi: single hop
-            if (neighbors_vars.neighbors[i].DAGrank==0x00) {
-               neighbors_vars.neighbors[i].parentPreference=MAXPREFERENCE;
-               if (neighbors_vars.neighbors[i].numTxACK==0) {
-                  temp_linkCost=15; //TODO: evaluate using RSSI?
-               } else {
-                  temp_linkCost=linkcost_calcETX(neighbors_vars.neighbors[i].numTx,neighbors_vars.neighbors[i].numTxACK);
-               }
-               if (idmanager_getIsDAGroot()==FALSE) {
-                 neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
-               }
-            } else {
-               neighbors_vars.neighbors[i].parentPreference=0;
-            }
+//            if (neighbors_vars.neighbors[i].DAGrank==0x00) {
+//               neighbors_vars.neighbors[i].parentPreference=MAXPREFERENCE;
+//               if (neighbors_vars.neighbors[i].numTxACK==0) {
+//                  temp_linkCost=15; //TODO: evaluate using RSSI?
+//               } else {
+//                  temp_linkCost=linkcost_calcETX(neighbors_vars.neighbors[i].numTx,neighbors_vars.neighbors[i].numTxACK);
+//               }
+//               if (idmanager_getIsDAGroot()==FALSE) {
+//                 neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
+//               }
+//            } else {
+//               neighbors_vars.neighbors[i].parentPreference=0;
+//            }
             break;
          }
       }
    }
    // poipoi: single hop
-   //neighbors_updateMyDAGrankAndNeighborPreference(); 
+   neighbors_updateMyDAGrankAndNeighborPreference(); 
 }
 
 void neighbors_indicateRx(open_addr_t* l2_src,

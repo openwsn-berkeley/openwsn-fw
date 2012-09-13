@@ -166,19 +166,19 @@ The body of this function executes one of the MAC management task.
 */
 void timers_res_fired() {
    res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%2;
-   if (idmanager_getIsDAGroot()==TRUE) {
+  // if (idmanager_getIsDAGroot()==TRUE) {
       if (res_vars.MacMgtTaskCounter==0) {
          sendAdv();
       } else {
          // don't send KAs if you're the master
       }
-   } else {
-      if (res_vars.MacMgtTaskCounter==0) {
-         // don't send ADVs if you're not the master
-      } else {
-         sendKa();
-      }
-   }
+//  } else {
+//      if (res_vars.MacMgtTaskCounter==0) {
+//         // don't send ADVs if you're not the master
+//      } else {
+//         sendKa();
+//      }
+//    }
 }
 
 //=========================== private =========================================
