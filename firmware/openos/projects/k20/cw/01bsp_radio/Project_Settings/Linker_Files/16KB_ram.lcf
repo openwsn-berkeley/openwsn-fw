@@ -1,0 +1,72 @@
+#/*
+# * File:		16KB_ram.lcf
+# * Purpose:	Linker file for Kinetis devices with
+# *			16KB of internal RAM
+# *
+# * Notes:		code executing from RAM
+# *
+# */
+
+MEMORY
+{
+    text    (RX) : ORIGIN = 0x1FFFE000,  LENGTH = 0x00004000
+    data    (RW) : ORIGIN = AFTER(text), LENGTH = 0
+    bss     (RW) : ORIGIN = AFTER(data), LENGTH = 0
+}
+
+SECTIONS
+{
+     __VECTOR_RAM		= 0x1FFFE000;
+
+ 
+	.text :
+	{
+		. 				= ALIGN(0x10);
+		__VECTOR_TABLE = .;
+       __exception_table_start__ = .;
+
+		*(.vectortable)
+		
+       __exception_table_end__ = .;
+		
+		*(.text)
+		. 				= ALIGN(0x10);
+	} > text
+
+	.data :
+	{
+		. 				= ALIGN(0x10);
+		__DATA_ROM 	= .;
+		__DATA_RAM 	= .;
+		*(.rodata)	
+		*(.sdata)
+		*(.data)
+		*(.relocate_code)
+		*(.relocate_const)
+		*(.relocate_data)
+		. 				= ALIGN(0x10);
+		__DATA_END 	= .;
+	} > data
+	
+	.bss :
+	{
+		. 					= ALIGN(0x10);
+		__START_BSS 		= .;
+		*(.sbss)
+		*(SCOMMON)
+		*(.bss)
+		*(COMMON)
+		__END_BSS 			= .;
+		. 					= ALIGN(0x10);
+		__HEAP_START		= .;
+		__heap_addr			= .;
+		__heap_size 		= 0x0000800;
+		.					= . + __heap_size;
+		__HEAP_END			= .;
+		__SP_END			= .;
+		.					= . + 0x400;
+		__BOOT_STACK_ADDRESS = .;
+	} > bss
+	
+	___BOOT_STACK_ADDRESS = __BOOT_STACK_ADDRESS;
+}
