@@ -1,0 +1,64 @@
+#/*
+# * File:       64KB_pflash_32KB_dflash.lcf
+# * Purpose:    Linker file for Kinetis devices with FlexMem
+# *		    that include 64KB of Pflash and 32KB of Dflash
+# *
+# * Notes:      Project running in internal Flash
+# *
+# */
+
+MEMORY
+{
+    rom     (RX) : ORIGIN = 0x00000000,  LENGTH = 0x00010000
+    ram     (RW) : ORIGIN = 0x1FFFE410,  LENGTH = 0x00003BF0
+}
+
+SECTIONS 
+{
+    __VECTOR_RAM       = 0x1FFFE000;
+    
+    .text :
+    {
+		. 				= ALIGN(0x10);
+		__VECTOR_TABLE = .;
+       __exception_table_start__ = .;
+
+		*(.vectortable)
+		
+       __exception_table_end__ = .;
+        *(.text)
+        *(.rodata)
+         .              = ALIGN(0x10);
+        __DATA_ROM     = .;
+    } > rom
+
+    .data_bss : AT(__DATA_ROM)
+    {
+        __DATA_RAM     = .;
+        *(.data)
+        *(.sdata)
+		*(.relocate_code)
+		*(.relocate_const)
+		*(.relocate_data)
+		*(.test)
+        __DATA_END     = .;
+        .               = ALIGN(0x10);
+        __START_BSS    = .;
+        *(.sbss)
+        *(SCOMMON)
+        *(.bss)
+        *(COMMON)
+        __END_BSS      = .;
+        .               = ALIGN(0x10);
+        __HEAP_START   = .;
+		__heap_addr			= .;
+		__heap_size 		= (4 * 1024);
+		.					= . + __heap_size;
+        __HEAP_END     = .;
+        __SP_END       = .;
+		.					= . + (1 * 1024);
+		__BOOT_STACK_ADDRESS = .;
+    } > ram
+	
+	___BOOT_STACK_ADDRESS = __BOOT_STACK_ADDRESS;
+}
