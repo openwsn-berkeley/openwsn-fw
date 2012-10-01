@@ -19,11 +19,11 @@
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildArguments</key>
-					<value>-j8</value>
+					<value>-j6</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildCommand</key>
-					<value>${system:ECLIPSE_HOME}/../gnu/bin/make</value>
+					<value>${system:ECLIPSE_HOME}/../gnu/bin/mingw32-make</value>
 				</dictionary>
 				<dictionary>
 					<key>org.eclipse.cdt.make.core.buildLocation</key>
@@ -69,24 +69,75 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>Sources/01bsp_leds.c</name>
-			<type>1</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/projects/common/01bsp_leds/01bsp_leds.c</location>
-		</link>
-		<link>
-			<name>Sources/boards</name>
-			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/boards</location>
-		</link>
-		<link>
 			<name>Sources/chips</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/bsp/chips</location>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Sources/openwsn</name>
+			<name>Sources/application/01bsp_leds.c</name>
+			<type>1</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/projects/common/01bsp_leds/01bsp_leds.c</location>
+		</link>
+		<link>
+			<name>Sources/application/openwsn.h</name>
+			<type>1</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/openwsn/openwsn.h</location>
+		</link>
+		<link>
+			<name>Sources/chips/at86rf231</name>
 			<type>2</type>
-			<location>/home/xvilajosana/Storage/Development/wsndev/workspaces/workspace_CW3/openos/openwsn</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/chips/at86rf231</location>
+		</link>
+		<link>
+			<name>Sources/chips/i2c.h</name>
+			<type>1</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/chips/i2c.h</location>
+		</link>
+		<link>
+			<name>Sources/chips/spi.h</name>
+			<type>1</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/chips/spi.h</location>
+		</link>
+		<link>
+			<name>Sources/k20/bsp</name>
+			<type>2</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/bsp</location>
+		</link>
+		<link>
+			<name>Sources/k20/bsp_ext</name>
+			<type>2</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/bsp_ext</location>
+		</link>
+		<link>
+			<name>Sources/k20/common</name>
+			<type>2</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/common</location>
+		</link>
+		<link>
+			<name>Sources/k20/cpu</name>
+			<type>2</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/cpu</location>
+		</link>
+		<link>
+			<name>Sources/k20/cw</name>
+			<type>2</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/cw</location>
+		</link>
+		<link>
+			<name>Sources/k20/platforms</name>
+			<type>2</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/platforms</location>
+		</link>
+		<link>
+			<name>Sources/k20/bsp/abstimer.c</name>
+			<type>1</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/common/abstimer.c</location>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>OPENOS_LOC</name>
+			<value>file:/C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos</value>
+		</variable>
+	</variableList>
 </projectDescription>
