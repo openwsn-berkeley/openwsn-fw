@@ -763,6 +763,9 @@
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\tcpinject&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\tcpprint&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udpecho&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udpprint&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udprand&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udpstorm&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udpinject&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\layerdebug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udpprint&quot;"/>
@@ -799,6 +802,48 @@
 							<tool id="com.freescale.arm.cdt.toolchain.disassembler.1970859907" name="ARM Disassembler" superClass="com.freescale.arm.cdt.toolchain.disassembler"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1487334609" name="01bsp_spi.c" rcbsApplicability="disable" resourcePath="Sources/application/01bsp_spi.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.1674150206">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.1674150206" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.487342638" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.2135319847" name="01bsp_bothtimers.c" rcbsApplicability="disable" resourcePath="Sources/application/01bsp_bothtimers.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.1327648233">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.1327648233" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.1146069877" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1425844693" name="openwsn_proj.c" rcbsApplicability="disable" resourcePath="Sources/application/openwsn_proj.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.867329271">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.867329271" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.1485103379" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.285406548" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.2016722507" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1255144470" name="Resource Custom Build Step Output Type"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.812487471" name="01bsp_uart.c" rcbsApplicability="disable" resourcePath="Sources/application/01bsp_uart.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.230767733">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.230767733" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.434351590" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.779237575" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1102419355" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.547993380" name="Resource Custom Build Step Output Type"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.856269377" name="01bsp_leds.c" rcbsApplicability="disable" resourcePath="Sources/application/01bsp_leds.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.647353879">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.647353879" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.2034703489" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1057780564" name="01bsp_radio.c" rcbsApplicability="disable" resourcePath="Sources/application/01bsp_radio.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.699513264">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.699513264" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.1494705939" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+					</fileInfo>
 					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1096660040" name="/" resourcePath="Sources/openwsn/07-App">
 						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.1638316240" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release" unusedChildren="">
 							<option id="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119.1269054439" name="Model" superClass="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119"/>
@@ -860,7 +905,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="Sources/application/01bsp_leds.c|Sources/application/openwsn_proj.c|Sources/application/01bsp_spi.c|Sources/application/01bsp_radio.c|Sources/application/01bsp_bothtimers.c|Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
