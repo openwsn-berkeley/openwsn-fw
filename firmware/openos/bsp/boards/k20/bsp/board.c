@@ -57,15 +57,8 @@ void board_init() {
 
 #endif	
 
-
-//	PORT_PIN_RADIO_RESET_HIGH();//reset the radio
-//	for (i=0;i<0xFFFF;i++){// delay for reset.
-//		for (j=0;j<0xF;j++);// delay for reset.
-//	}
 	PORT_PIN_RADIO_RESET_LOW();//activate the radio.
-//	for (i=0;i<0xFFFF;i++){// delay for reset.
-//			for (j=0;j<0xFF;j++);// delay for reset.
-//		}
+
 	
 	PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
 	
