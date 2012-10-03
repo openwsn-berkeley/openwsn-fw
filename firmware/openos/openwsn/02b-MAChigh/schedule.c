@@ -63,9 +63,37 @@ void schedule_init() {
          TRUE,
          0,
          &temp_neighbor);
+   
+   i = 2;
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+   temp_neighbor.type             = ADDR_ANYCAST;
+   schedule_addActiveSlot(i,
+         CELLTYPE_TXRX,
+         TRUE,
+         0,
+         &temp_neighbor);
+
+   i = 3;
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+   temp_neighbor.type             = ADDR_ANYCAST;
+   schedule_addActiveSlot(i,
+         CELLTYPE_TXRX,
+         TRUE,
+         0,
+         &temp_neighbor);
+
+   i = 4;
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+   temp_neighbor.type             = ADDR_ANYCAST;
+   schedule_addActiveSlot(i,
+         CELLTYPE_TXRX,
+         TRUE,
+         0,
+         &temp_neighbor);
+
 
    // slot 2 is SERIALRX
-   i = 2;
+   i = 5;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    schedule_addActiveSlot(i,
          CELLTYPE_SERIALRX,
@@ -74,7 +102,7 @@ void schedule_init() {
          &temp_neighbor);
 
    // slot 3 is MORESERIALRX
-   i = 3;
+   i = 6;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    schedule_addActiveSlot(i,
          CELLTYPE_MORESERIALRX,
@@ -83,7 +111,7 @@ void schedule_init() {
          &temp_neighbor);
 
    // slot 4 is MORESERIALRX
-   i = 4;
+   i = 7;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    schedule_addActiveSlot(i,
          CELLTYPE_MORESERIALRX,
