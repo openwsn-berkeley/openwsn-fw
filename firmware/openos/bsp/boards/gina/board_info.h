@@ -64,7 +64,7 @@ to return the board's description.
 #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
 #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
 #define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-#define PORT_maxTxAckPrepare                20    //  305us (measured 219us)
+#define PORT_maxTxAckPrepare                22    //  305us (measured 219us)
 // radio speed related
 #define PORT_delayTx                        7     //  214us (measured 219us)
 #define PORT_delayRx                        0     //    0us (can not measure)
