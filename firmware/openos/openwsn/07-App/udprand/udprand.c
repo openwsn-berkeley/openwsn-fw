@@ -7,6 +7,7 @@
 #include "opentimers.h"
 #include "openrandom.h"
 #include "opencoap.h"
+#include "scheduler.h"
 
 //=========================== defines =========================================
 
@@ -33,9 +34,9 @@ void udprand_init() {
                                           udprand_timer);
 }
 
-void udprand_timer() {
-   OpenQueueEntry_t* pkt;
-   
+void udprand_task(){
+    OpenQueueEntry_t* pkt;
+   debugpins_task_toggle();
    //prepare packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPRAND);
    if (pkt==NULL) {
@@ -58,6 +59,12 @@ void udprand_timer() {
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }
+   
+   debugpins_task_toggle();
+}
+
+void udprand_timer() {
+  scheduler_push_task(udprand_task,TASKPRIO_COAP);
 }
 
 void udprand_sendDone(OpenQueueEntry_t* msg, error_t error) {
