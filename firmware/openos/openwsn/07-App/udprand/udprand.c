@@ -36,7 +36,6 @@ void udprand_init() {
 
 void udprand_task(){
     OpenQueueEntry_t* pkt;
-   debugpins_task_toggle();
    //prepare packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPRAND);
    if (pkt==NULL) {
@@ -59,8 +58,6 @@ void udprand_task(){
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }
-   
-   debugpins_task_toggle();
 }
 
 void udprand_timer() {
