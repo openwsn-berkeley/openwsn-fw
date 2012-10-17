@@ -68,7 +68,7 @@ void debugpins_init() {
 	 PORTE_PCR1 = PORT_PCR_MUX(1);
 	 PORTE_PCR2 = PORT_PCR_MUX(1);
 	 PORTE_PCR3 = PORT_PCR_MUX(1);
-	 PORTC_PC11  = PORT_PCR_MUX(1);
+	 PORTC_PCR11  = PORT_PCR_MUX(1);
 	 PORTC_PCR16  = PORT_PCR_MUX(1);
  	 
 	 //set as output
