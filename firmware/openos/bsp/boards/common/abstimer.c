@@ -33,37 +33,29 @@ typedef struct {
 	uint16_t                  num_radiotimer_compare;
 	uint16_t                  num_late_schedule;
 	uint16_t                  nested_isr;
-	uint16_t                  consecutive_late;    // total time of the scheduled bsp timer (relative value
-	uint16_t                  consecutive_late_array_nextCurrentTime[10];
-	uint16_t                  consecutive_late_array_distanceNext[10];
-	uint16_t                  consecutive_late_array_timeSpent[10];
-	uint16_t                  consecutive_late_array_sctimerVal[10];
-	uint16_t                  consecutive_late_array_currentTime[10];
-	uint8_t                   consecutive_late_type[10];
-	uint16_t                  calc_currentTime[10];
-	uint8_t                   count_late;
-	uint8_t                   count_ctime;
+	uint16_t                  consecutive_late;    // total time of the scheduled bsp timer (relative value)
+        uint16_t                  count_late; 
 } abstimer_dbg_t;
 
 abstimer_dbg_t abstimer_dbg;
 
 typedef struct {
 	// admin
-	bool                      initialized;
-	volatile uint16_t                  currentTime;        // current "theoretical" time
-	volatile uint16_t                  nextCurrentTime;    // next "theoretical" time
+	bool                               initialized;
+	uint16_t                  currentTime;        // current "theoretical" time
+	uint16_t                  nextCurrentTime;    // next "theoretical" time
 	// timer values
-	abstimer_cbt              callback[ABSTIMER_SRC_MAX];
-	bool                      isArmed[ABSTIMER_SRC_MAX];
-	volatile uint16_t                  compareVal[ABSTIMER_SRC_MAX];
+	abstimer_cbt                       callback[ABSTIMER_SRC_MAX];
+	bool                               isArmed[ABSTIMER_SRC_MAX];
+	uint16_t                  compareVal[ABSTIMER_SRC_MAX];
 	// radiotimers-specific variables
-	volatile uint16_t                  radiotimer_period;
-	volatile uint16_t                  radiotimer_overflow_previousVal;
-	volatile uint16_t                  radiotimer_compare_offset;
+	uint16_t                  radiotimer_period;
+	uint16_t                  radiotimer_overflow_previousVal;
+	uint16_t                  radiotimer_compare_offset;
 	// bsp-timer-specific variables
-	volatile uint16_t                  bsp_timer_total;    // total time of the scheduled bsp timer (relative value)
+	uint16_t                  bsp_timer_total;    // total time of the scheduled bsp timer (relative value)
 	//poipio
-	volatile uint8_t  bitmapInterruptsFired;
+	uint8_t                   bitmapInterruptsFired;
 } abstimer_vars_t;
 
 abstimer_vars_t abstimer_vars;
@@ -141,10 +133,12 @@ void bsp_timer_cancel_schedule() {
  * 
  */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
-	PORT_TIMER_WIDTH x;
+	PORT_TIMER_WIDTH x,y;
 	INTERRUPT_DECLARATION();
 	DISABLE_INTERRUPTS();
-	x=abstimer_vars.bsp_timer_total - (abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER] - sctimer_getValue());
+	x=abstimer_vars.bsp_timer_total;
+        y=(abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER] - sctimer_getValue());
+        x=x-y;
 	ENABLE_INTERRUPTS();
 	return x;
 }
@@ -312,19 +306,17 @@ uint8_t bsp_timer_isr() {
 
 uint8_t radiotimer_isr() {
 	uint8_t         i;                       // iterator
-	volatile uint16_t        now,timeSpent;
-	volatile uint16_t        calc;
-	volatile uint16_t        min;
-	volatile uint16_t        tempcompare,tempcompare2;
-
+	uint16_t        now,timeSpent;
+	uint16_t        calc;
+	uint16_t        min;
+	uint16_t        tempcompare;
+debugpins_frame_set();
 	sctimer_clearISR();// clear all flags
 
-	debugpins_radio_set();//debug
-
-	// update the current theoretical time
+	// update the current theoretical time -- nextCurrentTime MUST be NOW
 	abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
 	
-	//debug -- to detect nested behaviours due to enable and disable interrupts.. 
+	//debug -- to detect nested behaviours in case of reentrant interrupt.. should never happen
 	abstimer_dbg.nested_isr++;
 	
 	//===== step 1. Find out which interrupts just fired
@@ -349,22 +341,24 @@ uint8_t radiotimer_isr() {
 	if (abstimer_vars.bitmapInterruptsFired==0) {
 		while(1);
 	}
-	//how many loops?
+	
+        //how many loops? -- this tells us how many timers have expired at the same time.
 	abstimer_dbg.consecutive_late=0;
-
+        
+        //let's execute all of them..
 	while (abstimer_vars.bitmapInterruptsFired!=0) {
-
+//check that...
 		while (abstimer_vars.bitmapInterruptsFired!=0) {
-
-			if       (abstimer_vars.bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW)) {
+                        //radiotimer overflow...
+			if      (abstimer_vars.bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW)) {
 
 				// update debug stats
 				abstimer_dbg.num_radiotimer_overflow++;
 
-				// keep previous value poipoi
+				// keep previous value -- this is now  poipoi
 				abstimer_vars.radiotimer_overflow_previousVal = \
 						abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-				// remember compare val
+				// remember compare val in case the callback modifies it.
 				tempcompare = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
 
 				// call the callback
@@ -374,19 +368,13 @@ uint8_t radiotimer_isr() {
 
 				// reschedule automatically if wasn't changed during callback
 				if (abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW]==tempcompare) {
-					// keep previous value
-					//poipoiabstimer_vars.radiotimer_overflow_previousVal = abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW];
-
-					// this is a periodic timer, reschedule automatically
+					// this is a periodic timer, reschedule automatically -- only if the callback has not already set it.
 					abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_OVERFLOW] += abstimer_vars.radiotimer_period;
-
-					// poipoipoi
-					//poipoiabstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]  += abstimer_vars.radiotimer_period;
 				}
 
 				// clear the interrupt flag
 				abstimer_vars.bitmapInterruptsFired &= ~(1<<ABSTIMER_SRC_RADIOTIMER_OVERFLOW);
-
+                        //radiotimer compare inside the slot...
 			} else if (abstimer_vars.bitmapInterruptsFired & (1<<ABSTIMER_SRC_RADIOTIMER_COMPARE)) {
 
 				// update debug stats
@@ -397,7 +385,8 @@ uint8_t radiotimer_isr() {
 
 				// call the callback
 				abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_COMPARE]();
-
+                                // XV: I do not understand this ... why is rescheduled in the next slot? 
+                                
 				// reschedule automatically if wasn't changed during callback
 				if (abstimer_vars.compareVal[ABSTIMER_SRC_RADIOTIMER_COMPARE]==tempcompare) {
 
@@ -408,7 +397,7 @@ uint8_t radiotimer_isr() {
 
 				// clear the interrupt flag
 				abstimer_vars.bitmapInterruptsFired &= ~(1<<ABSTIMER_SRC_RADIOTIMER_COMPARE);
-
+                        //bsp timer
 			} else if (abstimer_vars.bitmapInterruptsFired & (1<<ABSTIMER_SRC_BSP_TIMER)) {
 
 				// update debug stats
@@ -425,8 +414,6 @@ uint8_t radiotimer_isr() {
 			}
 		}
 
-
-
 		// make sure all interrupts have been handled
 		if (abstimer_vars.bitmapInterruptsFired!=0) {
 			while(1);
@@ -438,22 +425,19 @@ uint8_t radiotimer_isr() {
 
 		//===== step 5. make sure I'm not late for my next schedule
 
-
 		// evaluate how much time has passed since theoretical currentTime,
 		// (over estimate by ABSTIMER_GUARD_TICKS)
-		// As time elapsed is larger 
-		now   = sctimer_getValue(); 
+		now   = sctimer_getValue(); //this gets the value of the counter 
 		timeSpent  = (uint16_t)((uint16_t)now-(uint16_t)abstimer_vars.currentTime);
-		abstimer_dbg.calc_currentTime[abstimer_dbg.count_ctime%10]=abstimer_vars.currentTime;
-		abstimer_dbg.count_ctime++;
 		timeSpent += ABSTIMER_GUARD_TICKS;
-		//debug -- to detect wraps...
+	
+                //debug -- to detect wraps...
 		if (timeSpent > 65000){
 			//in case of negative wrap, lets say that a small time has elapsed.
 			timeSpent=ABSTIMER_GUARD_TICKS;
 		}
-		// verify that, for each timer, that duration doesn't exceed how much time is left
-
+		
+                // verify that, for each timer, that duration doesn't exceed how much time is left
 		//find smallest next timer and mark it in the bitmap to be executed next. Can only be one marked at a time. 
 		min=0xFFFF;
 		for (i=0;i<ABSTIMER_SRC_MAX;i++) {
@@ -462,7 +446,7 @@ uint8_t radiotimer_isr() {
 			calc = (uint16_t)abstimer_vars.compareVal[i]-(uint16_t)abstimer_vars.currentTime; 
 
 			if ((abstimer_vars.isArmed[i]==TRUE) && (timeSpent>calc) && (calc<min)) {
-				//this is the nearest in time
+				//this is the nearest in time and we are already late or it is closer to its deadline, (distance < ABSTIMER_GUARD_TICKS)
 				min=calc;
 				// this interrupt needs to be serviced now
 				abstimer_vars.bitmapInterruptsFired = (1<<i);
@@ -475,39 +459,30 @@ uint8_t radiotimer_isr() {
 			}
 		}
 		if (abstimer_vars.bitmapInterruptsFired!=0) {
-			//xavi db
-			//if (abstimer_dbg.count_late<10){//get first 100
-				abstimer_dbg.consecutive_late_array_sctimerVal[abstimer_dbg.count_late%10]=now;
-				abstimer_dbg.consecutive_late_array_currentTime[abstimer_dbg.count_late%10]=abstimer_vars.currentTime ;
-				abstimer_dbg.consecutive_late_array_nextCurrentTime[abstimer_dbg.count_late%10]=abstimer_vars.nextCurrentTime;
-				abstimer_dbg.consecutive_late_array_distanceNext[abstimer_dbg.count_late%10]=min;
-				abstimer_dbg.consecutive_late_array_timeSpent[abstimer_dbg.count_late%10]=timeSpent;
-				abstimer_dbg.consecutive_late_type[abstimer_dbg.count_late%10]=abstimer_vars.bitmapInterruptsFired;
-			//}
 			abstimer_dbg.count_late++;
 
-			//two or more timers are close so we need to execute the callback of the nearest one, 
-			//to do so we update the current time to now(time from the counter) plus some guard time as the execution of
-			//this (the following) callback will take some time. This is done as we do not want that currentime is smaller
-			//than the actual time (real time from the counter) because this sets the current timeout in the past and requires
-			//a complete wrap of the timer.
-
-			abstimer_vars.currentTime = now;//right now. + a guard time as we want to avoid that the distance calculation becomes negative.;
-			abstimer_vars.nextCurrentTime =  abstimer_vars.currentTime ; //next timer is right now as well
+                        //a timer (or more) is so close that we need to execute it right now. there are several problems:
+                        // 1) the isr function of that timer sets another timeout, also close in time, and the time it takes to execute the actual callback is higher 
+                        //    than the difference between now and the next timeout.. this will cause a timer to be lost.
+                        // 2) if we set currentTime as the time where this late timeout is expecting to be executed, currentTime can be still in the future because 
+                        //    the GUARD_TIME can be bigger than needed in this case. IN that situation, timeSpent will be "negative" .. i.e close to 65535 and will cause an 
+                        //    execution of all the subsequent timers (during 2s) in isr mode... (looping here as all are "late")
+                        // 3) if we set currentTime ti now, the "late" timer can be in the past or in the future.. in case it is in the future, there is no problem, in case it is in the
+                        //    past and this timer sets another timeout, the timeout can also be in the past, causing an interrupt to be lost and possibly hanging the timer sequence for a while. 
+                        
+			//abstimer_vars.currentTime = now;//right now. + a guard time as we want to avoid that the distance calculation becomes negative.;
+                        abstimer_vars.currentTime = abstimer_vars.nextCurrentTime ;//this is the expected time... NOte that can be in the past!!
+			//abstimer_vars.nextCurrentTime =  abstimer_vars.currentTime ; //next timer is right now as well
 
 		}
 	}
 
-	debugpins_radio_clr();
 	//debug
 	if (abstimer_dbg.nested_isr!=1) while(1);
-	if (abstimer_dbg.consecutive_late>=3){
-		abstimer_dbg.consecutive_late+=1;
-		abstimer_dbg.consecutive_late-=1;
-	}
-
+	
 	abstimer_dbg.nested_isr=0;
 	sctimer_clearISR();
+        debugpins_frame_clr();
 	// kick the OS
 	return 1;
 }
