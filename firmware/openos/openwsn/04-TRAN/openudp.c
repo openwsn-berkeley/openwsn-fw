@@ -11,6 +11,8 @@
 #include "udpprint.h"
 #include "udprand.h"
 #include "udpstorm.h"
+#include "udplatency.h"
+
 //#include "heli.h"
 //#include "imu.h"
 
@@ -61,6 +63,9 @@ void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
          break;
       case WKP_UDP_RAND:
          udprand_sendDone(msg,error);
+         break;
+      case WKP_UDP_LATENCY:
+         udplatency_sendDone(msg,error);
          break;
          
       default:
