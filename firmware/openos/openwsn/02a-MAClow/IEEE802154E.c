@@ -16,6 +16,8 @@
 #include "board.h"
 #include "stdlib.h"
 
+//debug XV -- this define is used to force multihop. Look at isValidAdv and isValidRxFrame functions. Comment it if you don't want to hardcode multihop.
+//#define FORCE_MULTIHOP 
 //=========================== variables =======================================
 
 typedef struct {
@@ -576,7 +578,7 @@ port_INLINE void activity_ti1ORri1() {
    // wiggle debug pins
    //debugpins_slot_toggle();
    if (ieee154e_vars.slotOffset==0) {
-      debugpins_frame_toggle();
+     // debugpins_frame_toggle();
       //debugpins_radio_toggle();
    }
    
@@ -1168,17 +1170,33 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-      
+#ifdef FORCE_MULTIHOP           
+      bool valAdv=FALSE;
+#endif       
       // if I just received a valid ADV, record the ASN and toss the payload
       if (isValidAdv(&ieee802514_header)==TRUE) {
+#ifdef FORCE_MULTIHOP   
+         valAdv=TRUE;
+#endif            
          if (idmanager_getIsDAGroot()==FALSE) {
             asnStoreFromAdv(ieee154e_vars.dataReceived);
          }
          // toss the ADV payload
          packetfunctions_tossHeader(ieee154e_vars.dataReceived,ADV_PAYLOAD_LENGTH);
       }
+#ifdef FORCE_MULTIHOP     
+      //xv debug -- avoid ADV from other to  be parsed as a message.
+       bool res =(ieee802514_header.valid==TRUE && \
+          ieee802514_header.frameType==IEEE154_TYPE_BEACON);
+       
+      if (res && !valAdv){
+         // break if other ADV payload
+        break;
+      }
+#endif      
+      //end
       
-      // record the captured time
+       // record the captured time
       ieee154e_vars.lastCapturedTime = capturedTime;
       
       // if I just received an invalid frame, stop
@@ -1385,10 +1403,35 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
 \returns TRUE if packet is a valid ADV, FALSE otherwise
 */
 port_INLINE bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
-   return ieee802514_header->valid==TRUE                                                              && \
+   
+  bool res;
+  open_addr_t* add;
+  
+  res=ieee802514_header->valid==TRUE                                                              && \
           ieee802514_header->frameType==IEEE154_TYPE_BEACON                                           && \
           packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))        && \
           ieee154e_vars.dataReceived->length==ADV_PAYLOAD_LENGTH;
+#ifdef FORCE_MULTIHOP 
+   add=idmanager_getMyID(ADDR_64B);
+   switch(add->addr_64b[7]){
+   case 0xEC:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xED);//only ADV from ED
+     break;
+   case 0xE8:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xEC);//only ADV from EC
+     break;
+   case 0xE6:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xE8);//only ADV from E8
+     break;
+   case 0xF5:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xE6);//only ADV from E6
+     break;
+   case 0xF3:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xF5);//only ADV from F5
+     break;
+   }
+#endif   
+ return res; 
 }
 
 /**
@@ -1406,7 +1449,10 @@ A valid Rx frame satisfies the following constraints:
 \returns TRUE if packet is valid received frame, FALSE otherwise
 */
 port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
-   return ieee802514_header->valid==TRUE                                                           && \
+   bool res;
+   open_addr_t* add;
+  
+   res=ieee802514_header->valid==TRUE                                                           && \
           (
              ieee802514_header->frameType==IEEE154_TYPE_DATA                   ||
              ieee802514_header->frameType==IEEE154_TYPE_BEACON
@@ -1416,6 +1462,33 @@ port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
              idmanager_isMyAddress(&ieee802514_header->dest)                   ||
              packetfunctions_isBroadcastMulticast(&ieee802514_header->dest)
           );
+#ifdef FORCE_MULTIHOP   
+   add=idmanager_getMyID(ADDR_64B);
+   
+   switch(add->addr_64b[7]){
+   
+   case 0xED:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xEC);//only PKT from EC
+     break;  
+   case 0xEC:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xED ||ieee802514_header->src.addr_64b[7]==0xE8);//only PKT from ED or E8
+     break;
+   case 0xE8:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xEC||ieee802514_header->src.addr_64b[7]==0xE6);//only PKT from EC or E6
+     break;
+   case 0xE6:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xE8||ieee802514_header->src.addr_64b[7]==0xF5);//only PKT from E8 or F5
+     break;
+   case 0xF5:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xE6||ieee802514_header->src.addr_64b[7]==0xF3);//only PKT from E6 or F3
+     break;
+   case 0xF3:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xF5);//only PKT from F5
+     break;
+   }
+#endif   
+   return res;
+   
 }
 
 /**
@@ -1434,8 +1507,10 @@ A packet is a valid ACK if it satisfies the following conditions:
 
 \returns TRUE if packet is a valid ACK, FALSE otherwise.
 */
-port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header,
-                       OpenQueueEntry_t*      packetSent) {
+port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header, OpenQueueEntry_t*      packetSent) {
+  
+  bool res;
+  //open_addr_t* add;
    /*
    return ieee802514_header->valid==TRUE                                                           && \
           ieee802514_header->frameType==IEEE154_TYPE_ACK                                           && \
@@ -1445,11 +1520,15 @@ port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header,
           packetfunctions_sameAddress(&ieee802514_header->src,&packetSent->l2_nextORpreviousHop);
    */
    // poipoi don't check for seq num
-   return ieee802514_header->valid==TRUE                                                           && \
+   res= ieee802514_header->valid==TRUE                                                           && \
           ieee802514_header->frameType==IEEE154_TYPE_ACK                                           && \
           packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))     && \
           idmanager_isMyAddress(&ieee802514_header->dest)                                          && \
           packetfunctions_sameAddress(&ieee802514_header->src,&packetSent->l2_nextORpreviousHop);
+   
+   return res;
+   
+   
 }
 
 //======= ASN handling
@@ -1480,6 +1559,24 @@ port_INLINE void asnWriteToAdv(OpenQueueEntry_t* advFrame) {
    advFrame->l2_payload[3]        = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
    advFrame->l2_payload[4]        =  ieee154e_vars.asn.byte4;
 }
+
+//from upper layer that want to send the ASN to compute timming or latency
+void asnWriteToPkt(OpenQueueEntry_t* frame) {
+   frame->payload[0]        = (ieee154e_vars.asn.bytes0and1     & 0xff);
+   frame->payload[1]        = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
+   frame->payload[2]        = (ieee154e_vars.asn.bytes2and3     & 0xff);
+   frame->payload[3]        = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
+   frame->payload[4]        =  ieee154e_vars.asn.byte4;
+}
+
+void asnWriteToSerial(uint8_t* array) {
+   array[0]        = (ieee154e_vars.asn.bytes0and1     & 0xff);
+   array[1]        = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
+   array[2]        = (ieee154e_vars.asn.bytes2and3     & 0xff);
+   array[3]        = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
+   array[4]        =  ieee154e_vars.asn.byte4;
+}
+
 
 port_INLINE void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
    
@@ -1633,6 +1730,7 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    // return 26;    
    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
    uint8_t temp = 11+(ieee154e_vars.asnOffset+channelOffset)%16;
+   //temp=20;
    return temp;
 }
 
