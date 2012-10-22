@@ -20,7 +20,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_PATCH 1
 
 // enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER 0x99
+#define DEBUG_MOTEID_MASTER 0xED
 
 
 #ifndef TRUE
@@ -83,6 +83,7 @@ enum {
    WKP_UDP_INJECT                      = 2188,
    WKP_UDP_DISCARD                     =    9,
    WKP_UDP_RAND                        = 61000,
+   WKP_UDP_LATENCY                        = 61001,
 };
 
 //status elements
@@ -163,6 +164,7 @@ enum {
    COMPONENT_LAYERDEBUG                = 0x2b,
    COMPONENT_UDPRAND                   = 0x2c,
    COMPONENT_UDPSTORM                  = 0x2d,
+   COMPONENT_UDPLATENCY                = 0x2e,
 };
 
 /**

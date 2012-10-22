@@ -47,6 +47,8 @@
 #include "udpinject.h"
 #include "udpprint.h"
 #include "udprand.h"
+#include "udplatency.h"
+
 //#include "udpstorm.h"
 //-- CoAP
 #include "rleds.h"
@@ -114,7 +116,8 @@ void openwsn_init() {
    udpecho_init();
    udpinject_init();
    udpprint_init();
-   udprand_init();
+  // udprand_init();
+   udplatency_init();
    //udpstorm_init();
    //-- CoAP
    //rleds_init();
