@@ -12,7 +12,7 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in mseconds)
-#define UDPRANDPERIOD     10000
+#define UDPRANDPERIOD     30000
 
 //=========================== variables =======================================
 
