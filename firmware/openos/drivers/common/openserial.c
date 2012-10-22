@@ -130,6 +130,7 @@ error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
 
 error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    uint8_t counter;
+   uint8_t asn[5];
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
@@ -140,6 +141,14 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'D';                  //this is data
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
+   //asn to serial .. 
+   asnWriteToSerial(asn);// byte01,byte23,byte4
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[0];
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[1];
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[2];
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[3];
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[4];
+   
    for (counter=0;counter<length;counter++){
       openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)buffer[counter];
    }
