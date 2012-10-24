@@ -255,16 +255,19 @@ void neighbors_getPreferredParent(open_addr_t* addressToWrite, uint8_t addr_type
          switch(addr_type) {
             case ADDR_64B:
                memcpy(addressToWrite,&(neighbors_vars.neighbors[i].addr_64b),sizeof(open_addr_t));
+               addressToWrite->type=ADDR_64B;//set the type
                break;
             default:
                openserial_printError(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                      (errorparameter_t)addr_type,
                                      (errorparameter_t)1);
                break;
-         }
-         return;
+              }
+         
+         
       }
    }
+    return;        
 }
 
 bool debugPrint_neighbors() {
