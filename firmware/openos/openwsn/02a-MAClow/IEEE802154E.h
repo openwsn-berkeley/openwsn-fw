@@ -120,6 +120,8 @@ typedef struct {
 // public
           PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN);
           bool     ieee154e_isSynch();
+          void asnWriteToPkt(OpenQueueEntry_t* frame);
+          void asnWriteToSerial(uint8_t* array);
 // events
           void     ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
           void     ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
@@ -128,6 +130,7 @@ typedef struct {
           bool     debugPrint_isSync();
           bool     debugPrint_macStats();
 
+          
 /**
 \}
 \}
