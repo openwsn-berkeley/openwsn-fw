@@ -10,6 +10,7 @@
 #include "scheduler.h"
 #include "IEEE802154E.h"
 #include "idmanager.h"
+#include "neighbors.h"
 
 //=========================== defines =========================================
 
@@ -31,14 +32,22 @@ void udplatency_timer();
 //=========================== public ==========================================
 
 void udplatency_init() {
-   udplatency_vars.timerId    = opentimers_start(openrandom_get16b()%UDPLATENCYPERIOD,
+ //don't run on dagroot 
+ if (idmanager_getIsDAGroot()) return;
+ 
+ udplatency_vars.timerId    = opentimers_start(UDPLATENCYPERIOD,
                                           TIMER_PERIODIC,TIME_MS,
                                           udplatency_timer);
 }
 
 void udplatency_task(){
    OpenQueueEntry_t* pkt;
+   open_addr_t * p;
+   open_addr_t  q;
+   
    //prepare packet
+   
+  
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPLATENCY);
    if (pkt==NULL) {
       openserial_printError(COMPONENT_UDPLATENCY,ERR_NO_FREE_PACKET_BUFFER,
@@ -60,7 +69,7 @@ void udplatency_task(){
    asnWriteToPkt(pkt);//gets asn from mac layer.
    
    packetfunctions_reserveHeaderSize(pkt,8);
-   open_addr_t * p=idmanager_getMyID(ADDR_64B);
+   p=idmanager_getMyID(ADDR_64B);
    pkt->payload[0]=p->addr_64b[0];
    pkt->payload[1]=p->addr_64b[1];
    pkt->payload[2]=p->addr_64b[2];
@@ -69,9 +78,21 @@ void udplatency_task(){
    pkt->payload[5]=p->addr_64b[5];
    pkt->payload[6]=p->addr_64b[6];
    pkt->payload[7]=p->addr_64b[7];
-     
-  // memcpy(&pkt->payload,&(p->addr_64b[0]),8);//8 bytes
    
+   neighbors_getPreferredParent(&q,ADDR_64B);  
+   if (q.type==ADDR_64B){
+      packetfunctions_reserveHeaderSize(pkt,8);
+   
+   //copy my preferred parent so we can build the topology
+      pkt->payload[0]=q.addr_64b[0];
+      pkt->payload[1]=q.addr_64b[1];
+      pkt->payload[2]=q.addr_64b[2];
+      pkt->payload[3]=q.addr_64b[3];
+      pkt->payload[4]=q.addr_64b[4];
+      pkt->payload[5]=q.addr_64b[5];
+      pkt->payload[6]=q.addr_64b[6];
+      pkt->payload[7]=q.addr_64b[7];
+   }
    //send packet
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
