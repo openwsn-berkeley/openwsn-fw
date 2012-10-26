@@ -44,7 +44,7 @@ void udplatency_task(){
    OpenQueueEntry_t* pkt;
    open_addr_t * p;
    open_addr_t  q;
-   
+
    //prepare packet
    
   
@@ -64,8 +64,7 @@ void udplatency_task(){
    memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_motedata,16);
    
 //the payload contains the 64bit address of the sender + the ASN
-   uint8_t size=sizeof(asn_t);
-   packetfunctions_reserveHeaderSize(pkt,size);
+   packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
    asnWriteToPkt(pkt);//gets asn from mac layer.
    
    packetfunctions_reserveHeaderSize(pkt,8);
