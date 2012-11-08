@@ -16,6 +16,8 @@
 #define BADNEIGHBORMAXRSSI        -80 //dBm
 #define GOODNEIGHBORMINRSSI       -90 //dBm
 #define SWITCHSTABILITYTHRESHOLD    3
+//poipoi xv
+#define MAXRANK                   0xFF //should be 0xFFFF when rank becomes 16bits.
 
 //=========================== typedef =========================================
 PRAGMA(pack(1));
@@ -71,7 +73,7 @@ PRAGMA(pack());
           bool          neighbors_isPreferredParent(open_addr_t* address);
           dagrank_t     neighbors_getMyDAGrank();
           uint8_t       neighbors_getNumNeighbors();
-          void          neighbors_getPreferredParent(open_addr_t* addressToWrite,
+          bool          neighbors_getPreferredParent(open_addr_t* addressToWrite,
                                                      uint8_t addr_type);
           //debug
           bool          debugPrint_neighbors();

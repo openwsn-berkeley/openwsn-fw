@@ -14,7 +14,7 @@
 
 //=========================== prototypes ======================================
 
-void    getNextHop(open_addr_t* destination, open_addr_t* addressToWrite);
+bool    getNextHop(open_addr_t* destination, open_addr_t* addressToWrite);
 error_t fowarding_send_internal(OpenQueueEntry_t *msg);
 
 //=========================== public ==========================================
@@ -88,8 +88,8 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
 //=========================== private =========================================
 
 error_t fowarding_send_internal(OpenQueueEntry_t *msg) {
-   getNextHop(&(msg->l3_destinationORsource),&(msg->l2_nextORpreviousHop));
-   if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
+   bool nextHopExists=getNextHop(&(msg->l3_destinationORsource),&(msg->l2_nextORpreviousHop));
+   if (msg->l2_nextORpreviousHop.type==ADDR_NONE || nextHopExists==FALSE) {
       openserial_printError(COMPONENT_FORWARDING,ERR_NO_NEXTHOP,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
@@ -98,7 +98,7 @@ error_t fowarding_send_internal(OpenQueueEntry_t *msg) {
    return iphc_sendFromForwarding(msg);
 }
 
-void getNextHop(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
+bool getNextHop(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
    uint8_t i;
    open_addr_t temp_prefix64btoWrite;
    if (packetfunctions_isBroadcastMulticast(destination128b)) {
@@ -110,8 +110,10 @@ void getNextHop(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
    } else if (neighbors_isStableNeighbor(destination128b)) {
        // IP destination is 1-hop neighbor, send directly
       packetfunctions_ip128bToMac64b(destination128b,&temp_prefix64btoWrite,addressToWrite64b);
+      
    } else {
       // destination is remote, send to preferred parent
-      neighbors_getPreferredParent(addressToWrite64b,ADDR_64B);
+      return neighbors_getPreferredParent(addressToWrite64b,ADDR_64B);
    }
+   return TRUE;
 }

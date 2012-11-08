@@ -233,7 +233,7 @@ uint8_t neighbors_getNumNeighbors() {
    return returnvalue;
 }
 
-void neighbors_getPreferredParent(open_addr_t* addressToWrite, uint8_t addr_type) {
+bool neighbors_getPreferredParent(open_addr_t* addressToWrite, uint8_t addr_type) {
    //following commented out section is equivalent to setting a default gw
    /*
       open_addr_t    nextHop;
@@ -248,26 +248,53 @@ void neighbors_getPreferredParent(open_addr_t* addressToWrite, uint8_t addr_type
       nextHop.addr_64b[7]=0x01;
       memcpy(addressToWrite,&nextHop,sizeof(open_addr_t));
       */
-   uint8_t i;
+   uint8_t i,posMinRank,usedNeighbours;
+   dagrank_t minRank;
+   bool preferred=FALSE;
+   
    addressToWrite->type=ADDR_NONE;
+   minRank=MAXRANK;//max rank
+   usedNeighbours=0;
+   
+   posMinRank=MAXNUMNEIGHBORS+1;
+   
    for (i=0; i<MAXNUMNEIGHBORS; i++) {
-      if (neighbors_vars.neighbors[i].used==TRUE && neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
+     if (neighbors_vars.neighbors[i].used==TRUE){
+        if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
          switch(addr_type) {
             case ADDR_64B:
                memcpy(addressToWrite,&(neighbors_vars.neighbors[i].addr_64b),sizeof(open_addr_t));
                addressToWrite->type=ADDR_64B;//set the type
+               preferred=TRUE;
                break;
             default:
                openserial_printError(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                      (errorparameter_t)addr_type,
                                      (errorparameter_t)1);
+               preferred=FALSE;
                break;
               }
-         
-         
-      }
+        }
+        //get possible preferred parent in case it does not exist. Will be the one with lowest rank
+        if( minRank > neighbors_vars.neighbors[i].DAGrank){
+           minRank=neighbors_vars.neighbors[i].DAGrank;
+           posMinRank=i;
+        }
+      usedNeighbours++;  //to see if there are neighbors
+     }
    }
-    return;        
+   if (preferred==FALSE && usedNeighbours > 0){
+     //no preferred parent.. and at least one neighbour
+      neighbors_vars.neighbors[posMinRank].parentPreference=MAXPREFERENCE;
+      neighbors_vars.neighbors[posMinRank].stableNeighbor=TRUE;
+      neighbors_vars.neighbors[posMinRank].switchStabilityCounter=0;
+      //poipoi xv check if we need to update our rank..
+      //neighbors_vars.myDAGrank=neighbors_vars.neighbors[posMinRank].DAGrank + 15;//tempLinkCost
+      memcpy(addressToWrite,&(neighbors_vars.neighbors[posMinRank].addr_64b),sizeof(open_addr_t));
+      addressToWrite->type=ADDR_64B;//set the type
+      preferred=TRUE;         
+   }
+    return preferred;//this can be false if we don't have neighbours.        
 }
 
 bool debugPrint_neighbors() {
@@ -419,7 +446,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint8_t   temp_preferredParentRow=0;
    bool      temp_preferredParentExists=FALSE;
    if ((idmanager_getIsDAGroot())==FALSE) {
-      neighbors_vars.myDAGrank=255;
+      neighbors_vars.myDAGrank=MAXRANK;
       i=0;
       while(i<MAXNUMNEIGHBORS) {
          neighbors_vars.neighbors[i].parentPreference=0;
