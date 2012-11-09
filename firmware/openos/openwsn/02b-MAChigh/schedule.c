@@ -42,8 +42,9 @@ void schedule_init() {
       schedule_resetEntry(&schedule_vars.scheduleBuf[i]);
    }
 
-   // set frame length
-   schedule_setFrameLength(12);
+   // set frame length -- this number must be mutually prime with num channels 
+   // as if it is not prime will cause the use of few channels.
+   schedule_setFrameLength(13);
 
    // slot 0 is advertisement slot
    i = 0;
