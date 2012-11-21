@@ -22,6 +22,9 @@ void udpecho_receive(OpenQueueEntry_t* msg) {
    temp_l4_destination_port           = msg->l4_destination_port;
    msg->l4_destination_port           = msg->l4_sourcePortORicmpv6Type;
    msg->l4_sourcePortORicmpv6Type     = temp_l4_destination_port;
+   msg->l3_destinationORsource.type = ADDR_128B;
+   memcpy(&msg->l3_destinationORsource.addr_128b[0],&msg->l3_sourceAdd.addr_128b[0],16);
+   
    if ((openudp_send(msg))==E_FAIL) {
       openqueue_freePacketBuffer(msg);
    }
