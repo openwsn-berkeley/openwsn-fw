@@ -25,7 +25,9 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
       bool m,
       bool dac,
       uint8_t dam,
-      open_addr_t* value_dest);
+      open_addr_t* value_dest,
+      open_addr_t* value_src,
+      uint8_t fw_SendOrfw_Rcv);  //>>>>>> diodio
 
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg);
 
@@ -35,12 +37,17 @@ void iphc_init() {
 }
 
 //send from upper layer: I need to add 6LoWPAN header
-error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg) {
+error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
    open_addr_t  temp_dest_prefix;
    open_addr_t  temp_dest_mac64b;
    open_addr_t* p_dest;
+   open_addr_t* p_src;  //>>>>>> diodio
+   open_addr_t  temp_src_prefix;  //>>>>>> diodio
+   open_addr_t  temp_src_mac64b;  //>>>>>> diodio
    uint8_t sam;
    uint8_t dam;
+   uint8_t nh=IPHC_NH_INLINE; //default value;
+   
    msg->owner = COMPONENT_IPHC;
    // error checking
    if (idmanager_getIsBridge()==TRUE &&
@@ -55,24 +62,35 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg) {
       //dest and me on same prefix
       if (neighbors_isStableNeighbor(&(msg->l3_destinationORsource))) {
          //if direct neighbors, MAC nextHop and IP destination indicate same node
-         sam = IPHC_SAM_ELIDED;
+         //sam = IPHC_SAM_ELIDED; //===> has to be fixed
+         sam = IPHC_SAM_64B;     //>>>>>> diodio
          dam = IPHC_DAM_ELIDED;
          p_dest = NULL;
+         packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);  //>>>>>> diodio
+         p_src = &temp_src_mac64b;  //>>>>>> diodio
       } else {
          //else, use 64B address
          sam = IPHC_SAM_64B;
          dam = IPHC_DAM_64B;
          p_dest = &temp_dest_mac64b;
+         packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);  //>>>>>> diodio
+         p_src = &temp_src_mac64b;  //>>>>>> diodio
+        
       }
    } else {
       sam = IPHC_SAM_128B;
       dam = IPHC_DAM_128B;
       p_dest = &(msg->l3_destinationORsource);
+      p_src = &(msg->l3_sourceAdd);  //>>>>>> diodio
    }
+   //check if we are forwarding a packet and it comes with the next header compressed. We want to preserve that state in the following hop.
+   
+   if ((fw_SendOrfw_Rcv==PCKTFORWARD) && ipv6_header.next_header_compressed) nh=IPHC_NH_COMPRESSED;
+   
    if (prependIPv6Header(msg,
             IPHC_TF_ELIDED,
             0, // value_flowlabel is not copied
-            IPHC_NH_INLINE,
+            nh,
             msg->l4_protocol,
             IPHC_HLIM_INLINE,
             64,
@@ -82,7 +100,9 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg) {
             IPHC_M_NO,
             IPHC_DAC_STATELESS,
             dam,
-            p_dest
+            p_dest,
+            p_src,            //>>>>>> diodio
+            fw_SendOrfw_Rcv   //>>>>>> diodio
             )==E_FAIL) {
       return E_FAIL;
    }
@@ -120,6 +140,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
       packetfunctions_tossHeader(msg,ipv6_header.header_length);
       forwarding_receive(msg,ipv6_header);       //up the internal stack
    } else {
+      ipv6_header = retrieveIPv6Header(msg);
       openbridge_receive(msg);                   //out to the OpenVisualizer
    }
 }
@@ -139,8 +160,12 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
       bool m,
       bool dac,
       uint8_t dam,
-      open_addr_t* value_dest) {
+      open_addr_t* value_dest,
+      open_addr_t* value_src,
+      uint8_t fw_SendOrfw_Rcv) {  //>>>>>> diodio
    uint8_t temp_8b;
+   
+   bool nextHeaderCompressed=FALSE;
    //destination address
    switch (dam) {
       case IPHC_DAM_ELIDED:
@@ -183,14 +208,53 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
       case IPHC_SAM_ELIDED:
          break;
       case IPHC_SAM_16B:
+        if(fw_SendOrfw_Rcv==PCKTSEND)
+        {
          packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_16B)),BIG_ENDIAN);
+        }
+        if(fw_SendOrfw_Rcv==PCKTFORWARD)
+        {
+            if (value_src->type!=ADDR_16B) {
+                openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+                                      (errorparameter_t)value_src->type,
+                                      (errorparameter_t)0);
+                return E_FAIL;
+             };                              //>>>>>> diodio
+             packetfunctions_writeAddress(msg,value_src,BIG_ENDIAN);
+        }
          break;
       case IPHC_SAM_64B:
-         packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_64B)),BIG_ENDIAN);
+        if(fw_SendOrfw_Rcv==PCKTSEND)
+        {
+          packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_64B)),BIG_ENDIAN);
+        }
+         if(fw_SendOrfw_Rcv==PCKTFORWARD)
+        {
+            if (value_src->type!=ADDR_64B) {
+                openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+                                      (errorparameter_t)value_src->type,
+                                      (errorparameter_t)1);
+                return E_FAIL;
+             };                          //>>>>>> diodio
+             packetfunctions_writeAddress(msg, value_src,BIG_ENDIAN);
+        }
          break;
       case IPHC_SAM_128B:
+        if(fw_SendOrfw_Rcv==PCKTSEND)
+        {
          packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_64B)),BIG_ENDIAN);
          packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_PREFIX)),BIG_ENDIAN);
+        }
+        if(fw_SendOrfw_Rcv==PCKTFORWARD)
+        {
+            if (value_src->type!=ADDR_128B) {
+                openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+                                      (errorparameter_t)value_src->type,
+                                      (errorparameter_t)2);
+                return E_FAIL;
+             };                     //>>>>>> diodio
+             packetfunctions_writeAddress(msg,value_src,BIG_ENDIAN);
+        }
          break;
       default:
          openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
@@ -222,6 +286,7 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
          break;
       case IPHC_NH_COMPRESSED:
          //unsupported
+        nextHeaderCompressed=TRUE;
       default:
          openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)3,

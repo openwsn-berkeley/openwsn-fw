@@ -9,6 +9,7 @@
 #include "board.h"
 #include "leds.h"
 //openwsn
+#include "openwsn.h"
 #include "scheduler.h"
 #include "packetfunctions.h"
 #include "openqueue.h"

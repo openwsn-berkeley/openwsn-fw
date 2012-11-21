@@ -38,6 +38,7 @@ typedef struct {
 		void         idmanager_triggerAboutBridge();
 		void         idmanager_triggerAboutRoot();
 		bool         debugPrint_id();
+                bool         isPrefixSet();
 
 /**
 \}

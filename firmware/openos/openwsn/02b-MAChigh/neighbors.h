@@ -8,6 +8,7 @@
 \{
 */
 #include "openwsn.h"
+#include "icmpv6rpl.h"
 
 //=========================== define ==========================================
 
@@ -16,8 +17,6 @@
 #define BADNEIGHBORMAXRSSI        -80 //dBm
 #define GOODNEIGHBORMINRSSI       -90 //dBm
 #define SWITCHSTABILITYTHRESHOLD    3
-//poipoi xv
-#define MAXRANK                   0xFF //should be 0xFFFF when rank becomes 16bits.
 
 //=========================== typedef =========================================
 PRAGMA(pack(1));
@@ -58,7 +57,7 @@ PRAGMA(pack());
 //=========================== prototypes ======================================
 
           void          neighbors_init();
-          void          neighbors_receiveDIO(OpenQueueEntry_t* msg);
+          void          neighbors_receiveDIO(OpenQueueEntry_t* msg, icmpv6rpl_dio_t* dio);
           void          neighbors_updateMyDAGrankAndNeighborPreference();
           void          neighbors_indicateRx(open_addr_t* l2_src,
                                              int8_t       rssi,
@@ -68,7 +67,6 @@ PRAGMA(pack());
                                              bool         was_finally_acked,
                                              asn_t*       asnTimestamp);
           open_addr_t*  neighbors_KaNeighbor();
-          open_addr_t*  neighbors_getAddr(uint8_t neighboIdx);
           bool          neighbors_isStableNeighbor(open_addr_t* address);
           bool          neighbors_isPreferredParent(open_addr_t* address);
           dagrank_t     neighbors_getMyDAGrank();
@@ -77,8 +75,14 @@ PRAGMA(pack());
                                                      uint8_t addr_type);
           //debug
           bool          debugPrint_neighbors();
+          void          neighbors_getAll(neighborRow_t *nlist);//deprecated
           void          neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes);
-          uint8_t       neighbors_getNumberOfNeighbors(); 
+         // uint8_t       neighbors_getNumberOfNeighbors(); 
+          //bool          getNeighborsWithLowerDAGrank(open_addr_t* addressToWrite, uint8_t addr_type, dagrank_t RefRank, uint8_t index);
+          bool          isNeighborsWithLowerDAGrank(dagrank_t RefRank, uint8_t index);
+          void          getNeighborsWithLowerDAGrank(uint8_t* addressToWrite,uint8_t addr_type, uint8_t index);
+          bool          getNeighborsWithHigherDAGrank(open_addr_t* addressToWrite,uint8_t addr_type, dagrank_t RefRank, uint8_t index);
+          
 /**
 \}
 \}

@@ -114,12 +114,24 @@ typedef struct {
    uint8_t     header_length; //used to toss the header
 } ipv6_header_iht; //iht for "internal header type"
 
+
+typedef struct {
+   uint8_t     nextHeader;
+   uint8_t     HdrExtLen;
+   uint8_t     RoutingType;
+   uint8_t     SegmentsLeft;
+   uint8_t     CmprICmprE;
+   uint8_t     PadRes;
+   uint16_t    Reserved;
+ } ipv6_Source_Routing_Header_t; //iht for "internal header type"
+
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 void    iphc_init();
-error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg);
+error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
 error_t iphc_sendFromBridge(OpenQueueEntry_t *msg);
 void    iphc_sendDone(OpenQueueEntry_t* msg, error_t error);
 void    iphc_receive(OpenQueueEntry_t* msg);

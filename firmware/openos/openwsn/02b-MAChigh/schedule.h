@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
 
-#define MAXACTIVESLOTS  11    // the maximum number of active slots
+#define MAXACTIVESLOTS  8    // the maximum number of active slots
 #define MINBE           2    // min backoff exponent, used in shared TX slots
 #define MAXBE           4    // max backoff exponent, used in shared TX slots
 
@@ -92,6 +92,7 @@ PRAGMA(pack());
  void            schedule_indicateRx(asn_t*   asnTimestamp);
  void            schedule_indicateTx(asn_t*   asnTimestamp,
                                               bool     succesfullTx);
+ void            scheduleBuf_getAll(scheduleEntry_t *blist);
  void            schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist,uint8_t maxbytes);
 
 /**

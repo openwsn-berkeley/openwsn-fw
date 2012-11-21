@@ -1414,20 +1414,14 @@ port_INLINE bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
 #ifdef FORCE_MULTIHOP 
    add=idmanager_getMyID(ADDR_64B);
    switch(add->addr_64b[7]){
-   case 0xEC:
+   case 0xC9:
      res=res&(ieee802514_header->src.addr_64b[7]==0xED);//only ADV from ED
      break;
-   case 0xE8:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xEC);//only ADV from EC
+   case 0xDC:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xD8);//only ADV from E8
      break;
-   case 0xE6:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xE8);//only ADV from E8
-     break;
-   case 0xF5:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xE6);//only ADV from E6
-     break;
-   case 0xF3:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xF5);//only ADV from F5
+   case 0xD8:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xC9);//only ADV from F5
      break;
    }
 #endif   
@@ -1468,22 +1462,16 @@ port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
    switch(add->addr_64b[7]){
    
    case 0xED:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xEC);//only PKT from EC
+     res=res&(ieee802514_header->src.addr_64b[7]==0xC9);//only PKT from EC
      break;  
-   case 0xEC:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xED ||ieee802514_header->src.addr_64b[7]==0xE8);//only PKT from ED or E8
+   case 0xC9:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xED ||ieee802514_header->src.addr_64b[7]==0xD8);//only PKT from ED or E8
      break;
-   case 0xE8:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xEC||ieee802514_header->src.addr_64b[7]==0xE6);//only PKT from EC or E6
+   case 0xD8:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xC9||ieee802514_header->src.addr_64b[7]==0xDC);//only PKT from E8 or F5
      break;
-   case 0xE6:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xE8||ieee802514_header->src.addr_64b[7]==0xF5);//only PKT from E8 or F5
-     break;
-   case 0xF5:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xE6||ieee802514_header->src.addr_64b[7]==0xF3);//only PKT from E6 or F3
-     break;
-   case 0xF3:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xF5);//only PKT from F5
+   case 0xDC:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xD8);//only PKT from F5
      break;
    }
 #endif   
@@ -1730,7 +1718,7 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    // return 26;    
    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
    uint8_t temp = 11+(ieee154e_vars.asnOffset+channelOffset)%16;
-   //temp=20;
+   temp=20;
    return temp;
 }
 

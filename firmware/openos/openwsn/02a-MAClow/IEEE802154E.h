@@ -13,7 +13,7 @@
 
 //=========================== define ==========================================
 
-#define SYNCHRONIZING_CHANNEL       26 // channel the mote listens on to synchronize
+#define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
@@ -62,7 +62,7 @@ enum ieee154e_atomicdurations_enum {
    // time-slot related
    TsTxOffset                =  131,                  //  4000us
    TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4000us
+   TsTxAckDelay              =  151,                  //  4606us
    TsShortGT                 =   16,                  //   500us
    TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
    // execution speed related
@@ -130,7 +130,6 @@ typedef struct {
           bool     debugPrint_isSync();
           bool     debugPrint_macStats();
 
-          
 /**
 \}
 \}

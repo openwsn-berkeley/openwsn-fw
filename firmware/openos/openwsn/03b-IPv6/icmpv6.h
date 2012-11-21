@@ -11,13 +11,14 @@
 //=========================== define ==========================================
 
 //=========================== typedef =========================================
-
 typedef struct {
    uint8_t     type;
    uint8_t     code;
    uint16_t    checksum;
-   uint16_t    identifier;
-   uint16_t    sequence_number;
+   // Below Identifier might need to be replaced by the identifier used by icmpv6rpl
+  // uint16_t    identifier;
+  // Below sequence_number might need to be removed
+  // uint16_t    sequence_number;
 } ICMPv6_ht;
 
 typedef struct {

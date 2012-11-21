@@ -42,9 +42,8 @@ void schedule_init() {
       schedule_resetEntry(&schedule_vars.scheduleBuf[i]);
    }
 
-   // set frame length -- this number must be mutually prime with num channels 
-   // as if it is not prime will cause the use of few channels.
-   schedule_setFrameLength(13);
+   // set frame length
+   schedule_setFrameLength(9);
 
    // slot 0 is advertisement slot
    i = 0;
@@ -73,7 +72,8 @@ void schedule_init() {
          TRUE,
          0,
          &temp_neighbor);
-
+   
+   
    i = 3;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
@@ -82,7 +82,8 @@ void schedule_init() {
          TRUE,
          0,
          &temp_neighbor);
-
+   
+   
    i = 4;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
@@ -92,35 +93,8 @@ void schedule_init() {
          0,
          &temp_neighbor);
 
-   i = 5;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
-   
-   i = 6;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
-
-   i = 7;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
-
    // slot 2 is SERIALRX
-   i = 8;
+   i = 5;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    schedule_addActiveSlot(i,
          CELLTYPE_SERIALRX,
@@ -129,7 +103,7 @@ void schedule_init() {
          &temp_neighbor);
 
    // slot 3 is MORESERIALRX
-   i = 9;
+   i = 6;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    schedule_addActiveSlot(i,
          CELLTYPE_MORESERIALRX,
@@ -138,7 +112,7 @@ void schedule_init() {
          &temp_neighbor);
 
    // slot 4 is MORESERIALRX
-   i = 10;
+   i = 7;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    schedule_addActiveSlot(i,
          CELLTYPE_MORESERIALRX,
@@ -178,10 +152,10 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
 \param newFrameLength The new frame length.
  */
 void schedule_addActiveSlot(slotOffset_t    slotOffset,
-                            cellType_t      type,
-                            bool            shared,
-                            uint8_t         channelOffset,
-                            open_addr_t*    neighbor) {
+      cellType_t      type,
+      bool            shared,
+      uint8_t         channelOffset,
+      open_addr_t*    neighbor) {
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
    scheduleEntry_t* nextSlotWalker;
@@ -424,6 +398,15 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
             openrandom_get16b()%(1<<schedule_vars.currentScheduleEntry->backoffExponent);
    }
    ENABLE_INTERRUPTS();
+}
+
+/**
+// The functio below returns a direct pointer to the scheduleBuf. Modifying 
+this structure means you are modifying the scheduleBuf. Be careful when using
+the pointer and try only to read from the buffer
+*/
+void scheduleBuf_getAll(scheduleEntry_t *blist){
+ blist=&schedule_vars.scheduleBuf[0];
 }
 
 //TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.

@@ -83,8 +83,10 @@ void icmpv6router_trigger() {
       packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
       ((ICMPv6_ht*)(msg->payload))->type         = msg->l4_sourcePortORicmpv6Type;
       ((ICMPv6_ht*)(msg->payload))->code         = 0;
-      packetfunctions_htons(0x1234       ,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->identifier);
-      packetfunctions_htons(icmpv6router_vars.seq++ ,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->sequence_number); 
+      // Below Identifier might need to be replaced by the identifier used by icmpv6rpl
+      // packetfunctions_htons(0x1234       ,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->identifier);
+      // Below sequence_number might need to be removed
+      // packetfunctions_htons(icmpv6router_vars.seq++ ,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->sequence_number); 
       packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//call last
       //send
       if (icmpv6_send(msg)!=E_SUCCESS) {
