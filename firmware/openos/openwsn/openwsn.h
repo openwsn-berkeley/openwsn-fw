@@ -9,7 +9,8 @@
 #define __OPENWSN_H
 
 //general
-#include <stdint.h>                                // needed for uin8_t, uint16_t
+#include <stdint.h>                              // needed for uin8_t, uint16_t
+//#include "string.h"                              // needed for memcpy and memcmp <-- now in board.info
 #include "board_info.h"
 
 //=========================== define ==========================================
@@ -37,7 +38,7 @@ enum {
 };
 
 // types of addresses
-typedef enum {
+enum {
    ADDR_NONE                           = 0,
    ADDR_16B                            = 1,
    ADDR_64B                            = 2,
@@ -45,7 +46,7 @@ typedef enum {
    ADDR_PANID                          = 4,
    ADDR_PREFIX                         = 5,
    ADDR_ANYCAST                        = 6,
-} open_addr_type_t;
+};
 
 enum {
    LITTLE_ENDIAN                       = TRUE,
@@ -65,6 +66,7 @@ enum {
    IANA_ICMPv6_RA_PREFIX_INFORMATION   =    3,
    IANA_ICMPv6_RPL                     =  155,
    IANA_ICMPv6_RPL_DIO                 = 0x01,
+   IANA_ICMPv6_RPL_DAO                 = 0x04,
    IANA_RSVP                           = 46,
 };
 
@@ -83,7 +85,6 @@ enum {
    WKP_UDP_INJECT                      = 2188,
    WKP_UDP_DISCARD                     =    9,
    WKP_UDP_RAND                        = 61000,
-   WKP_UDP_LATENCY                        = 61001,
 };
 
 //status elements
@@ -164,7 +165,7 @@ enum {
    COMPONENT_LAYERDEBUG                = 0x2b,
    COMPONENT_UDPRAND                   = 0x2c,
    COMPONENT_UDPSTORM                  = 0x2d,
-   COMPONENT_UDPLATENCY                = 0x2e,
+   COMPONENT_TEST                      = 0x2e,
 };
 
 /**
@@ -180,12 +181,12 @@ enum {
    ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x03, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
    ERR_INPUT_BUFFER_OVERFLOW           = 0x04, // the input buffer has overflown
    // l4
-   ERR_WRONG_TRAN_PROTOCOL             = 0x05, // unknown transport protocol {0} (code position {1})
-   ERR_WRONG_TCP_STATE                 = 0x06, // wrong TCP state {0} (code position {1})
-   ERR_RESET                           = 0x07, // TCP reset while in state {0} (code position {1})
-   ERR_UNSUPPORTED_PORT_NUMBER         = 0x08, // unsupported port number {0} (code position {1})
+   ERR_WRONG_TRAN_PROTOCOL             = 0x05, // unknown transport protocol {0} (code position {1))
+   ERR_WRONG_TCP_STATE                 = 0x06, // wrong TCP state {0} (code position {1))
+   ERR_RESET                           = 0x07, // TCP reset while in state {0} (code position {1))
+   ERR_UNSUPPORTED_PORT_NUMBER         = 0x08, // unsupported port number {0} (code position {1))
    // l3
-   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x09, // unsupported ICMPv6 type {0} (code position {1})
+   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x09, // unsupported ICMPv6 type {0} (code position {1))
    ERR_6LOWPAN_UNSUPPORTED             = 0x0a, // unsupported 6LoWPAN parameter {1} at location {0}
    ERR_NO_NEXTHOP                      = 0x0b, // no next hop
    // l2b
@@ -229,7 +230,7 @@ enum {
 typedef uint16_t  shortnodeid_t;
 typedef uint64_t  longnodeid_t;
 typedef uint16_t  errorparameter_t;
-typedef uint8_t   dagrank_t;
+typedef uint16_t   dagrank_t;
 typedef uint8_t   error_t;
 #define bool uint8_t
 
@@ -243,7 +244,7 @@ PRAGMA(pack());
 
 PRAGMA(pack(1));
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
-   open_addr_type_t type;
+   uint8_t type;
    union {
       uint8_t addr_16b[2];
       uint8_t addr_64b[8];
@@ -269,6 +270,7 @@ typedef struct {
    uint8_t       l4_length;                      // length of the payload of l4 (used for retransmits)
    //l3
    open_addr_t   l3_destinationORsource;         // 128b IPv6 destination (down stack) or source address (up)
+   open_addr_t   l3_sourceAdd;                   //source address 
    //l2
    error_t       l2_sendDoneError;               // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;           // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
@@ -285,6 +287,8 @@ typedef struct {
    bool          l1_crc;                         // did received packet pass CRC check?
    //the packet
    uint8_t       packet[1+1+125+2+1];            // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
+   // below has been added to be used for the multi-hop network  diodio
+  
 } OpenQueueEntry_t;
 
 //=========================== variables =======================================
