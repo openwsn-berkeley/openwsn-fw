@@ -1,6 +1,5 @@
 env = Environment()
 
-
 # the directory everything is built in
 buildDir = 'build/'
 
