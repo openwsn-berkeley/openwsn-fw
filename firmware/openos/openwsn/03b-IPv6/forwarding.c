@@ -63,6 +63,7 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
        || packetfunctions_isBroadcastMulticast(&ipv6_header.dest))
       && ipv6_header.next_header!=SourceFWNxtHdr) {//for me and not having src routing header
         memcpy(&(msg->l3_destinationORsource),&ipv6_header.src,sizeof(open_addr_t));
+        memcpy(&(msg->l3_sourceAdd),&ipv6_header.src,sizeof(open_addr_t));
         switch(msg->l4_protocol) {
         case IANA_TCP:
           opentcp_receive(msg);

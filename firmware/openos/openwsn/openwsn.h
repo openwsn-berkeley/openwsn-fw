@@ -85,6 +85,7 @@ enum {
    WKP_UDP_INJECT                      = 2188,
    WKP_UDP_DISCARD                     =    9,
    WKP_UDP_RAND                        = 61000,
+   WKP_UDP_LATENCY                     = 61001,
 };
 
 //status elements
@@ -165,7 +166,8 @@ enum {
    COMPONENT_LAYERDEBUG                = 0x2b,
    COMPONENT_UDPRAND                   = 0x2c,
    COMPONENT_UDPSTORM                  = 0x2d,
-   COMPONENT_TEST                      = 0x2e,
+   COMPONENT_UDPLATENCY                = 0x2e,
+   COMPONENT_TEST                      = 0x2f,
 };
 
 /**

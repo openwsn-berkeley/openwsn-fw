@@ -17,7 +17,7 @@
 #include "stdlib.h"
 
 //debug XV -- this define is used to force multihop. Look at isValidAdv and isValidRxFrame functions. Comment it if you don't want to hardcode multihop.
-//#define FORCE_MULTIHOP 
+#define FORCE_MULTIHOP 
 //=========================== variables =======================================
 
 typedef struct {

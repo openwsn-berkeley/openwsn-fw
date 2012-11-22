@@ -57,7 +57,7 @@
         </option>
         <option>
           <name>DdfFileName</name>
-          <state>$TOOLKIT_DIR$\config\MSP430F1611.ddf</state>
+          <state>$TOOLKIT_DIR$\config\MSP430F2618.ddf</state>
         </option>
         <option>
           <name>ProcTMS</name>
@@ -352,6 +352,10 @@
       </plugin>
       <plugin>
         <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-II\uCOS-II-KA-CSpy.ewplugin</file>
+        <loadFlag>0</loadFlag>
+      </plugin>
+      <plugin>
+        <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-III\uCOS-III-KA-CSpy.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
@@ -718,6 +722,10 @@
       </plugin>
       <plugin>
         <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-II\uCOS-II-KA-CSpy.ewplugin</file>
+        <loadFlag>0</loadFlag>
+      </plugin>
+      <plugin>
+        <file>$TOOLKIT_DIR$\plugins\rtos\uCOS-III\uCOS-III-KA-CSpy.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>

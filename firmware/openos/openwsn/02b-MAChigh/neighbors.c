@@ -258,7 +258,7 @@ bool neighbors_getPreferredParent(open_addr_t* addressToWrite, uint8_t addr_type
    bool preferred=FALSE;
    
    addressToWrite->type=ADDR_NONE;
-   minRank=MAXRANK;//max rank
+   minRank=0xffff;//max rank
    usedNeighbours=0;
    
    posMinRank=MAXNUMNEIGHBORS+1;
