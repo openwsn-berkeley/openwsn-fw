@@ -17,7 +17,7 @@
 #include "stdlib.h"
 
 //debug XV -- this define is used to force multihop. Look at isValidAdv and isValidRxFrame functions. Comment it if you don't want to hardcode multihop.
-#define FORCE_MULTIHOP 
+//#define FORCE_MULTIHOP 
 //=========================== variables =======================================
 
 typedef struct {
@@ -1423,6 +1423,9 @@ port_INLINE bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
    case 0xD8:
      res=res&(ieee802514_header->src.addr_64b[7]==0xC9);//only ADV from F5
      break;
+   case 0x9B:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xDC);//only ADV from F5
+     break;
    }
 #endif   
  return res; 
@@ -1471,7 +1474,10 @@ port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
      res=res&(ieee802514_header->src.addr_64b[7]==0xC9||ieee802514_header->src.addr_64b[7]==0xDC);//only PKT from E8 or F5
      break;
    case 0xDC:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xD8);//only PKT from F5
+     res=res&(ieee802514_header->src.addr_64b[7]==0xD8||ieee802514_header->src.addr_64b[7]==0x9B);//only PKT from F5
+     break;
+   case 0x9B:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xDC);//only PKT from F5
      break;
    }
 #endif   

@@ -7,6 +7,9 @@
 #include "IEEE802154E.h"
 #include "linkcost.h"
 
+//to force routing topology -- see above.
+//#define FORCE_MULTIHOP 
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -341,32 +344,6 @@ void neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes 
    }  
 }
 
-// To find the neighbors with lower DAGrank which could be a parent.
-// if a neighbor at index(given) has a lower DAGrank than ref. rank givin then it returns 1 and copied the address in addressToWrite  !
-//else it return zero
-//index is used to get the neighbors one by one from an external function that passes in a loop up to the MAXNUMNEIGHBORS 
-// bool getNeighborsWithLowerDAGrank(open_addr_t* addressToWrite,uint8_t addr_type, dagrank_t RefRank, uint8_t index)
-// {
-//   if(neighbors_vars.neighbors[index].used==TRUE && neighbors_vars.neighbors[index].DAGrank < RefRank)
-//   {
-//     
-//     switch(addr_type) {
-//            case ADDR_64B:
-//               memcpy(addressToWrite,&(neighbors_vars.neighbors[index].addr_64b),sizeof(open_addr_t));
-//               break;
-//            default:
-//               openserial_printError(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
-//                                     (errorparameter_t)addr_type,
-//                                     (errorparameter_t)1);
-//               break; 
-//     }
-//      return TRUE;
-//   }
-//   else
-//     return FALSE;
-//   
-// }
-
 //========================== Second Version of above function ===============================//
 // To find the neighbors with lower DAGrank which could be a parent.
 // if a neighbor at index(given) has a lower DAGrank than ref. rank givin then it returns 1 and copied the address in addressToWrite  !
@@ -552,16 +529,23 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
             }
             temp_myTentativeDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
            //poipoi xv -- avoiding dynamic routing...
-//            if (idmanager_getIsDAGroot()==FALSE && temp_myTentativeDAGrank<neighbors_vars.myDAGrank && temp_myTentativeDAGrank<0xffff) {
-//               
-//              neighbors_vars.myDAGrank=temp_myTentativeDAGrank;
-//               temp_preferredParentExists=TRUE;
-//               temp_preferredParentRow=i;
-//            }
-            //the following is equivalent to manual routing 
-            
-           //  below to enforce the routing as follow: 0x9B ==> //0x92 ==> 0xC9 ==> 0xD8
+            if (idmanager_getIsDAGroot()==FALSE && temp_myTentativeDAGrank<neighbors_vars.myDAGrank && temp_myTentativeDAGrank<0xffff) {
+               
+              neighbors_vars.myDAGrank=temp_myTentativeDAGrank;
+              temp_preferredParentExists=TRUE;
+              temp_preferredParentRow=i;
+            }
+               //the following is equivalent to manual routing 
+#ifdef FORCE_MULTIHOP            
+               //   below to enforce the routing 
                switch ((idmanager_getMyID(ADDR_64B))->addr_64b[7]) {
+               case 0x9B:
+               if (neighbors_vars.neighbors[i].addr_64b.addr_64b[7]==0xDC) {
+               neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
+               temp_preferredParentExists=TRUE;
+               temp_preferredParentRow=i;
+               }
+               break;
                case 0xDC:
                if (neighbors_vars.neighbors[i].addr_64b.addr_64b[7]==0xD8) {
                neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
@@ -586,7 +570,9 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
                default:
                break;
                }
-               
+          
+#endif
+            
          }
          i++;
       }
