@@ -319,10 +319,12 @@ bool debugPrint_neighbors() {
 
 \note Modifying  this structure means you are modifying the neighbor table.
       Be careful when using the pointer; only read from the table.
+NOBODY uses that. check and delete if not needed. poipoi xv
 */
-void neighbors_getAll(neighborRow_t* nlist){
-   nlist = &neighbors_vars.neighbors[0];
-}
+
+//void neighbors_getAll(neighborRow_t* nlist){
+//   nlist = &neighbors_vars.neighbors[0];
+//}
 
 /*returns a list of debug info
 TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.*/

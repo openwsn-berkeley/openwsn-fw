@@ -92,7 +92,7 @@ PRAGMA(pack());
  void            schedule_indicateRx(asn_t*   asnTimestamp);
  void            schedule_indicateTx(asn_t*   asnTimestamp,
                                               bool     succesfullTx);
- void            scheduleBuf_getAll(scheduleEntry_t *blist);
+ //void            scheduleBuf_getAll(scheduleEntry_t *blist);//deprecated
  void            schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist,uint8_t maxbytes);
 
 /**

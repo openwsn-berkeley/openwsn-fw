@@ -478,6 +478,6 @@ void icmpv6rpl_timer_DAO_cb() {
 
 void icmpv6rpl_receiveDAO(OpenQueueEntry_t* msg){
   icmpv6rpl_vars.counterForTesting=icmpv6rpl_vars.counterForTesting+1; 
-  
+  while(1);
  //should neve happen right? 
 }

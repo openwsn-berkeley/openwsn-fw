@@ -1405,8 +1405,9 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
 port_INLINE bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
    
   bool res;
+#ifdef FORCE_MULTIHOP
   open_addr_t* add;
-  
+#endif
   res=ieee802514_header->valid==TRUE                                                              && \
           ieee802514_header->frameType==IEEE154_TYPE_BEACON                                           && \
           packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))        && \
@@ -1447,8 +1448,9 @@ A valid Rx frame satisfies the following constraints:
 */
 port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
    bool res;
+#ifdef FORCE_MULTIHOP  
    open_addr_t* add;
-  
+#endif
    res=ieee802514_header->valid==TRUE                                                           && \
           (
              ieee802514_header->frameType==IEEE154_TYPE_DATA                   ||

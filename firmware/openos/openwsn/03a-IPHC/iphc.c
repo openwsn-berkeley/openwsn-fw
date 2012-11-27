@@ -165,7 +165,6 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
       uint8_t fw_SendOrfw_Rcv) {  //>>>>>> diodio
    uint8_t temp_8b;
    
-   bool nextHeaderCompressed=FALSE;
    //destination address
    switch (dam) {
       case IPHC_DAM_ELIDED:
@@ -285,8 +284,8 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
          *((uint8_t*)(msg->payload)) = value_nextHeader;
          break;
       case IPHC_NH_COMPRESSED:
-         //unsupported
-        nextHeaderCompressed=TRUE;
+         //do nothing, the next header will be there
+        break;
       default:
          openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)3,
