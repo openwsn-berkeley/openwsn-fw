@@ -1726,7 +1726,7 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    // return 26;    
    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
    uint8_t temp = 11+(ieee154e_vars.asnOffset+channelOffset)%16;
-   temp=20;
+   //temp=20;
    return temp;
 }
 
