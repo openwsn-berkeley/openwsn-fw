@@ -283,10 +283,9 @@ void timers_rpl_DAO_fired() {
 //=========================== private =========================================
 
 void sendDIO() {
-  // dagrank_t myCurrentRank;
-  open_addr_t* temp_prefixID;
-  OpenQueueEntry_t* msg;
-  dagrank_t temp_rang;
+  
+  open_addr_t*          temp_prefixID;
+  OpenQueueEntry_t*     msg;
   
   // check if my rank is not the default rank before sending DIO
   if(idmanager_getIsBridge()==FALSE)
