@@ -355,7 +355,7 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
    *checksum_ptr     = 0;
    *(checksum_ptr+1) = 0;
    //source/destination address
-   packetfunctions_ip128bToMac64b(&(msg->l3_destinationORsource),&temp_dest_prefix,&temp_dest_mac64b);
+   packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_dest_prefix,&temp_dest_mac64b);
    if (packetfunctions_sameAddress(&temp_dest_prefix,idmanager_getMyID(ADDR_PREFIX))) {
       little_helper[0] = 0xfe;
       little_helper[1] = 0x80;
@@ -373,7 +373,7 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
       //source address EUI
       onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
       //destination address
-      onesComplementSum(temp_checksum,msg->l3_destinationORsource.addr_128b,16);
+      onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
    }
    //length
    little_helper[0] = 0;

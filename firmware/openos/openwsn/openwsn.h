@@ -22,7 +22,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 
 // enter the last byte of your mote's address if you want it to be an LBR
 #define DEBUG_MOTEID_MASTER 0xED
-
+//#define DEBUG_MOTEID_MASTER 0xB9
 
 #ifndef TRUE
 #define TRUE 1
@@ -271,8 +271,8 @@ typedef struct {
    uint8_t*      l4_payload;                     // pointer to the start of the payload of l4 (used for retransmits)
    uint8_t       l4_length;                      // length of the payload of l4 (used for retransmits)
    //l3
-   open_addr_t   l3_destinationORsource;         // 128b IPv6 destination (down stack) or source address (up)
-   open_addr_t   l3_sourceAdd;                   //source address 
+   open_addr_t   l3_destinationAdd;              // 128b IPv6 destination (down stack) 
+   open_addr_t   l3_sourceAdd;                   // 128b IPv6 source address 
    //l2
    error_t       l2_sendDoneError;               // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;           // 64b IEEE802.15.4 next (down stack) or previous (up) hop address

@@ -8,8 +8,9 @@
 #include "linkcost.h"
 
 //to force routing topology -- see above.
-//#define FORCE_MULTIHOP 
-
+#define FORCE_MULTIHOP 
+#define GINA_FORCE_MULTIHOP 
+//#define TELOSB_FORCE_MULTIHOP 
 //=========================== variables =======================================
 
 typedef struct {
@@ -538,7 +539,9 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
               temp_preferredParentRow=i;
             }
                //the following is equivalent to manual routing 
-#ifdef FORCE_MULTIHOP            
+#ifdef FORCE_MULTIHOP   
+#ifdef GINA_FORCE_MULTIHOP   
+            
                //   below to enforce the routing 
                switch ((idmanager_getMyID(ADDR_64B))->addr_64b[7]) {
                case 0x9B:
@@ -573,6 +576,44 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
                break;
                }
           
+#endif
+#ifdef TELOSB_FORCE_MULTIHOP   
+            
+               //   below to enforce the routing 
+               switch ((idmanager_getMyID(ADDR_64B))->addr_64b[7]) {
+               case 0x51:
+               if (neighbors_vars.neighbors[i].addr_64b.addr_64b[7]==0xB9) {
+               neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
+               temp_preferredParentExists=TRUE;
+               temp_preferredParentRow=i;
+               }
+               break;
+               case 0x41:
+               if (neighbors_vars.neighbors[i].addr_64b.addr_64b[7]==0x51) {
+               neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
+               temp_preferredParentExists=TRUE;
+               temp_preferredParentRow=i;
+               }
+               break;
+               case 0x80:
+               if (neighbors_vars.neighbors[i].addr_64b.addr_64b[7]==0x41) {
+               neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
+               temp_preferredParentExists=TRUE;
+               temp_preferredParentRow=i;
+               }
+               break;
+               case 0xE1:
+               if (neighbors_vars.neighbors[i].addr_64b.addr_64b[7]==0x80) {
+               neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
+               temp_preferredParentExists=TRUE;
+               temp_preferredParentRow=i;
+               }
+               break;
+               default:
+               break;
+               }
+          
+#endif            
 #endif
             
          }

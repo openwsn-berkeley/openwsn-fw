@@ -60,8 +60,8 @@ void udplatency_task(){
    pkt->l4_protocol                 = IANA_UDP;
    pkt->l4_sourcePortORicmpv6Type   = WKP_UDP_LATENCY;
    pkt->l4_destination_port         = WKP_UDP_LATENCY;
-   pkt->l3_destinationORsource.type = ADDR_128B;
-   memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_motedata,16);
+   pkt->l3_destinationAdd.type = ADDR_128B;
+   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_motedata,16);
    
 //the payload contains the 64bit address of the sender + the ASN
    packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));

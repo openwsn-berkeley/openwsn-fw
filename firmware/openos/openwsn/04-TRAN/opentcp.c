@@ -70,7 +70,7 @@ error_t opentcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16_t 
    }
    tempPkt->creator                = COMPONENT_OPENTCP;
    tempPkt->owner                  = COMPONENT_OPENTCP;
-   memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+   memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
    tcp_vars.mySeqNum = TCP_INITIAL_SEQNUM;
    prependTCPHeader(tempPkt,
          TCP_ACK_NO,
@@ -102,7 +102,7 @@ error_t opentcp_send(OpenQueueEntry_t* msg) {             //[command] data
    msg->l4_destination_port  = tcp_vars.hisPort;
    msg->l4_payload           = msg->payload;
    msg->l4_length            = msg->length;
-   memcpy(&(msg->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+   memcpy(&(msg->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
    tcp_vars.dataToSend = msg;
    prependTCPHeader(tcp_vars.dataToSend,
          TCP_ACK_YES,
@@ -214,7 +214,7 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
          }
          tempPkt->creator       = COMPONENT_OPENTCP;
          tempPkt->owner         = COMPONENT_OPENTCP;
-         memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+         memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
          prependTCPHeader(tempPkt,
                TCP_ACK_YES,
                TCP_PSH_NO,
@@ -252,7 +252,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
          (
           msg->l4_destination_port != tcp_vars.myPort  ||
           msg->l4_sourcePortORicmpv6Type      != tcp_vars.hisPort ||
-          packetfunctions_sameAddress(&(msg->l3_destinationORsource),&tcp_vars.hisIPv6Address)==FALSE
+          packetfunctions_sameAddress(&(msg->l3_destinationAdd),&tcp_vars.hisIPv6Address)==FALSE
          )
       ) {
       openqueue_freePacketBuffer(msg);
@@ -290,7 +290,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
                   //I receive SYN, I send SYN+ACK
                   tcp_vars.hisNextSeqNum = (packetfunctions_ntohl((uint8_t*)&(((tcp_ht*)msg->payload)->sequence_number)))+1;
                   tcp_vars.hisPort       = msg->l4_sourcePortORicmpv6Type;
-                  memcpy(&tcp_vars.hisIPv6Address,&(msg->l3_destinationORsource),sizeof(open_addr_t));
+                  memcpy(&tcp_vars.hisIPv6Address,&(msg->l3_destinationAdd),sizeof(open_addr_t));
                   tempPkt       = openqueue_getFreePacketBuffer(COMPONENT_OPENTCP);
                   if (tempPkt==NULL) {
                      openserial_printError(COMPONENT_OPENTCP,ERR_NO_FREE_PACKET_BUFFER,
@@ -301,7 +301,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
                   }
                   tempPkt->creator       = COMPONENT_OPENTCP;
                   tempPkt->owner         = COMPONENT_OPENTCP;
-                  memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+                  memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
                   prependTCPHeader(tempPkt,
                         TCP_ACK_YES,
                         TCP_PSH_NO,
@@ -334,7 +334,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             }
             tempPkt->creator       = COMPONENT_OPENTCP;
             tempPkt->owner         = COMPONENT_OPENTCP;
-            memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+            memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
             prependTCPHeader(tempPkt,
                   TCP_ACK_YES,
                   TCP_PSH_NO,
@@ -356,7 +356,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             }
             tempPkt->creator       = COMPONENT_OPENTCP;
             tempPkt->owner         = COMPONENT_OPENTCP;
-            memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+            memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
             prependTCPHeader(tempPkt,
                   TCP_ACK_YES,
                   TCP_PSH_NO,
@@ -402,7 +402,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             }
             tempPkt->creator       = COMPONENT_OPENTCP;
             tempPkt->owner         = COMPONENT_OPENTCP;
-            memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+            memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
             prependTCPHeader(tempPkt,
                   TCP_ACK_YES,
                   TCP_PSH_NO,
@@ -424,7 +424,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             }
             tempPkt->creator       = COMPONENT_OPENTCP;
             tempPkt->owner         = COMPONENT_OPENTCP;
-            memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+            memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
             prependTCPHeader(tempPkt,
                   TCP_ACK_YES,
                   TCP_PSH_NO,
@@ -501,7 +501,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             }
             tempPkt->creator       = COMPONENT_OPENTCP;
             tempPkt->owner         = COMPONENT_OPENTCP;
-            memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+            memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
             prependTCPHeader(tempPkt,
                   TCP_ACK_YES,
                   TCP_PSH_NO,
@@ -533,7 +533,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             }
             tempPkt->creator       = COMPONENT_OPENTCP;
             tempPkt->owner         = COMPONENT_OPENTCP;
-            memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+            memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
             prependTCPHeader(tempPkt,
                   TCP_ACK_YES,
                   TCP_PSH_NO,
@@ -555,7 +555,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             }
             tempPkt->creator       = COMPONENT_OPENTCP;
             tempPkt->owner         = COMPONENT_OPENTCP;
-            memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+            memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
             prependTCPHeader(tempPkt,
                   TCP_ACK_YES,
                   TCP_PSH_NO,
@@ -590,7 +590,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             }
             tempPkt->creator       = COMPONENT_OPENTCP;
             tempPkt->owner         = COMPONENT_OPENTCP;
-            memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+            memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
             prependTCPHeader(tempPkt,
                   TCP_ACK_YES,
                   TCP_PSH_NO,
@@ -649,7 +649,7 @@ error_t opentcp_close() {    //[command] teardown
    }
    tempPkt->creator       = COMPONENT_OPENTCP;
    tempPkt->owner         = COMPONENT_OPENTCP;
-   memcpy(&(tempPkt->l3_destinationORsource),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
+   memcpy(&(tempPkt->l3_destinationAdd),&tcp_vars.hisIPv6Address,sizeof(open_addr_t));
    prependTCPHeader(tempPkt,
          TCP_ACK_YES,
          TCP_PSH_NO,

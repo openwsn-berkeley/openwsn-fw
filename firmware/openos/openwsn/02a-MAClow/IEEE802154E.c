@@ -17,7 +17,9 @@
 #include "stdlib.h"
 
 //debug XV -- this define is used to force multihop. Look at isValidAdv and isValidRxFrame functions. Comment it if you don't want to hardcode multihop.
-//#define FORCE_MULTIHOP 
+#define FORCE_MULTIHOP 
+#define GINA_FORCE_MULTIHOP
+//#define TELOSB_FORCE_MULTIHOP
 //=========================== variables =======================================
 
 typedef struct {
@@ -1413,7 +1415,9 @@ port_INLINE bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
           packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))        && \
           ieee154e_vars.dataReceived->length==ADV_PAYLOAD_LENGTH;
 #ifdef FORCE_MULTIHOP 
-   add=idmanager_getMyID(ADDR_64B);
+add=idmanager_getMyID(ADDR_64B);
+  
+#ifdef GINA_FORCE_MULTIHOP  
    switch(add->addr_64b[7]){
    case 0xC9:
      res=res&(ieee802514_header->src.addr_64b[7]==0xED);//only ADV from ED
@@ -1428,6 +1432,24 @@ port_INLINE bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
      res=res&(ieee802514_header->src.addr_64b[7]==0xDC);//only ADV from F5
      break;
    }
+#endif
+#ifdef TELOSB_FORCE_MULTIHOP
+   switch(add->addr_64b[7]){
+   case 0x51:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xB9);//only ADV from b9
+     break;
+   case 0x41:
+     res=res&(ieee802514_header->src.addr_64b[7]==0x51);//only ADV from 51
+     break;
+   case 0x80:
+     res=res&(ieee802514_header->src.addr_64b[7]==0x41);//only ADV from 41
+     break;
+   case 0xE1:
+     res=res&(ieee802514_header->src.addr_64b[7]==0x80);//only ADV from F5
+     break;
+   }   
+#endif   
+   
 #endif   
  return res; 
 }
@@ -1463,9 +1485,8 @@ port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
           );
 #ifdef FORCE_MULTIHOP   
    add=idmanager_getMyID(ADDR_64B);
-   
-   switch(add->addr_64b[7]){
-   
+#ifdef GINA_FORCE_MULTIHOP   
+   switch(add->addr_64b[7]){ 
    case 0xED:
      res=res&(ieee802514_header->src.addr_64b[7]==0xC9);//only PKT from EC
      break;  
@@ -1482,6 +1503,29 @@ port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
      res=res&(ieee802514_header->src.addr_64b[7]==0xDC);//only PKT from F5
      break;
    }
+#endif      
+#ifdef TELOSB_FORCE_MULTIHOP   
+   switch(add->addr_64b[7]){ 
+   case 0xB9:
+     res=res&(ieee802514_header->src.addr_64b[7]==0x51);//only PKT from EC
+     break;  
+   case 0x51:
+     res=res&(ieee802514_header->src.addr_64b[7]==0xB9 ||ieee802514_header->src.addr_64b[7]==0x41);//only PKT from ED or E8
+     break;
+   case 0x41:
+     res=res&(ieee802514_header->src.addr_64b[7]==0x51||ieee802514_header->src.addr_64b[7]==0x80);//only PKT from E8 or F5
+     break;
+   case 0x80:
+     res=res&(ieee802514_header->src.addr_64b[7]==0x41||ieee802514_header->src.addr_64b[7]==0xE1);//only PKT from F5
+     break;
+   case 0xE1:
+     res=res&(ieee802514_header->src.addr_64b[7]==0x80);//only PKT from F5
+     break;
+   }
+#endif      
+
+
+
 #endif   
    return res;
    

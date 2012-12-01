@@ -135,8 +135,8 @@ void rreg_timer() {
    numOptions++;
    // metadata
    pkt->l4_destination_port         = WKP_UDP_COAP;
-   pkt->l3_destinationORsource.type = ADDR_128B;
-   memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_ipsoRD,16);
+   pkt->l3_destinationAdd.type = ADDR_128B;
+   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_ipsoRD,16);
    // send
    outcome = opencoap_send(pkt,
                            COAP_TYPE_CON,

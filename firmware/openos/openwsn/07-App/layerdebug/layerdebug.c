@@ -143,8 +143,8 @@ void layerdebug_task_schedule_cb() {
    numOptions++;
    // metadata
    pkt->l4_destination_port         = WKP_UDP_COAP;
-   pkt->l3_destinationORsource.type = ADDR_128B;
-   memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_local,16);
+   pkt->l3_destinationAdd.type = ADDR_128B;
+   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_local,16);
    // send
    outcome = opencoap_send(pkt,
                            COAP_TYPE_NON,
@@ -207,8 +207,8 @@ void layerdebug_task_neighbors_cb() {
    numOptions++;
    // metadata
    pkt->l4_destination_port         = WKP_UDP_COAP;
-   pkt->l3_destinationORsource.type = ADDR_128B;
-   memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_local,16);
+   pkt->l3_destinationAdd.type = ADDR_128B;
+   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_local,16);
    // send
    outcome = opencoap_send(pkt,
                            COAP_TYPE_NON,

@@ -61,7 +61,7 @@ void icmpv6echo_trigger() {
       msg->l4_protocol                           = IANA_ICMPv6;
       msg->l4_sourcePortORicmpv6Type             = IANA_ICMPv6_ECHO_REQUEST;
       //l3
-      memcpy(&(msg->l3_destinationORsource),&icmpv6echo_vars.hisAddress,sizeof(open_addr_t));
+      memcpy(&(msg->l3_destinationAdd),&icmpv6echo_vars.hisAddress,sizeof(open_addr_t));
       //payload
       packetfunctions_reserveHeaderSize(msg,4);
       packetfunctions_htonl(0x789abcde,(uint8_t*)(msg->payload));
@@ -117,7 +117,7 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
          packetfunctions_reserveHeaderSize(reply,msg->length);
          memcpy(reply->payload,msg->payload,msg->length);
          // copy source of msg in destination of reply
-         memcpy(&(reply->l3_destinationORsource),&(msg->l3_destinationORsource),sizeof(open_addr_t));
+         memcpy(&(reply->l3_destinationAdd),&(msg->l3_sourceAdd),sizeof(open_addr_t));
          // free up msg
          openqueue_freePacketBuffer(msg);
          msg = NULL;

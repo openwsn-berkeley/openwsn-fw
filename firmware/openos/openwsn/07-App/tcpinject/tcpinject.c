@@ -59,7 +59,7 @@ void tcpinject_connectDone(error_t error) {
       tcpinject_vars.pkt->l4_protocol                  = IANA_UDP;
       tcpinject_vars.pkt->l4_sourcePortORicmpv6Type    = WKP_TCP_INJECT;
       tcpinject_vars.pkt->l4_destination_port          = tcpinject_vars.hisPort;
-      memcpy(&(tcpinject_vars.pkt->l3_destinationORsource),&tcpinject_vars.hisAddress,sizeof(open_addr_t));
+      memcpy(&(tcpinject_vars.pkt->l3_destinationAdd),&tcpinject_vars.hisAddress,sizeof(open_addr_t));
       packetfunctions_reserveHeaderSize(tcpinject_vars.pkt,6);
       ((uint8_t*)tcpinject_vars.pkt->payload)[0] = 'p';
       ((uint8_t*)tcpinject_vars.pkt->payload)[1] = 'o';

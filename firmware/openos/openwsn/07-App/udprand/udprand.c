@@ -49,8 +49,8 @@ void udprand_task(){
    pkt->l4_protocol                 = IANA_UDP;
    pkt->l4_sourcePortORicmpv6Type   = WKP_UDP_RAND;
    pkt->l4_destination_port         = WKP_UDP_RAND;
-   pkt->l3_destinationORsource.type = ADDR_128B;
-   memcpy(&pkt->l3_destinationORsource.addr_128b[0],&ipAddr_motedata,16);
+   pkt->l3_destinationAdd.type = ADDR_128B;
+   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_motedata,16);
    packetfunctions_reserveHeaderSize(pkt,2);
    ((uint8_t*)pkt->payload)[0]      = openrandom_get16b()%0xff;
    ((uint8_t*)pkt->payload)[1]      = openrandom_get16b()%0xff;
