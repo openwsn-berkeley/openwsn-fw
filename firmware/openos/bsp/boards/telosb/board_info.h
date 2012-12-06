@@ -23,7 +23,7 @@ to return the board's description.
 #define PACK(x)     pack(x)
 
 
-#define INTERRUPT_DECLARATION() istate_t s;
+#define INTERRUPT_DECLARATION() __istate_t s;
 #define DISABLE_INTERRUPTS()    s = __get_interrupt_state(); \
                                 __disable_interrupt();
 #define ENABLE_INTERRUPTS()     __set_interrupt_state(s);
