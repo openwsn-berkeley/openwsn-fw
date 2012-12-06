@@ -1,38 +1,17 @@
-import os
-
 Import('env')
 
 localEnv = env.Clone()
 
-localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'),
-                             os.path.join('#','firmware','openos','bsp','boards','pc'),
-                           ],
-               )
-localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc'),
-                           ],
-               )
+target =  '01bsp_debugpins'
+source = ['01bsp_debugpins.c']
+libs   = ['libbsp']
 
-source_files =  [
-                    '01bsp_debugpins.c',
-                ]
-if localEnv['PLATFORM']=='win32':
-    localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc','win'),
-                               ],
-                   ) 
-    library_files = [   'libbsppc.lib',
-                        'ws2_32.lib',
-                        'user32.lib',
-                    ]
-elif localEnv['PLATFORM'] == 'posix':
-    localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards','pc','linux'),
-                               ],
-                   ) 
-    library_files = [   'libbsppc.a'
-                    ]
-                 
-bsp_debugpins = localEnv.Program(
-                    target  = '01bsp_debugpins',
-                    source  = source_files,
-                    LIBS    = library_files,
-                    )
-Alias('bsp_debugpins', bsp_debugpins)
+exe = localEnv.Program(
+                       target  = target,
+                       source  = source,
+                       LIBS    = libs,
+                      )
+bsp_debugpins = env.PostBuildExtras(exe)
+
+Alias('bsp_debugpins', [libs, bsp_debugpins])
+

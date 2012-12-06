@@ -1,0 +1,16 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+source = ['ADC_Channel.c',
+          'gyro.c',
+          'large_range_accel.c',
+          'magnetometer.c',
+          'sensitive_accel_temperature.c',
+         ]
+
+gina_drivers = localEnv.Object(source=source)
+
+Return('gina_drivers')

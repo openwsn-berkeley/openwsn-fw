@@ -12,7 +12,11 @@
 //=========================== variables =======================================
 
 // address is flash where GINA's EUI64 identifier is stored
-__no_init volatile uint8_t eui64 @ 0x10ee;
+#if defined(__GNUC__)
+   volatile uint8_t eui64 __asm__("0x10ee");
+#else
+   __no_init volatile uint8_t eui64 @ 0x10ee;
+#endif
 
 //=========================== prototypes ======================================
 

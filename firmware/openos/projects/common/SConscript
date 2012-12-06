@@ -1,0 +1,29 @@
+import os
+
+Import('env')
+
+# directory/target tuples
+dirs = (('01bsp_bothtimers',     'bsp_bothtimers'),
+        ('01bsp_bsp_timer',      'bsp_bsp_timer'),
+        ('01bsp_buggytimer',     'bsp_buggytimer'),
+        ('01bsp_closetimers',    'bsp_closetimers'),
+        ('01bsp_debugpins',      'bsp_debugpins'),
+        ('01bsp_leds',           'bsp_leds'),
+        ('01bsp_radio',          'bsp_radio'),
+        ('01bsp_radio_range_rx', 'bsp_radio_range_rx'),
+        ('01bsp_radio_range_tx', 'bsp_radio_range_tx'),
+        ('01bsp_radiotimer',     'bsp_radiotimer'),
+        ('01bsp_spi',            'bsp_spi'),
+        ('01bsp_uart',           'bsp_uart'),
+        ('02drv_opentimers',     'drv_opentimers'),
+        ('03oos_openwsn',        'oos_openwsn'),
+       )
+
+
+for (dir, target) in dirs:
+    env.SConscript(os.path.join(dir,'SConscript'),
+                   variant_dir = os.path.join(dir,env['VARDIR']),
+                   exports     = {'env':env},
+                  )
+    Clean(target, Dir(os.path.join(dir,env['VARDIR'])).abspath)
+    Alias('all_common', [target])

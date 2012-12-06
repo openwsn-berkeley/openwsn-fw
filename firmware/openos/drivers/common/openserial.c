@@ -194,6 +194,7 @@ uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
 }
 
 void openserial_startInput() {
+   INTERRUPT_DECLARATION();
    if (openserial_vars.input_buffer_fill_level>0) {
       openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUTBUFFER_LENGTH,
                             (errorparameter_t)openserial_vars.input_buffer_fill_level,
@@ -204,7 +205,6 @@ void openserial_startInput() {
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();          // clear possible pending interrupts
    uart_enableInterrupts();           // Enable USCI_A1 TX & RX interrupt
-   INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    openserial_vars.mode                  = MODE_INPUT;
    openserial_vars.input_command_index   = 0;

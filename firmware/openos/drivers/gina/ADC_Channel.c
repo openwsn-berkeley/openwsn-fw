@@ -9,6 +9,8 @@ bool ADC_configured = FALSE;
 //===================================== public ================================
 
 void ADC_init() {
+  volatile int i;
+  
   // enable accelerometer and filter
   //P6DIR  |=  0x08;                              // P6.3 as output for accelerometer and filter
   //P6OUT  |=  0x08;		                 // P6.3 high to enable accelerometer and filter
@@ -32,7 +34,7 @@ void ADC_init() {
   
   ADC12IE = 0x10;                               // interrupt only when ADC12MEM4 changes
   
-  for (volatile int i=0; i<0x3600; i++) {}      // delay for ADC12 reference start-up
+  for (i=0; i<0x3600; i++) {}      // delay for ADC12 reference start-up
   ADC_configured = TRUE;
 }
 

@@ -15,6 +15,7 @@ sensitive_accel_temperature_vars_t sensitive_accel_temperature_vars;
 //=========================== public ==========================================
 
 void sensitive_accel_temperature_init() {
+   volatile int i;
    if (sensitive_accel_temperature_vars.configured==FALSE) {
       sensitive_accel_temperature_vars.configured = FALSE;
       
@@ -40,7 +41,7 @@ void sensitive_accel_temperature_init() {
    
       ADC12IE = 0x10;                               // interrupt only when ADC12MEM4 changes
    
-      for (volatile int i=0; i<0x3600; i++) {}      // delay for ADC12 reference start-up
+      for (i=0; i<0x3600; i++) {}      // delay for ADC12 reference start-up
       sensitive_accel_temperature_vars.configured = TRUE;
    }
 }

@@ -16,10 +16,12 @@ localEnv.Append(CPPPATH =  [os.path.join('#','firmware','openos','openwsn'),
                             os.path.join('#','firmware','openos','drivers','common'),
                            ])
 
-target =  'libopenos'
-source = ['scheduler.c']
+target =  'libdrivers'
+source = [os.path.join('common','openserial.c'),
+          os.path.join('common','opentimers.c'),
+         ]
 
-libopenos = localEnv.Library(target=target,
-                             source=source)
+libdrivers = localEnv.Library(target=target,
+                              source=source)
 
-Alias('libopenos', libopenos)
+Alias('libdrivers', libdrivers)

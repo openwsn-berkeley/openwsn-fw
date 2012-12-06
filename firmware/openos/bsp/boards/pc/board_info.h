@@ -14,6 +14,10 @@
 
 #define port_INLINE                         
 
+#define PRAGMA(x)  _Pragma(#x)
+#define PACK(x)     pack(x)
+
+#define INTERRUPT_DECLARATION()             ;
 #define ENABLE_INTERRUPTS()                 ;
 #define DISABLE_INTERRUPTS()                ;
 

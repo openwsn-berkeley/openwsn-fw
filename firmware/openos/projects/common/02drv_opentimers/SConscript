@@ -4,36 +4,16 @@ Import('env')
 
 localEnv = env.Clone()
 
-localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','openwsn'),
-                             os.path.join('#','firmware','openos','drivers','common'),
-                             os.path.join('#','firmware','openos','bsp','boards'),
-                             os.path.join('#','firmware','openos','bsp','boards','pc'),
-                           ],
-                )
-localEnv.Append(LIBPATH =  [ os.path.join('#','firmware','openos','drivers','common'),
-                             os.path.join('#','firmware','openos','bsp','boards','pc'),
-                           ],
-                )
+target =  '02drv_opentimers'
+source = ['02drv_opentimers.c']
+libs   = ['libdrivers', 'libbsp']
 
+exe = localEnv.Program(
+                       target  = target,
+                       source  = source,
+                       LIBS    = libs,
+                      )
 
-if localEnv['PLATFORM'] == 'win32':
-    library_files = [
-                        'libdrivers.lib',
-                        'libbsppc.lib',
-                        'ws2_32.lib',
-                        'user32.lib',
-                    ]
-else:
-    library_files = [
-                        'libdrivers.a',
-                        'libbsppc.a'
-                    ]
-source_files =  ['02drv_opentimers.c',
-                ]
+drv_opentimers = env.PostBuildExtras(exe)
 
-drv_opentimers = localEnv.Program(
-                target  = 'drv_opentimers',
-                source  = source_files,
-                LIBS    = library_files,
-                )
-Alias('drv_opentimers', drv_opentimers)
+Alias('drv_opentimers', [libs, drv_opentimers])
