@@ -17,8 +17,8 @@
 #include "stdlib.h"
 
 //debug XV -- this define is used to force multihop. Look at isValidAdv and isValidRxFrame functions. Comment it if you don't want to hardcode multihop.
-#define FORCE_MULTIHOP 
-#define GINA_FORCE_MULTIHOP
+//#define FORCE_MULTIHOP 
+//#define GINA_FORCE_MULTIHOP
 //#define TELOSB_FORCE_MULTIHOP
 //=========================== variables =======================================
 
@@ -1107,8 +1107,10 @@ port_INLINE void activity_rie3() {
 
 port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
+#ifdef FORCE_MULTIHOP  
    bool res;
    bool valAdv=FALSE;
+#endif
    // change state
    changeState(S_TXACKOFFSET);
    
@@ -1771,7 +1773,7 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    // return 26;    
    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
    uint8_t temp = 11+(ieee154e_vars.asnOffset+channelOffset)%16;
-   temp=20;
+   //temp=20;
    return temp;
 }
 

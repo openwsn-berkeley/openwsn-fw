@@ -8,8 +8,8 @@
 #include "linkcost.h"
 
 //to force routing topology -- see above.
-#define FORCE_MULTIHOP 
-#define GINA_FORCE_MULTIHOP 
+//#define FORCE_MULTIHOP 
+//#define GINA_FORCE_MULTIHOP 
 //#define TELOSB_FORCE_MULTIHOP 
 //=========================== variables =======================================
 

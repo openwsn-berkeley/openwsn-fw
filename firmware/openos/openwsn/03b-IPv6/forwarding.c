@@ -136,10 +136,7 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
   ipv6_Source_Routing_Header_t * ipv6_Source_Routing_Header;
   
   open_addr_t* prefix=idmanager_getMyID(ADDR_PREFIX);
-  open_addr_t* add64;
-  
-  
-  
+ 
   ipv6_Source_Routing_Header=(ipv6_Source_Routing_Header_t*)(msg->payload);
   
   
