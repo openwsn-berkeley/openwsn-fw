@@ -1107,7 +1107,8 @@ port_INLINE void activity_rie3() {
 
 port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
-   
+   bool res;
+   bool valAdv=FALSE;
    // change state
    changeState(S_TXACKOFFSET);
    
@@ -1173,7 +1174,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
 #ifdef FORCE_MULTIHOP           
-      bool valAdv=FALSE;
+       valAdv=FALSE;
 #endif       
       // if I just received a valid ADV, record the ASN and toss the payload
       if (isValidAdv(&ieee802514_header)==TRUE) {
@@ -1188,7 +1189,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       }
 #ifdef FORCE_MULTIHOP     
       //xv debug -- avoid ADV from other to  be parsed as a message.
-       bool res =(ieee802514_header.valid==TRUE && \
+      res =(ieee802514_header.valid==TRUE && \
           ieee802514_header.frameType==IEEE154_TYPE_BEACON);
        
       if (res && !valAdv){
