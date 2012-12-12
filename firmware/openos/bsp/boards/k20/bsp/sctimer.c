@@ -20,6 +20,9 @@
 
 sctimer_cbt callback;//callback to call when the isr expires.
 uint16_t unexpected_isr;// see isr function below.
+volatile uint16_t lastval=0;
+volatile uint16_t currval=0;
+
 //=========================== prototypes ======================================
 
 extern void lptmr_isr(void);
@@ -70,8 +73,19 @@ void sctimer_init() {
  */
 
 void sctimer_schedule(uint16_t val) {
-	LPTMR0_CMR = LPTMR_CMR_COMPARE(val); //Set compare value
-	LPTMR0_CSR |= LPTMR_CSR_TIE_MASK| LPTMR_CSR_TCF_MASK;//enable interrupts
+	uint8_t cntrl = (LPTMR0_CSR & LPTMR_CSR_TCF_MASK) >> LPTMR_CSR_TCF_SHIFT;
+	uint8_t ten   = (LPTMR0_CSR & LPTMR_CSR_TEN_MASK) >> LPTMR_CSR_TEN_SHIFT;
+    //timer is disabled or tcf is set
+	if ((cntrl==1) || (ten==0)){
+		LPTMR0_CMR = LPTMR_CMR_COMPARE(val); //Set compare value
+		LPTMR0_CSR |= LPTMR_CSR_TIE_MASK| LPTMR_CSR_TCF_MASK;//enable interrupts
+	}else{
+		//LPTMR0_CSR &= ~LPTMR_CSR_TEN_MASK;//disable timer -- page 999 manual says that cmr can only be changed if TCF is set or Timer is disabled
+		LPTMR0_CMR = LPTMR_CMR_COMPARE(val); //Set compare value
+		LPTMR0_CSR |= LPTMR_CSR_TEN_MASK|LPTMR_CSR_TIE_MASK| LPTMR_CSR_TCF_MASK; //Turn on again
+		cntrl++;
+		cntrl--;
+	}
 }
 
 uint16_t sctimer_getValue() {
@@ -95,18 +109,24 @@ void sctimer_setCb(sctimer_cbt cb) {
 }
 
 void lptmr_isr(void) {
-	volatile uint16_t val;
+	//volatile uint16_t val;
 	debugpins_isr_set();
 	 //write before read counter
 	 LPTMR0_CNR = 0x0;
-     val = LPTMR0_CNR ;//read counter
-	 if ( (val == LPTMR0_CMR&LPTMR_CMR_COMPARE_MASK) || (val ==(LPTMR0_CMR&LPTMR_CMR_COMPARE_MASK)+ 1)) {
+	 lastval=currval;
+     currval = LPTMR0_CNR ;//read counter
+	 if ( (currval == LPTMR0_CMR&LPTMR_CMR_COMPARE_MASK) || (currval ==(LPTMR0_CMR&LPTMR_CMR_COMPARE_MASK)+ 1)) {
 	    callback();// what happens if we are close to the next tic and get value returns the next tic??
 	 }else {
 		 //This should never happen, however for some reason, the TCF flag of the LPTMR is set
 		 //but the compare and the counter does not match, so an interrupt is triggered.
 		 //this can be caused by modifying the compare while the timer is running, although i am not sure.
 		 //this work around makes everything work fine but this BUG needs to be further investigated.
+		 
+		 //XV update. it seems that there is a reentrant interrupt, for some reason the TCF bit is not cleared and after few tics of the previous interrupt
+		 //this interrupt is signaled (I can see that with lastval and currval variables). The previous interrupt has changed the value of compare and hence CNT and CMP are not matching. 
+		 //this is not extremely dangerous as if this reentrant interrupt happens the TCF bit is cleared and things continue the normal cycle. 
+		 //
 		 unexpected_isr++; 
 		 //Cler flags.
 		 LPTMR0_CSR |= ( /*LPTMR_CSR_TEN_MASK |*/LPTMR_CSR_TIE_MASK
