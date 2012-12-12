@@ -677,7 +677,7 @@
 		<cconfiguration id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068" moduleId="org.eclipse.cdt.core.settings" name="MK20DX256_INTERNAL_FLASH">
 				<macros>
-					<stringMacro name="OPENOS_LOC" type="VALUE_TEXT" value="C:\Users\xvilajosana\Documents\workspaces\openwsn\firmware\openos\"/>
+					<stringMacro name="OPENOS_LOC" type="VALUE_TEXT" value="C:\Users\xvilajosana\Documents\workspaces\openwsn_git\openwsn-fw\firmware\openos"/>
 				</macros>
 				<externalSettings/>
 				<extensions>
@@ -697,7 +697,7 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration artifactExtension="afx" artifactName="openwsn" buildProperties="" buildReferences="true" buildReferencingConfigurations="false" cleanCommand="&quot;${system:ECLIPSE_HOME}/../gnu/bin/rm&quot; -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;com.freescale.core.ide.cdt.errorParsers.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.MwarmErrorParser" id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068" name="MK20DX256_INTERNAL_FLASH" parent="com.freescale.arm.cdt.toolchain.config.arm.release" produceBuildErrorsWithMissingReferences="true">
+				<configuration artifactExtension="afx" artifactName="bsp_timers" buildProperties="" buildReferences="true" buildReferencingConfigurations="false" cleanCommand="&quot;${system:ECLIPSE_HOME}/../gnu/bin/rm&quot; -f" description="" errorParsers="org.eclipse.cdt.core.MakeErrorParser;com.freescale.core.ide.cdt.errorParsers.GCCErrorParser;org.eclipse.cdt.core.GLDErrorParser;org.eclipse.cdt.core.GASErrorParser;com.freescale.core.ide.cdt.errorParsers.LnkErrorParser;com.freescale.core.ide.cdt.errorParsers.AsmErrorParser;com.freescale.core.ide.cdt.errorParsers.CobjErrorParser;com.freescale.core.ide.cdt.errorParsers.IcodeErrorParser;com.freescale.core.ide.cdt.errorParsers.LltErrorParser;com.freescale.core.ide.cdt.errorParsers.MwfeErrorParser;com.freescale.core.ide.cdt.errorParsers.MwarmErrorParser" id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068" name="MK20DX256_INTERNAL_FLASH" parent="com.freescale.arm.cdt.toolchain.config.arm.release" produceBuildErrorsWithMissingReferences="true">
 					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068." name="/" resourcePath="">
 						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.2135404663" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release">
 							<option id="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119" name="Model" superClass="com.freescale.arm.cdt.toolchain.sharedoption.model" value="com.freescale.arm.cdt.toolchain.sharedoption.model.c9x" valueType="enumerated"/>
@@ -707,7 +707,7 @@
 								<option id="com.freescale.arm.cdt.toolchain.linker.libraries.libSearch.184210399" name="Library Search Paths" superClass="com.freescale.arm.cdt.toolchain.linker.libraries.libSearch" valueType="stringList">
 									<listOptionValue builtIn="false" value="&quot;${MCUToolsBaseDir}/ARM_EABI_Support/ewl/lib&quot;"/>
 								</option>
-								<option id="com.freescale.arm.cdt.toolchain.linker.commandFile.157866562" name="Linker Command File" superClass="com.freescale.arm.cdt.toolchain.linker.commandFile" value="C:\Users\xvilajosana\Documents\workspaces\openwsn\firmware\openos\projects\k20\cw\03oos_openwsn\Project_Settings\linker_files\256KB_pflash_32KB_dflash.lcf" valueType="string"/>
+								<option id="com.freescale.arm.cdt.toolchain.linker.commandFile.157866562" name="Linker Command File" superClass="com.freescale.arm.cdt.toolchain.linker.commandFile" value="C:\Users\xvilajosana\Documents\workspaces\openwsn_git\openwsn-fw\firmware\openos\projects\k20\cw\01bsp_bsp_timer\Project_Settings\Linker_Files\256KB_pflash_32KB_dflash.lcf" valueType="string"/>
 								<option id="com.freescale.arm.cdt.toolchain.linker.entryPoint.888958262" name="Entry Point" superClass="com.freescale.arm.cdt.toolchain.linker.entryPoint" value="__startup" valueType="string"/>
 								<option id="com.freescale.arm.cdt.toolchain.linker.forceActive.2042630953" name="Force Active Symbols" superClass="com.freescale.arm.cdt.toolchain.linker.forceActive" valueType="stringList">
 									<listOptionValue builtIn="false" value="__vector_table"/>
@@ -726,6 +726,7 @@
 							<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler">
 								<option id="com.freescale.arm.cdt.toolchain.armCpp.input.userIncludes.205583644" name="Include User Search Paths (-i)" superClass="com.freescale.arm.cdt.toolchain.armCpp.input.userIncludes" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${ProjDirPath}/Project_Headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\projects\common\01bsp_bsp_timer&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\k20\common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\k20\cw&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\boards\k20\cpu&quot;"/>
@@ -738,7 +739,7 @@
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\chips&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\bsp\chips\at86rf231&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Sources/application}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/openos/openwsn}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${MCUToolsBaseDir}/ARM_EABI_Support/ewl/EWL_C/include&quot;"/>
 								</option>
 								<option id="com.freescale.arm.cdt.toolchain.armCpp.language.cpp.exceptions.770931639" name="Enable Exceptions" superClass="com.freescale.arm.cdt.toolchain.armCpp.language.cpp.exceptions" value="false" valueType="boolean"/>
@@ -773,6 +774,8 @@
 								<option id="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.2088051573.adjusted.1551649334" name="(hidden) toggle warnings flag" superClass="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.2088051573" value="com.freescale.arm.cdt.toolchain.enableWarnings.custom.hidden" valueType="enumerated"/>
 								<option id="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.2088051573.adjusted.298756630" name="(hidden) toggle warnings flag" superClass="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.2088051573" value="com.freescale.arm.cdt.toolchain.enableWarnings.custom.hidden" valueType="enumerated"/>
 								<option id="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.2088051573.adjusted.660448130" name="(hidden) toggle warnings flag" superClass="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.2088051573" value="com.freescale.arm.cdt.toolchain.enableWarnings.custom.hidden" valueType="enumerated"/>
+								<option id="com.freescale.arm.cdt.toolchain.armCpp.warn.warningsFlag.hidden.adjusted.1877283354.adjusted.476950977" superClass="com.freescale.arm.cdt.toolchain.armCpp.warn.warningsFlag.hidden.adjusted.1877283354" value="false" valueType="boolean"/>
+								<option id="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.1189111195.adjusted.798598397" superClass="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.1189111195" value="com.freescale.arm.cdt.toolchain.enableWarnings.custom.hidden" valueType="enumerated"/>
 								<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.55645970" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
 							</tool>
 							<tool id="com.freescale.arm.cdt.toolchain.assembler.1235350250" name="ARM Assembler" superClass="com.freescale.arm.cdt.toolchain.assembler">
@@ -782,6 +785,39 @@
 							<tool id="com.freescale.arm.cdt.toolchain.disassembler.1970859907" name="ARM Disassembler" superClass="com.freescale.arm.cdt.toolchain.disassembler"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1665084851" name="abstimer.c" rcbsApplicability="disable" resourcePath="Sources/k20/bsp/abstimer.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.610963997">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.610963997" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.751091072" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1442976998" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.988643570" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1961620491" name="Resource Custom Build Step Output Type"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.2093747712" name="radio.c" rcbsApplicability="disable" resourcePath="Sources/chips/at86rf231/radio.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.1536061072">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.1536061072" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.2033749034" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.295761701" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1921527996" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.739038010" name="Resource Custom Build Step Output Type"/>
+						</tool>
+					</fileInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.455006804" name="01bsp_bsp_timer.c" rcbsApplicability="disable" resourcePath="Sources/application/01bsp_bsp_timer.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.2092410610">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.2092410610" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.631979493" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1637051131" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1684466063" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1990357087" name="Resource Custom Build Step Output Type"/>
+						</tool>
+					</fileInfo>
 					<sourceEntries>
 						<entry excluding="Sources/application/openwsn_proj.c|Sources/application/01bsp_spi.c|Sources/application/01bsp_radio.c|Sources/application/01bsp_bothtimers.c|Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>

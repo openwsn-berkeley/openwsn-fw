@@ -310,7 +310,7 @@ void sendDIO() {
         msg->l4_protocol                           = IANA_ICMPv6;
         msg->l4_sourcePortORicmpv6Type             = IANA_ICMPv6_RPL;
         //l3
-        memcpy(&(msg->l3_destinationORsource),&icmpv6rpl_vars.all_routers_multicast,sizeof(open_addr_t));
+        memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.all_routers_multicast,sizeof(open_addr_t));
         
         //============ Now check if the prefix set then it has to be part of the DIO options ==========//
         if(isPrefixSet()==TRUE)
@@ -395,11 +395,11 @@ void sendDAO() {
         //l3
         //=============To send it to DODAGID ==========//
         
-        (msg->l3_destinationORsource).type=ADDR_128B;
+        (msg->l3_destinationAdd).type=ADDR_128B;
         
         for (i=0;i<sizeof(icmpv6rpl_dio.DODAGID);i++) {
          //big endian  
-          msg->l3_destinationORsource.addr_128b[i] =icmpv6rpl_dio.DODAGID[i];
+          msg->l3_destinationAdd.addr_128b[i] =icmpv6rpl_dio.DODAGID[i];
         }
         //======================= Reserve for the Transite option ============//
         j=0;

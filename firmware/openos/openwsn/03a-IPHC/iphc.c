@@ -51,37 +51,57 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
    msg->owner = COMPONENT_IPHC;
    // error checking
    if (idmanager_getIsBridge()==TRUE &&
-       packetfunctions_isAllRoutersMulticast(&(msg->l3_destinationORsource))==FALSE) {
+      packetfunctions_isAllRoutersMulticast(&(msg->l3_destinationAdd))==FALSE) {
       openserial_printError(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       return E_FAIL;
    }
-   packetfunctions_ip128bToMac64b(&(msg->l3_destinationORsource),&temp_dest_prefix,&temp_dest_mac64b);
-   if (packetfunctions_sameAddress(&temp_dest_prefix,idmanager_getMyID(ADDR_PREFIX))) {
-      //dest and me on same prefix
-      if (neighbors_isStableNeighbor(&(msg->l3_destinationORsource))) {
+   packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_dest_prefix,&temp_dest_mac64b);
+   //xv poipoi -- get the src prefix as well
+   packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);
+   //XV -poipoi this is not correct, we want to check if the source address prefix is the same as destination prefix
+   //if (packetfunctions_sameAddress(&temp_dest_prefix,idmanager_getMyID(ADDR_PREFIX))) {
+   if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {   
+   //dest and src on same prefix
+      if (neighbors_isStableNeighbor(&(msg->l3_destinationAdd))) {
          //if direct neighbors, MAC nextHop and IP destination indicate same node
-         //sam = IPHC_SAM_ELIDED; //===> has to be fixed
-         sam = IPHC_SAM_64B;     //>>>>>> diodio
+         //the source can be ME or another who I am relaying from. If its me then SAM is elided,
+         //if not SAM is 64b address 
+        if (fw_SendOrfw_Rcv==PCKTFORWARD){
+            sam = IPHC_SAM_64B;     //>>>>>> diodio
+            p_src = &temp_src_mac64b;
+        }else if (fw_SendOrfw_Rcv==PCKTSEND){
+            sam = IPHC_SAM_ELIDED; //xv -- this is the correct option
+            p_src = NULL;
+        }else{
+          while(1); //should never happen.
+        }
          dam = IPHC_DAM_ELIDED;
          p_dest = NULL;
-         packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);  //>>>>>> diodio
-         p_src = &temp_src_mac64b;  //>>>>>> diodio
       } else {
-         //else, use 64B address
+         //else, not a direct neighbour use 64B address
          sam = IPHC_SAM_64B;
          dam = IPHC_DAM_64B;
-         p_dest = &temp_dest_mac64b;
-         packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);  //>>>>>> diodio
+         p_dest = &temp_dest_mac64b;      
          p_src = &temp_src_mac64b;  //>>>>>> diodio
-        
       }
    } else {
+     //not the same prefix. so the packet travels to another network
+     
+     //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
+     if(ipv6_header.next_header !=SourceFWNxtHdr){ 
       sam = IPHC_SAM_128B;
       dam = IPHC_DAM_128B;
-      p_dest = &(msg->l3_destinationORsource);
+      p_dest = &(msg->l3_destinationAdd);
       p_src = &(msg->l3_sourceAdd);  //>>>>>> diodio
+     }else{
+       //source routing
+      sam = IPHC_SAM_128B;
+      dam = IPHC_DAM_ELIDED;
+      p_dest = NULL;
+      p_src = &(msg->l3_sourceAdd);  //>>>>>> diodio
+     }
    }
    //check if we are forwarding a packet and it comes with the next header compressed. We want to preserve that state in the following hop.
    
@@ -136,11 +156,11 @@ void iphc_receive(OpenQueueEntry_t* msg) {
    msg->owner  = COMPONENT_IPHC;
    ipv6_header = retrieveIPv6Header(msg);
    if (idmanager_getIsBridge()==FALSE ||
-       packetfunctions_isBroadcastMulticast(&(ipv6_header.dest))) {
+      packetfunctions_isBroadcastMulticast(&(ipv6_header.dest))) {
       packetfunctions_tossHeader(msg,ipv6_header.header_length);
       forwarding_receive(msg,ipv6_header);       //up the internal stack
    } else {
-      ipv6_header = retrieveIPv6Header(msg);
+      //ipv6_header = retrieveIPv6Header(msg);
       openbridge_receive(msg);                   //out to the OpenVisualizer
    }
 }

@@ -39,8 +39,8 @@ void udpinject_trigger() {
    pkt->l4_protocol                 = IANA_UDP;
    pkt->l4_sourcePortORicmpv6Type   = WKP_UDP_INJECT;
    pkt->l4_destination_port         = packetfunctions_ntohs(&(input_buffer[16]));
-   pkt->l3_destinationORsource.type = ADDR_128B;
-   memcpy(&(pkt->l3_destinationORsource.addr_128b[0]),&(input_buffer[0]),16);
+   pkt->l3_destinationAdd.type = ADDR_128B;
+   memcpy(&(pkt->l3_destinationAdd.addr_128b[0]),&(input_buffer[0]),16);
    packetfunctions_reserveHeaderSize(pkt,6);
    ((uint8_t*)pkt->payload)[0]      = 'p';
    ((uint8_t*)pkt->payload)[1]      = 'o';

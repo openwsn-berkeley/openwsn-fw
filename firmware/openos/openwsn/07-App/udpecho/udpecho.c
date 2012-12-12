@@ -31,8 +31,9 @@ void udpecho_receive(OpenQueueEntry_t* msg) {
    temp_l4_destination_port           = msg->l4_destination_port;
    pkt->l4_destination_port           = msg->l4_sourcePortORicmpv6Type;
    pkt->l4_sourcePortORicmpv6Type     = temp_l4_destination_port;
-   pkt->l3_destinationORsource.type = ADDR_128B;
-   memcpy(&pkt->l3_destinationORsource.addr_128b[0],&msg->l3_sourceAdd.addr_128b[0],16);
+   pkt->l3_destinationAdd.type = ADDR_128B;
+   //copy source to destination to echo.
+   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&msg->l3_sourceAdd.addr_128b[0],16);
    
    packetfunctions_reserveHeaderSize(pkt,msg->length);
    memcpy(&pkt->payload[0],&msg->payload[0],msg->length);

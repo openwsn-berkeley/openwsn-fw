@@ -19,13 +19,13 @@
 
 void eui64_get(uint8_t* addressToWrite){
 	uint32_t aux;
-	uint32_t /*euiH,euiMH,*/euiML,euiL;
+	uint32_t /*euiH,euiL,*/euiMH,euiML;
 	//read SIM uid registers.
 
 	//euiH=SIM_UIDH;
-	//euiMH=SIM_UIDMH;
+	euiMH=SIM_UIDMH;
 	euiML=SIM_UIDML;
-	euiL=SIM_UIDL;
+	//euiL=SIM_UIDL;
 
 	memset(addressToWrite,0,8);
 
@@ -41,7 +41,7 @@ void eui64_get(uint8_t* addressToWrite){
 	*addressToWrite=(uint8_t)((aux>>0) & 0x000000FF);
 	addressToWrite++;
 	
-	aux=euiL;//all 4 bytes of the low eui
+	aux=euiMH;//all 4 bytes of the mid high eui
 	*addressToWrite=(uint8_t)((aux>>24) & 0x000000FF);
 	addressToWrite++;
 	*addressToWrite=(uint8_t)((aux>>16) & 0x000000FF);

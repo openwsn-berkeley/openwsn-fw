@@ -677,7 +677,7 @@
 		<cconfiguration id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068" moduleId="org.eclipse.cdt.core.settings" name="MK20DX256_INTERNAL_FLASH">
 				<macros>
-					<stringMacro name="OPENOS_LOC" type="VALUE_TEXT" value="C:\Users\xvilajosana\Documents\workspaces\openwsn\firmware\openos\"/>
+					<stringMacro name="OPENOS_LOC" type="VALUE_TEXT" value="C:\Users\xvilajosana\Documents\workspaces\openwsn_git\openwsn-fw\firmware\openos\"/>
 				</macros>
 				<externalSettings/>
 				<extensions>
@@ -769,6 +769,7 @@
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udpinject&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\layerdebug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udpprint&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\07-App\udplatency&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENOS_LOC}\openwsn\cross-layers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Sources/application}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${MCUToolsBaseDir}/ARM_EABI_Support/ewl/EWL_C/include&quot;"/>
@@ -844,51 +845,6 @@
 							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.1494705939" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
 						</tool>
 					</fileInfo>
-					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1096660040" name="/" resourcePath="Sources/openwsn/07-App">
-						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.1638316240" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release" unusedChildren="">
-							<option id="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119.1269054439" name="Model" superClass="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119"/>
-							<targetPlatform id="com.freescale.arm.cdt.toolchain.targetplatform" isAbstract="false" name="ARM Target Platform" superClass="com.freescale.arm.cdt.toolchain.targetplatform"/>
-							<tool id="com.freescale.arm.cdt.toolchain.linker.985730918" name="ARM Linker" superClass="com.freescale.arm.cdt.toolchain.linker.1218070654"/>
-							<tool id="com.freescale.arm.cdt.toolchain.compiler.312855107" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
-								<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.2037484765" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
-							</tool>
-							<tool id="com.freescale.arm.cdt.toolchain.assembler.1367958417" name="ARM Assembler" superClass="com.freescale.arm.cdt.toolchain.assembler.1235350250">
-								<inputType id="com.freescale.arm.cdt.toolchain.armAsm.input.1539615907" name="ARM Assembler Input" superClass="com.freescale.arm.cdt.toolchain.armAsm.input"/>
-							</tool>
-							<tool id="com.freescale.arm.cdt.toolchain.preproc.1424919183" name="ARM Preprocessor" superClass="com.freescale.arm.cdt.toolchain.preproc.1327579727"/>
-							<tool id="com.freescale.arm.cdt.toolchain.disassembler.1742064026" name="ARM Disassembler" superClass="com.freescale.arm.cdt.toolchain.disassembler.1970859907"/>
-						</toolChain>
-					</folderInfo>
-					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1282332114" name="/" resourcePath="Sources/openwsn/07-App/heli">
-						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.1422494298" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release" unusedChildren="">
-							<option id="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119.1260727324" name="Model" superClass="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119"/>
-							<targetPlatform id="com.freescale.arm.cdt.toolchain.targetplatform" isAbstract="false" name="ARM Target Platform" superClass="com.freescale.arm.cdt.toolchain.targetplatform"/>
-							<tool id="com.freescale.arm.cdt.toolchain.linker.2015339766" name="ARM Linker" superClass="com.freescale.arm.cdt.toolchain.linker.1218070654"/>
-							<tool id="com.freescale.arm.cdt.toolchain.compiler.1506835033" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
-								<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.563086267" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
-							</tool>
-							<tool id="com.freescale.arm.cdt.toolchain.assembler.1891344951" name="ARM Assembler" superClass="com.freescale.arm.cdt.toolchain.assembler.1235350250">
-								<inputType id="com.freescale.arm.cdt.toolchain.armAsm.input.1499296494" name="ARM Assembler Input" superClass="com.freescale.arm.cdt.toolchain.armAsm.input"/>
-							</tool>
-							<tool id="com.freescale.arm.cdt.toolchain.preproc.2138615061" name="ARM Preprocessor" superClass="com.freescale.arm.cdt.toolchain.preproc.1327579727"/>
-							<tool id="com.freescale.arm.cdt.toolchain.disassembler.2114074386" name="ARM Disassembler" superClass="com.freescale.arm.cdt.toolchain.disassembler.1970859907"/>
-						</toolChain>
-					</folderInfo>
-					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1892070966" name="/" resourcePath="Sources/openwsn/02a-MAClow">
-						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.1224097275" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release" unusedChildren="">
-							<option id="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119.1328752778" name="Model" superClass="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119"/>
-							<targetPlatform id="com.freescale.arm.cdt.toolchain.targetplatform" isAbstract="false" name="ARM Target Platform" superClass="com.freescale.arm.cdt.toolchain.targetplatform"/>
-							<tool id="com.freescale.arm.cdt.toolchain.linker.576767577" name="ARM Linker" superClass="com.freescale.arm.cdt.toolchain.linker.1218070654"/>
-							<tool id="com.freescale.arm.cdt.toolchain.compiler.569846872" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
-								<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.919866698" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
-							</tool>
-							<tool id="com.freescale.arm.cdt.toolchain.assembler.1932986592" name="ARM Assembler" superClass="com.freescale.arm.cdt.toolchain.assembler.1235350250">
-								<inputType id="com.freescale.arm.cdt.toolchain.armAsm.input.129180782" name="ARM Assembler Input" superClass="com.freescale.arm.cdt.toolchain.armAsm.input"/>
-							</tool>
-							<tool id="com.freescale.arm.cdt.toolchain.preproc.115069" name="ARM Preprocessor" superClass="com.freescale.arm.cdt.toolchain.preproc.1327579727"/>
-							<tool id="com.freescale.arm.cdt.toolchain.disassembler.933563237" name="ARM Disassembler" superClass="com.freescale.arm.cdt.toolchain.disassembler.1970859907"/>
-						</toolChain>
-					</folderInfo>
 					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1002257415" name="/" resourcePath="Sources/openos">
 						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.68676536" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release" unusedChildren="">
 							<option id="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119.1922588229" name="Model" superClass="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119"/>
@@ -905,7 +861,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Sources/application/01bsp_leds.c|Sources/application/openwsn_proj.c|Sources/application/01bsp_spi.c|Sources/application/01bsp_radio.c|Sources/application/01bsp_bothtimers.c|Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Sources/application/01bsp_uart.c|Sources/application/01bsp_leds.c|Sources/application/01bsp_spi.c|Sources/application/01bsp_radio.c|Sources/application/01bsp_bothtimers.c|Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

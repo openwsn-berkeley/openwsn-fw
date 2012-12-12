@@ -4,38 +4,28 @@ Import('env')
 
 localEnv = env.Clone()
 
-localEnv.Append(CPPPATH =  [ os.path.join('#','firmware','openos','bsp','boards'),
-                             os.path.join('#','firmware','openos','bsp','boards','pc'),
-                           ],
-               )
-                   
-source_files = ['board.c',
-                'bsp_timer.c',
-                'debugpins.c',
-                'eui64.c',
-                'leds.c',
-                'opensim_client.c',
-                'opensim_cmdHandler.c',
-                'radio.c',
-                'radiotimer.c',
-                'uart.c',
-                'supply.c',
-               ]
+target =  'libbsp'
+source = ['board.c',
+          'bsp_timer.c',
+          'debugpins.c',
+          'eui64.c',
+          'leds.c',
+          'opensim_client.c',
+          'opensim_cmdHandler.c',
+          'radio.c',
+          'radiotimer.c',
+          'uart.c',
+          'supply.c',
+         ]
 
-if   localEnv['PLATFORM'] == 'win32':
-    localEnv.Append(CPPPATH = [ os.path.join('#','firmware','openos','bsp','boards','pc','win'),
-                              ],
-                   )
-    source_files += ['win/tcp_port_win.c'
-                    ]
-    
+if localEnv['PLATFORM'] == 'win32':
+    localEnv.Append(CPPPATH = [os.path.join('#','firmware','openos','bsp','boards','pc','win')])
+    source.append(os.path.join('win','tcp_port_win.c'))
+
 elif localEnv['PLATFORM'] == 'posix':
-    localEnv.Append(CPPPATH = [ os.path.join('#','firmware','openos','bsp','boards','pc','linux'),
-                              ],
-                   )
-    source_files += ['linux/tcp_port_linux.c'
-                    ]
+    localEnv.Append(CPPPATH = [ os.path.join('#','firmware','openos','bsp','boards','pc','linux')])
+    source.append(os.path.join('linux','tcp_port_linux.c'))
 
-libbsppc = localEnv.Library(target='libbsppc',
-                                source=source_files)
-Alias('libbsppc', libbsppc)
+libbsp = localEnv.Library(target=target,
+                          source=source)
+Alias('libbsp', libbsp)

@@ -22,10 +22,19 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
 
 void forwarding_init() {
 }
-
+//send from THIS node.
 error_t forwarding_send(OpenQueueEntry_t *msg) { 
-  msg->owner = COMPONENT_FORWARDING; 
   ipv6_header_iht ipv6_header;
+  open_addr_t* myprefix=idmanager_getMyID(ADDR_PREFIX);
+  open_addr_t* myadd64=idmanager_getMyID(ADDR_64B);
+  
+  msg->owner = COMPONENT_FORWARDING; 
+  //set src address as me.
+  
+  memcpy(&(msg->l3_sourceAdd.addr_128b[0]),myprefix->prefix,8);
+  memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b,8);
+  msg->l3_sourceAdd.type=ADDR_128B;
+  
   memset(&ipv6_header,0,sizeof(ipv6_header_iht));
   return fowarding_send_internal(msg,ipv6_header,PCKTSEND);
 }
@@ -62,7 +71,8 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
   if ((idmanager_isMyAddress(&ipv6_header.dest) 
        || packetfunctions_isBroadcastMulticast(&ipv6_header.dest))
       && ipv6_header.next_header!=SourceFWNxtHdr) {//for me and not having src routing header
-        memcpy(&(msg->l3_destinationORsource),&ipv6_header.src,sizeof(open_addr_t));
+        //destination address its me.
+        memcpy(&(msg->l3_destinationAdd),&ipv6_header.dest,sizeof(open_addr_t));
         memcpy(&(msg->l3_sourceAdd),&ipv6_header.src,sizeof(open_addr_t));
         switch(msg->l4_protocol) {
         case IANA_TCP:
@@ -80,7 +90,7 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
                                 (errorparameter_t)1);
         }
       } else { //relay
-        memcpy(&(msg->l3_destinationORsource),&ipv6_header.dest,sizeof(open_addr_t));//because initially contains source
+        memcpy(&(msg->l3_destinationAdd),&ipv6_header.dest,sizeof(open_addr_t));//because initially contains source
         memcpy(&(msg->l3_sourceAdd),&ipv6_header.src,sizeof(open_addr_t));  //>>>>>> diodio
         //TBC: source address gets changed!
         // change the creator to this components (should have been MAC)
@@ -105,7 +115,7 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
 //=========================== private =========================================
 
 error_t fowarding_send_internal(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
-  getNextHop(&(msg->l3_destinationORsource),&(msg->l2_nextORpreviousHop));
+  getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
  // getNextHop(&(msg->l3_sourceAdd),&(msg->l2_nextORpreviousHop));
   if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
     openserial_printError(COMPONENT_FORWARDING,ERR_NO_NEXTHOP,
@@ -125,6 +135,8 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
   uint8_t octetsAddressSize;
   ipv6_Source_Routing_Header_t * ipv6_Source_Routing_Header;
   
+  open_addr_t* prefix=idmanager_getMyID(ADDR_PREFIX);
+ 
   ipv6_Source_Routing_Header=(ipv6_Source_Routing_Header_t*)(msg->payload);
   
   
@@ -208,20 +220,29 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
       if(local_CmprE==0)
       {
         msg->l2_nextORpreviousHop.type = ADDR_16B;
+        msg->l3_destinationAdd.type = ADDR_16B;
         octetsAddressSize=2;
         memcpy(&(msg->l2_nextORpreviousHop.addr_16b),runningPointer+((addressposition-1)*octetsAddressSize),octetsAddressSize);
+        memcpy(&(msg->l3_destinationAdd.addr_16b),runningPointer+((addressposition-1)*octetsAddressSize),octetsAddressSize);
       }
       else if(local_CmprE==8)
       {
         msg->l2_nextORpreviousHop.type = ADDR_64B;
+        msg->l3_destinationAdd.type = ADDR_128B;
         octetsAddressSize=8;
         memcpy(&(msg->l2_nextORpreviousHop.addr_64b),runningPointer+((addressposition-1)*octetsAddressSize),octetsAddressSize);
+     
+        memcpy(&(msg->l3_destinationAdd.addr_128b[0]),prefix->prefix,8);
+        memcpy(&(msg->l3_destinationAdd.addr_128b[8]),runningPointer+((addressposition-1)*octetsAddressSize),octetsAddressSize);
       }
       else if(local_CmprE==2)
       {
         msg->l2_nextORpreviousHop.type = ADDR_128B;
+        msg->l3_destinationAdd.type = ADDR_128B;
+        
         octetsAddressSize=16;
         memcpy(&(msg->l2_nextORpreviousHop.addr_128b),runningPointer+((addressposition-1)*octetsAddressSize),octetsAddressSize);
+        memcpy(&(msg->l3_destinationAdd.addr_128b),runningPointer+((addressposition-1)*octetsAddressSize),octetsAddressSize);
       }
       else
       {

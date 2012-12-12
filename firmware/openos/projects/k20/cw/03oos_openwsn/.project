@@ -91,143 +91,143 @@
 		<link>
 			<name>Sources/application/01bsp_bothtimers.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/projects/common/01bsp_bothtimers/01bsp_bothtimers.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_bothtimers/01bsp_bothtimers.c</location>
 		</link>
 		<link>
 			<name>Sources/application/01bsp_leds.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/projects/common/01bsp_leds/01bsp_leds.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_leds/01bsp_leds.c</location>
 		</link>
 		<link>
 			<name>Sources/application/01bsp_radio.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/projects/common/01bsp_radio/01bsp_radio.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_radio/01bsp_radio.c</location>
 		</link>
 		<link>
 			<name>Sources/application/01bsp_spi.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/projects/common/01bsp_spi/01bsp_spi.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_spi/01bsp_spi.c</location>
 		</link>
 		<link>
 			<name>Sources/application/01bsp_uart.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/projects/common/01bsp_uart/01bsp_uart.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_uart/01bsp_uart.c</location>
 		</link>
 		<link>
 			<name>Sources/application/openwsn_proj.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/projects/common/03oos_openwsn/openwsn_proj.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/openwsn_proj.c</location>
 		</link>
 		<link>
 			<name>Sources/application/openwsn_proj.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/projects/common/03oos_openwsn/openwsn_proj.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/openwsn_proj.h</location>
 		</link>
 		<link>
 			<name>Sources/chips/at86rf231</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/chips/at86rf231</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/chips/at86rf231</location>
 		</link>
 		<link>
 			<name>Sources/chips/i2c.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/chips/i2c.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/chips/i2c.h</location>
 		</link>
 		<link>
 			<name>Sources/chips/spi.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/chips/spi.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/chips/spi.h</location>
 		</link>
 		<link>
 			<name>Sources/drivers/common</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/drivers/common</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/drivers/common</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/bsp</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/bsp</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp_ext</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/bsp_ext</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/bsp_ext</location>
 		</link>
 		<link>
 			<name>Sources/k20/common</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/common</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/common</location>
 		</link>
 		<link>
 			<name>Sources/k20/cpu</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/cpu</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/cpu</location>
 		</link>
 		<link>
 			<name>Sources/k20/cw</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/cw</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/cw</location>
 		</link>
 		<link>
 			<name>Sources/k20/platforms</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/platforms</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/platforms</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/abstimer.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/common/abstimer.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/common/abstimer.c</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/board.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/board.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/board.h</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/bsp_timer.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/bsp_timer.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/bsp_timer.h</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/debugpins.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/debugpins.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/debugpins.h</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/eui64.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/eui64.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/eui64.h</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/leds.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/leds.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/leds.h</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/radio.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/radio.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/radio.h</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/radiotimer.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/radiotimer.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/radiotimer.h</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/sctimer.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/sctimer.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/sctimer.h</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/uart.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/uart.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/uart.h</location>
 		</link>
 	</linkedResources>
 	<variableList>
 		<variable>
 			<name>OPENOS_LOC</name>
-			<value>file:/C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos</value>
+			<value>file:/C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos</value>
 		</variable>
 	</variableList>
 </projectDescription>
