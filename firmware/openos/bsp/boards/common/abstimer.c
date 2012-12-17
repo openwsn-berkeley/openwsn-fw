@@ -310,9 +310,7 @@ uint8_t radiotimer_isr() {
 	uint16_t        calc;
 	uint16_t        min;
 	uint16_t        tempcompare;
-debugpins_frame_set();
-	sctimer_clearISR();// clear all flags
-
+   
 	// update the current theoretical time -- nextCurrentTime MUST be NOW
 	abstimer_vars.currentTime = abstimer_vars.nextCurrentTime;
 	
