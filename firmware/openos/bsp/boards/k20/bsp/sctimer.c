@@ -73,18 +73,28 @@ void sctimer_init() {
  */
 
 void sctimer_schedule(uint16_t val) {
-	uint8_t cntrl = (LPTMR0_CSR & LPTMR_CSR_TCF_MASK) >> LPTMR_CSR_TCF_SHIFT;
-	uint8_t ten   = (LPTMR0_CSR & LPTMR_CSR_TEN_MASK) >> LPTMR_CSR_TEN_SHIFT;
+	volatile uint8_t cntrl,ten,aux;
+	cntrl= ((LPTMR0_CSR & LPTMR_CSR_TCF_MASK) >> LPTMR_CSR_TCF_SHIFT);
+	ten   = ((LPTMR0_CSR & LPTMR_CSR_TEN_MASK) >> LPTMR_CSR_TEN_SHIFT);
+	
+	if (val==0xffff){
+		aux=10;//debug.
+	}
     //timer is disabled or tcf is set
 	if ((cntrl==1) || (ten==0)){
 		LPTMR0_CMR = LPTMR_CMR_COMPARE(val); //Set compare value
 		LPTMR0_CSR |= LPTMR_CSR_TIE_MASK| LPTMR_CSR_TCF_MASK;//enable interrupts
 	}else{
-		//LPTMR0_CSR &= ~LPTMR_CSR_TEN_MASK;//disable timer -- page 999 manual says that cmr can only be changed if TCF is set or Timer is disabled
+		//this case happens when BSP timer sets a timer in user mode (i.e not in isr mode.).
+		//according to the manual page 999 the CMR can only be changed if TCF is set or Timer is disabled. 
+		//in this case the TCF is not set as we are not
+		//inside the lptmr ISR function and the timer is Enabled as is running..
+		//timer cannot be stop as it resets the counter.. :(
+		//So I do not know the consequences of modifying compare here..
+		//LPTMR0_CSR &= ~LPTMR_CSR_TEN_MASK;//disable timer cannot be done because this resets the counter.
+		
 		LPTMR0_CMR = LPTMR_CMR_COMPARE(val); //Set compare value
 		LPTMR0_CSR |= LPTMR_CSR_TEN_MASK|LPTMR_CSR_TIE_MASK| LPTMR_CSR_TCF_MASK; //Turn on again
-		cntrl++;
-		cntrl--;
 	}
 }
 
@@ -109,13 +119,15 @@ void sctimer_setCb(sctimer_cbt cb) {
 }
 
 void lptmr_isr(void) {
-	//volatile uint16_t val;
-	debugpins_isr_set();
+	 volatile uint16_t compval,nextcmpval;
+	 debugpins_isr_set();
 	 //write before read counter
 	 LPTMR0_CNR = 0x0;
 	 lastval=currval;
      currval = LPTMR0_CNR ;//read counter
-	 if ( (currval == LPTMR0_CMR&LPTMR_CMR_COMPARE_MASK) || (currval ==(LPTMR0_CMR&LPTMR_CMR_COMPARE_MASK)+ 1)) {
+     compval=LPTMR0_CMR; //the compare value
+     nextcmpval=compval+1;
+	 if ( (currval == compval) || (currval == nextcmpval)) {
 	    callback();// what happens if we are close to the next tic and get value returns the next tic??
 	 }else {
 		 //This should never happen, however for some reason, the TCF flag of the LPTMR is set
@@ -137,8 +149,20 @@ void lptmr_isr(void) {
 
 
 void sctimer_clearISR(){
-	//do nothing.. is done at the end.
+	volatile uint8_t csr;
+	volatile uint8_t cntrl;
+	//clear the isr flag on the csr register
 	LPTMR0_CSR |= ( /*LPTMR_CSR_TEN_MASK |*/LPTMR_CSR_TIE_MASK| LPTMR_CSR_TCF_MASK);
+	
+	//read tcf bit in csr to check that it has turned to 0
+	csr=LPTMR0_CSR;
+	cntrl= ((LPTMR0_CSR & LPTMR_CSR_TCF_MASK) >> LPTMR_CSR_TCF_SHIFT);
+		//timer is disabled or tcf is set
+	if (cntrl==1){
+		//this should never happen 
+		while(1);
+	}
+	
 }
 //=========================== private =========================================
 
