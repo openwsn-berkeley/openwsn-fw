@@ -707,7 +707,7 @@
 								<option id="com.freescale.arm.cdt.toolchain.linker.libraries.libSearch.184210399" name="Library Search Paths" superClass="com.freescale.arm.cdt.toolchain.linker.libraries.libSearch" valueType="stringList">
 									<listOptionValue builtIn="false" value="&quot;${MCUToolsBaseDir}/ARM_EABI_Support/ewl/lib&quot;"/>
 								</option>
-								<option id="com.freescale.arm.cdt.toolchain.linker.commandFile.157866562" name="Linker Command File" superClass="com.freescale.arm.cdt.toolchain.linker.commandFile" value="C:\Users\xvilajosana\Documents\workspaces\openwsn\firmware\openos\projects\k20\cw\03oos_openwsn\Project_Settings\linker_files\256KB_pflash_32KB_dflash.lcf" valueType="string"/>
+								<option id="com.freescale.arm.cdt.toolchain.linker.commandFile.157866562" name="Linker Command File" superClass="com.freescale.arm.cdt.toolchain.linker.commandFile" value="C:\Users\xvilajosana\Documents\workspaces\openwsn_git\openwsn-fw\firmware\openos\projects\k20\cw\03oos_openwsn\Project_Settings\linker_files\256KB_pflash_32KB_dflash.lcf" valueType="string"/>
 								<option id="com.freescale.arm.cdt.toolchain.linker.entryPoint.888958262" name="Entry Point" superClass="com.freescale.arm.cdt.toolchain.linker.entryPoint" value="__startup" valueType="string"/>
 								<option id="com.freescale.arm.cdt.toolchain.linker.forceActive.2042630953" name="Force Active Symbols" superClass="com.freescale.arm.cdt.toolchain.linker.forceActive" valueType="stringList">
 									<listOptionValue builtIn="false" value="__vector_table"/>

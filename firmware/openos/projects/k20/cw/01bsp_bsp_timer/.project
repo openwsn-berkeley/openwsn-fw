@@ -74,70 +74,75 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>Sources/application/01bsp_bothtimers.c</name>
+			<type>1</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_bothtimers/01bsp_bothtimers.c</location>
+		</link>
+		<link>
 			<name>Sources/application/01bsp_bsp_timer.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/projects/common/01bsp_bsp_timer/01bsp_bsp_timer.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_bsp_timer/01bsp_bsp_timer.c</location>
 		</link>
 		<link>
 			<name>Sources/application/openwsn.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/openwsn/openwsn.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/openwsn/openwsn.h</location>
 		</link>
 		<link>
 			<name>Sources/chips/at86rf231</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/chips/at86rf231</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/chips/at86rf231</location>
 		</link>
 		<link>
 			<name>Sources/chips/i2c.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/chips/i2c.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/chips/i2c.h</location>
 		</link>
 		<link>
 			<name>Sources/chips/spi.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/chips/spi.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/chips/spi.h</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/bsp</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/bsp</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp_ext</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/bsp_ext</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/bsp_ext</location>
 		</link>
 		<link>
 			<name>Sources/k20/common</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/common</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/common</location>
 		</link>
 		<link>
 			<name>Sources/k20/cpu</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/cpu</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/cpu</location>
 		</link>
 		<link>
 			<name>Sources/k20/cw</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/cw</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/cw</location>
 		</link>
 		<link>
 			<name>Sources/k20/platforms</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/k20/platforms</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/platforms</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/abstimer.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos/bsp/boards/common/abstimer.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/common/abstimer.c</location>
 		</link>
 	</linkedResources>
 	<variableList>
 		<variable>
 			<name>OPENOS_LOC</name>
-			<value>file:/C:/Users/xvilajosana/Documents/workspaces/openwsn/firmware/openos</value>
+			<value>file:/C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos</value>
 		</variable>
 	</variableList>
 </projectDescription>

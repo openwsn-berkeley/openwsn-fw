@@ -807,6 +807,17 @@
 							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.739038010" name="Resource Custom Build Step Output Type"/>
 						</tool>
 					</fileInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.604400156" name="01bsp_bothtimers.c" rcbsApplicability="disable" resourcePath="Sources/application/01bsp_bothtimers.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.657574428">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.657574428" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.982627339" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+						<tool customBuildStep="true" id="org.eclipse.cdt.managedbuilder.ui.rcbs.1989911431" name="Resource Custom Build Step">
+							<inputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.inputtype.1775100369" name="Resource Custom Build Step Input Type">
+								<additionalInput kind="additionalinputdependency" paths=""/>
+							</inputType>
+							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1860008661" name="Resource Custom Build Step Output Type"/>
+						</tool>
+					</fileInfo>
 					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.455006804" name="01bsp_bsp_timer.c" rcbsApplicability="disable" resourcePath="Sources/application/01bsp_bsp_timer.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.2092410610">
 						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.2092410610" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
 							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.631979493" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
@@ -819,7 +830,7 @@
 						</tool>
 					</fileInfo>
 					<sourceEntries>
-						<entry excluding="Sources/application/openwsn_proj.c|Sources/application/01bsp_spi.c|Sources/application/01bsp_radio.c|Sources/application/01bsp_bothtimers.c|Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Sources/application/01bsp_bothtimers.c|Sources/application/openwsn_proj.c|Sources/application/01bsp_spi.c|Sources/application/01bsp_radio.c|Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
