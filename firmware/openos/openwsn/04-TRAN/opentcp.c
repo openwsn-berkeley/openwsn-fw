@@ -42,8 +42,7 @@ void opentcp_timer_cb();
 
 void opentcp_init() {
    // reset local variables
-   memset(&tcp_vars,0,sizeof(tcp_vars_t));
-      
+   memset(&tcp_vars,0,sizeof(tcp_vars_t));   
    // reset state machine
    reset();
 }

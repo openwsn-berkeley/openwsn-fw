@@ -29,7 +29,7 @@ error_t forwarding_send(OpenQueueEntry_t *msg) {
   open_addr_t* myadd64=idmanager_getMyID(ADDR_64B);
   
   msg->owner = COMPONENT_FORWARDING; 
-  //set src address as me.
+  //poipoi xv set src address as me.
   
   memcpy(&(msg->l3_sourceAdd.addr_128b[0]),myprefix->prefix,8);
   memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b,8);
@@ -41,9 +41,11 @@ error_t forwarding_send(OpenQueueEntry_t *msg) {
 
 void forwarding_sendDone(OpenQueueEntry_t* msg, error_t error) {
   msg->owner = COMPONENT_FORWARDING;
-  if (msg->creator==COMPONENT_RADIO || msg->creator==COMPONENT_FORWARDING) {//that was a packet I had relayed
+  if (msg->creator==COMPONENT_RADIO || msg->creator==COMPONENT_FORWARDING) {
+    //that was a packet I had relayed
     openqueue_freePacketBuffer(msg);
-  } else {//that was a packet coming from above
+  } else {
+    //that was a packet coming from above
     switch(msg->l4_protocol) {
     case IANA_TCP:
       opentcp_sendDone(msg,error);
@@ -70,8 +72,8 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
   msg->l4_protocol_compressed = ipv6_header.next_header_compressed;
   if ((idmanager_isMyAddress(&ipv6_header.dest) 
        || packetfunctions_isBroadcastMulticast(&ipv6_header.dest))
-      && ipv6_header.next_header!=SourceFWNxtHdr) {//for me and not having src routing header
-        //destination address its me.
+      && ipv6_header.next_header!=SourceFWNxtHdr) {
+        //for me and not having src routing header destination address its me.
         memcpy(&(msg->l3_destinationAdd),&ipv6_header.dest,sizeof(open_addr_t));
         memcpy(&(msg->l3_sourceAdd),&ipv6_header.src,sizeof(open_addr_t));
         switch(msg->l4_protocol) {
@@ -90,14 +92,14 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
                                 (errorparameter_t)1);
         }
       } else { //relay
-        memcpy(&(msg->l3_destinationAdd),&ipv6_header.dest,sizeof(open_addr_t));//because initially contains source
-        memcpy(&(msg->l3_sourceAdd),&ipv6_header.src,sizeof(open_addr_t));  //>>>>>> diodio
-        //TBC: source address gets changed!
+        memcpy(&(msg->l3_destinationAdd),&ipv6_header.dest,sizeof(open_addr_t));
+        //because initially contains source
+        memcpy(&(msg->l3_sourceAdd),&ipv6_header.src,sizeof(open_addr_t)); 
         // change the creator to this components (should have been MAC)
         msg->creator = COMPONENT_FORWARDING;
         if(ipv6_header.next_header !=SourceFWNxtHdr) 
         {
-          // resend as if from upper layer        //>>>>>> diodio
+          // resend as if from upper layer 
           if (fowarding_send_internal(msg, ipv6_header,PCKTFORWARD)==E_FAIL) {
             openqueue_freePacketBuffer(msg);
           }
@@ -116,7 +118,6 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
 
 error_t fowarding_send_internal(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
   getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
- // getNextHop(&(msg->l3_sourceAdd),&(msg->l2_nextORpreviousHop));
   if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
     openserial_printError(COMPONENT_FORWARDING,ERR_NO_NEXTHOP,
                           (errorparameter_t)0,
@@ -139,7 +140,6 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
  
   ipv6_Source_Routing_Header=(ipv6_Source_Routing_Header_t*)(msg->payload);
   
-  
   runningPointer=(msg->payload) + sizeof(ipv6_Source_Routing_Header_t);
   
   // getting local_CmprE and CmprI;
@@ -148,21 +148,17 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
   //local_CmprI>>4; // shifting it by 4.
   local_CmprI=local_CmprI>>4; // shifting it by 4.
   
-//  foundFlag=0;
-
-    //see processing header algorithm in RFC6554 page 9
+  //see processing header algorithm in RFC6554 page 9
     
-    numAddr=(((ipv6_Source_Routing_Header->HdrExtLen*8)-ipv6_Source_Routing_Header->PadRes -(16-local_CmprE))/(16-local_CmprI))+1;
+  numAddr=(((ipv6_Source_Routing_Header->HdrExtLen*8)-ipv6_Source_Routing_Header->PadRes -(16-local_CmprE))/(16-local_CmprI))+1;
   
   if(ipv6_Source_Routing_Header->SegmentsLeft==0){
     //we are there!..
     //process the next header in the pkt.. i.e push stack up..
     msg->l4_protocol=ipv6_Source_Routing_Header->nextHeader;
     hlen=ipv6_Source_Routing_Header->HdrExtLen;
-        
     //toss header
     packetfunctions_tossHeader(msg,sizeof(ipv6_Source_Routing_Header_t));
-    
     //toss list of addresses.
     if(local_CmprE==0)
     {
@@ -206,10 +202,10 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
     return E_SUCCESS;
   }else{    
     if(ipv6_Source_Routing_Header->SegmentsLeft>numAddr){
-      //not good.. error.
+      //not good.. error. 
+      //poipoi xv :
       //send and ICMPv6 parameter problem, code 0, to the src address 
-      //then discard the packet.
-      //TODO
+      //then discard the packet.  //TODO
       while (1);
     }else{
       //still hops remaining 

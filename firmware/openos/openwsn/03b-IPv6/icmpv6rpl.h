@@ -49,9 +49,7 @@
 //=========================== variables =======================================
 PRAGMA(pack(1));
 typedef struct {
-//  //for the rank I should use: neighbors_getMyDAGrank();
    uint8_t         rplinstanceId; // set by the DODAG root.
-//   //DODAGID: it's 128 bits, not sure if I should include it
    uint8_t         verNumb;
    dagrank_t       rank;
    uint8_t         rplOptions;
@@ -60,7 +58,6 @@ typedef struct {
    uint8_t         reserved;
    uint8_t         DODAGID[16];    
    uint8_t         options;
-   
 } icmpv6rpl_dio_t;
 PRAGMA(pack());
 
@@ -72,7 +69,6 @@ typedef struct {
    uint8_t         DAOSequance;
    uint8_t         DODAGID[16];    
    uint8_t         options;
-   
 } icmpv6rpl_dao_t;
 PRAGMA(pack());
 
@@ -84,20 +80,8 @@ typedef struct {
    uint8_t         Resvd_Prf_Resvd;
    uint32_t        routeLifeTime;
    open_addr_t     prefix;
-   
 } icmpv6rpl_dio_options_t;
 PRAGMA(pack());
-
-//PRAGMA(pack(1));
-//typedef struct {
-//   uint8_t         type; // set by the DODAG root.
-//   uint8_t         optionLength;
-//   uint8_t         flags;
-//   uint8_t         prefixLength;
-//   uint8_t         targetPrefix[8];    
-//
-//} icmpv6rpl_dao_rpl_target_t;
-//PRAGMA(pack());
 
 PRAGMA(pack(1));
 typedef struct {

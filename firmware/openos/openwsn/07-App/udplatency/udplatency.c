@@ -46,8 +46,6 @@ void udplatency_task(){
    open_addr_t  q;
 
    //prepare packet
-   
-  
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPLATENCY);
    if (pkt==NULL) {
       openserial_printError(COMPONENT_UDPLATENCY,ERR_NO_FREE_PACKET_BUFFER,

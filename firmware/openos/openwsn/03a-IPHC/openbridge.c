@@ -22,14 +22,15 @@ void openbridge_trigger() {
    numDataBytes = openserial_getNumDataBytes();
    openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
    
-  //this is a temporal workaround as we are never supposed to get chunks of data
+   //poipoi xv
+   //this is a temporal workaround as we are never supposed to get chunks of data
    //longer than input buffer size.. I assume that HDLC will solve that.
    
    if (numDataBytes>136){
        openserial_printError(COMPONENT_OPENBRIDGE,ERR_INPUTBUFFER_LENGTH,
                    (errorparameter_t)0,
                    (errorparameter_t)numDataBytes);
-       //return.
+       //return;
        //poipoi xv test that..
        numDataBytes=sizeof(input_buffer);
    }
@@ -69,7 +70,7 @@ void openbridge_sendDone(OpenQueueEntry_t* msg, error_t error) {
 }
 
 void openbridge_receive(OpenQueueEntry_t* msg) {
-  //XV sending src and dest.
+  //poipoi xv sending src and dest.
    uint8_t total;
    uint8_t size=sizeof(msg->l2_nextORpreviousHop.addr_64b);
    total=size;
@@ -78,10 +79,10 @@ void openbridge_receive(OpenQueueEntry_t* msg) {
    
    size=sizeof(idmanager_getMyID(ADDR_64B)->addr_64b);
    total+=size;
+  
    packetfunctions_reserveHeaderSize(msg,size);
 
    memcpy(msg->payload,idmanager_getMyID(ADDR_64B)->addr_64b,size);
-  
   
    openserial_printData((uint8_t*)(msg->payload),msg->length);
    openqueue_freePacketBuffer(msg);

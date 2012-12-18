@@ -17,8 +17,6 @@ typedef struct {
    neighborRow_t    neighbors[MAXNUMNEIGHBORS];
    dagrank_t        myDAGrank;
    uint8_t          debugRow;
-   //=================//
-   uint8_t     testing;
 } neighbors_vars_t;
 
 neighbors_vars_t neighbors_vars;
@@ -54,7 +52,6 @@ void neighbors_receiveDIO(OpenQueueEntry_t* msg,icmpv6rpl_dio_t* dio) {
    if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
-            //neighbors_vars.neighbors[i].DAGrank = *((uint8_t*)(msg->payload));
            //poipoi xv is the rang big endian??
            neighbors_vars.neighbors[i].DAGrank = dio->rank;
             // poipoi: single hop
@@ -177,18 +174,13 @@ open_addr_t* neighbors_KaNeighbor() {
       }
    }
    // return the addr of the most urgent KA to send
-   if        (addrPreferred!=NULL) {
+   if    (addrPreferred!=NULL) {
       return addrPreferred;
    } else if (addrOther!=NULL) {
       return addrOther;
    } else {
       return NULL;
    }
-}
-
-// TODO: remove if not used
-open_addr_t*  neighbors_getAddr(uint8_t neighboIdx) {
-   return &neighbors_vars.neighbors[neighboIdx].addr_64b;
 }
 
 bool neighbors_isStableNeighbor(open_addr_t* address) {
@@ -219,7 +211,7 @@ bool neighbors_isStableNeighbor(open_addr_t* address) {
    DISABLE_INTERRUPTS();
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (isThisRowMatching(address,i) && neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
-    	  ENABLE_INTERRUPTS();
+    	 ENABLE_INTERRUPTS();
          return TRUE;
       }
    }
@@ -244,19 +236,6 @@ uint8_t neighbors_getNumNeighbors() {
 
 bool neighbors_getPreferredParent(open_addr_t* addressToWrite, uint8_t addr_type) {
    //following commented out section is equivalent to setting a default gw
-   /*
-      open_addr_t    nextHop;
-      nextHop.type = ADDR_64B;
-      nextHop.addr_64b[0]=0x00;
-      nextHop.addr_64b[1]=0x00;
-      nextHop.addr_64b[2]=0x00;
-      nextHop.addr_64b[3]=0x00;
-      nextHop.addr_64b[4]=0x00;
-      nextHop.addr_64b[5]=0x00;
-      nextHop.addr_64b[6]=0x00;
-      nextHop.addr_64b[7]=0x01;
-      memcpy(addressToWrite,&nextHop,sizeof(open_addr_t));
-      */
    uint8_t i,posMinRank,usedNeighbours;
    dagrank_t minRank;
    bool preferred=FALSE;
@@ -293,7 +272,7 @@ bool neighbors_getPreferredParent(open_addr_t* addressToWrite, uint8_t addr_type
      }
    }
    if (preferred==FALSE && usedNeighbours > 0){
-     //no preferred parent.. and at least one neighbour
+      //no preferred parent.. and at least one neighbour
       neighbors_vars.neighbors[posMinRank].parentPreference=MAXPREFERENCE;
       neighbors_vars.neighbors[posMinRank].stableNeighbor=TRUE;
       neighbors_vars.neighbors[posMinRank].switchStabilityCounter=0;
@@ -315,20 +294,9 @@ bool debugPrint_neighbors() {
    return TRUE;
 }
 
-/**
-\brief Return a direct pointer to the neighbor table.
-
-\note Modifying  this structure means you are modifying the neighbor table.
-      Be careful when using the pointer; only read from the table.
-NOBODY uses that. check and delete if not needed. poipoi xv
-*/
-
-//void neighbors_getAll(neighborRow_t* nlist){
-//   nlist = &neighbors_vars.neighbors[0];
-//}
-
 /*returns a list of debug info
 TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.*/
+
 void neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes ){
   uint8_t j,size;
   size=0;
@@ -358,9 +326,7 @@ bool isNeighborsWithLowerDAGrank(dagrank_t RefRank, uint8_t index)
    { 
       return TRUE;
    }
-   else
-     return FALSE;
-   
+   else return FALSE;
  }
 
 // Below function return the address for the neighbor at index and this function should be called after 
@@ -379,8 +345,6 @@ void getNeighborsWithLowerDAGrank(uint8_t* addressToWrite,uint8_t addr_type, uin
      }
  }
 
-
-
 //=========================================================================================
 
 // To find the neighbors with higher DAGrank which could be a children.
@@ -390,8 +354,7 @@ void getNeighborsWithLowerDAGrank(uint8_t* addressToWrite,uint8_t addr_type, uin
  bool getNeighborsWithHigherDAGrank(open_addr_t* addressToWrite,uint8_t addr_type, dagrank_t RefRank, uint8_t index)
  {
    if(neighbors_vars.neighbors[index].used==TRUE && neighbors_vars.neighbors[index].DAGrank > RefRank)
-   {
-     
+   {     
      switch(addr_type) {
             case ADDR_64B:
                memcpy(addressToWrite,&(neighbors_vars.neighbors[index].addr_64b),sizeof(open_addr_t));
@@ -407,7 +370,6 @@ void getNeighborsWithLowerDAGrank(uint8_t* addressToWrite,uint8_t addr_type, uin
    }
    else
      return FALSE;
-   
  }
 
 
@@ -433,7 +395,7 @@ void registerNewNeighbor(open_addr_t* address,
             // add this neighbor
             neighbors_vars.neighbors[i].used                   = TRUE;
             neighbors_vars.neighbors[i].parentPreference       = 0;
-            //neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
+            // neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
             // poipoi: all new neighbors are consider stable
             neighbors_vars.neighbors[i].stableNeighbor         = TRUE;
             neighbors_vars.neighbors[i].switchStabilityCounter = 0;
@@ -515,7 +477,7 @@ bool isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
 void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint8_t   i;
    uint8_t   temp_linkCost;
-   uint32_t  temp_myTentativeDAGrank; //has to be 16bit so that the sum can be larger than 255 "CHANGED BY Ahmad to be 32 bits since the DAGrank is 16 bits now", so the sum will be >(0xFFFF)
+   uint32_t  temp_myTentativeDAGrank; //has to be 32bit so that the sum can be larger than 65535 
    uint8_t   temp_preferredParentRow=0;
    bool      temp_preferredParentExists=FALSE;
    if ((idmanager_getIsDAGroot())==FALSE) {
@@ -523,7 +485,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
       i=0;
       while(i<MAXNUMNEIGHBORS) {
          neighbors_vars.neighbors[i].parentPreference=0;
-         //poipoi xv
+         //poipoi xv -- removing verification of stable neighbor, this was causing to loose all preferred parents
          if (neighbors_vars.neighbors[i].used==TRUE /*&& neighbors_vars.neighbors[i].stableNeighbor==TRUE*/) {
             if (neighbors_vars.neighbors[i].numTxACK==0) {
                temp_linkCost=15; //TODO: evaluate using RSSI?
@@ -531,9 +493,9 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
                temp_linkCost=(uint8_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*10.0);
             }
             temp_myTentativeDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
-           //poipoi xv -- avoiding dynamic routing...
+            //poipoi xv -- if I am not the dagroot and my new rang is smaller than my current rang and my new rang is smaller than ffff
             if (idmanager_getIsDAGroot()==FALSE && temp_myTentativeDAGrank<neighbors_vars.myDAGrank && temp_myTentativeDAGrank<0xffff) {
-               
+            //then update my rank.. this verification is done to avoid unstability.               
               neighbors_vars.myDAGrank=temp_myTentativeDAGrank;
               temp_preferredParentExists=TRUE;
               temp_preferredParentRow=i;
@@ -544,8 +506,8 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
             
                //   below to enforce the routing 
                switch ((idmanager_getMyID(ADDR_64B))->addr_64b[7]) {
-               case 0x9B:
-               if (neighbors_vars.neighbors[i].addr_64b.addr_64b[7]==0xDC) {
+               case 0x9B: //if I am 9B
+               if (neighbors_vars.neighbors[i].addr_64b.addr_64b[7]==0xDC) { //force my parent to be DC
                neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
                temp_preferredParentExists=TRUE;
                temp_preferredParentRow=i;

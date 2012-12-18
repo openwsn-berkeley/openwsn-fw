@@ -25,16 +25,9 @@ typedef struct {
   // Flag to check if DODAGID is set
   uint8_t         DODAGIDFlagSet;
   
-  // for testing
-  uint8_t checksize;
-  //====== by Ahmad =====//
+  //====== RPL =====//
   uint16_t        periodDAO;
   uint8_t         delayDAO;
-  //===============//
-  uint16_t        counterForTesting;
-  uint8_t*        getaddBefore1; // for testing
-  uint8_t*        getaddBefore2; // for testing
-  uint8_t*        getaddAfter; // for testing
 } icmpv6rpl_vars_t;
 
 icmpv6rpl_vars_t icmpv6rpl_vars;
@@ -148,13 +141,12 @@ void icmpv6rpl_init() {
   icmpv6rpl_vars.timerId    = opentimers_start(icmpv6rpl_vars.periodDIO,
                                                TIMER_PERIODIC,TIME_MS,
                                                icmpv6rpl_timer_cb);
-  //====== by Ahmad =====//
+  //====== RPL DAO TIMER =====//
   icmpv6rpl_vars.periodDAO  = 10000+(openrandom_get16b()&0xff);       // pseudo-random (2000 can be changed base on the network)
   icmpv6rpl_vars.timerId    = opentimers_start(icmpv6rpl_vars.periodDAO,
                                                TIMER_PERIODIC,TIME_MS,
                                                icmpv6rpl_timer_DAO_cb);
-  //===============//
-  icmpv6rpl_vars.counterForTesting=0;
+  
   
 }
 
@@ -342,7 +334,6 @@ void sendDIO() {
   
         //=====================================================================//
         //ICMPv6 header
-        icmpv6rpl_vars.checksize=sizeof(ICMPv6_ht);
         packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
         ((ICMPv6_ht*)(msg->payload))->type         = msg->l4_sourcePortORicmpv6Type;
         ((ICMPv6_ht*)(msg->payload))->code         = IANA_ICMPv6_RPL_DIO;
@@ -444,7 +435,6 @@ void sendDAO() {
              
         //=====================================================================//   
         //ICMPv6 header
-        icmpv6rpl_vars.checksize=sizeof(ICMPv6_ht);
         packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
         ((ICMPv6_ht*)(msg->payload))->type         = msg->l4_sourcePortORicmpv6Type;
         ((ICMPv6_ht*)(msg->payload))->code         = IANA_ICMPv6_RPL_DAO;
@@ -476,8 +466,7 @@ void icmpv6rpl_timer_DAO_cb() {
   scheduler_push_task(timers_rpl_DAO_fired,TASKPRIO_RPL);
 }
 
-void icmpv6rpl_receiveDAO(OpenQueueEntry_t* msg){
-  icmpv6rpl_vars.counterForTesting=icmpv6rpl_vars.counterForTesting+1; 
+void icmpv6rpl_receiveDAO(OpenQueueEntry_t* msg){ 
   while(1);
  //should neve happen right? 
 }
