@@ -11,6 +11,7 @@
 #include "openwsn.h"
 
 //=========================== define ==========================================
+#define INTIAL_KEY_ID           0x07
 
 enum IEEE802154_fcf_enums {
    IEEE154_FCF_FRAME_TYPE              = 0,
@@ -18,6 +19,7 @@ enum IEEE802154_fcf_enums {
    IEEE154_FCF_FRAME_PENDING           = 4,
    IEEE154_FCF_ACK_REQ                 = 5,
    IEEE154_FCF_INTRAPAN                = 6,
+   IEEE154_FCF_IELISTPRESENT           = 1,
    IEEE154_FCF_DEST_ADDR_MODE          = 2,
    IEEE154_FCF_SRC_ADDR_MODE           = 6,
 };
@@ -56,6 +58,30 @@ enum IEEE802154_fcf_addr_mode_enums {
    IEEE154_ADDR_EXT                    = 3,
 };
 
+enum IEEE802154_aux_enums {
+   IEEE154_AUX_SECURITY_LEVEL                      = 0,
+   IEEE154_AUX_KEY_ID_MODE                         = 3,
+   IEEE154_AUX_FRAME_COUNTER_SUPPRESSION           = 5,
+   IEEE154_AUX_FRAME_COUNTER_SIZE                  = 6,
+};
+
+enum IEEE802154_aux_security_level_enums {
+   IEEE154_SECURITY_LEVEL_32MIC                    = 1,
+};
+
+enum IEEE802154_aux_key_id_mode_enums {
+   IEEE154_KEY_FROM_INDEX                          = 1,
+};
+
+enum IEEE802154_aux_frame_counter_suppression_enums {
+    IEEE154_COUNTER_SUPPRESSION_YES                = 1,
+};
+
+enum IEEE802154_aux_frame_counter_size_enums {
+    IEEE154_COUNTER_SIZE_5B                        =1,
+};
+
+
 //=========================== typedef =========================================
 
 typedef struct {
@@ -66,6 +92,7 @@ typedef struct {
    bool        framePending;
    bool        ackRequested;
    bool        panIDCompression;
+   bool        IEListPresent;   //did have IE field?
    uint8_t     dsn;
    open_addr_t panid;
    open_addr_t dest;
@@ -81,6 +108,7 @@ typedef struct {
 void ieee802154_prependHeader  (OpenQueueEntry_t*      msg,
                                 uint8_t                frameType,
                                 bool                   securityEnabled,
+                                bool                   IEListPresent,
                                 uint8_t                sequenceNumber,
                                 open_addr_t*           nextHop);
 void ieee802154_retrieveHeader (OpenQueueEntry_t*      msg,
