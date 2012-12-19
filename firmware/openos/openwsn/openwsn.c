@@ -19,6 +19,8 @@
 #include "schedule.h"
 #include "res.h"
 #include "neighbors.h"
+#include "processIE.h"
+#include "reservation.h"
 //-- 03a-IPHC
 #include "openbridge.h"
 #include "iphc.h"
@@ -88,6 +90,9 @@ void openwsn_init() {
    schedule_init();
    res_init();
    neighbors_init();
+   processIE_init();
+   reservation_init();
+   
    //-- 03a-IPHC
    openbridge_init();
    iphc_init();
@@ -130,4 +135,5 @@ void openwsn_init() {
    //-- misc
    //heli_init();
    //imu_init();
+   
 }
