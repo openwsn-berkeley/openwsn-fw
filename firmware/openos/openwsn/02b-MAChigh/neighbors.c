@@ -183,6 +183,41 @@ open_addr_t* neighbors_KaNeighbor() {
    }
 }
 
+open_addr_t*  neighbors_reservationNeighbor(){
+  // should get from neighbor.c. We return a pre-define neighbor for test
+   uint8_t      i;
+   uint16_t     timeSinceHeard;
+   open_addr_t* addrPreferred;
+   open_addr_t* addrOther;
+   // initialize
+   addrPreferred = NULL;
+   addrOther     = NULL;
+   // scan through the neighbor table, and populate addrPreferred and addrOther
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+            if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
+               // its a preferred parent
+               addrPreferred = &(neighbors_vars.neighbors[i].addr_64b);
+            } else {
+               // its not a preferred parent
+               // poipoi: don't KA to non-preferred parent
+               //addrOther =     &(neighbors_vars.neighbors[i].addr_64b);
+            }
+      }
+   // return the addr of the most urgent KA to send
+   if        (addrPreferred!=NULL) {
+      return addrPreferred;
+   } else if (addrOther!=NULL) {
+      return addrOther;
+   } else {
+      return NULL;
+   }
+}
+
+
+open_addr_t*  neighbors_getAddr(uint8_t neighboIdx) {
+   return &neighbors_vars.neighbors[neighboIdx].addr_64b;
+}
+
 bool neighbors_isStableNeighbor(open_addr_t* address) {
    uint8_t i;
    open_addr_t temp_addr_64b;
@@ -296,7 +331,6 @@ bool debugPrint_neighbors() {
 
 /*returns a list of debug info
 TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.*/
-
 void neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes ){
   uint8_t j,size;
   size=0;
@@ -373,6 +407,18 @@ void getNeighborsWithLowerDAGrank(uint8_t* addressToWrite,uint8_t addr_type, uin
  }
 
 
+//returns the number of neighbors
+uint8_t  neighbors_getNumberOfNeighbors(){
+  uint8_t j,size;
+  size=0;
+  for(j=0;j<MAXNUMNEIGHBORS;j++) {
+     if(neighbors_vars.neighbors[j].used) {
+       size++;
+      }
+    }  
+  return size;
+}
+
 //=========================== private =========================================
 
 void registerNewNeighbor(open_addr_t* address,
@@ -414,7 +460,7 @@ void registerNewNeighbor(open_addr_t* address,
                }
             }
             // if I have none, and I'm not DAGroot, the new neighbor is my preferred
-            if (iHaveAPreferedParent==FALSE && idmanager_getIsDAGroot()==FALSE) {      
+            if (iHaveAPreferedParent==FALSE && idmanager_getIsDAGroot()==FALSE) {
                neighbors_vars.neighbors[i].parentPreference     = MAXPREFERENCE;
             }
             break;
