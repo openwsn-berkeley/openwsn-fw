@@ -15,6 +15,9 @@
 #include "scheduler.h"
 #include "bsp_timer.h"
 #include "opentimers.h"
+#include "processIE.h"
+#include "IEfield.h"
+#include "reservation.h"
 
 //=========================== variables =======================================
 
@@ -24,6 +27,8 @@ typedef struct {
    uint8_t         dsn;                  // current data sequence number
    uint8_t         MacMgtTaskCounter;    // counter to determine what management task to do
    opentimer_id_t  timerId;
+   asn_t           ADVasn;
+   uint8_t         joinPriority;
 } res_vars_t;
 
 res_vars_t res_vars;
@@ -35,6 +40,10 @@ void    sendAdv();
 void    sendKa();
 void    res_timer_cb();
 
+void    incrementADVasn();
+
+void    res_recordADV(OpenQueueEntry_t* msg);
+
 //=========================== public ==========================================
 
 void res_init() {
@@ -45,6 +54,10 @@ void res_init() {
    res_vars.timerId = opentimers_start(res_vars.periodMaintenance,
                                        TIMER_PERIODIC,TIME_MS,
                                        res_timer_cb);
+   res_vars.ADVasn.byte4 = 0;
+   res_vars.ADVasn.bytes2and3 = 0;
+   res_vars.ADVasn.bytes0and1 = 0;
+   res_vars.joinPriority = 0;   
 }
 
 bool debugPrint_myDAGrank() {
@@ -59,6 +72,10 @@ bool debugPrint_myDAGrank() {
 error_t res_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_RES;
    msg->l2_frameType = IEEE154_TYPE_DATA;
+   
+   //packet send at this slot
+   msg->l2_slotToSendPacket = schedule_getSlotToSendPacket(msg,&(msg->l2_nextORpreviousHop));
+   
    return res_send_internal(msg);
 }
 
@@ -102,6 +119,10 @@ void task_resNotifSendDone() {
                            TIME_MS,
                            res_vars.periodMaintenance);
    } else {
+     if(msg->creator == COMPONENT_RESERVATION) {
+       reservation_sendDone(msg,msg->l2_sendDoneError);
+     }
+     else
       // send the rest up the stack
       iphc_sendDone(msg,msg->l2_sendDoneError);
    }
@@ -134,7 +155,12 @@ void task_resNotifReceive() {
       case IEEE154_TYPE_BEACON:
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
+         if (msg->l2_IEListPresent)
+            IEFiled_retrieveIE(msg);
          if (msg->length>0) {
+           if(msg->payload[0]==0xff)
+             reservation_pretendReceiveData(msg);
+             else
             // send to upper layer
             iphc_receive(msg);
          } else {
@@ -166,20 +192,19 @@ The body of this function executes one of the MAC management task.
 */
 void timers_res_fired() {
    res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%2;
-//   if (idmanager_getMyID(ADDR_16B)->addr_16b[1]==DEBUG_MOTEID_MASTER) {
+   if (idmanager_getIsDAGroot()==TRUE) {
       if (res_vars.MacMgtTaskCounter==0) {
          sendAdv();
       } else {
          // don't send KAs if you're the master
-         sendKa();
       }
- /*  } else {
-      if (res_vars.MacMgtTaskCounter==0) {
-         // don't send ADVs if you're not the master
-      } else {
-         sendKa();
-      }
-   }*/
+//  } else {
+//      if (res_vars.MacMgtTaskCounter==0) {
+//         // don't send ADVs if you're not the master
+//      } else {
+//         sendKa();
+//      }
+    }
 }
 
 //=========================== private =========================================
@@ -215,6 +240,7 @@ error_t res_send_internal(OpenQueueEntry_t* msg) {
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             IEEE154_SEC_NO_SECURITY,
+                            msg->l2_IEListPresent,
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
@@ -252,9 +278,26 @@ port_INLINE void sendAdv() {
       adv->owner   = COMPONENT_RES;
       
       // reserve space for ADV-specific header
-      packetfunctions_reserveHeaderSize(adv, ADV_PAYLOAD_LENGTH);
+      //packetfunctions_reserveHeaderSize(adv, ADV_PAYLOAD_LENGTH);
       // the actual value of the current ASN will be written by the
       // IEEE802.15.4e when transmitting
+      
+      uint8_t numOfSlotframes = schedule_getNumSlotframe();
+     
+      for(uint8_t i=0;i<numOfSlotframes;i++)
+        schedule_generateLinkList(i);
+      //set SubFrameAndLinkIE
+      processIE_setSubFrameAndLinkIE();
+      //set subSyncIE
+      processIE_setSubSyncIE();
+      //set IE after set all required subIE
+      processIE_setMLME_IE();
+      
+      //add an IE to adv's payload
+      IEFiled_prependIE(adv);
+      
+      //I has an IE in my payload
+      adv->l2_IEListPresent = 1;
       
       // some l2 information about this packet
       adv->l2_frameType                     = IEEE154_TYPE_BEACON;
@@ -311,4 +354,52 @@ port_INLINE void sendKa() {
 
 void res_timer_cb() {
    scheduler_push_task(timers_res_fired,TASKPRIO_RES);
+}
+
+port_INLINE void incrementADVasn() {
+   // increment the asn
+   res_vars.ADVasn.bytes0and1++;
+   if (res_vars.ADVasn.bytes0and1==0) {
+      res_vars.ADVasn.bytes2and3++;
+      if (res_vars.ADVasn.bytes2and3==0) {
+         res_vars.ADVasn.byte4++;
+      }
+   }
+}
+// from processIE
+asn_t      res_getADVasn(){
+    return res_vars.ADVasn;
+}
+
+uint8_t    res_getJoinPriority(){
+    return res_vars.joinPriority;
+}
+
+void    res_notifRetrieveIEDone(OpenQueueEntry_t* msg){
+  
+    subIE_t*    tempSubIE = processIE_getSubSyncIE();
+    if(tempSubIE->length != 0)
+      res_recordADV(msg);
+    else
+      reservation_notifyReceiveuResCommand(msg);
+}
+
+void res_recordADV(OpenQueueEntry_t* msg) {
+  
+    syncIEcontent_t*    tempSyncIEcontent = processIE_getSyncIEcontent();
+    // node who joining network earlier have a higher priority 
+    res_vars.joinPriority = tempSyncIEcontent->joinPriority + 1;
+    
+    frameAndLinkIEcontent_t* tempFrameAndLinkIEcontent = processIE_getFrameAndLinkIEcontent();
+    
+    for(uint8_t i = 0; i<tempFrameAndLinkIEcontent->numOfSlotframes;i++)
+    {
+      uint8_t slotframeID    = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeID;
+      uint16_t slotframeSize = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeSize;
+      uint8_t numOfLink      = tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;
+      //set my schedule according links
+      schedule_setMySchedule(slotframeID,slotframeSize,numOfLink,&(msg->l2_nextORpreviousHop));
+    }
+     //reest sub IE
+     resetSubIE();
 }
