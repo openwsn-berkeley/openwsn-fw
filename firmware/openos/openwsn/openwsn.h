@@ -155,7 +155,6 @@ enum {
    COMPONENT_UDPPRINT                  = 0x1e,
    COMPONENT_RSVP                      = 0x1f,
    //App
-   ,
    COMPONENT_HELI                      = 0x20,
    COMPONENT_IMU                       = 0x21,
    COMPONENT_RLEDS                     = 0x22,

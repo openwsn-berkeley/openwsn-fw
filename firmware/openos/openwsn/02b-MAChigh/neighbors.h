@@ -57,7 +57,7 @@ PRAGMA(pack());
 //=========================== prototypes ======================================
 
           void          neighbors_init();
-          void          neighbors_receiveDIO(OpenQueueEntry_t* msg);
+          void          neighbors_receiveDIO(OpenQueueEntry_t* msg,icmpv6rpl_dio_t* dio);
           void          neighbors_updateMyDAGrankAndNeighborPreference();
           void          neighbors_indicateRx(open_addr_t* l2_src,
                                              int8_t       rssi,

@@ -614,6 +614,7 @@ void    schedule_addLinksToSchedule(uint8_t slotframeID,open_addr_t* previousHop
             break;
           default:
           //log error
+            break;
         }
 
       }
