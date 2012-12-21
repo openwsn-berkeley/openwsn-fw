@@ -68,7 +68,6 @@ void    reservation_notifyReceiveuResLinkRequest(OpenQueueEntry_t* msg){
   for(uint8_t i = 0; i<tempFrameAndLinkIEcontent->numOfSlotframes;i++)
   {
     uint8_t slotframeID    = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeID;
-    uint16_t slotframeSize = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeSize;
     uint8_t numOfLink      = tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;
     if(reservation_vars.bandwidth_vars.slotframeID == slotframeID)
       //allocate links for neighbor
@@ -91,7 +90,6 @@ void    reservation_notifyReceiveuResLinkResponse(OpenQueueEntry_t* msg){
     for(uint8_t i = 0; i<tempFrameAndLinkIEcontent->numOfSlotframes;i++)
     {
       uint8_t slotframeID    = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeID;
-      uint16_t slotframeSize = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeSize;
       uint8_t numOfLink      = tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;
       
       schedule_addLinksToSchedule(slotframeID,&(msg->l2_nextORpreviousHop),numOfLink,reservation_vars.State);
@@ -141,6 +139,7 @@ void    reservation_sendDone(OpenQueueEntry_t* msg, error_t error){
         break;
       default:
         //log error
+        break;
       }
       // discard reservation packets this component has created
       openqueue_freePacketBuffer(msg);

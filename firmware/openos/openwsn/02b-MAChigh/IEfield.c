@@ -225,7 +225,20 @@ void IEFiled_prependIE  (OpenQueueEntry_t*      msg){
 
 void IEFiled_retrieveIE (OpenQueueEntry_t*      msg){
      uint8_t       i    = 0;
-     subIE_t  tempSubIE;
+     //temp subIE variables
+     subIE_t      tempSubIE;
+     subIE_t*     tempSyncIE;
+     subIE_t*     tempFrameAndLinkIE;
+     subIE_t*     tempuResLinkTypeIE;
+     subIE_t*     tempuResCommandIE;
+     subIE_t*     tempuResBandwidthIE;
+     //temp subIEContent variables
+     syncIEcontent_t*    tempSyncIEcontent;
+     frameAndLinkIEcontent_t*  tempFrameAndLinkIEcontent;
+     uResLinkTypeIEcontent_t*  tempuResLinkTypeIEcontent;
+     uResCommandIEcontent_t*   tempuResCommmandIEcontent;
+     uResBandwidthIEcontent_t*  tempuResBandwidthIEcontent;
+     
      IEHeader_t* tempIE   = processIE_getIEHeader();
      tempIE->Length     = 0;
      uint16_t temp_16b  = msg->payload[i]+256*msg->payload[i+1];
@@ -254,11 +267,11 @@ void IEFiled_retrieveIE (OpenQueueEntry_t*      msg){
       switch(tempSubIE.SubID)
       {
       case 0x1a:        //syncIE(subID = 0x1a)
-        subIE_t*   tempSyncIE = processIE_getSubSyncIE();
+        tempSyncIE = processIE_getSubSyncIE();
         tempSyncIE->length        = tempSubIE.length;
         tempSyncIE->SubID         = tempSubIE.SubID;
         tempSyncIE->type          = tempSubIE.type;
-        syncIEcontent_t*    tempSyncIEcontent = processIE_getSyncIEcontent();
+        tempSyncIEcontent = processIE_getSyncIEcontent();
         //length of asn(asn had been stored by ieee802154e)
         i = i+5;
         //store joinPriority
@@ -267,11 +280,11 @@ void IEFiled_retrieveIE (OpenQueueEntry_t*      msg){
         break;
 
       case 0x1b:        //frameAndLinkIE(subID = 0x1b)
-        subIE_t*     tempFrameAndLinkIE = processIE_getSubFrameAndLinkIE();
+        tempFrameAndLinkIE = processIE_getSubFrameAndLinkIE();
         tempFrameAndLinkIE->length      = tempSubIE.length;
         tempFrameAndLinkIE->SubID       = tempSubIE.SubID;
         tempFrameAndLinkIE->type        = tempSubIE.type;
-        frameAndLinkIEcontent_t*  tempFrameAndLinkIEcontent = processIE_getFrameAndLinkIEcontent();
+        tempFrameAndLinkIEcontent = processIE_getFrameAndLinkIEcontent();
         //store number of slotframes
         tempFrameAndLinkIEcontent->numOfSlotframes = *((uint8_t*)(msg->payload)+i);
         i++;
@@ -304,11 +317,11 @@ void IEFiled_retrieveIE (OpenQueueEntry_t*      msg){
         }
         break;
       case 0x40:        //uResLinkTypeIE(subID = 0x40)
-        subIE_t*     tempuResLinkTypeIE = processIE_getSubuResLinkTypeIE();
+        tempuResLinkTypeIE = processIE_getSubuResLinkTypeIE();
         tempuResLinkTypeIE->length      = tempSubIE.length;
         tempuResLinkTypeIE->SubID       = tempSubIE.SubID;
         tempuResLinkTypeIE->type        = tempSubIE.type;
-        uResLinkTypeIEcontent_t*  tempuResLinkTypeIEcontent = processIE_getuResLinkTypeIEcontent();
+        tempuResLinkTypeIEcontent = processIE_getuResLinkTypeIEcontent();
         //store number of slotframes
         tempuResLinkTypeIEcontent->numOfSlotframes = *((uint8_t*)(msg->payload)+i);
         i++;
@@ -341,20 +354,20 @@ void IEFiled_retrieveIE (OpenQueueEntry_t*      msg){
         }
         break;
       case 0x41:
-        subIE_t*     tempuResCommandIE = processIE_getSubuResCommandIE();
+        tempuResCommandIE = processIE_getSubuResCommandIE();
         tempuResCommandIE->length      = tempSubIE.length;
         tempuResCommandIE->SubID       = tempSubIE.SubID;
         tempuResCommandIE->type        = tempSubIE.type;
-        uResCommandIEcontent_t*   tempuResCommmandIEcontent       = processIE_getuResCommandIEcontent();
+        tempuResCommmandIEcontent       = processIE_getuResCommandIEcontent();
         tempuResCommmandIEcontent->uResCommandID                  = *((uint8_t*)(msg->payload)+i);
         i++;
         break;
       case 0x42:
-        subIE_t*     tempuResBandwidthIE = processIE_getSubuResBandwidthIE();
+        tempuResBandwidthIE = processIE_getSubuResBandwidthIE();
         tempuResBandwidthIE->length      = tempSubIE.length;
         tempuResBandwidthIE->SubID       = tempSubIE.SubID;
         tempuResBandwidthIE->type        = tempSubIE.type;
-        uResBandwidthIEcontent_t*  tempuResBandwidthIEcontent    = processIE_getuResBandwidthIEcontent();
+        tempuResBandwidthIEcontent    = processIE_getuResBandwidthIEcontent();
         tempuResBandwidthIEcontent->slotframeID                  =  *((uint8_t*)(msg->payload)+i);
         i++;
         tempuResBandwidthIEcontent->numOfLinks                   =  *((uint8_t*)(msg->payload)+i);

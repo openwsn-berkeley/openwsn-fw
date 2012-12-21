@@ -681,6 +681,7 @@ void    schedule_removeLinksFromSchedule(uint8_t slotframeID,uint16_t slotframeS
             break;
         default:
           //log error
+          break;
         }
 
       }
