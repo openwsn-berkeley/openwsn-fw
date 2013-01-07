@@ -2,72 +2,146 @@ import os
 
 Import('env')
 
+# directory where we put object and linked files
+# WARNING: -c (clean) removes the VARDIR, so it cannot be blank
+env['VARDIR']  = os.path.join('#','build','{0}_{1}'.format(env['board'],env['toolchain']))
+
 # common include paths
-env.Append(CPPPATH = [os.path.join('#','firmware','openos','openwsn'),
-                      os.path.join('#','firmware','openos','bsp','boards'),
-                      os.path.join('#','firmware','openos','bsp','chips'),
-                      os.path.join('#','firmware','openos','kernel','openos'),
-                      os.path.join('#','firmware','openos','drivers','common')
-                     ])
-                   
-# Default function to execute after program is compiled, this one does nothing.
-# It is overridden to perform extra steps (convert to .hex for example) by
-# calling AddMethod(...) inside of the platform-specific SConscript.env
-def extras(source, env):
-  return source
-env.AddMethod(extras, 'PostBuildExtras')
+env.Append(
+    CPPPATH = [
+        os.path.join('#','firmware','openos','openwsn'),
+        os.path.join('#','firmware','openos','bsp','boards'),
+        os.path.join('#','firmware','openos','bsp','chips'),
+        os.path.join('#','firmware','openos','kernel','openos'),
+        os.path.join('#','firmware','openos','drivers','common'),
+    ]
+)
+
+#============================ toolchain =======================================
+
+if env['toolchain']=='mspgcc':
+    env.Replace(CC          = 'msp430-gcc')
+    env.Replace(LINK        = 'msp430-gcc')
+    env.Replace(AR          = 'msp430-ar')
+    env.Replace(RANLIB      = 'msp430-ranlib')
+    
+    env.Append(CCFLAGS      = '')
+    env.Append(LINKFLAGS    = '')
+    env.Append(ARFLAGS      = '')
+    env.Append(RANLIBFLAGS  = '')
+    
+    # PostBuildExtras is a method called after a program (not a library) is built.
+    # You can any addition step in this function, such as converting the binary
+    # or copying it somewhere.
+    def extras(env, source):
+        if   env['jtag']:
+            return [env.Size(source=source), env.JtagUpload(env.HexOut(source))]
+        elif env['bootload']:
+            return [env.Size(source=source), env.Bootload(env.HexOut(source))]
+        else:
+            return [env.Size(source=source), env.HexOut(source)]
+    env.AddMethod(extras, 'PostBuildExtras')
+    
+    # Converts binary into ihex
+    hexout = Builder(
+       action = 'msp430-objcopy --output-target=ihex $SOURCE $TARGET',
+       suffix = '.ihex',
+    )
+    env.Append(BUILDERS = {'HexOut' : hexout})
+
+    # upload over JTAG
+    def jtagUploadFunc(location):
+        if   env['fet_version']==2:
+            # MSP-FET430uif is running v2 Firmware
+            return Builder(
+                action      = 'mspdebug -d {0} -j uif "prog $SOURCE"'.format(location),
+                suffix      = '.phonyupload',
+                src_suffix  = '.ihex',
+            )
+        elif env['fet_version']==3:
+            # MSP-FET430uif is running v2 Firmware
+            return Builder(
+                action      = 'mspdebug tilib -d {0} "prog $SOURCE"'.format(location),
+                suffix      = '.phonyupload',
+                src_suffix  = '.ihex',
+            )
+        else:
+            raise SystemError('fet_version={0} unsupported.'.format(fet_version))
+    if env['jtag']:
+       env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
+    
+    # bootload
+    def BootloadFunc(location):
+        if   env['board']=='telosb':
+            return Builder(
+                action      = 'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p $SOURCE"'.format(location),
+                suffix      = '.phonyupload',
+                src_suffix  = '.ihex',
+            )
+        else:
+            raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
+    if env['bootload']:
+        env.Append(BUILDERS = {'Bootload' : BootloadFunc(env['bootload'])})
+    
+    # print sizes
+    sizeFunc = Builder(action = 'msp430-size $SOURCE', suffix = '.phonysize')
+    env.Append(BUILDERS = {'Size' : sizeFunc})
+
+#============================ board ===========================================
 
 # Get build environment from platform directory
-buildEnv = env.SConscript(os.path.join('firmware','openos','projects',env['PROJECT'],'SConscript.env'),
-                          exports = ['env']
-                         )
+buildEnv = env.SConscript(
+    os.path.join('firmware','openos','projects',env['board'],'SConscript.env'),
+    exports = ['env']
+)
 
 # bsp
-bspDir = os.path.join('#','firmware','openos','bsp','boards',buildEnv['BSP'])
-bspVarDir = os.path.join(bspDir,buildEnv['VARDIR'])
+bspDir    = os.path.join('#','firmware','openos','bsp','boards',buildEnv['BSP'])
+bspVarDir = os.path.join(buildEnv['VARDIR'],'bsp')
 buildEnv.Append(CPPPATH = [bspDir])
-buildEnv.SConscript(os.path.join(bspDir,'SConscript'),
-                    variant_dir = bspVarDir,
-                    exports     = {'env': buildEnv},
-                   )
+buildEnv.SConscript(
+    os.path.join(bspDir,'SConscript'),
+    variant_dir = bspVarDir,
+    exports     = {'env': buildEnv},
+)
 buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
 
-
 # kernel
-kernelDir = os.path.join('#','firmware','openos','kernel','openos')
-kernelVarDir = os.path.join(kernelDir,buildEnv['VARDIR'])
-buildEnv.SConscript(os.path.join(kernelDir,'SConscript'),
-                    variant_dir = kernelVarDir,
-                    exports     = {'env': buildEnv},
-                   )
+kernelDir    = os.path.join('#','firmware','openos','kernel','openos')
+kernelVarDir = os.path.join(buildEnv['VARDIR'],'kernel','openos')
+buildEnv.SConscript(
+    os.path.join(kernelDir,'SConscript'),
+    variant_dir = kernelVarDir,
+    exports     = {'env': buildEnv},
+)
 buildEnv.Clean('libopenos', Dir(kernelVarDir).abspath)
 buildEnv.Append(LIBPATH = [kernelVarDir])
 
-
 # drivers
-driversDir = os.path.join('#','firmware','openos','drivers')
-driversVarDir = os.path.join(driversDir,buildEnv['VARDIR'])
-buildEnv.SConscript(os.path.join(driversDir,'SConscript'),
-                    variant_dir = driversVarDir,
-                    exports     = {'env': buildEnv},
-                   )
+driversDir    = os.path.join('#','firmware','openos','drivers')
+driversVarDir = os.path.join(buildEnv['VARDIR'],'drivers')
+buildEnv.SConscript(
+    os.path.join(driversDir,'SConscript'),
+    variant_dir = driversVarDir,
+    exports     = {'env': buildEnv},
+)
 buildEnv.Clean('libdrivers', Dir(driversVarDir).abspath)
 buildEnv.Append(LIBPATH = [driversVarDir])
 
-
 # openstack
-openstackDir = os.path.join('#','firmware','openos','openwsn')
-openstackVarDir = os.path.join(openstackDir,buildEnv['VARDIR'])
-buildEnv.SConscript(os.path.join(openstackDir,'SConscript'),
-                    variant_dir = openstackVarDir,
-                    exports     = {'env': buildEnv},
-                   )
+openstackDir    = os.path.join('#','firmware','openos','openwsn')
+openstackVarDir = os.path.join(buildEnv['VARDIR'],'openwsn')
+buildEnv.SConscript(
+    os.path.join(openstackDir,'SConscript'),
+    variant_dir = openstackVarDir,
+    exports     = {'env': buildEnv},
+)
 buildEnv.Clean('libopenstack', Dir(openstackVarDir).abspath)
 buildEnv.Append(LIBPATH = [openstackVarDir])
 
-
 # projects
-buildEnv.SConscript(os.path.join('firmware','openos','projects','SConscript'),
-                    exports = {'env': buildEnv}
-                   )
+buildEnv.SConscript(
+    os.path.join('firmware','openos','projects','SConscript'),
+    exports = {'env': buildEnv},
+)
