@@ -30,62 +30,75 @@ if env['toolchain']=='mspgcc':
     env.Append(ARFLAGS      = '')
     env.Append(RANLIBFLAGS  = '')
     
-    # PostBuildExtras is a method called after a program (not a library) is built.
-    # You can any addition step in this function, such as converting the binary
-    # or copying it somewhere.
-    def extras(env, source):
-        if   env['jtag']:
-            return [env.Size(source=source), env.JtagUpload(env.HexOut(source))]
-        elif env['bootload']:
-            return [env.Size(source=source), env.Bootload(env.HexOut(source))]
-        else:
-            return [env.Size(source=source), env.HexOut(source)]
-    env.AddMethod(extras, 'PostBuildExtras')
-    
-    # Converts binary into ihex
-    hexout = Builder(
+    # converts ELF to iHex
+    elf2iHexFunc = Builder(
        action = 'msp430-objcopy --output-target=ihex $SOURCE $TARGET',
        suffix = '.ihex',
     )
-    env.Append(BUILDERS = {'HexOut' : hexout})
-
-    # upload over JTAG
-    def jtagUploadFunc(location):
-        if   env['fet_version']==2:
-            # MSP-FET430uif is running v2 Firmware
-            return Builder(
-                action      = 'mspdebug -d {0} -j uif "prog $SOURCE"'.format(location),
-                suffix      = '.phonyupload',
-                src_suffix  = '.ihex',
-            )
-        elif env['fet_version']==3:
-            # MSP-FET430uif is running v2 Firmware
-            return Builder(
-                action      = 'mspdebug tilib -d {0} "prog $SOURCE"'.format(location),
-                suffix      = '.phonyupload',
-                src_suffix  = '.ihex',
-            )
-        else:
-            raise SystemError('fet_version={0} unsupported.'.format(fet_version))
-    if env['jtag']:
-       env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
+    env.Append(BUILDERS = {'Elf2iHex' : elf2iHexFunc})
     
-    # bootload
-    def BootloadFunc(location):
-        if   env['board']=='telosb':
-            return Builder(
-                action      = 'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p $SOURCE"'.format(location),
-                suffix      = '.phonyupload',
-                src_suffix  = '.ihex',
-            )
-        else:
-            raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
-    if env['bootload']:
-        env.Append(BUILDERS = {'Bootload' : BootloadFunc(env['bootload'])})
+    # converts ELF to bin
+    elf2BinFunc = Builder(
+       action = 'msp430-objcopy --output-target=binary $SOURCE $TARGET',
+       suffix = '.ihex',
+    )
+    env.Append(BUILDERS = {'Elf2iBin' : elf2BinFunc})
     
     # print sizes
-    sizeFunc = Builder(action = 'msp430-size $SOURCE', suffix = '.phonysize')
-    env.Append(BUILDERS = {'Size' : sizeFunc})
+    printSizeFunc = Builder(
+        action = 'msp430-size $SOURCE',
+        suffix = '.phonysize',
+    )
+    env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
+    
+# upload over JTAG
+def jtagUploadFunc(location):
+    if   env['fet_version']==2:
+        # MSP-FET430uif is running v2 Firmware
+        return Builder(
+            action      = 'mspdebug -d {0} -j uif "prog $SOURCE"'.format(location),
+            suffix      = '.phonyupload',
+            src_suffix  = '.ihex',
+        )
+    elif env['fet_version']==3:
+        # MSP-FET430uif is running v2 Firmware
+        return Builder(
+            action      = 'mspdebug tilib -d {0} "prog $SOURCE"'.format(location),
+            suffix      = '.phonyupload',
+            src_suffix  = '.ihex',
+        )
+    else:
+        raise SystemError('fet_version={0} unsupported.'.format(fet_version))
+if env['jtag']:
+   env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
+
+# bootload
+def BootloadFunc(location):
+    if   env['board']=='telosb':
+        return Builder(
+            action      = 'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p $SOURCE"'.format(location),
+            suffix      = '.phonyupload',
+            src_suffix  = '.ihex',
+        )
+    else:
+        raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
+if env['bootload']:
+    env.Append(BUILDERS = {'Bootload' : BootloadFunc(env['bootload'])})
+
+# PostBuildExtras is a method called after a program (not a library) is built.
+# You can any addition step in this function, such as converting the binary
+# or copying it somewhere.
+def extras(env, source):
+    returnVal  = []
+    returnVal += [env.PrintSize(source=source)]
+    returnVal += [env.Elf2iHex(source=source)]
+    returnVal += [env.Elf2iBin(source=source)]
+    if   env['jtag']:
+        returnVal += [env.JtagUpload(env.Elf2iHex(source))]
+    elif env['bootload']:
+        returnVal += [env.Bootload(env.Elf2iHex(source))]
+    return returnVal
+env.AddMethod(extras, 'PostBuildExtras')
 
 #============================ board ===========================================
 
