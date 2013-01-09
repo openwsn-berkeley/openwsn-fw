@@ -21,8 +21,8 @@ env.Append(
 
 # dummy
 dummyFunc = Builder(
-    action = 'echo poipoi',
-    suffix = '.phonysize',
+    action = '',
+    suffix = '.ihex',
 )
 
 if env['toolchain']=='mspgcc':
@@ -39,14 +39,14 @@ if env['toolchain']=='mspgcc':
     env.Replace(LINK         = 'msp430-gcc')
     env.Append(LINKFLAGS     = '')
     
-    # converts ELF to iHex
+    # convert ELF to iHex
     elf2iHexFunc = Builder(
        action = 'msp430-objcopy --output-target=ihex $SOURCE $TARGET',
        suffix = '.ihex',
     )
     env.Append(BUILDERS = {'Elf2iHex' : elf2iHexFunc})
     
-    # converts ELF to bin
+    # convert ELF to bin
     elf2BinFunc = Builder(
        action = 'msp430-objcopy --output-target=binary $SOURCE $TARGET',
        suffix = '.ihex',
@@ -78,11 +78,10 @@ elif env['toolchain']=='iar':
     env.Append(CCFLAGS            = '--debug')
     env.Append(CCFLAGS            = '-e')
     env.Append(CCFLAGS            = '--double=32 ')
-    env.Append(CCFLAGS            = '--dlib_config "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\DLIB\\dl430xsfn.h"')
-    env.Append(CCFLAGS            = '--core=430X')
-    env.Append(CCFLAGS            = '--data_model=small')
+    env.Append(CCFLAGS            = '--dlib_config "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\DLIB\\dl430fn.h"')
+    env.Append(CCFLAGS            = '--library_module')
     env.Append(CCFLAGS            = '-Ol ')
-    env.Append(CCFLAGS            = '--multiplier=16s')
+    env.Append(CCFLAGS            = '--multiplier=16')
     env.Replace(INCPREFIX         = '-I ')
     env.Replace(CCCOM             = '$CC $SOURCES -o $TARGET $CFLAGS $CCFLAGS $_CCCOMCOM')
     env.Replace(RANLIBCOM         = '')
@@ -97,25 +96,38 @@ elif env['toolchain']=='iar':
     env.Replace(LIBLINKDIRPREFIX  = '-I')
     env.Replace(LIBLINKPREFIX     = 'lib')
     env.Replace(LIBLINKSUFFIX     = '.a')
-    #env.Append(LINKFLAGS          = '-Felf')
-    #env.Append(LINKFLAGS          = '-yn')
-    #env.Append(LINKFLAGS          = '-xsnh')
-    #env.Append(LINKFLAGS          = '-I"C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\"')
     env.Append(LINKFLAGS          = '-f "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\config\\multiplier.xcl"')
     env.Append(LINKFLAGS          = '-D_STACK_SIZE=50')
-    env.Append(LINKFLAGS          = '-rt "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\DLIB\\dl430xsfn.r43"')
+    env.Append(LINKFLAGS          = '-rt "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\DLIB\\dl430fn.r43"')
     env.Append(LINKFLAGS          = '-e_PrintfLarge=_Printf')
     env.Append(LINKFLAGS          = '-e_ScanfLarge=_Scanf ')
     env.Append(LINKFLAGS          = '-D_DATA16_HEAP_SIZE=50')
     env.Append(LINKFLAGS          = '-s __program_start')
-    env.Append(LINKFLAGS          = '-S')
     env.Append(LINKFLAGS          = '-D_DATA20_HEAP_SIZE=50')
-    env.Append(LINKFLAGS          = '-Ointel-standard=poipoi.bin')
-    env.Replace(LINKCOM           = '$LINK -o $TARGET $LINKFLAGS $__RPATH $SOURCES $_LIBDIRFLAGS $_LIBFLAGS')
-    #env.Replace(LINKCOM           = '$LINK $SOURCES -o $TARGET $LINKFLAGS')
+    env.Append(LINKFLAGS          = '-S')
+    env.Append(LINKFLAGS          = '-Ointel-standard')
+    env.Replace(LINKCOM           = '$LINK $SOURCES -o $TARGET $LINKFLAGS $__RPATH $_LIBDIRFLAGS $_LIBFLAGS')
     
-    env.Append(BUILDERS = {'Elf2iHex' : dummyFunc})
-    env.Append(BUILDERS = {'Elf2iBin' : dummyFunc})    
+    # converts ELF to iHex
+    def changeExtensionFunction(target, source, env):
+        baseName      = str(target[0]).split('.')[0]
+        fromExtension = '.a43'
+        toExtension   = '.ihex'
+        print 'change extension {0} {1}->{2}'.format(baseName,fromExtension,toExtension)
+        os.rename(
+            baseName+fromExtension,
+            baseName+toExtension,
+        )
+    changeExtensionBuilder = Builder(
+        action = changeExtensionFunction,
+        suffix = '.ihex'
+    )
+    env.Append(BUILDERS = {'Elf2iHex'  : changeExtensionBuilder})
+    
+    # convert ELF to bin
+    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    
+    # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
     #print env.Dump()
@@ -201,8 +213,8 @@ buildEnv.Clean('libopenos', Dir(kernelVarDir).abspath)
 buildEnv.Append(LIBPATH = [kernelVarDir])
 
 # drivers
-driversDir    = os.path.join('#','firmware','openos','drivers')
-driversVarDir = os.path.join(buildEnv['VARDIR'],'drivers')
+driversDir      = os.path.join('#','firmware','openos','drivers')
+driversVarDir   = os.path.join(buildEnv['VARDIR'],'drivers')
 buildEnv.SConscript(
     os.path.join(driversDir,'SConscript'),
     variant_dir = driversVarDir,
