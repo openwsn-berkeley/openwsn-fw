@@ -28,9 +28,9 @@ settings
 /firmware/openos/projects/gina/03oos_macpong_alt/*.dep
 /firmware/openos/projects/gina/03oos_openwsn/*.dep
 /firmware/openos/projects/gina/03oos_openwsn_alt/*.dep
-/firmware/openos/projects/gina/01bsp_radio_range_rx/*.dep
-/firmware/openos/projects/gina/01bsp_radio_range_tx/*.dep
-/firmware/openos/projects/gina/01bsp_radio_range_rx/*.sfr
+/firmware/openos/projects/gina/01bsp_radio_rx/*.dep
+/firmware/openos/projects/gina/01bsp_radio_tx/*.dep
+/firmware/openos/projects/gina/01bsp_radio_rx/*.sfr
 /firmware/openos/projects/gina/02drv_headsup/*.sfr
 /firmware/openos/projects/gina/02drv_opentimers/*.sfr
 /firmware/openos/projects/gina/03oos_macpong/*.sfr

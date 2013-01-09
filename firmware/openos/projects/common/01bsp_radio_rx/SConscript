@@ -11,6 +11,6 @@ exe = localEnv.Program(
     source  = source,
     LIBS    = libs,
 )
-bsp_radio_range_rx = env.PostBuildExtras(exe)
+bsp_radio_rx = env.PostBuildExtras(exe)
 
-Alias('bsp_radio_range_rx', [libs, bsp_radio_range_rx])
+Alias('bsp_radio_rx', [libs, bsp_radio_rx])
