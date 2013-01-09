@@ -36,3 +36,4 @@ settings
 /firmware/openos/projects/gina/03oos_macpong/*.sfr
 /firmware/openos/projects/gina/03oos_macpong_alt/*.sfr
 build
+/.sconsign.dblite
