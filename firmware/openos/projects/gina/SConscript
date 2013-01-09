@@ -17,4 +17,7 @@ for (dir, target) in dirs:
         exports     = {'env':env},
     )
 
-Alias('all_std', [dir[1] for dir in dirs if dir[1].startswith('std')])
+all_std = [dir[1] for dir in dirs if dir[1].startswith('std')]
+if env['toolchain']!='iar':
+    all_std.remove('std_eui64')
+Alias('all_std', all_std)
