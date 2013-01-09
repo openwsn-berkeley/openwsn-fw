@@ -20,7 +20,7 @@ Load this program on your boards. The LEDs should start blinking furiously.
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   uint16_t delay;
+   volatile uint16_t delay;
    
    board_init();
    
