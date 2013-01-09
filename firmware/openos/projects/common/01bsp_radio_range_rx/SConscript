@@ -1,5 +1,3 @@
-import os
-
 Import('env')
 
 localEnv = env.Clone()
@@ -9,10 +7,10 @@ source = ['01bsp_radio_rx.c']
 libs   = ['libbsp']
 
 exe = localEnv.Program(
-                       target  = target,
-                       source  = source,
-                       LIBS    = libs,
-                      )
+    target  = target,
+    source  = source,
+    LIBS    = libs,
+)
 bsp_radio_range_rx = env.PostBuildExtras(exe)
 
 Alias('bsp_radio_range_rx', [libs, bsp_radio_range_rx])

@@ -25,7 +25,7 @@ dummyFunc = Builder(
     suffix = '.ihex',
 )
 
-if env['toolchain']=='mspgcc':
+if   env['toolchain']=='mspgcc':
     
     # compiler
     env.Replace(CC           = 'msp430-gcc')
@@ -131,6 +131,8 @@ elif env['toolchain']=='iar':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
     #print env.Dump()
+else:
+    raise SystemError('toolchain={0} unsupported.'.format(toolchain))
 
 # upload over JTAG
 def jtagUploadFunc(location):
@@ -151,7 +153,7 @@ def jtagUploadFunc(location):
     else:
         raise SystemError('fet_version={0} unsupported.'.format(fet_version))
 if env['jtag']:
-   env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
+    env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
 
 # bootload
 def BootloadFunc(location):
@@ -190,8 +192,8 @@ buildEnv = env.SConscript(
 )
 
 # bsp
-bspDir    = os.path.join('#','firmware','openos','bsp','boards',buildEnv['BSP'])
-bspVarDir = os.path.join(buildEnv['VARDIR'],'bsp')
+bspDir          = os.path.join('#','firmware','openos','bsp','boards',buildEnv['BSP'])
+bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp')
 buildEnv.Append(CPPPATH = [bspDir])
 buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),
@@ -202,8 +204,8 @@ buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
 
 # kernel
-kernelDir    = os.path.join('#','firmware','openos','kernel','openos')
-kernelVarDir = os.path.join(buildEnv['VARDIR'],'kernel','openos')
+kernelDir       = os.path.join('#','firmware','openos','kernel','openos')
+kernelVarDir    = os.path.join(buildEnv['VARDIR'],'kernel','openos')
 buildEnv.SConscript(
     os.path.join(kernelDir,'SConscript'),
     variant_dir = kernelVarDir,
