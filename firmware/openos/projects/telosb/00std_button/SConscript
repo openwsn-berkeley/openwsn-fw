@@ -1,0 +1,16 @@
+Import('env')
+
+localEnv = env.Clone()
+
+target =  '00std_button'
+source = ['00std_button.c']
+libs   = []
+
+exe = localEnv.Program(
+    target  = target,
+    source  = source,
+    LIBS    = libs,
+)
+std_button = env.PostBuildExtras(exe)
+
+Alias('std_button', [std_button])
