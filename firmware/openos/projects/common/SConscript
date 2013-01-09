@@ -26,6 +26,8 @@ for (dir, target) in dirs:
         variant_dir = os.path.join(env['VARDIR'],'projects',dir),
         exports     = {'env':env},
     )
-    #Clean(target, Dir(os.path.join(dir,env['VARDIR'])).abspath)
 
 Alias('all_common', [dir[1] for dir in dirs])
+Alias('all_bsp',    [dir[1] for dir in dirs if dir[1].startswith('bsp')])
+Alias('all_drv',    [dir[1] for dir in dirs if dir[1].startswith('drv')])
+Alias('all_oos',    [dir[1] for dir in dirs if dir[1].startswith('oos')])
