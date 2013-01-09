@@ -647,7 +647,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_radio_range_tx.d43</state>
+          <state>01bsp_radio_tx.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -1952,7 +1952,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_radio_range_tx\01bsp_radio_tx.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_radio_tx\01bsp_radio_tx.c</name>
     </file>
   </group>
   <group>
