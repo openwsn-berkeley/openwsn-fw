@@ -19,16 +19,25 @@ env.Append(
 
 #============================ toolchain =======================================
 
+# dummy
+dummyFunc = Builder(
+    action = 'echo poipoi',
+    suffix = '.phonysize',
+)
+
 if env['toolchain']=='mspgcc':
-    env.Replace(CC          = 'msp430-gcc')
-    env.Replace(LINK        = 'msp430-gcc')
-    env.Replace(AR          = 'msp430-ar')
-    env.Replace(RANLIB      = 'msp430-ranlib')
     
-    env.Append(CCFLAGS      = '')
-    env.Append(LINKFLAGS    = '')
-    env.Append(ARFLAGS      = '')
-    env.Append(RANLIBFLAGS  = '')
+    # compiler
+    env.Replace(CC           = 'msp430-gcc')
+    env.Append(CCFLAGS       = '')
+    # archiver
+    env.Replace(AR           = 'msp430-ar')
+    env.Append(ARFLAGS       = '')
+    env.Replace(RANLIB       = 'msp430-ranlib')
+    env.Append(RANLIBFLAGS   = '')
+    # linker
+    env.Replace(LINK         = 'msp430-gcc')
+    env.Append(LINKFLAGS     = '')
     
     # converts ELF to iHex
     elf2iHexFunc = Builder(
@@ -50,7 +59,71 @@ if env['toolchain']=='mspgcc':
         suffix = '.phonysize',
     )
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
+
+elif env['toolchain']=='iar':
     
+    try:
+       iarEw430BinDir          = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'430','bin')
+    except KeyError as err:
+        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.4'
+        raise
+    
+    # compiler
+    env.Replace(CC           = '"'+os.path.join(iarEw430BinDir,'icc430')+'"')
+    env.Append(CCFLAGS       = '--no_cse')
+    env.Append(CCFLAGS       = '--no_unroll')
+    env.Append(CCFLAGS       = '--no_inline')
+    env.Append(CCFLAGS       = '--no_code_motion')
+    env.Append(CCFLAGS       = '--no_tbaa')
+    env.Append(CCFLAGS       = '--debug')
+    env.Append(CCFLAGS       = '-D__MSP430F1611__')
+    env.Append(CCFLAGS       = '-e')
+    env.Append(CCFLAGS       = '--double=32 ')
+    env.Append(CCFLAGS       = '--dlib_config "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\DLIB\\dl430xsfn.h"')
+    #env.Append(CCFLAGS       = '--library_module')
+    env.Append(CCFLAGS       = '--core=430X')
+    env.Append(CCFLAGS       = '--data_model=small')
+    env.Append(CCFLAGS       = '-Ol ')
+    env.Append(CCFLAGS       = '--multiplier=16s')
+    #env.Append(CCFLAGS       = '--silent')
+    env.Replace(INCPREFIX    = '-I ')
+    env.Replace(CCCOM        = '$CC $SOURCES -o $TARGET $CFLAGS $CCFLAGS $_CCCOMCOM')
+    env.Replace(RANLIBCOM    = '')
+    # archiver
+    env.Replace(AR           = '"'+os.path.join(iarEw430BinDir,'xar')+'"')
+    env.Replace(ARCOM        = '$AR $SOURCES -o $TARGET')
+    env.Append(ARFLAGS       = '')
+    # linker
+    env.Replace(LINK         = '"'+os.path.join(iarEw430BinDir,'xlink')+'"')
+    env.Replace(PROGSUFFIX = '.exe')
+    env.Replace(LIBDIRPREFIX = '-I')
+    env.Replace(LIBLINKDIRPREFIX = '-I')
+    env.Replace(LIBLINKPREFIX = 'lib')
+    env.Replace(LIBLINKSUFFIX = '.a')
+    #env.Append(LINKFLAGS     = '-Felf')
+    #env.Append(LINKFLAGS     = '-yn')
+    #env.Append(LINKFLAGS     = '-xsnh')
+    #env.Append(LINKFLAGS     = '-I"C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\"')
+    env.Append(LINKFLAGS     = '-f "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\CONFIG\\lnk430F1611.xcl"')
+    env.Append(LINKFLAGS     = '-f "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\config\\multiplier.xcl"')
+    env.Append(LINKFLAGS     = '-D_STACK_SIZE=50')
+    env.Append(LINKFLAGS     = '-rt "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\DLIB\\dl430xsfn.r43"')
+    env.Append(LINKFLAGS     = '-e_PrintfLarge=_Printf')
+    env.Append(LINKFLAGS     = '-e_ScanfLarge=_Scanf ')
+    env.Append(LINKFLAGS     = '-D_DATA16_HEAP_SIZE=50')
+    env.Append(LINKFLAGS     = '-s __program_start')
+    env.Append(LINKFLAGS     = '-S')
+    env.Append(LINKFLAGS     = '-D_DATA20_HEAP_SIZE=50')
+    env.Append(LINKFLAGS     = '-Ointel-standard=poipoi.bin')
+    env.Replace(LINKCOM      = '$LINK -o $TARGET $LINKFLAGS $__RPATH $SOURCES $_LIBDIRFLAGS $_LIBFLAGS')
+    #env.Replace(LINKCOM      = '$LINK $SOURCES -o $TARGET $LINKFLAGS')
+    
+    #print env.Dump()
+    
+    env.Append(BUILDERS = {'Elf2iHex' : dummyFunc})
+    env.Append(BUILDERS = {'Elf2iBin' : dummyFunc})    
+    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
+
 # upload over JTAG
 def jtagUploadFunc(location):
     if   env['fet_version']==2:
