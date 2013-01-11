@@ -252,22 +252,23 @@ def sconscript_scanner(localEnv):
     
     # parse dirs and build targets
     for projectDir in subdirs:
+        
+        src_dir     = os.path.join(os.getcwd(),projectDir)
+        variant_dir = os.path.join(env['VARDIR'],'projects',projectDir),
+        
         added      = False
         targetName = projectDir[2:]
-        
-        '''
-        # determine variant_dir
-        if localEnv['toolchain']!='iar-proj':
-            VariantDir(
-                variant_dir = os.path.join(localEnv['VARDIR'],'projects',projectDir),
-                src_dir     = projectDir,
-            )
-        '''
         
         if   (
                 ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
                 (localEnv['toolchain']!='iar-proj')
              ):
+            
+            VariantDir(
+                variant_dir = variant_dir,
+                src_dir     = src_dir,
+                duplicate   = 0,
+            )
     
             target =  projectDir
             source = [os.path.join(projectDir,'{0}.c'.format(projectDir))]
@@ -289,6 +290,12 @@ def sconscript_scanner(localEnv):
                 ('{0}.ewp'.format(projectDir) in os.listdir(projectDir)) and
                 (localEnv['toolchain']=='iar-proj')
              ):
+            
+            VariantDir(
+                variant_dir = variant_dir,
+                src_dir     = src_dir,
+                duplicate   = 0,
+            )
             
             source = [os.path.join(projectDir,'{0}.ewp'.format(projectDir))]
         
@@ -359,7 +366,7 @@ buildEnv.Append(LIBPATH = [openstackVarDir])
 
 # projects
 buildEnv.SConscript(
-    os.path.join('firmware','openos','projects','SConscript'),
+    os.path.join('#','firmware','openos','projects','SConscript'),
     exports     = {'env': buildEnv},
     #variant_dir = os.path.join(env['VARDIR'],'projects'),
 )
