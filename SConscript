@@ -231,8 +231,10 @@ def buildIncludePath(projectDir,localEnv):
         localEnv.Append(
             CPPPATH = [
                 os.path.join('#','firmware','openos','openwsn'),
-                os.path.join('#','firmware','openos','openwsn','cross-layers'),
+                os.path.join('#','firmware','openos','openwsn','03b-IPv6'),
+                os.path.join('#','firmware','openos','openwsn','02b-MAChigh'),
                 os.path.join('#','firmware','openos','openwsn','02a-MAClow'),
+                os.path.join('#','firmware','openos','openwsn','cross-layers'),
                 os.path.join('#','firmware','openos','drivers','common'),
             ]
         )
@@ -248,18 +250,20 @@ def sconscript_scanner(localEnv):
     # list subdirectories
     subdirs = [name for name in os.listdir('.') if os.path.isdir(os.path.join('.', name)) ]
     
-    '''
-    # determine variant_dir
-    if localEnv['toolchain']=='iar-proj':
-        variant_dir = None
-    else:
-        variant_dir = os.path.join(localEnv['VARDIR'],'projects',projectDir)
-    '''
-
     # parse dirs and build targets
     for projectDir in subdirs:
         added      = False
         targetName = projectDir[2:]
+        
+        '''
+        # determine variant_dir
+        if localEnv['toolchain']!='iar-proj':
+            VariantDir(
+                variant_dir = os.path.join(localEnv['VARDIR'],'projects',projectDir),
+                src_dir     = projectDir,
+            )
+        '''
+        
         if   (
                 ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
                 (localEnv['toolchain']!='iar-proj')
@@ -305,7 +309,7 @@ env.AddMethod(sconscript_scanner, 'SconscriptScanner')
 # Get build environment from platform directory
 buildEnv = env.SConscript(
     os.path.join('firmware','openos','projects',env['board'],'SConscript.env'),
-    exports = ['env']
+    exports     = ['env'],
 )
 
 # bsp
@@ -314,8 +318,8 @@ bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp')
 buildEnv.Append(CPPPATH = [bspDir])
 buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),
-    variant_dir = bspVarDir,
     exports     = {'env': buildEnv},
+    variant_dir = bspVarDir,
 )
 buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
@@ -325,8 +329,8 @@ kernelDir       = os.path.join('#','firmware','openos','kernel','openos')
 kernelVarDir    = os.path.join(buildEnv['VARDIR'],'kernel','openos')
 buildEnv.SConscript(
     os.path.join(kernelDir,'SConscript'),
-    variant_dir = kernelVarDir,
     exports     = {'env': buildEnv},
+    variant_dir = kernelVarDir,
 )
 buildEnv.Clean('libopenos', Dir(kernelVarDir).abspath)
 buildEnv.Append(LIBPATH = [kernelVarDir])
@@ -336,8 +340,8 @@ driversDir      = os.path.join('#','firmware','openos','drivers')
 driversVarDir   = os.path.join(buildEnv['VARDIR'],'drivers')
 buildEnv.SConscript(
     os.path.join(driversDir,'SConscript'),
-    variant_dir = driversVarDir,
     exports     = {'env': buildEnv},
+    variant_dir = driversVarDir,
 )
 buildEnv.Clean('libdrivers', Dir(driversVarDir).abspath)
 buildEnv.Append(LIBPATH = [driversVarDir])
@@ -347,8 +351,8 @@ openstackDir    = os.path.join('#','firmware','openos','openwsn')
 openstackVarDir = os.path.join(buildEnv['VARDIR'],'openwsn')
 buildEnv.SConscript(
     os.path.join(openstackDir,'SConscript'),
-    variant_dir = openstackVarDir,
     exports     = {'env': buildEnv},
+    variant_dir = openstackVarDir,
 )
 buildEnv.Clean('libopenstack', Dir(openstackVarDir).abspath)
 buildEnv.Append(LIBPATH = [openstackVarDir])
@@ -356,5 +360,6 @@ buildEnv.Append(LIBPATH = [openstackVarDir])
 # projects
 buildEnv.SConscript(
     os.path.join('firmware','openos','projects','SConscript'),
-    exports = {'env': buildEnv},
+    exports     = {'env': buildEnv},
+    #variant_dir = os.path.join(env['VARDIR'],'projects'),
 )
