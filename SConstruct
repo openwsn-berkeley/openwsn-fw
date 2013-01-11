@@ -81,10 +81,33 @@ Default(env.Command('default', None, default))
 
 #============================ load SConscript's ===============================
 
+# initialize targets
+env['targets'] = {
+   'all':     [],
+   'all_std': [],
+   'all_bsp': [],
+   'all_drv': [],
+   'all_oos': [],
+}
+
 # include main sconscript
 env.SConscript(
     'SConscript',
     exports = ['env'],
 )
 
-#print env.Dump()
+# print list of targets
+output = []
+for k,v in env['targets'].items():
+    output += [' - {0}'.format(k)]
+    for t in v:
+        output += ['    - {0}'.format(t)]
+output = '\n'.join(output)
+print output
+
+# declare target group alias
+for k,v in env['targets'].items():
+   Alias(k,v)
+
+# print final environment
+# print env.Dump()

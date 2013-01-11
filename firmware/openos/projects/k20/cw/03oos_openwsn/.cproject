@@ -813,7 +813,7 @@
 							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.1146069877" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
 						</tool>
 					</fileInfo>
-					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1425844693" name="openwsn_proj.c" rcbsApplicability="disable" resourcePath="Sources/application/openwsn_proj.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.867329271">
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1425844693" name="03oos_openwsn.c" rcbsApplicability="disable" resourcePath="Sources/application/03oos_openwsn.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.867329271">
 						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.867329271" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
 							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.1485103379" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
 						</tool>

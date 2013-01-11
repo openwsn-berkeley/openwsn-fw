@@ -15,7 +15,7 @@ localEnv.Append(
 
 target =  'oos_openwsn'
 source = [
-    'openwsn_proj.c',
+    '03oos_openwsn.c',
 ]
 libs   = [
     'libopenstack',

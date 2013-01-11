@@ -114,14 +114,14 @@
 			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_uart/01bsp_uart.c</location>
 		</link>
 		<link>
-			<name>Sources/application/openwsn_proj.c</name>
+			<name>Sources/application/03oos_openwsn.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/openwsn_proj.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/03oos_openwsn.c</location>
 		</link>
 		<link>
-			<name>Sources/application/openwsn_proj.h</name>
+			<name>Sources/application/03oos_openwsn.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/openwsn_proj.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/03oos_openwsn.h</location>
 		</link>
 		<link>
 			<name>Sources/chips/at86rf231</name>

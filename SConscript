@@ -227,7 +227,7 @@ def buildLibs(projectDir):
     return returnVal
 
 def buildIncludePath(projectDir,localEnv):
-    if projectDir.startswith('03_oos'):
+    if projectDir.startswith('03oos_'):
         localEnv.Append(
             CPPPATH = [
                 os.path.join('#','firmware','openos','openwsn'),
@@ -236,6 +236,12 @@ def buildIncludePath(projectDir,localEnv):
                 os.path.join('#','firmware','openos','drivers','common'),
             ]
         )
+
+def populateTargetGroup(localEnv,targetName):
+    env['targets']['all'].append(targetName)
+    for prefix in ['std','bsp','drv','oos']:
+        if targetName.startswith(prefix):
+            env['targets']['all_'+prefix].append(targetName)
 
 def sconscript_scanner(localEnv):
     
@@ -249,13 +255,6 @@ def sconscript_scanner(localEnv):
     else:
         variant_dir = os.path.join(localEnv['VARDIR'],'projects',projectDir)
     '''
-    
-    target_groups = {
-        '00std': [],
-        '01bsp': [],
-        '02drv': [],
-        '03oos': [],
-    }
 
     # parse dirs and build targets
     for projectDir in subdirs:
@@ -297,18 +296,7 @@ def sconscript_scanner(localEnv):
             added = True
         
         if added:
-            (head,tail) = os.path.split(os.getcwd())
-            print "added target {0} in {1}".format(targetName,os.path.join(tail,projectDir))
-            
-            # add to target_groups
-            for k,v in target_groups.items():
-                if projectDir.startswith(k):
-                   v.append(projectDir[2:])
-        
-    # build target groups
-    for k,v in target_groups.items():
-        if v:
-           Alias('all_{0}'.format(k[2:]), v)
+            populateTargetGroup(localEnv,targetName)
 
 env.AddMethod(sconscript_scanner, 'SconscriptScanner')
     

@@ -1991,10 +1991,10 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.c</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.h</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.h</name>
     </file>
   </group>
   <group>
