@@ -209,39 +209,80 @@ env.AddMethod(extras, 'PostBuildExtras')
 
 #============================ helpers =========================================
 
-def sconscript_scanner(env):
+def sconscript_scanner(localEnv):
     
     # list subdirectories
     subdirs = [name for name in os.listdir('.') if os.path.isdir(os.path.join('.', name)) ]
-    
+
     # determine variant_dir
-    if env['toolchain']=='iar-proj':
+    if localEnv['toolchain']=='iar-proj':
         variant_dir = None
     else:
-        variant_dir = os.path.join(env['VARDIR'],'projects',dir)
-    
+        variant_dir = None
+        #variant_dir = os.path.join(localEnv['VARDIR'],'projects',dir)
+
     target_groups = {
         '00std': [],
         '01bsp': [],
         '02drv': [],
         '03oos': [],
     }
-    
-    # find SConscripts
+
+    # parse dirs and build targets
     for dir in subdirs:
-        if 'SConscript' in os.listdir(dir):
-            # load SConscript
-            env.SConscript(
-                os.path.join(dir,'SConscript'),
-                variant_dir = variant_dir,
-                exports     = {'env':env},
+        added      = False
+        targetName = dir[2:]
+        if   (
+                ('{0}.c'.format(dir) in os.listdir(dir)) and
+                (localEnv['toolchain']!='iar-proj')
+             ):
+             
+            libs_dict = {
+                '00std': [],
+                '01bsp': ['libbsp'],
+                '02drv': ['libbsp','libdrivers'],
+                '03oos': ['libbsp','libdrivers','libopenos','libopenstack'],
+            }
+    
+            target =  dir
+            source = [os.path.join(dir,'{0}.c'.format(dir))]
+            for k,v in libs_dict.items():
+                if dir.startswith(k):
+                   libs = v
+            
+            exe = localEnv.Program(
+                target  = target,
+                source  = source,
+                LIBS    = libs,
             )
+            targetAction = localEnv.PostBuildExtras(exe)
+            
+            Alias(targetName, [targetAction])
+            added = True
+            
+        elif (
+                ('{0}.ewp'.format(dir) in os.listdir(dir)) and
+                (localEnv['toolchain']=='iar-proj')
+             ):
+            
+            source = [os.path.join(dir,'{0}.ewp'.format(dir))]
+        
+            targetAction = localEnv.iarProjBuilder(
+                source  = source,
+            )
+            
+            Alias(targetName, [targetAction])
+            added = True
+        
+        if added:
+            (head,tail) = os.path.split(os.getcwd())
+            print "added target {0} in {1}".format(targetName,os.path.join(tail,dir))
             
             # add to target_groups
             for k,v in target_groups.items():
                 if dir.startswith(k):
                    v.append(dir[2:])
-    
+        
     # build target groups
     for k,v in target_groups.items():
         if v:
