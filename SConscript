@@ -209,18 +209,47 @@ env.AddMethod(extras, 'PostBuildExtras')
 
 #============================ helpers =========================================
 
+def buildLibs(projectDir):
+    libs_dict = {
+        '00std': [],
+        '01bsp': ['libbsp'],
+        '02drv': ['libbsp','libdrivers'],
+        '03oos': ['libbsp','libdrivers','libopenos','libopenstack'],
+    }
+    
+    returnVal = None
+    for k,v in libs_dict.items():
+        if projectDir.startswith(k):
+           returnVal = v
+    
+    assert returnVal!=None
+    
+    return returnVal
+
+def buildIncludePath(projectDir,localEnv):
+    if projectDir.startswith('03_oos'):
+        localEnv.Append(
+            CPPPATH = [
+                os.path.join('#','firmware','openos','openwsn'),
+                os.path.join('#','firmware','openos','openwsn','cross-layers'),
+                os.path.join('#','firmware','openos','openwsn','02a-MAClow'),
+                os.path.join('#','firmware','openos','drivers','common'),
+            ]
+        )
+
 def sconscript_scanner(localEnv):
     
     # list subdirectories
     subdirs = [name for name in os.listdir('.') if os.path.isdir(os.path.join('.', name)) ]
-
+    
+    '''
     # determine variant_dir
     if localEnv['toolchain']=='iar-proj':
         variant_dir = None
     else:
-        variant_dir = None
-        #variant_dir = os.path.join(localEnv['VARDIR'],'projects',dir)
-
+        variant_dir = os.path.join(localEnv['VARDIR'],'projects',projectDir)
+    '''
+    
     target_groups = {
         '00std': [],
         '01bsp': [],
@@ -229,26 +258,19 @@ def sconscript_scanner(localEnv):
     }
 
     # parse dirs and build targets
-    for dir in subdirs:
+    for projectDir in subdirs:
         added      = False
-        targetName = dir[2:]
+        targetName = projectDir[2:]
         if   (
-                ('{0}.c'.format(dir) in os.listdir(dir)) and
+                ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
                 (localEnv['toolchain']!='iar-proj')
              ):
-             
-            libs_dict = {
-                '00std': [],
-                '01bsp': ['libbsp'],
-                '02drv': ['libbsp','libdrivers'],
-                '03oos': ['libbsp','libdrivers','libopenos','libopenstack'],
-            }
     
-            target =  dir
-            source = [os.path.join(dir,'{0}.c'.format(dir))]
-            for k,v in libs_dict.items():
-                if dir.startswith(k):
-                   libs = v
+            target =  projectDir
+            source = [os.path.join(projectDir,'{0}.c'.format(projectDir))]
+            libs   = buildLibs(projectDir)
+            
+            buildIncludePath(projectDir,localEnv)
             
             exe = localEnv.Program(
                 target  = target,
@@ -261,11 +283,11 @@ def sconscript_scanner(localEnv):
             added = True
             
         elif (
-                ('{0}.ewp'.format(dir) in os.listdir(dir)) and
+                ('{0}.ewp'.format(projectDir) in os.listdir(projectDir)) and
                 (localEnv['toolchain']=='iar-proj')
              ):
             
-            source = [os.path.join(dir,'{0}.ewp'.format(dir))]
+            source = [os.path.join(projectDir,'{0}.ewp'.format(projectDir))]
         
             targetAction = localEnv.iarProjBuilder(
                 source  = source,
@@ -276,12 +298,12 @@ def sconscript_scanner(localEnv):
         
         if added:
             (head,tail) = os.path.split(os.getcwd())
-            print "added target {0} in {1}".format(targetName,os.path.join(tail,dir))
+            print "added target {0} in {1}".format(targetName,os.path.join(tail,projectDir))
             
             # add to target_groups
             for k,v in target_groups.items():
-                if dir.startswith(k):
-                   v.append(dir[2:])
+                if projectDir.startswith(k):
+                   v.append(projectDir[2:])
         
     # build target groups
     for k,v in target_groups.items():
