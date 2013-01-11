@@ -1,0 +1,12 @@
+Import('env')
+
+localEnv = env.Clone()
+
+if   env['toolchain']=='iar-proj':
+    source = ['03oos_openwsn.ewp']
+    
+    oos_openwsn = localEnv.iarProjBuilder(
+        source  = source,
+    )
+    
+    Alias('oos_openwsn', [oos_openwsn])

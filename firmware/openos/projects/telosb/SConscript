@@ -2,22 +2,4 @@ import os
 
 Import('env')
 
-# directory/target tuples
-dirs = (
-    ('00std_button',         'std_button'),
-    ('00std_clocks',         'std_clocks'),
-    ('00std_eui64',          'std_eui64'),
-    ('00std_i2c',            'std_i2c'),
-    ('00std_leds_xtal',      'std_leds_xtal'),
-    ('00std_spi',            'std_spi'),
-    ('00std_uart',           'std_uart'),
-)
-
-for (dir, target) in dirs:
-    env.SConscript(
-        os.path.join(dir,'SConscript'),
-        variant_dir = os.path.join(env['VARDIR'],'projects',dir),
-        exports     = {'env':env},
-    )
-
-Alias('all_std', [dir[1] for dir in dirs if dir[1].startswith('std')])
+env.SconscriptScanner()

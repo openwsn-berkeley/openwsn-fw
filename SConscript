@@ -63,7 +63,7 @@ if   env['toolchain']=='mspgcc':
 elif env['toolchain']=='iar':
     
     try:
-       iarEw430BinDir          = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'430','bin')
+        iarEw430BinDir          = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'430','bin')
     except KeyError as err:
         print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.4'
         raise
@@ -129,8 +129,32 @@ elif env['toolchain']=='iar':
     
     # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
+
+elif env['toolchain']=='iar-proj':
     
-    #print env.Dump()
+    try:
+        iarEw430CommonBinDir      = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'common','bin')
+    except KeyError as err:
+        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.4'
+        raise
+    
+    iarProjBuilderFunction = Builder(
+        action = '"{0}" $SOURCE Debug'.format(
+                    os.path.join(iarEw430CommonBinDir,'IarBuild')
+                ),
+        src_suffix  = '.ewp',
+    )
+    env.Append(BUILDERS = {'iarProjBuilder' : iarProjBuilderFunction})
+    
+    # converts ELF to iHex
+    env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
+    
+    # convert ELF to bin
+    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    
+    # print sizes
+    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
+    
 else:
     raise SystemError('toolchain={0} unsupported.'.format(toolchain))
 
@@ -183,6 +207,48 @@ def extras(env, source):
     return returnVal
 env.AddMethod(extras, 'PostBuildExtras')
 
+#============================ helpers =========================================
+
+def sconscript_scanner(env):
+    
+    # list subdirectories
+    subdirs = [name for name in os.listdir('.') if os.path.isdir(os.path.join('.', name)) ]
+    
+    # determine variant_dir
+    if env['toolchain']=='iar-proj':
+        variant_dir = None
+    else:
+        variant_dir = os.path.join(env['VARDIR'],'projects',dir)
+    
+    target_groups = {
+        '00std': [],
+        '01bsp': [],
+        '02drv': [],
+        '03oos': [],
+    }
+    
+    # find SConscripts
+    for dir in subdirs:
+        if 'SConscript' in os.listdir(dir):
+            # load SConscript
+            env.SConscript(
+                os.path.join(dir,'SConscript'),
+                variant_dir = variant_dir,
+                exports     = {'env':env},
+            )
+            
+            # add to target_groups
+            for k,v in target_groups.items():
+                if dir.startswith(k):
+                   v.append(dir[2:])
+    
+    # build target groups
+    for k,v in target_groups.items():
+        if v:
+           Alias('all_{0}'.format(k[2:]), v)
+
+env.AddMethod(sconscript_scanner, 'SconscriptScanner')
+    
 #============================ board ===========================================
 
 # Get build environment from platform directory

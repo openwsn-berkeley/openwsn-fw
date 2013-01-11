@@ -1,0 +1,12 @@
+Import('env')
+
+localEnv = env.Clone()
+
+if   env['toolchain']=='iar-proj':
+    source = ['01bsp_radiotimer.ewp']
+    
+    bsp_radiotimer = localEnv.iarProjBuilder(
+        source  = source,
+    )
+    
+    Alias('bsp_radiotimer', [bsp_radiotimer])

@@ -1,0 +1,12 @@
+Import('env')
+
+localEnv = env.Clone()
+
+if   env['toolchain']=='iar-proj':
+    source = ['02drv_opentimers.ewp']
+    
+    drv_opentimers = localEnv.iarProjBuilder(
+        source  = source,
+    )
+    
+    Alias('drv_opentimers', [drv_opentimers])
