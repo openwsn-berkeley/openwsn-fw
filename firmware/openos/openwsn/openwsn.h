@@ -9,8 +9,7 @@
 #define __OPENWSN_H
 
 //general
-#include <stdint.h>                              // needed for uin8_t, uint16_t
-//#include "string.h"                              // needed for memcpy and memcmp <-- now in board.info
+#include <stdint.h>               // needed for uin8_t, uint16_t
 #include "board_info.h"
 
 //=========================== define ==========================================
@@ -66,23 +65,23 @@ enum {
    IANA_ICMPv6_RPL                     =  155,
    IANA_ICMPv6_RPL_DIO                 = 0x01,
    IANA_ICMPv6_RPL_DAO                 = 0x04,
-   IANA_RSVP                           = 46,
+   IANA_RSVP                           =   46,
 };
 
 // well known ports (which we define)
 enum {
    //TCP
-   WKP_TCP_HTTP                        =   80,
-   WKP_TCP_ECHO                        =    7,
-   WKP_TCP_INJECT                      = 2188,
-   WKP_TCP_DISCARD                     =    9,
+   WKP_TCP_HTTP                        =    80,
+   WKP_TCP_ECHO                        =     7,
+   WKP_TCP_INJECT                      =  2188,
+   WKP_TCP_DISCARD                     =     9,
    //UDP
-   WKP_UDP_COAP                        = 5683,
-   WKP_UDP_HELI                        = 2192,
-   WKP_UDP_IMU                         = 2190,
-   WKP_UDP_ECHO                        =    7,
-   WKP_UDP_INJECT                      = 2188,
-   WKP_UDP_DISCARD                     =    9,
+   WKP_UDP_COAP                        =  5683,
+   WKP_UDP_HELI                        =  2192,
+   WKP_UDP_IMU                         =  2190,
+   WKP_UDP_ECHO                        =     7,
+   WKP_UDP_INJECT                      =  2188,
+   WKP_UDP_DISCARD                     =     9,
    WKP_UDP_RAND                        = 61000,
    WKP_UDP_LATENCY                     = 61001,
 };
@@ -289,8 +288,6 @@ typedef struct {
    bool          l1_crc;                         // did received packet pass CRC check?
    //the packet
    uint8_t       packet[1+1+125+2+1];            // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
-   // below has been added to be used for the multi-hop network  diodio
-  
 } OpenQueueEntry_t;
 
 //=========================== variables =======================================

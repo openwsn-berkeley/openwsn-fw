@@ -7,10 +7,6 @@
 #include "IEEE802154E.h"
 #include "linkcost.h"
 
-//to force routing topology -- see above.
-//#define FORCE_MULTIHOP 
-//#define GINA_FORCE_MULTIHOP 
-//#define TELOSB_FORCE_MULTIHOP 
 //=========================== variables =======================================
 
 typedef struct {
@@ -47,32 +43,15 @@ void neighbors_init() {
 
 void neighbors_receiveDIO(OpenQueueEntry_t* msg,icmpv6rpl_dio_t* dio) {
    uint8_t i;
- //  uint8_t temp_linkCost;
    msg->owner = COMPONENT_NEIGHBORS;
    if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
-           //poipoi xv is the rang big endian??
-           neighbors_vars.neighbors[i].DAGrank = dio->rank;
-            // poipoi: single hop
-           /* if (neighbors_vars.neighbors[i].DAGrank==0x00) {
-               neighbors_vars.neighbors[i].parentPreference=MAXPREFERENCE;
-               if (neighbors_vars.neighbors[i].numTxACK==0) {
-                  temp_linkCost=15; //TODO: evaluate using RSSI?
-               } else {
-                  temp_linkCost=linkcost_calcETX(neighbors_vars.neighbors[i].numTx,neighbors_vars.neighbors[i].numTxACK);
-               }
-               if (idmanager_getIsDAGroot()==FALSE) {
-                 neighbors_vars.myDAGrank=neighbors_vars.neighbors[i].DAGrank+temp_linkCost;
-               }
-            } else {
-               neighbors_vars.neighbors[i].parentPreference=0;
-            }*/
+            neighbors_vars.neighbors[i].DAGrank = dio->rank;
             break;
          }
       }
    }
-   // poipoi: single hop
    neighbors_updateMyDAGrankAndNeighborPreference(); 
 }
 
@@ -144,37 +123,42 @@ This function iterates through the neighbor table and identifies the neighbor
 we need to send a KA to, if any. This neighbor satisfies the following
 conditions:
 - it is one of our preferred parents
-- we haven't heard it for over 
+- we haven't heard it for over KATIMEOUT
 
-\return A pointer to te neighbor's address, or NULL if no KA is needed.
+\returns A pointer to the neighbor's address, or NULL if no KA is needed.
 */
 open_addr_t* neighbors_KaNeighbor() {
-   uint8_t      i;
-   uint16_t     timeSinceHeard;
-   open_addr_t* addrPreferred;
-   open_addr_t* addrOther;
+   uint8_t         i;
+   uint16_t        timeSinceHeard;
+   open_addr_t*    addrPreferred;
+   open_addr_t*    addrOther;
+   
    // initialize
    addrPreferred = NULL;
    addrOther     = NULL;
+   
    // scan through the neighbor table, and populate addrPreferred and addrOther
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==1) {
          timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
          if (timeSinceHeard>KATIMEOUT) {
-            // this neighbor needs to be KA'ed
+            // this neighbor needs to be KA'ed to
             if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
                // its a preferred parent
                addrPreferred = &(neighbors_vars.neighbors[i].addr_64b);
             } else {
                // its not a preferred parent
-               // poipoi: don't KA to non-preferred parent
-               //addrOther =     &(neighbors_vars.neighbors[i].addr_64b);
+               // Note: commented out since policy is not to KA to non-preferred parents
+               // addrOther =     &(neighbors_vars.neighbors[i].addr_64b);
             }
          }
       }
    }
-   // return the addr of the most urgent KA to send
-   if    (addrPreferred!=NULL) {
+   
+   // return the addr of the most urgent KA to send:
+   // - if available, preferred parent
+   // - if not, non preferred parent
+   if        (addrPreferred!=NULL) {
       return addrPreferred;
    } else if (addrOther!=NULL) {
       return addrOther;
@@ -205,7 +189,7 @@ bool neighbors_isStableNeighbor(open_addr_t* address) {
    return FALSE;
 }
 
- bool neighbors_isPreferredParent(open_addr_t* address) {
+bool neighbors_isPreferredParent(open_addr_t* address) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -396,7 +380,7 @@ void registerNewNeighbor(open_addr_t* address,
             neighbors_vars.neighbors[i].used                   = TRUE;
             neighbors_vars.neighbors[i].parentPreference       = 0;
             // neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
-            // poipoi: all new neighbors are consider stable
+            // Note: all new neighbors are consider stable
             neighbors_vars.neighbors[i].stableNeighbor         = TRUE;
             neighbors_vars.neighbors[i].switchStabilityCounter = 0;
             memcpy(&neighbors_vars.neighbors[i].addr_64b,  address, sizeof(open_addr_t));
@@ -446,9 +430,9 @@ void removeNeighbor(uint8_t neighborIndex) {
    neighbors_vars.neighbors[neighborIndex].parentPreference          = 0;
    neighbors_vars.neighbors[neighborIndex].stableNeighbor            = FALSE;
    neighbors_vars.neighbors[neighborIndex].switchStabilityCounter    = 0;
-   //neighbors_vars.neighbors[neighborIndex].addr_16b.type             = ADDR_NONE;//removed to save RAM
+   //neighbors_vars.neighbors[neighborIndex].addr_16b.type           = ADDR_NONE; // to save RAM
    neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
-   //neighbors_vars.neighbors[neighborIndex].addr_128b.type            = ADDR_NONE;//removed to save RAM
+   //neighbors_vars.neighbors[neighborIndex].addr_128b.type          = ADDR_NONE; // to save RAM
    neighbors_vars.neighbors[neighborIndex].DAGrank                   = 0xffff;
    neighbors_vars.neighbors[neighborIndex].rssi                      = 0;
    neighbors_vars.neighbors[neighborIndex].numRx                     = 0;
@@ -471,7 +455,6 @@ bool isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
          return FALSE;
    }
 }
-
 
 //update neighbors_vars.myDAGrank and neighbor preference
 void neighbors_updateMyDAGrankAndNeighborPreference() {
@@ -501,9 +484,9 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
               temp_preferredParentRow=i;
             }
                //the following is equivalent to manual routing 
-#ifdef FORCE_MULTIHOP   
+
+#ifdef FORCE_MULTIHOP
 #ifdef GINA_FORCE_MULTIHOP   
-            
                //   below to enforce the routing 
                switch ((idmanager_getMyID(ADDR_64B))->addr_64b[7]) {
                case 0x9B: //if I am 9B
@@ -574,7 +557,6 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
                default:
                break;
                }
-          
 #endif            
 #endif
             

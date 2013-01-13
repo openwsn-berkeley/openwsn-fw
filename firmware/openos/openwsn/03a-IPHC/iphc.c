@@ -12,23 +12,24 @@
 
 //=========================== prototypes ======================================
 
-error_t prependIPv6Header(OpenQueueEntry_t* msg,
-      uint8_t tf,
-      uint32_t value_flowLabel,
-      bool nh,
-      uint8_t value_nextHeader,
-      uint8_t hlim,
-      uint8_t value_hopLimit,
-      bool cid,
-      bool sac,
-      uint8_t sam,
-      bool m,
-      bool dac,
-      uint8_t dam,
-      open_addr_t* value_dest,
-      open_addr_t* value_src,
-      uint8_t fw_SendOrfw_Rcv);  //>>>>>> diodio
-
+error_t prependIPv6Header(
+     OpenQueueEntry_t* msg,
+     uint8_t           tf,
+     uint32_t          value_flowLabel,
+     bool              nh,
+     uint8_t           value_nextHeader,
+     uint8_t           hlim,
+     uint8_t           value_hopLimit,
+     bool              cid,
+     bool              sac,
+     uint8_t           sam,
+     bool              m,
+     bool              dac,
+     uint8_t           dam,
+     open_addr_t*      value_dest,
+     open_addr_t*      value_src,
+     uint8_t           fw_SendOrfw_Rcv
+);
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg);
 
 //=========================== public ==========================================
@@ -44,11 +45,16 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
    open_addr_t* p_src;  
    open_addr_t  temp_src_prefix;
    open_addr_t  temp_src_mac64b; 
-   uint8_t sam;
-   uint8_t dam;
-   uint8_t nh=IPHC_NH_INLINE; //default value;
+   uint8_t      sam;
+   uint8_t      dam;
+   uint8_t      nh;
    
+   // take ownership over the packet
    msg->owner = COMPONENT_IPHC;
+   
+   // by default, the "next header" field is carried inline
+   nh=IPHC_NH_INLINE;
+   
    // error checking
    if (idmanager_getIsBridge()==TRUE &&
       packetfunctions_isAllRoutersMulticast(&(msg->l3_destinationAdd))==FALSE) {
@@ -57,6 +63,7 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
                             (errorparameter_t)0);
       return E_FAIL;
    }
+   
    packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_dest_prefix,&temp_dest_mac64b);
    //xv poipoi -- get the src prefix as well
    packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);
@@ -513,7 +520,7 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
    }
    /*
    During the parsing of the nh field, we found that the next header was
-   compressed. we now identify which next (compressed) header this is, and
+   compressed. We now identify which next (compressed) header this is, and
    populate the ipv6_header.next_header field accordingly. It's the role of the
    appropriate transport module to decompress the header.
    */

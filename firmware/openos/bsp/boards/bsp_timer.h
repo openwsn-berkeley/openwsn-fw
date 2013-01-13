@@ -27,8 +27,7 @@ void               bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks);
 void               bsp_timer_cancel_schedule();
 PORT_TIMER_WIDTH   bsp_timer_get_currentValue();
 
+// interrupt handlers
 uint8_t            bsp_timer_isr();
-
-
 
 #endif

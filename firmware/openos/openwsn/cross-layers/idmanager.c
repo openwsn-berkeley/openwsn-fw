@@ -101,7 +101,7 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
       res= &idmanager_vars.myPrefix;
       break;
    case ADDR_128B:
-      //you don't ask for my full address, rather for prefix, then 64b
+      // you don't ask for my full address, rather for prefix, then 64b
    default:
       openserial_printError(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
             (errorparameter_t)type,

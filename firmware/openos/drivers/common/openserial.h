@@ -18,15 +18,24 @@
 
 //=========================== define ==========================================
 
+/**
+\brief Number of bytes of the serial output buffer, in bytes.
+*/
 #define SERIAL_OUTPUT_BUFFER_SIZE 300
 
-//not more than 255 (length encoded in 1B)
+/**
+\brief Number of bytes of the serial input buffer, in bytes.
+
+\warning Do not pick a number greater than 255, since its filling level is
+         encoded by a single byte in the code.
+*/
 #define SERIAL_INPUT_BUFFER_SIZE  200
 
+/// Modes of the openserial module.
 enum {
-   MODE_OFF    = 0,
-   MODE_INPUT  = 1,
-   MODE_OUTPUT = 2
+   MODE_OFF    = 0, ///< The module is off, no serial activity.
+   MODE_INPUT  = 1, ///< The serial is listening or receiving bytes.
+   MODE_OUTPUT = 2  ///< The serial is transmitting bytes.
 };
 
 //=========================== typedef =========================================

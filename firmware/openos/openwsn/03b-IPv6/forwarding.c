@@ -22,6 +22,7 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
 
 void forwarding_init() {
 }
+
 //send from THIS node.
 error_t forwarding_send(OpenQueueEntry_t *msg) { 
   ipv6_header_iht ipv6_header;

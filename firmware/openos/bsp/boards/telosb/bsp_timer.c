@@ -98,7 +98,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    bsp_timer_vars.last_compare_value   =  newCompareValue;
    
    if (delayTicks<TAR-temp_last_compare_value) {
-      // we're already too late, schedule the ISR right now manually
+      // we're already too late, schedule the ISR right now, manually
       
       // setting the interrupt flag triggers an interrupt
       TACCTL0          |=  CCIFG;

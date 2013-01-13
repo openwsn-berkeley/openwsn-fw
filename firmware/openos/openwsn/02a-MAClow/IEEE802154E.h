@@ -11,10 +11,20 @@
 #include "openwsn.h"
 #include "board_info.h"
 
+//=========================== debug define ====================================
+
+/*
+To debug the behavior of the stack in a multi-hop setting, uncomment the define
+below.
+*/
+//#define FORCE_MULTIHOP 
+//#define GINA_FORCE_MULTIHOP
+//#define TELOSB_FORCE_MULTIHOP
+
 //=========================== define ==========================================
 
 #define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
-#define TXRETRIES                    3 // number of retries before declaring failed
+#define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
@@ -114,21 +124,20 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-
 // admin
-          void     ieee154e_init();
+void               ieee154e_init();
 // public
-          PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN);
-          bool     ieee154e_isSynch();
-          void asnWriteToPkt(OpenQueueEntry_t* frame);
-          void asnWriteToSerial(uint8_t* array);
+PORT_TIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
+bool               ieee154e_isSynch();
+void               asnWriteToPkt(OpenQueueEntry_t* frame);
+void               asnWriteToSerial(uint8_t* array);
 // events
-          void     ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
-          void     ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
+void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
+void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 // misc
-          bool     debugPrint_asn();
-          bool     debugPrint_isSync();
-          bool     debugPrint_macStats();
+bool               debugPrint_asn();
+bool               debugPrint_isSync();
+bool               debugPrint_macStats();
 
 /**
 \}

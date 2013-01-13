@@ -1,6 +1,5 @@
 /**
-\brief This project runs the full OpenWSN stack on the GINA2.2b/c and GINA
-       basestations platforms.
+\brief This project runs the full OpenWSN stack.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
 */
@@ -9,10 +8,5 @@
 #define __openwsn_H
 
 #include "openwsn.h"
-#include "iphc.h"
-
-void bridge_sendDone(OpenQueueEntry_t* pkt, error_t error);
-void bridge_receive(OpenQueueEntry_t* packetReceived);
 
 #endif
-

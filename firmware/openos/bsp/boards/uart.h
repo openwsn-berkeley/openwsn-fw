@@ -11,8 +11,6 @@
  
 //=========================== define ==========================================
 
-#define UART_BAUDRATE_115200
-
 //=========================== typedef =========================================
 
 typedef enum {
@@ -36,8 +34,8 @@ void    uart_clearTxInterrupts();
 void    uart_writeByte(uint8_t byteToWrite);
 uint8_t uart_readByte();
 
+// interrupt handlers
 uint8_t uart_isr_tx();
 uint8_t uart_isr_rx();
-
 
 #endif

@@ -12,8 +12,9 @@
 
 //=========================== define ==========================================
 
-/// The number of timer that can run concurrently
+/// Maximum number of timers that can run concurrently
 #define MAX_NUM_TIMERS            10
+
 #define MAX_TICKS_IN_SINGLE_CLOCK ((PORT_TIMER_WIDTH)0xFFFFFFFF)
 
 #define TOO_MANY_TIMERS_ERROR     255
@@ -27,15 +28,13 @@ typedef void (*opentimers_cbt)(void);
 typedef enum {
    TIMER_PERIODIC,
    TIMER_ONESHOT,
-}timer_type_t;
+} timer_type_t;
 
 /*the time can be in tics or in ms*/
 typedef enum {
    TIME_MS,
    TIME_TICS,
-}time_type_t;
-
-
+} time_type_t;
 
 typedef struct {
    uint32_t             period_ticks;       // total number of clock ticks

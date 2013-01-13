@@ -111,7 +111,7 @@ typedef struct {
    uint8_t     hop_limit;
    open_addr_t src;
    open_addr_t dest;
-   uint8_t     header_length; //used to toss the header
+   uint8_t     header_length;          ///< needed to toss the header
 } ipv6_header_iht; //iht for "internal header type"
 
 
@@ -123,8 +123,7 @@ typedef struct {
    uint8_t     CmprICmprE;
    uint8_t     PadRes;
    uint16_t    Reserved;
- } ipv6_Source_Routing_Header_t; //iht for "internal header type"
-
+} ipv6_Source_Routing_Header_t; //iht for "internal header type"
 
 //=========================== variables =======================================
 

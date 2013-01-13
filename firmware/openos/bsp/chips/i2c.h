@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
 
-#define I2C_PRESCALE        0x26       // I2C SCL speed (->392kHz @ 16MHz)
+#define I2C_PRESCALE        0x26       // I2C SCL speed (392kHz @ 16MHz)
 #define I2C_BUS_FREE_TIME   100        // 100 ticks @8MHz ~ 12us
 #define SDA_PIN             0x02       // msp430x261x UCB1SDA pin
 #define SCL_PIN             0x04       // msp430x261x UCB1SCL pin

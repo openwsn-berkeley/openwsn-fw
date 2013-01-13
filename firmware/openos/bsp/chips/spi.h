@@ -60,6 +60,7 @@ void    spi_txrx(uint8_t*     bufTx,
                  spi_first_t  isFirst,
                  spi_last_t   isLast);
 
+// interrupt handlers
 uint8_t spi_isr();
 
 #endif
