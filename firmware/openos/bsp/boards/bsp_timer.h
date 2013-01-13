@@ -8,6 +8,7 @@
 #define __BSP_TIMERS_H
 
 #include "stdint.h"
+#include "board.h"
 #include "board_info.h"
 
 //=========================== define ==========================================
@@ -28,6 +29,6 @@ void               bsp_timer_cancel_schedule();
 PORT_TIMER_WIDTH   bsp_timer_get_currentValue();
 
 // interrupt handlers
-uint8_t            bsp_timer_isr();
+kick_scheduler_t   bsp_timer_isr();
 
 #endif

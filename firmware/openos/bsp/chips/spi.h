@@ -8,6 +8,7 @@
 #define __SPI_H
 
 #include "stdint.h"
+#include "board.h"
 
 //=========================== define ==========================================
 
@@ -61,6 +62,6 @@ void    spi_txrx(uint8_t*     bufTx,
                  spi_last_t   isLast);
 
 // interrupt handlers
-uint8_t spi_isr();
+kick_scheduler_t spi_isr();
 
 #endif

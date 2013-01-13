@@ -111,7 +111,7 @@ inline uint16_t radiotimer_getCapturedTime() {
 
 //=========================== interrupt handlers ==============================
 
-uint8_t radiotimer_isr() {
+kick_scheduler_t radiotimer_isr() {
    uint16_t taiv_temp = TAIV;                    // read only once because accessing TAIV resets it
    switch (taiv_temp) {
       case 0x0002: // capture/compare CCR1
@@ -119,7 +119,7 @@ uint8_t radiotimer_isr() {
             // call the callback
             radiotimer_vars.compare_cb();
             // kick the OS
-            return 1;
+            return KICK_SCHEDULER;
          }
          break;
       case 0x000a: // timer overflows
@@ -127,12 +127,12 @@ uint8_t radiotimer_isr() {
             // call the callback
             radiotimer_vars.overflow_cb();
             // kick the OS
-            return 1;
+            return KICK_SCHEDULER;
          }
          break;
       case 0x0004: // capture/compare CCR2
       default:
          while(1);                               // this should not happen
    }
-   return 0;
+   return DO_NOT_KICK_SCHEDULER;
 }

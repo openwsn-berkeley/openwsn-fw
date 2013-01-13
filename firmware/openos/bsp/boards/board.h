@@ -11,8 +11,10 @@
 
 //=========================== define ==========================================
 
-#define DO_NOT_KICK_SCHEDULER     0
-#define KICK_SCHEDULER            1
+typedef enum {
+   DO_NOT_KICK_SCHEDULER,
+   KICK_SCHEDULER,
+} kick_scheduler_t;
 
 //=========================== typedef =========================================
 

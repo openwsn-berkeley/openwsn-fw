@@ -114,7 +114,7 @@ inline uint16_t radiotimer_getCapturedTime() {
 /**
 \brief TimerB CCR1-6 interrupt service routine
 */
-uint8_t radiotimer_isr() {
+kick_scheduler_t radiotimer_isr() {
    uint16_t tbiv_local;
    
    // reading TBIV returns the value of the highest pending interrupt flag

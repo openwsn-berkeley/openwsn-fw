@@ -8,6 +8,7 @@
 #define __UART_H
 
 #include "stdint.h"
+#include "board.h"
  
 //=========================== define ==========================================
 
@@ -35,7 +36,7 @@ void    uart_writeByte(uint8_t byteToWrite);
 uint8_t uart_readByte();
 
 // interrupt handlers
-uint8_t uart_tx_isr();
-uint8_t uart_rx_isr();
+kick_scheduler_t uart_tx_isr();
+kick_scheduler_t uart_rx_isr();
 
 #endif
