@@ -230,10 +230,10 @@ uint8_t spi_isr() {
          // call the callback
          spi_vars.spi_cb();
          // kick the OS
-         return 1;
+         return KICK_SCHEDULER;
       }
    }
-   return 0;
+   return DO_NOT_KICK_SCHEDULER;
 #else
    while(1); // this should never happen
 #endif  

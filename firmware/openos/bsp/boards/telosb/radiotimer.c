@@ -131,14 +131,14 @@ uint8_t radiotimer_isr() {
             if (radiotimer_vars.startFrameCb!=NULL) {
                radiotimer_vars.startFrameCb(TBCCR1);
                // kick the OS
-               return 1;
+               return KICK_SCHEDULER;
             }
          } else {
             // SFD pin is low: this was the end of a frame
             if (radiotimer_vars.endFrameCb!=NULL) {
                radiotimer_vars.endFrameCb(TBCCR1);
                // kick the OS
-               return 1;
+               return KICK_SCHEDULER;
             }
          }
          break;
@@ -146,7 +146,7 @@ uint8_t radiotimer_isr() {
          if (radiotimer_vars.compareCb!=NULL) {
             radiotimer_vars.compareCb();
             // kick the OS
-            return 1;
+            return KICK_SCHEDULER;
          }
          break;
       case 0x0006: // CCR3 fires
@@ -161,9 +161,9 @@ uint8_t radiotimer_isr() {
          if (radiotimer_vars.overflowCb!=NULL) {
             radiotimer_vars.overflowCb();
             // kick the OS
-            return 1;
+            return KICK_SCHEDULER;
          }
          break;
    }
-   return 0;
+   return DO_NOT_KICK_SCHEDULER;
 }

@@ -35,7 +35,7 @@ void    uart_writeByte(uint8_t byteToWrite);
 uint8_t uart_readByte();
 
 // interrupt handlers
-uint8_t uart_isr_tx();
-uint8_t uart_isr_rx();
+uint8_t uart_tx_isr();
+uint8_t uart_rx_isr();
 
 #endif

@@ -9,6 +9,7 @@
 #include "stdio.h"
 #include "string.h"
 #include "uart.h"
+#include "board.h"
 
 //=========================== defines =========================================
 
@@ -83,14 +84,14 @@ uint8_t uart_readByte(){
 
 //=========================== interrupt handlers ==============================
 
-uint8_t uart_isr_tx() {
+uint8_t uart_tx_isr() {
    uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
    uart_vars.txCb();
-   return 0;
+   return DO_NOT_KICK_SCHEDULER;
 }
 
-uint8_t uart_isr_rx() {
+uint8_t uart_rx_isr() {
    uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
    uart_vars.rxCb();
-   return 0;
+   return DO_NOT_KICK_SCHEDULER;
 }

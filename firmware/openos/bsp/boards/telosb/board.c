@@ -69,7 +69,7 @@ void board_sleep() {
 #pragma vector = USART1TX_VECTOR
 __interrupt void USART1TX_ISR (void) {
    debugpins_isr_set();
-   if (uart_isr_tx()==1) {                       // UART; TX
+   if (uart_tx_isr()==KICK_SCHEDULER) {          // UART; TX
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
@@ -78,7 +78,7 @@ __interrupt void USART1TX_ISR (void) {
 #pragma vector = USART1RX_VECTOR
 __interrupt void USART1RX_ISR (void) {
    debugpins_isr_set();
-   if (uart_isr_rx()==1) {                       // UART: RX
+   if (uart_rx_isr()==KICK_SCHEDULER) {          // UART: RX
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
@@ -91,7 +91,7 @@ __interrupt void USART1RX_ISR (void) {
 #pragma vector = TIMERA0_VECTOR
 __interrupt void TIMERA0_ISR (void) {
    debugpins_isr_set();
-   if (bsp_timer_isr()==1) {                     // timer: 0
+   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
@@ -104,7 +104,7 @@ __interrupt void TIMERA0_ISR (void) {
 #pragma vector = USART0RX_VECTOR
 __interrupt void USART0RX_ISR (void) {
    debugpins_isr_set();
-   if (spi_isr()==1) {                           // SPI
+   if (spi_isr()==KICK_SCHEDULER) {              // SPI
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
@@ -122,7 +122,7 @@ __interrupt void COMPARATORA_ISR (void) {
 #pragma vector = TIMERB1_VECTOR
 __interrupt void TIMERB1_ISR (void) {
    debugpins_isr_set();
-   if (radiotimer_isr()==1) {                    // radiotimer
+   if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
