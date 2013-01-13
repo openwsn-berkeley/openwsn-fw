@@ -21,8 +21,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_PATCH 1
 
 // enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER 0xED
-//#define DEBUG_MOTEID_MASTER 0xB9
+#define DEBUG_MOTEID_MASTER 0xB9
 
 #ifndef TRUE
 #define TRUE 1
@@ -173,8 +172,9 @@ enum {
 /**
 \brief error codes used throughout the OpenWSN stack
 
-\note The comments are used in the Python parsing tool; {0} refers to the value of the 
-first argument, {1} refers to the second.
+\note The comments are used in the Python parsing tool:
+   - {0} refers to the value of the first argument,
+   - {1} refers to the value of the second argument,
 */
 enum {
    // l7
@@ -232,7 +232,7 @@ enum {
 typedef uint16_t  shortnodeid_t;
 typedef uint64_t  longnodeid_t;
 typedef uint16_t  errorparameter_t;
-typedef uint16_t   dagrank_t;
+typedef uint16_t  dagrank_t;
 typedef uint8_t   error_t;
 #define bool uint8_t
 

@@ -206,7 +206,6 @@ This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
    radio_setTimerPeriod(TsSlotDuration);
-   debugpins_slot_toggle();
    if (ieee154e_vars.isSync==FALSE) {
       activity_synchronize_newSlot();
    } else {
@@ -578,10 +577,9 @@ port_INLINE void activity_ti1ORri1() {
    incrementAsnOffset();
    
    // wiggle debug pins
-   //debugpins_slot_toggle();
+   debugpins_slot_toggle();
    if (ieee154e_vars.slotOffset==0) {
-     // debugpins_frame_toggle();
-      //debugpins_radio_toggle();
+      debugpins_frame_toggle();
    }
    
    // desynchronize if needed
@@ -1793,7 +1791,6 @@ void changeState(ieee154e_state_t newstate) {
       case S_SYNCLISTEN:
       case S_TXDATAOFFSET:
          debugpins_fsm_set();
-       //  debugpins_frame_toggle();
          break;
       case S_SLEEP:
       case S_RXDATAOFFSET:
