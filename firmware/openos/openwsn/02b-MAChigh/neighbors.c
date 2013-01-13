@@ -5,7 +5,6 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "IEEE802154E.h"
-#include "linkcost.h"
 
 //=========================== variables =======================================
 

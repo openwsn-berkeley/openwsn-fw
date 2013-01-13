@@ -2121,12 +2121,6 @@
     <group>
       <name>02b-MAChigh</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\linkcost.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\linkcost.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
