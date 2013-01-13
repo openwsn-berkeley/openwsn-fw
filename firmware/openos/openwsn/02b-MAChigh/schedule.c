@@ -32,8 +32,9 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 //=== admin
 
 void schedule_init() {
-   uint8_t     i;
-   open_addr_t temp_neighbor;
+   uint8_t         i;
+   slotOffset_t    running_slotOffset;
+   open_addr_t     temp_neighbor;
 
    // reset local variables
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
@@ -43,82 +44,58 @@ void schedule_init() {
    }
 
    // set frame length
-   schedule_setFrameLength(9);
-
-   // slot 0 is advertisement slot
-   i = 0;
+   schedule_setFrameLength(SUPERFRAME_LENGTH);
+   
+   // start at slot 0
+   running_slotOffset = 0;
+   
+   // advertisement slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(i,
-         CELLTYPE_ADV,
-         FALSE,
-         0,
-         &temp_neighbor);
-
-   // slot 1 is shared TXRX anycast
-   i = 1;
+   for (i=0;i<NUMADVSLOTS;i++) {
+      schedule_addActiveSlot(
+         running_slotOffset,      // slot offset
+         CELLTYPE_ADV,            // type of slot
+         FALSE,                   // shared?
+         0,                       // channel offset
+         &temp_neighbor           // neighbor
+      );
+      running_slotOffset++;
+   } 
+   
+   // shared TXRX anycast slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
+   for (i=0;i<NUMSHAREDTXRX;i++) {
+      schedule_addActiveSlot(
+         running_slotOffset,      // slot offset
+         CELLTYPE_TXRX,           // type of slot
+         TRUE,                    // shared?
+         0,                       // channel offset
+         &temp_neighbor           // neighbor
+      );
+      running_slotOffset++;
+   }
    
-   i = 2;
+   // serial RX slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
-   
-   
-   i = 3;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
-   
-   
-   i = 4;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
-
-   // slot 2 is SERIALRX
-   i = 5;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(i,
-         CELLTYPE_SERIALRX,
-         FALSE,
-         0,
-         &temp_neighbor);
-
-   // slot 3 is MORESERIALRX
-   i = 6;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(i,
-         CELLTYPE_MORESERIALRX,
-         FALSE,
-         0,
-         &temp_neighbor);
-
-   // slot 4 is MORESERIALRX
-   i = 7;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(i,
-         CELLTYPE_MORESERIALRX,
-         FALSE,
-         0,
-         &temp_neighbor);
+   schedule_addActiveSlot(
+      running_slotOffset,         // slot offset
+      CELLTYPE_SERIALRX,          // type of slot
+      FALSE,                      // shared?
+      0,                          // channel offset
+      &temp_neighbor              // neighbor
+   );
+   running_slotOffset++;
+   for (i=0;i<NUMSERIALRX-1;i++) {
+      schedule_addActiveSlot(
+         running_slotOffset,      // slot offset
+         CELLTYPE_MORESERIALRX,   // type of slot
+         FALSE,                   // shared?
+         0,                       // channel offset
+         &temp_neighbor           // neighbor
+      );
+      running_slotOffset++;
+   }
 }
 
 bool debugPrint_schedule() {
@@ -138,7 +115,7 @@ bool debugPrint_schedule() {
 \brief Set frame length.
 
 \param newFrameLength The new frame length.
- */
+*/
 void schedule_setFrameLength(frameLength_t newFrameLength) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -150,7 +127,7 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
 \brief Add a new active slot into the schedule.
 
 \param newFrameLength The new frame length.
- */
+*/
 void schedule_addActiveSlot(slotOffset_t    slotOffset,
       cellType_t      type,
       bool            shared,
@@ -399,18 +376,6 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
    }
    ENABLE_INTERRUPTS();
 }
-
-/**
-// The functio below returns a direct pointer to the scheduleBuf. Modifying 
-this structure means you are modifying the scheduleBuf. Be careful when using
-the pointer and try only to read from the buffer
-
-NOBODY uses that- poipoi xv check and delete if not needed.
-*/
-/*void scheduleBuf_getAll(scheduleEntry_t *blist){
- blist=&schedule_vars.scheduleBuf[0];
-}*/
-
 
 //TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.
 void schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist, uint8_t maxbytes){
