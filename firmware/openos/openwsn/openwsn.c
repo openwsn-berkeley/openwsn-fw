@@ -78,7 +78,7 @@ void openwsn_init() {
    
    //===== stack
    //-- cross-layer
-   idmanager_init();    // call first since initializes e.g. EUI64
+   idmanager_init();    // call first since initializes EUI64 and isDAGroot
    openqueue_init();
    openrandom_init();
    opentimers_init();

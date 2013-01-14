@@ -12,11 +12,14 @@
 
 //=========================== define ==========================================
 
-#define MAXNUMNEIGHBORS            10
-#define MAXPREFERENCE               2
+#define MAXNUMNEIGHBORS           10
+#define MAXPREFERENCE             2
 #define BADNEIGHBORMAXRSSI        -80 //dBm
 #define GOODNEIGHBORMINRSSI       -90 //dBm
-#define SWITCHSTABILITYTHRESHOLD    3
+#define SWITCHSTABILITYTHRESHOLD  3
+
+#define MAXDAGRANK                0xffff
+#define DEFAULTDAGRANK            MAXDAGRANK
 
 //=========================== typedef =========================================
 
@@ -43,13 +46,12 @@ typedef struct {
 } debugNeighborEntry_t;
 PRAGMA(pack());
 
-//this structure is used by layer debug app to debug through the network.
 PRAGMA(pack(1));
 typedef struct {
-   uint8_t         last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
-   int8_t          rssi; //SIGNED!
+   uint8_t         last_addr_byte;   // last byte of the neighbor's address
+   int8_t          rssi;
    uint8_t         parentPreference;
-   uint8_t         DAGrank;
+   dagrank_t       DAGrank;
    uint16_t        asn; 
 } netDebugNeigborEntry_t;
 PRAGMA(pack());
@@ -59,35 +61,44 @@ PRAGMA(pack());
 //=========================== prototypes ======================================
 
 void          neighbors_init();
-void          neighbors_receiveDIO(OpenQueueEntry_t* msg, icmpv6rpl_dio_t* dio);
-void          neighbors_updateMyDAGrankAndNeighborPreference();
-void          neighbors_indicateRx(
-                   open_addr_t* l2_src,
-                   int8_t       rssi,
-                   asn_t*       asnTimestamp
-              );
-void          neighbors_indicateTx(
-                   open_addr_t* dest,
-                   uint8_t      numTxAttempts,
-                   bool         was_finally_acked,
-                   asn_t*       asnTimestamp
-              );
-open_addr_t*  neighbors_KaNeighbor();
-bool          neighbors_isStableNeighbor(open_addr_t* address);
-bool          neighbors_isPreferredParent(open_addr_t* address);
+// getters
 dagrank_t     neighbors_getMyDAGrank();
 uint8_t       neighbors_getNumNeighbors();
-bool          neighbors_getPreferredParent(
-                   open_addr_t* addressToWrite,
-                   uint8_t addr_type
+bool          neighbors_getPreferredParentEui64(open_addr_t* addressToWrite);
+open_addr_t*  neighbors_getKANeighbor();
+// interrogators
+bool          neighbors_isStableNeighbor(open_addr_t* address);
+bool          neighbors_isPreferredParent(open_addr_t* address);
+bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
+// updating neighbor information
+void          neighbors_indicateRx(
+                   open_addr_t*        l2_src,
+                   int8_t              rssi,
+                   asn_t*              asnTimestamp
               );
-//debug
+void          neighbors_indicateTx(
+                   open_addr_t*        dest,
+                   uint8_t             numTxAttempts,
+                   bool                was_finally_acked,
+                   asn_t*              asnTimestamp
+              );
+void          neighbors_indicateRxDIO(OpenQueueEntry_t* msg);
+// write addresses
+void          neighbors_writeAddrLowerDAGrank(
+                   uint8_t*            addressToWrite,
+                   uint8_t             addr_type,
+                   uint8_t             index
+              );
+
+bool          neighbors_writeAddrHigherDAGrank(
+                   open_addr_t*        addressToWrite,
+                   uint8_t             index
+              );
+// managing routing info
+void          neighbors_updateMyDAGrankAndNeighborPreference();
+// debug
 bool          debugPrint_neighbors();
 void          neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes);
-//rpl
-bool          isNeighborsWithLowerDAGrank(dagrank_t RefRank, uint8_t index);
-void          getNeighborsWithLowerDAGrank(uint8_t* addressToWrite,uint8_t addr_type, uint8_t index);
-bool          getNeighborsWithHigherDAGrank(open_addr_t* addressToWrite,uint8_t addr_type, dagrank_t RefRank, uint8_t index);
           
 /**
 \}

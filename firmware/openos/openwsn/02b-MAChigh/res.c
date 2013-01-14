@@ -283,7 +283,7 @@ port_INLINE void sendKa() {
    // the packet might be stuck in the queue for a long time for
    // example while the mote is synchronizing
    if (res_vars.busySending==FALSE) {
-      kaNeighAddr = neighbors_KaNeighbor();
+      kaNeighAddr = neighbors_getKANeighbor();
       if (kaNeighAddr!=NULL) {
          // get a free packet buffer
          kaPkt = openqueue_getFreePacketBuffer(COMPONENT_RES);

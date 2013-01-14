@@ -12,30 +12,28 @@
 #include "idmanager.h"
 #include "openbridge.h"
 
-
 //=========================== variables =======================================
 
 typedef struct {
-  uint16_t        periodDIO;
-  uint8_t         delayDIO;
-  open_addr_t     all_routers_multicast;
-  bool            busySending;
-  uint16_t        seq;
-  opentimer_id_t  timerId;
-  // Flag to check if DODAGID is set
-  uint8_t         DODAGIDFlagSet;
-  
-  //====== RPL =====//
-  uint16_t        periodDAO;
-  uint8_t         delayDAO;
+  uint16_t         periodDIO;
+  uint8_t          delayDIO;
+  open_addr_t      all_routers_multicast;
+  bool             busySending;
+  uint16_t         seq;
+  opentimer_id_t   timerId;
+  uint8_t          DODAGIDFlagSet; ///< is DODAGID set?
+  uint16_t         periodDAO;
+  uint8_t          delayDAO;
 } icmpv6rpl_vars_t;
 
-icmpv6rpl_vars_t icmpv6rpl_vars;
-icmpv6rpl_dio_t icmpv6rpl_dio;
-icmpv6rpl_dao_t icmpv6rpl_dao;
-//icmpv6rpl_dao_rpl_target_t icmpv6rpl_dao_rpl_target;
+icmpv6rpl_vars_t             icmpv6rpl_vars;
+
+icmpv6rpl_dio_t              icmpv6rpl_dio;
+icmpv6rpl_dao_t              icmpv6rpl_dao;
+//icmpv6rpl_dao_rpl_target_t   icmpv6rpl_dao_rpl_target;
 icmpv6rpl_dao_transit_info_t icmpv6rpl_dao_transit_info;
-icmpv6rpl_dio_options_t icmpv6rpl_dio_options;
+icmpv6rpl_dio_options_t      icmpv6rpl_dio_options;
+
 //=========================== prototypes ======================================
 
 void sendDIO();
@@ -146,8 +144,6 @@ void icmpv6rpl_init() {
   icmpv6rpl_vars.timerId    = opentimers_start(icmpv6rpl_vars.periodDAO,
                                                TIMER_PERIODIC,TIME_MS,
                                                icmpv6rpl_timer_DAO_cb);
-  
-  
 }
 
 void icmpv6rpl_trigger() {
@@ -162,7 +158,7 @@ void icmpv6rpl_trigger() {
     return;
   };
   // Before sending check if the rank is not the default one if not then send
-  if(neighbors_getMyDAGrank() != 0xffff)
+  if(neighbors_getMyDAGrank() != DEFAULTDAGRANK)
   {
     //send
     sendDIO();
@@ -187,7 +183,7 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
   
   msg->owner = COMPONENT_ICMPv6RPL;
   
-  //toss ICMPv6 header
+  // toss ICMPv6 header
   packetfunctions_tossHeader(msg,sizeof(ICMPv6_ht));
   
   if(codeValue == IANA_ICMPv6_RPL_DIO)
@@ -195,7 +191,7 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
     if(idmanager_getIsBridge()==FALSE) // check that I'm not a root
     {
        //update neighbor table
-      neighbors_receiveDIO(msg,(icmpv6rpl_dio_t*)(msg->payload));//pass dio specific object
+      neighbors_indicateRxDIO(msg);//pass dio specific object
       // now check the DODAGID and copy it if yet it has not been updated.
       // if(icmpv6rpl_vars.DODAGIDFlagSet==0)
       // {
@@ -275,85 +271,90 @@ void timers_rpl_DAO_fired() {
 //=========================== private =========================================
 
 void sendDIO() {
-  
-  open_addr_t*          temp_prefixID;
-  OpenQueueEntry_t*     msg;
-  
-  // check if my rank is not the default rank before sending DIO
-  if(idmanager_getIsBridge()==FALSE)
-  {
-    if(neighbors_getMyDAGrank() != 0xffff)
-    {
-      if (icmpv6rpl_vars.busySending==FALSE) {
-        icmpv6rpl_vars.busySending = TRUE;
-        msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
-        if (msg==NULL) {
-          openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
-                                (errorparameter_t)0,
-                                (errorparameter_t)0);
-          icmpv6rpl_vars.busySending = FALSE;
-          return;
-        }
-        
-        //admin
-        msg->creator                               = COMPONENT_ICMPv6RPL;
-        msg->owner                                 = COMPONENT_ICMPv6RPL;
-        //l4
-        msg->l4_protocol                           = IANA_ICMPv6;
-        msg->l4_sourcePortORicmpv6Type             = IANA_ICMPv6_RPL;
-        //l3
-        memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.all_routers_multicast,sizeof(open_addr_t));
-        
-        //============ Now check if the prefix set then it has to be part of the DIO options ==========//
-        if(isPrefixSet()==TRUE)
-        {        
-          // check if the below is fine ! 
-          temp_prefixID=idmanager_getMyID(ADDR_PREFIX);
-          memcpy(&(icmpv6rpl_dio_options.prefix),temp_prefixID,sizeof(open_addr_t));
-          
-          //Write the life time into endianness format
-          packetfunctions_htons(0x00000011,(uint8_t*)&(icmpv6rpl_dio_options.routeLifeTime)); 
-          
-          packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_options_t));
-          memcpy(((icmpv6rpl_dio_options_t*)(msg->payload)),&(icmpv6rpl_dio_options),sizeof(icmpv6rpl_dio_options));
-          
-          //Here I'm changing the option field to distinguish between the DIO with option and without.
-          icmpv6rpl_dio.options      = 0x03;
-          
-        }
-        
-        //====================== RESERVING THE WHOLE STRUCTURE (icmpv6rpl_dio_t) ================//
-        
-        // Setting the Rank
-        //packetfunctions_htons(neighbors_getMyDAGrank(),(uint8_t*)&(icmpv6rpl_dio.rank));
-        //poipoi xv the rang should be big endian??
-        
-        packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_t));
-        icmpv6rpl_dio.rank=neighbors_getMyDAGrank();
-        memcpy(((icmpv6rpl_dio_t*)(msg->payload)),&(icmpv6rpl_dio),sizeof(icmpv6rpl_dio));
-  
-        //=====================================================================//
-        //ICMPv6 header
-        packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
-        ((ICMPv6_ht*)(msg->payload))->type         = msg->l4_sourcePortORicmpv6Type;
-        ((ICMPv6_ht*)(msg->payload))->code         = IANA_ICMPv6_RPL_DIO;
-        // Below Identifier might need to be replaced by the identifier used by icmpv6rpl
-        // packetfunctions_htons(0x1234,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->identifier);
-        // Below sequence_number might need to be removed
-        // packetfunctions_htons(icmpv6rpl_vars.seq++ ,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->sequence_number); 
-        packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//call last
-        //send
-        if (icmpv6_send(msg)!=E_SUCCESS) {
-          icmpv6rpl_vars.busySending = FALSE;
-          openqueue_freePacketBuffer(msg);
-        }
-        else
-        {
-          icmpv6rpl_vars.busySending = FALSE; 
-        }
-      }
-    }
-  }
+   
+   open_addr_t*         temp_prefixID;
+   OpenQueueEntry_t*    msg;
+   
+   // do not send DIO if I'm in in bridge mode
+   if (idmanager_getIsBridge()==TRUE) {
+      return;
+   }
+   
+   // do not send DIO if I have the default DAG rank
+   if (neighbors_getMyDAGrank()==DEFAULTDAGRANK) {
+      return;
+   }
+   
+   // do not send DIO if I'm already busy sending
+   if (icmpv6rpl_vars.busySending==TRUE) {
+      return;
+   }
+   
+   // if you get here, all good to send a DIO
+   
+   // I'm now busy sending
+   icmpv6rpl_vars.busySending = TRUE;
+   
+   // reserve a free packet buffer for DIO
+   msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
+   if (msg==NULL) {
+      openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
+      icmpv6rpl_vars.busySending = FALSE;
+      return;
+   }
+   
+   // admin
+   msg->creator                               = COMPONENT_ICMPv6RPL;
+   msg->owner                                 = COMPONENT_ICMPv6RPL;
+   // l4
+   msg->l4_protocol                           = IANA_ICMPv6;
+   msg->l4_sourcePortORicmpv6Type             = IANA_ICMPv6_RPL;
+   // l3
+   memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.all_routers_multicast,sizeof(open_addr_t));
+   
+   //===== DIO option
+   if (isPrefixSet()==TRUE) {
+      temp_prefixID = idmanager_getMyID(ADDR_PREFIX);
+      memcpy(&(icmpv6rpl_dio_options.prefix),temp_prefixID,sizeof(open_addr_t));
+      
+      // lifetime
+      packetfunctions_htons(0x00000011,(uint8_t*)&(icmpv6rpl_dio_options.routeLifeTime)); 
+      
+      packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_options_t));
+      memcpy(((icmpv6rpl_dio_options_t*)(msg->payload)),&(icmpv6rpl_dio_options),sizeof(icmpv6rpl_dio_options));
+      
+      // change dio option field to distinguish between the DIO with/without option
+      icmpv6rpl_dio.options      = 0x03;
+   }
+   
+   //===== DIO
+   
+   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_t));
+   icmpv6rpl_dio.rank=neighbors_getMyDAGrank();
+   memcpy(((icmpv6rpl_dio_t*)(msg->payload)),&(icmpv6rpl_dio),sizeof(icmpv6rpl_dio));
+   
+   //=====================================================================//
+   //ICMPv6 header
+   
+   packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
+   ((ICMPv6_ht*)(msg->payload))->type         = msg->l4_sourcePortORicmpv6Type;
+   ((ICMPv6_ht*)(msg->payload))->code         = IANA_ICMPv6_RPL_DIO;
+   // Below Identifier might need to be replaced by the identifier used by icmpv6rpl
+   // packetfunctions_htons(0x1234,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->identifier);
+   // Below sequence_number might need to be removed
+   // packetfunctions_htons(icmpv6rpl_vars.seq++ ,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->sequence_number); 
+   packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//call last
+   //send
+   if (icmpv6_send(msg)!=E_SUCCESS) {
+      icmpv6rpl_vars.busySending = FALSE;
+      openqueue_freePacketBuffer(msg);
+   }
+   else
+   {
+      icmpv6rpl_vars.busySending = FALSE; 
+   }
 }
 
 void sendDAO() {
@@ -363,7 +364,7 @@ void sendDAO() {
   OpenQueueEntry_t* msg;
   if(idmanager_getIsBridge()==FALSE)
   {
-    if(neighbors_getMyDAGrank() != 0xffff)
+    if(neighbors_getMyDAGrank() != DEFAULTDAGRANK)
     {
       
       if (icmpv6rpl_vars.busySending==FALSE) {
@@ -395,10 +396,10 @@ void sendDAO() {
         //======================= Reserve for the Transite option ============//
         j=0;
         for (i=0;i<MAXNUMNEIGHBORS;i++) {
-          if((isNeighborsWithLowerDAGrank(neighbors_getMyDAGrank(),i))== TRUE)
+          if((neighbors_isNeighborWithLowerDAGrank(i))== TRUE)
           {
             packetfunctions_reserveHeaderSize(msg,8);
-            getNeighborsWithLowerDAGrank((msg->payload),ADDR_64B,i);    
+            neighbors_writeAddrLowerDAGrank((msg->payload),ADDR_64B,i);    
             j++;
           }  
         }
@@ -417,7 +418,7 @@ void sendDAO() {
         //======================= Reserve for the RPL Target option ============//
         //      j=0;
         //      for (i=0;i<MAXNUMNEIGHBORS;i++) {
-        //           if((getNeighborsWithHigherDAGrank(temp_prefix64btoWrite_parent,ADDR_64B, neighbors_getMyDAGrank(),i))== TRUE)
+        //           if((neighbors_writeAddrHigherDAGrank(temp_prefix64btoWrite_parent,i))== TRUE)
         //           {
         //             packetfunctions_reserveHeaderSize(msg,sizeof(open_addr_t));
         //             memcpy(((open_addr_t*)(msg->payload)),temp_prefix64btoWrite_parent,sizeof(open_addr_t));
@@ -467,6 +468,6 @@ void icmpv6rpl_timer_DAO_cb() {
 }
 
 void icmpv6rpl_receiveDAO(OpenQueueEntry_t* msg){ 
-  while(1);
- //should neve happen right? 
+   while(1);
+   //should neve happen right? 
 }

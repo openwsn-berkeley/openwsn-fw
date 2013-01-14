@@ -47,30 +47,8 @@
 //=========================== typedef =========================================
 
 //=========================== variables =======================================
-PRAGMA(pack(1));
-typedef struct {
-   uint8_t         rplinstanceId; // set by the DODAG root.
-   uint8_t         verNumb;
-   dagrank_t       rank;
-   uint8_t         rplOptions;
-   uint8_t         DTSN;
-   uint8_t         flags;
-   uint8_t         reserved;
-   uint8_t         DODAGID[16];    
-   uint8_t         options;
-} icmpv6rpl_dio_t;
-PRAGMA(pack());
 
-PRAGMA(pack(1));
-typedef struct {
-   uint8_t         rplinstanceId; // set by the DODAG root.
-   uint8_t         K_D_flags;
-   uint8_t         reserved;
-   uint8_t         DAOSequance;
-   uint8_t         DODAGID[16];    
-   uint8_t         options;
-} icmpv6rpl_dao_t;
-PRAGMA(pack());
+//===== DIO
 
 PRAGMA(pack(1));
 typedef struct {
@@ -85,14 +63,40 @@ PRAGMA(pack());
 
 PRAGMA(pack(1));
 typedef struct {
+   uint8_t         rplinstanceId; // set by the DODAG root.
+   uint8_t         verNumb;
+   dagrank_t       rank;
+   uint8_t         rplOptions;
+   uint8_t         DTSN;
+   uint8_t         flags;
+   uint8_t         reserved;
+   uint8_t         DODAGID[16];    
+   uint8_t         options;
+} icmpv6rpl_dio_t;
+PRAGMA(pack());
+
+//===== DAO
+
+PRAGMA(pack(1));
+typedef struct {
    uint8_t         type; // set by the DODAG root.
    uint8_t         optionLength;
    uint8_t         E_flags;
    uint8_t         PathControl;
    uint8_t         PathSequence;   
    uint8_t         PathLifetime;   
-
 } icmpv6rpl_dao_transit_info_t;
+PRAGMA(pack());
+
+PRAGMA(pack(1));
+typedef struct {
+   uint8_t         rplinstanceId; // set by the DODAG root.
+   uint8_t         K_D_flags;
+   uint8_t         reserved;
+   uint8_t         DAOSequance;
+   uint8_t         DODAGID[16];    
+   uint8_t         options;
+} icmpv6rpl_dao_t;
 PRAGMA(pack());
 
 //=========================== prototypes ======================================
@@ -102,6 +106,7 @@ void icmpv6rpl_trigger();
 void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, error_t error);
 void icmpv6rpl_receive(OpenQueueEntry_t* msg);
 void icmpv6rpl_receiveDAO(OpenQueueEntry_t* msg);
+
 /**
 \}
 \}

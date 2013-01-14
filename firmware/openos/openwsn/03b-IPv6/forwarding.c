@@ -273,6 +273,6 @@ void getNextHop(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
     packetfunctions_ip128bToMac64b(destination128b,&temp_prefix64btoWrite,addressToWrite64b);
   } else {
     // destination is remote, send to preferred parent
-    neighbors_getPreferredParent(addressToWrite64b,ADDR_64B);
+    neighbors_getPreferredParentEui64(addressToWrite64b);
   }
 }
