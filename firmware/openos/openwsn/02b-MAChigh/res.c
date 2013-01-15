@@ -47,6 +47,14 @@ void res_init() {
                                        res_timer_cb);
 }
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
 bool debugPrint_myDAGrank() {
    uint8_t output=0;
    output = neighbors_getMyDAGrank();

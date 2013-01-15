@@ -236,11 +236,11 @@ void openserial_startOutput() {
             break;
          }
       case STATUS_OUTBUFFERINDEXES:
-         if(debugPrint_outBufferIndexes()==TRUE) {
+         if (debugPrint_outBufferIndexes()==TRUE) {
             break;
          }
       case STATUS_ASN:
-         if(debugPrint_asn()==TRUE) {
+         if (debugPrint_asn()==TRUE) {
             break;
          }
       case STATUS_MACSTATS:
@@ -256,7 +256,7 @@ void openserial_startOutput() {
             break;
          }
       case STATUS_NEIGHBORS:
-         if(debugPrint_neighbors()==TRUE) {
+         if (debugPrint_neighbors()==TRUE) {
             break;
          }
       default:
@@ -330,6 +330,14 @@ void openserial_stop() {
    }
 }
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
 bool debugPrint_outBufferIndexes() {
    uint16_t temp_buffer[2];
    INTERRUPT_DECLARATION();

@@ -365,6 +365,14 @@ void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
 
 //======= misc
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
 bool debugPrint_asn() {
    asn_t output;
    output.byte4         =  ieee154e_vars.asn.byte4;
@@ -374,6 +382,14 @@ bool debugPrint_asn() {
    return TRUE;
 }
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
 bool debugPrint_isSync() {
    uint8_t output=0;
    output = ieee154e_vars.isSync;
@@ -381,6 +397,14 @@ bool debugPrint_isSync() {
    return TRUE;
 }
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
 bool debugPrint_macStats() {
    // send current stats over serial
    openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
