@@ -51,7 +51,6 @@ source = [
     os.path.join('02a-MAClow','IEEE802154.c'),
     os.path.join('02a-MAClow','IEEE802154E.c'),
     #=== 02b-MAChigh
-    os.path.join('02b-MAChigh','linkcost.c'),
     os.path.join('02b-MAChigh','neighbors.c'),
     os.path.join('02b-MAChigh','res.c'),
     os.path.join('02b-MAChigh','schedule.c'),
