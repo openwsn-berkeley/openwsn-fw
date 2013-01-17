@@ -98,7 +98,7 @@ bool          neighbors_writeAddrHigherDAGrank(
 void          neighbors_updateMyDAGrankAndNeighborPreference();
 // debug
 bool          debugPrint_neighbors();
-void          neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes);
+void          debugNetPrint_neighbors(netDebugNeigborEntry_t* schlist);
           
 /**
 \}

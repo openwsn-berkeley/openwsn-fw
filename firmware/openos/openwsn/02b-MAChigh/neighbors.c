@@ -603,6 +603,14 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
 
 //===== debug
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
 bool debugPrint_neighbors() {
    debugNeighborEntry_t temp;
    neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
@@ -612,23 +620,24 @@ bool debugPrint_neighbors() {
    return TRUE;
 }
 
-/*returns a list of debug info
-TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.*/
-void neighbors_getNetDebugInfo(netDebugNeigborEntry_t *schlist,uint8_t maxbytes ){
-  uint8_t j,size;
-  size=0;
-  
-  for(j=0;j<MAXNUMNEIGHBORS;j++) {
-     if(neighbors_vars.neighbors[j].used) {
-       schlist[size].last_addr_byte = neighbors_vars.neighbors[j].addr_64b.addr_64b[7];//last byte of the address; poipoi could be [0]; endianness
-       schlist[size].rssi = neighbors_vars.neighbors[j].rssi;
-       schlist[size].parentPreference = neighbors_vars.neighbors[j].parentPreference;
-       schlist[size].DAGrank = neighbors_vars.neighbors[j].DAGrank;
-       memcpy(&schlist[size].asn,
-              &neighbors_vars.neighbors[j].asn.bytes0and1,
-              sizeof(neighbors_vars.neighbors[j].asn.bytes0and1));
-       size++;//one more neighbour.
-     }
+void debugNetPrint_neighbors(netDebugNeigborEntry_t* out){
+   uint8_t idxIn;
+   uint8_t idxOut;
+   
+   idxOut=0;
+   for (idxIn=0;idxIn<MAXNUMNEIGHBORS;idxIn++) {
+      if(neighbors_vars.neighbors[idxIn].used) {
+         out[idxOut].last_addr_byte = neighbors_vars.neighbors[idxIn].addr_64b.addr_64b[7];//last byte of the address; poipoi could be [0]; endianness
+         out[idxOut].rssi = neighbors_vars.neighbors[idxIn].rssi;
+         out[idxOut].parentPreference = neighbors_vars.neighbors[idxIn].parentPreference;
+         out[idxOut].DAGrank = neighbors_vars.neighbors[idxIn].DAGrank;
+         memcpy(
+            &out[idxOut].asn,
+            &neighbors_vars.neighbors[idxIn].asn.bytes0and1,
+            sizeof(neighbors_vars.neighbors[idxIn].asn.bytes0and1)
+         );
+         idxOut++;
+      }
    }  
 }
 

@@ -98,6 +98,14 @@ void schedule_init() {
    }
 }
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
 bool debugPrint_schedule() {
    debugScheduleEntry_t temp;
    schedule_vars.debugPrintRow    = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
@@ -377,16 +385,14 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
    ENABLE_INTERRUPTS();
 }
 
-//TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.
-void schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist, uint8_t maxbytes){
-  
+void schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist){  
   uint8_t i;
+  
   for (i=0;i<MAXACTIVESLOTS;i++){
    schlist[i].last_addr_byte=schedule_vars.scheduleBuf[i].neighbor.addr_64b[7];
    schlist[i].slotOffset=(uint8_t)schedule_vars.scheduleBuf[i].slotOffset&0xFF;
    schlist[i].channelOffset=schedule_vars.scheduleBuf[i].channelOffset;
-  }    
-
+  }
 }
 //=========================== private =========================================
 

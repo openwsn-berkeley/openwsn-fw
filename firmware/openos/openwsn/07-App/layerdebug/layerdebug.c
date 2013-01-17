@@ -17,10 +17,10 @@
 /// inter-packet period (in ms)
 #define DEBUGPERIODNBS    11000
 #define DEBUGPERIODSCH    7000
-#define MAXPAYLOADLEN     80
 
 const uint8_t schedule_layerdebug_path0[]  = "d_s"; // debug/scheduling
 const uint8_t neighbors_layerdebug_path0[] = "d_n"; // debug/neighbours
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -120,9 +120,8 @@ void layerdebug_task_schedule_cb() {
    size=sizeof(netDebugScheduleEntry_t)*MAXACTIVESLOTS;
    packetfunctions_reserveHeaderSize(pkt,size);//reserve for some schedule entries
    //get the schedule information from the mac layer 
-   schedule_getNetDebugInfo((netDebugScheduleEntry_t*)pkt->payload,MAXPAYLOADLEN-1);
-
-  
+   schedule_getNetDebugInfo((netDebugScheduleEntry_t*)pkt->payload);
+   
    packetfunctions_reserveHeaderSize(pkt,1);//reserve for the size of schedule entries
    pkt->payload[0] = MAXACTIVESLOTS;
   
@@ -184,7 +183,7 @@ void layerdebug_task_neighbors_cb() {
    size=neighbors_getNumNeighbors(); //compute the number of neigbours sent   
    packetfunctions_reserveHeaderSize(pkt,size*sizeof(netDebugNeigborEntry_t));//reserve for the size of schedule entries
   
-   neighbors_getNetDebugInfo((netDebugNeigborEntry_t*) pkt->payload,MAXPAYLOADLEN-1);
+   debugNetPrint_neighbors((netDebugNeigborEntry_t*) pkt->payload);
    
    //now we know the size of the neihbours. Put it on the packet.
    packetfunctions_reserveHeaderSize(pkt,1);//reserve for the size of neighbours entries
@@ -245,7 +244,7 @@ error_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
       size=sizeof(netDebugScheduleEntry_t)*MAXACTIVESLOTS;
       packetfunctions_reserveHeaderSize(msg,size);//reserve for some schedule entries
       //get the schedule information from the mac layer 
-      schedule_getNetDebugInfo((netDebugScheduleEntry_t*)msg->payload,MAXPAYLOADLEN-1);
+      schedule_getNetDebugInfo((netDebugScheduleEntry_t*)msg->payload);
 
       packetfunctions_reserveHeaderSize(msg,1);//reserve for the size of schedule entries
       msg->payload[0] = MAXACTIVESLOTS;
@@ -281,7 +280,7 @@ error_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
       size=neighbors_getNumNeighbors(); //compute the number of neigbours sent   
       packetfunctions_reserveHeaderSize(msg,size*sizeof(netDebugNeigborEntry_t));//reserve for the size of schedule entries
   
-      neighbors_getNetDebugInfo((netDebugNeigborEntry_t*) msg->payload,MAXPAYLOADLEN-1);
+      debugNetPrint_neighbors((netDebugNeigborEntry_t*)msg->payload);
     
      //now we know the size of the neihbours. Put it on the packet.
       packetfunctions_reserveHeaderSize(msg,1);//reserve for the size of neighbours entries

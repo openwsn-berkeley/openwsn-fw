@@ -132,10 +132,7 @@ void               schedule_addActiveSlot(
                         asn_t*    asnTimestamp,
                         bool      succesfullTx
                    );
- void              schedule_getNetDebugInfo(
-                        netDebugScheduleEntry_t* schlist,
-                        uint8_t                  maxbytes
-                   );
+ void              schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist);
 
 /**
 \}
