@@ -42,10 +42,10 @@ typedef struct {
 ieee154e_vars_t ieee154e_vars;
 
 typedef struct {
-   PORT_TIMER_WIDTH           num_newSlot;
-   PORT_TIMER_WIDTH           num_timer;
-   PORT_TIMER_WIDTH           num_startOfFrame;
-   PORT_TIMER_WIDTH           num_endOfFrame;
+   PORT_TIMER_WIDTH          num_newSlot;
+   PORT_TIMER_WIDTH          num_timer;
+   PORT_TIMER_WIDTH          num_startOfFrame;
+   PORT_TIMER_WIDTH          num_endOfFrame;
 } ieee154e_dbg_t;
 
 ieee154e_dbg_t ieee154e_dbg;
@@ -53,10 +53,10 @@ ieee154e_dbg_t ieee154e_dbg;
 // these statistics are reset every time they are reported
 PRAGMA(pack(1));
 typedef struct {
-   uint8_t            syncCounter;          // how many times we synchronized
-   PORT_SIGNED_INT_WIDTH            minCorrection;        // minimum time correction
-   PORT_SIGNED_INT_WIDTH            maxCorrection;        // maximum time correction
-   uint8_t            numDeSync;            // number of times a desync happened
+   uint8_t                   syncCounter;        // how many times we synchronized
+   PORT_SIGNED_INT_WIDTH     minCorrection;      // minimum time correction
+   PORT_SIGNED_INT_WIDTH     maxCorrection;      // maximum time correction
+   uint8_t                   numDeSync;          // number of times a desync happened
 } ieee154e_stats_t;
 PRAGMA(pack());
 
@@ -1787,12 +1787,9 @@ different channel offsets in the same slot.
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
-   // poipoi: no channel hopping
-   // return 26;    
-   //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
-   uint8_t temp = 11+(ieee154e_vars.asnOffset+channelOffset)%16;
-   //temp=20;
-   return temp;
+   // comment the following line out to disable channel hopping
+   //return SYNCHRONIZING_CHANNEL; // single channel   
+   return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
 
 /**
