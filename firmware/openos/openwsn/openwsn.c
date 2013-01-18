@@ -116,7 +116,7 @@ void openwsn_init() {
    udpecho_init();
    udpinject_init();
    udpprint_init();
-  // udprand_init();
+   //udprand_init();
    //udplatency_init();
    //udpstorm_init();
    //-- CoAP
