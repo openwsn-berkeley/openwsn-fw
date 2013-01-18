@@ -53,10 +53,11 @@ ieee154e_dbg_t ieee154e_dbg;
 // these statistics are reset every time they are reported
 PRAGMA(pack(1));
 typedef struct {
-   uint8_t                   syncCounter;        // how many times we synchronized
-   PORT_SIGNED_INT_WIDTH     minCorrection;      // minimum time correction
-   PORT_SIGNED_INT_WIDTH     maxCorrection;      // maximum time correction
-   uint8_t                   numDeSync;          // number of times a desync happened
+   uint8_t                   numSyncPkt;    // how many times synchronized on a non-ACK packet
+   uint8_t                   numSyncAck;    // how many times synchronized on an ACK
+   PORT_SIGNED_INT_WIDTH     minCorrection; // minimum time correction
+   PORT_SIGNED_INT_WIDTH     maxCorrection; // maximum time correction
+   uint8_t                   numDeSync;     // number of times a desync happened
 } ieee154e_stats_t;
 PRAGMA(pack());
 
@@ -1688,6 +1689,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
    newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)newPeriod+timeCorrection);
    radio_setTimerPeriod(newPeriod);
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
+   ieee154e_stats.numSyncPkt++;
    updateStats(timeCorrection);
 }
 
@@ -1699,6 +1701,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod-timeCorrection);
    radio_setTimerPeriod(newPeriod);
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
+   ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
 }
 
@@ -1748,15 +1751,14 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
 //======= stats
 
 port_INLINE void resetStats() {
-   ieee154e_stats.syncCounter     =    0;
+   ieee154e_stats.numSyncPkt      =    0;
+   ieee154e_stats.numSyncAck      =    0;
    ieee154e_stats.minCorrection   =  127;
    ieee154e_stats.maxCorrection   = -127;
    // do not reset the number of de-synchronizations
 }
 
 void updateStats(PORT_SIGNED_INT_WIDTH timeCorrection) {
-    ieee154e_stats.syncCounter++;
-
    if (timeCorrection<ieee154e_stats.minCorrection) {
      ieee154e_stats.minCorrection = timeCorrection;
    }
