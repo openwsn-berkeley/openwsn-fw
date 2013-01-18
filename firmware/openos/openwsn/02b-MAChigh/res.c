@@ -20,7 +20,8 @@
 
 typedef struct {
    uint16_t        periodMaintenance;
-   bool            busySending;          // TRUE when busy sending an advertisement or keep-alive
+   bool            busySendingKa;        // TRUE when busy sending a keep-alive
+   bool            busySendingAdv;       // TRUE when busy sending an advertisement
    uint8_t         dsn;                  // current data sequence number
    uint8_t         MacMgtTaskCounter;    // counter to determine what management task to do
    opentimer_id_t  timerId;
@@ -38,8 +39,9 @@ void    res_timer_cb();
 //=========================== public ==========================================
 
 void res_init() {
-   res_vars.periodMaintenance = 1700+(openrandom_get16b()&0xff); // fires every 1 sec on average
-   res_vars.busySending       = FALSE;
+   res_vars.periodMaintenance = 872+(openrandom_get16b()&0xff); // fires every 1 sec on average
+   res_vars.busySendingKa     = FALSE;
+   res_vars.busySendingAdv    = FALSE;
    res_vars.dsn               = 0;
    res_vars.MacMgtTaskCounter = 0;
    res_vars.timerId = opentimers_start(res_vars.periodMaintenance,
@@ -100,12 +102,21 @@ void task_resNotifSendDone() {
    }
    // send the packet to where it belongs
    if (msg->creator == COMPONENT_RES) {
-      // discard (ADV or KA) packets this component has created
+      if (msg->l2_frameType==IEEE154_TYPE_BEACON) {
+         // this is a ADV
+         
+         // not busy sending ADV anymore
+         res_vars.busySendingAdv = FALSE;
+      } else {
+         // this is a KA
+         
+         // not busy sending KA anymore
+         res_vars.busySendingKa = FALSE;
+      }
+      // discard packets
       openqueue_freePacketBuffer(msg);
-      // I can send the next ADV or KA
-      res_vars.busySending = FALSE;
       // restart a random timer
-      res_vars.periodMaintenance = 1700+(openrandom_get16b()&0xff);
+      res_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
       opentimers_setPeriod(res_vars.timerId,
                            TIME_MS,
                            res_vars.periodMaintenance);
@@ -173,21 +184,12 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timers_res_fired() {
-   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%2;
-//   if (idmanager_getMyID(ADDR_16B)->addr_16b[1]==DEBUG_MOTEID_MASTER) {
-      if (res_vars.MacMgtTaskCounter==0) {
-         sendAdv();
-      } else {
-         // don't send KAs if you're the master
-         sendKa();
-      }
- /*  } else {
-      if (res_vars.MacMgtTaskCounter==0) {
-         // don't send ADVs if you're not the master
-      } else {
-         sendKa();
-      }
-   }*/
+   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%10;
+   if (res_vars.MacMgtTaskCounter==0) {
+      sendAdv(); // called every 10s
+   } else {
+      sendKa();  // called every second, except once every 10s
+   }
 }
 
 //=========================== private =========================================
@@ -245,35 +247,41 @@ port_INLINE void sendAdv() {
    // only send a packet if I received a sendDone for the previous.
    // the packet might be stuck in the queue for a long time for
    // example while the mote is synchronizing
-   if (res_vars.busySending==FALSE) {
-      // get a free packet buffer
-      adv = openqueue_getFreePacketBuffer(COMPONENT_RES);
-      if (adv==NULL) {
-         openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
-                               (errorparameter_t)0,
-                               (errorparameter_t)0);
-         return;
-      }
-      
-      // declare ownership over that packet
-      adv->creator = COMPONENT_RES;
-      adv->owner   = COMPONENT_RES;
-      
-      // reserve space for ADV-specific header
-      packetfunctions_reserveHeaderSize(adv, ADV_PAYLOAD_LENGTH);
-      // the actual value of the current ASN will be written by the
-      // IEEE802.15.4e when transmitting
-      
-      // some l2 information about this packet
-      adv->l2_frameType                     = IEEE154_TYPE_BEACON;
-      adv->l2_nextORpreviousHop.type        = ADDR_16B;
-      adv->l2_nextORpreviousHop.addr_16b[0] = 0xff;
-      adv->l2_nextORpreviousHop.addr_16b[1] = 0xff;
-      
-      // put in queue for MAC to handle
-      res_send_internal(adv);
-      res_vars.busySending = TRUE;
+   
+   if (res_vars.busySendingAdv==TRUE) {
+      // don't continue if I'm still sending a previous ADV
+      return;
    }
+   
+   // get a free packet buffer
+   adv = openqueue_getFreePacketBuffer(COMPONENT_RES);
+   if (adv==NULL) {
+      openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
+      return;
+   }
+   
+   // declare ownership over that packet
+   adv->creator = COMPONENT_RES;
+   adv->owner   = COMPONENT_RES;
+   
+   // reserve space for ADV-specific header
+   packetfunctions_reserveHeaderSize(adv, ADV_PAYLOAD_LENGTH);
+   // the actual value of the current ASN will be written by the
+   // IEEE802.15.4e when transmitting
+   
+   // some l2 information about this packet
+   adv->l2_frameType                     = IEEE154_TYPE_BEACON;
+   adv->l2_nextORpreviousHop.type        = ADDR_16B;
+   adv->l2_nextORpreviousHop.addr_16b[0] = 0xff;
+   adv->l2_nextORpreviousHop.addr_16b[1] = 0xff;
+   
+   // put in queue for MAC to handle
+   res_send_internal(adv);
+   
+   // I'm now busy sending an ADV
+   res_vars.busySendingAdv = TRUE;
 }
 
 /**
@@ -287,34 +295,46 @@ port_INLINE void sendKa() {
    OpenQueueEntry_t* kaPkt;
    open_addr_t*      kaNeighAddr;
    
-   // only send a packet if I received a sendDone for the previous.
-   // the packet might be stuck in the queue for a long time for
-   // example while the mote is synchronizing
-   if (res_vars.busySending==FALSE) {
-      kaNeighAddr = neighbors_getKANeighbor();
-      if (kaNeighAddr!=NULL) {
-         // get a free packet buffer
-         kaPkt = openqueue_getFreePacketBuffer(COMPONENT_RES);
-         if (kaPkt==NULL) {
-            openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
-                                  (errorparameter_t)0,
-                                  (errorparameter_t)0);
-            return;
-         }
-         
-         // declare ownership over that packet
-         kaPkt->creator = COMPONENT_RES;
-         kaPkt->owner   = COMPONENT_RES;
-         
-         // some l2 information about this packet
-         kaPkt->l2_frameType = IEEE154_TYPE_DATA;
-         memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
-         
-         // put in queue for MAC to handle
-         res_send_internal(kaPkt);
-         res_vars.busySending = TRUE;
-      }
+   if (res_vars.busySendingKa==TRUE) {
+      // don't proceed if I'm still sending a KA
+      return;
    }
+   
+   if (ieee154e_isSynch()==FALSE) {
+      // don't proceed if I'm not sync'ed
+      return;
+   }
+   
+   kaNeighAddr = neighbors_getKANeighbor();
+   if (kaNeighAddr==NULL) {
+      // don't proceed if I have no neighbor I need to send a KA to
+      return;
+   }
+   
+   // if I get here, I will send a KA
+   
+   // get a free packet buffer
+   kaPkt = openqueue_getFreePacketBuffer(COMPONENT_RES);
+   if (kaPkt==NULL) {
+      openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
+                            (errorparameter_t)1,
+                            (errorparameter_t)0);
+      return;
+   }
+   
+   // declare ownership over that packet
+   kaPkt->creator = COMPONENT_RES;
+   kaPkt->owner   = COMPONENT_RES;
+   
+   // some l2 information about this packet
+   kaPkt->l2_frameType = IEEE154_TYPE_DATA;
+   memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
+   
+   // put in queue for MAC to handle
+   res_send_internal(kaPkt);
+   
+   // I'm now busy sending a KA
+   res_vars.busySendingKa = TRUE;
 }
 
 void res_timer_cb() {
