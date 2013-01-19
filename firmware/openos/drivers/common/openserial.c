@@ -86,8 +86,8 @@ error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t l
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'S';                  //this is an status update
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)statusElement;        //type of element
    for (counter=0;counter<length;counter++){
       openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)buffer[counter];
@@ -112,8 +112,8 @@ error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'E';                  //this is an error
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)calling_component;    //component generating error
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)error_code;           //error_code
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((arg1 & 0xff00)>>8); //arg1
@@ -139,8 +139,8 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'D';                  //this is data
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
    //asn to serial .. 
    asnWriteToSerial(asn);// byte01,byte23,byte4
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[0];
