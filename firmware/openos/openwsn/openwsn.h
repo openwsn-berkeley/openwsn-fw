@@ -182,12 +182,12 @@ enum {
    ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x03, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
    ERR_INPUT_BUFFER_OVERFLOW           = 0x04, // the input buffer has overflown
    // l4
-   ERR_WRONG_TRAN_PROTOCOL             = 0x05, // unknown transport protocol {0} (code position {1))
-   ERR_WRONG_TCP_STATE                 = 0x06, // wrong TCP state {0} (code position {1))
-   ERR_TCP_RESET                       = 0x07, // TCP reset while in state {0} (code position {1))
-   ERR_UNSUPPORTED_PORT_NUMBER         = 0x08, // unsupported port number {0} (code position {1))
+   ERR_WRONG_TRAN_PROTOCOL             = 0x05, // unknown transport protocol {0} (code position {1})
+   ERR_WRONG_TCP_STATE                 = 0x06, // wrong TCP state {0} (code position {1})
+   ERR_TCP_RESET                       = 0x07, // TCP reset while in state {0} (code position {1})
+   ERR_UNSUPPORTED_PORT_NUMBER         = 0x08, // unsupported port number {0} (code position {1})
    // l3
-   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x09, // unsupported ICMPv6 type {0} (code position {1))
+   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x09, // unsupported ICMPv6 type {0} (code position {1})
    ERR_6LOWPAN_UNSUPPORTED             = 0x0a, // unsupported 6LoWPAN parameter {1} at location {0}
    ERR_NO_NEXTHOP                      = 0x0b, // no next hop
    // l2b
