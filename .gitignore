@@ -2,5 +2,9 @@ Debug
 settings
 *.dep
 *.sfr
+*.o
+*.exe
+*.ihex
+path.txt
 /build
 /.sconsign.dblite
