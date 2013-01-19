@@ -253,6 +253,13 @@ port_INLINE void sendAdv() {
       return;
    }
    
+   if (ieee154e_isSynch()==FALSE) {
+      // don't proceed if I'm not sync'ed
+      return;
+   }
+   
+   // if I get here, I will send an ADV
+   
    // get a free packet buffer
    adv = openqueue_getFreePacketBuffer(COMPONENT_RES);
    if (adv==NULL) {
