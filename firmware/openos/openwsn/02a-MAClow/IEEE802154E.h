@@ -30,6 +30,7 @@ below.
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
 #define KATIMEOUT                   66 // in slots: @15ms per slot -> ~1 seconds
 #define DESYNCTIMEOUT              333 // in slots: @15ms per slot -> ~5 seconds
+#define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 
 // the different states of the IEEE802.15.4e state machine
 typedef enum {

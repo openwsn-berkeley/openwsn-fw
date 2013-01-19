@@ -1677,8 +1677,20 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
       incrementAsnOffset();
    }
    newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)newPeriod+timeCorrection);
+   // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
+   // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
+   // log a large timeCorrection
+   if (
+          timeCorrection<-LIMITLARGETIMECORRECTION ||
+          timeCorrection> LIMITLARGETIMECORRECTION
+       ) {
+      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
+                            (errorparameter_t)ieee154e_vars.state,
+                            (errorparameter_t)0);
+   }
+   // update the stats
    ieee154e_stats.numSyncPkt++;
    updateStats(timeCorrection);
 }
@@ -1686,11 +1698,23 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
 void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    PORT_TIMER_WIDTH newPeriod;
    PORT_TIMER_WIDTH currentPeriod;
-   // resynchronize
+   // calculate new period
    currentPeriod                  =  radio_getTimerPeriod();
    newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod-timeCorrection);
+   // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
+   // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
+   // log a large timeCorrection
+   if (
+          timeCorrection<-LIMITLARGETIMECORRECTION ||
+          timeCorrection> LIMITLARGETIMECORRECTION
+       ) {
+      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
+                            (errorparameter_t)ieee154e_vars.state,
+                            (errorparameter_t)1);
+   }
+   // update the stats
    ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
 }
@@ -1749,9 +1773,11 @@ port_INLINE void resetStats() {
 }
 
 void updateStats(PORT_SIGNED_INT_WIDTH timeCorrection) {
+   // update minCorrection
    if (timeCorrection<ieee154e_stats.minCorrection) {
      ieee154e_stats.minCorrection = timeCorrection;
    }
+   // update maxConnection
    if(timeCorrection>ieee154e_stats.maxCorrection) {
      ieee154e_stats.maxCorrection = timeCorrection;
    }
