@@ -244,18 +244,22 @@ readability of the code.
 */
 port_INLINE void sendAdv() {
    OpenQueueEntry_t* adv;
-   // only send a packet if I received a sendDone for the previous.
-   // the packet might be stuck in the queue for a long time for
-   // example while the mote is synchronizing
    
-   if (res_vars.busySendingAdv==TRUE) {
-      // don't continue if I'm still sending a previous ADV
+   if (ieee154e_isSynch()==FALSE) {
+      // I'm not sync'ed
+      
+      // delete packets genereted by this module (ADV and KA) from openqueue
+      openqueue_removeAllCreatedBy(COMPONENT_RES);
+      
+      // I'm now busy sending an ADV
+      res_vars.busySendingAdv = FALSE;
+      
+      // stop here
       return;
    }
    
-   if (ieee154e_isSynch()==FALSE) {
-      // don't proceed if I'm not sync'ed
-      return;
+   if (res_vars.busySendingAdv==TRUE) {
+      // don't continue if I'm still sending a previous ADV
    }
    
    // if I get here, I will send an ADV
@@ -302,13 +306,21 @@ port_INLINE void sendKa() {
    OpenQueueEntry_t* kaPkt;
    open_addr_t*      kaNeighAddr;
    
-   if (res_vars.busySendingKa==TRUE) {
-      // don't proceed if I'm still sending a KA
+   if (ieee154e_isSynch()==FALSE) {
+      // I'm not sync'ed
+      
+      // delete packets genereted by this module (ADV and KA) from openqueue
+      openqueue_removeAllCreatedBy(COMPONENT_RES);
+      
+      // I'm now busy sending a KA
+      res_vars.busySendingKa = FALSE;
+      
+      // stop here
       return;
    }
    
-   if (ieee154e_isSynch()==FALSE) {
-      // don't proceed if I'm not sync'ed
+   if (res_vars.busySendingKa==TRUE) {
+      // don't proceed if I'm still sending a KA
       return;
    }
    

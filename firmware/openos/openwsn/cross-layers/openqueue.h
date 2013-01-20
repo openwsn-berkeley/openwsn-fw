@@ -33,7 +33,7 @@ bool               debugPrint_queue();
  OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator);
  error_t           openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
  void              openqueue_removeAllOwnedBy(uint8_t owner);
- void              openqueue_removeAll();
+ void              openqueue_removeAllCreatedBy(uint8_t creator);
 // called by res
  OpenQueueEntry_t* openqueue_resGetSentPacket();
  OpenQueueEntry_t* openqueue_resGetReceivedPacket();

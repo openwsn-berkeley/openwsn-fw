@@ -95,7 +95,7 @@ bool debugPrint_queue() {
    return E_FAIL;
 }
 
- void openqueue_removeAllOwnedBy(uint8_t owner) {
+void openqueue_removeAllOwnedBy(uint8_t owner) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -107,9 +107,16 @@ bool debugPrint_queue() {
    ENABLE_INTERRUPTS();
 }
 
-
-void openqueue_removeAll(){
-  openqueue_init();//hide it is an init.
+void openqueue_removeAllCreatedBy(uint8_t creator) {
+   uint8_t i;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++){
+      if (openqueue_vars.queue[i].creator==creator) {
+         openqueue_reset_entry(&(openqueue_vars.queue[i]));
+      }
+   }
+   ENABLE_INTERRUPTS();
 }
 
 //======= called by RES

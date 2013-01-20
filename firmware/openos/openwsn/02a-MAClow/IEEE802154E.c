@@ -1727,8 +1727,6 @@ void changeIsSync(bool newIsSync) {
       resetStats();
    } else {
       leds_sync_off();
-      //TODO, this is a workaround as while it is not synch the queue does not reset, so it keeps growing.
-      openqueue_removeAll();//reset the queue to avoid filling it while it is not connected.
    }
 }
 
@@ -1805,7 +1803,7 @@ different channel offsets in the same slot.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    // comment the following line out to disable channel hopping
-   //return SYNCHRONIZING_CHANNEL; // single channel   
+   //return SYNCHRONIZING_CHANNEL; // single channel
    return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
 
