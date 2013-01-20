@@ -1,39 +1,39 @@
 #ifndef __ICMPv6RPL_H
 #define __ICMPv6RPL_H
-#define MOP_DIO_A 1 <<5
-#define MOP_DIO_B 1 <<4
-#define MOP_DIO_C 1 <<3
-#define PRF_DIO_A 0 <<2
-#define PRF_DIO_B 0 <<1
-#define PRF_DIO_C 0 <<0
-#define G_DIO     0 <<7
 
-#define FLAG_DAO_A 0 <<0
-#define FLAG_DAO_B 0 <<1
-#define FLAG_DAO_C 0 <<2
-#define FLAG_DAO_D 0 <<3
-#define FLAG_DAO_E 0 <<4
-#define FLAG_DAO_F 0 <<5
-#define D_DAO      1 <<6
-#define K_DAO      0 <<7
+#define MOP_DIO_A                 1<<5
+#define MOP_DIO_B                 1<<4
+#define MOP_DIO_C                 1<<3
+#define PRF_DIO_A                 0<<2
+#define PRF_DIO_B                 0<<1
+#define PRF_DIO_C                 0<<0
+#define G_DIO                     0<<7
 
-#define E_DAO_Transit_Info      0 <<7
+#define FLAG_DAO_A                0<<0
+#define FLAG_DAO_B                0<<1
+#define FLAG_DAO_C                0<<2
+#define FLAG_DAO_D                0<<3
+#define FLAG_DAO_E                0<<4
+#define FLAG_DAO_F                0<<5
+#define D_DAO                     1<<6
+#define K_DAO                     0<<7
 
-#define PC1_A_DAO_Transit_Info  0 <<7
-#define PC1_B_DAO_Transit_Info  1 <<6
+#define E_DAO_Transit_Info        0<<7
 
-#define PC2_A_DAO_Transit_Info  0 <<5
-#define PC2_B_DAO_Transit_Info  0 <<4
+#define PC1_A_DAO_Transit_Info    0<<7
+#define PC1_B_DAO_Transit_Info    1<<6
 
-#define PC3_A_DAO_Transit_Info  0 <<3
-#define PC3_B_DAO_Transit_Info  0 <<2
+#define PC2_A_DAO_Transit_Info    0<<5
+#define PC2_B_DAO_Transit_Info    0<<4
 
-#define PC4_A_DAO_Transit_Info  0 <<1
-#define PC4_B_DAO_Transit_Info  0 <<0
+#define PC3_A_DAO_Transit_Info    0<<3
+#define PC3_B_DAO_Transit_Info    0<<2
 
-#define Prf_A_dio_options       0 <<4
-#define Prf_B_dio_options       0 <<3
+#define PC4_A_DAO_Transit_Info    0<<1
+#define PC4_B_DAO_Transit_Info    0<<0
 
+#define Prf_A_dio_options         0<<4
+#define Prf_B_dio_options         0<<3
 
 /**
 \addtogroup IPv6
