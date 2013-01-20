@@ -199,7 +199,7 @@ enum {
    ERR_IEEE154_UNSUPPORTED             = 0x10, // unsupported IEEE802.15.4 parameter {1} at location {0}
    ERR_DESYNCHRONIZED                  = 0x11, // got desynchronized at slotOffset {0}
    ERR_SYNCHRONIZED                    = 0x12, // synchronized at slotOffset {0}
-   ERR_LARGE_TIMECORRECTION            = 0x13, // unusually large timeCorrection of {0} ticks (code location {1})
+   ERR_LARGE_TIMECORRECTION            = 0x13, // large timeCorrection of {0} ticks (code location {1})
    ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x14, // wrong state {0} in end of frame+sync
    ERR_WRONG_STATE_IN_STARTSLOT        = 0x15, // wrong state {0} in startSlot, at slotOffset {1}
    ERR_WRONG_STATE_IN_TIMERFIRES       = 0x16, // wrong state {0} in timer fires, at slotOffset {1}

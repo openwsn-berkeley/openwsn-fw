@@ -13,22 +13,22 @@
 //=========================== prototypes ======================================
 
 error_t prependIPv6Header(
-     OpenQueueEntry_t* msg,
-     uint8_t           tf,
-     uint32_t          value_flowLabel,
-     bool              nh,
-     uint8_t           value_nextHeader,
-     uint8_t           hlim,
-     uint8_t           value_hopLimit,
-     bool              cid,
-     bool              sac,
-     uint8_t           sam,
-     bool              m,
-     bool              dac,
-     uint8_t           dam,
-     open_addr_t*      value_dest,
-     open_addr_t*      value_src,
-     uint8_t           fw_SendOrfw_Rcv
+   OpenQueueEntry_t*    msg,
+   uint8_t              tf,
+   uint32_t             value_flowLabel,
+   bool                 nh,
+   uint8_t              value_nextHeader,
+   uint8_t              hlim,
+   uint8_t              value_hopLimit,
+   bool                 cid,
+   bool                 sac,
+   uint8_t              sam,
+   bool                 m,
+   bool                 dac,
+   uint8_t              dam,
+   open_addr_t*         value_dest,
+   open_addr_t*         value_src,
+   uint8_t              fw_SendOrfw_Rcv
 );
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg);
 
@@ -95,7 +95,7 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
    } else {
      //not the same prefix. so the packet travels to another network
      //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
-     if(ipv6_header.next_header !=SourceFWNxtHdr){ 
+     if(ipv6_header.next_header!=SOURCEFWNXTHDR){ 
       sam = IPHC_SAM_128B;
       dam = IPHC_DAM_128B;
       p_dest = &(msg->l3_destinationAdd);
@@ -171,7 +171,8 @@ void iphc_receive(OpenQueueEntry_t* msg) {
 
 //=========================== private =========================================
 
-error_t prependIPv6Header(OpenQueueEntry_t* msg,
+error_t prependIPv6Header(
+      OpenQueueEntry_t* msg,
       uint8_t tf,
       uint32_t value_flowLabel,
       bool nh,
@@ -186,7 +187,8 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
       uint8_t dam,
       open_addr_t* value_dest,
       open_addr_t* value_src,
-      uint8_t fw_SendOrfw_Rcv) {
+      uint8_t fw_SendOrfw_Rcv
+   ) {
    
    uint8_t temp_8b;
    

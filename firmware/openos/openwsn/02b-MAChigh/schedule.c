@@ -247,7 +247,7 @@ slotOffset_t schedule_getNextActiveSlotOffset() {
 \brief Get the frame length.
 
 \returns The frame length.
- */
+*/
 frameLength_t schedule_getFrameLength() {
    frameLength_t res;
    INTERRUPT_DECLARATION();
@@ -257,29 +257,28 @@ frameLength_t schedule_getFrameLength() {
    ENABLE_INTERRUPTS();
    
    return res;
-   
 }
 
 /**
 \brief Get the type of the current schedule entry.
 
 \returns The type of the current schedule entry.
- */
- cellType_t schedule_getType() {
-    cellType_t res;
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
-    res= schedule_vars.currentScheduleEntry->type;
-    ENABLE_INTERRUPTS();
-         return res;
+*/
+cellType_t schedule_getType() {
+   cellType_t res;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   res= schedule_vars.currentScheduleEntry->type;
+   ENABLE_INTERRUPTS();
+   return res;
 }
 
 /**
 \brief Get the neighbor associated wit the current schedule entry.
 
 \returns The neighbor associated wit the current schedule entry.
- */
- void schedule_getNeighbor(open_addr_t* addrToWrite) {
+*/
+void schedule_getNeighbor(open_addr_t* addrToWrite) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    memcpy(addrToWrite,&(schedule_vars.currentScheduleEntry->neighbor),sizeof(open_addr_t));
@@ -290,7 +289,7 @@ frameLength_t schedule_getFrameLength() {
 \brief Get the channel offset of the current schedule entry.
 
 \returns The channel offset of the current schedule entry.
- */
+*/
 channelOffset_t schedule_getChannelOffset() {
    channelOffset_t res;
    INTERRUPT_DECLARATION();
@@ -334,7 +333,7 @@ bool schedule_getOkToSend() {
 
 /**
 \brief Indicate the reception of a packet.
- */
+*/
 void schedule_indicateRx(asn_t* asnTimestamp) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -348,8 +347,8 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
 
 /**
 \brief Indicate the transmission of a packet.
- */
- void schedule_indicateTx(asn_t*   asnTimestamp,
+*/
+void schedule_indicateTx(asn_t*   asnTimestamp,
    bool     succesfullTx) {
    
    INTERRUPT_DECLARATION();

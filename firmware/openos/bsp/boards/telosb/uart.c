@@ -5,9 +5,6 @@
 */
 
 #include "msp430f1611.h"
-#include "stdint.h"
-#include "stdio.h"
-#include "string.h"
 #include "uart.h"
 #include "board.h"
 

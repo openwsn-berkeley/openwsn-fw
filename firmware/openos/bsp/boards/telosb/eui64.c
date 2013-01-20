@@ -5,7 +5,6 @@
 */
 
 #include "msp430f1611.h"
-#include "stdint.h"
 #include "string.h"
 #include "eui64.h"
 

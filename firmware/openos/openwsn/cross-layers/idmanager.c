@@ -142,7 +142,7 @@ error_t idmanager_setMyID(open_addr_t* newID) {
    return E_SUCCESS;
 }
 
- bool idmanager_isMyAddress(open_addr_t* addr) {
+bool idmanager_isMyAddress(open_addr_t* addr) {
    open_addr_t temp_my128bID;
    bool res;
    INTERRUPT_DECLARATION();
@@ -215,6 +215,7 @@ void idmanager_triggerAboutBridge() {
    }
    return;
 }
+
 void idmanager_triggerAboutRoot() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer;
@@ -266,23 +267,23 @@ bool debugPrint_id() {
 }
 
 // function return if the prefix has been set and it's not the default one
-bool isPrefixSet()
-{
-   uint8_t i,j;
+bool isPrefixSet() {
+   uint8_t i;
+   uint8_t j;
+   
    j=0;
    for (i=0;i<8;i++) {
-      if(idmanager_vars.myPrefix.prefix[i]!= 0x00)
-      {
-        j=1;
-        break;
+      if(idmanager_vars.myPrefix.prefix[i]!= 0x00) {
+         j=1;
+         break;
       }
    }
    
-   if(j==1)
-    return TRUE; 
-   else
-     return FALSE;
-  
+   if(j==1) {
+      return TRUE; 
+   } else {
+      return FALSE;
+   }
 }
 
 //=========================== private =========================================

@@ -28,6 +28,7 @@ void icmpv6echo_trigger() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer[16];
    OpenQueueEntry_t* msg;
+   
    //get command from OpenSerial (16B IPv6 destination address)
    number_bytes_from_input_buffer = openserial_getInputBuffer(&(input_buffer[0]),sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
@@ -38,6 +39,7 @@ void icmpv6echo_trigger() {
    };
    icmpv6echo_vars.hisAddress.type  = ADDR_128B;
    memcpy(&(icmpv6echo_vars.hisAddress.addr_128b[0]),&(input_buffer[0]),16);
+   
    //send
    if (icmpv6echo_vars.busySending==TRUE) {
       openserial_printError(COMPONENT_ICMPv6ECHO,ERR_BUSY_SENDING,

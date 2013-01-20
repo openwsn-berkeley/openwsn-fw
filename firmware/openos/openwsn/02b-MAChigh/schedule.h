@@ -119,20 +119,20 @@ void               schedule_addActiveSlot(
                         open_addr_t*   neighbor
                    );
 // from IEEE802154E
- void              schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
- void              schedule_advanceSlot();
- slotOffset_t      schedule_getNextActiveSlotOffset();
- frameLength_t     schedule_getFrameLength();
- cellType_t        schedule_getType();
- void              schedule_getNeighbor(open_addr_t* addrToWrite);
- channelOffset_t   schedule_getChannelOffset();
- bool              schedule_getOkToSend();
- void              schedule_indicateRx(asn_t*   asnTimestamp);
- void              schedule_indicateTx(
+void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
+void               schedule_advanceSlot();
+slotOffset_t       schedule_getNextActiveSlotOffset();
+frameLength_t      schedule_getFrameLength();
+cellType_t         schedule_getType();
+void               schedule_getNeighbor(open_addr_t* addrToWrite);
+channelOffset_t    schedule_getChannelOffset();
+bool               schedule_getOkToSend();
+void               schedule_indicateRx(asn_t*   asnTimestamp);
+void               schedule_indicateTx(
                         asn_t*    asnTimestamp,
                         bool      succesfullTx
                    );
- void              schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist);
+void               schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist);
 
 /**
 \}

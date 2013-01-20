@@ -7,13 +7,13 @@
 #include "msp430f1611.h"
 #include "board.h"
 // bsp modules
+#include "debugpins.h"
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
 #include "bsp_timer.h"
 #include "radio.h"
 #include "radiotimer.h"
-#include "debugpins.h"
 
 //=========================== variables =======================================
 

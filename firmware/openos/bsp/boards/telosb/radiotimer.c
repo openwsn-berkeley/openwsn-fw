@@ -5,8 +5,6 @@
 */
 
 #include "msp430f1611.h"
-#include "stdio.h"
-#include "string.h"
 #include "radiotimer.h"
 
 //=========================== variables =======================================

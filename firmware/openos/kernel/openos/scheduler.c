@@ -35,7 +35,7 @@ scheduler_dbg_t scheduler_dbg;
 
 //=========================== prototypes ======================================
 
- void    consumeTask(uint8_t taskId);
+void consumeTask(uint8_t taskId);
 
 //=========================== public ==========================================
 
@@ -111,6 +111,7 @@ void scheduler_start() {
    if (scheduler_dbg.numTasksCur>scheduler_dbg.numTasksMax) {
       scheduler_dbg.numTasksMax   = scheduler_dbg.numTasksCur;
    }
+   
    ENABLE_INTERRUPTS();
 }
 

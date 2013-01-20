@@ -122,6 +122,7 @@ typedef void (*callbackTimer_t)(void);
 typedef void (*callbackSendDone_t)(OpenQueueEntry_t* msg, error_t error);
 
 typedef struct coap_resource_desc_t coap_resource_desc_t;
+
 struct coap_resource_desc_t {
    uint8_t               path0len;
    uint8_t*              path0val;

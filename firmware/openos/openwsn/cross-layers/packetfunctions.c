@@ -113,46 +113,50 @@ bool packetfunctions_isBroadcastMulticast(open_addr_t* address) {
 }
 
 bool packetfunctions_isAllRoutersMulticast(open_addr_t* address) {
-   if (address->type          == ADDR_128B &&
-         address->addr_128b[0]  == 0xff &&
-         address->addr_128b[1]  == 0x02 &&
-         address->addr_128b[2]  == 0x00 &&
-         address->addr_128b[3]  == 0x00 &&
-         address->addr_128b[4]  == 0x00 &&
-         address->addr_128b[5]  == 0x00 &&
-         address->addr_128b[6]  == 0x00 &&
-         address->addr_128b[7]  == 0x00 &&
-         address->addr_128b[8]  == 0x00 &&
-         address->addr_128b[9]  == 0x00 &&
-         address->addr_128b[10] == 0x00 &&
-         address->addr_128b[11] == 0x00 &&
-         address->addr_128b[12] == 0x00 &&
-         address->addr_128b[13] == 0x00 &&
-         address->addr_128b[14] == 0x00 &&
-         address->addr_128b[15] == 0x02) {
+   if (
+      address->type          == ADDR_128B &&
+      address->addr_128b[0]  == 0xff &&
+      address->addr_128b[1]  == 0x02 &&
+      address->addr_128b[2]  == 0x00 &&
+      address->addr_128b[3]  == 0x00 &&
+      address->addr_128b[4]  == 0x00 &&
+      address->addr_128b[5]  == 0x00 &&
+      address->addr_128b[6]  == 0x00 &&
+      address->addr_128b[7]  == 0x00 &&
+      address->addr_128b[8]  == 0x00 &&
+      address->addr_128b[9]  == 0x00 &&
+      address->addr_128b[10] == 0x00 &&
+      address->addr_128b[11] == 0x00 &&
+      address->addr_128b[12] == 0x00 &&
+      address->addr_128b[13] == 0x00 &&
+      address->addr_128b[14] == 0x00 &&
+      address->addr_128b[15] == 0x02
+   ) {
       return TRUE;
    }
    return FALSE;
 }
 
 bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
-   if (address->type          == ADDR_128B &&
-         address->addr_128b[0]  == 0xff &&
-         address->addr_128b[1]  == 0x02 &&
-         address->addr_128b[2]  == 0x00 &&
-         address->addr_128b[3]  == 0x00 &&
-         address->addr_128b[4]  == 0x00 &&
-         address->addr_128b[5]  == 0x00 &&
-         address->addr_128b[6]  == 0x00 &&
-         address->addr_128b[7]  == 0x00 &&
-         address->addr_128b[8]  == 0x00 &&
-         address->addr_128b[9]  == 0x00 &&
-         address->addr_128b[10] == 0x00 &&
-         address->addr_128b[11] == 0x00 &&
-         address->addr_128b[12] == 0x00 &&
-         address->addr_128b[13] == 0x00 &&
-         address->addr_128b[14] == 0x00 &&
-         address->addr_128b[15] == 0x01) {
+   if (
+      address->type          == ADDR_128B &&
+      address->addr_128b[0]  == 0xff &&
+      address->addr_128b[1]  == 0x02 &&
+      address->addr_128b[2]  == 0x00 &&
+      address->addr_128b[3]  == 0x00 &&
+      address->addr_128b[4]  == 0x00 &&
+      address->addr_128b[5]  == 0x00 &&
+      address->addr_128b[6]  == 0x00 &&
+      address->addr_128b[7]  == 0x00 &&
+      address->addr_128b[8]  == 0x00 &&
+      address->addr_128b[9]  == 0x00 &&
+      address->addr_128b[10] == 0x00 &&
+      address->addr_128b[11] == 0x00 &&
+      address->addr_128b[12] == 0x00 &&
+      address->addr_128b[13] == 0x00 &&
+      address->addr_128b[14] == 0x00 &&
+      address->addr_128b[15] == 0x01
+   ) {
       return TRUE;
    }
    return FALSE;
@@ -160,6 +164,7 @@ bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
 
 bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2) {
    uint8_t address_length;
+   
    if (address_1->type!=address_2->type) {
       return FALSE;
    }
@@ -196,6 +201,7 @@ bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2)
 void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* writeToAddress, bool littleEndian) {
    uint8_t i;
    uint8_t address_length;
+   
    writeToAddress->type = type;
    switch (type) {
       case ADDR_16B:
@@ -215,6 +221,7 @@ void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* wr
                                (errorparameter_t)6);
          return;
    }
+   
    for (i=0;i<address_length;i++) {
       if (littleEndian) {
          writeToAddress->addr_128b[address_length-1-i] = *(payload+i);
@@ -227,6 +234,7 @@ void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* wr
 void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, bool littleEndian) {
    uint8_t i;
    uint8_t address_length;
+   
    switch (address->type) {
       case ADDR_16B:
       case ADDR_PANID:
@@ -245,6 +253,7 @@ void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, b
                                (errorparameter_t)7);
          return;
    }
+   
    for (i=0;i<address_length;i++) {
       msg->payload      -= sizeof(uint8_t);
       msg->length       += sizeof(uint8_t);
@@ -267,6 +276,7 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_len
                             (errorparameter_t)pkt->length);
    }
 }
+
 void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length) {
    pkt->payload += header_length;
    pkt->length  -= header_length;
@@ -285,6 +295,7 @@ void packetfunctions_reserveFooterSize(OpenQueueEntry_t* pkt, uint8_t header_len
                             (errorparameter_t)pkt->length);
    }
 }
+
 void packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length) {
    pkt->length  -= header_length;
    if (pkt->length>128) {//wraps around, so a negative value will be >128
@@ -415,17 +426,20 @@ void packetfunctions_htons( uint16_t val, uint8_t* dest ) {
    dest[0] = (val & 0xff00) >> 8;
    dest[1] = (val & 0x00ff);
 }
+
 uint16_t packetfunctions_ntohs( uint8_t* src ) {
    return (((uint16_t) src[0]) << 8) |
       (((uint16_t) src[1])
       );
 }
+
 void packetfunctions_htonl( uint32_t val, uint8_t* dest ) {
    dest[0] = (val & 0xff000000) >> 24;
    dest[1] = (val & 0x00ff0000) >> 16;
    dest[2] = (val & 0x0000ff00) >> 8;
    dest[3] = (val & 0x000000ff);
 }
+
 uint32_t packetfunctions_ntohl( uint8_t* src ) {
    return (((uint32_t) src[0]) << 24) |
       (((uint32_t) src[1]) << 16)     |

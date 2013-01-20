@@ -9,9 +9,9 @@
 //=========================== variables =======================================
 
 typedef struct {
-bool        busySending;
-open_addr_t hisAddress;
-uint16_t    seq;
+   bool        busySending;
+   open_addr_t hisAddress;
+   uint16_t    seq;
 } icmpv6router_vars_t;
 
 icmpv6router_vars_t icmpv6router_vars;
@@ -29,6 +29,7 @@ void icmpv6router_trigger() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer[16];
    OpenQueueEntry_t* msg;
+   
    //get command from OpenSerial (16B IPv6 destination address)
    number_bytes_from_input_buffer = openserial_getInputBuffer(&(input_buffer[0]),sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
@@ -56,11 +57,11 @@ void icmpv6router_trigger() {
          return;
       }
       //admin
-      msg->creator                               = COMPONENT_ICMPv6ROUTER;
-      msg->owner                                 = COMPONENT_ICMPv6ROUTER;
+      msg->creator                          = COMPONENT_ICMPv6ROUTER;
+      msg->owner                            = COMPONENT_ICMPv6ROUTER;
       //l4
-      msg->l4_protocol                           = IANA_ICMPv6;
-      msg->l4_sourcePortORicmpv6Type             = IANA_ICMPv6_RS;
+      msg->l4_protocol                      = IANA_ICMPv6;
+      msg->l4_sourcePortORicmpv6Type        = IANA_ICMPv6_RS;
       //l3
       msg->l3_destinationAdd.type           = ADDR_128B;
       msg->l3_destinationAdd.addr_128b[0]   = 0xff;
@@ -81,8 +82,8 @@ void icmpv6router_trigger() {
       msg->l3_destinationAdd.addr_128b[15]  = 0x02;
       //ICMPv6 header
       packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
-      ((ICMPv6_ht*)(msg->payload))->type         = msg->l4_sourcePortORicmpv6Type;
-      ((ICMPv6_ht*)(msg->payload))->code         = 0;
+      ((ICMPv6_ht*)(msg->payload))->type    = msg->l4_sourcePortORicmpv6Type;
+      ((ICMPv6_ht*)(msg->payload))->code    = 0;
       // Below Identifier might need to be replaced by the identifier used by icmpv6rpl
       // packetfunctions_htons(0x1234       ,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->identifier);
       // Below sequence_number might need to be removed

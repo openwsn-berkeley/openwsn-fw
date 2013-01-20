@@ -7,6 +7,4 @@
 #ifndef __openwsn_H
 #define __openwsn_H
 
-#include "openwsn.h"
-
 #endif

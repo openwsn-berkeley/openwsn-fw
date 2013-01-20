@@ -7,7 +7,6 @@ On TelosB, we use timerA0 for the bsp_timer module.
 */
 
 #include "msp430f1611.h"
-#include "string.h"
 #include "bsp_timer.h"
 #include "board.h"
 #include "board_info.h"
@@ -125,7 +124,6 @@ void bsp_timer_cancel_schedule() {
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
    return TBR;
 }
-
 
 //=========================== private =========================================
 
