@@ -1,9 +1,7 @@
 #include "openwsn.h"
 #include "schedule.h"
 #include "openserial.h"
-#include "idmanager.h"
 #include "openrandom.h"
-#include "board_info.h"
 
 //=========================== variables =======================================
 

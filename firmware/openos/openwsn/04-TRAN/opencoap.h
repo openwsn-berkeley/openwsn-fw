@@ -27,7 +27,7 @@ static const uint8_t ipAddr_local[]     = {0x26, 0x07, 0xf1, 0x40, 0x04, 0x00, 0
 static const uint8_t ipAddr_motedata[]  = {0x20, 0x01, 0x04, 0x70, 0x00, 0x66, 0x00, 0x17, \
                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02};
 
-/// the maxmum number of options in a RX'ed CoAP message
+/// the maximum number of options in a RX'ed CoAP message
 #define MAX_COAP_OPTIONS               3
 
 #define COAP_VERSION                   1

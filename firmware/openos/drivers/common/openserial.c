@@ -4,18 +4,13 @@
 \author Fabien Chraim <chraim@eecs.berkeley.edu>, March 2012.
 */
 
-#include "board.h"
 #include "openwsn.h"
-#include "IEEE802154E.h"
 #include "openserial.h"
+#include "IEEE802154E.h"
 #include "neighbors.h"
 #include "res.h"
-#include "iphc.h"
-#include "forwarding.h"
-#include "icmpv6.h"
 #include "icmpv6echo.h"
 #include "icmpv6router.h"
-#include "icmpv6rpl.h"
 #include "idmanager.h"
 #include "openqueue.h"
 #include "tcpinject.h"

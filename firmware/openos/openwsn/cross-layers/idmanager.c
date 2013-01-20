@@ -1,10 +1,10 @@
 #include "openwsn.h"
-#include "eui64.h"
 #include "idmanager.h"
+#include "eui64.h"
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "neighbors.h"
-#include "board_info.h"
+
 //=========================== variables =======================================
 
 typedef struct {

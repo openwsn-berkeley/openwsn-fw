@@ -13,8 +13,6 @@
 #include "neighbors.h"
 #include "debugpins.h"
 #include "res.h"
-#include "board.h"
-#include "stdlib.h"
 
 //=========================== variables =======================================
 

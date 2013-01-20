@@ -4,9 +4,9 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "board.h"
-#include "scheduler.h"
 #include "openwsn.h"
+#include "scheduler.h"
+#include "board.h"
 #include "debugpins.h"
 
 //=========================== variables =======================================

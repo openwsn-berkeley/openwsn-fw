@@ -1,6 +1,15 @@
 #ifndef __ICMPv6RPL_H
 #define __ICMPv6RPL_H
 
+/**
+\addtogroup IPv6
+\{
+\addtogroup ICMPv6RPL
+\{
+*/
+
+//=========================== define ==========================================
+
 #define MOP_DIO_A                 1<<5
 #define MOP_DIO_B                 1<<4
 #define MOP_DIO_C                 1<<3
@@ -35,18 +44,7 @@
 #define Prf_A_dio_options         0<<4
 #define Prf_B_dio_options         0<<3
 
-/**
-\addtogroup IPv6
-\{
-\addtogroup ICMPv6RPL
-\{
-*/
-
-//=========================== define ==========================================
-
 //=========================== typedef =========================================
-
-//=========================== variables =======================================
 
 //===== DIO
 

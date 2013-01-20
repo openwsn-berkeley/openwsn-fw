@@ -8,8 +8,7 @@
 \{
 */
 
-#include "stdint.h"
-#include "radio.h"
+#include "openwsn.h"
 
 //=========================== define ==========================================
 
