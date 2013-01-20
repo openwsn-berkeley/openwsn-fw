@@ -12,11 +12,12 @@
 
 //=========================== define ==========================================
 
-#define SourceFWNxtHdr            43 //RFC2460 page 11
+// RFC2460 page 11
+#define SOURCEFWNXTHDR 43
 
 enum {
-   PCKTFORWARD                           = 1,          
-   PCKTSEND                              = 2,
+   PCKTFORWARD     = 1,          
+   PCKTSEND        = 2,
 };
 
 //=========================== typedef =========================================
