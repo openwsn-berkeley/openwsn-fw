@@ -20,6 +20,9 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry);
 
 //======= admin
 
+/**
+\brief Initialize this module.
+*/
 void openqueue_init() {
    uint8_t i;
    for (i=0;i<QUEUELENGTH;i++){
@@ -48,20 +51,36 @@ bool debugPrint_queue() {
 
 //======= called by any component
 
- OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
+/**
+\brief Request a new (free) packet buffer.
+
+Component throughout the protocol stack can call this function is they want to
+get a new packet buffer to start creating a new packet.
+
+\note Once a packet has been allocated, it is up to the creator of the packet
+      to free it using the openqueue_freePacketBuffer() function.
+
+\returns A pointer to the queue entry when it could be allocated, or NULL when
+         it could not be allocated (buffer full or not synchronized).
+*/
+OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   //enable only allocation of free buffers to MAC layer in case we are not sync
+   
+   // refuse to allocate if we're not in sync
    if (ieee154e_isSynch()==FALSE && creator > COMPONENT_IEEE802154E){
      ENABLE_INTERRUPTS();
      return NULL;
    }
-   //in synch or mac layer request
+   
+   // if you get here, I will try to allocate a buffer for you
+   
+   // walk through queue and find free entry
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
-         openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
          openqueue_vars.queue[i].creator=creator;
+         openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
          ENABLE_INTERRUPTS(); 
          return &openqueue_vars.queue[i];
       }
@@ -70,7 +89,16 @@ bool debugPrint_queue() {
    return NULL;
 }
 
- error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
+
+/**
+\brief Free a previously-allocated packet buffer.
+
+\param pkt A pointer to the previsouly-allocated packet buffer.
+
+\returns E_SUCCESS when the freeing was succeful.
+\returns E_FAIL when the module could not find the specified packet buffer.
+*/
+error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -95,18 +123,11 @@ bool debugPrint_queue() {
    return E_FAIL;
 }
 
-void openqueue_removeAllOwnedBy(uint8_t owner) {
-   uint8_t i;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   for (i=0;i<QUEUELENGTH;i++){
-      if (openqueue_vars.queue[i].owner==owner) {
-         openqueue_reset_entry(&(openqueue_vars.queue[i]));
-      }
-   }
-   ENABLE_INTERRUPTS();
-}
+/**
+\brief Free all the packet buffers created by a specific module.
 
+\param owner The identifier of the component, taken in COMPONENT_*.
+*/
 void openqueue_removeAllCreatedBy(uint8_t creator) {
    uint8_t i;
    INTERRUPT_DECLARATION();
@@ -119,9 +140,26 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    ENABLE_INTERRUPTS();
 }
 
+/**
+\brief Free all the packet buffers owned by a specific module.
+
+\param owner The identifier of the component, taken in COMPONENT_*.
+*/
+void openqueue_removeAllOwnedBy(uint8_t owner) {
+   uint8_t i;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++){
+      if (openqueue_vars.queue[i].owner==owner) {
+         openqueue_reset_entry(&(openqueue_vars.queue[i]));
+      }
+   }
+   ENABLE_INTERRUPTS();
+}
+
 //======= called by RES
 
- OpenQueueEntry_t* openqueue_resGetSentPacket() {
+OpenQueueEntry_t* openqueue_resGetSentPacket() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -136,7 +174,7 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    return NULL;
 }
 
- OpenQueueEntry_t* openqueue_resGetReceivedPacket() {
+OpenQueueEntry_t* openqueue_resGetReceivedPacket() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -153,7 +191,7 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
 
 //======= called by IEEE80215E
 
- OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
+OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -187,7 +225,7 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    return NULL;
 }
 
- OpenQueueEntry_t* openqueue_macGetAdvPacket() {
+OpenQueueEntry_t* openqueue_macGetAdvPacket() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -207,17 +245,17 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
 
 void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //admin
-   entry->creator                     = COMPONENT_NULL;
-   entry->owner                       = COMPONENT_NULL;
-   entry->payload                     = &(entry->packet[127]);
-   entry->length                      = 0;
+   entry->creator                      = COMPONENT_NULL;
+   entry->owner                        = COMPONENT_NULL;
+   entry->payload                      = &(entry->packet[127]);
+   entry->length                       = 0;
    //l4
-   entry->l4_protocol                 = IANA_UNDEFINED;
+   entry->l4_protocol                  = IANA_UNDEFINED;
    //l3
-   entry->l3_destinationAdd.type      = ADDR_NONE;
-   entry->l3_sourceAdd.type           = ADDR_NONE;
+   entry->l3_destinationAdd.type       = ADDR_NONE;
+   entry->l3_sourceAdd.type            = ADDR_NONE;
    //l2
-   entry->l2_nextORpreviousHop.type   = ADDR_NONE;
-   entry->l2_frameType                = IEEE154_TYPE_UNDEFINED;
-   entry->l2_retriesLeft              = 0;
+   entry->l2_nextORpreviousHop.type    = ADDR_NONE;
+   entry->l2_frameType                 = IEEE154_TYPE_UNDEFINED;
+   entry->l2_retriesLeft               = 0;
 }
