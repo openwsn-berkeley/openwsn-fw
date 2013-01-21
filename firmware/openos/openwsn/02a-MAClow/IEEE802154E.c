@@ -538,7 +538,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
          break;
       }
       
-      // parse the IEEE802.15.4 header
+      // parse the IEEE802.15.4 header (synchronize, end of frame)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
       
       // store header details in packet buffer
@@ -1009,7 +1009,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
          break;
       }
       
-      // parse the IEEE802.15.4 header
+      // parse the IEEE802.15.4 header (RX ACK)
       ieee802154_retrieveHeader(ieee154e_vars.ackReceived,&ieee802514_header);
       
       // store header details in packet buffer
@@ -1133,10 +1133,7 @@ port_INLINE void activity_rie3() {
 
 port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
-#ifdef FORCE_MULTIHOP  
-   bool res;
-   bool valAdv=FALSE;
-#endif
+   
    // change state
    changeState(S_TXACKOFFSET);
    
@@ -1191,7 +1188,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
          break;
       }
       
-      // parse the IEEE802.15.4 header
+      // parse the IEEE802.15.4 header (RX DATA)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
       
       // store header details in packet buffer
@@ -1201,33 +1198,17 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-#ifdef FORCE_MULTIHOP           
-       valAdv=FALSE;
-#endif       
+      
       // if I just received a valid ADV, record the ASN and toss the payload
       if (isValidAdv(&ieee802514_header)==TRUE) {
-#ifdef FORCE_MULTIHOP   
-         valAdv=TRUE;
-#endif            
          if (idmanager_getIsDAGroot()==FALSE) {
             asnStoreFromAdv(ieee154e_vars.dataReceived);
          }
          // toss the ADV payload
          packetfunctions_tossHeader(ieee154e_vars.dataReceived,ADV_PAYLOAD_LENGTH);
       }
-#ifdef FORCE_MULTIHOP     
-      //xv debug -- avoid ADV from other to  be parsed as a message.
-      res =(ieee802514_header.valid==TRUE && \
-          ieee802514_header.frameType==IEEE154_TYPE_BEACON);
-       
-      if (res && !valAdv){
-         // break if other ADV payload
-        break;
-      }
-#endif      
-      //end
       
-       // record the captured time
+      // record the captured time
       ieee154e_vars.lastCapturedTime = capturedTime;
       
       // if I just received an invalid frame, stop
@@ -1429,57 +1410,22 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
 /**
 \brief Decides whether the packet I just received is a valid ADV
 
-\param [in] ieee802514_header IEEE802.15.4 header of the packet I just received
+\param [in] ieee802514_header IEEE802.15.4 header of the packet I just
+            received.
+
+A valid ADV frame satisfies the following conditions:
+- its IEEE802.15.4 header is well formatted
+- it's a BEACON frame
+- it's sent to the my PANid
+- its payload length is the expected ADV payload length
 
 \returns TRUE if packet is a valid ADV, FALSE otherwise
 */
 port_INLINE bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
-   bool res;
-#ifdef FORCE_MULTIHOP
-   open_addr_t* add;
-#endif
-   res=ieee802514_header->valid==TRUE                                                              && \
-          ieee802514_header->frameType==IEEE154_TYPE_BEACON                                           && \
-          packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))        && \
+   return ieee802514_header->valid==TRUE                                                         && \
+          ieee802514_header->frameType==IEEE154_TYPE_BEACON                                      && \
+          packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))   && \
           ieee154e_vars.dataReceived->length==ADV_PAYLOAD_LENGTH;
-#ifdef FORCE_MULTIHOP 
-add=idmanager_getMyID(ADDR_64B);
-   
-#ifdef GINA_FORCE_MULTIHOP  
-   switch(add->addr_64b[7]){
-   case 0xC9:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xED);//only ADV from ED
-     break;
-   case 0xDC:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xD8);//only ADV from E8
-     break;
-   case 0xD8:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xC9);//only ADV from F5
-     break;
-   case 0x9B:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xDC);//only ADV from F5
-     break;
-   }
-#endif
-#ifdef TELOSB_FORCE_MULTIHOP
-   switch(add->addr_64b[7]){
-   case 0x51:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xB9);//only ADV from b9
-     break;
-   case 0x41:
-     res=res&(ieee802514_header->src.addr_64b[7]==0x51);//only ADV from 51
-     break;
-   case 0x80:
-     res=res&(ieee802514_header->src.addr_64b[7]==0x41);//only ADV from 41
-     break;
-   case 0xE1:
-     res=res&(ieee802514_header->src.addr_64b[7]==0x80);//only ADV from F5
-     break;
-   }
-#endif
-   
-#endif
- return res;
 }
 
 /**
@@ -1487,21 +1433,16 @@ add=idmanager_getMyID(ADDR_64B);
 
 A valid Rx frame satisfies the following constraints:
 - its IEEE802.15.4 header is well formatted
-- its a DATA of BEACON frame (i.e. not ACK and not COMMAND)
-- its sent on the same PANid as mine
-- its for me (unicast or broadcast)
-- 
+- it's a DATA of BEACON frame (i.e. not ACK and not COMMAND)
+- it's sent on the same PANid as mine
+- it's for me (unicast or broadcast)
 
 \param [in] ieee802514_header IEEE802.15.4 header of the packet I just received
 
 \returns TRUE if packet is valid received frame, FALSE otherwise
 */
 port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
-   bool res;
-#ifdef FORCE_MULTIHOP  
-   open_addr_t* add;
-#endif
-   res=ieee802514_header->valid==TRUE                                                           && \
+   return ieee802514_header->valid==TRUE                                                           && \
           (
              ieee802514_header->frameType==IEEE154_TYPE_DATA                   ||
              ieee802514_header->frameType==IEEE154_TYPE_BEACON
@@ -1511,48 +1452,6 @@ port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
              idmanager_isMyAddress(&ieee802514_header->dest)                   ||
              packetfunctions_isBroadcastMulticast(&ieee802514_header->dest)
           );
-#ifdef FORCE_MULTIHOP   
-   add=idmanager_getMyID(ADDR_64B);
-#ifdef GINA_FORCE_MULTIHOP   
-   switch(add->addr_64b[7]){ 
-   case 0xED:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xC9);//only PKT from EC
-     break;  
-   case 0xC9:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xED ||ieee802514_header->src.addr_64b[7]==0xD8);//only PKT from ED or E8
-     break;
-   case 0xD8:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xC9||ieee802514_header->src.addr_64b[7]==0xDC);//only PKT from E8 or F5
-     break;
-   case 0xDC:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xD8||ieee802514_header->src.addr_64b[7]==0x9B);//only PKT from F5
-     break;
-   case 0x9B:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xDC);//only PKT from F5
-     break;
-   }
-#endif      
-#ifdef TELOSB_FORCE_MULTIHOP   
-   switch(add->addr_64b[7]){ 
-   case 0xB9:
-     res=res&(ieee802514_header->src.addr_64b[7]==0x51);//only PKT from EC
-     break;  
-   case 0x51:
-     res=res&(ieee802514_header->src.addr_64b[7]==0xB9 ||ieee802514_header->src.addr_64b[7]==0x41);//only PKT from ED or E8
-     break;
-   case 0x41:
-     res=res&(ieee802514_header->src.addr_64b[7]==0x51||ieee802514_header->src.addr_64b[7]==0x80);//only PKT from E8 or F5
-     break;
-   case 0x80:
-     res=res&(ieee802514_header->src.addr_64b[7]==0x41||ieee802514_header->src.addr_64b[7]==0xE1);//only PKT from F5
-     break;
-   case 0xE1:
-     res=res&(ieee802514_header->src.addr_64b[7]==0x80);//only PKT from F5
-     break;
-   }
-#endif
-#endif   
-   return res;
 }
 
 /**

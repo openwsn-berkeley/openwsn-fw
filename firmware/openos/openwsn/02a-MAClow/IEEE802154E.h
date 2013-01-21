@@ -13,14 +13,6 @@
 
 //=========================== debug define ====================================
 
-/*
-To debug the behavior of the stack in a multi-hop setting, uncomment the define
-below.
-*/
-//#define FORCE_MULTIHOP 
-//#define GINA_FORCE_MULTIHOP
-//#define TELOSB_FORCE_MULTIHOP
-
 //=========================== define ==========================================
 
 #define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
