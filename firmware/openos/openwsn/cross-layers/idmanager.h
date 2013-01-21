@@ -37,8 +37,10 @@ error_t      idmanager_setMyID(open_addr_t* newID);
 bool         idmanager_isMyAddress(open_addr_t* addr);
 void         idmanager_triggerAboutBridge();
 void         idmanager_triggerAboutRoot();
+
+
 bool         debugPrint_id();
-bool         isPrefixSet();
+
 
 /**
 \}

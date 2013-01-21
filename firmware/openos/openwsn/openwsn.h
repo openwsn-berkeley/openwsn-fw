@@ -224,7 +224,7 @@ enum {
    ERR_WRONG_ADDR_TYPE                 = 0x28, // wrong address type {0} (code location {1})
    ERR_BRIDGE_MISMATCH                 = 0x29, // isBridge mismatch (code location {0})
    ERR_HEADER_TOO_LONG                 = 0x2a, // header too long, length {1} (code location {0})
-   ERR_INPUTBUFFER_LENGTH              = 0x2ab, // input length problem, length={0}
+   ERR_INPUTBUFFER_LENGTH              = 0x2b, // input length problem, length={0}
 };
 
 //=========================== typedef =========================================

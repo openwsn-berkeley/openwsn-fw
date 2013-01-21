@@ -266,24 +266,5 @@ bool debugPrint_id() {
    return TRUE;
 }
 
-// function return if the prefix has been set and it's not the default one
-bool isPrefixSet() {
-   uint8_t i;
-   uint8_t j;
-   
-   j=0;
-   for (i=0;i<8;i++) {
-      if(idmanager_vars.myPrefix.prefix[i]!= 0x00) {
-         j=1;
-         break;
-      }
-   }
-   
-   if(j==1) {
-      return TRUE; 
-   } else {
-      return FALSE;
-   }
-}
 
 //=========================== private =========================================
