@@ -541,6 +541,12 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       // parse the IEEE802.15.4 header (synchronize, end of frame)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
       
+      // break if invalid IEEE802.15.4 header
+      if (ieee802514_header.valid==FALSE) {
+         // break from the do-while loop and execute the clean-up code below
+         break;
+      }
+      
       // store header details in packet buffer
       ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
@@ -549,40 +555,43 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
       
-      // if I just received a valid ADV, handle
-      if (isValidAdv(&ieee802514_header)==TRUE) {
-         // turn off the radio
-         radio_rfOff();
-         
-         // record the ASN from the ADV payload
-         asnStoreFromAdv(ieee154e_vars.dataReceived);
-         
-         // toss the ADV payload
-         packetfunctions_tossHeader(ieee154e_vars.dataReceived,ADV_PAYLOAD_LENGTH);
-         
-         // synchronize (for the first time) to the sender's ADV
-         synchronizePacket(ieee154e_vars.syncCapturedTime);
-         
-         // declare synchronized
-         changeIsSync(TRUE);
-         
-         // log the "error"
-         openserial_printError(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
-                               (errorparameter_t)ieee154e_vars.slotOffset,
-                               (errorparameter_t)0);
-         
-         // send received ADV up the stack so RES can update statistics (synchronizing)
-         notif_receive(ieee154e_vars.dataReceived);
-         
-         // clear local variable
-         ieee154e_vars.dataReceived = NULL;
-         
-         // official end of synchronization
-         endSlot();
-         
-         // everything went well, return here not to execute the error code below
-         return;
+      // break if invalid ADV
+      if (isValidAdv(&ieee802514_header)==FALSE) {
+         // break from the do-while loop and execute the clean-up code below
+         break;
       }
+      
+      // turn off the radio
+      radio_rfOff();
+      
+      // record the ASN from the ADV payload
+      asnStoreFromAdv(ieee154e_vars.dataReceived);
+      
+      // toss the ADV payload
+      packetfunctions_tossHeader(ieee154e_vars.dataReceived,ADV_PAYLOAD_LENGTH);
+      
+      // synchronize (for the first time) to the sender's ADV
+      synchronizePacket(ieee154e_vars.syncCapturedTime);
+      
+      // declare synchronized
+      changeIsSync(TRUE);
+      
+      // log the "error"
+      openserial_printError(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
+                            (errorparameter_t)ieee154e_vars.slotOffset,
+                            (errorparameter_t)0);
+      
+      // send received ADV up the stack so RES can update statistics (synchronizing)
+      notif_receive(ieee154e_vars.dataReceived);
+      
+      // clear local variable
+      ieee154e_vars.dataReceived = NULL;
+      
+      // official end of synchronization
+      endSlot();
+      
+      // everything went well, return here not to execute the error code below
+      return;
    } while (0);
    
    // free the (invalid) received data buffer so RAM memory can be recycled
@@ -1012,6 +1021,12 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
       // parse the IEEE802.15.4 header (RX ACK)
       ieee802154_retrieveHeader(ieee154e_vars.ackReceived,&ieee802514_header);
       
+      // break if invalid IEEE802.15.4 header
+      if (ieee802514_header.valid==FALSE) {
+         // break from the do-while loop and execute the clean-up code below
+         break;
+      }
+      
       // store header details in packet buffer
       ieee154e_vars.ackReceived->l2_frameType  = ieee802514_header.frameType;
       ieee154e_vars.ackReceived->l2_dsn        = ieee802514_header.dsn;
@@ -1020,27 +1035,29 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
       
-      // if frame is a valid ACK, handle
-      if (isValidAck(&ieee802514_header,ieee154e_vars.dataToSend)==TRUE) {
-         
-         // resynchronize if I'm not a DAGroot and ACK from preferred parent
-         if (idmanager_getIsDAGroot()==FALSE &&
-             neighbors_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop)) ) {
-            byte0 = ieee154e_vars.ackReceived->payload[0];
-            byte1 = ieee154e_vars.ackReceived->payload[1];
-            timeCorrection  = (PORT_SIGNED_INT_WIDTH)((PORT_TIMER_WIDTH)byte1<<8 | (PORT_TIMER_WIDTH)byte0);
-            timeCorrection /=  US_PER_TICK;
-            timeCorrection  = -timeCorrection;
-            synchronizeAck(timeCorrection);
-         }
-         
-         // inform schedule of successful transmission
-         schedule_indicateTx(&ieee154e_vars.asn,TRUE);
-         
-         // inform upper layer
-         notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
-         ieee154e_vars.dataToSend = NULL;
+      // break if invalid ACK
+      if (isValidAck(&ieee802514_header,ieee154e_vars.dataToSend)==FALSE) {
+         // break from the do-while loop and execute the clean-up code below
+         break;
       }
+      
+      // resynchronize if I'm not a DAGroot and ACK from preferred parent
+      if (idmanager_getIsDAGroot()==FALSE &&
+          neighbors_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop)) ) {
+         byte0 = ieee154e_vars.ackReceived->payload[0];
+         byte1 = ieee154e_vars.ackReceived->payload[1];
+         timeCorrection  = (PORT_SIGNED_INT_WIDTH)((PORT_TIMER_WIDTH)byte1<<8 | (PORT_TIMER_WIDTH)byte0);
+         timeCorrection /=  US_PER_TICK;
+         timeCorrection  = -timeCorrection;
+         synchronizeAck(timeCorrection);
+      }
+      
+      // inform schedule of successful transmission
+      schedule_indicateTx(&ieee154e_vars.asn,TRUE);
+      
+      // inform upper layer
+      notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
+      ieee154e_vars.dataToSend = NULL;
       
       // in any case, execute the clean-up code below
    } while (0);
@@ -1191,6 +1208,12 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       // parse the IEEE802.15.4 header (RX DATA)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
       
+      // break if invalid IEEE802.15.4 header
+      if (ieee802514_header.valid==FALSE) {
+         // break from the do-while loop and execute the clean-up code below
+         break;
+      }
+      
       // store header details in packet buffer
       ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
@@ -1199,7 +1222,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
       
-      // if I just received a valid ADV, record the ASN and toss the payload
+      // if I just received a valid ADV, record the ASN and toss the ADV payload
       if (isValidAdv(&ieee802514_header)==TRUE) {
          if (idmanager_getIsDAGroot()==FALSE) {
             asnStoreFromAdv(ieee154e_vars.dataReceived);
