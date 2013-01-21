@@ -170,7 +170,7 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
    case ADDR_PANID:
       res= packetfunctions_sameAddress(addr,&idmanager_vars.myPANID);
       ENABLE_INTERRUPTS();
-            return res;
+      return res;
    case ADDR_PREFIX:
       res= packetfunctions_sameAddress(addr,&idmanager_vars.myPrefix);
       ENABLE_INTERRUPTS();
