@@ -91,14 +91,15 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
             openserial_printError(COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
                                   (errorparameter_t)msg->l4_protocol,
                                   (errorparameter_t)1);
+            openqueue_freePacketBuffer(msg);
       }
-   } else { //relay
+   } else {//relay
       memcpy(&(msg->l3_destinationAdd),&ipv6_header.dest,sizeof(open_addr_t));
-      //because initially contains source
+      // because initially contains source
       memcpy(&(msg->l3_sourceAdd),&ipv6_header.src,sizeof(open_addr_t)); 
       // change the creator to this components (should have been MAC)
       msg->creator = COMPONENT_FORWARDING;
-      if(ipv6_header.next_header !=SOURCEFWNXTHDR) {
+      if (ipv6_header.next_header!=SOURCEFWNXTHDR) {
          // resend as if from upper layer 
          if (fowarding_send_internal(msg, ipv6_header,PCKTFORWARD)==E_FAIL) {
             openqueue_freePacketBuffer(msg);
