@@ -229,8 +229,6 @@ enum {
 
 //=========================== typedef =========================================
 
-typedef uint16_t  shortnodeid_t;
-typedef uint64_t  longnodeid_t;
 typedef uint16_t  errorparameter_t;
 typedef uint16_t  dagrank_t;
 typedef uint8_t   error_t;
