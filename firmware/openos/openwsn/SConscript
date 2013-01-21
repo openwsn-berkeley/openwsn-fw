@@ -39,8 +39,8 @@ localEnv.Append(
         os.path.join('#','firmware','openos','openwsn','07-App','udpinject'),
         os.path.join('#','firmware','openos','openwsn','07-App','udpprint'),
         os.path.join('#','firmware','openos','openwsn','07-App','udprand'),
-		os.path.join('#','firmware','openos','openwsn','07-App','udplatency'),
-	    os.path.join('#','firmware','openos','openwsn','07-App','udpstorm'),
+        os.path.join('#','firmware','openos','openwsn','07-App','udplatency'),
+        os.path.join('#','firmware','openos','openwsn','07-App','udpstorm'),
         os.path.join('#','firmware','openos','openwsn','cross-layers'),
     ],
 )
@@ -48,6 +48,7 @@ localEnv.Append(
 source = [
     'openwsn.c',
     #=== 02a-MAClow
+    os.path.join('02a-MAClow','topology.c'),
     os.path.join('02a-MAClow','IEEE802154.c'),
     os.path.join('02a-MAClow','IEEE802154E.c'),
     #=== 02b-MAChigh

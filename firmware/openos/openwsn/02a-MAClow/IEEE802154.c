@@ -3,6 +3,7 @@
 #include "packetfunctions.h"
 #include "idmanager.h"
 #include "openserial.h"
+#include "topology.h"
 
 //=========================== variables =======================================
 
@@ -105,7 +106,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    
    ieee802514_header->headerLength = 0;
    // fcf, byte 1
-   if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
+   if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    temp_8b = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
    ieee802514_header->frameType         = (temp_8b >> IEEE154_FCF_FRAME_TYPE      ) & 0x07;//3b
    ieee802514_header->securityEnabled   = (temp_8b >> IEEE154_FCF_SECURITY_ENABLED) & 0x01;//1b
@@ -114,7 +115,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    ieee802514_header->panIDCompression  = (temp_8b >> IEEE154_FCF_INTRAPAN        ) & 0x01;//1b
    ieee802514_header->headerLength += 1;
    // fcf, byte 2
-   if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
+   if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    temp_8b = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
    switch ( (temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03 ) {
       case IEEE154_ADDR_NONE:
@@ -130,7 +131,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          openserial_printError(COMPONENT_IEEE802154,ERR_IEEE154_UNSUPPORTED,
                                (errorparameter_t)1,
                                (errorparameter_t)(temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03);
-         break;
+         return; // this is an invalid packet, return
    }
    switch ( (temp_8b >> IEEE154_FCF_SRC_ADDR_MODE ) & 0x03 ) {
       case IEEE154_ADDR_NONE:
@@ -146,22 +147,22 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          openserial_printError(COMPONENT_IEEE802154,ERR_IEEE154_UNSUPPORTED,
                                (errorparameter_t)2,
                                (errorparameter_t)(temp_8b >> IEEE154_FCF_SRC_ADDR_MODE ) & 0x03);
-         break;
+         return; // this is an invalid packet, return
    }
    ieee802514_header->headerLength += 1;
    // sequenceNumber
-   if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
+   if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    ieee802514_header->dsn  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
    ieee802514_header->headerLength += 1;
    // panID
-   if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
+   if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
                                ADDR_PANID,
                                &ieee802514_header->panid,
                                LITTLE_ENDIAN);
    ieee802514_header->headerLength += 2;
    // dest
-   if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
+   if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    switch (ieee802514_header->dest.type) {
       case ADDR_NONE:
          break;
@@ -206,6 +207,11 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
          break;
       // no need for a default, since case would have been caught above
+   }
+   // apply topology filter
+   if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {
+      // the topology filter does accept this packet, return
+      return;
    }
    // if you reach this, the header is valid
    ieee802514_header->valid=TRUE;

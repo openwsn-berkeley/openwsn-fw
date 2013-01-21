@@ -2117,6 +2117,12 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.h</name>
       </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.h</name>
+      </file>
     </group>
     <group>
       <name>02b-MAChigh</name>

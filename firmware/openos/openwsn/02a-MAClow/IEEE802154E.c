@@ -592,6 +592,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       
       // everything went well, return here not to execute the error code below
       return;
+      
    } while (0);
    
    // free the (invalid) received data buffer so RAM memory can be recycled
@@ -1059,7 +1060,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
       notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
       ieee154e_vars.dataToSend = NULL;
       
-      // in any case, execute the clean-up code below
+      // in any case, execute the clean-up code below (processing of ACK done)
    } while (0);
    
    // free the received ack so corresponding RAM memory can be recycled
@@ -1723,8 +1724,8 @@ different channel offsets in the same slot.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    // comment the following line out to disable channel hopping
-   //return SYNCHRONIZING_CHANNEL; // single channel
-   return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
+   return SYNCHRONIZING_CHANNEL; // single channel
+   //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
 
 /**
