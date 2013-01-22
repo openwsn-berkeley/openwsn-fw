@@ -117,6 +117,24 @@ bool debugPrint_schedule() {
    return TRUE;
 }
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
+bool debugPrint_backoff() {
+   uint8_t temp[2];
+   temp[0] = schedule_vars.backoffExponent;
+   temp[1] = schedule_vars.backoff;
+   openserial_printStatus(STATUS_BACKOFF,
+         (uint8_t*)&temp,
+         sizeof(temp));
+   return TRUE;
+}
+
 //=== from uRES (writing the schedule)
 
 /**

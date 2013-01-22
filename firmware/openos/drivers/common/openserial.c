@@ -273,6 +273,10 @@ void openserial_startOutput() {
          if(debugPrint_schedule()==TRUE) {
             break;
          }
+      case STATUS_BACKOFF:
+         if(debugPrint_backoff()==TRUE) {
+            break;
+         }
       case STATUS_QUEUE:
          if(debugPrint_queue()==TRUE) {
             break;

@@ -107,6 +107,7 @@ PRAGMA(pack());
 // admin
 void               schedule_init();
 bool               debugPrint_schedule();
+bool               debugPrint_backoff();
 // from uRES
 void               schedule_setFrameLength(frameLength_t newFrameLength);
 void               schedule_addActiveSlot(
