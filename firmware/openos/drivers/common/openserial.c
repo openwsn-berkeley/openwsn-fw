@@ -48,6 +48,13 @@ openserial_vars_t openserial_vars;
 
 uint16_t output_buffer_index_write_increment();
 uint16_t output_buffer_index_read_increment();
+error_t  openserial_printInfoErrorCritical(
+   char             severity,
+   uint8_t          calling_component,
+   uint8_t          error_code,
+   errorparameter_t arg1,
+   errorparameter_t arg2
+);
 
 //=========================== public ==========================================
 
@@ -56,7 +63,7 @@ void openserial_init() {
    openserial_vars.input_command[0] = (uint8_t)'^';
    openserial_vars.input_command[1] = (uint8_t)'^';
    openserial_vars.input_command[2] = (uint8_t)'^';
-   openserial_vars.input_command[3] = (uint8_t)'R';
+   openserial_vars.input_command[3] = (uint8_t)SERIALHEADER_REQUEST;
    openserial_vars.input_command[4] = 0;//to be filled out later
    openserial_vars.input_command[5] = (uint8_t)'$';
    openserial_vars.input_command[6] = (uint8_t)'$';
@@ -80,7 +87,7 @@ error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t l
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'S';                  //this is an status update
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)SERIALHEADER_STATUS;  //this is an status update
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)statusElement;        //type of element
@@ -95,32 +102,49 @@ error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t l
    return E_SUCCESS;
 }
 
+error_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
+                              errorparameter_t arg1,
+                              errorparameter_t arg2) {
+   return openserial_printInfoErrorCritical(
+      SERIALHEADER_INFO, // severity
+      calling_component,
+      error_code,
+      arg1,
+      arg2
+   );
+}
+
 error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
+   // blink error LED, this is serious
    leds_error_toggle();
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
+   
+   return openserial_printInfoErrorCritical(
+      SERIALHEADER_ERROR, // severity
+      calling_component,
+      error_code,
+      arg1,
+      arg2
+   );
+}
 
-   openserial_vars.somethingInOutputBuffer=TRUE;
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'E';                  //this is an error
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)calling_component;    //component generating error
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)error_code;           //error_code
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((arg1 & 0xff00)>>8); //arg1
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t) (arg1 & 0x00ff);
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((arg2 & 0xff00)>>8); //arg2
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t) (arg2 & 0x00ff);
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';                  //postamble
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
-   ENABLE_INTERRUPTS();
-
-   return E_SUCCESS;
+error_t openserial_printCritical(uint8_t calling_component, uint8_t error_code,
+                              errorparameter_t arg1,
+                              errorparameter_t arg2) {
+   // blink error LED, this is serious
+   leds_error_toggle();
+   
+   // schedule for the mote to reboot
+   // TODO
+   
+   return openserial_printInfoErrorCritical(
+      SERIALHEADER_CRITICAL, // severity
+      calling_component,
+      error_code,
+      arg1,
+      arg2
+   );
 }
 
 error_t openserial_printData(uint8_t* buffer, uint8_t length) {
@@ -362,6 +386,37 @@ uint16_t output_buffer_index_read_increment() {
    temp_openserial_output_buffer_index_read = openserial_vars.output_buffer_index_read;
    ENABLE_INTERRUPTS();
    return temp_openserial_output_buffer_index_read;
+}
+
+error_t openserial_printInfoErrorCritical(
+      char             severity,
+      uint8_t          calling_component,
+      uint8_t          error_code,
+      errorparameter_t arg1,
+      errorparameter_t arg2
+   ) {
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+   openserial_vars.somethingInOutputBuffer=TRUE;
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  // preamble
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)severity;             // severity indicator
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)calling_component;    // component generating error
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)error_code;           // error_code
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((arg1 & 0xff00)>>8); // arg1
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t) (arg1 & 0x00ff);
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((arg2 & 0xff00)>>8); // arg2
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t) (arg2 & 0x00ff);
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';                  // postamble
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
+   ENABLE_INTERRUPTS();
+
+   return E_SUCCESS;
 }
 
 //=========================== interrupt handlers ==============================

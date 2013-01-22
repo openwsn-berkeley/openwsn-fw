@@ -38,13 +38,26 @@ enum {
    MODE_OUTPUT = 2  ///< The serial is transmitting bytes.
 };
 
+#define SERIALHEADER_REQUEST     'R'
+#define SERIALHEADER_STATUS      'S'
+#define SERIALHEADER_INFO        'I'
+#define SERIALHEADER_ERROR       'E'
+#define SERIALHEADER_CRITICAL    'C'
+#define SERIALHEADER_DATA        'D'
+
 //=========================== typedef =========================================
 
 //=========================== prototypes ======================================
 
 void    openserial_init();
 error_t openserial_printStatus(uint8_t statusElement, uint8_t* buffer, uint16_t length);
+error_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
+                              errorparameter_t arg1,
+                              errorparameter_t arg2);
 error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
+                              errorparameter_t arg1,
+                              errorparameter_t arg2);
+error_t openserial_printCritical(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2);
 error_t openserial_printData(uint8_t* buffer, uint8_t length);
