@@ -19,6 +19,7 @@ void openbridge_trigger() {
    uint8_t           input_buffer[136];//worst case: 8B of next hop + 128B of data
    OpenQueueEntry_t* pkt;
    uint8_t           numDataBytes;
+   
    numDataBytes = openserial_getNumDataBytes();
    openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
    

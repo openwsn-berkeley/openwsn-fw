@@ -106,7 +106,7 @@ error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
       if (&openqueue_vars.queue[i]==pkt) {
          if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
             // log the error
-            openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
+            openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
                                   (errorparameter_t)0,
                                   (errorparameter_t)0);
          }
@@ -116,7 +116,7 @@ error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
       }
    }
    // log the error
-   openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_ERROR,
+   openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_ERROR,
                          (errorparameter_t)0,
                          (errorparameter_t)0);
    ENABLE_INTERRUPTS();

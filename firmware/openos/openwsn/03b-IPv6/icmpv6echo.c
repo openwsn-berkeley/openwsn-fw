@@ -135,7 +135,7 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
          }
          break;
       case IANA_ICMPv6_ECHO_REPLY:
-         openserial_printError(COMPONENT_ICMPv6ECHO,ERR_RCVD_ECHO_REPLY,
+         openserial_printInfo(COMPONENT_ICMPv6ECHO,ERR_RCVD_ECHO_REPLY,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          openqueue_freePacketBuffer(msg);

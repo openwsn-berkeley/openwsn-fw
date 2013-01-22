@@ -44,7 +44,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
             packetfunctions_writeAddress(msg,nextHop,LITTLE_ENDIAN);
             break;
          default:
-            openserial_printError(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,
+            openserial_printCritical(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,
                                   (errorparameter_t)nextHop->type,
                                   (errorparameter_t)1);
       }

@@ -58,7 +58,7 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
    // error checking
    if (idmanager_getIsBridge()==TRUE &&
       packetfunctions_isAllRoutersMulticast(&(msg->l3_destinationAdd))==FALSE) {
-      openserial_printError(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
+      openserial_printCritical(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       return E_FAIL;
@@ -139,7 +139,7 @@ error_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
    msg->owner = COMPONENT_IPHC;
    // error checking
    if (idmanager_getIsBridge()==FALSE) {
-      openserial_printError(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
+      openserial_printCritical(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
                             (errorparameter_t)1,
                             (errorparameter_t)0);
       return E_FAIL;
@@ -198,7 +198,7 @@ error_t prependIPv6Header(
          break;
       case IPHC_DAM_16B:
          if (value_dest->type!=ADDR_16B) {
-            openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+            openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                   (errorparameter_t)value_dest->type,
                                   (errorparameter_t)0);
             return E_FAIL;
@@ -207,7 +207,7 @@ error_t prependIPv6Header(
          break;
       case IPHC_DAM_64B:
          if (value_dest->type!=ADDR_64B) {
-            openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+            openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                   (errorparameter_t)value_dest->type,
                                   (errorparameter_t)1);
             return E_FAIL;
@@ -216,7 +216,7 @@ error_t prependIPv6Header(
          break;
       case IPHC_DAM_128B:
          if (value_dest->type!=ADDR_128B) {
-            openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+            openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                   (errorparameter_t)value_dest->type,
                                   (errorparameter_t)2);
             return E_FAIL;
@@ -224,7 +224,7 @@ error_t prependIPv6Header(
          packetfunctions_writeAddress(msg,value_dest,BIG_ENDIAN);
          break;
       default:
-         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)0,
                                (errorparameter_t)dam);
          return E_FAIL;
@@ -241,7 +241,7 @@ error_t prependIPv6Header(
         if(fw_SendOrfw_Rcv==PCKTFORWARD)
         {
             if (value_src->type!=ADDR_16B) {
-                openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+                openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                       (errorparameter_t)value_src->type,
                                       (errorparameter_t)0);
                 return E_FAIL;
@@ -257,7 +257,7 @@ error_t prependIPv6Header(
          if(fw_SendOrfw_Rcv==PCKTFORWARD)
         {
             if (value_src->type!=ADDR_64B) {
-                openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+                openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                       (errorparameter_t)value_src->type,
                                       (errorparameter_t)1);
                 return E_FAIL;
@@ -274,7 +274,7 @@ error_t prependIPv6Header(
         if(fw_SendOrfw_Rcv==PCKTFORWARD)
         {
             if (value_src->type!=ADDR_128B) {
-                openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+                openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                       (errorparameter_t)value_src->type,
                                       (errorparameter_t)2);
                 return E_FAIL;
@@ -283,7 +283,7 @@ error_t prependIPv6Header(
         }
          break;
       default:
-         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)1,
                                (errorparameter_t)sam);
          return E_FAIL;
@@ -299,7 +299,7 @@ error_t prependIPv6Header(
       case IPHC_HLIM_255:
          break;
       default:
-         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)2,
                                (errorparameter_t)hlim);
          return E_FAIL;
@@ -314,7 +314,7 @@ error_t prependIPv6Header(
          //do nothing, the next header will be there
         break;
       default:
-         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)3,
                                (errorparameter_t)nh);
          return E_FAIL;
@@ -336,7 +336,7 @@ error_t prependIPv6Header(
       case IPHC_TF_1B:
          //unsupported
       default:
-         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)4,
                                (errorparameter_t)tf);
          return E_FAIL;

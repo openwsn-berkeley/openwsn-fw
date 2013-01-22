@@ -58,7 +58,7 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, error_t error) {
          icmpv6_sendDone(msg,error);
          break;
       default:
-         openserial_printError(COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
+         openserial_printCritical(COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
                                (errorparameter_t)msg->l4_protocol,
                                (errorparameter_t)0);
          // free the corresponding packet buffer

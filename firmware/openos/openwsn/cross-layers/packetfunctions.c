@@ -18,7 +18,7 @@ void packetfunctions_ip128bToMac64b(
       open_addr_t* prefix64btoWrite,
       open_addr_t* mac64btoWrite) {
    if (ip128b->type!=ADDR_128B) {
-      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t)ip128b->type,
                             (errorparameter_t)0);
       mac64btoWrite->type=ADDR_NONE;
@@ -34,7 +34,7 @@ void packetfunctions_mac64bToIp128b(
       open_addr_t* mac64b,
       open_addr_t* ip128bToWrite) {
    if (prefix64b->type!=ADDR_PREFIX || mac64b->type!=ADDR_64B) {
-      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t)prefix64b->type,
                             (errorparameter_t)1);
       ip128bToWrite->type=ADDR_NONE;
@@ -48,7 +48,7 @@ void packetfunctions_mac64bToIp128b(
 //assuming an mac16b is lower 2B of mac64b
 void packetfunctions_mac64bToMac16b(open_addr_t* mac64b, open_addr_t* mac16btoWrite) {
    if (mac64b->type!=ADDR_64B) {
-      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t)mac64b->type,
                             (errorparameter_t)2);
       mac16btoWrite->type=ADDR_NONE;
@@ -60,7 +60,7 @@ void packetfunctions_mac64bToMac16b(open_addr_t* mac64b, open_addr_t* mac16btoWr
 }
 void packetfunctions_mac16bToMac64b(open_addr_t* mac16b, open_addr_t* mac64btoWrite) {
    if (mac16b->type!=ADDR_16B) {
-      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t)mac16b->type,
                             (errorparameter_t)3);
       mac64btoWrite->type=ADDR_NONE;
@@ -99,7 +99,7 @@ bool packetfunctions_isBroadcastMulticast(open_addr_t* address) {
          address_length = 8;
          break;
       default:
-         openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
                                (errorparameter_t)4);
          return FALSE;
@@ -181,7 +181,7 @@ bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2)
          address_length = 16;
          break;
       default:
-         openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address_1->type,
                                (errorparameter_t)5);
          return FALSE;
@@ -212,7 +212,7 @@ void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* wr
          address_length = 16;
          break;
       default:
-         openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)type,
                                (errorparameter_t)6);
          return;
@@ -244,7 +244,7 @@ void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, b
          address_length = 16;
          break;
       default:
-         openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
                                (errorparameter_t)7);
          return;

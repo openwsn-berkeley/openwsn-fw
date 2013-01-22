@@ -576,8 +576,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
       // declare synchronized
       changeIsSync(TRUE);
       
-      // log the "error"
-      openserial_printError(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
+      // log the info
+      openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
                             (errorparameter_t)ieee154e_vars.slotOffset,
                             (errorparameter_t)0);
       
@@ -748,7 +748,7 @@ port_INLINE void activity_ti1ORri1() {
          // stop using serial
          openserial_stop();
          // log the error
-         openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_CELLTYPE,
+         openserial_printCritical(COMPONENT_IEEE802154E,ERR_WRONG_CELLTYPE,
                                (errorparameter_t)cellType,
                                (errorparameter_t)ieee154e_vars.slotOffset);
          // abort

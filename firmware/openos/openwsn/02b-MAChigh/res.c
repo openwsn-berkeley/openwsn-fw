@@ -74,7 +74,7 @@ void task_resNotifSendDone() {
    msg = openqueue_resGetSentPacket();
    if (msg==NULL) {
       // log the error
-      openserial_printError(COMPONENT_RES,ERR_NO_SENT_PACKET,
+      openserial_printCritical(COMPONENT_RES,ERR_NO_SENT_PACKET,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       // abort
@@ -127,7 +127,7 @@ void task_resNotifReceive() {
    msg = openqueue_resGetReceivedPacket();
    if (msg==NULL) {
       // log the error
-      openserial_printError(COMPONENT_RES,ERR_NO_RECEIVED_PACKET,
+      openserial_printCritical(COMPONENT_RES,ERR_NO_RECEIVED_PACKET,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       // abort
