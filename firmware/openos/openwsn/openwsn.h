@@ -104,68 +104,69 @@ enum {
 //the order is important because
 enum {
    COMPONENT_NULL                      = 0x00,
+   COMPONENT_OPENWSN                   = 0x01,
    //cross-layers
-   COMPONENT_IDMANAGER                 = 0x01,
-   COMPONENT_OPENQUEUE                 = 0x02,
-   COMPONENT_OPENSERIAL                = 0x03,
-   COMPONENT_PACKETFUNCTIONS           = 0x04,
-   COMPONENT_RANDOM                    = 0x05,
+   COMPONENT_IDMANAGER                 = 0x02,
+   COMPONENT_OPENQUEUE                 = 0x03,
+   COMPONENT_OPENSERIAL                = 0x04,
+   COMPONENT_PACKETFUNCTIONS           = 0x05,
+   COMPONENT_RANDOM                    = 0x06,
    //PHY
-   COMPONENT_RADIO                     = 0x06,
+   COMPONENT_RADIO                     = 0x07,
    //MAClow
-   COMPONENT_IEEE802154                = 0x07,
-   COMPONENT_IEEE802154E               = 0x08,
+   COMPONENT_IEEE802154                = 0x08,
+   COMPONENT_IEEE802154E               = 0x09,
    
    //All components with higher component id than COMPONENT_IEEE802154E
    //won't be able to get free packets from the queue 
    //when the mote is not synch
    
    //MAClow<->MAChigh ("virtual components")
-   COMPONENT_RES_TO_IEEE802154E        = 0x09,
-   COMPONENT_IEEE802154E_TO_RES        = 0x0a,
+   COMPONENT_RES_TO_IEEE802154E        = 0x0a,
+   COMPONENT_IEEE802154E_TO_RES        = 0x0b,
    //MAChigh
-   COMPONENT_RES                       = 0x0b,
-   COMPONENT_NEIGHBORS                 = 0x0c,
-   COMPONENT_SCHEDULE                  = 0x0d,
+   COMPONENT_RES                       = 0x0c,
+   COMPONENT_NEIGHBORS                 = 0x0d,
+   COMPONENT_SCHEDULE                  = 0x0e,
    //IPHC
-   COMPONENT_OPENBRIDGE                = 0x0e,
-   COMPONENT_IPHC                      = 0x0f,
+   COMPONENT_OPENBRIDGE                = 0x0f,
+   COMPONENT_IPHC                      = 0x10,
    //IPv6
-   COMPONENT_FORWARDING                = 0x10,
-   COMPONENT_ICMPv6                    = 0x11,
-   COMPONENT_ICMPv6ECHO                = 0x12,
-   COMPONENT_ICMPv6ROUTER              = 0x13,
-   COMPONENT_ICMPv6RPL                 = 0x14,
+   COMPONENT_FORWARDING                = 0x11,
+   COMPONENT_ICMPv6                    = 0x12,
+   COMPONENT_ICMPv6ECHO                = 0x13,
+   COMPONENT_ICMPv6ROUTER              = 0x14,
+   COMPONENT_ICMPv6RPL                 = 0x15,
    //TRAN
-   COMPONENT_OPENTCP                   = 0x15,             
-   COMPONENT_OPENUDP                   = 0x16,
-   COMPONENT_OPENCOAP                  = 0x17,
+   COMPONENT_OPENTCP                   = 0x16,             
+   COMPONENT_OPENUDP                   = 0x17,
+   COMPONENT_OPENCOAP                  = 0x18,
    //App test
-   COMPONENT_TCPECHO                   = 0x18,
-   COMPONENT_TCPINJECT                 = 0x19,
-   COMPONENT_TCPPRINT                  = 0x1a,
-   COMPONENT_UDPECHO                   = 0x1b,
-   COMPONENT_UDPINJECT                 = 0x1c,
-   COMPONENT_UDPPRINT                  = 0x1d,
-   COMPONENT_RSVP                      = 0x1e,
+   COMPONENT_TCPECHO                   = 0x19,
+   COMPONENT_TCPINJECT                 = 0x1a,
+   COMPONENT_TCPPRINT                  = 0x1b,
+   COMPONENT_UDPECHO                   = 0x1c,
+   COMPONENT_UDPINJECT                 = 0x1d,
+   COMPONENT_UDPPRINT                  = 0x1e,
+   COMPONENT_RSVP                      = 0x1f,
    //App
-   COMPONENT_OHLONE                    = 0x1f,
-   COMPONENT_HELI                      = 0x20,
-   COMPONENT_IMU                       = 0x21,
-   COMPONENT_RLEDS                     = 0x22,
-   COMPONENT_RREG                      = 0x23,
-   COMPONENT_RWELLKNOWN                = 0x24,
-   COMPONENT_RT                        = 0x25,
-   COMPONENT_REX                       = 0x26,
-   COMPONENT_RXL1                      = 0x27,
-   COMPONENT_RINFO                     = 0x28,
-   COMPONENT_RHELI                     = 0x29,
-   COMPONENT_RRUBE                     = 0x2a,
-   COMPONENT_LAYERDEBUG                = 0x2b,
-   COMPONENT_UDPRAND                   = 0x2c,
-   COMPONENT_UDPSTORM                  = 0x2d,
-   COMPONENT_UDPLATENCY                = 0x2e,
-   COMPONENT_TEST                      = 0x2f,
+   COMPONENT_OHLONE                    = 0x20,
+   COMPONENT_HELI                      = 0x21,
+   COMPONENT_IMU                       = 0x22,
+   COMPONENT_RLEDS                     = 0x23,
+   COMPONENT_RREG                      = 0x24,
+   COMPONENT_RWELLKNOWN                = 0x25,
+   COMPONENT_RT                        = 0x26,
+   COMPONENT_REX                       = 0x27,
+   COMPONENT_RXL1                      = 0x28,
+   COMPONENT_RINFO                     = 0x29,
+   COMPONENT_RHELI                     = 0x2a,
+   COMPONENT_RRUBE                     = 0x2b,
+   COMPONENT_LAYERDEBUG                = 0x2c,
+   COMPONENT_UDPRAND                   = 0x2d,
+   COMPONENT_UDPSTORM                  = 0x2e,
+   COMPONENT_UDPLATENCY                = 0x2f,
+   COMPONENT_TEST                      = 0x30,
 };
 
 /**
@@ -229,6 +230,7 @@ enum {
    ERR_BRIDGE_MISMATCH                 = 0x2d, // isBridge mismatch (code location {0})
    ERR_HEADER_TOO_LONG                 = 0x2e, // header too long, length {1} (code location {0})
    ERR_INPUTBUFFER_LENGTH              = 0x2f, // input length problem, length={0}
+   ERR_BOOTED                          = 0x30, // booted
 };
 
 //=========================== typedef =========================================
