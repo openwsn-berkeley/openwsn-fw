@@ -9,6 +9,8 @@ typedef struct {
    scheduleEntry_t  scheduleBuf[MAXACTIVESLOTS];
    scheduleEntry_t* currentScheduleEntry;
    uint16_t         frameLength;
+   uint8_t          backoffExponent;
+   uint8_t          backoff;
    slotOffset_t     debugPrintRow;
 } schedule_vars_t;
 
@@ -302,33 +304,43 @@ channelOffset_t schedule_getChannelOffset() {
 /**
 \brief Check whether I can send on this slot.
 
-This function is called at the beginning of every TX slot. If the slot is not a
-shared slot, it always return TRUE. If the slot is a shared slot, it decrements
-the backoff counter and returns TRUE only if it hits 0.
+This function is called at the beginning of every TX slot.
+If the slot is *not* a shared slot, it always return TRUE.
+If the slot is a shared slot, it decrements the backoff counter and returns 
+TRUE only if it hits 0.
+
+Note that the backoff counter is global, not per slot.
 
 \returns TRUE if it is OK to send on this slot, FALSE otherwise.
  */
 bool schedule_getOkToSend() {
+   bool returnVal;
+   
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   // decrement backoff of that slot
-   if (schedule_vars.currentScheduleEntry->backoff>0) {
-      schedule_vars.currentScheduleEntry->backoff--;
-   }
-   // check whether backoff has hit 0
-   if (
-         schedule_vars.currentScheduleEntry->shared==FALSE ||
-         (
-               schedule_vars.currentScheduleEntry->shared==TRUE &&
-               schedule_vars.currentScheduleEntry->backoff==0
-         )
-   ) {
-      ENABLE_INTERRUPTS();
-      return TRUE;
+   
+   if (schedule_vars.currentScheduleEntry->shared==FALSE) {
+      // non-shared slot: backoff does not apply
+      
+      returnVal = TRUE;
    } else {
-      ENABLE_INTERRUPTS();
-      return FALSE;
+      // non-shared slot: check backoff before answering
+      
+      // decrement backoff
+      if (schedule_vars.backoff>0) {
+         schedule_vars.backoff--;
+      }
+      
+      // only return TRUE if backoff hit 0
+      if (schedule_vars.backoff==0) {
+         returnVal = TRUE;
+      } else {
+         returnVal = FALSE;
+      }
    }
+   
+   ENABLE_INTERRUPTS();
+   return returnVal;
 }
 
 /**
@@ -348,8 +360,8 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
 /**
 \brief Indicate the transmission of a packet.
 */
-void schedule_indicateTx(asn_t*   asnTimestamp,
-   bool     succesfullTx) {
+void schedule_indicateTx(asn_t* asnTimestamp,
+                         bool   succesfullTx) {
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -366,21 +378,23 @@ void schedule_indicateTx(asn_t*   asnTimestamp,
    // update last used timestamp
    memcpy(&schedule_vars.currentScheduleEntry->lastUsedAsn, asnTimestamp, sizeof(asn_t));
 
-   // update this slot's backoff parameters
-   if (succesfullTx==TRUE) {
-      // reset backoffExponent
-      schedule_vars.currentScheduleEntry->backoffExponent   = MINBE-1;
-      // reset backoff
-      schedule_vars.currentScheduleEntry->backoff           = 0;
-   } else {
-      // increase the backoffExponent
-      if (schedule_vars.currentScheduleEntry->backoffExponent<MAXBE) {
-         schedule_vars.currentScheduleEntry->backoffExponent++;
+   // update this backoff parameters for shared slots
+   if (schedule_vars.currentScheduleEntry->shared==TRUE) {
+      if (succesfullTx==TRUE) {
+         // reset backoffExponent
+         schedule_vars.backoffExponent = MINBE-1;
+         // reset backoff
+         schedule_vars.backoff         = 0;
+      } else {
+         // increase the backoffExponent
+         if (schedule_vars.backoffExponent<MAXBE) {
+            schedule_vars.backoffExponent++;
+         }
+         // set the backoff to a random value in [0..2^BE]
+         schedule_vars.backoff         = openrandom_get16b()%(1<<schedule_vars.backoffExponent);
       }
-      // set the backoff to a random value in [0..2^BE]
-      schedule_vars.currentScheduleEntry->backoff =
-            openrandom_get16b()%(1<<schedule_vars.currentScheduleEntry->backoffExponent);
    }
+   
    ENABLE_INTERRUPTS();
 }
 
@@ -398,8 +412,6 @@ void schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist){
 void schedule_resetEntry(scheduleEntry_t* pScheduleEntry) {
    pScheduleEntry->type                     = CELLTYPE_OFF;
    pScheduleEntry->shared                   = FALSE;
-   pScheduleEntry->backoffExponent          = MINBE-1;
-   pScheduleEntry->backoff                  = 0;
    pScheduleEntry->channelOffset            = 0;
    pScheduleEntry->neighbor.type            = ADDR_NONE;
    pScheduleEntry->neighbor.addr_64b[0]     = 0x14;
