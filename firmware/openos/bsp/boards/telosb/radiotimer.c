@@ -6,6 +6,7 @@
 
 #include "msp430f1611.h"
 #include "radiotimer.h"
+#include "leds.h"
 
 //=========================== variables =======================================
 
@@ -102,7 +103,15 @@ void radiotimer_cancel() {
 //===== capture
 
 inline uint16_t radiotimer_getCapturedTime() {
-   while(1);
+   // this should never happpen!
+   
+   // we can not print from within the BSP. Instead:
+   // blink the error LED
+   leds_error_blink();
+   // reset the board
+   board_reset();
+   
+   return 0;// this line is never reached, but here to satisfy compiler
 }
 
 //=========================== private =========================================

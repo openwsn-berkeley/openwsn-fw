@@ -8,6 +8,7 @@
 #include "scheduler.h"
 #include "board.h"
 #include "debugpins.h"
+#include "leds.h"
 
 //=========================== variables =======================================
 
@@ -90,8 +91,13 @@ void scheduler_start() {
       taskContainer++;
    }
    if (taskContainer>&scheduler_vars.taskBuf[TASK_LIST_DEPTH-1]) {
-      // task list has overflown
-      while(1);
+      // task list has overflown. This should never happpen!
+   
+      // we can not print from within the kernel. Instead:
+      // blink the error LED
+      leds_error_blink();
+      // reset the board
+      board_reset();
    }
    // fill that task container with this task
    taskContainer->cb              = cb;

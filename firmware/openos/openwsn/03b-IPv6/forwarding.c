@@ -162,7 +162,7 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
       //toss header
       packetfunctions_tossHeader(msg,sizeof(ipv6_Source_Routing_Header_t));
       //toss list of addresses.
-      if(local_CmprE==0) {
+      if (local_CmprE==0) {
          octetsAddressSize=2;
          //remove 
          packetfunctions_tossHeader(msg,octetsAddressSize*hlen);   
@@ -174,8 +174,9 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
          packetfunctions_tossHeader(msg,octetsAddressSize*hlen);
       } else {
          msg->l2_nextORpreviousHop.type = ADDR_NONE;
-         //error!
-         while(1);
+         openserial_printCritical(COMPONENT_FORWARDING,ERR_INVALID_PARAM,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
       }
       
       switch(msg->l4_protocol) {
@@ -231,8 +232,9 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
             memcpy(&(msg->l3_destinationAdd.addr_128b),runningPointer+((addressposition-1)*octetsAddressSize),octetsAddressSize);
          } else {
             msg->l2_nextORpreviousHop.type = ADDR_NONE;
-            //error!
-            while(1);
+            openserial_printCritical(COMPONENT_FORWARDING,ERR_INVALID_PARAM,
+                            (errorparameter_t)1,
+                            (errorparameter_t)0);
          }
       }
    }

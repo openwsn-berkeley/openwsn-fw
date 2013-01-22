@@ -6,6 +6,7 @@
 
 #include "msp430f1611.h"
 #include "spi.h"
+#include "leds.h"
 
 //=========================== defines =========================================
 
@@ -232,6 +233,14 @@ kick_scheduler_t spi_isr() {
    }
    return DO_NOT_KICK_SCHEDULER;
 #else
-   while(1); // this should never happen
-#endif  
+   // this should never happpen!
+   
+   // we can not print from within the BSP. Instead:
+   // blink the error LED
+   leds_error_blink();
+   // reset the board
+   board_reset();
+   
+   return DO_NOT_KICK_SCHEDULER; // we will not get here, statement to please compiler
+#endif
 }

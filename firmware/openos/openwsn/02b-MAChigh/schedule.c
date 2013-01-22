@@ -153,7 +153,9 @@ void schedule_addActiveSlot(slotOffset_t    slotOffset,
    }
    if (slotContainer>&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
       // schedule has overflown
-      while(1);
+      openserial_printCritical(COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
    }
    // fill that schedule entry with parameters passed
    slotContainer->slotOffset                = slotOffset;

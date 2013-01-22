@@ -187,44 +187,48 @@ enum {
    ERR_TCP_RESET                       = 0x07, // TCP reset while in state {0} (code position {1})
    ERR_UNSUPPORTED_PORT_NUMBER         = 0x08, // unsupported port number {0} (code position {1})
    // l3
-   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x09, // unsupported ICMPv6 type {0} (code position {1})
-   ERR_6LOWPAN_UNSUPPORTED             = 0x0a, // unsupported 6LoWPAN parameter {1} at location {0}
-   ERR_NO_NEXTHOP                      = 0x0b, // no next hop
+   ERR_UNEXPECTED_DAO                  = 0x09, // unexpected DAO (code position {0})
+   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x0a, // unsupported ICMPv6 type {0} (code position {1})
+   ERR_6LOWPAN_UNSUPPORTED             = 0x0b, // unsupported 6LoWPAN parameter {1} at location {0}
+   ERR_NO_NEXTHOP                      = 0x0c, // no next hop
+   ERR_INVALID_PARAM                   = 0x0d, // invalid parameter
+   ERR_INVALID_FWDMODE                 = 0x0e, // invalid forward mode
    // l2b
-   ERR_NEIGHBORS_FULL                  = 0x0c, // neighbors table is full (max number of neighbor is {0})
-   ERR_NO_SENT_PACKET                  = 0x0d, // there is no sent packet in queue
-   ERR_NO_RECEIVED_PACKET              = 0x0e, // there is no received packet in queue
+   ERR_NEIGHBORS_FULL                  = 0x0f, // neighbors table is full (max number of neighbor is {0})
+   ERR_NO_SENT_PACKET                  = 0x10, // there is no sent packet in queue
+   ERR_NO_RECEIVED_PACKET              = 0x11, // there is no received packet in queue
+   ERR_SCHEDULE_OVERFLOWN              = 0x12, // schedule overflown
    // l2a
-   ERR_WRONG_CELLTYPE                  = 0x0f, // wrong celltype {0} at slotOffset {1}
-   ERR_IEEE154_UNSUPPORTED             = 0x10, // unsupported IEEE802.15.4 parameter {1} at location {0}
-   ERR_DESYNCHRONIZED                  = 0x11, // got desynchronized at slotOffset {0}
-   ERR_SYNCHRONIZED                    = 0x12, // synchronized at slotOffset {0}
-   ERR_LARGE_TIMECORRECTION            = 0x13, // large timeCorrection of {0} ticks (code location {1})
-   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x14, // wrong state {0} in end of frame+sync
-   ERR_WRONG_STATE_IN_STARTSLOT        = 0x15, // wrong state {0} in startSlot, at slotOffset {1}
-   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x16, // wrong state {0} in timer fires, at slotOffset {1}
-   ERR_WRONG_STATE_IN_NEWSLOT          = 0x17, // wrong state {0} in start of frame, at slotOffset {1}
-   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x18, // wrong state {0} in end of frame, at slotOffset {1}
-   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x19, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x1a, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x1b, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x1c, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_WDDATADURATION_OVERFLOWS        = 0x1d, // wdDataDuration overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIO_OVERFLOWS               = 0x1e, // wdRadio overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIOTX_OVERFLOWS             = 0x1f, // wdRadioTx overflows while at state {0} in slotOffset {1}
-   ERR_WDACKDURATION_OVERFLOWS         = 0x20, // wdAckDuration overflows while at state {0} in slotOffset {1}
+   ERR_WRONG_CELLTYPE                  = 0x13, // wrong celltype {0} at slotOffset {1}
+   ERR_IEEE154_UNSUPPORTED             = 0x14, // unsupported IEEE802.15.4 parameter {1} at location {0}
+   ERR_DESYNCHRONIZED                  = 0x15, // got desynchronized at slotOffset {0}
+   ERR_SYNCHRONIZED                    = 0x16, // synchronized at slotOffset {0}
+   ERR_LARGE_TIMECORRECTION            = 0x17, // large timeCorrection of {0} ticks (code location {1})
+   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x18, // wrong state {0} in end of frame+sync
+   ERR_WRONG_STATE_IN_STARTSLOT        = 0x19, // wrong state {0} in startSlot, at slotOffset {1}
+   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x1a, // wrong state {0} in timer fires, at slotOffset {1}
+   ERR_WRONG_STATE_IN_NEWSLOT          = 0x1b, // wrong state {0} in start of frame, at slotOffset {1}
+   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x1c, // wrong state {0} in end of frame, at slotOffset {1}
+   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x1d, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x1e, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x1f, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x20, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_WDDATADURATION_OVERFLOWS        = 0x21, // wdDataDuration overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIO_OVERFLOWS               = 0x22, // wdRadio overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIOTX_OVERFLOWS             = 0x23, // wdRadioTx overflows while at state {0} in slotOffset {1}
+   ERR_WDACKDURATION_OVERFLOWS         = 0x24, // wdAckDuration overflows while at state {0} in slotOffset {1}
    // general
-   ERR_BUSY_SENDING                    = 0x21, // busy sending
-   ERR_UNEXPECTED_SENDDONE             = 0x22, // sendDone for packet I didn't send
-   ERR_NO_FREE_PACKET_BUFFER           = 0x23, // no free packet buffer (code location {0})
-   ERR_FREEING_UNUSED                  = 0x24, // freeing unused memory
-   ERR_FREEING_ERROR                   = 0x25, // freeing memory unsupported memory
-   ERR_UNSUPPORTED_COMMAND             = 0x26, // unsupported command {0}
-   ERR_MSG_UNKNOWN_TYPE                = 0x27, // unknown message type {0}
-   ERR_WRONG_ADDR_TYPE                 = 0x28, // wrong address type {0} (code location {1})
-   ERR_BRIDGE_MISMATCH                 = 0x29, // isBridge mismatch (code location {0})
-   ERR_HEADER_TOO_LONG                 = 0x2a, // header too long, length {1} (code location {0})
-   ERR_INPUTBUFFER_LENGTH              = 0x2ab, // input length problem, length={0}
+   ERR_BUSY_SENDING                    = 0x25, // busy sending
+   ERR_UNEXPECTED_SENDDONE             = 0x26, // sendDone for packet I didn't send
+   ERR_NO_FREE_PACKET_BUFFER           = 0x27, // no free packet buffer (code location {0})
+   ERR_FREEING_UNUSED                  = 0x28, // freeing unused memory
+   ERR_FREEING_ERROR                   = 0x29, // freeing memory unsupported memory
+   ERR_UNSUPPORTED_COMMAND             = 0x2a, // unsupported command {0}
+   ERR_MSG_UNKNOWN_TYPE                = 0x2b, // unknown message type {0}
+   ERR_WRONG_ADDR_TYPE                 = 0x2c, // wrong address type {0} (code location {1})
+   ERR_BRIDGE_MISMATCH                 = 0x2d, // isBridge mismatch (code location {0})
+   ERR_HEADER_TOO_LONG                 = 0x2e, // header too long, length {1} (code location {0})
+   ERR_INPUTBUFFER_LENGTH              = 0x2f, // input length problem, length={0}
 };
 
 //=========================== typedef =========================================

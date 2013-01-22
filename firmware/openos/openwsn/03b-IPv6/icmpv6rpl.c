@@ -230,7 +230,9 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
       }
    } else if(codeValue== IANA_ICMPv6_RPL_DAO) {
       // IT shouldn't get DAO because it will be handled in the lower layer.
-      while(1);
+      openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
    }
    
    //free packet
@@ -459,6 +461,7 @@ void icmpv6rpl_timer_DAO_cb() {
 }
 
 void icmpv6rpl_receiveDAO(OpenQueueEntry_t* msg){ 
-   while(1);
-   //should neve happen right? 
+   openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
+                            (errorparameter_t)1,
+                            (errorparameter_t)0);
 }

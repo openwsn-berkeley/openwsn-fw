@@ -77,11 +77,13 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
         if (fw_SendOrfw_Rcv==PCKTFORWARD){
             sam = IPHC_SAM_64B;    //case forwarding a packet
             p_src = &temp_src_mac64b;
-        }else if (fw_SendOrfw_Rcv==PCKTSEND){
+        } else if (fw_SendOrfw_Rcv==PCKTSEND){
             sam = IPHC_SAM_ELIDED;
             p_src = NULL;
-        }else{
-          while(1); //should never happen.
+        } else {
+           openserial_printCritical(COMPONENT_IPHC,ERR_INVALID_FWDMODE,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
         }
          dam = IPHC_DAM_ELIDED;
          p_dest = NULL;
