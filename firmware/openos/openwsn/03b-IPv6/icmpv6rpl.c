@@ -7,8 +7,9 @@
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "scheduler.h"
-#include "opentimers.h"
 #include "idmanager.h"
+#include "opentimers.h"
+
 
 //=========================== variables =======================================
 
@@ -133,6 +134,7 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.all_routers_multicast.addr_128b[13] = 0x00;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[14] = 0x00;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[15] = 0x02;
+   
    icmpv6rpl_vars.periodDIO  = 1700+(openrandom_get16b()&0xff);       // pseudo-random
    icmpv6rpl_vars.timerId    = opentimers_start(icmpv6rpl_vars.periodDIO,
                                                 TIMER_PERIODIC,TIME_MS,
@@ -219,12 +221,10 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
          /*
          // check if the DIO option is included.
          if(((icmpv6rpl_dio_t*)(msg->payload))->options==0x03) {
-            if(isPrefixSet()==FALSE) {
                packetfunctions_tossHeader(msg,sizeof(icmpv6rpl_dio_t));
                temp_prefix=&(((icmpv6rpl_dio_options_t*)(msg->payload))->prefix);
                temp_prefix->type=ADDR_PREFIX;
                idmanager_setMyID(temp_prefix);
-            }
          }
          */
       }
@@ -312,7 +312,8 @@ void sendDIO() {
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.all_routers_multicast,sizeof(open_addr_t));
    
    //===== DIO option
-   if (isPrefixSet()==TRUE) {
+    //pooipoi xv-- removing prefix checking as we want to form the topology even the network is not connected to the IPv6 Network.
+  
       temp_prefixID = idmanager_getMyID(ADDR_PREFIX);
       memcpy(&(icmpv6rpl_dio_options.prefix),temp_prefixID,sizeof(open_addr_t));
       
@@ -324,7 +325,7 @@ void sendDIO() {
       
       // change dio option field to distinguish between the DIO with/without option
       icmpv6rpl_dio.options      = 0x03;
-   }
+
    
    //===== DIO
    

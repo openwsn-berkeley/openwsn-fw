@@ -2146,13 +2146,19 @@
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.h</name>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\ieee802154.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.h</name>
       </file>
     </group>
     <group>
