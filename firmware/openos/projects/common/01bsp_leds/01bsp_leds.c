@@ -50,4 +50,5 @@ int mote_main(void) {
    leds_error_blink();
    
    board_reset();
+   return 0;
 }

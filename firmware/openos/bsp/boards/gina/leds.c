@@ -87,6 +87,20 @@ void leds_all_toggle() {
    P5OUT     ^=  0x0F;
 }
 
+void leds_error_blink() {
+   uint8_t i;
+   volatile uint16_t delay;
+   // turn all LEDs off
+   P2OUT |= 0x08;
+     
+   // blink error LED for ~10s
+   for (i=0;i<80;i++) {
+      P2OUT ^=  0x08; //10 seconds more or less..
+      for (delay=0xffff;delay>0;delay--);
+      for (delay=0xffff;delay>0;delay--);
+   }
+}
+
 void leds_circular_shift() {
    uint8_t temp_leds;
    if ((P2OUT & 0x0F)==0) {                      // if no LEDs on, switch on first one
