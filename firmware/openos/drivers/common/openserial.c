@@ -19,6 +19,7 @@
 #include "leds.h"
 #include "schedule.h"
 #include "uart.h"
+#include "opentimers.h"
 
 //=========================== variables =======================================
 
@@ -133,10 +134,12 @@ error_t openserial_printCritical(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
    // blink error LED, this is serious
-   leds_error_toggle();
+   leds_error_blink();
    
-   // schedule for the mote to reboot
-   // TODO
+   // schedule for the mote to reboot in 10s
+   opentimers_start(10000,
+                    TIMER_ONESHOT,TIME_MS,
+                    board_reset);
    
    return openserial_printInfoErrorCritical(
       SERIALHEADER_CRITICAL, // severity

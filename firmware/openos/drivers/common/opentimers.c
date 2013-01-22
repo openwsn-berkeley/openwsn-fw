@@ -71,7 +71,7 @@ The timer works as follows:
          timer could be started.
 \returns TOO_MANY_TIMERS_ERROR if the timer could NOT be started.
  */
-opentimer_id_t opentimers_start(uint32_t duration, timer_type_t type,time_type_t timetype, opentimers_cbt callback) {
+opentimer_id_t opentimers_start(uint32_t duration, timer_type_t type, time_type_t timetype, opentimers_cbt callback) {
 
    uint8_t  id;
 

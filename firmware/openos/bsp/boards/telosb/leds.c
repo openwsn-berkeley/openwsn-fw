@@ -39,8 +39,8 @@ void leds_error_blink() {
    // turn all LEDs off
    P5OUT     |=  0x70;
    
-   // blink error LED for ~30s
-   for (i=0;i<200;i++) {
+   // blink error LED for ~10s
+   for (i=0;i<80;i++) {
       P5OUT     ^=  0x10;
       for (delay=0xffff;delay>0;delay--);
    }
