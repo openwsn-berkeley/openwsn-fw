@@ -38,10 +38,11 @@ void schedule_init() {
 
    // reset local variables
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
-   memset(&schedule_dbg, 0,sizeof(schedule_dbg_t));
    for (i=0;i<MAXACTIVESLOTS;i++){
       schedule_resetEntry(&schedule_vars.scheduleBuf[i]);
    }
+   schedule_vars.backoffExponent = MINBE-1;
+   memset(&schedule_dbg, 0,sizeof(schedule_dbg_t));
 
    // set frame length
    schedule_setFrameLength(SUPERFRAME_LENGTH);
