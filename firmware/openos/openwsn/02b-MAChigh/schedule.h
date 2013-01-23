@@ -126,6 +126,7 @@ cellType_t         schedule_getType();
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset();
 bool               schedule_getOkToSend();
+void               schedule_resetBackoff();
 void               schedule_indicateRx(asn_t*   asnTimestamp);
 void               schedule_indicateTx(
                         asn_t*    asnTimestamp,

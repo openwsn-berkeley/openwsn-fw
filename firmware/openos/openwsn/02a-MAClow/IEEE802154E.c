@@ -1648,6 +1648,7 @@ void changeIsSync(bool newIsSync) {
       resetStats();
    } else {
       leds_sync_off();
+      schedule_resetBackoff();
    }
 }
 

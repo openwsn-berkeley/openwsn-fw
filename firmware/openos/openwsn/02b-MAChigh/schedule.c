@@ -363,6 +363,21 @@ bool schedule_getOkToSend() {
 }
 
 /**
+\brief Reset the backoff and backoffExponent.
+*/
+void schedule_resetBackoff() {
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   // reset backoffExponent
+   schedule_vars.backoffExponent = MINBE-1;
+   // reset backoff
+   schedule_vars.backoff         = 0;
+   
+   ENABLE_INTERRUPTS();
+}
+
+/**
 \brief Indicate the reception of a packet.
 */
 void schedule_indicateRx(asn_t* asnTimestamp) {
