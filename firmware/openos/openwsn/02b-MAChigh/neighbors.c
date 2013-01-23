@@ -40,7 +40,7 @@ void neighbors_init() {
    // clear module variables
    memset(&neighbors_vars,0,sizeof(neighbors_vars_t));
    
-   // set my DAGrank
+   // set myDAGrank
    if (idmanager_getIsDAGroot()==TRUE) {
       neighbors_vars.myDAGrank=0;
    } else {
