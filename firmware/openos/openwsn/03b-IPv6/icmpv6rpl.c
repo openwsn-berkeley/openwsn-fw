@@ -10,7 +10,6 @@
 #include "idmanager.h"
 #include "opentimers.h"
 
-
 //=========================== variables =======================================
 
 typedef struct {
