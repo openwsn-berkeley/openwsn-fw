@@ -11,8 +11,13 @@
 #include "opentcp.h"
 
 //=========================== variables =======================================
+typedef struct{
+   ipv6_Source_Routing_Header_t*  ipv6_Source_Routing_Header;
+}forwarding_vars_t;
 
-//=========================== prototypes ======================================
+forwarding_vars_t forwaring_vars;
+
+//=========================== prototypes ====================h==================
 
 void    getNextHop(open_addr_t* destination, open_addr_t* addressToWrite);
 error_t fowarding_send_internal(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv); //>>>>>> diodio
@@ -135,30 +140,30 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
    uint8_t                        addressposition;
    uint8_t*                       runningPointer;
    uint8_t                        octetsAddressSize;
-   ipv6_Source_Routing_Header_t*  ipv6_Source_Routing_Header;
+
    open_addr_t*                   prefix;
    
    prefix = idmanager_getMyID(ADDR_PREFIX);
    
-   ipv6_Source_Routing_Header = (ipv6_Source_Routing_Header_t*)(msg->payload);
+   forwaring_vars.ipv6_Source_Routing_Header = (ipv6_Source_Routing_Header_t*)(msg->payload);
    
    runningPointer = (msg->payload) + sizeof(ipv6_Source_Routing_Header_t);
    
    // getting local_CmprE and CmprI;
-   local_CmprE = ipv6_Source_Routing_Header->CmprICmprE & 0xf;
-   local_CmprI = ipv6_Source_Routing_Header->CmprICmprE & 0xf0;
+   local_CmprE = forwaring_vars.ipv6_Source_Routing_Header->CmprICmprE & 0xf;
+   local_CmprI = forwaring_vars.ipv6_Source_Routing_Header->CmprICmprE & 0xf0;
    //local_CmprI>>4; // shifting it by 4.
    local_CmprI=local_CmprI>>4; // shifting it by 4.
    
    //see processing header algorithm in RFC6554 page 9
    
-   numAddr=(((ipv6_Source_Routing_Header->HdrExtLen*8)-ipv6_Source_Routing_Header->PadRes -(16-local_CmprE))/(16-local_CmprI))+1;
+   numAddr=(((forwaring_vars.ipv6_Source_Routing_Header->HdrExtLen*8)-forwaring_vars.ipv6_Source_Routing_Header->PadRes -(16-local_CmprE))/(16-local_CmprI))+1;
    
-   if (ipv6_Source_Routing_Header->SegmentsLeft==0){
+   if (forwaring_vars.ipv6_Source_Routing_Header->SegmentsLeft==0){
       //we are there!..
       //process the next header in the pkt.. i.e push stack up..
-      msg->l4_protocol=ipv6_Source_Routing_Header->nextHeader;
-      hlen=ipv6_Source_Routing_Header->HdrExtLen;
+      msg->l4_protocol=forwaring_vars.ipv6_Source_Routing_Header->nextHeader;
+      hlen=forwaring_vars.ipv6_Source_Routing_Header->HdrExtLen;
       //toss header
       packetfunctions_tossHeader(msg,sizeof(ipv6_Source_Routing_Header_t));
       //toss list of addresses.
@@ -197,17 +202,19 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
       return E_SUCCESS;
    
    } else {    
-      if (ipv6_Source_Routing_Header->SegmentsLeft>numAddr) {
+      if (forwaring_vars.ipv6_Source_Routing_Header->SegmentsLeft>numAddr) {
          //not good.. error. 
          //poipoi xv :
          //send and ICMPv6 parameter problem, code 0, to the src address 
          //then discard the packet.  //TODO
-         while (1);
+         openserial_printCritical(COMPONENT_FORWARDING,ERR_NO_NEXTHOP,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
       } else {
          //still hops remaining 
-         ipv6_Source_Routing_Header->SegmentsLeft--;
+         forwaring_vars.ipv6_Source_Routing_Header->SegmentsLeft--;
          //find the address in the vector.
-         addressposition=numAddr-(ipv6_Source_Routing_Header->SegmentsLeft);
+         addressposition=numAddr-(forwaring_vars.ipv6_Source_Routing_Header->SegmentsLeft);
          
          if(local_CmprE==0) {
             msg->l2_nextORpreviousHop.type = ADDR_16B;
