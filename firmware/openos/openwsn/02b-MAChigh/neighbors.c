@@ -40,7 +40,7 @@ void neighbors_init() {
    // clear module variables
    memset(&neighbors_vars,0,sizeof(neighbors_vars_t));
    
-   // set my DAGrank
+   // set myDAGrank
    if (idmanager_getIsDAGroot()==TRUE) {
       neighbors_vars.myDAGrank=0;
    } else {
@@ -414,7 +414,18 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
    if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
-            neighbors_vars.neighbors[i].DAGrank = dio->rank;
+            if (
+                  dio->rank>neighbors_vars.neighbors[i].DAGrank &&
+                  dio->rank - neighbors_vars.neighbors[i].DAGrank>DEFAULTLINKCOST
+               ) {
+                // the new DAGrank looks suspiciously high, only increment a bit
+                neighbors_vars.neighbors[i].DAGrank += DEFAULTLINKCOST;
+                openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
+                               (errorparameter_t)dio->rank,
+                               (errorparameter_t)neighbors_vars.neighbors[i].DAGrank);
+            } else {
+               neighbors_vars.neighbors[i].DAGrank = dio->rank;
+            }
             break;
          }
       }
@@ -507,7 +518,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
          neighbors_vars.neighbors[i].parentPreference=0;
          // calculate link cost to this neighbor
          if (neighbors_vars.neighbors[i].numTxACK==0) {
-            linkCost = 15;
+            linkCost = DEFAULTLINKCOST;
          } else {
             linkCost = (uint8_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*10.0);
          }
