@@ -375,7 +375,7 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
    //bool            cid;
    //bool            sac;
    uint8_t         sam;
-   bool            m;
+  // bool            m;
    //bool          dac;
    uint8_t         dam;
    
@@ -391,7 +391,7 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
    //cid       = (temp_8b >> IPHC_CID)       & 0x01;//1b unused
    //sac       = (temp_8b >> IPHC_SAC)       & 0x01;//1b unused
    sam       = (temp_8b >> IPHC_SAM)       & 0x03;//2b
-   m         = (temp_8b >> IPHC_M)         & 0x01;//1b unused
+   //m         = (temp_8b >> IPHC_M)         & 0x01;//1b unused
    //dac       = (temp_8b >> IPHC_DAC)       & 0x01;//1b unused
    dam       = (temp_8b >> IPHC_DAM)       & 0x03;//2b
    ipv6_header.header_length += sizeof(uint8_t);
@@ -542,8 +542,8 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
    }
    // this is a temporary workaround for allowing multicast RAs to go through
    //poipoi xv -- TODO -- check if this still needed. NO RAs anymore after RPL implementation.
-   if (m==1 && dam==IPHC_DAM_ELIDED) {
+   /*if (m==1 && dam==IPHC_DAM_ELIDED) {
       ipv6_header.header_length += sizeof(uint8_t);
-   }
+   }*/
    return ipv6_header;
 }

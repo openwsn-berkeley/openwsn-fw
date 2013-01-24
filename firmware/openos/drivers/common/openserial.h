@@ -46,7 +46,7 @@ enum {
 #define SERIALHEADER_DATA        'D'
 
 //=========================== typedef =========================================
-
+typedef void (*hook_cb)();//callback for the driver
 //=========================== prototypes ======================================
 
 void    openserial_init();
@@ -67,6 +67,9 @@ void    openserial_startInput();
 void    openserial_startOutput();
 void    openserial_stop();
 bool    debugPrint_outBufferIndexes();
+
+bool    openserial_isThereSomethingInOutputBuffer();
+void    openserial_setHookCallback(hook_cb cb,hook_cb out);
 
 // interrupt handlers
 void    isr_openserial_rx();
