@@ -20,6 +20,7 @@
 #include "schedule.h"
 #include "uart.h"
 #include "opentimers.h"
+#include "serialecho.h"
 
 //=========================== variables =======================================
 
@@ -42,9 +43,6 @@ typedef struct {
    uint8_t    mode;
    uint8_t    debugPrintCounter;
    
-   hook_cb    hook_input_callback;//for the drv_openserial
-   hook_cb    hook_output_callback;//for the drv_openserial
-   bool       hooks_set;
 } openserial_vars_t;
 
 openserial_vars_t openserial_vars;
@@ -66,16 +64,6 @@ error_t  openserial_printInfoErrorCritical(
 
 
 
-bool    openserial_isThereSomethingInOutputBuffer(){
-return openserial_vars.somethingInOutputBuffer;
-}
-
-void   openserial_setHookCallback(hook_cb cb,hook_cb out){
-     openserial_vars.hook_input_callback=cb;
-     openserial_vars.hook_output_callback=out;
-     openserial_vars.hooks_set=TRUE;
-}
-
 void openserial_init() {
    //initialize variables
    openserial_vars.input_command[0] = (uint8_t)'^';
@@ -90,7 +78,6 @@ void openserial_init() {
    openserial_vars.output_buffer_index_write = 0;
    openserial_vars.somethingInOutputBuffer   = FALSE;
    openserial_vars.mode = MODE_OFF;
-   openserial_vars.hooks_set=FALSE;
    // set callbacks
    uart_setCallbacks(isr_openserial_tx,
                      isr_openserial_rx);
@@ -362,7 +349,7 @@ void openserial_stop() {
             openbridge_trigger();
             break;
          case 'H': //drv_openserial hook
-            if (openserial_vars.hooks_set==TRUE) openserial_vars.hook_input_callback();
+            serialecho_echo();
             break;   
          default:
             openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
@@ -446,6 +433,7 @@ error_t openserial_printInfoErrorCritical(
    return E_SUCCESS;
 }
 
+
 //=========================== interrupt handlers ==============================
 
 //executed in ISR, called from scheduler.c
@@ -462,8 +450,6 @@ void isr_openserial_tx() {
       case MODE_OUTPUT:
          if (openserial_vars.output_buffer_index_write==openserial_vars.output_buffer_index_read) {
             openserial_vars.somethingInOutputBuffer=FALSE;
-            //call the hook
-            if (openserial_vars.hooks_set==TRUE) openserial_vars.hook_output_callback();
          }
          if (openserial_vars.somethingInOutputBuffer) {
             uart_writeByte(openserial_vars.output_buffer[output_buffer_index_read_increment()]);
