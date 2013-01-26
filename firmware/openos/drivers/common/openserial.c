@@ -49,7 +49,6 @@ openserial_vars_t openserial_vars;
 
 //=========================== prototypes ======================================
 
-
 uint16_t output_buffer_index_write_increment();
 uint16_t output_buffer_index_read_increment();
 error_t  openserial_printInfoErrorCritical(
@@ -61,8 +60,6 @@ error_t  openserial_printInfoErrorCritical(
 );
 
 //=========================== public ==========================================
-
-
 
 void openserial_init() {
    //initialize variables
