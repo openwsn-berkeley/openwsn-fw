@@ -218,7 +218,7 @@ void idmanager_triggerAboutBridge() {
 void idmanager_triggerAboutRoot() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer;
-   //get command from OpenSerial (16B IPv6 destination address, 2B destination port)
+   //get command from OpenSerial
    number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer,sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
       openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
