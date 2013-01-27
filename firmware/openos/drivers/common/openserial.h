@@ -38,12 +38,16 @@ enum {
    MODE_OUTPUT = 2  ///< The serial is transmitting bytes.
 };
 
-#define SERIALHEADER_REQUEST     'R'
-#define SERIALHEADER_STATUS      'S'
-#define SERIALHEADER_INFO        'I'
-#define SERIALHEADER_ERROR       'E'
-#define SERIALHEADER_CRITICAL    'C'
-#define SERIALHEADER_DATA        'D'
+// frames sent mote->PC
+#define SERFRAME_MOTE2PC_DATA          ((uint8_t)'D')
+#define SERFRAME_MOTE2PC_STATUS        ((uint8_t)'S')
+#define SERFRAME_MOTE2PC_INFO          ((uint8_t)'I')
+#define SERFRAME_MOTE2PC_ERROR         ((uint8_t)'E')
+#define SERFRAME_MOTE2PC_CRITICAL      ((uint8_t)'C')
+#define SERFRAME_MOTE2PC_REQUEST       ((uint8_t)'R')
+
+// frames sent PC->mote
+
 
 //=========================== typedef =========================================
 

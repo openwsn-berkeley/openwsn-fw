@@ -21,28 +21,28 @@
 #include "uart.h"
 #include "opentimers.h"
 #include "serialecho.h"
+#include "hdlcserial.h"
 
 //=========================== variables =======================================
 
 typedef struct {
-   uint8_t    output_buffer[SERIAL_OUTPUT_BUFFER_SIZE];
-   uint16_t   output_buffer_index_write;
-   uint16_t   output_buffer_index_read;
-   bool       somethingInOutputBuffer;
-
+   // admin
+   uint8_t    mode;
+   uint8_t    debugPrintCounter;
+   // input
+   uint8_t    input_command[1+1+2+1]; // flag (1B), command (2B), CRC (1B), flag (1B)
+   uint8_t    input_command_index;
    uint8_t    input_buffer[SERIAL_INPUT_BUFFER_SIZE];
    uint16_t   input_buffer_fill_level;
    uint8_t    input_buffer_bytes_still_to_come;
-   uint8_t    received_command;
-
+   bool       receiving;
    bool       ready_receive_command;
-   bool       ready_receive_length;
-   uint8_t    input_command[8];
-   uint8_t    input_command_index;
-
-   uint8_t    mode;
-   uint8_t    debugPrintCounter;
-   
+   uint8_t    received_command;
+   // output
+   uint8_t    output_buffer[SERIAL_OUTPUT_BUFFER_SIZE];
+   uint8_t    output_buffer_index_read;
+   uint8_t    output_buffer_index_write;
+   bool       somethingInOutputBuffer;
 } openserial_vars_t;
 
 openserial_vars_t openserial_vars;
@@ -63,18 +63,16 @@ error_t  openserial_printInfoErrorCritical(
 
 void openserial_init() {
    //initialize variables
-   openserial_vars.input_command[0] = (uint8_t)'^';
-   openserial_vars.input_command[1] = (uint8_t)'^';
-   openserial_vars.input_command[2] = (uint8_t)'^';
-   openserial_vars.input_command[3] = (uint8_t)SERIALHEADER_REQUEST;
-   openserial_vars.input_command[4] = 0;//to be filled out later
-   openserial_vars.input_command[5] = (uint8_t)'$';
-   openserial_vars.input_command[6] = (uint8_t)'$';
-   openserial_vars.input_command[7] = (uint8_t)'$';
-   openserial_vars.output_buffer_index_read  = 0;
-   openserial_vars.output_buffer_index_write = 0;
-   openserial_vars.somethingInOutputBuffer   = FALSE;
-   openserial_vars.mode = MODE_OFF;
+   openserial_vars.input_command[0]              = SERFRAME_MOTE2PC_REQUEST;
+   hdlcify(openserial_vars.input_command,1);
+
+   openserial_vars.output_buffer_index_read      = -1;
+   openserial_vars.output_buffer_index_write     = -1;
+   openserial_vars.somethingInOutputBuffer       = FALSE;
+   openserial_vars.mode                          = MODE_OFF;
+   openserial_vars.receiving                     = FALSE;
+   openserial_vars.input_buffer_fill_level       = 0;
+   
    // set callbacks
    uart_setCallbacks(isr_openserial_tx,
                      isr_openserial_rx);
@@ -86,21 +84,17 @@ error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t l
    DISABLE_INTERRUPTS();
 
    openserial_vars.somethingInOutputBuffer=TRUE;
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)SERIALHEADER_STATUS;  //this is an status update
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=SERFRAME_MOTE2PC_STATUS;
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)statusElement;        //type of element
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)statusElement;
    for (counter=0;counter<length;counter++){
       openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)buffer[counter];
    }
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';                  //postamble
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
+   counter = hdlcify(openserial_vars.output_buffer,openserial_vars.output_buffer_index_write+1);
+   openserial_vars.output_buffer_index_write = counter-1;
    ENABLE_INTERRUPTS();
-
+   
    return E_SUCCESS;
 }
 
@@ -108,7 +102,7 @@ error_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
    return openserial_printInfoErrorCritical(
-      SERIALHEADER_INFO, // severity
+      SERFRAME_MOTE2PC_INFO, // severity
       calling_component,
       error_code,
       arg1,
@@ -123,7 +117,7 @@ error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
    leds_error_toggle();
    
    return openserial_printInfoErrorCritical(
-      SERIALHEADER_ERROR, // severity
+      SERFRAME_MOTE2PC_ERROR, // severity
       calling_component,
       error_code,
       arg1,
@@ -143,7 +137,7 @@ error_t openserial_printCritical(uint8_t calling_component, uint8_t error_code,
                     board_reset);
    
    return openserial_printInfoErrorCritical(
-      SERIALHEADER_CRITICAL, // severity
+      SERFRAME_MOTE2PC_CRITICAL, // severity
       calling_component,
       error_code,
       arg1,
@@ -158,28 +152,28 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    DISABLE_INTERRUPTS();
 
    openserial_vars.somethingInOutputBuffer=TRUE;
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  //preamble
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'D';                  //this is data
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
+   
+   // type
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=SERFRAME_MOTE2PC_DATA;
+   // addr16b
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
-   //asn to serial .. 
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
+   // asn
    asnWriteToSerial(asn);// byte01,byte23,byte4
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[0];
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[1];
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[2];
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[3];
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=asn[4];
-   
+   // payload
    for (counter=0;counter<length;counter++){
       openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)buffer[counter];
    }
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';                  //postamble
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
+   
+   counter = hdlcify(openserial_vars.output_buffer,openserial_vars.output_buffer_index_write+1);
+   openserial_vars.output_buffer_index_write = counter-1;
    ENABLE_INTERRUPTS();
-
+   
    return E_SUCCESS;
 }
 
@@ -224,7 +218,6 @@ void openserial_startInput() {
                             (errorparameter_t)0);
       openserial_vars.input_buffer_fill_level = 0;
    }
-   openserial_vars.input_command[4] = SERIAL_INPUT_BUFFER_SIZE;
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();          // clear possible pending interrupts
    uart_enableInterrupts();           // Enable USCI_A1 TX & RX interrupt
@@ -232,7 +225,6 @@ void openserial_startInput() {
    openserial_vars.mode                  = MODE_INPUT;
    openserial_vars.input_command_index   = 0;
    openserial_vars.ready_receive_command = FALSE;
-   openserial_vars.ready_receive_length  = FALSE;
    uart_writeByte(openserial_vars.input_command[openserial_vars.input_command_index]);
    ENABLE_INTERRUPTS();
 }
@@ -298,6 +290,7 @@ void openserial_startOutput() {
    DISABLE_INTERRUPTS();
    openserial_vars.mode=MODE_OUTPUT;
    if (openserial_vars.somethingInOutputBuffer) {
+      openserial_vars.output_buffer_index_read = -1;
       uart_writeByte(openserial_vars.output_buffer[output_buffer_index_read_increment()]);
    } else {
       openserial_stop();
@@ -336,16 +329,13 @@ void openserial_stop() {
          case 'E': //Trigger ICMPv6Echo
             icmpv6echo_trigger();
             break;
-         case 'O': //Trigger ICMPv6Router
-            icmpv6router_trigger();
-            break;
          case 'P': //Trigger ICMPv6RPL
             icmpv6rpl_trigger();
             break;
          case 'D': //Trigger OpenBridge (called only by moteProbe)
             openbridge_trigger();
             break;
-         case 'H': //drv_openserial hook
+         case 'H': //Trigger serial echo
             serialecho_echo();
             break;   
          default:
@@ -406,14 +396,13 @@ error_t openserial_printInfoErrorCritical(
       errorparameter_t arg1,
       errorparameter_t arg2
    ) {
+   uint8_t counter;
+   
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
    openserial_vars.somethingInOutputBuffer=TRUE;
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';                  // preamble
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'^';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)severity;             // severity indicator
+   openserial_vars.output_buffer[output_buffer_index_write_increment()]=severity;                      // severity indicator
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)calling_component;    // component generating error
@@ -422,11 +411,10 @@ error_t openserial_printInfoErrorCritical(
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t) (arg1 & 0x00ff);
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)((arg2 & 0xff00)>>8); // arg2
    openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t) (arg2 & 0x00ff);
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';                  // postamble
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
-   openserial_vars.output_buffer[output_buffer_index_write_increment()]=(uint8_t)'$';
+   counter = hdlcify(openserial_vars.output_buffer,openserial_vars.output_buffer_index_write+1);
+   openserial_vars.output_buffer_index_write = counter-1;
    ENABLE_INTERRUPTS();
-
+   
    return E_SUCCESS;
 }
 
@@ -447,6 +435,8 @@ void isr_openserial_tx() {
       case MODE_OUTPUT:
          if (openserial_vars.output_buffer_index_write==openserial_vars.output_buffer_index_read) {
             openserial_vars.somethingInOutputBuffer=FALSE;
+            openserial_vars.output_buffer_index_read   = -1;
+            openserial_vars.output_buffer_index_write  = -1;
          }
          if (openserial_vars.somethingInOutputBuffer) {
             uart_writeByte(openserial_vars.output_buffer[output_buffer_index_read_increment()]);
@@ -459,28 +449,53 @@ void isr_openserial_tx() {
 }
 
 //executed in ISR, called from scheduler.c
+//TODO make sure I'm initializing the buffer length
 void isr_openserial_rx() {
+   uint8_t temporary;
+   uint8_t receivedLength;
    if (openserial_vars.mode==MODE_INPUT) {
-      if (openserial_vars.ready_receive_command==TRUE) {
-         openserial_vars.ready_receive_command=FALSE;
-         openserial_vars.received_command=uart_readByte();
-         openserial_vars.ready_receive_length=TRUE;
-      } else if (openserial_vars.ready_receive_length==TRUE) {
-         openserial_vars.ready_receive_length=FALSE;
-         openserial_vars.input_buffer_bytes_still_to_come=uart_readByte();
-      } else {
-         openserial_vars.input_buffer[openserial_vars.input_buffer_fill_level++]=uart_readByte();
-         if (openserial_vars.input_buffer_fill_level+1>SERIAL_INPUT_BUFFER_SIZE){
-            openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUT_BUFFER_OVERFLOW,
-                                  (errorparameter_t)0,
-                                  (errorparameter_t)0);
-            openserial_vars.input_buffer_fill_level=0;
-            openserial_stop();
+     temporary=uart_readByte();
+     if(openserial_vars.receiving==FALSE){
+       if (temporary==HDLC_FLAG){//we just started receiving
+         openserial_vars.receiving=TRUE;
+         openserial_vars.input_buffer[openserial_vars.input_buffer_fill_level++]=temporary;
+       }
+     } else {
+       if(temporary==HDLC_FLAG){//we're done receiving
+         openserial_vars.input_buffer[openserial_vars.input_buffer_fill_level++]=temporary;
+         receivedLength = dehdlcify(openserial_vars.input_buffer,openserial_vars.input_buffer_fill_level);
+         if(receivedLength<255){//valid packet
+           openserial_vars.receiving = FALSE;
+           openserial_vars.received_command = openserial_vars.input_buffer[0];
+           openserial_vars.input_buffer_fill_level = receivedLength-1;//minus the command byte
+           memcpy(openserial_vars.input_buffer,openserial_vars.input_buffer+1,receivedLength-1);//removing the command byte
+           openserial_stop();
+         } else { //invalid packet
+           openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUTBUFFER_BAD_CRC,
+                                 (errorparameter_t)0,
+                                 (errorparameter_t)0);
+           openserial_vars.receiving = FALSE;
+           openserial_vars.input_buffer_fill_level=0;
+           openserial_vars.received_command = (uint8_t)'X';//invalid command
+           openserial_stop();
+           
          }
-         openserial_vars.input_buffer_bytes_still_to_come--;
-         if (openserial_vars.input_buffer_bytes_still_to_come==0) {
-            openserial_stop();
+         //call dehdlcify
+         //reset the buffer length
+         //set receiving to FALSE
+         //call stop
+       } else { //we're in the middle of a packet
+         openserial_vars.input_buffer[openserial_vars.input_buffer_fill_level++]=temporary;
+         if (openserial_vars.input_buffer_fill_level+1>SERIAL_INPUT_BUFFER_SIZE){//make sure we're not overflowing
+           openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUT_BUFFER_OVERFLOW,
+                                 (errorparameter_t)0,
+                                 (errorparameter_t)0);
+           openserial_vars.receiving = FALSE;
+           openserial_vars.input_buffer_fill_level=0;
+           openserial_vars.received_command = (uint8_t)'X';//invalid command
+           openserial_stop();
          }
-      }
+       }
+     }
    }
 }
