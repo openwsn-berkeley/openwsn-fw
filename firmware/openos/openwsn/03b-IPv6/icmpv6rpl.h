@@ -100,7 +100,6 @@ PRAGMA(pack());
 //=========================== prototypes ======================================
 
 void icmpv6rpl_init();
-void icmpv6rpl_trigger();
 void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, error_t error);
 void icmpv6rpl_receive(OpenQueueEntry_t* msg);
 void icmpv6rpl_receiveDAO(OpenQueueEntry_t* msg);

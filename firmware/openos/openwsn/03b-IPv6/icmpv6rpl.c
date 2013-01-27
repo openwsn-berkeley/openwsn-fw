@@ -145,25 +145,6 @@ void icmpv6rpl_init() {
                                                 icmpv6rpl_timer_DAO_cb);
 }
 
-void icmpv6rpl_trigger() {
-   uint8_t number_bytes_from_input_buffer;
-   uint8_t input_buffer[16];
-   
-   //get command from OpenSerial (16B IPv6 destination address)
-   number_bytes_from_input_buffer = openserial_getInputBuffer(&(input_buffer[0]),sizeof(input_buffer));
-   if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
-      openserial_printError(COMPONENT_ICMPv6ECHO,ERR_INPUTBUFFER_LENGTH,
-                            (errorparameter_t)number_bytes_from_input_buffer,
-                            (errorparameter_t)0);
-      return;
-   };
-   // Before sending check if the rank is not the default one if not then send
-   if(neighbors_getMyDAGrank() != DEFAULTDAGRANK) {
-      //send
-      sendDIO();
-   }
-}
-
 void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, error_t error) {
    msg->owner = COMPONENT_ICMPv6RPL;
    if (msg->creator!=COMPONENT_ICMPv6RPL) {//that was a packet I had not created

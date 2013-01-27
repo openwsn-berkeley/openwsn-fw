@@ -183,6 +183,36 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
    }
 }
 
+void idmanager_triggerAboutRoot() {
+   uint8_t number_bytes_from_input_buffer;
+   uint8_t input_buffer;
+   //get command from OpenSerial
+   number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer,sizeof(input_buffer));
+   if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
+      openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
+            (errorparameter_t)number_bytes_from_input_buffer,
+            (errorparameter_t)0);
+      return;
+   };
+   //handle command
+   switch (input_buffer) {
+   case 'Y':
+      idmanager_setIsDAGroot(TRUE);
+      break;
+   case 'N':
+      idmanager_setIsDAGroot(FALSE);
+      break;
+   case 'T':
+      if (idmanager_getIsDAGroot()) {
+         idmanager_setIsDAGroot(FALSE);
+      } else {
+         idmanager_setIsDAGroot(TRUE);
+      }
+      break;
+   }
+   return;
+}
+
 void idmanager_triggerAboutBridge() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer[9];
@@ -209,36 +239,6 @@ void idmanager_triggerAboutBridge() {
       } else {
          idmanager_setIsBridge(TRUE);
          memcpy(&(idmanager_vars.myPrefix.prefix),&(input_buffer[1]),8);
-      }
-      break;
-   }
-   return;
-}
-
-void idmanager_triggerAboutRoot() {
-   uint8_t number_bytes_from_input_buffer;
-   uint8_t input_buffer;
-   //get command from OpenSerial
-   number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer,sizeof(input_buffer));
-   if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
-      openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
-            (errorparameter_t)number_bytes_from_input_buffer,
-            (errorparameter_t)0);
-      return;
-   };
-   //handle command
-   switch (input_buffer) {
-   case 'Y':
-      idmanager_setIsDAGroot(TRUE);
-      break;
-   case 'N':
-      idmanager_setIsDAGroot(FALSE);
-      break;
-   case 'T':
-      if (idmanager_getIsDAGroot()) {
-         idmanager_setIsDAGroot(FALSE);
-      } else {
-         idmanager_setIsDAGroot(TRUE);
       }
       break;
    }

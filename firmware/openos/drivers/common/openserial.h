@@ -39,15 +39,21 @@ enum {
 };
 
 // frames sent mote->PC
-#define SERFRAME_MOTE2PC_DATA          ((uint8_t)'D')
-#define SERFRAME_MOTE2PC_STATUS        ((uint8_t)'S')
-#define SERFRAME_MOTE2PC_INFO          ((uint8_t)'I')
-#define SERFRAME_MOTE2PC_ERROR         ((uint8_t)'E')
-#define SERFRAME_MOTE2PC_CRITICAL      ((uint8_t)'C')
-#define SERFRAME_MOTE2PC_REQUEST       ((uint8_t)'R')
+#define SERFRAME_MOTE2PC_DATA               ((uint8_t)'D')
+#define SERFRAME_MOTE2PC_STATUS             ((uint8_t)'S')
+#define SERFRAME_MOTE2PC_INFO               ((uint8_t)'I')
+#define SERFRAME_MOTE2PC_ERROR              ((uint8_t)'E')
+#define SERFRAME_MOTE2PC_CRITICAL           ((uint8_t)'C')
+#define SERFRAME_MOTE2PC_REQUEST            ((uint8_t)'R')
 
 // frames sent PC->mote
-
+#define SERFRAME_PC2MOTE_SETROOT            ((uint8_t)'R')
+#define SERFRAME_PC2MOTE_SETBRIDGE          ((uint8_t)'B')
+#define SERFRAME_PC2MOTE_DATA               ((uint8_t)'D')
+#define SERFRAME_PC2MOTE_TRIGGERTCPINJECT   ((uint8_t)'T')
+#define SERFRAME_PC2MOTE_TRIGGERUDPINJECT   ((uint8_t)'U')
+#define SERFRAME_PC2MOTE_TRIGGERICMPv6ECHO  ((uint8_t)'E')
+#define SERFRAME_PC2MOTE_TRIGGERSERIALECHO  ((uint8_t)'S')
 
 //=========================== typedef =========================================
 

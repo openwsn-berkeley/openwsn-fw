@@ -314,28 +314,25 @@ void openserial_stop() {
       temp_openserial_received_command = openserial_vars.received_command;
       ENABLE_INTERRUPTS();
       switch (temp_openserial_received_command) {
-         case 'R': //Trigger IDManager about isRoot
+         case SERFRAME_PC2MOTE_SETROOT:
             idmanager_triggerAboutRoot();
             break;
-         case 'B': //Trigger IDManager about isBridge
+         case SERFRAME_PC2MOTE_SETBRIDGE:
             idmanager_triggerAboutBridge();
             break;
-         case 'T': //Trigger TCPInject
+         case SERFRAME_PC2MOTE_DATA:
+            openbridge_triggerData();
+            break;
+         case SERFRAME_PC2MOTE_TRIGGERTCPINJECT:
             tcpinject_trigger();
             break;
-         case 'U': //Trigger UDPInject
+         case SERFRAME_PC2MOTE_TRIGGERUDPINJECT:
             udpinject_trigger();
             break;
-         case 'E': //Trigger ICMPv6Echo
+         case SERFRAME_PC2MOTE_TRIGGERICMPv6ECHO:
             icmpv6echo_trigger();
             break;
-         case 'P': //Trigger ICMPv6RPL
-            icmpv6rpl_trigger();
-            break;
-         case 'D': //Trigger OpenBridge (called only by moteProbe)
-            openbridge_trigger();
-            break;
-         case 'H': //Trigger serial echo
+         case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
             serialecho_echo();
             break;   
          default:
