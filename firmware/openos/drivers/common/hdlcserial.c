@@ -1,156 +1,213 @@
+/**
+\brief Definition of the "openserial" driver.
+
+\author Min Ting, October 2012.
+\author Fabien Chraim <chraim@eecs.berkeley.edu>, October 2012.
+*/
+
 #include "hdlcserial.h"
-#include "board.h"
-//#include "schedule.h"
-#include "uart.h"
 
-//callback variable
-hdlc_rx_cbt hdlcrxCb;
+//=========================== variables =======================================
 
-//variables
-uint16_t crc16;
-char hdlc_buffer[HDLC_MAX_LEN];
-char hdlc_index;
-char hdlc_len;
-volatile int hdlc_num_chars_left; // current # of chars remaining to TX
-volatile char hdlc_numflags;//for header
-volatile char hdlc_packetsum;
-hdlc_state_t hdlc_state;
-volatile char hdlc_tx_char_str[HDLC_MAX_LEN];           // pointer to remaining chars to tx
-uint8_t tx_index_hdlc;//used in isr_hdlc_tx to index the array
-char isStuffing;//used in isr_hdlc_rx to account for stuffing
+//=========================== prototypes ======================================
 
-//====prototypes=================
-char fcs_calc(char *buffer,char length,uint16_t crc);
-static uint16_t fcs_fcs16(uint16_t fcs, uint8_t data);
+       bool     doesCrcCheck(uint8_t* buffer, uint8_t length, uint16_t crc);
+static uint16_t crcIteration(uint16_t fcs, uint8_t data);
 
-//=====function implementations==
+//=========================== public ==========================================
 
-void hdlcserial_init(){
-  uart_setCallbacks(isr_hdlcserial_tx, isr_hdlcserial_rx);
-  hdlc_index = 0;
-  hdlc_len = 0;
-  hdlc_state = HDLC_STATE_DONE_RECEIVING;//initially, we're not receiving anything
-  hdlc_numflags = 0;
-  //  hdlc_packetsum = 0;
-  isStuffing = 0x00;
-  tx_index_hdlc = 0;
-  hdlc_num_chars_left = 0;
-  uart_enableInterrupts();
+/**
+\brief Frame some buffer using HDLC.
+
+This function will modify the contents and the length of the buffer passed as
+a parameter, by:
+- adding a leading 1-byte flag
+- stuffing the buffer when reserved characters appear
+- adding a trailing 2-byte CRC
+- adding a trailing 1-byte flag
+
+\param buf      [in,out] A pointer to the buffer to frame.
+\param inputLen [in]     Number of bytes in the buffer.
+
+\returns The new length of the buffer.
+*/
+uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
+   uint16_t fcs;
+   uint8_t  stuff_count;
+   uint8_t  crc1;
+   uint8_t  crc2;
+   
+   uint8_t  bufIdx;
+   
+   uint8_t  tempBuf[HDLC_MAX_LEN];
+   uint8_t  tempBufLen;
+   uint8_t  tempBufIdx;
+   
+   //===== step 1. compute crc
+   fcs = 0xffff;                            // initial FCS
+   for (bufIdx=0;bufIdx<inputLen;bufIdx++) {
+      fcs = crcIteration(fcs, buf[bufIdx]);    // iterate through bytes
+   }
+   fcs = ~fcs;                              // take one's complement
+   fcs=0; //poipoi
+   crc1 = fcs;
+   crc2 = fcs>>8;
+   
+   //===== step 2. count the number of bytes to stuff
+   stuff_count = 0;
+   /*
+   for (bufIdx=0;bufIdx<inputLen;bufIdx++) {
+      if ( (buf[bufIdx]==HDLC_FLAG) || (buf[bufIdx]==HDLC_ESCAPE)) {
+         stuff_count++;
+      }
+   }
+   if ((crc1==HDLC_FLAG) || (crc1==HDLC_ESCAPE)) {
+      stuff_count++;
+   }
+   if ((crc2==HDLC_FLAG) || (crc2==HDLC_ESCAPE)) {
+      stuff_count++;
+   }
+   */
+   
+   //===== step 3. prepare temporary buffer
+   // flag, (pkt+stuffed), crc, flag
+   tempBufLen                     = 1+(inputLen+stuff_count)+2+1;
+   // opening flags
+   tempBuf[0]                     = HDLC_FLAG;
+   // CRC
+   tempBuf[tempBufLen-3]          = crc1;
+   tempBuf[tempBufLen-2]          = crc2;
+   // closing flags
+   tempBuf[tempBufLen-1]          = HDLC_FLAG;
+   
+   //===== step 4. fill temporary buffer
+   tempBufIdx=1;
+   for (bufIdx=0;bufIdx<inputLen;bufIdx++){
+      /*
+      if (buf[bufIdx]==HDLC_FLAG) {
+         tempBuf[tempBufIdx]      = HDLC_ESCAPE;
+         tempBuf[tempBufIdx+1]    = HDLC_FLAG_ESCAPED;
+         tempBufIdx += 2;
+      } else if(buf[bufIdx]==HDLC_ESCAPE) {
+         tempBuf[tempBufIdx]      = HDLC_ESCAPE;
+         tempBuf[tempBufIdx+1]    = HDLC_ESCAPE_ESCAPED;
+         tempBufIdx += 2;
+      } else {
+         tempBuf[tempBufIdx]      = buf[bufIdx];
+         tempBufIdx += 1;
+      }
+      */
+      tempBuf[tempBufIdx]         = buf[bufIdx];
+      tempBufIdx += 1;
+   }
+   
+   //===== step 5. copy temporary buffer back into buf
+   memcpy(buf,tempBuf,tempBufLen);
+   
+   return tempBufLen;
 }
 
+/**
+\brief Unframe some buffer from HDLC.
 
-void hdlcserial_send(uint8_t* str, uint16_t len){
-  //compute crc:
-  uint16_t    fcs = 0;
-  uint8_t length = len;
-  uint8_t count,i,c;
-  uint8_t crc1;
-    uint8_t crc2;
-    uint8_t stuff_count,index;
-  
-  fcs = (uint16_t) 0xffff;
-  for( count=0;count <length;count++)
-    fcs = fcs_fcs16(fcs, str[count]);
-  fcs = ~fcs;//one's complement
-  
-  //prepare packet for transmission:
-  //first count the number of bytes to stuff
-  stuff_count = 0;
-  for ( i=0;i<len;i++) if((str[i] == 0x7E) || (str[i] == 0x7D)) stuff_count++;
-  
-  crc1 = fcs;
-  crc2 = fcs>>8;
-  if ((crc1 == 0x7E) || (crc1 == 0x7D)) stuff_count++;
-  if ((crc2 == 0x7E) || (crc2 == 0x7D)) stuff_count++;
-  str[len] = crc1;//fill in crc
-  str[len+1] = crc2;
-  
-  len += (4+stuff_count);//to account for the header, footer and crc stuffing bytes
-  //now fill hdlc_tx_char with the bytes to send.
-  //perform byte stuffing
-  hdlc_num_chars_left = len;  
-   index=1;
-  hdlc_tx_char_str[0] = 0x7E; //first delimiter
-  for ( c=0;c<length+2;c++){//length+2 for crc
-    if (str[c]==0x7E){
-      str[index] = 0x7D;
-      str[index+1] = 0x5E;
-      index+=2;
-    }
-    else if(str[c] == 0x7D){
-      hdlc_tx_char_str[index] = 0x7D;
-      hdlc_tx_char_str[index+1] = 0x5D;
-      index+=2;
-    }
-    else
-      hdlc_tx_char_str[index++] = str[c];
-  }
-  hdlc_tx_char_str[len-1] = 0x7E;
-  
-  tx_index_hdlc = 0;//reset the send index
-  uart_writeByte(hdlc_tx_char_str[tx_index_hdlc++]);//write the first byte
+\param buf      [in,out] A pointer to the buffer to unframe.
+\param inputLen [in]     Number of bytes in the buffer.
+
+\returns The new length of the buffer.
+*/
+uint8_t dehdlcify(uint8_t* buf, uint8_t len) {
+   uint16_t   fcs;
+   uint8_t    stuff_count;
+   
+   uint8_t    bufIdx;
+   
+   uint8_t    tempBuf[HDLC_MAX_LEN];
+   uint8_t    tempBufLen;
+   uint8_t    tempBufIdx;
+   
+   fcs = 0;
+   
+   //===== step 0. Make sure this is an HDLC frame
+   if(buf[0] != HDLC_FLAG || buf[len-1] != HDLC_FLAG) {
+      return 255; // TODO: printCritical
+   }
+   
+   //===== step 1. count the number of stuffed bytes
+   stuff_count = 0;
+   /*
+   for (bufIdx=0;bufIdx<len;bufIdx++) {
+      if (buf[bufIdx]==HDLC_ESCAPE) {
+         stuff_count++;
+      }
+   }
+   */
+   
+   //===== step 2. unstuff into temporary buffer
+   tempBufLen = len-stuff_count-1-2-1; // stuffed, flag, crc, flag
+   bufIdx = 1;
+   for (tempBufIdx=0;tempBufIdx<tempBufLen;tempBufIdx++){
+      /*
+      if (buf[bufIdx]==HDLC_ESCAPE){
+         if        (buf[bufIdx+1]==HDLC_FLAG_ESCAPED) {
+            tempBuf[tempBufIdx] = HDLC_FLAG;
+         } else if (buf[bufIdx+1]==HDLC_ESCAPE_ESCAPED) {
+            tempBuf[tempBufIdx] = HDLC_ESCAPE;
+         } else {
+            // this should never happen
+         }
+         bufIdx += 2;
+      } else {
+         tempBuf[tempBufIdx] = buf[bufIdx];
+         bufIdx += 1;
+      }
+      */
+      tempBuf[tempBufIdx] = buf[bufIdx];
+      bufIdx += 1;
+   }
+   
+   //===== step 3. check CDC
+   // read CRC
+   fcs = tempBuf[tempBufLen-2] + (tempBuf[tempBufLen-1]<<8);
+   // remove from temporary buffer
+   tempBufLen -= 2;
+   // recalculate and check CRC
+   if (doesCrcCheck(tempBuf,tempBufLen,fcs)) {
+      // CRC checks
+      memcpy(buf,tempBuf,tempBufLen);
+      return tempBufLen;
+   } else {
+      // CRC does not check
+      return 255;
+   }
 }
 
-void hdlcserial_setcb(hdlc_rx_cbt rxCb){
-  hdlcrxCb = rxCb;
+//=========================== private =========================================
+
+/**
+\brief Determine whether the CRC of a buffer checks.
+
+This function re-calculates the CRC of the buffer, and compares that to the
+expected CRC passed as a parameter.
+
+\param buf    [in] The buffer in question.
+\param bufLen [in] The number of bytes in the buffer.
+\param crcExp [in] The expected CRC.
+*/
+bool doesCrcCheck(uint8_t* buf, uint8_t bufLen, uint16_t crcExp) {
+   uint16_t crcCalc;
+   uint8_t  bufIdx;
+   
+   return TRUE;//poipoi
+   
+   crcCalc = (uint16_t)0xffff;
+   
+   for (bufIdx=0;bufIdx<bufLen-2;bufIdx++) {
+      crcCalc = crcIteration(crcCalc, buf[bufIdx]);
+   }
+   
+   return ((~crcCalc) == crcExp); /* add 1's complement then compare*/
 }
 
-
-//============interrupt handlers===
-void    isr_hdlcserial_rx(){  
-  register char hdlcrxc = uart_readByte();//read the rx buffer
-  uart_clearRxInterrupts();//this should be taken care of in hardware (when the byte is read, the interrupt is cleared)
-  if (hdlcrxc == HDLC_HEADER_FLAG)
-    ++hdlc_numflags;
-  else 
-    hdlc_numflags = 0;
-  
-  if ((hdlc_numflags == HDLC_HEADER_LEN) && (hdlc_state == HDLC_STATE_DONE_RECEIVING)) {//means we just started
-    hdlc_state = HDLC_STATE_RECEIVING;
-    hdlc_index = 0;//reset counter
-  }
-  else if((hdlc_numflags == 0) && (hdlc_state == HDLC_STATE_RECEIVING)){//getting the payload
-    if(isStuffing == 0x01 && hdlcrxc==0x5E) //or 5D
-      hdlc_buffer[hdlc_index-1] = 0x7E;
-    else if ((isStuffing == 0x01) && (hdlcrxc == 0x5D));//ignore this byte
-    else //business as usual
-      hdlc_buffer[hdlc_index++] = hdlcrxc;
-  }
-  else if ((hdlc_numflags == HDLC_HEADER_LEN) && (hdlc_state == HDLC_STATE_RECEIVING)) {//means we're done
-    hdlc_state = HDLC_STATE_DONE_RECEIVING;
-    //hdlc_index--;//because we increased it more than enough
-    crc16 = hdlc_buffer[hdlc_index - 2] + (hdlc_buffer[hdlc_index-1] <<8);
-    if (fcs_calc(hdlc_buffer,hdlc_index,crc16))
-      //push the callback to the scheduler or just call it
-      hdlcrxCb();
-  }
-  
-  //the next 3 lines enables removing stuffed bytes on the fly
-  if(hdlcrxc == 0x7D)
-    isStuffing = 0x01;
-  else isStuffing = 0x00;
-}
-
-
-void    isr_hdlcserial_tx(){
-  if (tx_index_hdlc<hdlc_num_chars_left) {
-    uart_writeByte(hdlc_tx_char_str[tx_index_hdlc++]);
-    uart_clearTxInterrupts();//I really am not comfortable putting this. I think the hardware takes care of it.
-  } else{
-    hdlc_num_chars_left = 0;
-  }  
-}
-//============private===============
-char fcs_calc(char *buffer,char length,uint16_t crc){//change function to bool?
-  uint16_t    fcs;
-  uint8_t count;
- 
-  fcs = (uint16_t) 0xffff;
-  for ( count=0;count<length-2;count++)
-    fcs = fcs_fcs16(fcs, buffer[count]);
-  return ((~fcs) == crc); /* add 1's complement then compare*/
-}
-
-static uint16_t fcs_fcs16(uint16_t fcs, uint8_t data){
-  return (fcs >> 8) ^ fcstab[(fcs ^ data) & 0xff];
+static uint16_t crcIteration(uint16_t fcs, uint8_t data){
+   return (fcs >> 8) ^ fcstab[(fcs ^ data) & 0xff];
 }

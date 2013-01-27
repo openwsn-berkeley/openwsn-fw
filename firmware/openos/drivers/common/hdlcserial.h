@@ -1,30 +1,29 @@
-//author Fabien Chraim <chraim@eecs.berkeley.edu>
-#ifndef __HDLCSERIAL
-#define __HDLCSERIAL
+/**
+\brief Declaraion of the "openserial" driver.
+
+\author Min Ting, October 2012.
+\author Fabien Chraim <chraim@eecs.berkeley.edu>, October 2012.
+*/
+
+#ifndef __HDLCSERIAL_H
+#define __HDLCSERIAL_H
 
 #include "openwsn.h"
 
-//defines
-#define HDLC_HEADER_FLAG 0x7e
-#define HDLC_HEADER_LEN 1
-#define HDLC_MAX_LEN 300
-typedef enum HDLC_STATE_T {
-  HDLC_STATE_RECEIVING,
-  HDLC_STATE_DONE_RECEIVING} hdlc_state_t;
-typedef void (*hdlc_rx_cbt)();
+/**
+\addtogroup cross-layers
+\{
+\addtogroup HDLC
+\{
+*/
 
-//prototypes
-void hdlcserial_init();
-void hdlcserial_setcb(hdlc_rx_cbt rxCb);
-void hdlcserial_send(uint8_t* str, uint16_t len);
-//no need for an hdlcserial_receive function; it's not like we can say 
-//"receive now"; the bytes arrive and when the packet is formed, the callback
-//is pushed to the scheduler
+//=========================== define ==========================================
 
-//interrupt handler prototypes
-void    isr_hdlcserial_rx();
-void    isr_hdlcserial_tx();
-
+#define HDLC_FLAG            0x7e
+#define HDLC_FLAG_ESCAPED    0x5e
+#define HDLC_ESCAPE          0x7d
+#define HDLC_ESCAPE_ESCAPED  0x5d
+#define HDLC_MAX_LEN         256
 
 //this table is used to expedite execution (at the expense of memory usage)
 static const uint16_t fcstab[256] = {
@@ -61,5 +60,17 @@ static const uint16_t fcstab[256] = {
    0xf78f, 0xe606, 0xd49d, 0xc514, 0xb1ab, 0xa022, 0x92b9, 0x8330,
    0x7bc7, 0x6a4e, 0x58d5, 0x495c, 0x3de3, 0x2c6a, 0x1ef1, 0x0f78
 };
+
+//=========================== typedef =========================================
+
+//=========================== prototypes ======================================
+
+uint8_t  hdlcify(uint8_t* buf,   uint8_t inputLen);
+uint8_t  dehdlcify(uint8_t* buf, uint8_t len);
+
+/**
+\}
+\}
+*/
 
 #endif
