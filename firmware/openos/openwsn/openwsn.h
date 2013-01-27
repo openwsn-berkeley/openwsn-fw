@@ -233,6 +233,7 @@ enum {
    ERR_HEADER_TOO_LONG                 = 0x2f, // header too long, length {1} (code location {0})
    ERR_INPUTBUFFER_LENGTH              = 0x30, // input length problem, length={0}
    ERR_BOOTED                          = 0x31, // booted
+   ERR_INPUTBUFFER_BAD_CRC             = 0x32, // serial packet had bad CRC
 };
 
 //=========================== typedef =========================================
