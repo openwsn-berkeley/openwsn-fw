@@ -256,12 +256,12 @@ void openserial_startInput() {
    }
    
    uart_clearTxInterrupts();
-   uart_clearRxInterrupts();          // clear possible pending interrupts
-   uart_enableInterrupts();           // Enable USCI_A1 TX & RX interrupt
+   uart_clearRxInterrupts();      // clear possible pending interrupts
+   uart_enableInterrupts();       // Enable USCI_A1 TX & RX interrupt
    
    DISABLE_INTERRUPTS();
-   openserial_vars.mode                  = MODE_INPUT;
-   openserial_vars.reqFrameIdx       = 0;
+   openserial_vars.mode           = MODE_INPUT;
+   openserial_vars.reqFrameIdx    = 0;
    uart_writeByte(openserial_vars.reqFrame[openserial_vars.reqFrameIdx]);
    ENABLE_INTERRUPTS();
 }
