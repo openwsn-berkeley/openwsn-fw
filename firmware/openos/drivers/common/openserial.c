@@ -10,7 +10,6 @@
 #include "neighbors.h"
 #include "res.h"
 #include "icmpv6echo.h"
-#include "icmpv6router.h"
 #include "idmanager.h"
 #include "openqueue.h"
 #include "tcpinject.h"

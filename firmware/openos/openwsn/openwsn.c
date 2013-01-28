@@ -27,7 +27,6 @@
 #include "forwarding.h"
 #include "icmpv6.h"
 #include "icmpv6echo.h"
-#include "icmpv6router.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
 #include "opentcp.h"
@@ -96,7 +95,6 @@ void openwsn_init() {
    forwarding_init();
    icmpv6_init();
    icmpv6echo_init();
-   icmpv6router_init();
    icmpv6rpl_init();
    //-- 04-TRAN
    opentcp_init();
