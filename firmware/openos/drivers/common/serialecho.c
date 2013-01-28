@@ -9,31 +9,18 @@
 
 //=========================== variables =======================================
 
-typedef struct{
-   uint8_t bufLen;
-   uint8_t buf[SERIAL_INPUT_BUFFER_SIZE];
-} serialecho_vars_t;
-
-serialecho_vars_t serialecho_vars;
-
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
 void serialecho_init(){
-   memset(&serialecho_vars,0,sizeof(serialecho_vars_t));
 }
 
 void serialecho_echo(uint8_t* buf, uint8_t bufLen){
-   
-   // read input
-   serialecho_vars.bufLen = bufLen;
-   memcpy(serialecho_vars.buf,buf,serialecho_vars.bufLen);
-   
-   // echo them
+   // echo back what you received
    openserial_printData(
-      serialecho_vars.buf,
-      serialecho_vars.bufLen
+      buf,
+      bufLen
    );
 }
 
