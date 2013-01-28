@@ -10,7 +10,6 @@
 #include "neighbors.h"
 #include "res.h"
 #include "icmpv6echo.h"
-#include "icmpv6router.h"
 #include "idmanager.h"
 #include "openqueue.h"
 #include "tcpinject.h"
@@ -335,9 +334,6 @@ void openserial_stop() {
             break;
          case 'E': //Trigger ICMPv6Echo
             icmpv6echo_trigger();
-            break;
-         case 'O': //Trigger ICMPv6Router
-            icmpv6router_trigger();
             break;
          case 'P': //Trigger ICMPv6RPL
             icmpv6rpl_trigger();

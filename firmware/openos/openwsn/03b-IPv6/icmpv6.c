@@ -1,7 +1,6 @@
 #include "openwsn.h"
 #include "icmpv6.h"
 #include "icmpv6echo.h"
-#include "icmpv6router.h"
 #include "icmpv6rpl.h"
 #include "forwarding.h"
 #include "openqueue.h"
@@ -29,10 +28,6 @@ void icmpv6_sendDone(OpenQueueEntry_t* msg, error_t error) {
       case IANA_ICMPv6_ECHO_REPLY:
          icmpv6echo_sendDone(msg, error);
          break;
-      case IANA_ICMPv6_RS:
-      case IANA_ICMPv6_RA:
-         icmpv6router_sendDone(msg, error);
-         break;
       case IANA_ICMPv6_RPL:
          icmpv6rpl_sendDone(msg, error);
          break;
@@ -53,10 +48,6 @@ void icmpv6_receive(OpenQueueEntry_t* msg) {
       case IANA_ICMPv6_ECHO_REQUEST:
       case IANA_ICMPv6_ECHO_REPLY:
          icmpv6echo_receive(msg);
-         break;
-      case IANA_ICMPv6_RS:
-      case IANA_ICMPv6_RA:
-         icmpv6router_receive(msg);
          break;
       case IANA_ICMPv6_RPL:
          icmpv6rpl_receive(msg);

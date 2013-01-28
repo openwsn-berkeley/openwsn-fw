@@ -2187,12 +2187,6 @@
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6echo.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.c</name>
       </file>
       <file>
