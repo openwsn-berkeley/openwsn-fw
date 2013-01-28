@@ -10,8 +10,8 @@
 //=========================== variables =======================================
 
 typedef struct{
-   uint8_t buffer[SERIAL_INPUT_BUFFER_SIZE];
-   uint8_t numDataBytes;
+   uint8_t bufLen;
+   uint8_t buf[SERIAL_INPUT_BUFFER_SIZE];
 } serialecho_vars_t;
 
 serialecho_vars_t serialecho_vars;
@@ -24,14 +24,17 @@ void serialecho_init(){
    memset(&serialecho_vars,0,sizeof(serialecho_vars_t));
 }
 
-void serialecho_echo(){
+void serialecho_echo(uint8_t* buf, uint8_t bufLen){
    
    // read input
-   serialecho_vars.numDataBytes = openserial_getNumDataBytes();
-   openserial_getInputBuffer(&(serialecho_vars.buffer[0]),serialecho_vars.numDataBytes);
+   serialecho_vars.bufLen = bufLen;
+   memcpy(serialecho_vars.buf,buf,serialecho_vars.bufLen);
    
    // echo them
-   openserial_printData(serialecho_vars.buffer, serialecho_vars.numDataBytes);
+   openserial_printData(
+      serialecho_vars.buf,
+      serialecho_vars.bufLen
+   );
 }
 
 //=========================== private =========================================

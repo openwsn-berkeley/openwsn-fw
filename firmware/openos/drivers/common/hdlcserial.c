@@ -113,10 +113,11 @@ uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
 \param buf      [in,out] A pointer to the buffer to unframe.
 \param inputLen [in]     Number of bytes in the buffer.
 
-\returns The new length of the buffer.
+\returns The new length of the buffer, or 0 is the CRC didn't
+         match or the buf was not a valid HDLC frame.
 */
 uint8_t dehdlcify(uint8_t* buf, uint8_t len) {
-   uint16_t   fcs;
+   uint16_t   crcExp;
    uint8_t    stuff_count;
    
    uint8_t    bufIdx;
@@ -125,11 +126,9 @@ uint8_t dehdlcify(uint8_t* buf, uint8_t len) {
    uint8_t    tempBufLen;
    uint8_t    tempBufIdx;
    
-   fcs = 0;
-   
    //===== step 0. Make sure this is an HDLC frame
    if(buf[0] != HDLC_FLAG || buf[len-1] != HDLC_FLAG) {
-      return 255; // TODO: printCritical
+      return 0;
    }
    
    //===== step 1. count the number of stuffed bytes
@@ -165,19 +164,17 @@ uint8_t dehdlcify(uint8_t* buf, uint8_t len) {
       bufIdx += 1;
    }
    
-   //===== step 3. check CDC
-   // read CRC
-   fcs = tempBuf[tempBufLen-2] + (tempBuf[tempBufLen-1]<<8);
-   // remove from temporary buffer
-   tempBufLen -= 2;
+   //===== step 3. check CRC
+   // read CRC from buf
+   crcExp = buf[bufIdx] + (buf[bufIdx+1]<<8);
    // recalculate and check CRC
-   if (doesCrcCheck(tempBuf,tempBufLen,fcs)) {
+   if (doesCrcCheck(tempBuf,tempBufLen,crcExp)) {
       // CRC checks
       memcpy(buf,tempBuf,tempBufLen);
       return tempBufLen;
    } else {
       // CRC does not check
-      return 255;
+      return 0;
    }
 }
 
@@ -189,7 +186,8 @@ uint8_t dehdlcify(uint8_t* buf, uint8_t len) {
 This function re-calculates the CRC of the buffer, and compares that to the
 expected CRC passed as a parameter.
 
-\param buf    [in] The buffer in question.
+\param buf    [in] The buffer in question, already untuffed and with flags
+                   and CRC remove (i.e. just the payload).
 \param bufLen [in] The number of bytes in the buffer.
 \param crcExp [in] The expected CRC.
 */
@@ -199,13 +197,13 @@ bool doesCrcCheck(uint8_t* buf, uint8_t bufLen, uint16_t crcExp) {
    
    return TRUE;//poipoi
    
-   crcCalc = (uint16_t)0xffff;
-   
-   for (bufIdx=0;bufIdx<bufLen-2;bufIdx++) {
+   crcCalc = 0xffff;
+   for (bufIdx=0;bufIdx<bufLen;bufIdx++) {
       crcCalc = crcIteration(crcCalc, buf[bufIdx]);
    }
+   crcCalc = ~crcCalc;
    
-   return ((~crcCalc) == crcExp); /* add 1's complement then compare*/
+   return (crcCalc==crcExp);
 }
 
 static uint16_t crcIteration(uint16_t fcs, uint8_t data){
