@@ -37,6 +37,7 @@ typedef struct {
    uint8_t    inputBuf[SERIAL_INPUT_BUFFER_SIZE];
    // output
    bool       outputBufFilled;
+   uint16_t   crc;
    uint8_t    outputBufIdxW;
    uint8_t    outputBufIdxR;
    uint8_t    outputBuf[SERIAL_OUTPUT_BUFFER_SIZE];
@@ -83,21 +84,37 @@ void openserial_init() {
                      isr_openserial_rx);
 }
 
+//########################### poipoipoipoi ####################################
+void hdlcOpen() {
+   openserial_vars.crc                                = 0xffff;
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = HDLC_FLAG;
+}
+void hdlcWrite(uint8_t b) {
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = b;
+}
+void hdlcClose() {
+   openserial_vars.crc                                = 0x0000;// poipoipoi
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (openserial_vars.crc>>0)&0xff;
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (openserial_vars.crc>>8)&0xff;
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = HDLC_FLAG;
+}
+//########################### poipoipoipoi ####################################
+
 error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t length) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
-   openserial_vars.outputBufFilled                    = TRUE;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = SERFRAME_MOTE2PC_STATUS;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = statusElement;
+   openserial_vars.outputBufFilled  = TRUE;
+   hdlcOpen();
+   hdlcWrite(SERFRAME_MOTE2PC_STATUS);
+   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   hdlcWrite(statusElement);
    for (i=0;i<length;i++){
-      openserial_vars.outputBuf[IncrOutputBufIdxW()]  = buffer[i];
+      hdlcWrite(buffer[i]);
    }
-   i = hdlcify(openserial_vars.outputBuf,openserial_vars.outputBufIdxW+1);
-   openserial_vars.outputBufIdxW                      = i-1; //poipoipoi
+   hdlcClose();
    ENABLE_INTERRUPTS();
    
    return E_SUCCESS;
@@ -110,53 +127,49 @@ error_t openserial_printInfoErrorCritical(
       errorparameter_t arg1,
       errorparameter_t arg2
    ) {
-   uint8_t i;
-   
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
-   openserial_vars.outputBufFilled                    = TRUE;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = severity;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = calling_component;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = error_code;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (uint8_t)((arg1 & 0xff00)>>8);
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (uint8_t) (arg1 & 0x00ff);
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (uint8_t)((arg2 & 0xff00)>>8);
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (uint8_t) (arg2 & 0x00ff);
-   
-   i = hdlcify(openserial_vars.outputBuf,openserial_vars.outputBufIdxW+1);
-   openserial_vars.outputBufIdxW                      = i-1; //poipoipoi
+   openserial_vars.outputBufFilled  = TRUE;
+   hdlcOpen();
+   hdlcWrite(severity);
+   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   hdlcWrite(calling_component);
+   hdlcWrite(error_code);
+   hdlcWrite((uint8_t)((arg1 & 0xff00)>>8));
+   hdlcWrite((uint8_t) (arg1 & 0x00ff));
+   hdlcWrite((uint8_t)((arg2 & 0xff00)>>8));
+   hdlcWrite((uint8_t) (arg2 & 0x00ff));
+   hdlcClose();
    ENABLE_INTERRUPTS();
    
    return E_SUCCESS;
 }
 
 error_t openserial_printData(uint8_t* buffer, uint8_t length) {
-   uint8_t i;
-   uint8_t asn[5];
+   uint8_t  i;
+   uint8_t  asn[5];
    INTERRUPT_DECLARATION();
    
+   // retrieve ASN
    asnWriteToSerial(asn);// byte01,byte23,byte4
    
    DISABLE_INTERRUPTS();
-   openserial_vars.outputBufFilled                    = TRUE;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = SERFRAME_MOTE2PC_DATA;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[1]);
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (uint8_t)((idmanager_getMyID(ADDR_16B))->addr_16b[0]);
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = asn[0];
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = asn[1];
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = asn[2];
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = asn[3];
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = asn[4];
-   // payload
+   openserial_vars.outputBufFilled  = TRUE;
+   hdlcOpen();
+   hdlcWrite(SERFRAME_MOTE2PC_DATA);
+   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   hdlcWrite(asn[0]);
+   hdlcWrite(asn[1]);
+   hdlcWrite(asn[2]);
+   hdlcWrite(asn[3]);
+   hdlcWrite(asn[4]);
    for (i=0;i<length;i++){
-      openserial_vars.outputBuf[IncrOutputBufIdxW()]  = buffer[i];
+      hdlcWrite(buffer[i]);
    }
-   
-   i = hdlcify(openserial_vars.outputBuf,openserial_vars.outputBufIdxW+1);
-   openserial_vars.outputBufIdxW                      = i-1; //poipoipoi
+   hdlcClose();
    ENABLE_INTERRUPTS();
    
    return E_SUCCESS;
