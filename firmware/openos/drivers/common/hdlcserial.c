@@ -31,6 +31,7 @@ a parameter, by:
 
 \returns The new length of the buffer.
 */
+/*
 uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
    uint16_t fcs;
    uint8_t  stuff_count;
@@ -55,7 +56,6 @@ uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
    
    //===== step 2. count the number of bytes to stuff
    stuff_count = 0;
-   /*
    for (bufIdx=0;bufIdx<inputLen;bufIdx++) {
       if ( (buf[bufIdx]==HDLC_FLAG) || (buf[bufIdx]==HDLC_ESCAPE)) {
          stuff_count++;
@@ -67,7 +67,6 @@ uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
    if ((crc2==HDLC_FLAG) || (crc2==HDLC_ESCAPE)) {
       stuff_count++;
    }
-   */
    
    //===== step 3. prepare temporary buffer
    // flag, (pkt+stuffed), crc, flag
@@ -83,7 +82,6 @@ uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
    //===== step 4. fill temporary buffer
    tempBufIdx=1;
    for (bufIdx=0;bufIdx<inputLen;bufIdx++){
-      /*
       if (buf[bufIdx]==HDLC_FLAG) {
          tempBuf[tempBufIdx]      = HDLC_ESCAPE;
          tempBuf[tempBufIdx+1]    = HDLC_FLAG_ESCAPED;
@@ -96,9 +94,6 @@ uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
          tempBuf[tempBufIdx]      = buf[bufIdx];
          tempBufIdx += 1;
       }
-      */
-      tempBuf[tempBufIdx]         = buf[bufIdx];
-      tempBufIdx += 1;
    }
    
    //===== step 5. copy temporary buffer back into buf
@@ -106,6 +101,7 @@ uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
    
    return tempBufLen;
 }
+*/
 
 /**
 \brief Unframe some buffer from HDLC.
@@ -122,7 +118,7 @@ uint8_t dehdlcify(uint8_t* buf, uint8_t len) {
    
    uint8_t    bufIdx;
    
-   uint8_t    tempBuf[HDLC_MAX_LEN];
+   uint8_t    tempBuf[20];
    uint8_t    tempBufLen;
    uint8_t    tempBufIdx;
    

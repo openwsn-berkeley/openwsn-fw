@@ -32,12 +32,13 @@ typedef struct {
    // input
    uint8_t    reqFrame[1+1+2+1]; // flag (1B), command (2B), CRC (1B), flag (1B)
    uint8_t    reqFrameIdx;
+   uint8_t    lastRxByte;
    bool       busyReceiving;
-   uint16_t   inputBufFill;
+   uint8_t    inputBufFill;
    uint8_t    inputBuf[SERIAL_INPUT_BUFFER_SIZE];
    // output
    bool       outputBufFilled;
-   uint16_t   crc;
+   uint16_t   outputCrc;
    uint8_t    outputBufIdxW;
    uint8_t    outputBufIdxR;
    uint8_t    outputBuf[SERIAL_OUTPUT_BUFFER_SIZE];
@@ -68,9 +69,13 @@ void openserial_init() {
    openserial_vars.debugPrintCounter   = 0;
    
    // input
-   openserial_vars.reqFrame[0]         = SERFRAME_MOTE2PC_REQUEST;
-   hdlcify(openserial_vars.reqFrame,1);
+   openserial_vars.reqFrame[0]         = HDLC_FLAG;
+   openserial_vars.reqFrame[1]         = SERFRAME_MOTE2PC_REQUEST;
+   openserial_vars.reqFrame[2]         = ((CRC_MAGICVALUE>>0)&0xff);
+   openserial_vars.reqFrame[3]         = ((CRC_MAGICVALUE>>8)&0xff);
+   openserial_vars.reqFrame[4]         = HDLC_FLAG;
    openserial_vars.reqFrameIdx         = 0;
+   openserial_vars.lastRxByte          = HDLC_FLAG;
    openserial_vars.busyReceiving       = FALSE;
    openserial_vars.inputBufFill        = 0;
    
@@ -86,16 +91,16 @@ void openserial_init() {
 
 //########################### poipoipoipoi ####################################
 void hdlcOpen() {
-   openserial_vars.crc                                = 0xffff;
+   openserial_vars.outputCrc                          = 0xffff;
    openserial_vars.outputBuf[IncrOutputBufIdxW()]     = HDLC_FLAG;
 }
 void hdlcWrite(uint8_t b) {
    openserial_vars.outputBuf[IncrOutputBufIdxW()]     = b;
 }
 void hdlcClose() {
-   openserial_vars.crc                                = 0x0000;// poipoipoi
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (openserial_vars.crc>>0)&0xff;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (openserial_vars.crc>>8)&0xff;
+   openserial_vars.outputCrc                          = CRC_MAGICVALUE;
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (openserial_vars.outputCrc>>0)&0xff;
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (openserial_vars.outputCrc>>8)&0xff;
    openserial_vars.outputBuf[IncrOutputBufIdxW()]     = HDLC_FLAG;
 }
 //########################### poipoipoipoi ####################################
@@ -223,7 +228,7 @@ error_t openserial_printCritical(uint8_t calling_component, uint8_t error_code,
 }
 
 uint8_t openserial_getNumDataBytes() {
-   uint16_t inputBufFill;
+   uint8_t inputBufFill;
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
@@ -234,8 +239,8 @@ uint8_t openserial_getNumDataBytes() {
 }
 
 uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
-   uint8_t  numBytesWritten;
-   uint16_t inputBufFill;
+   uint8_t numBytesWritten;
+   uint8_t inputBufFill;
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
@@ -344,7 +349,6 @@ void openserial_startOutput() {
    DISABLE_INTERRUPTS();
    openserial_vars.mode=MODE_OUTPUT;
    if (openserial_vars.outputBufFilled) {
-      openserial_vars.outputBufIdxR    = 0;//poipoipoi
       uart_writeByte(openserial_vars.outputBuf[IncrOutputBufIdxR()]);
    } else {
       openserial_stop();
@@ -353,8 +357,8 @@ void openserial_startOutput() {
 }
 
 void openserial_stop() {
-   uint16_t  inputBufFill;
-   uint8_t   cmdByte;
+   uint8_t inputBufFill;
+   uint8_t cmdByte;
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
@@ -403,6 +407,9 @@ void openserial_stop() {
             ENABLE_INTERRUPTS();
             break;
       }
+      DISABLE_INTERRUPTS();
+      openserial_vars.inputBufFill = 0;
+      ENABLE_INTERRUPTS();
    }
 }
 
@@ -457,8 +464,6 @@ void isr_openserial_tx() {
       case MODE_OUTPUT:
          if (openserial_vars.outputBufIdxW==openserial_vars.outputBufIdxR) {
             openserial_vars.outputBufFilled = FALSE;
-            openserial_vars.outputBufIdxR   = 0;//poipoi
-            openserial_vars.outputBufIdxW   = 0;//poipoi
          }
          if (openserial_vars.outputBufFilled) {
             uart_writeByte(openserial_vars.outputBuf[IncrOutputBufIdxR()]);
@@ -482,13 +487,21 @@ void isr_openserial_rx() {
    // read byte just received
    rxbyte = uart_readByte();
    
-   if        (openserial_vars.busyReceiving==FALSE && rxbyte==HDLC_FLAG) {
+   if        (
+                openserial_vars.busyReceiving==FALSE  &&
+                openserial_vars.lastRxByte==HDLC_FLAG &&
+                rxbyte!=HDLC_FLAG
+              ) {
       // start of frame
       
       openserial_vars.busyReceiving         = TRUE;
+      openserial_vars.inputBufFill          = 0;
       openserial_vars.inputBuf[openserial_vars.inputBufFill++]=rxbyte;
    
-   } else if (openserial_vars.busyReceiving==TRUE  && rxbyte!=HDLC_FLAG) {
+   } else if (
+                openserial_vars.busyReceiving==TRUE   &&
+                rxbyte!=HDLC_FLAG
+             ) {
       // middle of frame
       
       openserial_vars.inputBuf[openserial_vars.inputBufFill++]=rxbyte;
@@ -502,11 +515,27 @@ void isr_openserial_rx() {
          openserial_vars.inputBufFill       = 0;
          openserial_stop();
       }
-   } else if (openserial_vars.busyReceiving==TRUE  && rxbyte==HDLC_FLAG) {
+   } else if (
+                openserial_vars.busyReceiving==TRUE   &&
+                rxbyte==HDLC_FLAG
+              ) {
          // end of frame
          
-         openserial_vars.inputBuf[openserial_vars.inputBufFill++]=rxbyte;
-         openserial_vars.inputBufFill = dehdlcify(openserial_vars.inputBuf,openserial_vars.inputBufFill);
+         //openserial_vars.inputBufFill = dehdlcify(openserial_vars.inputBuf,openserial_vars.inputBufFill);
+         
+         if (openserial_vars.inputBufFill<2) {
+            // frame too short
+            openserial_vars.inputBufFill    = 0;
+         } else if (
+               (openserial_vars.inputBuf[openserial_vars.inputBufFill-2]!=((CRC_MAGICVALUE>>0)&0xff)) ||
+               (openserial_vars.inputBuf[openserial_vars.inputBufFill-1]!=((CRC_MAGICVALUE>>8)&0xff))
+            ){
+            // wrong CRC
+            openserial_vars.inputBufFill    = 0;
+         } else {
+            // frame valid, remove CRC
+            openserial_vars.inputBufFill   -= 2;
+         }
          
          if (openserial_vars.inputBufFill==0){
             openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUTBUFFER_BAD_CRC,
@@ -515,7 +544,9 @@ void isr_openserial_rx() {
          
          }
          
-         openserial_vars.busyReceiving             = FALSE;
+         openserial_vars.busyReceiving      = FALSE;
          openserial_stop();
    }
+   
+   openserial_vars.lastRxByte = rxbyte;
 }
