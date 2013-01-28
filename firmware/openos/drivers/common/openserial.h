@@ -21,7 +21,7 @@
 /**
 \brief Number of bytes of the serial output buffer, in bytes.
 */
-#define SERIAL_OUTPUT_BUFFER_SIZE 300
+#define SERIAL_OUTPUT_BUFFER_SIZE 200
 
 /**
 \brief Number of bytes of the serial input buffer, in bytes.
