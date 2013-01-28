@@ -101,15 +101,15 @@
         </option>
         <option>
           <name>GStackHeapOverride</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>GStackSize2</name>
-          <state>80</state>
+          <state>200</state>
         </option>
         <option>
           <name>GHeapSize2</name>
-          <state>80</state>
+          <state>200</state>
         </option>
         <option>
           <name>RadioDataModelType</name>
