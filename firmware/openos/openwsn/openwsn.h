@@ -15,12 +15,12 @@
 //=========================== define ==========================================
 
 static const uint8_t infoStackName[] = "OpenWSN ";
-#define OPENWSN_VERSION_MAJOR 1
-#define OPENWSN_VERSION_MINOR 2
-#define OPENWSN_VERSION_PATCH 1
+#define OPENWSN_VERSION_MAJOR     1
+#define OPENWSN_VERSION_MINOR     2
+#define OPENWSN_VERSION_PATCH     1
 
 // enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER 0x41
+#define DEBUG_MOTEID_MASTER       0x3b
 
 #ifndef TRUE
 #define TRUE 1
@@ -233,7 +233,7 @@ enum {
    ERR_HEADER_TOO_LONG                 = 0x2f, // header too long, length {1} (code location {0})
    ERR_INPUTBUFFER_LENGTH              = 0x30, // input length problem, length={0}
    ERR_BOOTED                          = 0x31, // booted
-   ERR_INPUTBUFFER_BAD_CRC             = 0x32, // serial packet had bad CRC
+   ERR_INVALIDSERIALFRAME              = 0x32, // invalid serial frame
 };
 
 //=========================== typedef =========================================

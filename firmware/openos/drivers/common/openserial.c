@@ -623,7 +623,7 @@ void isr_openserial_rx() {
          
          if (openserial_vars.inputBufFill==0){
             // invalid HDLC frame
-            openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUTBUFFER_BAD_CRC,
+            openserial_printError(COMPONENT_OPENSERIAL,ERR_INVALIDSERIALFRAME,
                                   (errorparameter_t)0,
                                   (errorparameter_t)0);
          
