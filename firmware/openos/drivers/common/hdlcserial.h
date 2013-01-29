@@ -20,12 +20,12 @@
 //=========================== define ==========================================
 
 #define HDLC_FLAG            0x7e
-#define HDLC_FLAG_ESCAPED    0x5e
 #define HDLC_ESCAPE          0x7d
-#define HDLC_ESCAPE_ESCAPED  0x5d
-#define HDLC_MAX_LEN         256
+#define HDLC_ESCAPE_MASK     0x20
 #define HDLC_CRCINIT         0xffff
 #define HDLC_CRCGOOD         0xf0b8
+
+#define HDLC_FLAG_ESCAPED    0x5e
 
 //this table is used to expedite execution (at the expense of memory usage)
 static const uint16_t fcstab[256] = {

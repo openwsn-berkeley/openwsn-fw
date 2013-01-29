@@ -33,6 +33,7 @@ typedef struct {
    uint8_t    reqFrameIdx;
    uint8_t    lastRxByte;
    bool       busyReceiving;
+   bool       inputEscaping;
    uint16_t   inputCrc;
    uint8_t    inputBufFill;
    uint8_t    inputBuf[SERIAL_INPUT_BUFFER_SIZE];
@@ -86,6 +87,7 @@ void openserial_init() {
    openserial_vars.reqFrameIdx         = 0;
    openserial_vars.lastRxByte          = HDLC_FLAG;
    openserial_vars.busyReceiving       = FALSE;
+   openserial_vars.inputEscaping       = FALSE;
    openserial_vars.inputBufFill        = 0;
    
    // ouput
@@ -463,11 +465,15 @@ void outputHdlcOpen() {
 \todo escape 0x7e and 0x7d.
 */
 void outputHdlcWrite(uint8_t b) {
-   // add byte to buffer
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = b;
-   
    // iterate through CRC calculator
    openserial_vars.outputCrc = crcIteration(openserial_vars.outputCrc,b);
+   
+   // add byte to buffer
+   if (b==HDLC_FLAG || b==HDLC_ESCAPE) {
+      openserial_vars.outputBuf[IncrOutputBufIdxW()]  = HDLC_ESCAPE;
+      b                                               = b^HDLC_ESCAPE_MASK;
+   }
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = b;
 }
 /**
 \brief Finalize the outgoing HDLC frame.
@@ -502,12 +508,21 @@ void inputHdlcOpen() {
 \todo escape 0x7e and 0x7d.
 */
 void inputHdlcWrite(uint8_t b) {
-   // add byte to input buffer
-   openserial_vars.inputBuf[openserial_vars.inputBufFill] = b;
-   openserial_vars.inputBufFill++;
-   
-   // iterate through CRC calculator
-   openserial_vars.inputCrc = crcIteration(openserial_vars.inputCrc,b);
+   if (b==HDLC_ESCAPE) {
+      openserial_vars.inputEscaping = TRUE;
+   } else {
+      if (openserial_vars.inputEscaping==TRUE) {
+         b                             = b^HDLC_ESCAPE_MASK;
+         openserial_vars.inputEscaping = FALSE;
+      }
+      
+      // add byte to input buffer
+      openserial_vars.inputBuf[openserial_vars.inputBufFill] = b;
+      openserial_vars.inputBufFill++;
+      
+      // iterate through CRC calculator
+      openserial_vars.inputCrc = crcIteration(openserial_vars.inputCrc,b);
+   }
 }
 /**
 \brief Finalize the incoming HDLC frame.
