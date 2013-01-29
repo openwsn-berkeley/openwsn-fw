@@ -64,7 +64,6 @@ source = [
     os.path.join('03b-IPv6','forwarding.c'),
     os.path.join('03b-IPv6','icmpv6.c'),
     os.path.join('03b-IPv6','icmpv6echo.c'),
-    os.path.join('03b-IPv6','icmpv6router.c'),
     os.path.join('03b-IPv6','icmpv6rpl.c'),
     #=== 04-TRAN
     os.path.join('04-TRAN','opencoap.c'),

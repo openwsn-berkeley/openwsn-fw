@@ -21,6 +21,7 @@ localEnv.Append(
 
 target =  'libdrivers'
 source = [
+    os.path.join('common','openhdlc.c'),
     os.path.join('common','openserial.c'),
     os.path.join('common','opentimers.c'),
     os.path.join('common','serialecho.c'),
