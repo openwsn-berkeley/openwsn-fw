@@ -18,8 +18,6 @@
 
 //=========================== define ==========================================
 
-#define CRC_MAGICVALUE 0xabcd
-
 /**
 \brief Number of bytes of the serial output buffer, in bytes.
 */

@@ -29,10 +29,11 @@ typedef struct {
    uint8_t    mode;
    uint8_t    debugPrintCounter;
    // input
-   uint8_t    reqFrame[1+1+2+1]; // flag (1B), command (2B), CRC (1B), flag (1B)
+   uint8_t    reqFrame[1+1+2+1]; // flag (1B), command (2B), CRC (2B), flag (1B)
    uint8_t    reqFrameIdx;
    uint8_t    lastRxByte;
    bool       busyReceiving;
+   uint16_t   inputCrc;
    uint8_t    inputBufFill;
    uint8_t    inputBuf[SERIAL_INPUT_BUFFER_SIZE];
    // output
@@ -56,10 +57,16 @@ error_t openserial_printInfoErrorCritical(
    errorparameter_t arg1,
    errorparameter_t arg2
 );
+// HDLC output
+void outputHdlcOpen();
+void outputHdlcWrite(uint8_t b);
+void outputHdlcClose();
 
 //=========================== public ==========================================
 
 void openserial_init() {
+   uint16_t crc;
+   
    // reset variable
    memset(&openserial_vars,0,sizeof(openserial_vars_t));
    
@@ -70,8 +77,11 @@ void openserial_init() {
    // input
    openserial_vars.reqFrame[0]         = HDLC_FLAG;
    openserial_vars.reqFrame[1]         = SERFRAME_MOTE2PC_REQUEST;
-   openserial_vars.reqFrame[2]         = ((CRC_MAGICVALUE>>0)&0xff);
-   openserial_vars.reqFrame[3]         = ((CRC_MAGICVALUE>>8)&0xff);
+   crc = HDLC_CRCINIT;
+   crc = crcIteration(crc,openserial_vars.reqFrame[1]);
+   crc = ~crc;
+   openserial_vars.reqFrame[2]         = (crc>>0)&0xff;
+   openserial_vars.reqFrame[3]         = (crc>>8)&0xff;
    openserial_vars.reqFrame[4]         = HDLC_FLAG;
    openserial_vars.reqFrameIdx         = 0;
    openserial_vars.lastRxByte          = HDLC_FLAG;
@@ -88,37 +98,21 @@ void openserial_init() {
                      isr_openserial_rx);
 }
 
-//########################### poipoipoipoi ####################################
-void hdlcOpen() {
-   openserial_vars.outputCrc                          = 0xffff;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = HDLC_FLAG;
-}
-void hdlcWrite(uint8_t b) {
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = b;
-}
-void hdlcClose() {
-   openserial_vars.outputCrc                          = CRC_MAGICVALUE;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (openserial_vars.outputCrc>>0)&0xff;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (openserial_vars.outputCrc>>8)&0xff;
-   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = HDLC_FLAG;
-}
-//########################### poipoipoipoi ####################################
-
 error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t length) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
    openserial_vars.outputBufFilled  = TRUE;
-   hdlcOpen();
-   hdlcWrite(SERFRAME_MOTE2PC_STATUS);
-   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   hdlcWrite(statusElement);
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_STATUS);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   outputHdlcWrite(statusElement);
    for (i=0;i<length;i++){
-      hdlcWrite(buffer[i]);
+      outputHdlcWrite(buffer[i]);
    }
-   hdlcClose();
+   outputHdlcClose();
    ENABLE_INTERRUPTS();
    
    return E_SUCCESS;
@@ -135,17 +129,17 @@ error_t openserial_printInfoErrorCritical(
    
    DISABLE_INTERRUPTS();
    openserial_vars.outputBufFilled  = TRUE;
-   hdlcOpen();
-   hdlcWrite(severity);
-   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   hdlcWrite(calling_component);
-   hdlcWrite(error_code);
-   hdlcWrite((uint8_t)((arg1 & 0xff00)>>8));
-   hdlcWrite((uint8_t) (arg1 & 0x00ff));
-   hdlcWrite((uint8_t)((arg2 & 0xff00)>>8));
-   hdlcWrite((uint8_t) (arg2 & 0x00ff));
-   hdlcClose();
+   outputHdlcOpen();
+   outputHdlcWrite(severity);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   outputHdlcWrite(calling_component);
+   outputHdlcWrite(error_code);
+   outputHdlcWrite((uint8_t)((arg1 & 0xff00)>>8));
+   outputHdlcWrite((uint8_t) (arg1 & 0x00ff));
+   outputHdlcWrite((uint8_t)((arg2 & 0xff00)>>8));
+   outputHdlcWrite((uint8_t) (arg2 & 0x00ff));
+   outputHdlcClose();
    ENABLE_INTERRUPTS();
    
    return E_SUCCESS;
@@ -161,19 +155,19 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    
    DISABLE_INTERRUPTS();
    openserial_vars.outputBufFilled  = TRUE;
-   hdlcOpen();
-   hdlcWrite(SERFRAME_MOTE2PC_DATA);
-   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   hdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   hdlcWrite(asn[0]);
-   hdlcWrite(asn[1]);
-   hdlcWrite(asn[2]);
-   hdlcWrite(asn[3]);
-   hdlcWrite(asn[4]);
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_DATA);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   outputHdlcWrite(asn[0]);
+   outputHdlcWrite(asn[1]);
+   outputHdlcWrite(asn[2]);
+   outputHdlcWrite(asn[3]);
+   outputHdlcWrite(asn[4]);
    for (i=0;i<length;i++){
-      hdlcWrite(buffer[i]);
+      outputHdlcWrite(buffer[i]);
    }
-   hdlcClose();
+   outputHdlcClose();
    ENABLE_INTERRUPTS();
    
    return E_SUCCESS;
@@ -433,6 +427,8 @@ bool debugPrint_outBufferIndexes() {
 
 //=========================== private =========================================
 
+//===== increment indexes
+
 /**
 \pre Disable interrupts before calling this function.
 */
@@ -447,6 +443,89 @@ uint8_t IncrOutputBufIdxW() {
 uint8_t IncrOutputBufIdxR() {
    openserial_vars.outputBufIdxR = (openserial_vars.outputBufIdxR+1)%SERIAL_OUTPUT_BUFFER_SIZE;
    return openserial_vars.outputBufIdxR;
+}
+
+//===== hdlc (output)
+
+/**
+\brief Start an HDLC frame in the output buffer.
+*/
+void outputHdlcOpen() {
+   // initialize the value of the CRC
+   openserial_vars.outputCrc                          = HDLC_CRCINIT;
+   
+   // write the opening HDLC flag
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = HDLC_FLAG;
+}
+/**
+\brief Add a byte to the outgoing HDLC frame being built.
+
+\todo escape 0x7e and 0x7d.
+*/
+void outputHdlcWrite(uint8_t b) {
+   // add byte to buffer
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = b;
+   
+   // iterate through CRC calculator
+   openserial_vars.outputCrc = crcIteration(openserial_vars.outputCrc,b);
+}
+/**
+\brief Finalize the outgoing HDLC frame.
+*/
+void outputHdlcClose() {
+   // finalize the calculation of the CRC
+   openserial_vars.outputCrc                          = ~openserial_vars.outputCrc;
+   
+   // write the CRC value
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (openserial_vars.outputCrc>>0)&0xff;
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = (openserial_vars.outputCrc>>8)&0xff;
+   
+   // write the closing HDLC flag
+   openserial_vars.outputBuf[IncrOutputBufIdxW()]     = HDLC_FLAG;
+}
+
+//===== hdlc (input)
+
+/**
+\brief Start an HDLC frame in the input buffer.
+*/
+void inputHdlcOpen() {
+   // reset the input buffer index
+   openserial_vars.inputBufFill                       = 0;
+   
+   // initialize the value of the CRC
+   openserial_vars.inputCrc                           = HDLC_CRCINIT;
+}
+/**
+\brief Add a byte to the incoming HDLC frame.
+
+\todo escape 0x7e and 0x7d.
+*/
+void inputHdlcWrite(uint8_t b) {
+   // add byte to input buffer
+   openserial_vars.inputBuf[openserial_vars.inputBufFill] = b;
+   openserial_vars.inputBufFill++;
+   
+   // iterate through CRC calculator
+   openserial_vars.inputCrc = crcIteration(openserial_vars.inputCrc,b);
+}
+/**
+\brief Finalize the incoming HDLC frame.
+*/
+void inputHdlcClose() {
+   
+   // verify the validity of the frame
+   if (openserial_vars.inputCrc==HDLC_CRCGOOD) {
+      // the CRC is correct
+      
+      // remove the CRC from the input buffer
+      openserial_vars.inputBufFill    -= 2;
+   } else {
+      // the CRC is incorrect
+      
+      // drop the incoming fram
+      openserial_vars.inputBufFill     = 0;
+   }
 }
 
 //=========================== interrupt handlers ==============================
@@ -493,25 +572,29 @@ void isr_openserial_rx() {
               ) {
       // start of frame
       
+      // I'm now receiving
       openserial_vars.busyReceiving         = TRUE;
-      openserial_vars.inputBufFill          = 0;
-      openserial_vars.inputBuf[openserial_vars.inputBufFill++]=rxbyte;
-   
+      
+      // create the HDLC frame
+      inputHdlcOpen();
+      
+      // add the byte just received
+      inputHdlcWrite(rxbyte);
    } else if (
                 openserial_vars.busyReceiving==TRUE   &&
                 rxbyte!=HDLC_FLAG
              ) {
       // middle of frame
       
-      openserial_vars.inputBuf[openserial_vars.inputBufFill++]=rxbyte;
-      
+      // add the byte just received
+      inputHdlcWrite(rxbyte);
       if (openserial_vars.inputBufFill+1>SERIAL_INPUT_BUFFER_SIZE){
          // input buffer overflow
          openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUT_BUFFER_OVERFLOW,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
-         openserial_vars.busyReceiving      = FALSE;
          openserial_vars.inputBufFill       = 0;
+         openserial_vars.busyReceiving      = FALSE;
          openserial_stop();
       }
    } else if (
@@ -520,23 +603,11 @@ void isr_openserial_rx() {
               ) {
          // end of frame
          
-         //openserial_vars.inputBufFill = dehdlcify(openserial_vars.inputBuf,openserial_vars.inputBufFill);
-         
-         if (openserial_vars.inputBufFill<2) {
-            // frame too short
-            openserial_vars.inputBufFill    = 0;
-         } else if (
-               (openserial_vars.inputBuf[openserial_vars.inputBufFill-2]!=((CRC_MAGICVALUE>>0)&0xff)) ||
-               (openserial_vars.inputBuf[openserial_vars.inputBufFill-1]!=((CRC_MAGICVALUE>>8)&0xff))
-            ){
-            // wrong CRC
-            openserial_vars.inputBufFill    = 0;
-         } else {
-            // frame valid, remove CRC
-            openserial_vars.inputBufFill   -= 2;
-         }
+         // finalize the HDLC frame
+         inputHdlcClose();
          
          if (openserial_vars.inputBufFill==0){
+            // invalid HDLC frame
             openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUTBUFFER_BAD_CRC,
                                   (errorparameter_t)0,
                                   (errorparameter_t)0);

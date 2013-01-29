@@ -11,26 +11,18 @@
 
 //=========================== prototypes ======================================
 
-       bool     doesCrcCheck(uint8_t* buffer, uint8_t length, uint16_t crc);
-static uint16_t crcIteration(uint16_t fcs, uint8_t data);
-
 //=========================== public ==========================================
 
-/**
-\brief Frame some buffer using HDLC.
+uint16_t crcIteration(uint16_t crc, uint8_t byte) {
+   return (crc >> 8) ^ fcstab[(crc ^ byte) & 0xff];
+}
 
-This function will modify the contents and the length of the buffer passed as
-a parameter, by:
-- adding a leading 1-byte flag
-- stuffing the buffer when reserved characters appear
-- adding a trailing 2-byte CRC
-- adding a trailing 1-byte flag
+//=========================== private =========================================
 
-\param buf      [in,out] A pointer to the buffer to frame.
-\param inputLen [in]     Number of bytes in the buffer.
+//#############################################################################
+//#### OLD ### OLD ### OLD ### OLD ### OLD ### OLD ### OLD ### OLD ### OLD ####
+//#############################################################################
 
-\returns The new length of the buffer.
-*/
 /*
 uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
    uint16_t fcs;
@@ -45,12 +37,11 @@ uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
    uint8_t  tempBufIdx;
    
    //===== step 1. compute crc
-   fcs = 0xffff;                            // initial FCS
+   fcs = HDLC_CRCINIT;                           // initial FCS
    for (bufIdx=0;bufIdx<inputLen;bufIdx++) {
-      fcs = crcIteration(fcs, buf[bufIdx]);    // iterate through bytes
+      fcs = crcIteration(fcs, buf[bufIdx]);      // iterate through bytes
    }
-   fcs = ~fcs;                              // take one's complement
-   fcs=0; //poipoi
+   fcs = ~fcs;                                   // take one's complement
    crc1 = fcs;
    crc2 = fcs>>8;
    
@@ -103,15 +94,7 @@ uint8_t hdlcify(uint8_t* buf, uint8_t inputLen) {
 }
 */
 
-/**
-\brief Unframe some buffer from HDLC.
-
-\param buf      [in,out] A pointer to the buffer to unframe.
-\param inputLen [in]     Number of bytes in the buffer.
-
-\returns The new length of the buffer, or 0 is the CRC didn't
-         match or the buf was not a valid HDLC frame.
-*/
+/*
 uint8_t dehdlcify(uint8_t* buf, uint8_t len) {
    uint16_t   crcExp;
    uint8_t    stuff_count;
@@ -129,19 +112,16 @@ uint8_t dehdlcify(uint8_t* buf, uint8_t len) {
    
    //===== step 1. count the number of stuffed bytes
    stuff_count = 0;
-   /*
    for (bufIdx=0;bufIdx<len;bufIdx++) {
       if (buf[bufIdx]==HDLC_ESCAPE) {
          stuff_count++;
       }
    }
-   */
    
    //===== step 2. unstuff into temporary buffer
    tempBufLen = len-stuff_count-1-2-1; // stuffed, flag, crc, flag
    bufIdx = 1;
    for (tempBufIdx=0;tempBufIdx<tempBufLen;tempBufIdx++){
-      /*
       if (buf[bufIdx]==HDLC_ESCAPE){
          if        (buf[bufIdx+1]==HDLC_FLAG_ESCAPED) {
             tempBuf[tempBufIdx] = HDLC_FLAG;
@@ -155,7 +135,6 @@ uint8_t dehdlcify(uint8_t* buf, uint8_t len) {
          tempBuf[tempBufIdx] = buf[bufIdx];
          bufIdx += 1;
       }
-      */
       tempBuf[tempBufIdx] = buf[bufIdx];
       bufIdx += 1;
    }
@@ -173,35 +152,6 @@ uint8_t dehdlcify(uint8_t* buf, uint8_t len) {
       return 0;
    }
 }
-
-//=========================== private =========================================
-
-/**
-\brief Determine whether the CRC of a buffer checks.
-
-This function re-calculates the CRC of the buffer, and compares that to the
-expected CRC passed as a parameter.
-
-\param buf    [in] The buffer in question, already untuffed and with flags
-                   and CRC remove (i.e. just the payload).
-\param bufLen [in] The number of bytes in the buffer.
-\param crcExp [in] The expected CRC.
 */
-bool doesCrcCheck(uint8_t* buf, uint8_t bufLen, uint16_t crcExp) {
-   uint16_t crcCalc;
-   uint8_t  bufIdx;
-   
-   return TRUE;//poipoi
-   
-   crcCalc = 0xffff;
-   for (bufIdx=0;bufIdx<bufLen;bufIdx++) {
-      crcCalc = crcIteration(crcCalc, buf[bufIdx]);
-   }
-   crcCalc = ~crcCalc;
-   
-   return (crcCalc==crcExp);
-}
 
-static uint16_t crcIteration(uint16_t fcs, uint8_t data){
-   return (fcs >> 8) ^ fcstab[(fcs ^ data) & 0xff];
-}
+
