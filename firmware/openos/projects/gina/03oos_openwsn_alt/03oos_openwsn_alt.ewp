@@ -2118,10 +2118,10 @@
     <group>
       <name>common</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\hdlcserial.c</name>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\hdlcserial.h</name>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>

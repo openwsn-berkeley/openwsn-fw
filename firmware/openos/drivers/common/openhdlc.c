@@ -5,7 +5,7 @@
 \author Fabien Chraim <chraim@eecs.berkeley.edu>, October 2012.
 */
 
-#include "hdlcserial.h"
+#include "openhdlc.h"
 
 //=========================== variables =======================================
 

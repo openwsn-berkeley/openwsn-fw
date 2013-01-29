@@ -20,7 +20,7 @@
 #include "uart.h"
 #include "opentimers.h"
 #include "serialecho.h"
-#include "hdlcserial.h"
+#include "openhdlc.h"
 
 //=========================== variables =======================================
 

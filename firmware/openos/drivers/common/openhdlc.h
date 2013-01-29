@@ -5,8 +5,8 @@
 \author Fabien Chraim <chraim@eecs.berkeley.edu>, October 2012.
 */
 
-#ifndef __HDLCSERIAL_H
-#define __HDLCSERIAL_H
+#ifndef __OPENHDLC_H
+#define __OPENHDLC_H
 
 #include "openwsn.h"
 
