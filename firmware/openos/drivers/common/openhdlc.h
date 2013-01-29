@@ -1,7 +1,7 @@
 /**
 \brief Declaraion of the "openserial" driver.
 
-\author Min Ting, October 2012.
+\author Min Ting <tingm417@gmail.com>, October 2012.
 \author Fabien Chraim <chraim@eecs.berkeley.edu>, October 2012.
 */
 
