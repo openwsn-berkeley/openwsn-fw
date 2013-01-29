@@ -2118,6 +2118,12 @@
     <group>
       <name>common</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\hdlcserial.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\hdlcserial.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
       </file>
       <file>
@@ -2128,6 +2134,12 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\serialecho.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\serialecho.h</name>
       </file>
     </group>
     <group>
@@ -2227,12 +2239,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6echo.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.c</name>
