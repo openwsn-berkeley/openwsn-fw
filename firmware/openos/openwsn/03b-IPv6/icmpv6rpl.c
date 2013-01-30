@@ -9,6 +9,7 @@
 #include "scheduler.h"
 #include "idmanager.h"
 #include "opentimers.h"
+#include "IEEE802154E.h"
 
 //=========================== variables =======================================
 
@@ -252,11 +253,25 @@ void sendDIO() {
    open_addr_t*         temp_prefixID;
    OpenQueueEntry_t*    msg;
    
+   if (ieee154e_isSynch()==FALSE) {
+      // I'm not sync'ed
+      
+      // delete packets genereted by this module (DIO and DAO) from openqueue
+     openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
+      
+      // I'm not busy sending a DIO
+     icmpv6rpl_vars.busySending  = FALSE;
+      
+      // stop here
+      return;
+   }
+      
    // do not send DIO if I'm in in bridge mode
    if (idmanager_getIsBridge()==TRUE) {
       return;
    }
    
+      
    // do not send DIO if I have the default DAG rank
    if (neighbors_getMyDAGrank()==DEFAULTDAGRANK) {
       return;
@@ -279,6 +294,8 @@ void sendDIO() {
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       icmpv6rpl_vars.busySending = FALSE;
+      
+      
       return;
    }
    
@@ -337,6 +354,20 @@ void sendDAO() {
    uint8_t           i;
    uint8_t           j;
    OpenQueueEntry_t* msg;
+   
+   
+    if (ieee154e_isSynch()==FALSE) {
+      // I'm not sync'ed 
+      
+      // delete packets genereted by this module (DIO and DAO) from openqueue
+      openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
+      
+      // I'm not busy sending a DIO
+      icmpv6rpl_vars.busySending  = FALSE;
+      
+      // stop here
+      return;
+   }
    
    // dont' send a DAO if you're in bridge mode
    if (idmanager_getIsBridge()==TRUE) {
