@@ -19,7 +19,6 @@
 #include "schedule.h"
 #include "uart.h"
 #include "opentimers.h"
-#include "serialecho.h"
 #include "openhdlc.h"
 
 //=========================== variables =======================================
@@ -393,7 +392,7 @@ void openserial_stop() {
             icmpv6echo_trigger();
             break;
          case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
-            serialecho_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
+            openserial_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
             break;   
          default:
             openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
@@ -620,4 +619,15 @@ void isr_openserial_rx() {
    }
    
    openserial_vars.lastRxByte = rxbyte;
+}
+
+
+//======== SERIAL ECHO =============
+
+void openserial_echo(uint8_t* buf, uint8_t bufLen){
+   // echo back what you received
+   openserial_printData(
+      buf,
+      bufLen
+   );
 }

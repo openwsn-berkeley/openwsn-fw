@@ -80,7 +80,7 @@ void    openserial_startInput();
 void    openserial_startOutput();
 void    openserial_stop();
 bool    debugPrint_outBufferIndexes();
-
+void    openserial_echo(uint8_t* but, uint8_t bufLen);
 
 // interrupt handlers
 void    isr_openserial_rx();

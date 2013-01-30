@@ -7,7 +7,6 @@
 #include "openwsn.h"
 //===== drivers
 #include "openserial.h"
-#include "serialecho.h"
 //===== stack
 //-- cross-layer
 #include "idmanager.h"
@@ -74,7 +73,6 @@ void openwsn_init();
 void openwsn_init() {
    //===== drivers
    openserial_init();
-   serialecho_init();
    
    //===== stack
    //-- cross-layer
