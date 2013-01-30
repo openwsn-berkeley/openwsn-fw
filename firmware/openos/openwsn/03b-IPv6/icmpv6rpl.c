@@ -50,8 +50,8 @@ void icmpv6rpl_init() {
    icmpv6rpl_dio.reserved         = 0;
    icmpv6rpl_dio.flags            = 0;
    icmpv6rpl_dio.DTSN             = 0x33; //?? this values are not correct.
-   icmpv6rpl_dio.verNumb          = 0x11; //?? this values are not correct.
-   icmpv6rpl_dio.rplinstanceId    = 0x22; //?? this values are not correct.
+   icmpv6rpl_dio.verNumb          = 0x0; //?? this values are not correct.
+   icmpv6rpl_dio.rplinstanceId    = 0x0; //?? this values are not correct.
    icmpv6rpl_dio.rplOptions       = 0x00| MOP_DIO_A | MOP_DIO_B | MOP_DIO_C | PRF_DIO_A | PRF_DIO_B | PRF_DIO_C | G_DIO ;
    
    //set flag to zero first
@@ -73,13 +73,12 @@ void icmpv6rpl_init() {
    icmpv6rpl_dio.DODAGID[13]      = 0xcc;
    icmpv6rpl_dio.DODAGID[14]      = 0xdd;
    icmpv6rpl_dio.DODAGID[15]      = 0xdd;
-   icmpv6rpl_dio.options          = 0x05;
    
-   icmpv6rpl_dao.rplinstanceId    = 0x88;
+   icmpv6rpl_dao.rplinstanceId    = 0x00;
    //K_D_flags
    icmpv6rpl_dao.K_D_flags        = 0x00| FLAG_DAO_A | FLAG_DAO_B | FLAG_DAO_C | FLAG_DAO_D | FLAG_DAO_E | PRF_DIO_C | FLAG_DAO_F | D_DAO | K_DAO;
    icmpv6rpl_dao.reserved         = 0x00;
-   icmpv6rpl_dao.DAOSequance      = 0x99;
+   icmpv6rpl_dao.DAOSequance      = 0x00;
    icmpv6rpl_dao.DODAGID[0]       = 0xEE;
    icmpv6rpl_dao.DODAGID[1]       = 0xFF;
    icmpv6rpl_dao.DODAGID[2]       = 0xEE;
@@ -97,7 +96,6 @@ void icmpv6rpl_init() {
    icmpv6rpl_dao.DODAGID[13]      = 0xFF;
    icmpv6rpl_dao.DODAGID[14]      = 0xEE;
    icmpv6rpl_dao.DODAGID[15]      = 0xFF;
-   icmpv6rpl_dao.options          = 0x07;
    
    //icmpv6rpl_dao_rpl_target.type                      = 0x05; 
    //icmpv6rpl_dao_rpl_target.optionLength              = 0x00; 
@@ -110,12 +108,12 @@ void icmpv6rpl_init() {
    icmpv6rpl_dao_transit_info.PathSequence            = 0x00;
    icmpv6rpl_dao_transit_info.PathLifetime            = 0xAA;
    icmpv6rpl_dao_transit_info.optionLength            = 0x00;
-   
-   icmpv6rpl_dio_options.type                         = 0x03;
-   icmpv6rpl_dio_options.optionLength                 = 0x08;
-   icmpv6rpl_dio_options.prefixLength                 = 0x06;
-   icmpv6rpl_dio_options.Resvd_Prf_Resvd              = 0x00 | Prf_A_dio_options | Prf_B_dio_options;
-   icmpv6rpl_dio_options.routeLifeTime                = 0x00000011;
+   // poipoi xv -- this is not needed right?
+//   icmpv6rpl_dio_options.type                         = 0x03;
+//   icmpv6rpl_dio_options.optionLength                 = 0x08;
+//   icmpv6rpl_dio_options.prefixLength                 = 0x06;
+//   icmpv6rpl_dio_options.Resvd_Prf_Resvd              = 0x00 | Prf_A_dio_options | Prf_B_dio_options;
+//   icmpv6rpl_dio_options.routeLifeTime                = 0x00000011;
    
    icmpv6rpl_vars.all_routers_multicast.type = ADDR_128B;
    icmpv6rpl_vars.all_routers_multicast.addr_128b[0]  = 0xff;
@@ -250,7 +248,7 @@ void timers_rpl_DAO_fired() {
 
 void sendDIO() {
    
-   open_addr_t*         temp_prefixID;
+  // open_addr_t*         temp_prefixID;
    OpenQueueEntry_t*    msg;
    
    if (ieee154e_isSynch()==FALSE) {
@@ -308,22 +306,21 @@ void sendDIO() {
    // l3
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.all_routers_multicast,sizeof(open_addr_t));
    
-   //===== DIO option
-    //pooipoi xv-- removing prefix checking as we want to form the topology even the network is not connected to the IPv6 Network.
-  
-      temp_prefixID = idmanager_getMyID(ADDR_PREFIX);
-      memcpy(&(icmpv6rpl_dio_options.prefix),temp_prefixID,sizeof(open_addr_t));
-      
-      // lifetime
-      packetfunctions_htons(0x00000011,(uint8_t*)&(icmpv6rpl_dio_options.routeLifeTime)); 
-      
-      packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_options_t));
-      memcpy(((icmpv6rpl_dio_options_t*)(msg->payload)),&(icmpv6rpl_dio_options),sizeof(icmpv6rpl_dio_options));
-      
-      // change dio option field to distinguish between the DIO with/without option
-      icmpv6rpl_dio.options      = 0x03;
-
+   //poipoi xv -- commenting the following as it is not needed. we don't need options for now. also needs checking as the code looks odd.
+   //===== DIO option this should never be sent right? the prefix is included in the DODAGID. 
    
+//      icmpv6rpl_dio_options.type=0x03;//TODO change by DIO_ROUTING_INFORMATION_OPTION
+//   
+//      temp_prefixID = idmanager_getMyID(ADDR_PREFIX);
+//      memcpy(&(icmpv6rpl_dio_options.prefix[0]),temp_prefixID->prefix[0],LENGTH_ADDR64b);
+//      
+//      // lifetime
+//      packetfunctions_htons(0x00000011,(uint8_t*)&(icmpv6rpl_dio_options.routeLifeTime)); 
+//      
+//      packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_options_t));
+//      memcpy(((icmpv6rpl_dio_options_t*)(msg->payload)),&(icmpv6rpl_dio_options),sizeof(icmpv6rpl_dio_options));
+// 
+ 
    //===== DIO
    
    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_t));
@@ -336,10 +333,7 @@ void sendDIO() {
    packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
    ((ICMPv6_ht*)(msg->payload))->type         = msg->l4_sourcePortORicmpv6Type;
    ((ICMPv6_ht*)(msg->payload))->code         = IANA_ICMPv6_RPL_DIO;
-   // Below Identifier might need to be replaced by the identifier used by icmpv6rpl
-   // packetfunctions_htons(0x1234,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->identifier);
-   // Below sequence_number might need to be removed
-   // packetfunctions_htons(icmpv6rpl_vars.seq++ ,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->sequence_number); 
+
    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//call last
    //send
    if (icmpv6_send(msg)!=E_SUCCESS) {
@@ -426,8 +420,9 @@ void sendDAO() {
       memcpy(((icmpv6rpl_dao_transit_info_t*)(msg->payload)),&(icmpv6rpl_dao_transit_info),sizeof(icmpv6rpl_dao_transit_info));
       
       // The path sequance has to be increased by one assuming each DAO sent is a new DAO frame
-      icmpv6rpl_dao_transit_info.PathSequence++;  
-      icmpv6rpl_dao.options      =0x06;    // indicate that in DAO the transit frame will be appended to the main DAO frame.
+      icmpv6rpl_dao_transit_info.PathSequence++; 
+      icmpv6rpl_dao_transit_info.type=0x06; //RFC 6550 page 55 section 6.7.8.  TODO replace magic number by DAO_TRANSIT_INFORMATION_OPTION 
+    //  icmpv6rpl_dao.options      =0x06;    // indicate that in DAO the transit frame will be appended to the main DAO frame.
    }
    
    //===== Target option

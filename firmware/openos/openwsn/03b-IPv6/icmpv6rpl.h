@@ -16,7 +16,7 @@
 #define PRF_DIO_A                 0<<2
 #define PRF_DIO_B                 0<<1
 #define PRF_DIO_C                 0<<0
-#define G_DIO                     0<<7
+#define G_DIO                     1<<7  //grounded..
 
 #define FLAG_DAO_A                0<<0
 #define FLAG_DAO_B                0<<1
@@ -55,7 +55,7 @@ typedef struct {
    uint8_t         prefixLength;
    uint8_t         Resvd_Prf_Resvd;
    uint32_t        routeLifeTime;
-   open_addr_t     prefix;
+   uint8_t         prefix[8]; //8bytes prefix
 } icmpv6rpl_dio_options_t;
 PRAGMA(pack());
 
@@ -69,7 +69,6 @@ typedef struct {
    uint8_t         flags;
    uint8_t         reserved;
    uint8_t         DODAGID[16];    
-   uint8_t         options;
 } icmpv6rpl_dio_t;
 PRAGMA(pack());
 
@@ -93,7 +92,7 @@ typedef struct {
    uint8_t         reserved;
    uint8_t         DAOSequance;
    uint8_t         DODAGID[16];    
-   uint8_t         options;
+   //uint8_t         options;//removing options as this is optional
 } icmpv6rpl_dao_t;
 PRAGMA(pack());
 
