@@ -513,17 +513,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
    ieee154e_vars.dataReceived->creator = COMPONENT_IEEE802154E;
    ieee154e_vars.dataReceived->owner   = COMPONENT_IEEE802154E;
    
-   // retrieve the received data frame from the radio's Rx buffer
-   ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[0]);
-   radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
-                                &ieee154e_vars.dataReceived->length,
-                          sizeof(ieee154e_vars.dataReceived->packet),
-                                &ieee154e_vars.dataReceived->l1_rssi,
-                                &ieee154e_vars.dataReceived->l1_lqi,
-                                &ieee154e_vars.dataReceived->l1_crc);
-   // toss CRC (2 last bytes)
-   packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
-   
    /*
    The do-while loop that follows is a little parsing trick.
    Because it contains a while(0) condition, it gets executed only once.
@@ -535,6 +524,24 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
      does not get executed. This indicates the received packet is correct.
    */
    do { // this "loop" is only executed once
+      
+      // retrieve the received data frame from the radio's Rx buffer
+      ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[0]);
+      radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
+                                   &ieee154e_vars.dataReceived->length,
+                             sizeof(ieee154e_vars.dataReceived->packet),
+                                   &ieee154e_vars.dataReceived->l1_rssi,
+                                   &ieee154e_vars.dataReceived->l1_lqi,
+                                   &ieee154e_vars.dataReceived->l1_crc);
+      
+      // break if packet too short
+      if (ieee154e_vars.dataReceived->length<LENGTH_CRC) {
+         // break from the do-while loop and execute abort code below
+         break;
+      }
+      
+      // toss CRC (2 last bytes)
+      packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
       
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
@@ -995,17 +1002,6 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
    ieee154e_vars.ackReceived->creator = COMPONENT_IEEE802154E;
    ieee154e_vars.ackReceived->owner   = COMPONENT_IEEE802154E;
    
-   // retrieve the received ack frame from the radio's Rx buffer
-   ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[0]);
-   radio_getReceivedFrame(       ieee154e_vars.ackReceived->payload,
-                                &ieee154e_vars.ackReceived->length,
-                          sizeof(ieee154e_vars.ackReceived->packet),
-                                &ieee154e_vars.ackReceived->l1_rssi,
-                                &ieee154e_vars.ackReceived->l1_lqi,
-                                &ieee154e_vars.ackReceived->l1_crc);
-   // toss CRC (2 last bytes)
-   packetfunctions_tossFooter(   ieee154e_vars.ackReceived, LENGTH_CRC);
-   
    /*
    The do-while loop that follows is a little parsing trick.
    Because it contains a while(0) condition, it gets executed only once.
@@ -1017,6 +1013,24 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
    */
    do { // this "loop" is only executed once
       
+      // retrieve the received ack frame from the radio's Rx buffer
+      ieee154e_vars.ackReceived->payload = &(ieee154e_vars.ackReceived->packet[0]);
+      radio_getReceivedFrame(       ieee154e_vars.ackReceived->payload,
+                                   &ieee154e_vars.ackReceived->length,
+                             sizeof(ieee154e_vars.ackReceived->packet),
+                                   &ieee154e_vars.ackReceived->l1_rssi,
+                                   &ieee154e_vars.ackReceived->l1_lqi,
+                                   &ieee154e_vars.ackReceived->l1_crc);
+      
+      // break if wrong length
+      if (ieee154e_vars.ackReceived->length<LENGTH_CRC) {
+         // break from the do-while loop and execute the clean-up code below
+         break;
+      }
+      
+      // toss CRC (2 last bytes)
+      packetfunctions_tossFooter(   ieee154e_vars.ackReceived, LENGTH_CRC);
+   
       // break if invalid CRC
       if (ieee154e_vars.ackReceived->l1_crc==FALSE) {
          // break from the do-while loop and execute the clean-up code below
@@ -1180,17 +1194,6 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    // declare ownership over that packet
    ieee154e_vars.dataReceived->creator = COMPONENT_IEEE802154E;
    ieee154e_vars.dataReceived->owner   = COMPONENT_IEEE802154E;
-   
-   // retrieve the received data frame from the radio's Rx buffer
-   ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[0]);
-   radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
-                                &ieee154e_vars.dataReceived->length,
-                          sizeof(ieee154e_vars.dataReceived->packet),
-                                &ieee154e_vars.dataReceived->l1_rssi,
-                                &ieee154e_vars.dataReceived->l1_lqi,
-                                &ieee154e_vars.dataReceived->l1_crc);
-   // toss CRC (2 last bytes)
-   packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
 
    /*
    The do-while loop that follows is a little parsing trick.
@@ -1203,6 +1206,24 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
      does not get executed. This indicates the received packet is correct.
    */
    do { // this "loop" is only executed once
+      
+      // retrieve the received data frame from the radio's Rx buffer
+      ieee154e_vars.dataReceived->payload = &(ieee154e_vars.dataReceived->packet[0]);
+      radio_getReceivedFrame(       ieee154e_vars.dataReceived->payload,
+                                   &ieee154e_vars.dataReceived->length,
+                             sizeof(ieee154e_vars.dataReceived->packet),
+                                   &ieee154e_vars.dataReceived->l1_rssi,
+                                   &ieee154e_vars.dataReceived->l1_lqi,
+                                   &ieee154e_vars.dataReceived->l1_crc);
+      
+      // break if wrong length
+      if (ieee154e_vars.dataReceived->length<LENGTH_CRC) {
+         // jump to the error code below this do-while loop
+         break;
+      }
+      
+      // toss CRC (2 last bytes)
+      packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
       
       // if CRC doesn't check, stop
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
