@@ -30,6 +30,9 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define FALSE 0
 #endif
 
+#define LENGTH_ADDR16b 2
+#define LENGTH_ADDR64b 8
+
 enum {
    E_SUCCESS                           = 0,          
    E_FAIL                              = 1,
