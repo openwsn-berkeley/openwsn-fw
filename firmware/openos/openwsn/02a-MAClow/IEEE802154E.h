@@ -24,6 +24,19 @@
 #define DESYNCTIMEOUT              333 // in slots: @15ms per slot -> ~5 seconds
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 
+/**
+When a packet is received, it is written inside the OpenQueueEntry_t->packet
+buffer, starting at the byte defined below. When a packet is relayed, it
+traverses the stack in which the MAC and IPHC headers are parsed and stripped
+off, then put on again. During that process, the IPv6 hop limit field is
+decremented. Depending on the new value of the hop limit, the IPHC header
+compression algorithm might not be able to compress it, and hence has to carry
+it inline, adding a byte to the header. To avoid having to move bytes around
+inside OpenQueueEntry_t->packet buffer, we start writing the received packet a
+bit after the start of the packet.
+*/
+#define FIRST_FRAME_BYTE             1
+
 // the different states of the IEEE802.15.4e state machine
 typedef enum {
    S_SLEEP                   = 0x00,   // ready for next slot
