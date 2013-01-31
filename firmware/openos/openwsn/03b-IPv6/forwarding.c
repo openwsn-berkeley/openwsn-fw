@@ -31,6 +31,7 @@ void forwarding_init() {
 //send from THIS node.
 error_t forwarding_send(OpenQueueEntry_t *msg) { 
    ipv6_header_iht ipv6_header;
+   
    open_addr_t* myprefix=idmanager_getMyID(ADDR_PREFIX);
    open_addr_t* myadd64=idmanager_getMyID(ADDR_64B);
    
@@ -42,6 +43,12 @@ error_t forwarding_send(OpenQueueEntry_t *msg) {
    msg->l3_sourceAdd.type=ADDR_128B;
    
    memset(&ipv6_header,0,sizeof(ipv6_header_iht));
+   
+   //set hop limit to the default in-network value as this packet is being sent from upper layer.
+   //this is done here as send_internal is used by forwarding of packets as well which 
+   //carry a hlim. This value is required to be set to a value as the following function can decrement it
+   ipv6_header.hop_limit=IPHC_DEFAULT_HOP_LIMIT;
+   
    return fowarding_send_internal(msg,ipv6_header,PCKTSEND);
 }
 

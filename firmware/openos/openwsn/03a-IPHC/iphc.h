@@ -10,6 +10,8 @@
 
 //=========================== define ==========================================
 
+#define IPHC_DEFAULT_HOP_LIMIT 65
+
 enum IPHC_enums {
    IPHC_DISPATCH             = 5,
    IPHC_TF                   = 3,
