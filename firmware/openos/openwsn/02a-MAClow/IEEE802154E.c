@@ -751,6 +751,9 @@ port_INLINE void activity_ti1ORri1() {
          endSlot();
          //start inputting serial data
          openserial_startInput();
+         
+         radio_setTimerPeriod(TsSlotDuration*(NUMSERIALRX-1));
+         
          break;
       case CELLTYPE_MORESERIALRX:
          // do nothing (not even endSlot())

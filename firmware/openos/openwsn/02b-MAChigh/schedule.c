@@ -87,6 +87,7 @@ void schedule_init() {
       &temp_neighbor              // neighbor
    );
    running_slotOffset++;
+   /*
    for (i=0;i<NUMSERIALRX-1;i++) {
       schedule_addActiveSlot(
          running_slotOffset,      // slot offset
@@ -97,6 +98,7 @@ void schedule_init() {
       );
       running_slotOffset++;
    }
+   */
 }
 
 /**
