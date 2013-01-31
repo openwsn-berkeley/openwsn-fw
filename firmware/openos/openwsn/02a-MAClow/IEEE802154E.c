@@ -621,6 +621,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
 port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
    open_addr_t neighbor;
+   uint8_t  i;
    
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -751,9 +752,13 @@ port_INLINE void activity_ti1ORri1() {
          endSlot();
          //start inputting serial data
          openserial_startInput();
+         //this is to emulate a set of serial input slots without having the slotted structure.
+         radio_setTimerPeriod(TsSlotDuration*(NUMSERIALRX));
          
-         radio_setTimerPeriod(TsSlotDuration*(NUMSERIALRX-1));
-         
+         //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
+         for (i=0;i<NUMSERIALRX-1;i++){
+            incrementAsnOffset();
+         }
          break;
       case CELLTYPE_MORESERIALRX:
          // do nothing (not even endSlot())
