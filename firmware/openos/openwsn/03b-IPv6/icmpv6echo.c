@@ -100,7 +100,7 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
    msg->owner = COMPONENT_ICMPv6ECHO;
    switch(msg->l4_sourcePortORicmpv6Type) {
       case IANA_ICMPv6_ECHO_REQUEST:
-         openserial_printError(COMPONENT_ICMPv6ECHO,ERR_RCVD_ECHO_REQUEST,
+         openserial_printInfo(COMPONENT_ICMPv6ECHO,ERR_RCVD_ECHO_REQUEST,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          // get a new openqueuEntry_t for the echo reply
