@@ -122,13 +122,16 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
    
    if ((fw_SendOrfw_Rcv==PCKTFORWARD) && ipv6_header.next_header_compressed) nh=IPHC_NH_COMPRESSED;
    
+   // decrement the packet's hop limit
+   ipv6_header.hop_limit--;
+   
    if (prependIPv6Header(msg,
             IPHC_TF_ELIDED,
             0, // value_flowlabel is not copied
             nh,
             msg->l4_protocol,
             IPHC_HLIM_INLINE,
-            ipv6_header.hop_limit--,//decrement hop limit.
+            ipv6_header.hop_limit,
             IPHC_CID_NO,
             IPHC_SAC_STATELESS,
             sam,
