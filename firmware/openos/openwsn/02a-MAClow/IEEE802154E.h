@@ -23,6 +23,7 @@
 #define KATIMEOUT                   66 // in slots: @15ms per slot -> ~1 seconds
 #define DESYNCTIMEOUT              333 // in slots: @15ms per slot -> ~5 seconds
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
+#define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 
 /**
 When a packet is received, it is written inside the OpenQueueEntry_t->packet

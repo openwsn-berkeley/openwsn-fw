@@ -535,8 +535,11 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
                                    &ieee154e_vars.dataReceived->l1_crc);
       
       // break if packet too short
-      if (ieee154e_vars.dataReceived->length<LENGTH_CRC) {
+      if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
          // break from the do-while loop and execute abort code below
+          openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
+                            (errorparameter_t)0,
+                            ieee154e_vars.dataReceived->length);
          break;
       }
       
@@ -1031,8 +1034,12 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
                                    &ieee154e_vars.ackReceived->l1_crc);
       
       // break if wrong length
-      if (ieee154e_vars.ackReceived->length<LENGTH_CRC) {
+      if (ieee154e_vars.ackReceived->length<LENGTH_CRC || ieee154e_vars.ackReceived->length>LENGTH_IEEE154_MAX) {
          // break from the do-while loop and execute the clean-up code below
+        openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
+                            (errorparameter_t)1,
+                            ieee154e_vars.ackReceived->length);
+        
          break;
       }
       
@@ -1225,8 +1232,11 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
                                    &ieee154e_vars.dataReceived->l1_crc);
       
       // break if wrong length
-      if (ieee154e_vars.dataReceived->length<LENGTH_CRC) {
+      if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX ) {
          // jump to the error code below this do-while loop
+        openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
+                            (errorparameter_t)2,
+                            ieee154e_vars.dataReceived->length);
          break;
       }
       
