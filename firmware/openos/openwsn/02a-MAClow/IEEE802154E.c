@@ -145,6 +145,9 @@ void ieee154e_init() {
    resetStats();
    ieee154e_stats.numDeSync                 = 0;
    
+   // switch radio on
+   radio_rfOn();
+   
    // set callback functions for the radio
    radio_setOverflowCb(isr_ieee154e_newSlot);
    radio_setCompareCb(isr_ieee154e_timer);
@@ -152,9 +155,6 @@ void ieee154e_init() {
    radio_setEndFrameCb(ieee154e_endOfFrame);
    // have the radio start its timer
    radio_startTimer(TsSlotDuration);
-   
-   // switch radio on
-   radio_rfOn();
 }
 
 //=========================== public ==========================================
@@ -613,7 +613,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) 
    ieee154e_vars.dataReceived = NULL;
    
    // return to listening state
-   changeState(S_SYNCRX);
+   changeState(S_SYNCLISTEN);
 }
 
 //======= TX
