@@ -214,7 +214,7 @@ def buildLibs(projectDir):
         '00std': [],
         '01bsp': ['libbsp'],
         '02drv': ['libbsp','libdrivers'],
-        '03oos': ['libbsp','libdrivers','libopenos','libopenstack'],
+        '03oos': ['libopenstack','libopenos','libdrivers','libbsp'],
     }
     
     returnVal = None
