@@ -23,6 +23,7 @@ command_line_options = {
     'board':       ['telosb','gina','pc'],
     'toolchain':   ['mspgcc','iar','iar-proj','gcc','visualstudio'],
     'fet_version': ['2','3'],
+    'verbose':     ['0','1']
 }
 
 def validate_option(key, value, env):
@@ -68,6 +69,13 @@ command_line_vars.AddVariables(
         None,                                              # validator
         None,                                              # converter
     ),
+    (
+        'verbose',                                         # key
+        'Print complete compile/link comand.',             # help
+        command_line_options['verbose'][0],                # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
 )
 
 env = Environment(variables = command_line_vars)
@@ -78,6 +86,14 @@ Help("\nUsage: scons board=<b> toolchain=<tc> project\n\nWhere:")
 Help(command_line_vars.GenerateHelpText(env))
 def default(env,target,source): print SCons.Script.help_text
 Default(env.Command('default', None, default))
+
+#============================ verbose =========================================
+
+if not env['verbose']:
+   env['CCCOMSTR']      = "Compiling $TARGET"
+   env['ARCOMSTR']      = "Archiving $TARGET"
+   env['RANLIBCOMSTR']  = "Indexing $TARGET"
+   env['LINKCOMSTR']    = "Linking $TARGET"
 
 #============================ load SConscript's ===============================
 
@@ -91,6 +107,7 @@ env['targets'] = {
 }
 
 # include main sconscript
+# which will discover targets for this board/toolchain
 env.SConscript(
     'SConscript',
     exports = ['env'],
