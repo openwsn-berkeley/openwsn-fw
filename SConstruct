@@ -113,18 +113,33 @@ env.SConscript(
     exports = ['env'],
 )
 
-# print list of targets
-output = []
-for k,v in env['targets'].items():
-    output += [' - {0}'.format(k)]
-    for t in v:
-        output += ['    - {0}'.format(t)]
-output = '\n'.join(output)
-print output
-
 # declare target group alias
 for k,v in env['targets'].items():
    Alias(k,v)
 
-# print final environment
-# print env.Dump()
+#============================ admin targets ===================================
+
+#===== list
+
+def listFunction(env,target,source):
+    output  = []
+    output += ['\n']
+    output += ['Avaiable targets for board={0} toolchain={1}'.format(env['board'],env['toolchain'])]
+    output += ['\n']
+    for k,v in env['targets'].items():
+        output += [' - {0}'.format(k)]
+        for t in v:
+            output += ['    - {0}'.format(t)]
+    output = '\n'.join(output)
+    print output
+list = env.Command('list', None, listFunction)
+AlwaysBuild(list)
+Alias('list',list)
+
+#===== env
+
+def envFunction(env,target,source):
+    print env.Dump()
+envCommand = env.Command('env', None, envFunction)
+AlwaysBuild(envCommand)
+Alias('env',envCommand)
