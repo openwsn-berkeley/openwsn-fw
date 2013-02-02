@@ -684,7 +684,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>03oos_openserial.d43</state>
+          <state>02drv_openserial.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -878,7 +878,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>03oos_openwsn.a43</state>
+          <state>02drv_openserial.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -2077,6 +2077,12 @@
   <group>
     <name>drivers</name>
     <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
     </file>
     <file>
@@ -2176,12 +2182,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6echo.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.c</name>

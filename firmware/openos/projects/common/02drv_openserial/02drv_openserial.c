@@ -38,8 +38,6 @@ int mote_main(void) {
    board_init();
    openserial_init();
    
-   openserial_setHookCallback(isr_serie_rx,isr_serie_tx); 
-   
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();          // clear possible pending interrupts
    uart_enableInterrupts(); 
