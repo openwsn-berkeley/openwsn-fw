@@ -41,9 +41,6 @@ void board_init() {
    P4DIR     |=  0x20;                           // [P4.5] radio VREG:  output
    P4DIR     |=  0x40;                           // [P4.6] radio reset: output
    
-   P4OUT     &=  ~0x40;                          // [P4.6] radio reset low (resets the radio)
-   P4OUT     |=  0x40;                           // [P4.6] radio reset high (radio active)
-   
    // initialize bsp modules
    debugpins_init();
    leds_init();
