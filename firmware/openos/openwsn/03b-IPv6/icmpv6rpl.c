@@ -325,6 +325,7 @@ void sendDIO() {
    
    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dio_t));
    icmpv6rpl_dio.rank=neighbors_getMyDAGrank();
+   
    memcpy(((icmpv6rpl_dio_t*)(msg->payload)),&(icmpv6rpl_dio),sizeof(icmpv6rpl_dio));
    
    //=====================================================================//
@@ -422,7 +423,6 @@ void sendDAO() {
       // The path sequance has to be increased by one assuming each DAO sent is a new DAO frame
       icmpv6rpl_dao_transit_info.PathSequence++; 
       icmpv6rpl_dao_transit_info.type=0x06; //RFC 6550 page 55 section 6.7.8.  TODO replace magic number by DAO_TRANSIT_INFORMATION_OPTION 
-    //  icmpv6rpl_dao.options      =0x06;    // indicate that in DAO the transit frame will be appended to the main DAO frame.
    }
    
    //===== Target option

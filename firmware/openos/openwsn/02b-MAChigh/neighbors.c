@@ -12,6 +12,7 @@ typedef struct {
    neighborRow_t    neighbors[MAXNUMNEIGHBORS];
    dagrank_t        myDAGrank;
    uint8_t          debugRow;
+   icmpv6rpl_dio_t* dio; //keep it global to be able to debug correctly.
 } neighbors_vars_t;
 
 neighbors_vars_t neighbors_vars;
@@ -364,8 +365,9 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
                           uint8_t      numTxAttempts,
                           bool         was_finally_acked,
                           asn_t*       asnTs) {
-   uint8_t i;
+   uint8_t i,j;
    
+ 
    // don't run through this function if packet was sent to broadcast address
    if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
       return;
@@ -375,17 +377,22 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (isThisRowMatching(l2_dest,i)) {
          // handle roll-over case
-         if (neighbors_vars.neighbors[i].numTx==255) {
-            neighbors_vars.neighbors[i].numTx/=2;
-            neighbors_vars.neighbors[i].numTxACK/=2;
-         }
+        for (j=0;j<numTxAttempts;j++){
+          //increment one by one to detect roll-over
+          if (neighbors_vars.neighbors[i].numTx==255) {
+              neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
+              neighbors_vars.neighbors[i].numTx/=2;
+              neighbors_vars.neighbors[i].numTxACK/=2;
+           }
          // update statistics
-         neighbors_vars.neighbors[i].numTx += numTxAttempts;
-         if (was_finally_acked==TRUE) {
+         neighbors_vars.neighbors[i].numTx += 1;
+        } 
+        
+        if (was_finally_acked==TRUE) {
             neighbors_vars.neighbors[i].numTxACK++;
             memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
-         }
-         break;
+        }
+        break;
       }
    }
 }
@@ -404,33 +411,31 @@ The fields which are updated are:
 */
 void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
    uint8_t          i;
-   icmpv6rpl_dio_t* dio;
-   
+  
    // take ownership over the packet
    msg->owner = COMPONENT_NEIGHBORS;
    
    // update rank of that neighbor in table
-   dio = (icmpv6rpl_dio_t*)(msg->payload);
+   neighbors_vars.dio = (icmpv6rpl_dio_t*)(msg->payload);
    if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
             if (
-                  dio->rank>neighbors_vars.neighbors[i].DAGrank &&
-                  dio->rank - neighbors_vars.neighbors[i].DAGrank>DEFAULTLINKCOST
+                  neighbors_vars.dio->rank>neighbors_vars.neighbors[i].DAGrank &&
+                  neighbors_vars.dio->rank - neighbors_vars.neighbors[i].DAGrank>DEFAULTLINKCOST
                ) {
                 // the new DAGrank looks suspiciously high, only increment a bit
                 neighbors_vars.neighbors[i].DAGrank += DEFAULTLINKCOST;
                 openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
-                               (errorparameter_t)dio->rank,
+                               (errorparameter_t)neighbors_vars.dio->rank,
                                (errorparameter_t)neighbors_vars.neighbors[i].DAGrank);
             } else {
-               neighbors_vars.neighbors[i].DAGrank = dio->rank;
+               neighbors_vars.neighbors[i].DAGrank = neighbors_vars.dio->rank;
             }
             break;
          }
       }
-   }
-   
+   } 
    // update my routing information
    neighbors_updateMyDAGrankAndNeighborPreference(); 
 }
@@ -531,7 +536,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
             prefParentIdx              = i;
          }
       }
-   }
+   } 
    
    // update preferred parent
    if (prefParentFound) {
