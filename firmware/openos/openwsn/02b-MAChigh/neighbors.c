@@ -365,9 +365,7 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
                           uint8_t      numTxAttempts,
                           bool         was_finally_acked,
                           asn_t*       asnTs) {
-   uint8_t i,j;
-   
- 
+   uint8_t i;
    // don't run through this function if packet was sent to broadcast address
    if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
       return;
@@ -377,16 +375,14 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (isThisRowMatching(l2_dest,i)) {
          // handle roll-over case
-        for (j=0;j<numTxAttempts;j++){
-          //increment one by one to detect roll-over
-          if (neighbors_vars.neighbors[i].numTx==255) {
+        
+          if (neighbors_vars.neighbors[i].numTx>(0xff-numTxAttempts)) {
               neighbors_vars.neighbors[i].numWraps++; //counting the number of times that tx wraps.
               neighbors_vars.neighbors[i].numTx/=2;
               neighbors_vars.neighbors[i].numTxACK/=2;
            }
          // update statistics
-         neighbors_vars.neighbors[i].numTx += 1;
-        } 
+        neighbors_vars.neighbors[i].numTx += numTxAttempts; 
         
         if (was_finally_acked==TRUE) {
             neighbors_vars.neighbors[i].numTxACK++;
