@@ -21,8 +21,8 @@ int mote_main(void) {
    board_init();
 
    // prepare buffer to send over SPI
-   spi_tx_buffer[0]     =  (0x40 | 0x1E);        // [b7]    RAM/Register : 0    (register)
-                                                 // [b6]    Read/Write:    1    (read)
+   spi_tx_buffer[0]     =  (0x80 | 0x1E);        // [b7]    Read/Write:    1    (read)
+                                                 // [b6]    RAM/Register : 0    (register)
                                                  // [b5-0]  address:       0x1E (Manufacturer ID, Lower 16 Bit)
    spi_tx_buffer[1]     =  0x00;                 // send a SNOP strobe just to get the reg value
    spi_tx_buffer[2]     =  0x00;                 // send a SNOP strobe just to get the reg value
