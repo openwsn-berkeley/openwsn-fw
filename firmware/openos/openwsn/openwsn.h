@@ -238,7 +238,7 @@ enum {
    ERR_INPUTBUFFER_LENGTH              = 0x31, // input length problem, length={0}
    ERR_BOOTED                          = 0x32, // booted
    ERR_INVALIDSERIALFRAME              = 0x33, // invalid serial frame
-   ERR_INVALIDPACKETFROMRADIO          = 0x34, // invalid packet frome radio, length {1} (code location {0})
+   ERR_INVALIDPACKETFROMRADIO          = 0x34, // invalid packet from radio, length {1} (code location {0})
 };
 
 //=========================== typedef =========================================
