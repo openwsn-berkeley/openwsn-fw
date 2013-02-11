@@ -10,13 +10,16 @@
 
 //=========================== define ==========================================
 
+#define TIMER_DIO_TIMEOUT         1700
+#define TIMER_DAO_TIMEOUT         10000
+
 #define MOP_DIO_A                 1<<5
 #define MOP_DIO_B                 1<<4
 #define MOP_DIO_C                 1<<3
 #define PRF_DIO_A                 0<<2
 #define PRF_DIO_B                 0<<1
 #define PRF_DIO_C                 0<<0
-#define G_DIO                     1<<7  //grounded..
+#define G_DIO                     1<<7
 
 #define FLAG_DAO_A                0<<0
 #define FLAG_DAO_B                0<<1
@@ -44,24 +47,26 @@
 #define Prf_A_dio_options         0<<4
 #define Prf_B_dio_options         0<<3
 
+//=========================== static ==========================================
+
+/**
+\brief Well-known IPv6 multicast address for "all routers".
+*/
+static const uint8_t all_routers_multicast[] = {
+   0xff, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02
+};
+
 //=========================== typedef =========================================
 
 //===== DIO
 
+/**
+\brief Header format of a RPL DIO packet.
+*/
 PRAGMA(pack(1));
 typedef struct {
-   uint8_t         type; // set by the DODAG root.
-   uint8_t         optionLength;
-   uint8_t         prefixLength;
-   uint8_t         Resvd_Prf_Resvd;
-   uint32_t        routeLifeTime;
-   uint8_t         prefix[8]; //8bytes prefix
-} icmpv6rpl_dio_options_t;
-PRAGMA(pack());
-
-PRAGMA(pack(1));
-typedef struct {
-   uint8_t         rplinstanceId; // set by the DODAG root.
+   uint8_t         rplinstanceId;      ///< set by the DODAG root.
    uint8_t         verNumb;
    dagrank_t       rank;
    uint8_t         rplOptions;
@@ -69,31 +74,36 @@ typedef struct {
    uint8_t         flags;
    uint8_t         reserved;
    uint8_t         DODAGID[16];    
-} icmpv6rpl_dio_t;
+} icmpv6rpl_dio_ht;
 PRAGMA(pack());
 
 //===== DAO
 
+/**
+\brief Header format of a RPL DAO packet.
+*/
 PRAGMA(pack(1));
 typedef struct {
-   uint8_t         type; // set by the DODAG root.
+   uint8_t         rplinstanceId;      ///< set by the DODAG root.
+   uint8_t         K_D_flags;
+   uint8_t         reserved;
+   uint8_t         DAOSequance;
+   uint8_t         DODAGID[16];
+} icmpv6rpl_dao_ht;
+PRAGMA(pack());
+
+/**
+\brief Header format of a RPL DAO "Transit Information" option.
+*/
+PRAGMA(pack(1));
+typedef struct {
+   uint8_t         type;               ///< set by the DODAG root.
    uint8_t         optionLength;
    uint8_t         E_flags;
    uint8_t         PathControl;
    uint8_t         PathSequence;   
    uint8_t         PathLifetime;   
-} icmpv6rpl_dao_transit_info_t;
-PRAGMA(pack());
-
-PRAGMA(pack(1));
-typedef struct {
-   uint8_t         rplinstanceId; // set by the DODAG root.
-   uint8_t         K_D_flags;
-   uint8_t         reserved;
-   uint8_t         DAOSequance;
-   uint8_t         DODAGID[16];    
-   //uint8_t         options;//removing options as this is optional
-} icmpv6rpl_dao_t;
+} icmpv6rpl_dao_transit_ht;
 PRAGMA(pack());
 
 //=========================== prototypes ======================================
@@ -101,7 +111,6 @@ PRAGMA(pack());
 void icmpv6rpl_init();
 void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, error_t error);
 void icmpv6rpl_receive(OpenQueueEntry_t* msg);
-void icmpv6rpl_receiveDAO(OpenQueueEntry_t* msg);
 
 /**
 \}
