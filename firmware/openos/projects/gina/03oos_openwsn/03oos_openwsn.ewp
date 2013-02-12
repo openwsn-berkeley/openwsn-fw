@@ -2124,12 +2124,6 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
       </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\serialecho.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\serialecho.h</name>
-      </file>
     </group>
     <group>
       <name>gina</name>

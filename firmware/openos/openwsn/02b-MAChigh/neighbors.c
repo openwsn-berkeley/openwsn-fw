@@ -9,10 +9,10 @@
 //=========================== variables =======================================
 
 typedef struct {
-   neighborRow_t    neighbors[MAXNUMNEIGHBORS];
-   dagrank_t        myDAGrank;
-   uint8_t          debugRow;
-   icmpv6rpl_dio_t* dio; //keep it global to be able to debug correctly.
+   neighborRow_t        neighbors[MAXNUMNEIGHBORS];
+   dagrank_t            myDAGrank;
+   uint8_t              debugRow;
+   icmpv6rpl_dio_ht*    dio; //keep it global to be able to debug correctly.
 } neighbors_vars_t;
 
 neighbors_vars_t neighbors_vars;
@@ -412,7 +412,7 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
    msg->owner = COMPONENT_NEIGHBORS;
    
    // update rank of that neighbor in table
-   neighbors_vars.dio = (icmpv6rpl_dio_t*)(msg->payload);
+   neighbors_vars.dio = (icmpv6rpl_dio_ht*)(msg->payload);
    if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
@@ -545,7 +545,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
 //===== debug
 
 /**
-\brief Trigger this module to print status information, over serial.
+\brief Triggers this module to print status information, over serial.
 
 debugPrint_* functions are used by the openserial module to continuously print
 status information about several modules in the OpenWSN stack.
