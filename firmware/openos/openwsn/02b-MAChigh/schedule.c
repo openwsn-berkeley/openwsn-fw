@@ -222,7 +222,9 @@ error_t schedule_addActiveSlot(slotOffset_t    slotOffset,
          slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
   
            //check that this entry for that neighbour and timeslot is not already scheduled.
-           if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
+           if (type!=CELLTYPE_SERIALRX && type!=CELLTYPE_MORESERIALRX &&  
+               packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& 
+               (slotContainer->slotOffset==slotOffset)){
                //it exists so this is an update.
                slotContainer->type                      = type;
                slotContainer->shared                    = shared;

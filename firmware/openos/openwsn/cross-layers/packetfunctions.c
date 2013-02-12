@@ -168,6 +168,7 @@ bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2)
    if (address_1->type!=address_2->type) {
       return FALSE;
    }
+   
    switch (address_1->type) {
       case ADDR_16B:
       case ADDR_PANID:
@@ -178,8 +179,10 @@ bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2)
          address_length = 8;
          break;
       case ADDR_128B:
+      case ADDR_ANYCAST:
          address_length = 16;
          break;
+    
       default:
          openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address_1->type,
