@@ -116,17 +116,6 @@ typedef struct {
    uint8_t     header_length;          ///< needed to toss the header
 } ipv6_header_iht; //iht for "internal header type"
 
-
-typedef struct {
-   uint8_t     nextHeader;
-   uint8_t     HdrExtLen;
-   uint8_t     RoutingType;
-   uint8_t     SegmentsLeft;
-   uint8_t     CmprICmprE;
-   uint8_t     PadRes;
-   uint16_t    Reserved;
-} ipv6_Source_Routing_Header_t; //iht for "internal header type"
-
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================

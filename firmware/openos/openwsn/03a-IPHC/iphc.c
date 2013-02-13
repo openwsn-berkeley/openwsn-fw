@@ -105,7 +105,7 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
    } else {
      //not the same prefix. so the packet travels to another network
      //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
-     if(ipv6_header.next_header!=SOURCEFWNXTHDR){ 
+     if(ipv6_header.next_header!=IANA_IPv6ROUTE){ 
       sam = IPHC_SAM_128B;
       dam = IPHC_DAM_128B;
       p_dest = &(msg->l3_destinationAdd);
