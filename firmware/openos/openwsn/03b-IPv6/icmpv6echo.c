@@ -4,7 +4,8 @@
 #include "openserial.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
-
+#include "debugpins.h"
+#include "scheduler.h"
 //=========================== variables =======================================
 
 typedef struct {
@@ -16,7 +17,7 @@ typedef struct {
 icmpv6echo_vars_t icmpv6echo_vars;
 
 //=========================== prototypes ======================================
-
+void toggle_leds_demo_echo();
 //=========================== public ==========================================
 
 void icmpv6echo_init() {
@@ -28,6 +29,7 @@ void icmpv6echo_trigger() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer[16];
    OpenQueueEntry_t* msg;
+ 
    
    //get command from OpenSerial (16B IPv6 destination address)
    number_bytes_from_input_buffer = openserial_getInputBuffer(&(input_buffer[0]),sizeof(input_buffer));
@@ -77,6 +79,7 @@ void icmpv6echo_trigger() {
       // packetfunctions_htons(icmpv6echo_vars.seq++ ,(uint8_t*)&((ICMPv6_ht*)(msg->payload))->sequence_number); 
       packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//do last
       //send
+      
       if (icmpv6_send(msg)!=E_SUCCESS) {
          icmpv6echo_vars.busySending = FALSE;
          openqueue_freePacketBuffer(msg);
@@ -85,6 +88,10 @@ void icmpv6echo_trigger() {
 }
 
 void icmpv6echo_sendDone(OpenQueueEntry_t* msg, error_t error) {
+
+   //poipoi demo
+   scheduler_push_task(toggle_leds_demo_echo,TASKPRIO_COAP);
+      
    msg->owner = COMPONENT_ICMPv6ECHO;
    if (msg->creator!=COMPONENT_ICMPv6ECHO) {//that was a packet I had not created
       openserial_printError(COMPONENT_ICMPv6ECHO,ERR_UNEXPECTED_SENDDONE,
@@ -150,3 +157,13 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
 }
 
 //=========================== private =========================================
+//poipoi demo
+void toggle_leds_demo_echo(){
+   uint8_t j=0;
+   uint16_t i=0;
+   for(j=0;j<4;j++){
+      debugpins_task_toggle();
+      for(i=0;i<0xffff;i++);
+      for(i=0;i<0xffff;i++);
+  }
+}

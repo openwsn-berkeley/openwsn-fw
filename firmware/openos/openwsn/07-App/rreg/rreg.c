@@ -35,7 +35,10 @@ uint8_t hexToAscii(uint8_t hex);
 //=========================== public ==========================================
 
 void rreg_init() {
-   // prepare the resource descriptor for the /.well-known/core path
+  //dagroot does not run upper layers.
+   if(idmanager_getIsDAGroot()==TRUE) return; 
+ 
+  // prepare the resource descriptor for the /.well-known/core path
    rreg_vars.desc.path0len             = sizeof(rreg_path0)-1;
    rreg_vars.desc.path0val             = (uint8_t*)(&rreg_path0);
    rreg_vars.desc.path1len             = 0;

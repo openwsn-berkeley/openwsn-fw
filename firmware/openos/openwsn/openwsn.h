@@ -20,7 +20,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_PATCH     1
 
 // enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER       0xf4
+#define DEBUG_MOTEID_MASTER       0xE9
 
 #ifndef TRUE
 #define TRUE 1
@@ -32,6 +32,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 
 #define LENGTH_ADDR16b 2
 #define LENGTH_ADDR64b 8
+#define LENGTH_ADDR128b 16
 
 enum {
    E_SUCCESS                           = 0,          

@@ -118,7 +118,7 @@ void openwsn_init() {
    //udplatency_init();
    //udpstorm_init();
    //-- CoAP
-   rleds_init();
+   //rleds_init();
    //rt_init();
    //rex_init();
    //rheli_init();

@@ -9,6 +9,8 @@
 #include "icmpv6.h"
 #include "openudp.h"
 #include "opentcp.h"
+#include "debugpins.h"
+#include "scheduler.h"
 
 //=========================== variables =======================================
 typedef struct{
@@ -20,9 +22,10 @@ forwarding_vars_t forwaring_vars;
 //=========================== prototypes ====================h==================
 
 void    getNextHop(open_addr_t* destination, open_addr_t* addressToWrite);
-error_t fowarding_send_internal(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv); //>>>>>> diodio
+error_t fowarding_send_internal(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv); 
 error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
-
+//poipoi demo
+void toggle_leds_demo_fw();
 //=========================== public ==========================================
 
 void forwarding_init() {
@@ -80,6 +83,7 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, error_t error) {
 }
 
 void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
+  
    msg->owner                  = COMPONENT_FORWARDING;
    msg->l4_protocol            = ipv6_header.next_header;
    msg->l4_protocol_compressed = ipv6_header.next_header_compressed;
@@ -118,7 +122,10 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
          }
       } else {
          // source route
-         if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
+         //poipoi demo
+          scheduler_push_task(toggle_leds_demo_fw,TASKPRIO_COAP);
+         
+          if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
             openqueue_freePacketBuffer(msg);
          }
       }
@@ -126,6 +133,19 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
 }
 
 //=========================== private =========================================
+//poipoi demo
+void toggle_leds_demo_fw(){
+   uint8_t j=0;
+   uint16_t i=0;
+
+   for(j=0;j<2;j++){
+      debugpins_task_toggle();
+      for(i=0;i<0xffff;i++);
+      for(i=0;i<0xffff;i++);
+   }
+}
+
+
 
 error_t fowarding_send_internal(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
   getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));

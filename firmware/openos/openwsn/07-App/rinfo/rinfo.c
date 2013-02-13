@@ -6,6 +6,7 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "board.h"
+#include "idmanager.h"
 
 //=========================== defines =========================================
 
@@ -30,6 +31,9 @@ void    rinfo_sendDone(OpenQueueEntry_t* msg,
 //=========================== public ==========================================
 
 void rinfo_init() {
+  
+  
+   if(idmanager_getIsDAGroot()==TRUE) return; 
    // prepare the resource descriptor for the /temp path
    rinfo_vars.desc.path0len             = sizeof(rinfo_path0)-1;
    rinfo_vars.desc.path0val             = (uint8_t*)(&rinfo_path0);

@@ -14,11 +14,12 @@
 #include "openserial.h"
 #include "scheduler.h"
 #include "schedule.h"
+#include "idmanager.h"
 
 //=========================== defines =========================================
 
 
-const uint8_t rsched_path0[] = "rsch";
+const uint8_t rsched_path0[] = "6tus";
 
 //=========================== variables =======================================
 
@@ -41,6 +42,7 @@ void    rsched_sendDone(OpenQueueEntry_t* msg,
 
 void rsched_init() {
    
+   if(idmanager_getIsDAGroot()==TRUE) return; 
    // prepare the resource descriptor for the /rsched path
    rsched_vars.desc.path0len             = sizeof(rsched_path0)-1;
    rsched_vars.desc.path0val             = (uint8_t*)(&rsched_path0);
@@ -79,8 +81,25 @@ error_t rsched_receive(OpenQueueEntry_t* msg,
     rsched_command_t* link_command;
     slotinfo_element_t* link_element;
     open_addr_t temp_addr;
-   
     error_t responses[RSCHED_MAXRESPONSES];
+    
+    //this is a hack as copper send the the payload with "chars" instead of binary
+    //poipoi this does not work as an address can be
+    //14 15 92 ... being that the actual hex, so params need to be 
+    //handled in a different way... 
+    for (i=0;i<msg->length;i++){
+      if (msg->payload[i]>='0' && msg->payload[i]<='9'){
+          msg->payload[i]=msg->payload[i] - '0';
+      }
+      if (msg->payload[i]>='A' && msg->payload[i]<='F'){
+          msg->payload[i]=msg->payload[i]-55; //A is 65 so we want to be 10
+      }
+      if (msg->payload[i]>='a' && msg->payload[i]<='f'){
+          msg->payload[i]=msg->payload[i]-87; //A is 65 so we want to be 10
+      }
+    }
+    
+
   
     if (coap_header->Code==COAP_CODE_REQ_GET) {
     //get will only be legal for read operation.      
