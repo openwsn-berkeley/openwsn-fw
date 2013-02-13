@@ -229,7 +229,13 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
    runningPointer       = (msg->payload)+sizeof(rpl_routing_ht);
    
    // retrieve CmprE and CmprI
-   local_CmprE          = rpl_routing_hdr->CmprICmprE & 0x0f;
+   
+   /*CmprE 4-bit unsigned integer. Number of prefix octets
+     from the last segment (i.e., segment n) that are
+     elided. For example, an SRH carrying a full IPv6
+     address in Addressesn sets CmprE to 0.*/
+   
+   local_CmprE          = rpl_routing_hdr->CmprICmprE & 0x0f;   
    local_CmprI          = rpl_routing_hdr->CmprICmprE & 0xf0;
    local_CmprI          = local_CmprI>>4;
    
@@ -240,29 +246,13 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
       
       // push packet up the stack
       msg->l4_protocol  = rpl_routing_hdr->nextHeader;
-      hlen              = rpl_routing_hdr->HdrExtLen;
+      hlen              = rpl_routing_hdr->HdrExtLen; //in 8-octet units
       
       // toss RPL routing header
       packetfunctions_tossHeader(msg,sizeof(rpl_routing_ht));
       
       // toss source route addresses
-      switch (local_CmprE) {
-         case 0:
-            octetsAddressSize   = 2;
-            break;
-         case 8:
-            octetsAddressSize   = 8;
-            break;
-         case 2:
-            octetsAddressSize   = 16;
-            break;
-         default:
-            openserial_printError(COMPONENT_FORWARDING,ERR_INVALID_PARAM,
-                               (errorparameter_t)0,
-                               (errorparameter_t)0);
-            openqueue_freePacketBuffer(msg);
-            return E_FAIL;
-      }
+      octetsAddressSize = LENGTH_ADDR128b - local_CmprE; //total length - number of octets that are elided
       packetfunctions_tossHeader(msg,octetsAddressSize*hlen);
       
       // indicate reception to upper layer
@@ -309,9 +299,14 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
          // find next hop address in source route
          addressposition    = numAddr-(rpl_routing_hdr->SegmentsLeft);
          
-         switch(local_CmprE) {
-            case 0:
-               octetsAddressSize                 = 2;
+         // how many octets have the address? 
+         if (rpl_routing_hdr->SegmentsLeft > 1){
+              octetsAddressSize = LENGTH_ADDR128b - local_CmprI; //max addr length - number of prefix octets that are elided in the internal route elements
+         }else{
+              octetsAddressSize = LENGTH_ADDR128b - local_CmprE; //max addr length - number of prefix octets that are elided in the internal route elements
+         }
+         switch(octetsAddressSize) {
+            case LENGTH_ADDR16b:
                // write previous hop
                msg->l2_nextORpreviousHop.type    = ADDR_16B;
                memcpy(
@@ -327,8 +322,7 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
                   octetsAddressSize
                );
                break;
-            case 8:
-               octetsAddressSize                 = 8;
+            case LENGTH_ADDR64b:
                // write previous hop
                msg->l2_nextORpreviousHop.type    = ADDR_64B;
                memcpy(
@@ -336,21 +330,26 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
                   runningPointer+((addressposition-1)*octetsAddressSize),
                   octetsAddressSize
                );
-               // write next hop
+               
+               //this is 128b address as send from forwarding function 
+               //takes care of reducing it if needed.
+               
+               //write next hop
                msg->l3_destinationAdd.type       = ADDR_128B;
                memcpy(
                   &(msg->l3_destinationAdd.addr_128b[0]),
                   prefix->prefix,
-                  8
+                  LENGTH_ADDR64b
                );
+               
                memcpy(
                   &(msg->l3_destinationAdd.addr_128b[8]),
                   runningPointer+((addressposition-1)*octetsAddressSize),
                   octetsAddressSize
                );
+               
                break;
-            case 2:
-               octetsAddressSize                 = 16;
+            case LENGTH_ADDR128b:
                // write previous hop
                msg->l2_nextORpreviousHop.type    = ADDR_128B;
                memcpy(
@@ -367,6 +366,8 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
                );
                break;
             default:
+               //poipoi xv
+               //any other value is not supported by now.
                openserial_printError(COMPONENT_FORWARDING,ERR_INVALID_PARAM,
                                (errorparameter_t)1,
                                (errorparameter_t)0);
