@@ -103,7 +103,7 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dao.DAOSequance           = 0x00;
    // DODAGID: to be populated upon receiving DIO
    
-   icmpv6rpl_vars.dao_transit.type          = 0x06;        ///< TODO: put correct value
+   icmpv6rpl_vars.dao_transit.type          = OPTION_TRANSIT_INFORMATION_TYPE;
    // optionLength: to be populated upon TX
    icmpv6rpl_vars.dao_transit.E_flags       = E_DAO_Transit_Info;
    icmpv6rpl_vars.dao_transit.PathControl   = PC1_A_DAO_Transit_Info | \
@@ -458,20 +458,42 @@ void sendDAO() {
    
    //===== fill in packet
    
-   //=== transit option
+   //=== transit option -- from RFC 6550, page 55 - 1 transit information header per parent is required.
    numTransitParents                        = 0;
    for (nbrIdx=0;nbrIdx<MAXNUMNEIGHBORS;nbrIdx++) {
       if ((neighbors_isNeighborWithLowerDAGrank(nbrIdx))==TRUE) {
          // this neighbor is of lower DAGrank as I am
          
          // write it's address in DAO
-         packetfunctions_reserveHeaderSize(msg,8);
+         packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
          neighbors_writeAddrLowerDAGrank((msg->payload),ADDR_64B,nbrIdx);
+        
+         // update transit info fields 
+         //size of the whole option in bytes.
+         icmpv6rpl_vars.dao_transit.optionLength  = LENGTH_ADDR64b + sizeof(icmpv6rpl_dao_transit_ht);
+         icmpv6rpl_vars.dao_transit.PathControl=0; //todo. this is to set the preference of this parent.      
+         icmpv6rpl_vars.dao_transit.type=OPTION_TRANSIT_INFORMATION_TYPE;
+           
+         // write transit info in packet
+         packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_transit_ht));
+         memcpy(
+               ((icmpv6rpl_dao_transit_ht*)(msg->payload)),
+               &(icmpv6rpl_vars.dao_transit),
+               sizeof(icmpv6rpl_dao_transit_ht)
+         );
          
          // remember I found it
          numTransitParents++;
       }  
    }
+   
+   
+   //target information is required. RFC 6550 page 55.
+   /*
+   One or more Transit Information options MUST be preceded by one or
+   more RPL Target options.   
+   */
+   //TODO
    
    // stop here if no parents found
    if (numTransitParents==0) {
@@ -479,19 +501,9 @@ void sendDAO() {
       return;
    }
    
+   icmpv6rpl_vars.dao_transit.PathSequence++; //increment path sequence.
    // if you get here, you will send a DAO
    
-   // update transit info fields
-   icmpv6rpl_vars.dao_transit.optionLength  = numTransitParents;
-   icmpv6rpl_vars.dao_transit.PathSequence++;
-   
-   // write transit info in packet
-   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_transit_ht));
-   memcpy(
-      ((icmpv6rpl_dao_transit_ht*)(msg->payload)),
-      &(icmpv6rpl_vars.dao_transit),
-      sizeof(icmpv6rpl_dao_transit_ht)
-   );
    
    //=== DAO header
    packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_ht));

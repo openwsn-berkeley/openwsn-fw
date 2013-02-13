@@ -47,6 +47,13 @@
 #define Prf_A_dio_options         0<<4
 #define Prf_B_dio_options         0<<3
 
+enum{
+  OPTION_ROUTE_INFORMATION_TYPE   = 0x03,
+  OPTION_DODAG_CONFIGURATION_TYPE = 0x04,
+  OPTION_TARGET_INFORMATION_TYPE  = 0x05,
+  OPTION_TRANSIT_INFORMATION_TYPE = 0x06,
+};
+
 //=========================== static ==========================================
 
 /**
@@ -105,6 +112,19 @@ typedef struct {
    uint8_t         PathLifetime;   
 } icmpv6rpl_dao_transit_ht;
 PRAGMA(pack());
+
+/**
+\brief Header format of a RPL DAO "Target" option.
+*/
+PRAGMA(pack(1));
+typedef struct {
+   uint8_t         type;               ///< set by the DODAG root.
+   uint8_t         optionLength;
+   uint8_t         flags;
+   uint8_t         prefixLength;  
+} icmpv6rpl_dao_target_ht;
+PRAGMA(pack());
+
 
 //=========================== prototypes ======================================
 
