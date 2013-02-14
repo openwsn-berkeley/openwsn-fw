@@ -72,6 +72,8 @@ open_addr_t*  neighbors_getKANeighbor();
 bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isPreferredParent(open_addr_t* address);
 bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
+bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
+
 // updating neighbor information
 void          neighbors_indicateRx(
                    open_addr_t*        l2_src,
@@ -85,17 +87,8 @@ void          neighbors_indicateTx(
                    asn_t*              asnTimestamp
               );
 void          neighbors_indicateRxDIO(OpenQueueEntry_t* msg);
-// write addresses
-void          neighbors_writeAddrLowerDAGrank(
-                   uint8_t*            addressToWrite,
-                   uint8_t             addr_type,
-                   uint8_t             index
-              );
-
-bool          neighbors_writeAddrHigherDAGrank(
-                   open_addr_t*        addressToWrite,
-                   uint8_t             index
-              );
+// get addresses
+void          neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index);
 // managing routing info
 void          neighbors_updateMyDAGrankAndNeighborPreference();
 // debug

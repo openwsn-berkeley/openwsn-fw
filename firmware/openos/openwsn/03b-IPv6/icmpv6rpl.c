@@ -26,6 +26,7 @@ typedef struct {
    // DAO-related
    icmpv6rpl_dao_ht          dao;                     ///< pre-populated DAO packet.
    icmpv6rpl_dao_transit_ht  dao_transit;             ///< pre-populated DAO "Transit Info" option header.
+   icmpv6rpl_dao_target_ht  dao_target;             ///< pre-populated DAO "Transit Info" option header.
    opentimer_id_t            timerIdDAO;              ///< ID of the timer used to send DAOs.
    uint16_t                  periodDAO;               ///< duration, in ms, of a timerIdDAO timeout.
    uint8_t                   delayDAO;                ///< number of timerIdDIO events before actually sending a DAO.
@@ -116,6 +117,11 @@ void icmpv6rpl_init() {
                                               PC4_B_DAO_Transit_Info;  
    icmpv6rpl_vars.dao_transit.PathSequence  = 0x00; // to be incremented at each TX
    icmpv6rpl_vars.dao_transit.PathLifetime  = 0xAA;
+   //target information
+   icmpv6rpl_vars.dao_target.type  = OPTION_TARGET_INFORMATION_TYPE;
+   icmpv6rpl_vars.dao_target.optionLength  = 0;
+   icmpv6rpl_vars.dao_target.flags  = 0;
+   icmpv6rpl_vars.dao_target.prefixLength = 0;
    
    icmpv6rpl_vars.periodDAO                 = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
    icmpv6rpl_vars.timerIdDAO                = opentimers_start(
@@ -402,8 +408,8 @@ void icmpv6rpl_timer_DAO_task() {
 void sendDAO() {
    OpenQueueEntry_t*    msg;                // pointer to DAO messages
    uint8_t              nbrIdx;             // running neighbor index
-   uint8_t              numTransitParents;  // the number of parents indicated in transit option
-   
+   uint8_t              numTransitParents,numTargetParents;  // the number of parents indicated in transit option
+   open_addr_t         address;
    
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed 
@@ -465,8 +471,10 @@ void sendDAO() {
          // this neighbor is of lower DAGrank as I am
          
          // write it's address in DAO
-         packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
-         neighbors_writeAddrLowerDAGrank((msg->payload),ADDR_64B,nbrIdx);
+         //packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
+         neighbors_getNeighbor(&address,ADDR_64B,nbrIdx);
+         packetfunctions_writeAddress(msg,&address,BIG_ENDIAN);
+        
         
          // update transit info fields 
          //size of the whole option in bytes.
@@ -487,13 +495,39 @@ void sendDAO() {
       }  
    }
    
-   
    //target information is required. RFC 6550 page 55.
    /*
    One or more Transit Information options MUST be preceded by one or
    more RPL Target options.   
    */
-   //TODO
+    numTargetParents                        = 0;
+    for (nbrIdx=0;nbrIdx<MAXNUMNEIGHBORS;nbrIdx++) {
+      if ((neighbors_isNeighborWithHigherDAGrank(nbrIdx))==TRUE) {
+         // this neighbor is of higher DAGrank as I am. so it is my child
+         
+         // write it's address in DAO RFC6550 page 80 check point 1.
+         neighbors_getNeighbor(&address,ADDR_64B,nbrIdx);
+         packetfunctions_writeAddress(msg,&address,BIG_ENDIAN);
+        
+         // update target info fields 
+         icmpv6rpl_vars.dao_target.optionLength  = LENGTH_ADDR64b + sizeof(icmpv6rpl_dao_target_ht);
+         icmpv6rpl_vars.dao_target.type  = OPTION_TARGET_INFORMATION_TYPE;
+         icmpv6rpl_vars.dao_target.flags  = 0;       //must be 0
+         icmpv6rpl_vars.dao_target.prefixLength = 0; //no prefix.  
+         
+         // write transit info in packet
+         packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_target_ht));
+         memcpy(
+               ((icmpv6rpl_dao_target_ht*)(msg->payload)),
+               &(icmpv6rpl_vars.dao_target),
+               sizeof(icmpv6rpl_dao_target_ht)
+         );
+         
+         // remember I found it
+         numTargetParents++;
+      }  
+   }
+   
    
    // stop here if no parents found
    if (numTransitParents==0) {

@@ -270,6 +270,27 @@ bool neighbors_isNeighborWithLowerDAGrank(uint8_t index) {
    return returnVal;
 }
 
+
+/**
+\brief Indicate whether some neighbor has a lower DAG rank that me.
+
+\param index [in] The index of that neighbor in the neighbor table.
+
+\returns TRUE if that neighbor has a lower DAG rank than me, FALSE otherwise.
+*/
+bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
+   bool    returnVal;
+   
+   if (neighbors_vars.neighbors[index].used==TRUE &&
+       neighbors_vars.neighbors[index].DAGrank >= neighbors_getMyDAGrank()) { 
+      returnVal = TRUE;
+   } else {
+      returnVal = FALSE;
+   }
+   
+   return returnVal;
+}
+
 //===== updating neighbor information
 
 /**
@@ -441,12 +462,13 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
 /**
 \brief Write the 64-bit address of some neighbor to some location.
 
-\bug Replace by packetfunctions_writeAddress?
 */
-void neighbors_writeAddrLowerDAGrank(uint8_t* addressToWrite, uint8_t addr_type, uint8_t index) {
+
+void  neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index){
    switch(addr_type) {
       case ADDR_64B:
-         memcpy(addressToWrite,&(neighbors_vars.neighbors[index].addr_64b.addr_64b),8);
+         memcpy(&(address->addr_64b),&(neighbors_vars.neighbors[index].addr_64b.addr_64b),LENGTH_ADDR64b);
+         address->type=ADDR_64B;
          break;
       default:
          openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
@@ -456,30 +478,6 @@ void neighbors_writeAddrLowerDAGrank(uint8_t* addressToWrite, uint8_t addr_type,
    }
 }
 
-/**
-\brief Write the 64-bit address of some neighbor to some location if it has a 
-       higher DAG rank than me.
-
-\param addressToWrite [out] The memory location to write the neighbor's EUI64
-              to.
-\param index [in] The index of the neighbor to consider.
-
-\returns TRUE if this neighbor's address was written, FALSE othewise.
-*/
-bool neighbors_writeAddrHigherDAGrank(open_addr_t* addressToWrite, uint8_t index) {
-   bool returnVal;
-   
-   if (neighbors_vars.neighbors[index].used==TRUE &&
-       neighbors_vars.neighbors[index].DAGrank > neighbors_getMyDAGrank()) {
-      memcpy(addressToWrite,&(neighbors_vars.neighbors[index].addr_64b),sizeof(open_addr_t));
-      addressToWrite->type=ADDR_64B;
-      returnVal = TRUE;
-   } else {
-      returnVal = FALSE;
-   }
-   
-   return returnVal;
-}
 
 //===== managing routing info
 
