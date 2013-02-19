@@ -106,6 +106,9 @@ void    reservation_notifyReceiveuResLinkResponse(OpenQueueEntry_t* msg){
 
 void    reservation_notifyReceiveRemoveLinkRequest(OpenQueueEntry_t* msg){
   
+  //qw: turn on yellow led when receive RemoveLink Request
+    leds_debug_toggle();
+    
   frameAndLinkIEcontent_t* tempFrameAndLinkIEcontent = processIE_getFrameAndLinkIEcontent();
     
   for(uint8_t i = 0; i<tempFrameAndLinkIEcontent->numOfSlotframes;i++)
@@ -118,6 +121,9 @@ void    reservation_notifyReceiveRemoveLinkRequest(OpenQueueEntry_t* msg){
   }
   
   reservation_vars.State = S_IDLE;
+  
+  //qw: turn off yellow led when finish Remove Link operation
+    leds_debug_toggle();
 }
 
 void    reservation_notifyReceiveScheduleRequest(OpenQueueEntry_t* msg){
@@ -273,8 +279,6 @@ void  reservation_linkResponse(open_addr_t* tempNeighbor){
     //return;
   //qw: move to when just receiving packet
   //leds_debug_toggle();
-  
-  leds_debug_toggle();
   
   OpenQueueEntry_t* reservationPkt;
   
@@ -459,7 +463,7 @@ void isr_reservation_button() {
   case 0:
   case 1:
     //set slotframeID and bandwidth
-    reservation_setuResBandwidth(1,0);
+    reservation_setuResBandwidth(2,0);
   
     reservation_linkRequest();
     break;
