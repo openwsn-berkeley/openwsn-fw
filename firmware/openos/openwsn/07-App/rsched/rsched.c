@@ -82,25 +82,8 @@ error_t rsched_receive(OpenQueueEntry_t* msg,
     slotinfo_element_t* link_element;
     open_addr_t temp_addr;
     error_t responses[RSCHED_MAXRESPONSES];
-    
-    //this is a hack as copper send the the payload with "chars" instead of binary
-    //poipoi this does not work as an address can be
-    //14 15 92 ... being that the actual hex, so params need to be 
-    //handled in a different way... 
-    for (i=0;i<msg->length;i++){
-      if (msg->payload[i]>='0' && msg->payload[i]<='9'){
-          msg->payload[i]=msg->payload[i] - '0';
-      }
-      if (msg->payload[i]>='A' && msg->payload[i]<='F'){
-          msg->payload[i]=msg->payload[i]-55; //A is 65 so we want to be 10
-      }
-      if (msg->payload[i]>='a' && msg->payload[i]<='f'){
-          msg->payload[i]=msg->payload[i]-87; //A is 65 so we want to be 10
-      }
-    }
-    
+    //assuming data comes in binary format.
 
-  
     if (coap_header->Code==COAP_CODE_REQ_GET) {
     //get will only be legal for read operation.      
        link_command = (rsched_command_t*) msg->payload; 
