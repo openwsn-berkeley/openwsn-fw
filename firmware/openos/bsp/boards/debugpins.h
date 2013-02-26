@@ -41,4 +41,7 @@ void debugpins_radio_toggle();
 void debugpins_radio_clr();
 void debugpins_radio_set();
 
+void    leds_toggle_2x();
+void    leds_toggle_4x();
+
 #endif

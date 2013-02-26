@@ -4,7 +4,8 @@
 #include "openserial.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
-
+#include "debugpins.h"
+#include "scheduler.h"
 //=========================== variables =======================================
 
 typedef struct {
@@ -93,6 +94,8 @@ void icmpv6echo_sendDone(OpenQueueEntry_t* msg, error_t error) {
    }
    openqueue_freePacketBuffer(msg);
    icmpv6echo_vars.busySending = FALSE;
+   //demo
+   scheduler_push_task(leds_toggle_4x,TASKPRIO_COAP);
 }
 
 void icmpv6echo_receive(OpenQueueEntry_t* msg) {

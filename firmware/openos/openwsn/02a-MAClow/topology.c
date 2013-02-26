@@ -4,10 +4,10 @@
 
 //=========================== defines =========================================
 
-#define TOPOLOGY_MOTE1 0x6f
-#define TOPOLOGY_MOTE2 0xb9
-#define TOPOLOGY_MOTE3 0x3b
-
+#define TOPOLOGY_MOTE1 0x41
+#define TOPOLOGY_MOTE2 0xB9
+#define TOPOLOGY_MOTE3 0xEE
+#define TOPOLOGY_MOTE4 0x80
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -32,8 +32,16 @@ bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
             returnVal=FALSE;
          }
          break;
-      case TOPOLOGY_MOTE3:
-         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE2) {
+       case TOPOLOGY_MOTE3:
+         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE2 ||
+             ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE4) {
+            returnVal=TRUE;
+         } else {
+            returnVal=FALSE;
+         }
+         break;
+       case TOPOLOGY_MOTE4:
+         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE3) {
             returnVal=TRUE;
          } else {
             returnVal=FALSE;

@@ -17,7 +17,7 @@ can use this project with any platform.
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
-#define CHANNEL         15            // 2.480GHz
+#define CHANNEL         20            // 2.480GHz
 #define TIMER_ID        0
 #define TIMER_PERIOD    32768          // 1s @ 32kHz
 
@@ -106,8 +106,8 @@ int mote_main(void) {
    leds_radio_off();
    leds_sync_on();
    
-   for (i=0;i<255;i++) {
-      
+   while(1) {
+      i++;
       i=i%255;
       
       app_vars.packet_num = i;
