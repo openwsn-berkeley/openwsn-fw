@@ -178,7 +178,7 @@ kick_scheduler_t radiotimer_isr() {
             // call the callback
             radiotimer_vars.compare_cb();
             // kick the OS
-            return 1;
+            return KICK_SCHEDULER;
          }
          break;
       case RADIOTIMER_OVERFLOW: // timer overflows
@@ -194,12 +194,12 @@ kick_scheduler_t radiotimer_isr() {
             // call the callback
             radiotimer_vars.overflow_cb();
             // kick the OS
-            return 1;
+            return KICK_SCHEDULER;
          }
          break;
       case RADIOTIMER_NONE:                     // this should not happen
       default:
          while(1);                               // this should not happen
    }
-   return 0;
+  return DO_NOT_KICK_SCHEDULER;
 }

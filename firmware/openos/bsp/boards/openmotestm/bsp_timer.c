@@ -172,5 +172,5 @@ kick_scheduler_t bsp_timer_isr()
    // call the callback
    bsp_timer_vars.cb();
    // kick the OS
-   return 1;
+   return KICK_SCHEDULER;
 }

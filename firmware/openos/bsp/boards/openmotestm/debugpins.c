@@ -106,3 +106,9 @@ void debugpins_radio_clr() {
 void debugpins_radio_set() {
 //   P1OUT |=  0x02;
 }
+
+void    leds_toggle_2x(){
+}
+
+void    leds_toggle_4x(){
+}
