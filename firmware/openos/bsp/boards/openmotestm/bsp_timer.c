@@ -1,17 +1,18 @@
 /**
-\brief GINA-specific definition of the "bsp_timer" bsp module.
+\brief openmoteSTM32 definition of the "bsp_timer" bsp module.
 
-On GINA, we use timerB0 for the bsp_timer module.
+On openmoteSTM32, we use TIM2 for the bsp_timer module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
-#include "stm32f10x_rcc.h"
-#include "stm32f10x_nvic.h"
-#include "stm32f10x_tim.h"
+#include "stm32f10x_lib.h"
+#include "string.h"
+#include "board_info.h"
 #include "bsp_timer.h"
 #include "board.h"
-#include "board_info.h"
+
+#include "rcc.h"
+#include "nvic.h"
 
 //=========================== defines =========================================
 
@@ -38,37 +39,31 @@ void bsp_timer_init()
 {
     // clear local variables
     memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
-   
-    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure ;
-    TIM_OCInitTypeDef TIM_OCInitStructure;
-    NVIC_InitTypeDef NVIC_InitStructure;
     
-    //打开TIM2外设时钟
+    //Configure TIM2, Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 , ENABLE);
 
-    //**************************************************************************
-    //     定时器2设置： 7199分频，TIM1_COUNTms中断一次，向上计数
-    //**************************************************************************
-    TIM_TimeBaseStructure.TIM_Period = (uint16_t)TIM2_COUNT;
-    TIM_TimeBaseStructure.TIM_Prescaler = 7199;    //10KHz
+    //Configure TIM2: Period = 0xffff, prescaler = 719(72M/(719+1) = 100KHz), CounterMode  = upCounting mode
+    TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure ;
+    TIM_TimeBaseStructure.TIM_Period        = 0xFFFF;
+    TIM_TimeBaseStructure.TIM_Prescaler     = 719;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
-    TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;
-    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure); //初始化定时器
+    TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;
+    TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
     
-    //TIM2_OC1模块设置
-    TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_Toggle;             //管脚输出模式：翻转
-    TIM_OCInitStructure.TIM_Pulse = 0;                           //翻转周期：2000个脉冲
-    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;   //使能TIM1_CH1通道
-    TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;       //输出为正逻辑
-    TIM_OC1Init(TIM2, &TIM_OCInitStructure);                        //写入配置
-   /* 
-    //清中断
-    TIM_ClearFlag(TIM2, TIM_FLAG_CC1);
-    TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE); //开定时器中断
-    */
-    TIM_Cmd(TIM2, ENABLE); //使能定时器
+    //Configure TIM2's out compare mode:  out compare mode = toggle, out compare value = 0 (useless before enable compare interrupt), enable TIM2_CH1
+    TIM_OCInitTypeDef TIM_OCInitStructure;
+    TIM_OCInitStructure.TIM_OCMode      = TIM_OCMode_Toggle;
+    TIM_OCInitStructure.TIM_Pulse       = 0;
+    TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
+    TIM_OCInitStructure.TIM_OCPolarity  = TIM_OCPolarity_High;
+    TIM_OC1Init(TIM2, &TIM_OCInitStructure);
+          
+    //enable TIM2
+    TIM_Cmd(TIM2, ENABLE); 
     
-         // 使能TIM1比较中断
+    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 1
+    NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQChannel;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
@@ -95,13 +90,15 @@ counter, and cancels a possible pending compare event.
 void bsp_timer_reset()
 {
     // reset compare
-    //TIM1_OC1模块设置
     TIM_SetCompare1(TIM2,0);
   
+    //enable compare interrupt
     TIM_ClearFlag(TIM2, TIM_FLAG_CC1);
-    TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE); //开定时器中断
+    TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE);
+    
     // reset timer
     TIM_SetCounter(TIM2,0);
+    
     // record last timer compare value
     bsp_timer_vars.last_compare_value =  0;
 }
@@ -136,15 +133,14 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks)
    if (delayTicks < (TIM_GetCounter(TIM2)-temp_last_compare_value)) 
    {
       // setting the interrupt flag triggers an interrupt
-      TIM_ClearFlag(TIM2, TIM_FLAG_CC1);
-      TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE); //开定时器中断
+        TIM2->SR |= (u16)TIM_FLAG_CC1;
    } 
    else
    {
       // this is the normal case, have timer expire at newCompareValue
       TIM_SetCompare1(TIM2,newCompareValue);
       TIM_ClearFlag(TIM2, TIM_FLAG_CC1);
-      TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE); //开定时器中断
+      TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE);
    }
 }
 
@@ -154,7 +150,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks)
 void bsp_timer_cancel_schedule() 
 {
     TIM_SetCompare1(TIM2,0);
-    TIM_ITConfig(TIM2, TIM_IT_CC1, DISABLE); //关定时器中断
+    TIM_ITConfig(TIM2, TIM_IT_CC1, DISABLE); 
 }
 
 /**
@@ -171,7 +167,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue()
 
 //=========================== interrupt handlers ==============================
 
-uint8_t bsp_timer_isr()
+kick_scheduler_t bsp_timer_isr()
 {
    // call the callback
    bsp_timer_vars.cb();

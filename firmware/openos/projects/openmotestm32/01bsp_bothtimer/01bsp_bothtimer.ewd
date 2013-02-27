@@ -415,7 +415,7 @@
         </option>
         <option>
           <name>CCJLinkInterfaceRadio</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>OCJLinkAttachSlave</name>
@@ -424,7 +424,7 @@
         <option>
           <name>CCJLinkResetList</name>
           <version>4</version>
-          <state>7</state>
+          <state>8</state>
         </option>
         <option>
           <name>CCJLinkInterfaceCmdLine</name>

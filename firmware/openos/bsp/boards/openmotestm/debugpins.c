@@ -1,10 +1,9 @@
 /**
-\brief TelosB-specific definition of the "debugpins" bsp module.
+\brief opemnstm32 definition of the "debugpins" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
-
-//#include "msp430x26x.h"
+#include "stm32f10x_lib.h"
 #include "debugpins.h"
 
 //=========================== defines =========================================
@@ -16,6 +15,15 @@
 //=========================== public ==========================================
 
 void debugpins_init() {
+  
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
+  
+    GPIO_InitTypeDef GPIO_InitStructure;
+    // Configure PC.4 and PC.5 as Output push-pull 
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
   /*
    P4DIR |=  0x20;      // frame
    P4DIR |=  0x02 ;     // slot
@@ -33,26 +41,26 @@ void debugpins_init() {
   */
 }
 
-// P4.5
+// A.4
 void debugpins_frame_toggle() {
-//   P4OUT ^=  0x20;
+  GPIOC->ODR ^= 0X0010;
 }
 void debugpins_frame_clr() {
-  // P4OUT &= ~0x20;
+  GPIOC->ODR &= ~0X0010;
 }
 void debugpins_frame_set() {
-   //P4OUT |=  0x20;
+  GPIOC->ODR |=  0X0010;
 }
 
-// P4.1
+// PA.5
 void debugpins_slot_toggle() {
-//   P4OUT ^=  0x02;
+  GPIOC->ODR ^=  0X0020;
 }
 void debugpins_slot_clr() {
-//   P4OUT &= ~0x02;
+  GPIOC->ODR &= ~0X0020;
 }
 void debugpins_slot_set() {
-//   P4OUT |=  0x02;
+  GPIOC->ODR |=  0X0020;
 }
 
 // P4.2

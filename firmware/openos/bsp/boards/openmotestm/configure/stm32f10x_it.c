@@ -17,11 +17,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "Systick.h"
 #include "uart.h"
 #include "leds.h"
 #include "bsp_timer.h"
-//#include "radiotimer.h"
+#include "radiotimer.h"
 #include "spi.h"
 #include "radio.h"
 #include "rtc_timer.h"
@@ -146,13 +145,6 @@ void PendSVC(void)
 *******************************************************************************/
 void SysTickHandler(void)
 {
-       systik_i++;
-    
-     if(systik_i > 0)//如果大于23，则跳变LED8
-       {
-         systik_i = 0;
-         //leds_error_toggle();
-       }
 }
 
 /*******************************************************************************
@@ -197,27 +189,12 @@ void TAMPER_IRQHandler(void)
 *******************************************************************************/
 void RTC_IRQHandler(void)
 {
-  radiotimer_isr();
-  /*
-      if(RTC_GetFlagStatus(RTC_IT_ALR) != RESET)
-      {
-          RTC_ClearFlag(RTC_IT_ALR);
-          leds_radio_toggle();
-          u32 temp =   RTC_GetAlarm();
-            RTC_WaitForLastTask();
-            RTC_SetAlarm(temp+400);
-      }
-      else
-      {
-        if(RTC_GetFlagStatus(RTC_IT_OW) != RESET)
-        {
-            RTC_ClearFlag(RTC_IT_OW);
-            leds_error_toggle();
-              RTC_WaitForLastTask();
-              RTC_SetCounter(0xFFFFFFFF-32768);
-        }
-      }
-  */
+    if(RTC_GetFlagStatus(RTC_IT_ALR) != RESET)
+    {
+      RTC_ClearITPendingBit(RTC_IT_ALR);      //Clear RTC Alarm interrupt pending bit
+      RTC_WaitForLastTask();                  //Wait until last write operation on RTC registers has finished
+    }
+
 }
 
 /*******************************************************************************
@@ -251,9 +228,6 @@ void RCC_IRQHandler(void)
 *******************************************************************************/
 void EXTI0_IRQHandler(void)
 {
-  //leds_sync_toggle();
-  EXTI_ClearFlag(EXTI_Line0);
-  radio_isr();
 }
 
 /*******************************************************************************
@@ -518,7 +492,10 @@ void TIM2_IRQHandler(void)
 *******************************************************************************/
 void TIM3_IRQHandler(void)
 {
-  radiotimer_isr();
+  if(TIM_GetFlagStatus(TIM3,TIM_FLAG_CC1) != RESET)
+  {
+    TIM_ClearFlag(TIM3,TIM_FLAG_CC1);
+  }
 }
 
 /*******************************************************************************
@@ -587,8 +564,7 @@ void SPI1_IRQHandler(void)
 {
   if(SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE) != RESET)
   {
-                       //leds_sync_on();
-  spi_isr();
+    spi_isr();
   }
 
 }
@@ -613,17 +589,6 @@ void SPI2_IRQHandler(void)
 *******************************************************************************/
 void USART1_IRQHandler(void)
 {  
-    if(USART_GetFlagStatus(USART1,USART_FLAG_RXNE) != RESET)
-    {
-      USART_ClearFlag(USART1,USART_FLAG_RXNE);
-      uart_isr_rx();
-    }
-  
-    if(USART_GetFlagStatus(USART1,USART_FLAG_TC) != RESET)
-    {
-      USART_ClearFlag(USART1,USART_FLAG_TC);
-      uart_isr_tx();
-    }
 }
 
 /*******************************************************************************
@@ -657,6 +622,9 @@ void USART3_IRQHandler(void)
 *******************************************************************************/
 void EXTI15_10_IRQHandler(void)
 {
+    //leds_sync_toggle();
+    EXTI_ClearFlag(EXTI_Line10);
+    radio_isr();
 }
 
 /*******************************************************************************
@@ -668,6 +636,11 @@ void EXTI15_10_IRQHandler(void)
 *******************************************************************************/
 void RTCAlarm_IRQHandler(void)
 {
+  if(EXTI_GetITStatus(EXTI_Line17) != RESET)
+  {
+	EXTI_ClearITPendingBit(EXTI_Line17);
+        radiotimer_isr();
+  }
 }
 
 /*******************************************************************************
@@ -791,6 +764,17 @@ void SPI3_IRQHandler(void)
 *******************************************************************************/
 void UART4_IRQHandler(void)
 {
+    if(USART_GetFlagStatus(UART4,USART_FLAG_RXNE) != RESET)
+    {
+      USART_ClearFlag(UART4,USART_FLAG_RXNE);
+      uart_isr_rx();
+    }
+  
+    if(USART_GetFlagStatus(UART4,USART_FLAG_TC) != RESET)
+    {
+      USART_ClearFlag(UART4,USART_FLAG_TC);
+      uart_isr_tx();
+    }
 }
 
 /*******************************************************************************

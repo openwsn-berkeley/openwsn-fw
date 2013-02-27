@@ -579,15 +579,15 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>03oos_openwsn.srec</state>
+          <state>003oos_openwsn.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -595,7 +595,7 @@
         </option>
         <option>
           <name>OOCObjCopyEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
       </data>
     </settings>
@@ -641,7 +641,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>03oos_openwsn.out</state>
+          <state>003oos_openwsn.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -1758,10 +1758,10 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.c</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.h</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.h</name>
     </file>
   </group>
   <group>
@@ -1870,19 +1870,34 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\board.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\board_info.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\bsp_timer.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\debugpins.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\eui64.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\leds.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\nvic.c</name>
@@ -1891,7 +1906,13 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\nvic.h</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\radiotimer.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\rcc.c</name>
@@ -1900,39 +1921,18 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\rcc.h</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\spi.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\uart.c</name>
         </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
+        </file>
       </group>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
-      </file>
     </group>
     <group>
       <name>chips</name>
@@ -1958,10 +1958,10 @@
     <group>
       <name>common</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\hdlcserial.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\hdlcserial.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
@@ -1975,6 +1975,9 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
       </file>
+    </group>
+    <group>
+      <name>stm32</name>
     </group>
   </group>
   <group>
@@ -1994,7 +1997,7 @@
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\ieee802154.h</name>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.c</name>
@@ -2002,15 +2005,15 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.h</name>
       </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.h</name>
-      </file>
     </group>
     <group>
       <name>02b-MAChigh</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\linkcost.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\linkcost.h</name>
+      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.c</name>
       </file>
@@ -2064,6 +2067,12 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6echo.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.c</name>
@@ -2189,7 +2198,7 @@
         </file>
       </group>
       <group>
-        <name>tcpinject</name>
+        <name>tcpjnject</name>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\tcpinject.c</name>
         </file>
@@ -2198,7 +2207,7 @@
         </file>
       </group>
       <group>
-        <name>tcprpint</name>
+        <name>tcpprint</name>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\tcpprint.c</name>
         </file>
