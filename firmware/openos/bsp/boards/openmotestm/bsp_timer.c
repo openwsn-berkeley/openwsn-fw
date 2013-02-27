@@ -61,6 +61,8 @@ void bsp_timer_init()
           
     //enable TIM2
     TIM_Cmd(TIM2, ENABLE); 
+    //disable interrupt
+    bsp_timer_cancel_schedule();
     
     //Configure NVIC: Preemption Priority = 2 and Sub Priority = 1
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -124,6 +126,8 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks)
 {
    PORT_TIMER_WIDTH newCompareValue;
    PORT_TIMER_WIDTH temp_last_compare_value;
+   //enable it if not enabled.
+   TIM_Cmd(TIM2, ENABLE); 
    
    temp_last_compare_value = bsp_timer_vars.last_compare_value;
    

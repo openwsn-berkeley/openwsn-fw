@@ -117,10 +117,10 @@ void NVIC_Configuration(void)
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
     
     //configure every module on openmotestm32
-    NVIC_uart();
-    NVIC_spi();
-    NVIC_bsptimer();
-    NVIC_rtctimer();
-    NVIC_radiotimer();
+     NVIC_uart();
+     NVIC_spi();
+     NVIC_bsptimer();
+     NVIC_rtctimer();
+     NVIC_radiotimer();
     //NVIC_radio();
 }

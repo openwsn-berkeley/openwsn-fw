@@ -48,7 +48,8 @@ void uart_init()
     USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     USART_InitStructure.USART_Mode                = USART_Mode_Rx | USART_Mode_Tx;
     USART_Init(UART4, &USART_InitStructure);
-  
+    
+    uart_disableInterrupts(); 
     //enable usart
     USART_Cmd(UART4, ENABLE);
   
@@ -121,11 +122,11 @@ uint8_t uart_readByte()
 kick_scheduler_t uart_isr_tx() 
 {
     uart_vars.txCb();
-    return 0;
+    return DO_NOT_KICK_SCHEDULER;
 }
 
 kick_scheduler_t uart_isr_rx() 
 {
     uart_vars.rxCb();
-    return 0;
+    return DO_NOT_KICK_SCHEDULER;
 }

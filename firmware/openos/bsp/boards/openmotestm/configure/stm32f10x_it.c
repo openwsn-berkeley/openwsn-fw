@@ -17,13 +17,13 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x_it.h"
-#include "uart.h"
 #include "leds.h"
 #include "bsp_timer.h"
 #include "radiotimer.h"
 #include "spi.h"
 #include "radio.h"
 #include "rtc_timer.h"
+#include "uart.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -768,12 +768,16 @@ void UART4_IRQHandler(void)
     {
       USART_ClearFlag(UART4,USART_FLAG_RXNE);
       uart_isr_rx();
+      
+      //  uart_rx_isr();
     }
   
     if(USART_GetFlagStatus(UART4,USART_FLAG_TC) != RESET)
     {
       USART_ClearFlag(UART4,USART_FLAG_TC);
-      uart_isr_tx();
+      // uart_tx_isr();
+        uart_isr_tx();
+        //uart_tx_isr(); 
     }
 }
 

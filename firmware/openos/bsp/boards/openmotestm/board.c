@@ -24,8 +24,7 @@
 extern int mote_main(void);
 int main(void) {
   
-    RCC_Configuration();//Configure rcc
-    NVIC_Configuration();//configure NVIC and Vector Table 
+  
   
    return mote_main();
 }
@@ -34,6 +33,10 @@ int main(void) {
 
 void board_init()
 {
+  
+    RCC_Configuration();//Configure rcc
+    NVIC_Configuration();//configure NVIC and Vector Table
+    
     GPIO_InitTypeDef  GPIO_InitStructure;  
   
     //enable GPIOB, Clock
