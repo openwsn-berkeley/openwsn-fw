@@ -767,17 +767,15 @@ void UART4_IRQHandler(void)
     if(USART_GetFlagStatus(UART4,USART_FLAG_RXNE) != RESET)
     {
       USART_ClearFlag(UART4,USART_FLAG_RXNE);
-      uart_isr_rx();
       
-      //  uart_rx_isr();
+        uart_rx_isr();
     }
   
     if(USART_GetFlagStatus(UART4,USART_FLAG_TC) != RESET)
     {
       USART_ClearFlag(UART4,USART_FLAG_TC);
-      // uart_tx_isr();
-        uart_isr_tx();
-        //uart_tx_isr(); 
+      
+        uart_tx_isr(); 
     }
 }
 

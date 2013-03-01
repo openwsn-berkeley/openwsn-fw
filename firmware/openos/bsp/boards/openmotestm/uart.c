@@ -119,13 +119,13 @@ uint8_t uart_readByte()
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t uart_isr_tx() 
+kick_scheduler_t uart_tx_isr() 
 {
     uart_vars.txCb();
     return DO_NOT_KICK_SCHEDULER;
 }
 
-kick_scheduler_t uart_isr_rx() 
+kick_scheduler_t uart_rx_isr() 
 {
     uart_vars.rxCb();
     return DO_NOT_KICK_SCHEDULER;
