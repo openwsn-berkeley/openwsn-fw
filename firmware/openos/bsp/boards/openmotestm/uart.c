@@ -49,7 +49,7 @@ void uart_init()
     USART_InitStructure.USART_Mode                = USART_Mode_Rx | USART_Mode_Tx;
     USART_Init(UART4, &USART_InitStructure);
     
-    uart_disableInterrupts(); 
+    //uart_disableInterrupts(); 
     //enable usart
     USART_Cmd(UART4, ENABLE);
   

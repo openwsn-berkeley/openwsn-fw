@@ -62,7 +62,7 @@ void bsp_timer_init()
     //enable TIM2
     TIM_Cmd(TIM2, ENABLE); 
     //disable interrupt
-    bsp_timer_cancel_schedule();
+    //bsp_timer_cancel_schedule();
     
     //Configure NVIC: Preemption Priority = 2 and Sub Priority = 1
     NVIC_InitTypeDef NVIC_InitStructure;

@@ -17,6 +17,7 @@
 #include "rcc.h"
 #include "nvic.h"
 #include "debugpins.h"
+#include "board_info.h"
 
 
 //=========================== main ============================================
@@ -36,6 +37,8 @@ void board_init()
   
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
+    
+    DISABLE_INTERRUPTS();
     
     GPIO_InitTypeDef  GPIO_InitStructure;  
   
