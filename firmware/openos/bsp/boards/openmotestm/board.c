@@ -77,13 +77,13 @@ void board_init()
     EXTI_InitStructure.EXTI_LineCmd = ENABLE; 
     EXTI_Init(&EXTI_InitStructure);
       
-    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 0
-    NVIC_InitTypeDef  NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                     = EXTI15_10_IRQChannel; 
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 2;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 0; 
-    NVIC_InitStructure.NVIC_IRQChannelCmd                  = ENABLE; 
-    NVIC_Init(&NVIC_InitStructure);
+//    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 0
+//    NVIC_InitTypeDef  NVIC_InitStructure;
+//    NVIC_InitStructure.NVIC_IRQChannel                     = EXTI15_10_IRQChannel; 
+//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 2;
+//    NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 0; 
+//    NVIC_InitStructure.NVIC_IRQChannelCmd                  = ENABLE; 
+//    NVIC_Init(&NVIC_InitStructure);
 
 //    //configure sheduler interrupt by EXTI_Line1
 //    EXTI_ClearITPendingBit(EXTI_Line1);

@@ -64,13 +64,13 @@ void bsp_timer_init()
     //disable interrupt
     //bsp_timer_cancel_schedule();
     
-    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 1
-    NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+//    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 1
+//    NVIC_InitTypeDef NVIC_InitStructure;
+//    NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQChannel;
+//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+//    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+//    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//    NVIC_Init(&NVIC_InitStructure);
 }
 
 /**

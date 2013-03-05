@@ -48,7 +48,7 @@ void uart_init()
     USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     USART_InitStructure.USART_Mode                = USART_Mode_Rx | USART_Mode_Tx;
     USART_Init(UART4, &USART_InitStructure);
-    
+
     //uart_disableInterrupts(); 
     //enable usart
     USART_Cmd(UART4, ENABLE);
@@ -66,13 +66,13 @@ void uart_init()
     GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
   
-    //Configure NVIC: Preemption Priority = 3 and Sub Priority = 3
-    NVIC_InitTypeDef 	NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+//    //Configure NVIC: Preemption Priority = 3 and Sub Priority = 3
+//    NVIC_InitTypeDef 	NVIC_InitStructure;
+//    NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQChannel;
+//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
+//    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
+//    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//    NVIC_Init(&NVIC_InitStructure);
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) 
