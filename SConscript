@@ -264,7 +264,7 @@ def sconscript_scanner(localEnv):
                 (localEnv['toolchain']!='iar-proj')
              ):
             
-            VariantDir(
+            localEnv.VariantDir(
                 variant_dir = variant_dir,
                 src_dir     = src_dir,
                 duplicate   = 0,
@@ -275,7 +275,10 @@ def sconscript_scanner(localEnv):
             libs   = buildLibs(projectDir)
             
             buildIncludePath(projectDir,localEnv)
-            
+
+            #fix for problem on having the same target as directory name and failing to compile in linux. Appending something to the target solves the isse.
+            target=target+"_prog"
+
             exe = localEnv.Program(
                 target  = target,
                 source  = source,
