@@ -1774,8 +1774,8 @@ different channel offsets in the same slot.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    // comment the following line out to disable channel hopping
-   //return SYNCHRONIZING_CHANNEL; // single channel
-   return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
+   return SYNCHRONIZING_CHANNEL; // single channel
+   //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
 
 /**
