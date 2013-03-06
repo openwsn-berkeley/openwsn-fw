@@ -258,7 +258,7 @@ void _spi_isr(){
 }
 
 //todo make it inline later.
-uint8_t spi_isr() {
+kick_scheduler_t spi_isr() {
 #ifdef SPI_IN_INTERRUPT_MODE
 	// save the byte just received in the RX buffer
 	switch (spi_vars.returnType) {

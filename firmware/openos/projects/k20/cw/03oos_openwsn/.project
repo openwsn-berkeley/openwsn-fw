@@ -89,31 +89,6 @@
 			<locationURI>OPENOS_LOC/openwsn</locationURI>
 		</link>
 		<link>
-			<name>Sources/application/01bsp_bothtimers.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_bothtimers/01bsp_bothtimers.c</location>
-		</link>
-		<link>
-			<name>Sources/application/01bsp_leds.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_leds/01bsp_leds.c</location>
-		</link>
-		<link>
-			<name>Sources/application/01bsp_radio.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_radio/01bsp_radio.c</location>
-		</link>
-		<link>
-			<name>Sources/application/01bsp_spi.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_spi/01bsp_spi.c</location>
-		</link>
-		<link>
-			<name>Sources/application/01bsp_uart.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_uart/01bsp_uart.c</location>
-		</link>
-		<link>
 			<name>Sources/application/03oos_openwsn.c</name>
 			<type>1</type>
 			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/03oos_openwsn.c</location>

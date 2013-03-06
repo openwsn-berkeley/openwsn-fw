@@ -37,6 +37,21 @@ uint8_t leds_error_isOn() {
 	return LED1_IS_ON;
 }
 
+void    leds_error_blink(){
+	   uint8_t i;
+	   volatile uint16_t delay;
+	   // turn all LEDs off
+	   leds_all_off();
+	     
+	   // blink error LED for ~10s
+	   for (i=0;i<80;i++) {
+		  LED1_TOGGLE; //10 seconds more or less..
+	      for (delay=0xffff;delay>0;delay--);
+	      for (delay=0xffff;delay>0;delay--);
+	   }
+}
+
+
 // orange led 1
 void    leds_radio_on() {
 	LED3_ON;

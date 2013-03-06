@@ -99,6 +99,12 @@ void board_sleep() {
 	clk_monitor_0(ON);//enable it again.
 }
 
+
+void board_reset() {
+   //todo
+}
+
+
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
