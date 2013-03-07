@@ -17,94 +17,100 @@
 void debugpins_init() {
   
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
-  
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA , ENABLE);
+    
     GPIO_InitTypeDef GPIO_InitStructure;
-    // Configure PC.4 and PC.5 as Output push-pull 
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5;
+    // Configure PC.0, PC.1 and PC.5 as Output push-pull 
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_5;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-  /*
-   P4DIR |=  0x20;      // frame
-   P4DIR |=  0x02 ;     // slot
-   P4DIR |=  0x04;      // fsm
-   P4DIR |=  0x08;      // task
-   P4DIR |=  0x10;      // isr
-   P1DIR |=  0x02;      // radio
+    
+    // Configure PA.5, PA.6 and PA.7 as Output push-pull 
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
+  
+     GPIOC->ODR |= 0X0020;      // frame, PC.5
+     GPIOA->ODR |= 0X0080;      // slot, PA.7
+     GPIOA->ODR |= 0X0020;      // fsm, PA.5
+     GPIOA->ODR |= 0X0040;      // task, PA.6
+     GPIOC->ODR |= 0X0002;      // isr, PC.1
+     GPIOC->ODR |= 0X0001;      // radio, PC.0
    
-   debugpins_frame_clr();
-   debugpins_slot_clr();
-   debugpins_fsm_clr();
-   debugpins_task_clr();
-   debugpins_isr_clr();
-   debugpins_radio_clr();
-  */
+     debugpins_frame_clr();
+     debugpins_slot_clr();
+     debugpins_fsm_clr();
+     debugpins_task_clr();
+     debugpins_isr_clr();
+     debugpins_radio_clr();
 }
 
-// A.4
+// PC.5
 void debugpins_frame_toggle() {
-  GPIOC->ODR ^= 0X0010;
+  GPIOC->ODR ^= 0X0020;
 }
 void debugpins_frame_clr() {
-  GPIOC->ODR &= ~0X0010;
-}
-void debugpins_frame_set() {
-  GPIOC->ODR |=  0X0010;
-}
-
-// PA.5
-void debugpins_slot_toggle() {
-  GPIOC->ODR ^=  0X0020;
-}
-void debugpins_slot_clr() {
   GPIOC->ODR &= ~0X0020;
 }
-void debugpins_slot_set() {
+void debugpins_frame_set() {
   GPIOC->ODR |=  0X0020;
 }
 
-// P4.2
+// PA.7
+void debugpins_slot_toggle() {
+  GPIOA->ODR ^=  0X0080;
+}
+void debugpins_slot_clr() {
+  GPIOA->ODR &= ~0X0080;
+}
+void debugpins_slot_set() {
+  GPIOA->ODR |=  0X0080;
+}
+
+// PA.5
 void debugpins_fsm_toggle() {
-//   P4OUT ^=  0x04;
+  GPIOA->ODR ^=  0X0020;
 }
 void debugpins_fsm_clr() {
-//   P4OUT &= ~0x04;
+  GPIOA->ODR &= ~0X0020;
 }
 void debugpins_fsm_set() {
-//   P4OUT |=  0x04;
+  GPIOA->ODR |=  0X0020;
 }
 
-// P4.3
+// PA.6
 void debugpins_task_toggle() {
-//   P4OUT ^=  0x08;
+  GPIOA->ODR ^=  0X0040;
 }
 void debugpins_task_clr() {
-//   P4OUT &= ~0x08;
+  GPIOA->ODR &= ~0X0040;
 }
 void debugpins_task_set() {
-//   P4OUT |=  0x08;
+  GPIOA->ODR |= 0X0040;
 }
 
-// P4.4
+// PC.1
 void debugpins_isr_toggle() {
-//   P4OUT ^=  0x10;
+  GPIOC->ODR ^=  0X0002;
 }
 void debugpins_isr_clr() {
-//   P4OUT &= ~0x10;
+  GPIOC->ODR &= ~0X0002;
 }
 void debugpins_isr_set() {
-//   P4OUT |=  0x10;
+  GPIOC->ODR |= 0X0002;
 }
 
-// P1.1
+// PC.0
 void debugpins_radio_toggle() {
-//   P1OUT ^=  0x02;
+  GPIOC->ODR ^=  0X0001;
 }
 void debugpins_radio_clr() {
-//   P1OUT &= ~0x02;
+  GPIOC->ODR &= ~0X0001;
 }
 void debugpins_radio_set() {
-//   P1OUT |=  0x02;
+  GPIOC->ODR |=  0X0001;
 }
 
 void    leds_toggle_2x(){
