@@ -79,6 +79,9 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb)
 {
     uart_vars.txCb = txCb;
     uart_vars.rxCb = rxCb;
+    
+    //enable nvic uart.
+     NVIC_uart();
 }
 
 void uart_enableInterrupts()

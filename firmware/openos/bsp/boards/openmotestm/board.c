@@ -38,7 +38,7 @@ void board_init()
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
     
-    DISABLE_INTERRUPTS();
+ //   DISABLE_INTERRUPTS();
     
     GPIO_InitTypeDef  GPIO_InitStructure;  
   
@@ -108,6 +108,8 @@ void board_init()
     radio_init();
     radiotimer_init();
     debugpins_init();
+    //enable nvic for the radio
+    NVIC_radio();
 }
 
 void board_sleep() {

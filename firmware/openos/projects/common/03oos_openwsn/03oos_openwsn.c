@@ -13,11 +13,6 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    openwsn_init();
-   
-   NVIC_uart();
-   NVIC_bsptimer();
-   NVIC_radio();
-   
    scheduler_start();
    return 0; // this line should never be reached
 }

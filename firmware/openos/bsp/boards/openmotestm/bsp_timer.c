@@ -81,6 +81,8 @@ void bsp_timer_init()
 void bsp_timer_set_callback(bsp_timer_cbt cb)
 {
    bsp_timer_vars.cb   = cb;
+   //enable nvic
+   NVIC_bsptimer();
 }
 
 /**
