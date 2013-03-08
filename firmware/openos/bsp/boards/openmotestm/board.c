@@ -30,7 +30,6 @@ int main(void) {
 
 void board_init()
 {
-  
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
     
@@ -70,29 +69,6 @@ void board_init()
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE; 
     EXTI_Init(&EXTI_InitStructure);
-      
-//    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 0
-//    NVIC_InitTypeDef  NVIC_InitStructure;
-//    NVIC_InitStructure.NVIC_IRQChannel                     = EXTI15_10_IRQChannel; 
-//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 2;
-//    NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 0; 
-//    NVIC_InitStructure.NVIC_IRQChannelCmd                  = ENABLE; 
-//    NVIC_Init(&NVIC_InitStructure);
-
-//    //configure sheduler interrupt by EXTI_Line1
-//    EXTI_ClearITPendingBit(EXTI_Line1);
-//    EXTI_InitStructure.EXTI_Line    = EXTI_Line1;
-//    EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt; 
-//    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-//    EXTI_InitStructure.EXTI_LineCmd = ENABLE; 
-//    EXTI_Init(&EXTI_InitStructure);
-//    
-//    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 3
-//    NVIC_InitStructure.NVIC_IRQChannel                     = EXTI1_IRQChannel; 
-//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 2;
-//    NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 3; 
-//    NVIC_InitStructure.NVIC_IRQChannelCmd                  = ENABLE; 
-//    NVIC_Init(&NVIC_InitStructure);
     
     // initialize board
     leds_init();
