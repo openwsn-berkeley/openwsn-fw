@@ -183,7 +183,7 @@ if env['jtag']:
 def BootloadFunc(location):
     if   env['board']=='telosb':
         return Builder(
-            action      = 'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p $SOURCE"'.format(location),
+            action      = 'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "$SOURCE"'.format(location),
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
