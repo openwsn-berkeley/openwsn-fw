@@ -22,14 +22,11 @@ Load this program on your boards. The LEDs should start blinking furiously.
 */
 int mote_main(void) {
   
-   leds_init();
+   board_init();
   
    flash_init();
-   uint8_t address[8];
-   memset(address,0,8);
-   flash_write_ID();
    flash_read_ID();
-   flash_getID(address);
    while (1) {
+     
    }
 }

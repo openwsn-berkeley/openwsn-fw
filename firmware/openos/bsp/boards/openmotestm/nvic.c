@@ -29,7 +29,7 @@ void NVIC_uart(void)
 {
     //Configure NVIC: Preemption Priority = 3 and Sub Priority = 3
     NVIC_InitTypeDef 	NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = USART1_IRQChannel;
+    NVIC_InitStructure.NVIC_IRQChannel                    = UART4_IRQChannel;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority  = 3;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 3;
     NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
@@ -99,12 +99,12 @@ void NVIC_radiotimer(void)
 void NVIC_radio(void)
 {
      //Configure NVIC: Preemption Priority = 2 and Sub Priority = 0
-     NVIC_InitTypeDef  NVIC_InitStructure;
-     NVIC_InitStructure.NVIC_IRQChannel                     = EXTI0_IRQChannel; 
-     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 2;
-     NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 0; 
-     NVIC_InitStructure.NVIC_IRQChannelCmd                  = ENABLE; 
-     NVIC_Init(&NVIC_InitStructure);
+    NVIC_InitTypeDef  NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel                     = EXTI15_10_IRQChannel; 
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 2;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 0; 
+    NVIC_InitStructure.NVIC_IRQChannelCmd                  = ENABLE; 
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 //configuration of interrupt on openmotestm32

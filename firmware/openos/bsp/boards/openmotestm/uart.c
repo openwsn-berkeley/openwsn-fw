@@ -40,8 +40,8 @@ void uart_init()
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
     
-    //configure UART4 :Baud rate = 38400bit/s, data bit = 8bit, stop bit = 1, no parity, no flow control enable Tx and Rx 
-    USART_InitStructure.USART_BaudRate            = 38400; 
+    //configure UART4 :Baud rate = 115200bit/s, data bit = 8bit, stop bit = 1, no parity, no flow control enable Tx and Rx 
+    USART_InitStructure.USART_BaudRate            = 115200; 
     USART_InitStructure.USART_WordLength          = USART_WordLength_8b; 
     USART_InitStructure.USART_StopBits            = USART_StopBits_1;    
     USART_InitStructure.USART_Parity              = USART_Parity_No ;
@@ -49,7 +49,6 @@ void uart_init()
     USART_InitStructure.USART_Mode                = USART_Mode_Rx | USART_Mode_Tx;
     USART_Init(UART4, &USART_InitStructure);
 
-    //uart_disableInterrupts(); 
     //enable usart
     USART_Cmd(UART4, ENABLE);
   

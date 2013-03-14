@@ -13,7 +13,6 @@
 #include "bsp_timer.h"
 #include "radio.h"
 #include "radiotimer.h"
-#include "rtc_timer.h"
 #include "rcc.h"
 #include "nvic.h"
 #include "debugpins.h"
@@ -24,9 +23,6 @@
 
 extern int mote_main(void);
 int main(void) {
-  
-  
-  
    return mote_main();
 }
 
@@ -34,11 +30,8 @@ int main(void) {
 
 void board_init()
 {
-  
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
-    
- //   DISABLE_INTERRUPTS();
     
     GPIO_InitTypeDef  GPIO_InitStructure;  
   
@@ -76,29 +69,6 @@ void board_init()
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE; 
     EXTI_Init(&EXTI_InitStructure);
-      
-//    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 0
-//    NVIC_InitTypeDef  NVIC_InitStructure;
-//    NVIC_InitStructure.NVIC_IRQChannel                     = EXTI15_10_IRQChannel; 
-//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 2;
-//    NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 0; 
-//    NVIC_InitStructure.NVIC_IRQChannelCmd                  = ENABLE; 
-//    NVIC_Init(&NVIC_InitStructure);
-
-//    //configure sheduler interrupt by EXTI_Line1
-//    EXTI_ClearITPendingBit(EXTI_Line1);
-//    EXTI_InitStructure.EXTI_Line    = EXTI_Line1;
-//    EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt; 
-//    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-//    EXTI_InitStructure.EXTI_LineCmd = ENABLE; 
-//    EXTI_Init(&EXTI_InitStructure);
-//    
-//    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 3
-//    NVIC_InitStructure.NVIC_IRQChannel                     = EXTI1_IRQChannel; 
-//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 2;
-//    NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 3; 
-//    NVIC_InitStructure.NVIC_IRQChannelCmd                  = ENABLE; 
-//    NVIC_Init(&NVIC_InitStructure);
     
     // initialize board
     leds_init();
@@ -132,19 +102,31 @@ void board_sleep() {
         
 	//Wait till PLL is ready 
 	while(RCC_GetFlagStatus(RCC_FLAG_PLLRDY) == RESET)
-	{}
+{}
 
-	//Select PLL as system clock source
-	RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
 
-	//Wait till PLL is used as system clock source
-	while(RCC_GetSYSCLKSource() != 0x08)
-	{}
-    }
-    */
+//Select PLL as system clock source
+
+RCC_SYSCLKConfig(RCC_SYSCLKSource_PLLCLK);
+
+
+//Wait till PLL is used as system clock source
+
+while(RCC_GetSYSCLKSource() != 0x08)
+
+{}
+
+   }
+
+   */
+
 }
 
-void board_reset()
-{
-  
+
+
+void board_reset(){
 }
+
+
+ 
+

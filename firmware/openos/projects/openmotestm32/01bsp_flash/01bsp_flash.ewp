@@ -1864,9 +1864,6 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\eui64.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\exi.c</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\flash.c</name>
       </file>
       <file>
