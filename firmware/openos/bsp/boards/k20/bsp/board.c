@@ -68,7 +68,7 @@ void board_init() {
 	//external port radio_isr.
 	PORTC_PCR5 = PORT_PCR_MUX(1);// -- PTC5 used as gpio for radio isr through llwu
 	GPIOC_PDDR &= ~1<<RADIO_ISR_PIN; //set as input ==0
-	PORTC_PCR5 |= PORT_PCR_IRQC(0x09); //9 interrupt on raising edge. page 249 of the manual.	
+	PORTC_PCR5 |= PORT_PCR_IRQC(0x0B); //9 interrupt on raising edge. page 249 of the manual.	
 	PORTC_PCR5 |= PORT_PCR_ISF_MASK; //clear any pending interrupt.
 
 	llwu_init();//low leakage unit init - to recover from deep sleep

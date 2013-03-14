@@ -9,8 +9,6 @@
 #include "sctimer.h"
 #include "arm_cm4.h"
 
-//#include "openwsn.h"
-
 //=========================== defines =========================================
 #define LPTMR_USE_IRCLK 0 
 #define LPTMR_USE_LPOCLK 1
@@ -105,12 +103,13 @@ uint16_t sctimer_getValue() {
 
 	//manual says to read two times and check that the value is the same. However, 
 	//freescale code examples only read this once.
-//	LPTMR0_CNR = 0x0;
-//	while ((nextval=(LPTMR0_CNR ))!=val) {
-//		LPTMR0_CNR = 0x0;
-//		val= LPTMR0_CNR ;
-//		LPTMR0_CNR = 0x0;
-//	}
+	//	LPTMR0_CNR = 0x0;
+	//	while ((nextval=(LPTMR0_CNR ))!=val) {
+	//		LPTMR0_CNR = 0x0;
+	//		val= LPTMR0_CNR ;
+	//		LPTMR0_CNR = 0x0;
+	//	}
+	
 	return val;
 }
 
