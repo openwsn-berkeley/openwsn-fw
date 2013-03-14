@@ -74,8 +74,8 @@ to return the board's description.
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[]        = "h=ucb";
-static const uint8_t infoBoardname[]        = "GINA";
-static const uint8_t infouCName[]           = "MSP430f2618";
+static const uint8_t infoBoardname[]        = "OPENMOTESTM32";
+static const uint8_t infouCName[]           = "STM32F108";
 static const uint8_t infoRadioName[]        = "AT86RF231";
 
 //=========================== prototypes ======================================
