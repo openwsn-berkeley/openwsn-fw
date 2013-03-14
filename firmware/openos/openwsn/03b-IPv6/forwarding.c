@@ -10,7 +10,6 @@
 #include "openudp.h"
 #include "opentcp.h"
 #include "debugpins.h"
-#include "scheduler.h"
 
 //=========================== variables =======================================
 
@@ -170,8 +169,6 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
          if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
             openqueue_freePacketBuffer(msg);
          }
-         //demo
-         scheduler_push_task(leds_toggle_2x,TASKPRIO_COAP);
       }
    }
 }
