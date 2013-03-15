@@ -163,6 +163,14 @@ void sctimer_clearISR(){
 	}
 	
 }
+
+
+
+void sctimer_reset(){
+	//clear the isr flag on the csr register
+	LPTMR0_CSR /=  ~LPTMR_CSR_TEN_MASK; //disable the timer, and enable again, this resets the counter
+	sctimer_init();
+}
 //=========================== private =========================================
 
 /*

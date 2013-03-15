@@ -28,5 +28,6 @@ void sctimer_schedule(PORT_TIMER_WIDTH val);
 PORT_TIMER_WIDTH sctimer_getValue();
 void sctimer_setCb(sctimer_cbt cb);
 void sctimer_clearISR();
+void sctimer_reset();
 
 #endif

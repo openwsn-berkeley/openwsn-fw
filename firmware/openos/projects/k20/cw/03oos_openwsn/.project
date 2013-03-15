@@ -154,11 +154,6 @@
 			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/platforms</location>
 		</link>
 		<link>
-			<name>Sources/k20/bsp/abstimer_radiotimer.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/common/abstimer_radiotimer.c</location>
-		</link>
-		<link>
 			<name>Sources/k20/bsp/board.h</name>
 			<type>1</type>
 			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/board.h</location>
@@ -187,6 +182,11 @@
 			<name>Sources/k20/bsp/radio.h</name>
 			<type>1</type>
 			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/radio.h</location>
+		</link>
+		<link>
+			<name>Sources/k20/bsp/radiotimer.c</name>
+			<type>1</type>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/common/abstimer_radiotimer.c</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/radiotimer.h</name>
