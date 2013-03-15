@@ -184,11 +184,6 @@
 			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/radio.h</location>
 		</link>
 		<link>
-			<name>Sources/k20/bsp/radiotimer.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/common/abstimer_radiotimer.c</location>
-		</link>
-		<link>
 			<name>Sources/k20/bsp/radiotimer.h</name>
 			<type>1</type>
 			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/radiotimer.h</location>
