@@ -94,7 +94,7 @@ void board_sleep() {
 	uint8_t op_mode;
 	clk_monitor_0(OFF);//turn off clock monitors so the freq can be changed without causing a reset
 	PORTA_PCR2 |= PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;//JTAG_TDO -- disconnect jtag before entering deep sleep.    
-	//enter_lls();
+	//enter_lls(); //need to restart bsp_timer maybe..
 	enter_wait();
 	clk_monitor_0(ON);//enable it again.
 }
@@ -129,7 +129,7 @@ void radio_external_port_c_isr(void) {
 		PORTC_ISFR |= RADIO_ISR_MASK; //clear isr flag
 		PORTC_PCR5 |= PORT_PCR_ISF_MASK;    //clear flag
 		radio_isr();
-		leds_debug_toggle();
+		//leds_debug_toggle();
 	}else{
 		while(1);
 		//radio_isr();
