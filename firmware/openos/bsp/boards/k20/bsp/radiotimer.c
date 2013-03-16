@@ -67,7 +67,7 @@ void radiotimer_start(uint16_t period) {
    DISABLE_INTERRUPTS();
    // remember the period
    abstimer_vars.radiotimer_period                              = period;
-
+   sctimer_reset();//resets counter to 0.
    sctimer_schedule(period);
    abstimer_vars.overflowORcompare=RADIOTIMER_OVERFLOW;
    ENABLE_INTERRUPTS();
@@ -85,6 +85,7 @@ void radiotimer_setPeriod(uint16_t period) {
    DISABLE_INTERRUPTS();
    //why??
    abstimer_vars.radiotimer_period=period;
+   
    sctimer_schedule(period);
    abstimer_vars.overflowORcompare=RADIOTIMER_OVERFLOW;
     

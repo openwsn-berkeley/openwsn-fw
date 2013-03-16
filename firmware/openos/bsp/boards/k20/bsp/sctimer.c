@@ -118,31 +118,8 @@ void sctimer_setCb(sctimer_cbt cb) {
 }
 
 void lptmr_isr(void) {
-	 volatile uint16_t compval,nextcmpval;
 	 debugpins_isr_set();
-	 //write before read counter
-	 LPTMR0_CNR = 0x0;
-	 lastval=currval;
-     currval = LPTMR0_CNR ;//read counter
-     compval=LPTMR0_CMR; //the compare value
-     nextcmpval=compval+1;
-	 if ( (currval == compval) || (currval == nextcmpval)) {
-	    callback();// what happens if we are close to the next tic and get value returns the next tic??
-	 }else {
-		 //This should never happen, however for some reason, the TCF flag of the LPTMR is set
-		 //but the compare and the counter does not match, so an interrupt is triggered.
-		 //this can be caused by modifying the compare while the timer is running, although i am not sure.
-		 //this work around makes everything work fine but this BUG needs to be further investigated.
-		 
-		 //XV update. it seems that there is a reentrant interrupt, for some reason the TCF bit is not cleared and after few tics of the previous interrupt
-		 //this interrupt is signaled (I can see that with lastval and currval variables). The previous interrupt has changed the value of compare and hence CNT and CMP are not matching. 
-		 //this is not extremely dangerous as if this reentrant interrupt happens the TCF bit is cleared and things continue the normal cycle. 
-		 //
-		 unexpected_isr++; 
-		 //Cler flags.
-		 LPTMR0_CSR |= ( /*LPTMR_CSR_TEN_MASK |*/LPTMR_CSR_TIE_MASK
-		 			| LPTMR_CSR_TCF_MASK);
-	 }
+	 callback();
 	 debugpins_isr_clr();
 }
 
