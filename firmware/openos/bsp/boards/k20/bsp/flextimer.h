@@ -27,6 +27,8 @@ void flextimer_schedule(PORT_TIMER_WIDTH val);
 PORT_TIMER_WIDTH flextimer_getValue();
 void flextimer_setCb(flextimer_cbt cb);
 void flextimer_cancel();
+void flextimer_save();
+void flextimer_restore();
 
 
 

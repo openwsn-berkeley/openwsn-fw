@@ -13,7 +13,7 @@
 #include "board.h"
 
 //=========================== define ==========================================
-
+#define SCTIMER_TICS_MS 33
 //=========================== typedef =========================================
 typedef kick_scheduler_t (*sctimer_cbt)(void);
 

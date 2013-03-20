@@ -10,6 +10,7 @@
 #include "led.h"
 #include "bsp_timer.h"
 #include "smc.h"
+#include "flextimer.h"
 //#include "mcg.h"
 #include "rcm.h"
 
@@ -92,11 +93,13 @@ void board_init() {
 
 void board_sleep() {
 	uint8_t op_mode;
+	//flextimer_save();
 	clk_monitor_0(OFF);//turn off clock monitors so the freq can be changed without causing a reset
 	PORTA_PCR2 |= PORT_PCR_PE_MASK | PORT_PCR_PS_MASK;//JTAG_TDO -- disconnect jtag before entering deep sleep.    
 	//enter_lls(); //need to restart bsp_timer maybe..
 	enter_wait();
 	clk_monitor_0(ON);//enable it again.
+	//flextimer_restore();
 }
 
 

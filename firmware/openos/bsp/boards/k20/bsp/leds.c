@@ -87,7 +87,7 @@ void    leds_debug_on() {
 void    leds_debug_off() {
 	LED0_OFF;
 }
-void    leds_debug_toggle() {
+void leds_debug_toggle() {
 	LED0_TOGGLE;
 }
 uint8_t leds_debug_isOn() {

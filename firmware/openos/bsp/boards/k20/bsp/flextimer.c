@@ -8,11 +8,20 @@
 #include "flextimer.h"
 #include "arm_cm4.h"
 
-//=========================== defines =========================================
 
+//=========================== defines =========================================
+#define LATE_TICS_MARGIN 2
 //=========================== variables =======================================
 
 flextimer_cbt ft_cb;//callback to call when the isr expires.
+
+typedef struct{
+	PORT_TIMER_WIDTH saved_next_overflow;
+	PORT_TIMER_WIDTH prev_overflow;
+		
+}flex_timer_state_t;
+
+flex_timer_state_t ft_state;
 
 //=========================== prototypes ======================================
 
@@ -21,6 +30,7 @@ extern void ftm0_isr(void);
 //=========================== public ==========================================
 
 void flextimer_init() {
+	
 	//power the timer
 	SIM_SCGC6 |= SIM_SCGC6_FTM0_MASK; 
 	/* Dummy read of the FTM0_SC register to clear the interrupt flag */
@@ -68,7 +78,7 @@ void flextimer_init() {
 	enable_irq(62/*FTM0_IRQ_NUM*/);
 }
 
-void flextimer_schedule(uint16_t val) {
+void flextimer_schedule(PORT_TIMER_WIDTH val) {
 	uint16_t aux=FTM0_CNT;
 	
 	//FTM0_MODE |= FTM_MODE_WPDIS_MASK;
@@ -142,3 +152,16 @@ void flextimer_reset() {
 	// reset timer
 	FTM0_CNT = 0; //initializes the counter load initial value
 }
+
+//save state before going to sleep
+void flextimer_save(){
+	ft_state.prev_overflow=ft_state.saved_next_overflow; //keep prev for debug
+	ft_state.saved_next_overflow=(PORT_TIMER_WIDTH) FTM0_MOD;
+	ft_state.saved_next_overflow-=FTM0_CNT; //compute remaining time
+}
+
+//restore timer state after. Some tics might be lost..
+void flextimer_restore(){
+    flextimer_schedule(ft_state.saved_next_overflow);
+}
+
