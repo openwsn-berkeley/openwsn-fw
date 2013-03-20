@@ -788,7 +788,7 @@
 								<option id="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.781950433.adjusted.1424307158" superClass="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.781950433" value="com.freescale.arm.cdt.toolchain.enableWarnings.custom.hidden" valueType="enumerated"/>
 								<option id="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.781950433.adjusted.1718092199" superClass="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.781950433" value="com.freescale.arm.cdt.toolchain.enableWarnings.custom.hidden" valueType="enumerated"/>
 								<option id="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.781950433.adjusted.2035085065" superClass="com.freescale.arm.cdt.toolchain.armCpp.warn.enableWarnings.hidden.adjusted.781950433" value="com.freescale.arm.cdt.toolchain.enableWarnings.custom.hidden" valueType="enumerated"/>
-								<option id="com.freescale.arm.cdt.toolchain.armCpp.optimization.mode.1108728679" superClass="com.freescale.arm.cdt.toolchain.armCpp.optimization.mode" value="com.freescale.arm.cdt.toolchain.armCpp.optimization.mode.space" valueType="enumerated"/>
+								<option id="com.freescale.arm.cdt.toolchain.armCpp.optimization.mode.1108728679" name="Speed vs. Size" superClass="com.freescale.arm.cdt.toolchain.armCpp.optimization.mode" value="com.freescale.arm.cdt.toolchain.armCpp.optimization.mode.space" valueType="enumerated"/>
 								<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.55645970" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
 							</tool>
 							<tool id="com.freescale.arm.cdt.toolchain.assembler.1235350250" name="ARM Assembler" superClass="com.freescale.arm.cdt.toolchain.assembler">
@@ -809,6 +809,11 @@
 							<outputType id="org.eclipse.cdt.managedbuilder.ui.rcbs.outputtype.1255144470" name="Resource Custom Build Step Output Type"/>
 						</tool>
 					</fileInfo>
+					<fileInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.75255338" name="01bsp_bsp_timer.c" rcbsApplicability="disable" resourcePath="Sources/application/01bsp_bsp_timer.c" toolsToInvoke="com.freescale.arm.cdt.toolchain.compiler.592742812.492587392">
+						<tool id="com.freescale.arm.cdt.toolchain.compiler.592742812.492587392" name="ARM Compiler" superClass="com.freescale.arm.cdt.toolchain.compiler.592742812">
+							<inputType id="com.freescale.arm.cdt.toolchain.armCpp.cSource.1951287045" name="ARM C/C++ Compiler" superClass="com.freescale.arm.cdt.toolchain.armCpp.cSource"/>
+						</tool>
+					</fileInfo>
 					<folderInfo id="com.freescale.arm.cdt.toolchain.config.arm.release.807334068.1002257415" name="/" resourcePath="Sources/openos">
 						<toolChain id="com.freescale.arm.cdt.toolchain.arm.release.68676536" name="ARM Toolchain" superClass="com.freescale.arm.cdt.toolchain.arm.release" unusedChildren="">
 							<option id="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119.1922588229" name="Model" superClass="com.freescale.arm.cdt.toolchain.sharedoption.model.267093119"/>
@@ -825,7 +830,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="Sources/application/01bsp_uart.c|Sources/application/01bsp_leds.c|Sources/application/01bsp_spi.c|Sources/application/01bsp_radio.c|Sources/application/01bsp_bothtimers.c|Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Sources/application/01bsp_bsp_timer.c|Sources/application/01bsp_uart.c|Sources/application/01bsp_leds.c|Sources/application/01bsp_spi.c|Sources/application/01bsp_radio.c|Sources/application/01bsp_bothtimers.c|Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

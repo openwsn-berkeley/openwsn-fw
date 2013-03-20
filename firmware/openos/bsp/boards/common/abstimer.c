@@ -71,77 +71,77 @@ uint16_t sctimer_getValue();
 //=========================== public ==========================================
 
 //===== from bsp_timer
-void bsp_timer_init() {
-   abstimer_init();
-}
-
-void bsp_timer_set_callback(bsp_timer_cbt cb) {
-   abstimer_vars.callback[ABSTIMER_SRC_BSP_TIMER]               = cb;
-}
-
-/**
-\brief Clears the hardware timer and the current data structures, i.e. resets everything.
-*/
-void bsp_timer_reset() {
-   bsp_timer_cancel_schedule();
-}
-
-/**
-\brief Schedules the bsp timer to fire in delayTicks.
-*/
-void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   // keep ticks
-   abstimer_vars.bsp_timer_total                                = delayTicks;
-
-   // set the compare value (since last one)
-   abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]            += delayTicks;
-
-   // I'm using this timer
-   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]                = TRUE;
-
-   // reschedule
-   abstimer_reschedule();
-   ENABLE_INTERRUPTS();
-}
-
-/**
- * cancels the bsp timer. 
- * sets it to not running and schedules any other running timer
- */
-void bsp_timer_cancel_schedule() {
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   // clear total tics.
-   abstimer_vars.bsp_timer_total                                = 0;
-
-   // clear the compare value   
-   abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]             = 0;
-
-   // I'm not using this timer
-   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]                = FALSE;
-
-   // reschedule
-   abstimer_reschedule();
-   ENABLE_INTERRUPTS();
-}
-
-/**
- * timers are relative to the last compare 
- * the elapsed time should be total -(compareVal-current)
- * 
- */
-PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
-   PORT_TIMER_WIDTH x,y;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   x=abstimer_vars.bsp_timer_total;
-        y=(abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER] - sctimer_getValue());
-        x=x-y;
-   ENABLE_INTERRUPTS();
-   return x;
-}
+//void bsp_timer_init() {
+//   abstimer_init();
+//}
+//
+//void bsp_timer_set_callback(bsp_timer_cbt cb) {
+//   abstimer_vars.callback[ABSTIMER_SRC_BSP_TIMER]               = cb;
+//}
+//
+///**
+//\brief Clears the hardware timer and the current data structures, i.e. resets everything.
+//*/
+//void bsp_timer_reset() {
+//   bsp_timer_cancel_schedule();
+//}
+//
+///**
+//\brief Schedules the bsp timer to fire in delayTicks.
+//*/
+//void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
+//   INTERRUPT_DECLARATION();
+//   DISABLE_INTERRUPTS();
+//   // keep ticks
+//   abstimer_vars.bsp_timer_total                                = delayTicks;
+//
+//   // set the compare value (since last one)
+//   abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]            += delayTicks;
+//
+//   // I'm using this timer
+//   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]                = TRUE;
+//
+//   // reschedule
+//   abstimer_reschedule();
+//   ENABLE_INTERRUPTS();
+//}
+//
+///**
+// * cancels the bsp timer. 
+// * sets it to not running and schedules any other running timer
+// */
+//void bsp_timer_cancel_schedule() {
+//   INTERRUPT_DECLARATION();
+//   DISABLE_INTERRUPTS();
+//   // clear total tics.
+//   abstimer_vars.bsp_timer_total                                = 0;
+//
+//   // clear the compare value   
+//   abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER]             = 0;
+//
+//   // I'm not using this timer
+//   abstimer_vars.isArmed[ABSTIMER_SRC_BSP_TIMER]                = FALSE;
+//
+//   // reschedule
+//   abstimer_reschedule();
+//   ENABLE_INTERRUPTS();
+//}
+//
+///**
+// * timers are relative to the last compare 
+// * the elapsed time should be total -(compareVal-current)
+// * 
+// */
+//PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
+//   PORT_TIMER_WIDTH x,y;
+//   INTERRUPT_DECLARATION();
+//   DISABLE_INTERRUPTS();
+//   x=abstimer_vars.bsp_timer_total;
+//        y=(abstimer_vars.compareVal[ABSTIMER_SRC_BSP_TIMER] - sctimer_getValue());
+//        x=x-y;
+//   ENABLE_INTERRUPTS();
+//   return x;
+//}
 
 //===== from radiotimer
 void radiotimer_init() {
@@ -299,10 +299,10 @@ void abstimer_reschedule() {
 
 //=========================== interrupts ======================================
 
-kick_scheduler_t bsp_timer_isr() {
-   // the lptmr module uses only TimerA, so this should never happen
-   while(1);
-}
+//kick_scheduler_t bsp_timer_isr() {
+//   // the lptmr module uses only TimerA, so this should never happen
+//   while(1);
+//}
 
 kick_scheduler_t radiotimer_isr() {
    uint8_t         i;                       // iterator
