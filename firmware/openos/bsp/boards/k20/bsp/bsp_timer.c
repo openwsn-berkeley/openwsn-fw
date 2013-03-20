@@ -87,7 +87,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    
    temp_last_compare_value = bsp_timer_vars.last_compare_value;
    
-   newCompareValue      =  bsp_timer_vars.last_compare_value+delayTicks+1;
+   newCompareValue      = delayTicks;  /*bsp_timer_vars.last_compare_value+delayTicks+1;*/
    bsp_timer_vars.last_compare_value   =  newCompareValue;
    
    if (delayTicks<flextimer_getValue()-temp_last_compare_value) {

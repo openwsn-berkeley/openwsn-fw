@@ -18,7 +18,7 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD     0x0fff // @32kHz = 1s
+#define BSP_TIMER_PERIOD     281 // @32kHz = 1s
 
 //=========================== variables =======================================
 
@@ -51,8 +51,8 @@ int mote_main(void)
 //   flextimer_schedule(BSP_TIMER_PERIOD);
    app_vars.prev=BSP_TIMER_PERIOD;
    
-   //bsp_timer_set_callback(cb_compare);
-   //bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
+  // bsp_timer_set_callback(cb_compare);
+  // bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    opentimers_init();
    opentimers_start(1000,TIMER_ONESHOT,TIME_MS,cb_compare);
    while (1) {
@@ -75,5 +75,5 @@ void cb_compare() {
    // schedule again
   // bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
   // flextimer_schedule(app_vars.prev);
-   opentimers_start(1000,TIMER_ONESHOT,TIME_MS,cb_compare);
+   opentimers_start(3000,TIMER_ONESHOT,TIME_MS,cb_compare);
 }

@@ -39,12 +39,12 @@ void flextimer_init() {
 
 	/* FTM0_MODE: FTMEN=0 */
 	FTM0_MODE &= (uint32_t) ~FTM_MODE_FTMEN_MASK;
-
+    //don't enable compare option we use overflow instead.
 	/* FTM0_C0SC: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,CHF=0,CHIE=0,MSB=0,MSA=1,ELSB=0,ELSA=0,??=0,DMA=0 */
-	FTM0_C0SC |= FTM_CnSC_MSA_MASK;
+	//FTM0_C0SC |= FTM_CnSC_MSA_MASK;
 
 	/* FTM0_C0V: ??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,??=0,VAL=0 */
-	FTM0_C0V = (uint32_t) 0x00UL;
+	//FTM0_C0V = (uint32_t) 0x00UL;
 	/* FTM0_MOD: MOD=0xFFFF */
 	FTM0_MOD |= (uint32_t) 0xFFFFUL;
 
@@ -69,8 +69,36 @@ void flextimer_init() {
 }
 
 void flextimer_schedule(uint16_t val) {
-	FTM0_C0V = FTM_CnV_VAL(val);//set the val of the compare.
-	FTM0_C0SC |= FTM_CnSC_CHIE_MASK;//enable ch interrupt
+	uint16_t aux=FTM0_CNT;
+	
+	//FTM0_MODE |= FTM_MODE_WPDIS_MASK;
+	(void) (FTM0_SC == 0U); 
+		
+	FTM0_SC = 0; //make sure it is off
+	/* Dummy read of the FTM0_C0SC register to clear the interrupt flag */
+	(void) (FTM0_C0SC == 0U); 
+	FTM0_C0SC = (uint32_t) 0x00UL; //set to 0 
+
+		/* FTM0_SC: TOF=0,CPWMS=0 */
+	FTM0_SC &= (uint32_t) ~FTM_SC_TOF_MASK;
+	FTM0_SC &= (uint32_t) ~FTM_SC_CPWMS_MASK;
+
+	FTM0_MODE |= FTM_MODE_WPDIS_MASK; /* Disable write protection */
+
+	/* FTM0_MODE: FTMEN=0 */
+	FTM0_MODE &= (uint32_t) ~FTM_MODE_FTMEN_MASK;	
+    //Edit registers when no clock is fed to timer so the MOD value, gets pushed in immediately
+
+	FTM0_CNT = 0;	//reset the counter to zero
+	FTM0_MOD = FTM_MOD_MOD(val); //Set the overflow rate
+	FTM0_SC |= FTM_SC_PS(7); //divide the input clock down by 2^FTM0_CLK_PRESCALE
+	FTM0_SC |= FTM_SC_CLKS(1); //Select the System Clock
+	FTM0_SC |= FTM_SC_TOIE_MASK; //Enable the interrupt mask.
+	enable_irq(62/*FTM0_IRQ_NUM*/);
+	//don't use the compare but the overflow.		
+	//	FTM0_C0V = FTM_CnV_VAL(val);//set the val of the compare.
+    //	FTM0_C0SC |= FTM_CnSC_CHIE_MASK;//enable ch interrupt
+
 }
 
 uint16_t flextimer_getValue() {
@@ -83,31 +111,34 @@ void flextimer_setCb(flextimer_cbt cb) {
 
 void ftm0_isr(void) {
 	//check if the Timer Offset raised.. should not happen.
-	if (FTM0_SC & FTM_SC_TOF_MASK)
+	if (FTM0_SC & FTM_SC_TOF_MASK){
 		FTM0_SC &= ~FTM_SC_TOF_MASK;//clear it
-
-	//Clear the overflow mask if set	
-	if (FTM0_STATUS & FTM_STATUS_CH0F_MASK) {
-		//the event occurred
-		//read csc as described in p.865
-		(void) (FTM0_C0SC == 0U); /* Dummy read of the FTM0_C0SC register to clear the interrupt flag */
-		FTM0_C0SC &= ~FTM_CnSC_CHF_MASK;//set Channel flag to zero.
-		FTM0_C0SC |= FTM_CnSC_CHIE_MASK;//enable ch interrupt
-		//call the callback
-		ft_cb();
+	    ft_cb();
 	}
+	//Clear the overflow mask if set	
+//	if (FTM0_STATUS & FTM_STATUS_CH0F_MASK) {
+//		//the event occurred
+//		//read csc as described in p.865
+//		(void) (FTM0_C0SC == 0U); /* Dummy read of the FTM0_C0SC register to clear the interrupt flag */
+//		FTM0_C0SC &= ~FTM_CnSC_CHF_MASK;//set Channel flag to zero.
+//		FTM0_C0SC |= FTM_CnSC_CHIE_MASK;//enable ch interrupt
+//		//call the callback
+//	//	ft_cb();
+//	}
 }
 
 void flextimer_cancel() {
-	FTM0_C0SC &= ~FTM_CnSC_CHIE_MASK;//disable ch interrupt
-	FTM0_C0V = FTM_CnV_VAL(0);//set the val of the compare   
+	//FTM0_C0SC &= ~FTM_CnSC_CHIE_MASK;//disable ch interrupt
+	//FTM0_C0V = FTM_CnV_VAL(0);//set the val of the compare
+	FTM0_SC &= ~FTM_SC_TOIE_MASK; //disable the interrupt mask.
 }
 //=========================== private =========================================
 
 
 void flextimer_reset() {
-	FTM0_C0SC &= ~FTM_CnSC_CHIE_MASK;//disable ch interrupt
-	FTM0_C0V = FTM_CnV_VAL(0);//set the val of the compare   
+	//FTM0_C0SC &= ~FTM_CnSC_CHIE_MASK;//disable ch interrupt
+	FTM0_SC &= ~FTM_SC_TOIE_MASK; //disable the interrupt mask.
+	//FTM0_C0V = FTM_CnV_VAL(0);//set the val of the compare   
 	// reset timer
 	FTM0_CNT = 0; //initializes the counter load initial value
 }
