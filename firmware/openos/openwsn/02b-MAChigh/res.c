@@ -185,7 +185,6 @@ void timers_res_fired() {
       sendKa();  // called every second, except once every 10s
       leds_debug_toggle();
    }
-   debugpins_task_toggle();
 }
 
 //=========================== private =========================================

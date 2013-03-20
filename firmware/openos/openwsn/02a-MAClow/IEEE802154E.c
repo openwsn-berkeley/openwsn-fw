@@ -1109,8 +1109,6 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
 //======= RX
 
 port_INLINE void activity_ri2() {
-	uint16_t val;
-    uint16_t duration;
 	// change state
    changeState(S_RXDATAPREPARE);
    
@@ -1127,9 +1125,7 @@ port_INLINE void activity_ri2() {
    
    // arm rt2
    radiotimer_schedule(DURATION_rt2);
-   val=radiotimer_getCapturedTime();
-   duration=DURATION_rt2;
-      
+       
    // change state
    changeState(S_RXDATAREADY);
 }
@@ -1145,24 +1141,17 @@ port_INLINE void activity_rie1() {
 }
 
 port_INLINE void activity_ri3() {
-	uint16_t val;
-	uint16_t duration;
    // change state
    changeState(S_RXDATALISTEN);
    
    // give the 'go' to receive
    radio_rxNow();
    
-   // arm rt3
-   
-   	val=radiotimer_getCapturedTime();
-   	duration=DURATION_rt3;
+   // arm rt3 
    radiotimer_schedule(DURATION_rt3);
 }
 
 port_INLINE void activity_rie2() {
-	uint16_t val;
-	val=radiotimer_getCapturedTime();
    // abort
    endSlot();
 }
