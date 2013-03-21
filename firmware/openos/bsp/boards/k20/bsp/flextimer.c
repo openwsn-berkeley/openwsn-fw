@@ -79,7 +79,11 @@ void flextimer_init() {
 }
 
 void flextimer_schedule(PORT_TIMER_WIDTH val) {
-	uint16_t aux=FTM0_CNT;
+	uint16_t aux;
+	INTERRUPT_DECLARATION();
+	DISABLE_INTERRUPTS();
+	
+	aux=FTM0_CNT;
 	
 	//FTM0_MODE |= FTM_MODE_WPDIS_MASK;
 	(void) (FTM0_SC == 0U); 
@@ -109,6 +113,7 @@ void flextimer_schedule(PORT_TIMER_WIDTH val) {
 	//	FTM0_C0V = FTM_CnV_VAL(val);//set the val of the compare.
     //	FTM0_C0SC |= FTM_CnSC_CHIE_MASK;//enable ch interrupt
 
+	ENABLE_INTERRUPTS();
 }
 
 uint16_t flextimer_getValue() {
