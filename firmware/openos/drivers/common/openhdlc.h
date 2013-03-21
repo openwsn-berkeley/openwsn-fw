@@ -8,21 +8,7 @@
 #ifndef __OPENHDLC_H
 #define __OPENHDLC_H
 
-<<<<<<< HEAD:firmware/openos/drivers/common/hdlcserial.h
-//defines
-#define HDLC_XBEE // define to make XBee-compatible HDLC, otherwise, vanilla HDLC
-#define HDLC_HEADER_FLAG 0x7e
-#define HDLC_HEADER_LEN 1
-#define HDLC_MAX_LEN 300
-typedef enum HDLC_STATE_T {
-  HDLC_STATE_RECEIVING_LENGTH_MSB,
-  HDLC_STATE_RECEIVING_LENGTH_LSB,
-  HDLC_STATE_RECEIVING,
-  HDLC_STATE_DONE_RECEIVING} hdlc_state_t;
-typedef void (*hdlc_rx_cbt)();
-=======
 #include "openwsn.h"
->>>>>>> develop:firmware/openos/drivers/common/openhdlc.h
 
 /**
 \addtogroup cross-layers
