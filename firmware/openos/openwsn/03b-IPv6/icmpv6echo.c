@@ -28,6 +28,7 @@ void icmpv6echo_trigger() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer[16];
    OpenQueueEntry_t* msg;
+   
    //get command from OpenSerial (16B IPv6 destination address)
    number_bytes_from_input_buffer = openserial_getInputBuffer(&(input_buffer[0]),sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
@@ -38,6 +39,7 @@ void icmpv6echo_trigger() {
    };
    icmpv6echo_vars.hisAddress.type  = ADDR_128B;
    memcpy(&(icmpv6echo_vars.hisAddress.addr_128b[0]),&(input_buffer[0]),16);
+   
    //send
    if (icmpv6echo_vars.busySending==TRUE) {
       openserial_printError(COMPONENT_ICMPv6ECHO,ERR_BUSY_SENDING,
@@ -98,7 +100,7 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
    msg->owner = COMPONENT_ICMPv6ECHO;
    switch(msg->l4_sourcePortORicmpv6Type) {
       case IANA_ICMPv6_ECHO_REQUEST:
-         openserial_printError(COMPONENT_ICMPv6ECHO,ERR_RCVD_ECHO_REQUEST,
+         openserial_printInfo(COMPONENT_ICMPv6ECHO,ERR_RCVD_ECHO_REQUEST,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          // get a new openqueuEntry_t for the echo reply
@@ -133,7 +135,7 @@ void icmpv6echo_receive(OpenQueueEntry_t* msg) {
          }
          break;
       case IANA_ICMPv6_ECHO_REPLY:
-         openserial_printError(COMPONENT_ICMPv6ECHO,ERR_RCVD_ECHO_REPLY,
+         openserial_printInfo(COMPONENT_ICMPv6ECHO,ERR_RCVD_ECHO_REPLY,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          openqueue_freePacketBuffer(msg);

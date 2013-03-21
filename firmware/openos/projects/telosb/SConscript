@@ -2,3 +2,4 @@ import os
 
 Import('env')
 
+env.SconscriptScanner()

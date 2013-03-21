@@ -29,7 +29,7 @@ void start(void)
 	/* Perform processor initialization */
 	sysinit();
         
-        printf("\n\n");
+      //  printf("\n\n");
         
 	/* Determine the last cause(s) of reset */
 //	if (RCM_SRS1 & RCM_SRS1_SW_MASK)
@@ -53,7 +53,7 @@ void start(void)
 //		printf("LLWU Reset\n");	
 
 	/* Determine specific Kinetis device and revision */
-	cpu_identify();
+	//cpu_identify();
 	
 	/* Jump to main process */
 	main();
@@ -83,7 +83,7 @@ void cpu_identify (void)
     		printf("\nK10-");
     		break;
     	case 0x1:
-    		printf("\nK20-");
+    		//printf("\nK20-");
     		break;
     	case 0x2:
     		printf("\nK30-");
@@ -114,7 +114,7 @@ void cpu_identify (void)
     {  
     		break;
     	case 0x6:
-    		printf("80pin       ");
+    		//printf("80pin       ");
     		break;
     	case 0x7:
     		printf("81pin       ");
@@ -142,7 +142,7 @@ void cpu_identify (void)
     		printf("Silicon rev 1.0   \n ");
     		break;
     default:
-		printf("\nThis version of software doesn't recognize the revision code.");  
+		//printf("\nThis version of software doesn't recognize the revision code.");  
 		break;  
     }
     
@@ -156,7 +156,7 @@ void cpu_identify (void)
     		printf("128 kBytes of P-flash	");
     		break;
     	case 0x9:
-    		printf("256 kBytes of P-flash	");
+    		//printf("256 kBytes of P-flash	");
     		break;
         case 0xB:
     		printf("512 kBytes of P-flash	");
@@ -182,7 +182,7 @@ void cpu_identify (void)
     		printf(" 96 kBytes of RAM\n\n");
     		break;
     	case 0x9:
-    		printf(" 128 kBytes of RAM\n\n");
+    		//printf(" 128 kBytes of RAM\n\n");
     		break;
 		default:
 			printf(" ERR!! Undefined RAM size\n\n");  
@@ -218,7 +218,7 @@ void flash_identify (void)
     /* Wait for the command to complete */
     while(!(FTFL_FSTAT & FTFL_FSTAT_CCIF_MASK));
     
-    printf("Flash parameter version %d.%d.%d.%d\n",FTFL_FCCOB4,FTFL_FCCOB5,FTFL_FCCOB6,FTFL_FCCOB7);
+    //printf("Flash parameter version %d.%d.%d.%d\n",FTFL_FCCOB4,FTFL_FCCOB5,FTFL_FCCOB6,FTFL_FCCOB7);
 
     /* Get the flash version ID */   
 
@@ -235,7 +235,7 @@ void flash_identify (void)
     /* Wait for the command to complete */
     while(!(FTFL_FSTAT & FTFL_FSTAT_CCIF_MASK));
 
-    printf("Flash version ID %d.%d.%d.%d\n",FTFL_FCCOB4,FTFL_FCCOB5,FTFL_FCCOB6,FTFL_FCCOB7);  
+    //printf("Flash version ID %d.%d.%d.%d\n",FTFL_FCCOB4,FTFL_FCCOB5,FTFL_FCCOB6,FTFL_FCCOB7);  
 }
 /********************************************************************/
 

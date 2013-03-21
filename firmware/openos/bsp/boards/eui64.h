@@ -7,7 +7,7 @@
 #ifndef __EUI64_H
 #define __EUI64_H
 
-#include "stdint.h"
+#include <stdint.h>
  
 //=========================== define ==========================================
 

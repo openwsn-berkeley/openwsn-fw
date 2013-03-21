@@ -23,6 +23,7 @@ void    leds_error_on();
 void    leds_error_off();
 void    leds_error_toggle();
 uint8_t leds_error_isOn();
+void    leds_error_blink();
 
 void    leds_radio_on();
 void    leds_radio_off();

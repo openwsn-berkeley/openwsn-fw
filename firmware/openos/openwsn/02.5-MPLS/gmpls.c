@@ -21,9 +21,9 @@ mpls_vars_t mpls_vars;
 void    mpls_timer_cb();
 
 void    mpls_init(){
-	mpls_vars.refreshperiod = 60000; // fires every 10 s on average
-	mpls_vars.busySending       = FALSE;
-	mpls_vars.timerId = opentimers_start(mpls_vars.refreshperiod,TIMER_PERIODIC,TIME_MS, mpls_timer_cb);
+   mpls_vars.refreshperiod = 60000; // fires every 10 s on average
+   mpls_vars.busySending       = FALSE;
+   mpls_vars.timerId = opentimers_start(mpls_vars.refreshperiod,TIMER_PERIODIC,TIME_MS, mpls_timer_cb);
 }
 
 // from upper layer or from the timer. Triggers a reservation request. Genereates a rsv msg or in contrast forwards path message.
@@ -45,5 +45,5 @@ void  mpls_receive(OpenQueueEntry_t* msg){
 }
 
 void mpls_timer_cb(){
-	//TODO
+   //TODO
 }

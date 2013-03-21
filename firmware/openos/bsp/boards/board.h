@@ -11,10 +11,10 @@
 
 //=========================== define ==========================================
 
-enum radio_antennaselection_enum {
-   RADIO_UFL_ANTENNA              = 0x06, ///< Use the antenna connected by U.FL.
-   RADIO_CHIP_ANTENNA             = 0x05, ///< Use the on-board chip antenna.
-};
+typedef enum {
+   DO_NOT_KICK_SCHEDULER,
+   KICK_SCHEDULER,
+} kick_scheduler_t;
 
 //=========================== typedef =========================================
 
@@ -24,5 +24,6 @@ enum radio_antennaselection_enum {
 
 void board_init();
 void board_sleep();
+void board_reset();
 
 #endif

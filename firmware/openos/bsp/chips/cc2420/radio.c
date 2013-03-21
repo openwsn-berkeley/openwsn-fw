@@ -4,13 +4,10 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "stdint.h"
-#include "string.h"
 #include "board.h"
 #include "radio.h"
 #include "cc2420.h"
 #include "spi.h"
-#include "radiotimer.h"
 #include "debugpins.h"
 #include "leds.h"
 
@@ -73,7 +70,7 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 //===== reset
 
 void radio_reset() {
-   uint16_t              delay;
+   volatile uint16_t     delay;
    cc2420_MDMCTRL0_reg_t cc2420_MDMCTRL0_reg;
    cc2420_TXCTRL_reg_t   cc2420_TXCTRL_reg;
    cc2420_RXCTRL1_reg_t  cc2420_RXCTRL1_reg;

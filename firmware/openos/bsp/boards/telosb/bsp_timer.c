@@ -7,7 +7,6 @@ On TelosB, we use timerA0 for the bsp_timer module.
 */
 
 #include "msp430f1611.h"
-#include "string.h"
 #include "bsp_timer.h"
 #include "board.h"
 #include "board_info.h"
@@ -98,7 +97,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    bsp_timer_vars.last_compare_value   =  newCompareValue;
    
    if (delayTicks<TAR-temp_last_compare_value) {
-      // we're already too late, schedule the ISR right now manually
+      // we're already too late, schedule the ISR right now, manually
       
       // setting the interrupt flag triggers an interrupt
       TACCTL0          |=  CCIFG;
@@ -126,14 +125,13 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
    return TBR;
 }
 
-
 //=========================== private =========================================
 
 //=========================== interrup handlers ===============================
 
-uint8_t bsp_timer_isr() {
+kick_scheduler_t bsp_timer_isr() {
    // call the callback
    bsp_timer_vars.cb();
    // kick the OS
-   return 1;
+   return KICK_SCHEDULER;
 }

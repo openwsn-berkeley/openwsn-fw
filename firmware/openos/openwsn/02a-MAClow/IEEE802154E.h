@@ -11,15 +11,32 @@
 #include "openwsn.h"
 #include "board_info.h"
 
+//=========================== debug define ====================================
+
 //=========================== define ==========================================
 
 #define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
-#define TXRETRIES                    3 // number of retries before declaring failed
+#define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define KATIMEOUT                  500 // in slots: @15ms per slot ->  ~8 second
-#define DESYNCTIMEOUT             1500 // in slots: @15ms per slot -> ~23 seconds
+#define KATIMEOUT                   66 // in slots: @15ms per slot -> ~1 seconds
+#define DESYNCTIMEOUT              333 // in slots: @15ms per slot -> ~5 seconds
+#define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
+#define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
+
+/**
+When a packet is received, it is written inside the OpenQueueEntry_t->packet
+buffer, starting at the byte defined below. When a packet is relayed, it
+traverses the stack in which the MAC and IPHC headers are parsed and stripped
+off, then put on again. During that process, the IPv6 hop limit field is
+decremented. Depending on the new value of the hop limit, the IPHC header
+compression algorithm might not be able to compress it, and hence has to carry
+it inline, adding a byte to the header. To avoid having to move bytes around
+inside OpenQueueEntry_t->packet buffer, we start writing the received packet a
+bit after the start of the packet.
+*/
+#define FIRST_FRAME_BYTE             1
 
 // the different states of the IEEE802.15.4e state machine
 typedef enum {
@@ -114,21 +131,20 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-
 // admin
-          void     ieee154e_init();
+void               ieee154e_init();
 // public
-          PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN);
-          bool     ieee154e_isSynch();
-          void asnWriteToPkt(OpenQueueEntry_t* frame);
-          void asnWriteToSerial(uint8_t* array);
+PORT_TIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
+bool               ieee154e_isSynch();
+void               asnWriteToPkt(OpenQueueEntry_t* frame);
+void               asnWriteToSerial(uint8_t* array);
 // events
-          void     ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
-          void     ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
+void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
+void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
 // misc
-          bool     debugPrint_asn();
-          bool     debugPrint_isSync();
-          bool     debugPrint_macStats();
+bool               debugPrint_asn();
+bool               debugPrint_isSync();
+bool               debugPrint_macStats();
 
 /**
 \}

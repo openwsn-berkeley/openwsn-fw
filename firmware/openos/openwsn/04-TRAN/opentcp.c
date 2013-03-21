@@ -42,8 +42,7 @@ void opentcp_timer_cb();
 
 void opentcp_init() {
    // reset local variables
-   memset(&tcp_vars,0,sizeof(tcp_vars_t));
-      
+   memset(&tcp_vars,0,sizeof(tcp_vars_t));   
    // reset state machine
    reset();
 }
@@ -313,7 +312,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
                   forwarding_send(tempPkt);
                } else {
                   reset();
-                  openserial_printError(COMPONENT_OPENTCP,ERR_RESET,
+                  openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                         (errorparameter_t)tcp_vars.state,
                                         (errorparameter_t)0);
                }
@@ -368,7 +367,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             forwarding_send(tempPkt);
          } else {
             reset();
-            openserial_printError(COMPONENT_OPENTCP,ERR_RESET,
+            openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                   (errorparameter_t)tcp_vars.state,
                                   (errorparameter_t)1);
          }
@@ -381,7 +380,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             tcp_change_state(TCP_STATE_ESTABLISHED);
          } else {
             reset();
-            openserial_printError(COMPONENT_OPENTCP,ERR_RESET,
+            openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                   (errorparameter_t)tcp_vars.state,
                                   (errorparameter_t)2);
          }
@@ -437,7 +436,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             tcp_change_state(TCP_STATE_ALMOST_DATA_RECEIVED);
          } else {
             reset();
-            openserial_printError(COMPONENT_OPENTCP,ERR_RESET,
+            openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                   (errorparameter_t)tcp_vars.state,
                                   (errorparameter_t)3);
             openqueue_freePacketBuffer(msg);
@@ -512,7 +511,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             tcp_change_state(TCP_STATE_ALMOST_CLOSE_WAIT);
          } else {
             reset();
-            openserial_printError(COMPONENT_OPENTCP,ERR_RESET,
+            openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                   (errorparameter_t)tcp_vars.state,
                                   (errorparameter_t)4);
          }
@@ -569,7 +568,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             tcp_change_state(TCP_STATE_FIN_WAIT_2);
          } else {
             reset();
-            openserial_printError(COMPONENT_OPENTCP,ERR_RESET,
+            openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                   (errorparameter_t)tcp_vars.state,
                                   (errorparameter_t)5);
          }

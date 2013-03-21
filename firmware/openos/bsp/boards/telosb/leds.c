@@ -5,7 +5,6 @@
 */
 
 #include "msp430f1611.h"
-#include "stdint.h"
 #include "leds.h"
 
 //=========================== defines =========================================
@@ -33,6 +32,18 @@ void    leds_error_toggle() {
 }
 uint8_t leds_error_isOn() {
    return (uint8_t)(P5OUT & 0x10)>>4;
+}
+void leds_error_blink() {
+   uint8_t i;
+   volatile uint16_t delay;
+   // turn all LEDs off
+   P5OUT     |=  0x70;
+   
+   // blink error LED for ~10s
+   for (i=0;i<80;i++) {
+      P5OUT     ^=  0x10;
+      for (delay=0xffff;delay>0;delay--);
+   }
 }
 
 // green = LED2 = P5.5

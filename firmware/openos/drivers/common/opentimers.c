@@ -8,9 +8,9 @@ at most MAX_NUM_TIMERS timers.
  */
 
 #include "openwsn.h"
-#include "board_info.h"
 #include "opentimers.h"
 #include "bsp_timer.h"
+#include "leds.h"
 
 //=========================== define ==========================================
 
@@ -71,7 +71,7 @@ The timer works as follows:
          timer could be started.
 \returns TOO_MANY_TIMERS_ERROR if the timer could NOT be started.
  */
-opentimer_id_t opentimers_start(uint32_t duration, timer_type_t type,time_type_t timetype, opentimers_cbt callback) {
+opentimer_id_t opentimers_start(uint32_t duration, timer_type_t type, time_type_t timetype, opentimers_cbt callback) {
 
    uint8_t  id;
 
@@ -98,7 +98,13 @@ opentimer_id_t opentimers_start(uint32_t duration, timer_type_t type,time_type_t
          } else if (timetype==TIME_TICS) {
             opentimers_vars.timersBuf[id].ticks_remaining   = duration;
          } else {
-            while(1);//error
+            // this should never happpen!
+   
+            // we can not print from within the drivers. Instead:
+            // blink the error LED
+            leds_error_blink();
+            // reset the board
+            board_reset();
          }
       }else{
          opentimers_vars.timersBuf[id].ticks_remaining = MAX_TICKS_IN_SINGLE_CLOCK;
@@ -141,7 +147,13 @@ void  opentimers_setPeriod(opentimer_id_t id,time_type_t timetype,uint32_t newDu
       opentimers_vars.timersBuf[id].period_ticks      = newDuration;
       opentimers_vars.timersBuf[id].wraps_remaining   = (newDuration/MAX_TICKS_IN_SINGLE_CLOCK);//65535=maxValue of uint16_t
    } else {
-      while(1);//error
+      // this should never happpen!
+      
+      // we can not print from within the drivers. Instead:
+      // blink the error LED
+      leds_error_blink();
+      // reset the board
+      board_reset();
    }
    if(opentimers_vars.timersBuf[id].wraps_remaining==0) {
       if        (timetype==TIME_MS){

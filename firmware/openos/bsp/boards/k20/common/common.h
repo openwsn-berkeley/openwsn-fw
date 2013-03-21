@@ -70,10 +70,8 @@
 /* 
  * Include common utilities
  */
-#include "assert.h"
-#include "io.h"
 #include "startup.h"
-#include "stdlib.h"
+#include <stdlib.h> 
 
 #if (defined(IAR))
 	#include "intrinsics.h"

@@ -396,7 +396,7 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
 
 //=========================== interrupt handlers ==============================
 
-uint8_t radio_isr() {
+kick_scheduler_t radio_isr() {
    PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status;
    
@@ -414,7 +414,7 @@ uint8_t radio_isr() {
          // call the callback
          radio_vars.startFrame_cb(capturedTime);
          // kick the OS
-         return 1;
+         return KICK_SCHEDULER;
       } else {
          while(1);
       }
@@ -427,11 +427,11 @@ uint8_t radio_isr() {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
          // kick the OS
-         return 1;
+         return KICK_SCHEDULER;
       } else {
          while(1);
       }
    }
    
-   return 0;
+   return DO_NOT_KICK_SCHEDULER;
 }

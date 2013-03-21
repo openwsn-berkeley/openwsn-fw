@@ -10,25 +10,28 @@ localEnv = env.Clone()
 # which can be appended to the source list. Don't forget to specify a variant_dir,
 # or else the build will occur directly in the chips directory.
 
-cc2420 = localEnv.SConscript(os.path.join('#','firmware','openos','bsp','chips','cc2420','SConscript'),
-                             variant_dir = 'cc2420',
-                             exports = {'env': env},
-                            )
+cc2420 = localEnv.SConscript(
+    os.path.join('#','firmware','openos','bsp','chips','cc2420','SConscript'),
+    variant_dir = 'cc2420',
+    exports = {'env': env},
+)
 
-target =  'libbsp'
-source = ['board.c',
-          'bsp_timer.c',
-          'debugpins.c',
-          'eui64.c',
-          'leds.c',
-          'radiotimer.c',
-          'spi.c',
-          'uart.c',
-          cc2420,
-         ]
+target = 'libbsp'
+source = [
+    'board.c',
+    'bsp_timer.c',
+    'debugpins.c',
+    'eui64.c',
+    'leds.c',
+    'radiotimer.c',
+    'spi.c',
+    'uart.c',
+    cc2420,
+]
 
-
-libbsp = localEnv.Library(target=target,
-                          source=source)
+libbsp = localEnv.Library(
+    target=target,
+    source=source,
+)
 
 Alias('libbsp', libbsp)

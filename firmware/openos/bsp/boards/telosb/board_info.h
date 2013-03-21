@@ -1,8 +1,8 @@
 /**
 \brief TelosB-specific board information bsp module.
 
-This module simply defines some strings describing the board, which CoAP uses
-to return the board's description.
+This module file defines board-related element, but which are applicable only
+to this board.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
@@ -15,18 +15,18 @@ to return the board's description.
 #include "string.h"
 
 //=========================== define ==========================================
-//processor scpecific
+
+// (pre-)processor scpecific commands
 
 #define port_INLINE                         inline
 
 #define PRAGMA(x)  _Pragma(#x)
 #define PACK(x)     pack(x)
 
-
-#define INTERRUPT_DECLARATION() __istate_t s;
-#define DISABLE_INTERRUPTS()    s = __get_interrupt_state(); \
-                                __disable_interrupt();
-#define ENABLE_INTERRUPTS()     __set_interrupt_state(s);
+#define INTERRUPT_DECLARATION()   __istate_t s;
+#define DISABLE_INTERRUPTS()      s = __get_interrupt_state(); \
+                                  __disable_interrupt();
+#define ENABLE_INTERRUPTS()       __set_interrupt_state(s);
 
 //===== timer
 
@@ -38,7 +38,7 @@ to return the board's description.
 #define SCHEDULER_WAKEUP()                  CACTL1 |= CAIFG
 #define SCHEDULER_ENABLE_INTERRUPT()        CACTL1  = CAIE
 
-//===== pinout
+//===== pins
 
 // [P4.5] radio VREG
 #define PORT_PIN_RADIO_VREG_HIGH()          P4OUT |=  0x20;
@@ -51,17 +51,20 @@ to return the board's description.
 
 // time-slot related
 #define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+
 // execution speed related
 #define PORT_maxTxDataPrepare               100    //  2899us (measured 2420us)
 #define PORT_maxRxAckPrepare                20    //   610us (measured  474us)
 #define PORT_maxRxDataPrepare               33    //  1000us (measured  477us)
 #define PORT_maxTxAckPrepare                40    //   792us (measured  746us)- cannot be bigger than 28.. is the limit for telosb as actvitiy_rt5 is executed almost there.
+
 // radio speed related
 #define PORT_delayTx                        12    //   366us (measured  352us)
 #define PORT_delayRx                        0     //     0us (can not measure)
-// radio watchdog
 
 //=========================== variables =======================================
+
+// The variables below are used by CoAP's registration engine.
 
 static const uint8_t rreg_uriquery[]        = "h=ucb";
 static const uint8_t infoBoardname[]        = "TelosB";

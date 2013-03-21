@@ -1,9 +1,14 @@
-//author Fabien Chraim <chraim@eecs.berkeley.edu>
-#ifndef __HDLCSERIAL
-#define __HDLCSERIAL
+/**
+\brief Declaraion of the "openserial" driver.
 
-#include "openwsn.h"
+\author Min Ting <tingm417@gmail.com>, October 2012.
+\author Fabien Chraim <chraim@eecs.berkeley.edu>, October 2012.
+*/
 
+#ifndef __OPENHDLC_H
+#define __OPENHDLC_H
+
+<<<<<<< HEAD:firmware/openos/drivers/common/hdlcserial.h
 //defines
 #define HDLC_XBEE // define to make XBee-compatible HDLC, otherwise, vanilla HDLC
 #define HDLC_HEADER_FLAG 0x7e
@@ -15,19 +20,24 @@ typedef enum HDLC_STATE_T {
   HDLC_STATE_RECEIVING,
   HDLC_STATE_DONE_RECEIVING} hdlc_state_t;
 typedef void (*hdlc_rx_cbt)();
+=======
+#include "openwsn.h"
+>>>>>>> develop:firmware/openos/drivers/common/openhdlc.h
 
-//prototypes
-void hdlcserial_init();
-void hdlcserial_setcb(hdlc_rx_cbt rxCb);
-void hdlcserial_send(uint8_t* str, uint16_t len);
-//no need for an hdlcserial_receive function; it's not like we can say 
-//"receive now"; the bytes arrive and when the packet is formed, the callback
-//is pushed to the scheduler
+/**
+\addtogroup cross-layers
+\{
+\addtogroup HDLC
+\{
+*/
 
-//interrupt handler prototypes
-void    isr_hdlcserial_rx();
-void    isr_hdlcserial_tx();
+//=========================== define ==========================================
 
+#define HDLC_FLAG            0x7e
+#define HDLC_ESCAPE          0x7d
+#define HDLC_ESCAPE_MASK     0x20
+#define HDLC_CRCINIT         0xffff
+#define HDLC_CRCGOOD         0xf0b8
 
 //this table is used to expedite execution (at the expense of memory usage)
 static const uint16_t fcstab[256] = {
@@ -64,5 +74,16 @@ static const uint16_t fcstab[256] = {
    0xf78f, 0xe606, 0xd49d, 0xc514, 0xb1ab, 0xa022, 0x92b9, 0x8330,
    0x7bc7, 0x6a4e, 0x58d5, 0x495c, 0x3de3, 0x2c6a, 0x1ef1, 0x0f78
 };
+
+//=========================== typedef =========================================
+
+//=========================== prototypes ======================================
+
+uint16_t crcIteration(uint16_t crc, uint8_t byte);
+
+/**
+\}
+\}
+*/
 
 #endif

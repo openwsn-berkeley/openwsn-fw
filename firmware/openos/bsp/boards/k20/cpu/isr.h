@@ -11,7 +11,7 @@
 /*
    ISR prototypes
  */
-
+void ftm0_isr(void);
 void lptmr_isr(void);
 void llwu_isr(void);
 void uart_isr(void);
@@ -23,6 +23,9 @@ void radio_external_port_c_isr(); //radio interrupt on external port ptc11s
 
 #undef VECTOR_042
 #define VECTOR_042 _spi_isr
+
+#undef VECTOR_078
+#define VECTOR_078 ftm0_isr
 
 #undef VECTOR_063
 #define VECTOR_063 uart_isr

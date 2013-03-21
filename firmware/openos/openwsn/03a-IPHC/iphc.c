@@ -12,23 +12,24 @@
 
 //=========================== prototypes ======================================
 
-error_t prependIPv6Header(OpenQueueEntry_t* msg,
-      uint8_t tf,
-      uint32_t value_flowLabel,
-      bool nh,
-      uint8_t value_nextHeader,
-      uint8_t hlim,
-      uint8_t value_hopLimit,
-      bool cid,
-      bool sac,
-      uint8_t sam,
-      bool m,
-      bool dac,
-      uint8_t dam,
-      open_addr_t* value_dest,
-      open_addr_t* value_src,
-      uint8_t fw_SendOrfw_Rcv);  //>>>>>> diodio
-
+error_t prependIPv6Header(
+   OpenQueueEntry_t*    msg,
+   uint8_t              tf,
+   uint32_t             value_flowLabel,
+   bool                 nh,
+   uint8_t              value_nextHeader,
+   uint8_t              hlim,
+   uint8_t              value_hopLimit,
+   bool                 cid,
+   bool                 sac,
+   uint8_t              sam,
+   bool                 m,
+   bool                 dac,
+   uint8_t              dam,
+   open_addr_t*         value_dest,
+   open_addr_t*         value_src,
+   uint8_t              fw_SendOrfw_Rcv
+);
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg);
 
 //=========================== public ==========================================
@@ -41,27 +42,40 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
    open_addr_t  temp_dest_prefix;
    open_addr_t  temp_dest_mac64b;
    open_addr_t* p_dest;
-   open_addr_t* p_src;  //>>>>>> diodio
-   open_addr_t  temp_src_prefix;  //>>>>>> diodio
-   open_addr_t  temp_src_mac64b;  //>>>>>> diodio
-   uint8_t sam;
-   uint8_t dam;
-   uint8_t nh=IPHC_NH_INLINE; //default value;
+   open_addr_t* p_src;  
+   open_addr_t  temp_src_prefix;
+   open_addr_t  temp_src_mac64b; 
+   uint8_t      sam;
+   uint8_t      dam;
+   uint8_t      nh;
    
+   // take ownership over the packet
    msg->owner = COMPONENT_IPHC;
+   
+   // by default, the "next header" field is carried inline
+   nh=IPHC_NH_INLINE;
+   
    // error checking
    if (idmanager_getIsBridge()==TRUE &&
       packetfunctions_isAllRoutersMulticast(&(msg->l3_destinationAdd))==FALSE) {
-      openserial_printError(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
+      openserial_printCritical(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       return E_FAIL;
    }
+   
+   //discard the packet.. hop limit reached.
+   if (ipv6_header.hop_limit==0) {
+      openserial_printError(COMPONENT_IPHC,ERR_HOP_LIMIT_REACHED,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
+     return E_FAIL;
+   }
+   
    packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_dest_prefix,&temp_dest_mac64b);
    //xv poipoi -- get the src prefix as well
    packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);
-   //XV -poipoi this is not correct, we want to check if the source address prefix is the same as destination prefix
-   //if (packetfunctions_sameAddress(&temp_dest_prefix,idmanager_getMyID(ADDR_PREFIX))) {
+   //XV -poipoi we want to check if the source address prefix is the same as destination prefix
    if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {   
    //dest and src on same prefix
       if (neighbors_isStableNeighbor(&(msg->l3_destinationAdd))) {
@@ -69,13 +83,15 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
          //the source can be ME or another who I am relaying from. If its me then SAM is elided,
          //if not SAM is 64b address 
         if (fw_SendOrfw_Rcv==PCKTFORWARD){
-            sam = IPHC_SAM_64B;     //>>>>>> diodio
+            sam = IPHC_SAM_64B;    //case forwarding a packet
             p_src = &temp_src_mac64b;
-        }else if (fw_SendOrfw_Rcv==PCKTSEND){
-            sam = IPHC_SAM_ELIDED; //xv -- this is the correct option
+        } else if (fw_SendOrfw_Rcv==PCKTSEND){
+            sam = IPHC_SAM_ELIDED;
             p_src = NULL;
-        }else{
-          while(1); //should never happen.
+        } else {
+           openserial_printCritical(COMPONENT_IPHC,ERR_INVALID_FWDMODE,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
         }
          dam = IPHC_DAM_ELIDED;
          p_dest = NULL;
@@ -84,28 +100,30 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
          sam = IPHC_SAM_64B;
          dam = IPHC_DAM_64B;
          p_dest = &temp_dest_mac64b;      
-         p_src = &temp_src_mac64b;  //>>>>>> diodio
+         p_src  = &temp_src_mac64b; 
       }
    } else {
      //not the same prefix. so the packet travels to another network
-     
      //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
-     if(ipv6_header.next_header !=SourceFWNxtHdr){ 
+     if(ipv6_header.next_header!=IANA_IPv6ROUTE){ 
       sam = IPHC_SAM_128B;
       dam = IPHC_DAM_128B;
       p_dest = &(msg->l3_destinationAdd);
-      p_src = &(msg->l3_sourceAdd);  //>>>>>> diodio
+      p_src = &(msg->l3_sourceAdd);
      }else{
        //source routing
       sam = IPHC_SAM_128B;
       dam = IPHC_DAM_ELIDED;
       p_dest = NULL;
-      p_src = &(msg->l3_sourceAdd);  //>>>>>> diodio
+      p_src = &(msg->l3_sourceAdd);
      }
    }
    //check if we are forwarding a packet and it comes with the next header compressed. We want to preserve that state in the following hop.
    
    if ((fw_SendOrfw_Rcv==PCKTFORWARD) && ipv6_header.next_header_compressed) nh=IPHC_NH_COMPRESSED;
+   
+   // decrement the packet's hop limit
+   ipv6_header.hop_limit--;
    
    if (prependIPv6Header(msg,
             IPHC_TF_ELIDED,
@@ -113,7 +131,7 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
             nh,
             msg->l4_protocol,
             IPHC_HLIM_INLINE,
-            64,
+            ipv6_header.hop_limit,
             IPHC_CID_NO,
             IPHC_SAC_STATELESS,
             sam,
@@ -121,8 +139,8 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
             IPHC_DAC_STATELESS,
             dam,
             p_dest,
-            p_src,            //>>>>>> diodio
-            fw_SendOrfw_Rcv   //>>>>>> diodio
+            p_src,            
+            fw_SendOrfw_Rcv  
             )==E_FAIL) {
       return E_FAIL;
    }
@@ -134,7 +152,7 @@ error_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
    msg->owner = COMPONENT_IPHC;
    // error checking
    if (idmanager_getIsBridge()==FALSE) {
-      openserial_printError(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
+      openserial_printCritical(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
                             (errorparameter_t)1,
                             (errorparameter_t)0);
       return E_FAIL;
@@ -160,14 +178,14 @@ void iphc_receive(OpenQueueEntry_t* msg) {
       packetfunctions_tossHeader(msg,ipv6_header.header_length);
       forwarding_receive(msg,ipv6_header);       //up the internal stack
    } else {
-      //ipv6_header = retrieveIPv6Header(msg);
       openbridge_receive(msg);                   //out to the OpenVisualizer
    }
 }
 
 //=========================== private =========================================
 
-error_t prependIPv6Header(OpenQueueEntry_t* msg,
+error_t prependIPv6Header(
+      OpenQueueEntry_t* msg,
       uint8_t tf,
       uint32_t value_flowLabel,
       bool nh,
@@ -182,7 +200,9 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
       uint8_t dam,
       open_addr_t* value_dest,
       open_addr_t* value_src,
-      uint8_t fw_SendOrfw_Rcv) {  //>>>>>> diodio
+      uint8_t fw_SendOrfw_Rcv
+   ) {
+   
    uint8_t temp_8b;
    
    //destination address
@@ -191,7 +211,7 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
          break;
       case IPHC_DAM_16B:
          if (value_dest->type!=ADDR_16B) {
-            openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+            openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                   (errorparameter_t)value_dest->type,
                                   (errorparameter_t)0);
             return E_FAIL;
@@ -200,7 +220,7 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
          break;
       case IPHC_DAM_64B:
          if (value_dest->type!=ADDR_64B) {
-            openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+            openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                   (errorparameter_t)value_dest->type,
                                   (errorparameter_t)1);
             return E_FAIL;
@@ -209,7 +229,7 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
          break;
       case IPHC_DAM_128B:
          if (value_dest->type!=ADDR_128B) {
-            openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+            openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                   (errorparameter_t)value_dest->type,
                                   (errorparameter_t)2);
             return E_FAIL;
@@ -217,7 +237,7 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
          packetfunctions_writeAddress(msg,value_dest,BIG_ENDIAN);
          break;
       default:
-         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)0,
                                (errorparameter_t)dam);
          return E_FAIL;
@@ -234,12 +254,12 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
         if(fw_SendOrfw_Rcv==PCKTFORWARD)
         {
             if (value_src->type!=ADDR_16B) {
-                openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+                openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                       (errorparameter_t)value_src->type,
                                       (errorparameter_t)0);
                 return E_FAIL;
-             };                              //>>>>>> diodio
-             packetfunctions_writeAddress(msg,value_src,BIG_ENDIAN);
+            } 
+            packetfunctions_writeAddress(msg,value_src,BIG_ENDIAN);
         }
          break;
       case IPHC_SAM_64B:
@@ -250,12 +270,12 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
          if(fw_SendOrfw_Rcv==PCKTFORWARD)
         {
             if (value_src->type!=ADDR_64B) {
-                openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+                openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                       (errorparameter_t)value_src->type,
                                       (errorparameter_t)1);
                 return E_FAIL;
-             };                          //>>>>>> diodio
-             packetfunctions_writeAddress(msg, value_src,BIG_ENDIAN);
+            }      
+            packetfunctions_writeAddress(msg, value_src,BIG_ENDIAN);
         }
          break;
       case IPHC_SAM_128B:
@@ -267,16 +287,16 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
         if(fw_SendOrfw_Rcv==PCKTFORWARD)
         {
             if (value_src->type!=ADDR_128B) {
-                openserial_printError(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
+                openserial_printCritical(COMPONENT_IPHC,ERR_WRONG_ADDR_TYPE,
                                       (errorparameter_t)value_src->type,
                                       (errorparameter_t)2);
                 return E_FAIL;
-             };                     //>>>>>> diodio
-             packetfunctions_writeAddress(msg,value_src,BIG_ENDIAN);
+             }
+           packetfunctions_writeAddress(msg,value_src,BIG_ENDIAN);
         }
          break;
       default:
-         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)1,
                                (errorparameter_t)sam);
          return E_FAIL;
@@ -292,7 +312,7 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
       case IPHC_HLIM_255:
          break;
       default:
-         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)2,
                                (errorparameter_t)hlim);
          return E_FAIL;
@@ -307,7 +327,7 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
          //do nothing, the next header will be there
         break;
       default:
-         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)3,
                                (errorparameter_t)nh);
          return E_FAIL;
@@ -329,7 +349,7 @@ error_t prependIPv6Header(OpenQueueEntry_t* msg,
       case IPHC_TF_1B:
          //unsupported
       default:
-         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)4,
                                (errorparameter_t)tf);
          return E_FAIL;
@@ -366,7 +386,7 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
    //bool            cid;
    //bool            sac;
    uint8_t         sam;
-   bool            m;
+  // bool            m;
    //bool          dac;
    uint8_t         dam;
    
@@ -382,7 +402,7 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
    //cid       = (temp_8b >> IPHC_CID)       & 0x01;//1b unused
    //sac       = (temp_8b >> IPHC_SAC)       & 0x01;//1b unused
    sam       = (temp_8b >> IPHC_SAM)       & 0x03;//2b
-   m         = (temp_8b >> IPHC_M)         & 0x01;//1b unused
+   //m         = (temp_8b >> IPHC_M)         & 0x01;//1b unused
    //dac       = (temp_8b >> IPHC_DAC)       & 0x01;//1b unused
    dam       = (temp_8b >> IPHC_DAM)       & 0x03;//2b
    ipv6_header.header_length += sizeof(uint8_t);
@@ -515,7 +535,7 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
    }
    /*
    During the parsing of the nh field, we found that the next header was
-   compressed. we now identify which next (compressed) header this is, and
+   compressed. We now identify which next (compressed) header this is, and
    populate the ipv6_header.next_header field accordingly. It's the role of the
    appropriate transport module to decompress the header.
    */
@@ -532,8 +552,9 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
       }
    }
    // this is a temporary workaround for allowing multicast RAs to go through
-   if (m==1 && dam==IPHC_DAM_ELIDED) {
+   //poipoi xv -- TODO -- check if this still needed. NO RAs anymore after RPL implementation.
+   /*if (m==1 && dam==IPHC_DAM_ELIDED) {
       ipv6_header.header_length += sizeof(uint8_t);
-   }
+   }*/
    return ipv6_header;
 }

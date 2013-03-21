@@ -1,9 +1,7 @@
 #include "openwsn.h"
 #include "schedule.h"
 #include "openserial.h"
-#include "idmanager.h"
 #include "openrandom.h"
-#include "board_info.h"
 
 //=========================== variables =======================================
 
@@ -11,6 +9,8 @@ typedef struct {
    scheduleEntry_t  scheduleBuf[MAXACTIVESLOTS];
    scheduleEntry_t* currentScheduleEntry;
    uint16_t         frameLength;
+   uint8_t          backoffExponent;
+   uint8_t          backoff;
    slotOffset_t     debugPrintRow;
 } schedule_vars_t;
 
@@ -32,103 +32,119 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 //=== admin
 
 void schedule_init() {
-   uint8_t     i;
-   open_addr_t temp_neighbor;
+   uint8_t         i;
+   slotOffset_t    running_slotOffset;
+   open_addr_t     temp_neighbor;
 
    // reset local variables
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
-   memset(&schedule_dbg, 0,sizeof(schedule_dbg_t));
    for (i=0;i<MAXACTIVESLOTS;i++){
       schedule_resetEntry(&schedule_vars.scheduleBuf[i]);
    }
+   schedule_vars.backoffExponent = MINBE-1;
+   memset(&schedule_dbg, 0,sizeof(schedule_dbg_t));
 
    // set frame length
-   schedule_setFrameLength(9);
-
-   // slot 0 is advertisement slot
-   i = 0;
+   schedule_setFrameLength(SUPERFRAME_LENGTH);
+   
+   // start at slot 0
+   running_slotOffset = 0;
+   
+   // advertisement slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(i,
-         CELLTYPE_ADV,
-         FALSE,
-         0,
-         &temp_neighbor);
-
-   // slot 1 is shared TXRX anycast
-   i = 1;
+   for (i=0;i<NUMADVSLOTS;i++) {
+      schedule_addActiveSlot(
+         running_slotOffset,      // slot offset
+         CELLTYPE_ADV,            // type of slot
+         FALSE,                   // shared?
+         0,                       // channel offset
+         &temp_neighbor           // neighbor
+      );
+      running_slotOffset++;
+   } 
+   
+   // shared TXRX anycast slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
+   for (i=0;i<NUMSHAREDTXRX;i++) {
+      schedule_addActiveSlot(
+         running_slotOffset,      // slot offset
+         CELLTYPE_TXRX,           // type of slot
+         TRUE,                    // shared?
+         0,                       // channel offset
+         &temp_neighbor           // neighbor
+      );
+      running_slotOffset++;
+   }
    
-   i = 2;
+   // serial RX slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
-   
-   
-   i = 3;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
-   
-   
-   i = 4;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   schedule_addActiveSlot(i,
-         CELLTYPE_TXRX,
-         TRUE,
-         0,
-         &temp_neighbor);
-
-   // slot 2 is SERIALRX
-   i = 5;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(i,
-         CELLTYPE_SERIALRX,
-         FALSE,
-         0,
-         &temp_neighbor);
-
-   // slot 3 is MORESERIALRX
-   i = 6;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(i,
-         CELLTYPE_MORESERIALRX,
-         FALSE,
-         0,
-         &temp_neighbor);
-
-   // slot 4 is MORESERIALRX
-   i = 7;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(i,
-         CELLTYPE_MORESERIALRX,
-         FALSE,
-         0,
-         &temp_neighbor);
+   schedule_addActiveSlot(
+      running_slotOffset,         // slot offset
+      CELLTYPE_SERIALRX,          // type of slot
+      FALSE,                      // shared?
+      0,                          // channel offset
+      &temp_neighbor              // neighbor
+   );
+   running_slotOffset++;
+   /*
+   for (i=0;i<NUMSERIALRX-1;i++) {
+      schedule_addActiveSlot(
+         running_slotOffset,      // slot offset
+         CELLTYPE_MORESERIALRX,   // type of slot
+         FALSE,                   // shared?
+         0,                       // channel offset
+         &temp_neighbor           // neighbor
+      );
+      running_slotOffset++;
+   }
+   */
 }
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
 bool debugPrint_schedule() {
    debugScheduleEntry_t temp;
    schedule_vars.debugPrintRow    = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
    temp.row                       = schedule_vars.debugPrintRow;
-   temp.scheduleEntry             = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow];
+   //copy element  by element to the struct that will  be serialized. we don't want to sent the pointer through the serial port.
+   temp.scheduleEntry.channelOffset  = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+   temp.scheduleEntry.numRx  = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
+   temp.scheduleEntry.numTx=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
+   temp.scheduleEntry.numTxACK=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+   temp.scheduleEntry.lastUsedAsn=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn;
+   temp.scheduleEntry.neighbor=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor;
+   temp.scheduleEntry.shared=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
+   temp.scheduleEntry.slotOffset=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
+   temp.scheduleEntry.type=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
+            
    openserial_printStatus(STATUS_SCHEDULE,
          (uint8_t*)&temp,
          sizeof(debugScheduleEntry_t));
+   return TRUE;
+}
+
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
+bool debugPrint_backoff() {
+   uint8_t temp[2];
+   temp[0] = schedule_vars.backoffExponent;
+   temp[1] = schedule_vars.backoff;
+   openserial_printStatus(STATUS_BACKOFF,
+         (uint8_t*)&temp,
+         sizeof(temp));
    return TRUE;
 }
 
@@ -138,7 +154,7 @@ bool debugPrint_schedule() {
 \brief Set frame length.
 
 \param newFrameLength The new frame length.
- */
+*/
 void schedule_setFrameLength(frameLength_t newFrameLength) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -150,7 +166,7 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
 \brief Add a new active slot into the schedule.
 
 \param newFrameLength The new frame length.
- */
+*/
 void schedule_addActiveSlot(slotOffset_t    slotOffset,
       cellType_t      type,
       bool            shared,
@@ -170,7 +186,9 @@ void schedule_addActiveSlot(slotOffset_t    slotOffset,
    }
    if (slotContainer>&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
       // schedule has overflown
-      while(1);
+      openserial_printCritical(COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
    }
    // fill that schedule entry with parameters passed
    slotContainer->slotOffset                = slotOffset;
@@ -262,7 +280,7 @@ slotOffset_t schedule_getNextActiveSlotOffset() {
 \brief Get the frame length.
 
 \returns The frame length.
- */
+*/
 frameLength_t schedule_getFrameLength() {
    frameLength_t res;
    INTERRUPT_DECLARATION();
@@ -272,29 +290,28 @@ frameLength_t schedule_getFrameLength() {
    ENABLE_INTERRUPTS();
    
    return res;
-   
 }
 
 /**
 \brief Get the type of the current schedule entry.
 
 \returns The type of the current schedule entry.
- */
- cellType_t schedule_getType() {
-    cellType_t res;
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
-    res= schedule_vars.currentScheduleEntry->type;
-    ENABLE_INTERRUPTS();
-         return res;
+*/
+cellType_t schedule_getType() {
+   cellType_t res;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   res= schedule_vars.currentScheduleEntry->type;
+   ENABLE_INTERRUPTS();
+   return res;
 }
 
 /**
 \brief Get the neighbor associated wit the current schedule entry.
 
 \returns The neighbor associated wit the current schedule entry.
- */
- void schedule_getNeighbor(open_addr_t* addrToWrite) {
+*/
+void schedule_getNeighbor(open_addr_t* addrToWrite) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    memcpy(addrToWrite,&(schedule_vars.currentScheduleEntry->neighbor),sizeof(open_addr_t));
@@ -305,7 +322,7 @@ frameLength_t schedule_getFrameLength() {
 \brief Get the channel offset of the current schedule entry.
 
 \returns The channel offset of the current schedule entry.
- */
+*/
 channelOffset_t schedule_getChannelOffset() {
    channelOffset_t res;
    INTERRUPT_DECLARATION();
@@ -318,38 +335,63 @@ channelOffset_t schedule_getChannelOffset() {
 /**
 \brief Check whether I can send on this slot.
 
-This function is called at the beginning of every TX slot. If the slot is not a
-shared slot, it always return TRUE. If the slot is a shared slot, it decrements
-the backoff counter and returns TRUE only if it hits 0.
+This function is called at the beginning of every TX slot.
+If the slot is *not* a shared slot, it always return TRUE.
+If the slot is a shared slot, it decrements the backoff counter and returns 
+TRUE only if it hits 0.
+
+Note that the backoff counter is global, not per slot.
 
 \returns TRUE if it is OK to send on this slot, FALSE otherwise.
  */
 bool schedule_getOkToSend() {
+   bool returnVal;
+   
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   // decrement backoff of that slot
-   if (schedule_vars.currentScheduleEntry->backoff>0) {
-      schedule_vars.currentScheduleEntry->backoff--;
-   }
-   // check whether backoff has hit 0
-   if (
-         schedule_vars.currentScheduleEntry->shared==FALSE ||
-         (
-               schedule_vars.currentScheduleEntry->shared==TRUE &&
-               schedule_vars.currentScheduleEntry->backoff==0
-         )
-   ) {
-      ENABLE_INTERRUPTS();
-      return TRUE;
+   
+   if (schedule_vars.currentScheduleEntry->shared==FALSE) {
+      // non-shared slot: backoff does not apply
+      
+      returnVal = TRUE;
    } else {
-      ENABLE_INTERRUPTS();
-      return FALSE;
+      // non-shared slot: check backoff before answering
+      
+      // decrement backoff
+      if (schedule_vars.backoff>0) {
+         schedule_vars.backoff--;
+      }
+      
+      // only return TRUE if backoff hit 0
+      if (schedule_vars.backoff==0) {
+         returnVal = TRUE;
+      } else {
+         returnVal = FALSE;
+      }
    }
+   
+   ENABLE_INTERRUPTS();
+   return returnVal;
+}
+
+/**
+\brief Reset the backoff and backoffExponent.
+*/
+void schedule_resetBackoff() {
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   // reset backoffExponent
+   schedule_vars.backoffExponent = MINBE-1;
+   // reset backoff
+   schedule_vars.backoff         = 0;
+   
+   ENABLE_INTERRUPTS();
 }
 
 /**
 \brief Indicate the reception of a packet.
- */
+*/
 void schedule_indicateRx(asn_t* asnTimestamp) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -363,9 +405,9 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
 
 /**
 \brief Indicate the transmission of a packet.
- */
- void schedule_indicateTx(asn_t*   asnTimestamp,
-   bool     succesfullTx) {
+*/
+void schedule_indicateTx(asn_t* asnTimestamp,
+                         bool   succesfullTx) {
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -382,54 +424,40 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
    // update last used timestamp
    memcpy(&schedule_vars.currentScheduleEntry->lastUsedAsn, asnTimestamp, sizeof(asn_t));
 
-   // update this slot's backoff parameters
-   if (succesfullTx==TRUE) {
-      // reset backoffExponent
-      schedule_vars.currentScheduleEntry->backoffExponent   = MINBE-1;
-      // reset backoff
-      schedule_vars.currentScheduleEntry->backoff           = 0;
-   } else {
-      // increase the backoffExponent
-      if (schedule_vars.currentScheduleEntry->backoffExponent<MAXBE) {
-         schedule_vars.currentScheduleEntry->backoffExponent++;
+   // update this backoff parameters for shared slots
+   if (schedule_vars.currentScheduleEntry->shared==TRUE) {
+      if (succesfullTx==TRUE) {
+         // reset backoffExponent
+         schedule_vars.backoffExponent = MINBE-1;
+         // reset backoff
+         schedule_vars.backoff         = 0;
+      } else {
+         // increase the backoffExponent
+         if (schedule_vars.backoffExponent<MAXBE) {
+            schedule_vars.backoffExponent++;
+         }
+         // set the backoff to a random value in [0..2^BE]
+         schedule_vars.backoff         = openrandom_get16b()%(1<<schedule_vars.backoffExponent);
       }
-      // set the backoff to a random value in [0..2^BE]
-      schedule_vars.currentScheduleEntry->backoff =
-            openrandom_get16b()%(1<<schedule_vars.currentScheduleEntry->backoffExponent);
    }
+   
    ENABLE_INTERRUPTS();
 }
 
-/**
-// The functio below returns a direct pointer to the scheduleBuf. Modifying 
-this structure means you are modifying the scheduleBuf. Be careful when using
-the pointer and try only to read from the buffer
-
-NOBODY uses that- poipoi xv check and delete if not needed.
-*/
-/*void scheduleBuf_getAll(scheduleEntry_t *blist){
- blist=&schedule_vars.scheduleBuf[0];
-}*/
-
-
-//TODO, check that the number of bytes is not bigger than maxbytes. If so, retun error.
-void schedule_getNetDebugInfo(netDebugScheduleEntry_t *schlist, uint8_t maxbytes){
-  
+void schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist){  
   uint8_t i;
+  
   for (i=0;i<MAXACTIVESLOTS;i++){
    schlist[i].last_addr_byte=schedule_vars.scheduleBuf[i].neighbor.addr_64b[7];
    schlist[i].slotOffset=(uint8_t)schedule_vars.scheduleBuf[i].slotOffset&0xFF;
    schlist[i].channelOffset=schedule_vars.scheduleBuf[i].channelOffset;
-  }    
-
+  }
 }
 //=========================== private =========================================
 
 void schedule_resetEntry(scheduleEntry_t* pScheduleEntry) {
    pScheduleEntry->type                     = CELLTYPE_OFF;
    pScheduleEntry->shared                   = FALSE;
-   pScheduleEntry->backoffExponent          = MINBE-1;
-   pScheduleEntry->backoff                  = 0;
    pScheduleEntry->channelOffset            = 0;
    pScheduleEntry->neighbor.type            = ADDR_NONE;
    pScheduleEntry->neighbor.addr_64b[0]     = 0x14;
