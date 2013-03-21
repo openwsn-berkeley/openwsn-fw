@@ -30,6 +30,7 @@ typedef struct {
    radiotimer_compare_cbt    overflow_cb;
    radiotimer_compare_cbt    compare_cb;
    uint8_t                   overflowORcompare;//indicate RTC alarm interrupt status
+   uint16_t                  currentSlotPeriod;
 } radiotimer_vars_t;
 
 radiotimer_vars_t radiotimer_vars;
@@ -76,7 +77,7 @@ void radiotimer_start(uint16_t period) {
     // Wait for RTC APB registers synchronisation 
     RTC_WaitForSynchro();
     
-    RTC_SetPrescaler(0);                              //use 32768Hz clock
+    RTC_SetPrescaler(1);                              //use 32768Hz clock
     RTC_WaitForLastTask();                            //Wait until last write operation on RTC registers has finished
 
     //Set the RTC time counter to 0
@@ -86,6 +87,8 @@ void radiotimer_start(uint16_t period) {
     // Set the RTC time alarm(the length of slot)
     RTC_SetAlarm(period);
     RTC_WaitForLastTask();
+    
+    radiotimer_vars.currentSlotPeriod = period;
     
     //interrupt when reach alarm value
     RTC_ClearFlag(RTC_IT_ALR);
@@ -122,16 +125,15 @@ uint16_t radiotimer_getValue() {
 }
 
 void radiotimer_setPeriod(uint16_t period) {
-  
-    DISABLE_INTERRUPTS();
     
     //Reset RTC Counter to begin a new slot
     RTC_SetAlarm(period);
     RTC_WaitForLastTask();
     
+    radiotimer_vars.currentSlotPeriod = period;
+    
     //set radiotimer irpstatus
     radiotimer_vars.overflowORcompare = RADIOTIMER_OVERFLOW;
-    ENABLE_INTERRUPTS();
 }
 
 uint16_t radiotimer_getPeriod() {
@@ -151,8 +153,10 @@ void radiotimer_schedule(uint16_t offset) {
 }
 
 void radiotimer_cancel() {
+  
     // set RTC alarm (slotlength) 
-    RTC_SetAlarm(PORT_TsSlotDuration);
+//    RTC_SetAlarm(PORT_TsSlotDuration);
+    RTC_SetAlarm(radiotimer_vars.currentSlotPeriod);
     RTC_WaitForLastTask();
     
     //set radiotimer irpstatus
