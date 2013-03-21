@@ -113,7 +113,17 @@ bool debugPrint_schedule() {
    debugScheduleEntry_t temp;
    schedule_vars.debugPrintRow    = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
    temp.row                       = schedule_vars.debugPrintRow;
-   temp.scheduleEntry             = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow];
+   //copy element  by element to the struct that will  be serialized. we don't want to sent the pointer through the serial port.
+   temp.scheduleEntry.channelOffset  = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+   temp.scheduleEntry.numRx  = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
+   temp.scheduleEntry.numTx=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
+   temp.scheduleEntry.numTxACK=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+   temp.scheduleEntry.lastUsedAsn=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn;
+   temp.scheduleEntry.neighbor=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor;
+   temp.scheduleEntry.shared=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
+   temp.scheduleEntry.slotOffset=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
+   temp.scheduleEntry.type=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
+            
    openserial_printStatus(STATUS_SCHEDULE,
          (uint8_t*)&temp,
          sizeof(debugScheduleEntry_t));
