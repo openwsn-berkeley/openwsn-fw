@@ -37,7 +37,7 @@ void debugpins_init() {
      GPIOA->ODR |= 0X0020;      // fsm, PA.5
      GPIOA->ODR |= 0X0040;      // task, PA.6
      GPIOC->ODR |= 0X0002;      // isr, PC.1
-     GPIOC->ODR |= 0X0001;      // radio, PC.0
+     //GPIOC->ODR |= 0X0001;      // radio, PC.0
    
      debugpins_frame_clr();
      debugpins_slot_clr();
@@ -104,11 +104,11 @@ void debugpins_isr_set() {
 
 // PC.0
 void debugpins_radio_toggle() {
-  GPIOC->ODR ^=  0X0001;
+  //GPIOC->ODR ^=  0X0001;
 }
 void debugpins_radio_clr() {
-  GPIOC->ODR &= ~0X0001;
+  //GPIOC->ODR &= ~0X0001;
 }
 void debugpins_radio_set() {
-  GPIOC->ODR |=  0X0001;
+  //GPIOC->ODR |=  0X0001;
 }
