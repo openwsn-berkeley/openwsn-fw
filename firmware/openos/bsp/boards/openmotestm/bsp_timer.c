@@ -21,6 +21,7 @@ On openmoteSTM32, we use TIM2 for the bsp_timer module.
 typedef struct {
    bsp_timer_cbt    cb;
    PORT_TIMER_WIDTH last_compare_value;
+   PORT_TIMER_WIDTH current_bsp_timer_COUNTER;
 } bsp_timer_vars_t;
 
 bsp_timer_vars_t bsp_timer_vars;
@@ -43,10 +44,10 @@ void bsp_timer_init()
     //Configure TIM2, Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 , ENABLE);
 
-    //Configure TIM2: Period = 0xffff, prescaler = 719(72M/(719+1) = 100KHz), CounterMode  = upCounting mode
+    //Configure TIM2: Period = 0xffff, prescaler = 71(72M/(71+1) = 1MHz), CounterMode  = upCounting mode
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure ;
     TIM_TimeBaseStructure.TIM_Period        = 0xFFFF;
-    TIM_TimeBaseStructure.TIM_Prescaler     = 719;
+    TIM_TimeBaseStructure.TIM_Prescaler     = 71;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);
@@ -60,7 +61,7 @@ void bsp_timer_init()
     TIM_OC1Init(TIM2, &TIM_OCInitStructure);
           
     //enable TIM2
-    TIM_Cmd(TIM2, ENABLE); 
+    TIM_Cmd(TIM2, ENABLE);
     //disable interrupt
     //bsp_timer_cancel_schedule();
     
@@ -167,6 +168,11 @@ void bsp_timer_cancel_schedule()
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() 
 {
    return TIM_GetCounter(TIM2);
+}
+
+PORT_TIMER_WIDTH   bsp_timer_get_comparevalue()
+{
+  return TIM_GetCapture1(TIM2);;
 }
 
 //=========================== private =========================================

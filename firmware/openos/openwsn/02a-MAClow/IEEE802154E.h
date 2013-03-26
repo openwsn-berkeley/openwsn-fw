@@ -22,6 +22,10 @@
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
 #define KATIMEOUT                   66 // in slots: @15ms per slot -> ~1 seconds
 #define DESYNCTIMEOUT              333 // in slots: @15ms per slot -> ~5 seconds
+//#define RESYNCHRONIZATIONGUARD       3 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
+//#define US_PER_TICK                 60 // number of us per 32kHz clock tick
+//#define KATIMEOUT                   33 // in slots: @15ms per slot -> ~1 seconds
+//#define DESYNCTIMEOUT              167 // in slots: @15ms per slot -> ~5 seconds
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 
@@ -81,6 +85,10 @@ enum ieee154e_atomicdurations_enum {
    TsLongGT                  =   43,                  //  1300us
    TsTxAckDelay              =  151,                  //  4606us
    TsShortGT                 =   16,                  //   500us
+//   TsTxOffset                =   66,                  //  4000us
+//   TsLongGT                  =   22,                  //  1300us
+//   TsTxAckDelay              =   76,                  //  4606us
+//   TsShortGT                 =    8,                  //   500us
    TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
@@ -94,6 +102,9 @@ enum ieee154e_atomicdurations_enum {
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
+//   wdRadioTx                 =   17,                  //  1000us (needs to be >delayTx)
+//   wdDataDuration            =   82,                  //  5000us (measured 4280us with max payload)
+//   wdAckDuration             =   49,                  //  3000us (measured 1000us)
 };
 
 

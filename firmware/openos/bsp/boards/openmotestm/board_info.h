@@ -36,7 +36,7 @@ to return the board's description.
 
 #define PORT_TIMER_WIDTH                    uint16_t
 #define PORT_SIGNED_INT_WIDTH               int16_t
-#define PORT_TICS_PER_MS                    100
+#define PORT_TICS_PER_MS                    50
 #define SCHEDULER_WAKEUP()                  EXTI->SWIER |= EXTI_Line1;
 #define SCHEDULER_ENABLE_INTERRUPT()        //enable in board use EXTI_Line1
 
@@ -57,7 +57,7 @@ to return the board's description.
 
 //===== IEEE802154E timing
 
-// time-slot related
+//// time-slot related
 #define PORT_TsSlotDuration                 490   // counter counts one extra count, see datasheet
 // execution speed related
 #define PORT_maxTxDataPrepare               77    // 2014us (measured 746us)
@@ -67,6 +67,18 @@ to return the board's description.
 // radio speed related
 #define PORT_delayTx                        12     //  214us (measured 219us)
 #define PORT_delayRx                        0     //    0us (can not measure)
+
+// time-slot related
+//#define PORT_TsSlotDuration                 245   // counter counts one extra count, see datasheet
+//// execution speed related
+//#define PORT_maxTxDataPrepare               39    // 2014us (measured 746us)
+//#define PORT_maxRxAckPrepare                 6    //  305us (measured  83us)
+//#define PORT_maxRxDataPrepare               20    // 1007us (measured  84us)
+//#define PORT_maxTxAckPrepare                 6    //  305us (measured 219us)
+//// radio speed related
+//#define PORT_delayTx                         6    //  214us (measured 219us)
+//#define PORT_delayRx                         0    //    0us (can not measure)
+
 // radio watchdog
 
 //=========================== typedef  ========================================
