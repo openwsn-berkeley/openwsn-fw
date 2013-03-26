@@ -183,7 +183,7 @@ void timers_res_fired() {
       sendAdv(); // called every 10s
    } else {
       sendKa();  // called every second, except once every 10s
-      leds_debug_toggle();
+      //leds_debug_toggle();
    }
 }
 
