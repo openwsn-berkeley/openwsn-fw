@@ -419,6 +419,8 @@ status information about several modules in the OpenWSN stack.
 bool debugPrint_macStats() {
    // send current stats over serial
    ieee154e_stats.dutyCycle/=(float)SUPERFRAME_LENGTH; //avg on the all slots of a frame
+   ieee154e_stats.dutyCycle/=STATUS_MAX;//because this is executed once every 10 times of debugprint
+   ieee154e_stats.dutyCycle*=100.0;//as is a percentage
    openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
    ieee154e_stats.dutyCycle=0; //reset for the next superframe.
    
