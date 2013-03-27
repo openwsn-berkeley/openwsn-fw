@@ -57,4 +57,6 @@ void           opentimers_setPeriod(opentimer_id_t id,time_type_t timetype, uint
 void           opentimers_stop(opentimer_id_t id);
 void           opentimers_restart(opentimer_id_t id);
 
+void           opentimers_sleepTimeCompesation(uint16_t sleepTime);
+
 #endif
