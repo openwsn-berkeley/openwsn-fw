@@ -17,8 +17,9 @@
 #include "nvic.h"
 #include "debugpins.h"
 #include "board_info.h"
-#include "openserial.h"
-#include "opentimers.h"
+//#include "opentimers.h"
+//#include "openserial.h"
+#include "gpio.h"
 
 
 //=========================== main ============================================
@@ -35,6 +36,8 @@ void board_init()
 {
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
+    
+    GPIO_Config_ALL_AIN();
     
     GPIO_InitTypeDef  GPIO_InitStructure;  
   
@@ -86,21 +89,24 @@ void board_init()
 }
 
 void board_sleep() {
-  
+//    uint16_t sleepTime = radiotimer_getPeriod() - radiotimer_getCapturedTime();
     DBGMCU_Config(DBGMCU_STOP, ENABLE);
-
+    
     // Enable PWR and BKP clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
     // Desable the SRAM and FLITF clock in Stop mode
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM|RCC_AHBPeriph_FLITF, DISABLE);
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM | RCC_AHBPeriph_FLITF, DISABLE);
     
-    uint16_t sleepTime = radiotimer_getPeriod() - radiotimer_getCapturedTime();
-
+    GPIOC->ODR |= 0x0010;
+    
+//    openserial_stop();
     PWR_EnterSTOPMode(PWR_Regulator_LowPower,PWR_STOPEntry_WFI);
+//    openserial_startOutput();
     
-    RCC_Configuration();//Configure rcc
+    GPIOC->ODR &= ~0x0010;
     
-    opentimers_sleepTimeCompesation(sleepTime*2);
+//    if(sleepTime > 0)
+//    opentimers_sleepTimeCompesation(sleepTime*2);
     
 }
 

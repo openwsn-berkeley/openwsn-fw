@@ -2,6 +2,9 @@
 
 <workspace>
   <project>
+    <path>$WS_DIR$\00std_low_power_mode\00std_low_power_mode.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_bothtimer\01bsp_bothtimer.ewp</path>
   </project>
   <project>

@@ -28,7 +28,7 @@ void leds_init()
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-    // Configure PA.11 and PA.12 as Output push-pull 
+    // Configure PB.08 and PB.09 as Output push-pull 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
@@ -152,17 +152,17 @@ uint8_t leds_debug_isOn()
 
 void leds_all_on() 
 {
-   GPIOC->ODR |= 0X00C0;
+   GPIOC->ODR |= 0X000C;
    GPIOB->ODR |= 0X0300;
 }
 void leds_all_off() 
 {
-   GPIOC->ODR &= ~0X00C0;
+   GPIOC->ODR &= ~0X000C;
    GPIOB->ODR &= ~0X0300;
 }
 void leds_all_toggle() 
 {
-   GPIOC->ODR ^= 0X00C0;
+   GPIOC->ODR ^= 0X000C;
    GPIOB->ODR ^= 0X0300;
 }
 

@@ -86,12 +86,29 @@ void NVIC_rtctimer(void)
 //configuration radiotimer interrput
 void NVIC_radiotimer(void)
 {
-    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 2
+//    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 2
+//    NVIC_InitTypeDef NVIC_InitStructure;
+//    NVIC_InitStructure.NVIC_IRQChannel                   = TIM3_IRQChannel;
+//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+//    NVIC_InitStructure.NVIC_IRQChannelSubPriority        = 2;
+//    NVIC_InitStructure.NVIC_IRQChannelCmd                = ENABLE;
+//    NVIC_Init(&NVIC_InitStructure);
+  
+    //Configure RTC global interrupt:
+    //Configure NVIC: Preemption Priority = 1 and Sub Priority = 1
     NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                   = TIM3_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority        = 2;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                = ENABLE;
+    NVIC_InitStructure.NVIC_IRQChannel                    = RTC_IRQChannel;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority  = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 1;
+    NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+    
+    //Configure RTC Alarm interrupt:
+    //Configure NVIC: Preemption Priority = 0 and Sub Priority = 1
+    NVIC_InitStructure.NVIC_IRQChannel                    = RTCAlarm_IRQChannel;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority  = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 }
 
@@ -105,6 +122,16 @@ void NVIC_radio(void)
     NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 0; 
     NVIC_InitStructure.NVIC_IRQChannelCmd                  = ENABLE; 
     NVIC_Init(&NVIC_InitStructure);
+}
+
+void NVIC_exti(void)
+{
+  NVIC_InitTypeDef NVIC_InitStructure;
+  NVIC_InitStructure.NVIC_IRQChannel = EXTI4_IRQChannel;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
 }
 
 //configuration of interrupt on openmotestm32

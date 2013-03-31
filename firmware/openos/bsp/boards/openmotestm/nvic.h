@@ -26,6 +26,7 @@ void NVIC_bsptimer(void);
 void NVIC_rtctimer(void);
 void NVIC_radiotimer(void);
 void NVIC_radio(void);
+void NVIC_exti(void);
 
 //disabel module interrput on openmotestm32 
 void NVIC_uart_disable(void);

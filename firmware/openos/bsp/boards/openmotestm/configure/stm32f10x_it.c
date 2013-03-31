@@ -24,6 +24,7 @@
 #include "radio.h"
 #include "rtc_timer.h"
 #include "uart.h"
+#include "rcc.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -636,6 +637,7 @@ void EXTI15_10_IRQHandler(void)
 *******************************************************************************/
 void RTCAlarm_IRQHandler(void)
 {
+  RCC_Wakeup();
   if(EXTI_GetITStatus(EXTI_Line17) != RESET)
   {
 	EXTI_ClearITPendingBit(EXTI_Line17);
