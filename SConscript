@@ -49,7 +49,7 @@ if   env['toolchain']=='mspgcc':
     # convert ELF to bin
     elf2BinFunc = Builder(
        action = 'msp430-objcopy --output-target=binary $SOURCE $TARGET',
-       suffix = '.ihex',
+       suffix = '.bin',
     )
     env.Append(BUILDERS = {'Elf2iBin' : elf2BinFunc})
     
