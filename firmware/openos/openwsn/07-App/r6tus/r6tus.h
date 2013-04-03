@@ -21,7 +21,7 @@
 
 //=========================== define ==========================================
 
-#define RSCHED_MAXRESPONSES 20 //max number of elements to be processed by a command.
+#define R6TUS_MAXRESPONSES 20 //max number of elements to be processed by a command.
 
 
 
@@ -40,7 +40,7 @@ PRAGMA(pack(1)); //elements for slot info
 typedef struct {
   link_command_t type; 
   uint8_t numelem;//number of elements 
-}rsched_command_t;
+}r6tus_command_t;
 PRAGMA(pack());
 
 
@@ -50,7 +50,7 @@ PRAGMA(pack());
 
 //=========================== prototypes ======================================
 
-void rsched_init();
+void r6tus_init();
 
 /**
 \}

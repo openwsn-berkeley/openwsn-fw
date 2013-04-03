@@ -56,7 +56,7 @@
 //#include "rrube.h"
 //#include "rxl1.h"
 //#include "layerdebug.h"
-#include "rsched.h"
+#include "r6tus.h"
 //-- misc
 //#include "heli.h"
 //#include "imu.h"
@@ -125,7 +125,7 @@ void openwsn_init() {
    //rrube_init();
    //rxl1_init();
    //layerdebug_init();
-   rsched_init();
+   r6tus_init();
    //-- misc
    //heli_init();
    //imu_init();
