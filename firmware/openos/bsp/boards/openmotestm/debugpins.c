@@ -105,11 +105,11 @@ void debugpins_isr_set() {
 
 // PC.0
 void debugpins_radio_toggle() {
-  //GPIOC->ODR ^=  0X0001;
+  GPIOC->ODR ^=  0X0001;
 }
 void debugpins_radio_clr() {
-  //GPIOC->ODR &= ~0X0001;
+  GPIOC->ODR &= ~0X0001;
 }
 void debugpins_radio_set() {
-  //GPIOC->ODR |=  0X0001;
+  GPIOC->ODR |=  0X0001;
 }

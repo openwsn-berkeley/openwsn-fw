@@ -47,7 +47,7 @@ void GPIO_Config_ALL_AIN(void)
 }
 
 /**
-  * @brief  Configures the GPIO PC0.6 port.
+  * @brief  Configures the GPIO PD0.2 port.
   * @param  None
   * @retval : None
   */
@@ -55,12 +55,22 @@ void GPIO_Configuration(void)
 {
   GPIO_InitTypeDef GPIO_InitStructure;
 
-  /* Enable GPIOC clock */
+  /* Enable GPIOD clock */
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD, ENABLE);
 
-  /* Configure PC.09 as Output push-pull 50MHz */
+  /* Configure PD.02 as Output push-pull 50MHz */
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_2;
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
   GPIO_Init(GPIOD, &GPIO_InitStructure);
+  
+    /* Enable GPIOC clock */
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
+
+  /* Configure PC.04 as Output push-pull 50MHz */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_4;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
+
 }

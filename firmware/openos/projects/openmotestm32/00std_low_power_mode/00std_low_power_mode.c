@@ -24,11 +24,12 @@ can use this project with any platform.
 #define ID              0xab           ///< byte sent in the packets
 
 // voltage: 4.14V
-//#define RADIO_SLEEP //measured: 49uA
-//#define RADIO_TRXOFF //measured: 1.31mA
-//#define RADIO_PLL_ON //measured: 6.43mA
-//#define RADIO_BUSY_TX //can not measure
-#define RADIO_RX_ON //measured: 13.84mA
+#define RADIO_SLEEP //measured: 49uA in stop mode
+#define RADIO_SLEEP_IN_RUN_MOdE //measured: 23.7mA in run mode 
+//#define RADIO_TRXOFF //measured: 1.31mA in stop mode
+//#define RADIO_PLL_ON //measured: 6.43mA in stop mode
+//#define RADIO_BUSY_TX //calculated: 41mA-23.7mA+49uA = 17.35mA
+//#define RADIO_RX_ON //measured: 13.84mA in stop mode
 
 //=========================== variables =======================================
 
@@ -97,6 +98,9 @@ int mote_main(void) {
    
 #ifdef RADIO_SLEEP
    PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
+#ifdef RADIO_SLEEP_IN_RUN_MOdE
+   while(1);
+#endif
    board_sleep();
 #endif
    
@@ -214,10 +218,18 @@ int mote_main(void) {
                
 #ifdef RADIO_PLL_ON
                leds_all_off();
-   board_sleep();
+               board_sleep();
 #endif
                
                radio_txNow();
+#ifdef RADIO_BUSY_TX
+               leds_all_off();
+               while(1) { //keep sending
+                    PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
+                    PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
+               }
+               board_sleep();
+#endif
                
                app_vars.state = APP_STATE_TX;
             }

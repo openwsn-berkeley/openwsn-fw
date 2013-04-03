@@ -35,6 +35,9 @@
     <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\01bsp_uart_with_stop_mode\01bsp_uart_with_stop_mode.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\02drv_opentimers\02drv_opentimer.ewp</path>
   </project>
   <project>
