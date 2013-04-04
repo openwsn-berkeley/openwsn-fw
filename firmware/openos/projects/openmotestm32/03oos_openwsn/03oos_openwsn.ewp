@@ -1888,12 +1888,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\flash.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\gpio.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\gpio.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\leds.c</name>
         </file>
         <file>

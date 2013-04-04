@@ -18,8 +18,6 @@
 #include "debugpins.h"
 #include "board_info.h"
 #include "opentimers.h"
-#include "openserial.h"
-#include "gpio.h"
 
 
 //=========================== main ============================================
@@ -28,7 +26,6 @@ extern int mote_main(void);
 int main(void) {
    return mote_main();
 }
-//=========================== defines =========================================
 
 //=========================== public ==========================================
 
@@ -36,10 +33,6 @@ void board_init()
 {
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
-    
-    GPIO_Config_ALL_AIN();
-    
-    GPIO_Configuration();
     
     GPIO_InitTypeDef  GPIO_InitStructure;  
   
@@ -99,20 +92,22 @@ void board_sleep() {
     // Desable the SRAM and FLITF clock in Stop mode
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM | RCC_AHBPeriph_FLITF, DISABLE);
     
-    GPIOC->ODR |= 0x0010;
+//    GPIOC->ODR |= 0x0010;
 
 //    while(openserial_get_outBufferFilled());
     PWR_EnterSTOPMode(PWR_Regulator_LowPower,PWR_STOPEntry_WFI);
     
-    GPIOC->ODR &= ~0x0010;
+//    GPIOC->ODR &= ~0x0010;
     
     if(sleepTime > 0)
     opentimers_sleepTimeCompesation(sleepTime*2);
-    
 }
+
+
 
 void board_reset(){
 }
+
 
  
 

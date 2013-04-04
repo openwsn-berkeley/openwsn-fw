@@ -36,11 +36,11 @@ void RCC_Configuration(void)
       /* HCLK = SYSCLK */
       RCC_HCLKConfig(RCC_SYSCLK_Div1); 
   
-      /* PCLK2 = HCLK/2 */
-      RCC_PCLK2Config(RCC_HCLK_Div2); 
+      /* PCLK2 = HCLK */
+      RCC_PCLK2Config(RCC_HCLK_Div1); 
 
-      /* PCLK1 = HCLK/4 */
-      RCC_PCLK1Config(RCC_HCLK_Div4);
+      /* PCLK1 = HCLK/2 */
+      RCC_PCLK1Config(RCC_HCLK_Div2);
 
       /* PLLCLK = 8MHz * 9 = 72 MHz */
       RCC_PLLConfig(RCC_PLLSource_HSE_Div1, RCC_PLLMul_9);
@@ -90,6 +90,4 @@ void RCC_Wakeup(void)
       while(RCC_GetSYSCLKSource() != 0x08)
       {}
      }
-    //enable AFIO 
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO, ENABLE);
 }

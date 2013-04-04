@@ -24,6 +24,7 @@
 #include "radio.h"
 #include "rtc_timer.h"
 #include "uart.h"
+#include "debugpins.h"
 #include "rcc.h"
 
 /* Private typedef -----------------------------------------------------------*/
@@ -476,12 +477,14 @@ void TIM1_CC_IRQHandler(void)
 *******************************************************************************/
 void TIM2_IRQHandler(void)
 {
+  debugpins_isr_set();
   if(TIM_GetFlagStatus(TIM2,TIM_FLAG_CC1) != RESET)
   {
     TIM_ClearFlag(TIM2,TIM_FLAG_CC1);
     //leds_error_toggle();
     bsp_timer_isr();
   }
+  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -563,11 +566,12 @@ void I2C2_ER_IRQHandler(void)
 *******************************************************************************/
 void SPI1_IRQHandler(void)
 {
+  debugpins_isr_set();
   if(SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE) != RESET)
   {
     spi_isr();
   }
-
+  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -623,9 +627,11 @@ void USART3_IRQHandler(void)
 *******************************************************************************/
 void EXTI15_10_IRQHandler(void)
 {
+    debugpins_isr_set();
     //leds_sync_toggle();
     EXTI_ClearFlag(EXTI_Line10);
     radio_isr();
+    debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -638,11 +644,13 @@ void EXTI15_10_IRQHandler(void)
 void RTCAlarm_IRQHandler(void)
 {
   RCC_Wakeup();
+  debugpins_isr_set();
   if(EXTI_GetITStatus(EXTI_Line17) != RESET)
   {
 	EXTI_ClearITPendingBit(EXTI_Line17);
         radiotimer_isr();
   }
+  debugpins_isr_clr();
 }
 
 /*******************************************************************************
@@ -766,6 +774,7 @@ void SPI3_IRQHandler(void)
 *******************************************************************************/
 void UART4_IRQHandler(void)
 {
+    debugpins_isr_set();
     if(USART_GetFlagStatus(UART4,USART_FLAG_RXNE) != RESET)
     {
       USART_ClearFlag(UART4,USART_FLAG_RXNE);
@@ -779,6 +788,7 @@ void UART4_IRQHandler(void)
       
         uart_tx_isr(); 
     }
+    debugpins_isr_clr();
 }
 
 /*******************************************************************************

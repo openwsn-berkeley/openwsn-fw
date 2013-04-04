@@ -362,4 +362,3 @@ void opentimers_sleepTimeCompesation(uint16_t sleepTime)
       opentimers_vars.running = FALSE;
    }
 }
-

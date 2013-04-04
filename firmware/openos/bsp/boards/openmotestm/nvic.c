@@ -86,14 +86,6 @@ void NVIC_rtctimer(void)
 //configuration radiotimer interrput
 void NVIC_radiotimer(void)
 {
-//    //Configure NVIC: Preemption Priority = 2 and Sub Priority = 2
-//    NVIC_InitTypeDef NVIC_InitStructure;
-//    NVIC_InitStructure.NVIC_IRQChannel                   = TIM3_IRQChannel;
-//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-//    NVIC_InitStructure.NVIC_IRQChannelSubPriority        = 2;
-//    NVIC_InitStructure.NVIC_IRQChannelCmd                = ENABLE;
-//    NVIC_Init(&NVIC_InitStructure);
-  
     //Configure RTC global interrupt:
     //Configure NVIC: Preemption Priority = 1 and Sub Priority = 1
     NVIC_InitTypeDef NVIC_InitStructure;
@@ -124,16 +116,6 @@ void NVIC_radio(void)
     NVIC_Init(&NVIC_InitStructure);
 }
 
-void NVIC_exti(void)
-{
-  NVIC_InitTypeDef NVIC_InitStructure;
-  NVIC_InitStructure.NVIC_IRQChannel = EXTI4_IRQChannel;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
-}
-
 //configuration of interrupt on openmotestm32
 void NVIC_Configuration(void)
 {
@@ -150,58 +132,4 @@ void NVIC_Configuration(void)
 //     NVIC_rtctimer();
 //     NVIC_radiotimer();
     //NVIC_radio();
-}
-
-//disabel module interrput on openmotestm32 
-void NVIC_uart_disable(void)
-{
-    NVIC_InitTypeDef 	NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = UART4_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = DISABLE;
-    NVIC_Init(&NVIC_InitStructure);
-}
-
-void NVIC_spi_disable(void)
-{
-    NVIC_InitTypeDef 	NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = SPI1_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = DISABLE;
-    NVIC_Init(&NVIC_InitStructure);
-}
-void NVIC_bsptimer_disable(void)
-{
-    NVIC_InitTypeDef 	NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = TIM2_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = DISABLE;
-    NVIC_Init(&NVIC_InitStructure);  
-}
-
-void NVIC_rtctimer_disable(void)
-{
-    NVIC_InitTypeDef 	NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = RTC_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = DISABLE;
-    NVIC_Init(&NVIC_InitStructure);
-    
-    NVIC_InitStructure.NVIC_IRQChannel                    = RTCAlarm_IRQChannel;
-    NVIC_Init(&NVIC_InitStructure);
-}
-
-void NVIC_radiotimer_disable(void)
-{
-    NVIC_InitTypeDef 	NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = RTC_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = DISABLE;
-    NVIC_Init(&NVIC_InitStructure);
-    
-    NVIC_InitStructure.NVIC_IRQChannel                    = RTCAlarm_IRQChannel;
-    NVIC_Init(&NVIC_InitStructure);
-}
-
-void NVIC_radio_disable(void)
-{
-    NVIC_InitTypeDef 	NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = EXTI15_10_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = DISABLE;
-    NVIC_Init(&NVIC_InitStructure);
 }
