@@ -1,7 +1,6 @@
 #include "openwsn.h"
 #include "icmpv6.h"
 #include "icmpv6echo.h"
-#include "icmpv6router.h"
 #include "icmpv6rpl.h"
 #include "forwarding.h"
 #include "openqueue.h"
@@ -17,7 +16,7 @@ void icmpv6_init() {
 }
 
 error_t icmpv6_send(OpenQueueEntry_t* msg) {
-   msg->owner = COMPONENT_ICMPv6;
+   msg->owner       = COMPONENT_ICMPv6;
    msg->l4_protocol = IANA_ICMPv6;
    return forwarding_send(msg);
 }
@@ -29,15 +28,11 @@ void icmpv6_sendDone(OpenQueueEntry_t* msg, error_t error) {
       case IANA_ICMPv6_ECHO_REPLY:
          icmpv6echo_sendDone(msg, error);
          break;
-      case IANA_ICMPv6_RS:
-      case IANA_ICMPv6_RA:
-         icmpv6router_sendDone(msg, error);
-         break;
       case IANA_ICMPv6_RPL:
          icmpv6rpl_sendDone(msg, error);
          break;
       default:
-         openserial_printError(COMPONENT_ICMPv6,ERR_UNSUPPORTED_ICMPV6_TYPE,
+         openserial_printCritical(COMPONENT_ICMPv6,ERR_UNSUPPORTED_ICMPV6_TYPE,
                                (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
                                (errorparameter_t)0);
          // free the corresponding packet buffer
@@ -53,10 +48,6 @@ void icmpv6_receive(OpenQueueEntry_t* msg) {
       case IANA_ICMPv6_ECHO_REQUEST:
       case IANA_ICMPv6_ECHO_REPLY:
          icmpv6echo_receive(msg);
-         break;
-      case IANA_ICMPv6_RS:
-      case IANA_ICMPv6_RA:
-         icmpv6router_receive(msg);
          break;
       case IANA_ICMPv6_RPL:
          icmpv6rpl_receive(msg);

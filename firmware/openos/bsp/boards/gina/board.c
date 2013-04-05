@@ -109,6 +109,10 @@ void board_sleep() {
    __bis_SR_register(GIE+LPM3_bits);             // sleep, but leave ACLK on
 }
 
+void board_reset() {
+   WDTCTL = (WDTPW+0x1200) + WDTHOLD; // writing a wrong watchdog password to causes handler to reset
+}
+
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
@@ -136,7 +140,7 @@ __interrupt void USCIAB1TX_ISR(void) {
       isr_i2c_tx(1);                             // I2C: TX
    }
    if ( (UC1IFG & UCA1TXIFG) && (UC1IE & UCA1TXIE) ){
-      if (uart_isr_tx()==1) {                    // UART: TX
+      if (uart_tx_isr()==KICK_SCHEDULER) {       // UART: TX
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
@@ -152,7 +156,7 @@ __interrupt void USCIAB1RX_ISR(void) {
       isr_i2c_rx(1);                             // I2C: RX, bus 1
    }
    if ( (UC1IFG & UCA1RXIFG) && (UC1IE & UCA1RXIE) ){
-      if (uart_isr_rx()==1) {                    // UART: RX
+      if (uart_rx_isr()==KICK_SCHEDULER) {       // UART: RX
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
@@ -165,7 +169,7 @@ __interrupt void PORT1_ISR (void) {
    debugpins_isr_set();
    if (P1IFG & 0x40) {
       P1IFG &= ~0x40;
-      if (radio_isr()==1) {                      // radio:  SFD pin [P1.6]
+      if (radio_isr()==KICK_SCHEDULER) {         // radio:  SFD pin [P1.6]
          __bic_SR_register_on_exit(CPUOFF);
       }
    } else {
@@ -213,7 +217,7 @@ __interrupt void USCIAB0RX_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
    if ( (IFG2 & UCA0RXIFG) && (IE2 & UCA0RXIE) ) {
-      if (spi_isr()==1) {                        // SPI
+      if (spi_isr()==KICK_SCHEDULER) {           // SPI
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
@@ -229,7 +233,7 @@ __interrupt void TIMERA1_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
    
-   if (radiotimer_isr()==1) {                    // radiotimer
+   if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
@@ -268,7 +272,7 @@ __interrupt void TIMERB1_ISR (void) {
 __interrupt void TIMERB0_ISR (void) {
    CAPTURE_TIME();
    debugpins_isr_set();
-   if (bsp_timer_isr()==1) {                       // timer: 0
+   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();

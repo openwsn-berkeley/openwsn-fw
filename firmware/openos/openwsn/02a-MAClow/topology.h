@@ -1,12 +1,15 @@
-#ifndef __ICMPv6ROUTER_H
-#define __ICMPv6ROUTER_H
+#ifndef __TOPOLOGY_H
+#define __TOPOLOGY_H
 
 /**
-\addtogroup IPv6
+\addtogroup MAClow
 \{
-\addtogroup ICMPv6Router
+\addtogroup topology
 \{
 */
+
+#include "openwsn.h"
+#include "IEEE802154.h"
 
 //=========================== define ==========================================
 
@@ -16,10 +19,9 @@
 
 //=========================== prototypes ======================================
 
-void icmpv6router_init();
-void icmpv6router_trigger();
-void icmpv6router_sendDone(OpenQueueEntry_t* msg, error_t error);
-void icmpv6router_receive(OpenQueueEntry_t* msg);
+//=========================== prototypes ======================================
+
+bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header);
 
 /**
 \}

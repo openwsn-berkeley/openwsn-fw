@@ -54,7 +54,7 @@ typedef struct{
 
 typedef struct{
 	uint8_t	        numOfSlotframes;
-        slotframeInfo_t   slotframeInfo[MAXSOLTFRAMENUM];
+        slotframeInfo_t   slotframeInfo[SUPERFRAME_LENGTH];
 }frameAndLinkIEcontent_t;
 
 typedef	struct{
@@ -71,7 +71,7 @@ typedef struct{
 
 typedef	struct{
 	uint8_t		  numOfSlotframes;
-        slotframeInfo_t   slotframeInfo[MAXSOLTFRAMENUM];
+        slotframeInfo_t   slotframeInfo[SUPERFRAME_LENGTH];
 }uResLinkTypeIEcontent_t;
 
 typedef	struct{

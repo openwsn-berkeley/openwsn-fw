@@ -59,6 +59,12 @@ void radio_init() {
    radio_spiWriteReg(RG_TRX_CTRL_1, 0x20);                // have the radio calculate CRC
    //busy wait until radio status is TRX_OFF
   
+   #define RG_TRX_CTRL_2 0x0C //data rate  
+#define DATA_RATE_2MB 0x03 //data rate 2mbps
+#define DATA_RATE_250KB 0x00 //data rate 2mbps
+
+radio_spiWriteReg(RG_TRX_CTRL_2,DATA_RATE_250KB);
+   
    while((radio_spiReadReg(RG_TRX_STATUS) & 0x1F) != TRX_OFF);
    
    // change state
@@ -396,7 +402,7 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
 
 //=========================== interrupt handlers ==============================
 
-uint8_t radio_isr() {
+kick_scheduler_t radio_isr() {
    PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status;
    
@@ -414,7 +420,7 @@ uint8_t radio_isr() {
          // call the callback
          radio_vars.startFrame_cb(capturedTime);
          // kick the OS
-         return 1;
+         return KICK_SCHEDULER;
       } else {
          while(1);
       }
@@ -427,11 +433,11 @@ uint8_t radio_isr() {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
          // kick the OS
-         return 1;
+         return KICK_SCHEDULER;
       } else {
          while(1);
       }
    }
    
-   return 0;
+   return DO_NOT_KICK_SCHEDULER;
 }

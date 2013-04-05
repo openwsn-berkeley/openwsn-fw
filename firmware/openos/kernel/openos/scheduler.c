@@ -4,10 +4,11 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "board.h"
-#include "scheduler.h"
 #include "openwsn.h"
+#include "scheduler.h"
+#include "board.h"
 #include "debugpins.h"
+#include "leds.h"
 
 //=========================== variables =======================================
 
@@ -35,7 +36,7 @@ scheduler_dbg_t scheduler_dbg;
 
 //=========================== prototypes ======================================
 
- void    consumeTask(uint8_t taskId);
+void consumeTask(uint8_t taskId);
 
 //=========================== public ==========================================
 
@@ -90,8 +91,13 @@ void scheduler_start() {
       taskContainer++;
    }
    if (taskContainer>&scheduler_vars.taskBuf[TASK_LIST_DEPTH-1]) {
-      // task list has overflown
-      while(1);
+      // task list has overflown. This should never happpen!
+   
+      // we can not print from within the kernel. Instead:
+      // blink the error LED
+      leds_error_blink();
+      // reset the board
+      board_reset();
    }
    // fill that task container with this task
    taskContainer->cb              = cb;
@@ -111,6 +117,7 @@ void scheduler_start() {
    if (scheduler_dbg.numTasksCur>scheduler_dbg.numTasksMax) {
       scheduler_dbg.numTasksMax   = scheduler_dbg.numTasksCur;
    }
+   
    ENABLE_INTERRUPTS();
 }
 

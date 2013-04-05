@@ -20,7 +20,8 @@ Load this program on your boards. The LEDs should start blinking furiously.
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   uint16_t delay;
+   volatile uint16_t delay;
+   uint8_t i;
    
    board_init();
    
@@ -39,10 +40,15 @@ int mote_main(void) {
    leds_sync_toggle();
    leds_circular_shift();
    
-   while (1) {
+   for (i=0;i<20;i++) {
       for (delay=0xffff;delay>0;delay--);
       leds_increment();
       for (delay=0xffff;delay>0;delay--);
       leds_circular_shift();
    }
+   
+   leds_error_blink();
+   
+   board_reset();
+   return 0;
 }

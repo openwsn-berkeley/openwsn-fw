@@ -38,7 +38,7 @@ void     radiotimer_cancel();
 // capture
 PORT_TIMER_WIDTH radiotimer_getCapturedTime();
 
-
-uint8_t  radiotimer_isr();
+// interrupt handlers
+kick_scheduler_t   radiotimer_isr();
 
 #endif

@@ -5,9 +5,8 @@
 */
 
 #include "msp430f1611.h"
-#include "stdio.h"
-#include "string.h"
 #include "radiotimer.h"
+#include "leds.h"
 
 //=========================== variables =======================================
 
@@ -104,7 +103,15 @@ void radiotimer_cancel() {
 //===== capture
 
 inline uint16_t radiotimer_getCapturedTime() {
-   while(1);
+   // this should never happpen!
+   
+   // we can not print from within the BSP. Instead:
+   // blink the error LED
+   leds_error_blink();
+   // reset the board
+   board_reset();
+   
+   return 0;// this line is never reached, but here to satisfy compiler
 }
 
 //=========================== private =========================================
@@ -114,7 +121,7 @@ inline uint16_t radiotimer_getCapturedTime() {
 /**
 \brief TimerB CCR1-6 interrupt service routine
 */
-uint8_t radiotimer_isr() {
+kick_scheduler_t radiotimer_isr() {
    uint16_t tbiv_local;
    
    // reading TBIV returns the value of the highest pending interrupt flag
@@ -131,14 +138,14 @@ uint8_t radiotimer_isr() {
             if (radiotimer_vars.startFrameCb!=NULL) {
                radiotimer_vars.startFrameCb(TBCCR1);
                // kick the OS
-               return 1;
+               return KICK_SCHEDULER;
             }
          } else {
             // SFD pin is low: this was the end of a frame
             if (radiotimer_vars.endFrameCb!=NULL) {
                radiotimer_vars.endFrameCb(TBCCR1);
                // kick the OS
-               return 1;
+               return KICK_SCHEDULER;
             }
          }
          break;
@@ -146,7 +153,7 @@ uint8_t radiotimer_isr() {
          if (radiotimer_vars.compareCb!=NULL) {
             radiotimer_vars.compareCb();
             // kick the OS
-            return 1;
+            return KICK_SCHEDULER;
          }
          break;
       case 0x0006: // CCR3 fires
@@ -161,9 +168,9 @@ uint8_t radiotimer_isr() {
          if (radiotimer_vars.overflowCb!=NULL) {
             radiotimer_vars.overflowCb();
             // kick the OS
-            return 1;
+            return KICK_SCHEDULER;
          }
          break;
    }
-   return 0;
+   return DO_NOT_KICK_SCHEDULER;
 }

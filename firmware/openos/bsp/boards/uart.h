@@ -8,10 +8,9 @@
 #define __UART_H
 
 #include "stdint.h"
+#include "board.h"
  
 //=========================== define ==========================================
-
-#define UART_BAUDRATE_115200
 
 //=========================== typedef =========================================
 
@@ -36,8 +35,8 @@ void    uart_clearTxInterrupts();
 void    uart_writeByte(uint8_t byteToWrite);
 uint8_t uart_readByte();
 
-uint8_t uart_isr_tx();
-uint8_t uart_isr_rx();
-
+// interrupt handlers
+kick_scheduler_t uart_tx_isr();
+kick_scheduler_t uart_rx_isr();
 
 #endif

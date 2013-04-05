@@ -133,9 +133,9 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 
 //=========================== interrupt handlers ==============================
 
-uint8_t bsp_timer_isr() {
+kick_scheduler_t bsp_timer_isr() {
    // call the callback
    bsp_timer_vars.cb();
    // kick the OS
-   return 1;
+   return KICK_SCHEDULER;
 }

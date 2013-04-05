@@ -3,7 +3,7 @@ import socket
 request    = "poipoipoipoi"
 myAddress  = '' #means 'all'
 myPort     = 21568
-hisAddress = 'aaaa:0:0:cafe:1415:9209:22c:ae'
+hisAddress = '2001:470:48b8:cfde:1415:9200:12:e63b'
 hisPort    = 7
 
 print "Testing udpEcho..."

@@ -15,10 +15,11 @@
 void openbridge_init() {
 }
 
-void openbridge_trigger() {
+void openbridge_triggerData() {
    uint8_t           input_buffer[136];//worst case: 8B of next hop + 128B of data
    OpenQueueEntry_t* pkt;
    uint8_t           numDataBytes;
+   
    numDataBytes = openserial_getNumDataBytes();
    openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
    
@@ -69,22 +70,23 @@ void openbridge_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
+/**
+\brief Receive a frame at the openbridge, which sends it out over serial.
+*/
 void openbridge_receive(OpenQueueEntry_t* msg) {
-  //poipoi xv sending src and dest.
-   uint8_t total;
-   uint8_t size=sizeof(msg->l2_nextORpreviousHop.addr_64b);
-   total=size;
-   packetfunctions_reserveHeaderSize(msg,size);
-   memcpy(msg->payload,msg->l2_nextORpreviousHop.addr_64b,size);
    
-   size=sizeof(idmanager_getMyID(ADDR_64B)->addr_64b);
-   total+=size;
-  
-   packetfunctions_reserveHeaderSize(msg,size);
-
-   memcpy(msg->payload,idmanager_getMyID(ADDR_64B)->addr_64b,size);
-  
+   // prepend previous hop
+   packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
+   memcpy(msg->payload,msg->l2_nextORpreviousHop.addr_64b,LENGTH_ADDR64b);
+   
+   // prepend next hop (me)
+   packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
+   memcpy(msg->payload,idmanager_getMyID(ADDR_64B)->addr_64b,LENGTH_ADDR64b);
+   
+   // send packet over serial (will be memcopied into serial buffer)
    openserial_printData((uint8_t*)(msg->payload),msg->length);
+   
+   // free packet
    openqueue_freePacketBuffer(msg);
 }
 

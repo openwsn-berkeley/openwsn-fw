@@ -41,10 +41,10 @@
     <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\01bsp_radio_range_rx\01bsp_radio_range_rx.ewp</path>
+    <path>$WS_DIR$\01bsp_radio_rx\01bsp_radio_rx.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\01bsp_radio_range_tx\01bsp_radio_range_tx.ewp</path>
+    <path>$WS_DIR$\01bsp_radio_tx\01bsp_radio_tx.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_radiotimer\01bsp_radiotimer.ewp</path>

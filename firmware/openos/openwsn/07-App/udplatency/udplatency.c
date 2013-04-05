@@ -76,7 +76,7 @@ void udplatency_task(){
    pkt->payload[6]=p->addr_64b[6];
    pkt->payload[7]=p->addr_64b[7];
    
-   neighbors_getPreferredParent(&q,ADDR_64B);  
+   neighbors_getPreferredParentEui64(&q);
    if (q.type==ADDR_64B){
       packetfunctions_reserveHeaderSize(pkt,8);
    

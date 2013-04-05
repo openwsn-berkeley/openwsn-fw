@@ -1987,10 +1987,10 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.c</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\openwsn_proj.h</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.h</name>
     </file>
   </group>
   <group>
@@ -2118,6 +2118,12 @@
     <group>
       <name>common</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
       </file>
       <file>
@@ -2128,6 +2134,12 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\serialecho.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\serialecho.h</name>
       </file>
     </group>
     <group>
@@ -2165,15 +2177,15 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.h</name>
       </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.h</name>
+      </file>
     </group>
     <group>
       <name>02b-MAChigh</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\linkcost.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\linkcost.h</name>
-      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.c</name>
       </file>
@@ -2227,12 +2239,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6echo.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6router.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.c</name>

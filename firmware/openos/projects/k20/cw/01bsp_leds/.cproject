@@ -788,7 +788,7 @@
 						</tool>
 					</fileInfo>
 					<sourceEntries>
-						<entry excluding="Sources/application/openwsn_proj.c|Sources/application/01bsp_spi.c|Sources/application/01bsp_radio.c|Sources/application/01bsp_bothtimers.c|Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Sources/application/03oos_openwsn.c|Sources/application/01bsp_spi.c|Sources/application/01bsp_radio.c|Sources/application/01bsp_bothtimers.c|Sources/openwsn/02a-MAClow/stupidmac/|Sources/openwsn/07-App/heli/|Sources/k20/cpu/crt0.s|Sources/openwsn/07-App/rt/|Sources/openwsn/07-App/rex/|Project_Settings/Linker_Files/MK20DX256_ram.lcf|Sources/openwsn/07-App/imu/|Sources/openwsn/07-App/rxl1/" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

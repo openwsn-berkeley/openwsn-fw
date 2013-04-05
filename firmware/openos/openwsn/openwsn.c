@@ -28,7 +28,6 @@
 #include "forwarding.h"
 #include "icmpv6.h"
 #include "icmpv6echo.h"
-#include "icmpv6router.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
 #include "opentcp.h"
@@ -48,14 +47,13 @@
 #include "udpecho.h"
 #include "udpinject.h"
 #include "udpprint.h"
-#include "udprand.h"
-#include "udplatency.h"
-
+//#include "udprand.h"
+//#include "udplatency.h"
 //#include "udpstorm.h"
 //-- CoAP
-#include "rleds.h"
-#include "rt.h"
-#include "rex.h"
+//#include "rleds.h"
+//#include "rt.h"
+//#include "rex.h"
 //#include "rheli.h"
 //#include "rrube.h"
 //#include "rxl1.h"
@@ -80,7 +78,7 @@ void openwsn_init() {
    
    //===== stack
    //-- cross-layer
-   idmanager_init();    // call first since initializes e.g. EUI64
+   idmanager_init();    // call first since initializes EUI64 and isDAGroot
    openqueue_init();
    openrandom_init();
    opentimers_init();
@@ -100,7 +98,6 @@ void openwsn_init() {
    forwarding_init();
    icmpv6_init();
    icmpv6echo_init();
-   icmpv6router_init();
    icmpv6rpl_init();
    //-- 04-TRAN
    opentcp_init();
@@ -121,7 +118,7 @@ void openwsn_init() {
    udpecho_init();
    udpinject_init();
    udpprint_init();
-  // udprand_init();
+   //udprand_init();
    //udplatency_init();
    //udpstorm_init();
    //-- CoAP
@@ -136,4 +133,7 @@ void openwsn_init() {
    //heli_init();
    //imu_init();
    
+   openserial_printInfo(COMPONENT_OPENWSN,ERR_BOOTED,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
 }

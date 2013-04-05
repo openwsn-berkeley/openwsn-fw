@@ -1,10 +1,10 @@
 #include "openwsn.h"
-#include "eui64.h"
 #include "idmanager.h"
+#include "eui64.h"
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "neighbors.h"
-#include "board_info.h"
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -101,9 +101,9 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
       res= &idmanager_vars.myPrefix;
       break;
    case ADDR_128B:
-      //you don't ask for my full address, rather for prefix, then 64b
+      // you don't ask for my full address, rather for prefix, then 64b
    default:
-      openserial_printError(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
+      openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
             (errorparameter_t)type,
             (errorparameter_t)0);
       res= NULL;
@@ -132,7 +132,7 @@ error_t idmanager_setMyID(open_addr_t* newID) {
    case ADDR_128B:
       //don't set 128b, but rather prefix and 64b
    default:
-      openserial_printError(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
+      openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
             (errorparameter_t)newID->type,
             (errorparameter_t)1);
       ENABLE_INTERRUPTS();
@@ -142,7 +142,7 @@ error_t idmanager_setMyID(open_addr_t* newID) {
    return E_SUCCESS;
 }
 
- bool idmanager_isMyAddress(open_addr_t* addr) {
+bool idmanager_isMyAddress(open_addr_t* addr) {
    open_addr_t temp_my128bID;
    bool res;
    INTERRUPT_DECLARATION();
@@ -150,7 +150,6 @@ error_t idmanager_setMyID(open_addr_t* newID) {
 
    switch (addr->type) {
    case ADDR_16B:
-
       res= packetfunctions_sameAddress(addr,&idmanager_vars.my16bID);
       ENABLE_INTERRUPTS();
       return res;
@@ -170,18 +169,48 @@ error_t idmanager_setMyID(open_addr_t* newID) {
    case ADDR_PANID:
       res= packetfunctions_sameAddress(addr,&idmanager_vars.myPANID);
       ENABLE_INTERRUPTS();
-            return res;
+      return res;
    case ADDR_PREFIX:
       res= packetfunctions_sameAddress(addr,&idmanager_vars.myPrefix);
       ENABLE_INTERRUPTS();
       return res;
    default:
-      openserial_printError(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
+      openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
             (errorparameter_t)addr->type,
             (errorparameter_t)2);
       ENABLE_INTERRUPTS();
       return FALSE;
    }
+}
+
+void idmanager_triggerAboutRoot() {
+   uint8_t number_bytes_from_input_buffer;
+   uint8_t input_buffer;
+   //get command from OpenSerial
+   number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer,sizeof(input_buffer));
+   if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
+      openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
+            (errorparameter_t)number_bytes_from_input_buffer,
+            (errorparameter_t)0);
+      return;
+   };
+   //handle command
+   switch (input_buffer) {
+   case 'Y':
+      idmanager_setIsDAGroot(TRUE);
+      break;
+   case 'N':
+      idmanager_setIsDAGroot(FALSE);
+      break;
+   case 'T':
+      if (idmanager_getIsDAGroot()) {
+         idmanager_setIsDAGroot(FALSE);
+      } else {
+         idmanager_setIsDAGroot(TRUE);
+      }
+      break;
+   }
+   return;
 }
 
 void idmanager_triggerAboutBridge() {
@@ -215,36 +244,15 @@ void idmanager_triggerAboutBridge() {
    }
    return;
 }
-void idmanager_triggerAboutRoot() {
-   uint8_t number_bytes_from_input_buffer;
-   uint8_t input_buffer;
-   //get command from OpenSerial (16B IPv6 destination address, 2B destination port)
-   number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer,sizeof(input_buffer));
-   if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
-      openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
-            (errorparameter_t)number_bytes_from_input_buffer,
-            (errorparameter_t)0);
-      return;
-   };
-   //handle command
-   switch (input_buffer) {
-   case 'Y':
-      idmanager_setIsDAGroot(TRUE);
-      break;
-   case 'N':
-      idmanager_setIsDAGroot(FALSE);
-      break;
-   case 'T':
-      if (idmanager_getIsDAGroot()) {
-         idmanager_setIsDAGroot(FALSE);
-      } else {
-         idmanager_setIsDAGroot(TRUE);
-      }
-      break;
-   }
-   return;
-}
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
 bool debugPrint_id() {
    debugIDManagerEntry_t output;
    output.isDAGroot = idmanager_vars.isDAGroot;
@@ -257,24 +265,5 @@ bool debugPrint_id() {
    return TRUE;
 }
 
-// function return if the prefix has been set and it's not the default one
-bool isPrefixSet()
-{
-   uint8_t i,j;
-   j=0;
-   for (i=0;i<8;i++) {
-      if(idmanager_vars.myPrefix.prefix[i]!= 0x00)
-      {
-        j=1;
-        break;
-      }
-   }
-   
-   if(j==1)
-    return TRUE; 
-   else
-     return FALSE;
-  
-}
 
 //=========================== private =========================================

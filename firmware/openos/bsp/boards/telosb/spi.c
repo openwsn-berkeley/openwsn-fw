@@ -5,10 +5,8 @@
 */
 
 #include "msp430f1611.h"
-#include "string.h"
-#include "stdio.h"
-#include "stdint.h"
 #include "spi.h"
+#include "leds.h"
 
 //=========================== defines =========================================
 
@@ -191,7 +189,7 @@ void spi_txrx(uint8_t*     bufTx,
 
 //=========================== interrupt handlers ==============================
 
-uint8_t spi_isr() {
+kick_scheduler_t spi_isr() {
 #ifdef SPI_IN_INTERRUPT_MODE   
    // save the byte just received in the RX buffer
    switch (spi_vars.returnType) {
@@ -230,11 +228,19 @@ uint8_t spi_isr() {
          // call the callback
          spi_vars.spi_cb();
          // kick the OS
-         return 1;
+         return KICK_SCHEDULER;
       }
    }
-   return 0;
+   return DO_NOT_KICK_SCHEDULER;
 #else
-   while(1); // this should never happen
-#endif  
+   // this should never happpen!
+   
+   // we can not print from within the BSP. Instead:
+   // blink the error LED
+   leds_error_blink();
+   // reset the board
+   board_reset();
+   
+   return DO_NOT_KICK_SCHEDULER; // we will not get here, statement to please compiler
+#endif
 }

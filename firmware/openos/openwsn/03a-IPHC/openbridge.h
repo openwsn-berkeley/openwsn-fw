@@ -17,7 +17,7 @@
 //=========================== prototypes ======================================
 
 void openbridge_init();
-void openbridge_trigger();
+void openbridge_triggerData();
 void openbridge_sendDone(OpenQueueEntry_t* msg, error_t error);
 void openbridge_receive(OpenQueueEntry_t* msg);
 

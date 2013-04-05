@@ -89,39 +89,19 @@
 			<locationURI>OPENOS_LOC/openwsn</locationURI>
 		</link>
 		<link>
-			<name>Sources/application/01bsp_bothtimers.c</name>
+			<name>Sources/application/01bsp_bsp_timer.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_bothtimers/01bsp_bothtimers.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_bsp_timer/01bsp_bsp_timer.c</location>
 		</link>
 		<link>
-			<name>Sources/application/01bsp_leds.c</name>
+			<name>Sources/application/03oos_openwsn.c</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_leds/01bsp_leds.c</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/03oos_openwsn.c</location>
 		</link>
 		<link>
-			<name>Sources/application/01bsp_radio.c</name>
+			<name>Sources/application/03oos_openwsn.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_radio/01bsp_radio.c</location>
-		</link>
-		<link>
-			<name>Sources/application/01bsp_spi.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_spi/01bsp_spi.c</location>
-		</link>
-		<link>
-			<name>Sources/application/01bsp_uart.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_uart/01bsp_uart.c</location>
-		</link>
-		<link>
-			<name>Sources/application/openwsn_proj.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/openwsn_proj.c</location>
-		</link>
-		<link>
-			<name>Sources/application/openwsn_proj.h</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/openwsn_proj.h</location>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/03oos_openwsn/03oos_openwsn.h</location>
 		</link>
 		<link>
 			<name>Sources/chips/at86rf231</name>
@@ -172,11 +152,6 @@
 			<name>Sources/k20/platforms</name>
 			<type>2</type>
 			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/k20/platforms</location>
-		</link>
-		<link>
-			<name>Sources/k20/bsp/abstimer.c</name>
-			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/common/abstimer.c</location>
 		</link>
 		<link>
 			<name>Sources/k20/bsp/board.h</name>

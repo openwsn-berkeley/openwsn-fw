@@ -15,12 +15,12 @@
 //=========================== define ==========================================
 
 static const uint8_t infoStackName[] = "OpenWSN ";
-#define OPENWSN_VERSION_MAJOR 1
-#define OPENWSN_VERSION_MINOR 2
-#define OPENWSN_VERSION_PATCH 1
+#define OPENWSN_VERSION_MAJOR     1
+#define OPENWSN_VERSION_MINOR     4
+#define OPENWSN_VERSION_PATCH     1
 
 // enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER 0xdf
+#define DEBUG_MOTEID_MASTER 0xe8
 
 
 #ifndef TRUE
@@ -30,6 +30,10 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #ifndef FALSE
 #define FALSE 0
 #endif
+
+#define LENGTH_ADDR16b 2
+#define LENGTH_ADDR64b 8
+#define LENGTH_ADDR128b 16
 
 enum {
    E_SUCCESS                           = 0,          
@@ -57,6 +61,7 @@ enum {
    IANA_UNDEFINED                      = 0x00,
    IANA_TCP                            = 0x06,
    IANA_UDP                            = 0x11,
+   IANA_IPv6ROUTE                      =   43,
    IANA_ICMPv6                         = 0x3a,
    IANA_ICMPv6_ECHO_REQUEST            =  128,
    IANA_ICMPv6_ECHO_REPLY              =  129,
@@ -66,68 +71,70 @@ enum {
    IANA_ICMPv6_RPL                     =  155,
    IANA_ICMPv6_RPL_DIO                 = 0x01,
    IANA_ICMPv6_RPL_DAO                 = 0x04,
-   IANA_RSVP                           = 46,
+   IANA_RSVP                           =   46,
 };
 
 // well known ports (which we define)
 enum {
    //TCP
-   WKP_TCP_HTTP                        =   80,
-   WKP_TCP_ECHO                        =    7,
-   WKP_TCP_INJECT                      = 2188,
-   WKP_TCP_DISCARD                     =    9,
+   WKP_TCP_HTTP                        =    80,
+   WKP_TCP_ECHO                        =     7,
+   WKP_TCP_INJECT                      =  2188,
+   WKP_TCP_DISCARD                     =     9,
    //UDP
-   WKP_UDP_COAP                        = 5683,
-   WKP_UDP_HELI                        = 2192,
-   WKP_UDP_IMU                         = 2190,
-   WKP_UDP_ECHO                        =    7,
-   WKP_UDP_INJECT                      = 2188,
-   WKP_UDP_DISCARD                     =    9,
+   WKP_UDP_COAP                        =  5683,
+   WKP_UDP_HELI                        =  2192,
+   WKP_UDP_IMU                         =  2190,
+   WKP_UDP_ECHO                        =     7,
+   WKP_UDP_INJECT                      =  2188,
+   WKP_UDP_DISCARD                     =     9,
    WKP_UDP_RAND                        = 61000,
    WKP_UDP_LATENCY                     = 61001,
 };
 
 //status elements
 enum {
-   STATUS_ISSYNC                       = 0,
-   STATUS_ID                           = 1,
-   STATUS_DAGRANK                      = 2,
-   STATUS_OUTBUFFERINDEXES             = 3,
-   STATUS_ASN                          = 4,
-   STATUS_MACSTATS                     = 5,
-   STATUS_SCHEDULE                     = 6,
-   STATUS_QUEUE                        = 7,
-   STATUS_NEIGHBORS                    = 8,
-   STATUS_MAX                          = 9,
+   STATUS_ISSYNC                       =  0,
+   STATUS_ID                           =  1,
+   STATUS_DAGRANK                      =  2,
+   STATUS_OUTBUFFERINDEXES             =  3,
+   STATUS_ASN                          =  4,
+   STATUS_MACSTATS                     =  5,
+   STATUS_SCHEDULE                     =  6,
+   STATUS_BACKOFF                      =  7,
+   STATUS_QUEUE                        =  8,
+   STATUS_NEIGHBORS                    =  9,
+   STATUS_MAX                          = 10,
 };
 
 //component identifiers
 //the order is important because
 enum {
    COMPONENT_NULL                      = 0x00,
+   COMPONENT_OPENWSN                   = 0x01,
    //cross-layers
-   COMPONENT_IDMANAGER                 = 0x01,
-   COMPONENT_OPENQUEUE                 = 0x02,
-   COMPONENT_OPENSERIAL                = 0x03,
-   COMPONENT_PACKETFUNCTIONS           = 0x04,
-   COMPONENT_RANDOM                    = 0x05,
+   COMPONENT_IDMANAGER                 = 0x02,
+   COMPONENT_OPENQUEUE                 = 0x03,
+   COMPONENT_OPENSERIAL                = 0x04,
+   COMPONENT_PACKETFUNCTIONS           = 0x05,
+   COMPONENT_RANDOM                    = 0x06,
    //PHY
-   COMPONENT_RADIO                     = 0x06,
+   COMPONENT_RADIO                     = 0x07,
    //MAClow
-   COMPONENT_IEEE802154                = 0x07,
-   COMPONENT_IEEE802154E               = 0x08,
+   COMPONENT_IEEE802154                = 0x08,
+   COMPONENT_IEEE802154E               = 0x09,
    
    //All components with higher component id than COMPONENT_IEEE802154E
    //won't be able to get free packets from the queue 
    //when the mote is not synch
    
    //MAClow<->MAChigh ("virtual components")
-   COMPONENT_RES_TO_IEEE802154E        = 0x09,
-   COMPONENT_IEEE802154E_TO_RES        = 0x0a,
+   COMPONENT_RES_TO_IEEE802154E        = 0x0a,
+   COMPONENT_IEEE802154E_TO_RES        = 0x0b,
    //MAChigh
-   COMPONENT_RES                       = 0x0b,
-   COMPONENT_NEIGHBORS                 = 0x0c,
-   COMPONENT_SCHEDULE                  = 0x0d,
+   COMPONENT_RES                       = 0x0c,
+   COMPONENT_NEIGHBORS                 = 0x0d,
+   COMPONENT_SCHEDULE                  = 0x0e,
    COMPONENT_RESERVATION               = 0x0e,
  //Since I want send a data from upper layer at Tx slot generated by reservation, 
  //reservation module pretend upper layer generates a message. The creator of this 
@@ -155,30 +162,31 @@ enum {
    COMPONENT_UDPPRINT                  = 0x1e,
    COMPONENT_RSVP                      = 0x1f,
    //App
-   COMPONENT_HELI                      = 0x20,
-   COMPONENT_IMU                       = 0x21,
-   COMPONENT_RLEDS                     = 0x22,
-   COMPONENT_RREG                      = 0x23,
-   COMPONENT_RWELLKNOWN                = 0x24,
-   COMPONENT_RT                        = 0x25,
-   COMPONENT_REX                       = 0x26,
-   COMPONENT_RXL1                      = 0x27,
-   COMPONENT_RINFO                     = 0x28,
-   COMPONENT_RHELI                     = 0x29,
-   COMPONENT_RRUBE                     = 0x2a,
-   COMPONENT_LAYERDEBUG                = 0x2b,
-   COMPONENT_UDPRAND                   = 0x2c,
-   COMPONENT_UDPSTORM                  = 0x2d,
-   COMPONENT_UDPLATENCY                = 0x2e,
-   COMPONENT_TEST                      = 0x2f,
-   COMPONENT_OHLONE                    = 0x30
+   COMPONENT_OHLONE                    = 0x20,
+   COMPONENT_HELI                      = 0x21,
+   COMPONENT_IMU                       = 0x22,
+   COMPONENT_RLEDS                     = 0x23,
+   COMPONENT_RREG                      = 0x24,
+   COMPONENT_RWELLKNOWN                = 0x25,
+   COMPONENT_RT                        = 0x26,
+   COMPONENT_REX                       = 0x27,
+   COMPONENT_RXL1                      = 0x28,
+   COMPONENT_RINFO                     = 0x29,
+   COMPONENT_RHELI                     = 0x2a,
+   COMPONENT_RRUBE                     = 0x2b,
+   COMPONENT_LAYERDEBUG                = 0x2c,
+   COMPONENT_UDPRAND                   = 0x2d,
+   COMPONENT_UDPSTORM                  = 0x2e,
+   COMPONENT_UDPLATENCY                = 0x2f,
+   COMPONENT_TEST                      = 0x30,
 };
 
 /**
 \brief error codes used throughout the OpenWSN stack
 
-\note The comments are used in the Python parsing tool; {0} refers to the value of the 
-first argument, {1} refers to the second.
+\note The comments are used in the Python parsing tool:
+   - {0} refers to the value of the first argument,
+   - {1} refers to the value of the second argument,
 */
 enum {
    // l7
@@ -187,56 +195,64 @@ enum {
    ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x03, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
    ERR_INPUT_BUFFER_OVERFLOW           = 0x04, // the input buffer has overflown
    // l4
-   ERR_WRONG_TRAN_PROTOCOL             = 0x05, // unknown transport protocol {0} (code position {1})
-   ERR_WRONG_TCP_STATE                 = 0x06, // wrong TCP state {0} (code position {1})
-   ERR_RESET                           = 0x07, // TCP reset while in state {0} (code position {1})
-   ERR_UNSUPPORTED_PORT_NUMBER         = 0x08, // unsupported port number {0} (code position {1})
+   ERR_WRONG_TRAN_PROTOCOL             = 0x05, // unknown transport protocol {0} (code location {1})
+   ERR_WRONG_TCP_STATE                 = 0x06, // wrong TCP state {0} (code location {1})
+   ERR_TCP_RESET                       = 0x07, // TCP reset while in state {0} (code location {1})
+   ERR_UNSUPPORTED_PORT_NUMBER         = 0x08, // unsupported port number {0} (code location {1})
    // l3
-   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x09, // unsupported ICMPv6 type {0} (code position {1})
-   ERR_6LOWPAN_UNSUPPORTED             = 0x0a, // unsupported 6LoWPAN parameter {1} at location {0}
-   ERR_NO_NEXTHOP                      = 0x0b, // no next hop
+   ERR_UNEXPECTED_DAO                  = 0x09, // unexpected DAO (code location {0})
+   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x0a, // unsupported ICMPv6 type {0} (code location {1})
+   ERR_6LOWPAN_UNSUPPORTED             = 0x0b, // unsupported 6LoWPAN parameter {1} at location {0}
+   ERR_NO_NEXTHOP                      = 0x0c, // no next hop
+   ERR_INVALID_PARAM                   = 0x0d, // invalid parameter
+   ERR_INVALID_FWDMODE                 = 0x0e, // invalid forward mode
+   ERR_LARGE_DAGRANK                   = 0x0f, // large DAGrank {0}, set to {1}
+   ERR_HOP_LIMIT_REACHED               = 0x10, // packet discarded hop limit reached
    // l2b
-   ERR_NEIGHBORS_FULL                  = 0x0c, // neighbors table is full (max number of neighbor is {0})
-   ERR_NO_SENT_PACKET                  = 0x0d, // there is no sent packet in queue
-   ERR_NO_RECEIVED_PACKET              = 0x0e, // there is no received packet in queue
+   ERR_NEIGHBORS_FULL                  = 0x11, // neighbors table is full (max number of neighbor is {0})
+   ERR_NO_SENT_PACKET                  = 0x12, // there is no sent packet in queue
+   ERR_NO_RECEIVED_PACKET              = 0x13, // there is no received packet in queue
+   ERR_SCHEDULE_OVERFLOWN              = 0x14, // schedule overflown
    // l2a
-   ERR_WRONG_CELLTYPE                  = 0x0f, // wrong celltype {0} at slotOffset {1}
-   ERR_IEEE154_UNSUPPORTED             = 0x10, // unsupported IEEE802.15.4 parameter {1} at location {0}
-   ERR_DESYNCHRONIZED                  = 0x11, // got desynchronized at slotOffset {0}
-   ERR_SYNCHRONIZED                    = 0x12, // synchronized at slotOffset {0}
-   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x13, // wrong state {0} in end of frame+sync
-   ERR_WRONG_STATE_IN_STARTSLOT        = 0x14, // wrong state {0} in startSlot, at slotOffset {1}
-   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x15, // wrong state {0} in timer fires, at slotOffset {1}
-   ERR_WRONG_STATE_IN_NEWSLOT          = 0x16, // wrong state {0} in start of frame, at slotOffset {1}
-   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x17, // wrong state {0} in end of frame, at slotOffset {1}
-   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x18, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x19, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x1a, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x1b, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_WDDATADURATION_OVERFLOWS        = 0x1c, // wdDataDuration overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIO_OVERFLOWS               = 0x1d, // wdRadio overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIOTX_OVERFLOWS             = 0x1e, // wdRadioTx overflows while at state {0} in slotOffset {1}
-   ERR_WDACKDURATION_OVERFLOWS         = 0x1f, // wdAckDuration overflows while at state {0} in slotOffset {1}
+   ERR_WRONG_CELLTYPE                  = 0x15, // wrong celltype {0} at slotOffset {1}
+   ERR_IEEE154_UNSUPPORTED             = 0x16, // unsupported IEEE802.15.4 parameter {1} at location {0}
+   ERR_DESYNCHRONIZED                  = 0x17, // got desynchronized at slotOffset {0}
+   ERR_SYNCHRONIZED                    = 0x18, // synchronized at slotOffset {0}
+   ERR_LARGE_TIMECORRECTION            = 0x19, // large timeCorr.: {0} ticks (code loc. {1})
+   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x1a, // wrong state {0} in end of frame+sync
+   ERR_WRONG_STATE_IN_STARTSLOT        = 0x1b, // wrong state {0} in startSlot, at slotOffset {1}
+   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x1c, // wrong state {0} in timer fires, at slotOffset {1}
+   ERR_WRONG_STATE_IN_NEWSLOT          = 0x1d, // wrong state {0} in start of frame, at slotOffset {1}
+   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x1e, // wrong state {0} in end of frame, at slotOffset {1}
+   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x1f, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x20, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x21, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x22, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_WDDATADURATION_OVERFLOWS        = 0x23, // wdDataDuration overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIO_OVERFLOWS               = 0x24, // wdRadio overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIOTX_OVERFLOWS             = 0x25, // wdRadioTx overflows while at state {0} in slotOffset {1}
+   ERR_WDACKDURATION_OVERFLOWS         = 0x26, // wdAckDuration overflows while at state {0} in slotOffset {1}
    // general
-   ERR_BUSY_SENDING                    = 0x20, // busy sending
-   ERR_UNEXPECTED_SENDDONE             = 0x21, // sendDone for packet I didn't send
-   ERR_NO_FREE_PACKET_BUFFER           = 0x22, // no free packet buffer (code location {0})
-   ERR_FREEING_UNUSED                  = 0x23, // freeing unused memory
-   ERR_FREEING_ERROR                   = 0x24, // freeing memory unsupported memory
-   ERR_UNSUPPORTED_COMMAND             = 0x25, // unsupported command {0}
-   ERR_MSG_UNKNOWN_TYPE                = 0x26, // unknown message type {0}
-   ERR_WRONG_ADDR_TYPE                 = 0x27, // wrong address type {0} (code location {1})
-   ERR_BRIDGE_MISMATCH                 = 0x28, // isBridge mismatch (code location {0})
-   ERR_HEADER_TOO_LONG                 = 0x29, // header too long, length {1} (code location {0})
-   ERR_INPUTBUFFER_LENGTH              = 0x2a, // input length problem, length={0}
+   ERR_BUSY_SENDING                    = 0x27, // busy sending
+   ERR_UNEXPECTED_SENDDONE             = 0x28, // sendDone for packet I didn't send
+   ERR_NO_FREE_PACKET_BUFFER           = 0x29, // no free packet buffer (code location {0})
+   ERR_FREEING_UNUSED                  = 0x2a, // freeing unused memory
+   ERR_FREEING_ERROR                   = 0x2b, // freeing memory unsupported memory
+   ERR_UNSUPPORTED_COMMAND             = 0x2c, // unsupported command {0}
+   ERR_MSG_UNKNOWN_TYPE                = 0x2d, // unknown message type {0}
+   ERR_WRONG_ADDR_TYPE                 = 0x2e, // wrong address type {0} (code location {1})
+   ERR_BRIDGE_MISMATCH                 = 0x2f, // isBridge mismatch (code location {0})
+   ERR_HEADER_TOO_LONG                 = 0x30, // header too long, length {1} (code location {0})
+   ERR_INPUTBUFFER_LENGTH              = 0x31, // input length problem, length={0}
+   ERR_BOOTED                          = 0x32, // booted
+   ERR_INVALIDSERIALFRAME              = 0x33, // invalid serial frame
+   ERR_INVALIDPACKETFROMRADIO          = 0x34, // invalid packet from radio, length {1} (code location {0})
 };
 
 //=========================== typedef =========================================
 
-typedef uint16_t  shortnodeid_t;
-typedef uint64_t  longnodeid_t;
 typedef uint16_t  errorparameter_t;
-typedef uint16_t   dagrank_t;
+typedef uint16_t  dagrank_t;
 typedef uint8_t   error_t;
 #define bool uint8_t
 
@@ -296,8 +312,6 @@ typedef struct {
    bool          l1_crc;                         // did received packet pass CRC check?
    //the packet
    uint8_t       packet[1+1+125+2+1];            // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
-   // below has been added to be used for the multi-hop network 
-  
 } OpenQueueEntry_t;
 
 //=========================== variables =======================================
