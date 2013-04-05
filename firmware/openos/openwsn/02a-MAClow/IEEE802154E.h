@@ -18,8 +18,10 @@
 #define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
-#define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
-#define US_PER_TICK                 30 // number of us per 32kHz clock tick
+//#define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
+#define RESYNCHRONIZATIONGUARD       2 // in 16kHz ticks. min distance to the end of the slot to succesfully synchronize
+//#define US_PER_TICK                 30 // number of us per 32kHz clock tick
+#define US_PER_TICK                 60 // number of us per 16kHz clock tick
 #define KATIMEOUT                   66 // in slots: @15ms per slot -> ~1 seconds
 #define DESYNCTIMEOUT              333 // in slots: @15ms per slot -> ~5 seconds
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"

@@ -19,6 +19,8 @@
 #include "board_info.h"
 #include "opentimers.h"
 
+#include "openserial.h"
+
 
 //=========================== main ============================================
 
@@ -94,7 +96,7 @@ void board_sleep() {
     
 //    GPIOC->ODR |= 0x0010;
 
-//    while(openserial_get_outBufferFilled());
+    while(openserial_get_outBufferFilled());
     PWR_EnterSTOPMode(PWR_Regulator_LowPower,PWR_STOPEntry_WFI);
     
 //    GPIOC->ODR &= ~0x0010;

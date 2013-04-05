@@ -44,17 +44,24 @@ int mote_main(void) {
 }
 
 void macpong_initSend() {
-   if (ieee154e_isSynch()==TRUE && neighbors_getNumberOfNeighbors()==1) {
+   if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
       // send packet
       macpong_send(0);   
       // cancel timer
-      opentimers_stop(macpong_vars.timerId);
+//      opentimers_stop(macpong_vars.timerId);
    }
 }
 
 void macpong_send(uint8_t payloadCtr) {
    OpenQueueEntry_t* pkt;
    uint8_t i;
+   open_addr_t*      tempNeighAddr;
+   
+   tempNeighAddr = neighbors_getAddr(0);
+   if (tempNeighAddr==NULL) {
+      // don't proceed if I have no neighbor
+      return;
+   }
    
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPRAND);
    if (pkt==NULL) {
@@ -65,6 +72,7 @@ void macpong_send(uint8_t payloadCtr) {
    }
    pkt->creator                     = COMPONENT_IPHC;
    pkt->owner                       = COMPONENT_IPHC;
+   
    memcpy(&pkt->l2_nextORpreviousHop,neighbors_getAddr(0),sizeof(open_addr_t));
    packetfunctions_reserveHeaderSize(pkt,MAX_PAYLOAD);
    for (i=0;i<MAX_PAYLOAD;i++){
@@ -79,7 +87,7 @@ void macpong_send(uint8_t payloadCtr) {
 
 void iphc_init() {
    if (idmanager_getIsDAGroot()==FALSE) {
-      macpong_vars.timerId    = opentimers_start(5000,
+      macpong_vars.timerId    = opentimers_start(1000,
                                                  TIMER_PERIODIC,TIME_MS,
                                                  macpong_initSend);
    }
@@ -101,6 +109,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
 void forwarding_init()       { return; }
 void openbridge_init()       { return; }
 void openbridge_trigger()    { return; }
+void openbridge_triggerData(){ return; }
 
 //===== L4
 
