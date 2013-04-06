@@ -169,8 +169,9 @@ void task_resNotifReceive() {
       case IEEE154_TYPE_BEACON:
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
-         if (msg->l2_IEListPresent)
+        if (msg->l2_IEListPresent){
             IEFiled_retrieveIE(msg);
+        }
          if (msg->length>0) {
            if(msg->payload[0]==0xff){
              reservation_pretendReceiveData(msg);
@@ -420,13 +421,14 @@ uint8_t    res_getJoinPriority(){
     return res_vars.joinPriority;
 }
 
-void    res_notifRetrieveIEDone(OpenQueueEntry_t* msg){
+void  res_notifRetrieveIEDone(OpenQueueEntry_t* msg){
   
     subIE_t*    tempSubIE = processIE_getSubSyncIE();
-    if(tempSubIE->length != 0)
+    if(tempSubIE->length != 0){
       res_recordADV(msg);
-    else
+    }else{
       reservation_notifyReceiveuResCommand(msg);
+    }
 }
 
 void res_recordADV(OpenQueueEntry_t* msg) {

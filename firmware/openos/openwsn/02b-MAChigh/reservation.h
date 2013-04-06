@@ -12,11 +12,6 @@ enum uResCommandID_num{
   RESERVATIONSCHEDULERESPONSE   = 0x04,
 };
 
-typedef struct {
-  uint8_t numOfLinks;
-  uint8_t slotframeID;
-} bandwidth_vars_t;
-
 // the different states of the reservation state machine
 typedef enum {
     S_IDLE                              = 0x00,   // ready for next event
@@ -41,11 +36,8 @@ typedef enum {
 //admin
 void             reservation_init();
 //public
-uint8_t          reservation_getuResCommandID();
-bandwidth_vars_t reservation_getuResBandwidth();
-
-void             reservation_setuResCommandID(uint8_t commandID);
-void             reservation_setuResBandwidth(uint8_t numOfLinks, uint8_t slotframeID);
+//uint8_t          reservation_getuResCommandID();
+//void             reservation_setuResCommandID(uint8_t commandID);
 
 void             reservation_notifyReceiveuResLinkRequest(OpenQueueEntry_t* msg);
 void             reservation_notifyReceiveuResLinkResponse(OpenQueueEntry_t* msg);

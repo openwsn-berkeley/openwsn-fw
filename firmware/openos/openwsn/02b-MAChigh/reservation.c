@@ -27,7 +27,6 @@ typedef struct {
   open_addr_t          ResNeighborAddr;
   reservation_state_t  State;
   uint8_t              commandID;
-  bandwidth_vars_t     bandwidth_vars;
   uint8_t              button_event; //when requestOrRemoveLink%3 is 0 or 1, call uResLinkRequest; when the value is 2, call uResRemoveLink.
 } reservation_vars_t;
 
@@ -39,47 +38,32 @@ void    reservation_init(){
   memset(&reservation_vars,0,sizeof(reservation_vars_t));
 }
 // public
-uint8_t reservation_getuResCommandID(){
-  return reservation_vars.commandID;
-}
-
-bandwidth_vars_t reservation_getuResBandwidth() {
-  return reservation_vars.bandwidth_vars;
-}
-
-void    reservation_setuResCommandID(uint8_t commandID){
-  reservation_vars.commandID = commandID;
-}
-
-
- //sets the number of links to be reserved at each request.
-void    reservation_setuResBandwidth(uint8_t numOfLinks, uint8_t slotframeID){
-  reservation_vars.bandwidth_vars.numOfLinks    = numOfLinks;
-  reservation_vars.bandwidth_vars.slotframeID   = slotframeID;
-}
 
 void    reservation_notifyReceiveuResLinkRequest(OpenQueueEntry_t* msg){
+  uint8_t numOfLinksBw,slotframeIDBw; //in BW IE
+  uint8_t slotframeID,numOfLink; //in Frame and Link IE
   
   //qw : indicate receiving ResLinkRequest
   leds_debug_toggle();
   
   uResBandwidthIEcontent_t* tempBandwidthIE = processIE_getuResBandwidthIEcontent();
   //record bandwidth information
-  reservation_vars.bandwidth_vars.numOfLinks  = tempBandwidthIE->numOfLinks;
-  reservation_vars.bandwidth_vars.slotframeID = tempBandwidthIE->slotframeID;
+  numOfLinksBw  = tempBandwidthIE->numOfLinks;
+  slotframeIDBw = tempBandwidthIE->slotframeID;
   
   frameAndLinkIEcontent_t* tempFrameAndLinkIEcontent = processIE_getFrameAndLinkIEcontent();
     
   for(uint8_t i = 0; i<tempFrameAndLinkIEcontent->numOfSlotframes;i++)
   {
-    uint8_t slotframeID    = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeID;
-    uint8_t numOfLink      = tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;
-    if(reservation_vars.bandwidth_vars.slotframeID == slotframeID)
+    slotframeID    = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeID;
+    numOfLink      = tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;
+    if(slotframeIDBw == slotframeID){
       //allocate links for neighbor
-      schedule_allocateLinks(slotframeID,numOfLink,reservation_vars.bandwidth_vars.numOfLinks);
+      schedule_allocateLinks(slotframeID,numOfLink,numOfLinksBw);
+    }
   }
   
-  schedule_addLinksToSchedule(reservation_vars.bandwidth_vars.slotframeID,&(msg->l2_nextORpreviousHop),reservation_vars.bandwidth_vars.numOfLinks,reservation_vars.State);
+  schedule_addLinksToSchedule(slotframeIDBw,&(msg->l2_nextORpreviousHop),numOfLinksBw,reservation_vars.State);
   
   //reservation_vars.State = S_IDLE;
   
@@ -219,7 +203,6 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
   
   leds_debug_toggle();
   
-
   if(reservationNeighAddr==NULL){
      return;
   }
@@ -241,9 +224,6 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
     reservationPkt->owner   = COMPONENT_RESERVATION;
          
     memcpy(&(reservationPkt->l2_nextORpreviousHop),reservationNeighAddr,sizeof(open_addr_t));
-  
-    //set uRes command ID
-    reservation_setuResCommandID(RESERCATIONLINKREQ);
     
     uint8_t numOfSlotframes = schedule_getNumSlotframe();
     
@@ -255,16 +235,11 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
     //set SubFrameAndLinkIE
     processIE_setSubFrameAndLinkIE();
     //set uResCommandIE
-    processIE_setSubuResCommandIE();
-
-    //set the bw
-    reservation_setuResBandwidth(bandwidth,0);
-    
+    processIE_setSubuResCommandIE(RESERCATIONLINKREQ);
+ 
     //set uResBandwidthIE
-    processIE_setSubuResBandwidthIE();
+    processIE_setSubuResBandwidthIE(bandwidth,0);
     
-    //reset bandwidth to 0
-    memset(&(reservation_vars.bandwidth_vars),0,sizeof(bandwidth_vars_t));
     //set IE after set all required subIE
     processIE_setMLME_IE();
     //add an IE to adv's payload
@@ -279,12 +254,6 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
 }
 
 void  reservation_linkResponse(open_addr_t* tempNeighbor){
-  
-  //qw: seems useless
-  //if(reservation_vars.State != S_RESLINKREQUEST_RECEIVE)
-    //return;
-  //qw: move to when just receiving packet
-  //leds_debug_toggle();
   
   OpenQueueEntry_t* reservationPkt;
   
@@ -307,13 +276,13 @@ void  reservation_linkResponse(open_addr_t* tempNeighbor){
     
     memcpy(&(reservationPkt->l2_nextORpreviousHop),tempNeighbor,sizeof(open_addr_t));
     
-    //set uRes command ID
-    reservation_setuResCommandID(RESERCATIONLINKRESPONSE);
+    //reservation_setuResCommandID(RESERCATIONLINKRESPONSE);
 
     //set SubFrameAndLinkIE
     processIE_setSubFrameAndLinkIE();
-    //set uResCommandIE
-    processIE_setSubuResCommandIE();
+    
+    //set uResCommandIE  //set uRes command ID
+    processIE_setSubuResCommandIE(RESERCATIONLINKRESPONSE);
 
     //set IE after set all required subIE
     processIE_setMLME_IE();
@@ -358,7 +327,7 @@ void reservation_removeLinkRequest(open_addr_t*  reservationNeighAddr){
     memcpy(&(reservationPkt->l2_nextORpreviousHop),reservationNeighAddr,sizeof(open_addr_t));
   
     //set uRes command ID
-    reservation_setuResCommandID(RESERVATIONREMOVELINKREQUEST);
+  //  reservation_setuResCommandID(RESERVATIONREMOVELINKREQUEST);
     
     uint8_t numOfSlotframes = schedule_getNumSlotframe();
 #ifdef NO_UPPER_LAYER_CALLING_RESERVATION
@@ -386,7 +355,7 @@ void reservation_removeLinkRequest(open_addr_t*  reservationNeighAddr){
     }
     
     //set uResCommandIE
-    processIE_setSubuResCommandIE();
+    processIE_setSubuResCommandIE(RESERVATIONREMOVELINKREQUEST);
 
     //set IE after set all required subIE
     processIE_setMLME_IE();

@@ -100,11 +100,12 @@ void processIE_setSubFrameAndLinkIE();
 void processIE_setSubTimeslotIE();
 void processIE_setSubChannelHoppingIE();
 void processIE_setSubuResLinkTypeIE();
-void processIE_setSubuResCommandIE();
-void processIE_setSubuResBandwidthIE();
+void processIE_setSubuResCommandIE(uint8_t uResCommandID);
+void processIE_setSubuResBandwidthIE(uint8_t numOfLinks, uint8_t slotframeID);
 void processIE_setSubuResGeneralSheduleIE();
         
 void processIE_getMLME_IE();
+
 subIE_t* processIE_getSubSyncIE();	 
 subIE_t* processIE_getSubFrameAndLinkIE(); 
 subIE_t* processIE_getSubChannelHoppingIE(); 

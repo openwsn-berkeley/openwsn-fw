@@ -157,29 +157,28 @@ void processIE_setSubuResLinkTypeIE(){
   uResLinkTypeIE_vars.length = length;
 }
 
-void processIE_setSubuResCommandIE(){
+void processIE_setSubuResCommandIE(uint8_t uResCommandID){
   //set subIE length,subID and type fields
   uint8_t length = 0;
   uResCommandIE_vars.SubID = 0x41;
   uResCommandIE_vars.type  = 0;
   length = length + 2;
   // set uRes Command ID
-  uResCommandIEcontent_vars.uResCommandID = reservation_getuResCommandID();
+  uResCommandIEcontent_vars.uResCommandID = uResCommandID;
   length = length + 1;
   uResCommandIE_vars.length = length;
 }
 
-void processIE_setSubuResBandwidthIE(){
+void processIE_setSubuResBandwidthIE(uint8_t numOfLinks, uint8_t slotframeID){
   //set subIE length,subID and type fields
   uint8_t length = 0;
   uResBandwidthIE_vars.SubID = 0x42;
   uResBandwidthIE_vars.type  = 0;
   length = length + 2;
-
-  bandwidth_vars_t tempBandwidth = reservation_getuResBandwidth();
-  uResBandwidthIEcontent_vars.numOfLinks = tempBandwidth.numOfLinks;
+  
+  uResBandwidthIEcontent_vars.numOfLinks = numOfLinks;
   length = length + 1;
-  uResBandwidthIEcontent_vars.slotframeID = tempBandwidth.slotframeID;
+  uResBandwidthIEcontent_vars.slotframeID = slotframeID;
   length = length + 1;
   uResBandwidthIE_vars.length = length;
 }
