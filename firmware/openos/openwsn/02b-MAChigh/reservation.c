@@ -51,6 +51,8 @@ void    reservation_setuResCommandID(uint8_t commandID){
   reservation_vars.commandID = commandID;
 }
 
+
+ //sets the number of links to be reserved at each request.
 void    reservation_setuResBandwidth(uint8_t numOfLinks, uint8_t slotframeID){
   reservation_vars.bandwidth_vars.numOfLinks    = numOfLinks;
   reservation_vars.bandwidth_vars.slotframeID   = slotframeID;
@@ -206,19 +208,21 @@ void    reservation_notifyReceiveuResCommand(OpenQueueEntry_t* msg){
         break;
       }
 }
-//call by up layer
-void reservation_linkRequest() {
+
+//call by up layer to reserve a link with a neighbour
+void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwidth) {
+  
+  OpenQueueEntry_t* reservationPkt;
   
   if(reservation_vars.State != S_IDLE)
     return;
   
   leds_debug_toggle();
   
-  OpenQueueEntry_t* reservationPkt;
-  open_addr_t*      reservationNeighAddr;
-  
-  reservationNeighAddr = neighbors_reservationNeighbor();
-  if(reservationNeighAddr!=NULL){
+
+  if(reservationNeighAddr==NULL){
+     return;
+  }
     // get a free packet buffer
     reservationPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
   
@@ -253,6 +257,9 @@ void reservation_linkRequest() {
     //set uResCommandIE
     processIE_setSubuResCommandIE();
 
+    //set the bw
+    reservation_setuResBandwidth(bandwidth,0);
+    
     //set uResBandwidthIE
     processIE_setSubuResBandwidthIE();
     
@@ -269,7 +276,6 @@ void reservation_linkRequest() {
     res_send(reservationPkt);
     
     reservation_vars.State = S_WAIT_RESLINKREQUEST_SENDDONE;
-  }
 }
 
 void  reservation_linkResponse(open_addr_t* tempNeighbor){
@@ -322,18 +328,17 @@ void  reservation_linkResponse(open_addr_t* tempNeighbor){
     reservation_vars.State = S_WAIT_RESLINKRESPONSE_SENDDONE;
 }
 
-//remove link command
-void reservation_removeLinkRequest(){
+//remove one link command
+void reservation_removeLinkRequest(open_addr_t*  reservationNeighAddr){
+  
+  OpenQueueEntry_t* reservationPkt;
+  
   
   if(reservation_vars.State != S_IDLE)
     return;
   
   leds_debug_toggle();
   
-  OpenQueueEntry_t* reservationPkt;
-  open_addr_t*      reservationNeighAddr;
-  
-  reservationNeighAddr = neighbors_reservationNeighbor();
   if(reservationNeighAddr!=NULL){
     // get a free packet buffer
     reservationPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
@@ -458,17 +463,20 @@ void reservation_pretendReceiveData(OpenQueueEntry_t* msg){
            
 //event
 void isr_reservation_button() {
+  open_addr_t*  reservationNeighAddr;
   
   switch (reservation_vars.button_event){
   case 0:
   case 1:
     //set slotframeID and bandwidth
-    reservation_setuResBandwidth(2,0);
   
-    reservation_linkRequest();
+    reservationNeighAddr = neighbors_reservationNeighbor();
+    reservation_linkRequest(reservationNeighAddr,2);
     break;
   case 2:
-    reservation_removeLinkRequest();
+    reservationNeighAddr = neighbors_reservationNeighbor();
+  
+    reservation_removeLinkRequest(reservationNeighAddr);
     break;
   default:
     //pretend that uppler is sending a data

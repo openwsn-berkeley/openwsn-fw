@@ -58,8 +58,8 @@ void             reservation_linkResponse(open_addr_t* tempNeighbor);
 void             reservation_sendDone(OpenQueueEntry_t* msg, error_t error);
 void             reservation_notifyReceiveuResCommand(OpenQueueEntry_t* msg);
 // call by up layer
-void             reservation_linkRequest();
-void             reservation_removeLinkRequest();
+void             reservation_linkRequest(open_addr_t*  reservationNeighAddr,uint16_t bandwidth);
+void             reservation_removeLinkRequest(open_addr_t*  reservationNeighAddr);
 //"reservation" pretends it is upplayer and sending a data
 void             reservation_pretendSendData();
 void             reservation_pretendReceiveData(OpenQueueEntry_t* msg);
