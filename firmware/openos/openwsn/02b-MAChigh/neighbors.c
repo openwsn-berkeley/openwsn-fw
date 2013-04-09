@@ -6,6 +6,9 @@
 #include "openserial.h"
 #include "IEEE802154E.h"
 
+#include "reservation.h"
+
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -89,7 +92,7 @@ bool neighbors_getPreferredParentEui64(open_addr_t* addressToWrite) {
    uint8_t   numNeighbors;
    dagrank_t minRankVal;
    uint8_t   minRankIdx;
-   
+  
    addressToWrite->type = ADDR_NONE;
    
    foundPreferred       = FALSE;
@@ -123,9 +126,10 @@ bool neighbors_getPreferredParentEui64(open_addr_t* addressToWrite) {
       // return its address
       memcpy(addressToWrite,&(neighbors_vars.neighbors[minRankIdx].addr_64b),sizeof(open_addr_t));
       addressToWrite->type=ADDR_64B;
-      foundPreferred=TRUE;         
+      foundPreferred=TRUE;   
+      //xv -- poipoi to test ures     
+      reservation_addLinkToNode(addressToWrite);
    }
-   
    return foundPreferred;
 }
 
@@ -574,6 +578,9 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
       neighbors_vars.neighbors[prefParentIdx].parentPreference       = MAXPREFERENCE;
       neighbors_vars.neighbors[prefParentIdx].stableNeighbor         = TRUE;
       neighbors_vars.neighbors[prefParentIdx].switchStabilityCounter = 0;
+      
+          //xv -- poipoi to test ures     
+      reservation_addLinkToNode(&neighbors_vars.neighbors[prefParentIdx].addr_64b);
    }
 }
 

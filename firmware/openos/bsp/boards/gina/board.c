@@ -17,8 +17,8 @@
 #include "radiotimer.h"
 #include "eui64.h"
 
-#include "reservation.h"
-#include "scheduler.h"
+//#include "reservation.h"
+//#include "scheduler.h"
 
 // sensors
 //#include "gyro.h"
@@ -185,7 +185,7 @@ __interrupt void PORT2_ISR (void) {
 #ifdef ISR_BUTTON
    if ((P2IFG & 0x80)!=0) {                      // button: [P2.7]
       P2IFG &= ~0x80;
-      scheduler_push_task(isr_reservation_button,TASKPRIO_BUTTON);
+   //   scheduler_push_task(isr_reservation_button,TASKPRIO_BUTTON);
       __bic_SR_register_on_exit(CPUOFF);
    } else {
       while (1); // should never happen

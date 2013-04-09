@@ -4,9 +4,9 @@
 
 //=========================== defines =========================================
 
-#define TOPOLOGY_MOTE1 0x6f
-#define TOPOLOGY_MOTE2 0xb9
-#define TOPOLOGY_MOTE3 0x3b
+#define TOPOLOGY_MOTE1 0xe8
+#define TOPOLOGY_MOTE2 0xe6
+#define TOPOLOGY_MOTE3 0xf3
 
 //=========================== variables =======================================
 

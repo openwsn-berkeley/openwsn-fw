@@ -36,8 +36,8 @@ typedef enum {
 //admin
 void             reservation_init();
 //public
-//uint8_t          reservation_getuResCommandID();
-//void             reservation_setuResCommandID(uint8_t commandID);
+//by neighbors to add a link
+void             reservation_addLinkToNode(open_addr_t* addressToWrite);
 
 void             reservation_notifyReceiveuResLinkRequest(OpenQueueEntry_t* msg);
 void             reservation_notifyReceiveuResLinkResponse(OpenQueueEntry_t* msg);

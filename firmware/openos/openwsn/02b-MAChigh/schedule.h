@@ -20,7 +20,7 @@ The superframe repears over time and can be arbitrarly long.
 #define SUPERFRAME_LENGTH    9
 
 #define NUMADVSLOTS          1
-#define NUMSHAREDTXRX        4
+#define NUMSHAREDTXRX        1
 #define NUMSERIALRX          3
 
 // number of slots frames 
@@ -172,6 +172,10 @@ frameLength_t   schedule_getSlotframeSize(uint8_t numOfSlotframe);
 uint8_t         schedule_getLinksNumber(uint8_t numOfSlotframe);
 void            schedule_generateLinkList(uint8_t slotframeID);
 Link_t*         schedule_getLinksList(uint8_t slotframeID);
+
+// to schedule from preferred parent selection.
+uint8_t         schedule_countLinksToNeighbor(uint8_t slotframeID,open_addr_t* address, cellType_t type);
+uint8_t         schedule_getLinksToNeighbor(uint8_t slotframeID,open_addr_t* address, scheduleEntry_t* links,cellType_t type);
 
 // from reservation
 void            schedule_uResGenerateCandidataLinkList(uint8_t slotframeID);

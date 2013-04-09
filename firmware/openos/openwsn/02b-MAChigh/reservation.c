@@ -19,8 +19,8 @@
 
 
 //=========================== typedef =========================================
-#define NO_UPPER_LAYER_CALLING_RESERVATION
-
+//#define NO_UPPER_LAYER_CALLING_RESERVATION
+#define ONE_LINK 1
 //=========================== variables =======================================
 typedef struct {
   bool                 busySending;     // TRUE when busy sending an reservation command
@@ -247,7 +247,14 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
     
     //I has an IE in my payload
     reservationPkt->l2_IEListPresent = 1;
-  
+    //debug
+//    packetfunctions_reserveHeaderSize(reservationPkt,10);
+    
+    
+//    for(uint8_t i=0;i<10;i++) {
+//       reservationPkt->payload[i]=0x09;
+//    }   
+    
     res_send(reservationPkt);
     
     reservation_vars.State = S_WAIT_RESLINKREQUEST_SENDDONE;
@@ -454,4 +461,15 @@ void isr_reservation_button() {
   
   reservation_vars.button_event += 1;
   //reservation_vars.button_event = (reservation_vars.button_event+1)%3;
+}
+
+void reservation_addLinkToNode(open_addr_t* addressToWrite ){
+   uint8_t count;
+   //uRES -- add a link with preferred parent
+   //check if a link exists to that neighbour. In case it does not exist create one.
+   //count = schedule_countLinksToNeighbor(uint8_t slotframeID,addressToWrite, CELLTYPE_TXRX);
+   count = schedule_countLinksToNeighbor(schedule_getNumSlotframe(),addressToWrite, CELLTYPE_TX);
+   if (count==0){//reserve if no TX links to that neighbour
+         reservation_linkRequest(addressToWrite,ONE_LINK);
+   }
 }

@@ -547,6 +547,38 @@ Link_t* schedule_getLinksList(uint8_t slotframeID){
     return links;
 }
 
+//get a list of the links to a neighbor
+uint8_t schedule_getLinksToNeighbor(uint8_t slotframeID,open_addr_t* address, scheduleEntry_t* links,cellType_t type){
+    
+    uint8_t i,count;
+    count=0;
+    
+    for (i=0;i<MAXACTIVESLOTS;i++){
+      if(schedule_vars.scheduleBuf[i].type == type 
+         && packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor,address)==TRUE){ //TODO add slotFrameID in the scheduleEntry so we can support multiple frames.
+         // copy the entry
+         memcpy(&links[i], &schedule_vars.scheduleBuf[i], sizeof(scheduleEntry_t));
+         count++;
+      }
+   }
+   return count;//return how many
+}
+
+//counts how many
+uint8_t schedule_countLinksToNeighbor(uint8_t slotframeID,open_addr_t* address, cellType_t type){    
+    uint8_t i,count;
+    count=0;
+    
+    for (i=0;i<MAXACTIVESLOTS;i++){
+      if(schedule_vars.scheduleBuf[i].type == type 
+         && packetfunctions_sameAddress(&schedule_vars.scheduleBuf[i].neighbor,address)==TRUE){ //TODO add slotFrameID in the scheduleEntry so we can support multiple frames.
+          count++;
+      }
+   }
+   return count;//return how many
+}
+
+
 void schedule_generateLinkList(uint8_t slotframeID){
     uint8_t j = 0;
     // for test
