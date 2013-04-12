@@ -127,8 +127,8 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
              ||
              packetfunctions_isBroadcastMulticast(&ipv6_header.dest)
           )
-          &&
-          ipv6_header.next_header!=IANA_IPv6ROUTE
+        //  &&
+        //  ipv6_header.next_header!=IANA_IPv6ROUTE
        ) {
       // this packet is for me, but no routing header.
       
@@ -142,6 +142,11 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
             break;
          case IANA_ICMPv6:
             icmpv6_receive(msg);
+            break;
+         case IANA_IPv6ROUTE: //source routing packet
+             if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
+               openqueue_freePacketBuffer(msg);
+             }
             break;
          default:
             openserial_printError(COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,

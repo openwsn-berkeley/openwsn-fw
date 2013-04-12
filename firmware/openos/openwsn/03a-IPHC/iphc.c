@@ -113,7 +113,7 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
      }else{
        //source routing
       sam = IPHC_SAM_128B;
-      dam = IPHC_DAM_ELIDED;
+      dam = IPHC_DAM_ELIDED; //poipoi xv not true, should not be elided.
       p_dest = NULL;
       p_src = &(msg->l3_sourceAdd);
      }
@@ -375,7 +375,7 @@ error_t prependIPv6Header(
 }
 
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
-   uint8_t         temp_8b;
+   uint8_t         temp_8b,temp_aux;
    open_addr_t     temp_addr_16b;
    open_addr_t     temp_addr_64b;
    ipv6_header_iht ipv6_header;
@@ -446,6 +446,11 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
          ipv6_header.next_header_compressed = FALSE;
          ipv6_header.next_header = *((uint8_t*)(msg->payload)+ipv6_header.header_length);
          ipv6_header.header_length += sizeof(uint8_t);
+         //poipoi debug
+         if (ipv6_header.next_header==IANA_IPv6ROUTE){
+            temp_aux=1;
+            temp_aux++;
+         }
          break;
       case IPHC_NH_COMPRESSED:
          // the Next header field is compressed and the next header is encoded
