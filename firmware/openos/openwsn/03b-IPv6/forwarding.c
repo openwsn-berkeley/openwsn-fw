@@ -109,7 +109,6 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, error_t error) {
 \param[in]     ipv6_header The information contained in the 6LoWPAN header.
 */
 void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
-   
    // take ownership
    msg->owner                  = COMPONENT_FORWARDING;
    
@@ -127,8 +126,8 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
              ||
              packetfunctions_isBroadcastMulticast(&ipv6_header.dest)
           )
-        //  &&
-        //  ipv6_header.next_header!=IANA_IPv6ROUTE
+          &&
+          ipv6_header.next_header!=IANA_IPv6ROUTE
        ) {
       // this packet is for me, but no routing header.
       
@@ -142,11 +141,6 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
             break;
          case IANA_ICMPv6:
             icmpv6_receive(msg);
-            break;
-         case IANA_IPv6ROUTE: //source routing packet
-             if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
-               openqueue_freePacketBuffer(msg);
-             }
             break;
          default:
             openserial_printError(COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
@@ -162,14 +156,13 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
       
       if (ipv6_header.next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
-         
          // resend as if from upper layer 
          if (fowarding_send_internal_RoutingTable(msg, ipv6_header,PCKTFORWARD)==E_FAIL) {
             openqueue_freePacketBuffer(msg);
          }
       } else {
          // source routing header present
-         
+        
          if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
             openqueue_freePacketBuffer(msg);
          }
