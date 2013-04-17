@@ -48,7 +48,7 @@ void macpong_initSend() {
       // send packet
       macpong_send(0);   
       // cancel timer
-//      opentimers_stop(macpong_vars.timerId);
+      opentimers_stop(macpong_vars.timerId);
    }
 }
 

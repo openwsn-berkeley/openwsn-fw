@@ -72,12 +72,12 @@ to return the board's description.
 // time-slot related
 #define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
 // execution speed related
-#define PORT_maxTxDataPrepare               77    // 2014us (measured 746us)
-#define PORT_maxRxAckPrepare                12    //  305us (measured  83us)
-#define PORT_maxRxDataPrepare               40    // 1007us (measured  84us)
-#define PORT_maxTxAckPrepare                12    //  305us (measured 219us)
+#define PORT_maxTxDataPrepare               66    // 2014us (measured 810us) stm32
+#define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
+#define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
+#define PORT_maxTxAckPrepare                10    //  305us (measured 219us)
 // radio speed related
-#define PORT_delayTx                        12     //  214us (measured 219us)
+#define PORT_delayTx                        7     //  214us (measured 219us)
 #define PORT_delayRx                        0     //    0us (can not measure)
 
 //=========================== typedef  ========================================
@@ -86,7 +86,7 @@ to return the board's description.
 
 static const uint8_t rreg_uriquery[]        = "h=ucb";
 static const uint8_t infoBoardname[]        = "OPENMOTESTM32";
-static const uint8_t infouCName[]           = "STM32F108";
+static const uint8_t infouCName[]           = "STM32F103";
 static const uint8_t infoRadioName[]        = "AT86RF231";
 
 //=========================== prototypes ======================================

@@ -114,7 +114,6 @@ void radiotimer_start(uint16_t period) {
     NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 0;
     NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
-    
 }
 
 //===== direct access
@@ -125,7 +124,7 @@ uint16_t radiotimer_getValue() {
 }
 
 void radiotimer_setPeriod(uint16_t period) {
-    
+    RTC_ITConfig(RTC_IT_ALR, DISABLE);
     //Reset RTC Counter to begin a new slot
     RTC_SetAlarm(period);
     RTC_WaitForLastTask();
@@ -134,6 +133,8 @@ void radiotimer_setPeriod(uint16_t period) {
     
     //set radiotimer irpstatus
     radiotimer_vars.overflowORcompare = RADIOTIMER_OVERFLOW;
+    RTC_ClearFlag(RTC_IT_ALR);
+    RTC_ITConfig(RTC_IT_ALR, ENABLE);
 }
 
 uint16_t radiotimer_getPeriod() {
@@ -144,16 +145,19 @@ uint16_t radiotimer_getPeriod() {
 //===== compare
 
 void radiotimer_schedule(uint16_t offset) {
+    RTC_ITConfig(RTC_IT_ALR, DISABLE);
     // Set the RTC alarm(RTC timer will alarm at next state of slot)
     RTC_SetAlarm(offset);
     RTC_WaitForLastTask();
     
     //set radiotimer irpstatus
     radiotimer_vars.overflowORcompare = RADIOTIMER_COMPARE;
+    RTC_ClearFlag(RTC_IT_ALR);
+    RTC_ITConfig(RTC_IT_ALR, ENABLE);
 }
 
 void radiotimer_cancel() {
-  
+    RTC_ITConfig(RTC_IT_ALR, DISABLE);
     // set RTC alarm (slotlength) 
 //    RTC_SetAlarm(PORT_TsSlotDuration);
     RTC_SetAlarm(radiotimer_vars.currentSlotPeriod);
@@ -161,6 +165,8 @@ void radiotimer_cancel() {
     
     //set radiotimer irpstatus
     radiotimer_vars.overflowORcompare = RADIOTIMER_OVERFLOW;
+    RTC_ClearFlag(RTC_IT_ALR);
+    RTC_ITConfig(RTC_IT_ALR, ENABLE);
 }
 
 //===== capture
@@ -179,6 +185,7 @@ kick_scheduler_t radiotimer_isr() {
    switch (taiv_temp) {
       case RADIOTIMER_COMPARE:
          if (radiotimer_vars.compare_cb!=NULL) {
+            RCC_Wakeup();
             // call the callback
             radiotimer_vars.compare_cb();
             // kick the OS
@@ -190,11 +197,11 @@ kick_scheduler_t radiotimer_isr() {
            
             //Wait until last write operation on RTC registers has finished
             RTC_WaitForLastTask();                            
-
+            
             //Set the RTC time counter to 0
             RTC_SetCounter(0x00000000);
             RTC_WaitForLastTask();
-            
+            RCC_Wakeup();
             // call the callback
             radiotimer_vars.overflow_cb();
             // kick the OS

@@ -19,14 +19,11 @@
 #include "board_info.h"
 #include "opentimers.h"
 
-#include "openserial.h"
-
-
 //=========================== main ============================================
 
 extern int mote_main(void);
 int main(void) {
-   return mote_main();
+   return mote_main(); 
 }
 
 //=========================== public ==========================================
@@ -36,7 +33,7 @@ void board_init()
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
     
-    GPIO_InitTypeDef  GPIO_InitStructure;  
+    GPIO_InitTypeDef  GPIO_InitStructure;
   
     //enable GPIOB, Clock
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB , ENABLE);
@@ -64,7 +61,8 @@ void board_init()
     GPIOB->ODR |= 0X0400;//set low
     
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOB, GPIO_PinSource10);//Connect EXTI Line10 to PB.10
-  
+    EXTI_ClearITPendingBit(EXTI_Line10);
+
     //Configures EXTI line 10 to generate an interrupt on rising edge
     EXTI_InitTypeDef  EXTI_InitStructure; 
     EXTI_InitStructure.EXTI_Line    = EXTI_Line10;
@@ -93,13 +91,9 @@ void board_sleep() {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
     // Desable the SRAM and FLITF clock in Stop mode
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM | RCC_AHBPeriph_FLITF, DISABLE);
-    
-//    GPIOC->ODR |= 0x0010;
 
-    while(openserial_get_outBufferFilled());
-    PWR_EnterSTOPMode(PWR_Regulator_LowPower,PWR_STOPEntry_WFI);
-    
-//    GPIOC->ODR &= ~0x0010;
+//    while(openserial_get_outBufferFilled());
+    PWR_EnterSTOPMode(PWR_Regulator_ON,PWR_STOPEntry_WFI);
     
     if(sleepTime > 0)
     opentimers_sleepTimeCompesation(sleepTime*2);
