@@ -352,52 +352,47 @@ bool packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
 //see http://www-net.cs.umass.edu/kurose/transport/UDP.html, or http://tools.ietf.org/html/rfc1071
 //see http://en.wikipedia.org/wiki/User_Datagram_Protocol#IPv6_PSEUDO-HEADER
 void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_ptr) {
-   open_addr_t  temp_dest_prefix;
-   open_addr_t  temp_dest_mac64b;
    uint8_t temp_checksum[2];
    uint8_t little_helper[2];
-   //initialization
+   
+   // initialize running checksum
    temp_checksum[0]  = 0;
    temp_checksum[1]  = 0;
-   *checksum_ptr     = 0;
-   *(checksum_ptr+1) = 0;
-   //source/destination address
-   packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_dest_prefix,&temp_dest_mac64b);
-   if (packetfunctions_sameAddress(&temp_dest_prefix,idmanager_getMyID(ADDR_PREFIX))) {
-      little_helper[0] = 0xfe;
-      little_helper[1] = 0x80;
-      //source address prefix
-      onesComplementSum(temp_checksum,little_helper,2);
-      //source address EUI
-      onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
-      //destination address prefix (fe:80)
-      onesComplementSum(temp_checksum,little_helper,2);
-      //destination address EUI
-      onesComplementSum(temp_checksum,temp_dest_mac64b.addr_64b,8);
-   } else {
-      //source address prefix
-      onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
-      //source address EUI
-      onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
-      //destination address
-      onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
-   }
-   //length
+   
+   //===== IPv6 pseudo header
+   
+   // source address (prefix and EUI64)
+   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
+   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
+   
+   // destination address
+   onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
+   
+   // length
    little_helper[0] = 0;
    little_helper[1] = msg->length;
    onesComplementSum(temp_checksum,little_helper,2);
-   //next header
+   
+   // next header
    little_helper[0] = 0;
    little_helper[1] = msg->l4_protocol;
    onesComplementSum(temp_checksum,little_helper,2);
-   //ICMPv6 packet
+   
+   //===== payload
+   
+   // reset the checksum currently in the payload
+   *checksum_ptr     = 0;
+   *(checksum_ptr+1) = 0;
+   
    onesComplementSum(temp_checksum,msg->payload,msg->length);
    temp_checksum[0] ^= 0xFF;
    temp_checksum[1] ^= 0xFF;
+   
    //write in packet
    *checksum_ptr     = temp_checksum[0];
    *(checksum_ptr+1) = temp_checksum[1];
 }
+
 
 void onesComplementSum(uint8_t* global_sum, uint8_t* ptr, int length) {
    uint32_t sum = 0xFFFF & (global_sum[0]<<8 | global_sum[1]);
