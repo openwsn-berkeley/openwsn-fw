@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 Import('env')
 
@@ -158,7 +159,8 @@ elif env['toolchain']=='iar-proj':
 else:
     raise SystemError('toolchain={0} unsupported.'.format(toolchain))
 
-# upload over JTAG
+#============================ upload over JTAG ================================
+
 def jtagUploadFunc(location):
     if   env['fet_version']==2:
         # MSP-FET430uif is running v2 Firmware
@@ -179,18 +181,26 @@ def jtagUploadFunc(location):
 if env['jtag']:
     env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
 
+#============================ bootload ========================================
+
+def telosb_bootstrap(target, source, env):
+    for comPort in env['bootload'].split(','):
+        subprocess.call(
+            'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(comPort,source[0])
+        )
+
 # bootload
-def BootloadFunc(location):
+def BootloadFunc():
     if   env['board']=='telosb':
         return Builder(
-            action      = 'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "$SOURCE"'.format(location),
+            action      = telosb_bootstrap,
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
 if env['bootload']:
-    env.Append(BUILDERS = {'Bootload' : BootloadFunc(env['bootload'])})
+    env.Append(BUILDERS = {'Bootload' : BootloadFunc()})
 
 # PostBuildExtras is a method called after a program (not a library) is built.
 # You can any addition step in this function, such as converting the binary
