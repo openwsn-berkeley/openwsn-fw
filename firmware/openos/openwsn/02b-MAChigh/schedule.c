@@ -111,22 +111,40 @@ status information about several modules in the OpenWSN stack.
 */
 bool debugPrint_schedule() {
    debugScheduleEntry_t temp;
-   schedule_vars.debugPrintRow    = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
-   temp.row                       = schedule_vars.debugPrintRow;
-   //copy element  by element to the struct that will  be serialized. we don't want to sent the pointer through the serial port.
-   temp.scheduleEntry.channelOffset  = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
-   temp.scheduleEntry.numRx  = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
-   temp.scheduleEntry.numTx=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
-   temp.scheduleEntry.numTxACK=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
-   temp.scheduleEntry.lastUsedAsn=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn;
-   temp.scheduleEntry.neighbor=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor;
-   temp.scheduleEntry.shared=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
-   temp.scheduleEntry.slotOffset=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
-   temp.scheduleEntry.type=schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
-            
+   
+   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
+   
+   temp.row                            = schedule_vars.debugPrintRow;
+   temp.slotOffset                     = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
+   temp.type                           = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
+   temp.shared                         = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
+   temp.channelOffset                  = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+   memcpy(
+      &temp.neighbor,
+      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
+      sizeof(open_addr_t)
+   );
+   temp.numRx                          = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
+   temp.numTx                          = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
+   temp.numTxACK                       = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+   memcpy(
+      &temp.lastUsedAsn,
+      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
+      sizeof(asn_t)
+   );
+   
    openserial_printStatus(STATUS_SCHEDULE,
          (uint8_t*)&temp,
-         sizeof(debugScheduleEntry_t));
+         sizeof(debugScheduleEntry_t)
+   );
+   
    return TRUE;
 }
 

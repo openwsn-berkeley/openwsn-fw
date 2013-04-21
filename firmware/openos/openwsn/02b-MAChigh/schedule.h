@@ -83,21 +83,6 @@ typedef struct {
 } scheduleEntry_t;
 PRAGMA(pack());
 
-//copy of the previous one but without the pointer
-PRAGMA(pack(1));
-typedef struct {
-   slotOffset_t    slotOffset;
-   cellType_t      type;
-   bool            shared;
-   uint8_t         channelOffset;
-   open_addr_t     neighbor;
-   uint8_t         numRx;
-   uint8_t         numTx;
-   uint8_t         numTxACK;
-   asn_t           lastUsedAsn;
-} scheduleEntryDebug_t;
-PRAGMA(pack());
-
 //used to debug through ipv6 pkt. 
 
 PRAGMA(pack(1));
@@ -111,7 +96,15 @@ PRAGMA(pack());
 PRAGMA(pack(1));
 typedef struct {
    uint8_t         row;
-   scheduleEntryDebug_t scheduleEntry;
+   slotOffset_t    slotOffset;
+   uint8_t         type;
+   bool            shared;
+   uint8_t         channelOffset;
+   open_addr_t     neighbor;
+   uint8_t         numRx;
+   uint8_t         numTx;
+   uint8_t         numTxACK;
+   asn_t           lastUsedAsn;
 } debugScheduleEntry_t;
 PRAGMA(pack());
 
