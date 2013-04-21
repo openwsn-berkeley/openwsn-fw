@@ -1,4 +1,5 @@
 import os
+import threading
 import subprocess
 
 Import('env')
@@ -183,17 +184,52 @@ if env['jtag']:
 
 #============================ bootload ========================================
 
-def telosb_bootstrap(target, source, env):
-    for comPort in env['bootload'].split(','):
+class telosb_bootloadThread(threading.Thread):
+    def __init__(self,comPort,hexFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.hexFile         = hexFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'telosb_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(comPort,source[0])
+            'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(self.comPort,self.hexFile)
         )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+
+def telosb_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        bootloadThreads += [
+            telosb_bootloadThread(
+                comPort      = comPort,
+                hexFile      = source[0],
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
 
 # bootload
 def BootloadFunc():
     if   env['board']=='telosb':
         return Builder(
-            action      = telosb_bootstrap,
+            action      = telosb_bootload,
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
