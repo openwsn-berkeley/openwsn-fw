@@ -1,4 +1,6 @@
 import os
+import threading
+import subprocess
 
 Import('env')
 
@@ -158,7 +160,8 @@ elif env['toolchain']=='iar-proj':
 else:
     raise SystemError('toolchain={0} unsupported.'.format(toolchain))
 
-# upload over JTAG
+#============================ upload over JTAG ================================
+
 def jtagUploadFunc(location):
     if   env['fet_version']==2:
         # MSP-FET430uif is running v2 Firmware
@@ -179,18 +182,61 @@ def jtagUploadFunc(location):
 if env['jtag']:
     env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
 
+#============================ bootload ========================================
+
+class telosb_bootloadThread(threading.Thread):
+    def __init__(self,comPort,hexFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.hexFile         = hexFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'telosb_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(self.comPort,self.hexFile)
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+
+def telosb_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        bootloadThreads += [
+            telosb_bootloadThread(
+                comPort      = comPort,
+                hexFile      = source[0],
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+
 # bootload
-def BootloadFunc(location):
+def BootloadFunc():
     if   env['board']=='telosb':
         return Builder(
-            action      = 'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "$SOURCE"'.format(location),
+            action      = telosb_bootload,
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
 if env['bootload']:
-    env.Append(BUILDERS = {'Bootload' : BootloadFunc(env['bootload'])})
+    env.Append(BUILDERS = {'Bootload' : BootloadFunc()})
 
 # PostBuildExtras is a method called after a program (not a library) is built.
 # You can any addition step in this function, such as converting the binary
