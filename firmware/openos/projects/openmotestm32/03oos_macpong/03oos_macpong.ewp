@@ -1882,6 +1882,12 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\eui64.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\gpio.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\gpio.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\leds.c</name>
         </file>
         <file>
@@ -1994,7 +2000,7 @@
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\ieee802154.h</name>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.c</name>

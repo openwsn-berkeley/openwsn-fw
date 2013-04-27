@@ -119,6 +119,7 @@ void radiotimer_start(uint16_t period) {
 //===== direct access
 
 uint16_t radiotimer_getValue() {
+    RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
     return (uint16_t)counter;
 }
@@ -138,6 +139,7 @@ void radiotimer_setPeriod(uint16_t period) {
 }
 
 uint16_t radiotimer_getPeriod() {
+    RTC_WaitForSynchro();
     uint32_t period = RTC_GetAlarm();
     return (uint16_t)period;
 }
@@ -172,6 +174,7 @@ void radiotimer_cancel() {
 //===== capture
 
 inline uint16_t radiotimer_getCapturedTime() {
+    RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
     return (uint16_t)counter;
 }

@@ -18,12 +18,13 @@
 #include "debugpins.h"
 #include "board_info.h"
 #include "opentimers.h"
+#include "gpio.h"
 
 //=========================== main ============================================
 
 extern int mote_main(void);
 int main(void) {
-   return mote_main(); 
+   return mote_main();
 }
 
 //=========================== public ==========================================
@@ -32,6 +33,11 @@ void board_init()
 {
     RCC_Configuration();//Configure rcc
     NVIC_Configuration();//configure NVIC and Vector Table
+    
+    //configure ALL GPIO to AIN to get lowest power
+    GPIO_Config_ALL_AIN();
+    //configuration GPIO to measure the time from sleep to 72MHz
+    GPIO_Configuration();
     
     GPIO_InitTypeDef  GPIO_InitStructure;
   

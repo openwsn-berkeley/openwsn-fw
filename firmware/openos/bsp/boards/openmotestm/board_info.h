@@ -5,7 +5,7 @@ This module simply defines some strings describing the board, which CoAP uses
 to return the board's description.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
-\author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
+\author Tengfei Chang <tengfei.chang@gmail.com>,  July 2012.
 */
 
 #ifndef __BOARD_INFO_H
@@ -65,19 +65,19 @@ to return the board's description.
 //#define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
 //#define PORT_maxTxAckPrepare                10    //  305us (measured 219us)
 //// radio speed related
-//#define PORT_delayTx                        7     //  214us (measured 219us)
+//#define PORT_delayTx                        9     //  214us (measured 219us)
 //#define PORT_delayRx                        0     //    0us (can not measure)
 //// radio watchdog
 
 // time-slot related
-#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
-// execution speed related
-#define PORT_maxTxDataPrepare               66    // 2014us (measured 810us) stm32
-#define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
-#define PORT_maxRxDataPrepare               33    // 1007us (measured  84us)
-#define PORT_maxTxAckPrepare                10    //  305us (measured 219us)
+#define PORT_TsSlotDuration                 245   // counter counts one extra count, see datasheet
+// execution speed related   (rcc configure need 235us)
+#define PORT_maxTxDataPrepare               33    // 2014us (measured 812us+235) stm32
+#define PORT_maxRxAckPrepare                12    //  610us (measured 171us+235) stm32
+#define PORT_maxRxDataPrepare               16    //  976us (measured 170us+235) stm32
+#define PORT_maxTxAckPrepare                12    //  610us (measured 323us+235) stm32
 // radio speed related
-#define PORT_delayTx                        7     //  214us (measured 219us)
+#define PORT_delayTx                        9     //  549us (measured 315us+235) .....
 #define PORT_delayRx                        0     //    0us (can not measure)
 
 //=========================== typedef  ========================================

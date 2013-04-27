@@ -19,7 +19,7 @@
 #include "idmanager.h"
 #include "neighbors.h"
 
-#define MAX_PAYLOAD 100
+#define MAX_PAYLOAD 104
 //=========================== variables =======================================
 
 typedef struct {
