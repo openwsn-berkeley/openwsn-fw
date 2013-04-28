@@ -64,14 +64,6 @@ void uart_init()
     GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-  
-//    //Configure NVIC: Preemption Priority = 3 and Sub Priority = 3
-//    NVIC_InitTypeDef 	NVIC_InitStructure;
-//    NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQChannel;
-//    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
-//    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
-//    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//    NVIC_Init(&NVIC_InitStructure);
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) 
@@ -85,14 +77,13 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb)
 
 void uart_enableInterrupts()
 {
-    USART_ITConfig(UART4, USART_IT_TC, ENABLE);
+    USART_ITConfig(UART4, USART_IT_TXE, ENABLE);
     USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
-    USART_ClearFlag(UART4, USART_FLAG_TC);
 }
 
 void uart_disableInterrupts()
 {
-    USART_ITConfig(UART4, USART_IT_TC, DISABLE);
+    USART_ITConfig(UART4, USART_IT_TXE, DISABLE);
     USART_ITConfig(UART4, USART_IT_RXNE, DISABLE);
 }
 
@@ -103,7 +94,7 @@ void uart_clearRxInterrupts()
 
 void uart_clearTxInterrupts()
 {
-    USART_ClearFlag(UART4,USART_FLAG_TC);
+    USART_ClearFlag(UART4,USART_FLAG_TXE);
 }
 
 void uart_writeByte(uint8_t byteToWrite)

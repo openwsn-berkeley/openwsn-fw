@@ -784,10 +784,8 @@ void UART4_IRQHandler(void)
         uart_rx_isr();
     }
   
-    if(USART_GetFlagStatus(UART4,USART_FLAG_TC) != RESET)
-    {
-      USART_ClearFlag(UART4,USART_FLAG_TC);
-      
+    if(USART_GetFlagStatus(UART4,USART_FLAG_TXE) != RESET)
+    { 
         uart_tx_isr(); 
     }
     debugpins_isr_clr();

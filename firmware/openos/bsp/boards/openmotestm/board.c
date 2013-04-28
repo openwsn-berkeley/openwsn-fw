@@ -98,7 +98,6 @@ void board_sleep() {
     // Desable the SRAM and FLITF clock in Stop mode
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM | RCC_AHBPeriph_FLITF, DISABLE);
 
-//    while(openserial_get_outBufferFilled());
     PWR_EnterSTOPMode(PWR_Regulator_ON,PWR_STOPEntry_WFI);
     
     if(sleepTime > 0)
