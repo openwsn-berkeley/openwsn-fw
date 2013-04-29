@@ -19,6 +19,7 @@ source = ['board.c',
          ]
 
 if localEnv['PLATFORM'] == 'win32':
+    env.Append(LINKCOM     = ' -lws2_32')
     localEnv.Append(CPPPATH = [os.path.join('#','firmware','openos','bsp','boards','pc','win')])
     source.append(os.path.join('win','tcp_port_win.c'))
 

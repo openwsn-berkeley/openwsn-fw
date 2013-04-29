@@ -118,10 +118,10 @@ void opensim_client_send(int  txPacketType,
 #endif
 }
 
-void opensim_client_waitForPacket(int* rxPacketType,
-                                  int* rxPacketParamsBuf,
-                                  int  rxPacketParamsMaxLength,
-                                  int* rxPacketParamsLength) {
+void opensim_client_waitForPacket(int*  rxPacketType,
+                                  char* rxPacketParamsBuf,
+                                  int   rxPacketParamsMaxLength,
+                                  int*  rxPacketParamsLength) {
    int retval;
    
    // this blocks while waiting for a packet
