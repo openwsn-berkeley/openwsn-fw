@@ -28,6 +28,8 @@ dummyFunc = Builder(
 )
 
 if   env['toolchain']=='mspgcc':
+    if env['board'] not in ['telosb','gina']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     # compiler
     env.Replace(CC           = 'msp430-gcc')
@@ -63,6 +65,8 @@ if   env['toolchain']=='mspgcc':
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
 
 elif env['toolchain']=='iar':
+    if env['board'] not in ['telosb','gina']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
         iarEw430BinDir          = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'430','bin')
@@ -133,6 +137,8 @@ elif env['toolchain']=='iar':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
 elif env['toolchain']=='iar-proj':
+    if env['board'] not in ['telosb','gina']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
         iarEw430CommonBinDir      = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'common','bin')
@@ -158,7 +164,17 @@ elif env['toolchain']=='iar-proj':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
 else:
-    raise SystemError('toolchain={0} unsupported.'.format(env['toolchain']))
+    if env['board'] in ['telosb','gina']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
+    # converts ELF to iHex
+    env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
+    
+    # convert ELF to bin
+    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    
+    # print sizes
+    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
 #============================ upload over JTAG ================================
 

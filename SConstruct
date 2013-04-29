@@ -21,7 +21,7 @@ print banner
 
 command_line_options = {
     'board':       ['telosb','gina','pc'],
-    'toolchain':   ['mspgcc','iar','iar-proj','gcc','visualstudio'],
+    'toolchain':   ['mspgcc','iar','iar-proj','gcc'],
     'fet_version': ['2','3'],
     'verbose':     ['0','1']
 }
