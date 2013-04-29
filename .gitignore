@@ -6,6 +6,7 @@ settings
 *.exe
 *.ihex
 *.a43
+*.bin
 path.txt
 /build
 /.sconsign.dblite
