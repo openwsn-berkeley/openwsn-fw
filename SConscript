@@ -158,7 +158,7 @@ elif env['toolchain']=='iar-proj':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
 else:
-    raise SystemError('toolchain={0} unsupported.'.format(toolchain))
+    raise SystemError('toolchain={0} unsupported.'.format(env['toolchain']))
 
 #============================ upload over JTAG ================================
 
