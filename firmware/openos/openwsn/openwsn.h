@@ -51,8 +51,8 @@ enum {
 };
 
 enum {
-   LITTLE_ENDIAN                       = TRUE,
-   BIG_ENDIAN                          = FALSE,
+   OW_LITTLE_ENDIAN                       = TRUE,
+   OW_BIG_ENDIAN                          = FALSE,
 };
 
 // protocol numbers, as defined by the IANA

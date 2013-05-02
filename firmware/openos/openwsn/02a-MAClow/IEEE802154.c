@@ -29,7 +29,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint8_t temp_8b;
    
    // previousHop address (always 64-bit)
-   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),LITTLE_ENDIAN);
+   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
    // nextHop address
    if (packetfunctions_isBroadcastMulticast(nextHop)) {
       //broadcast address is always 16-bit
@@ -41,7 +41,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       switch (nextHop->type) {
          case ADDR_16B:
          case ADDR_64B:
-            packetfunctions_writeAddress(msg,nextHop,LITTLE_ENDIAN);
+            packetfunctions_writeAddress(msg,nextHop,OW_LITTLE_ENDIAN);
             break;
          default:
             openserial_printCritical(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,
@@ -51,7 +51,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       
    }
    // destpan
-   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),LITTLE_ENDIAN);
+   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
    //dsn
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
    *((uint8_t*)(msg->payload)) = sequenceNumber;
@@ -159,7 +159,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
                                ADDR_PANID,
                                &ieee802514_header->panid,
-                               LITTLE_ENDIAN);
+                               OW_LITTLE_ENDIAN);
    ieee802514_header->headerLength += 2;
    // dest
    if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
@@ -171,7 +171,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
              ((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
              ADDR_16B,
              &ieee802514_header->dest,
-             LITTLE_ENDIAN
+             OW_LITTLE_ENDIAN
          );
          ieee802514_header->headerLength += 2;
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
@@ -180,7 +180,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
                                      ADDR_64B,
                                      &ieee802514_header->dest,
-                                     LITTLE_ENDIAN);
+                                     OW_LITTLE_ENDIAN);
          ieee802514_header->headerLength += 8;
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
          break;
@@ -194,7 +194,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
                                      ADDR_16B,
                                      &ieee802514_header->src,
-                                     LITTLE_ENDIAN);
+                                     OW_LITTLE_ENDIAN);
          ieee802514_header->headerLength += 2;
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
          break;
@@ -202,7 +202,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
                                      ADDR_64B,
                                      &ieee802514_header->src,
-                                     LITTLE_ENDIAN);
+                                     OW_LITTLE_ENDIAN);
          ieee802514_header->headerLength += 8;
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
          break;
