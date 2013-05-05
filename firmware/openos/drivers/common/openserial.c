@@ -101,7 +101,7 @@ void openserial_init() {
                      isr_openserial_rx);
 }
 
-error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t length) {
+error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint8_t length) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    
