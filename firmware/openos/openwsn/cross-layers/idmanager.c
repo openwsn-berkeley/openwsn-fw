@@ -40,12 +40,6 @@ void idmanager_init() {
    idmanager_vars.my64bID.type         = ADDR_64B;
    eui64_get(idmanager_vars.my64bID.addr_64b);
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
-
-   // DEBUG_MOTEID_MASTER is DAGroot and bridge
-   if (idmanager_vars.my16bID.addr_16b[1]==DEBUG_MOTEID_MASTER) {
-      idmanager_vars.isDAGroot         = TRUE;
-      idmanager_vars.isBridge          = TRUE;
-   }
 }
 
 bool idmanager_getIsDAGroot() {
@@ -215,20 +209,19 @@ void idmanager_triggerAboutRoot() {
 
 void idmanager_triggerAboutBridge() {
    uint8_t number_bytes_from_input_buffer;
-   uint8_t input_buffer[9];
-   //get command from OpenSerial (1B command, 8B prefix)
-   number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer[0],sizeof(input_buffer));
+   uint8_t input_buffer;
+   //get command from OpenSerial
+   number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer,sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
       openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
             (errorparameter_t)number_bytes_from_input_buffer,
-            (errorparameter_t)0);
+            (errorparameter_t)1);
       return;
    };
    //handle command
-   switch (input_buffer[0]) {
+   switch (input_buffer) {
      case ACTION_YES:
         idmanager_setIsBridge(TRUE);
-        memcpy(&(idmanager_vars.myPrefix.prefix),&(input_buffer[1]),8);
         break;
      case ACTION_NO:
         idmanager_setIsBridge(FALSE);
@@ -238,7 +231,6 @@ void idmanager_triggerAboutBridge() {
            idmanager_setIsBridge(FALSE);
         } else {
            idmanager_setIsBridge(TRUE);
-           memcpy(&(idmanager_vars.myPrefix.prefix),&(input_buffer[1]),8);
         }
         break;
    }
