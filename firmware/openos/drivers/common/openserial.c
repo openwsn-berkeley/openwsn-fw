@@ -464,15 +464,17 @@ inline void outputHdlcWrite(uint8_t b) {
 \brief Finalize the outgoing HDLC frame.
 */
 inline void outputHdlcClose() {
+   uint16_t   finalCrc;
+    
    // finalize the calculation of the CRC
-   openserial_vars.outputCrc                          = ~openserial_vars.outputCrc;
+   finalCrc   = ~openserial_vars.outputCrc;
    
    // write the CRC value
-   openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]     = (openserial_vars.outputCrc>>0)&0xff;
-   openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]     = (openserial_vars.outputCrc>>8)&0xff;
+   outputHdlcWrite((finalCrc>>0)&0xff);
+   outputHdlcWrite((finalCrc>>8)&0xff);
    
    // write the closing HDLC flag
-   openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]     = HDLC_FLAG;
+   openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]   = HDLC_FLAG;
 }
 
 //===== hdlc (input)
