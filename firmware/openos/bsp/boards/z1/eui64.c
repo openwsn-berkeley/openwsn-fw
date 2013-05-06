@@ -8,6 +8,7 @@
 #include "string.h"
 #include "eui64.h"
 #include "msp430x26x.h"
+#include "board_info.h"
 
 //=========================== defines =========================================
 
@@ -85,6 +86,7 @@ void eui64_get(uint8_t* addressToWrite) {    // >= 6000us
             *(addressToWrite+1) = 0x15;
             *(addressToWrite+2) = 0x92;
             memcpy(addressToWrite+3,id+1,5);
+            *(addressToWrite+7) = MY_ID;//hack to have a differnt address
          }
       }
    }

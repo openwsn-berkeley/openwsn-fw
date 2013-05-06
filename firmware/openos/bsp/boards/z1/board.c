@@ -95,11 +95,6 @@ __interrupt void USCIAB1TX_ISR(void) {
         ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ) {
       //isr_i2c_tx(1);                             // I2C: TX
    }
-   if ( (UC1IFG & UCA1TXIFG) && (UC1IE & UCA1TXIE) ){
-      if (uart_tx_isr()==KICK_SCHEDULER) {       // UART: TX
-         __bic_SR_register_on_exit(CPUOFF);
-      }
-   }
    debugpins_isr_clr();
 }
 
@@ -110,11 +105,6 @@ __interrupt void USCIAB1RX_ISR(void) {
    if ( ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ||
          (UCB1STAT & UCNACKIFG) ) {
       //isr_i2c_rx(1);                             // I2C: RX, bus 1
-   }
-   if ( (UC1IFG & UCA1RXIFG) && (UC1IE & UCA1RXIE) ){
-      if (uart_rx_isr()==KICK_SCHEDULER) {       // UART: RX
-         __bic_SR_register_on_exit(CPUOFF);
-      }
    }
    debugpins_isr_clr();
 }
@@ -131,24 +121,30 @@ __interrupt void ADC12_ISR (void) {
 
 #pragma vector = USCIAB0TX_VECTOR
 __interrupt void USCIAB0TX_ISR (void) {
-   
    debugpins_isr_set();
-   while(1); // should never happen
+   if ( (UC0IFG & UCA0TXIFG) && (UC0IE & UCA0TXIE) ){
+      if (uart_tx_isr()==KICK_SCHEDULER) {       // UART: TX
+         __bic_SR_register_on_exit(CPUOFF);
+      }
+   }
+   debugpins_isr_clr();
 }
 
 #pragma vector = USCIAB0RX_VECTOR
 __interrupt void USCIAB0RX_ISR (void) {
    
    debugpins_isr_set();
-   if ( (IFG2 & UCA0RXIFG) && (IE2 & UCA0RXIE) ) {
+   if ( (IFG2 & UCB0RXIFG) && (IE2 & UCB0RXIE) ) {
       if (spi_isr()==KICK_SCHEDULER) {           // SPI
          __bic_SR_register_on_exit(CPUOFF);
       }
    }
-   if ( ((IFG2 & UCB0RXIFG) && (IE2 & UCB0RXIE)) ||
-        (UCB0STAT & UCNACKIFG) ) {
-      //isr_i2c_rx(0);                             // I2C: RX, bus 0
+   if ( (UC0IFG & UCA0RXIFG) && (UC0IE & UCA0RXIE) ){
+      if (uart_rx_isr()==KICK_SCHEDULER) {       // UART: RX
+         __bic_SR_register_on_exit(CPUOFF);
+      }
    }
+   
    debugpins_isr_clr();
 }
 

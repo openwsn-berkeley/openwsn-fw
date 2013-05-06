@@ -97,7 +97,7 @@
         </option>
         <option>
           <name>OGChipSelectMenu</name>
-          <state>MSP430F2618	MSP430F2618</state>
+          <state>MSP430F2617	MSP430F2617</state>
         </option>
         <option>
           <name>GStackHeapOverride</name>
@@ -963,7 +963,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state></state>
+          <state>$PROJ_FNAME$.ulp</state>
         </option>
         <option>
           <name>ULPStatus</name>

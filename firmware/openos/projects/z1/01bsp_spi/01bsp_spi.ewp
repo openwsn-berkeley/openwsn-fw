@@ -97,7 +97,7 @@
         </option>
         <option>
           <name>OGChipSelectMenu</name>
-          <state>MSP430F2618	MSP430F2618</state>
+          <state>MSP430F2617	MSP430F2617</state>
         </option>
         <option>
           <name>GStackHeapOverride</name>
@@ -713,7 +713,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F2618.xcl</state>
+          <state>$TOOLKIT_DIR$\CONFIG\lnk430F2417.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -950,7 +950,11 @@
         <debug>1</debug>
         <option>
           <name>CUTest</name>
-          <state>###Uninitialized###</state>
+          <state>-I$TOOLKIT_DIR$\inc</state>
+          <state>-@$TOOLKIT_DIR$\bin\iar.cmd</state>
+          <state>-@$PROJ_DIR$\source.txt</state>
+          <state>-@$PROJ_DIR$\include.txt</state>
+          <state>--preinclude=$PROJ_DIR$\IAR_ULPAdvisor_Defs.h</state>
         </option>
         <option>
           <name>ULPRules</name>
@@ -963,7 +967,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state></state>
+          <state>$PROJ_FNAME$.ulp</state>
         </option>
         <option>
           <name>ULPStatus</name>

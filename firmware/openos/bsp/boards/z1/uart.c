@@ -31,12 +31,14 @@ void uart_init() {
    memset(&uart_vars,0,sizeof(uart_vars_t));
    
    //initialize UART openserial_vars.mode
-   P3SEL    |=  0xC0;                             // P3.6,7 = USCI_A1 TXD/RXD
-   UCA1CTL1 |=  UCSSEL_2;                         // CLK = SMCL
-   UCA1BR0   =  0x8a;                             // 115200 baud if SMCLK@16MHz
-   UCA1BR1   =  0x00;
-   UCA1MCTL  =  UCBRS_7;                          // Modulation UCBRSx = 7
-   UCA1CTL1 &= ~UCSWRST;                          // Initialize USCI state machine
+   P3SEL    |=  0x30;                             // P3.4,5 = USCI_A0 TXD/RXD
+//   UCA0CTL0  = 0;
+//   UCA0CTL1  = 0;
+   UCA0CTL1 |=  UCSSEL_2;                         // CLK = SMCL
+   UCA0BR0   =  0x8a;                             // 115200 baud if SMCLK@16MHz (divide by 138)
+   UCA0BR1   =  0x00;
+   UCA0MCTL  =  UCBRS_7;                          // Modulation UCBRSx = 7
+   UCA0CTL1 &= ~UCSWRST;                          // Initialize USCI state machine
    //UC1IFG   &= ~(UCA1TXIFG | UCA1RXIFG);          // clear possible pending interrupts
    //UC1IE    |=  (UCA1RXIE  | UCA1TXIE);           // Enable USCI_A1 TX & RX interrupt  
 }
@@ -47,27 +49,27 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
 }
 
 void    uart_enableInterrupts(){
-  UC1IE    |=  (UCA1RXIE  | UCA1TXIE);  
+  UC0IE    |=  (UCA0RXIE  | UCA0TXIE);  
 }
 
 void    uart_disableInterrupts(){
-  UC1IE &= ~(UCA1RXIE | UCA1TXIE);
+  UC0IE &= ~(UCA0RXIE | UCA0TXIE);
 }
 
 void    uart_clearRxInterrupts(){
-  UC1IFG   &= ~(UCA1RXIFG);
+  UC0IFG   &= ~(UCA0RXIFG);
 }
 
 void    uart_clearTxInterrupts(){
-  UC1IFG   &= ~(UCA1TXIFG);
+  UC0IFG   &= ~(UCA0TXIFG);
 }
 
 void    uart_writeByte(uint8_t byteToWrite){
-  UCA1TXBUF = byteToWrite;
+  UCA0TXBUF = byteToWrite;
 }
 
 uint8_t uart_readByte(){
-  return UCA1RXBUF;
+  return UCA0RXBUF;
 }
 
 //=========================== interrupt handlers ==============================
