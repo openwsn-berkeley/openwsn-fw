@@ -37,9 +37,19 @@ void board_init() {
    // disable watchdog timer
    WDTCTL  = WDTPW + WDTHOLD;
    
-   // setup clock speed
-   BCSCTL1 = CALBC1_16MHZ;                       // MCLK at ~16MHz
-   DCOCTL  = CALDCO_16MHZ;                       // MCLK at ~16MHz
+   // setup clock speed --seems that does not work
+//   BCSCTL1 = CALBC1_16MHZ;                       // MCLK at ~16MHz
+//   DCOCTL  = CALDCO_16MHZ;                       // MCLK at ~16MHz
+   
+   if(CALBC1_8MHZ != 0xFF) {
+     DCOCTL = 0x00;
+     BCSCTL1 = CALBC1_8MHZ;                    //Set DCO to 8MHz
+     DCOCTL = CALDCO_8MHZ;    
+   } else { //start using reasonable values at 8 Mhz
+     DCOCTL = 0x00;
+     BCSCTL1 = 0x8D;
+     DCOCTL = 0x88;
+   }
    
    // enable flash access violation NMIs
    IE1 |= ACCVIE;

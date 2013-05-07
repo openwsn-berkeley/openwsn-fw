@@ -59,7 +59,7 @@ void spi_init() {
    // initialize USART registers
    UCB0CTL1  |=  UCSSEL1 + UCSSEL0;               // SMCLK, reset
    UCB0CTL0   =  UCCKPH + UCMSB + UCMST + UCSYNC; // polarity, MSB first, master mode, 3-pin SPI
-   UCB0BR0    =  0x03;                            // UCLK/4
+   UCB0BR0    =  0x02;                            // UCLK/2
    UCB0BR1    =  0x00;                            // 0
    
    // clear USART state machine from reset, starting operation

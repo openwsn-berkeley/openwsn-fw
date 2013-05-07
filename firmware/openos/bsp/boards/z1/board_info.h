@@ -19,7 +19,7 @@ to return the board's description.
 
 #define port_INLINE                         inline
 
-#define MY_ID 0x01
+#define MY_ID 0x00
 
 #define PRAGMA(x)  _Pragma(#x)
 #define PACK(x)     pack(x)

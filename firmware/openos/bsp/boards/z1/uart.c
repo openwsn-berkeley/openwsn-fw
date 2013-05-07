@@ -35,9 +35,9 @@ void uart_init() {
 //   UCA0CTL0  = 0;
 //   UCA0CTL1  = 0;
    UCA0CTL1 |=  UCSSEL_2;                         // CLK = SMCL
-   UCA0BR0   =  0x8a;                             // 115200 baud if SMCLK@16MHz (divide by 138)
+   UCA0BR0   =  0x45;                             // 115200 baud if SMCLK@8MHz (
    UCA0BR1   =  0x00;
-   UCA0MCTL  =  UCBRS_7;                          // Modulation UCBRSx = 7
+   UCA0MCTL = UCBRS1 + UCBRS0;                          // Modulation UCBRSx = 7
    UCA0CTL1 &= ~UCSWRST;                          // Initialize USCI state machine
    //UC1IFG   &= ~(UCA1TXIFG | UCA1RXIFG);          // clear possible pending interrupts
    //UC1IE    |=  (UCA1RXIE  | UCA1TXIE);           // Enable USCI_A1 TX & RX interrupt  
