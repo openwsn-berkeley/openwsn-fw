@@ -28,7 +28,7 @@ dummyFunc = Builder(
 )
 
 if   env['toolchain']=='mspgcc':
-    if env['board'] not in ['telosb','gina']:
+    if env['board'] not in ['telosb','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     # compiler
@@ -65,7 +65,7 @@ if   env['toolchain']=='mspgcc':
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
 
 elif env['toolchain']=='iar':
-    if env['board'] not in ['telosb','gina']:
+    if env['board'] not in ['telosb','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
@@ -137,7 +137,7 @@ elif env['toolchain']=='iar':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
 elif env['toolchain']=='iar-proj':
-    if env['board'] not in ['telosb','gina']:
+    if env['board'] not in ['telosb','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
@@ -164,7 +164,7 @@ elif env['toolchain']=='iar-proj':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
 else:
-    if env['board'] in ['telosb','gina']:
+    if env['board'] in ['telosb','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     # converts ELF to iHex
