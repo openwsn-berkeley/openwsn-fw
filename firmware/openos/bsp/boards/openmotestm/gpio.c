@@ -24,10 +24,6 @@ void GPIO_Config_ALL_AIN(void)
                          | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD 
                          | RCC_APB2Periph_AFIO, ENABLE);
   
-  
-  /* Disable the Serial Wire Jtag Debug Port SWJ-DP */
-  GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE); 
-  
     /* PA  */
   GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;

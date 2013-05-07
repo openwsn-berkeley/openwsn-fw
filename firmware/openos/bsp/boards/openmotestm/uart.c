@@ -21,6 +21,8 @@
 typedef struct {
    uart_tx_cbt txCb;
    uart_rx_cbt rxCb;
+   uint8_t     startOrend;
+   uint8_t     flagByte;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -33,6 +35,11 @@ void uart_init()
 {
     // reset local variables
     memset(&uart_vars,0,sizeof(uart_vars_t));
+    
+    //when this value is 0, we are send the first data
+    uart_vars.startOrend = 0;
+    //flag byte for start byte and end byte
+    uart_vars.flagByte = '~';
   
     USART_InitTypeDef USART_InitStructure;
 
@@ -77,7 +84,8 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb)
 
 void uart_enableInterrupts()
 {
-    USART_ITConfig(UART4, USART_IT_TXE, ENABLE);
+//    USART_ClearFlag(UART4,USART_FLAG_TXE);
+//    USART_ITConfig(UART4, USART_IT_TXE, ENABLE);
     USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
 }
 
@@ -98,9 +106,18 @@ void uart_clearTxInterrupts()
 }
 
 void uart_writeByte(uint8_t byteToWrite)
-{
+{ 
     USART_SendData(UART4,(uint16_t)byteToWrite);
     while(USART_GetFlagStatus(UART4,USART_FLAG_TXE) == RESET);
+      //start or end byte?
+    if(byteToWrite == uart_vars.flagByte){
+      uart_vars.startOrend = (uart_vars.startOrend == 0)?1:0;
+      //start byte
+      if(uart_vars.startOrend == 1)
+        USART_ITConfig(UART4, USART_IT_TXE, ENABLE);
+      else
+        USART_ITConfig(UART4, USART_IT_TXE, DISABLE);
+    }
 }
 
 uint8_t uart_readByte()

@@ -77,7 +77,7 @@ void radiotimer_start(uint16_t period) {
     // Wait for RTC APB registers synchronisation 
     RTC_WaitForSynchro();
     
-    RTC_SetPrescaler(1);                              //use 32768Hz clock
+    RTC_SetPrescaler(1);                              //use 16KHz clock
     RTC_WaitForLastTask();                            //Wait until last write operation on RTC registers has finished
 
     //Set the RTC time counter to 0
@@ -125,7 +125,11 @@ uint16_t radiotimer_getValue() {
 }
 
 void radiotimer_setPeriod(uint16_t period) {
+
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
+    //need to disable radio also in case that a radio interrupt is happening when set Alarm value
+    
+    
     //Reset RTC Counter to begin a new slot
     RTC_SetAlarm(period);
     RTC_WaitForLastTask();
@@ -148,6 +152,8 @@ uint16_t radiotimer_getPeriod() {
 
 void radiotimer_schedule(uint16_t offset) {
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
+    //need to disable radio also in case that a radio interrupt is happening
+    
     // Set the RTC alarm(RTC timer will alarm at next state of slot)
     RTC_SetAlarm(offset);
     RTC_WaitForLastTask();
@@ -160,8 +166,10 @@ void radiotimer_schedule(uint16_t offset) {
 
 void radiotimer_cancel() {
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
+    //need to disable radio also in case that a radio interrupt is happening
+    
+    
     // set RTC alarm (slotlength) 
-//    RTC_SetAlarm(PORT_TsSlotDuration);
     RTC_SetAlarm(radiotimer_vars.currentSlotPeriod);
     RTC_WaitForLastTask();
     
