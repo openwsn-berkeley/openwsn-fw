@@ -13,12 +13,11 @@ can use this project with any platform.
 #include "debugpins.h"
 #include "leds.h"
 #include "bsp_timer.h"
-#include "flextimer.h"
-#include "opentimers.h"
+
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD     281 // @32kHz = 1s
+#define BSP_TIMER_PERIOD     8192 // @32kHz = 1s
 
 //=========================== variables =======================================
 
@@ -42,19 +41,11 @@ int mote_main(void)
 {  
    // initialize board
    board_init();
-//   flextimer_init();
-//   flextimer_setCb(cb_compare);
-//   app_vars.prev=0;
-//   app_vars.num_compare=0;
-//    
-//   
-//   flextimer_schedule(BSP_TIMER_PERIOD);
+
    app_vars.prev=BSP_TIMER_PERIOD;
    
-  // bsp_timer_set_callback(cb_compare);
-  // bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
-   opentimers_init();
-   opentimers_start(1000,TIMER_ONESHOT,TIME_MS,cb_compare);
+   bsp_timer_set_callback(cb_compare);
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    while (1) {
       board_sleep();
    }
@@ -67,13 +58,12 @@ void cb_compare() {
    debugpins_fsm_toggle();
    
    // toggle error led
-   leds_error_toggle();
+   leds_sync_toggle();
    
    // increment counter
    app_vars.num_compare++;
    app_vars.prev+=BSP_TIMER_PERIOD;
    // schedule again
-  // bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
-  // flextimer_schedule(app_vars.prev);
-   opentimers_start(3000,TIMER_ONESHOT,TIME_MS,cb_compare);
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
+
 }
