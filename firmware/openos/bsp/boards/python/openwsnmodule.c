@@ -62,16 +62,68 @@ static PyObject* my_set_callback(PyObject* self, PyObject *args) {
    return result;
 }
 
-//=========================== private =========================================
+//=========================== mote object =====================================
+
+typedef struct {
+    PyObject_HEAD
+    /* Type-specific fields go here. */
+} openwsn_OpenMoteObject;
+
+static PyTypeObject openwsn_OpenMoteType = {
+   PyObject_HEAD_INIT(NULL)
+   0,                                  /*ob_size*/
+   "openwsn.OpenMote",                 /*tp_name*/
+   sizeof(openwsn_OpenMoteObject),     /*tp_basicsize*/
+   0,                                  /*tp_itemsize*/
+   0,                                  /*tp_dealloc*/
+   0,                                  /*tp_print*/
+   0,                                  /*tp_getattr*/
+   0,                                  /*tp_setattr*/
+   0,                                  /*tp_compare*/
+   0,                                  /*tp_repr*/
+   0,                                  /*tp_as_number*/
+   0,                                  /*tp_as_sequence*/
+   0,                                  /*tp_as_mapping*/
+   0,                                  /*tp_hash */
+   0,                                  /*tp_call*/
+   0,                                  /*tp_str*/
+   0,                                  /*tp_getattro*/
+   0,                                  /*tp_setattro*/
+   0,                                  /*tp_as_buffer*/
+   Py_TPFLAGS_DEFAULT,                 /*tp_flags*/
+   "Emulated OpenWSN mote",            /* tp_doc */
+};
 
 //=========================== initialize module ===============================
 
-static PyMethodDef OpenWSNMethods[] = {
+static PyMethodDef openwsn_methods[] = {
    {"say_hello",        say_hello,          METH_VARARGS,  "Greet somebody."},
    {"my_set_callback",  my_set_callback,    METH_VARARGS,  "Set a callback."},
-   {NULL,               NULL,               0,             NULL}
+   {NULL,               NULL,               0,             NULL} // sentinel
 };
 
+#ifndef PyMODINIT_FUNC
+#define PyMODINIT_FUNC void
+#endif
+
 PyMODINIT_FUNC initopenwsn(void) {
-   (void)Py_InitModule("openwsn", OpenWSNMethods);
+   PyObject* openmote_object;
+   
+   openwsn_OpenMoteType.tp_new = PyType_GenericNew;
+   if (PyType_Ready(&openwsn_OpenMoteType) < 0) {
+      return;
+   }
+   
+   openmote_object = Py_InitModule3(
+      "openwsn",
+      openwsn_methods,
+      "Module which declares the OpenMote class."
+   );
+   
+   Py_INCREF(&openwsn_OpenMoteType);
+   PyModule_AddObject(
+      openmote_object,
+      "OpenMote",
+      (PyObject*)&openwsn_OpenMoteType
+   );
 }

@@ -10,3 +10,4 @@ settings
 path.txt
 /build
 /.sconsign.dblite
+/firmware/openos/bsp/boards/python/*.def
