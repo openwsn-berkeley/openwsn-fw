@@ -39,7 +39,7 @@ void uart_init()
     //when this value is 0, we are send the first data
     uart_vars.startOrend = 0;
     //flag byte for start byte and end byte
-    uart_vars.flagByte = '~';
+    uart_vars.flagByte = 0x7E;
   
     USART_InitTypeDef USART_InitStructure;
 
@@ -84,7 +84,6 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb)
 
 void uart_enableInterrupts()
 {
-//    USART_ClearFlag(UART4,USART_FLAG_TXE);
 //    USART_ITConfig(UART4, USART_IT_TXE, ENABLE);
     USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
 }

@@ -91,6 +91,4 @@ void    isr_openserial_tx();
 \}
 */
 
-uint8_t openserial_get_outBufferFilled();
-
 #endif
