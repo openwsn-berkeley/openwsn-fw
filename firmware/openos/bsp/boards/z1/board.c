@@ -103,7 +103,7 @@ __interrupt void USCIAB1TX_ISR(void) {
    debugpins_isr_set();
    if ( ((UC1IFG & UCB1TXIFG) && (UC1IE & UCB1TXIE)) ||
         ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ) {
-      //isr_i2c_tx(1);                             // I2C: TX
+         isr_i2c_tx(1);                             // I2C: TX
    }
    debugpins_isr_clr();
 }
@@ -114,7 +114,7 @@ __interrupt void USCIAB1RX_ISR(void) {
    debugpins_isr_set();
    if ( ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ||
          (UCB1STAT & UCNACKIFG) ) {
-      //isr_i2c_rx(1);                             // I2C: RX, bus 1
+          isr_i2c_rx(1);                             // I2C: RX, bus 1
    }
    debugpins_isr_clr();
 }

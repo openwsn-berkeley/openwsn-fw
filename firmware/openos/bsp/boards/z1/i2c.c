@@ -64,7 +64,7 @@ void i2c_init() {
    i2c_control.i2csa[0]=&UCB0I2CSA;
    i2c_control.i2csa[1]=&UCB1I2CSA;
    
-   i2c_control.port[0]=&P3SEL;
+   i2c_control.port[0]=&P5SEL;
    i2c_control.port[1]=&P5SEL;
    
    i2c_control.ie[0]=&IE2;
