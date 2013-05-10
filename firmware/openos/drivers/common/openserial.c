@@ -154,7 +154,7 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    INTERRUPT_DECLARATION();
    
    // retrieve ASN
-   asnWriteToSerial(asn);// byte01,byte23,byte4
+   ieee154e_getAsn(asn);// byte01,byte23,byte4
    
    DISABLE_INTERRUPTS();
    openserial_vars.outputBufFilled  = TRUE;

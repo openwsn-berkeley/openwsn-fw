@@ -1602,12 +1602,12 @@ port_INLINE void asnWriteToAdv(OpenQueueEntry_t* advFrame) {
 }
 
 //from upper layer that want to send the ASN to compute timming or latency
-void asnWriteToPkt(OpenQueueEntry_t* frame) {
-   frame->payload[0]         = (ieee154e_vars.asn.bytes0and1     & 0xff);
-   frame->payload[1]         = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
-   frame->payload[2]         = (ieee154e_vars.asn.bytes2and3     & 0xff);
-   frame->payload[3]         = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
-   frame->payload[4]         =  ieee154e_vars.asn.byte4;
+void ieee154e_getAsn(uint8_t* array) {
+   array[0]         = (ieee154e_vars.asn.bytes0and1     & 0xff);
+   array[1]         = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
+   array[2]         = (ieee154e_vars.asn.bytes2and3     & 0xff);
+   array[3]         = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
+   array[4]         =  ieee154e_vars.asn.byte4;
 }
 
 void asnWriteToSerial(uint8_t* array) {

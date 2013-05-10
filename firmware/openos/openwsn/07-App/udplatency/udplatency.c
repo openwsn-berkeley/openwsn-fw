@@ -63,7 +63,7 @@ void udplatency_task(){
    
 //the payload contains the 64bit address of the sender + the ASN
    packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
-   asnWriteToPkt(pkt);//gets asn from mac layer.
+   ieee154e_getAsn(pkt->payload);//gets asn from mac layer.
    
    packetfunctions_reserveHeaderSize(pkt,8);
    p=idmanager_getMyID(ADDR_64B);
