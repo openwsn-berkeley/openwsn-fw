@@ -324,6 +324,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\boards\z1\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\</state>
+          <state>$PROJ_DIR$\..\..\..\drivers\z1\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\</state>
@@ -2018,6 +2019,9 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\z1\eui64.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\z1\i2c.c</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\z1\leds.c</name>
         </file>
         <file>
@@ -2095,6 +2099,15 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
+      </file>
+    </group>
+    <group>
+      <name>z1</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\z1\tmp102.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\z1\tmp102.h</name>
       </file>
     </group>
   </group>
