@@ -20,16 +20,26 @@ gyro_vars_t gyro_vars;
 //=========================== public ==========================================
 
 void gyro_init() {
+   uint8_t reg[]={GYRO_REG_SMPLRT_DIV_ADDR,GYRO_REG_SMPLRT_DIV_SETTING};
+   
    gyro_vars.configured = FALSE;
-   i2c_write_register(1,GYRO_I2C_ADDR, GYRO_REG_SMPLRT_DIV_ADDR, GYRO_REG_SMPLRT_DIV_SETTING);
-   i2c_write_register(1,GYRO_I2C_ADDR, GYRO_REG_DLPF_FS_ADDR,    GYRO_REG_DLPF_FS_SETTING);
-   i2c_write_register(1,GYRO_I2C_ADDR, GYRO_REG_INT_CFG_ADDR,    GYRO_REG_INT_CFG_SETTING);
-   i2c_write_register(1,GYRO_I2C_ADDR, GYRO_REG_PWR_MGM_ADDR,    GYRO_REG_PWR_MGM_SETTING);
+   
+   i2c_write_register(1,GYRO_I2C_ADDR, sizeof(reg), reg);
+   reg[0]=GYRO_REG_DLPF_FS_ADDR;
+   reg[1]=GYRO_REG_DLPF_FS_SETTING;
+   i2c_write_register(1,GYRO_I2C_ADDR, sizeof(reg), reg);
+   reg[0]=GYRO_REG_INT_CFG_ADDR;
+   reg[1]=GYRO_REG_INT_CFG_SETTING;
+   i2c_write_register(1,GYRO_I2C_ADDR, sizeof(reg), reg);
+   reg[0]=GYRO_REG_PWR_MGM_ADDR;
+   reg[1]=GYRO_REG_PWR_MGM_SETTING;
+   i2c_write_register(1,GYRO_I2C_ADDR, sizeof(reg), reg);
    gyro_vars.configured = TRUE;
 }
 
 void gyro_disable() {
-   i2c_write_register(1,GYRO_I2C_ADDR, GYRO_REG_PWR_MGM_ADDR,    GYRO_REG_PWR_MGM_SLEEP);
+   uint8_t reg[]={GYRO_REG_PWR_MGM_ADDR,GYRO_REG_PWR_MGM_SLEEP};
+   i2c_write_register(1,GYRO_I2C_ADDR, sizeof(reg), reg);
 }
 
 void gyro_get_config() {

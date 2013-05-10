@@ -60,9 +60,7 @@ void tmp102_write_reg (uint8_t reg, uint16_t val)
   tx_buf[1] = (uint8_t) (val >> 8);
   tx_buf[2] = (uint8_t) (val & 0x00FF);
   
-  //TODO check if this is correct or needs to be written in one instruction 
-  i2c_write_register(1,TMP102_ADDR, reg, tx_buf[1]);
-  i2c_write_register(1,TMP102_ADDR, reg, tx_buf[2]);
+  i2c_write_register(1,TMP102_ADDR, sizeof(tx_buf), tx_buf);
 }
 
 /*---------------------------------------------------------------------------*/
