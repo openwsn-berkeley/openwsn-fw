@@ -82,11 +82,9 @@ void rex_task_cb() {
    uint16_t       avg         = 0;
    uint8_t        N_avg       = 10;
    
-   for (int i = 0; i < N_avg; i++)
-   {
-     //ADC_getvoltage(p_x_int);
-      
-     sum += x_int;
+   for (i = 0; i < N_avg; i++) {
+      //ADC_getvoltage(p_x_int);
+      sum += x_int;
    }
    avg = sum/N_avg;
    

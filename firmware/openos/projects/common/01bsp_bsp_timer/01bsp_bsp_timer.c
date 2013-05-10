@@ -14,14 +14,16 @@ can use this project with any platform.
 #include "leds.h"
 #include "bsp_timer.h"
 
+
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD     0x7fff // @32kHz = 1s
+#define BSP_TIMER_PERIOD     8192 // @32kHz = 1s
 
 //=========================== variables =======================================
 
 typedef struct {
    uint16_t num_compare;
+   uint16_t prev;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -39,10 +41,11 @@ int mote_main(void)
 {  
    // initialize board
    board_init();
+
+   app_vars.prev=BSP_TIMER_PERIOD;
    
    bsp_timer_set_callback(cb_compare);
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
-   
    while (1) {
       board_sleep();
    }
@@ -55,11 +58,12 @@ void cb_compare() {
    debugpins_fsm_toggle();
    
    // toggle error led
-   leds_error_toggle();
+   leds_sync_toggle();
    
    // increment counter
    app_vars.num_compare++;
-   
+   app_vars.prev+=BSP_TIMER_PERIOD;
    // schedule again
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
+
 }

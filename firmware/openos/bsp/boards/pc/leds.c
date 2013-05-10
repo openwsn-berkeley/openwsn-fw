@@ -64,6 +64,15 @@ uint8_t leds_error_isOn() {
    
    return replparams.isOn;
 }
+void leds_error_blink() {
+   
+   // send request to server and get reply
+   opensim_client_sendAndWaitForAck(OPENSIM_CMD_leds_error_blink,
+                                    0,
+                                    0,
+                                    0,
+                                    0);
+}
 
 void leds_radio_on() {
    

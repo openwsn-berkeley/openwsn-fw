@@ -73,7 +73,7 @@ void macpong_send(uint8_t payloadCtr) {
    pkt->creator                     = COMPONENT_IPHC;
    pkt->owner                       = COMPONENT_IPHC;
    
-   memcpy(&pkt->l2_nextORpreviousHop,neighbors_getAddr(0),sizeof(open_addr_t));
+   neighbors_getNeighbor(&pkt->l2_nextORpreviousHop,ADDR_64B,0);
    packetfunctions_reserveHeaderSize(pkt,MAX_PAYLOAD);
    for (i=0;i<MAX_PAYLOAD;i++){
      ((uint8_t*)pkt->payload)[i]      = i;
@@ -108,7 +108,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
 
 void forwarding_init()       { return; }
 void openbridge_init()       { return; }
-void openbridge_trigger()    { return; }
+void openbridge_triggerData()    { return; }
 void openbridge_triggerData(){ return; }
 
 //===== L4

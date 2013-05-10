@@ -1,4 +1,6 @@
 import os
+import threading
+import subprocess
 
 Import('env')
 
@@ -26,6 +28,8 @@ dummyFunc = Builder(
 )
 
 if   env['toolchain']=='mspgcc':
+    if env['board'] not in ['telosb','gina','z1']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     # compiler
     env.Replace(CC           = 'msp430-gcc')
@@ -49,7 +53,7 @@ if   env['toolchain']=='mspgcc':
     # convert ELF to bin
     elf2BinFunc = Builder(
        action = 'msp430-objcopy --output-target=binary $SOURCE $TARGET',
-       suffix = '.ihex',
+       suffix = '.bin',
     )
     env.Append(BUILDERS = {'Elf2iBin' : elf2BinFunc})
     
@@ -61,6 +65,8 @@ if   env['toolchain']=='mspgcc':
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
 
 elif env['toolchain']=='iar':
+    if env['board'] not in ['telosb','gina','z1']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
         iarEw430BinDir          = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'430','bin')
@@ -131,6 +137,8 @@ elif env['toolchain']=='iar':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
 elif env['toolchain']=='iar-proj':
+    if env['board'] not in ['telosb','gina','z1']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
         iarEw430CommonBinDir      = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'common','bin')
@@ -156,9 +164,20 @@ elif env['toolchain']=='iar-proj':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
 else:
-    raise SystemError('toolchain={0} unsupported.'.format(toolchain))
+    if env['board'] in ['telosb','gina','z1']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
+    # converts ELF to iHex
+    env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
+    
+    # convert ELF to bin
+    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    
+    # print sizes
+    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
-# upload over JTAG
+#============================ upload over JTAG ================================
+
 def jtagUploadFunc(location):
     if   env['fet_version']==2:
         # MSP-FET430uif is running v2 Firmware
@@ -179,18 +198,61 @@ def jtagUploadFunc(location):
 if env['jtag']:
     env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
 
+#============================ bootload ========================================
+
+class telosb_bootloadThread(threading.Thread):
+    def __init__(self,comPort,hexFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.hexFile         = hexFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'telosb_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(self.comPort,self.hexFile)
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+
+def telosb_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        bootloadThreads += [
+            telosb_bootloadThread(
+                comPort      = comPort,
+                hexFile      = source[0],
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+
 # bootload
-def BootloadFunc(location):
+def BootloadFunc():
     if   env['board']=='telosb':
         return Builder(
-            action      = 'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p $SOURCE"'.format(location),
+            action      = telosb_bootload,
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
 if env['bootload']:
-    env.Append(BUILDERS = {'Bootload' : BootloadFunc(env['bootload'])})
+    env.Append(BUILDERS = {'Bootload' : BootloadFunc()})
 
 # PostBuildExtras is a method called after a program (not a library) is built.
 # You can any addition step in this function, such as converting the binary
@@ -264,7 +326,7 @@ def sconscript_scanner(localEnv):
                 (localEnv['toolchain']!='iar-proj')
              ):
             
-            VariantDir(
+            localEnv.VariantDir(
                 variant_dir = variant_dir,
                 src_dir     = src_dir,
                 duplicate   = 0,
@@ -275,7 +337,10 @@ def sconscript_scanner(localEnv):
             libs   = buildLibs(projectDir)
             
             buildIncludePath(projectDir,localEnv)
-            
+
+            #fix for problem on having the same target as directory name and failing to compile in linux. Appending something to the target solves the isse.
+            target=target+"_prog"
+
             exe = localEnv.Program(
                 target  = target,
                 source  = source,

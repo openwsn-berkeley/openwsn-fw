@@ -40,12 +40,6 @@ void idmanager_init() {
    idmanager_vars.my64bID.type         = ADDR_64B;
    eui64_get(idmanager_vars.my64bID.addr_64b);
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
-
-   // DEBUG_MOTEID_MASTER is DAGroot and bridge
-   if (idmanager_vars.my16bID.addr_16b[1]==DEBUG_MOTEID_MASTER) {
-      idmanager_vars.isDAGroot         = TRUE;
-      idmanager_vars.isBridge          = TRUE;
-   }
 }
 
 bool idmanager_getIsDAGroot() {
@@ -88,26 +82,26 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    switch (type) {
-   case ADDR_16B:
-      res= &idmanager_vars.my16bID;
-      break;
-   case ADDR_64B:
-      res= &idmanager_vars.my64bID;
-      break;
-   case ADDR_PANID:
-      res= &idmanager_vars.myPANID;
-      break;
-   case ADDR_PREFIX:
-      res= &idmanager_vars.myPrefix;
-      break;
-   case ADDR_128B:
-      // you don't ask for my full address, rather for prefix, then 64b
-   default:
-      openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
-            (errorparameter_t)type,
-            (errorparameter_t)0);
-      res= NULL;
-      break;
+     case ADDR_16B:
+        res= &idmanager_vars.my16bID;
+        break;
+     case ADDR_64B:
+        res= &idmanager_vars.my64bID;
+        break;
+     case ADDR_PANID:
+        res= &idmanager_vars.myPANID;
+        break;
+     case ADDR_PREFIX:
+        res= &idmanager_vars.myPrefix;
+        break;
+     case ADDR_128B:
+        // you don't ask for my full address, rather for prefix, then 64b
+     default:
+        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
+              (errorparameter_t)type,
+              (errorparameter_t)0);
+        res= NULL;
+        break;
    }
    ENABLE_INTERRUPTS();
    return res;
@@ -117,26 +111,26 @@ error_t idmanager_setMyID(open_addr_t* newID) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    switch (newID->type) {
-   case ADDR_16B:
-      memcpy(&idmanager_vars.my16bID,newID,sizeof(open_addr_t));
-      break;
-   case ADDR_64B:
-      memcpy(&idmanager_vars.my64bID,newID,sizeof(open_addr_t));
-      break;
-   case ADDR_PANID:
-      memcpy(&idmanager_vars.myPANID,newID,sizeof(open_addr_t));
-      break;
-   case ADDR_PREFIX:
-      memcpy(&idmanager_vars.myPrefix,newID,sizeof(open_addr_t));
-      break;
-   case ADDR_128B:
-      //don't set 128b, but rather prefix and 64b
-   default:
-      openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
-            (errorparameter_t)newID->type,
-            (errorparameter_t)1);
-      ENABLE_INTERRUPTS();
-      return E_FAIL;
+     case ADDR_16B:
+        memcpy(&idmanager_vars.my16bID,newID,sizeof(open_addr_t));
+        break;
+     case ADDR_64B:
+        memcpy(&idmanager_vars.my64bID,newID,sizeof(open_addr_t));
+        break;
+     case ADDR_PANID:
+        memcpy(&idmanager_vars.myPANID,newID,sizeof(open_addr_t));
+        break;
+     case ADDR_PREFIX:
+        memcpy(&idmanager_vars.myPrefix,newID,sizeof(open_addr_t));
+        break;
+     case ADDR_128B:
+        //don't set 128b, but rather prefix and 64b
+     default:
+        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
+              (errorparameter_t)newID->type,
+              (errorparameter_t)1);
+        ENABLE_INTERRUPTS();
+        return E_FAIL;
    }
    ENABLE_INTERRUPTS();
    return E_SUCCESS;
@@ -149,44 +143,44 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
    DISABLE_INTERRUPTS();
 
    switch (addr->type) {
-   case ADDR_16B:
-      res= packetfunctions_sameAddress(addr,&idmanager_vars.my16bID);
-      ENABLE_INTERRUPTS();
-      return res;
-   case ADDR_64B:
-      res= packetfunctions_sameAddress(addr,&idmanager_vars.my64bID);
-      ENABLE_INTERRUPTS();
-      return res;
-   case ADDR_128B:
-      //build temporary my128bID
-      temp_my128bID.type = ADDR_128B;
-      memcpy(&temp_my128bID.addr_128b[0],&idmanager_vars.myPrefix.prefix,8);
-      memcpy(&temp_my128bID.addr_128b[8],&idmanager_vars.my64bID.addr_64b,8);
+     case ADDR_16B:
+        res= packetfunctions_sameAddress(addr,&idmanager_vars.my16bID);
+        ENABLE_INTERRUPTS();
+        return res;
+     case ADDR_64B:
+        res= packetfunctions_sameAddress(addr,&idmanager_vars.my64bID);
+        ENABLE_INTERRUPTS();
+        return res;
+     case ADDR_128B:
+        //build temporary my128bID
+        temp_my128bID.type = ADDR_128B;
+        memcpy(&temp_my128bID.addr_128b[0],&idmanager_vars.myPrefix.prefix,8);
+        memcpy(&temp_my128bID.addr_128b[8],&idmanager_vars.my64bID.addr_64b,8);
 
-      res= packetfunctions_sameAddress(addr,&temp_my128bID);
-      ENABLE_INTERRUPTS();
-      return res;
-   case ADDR_PANID:
-      res= packetfunctions_sameAddress(addr,&idmanager_vars.myPANID);
-      ENABLE_INTERRUPTS();
-      return res;
-   case ADDR_PREFIX:
-      res= packetfunctions_sameAddress(addr,&idmanager_vars.myPrefix);
-      ENABLE_INTERRUPTS();
-      return res;
-   default:
-      openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
-            (errorparameter_t)addr->type,
-            (errorparameter_t)2);
-      ENABLE_INTERRUPTS();
-      return FALSE;
+        res= packetfunctions_sameAddress(addr,&temp_my128bID);
+        ENABLE_INTERRUPTS();
+        return res;
+     case ADDR_PANID:
+        res= packetfunctions_sameAddress(addr,&idmanager_vars.myPANID);
+        ENABLE_INTERRUPTS();
+        return res;
+     case ADDR_PREFIX:
+        res= packetfunctions_sameAddress(addr,&idmanager_vars.myPrefix);
+        ENABLE_INTERRUPTS();
+        return res;
+     default:
+        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
+              (errorparameter_t)addr->type,
+              (errorparameter_t)2);
+        ENABLE_INTERRUPTS();
+        return FALSE;
    }
 }
 
 void idmanager_triggerAboutRoot() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer;
-   //get command from OpenSerial
+   // get command from OpenSerial
    number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer,sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
       openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
@@ -194,53 +188,51 @@ void idmanager_triggerAboutRoot() {
             (errorparameter_t)0);
       return;
    };
-   //handle command
+   // handle command
    switch (input_buffer) {
-   case 'Y':
-      idmanager_setIsDAGroot(TRUE);
-      break;
-   case 'N':
-      idmanager_setIsDAGroot(FALSE);
-      break;
-   case 'T':
-      if (idmanager_getIsDAGroot()) {
-         idmanager_setIsDAGroot(FALSE);
-      } else {
-         idmanager_setIsDAGroot(TRUE);
-      }
-      break;
+     case ACTION_YES:
+        idmanager_setIsDAGroot(TRUE);
+        break;
+     case ACTION_NO:
+        idmanager_setIsDAGroot(FALSE);
+        break;
+     case ACTION_TOGGLE:
+        if (idmanager_getIsDAGroot()) {
+           idmanager_setIsDAGroot(FALSE);
+        } else {
+           idmanager_setIsDAGroot(TRUE);
+        }
+        break;
    }
    return;
 }
 
 void idmanager_triggerAboutBridge() {
    uint8_t number_bytes_from_input_buffer;
-   uint8_t input_buffer[9];
-   //get command from OpenSerial (1B command, 8B prefix)
-   number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer[0],sizeof(input_buffer));
+   uint8_t input_buffer;
+   //get command from OpenSerial
+   number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer,sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
       openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
             (errorparameter_t)number_bytes_from_input_buffer,
-            (errorparameter_t)0);
+            (errorparameter_t)1);
       return;
    };
    //handle command
-   switch (input_buffer[0]) {
-   case 'Y':
-      idmanager_setIsBridge(TRUE);
-      memcpy(&(idmanager_vars.myPrefix.prefix),&(input_buffer[1]),8);
-      break;
-   case 'N':
-      idmanager_setIsBridge(FALSE);
-      break;
-   case 'T':
-      if (idmanager_getIsBridge()) {
-         idmanager_setIsBridge(FALSE);
-      } else {
-         idmanager_setIsBridge(TRUE);
-         memcpy(&(idmanager_vars.myPrefix.prefix),&(input_buffer[1]),8);
-      }
-      break;
+   switch (input_buffer) {
+     case ACTION_YES:
+        idmanager_setIsBridge(TRUE);
+        break;
+     case ACTION_NO:
+        idmanager_setIsBridge(FALSE);
+        break;
+     case ACTION_TOGGLE:
+        if (idmanager_getIsBridge()) {
+           idmanager_setIsBridge(FALSE);
+        } else {
+           idmanager_setIsBridge(TRUE);
+        }
+        break;
    }
    return;
 }

@@ -13,7 +13,7 @@
 #include "board.h"
 
 //=========================== define ==========================================
-
+#define SCTIMER_TICS_MS 33
 //=========================== typedef =========================================
 typedef kick_scheduler_t (*sctimer_cbt)(void);
 
@@ -28,5 +28,6 @@ void sctimer_schedule(PORT_TIMER_WIDTH val);
 PORT_TIMER_WIDTH sctimer_getValue();
 void sctimer_setCb(sctimer_cbt cb);
 void sctimer_clearISR();
+void sctimer_reset();
 
 #endif

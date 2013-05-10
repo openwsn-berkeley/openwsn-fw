@@ -9,7 +9,7 @@
 #include "openrandom.h"
 #include "scheduler.h"
 #include "opentimers.h"
-
+#include "debugpins.h"
 //=========================== variables =======================================
 
 typedef struct {
@@ -183,6 +183,7 @@ void timers_res_fired() {
       sendAdv(); // called every 10s
    } else {
       sendKa();  // called every second, except once every 10s
+      //leds_debug_toggle();
    }
 }
 

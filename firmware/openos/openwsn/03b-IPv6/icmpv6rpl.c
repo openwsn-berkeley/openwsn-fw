@@ -473,7 +473,7 @@ void sendDAO() {
          // write it's address in DAO
          //packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
          neighbors_getNeighbor(&address,ADDR_64B,nbrIdx);
-         packetfunctions_writeAddress(msg,&address,BIG_ENDIAN);
+         packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
         
         
          // update transit info fields 
@@ -507,7 +507,7 @@ void sendDAO() {
          
          // write it's address in DAO RFC6550 page 80 check point 1.
          neighbors_getNeighbor(&address,ADDR_64B,nbrIdx);
-         packetfunctions_writeAddress(msg,&address,BIG_ENDIAN);
+         packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
         
          // update target info fields 
          icmpv6rpl_vars.dao_target.optionLength  = LENGTH_ADDR64b + sizeof(icmpv6rpl_dao_target_ht);

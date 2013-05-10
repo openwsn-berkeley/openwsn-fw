@@ -12,6 +12,10 @@
 
 //=========================== define ==========================================
 
+#define ACTION_YES      'Y'
+#define ACTION_NO       'N'
+#define ACTION_TOGGLE   'T'
+
 //=========================== typedef =========================================
 
 typedef struct {

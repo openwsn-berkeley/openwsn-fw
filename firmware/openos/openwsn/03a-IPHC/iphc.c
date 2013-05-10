@@ -85,6 +85,7 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
         if (fw_SendOrfw_Rcv==PCKTFORWARD){
             sam = IPHC_SAM_64B;    //case forwarding a packet
             p_src = &temp_src_mac64b;
+            //poipoi xv forcing elided addresses on src routing, this needs to be fixed so any type of address should be supported supported.
         } else if (fw_SendOrfw_Rcv==PCKTSEND){
             sam = IPHC_SAM_ELIDED;
             p_src = NULL;
@@ -92,9 +93,9 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
            openserial_printCritical(COMPONENT_IPHC,ERR_INVALID_FWDMODE,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-        }
-         dam = IPHC_DAM_ELIDED;
-         p_dest = NULL;
+        } 
+        dam = IPHC_DAM_ELIDED;
+        p_dest = NULL;     
       } else {
          //else, not a direct neighbour use 64B address
          sam = IPHC_SAM_64B;
@@ -113,7 +114,7 @@ error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_head
      }else{
        //source routing
       sam = IPHC_SAM_128B;
-      dam = IPHC_DAM_ELIDED;
+      dam = IPHC_DAM_ELIDED; //poipoi xv not true, should not be elided.
       p_dest = NULL;
       p_src = &(msg->l3_sourceAdd);
      }
@@ -216,7 +217,7 @@ error_t prependIPv6Header(
                                   (errorparameter_t)0);
             return E_FAIL;
          };
-         packetfunctions_writeAddress(msg,value_dest,BIG_ENDIAN);
+         packetfunctions_writeAddress(msg,value_dest,OW_BIG_ENDIAN);
          break;
       case IPHC_DAM_64B:
          if (value_dest->type!=ADDR_64B) {
@@ -225,7 +226,7 @@ error_t prependIPv6Header(
                                   (errorparameter_t)1);
             return E_FAIL;
          };
-         packetfunctions_writeAddress(msg,value_dest,BIG_ENDIAN);
+         packetfunctions_writeAddress(msg,value_dest,OW_BIG_ENDIAN);
          break;
       case IPHC_DAM_128B:
          if (value_dest->type!=ADDR_128B) {
@@ -234,7 +235,7 @@ error_t prependIPv6Header(
                                   (errorparameter_t)2);
             return E_FAIL;
          };
-         packetfunctions_writeAddress(msg,value_dest,BIG_ENDIAN);
+         packetfunctions_writeAddress(msg,value_dest,OW_BIG_ENDIAN);
          break;
       default:
          openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
@@ -249,7 +250,7 @@ error_t prependIPv6Header(
       case IPHC_SAM_16B:
         if(fw_SendOrfw_Rcv==PCKTSEND)
         {
-         packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_16B)),BIG_ENDIAN);
+         packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_16B)),OW_BIG_ENDIAN);
         }
         if(fw_SendOrfw_Rcv==PCKTFORWARD)
         {
@@ -259,13 +260,13 @@ error_t prependIPv6Header(
                                       (errorparameter_t)0);
                 return E_FAIL;
             } 
-            packetfunctions_writeAddress(msg,value_src,BIG_ENDIAN);
+            packetfunctions_writeAddress(msg,value_src,OW_BIG_ENDIAN);
         }
          break;
       case IPHC_SAM_64B:
         if(fw_SendOrfw_Rcv==PCKTSEND)
         {
-          packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_64B)),BIG_ENDIAN);
+          packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_64B)),OW_BIG_ENDIAN);
         }
          if(fw_SendOrfw_Rcv==PCKTFORWARD)
         {
@@ -275,14 +276,14 @@ error_t prependIPv6Header(
                                       (errorparameter_t)1);
                 return E_FAIL;
             }      
-            packetfunctions_writeAddress(msg, value_src,BIG_ENDIAN);
+            packetfunctions_writeAddress(msg, value_src,OW_BIG_ENDIAN);
         }
          break;
       case IPHC_SAM_128B:
         if(fw_SendOrfw_Rcv==PCKTSEND)
         {
-         packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_64B)),BIG_ENDIAN);
-         packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_PREFIX)),BIG_ENDIAN);
+         packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_64B)),OW_BIG_ENDIAN);
+         packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_PREFIX)),OW_BIG_ENDIAN);
         }
         if(fw_SendOrfw_Rcv==PCKTFORWARD)
         {
@@ -292,7 +293,7 @@ error_t prependIPv6Header(
                                       (errorparameter_t)2);
                 return E_FAIL;
              }
-           packetfunctions_writeAddress(msg,value_src,BIG_ENDIAN);
+           packetfunctions_writeAddress(msg,value_src,OW_BIG_ENDIAN);
         }
          break;
       default:
@@ -375,7 +376,7 @@ error_t prependIPv6Header(
 }
 
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
-   uint8_t         temp_8b;
+   uint8_t         temp_8b,temp_aux;
    open_addr_t     temp_addr_16b;
    open_addr_t     temp_addr_64b;
    ipv6_header_iht ipv6_header;
@@ -446,6 +447,11 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
          ipv6_header.next_header_compressed = FALSE;
          ipv6_header.next_header = *((uint8_t*)(msg->payload)+ipv6_header.header_length);
          ipv6_header.header_length += sizeof(uint8_t);
+         //poipoi debug
+         if (ipv6_header.next_header==IANA_IPv6ROUTE){
+            temp_aux=1;
+            temp_aux++;
+         }
          break;
       case IPHC_NH_COMPRESSED:
          // the Next header field is compressed and the next header is encoded
@@ -487,18 +493,18 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
          packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&(msg->l2_nextORpreviousHop),&ipv6_header.src);
          break;
       case IPHC_SAM_16B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_16B,&temp_addr_16b,BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_16B,&temp_addr_16b,OW_BIG_ENDIAN);
          ipv6_header.header_length += 2*sizeof(uint8_t);
          packetfunctions_mac16bToMac64b(&temp_addr_16b,&temp_addr_64b);
          packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&temp_addr_64b,&ipv6_header.src);
          break;
       case IPHC_SAM_64B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_64B,&temp_addr_64b,BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_64B,&temp_addr_64b,OW_BIG_ENDIAN);
          ipv6_header.header_length += 8*sizeof(uint8_t);
          packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&temp_addr_64b,&ipv6_header.src);
          break;
       case IPHC_SAM_128B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_128B,&ipv6_header.src,BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_128B,&ipv6_header.src,OW_BIG_ENDIAN);
          ipv6_header.header_length += 16*sizeof(uint8_t);
          break;
       default:
@@ -513,18 +519,18 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
          packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),idmanager_getMyID(ADDR_64B),&(ipv6_header.dest));
          break;
       case IPHC_DAM_16B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_16B,&temp_addr_16b,BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_16B,&temp_addr_16b,OW_BIG_ENDIAN);
          ipv6_header.header_length += 2*sizeof(uint8_t);
          packetfunctions_mac16bToMac64b(&temp_addr_16b,&temp_addr_64b);
          packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&temp_addr_64b,&ipv6_header.dest);
          break;
       case IPHC_DAM_64B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_64B,&temp_addr_64b,BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_64B,&temp_addr_64b,OW_BIG_ENDIAN);
          ipv6_header.header_length += 8*sizeof(uint8_t);
          packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&temp_addr_64b,&ipv6_header.dest);
          break;
       case IPHC_DAM_128B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_128B,&ipv6_header.dest,BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header.header_length)),ADDR_128B,&ipv6_header.dest,OW_BIG_ENDIAN);
          ipv6_header.header_length += 16*sizeof(uint8_t);
          break;
       default:

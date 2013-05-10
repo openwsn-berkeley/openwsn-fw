@@ -101,7 +101,7 @@ void openserial_init() {
                      isr_openserial_rx);
 }
 
-error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint16_t length) {
+error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint8_t length) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    
@@ -154,7 +154,7 @@ error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    INTERRUPT_DECLARATION();
    
    // retrieve ASN
-   asnWriteToSerial(asn);// byte01,byte23,byte4
+   ieee154e_getAsn(asn);// byte01,byte23,byte4
    
    DISABLE_INTERRUPTS();
    openserial_vars.outputBufFilled  = TRUE;
@@ -464,15 +464,17 @@ inline void outputHdlcWrite(uint8_t b) {
 \brief Finalize the outgoing HDLC frame.
 */
 inline void outputHdlcClose() {
+   uint16_t   finalCrc;
+    
    // finalize the calculation of the CRC
-   openserial_vars.outputCrc                          = ~openserial_vars.outputCrc;
+   finalCrc   = ~openserial_vars.outputCrc;
    
    // write the CRC value
-   openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]     = (openserial_vars.outputCrc>>0)&0xff;
-   openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]     = (openserial_vars.outputCrc>>8)&0xff;
+   outputHdlcWrite((finalCrc>>0)&0xff);
+   outputHdlcWrite((finalCrc>>8)&0xff);
    
    // write the closing HDLC flag
-   openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]     = HDLC_FLAG;
+   openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]   = HDLC_FLAG;
 }
 
 //===== hdlc (input)

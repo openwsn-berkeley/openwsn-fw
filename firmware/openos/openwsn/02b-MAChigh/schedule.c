@@ -111,12 +111,40 @@ status information about several modules in the OpenWSN stack.
 */
 bool debugPrint_schedule() {
    debugScheduleEntry_t temp;
-   schedule_vars.debugPrintRow    = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
-   temp.row                       = schedule_vars.debugPrintRow;
-   temp.scheduleEntry             = schedule_vars.scheduleBuf[schedule_vars.debugPrintRow];
+   
+   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
+   
+   temp.row                            = schedule_vars.debugPrintRow;
+   temp.slotOffset                     = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
+   temp.type                           = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
+   temp.shared                         = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
+   temp.channelOffset                  = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+   memcpy(
+      &temp.neighbor,
+      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
+      sizeof(open_addr_t)
+   );
+   temp.numRx                          = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
+   temp.numTx                          = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
+   temp.numTxACK                       = \
+      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+   memcpy(
+      &temp.lastUsedAsn,
+      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
+      sizeof(asn_t)
+   );
+   
    openserial_printStatus(STATUS_SCHEDULE,
          (uint8_t*)&temp,
-         sizeof(debugScheduleEntry_t));
+         sizeof(debugScheduleEntry_t)
+   );
+   
    return TRUE;
 }
 

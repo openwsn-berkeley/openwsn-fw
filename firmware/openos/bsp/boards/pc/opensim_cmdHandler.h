@@ -13,8 +13,10 @@
 
 //=========================== prototypes ======================================
 
-void opensim_cmdHandler_handle(int  cmdType,
-                               int  paramLen,
-                               int* paramBuf);
+void opensim_cmdHandler_handle(
+   int   cmdType,
+   int   paramLen,
+   char* paramBuf
+ );
 
 #endif

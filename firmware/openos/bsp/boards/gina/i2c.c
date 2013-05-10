@@ -81,12 +81,12 @@ void i2c_init() {
    i2c_control.iflagtx[0]=UCB0TXIFG;
    i2c_control.iflagtx[1]=UCB1TXIFG;
 }
-
-void i2c_write_register(uint8_t bus_num, uint8_t slave_addr, uint8_t reg_addr, uint8_t reg_setting) {
-   uint8_t i2c_packet[2] = {reg_addr, reg_setting};
+//data contains the register as a first element if needed. Note that i2c is a transport
+//mechanism and whether there is a register as a first param or not is app/device dependent
+void i2c_write_register(uint8_t bus_num, uint8_t slave_addr, uint8_t length, uint8_t* data) {
    i2c_init_transmit(bus_num,slave_addr);
    while ( i2c_busy(bus_num) );
-   i2c_transmit(bus_num,sizeof(i2c_packet),i2c_packet);
+   i2c_transmit(bus_num,length,data);
    while ( i2c_busy(bus_num) );
    __delay_cycles(I2C_BUS_FREE_TIME);
 }

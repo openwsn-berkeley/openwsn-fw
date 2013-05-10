@@ -16,11 +16,8 @@
 
 static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_MAJOR     1
-#define OPENWSN_VERSION_MINOR     2
+#define OPENWSN_VERSION_MINOR     4
 #define OPENWSN_VERSION_PATCH     1
-
-// enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER       0xe2
 
 #ifndef TRUE
 #define TRUE 1
@@ -51,8 +48,8 @@ enum {
 };
 
 enum {
-   LITTLE_ENDIAN                       = TRUE,
-   BIG_ENDIAN                          = FALSE,
+   OW_LITTLE_ENDIAN                       = TRUE,
+   OW_BIG_ENDIAN                          = FALSE,
 };
 
 // protocol numbers, as defined by the IANA
@@ -60,7 +57,7 @@ enum {
    IANA_UNDEFINED                      = 0x00,
    IANA_TCP                            = 0x06,
    IANA_UDP                            = 0x11,
-   IANA_IPv6ROUTE                      =   43,
+   IANA_IPv6ROUTE                      = 0x2b,
    IANA_ICMPv6                         = 0x3a,
    IANA_ICMPv6_ECHO_REQUEST            =  128,
    IANA_ICMPv6_ECHO_REPLY              =  129,

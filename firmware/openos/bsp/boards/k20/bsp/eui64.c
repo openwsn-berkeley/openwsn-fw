@@ -6,9 +6,9 @@
 #include "eui64.h"
 #include "common.h"
 
-#define OPENWSN_EUI_B0 14
-#define OPENWSN_EUI_B1 15
-#define OPENWSN_EUI_B2 92
+#define OPENWSN_EUI_B0 0x14
+#define OPENWSN_EUI_B1 0x15
+#define OPENWSN_EUI_B2 0x92
 #define EUI_SIZE_IN_BYTES 8
 
 /**
