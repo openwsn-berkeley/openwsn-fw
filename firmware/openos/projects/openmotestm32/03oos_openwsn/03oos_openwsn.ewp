@@ -304,14 +304,12 @@
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\OpenwsnHeads\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\bbk\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>
@@ -2224,12 +2222,6 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\openudp.h</name>
       </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\rsvp.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\rsvp.h</name>
-      </file>
     </group>
     <group>
       <name>07-App</name>
@@ -2259,6 +2251,9 @@
       </group>
       <group>
         <name>rheli</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\rheli.c</name>
         </file>
@@ -2295,6 +2290,9 @@
       </group>
       <group>
         <name>rrube</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\rrube.c</name>
         </file>

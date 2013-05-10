@@ -73,11 +73,11 @@ to return the board's description.
 #define PORT_TsSlotDuration                 245   // counter counts one extra count, see datasheet
 // execution speed related   (rcc configure need 235us)
 #define PORT_maxTxDataPrepare               33    // 2014us (measured 812us+235) stm32
-#define PORT_maxRxAckPrepare                15    //  900us (measured 171us+235) stm32
+#define PORT_maxRxAckPrepare                10    //  900us (measured 171us+235) stm32
 #define PORT_maxRxDataPrepare               16    //  976us (measured 170us+235) stm32
-#define PORT_maxTxAckPrepare                15    //  900us (measured 323us+235) stm32
+#define PORT_maxTxAckPrepare                10    //  900us (measured 323us+235) stm32
 // radio speed related
-#define PORT_delayTx                        9     //  549us (measured 315us+235) .....
+#define PORT_delayTx                        10     //  549us (measured 315us+235) .....
 #define PORT_delayRx                        0     //    0us (can not measure)
 
 //=========================== typedef  ========================================
