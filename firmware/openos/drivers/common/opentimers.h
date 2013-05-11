@@ -46,6 +46,14 @@ typedef struct {
    bool                 hasExpired;         // whether the callback has to be called
 } opentimers_t;
 
+//=========================== module variables ================================
+
+typedef struct {
+   opentimers_t         timersBuf[MAX_NUM_TIMERS];
+   bool                 running;
+   PORT_TIMER_WIDTH     currentTimeout; // current timeout, in ticks
+} opentimers_vars_t;
+
 //=========================== prototypes ======================================
 
 void           opentimers_init();

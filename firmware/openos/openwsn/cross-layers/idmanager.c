@@ -7,15 +7,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   bool          isDAGroot;
-   bool          isBridge;
-   open_addr_t   my16bID;
-   open_addr_t   my64bID;
-   open_addr_t   myPANID;
-   open_addr_t   myPrefix;
-} idmanager_vars_t;
-
 idmanager_vars_t idmanager_vars;
 
 //=========================== prototypes ======================================

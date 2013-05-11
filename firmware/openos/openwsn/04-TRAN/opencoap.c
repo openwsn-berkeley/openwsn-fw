@@ -11,15 +11,6 @@
 
 //=========================== variables =======================================
 
-// general variable to the CoAP core
-typedef struct {
-   coap_resource_desc_t* resources;
-   bool                  busySending;
-   uint8_t               delayCounter;
-   uint16_t              messageID;
-   opentimer_id_t        timerId;
-} opencoap_vars_t;
-
 opencoap_vars_t opencoap_vars;
 
 //=========================== prototype =======================================

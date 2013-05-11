@@ -10,6 +10,7 @@
 
 #include "openwsn.h"
 #include "board_info.h"
+#include "schedule.h"
 
 //=========================== debug define ====================================
 
@@ -127,7 +128,49 @@ typedef struct {
 
 #define ADV_PAYLOAD_LENGTH 5
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+
+typedef struct {
+   // misc
+   asn_t              asn;                  // current absolute slot number
+   slotOffset_t       slotOffset;           // current slot offset
+   slotOffset_t       nextActiveSlotOffset; // next active slot offset
+   PORT_TIMER_WIDTH   deSyncTimeout;        // how many slots left before looses sync
+   bool               isSync;               // TRUE iff mote is synchronized to network
+   // as shown on the chronogram
+   ieee154e_state_t   state;                // state of the FSM
+   OpenQueueEntry_t*  dataToSend;           // pointer to the data to send
+   OpenQueueEntry_t*  dataReceived;         // pointer to the data received
+   OpenQueueEntry_t*  ackToSend;            // pointer to the ack to send
+   OpenQueueEntry_t*  ackReceived;          // pointer to the ack received
+   PORT_TIMER_WIDTH   lastCapturedTime;     // last captured time
+   PORT_TIMER_WIDTH   syncCapturedTime;     // captured time used to sync
+   //channel hopping
+   uint8_t            freq;                 // frequency of the current slot
+   uint8_t            asnOffset;            // offset inside the frame
+   
+   PORT_TIMER_WIDTH radioOnInit;  //when within the slot the radio turns on
+   PORT_TIMER_WIDTH radioOnTics;//how many tics within the slot the radio is on
+   bool             radioOnThisSlot; //to control if the radio has been turned on in a slot.
+} ieee154e_vars_t;
+
+PRAGMA(pack(1));
+typedef struct {
+   uint8_t                   numSyncPkt;    // how many times synchronized on a non-ACK packet
+   uint8_t                   numSyncAck;    // how many times synchronized on an ACK
+   PORT_SIGNED_INT_WIDTH     minCorrection; // minimum time correction
+   PORT_SIGNED_INT_WIDTH     maxCorrection; // maximum time correction
+   uint8_t                   numDeSync;     // number of times a desync happened
+   float                     dutyCycle;     // mac dutyCycle at each superframe
+} ieee154e_stats_t;
+PRAGMA(pack());
+
+typedef struct {
+   PORT_TIMER_WIDTH          num_newSlot;
+   PORT_TIMER_WIDTH          num_timer;
+   PORT_TIMER_WIDTH          num_startOfFrame;
+   PORT_TIMER_WIDTH          num_endOfFrame;
+} ieee154e_dbg_t;
 
 //=========================== prototypes ======================================
 

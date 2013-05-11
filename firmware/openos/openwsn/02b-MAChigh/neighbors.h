@@ -58,7 +58,14 @@ typedef struct {
 } netDebugNeigborEntry_t;
 PRAGMA(pack());
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+   
+typedef struct {
+   neighborRow_t        neighbors[MAXNUMNEIGHBORS];
+   dagrank_t            myDAGrank;
+   uint8_t              debugRow;
+   icmpv6rpl_dio_ht*    dio; //keep it global to be able to debug correctly.
+} neighbors_vars_t;
 
 //=========================== prototypes ======================================
 

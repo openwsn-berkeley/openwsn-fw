@@ -51,7 +51,6 @@ See MINBE for an explanation of backoff.
 */
 #define MAXBE                4
 
-
 //=========================== typedef =========================================
 
 typedef uint8_t    channelOffset_t;
@@ -108,7 +107,21 @@ typedef struct {
 } debugScheduleEntry_t;
 PRAGMA(pack());
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+
+typedef struct {
+   scheduleEntry_t  scheduleBuf[MAXACTIVESLOTS];
+   scheduleEntry_t* currentScheduleEntry;
+   uint16_t         frameLength;
+   uint8_t          backoffExponent;
+   uint8_t          backoff;
+   slotOffset_t     debugPrintRow;
+} schedule_vars_t;
+
+typedef struct {
+   uint8_t          numActiveSlotsCur;
+   uint8_t          numActiveSlotsMax;
+} schedule_dbg_t;
 
 //=========================== prototypes ======================================
 

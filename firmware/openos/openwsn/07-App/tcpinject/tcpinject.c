@@ -7,13 +7,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   OpenQueueEntry_t*    pkt;
-   bool                 sending;
-   open_addr_t          hisAddress;
-   uint16_t             hisPort;
-} tcpinject_vars_t;
-
 tcpinject_vars_t tcpinject_vars;
 
 //=========================== prototypes ======================================

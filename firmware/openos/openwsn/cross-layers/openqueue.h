@@ -22,7 +22,11 @@ typedef struct {
    uint8_t  owner;
 } debugOpenQueueEntry_t;
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+
+typedef struct {
+   OpenQueueEntry_t queue[QUEUELENGTH];
+} openqueue_vars_t;
 
 //=========================== prototypes ======================================
 
