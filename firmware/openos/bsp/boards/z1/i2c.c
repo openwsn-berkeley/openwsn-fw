@@ -1,3 +1,9 @@
+/**
+\brief Z1-specific definition of the "I2C" bsp module.
+
+\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
+*/
+
 #include "msp430x26x.h"
 #include "i2c.h"
 

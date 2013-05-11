@@ -2,8 +2,7 @@
 \brief A timer module with only a single compare value. Can be used to replace
        the "bsp_timer" and "radiotimer" modules with the help of abstimer.
 
-\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2012.
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2012.
+\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
 */
 
 #include "sctimer.h"

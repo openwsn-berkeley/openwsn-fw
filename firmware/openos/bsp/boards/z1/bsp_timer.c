@@ -3,8 +3,7 @@
 
 On Z1, we use timerB0 for the bsp_timer module.
 
-\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
+\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
 */
 
 #include "msp430x26x.h"
