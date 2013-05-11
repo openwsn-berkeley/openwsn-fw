@@ -1,7 +1,7 @@
 /**
-\brief This project runs the full OpenWSN stack.
+\brief A simple application to test MAC connectivity.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, November 2012.
 */
 
 // stack initialization
@@ -20,6 +20,7 @@
 #include "neighbors.h"
 
 #define MAX_PAYLOAD 100
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -101,7 +102,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
 
 void forwarding_init()       { return; }
 void openbridge_init()       { return; }
-void openbridge_triggerData()    { return; }
+void openbridge_triggerData(){ return; }
 
 //===== L4
 
