@@ -4,7 +4,7 @@ from distutils.core import setup, Extension
 openwsnmodule = Extension(
     'openwsn',
     sources        = \
-        glob.glob('C:/Users/Thomas/Desktop/openwsn-fw/firmware/openos/bsp/boards/python/*.c'),
+        glob.glob('C:/Users/Thomas/Desktop/openwsn-fw/firmware/openos/bsp/boards/python/openwsnmodule.c'),
         #glob.glob('C:/Users/Thomas/Desktop/openwsn-fw/firmware/openos/bsp/boards/python/*.c')           + \
         #glob.glob('C:/Users/Thomas/Desktop/openwsn-fw/firmware/openos/drivers/common/*.c')              + \
         #glob.glob('C:/Users/Thomas/Desktop/openwsn-fw/firmware/openos/kernel/openos/*.c')               + \
