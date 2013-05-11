@@ -1,7 +1,7 @@
 /**
-\brief This project runs the full OpenWSN stack.
+\brief A simple application to test MAC connectivity.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, November 2012.
 */
 
 // stack initialization
@@ -20,6 +20,7 @@
 #include "neighbors.h"
 
 #define MAX_PAYLOAD 100
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -44,7 +45,7 @@ int mote_main(void) {
 }
 
 void macpong_initSend() {
-   if (ieee154e_isSynch()==TRUE && neighbors_getNumberOfNeighbors()==1) {
+   if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
       // send packet
       macpong_send(0);   
       // cancel timer
@@ -65,7 +66,8 @@ void macpong_send(uint8_t payloadCtr) {
    }
    pkt->creator                     = COMPONENT_IPHC;
    pkt->owner                       = COMPONENT_IPHC;
-   memcpy(&pkt->l2_nextORpreviousHop,neighbors_getAddr(0),sizeof(open_addr_t));
+   
+   neighbors_getNeighbor(&pkt->l2_nextORpreviousHop,ADDR_64B,0);
    packetfunctions_reserveHeaderSize(pkt,MAX_PAYLOAD);
    for (i=0;i<MAX_PAYLOAD;i++){
      ((uint8_t*)pkt->payload)[i]      = i;
@@ -100,7 +102,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
 
 void forwarding_init()       { return; }
 void openbridge_init()       { return; }
-void openbridge_trigger()    { return; }
+void openbridge_triggerData(){ return; }
 
 //===== L4
 

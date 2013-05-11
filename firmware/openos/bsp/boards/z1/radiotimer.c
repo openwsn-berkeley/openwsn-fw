@@ -2,9 +2,7 @@
 \brief Z1-specific definition of the "radiotimer" bsp module.
 
 \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
-
 
 #include "msp430x26x.h"
 #include "radiotimer.h"

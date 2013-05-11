@@ -141,7 +141,7 @@ enum {
    COMPONENT_ICMPv6ROUTER              = 0x14,
    COMPONENT_ICMPv6RPL                 = 0x15,
    //TRAN
-   COMPONENT_OPENTCP                   = 0x16,             
+   COMPONENT_OPENTCP                   = 0x16,
    COMPONENT_OPENUDP                   = 0x17,
    COMPONENT_OPENCOAP                  = 0x18,
    //App test

@@ -1,3 +1,16 @@
+/**
+\brief Z1-specific definition of the "I2C" bsp module.
+
+The driver for the I2C bus, initialy downloaded from Texas Instruments, were
+heavily modified since.
+
+\author Uli Kretzschmar, Texas Instruments Deutschland GmbH, November 2007
+\author Hoam Chung, June 2010.
+\author Leo Keselman <lkeselman@berkeley.edu>, July 2010.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010.
+\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
+*/
+
 #include "msp430x26x.h"
 #include "i2c.h"
 
@@ -64,7 +77,7 @@ void i2c_init() {
    i2c_control.i2csa[0]=&UCB0I2CSA;
    i2c_control.i2csa[1]=&UCB1I2CSA;
    
-   i2c_control.port[0]=&P3SEL;
+   i2c_control.port[0]=&P5SEL;
    i2c_control.port[1]=&P5SEL;
    
    i2c_control.ie[0]=&IE2;
@@ -82,11 +95,12 @@ void i2c_init() {
    i2c_control.iflagtx[1]=UCB1TXIFG;
 }
 
-void i2c_write_register(uint8_t bus_num, uint8_t slave_addr, uint8_t reg_addr, uint8_t reg_setting) {
-   uint8_t i2c_packet[2] = {reg_addr, reg_setting};
+//data contains the register as a first element if needed. Note that i2c is a transport
+//mechanism and whether there is a register as a first param or not is app/device dependent
+void i2c_write_register(uint8_t bus_num, uint8_t slave_addr, uint8_t length, uint8_t* data) {
    i2c_init_transmit(bus_num,slave_addr);
    while ( i2c_busy(bus_num) );
-   i2c_transmit(bus_num,sizeof(i2c_packet),i2c_packet);
+   i2c_transmit(bus_num,length,data);
    while ( i2c_busy(bus_num) );
    __delay_cycles(I2C_BUS_FREE_TIME);
 }

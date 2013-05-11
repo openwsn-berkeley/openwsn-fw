@@ -16,12 +16,6 @@ at most MAX_NUM_TIMERS timers.
 
 //=========================== variables =======================================
 
-typedef struct {
-   opentimers_t         timersBuf[MAX_NUM_TIMERS];
-   bool                 running;
-   PORT_TIMER_WIDTH     currentTimeout; // current timeout, in ticks
-} opentimers_vars_t;
-
 opentimers_vars_t opentimers_vars;
 //uint32_t counter; //counts the elapsed time.
 

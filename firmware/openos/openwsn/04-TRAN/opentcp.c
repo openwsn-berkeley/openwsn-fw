@@ -15,19 +15,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   uint8_t              state;
-   uint32_t             mySeqNum;
-   uint16_t             myPort;
-   uint32_t             hisNextSeqNum;
-   uint16_t             hisPort;
-   open_addr_t          hisIPv6Address;
-   OpenQueueEntry_t*    dataToSend;
-   OpenQueueEntry_t*    dataReceived;
-   bool                 timerStarted;
-   opentimer_id_t       timerId;
-} tcp_vars_t;
-
 tcp_vars_t tcp_vars;
 
 //=========================== prototypes ======================================

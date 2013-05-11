@@ -6,10 +6,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   OpenQueueEntry_t queue[QUEUELENGTH];
-} openqueue_vars_t;
-
 openqueue_vars_t openqueue_vars;
 
 //=========================== prototypes ======================================

@@ -8,11 +8,22 @@
 \{
 */
 
+#include "opentimers.h"
+
 //=========================== define ==========================================
 
 //=========================== typedef =========================================
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+
+typedef struct {
+   uint16_t        periodMaintenance;
+   bool            busySendingKa;        // TRUE when busy sending a keep-alive
+   bool            busySendingAdv;       // TRUE when busy sending an advertisement
+   uint8_t         dsn;                  // current data sequence number
+   uint8_t         MacMgtTaskCounter;    // counter to determine what management task to do
+   opentimer_id_t  timerId;
+} res_vars_t;
 
 //=========================== prototypes ======================================
 

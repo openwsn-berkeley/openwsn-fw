@@ -8,6 +8,8 @@
 \{
 */
 
+#include "opentimers.h"
+
 //=========================== define ==========================================
 
 // IPv6 addresses of servers on the Internet
@@ -135,7 +137,15 @@ struct coap_resource_desc_t {
    coap_resource_desc_t* next;
 };
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+
+typedef struct {
+   coap_resource_desc_t* resources;
+   bool                  busySending;
+   uint8_t               delayCounter;
+   uint16_t              messageID;
+   opentimer_id_t        timerId;
+} opencoap_vars_t;
 
 //=========================== prototypes ======================================
 
