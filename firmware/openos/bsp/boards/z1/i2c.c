@@ -1,6 +1,13 @@
 /**
 \brief Z1-specific definition of the "I2C" bsp module.
 
+The driver for the I2C bus, initialy downloaded from Texas Instruments, were
+heavily modified since.
+
+\author Uli Kretzschmar, Texas Instruments Deutschland GmbH, November 2007
+\author Hoam Chung, June 2010.
+\author Leo Keselman <lkeselman@berkeley.edu>, July 2010.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010.
 \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
 */
 
