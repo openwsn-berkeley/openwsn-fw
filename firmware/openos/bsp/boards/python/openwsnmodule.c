@@ -324,45 +324,10 @@ static PyObject* my_callback  = NULL;
 
 //===== methods
 
-static PyObject* say_hello(PyObject* self, PyObject* args) {
-   const char* name;
-   int         a;
-   int         b;
-   int         sum;
-   PyObject*   arglist;
-   PyObject*   result;
-   
-   // parse the arguments
-   if (!PyArg_ParseTuple(args, "s", &name)) {
-      return NULL;
-   }
-   
-   printf("Hello %s!\n", name);
-   
-   // call the Python function
-   a          = 1;
-   b          = 2;
-   arglist    = Py_BuildValue("(i,i)",a,b);
-   result     = PyObject_CallObject(my_callback, arglist);
-   Py_DECREF(arglist);
-   if (result == NULL) {
-      return NULL;
-   }
-   if (!PyInt_Check(result)) {
-      return NULL;
-   }
-   sum = PyInt_AsLong(result);
-   Py_DECREF(result);
-   printf("sum %d\n", sum);
-   
-   Py_RETURN_NONE;
-}
-
 //===== admin
 
 static PyMethodDef openwsn_methods[] = {
-   {"say_hello",        say_hello,          METH_VARARGS,  "Greet somebody."},
-   {NULL,               NULL,               0,             NULL} // sentinel
+   {NULL, NULL, 0, NULL} // sentinel
 };
 
 #ifndef PyMODINIT_FUNC
@@ -372,19 +337,20 @@ static PyMethodDef openwsn_methods[] = {
 PyMODINIT_FUNC initopenwsn(void) {
    PyObject* openwsn_module;
    
+   // populate "new" method for OpenMote object
    openwsn_OpenMoteType.tp_new = PyType_GenericNew;
    if (PyType_Ready(&openwsn_OpenMoteType) < 0) {
       return;
    }
    
+   // initialize the openwsn module
    openwsn_module = Py_InitModule3(
       "openwsn",
       openwsn_methods,
       "Module which declares the OpenMote class."
    );
    
-   
-   
+   // create OpenMote class
    Py_INCREF(&openwsn_OpenMoteType);
    PyModule_AddObject(
       openwsn_module,
