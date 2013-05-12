@@ -24,19 +24,111 @@
 #include "openqueue.h"
 #include "openrandom.h"
 
+enum {
+   //===== from client to server
+   // board
+   OPENSIM_CMD_board_init = 0,
+   OPENSIM_CMD_board_sleep,
+   OPENSIM_CMD_board_reset,
+   // bsp_timer
+   OPENSIM_CMD_bsp_timer_init,
+   OPENSIM_CMD_bsp_timer_reset,
+   OPENSIM_CMD_bsp_timer_scheduleIn,
+   OPENSIM_CMD_bsp_timer_cancel_schedule,
+   OPENSIM_CMD_bsp_timer_get_currentValue,
+   // debugpins
+   OPENSIM_CMD_debugpins_init,
+   OPENSIM_CMD_debugpins_frame_toggle,
+   OPENSIM_CMD_debugpins_frame_clr,
+   OPENSIM_CMD_debugpins_frame_set,
+   OPENSIM_CMD_debugpins_slot_toggle,
+   OPENSIM_CMD_debugpins_slot_clr,
+   OPENSIM_CMD_debugpins_slot_set,
+   OPENSIM_CMD_debugpins_fsm_toggle,
+   OPENSIM_CMD_debugpins_fsm_clr,
+   OPENSIM_CMD_debugpins_fsm_set,
+   OPENSIM_CMD_debugpins_task_toggle,
+   OPENSIM_CMD_debugpins_task_clr,
+   OPENSIM_CMD_debugpins_task_set,
+   OPENSIM_CMD_debugpins_isr_toggle,
+   OPENSIM_CMD_debugpins_isr_clr,
+   OPENSIM_CMD_debugpins_isr_set,
+   OPENSIM_CMD_debugpins_radio_toggle,
+   OPENSIM_CMD_debugpins_radio_clr,
+   OPENSIM_CMD_debugpins_radio_set,
+   // eui64
+   OPENSIM_CMD_eui64_get,
+   // leds
+   OPENSIM_CMD_leds_init,
+   OPENSIM_CMD_leds_error_on,
+   OPENSIM_CMD_leds_error_off,
+   OPENSIM_CMD_leds_error_toggle,
+   OPENSIM_CMD_leds_error_isOn,
+   OPENSIM_CMD_leds_error_blink,
+   OPENSIM_CMD_leds_radio_on,
+   OPENSIM_CMD_leds_radio_off,
+   OPENSIM_CMD_leds_radio_toggle,
+   OPENSIM_CMD_leds_radio_isOn,
+   OPENSIM_CMD_leds_sync_on,
+   OPENSIM_CMD_leds_sync_off,
+   OPENSIM_CMD_leds_sync_toggle,
+   OPENSIM_CMD_leds_sync_isOn,
+   OPENSIM_CMD_leds_debug_on,
+   OPENSIM_CMD_leds_debug_off,
+   OPENSIM_CMD_leds_debug_toggle,
+   OPENSIM_CMD_leds_debug_isOn,
+   OPENSIM_CMD_leds_all_on,
+   OPENSIM_CMD_leds_all_off,
+   OPENSIM_CMD_leds_all_toggle,
+   OPENSIM_CMD_leds_circular_shift,
+   OPENSIM_CMD_leds_increment,
+   // radio
+   OPENSIM_CMD_radio_init,
+   OPENSIM_CMD_radio_reset,
+   OPENSIM_CMD_radio_startTimer,
+   OPENSIM_CMD_radio_getTimerValue,
+   OPENSIM_CMD_radio_setTimerPeriod,
+   OPENSIM_CMD_radio_getTimerPeriod,
+   OPENSIM_CMD_radio_setFrequency,
+   OPENSIM_CMD_radio_rfOn,
+   OPENSIM_CMD_radio_rfOff,
+   OPENSIM_CMD_radio_loadPacket,
+   OPENSIM_CMD_radio_txEnable,
+   OPENSIM_CMD_radio_txNow,
+   OPENSIM_CMD_radio_rxEnable,
+   OPENSIM_CMD_radio_rxNow,
+   OPENSIM_CMD_radio_getReceivedFrame,
+   // radiotimer
+   OPENSIM_CMD_radiotimer_init,
+   OPENSIM_CMD_radiotimer_start,
+   OPENSIM_CMD_radiotimer_getValue,
+   OPENSIM_CMD_radiotimer_setPeriod,
+   OPENSIM_CMD_radiotimer_getPeriod,
+   OPENSIM_CMD_radiotimer_schedule,
+   OPENSIM_CMD_radiotimer_cancel,
+   OPENSIM_CMD_radiotimer_getCapturedTime,
+   // uart
+   OPENSIM_CMD_uart_init,
+   OPENSIM_CMD_uart_enableInterrupts,
+   OPENSIM_CMD_uart_disableInterrupts,
+   OPENSIM_CMD_uart_clearRxInterrupts,
+   OPENSIM_CMD_uart_clearTxInterrupts,
+   OPENSIM_CMD_uart_writeByte,
+   OPENSIM_CMD_uart_readByte,
+   // last
+   OPENSIM_CMD_LAST
+};
+
 //=========================== OpenMote Class ==================================
-
-//===== members
-
-//===== methods
-
-//===== admin
 
 /*
 \brief Memory footprint of an OpenMote instance.
 */
 typedef struct {
    PyObject_HEAD // No ';' allows since in macro
+   //===== callbacks
+   PyObject*            callback[OPENSIM_CMD_LAST];
+   //===== state
    // l7
    ohlone_vars_t        ohlone_vars;
    tcpinject_vars_t     tcpinject_vars;
@@ -66,13 +158,106 @@ typedef struct {
    scheduler_dbg_t      scheduler_dbg;
 } OpenMote;
 
+//===== members
+
+//===== methods
+
+static PyObject* OpenMote_set_callback(OpenMote* self, PyObject *args) {
+   int       cmdId;
+   PyObject* tempCallback;
+   
+   // parse arguments
+   if (!PyArg_ParseTuple(args, "iO:set_callback", &cmdId, &tempCallback)) {
+      return NULL;
+   }
+   
+   // make sure cmdId is plausible
+   if (cmdId<0 || cmdId>OPENSIM_CMD_LAST) {
+      PyErr_SetString(PyExc_TypeError, "wrong cmdId");
+      return NULL;
+   }
+   
+   // make sure tempCallback is callable
+   if (!PyCallable_Check(tempCallback)) {
+      PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+      return NULL;
+   }
+   
+   // record the callback
+   Py_XINCREF(tempCallback);                // add a reference to new callback
+   Py_XDECREF(self->callback[cmdId]);       // dispose of previous callback
+   self->callback[cmdId] = tempCallback;    // remember new callback
+   
+   // return successfully
+   Py_RETURN_NONE;
+}
+
+static PyObject* OpenMote_bsp_timer_isr(OpenMote* self) {
+   //poipoi bsp_timer_isr();
+   Py_RETURN_NONE;
+}
+
+static PyObject* OpenMote_radio_isr_startFrame(OpenMote* self, PyObject* args) {
+   int capturedTime;
+   
+   // parse the arguments
+   if (!PyArg_ParseTuple(args, "i", &capturedTime)) {
+      return NULL;
+   }
+   if (capturedTime>0xffff) {
+      fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffff\n");
+      return NULL;
+   }
+   
+   // call the callback
+   //poipoi radio_intr_startOfFrame((uint16_t)radio_startOfFrame->capturedTime);
+   
+   // return successfully
+   Py_RETURN_NONE;
+}
+
+static PyObject* OpenMote_radio_isr_endFrame(OpenMote* self, PyObject* args) {
+   int capturedTime;
+   
+   // parse the arguments
+   if (!PyArg_ParseTuple(args, "i", &capturedTime)) {
+      return NULL;
+   }
+   if (capturedTime>0xffff) {
+      fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffff\n");
+      return NULL;
+   }
+   
+   // call the callback
+   //poipoi radio_intr_endOfFrame((uint16_t)radio_startOfFrame->capturedTime);
+   
+   // return successfully
+   Py_RETURN_NONE;
+}
+
+static PyObject* OpenMote_radiotimer_isr_compare(OpenMote* self) {
+   //poipoi radiotimer_intr_compare();
+   Py_RETURN_NONE;
+}
+
+static PyObject* OpenMote_radiotimer_isr_overflow(OpenMote* self) {
+   //poipoi radiotimer_intr_overflow();
+   Py_RETURN_NONE;
+}
+
+//===== admin
+
 /*
 \brief List of methods of the OpenMote class.
 */
 static PyMethodDef OpenMote_methods[] = {
-   // name      function                   flags        doc
-   //{"name",   (PyCFunction)Noddy_name,   METH_NOARGS, "Return the name, combining the first and last name"},
-   //{"getNum", (PyCFunction)Noddy_getNum, METH_NOARGS, "" },
+   // name                        function                                          flags          doc
+   {  "set_callback",             (PyCFunction)OpenMote_set_callback,               METH_NOARGS,   ""},
+   {  "bsp_timer_isr",            (PyCFunction)OpenMote_bsp_timer_isr,              METH_NOARGS,   ""},
+   {  "radio_isr_startFrame",     (PyCFunction)OpenMote_radio_isr_startFrame,       METH_VARARGS,  ""},
+   {  "radio_isr_endFrame",       (PyCFunction)OpenMote_radio_isr_endFrame,         METH_VARARGS,  ""},
+   {  "radiotimer_isr_compare",   (PyCFunction)OpenMote_radiotimer_isr_compare,     METH_NOARGS,   ""},
+   {  "radiotimer_isr_overflow",  (PyCFunction)OpenMote_radiotimer_isr_overflow,    METH_NOARGS,   ""},
    {NULL} // sentinel
 };
 
@@ -82,9 +267,7 @@ static PyMethodDef OpenMote_methods[] = {
 static PyMemberDef OpenMote_members[] = {
    // name      type           offset                             flags   doc
    //{"first",  T_OBJECT_EX,   offsetof(Noddy, first),            0,      "first name"},
-   //{"last",   T_OBJECT_EX,   offsetof(Noddy, last),             0,      "last name"},
    //{"number", T_INT,         offsetof(Noddy, number),           0,      "noddy number"},
-   //{"hC",     T_INT,         offsetof(Noddy, hiddenCounter),    0,      ""},
    {NULL} // sentinel
 };
 
@@ -175,31 +358,10 @@ static PyObject* say_hello(PyObject* self, PyObject* args) {
    Py_RETURN_NONE;
 }
 
-static PyObject* my_set_callback(PyObject* self, PyObject *args) {
-   PyObject* result = NULL;
-   PyObject* temp;
-   
-   if (PyArg_ParseTuple(args, "O:set_callback", &temp)) {
-      if (!PyCallable_Check(temp)) {
-         PyErr_SetString(PyExc_TypeError, "parameter must be callable");
-         return NULL;
-      }
-      Py_XINCREF(temp);           // Add a reference to new callback.
-      Py_XDECREF(my_callback);    // Dispose of previous callback.
-      my_callback = temp;         // Remember new callback.
-      
-      // Prepare to return "None".
-      Py_INCREF(Py_None);
-      result = Py_None;
-   }
-   return result;
-}
-
 //===== admin
 
 static PyMethodDef openwsn_methods[] = {
    {"say_hello",        say_hello,          METH_VARARGS,  "Greet somebody."},
-   {"my_set_callback",  my_set_callback,    METH_VARARGS,  "Set a callback."},
    {NULL,               NULL,               0,             NULL} // sentinel
 };
 
