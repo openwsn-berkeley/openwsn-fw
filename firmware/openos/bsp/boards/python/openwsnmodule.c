@@ -162,7 +162,7 @@ typedef struct {
 
 //===== methods
 
-static PyObject* OpenMote_set_callback(OpenMote* self, PyObject *args) {
+static PyObject* OpenMote_set_callback(OpenMote* self, PyObject* args) {
    int       cmdId;
    PyObject* tempCallback;
    
@@ -252,7 +252,7 @@ static PyObject* OpenMote_radiotimer_isr_overflow(OpenMote* self) {
 */
 static PyMethodDef OpenMote_methods[] = {
    // name                        function                                          flags          doc
-   {  "set_callback",             (PyCFunction)OpenMote_set_callback,               METH_NOARGS,   ""},
+   {  "set_callback",             (PyCFunction)OpenMote_set_callback,               METH_VARARGS,  ""},
    {  "bsp_timer_isr",            (PyCFunction)OpenMote_bsp_timer_isr,              METH_NOARGS,   ""},
    {  "radio_isr_startFrame",     (PyCFunction)OpenMote_radio_isr_startFrame,       METH_VARARGS,  ""},
    {  "radio_isr_endFrame",       (PyCFunction)OpenMote_radio_isr_endFrame,         METH_VARARGS,  ""},
