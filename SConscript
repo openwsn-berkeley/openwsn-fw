@@ -2,6 +2,8 @@ import os
 import threading
 import subprocess
 import distutils.sysconfig
+import re
+import datetime
 
 Import('env')
 
@@ -199,6 +201,186 @@ def jtagUploadFunc(location):
 if env['jtag']:
     env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
 
+#============================ objectify functions =============================
+
+#===== Objectify
+
+varsToChange = [
+    'openserial_vars',
+    'opentimers_vars',
+    'scheduler_vars',
+    'scheduler_dbg',
+    'ieee154e_vars',
+    'ieee154e_stats',
+    'ieee154e_dbg',
+    'neighbors_vars',
+    'res_vars',
+    'schedule_vars',
+    'schedule_dbg',
+    'icmpv6echo_vars',
+    'icmpv6rpl_vars',
+    'opencoap_vars',
+    'tcp_vars',
+    'ohlone_vars',
+    'tcpinject_vars',
+    'idmanager_vars',
+    'openqueue_vars',
+    'random_vars',
+]
+
+returnTypes = [
+    'void',
+    'error_t',
+    'uint8_t',
+    'bool',
+]
+
+functionsToChange = [
+    # openserial
+    'openserial_init',
+    'openserial_printStatus',
+    'openserial_printInfoErrorCritical',
+    'openserial_printData',
+    'openserial_getNumDataBytes',
+    'openserial_getInputBuffer',
+    'openserial_startInput',
+    'openserial_startOutput',
+    'openserial_stop',
+    'debugPrint_outBufferIndexes',
+    'outputHdlcOpen',
+    'outputHdlcWrite',
+    'outputHdlcClose',
+    'inputHdlcOpen',
+    'inputHdlcWrite',
+    'inputHdlcClose',
+    'isr_openserial_tx',
+    'isr_openserial_rx',
+]
+
+def objectify(env,target,source):
+    assert len(target)==1
+    assert len(source)==1
+    
+    target_c = target[0].abspath
+    source_c = source[0].abspath
+    
+    dir            = os.path.split(source_c)[0]
+    file           = os.path.split(source_c)[1]
+    filebase       = file.split('.')[0]
+    fileext        = file.split('.')[1]
+    source_h       = os.path.join(dir,'{0}.h'.format(filebase))
+    if os.path.exists(source_h):
+        target_h   = source_h
+    else:
+        source_h   = None
+        target_h   = None
+    
+    #===== read
+    
+    f = open(source_c,'r')
+    lines_c = f.read()
+    f.close()
+    
+    if source_h:
+        f = open(source_h,'r')
+        lines_h = f.read()
+        f.close()
+    
+    #===== modify
+    
+    # add header and include
+    header    = []
+    header   += ['/**']
+    header   += ['DO NOT EDIT DIRECTLY!!']
+    header   += ['This file was \'objectified\' by SCons as a pre-processing']
+    header   += ['step for the building a Python extension module.']
+    header   += ['This was done on {0}.'.format(datetime.datetime.now())]
+    header   += ['*/']
+    header   += ['']
+    header    = '\n'.join(header)
+    
+    include   = []
+    include  += ['#include "openwsnmodule.h"']
+    include  += ['']
+    include   = '\n'.join(include)
+    
+    lines_c = header+include+lines_c
+    
+    if source_h:
+        lines_h = header+lines_h
+    
+    # remove global variables declarations
+    for v in varsToChange:
+        lines_c = re.sub(
+            '{0}_t\s+{0}\s*;'.format(v),
+            '// declaration of global variable _{0}_ removed during objectification.'.format(v),
+            lines_c
+        )
+    
+    # change global variables by self->* counterpart
+    for v in varsToChange:
+        lines_c = re.sub(
+            r'\b{0}\b'.format(v),
+            r'self->{0}'.format(v),
+            lines_c
+        )
+    
+    def replaceFunctions(matchObj):
+        returnType = matchObj.group(1)
+        function   = matchObj.group(2)
+        args       = matchObj.group(3).strip()
+        
+        if returnType in returnTypes:
+            if args:
+                return '{0} {1}(OpenMote* self, {2})'.format(returnType,function, args)
+            else:
+                return '{0} {1}(OpenMote* self)'.format(returnType,function)
+        else:
+            if args:
+                return '{0} {1}(self, {2})'.format(returnType,function, args)
+            else:
+                return '{0} {1}(self)'.format(returnType,function, args)
+    
+    # change function signatures
+    for v in functionsToChange:
+        lines_c = re.sub(
+            pattern = r'(\w*)[ \t]+({0})[ \t]*\((.*?)\)'.format(v),
+            repl    = replaceFunctions,
+            string  = lines_c,
+            flags   = re.DOTALL,
+        )
+        if source_h:
+            lines_h = re.sub(
+                pattern = r'(\w*)[ \t]+({0})[ \t]*\((.*?)\)'.format(v),
+                repl    = replaceFunctions,
+                string  = lines_h,
+                flags   = re.DOTALL,
+            )
+    
+    #===== write
+    f = open(target_c,'w')
+    f.write(''.join(lines_c))
+    f.close()
+    
+    if source_h:
+        f = open(target_h,'w')
+        f.write(''.join(lines_h))
+        f.close()
+    
+objectifyBuilder = Builder(action = objectify)
+env.Append(BUILDERS = {'Objectify' : objectifyBuilder})
+
+#===== ObjectifiedFilename
+
+def ObjectifiedFilename(env,source):
+    dir       = os.path.split(source)[0]
+    file      = os.path.split(source)[1]
+    filebase  = file.split('.')[0]
+    fileext   = file.split('.')[1]
+    return os.path.join(dir,'{0}_obj.{1}'.format(filebase,fileext))
+
+env.AddMethod(ObjectifiedFilename, 'ObjectifiedFilename')
+
 #============================ bootload ========================================
 
 class telosb_bootloadThread(threading.Thread):
@@ -368,7 +550,7 @@ def sconscript_scanner(localEnv):
                 duplicate   = 0,
             )
             
-            target =  projectDir
+            target = projectDir
             source = [os.path.join(projectDir,'{0}.c'.format(projectDir))]
             libs   = buildLibs(projectDir)
             libs  += [['python' + distutils.sysconfig.get_config_var('VERSION')]]

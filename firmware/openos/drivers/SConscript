@@ -26,9 +26,24 @@ source = [
     os.path.join('common','opentimers.c'),
 ]
 
-libdrivers = localEnv.Library(
-    target=target,
-    source=source,
-)
+if localEnv['board']=='python':
+    
+    for s in source:
+        temp = localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+        localEnv.AlwaysBuild(temp)
+    
+    libdrivers = localEnv.Library(
+        target = target,
+        source = [localEnv.ObjectifiedFilename(s) for s in source],
+    )
+
+else:
+    libdrivers = localEnv.Library(
+        target = target,
+        source = source,
+    )
 
 Alias('libdrivers', libdrivers)

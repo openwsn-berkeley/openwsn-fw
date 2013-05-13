@@ -44,7 +44,8 @@ localEnv.Append(
         os.path.join('#','firmware','openos','openwsn','cross-layers'),
     ],
 )
-                   
+
+target = 'libopenstack'
 source = [
     'openwsn.c',
     #=== 02a-MAClow
@@ -101,9 +102,23 @@ source = [
     os.path.join('cross-layers','packetfunctions.c'),
 ]
 
-target = 'libopenstack'
-libopenstack = localEnv.Library(
-    target=target,
-    source=source,
-)
+if localEnv['board']=='python':
+    
+    for s in source:
+        localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+    
+    libopenstack = localEnv.Library(
+        target = target,
+        source = [localEnv.ObjectifiedFilename(s) for s in source],
+    )
+
+else:
+    libopenstack = localEnv.Library(
+        target=target,
+        source=source,
+    )
+
 Alias('libopenstack', libopenstack)

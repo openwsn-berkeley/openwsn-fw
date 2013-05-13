@@ -22,9 +22,23 @@ localEnv.Append(
 target =  'libopenos'
 source = ['scheduler.c']
 
-libopenos = localEnv.Library(
-    target=target,
-    source=source,
-)
+if localEnv['board']=='python':
+    
+    for s in source:
+        localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+    
+    libopenos = localEnv.Library(
+        target = target,
+        source = [localEnv.ObjectifiedFilename(s) for s in source],
+    )
+
+else:
+    libopenos = localEnv.Library(
+        target=target,
+        source=source,
+    )
 
 Alias('libopenos', libopenos)
