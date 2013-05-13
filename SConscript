@@ -1,6 +1,7 @@
 import os
 import threading
 import subprocess
+import distutils.sysconfig
 
 Import('env')
 
@@ -308,7 +309,11 @@ def populateTargetGroup(localEnv,targetName):
             env['targets']['all_'+prefix].append(targetName)
 
 def sconscript_scanner(localEnv):
-    
+    '''
+    This function is called from the following directories:
+    - projects\common\
+    - projects\<board>\
+    '''
     # list subdirectories
     subdirs = [name for name in os.listdir('.') if os.path.isdir(os.path.join('.', name)) ]
     
@@ -323,7 +328,8 @@ def sconscript_scanner(localEnv):
         
         if   (
                 ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
-                (localEnv['toolchain']!='iar-proj')
+                (localEnv['toolchain']!='iar-proj') and 
+                (localEnv['board']!='python')
              ):
             
             localEnv.VariantDir(
@@ -340,13 +346,42 @@ def sconscript_scanner(localEnv):
 
             #fix for problem on having the same target as directory name and failing to compile in linux. Appending something to the target solves the isse.
             target=target+"_prog"
-
+            
             exe = localEnv.Program(
                 target  = target,
                 source  = source,
                 LIBS    = libs,
             )
             targetAction = localEnv.PostBuildExtras(exe)
+            
+            Alias(targetName, [targetAction])
+            added = True
+        
+        elif (
+                ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
+                (localEnv['board']=='python')
+             ):
+            
+            localEnv.VariantDir(
+                variant_dir = variant_dir,
+                src_dir     = src_dir,
+                duplicate   = 0,
+            )
+            
+            target =  projectDir
+            source = [os.path.join(projectDir,'{0}.c'.format(projectDir))]
+            libs   = buildLibs(projectDir)
+            libs  += [['python' + distutils.sysconfig.get_config_var('VERSION')]]
+            
+            buildIncludePath(projectDir,localEnv)
+            
+            targetAction = localEnv.SharedLibrary(
+                target,
+                source,
+                LIBS           = libs,
+                SHLIBPREFIX    = '',
+                SHLIBSUFFIX    = distutils.sysconfig.get_config_var('SO'),
+            )
             
             Alias(targetName, [targetAction])
             added = True

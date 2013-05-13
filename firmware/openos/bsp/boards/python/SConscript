@@ -7,22 +7,20 @@ localEnv = env.Clone()
 
 target =  'openwsn'
 source = [
-    #'board.c',
-    #'bsp_timer.c',
-    #'debugpins.c',
-    #'eui64.c',
-    #'leds.c',
+    'board.c',
+    'bsp_timer.c',
+    'debugpins.c',
+    'eui64.c',
+    'leds.c',
     'openwsnmodule.c',
-    #'radio.c',
-    #'radiotimer.c',
-    #'uart.c',
-    #'supply.c',
+    'radio.c',
+    'radiotimer.c',
+    'uart.c',
+    'supply.c',
 ]
 
-openwsnmodule = SharedLibrary (
-    target,
-    source,
-    CPPPATH        = [
+localEnv.Append(
+    CPPPATH = [
         distutils.sysconfig.get_python_inc(),
         os.path.join('#','firmware','openos','bsp','boards'),
         os.path.join('#','firmware','openos','bsp','boards','python'),
@@ -53,11 +51,12 @@ openwsnmodule = SharedLibrary (
         os.path.join('#','firmware','openos','openwsn','07-App','udprand'),
         os.path.join('#','firmware','openos','openwsn','07-App','udpstorm'),
         os.path.join('#','firmware','openos','openwsn','cross-layers'),
-    ],
-    LIBPATH        = [distutils.sysconfig.PREFIX+"/libs"],
-    LIBS           = ['python' + distutils.sysconfig.get_config_var('VERSION')],
-    SHLIBPREFIX    = '',
-    SHLIBSUFFIX    = distutils.sysconfig.get_config_var('SO'),
+    ]
 )
 
-Alias('openwsnmodule', openwsnmodule)
+libbsp = localEnv.Library(
+    target         = 'libbsp',
+    source         = source,
+)
+
+Alias('libbsp', libbsp)
