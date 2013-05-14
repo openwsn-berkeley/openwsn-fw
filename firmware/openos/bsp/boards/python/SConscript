@@ -5,8 +5,8 @@ Import('env')
 
 localEnv = env.Clone()
 
-target =  'openwsn'
-source = [
+target =  'libbsp'
+sources_c = [
     'board.c',
     'bsp_timer.c',
     'debugpins.c',
@@ -18,45 +18,24 @@ source = [
     'uart.c',
     'supply.c',
 ]
+sources_h = [
+    'openwsnmodule.h',
+    'supply.h',
+]
 
-localEnv.Append(
-    CPPPATH = [
-        distutils.sysconfig.get_python_inc(),
-        os.path.join('#','firmware','openos','bsp','boards'),
-        os.path.join('#','firmware','openos','bsp','boards','python'),
-        os.path.join('#','firmware','openos','drivers','common'),
-        os.path.join('#','firmware','openos','kernel','openos'),
-        os.path.join('#','firmware','openos','openwsn'),
-        os.path.join('#','firmware','openos','openwsn','02.5-MPLS'),
-        os.path.join('#','firmware','openos','openwsn','02a-MAClow'),
-        os.path.join('#','firmware','openos','openwsn','02b-MAChigh'),
-        os.path.join('#','firmware','openos','openwsn','03a-IPHC'),
-        os.path.join('#','firmware','openos','openwsn','03b-IPv6'),
-        os.path.join('#','firmware','openos','openwsn','04-TRAN'),
-        os.path.join('#','firmware','openos','openwsn','07-App'),
-        os.path.join('#','firmware','openos','openwsn','07-App','layerdebug'),
-        os.path.join('#','firmware','openos','openwsn','07-App','ohlone'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rex'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rinfo'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rleds'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rreg'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rwellknown'),
-        os.path.join('#','firmware','openos','openwsn','07-App','tcpecho'),
-        os.path.join('#','firmware','openos','openwsn','07-App','tcpinject'),
-        os.path.join('#','firmware','openos','openwsn','07-App','tcpprint'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udpecho'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udpinject'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udplatency'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udpprint'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udprand'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udpstorm'),
-        os.path.join('#','firmware','openos','openwsn','cross-layers'),
-    ]
-)
+#============================ SCons targets ===================================
+
+assert(localEnv['board']=='python')
+
+for s in sources_c+sources_h:
+    localEnv.Objectify(
+        target = localEnv.ObjectifiedFilename(s),
+        source = s,
+    )
 
 libbsp = localEnv.Library(
-    target         = 'libbsp',
-    source         = source,
+    target = target,
+    source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
 )
-
+localEnv.Depends(libbsp,[localEnv.ObjectifiedFilename(s) for s in sources_h])
 Alias('libbsp', libbsp)

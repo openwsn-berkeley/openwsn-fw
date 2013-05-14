@@ -19,26 +19,33 @@ localEnv.Append(
     ],
 )
 
-target =  'libopenos'
-source = ['scheduler.c']
+target    =  'libopenos'
+sources_c = [
+    'scheduler.c',
+]
+sources_h = [
+    'scheduler.h',
+]
 
 if localEnv['board']=='python':
     
-    for s in source:
-        localEnv.Objectify(
+    for s in sources_c+sources_h:
+        temp = localEnv.Objectify(
             target = localEnv.ObjectifiedFilename(s),
             source = s,
         )
+        #localEnv.AlwaysBuild(temp)
     
     libopenos = localEnv.Library(
         target = target,
-        source = [localEnv.ObjectifiedFilename(s) for s in source],
+        source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
     )
+    localEnv.Depends(libopenos,[localEnv.ObjectifiedFilename(s) for s in sources_h])
 
 else:
     libopenos = localEnv.Library(
-        target=target,
-        source=source,
+        target = target,
+        source = sources_c,
     )
 
 Alias('libopenos', libopenos)

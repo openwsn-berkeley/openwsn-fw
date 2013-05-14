@@ -2,6 +2,9 @@
 \brief Source code of the Python openwsn module, written in C.
 */
 
+#ifndef __OPENWSNMODULE_H
+#define __OPENWSNMODULE_H
+
 // Python
 #include <Python.h>
 #include "structmember.h"
@@ -121,7 +124,7 @@ enum {
 /*
 \brief Memory footprint of an OpenMote instance.
 */
-typedef struct {
+struct OpenMote {
    PyObject_HEAD // No ';' allows since in macro
    //===== callbacks
    PyObject*            callback[OPENSIM_CMD_LAST];
@@ -154,4 +157,6 @@ typedef struct {
    // kernel
    scheduler_vars_t     scheduler_vars;
    scheduler_dbg_t      scheduler_dbg;
-} OpenMote;
+};
+
+#endif

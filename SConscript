@@ -12,15 +12,16 @@ Import('env')
 env['VARDIR']  = os.path.join('#','build','{0}_{1}'.format(env['board'],env['toolchain']))
 
 # common include paths
-env.Append(
-    CPPPATH = [
-        os.path.join('#','firmware','openos','openwsn'),
-        os.path.join('#','firmware','openos','bsp','boards'),
-        os.path.join('#','firmware','openos','bsp','chips'),
-        os.path.join('#','firmware','openos','kernel','openos'),
-        os.path.join('#','firmware','openos','drivers','common'),
-    ]
-)
+if env['board']!='python':
+    env.Append(
+        CPPPATH = [
+            os.path.join('#','firmware','openos','openwsn'),
+            os.path.join('#','firmware','openos','bsp','boards'),
+            os.path.join('#','firmware','openos','bsp','chips'),
+            os.path.join('#','firmware','openos','kernel','openos'),
+            os.path.join('#','firmware','openos','drivers','common'),
+        ]
+    )
 
 #============================ toolchain =======================================
 
@@ -203,6 +204,17 @@ if env['jtag']:
 
 #============================ objectify functions =============================
 
+#===== ObjectifiedFilename
+
+def ObjectifiedFilename(env,source):
+    dir       = os.path.split(source)[0]
+    file      = os.path.split(source)[1]
+    filebase  = file.split('.')[0]
+    fileext   = file.split('.')[1]
+    return os.path.join(dir,'{0}_obj.{1}'.format(filebase,fileext))
+
+env.AddMethod(ObjectifiedFilename, 'ObjectifiedFilename')
+
 #===== Objectify
 
 varsToChange = [
@@ -241,6 +253,9 @@ functionsToChange = [
     'openserial_printStatus',
     'openserial_printInfoErrorCritical',
     'openserial_printData',
+    'openserial_printInfo',
+    'openserial_printError',
+    'openserial_printCritical',
     'openserial_getNumDataBytes',
     'openserial_getInputBuffer',
     'openserial_startInput',
@@ -258,72 +273,83 @@ functionsToChange = [
 ]
 
 def objectify(env,target,source):
+    
     assert len(target)==1
     assert len(source)==1
     
-    target_c = target[0].abspath
-    source_c = source[0].abspath
+    target = target[0].abspath
+    source = source[0].abspath
     
-    dir            = os.path.split(source_c)[0]
-    file           = os.path.split(source_c)[1]
-    filebase       = file.split('.')[0]
-    fileext        = file.split('.')[1]
-    source_h       = os.path.join(dir,'{0}.h'.format(filebase))
-    if os.path.exists(source_h):
-        target_h   = source_h
+    if os.path.split(source)[1].split('.')[1]=='h':
+        headerFile = True
     else:
-        source_h   = None
-        target_h   = None
+        headerFile = False
+    
+    output  = []
+    output += ['objectify:']
+    output += ['- target : {0}'.format(target)]
+    output += ['- source : {0}'.format(source)]
+    output  = '\n'.join(output)
+    #print output
     
     #===== read
     
-    f = open(source_c,'r')
-    lines_c = f.read()
+    f = open(source,'r')
+    lines = f.read()
     f.close()
-    
-    if source_h:
-        f = open(source_h,'r')
-        lines_h = f.read()
-        f.close()
     
     #===== modify
     
-    # add header and include
-    header    = []
-    header   += ['/**']
-    header   += ['DO NOT EDIT DIRECTLY!!']
-    header   += ['This file was \'objectified\' by SCons as a pre-processing']
-    header   += ['step for the building a Python extension module.']
-    header   += ['This was done on {0}.'.format(datetime.datetime.now())]
-    header   += ['*/']
-    header   += ['']
-    header    = '\n'.join(header)
+    # add banner
+    banner    = []
+    banner   += ['/**']
+    banner   += ['DO NOT EDIT DIRECTLY!!']
+    banner   += ['This file was \'objectified\' by SCons as a pre-processing']
+    banner   += ['step for the building a Python extension module.']
+    banner   += ['This was done on {0}.'.format(datetime.datetime.now())]
+    banner   += ['*/']
+    banner   += ['']
+    banner    = '\n'.join(banner)
     
-    include   = []
-    include  += ['#include "openwsnmodule.h"']
-    include  += ['']
-    include   = '\n'.join(include)
+    lines     = banner+lines
     
-    lines_c = header+include+lines_c
+    # include openwsnmodule
+    if headerFile:
+        lines = re.sub(
+            r'(#include "\w+.h")',
+            #r'\1\n#include "openwsnmodule.h"\ntypedef struct OpenMote OpenMote;',
+            #r'\1\n#include "openwsnmodule_obj.h"',
+            r'\1\ntypedef struct OpenMote OpenMote;',
+            lines,
+            count=1,
+        )
     
-    if source_h:
-        lines_h = header+lines_h
+    # update the included header
+    if not headerFile:
+        for v in varsToChange:
+            lines = re.sub(
+                r'\b{0}.h\b'.format(os.path.split(source)[1].split('.')[0]),
+                r'{0}_obj.h'.format(os.path.split(source)[1].split('.')[0]),
+                lines
+            )
     
     # remove global variables declarations
-    for v in varsToChange:
-        lines_c = re.sub(
-            '{0}_t\s+{0}\s*;'.format(v),
-            '// declaration of global variable _{0}_ removed during objectification.'.format(v),
-            lines_c
-        )
+    if not headerFile:
+        for v in varsToChange:
+            lines = re.sub(
+                '{0}_t\s+{0}\s*;'.format(v),
+                '// declaration of global variable _{0}_ removed during objectification.'.format(v),
+                lines
+            )
     
     # change global variables by self->* counterpart
-    for v in varsToChange:
-        lines_c = re.sub(
-            r'\b{0}\b'.format(v),
-            r'self->{0}'.format(v),
-            lines_c
-        )
+    if not headerFile:
+        for v in varsToChange:
+            lines = re.sub(
+                r'\b{0}\b'.format(v),
+                r'(self->{0})'.format(v),
+                lines
+            )
     
     def replaceFunctions(matchObj):
         returnType = matchObj.group(1)
@@ -343,43 +369,22 @@ def objectify(env,target,source):
     
     # change function signatures
     for v in functionsToChange:
-        lines_c = re.sub(
+        lines = re.sub(
             pattern = r'(\w*)[ \t]+({0})[ \t]*\((.*?)\)'.format(v),
             repl    = replaceFunctions,
-            string  = lines_c,
+            string  = lines,
             flags   = re.DOTALL,
         )
-        if source_h:
-            lines_h = re.sub(
-                pattern = r'(\w*)[ \t]+({0})[ \t]*\((.*?)\)'.format(v),
-                repl    = replaceFunctions,
-                string  = lines_h,
-                flags   = re.DOTALL,
-            )
     
     #===== write
-    f = open(target_c,'w')
-    f.write(''.join(lines_c))
+    f = open(target,'w')
+    f.write(''.join(lines))
     f.close()
-    
-    if source_h:
-        f = open(target_h,'w')
-        f.write(''.join(lines_h))
-        f.close()
-    
+
 objectifyBuilder = Builder(action = objectify)
 env.Append(BUILDERS = {'Objectify' : objectifyBuilder})
 
-#===== ObjectifiedFilename
-
-def ObjectifiedFilename(env,source):
-    dir       = os.path.split(source)[0]
-    file      = os.path.split(source)[1]
-    filebase  = file.split('.')[0]
-    fileext   = file.split('.')[1]
-    return os.path.join(dir,'{0}_obj.{1}'.format(filebase,fileext))
-
-env.AddMethod(ObjectifiedFilename, 'ObjectifiedFilename')
+#env.AddMethod(Objectify, 'Objectify')
 
 #============================ bootload ========================================
 
@@ -547,7 +552,7 @@ def sconscript_scanner(localEnv):
             localEnv.VariantDir(
                 variant_dir = variant_dir,
                 src_dir     = src_dir,
-                duplicate   = 0,
+                duplicate   = 1,
             )
             
             target = projectDir
@@ -601,9 +606,18 @@ buildEnv = env.SConscript(
     exports     = ['env'],
 )
 
+#bspheader
+boardsDir       = os.path.join('#','firmware','openos','bsp','boards')
+boardsVarDir    = os.path.join(buildEnv['VARDIR'],'bsp','boards')
+buildEnv.SConscript(
+    os.path.join(boardsDir,'SConscript'),
+    exports     = {'env': buildEnv},
+    variant_dir = boardsVarDir,
+)
+
 # bsp
 bspDir          = os.path.join('#','firmware','openos','bsp','boards',buildEnv['BSP'])
-bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp')
+bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp','boards',buildEnv['BSP'])
 buildEnv.Append(CPPPATH = [bspDir])
 buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),
