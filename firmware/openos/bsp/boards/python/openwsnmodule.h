@@ -121,7 +121,7 @@ enum {
    OPENSIM_CMD_LAST
 };
 
-/*
+/**
 \brief Memory footprint of an OpenMote instance.
 */
 struct OpenMote {
