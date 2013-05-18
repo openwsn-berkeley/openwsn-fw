@@ -258,6 +258,7 @@ returnTypes = [
     'channelOffset_t',
     'ipv6_header_iht',
     'OpenQueueEntry_t*',
+    'kick_scheduler_t',
 ]
 
 functionsToChange = [
