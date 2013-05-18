@@ -241,13 +241,143 @@ varsToChange = [
 ]
 
 returnTypes = [
+    'int',
     'void',
     'error_t',
     'uint8_t',
+    'uint16_t',
+    'uint32_t',
     'bool',
+    'opentimer_id_t',
+    'PORT_TIMER_WIDTH',
+    'dagrank_t',
+    'open_addr_t*',
+    'slotOffset_t',
+    'frameLength_t',
+    'cellType_t',
+    'channelOffset_t',
+    'ipv6_header_iht',
+    'OpenQueueEntry_t*',
 ]
 
 functionsToChange = [
+    #===== bsp
+    'mote_main',
+    # supply
+    'supply_init',
+    'supply_rootFunction',
+    # board
+    'board_init',
+    'board_sleep',
+    'board_reset',
+    # bsp_timer
+    'bsp_timer_init',
+    'bsp_timer_set_callback',
+    'bsp_timer_reset',
+    'bsp_timer_scheduleIn',
+    'bsp_timer_cancel_schedule',
+    'bsp_timer_get_currentValue',
+    # debugpins
+    'debugpins_init',
+    'debugpins_frame_toggle',
+    'debugpins_frame_clr',
+    'debugpins_frame_set',
+    'debugpins_slot_toggle',
+    'debugpins_slot_clr',
+    'debugpins_slot_set',
+    'debugpins_fsm_toggle',
+    'debugpins_fsm_clr',
+    'debugpins_fsm_set',
+    'debugpins_task_toggle',
+    'debugpins_task_clr',
+    'debugpins_task_set',
+    'debugpins_isr_toggle',
+    'debugpins_isr_clr',
+    'debugpins_isr_set',
+    'debugpins_radio_toggle',
+    'debugpins_radio_clr',
+    'debugpins_radio_set',
+    # eui64
+    'eui64_get',
+    # leds
+    'leds_init',
+    'leds_error_on',
+    'leds_error_off',
+    'leds_error_toggle',
+    'leds_error_isOn',
+    'leds_error_blink',
+    'leds_radio_on',
+    'leds_radio_off',
+    'leds_radio_toggle',
+    'leds_radio_isOn',
+    'leds_sync_on',
+    'leds_sync_off',
+    'leds_sync_toggle',
+    'leds_sync_isOn',
+    'leds_debug_on',
+    'leds_debug_off',
+    'leds_debug_toggle',
+    'leds_debug_isOn',
+    'leds_all_on',
+    'leds_all_off',
+    'leds_all_toggle',
+    'leds_circular_shift',
+    'leds_increment',
+    # radio
+    'radio_init',
+    'radio_setOverflowCb',
+    'radio_setCompareCb',
+    'radio_setStartFrameCb',
+    'radio_setEndFrameCb',
+    'radio_reset',
+    'radio_startTimer',
+    'radio_getTimerValue',
+    'radio_setTimerPeriod',
+    'radio_getTimerPeriod',
+    'radio_setFrequency',
+    'radio_rfOn',
+    'radio_rfOff',
+    'radio_loadPacket',
+    'radio_txEnable',
+    'radio_txNow',
+    'radio_rxEnable',
+    'radio_rxNow',
+    'radio_getReceivedFrame',
+    'radio_isr',
+    # radiotimer
+    'radiotimer_init',
+    'radiotimer_setOverflowCb',
+    'radiotimer_setCompareCb',
+    'radiotimer_setStartFrameCb',
+    'radiotimer_setEndFrameCb',
+    'radiotimer_start',
+    'radiotimer_getValue',
+    'radiotimer_setPeriod',
+    'radiotimer_getPeriod',
+    'radiotimer_schedule',
+    'radiotimer_cancel',
+    'radiotimer_getCapturedTime',
+    'radiotimer_isr',
+    # sctimer
+    'sctimer_init',
+    'sctimer_stop',
+    'sctimer_schedule',
+    'sctimer_getValue',
+    'sctimer_setCb',
+    'sctimer_clearISR',
+    'sctimer_reset',
+    # uart
+    'uart_init',
+    'uart_setCallbacks',
+    'uart_enableInterrupts',
+    'uart_disableInterrupts',
+    'uart_clearRxInterrupts',
+    'uart_clearTxInterrupts',
+    'uart_writeByte',
+    'uart_readByte',
+    'uart_tx_isr',
+    'uart_rx_isr',
+    #===== drivers
     # openserial
     'openserial_init',
     'openserial_printStatus',
@@ -262,6 +392,7 @@ functionsToChange = [
     'openserial_startOutput',
     'openserial_stop',
     'debugPrint_outBufferIndexes',
+    'openserial_echo',
     'outputHdlcOpen',
     'outputHdlcWrite',
     'outputHdlcClose',
@@ -270,6 +401,429 @@ functionsToChange = [
     'inputHdlcClose',
     'isr_openserial_tx',
     'isr_openserial_rx',
+    # opentimers
+    'opentimers_init',
+    'opentimers_start',
+    'opentimers_setPeriod',
+    'opentimers_stop',
+    'opentimers_restart',
+    'opentimers_timer_callback',
+    #===== kernel
+    # scheduler
+    'scheduler_init',
+    'scheduler_start',
+    'scheduler_push_task',
+    #===== openwsn
+    'openwsn_init',
+    # IEEE802154
+    'ieee802154_prependHeader',
+    'ieee802154_retrieveHeader',
+    # IEEE802154E
+    'ieee154e_init',
+    'ieee154e_asnDiff',
+    'isr_ieee154e_newSlot',
+    'isr_ieee154e_timer',
+    'ieee154e_startOfFrame',
+    'ieee154e_endOfFrame',
+    'debugPrint_asn',
+    'debugPrint_isSync',
+    'debugPrint_macStats',
+    'activity_synchronize_newSlot',
+    'activity_synchronize_startOfFrame',
+    'activity_synchronize_endOfFrame',
+    'activity_ti1ORri1',
+    'activity_ti2',
+    'activity_tie1',
+    'activity_ti3',
+    'activity_tie2',
+    'activity_ti4',
+    'activity_tie3',
+    'activity_ti5',
+    'activity_ti6',
+    'activity_tie4',
+    'activity_ti7',
+    'activity_tie5',
+    'activity_ti8',
+    'activity_tie6',
+    'activity_ti9',
+    'activity_ri2',
+    'activity_rie1',
+    'activity_ri3',
+    'activity_rie2',
+    'activity_ri4',
+    'activity_rie3',
+    'activity_ri5',
+    'activity_ri6',
+    'activity_rie4',
+    'activity_ri7',
+    'activity_rie5',
+    'activity_ri8',
+    'activity_rie6',
+    'activity_ri9',
+    'isValidAdv',
+    'isValidRxFrame',
+    'isValidAck',
+    'incrementAsnOffset',
+    'asnWriteToAdv',
+    'ieee154e_getAsn',
+    'asnWriteToSerial',
+    'asnStoreFromAdv',
+    'synchronizePacket',
+    'synchronizeAck',
+    'changeIsSync',
+    'notif_sendDone',
+    'notif_receive',
+    'resetStats',
+    'updateStats',
+    'calculateFrequency',
+    'changeState',
+    'endSlot',
+    'ieee154e_isSynch',
+    # topology
+    'topology_isAcceptablePacket',
+    # neighbors
+    'neighbors_init',
+    'neighbors_getMyDAGrank',
+    'neighbors_getNumNeighbors',
+    'neighbors_getPreferredParentEui64',
+    'neighbors_getKANeighbor',
+    'neighbors_isStableNeighbor',
+    'neighbors_isPreferredParent',
+    'neighbors_isNeighborWithLowerDAGrank',
+    'neighbors_isNeighborWithHigherDAGrank',
+    'neighbors_indicateRx',
+    'neighbors_indicateTx',
+    'neighbors_indicateRxDIO',
+    'neighbors_getNeighbor',
+    'neighbors_updateMyDAGrankAndNeighborPreference',
+    'debugPrint_neighbors',
+    'debugNetPrint_neighbors',
+    'registerNewNeighbor',
+    'isNeighbor',
+    'removeNeighbor',
+    'isThisRowMatching',
+    # res
+    'res_init',
+    'debugPrint_myDAGrank',
+    'res_send',
+    'task_resNotifSendDone',
+    'task_resNotifReceive',
+    'timers_res_fired',
+    'res_send_internal',
+    'sendAdv',
+    'sendKa',
+    'res_timer_cb',
+    # schedule
+    'schedule_init',
+    'debugPrint_schedule',
+    'debugPrint_backoff',
+    'schedule_setFrameLength',
+    'schedule_addActiveSlot',
+    'schedule_syncSlotOffset',
+    'schedule_advanceSlot',
+    'schedule_getNextActiveSlotOffset',
+    'schedule_getFrameLength',
+    'schedule_getType',
+    'schedule_getNeighbor',
+    'schedule_getChannelOffset',
+    'schedule_getOkToSend',
+    'schedule_resetBackoff',
+    'schedule_indicateRx',
+    'schedule_indicateTx',
+    'schedule_getNetDebugInfo',
+    'schedule_resetEntry',
+    # iphc
+    'iphc_init',
+    'iphc_sendFromForwarding',
+    'iphc_sendFromBridge',
+    'iphc_sendDone',
+    'iphc_receive',
+    'prependIPv6Header',
+    'retrieveIPv6Header',
+    # openbridge
+    'openbridge_init',
+    'openbridge_triggerData',
+    'openbridge_sendDone',
+    'openbridge_receive',
+    # forwarding
+    'forwarding_init',
+    'forwarding_send',
+    'forwarding_sendDone',
+    'forwarding_receive',
+    'fowarding_send_internal_RoutingTable',
+    'fowarding_send_internal_SourceRouting',
+    'forwarding_getNextHop_RoutingTable',
+    # icmpv6
+    'icmpv6_init',
+    'icmpv6_send',
+    'icmpv6_sendDone',
+    'icmpv6_receive',
+    # icmpv6echo
+    'icmpv6echo_init',
+    'icmpv6echo_trigger',
+    'icmpv6echo_sendDone',
+    'icmpv6echo_receive',
+    # icmpv6rpl
+    'icmpv6rpl_init',
+    'icmpv6rpl_sendDone',
+    'icmpv6rpl_receive',
+    'icmpv6rpl_timer_DIO_cb',
+    'icmpv6rpl_timer_DIO_task',
+    'sendDIO',
+    'icmpv6rpl_timer_DAO_cb',
+    'icmpv6rpl_timer_DAO_task',
+    'sendDAO',
+    # opencoap
+    'opencoap_init',
+    'opencoap_receive',
+    'opencoap_sendDone',
+    'timers_coap_fired',
+    'opencoap_writeLinks',
+    'opencoap_register',
+    'opencoap_send',
+    'icmpv6coap_timer_cb',
+    # opentcp
+    'opentcp_init',
+    'opentcp_connect',
+    'opentcp_send',
+    'opentcp_sendDone',
+    'opentcp_receive',
+    'opentcp_close',
+    'opentcp_debugPrint',
+    'timers_tcp_fired',
+    'prependTCPHeader',
+    'containsControlBits',
+    'opentcp_reset',
+    'tcp_change_state',
+    'opentcp_timer_cb',
+    # openudp
+    'openudp_init',
+    'openudp_send',
+    'openudp_sendDone',
+    'openudp_receive',
+    'openudp_debugPrint',
+    # rsvp
+    'rsvp_qos_request',
+    'rsvp_timer_cb',
+    # layerdebug
+    'layerdebug_init',
+    'layerdebug_timer_schedule_cb',
+    'layerdebug_timer_neighbors_cb',
+    'layerdebug_task_schedule_cb',
+    'layerdebug_task_neighbors_cb',
+    'layerdebug_sendDone',
+    'layerdebug_schedule_receive',
+    'layerdebug_neighbors_receive',
+    # ohlone
+    'ohlone_init',
+    'ohlone_shouldIlisten',
+    'ohlone_sendpkt',
+    'ohlone_check4chars',
+    'ohlone_receive',
+    'ohlone_sendDone',
+    'ohlone_connectDone',
+    'ohlone_debugPrint',
+    # rex
+    'rex_init',
+    'rex_receive',
+    'rex_timer_cb',
+    'rex_task_cb',
+    'rex_sendDone',
+    # rinfo
+    'rinfo_init',
+    'rinfo_receive',
+    'rinfo_sendDone',
+    # rleds
+    'rleds__init',
+    'rleds_receive',
+    'rleds_sendDone',
+    # rreg
+    'rreg_init',
+    'rreg_receive',
+    'rreg_timer',
+    'rreg_sendDone',
+    'hexToAscii',
+    # rwellknown
+    'rwellknown_init',
+    'rwellknown_receive',
+    'rwellknown_sendDone',
+    # tcpecho
+    'tcpecho_init',
+    'tcpecho_shouldIlisten',
+    'tcpecho_receive',
+    'tcpecho_sendDone',
+    'tcpecho_connectDone',
+    'tcpecho_debugPrint',
+    # tcpinject
+    'tcpinject_init',
+    'tcpinject_shouldIlisten',
+    'tcpinject_trigger',
+    'tcpinject_connectDone',
+    'tcpinject_sendDone',
+    'tcpinject_receive',
+    'tcpinject_debugPrint',
+    # tcpprint
+    'tcpprint_init',
+    'tcpprint_shouldIlisten',
+    'tcpprint_receive',
+    'tcpprint_connectDone',
+    'tcpprint_sendDone',
+    'tcpprint_debugPrint',
+    # udpecho
+    'udpecho_init',
+    'udpecho_receive',
+    'udpecho_sendDone',
+    'udpecho_debugPrint',
+    # udpinject
+    'udpinject_init',
+    'udpinject_trigger',
+    'udpinject_sendDone',
+    'udpinject_receive',
+    'udpinject_debugPrint',
+    # udplatency
+    'udplatency_init',
+    'udplatency_task',
+    'udplatency_timer',
+    'udplatency_sendDone',
+    'udplatency_receive',
+    # udpprint
+    'udpprint_init',
+    'udpprint_sendDone',
+    'udpprint_receive',
+    'udpprint_debugPrint',
+    # udprand
+    'udprand_init',
+    'udprand_task',
+    'udprand_timer',
+    'udprand_sendDone',
+    'udprand_receive',
+    # udpstorm
+    'udpstorm_init',
+    'udpstorm_receive',
+    'udpstorm_timer_cb',
+    'udpstorm_task_cb',
+    'udpstorm_sendDone',
+    # idmanager
+    'idmanager_init',
+    'idmanager_getIsDAGroot',
+    'idmanager_setIsDAGroot',
+    'idmanager_getIsBridge',
+    'idmanager_setIsBridge',
+    'idmanager_getMyID',
+    'idmanager_setMyID',
+    'idmanager_isMyAddress',
+    'idmanager_triggerAboutRoot',
+    'idmanager_triggerAboutBridge',
+    'debugPrint_id',
+    # openqueue
+    'openqueue_init',
+    'debugPrint_queue',
+    'openqueue_getFreePacketBuffer',
+    'openqueue_freePacketBuffer',
+    'openqueue_removeAllCreatedBy',
+    'openqueue_removeAllOwnedBy',
+    'openqueue_resGetSentPacket',
+    'openqueue_resGetReceivedPacket',
+    'openqueue_macGetDataPacket',
+    'openqueue_macGetAdvPacket',
+    'openqueue_reset_entry',
+    # openrandom
+    'openrandom_init',
+    'openrandom_get16b',
+    # packetfunctions
+    'packetfunctions_ip128bToMac64b',
+    'packetfunctions_mac64bToIp128b',
+    'packetfunctions_mac64bToMac16b',
+    'packetfunctions_mac16bToMac64b',
+    'packetfunctions_isBroadcastMulticast',
+    'packetfunctions_isAllRoutersMulticast',
+    'packetfunctions_isAllHostsMulticast',
+    'packetfunctions_sameAddress',
+    'packetfunctions_readAddress',
+    'packetfunctions_writeAddress',
+    'packetfunctions_reserveHeaderSize',
+    'packetfunctions_tossHeader',
+    'packetfunctions_reserveFooterSize',
+    'packetfunctions_tossFooter',
+    'packetfunctions_calculateCRC',
+    'packetfunctions_checkCRC',
+    'packetfunctions_calculateChecksum',
+    'onesComplementSum',
+    'packetfunctions_htons',
+    'packetfunctions_ntohs',
+    'packetfunctions_htonl',
+]
+
+headerFiles = [
+    #=== libbsp
+    'board',
+    'bsp_timer',
+    'debugpins',
+    'eui64',
+    'leds',
+    'radio',
+    'radiotimer',
+    'uart',
+    #=== libdrivers,
+    'openhdlc',
+    'openserial',
+    'opentimers',
+    #=== libopenos
+    'scheduler',
+    #=== libopenstack
+    'openwsn',
+    # 02a-MAClow
+    'topology',
+    'IEEE802154',
+    'IEEE802154E',
+    # 02b-MAChigh
+    'neighbors',
+    'res',
+    'schedule',
+    # 02.5-MPLS
+    # TODO
+    # 03a-IPHC
+    'iphc',
+    'openbridge',
+    # 03b-IPv6
+    'forwarding',
+    'icmpv6',
+    'icmpv6echo',
+    'icmpv6rpl',
+    # 04-TRAN
+    'opencoap',
+    'opentcp',
+    'openudp',
+    'rsvp',
+    # 07-App
+    #'heli',
+    #'imu',
+    'layerdebug',
+    'ohlone',
+    'ohlone_webpages',
+    #'rex',
+    'rheli',
+    'rinfo',
+    'rleds',
+    'rreg',
+    'rrube',
+    #'rt',
+    'rwellknown',
+    #'rxl1',
+    'tcpecho',
+    'tcpinject',
+    'tcpprint',
+    'udpecho',
+    'udpinject',
+    'udpprint',
+    'udprand',
+    'udplatency',
+    'udpstorm',
+    # cross-layers
+    'idmanager',
+    'openqueue',
+    'openrandom',
+    'packetfunctions',
 ]
 
 def objectify(env,target,source):
@@ -316,22 +870,19 @@ def objectify(env,target,source):
     # include openwsnmodule
     if headerFile:
         lines = re.sub(
-            r'(#include "\w+.h")',
-            #r'\1\n#include "openwsnmodule.h"\ntypedef struct OpenMote OpenMote;',
-            #r'\1\n#include "openwsnmodule_obj.h"',
-            r'\1\ntypedef struct OpenMote OpenMote;',
+            r'(//=========================== prototypes)',
+            r'#include "openwsnmodule_obj.h"\ntypedef struct OpenMote OpenMote;\n\n\1',
             lines,
-            count=1,
         )
     
     # update the included header
-    if not headerFile:
-        for v in varsToChange:
-            lines = re.sub(
-                r'\b{0}.h\b'.format(os.path.split(source)[1].split('.')[0]),
-                r'{0}_obj.h'.format(os.path.split(source)[1].split('.')[0]),
-                lines
-            )
+    #if not headerFile:
+    for v in headerFiles+[os.path.split(source)[1].split('.')[0]]:
+        lines = re.sub(
+            r'\b{0}.h\b'.format(v),
+            r'{0}_obj.h'.format(v),
+            lines
+        )
     
     # remove global variables declarations
     if not headerFile:
@@ -343,7 +894,7 @@ def objectify(env,target,source):
             )
     
     # change global variables by self->* counterpart
-    if not headerFile:
+    if (not headerFile) or (os.path.split(source)[1].split('.')[0]!='openwsnmodule'):
         for v in varsToChange:
             lines = re.sub(
                 r'\b{0}\b'.format(v),
@@ -354,7 +905,7 @@ def objectify(env,target,source):
     def replaceFunctions(matchObj):
         returnType = matchObj.group(1)
         function   = matchObj.group(2)
-        args       = matchObj.group(3).strip()
+        args       = matchObj.group(3)
         
         if returnType in returnTypes:
             if args:
@@ -370,7 +921,7 @@ def objectify(env,target,source):
     # change function signatures
     for v in functionsToChange:
         lines = re.sub(
-            pattern = r'(\w*)[ \t]+({0})[ \t]*\((.*?)\)'.format(v),
+            pattern = r'([\w\*]*)[ \t]*({0})[ \t]*\((.*?)\)'.format(v),
             repl    = replaceFunctions,
             string  = lines,
             flags   = re.DOTALL,
@@ -465,6 +1016,7 @@ def buildLibs(projectDir):
         '01bsp': [                                        'libbsp'],
         '02drv': [                           'libdrivers','libbsp'],
         '03oos': ['libopenstack','libopenos','libdrivers','libbsp'], # this order needed for mspgcc
+        'poipoi': ['libopenstack','libopenos','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
     returnVal = None
@@ -511,7 +1063,8 @@ def sconscript_scanner(localEnv):
         variant_dir = os.path.join(env['VARDIR'],'projects',projectDir),
         
         added      = False
-        targetName = projectDir[2:]
+        #targetName = projectDir[2:]
+        targetName = projectDir
         
         if   (
                 ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
@@ -555,8 +1108,16 @@ def sconscript_scanner(localEnv):
                 duplicate   = 1,
             )
             
+            sources_c = [os.path.join(projectDir,'{0}.c'.format(projectDir))]
+            
+            for s in sources_c:
+                temp = localEnv.Objectify(
+                    target = localEnv.ObjectifiedFilename(s),
+                    source = s,
+                )
+            
             target = projectDir
-            source = [os.path.join(projectDir,'{0}.c'.format(projectDir))]
+            source = [os.path.join(projectDir,'{0}_obj.c'.format(projectDir))]
             libs   = buildLibs(projectDir)
             libs  += [['python' + distutils.sysconfig.get_config_var('VERSION')]]
             
