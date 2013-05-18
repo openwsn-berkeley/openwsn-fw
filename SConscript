@@ -834,6 +834,8 @@ def objectify(env,target,source):
     target = target[0].abspath
     source = source[0].abspath
     
+    basefilename = os.path.split(source)[1].split('.')[0]
+    
     if os.path.split(source)[1].split('.')[1]=='h':
         headerFile = True
     else:
@@ -858,8 +860,10 @@ def objectify(env,target,source):
     banner    = []
     banner   += ['/**']
     banner   += ['DO NOT EDIT DIRECTLY!!']
+    banner   += ['']
     banner   += ['This file was \'objectified\' by SCons as a pre-processing']
     banner   += ['step for the building a Python extension module.']
+    banner   += ['']
     banner   += ['This was done on {0}.'.format(datetime.datetime.now())]
     banner   += ['*/']
     banner   += ['']
@@ -870,14 +874,14 @@ def objectify(env,target,source):
     # include openwsnmodule
     if headerFile:
         lines = re.sub(
-            r'(//=========================== prototypes)',
+            r'(//[=]+ prototypes [=]+)',
             r'#include "openwsnmodule_obj.h"\ntypedef struct OpenMote OpenMote;\n\n\1',
             lines,
         )
     
     # update the included header
     #if not headerFile:
-    for v in headerFiles+[os.path.split(source)[1].split('.')[0]]:
+    for v in headerFiles+[basefilename]:
         lines = re.sub(
             r'\b{0}.h\b'.format(v),
             r'{0}_obj.h'.format(v),
@@ -894,11 +898,21 @@ def objectify(env,target,source):
             )
     
     # change global variables by self->* counterpart
-    if (not headerFile) or (os.path.split(source)[1].split('.')[0]!='openwsnmodule'):
+    if (not headerFile) or (basefilename!='openwsnmodule'):
         for v in varsToChange:
             lines = re.sub(
                 r'\b{0}\b'.format(v),
                 r'(self->{0})'.format(v),
+                lines
+            )
+    
+    # modify Python module name
+    assert len(BUILD_TARGETS)==1
+    if basefilename=='openwsnmodule':
+        if not headerFile:
+            lines = re.sub(
+                'openwsn_generic',
+                BUILD_TARGETS[0],
                 lines
             )
     
@@ -934,8 +948,6 @@ def objectify(env,target,source):
 
 objectifyBuilder = Builder(action = objectify)
 env.Append(BUILDERS = {'Objectify' : objectifyBuilder})
-
-#env.AddMethod(Objectify, 'Objectify')
 
 #============================ bootload ========================================
 
@@ -1016,7 +1028,6 @@ def buildLibs(projectDir):
         '01bsp': [                                        'libbsp'],
         '02drv': [                           'libdrivers','libbsp'],
         '03oos': ['libopenstack','libopenos','libdrivers','libbsp'], # this order needed for mspgcc
-        'poipoi': ['libopenstack','libopenos','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
     returnVal = None
@@ -1063,8 +1074,7 @@ def sconscript_scanner(localEnv):
         variant_dir = os.path.join(env['VARDIR'],'projects',projectDir),
         
         added      = False
-        #targetName = projectDir[2:]
-        targetName = projectDir
+        targetName = projectDir[2:]
         
         if   (
                 ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
@@ -1102,26 +1112,35 @@ def sconscript_scanner(localEnv):
                 (localEnv['board']=='python')
              ):
             
+            # build the artifacts in a separate directory
             localEnv.VariantDir(
                 variant_dir = variant_dir,
                 src_dir     = src_dir,
                 duplicate   = 1,
             )
             
-            sources_c = [os.path.join(projectDir,'{0}.c'.format(projectDir))]
+            # build both the application's and the Python module's main files
+            sources_c = [
+                os.path.join(projectDir,'{0}.c'.format(projectDir)),
+                os.path.join('#','firmware','openos','bsp','boards','python','openwsnmodule.c'),
+            ]
             
+            # objectify those two files
             for s in sources_c:
                 temp = localEnv.Objectify(
                     target = localEnv.ObjectifiedFilename(s),
                     source = s,
                 )
             
-            target = projectDir
-            source = [os.path.join(projectDir,'{0}_obj.c'.format(projectDir))]
+            # prepare environment for this build
+            target = targetName
+            source = [localEnv.ObjectifiedFilename(s) for s in sources_c]
             libs   = buildLibs(projectDir)
             libs  += [['python' + distutils.sysconfig.get_config_var('VERSION')]]
             
             buildIncludePath(projectDir,localEnv)
+            
+            # build a shared library (a Python extension module) rather than an exe
             
             targetAction = localEnv.SharedLibrary(
                 target,

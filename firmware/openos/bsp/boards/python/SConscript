@@ -12,14 +12,14 @@ sources_c = [
     'debugpins.c',
     'eui64.c',
     'leds.c',
-    'openwsnmodule.c',
+    #'openwsnmodule.c', # Note: added to main build target
     'radio.c',
     'radiotimer.c',
     'uart.c',
     'supply.c',
 ]
 sources_h = [
-    'openwsnmodule.h',
+    'openwsnmodule.h',  # Note: needed here to be able to build
     'supply.h',
 ]
 

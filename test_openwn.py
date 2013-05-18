@@ -2,18 +2,17 @@ import sys
 import os
 if __name__=='__main__':
     here = sys.path[0]
-    #sys.path.insert(0, os.path.join(here, 'build', 'lib.win32-2.7'))# contains openwsn module
-    sys.path.insert(0, os.path.join(here, 'build', 'python_gcc', 'bsp'))# contains openwsn module
+    sys.path.insert(0, os.path.join(here, 'firmware','openos','projects','common'))# contains openwsn module
 
 try:
 
-    import openwsn
+    import oos_openwsn
 
     def callback():
        print "callback called"
 
     # create instance
-    mote = openwsn.OpenMote()
+    mote = oos_openwsn.OpenMote()
     print str(mote)
     
     # install some callbacks

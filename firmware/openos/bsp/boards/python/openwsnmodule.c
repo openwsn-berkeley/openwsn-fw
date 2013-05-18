@@ -125,7 +125,7 @@ static PyMemberDef OpenMote_members[] = {
 static PyTypeObject openwsn_OpenMoteType = {
    PyObject_HEAD_INIT(NULL)
    0,                                  // ob_size
-   "openwsn.OpenMote",                 // tp_name
+   "openwsn_generic.OpenMote",         // tp_name
    sizeof(OpenMote),                   // tp_basicsize
    0,                                  // tp_itemsize
    0,                                  // tp_dealloc
@@ -182,7 +182,7 @@ static PyMethodDef openwsn_methods[] = {
 #define PyMODINIT_FUNC void
 #endif
 
-PyMODINIT_FUNC initopenwsn(void) {
+PyMODINIT_FUNC initopenwsn_generic(void) {
    PyObject* openwsn_module;
    
    // populate "new" method for OpenMote object
@@ -193,7 +193,7 @@ PyMODINIT_FUNC initopenwsn(void) {
    
    // initialize the openwsn module
    openwsn_module = Py_InitModule3(
-      "openwsn",
+      "openwsn_generic",
       openwsn_methods,
       "Module which declares the OpenMote class."
    );

@@ -14,7 +14,6 @@ sources_h = [
     os.path.join('common','openhdlc.h'),
     os.path.join('common','openserial.h'),
     os.path.join('common','opentimers.h'),
-    #os.path.join('..','bsp','board','leds.h'),
 ]
 
 if localEnv['board']=='python':
