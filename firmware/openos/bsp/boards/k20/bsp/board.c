@@ -21,10 +21,10 @@ extern int mcg_clk_hz;
 
 //=========================== public ==========================================
 
-extern int mote_main(void);
+extern int mote_main(vod);
 
 int main(void) {
-	return mote_main();
+   return mote_main();
 }
 
 void board_init() {

@@ -42,7 +42,7 @@ void cb_timer2();
 /**
 \brief The program starts executing here.
 */
-int mote_main(void) {  
+int mote_main() {
    board_init();
    opentimers_init();
    

@@ -36,7 +36,7 @@ void macpong_send(uint8_t payloadCtr);
 
 //=========================== initialization ==================================
 
-int mote_main(void) {
+int mote_main() {
    board_init();
    scheduler_init();
    openwsn_init();
