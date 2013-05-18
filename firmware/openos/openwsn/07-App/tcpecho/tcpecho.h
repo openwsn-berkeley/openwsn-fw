@@ -20,7 +20,7 @@ void tcpecho_init();
 bool tcpecho_shouldIlisten();
 void tcpecho_receive(OpenQueueEntry_t* msg);
 void tcpecho_sendDone(OpenQueueEntry_t* msg, error_t error);
-void tcpecho_connectDone();
+void tcpecho_connectDone(error_t error);
 bool tcpecho_debugPrint();
 
 /**

@@ -43,7 +43,7 @@ void tcpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-void tcpecho_connectDone() {
+void tcpecho_connectDone(error_t error) {
 }
 
 bool tcpecho_debugPrint() {
