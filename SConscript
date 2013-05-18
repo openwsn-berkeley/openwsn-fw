@@ -261,6 +261,70 @@ returnTypes = [
     'kick_scheduler_t',
 ]
 
+callbackFunctionsToChange = [
+    #===== bsp
+    # supply
+    # board
+    # bsp_timer
+    'cb',
+    # debugpins
+    # eui64
+    # leds
+    # radio
+    'startFrame_cb',
+    'endFrame_cb',
+    # radiotimer
+    'overflow_cb',
+    'compare_cb',
+    # sctimer
+    # uart
+    #===== drivers
+    # openserial
+    # opentimers
+    'callback',
+    #===== kernel
+    # scheduler
+    #===== openwsn
+    # IEEE802154
+    # IEEE802154E
+    # topology
+    # neighbors
+    # res
+    # schedule
+    # iphc
+    # openbridge
+    # forwarding
+    # icmpv6
+    # icmpv6echo
+    # icmpv6rpl
+    # opencoap
+    'callbackRx',
+    'callbackSendDone',
+    # opentcp
+    # openudp
+    # rsvp
+    # layerdebug
+    # ohlone
+    # rex
+    # rinfo
+    # rleds
+    # rreg
+    # rwellknown
+    # tcpecho
+    # tcpinject
+    # tcpprint
+    # udpecho
+    # udpinject
+    # udplatency
+    # udpprint
+    # udprand
+    # udpstorm
+    # idmanager
+    # openqueue
+    # openrandom
+    # packetfunctions
+]
+
 functionsToChange = [
     #===== bsp
     'mote_main',
@@ -278,6 +342,7 @@ functionsToChange = [
     'bsp_timer_scheduleIn',
     'bsp_timer_cancel_schedule',
     'bsp_timer_get_currentValue',
+    'bsp_timer_isr',
     # debugpins
     'debugpins_init',
     'debugpins_frame_toggle',
@@ -345,6 +410,8 @@ functionsToChange = [
     'radio_rxNow',
     'radio_getReceivedFrame',
     'radio_isr',
+    'radio_intr_startOfFrame',
+    'radio_intr_endOfFrame',
     # radiotimer
     'radiotimer_init',
     'radiotimer_setOverflowCb',
@@ -359,6 +426,8 @@ functionsToChange = [
     'radiotimer_cancel',
     'radiotimer_getCapturedTime',
     'radiotimer_isr',
+    'radiotimer_intr_compare',
+    'radiotimer_intr_overflow',
     # sctimer
     'sctimer_init',
     'sctimer_stop',
@@ -849,13 +918,15 @@ def objectify(env,target,source):
     output  = '\n'.join(output)
     #print output
     
-    #===== read
+    #========== read
     
     f = open(source,'r')
     lines = f.read()
     f.close()
     
-    #===== modify
+    #========= modify
+    
+    #=== all files
     
     # add banner
     banner    = []
@@ -872,16 +943,7 @@ def objectify(env,target,source):
     
     lines     = banner+lines
     
-    # include openwsnmodule
-    if headerFile:
-        lines = re.sub(
-            r'(//[=]+ prototypes [=]+)',
-            r'#include "openwsnmodule_obj.h"\ntypedef struct OpenMote OpenMote;\n\n\1',
-            lines,
-        )
-    
-    # update the included header
-    #if not headerFile:
+    # update the included headers
     for v in headerFiles+[basefilename]:
         lines = re.sub(
             r'\b{0}.h\b'.format(v),
@@ -889,17 +951,34 @@ def objectify(env,target,source):
             lines
         )
     
-    # remove global variables declarations
+    # change callback function declaration signatures
+    def replaceCallbackFunctionDeclarations(matchObj):
+        function        = matchObj.group(1)
+        args            = matchObj.group(2)
+        
+        if args:
+            return '{0}(OpenMote* self, {1})'.format(function, args)
+        else:
+            return '{0}(OpenMote* self)'.format(function)
+    
+    lines = re.sub(
+        pattern         = r'(typedef[ \S]+_cbt\))\((.*?)\)',
+        repl            = replaceCallbackFunctionDeclarations,
+        string          = lines,
+        flags           = re.DOTALL,
+    )
+    
+    # comment out global variables declarations 
     if not headerFile:
         for v in varsToChange:
-            lines = re.sub(
+            lines  = re.sub(
                 '{0}_t\s+{0}\s*;'.format(v),
                 '// declaration of global variable _{0}_ removed during objectification.'.format(v),
                 lines
             )
     
     # change global variables by self->* counterpart
-    if (not headerFile) or (basefilename!='openwsnmodule'):
+    if basefilename!='openwsnmodule':
         for v in varsToChange:
             lines = re.sub(
                 r'\b{0}\b'.format(v),
@@ -907,20 +986,11 @@ def objectify(env,target,source):
                 lines
             )
     
-    # modify Python module name
-    assert len(BUILD_TARGETS)==1
-    if basefilename=='openwsnmodule':
-        if not headerFile:
-            lines = re.sub(
-                'openwsn_generic',
-                BUILD_TARGETS[0],
-                lines
-            )
-    
+    # change function signatures
     def replaceFunctions(matchObj):
-        returnType = matchObj.group(1)
-        function   = matchObj.group(2)
-        args       = matchObj.group(3)
+        returnType      = matchObj.group(1)
+        function        = matchObj.group(2)
+        args            = matchObj.group(3)
         
         if returnType in returnTypes:
             if args:
@@ -933,16 +1003,59 @@ def objectify(env,target,source):
             else:
                 return '{0} {1}(self)'.format(returnType,function, args)
     
-    # change function signatures
-    for v in functionsToChange:
+    if basefilename!='openwsnmodule':
+        for v in functionsToChange:
+            lines = re.sub(
+                pattern     = r'([\w\*]*)[ \t]*({0})[ \t]*\((.*?)\)'.format(v),
+                repl        = replaceFunctions,
+                string      = lines,
+                flags       = re.DOTALL,
+            )
+    
+    #=== .h files only
+    
+    if headerFile:
+        
+        # include openwsnmodule
         lines = re.sub(
-            pattern = r'([\w\*]*)[ \t]*({0})[ \t]*\((.*?)\)'.format(v),
-            repl    = replaceFunctions,
-            string  = lines,
-            flags   = re.DOTALL,
+            r'(//[=]+ prototypes [=]+)',
+            r'#include "openwsnmodule_obj.h"\ntypedef struct OpenMote OpenMote;\n\n\1',
+            lines,
         )
     
-    #===== write
+    #=== .c files only
+    
+    if not headerFile:
+        
+        # change function signatures
+        def replaceCallbackFunctionCalls(matchObj):
+            operator        = matchObj.group(1)
+            function        = matchObj.group(2)
+            args            = matchObj.group(3)
+            
+            if args:
+                return '{0}{1}(self, {2})'.format(operator,function, args)
+            else:
+                return '{0}{1}(self)'.format(operator,function)
+        
+        for v in callbackFunctionsToChange:
+            lines = re.sub(
+                pattern     = '(\.|->)({0})\((.*?)\)'.format(v),
+                repl        = replaceCallbackFunctionCalls,
+                string      = lines,
+            )
+        
+        # modify Python module name
+        assert len(BUILD_TARGETS)==1
+        if basefilename=='openwsnmodule':
+            lines = re.sub(
+                'openwsn_generic',
+                BUILD_TARGETS[0],
+                lines
+            )
+    
+    #========== write
+    
     f = open(target,'w')
     f.write(''.join(lines))
     f.close()

@@ -117,11 +117,11 @@ typedef struct {
    uint8_t*      pValue;
 } coap_option_iht;
 
-typedef error_t (*callbackRx_t)(OpenQueueEntry_t* msg,
+typedef error_t (*callbackRx_cbt)(OpenQueueEntry_t* msg,
                                 coap_header_iht*  coap_header,
                                 coap_option_iht*  coap_options);
-typedef void (*callbackTimer_t)(void);
-typedef void (*callbackSendDone_t)(OpenQueueEntry_t* msg, error_t error);
+typedef void (*callbackSendDone_cbt)(OpenQueueEntry_t* msg,
+                                      error_t error);
 
 typedef struct coap_resource_desc_t coap_resource_desc_t;
 
@@ -132,8 +132,8 @@ struct coap_resource_desc_t {
    uint8_t*              path1val;
    uint8_t               componentID;
    uint16_t              messageID;
-   callbackRx_t          callbackRx;
-   callbackSendDone_t    callbackSendDone;
+   callbackRx_cbt        callbackRx;
+   callbackSendDone_cbt  callbackSendDone;
    coap_resource_desc_t* next;
 };
 
