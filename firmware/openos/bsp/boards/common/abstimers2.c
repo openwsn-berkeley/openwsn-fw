@@ -16,7 +16,7 @@
 //
 //#define ABSTIMER_GUARD_TICKS 3
 //
-//typedef void (*abstimer_cbt)(void);
+//typedef void (*abstimer_cbt)();
 //
 ////=========================== variables =======================================
 //

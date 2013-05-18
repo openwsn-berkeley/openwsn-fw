@@ -20,7 +20,7 @@
 
 #define opentimer_id_t uint8_t
 
-typedef void (*opentimers_cbt)(void);
+typedef void (*opentimers_cbt)();
 
 //=========================== typedef =========================================
 

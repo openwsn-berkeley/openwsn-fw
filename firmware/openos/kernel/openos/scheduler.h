@@ -31,7 +31,7 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-typedef void (*task_cbt)(void);
+typedef void (*task_cbt)();
 
 typedef struct task_llist_t {
    task_cbt             cb;

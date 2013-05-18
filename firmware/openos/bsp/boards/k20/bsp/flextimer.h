@@ -15,7 +15,7 @@
 
 //=========================== typedef =========================================
 
-typedef kick_scheduler_t (*flextimer_cbt)(void);
+typedef kick_scheduler_t (*flextimer_cbt)();
 
 //=========================== variables =======================================
 

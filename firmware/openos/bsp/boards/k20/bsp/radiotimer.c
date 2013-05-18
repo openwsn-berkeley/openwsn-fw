@@ -14,7 +14,7 @@
 
 #define ABSTIMER_GUARD_TICKS 2
 
-typedef void (*abstimer_cbt)(void);
+typedef void (*abstimer_cbt)();
 
 enum abstimer_irqstatus_enum{
 	RADIOTIMER_NONE = 0,
