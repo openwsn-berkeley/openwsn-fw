@@ -4,21 +4,6 @@ Import('env')
 
 localEnv = env.Clone()
 
-localEnv.Append(
-    CPPPATH =  [
-        os.path.join('#','firmware','openos','openwsn'),
-        os.path.join('#','firmware','openos','openwsn','02a-MAClow'),
-        os.path.join('#','firmware','openos','openwsn','02b-MAChigh'),
-        os.path.join('#','firmware','openos','openwsn','03a-IPHC'),
-        os.path.join('#','firmware','openos','openwsn','03b-IPv6'),
-        os.path.join('#','firmware','openos','openwsn','04-TRAN'),
-        os.path.join('#','firmware','openos','openwsn','07-App','tcpinject'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udpinject'),
-        os.path.join('#','firmware','openos','openwsn','cross-layers'),
-        os.path.join('#','firmware','openos','drivers','common'),
-    ],
-)
-
 target    =  'libopenos'
 sources_c = [
     'scheduler.c',
@@ -43,6 +28,22 @@ if localEnv['board']=='python':
     localEnv.Depends(libopenos,[localEnv.ObjectifiedFilename(s) for s in sources_h])
 
 else:
+    
+    localEnv.Append(
+        CPPPATH =  [
+            os.path.join('#','firmware','openos','openwsn'),
+            os.path.join('#','firmware','openos','openwsn','02a-MAClow'),
+            os.path.join('#','firmware','openos','openwsn','02b-MAChigh'),
+            os.path.join('#','firmware','openos','openwsn','03a-IPHC'),
+            os.path.join('#','firmware','openos','openwsn','03b-IPv6'),
+            os.path.join('#','firmware','openos','openwsn','04-TRAN'),
+            os.path.join('#','firmware','openos','openwsn','07-App','tcpinject'),
+            os.path.join('#','firmware','openos','openwsn','07-App','udpinject'),
+            os.path.join('#','firmware','openos','openwsn','cross-layers'),
+            os.path.join('#','firmware','openos','drivers','common'),
+        ],
+    )
+    
     libopenos = localEnv.Library(
         target = target,
         source = sources_c,
