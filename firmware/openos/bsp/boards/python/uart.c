@@ -128,3 +128,13 @@ uint8_t uart_readByte() {
 }
 
 //=========================== interrupt handlers ==============================
+
+kick_scheduler_t uart_tx_isr() {
+   uart_vars.txCb();
+   return 0;//poipoi
+}
+
+kick_scheduler_t uart_rx_isr() {
+   uart_vars.rxCb();
+   return 0;//poipoi
+}

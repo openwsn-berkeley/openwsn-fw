@@ -20,7 +20,7 @@ static PyObject* OpenMote_set_callback(OpenMote* self, PyObject* args) {
    }
    
    // make sure cmdId is plausible
-   if (cmdId<0 || cmdId>OPENSIM_CMD_LAST) {
+   if (cmdId<0 || cmdId>MOTE_NOTIF_LAST) {
       PyErr_SetString(PyExc_TypeError, "wrong cmdId");
       return NULL;
    }
@@ -41,7 +41,13 @@ static PyObject* OpenMote_set_callback(OpenMote* self, PyObject* args) {
 }
 
 static PyObject* OpenMote_bsp_timer_isr(OpenMote* self) {
-   //poipoi bsp_timer_isr();
+   
+   // no arguments
+   
+   // call the callback
+   bsp_timer_isr(self);
+   
+   // return successfully
    Py_RETURN_NONE;
 }
 
@@ -54,11 +60,15 @@ static PyObject* OpenMote_radio_isr_startFrame(OpenMote* self, PyObject* args) {
    }
    if (capturedTime>0xffff) {
       fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffff\n");
+      // TODO raise exception
       return NULL;
    }
    
    // call the callback
-   //poipoi radio_intr_startOfFrame((uint16_t)radio_startOfFrame->capturedTime);
+   radio_intr_startOfFrame(
+      self,
+      (uint16_t)capturedTime
+   );
    
    // return successfully
    Py_RETURN_NONE;
@@ -73,23 +83,83 @@ static PyObject* OpenMote_radio_isr_endFrame(OpenMote* self, PyObject* args) {
    }
    if (capturedTime>0xffff) {
       fprintf(stderr,"[OpenMote_radio_isr_startFrame] FATAL: capturedTime larger than 0xffff\n");
+      // TODO raise exception
       return NULL;
    }
    
    // call the callback
-   //poipoi radio_intr_endOfFrame((uint16_t)radio_startOfFrame->capturedTime);
+   radio_intr_endOfFrame(
+      self,
+      (uint16_t)capturedTime
+   );
    
    // return successfully
    Py_RETURN_NONE;
 }
 
 static PyObject* OpenMote_radiotimer_isr_compare(OpenMote* self) {
-   //poipoi radiotimer_intr_compare();
+   
+   // no arguments
+   
+   // call the callback
+   radiotimer_intr_compare(self);
+   
+   // return successfully
    Py_RETURN_NONE;
 }
 
 static PyObject* OpenMote_radiotimer_isr_overflow(OpenMote* self) {
-   //poipoi radiotimer_intr_overflow();
+   
+   // no arguments
+   
+   // call the callback
+   radiotimer_intr_overflow();
+   
+   // return successfully
+   Py_RETURN_NONE;
+}
+
+static PyObject* OpenMote_uart_isr_tx(OpenMote* self) {
+   
+   // no arguments
+   
+   // call the callback
+   uart_tx_isr(self);
+   
+   // return successfully
+   Py_RETURN_NONE;
+}
+
+static PyObject* OpenMote_uart_isr_rx(OpenMote* self) {
+   
+   // no arguments
+   
+   // call the callback
+   uart_rx_isr(self);
+   
+   // return successfully
+   Py_RETURN_NONE;
+}
+
+static PyObject* OpenMote_supply_on(OpenMote* self) {
+   
+   // no arguments
+   
+   // call the callback
+   supply_on(self);
+   
+   // return successfully
+   Py_RETURN_NONE;
+}
+
+static PyObject* OpenMote_supply_off(OpenMote* self) {
+   
+   // no arguments
+   
+   // call the callback
+   supply_off(self);
+   
+   // return successfully
    Py_RETURN_NONE;
 }
 
@@ -106,6 +176,8 @@ static PyMethodDef OpenMote_methods[] = {
    {  "radio_isr_endFrame",       (PyCFunction)OpenMote_radio_isr_endFrame,         METH_VARARGS,  ""},
    {  "radiotimer_isr_compare",   (PyCFunction)OpenMote_radiotimer_isr_compare,     METH_NOARGS,   ""},
    {  "radiotimer_isr_overflow",  (PyCFunction)OpenMote_radiotimer_isr_overflow,    METH_NOARGS,   ""},
+   {  "uart_isr_tx",              (PyCFunction)OpenMote_uart_isr_tx,                METH_NOARGS,   ""},
+   {  "uart_isr_rx",              (PyCFunction)OpenMote_uart_isr_rx,                METH_NOARGS,   ""},
    {NULL} // sentinel
 };
 

@@ -16,6 +16,7 @@
 //=========================== prototypes ======================================
 
 void supply_init();
-void supply_rootFunction();
+void supply_on();
+void supply_off();
 
 #endif
