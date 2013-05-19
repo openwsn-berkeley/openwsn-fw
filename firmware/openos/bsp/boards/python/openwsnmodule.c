@@ -43,6 +43,14 @@ static PyObject* OpenMote_set_callback(OpenMote* self, PyObject* args) {
    Py_RETURN_NONE;
 }
 
+static PyObject* OpenMote_getState(OpenMote* self) {
+   PyObject* returnVal;
+   
+   returnVal = PyDict_New();
+   
+   return returnVal;
+}
+
 static PyObject* OpenMote_bsp_timer_isr(OpenMote* self) {
    
    // no arguments
@@ -173,7 +181,10 @@ static PyObject* OpenMote_supply_off(OpenMote* self) {
 */
 static PyMethodDef OpenMote_methods[] = {
    // name                        function                                          flags          doc
+   //=== admin
    {  "set_callback",             (PyCFunction)OpenMote_set_callback,               METH_VARARGS,  ""},
+   {  "getState",                 (PyCFunction)OpenMote_getState,                   METH_NOARGS,   ""},
+   //=== BSP
    {  "bsp_timer_isr",            (PyCFunction)OpenMote_bsp_timer_isr,              METH_NOARGS,   ""},
    {  "radio_isr_startFrame",     (PyCFunction)OpenMote_radio_isr_startFrame,       METH_VARARGS,  ""},
    {  "radio_isr_endFrame",       (PyCFunction)OpenMote_radio_isr_endFrame,         METH_VARARGS,  ""},
