@@ -1,7 +1,7 @@
 /**
-\brief PC-specific definition of the "eui64" bsp module.
+\brief Python-specific definition of the "eui64" bsp module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2013.
 */
 
 #include "eui64_obj.h"
@@ -37,10 +37,13 @@ void eui64_get(OpenMote* self, uint8_t* addressToWrite) {
       printf("[CRITICAL] eui64_get() did not return a list of exactly 8 elements\r\n");
    }
    
+   // store retrieved information
    for (i=0;i<8;i++) {
       item = PyList_GetItem(result, i);
       addressToWrite[i] = (uint8_t)PyInt_AsLong(item);
    }
+   
+   // dispose of returned value
    Py_DECREF(result);
 }
 

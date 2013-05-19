@@ -1,7 +1,7 @@
 /**
-\brief PC-based emulation of the mote's power supply.
+\brief Python-based emulation of the mote's power supply.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2013.
 */
 
 #include <stdio.h>

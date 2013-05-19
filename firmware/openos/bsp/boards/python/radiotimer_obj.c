@@ -1,7 +1,7 @@
 /**
-\brief PC-specific definition of the "radiotimer" bsp module.
+\brief Python-specific definition of the "radiotimer" bsp module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2013.
 */
 
 #include "radiotimer_obj.h"
