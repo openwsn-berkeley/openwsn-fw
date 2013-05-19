@@ -8,8 +8,9 @@ try:
 
     import oos_openwsn
 
-    def callback():
-       print "callback called"
+    def callback(notifId):
+       print "callback {0} called".format(notifId)
+       raw_input("press Enter for next")
 
     # create instance
     mote = oos_openwsn.OpenMote()
@@ -17,15 +18,11 @@ try:
     
     # install some callbacks
     for i in range(81):
-       mote.set_callback(i,callback)
-    '''
+       temp_lambda = lambda notifId=i:callback(notifId)
+       mote.set_callback(i,temp_lambda)
+    
     # call other methods
-    print mote.bsp_timer_isr()
-    #print mote.radio_isr_startFrame()
-    #print mote.radio_isr_endFrame()
-    print mote.radiotimer_isr_compare()
-    print mote.radiotimer_isr_overflow()
-    '''
+    mote.supply_on()
 
 except Exception as err:
     raw_input('ERROR: {0}'.format(err))

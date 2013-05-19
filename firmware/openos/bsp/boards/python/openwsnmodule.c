@@ -179,6 +179,8 @@ static PyMethodDef OpenMote_methods[] = {
    {  "radiotimer_isr_overflow",  (PyCFunction)OpenMote_radiotimer_isr_overflow,    METH_NOARGS,   ""},
    {  "uart_isr_tx",              (PyCFunction)OpenMote_uart_isr_tx,                METH_NOARGS,   ""},
    {  "uart_isr_rx",              (PyCFunction)OpenMote_uart_isr_rx,                METH_NOARGS,   ""},
+   {  "supply_on",                (PyCFunction)OpenMote_supply_on,                  METH_NOARGS,   ""},
+   {  "supply_off",               (PyCFunction)OpenMote_supply_off,                 METH_NOARGS,   ""},
    {NULL} // sentinel
 };
 
