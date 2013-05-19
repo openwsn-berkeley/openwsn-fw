@@ -27,6 +27,7 @@
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
+#include "uart_obj.h"
 
 // notifications sent from the C mote to the Python BSP
 enum {
@@ -123,13 +124,46 @@ enum {
    MOTE_NOTIF_LAST
 };
 
+typedef void (*uart_tx_cbt)(OpenMote* self);
+typedef void (*uart_rx_cbt)(OpenMote* self);
+
+typedef struct {
+   uart_tx_cbt     txCb;
+   uart_rx_cbt     rxCb;
+} uart_icb_t;
+
+typedef void (*bsp_timer_cbt)(OpenMote* self);
+
+typedef struct {
+   bsp_timer_cbt   cb;
+} bsp_timer_icb_t;
+
+typedef void (*radiotimer_capture_cbt)(OpenMote* self, PORT_TIMER_WIDTH timestamp);
+
+typedef struct {
+   radiotimer_capture_cbt    startFrame_cb;
+   radiotimer_capture_cbt    endFrame_cb;
+} radio_icb_t;
+
+typedef void (*radiotimer_compare_cbt)(OpenMote* self);
+
+typedef struct {
+   radiotimer_compare_cbt    overflow_cb;
+   radiotimer_compare_cbt    compare_cb;
+} radiotimer_icb_t;
+
 /**
 \brief Memory footprint of an OpenMote instance.
 */
 struct OpenMote {
    PyObject_HEAD // No ';' allows since in macro
-   //===== callbacks
+   //===== callbacks to Python
    PyObject*            callback[MOTE_NOTIF_LAST];
+   //===== internal C callbacks
+   uart_icb_t           uart_icb;
+   bsp_timer_icb_t      bsp_timer_icb;
+   radio_icb_t          radio_icb;
+   radiotimer_icb_t     radiotimer_icb;
    //===== state
    // l7
    ohlone_vars_t        ohlone_vars;

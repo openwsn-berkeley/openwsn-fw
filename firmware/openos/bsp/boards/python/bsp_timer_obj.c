@@ -11,19 +11,12 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   bsp_timer_cbt    cb;
-   PORT_TIMER_WIDTH last_compare_value;
-} bsp_timer_vars_t;
-
-bsp_timer_vars_t bsp_timer_vars;
-
 //=========================== prototypes ======================================
 
 //=========================== callbacks =======================================
 
 void bsp_timer_set_callback(OpenMote* self, bsp_timer_cbt cb) {
-   bsp_timer_vars.cb   = cb;
+   self->bsp_timer_icb.cb   = cb;
 }
 
 //=========================== public ==========================================
@@ -34,9 +27,6 @@ void bsp_timer_init(OpenMote* self) {
 #ifdef TRACE_ON
    printf("C: bsp_timer_init()\n");
 #endif
-   
-   // clear local variables
-   memset((void*)&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_init],NULL);
@@ -122,6 +112,6 @@ kick_scheduler_t bsp_timer_isr(OpenMote* self) {
    printf("C: bsp_timer_isr()\n");
 #endif
    
-   bsp_timer_vars.cb(self);
+   self->bsp_timer_icb.cb(self);
    return 0;//poipoi
 }

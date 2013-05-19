@@ -8,23 +8,16 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   radiotimer_compare_cbt    overflow_cb;
-   radiotimer_compare_cbt    compare_cb;
-} radiotimer_vars_t;
-
-radiotimer_vars_t radiotimer_vars;
-
 //=========================== prototypes ======================================
 
 //=========================== callback ========================================
 
 void radiotimer_setOverflowCb(OpenMote* self, radiotimer_compare_cbt cb) {
-   radiotimer_vars.overflow_cb = cb;
+   self->radiotimer_icb.overflow_cb = cb;
 }
 
 void radiotimer_setCompareCb(OpenMote* self, radiotimer_compare_cbt cb) {
-   radiotimer_vars.compare_cb = cb;
+   self->radiotimer_icb.compare_cb = cb;
 }
 
 //=========================== public ==========================================
@@ -32,9 +25,6 @@ void radiotimer_setCompareCb(OpenMote* self, radiotimer_compare_cbt cb) {
 //===== admin
 
 void radiotimer_init(OpenMote* self) {
-   
-   // clear local variables
-   memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
    
    // send request to server and get reply
    /*
@@ -179,11 +169,11 @@ uint16_t radiotimer_getCapturedTime(OpenMote* self) {
 //=========================== interrupt handlers ==============================
 
 void radiotimer_intr_compare(OpenMote* self) {
-   radiotimer_vars.compare_cb(self);
+   self->radiotimer_icb.compare_cb(self);
 }
 
 void radiotimer_intr_overflow(OpenMote* self) {
-   radiotimer_vars.overflow_cb(self);
+   self->radiotimer_icb.overflow_cb(self);
 }
 
 //=========================== private =========================================

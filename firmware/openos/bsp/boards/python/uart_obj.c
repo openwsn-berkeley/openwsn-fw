@@ -10,27 +10,18 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   uart_tx_cbt txCb;
-   uart_rx_cbt rxCb;
-} uart_vars_t;
-
-uart_vars_t uart_vars;
-
 //=========================== prototypes ======================================
 
 //=========================== callbacks =======================================
 
 void uart_setCallbacks(OpenMote* self, uart_tx_cbt txCb, uart_rx_cbt rxCb) {
-   uart_vars.txCb = txCb;
-   uart_vars.rxCb = rxCb;
+   self->uart_icb.txCb = txCb;
+   self->uart_icb.rxCb = rxCb;
 }
 
 //=========================== public ==========================================
 
 void uart_init(OpenMote* self) {
-   // clear local variables
-   memset(&uart_vars,0,sizeof(uart_vars_t));
    
    // send request to server and get reply
    /*
@@ -130,11 +121,11 @@ uint8_t uart_readByte(OpenMote* self) {
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t uart_tx_isr(OpenMote* self) {
-   uart_vars.txCb(self);
+   self->uart_icb.txCb(self);
    return 0;//poipoi
 }
 
 kick_scheduler_t uart_rx_isr(OpenMote* self) {
-   uart_vars.rxCb(self);
+   self->uart_icb.rxCb(self);
    return 0;//poipoi
 }

@@ -10,14 +10,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   radiotimer_capture_cbt    startFrame_cb;
-   radiotimer_capture_cbt    endFrame_cb;
-   radio_state_t             state;
-} radio_vars_t;
-
-radio_vars_t radio_vars;
-
 //=========================== prototypes ======================================
 
 //=========================== callbacks =======================================
@@ -31,11 +23,11 @@ void radio_setCompareCb(OpenMote* self, radiotimer_compare_cbt cb) {
 }
 
 void radio_setStartFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
-   radio_vars.startFrame_cb  = cb;
+   self->radio_icb.startFrame_cb  = cb;
 }
 
 void radio_setEndFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
-   radio_vars.endFrame_cb    = cb;
+   self->radio_icb.endFrame_cb    = cb;
 }
 
 //=========================== public ==========================================
@@ -43,9 +35,6 @@ void radio_setEndFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
 //===== admin
 
 void radio_init(OpenMote* self) {
-
-   // clear variables
-   memset(&radio_vars,0,sizeof(radio_vars_t));
    
    // send request to server and get reply
    /*
@@ -301,11 +290,11 @@ void radio_getReceivedFrame(OpenMote* self,
 //=========================== interrupts ======================================
 
 void radio_intr_startOfFrame(OpenMote* self, uint16_t capturedTime) {
-   radio_vars.startFrame_cb(self, capturedTime);
+   self->radio_icb.startFrame_cb(self, capturedTime);
 }
 
 void radio_intr_endOfFrame(OpenMote* self, uint16_t capturedTime) {
-   radio_vars.endFrame_cb(self, capturedTime);
+   self->radio_icb.endFrame_cb(self, capturedTime);
 }
 
 //=========================== private =========================================

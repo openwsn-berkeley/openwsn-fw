@@ -50,5 +50,5 @@ for i in range(len(notifString)-1):
 mote.set_callback(notifId('eui64_get'),           eui64_get)
 mote.set_callback(notifId('bsp_timer_scheduleIn'),bsp_timer_scheduleIn)
 
-# call other methods
+# start the mote
 mote.supply_on()
