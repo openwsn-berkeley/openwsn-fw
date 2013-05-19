@@ -2,6 +2,7 @@
 \brief Source code of the Python openwsn module, written in C.
 */
 
+#include <stdio.h>
 #include "openwsnmodule.h"
 
 //=========================== OpenMote Class ==================================

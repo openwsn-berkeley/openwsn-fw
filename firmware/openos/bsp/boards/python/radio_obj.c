@@ -262,12 +262,13 @@ void radio_rxNow(OpenMote* self) {
    // TODO: replace by call to Python
 }
 
-void radio_getReceivedFrame(OpenMote* self, uint8_t* pBufRead,
-                            uint8_t* pLenRead,
-                            uint8_t  maxBufLen,
-                             int8_t* pRssi,
-                            uint8_t* pLqi,
-                            uint8_t* pCrc) {
+void radio_getReceivedFrame(OpenMote* self,
+                             uint8_t* pBufRead,
+                             uint8_t* pLenRead,
+                             uint8_t  maxBufLen,
+                              int8_t* pRssi,
+                             uint8_t* pLqi,
+                             uint8_t* pCrc) {
    /*
    uint8_t numBytesToWrite;
    

@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
 */
 
-#include <string.h>
+#include <stdio.h>
 #include "bsp_timer_obj.h"
 
 //=========================== defines =========================================
@@ -29,79 +29,68 @@ void bsp_timer_set_callback(OpenMote* self, bsp_timer_cbt cb) {
 //=========================== public ==========================================
 
 void bsp_timer_init(OpenMote* self) {
+   PyObject*   result;
    
    // clear local variables
    memset((void*)&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_init,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_init],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] bsp_timer_init() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 void bsp_timer_reset(OpenMote* self) {
+   PyObject*   result;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_reset,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_reset],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] bsp_timer_reset() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 void bsp_timer_scheduleIn(OpenMote* self, PORT_TIMER_WIDTH delayTicks) {
-   //opensim_requ_bsp_timer_scheduleIn_t reqparams;
+   PyObject*   result;
+   PyObject*   arglist;
    
-   // prepare params
-   //reqparams.delayTicks = delayTicks;
-   
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_scheduleIn,
-                                    &reqparams,
-                                    sizeof(opensim_requ_bsp_timer_scheduleIn_t),
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+   // forward to Python
+   arglist    = Py_BuildValue("(i)",delayTicks);
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_scheduleIn],arglist);
+   if (result == NULL) {
+      printf("[CRITICAL] bsp_timer_scheduleIn() returned NULL\r\n");
+   }
+   Py_DECREF(result);
+   Py_DECREF(arglist);
 }
 
 void bsp_timer_cancel_schedule(OpenMote* self) {
+   PyObject*   result;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_cancel_schedule,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_cancel_schedule],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] bsp_timer_cancel_schedule() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 PORT_TIMER_WIDTH bsp_timer_get_currentValue(OpenMote* self) {
-   //opensim_repl_bsp_timer_get_currentValue_t replparams;
-
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_bsp_timer_get_currentValue,
-                                    0,
-                                    0,
-                                    &replparams,
-                                    sizeof(opensim_repl_bsp_timer_get_currentValue_t));
-   */
-   // TODO: replace by call to Python
+   PyObject*            result;
+   PORT_TIMER_WIDTH     returnVal;
    
-   //return replparams.value;
-   return 0; //poipoi
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_get_currentValue],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] bsp_timer_get_currentValue() returned NULL\r\n");
+   }
+   returnVal  = (PORT_TIMER_WIDTH)PyInt_AsLong(result);
+   Py_DECREF(result);
+   
+   return returnVal;
 }
 //=========================== private =========================================
 
