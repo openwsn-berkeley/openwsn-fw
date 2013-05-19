@@ -15,20 +15,37 @@
 //=========================== public ==========================================
 
 void eui64_get(OpenMote* self, uint8_t* addressToWrite) {
-   //opensim_repl_eui64_get_t replparams;
+   printf("eui64_get\r\n");
+   PyObject*  result;
+   PyObject*  euiList;
+   PyObject*  item;
+   uint8_t    i;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_eui64_get,
-                                    0,
-                                    0,
-                                    &replparams,
-                                    sizeof(opensim_repl_eui64_get_t));
-   */
-   // TODO: replace by call to Python
-                                    
-   // copy into addressToWrite
-   //memcpy(addressToWrite,replparams.eui64,8);
+#ifdef TRACE_ON
+   printf("C: eui64_get()\n");
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_eui64_get],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] eui64_get() returned NULL\r\n");
+   }
+   
+   // verify 
+   PyArg_ParseTuple(result, "O", &euiList);
+   if (!PySequence_Check(euiList)) {
+      printf("[CRITICAL] eui64_get() did not return a list\r\n");
+   }
+   if (PyList_Size(euiList)!=8) {
+      printf("[CRITICAL] eui64_get() did not return a list of exactly 8 elements\r\n");
+   }
+   
+   for (i=0;i<8;i++) {
+      item = PyList_GetItem(euiList, i);
+      addressToWrite[i] = (uint8_t)PyInt_AsLong(item);
+   }
+   Py_DECREF(result);
+   Py_DECREF(euiList);
 }
 
 //=========================== private =========================================

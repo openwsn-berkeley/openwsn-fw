@@ -24,6 +24,10 @@
 void board_init(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: board_init()\n");
+#endif
+   
    // initialize bsp modules
    debugpins_init(self);
    leds_init(self);
@@ -43,6 +47,10 @@ void board_init(OpenMote* self) {
 void board_sleep(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: board_sleep()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_board_sleep],NULL);
    if (result == NULL) {
@@ -53,6 +61,10 @@ void board_sleep(OpenMote* self) {
 
 void board_reset(OpenMote* self) {
    PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C: board_reset()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_board_reset],NULL);

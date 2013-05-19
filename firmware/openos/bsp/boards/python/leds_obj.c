@@ -18,6 +18,10 @@
 void leds_init(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_init()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_init],NULL);
    if (result == NULL) {
@@ -29,6 +33,10 @@ void leds_init(OpenMote* self) {
 void leds_error_on(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_error_on()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_error_on],NULL);
    if (result == NULL) {
@@ -38,6 +46,10 @@ void leds_error_on(OpenMote* self) {
 }
 void leds_error_off(OpenMote* self) {
    PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C: leds_error_off()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_error_off],NULL);
@@ -49,6 +61,10 @@ void leds_error_off(OpenMote* self) {
 void leds_error_toggle(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_error_toggle()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_error_toggle],NULL);
    if (result == NULL) {
@@ -59,6 +75,10 @@ void leds_error_toggle(OpenMote* self) {
 uint8_t leds_error_isOn(OpenMote* self) {
    PyObject*  result;
    uint8_t    returnVal;
+   
+#ifdef TRACE_ON
+   printf("C: leds_error_isOn()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_error_isOn],NULL);
@@ -73,6 +93,10 @@ uint8_t leds_error_isOn(OpenMote* self) {
 void leds_error_blink(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_error_blink()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_error_blink],NULL);
    if (result == NULL) {
@@ -84,6 +108,10 @@ void leds_error_blink(OpenMote* self) {
 void leds_radio_on(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_radio_on()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_radio_on],NULL);
    if (result == NULL) {
@@ -93,6 +121,10 @@ void leds_radio_on(OpenMote* self) {
 }
 void leds_radio_off(OpenMote* self) {
    PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C: leds_radio_off()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_radio_off],NULL);
@@ -104,6 +136,10 @@ void leds_radio_off(OpenMote* self) {
 void leds_radio_toggle(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_radio_toggle()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_radio_toggle],NULL);
    if (result == NULL) {
@@ -114,6 +150,10 @@ void leds_radio_toggle(OpenMote* self) {
 uint8_t leds_radio_isOn(OpenMote* self) {
    PyObject*  result;
    uint8_t    returnVal;
+   
+#ifdef TRACE_ON
+   printf("C: leds_radio_isOn()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_radio_isOn],NULL);
@@ -130,6 +170,10 @@ uint8_t leds_radio_isOn(OpenMote* self) {
 void leds_sync_on(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_sync_on()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_sync_on],NULL);
    if (result == NULL) {
@@ -139,6 +183,10 @@ void leds_sync_on(OpenMote* self) {
 }
 void leds_sync_off(OpenMote* self) {
    PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C: leds_sync_off()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_sync_off],NULL);
@@ -150,6 +198,10 @@ void leds_sync_off(OpenMote* self) {
 void leds_sync_toggle(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_sync_toggle()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_sync_toggle],NULL);
    if (result == NULL) {
@@ -160,6 +212,10 @@ void leds_sync_toggle(OpenMote* self) {
 uint8_t leds_sync_isOn(OpenMote* self) {
    PyObject*  result;
    uint8_t    returnVal;
+   
+#ifdef TRACE_ON
+   printf("C: leds_sync_isOn()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_sync_isOn],NULL);
@@ -176,6 +232,10 @@ uint8_t leds_sync_isOn(OpenMote* self) {
 void leds_debug_on(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_debug_on()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_debug_on],NULL);
    if (result == NULL) {
@@ -185,6 +245,10 @@ void leds_debug_on(OpenMote* self) {
 }
 void leds_debug_off(OpenMote* self) {
    PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C: leds_debug_off()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_debug_off],NULL);
@@ -196,6 +260,10 @@ void leds_debug_off(OpenMote* self) {
 void leds_debug_toggle(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_debug_toggle()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_debug_toggle],NULL);
     if (result == NULL) {
@@ -206,6 +274,10 @@ void leds_debug_toggle(OpenMote* self) {
 uint8_t leds_debug_isOn(OpenMote* self) {
    PyObject*  result;
    uint8_t    returnVal;
+   
+#ifdef TRACE_ON
+   printf("C: leds_debug_isOn()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_debug_isOn],NULL);
@@ -221,6 +293,10 @@ uint8_t leds_debug_isOn(OpenMote* self) {
 void leds_all_on(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_all_on()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_all_on],NULL);
    if (result == NULL) {
@@ -231,6 +307,10 @@ void leds_all_on(OpenMote* self) {
 void leds_all_off(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_all_off()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_all_off],NULL);
    if (result == NULL) {
@@ -240,6 +320,10 @@ void leds_all_off(OpenMote* self) {
 }
 void leds_all_toggle(OpenMote* self) {
    PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C: leds_all_toggle()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_all_toggle],NULL);
@@ -252,6 +336,10 @@ void leds_all_toggle(OpenMote* self) {
 void leds_circular_shift(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: leds_circular_shift()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_circular_shift],NULL);
    if (result == NULL) {
@@ -262,6 +350,10 @@ void leds_circular_shift(OpenMote* self) {
 
 void leds_increment(OpenMote* self) {
    PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C: leds_increment()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_leds_increment],NULL);

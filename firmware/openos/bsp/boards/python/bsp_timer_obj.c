@@ -31,6 +31,10 @@ void bsp_timer_set_callback(OpenMote* self, bsp_timer_cbt cb) {
 void bsp_timer_init(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: bsp_timer_init()\n");
+#endif
+   
    // clear local variables
    memset((void*)&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
@@ -45,6 +49,10 @@ void bsp_timer_init(OpenMote* self) {
 void bsp_timer_reset(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: bsp_timer_reset()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_reset],NULL);
    if (result == NULL) {
@@ -56,6 +64,10 @@ void bsp_timer_reset(OpenMote* self) {
 void bsp_timer_scheduleIn(OpenMote* self, PORT_TIMER_WIDTH delayTicks) {
    PyObject*   result;
    PyObject*   arglist;
+   
+#ifdef TRACE_ON
+   printf("C: bsp_timer_scheduleIn()\n");
+#endif
    
    // forward to Python
    arglist    = Py_BuildValue("(i)",delayTicks);
@@ -70,6 +82,10 @@ void bsp_timer_scheduleIn(OpenMote* self, PORT_TIMER_WIDTH delayTicks) {
 void bsp_timer_cancel_schedule(OpenMote* self) {
    PyObject*   result;
    
+#ifdef TRACE_ON
+   printf("C: bsp_timer_cancel_schedule()\n");
+#endif
+   
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_cancel_schedule],NULL);
    if (result == NULL) {
@@ -81,6 +97,10 @@ void bsp_timer_cancel_schedule(OpenMote* self) {
 PORT_TIMER_WIDTH bsp_timer_get_currentValue(OpenMote* self) {
    PyObject*            result;
    PORT_TIMER_WIDTH     returnVal;
+   
+#ifdef TRACE_ON
+   printf("C: bsp_timer_get_currentValue()\n");
+#endif
    
    // forward to Python
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_get_currentValue],NULL);
@@ -97,6 +117,11 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue(OpenMote* self) {
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t bsp_timer_isr(OpenMote* self) {
+   
+#ifdef TRACE_ON
+   printf("C: bsp_timer_isr()\n");
+#endif
+   
    bsp_timer_vars.cb(self);
    return 0;//poipoi
 }
