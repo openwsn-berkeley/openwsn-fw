@@ -5,7 +5,7 @@
 */
 
 #include <string.h>
-#include "bsp_timer.h"
+#include "bsp_timer_obj.h"
 
 //=========================== defines =========================================
 
@@ -22,13 +22,13 @@ bsp_timer_vars_t bsp_timer_vars;
 
 //=========================== callbacks =======================================
 
-void bsp_timer_set_callback(bsp_timer_cbt cb) {
+void bsp_timer_set_callback(OpenMote* self, bsp_timer_cbt cb) {
    bsp_timer_vars.cb   = cb;
 }
 
 //=========================== public ==========================================
 
-void bsp_timer_init() {
+void bsp_timer_init(OpenMote* self) {
    
    // clear local variables
    memset((void*)&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
@@ -44,7 +44,7 @@ void bsp_timer_init() {
    // TODO: replace by call to Python
 }
 
-void bsp_timer_reset() {
+void bsp_timer_reset(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -57,7 +57,7 @@ void bsp_timer_reset() {
    // TODO: replace by call to Python
 }
 
-void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
+void bsp_timer_scheduleIn(OpenMote* self, PORT_TIMER_WIDTH delayTicks) {
    //opensim_requ_bsp_timer_scheduleIn_t reqparams;
    
    // prepare params
@@ -74,7 +74,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    // TODO: replace by call to Python
 }
 
-void bsp_timer_cancel_schedule() {
+void bsp_timer_cancel_schedule(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -87,7 +87,7 @@ void bsp_timer_cancel_schedule() {
    // TODO: replace by call to Python
 }
 
-PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
+PORT_TIMER_WIDTH bsp_timer_get_currentValue(OpenMote* self) {
    //opensim_repl_bsp_timer_get_currentValue_t replparams;
 
    // send request to server and get reply
@@ -107,7 +107,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 
 //=========================== interrupt handlers ==============================
 
-kick_scheduler_t bsp_timer_isr() {
-   bsp_timer_vars.cb();
+kick_scheduler_t bsp_timer_isr(OpenMote* self) {
+   bsp_timer_vars.cb(self);
    return 0;//poipoi
 }

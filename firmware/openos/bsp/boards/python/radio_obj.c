@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
 */
 
-#include "radio.h"
+#include "radio_obj.h"
 
 //=========================== defines =========================================
 
@@ -22,19 +22,19 @@ radio_vars_t radio_vars;
 
 //=========================== callbacks =======================================
 
-void radio_setOverflowCb(radiotimer_compare_cbt cb) {
-   radiotimer_setOverflowCb(cb);
+void radio_setOverflowCb(OpenMote* self, radiotimer_compare_cbt cb) {
+ radiotimer_setOverflowCb(self, cb);
 }
 
-void radio_setCompareCb(radiotimer_compare_cbt cb) {
-   radiotimer_setCompareCb(cb);
+void radio_setCompareCb(OpenMote* self, radiotimer_compare_cbt cb) {
+ radiotimer_setCompareCb(self, cb);
 }
 
-void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
+void radio_setStartFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
    radio_vars.startFrame_cb  = cb;
 }
 
-void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
+void radio_setEndFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
    radio_vars.endFrame_cb    = cb;
 }
 
@@ -42,7 +42,7 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 
 //===== admin
 
-void radio_init() {
+void radio_init(OpenMote* self) {
 
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
@@ -60,7 +60,7 @@ void radio_init() {
 
 //===== reset
 
-void radio_reset() {
+void radio_reset(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -75,7 +75,7 @@ void radio_reset() {
 
 //===== timer
 
-void radio_startTimer(PORT_TIMER_WIDTH period) {
+void radio_startTimer(OpenMote* self, PORT_TIMER_WIDTH period) {
    //opensim_requ_radio_startTimer_t requparams;
    
    // prepare request
@@ -92,7 +92,7 @@ void radio_startTimer(PORT_TIMER_WIDTH period) {
    // TODO: replace by call to Python
 }
 
-PORT_TIMER_WIDTH radio_getTimerValue() {
+PORT_TIMER_WIDTH radio_getTimerValue(OpenMote* self) {
    //opensim_repl_radio_getTimerValue_t replparams;
    
    // send request to server and get reply
@@ -109,7 +109,7 @@ PORT_TIMER_WIDTH radio_getTimerValue() {
    return 0;//poipoi
 }
 
-void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
+void radio_setTimerPeriod(OpenMote* self, PORT_TIMER_WIDTH period) {
    //opensim_requ_radio_setTimerPeriod_t requparams;
    
    // prepare request
@@ -126,7 +126,7 @@ void radio_setTimerPeriod(PORT_TIMER_WIDTH period) {
    // TODO: replace by call to Python
 }
 
-PORT_TIMER_WIDTH radio_getTimerPeriod() {
+PORT_TIMER_WIDTH radio_getTimerPeriod(OpenMote* self) {
    //opensim_repl_radio_getTimerPeriod_t replparams;
    
    // send request to server and get reply
@@ -146,7 +146,7 @@ PORT_TIMER_WIDTH radio_getTimerPeriod() {
 
 //===== RF admin
 
-void radio_setFrequency(uint8_t frequency) {
+void radio_setFrequency(OpenMote* self, uint8_t frequency) {
    //opensim_requ_radio_setFrequency_t requparams;
    
    // prepare request
@@ -163,7 +163,7 @@ void radio_setFrequency(uint8_t frequency) {
    // TODO: replace by call to Python
 }
 
-void radio_rfOn() {
+void radio_rfOn(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -176,7 +176,7 @@ void radio_rfOn() {
    // TODO: replace by call to Python
 }
 
-void radio_rfOff() {
+void radio_rfOff(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -191,7 +191,7 @@ void radio_rfOff() {
 
 //===== TX
 
-void radio_loadPacket(uint8_t* packet, uint8_t len) {
+void radio_loadPacket(OpenMote* self, uint8_t* packet, uint8_t len) {
    //opensim_requ_radio_loadPacket_t requparams;
    
    //requparams.len = len;
@@ -208,7 +208,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
    // TODO: replace by call to Python
 }
 
-void radio_txEnable() {
+void radio_txEnable(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -221,7 +221,7 @@ void radio_txEnable() {
    // TODO: replace by call to Python
 }
 
-void radio_txNow() {
+void radio_txNow(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -236,7 +236,7 @@ void radio_txNow() {
 
 //===== RX
 
-void radio_rxEnable() {
+void radio_rxEnable(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -249,7 +249,7 @@ void radio_rxEnable() {
    // TODO: replace by call to Python
 }
 
-void radio_rxNow() {
+void radio_rxNow(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -262,7 +262,7 @@ void radio_rxNow() {
    // TODO: replace by call to Python
 }
 
-void radio_getReceivedFrame(uint8_t* pBufRead,
+void radio_getReceivedFrame(OpenMote* self, uint8_t* pBufRead,
                             uint8_t* pLenRead,
                             uint8_t  maxBufLen,
                              int8_t* pRssi,
@@ -299,12 +299,12 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 
 //=========================== interrupts ======================================
 
-void radio_intr_startOfFrame(uint16_t capturedTime) {
-   radio_vars.startFrame_cb(capturedTime);
+void radio_intr_startOfFrame(OpenMote* self, uint16_t capturedTime) {
+   radio_vars.startFrame_cb(self, capturedTime);
 }
 
-void radio_intr_endOfFrame(uint16_t capturedTime) {
-   radio_vars.endFrame_cb(capturedTime);
+void radio_intr_endOfFrame(OpenMote* self, uint16_t capturedTime) {
+   radio_vars.endFrame_cb(self, capturedTime);
 }
 
 //=========================== private =========================================

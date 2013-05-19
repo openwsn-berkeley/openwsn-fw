@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
 */
 
-#include "debugpins.h"
+#include "debugpins_obj.h"
 
 //=========================== defines =========================================
 
@@ -14,7 +14,7 @@
 
 //=========================== public ==========================================
 
-void debugpins_init() {
+void debugpins_init(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -27,7 +27,7 @@ void debugpins_init() {
    // TODO: replace by call to Python
 }
 
-void debugpins_frame_toggle() {
+void debugpins_frame_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -39,7 +39,7 @@ void debugpins_frame_toggle() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_frame_clr() {
+void debugpins_frame_clr(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -51,7 +51,7 @@ void debugpins_frame_clr() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_frame_set() {
+void debugpins_frame_set(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -64,7 +64,7 @@ void debugpins_frame_set() {
    // TODO: replace by call to Python
 }
 
-void debugpins_slot_toggle() {
+void debugpins_slot_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -76,7 +76,7 @@ void debugpins_slot_toggle() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_slot_clr() {
+void debugpins_slot_clr(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -88,7 +88,7 @@ void debugpins_slot_clr() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_slot_set() {
+void debugpins_slot_set(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -101,7 +101,7 @@ void debugpins_slot_set() {
    // TODO: replace by call to Python
 }
 
-void debugpins_fsm_toggle() {
+void debugpins_fsm_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -113,7 +113,7 @@ void debugpins_fsm_toggle() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_fsm_clr() {
+void debugpins_fsm_clr(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -125,7 +125,7 @@ void debugpins_fsm_clr() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_fsm_set() {
+void debugpins_fsm_set(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -138,7 +138,7 @@ void debugpins_fsm_set() {
    // TODO: replace by call to Python
 }
 
-void debugpins_task_toggle() {
+void debugpins_task_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -150,7 +150,7 @@ void debugpins_task_toggle() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_task_clr() {
+void debugpins_task_clr(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -162,7 +162,7 @@ void debugpins_task_clr() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_task_set() {
+void debugpins_task_set(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -175,7 +175,7 @@ void debugpins_task_set() {
    // TODO: replace by call to Python
 }
 
-void debugpins_isr_toggle() {
+void debugpins_isr_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -187,7 +187,7 @@ void debugpins_isr_toggle() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_isr_clr() {
+void debugpins_isr_clr(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -199,7 +199,7 @@ void debugpins_isr_clr() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_isr_set() {
+void debugpins_isr_set(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -212,7 +212,7 @@ void debugpins_isr_set() {
    // TODO: replace by call to Python
 }
 
-void debugpins_radio_toggle() {
+void debugpins_radio_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -224,7 +224,7 @@ void debugpins_radio_toggle() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_radio_clr() {
+void debugpins_radio_clr(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -236,7 +236,7 @@ void debugpins_radio_clr() {
    */
    // TODO: replace by call to Python
 }
-void debugpins_radio_set() {
+void debugpins_radio_set(OpenMote* self) {
    
    // send request to server and get reply
    /*

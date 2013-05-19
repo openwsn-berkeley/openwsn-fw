@@ -5,7 +5,7 @@
 */
 
 #include <stdio.h>
-#include "supply.h"
+#include "supply_obj.h"
 
 //=========================== defines =========================================
 
@@ -15,15 +15,15 @@
 
 //=========================== public ==========================================
 
-void supply_init() {
+void supply_init(OpenMote* self) {
    // Nothing to do
 }
 
-void supply_on() {
-   mote_main();
+void supply_on(OpenMote* self) {
+ mote_main(self);
 }
 
-void supply_off() {
+void supply_off(OpenMote* self) {
    // TODO
 }
 

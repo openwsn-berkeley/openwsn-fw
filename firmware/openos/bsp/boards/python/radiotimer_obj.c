@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
 */
 
-#include "radiotimer.h"
+#include "radiotimer_obj.h"
 
 //=========================== variables =======================================
 
@@ -19,11 +19,11 @@ radiotimer_vars_t radiotimer_vars;
 
 //=========================== callback ========================================
 
-void radiotimer_setOverflowCb(radiotimer_compare_cbt cb) {
+void radiotimer_setOverflowCb(OpenMote* self, radiotimer_compare_cbt cb) {
    radiotimer_vars.overflow_cb = cb;
 }
 
-void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
+void radiotimer_setCompareCb(OpenMote* self, radiotimer_compare_cbt cb) {
    radiotimer_vars.compare_cb = cb;
 }
 
@@ -31,7 +31,7 @@ void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
 
 //===== admin
 
-void radiotimer_init() {
+void radiotimer_init(OpenMote* self) {
    
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
@@ -47,7 +47,7 @@ void radiotimer_init() {
    // TODO: replace by call to Python
 }
 
-void radiotimer_start(uint16_t period) {
+void radiotimer_start(OpenMote* self, uint16_t period) {
    /*
    opensim_requ_radiotimer_start_t requparams;
    
@@ -67,7 +67,7 @@ void radiotimer_start(uint16_t period) {
 
 //===== direct access
 
-uint16_t radiotimer_getValue() {
+uint16_t radiotimer_getValue(OpenMote* self) {
    /*
    opensim_repl_radiotimer_getValue_t replparams;
    
@@ -84,7 +84,7 @@ uint16_t radiotimer_getValue() {
    return 0;//poipoi
 }
 
-void radiotimer_setPeriod(uint16_t period) {
+void radiotimer_setPeriod(OpenMote* self, uint16_t period) {
    /*
    opensim_requ_radiotimer_setPeriod_t requparams;
    
@@ -102,7 +102,7 @@ void radiotimer_setPeriod(uint16_t period) {
    // TODO: replace by call to Python
 }
 
-uint16_t radiotimer_getPeriod() {
+uint16_t radiotimer_getPeriod(OpenMote* self) {
    /*
    opensim_repl_radiotimer_getPeriod_t replparams;
 
@@ -123,7 +123,7 @@ uint16_t radiotimer_getPeriod() {
 
 //===== compare
 
-void radiotimer_schedule(uint16_t offset) {
+void radiotimer_schedule(OpenMote* self, uint16_t offset) {
    /*
    opensim_requ_radiotimer_schedule_t requparams;
    
@@ -142,7 +142,7 @@ void radiotimer_schedule(uint16_t offset) {
    // TODO: replace by call to Python
 }
 
-void radiotimer_cancel() {
+void radiotimer_cancel(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -157,7 +157,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-uint16_t radiotimer_getCapturedTime() {
+uint16_t radiotimer_getCapturedTime(OpenMote* self) {
    /*
    opensim_repl_radiotimer_getCapturedTime_t replparams;
 
@@ -178,12 +178,12 @@ uint16_t radiotimer_getCapturedTime() {
 
 //=========================== interrupt handlers ==============================
 
-void radiotimer_intr_compare() {
-   radiotimer_vars.compare_cb();
+void radiotimer_intr_compare(OpenMote* self) {
+   radiotimer_vars.compare_cb(self);
 }
 
-void radiotimer_intr_overflow() {
-   radiotimer_vars.overflow_cb();
+void radiotimer_intr_overflow(OpenMote* self) {
+   radiotimer_vars.overflow_cb(self);
 }
 
 //=========================== private =========================================

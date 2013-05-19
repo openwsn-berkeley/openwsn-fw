@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
 */
 
-#include "leds.h"
+#include "leds_obj.h"
 
 //=========================== defines =========================================
 
@@ -14,7 +14,7 @@
 
 //=========================== public ==========================================
 
-void leds_init() {
+void leds_init(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -27,7 +27,7 @@ void leds_init() {
    // TODO: replace by call to Python
 }
 
-void leds_error_on() {
+void leds_error_on(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -39,7 +39,7 @@ void leds_error_on() {
    */
    // TODO: replace by call to Python
 }
-void leds_error_off() {
+void leds_error_off(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -51,7 +51,7 @@ void leds_error_off() {
    */
    // TODO: replace by call to Python
 }
-void leds_error_toggle() {
+void leds_error_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -63,7 +63,7 @@ void leds_error_toggle() {
    */
    // TODO: replace by call to Python
 }
-uint8_t leds_error_isOn() {
+uint8_t leds_error_isOn(OpenMote* self) {
    //opensim_repl_error_isOn_t replparams;
    
    // send request to server and get reply
@@ -79,7 +79,7 @@ uint8_t leds_error_isOn() {
    //return replparams.isOn;
    return 0;//poipoi
 }
-void leds_error_blink() {
+void leds_error_blink(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -92,7 +92,7 @@ void leds_error_blink() {
    // TODO: replace by call to Python
 }
 
-void leds_radio_on() {
+void leds_radio_on(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -104,7 +104,7 @@ void leds_radio_on() {
    */
    // TODO: replace by call to Python
 }
-void leds_radio_off() {
+void leds_radio_off(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -116,7 +116,7 @@ void leds_radio_off() {
    */
    // TODO: replace by call to Python
 }
-void leds_radio_toggle() {
+void leds_radio_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -128,7 +128,7 @@ void leds_radio_toggle() {
    */
    // TODO: replace by call to Python
 }
-uint8_t leds_radio_isOn() {
+uint8_t leds_radio_isOn(OpenMote* self) {
    //opensim_repl_radio_isOn_t replparams;
    
    // send request to server and get reply
@@ -146,7 +146,7 @@ uint8_t leds_radio_isOn() {
 }
 
 // green
-void leds_sync_on() {
+void leds_sync_on(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -158,7 +158,7 @@ void leds_sync_on() {
    */
    // TODO: replace by call to Python
 }
-void leds_sync_off() {
+void leds_sync_off(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -170,7 +170,7 @@ void leds_sync_off() {
    */
    // TODO: replace by call to Python
 }
-void leds_sync_toggle() {
+void leds_sync_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -182,7 +182,7 @@ void leds_sync_toggle() {
    */
    // TODO: replace by call to Python
 }
-uint8_t leds_sync_isOn() {
+uint8_t leds_sync_isOn(OpenMote* self) {
    //opensim_repl_sync_isOn_t replparams;
    
    // send request to server and get reply
@@ -200,7 +200,7 @@ uint8_t leds_sync_isOn() {
 }
 
 // yellow
-void leds_debug_on() {
+void leds_debug_on(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -212,7 +212,7 @@ void leds_debug_on() {
    */
    // TODO: replace by call to Python
 }
-void leds_debug_off() {
+void leds_debug_off(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -224,7 +224,7 @@ void leds_debug_off() {
    */
    // TODO: replace by call to Python
 }
-void leds_debug_toggle() {
+void leds_debug_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -236,7 +236,7 @@ void leds_debug_toggle() {
    */
    // TODO: replace by call to Python
 }
-uint8_t leds_debug_isOn() {
+uint8_t leds_debug_isOn(OpenMote* self) {
    //opensim_repl_debug_isOn_t replparams;
    
    // send request to server and get reply
@@ -253,7 +253,7 @@ uint8_t leds_debug_isOn() {
    return 0;//poipoi
 }
 
-void leds_all_on() {
+void leds_all_on(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -265,7 +265,7 @@ void leds_all_on() {
    */
    // TODO: replace by call to Python
 }
-void leds_all_off() {
+void leds_all_off(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -277,7 +277,7 @@ void leds_all_off() {
    */
    // TODO: replace by call to Python
 }
-void leds_all_toggle() {
+void leds_all_toggle(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -290,7 +290,7 @@ void leds_all_toggle() {
    // TODO: replace by call to Python
 }
 
-void leds_circular_shift() {
+void leds_circular_shift(OpenMote* self) {
    
    // send request to server and get reply
    /*
@@ -303,7 +303,7 @@ void leds_circular_shift() {
    // TODO: replace by call to Python
 }
 
-void leds_increment() {
+void leds_increment(OpenMote* self) {
    
    // send request to server and get reply
    /*

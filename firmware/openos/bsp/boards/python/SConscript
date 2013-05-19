@@ -7,35 +7,24 @@ localEnv = env.Clone()
 
 target =  'libbsp'
 sources_c = [
-    'board.c',
-    'bsp_timer.c',
-    'debugpins.c',
-    'eui64.c',
-    'leds.c',
+    'board_obj.c',
+    'bsp_timer_obj.c',
+    'debugpins_obj.c',
+    'eui64_obj.c',
+    'leds_obj.c',
     #'openwsnmodule.c', # Note: added to main build target
-    'radio.c',
-    'radiotimer.c',
-    'uart.c',
-    'supply.c',
-]
-sources_h = [
-    'openwsnmodule.h',  # Note: needed here to be able to build
-    'supply.h',
+    'radio_obj.c',
+    'radiotimer_obj.c',
+    'uart_obj.c',
+    'supply_obj.c',
 ]
 
 #============================ SCons targets ===================================
 
 assert(localEnv['board']=='python')
 
-for s in sources_c+sources_h:
-    localEnv.Objectify(
-        target = localEnv.ObjectifiedFilename(s),
-        source = s,
-    )
-
 libbsp = localEnv.Library(
     target = target,
-    source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
+    source = sources_c,
 )
-localEnv.Depends(libbsp,[localEnv.ObjectifiedFilename(s) for s in sources_h])
 Alias('libbsp', libbsp)

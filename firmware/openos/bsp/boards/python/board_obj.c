@@ -4,15 +4,15 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
 */
 
-#include "board.h"
+#include "board_obj.h"
 // bsp modules
-#include "debugpins.h"
-#include "leds.h"
-#include "uart.h"
-#include "bsp_timer.h"
-#include "radio.h"
-#include "radiotimer.h"
-#include "eui64.h"
+#include "debugpins_obj.h"
+#include "leds_obj.h"
+#include "uart_obj.h"
+#include "bsp_timer_obj.h"
+#include "radio_obj.h"
+#include "radiotimer_obj.h"
+#include "eui64_obj.h"
 
 //=========================== variables =======================================
 
@@ -20,15 +20,15 @@
 
 //=========================== public ==========================================
 
-void board_init() {
+void board_init(OpenMote* self) {
 
    // initialize bsp modules
-   debugpins_init();
-   leds_init();
-   uart_init();
-   bsp_timer_init();
-   radio_init();
-   radiotimer_init();
+ debugpins_init(self);
+ leds_init(self);
+ uart_init(self);
+ bsp_timer_init(self);
+ radio_init(self);
+ radiotimer_init(self);
    
    // send request to server and get reply
    /*
@@ -41,7 +41,7 @@ void board_init() {
    // TODO: replace by call to Python
 }
 
-void board_sleep() {
+void board_sleep(OpenMote* self) {
    int  pkType;
    int  paramLen;
    //char rxBuffer[OPENCLIENT_BUFSIZE];
@@ -77,7 +77,7 @@ void board_sleep() {
    // call this function again.
 }
 
-void board_reset() {
+void board_reset(OpenMote* self) {
    /*
    opensim_client_send(OPENSIM_CMD_board_reset,
                                     0,

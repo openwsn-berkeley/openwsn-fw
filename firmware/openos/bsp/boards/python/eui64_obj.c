@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, April 2012.
 */
 
-#include "eui64.h"
+#include "eui64_obj.h"
 
 //=========================== defines =========================================
 
@@ -14,7 +14,7 @@
 
 //=========================== public ==========================================
 
-void eui64_get(uint8_t* addressToWrite) {
+void eui64_get(OpenMote* self, uint8_t* addressToWrite) {
    //opensim_repl_eui64_get_t replparams;
    
    // send request to server and get reply
