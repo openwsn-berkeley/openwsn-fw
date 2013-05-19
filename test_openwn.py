@@ -31,8 +31,12 @@ def default_callback(id):
    raw_input("press Enter for next")
 
 def eui64_get():
+   print "P: eui64_get()"
    return range(8)
 
+def bsp_timer_scheduleIn(delay):
+   print "P: bsp_timer_scheduleIn({0})".format(delay)
+   
 # create instance
 mote = oos_openwsn.OpenMote()
 print str(mote)
@@ -43,7 +47,8 @@ for i in range(len(notifString)-1):
     mote.set_callback(i,temp_lambda)
 
 # overwrite some callbacks
-mote.set_callback(notifId('eui64_get'),eui64_get)
+mote.set_callback(notifId('eui64_get'),           eui64_get)
+mote.set_callback(notifId('bsp_timer_scheduleIn'),bsp_timer_scheduleIn)
 
 # call other methods
 mote.supply_on()
