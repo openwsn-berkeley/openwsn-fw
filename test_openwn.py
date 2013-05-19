@@ -14,18 +14,19 @@ try:
     # create instance
     mote = oos_openwsn.OpenMote()
     print str(mote)
+    print dir(mote)
     
     # install some callbacks
     for i in range(20):
        mote.set_callback(i,callback)
-    
+    '''
     # call other methods
     print mote.bsp_timer_isr()
     #print mote.radio_isr_startFrame()
     #print mote.radio_isr_endFrame()
     print mote.radiotimer_isr_compare()
     print mote.radiotimer_isr_overflow()
-    
+    '''
     raw_input('OK')
 
 except Exception as err:
