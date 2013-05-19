@@ -45,8 +45,128 @@ static PyObject* OpenMote_set_callback(OpenMote* self, PyObject* args) {
 
 static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* returnVal;
+   PyObject* ohlone_vars;
+   PyObject* tcpinject_vars;
+   PyObject* icmpv6echo_vars;
+   PyObject* icmpv6rpl_vars;
+   PyObject* opencoap_vars;
+   PyObject* tcp_vars;
+   PyObject* neighbors_vars;
+   PyObject* res_vars;
+   PyObject* schedule_vars;
+   PyObject* schedule_dbg;
+   PyObject* ieee154e_vars;
+   PyObject* ieee154e_stats;
+   PyObject* ieee154e_dbg;
+   PyObject* idmanager_vars;
+   PyObject* openqueue_vars;
+   PyObject* opentimers_vars;
+   PyObject* random_vars;
+   PyObject* openserial_vars;
+   PyObject* scheduler_vars;
+   PyObject* scheduler_dbg;
    
    returnVal = PyDict_New();
+   
+   // ohlone_vars
+   ohlone_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "ohlone_vars", ohlone_vars);
+   
+   // tcpinject_vars
+   tcpinject_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "tcpinject_vars", tcpinject_vars);
+   
+   // icmpv6echo_vars
+   icmpv6echo_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "icmpv6echo_vars", icmpv6echo_vars);
+   
+   // icmpv6rpl_vars
+   icmpv6rpl_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "icmpv6rpl_vars", icmpv6rpl_vars);
+   
+   // opencoap_vars
+   opencoap_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "opencoap_vars", opencoap_vars);
+   
+   // tcp_vars
+   tcp_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "tcp_vars", tcp_vars);
+   
+   // neighbors_vars
+   neighbors_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "neighbors_vars", neighbors_vars);
+   
+   // res_vars
+   res_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "res_vars", res_vars);
+   
+   // schedule_vars
+   schedule_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "schedule_vars", schedule_vars);
+   
+   // schedule_dbg
+   schedule_dbg = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "schedule_dbg", schedule_dbg);
+   
+   // ieee154e_vars
+   ieee154e_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "ieee154e_vars", ieee154e_vars);
+   
+   // ieee154e_stats
+   ieee154e_stats = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "ieee154e_stats", ieee154e_stats);
+   
+   // ieee154e_dbg
+   ieee154e_dbg = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "ieee154e_dbg", ieee154e_dbg);
+   
+   // idmanager_vars
+   idmanager_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "idmanager_vars", idmanager_vars);
+   
+   // openqueue_vars
+   openqueue_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "openqueue_vars", openqueue_vars);
+   
+   // opentimers_vars
+   opentimers_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "opentimers_vars", opentimers_vars);
+   
+   // random_vars
+   random_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "random_vars", random_vars);
+   
+   // openserial_vars
+   openserial_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "openserial_vars", openserial_vars);
+   
+   // scheduler_vars
+   scheduler_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "scheduler_vars", scheduler_vars);
+   
+   // scheduler_dbg
+   scheduler_dbg = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "scheduler_dbg", scheduler_dbg);
    
    return returnVal;
 }
