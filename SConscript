@@ -278,6 +278,8 @@ callbackFunctionsToChange = [
     'compare_cb',
     # sctimer
     # uart
+    'txCb',
+    'rxCb',
     #===== drivers
     # openserial
     # opentimers
@@ -330,7 +332,8 @@ functionsToChange = [
     'mote_main',
     # supply
     'supply_init',
-    'supply_rootFunction',
+    'supply_on',
+    'supply_off',
     # board
     'board_init',
     'board_sleep',
