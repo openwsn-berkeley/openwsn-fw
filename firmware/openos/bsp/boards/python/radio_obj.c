@@ -23,11 +23,11 @@ radio_vars_t radio_vars;
 //=========================== callbacks =======================================
 
 void radio_setOverflowCb(OpenMote* self, radiotimer_compare_cbt cb) {
- radiotimer_setOverflowCb(self, cb);
+   radiotimer_setOverflowCb(self, cb);
 }
 
 void radio_setCompareCb(OpenMote* self, radiotimer_compare_cbt cb) {
- radiotimer_setCompareCb(self, cb);
+   radiotimer_setCompareCb(self, cb);
 }
 
 void radio_setStartFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {

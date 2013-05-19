@@ -23,12 +23,12 @@
 void board_init(OpenMote* self) {
 
    // initialize bsp modules
- debugpins_init(self);
- leds_init(self);
- uart_init(self);
- bsp_timer_init(self);
- radio_init(self);
- radiotimer_init(self);
+   debugpins_init(self);
+   leds_init(self);
+   uart_init(self);
+   bsp_timer_init(self);
+   radio_init(self);
+   radiotimer_init(self);
    
    // send request to server and get reply
    /*

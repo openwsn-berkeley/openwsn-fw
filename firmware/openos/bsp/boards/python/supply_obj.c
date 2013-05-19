@@ -20,7 +20,7 @@ void supply_init(OpenMote* self) {
 }
 
 void supply_on(OpenMote* self) {
- mote_main(self);
+   mote_main(self);
 }
 
 void supply_off(OpenMote* self) {
