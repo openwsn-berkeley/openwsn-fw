@@ -35,147 +35,171 @@ void radio_setEndFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
 //===== admin
 
 void radio_init(OpenMote* self) {
+   PyObject*   result;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_init,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+#ifdef TRACE_ON
+   printf("C: radio_init()\n");
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_init],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_init() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 //===== reset
 
 void radio_reset(OpenMote* self) {
+   PyObject*   result;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_reset,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+#ifdef TRACE_ON
+   printf("C: radio_reset()\n");
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_reset],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_reset() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 //===== timer
 
 void radio_startTimer(OpenMote* self, PORT_TIMER_WIDTH period) {
-   //opensim_requ_radio_startTimer_t requparams;
+   PyObject*   result;
+   PyObject*   arglist;
    
-   // prepare request
-   //requparams.period = period;
+#ifdef TRACE_ON
+   printf("C: radio_startTimer()\n");
+#endif
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_startTimer,
-                                    &requparams,
-                                    sizeof(opensim_requ_radio_startTimer_t),
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+   // forward to Python
+   arglist    = Py_BuildValue("(i)",period);
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_startTimer],arglist);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_startTimer() returned NULL\r\n");
+   }
+   Py_DECREF(result);
+   Py_DECREF(arglist);
 }
 
 PORT_TIMER_WIDTH radio_getTimerValue(OpenMote* self) {
-   //opensim_repl_radio_getTimerValue_t replparams;
+   PyObject*            result;
+   PORT_TIMER_WIDTH     returnVal;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_getTimerValue,
-                                    0,
-                                    0,
-                                    &replparams,
-                                    sizeof(opensim_repl_radio_getTimerValue_t));
-   */
-   // TODO: replace by call to Python
+#ifdef TRACE_ON
+   printf("C: radio_getTimerValue()\n");
+#endif
    
-   //return replparams.value;
-   return 0;//poipoi
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_getTimerValue],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_getTimerValue() returned NULL\r\n");
+   }
+   if (!PyInt_Check(result)) {
+      printf("[CRITICAL] radio_getTimerValue() returned NULL\r\n");
+   }
+   returnVal = PyInt_AsLong(result);
+   
+   // dispose of returned value
+   Py_DECREF(result);
+   
+   return returnVal;
 }
 
 void radio_setTimerPeriod(OpenMote* self, PORT_TIMER_WIDTH period) {
-   //opensim_requ_radio_setTimerPeriod_t requparams;
+   PyObject*   result;
+   PyObject*   arglist;
    
-   // prepare request
-   //requparams.period = period;
+#ifdef TRACE_ON
+   printf("C: radio_setTimerPeriod()\n");
+#endif
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_setTimerPeriod,
-                                    &requparams,
-                                    sizeof(opensim_requ_radio_setTimerPeriod_t),
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+   // forward to Python
+   arglist    = Py_BuildValue("(i)",period);
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_setTimerPeriod],arglist);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_setTimerPeriod() returned NULL\r\n");
+   }
+   Py_DECREF(result);
+   Py_DECREF(arglist);
 }
 
 PORT_TIMER_WIDTH radio_getTimerPeriod(OpenMote* self) {
-   //opensim_repl_radio_getTimerPeriod_t replparams;
+   PyObject*            result;
+   PORT_TIMER_WIDTH     returnVal;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_getTimerPeriod,
-                                    0,
-                                    0,
-                                    &replparams,
-                                    sizeof(opensim_repl_radio_getTimerPeriod_t));
-                                    
-   */
-   // TODO: replace by call to Python
+#ifdef TRACE_ON
+   printf("C: radio_getTimerPeriod()\n");
+#endif
    
-   //return replparams.value;
-   return 0;//poipoi
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_getTimerPeriod],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_getTimerPeriod() returned NULL\r\n");
+   }
+   if (!PyInt_Check(result)) {
+      printf("[CRITICAL] radio_getTimerPeriod() returned something which is not an int\r\n");
+   }
+   returnVal = PyInt_AsLong(result);
+   
+   // dispose of returned value
+   Py_DECREF(result);
+   
+   return returnVal;
 }
 
 //===== RF admin
 
 void radio_setFrequency(OpenMote* self, uint8_t frequency) {
-   //opensim_requ_radio_setFrequency_t requparams;
+   PyObject*   result;
+   PyObject*   arglist;
    
-   // prepare request
-   //requparams.frequency = frequency;
+#ifdef TRACE_ON
+   printf("C: radio_setFrequency()\n");
+#endif
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_setFrequency,
-                                    &requparams,
-                                    sizeof(opensim_requ_radio_setFrequency_t),
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+   // forward to Python
+   arglist    = Py_BuildValue("(i)",frequency);
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_setFrequency],arglist);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_setFrequency() returned NULL\r\n");
+   }
+   Py_DECREF(result);
+   Py_DECREF(arglist);
 }
 
 void radio_rfOn(OpenMote* self) {
+   PyObject*   result;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_rfOn,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+#ifdef TRACE_ON
+   printf("C: radio_rfOn()\n");
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_rfOn],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_rfOn() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 void radio_rfOff(OpenMote* self) {
+   PyObject*   result;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_rfOff,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+#ifdef TRACE_ON
+   printf("C: radio_rfOff()\n");
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_rfOff],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_rfOff() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 //===== TX
@@ -198,57 +222,65 @@ void radio_loadPacket(OpenMote* self, uint8_t* packet, uint8_t len) {
 }
 
 void radio_txEnable(OpenMote* self) {
+   PyObject*   result;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_txEnable,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+#ifdef TRACE_ON
+   printf("C: radio_txEnable()\n");
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_txEnable],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_txEnable() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 void radio_txNow(OpenMote* self) {
+   PyObject*   result;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_txNow,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+#ifdef TRACE_ON
+   printf("C: radio_txNow()\n");
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_txNow],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_txNow() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 //===== RX
 
 void radio_rxEnable(OpenMote* self) {
+   PyObject*   result;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_rxEnable,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+#ifdef TRACE_ON
+   printf("C: radio_rxEnable()\n");
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_rxEnable],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_rxEnable() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 void radio_rxNow(OpenMote* self) {
+   PyObject*   result;
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_rxNow,
-                                    0,
-                                    0,
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+#ifdef TRACE_ON
+   printf("C: radio_rxNow()\n");
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_rxNow],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_rxNow() returned NULL\r\n");
+   }
+   Py_DECREF(result);
 }
 
 void radio_getReceivedFrame(OpenMote* self,
