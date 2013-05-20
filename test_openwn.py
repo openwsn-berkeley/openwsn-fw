@@ -51,6 +51,6 @@ mote.set_callback(notifId('eui64_get'),           eui64_get)
 mote.set_callback(notifId('bsp_timer_scheduleIn'),bsp_timer_scheduleIn)
 
 # start the mote
-#mote.supply_on()
+mote.supply_on()
 
-print mote.getState()
+#print mote.getState()

@@ -18,7 +18,7 @@ void debugpins_init(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_init()\n");
+   printf("C: debugpins_init()... \n");
 #endif
    
    // forward to Python
@@ -27,13 +27,17 @@ void debugpins_init(OpenMote* self) {
       printf("[CRITICAL] debugpins_init() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void debugpins_frame_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_frame_toggle()\n");
+   printf("C: debugpins_frame_toggle()... \n");
 #endif
    
    // forward to Python
@@ -42,12 +46,16 @@ void debugpins_frame_toggle(OpenMote* self) {
       printf("[CRITICAL] debugpins_frame_toggle() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_frame_clr(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_frame_clr()\n");
+   printf("C: debugpins_frame_clr()... \n");
 #endif
    
    // forward to Python
@@ -56,12 +64,16 @@ void debugpins_frame_clr(OpenMote* self) {
       printf("[CRITICAL] debugpins_frame_clr() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_frame_set(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_frame_set()\n");
+   printf("C: debugpins_frame_set()... \n");
 #endif
    
    // forward to Python
@@ -70,13 +82,17 @@ void debugpins_frame_set(OpenMote* self) {
       printf("[CRITICAL] debugpins_frame_set() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void debugpins_slot_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_slot_toggle()\n");
+   printf("C: debugpins_slot_toggle()... \n");
 #endif
    
    // forward to Python
@@ -85,12 +101,16 @@ void debugpins_slot_toggle(OpenMote* self) {
       printf("[CRITICAL] debugpins_slot_toggle() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_slot_clr(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_slot_clr()\n");
+   printf("C: debugpins_slot_clr()... \n");
 #endif
    
    // forward to Python
@@ -99,12 +119,16 @@ void debugpins_slot_clr(OpenMote* self) {
       printf("[CRITICAL] debugpins_slot_clr() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_slot_set(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_slot_set()\n");
+   printf("C: debugpins_slot_set()... \n");
 #endif
    
    // forward to Python
@@ -113,13 +137,17 @@ void debugpins_slot_set(OpenMote* self) {
       printf("[CRITICAL] debugpins_slot_set() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void debugpins_fsm_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_fsm_toggle()\n");
+   printf("C: debugpins_fsm_toggle()... \n");
 #endif
    
    // forward to Python
@@ -128,12 +156,16 @@ void debugpins_fsm_toggle(OpenMote* self) {
       printf("[CRITICAL] debugpins_fsm_toggle() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_fsm_clr(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_fsm_clr()\n");
+   printf("C: debugpins_fsm_clr()... \n");
 #endif
    
    // forward to Python
@@ -142,12 +174,16 @@ void debugpins_fsm_clr(OpenMote* self) {
       printf("[CRITICAL] debugpins_fsm_clr() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_fsm_set(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_fsm_set()\n");
+   printf("C: debugpins_fsm_set()... \n");
 #endif
    
    // forward to Python
@@ -156,13 +192,17 @@ void debugpins_fsm_set(OpenMote* self) {
       printf("[CRITICAL] debugpins_fsm_set() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void debugpins_task_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_task_toggle()\n");
+   printf("C: debugpins_task_toggle(... \n");
 #endif
    
    // forward to Python
@@ -171,12 +211,16 @@ void debugpins_task_toggle(OpenMote* self) {
       printf("[CRITICAL] debugpins_task_toggle() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_task_clr(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_task_clr()\n");
+   printf("C: debugpins_task_clr()... \n");
 #endif
    
    // forward to Python
@@ -185,12 +229,16 @@ void debugpins_task_clr(OpenMote* self) {
       printf("[CRITICAL] debugpins_task_clr() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_task_set(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_task_set()\n");
+   printf("C: debugpins_task_set()... \n");
 #endif
    
    // forward to Python
@@ -199,13 +247,17 @@ void debugpins_task_set(OpenMote* self) {
       printf("[CRITICAL] debugpins_task_set() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void debugpins_isr_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_isr_toggle()\n");
+   printf("C: debugpins_isr_toggle()... \n");
 #endif
    
    // forward to Python
@@ -214,12 +266,16 @@ void debugpins_isr_toggle(OpenMote* self) {
       printf("[CRITICAL] debugpins_isr_toggle() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_isr_clr(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_isr_clr()\n");
+   printf("C: debugpins_isr_clr()... \n");
 #endif
    
    // forward to Python
@@ -228,12 +284,16 @@ void debugpins_isr_clr(OpenMote* self) {
       printf("[CRITICAL] debugpins_isr_clr() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_isr_set(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_isr_set()\n");
+   printf("C: debugpins_isr_set()... \n");
 #endif
    
    // forward to Python
@@ -242,13 +302,17 @@ void debugpins_isr_set(OpenMote* self) {
       printf("[CRITICAL] debugpins_isr_set() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void debugpins_radio_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_radio_toggle()\n");
+   printf("C: debugpins_radio_toggle()... \n");
 #endif
    
    // forward to Python
@@ -257,12 +321,16 @@ void debugpins_radio_toggle(OpenMote* self) {
       printf("[CRITICAL] debugpins_radio_toggle() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_radio_clr(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_radio_clr()\n");
+   printf("C: debugpins_radio_clr()... \n");
 #endif
    
    // forward to Python
@@ -271,12 +339,16 @@ void debugpins_radio_clr(OpenMote* self) {
       printf("[CRITICAL] debugpins_radio_clr() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 void debugpins_radio_set(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: debugpins_radio_set()\n");
+   printf("C: debugpins_radio_set()... \n");
 #endif
    
    // forward to Python
@@ -285,4 +357,8 @@ void debugpins_radio_set(OpenMote* self) {
       printf("[CRITICAL] debugpins_radio_set() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }

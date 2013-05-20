@@ -25,7 +25,7 @@ void bsp_timer_init(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: bsp_timer_init()\n");
+   printf("C: bsp_timer_init()... \n");
 #endif
    
    // forward to Python
@@ -34,13 +34,17 @@ void bsp_timer_init(OpenMote* self) {
       printf("[CRITICAL] bsp_timer_init() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void bsp_timer_reset(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: bsp_timer_reset()\n");
+   printf("C: bsp_timer_reset()... \n");
 #endif
    
    // forward to Python
@@ -49,6 +53,10 @@ void bsp_timer_reset(OpenMote* self) {
       printf("[CRITICAL] bsp_timer_reset() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void bsp_timer_scheduleIn(OpenMote* self, PORT_TIMER_WIDTH delayTicks) {
@@ -56,7 +64,7 @@ void bsp_timer_scheduleIn(OpenMote* self, PORT_TIMER_WIDTH delayTicks) {
    PyObject*   arglist;
    
 #ifdef TRACE_ON
-   printf("C: bsp_timer_scheduleIn()\n");
+   printf("C: bsp_timer_scheduleIn(delayTicks=%d)... \n",delayTicks);
 #endif
    
    // forward to Python
@@ -67,13 +75,17 @@ void bsp_timer_scheduleIn(OpenMote* self, PORT_TIMER_WIDTH delayTicks) {
    }
    Py_DECREF(result);
    Py_DECREF(arglist);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void bsp_timer_cancel_schedule(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: bsp_timer_cancel_schedule()\n");
+   printf("C: bsp_timer_cancel_schedule()... \n");
 #endif
    
    // forward to Python
@@ -82,6 +94,10 @@ void bsp_timer_cancel_schedule(OpenMote* self) {
       printf("[CRITICAL] bsp_timer_cancel_schedule() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 PORT_TIMER_WIDTH bsp_timer_get_currentValue(OpenMote* self) {
@@ -89,7 +105,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue(OpenMote* self) {
    PORT_TIMER_WIDTH     returnVal;
    
 #ifdef TRACE_ON
-   printf("C: bsp_timer_get_currentValue()\n");
+   printf("C: bsp_timer_get_currentValue()... \n");
 #endif
    
    // forward to Python
@@ -99,6 +115,10 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue(OpenMote* self) {
    }
    returnVal  = (PORT_TIMER_WIDTH)PyInt_AsLong(result);
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("returnVal=%d.\n",returnVal);
+#endif
    
    return returnVal;
 }

@@ -20,7 +20,7 @@ void eui64_get(OpenMote* self, uint8_t* addressToWrite) {
    uint8_t    i;
    
 #ifdef TRACE_ON
-   printf("C: eui64_get()\n");
+   printf("C: eui64_get()... \n");
 #endif
    
    // forward to Python
@@ -36,12 +36,21 @@ void eui64_get(OpenMote* self, uint8_t* addressToWrite) {
    if (PyList_Size(result)!=8) {
       printf("[CRITICAL] eui64_get() did not return a list of exactly 8 elements\r\n");
    }
-   
+
+#ifdef TRACE_ON
+   printf("C: got ");
+#endif
    // store retrieved information
    for (i=0;i<8;i++) {
       item = PyList_GetItem(result, i);
       addressToWrite[i] = (uint8_t)PyInt_AsLong(item);
+#ifdef TRACE_ON
+   printf("%02x",addressToWrite[i]);
+#endif
    }
+#ifdef TRACE_ON
+   printf("\n");
+#endif
    
    // dispose of returned value
    Py_DECREF(result);

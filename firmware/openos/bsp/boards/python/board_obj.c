@@ -25,7 +25,7 @@ void board_init(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: board_init()\n");
+   printf("C: board_init()...\n");
 #endif
    
    // initialize bsp modules
@@ -42,13 +42,17 @@ void board_init(OpenMote* self) {
       printf("[CRITICAL] board_init() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void board_sleep(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: board_sleep()\n");
+   printf("C: board_sleep()... \n");
 #endif
    
    // forward to Python
@@ -57,13 +61,17 @@ void board_sleep(OpenMote* self) {
       printf("[CRITICAL] board_sleep() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void board_reset(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: board_reset()\n");
+   printf("C: board_reset()... \n");
 #endif
    
    // forward to Python
@@ -72,6 +80,10 @@ void board_reset(OpenMote* self) {
       printf("[CRITICAL] board_reset() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 //=========================== private =========================================

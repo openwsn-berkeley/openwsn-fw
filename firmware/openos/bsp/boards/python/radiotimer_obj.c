@@ -28,7 +28,7 @@ void radiotimer_init(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radiotimer_init()\n");
+   printf("C: radiotimer_init()... \n");
 #endif
    
    // forward to Python
@@ -37,13 +37,17 @@ void radiotimer_init(OpenMote* self) {
       printf("[CRITICAL] radiotimer_init() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void radiotimer_start(OpenMote* self, uint16_t period) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radiotimer_start()\n");
+   printf("C: radiotimer_start(period=%d)... \n",period);
 #endif
    
    // forward to Python
@@ -52,6 +56,10 @@ void radiotimer_start(OpenMote* self, uint16_t period) {
       printf("[CRITICAL] radiotimer_start() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 //===== direct access
@@ -61,7 +69,7 @@ uint16_t radiotimer_getValue(OpenMote* self) {
    uint16_t   returnVal;
    
 #ifdef TRACE_ON
-   printf("C: radiotimer_getValue()\n");
+   printf("C: radiotimer_getValue()... \n");
 #endif
    
    // forward to Python
@@ -77,6 +85,10 @@ uint16_t radiotimer_getValue(OpenMote* self) {
    // dispose of returned value
    Py_DECREF(result);
    
+#ifdef TRACE_ON
+   printf("C: ...got %d.\n",returnVal);
+#endif
+   
    return returnVal;
 }
 
@@ -85,7 +97,7 @@ void radiotimer_setPeriod(OpenMote* self, uint16_t period) {
    PyObject*   arglist;
    
 #ifdef TRACE_ON
-   printf("C: radiotimer_setPeriod()\n");
+   printf("C: radiotimer_setPeriod(period=%d)... \n",period);
 #endif
    
    // forward to Python
@@ -96,6 +108,10 @@ void radiotimer_setPeriod(OpenMote* self, uint16_t period) {
    }
    Py_DECREF(result);
    Py_DECREF(arglist);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 uint16_t radiotimer_getPeriod(OpenMote* self) {
@@ -103,7 +119,7 @@ uint16_t radiotimer_getPeriod(OpenMote* self) {
    uint16_t   returnVal;
    
 #ifdef TRACE_ON
-   printf("C: radiotimer_getPeriod()\n");
+   printf("C: radiotimer_getPeriod()... \n");
 #endif
    
    // forward to Python
@@ -119,6 +135,10 @@ uint16_t radiotimer_getPeriod(OpenMote* self) {
    // dispose of returned value
    Py_DECREF(result);
    
+#ifdef TRACE_ON
+   printf("C: ...got %d.\n",returnVal);
+#endif
+   
    return returnVal;
 }
 
@@ -129,7 +149,7 @@ void radiotimer_schedule(OpenMote* self, uint16_t offset) {
    PyObject*   arglist;
    
 #ifdef TRACE_ON
-   printf("C: radiotimer_schedule()\n");
+   printf("C: radiotimer_schedule(offset=%d)... \n",offset);
 #endif
    
    // forward to Python
@@ -140,13 +160,17 @@ void radiotimer_schedule(OpenMote* self, uint16_t offset) {
    }
    Py_DECREF(result);
    Py_DECREF(arglist);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 void radiotimer_cancel(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radiotimer_cancel()\n");
+   printf("C: radiotimer_cancel()... \n");
 #endif
    
    // forward to Python
@@ -155,6 +179,10 @@ void radiotimer_cancel(OpenMote* self) {
       printf("[CRITICAL] radiotimer_cancel() returned NULL\r\n");
    }
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...done.\n");
+#endif
 }
 
 //===== capture
@@ -164,7 +192,7 @@ uint16_t radiotimer_getCapturedTime(OpenMote* self) {
    uint16_t   returnVal;
    
 #ifdef TRACE_ON
-   printf("C: radiotimer_getCapturedTime()\n");
+   printf("C: radiotimer_getCapturedTime()... \n");
 #endif
    
    // forward to Python
@@ -179,6 +207,10 @@ uint16_t radiotimer_getCapturedTime(OpenMote* self) {
    
    // dispose of returned value
    Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C: ...got %d.\n",returnVal);
+#endif
    
    return returnVal;
 }
