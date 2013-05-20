@@ -35,6 +35,7 @@ void radiotimer_init(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radiotimer_init],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radiotimer_init() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -54,6 +55,7 @@ void radiotimer_start(OpenMote* self, uint16_t period) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radiotimer_start],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radiotimer_start() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -76,9 +78,11 @@ uint16_t radiotimer_getValue(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radiotimer_getValue],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radiotimer_getValue() returned NULL\r\n");
+      return 0;
    }
    if (!PyInt_Check(result)) {
       printf("[CRITICAL] radiotimer_getValue() returned NULL\r\n");
+      return 0;
    }
    returnVal = PyInt_AsLong(result);
    
@@ -105,6 +109,7 @@ void radiotimer_setPeriod(OpenMote* self, uint16_t period) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radiotimer_setPeriod],arglist);
    if (result == NULL) {
       printf("[CRITICAL] radiotimer_setPeriod() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    Py_DECREF(arglist);
@@ -126,9 +131,11 @@ uint16_t radiotimer_getPeriod(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radiotimer_getPeriod],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radiotimer_getPeriod() returned NULL\r\n");
+      return 0;
    }
    if (!PyInt_Check(result)) {
       printf("[CRITICAL] radiotimer_getPeriod() returned NULL\r\n");
+      return 0;
    }
    returnVal = PyInt_AsLong(result);
    
@@ -157,6 +164,7 @@ void radiotimer_schedule(OpenMote* self, uint16_t offset) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radiotimer_schedule],arglist);
    if (result == NULL) {
       printf("[CRITICAL] radiotimer_schedule() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    Py_DECREF(arglist);
@@ -177,6 +185,7 @@ void radiotimer_cancel(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radiotimer_cancel],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radiotimer_cancel() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -199,9 +208,11 @@ uint16_t radiotimer_getCapturedTime(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radiotimer_getCapturedTime],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radiotimer_getCapturedTime() returned NULL\r\n");
+      return 0;
    }
    if (!PyInt_Check(result)) {
       printf("[CRITICAL] radiotimer_getCapturedTime() returned NULL\r\n");
+      return 0;
    }
    returnVal = PyInt_AsLong(result);
    

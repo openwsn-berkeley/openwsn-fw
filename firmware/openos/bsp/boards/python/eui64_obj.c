@@ -27,14 +27,17 @@ void eui64_get(OpenMote* self, uint8_t* addressToWrite) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_eui64_get],NULL);
    if (result == NULL) {
       printf("[CRITICAL] eui64_get() returned NULL\r\n");
+      return;
    }
    
    // verify
    if (!PySequence_Check(result)) {
       printf("[CRITICAL] eui64_get() did not return a list\r\n");
+      return;
    }
    if (PyList_Size(result)!=8) {
       printf("[CRITICAL] eui64_get() did not return a list of exactly 8 elements\r\n");
+      return;
    }
 
 #ifdef TRACE_ON

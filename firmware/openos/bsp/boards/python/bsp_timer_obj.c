@@ -32,6 +32,7 @@ void bsp_timer_init(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_init],NULL);
    if (result == NULL) {
       printf("[CRITICAL] bsp_timer_init() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -51,6 +52,7 @@ void bsp_timer_reset(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_reset],NULL);
    if (result == NULL) {
       printf("[CRITICAL] bsp_timer_reset() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -72,6 +74,7 @@ void bsp_timer_scheduleIn(OpenMote* self, PORT_TIMER_WIDTH delayTicks) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_scheduleIn],arglist);
    if (result == NULL) {
       printf("[CRITICAL] bsp_timer_scheduleIn() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    Py_DECREF(arglist);
@@ -92,6 +95,7 @@ void bsp_timer_cancel_schedule(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_cancel_schedule],NULL);
    if (result == NULL) {
       printf("[CRITICAL] bsp_timer_cancel_schedule() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -112,6 +116,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_bsp_timer_get_currentValue],NULL);
    if (result == NULL) {
       printf("[CRITICAL] bsp_timer_get_currentValue() returned NULL\r\n");
+      return 0;
    }
    returnVal  = (PORT_TIMER_WIDTH)PyInt_AsLong(result);
    Py_DECREF(result);

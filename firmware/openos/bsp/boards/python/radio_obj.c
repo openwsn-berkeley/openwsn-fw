@@ -45,6 +45,7 @@ void radio_init(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_init],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radio_init() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -66,6 +67,7 @@ void radio_reset(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_reset],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radio_reset() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -89,6 +91,7 @@ void radio_startTimer(OpenMote* self, PORT_TIMER_WIDTH period) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_startTimer],arglist);
    if (result == NULL) {
       printf("[CRITICAL] radio_startTimer() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    Py_DECREF(arglist);
@@ -110,9 +113,11 @@ PORT_TIMER_WIDTH radio_getTimerValue(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_getTimerValue],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radio_getTimerValue() returned NULL\r\n");
+      return 0;
    }
    if (!PyInt_Check(result)) {
       printf("[CRITICAL] radio_getTimerValue() returned NULL\r\n");
+      return 0;
    }
    returnVal = PyInt_AsLong(result);
    
@@ -139,6 +144,7 @@ void radio_setTimerPeriod(OpenMote* self, PORT_TIMER_WIDTH period) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_setTimerPeriod],arglist);
    if (result == NULL) {
       printf("[CRITICAL] radio_setTimerPeriod() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    Py_DECREF(arglist);
@@ -160,9 +166,11 @@ PORT_TIMER_WIDTH radio_getTimerPeriod(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_getTimerPeriod],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radio_getTimerPeriod() returned NULL\r\n");
+      return 0;
    }
    if (!PyInt_Check(result)) {
       printf("[CRITICAL] radio_getTimerPeriod() returned something which is not an int\r\n");
+      return 0;
    }
    returnVal = PyInt_AsLong(result);
    
@@ -191,6 +199,7 @@ void radio_setFrequency(OpenMote* self, uint8_t frequency) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_setFrequency],arglist);
    if (result == NULL) {
       printf("[CRITICAL] radio_setFrequency() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    Py_DECREF(arglist);
@@ -211,6 +220,7 @@ void radio_rfOn(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_rfOn],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radio_rfOn() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -230,6 +240,7 @@ void radio_rfOff(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_rfOff],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radio_rfOff() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -268,6 +279,7 @@ void radio_txEnable(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_txEnable],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radio_txEnable() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -287,6 +299,7 @@ void radio_txNow(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_txNow],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radio_txNow() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -308,6 +321,7 @@ void radio_rxEnable(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_rxEnable],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radio_rxEnable() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -327,6 +341,7 @@ void radio_rxNow(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_rxNow],NULL);
    if (result == NULL) {
       printf("[CRITICAL] radio_rxNow() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    

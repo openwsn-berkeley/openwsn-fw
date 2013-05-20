@@ -40,6 +40,7 @@ void board_init(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_board_init],NULL);
    if (result == NULL) {
       printf("[CRITICAL] board_init() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -59,6 +60,7 @@ void board_sleep(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_board_sleep],NULL);
    if (result == NULL) {
       printf("[CRITICAL] board_sleep() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
@@ -78,6 +80,7 @@ void board_reset(OpenMote* self) {
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_board_reset],NULL);
    if (result == NULL) {
       printf("[CRITICAL] board_reset() returned NULL\r\n");
+      return;
    }
    Py_DECREF(result);
    
