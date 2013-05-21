@@ -31,9 +31,7 @@ void openbridge_triggerData() {
        openserial_printError(COMPONENT_OPENBRIDGE,ERR_INPUTBUFFER_LENGTH,
                    (errorparameter_t)0,
                    (errorparameter_t)numDataBytes);
-       //return;
-       //poipoi xv test that..
-       numDataBytes=sizeof(input_buffer);
+       return;
    }
    
    if (idmanager_getIsBridge()==TRUE && numDataBytes>0) {
