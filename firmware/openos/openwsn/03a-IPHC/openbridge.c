@@ -27,7 +27,8 @@ void openbridge_triggerData() {
    //this is a temporal workaround as we are never supposed to get chunks of data
    //longer than input buffer size.. I assume that HDLC will solve that.
    
-   if (numDataBytes>136){
+   if (numDataBytes>136 || numDataBytes<8){
+   //to prevent too short or too long serial frames to kill the stack  
        openserial_printError(COMPONENT_OPENBRIDGE,ERR_INPUTBUFFER_LENGTH,
                    (errorparameter_t)0,
                    (errorparameter_t)numDataBytes);
