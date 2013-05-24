@@ -252,20 +252,36 @@ void radio_rfOff(OpenMote* self) {
 //===== TX
 
 void radio_loadPacket(OpenMote* self, uint8_t* packet, uint8_t len) {
-   //opensim_requ_radio_loadPacket_t requparams;
+   PyObject*   pkt;
+   PyObject*   arglist;
+   PyObject*   result;
+   PyObject*   item;
+   int8_t      i;
+   int         res;
    
-   //requparams.len = len;
-   //memcpy(requparams.txBuffer,packet,len);
+#ifdef TRACE_ON
+   printf("C: radio_loadPacket(len=%d)... \n",len);
+#endif
    
-   // send request to server and get reply
-   /*
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_loadPacket,
-                                    &requparams,
-                                    sizeof(opensim_requ_radio_loadPacket_t),
-                                    0,
-                                    0);
-   */
-   // TODO: replace by call to Python
+   // forward to Python
+   pkt        = PyList_New(len);
+   for (i=0;i<len;i++) {
+      item    = PyInt_FromLong(packet[i]);
+      res     = PyList_SetItem(pkt,i,item);
+      if (res!=0) {
+         printf("[CRITICAL] radio_loadPacket() failed setting list item\r\n");
+         return;
+      }
+   }
+   arglist    = Py_BuildValue("(O)",pkt);
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_loadPacket],arglist);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_loadPacket() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   Py_DECREF(arglist);
+   Py_DECREF(pkt);
 }
 
 void radio_txEnable(OpenMote* self) {
