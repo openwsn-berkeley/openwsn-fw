@@ -347,7 +347,7 @@ void openserial_stop() {
    openserial_vars.mode=MODE_OFF;
    ENABLE_INTERRUPTS();
    
-   if (inputBufFill>0) {
+   if (!openserial_vars.busyReceiving && inputBufFill>0) {
       DISABLE_INTERRUPTS();
       cmdByte = openserial_vars.inputBuf[0];
       ENABLE_INTERRUPTS();
