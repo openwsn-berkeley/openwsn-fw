@@ -267,7 +267,7 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_len
    pkt->payload -= header_length;
    pkt->length  += header_length;
    if ( (uint8_t*)(pkt->payload) < (uint8_t*)(pkt->packet) ) {
-      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)0,
                             (errorparameter_t)pkt->length);
    }

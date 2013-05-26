@@ -164,7 +164,11 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
          // source routing header present
         
          if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
-            openqueue_freePacketBuffer(msg);
+            //already freed by send_internal if it fails
+            //todo change error type to another that says src_route failure.
+           openserial_printError(COMPONENT_FORWARDING,ERR_INVALID_FWDMODE,
+                                  (errorparameter_t)0,
+                                  (errorparameter_t)0);
          }
       }
    }
@@ -268,6 +272,7 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
             openserial_printError(COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
                                (errorparameter_t)msg->l4_protocol,
                                (errorparameter_t)1);
+            //not sure that this is correct as iphc will free it?
             openqueue_freePacketBuffer(msg);
             return E_FAIL;
       }
