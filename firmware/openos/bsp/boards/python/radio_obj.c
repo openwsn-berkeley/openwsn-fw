@@ -373,6 +373,28 @@ void radio_getReceivedFrame(OpenMote* self,
                               int8_t* pRssi,
                              uint8_t* pLqi,
                              uint8_t* pCrc) {
+   PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C: radio_getReceivedFrame()... \n");
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_radio_getReceivedFrame],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] radio_getReceivedFrame() returned NULL\r\n");
+      return;
+   }
+   
+   // verify
+   if (!PySequence_Check(result)) {
+      printf("[CRITICAL] radio_getReceivedFrame() did not return a tuple\r\n");
+      return;
+   }
+   if (PyList_Size(result)!=4) {
+      printf("[CRITICAL] radio_getReceivedFrame() did not return a tuple of exactly 4 elements\r\n");
+      return;
+   }
    /*
    uint8_t numBytesToWrite;
    
