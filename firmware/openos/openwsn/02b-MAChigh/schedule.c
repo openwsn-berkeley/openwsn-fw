@@ -173,7 +173,7 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
 void schedule_addActiveSlot(slotOffset_t    slotOffset,
       cellType_t      type,
       bool            shared,
-      uint8_t         channelOffset,
+      channelOffset_t channelOffset,
       open_addr_t*    neighbor) {
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
