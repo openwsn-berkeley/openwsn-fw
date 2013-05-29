@@ -373,7 +373,11 @@ void radio_getReceivedFrame(OpenMote* self,
                               int8_t* pRssi,
                              uint8_t* pLqi,
                              uint8_t* pCrc) {
-   PyObject*   result;
+   PyObject*  result;
+   PyObject*  item;
+   PyObject*  subitem;
+   int8_t     lenRead;
+   int8_t     i;
    
 #ifdef TRACE_ON
    printf("C: radio_getReceivedFrame()... \n");
@@ -391,37 +395,36 @@ void radio_getReceivedFrame(OpenMote* self,
       printf("[CRITICAL] radio_getReceivedFrame() did not return a tuple\r\n");
       return;
    }
-   if (PyList_Size(result)!=4) {
-      printf("[CRITICAL] radio_getReceivedFrame() did not return a tuple of exactly 4 elements\r\n");
+   if (PyTuple_Size(result)!=4) {
+      printf("[CRITICAL] radio_getReceivedFrame() did not return a tuple of exactly 4 elements %d\r\n",PyList_Size(result));
       return;
    }
-   /*
-   uint8_t numBytesToWrite;
    
-   //opensim_repl_radio_getReceivedFrame_t replparams;
+   //==== item 0: rxBuffer
    
-   // send request to server and get reply
-   opensim_client_sendAndWaitForAck(OPENSIM_CMD_radio_getReceivedFrame,
-                                    0,
-                                    0,
-                                    &replparams,
-                                    sizeof(opensim_repl_radio_getReceivedFrame_t));
-   
-   // TODO: replace by call to Python
-   
-   if (maxBufLen>replparams.len) {
-      numBytesToWrite=replparams.len;
-   } else {
-      numBytesToWrite=maxBufLen;
+   item       = PyTuple_GetItem(result,0);
+   lenRead    = PyList_Size(item);
+   *pLenRead  = lenRead;
+   // store retrieved information
+   for (i=0;i<lenRead;i++) {
+      subitem = PyList_GetItem(item, i);
+      pBufRead[i] = (uint8_t)PyInt_AsLong(subitem);
    }
    
-   // write return values
-   memcpy(pBufRead,replparams.rxBuffer,numBytesToWrite);
-   *pLenRead = replparams.len;
-   *pRssi    = replparams.rssi;
-   *pLqi     = replparams.lqi;
-   *pCrc     = replparams.crc;
-   */
+   //==== item 1: rssi
+   
+   item       = PyTuple_GetItem(result,1);
+   *pRssi     = (int8_t)PyInt_AsLong(item);
+   
+   //==== item 2: lqi
+   
+   item       = PyTuple_GetItem(result,2);
+   *pLqi      = (uint8_t)PyInt_AsLong(item);
+   
+   //==== item 3: crc
+   
+   item       = PyTuple_GetItem(result,3);
+   *pCrc      = (uint8_t)PyInt_AsLong(item);
 }
 
 //=========================== interrupts ======================================
