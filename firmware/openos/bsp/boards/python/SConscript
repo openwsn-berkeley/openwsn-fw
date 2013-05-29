@@ -27,6 +27,6 @@ assert(localEnv['board']=='python')
 libbsp = localEnv.Library(
     target  = target,
     source  = sources_c,
-    CCFLAGS = '-D TRACE_ON',
+    #CCFLAGS = '-D TRACE_ON',
 )
 Alias('libbsp', libbsp)

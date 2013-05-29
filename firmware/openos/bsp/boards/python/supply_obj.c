@@ -34,7 +34,7 @@ void supply_on(OpenMote* self) {
    printf("C: supply_on()... \n");
 #endif
    
-   // star the mote's execution
+   // start the mote's execution
    mote_main(self);
    
 #ifdef TRACE_ON
@@ -47,6 +47,7 @@ void supply_off(OpenMote* self) {
 #ifdef TRACE_ON
    printf("C: supply_off()... \n");
 #endif
+   
    // TODO
    
 #ifdef TRACE_ON
