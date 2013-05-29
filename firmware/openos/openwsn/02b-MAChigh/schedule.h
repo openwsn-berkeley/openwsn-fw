@@ -132,11 +132,11 @@ bool               debugPrint_backoff();
 // from uRES
 void               schedule_setFrameLength(frameLength_t newFrameLength);
 void               schedule_addActiveSlot(
-                        slotOffset_t   slotOffset,
-                        cellType_t     type,
-                        bool           shared,
-                        uint8_t        channelOffset,
-                        open_addr_t*   neighbor
+                        slotOffset_t    slotOffset,
+                        cellType_t      type,
+                        bool            shared,
+                        channelOffset_t channelOffset,
+                        open_addr_t*    neighbor
                    );
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
