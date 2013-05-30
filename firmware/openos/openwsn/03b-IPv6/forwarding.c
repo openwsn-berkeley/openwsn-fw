@@ -9,6 +9,8 @@
 #include "icmpv6.h"
 #include "openudp.h"
 #include "opentcp.h"
+#include "debugpins.h"
+#include "scheduler.h"
 
 //=========================== variables =======================================
 
@@ -17,7 +19,8 @@
 error_t fowarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
 void    forwarding_getNextHop_RoutingTable(open_addr_t* destination, open_addr_t* addressToWrite);
 error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
-
+//poipoi demo
+void toggle_leds_demo_fw();
 //=========================== public ==========================================
 
 /**
@@ -163,7 +166,10 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
       } else {
          // source routing header present
         
-         if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
+         //poipoi demo
+          scheduler_push_task(toggle_leds_demo_fw,TASKPRIO_COAP);
+         
+          if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
             //already freed by send_internal if it fails
             //todo change error type to another that says src_route failure.
            openserial_printError(COMPONENT_FORWARDING,ERR_INVALID_FWDMODE,
@@ -175,6 +181,10 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
 }
 
 //=========================== private =========================================
+//poipoi demo
+void toggle_leds_demo_fw(){
+   uint8_t j=0;
+   uint16_t i=0;
 
 /**
 \brief Send a packet using the routing table to find the next hop.

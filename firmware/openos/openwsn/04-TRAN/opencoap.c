@@ -204,6 +204,11 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    msg->l4_destination_port         = msg->l4_sourcePortORicmpv6Type;
    msg->l4_sourcePortORicmpv6Type   = temp_l4_destination_port;
    
+   //set destination address as the current source.
+   msg->l3_destinationAdd.type = ADDR_128B;
+   memcpy(&msg->l3_destinationAdd.addr_128b[0],&msg->l3_sourceAdd.addr_128b[0],LENGTH_ADDR128b);
+   
+   
    // fill in CoAP header
    packetfunctions_reserveHeaderSize(msg,4);
    msg->payload[0]                  = (COAP_VERSION   << 6) |

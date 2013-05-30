@@ -22,6 +22,7 @@ void icmpv6echo_trigger() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer[16];
    OpenQueueEntry_t* msg;
+ 
    
    //get command from OpenSerial (16B IPv6 destination address)
    number_bytes_from_input_buffer = openserial_getInputBuffer(&(input_buffer[0]),sizeof(input_buffer));

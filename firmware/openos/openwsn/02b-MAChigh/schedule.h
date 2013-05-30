@@ -88,7 +88,7 @@ PRAGMA(pack(1));
 typedef struct {
    uint8_t last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
    uint8_t slotOffset;
-   uint8_t channelOffset;
+   channelOffset_t channelOffset;
 }netDebugScheduleEntry_t;
 PRAGMA(pack());
 
@@ -107,7 +107,16 @@ typedef struct {
 } debugScheduleEntry_t;
 PRAGMA(pack());
 
-//=========================== module variables ================================
+PRAGMA(pack(1)); //elements for slot info 
+typedef struct {
+  uint8_t address[LENGTH_ADDR64b];// 
+  cellType_t link_type;// rx,tx etc...
+  bool shared;
+  slotOffset_t slotOffset;
+  channelOffset_t channelOffset;
+}slotinfo_element_t;
+PRAGMA(pack());
+//=========================== variables =======================================
 
 typedef struct {
    scheduleEntry_t  scheduleBuf[MAXACTIVESLOTS];
@@ -131,13 +140,22 @@ bool               debugPrint_schedule();
 bool               debugPrint_backoff();
 // from uRES
 void               schedule_setFrameLength(frameLength_t newFrameLength);
-void               schedule_addActiveSlot(
-                        slotOffset_t    slotOffset,
-                        cellType_t      type,
-                        bool            shared,
-                        channelOffset_t channelOffset,
-                        open_addr_t*    neighbor
-                   );
+error_t            schedule_addActiveSlot(
+                        slotOffset_t   slotOffset,
+                        cellType_t     type,
+                        bool           shared,
+                        uint8_t        channelOffset,
+                        open_addr_t*   neighbor,
+                        bool isUpdate);
+
+void               schedule_getSlotInfo(slotOffset_t   slotOffset,                      
+                              open_addr_t*   neighbor,
+                              slotinfo_element_t* info);
+
+error_t               schedule_removeActiveSlot(slotOffset_t   slotOffset,                      
+                              open_addr_t*   neighbor);
+
+
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
 void               schedule_advanceSlot();
