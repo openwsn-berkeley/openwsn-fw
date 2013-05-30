@@ -103,7 +103,7 @@ void rreg_timer() {
       openserial_printError(COMPONENT_RREG,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      openqueue_freePacketBuffer(pkt);
+      //openqueue_freePacketBuffer(pkt);
       return;
    }
    // take ownership over that packet
