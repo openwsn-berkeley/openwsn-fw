@@ -7,13 +7,6 @@
 //=========================== variables =======================================
 
 schedule_vars_t schedule_vars;
-
-typedef struct {
-   uint8_t          numActiveSlotsCur;
-   uint8_t          numActiveSlotsMax;
-   uint8_t          numUpdatedSlotsCur;
-} schedule_dbg_t;
-
 schedule_dbg_t schedule_dbg;
 
 //=========================== prototypes ======================================

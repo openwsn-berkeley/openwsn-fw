@@ -130,6 +130,7 @@ typedef struct {
 typedef struct {
    uint8_t          numActiveSlotsCur;
    uint8_t          numActiveSlotsMax;
+   uint8_t          numUpdatedSlotsCur;
 } schedule_dbg_t;
 
 //=========================== prototypes ======================================
