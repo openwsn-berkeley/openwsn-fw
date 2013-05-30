@@ -100,7 +100,7 @@ void openwsn_init() {
    openudp_init();
    opencoap_init();    // initialize before any of the CoAP applications
    //-- app (common)
-   rreg_init();
+ //  rreg_init();
    rwellknown_init();
    rinfo_init();
    
