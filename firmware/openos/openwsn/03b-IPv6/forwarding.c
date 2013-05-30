@@ -14,9 +14,9 @@
 
 //=========================== prototypes ======================================
 
-error_t fowarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
+error_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
 void    forwarding_getNextHop_RoutingTable(open_addr_t* destination, open_addr_t* addressToWrite);
-error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
+error_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
 
 //=========================== public ==========================================
 
@@ -34,32 +34,32 @@ at this mote.
 
 \param[in,out] msg Packet to send.
 */
-error_t forwarding_send(OpenQueueEntry_t* msg) { 
+error_t forwarding_send(OpenQueueEntry_t* msg) {
    ipv6_header_iht ipv6_header;
    open_addr_t*    myprefix;
    open_addr_t*    myadd64;
-   
+
    // take ownership
-   msg->owner                = COMPONENT_FORWARDING; 
-   
+   msg->owner                = COMPONENT_FORWARDING;
+
    // retrieve my prefix and EUI64
    myprefix                  = idmanager_getMyID(ADDR_PREFIX);
    myadd64                   = idmanager_getMyID(ADDR_64B);
-   
+
    // set source address (to me)
    msg->l3_sourceAdd.type=ADDR_128B;
    memcpy(&(msg->l3_sourceAdd.addr_128b[0]),myprefix->prefix,8);
    memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b,8);
-   
+
    // initialize IPv6 header
    memset(&ipv6_header,0,sizeof(ipv6_header_iht));
-   
+
    //set hop limit to the default in-network value as this packet is being sent from upper layer.
-   //this is done here as send_internal is used by forwarding of packets as well which 
+   //this is done here as send_internal is used by forwarding of packets as well which
    //carry a hlim. This value is required to be set to a value as the following function can decrement it
    ipv6_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
-   
-   return fowarding_send_internal_RoutingTable(msg,ipv6_header,PCKTSEND);
+
+   return forwarding_send_internal_RoutingTable(msg,ipv6_header,PCKTSEND);
 }
 
 /**
@@ -69,18 +69,18 @@ error_t forwarding_send(OpenQueueEntry_t* msg) {
 \param[in]     error The outcome of sending it.
 */
 void forwarding_sendDone(OpenQueueEntry_t* msg, error_t error) {
-   
+
    // take ownership
    msg->owner = COMPONENT_FORWARDING;
-   
+
    if (msg->creator==COMPONENT_RADIO || msg->creator==COMPONENT_FORWARDING) {
       // that is a packet I relayed
-      
+
       // free packet
       openqueue_freePacketBuffer(msg);
    } else {
       // that is a packet I created
-      
+
       // indicate sendDone to upper layer
       switch(msg->l4_protocol) {
          case IANA_TCP:
@@ -111,15 +111,15 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, error_t error) {
 void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
    // take ownership
    msg->owner                  = COMPONENT_FORWARDING;
-   
+
    // populate packets metadata with l4 information
    msg->l4_protocol            = ipv6_header.next_header;
    msg->l4_protocol_compressed = ipv6_header.next_header_compressed;
-   
+
    // populate packets metadata with l3 information
    memcpy(&(msg->l3_destinationAdd),&ipv6_header.dest,sizeof(open_addr_t));
    memcpy(&(msg->l3_sourceAdd),     &ipv6_header.src, sizeof(open_addr_t));
-   
+
    if (
           (
              idmanager_isMyAddress(&ipv6_header.dest)
@@ -130,7 +130,7 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
           ipv6_header.next_header!=IANA_IPv6ROUTE
        ) {
       // this packet is for me, but no routing header.
-      
+
       // indicate received packet to upper layer
       switch(msg->l4_protocol) {
          case IANA_TCP:
@@ -150,20 +150,20 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
       }
    } else {
       // this packet is not for me: relay
-      
+
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
-      
+
       if (ipv6_header.next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
-         // resend as if from upper layer 
-         if (fowarding_send_internal_RoutingTable(msg, ipv6_header,PCKTFORWARD)==E_FAIL) {
+         // resend as if from upper layer
+         if (forwarding_send_internal_RoutingTable(msg, ipv6_header,PCKTFORWARD)==E_FAIL) {
             openqueue_freePacketBuffer(msg);
          }
       } else {
          // source routing header present
-        
-         if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
+
+         if (forwarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
             //already freed by send_internal if it fails
             //todo change error type to another that says src_route failure.
            openserial_printError(COMPONENT_FORWARDING,ERR_INVALID_FWDMODE,
@@ -184,8 +184,8 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
 \param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
-error_t fowarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
-   
+error_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
+
    // retrieve the next hop from the routing table
    forwarding_getNextHop_RoutingTable(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
    if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
@@ -194,7 +194,7 @@ error_t fowarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_
                             (errorparameter_t)0);
       return E_FAIL;
    }
-   
+
    // send to next lower layer
    return iphc_sendFromForwarding(msg, ipv6_header, fw_SendOrfw_Rcv);
 }
@@ -210,7 +210,7 @@ http://tools.ietf.org/html/rfc6554#page-9.
 \param[in,out] msg             The packet to send.
 \param[in]     ipv6_header     The packet's IPv6 header.
 */
-error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header) {
+error_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header) {
    uint8_t         local_CmprE;
    uint8_t         local_CmprI;
    uint8_t         numAddr;
@@ -220,43 +220,43 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
    uint8_t         octetsAddressSize;
    open_addr_t*    prefix;
    rpl_routing_ht* rpl_routing_hdr;
-   
+
    // get my prefix
    prefix               = idmanager_getMyID(ADDR_PREFIX);
-   
+
    // cast packet to RPL routing header
    rpl_routing_hdr      = (rpl_routing_ht*)(msg->payload);
-   
+
    // point behind the RPL routing header
    runningPointer       = (msg->payload)+sizeof(rpl_routing_ht);
-   
+
    // retrieve CmprE and CmprI
-   
+
    /*CmprE 4-bit unsigned integer. Number of prefix octets
      from the last segment (i.e., segment n) that are
      elided. For example, an SRH carrying a full IPv6
      address in Addressesn sets CmprE to 0.*/
-   
-   local_CmprE          = rpl_routing_hdr->CmprICmprE & 0x0f;   
+
+   local_CmprE          = rpl_routing_hdr->CmprICmprE & 0x0f;
    local_CmprI          = rpl_routing_hdr->CmprICmprE & 0xf0;
    local_CmprI          = local_CmprI>>4;
-   
+
    numAddr              = (((rpl_routing_hdr->HdrExtLen*8)-rpl_routing_hdr->PadRes-(16-local_CmprE))/(16-local_CmprI))+1;
-   
+
    if (rpl_routing_hdr->SegmentsLeft==0){
       // no more segments left, this is the last hop
-      
+
       // push packet up the stack
       msg->l4_protocol  = rpl_routing_hdr->nextHeader;
       hlen              = rpl_routing_hdr->HdrExtLen; //in 8-octet units
-      
+
       // toss RPL routing header
       packetfunctions_tossHeader(msg,sizeof(rpl_routing_ht));
-      
+
       // toss source route addresses
       octetsAddressSize = LENGTH_ADDR128b - local_CmprE; //total length - number of octets that are elided
       packetfunctions_tossHeader(msg,octetsAddressSize*hlen);
-      
+
       // indicate reception to upper layer
       switch(msg->l4_protocol) {
          case IANA_TCP:
@@ -276,33 +276,33 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
             openqueue_freePacketBuffer(msg);
             return E_FAIL;
       }
-      
+
       // stop executing here (successful)
       return E_SUCCESS;
-   
+
    } else {
       // this is not the last hop
-      
+
       if (rpl_routing_hdr->SegmentsLeft>numAddr) {
          // error code: there are more segments left than space in source route
-         
+
          // TODO: send ICMPv6 packet (code 0) to originator
-         
+
          openserial_printError(COMPONENT_FORWARDING,ERR_NO_NEXTHOP,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
          openqueue_freePacketBuffer(msg);
          return E_FAIL;
-      
+
       } else {
-         
+
          // decrement number of segments left
          rpl_routing_hdr->SegmentsLeft--;
-         
+
          // find next hop address in source route
          addressposition    = numAddr-(rpl_routing_hdr->SegmentsLeft);
-         
-         // how many octets have the address? 
+
+         // how many octets have the address?
          if (rpl_routing_hdr->SegmentsLeft > 1){
               octetsAddressSize = LENGTH_ADDR128b - local_CmprI; //max addr length - number of prefix octets that are elided in the internal route elements
          }else{
@@ -333,10 +333,10 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
                   runningPointer+((addressposition-1)*octetsAddressSize),
                   octetsAddressSize
                );
-               
-               //this is 128b address as send from forwarding function 
+
+               //this is 128b address as send from forwarding function
                //takes care of reducing it if needed.
-               
+
                //write next hop
                msg->l3_destinationAdd.type       = ADDR_128B;
                memcpy(
@@ -344,13 +344,13 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
                   prefix->prefix,
                   LENGTH_ADDR64b
                );
-               
+
                memcpy(
                   &(msg->l3_destinationAdd.addr_128b[8]),
                   runningPointer+((addressposition-1)*octetsAddressSize),
                   octetsAddressSize
                );
-               
+
                break;
             case LENGTH_ADDR128b:
                // write previous hop
@@ -379,7 +379,7 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
          }
       }
    }
-   
+
    // send to next lower layer
    return iphc_sendFromForwarding(msg, ipv6_header, PCKTFORWARD);
 }
