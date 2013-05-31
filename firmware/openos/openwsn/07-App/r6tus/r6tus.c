@@ -145,23 +145,6 @@ error_t r6tus_receive(OpenQueueEntry_t* msg,
           case READ_LINK:
             outcome=E_FAIL; 
             //cannot put READ operation
-//            if (link_command->numelem<R6TUS_MAXRESPONSES){
-//               //parse the required link and return that
-//                for(i=0;i<link_command->numelem;i++) {
-//                    link_element=(slotinfo_element_t*) (msg->payload[sizeof(r6tus_command_t)+i*sizeof(slotinfo_element_t)]);
-//                    //query the schedule and update the field in the msg.
-//                    temp_addr.type=ADDR_64B;
-//                    memcpy(&(temp_addr.addr_64b[0]), &(link_element->address[0]),LENGTH_ADDR64b);
-//                    schedule_getSlotInfo(link_element->slotOffset, &temp_addr, link_element);                       
-//                }
-//                //write back the packet.
-//                //set the CoAP header
-//                coap_header->OC                  = 0;
-//                coap_header->Code                = COAP_CODE_RESP_CONTENT;
-//                //by using the same link_element we don't need to write the packet. it returns the same payload  but with the correct values.
-//              
-//                outcome                          = E_SUCCESS;      
-//          }
           break;
           case CREATE_LINK:
           case UPDATE_LINK://update should be post according to REST architecture.
@@ -169,7 +152,7 @@ error_t r6tus_receive(OpenQueueEntry_t* msg,
             if (link_command->numelem<R6TUS_MAXRESPONSES){
             
                for(i=0;i<link_command->numelem;i++) {
-                  link_element=(slotinfo_element_t*) (msg->payload[sizeof(r6tus_command_t)+i*sizeof(slotinfo_element_t)]);
+                  link_element=(slotinfo_element_t*) &(msg->payload[sizeof(r6tus_command_t)+i*sizeof(slotinfo_element_t)]);
                   temp_addr.type=ADDR_64B;
                   memcpy(&(temp_addr.addr_64b[0]), &(link_element->address[0]),LENGTH_ADDR64b);
 
@@ -181,16 +164,6 @@ error_t r6tus_receive(OpenQueueEntry_t* msg,
           case DELETE_LINK:
           outcome=E_FAIL; 
           //cannot delete with PUT/POST
-//            if (link_command->numelem<R6TUS_MAXRESPONSES){    
-//               for(i=0;i<link_command->numelem;i++) {
-//                  link_element=(slotinfo_element_t*) (msg->payload[sizeof(r6tus_command_t)+i*sizeof(slotinfo_element_t)]);
-//                  temp_addr.type=ADDR_64B;
-//                  memcpy(&(temp_addr.addr_64b[0]), &(link_element->address[0]),LENGTH_ADDR64b);
-//                  //remove the required links.
-//                  responses[i]=schedule_removeActiveSlot(link_element->slotOffset,&temp_addr);
-//               }
-//               outcome=E_SUCCESS; 
-//            }
             break;
           default:
               openserial_printError(COMPONENT_R6TUS,ERR_COMMAND_NOT_ALLOWED,
