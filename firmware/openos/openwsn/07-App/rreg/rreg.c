@@ -127,7 +127,7 @@ void rreg_timer() {
    pkt->payload[0] = 'r';
    pkt->payload[1] = 'd';
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_NUM_LOCATIONPATH-COAP_OPTION_NUM_CONTENTFORMAT) << 4 |
+   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 |
       2;
    numOptions++;
    // add content-type option
