@@ -115,12 +115,12 @@ void rex_task_cb() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(rex_path0)-1);
    memcpy(&pkt->payload[0],&rex_path0,sizeof(rex_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                  = (COAP_OPTION_LOCATIONPATH-COAP_OPTION_CONTENTTYPE) << 4 |
+   pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
       sizeof(rex_path0)-1;
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+   pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
       1;
    pkt->payload[1]                  = COAP_MEDTYPE_APPOCTETSTREAM;
    numOptions++;

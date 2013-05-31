@@ -61,7 +61,7 @@ error_t rwellknown_receive(OpenQueueEntry_t* msg,
          
       // add return option
       packetfunctions_reserveHeaderSize(msg,2);
-      msg->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+      msg->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
                                          1;
       msg->payload[1]                  = COAP_MEDTYPE_APPLINKFORMAT;
       

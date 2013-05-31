@@ -75,22 +75,24 @@ typedef enum {
 } coap_code_t;
 
 typedef enum {
-   COAP_OPTION_NONE                    =  0,
-   COAP_OPTION_CONTENTTYPE             =  1,
-   COAP_OPTION_MAXAGE                  =  2,
-   COAP_OPTION_PROXYURI                =  3,
-   COAP_OPTION_ETAG                    =  4,
-   COAP_OPTION_URIHOST                 =  5,
-   COAP_OPTION_LOCATIONPATH            =  6,
-   COAP_OPTION_URIPORT                 =  7,
-   COAP_OPTION_LOCATIONQUERY           =  8,
-   COAP_OPTION_URIPATH                 =  9,
-   COAP_OPTION_TOKEN                   = 11,
-   COAP_OPTION_ACCEPT                  = 12,
-   COAP_OPTION_IFMATCH                 = 13,
-   COAP_OPTION_URIQUERY                = 15,
-   COAP_OPTION_IFNONEMATCH             = 21,
+   COAP_OPTION_NONE                            = 0,
+   COAP_OPTION_NUM_IFMATCH                     = 1,
+   COAP_OPTION_NUM_URIHOST                     = 3,
+   COAP_OPTION_NUM_ETAG                        = 4,
+   COAP_OPTION_NUM_IFNONEMATCH                 = 5,
+   COAP_OPTION_NUM_URIPORT                     = 7,
+   COAP_OPTION_NUM_LOCATIONPATH                = 8,
+   COAP_OPTION_NUM_URIPATH                     = 11,
+   COAP_OPTION_NUM_CONTENTFORMAT               = 12,
+   COAP_OPTION_NUM_MAXAGE                      = 14,
+   COAP_OPTION_NUM_URIQUERY                    = 15,
+   COAP_OPTION_NUM_ACCEPT                      = 16,
+   COAP_OPTION_NUM_LOCATIONQUERY               = 20,
+   COAP_OPTION_NUM_PROXYURI                    = 35,
+   COAP_OPTION_NUM_PROXYSCHEME                 = 39,
 } coap_option_t;
+
+
 
 typedef enum {
    COAP_MEDTYPE_TEXTPLAIN              =  0,
@@ -109,6 +111,7 @@ typedef struct {
    uint8_t       OC;
    coap_code_t   Code;
    uint16_t      messageID;
+   uint8_t       token;
 } coap_header_iht;
 
 typedef struct {

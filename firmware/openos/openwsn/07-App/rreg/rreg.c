@@ -119,7 +119,7 @@ void rreg_timer() {
    pkt->payload[sizeof(rreg_uriquery)-1] = hexToAscii((temp8b>>4) & 0x0f);
    pkt->payload[sizeof(rreg_uriquery)-0] = hexToAscii((temp8b>>0) & 0x0f);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_URIQUERY-COAP_OPTION_URIPATH) << 4 |
+   pkt->payload[0] = (COAP_OPTION_NUM_URIQUERY-COAP_OPTION_NUM_URIPATH) << 4 |
       sizeof(rreg_uriquery)-1+2;
    numOptions++;
    // URI-path
@@ -127,12 +127,12 @@ void rreg_timer() {
    pkt->payload[0] = 'r';
    pkt->payload[1] = 'd';
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_URIPATH-COAP_OPTION_CONTENTTYPE) << 4 |
+   pkt->payload[0] = (COAP_OPTION_NUM_LOCATIONPATH-COAP_OPTION_NUM_CONTENTFORMAT) << 4 |
       2;
    numOptions++;
    // add content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+   pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
       1;
    pkt->payload[1]                  = COAP_MEDTYPE_APPLINKFORMAT;
    numOptions++;
