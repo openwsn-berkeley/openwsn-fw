@@ -238,6 +238,7 @@ varsToChange = [
     'idmanager_vars',
     'openqueue_vars',
     'random_vars',
+    'r6tus_vars',
 ]
 
 returnTypes = [
@@ -591,7 +592,9 @@ functionsToChange = [
     'debugPrint_schedule',
     'debugPrint_backoff',
     'schedule_setFrameLength',
+    'schedule_getSlotInfo',
     'schedule_addActiveSlot',
+    'schedule_removeActiveSlot',
     'schedule_syncSlotOffset',
     'schedule_advanceSlot',
     'schedule_getNextActiveSlotOffset',
@@ -623,8 +626,8 @@ functionsToChange = [
     'forwarding_send',
     'forwarding_sendDone',
     'forwarding_receive',
-    'fowarding_send_internal_RoutingTable',
-    'fowarding_send_internal_SourceRouting',
+    'forwarding_send_internal_RoutingTable',
+    'forwarding_send_internal_SourceRouting',
     'forwarding_getNextHop_RoutingTable',
     # icmpv6
     'icmpv6_init',
@@ -696,6 +699,10 @@ functionsToChange = [
     'ohlone_sendDone',
     'ohlone_connectDone',
     'ohlone_debugPrint',
+    # r6tus
+    'r6tus_init',
+    'r6tus_receive',
+    'r6tus_sendDone',
     # rex
     'rex_init',
     'rex_receive',
