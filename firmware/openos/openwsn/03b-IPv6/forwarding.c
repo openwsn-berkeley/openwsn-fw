@@ -16,9 +16,9 @@
 
 //=========================== prototypes ======================================
 
-error_t fowarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
+error_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
 void    forwarding_getNextHop_RoutingTable(open_addr_t* destination, open_addr_t* addressToWrite);
-error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
+error_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
 //=========================== public ==========================================
 
 /**
@@ -60,7 +60,7 @@ error_t forwarding_send(OpenQueueEntry_t* msg) {
    //carry a hlim. This value is required to be set to a value as the following function can decrement it
    ipv6_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
    
-   return fowarding_send_internal_RoutingTable(msg,ipv6_header,PCKTSEND);
+   return forwarding_send_internal_RoutingTable(msg,ipv6_header,PCKTSEND);
 }
 
 /**
@@ -158,12 +158,12 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
       if (ipv6_header.next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
          // resend as if from upper layer 
-         if (fowarding_send_internal_RoutingTable(msg, ipv6_header,PCKTFORWARD)==E_FAIL) {
+         if (forwarding_send_internal_RoutingTable(msg, ipv6_header,PCKTFORWARD)==E_FAIL) {
             openqueue_freePacketBuffer(msg);
          }
       } else {
          // source routing header present 
-          if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
+          if (forwarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
             //already freed by send_internal if it fails
             //todo change error type to another that says src_route failure.
            openserial_printError(COMPONENT_FORWARDING,ERR_INVALID_FWDMODE,
@@ -184,7 +184,7 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
 \param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
-error_t fowarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
+error_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
    
    // retrieve the next hop from the routing table
    forwarding_getNextHop_RoutingTable(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
@@ -210,7 +210,7 @@ http://tools.ietf.org/html/rfc6554#page-9.
 \param[in,out] msg             The packet to send.
 \param[in]     ipv6_header     The packet's IPv6 header.
 */
-error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header) {
+error_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header) {
    uint8_t         local_CmprE;
    uint8_t         local_CmprI;
    uint8_t         numAddr;
