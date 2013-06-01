@@ -17,6 +17,7 @@
 */
 
 #include "openwsn.h"
+#include "opencoap.h"
 #include "schedule.h"
 
 //=========================== define ==========================================

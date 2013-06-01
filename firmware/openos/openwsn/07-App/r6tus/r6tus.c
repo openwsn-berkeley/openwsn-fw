@@ -7,7 +7,6 @@
 
 #include "openwsn.h"
 #include "r6tus.h"
-#include "opencoap.h"
 #include "opentimers.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
