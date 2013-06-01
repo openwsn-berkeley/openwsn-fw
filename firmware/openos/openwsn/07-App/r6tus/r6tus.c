@@ -191,7 +191,7 @@ error_t r6tus_receive(OpenQueueEntry_t* msg,
             outcome=E_FAIL; 
             if (link_command->numelem<R6TUS_MAXRESPONSES){    
                for(i=0;i<link_command->numelem;i++) {
-                  link_element=(slotinfo_element_t*)(msg->payload[sizeof(r6tus_command_t)+i*sizeof(slotinfo_element_t)]);
+                  link_element=(slotinfo_element_t*) &(msg->payload[sizeof(r6tus_command_t)+i*sizeof(slotinfo_element_t)]);
                   temp_addr.type=ADDR_64B;
                   memcpy(&(temp_addr.addr_64b[0]), &(link_element->address[0]),LENGTH_ADDR64b);
                   //remove the required links.
