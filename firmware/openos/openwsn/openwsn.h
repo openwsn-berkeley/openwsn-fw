@@ -71,6 +71,7 @@ enum {
 };
 
 // well known ports (which we define)
+// warning: first 4 MSB of 2° octect may coincide with previous protocol number
 enum {
    //TCP
    WKP_TCP_HTTP                        =    80,
