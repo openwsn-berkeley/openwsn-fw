@@ -161,7 +161,7 @@ void rrube_timer() {
       packetfunctions_reserveHeaderSize(pkt,sizeof(rrube_path0)-1);
       memcpy(&pkt->payload[0],&rrube_path0,sizeof(rrube_path0)-1);
       packetfunctions_reserveHeaderSize(pkt,1);
-      pkt->payload[0] = (COAP_OPTION_URIPATH) << 4 |
+      pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 |
                         sizeof(rrube_path0)-1;
       numOptions++;
       // metadata
@@ -205,7 +205,7 @@ void rrube_timer() {
       packetfunctions_reserveHeaderSize(pkt,sizeof(rrube_path0)-1);
       memcpy(&pkt->payload[0],&rrube_path0,sizeof(rrube_path0)-1);
       packetfunctions_reserveHeaderSize(pkt,1);
-      pkt->payload[0] = (COAP_OPTION_URIPATH) << 4 |
+      pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 |
                         sizeof(rrube_path0)-1;
       numOptions++;
       // metadata

@@ -4,7 +4,7 @@
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
-
+#include "idmanager.h"
 //=========================== variables =======================================
 
 typedef struct {
@@ -28,6 +28,10 @@ void    rwellknown_sendDone(OpenQueueEntry_t* msg,
 //=========================== public ==========================================
 
 void rwellknown_init() {
+  
+  
+   if(idmanager_getIsDAGroot()==TRUE) return; 
+   
    // prepare the resource descriptor for the /.well-known/core path
    rwellknown_vars.desc.path0len            = sizeof(rwellknown_path0)-1;
    rwellknown_vars.desc.path0val            = (uint8_t*)(&rwellknown_path0);
@@ -57,7 +61,7 @@ error_t rwellknown_receive(OpenQueueEntry_t* msg,
          
       // add return option
       packetfunctions_reserveHeaderSize(msg,2);
-      msg->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+      msg->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
                                          1;
       msg->payload[1]                  = COAP_MEDTYPE_APPLINKFORMAT;
       

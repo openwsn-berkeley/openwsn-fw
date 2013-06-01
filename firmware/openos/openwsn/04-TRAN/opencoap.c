@@ -63,6 +63,10 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    index++;
    coap_header.messageID     = msg->payload[index]*256+msg->payload[index+1];
    index+=2;
+   coap_header.token         =(msg->payload[index]);
+   index++;
+   
+   
    // reject unsupported header
    if (
          coap_header.Ver!=COAP_VERSION ||
@@ -88,6 +92,10 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       coap_options[i].pValue      = &(msg->payload[index]);
       index += coap_options[i].length;
    }
+   //check payload spacer and remove it
+   if (msg->payload[index]==0xFF){
+     index++; //
+   }
    // remove the CoAP header+options
    packetfunctions_tossHeader(msg,index);
    
@@ -103,8 +111,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       temp_desc = opencoap_vars.resources;
       while (found==FALSE) {
          if    (
-                coap_options[0].type==COAP_OPTION_URIPATH &&
-                coap_options[1].type==COAP_OPTION_URIPATH &&
+                coap_options[0].type==COAP_OPTION_NUM_URIPATH &&
+                coap_options[1].type==COAP_OPTION_NUM_URIPATH &&
                 temp_desc->path0len>0                     &&
                 temp_desc->path0val!=NULL                 &&
                 temp_desc->path1len>0                     &&
@@ -121,7 +129,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
                found = TRUE;
             };
          } else if (
-                coap_options[0].type==COAP_OPTION_URIPATH &&
+                coap_options[0].type==COAP_OPTION_NUM_URIPATH &&
                 temp_desc->path0len>0                     &&
                 temp_desc->path0val!=NULL
             ) {
@@ -204,14 +212,20 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    msg->l4_destination_port         = msg->l4_sourcePortORicmpv6Type;
    msg->l4_sourcePortORicmpv6Type   = temp_l4_destination_port;
    
+   //set destination address as the current source.
+   msg->l3_destinationAdd.type = ADDR_128B;
+   memcpy(&msg->l3_destinationAdd.addr_128b[0],&msg->l3_sourceAdd.addr_128b[0],LENGTH_ADDR128b);
+   
+   
    // fill in CoAP header
-   packetfunctions_reserveHeaderSize(msg,4);
+   packetfunctions_reserveHeaderSize(msg,5);
    msg->payload[0]                  = (COAP_VERSION   << 6) |
                                       (COAP_TYPE_ACK  << 4) |
                                       (coap_header.OC << 0);
    msg->payload[1]                  = coap_header.Code;
    msg->payload[2]                  = coap_header.messageID/256;
    msg->payload[3]                  = coap_header.messageID%256;
+   msg->payload[4]                  = coap_header.token;
    
    if ((openudp_send(msg))==E_FAIL) {
       openqueue_freePacketBuffer(msg);

@@ -19,16 +19,11 @@ void idmanager_init() {
    idmanager_vars.myPANID.type         = ADDR_PANID;
    idmanager_vars.myPANID.panid[0]     = 0xca;
    idmanager_vars.myPANID.panid[1]     = 0xfe;
+
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
-   idmanager_vars.myPrefix.prefix[0]   = 0x00;
-   idmanager_vars.myPrefix.prefix[1]   = 0x00;
-   idmanager_vars.myPrefix.prefix[2]   = 0x00;
-   idmanager_vars.myPrefix.prefix[3]   = 0x00;
-   idmanager_vars.myPrefix.prefix[4]   = 0x00;
-   idmanager_vars.myPrefix.prefix[5]   = 0x00;
-   idmanager_vars.myPrefix.prefix[6]   = 0x00;
-   idmanager_vars.myPrefix.prefix[7]   = 0x00;
+   memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
    idmanager_vars.my64bID.type         = ADDR_64B;
+
    eui64_get(idmanager_vars.my64bID.addr_64b);
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
    

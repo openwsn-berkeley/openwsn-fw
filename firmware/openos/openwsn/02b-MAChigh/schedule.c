@@ -2,6 +2,7 @@
 #include "schedule.h"
 #include "openserial.h"
 #include "openrandom.h"
+#include "packetfunctions.h"
 
 //=========================== variables =======================================
 
@@ -43,7 +44,8 @@ void schedule_init() {
          CELLTYPE_ADV,            // type of slot
          FALSE,                   // shared?
          0,                       // channel offset
-         &temp_neighbor           // neighbor
+         &temp_neighbor,           // neighbor
+         FALSE                     //no update but insert
       );
       running_slotOffset++;
    } 
@@ -57,7 +59,8 @@ void schedule_init() {
          CELLTYPE_TXRX,           // type of slot
          TRUE,                    // shared?
          0,                       // channel offset
-         &temp_neighbor           // neighbor
+         &temp_neighbor,          // neighbor
+         FALSE                    //no update but insert
       );
       running_slotOffset++;
    }
@@ -69,7 +72,8 @@ void schedule_init() {
       CELLTYPE_SERIALRX,          // type of slot
       FALSE,                      // shared?
       0,                          // channel offset
-      &temp_neighbor              // neighbor
+      &temp_neighbor,             // neighbor
+      FALSE                       //no update but insert
    );
    running_slotOffset++;
    /*
@@ -166,32 +170,100 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
 }
 
 /**
-\brief Add a new active slot into the schedule.
+\brief get the information of a spcific slot.
 
-\param newFrameLength The new frame length.
+\param slotoffset
+\param neighbour address
 */
-void schedule_addActiveSlot(slotOffset_t    slotOffset,
+void  schedule_getSlotInfo(slotOffset_t   slotOffset,                      
+                              open_addr_t*   neighbor,
+                              slotinfo_element_t* info){                            
+                           
+   scheduleEntry_t* slotContainer;
+  
+   // find an empty schedule entry container
+   slotContainer = &schedule_vars.scheduleBuf[0];
+   while (slotContainer->type!=CELLTYPE_OFF && slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+       //check that this entry for that neighbour and timeslot is not already scheduled.
+       if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
+               //it exists so this is an update.
+               info->link_type                 = slotContainer->type;
+               info->shared                    =slotContainer->shared;
+               info->channelOffset             = slotContainer->channelOffset;
+               return; //as this is an update. No need to re-insert as it is in the same position on the list.
+        }
+        slotContainer++;
+   }
+   //return cell type off.
+   info->link_type                 = CELLTYPE_OFF;
+   info->shared                    = FALSE;
+   info->channelOffset             = 0;//set to zero if not set.                          
+}
+
+
+
+
+/**
+\brief Add a new active slot into the schedule. If udpate param is set then update it in case it exists.
+
+\param slotOffset
+\param type
+\param shared
+\param channelOffset
+\param neighbor
+*/
+error_t schedule_addActiveSlot(slotOffset_t    slotOffset,
       cellType_t      type,
       bool            shared,
-      uint8_t         channelOffset,
-      open_addr_t*    neighbor) {
+      channelOffset_t channelOffset,
+      open_addr_t*    neighbor,
+      bool isUpdate) {
+   
+   error_t outcome;
+   
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
    scheduleEntry_t* nextSlotWalker;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-
+   
+   
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (slotContainer->type!=CELLTYPE_OFF &&
          slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
-      slotContainer++;
+  
+           //check that this entry for that neighbour and timeslot is not already scheduled.
+           if (type!=CELLTYPE_SERIALRX && type!=CELLTYPE_MORESERIALRX &&  
+               (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))||
+                 (slotContainer->neighbor.type==ADDR_ANYCAST && isUpdate==TRUE))
+                 &&(slotContainer->slotOffset==slotOffset)){
+               //it exists so this is an update.
+               slotContainer->type                      = type;
+               slotContainer->shared                    = shared;
+               slotContainer->channelOffset             = channelOffset;
+               memcpy(&slotContainer->neighbor,neighbor,sizeof(open_addr_t));//update the address too!
+               schedule_dbg.numUpdatedSlotsCur++;
+               ENABLE_INTERRUPTS();
+               return E_SUCCESS; //as this is an update. No need to re-insert as it is in the same position on the list.
+           }
+           
+           slotContainer++;
+   }
+   
+   if (isUpdate==TRUE) {
+     //we are trying to update an item that is not in the schedule list.
+     ENABLE_INTERRUPTS();
+     return E_FAIL;
    }
    if (slotContainer>&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
       // schedule has overflown
+      outcome=E_FAIL;
       openserial_printCritical(COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
+      
+      
    }
    // fill that schedule entry with parameters passed
    slotContainer->slotOffset                = slotOffset;
@@ -245,8 +317,77 @@ void schedule_addActiveSlot(slotOffset_t    slotOffset,
    if (schedule_dbg.numActiveSlotsCur>schedule_dbg.numActiveSlotsMax) {
       schedule_dbg.numActiveSlotsMax        = schedule_dbg.numActiveSlotsCur;
    }
+   outcome=E_SUCCESS;
    ENABLE_INTERRUPTS();
+   return outcome;
 }
+
+
+
+error_t   schedule_removeActiveSlot(slotOffset_t   slotOffset, open_addr_t*   neighbor){
+  
+   error_t outcome;
+   
+   scheduleEntry_t* slotContainer;
+   scheduleEntry_t* previousSlotWalker;
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   
+   // find the schedule entry
+   slotContainer = &schedule_vars.scheduleBuf[0];
+   while (slotContainer->type!=CELLTYPE_OFF && slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+          //check that this entry for that neighbour and timeslot is not already scheduled.
+           if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
+               break;
+           }
+           slotContainer++;
+   }
+  
+   if (slotContainer->next==slotContainer) {
+      // this is the last active slot
+
+      // the next slot of this slot is NULL
+      slotContainer->next                   = NULL;
+
+      // current slot points to this slot
+      schedule_vars.currentScheduleEntry    = NULL;
+   } else  {
+      // this is NOT the last active slot
+
+      // find the previous in the schedule
+      previousSlotWalker                    = schedule_vars.currentScheduleEntry;
+      
+      while (1) {
+        if (previousSlotWalker->next=slotContainer){
+            break;
+         }
+         previousSlotWalker                 = previousSlotWalker->next;
+      }
+      // remove this element from the linked list
+      previousSlotWalker->next              = slotContainer->next;//my next;
+      slotContainer->next                   = NULL;
+   }
+
+    // clear that schedule entry 
+    slotContainer->slotOffset                = 0;
+    slotContainer->type                      = CELLTYPE_OFF;
+    slotContainer->shared                    = FALSE;
+    slotContainer->channelOffset             = 0;
+    memset(&slotContainer->neighbor,0,sizeof(open_addr_t));
+
+    // maintain debug stats
+    schedule_dbg.numActiveSlotsCur--;
+   
+    outcome=E_SUCCESS;
+    ENABLE_INTERRUPTS();
+    
+    return outcome;
+}
+
+
+
 
 //=== from IEEE802154E: reading the schedule and updating statistics
 

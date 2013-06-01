@@ -35,7 +35,10 @@ uint8_t hexToAscii(uint8_t hex);
 //=========================== public ==========================================
 
 void rreg_init() {
-   // prepare the resource descriptor for the /.well-known/core path
+  //dagroot does not run upper layers.
+   if(idmanager_getIsDAGroot()==TRUE) return; 
+ 
+  // prepare the resource descriptor for the /.well-known/core path
    rreg_vars.desc.path0len             = sizeof(rreg_path0)-1;
    rreg_vars.desc.path0val             = (uint8_t*)(&rreg_path0);
    rreg_vars.desc.path1len             = 0;
@@ -100,7 +103,7 @@ void rreg_timer() {
       openserial_printError(COMPONENT_RREG,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      openqueue_freePacketBuffer(pkt);
+      //openqueue_freePacketBuffer(pkt);
       return;
    }
    // take ownership over that packet
@@ -116,7 +119,7 @@ void rreg_timer() {
    pkt->payload[sizeof(rreg_uriquery)-1] = hexToAscii((temp8b>>4) & 0x0f);
    pkt->payload[sizeof(rreg_uriquery)-0] = hexToAscii((temp8b>>0) & 0x0f);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_URIQUERY-COAP_OPTION_URIPATH) << 4 |
+   pkt->payload[0] = (COAP_OPTION_NUM_URIQUERY-COAP_OPTION_NUM_URIPATH) << 4 |
       sizeof(rreg_uriquery)-1+2;
    numOptions++;
    // URI-path
@@ -124,12 +127,12 @@ void rreg_timer() {
    pkt->payload[0] = 'r';
    pkt->payload[1] = 'd';
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_URIPATH-COAP_OPTION_CONTENTTYPE) << 4 |
+   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 |
       2;
    numOptions++;
    // add content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+   pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
       1;
    pkt->payload[1]                  = COAP_MEDTYPE_APPLINKFORMAT;
    numOptions++;
