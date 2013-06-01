@@ -23,6 +23,7 @@ localEnv.Append(
         os.path.join('#','firmware','openos','openwsn','07-App','imu'),
         os.path.join('#','firmware','openos','openwsn','07-App','layerdebug'),
         os.path.join('#','firmware','openos','openwsn','07-App','ohlone'),
+        os.path.join('#','firmware','openos','openwsn','07-App','r6tus'),
         os.path.join('#','firmware','openos','openwsn','07-App','rex'),
         os.path.join('#','firmware','openos','openwsn','07-App','rheli'),
         os.path.join('#','firmware','openos','openwsn','07-App','rinfo'),
@@ -44,7 +45,7 @@ localEnv.Append(
         os.path.join('#','firmware','openos','openwsn','cross-layers'),
     ],
 )
-                   
+
 source = [
     'openwsn.c',
     #=== 02a-MAClow
@@ -76,6 +77,7 @@ source = [
     os.path.join('07-App','layerdebug','layerdebug.c'),
     os.path.join('07-App','ohlone','ohlone.c'),
     os.path.join('07-App','ohlone','ohlone_webpages.c'),
+    os.path.join('07-App','r6tus','r6tus.c'),
     #os.path.join('07-App','rex','rex.c'),
     os.path.join('07-App','rheli','rheli.c'),
     os.path.join('07-App','rinfo','rinfo.c'),
