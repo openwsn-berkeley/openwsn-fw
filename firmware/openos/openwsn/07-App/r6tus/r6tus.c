@@ -24,10 +24,6 @@ const uint8_t r6tus_path0[] = "6tus";
 
 //=========================== variables =======================================
 
-typedef struct {
-   coap_resource_desc_t desc;
-} r6tus_vars_t;
-
 r6tus_vars_t r6tus_vars;
 
 //=========================== prototypes ======================================

@@ -23,8 +23,6 @@
 
 #define R6TUS_MAXRESPONSES 20 //max number of elements to be processed by a command.
 
-
-
 //=========================== typedef =========================================
 
 //CRUD OPERATIONS FOR LINKS.
@@ -43,10 +41,11 @@ typedef struct {
 }r6tus_command_t;
 PRAGMA(pack());
 
-
-
-
 //=========================== variables =======================================
+
+typedef struct {
+   coap_resource_desc_t desc;
+} r6tus_vars_t;
 
 //=========================== prototypes ======================================
 

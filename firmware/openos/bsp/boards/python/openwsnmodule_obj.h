@@ -23,6 +23,7 @@
 #include "opencoap_obj.h"
 #include "opentcp_obj.h"
 #include "ohlone_obj.h"
+#include "r6tus_obj.h"
 #include "tcpinject_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
@@ -167,6 +168,7 @@ struct OpenMote {
    //===== state
    // l7
    ohlone_vars_t        ohlone_vars;
+   r6tus_vars_t         r6tus_vars;
    tcpinject_vars_t     tcpinject_vars;
    // l4
    icmpv6echo_vars_t    icmpv6echo_vars;
