@@ -235,12 +235,14 @@ error_t schedule_addActiveSlot(slotOffset_t    slotOffset,
   
            //check that this entry for that neighbour and timeslot is not already scheduled.
            if (type!=CELLTYPE_SERIALRX && type!=CELLTYPE_MORESERIALRX &&  
-               packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& 
-               (slotContainer->slotOffset==slotOffset)){
+               (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))||
+                 (slotContainer->neighbor.type==ADDR_ANYCAST && isUpdate==TRUE))
+                 &&(slotContainer->slotOffset==slotOffset)){
                //it exists so this is an update.
                slotContainer->type                      = type;
                slotContainer->shared                    = shared;
                slotContainer->channelOffset             = channelOffset;
+               memcpy(&slotContainer->neighbor,neighbor,sizeof(open_addr_t));//update the address too!
                schedule_dbg.numUpdatedSlotsCur++;
                ENABLE_INTERRUPTS();
                return E_SUCCESS; //as this is an update. No need to re-insert as it is in the same position on the list.

@@ -218,13 +218,14 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    
    
    // fill in CoAP header
-   packetfunctions_reserveHeaderSize(msg,4);
+   packetfunctions_reserveHeaderSize(msg,5);
    msg->payload[0]                  = (COAP_VERSION   << 6) |
                                       (COAP_TYPE_ACK  << 4) |
                                       (coap_header.OC << 0);
    msg->payload[1]                  = coap_header.Code;
    msg->payload[2]                  = coap_header.messageID/256;
    msg->payload[3]                  = coap_header.messageID%256;
+   msg->payload[4]                  = coap_header.token;
    
    if ((openudp_send(msg))==E_FAIL) {
       openqueue_freePacketBuffer(msg);
