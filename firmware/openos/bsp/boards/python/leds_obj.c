@@ -19,7 +19,7 @@ void leds_init(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_init()... \n");
+   printf("C@0x%x: leds_init()... \n",self);
 #endif
    
    // forward to Python
@@ -31,7 +31,7 @@ void leds_init(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -39,7 +39,7 @@ void leds_error_on(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_error_on()... \n");
+   printf("C@0x%x: leds_error_on()... \n",self);
 #endif
    
    // forward to Python
@@ -51,14 +51,14 @@ void leds_error_on(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 void leds_error_off(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_error_off()... \n");
+   printf("C@0x%x: leds_error_off()... \n",self);
 #endif
    
    // forward to Python
@@ -70,14 +70,14 @@ void leds_error_off(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 void leds_error_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_error_toggle()... \n");
+   printf("C@0x%x: leds_error_toggle()... \n",self);
 #endif
    
    // forward to Python
@@ -89,7 +89,7 @@ void leds_error_toggle(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 uint8_t leds_error_isOn(OpenMote* self) {
@@ -97,7 +97,7 @@ uint8_t leds_error_isOn(OpenMote* self) {
    uint8_t    returnVal;
    
 #ifdef TRACE_ON
-   printf("C: leds_error_isOn()... \n");
+   printf("C@0x%x: leds_error_isOn()... \n",self);
 #endif
    
    // forward to Python
@@ -110,7 +110,7 @@ uint8_t leds_error_isOn(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...got %d.\n",returnVal);
+   printf("C@0x%x: ...got %d.\n",self,returnVal);
 #endif
    
    return returnVal;
@@ -119,7 +119,7 @@ void leds_error_blink(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_error_blink()... \n");
+   printf("C@0x%x: leds_error_blink()... \n",self);
 #endif
    
    // forward to Python
@@ -131,7 +131,7 @@ void leds_error_blink(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -139,7 +139,7 @@ void leds_radio_on(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_radio_on()... \n");
+   printf("C@0x%x: leds_radio_on()... \n",self);
 #endif
    
    // forward to Python
@@ -151,14 +151,14 @@ void leds_radio_on(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 void leds_radio_off(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_radio_off()... \n");
+   printf("C@0x%x: leds_radio_off()... \n",self);
 #endif
    
    // forward to Python
@@ -170,14 +170,14 @@ void leds_radio_off(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 void leds_radio_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_radio_toggle()... \n");
+   printf("C@0x%x: leds_radio_toggle()... \n",self);
 #endif
    
    // forward to Python
@@ -189,7 +189,7 @@ void leds_radio_toggle(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 uint8_t leds_radio_isOn(OpenMote* self) {
@@ -197,7 +197,7 @@ uint8_t leds_radio_isOn(OpenMote* self) {
    uint8_t    returnVal;
    
 #ifdef TRACE_ON
-   printf("C: leds_radio_isOn()... \n");
+   printf("C@0x%x: leds_radio_isOn()... \n",self);
 #endif
    
    // forward to Python
@@ -210,7 +210,7 @@ uint8_t leds_radio_isOn(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...got %d.\n",returnVal);
+   printf("C@0x%x: ...got %d.\n",self,returnVal);
 #endif
    
    return returnVal;
@@ -221,7 +221,7 @@ void leds_sync_on(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_sync_on()... \n");
+   printf("C@0x%x: leds_sync_on()... \n",self);
 #endif
    
    // forward to Python
@@ -233,14 +233,14 @@ void leds_sync_on(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 void leds_sync_off(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_sync_off()... \n");
+   printf("C@0x%x: leds_sync_off()... \n",self);
 #endif
    
    // forward to Python
@@ -252,14 +252,14 @@ void leds_sync_off(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 void leds_sync_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_sync_toggle()... \n");
+   printf("C@0x%x: leds_sync_toggle()... \n",self);
 #endif
    
    // forward to Python
@@ -271,7 +271,7 @@ void leds_sync_toggle(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 uint8_t leds_sync_isOn(OpenMote* self) {
@@ -279,7 +279,7 @@ uint8_t leds_sync_isOn(OpenMote* self) {
    uint8_t    returnVal;
    
 #ifdef TRACE_ON
-   printf("C: leds_sync_isOn()... \n");
+   printf("C@0x%x: leds_sync_isOn()... \n",self);
 #endif
    
    // forward to Python
@@ -292,7 +292,7 @@ uint8_t leds_sync_isOn(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...got %d.\n",returnVal);
+   printf("C@0x%x: ...got %d.\n",self,returnVal);
 #endif
    
    return returnVal;
@@ -303,7 +303,7 @@ void leds_debug_on(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_debug_on()... \n");
+   printf("C@0x%x: leds_debug_on()... \n",self);
 #endif
    
    // forward to Python
@@ -315,14 +315,14 @@ void leds_debug_on(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 void leds_debug_off(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_debug_off()... \n");
+   printf("C@0x%x: leds_debug_off()... \n",self);
 #endif
    
    // forward to Python
@@ -334,14 +334,14 @@ void leds_debug_off(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 void leds_debug_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_debug_toggle()... \n");
+   printf("C@0x%x: leds_debug_toggle()... \n",self);
 #endif
    
    // forward to Python
@@ -353,7 +353,7 @@ void leds_debug_toggle(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 uint8_t leds_debug_isOn(OpenMote* self) {
@@ -361,7 +361,7 @@ uint8_t leds_debug_isOn(OpenMote* self) {
    uint8_t    returnVal;
    
 #ifdef TRACE_ON
-   printf("C: leds_debug_isOn()... \n");
+   printf("C@0x%x: leds_debug_isOn()... \n",self);
 #endif
    
    // forward to Python
@@ -374,7 +374,7 @@ uint8_t leds_debug_isOn(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...got %d.\n",returnVal);
+   printf("C@0x%x: ...got %d.\n",self,returnVal);
 #endif
    
    return returnVal;
@@ -384,7 +384,7 @@ void leds_all_on(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_all_on()... \n");
+   printf("C@0x%x: leds_all_on()... \n",self);
 #endif
    
    // forward to Python
@@ -396,14 +396,14 @@ void leds_all_on(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 void leds_all_off(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_all_off()... \n");
+   printf("C@0x%x: leds_all_off()... \n",self);
 #endif
    
    // forward to Python
@@ -415,14 +415,14 @@ void leds_all_off(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 void leds_all_toggle(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_all_toggle()... \n");
+   printf("C@0x%x: leds_all_toggle()... \n",self);
 #endif
    
    // forward to Python
@@ -434,7 +434,7 @@ void leds_all_toggle(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -442,7 +442,7 @@ void leds_circular_shift(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_circular_shift()... \n");
+   printf("C@0x%x: leds_circular_shift()... \n",self);
 #endif
    
    // forward to Python
@@ -454,7 +454,7 @@ void leds_circular_shift(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -462,7 +462,7 @@ void leds_increment(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: leds_increment()... \n");
+   printf("C@0x%x: leds_increment()... \n",self);
 #endif
    
    // forward to Python
@@ -474,7 +474,7 @@ void leds_increment(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 

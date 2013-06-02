@@ -15,19 +15,55 @@
 //=========================== callbacks =======================================
 
 void radio_setOverflowCb(OpenMote* self, radiotimer_compare_cbt cb) {
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: radio_setOverflowCb(cb=0x%x)... \n",self,cb);
+#endif
+   
    radiotimer_setOverflowCb(self, cb);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
 }
 
 void radio_setCompareCb(OpenMote* self, radiotimer_compare_cbt cb) {
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: radio_setCompareCb(cb=0x%x)... \n",self,cb);
+#endif
+   
    radiotimer_setCompareCb(self, cb);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
 }
 
 void radio_setStartFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: radio_setStartFrameCb(cb=0x%x)... \n",self,cb);
+#endif
+   
    self->radio_icb.startFrame_cb  = cb;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
 }
 
 void radio_setEndFrameCb(OpenMote* self, radiotimer_capture_cbt cb) {
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: radio_setEndFrameCb(cb=0x%x)... \n",self,cb);
+#endif
+   
    self->radio_icb.endFrame_cb    = cb;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
 }
 
 //=========================== public ==========================================
@@ -38,7 +74,7 @@ void radio_init(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radio_init()... \n");
+   printf("C@0x%x: radio_init()... \n",self);
 #endif
    
    // forward to Python
@@ -50,7 +86,7 @@ void radio_init(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -60,7 +96,7 @@ void radio_reset(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radio_reset()... \n");
+   printf("C@0x%x: radio_reset()... \n",self);
 #endif
    
    // forward to Python
@@ -72,7 +108,7 @@ void radio_reset(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -83,7 +119,7 @@ void radio_startTimer(OpenMote* self, PORT_TIMER_WIDTH period) {
    PyObject*   arglist;
    
 #ifdef TRACE_ON
-   printf("C: radio_startTimer(period=%d)... \n",period);
+   printf("C@0x%x: radio_startTimer(period=%d)... \n",self,period);
 #endif
    
    // forward to Python
@@ -97,7 +133,7 @@ void radio_startTimer(OpenMote* self, PORT_TIMER_WIDTH period) {
    Py_DECREF(arglist);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -106,7 +142,7 @@ PORT_TIMER_WIDTH radio_getTimerValue(OpenMote* self) {
    PORT_TIMER_WIDTH     returnVal;
    
 #ifdef TRACE_ON
-   printf("C: radio_getTimerValue()... \n");
+   printf("C@0x%x: radio_getTimerValue()... \n",self);
 #endif
    
    // forward to Python
@@ -125,7 +161,7 @@ PORT_TIMER_WIDTH radio_getTimerValue(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...got %d.\n",returnVal);
+   printf("C@0x%x: ...got %d.\n",self,returnVal);
 #endif
    
    return returnVal;
@@ -136,7 +172,7 @@ void radio_setTimerPeriod(OpenMote* self, PORT_TIMER_WIDTH period) {
    PyObject*   arglist;
    
 #ifdef TRACE_ON
-   printf("C: radio_setTimerPeriod(period=%d)... \n",period);
+   printf("C@0x%x: radio_setTimerPeriod(period=%d)... \n",self,period);
 #endif
    
    // forward to Python
@@ -150,7 +186,7 @@ void radio_setTimerPeriod(OpenMote* self, PORT_TIMER_WIDTH period) {
    Py_DECREF(arglist);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -159,7 +195,7 @@ PORT_TIMER_WIDTH radio_getTimerPeriod(OpenMote* self) {
    PORT_TIMER_WIDTH     returnVal;
    
 #ifdef TRACE_ON
-   printf("C: radio_getTimerPeriod()... \n");
+   printf("C@0x%x: radio_getTimerPeriod()... \n",self);
 #endif
    
    // forward to Python
@@ -178,7 +214,7 @@ PORT_TIMER_WIDTH radio_getTimerPeriod(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...got %d.\n",returnVal);
+   printf("C@0x%x: ...got %d.\n",self,returnVal);
 #endif
    
    return returnVal;
@@ -191,7 +227,7 @@ void radio_setFrequency(OpenMote* self, uint8_t frequency) {
    PyObject*   arglist;
    
 #ifdef TRACE_ON
-   printf("C: radio_setFrequency(frequency=%d)... \n",frequency);
+   printf("C@0x%x: radio_setFrequency(frequency=%d)... \n",self,frequency);
 #endif
    
    // forward to Python
@@ -205,7 +241,7 @@ void radio_setFrequency(OpenMote* self, uint8_t frequency) {
    Py_DECREF(arglist);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -213,7 +249,7 @@ void radio_rfOn(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radio_rfOn()... \n");
+   printf("C@0x%x: radio_rfOn()... \n",self);
 #endif
    
    // forward to Python
@@ -225,7 +261,7 @@ void radio_rfOn(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -233,7 +269,7 @@ void radio_rfOff(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radio_rfOff()... \n");
+   printf("C@0x%x: radio_rfOff()... \n",self);
 #endif
    
    // forward to Python
@@ -245,7 +281,7 @@ void radio_rfOff(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -260,7 +296,7 @@ void radio_loadPacket(OpenMote* self, uint8_t* packet, uint8_t len) {
    int         res;
    
 #ifdef TRACE_ON
-   printf("C: radio_loadPacket(len=%d)... \n",len);
+   printf("C@0x%x: radio_loadPacket(len=%d)... \n",self,len);
 #endif
    
    // forward to Python
@@ -288,7 +324,7 @@ void radio_txEnable(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radio_txEnable()... \n");
+   printf("C@0x%x: radio_txEnable()... \n",self);
 #endif
    
    // forward to Python
@@ -300,7 +336,7 @@ void radio_txEnable(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -308,7 +344,7 @@ void radio_txNow(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radio_txNow()... \n");
+   printf("C@0x%x: radio_txNow()... \n",self);
 #endif
    
    // forward to Python
@@ -320,7 +356,7 @@ void radio_txNow(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -330,7 +366,7 @@ void radio_rxEnable(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radio_rxEnable()... \n");
+   printf("C@0x%x: radio_rxEnable()... \n",self);
 #endif
    
    // forward to Python
@@ -342,7 +378,7 @@ void radio_rxEnable(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -350,7 +386,7 @@ void radio_rxNow(OpenMote* self) {
    PyObject*   result;
    
 #ifdef TRACE_ON
-   printf("C: radio_rxNow()... \n");
+   printf("C@0x%x: radio_rxNow()... \n",self);
 #endif
    
    // forward to Python
@@ -362,7 +398,7 @@ void radio_rxNow(OpenMote* self) {
    Py_DECREF(result);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
@@ -380,7 +416,7 @@ void radio_getReceivedFrame(OpenMote* self,
    int8_t     i;
    
 #ifdef TRACE_ON
-   printf("C: radio_getReceivedFrame()... \n");
+   printf("C@0x%x: radio_getReceivedFrame()... \n",self);
 #endif
    
    // forward to Python

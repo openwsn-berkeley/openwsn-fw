@@ -45,6 +45,13 @@ static PyObject* OpenMote_set_callback(OpenMote* self, PyObject* args) {
 
 static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* returnVal;
+   PyObject* uart_icb_tx;
+   PyObject* uart_icb_rx;
+   PyObject* bsp_timer_icb_cb;
+   PyObject* radio_icb_startFrame_cb;
+   PyObject* radio_icb_endFrame_cb;
+   PyObject* radiotimer_icb_overflow_cb;
+   PyObject* radiotimer_icb_compare_cb;
    PyObject* ohlone_vars;
    PyObject* tcpinject_vars;
    PyObject* icmpv6echo_vars;
@@ -67,6 +74,22 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* scheduler_dbg;
    
    returnVal = PyDict_New();
+   
+   // callbacks
+   uart_icb_tx                    = PyInt_FromLong((long)self->uart_icb.txCb);
+   PyDict_SetItemString(returnVal, "uart_icb_tx", uart_icb_tx);
+   uart_icb_rx                    = PyInt_FromLong((long)self->uart_icb.rxCb);
+   PyDict_SetItemString(returnVal, "uart_icb_rx", uart_icb_rx);
+   bsp_timer_icb_cb               = PyInt_FromLong((long)self->bsp_timer_icb.cb);
+   PyDict_SetItemString(returnVal, "bsp_timer_icb_cb", bsp_timer_icb_cb);
+   radio_icb_startFrame_cb        = PyInt_FromLong((long)self->radio_icb.startFrame_cb);
+   PyDict_SetItemString(returnVal, "radio_icb_startFrame_cb", radio_icb_startFrame_cb);
+   radio_icb_endFrame_cb          = PyInt_FromLong((long)self->radio_icb.endFrame_cb);
+   PyDict_SetItemString(returnVal, "radio_icb_endFrame_cb", radio_icb_endFrame_cb   );
+   radiotimer_icb_overflow_cb     = PyInt_FromLong((long)self->radiotimer_icb.overflow_cb);
+   PyDict_SetItemString(returnVal, "radiotimer_icb_overflow_cb", radiotimer_icb_overflow_cb);
+   radiotimer_icb_compare_cb      = PyInt_FromLong((long)self->radiotimer_icb.compare_cb);
+   PyDict_SetItemString(returnVal, "radiotimer_icb_compare_cb", radiotimer_icb_compare_cb);
    
    // ohlone_vars
    ohlone_vars = PyDict_New();
@@ -244,7 +267,7 @@ static PyObject* OpenMote_radiotimer_isr_overflow(OpenMote* self) {
    // no arguments
    
    // call the callback
-   radiotimer_intr_overflow();
+   radiotimer_intr_overflow(self);
    
    // return successfully
    Py_RETURN_NONE;

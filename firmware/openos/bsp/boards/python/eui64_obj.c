@@ -20,7 +20,7 @@ void eui64_get(OpenMote* self, uint8_t* addressToWrite) {
    uint8_t    i;
    
 #ifdef TRACE_ON
-   printf("C: eui64_get()... \n");
+   printf("C@0x%x: eui64_get()... \n",self);
 #endif
    
    // forward to Python
@@ -41,7 +41,7 @@ void eui64_get(OpenMote* self, uint8_t* addressToWrite) {
    }
 
 #ifdef TRACE_ON
-   printf("C: got ");
+   printf("C@0x%x: got ",self);
 #endif
    // store retrieved information
    for (i=0;i<8;i++) {

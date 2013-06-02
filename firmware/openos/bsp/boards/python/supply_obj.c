@@ -18,40 +18,40 @@
 void supply_init(OpenMote* self) {
    
 #ifdef TRACE_ON
-   printf("C: supply_init()... \n");
+   printf("C@0x%x: supply_init()... \n",self);
 #endif
    
    // Nothing to do
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
 void supply_on(OpenMote* self) {
    
 #ifdef TRACE_ON
-   printf("C: supply_on()... \n");
+   printf("C@0x%x: supply_on()... \n",self);
 #endif
    
    // start the mote's execution
    mote_main(self);
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
 void supply_off(OpenMote* self) {
    
 #ifdef TRACE_ON
-   printf("C: supply_off()... \n");
+   printf("C@0x%x: supply_off()... \n",self);
 #endif
    
    // TODO
    
 #ifdef TRACE_ON
-   printf("C: ...done.\n");
+   printf("C@0x%x: ...done.\n",self);
 #endif
 }
 
