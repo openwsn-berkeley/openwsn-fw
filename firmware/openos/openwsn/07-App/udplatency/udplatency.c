@@ -32,9 +32,6 @@ void udplatency_timer();
 //=========================== public ==========================================
 
 void udplatency_init() {
- //don't run on dagroot 
- if (idmanager_getIsDAGroot()) return;
- 
  udplatency_vars.timerId    = opentimers_start(UDPLATENCYPERIOD,
                                           TIMER_PERIODIC,TIME_MS,
                                           udplatency_timer);
@@ -44,6 +41,15 @@ void udplatency_task(){
    OpenQueueEntry_t* pkt;
    open_addr_t * p;
    open_addr_t  q;
+
+   //don't run if not synch
+   if (ieee154e_isSynch() == FALSE) return;
+
+   //don't run on dagroot
+   if (idmanager_getIsDAGroot()) {
+       opentimers_stop(udplatency_vars.timerId);
+       return;
+   }
 
    //prepare packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPLATENCY);
