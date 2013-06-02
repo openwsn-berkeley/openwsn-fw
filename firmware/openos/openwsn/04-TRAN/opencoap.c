@@ -293,8 +293,18 @@ void opencoap_writeLinks(OpenQueueEntry_t* msg) {
    }
 }
 
+/**
+\brief Register a new CoAP resource.
+
+Registration consists in adding a new resource at the end of the linked list
+of resources.
+*/
 void opencoap_register(coap_resource_desc_t* desc) {
    coap_resource_desc_t* last_elem;
+   
+   // since this CoAP resource will be at the end of the list, its next element
+   // should point to NULL, indicating the end of the linked list.
+   desc->next = NULL;
    
    if (opencoap_vars.resources==NULL) {
       opencoap_vars.resources = desc;
