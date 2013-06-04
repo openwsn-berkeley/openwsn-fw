@@ -82,13 +82,12 @@ error_t r6tus_receive(OpenQueueEntry_t* msg,
       outcome = E_SUCCESS;    
       // parsing the options from header
       // assuming the following header: /6tus/LinkComandType/targetSlot/targetAddress
-      if (coap_header->OC != TSCH_GET_OPTIONS) {
+      // if (coap_header->OC != TSCH_GET_OPTIONS) {
          //option[0] is 6tus
          getResponse.type=(link_command_t)coap_options[1].pValue[0];
          if (getResponse.type != READ_LINK){
             //fail if this is not a READ REQUEST
             outcome                    = E_FAIL;
-            coap_header->OC            = 0;
             coap_header->Code          = COAP_CODE_RESP_CONTENT;
             //return as this is not the right request.
             return outcome;
@@ -118,9 +117,7 @@ error_t r6tus_receive(OpenQueueEntry_t* msg,
                outcome                 = E_FAIL;
                break;  
          }
-      }
       
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CONTENT;
       // By using the same link_element we don't need to write the packet.
       // It returns the same payload  but with the correct values.
@@ -172,11 +169,11 @@ error_t r6tus_receive(OpenQueueEntry_t* msg,
          msg->payload                  = &(msg->packet[127]);
          msg->length                   = 0;
          //copy the response.
-         packetfunctions_reserveHeaderSize(msg,link_command->numelem); 
-         memcpy(&(msg->payload[0]), &(responses[0]),link_command->numelem);
+         
+         //packetfunctions_reserveHeaderSize(msg,link_command->numelem); 
+         //memcpy(&(msg->payload[0]), &(responses[0]),link_command->numelem);
          
          // set the CoAP header
-         coap_header->OC               = 0;
          coap_header->Code             = COAP_CODE_RESP_CONTENT;
       }
    } else if (coap_header->Code==COAP_CODE_REQ_DELETE) {  

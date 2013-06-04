@@ -85,8 +85,7 @@ error_t rinfo_receive(OpenQueueEntry_t* msg,
       msg->payload[sizeof(infoStackName)-1+5-1] = '0'+OPENWSN_VERSION_PATCH;
          
       // set the CoAP header
-      coap_header->OC                  = 0;
-      coap_header->Code                = COAP_CODE_RESP_CONTENT;
+       coap_header->Code                = COAP_CODE_RESP_CONTENT;
       
       outcome                          = E_SUCCESS;
    

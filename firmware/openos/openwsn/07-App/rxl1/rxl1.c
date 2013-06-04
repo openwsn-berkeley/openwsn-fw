@@ -83,7 +83,6 @@ error_t rxl1_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_VALID;
       
       outcome = E_SUCCESS;
@@ -101,7 +100,6 @@ error_t rxl1_receive(OpenQueueEntry_t* msg,
       memcpy(&msg->payload[0],&rawdata[8],8);
          
       // set the CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CONTENT;
       
       outcome                          = E_SUCCESS;

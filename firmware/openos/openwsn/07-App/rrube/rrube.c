@@ -90,7 +90,6 @@ error_t rrube_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // set the CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_VALID;
       
       // advance state machine

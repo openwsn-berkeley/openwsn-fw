@@ -108,10 +108,10 @@ typedef enum {
 typedef struct {
    uint8_t       Ver;
    coap_type_t   T;
-   uint8_t       OC;
+   uint8_t       TKL;
    coap_code_t   Code;
    uint16_t      messageID;
-   uint8_t       token;
+   uint8_t       token; //this might be an array of 8 as tkl can be 8
 } coap_header_iht;
 
 typedef struct {
@@ -135,6 +135,7 @@ struct coap_resource_desc_t {
    uint8_t*              path1val;
    uint8_t               componentID;
    uint16_t              messageID;
+   uint8_t               token; //should be 8bytes
    callbackRx_cbt        callbackRx;
    callbackSendDone_cbt  callbackSendDone;
    coap_resource_desc_t* next;

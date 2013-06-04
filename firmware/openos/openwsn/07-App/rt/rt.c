@@ -78,7 +78,6 @@ error_t rt_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_VALID;
       
       outcome = E_SUCCESS;
@@ -97,8 +96,7 @@ error_t rt_receive(OpenQueueEntry_t* msg,
       msg->payload[1] = rawdata[9];
          
       // set the CoAP header
-      coap_header->OC                  = 0;
-      coap_header->Code                = COAP_CODE_RESP_CONTENT;
+       coap_header->Code                = COAP_CODE_RESP_CONTENT;
       
       outcome                          = E_SUCCESS;
    

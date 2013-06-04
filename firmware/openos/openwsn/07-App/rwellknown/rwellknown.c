@@ -66,8 +66,7 @@ error_t rwellknown_receive(OpenQueueEntry_t* msg,
       msg->payload[1]                  = COAP_MEDTYPE_APPLINKFORMAT;
       
       // set the CoAP header
-      coap_header->OC                  = 1;
-      coap_header->Code                = COAP_CODE_RESP_CONTENT;
+       coap_header->Code                = COAP_CODE_RESP_CONTENT;
       
       outcome                          = E_SUCCESS;
    } else {

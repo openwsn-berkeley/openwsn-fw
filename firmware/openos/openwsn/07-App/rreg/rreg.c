@@ -77,8 +77,7 @@ error_t rreg_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // set the CoAP header
-      coap_header->OC                  = 0;
-      coap_header->Code                = COAP_CODE_RESP_VALID;
+       coap_header->Code                = COAP_CODE_RESP_VALID;
       
       outcome = E_SUCCESS;
    } else if (coap_header->T==COAP_TYPE_ACK) {

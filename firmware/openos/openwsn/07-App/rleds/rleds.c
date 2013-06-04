@@ -59,7 +59,6 @@ error_t rleds_receive(OpenQueueEntry_t* msg,
       }
          
       // set the CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CONTENT;
       
       outcome                          = E_SUCCESS;
@@ -79,7 +78,6 @@ error_t rleds_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // set the CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CHANGED;
       
       outcome                          = E_SUCCESS;
