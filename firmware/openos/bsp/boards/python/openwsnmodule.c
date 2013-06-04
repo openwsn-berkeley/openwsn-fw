@@ -278,7 +278,7 @@ static PyObject* OpenMote_uart_isr_tx(OpenMote* self) {
    // no arguments
    
    // call the callback
-   uart_tx_isr(self);
+   uart_intr_tx(self);
    
    // return successfully
    Py_RETURN_NONE;
@@ -289,7 +289,7 @@ static PyObject* OpenMote_uart_isr_rx(OpenMote* self) {
    // no arguments
    
    // call the callback
-   uart_rx_isr(self);
+   uart_intr_rx(self);
    
    // return successfully
    Py_RETURN_NONE;
