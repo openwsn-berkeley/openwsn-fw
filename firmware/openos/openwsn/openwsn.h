@@ -66,7 +66,7 @@ enum {
    IANA_ICMPv6_RA_PREFIX_INFORMATION   =    3,
    IANA_ICMPv6_RPL                     =  155,
    IANA_ICMPv6_RPL_DIO                 = 0x01,
-   IANA_ICMPv6_RPL_DAO                 = 0x04,
+   IANA_ICMPv6_RPL_DAO                 = 0x02,
    IANA_RSVP                           =   46,
 };
 
