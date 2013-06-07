@@ -87,6 +87,7 @@ enum {
    WKP_UDP_DISCARD                     =     9,
    WKP_UDP_RAND                        = 61000,
    WKP_UDP_LATENCY                     = 61001,
+   WKP_NET_LATENCY                     = 61009, // my port for netlatency
 };
 
 //status elements
@@ -101,7 +102,8 @@ enum {
    STATUS_BACKOFF                      =  7,
    STATUS_QUEUE                        =  8,
    STATUS_NEIGHBORS                    =  9,
-   STATUS_MAX                          = 10,
+   STATUS_NETLATENCY                   = 10, // My implementation
+   STATUS_MAX                          = 11,
 };
 
 //component identifiers
@@ -171,7 +173,8 @@ enum {
    COMPONENT_UDPSTORM                  = 0x2e,
    COMPONENT_UDPLATENCY                = 0x2f,
    COMPONENT_TEST                      = 0x30,
-   COMPONENT_R6TUS                    = 0x31,
+   COMPONENT_R6TUS                     = 0x31,
+   COMPONENT_NETLATENCY                = 0X32, // my implementation of udplatency
 };
 
 /**
@@ -241,6 +244,7 @@ enum {
    ERR_BOOTED                          = 0x33, // booted
    ERR_INVALIDSERIALFRAME              = 0x34, // invalid serial frame
    ERR_INVALIDPACKETFROMRADIO          = 0x35, // invalid packet frome radio, length {1} (code location {0})
+   ERR_RCVD_LATENCY                    = 0X36, // netlatency {1} (seq num {0})
 };
 
 //=========================== typedef =========================================
