@@ -2,6 +2,7 @@
 #include "schedule.h"
 #include "openserial.h"
 #include "openrandom.h"
+#include "packetfunctions.h"
 
 //=========================== variables =======================================
 
@@ -17,124 +18,132 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 //=== admin
 
 void schedule_init() {
-    uint8_t         i;
-    slotOffset_t    running_slotOffset;
-    channelOffset_t running_channelOffset;
-    open_addr_t     temp_neighbor;
-    uint8_t         addr[8];
+   uint8_t         i;
+   slotOffset_t    running_slotOffset;
+   channelOffset_t running_channelOffset;
+   open_addr_t     temp_neighbor;
+   uint8_t         addr[8];
 
-    // reset local variables
-    memset(&schedule_vars,0,sizeof(schedule_vars_t));
-    for (i=0;i<MAXACTIVESLOTS;i++){
-       schedule_resetEntry(&schedule_vars.scheduleBuf[i]);
-    }
-    schedule_vars.backoffExponent = MINBE-1;
-    memset(&schedule_dbg, 0,sizeof(schedule_dbg_t));
+   // reset local variables
+   memset(&schedule_vars,0,sizeof(schedule_vars_t));
+   for (i=0;i<MAXACTIVESLOTS;i++){
+      schedule_resetEntry(&schedule_vars.scheduleBuf[i]);
+   }
+   schedule_vars.backoffExponent = MINBE-1;
+   memset(&schedule_dbg, 0,sizeof(schedule_dbg_t));
 
-    // set frame length
-    schedule_setFrameLength(SUPERFRAME_LENGTH);
+   // set frame length
+   schedule_setFrameLength(SUPERFRAME_LENGTH);
+   
+   // start at slot 0
+   running_slotOffset = 0;
 
-    // start at slot 0
-    running_slotOffset = 0;
+   // start at channel 0
+   running_channelOffset = 0;
+   
+   // advertisement slot(s)
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+   for (i=0;i<NUMADVSLOTS;i++) {
+      schedule_addActiveSlot(
+         running_slotOffset,      // slot offset
+         CELLTYPE_ADV,            // type of slot
+         FALSE,                   // shared?
+         running_channelOffset,   // channel offset
+         &temp_neighbor,         // neighbor
+         FALSE                   //no update but insert
+      );
+      running_slotOffset++;
+      running_channelOffset++;
+   } 
+   
+   // shared TXRX anycast slot(s)
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+   temp_neighbor.type             = ADDR_ANYCAST;
+   for (i = 0; i < 1; i++) {
+      schedule_addActiveSlot(
+         running_slotOffset,      // slot offset
+         CELLTYPE_TXRX,           // type of slot
+         TRUE,                    // shared?
+         running_channelOffset,   // channel offset
+         &temp_neighbor,          // neighbor
+         FALSE                    //no update but insert
+      );
+      running_slotOffset++;
+      running_channelOffset++;
+   }
 
-    // start at channel 0
-    running_channelOffset = 0;
+   //set the mac-addr
+   memset(&addr[0], 0x14, 1);
+   memset(&addr[1], 0x15, 1);
+   memset(&addr[2], 0x92, 1);
+   memset(&addr[3], 0x00, 1);
+   memset(&addr[4], 0x00, 1);
+   memset(&addr[5], 0x15, 1);
+   memset(&addr[6], 0x08, 1);
+   memset(&addr[7], 0xb6, 1);
 
-    // advertisement slot(s)
-    memset(&temp_neighbor, 0, sizeof(temp_neighbor));
-    for (i=0;i<NUMADVSLOTS;i++) {
-       schedule_addActiveSlot(
-          running_slotOffset,      // slot offset
-          CELLTYPE_ADV,            // type of slot
-          FALSE,                   // shared?
-          running_channelOffset,   // channel offset
-          &temp_neighbor           // neighbor
-       );
-       running_slotOffset++;
-       running_channelOffset++;
-    }
+   // not-shared RX unicast slot
+   memcpy(&temp_neighbor.addr_64b[0], &addr, 8);
+   temp_neighbor.type             = ADDR_64B;
+      schedule_addActiveSlot(
+      running_slotOffset,      // slot offset
+      CELLTYPE_RX,             // type of slot
+      FALSE,                   // shared?
+      running_channelOffset,   // channel offset
+      &temp_neighbor,          // neighbor
+      FALSE                    //no update but insert
+   );
+   running_slotOffset++;
+   running_channelOffset++;
 
-    // CSMA-CA slot used to exchange frame that need of CSMA-CA access, like DIO and DAO
-    memset(&temp_neighbor, 0, sizeof(temp_neighbor));
-    temp_neighbor.type             = ADDR_ANYCAST;
-    schedule_addActiveSlot(
-       running_slotOffset,      // slot offset
-       CELLTYPE_TXRX,           // type of slot
-       TRUE,                    // shared?
-       running_channelOffset,   // channel offset
-       &temp_neighbor           // neighbor
-    );
-    running_slotOffset++;
-    running_channelOffset++;
+   //set the mac-addr
+   memset(&addr[0], 0x14, 1);
+   memset(&addr[1], 0x15, 1);
+   memset(&addr[2], 0x92, 1);
+   memset(&addr[3], 0x00, 1);
+   memset(&addr[4], 0x00, 1);
+   memset(&addr[5], 0x15, 1);
+   memset(&addr[6], 0x15, 1);
+   memset(&addr[7], 0x83, 1);
 
-    memset(&addr[0], 0x14, 1);
-    memset(&addr[1], 0x15, 1);
-    memset(&addr[2], 0x92, 1);
-    memset(&addr[3], 0x00, 1);
-    memset(&addr[4], 0x00, 1);
-    memset(&addr[5], 0x15, 1);
-    memset(&addr[6], 0x08, 1);
-    memset(&addr[7], 0xaa, 1);
+   // not-shared TX unicast slot
+   memcpy(&temp_neighbor.addr_64b[0], &addr, 8);
+   temp_neighbor.type             = ADDR_64B;
+      schedule_addActiveSlot(
+      running_slotOffset,      // slot offset
+      CELLTYPE_TX,             // type of slot
+      FALSE,                   // shared?
+      0,                       // channel offset
+      &temp_neighbor,          // neighbor
+      FALSE                    //no update but insert
+   );
+   running_slotOffset++;
+   running_channelOffset++;
 
-    // not-shared TX unicast slot
-    memcpy(&temp_neighbor.addr_64b[0], &addr, 8);
-    temp_neighbor.type             = ADDR_64B;
-       schedule_addActiveSlot(
-       running_slotOffset,      // slot offset
-       CELLTYPE_TX,             // type of slot
-       FALSE,                   // shared?
-       running_channelOffset,   // channel offset
-       &temp_neighbor           // neighbor
-    );
-    running_slotOffset++;
-    running_channelOffset++;
-
-    //empty slot
-    running_slotOffset++;
-    running_channelOffset++;
-    running_slotOffset++;
-    running_channelOffset++;
-    running_slotOffset++;
-    running_channelOffset++;
-    running_slotOffset++;
-    running_channelOffset++;
-
-    // not-shared RX unicast slot
-    memcpy(&temp_neighbor.addr_64b[0], &addr, 8);
-    temp_neighbor.type             = ADDR_64B;
-       schedule_addActiveSlot(
-       running_slotOffset,      // slot offset
-       CELLTYPE_RX,             // type of slot
-       FALSE,                   // shared?
-       running_channelOffset,   // channel offset
-       &temp_neighbor           // neighbor
-    );
-    running_slotOffset++;
-
-    // serial RX slot(s)
-    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-    schedule_addActiveSlot(
-       running_slotOffset,         // slot offset
-       CELLTYPE_SERIALRX,          // type of slot
-       FALSE,                      // shared?
-       0,                          // channel offset
-       &temp_neighbor              // neighbor
-    );
-    running_slotOffset++;
-
-    /*
-    for (i=0;i<NUMSERIALRX-1;i++) {
-       schedule_addActiveSlot(
-          running_slotOffset,      // slot offset
-          CELLTYPE_MORESERIALRX,   // type of slot
-          FALSE,                   // shared?
-          0,                       // channel offset
-          &temp_neighbor           // neighbor
-       );
-       running_slotOffset++;
-    }
-    */
- }
+   // serial RX slot(s)
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+   schedule_addActiveSlot(
+      running_slotOffset,         // slot offset
+      CELLTYPE_SERIALRX,          // type of slot
+      FALSE,                      // shared?
+      0,                          // channel offset
+      &temp_neighbor,             // neighbor
+      FALSE                       //no update but insert
+   );
+   running_slotOffset++;
+   /*
+   for (i=0;i<NUMSERIALRX-1;i++) {
+      schedule_addActiveSlot(
+         running_slotOffset,      // slot offset
+         CELLTYPE_MORESERIALRX,   // type of slot
+         FALSE,                   // shared?
+         0,                       // channel offset
+         &temp_neighbor           // neighbor
+      );
+      running_slotOffset++;
+   }
+   */
+}
 
 /**
 \brief Trigger this module to print status information, over serial.
@@ -216,32 +225,100 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
 }
 
 /**
-\brief Add a new active slot into the schedule.
+\brief get the information of a spcific slot.
 
-\param newFrameLength The new frame length.
+\param slotoffset
+\param neighbour address
 */
-void schedule_addActiveSlot(slotOffset_t    slotOffset,
+void  schedule_getSlotInfo(slotOffset_t   slotOffset,                      
+                              open_addr_t*   neighbor,
+                              slotinfo_element_t* info){                            
+                           
+   scheduleEntry_t* slotContainer;
+  
+   // find an empty schedule entry container
+   slotContainer = &schedule_vars.scheduleBuf[0];
+   while (slotContainer->type!=CELLTYPE_OFF && slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+       //check that this entry for that neighbour and timeslot is not already scheduled.
+       if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
+               //it exists so this is an update.
+               info->link_type                 = slotContainer->type;
+               info->shared                    =slotContainer->shared;
+               info->channelOffset             = slotContainer->channelOffset;
+               return; //as this is an update. No need to re-insert as it is in the same position on the list.
+        }
+        slotContainer++;
+   }
+   //return cell type off.
+   info->link_type                 = CELLTYPE_OFF;
+   info->shared                    = FALSE;
+   info->channelOffset             = 0;//set to zero if not set.                          
+}
+
+
+
+
+/**
+\brief Add a new active slot into the schedule. If udpate param is set then update it in case it exists.
+
+\param slotOffset
+\param type
+\param shared
+\param channelOffset
+\param neighbor
+*/
+error_t schedule_addActiveSlot(slotOffset_t    slotOffset,
       cellType_t      type,
       bool            shared,
       channelOffset_t channelOffset,
-      open_addr_t*    neighbor) {
+      open_addr_t*    neighbor,
+      bool isUpdate) {
+   
+   error_t outcome;
+   
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
    scheduleEntry_t* nextSlotWalker;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-
+   
+   
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (slotContainer->type!=CELLTYPE_OFF &&
          slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
-      slotContainer++;
+  
+           //check that this entry for that neighbour and timeslot is not already scheduled.
+           if (type!=CELLTYPE_SERIALRX && type!=CELLTYPE_MORESERIALRX &&  
+               (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))||
+                 (slotContainer->neighbor.type==ADDR_ANYCAST && isUpdate==TRUE))
+                 &&(slotContainer->slotOffset==slotOffset)){
+               //it exists so this is an update.
+               slotContainer->type                      = type;
+               slotContainer->shared                    = shared;
+               slotContainer->channelOffset             = channelOffset;
+               memcpy(&slotContainer->neighbor,neighbor,sizeof(open_addr_t));//update the address too!
+               schedule_dbg.numUpdatedSlotsCur++;
+               ENABLE_INTERRUPTS();
+               return E_SUCCESS; //as this is an update. No need to re-insert as it is in the same position on the list.
+           }
+           
+           slotContainer++;
+   }
+   
+   if (isUpdate==TRUE) {
+     //we are trying to update an item that is not in the schedule list.
+     ENABLE_INTERRUPTS();
+     return E_FAIL;
    }
    if (slotContainer>&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
       // schedule has overflown
+      outcome=E_FAIL;
       openserial_printCritical(COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
+      
+      
    }
    // fill that schedule entry with parameters passed
    slotContainer->slotOffset                = slotOffset;
@@ -295,8 +372,77 @@ void schedule_addActiveSlot(slotOffset_t    slotOffset,
    if (schedule_dbg.numActiveSlotsCur>schedule_dbg.numActiveSlotsMax) {
       schedule_dbg.numActiveSlotsMax        = schedule_dbg.numActiveSlotsCur;
    }
+   outcome=E_SUCCESS;
    ENABLE_INTERRUPTS();
+   return outcome;
 }
+
+
+
+error_t   schedule_removeActiveSlot(slotOffset_t   slotOffset, open_addr_t*   neighbor){
+  
+   error_t outcome;
+   
+   scheduleEntry_t* slotContainer;
+   scheduleEntry_t* previousSlotWalker;
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   
+   // find the schedule entry
+   slotContainer = &schedule_vars.scheduleBuf[0];
+   while (slotContainer->type!=CELLTYPE_OFF && slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+          //check that this entry for that neighbour and timeslot is not already scheduled.
+           if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
+               break;
+           }
+           slotContainer++;
+   }
+  
+   if (slotContainer->next==slotContainer) {
+      // this is the last active slot
+
+      // the next slot of this slot is NULL
+      slotContainer->next                   = NULL;
+
+      // current slot points to this slot
+      schedule_vars.currentScheduleEntry    = NULL;
+   } else  {
+      // this is NOT the last active slot
+
+      // find the previous in the schedule
+      previousSlotWalker                    = schedule_vars.currentScheduleEntry;
+      
+      while (1) {
+        if (previousSlotWalker->next=slotContainer){
+            break;
+         }
+         previousSlotWalker                 = previousSlotWalker->next;
+      }
+      // remove this element from the linked list
+      previousSlotWalker->next              = slotContainer->next;//my next;
+      slotContainer->next                   = NULL;
+   }
+
+    // clear that schedule entry 
+    slotContainer->slotOffset                = 0;
+    slotContainer->type                      = CELLTYPE_OFF;
+    slotContainer->shared                    = FALSE;
+    slotContainer->channelOffset             = 0;
+    memset(&slotContainer->neighbor,0,sizeof(open_addr_t));
+
+    // maintain debug stats
+    schedule_dbg.numActiveSlotsCur--;
+   
+    outcome=E_SUCCESS;
+    ENABLE_INTERRUPTS();
+    
+    return outcome;
+}
+
+
+
 
 //=== from IEEE802154E: reading the schedule and updating statistics
 
