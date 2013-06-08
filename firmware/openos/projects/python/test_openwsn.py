@@ -2,13 +2,13 @@ import sys
 import os
 if __name__=='__main__':
     here = sys.path[0]
-    sys.path.insert(0, os.path.join(here, 'firmware','openos','projects','common'))# contains openwsn module
+    sys.path.insert(0, os.path.join(here, '..','common'))# contains openwsn module
 
 import re
 
 #============================ get notification IDs ============================
 
-f = open(os.path.join('firmware','openos','bsp','boards','python','openwsnmodule_obj.h'))
+f = open(os.path.join('..','..','bsp','boards','python','openwsnmodule_obj.h'))
 lines = f.readlines()
 f.close()
 
