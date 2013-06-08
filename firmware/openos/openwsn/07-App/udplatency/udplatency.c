@@ -14,6 +14,9 @@
 
 //=========================== defines =========================================
 
+/// inter-packet period (in mseconds)
+#define UDPLATENCYPERIOD     30000
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -21,7 +24,6 @@ typedef struct {
 } udplatency_vars_t;
 
 udplatency_vars_t udplatency_vars;
-uint16_t          seqNum;
 
 //=========================== prototypes ======================================
 
@@ -30,27 +32,18 @@ void udplatency_timer();
 //=========================== public ==========================================
 
 void udplatency_init() {
-   // run only on client
-   if (!(idmanager_getMyID(ADDR_16B)->addr_16b[0] == 0x08 && idmanager_getMyID(ADDR_16B)->addr_16b[1] == 0xb6)) return;
-   seqNum = 0;
-   udplatency_vars.timerId    = opentimers_start(UDPLATENCYPERIOD,
-                                            TIMER_PERIODIC,TIME_MS,
-                                            udplatency_timer);
+ //don't run on dagroot 
+ if (idmanager_getIsDAGroot()) return;
+ 
+ udplatency_vars.timerId    = opentimers_start(UDPLATENCYPERIOD,
+                                          TIMER_PERIODIC,TIME_MS,
+                                          udplatency_timer);
 }
 
 void udplatency_task(){
    OpenQueueEntry_t* pkt;
    open_addr_t * p;
    open_addr_t  q;
-
-   // don't run if not synch
-   if (ieee154e_isSynch() == FALSE) return;
-
-   // don't run on dagroot
-//   if (idmanager_getIsDAGroot()) {
-//       opentimers_stop(udplatency_vars.timerId);
-//       return;
-//   }
 
    //prepare packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPLATENCY);
@@ -68,8 +61,8 @@ void udplatency_task(){
    pkt->l3_destinationAdd.type = ADDR_128B;
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_motedata,16);
    
-   // the payload contains the 64bit address of the sender + the ASN
-   packetfunctions_reserveHeaderSize(pkt, sizeof(asn_t));
+//the payload contains the 64bit address of the sender + the ASN
+   packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
    ieee154e_getAsn(pkt->payload);//gets asn from mac layer.
    
    packetfunctions_reserveHeaderSize(pkt,8);
@@ -84,10 +77,10 @@ void udplatency_task(){
    pkt->payload[7]=p->addr_64b[7];
    
    neighbors_getPreferredParentEui64(&q);
-   if (q.type==ADDR_64B) {
+   if (q.type==ADDR_64B){
       packetfunctions_reserveHeaderSize(pkt,8);
    
-   // copy my preferred parent so we can build the topology
+   //copy my preferred parent so we can build the topology
       pkt->payload[0]=q.addr_64b[0];
       pkt->payload[1]=q.addr_64b[1];
       pkt->payload[2]=q.addr_64b[2];
@@ -97,18 +90,9 @@ void udplatency_task(){
       pkt->payload[6]=q.addr_64b[6];
       pkt->payload[7]=q.addr_64b[7];
    }
-
-   // send packet
+   //send packet
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
-   }
-
-   // increment seqNum
-   seqNum++;
-
-   // close timer when test finish
-   if (seqNum > NUMPKTTEST) {
-       opentimers_stop(udplatency_vars.timerId);
    }
 }
 

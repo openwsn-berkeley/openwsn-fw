@@ -311,10 +311,6 @@ void openserial_startOutput() {
          if (debugPrint_neighbors()==TRUE) {
             break;
          }
-      case STATUS_NETLATENCY:
-         if (debugPrint_netlatency()==TRUE) { // my implementation
-            break;
-         }
       default:
          DISABLE_INTERRUPTS();
          openserial_vars.debugPrintCounter=0;

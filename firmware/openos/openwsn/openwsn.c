@@ -28,36 +28,35 @@
 #include "icmpv6echo.h"
 #include "icmpv6rpl.h"
 //-- 04-TRAN
-//#include "opentcp.h"
+#include "opentcp.h"
 #include "openudp.h"
 #include "opencoap.h"
 //-- app (common)
-//#include "rreg.h"
-//#include "rwellknown.h"
-//#include "rinfo.h"
+#include "rreg.h"
+#include "rwellknown.h"
+#include "rinfo.h"
 //===== applications
 //-- TCP
-//#include "tcpecho.h"
-//#include "tcpinject.h"
-//#include "tcpprint.h"
-//#include "ohlone.h"
+#include "tcpecho.h"
+#include "tcpinject.h"
+#include "tcpprint.h"
+#include "ohlone.h"
 //-- UDP
-//#include "udpecho.h"
-//#include "udpinject.h"
-//#include "udpprint.h"
+#include "udpecho.h"
+#include "udpinject.h"
+#include "udpprint.h"
 //#include "udprand.h"
-#include "udplatency.h"
+//#include "udplatency.h"
 //#include "udpstorm.h"
-//#include "netlatency.h"
 //-- CoAP
-//#include "rleds.h"
+#include "rleds.h"
 //#include "rt.h"
 //#include "rex.h"
 //#include "rheli.h"
 //#include "rrube.h"
 //#include "rxl1.h"
 //#include "layerdebug.h"
-//#include "r6tus.h"
+#include "r6tus.h"
 //-- misc
 //#include "heli.h"
 //#include "imu.h"
@@ -97,28 +96,27 @@ void openwsn_init() {
    icmpv6echo_init();
    icmpv6rpl_init();
    //-- 04-TRAN
-//   opentcp_init();
+   opentcp_init();
    openudp_init();
    opencoap_init();    // initialize before any of the CoAP applications
    //-- app (common)
  //  rreg_init();
-//   rwellknown_init();
-//   rinfo_init();
+   rwellknown_init();
+   rinfo_init();
    
    //===== applications
    //-- TCP
-//   tcpecho_init();
-//   tcpinject_init();
-//   tcpprint_init();
-//   ohlone_init();
+   tcpecho_init();
+   tcpinject_init();
+   tcpprint_init();
+   ohlone_init();
    //-- UDP
-//   udpecho_init();
-//   udpinject_init();
-//   udpprint_init();
+   udpecho_init();
+   udpinject_init();
+   udpprint_init();
    //udprand_init();
-   udplatency_init();
+   //udplatency_init();
    //udpstorm_init();
-//   netlatency_init();
    //-- CoAP
    //rleds_init();
    //rt_init();
@@ -127,7 +125,7 @@ void openwsn_init() {
    //rrube_init();
    //rxl1_init();
    //layerdebug_init();
-//   r6tus_init();
+   r6tus_init();
    //-- misc
    //heli_init();
    //imu_init();

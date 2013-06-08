@@ -12,7 +12,6 @@
 #include "udprand.h"
 #include "udpstorm.h"
 #include "udplatency.h"
-#include "netlatency.h" //my app
 //#include "heli.h"
 //#include "imu.h"
 
@@ -67,9 +66,7 @@ void openudp_sendDone(OpenQueueEntry_t* msg, error_t error) {
       case WKP_UDP_LATENCY:
          udplatency_sendDone(msg,error);
          break;
-      case WKP_NET_LATENCY:              // my app
-         netlatency_sendDone(msg,error); //
-         break;                          //
+         
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
                                (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
@@ -146,9 +143,6 @@ void openudp_receive(OpenQueueEntry_t* msg) {
       case WKP_UDP_RAND:
          udprand_receive(msg);
          break;
-      case WKP_NET_LATENCY:       // my app
-         netlatency_receive(msg); //
-         break;                   //
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
                                (errorparameter_t)msg->l4_destination_port,
