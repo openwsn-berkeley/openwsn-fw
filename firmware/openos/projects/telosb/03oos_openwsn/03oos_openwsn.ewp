@@ -337,7 +337,6 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
@@ -2255,15 +2254,6 @@
         </file>
       </group>
       <group>
-        <name>r6tus</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\r6tus.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\r6tus.h</name>
-        </file>
-      </group>
-      <group>
         <name>rex</name>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\rex.c</name>
@@ -2321,6 +2311,15 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\rrube.h</name>
+        </file>
+      </group>
+      <group>
+        <name>rsched</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rsched\rsched.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rsched\rsched.h</name>
         </file>
       </group>
       <group>
