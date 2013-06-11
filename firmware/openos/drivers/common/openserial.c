@@ -245,7 +245,9 @@ void openserial_startInput() {
       openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUTBUFFER_LENGTH,
                             (errorparameter_t)openserial_vars.inputBufFill,
                             (errorparameter_t)0);
-      openserial_vars.inputBufFill = 0;
+      DISABLE_INTERRUPTS();
+      openserial_vars.inputBufFill=0;
+      ENABLE_INTERRUPTS();
    }
    
    uart_clearTxInterrupts();
