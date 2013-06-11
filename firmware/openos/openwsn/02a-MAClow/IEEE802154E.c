@@ -64,7 +64,6 @@ bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
 // ASN handling
 void     incrementAsnOffset();
-void     asnWriteToAdv(OpenQueueEntry_t* advFrame);
 void     asnStoreFromAdv(OpenQueueEntry_t* advFrame);
 // synchronization
 void     synchronizePacket(PORT_TIMER_WIDTH timeReceived);
@@ -679,7 +678,7 @@ port_INLINE void activity_ti1ORri1() {
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
             // fill in the ASN field of the ADV
-            asnWriteToAdv(ieee154e_vars.dataToSend);
+            ieee154e_getAsn(ieee154e_vars.dataToSend->l2_payload);
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
@@ -1549,31 +1548,14 @@ port_INLINE void incrementAsnOffset() {
    ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)%16;
 }
 
-port_INLINE void asnWriteToAdv(OpenQueueEntry_t* advFrame) {
-   advFrame->l2_payload[0]   = (ieee154e_vars.asn.bytes0and1     & 0xff);
-   advFrame->l2_payload[1]   = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
-   advFrame->l2_payload[2]   = (ieee154e_vars.asn.bytes2and3     & 0xff);
-   advFrame->l2_payload[3]   = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
-   advFrame->l2_payload[4]   =  ieee154e_vars.asn.byte4;
-}
-
-//from upper layer that want to send the ASN to compute timming or latency
-void ieee154e_getAsn(uint8_t* array) {
+//from upper layer that want to send the ASN to compute timing or latency
+port_INLINE void ieee154e_getAsn(uint8_t* array) {
    array[0]         = (ieee154e_vars.asn.bytes0and1     & 0xff);
    array[1]         = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
    array[2]         = (ieee154e_vars.asn.bytes2and3     & 0xff);
    array[3]         = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
    array[4]         =  ieee154e_vars.asn.byte4;
 }
-
-void asnWriteToSerial(uint8_t* array) {
-   array[0]                  = (ieee154e_vars.asn.bytes0and1     & 0xff);
-   array[1]                  = (ieee154e_vars.asn.bytes0and1/256 & 0xff);
-   array[2]                  = (ieee154e_vars.asn.bytes2and3     & 0xff);
-   array[3]                  = (ieee154e_vars.asn.bytes2and3/256 & 0xff);
-   array[4]                  =  ieee154e_vars.asn.byte4;
-}
-
 
 port_INLINE void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
    
