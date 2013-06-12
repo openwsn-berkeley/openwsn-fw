@@ -28,8 +28,8 @@ void openbridge_triggerData() {
    if (numDataBytes>(136 - 21) || numDataBytes<8){
    //to prevent too short or too long serial frames to kill the stack  
        openserial_printError(COMPONENT_OPENBRIDGE,ERR_INPUTBUFFER_LENGTH,
-                   (errorparameter_t)0,
-                   (errorparameter_t)numDataBytes);
+                   (errorparameter_t)numDataBytes,
+                   (errorparameter_t)0);
        return;
    }
   

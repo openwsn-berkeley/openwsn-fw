@@ -231,9 +231,6 @@ uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
       numBytesWritten = inputBufFill-1;
       memcpy(bufferToWrite,&(openserial_vars.inputBuf[1]),numBytesWritten);
    }
-   DISABLE_INTERRUPTS();
-   openserial_vars.inputBufFill=0;
-   ENABLE_INTERRUPTS();
    
    return numBytesWritten;
 }
@@ -255,6 +252,7 @@ void openserial_startInput() {
    uart_enableInterrupts();       // Enable USCI_A1 TX & RX interrupt
    
    DISABLE_INTERRUPTS();
+   openserial_vars.busyReceiving  = FALSE;
    openserial_vars.mode           = MODE_INPUT;
    openserial_vars.reqFrameIdx    = 0;
    uart_writeByte(openserial_vars.reqFrame[openserial_vars.reqFrameIdx]);
@@ -336,9 +334,11 @@ void openserial_startOutput() {
 void openserial_stop() {
    uint8_t inputBufFill;
    uint8_t cmdByte;
+   bool busyReceiving;
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
+   busyReceiving = openserial_vars.busyReceiving;
    inputBufFill = openserial_vars.inputBufFill;
    ENABLE_INTERRUPTS();
    
@@ -348,8 +348,15 @@ void openserial_stop() {
    DISABLE_INTERRUPTS();
    openserial_vars.mode=MODE_OFF;
    ENABLE_INTERRUPTS();
+   //the inputBuffer has to be reset if it is not reset where the data is read.
+   //or the function openserial_getInputBuffer is called (which resets the buffer)
+   if (busyReceiving==TRUE){
+      openserial_printError(COMPONENT_OPENSERIAL,ERR_BUSY_RECEIVING,
+                                  (errorparameter_t)0,
+                                  (errorparameter_t)inputBufFill);
+   }
    
-   if (inputBufFill>0) {
+   if (busyReceiving == FALSE && inputBufFill>0) {
       DISABLE_INTERRUPTS();
       cmdByte = openserial_vars.inputBuf[0];
       ENABLE_INTERRUPTS();
@@ -373,21 +380,23 @@ void openserial_stop() {
             icmpv6echo_trigger();
             break;
          case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
+            //echo function must reset input buffer after reading the data.
             openserial_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
             break;   
          default:
             openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
                                   (errorparameter_t)cmdByte,
                                   (errorparameter_t)0);
+            //reset here as it is not being reset in any other callback
             DISABLE_INTERRUPTS();
             openserial_vars.inputBufFill = 0;
             ENABLE_INTERRUPTS();
             break;
       }
+   }
       DISABLE_INTERRUPTS();
       openserial_vars.inputBufFill = 0;
       ENABLE_INTERRUPTS();
-   }
 }
 
 /**
@@ -608,9 +617,14 @@ void isr_openserial_rx() {
 //======== SERIAL ECHO =============
 
 void openserial_echo(uint8_t* buf, uint8_t bufLen){
+   INTERRUPT_DECLARATION();
    // echo back what you received
    openserial_printData(
       buf,
       bufLen
    );
+   
+    DISABLE_INTERRUPTS();
+    openserial_vars.inputBufFill = 0;
+    ENABLE_INTERRUPTS();
 }
