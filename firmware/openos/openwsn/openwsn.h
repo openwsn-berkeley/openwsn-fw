@@ -242,6 +242,7 @@ enum {
    ERR_INVALIDSERIALFRAME              = 0x34, // invalid serial frame
    ERR_INVALIDPACKETFROMRADIO          = 0x35, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x36, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
+   ERR_WRONG_CRC_INPUT                  = 0x37, // wrong CRC in input Buffer (code location {0})
 };
 
 //=========================== typedef =========================================
