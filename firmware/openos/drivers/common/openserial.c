@@ -548,6 +548,7 @@ void isr_openserial_tx() {
 // executed in ISR, called from scheduler.c
 void isr_openserial_rx() {
    uint8_t rxbyte;
+   uint8_t inputBufFill;
    
    // stop if I'm not in input mode
    if (openserial_vars.mode!=MODE_INPUT) {
@@ -556,6 +557,8 @@ void isr_openserial_rx() {
    
    // read byte just received
    rxbyte = uart_readByte();
+   //keep lenght
+   inputBufFill=openserial_vars.inputBufFill;
    
    if        (
                 openserial_vars.busyReceiving==FALSE  &&
@@ -601,7 +604,7 @@ void isr_openserial_rx() {
          if (openserial_vars.inputBufFill==0){
             // invalid HDLC frame
             openserial_printError(COMPONENT_OPENSERIAL,ERR_WRONG_CRC_INPUT,
-                                  (errorparameter_t)0,
+                                  (errorparameter_t)inputBufFill,
                                   (errorparameter_t)0);
          
          }
