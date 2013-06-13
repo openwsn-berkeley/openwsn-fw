@@ -394,9 +394,11 @@ void openserial_stop() {
             break;
       }
    }
-      DISABLE_INTERRUPTS();
-      openserial_vars.inputBufFill = 0;
-      ENABLE_INTERRUPTS();
+   
+   DISABLE_INTERRUPTS();
+   openserial_vars.inputBufFill  = 0;
+   openserial_vars.busyReceiving = FALSE;
+   ENABLE_INTERRUPTS();
 }
 
 /**
