@@ -24,7 +24,7 @@ void schedule_init() {
 
    // reset local variables
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
-   for (i=0;i<MAXACTIVESLOTS;i++){
+   for (i=0;i<MAXACTIVESLOTS;i++) {
       schedule_resetEntry(&schedule_vars.scheduleBuf[i]);
    }
    schedule_vars.backoffExponent = MINBE-1;
@@ -603,14 +603,10 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry) {
    pScheduleEntry->type                     = CELLTYPE_OFF;
    pScheduleEntry->shared                   = FALSE;
    pScheduleEntry->channelOffset            = 0;
+
    pScheduleEntry->neighbor.type            = ADDR_NONE;
-   pScheduleEntry->neighbor.addr_64b[0]     = 0x14;
-   pScheduleEntry->neighbor.addr_64b[1]     = 0x15;
-   pScheduleEntry->neighbor.addr_64b[2]     = 0x92;
-   pScheduleEntry->neighbor.addr_64b[3]     = 0x09;
-   pScheduleEntry->neighbor.addr_64b[4]     = 0x02;
-   pScheduleEntry->neighbor.addr_64b[5]     = 0x2c;
-   pScheduleEntry->neighbor.addr_64b[6]     = 0x00;
+   memset(&pScheduleEntry->neighbor.addr_64b[0], 0x00, sizeof(pScheduleEntry->neighbor.addr_64b));
+
    pScheduleEntry->numRx                    = 0;
    pScheduleEntry->numTx                    = 0;
    pScheduleEntry->numTxACK                 = 0;
