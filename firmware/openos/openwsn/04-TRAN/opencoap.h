@@ -120,11 +120,11 @@ typedef struct {
    uint8_t*      pValue;
 } coap_option_iht;
 
-typedef error_t (*callbackRx_cbt)(OpenQueueEntry_t* msg,
+typedef ow_error_t (*callbackRx_cbt)(OpenQueueEntry_t* msg,
                                 coap_header_iht*  coap_header,
                                 coap_option_iht*  coap_options);
 typedef void (*callbackSendDone_cbt)(OpenQueueEntry_t* msg,
-                                      error_t error);
+                                      ow_error_t error);
 
 typedef struct coap_resource_desc_t coap_resource_desc_t;
 
@@ -156,12 +156,12 @@ typedef struct {
 // from stack
 void     opencoap_init();
 void     opencoap_receive(OpenQueueEntry_t* msg);
-void     opencoap_sendDone(OpenQueueEntry_t* msg, error_t error);
+void     opencoap_sendDone(OpenQueueEntry_t* msg, ow_error_t error);
 
 // from CoAP resources
 void     opencoap_writeLinks(OpenQueueEntry_t* msg);
 void     opencoap_register(coap_resource_desc_t* desc);
-error_t  opencoap_send(OpenQueueEntry_t*     msg,
+ow_error_t  opencoap_send(OpenQueueEntry_t*     msg,
                        coap_type_t           type,
                        coap_code_t           code,
                        uint8_t               numOptions,

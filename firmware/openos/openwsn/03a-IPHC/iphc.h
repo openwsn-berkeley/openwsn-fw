@@ -121,9 +121,9 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void    iphc_init();
-error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
-error_t iphc_sendFromBridge(OpenQueueEntry_t *msg);
-void    iphc_sendDone(OpenQueueEntry_t* msg, error_t error);
+ow_error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
+ow_error_t iphc_sendFromBridge(OpenQueueEntry_t *msg);
+void    iphc_sendDone(OpenQueueEntry_t* msg, ow_error_t error);
 void    iphc_receive(OpenQueueEntry_t* msg);
 
 /**

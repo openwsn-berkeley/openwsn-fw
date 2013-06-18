@@ -54,7 +54,7 @@ void imu_receive(OpenQueueEntry_t* msg) {
 }
 
 //I just sent a IMU packet, check I need to resend one
-void imu_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void imu_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
    msg->owner = COMPONENT_IMU;
    if (msg->creator!=COMPONENT_IMU) {
       openserial_printError(COMPONENT_IMU,ERR_UNEXPECTED_SENDDONE,

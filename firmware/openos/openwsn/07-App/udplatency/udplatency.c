@@ -100,7 +100,7 @@ void udplatency_timer() {
   scheduler_push_task(udplatency_task,TASKPRIO_COAP);
 }
 
-void udplatency_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void udplatency_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
    msg->owner = COMPONENT_UDPLATENCY;
    if (msg->creator!=COMPONENT_UDPLATENCY) {
       openserial_printError(COMPONENT_UDPLATENCY,ERR_UNEXPECTED_SENDDONE,

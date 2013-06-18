@@ -151,7 +151,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void icmpv6rpl_init();
-void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, error_t error);
+void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, ow_error_t error);
 void icmpv6rpl_receive(OpenQueueEntry_t* msg);
 
 /**

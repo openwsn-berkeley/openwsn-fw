@@ -19,11 +19,11 @@ const uint8_t rwellknown_testlink[]  = "</led>;if=\"actuator\";rt=\"ipso:light\"
 
 //=========================== prototypes ======================================
 
-error_t rwellknown_receive(OpenQueueEntry_t* msg,
+ow_error_t rwellknown_receive(OpenQueueEntry_t* msg,
                            coap_header_iht*  coap_header,
                            coap_option_iht*  coap_options);
 void    rwellknown_sendDone(OpenQueueEntry_t* msg,
-                            error_t error);
+                            ow_error_t error);
 
 //=========================== public ==========================================
 
@@ -46,10 +46,10 @@ void rwellknown_init() {
 
 //=========================== private =========================================
 
-error_t rwellknown_receive(OpenQueueEntry_t* msg,
+ow_error_t rwellknown_receive(OpenQueueEntry_t* msg,
                            coap_header_iht*  coap_header,
                            coap_option_iht*  coap_options) {
-   error_t outcome;
+   ow_error_t outcome;
    
    if (coap_header->Code==COAP_CODE_REQ_GET) {
       // reset packet payload
@@ -75,6 +75,6 @@ error_t rwellknown_receive(OpenQueueEntry_t* msg,
    return outcome;
 }
 
-void rwellknown_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void rwellknown_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
    openqueue_freePacketBuffer(msg);
 }

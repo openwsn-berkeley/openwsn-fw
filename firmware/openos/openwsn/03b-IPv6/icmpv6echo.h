@@ -24,7 +24,7 @@ typedef struct {
 
 void icmpv6echo_init();
 void icmpv6echo_trigger();
-void icmpv6echo_sendDone(OpenQueueEntry_t* msg, error_t error);
+void icmpv6echo_sendDone(OpenQueueEntry_t* msg, ow_error_t error);
 void icmpv6echo_receive(OpenQueueEntry_t* msg);
 
 /**

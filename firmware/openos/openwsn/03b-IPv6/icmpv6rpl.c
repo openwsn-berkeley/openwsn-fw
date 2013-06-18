@@ -120,7 +120,7 @@ void icmpv6rpl_init() {
 \param[in] msg   Pointer to the message just sent.
 \param[in] error Outcome of the sending.
 */
-void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
    
    // take ownership over that packet
    msg->owner = COMPONENT_ICMPv6RPL;

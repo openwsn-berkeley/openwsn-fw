@@ -91,7 +91,7 @@ void ohlone_receive(OpenQueueEntry_t* msg) {
    openqueue_freePacketBuffer(msg);
 }
 
-void ohlone_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void ohlone_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
    msg->owner = COMPONENT_OHLONE;
    if (msg->creator!=COMPONENT_OHLONE) {
       openserial_printError(COMPONENT_OHLONE,ERR_UNEXPECTED_SENDDONE,
@@ -103,7 +103,7 @@ void ohlone_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-void ohlone_connectDone(error_t error) {
+void ohlone_connectDone(ow_error_t error) {
 }
 
 bool ohlone_debugPrint() {

@@ -93,7 +93,7 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
    return res;
 }
 
-error_t idmanager_setMyID(open_addr_t* newID) {
+ow_error_t idmanager_setMyID(open_addr_t* newID) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    switch (newID->type) {

@@ -30,7 +30,7 @@ typedef struct {
 void    res_init();
 bool    debugPrint_myDAGrank();
 // from upper layer
-error_t res_send(OpenQueueEntry_t *msg);
+ow_error_t res_send(OpenQueueEntry_t *msg);
 // from lower layer
 void    task_resNotifSendDone();
 void    task_resNotifReceive();

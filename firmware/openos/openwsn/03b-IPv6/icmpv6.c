@@ -15,13 +15,13 @@
 void icmpv6_init() {
 }
 
-error_t icmpv6_send(OpenQueueEntry_t* msg) {
+ow_error_t icmpv6_send(OpenQueueEntry_t* msg) {
    msg->owner       = COMPONENT_ICMPv6;
    msg->l4_protocol = IANA_ICMPv6;
    return forwarding_send(msg);
 }
 
-void icmpv6_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void icmpv6_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
    msg->owner = COMPONENT_ICMPv6;
    switch (msg->l4_sourcePortORicmpv6Type) {
       case IANA_ICMPv6_ECHO_REQUEST:

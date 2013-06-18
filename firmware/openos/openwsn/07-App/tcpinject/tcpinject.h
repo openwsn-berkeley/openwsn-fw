@@ -26,8 +26,8 @@ typedef struct {
 void tcpinject_init();
 bool tcpinject_shouldIlisten();
 void tcpinject_trigger();
-void tcpinject_connectDone(error_t error);
-void tcpinject_sendDone(OpenQueueEntry_t* msg, error_t error);
+void tcpinject_connectDone(ow_error_t error);
+void tcpinject_sendDone(OpenQueueEntry_t* msg, ow_error_t error);
 void tcpinject_receive(OpenQueueEntry_t* msg);
 bool tcpinject_debugPrint();
 
