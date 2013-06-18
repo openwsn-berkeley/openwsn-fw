@@ -7,9 +7,11 @@ settings
 *.ihex
 *.a43
 *.bin
+*.so
 path.txt
 /build
 /.sconsign.dblite
 /firmware/openos/bsp/boards/python/*.def
 .directory
 /firmware/openos/projects/common/03oos_openwsn_prog
+firmware/openos/projects/common/03oos_openwsn/03oos_openwsn_obj.*
