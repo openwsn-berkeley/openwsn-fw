@@ -169,6 +169,8 @@ else:
     if env['board'] in ['telosb','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
+	# enabling shared library to be reallocated 
+	env.Append(CCFLAGS = '-fPIC')
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
     
