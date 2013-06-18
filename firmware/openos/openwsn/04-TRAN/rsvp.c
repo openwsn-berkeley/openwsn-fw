@@ -35,7 +35,7 @@ void rsvp_init(){
 void rsvp_qos_request(uint8_t bandwith, uint16_t refresh_period, open_addr_t dest){
    
       OpenQueueEntry_t* pkt;
-      error_t           outcome;
+      owerror_t           outcome;
       uint8_t           i,j;
      
       pkt = openqueue_getFreePacketBuffer(COMPONENT_RSVP);
