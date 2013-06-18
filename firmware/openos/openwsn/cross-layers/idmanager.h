@@ -46,7 +46,7 @@ void         idmanager_setIsDAGroot(bool newRole);
 bool         idmanager_getIsBridge();
 void         idmanager_setIsBridge(bool newRole);
 open_addr_t* idmanager_getMyID(uint8_t type);
-ow_error_t      idmanager_setMyID(open_addr_t* newID);
+owerror_t      idmanager_setMyID(open_addr_t* newID);
 bool         idmanager_isMyAddress(open_addr_t* addr);
 void         idmanager_triggerAboutRoot();
 void         idmanager_triggerAboutBridge();

@@ -27,12 +27,12 @@ rxl1_vars_t rxl1_vars;
 
 //=========================== prototypes ======================================
 
-error_t rxl1_receive(OpenQueueEntry_t* msg,
+owerror_t rxl1_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options);
 void    rxl1_timer();
 void    rxl1_sendDone(OpenQueueEntry_t* msg,
-                       error_t error);
+                       owerror_t error);
 
 //=========================== public ==========================================
 
@@ -60,10 +60,10 @@ void rxl1_init() {
 
 //=========================== private =========================================
 
-error_t rxl1_receive(OpenQueueEntry_t* msg,
+owerror_t rxl1_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
-   error_t outcome;
+   owerror_t outcome;
    uint8_t rawdata[SENSITIVE_ACCEL_TEMPERATURE_DATALEN];
    
    if (coap_header->Code==COAP_CODE_REQ_POST) {
@@ -114,7 +114,7 @@ error_t rxl1_receive(OpenQueueEntry_t* msg,
 
 void rxl1_timer() {
    OpenQueueEntry_t* pkt;
-   error_t           outcome;
+   owerror_t           outcome;
    uint8_t           numOptions;
    uint8_t           rawdata[SENSITIVE_ACCEL_TEMPERATURE_DATALEN];
    
@@ -169,6 +169,6 @@ void rxl1_timer() {
    return;
 }
 
-void rxl1_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void rxl1_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

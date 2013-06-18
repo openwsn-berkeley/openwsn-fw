@@ -36,13 +36,13 @@ udpstorm_vars_t udpstorm_vars;
 
 //=========================== prototypes ======================================
 
-error_t udpstorm_receive(OpenQueueEntry_t* msg,
+owerror_t udpstorm_receive(OpenQueueEntry_t* msg,
                          coap_header_iht*  coap_header,
                          coap_option_iht*  coap_options);
 void    udpstorm_timer_cb();
 void    udpstorm_task_cb();
 void    udpstorm_sendDone(OpenQueueEntry_t* msg,
-                          error_t           error);
+                          owerror_t           error);
 
 //=========================== public ==========================================
 
@@ -65,7 +65,7 @@ void udpstorm_init() {
 
 //=========================== private =========================================
 
-error_t udpstorm_receive(OpenQueueEntry_t* msg,
+owerror_t udpstorm_receive(OpenQueueEntry_t* msg,
                          coap_header_iht* coap_header,
                          coap_option_iht* coap_options) {
    return E_FAIL;
@@ -79,7 +79,7 @@ void udpstorm_timer_cb(){
 
 void udpstorm_task_cb() {
    OpenQueueEntry_t* pkt;
-   error_t           outcome;
+   owerror_t           outcome;
    uint8_t           numOptions;
    
    if(udpstorm_vars.seqNum>=NUMPACKETS) {
@@ -147,6 +147,6 @@ void udpstorm_task_cb() {
    udpstorm_vars.seqNum++;
 }
 
-void udpstorm_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void udpstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

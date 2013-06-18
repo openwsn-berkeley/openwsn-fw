@@ -46,8 +46,8 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void    openudp_init();
-ow_error_t openudp_send(OpenQueueEntry_t* msg);
-void    openudp_sendDone(OpenQueueEntry_t* msg, ow_error_t error);
+owerror_t openudp_send(OpenQueueEntry_t* msg);
+void    openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void    openudp_receive(OpenQueueEntry_t* msg);
 bool    openudp_debugPrint();
 

@@ -212,14 +212,14 @@ void  schedule_getSlotInfo(slotOffset_t   slotOffset,
 \param channelOffset
 \param neighbor
 */
-ow_error_t schedule_addActiveSlot(slotOffset_t    slotOffset,
+owerror_t schedule_addActiveSlot(slotOffset_t    slotOffset,
       cellType_t      type,
       bool            shared,
       channelOffset_t channelOffset,
       open_addr_t*    neighbor,
       bool isUpdate) {
    
-   ow_error_t outcome;
+   owerror_t outcome;
    
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
@@ -324,9 +324,9 @@ ow_error_t schedule_addActiveSlot(slotOffset_t    slotOffset,
 
 
 
-ow_error_t   schedule_removeActiveSlot(slotOffset_t   slotOffset, open_addr_t*   neighbor){
+owerror_t   schedule_removeActiveSlot(slotOffset_t   slotOffset, open_addr_t*   neighbor){
   
-   ow_error_t outcome;
+   owerror_t outcome;
    
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;

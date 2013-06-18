@@ -12,7 +12,7 @@
 
 //=========================== prototypes ======================================
 
-ow_error_t prependIPv6Header(
+owerror_t prependIPv6Header(
    OpenQueueEntry_t*    msg,
    uint8_t              tf,
    uint32_t             value_flowLabel,
@@ -38,7 +38,7 @@ void iphc_init() {
 }
 
 //send from upper layer: I need to add 6LoWPAN header
-ow_error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
+owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
    open_addr_t  temp_dest_prefix;
    open_addr_t  temp_dest_mac64b;
    open_addr_t* p_dest;
@@ -149,7 +149,7 @@ ow_error_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_h
 }
 
 //send from bridge: 6LoWPAN header already added by OpenLBR, send as is
-ow_error_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
+owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
    msg->owner = COMPONENT_IPHC;
    // error checking
    if (idmanager_getIsBridge()==FALSE) {
@@ -161,7 +161,7 @@ ow_error_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
    return res_send(msg);
 }
 
-void iphc_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_IPHC;
    if (msg->creator==COMPONENT_OPENBRIDGE) {
       openbridge_sendDone(msg,error);
@@ -185,7 +185,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
 
 //=========================== private =========================================
 
-ow_error_t prependIPv6Header(
+owerror_t prependIPv6Header(
       OpenQueueEntry_t* msg,
       uint8_t tf,
       uint32_t value_flowLabel,

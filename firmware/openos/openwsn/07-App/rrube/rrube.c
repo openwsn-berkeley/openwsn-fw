@@ -37,12 +37,12 @@ const uint8_t rrube_path0[]    = "g";
 
 //=========================== prototypes ======================================
 
-ow_error_t rrube_receive(OpenQueueEntry_t* msg,
+owerror_t rrube_receive(OpenQueueEntry_t* msg,
                      coap_header_iht*  coap_header,
                      coap_option_iht*  coap_options);
 void    rrube_timer();
 void    rrube_sendDone(OpenQueueEntry_t* msg,
-                      ow_error_t error);
+                      owerror_t error);
 uint8_t hexToAscii(uint8_t hex);
 
 //=========================== public ==========================================
@@ -70,11 +70,11 @@ void rrube_init() {
 
 //=========================== private =========================================
 
-ow_error_t rrube_receive(OpenQueueEntry_t* msg,
+owerror_t rrube_receive(OpenQueueEntry_t* msg,
                    coap_header_iht* coap_header,
                    coap_option_iht* coap_options) {
                       
-   ow_error_t outcome;
+   owerror_t outcome;
    
    if (rrube_vars.rrube_state==RRUBE_ST_IDLE &&
        coap_header->Code==COAP_CODE_REQ_POST) {
@@ -135,7 +135,7 @@ ow_error_t rrube_receive(OpenQueueEntry_t* msg,
 void rrube_timer() {
    OpenQueueEntry_t* pkt;
    uint8_t           numOptions;
-   ow_error_t           outcome;
+   owerror_t           outcome;
    
    // turn off heli
    heli_off();
@@ -237,6 +237,6 @@ void rrube_timer() {
    return;
 }
 
-void rrube_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void rrube_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

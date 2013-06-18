@@ -24,12 +24,12 @@ const uint8_t rreg_path0[]    = "r";
 
 //=========================== prototypes ======================================
 
-ow_error_t rreg_receive(OpenQueueEntry_t* msg,
+owerror_t rreg_receive(OpenQueueEntry_t* msg,
                      coap_header_iht*  coap_header,
                      coap_option_iht*  coap_options);
 void    rreg_timer();
 void    rreg_sendDone(OpenQueueEntry_t* msg,
-                      ow_error_t error);
+                      owerror_t error);
 uint8_t hexToAscii(uint8_t hex);
 
 //=========================== public ==========================================
@@ -58,11 +58,11 @@ void rreg_init() {
 
 //=========================== private =========================================
 
-ow_error_t rreg_receive(OpenQueueEntry_t* msg,
+owerror_t rreg_receive(OpenQueueEntry_t* msg,
                    coap_header_iht* coap_header,
                    coap_option_iht* coap_options) {
                       
-   ow_error_t outcome;
+   owerror_t outcome;
    
    if (coap_header->Code==COAP_CODE_REQ_POST) {
       // request to register received
@@ -92,7 +92,7 @@ ow_error_t rreg_receive(OpenQueueEntry_t* msg,
 void rreg_timer() {
    OpenQueueEntry_t* pkt;
    uint8_t           temp8b;
-   ow_error_t           outcome;
+   owerror_t           outcome;
    uint8_t           numOptions;
    
 
@@ -153,7 +153,7 @@ void rreg_timer() {
    return;
 }
 
-void rreg_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void rreg_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 

@@ -27,7 +27,7 @@ openserial_vars_t openserial_vars;
 
 //=========================== prototypes ======================================
 
-ow_error_t openserial_printInfoErrorCritical(
+owerror_t openserial_printInfoErrorCritical(
    char             severity,
    uint8_t          calling_component,
    uint8_t          error_code,
@@ -80,7 +80,7 @@ void openserial_init() {
                      isr_openserial_rx);
 }
 
-ow_error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint8_t length) {
+owerror_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint8_t length) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    
@@ -100,7 +100,7 @@ ow_error_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint8_t
    return E_SUCCESS;
 }
 
-ow_error_t openserial_printInfoErrorCritical(
+owerror_t openserial_printInfoErrorCritical(
       char             severity,
       uint8_t          calling_component,
       uint8_t          error_code,
@@ -127,7 +127,7 @@ ow_error_t openserial_printInfoErrorCritical(
    return E_SUCCESS;
 }
 
-ow_error_t openserial_printData(uint8_t* buffer, uint8_t length) {
+owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
    uint8_t  i;
    uint8_t  asn[5];
    INTERRUPT_DECLARATION();
@@ -155,7 +155,7 @@ ow_error_t openserial_printData(uint8_t* buffer, uint8_t length) {
    return E_SUCCESS;
 }
 
-ow_error_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
+owerror_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
    return openserial_printInfoErrorCritical(
@@ -167,7 +167,7 @@ ow_error_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
    );
 }
 
-ow_error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
+owerror_t openserial_printError(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
    // blink error LED, this is serious
@@ -182,7 +182,7 @@ ow_error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
    );
 }
 
-ow_error_t openserial_printCritical(uint8_t calling_component, uint8_t error_code,
+owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
    // blink error LED, this is serious

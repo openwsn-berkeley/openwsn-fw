@@ -22,11 +22,11 @@ rinfo_vars_t rinfo_vars;
 
 //=========================== prototypes ======================================
 
-ow_error_t rinfo_receive(OpenQueueEntry_t* msg,
+owerror_t rinfo_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options);
 void    rinfo_sendDone(OpenQueueEntry_t* msg,
-                       ow_error_t error);
+                       owerror_t error);
 
 //=========================== public ==========================================
 
@@ -48,10 +48,10 @@ void rinfo_init() {
 
 //=========================== private =========================================
 
-ow_error_t rinfo_receive(OpenQueueEntry_t* msg,
+owerror_t rinfo_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
-   ow_error_t outcome;
+   owerror_t outcome;
    
    if (coap_header->Code==COAP_CODE_REQ_GET) {
       
@@ -97,6 +97,6 @@ ow_error_t rinfo_receive(OpenQueueEntry_t* msg,
    return outcome;
 }
 
-void rinfo_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void rinfo_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

@@ -16,9 +16,9 @@
 
 //=========================== prototypes ======================================
 
-ow_error_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
+owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
 void    forwarding_getNextHop_RoutingTable(open_addr_t* destination, open_addr_t* addressToWrite);
-ow_error_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
+owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
 //=========================== public ==========================================
 
 /**
@@ -35,7 +35,7 @@ at this mote.
 
 \param[in,out] msg Packet to send.
 */
-ow_error_t forwarding_send(OpenQueueEntry_t* msg) { 
+owerror_t forwarding_send(OpenQueueEntry_t* msg) { 
    ipv6_header_iht ipv6_header;
    open_addr_t*    myprefix;
    open_addr_t*    myadd64;
@@ -69,7 +69,7 @@ ow_error_t forwarding_send(OpenQueueEntry_t* msg) {
 \param[in,out] msg   The packet just sent.
 \param[in]     error The outcome of sending it.
 */
-void forwarding_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    
    // take ownership
    msg->owner = COMPONENT_FORWARDING;
@@ -184,7 +184,7 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
 \param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
-ow_error_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
+owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
    
    // retrieve the next hop from the routing table
    forwarding_getNextHop_RoutingTable(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
@@ -210,7 +210,7 @@ http://tools.ietf.org/html/rfc6554#page-9.
 \param[in,out] msg             The packet to send.
 \param[in]     ipv6_header     The packet's IPv6 header.
 */
-ow_error_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header) {
+owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header) {
    uint8_t         local_CmprE;
    uint8_t         local_CmprI;
    uint8_t         numAddr;

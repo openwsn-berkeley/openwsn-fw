@@ -94,7 +94,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 \returns E_SUCCESS when the freeing was succeful.
 \returns E_FAIL when the module could not find the specified packet buffer.
 */
-ow_error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
+owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();

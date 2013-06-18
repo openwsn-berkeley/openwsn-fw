@@ -70,7 +70,7 @@ void     synchronizePacket(PORT_TIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
 void     changeIsSync(bool newIsSync);
 // notifying upper layer
-void     notif_sendDone(OpenQueueEntry_t* packetSent, ow_error_t error);
+void     notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error);
 void     notif_receive(OpenQueueEntry_t* packetReceived);
 // statistics
 void     resetStats();
@@ -1664,7 +1664,7 @@ void changeIsSync(bool newIsSync) {
 
 //======= notifying upper layer
 
-void notif_sendDone(OpenQueueEntry_t* packetSent, ow_error_t error) {
+void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
    // record the outcome of the trasmission attempt
    packetSent->l2_sendDoneError   = error;
    // record the current ASN

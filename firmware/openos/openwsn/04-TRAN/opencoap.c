@@ -43,7 +43,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    coap_option_t             last_option;
    coap_resource_desc_t*     temp_desc;
    bool                      found;
-   ow_error_t                   outcome;
+   owerror_t                   outcome;
    // local variables passed to the handlers (with msg)
    coap_header_iht           coap_header;
    coap_option_iht           coap_options[MAX_COAP_OPTIONS];
@@ -234,7 +234,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-void opencoap_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    coap_resource_desc_t* temp_resource;
    
    // take ownership over that packet
@@ -321,7 +321,7 @@ void opencoap_register(coap_resource_desc_t* desc) {
    last_elem->next = desc;
 }
 
-ow_error_t opencoap_send(OpenQueueEntry_t*     msg,
+owerror_t opencoap_send(OpenQueueEntry_t*     msg,
                       coap_type_t           type,
                       coap_code_t           code,
                       uint8_t               TKL,

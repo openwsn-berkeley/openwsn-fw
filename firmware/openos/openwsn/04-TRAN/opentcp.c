@@ -34,7 +34,7 @@ void opentcp_init() {
    opentcp_reset();
 }
 
-ow_error_t opentcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16_t param_tcp_myPort) {
+owerror_t opentcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16_t param_tcp_myPort) {
    //[command] establishment
    OpenQueueEntry_t* tempPkt;
    if (tcp_vars.state!=TCP_STATE_CLOSED) {
@@ -68,7 +68,7 @@ ow_error_t opentcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16
    return forwarding_send(tempPkt);
 }
 
-ow_error_t opentcp_send(OpenQueueEntry_t* msg) {             //[command] data
+owerror_t opentcp_send(OpenQueueEntry_t* msg) {             //[command] data
    msg->owner = COMPONENT_OPENTCP;
    if (tcp_vars.state!=TCP_STATE_ESTABLISHED) {
       openserial_printError(COMPONENT_OPENTCP,ERR_WRONG_TCP_STATE,
@@ -101,7 +101,7 @@ ow_error_t opentcp_send(OpenQueueEntry_t* msg) {             //[command] data
    return forwarding_send(tcp_vars.dataToSend);
 }
 
-void opentcp_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void opentcp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    OpenQueueEntry_t* tempPkt;
    msg->owner = COMPONENT_OPENTCP;
    switch (tcp_vars.state) {
@@ -615,7 +615,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-ow_error_t opentcp_close() {    //[command] teardown
+owerror_t opentcp_close() {    //[command] teardown
    OpenQueueEntry_t* tempPkt;
    if (  tcp_vars.state==TCP_STATE_ALMOST_CLOSE_WAIT ||
          tcp_vars.state==TCP_STATE_CLOSE_WAIT        ||

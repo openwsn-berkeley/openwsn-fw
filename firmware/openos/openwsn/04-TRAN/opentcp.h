@@ -118,11 +118,11 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void     opentcp_init();
-ow_error_t  opentcp_connect(open_addr_t* dest, uint16_t param_hisPort, uint16_t param_myPort);
-ow_error_t  opentcp_send(OpenQueueEntry_t* msg);
-void     opentcp_sendDone(OpenQueueEntry_t* msg, ow_error_t error);
+owerror_t  opentcp_connect(open_addr_t* dest, uint16_t param_hisPort, uint16_t param_myPort);
+owerror_t  opentcp_send(OpenQueueEntry_t* msg);
+void     opentcp_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void     opentcp_receive(OpenQueueEntry_t* msg);
-ow_error_t  opentcp_close();
+owerror_t  opentcp_close();
 bool     opentcp_debugPrint();
 
 /**

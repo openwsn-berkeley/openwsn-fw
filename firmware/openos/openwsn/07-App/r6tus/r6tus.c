@@ -27,12 +27,12 @@ r6tus_vars_t r6tus_vars;
 
 //=========================== prototypes ======================================
 
-ow_error_t r6tus_receive(OpenQueueEntry_t* msg,
+owerror_t r6tus_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
 
 void    r6tus_sendDone(OpenQueueEntry_t* msg,
-                       ow_error_t error);
+                       owerror_t error);
 
 //=========================== public ==========================================
 
@@ -64,18 +64,18 @@ type.
 According to the command it returns the list of responses or the required
 information.
 */
-ow_error_t r6tus_receive(OpenQueueEntry_t* msg,
+owerror_t r6tus_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options) {
                         
    uint8_t              i;
-   ow_error_t              outcome;
+   owerror_t              outcome;
    r6tus_command_t*     link_command;
    r6tus_command_t      getResponse;
    slotinfo_element_t*  link_element;
    slotinfo_element_t   getLink_elementResponse;
    open_addr_t          temp_addr;
-   ow_error_t              responses[R6TUS_MAXRESPONSES];
+   owerror_t              responses[R6TUS_MAXRESPONSES];
    //assuming data comes in binary format.
     
    if (coap_header->Code==COAP_CODE_REQ_GET) {
@@ -206,6 +206,6 @@ ow_error_t r6tus_receive(OpenQueueEntry_t* msg,
 }
 
 
-void r6tus_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void r6tus_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

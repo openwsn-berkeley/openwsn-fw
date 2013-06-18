@@ -17,11 +17,11 @@ const uint8_t rleds_path0[]        = "l";
 
 //=========================== prototypes ======================================
 
-ow_error_t rleds_receive(OpenQueueEntry_t* msg,
+owerror_t rleds_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options);
 void    rleds_sendDone(OpenQueueEntry_t* msg,
-                       ow_error_t error);
+                       owerror_t error);
 
 //=========================== public ==========================================
 
@@ -40,10 +40,10 @@ void rleds__init() {
 
 //=========================== private =========================================
 
-ow_error_t rleds_receive(OpenQueueEntry_t* msg,
+owerror_t rleds_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options) {      
-   ow_error_t outcome;
+   owerror_t outcome;
    
    if        (coap_header->Code==COAP_CODE_REQ_GET) {
       // reset packet payload
@@ -87,6 +87,6 @@ ow_error_t rleds_receive(OpenQueueEntry_t* msg,
    return outcome;
 }
 
-void rleds_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void rleds_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

@@ -31,7 +31,7 @@ void tcpecho_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-void tcpecho_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void tcpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_TCPECHO;
    if (msg->creator!=COMPONENT_TCPECHO) {
       openserial_printError(COMPONENT_TCPECHO,ERR_UNEXPECTED_SENDDONE,
@@ -43,7 +43,7 @@ void tcpecho_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-void tcpecho_connectDone(ow_error_t error) {
+void tcpecho_connectDone(owerror_t error) {
 }
 
 bool tcpecho_debugPrint() {

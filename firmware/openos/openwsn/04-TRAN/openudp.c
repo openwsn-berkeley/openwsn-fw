@@ -24,7 +24,7 @@
 void openudp_init() {
 }
 
-ow_error_t openudp_send(OpenQueueEntry_t* msg) {
+owerror_t openudp_send(OpenQueueEntry_t* msg) {
    msg->owner       = COMPONENT_OPENUDP;
    msg->l4_protocol = IANA_UDP;
    msg->l4_payload  = msg->payload;
@@ -37,7 +37,7 @@ ow_error_t openudp_send(OpenQueueEntry_t* msg) {
    return forwarding_send(msg);
 }
 
-void openudp_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_OPENUDP;
    switch(msg->l4_sourcePortORicmpv6Type) {
       case WKP_UDP_COAP:

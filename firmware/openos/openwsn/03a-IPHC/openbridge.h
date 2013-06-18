@@ -18,7 +18,7 @@
 
 void openbridge_init();
 void openbridge_triggerData();
-void openbridge_sendDone(OpenQueueEntry_t* msg, ow_error_t error);
+void openbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void openbridge_receive(OpenQueueEntry_t* msg);
 
 /**

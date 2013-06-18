@@ -34,12 +34,12 @@ layerdebug_vars_t layerdebug_vars;
 
 //=========================== prototypes ======================================
 
-ow_error_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
+owerror_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
 
 
-ow_error_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
+owerror_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
 
@@ -50,7 +50,7 @@ void    layerdebug_task_schedule_cb();
 void    layerdebug_task_neighbors_cb();
 
 void    layerdebug_sendDone(OpenQueueEntry_t* msg,
-                       ow_error_t error);
+                       owerror_t error);
 
 //=========================== public ==========================================
 
@@ -100,7 +100,7 @@ void layerdebug_timer_neighbors_cb(){
 //schedule stats
 void layerdebug_task_schedule_cb() {
    OpenQueueEntry_t* pkt;
-   ow_error_t           outcome;
+   owerror_t           outcome;
    uint8_t           numOptions;
    uint8_t           size;
 
@@ -162,7 +162,7 @@ void layerdebug_task_schedule_cb() {
 void layerdebug_task_neighbors_cb() {
   
    OpenQueueEntry_t* pkt;
-   ow_error_t           outcome;
+   owerror_t           outcome;
    uint8_t           numOptions;
    uint8_t           size;
    
@@ -222,15 +222,15 @@ void layerdebug_task_neighbors_cb() {
    return;
 }
 
-void layerdebug_sendDone(OpenQueueEntry_t* msg, ow_error_t error) {
+void layerdebug_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
 
-ow_error_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
+owerror_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
-   ow_error_t outcome;
+   owerror_t outcome;
    uint8_t size;
   
    
@@ -262,10 +262,10 @@ ow_error_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
    return outcome;
 }
 
-ow_error_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
+owerror_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
-   ow_error_t outcome;
+   owerror_t outcome;
    uint8_t size;
   
    
