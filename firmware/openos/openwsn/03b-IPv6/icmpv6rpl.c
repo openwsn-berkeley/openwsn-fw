@@ -82,7 +82,7 @@ void icmpv6rpl_init() {
                                               D_DAO        |
                                               K_DAO;
    icmpv6rpl_vars.dao.reserved              = 0x00;
-   icmpv6rpl_vars.dao.DAOSequance           = 0x00;
+   icmpv6rpl_vars.dao.DAOSequence           = 0x00;
    // DODAGID: to be populated upon receiving DIO
    
    icmpv6rpl_vars.dao_transit.type          = OPTION_TRANSIT_INFORMATION_TYPE;
@@ -391,6 +391,7 @@ void sendDAO() {
    uint8_t              nbrIdx;             // running neighbor index
    uint8_t              numTransitParents,numTargetParents;  // the number of parents indicated in transit option
    open_addr_t         address;
+   open_addr_t*        prefix;
    
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed 
@@ -451,15 +452,16 @@ void sendDAO() {
       if ((neighbors_isNeighborWithLowerDAGrank(nbrIdx))==TRUE) {
          // this neighbor is of lower DAGrank as I am
          
-         // write it's address in DAO
-         //packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
+         // write it's address in DAO -- requires full 128b address..
          neighbors_getNeighbor(&address,ADDR_64B,nbrIdx);
          packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
-        
-        
-         // update transit info fields 
-         //size of the whole option in bytes.
-         icmpv6rpl_vars.dao_transit.optionLength  = LENGTH_ADDR64b + sizeof(icmpv6rpl_dao_transit_ht);
+         prefix=idmanager_getMyID(ADDR_PREFIX);
+         packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
+         // update transit info fields
+         // from rfc6550 p.55 -- Variable, depending on whether or not the DODAG ParentAddress subfield is present.
+         // poipoi xv: it is not very clear if this includes all fields in the header. or as target info 2 bytes are removed.
+         // using the same pattern as in target information.
+         icmpv6rpl_vars.dao_transit.optionLength  = LENGTH_ADDR128b + sizeof(icmpv6rpl_dao_transit_ht)-2;
          icmpv6rpl_vars.dao_transit.PathControl=0; //todo. this is to set the preference of this parent.      
          icmpv6rpl_vars.dao_transit.type=OPTION_TRANSIT_INFORMATION_TYPE;
            
@@ -491,7 +493,9 @@ void sendDAO() {
          packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
         
          // update target info fields 
-         icmpv6rpl_vars.dao_target.optionLength  = LENGTH_ADDR64b + sizeof(icmpv6rpl_dao_target_ht);
+         // from rfc6550 p.55 -- Variable, length of the option in octets excluding the Type and Length fields.
+         // poipoi xv: assuming that type and length fields refer to the 2 first bytes of the header
+         icmpv6rpl_vars.dao_target.optionLength  = LENGTH_ADDR64b +sizeof(icmpv6rpl_dao_target_ht) - 2; //no header type and length
          icmpv6rpl_vars.dao_target.type  = OPTION_TARGET_INFORMATION_TYPE;
          icmpv6rpl_vars.dao_target.flags  = 0;       //must be 0
          icmpv6rpl_vars.dao_target.prefixLength = 0; //no prefix.  
