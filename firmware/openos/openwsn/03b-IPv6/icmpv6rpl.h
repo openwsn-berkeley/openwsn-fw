@@ -96,7 +96,7 @@ typedef struct {
    uint8_t         rplinstanceId;      ///< set by the DODAG root.
    uint8_t         K_D_flags;
    uint8_t         reserved;
-   uint8_t         DAOSequance;
+   uint8_t         DAOSequence;
    uint8_t         DODAGID[16];
 } icmpv6rpl_dao_ht;
 PRAGMA(pack());
