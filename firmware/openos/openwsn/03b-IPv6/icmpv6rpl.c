@@ -491,14 +491,16 @@ void sendDAO() {
          // write it's address in DAO RFC6550 page 80 check point 1.
          neighbors_getNeighbor(&address,ADDR_64B,nbrIdx);
          packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
+         prefix=idmanager_getMyID(ADDR_PREFIX);
+         packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
         
          // update target info fields 
          // from rfc6550 p.55 -- Variable, length of the option in octets excluding the Type and Length fields.
          // poipoi xv: assuming that type and length fields refer to the 2 first bytes of the header
-         icmpv6rpl_vars.dao_target.optionLength  = LENGTH_ADDR64b +sizeof(icmpv6rpl_dao_target_ht) - 2; //no header type and length
+         icmpv6rpl_vars.dao_target.optionLength  = LENGTH_ADDR128b +sizeof(icmpv6rpl_dao_target_ht) - 2; //no header type and length
          icmpv6rpl_vars.dao_target.type  = OPTION_TARGET_INFORMATION_TYPE;
          icmpv6rpl_vars.dao_target.flags  = 0;       //must be 0
-         icmpv6rpl_vars.dao_target.prefixLength = 0; //no prefix.  
+         icmpv6rpl_vars.dao_target.prefixLength = 128; //128 leading bits  -- full address.
          
          // write transit info in packet
          packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_target_ht));
