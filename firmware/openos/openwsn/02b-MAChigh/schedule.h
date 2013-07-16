@@ -51,6 +51,7 @@ See MINBE for an explanation of backoff.
 */
 #define MAXBE                4
 
+
 //=========================== typedef =========================================
 
 typedef uint8_t    channelOffset_t;
@@ -67,7 +68,8 @@ typedef enum {
    CELLTYPE_MORESERIALRX     = 6
 } cellType_t;
 
-PRAGMA(pack(1));
+//not packed as does not fly on the network
+//PRAGMA(pack(1));
 typedef struct {
    slotOffset_t    slotOffset;
    cellType_t      type;
@@ -80,9 +82,9 @@ typedef struct {
    asn_t           lastUsedAsn;
    void*           next;
 } scheduleEntry_t;
-PRAGMA(pack());
+//PRAGMA(pack());
 
-//used to debug through ipv6 pkt. 
+//copy of the previous one but without the pointer
 
 PRAGMA(pack(1));
 typedef struct {
