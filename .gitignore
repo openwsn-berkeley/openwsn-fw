@@ -8,6 +8,8 @@ settings
 *.a43
 *.bin
 *.so
+*.a
+*.pyd
 path.txt
 /build
 /.sconsign.dblite
