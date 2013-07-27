@@ -98,8 +98,8 @@ void udplatency_task() {
 
    // insert Sequence Number
    packetfunctions_reserveHeaderSize(pkt,sizeof(seqNum));
-   pkt->payload[0]    = (seqNum & 0xff00);
-   pkt->payload[1]    = (seqNum & 0x00ff);
+   pkt->payload[0]    = (seqNum >> 8) & 0xff;
+   pkt->payload[1]    = seqNum & 0xff;
 
    // send packet
    if ((openudp_send(pkt)) == E_FAIL) {
