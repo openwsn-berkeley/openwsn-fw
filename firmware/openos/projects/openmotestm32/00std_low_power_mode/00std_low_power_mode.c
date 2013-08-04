@@ -90,7 +90,6 @@ int mote_main(void) {
    
    // initialize board
    board_init();
-   NVIC_exti();
    GPIO_Configuration();
    EXTI_Configuration();
    

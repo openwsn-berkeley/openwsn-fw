@@ -108,7 +108,6 @@ void iphc_receive(OpenQueueEntry_t* msg) {
 
 void forwarding_init()       { return; }
 void openbridge_init()       { return; }
-void openbridge_triggerData()    { return; }
 void openbridge_triggerData(){ return; }
 
 //===== L4
