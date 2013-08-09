@@ -1,7 +1,7 @@
 /**
-\brief This project runs the full OpenWSN stack.
+\brief A simple application to test MAC connectivity.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, November 2012.
 */
 
 // stack initialization
@@ -20,6 +20,7 @@
 #include "neighbors.h"
 
 #define MAX_PAYLOAD 104
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -35,7 +36,7 @@ void macpong_send(uint8_t payloadCtr);
 
 //=========================== initialization ==================================
 
-int mote_main(void) {
+int mote_main() {
    board_init();
    scheduler_init();
    openwsn_init();

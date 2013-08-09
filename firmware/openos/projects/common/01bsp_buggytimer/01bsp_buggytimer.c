@@ -51,7 +51,7 @@ void radiotimer_cb_compare();
 /**
 \brief The program starts executing here.
 */
-int mote_main(void)
+int mote_main()
 {  
    // initialize board
    board_init();

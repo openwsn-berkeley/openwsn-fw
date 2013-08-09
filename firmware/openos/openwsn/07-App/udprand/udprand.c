@@ -64,7 +64,7 @@ void udprand_timer() {
   scheduler_push_task(udprand_task,TASKPRIO_COAP);
 }
 
-void udprand_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void udprand_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_UDPRAND;
    if (msg->creator!=COMPONENT_UDPRAND) {
       openserial_printError(COMPONENT_UDPRAND,ERR_UNEXPECTED_SENDDONE,

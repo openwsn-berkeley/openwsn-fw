@@ -60,20 +60,43 @@ enum {
 
 //=========================== typedef =========================================
 
+//=========================== module variables ================================
+
+typedef struct {
+   // admin
+   uint8_t    mode;
+   uint8_t    debugPrintCounter;
+   // input
+   uint8_t    reqFrame[1+1+2+1]; // flag (1B), command (2B), CRC (2B), flag (1B)
+   uint8_t    reqFrameIdx;
+   uint8_t    lastRxByte;
+   bool       busyReceiving;
+   bool       inputEscaping;
+   uint16_t   inputCrc;
+   uint8_t    inputBufFill;
+   uint8_t    inputBuf[SERIAL_INPUT_BUFFER_SIZE];
+   // output
+   bool       outputBufFilled;
+   uint16_t   outputCrc;
+   uint8_t    outputBufIdxW;
+   uint8_t    outputBufIdxR;
+   uint8_t    outputBuf[SERIAL_OUTPUT_BUFFER_SIZE];
+} openserial_vars_t;
+
 //=========================== prototypes ======================================
 
 void    openserial_init();
-error_t openserial_printStatus(uint8_t statusElement, uint8_t* buffer, uint8_t length);
-error_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
+owerror_t openserial_printStatus(uint8_t statusElement, uint8_t* buffer, uint8_t length);
+owerror_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2);
-error_t openserial_printError(uint8_t calling_component, uint8_t error_code,
+owerror_t openserial_printError(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2);
-error_t openserial_printCritical(uint8_t calling_component, uint8_t error_code,
+owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2);
-error_t openserial_printData(uint8_t* buffer, uint8_t length);
+owerror_t openserial_printData(uint8_t* buffer, uint8_t length);
 uint8_t openserial_getNumDataBytes();
 uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes);
 void    openserial_startInput();

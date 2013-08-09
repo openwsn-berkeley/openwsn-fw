@@ -14,7 +14,7 @@
 /**
 \brief The program starts executing here.
 */
-int mote_main(void) {
+int mote_main() {
    uint16_t delay;
    
    board_init();

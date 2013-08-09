@@ -16,7 +16,7 @@
 
 #define ABSTIMER_GUARD_TICKS 2
 
-typedef void (*abstimer_cbt)(void);
+typedef void (*abstimer_cbt)();
 
 //=========================== variables =======================================
 
@@ -62,6 +62,7 @@ abstimer_vars_t abstimer_vars;
 
 
 //=========================== prototypes ======================================
+
 void     abstimer_init();
 void     abstimer_reschedule();
 void     sctimer_init();

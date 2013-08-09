@@ -20,7 +20,7 @@ print banner
 #===== options
 
 command_line_options = {
-    'board':       ['telosb','gina','z1','pc'],
+    'board':       ['telosb','gina','z1','pc','python'],
     'toolchain':   ['mspgcc','iar','iar-proj','gcc'],
     'fet_version': ['2','3'],
     'verbose':     ['0','1']
@@ -90,10 +90,12 @@ Default(env.Command('default', None, default))
 #============================ verbose =========================================
 
 if not env['verbose']:
-   env['CCCOMSTR']      = "Compiling $TARGET"
-   env['ARCOMSTR']      = "Archiving $TARGET"
+   env[    'CCCOMSTR']  = "Compiling $TARGET"
+   env[  'SHCCCOMSTR']  = "Compiling (shared) $TARGET"
+   env[    'ARCOMSTR']  = "Archiving $TARGET"
    env['RANLIBCOMSTR']  = "Indexing  $TARGET"
-   env['LINKCOMSTR']    = "Linking   $TARGET"
+   env[  'LINKCOMSTR']  = "Linking   $TARGET"
+   env['SHLINKCOMSTR']  = "Linking (shared)   $TARGET"
 
 #============================ load SConscript's ===============================
 

@@ -27,12 +27,12 @@ rxl1_vars_t rxl1_vars;
 
 //=========================== prototypes ======================================
 
-error_t rxl1_receive(OpenQueueEntry_t* msg,
+owerror_t rxl1_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options);
 void    rxl1_timer();
 void    rxl1_sendDone(OpenQueueEntry_t* msg,
-                       error_t error);
+                       owerror_t error);
 
 //=========================== public ==========================================
 
@@ -60,10 +60,10 @@ void rxl1_init() {
 
 //=========================== private =========================================
 
-error_t rxl1_receive(OpenQueueEntry_t* msg,
+owerror_t rxl1_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
-   error_t outcome;
+   owerror_t outcome;
    uint8_t rawdata[SENSITIVE_ACCEL_TEMPERATURE_DATALEN];
    
    if (coap_header->Code==COAP_CODE_REQ_POST) {
@@ -83,7 +83,6 @@ error_t rxl1_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_VALID;
       
       outcome = E_SUCCESS;
@@ -101,7 +100,6 @@ error_t rxl1_receive(OpenQueueEntry_t* msg,
       memcpy(&msg->payload[0],&rawdata[8],8);
          
       // set the CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CONTENT;
       
       outcome                          = E_SUCCESS;
@@ -116,7 +114,7 @@ error_t rxl1_receive(OpenQueueEntry_t* msg,
 
 void rxl1_timer() {
    OpenQueueEntry_t* pkt;
-   error_t           outcome;
+   owerror_t           outcome;
    uint8_t           numOptions;
    uint8_t           rawdata[SENSITIVE_ACCEL_TEMPERATURE_DATALEN];
    
@@ -143,12 +141,12 @@ void rxl1_timer() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(rxl1_path0)-1);
    memcpy(&pkt->payload[0],&rxl1_path0,sizeof(rxl1_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                  = (COAP_OPTION_LOCATIONPATH-COAP_OPTION_CONTENTTYPE) << 4 |
+   pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
       sizeof(rxl1_path0)-1;
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+   pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
       1;
    pkt->payload[1]                  = COAP_MEDTYPE_APPOCTETSTREAM;
    numOptions++;
@@ -171,6 +169,6 @@ void rxl1_timer() {
    return;
 }
 
-void rxl1_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void rxl1_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

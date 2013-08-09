@@ -2,7 +2,6 @@
 \brief Z1-specific definition of the "spi" bsp module.
 
 \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
 #include "msp430x26x.h"

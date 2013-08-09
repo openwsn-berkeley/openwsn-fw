@@ -44,7 +44,7 @@ void udpecho_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-void udpecho_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void udpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_UDPECHO;
    if (msg->creator!=COMPONENT_UDPECHO) {
       openserial_printError(COMPONENT_UDPECHO,ERR_UNEXPECTED_SENDDONE,

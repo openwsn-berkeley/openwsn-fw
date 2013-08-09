@@ -9,7 +9,7 @@
 #include "openwsn.h"
 #include "nvic.h"
 
-int mote_main(void) {
+int mote_main() {
    board_init();
    scheduler_init();
    openwsn_init();

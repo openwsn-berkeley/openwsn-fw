@@ -25,9 +25,9 @@ extern void EINT3_IRQHandler(void);
 
 //=========================== public ==========================================
 
+extern int mote_main();
 
-extern int mote_main(void);
-int main(void) {
+int main() {
    return mote_main();
 }
 

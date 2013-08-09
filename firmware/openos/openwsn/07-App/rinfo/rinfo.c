@@ -6,6 +6,7 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "board.h"
+#include "idmanager.h"
 
 //=========================== defines =========================================
 
@@ -21,15 +22,18 @@ rinfo_vars_t rinfo_vars;
 
 //=========================== prototypes ======================================
 
-error_t rinfo_receive(OpenQueueEntry_t* msg,
+owerror_t rinfo_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options);
 void    rinfo_sendDone(OpenQueueEntry_t* msg,
-                       error_t error);
+                       owerror_t error);
 
 //=========================== public ==========================================
 
 void rinfo_init() {
+  
+  
+   if(idmanager_getIsDAGroot()==TRUE) return; 
    // prepare the resource descriptor for the /temp path
    rinfo_vars.desc.path0len             = sizeof(rinfo_path0)-1;
    rinfo_vars.desc.path0val             = (uint8_t*)(&rinfo_path0);
@@ -44,10 +48,10 @@ void rinfo_init() {
 
 //=========================== private =========================================
 
-error_t rinfo_receive(OpenQueueEntry_t* msg,
+owerror_t rinfo_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
-   error_t outcome;
+   owerror_t outcome;
    
    if (coap_header->Code==COAP_CODE_REQ_GET) {
       
@@ -81,8 +85,7 @@ error_t rinfo_receive(OpenQueueEntry_t* msg,
       msg->payload[sizeof(infoStackName)-1+5-1] = '0'+OPENWSN_VERSION_PATCH;
          
       // set the CoAP header
-      coap_header->OC                  = 0;
-      coap_header->Code                = COAP_CODE_RESP_CONTENT;
+       coap_header->Code                = COAP_CODE_RESP_CONTENT;
       
       outcome                          = E_SUCCESS;
    
@@ -94,6 +97,6 @@ error_t rinfo_receive(OpenQueueEntry_t* msg,
    return outcome;
 }
 
-void rinfo_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void rinfo_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

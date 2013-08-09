@@ -10,15 +10,15 @@
 #include "openudp.h"
 #include "opentcp.h"
 #include "debugpins.h"
+#include "scheduler.h"
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-error_t fowarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
+owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
 void    forwarding_getNextHop_RoutingTable(open_addr_t* destination, open_addr_t* addressToWrite);
-error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
-
+owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
 //=========================== public ==========================================
 
 /**
@@ -35,7 +35,7 @@ at this mote.
 
 \param[in,out] msg Packet to send.
 */
-error_t forwarding_send(OpenQueueEntry_t* msg) { 
+owerror_t forwarding_send(OpenQueueEntry_t* msg) { 
    ipv6_header_iht ipv6_header;
    open_addr_t*    myprefix;
    open_addr_t*    myadd64;
@@ -60,7 +60,7 @@ error_t forwarding_send(OpenQueueEntry_t* msg) {
    //carry a hlim. This value is required to be set to a value as the following function can decrement it
    ipv6_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
    
-   return fowarding_send_internal_RoutingTable(msg,ipv6_header,PCKTSEND);
+   return forwarding_send_internal_RoutingTable(msg,ipv6_header,PCKTSEND);
 }
 
 /**
@@ -69,7 +69,7 @@ error_t forwarding_send(OpenQueueEntry_t* msg) {
 \param[in,out] msg   The packet just sent.
 \param[in]     error The outcome of sending it.
 */
-void forwarding_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    
    // take ownership
    msg->owner = COMPONENT_FORWARDING;
@@ -158,20 +158,23 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
       if (ipv6_header.next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
          // resend as if from upper layer 
-         if (fowarding_send_internal_RoutingTable(msg, ipv6_header,PCKTFORWARD)==E_FAIL) {
+         if (forwarding_send_internal_RoutingTable(msg, ipv6_header,PCKTFORWARD)==E_FAIL) {
             openqueue_freePacketBuffer(msg);
          }
       } else {
-         // source routing header present
-        
-         if (fowarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
-            openqueue_freePacketBuffer(msg);
+         // source routing header present 
+          if (forwarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
+            //already freed by send_internal if it fails
+            //todo change error type to another that says src_route failure.
+           openserial_printError(COMPONENT_FORWARDING,ERR_INVALID_FWDMODE,
+                                  (errorparameter_t)0,
+                                  (errorparameter_t)0);
          }
       }
    }
 }
 
-//=========================== private =========================================
+
 
 /**
 \brief Send a packet using the routing table to find the next hop.
@@ -181,7 +184,7 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
 \param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
-error_t fowarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
+owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
    
    // retrieve the next hop from the routing table
    forwarding_getNextHop_RoutingTable(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
@@ -207,7 +210,7 @@ http://tools.ietf.org/html/rfc6554#page-9.
 \param[in,out] msg             The packet to send.
 \param[in]     ipv6_header     The packet's IPv6 header.
 */
-error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header) {
+owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header) {
    uint8_t         local_CmprE;
    uint8_t         local_CmprI;
    uint8_t         numAddr;
@@ -269,6 +272,7 @@ error_t fowarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header
             openserial_printError(COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
                                (errorparameter_t)msg->l4_protocol,
                                (errorparameter_t)1);
+            //not sure that this is correct as iphc will free it?
             openqueue_freePacketBuffer(msg);
             return E_FAIL;
       }

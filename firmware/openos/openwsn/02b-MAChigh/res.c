@@ -10,22 +10,14 @@
 #include "scheduler.h"
 #include "opentimers.h"
 #include "debugpins.h"
-//=========================== variables =======================================
 
-typedef struct {
-   uint16_t        periodMaintenance;
-   bool            busySendingKa;        // TRUE when busy sending a keep-alive
-   bool            busySendingAdv;       // TRUE when busy sending an advertisement
-   uint8_t         dsn;                  // current data sequence number
-   uint8_t         MacMgtTaskCounter;    // counter to determine what management task to do
-   opentimer_id_t  timerId;
-} res_vars_t;
+//=========================== variables =======================================
 
 res_vars_t res_vars;
 
 //=========================== prototypes ======================================
 
-error_t res_send_internal(OpenQueueEntry_t* msg);
+owerror_t res_send_internal(OpenQueueEntry_t* msg);
 void    sendAdv();
 void    sendKa();
 void    res_timer_cb();
@@ -60,7 +52,7 @@ bool debugPrint_myDAGrank() {
 
 //======= from upper layer
 
-error_t res_send(OpenQueueEntry_t *msg) {
+owerror_t res_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_RES;
    msg->l2_frameType = IEEE154_TYPE_DATA;
    return res_send_internal(msg);
@@ -201,7 +193,7 @@ IEEE802154E will handle the packet.
 
 \returns E_SUCCESS iff successful.
 */
-error_t res_send_internal(OpenQueueEntry_t* msg) {
+owerror_t res_send_internal(OpenQueueEntry_t* msg) {
    // assign a number of retries
    if (packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE) {
       msg->l2_retriesLeft = 1;

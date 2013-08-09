@@ -1,6 +1,7 @@
 import os
 import threading
 import subprocess
+import distutils.sysconfig
 
 Import('env')
 
@@ -9,15 +10,16 @@ Import('env')
 env['VARDIR']  = os.path.join('#','build','{0}_{1}'.format(env['board'],env['toolchain']))
 
 # common include paths
-env.Append(
-    CPPPATH = [
-        os.path.join('#','firmware','openos','openwsn'),
-        os.path.join('#','firmware','openos','bsp','boards'),
-        os.path.join('#','firmware','openos','bsp','chips'),
-        os.path.join('#','firmware','openos','kernel','openos'),
-        os.path.join('#','firmware','openos','drivers','common'),
-    ]
-)
+if env['board']!='python':
+    env.Append(
+        CPPPATH = [
+            os.path.join('#','firmware','openos','openwsn'),
+            os.path.join('#','firmware','openos','bsp','boards'),
+            os.path.join('#','firmware','openos','bsp','chips'),
+            os.path.join('#','firmware','openos','kernel','openos'),
+            os.path.join('#','firmware','openos','drivers','common'),
+        ]
+    )
 
 #============================ toolchain =======================================
 
@@ -167,6 +169,9 @@ else:
     if env['board'] in ['telosb','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
+    # enabling shared library to be reallocated 
+    env.Append(CCFLAGS = '-fPIC')
+    
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
     
@@ -308,7 +313,11 @@ def populateTargetGroup(localEnv,targetName):
             env['targets']['all_'+prefix].append(targetName)
 
 def sconscript_scanner(localEnv):
-    
+    '''
+    This function is called from the following directories:
+    - projects\common\
+    - projects\<board>\
+    '''
     # list subdirectories
     subdirs = [name for name in os.listdir('.') if os.path.isdir(os.path.join('.', name)) ]
     
@@ -323,7 +332,8 @@ def sconscript_scanner(localEnv):
         
         if   (
                 ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
-                (localEnv['toolchain']!='iar-proj')
+                (localEnv['toolchain']!='iar-proj') and 
+                (localEnv['board']!='python')
              ):
             
             localEnv.VariantDir(
@@ -340,13 +350,59 @@ def sconscript_scanner(localEnv):
 
             #fix for problem on having the same target as directory name and failing to compile in linux. Appending something to the target solves the isse.
             target=target+"_prog"
-
+            
             exe = localEnv.Program(
                 target  = target,
                 source  = source,
                 LIBS    = libs,
             )
             targetAction = localEnv.PostBuildExtras(exe)
+            
+            Alias(targetName, [targetAction])
+            added = True
+        
+        elif (
+                ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
+                (localEnv['board']=='python')
+             ):
+            
+            # build the artifacts in a separate directory
+            localEnv.VariantDir(
+                variant_dir = variant_dir,
+                src_dir     = src_dir,
+                duplicate   = 1,
+            )
+            
+            # build both the application's and the Python module's main files
+            sources_c = [
+                os.path.join(projectDir,'{0}.c'.format(projectDir)),
+                os.path.join('#','firmware','openos','bsp','boards','python','openwsnmodule.c'),
+            ]
+            
+            # objectify those two files
+            for s in sources_c:
+                temp = localEnv.Objectify(
+                    target = localEnv.ObjectifiedFilename(s),
+                    source = s,
+                )
+            
+            # prepare environment for this build
+            target = targetName
+            source = [localEnv.ObjectifiedFilename(s) for s in sources_c]
+            libs   = buildLibs(projectDir)
+            libs  += [['python' + distutils.sysconfig.get_config_var('VERSION')]]
+            
+            buildIncludePath(projectDir,localEnv)
+            
+            # build a shared library (a Python extension module) rather than an exe
+            
+            targetAction = localEnv.SharedLibrary(
+                target,
+                source,
+                LIBS           = libs,
+                SHLIBPREFIX    = '',
+                SHLIBSUFFIX    = distutils.sysconfig.get_config_var('SO'),
+            )
             
             Alias(targetName, [targetAction])
             added = True
@@ -384,9 +440,18 @@ buildEnv = env.SConscript(
     exports     = ['env'],
 )
 
+#bspheader
+boardsDir       = os.path.join('#','firmware','openos','bsp','boards')
+boardsVarDir    = os.path.join(buildEnv['VARDIR'],'bsp','boards')
+buildEnv.SConscript(
+    os.path.join(boardsDir,'SConscript'),
+    exports     = {'env': buildEnv},
+    variant_dir = boardsVarDir,
+)
+
 # bsp
 bspDir          = os.path.join('#','firmware','openos','bsp','boards',buildEnv['BSP'])
-bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp')
+bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp','boards',buildEnv['BSP'])
 buildEnv.Append(CPPPATH = [bspDir])
 buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),

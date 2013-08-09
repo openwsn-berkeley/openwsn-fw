@@ -12,27 +12,8 @@
 
 //=========================== variables =======================================
 
-typedef struct task_llist_t {
-   task_cbt             cb;
-   task_prio_t          prio;
-   void*                next;
-} taskList_item_t;
-
-typedef struct {
-   taskList_item_t      taskBuf[TASK_LIST_DEPTH];
-   taskList_item_t*     task_list;
-   uint8_t              numTasksCur;
-   uint8_t              numTasksMax;
-} scheduler_vars_t;
-
 scheduler_vars_t scheduler_vars;
-
-typedef struct {
-   uint8_t              numTasksCur;
-   uint8_t              numTasksMax;
-} scheduler_dbg_t;
-
-scheduler_dbg_t scheduler_dbg;
+scheduler_dbg_t  scheduler_dbg;
 
 //=========================== prototypes ======================================
 

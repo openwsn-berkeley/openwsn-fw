@@ -20,7 +20,7 @@
 
 #define opentimer_id_t uint8_t
 
-typedef void (*opentimers_cbt)(void);
+typedef void (*opentimers_cbt)();
 
 //=========================== typedef =========================================
 
@@ -45,6 +45,14 @@ typedef struct {
    opentimers_cbt       callback;           // function to call when elapses
    bool                 hasExpired;         // whether the callback has to be called
 } opentimers_t;
+
+//=========================== module variables ================================
+
+typedef struct {
+   opentimers_t         timersBuf[MAX_NUM_TIMERS];
+   bool                 running;
+   PORT_TIMER_WIDTH     currentTimeout; // current timeout, in ticks
+} opentimers_vars_t;
 
 //=========================== prototypes ======================================
 

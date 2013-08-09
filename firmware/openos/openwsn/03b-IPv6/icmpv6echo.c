@@ -8,12 +8,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   bool        busySending;
-   open_addr_t hisAddress;
-   uint16_t    seq;
-} icmpv6echo_vars_t;
-
 icmpv6echo_vars_t icmpv6echo_vars;
 
 //=========================== prototypes ======================================
@@ -29,6 +23,7 @@ void icmpv6echo_trigger() {
    uint8_t number_bytes_from_input_buffer;
    uint8_t input_buffer[16];
    OpenQueueEntry_t* msg;
+ 
    
    //get command from OpenSerial (16B IPv6 destination address)
    number_bytes_from_input_buffer = openserial_getInputBuffer(&(input_buffer[0]),sizeof(input_buffer));
@@ -85,7 +80,7 @@ void icmpv6echo_trigger() {
    }
 }
 
-void icmpv6echo_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void icmpv6echo_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_ICMPv6ECHO;
    if (msg->creator!=COMPONENT_ICMPv6ECHO) {//that was a packet I had not created
       openserial_printError(COMPONENT_ICMPv6ECHO,ERR_UNEXPECTED_SENDDONE,

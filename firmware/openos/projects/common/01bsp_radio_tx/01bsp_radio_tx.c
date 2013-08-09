@@ -72,7 +72,7 @@ void     cb_timer();
 /**
 \brief The program starts executing here.
 */
-int mote_main(void) {
+int mote_main() {
    uint8_t  i;
    uint16_t j;
    

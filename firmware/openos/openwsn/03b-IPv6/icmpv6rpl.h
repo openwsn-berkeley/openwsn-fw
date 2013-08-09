@@ -8,6 +8,8 @@
 \{
 */
 
+#include "opentimers.h"
+
 //=========================== define ==========================================
 
 #define TIMER_DIO_TIMEOUT         1700
@@ -94,7 +96,7 @@ typedef struct {
    uint8_t         rplinstanceId;      ///< set by the DODAG root.
    uint8_t         K_D_flags;
    uint8_t         reserved;
-   uint8_t         DAOSequance;
+   uint8_t         DAOSequence;
    uint8_t         DODAGID[16];
 } icmpv6rpl_dao_ht;
 PRAGMA(pack());
@@ -125,11 +127,31 @@ typedef struct {
 } icmpv6rpl_dao_target_ht;
 PRAGMA(pack());
 
+//=========================== module variables ================================
+
+typedef struct {
+   // admin
+   bool                      busySending;             ///< currently sending DIO/DAO.
+   uint8_t                   DODAGIDFlagSet;          ///< is DODAGID set already?
+   // DIO-related
+   icmpv6rpl_dio_ht          dio;                     ///< pre-populated DIO packet.
+   open_addr_t               dioDestination;          ///< IPv6 destination address for DIOs.
+   uint16_t                  periodDIO;               ///< duration, in ms, of a timerIdDIO timeout.
+   opentimer_id_t            timerIdDIO;              ///< ID of the timer used to send DIOs.
+   uint8_t                   delayDIO;                ///< number of timerIdDIO events before actually sending a DIO.
+   // DAO-related
+   icmpv6rpl_dao_ht          dao;                     ///< pre-populated DAO packet.
+   icmpv6rpl_dao_transit_ht  dao_transit;             ///< pre-populated DAO "Transit Info" option header.
+   icmpv6rpl_dao_target_ht  dao_target;             ///< pre-populated DAO "Transit Info" option header.
+   opentimer_id_t            timerIdDAO;              ///< ID of the timer used to send DAOs.
+   uint16_t                  periodDAO;               ///< duration, in ms, of a timerIdDAO timeout.
+   uint8_t                   delayDAO;                ///< number of timerIdDIO events before actually sending a DAO.
+} icmpv6rpl_vars_t;
 
 //=========================== prototypes ======================================
 
 void icmpv6rpl_init();
-void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, error_t error);
+void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void icmpv6rpl_receive(OpenQueueEntry_t* msg);
 
 /**

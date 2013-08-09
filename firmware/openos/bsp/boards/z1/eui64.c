@@ -2,7 +2,6 @@
 \brief Z1-specific definition of the "eui64" bsp module.
 
 \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
 */
 
 #include "string.h"

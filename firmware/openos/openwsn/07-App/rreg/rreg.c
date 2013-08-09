@@ -24,18 +24,21 @@ const uint8_t rreg_path0[]    = "r";
 
 //=========================== prototypes ======================================
 
-error_t rreg_receive(OpenQueueEntry_t* msg,
+owerror_t rreg_receive(OpenQueueEntry_t* msg,
                      coap_header_iht*  coap_header,
                      coap_option_iht*  coap_options);
 void    rreg_timer();
 void    rreg_sendDone(OpenQueueEntry_t* msg,
-                      error_t error);
+                      owerror_t error);
 uint8_t hexToAscii(uint8_t hex);
 
 //=========================== public ==========================================
 
 void rreg_init() {
-   // prepare the resource descriptor for the /.well-known/core path
+  //dagroot does not run upper layers.
+   if(idmanager_getIsDAGroot()==TRUE) return; 
+ 
+  // prepare the resource descriptor for the /.well-known/core path
    rreg_vars.desc.path0len             = sizeof(rreg_path0)-1;
    rreg_vars.desc.path0val             = (uint8_t*)(&rreg_path0);
    rreg_vars.desc.path1len             = 0;
@@ -55,11 +58,11 @@ void rreg_init() {
 
 //=========================== private =========================================
 
-error_t rreg_receive(OpenQueueEntry_t* msg,
+owerror_t rreg_receive(OpenQueueEntry_t* msg,
                    coap_header_iht* coap_header,
                    coap_option_iht* coap_options) {
                       
-   error_t outcome;
+   owerror_t outcome;
    
    if (coap_header->Code==COAP_CODE_REQ_POST) {
       // request to register received
@@ -74,8 +77,7 @@ error_t rreg_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // set the CoAP header
-      coap_header->OC                  = 0;
-      coap_header->Code                = COAP_CODE_RESP_VALID;
+       coap_header->Code                = COAP_CODE_RESP_VALID;
       
       outcome = E_SUCCESS;
    } else if (coap_header->T==COAP_TYPE_ACK) {
@@ -90,7 +92,7 @@ error_t rreg_receive(OpenQueueEntry_t* msg,
 void rreg_timer() {
    OpenQueueEntry_t* pkt;
    uint8_t           temp8b;
-   error_t           outcome;
+   owerror_t           outcome;
    uint8_t           numOptions;
    
 
@@ -100,7 +102,7 @@ void rreg_timer() {
       openserial_printError(COMPONENT_RREG,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      openqueue_freePacketBuffer(pkt);
+      //openqueue_freePacketBuffer(pkt);
       return;
    }
    // take ownership over that packet
@@ -116,7 +118,7 @@ void rreg_timer() {
    pkt->payload[sizeof(rreg_uriquery)-1] = hexToAscii((temp8b>>4) & 0x0f);
    pkt->payload[sizeof(rreg_uriquery)-0] = hexToAscii((temp8b>>0) & 0x0f);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_URIQUERY-COAP_OPTION_URIPATH) << 4 |
+   pkt->payload[0] = (COAP_OPTION_NUM_URIQUERY-COAP_OPTION_NUM_URIPATH) << 4 |
       sizeof(rreg_uriquery)-1+2;
    numOptions++;
    // URI-path
@@ -124,12 +126,12 @@ void rreg_timer() {
    pkt->payload[0] = 'r';
    pkt->payload[1] = 'd';
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_URIPATH-COAP_OPTION_CONTENTTYPE) << 4 |
+   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 |
       2;
    numOptions++;
    // add content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+   pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
       1;
    pkt->payload[1]                  = COAP_MEDTYPE_APPLINKFORMAT;
    numOptions++;
@@ -151,7 +153,7 @@ void rreg_timer() {
    return;
 }
 
-void rreg_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void rreg_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 

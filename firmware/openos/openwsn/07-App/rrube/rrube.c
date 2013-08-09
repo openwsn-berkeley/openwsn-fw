@@ -37,12 +37,12 @@ const uint8_t rrube_path0[]    = "g";
 
 //=========================== prototypes ======================================
 
-error_t rrube_receive(OpenQueueEntry_t* msg,
+owerror_t rrube_receive(OpenQueueEntry_t* msg,
                      coap_header_iht*  coap_header,
                      coap_option_iht*  coap_options);
 void    rrube_timer();
 void    rrube_sendDone(OpenQueueEntry_t* msg,
-                      error_t error);
+                      owerror_t error);
 uint8_t hexToAscii(uint8_t hex);
 
 //=========================== public ==========================================
@@ -70,11 +70,11 @@ void rrube_init() {
 
 //=========================== private =========================================
 
-error_t rrube_receive(OpenQueueEntry_t* msg,
+owerror_t rrube_receive(OpenQueueEntry_t* msg,
                    coap_header_iht* coap_header,
                    coap_option_iht* coap_options) {
                       
-   error_t outcome;
+   owerror_t outcome;
    
    if (rrube_vars.rrube_state==RRUBE_ST_IDLE &&
        coap_header->Code==COAP_CODE_REQ_POST) {
@@ -90,7 +90,6 @@ error_t rrube_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // set the CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_VALID;
       
       // advance state machine
@@ -136,7 +135,7 @@ error_t rrube_receive(OpenQueueEntry_t* msg,
 void rrube_timer() {
    OpenQueueEntry_t* pkt;
    uint8_t           numOptions;
-   error_t           outcome;
+   owerror_t           outcome;
    
    // turn off heli
    heli_off();
@@ -161,7 +160,7 @@ void rrube_timer() {
       packetfunctions_reserveHeaderSize(pkt,sizeof(rrube_path0)-1);
       memcpy(&pkt->payload[0],&rrube_path0,sizeof(rrube_path0)-1);
       packetfunctions_reserveHeaderSize(pkt,1);
-      pkt->payload[0] = (COAP_OPTION_URIPATH) << 4 |
+      pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 |
                         sizeof(rrube_path0)-1;
       numOptions++;
       // metadata
@@ -205,7 +204,7 @@ void rrube_timer() {
       packetfunctions_reserveHeaderSize(pkt,sizeof(rrube_path0)-1);
       memcpy(&pkt->payload[0],&rrube_path0,sizeof(rrube_path0)-1);
       packetfunctions_reserveHeaderSize(pkt,1);
-      pkt->payload[0] = (COAP_OPTION_URIPATH) << 4 |
+      pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 |
                         sizeof(rrube_path0)-1;
       numOptions++;
       // metadata
@@ -238,6 +237,6 @@ void rrube_timer() {
    return;
 }
 
-void rrube_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void rrube_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

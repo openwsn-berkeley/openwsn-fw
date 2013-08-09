@@ -5,7 +5,6 @@ This module simply defines some strings describing the board, which CoAP uses
 to return the board's description.
 
 \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
 #ifndef __BOARD_INFO_H
@@ -38,10 +37,9 @@ to return the board's description.
 // on Z1, we use the comparatorA interrupt for the OS
 #define SCHEDULER_WAKEUP()                  CACTL1 |= CAIFG
 #define SCHEDULER_ENABLE_INTERRUPT()        CACTL1  = CAIE
-                        
+
 //===== pinout
 
-                        
 // [P4.5] radio VREG
 #define PORT_PIN_RADIO_VREG_HIGH()          P4OUT |=  0x20;
 #define PORT_PIN_RADIO_VREG_LOW()           P4OUT &= ~0x20;

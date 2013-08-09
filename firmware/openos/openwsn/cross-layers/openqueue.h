@@ -22,7 +22,11 @@ typedef struct {
    uint8_t  owner;
 } debugOpenQueueEntry_t;
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+
+typedef struct {
+   OpenQueueEntry_t queue[QUEUELENGTH];
+} openqueue_vars_t;
 
 //=========================== prototypes ======================================
 
@@ -31,7 +35,7 @@ void               openqueue_init();
 bool               debugPrint_queue();
 // called by any component
 OpenQueueEntry_t*  openqueue_getFreePacketBuffer(uint8_t creator);
-error_t            openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
+owerror_t         openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 void               openqueue_removeAllOwnedBy(uint8_t owner);
 // called by res

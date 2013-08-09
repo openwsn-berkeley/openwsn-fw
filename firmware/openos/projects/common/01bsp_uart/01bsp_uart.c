@@ -45,7 +45,7 @@ void cb_uartRxCb();
 /**
 \brief The program starts executing here.
 */
-int mote_main(void) {
+int mote_main() {
    board_init();
    
    // clear local variable

@@ -43,7 +43,7 @@ typedef enum {
    SPI_LAST             = 1,
 } spi_last_t;
 
-typedef void (*spi_cbt)(void);
+typedef void (*spi_cbt)();
 
 //=========================== variables =======================================
 

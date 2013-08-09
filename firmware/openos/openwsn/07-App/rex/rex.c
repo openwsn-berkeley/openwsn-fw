@@ -28,13 +28,13 @@ rex_vars_t rex_vars;
 
 //=========================== prototypes ======================================
 
-error_t rex_receive(OpenQueueEntry_t* msg,
+owerror_t rex_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
 void    rex_timer_cb();
 void    rex_task_cb();
 void    rex_sendDone(OpenQueueEntry_t* msg,
-                       error_t error);
+                       owerror_t error);
 
 //=========================== public ==========================================
 
@@ -58,7 +58,7 @@ void rex_init() {
 
 //=========================== private =========================================
 
-error_t rex_receive(OpenQueueEntry_t* msg,
+owerror_t rex_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
    return E_FAIL;
@@ -72,7 +72,7 @@ void rex_timer_cb(){
 
 void rex_task_cb() {
    OpenQueueEntry_t* pkt;
-   error_t           outcome;
+   owerror_t           outcome;
    uint8_t           numOptions;
    uint8_t           i;
    
@@ -115,12 +115,12 @@ void rex_task_cb() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(rex_path0)-1);
    memcpy(&pkt->payload[0],&rex_path0,sizeof(rex_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                  = (COAP_OPTION_LOCATIONPATH-COAP_OPTION_CONTENTTYPE) << 4 |
+   pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
       sizeof(rex_path0)-1;
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+   pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
       1;
    pkt->payload[1]                  = COAP_MEDTYPE_APPOCTETSTREAM;
    numOptions++;
@@ -142,6 +142,6 @@ void rex_task_cb() {
    return;
 }
 
-void rex_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void rex_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

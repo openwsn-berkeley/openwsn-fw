@@ -34,12 +34,12 @@ layerdebug_vars_t layerdebug_vars;
 
 //=========================== prototypes ======================================
 
-error_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
+owerror_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
 
 
-error_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
+owerror_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
 
@@ -50,7 +50,7 @@ void    layerdebug_task_schedule_cb();
 void    layerdebug_task_neighbors_cb();
 
 void    layerdebug_sendDone(OpenQueueEntry_t* msg,
-                       error_t error);
+                       owerror_t error);
 
 //=========================== public ==========================================
 
@@ -100,7 +100,7 @@ void layerdebug_timer_neighbors_cb(){
 //schedule stats
 void layerdebug_task_schedule_cb() {
    OpenQueueEntry_t* pkt;
-   error_t           outcome;
+   owerror_t           outcome;
    uint8_t           numOptions;
    uint8_t           size;
 
@@ -131,12 +131,12 @@ void layerdebug_task_schedule_cb() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(schedule_layerdebug_path0)-1);
    memcpy(&pkt->payload[0],&schedule_layerdebug_path0,sizeof(schedule_layerdebug_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                  = (COAP_OPTION_LOCATIONPATH-COAP_OPTION_CONTENTTYPE) << 4 |
+   pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
       sizeof(schedule_layerdebug_path0)-1;
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+   pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
       1;
    pkt->payload[1]                  = COAP_MEDTYPE_APPOCTETSTREAM;
    numOptions++;
@@ -162,7 +162,7 @@ void layerdebug_task_schedule_cb() {
 void layerdebug_task_neighbors_cb() {
   
    OpenQueueEntry_t* pkt;
-   error_t           outcome;
+   owerror_t           outcome;
    uint8_t           numOptions;
    uint8_t           size;
    
@@ -195,12 +195,12 @@ void layerdebug_task_neighbors_cb() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(neighbors_layerdebug_path0)-1);
    memcpy(&pkt->payload[0],&neighbors_layerdebug_path0,sizeof(neighbors_layerdebug_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                  = (COAP_OPTION_LOCATIONPATH-COAP_OPTION_CONTENTTYPE) << 4 |
+   pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
       sizeof(neighbors_layerdebug_path0)-1;
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                  = COAP_OPTION_CONTENTTYPE << 4 |
+   pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
       1;
    pkt->payload[1]                  = COAP_MEDTYPE_APPOCTETSTREAM;
    numOptions++;
@@ -222,15 +222,15 @@ void layerdebug_task_neighbors_cb() {
    return;
 }
 
-void layerdebug_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void layerdebug_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
 
-error_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
+owerror_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
-   error_t outcome;
+   owerror_t outcome;
    uint8_t size;
   
    
@@ -250,7 +250,6 @@ error_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
       msg->payload[0] = MAXACTIVESLOTS;
            
       // set the CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CONTENT;
       
       outcome                          = E_SUCCESS;
@@ -263,10 +262,10 @@ error_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
    return outcome;
 }
 
-error_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
+owerror_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
-   error_t outcome;
+   owerror_t outcome;
    uint8_t size;
   
    
@@ -287,7 +286,6 @@ error_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
       msg->payload[0] = size;
            
       // set the CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CONTENT;
       
       outcome                          = E_SUCCESS;

@@ -1,7 +1,7 @@
 /**
 \brief Z1-specific definition of the "board" bsp module.
 
-\author Xavier Vilajosana <watteyne@eecs.berkeley.edu>, May 2013.
+\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, May 2013.
 */
 
 #include "msp430x26x.h"
@@ -17,16 +17,17 @@
 #include "radiotimer.h"
 #include "eui64.h"
 
-
 //#define ISR_BUTTON 1
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 //=========================== main ============================================
 
-extern int mote_main(void);
-int main(void) {
+extern int mote_main();
+
+int main() {
    return mote_main();
 }
 
@@ -38,17 +39,17 @@ void board_init() {
    WDTCTL  = WDTPW + WDTHOLD;
    
    // setup clock speed --seems that does not work
-//   BCSCTL1 = CALBC1_16MHZ;                       // MCLK at ~16MHz
-//   DCOCTL  = CALDCO_16MHZ;                       // MCLK at ~16MHz
+   //BCSCTL1 = CALBC1_16MHZ;                       // MCLK at ~16MHz
+   //DCOCTL  = CALDCO_16MHZ;                       // MCLK at ~16MHz
    
    if(CALBC1_8MHZ != 0xFF) {
-     DCOCTL = 0x00;
-     BCSCTL1 = CALBC1_8MHZ;                    //Set DCO to 8MHz
-     DCOCTL = CALDCO_8MHZ;    
+     DCOCTL   = 0x00;
+     BCSCTL1  = CALBC1_8MHZ;                     //Set DCO to 8MHz
+     DCOCTL   = CALDCO_8MHZ;    
    } else { //start using reasonable values at 8 Mhz
-     DCOCTL = 0x00;
-     BCSCTL1 = 0x8D;
-     DCOCTL = 0x88;
+     DCOCTL   = 0x00;
+     BCSCTL1  = 0x8D;
+     DCOCTL   = 0x88;
    }
    
    // enable flash access violation NMIs

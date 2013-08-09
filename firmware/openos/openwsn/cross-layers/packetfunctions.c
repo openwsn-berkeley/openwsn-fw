@@ -178,8 +178,10 @@ bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2)
          address_length = 8;
          break;
       case ADDR_128B:
+      case ADDR_ANYCAST:
          address_length = 16;
          break;
+    
       default:
          openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address_1->type,
@@ -267,7 +269,7 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_len
    pkt->payload -= header_length;
    pkt->length  += header_length;
    if ( (uint8_t*)(pkt->payload) < (uint8_t*)(pkt->packet) ) {
-      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)0,
                             (errorparameter_t)pkt->length);
    }

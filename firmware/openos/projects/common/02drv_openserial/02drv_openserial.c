@@ -34,7 +34,7 @@ void isr_serie_rx();
 in order to echo chunks of bytes, each chunk needs to start with character 'H' as
 openserial takes different actions according to the initial character of the stream.
 */
-int mote_main(void) {  
+int mote_main() {  
    board_init();
    openserial_init();
    
