@@ -4,14 +4,18 @@ before_script:
   # update
   - "sudo apt-get update"
   # install mspgcc 4.7.0 (thanks Adam for making pre-compiled version available!)
-  - "curl \
-       http://adamdunkels.github.io/contiki-fork/mspgcc-4.7.0-compiled.tar.bz2 \
-         | tar xjf - -C /tmp/ && sudo cp -f -r /tmp/msp430/* /usr/local/ && rm -rf /tmp/msp430"
+  - "curl http://adamdunkels.github.io/contiki-fork/mspgcc-4.7.0-compiled.tar.bz2"
+  - "ls -al"
+  - "tar xjf mspgcc-4.7.0-compiled.tar.bz2 -C /tmp/"
+  - "ls -al /tmp/"
+  - "sudo cp -f -r /tmp/msp430/* /usr/local/"
+  - "ls -al /usr/local/"
+  - "ls -al /usr/local/msp430/"
+  - "rm -rf /tmp/msp430"
+  - "ls -al"
   - "export PATH=/usr/local/msp430/:$PATH"
   - "echo $PATH"
   - "msp430-gcc --version"
-  - "ls -al /usr/local/"
-  - "ls -al /usr/local/msp430/"
 
 script:
 #  - scons board=python toolchain=gcc    oos_openwsn
