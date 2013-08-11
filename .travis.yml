@@ -17,7 +17,7 @@ before_script:
   #- "ls -al /usr/local/bin/msp*"
   - "export PATH=/tmp/msp430/bin/:$PATH"
   - "echo $PATH"
-  - "msp430-gcc --version"
+  - "sudo msp430-gcc --version"
 
 script:
 #  - scons board=python toolchain=gcc    oos_openwsn
