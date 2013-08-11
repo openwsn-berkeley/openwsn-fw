@@ -9,5 +9,5 @@ before_script:
 
 script:
 #  - scons board=python toolchain=gcc    oos_openwsn
-  - scons board=telosb toolchain=mspgcc verbose=1 oos_openwsn
-#  - scons board=gina   toolchain=mspgcc oos_openwsn
+#  - scons board=telosb toolchain=mspgcc verbose=1 oos_openwsn
+ - scons board=gina toolchain=mspgcc verbose=1 oos_openwsn
