@@ -7,6 +7,7 @@ before_script:
   - "curl -s \
        http://adamdunkels.github.io/contiki-fork/mspgcc-4.7.0-compiled.tar.bz2 \
          | tar xjf - -C /tmp/ && sudo cp -f -r /tmp/msp430/* /usr/local/ && rm -rf /tmp/msp430 && msp430-gcc --version || true"
+  - "export PATH=/usr/local/msp430/:$PATH"
   - "echo $PATH"
   - "ls -al /usr/local/"
 
