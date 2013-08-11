@@ -6,27 +6,8 @@ before_script:
   - "curl -s \
        http://adamdunkels.github.io/contiki-fork/mspgcc-4.7.0-compiled.tar.bz2 \
          | tar xjf - -C /tmp/ && sudo cp -f -r /tmp/msp430/* /usr/local/ && rm -rf /tmp/msp430 && msp430-gcc --version || true"
-  # update
-  #- "sudo apt-get update"
-  # install mspgcc 4.7.0 (thanks Adam for making pre-compiled version available!)
-  #- "wget http://adamdunkels.github.io/contiki-fork/mspgcc-4.7.0-compiled.tar.bz2"
-  #- "ls -al"
-  #- "tar xjf mspgcc-4.7.0-compiled.tar.bz2 -C /tmp/"
-  #- "ls -al /tmp/"
-  #- "ls -al /tmp/msp430/"
-  #- "ls -al /tmp/msp430/bin/"
-  #- "ls -al /usr/local/bin/"
-  #- "sudo ln -s /usr/local/bin/msp430-gcc    /tmp/msp430/bin/gcc"
-  #- "sudo ln -s /usr/local/bin/msp430-ar     /tmp/msp430/bin/ar"
-  #- "sudo ln -s /usr/local/bin/msp430-ranlib /tmp/msp430/bin/ranlib"
-  #- "ls -al /usr/local/bin/msp*"
-  #- "/tmp/msp430/bin/msp430-gcc || true"
-  #- "export PATH=/tmp/msp430/bin/:$PATH"
-  #- "echo $PATH"
-  #- "msp430-gcc || true"
-  #- "ls -al /tmp/msp430/bin/msp*"
 
 script:
 #  - scons board=python toolchain=gcc    oos_openwsn
-  - scons board=telosb toolchain=mspgcc oos_openwsn
+  - scons board=telosb toolchain=mspgcc verbose=1 oos_openwsn
 #  - scons board=gina   toolchain=mspgcc oos_openwsn
