@@ -36,6 +36,8 @@ if   env['toolchain']=='mspgcc':
     # compiler
     env.Replace(CC           = 'msp430-gcc')
     env.Append(CCFLAGS       = '')
+    if 'TRAVIS' in os.environ:
+        env.Append(CCFLAGS   = '-DTRAVIS=1')
     # archiver
     env.Replace(AR           = 'msp430-ar')
     env.Append(ARFLAGS       = '')
