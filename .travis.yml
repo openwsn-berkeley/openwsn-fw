@@ -4,9 +4,9 @@ before_script:
   # update
   - "sudo apt-get update"
   # install mspgcc 4.7.0 (thanks Adam for making pre-compiled version available!)
-  - "wget http://adamdunkels.github.io/contiki-fork/mspgcc-4.7.0-compiled.tar.bz2"
+  - "sudo wget http://adamdunkels.github.io/contiki-fork/mspgcc-4.7.0-compiled.tar.bz2"
   - "ls -al"
-  - "tar xjf mspgcc-4.7.0-compiled.tar.bz2 -C /tmp/"
+  - "sudo tar xjf mspgcc-4.7.0-compiled.tar.bz2 -C /tmp/"
   #- "ls -al /tmp/"
   #- "ls -al /tmp/msp430/"
   - "ls -al /tmp/msp430/bin/"
@@ -15,7 +15,7 @@ before_script:
   #- "sudo ln -s /usr/local/bin/msp430-ar     /tmp/msp430/bin/ar"
   #- "sudo ln -s /usr/local/bin/msp430-ranlib /tmp/msp430/bin/ranlib"
   #- "ls -al /usr/local/bin/msp*"
-  - "export PATH=/tmp/msp430/bin/:$PATH"
+  - "sudo export PATH=/tmp/msp430/bin/:$PATH"
   - "echo $PATH"
   - "sudo msp430-gcc --version"
 
