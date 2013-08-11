@@ -1,7 +1,10 @@
 language: c
 
 before_script:
-  - sudo apt-get install gcc-msp430
+  - "sudo apt-get -qq update"
+  - "curl -s \
+       http://adamdunkels.github.io/contiki-fork/mspgcc-4.7.0-compiled.tar.bz2 \
+         | tar xjf - -C /tmp/ && sudo cp -f -r /tmp/msp430/* /usr/local/ && rm -rf /tmp/msp430 && msp430-gcc --version || true"
 
 script:
 #  - scons board=python toolchain=gcc    oos_openwsn
