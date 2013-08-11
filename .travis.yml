@@ -11,7 +11,7 @@ before_script:
   #- "ls -al /tmp/msp430/"
   - "ls -al /tmp/msp430/bin/"
   #- "ls -al /usr/local/bin/"
-  3- "sudo ln -s /usr/local/bin/msp430-gcc    /tmp/msp430/bin/gcc"
+  #- "sudo ln -s /usr/local/bin/msp430-gcc    /tmp/msp430/bin/gcc"
   #- "sudo ln -s /usr/local/bin/msp430-ar     /tmp/msp430/bin/ar"
   #- "sudo ln -s /usr/local/bin/msp430-ranlib /tmp/msp430/bin/ranlib"
   #- "ls -al /usr/local/bin/msp*"
