@@ -1,0 +1,2 @@
+language: c
+script: scons board=python toolchain=gcc oos_openwsn
