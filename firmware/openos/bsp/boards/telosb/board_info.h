@@ -23,9 +23,7 @@ to this board.
 #define PRAGMA(x)  _Pragma(#x)
 #define PACK(x)     pack(x)
 
-#ifdef TRAVIS
 typedef unsigned short __istate_t;
-#endif
 
 #define INTERRUPT_DECLARATION()   __istate_t s;
 #define DISABLE_INTERRUPTS()      s = __get_interrupt_state(); \
