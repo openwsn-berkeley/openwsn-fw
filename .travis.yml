@@ -4,6 +4,6 @@ before_script:
   - sudo apt-get install gcc-msp430
 
 script:
-  - scons board=python toolchain=gcc    oos_openwsn
+#  - scons board=python toolchain=gcc    oos_openwsn
   - scons board=telosb toolchain=mspgcc oos_openwsn
-  - scons board=gina   toolchain=mspgcc oos_openwsn
+#  - scons board=gina   toolchain=mspgcc oos_openwsn
