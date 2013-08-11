@@ -2,7 +2,7 @@ language: c
 
 before_script:
   # update
-  - "sudo apt-get update"
+  #- "sudo apt-get update"
   # install mspgcc 4.7.0 (thanks Adam for making pre-compiled version available!)
   - "wget http://adamdunkels.github.io/contiki-fork/mspgcc-4.7.0-compiled.tar.bz2"
   - "ls -al"
@@ -15,6 +15,7 @@ before_script:
   #- "sudo ln -s /usr/local/bin/msp430-ar     /tmp/msp430/bin/ar"
   #- "sudo ln -s /usr/local/bin/msp430-ranlib /tmp/msp430/bin/ranlib"
   #- "ls -al /usr/local/bin/msp*"
+  - "/tmp/msp430/bin/msp430-gcc || true"
   - "export PATH=/tmp/msp430/bin/:$PATH"
   - "echo $PATH"
   - "msp430-gcc || true"
