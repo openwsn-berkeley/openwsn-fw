@@ -9,7 +9,7 @@ docsenv = env.Clone()
 docs = docsenv.Command(
     'phony_output', [],
     'doxygen Doxyfile',
-    chdir='doc'
+    chdir='docs'
 )
 docsenv.AlwaysBuild(docs)
 docsenv.Alias('docs', docs)
