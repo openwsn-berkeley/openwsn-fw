@@ -25,8 +25,8 @@ to this board.
 
 //===== interrupt state
 
-#if defined(__GNUC__) && (__GNUC__==3) && defined(__MSP430__)
-   // mspgcc 3.x.x
+#if defined(__GNUC__) && (__GNUC__==4)  && (__GNUC_MINOR__<=5) && defined(__MSP430__)
+   // mspgcc <4.5.x
 #define INTERRUPT_DECLARATION()   unsigned short s;
 #define DISABLE_INTERRUPTS()      s = READ_SR&0x0008; \
                                   __disable_interrupt();

@@ -16,8 +16,8 @@ typedef enum {
    KICK_SCHEDULER,
 } kick_scheduler_t;
 
-#if defined(__GNUC__) && (__GNUC__==3) && defined(__MSP430__)
-   // mspgcc 3.x.x
+#if defined(__GNUC__) && (__GNUC__==4)  && (__GNUC_MINOR__<=5) && defined(__MSP430__)
+   // mspgcc <4.5.x
 #include <signal.h>
 #define ISR(v) interrupt (v ## _VECTOR) v ## _ISR(void)
 #else
