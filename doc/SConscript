@@ -1,0 +1,14 @@
+Import('env')
+
+docenv = env.Clone()
+
+#============================ SCons targets ===================================
+
+#===== doc
+
+doc = docenv.Command(
+    'dummy', [],
+    'doxygen Doxyfile',
+)
+env.AlwaysBuild(doc)
+env.Alias('doc', doc)
