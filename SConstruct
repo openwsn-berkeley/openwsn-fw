@@ -111,7 +111,7 @@ env['targets'] = {
 # include docs SConscript
 # which will discover targets for this board/toolchain
 env.SConscript(
-    os.path.join('doc','SConscript'),
+    os.path.join('docs','SConscript'),
     exports = ['env'],
 )
 

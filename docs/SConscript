@@ -1,3 +1,5 @@
+import os
+
 Import('env')
 
 docsenv = env.Clone()
@@ -5,6 +7,8 @@ docsenv = env.Clone()
 #============================ SCons targets ===================================
 
 #===== docs
+
+docsenv['ENV']['PATH'] += os.environ['PATH']
 
 docs = docsenv.Command(
     'phony_output', [],
