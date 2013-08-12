@@ -7,6 +7,8 @@ before_script:
   - "doxygen --version"
 
 script:
+  - mkdir -p ./build/doc/
+  - scons docs
   - scons board=telosb toolchain=mspgcc oos_openwsn
   - scons board=gina   toolchain=mspgcc oos_openwsn
   - scons board=python toolchain=gcc    oos_openwsn

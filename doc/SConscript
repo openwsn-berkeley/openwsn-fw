@@ -1,14 +1,15 @@
 Import('env')
 
-docenv = env.Clone()
+docsenv = env.Clone()
 
 #============================ SCons targets ===================================
 
-#===== doc
+#===== docs
 
-doc = docenv.Command(
-    'dummy', [],
+docs = docsenv.Command(
+    'phony_output', [],
     'doxygen Doxyfile',
+    chdir='doc'
 )
-env.AlwaysBuild(doc)
-env.Alias('doc', doc)
+docsenv.AlwaysBuild(docs)
+docsenv.Alias('docs', docs)
