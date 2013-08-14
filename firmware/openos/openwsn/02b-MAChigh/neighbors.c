@@ -173,6 +173,43 @@ open_addr_t* neighbors_getKANeighbor() {
    }
 }
 
+open_addr_t*  neighbors_getAddr(uint8_t temp) {
+   uint8_t         i;
+   open_addr_t*    addrPreferred;
+   open_addr_t*    addrOther;
+   
+   // initialize
+   addrPreferred = NULL;
+   addrOther     = NULL;
+   
+   // scan through the neighbor table, and populate addrPreferred and addrOther
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (neighbors_vars.neighbors[i].used==1) {
+            // this neighbor needs to be KA'ed to
+            if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
+               // its a preferred parent
+               addrPreferred = &(neighbors_vars.neighbors[i].addr_64b);
+            } else {
+               // its not a preferred parent
+               // Note: commented out since policy is not to KA to non-preferred parents
+                addrOther =     &(neighbors_vars.neighbors[i].addr_64b);
+            }
+      }
+   }
+   
+   // return the addr of the most urgent KA to send:
+   // - if available, preferred parent
+   // - if not, non preferred parent
+   if        (addrPreferred!=NULL) {
+      return addrPreferred;
+   } else if (addrOther!=NULL) {
+      return addrOther;
+   } else {
+      return NULL;
+   }
+
+}
+
 //===== interrogators
 
 /**

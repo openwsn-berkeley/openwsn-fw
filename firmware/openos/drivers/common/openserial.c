@@ -618,7 +618,6 @@ void isr_openserial_rx() {
    openserial_vars.lastRxByte = rxbyte;
 }
 
-
 //======== SERIAL ECHO =============
 
 void openserial_echo(uint8_t* buf, uint8_t bufLen){

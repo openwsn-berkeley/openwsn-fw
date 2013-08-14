@@ -20,7 +20,9 @@
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
-#define US_PER_TICK                 30 // number of us per 32kHz clock tick
+//#define RESYNCHRONIZATIONGUARD       2 // in 16kHz ticks. min distance to the end of the slot to succesfully synchronize
+//#define US_PER_TICK                 30 // number of us per 32kHz clock tick
+#define US_PER_TICK                 60 // number of us per 16kHz clock tick
 #define KATIMEOUT                   66 // in slots: @15ms per slot -> ~1 seconds
 #define DESYNCTIMEOUT              333 // in slots: @15ms per slot -> ~5 seconds
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -76,12 +78,33 @@ typedef enum {
 // expressed in 32kHz ticks:
 //    - ticks = duration_in_seconds * 32768
 //    - duration_in_seconds = ticks / 32768
+//enum ieee154e_atomicdurations_enum {
+//   // time-slot related
+//   TsTxOffset                =  131,                  //  4000us
+//   TsLongGT                  =   43,                  //  1300us
+//   TsTxAckDelay              =  151,                  //  4606us
+//   TsShortGT                 =   16,                  //   500us
+//   TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
+//   // execution speed related
+//   maxTxDataPrepare          =  PORT_maxTxDataPrepare,
+//   maxRxAckPrepare           =  PORT_maxRxAckPrepare,
+//   maxRxDataPrepare          =  PORT_maxRxDataPrepare,
+//   maxTxAckPrepare           =  PORT_maxTxAckPrepare,
+//   // radio speed related
+//   delayTx                   =  PORT_delayTx,         // between GO signal and SFD
+//   delayRx                   =  PORT_delayRx,         // between GO signal and start listening
+//   // radio watchdog
+//   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
+//   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+//   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+//};
+
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-   TsTxOffset                =  131,                  //  4000us
-   TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4606us
-   TsShortGT                 =   16,                  //   500us
+   TsTxOffset                =    65,                  //  4000us
+   TsLongGT                  =    21,                  //  1300us
+   TsTxAckDelay              =    75,                  //  4606us
+   TsShortGT                 =     8,                  //   500us
    TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
@@ -92,9 +115,9 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-   wdAckDuration             =   98,                  //  3000us (measured 1000us)
+   wdRadioTx                 =    16,                  //  1000us (needs to be >delayTx)
+   wdDataDuration            =    82,                  //  5000us (measured 4545us with max payload) stm32
+   wdAckDuration             =    49,                  //  3000us (measured 1281us) stm32
 };
 
 

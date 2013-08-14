@@ -4,6 +4,7 @@
 #include "openserial.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
+#include "debugpins.h"
 
 //=========================== variables =======================================
 
@@ -88,7 +89,7 @@ void icmpv6echo_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    }
    openqueue_freePacketBuffer(msg);
    icmpv6echo_vars.busySending = FALSE;
-}
+ }
 
 void icmpv6echo_receive(OpenQueueEntry_t* msg) {
    OpenQueueEntry_t* reply;

@@ -25,7 +25,7 @@ TeraTerm):
 
 //=========================== defines =========================================
 
-uint8_t stringToSend[] = "Hello World!";
+uint8_t stringToSend[] = "~Hello World!~";
 
 //=========================== variables =======================================
 
