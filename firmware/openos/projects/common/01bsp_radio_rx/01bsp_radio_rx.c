@@ -18,7 +18,7 @@ can use this project with any platform.
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
-#define CHANNEL         26             // 2.480GHz
+#define CHANNEL         20             // 2.480GHz
 #define TIMER_ID        0
 #define TIMER_PERIOD    32768          // 1s @ 32kHz
 #define TRUE 1
@@ -62,7 +62,7 @@ typedef struct {
 
 app_vars_t app_vars;
 
-uint8_t stringToSend[5];//pkt,rssi,lqi,crc,FF(final)
+uint8_t stringToSend[7];//'~',pkt,rssi,lqi,crc,FF(final),'~'
 
 
 //=========================== prototypes ======================================
@@ -93,6 +93,10 @@ int mote_main() {
    // initialize board
    board_init();
    
+   // Needed to init RTC, which is used then by RX irc and sleep.
+   // Dummy value, just to not get stuck in a synch wait ...
+   radiotimer_start(1000);
+  
    // add callback functions radio
    radio_setOverflowCb(cb_radioTimerOverflows);
    radio_setCompareCb(cb_radioTimerCompare);
@@ -133,11 +137,13 @@ int mote_main() {
          
          app_vars.packet_num=app_vars.packet[0];//packet number
          leds_error_off();
-         stringToSend[0]=app_vars.packet_num;
-         stringToSend[1]=app_vars.rxpk_rssi;
-         stringToSend[2]=app_vars.rxpk_lqi;
-         stringToSend[3]=app_vars.rxpk_crc;
-         stringToSend[4]= 0xFF;      
+         stringToSend[0] = '~';
+         stringToSend[1]=app_vars.packet_num;
+         stringToSend[2]=app_vars.rxpk_rssi;
+         stringToSend[3]=app_vars.rxpk_lqi;
+         stringToSend[4]=app_vars.rxpk_crc;
+         stringToSend[5]= 0xFF;      
+         stringToSend[6] = '~';
          
          //clear this interrupt.
          app_vars.flags = 0x00;
