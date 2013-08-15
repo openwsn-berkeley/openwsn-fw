@@ -632,6 +632,10 @@ void EXTI15_10_IRQHandler(void)
     {
       //leds_sync_toggle();
       EXTI_ClearITPendingBit(EXTI_Line10);
+      //call RCC wake up here as we cannot include rcc at radio.c 
+      //as brakes compatibility with other boards using atmel radio
+      RCC_Wakeup();
+      
       radio_isr();
     }
     debugpins_isr_clr();

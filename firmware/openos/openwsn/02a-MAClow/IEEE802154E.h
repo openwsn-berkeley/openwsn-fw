@@ -78,33 +78,12 @@ typedef enum {
 // expressed in 32kHz ticks:
 //    - ticks = duration_in_seconds * 32768
 //    - duration_in_seconds = ticks / 32768
-//enum ieee154e_atomicdurations_enum {
-//   // time-slot related
-//   TsTxOffset                =  131,                  //  4000us
-//   TsLongGT                  =   43,                  //  1300us
-//   TsTxAckDelay              =  151,                  //  4606us
-//   TsShortGT                 =   16,                  //   500us
-//   TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
-//   // execution speed related
-//   maxTxDataPrepare          =  PORT_maxTxDataPrepare,
-//   maxRxAckPrepare           =  PORT_maxRxAckPrepare,
-//   maxRxDataPrepare          =  PORT_maxRxDataPrepare,
-//   maxTxAckPrepare           =  PORT_maxTxAckPrepare,
-//   // radio speed related
-//   delayTx                   =  PORT_delayTx,         // between GO signal and SFD
-//   delayRx                   =  PORT_delayRx,         // between GO signal and start listening
-//   // radio watchdog
-//   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
-//   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
-//   wdAckDuration             =   98,                  //  3000us (measured 1000us)
-//};
-
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-   TsTxOffset                =    65,                  //  4000us
-   TsLongGT                  =    21,                  //  1300us
-   TsTxAckDelay              =    75,                  //  4606us
-   TsShortGT                 =     8,                  //   500us
+   TsTxOffset                =  131,                  //  4000us
+   TsLongGT                  =   43,                  //  1300us
+   TsTxAckDelay              =  151,                  //  4606us
+   TsShortGT                 =   16,                  //   500us
    TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
@@ -115,11 +94,10 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-   wdRadioTx                 =    16,                  //  1000us (needs to be >delayTx)
-   wdDataDuration            =    82,                  //  5000us (measured 4545us with max payload) stm32
-   wdAckDuration             =    49,                  //  3000us (measured 1281us) stm32
+   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
+   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =   98,                  //  3000us (measured 1000us)
 };
-
 
 
 // FSM timer durations (combinations of atomic durations)

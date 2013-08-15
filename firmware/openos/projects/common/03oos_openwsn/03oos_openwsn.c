@@ -7,7 +7,7 @@
 #include "board.h"
 #include "scheduler.h"
 #include "openwsn.h"
-#include "nvic.h"
+
 
 int mote_main() {
    board_init();

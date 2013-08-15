@@ -1146,16 +1146,12 @@ port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
    
    // record the captured time to sync
    ieee154e_vars.syncCapturedTime = capturedTime;
-   
-//   ieee154e_vars.val=radiotimer_getValue();
-//   // arm rt4
-//   ieee154e_vars.dur=DURATION_rt4;
+
    radiotimer_schedule(DURATION_rt4);
 }
 
 port_INLINE void activity_rie3() {
      
-//   ieee154e_vars.val=radiotimer_getValue();
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -1173,7 +1169,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    
    // cancel rt4
    radiotimer_cancel();
-//   ieee154e_vars.val=radiotimer_getValue();
+
    // turn off the radio
    radio_rfOff();
    ieee154e_vars.radioOnTics+=radio_getTimerValue()-ieee154e_vars.radioOnInit;
