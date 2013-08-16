@@ -82,7 +82,7 @@ to return the board's description.
 #define PORT_maxRxDataPrepare               33    //  976us (measured 170us+235) stm32
 #define PORT_maxTxAckPrepare                20    //  900us (measured 323us+235) stm32
 // radio speed related
-#define PORT_delayTx                        20     //  549us (measured 315us+235) .....
+#define PORT_delayTx                        28     //  549us (measured 315us+235) .....
 #define PORT_delayRx                        0     //    0us (can not measure)
 
 //=========================== typedef  ========================================
