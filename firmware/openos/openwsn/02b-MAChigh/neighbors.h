@@ -95,6 +95,8 @@ void          neighbors_indicateTx(
                    asn_t*              asnTimestamp
               );
 void          neighbors_indicateRxDIO(OpenQueueEntry_t* msg);
+
+
 // get addresses
 void          neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index);
 // managing routing info
