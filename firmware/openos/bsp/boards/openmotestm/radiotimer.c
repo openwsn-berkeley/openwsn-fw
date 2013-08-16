@@ -88,7 +88,7 @@ void radiotimer_start(uint16_t period) {
     RTC_SetAlarm(period);
     RTC_WaitForLastTask();
     
-    radiotimer_vars.currentSlotPeriod = period;
+    radiotimer_vars.currentSlotPeriod = period>>1;
     
     //interrupt when reach alarm value
     RTC_ClearFlag(RTC_IT_ALR);
@@ -121,11 +121,12 @@ void radiotimer_start(uint16_t period) {
 uint16_t radiotimer_getValue() {
     RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
+    counter = counter << 1;
     return (uint16_t)counter;
 }
 
 void radiotimer_setPeriod(uint16_t period) {
-    period=period>>2;//divide by two as this timer runs at 16Khz and tics are expressed as 32khz tics -- for comptaibility with other boards.
+    period = period >> 1;//divide by two as this timer runs at 16Khz and tics are expressed as 32khz tics -- for comptaibility with other boards.
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
     //need to disable radio also in case that a radio interrupt is happening when set Alarm value
     
@@ -145,13 +146,14 @@ void radiotimer_setPeriod(uint16_t period) {
 uint16_t radiotimer_getPeriod() {
     RTC_WaitForSynchro();
     uint32_t period = RTC_GetAlarm();
+    period = period << 1;
     return (uint16_t)period;
 }
 
 //===== compare
 
 void radiotimer_schedule(uint16_t offset) {
-    offset=offset>>2;//divide by two as this timer runs at 16Khz
+    offset = offset >> 1;//divide by two as this timer runs at 16Khz
     
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
     //need to disable radio also in case that a radio interrupt is happening
@@ -185,6 +187,7 @@ void radiotimer_cancel() {
 inline uint16_t radiotimer_getCapturedTime() {
     RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
+    counter = counter << 1;
     return (uint16_t)counter;
 }
 
