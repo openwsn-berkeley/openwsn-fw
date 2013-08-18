@@ -8,6 +8,7 @@
 #include "scheduler.h"
 #include "openwsn.h"
 
+
 int mote_main() {
    board_init();
    scheduler_init();

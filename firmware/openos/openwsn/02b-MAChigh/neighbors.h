@@ -75,6 +75,7 @@ dagrank_t     neighbors_getMyDAGrank();
 uint8_t       neighbors_getNumNeighbors();
 bool          neighbors_getPreferredParentEui64(open_addr_t* addressToWrite);
 open_addr_t*  neighbors_getKANeighbor();
+
 // interrogators
 bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isPreferredParent(open_addr_t* address);

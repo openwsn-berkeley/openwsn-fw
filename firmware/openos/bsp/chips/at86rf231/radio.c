@@ -399,10 +399,10 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
 kick_scheduler_t radio_isr() {
    PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status;
-   
-   
+
    // capture the time
    capturedTime = radiotimer_getCapturedTime();
+   //RCC_Wakeup();
    // reading IRQ_STATUS causes radio's IRQ pin to go low
    irq_status = radio_spiReadReg(RG_IRQ_STATUS);
     

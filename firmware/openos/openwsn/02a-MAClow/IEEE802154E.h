@@ -98,7 +98,6 @@ enum ieee154e_atomicdurations_enum {
 };
 
 
-
 // FSM timer durations (combinations of atomic durations)
 // TX
 #define DURATION_tt1 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx-maxTxDataPrepare

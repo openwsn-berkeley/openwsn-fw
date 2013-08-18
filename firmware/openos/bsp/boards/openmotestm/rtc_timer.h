@@ -1,11 +1,11 @@
 /**
-\brief Cross-platform declaration "radiotimer" bsp module.
+\brief openmoteSTM32 declaration "rtctimer" bsp module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
+\author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
 
-#ifndef __RADIOTIMER_H
-#define __RADIOTIMER_H
+#ifndef __RTC_TIMER_H
+#define __RTC_TIMER_H
 
 #include "stdint.h"
 #include "board.h"
@@ -14,31 +14,25 @@
 
 //=========================== typedef =========================================
 
-typedef void (*radiotimer_compare_cbt)();
-typedef void (*radiotimer_capture_cbt)(PORT_TIMER_WIDTH timestamp);
+typedef void (*rtc_timer_alarm_cbt)();
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 // admin
-void     radiotimer_init();
-void     radiotimer_setOverflowCb(radiotimer_compare_cbt cb);
-void     radiotimer_setCompareCb(radiotimer_compare_cbt cb);
-void     radiotimer_setStartFrameCb(radiotimer_capture_cbt cb);
-void     radiotimer_setEndFrameCb(radiotimer_capture_cbt cb);
-void     radiotimer_start(u32 period);
+void     rtc_timer_init();
+void     rtc_timer_setAlarmCb(rtc_timer_alarm_cbt cb);
+void     rtc_timer_start(u32 alarmValue);
 // direct access
-u32 radiotimer_getValue();
-void     radiotimer_setPeriod(u32 period);
-u32 radiotimer_getPeriod();
-// compare
-void     radiotimer_schedule(u32 period,u32 offset);
-void     radiotimer_cancel();
+PORT_TIMER_WIDTH     rtc_timer_getAlarm();
+void    rtc_timer_resetCounter();
+//set alarm
+
 // capture
-u32 radiotimer_getCapturedTime();
+PORT_TIMER_WIDTH rtc_timer_getCapturedTime();
 
 
-uint8_t  radiotimer_isr();
+uint8_t  rtc_timer_isr();
 
 #endif
