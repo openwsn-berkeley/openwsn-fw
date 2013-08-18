@@ -35,6 +35,15 @@ void    uart_clearTxInterrupts();
 void    uart_writeByte(uint8_t byteToWrite);
 uint8_t uart_readByte();
 
+#ifdef UART_USE_CTS
+void    uart_cts_set();
+void    uart_cts_clr();
+#endif
+
+#ifdef UART_USE_RTS
+uint8_t uart_rts_get();
+#endif
+
 // interrupt handlers
 kick_scheduler_t uart_tx_isr();
 kick_scheduler_t uart_rx_isr();

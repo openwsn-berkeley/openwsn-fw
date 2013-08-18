@@ -11,6 +11,9 @@ settings
 *.so
 *.a
 *.pyd
+*.orig
+*.tmp
+*.temp
 path.txt
 /build
 /.sconsign.dblite

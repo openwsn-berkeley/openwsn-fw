@@ -71,6 +71,11 @@ void uart_init()
     GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
+    
+    // RTS pin
+    
+    
+    // CTS pin
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) 
