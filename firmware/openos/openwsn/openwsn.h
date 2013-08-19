@@ -84,6 +84,7 @@ enum {
    WKP_UDP_IMU                         =  2190,
    WKP_UDP_ECHO                        =     7,
    WKP_UDP_INJECT                      =  2188,
+   WKP_UDP_XBEE                        =  7505,
    WKP_UDP_DISCARD                     =     9,
    WKP_UDP_RAND                        = 61000,
    WKP_UDP_LATENCY                     = 61001,
@@ -172,6 +173,7 @@ enum {
    COMPONENT_UDPLATENCY                = 0x2f,
    COMPONENT_TEST                      = 0x30,
    COMPONENT_R6TUS                    = 0x31,
+   COMPONENT_XBEEAPP                    = 0x32
 };
 
 /**

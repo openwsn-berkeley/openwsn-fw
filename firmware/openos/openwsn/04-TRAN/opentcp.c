@@ -12,6 +12,7 @@
 #include "tcpecho.h"
 #include "tcpinject.h"
 #include "tcpprint.h"
+#include "xbee_app.h"
 
 //=========================== variables =======================================
 

@@ -50,6 +50,9 @@ to return the board's description.
 
 //===== pinout
 
+#define UART_USE_CTS
+#define UART_USE_RTS
+
 // [P4.7] radio SLP_TR_CNTL
 #define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()     GPIOB->ODR |= 0X0002;
 #define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()      GPIOB->ODR &= ~0X0002;

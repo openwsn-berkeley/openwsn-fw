@@ -2,7 +2,7 @@
 \brief Cross-platform declaration "uart" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
-*/
+*/ 
 
 #ifndef __UART_H
 #define __UART_H

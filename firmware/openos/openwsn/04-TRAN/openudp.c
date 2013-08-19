@@ -12,6 +12,7 @@
 #include "udprand.h"
 #include "udpstorm.h"
 #include "udplatency.h"
+#include "xbee_app.h"
 //#include "heli.h"
 //#include "imu.h"
 
@@ -56,6 +57,9 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          break;
       case WKP_UDP_INJECT:
          udpinject_sendDone(msg,error);
+         break;
+      case WKP_UDP_XBEE:
+         xbeeapp_sendDone(msg,error);
          break;
       case WKP_UDP_DISCARD:
          udpprint_sendDone(msg,error);
@@ -136,6 +140,9 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          break;
       case WKP_UDP_INJECT:
          udpinject_receive(msg);
+         break;
+      case WKP_UDP_XBEE:
+         xbeeapp_receive(msg);
          break;
       case WKP_UDP_DISCARD:
          udpprint_receive(msg);
