@@ -6,6 +6,7 @@
 
 #include "openwsn.h"
 #include "openserial.h"
+#include "openserial_xbee.h"
 #include "IEEE802154E.h"
 #include "neighbors.h"
 #include "res.h"
@@ -62,6 +63,7 @@ typedef struct {
   // output
   bool       outputBufFilled;
   uint8_t   outputChecksum;
+  uint16_t    outputBufIdxSP; // start of packet
   uint16_t    outputBufIdxW;
   uint16_t    outputBufIdxR;
   uint8_t    outputBuf[SERIAL_OUTPUT_BUFFER_SIZE];
@@ -152,6 +154,79 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
                                      
                                      return E_SUCCESS;
                                    }
+
+void xbee_print_modem_status(uint8_t status_byte) {
+  INTERRUPT_DECLARATION();
+  DISABLE_INTERRUPTS();
+  outputAPIOpen();
+  outputAPIWrite(API_MODEM_STATUS);
+  outputAPIWrite(status_byte);
+  outputAPIClose();
+  ENABLE_INTERRUPTS();   
+}
+
+void xbee_print_AT_response(uint8_t frame_id, uint8_t atcmd[2], uint8_t status, uint8_t * data, uint16_t datalen) {
+  uint16_t c;
+  INTERRUPT_DECLARATION();
+  DISABLE_INTERRUPTS();
+  outputAPIOpen();
+  outputAPIWrite(API_AT_RESPONSE);
+  outputAPIWrite(frame_id);
+  outputAPIWrite(atcmd[0]);
+  outputAPIWrite(atcmd[1]);
+  outputAPIWrite(status);
+  for ( c = 0; c < datalen; c++ )
+     outputAPIWrite(data[c]);
+  outputAPIClose();
+  ENABLE_INTERRUPTS();     
+}
+
+void xbee_print_TX_status(uint8_t frame_id, uint8_t status_byte) {
+  INTERRUPT_DECLARATION();
+  DISABLE_INTERRUPTS();
+  outputAPIOpen();
+  outputAPIWrite(API_TX_STATUS);
+  outputAPIWrite(frame_id);
+  outputAPIWrite(status_byte);
+  outputAPIClose();
+  ENABLE_INTERRUPTS();     
+}
+
+void xbee_print_RX_packet64( uint8_t * addr, int8_t rssi, uint8_t options, uint8_t * data, uint16_t datalen) {
+  uint16_t c;
+  INTERRUPT_DECLARATION();
+  DISABLE_INTERRUPTS();
+  outputAPIOpen();
+  outputAPIWrite(API_RX_PACKET_64);
+  for (c = 0; c < 8; c++) {
+      outputAPIWrite(addr[c]);
+  }
+  outputAPIWrite((uint8_t)rssi);
+  outputAPIWrite(options);
+  for ( c = 0; c < datalen; c++ ) {
+      outputAPIWrite(data[c]);
+  }
+  outputAPIClose();
+  ENABLE_INTERRUPTS();     
+}
+
+void xbee_print_RX_packet16( uint8_t * addr, int8_t rssi, uint8_t options, uint8_t * data, uint16_t datalen) {
+  uint16_t c;
+  INTERRUPT_DECLARATION();
+  DISABLE_INTERRUPTS();
+  outputAPIOpen();
+  outputAPIWrite(API_RX_PACKET_16);
+  for ( c = 0; c < 2; c++ ) {
+    outputAPIWrite(addr[c]);
+  }
+  outputAPIWrite((uint8_t)rssi);
+  outputAPIWrite(options);
+  for ( c = 0; c < datalen; c++ ) {
+      outputAPIWrite(data[c]);
+  }
+  outputAPIClose();
+  ENABLE_INTERRUPTS();   
+}
 
 uint8_t openserial_getNumDataBytes() {
   uint8_t inputBufFill;
@@ -286,9 +361,9 @@ void openserial_stop() {
       cmdlen = openserial_vars.inputLengthExpected - 3;
       ENABLE_INTERRUPTS();
       if (cmdlen == 0 ) {
-          at_command_get(AT_Cmd);
+          at_command_get(frameID,AT_Cmd);
       } else {
-          at_command_set(AT_Cmd,&(openserial_vars.inputBuf[4]),cmdlen);
+          at_command_set(frameID,AT_Cmd,&(openserial_vars.inputBuf[4]),cmdlen);
       }
       break;
     case API_TX_REQUEST_64:
@@ -322,6 +397,8 @@ inline void outputAPIOpen() {
   // initialize the value of the checksum
   openserial_vars.outputChecksum                          = 0xFF;
   
+  openserial_vars.outputBufIdxSP = openserial_vars.outputBufIdxW;
+  
   // write the opening API flag
   openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]     = XBEE_API_INIT;
   
@@ -344,28 +421,26 @@ inline void outputAPIWrite(uint8_t b) {
   openserial_vars.outputChecksum  -= b;
   
   // add byte to buffer
-  if (b==XBEE_API_INIT || b==XBEE_API_ESCAPE || b == 0x11 || b == 0x13) {
-    openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]  = XBEE_API_ESCAPE;
-    b                                               = b^XBEE_API_ESCAPE_MASK;
-  }
   openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]     = b;
   
-  openserial_vars.outputBufFilled = TRUE;
 }
 /**
 \brief Finalize the outgoing API frame.
 */
 inline void outputAPIClose() {
   uint16_t  temp_len;
+  uint8_t temp_chr;
   // write the current checksum value
   outputAPIWrite((openserial_vars.outputChecksum)&0xff);
   // outputBufIdxW will be size of the buf including checksum, length, and start delimeter, a total of 4 bytes
   
-  temp_len = openserial_vars.outputBufIdxW - 4;
-  openserial_vars.outputBufIdxW = 1; // write to length fields
+  temp_len = openserial_vars.outputBufIdxW - openserial_vars.outputBufIdxSP - 4;
+  openserial_vars.outputBufIdxW = openserial_vars.outputBufIdxSP+1; // write to length fields
   outputAPIWrite((temp_len>>8)&0xff);
   outputAPIWrite(temp_len&0xff);
-  openserial_vars.outputBufIdxW = temp_len + 4;
+  openserial_vars.outputBufIdxW = openserial_vars.outputBufIdxSP + temp_len + 4;
+  
+  openserial_vars.outputBufFilled = TRUE;
 }
 
 //===== api (input)
@@ -397,13 +472,20 @@ inline void inputAPIWrite(uint8_t b) {
 
 //executed in ISR, called from scheduler.c
 void isr_openserial_tx() {
+  uint8_t b;
   switch (openserial_vars.mode) {
   case MODE_OUTPUT:
     if (openserial_vars.outputBufIdxW==openserial_vars.outputBufIdxR) {
       openserial_vars.outputBufFilled = FALSE;
     }
     if (openserial_vars.outputBufFilled) {
-      uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
+      b = openserial_vars.outputBuf[openserial_vars.outputBufIdxR];
+      if (b==XBEE_API_INIT || b==XBEE_API_ESCAPE || b == 0x11 || b == 0x13) {
+        openserial_vars.outputBuf[openserial_vars.outputBufIdxR]  = b ^ XBEE_API_ESCAPE_MASK;
+      } else {
+        openserial_vars.outputBufIdxR++;
+      }
+      uart_writeByte(b);
     }
     break;
   case MODE_OFF:

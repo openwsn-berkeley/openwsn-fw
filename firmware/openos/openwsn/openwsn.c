@@ -44,6 +44,7 @@
 //-- UDP
 #include "udpecho.h"
 #include "udpinject.h"
+#include "xbee_app.h"
 #include "udpprint.h"
 //#include "udprand.h"
 //#include "udplatency.h"
@@ -113,6 +114,7 @@ void openwsn_init() {
    //-- UDP
    udpecho_init();
    udpinject_init();
+   xbeeapp_init();
    udpprint_init();
    //udprand_init();
    //udplatency_init();

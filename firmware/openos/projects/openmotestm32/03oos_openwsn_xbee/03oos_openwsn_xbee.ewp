@@ -2130,6 +2130,9 @@
         <name>$PROJ_DIR$\..\..\..\drivers\common\openserial_xbee.c</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openserial_xbee.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
       </file>
       <file>
