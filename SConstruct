@@ -78,7 +78,10 @@ command_line_vars.AddVariables(
     ),
 )
 
-env = Environment(variables = command_line_vars)
+env = Environment(
+    tools     = ['mingw'],
+    variables = command_line_vars,
+)
 
 #===== help text
 
