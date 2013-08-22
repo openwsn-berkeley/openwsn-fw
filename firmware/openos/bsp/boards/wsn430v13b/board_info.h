@@ -41,10 +41,6 @@ to this board.
 
 //===== pins
 
-// [P3.1] SIMO
-
-#define PORT_PIN_SIMO_HIGH()                P3OUT |=  0x02;
-#define PORT_PIN_SIMO_LOW()                 P3OUT &= ~0x02;
 
 // [P3.1] SIMO
 #define PORT_PIN_SIMO_HIGH()                P3OUT |=  0x02;
