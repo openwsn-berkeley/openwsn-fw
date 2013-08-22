@@ -57,6 +57,7 @@
 
 extern int main (void);
 
+
 void ResetISR(void);
 void NmiSR(void);
 void FaultISR(void);
@@ -68,6 +69,7 @@ void IntDefaultHandler(void);
 //
 //*****************************************************************************
 static uint32_t pui32Stack[128];
+
 
 //*****************************************************************************
 //
@@ -314,7 +316,7 @@ ResetISR (void)
     //
 	// Workaround for PM debug issue
     //
-    HWREG(SYS_CTRL_EMUOVR) = 0xFF; 
+    HWREG(SYS_CTRL_EMUOVR) = 0xFF;
 
     //
 	// Copy the data segment initializers from flash to SRAM.
