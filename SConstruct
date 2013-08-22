@@ -20,7 +20,7 @@ print banner
 #===== options
 
 command_line_options = {
-    'board':       ['telosb','gina','z1','pc','python'],
+    'board':       ['telosb','gina','z1','pc','python','wsn430v13b','wsn430v14'],
     'toolchain':   ['mspgcc','iar','iar-proj','gcc'],
     'fet_version': ['2','3'],
     'verbose':     ['0','1']
