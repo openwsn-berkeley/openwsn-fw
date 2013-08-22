@@ -1,5 +1,5 @@
 /**
-\brief wsn430v14-specific definition of the "spi" bsp module.
+\brief wsn430v13b-specific definition of the "spi" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */

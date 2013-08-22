@@ -1,7 +1,7 @@
 /**
-\brief TelosB-specific definition of the "bsp_timer" bsp module.
+\brief WSN430v14-specific definition of the "bsp_timer" bsp module.
 
-On TelosB, we use timerA0 for the bsp_timer module.
+On WSN430v14, we use timerA0 for the bsp_timer module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
 */

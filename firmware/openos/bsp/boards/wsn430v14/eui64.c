@@ -1,5 +1,5 @@
 /**
-\brief TelosB-specific definition of the "eui64" bsp module.
+\brief WSN430v14-specific definition of the "eui64" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
 */

@@ -1,5 +1,5 @@
 /**
-\brief TelosB-specific definition of the "radiotimer" bsp module.
+\brief WSN430v13b-specific definition of the "radiotimer" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */

@@ -1,5 +1,5 @@
 /**
-\brief TelosB-specific definition of the "leds" bsp module.
+\brief WSN430v13b-specific definition of the "leds" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
