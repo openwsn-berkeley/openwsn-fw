@@ -39,7 +39,6 @@ void board_init() {
    leds_init();
    bsp_timer_init();
 
-   IntMasterEnable();
 }
 
 void board_sleep() {
