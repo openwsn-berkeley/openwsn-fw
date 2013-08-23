@@ -76,13 +76,13 @@ void radio_init() {
   PORT_PIN_CS_LOW();
 
   // Wait for SOMI to go low
-  while (radio_vars.radioStatusByte.CHIP_RDYn != 0);
+  while (radio_vars.radioStatusByte.CHIP_RDYn != 0x00);
 
   // reset radio
   radio_reset();
 
   // Wait until SOMI goes low again
-  while (radio_vars.radioStatusByte.CHIP_RDYn != 0);  
+  while (radio_vars.radioStatusByte.CHIP_RDYn != 0x00);  
 
   // change state 
   radio_vars.state            = RADIOSTATE_RFOFF;
@@ -310,7 +310,7 @@ void radio_rxEnable() {
    
 
    // busy wait until radio really listening
-  while (radio_vars.radioStatusByte.STATE == 0x04) {
+  while (radio_vars.radioStatusByte.STATE == 0x01) {
     radio_spiStrobe(CC1101_SNOP, &radio_vars.radioStatusByte);
   }
    
@@ -361,7 +361,7 @@ void radio_spiStrobe(uint8_t strobe, cc1101_status_t* statusRead) {
 void radio_spiWriteReg(uint8_t reg, cc1101_status_t* statusRead, uint8_t regValueToWrite) {
    uint8_t              spi_tx_buffer[3];
    
-   spi_tx_buffer[0]     = (CC1101_WRITE_SINGLE | reg);  // consecutives addresses access with burst bit set might not be necessary
+   spi_tx_buffer[0]     = (CC1101_WRITE_SINGLE | reg); 
    spi_tx_buffer[1]     = regValueToWrite/256;
    spi_tx_buffer[2]     = regValueToWrite%256;
    
