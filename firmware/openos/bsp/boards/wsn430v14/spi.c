@@ -47,8 +47,9 @@ void spi_init() {
    P3SEL     |=  0x02;                           // P3.1 in SIMO mode
    P3DIR     |=  0x02;                           // P3.1 as output
    P3SEL     |=  0x04;                           // P3.2 in SOMI mode
-   P3DIR     |=  0x04;                           // P3.2 as output
-   //  P3DIR     &= ~0x04;                      ?? Shouldn't be P3.2 put as input ??? 
+ 
+  // P3DIR     |=  0x04;                        // P3.2 as output
+   P3DIR     &= ~0x04;                          // ?? Shouldn't be P3.2 put as input ??? 
 
    P3SEL     |=  0x08;                           // P3.3 in SCL mode
    P3DIR     |=  0x08;                           // P3.3 as output 
