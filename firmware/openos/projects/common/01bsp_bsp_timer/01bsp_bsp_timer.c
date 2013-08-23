@@ -10,7 +10,7 @@ can use this project with any platform.
 #include "stdint.h"
 #include "string.h"
 #include "board.h"
-//#include "debugpins.h"
+#include "debugpins.h"
 #include "leds.h"
 #include "bsp_timer.h"
 
@@ -55,7 +55,7 @@ int mote_main()
 
 void cb_compare() {
    // toggle pin
-   //debugpins_fsm_toggle();
+   debugpins_fsm_toggle();
    
    // toggle error led
    leds_sync_toggle();
