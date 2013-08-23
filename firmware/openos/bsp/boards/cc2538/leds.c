@@ -51,7 +51,6 @@ void    leds_error_toggle() {
 	bspLedToggle(BSP_LED_1);
 }
 uint8_t leds_error_isOn() {
-
 	  uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_1);
 	  return (uint8_t)(ui32Toggle & BSP_LED_1)>>0;
 }
