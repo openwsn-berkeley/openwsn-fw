@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<flash_board>
+  <pass>
+    <loader></loader>
+    <range>CODE 0x8000000 0x807ffff</range>
+  </pass>
+</flash_board>
+
+

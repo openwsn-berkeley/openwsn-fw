@@ -78,7 +78,10 @@ command_line_vars.AddVariables(
     ),
 )
 
-env = Environment(variables = command_line_vars)
+env = Environment(
+    tools     = ['mingw'],
+    variables = command_line_vars,
+)
 
 #===== help text
 
@@ -108,7 +111,14 @@ env['targets'] = {
    'all_oos': [],
 }
 
-# include main sconscript
+# include docs SConscript
+# which will discover targets for this board/toolchain
+env.SConscript(
+    os.path.join('docs','SConscript'),
+    exports = ['env'],
+)
+
+# include main SConscript
 # which will discover targets for this board/toolchain
 env.SConscript(
     'SConscript',

@@ -18,9 +18,9 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD                  0x100
-#define RADIOTIMER_OVERFLOW_PERIOD        0x100
-#define RADIOTIMER_COMPARE_PERIOD             4
+#define BSP_TIMER_PERIOD                  50000
+#define RADIOTIMER_OVERFLOW_PERIOD        32768
+#define RADIOTIMER_COMPARE_PERIOD          5000
 #define RADIOTIMER_NUM_COMPARES               4
 #define ISR_DELAY                           250
 

@@ -20,6 +20,7 @@ int putchar(int c) {
 
 
 
+
 int mote_main() {
   uint8_t tmp;
   uint8_t leds_on;

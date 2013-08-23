@@ -1,0 +1,19 @@
+import os
+
+Import('env')
+
+docsenv = env.Clone()
+
+#============================ SCons targets ===================================
+
+#===== docs
+
+docsenv['ENV']['PATH'] += os.environ['PATH']
+
+docs = docsenv.Command(
+    'phony_output', [],
+    'doxygen Doxyfile',
+    chdir='docs'
+)
+docsenv.AlwaysBuild(docs)
+docsenv.Alias('docs', docs)

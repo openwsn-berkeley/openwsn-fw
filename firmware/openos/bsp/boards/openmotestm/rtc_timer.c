@@ -1,25 +1,24 @@
 /**
-\brief GINA-specific definition of the "radiotimer" bsp module.
+\brief openmoteSTM32 definition of the "rtc_timer" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 */
 
-#include "stm32f10x_rcc.h"
-#include "stm32f10x_nvic.h"
-#include "stm32f10x_rtc.h"
-#include "stm32f10x_pwr.h"
+#include "stm32f10x_lib.h"
 #include "leds.h"
 #include "rtc_timer.h"
+
+#include "rcc.h"
+#include "nvic.h"
 
 //=========================== variables =======================================
 
 typedef struct {
-   radiotimer_compare_cbt    overflow_cb;
-   radiotimer_compare_cbt    compare_cb;
-} radiotimer_vars_t;
+   rtc_timer_alarm_cbt    alarm_cb;
+} rtc_timer_vars_t;
 
-radiotimer_vars_t radiotimer_vars;
+rtc_timer_vars_t rtc_timer_vars;
 
 //=========================== prototypes ======================================
 
@@ -27,150 +26,106 @@ radiotimer_vars_t radiotimer_vars;
 
 //===== admin
 
-void radiotimer_init() {
+void rtc_timer_init() {
    // clear local variables
-   memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
+   memset(&rtc_timer_vars,0,sizeof(rtc_timer_vars_t));
 }
 
-void radiotimer_setOverflowCb(radiotimer_compare_cbt cb) {
-   radiotimer_vars.overflow_cb    = cb;
+void rtc_timer_setAlarmCb(rtc_timer_alarm_cbt cb) {
+   rtc_timer_vars.alarm_cb    = cb;
 }
 
-void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
-   radiotimer_vars.compare_cb     = cb;
-}
-
-void radiotimer_setStartFrameCb(radiotimer_capture_cbt cb) {
-   while(1);
-}
-
-void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
-   while(1);
-}
-
-void radiotimer_start(u32 period) 
+void rtc_timer_start(u32 alarmValue) 
 {
+    //enable BKP and PWR, Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_BKP|RCC_APB1Periph_PWR , ENABLE);
     
-    PWR_BackupAccessCmd(ENABLE);// 使能写 Backup domain 
-
-    RCC_LSEConfig(RCC_LSE_ON);//打开外部低频晶振
-
-    while(RCC_GetFlagStatus(RCC_FLAG_LSERDY)==RESET);//等待外部低频晶振工作正常
-
-    RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);//外部低频晶振作为RTC晶振源
-
-    RCC_RTCCLKCmd(ENABLE);//使能RTC
-
+    // RTC clock source configuration 
+    PWR_BackupAccessCmd(ENABLE);                      //Allow access to BKP Domain
+    RCC_LSEConfig(RCC_LSE_ON);                        //Enable LSE OSC
+    while(RCC_GetFlagStatus(RCC_FLAG_LSERDY)==RESET); //Wait till LSE is ready
+    RCC_RTCCLKConfig(RCC_RTCCLKSource_LSE);           //Select the RTC Clock Source
+    RCC_RTCCLKCmd(ENABLE);                            //enable RTC
+    
+    // RTC configuration 
+    // Wait for RTC APB registers synchronisation 
     RTC_WaitForSynchro();
+    
+    RTC_SetPrescaler(0);                              //Set the RTC time base to 30.5us
+    RTC_WaitForLastTask();                            //Wait until last write operation on RTC registers has finished
 
+    //Set the RTC time counter to 0
+    RTC_SetCounter(0);
+    RTC_WaitForLastTask();
+
+    // Set the RTC time alarm(the length of slot)
+    RTC_SetAlarm(alarmValue);
     RTC_WaitForLastTask();
     
-    RTC_ClearFlag(RTC_IT_OW);
-    RTC_ITConfig(RTC_IT_OW, ENABLE);
-    RTC_WaitForLastTask();
-
-    RTC_WaitForLastTask(); //等待
-
-    RTC_SetPrescaler(0);//(32.768 KHz)/(32767+1)
-  
-    RTC_WaitForLastTask();
-    RTC_SetCounter(0xFFFFFFFF-period);
-        
+    //interrupt when reach alarm value
+    RTC_ClearFlag(RTC_IT_ALR);
+    RTC_ITConfig(RTC_IT_ALR, ENABLE);
    
-    //########### 有关NVIC的设置部分 ##############################################
-    NVIC_InitTypeDef NVIC_InitStructure; 
-  
-    NVIC_InitStructure.NVIC_IRQChannel = RTC_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure); 
+    //Configures EXTI line 17 to generate an interrupt on rising edge(alarm interrupt to wakeup board)
+    EXTI_ClearITPendingBit(EXTI_Line17);
+    EXTI_InitTypeDef  EXTI_InitStructure; 
+    EXTI_InitStructure.EXTI_Line    = EXTI_Line17;
+    EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt; 
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE; 
+    EXTI_Init(&EXTI_InitStructure);
+   
+    //Configure RTC global interrupt:
+    //Configure NVIC: Preemption Priority = 1 and Sub Priority = 1
+    NVIC_InitTypeDef NVIC_InitStructure;
+    NVIC_InitStructure.NVIC_IRQChannel                    = RTC_IRQChannel;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority  = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+    
+    //Configure RTC Alarm interrupt:
+    //Configure NVIC: Preemption Priority = 0 and Sub Priority = 1
+    NVIC_InitStructure.NVIC_IRQChannel                    = RTCAlarm_IRQChannel;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority  = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 1;
+    NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
 }
 
 //===== direct access
 
-u32 radiotimer_getValue() 
-{
-    return RTC_GetCounter();
+uint16_t rtc_timer_getAlarm() {
+    uint32_t alarmValue = RTC_GetAlarm();
+    return (uint16_t)alarmValue;
 }
 
-void radiotimer_setPeriod(u32 period) 
-{
-    RTC_WaitForLastTask();
-    RTC_SetCounter(0xFFFFFFFF-period);
-}
-
-u32 radiotimer_getPeriod() {
-    return PORT_TsSlotDuration;//need to modify
-}
-
-//===== compare
-
-void radiotimer_schedule(u32 period,u32 offset) 
-{
-    // offset when to fire
-    RTC_WaitForLastTask();
-    RTC_SetAlarm(0xFFFFFFFF - period + offset);
-   
-    // enable CCR1 interrupt (this also cancels any pending interrupts)
-    RTC_WaitForLastTask();
-    RTC_ClearFlag(RTC_IT_ALR);
-    RTC_ITConfig(RTC_IT_ALR, ENABLE);
-
-}
-
-void radiotimer_cancel() 
-{
-   // reset CCR1 value (also resets interrupt flag)
-    RTC_WaitForLastTask();
-    RTC_SetAlarm(0);
-    RTC_WaitForLastTask();
-   // disable CCR1 interrupt
-    RTC_ITConfig(RTC_IT_ALR, DISABLE);
+void    rtc_timer_resetCounter() {
+    RTC_SetCounter(0);                //Set RTC Counter to begin a new slot
+    RTC_WaitForLastTask();            //Wait until last write operation on RTC registers has finished
 }
 
 //===== capture
 
-u32 radiotimer_getCapturedTime() 
+uint16_t rtc_timer_getCapturedTime() 
 {
-   return RTC_GetCounter();
+    uint32_t counter = RTC_GetCounter();
+    return (uint16_t)counter;
 }
 
 //=========================== private =========================================
 
 //=========================== interrupt handlers ==============================
 
-uint8_t radiotimer_isr() 
+
+uint8_t rtc_timer_isr() 
 {
-  if(RTC_GetFlagStatus(RTC_IT_ALR) != RESET)
-  {
-    RTC_ClearFlag(RTC_IT_ALR);
-    if (radiotimer_vars.compare_cb!=NULL)
+    if (rtc_timer_vars.alarm_cb!=NULL)
     {
       // call the callback
-      radiotimer_vars.compare_cb();
+      rtc_timer_vars.alarm_cb();
       // kick the OS
       return 1;
     }
-  }
-  else
-  {
-      if(RTC_GetFlagStatus(RTC_IT_OW) != RESET)
-      {
-        RTC_ClearFlag(RTC_IT_OW);
-        if (radiotimer_vars.overflow_cb!=NULL)
-        {
-          // call the callback
-          radiotimer_vars.overflow_cb();
-          // kick the OS
-          return 1;
-        }
-      }
-      else
-      {
-        while(1);
-      }
-  }
-   return 0;
+    return 0;
 }

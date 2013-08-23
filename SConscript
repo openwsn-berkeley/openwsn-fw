@@ -171,7 +171,7 @@ else:
     
     # enabling shared library to be reallocated 
     env.Append(CCFLAGS = '-fPIC')
-	
+    
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
     
