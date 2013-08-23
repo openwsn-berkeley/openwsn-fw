@@ -49,7 +49,7 @@
 //#include "udplatency.h"
 //#include "udpstorm.h"
 //-- CoAP
-#include "rleds.h"
+//#include "rleds.h"
 //#include "rt.h"
 //#include "rex.h"
 //#include "rheli.h"
@@ -59,7 +59,7 @@
 #include "r6tus.h"
 //-- misc
 //#include "heli.h"
-//#include "imu.h"
+//#include "imu.h
 
 //=========================== variables =======================================
 
@@ -118,12 +118,12 @@ void openwsn_init() {
    //udplatency_init();
    //udpstorm_init();
    //-- CoAP
-   //rleds_init();
+   // rleds_init();
    //rt_init();
    //rex_init();
    //rheli_init();
    //rrube_init();
-   //rxl1_init();
+   // rxl1_init();
    //layerdebug_init();
    r6tus_init();
    //-- misc
