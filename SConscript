@@ -347,8 +347,9 @@ def sconscript_scanner(localEnv):
             libs   = buildLibs(projectDir)
             
             buildIncludePath(projectDir,localEnv)
-
-            #fix for problem on having the same target as directory name and failing to compile in linux. Appending something to the target solves the isse.
+            
+            # In Linux, you cannot have the same target name as the name of the
+            # directory name.
             target=target+"_prog"
             
             exe = localEnv.Program(
