@@ -2,7 +2,13 @@
 
 <workspace>
   <project>
+    <path>$WS_DIR$\01bsp_bothtimers\01bsp_bothtimers.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_bsp_timer\01bsp_bsp_timer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_closetimers\01bsp_closetimers.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_debugpins\01bsp_debugpins.ewp</path>
@@ -14,6 +20,12 @@
     <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\01bsp_radio_rx\01bsp_radio_rx.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_radio_tx\01bsp_radio_tx.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_radiotimer\01bsp_radiotimer.ewp</path>
   </project>
   <project>
@@ -22,9 +34,14 @@
   <project>
     <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
   </project>
+  
+  <project>
+    <path>$WS_DIR$\02drv_openserial\02drv_openserial.ewp</path>
+  </project>
   <project>
     <path>$WS_DIR$\02drv_opentimers\02drv_opentimers.ewp</path>
   </project>
+  
   <project>
     <path>$WS_DIR$\03oos_macpong\03oos_macpong.ewp</path>
   </project>
