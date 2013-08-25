@@ -19,7 +19,7 @@
 #include "idmanager.h"
 #include "neighbors.h"
 
-#define MAX_PAYLOAD 104
+#define MAX_PAYLOAD 100
 
 //=========================== variables =======================================
 
@@ -56,13 +56,6 @@ void macpong_initSend() {
 void macpong_send(uint8_t payloadCtr) {
    OpenQueueEntry_t* pkt;
    uint8_t i;
-   open_addr_t*      tempNeighAddr;
-   
-   tempNeighAddr = neighbors_getAddr(0);
-   if (tempNeighAddr==NULL) {
-      // don't proceed if I have no neighbor
-      return;
-   }
    
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPRAND);
    if (pkt==NULL) {
@@ -88,13 +81,13 @@ void macpong_send(uint8_t payloadCtr) {
 
 void iphc_init() {
    if (idmanager_getIsDAGroot()==FALSE) {
-      macpong_vars.timerId    = opentimers_start(1000,
+      macpong_vars.timerId    = opentimers_start(5000,
                                                  TIMER_PERIODIC,TIME_MS,
                                                  macpong_initSend);
    }
 }
 
-void iphc_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_IPHC;
    openqueue_freePacketBuffer(msg);
 }
@@ -149,3 +142,7 @@ void udpinject_trigger()     { return; }
 void udpprint_init()         { return; }
 
 void udprand_init()          { return; }
+
+void r6tus_init()            { return; }
+void rinfo_init()            { return; }
+void rwellknown_init()       { return; }
