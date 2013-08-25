@@ -337,6 +337,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\</state>
@@ -748,7 +749,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F2618.xcl</state>
+          <state>$TOOLKIT_DIR$\CONFIG\lnk430F2617.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -2015,37 +2016,16 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\z1\eui64.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\drivers\z1\gyro.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\drivers\z1\gyro.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\z1\i2c.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\drivers\z1\large_range_accel.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\drivers\z1\large_range_accel.h</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\z1\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\drivers\z1\magnetometer.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\drivers\z1\magnetometer.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\z1\radiotimer.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\drivers\z1\sensitive_accel_temperature.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\drivers\z1\sensitive_accel_temperature.h</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\z1\sctimer.c</name>
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\z1\spi.c</name>
@@ -2103,6 +2083,12 @@
     <group>
       <name>common</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
       </file>
       <file>
@@ -2118,10 +2104,10 @@
     <group>
       <name>z1</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\z1\ADC_Channel.c</name>
+        <name>$PROJ_DIR$\..\..\..\drivers\z1\tmp102.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\drivers\z1\ADC_Channel.h</name>
+        <name>$PROJ_DIR$\..\..\..\drivers\z1\tmp102.h</name>
       </file>
     </group>
   </group>
@@ -2149,6 +2135,12 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.h</name>
       </file>
     </group>
     <group>
