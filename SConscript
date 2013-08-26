@@ -30,7 +30,7 @@ dummyFunc = Builder(
 )
 
 if   env['toolchain']=='mspgcc':
-    if env['board'] not in ['telosb','gina','z1','wsn430v13b','wsn430v14']:
+    if env['board'] not in ['telosb','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     # compiler
@@ -67,7 +67,7 @@ if   env['toolchain']=='mspgcc':
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
 
 elif env['toolchain']=='iar':
-    if env['board'] not in ['telosb','gina','z1','wsn430v13b','wsn430v14']:
+    if env['board'] not in ['telosb','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
@@ -139,7 +139,7 @@ elif env['toolchain']=='iar':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
 elif env['toolchain']=='iar-proj':
-    if env['board'] not in ['telosb','gina','z1','wsn430v13b','wsn430v14']:
+    if env['board'] not in ['telosb','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
@@ -166,7 +166,7 @@ elif env['toolchain']=='iar-proj':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
 else:
-    if env['board'] in ['telosb','gina','z1','wsn430v13b','wsn430v14']:
+    if env['board'] in ['telosb','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     # enabling shared library to be reallocated 
@@ -220,7 +220,7 @@ class telosb_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(	    
-            'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(self.comPort,self.hexFile), shell=True
+            'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(self.comPort,self.hexFile)
 	    )
 
 		
