@@ -16,6 +16,7 @@
 #include "gpio.h"               // Access to driverlib gpio fns
 #include "sys_ctrl.h"           // Access to driverlib SysCtrl fns
 #include "interrupt.h"          // Access to driverlib interrupt fns
+#include "bsp_timer.h"
 
 
 //=========================== variables =======================================

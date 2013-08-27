@@ -6,8 +6,6 @@
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
-					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -17,7 +15,7 @@
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.cross.arm.gnu.buildArtefactType.application" description="" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528" name="Debug" parent="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug">
 					<folderInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528." name="/" resourcePath="">
-						<toolChain id="org.eclipse.cdt.cross.arm.gnu.windows.elf.toolchain.debug.2097685250" name="ARM Windows GCC (GNUARM, WinARM)" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.toolchain.debug">
+						<toolChain id="org.eclipse.cdt.cross.arm.gnu.windows.elf.toolchain.debug.2097685250" name="ARM Windows GCC (GNUARM, WinARM)" nonInternalBuilderId="org.eclipse.cdt.cross.arm.gnu.windows.elf.builder.debug" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.toolchain.debug">
 							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.debugging.level.3067363" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.max" valueType="enumerated"/>
 							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.target.processor.1476599113" name="Processor" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.target.processor" value="org.eclipse.cdt.cross.arm.gnu.base.option.mcpu.cortex-m3" valueType="enumerated"/>
 							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.debugging.format.1893464677" name="Debug format" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.debugging.format" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.format.default" valueType="enumerated"/>
@@ -26,12 +24,7 @@
 							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.target.endiannes.1333580163" name="Endiannes" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.target.endiannes" value="org.eclipse.cdt.cross.arm.gnu.base.option.target.endiannes.default" valueType="enumerated"/>
 							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.target.thumbinterwork.812836606" name="Thumb interwork (-mthumb-interwork)" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.target.thumbinterwork" value="false" valueType="boolean"/>
 							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.windows.elf.platform.debug.213835330" isAbstract="false" name="Linux Platform" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.platform.debug"/>
-							<builder buildPath="${workspace_loc:/01bsp_bsp_timer}/Debug" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.builder.debug.254100592" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="ARM Windows GNU Make builder" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.builder.debug">
-								<outputEntries>
-									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
-									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
-								</outputEntries>
-							</builder>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/01bsp_bsp_timer}/Debug" cleanBuildTarget="clean" id="org.eclipse.cdt.build.core.internal.builder.182313874" incrementalBuildTarget="all" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool command="arm-none-eabi-gcc" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.assembler.debug.516487918" name="ARM Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.assembler.debug">
 								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.162547698" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_HOME}/bsp/boards/cc2538&quot;"/>
@@ -59,7 +52,7 @@
 								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.1602019665" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
 							</tool>
 							<tool command="arm-none-eabi-gcc" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.linker.debug.630680942" name="ARM Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.linker.debug">
-								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.592372655" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="C:\Users\xvilajosana\Documents\workspaces\openwsn_git\openwsn-fw\firmware\openos\bsp\boards\cc2538\cc2538.lds" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.592372655" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="C:\Users\xvilajosana\Documents\Development\workspaces\workspace_openwsn\openwsn-fw\firmware\openos\bsp\boards\cc2538\cc2538.lds" valueType="string"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths.206232975" name="Library search path (-L)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.otherflags.463389339" name="Other flags" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.otherflags" value="" valueType="string"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.1141726442" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">

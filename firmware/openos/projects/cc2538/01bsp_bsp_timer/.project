@@ -27,38 +27,38 @@
 		<link>
 			<name>01bsp_bsp_timer</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/projects/common/01bsp_bsp_timer</location>
+			<locationURI>OPENWSN_HOME/projects/common/01bsp_bsp_timer</locationURI>
 		</link>
 		<link>
 			<name>cc2538</name>
 			<type>2</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/cc2538</location>
+			<locationURI>OPENWSN_HOME/bsp/boards/cc2538</locationURI>
 		</link>
 		<link>
 			<name>cc2538/board.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/board.h</location>
+			<locationURI>OPENWSN_HOME/bsp/boards/board.h</locationURI>
 		</link>
 		<link>
 			<name>cc2538/bsp_timer.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/bsp_timer.h</location>
+			<locationURI>OPENWSN_HOME/bsp/boards/bsp_timer.h</locationURI>
 		</link>
 		<link>
 			<name>cc2538/leds.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/leds.h</location>
+			<locationURI>OPENWSN_HOME/bsp/boards/leds.h</locationURI>
 		</link>
 		<link>
 			<name>linker/cc2538.lds</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/cc2538/cc2538.lds</location>
+			<locationURI>OPENWSN_HOME/bsp/boards/cc2538/cc2538.lds</locationURI>
 		</link>
 	</linkedResources>
 	<variableList>
 		<variable>
 			<name>OPENWSN_HOME</name>
-			<value>file:/C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos</value>
+			<value>file:/C:/Users/xvilajosana/Documents/Development/workspaces/workspace_openwsn/openwsn-fw/firmware/openos</value>
 		</variable>
 	</variableList>
 </projectDescription>
