@@ -57,7 +57,6 @@
 
 
 extern int main (void);
-extern kick_scheduler_t   bsp_timer_isr();
 
 void ResetISR(void);
 void NmiSR(void);

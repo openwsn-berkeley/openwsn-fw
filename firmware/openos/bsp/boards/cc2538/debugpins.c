@@ -1,7 +1,7 @@
 /**
-\brief TelosB-specific definition of the "debugpins" bsp module.
+\brief cc2538-specific definition of the "debugpins" bsp module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
+\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, August 2013.
 */
 
 
