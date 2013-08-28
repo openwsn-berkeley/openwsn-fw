@@ -23,7 +23,7 @@ can use this project with any platform.
 
 typedef struct {
    uint16_t num_compare;
-   uint16_t prev;
+   PORT_TIMER_WIDTH prev;
 } app_vars_t;
 
 app_vars_t app_vars;
