@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>01bsp_leds</name>
+	<name>01bsp_debugpins</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -25,9 +25,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>01bsp_leds</name>
+			<name>01bsp_debugpins</name>
 			<type>2</type>
-			<locationURI>OPENWSN_HOME/projects/common/01bsp_leds</locationURI>
+			<locationURI>OPENWSN_HOME/projects/common/01bsp_debugpins</locationURI>
 		</link>
 		<link>
 			<name>cc2538</name>
@@ -38,6 +38,11 @@
 			<name>cc2538/board.h</name>
 			<type>1</type>
 			<locationURI>OPENWSN_HOME/bsp/boards/board.h</locationURI>
+		</link>
+		<link>
+			<name>cc2538/debugpins.h</name>
+			<type>1</type>
+			<locationURI>OPENWSN_HOME/bsp/boards/debugpins.h</locationURI>
 		</link>
 		<link>
 			<name>cc2538/leds.h</name>

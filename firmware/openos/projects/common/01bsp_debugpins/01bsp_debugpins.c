@@ -28,4 +28,6 @@ int mote_main() {
       debugpins_isr_toggle();
       debugpins_radio_toggle();
    }
+
+   return 0;
 }

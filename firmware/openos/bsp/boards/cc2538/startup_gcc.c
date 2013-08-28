@@ -56,7 +56,6 @@
 
 
 extern int main (void);
-extern kick_scheduler_t   bsp_timer_isr();
 
 void ResetISR(void);
 void NmiSR(void);
@@ -146,7 +145,7 @@ void (* const gVectors[])(void) =
    IntDefaultHandler,                      // 45 FLASH Control
    IntDefaultHandler,                      // 46 AES
    IntDefaultHandler,                      // 47 PKA
-   bsp_timer_isr,                      // 48 Sleep Timer
+   IntDefaultHandler,                      // 48 Sleep Timer
    IntDefaultHandler,                      // 49 MacTimer
    IntDefaultHandler,                      // 50 SSI1 Rx and Tx
    IntDefaultHandler,                      // 51 Timer 3 subtimer A

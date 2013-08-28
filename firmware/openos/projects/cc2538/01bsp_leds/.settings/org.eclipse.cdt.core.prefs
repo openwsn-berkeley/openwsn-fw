@@ -1,7 +1,7 @@
 eclipse.preferences.version=1
 environment/project/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/OPENWSN_HOME/delimiter=;
 environment/project/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/OPENWSN_HOME/operation=replace
-environment/project/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/OPENWSN_HOME/value=C\:\\Users\\xvilajosana\\Documents\\workspaces\\openwsn_git\\openwsn-fw\\firmware\\openos
+environment/project/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/OPENWSN_HOME/value=C\:\\Users\\xvilajosana\\Documents\\Development\\workspaces\\workspace_openwsn\\openwsn-fw\\firmware\\openos
 environment/project/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/append=true
 environment/project/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/appendContributed=true
 environment/project/org.eclipse.cdt.cross.arm.gnu.windows.elf.release.1465004599/OPENWSN_HOME/delimiter=;
