@@ -38,7 +38,7 @@ void board_init() {
    clockInit(SYS_CTRL_32MHZ);
 
    leds_init();
-  // bsp_timer_init();
+   bsp_timer_init();
 
 }
 

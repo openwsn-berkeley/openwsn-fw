@@ -30,7 +30,7 @@ typedef struct {
 bsp_timer_vars_t bsp_timer_vars;
 
 //=========================== prototypes ======================================
-
+void bsp_timer_isr_private();
 //=========================== public ==========================================
 
 /**
@@ -45,7 +45,8 @@ void bsp_timer_init() {
    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
    // enable peripheral Sleeptimer??
-   SleepModeIntRegister(bsp_timer_isr);
+   SleepModeIntRegister(bsp_timer_isr_private);
+   //IntEnable(INT_SMTIM);
 }
 
 /**
@@ -136,7 +137,12 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 
 //=========================== private =========================================
 
+void bsp_timer_isr_private(){
+	 bsp_timer_isr();
+}
+
 //=========================== interrupt handlers ==============================
+
 
 kick_scheduler_t bsp_timer_isr() {
 

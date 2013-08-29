@@ -37,7 +37,8 @@
 //****************************************************************************/
 
 #include <stdint.h>
-#include "board.h"
+#include "hw_nvic.h"
+
 #define FLASH_START_ADDR                0x00200000
 #define BOOTLOADER_BACKDOOR_DISABLE     0xEFFFFFFF
 #define SYS_CTRL_EMUOVR                 0x400D20B4
@@ -56,6 +57,7 @@
 
 
 extern int main (void);
+extern void bsp_timer_isr_private(void);
 
 void ResetISR(void);
 void NmiSR(void);
@@ -145,7 +147,7 @@ void (* const gVectors[])(void) =
    IntDefaultHandler,                      // 45 FLASH Control
    IntDefaultHandler,                      // 46 AES
    IntDefaultHandler,                      // 47 PKA
-   IntDefaultHandler,                      // 48 Sleep Timer
+   bsp_timer_isr_private,                      // 48 Sleep Timer
    IntDefaultHandler,                      // 49 MacTimer
    IntDefaultHandler,                      // 50 SSI1 Rx and Tx
    IntDefaultHandler,                      // 51 Timer 3 subtimer A
@@ -259,7 +261,7 @@ void (* const gVectors[])(void) =
    IntDefaultHandler,                      // 158 RFCORE Error
    IntDefaultHandler,                      // 159 AES
    IntDefaultHandler,                      // 160 PKA
-   IntDefaultHandler,                      // 161 SMTimer
+   bsp_timer_isr_private,                      // 161 SMTimer
    IntDefaultHandler,                      // 162 MACTimer
 #endif
 };
@@ -316,6 +318,10 @@ ResetISR (void)
 	// Workaround for PM debug issue
     //
     HWREG(SYS_CTRL_EMUOVR) = 0xFF;
+
+
+    /* Workaround for J-Link debug issue */
+    HWREG(NVIC_VTABLE) = (uint32_t)gVectors;
 
     //
 	// Copy the data segment initializers from flash to SRAM.

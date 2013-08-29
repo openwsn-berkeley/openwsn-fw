@@ -45,6 +45,11 @@
 			<locationURI>OPENWSN_HOME/bsp/boards/bsp_timer.h</locationURI>
 		</link>
 		<link>
+			<name>cc2538/debugpins.h</name>
+			<type>1</type>
+			<locationURI>OPENWSN_HOME/bsp/boards/debugpins.h</locationURI>
+		</link>
+		<link>
 			<name>cc2538/leds.h</name>
 			<type>1</type>
 			<locationURI>OPENWSN_HOME/bsp/boards/leds.h</locationURI>
@@ -58,7 +63,7 @@
 	<variableList>
 		<variable>
 			<name>OPENWSN_HOME</name>
-			<value>file:/C:/Users/xvilajosana/Documents/Development/workspaces/workspace_openwsn/openwsn-fw/firmware/openos</value>
+			<value>file:/C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos</value>
 		</variable>
 	</variableList>
 </projectDescription>
