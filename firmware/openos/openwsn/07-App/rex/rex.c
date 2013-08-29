@@ -8,6 +8,8 @@
 #include "openrandom.h"
 #include "scheduler.h"
 //#include "ADC_Channel.h"
+#include "idmanager.h"
+#include "IEEE802154E.h"
 
 //=========================== defines =========================================
 
@@ -81,6 +83,16 @@ void rex_task_cb() {
    uint16_t       sum         = 0;
    uint16_t       avg         = 0;
    uint8_t        N_avg       = 10;
+   
+   // don't run if not synch
+   if (ieee154e_isSynch() == FALSE) return;
+   
+       // don't run on dagroot
+   if (idmanager_getIsDAGroot()) {
+       opentimers_stop(rex_vars.timerId);
+       return;
+   }
+   
    
    for (i = 0; i < N_avg; i++) {
       //ADC_getvoltage(p_x_int);

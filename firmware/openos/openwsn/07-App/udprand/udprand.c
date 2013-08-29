@@ -8,6 +8,8 @@
 #include "openrandom.h"
 #include "opencoap.h"
 #include "scheduler.h"
+#include "idmanager.h"
+#include "IEEE802154E.h"
 
 //=========================== defines =========================================
 
@@ -36,6 +38,16 @@ void udprand_init() {
 
 void udprand_task(){
     OpenQueueEntry_t* pkt;
+   
+   // don't run if not synch
+   if (ieee154e_isSynch() == FALSE) return;
+    
+    // don't run on dagroot
+   if (idmanager_getIsDAGroot()) {
+      opentimers_stop(udprand_vars.timerId);
+      return;
+   }
+   
    //prepare packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPRAND);
    if (pkt==NULL) {

@@ -7,7 +7,8 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "scheduler.h"
-
+#include "IEEE802154E.h"
+#include "idmanager.h"
 
 // include layer files to debug
 #include "neighbors.h"
@@ -104,6 +105,16 @@ void layerdebug_task_schedule_cb() {
    uint8_t           numOptions;
    uint8_t           size;
 
+   // don't run if not synch
+   if (ieee154e_isSynch() == FALSE) return;
+   
+    // don't run on dagroot
+   if (idmanager_getIsDAGroot()) {
+       opentimers_stop( layerdebug_vars.schtimerId);
+       opentimers_stop( layerdebug_vars.nbstimerId);
+       return;
+   }
+   
    // create a CoAP RD packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_LAYERDEBUG);
    if (pkt==NULL) {

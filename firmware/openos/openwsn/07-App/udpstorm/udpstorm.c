@@ -9,6 +9,7 @@
 #include "scheduler.h"
 //#include "ADC_Channel.h"
 #include "IEEE802154E.h"
+#include "idmanager.h"
 
 //=========================== defines =========================================
 
@@ -81,6 +82,16 @@ void udpstorm_task_cb() {
    OpenQueueEntry_t* pkt;
    owerror_t           outcome;
    uint8_t           numOptions;
+   
+   // don't run if not synch
+   if (ieee154e_isSynch() == FALSE) return;
+   
+   // don't run on dagroot
+   if (idmanager_getIsDAGroot()) {
+       opentimers_stop(udpstorm_vars.timerId);
+       return;
+   }
+   
    
    if(udpstorm_vars.seqNum>=NUMPACKETS) {
       // we've sent enough packets
