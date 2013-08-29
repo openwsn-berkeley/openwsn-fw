@@ -27,7 +27,7 @@
 		<link>
 			<name>01bsp_leds</name>
 			<type>2</type>
-			<locationURI>OPENWSN_HOME/projects/common/01bsp_leds</locationURI>
+			<locationURI>OPENWSN_HOME</locationURI>
 		</link>
 		<link>
 			<name>cc2538</name>
@@ -53,7 +53,7 @@
 	<variableList>
 		<variable>
 			<name>OPENWSN_HOME</name>
-			<value>file:/C:/Users/xvilajosana/Documents/Development/workspaces/workspace_openwsn/openwsn-fw/firmware/openos</value>
+			<value>file:/C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos</value>
 		</variable>
 	</variableList>
 </projectDescription>

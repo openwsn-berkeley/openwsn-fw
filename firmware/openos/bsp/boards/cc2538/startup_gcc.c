@@ -37,7 +37,6 @@
 //****************************************************************************/
 
 #include <stdint.h>
-#include "hw_nvic.h"
 
 #define FLASH_START_ADDR                0x00200000
 #define BOOTLOADER_BACKDOOR_DISABLE     0xEFFFFFFF
@@ -57,7 +56,6 @@
 
 
 extern int main (void);
-extern void bsp_timer_isr_private(void);
 
 void ResetISR(void);
 void NmiSR(void);
@@ -147,7 +145,7 @@ void (* const gVectors[])(void) =
    IntDefaultHandler,                      // 45 FLASH Control
    IntDefaultHandler,                      // 46 AES
    IntDefaultHandler,                      // 47 PKA
-   bsp_timer_isr_private,                      // 48 Sleep Timer
+   IntDefaultHandler,                      // 48 Sleep Timer
    IntDefaultHandler,                      // 49 MacTimer
    IntDefaultHandler,                      // 50 SSI1 Rx and Tx
    IntDefaultHandler,                      // 51 Timer 3 subtimer A
@@ -261,7 +259,7 @@ void (* const gVectors[])(void) =
    IntDefaultHandler,                      // 158 RFCORE Error
    IntDefaultHandler,                      // 159 AES
    IntDefaultHandler,                      // 160 PKA
-   bsp_timer_isr_private,                      // 161 SMTimer
+   IntDefaultHandler,                      // 161 SMTimer
    IntDefaultHandler,                      // 162 MACTimer
 #endif
 };
@@ -321,7 +319,7 @@ ResetISR (void)
 
 
     /* Workaround for J-Link debug issue */
-    HWREG(NVIC_VTABLE) = (uint32_t)gVectors;
+   // HWREG(NVIC_VTABLE) = (uint32_t)gVectors;
 
     //
 	// Copy the data segment initializers from flash to SRAM.
