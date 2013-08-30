@@ -63,7 +63,7 @@
 	<variableList>
 		<variable>
 			<name>OPENWSN_HOME</name>
-			<value>file:/C:/Users/xvilajosana/Documents/Development/workspaces/workspace_openwsn/openwsn-fw/firmware/openos</value>
+			<value>file:/C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos</value>
 		</variable>
 	</variableList>
 </projectDescription>
