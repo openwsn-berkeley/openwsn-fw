@@ -446,37 +446,31 @@ void sendDAO() {
    
    //===== fill in packet
    
-   //=== transit option -- from RFC 6550, page 55 - 1 transit information header per parent is required.
-   numTransitParents                        = 0;
-   for (nbrIdx=0;nbrIdx<MAXNUMNEIGHBORS;nbrIdx++) {
-      if ((neighbors_isNeighborWithLowerDAGrank(nbrIdx))==TRUE) {
-         // this neighbor is of lower DAGrank as I am
-         
-         // write it's address in DAO -- requires full 128b address..
-         neighbors_getNeighbor(&address,ADDR_64B,nbrIdx);
-         packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
-         prefix=idmanager_getMyID(ADDR_PREFIX);
-         packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
-         // update transit info fields
-         // from rfc6550 p.55 -- Variable, depending on whether or not the DODAG ParentAddress subfield is present.
-         // poipoi xv: it is not very clear if this includes all fields in the header. or as target info 2 bytes are removed.
-         // using the same pattern as in target information.
-         icmpv6rpl_vars.dao_transit.optionLength  = LENGTH_ADDR128b + sizeof(icmpv6rpl_dao_transit_ht)-2;
-         icmpv6rpl_vars.dao_transit.PathControl=0; //todo. this is to set the preference of this parent.      
-         icmpv6rpl_vars.dao_transit.type=OPTION_TRANSIT_INFORMATION_TYPE;
+   //NOTE: limit to preferrred parent only the number of DAO transit addresses to send
+   
+   //=== transit option -- from RFC 6550, page 55 - 1 transit information header per parent is required. 
+   //getting only preferred parent as transit
+   numTransitParents=0;
+   neighbors_getPreferredParentEui64(&address);
+   packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
+   prefix=idmanager_getMyID(ADDR_PREFIX);
+   packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
+   // update transit info fields
+   // from rfc6550 p.55 -- Variable, depending on whether or not the DODAG ParentAddress subfield is present.
+   // poipoi xv: it is not very clear if this includes all fields in the header. or as target info 2 bytes are removed.
+   // using the same pattern as in target information.
+   icmpv6rpl_vars.dao_transit.optionLength  = LENGTH_ADDR128b + sizeof(icmpv6rpl_dao_transit_ht)-2;
+   icmpv6rpl_vars.dao_transit.PathControl=0; //todo. this is to set the preference of this parent.      
+   icmpv6rpl_vars.dao_transit.type=OPTION_TRANSIT_INFORMATION_TYPE;
            
-         // write transit info in packet
-         packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_transit_ht));
-         memcpy(
-               ((icmpv6rpl_dao_transit_ht*)(msg->payload)),
-               &(icmpv6rpl_vars.dao_transit),
-               sizeof(icmpv6rpl_dao_transit_ht)
-         );
-         
-         // remember I found it
-         numTransitParents++;
-      }  
-   }
+   // write transit info in packet
+   packetfunctions_reserveHeaderSize(msg,sizeof(icmpv6rpl_dao_transit_ht));
+   memcpy(
+          ((icmpv6rpl_dao_transit_ht*)(msg->payload)),
+          &(icmpv6rpl_vars.dao_transit),
+          sizeof(icmpv6rpl_dao_transit_ht)
+   );
+   numTransitParents++;
    
    //target information is required. RFC 6550 page 55.
    /*
@@ -489,7 +483,7 @@ void sendDAO() {
          // this neighbor is of higher DAGrank as I am. so it is my child
          
          // write it's address in DAO RFC6550 page 80 check point 1.
-         neighbors_getNeighbor(&address,ADDR_64B,nbrIdx);
+         neighbors_getNeighbor(&address,ADDR_64B,nbrIdx); 
          packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
          prefix=idmanager_getMyID(ADDR_PREFIX);
          packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
@@ -513,6 +507,10 @@ void sendDAO() {
          // remember I found it
          numTargetParents++;
       }  
+      //limit to MAX_TARGET_PARENTS the number of DAO target addresses to send
+      //section 8.2.1 pag 67 RFC6550 -- using a subset
+      // poipoi TODO base selection on ETX rather than first X.
+      if (numTargetParents>=MAX_TARGET_PARENTS) break;
    }
    
    
