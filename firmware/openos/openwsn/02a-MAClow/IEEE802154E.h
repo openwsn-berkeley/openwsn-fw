@@ -82,6 +82,7 @@ enum ieee154e_atomicdurations_enum {
    TsLongGT                  =   43,                  //  1300us
    TsTxAckDelay              =  151,                  //  4606us
    TsShortGT                 =   16,                  //   500us
+//   TsShortGT                 =   30,                  //   900us, stm32 can work well well this value
    TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
