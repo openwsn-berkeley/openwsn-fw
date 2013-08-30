@@ -12,7 +12,6 @@
 #include "radiotimer.h"
 #include "debugpins.h"
 #include "leds.h"
-#include "rcc.h"
 
 //=========================== defines =========================================
 
