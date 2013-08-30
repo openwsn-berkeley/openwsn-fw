@@ -89,7 +89,7 @@ void radiotimer_start(uint16_t period) {
 
 //===== direct access
 
-uint16_t radiotimer_getValue() {
+PORT_TIMER_WIDTH radiotimer_getValue() {
 	 uint16_t value=0;
 	 //select period register in the selector so it can be read
 	 HWREG(RFCORE_SFR_MTMSEL)= (0x00 && RFCORE_SFR_MTMSEL_MTMSEL_M) << RFCORE_SFR_MTMSEL_MTMSEL_S;
@@ -107,8 +107,8 @@ void radiotimer_setPeriod(uint16_t period) {
 	   HWREG(RFCORE_SFR_MTM1)=(period>>8 && RFCORE_SFR_MTM1_MTM1_M)<<RFCORE_SFR_MTM1_MTM1_S;
 }
 
-uint16_t radiotimer_getPeriod() {
-    uint16_t period=0;
+PORT_TIMER_WIDTH radiotimer_getPeriod() {
+	PORT_TIMER_WIDTH period=0;
 	//select period register in the selector so it can be read
     HWREG(RFCORE_SFR_MTMSEL)= (0x02 && RFCORE_SFR_MTMSEL_MTMSEL_M) << RFCORE_SFR_MTMSEL_MTMSEL_S;
 	// compute period by adding m0 and m1 registers
@@ -142,7 +142,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline uint16_t radiotimer_getCapturedTime() {
+port_INLINE PORT_TIMER_WIDTH radiotimer_getCapturedTime() {
 	uint16_t value=0;
 	//select period register in the selector so it can be read
 	HWREG(RFCORE_SFR_MTMSEL)= (0x00 && RFCORE_SFR_MTMSEL_MTMSEL_M) << RFCORE_SFR_MTMSEL_MTMSEL_S;
