@@ -1894,9 +1894,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\rcc.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\rtc_timer.c</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\spi.c</name>
         </file>
         <file>

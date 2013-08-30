@@ -23,13 +23,13 @@ can use this project with any platform.
 #define TIMER_PERIOD    65535          ///< 2s @ 32kHz
 #define ID              0xab           ///< byte sent in the packets
 
-// voltage: 4.14V
-#define RADIO_SLEEP //measured: 49uA in stop mode
-#define RADIO_SLEEP_IN_RUN_MOdE //measured: 23.7mA in run mode 
+// voltage: 3.8V
+//#define RADIO_SLEEP //measured: 49uA in stop mode
 //#define RADIO_TRXOFF //measured: 1.31mA in stop mode
 //#define RADIO_PLL_ON //measured: 6.43mA in stop mode
-//#define RADIO_BUSY_TX //calculated: 41mA-23.7mA+49uA = 17.35mA
 //#define RADIO_RX_ON //measured: 13.84mA in stop mode
+//#define RADIO_SLEEP_IN_RUN_MODE //measured: 23.7mA in run mode 
+#define RADIO_BUSY_TX //calculated: 41mA-23.7mA+49uA = 17.35mA
 
 //=========================== variables =======================================
 
@@ -76,7 +76,7 @@ void     cb_endFrame(uint16_t timestamp);
 void     cb_timer();
 
 void EXTI_Configuration(void);
-
+void board_stopmode();
 //=========================== main ============================================
 
 /**
@@ -97,14 +97,14 @@ int mote_main(void) {
    
 #ifdef RADIO_SLEEP
    PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
-#ifdef RADIO_SLEEP_IN_RUN_MOdE
+#ifdef RADIO_SLEEP_IN_RUN_MODE
    while(1);
 #endif
-   board_sleep();
+   board_stopmode();
 #endif
    
 #ifdef RADIO_TRXOFF
-   board_sleep();
+   board_stopmode();
 #endif
  
    // add callback functions radio
@@ -133,7 +133,7 @@ int mote_main(void) {
    
 #ifdef RADIO_RX_ON
    leds_all_off();
-   board_sleep();
+   board_stopmode();
 #endif
    
    // start by a transmit
@@ -142,7 +142,7 @@ int mote_main(void) {
    while (1) {
       // sleep while waiting for at least one of the flags to be set
       while (app_vars.flags==0x00) {
-         board_sleep();
+         board_stopmode();
       }
       // handle and clear every flag
       while (app_vars.flags) {
@@ -217,7 +217,7 @@ int mote_main(void) {
                
 #ifdef RADIO_PLL_ON
                leds_all_off();
-               board_sleep();
+               board_stopmode();
 #endif
                
                radio_txNow();
@@ -227,7 +227,7 @@ int mote_main(void) {
                     PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
                     PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
                }
-               board_sleep();
+               board_stopmode();
 #endif
                
                app_vars.state = APP_STATE_TX;
@@ -299,4 +299,15 @@ void EXTI_Configuration(void)
   EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
   EXTI_InitStructure.EXTI_LineCmd = ENABLE;
   EXTI_Init(&EXTI_InitStructure); 
+}
+
+void board_stopmode() {
+    DBGMCU_Config(DBGMCU_STOP, ENABLE);
+    
+    // Enable PWR and BKP clock
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
+    // Desable the SRAM and FLITF clock in Stop mode
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM | RCC_AHBPeriph_FLITF, DISABLE);
+
+    PWR_EnterSTOPMode(PWR_Regulator_ON,PWR_STOPEntry_WFI);
 }

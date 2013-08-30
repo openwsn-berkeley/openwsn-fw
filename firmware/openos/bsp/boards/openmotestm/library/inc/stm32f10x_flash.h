@@ -133,7 +133,7 @@ typedef enum
 #define IS_FLASH_WRPROT_PAGE(PAGE) (((PAGE) != 0x00000000))
 
 #define IS_FLASH_ADDRESS(ADDRESS) (((ADDRESS) >= 0x08000000) && ((ADDRESS) < 0x0807FFFF))
-#define IS_OB_DATA_ADDRESS(ADDRESS) (((ADDRESS) == 0x1FFFF804) || ((ADDRESS) == 0x1FFFF806))
+#define IS_OB_DATA_ADDRESS(ADDRESS) (((ADDRESS) == 0x1FFFF800) || ((ADDRESS) == 0x1FFFF802) || ((ADDRESS) == 0x1FFFF804) || ((ADDRESS) == 0x1FFFF806) || ((ADDRESS) == 0x1FFFF808) || ((ADDRESS) == 0x1FFFF80A) || ((ADDRESS) == 0x1FFFF80C))
 
 /* Option Bytes IWatchdog ----------------------------------------------------*/
 #define OB_IWDG_SW                     ((u16)0x0001)  /* Software IWDG selected */

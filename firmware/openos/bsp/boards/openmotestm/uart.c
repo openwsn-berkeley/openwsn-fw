@@ -43,7 +43,7 @@ void uart_init()
   
     USART_InitTypeDef USART_InitStructure;
 
-    // Enable UART4 and GPIOA clock
+    // Enable UART4 and GPIOC clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
     
@@ -59,14 +59,14 @@ void uart_init()
     //enable usart
     USART_Cmd(UART4, ENABLE);
   
-    // Configure PA.09 as alternate function push-pull
+    // Configure PC.10 as alternate function push-pull
     GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_10;
     GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_AF_PP;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
     
-    //Configure PA.10 as input floating 
+    //Configure PC.11 as input floating 
     GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_11;
     GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
     GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_IN_FLOATING;

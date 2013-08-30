@@ -12,46 +12,60 @@
 
 //=========================== defines =========================================
 
-#define ID_ADDRESS  0x1FFFF7E8
-#define ID_LENGTH   8
-
-//=========================== variables =======================================
-    uint8_t addressToWrite[ID_LENGTH];
-
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
 void flash_init()
-{
-    RCC_HSICmd(ENABLE);
-    
+{   
     FLASH_Unlock(); 
     FLASH_ClearFlag(FLASH_FLAG_BSY | FLASH_FLAG_EOP|FLASH_FLAG_PGERR |FLASH_FLAG_WRPRTERR);
 }
 
-void flash_write_ID()
+uint8_t flash_erasePage(uint32_t address)
 {
-    for(uint8_t i = 0; i<ID_LENGTH;i++)
-    {
-      FLASH_ProgramHalfWord(ID_ADDRESS + i*2, addressToWrite[i]);
-      leds_sync_toggle();
-    }
-    memset(addressToWrite , 0, ID_LENGTH);
+  uint8_t status;
+  status = FLASH_ErasePage(address);
+  return status;
 }
 
-void flash_read_ID()
+uint8_t  flash_erase_optByte()
 {
-    for(uint8_t i = 0; i<ID_LENGTH;i++)
-    {
-      addressToWrite[i] = *(uint8_t*)(ID_ADDRESS + i);
-      leds_error_toggle();
-    }
+  uint8_t status;
+  status = FLASH_EraseOptionBytes();
+  return status;
 }
 
-void flash_getID(uint8_t* address)
+uint8_t flash_write(uint32_t address,uint16_t data)
 {
-  memcpy(address,addressToWrite,ID_LENGTH);
+  uint8_t status;
+  status = FLASH_ProgramHalfWord(address,data);
+  return status;
 }
 
+uint8_t flash_write_optByte(uint32_t address,uint8_t data)
+{
+  uint8_t status;
+  status = FLASH_ProgramOptionByteData(address,data);
+  return status;
+}
+
+uint16_t flash_read(uint32_t address)
+{
+  uint16_t temp = 0x00;
+  temp = *(uint32_t*)address;
+  return temp;
+}
+
+uint16_t flash_read_optByte(uint32_t address)
+{
+  uint16_t temp = 0x00;
+  temp = *(uint32_t*)address;
+  return temp;
+}
+
+void flash_getID(uint32_t address)
+{
+  
+}
 //=========================== private =========================================

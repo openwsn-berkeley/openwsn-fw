@@ -102,7 +102,7 @@ void board_sleep() {
     PWR_EnterSTOPMode(PWR_Regulator_ON,PWR_STOPEntry_WFI);
     
     if(sleepTime > 0)
-    opentimers_sleepTimeCompesation(sleepTime*2);
+    opentimers_sleepTimeCompesation(sleepTime);
 }
 
 
