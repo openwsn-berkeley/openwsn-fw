@@ -58,12 +58,14 @@ int mote_main()
    radiotimer_setOverflowCb(cb_overflow);
    radiotimer_setCompareCb(cb_compare);
    
-   // start periodic overflow
-   radiotimer_start(RADIOTIMER_OVERFLOW_PERIOD);
    
    // kick off first compare
    app_vars.num_compares_left  = RADIOTIMER_NUM_COMPARES-1;
    app_vars.last_compare_val   = RADIOTIMER_COMPARE_PERIOD;
+
+   // start periodic overflow
+   radiotimer_start(RADIOTIMER_OVERFLOW_PERIOD);
+
    radiotimer_schedule(app_vars.last_compare_val);
    
    while (1) {

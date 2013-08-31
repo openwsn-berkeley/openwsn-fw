@@ -75,8 +75,11 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1935404970" name="cc2538.lds" rcbsApplicability="disable" resourcePath="linker/cc2538.lds" toolsToInvoke=""/>
+					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.231634186" name="bsp_timer.c" rcbsApplicability="disable" resourcePath="cc2538/bsp_timer.c" toolsToInvoke="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.compiler.debug.1981469427.932172276">
+						<tool id="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.compiler.debug.1981469427.932172276" name="ARM Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.compiler.debug.1981469427"/>
+					</fileInfo>
 					<sourceEntries>
-						<entry excluding="cc2538/source/__startup.h|cc2538/source/__startup.c|cc2538/eui64.c|cc2538/uart.c|bsp|cc2538/bsp_timer.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="cc2538/source/__startup.h|cc2538/source/__startup.c|cc2538/eui64.c|cc2538/uart.c|bsp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

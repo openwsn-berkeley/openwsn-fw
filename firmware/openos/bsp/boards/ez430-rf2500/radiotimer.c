@@ -46,7 +46,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
    while(1);
 }
 
-void radiotimer_start(uint16_t period) {
+void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    // source ACLK from 10kHz DCO
    BCSCTL3 |= LFXT1S_2;
    
@@ -72,21 +72,21 @@ void radiotimer_start(uint16_t period) {
 
 //===== direct access
 
-uint16_t radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
    return TAR;
 }
 
-void radiotimer_setPeriod(uint16_t period) {
+void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
    TACCR0   =  period;
 }
 
-uint16_t radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
    return TACCR0;
 }
 
 //===== compare
 
-void radiotimer_schedule(uint16_t offset) {
+void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
    // offset when to fire
    TACCR1   =  offset;
    
@@ -104,7 +104,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline uint16_t radiotimer_getCapturedTime() {
+inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
    return TAR;
 }
 
@@ -113,7 +113,7 @@ inline uint16_t radiotimer_getCapturedTime() {
 //=========================== interrupt handlers ==============================
 
 uint8_t radiotimer_isr() {
-   uint16_t taiv_temp = TAIV;                    // read only once because accessing TAIV resets it
+   PORT_RADIOTIMER_WIDTH taiv_temp = TAIV;                    // read only once because accessing TAIV resets it
    switch (taiv_temp) {
       case 0x0002: // capture/compare CCR1
          if (radiotimer_vars.compare_cb!=NULL) {

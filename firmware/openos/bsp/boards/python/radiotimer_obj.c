@@ -62,7 +62,7 @@ void radiotimer_init(OpenMote* self) {
 #endif
 }
 
-void radiotimer_start(OpenMote* self, uint16_t period) {
+void radiotimer_start(OpenMote* self, PORT_RADIOTIMER_WIDTH period) {
    PyObject*   result;
    
 #ifdef TRACE_ON
@@ -84,9 +84,9 @@ void radiotimer_start(OpenMote* self, uint16_t period) {
 
 //===== direct access
 
-uint16_t radiotimer_getValue(OpenMote* self) {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue(OpenMote* self) {
    PyObject*  result;
-   uint16_t   returnVal;
+   PORT_RADIOTIMER_WIDTH   returnVal;
    
 #ifdef TRACE_ON
    printf("C@0x%x: radiotimer_getValue()... \n",self);
@@ -114,7 +114,7 @@ uint16_t radiotimer_getValue(OpenMote* self) {
    return returnVal;
 }
 
-void radiotimer_setPeriod(OpenMote* self, uint16_t period) {
+void radiotimer_setPeriod(OpenMote* self, PORT_RADIOTIMER_WIDTH period) {
    PyObject*   result;
    PyObject*   arglist;
    
@@ -137,9 +137,9 @@ void radiotimer_setPeriod(OpenMote* self, uint16_t period) {
 #endif
 }
 
-uint16_t radiotimer_getPeriod(OpenMote* self) {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(OpenMote* self) {
    PyObject*  result;
-   uint16_t   returnVal;
+   PORT_RADIOTIMER_WIDTH   returnVal;
    
 #ifdef TRACE_ON
    printf("C@0x%x: radiotimer_getPeriod()... \n",self);
@@ -169,7 +169,7 @@ uint16_t radiotimer_getPeriod(OpenMote* self) {
 
 //===== compare
 
-void radiotimer_schedule(OpenMote* self, uint16_t offset) {
+void radiotimer_schedule(OpenMote* self, PORT_RADIOTIMER_WIDTH offset) {
    PyObject*   result;
    PyObject*   arglist;
    
@@ -214,9 +214,9 @@ void radiotimer_cancel(OpenMote* self) {
 
 //===== capture
 
-uint16_t radiotimer_getCapturedTime(OpenMote* self) {
+PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(OpenMote* self) {
    PyObject*  result;
-   uint16_t   returnVal;
+   PORT_RADIOTIMER_WIDTH   returnVal;
    
 #ifdef TRACE_ON
    printf("C@0x%x: radiotimer_getCapturedTime()... \n",self);

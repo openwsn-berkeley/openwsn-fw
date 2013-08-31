@@ -13,6 +13,7 @@
 #include "sys_ctrl.h"
 #include "hw_ints.h"
 #include "hw_types.h"
+#include "sys_ctrl.h"
 //=========================== variables =======================================
 
 typedef struct {
@@ -49,7 +50,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
    while(1);
 }
 
-void radiotimer_start(uint16_t period) {
+void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    
    //selects the event that triggers MacTimer isr. selecting compare 1 and overflow
    HWREG(RFCORE_SFR_MTCSPCFG)|=(0x01 && RFCORE_SFR_MTCSPCFG_MACTIMER_EVENT1_CFG_M)<<RFCORE_SFR_MTCSPCFG_MACTIMER_EVENT1_CFG_S;
@@ -71,7 +72,7 @@ void radiotimer_start(uint16_t period) {
    //set the counter to 0 now -- high 8bits
    HWREG(RFCORE_SFR_MTM1)=(0x00 && RFCORE_SFR_MTM1_MTM1_M)<<RFCORE_SFR_MTM1_MTM1_S;
 
-   //enable interrupts
+   //enable period interrupt
    HWREG(RFCORE_SFR_MTIRQM)|=RFCORE_SFR_MTIRQM_MACTIMER_PERM;
 
 
@@ -89,7 +90,7 @@ void radiotimer_start(uint16_t period) {
 
 //===== direct access
 
-PORT_TIMER_WIDTH radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
 	 uint16_t value=0;
 	 //select period register in the selector so it can be read
 	 HWREG(RFCORE_SFR_MTMSEL)= (0x00 && RFCORE_SFR_MTMSEL_MTMSEL_M) << RFCORE_SFR_MTMSEL_MTMSEL_S;
@@ -98,7 +99,7 @@ PORT_TIMER_WIDTH radiotimer_getValue() {
 	 return value;
 }
 
-void radiotimer_setPeriod(uint16_t period) {
+void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
 	   //select period register in the selector so it can be modified
 	   HWREG(RFCORE_SFR_MTMSEL)= (0x02 && RFCORE_SFR_MTMSEL_MTMSEL_M) << RFCORE_SFR_MTMSEL_MTMSEL_S;
 	   //set the period now -- low 8bits
@@ -107,7 +108,7 @@ void radiotimer_setPeriod(uint16_t period) {
 	   HWREG(RFCORE_SFR_MTM1)=(period>>8 && RFCORE_SFR_MTM1_MTM1_M)<<RFCORE_SFR_MTM1_MTM1_S;
 }
 
-PORT_TIMER_WIDTH radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 	PORT_TIMER_WIDTH period=0;
 	//select period register in the selector so it can be read
     HWREG(RFCORE_SFR_MTMSEL)= (0x02 && RFCORE_SFR_MTMSEL_MTMSEL_M) << RFCORE_SFR_MTMSEL_MTMSEL_S;
@@ -118,7 +119,7 @@ PORT_TIMER_WIDTH radiotimer_getPeriod() {
 
 //===== compare
 
-void radiotimer_schedule(uint16_t offset) {
+void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
 	//select cmp1 register in the selector so it can be modified
 	HWREG(RFCORE_SFR_MTMSEL)= (0x03 && RFCORE_SFR_MTMSEL_MTMSEL_M) << RFCORE_SFR_MTMSEL_MTMSEL_S;
 	//set the cmp1 now
@@ -142,7 +143,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-port_INLINE PORT_TIMER_WIDTH radiotimer_getCapturedTime() {
+port_INLINE PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 	uint16_t value=0;
 	//select period register in the selector so it can be read
 	HWREG(RFCORE_SFR_MTMSEL)= (0x00 && RFCORE_SFR_MTMSEL_MTMSEL_M) << RFCORE_SFR_MTMSEL_MTMSEL_S;
@@ -165,7 +166,7 @@ generated. The interrupt flag bit is set, however, regardless of the state of th
  *
  */
 kick_scheduler_t radiotimer_isr() {
-   uint8_t source = RFCORE_SFR_MTIRQF && 0xFF;  // read interrupt source
+   uint8_t source = HWREG(RFCORE_SFR_MTIRQF) && 0xFF;  // read interrupt source
 
    //clear flags
    HWREG(RFCORE_SFR_MTIRQF) &= ~0xFF;

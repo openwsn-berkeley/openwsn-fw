@@ -23,6 +23,8 @@ to return the board's description.
 //===== timer
 
 #define PORT_TIMER_WIDTH                    uint32_t
+#define PORT_RADIOTIMER_WIDTH               uint32_t
+
 #define PORT_TICS_PER_MS                    33
 /*
 #define SCHEDULER_WAKEUP()                  radiotimer_isr()

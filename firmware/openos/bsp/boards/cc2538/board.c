@@ -39,6 +39,7 @@ void board_init() {
 
    leds_init();
    bsp_timer_init();
+   radiotimer_init();
 
 }
 

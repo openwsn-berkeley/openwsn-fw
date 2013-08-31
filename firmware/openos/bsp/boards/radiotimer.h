@@ -27,16 +27,16 @@ void     radiotimer_setOverflowCb(radiotimer_compare_cbt cb);
 void     radiotimer_setCompareCb(radiotimer_compare_cbt cb);
 void     radiotimer_setStartFrameCb(radiotimer_capture_cbt cb);
 void     radiotimer_setEndFrameCb(radiotimer_capture_cbt cb);
-void     radiotimer_start(PORT_TIMER_WIDTH period);
+void     radiotimer_start(PORT_RADIOTIMER_WIDTH period);
 // direct access
-PORT_TIMER_WIDTH radiotimer_getValue();
-void     radiotimer_setPeriod(PORT_TIMER_WIDTH period);
-PORT_TIMER_WIDTH radiotimer_getPeriod();
+PORT_RADIOTIMER_WIDTH radiotimer_getValue();
+void     radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period);
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod();
 // compare
-void     radiotimer_schedule(PORT_TIMER_WIDTH offset);
+void     radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset);
 void     radiotimer_cancel();
 // capture
-PORT_TIMER_WIDTH radiotimer_getCapturedTime();
+PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime();
 
 // interrupt handlers
 kick_scheduler_t   radiotimer_isr();
