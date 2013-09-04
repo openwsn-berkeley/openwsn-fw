@@ -101,15 +101,15 @@
         </option>
         <option>
           <name>GStackHeapOverride</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>GStackSize2</name>
-          <state>200</state>
+          <state>80</state>
         </option>
         <option>
           <name>GHeapSize2</name>
-          <state>200</state>
+          <state>80</state>
         </option>
         <option>
           <name>RadioDataModelType</name>
@@ -346,7 +346,6 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rsched\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\</state>
@@ -686,7 +685,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>03oos_openwsn.d43</state>
+          <state>02drv_openserial.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -880,7 +879,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>03oos_openwsn.a43</state>
+          <state>02drv_openserial.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -1995,10 +1994,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.h</name>
+      <name>$PROJ_DIR$\..\..\common\02drv_openserial\02drv_openserial.c</name>
     </file>
   </group>
   <group>
@@ -2252,15 +2248,6 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone_webpages.h</name>
-        </file>
-      </group>
-      <group>
-        <name>r6tus</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\r6tus.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\r6tus.h</name>
         </file>
       </group>
       <group>

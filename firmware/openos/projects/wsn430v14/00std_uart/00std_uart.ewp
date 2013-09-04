@@ -101,15 +101,15 @@
         </option>
         <option>
           <name>GStackHeapOverride</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>GStackSize2</name>
-          <state>200</state>
+          <state>80</state>
         </option>
         <option>
           <name>GHeapSize2</name>
-          <state>200</state>
+          <state>80</state>
         </option>
         <option>
           <name>RadioDataModelType</name>
@@ -180,7 +180,7 @@
         </option>
         <option>
           <name>CCListCFile</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCListCMnemonics</name>
@@ -317,49 +317,7 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc1101\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\wsn430v14\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
-          <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rsched\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udplatency\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\cross-layers\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\common</state>
+          <state></state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -686,7 +644,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>03oos_openwsn.d43</state>
+          <state>00std_uart.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -880,7 +838,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>03oos_openwsn.a43</state>
+          <state>00std_uart.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -989,11 +947,7 @@
         <debug>1</debug>
         <option>
           <name>CUTest</name>
-          <state>-I$TOOLKIT_DIR$\inc</state>
-          <state>-@$TOOLKIT_DIR$\bin\iar.cmd</state>
-          <state>-@$PROJ_DIR$\source.txt</state>
-          <state>-@$PROJ_DIR$\include.txt</state>
-          <state>--preinclude=$PROJ_DIR$\IAR_ULPAdvisor_Defs.h</state>
+          <state>###Uninitialized###</state>
         </option>
         <option>
           <name>ULPRules</name>
@@ -1006,7 +960,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>$PROJ_FNAME$.ulp</state>
+          <state></state>
         </option>
         <option>
           <name>ULPStatus</name>
@@ -1992,465 +1946,9 @@
       <data/>
     </settings>
   </configuration>
-  <group>
-    <name>application</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.h</name>
-    </file>
-  </group>
-  <group>
-    <name>bsp</name>
-    <group>
-      <name>boards</name>
-      <group>
-        <name>wsn430v14</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\board.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\board_info.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\bsp_timer.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\debugpins.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\eui64.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\leds.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\radiotimer.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\spi.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\uart.c</name>
-        </file>
-      </group>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
-      </file>
-    </group>
-    <group>
-      <name>chips</name>
-      <group>
-        <name>cc1101</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1101\cc1101.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1101\radio.c</name>
-        </file>
-      </group>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
-      </file>
-    </group>
-  </group>
-  <group>
-    <name>drivers</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
-    </file>
-  </group>
-  <group>
-    <name>kernel</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.h</name>
-    </file>
-  </group>
-  <group>
-    <name>openwsn</name>
-    <group>
-      <name>02a-MAClow</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.h</name>
-      </file>
-    </group>
-    <group>
-      <name>02b-MAChigh</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.h</name>
-      </file>
-    </group>
-    <group>
-      <name>03a-IPHC</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\iphc.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\iphc.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\openbridge.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\openbridge.h</name>
-      </file>
-    </group>
-    <group>
-      <name>03b-IPv6</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\forwarding.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\forwarding.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6echo.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6echo.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\icmpv6rpl.h</name>
-      </file>
-    </group>
-    <group>
-      <name>04-TRAN</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opencoap.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opencoap.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opentcp.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\opentcp.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\openudp.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\openudp.h</name>
-      </file>
-    </group>
-    <group>
-      <name>07-App</name>
-      <group>
-        <name>imu</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\imu.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\imu.h</name>
-        </file>
-      </group>
-      <group>
-        <name>layerdebug</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\layerdebug.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\layerdebug.h</name>
-        </file>
-      </group>
-      <group>
-        <name>ohlone</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone_webpages.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\ohlone_webpages.h</name>
-        </file>
-      </group>
-      <group>
-        <name>r6tus</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\r6tus.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\r6tus.h</name>
-        </file>
-      </group>
-      <group>
-        <name>rex</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\rex.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\rex.h</name>
-        </file>
-      </group>
-      <group>
-        <name>rheli</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\rheli.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\rheli.h</name>
-        </file>
-      </group>
-      <group>
-        <name>rinfo</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\rinfo.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\rinfo.h</name>
-        </file>
-      </group>
-      <group>
-        <name>rleds</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\rleds.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\rleds.h</name>
-        </file>
-      </group>
-      <group>
-        <name>rreg</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\rreg.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\rreg.h</name>
-        </file>
-      </group>
-      <group>
-        <name>rrube</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\rrube.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\rrube.h</name>
-        </file>
-      </group>
-      <group>
-        <name>rt</name>
-        <excluded>
-          <configuration>Debug</configuration>
-        </excluded>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\rt.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\rt.h</name>
-        </file>
-      </group>
-      <group>
-        <name>rwellknown</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\rwellknown.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\rwellknown.h</name>
-        </file>
-      </group>
-      <group>
-        <name>tcpecho</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\tcpecho.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\tcpecho.h</name>
-        </file>
-      </group>
-      <group>
-        <name>tcpinject</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\tcpinject.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\tcpinject.h</name>
-        </file>
-      </group>
-      <group>
-        <name>tcpprint</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\tcpprint.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\tcpprint.h</name>
-        </file>
-      </group>
-      <group>
-        <name>udpecho</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpecho\udpecho.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpecho\udpecho.h</name>
-        </file>
-      </group>
-      <group>
-        <name>udpinject</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\udpinject.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\udpinject.h</name>
-        </file>
-      </group>
-      <group>
-        <name>udplatency</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udplatency\udplatency.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udplatency\udplatency.h</name>
-        </file>
-      </group>
-      <group>
-        <name>udpprint</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\udpprint.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\udpprint.h</name>
-        </file>
-      </group>
-      <group>
-        <name>udprand</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\udprand.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\udprand.h</name>
-        </file>
-      </group>
-    </group>
-    <group>
-      <name>cross-layers</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\idmanager.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\idmanager.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openqueue.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openqueue.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openrandom.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openrandom.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\packetfunctions.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\packetfunctions.h</name>
-      </file>
-    </group>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\openwsn\openwsn.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\openwsn\openwsn.h</name>
-    </file>
-  </group>
+  <file>
+    <name>$PROJ_DIR$\00std_uart.c</name>
+  </file>
 </project>
 
 
