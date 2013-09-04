@@ -7,13 +7,13 @@ localEnv = env.Clone()
 # scons doesn't let us look to parent directories for source, so the
 # bsp/chips/cc1101/radio.c is off limits from this file. To keep things
 # simple, each SConscript file in bsp/chips/* will return a list of objects
-# which can be appended to the source list. Don't forget to specify a variant_dir,
-# or else the build will occur directly in the chips directory.
+# which can be appended to the source list. Don't forget to specify a
+# variant_dir, or else the build will occur directly in the chips directory.
 
 cc1101 = localEnv.SConscript(
     os.path.join('#','firmware','openos','bsp','chips','cc1101','SConscript'),
-    variant_dir = 'cc1101',
-    exports = {'env': env},
+    variant_dir    = 'cc1101',
+    exports        = {'env': env},
 )
 
 target = 'libbsp'

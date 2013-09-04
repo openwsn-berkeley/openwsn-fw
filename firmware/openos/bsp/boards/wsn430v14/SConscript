@@ -7,8 +7,8 @@ localEnv = env.Clone()
 # scons doesn't let us look to parent directories for source, so the
 # bsp/chips/cc2420/radio.c is off limits from this file. To keep things
 # simple, each SConscript file in bsp/chips/* will return a list of objects
-# which can be appended to the source list. Don't forget to specify a variant_dir,
-# or else the build will occur directly in the chips directory.
+# which can be appended to the source list. Don't forget to specify a
+# variant_dir, or else the build will occur directly in the chips directory.
 
 cc2420 = localEnv.SConscript(
     os.path.join('#','firmware','openos','bsp','chips','cc2420','SConscript'),
