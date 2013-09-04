@@ -71,8 +71,7 @@ void board_reset() {
 
 // PORT2_VECTOR
 
-#pragma vector = USART1TX_VECTOR
-__interrupt void USART1TX_ISR (void) {
+ISR(USART1TX){
    debugpins_isr_set();
    if (uart_tx_isr()==KICK_SCHEDULER) {          // UART; TX
       __bic_SR_register_on_exit(CPUOFF);
@@ -80,8 +79,7 @@ __interrupt void USART1TX_ISR (void) {
    debugpins_isr_clr();
 }
 
-#pragma vector = USART1RX_VECTOR
-__interrupt void USART1RX_ISR (void) {
+ISR(USART1RX) {
    debugpins_isr_set();
    if (uart_rx_isr()==KICK_SCHEDULER) {          // UART: RX
       __bic_SR_register_on_exit(CPUOFF);
