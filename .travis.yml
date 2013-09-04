@@ -9,6 +9,8 @@ before_script:
 script:
   - mkdir -p ./build/doc/
   - scons docs
-  - scons board=telosb toolchain=mspgcc oos_openwsn
-  - scons board=gina   toolchain=mspgcc oos_openwsn
-  - scons board=python toolchain=gcc    oos_openwsn
+  - scons board=telosb       toolchain=mspgcc oos_openwsn
+  - scons board=wsn430v14    toolchain=mspgcc oos_openwsn
+  - scons board=wsn430v13b   toolchain=mspgcc oos_openwsn
+  - scons board=gina         toolchain=mspgcc oos_openwsn
+  - scons board=python       toolchain=gcc    oos_openwsn
