@@ -318,7 +318,7 @@
         <option>
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\wsn43013b\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v13b\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
         </option>
@@ -1958,16 +1958,16 @@
   <group>
     <name>bsp</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn43013b\board.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v13b\board.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn43013b\board_info.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v13b\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn43013b\bsp_timer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v13b\bsp_timer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
@@ -1976,16 +1976,16 @@
       <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn43013b\debugpins.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v13b\debugpins.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn43013b\debugpins.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v13b\debugpins.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn43013b\leds.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v13b\leds.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
@@ -1997,19 +1997,19 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn43013b\radiotimer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v13b\radiotimer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn43013b\spi.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v13b\spi.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn43013b\uart.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v13b\uart.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
