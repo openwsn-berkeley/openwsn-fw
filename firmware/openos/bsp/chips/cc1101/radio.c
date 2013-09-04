@@ -11,22 +11,16 @@
 #include "debugpins.h"
 #include "leds.h"
 
+//=========================== defines =========================================
 
-
-//====================== defines =========================
-
-
-
-//====================== variables =======================
-
+//=========================== variables =======================================
 
 typedef struct {
-  cc1101_status_t radioStatusByte;
-  radio_state_t   state;
+   cc1101_status_t radioStatusByte;
+   radio_state_t   state;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
-
 
 //====================== prototypes ======================
 
@@ -40,14 +34,9 @@ void radio_spiReadRxFifo (                cc1101_status_t* statusRead, uint8_t* 
 
 //==== admin
 
-
-void inline delay(register unsigned int usec)
-{
-    __asm__ __volatile__(
-  "1: \n"
-  " dec %[usec] \n"
-  " jne 1b \n"
-  : [usec] "+r"(usec));
+void inline delay(unsigned int usec) {
+   volatile delay;
+   for (delay=usec;delay>0;delay--);
 }
 
 void radio_init() {
