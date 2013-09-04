@@ -22,7 +22,7 @@ typedef struct {
 
 radio_vars_t radio_vars;
 
-//====================== prototypes ======================
+//=========================== prototypes ======================================
 
 void radio_spiStrobe     (uint8_t strobe, cc1101_status_t* statusRead);
 void radio_spiWriteReg   (uint8_t reg,    cc1101_status_t* statusRead, uint8_t  regValueToWrite);
@@ -30,14 +30,16 @@ void radio_spiReadReg    (uint8_t reg,    cc1101_status_t* statusRead, uint8_t* 
 void radio_spiWriteTxFifo(                cc1101_status_t* statusRead, uint8_t* bufToWrite, uint8_t  lenToWrite);
 void radio_spiReadRxFifo (                cc1101_status_t* statusRead, uint8_t* bufRead,    uint8_t* lenRead, uint8_t maxBuf);
 
-//====================== public ==========================
+void delay(uint16_t usec);
+
+//=========================== public ==========================================
+
+void delay(uint16_t usec) {
+   volatile uint16_t d;
+   for (d=usec;d>0;d--);
+}
 
 //==== admin
-
-void inline delay(unsigned int usec) {
-   volatile delay;
-   for (delay=usec;delay>0;delay--);
-}
 
 void radio_init() {
 

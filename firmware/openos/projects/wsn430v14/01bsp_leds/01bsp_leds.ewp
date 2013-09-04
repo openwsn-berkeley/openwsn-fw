@@ -320,7 +320,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc1101\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -1977,7 +1977,7 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1101\cc1101.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\debugpins.c</name>
@@ -1998,7 +1998,7 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1101\radio.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
