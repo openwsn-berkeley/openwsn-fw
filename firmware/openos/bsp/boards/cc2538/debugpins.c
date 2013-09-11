@@ -17,13 +17,13 @@
 #define BSP_PINC_BASE           GPIO_C_BASE
 
 
-#define BSP_PINB_1              GPIO_PIN_1      //!< PB1 -- frame
-#define BSP_PINB_2              GPIO_PIN_2      //!< PB2 -- isr
+#define BSP_PINB_1              GPIO_PIN_1      //!< PB1 -- frame -RF1.5
+#define BSP_PINB_2              GPIO_PIN_2      //!< PB2 -- isr   -RF1.11
 
-#define BSP_PINC_4              GPIO_PIN_4      //!< PC4 -- slot
-#define BSP_PINC_5              GPIO_PIN_5      //!< PC5 -- fsm
-#define BSP_PINC_6              GPIO_PIN_6      //!< PC6 -- task
-#define BSP_PINC_7              GPIO_PIN_7      //!< PC7 -- radio
+#define BSP_PINC_4              GPIO_PIN_4      //!< PC4 -- slot  -RF1.6
+#define BSP_PINC_5              GPIO_PIN_5      //!< PC5 -- fsm   -RF1.8
+#define BSP_PINC_6              GPIO_PIN_6      //!< PC6 -- task  -RF1.10
+#define BSP_PINC_7              GPIO_PIN_7      //!< PC7 -- radio -RF1-12
 
 
 //=========================== variables =======================================
