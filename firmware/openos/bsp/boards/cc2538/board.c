@@ -18,6 +18,8 @@
 #include "interrupt.h"          // Access to driverlib interrupt fns
 #include "bsp_timer.h"
 #include "radiotimer.h"
+#include "debugpins.h"
+#include "uart.h"
 
 
 //=========================== variables =======================================
@@ -26,6 +28,7 @@
 void clockInit(uint32_t ui32SysClockSpeed);
 void SysCtrlDeepSleepSetting(void);
 void SysCtrlSleepSetting(void);
+void SysCtrlRunSetting(void);
 void SysCtrlWakeupSetting(void);
 //=========================== main ============================================
 
@@ -44,6 +47,7 @@ void board_init() {
    debugpins_init();
    bsp_timer_init();
    radiotimer_init();
+   uart_init();
 
 }
 

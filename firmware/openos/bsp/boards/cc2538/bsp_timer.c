@@ -132,7 +132,9 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 //=========================== private =========================================
 
 void bsp_timer_isr_private() {
+	debugpins_isr_set();
 	bsp_timer_isr();
+	debugpins_isr_clr();
 }
 
 //=========================== interrupt handlers ==============================

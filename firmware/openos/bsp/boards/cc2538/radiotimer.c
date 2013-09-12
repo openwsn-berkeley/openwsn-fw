@@ -211,7 +211,9 @@ port_INLINE uint16_t get_real_counter(void){
 
 
 void radiotimer_isr_private(){
+	debugpins_isr_set();
 	radiotimer_isr();
+	debugpins_isr_clr();
 }
 
 /*
@@ -226,8 +228,6 @@ kick_scheduler_t radiotimer_isr() {
 
    uint8_t t2irqm;
    uint8_t t2irqf;
-
-   PORT_RADIOTIMER_WIDTH offset=radiotimer_getValue();
 
    t2irqm = HWREG(RFCORE_SFR_MTIRQM);
    t2irqf = HWREG(RFCORE_SFR_MTIRQF);
