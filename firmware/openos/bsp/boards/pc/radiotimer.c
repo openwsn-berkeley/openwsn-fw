@@ -45,7 +45,7 @@ void radiotimer_init() {
                                     0);
 }
 
-void radiotimer_start(uint16_t period) {
+void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    opensim_requ_radiotimer_start_t requparams;
    
    // prepare params
@@ -61,7 +61,7 @@ void radiotimer_start(uint16_t period) {
 
 //===== direct access
 
-uint16_t radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
    opensim_repl_radiotimer_getValue_t replparams;
 
    // send request to server and get reply
@@ -74,7 +74,7 @@ uint16_t radiotimer_getValue() {
    return replparams.value;
 }
 
-void radiotimer_setPeriod(uint16_t period) {
+void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
    opensim_requ_radiotimer_setPeriod_t requparams;
    
    // prepare params
@@ -88,7 +88,7 @@ void radiotimer_setPeriod(uint16_t period) {
                                     0);
 }
 
-uint16_t radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
    opensim_repl_radiotimer_getPeriod_t replparams;
 
    // send request to server and get reply
@@ -103,7 +103,7 @@ uint16_t radiotimer_getPeriod() {
 
 //===== compare
 
-void radiotimer_schedule(uint16_t offset) {
+void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
    opensim_requ_radiotimer_schedule_t requparams;
    
    // prepare params
@@ -129,7 +129,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-uint16_t radiotimer_getCapturedTime() {
+PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
    opensim_repl_radiotimer_getCapturedTime_t replparams;
 
    // send request to server and get reply

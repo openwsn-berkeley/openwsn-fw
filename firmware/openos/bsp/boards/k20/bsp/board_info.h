@@ -24,6 +24,8 @@
 
 #define PORT_TICS_PER_MS                    281
 #define PORT_TIMER_WIDTH                    uint16_t
+#define PORT_RADIOTIMER_WIDTH               uint16_t
+
 #define PORT_SIGNED_INT_WIDTH               int16_t
 
 #define CAPTURE_TIME()   //the timer does not have a capture register so do nothing
