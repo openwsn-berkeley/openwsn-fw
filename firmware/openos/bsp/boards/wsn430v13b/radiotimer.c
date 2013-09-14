@@ -46,7 +46,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
    radiotimer_vars.endFrameCb     = cb;
 }
 
-void radiotimer_start(uint16_t period) {
+void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    // radio's SFD pin connected to P4.1
    P4DIR   &= ~0x02; // input
    P4SEL   |=  0x02; // in CCI1a/B mode
@@ -70,21 +70,21 @@ void radiotimer_start(uint16_t period) {
 
 //===== direct access
 
-uint16_t radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
    return TBR;
 }
 
-void radiotimer_setPeriod(uint16_t period) {
+void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
    TBCCR0   =  period;
 }
 
-uint16_t radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
    return TBCCR0;
 }
 
 //===== compare
 
-void radiotimer_schedule(uint16_t offset) {
+void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
    // offset when to fire
    TBCCR2   =  offset;
    
@@ -102,7 +102,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline uint16_t radiotimer_getCapturedTime() {
+inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
    // this should never happpen!
    
    // we can not print from within the BSP. Instead:
@@ -122,7 +122,7 @@ inline uint16_t radiotimer_getCapturedTime() {
 \brief TimerB CCR1-6 interrupt service routine
 */
 kick_scheduler_t radiotimer_isr() {
-   uint16_t tbiv_local;
+   PORT_RADIOTIMER_WIDTH tbiv_local;
    
    // reading TBIV returns the value of the highest pending interrupt flag
    // and automatically resets that flag. We therefore copy its value to the
