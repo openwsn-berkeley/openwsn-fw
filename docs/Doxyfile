@@ -743,10 +743,19 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../firmware/openos/drivers/common \
-                         ../firmware/openos/kernel/openos \
+INPUT                  = . \
                          ../firmware/openos/openwsn \
-                         ../firmware/openos/projects/common
+                         ../firmware/openos/kernel/openos \
+                         ../firmware/openos/drivers/common \
+                         ../firmware/openos/bsp/boards/board.h \
+                         ../firmware/openos/bsp/boards/bsp_timer.h \
+                         ../firmware/openos/bsp/boards/debugpins.h \
+                         ../firmware/openos/bsp/boards/eui64.h \
+                         ../firmware/openos/bsp/boards/leds.h \
+                         ../firmware/openos/bsp/boards/radio.h \
+                         ../firmware/openos/bsp/boards/radiotimer.h \
+                         ../firmware/openos/bsp/boards/sctimer.h \
+                         ../firmware/openos/bsp/boards/uart.h \
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses

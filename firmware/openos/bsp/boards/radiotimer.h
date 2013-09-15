@@ -1,11 +1,16 @@
+#ifndef __RADIOTIMER_H
+#define __RADIOTIMER_H
+
 /**
+\addtogroup BSP
+\{
+\addtogroup radiotimer
+\{
+
 \brief Cross-platform declaration "radiotimer" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
-
-#ifndef __RADIOTIMER_H
-#define __RADIOTIMER_H
 
 #include "stdint.h"
 #include "board.h"
@@ -40,5 +45,10 @@ PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime();
 
 // interrupt handlers
 kick_scheduler_t   radiotimer_isr();
+
+/**
+\}
+\}
+*/
 
 #endif

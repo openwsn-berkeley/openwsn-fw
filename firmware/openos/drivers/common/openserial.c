@@ -436,8 +436,6 @@ inline void outputHdlcOpen() {
 }
 /**
 \brief Add a byte to the outgoing HDLC frame being built.
-
-\todo escape 0x7e and 0x7d.
 */
 inline void outputHdlcWrite(uint8_t b) {
    
@@ -483,8 +481,6 @@ inline void inputHdlcOpen() {
 }
 /**
 \brief Add a byte to the incoming HDLC frame.
-
-\todo escape 0x7e and 0x7d.
 */
 inline void inputHdlcWrite(uint8_t b) {
    if (b==HDLC_ESCAPE) {

@@ -1,11 +1,16 @@
+#ifndef __DEBUGPINS_H
+#define __DEBUGPINS_H
+
 /**
+\addtogroup BSP
+\{
+\addtogroup debugpins
+\{
+
 \brief Cross-platform declaration "leds" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
-
-#ifndef __DEBUGPINS_H
-#define __DEBUGPINS_H
 
 //=========================== define ==========================================
 
@@ -40,5 +45,10 @@ void debugpins_isr_set();
 void debugpins_radio_toggle();
 void debugpins_radio_clr();
 void debugpins_radio_set();
+
+/**
+\}
+\}
+*/
 
 #endif

@@ -1,7 +1,15 @@
 /**
+\mainpage Berkeley's OpenWSN project
+
+\image html https://openwsn.atlassian.net/wiki/download/attachments/1081394/stack_organization.png
+*/
+
+/**
 \defgroup App Application
+\{
 
 \brief Application layer.
+\}
 */
 
 /**
@@ -39,19 +47,10 @@
 */
 
 /**
-\defgroup bsp BSP
+\defgroup BSP BSP
 \{
 
 \brief poipoi.
 
 \}
-*/
-
-/**
-\mainpage Berkeley's OpenWSN project
-
-Welcome!
-
-\image html https://openwsn.atlassian.net/wiki/download/attachments/1081394/stack_organization.png
-
 */

@@ -1,11 +1,16 @@
+#ifndef __BOARD_H
+#define __BOARD_H
+
 /**
+\addtogroup BSP
+\{
+\addtogroup board
+\{
+
 \brief Cross-platform declaration "board" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
-
-#ifndef __BOARD_H
-#define __BOARD_H
 
 #include "board_info.h"
 
@@ -35,5 +40,10 @@ typedef enum {
 void board_init();
 void board_sleep();
 void board_reset();
+
+/**
+\}
+\}
+*/
 
 #endif
