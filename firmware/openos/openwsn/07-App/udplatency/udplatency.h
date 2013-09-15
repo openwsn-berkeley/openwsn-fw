@@ -3,8 +3,8 @@
 
 /**
 \addtogroup App
-
-\addtogroup udpLatency
+\{
+\addtogroup UdpLatency
 \{
 */
 

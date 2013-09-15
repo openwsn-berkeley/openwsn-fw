@@ -1,5 +1,5 @@
 /**
-\defgroup IPv6 IPv6
+\defgroup IPv6 03b-IPv6
 
 \brief IPv6 and ICMPv6 stack.
 */

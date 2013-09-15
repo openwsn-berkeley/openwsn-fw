@@ -2,7 +2,7 @@
 #define __SCHEDULER_H
 
 /**
-\addtogroup drivers
+\addtogroup kernel
 \{
 \addtogroup Scheduler
 \{

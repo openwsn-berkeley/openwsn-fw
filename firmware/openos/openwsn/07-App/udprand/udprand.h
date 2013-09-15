@@ -3,8 +3,8 @@
 
 /**
 \addtogroup App
-
-\addtogroup udpRand
+\{
+\addtogroup UdpRand
 \{
 */
 

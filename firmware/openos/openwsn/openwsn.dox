@@ -1,5 +1,57 @@
 /**
+\defgroup App Application
+
+\brief Application layer.
+*/
+
+/**
+\defgroup openstack OpenStack
+\{
+
+\brief poipoi.
+
+\addtogroup Transport
+\addtogroup IPv6
+\addtogroup LoWPAN
+\addtogroup MAChigh
+\addtogroup MAClow
+\addtogroup cross-layers
+
+\}
+*/
+
+/**
+\defgroup drivers Drivers
+\{
+
+\brief poipoi.
+
+\}
+*/
+
+/**
+\defgroup kernel Kernel
+\{
+
+\brief poipoi.
+
+\}
+*/
+
+/**
+\defgroup bsp BSP
+\{
+
+\brief poipoi.
+
+\}
+*/
+
+/**
 \mainpage Berkeley's OpenWSN project
 
 Welcome!
+
+\image html https://openwsn.atlassian.net/wiki/download/attachments/1081394/stack_organization.png
+
 */
