@@ -16,10 +16,11 @@
 
 Note that we are writing the field from the end of the header to the beginning.
 
-\param msg             [in,out] The message to append the header to.
-\param frameType       [in]     Type of IEEE802.15.4 frame.
-\param securityEnabled [in]     Is security enabled on this frame?
-\param nextHop         [in]     Address of the next hop
+\param[in,out] msg              The message to append the header to.
+\param[in]     frameType        Type of IEEE802.15.4 frame.
+\param[in]     securityEnabled  Is security enabled on this frame?
+\param[in]     sequenceNumber   Sequence number of this frame.
+\param[in]     nextHop          Address of the next hop
 */
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
