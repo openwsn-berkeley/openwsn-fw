@@ -19,6 +19,7 @@
 owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
 void    forwarding_getNextHop_RoutingTable(open_addr_t* destination, open_addr_t* addressToWrite);
 owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
+
 //=========================== public ==========================================
 
 /**
@@ -388,7 +389,7 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_hea
 \brief Retrieve the next hop's address from routing table.
 
 \param[in]  destination128b  Final IPv6 destination address.
-\param[out]addressToWrite64b Location to write the EUI64 of next hop to.
+\param[out] addressToWrite64b Location to write the EUI64 of next hop to.
 */
 void forwarding_getNextHop_RoutingTable(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
    uint8_t i;
