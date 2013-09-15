@@ -2,7 +2,7 @@
 #define __REX_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup rT
 \{

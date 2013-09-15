@@ -2,7 +2,7 @@
 #define __UDPPRINT_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup udpPrint
 \{

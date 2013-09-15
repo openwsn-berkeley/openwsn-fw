@@ -2,7 +2,7 @@
 #define __TCPECHO_H
 
 /**
-\addtogroup App
+\addtogroup AppTcp
 \{
 \addtogroup tcpEcho
 \{

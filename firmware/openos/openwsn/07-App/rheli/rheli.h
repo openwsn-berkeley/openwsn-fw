@@ -2,7 +2,7 @@
 #define __RHELI_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rHeli
 \{

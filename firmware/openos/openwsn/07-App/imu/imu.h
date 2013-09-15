@@ -2,7 +2,7 @@
 #define __IMU_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup imu
 \{

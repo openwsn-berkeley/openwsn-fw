@@ -5,10 +5,39 @@
 */
 
 /**
+\defgroup AppCoAP CoAP Applications
+\{
+
+\brief Applications running on top of CoAP.
+\}
+*/
+
+/**
+\defgroup AppUdp UDP Applications
+\{
+
+\brief Applications running on top of UDP.
+\}
+*/
+
+/**
+\defgroup AppTcp TDP Applications
+\{
+
+\brief Applications running on top of TCP.
+\}
+*/
+
+/**
 \defgroup App Application
 \{
 
 \brief Application layer.
+
+\addtogroup AppCoAP
+\addtogroup AppUdp
+\addtogroup AppTcp
+
 \}
 */
 

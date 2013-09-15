@@ -2,7 +2,7 @@
 #define __RT_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rT
 \{

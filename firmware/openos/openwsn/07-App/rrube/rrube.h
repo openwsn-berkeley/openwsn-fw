@@ -2,7 +2,7 @@
 #define __RRUBE_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rRube
 \{
