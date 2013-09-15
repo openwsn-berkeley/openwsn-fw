@@ -94,8 +94,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
 
 Note We are writing the fields from the begnning of the header to the end.
 
-\param msg               [in,out] The message just received.
-\param ieee802514_header [out]    The internal header to write the data to.
+\param[in,out] msg            The message just received.
+\param[out] ieee802514_header The internal header to write the data to.
 */
 void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                                ieee802154_header_iht* ieee802514_header) {

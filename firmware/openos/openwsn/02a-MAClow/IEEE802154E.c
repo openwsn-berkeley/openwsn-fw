@@ -122,7 +122,7 @@ void ieee154e_init() {
 /**
 /brief Difference between some older ASN and the current ASN.
 
-\param someASN [in] some ASN to compare to the current
+\param[in] someASN some ASN to compare to the current
 
 \returns The ASN difference, or 0xffff if more than 65535 different
 */
@@ -1456,7 +1456,7 @@ port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
 /**
 \brief Decides whether the packet I just received is a valid ADV
 
-\param [in] ieee802514_header IEEE802.15.4 header of the packet I just
+\param[in] ieee802514_header IEEE802.15.4 header of the packet I just
             received.
 
 A valid ADV frame satisfies the following conditions:
@@ -1483,7 +1483,7 @@ A valid Rx frame satisfies the following constraints:
 - it's sent on the same PANid as mine
 - it's for me (unicast or broadcast)
 
-\param [in] ieee802514_header IEEE802.15.4 header of the packet I just received
+\param[in] ieee802514_header IEEE802.15.4 header of the packet I just received
 
 \returns TRUE if packet is valid received frame, FALSE otherwise
 */
@@ -1511,8 +1511,8 @@ A packet is a valid ACK if it satisfies the following conditions:
 - the packet is unicast to me
 - the packet comes from the neighbor I sent the data to
 
-\param [in] ieee802514_header IEEE802.15.4 header of the packet I just received
-\param [in] packetSent points to the packet I just sent
+\param[in] ieee802514_header IEEE802.15.4 header of the packet I just received
+\param[in] packetSent points to the packet I just sent
 
 \returns TRUE if packet is a valid ACK, FALSE otherwise.
 */
@@ -1731,7 +1731,7 @@ function return a constant channel number (between 11 and 26). This allows you
 to use a single-channel sniffer; but you can not schedule two links on two
 different channel offsets in the same slot.
 
-\param [in] channelOffset channel offset for the current slot
+\param[in] channelOffset channel offset for the current slot
 
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
@@ -1747,7 +1747,7 @@ port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
 Besides simply updating the state global variable,
 this function toggles the FSM debug pin.
 
-\param [in] newstate The state the IEEE802.15.4e FSM is now in.
+\param[in] newstate The state the IEEE802.15.4e FSM is now in.
 */
 void changeState(ieee154e_state_t newstate) {
    // update the state

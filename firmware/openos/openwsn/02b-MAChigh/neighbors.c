@@ -74,7 +74,7 @@ uint8_t neighbors_getNumNeighbors() {
 /**
 \brief Retrieve my preferred parent's EUI64 address.
 
-\param [out] addressToWrite Where to write the preferred parent's address to.
+\param[out] addressToWrite Where to write the preferred parent's address to.
 */
 bool neighbors_getPreferredParentEui64(open_addr_t* addressToWrite) {
    uint8_t   i;
@@ -179,7 +179,7 @@ open_addr_t* neighbors_getKANeighbor() {
 /**
 \brief Indicate whether some neighbor is a stable neighbor
 
-\param address [in] The address of the neighbor, a full 128-bit IPv6 addres.
+\param[in] address The address of the neighbor, a full 128-bit IPv6 addres.
 
 \returns TRUE if that neighbor is stable, FALSE otherwise.
 */
@@ -218,7 +218,7 @@ bool neighbors_isStableNeighbor(open_addr_t* address) {
 /**
 \brief Indicate whether some neighbor is a preferred neighbor.
 
-\param address [in] The EUI64 address of the neighbor.
+\param[in] address The EUI64 address of the neighbor.
 
 \returns TRUE if that neighbor is preferred, FALSE otherwise.
 */
@@ -247,7 +247,7 @@ bool neighbors_isPreferredParent(open_addr_t* address) {
 /**
 \brief Indicate whether some neighbor has a lower DAG rank that me.
 
-\param index [in] The index of that neighbor in the neighbor table.
+\param[in] index The index of that neighbor in the neighbor table.
 
 \returns TRUE if that neighbor has a lower DAG rank than me, FALSE otherwise.
 */
@@ -268,7 +268,7 @@ bool neighbors_isNeighborWithLowerDAGrank(uint8_t index) {
 /**
 \brief Indicate whether some neighbor has a lower DAG rank that me.
 
-\param index [in] The index of that neighbor in the neighbor table.
+\param[in] index The index of that neighbor in the neighbor table.
 
 \returns TRUE if that neighbor has a lower DAG rank than me, FALSE otherwise.
 */
@@ -300,10 +300,10 @@ The fields which are updated are:
 - stableNeighbor
 - switchStabilityCounter
 
-\param l2_src [in] MAC source address of the packet, i.e. the neighbor who sent
-                   the packet just received.
-\param rssi   [in] RSSI with which this packet was received.
-\param asnTs  [in] ASN at which this packet was received.
+\param[in] l2_src MAC source address of the packet, i.e. the neighbor who sent
+   the packet just received.
+\param[in] rssi   RSSI with which this packet was received.
+\param[in] asnTs  ASN at which this packet was received.
 */
 void neighbors_indicateRx(open_addr_t* l2_src,
                           int8_t       rssi,
@@ -369,12 +369,12 @@ The fields which are updated are:
 - numTxACK
 - asn
 
-\param l2_dest [in] MAC destination address of the packet, i.e. the neighbor
-                    who I just sent the packet to.
-\param numTxAttempts [in] Number of transmission attempts to this neighbor.
-\param was_finally_acked [in] TRUE iff the packet was ACK'ed by the neighbor
-               on final transmission attempt.
-\param asnTs   [in] ASN of the last transmission attempt.
+\param[in] l2_dest MAC destination address of the packet, i.e. the neighbor
+   who I just sent the packet to.
+\param[in] numTxAttempts Number of transmission attempts to this neighbor.
+\param[in] was_finally_acked TRUE iff the packet was ACK'ed by the neighbor
+   on final transmission attempt.
+\param[in] asnTs ASN of the last transmission attempt.
 */
 void neighbors_indicateTx(open_addr_t* l2_dest,
                           uint8_t      numTxAttempts,
@@ -417,8 +417,8 @@ routing information in the neighbor table can be updated.
 The fields which are updated are:
 - DAGrank
 
-\param msg  [in] The received message with msg->payload pointing to the DIO
-                 header.
+\param[in] msg The received message with msg->payload pointing to the DIO
+   header.
 */
 void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
    uint8_t          i;

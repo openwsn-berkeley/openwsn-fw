@@ -189,7 +189,7 @@ OpenQueue buffer. The very last thing it does is assigning this packet to the
 virtual component COMPONENT_RES_TO_IEEE802154E. Whenever it gets a change,
 IEEE802154E will handle the packet.
 
-\param [in] msg The packet to the transmitted
+\param[in] msg The packet to the transmitted
 
 \returns E_SUCCESS iff successful.
 */
