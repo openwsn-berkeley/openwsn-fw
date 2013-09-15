@@ -45,8 +45,6 @@
 \defgroup openstack OpenStack
 \{
 
-\brief poipoi.
-
 \addtogroup Transport
 \addtogroup IPv6
 \addtogroup LoWPAN
@@ -61,8 +59,6 @@
 \defgroup drivers Drivers
 \{
 
-\brief poipoi.
-
 \}
 */
 
@@ -70,16 +66,12 @@
 \defgroup kernel Kernel
 \{
 
-\brief poipoi.
-
 \}
 */
 
 /**
 \defgroup BSP BSP
 \{
-
-\brief poipoi.
 
 \}
 */
