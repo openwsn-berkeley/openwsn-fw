@@ -9,6 +9,13 @@
 
 #include "openwsn.h"
 
+/**
+\addtogroup drivers
+\{
+\addtogroup OpenTimers
+\{
+*/
+
 //=========================== define ==========================================
 
 /// Maximum number of timers that can run concurrently
@@ -66,5 +73,10 @@ void           opentimers_stop(opentimer_id_t id);
 void           opentimers_restart(opentimer_id_t id);
 
 void           opentimers_sleepTimeCompesation(uint16_t sleepTime);
+
+/**
+\}
+\}
+*/
 
 #endif
