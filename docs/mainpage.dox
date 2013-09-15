@@ -29,7 +29,7 @@
 */
 
 /**
-\defgroup App Application
+\defgroup App Applications
 \{
 
 \brief Application layer.
