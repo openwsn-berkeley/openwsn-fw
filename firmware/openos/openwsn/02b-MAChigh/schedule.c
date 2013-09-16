@@ -172,12 +172,15 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
 /**
 \brief get the information of a spcific slot.
 
-\param slotoffset
-\param neighbour address
+\param slotOffset
+\param neighbor
+\param info
 */
-void  schedule_getSlotInfo(slotOffset_t   slotOffset,                      
-                              open_addr_t*   neighbor,
-                              slotinfo_element_t* info){                            
+void  schedule_getSlotInfo(
+   slotOffset_t         slotOffset,
+   open_addr_t*         neighbor,
+   slotinfo_element_t*  info
+){
                            
    scheduleEntry_t* slotContainer;
   
@@ -200,24 +203,26 @@ void  schedule_getSlotInfo(slotOffset_t   slotOffset,
    info->channelOffset             = 0;//set to zero if not set.                          
 }
 
-
-
-
 /**
-\brief Add a new active slot into the schedule. If udpate param is set then update it in case it exists.
+\brief Add a new active slot into the schedule.
+
+If udpate param is set then update it in case it exists.
 
 \param slotOffset
 \param type
 \param shared
 \param channelOffset
 \param neighbor
+\param isUpdate
 */
-owerror_t schedule_addActiveSlot(slotOffset_t    slotOffset,
+owerror_t schedule_addActiveSlot(
+      slotOffset_t    slotOffset,
       cellType_t      type,
       bool            shared,
       channelOffset_t channelOffset,
       open_addr_t*    neighbor,
-      bool isUpdate) {
+      bool            isUpdate
+   ) {
    
    owerror_t outcome;
    

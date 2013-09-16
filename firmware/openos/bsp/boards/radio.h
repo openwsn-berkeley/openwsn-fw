@@ -1,11 +1,16 @@
+#ifndef __RADIO_H
+#define __RADIO_H
+
 /**
+\addtogroup BSP
+\{
+\addtogroup radio
+\{
+
 \brief Cross-platform declaration "radio" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
-
-#ifndef __RADIO_H
-#define __RADIO_H
 
 #include "radiotimer.h"
 
@@ -76,5 +81,10 @@ void     radio_getReceivedFrame(uint8_t* bufRead,
 
 // interrupt handlers
 kick_scheduler_t   radio_isr();
+
+/**
+\}
+\}
+*/
 
 #endif

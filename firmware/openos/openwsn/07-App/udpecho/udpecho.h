@@ -2,7 +2,7 @@
 #define __UDPECHO_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup udpEcho
 \{

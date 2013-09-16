@@ -49,6 +49,10 @@
 #define Prf_A_dio_options         0<<4
 #define Prf_B_dio_options         0<<3
 
+// max number of parents and children to send in DAO
+//section 8.2.1 pag 67 RFC6550 -- using a subset
+#define MAX_TARGET_PARENTS        0x01
+
 enum{
   OPTION_ROUTE_INFORMATION_TYPE   = 0x03,
   OPTION_DODAG_CONFIGURATION_TYPE = 0x04,

@@ -2,7 +2,7 @@
 #define __RINFO_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rXL1
 \{

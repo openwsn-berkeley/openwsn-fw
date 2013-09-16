@@ -2,7 +2,7 @@
 #define __TCPINJECT_H
 
 /**
-\addtogroup App
+\addtogroup AppTcp
 \{
 \addtogroup tcpInject
 \{

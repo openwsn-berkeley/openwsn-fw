@@ -4,7 +4,7 @@
 /**
 \addtogroup Transport
 \{
-\addtogroup UDP
+\addtogroup OpenUdp
 \{
 */
 

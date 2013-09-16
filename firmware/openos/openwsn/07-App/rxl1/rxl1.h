@@ -2,7 +2,7 @@
 #define __RXL1_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rXL1
 \{

@@ -2,7 +2,7 @@
 #define __IEEE802154_H
 
 /**
-\addtogroup helpers
+\addtogroup MAClow
 \{
 \addtogroup IEEE802154
 \{

@@ -2,7 +2,7 @@
 #define __RWELLKNOWN_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rWellKnown
 \{

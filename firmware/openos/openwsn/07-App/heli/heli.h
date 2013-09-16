@@ -2,7 +2,7 @@
 #define __HELI_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup Heli
 \{

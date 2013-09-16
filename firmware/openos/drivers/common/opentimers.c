@@ -58,7 +58,12 @@ The timer works as follows:
 - if not, insert it in the list
 
 \param duration Number milli-seconds after which the timer will fire.
-\param type     The type of timer, indicating whether it's a one-shot or a period timer.
+\param type     Type of timer:
+   - #TIMER_PERIODIC for a periodic timer.
+   - #TIMER_ONESHOT for a on-shot timer.
+\param timetype Units of the <tt>duration</tt>:
+   - #TIME_MS when <tt>duration</tt> is in ms.
+   - #TIME_TICS when <tt>duration</tt> is in clock ticks.
 \param callback The function to call when the timer fires.
 
 \returns The id of the timer (which serves as a handler to stop it) if the

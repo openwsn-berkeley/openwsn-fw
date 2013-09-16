@@ -10,7 +10,7 @@
 #define __RSCHED_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rsched
 \{

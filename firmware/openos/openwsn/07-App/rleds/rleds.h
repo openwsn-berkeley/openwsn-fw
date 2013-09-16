@@ -2,7 +2,7 @@
 #define __RLEDS_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup netLeds
 \{

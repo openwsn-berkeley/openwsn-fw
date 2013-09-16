@@ -1,11 +1,16 @@
+#ifndef __UART_H
+#define __UART_H
+
 /**
+\addtogroup BSP
+\{
+\addtogroup uart
+\{
+
 \brief Cross-platform declaration "uart" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
-
-#ifndef __UART_H
-#define __UART_H
 
 #include "stdint.h"
 #include "board.h"
@@ -40,5 +45,10 @@ bool    uart_getFlag();
 // interrupt handlers
 kick_scheduler_t uart_tx_isr();
 kick_scheduler_t uart_rx_isr();
+
+/**
+\}
+\}
+*/
 
 #endif

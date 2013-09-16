@@ -11,7 +11,7 @@
 #include "openwsn.h"
 
 /**
-\addtogroup cross-layers
+\addtogroup drivers
 \{
 \addtogroup HDLC
 \{

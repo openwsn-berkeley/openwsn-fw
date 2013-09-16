@@ -2,9 +2,9 @@
 #define __UDPRAND_H
 
 /**
-\addtogroup App
-
-\addtogroup udpRand
+\addtogroup AppUdp
+\{
+\addtogroup UdpRand
 \{
 */
 

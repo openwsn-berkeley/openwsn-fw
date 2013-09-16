@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/CPATH/delimiter=;
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/CPATH/operation=remove
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/C_INCLUDE_PATH/delimiter=;
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/C_INCLUDE_PATH/operation=remove
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/append=true
+environment/buildEnvironmentInclude/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/appendContributed=true
+environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/LIBRARY_PATH/delimiter=;
+environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/LIBRARY_PATH/operation=remove
+environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/append=true
+environment/buildEnvironmentLibrary/org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528/appendContributed=true

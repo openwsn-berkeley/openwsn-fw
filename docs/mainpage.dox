@@ -1,0 +1,77 @@
+/**
+\mainpage Berkeley's OpenWSN project
+
+\image html https://openwsn.atlassian.net/wiki/download/attachments/1081394/stack_organization.png
+*/
+
+/**
+\defgroup AppCoAP CoAP Applications
+\{
+
+\brief Applications running on top of CoAP.
+\}
+*/
+
+/**
+\defgroup AppUdp UDP Applications
+\{
+
+\brief Applications running on top of UDP.
+\}
+*/
+
+/**
+\defgroup AppTcp TDP Applications
+\{
+
+\brief Applications running on top of TCP.
+\}
+*/
+
+/**
+\defgroup App Applications
+\{
+
+\brief Application layer.
+
+\addtogroup AppCoAP
+\addtogroup AppUdp
+\addtogroup AppTcp
+
+\}
+*/
+
+/**
+\defgroup openstack OpenStack
+\{
+
+\addtogroup Transport
+\addtogroup IPv6
+\addtogroup LoWPAN
+\addtogroup MAChigh
+\addtogroup MAClow
+\addtogroup cross-layers
+
+\}
+*/
+
+/**
+\defgroup drivers Drivers
+\{
+
+\}
+*/
+
+/**
+\defgroup kernel Kernel
+\{
+
+\}
+*/
+
+/**
+\defgroup BSP BSP
+\{
+
+\}
+*/

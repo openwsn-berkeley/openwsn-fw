@@ -2,9 +2,9 @@
 #define __UDPLATENCY_H
 
 /**
-\addtogroup App
-
-\addtogroup udpLatency
+\addtogroup AppUdp
+\{
+\addtogroup UdpLatency
 \{
 */
 

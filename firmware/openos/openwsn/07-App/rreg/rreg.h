@@ -2,7 +2,7 @@
 #define __RREG_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rReg
 \{

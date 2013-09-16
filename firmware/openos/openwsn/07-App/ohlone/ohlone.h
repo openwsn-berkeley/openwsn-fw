@@ -2,7 +2,7 @@
 #define __OHLONE_H
 
 /**
-\addtogroup App
+\addtogroup AppTcp
 \{
 \addtogroup ohlone
 \{

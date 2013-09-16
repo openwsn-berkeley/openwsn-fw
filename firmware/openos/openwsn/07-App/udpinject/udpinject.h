@@ -2,7 +2,7 @@
 #define __UDPINJECT_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup udpInject
 \{

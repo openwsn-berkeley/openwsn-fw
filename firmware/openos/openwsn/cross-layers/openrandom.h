@@ -2,9 +2,9 @@
 #define __OPENRANDOM_H
 
 /**
-\addtogroup helpers
+\addtogroup cross-layers
 \{
-\addtogroup Random
+\addtogroup OpenRandom
 \{
 */
 

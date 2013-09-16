@@ -58,7 +58,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
    while(1);
 }
 
-void radiotimer_start(PORT_TIMER_WIDTH period) {
+void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    // source ACLK from 32kHz crystal
  //user bsp_timer.
 	 timer_init(TIMER_NUM3);
@@ -73,13 +73,13 @@ void radiotimer_start(PORT_TIMER_WIDTH period) {
 
 //===== direct access
 
-PORT_TIMER_WIDTH radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
    return timer_get_current_value(TIMER_NUM3);
 }
 //period is in ms???
 
-void radiotimer_setPeriod(PORT_TIMER_WIDTH period) {
-	radiotimer_vars.period=(PORT_TIMER_WIDTH)period;
+void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
+	radiotimer_vars.period=(PORT_RADIOTIMER_WIDTH)period;
 	timer_reset(TIMER_NUM3);
 	timer_enable(TIMER_NUM3);
 	radiotimer_vars.counter_slot_val=radiotimer_getValue(); //it is 0 always. remove that..
@@ -89,15 +89,15 @@ void radiotimer_setPeriod(PORT_TIMER_WIDTH period) {
 
 
 
-PORT_TIMER_WIDTH radiotimer_getPeriod() {
-   return (PORT_TIMER_WIDTH)radiotimer_vars.period;
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
+   return (PORT_RADIOTIMER_WIDTH)radiotimer_vars.period;
 }
 
 //===== compare
 
-void radiotimer_schedule(PORT_TIMER_WIDTH offset) {
+void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
 	uint32_t cur;
-	PORT_TIMER_WIDTH current=radiotimer_vars.counter_slot_val;//references to the init of the current time slot.
+	PORT_RADIOTIMER_WIDTH current=radiotimer_vars.counter_slot_val;//references to the init of the current time slot.
 	// offset when to fire
 	//get current
 	cur=current + offset;
@@ -113,9 +113,9 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline PORT_TIMER_WIDTH radiotimer_getCapturedTime() {
-	PORT_TIMER_WIDTH wi;
-	PORT_TIMER_WIDTH wa;
+inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
+	PORT_RADIOTIMER_WIDTH wi;
+	PORT_RADIOTIMER_WIDTH wa;
 	wa=timer_get_capture_value(TIMER_NUM3,TIMER_CAPTURE_REG0);
 	wi= wa-radiotimer_vars.counter_slot_val;//w.r.t init of the super slot -- as timer is reset now, counter val is 0 always.
 	return wi;

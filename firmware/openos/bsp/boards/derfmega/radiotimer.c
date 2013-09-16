@@ -48,7 +48,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
    while(1);
 }
 
-void radiotimer_start(PORT_TIMER_WIDTH period) {
+void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    
    PRR0 &= ~(1<<PRTIM2); // turn on timer 2 for crystal
    SCCR0 = (SCCR0 | 0b00110110) & 0b11111110; // enable symbol counter, 32KHz clock, absolute compare 1,
@@ -57,7 +57,7 @@ void radiotimer_start(PORT_TIMER_WIDTH period) {
    ASSR |= (1<<AS2); // enable 32KHz crystal
 
    //set compare registers
-   *((PORT_TIMER_WIDTH *)(&SCOCR2LL)) = 0;
+   *((PORT_RADIOTIMER_WIDTH *)(&SCOCR2LL)) = 0;
    SCOCR2LL = 0;
       
    // reset timer value
@@ -76,24 +76,24 @@ void radiotimer_start(PORT_TIMER_WIDTH period) {
 
 //===== direct access
 
-PORT_TIMER_WIDTH radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
    return radiotimer_getCapturedTime();
 }
 
-void radiotimer_setPeriod(PORT_TIMER_WIDTH period) {
+void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
 	SCOCR3HH = (uint8_t)(period>>24);
 	SCOCR3HL = (uint8_t)(period>>16);
 	SCOCR3LH = (uint8_t)(period>>8);
 	SCOCR3LL = (uint8_t)period;
 }
 
-PORT_TIMER_WIDTH radiotimer_getPeriod() {
-	return *((PORT_TIMER_WIDTH *)(&SCOCR3LL));
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
+	return *((PORT_RADIOTIMER_WIDTH *)(&SCOCR3LL));
 }
 
 //===== compare
 
-void radiotimer_schedule(PORT_TIMER_WIDTH offset) {
+void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
    // offset when to fire
 	SCOCR2HH = (uint8_t)(offset>>24);
 	SCOCR2HL = (uint8_t)(offset>>16);
@@ -108,7 +108,7 @@ void radiotimer_schedule(PORT_TIMER_WIDTH offset) {
 
 void radiotimer_cancel() {
    // reset value
-   *((PORT_TIMER_WIDTH *)(&SCOCR2LL)) = 0;
+   *((PORT_RADIOTIMER_WIDTH *)(&SCOCR2LL)) = 0;
    SCOCR2LL = 0;
    
    // disable interrupt
@@ -117,8 +117,8 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline PORT_TIMER_WIDTH radiotimer_getCapturedTime() {
-   return *((PORT_TIMER_WIDTH *)(&SCCNTLL)) - *((PORT_TIMER_WIDTH *)(&SCBTSRLL));
+inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
+   return *((PORT_RADIOTIMER_WIDTH *)(&SCCNTLL)) - *((PORT_RADIOTIMER_WIDTH *)(&SCBTSRLL));
 }
 
 //=========================== private =========================================

@@ -2,7 +2,7 @@
 #define __TCPPRINT_H
 
 /**
-\addtogroup App
+\addtogroup AppTcp
 \{
 \addtogroup tcpPrint
 \{

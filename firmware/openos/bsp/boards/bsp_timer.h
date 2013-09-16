@@ -1,11 +1,16 @@
+#ifndef __BSP_TIMERS_H
+#define __BSP_TIMERS_H
+
 /**
+\addtogroup BSP
+\{
+\addtogroup bsp_timer
+\{
+
 \brief Cross-platform declaration "bsp_timer" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
 */
-
-#ifndef __BSP_TIMERS_H
-#define __BSP_TIMERS_H
 
 #include "stdint.h"
 #include "board.h"
@@ -30,5 +35,10 @@ PORT_TIMER_WIDTH   bsp_timer_get_currentValue();
 
 // interrupt handlers
 kick_scheduler_t   bsp_timer_isr();
+
+/**
+\}
+\}
+*/
 
 #endif

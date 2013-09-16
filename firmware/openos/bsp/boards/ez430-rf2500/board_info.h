@@ -26,6 +26,8 @@ to return the board's description.
 //===== timer
 
 #define PORT_TIMER_WIDTH                    uint16_t
+#define PORT_RADIOTIMER_WIDTH               uint16_t
+
 #define PORT_TICS_PER_MS                    33
 
 // on eZ430-RF2500, we use the comparatorA interrupt for the OS

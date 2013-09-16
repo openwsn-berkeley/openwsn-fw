@@ -30,7 +30,7 @@ typedef struct {
    radiotimer_compare_cbt    overflow_cb;
    radiotimer_compare_cbt    compare_cb;
    uint8_t                   overflowORcompare;//indicate RTC alarm interrupt status
-   uint16_t                  currentSlotPeriod;
+   PORT_RADIOTIMER_WIDTH                  currentSlotPeriod;
 } radiotimer_vars_t;
 
 radiotimer_vars_t radiotimer_vars;
@@ -62,7 +62,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
    while(1);
 }
 
-void radiotimer_start(uint16_t period) {
+void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     //enable BKP and PWR, Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_BKP|RCC_APB1Periph_PWR , ENABLE);
     
@@ -118,14 +118,14 @@ void radiotimer_start(uint16_t period) {
 
 //===== direct access
 
-uint16_t radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
     RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
     counter = counter << 1;
-    return (uint16_t)counter;
+    return (PORT_RADIOTIMER_WIDTH)counter;
 }
 
-void radiotimer_setPeriod(uint16_t period) {
+void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
   
     period = period >> 1;
 
@@ -145,16 +145,16 @@ void radiotimer_setPeriod(uint16_t period) {
     RTC_ITConfig(RTC_IT_ALR, ENABLE);
 }
 
-uint16_t radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
     RTC_WaitForSynchro();
     uint32_t period = RTC_GetAlarm();
     period = period <<1;
-    return (uint16_t)period;
+    return (PORT_RADIOTIMER_WIDTH)period;
 }
 
 //===== compare
 
-void radiotimer_schedule(uint16_t offset) {
+void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
   
     offset = offset >>1;
     
@@ -188,11 +188,11 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline uint16_t radiotimer_getCapturedTime() {
+inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
     RTC_WaitForSynchro();
     uint32_t counter = RTC_GetCounter();
     counter = counter << 1;
-    return (uint16_t)counter;
+    return (PORT_RADIOTIMER_WIDTH)counter;
 }
 
 //=========================== private =========================================

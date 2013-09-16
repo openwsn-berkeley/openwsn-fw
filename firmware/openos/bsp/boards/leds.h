@@ -1,11 +1,16 @@
+#ifndef __LEDS_H
+#define __LEDS_H
+
 /**
+\addtogroup BSP
+\{
+\addtogroup leds
+\{
+
 \brief Cross-platform declaration "leds" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
-
-#ifndef __LEDS_H
-#define __LEDS_H
 
 #include "stdint.h"
  
@@ -46,5 +51,10 @@ void    leds_all_toggle();
 
 void    leds_circular_shift();
 void    leds_increment();
+
+/**
+\}
+\}
+*/
 
 #endif

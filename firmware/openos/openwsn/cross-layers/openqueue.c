@@ -122,7 +122,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
 /**
 \brief Free all the packet buffers created by a specific module.
 
-\param owner The identifier of the component, taken in COMPONENT_*.
+\param creator The identifier of the component, taken in COMPONENT_*.
 */
 void openqueue_removeAllCreatedBy(uint8_t creator) {
    uint8_t i;

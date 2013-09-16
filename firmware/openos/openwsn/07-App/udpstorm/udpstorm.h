@@ -2,7 +2,7 @@
 #define __UDPSTORM_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup udpStorm
 \{

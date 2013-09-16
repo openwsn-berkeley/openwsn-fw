@@ -30,7 +30,7 @@ dummyFunc = Builder(
 )
 
 if   env['toolchain']=='mspgcc':
-    if env['board'] not in ['telosb','gina','z1']:
+    if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     # compiler
@@ -67,7 +67,7 @@ if   env['toolchain']=='mspgcc':
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
 
 elif env['toolchain']=='iar':
-    if env['board'] not in ['telosb','gina','z1']:
+    if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
@@ -139,7 +139,7 @@ elif env['toolchain']=='iar':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
 elif env['toolchain']=='iar-proj':
-    if env['board'] not in ['telosb','gina','z1']:
+    if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
@@ -166,7 +166,7 @@ elif env['toolchain']=='iar-proj':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
 else:
-    if env['board'] in ['telosb','gina','z1']:
+    if env['board'] in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     # enabling shared library to be reallocated 
@@ -432,7 +432,7 @@ def sconscript_scanner(localEnv):
             populateTargetGroup(localEnv,targetName)
 
 env.AddMethod(sconscript_scanner, 'SconscriptScanner')
-    
+
 #============================ board ===========================================
 
 # Get build environment from platform directory
