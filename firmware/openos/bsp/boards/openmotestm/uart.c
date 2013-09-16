@@ -23,6 +23,7 @@ typedef struct {
    uart_rx_cbt rxCb;
    uint8_t     startOrend;
    uint8_t     flagByte;
+   bool        flag;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -62,15 +63,26 @@ void uart_init()
     // Configure PC.10 as alternate function push-pull
     GPIO_InitTypeDef GPIO_InitStructure;
     GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_10;
-    GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_AF_PP;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
     
     //Configure PC.11 as input floating 
     GPIO_InitStructure.GPIO_Pin     = GPIO_Pin_11;
-    GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_50MHz;
+    GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
+    
+    GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource11);//Connect EXTI Line11 to PC.11
+    EXTI_ClearITPendingBit(EXTI_Line11);
+    
+    //Configures EXTI line 11 to generate an interrupt on rising edge
+    EXTI_InitTypeDef  EXTI_InitStructure; 
+    EXTI_InitStructure.EXTI_Line    = EXTI_Line11;
+    EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt; 
+    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
+    EXTI_InitStructure.EXTI_LineCmd = ENABLE; 
+    EXTI_Init(&EXTI_InitStructure);
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) 
@@ -124,6 +136,16 @@ uint8_t uart_readByte()
     uint16_t temp;
     temp = USART_ReceiveData(UART4);
     return (uint8_t)temp;
+}
+
+void    uart_setFlag(bool flag)
+{
+  uart_vars.flag = flag;
+}
+
+bool    uart_getFlag()
+{
+  return uart_vars.flag;
 }
 
 //=========================== interrupt handlers ==============================

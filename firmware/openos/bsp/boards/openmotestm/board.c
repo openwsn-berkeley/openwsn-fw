@@ -91,6 +91,8 @@ void board_init()
 }
 
 void board_sleep() {
+  if(uart_getFlag() == FALSE)
+  {
     uint16_t sleepTime = radiotimer_getPeriod() - radiotimer_getCapturedTime();
     DBGMCU_Config(DBGMCU_STOP, ENABLE);
     
@@ -103,6 +105,7 @@ void board_sleep() {
     
     if(sleepTime > 0)
     opentimers_sleepTimeCompesation(sleepTime);
+  }
 }
 
 
