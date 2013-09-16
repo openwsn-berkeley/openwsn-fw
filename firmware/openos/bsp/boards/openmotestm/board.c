@@ -20,6 +20,10 @@
 #include "opentimers.h"
 #include "gpio.h"
 
+//=========================== variable ========================================
+
+extern bool needSleep;
+
 //=========================== main ============================================
 
 extern int mote_main();
@@ -91,7 +95,7 @@ void board_init()
 }
 
 void board_sleep() {
-  if(uart_getFlag() == FALSE)
+  if(needSleep == TRUE)
   {
     uint16_t sleepTime = radiotimer_getPeriod() - radiotimer_getCapturedTime();
     DBGMCU_Config(DBGMCU_STOP, ENABLE);

@@ -28,6 +28,8 @@ typedef struct {
 
 uart_vars_t uart_vars;
 
+bool needSleep;  
+
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
@@ -36,6 +38,8 @@ void uart_init()
 {
     // reset local variables
     memset(&uart_vars,0,sizeof(uart_vars_t));
+    
+    needSleep = TRUE;
     
     //when this value is 0, we are send the first data
     uart_vars.startOrend = 0;
@@ -136,16 +140,6 @@ uint8_t uart_readByte()
     uint16_t temp;
     temp = USART_ReceiveData(UART4);
     return (uint8_t)temp;
-}
-
-void    uart_setFlag(bool flag)
-{
-  uart_vars.flag = flag;
-}
-
-bool    uart_getFlag()
-{
-  return uart_vars.flag;
 }
 
 //=========================== interrupt handlers ==============================

@@ -31,6 +31,9 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
+
+extern bool needSleep;
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -643,7 +646,7 @@ void EXTI15_10_IRQHandler(void)
       //call RCC wake up here as we cannot include rcc at radio.c 
       //as brakes compatibility with other boards using atmel radio
       RCC_Wakeup();
-      uart_setFlag(TRUE);
+      needSleep = FALSE;
 //      radio_isr();
     }
     debugpins_isr_clr();

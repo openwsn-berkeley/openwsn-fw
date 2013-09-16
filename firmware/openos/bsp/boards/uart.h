@@ -39,8 +39,6 @@ void    uart_clearRxInterrupts();
 void    uart_clearTxInterrupts();
 void    uart_writeByte(uint8_t byteToWrite);
 uint8_t uart_readByte();
-//void    uart_setFlag(bool flag);
-//bool    uart_getFlag();
 
 // interrupt handlers
 kick_scheduler_t uart_tx_isr();
