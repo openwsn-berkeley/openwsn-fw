@@ -16,6 +16,7 @@
 #include "debug.h"
 #include "interrupt.h"
 #include "sleepmode.h"
+#include "debugpins.h"
 
 //=========================== defines =========================================
 
