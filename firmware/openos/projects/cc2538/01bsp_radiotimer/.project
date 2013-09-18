@@ -40,6 +40,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/board.h</locationURI>
 		</link>
 		<link>
+			<name>cc2538/bsp_timer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/bsp_timer.h</locationURI>
+		</link>
+		<link>
 			<name>cc2538/debugpins.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/debugpins.h</locationURI>
