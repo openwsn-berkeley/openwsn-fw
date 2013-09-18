@@ -27,11 +27,11 @@
 							<builder autoBuildTarget="all" buildPath="${workspace_loc:/01bsp_bsp_timer}/Debug" cleanBuildTarget="clean" id="org.eclipse.cdt.build.core.internal.builder.182313874" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool command="arm-none-eabi-gcc" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.assembler.debug.516487918" name="ARM Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.assembler.debug">
 								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.162547698" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_HOME}/bsp/boards/cc2538&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_HOME}/projects/common/01bsp_bsp_timer&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_HOME}/bsp/boards/cc2538/source&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_HOME}/bsp/boards/&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_HOME}/bsp/boards/cc2538/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/cc2538&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/projects/common/01bsp_bsp_timer&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/cc2538/source&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/cc2538/inc&quot;"/>
 								</option>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.windows.assembler.base.input.1546964571" superClass="org.eclipse.cdt.cross.arm.gnu.windows.assembler.base.input"/>
 							</tool>
