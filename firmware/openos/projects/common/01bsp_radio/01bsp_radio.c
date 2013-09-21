@@ -17,7 +17,7 @@ can use this project with any platform.
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
-#define CHANNEL         26             ///< 2.480GHz
+#define CHANNEL         20             ///< 2.480GHz
 #define TIMER_PERIOD    65535          ///< 2s @ 32kHz
 #define ID              0xab           ///< byte sent in the packets
 
@@ -72,6 +72,7 @@ void     cb_timer();
 */
 int mote_main() {
    uint8_t i;
+   uint16_t j=0;
    
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));
@@ -90,6 +91,20 @@ int mote_main() {
    for (i=0;i<app_vars.packet_len;i++) {
       app_vars.packet[i] = ID;
    }
+
+  while (1){
+   j=0;
+   // start transmitting packet
+   radio_loadPacket(app_vars.packet,app_vars.packet_len);
+   radio_txEnable();
+   radio_txNow();
+
+   while (j!=0xffff) {
+	       j++;
+        //   board_sleep();
+   }
+  }
+
 
    // start bsp timer
    bsp_timer_set_callback(cb_timer);
