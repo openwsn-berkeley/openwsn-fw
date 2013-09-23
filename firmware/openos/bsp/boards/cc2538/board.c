@@ -20,6 +20,7 @@
 #include "radiotimer.h"
 #include "debugpins.h"
 #include "uart.h"
+#include "radio.h"
 
 
 //=========================== variables =======================================
@@ -48,6 +49,7 @@ void board_init() {
    bsp_timer_init();
    radiotimer_init();
    uart_init();
+   radio_init();
 
 }
 

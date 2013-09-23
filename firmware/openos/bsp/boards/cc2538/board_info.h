@@ -43,6 +43,13 @@ to return the board's description.
 // is not connected to a pin on the MSP which allows time capture.
 #define CAPTURE_TIME()
 
+/* sleep timer interrupt */
+#define HAL_INT_PRIOR_ST        (4 << 5)
+/* MAC interrupts */
+#define HAL_INT_PRIOR_MAC       (4 << 5)
+/* UART interrupt */
+#define HAL_INT_PRIOR_UART      (5 << 5)
+
 
 //===== pinout
 
