@@ -99,7 +99,7 @@ void radio_init() {
    HWREG(ANA_REGS_O_IVCTRL) = 0x0B;        /** Bias currents */
 
    /* disable the CSPT register compare function */
-  // HWREG(RFCORE_XREG_CSPT) = 0xFFUL;
+   HWREG(RFCORE_XREG_CSPT) = 0xFFUL;
    /*
     * Defaults:
     * Auto CRC; Append RSSI, CRC-OK and Corr. Val.; CRC calculation;
@@ -124,7 +124,7 @@ void radio_init() {
    HWREG(RFCORE_XREG_RFIRQM0) |= ((0x02|0x01) << RFCORE_XREG_RFIRQM0_RFIRQM_S) & RFCORE_XREG_RFIRQM0_RFIRQM_M;
 
    /* Enable RF interrupts 1, TXDONE only */
-   HWREG(RFCORE_XREG_RFIRQM1) |= ((0x01) << RFCORE_XREG_RFIRQM1_RFIRQM_S) & RFCORE_XREG_RFIRQM1_RFIRQM_M;
+   HWREG(RFCORE_XREG_RFIRQM1) |= ((0x02) << RFCORE_XREG_RFIRQM1_RFIRQM_S) & RFCORE_XREG_RFIRQM1_RFIRQM_M;
 
 
    //register interrupt
@@ -139,7 +139,7 @@ void radio_init() {
      /* Enable all RF Error interrupts */
    HWREG(RFCORE_XREG_RFERRM) = RFCORE_XREG_RFERRM_RFERRM_M; //all errors
    IntEnable(INT_RFCOREERR);
-   
+   radio_on();
    // change state
    radio_vars.state          = RADIOSTATE_RFOFF;
 }
@@ -249,7 +249,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
      CC2538_RF_CSP_ISFLUSHTX();
 
      /* Send the phy length byte first --  */
-     //HWREG(RFCORE_SFR_RFDATA) = len;
+     HWREG(RFCORE_SFR_RFDATA) = len + 2; //crc len
 
      for(i = 0; i < len; i++) {
          HWREG(RFCORE_SFR_RFDATA) = packet[i];
@@ -279,6 +279,9 @@ void radio_txNow() {
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
    
+   //make sure we are not transmitting already
+   while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
+
    // send packet by STON strobe see pag 669
 
    CC2538_RF_CSP_ISTXON();
@@ -294,6 +297,11 @@ void radio_txNow() {
       val=radiotimer_getCapturedTime();
       radio_vars.startFrame_cb(val);
    }
+
+   //wait until tx done
+   //while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
+   //flush the packet.
+   //CC2538_RF_CSP_ISFLUSHTX();
 
 }
 
