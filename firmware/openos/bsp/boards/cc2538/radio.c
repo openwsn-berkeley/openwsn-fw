@@ -269,7 +269,7 @@ void radio_txEnable() {
 
    // turn on radio's PLL
    //do nothing??
-   //radio_rfOn();
+   radio_rfOn();
    // change state
    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
