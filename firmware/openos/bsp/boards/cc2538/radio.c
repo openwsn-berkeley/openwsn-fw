@@ -108,7 +108,7 @@ void radio_init() {
    HWREG(RFCORE_XREG_FRMCTRL0) = RFCORE_XREG_FRMCTRL0_AUTOCRC;
 
    //poipoi disable frame filtering by now.. sniffer mode.
-   //HWREG(RFCORE_XREG_FRMFILT0) &= ~RFCORE_XREG_FRMFILT0_FRAME_FILTER_EN;
+   HWREG(RFCORE_XREG_FRMFILT0) &= ~RFCORE_XREG_FRMFILT0_FRAME_FILTER_EN;
 
    /* Disable source address matching and autopend */
    HWREG(RFCORE_XREG_SRCMATCH) = 0;
@@ -119,12 +119,12 @@ void radio_init() {
    HWREG(RFCORE_XREG_TXPOWER) = CC2538_RF_TX_POWER;
    HWREG(RFCORE_XREG_FREQCTRL) = CC2538_RF_CHANNEL_MIN;
 
-
-     /* Enable RF interrupts 0, FIFOP,SFD only */
-   HWREG(RFCORE_XREG_RFIRQM0) |= ((0x02|0x01) << RFCORE_XREG_RFIRQM0_RFIRQM_S) & RFCORE_XREG_RFIRQM0_RFIRQM_M;
+   /* Enable RF interrupts 0, RXPKTDONE,SFD,FIFOP only -- see page 751  */
+   HWREG(RFCORE_XREG_RFIRQM0) |= ((0x06|0x02|0x01) << RFCORE_XREG_RFIRQM0_RFIRQM_S) & RFCORE_XREG_RFIRQM0_RFIRQM_M;
 
    /* Enable RF interrupts 1, TXDONE only */
    HWREG(RFCORE_XREG_RFIRQM1) |= ((0x02) << RFCORE_XREG_RFIRQM1_RFIRQM_S) & RFCORE_XREG_RFIRQM1_RFIRQM_M;
+
 
 
    //register interrupt
@@ -139,7 +139,7 @@ void radio_init() {
      /* Enable all RF Error interrupts */
    HWREG(RFCORE_XREG_RFERRM) = RFCORE_XREG_RFERRM_RFERRM_M; //all errors
    IntEnable(INT_RFCOREERR);
-   radio_on();
+   //radio_on();
    // change state
    radio_vars.state          = RADIOSTATE_RFOFF;
 }
@@ -249,7 +249,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
      CC2538_RF_CSP_ISFLUSHTX();
 
      /* Send the phy length byte first --  */
-     HWREG(RFCORE_SFR_RFDATA) = len + 2; //crc len
+     HWREG(RFCORE_SFR_RFDATA) = len; //crc len is included
 
      for(i = 0; i < len; i++) {
          HWREG(RFCORE_SFR_RFDATA) = packet[i];
@@ -266,7 +266,7 @@ void radio_txEnable() {
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
-   
+
    // turn on radio's PLL
    //do nothing??
    //radio_rfOn();
@@ -310,6 +310,7 @@ void radio_txNow() {
 void radio_rxEnable() {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
+
    
    // put radio in reception mode
    CC2538_RF_CSP_ISRXON();
@@ -319,7 +320,7 @@ void radio_rxEnable() {
    leds_radio_on();
    
    // busy wait until radio really listening
-   //while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_RX_ACTIVE)));
+   while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_RX_ACTIVE)));
    
    // change state
    radio_vars.state = RADIOSTATE_LISTENING;
@@ -401,7 +402,7 @@ port_INLINE void radio_off(){
     if(HWREG(RFCORE_XREG_RXENABLE) != 0) {
 	    CC2538_RF_CSP_ISRFOFF();
 	    //clear fifo isr flag
-	    HWREG(RFCORE_SFR_RFIRQF0) = ~RFCORE_SFR_RFIRQF0_FIFOP;
+	    HWREG(RFCORE_SFR_RFIRQF0) = ~(RFCORE_SFR_RFIRQF0_FIFOP|RFCORE_SFR_RFIRQF0_RXPKTDONE);
 
 	}
 }
@@ -428,6 +429,7 @@ kick_scheduler_t radio_isr() {
    HWREG(RFCORE_SFR_RFIRQF0) = 0;
    HWREG(RFCORE_SFR_RFIRQF1) = 0;
 
+   //STATUS0 Register
    // start of frame event
    if ((irq_status0 & RFCORE_SFR_RFIRQF0_SFD) == RFCORE_SFR_RFIRQF0_SFD) {
       // change state
@@ -441,9 +443,39 @@ kick_scheduler_t radio_isr() {
          while(1);
       }
    }
-   // end of frame event --either end of tx or fifop is full -- we have a packet..
-   if (((irq_status1 & RFCORE_SFR_RFIRQF1_TXDONE) == RFCORE_SFR_RFIRQF1_TXDONE)
-	  || ((irq_status0 & RFCORE_SFR_RFIRQF0_FIFOP) ==  RFCORE_SFR_RFIRQF0_FIFOP) ) {
+
+   //or RXDONE is full -- we have a packet.
+   if (((irq_status0 & RFCORE_SFR_RFIRQF0_RXPKTDONE) ==  RFCORE_SFR_RFIRQF0_RXPKTDONE)) {
+        // change state
+        radio_vars.state = RADIOSTATE_TXRX_DONE;
+        if (radio_vars.endFrame_cb!=NULL) {
+           // call the callback
+           radio_vars.endFrame_cb(capturedTime);
+           // kick the OS
+           return KICK_SCHEDULER;
+        } else {
+           while(1);
+        }
+     }
+
+
+   //or FIFOP is full -- we have a packet.
+     if (((irq_status0 & RFCORE_SFR_RFIRQF0_FIFOP) ==  RFCORE_SFR_RFIRQF0_FIFOP)) {
+          // change state
+          radio_vars.state = RADIOSTATE_TXRX_DONE;
+          if (radio_vars.endFrame_cb!=NULL) {
+             // call the callback
+             radio_vars.endFrame_cb(capturedTime);
+             // kick the OS
+             return KICK_SCHEDULER;
+          } else {
+             while(1);
+          }
+       }
+
+   //STATUS1 Register
+   // end of frame event --either end of tx .
+   if (((irq_status1 & RFCORE_SFR_RFIRQF1_TXDONE) == RFCORE_SFR_RFIRQF1_TXDONE)) {
       // change state
       radio_vars.state = RADIOSTATE_TXRX_DONE;
       if (radio_vars.endFrame_cb!=NULL) {
