@@ -125,8 +125,6 @@ void radio_init() {
    /* Enable RF interrupts 1, TXDONE only */
    HWREG(RFCORE_XREG_RFIRQM1) |= ((0x02) << RFCORE_XREG_RFIRQM1_RFIRQM_S) & RFCORE_XREG_RFIRQM1_RFIRQM_M;
 
-
-
    //register interrupt
    IntRegister(INT_RFCORERTX, radio_isr);
    IntRegister(INT_RFCOREERR, radio_error_isr);
