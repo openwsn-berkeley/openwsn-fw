@@ -486,7 +486,7 @@ routing decisions to change. Examples are:
 */
 void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint8_t   i;
-   uint8_t   linkCost;
+   uint16_t  rankIncrease;
    uint32_t  tentativeDAGrank; // 32-bit since is used to sum
    uint8_t   prefParentIdx;
    bool      prefParentFound;
@@ -511,11 +511,12 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
          neighbors_vars.neighbors[i].parentPreference=0;
          // calculate link cost to this neighbor
          if (neighbors_vars.neighbors[i].numTxACK==0) {
-            linkCost = DEFAULTLINKCOST;
+            rankIncrease = DEFAULTLINKCOST*2*MINHOPRANKINCREASE;
          } else {
-            linkCost = (uint8_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*10.0);
+        	//6TiSCH minimal draft using OF0 for rank computation
+            rankIncrease = (uint16_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*2*MINHOPRANKINCREASE);
          }
-         tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+linkCost;
+         tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
          if ( tentativeDAGrank<neighbors_vars.myDAGrank &&
               tentativeDAGrank<MAXDAGRANK) {
             // found better parent, lower my DAGrank
