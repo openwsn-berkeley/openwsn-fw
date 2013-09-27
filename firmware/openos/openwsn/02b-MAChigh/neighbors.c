@@ -432,11 +432,11 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
             if (
-                  neighbors_vars.dio->rank>neighbors_vars.neighbors[i].DAGrank &&
-                  neighbors_vars.dio->rank - neighbors_vars.neighbors[i].DAGrank>DEFAULTLINKCOST
+                  neighbors_vars.dio->rank > neighbors_vars.neighbors[i].DAGrank &&
+                  neighbors_vars.dio->rank - neighbors_vars.neighbors[i].DAGrank >(DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
                ) {
                 // the new DAGrank looks suspiciously high, only increment a bit
-                neighbors_vars.neighbors[i].DAGrank += DEFAULTLINKCOST;
+                neighbors_vars.neighbors[i].DAGrank += (DEFAULTLINKCOST*2*MINHOPRANKINCREASE);
                 openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
                                (errorparameter_t)neighbors_vars.dio->rank,
                                (errorparameter_t)neighbors_vars.neighbors[i].DAGrank);
