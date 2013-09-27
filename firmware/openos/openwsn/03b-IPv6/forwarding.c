@@ -7,6 +7,7 @@
 #include "packetfunctions.h"
 #include "neighbors.h"
 #include "icmpv6.h"
+#include "icmpv6rpl.h"
 #include "openudp.h"
 #include "opentcp.h"
 #include "debugpins.h"
@@ -19,6 +20,8 @@
 owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv);
 void    forwarding_getNextHop_RoutingTable(open_addr_t* destination, open_addr_t* addressToWrite);
 owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
+port_INLINE bool forwarding_extractHopByHopHeader(OpenQueueEntry_t *msg, rpl_hopbyhop_ht *hopbyhop_header);
+port_INLINE void forwarding_createHopByHopHeader(OpenQueueEntry_t* msg, rpl_hopbyhop_ht* hopbyhop_header, uint8_t flags);
 
 //=========================== public ==========================================
 
@@ -27,6 +30,7 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_hea
 */
 void forwarding_init() {
 }
+
 
 /**
 \brief Send a packet originating at this mote.
@@ -38,6 +42,8 @@ at this mote.
 */
 owerror_t forwarding_send(OpenQueueEntry_t* msg) { 
    ipv6_header_iht ipv6_header;
+   rpl_hopbyhop_ht hopbyhop_header;
+
    open_addr_t*    myprefix;
    open_addr_t*    myadd64;
    
@@ -61,6 +67,10 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    //carry a hlim. This value is required to be set to a value as the following function can decrement it
    ipv6_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
    
+   //set the rpl hop by hop header
+   //flags -- all zero by now as no problems on sending O is 0 as this is upward traffic
+   forwarding_createHopByHopHeader(msg, &hopbyhop_header,0x00);
+
    return forwarding_send_internal_RoutingTable(msg,ipv6_header,PCKTSEND);
 }
 
@@ -111,7 +121,10 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 \param[in]     ipv6_header The information contained in the 6LoWPAN header.
 */
 void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
-   // take ownership
+   rpl_hopbyhop_ht hopbyhop_header;
+   bool containsHopByHopHeader= FALSE;
+
+	// take ownership
    msg->owner                  = COMPONENT_FORWARDING;
    
    // populate packets metadata with l4 information
@@ -122,6 +135,13 @@ void forwarding_receive(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
    memcpy(&(msg->l3_destinationAdd),&ipv6_header.dest,sizeof(open_addr_t));
    memcpy(&(msg->l3_sourceAdd),     &ipv6_header.src, sizeof(open_addr_t));
    
+   //extract hop by hop header
+   containsHopByHopHeader = forwarding_extractHopByHopHeader(msg,&hopbyhop_header);
+   //process hop by hop header
+   if (containsHopByHopHeader==TRUE){
+	   //TODO - process hop by hop header?? - it has to be added again to the packet,
+   }
+
    if (
           (
              idmanager_isMyAddress(&ipv6_header.dest)
@@ -407,4 +427,41 @@ void forwarding_getNextHop_RoutingTable(open_addr_t* destination128b, open_addr_
       // destination is remote, send to preferred parent
       neighbors_getPreferredParentEui64(addressToWrite64b);
    }
+}
+/*
+ * HOP BY HOP HEADER OPTION
+ */
+port_INLINE bool forwarding_extractHopByHopHeader(OpenQueueEntry_t *msg, rpl_hopbyhop_ht *hopbyhop_header){
+
+	if (msg->payload[0]!=RPL_HOPBYHOP_HEADER_OPTION_TYPE){
+		//this message does not contain the hop by hop header..
+		return FALSE;
+	}
+    //copy the header to the data structure, field 1 is len without type and len fields hence +2
+	memcpy(&((rpl_hopbyhop_ht*)msg->payload[0]),hopbyhop_header,msg->payload[1]+2);
+	//toss the header
+	packetfunctions_tossHeader(msg,hopbyhop_header->optionLen);
+
+	return TRUE;
+
+}
+
+
+port_INLINE void forwarding_createHopByHopHeader(OpenQueueEntry_t* msg, rpl_hopbyhop_ht* hopbyhop_header, uint8_t flags) {
+	//set the rpl hop by hop header
+	hopbyhop_header->optionType = RPL_HOPBYHOP_HEADER_OPTION_TYPE;
+	//8-bit field indicating the length of the option, in
+	//octets, excluding the Option Type and Opt Data Len fields.
+	hopbyhop_header->optionLen = 0x04; //4-bytes, flags+instanceID+senderrank - no sub-tlvs
+	hopbyhop_header->flags = flags;
+	hopbyhop_header->rplInstanceID = icmpv6rpl_getRPLIntanceID(); //getit..
+	hopbyhop_header->senderRank = neighbors_getMyDAGrank(); //getit
+	//reserve header size
+
+	//In case TLV objects have to be added. Add them here.
+
+	packetfunctions_reserveHeaderSize(msg, sizeof(*hopbyhop_header));
+	//append option to the msg
+	memcpy(&*hopbyhop_header, (rpl_hopbyhop_ht*) (msg->payload),sizeof(*hopbyhop_header));
+
 }
