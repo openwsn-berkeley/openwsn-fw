@@ -432,13 +432,14 @@ void forwarding_getNextHop_RoutingTable(open_addr_t* destination128b, open_addr_
  * HOP BY HOP HEADER OPTION
  */
 port_INLINE bool forwarding_extractHopByHopHeader(OpenQueueEntry_t *msg, rpl_hopbyhop_ht *hopbyhop_header){
-
+    uint8_t len;
 	if (msg->payload[0]!=RPL_HOPBYHOP_HEADER_OPTION_TYPE){
 		//this message does not contain the hop by hop header..
 		return FALSE;
 	}
     //copy the header to the data structure, field 1 is len without type and len fields hence +2
-	memcpy(&((rpl_hopbyhop_ht*)msg->payload[0]),hopbyhop_header,msg->payload[1]+2);
+	len=msg->payload[1]+2;
+	memcpy(msg->payload,hopbyhop_header,len);
 	//toss the header
 	packetfunctions_tossHeader(msg,hopbyhop_header->optionLen);
 
