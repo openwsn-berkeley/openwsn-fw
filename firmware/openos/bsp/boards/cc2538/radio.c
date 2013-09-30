@@ -45,7 +45,8 @@ radio_vars_t radio_vars;
 port_INLINE void    radio_on();
 port_INLINE void    radio_off();
 void radio_error_isr();
-
+port_INLINE void enable_radio_interrupts();
+port_INLINE void disable_radio_interrupts();
 //=========================== public ==========================================
 
 //===== admin
@@ -59,6 +60,10 @@ void radio_init() {
    radio_vars.state          = RADIOSTATE_STOPPED;
   
    radio_off();
+
+   //disable radio interrupts
+   disable_radio_interrupts();
+
    /* This CORR_THR value should be changed to 0x14 before attempting RX. Testing has shown that
       * too many false frames are received if the reset value is used. Make it more likely to detect
       * sync by removing the requirement that both symbols in the SFD must have a correlation value
@@ -119,11 +124,8 @@ void radio_init() {
    HWREG(RFCORE_XREG_TXPOWER) = CC2538_RF_TX_POWER;
    HWREG(RFCORE_XREG_FREQCTRL) = CC2538_RF_CHANNEL_MIN;
 
-   /* Enable RF interrupts 0, RXPKTDONE,SFD,FIFOP only -- see page 751  */
-   HWREG(RFCORE_XREG_RFIRQM0) |= ((0x06|0x02|0x01) << RFCORE_XREG_RFIRQM0_RFIRQM_S) & RFCORE_XREG_RFIRQM0_RFIRQM_M;
-
-   /* Enable RF interrupts 1, TXDONE only */
-   HWREG(RFCORE_XREG_RFIRQM1) |= ((0x02) << RFCORE_XREG_RFIRQM1_RFIRQM_S) & RFCORE_XREG_RFIRQM1_RFIRQM_M;
+   /* Enable RF interrupts  see page 751  */
+//      enable_radio_interrupts();
 
    //register interrupt
    IntRegister(INT_RFCORERTX, radio_isr);
@@ -133,6 +135,7 @@ void radio_init() {
    IntPrioritySet(INT_RFCOREERR, HAL_INT_PRIOR_MAC);
 
    IntEnable(INT_RFCORERTX);
+
 
      /* Enable all RF Error interrupts */
    HWREG(RFCORE_XREG_RFERRM) = RFCORE_XREG_RFERRM_RFERRM_M; //all errors
@@ -225,6 +228,8 @@ void radio_rfOff() {
    // wiggle debug pin
    debugpins_radio_clr();
    leds_radio_off();
+   //enable radio interrupts
+   disable_radio_interrupts();
    
    // change state
    radio_vars.state = RADIOSTATE_RFOFF;
@@ -268,6 +273,7 @@ void radio_txEnable() {
    // turn on radio's PLL
    //do nothing??
    radio_rfOn();
+
    // change state
    radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
@@ -276,7 +282,10 @@ void radio_txNow() {
    PORT_TIMER_WIDTH val,count;
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
-   
+
+   //enable radio interrupts
+   enable_radio_interrupts();
+
    //make sure we are not transmitting already
    while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
 
@@ -290,42 +299,38 @@ void radio_txNow() {
    }
 
 
-   if (radio_vars.startFrame_cb!=NULL) {
-      // call the callback
-      val=radiotimer_getCapturedTime();
-      radio_vars.startFrame_cb(val);
-   }
-
-   //wait until tx done
-   //while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
-   //flush the packet.
-   //CC2538_RF_CSP_ISFLUSHTX();
+//   if (radio_vars.startFrame_cb!=NULL) {
+//      // call the callback
+//      val=radiotimer_getCapturedTime();
+//      radio_vars.startFrame_cb(val);
+//   }
 
 }
 
 //===== RX
 
 void radio_rxEnable() {
+
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
-
-   
+   //enable radio interrupts
+   enable_radio_interrupts();
    // put radio in reception mode
-   CC2538_RF_CSP_ISRXON();
-   
+   // do nothing as we do not want to receive anything yet.
+
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
-   
-   // busy wait until radio really listening
-   while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_RX_ACTIVE)));
-   
+
    // change state
    radio_vars.state = RADIOSTATE_LISTENING;
 }
 
 void radio_rxNow() {
-   // nothing to do
+	CC2538_RF_CSP_ISRXON();
+	// busy wait until radio really listening
+	while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_RX_ACTIVE)));
+    // nothing to do
 }
 
 void radio_getReceivedFrame(uint8_t* pBufRead,
@@ -386,6 +391,22 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 
 //=========================== private =========================================
 
+port_INLINE  void enable_radio_interrupts(){
+   /* Enable RF interrupts 0, RXPKTDONE,SFD,FIFOP only -- see page 751  */
+   HWREG(RFCORE_XREG_RFIRQM0) |= ((0x06|0x02|0x01) << RFCORE_XREG_RFIRQM0_RFIRQM_S) & RFCORE_XREG_RFIRQM0_RFIRQM_M;
+
+   /* Enable RF interrupts 1, TXDONE only */
+   HWREG(RFCORE_XREG_RFIRQM1) |= ((0x02) << RFCORE_XREG_RFIRQM1_RFIRQM_S) & RFCORE_XREG_RFIRQM1_RFIRQM_M;
+}
+
+port_INLINE  void disable_radio_interrupts(){
+   /* Enable RF interrupts 0, RXPKTDONE,SFD,FIFOP only -- see page 751  */
+   HWREG(RFCORE_XREG_RFIRQM0) = 0;
+   /* Enable RF interrupts 1, TXDONE only */
+   HWREG(RFCORE_XREG_RFIRQM1) = 0;
+}
+
+
 port_INLINE void radio_on(){
     CC2538_RF_CSP_ISFLUSHRX();
     CC2538_RF_CSP_ISRXON();
@@ -403,6 +424,7 @@ port_INLINE void radio_off(){
 	    HWREG(RFCORE_SFR_RFIRQF0) = ~(RFCORE_SFR_RFIRQF0_FIFOP|RFCORE_SFR_RFIRQF0_RXPKTDONE);
 
 	}
+
 }
 
 
@@ -411,7 +433,7 @@ port_INLINE void radio_off(){
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t radio_isr() {
-   PORT_TIMER_WIDTH capturedTime;
+   volatile PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status0,irq_status1;
 
    // capture the time

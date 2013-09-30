@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>03oos_openwsn</name>
+	<name>03oos_macpong</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -25,9 +25,9 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>03oos_openwsn</name>
+			<name>03oos_macpong</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/projects/common/03oos_openwsn</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/projects/common/03oos_macpong</locationURI>
 		</link>
 		<link>
 			<name>cc2538</name>
