@@ -24,39 +24,39 @@ ieee154e_dbg_t     ieee154e_dbg;
 
 // SYNCHRONIZING
 void     activity_synchronize_newSlot();
-void     activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime);
-void     activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime);
+void     activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
+void     activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 // TX
 void     activity_ti1ORri1();
 void     activity_ti2();
 void     activity_tie1();
 void     activity_ti3();
 void     activity_tie2();
-void     activity_ti4(PORT_TIMER_WIDTH capturedTime);
+void     activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime);
 void     activity_tie3();
-void     activity_ti5(PORT_TIMER_WIDTH capturedTime);
+void     activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime);
 void     activity_ti6();
 void     activity_tie4();
 void     activity_ti7();
 void     activity_tie5();
-void     activity_ti8(PORT_TIMER_WIDTH capturedTime);
+void     activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime);
 void     activity_tie6();
-void     activity_ti9(PORT_TIMER_WIDTH capturedTime);
+void     activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime);
 // RX
 void     activity_ri2();
 void     activity_rie1();
 void     activity_ri3();
 void     activity_rie2();
-void     activity_ri4(PORT_TIMER_WIDTH capturedTime);
+void     activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime);
 void     activity_rie3();
-void     activity_ri5(PORT_TIMER_WIDTH capturedTime);
+void     activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime);
 void     activity_ri6();
 void     activity_rie4();
 void     activity_ri7();
 void     activity_rie5();
-void     activity_ri8(PORT_TIMER_WIDTH capturedTime);
+void     activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime);
 void     activity_rie6();
-void     activity_ri9(PORT_TIMER_WIDTH capturedTime);
+void     activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime);
 // frame validity check
 bool     isValidAdv(ieee802154_header_iht*     ieee802514_header);
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
@@ -66,7 +66,7 @@ bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
 void     incrementAsnOffset();
 void     asnStoreFromAdv(OpenQueueEntry_t* advFrame);
 // synchronization
-void     synchronizePacket(PORT_TIMER_WIDTH timeReceived);
+void     synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
 void     changeIsSync(bool newIsSync);
 // notifying upper layer
@@ -126,13 +126,13 @@ void ieee154e_init() {
 
 \returns The ASN difference, or 0xffff if more than 65535 different
 */
-PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
-   PORT_TIMER_WIDTH diff;
+PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
+   PORT_RADIOTIMER_WIDTH diff;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (ieee154e_vars.asn.byte4 != someASN->byte4) {
       ENABLE_INTERRUPTS();
-      return (PORT_TIMER_WIDTH)0xFFFFFFFF;;
+      return (PORT_RADIOTIMER_WIDTH)0xFFFFFFFF;;
    }
    
    diff = 0;
@@ -144,7 +144,7 @@ PORT_TIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
       diff += 0xffff-someASN->bytes0and1;
       diff += 1;
    } else {
-      diff = (PORT_TIMER_WIDTH)0xFFFFFFFF;;
+      diff = (PORT_RADIOTIMER_WIDTH)0xFFFFFFFF;;
    }
    ENABLE_INTERRUPTS();
    return diff;
@@ -255,7 +255,7 @@ void isr_ieee154e_timer() {
 
 This function executes in ISR mode.
 */
-void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
+void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
    if (ieee154e_vars.isSync==FALSE) {
      activity_synchronize_startOfFrame(capturedTime);
    } else {
@@ -303,7 +303,7 @@ void ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
 
 This function executes in ISR mode.
 */
-void ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
+void ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
    if (ieee154e_vars.isSync==FALSE) {
       activity_synchronize_endOfFrame(capturedTime);
    } else {
@@ -432,7 +432,7 @@ port_INLINE void activity_synchronize_newSlot() {
    }
 }
 
-port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
    
    // don't care about packet if I'm not listening
    if (ieee154e_vars.state!=S_SYNCLISTEN) {
@@ -452,7 +452,7 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_TIMER_WIDTH capturedTime
    ieee154e_vars.syncCapturedTime = capturedTime;
 }
 
-port_INLINE void activity_synchronize_endOfFrame(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    
    // check state
@@ -729,6 +729,7 @@ port_INLINE void activity_ti1ORri1() {
          //start inputting serial data
          openserial_startInput();
          //this is to emulate a set of serial input slots without having the slotted structure.
+
          radio_setTimerPeriod(TsSlotDuration*(NUMSERIALRX));
          
          //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
@@ -808,7 +809,8 @@ port_INLINE void activity_tie2() {
    endSlot();
 }
 
-port_INLINE void activity_ti4(PORT_TIMER_WIDTH capturedTime) {
+//start of frame interrupt
+port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
    // change state
    changeState(S_TXDATA);
    
@@ -832,7 +834,7 @@ port_INLINE void activity_tie3() {
    endSlot();
 }
 
-port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    bool listenForAck;
    
    // change state
@@ -842,7 +844,7 @@ port_INLINE void activity_ti5(PORT_TIMER_WIDTH capturedTime) {
    radiotimer_cancel();
    
    // turn off the radio
-   radio_rfOff();
+    radio_rfOff();
    ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
    
    // record the captured time
@@ -935,7 +937,7 @@ port_INLINE void activity_tie5() {
    endSlot();
 }
 
-port_INLINE void activity_ti8(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
    // change state
    changeState(S_RXACK);
    
@@ -954,7 +956,7 @@ port_INLINE void activity_tie6() {
    endSlot();
 }
 
-port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    volatile PORT_SIGNED_INT_WIDTH  timeCorrection;
    uint8_t byte0;
@@ -1057,7 +1059,7 @@ port_INLINE void activity_ti9(PORT_TIMER_WIDTH capturedTime) {
           neighbors_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop)) ) {
          byte0 = ieee154e_vars.ackReceived->payload[0];
          byte1 = ieee154e_vars.ackReceived->payload[1];
-         timeCorrection  = (PORT_SIGNED_INT_WIDTH)((PORT_TIMER_WIDTH)byte1<<8 | (PORT_TIMER_WIDTH)byte0);
+         timeCorrection  = (PORT_SIGNED_INT_WIDTH)((PORT_RADIOTIMER_WIDTH)byte1<<8 | (PORT_RADIOTIMER_WIDTH)byte0);
          timeCorrection /=  US_PER_TICK;
          timeCorrection  = -timeCorrection;
          synchronizeAck(timeCorrection);
@@ -1133,7 +1135,7 @@ port_INLINE void activity_rie2() {
    endSlot();
 }
 
-port_INLINE void activity_ri4(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
 
    // change state
    changeState(S_RXDATA);
@@ -1161,7 +1163,7 @@ port_INLINE void activity_rie3() {
    endSlot();
 }
 
-port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    
    // change state
@@ -1171,7 +1173,7 @@ port_INLINE void activity_ri5(PORT_TIMER_WIDTH capturedTime) {
    radiotimer_cancel();
 
    // turn off the radio
-   radio_rfOff();
+   //radio_rfOff();
    ieee154e_vars.radioOnTics+=radio_getTimerValue()-ieee154e_vars.radioOnInit;
    // get a buffer to put the (received) data in
    ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
@@ -1328,8 +1330,8 @@ port_INLINE void activity_ri6() {
    packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(IEEE802154E_ACK_ht));
    timeCorrection  = -timeCorrection;
    timeCorrection *= US_PER_TICK;
-   ieee154e_vars.ackToSend->payload[0] = (uint8_t)((((PORT_TIMER_WIDTH)timeCorrection)   ) & 0xff);
-   ieee154e_vars.ackToSend->payload[1] = (uint8_t)((((PORT_TIMER_WIDTH)timeCorrection)>>8) & 0xff);
+   ieee154e_vars.ackToSend->payload[0] = (uint8_t)((((PORT_RADIOTIMER_WIDTH)timeCorrection)   ) & 0xff);
+   ieee154e_vars.ackToSend->payload[1] = (uint8_t)((((PORT_RADIOTIMER_WIDTH)timeCorrection)>>8) & 0xff);
    
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
@@ -1396,7 +1398,7 @@ port_INLINE void activity_rie5() {
    endSlot();
 }
 
-port_INLINE void activity_ri8(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
    // change state
    changeState(S_TXACK);
    
@@ -1420,7 +1422,7 @@ port_INLINE void activity_rie6() {
    endSlot();
 }
 
-port_INLINE void activity_ri9(PORT_TIMER_WIDTH capturedTime) {
+port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    // change state
    changeState(S_RXPROC);
    
@@ -1585,16 +1587,17 @@ port_INLINE void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
 
 //======= synchronization
 
-void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
+void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    PORT_SIGNED_INT_WIDTH  timeCorrection;
-   PORT_TIMER_WIDTH newPeriod;
-   PORT_TIMER_WIDTH currentValue;
-   PORT_TIMER_WIDTH currentPeriod;
+   PORT_RADIOTIMER_WIDTH newPeriod;
+   PORT_RADIOTIMER_WIDTH currentValue;
+   PORT_RADIOTIMER_WIDTH currentPeriod;
    // record the current timer value and period
    currentValue                   =  radio_getTimerValue();
    currentPeriod                  =  radio_getTimerPeriod();
    // calculate new period
    timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
+
    newPeriod                      =  TsSlotDuration;
    // detect whether I'm too close to the edge of the slot, in that case,
    // skip a slot and increase the temporary slot length to be 2 slots long
@@ -1602,7 +1605,7 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
       newPeriod                  +=  TsSlotDuration;
       incrementAsnOffset();
    }
-   newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)newPeriod+timeCorrection);
+   newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)newPeriod+timeCorrection);
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
    // reset the de-synchronization timeout
@@ -1625,11 +1628,12 @@ void synchronizePacket(PORT_TIMER_WIDTH timeReceived) {
 }
 
 void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
-   PORT_TIMER_WIDTH newPeriod;
-   PORT_TIMER_WIDTH currentPeriod;
+   PORT_RADIOTIMER_WIDTH newPeriod;
+   PORT_RADIOTIMER_WIDTH currentPeriod;
    // calculate new period
    currentPeriod                  =  radio_getTimerPeriod();
-   newPeriod                      =  (PORT_TIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod-timeCorrection);
+   newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod-timeCorrection);
+
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
    // reset the de-synchronization timeout

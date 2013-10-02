@@ -135,7 +135,7 @@ typedef struct {
    asn_t              asn;                  // current absolute slot number
    slotOffset_t       slotOffset;           // current slot offset
    slotOffset_t       nextActiveSlotOffset; // next active slot offset
-   PORT_TIMER_WIDTH   deSyncTimeout;        // how many slots left before looses sync
+   PORT_RADIOTIMER_WIDTH   deSyncTimeout;        // how many slots left before looses sync
    bool               isSync;               // TRUE iff mote is synchronized to network
    // as shown on the chronogram
    ieee154e_state_t   state;                // state of the FSM
@@ -143,14 +143,14 @@ typedef struct {
    OpenQueueEntry_t*  dataReceived;         // pointer to the data received
    OpenQueueEntry_t*  ackToSend;            // pointer to the ack to send
    OpenQueueEntry_t*  ackReceived;          // pointer to the ack received
-   PORT_TIMER_WIDTH   lastCapturedTime;     // last captured time
-   PORT_TIMER_WIDTH   syncCapturedTime;     // captured time used to sync
+   PORT_RADIOTIMER_WIDTH   lastCapturedTime;     // last captured time
+   PORT_RADIOTIMER_WIDTH   syncCapturedTime;     // captured time used to sync
    //channel hopping
    uint8_t            freq;                 // frequency of the current slot
    uint8_t            asnOffset;            // offset inside the frame
    
-   PORT_TIMER_WIDTH radioOnInit;  //when within the slot the radio turns on
-   PORT_TIMER_WIDTH radioOnTics;//how many tics within the slot the radio is on
+   PORT_RADIOTIMER_WIDTH radioOnInit;  //when within the slot the radio turns on
+   PORT_RADIOTIMER_WIDTH radioOnTics;//how many tics within the slot the radio is on
    bool             radioOnThisSlot; //to control if the radio has been turned on in a slot.
 } ieee154e_vars_t;
 
@@ -166,10 +166,10 @@ typedef struct {
 PRAGMA(pack());
 
 typedef struct {
-   PORT_TIMER_WIDTH          num_newSlot;
-   PORT_TIMER_WIDTH          num_timer;
-   PORT_TIMER_WIDTH          num_startOfFrame;
-   PORT_TIMER_WIDTH          num_endOfFrame;
+   PORT_RADIOTIMER_WIDTH          num_newSlot;
+   PORT_RADIOTIMER_WIDTH          num_timer;
+   PORT_RADIOTIMER_WIDTH          num_startOfFrame;
+   PORT_RADIOTIMER_WIDTH          num_endOfFrame;
 } ieee154e_dbg_t;
 
 //=========================== prototypes ======================================
@@ -177,12 +177,12 @@ typedef struct {
 // admin
 void               ieee154e_init();
 // public
-PORT_TIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
+PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
 bool               ieee154e_isSynch();
 void               ieee154e_getAsn(uint8_t* array);
 // events
-void               ieee154e_startOfFrame(PORT_TIMER_WIDTH capturedTime);
-void               ieee154e_endOfFrame(PORT_TIMER_WIDTH capturedTime);
+void               ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
+void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 // misc
 bool               debugPrint_asn();
 bool               debugPrint_isSync();
