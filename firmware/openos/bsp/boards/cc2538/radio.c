@@ -58,7 +58,10 @@ void radio_init() {
    
    // change state
    radio_vars.state          = RADIOSTATE_STOPPED;
-  
+   //flush fifos
+   CC2538_RF_CSP_ISFLUSHRX();
+   CC2538_RF_CSP_ISFLUSHTX();
+
    radio_off();
 
    //disable radio interrupts
@@ -166,8 +169,9 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
 void radio_reset() {
 	 /* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
 	  while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
-
+      //flush fifos
 	  CC2538_RF_CSP_ISFLUSHRX();
+	  CC2538_RF_CSP_ISFLUSHTX();
 
 	  /* Don't turn off if we are off as this will trigger a Strobe Error */
 	  if(HWREG(RFCORE_XREG_RXENABLE) != 0) {
@@ -200,6 +204,7 @@ void radio_setFrequency(uint8_t frequency) {
 
    // change state
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
+
    radio_off();
    // configure the radio to the right frequecy
    if((frequency < CC2538_RF_CHANNEL_MIN) || (frequency > CC2538_RF_CHANNEL_MAX)) {
@@ -211,7 +216,7 @@ void radio_setFrequency(uint8_t frequency) {
    HWREG(RFCORE_XREG_FREQCTRL) = (CC2538_RF_CHANNEL_MIN
         + (frequency - CC2538_RF_CHANNEL_MIN) * CC2538_RF_CHANNEL_SPACING);
 
-    radio_on();
+   radio_on();
    
    // change state
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
@@ -270,9 +275,8 @@ void radio_txEnable() {
    debugpins_radio_set();
    leds_radio_on();
 
-   // turn on radio's PLL
-   //do nothing??
-   radio_rfOn();
+   //do nothing -- radio is activated by the strobe on rx or tx
+   //radio_rfOn();
 
    // change state
    radio_vars.state = RADIOSTATE_TX_ENABLED;
@@ -297,14 +301,6 @@ void radio_txNow() {
    while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE))){
 	   count++; //debug
    }
-
-
-//   if (radio_vars.startFrame_cb!=NULL) {
-//      // call the callback
-//      val=radiotimer_getCapturedTime();
-//      radio_vars.startFrame_cb(val);
-//   }
-
 }
 
 //===== RX
@@ -314,10 +310,8 @@ void radio_rxEnable() {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
    //enable radio interrupts
-   enable_radio_interrupts();
-   // put radio in reception mode
-   // do nothing as we do not want to receive anything yet.
 
+   // do nothing as we do not want to receive anything yet.
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
@@ -327,10 +321,16 @@ void radio_rxEnable() {
 }
 
 void radio_rxNow() {
+	//empty buffer before receiving
+	//CC2538_RF_CSP_ISFLUSHRX();
+
+	//enable radio interrupts
+	enable_radio_interrupts();
+
 	CC2538_RF_CSP_ISRXON();
 	// busy wait until radio really listening
 	while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_RX_ACTIVE)));
-    // nothing to do
+
 }
 
 void radio_getReceivedFrame(uint8_t* pBufRead,
@@ -340,31 +340,29 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                             uint8_t* pLqi,
                             uint8_t* pCrc) {
    uint8_t crc_corr,i;
-   //fifo empty --  nothing to read
-   if((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_FIFOP) == 0) {
-       return ;
-   }
-   
+
+   uint8_t len=0;
+
    /* Check the length */
-   *pLenRead = HWREG(RFCORE_SFR_RFDATA); //first byte is len
+    len = HWREG(RFCORE_SFR_RFDATA); //first byte is len
 
 
    /* Check for validity */
-    if(*pLenRead > CC2538_RF_MAX_PACKET_LEN) {
+    if(len > CC2538_RF_MAX_PACKET_LEN) {
       /* wrong len */
       CC2538_RF_CSP_ISFLUSHRX();
       return;
     }
 
 
-    if(*pLenRead <= CC2538_RF_MIN_PACKET_LEN) {
+    if(len <= CC2538_RF_MIN_PACKET_LEN) {
         //too short
     	CC2538_RF_CSP_ISFLUSHRX();
         return;
     }
 
     //check if this fits to the buffer
-    if(*pLenRead > maxBufLen) {
+    if(len > maxBufLen) {
         CC2538_RF_CSP_ISFLUSHRX();
         return;
      }
@@ -375,18 +373,18 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
     // -  [1B]     RSSI
     // - *[2B]     CRC
 
-
-    for(i = 0; i < *pLenRead; ++i) {
+  //skip first byte is len
+    for(i = 0; i < len; ++i) {
           pBufRead[i] = HWREG(RFCORE_SFR_RFDATA);
     }
 
 
     *pRssi = ((int8_t)HWREG(RFCORE_SFR_RFDATA)) - RSSI_OFFSET;
     crc_corr = HWREG(RFCORE_SFR_RFDATA);
-    *pCrc= crc_corr & CRC_BIT_MASK;
+    *pCrc = crc_corr & CRC_BIT_MASK;
+    *pLenRead = len;
     //flush it
     CC2538_RF_CSP_ISFLUSHRX();
-   
 }
 
 //=========================== private =========================================
@@ -422,7 +420,6 @@ port_INLINE void radio_off(){
 	    CC2538_RF_CSP_ISRFOFF();
 	    //clear fifo isr flag
 	    HWREG(RFCORE_SFR_RFIRQF0) = ~(RFCORE_SFR_RFIRQF0_FIFOP|RFCORE_SFR_RFIRQF0_RXPKTDONE);
-
 	}
 
 }
