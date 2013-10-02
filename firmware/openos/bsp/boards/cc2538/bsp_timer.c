@@ -95,13 +95,11 @@ void bsp_timer_reset() {
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 	PORT_TIMER_WIDTH newCompareValue, current;
 	PORT_TIMER_WIDTH temp_last_compare_value;
-    bool entered=false;
 
 	if (!bsp_timer_vars.initiated){
 		//as the timer runs forever the first time it is turned on has a weired value
 		bsp_timer_vars.last_compare_value=SleepModeTimerCountGet();
 		bsp_timer_vars.initiated=true;
-		entered=true;
 	}
 
 	temp_last_compare_value = bsp_timer_vars.last_compare_value;

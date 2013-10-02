@@ -13,6 +13,7 @@ to return the board's description.
 #include <stdint.h>
 #include <string.h>
 #include "cpu.h"
+#include "interrupt.h"
 //=========================== defines =========================================
 
 #define port_INLINE                         inline

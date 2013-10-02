@@ -283,7 +283,7 @@ void radio_txEnable() {
 }
 
 void radio_txNow() {
-   PORT_TIMER_WIDTH val,count;
+   PORT_TIMER_WIDTH count;
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
 
