@@ -17,11 +17,10 @@
 
 //=========================== prototypes ======================================
 
-owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header,  uint8_t fw_SendOrfw_Rcv);
+owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t *msg,  ipv6_header_iht ipv6_header, rpl_hopoption_ht hopbyhop_header, uint8_t fw_SendOrfw_Rcv);
 void    forwarding_getNextHop_RoutingTable(open_addr_t* destination, open_addr_t* addressToWrite);
 owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header);
-port_INLINE bool forwarding_extractHopByHopHeader(OpenQueueEntry_t *msg, rpl_hopbyhop_ht *hopbyhop_header);
-port_INLINE void forwarding_createHopByHopHeader(OpenQueueEntry_t* msg, rpl_hopbyhop_ht* hopbyhop_header, uint8_t flags);
+void forwarding_createHopByHopOption(rpl_hopoption_ht *hopbyhop_opt, uint8_t flags);
 
 //=========================== public ==========================================
 
@@ -42,7 +41,7 @@ at this mote.
 */
 owerror_t forwarding_send(OpenQueueEntry_t* msg) { 
    ipv6_header_iht ipv6_header;
-  
+   rpl_hopoption_ht hopbyhop_opt;
 
    open_addr_t*    myprefix;
    open_addr_t*    myadd64;
@@ -66,8 +65,10 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    //this is done here as send_internal is used by forwarding of packets as well which 
    //carry a hlim. This value is required to be set to a value as the following function can decrement it
    ipv6_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
-       
-   return forwarding_send_internal_RoutingTable(msg,ipv6_header,PCKTSEND);
+    //create hop  by hop option
+   forwarding_createHopByHopOption(&hopbyhop_opt, 0x00); //flags are 0x00 -- TODO check and define macro   
+   
+   return forwarding_send_internal_RoutingTable(msg,ipv6_header,hopbyhop_opt,PCKTSEND);
 }
 
 /**
@@ -119,22 +120,33 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 void forwarding_receive(OpenQueueEntry_t* msg, 
                         ipv6_header_iht ipv6_header, 
                         ipv6_hopbyhop_ht ipv6_hop_header, 
-                        rpl_hopbyhop_option_ht hop_by_hop_option) {
+                        rpl_hopoption_ht hop_by_hop_option) {
                           
+   uint8_t temp_flags;
+   
    // take ownership
    msg->owner                  = COMPONENT_FORWARDING;
    
-   // populate packets metadata with l4 information
-   msg->l4_protocol            = ipv6_hop_header.next_header;
-   msg->l4_protocol_compressed = ipv6_hop_header.next_header_compressed; // rfc 6282
    
-   // populate packets metadata with l3 information
+   //contains a 
+   if (ipv6_header.next_header==IANA_IPv6HOPOPT){
+      // populate packets metadata with l4 information
+      msg->l4_protocol            = ipv6_hop_header.nextHeader;
+      msg->l4_protocol_compressed = ipv6_hop_header.next_header_compressed; // rfc 6282   
+      
+      //process HOP BY HOP header
+      
+      
+   }else{
+      msg->l4_protocol            = ipv6_header.next_header;
+      msg->l4_protocol_compressed = ipv6_header.next_header_compressed; // rfc 6282   
+   }
+   
+     // populate packets metadata with l3 information
    memcpy(&(msg->l3_destinationAdd),&ipv6_header.dest,sizeof(open_addr_t));
    memcpy(&(msg->l3_sourceAdd),     &ipv6_header.src, sizeof(open_addr_t));
-  
-   //process HOP bY HOP header
-   //TODO
-
+   
+   
    if (
           (
              idmanager_isMyAddress(&ipv6_header.dest)
@@ -142,9 +154,10 @@ void forwarding_receive(OpenQueueEntry_t* msg,
              packetfunctions_isBroadcastMulticast(&ipv6_header.dest)
           )
           &&
+          //ipv6 header - next header will be IANA_IPv6HOPOPT or IANA_IPv6ROUTE
           ipv6_header.next_header!=IANA_IPv6ROUTE
        ) {
-      // this packet is for me, but no routing header.
+      // this packet is for me, but no src routing header.
       
       // indicate received packet to upper layer
       switch(msg->l4_protocol) {
@@ -165,17 +178,37 @@ void forwarding_receive(OpenQueueEntry_t* msg,
       }
    } else {
       // this packet is not for me: relay
-     
-     //process HOP bY HOP header
-      //TODO
-      
+   
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
       
       if (ipv6_header.next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
+          
+          //process HOP bY HOP header
+          temp_flags = hop_by_hop_option.flags;
+          if ((temp_flags & O_FLAG)!=0){
+            //error wrong direction
+            //what todo? print the error
+            openserial_printError(COMPONENT_FORWARDING,ERR_WRONG_DIRECTION,
+                                  (errorparameter_t)1,
+                                  (errorparameter_t)1);
+          }
+          if (hop_by_hop_option.senderRank > neighbors_getMyDAGrank()){
+            //wrong rank relation.. loop detected
+            temp_flags |= R_FLAG; //set r flag.
+            openserial_printError(COMPONENT_FORWARDING,ERR_LOOP_DETECTED,
+                                  (errorparameter_t) hop_by_hop_option.senderRank,
+                                  (errorparameter_t) neighbors_getMyDAGrank());
+          }
+            
+          //O flag should always be 0 as this is upstream route.
+          
+          forwarding_createHopByHopOption(&hop_by_hop_option, temp_flags); 
+   
+        
          // resend as if from upper layer 
-         if (forwarding_send_internal_RoutingTable(msg, ipv6_header,PCKTFORWARD)==E_FAIL) {
+         if (forwarding_send_internal_RoutingTable(msg, ipv6_header,hop_by_hop_option,PCKTFORWARD)==E_FAIL) {
             openqueue_freePacketBuffer(msg);
          }
       } else {
@@ -201,10 +234,8 @@ void forwarding_receive(OpenQueueEntry_t* msg,
 \param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
-owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
+owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, rpl_hopoption_ht hopbyhop_opt, uint8_t fw_SendOrfw_Rcv) {
    
-    rpl_hopbyhop_option_ht hopbyhop_opt;
-      
    // retrieve the next hop from the routing table
    forwarding_getNextHop_RoutingTable(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
    if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
@@ -213,9 +244,6 @@ owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_head
                             (errorparameter_t)0);
       return E_FAIL;
    }
-   
-   //create hop  by hop option
-   forwarding_createHopByHopOption(&hopbyhop_opt, 0x00); //flags are 0x00 -- TODO check and define macro  
    
    // send to next lower layer
    return iphc_sendFromForwarding(msg, ipv6_header, &hopbyhop_opt,fw_SendOrfw_Rcv);
@@ -242,10 +270,10 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_hea
    uint8_t         octetsAddressSize;
    open_addr_t*    prefix;
    rpl_routing_ht* rpl_routing_hdr;
+  
+   rpl_hopoption_ht hopbyhop_opt; 
    
-   
-   //TODO -- check OPTION HOP BY HOP HEADER
-   
+   memset(&hopbyhop_opt,0,sizeof(rpl_hopoption_ht));//reset everything
    
    // get my prefix
    prefix               = idmanager_getMyID(ADDR_PREFIX);
@@ -407,7 +435,7 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_hea
    }
    
    // send to next lower layer
-   return iphc_sendFromForwarding(msg, ipv6_header, PCKTFORWARD);
+   return iphc_sendFromForwarding(msg, ipv6_header,&hopbyhop_opt, PCKTFORWARD);
 }
 
 /**
@@ -438,7 +466,7 @@ void forwarding_getNextHop_RoutingTable(open_addr_t* destination128b, open_addr_
  */
 
 
-port_INLINE void forwarding_createHopByHopOption(ipv6_hopbyhop_option_ht* hopbyhop_opt, uint8_t flags) {   
+void forwarding_createHopByHopOption(rpl_hopoption_ht *hopbyhop_opt, uint8_t flags) {   
         //set the rpl hop by hop header
 	hopbyhop_opt->optionType = RPL_HOPBYHOP_HEADER_OPTION_TYPE;
 	//8-bit field indicating the length of the option, in
@@ -446,5 +474,5 @@ port_INLINE void forwarding_createHopByHopOption(ipv6_hopbyhop_option_ht* hopbyh
 	hopbyhop_opt->optionLen = 0x04; //4-bytes, flags+instanceID+senderrank - no sub-tlvs
 	hopbyhop_opt->flags = flags;
 	hopbyhop_opt->rplInstanceID = icmpv6rpl_getRPLIntanceID(); //getit..
-	hopbyhop_opt->senderRank = neighbors_getMyDAGrank(); //getit
+	hopbyhop_opt->senderRank = neighbors_getMyDAGrank(); //TODO change to DAGRAnk(rank) instead of rank
 }

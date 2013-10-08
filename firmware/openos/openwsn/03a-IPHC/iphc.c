@@ -32,15 +32,15 @@ owerror_t prependIPv6Header(
 );
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg);
 //hop by hop header
-void prependIPv6HopByHopHeader(OpenQueueEntry_t* msg, uint8_t nextheader, rpl_hopbyhop_option_ht* hopbyhop_option);
-void retrieveIPv6HopByHopHeader(OpenQueueEntry_t* msg,ipv6_hopbyhop_ht* hopbyhop_header, rpl_hopbyhop_option_ht* rpl_option);
+void prependIPv6HopByHopHeader(OpenQueueEntry_t* msg,uint8_t nextheader, bool nh, rpl_hopoption_ht *hopbyhop_option);
+void retrieveIPv6HopByHopHeader(OpenQueueEntry_t* msg, ipv6_hopbyhop_ht *hopbyhop_header, rpl_hopoption_ht *rpl_option);
 //=========================== public ==========================================
 
 void iphc_init() {
 }
 
 //send from upper layer: I need to add 6LoWPAN header
-owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, rpl_hopbyhop_option_ht *hopbyhop_option, uint8_t fw_SendOrfw_Rcv) {
+owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, rpl_hopoption_ht *hopbyhop_option, uint8_t fw_SendOrfw_Rcv) {
    open_addr_t  temp_dest_prefix;
    open_addr_t  temp_dest_mac64b;
    open_addr_t* p_dest;
@@ -129,9 +129,10 @@ owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_he
    // decrement the packet's hop limit
    ipv6_header.hop_limit--;
    
-    //prepend Option hop by hop header
-   prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, hopbyhop_option);
-   
+    //prepend Option hop by hop header except when src routing -- this is a little trick as src routing is using an option header set to 0x00
+   if (hopbyhop_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE){
+      prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, hopbyhop_option);
+   }
    //then regular header
    if (prependIPv6Header(msg,
             IPHC_TF_ELIDED,
@@ -184,13 +185,13 @@ void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 void iphc_receive(OpenQueueEntry_t* msg) {
    ipv6_header_iht ipv6_header;
    ipv6_hopbyhop_ht ipv6_hop_header;
-   rpl_hopbyhop_option_ht hop_by_hop_option;
+   rpl_hopoption_ht hop_by_hop_option;
    
    msg->owner  = COMPONENT_IPHC;
    //retrieve hop by hop header
    retrieveIPv6HopByHopHeader(msg,&ipv6_hop_header,&hop_by_hop_option);
    //toss the header + option +tlv on it if any
-   packetfunctions_tossHeader(msg,sizeof(ipv6_hopbyhop_ht)+ipv6_hop_header.HdrExtLen+sizeof(rpl_hopbyhop_option_ht));
+   packetfunctions_tossHeader(msg,sizeof(ipv6_hopbyhop_ht)+ipv6_hop_header.HdrExtLen+sizeof(rpl_hopoption_ht));
    
    //then regular header
    ipv6_header = retrieveIPv6Header(msg);
@@ -206,15 +207,15 @@ void iphc_receive(OpenQueueEntry_t* msg) {
 //=========================== private =========================================
 
 
-void prependIPv6HopByHopHeader(OpenQueueEntry_t* msg,uint8_t nextheader, boolean nh, rpl_hopbyhop_option_ht* hopbyhop_option){
+void prependIPv6HopByHopHeader(OpenQueueEntry_t *msg,uint8_t nextheader, bool nh, rpl_hopoption_ht *hopbyhop_option){
    
     //copy them in reverse order, first option later header
-    packetfunctions_reserveHeaderSize(msg,sizeof(rpl_hopbyhop_option_ht));
-    memcpy(msg->payload,hopbyhop_option,sizeof(rpl_hopbyhop_option_ht));
+    packetfunctions_reserveHeaderSize(msg,sizeof(rpl_hopoption_ht));
+    memcpy(msg->payload,hopbyhop_option,sizeof(rpl_hopoption_ht));
     
     //hdr len as defined by rfc6282 sect 4.2
     packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-   *((uint8_t*)(msg->payload)) = sizeof(rpl_hopbyhop_option_ht);
+   *((uint8_t*)(msg->payload)) = sizeof(rpl_hopoption_ht);
     
     //next header
     switch (nh) {
@@ -229,17 +230,14 @@ void prependIPv6HopByHopHeader(OpenQueueEntry_t* msg,uint8_t nextheader, boolean
          break;
       case IPHC_NH_COMPRESSED:
          packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-         *((uint8_t*)(msg->payload)) = NHC_IPv6EXT_ID | IPHC_NH_COMPRESSED; //mark last bit as 1 -- see rfc 6282 sect 4.2
+         *((uint8_t*)(msg->payload)) = NHC_IPv6EXT_ID | 0x01; //mark last bit as 1 -- see rfc 6282 sect 4.2
         break;
       default:
          openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)3,
                                (errorparameter_t)nh);
-         return E_FAIL;
    }
 
-        
-   
 }
 
 owerror_t prependIPv6Header(
@@ -434,11 +432,12 @@ owerror_t prependIPv6Header(
 
 
 
-void retrieveIPv6HopByHopHeader(OpenQueueEntry_t* msg,ipv6_hopbyhop_ht* hopbyhop_header, rpl_hopbyhop_option_ht* rpl_option){
+void retrieveIPv6HopByHopHeader(OpenQueueEntry_t *msg,ipv6_hopbyhop_ht *hopbyhop_header, rpl_hopoption_ht *rpl_option){
+  uint8_t temp_8b;
   
   hopbyhop_header->headerlen=0;
    
-  hopbyhop_header->lowpan_nhc = *((uint8_t*)(msg->payload)+headerlen);
+  hopbyhop_header->lowpan_nhc = *((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen);
   hopbyhop_header->headerlen += sizeof(uint8_t);   
   
    //next header
@@ -459,7 +458,7 @@ void retrieveIPv6HopByHopHeader(OpenQueueEntry_t* msg,ipv6_hopbyhop_ht* hopbyhop
       default:
          openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)7,
-                               (errorparameter_t)nh);
+                               (errorparameter_t)hopbyhop_header->lowpan_nhc);
          break;
    }
    
@@ -467,8 +466,8 @@ void retrieveIPv6HopByHopHeader(OpenQueueEntry_t* msg,ipv6_hopbyhop_ht* hopbyhop
    hopbyhop_header->HdrExtLen =*((uint8_t*)(msg->payload)+hopbyhop_header->headerlen);
    hopbyhop_header->headerlen+= sizeof(uint8_t);  
    //copy the options
-   memcpy(rpl_option,((uint8_t*)(msg->payload)+hopbyhop_header->headerlen),sizeof(rpl_hopbyhop_option_ht));
-   hopbyhop_header->headerlen+= sizeof(rpl_hopbyhop_option_ht);  
+   memcpy(rpl_option,((uint8_t*)(msg->payload)+hopbyhop_header->headerlen),sizeof(rpl_hopoption_ht));
+   hopbyhop_header->headerlen+= sizeof(rpl_hopoption_ht);  
    
    //now in case nh compressed:
     /*
@@ -483,7 +482,7 @@ void retrieveIPv6HopByHopHeader(OpenQueueEntry_t* msg,ipv6_hopbyhop_ht* hopbyhop
          hopbyhop_header->nextHeader = IANA_UDP;
       }else {
          // the next header could be an IPv6 extension header, or misformed
-         hopbyhop_header->next_header = IANA_UNDEFINED;
+         hopbyhop_header->nextHeader = IANA_UNDEFINED;
          openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
                                (errorparameter_t)14,
                                (errorparameter_t)hopbyhop_header->nextHeader);
@@ -493,7 +492,7 @@ void retrieveIPv6HopByHopHeader(OpenQueueEntry_t* msg,ipv6_hopbyhop_ht* hopbyhop
 
 
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
-   uint8_t         temp_8b,temp_aux;
+   uint8_t         temp_8b;
    open_addr_t     temp_addr_16b;
    open_addr_t     temp_addr_64b;
    ipv6_header_iht ipv6_header;

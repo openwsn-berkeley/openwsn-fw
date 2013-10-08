@@ -8,6 +8,7 @@
 \{
 */
 
+#include "openwsn.h"
 //=========================== define ==========================================
 
 #define IPHC_DEFAULT_HOP_LIMIT 65
@@ -136,6 +137,7 @@ typedef struct {
   /*see rfc 6282 section 4.2 The first 7 bits serve as an identifier for the IPv6 Extension Header immediately
    following the LOWPAN_NHC octet.  The remaining bit indicates whether
    or not the following header utilizes LOWPAN_NHC encoding. */
+   uint8_t    headerlen;// counter for internal use
    bool       next_header_compressed;
    uint8_t    lowpan_nhc; 
    uint8_t    nextHeader;//IPv6 hop by hop header field see rfc 2460 section 4.3 
@@ -152,16 +154,29 @@ typedef struct {
 } ipv6_hopbyhop_ht;
 PRAGMA(pack());
 
-
+PRAGMA(pack(1));
+typedef struct {
+   //RPL hop by hop option header as described by RFC 6553 p.3
+   uint8_t    optionType;    ///0x63.
+   uint8_t    optionLen;     /////8-bit field indicating the length of the option, in octets, excluding the Option Type and Opt Data Len fields.
+   uint8_t    flags;         //ORF00000.
+   uint8_t    rplInstanceID;  //instanceid
+   uint16_t   senderRank;    //sender rank
+} rpl_hopoption_ht;
+PRAGMA(pack());
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 void    iphc_init();
-owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, rpl_hopbyhop_option_ht* hopbyhop_option, uint8_t fw_SendOrfw_Rcv);
+owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, 
+                                  ipv6_header_iht ipv6_header, 
+                                  rpl_hopoption_ht *hopbyhop_option, 
+                                  uint8_t fw_SendOrfw_Rcv);
+
 owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg);
-void    iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error);
-void    iphc_receive(OpenQueueEntry_t* msg);
+void    iphc_sendDone(OpenQueueEntry_t *msg, owerror_t error);
+void    iphc_receive(OpenQueueEntry_t *msg);
 
 /**
 \}
