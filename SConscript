@@ -169,6 +169,9 @@ else:
     if env['board'] in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
+    if env['fastsim']==1:
+        env.Append(CPPDEFINES = {'FASTSIM': None})
+    
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
     
