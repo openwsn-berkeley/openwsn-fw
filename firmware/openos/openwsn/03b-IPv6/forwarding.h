@@ -38,19 +38,19 @@ typedef struct {
 } rpl_routing_ht;
 PRAGMA(pack());
 
-//RPL hop by hop option header as described by RFC 6553 p.3
 PRAGMA(pack(1));
 typedef struct {
+   //RPL hop by hop option header as described by RFC 6553 p.3
    uint8_t    optionType;    ///0x63.
    uint8_t    optionLen;     /////8-bit field indicating the length of the option, in octets, excluding the Option Type and Opt Data Len fields.
    uint8_t    flags;         //ORF00000.
    uint8_t    rplInstanceID;  //instanceid
    uint16_t   senderRank;    //sender rank
-} rpl_hopbyhop_ht;
+} rpl_hopbyhop_option_ht;
 PRAGMA(pack());
 
 
-
+   
 
 //=========================== variables =======================================
 

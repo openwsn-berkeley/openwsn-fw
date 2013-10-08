@@ -54,7 +54,7 @@ enum {
 
 // protocol numbers, as defined by the IANA
 enum {
-   IANA_UNDEFINED                      = 0x00,
+   IANA_IPv6HOPOPT                     = 0x00,
    IANA_TCP                            = 0x06,
    IANA_UDP                            = 0x11,
    IANA_IPv6ROUTE                      = 0x2b,
@@ -68,6 +68,7 @@ enum {
    IANA_ICMPv6_RPL_DIO                 = 0x01,
    IANA_ICMPv6_RPL_DAO                 = 0x02,
    IANA_RSVP                           =   46,
+   IANA_UNDEFINED                      =  250, //use an unassigned
 };
 
 // well known ports (which we define)
