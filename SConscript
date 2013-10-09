@@ -170,7 +170,8 @@ else:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if env['fastsim']==1:
-        env.Append(CPPDEFINES = {'FASTSIM': None})
+        env.Append(CPPDEFINES = {'FASTSIM':  None})
+        #env.Append(CPPDEFINES = {'TRACE_ON': None})
     
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})

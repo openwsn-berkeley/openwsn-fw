@@ -324,7 +324,19 @@ void openserial_startOutput() {
    DISABLE_INTERRUPTS();
    openserial_vars.mode=MODE_OUTPUT;
    if (openserial_vars.outputBufFilled) {
+#ifdef FASTSIM
+      // in FASTSIM mode, send all the bytes in the outputBuf at once
+      
+      uart_writeBuffer_FASTSIM(
+         &openserial_vars.outputBuf[openserial_vars.outputBufIdxR],
+         openserial_vars.outputBufIdxW-openserial_vars.outputBufIdxR
+      );
+      openserial_vars.outputBufIdxR = openserial_vars.outputBufIdxW;
+#else
+      // in normal mode, send a single byte
+      
       uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
+#endif
    } else {
       openserial_stop();
    }

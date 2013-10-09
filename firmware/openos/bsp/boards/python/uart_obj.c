@@ -153,6 +153,43 @@ void uart_writeByte(OpenMote* self, uint8_t byteToWrite) {
 #endif
 }
 
+void uart_writeBuffer_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t len) {
+   PyObject*   frame;
+   PyObject*   arglist;
+   PyObject*   result;
+   PyObject*   item;
+   int8_t      i;
+   int         res;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: uart_writeBuffer_FASTSIM(buffer=%x,len=%d)... \n",self,buffer,len);
+#endif
+   
+   // forward to Python
+   frame        = PyList_New(len);
+   for (i=0;i<len;i++) {
+      item    = PyInt_FromLong(buffer[i]);
+      res     = PyList_SetItem(frame,i,item);
+      if (res!=0) {
+         printf("[CRITICAL] uart_writeBuffer_FASTSIM() failed setting list item\r\n");
+         return;
+      }
+   }
+   arglist    = Py_BuildValue("(O)",frame);
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_uart_writeBuffer_FASTSIM],arglist);
+   if (result == NULL) {
+      printf("[CRITICAL] uart_writeBuffer_FASTSIM() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   Py_DECREF(arglist);
+   Py_DECREF(frame);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
+
 uint8_t uart_readByte(OpenMote* self) {
    PyObject*  result;
    uint8_t    returnVal;
