@@ -188,16 +188,21 @@ void iphc_receive(OpenQueueEntry_t* msg) {
    rpl_hopoption_ht hop_by_hop_option;
    
    msg->owner  = COMPONENT_IPHC;
-   //retrieve hop by hop header
-   retrieveIPv6HopByHopHeader(msg,&ipv6_hop_header,&hop_by_hop_option);
-   //toss the header + option +tlv on it if any
-   packetfunctions_tossHeader(msg,sizeof(ipv6_hopbyhop_ht)+ipv6_hop_header.HdrExtLen+sizeof(rpl_hopoption_ht));
    
    //then regular header
    ipv6_header = retrieveIPv6Header(msg);
+   
+  
    if (idmanager_getIsBridge()==FALSE ||
       packetfunctions_isBroadcastMulticast(&(ipv6_header.dest))) {
       packetfunctions_tossHeader(msg,ipv6_header.header_length);
+      
+      if (ipv6_header.next_header==IANA_IPv6HOPOPT){
+          //retrieve hop by hop header
+          retrieveIPv6HopByHopHeader(msg,&ipv6_hop_header,&hop_by_hop_option);
+          //toss the header + option +tlv on it if any
+          packetfunctions_tossHeader(msg,IPv6HOP_HDR_LEN+ipv6_hop_header.HdrExtLen);
+      }
       forwarding_receive(msg,ipv6_header,ipv6_hop_header,hop_by_hop_option);       //up the internal stack
    } else {
       openbridge_receive(msg);                   //out to the OpenVisualizer

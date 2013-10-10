@@ -12,7 +12,7 @@
 //=========================== define ==========================================
 
 #define IPHC_DEFAULT_HOP_LIMIT 65
-
+#define IPv6HOP_HDR_LEN         3
 
 enum IPHC_enums {
    IPHC_DISPATCH             = 5,
