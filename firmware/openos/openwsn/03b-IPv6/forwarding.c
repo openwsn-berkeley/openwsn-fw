@@ -194,7 +194,7 @@ void forwarding_receive(OpenQueueEntry_t* msg,
                                   (errorparameter_t)1,
                                   (errorparameter_t)1);
           }
-          if (hop_by_hop_option.senderRank > neighbors_getMyDAGrank()){
+          if (hop_by_hop_option.senderRank < neighbors_getMyDAGrank()){
             //wrong rank relation.. loop detected
             temp_flags |= R_FLAG; //set r flag.
             openserial_printError(COMPONENT_FORWARDING,ERR_LOOP_DETECTED,
