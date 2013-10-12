@@ -677,6 +677,9 @@ port_INLINE void activity_ti1ORri1() {
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+            
+            //TODO create Sync IE with JP and ASN
+            
             // fill in the ASN field of the ADV
             ieee154e_getAsn(ieee154e_vars.dataToSend->l2_payload);
             // record that I attempt to transmit this packet
