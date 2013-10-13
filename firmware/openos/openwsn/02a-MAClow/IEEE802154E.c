@@ -540,6 +540,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
       
+      //handle IEs
+      ieee802154e_processIEs();
       // break if invalid ADV
       if (isValidAdv(&ieee802514_header)==FALSE) {
          // break from the do-while loop and execute the clean-up code below
@@ -592,13 +594,39 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
    changeState(S_SYNCLISTEN);
 }
 
+port_INLINE void ieee802154e_processIEs()
+{
+  uint8_t ptr=0;
+  uint8_t temp_8b;
+  uint16_t temp_16b;
+  //candidate IE header
+  //first header IEs
+  
+  
+  //then payload IEs
+  
+  temp_8b = *((uint8_t*)(ieee154e_vars.dataReceived->payload)+ptr);
+  ptr++;
+  temp_16b = (temp_8b << 8) +*((uint8_t*)(ieee154e_vars.dataReceived->payload)+ptr);
+  if ((temp_16b & IEEE802154E_DESC_TYPE_LONG) == IEEE802154E_DESC_TYPE_LONG){
+  //long descriptor
+  }else{
+  //short descriptor
+  }
+    
+  
+}
+
+
 //======= TX
 
 port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
    open_addr_t neighbor;
    uint8_t  i;
-   
+   payload_IE_descriptor_t payload_IE_desc;
+   MLME_IE_subHeader_t mlme_subHeader;
+   synch_IE_t  syn_IE;
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
    
@@ -678,10 +706,27 @@ port_INLINE void activity_ti1ORri1() {
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
             
-            //TODO create Sync IE with JP and ASN
-            
+            //create Sync IE with JP and ASN
+            payload_IE_desc.length_groupid_type = (sizeof(MLME_IE_subHeader_t)+sizeof(synch_IE_t))<<IEEE802154E_PAYLOAD_DESC_LEN_SHIFT;
+            payload_IE_desc.length_groupid_type |=  (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); //
+            //copy header into the packet
+            packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend->l2_payload,sizeof(payload_IE_descriptor_t));
+            memcpy(&packetSent->l2_payload,&payload_IE_desc,sizeof(payload_IE_descriptor_t));
+
+            //copy mlme sub-header               
+            mlme_subHeader.length=sizeof(synch_IE_t);
+            mlme_subHeader.subID_type = (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT) | IEEE802154E_DESC_TYPE_SHORT;
+             
+            packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend->l2_payload,sizeof(MLME_IE_subHeader_t));
+            memcpy(&packetSent->l2_payload,&mlme_subHeader,sizeof(MLME_IE_subHeader_t));
+            //copy synch IE 
             // fill in the ASN field of the ADV
-            ieee154e_getAsn(ieee154e_vars.dataToSend->l2_payload);
+            ieee154e_getAsn(syn_IE.asn);
+            syn_IE.join_priority = 0xff; //poipoi -- use dagrank(rank) 
+             
+            packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend->l2_payload,sizeof(synch_IE_t));
+            memcpy(&packetSent->l2_payload,&syn_IE,sizeof(synch_IE_t));
+             
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1

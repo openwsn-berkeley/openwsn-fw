@@ -26,6 +26,15 @@
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 
+//15.4e information elements related
+#define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT 0x04
+#define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  0x10 //includes shift 1
+#define IEEE802154E_DESC_TYPE_LONG      0x01
+#define IEEE802154E_DESC_TYPE_SHORT     0x00
+
+#define IEEE802154E_MLME_SYNC_IE_SUBID  0x1a
+#define IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT 1
+
 /**
 When a packet is received, it is written inside the OpenQueueEntry_t->packet
 buffer, starting at the byte defined below. When a packet is relayed, it
@@ -178,30 +187,30 @@ typedef struct {
 typedef struct{
    uint8_t length;
    uint8_t elementid_type;
-}header_IE_descriptor; //header descriptor. elementid will be 0 as described in 15.4e pag. 81
+}header_IE_descriptor_t; //header descriptor. elementid will be 0 as described in 15.4e pag. 81
 
 //the content for ack ie -- it is a header IE with values - element id =0x1e len=2 type=0
 typedef struct {
     int16_t timesync_info;
-}ack_timecorrection_IE;
+}ack_timecorrection_IE_t;
 
 //the header for all payload IEs
-typedef struct{
-   uint8_t length; //bytes on the IE content- that is the embedded MLME or Header IE.
-   uint8_t groupid_type; //1 | 1
-}payload_IE_descriptor; // payload descriptor. groupid will be 1 as described in 15.4e pag. 81
+typedef struct{//11b len 4b gid 1b type
+   uint16_t length_groupid_type; //bytes on the IE content- that is the embedded MLME or Header IE.
+  //groupid == 0x01 MLME | type long = 1
+}payload_IE_descriptor_t; // payload descriptor. groupid will be 1 as described in 15.4e pag. 81
 
 //MLME sub id header appended to payload descriptor. we use group id=1 type=1
 typedef struct{
    uint8_t length;
    uint8_t subID_type;
-}MLME_IE_subHeader;
+}MLME_IE_subHeader_t;
 
 //the Synchronization IE. it is a payload IE with values - subid=0x1a type=0 (short) len=6 
 typedef struct {
     uint8_t asn[5];
     uint8_t join_priority;
-}synch_IE;
+}synch_IE_t;
 
 
 //=========================== prototypes ======================================
