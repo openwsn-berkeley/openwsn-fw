@@ -121,6 +121,7 @@ enum {
    MOTE_NOTIF_uart_clearTxInterrupts,
    MOTE_NOTIF_uart_writeByte,
    MOTE_NOTIF_uart_writeCircularBuffer_FASTSIM,
+   MOTE_NOTIF_uart_writeBufferByLen_FASTSIM,
    MOTE_NOTIF_uart_readByte,
    // last
    MOTE_NOTIF_LAST

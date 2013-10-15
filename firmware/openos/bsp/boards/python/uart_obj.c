@@ -130,6 +130,7 @@ void uart_clearTxInterrupts(OpenMote* self) {
 #endif
 }
 
+#ifdef FASTSIM
 void uart_writeByte(OpenMote* self, uint8_t byteToWrite) {
    PyObject*   result;
    PyObject*   arglist;
@@ -152,6 +153,11 @@ void uart_writeByte(OpenMote* self, uint8_t byteToWrite) {
    printf("C@0x%x: ...done.\n",self);
 #endif
 }
+#else
+uint8_t uart_writeByte(OpenMote* self, uint8_t byteToWrite) {
+   printf("[CRITICAL] uart_writeByte() should not be called\r\n");
+}
+#endif
 
 void uart_writeCircularBuffer_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t* outputBufIdxR, uint8_t* outputBufIdxW) {
    PyObject*   frame;
@@ -188,6 +194,47 @@ void uart_writeCircularBuffer_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t* 
    result     = PyObject_CallObject(self->callback[MOTE_NOTIF_uart_writeCircularBuffer_FASTSIM],arglist);
    if (result == NULL) {
       printf("[CRITICAL] uart_writeCircularBuffer_FASTSIM() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   Py_DECREF(arglist);
+   Py_DECREF(frame);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
+
+void uart_writeBufferByLen_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t len) {
+   PyObject*   frame;
+   PyObject*   arglist;
+   PyObject*   result;
+   PyObject*   item;
+   uint8_t     i;
+   int         res;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: uart_writeBufferByLen_FASTSIM(buffer=%x,len=%d)... \n",
+      self,
+      buffer,
+      len
+   );
+#endif
+   
+   // forward to Python
+   frame      = PyList_New(0);
+   for (i=0;i<len;i++) {
+      item    = PyInt_FromLong(buffer[i]);
+      res     = PyList_Append(frame,item);
+      if (res!=0) {
+         printf("[CRITICAL] uart_writeBufferByLen_FASTSIM() failed setting list item\r\n");
+         return;
+      }
+   }
+   arglist    = Py_BuildValue("(O)",frame);
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_uart_writeBufferByLen_FASTSIM],arglist);
+   if (result == NULL) {
+      printf("[CRITICAL] uart_writeBufferByLen_FASTSIM() returned NULL\r\n");
       return;
    }
    Py_DECREF(result);

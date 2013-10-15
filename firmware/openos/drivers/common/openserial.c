@@ -256,8 +256,11 @@ void openserial_startInput() {
    openserial_vars.mode           = MODE_INPUT;
    openserial_vars.reqFrameIdx    = 0;
 #ifdef FASTSIM
-   // poipoi
-   uart_writeByte(openserial_vars.reqFrame[openserial_vars.reqFrameIdx]);
+   uart_writeBufferByLen_FASTSIM(
+      openserial_vars.reqFrame,
+      sizeof(openserial_vars.reqFrame)
+   );
+   openserial_vars.reqFrameIdx = sizeof(openserial_vars.reqFrame);
 #else
    uart_writeByte(openserial_vars.reqFrame[openserial_vars.reqFrameIdx]);
 #endif
@@ -330,12 +333,6 @@ void openserial_startOutput() {
    openserial_vars.mode=MODE_OUTPUT;
    if (openserial_vars.outputBufFilled) {
 #ifdef FASTSIM
-      
-      printf("outputBufIdxR=%x outputBufIdxW=%x\n",
-         &openserial_vars.outputBufIdxR,
-         &openserial_vars.outputBufIdxW
-      );
-      
       uart_writeCircularBuffer_FASTSIM(
          openserial_vars.outputBuf,
          &openserial_vars.outputBufIdxR,
