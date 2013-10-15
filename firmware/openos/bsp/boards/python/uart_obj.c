@@ -153,32 +153,41 @@ void uart_writeByte(OpenMote* self, uint8_t byteToWrite) {
 #endif
 }
 
-void uart_writeBuffer_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t len) {
+void uart_writeCircularBuffer_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t* outputBufIdxR, uint8_t* outputBufIdxW) {
    PyObject*   frame;
    PyObject*   arglist;
    PyObject*   result;
    PyObject*   item;
-   int8_t      i;
    int         res;
    
 #ifdef TRACE_ON
-   printf("C@0x%x: uart_writeBuffer_FASTSIM(buffer=%x,len=%d)... \n",self,buffer,len);
+   printf("C@0x%x: uart_writeCircularBuffer_FASTSIM(buffer=%x,outputBufIdxR=%x,outputBufIdxW=%x)... \n",
+      self,
+      buffer,
+      outputBufIdxR,
+      outputBufIdxW
+   );
 #endif
    
    // forward to Python
-   frame        = PyList_New(len);
-   for (i=0;i<len;i++) {
-      item    = PyInt_FromLong(buffer[i]);
-      res     = PyList_SetItem(frame,i,item);
+   frame      = PyList_New(0);
+   while (*outputBufIdxR!=*outputBufIdxW) {
+      
+      // get element at outputBufIdxR
+      item    = PyInt_FromLong(buffer[*outputBufIdxR]);
+      res     = PyList_Append(frame,item);
       if (res!=0) {
-         printf("[CRITICAL] uart_writeBuffer_FASTSIM() failed setting list item\r\n");
+         printf("[CRITICAL] uart_writeCircularBuffer_FASTSIM() failed setting list item\r\n");
          return;
       }
+      
+      // increment index
+      (*outputBufIdxR)++;
    }
    arglist    = Py_BuildValue("(O)",frame);
-   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_uart_writeBuffer_FASTSIM],arglist);
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_uart_writeCircularBuffer_FASTSIM],arglist);
    if (result == NULL) {
-      printf("[CRITICAL] uart_writeBuffer_FASTSIM() returned NULL\r\n");
+      printf("[CRITICAL] uart_writeCircularBuffer_FASTSIM() returned NULL\r\n");
       return;
    }
    Py_DECREF(result);

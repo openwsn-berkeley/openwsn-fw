@@ -255,7 +255,12 @@ void openserial_startInput() {
    openserial_vars.busyReceiving  = FALSE;
    openserial_vars.mode           = MODE_INPUT;
    openserial_vars.reqFrameIdx    = 0;
+#ifdef FASTSIM
+   // poipoi
    uart_writeByte(openserial_vars.reqFrame[openserial_vars.reqFrameIdx]);
+#else
+   uart_writeByte(openserial_vars.reqFrame[openserial_vars.reqFrameIdx]);
+#endif
    ENABLE_INTERRUPTS();
 }
 
@@ -325,16 +330,18 @@ void openserial_startOutput() {
    openserial_vars.mode=MODE_OUTPUT;
    if (openserial_vars.outputBufFilled) {
 #ifdef FASTSIM
-      // in FASTSIM mode, send all the bytes in the outputBuf at once
       
-      uart_writeBuffer_FASTSIM(
-         &openserial_vars.outputBuf[openserial_vars.outputBufIdxR],
-         openserial_vars.outputBufIdxW-openserial_vars.outputBufIdxR
+      printf("outputBufIdxR=%x outputBufIdxW=%x\n",
+         &openserial_vars.outputBufIdxR,
+         &openserial_vars.outputBufIdxW
       );
-      openserial_vars.outputBufIdxR = openserial_vars.outputBufIdxW;
-#else
-      // in normal mode, send a single byte
       
+      uart_writeCircularBuffer_FASTSIM(
+         openserial_vars.outputBuf,
+         &openserial_vars.outputBufIdxR,
+         &openserial_vars.outputBufIdxW
+      );
+#else
       uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
 #endif
    } else {
