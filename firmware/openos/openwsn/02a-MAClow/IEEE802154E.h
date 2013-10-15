@@ -27,14 +27,52 @@
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 
 //15.4e information elements related
-#define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT 0x04
-#define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  0x10 //includes shift 1
-#define IEEE802154E_DESC_TYPE_LONG      0x01
-#define IEEE802154E_DESC_TYPE_SHORT     0x00
+#define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT              0x04
+#define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME         (0x01 << 1) //includes shift 1
+#define IEEE802154E_DESC_TYPE_LONG                      0x01
+#define IEEE802154E_DESC_TYPE_SHORT                     0x00
 
-#define IEEE802154E_MLME_SYNC_IE_SUBID  0x1a
-#define IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT 1
+#define IEEE802154E_DESC_TYPE_HEADER_IE                 0x00
+#define IEEE802154E_DESC_TYPE_PAYLOAD_IE                0x01
+//len field on PAYLOAD/HEADER DESC
+#define IEEE802154E_DESC_LEN_HEADER_IE_MASK             0xFE00
+#define IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK            0xFFE0
 
+#define IEEE802154E_DESC_LEN_HEADER_IE_SHIFT            9
+#define IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT           5
+
+//groupID/elementID field on PAYLOAD/HEADER DESC
+#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK       0x01FE
+#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK        0x001E
+
+#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT      1
+#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT       1
+
+//MLME Sub IE LONG page 83
+#define IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK          0xFFE0
+#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK        0x001E
+
+#define IEEE802154E_DESC_LEN_LONG_MLME_IE_SHIFT         5
+#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT       1
+
+//MLME Sub IE SHORT page 82
+#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK          0xFF00
+#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK        0x00FE
+
+#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT         8
+#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT       1
+
+#define IEEE802154E_MLME_SYNC_IE_SUBID                  0x1A
+#define IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT            1
+#define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID        0x1B
+#define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID_SHIFT  1
+#define IEEE802154E_MLME_TIMESLOT_IE_SUBID              0x1c
+#define IEEE802154E_MLME_TIMESLOT_IE_SUBID_SHIFT        1
+
+#define IEEE802154E_MLME_IE_GROUPID                     0x01
+#define IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID   0x1E
+
+#define IEEE802154E_
 /**
 When a packet is received, it is written inside the OpenQueueEntry_t->packet
 buffer, starting at the byte defined below. When a packet is relayed, it
@@ -185,9 +223,11 @@ typedef struct {
 //=========================== IEs =============================================
 //the header for all header IEs
 typedef struct{
-   uint8_t length;
-   uint8_t elementid_type;
-}header_IE_descriptor_t; //header descriptor. elementid will be 0 as described in 15.4e pag. 81
+   uint16_t length_elementid_type; 
+}header_IE_descriptor_t; 
+//header descriptor. elementid will be 0 as described in 15.4e pag. 81
+//type is 0 as described on p. 80
+
 
 //the content for ack ie -- it is a header IE with values - element id =0x1e len=2 type=0
 typedef struct {
