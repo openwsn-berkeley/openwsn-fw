@@ -691,6 +691,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
       }
       break; 
     default:
+      *lenIE=0;//no header or not recognized.
        return FALSE;
   }
   
@@ -1191,7 +1192,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       }
  
       // toss the IEs including ACK -- xv poipoi
-      packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
+      packetfunctions_tossHeader(ieee154e_vars.ackReceived,lenIE);
       
       // inform schedule of successful transmission
       schedule_indicateTx(&ieee154e_vars.asn,TRUE);
@@ -1460,7 +1461,7 @@ port_INLINE void activity_ri6() {
    timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
     
    // add the payload to the ACK (i.e. the timeCorrection)
-   packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(header_IE_descriptor_t));
+   packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(ack_timecorrection_IE_t));
    timeCorrection  = -timeCorrection;
    timeCorrection *= US_PER_TICK;
    ieee154e_vars.ackToSend->payload[0] = (uint8_t)((((PORT_RADIOTIMER_WIDTH)timeCorrection)   ) & 0xff);
@@ -1472,7 +1473,7 @@ port_INLINE void activity_ri6() {
    header_desc.length_elementid_type=(sizeof(ack_timecorrection_IE_t)<< IEEE802154E_DESC_LEN_HEADER_IE_SHIFT)|
                                      (IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID << IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT)|
                                      IEEE802154E_DESC_TYPE_SHORT; 
-   memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(asn_t));
+   memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_descriptor_t));
    
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
