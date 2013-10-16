@@ -62,6 +62,7 @@
 #define IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT         8
 #define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT       1
 
+
 #define IEEE802154E_MLME_SYNC_IE_SUBID                  0x1A
 #define IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT            1
 #define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID        0x1B
@@ -173,7 +174,13 @@ typedef struct {
    PORT_SIGNED_INT_WIDTH timeCorrection;
 } IEEE802154E_ACK_ht;
 
-#define ADV_PAYLOAD_LENGTH 5
+//includes payload header IE short + MLME short Header + Sync IE
+#define ADV_PAYLOAD_LENGTH sizeof(payload_IE_descriptor_t) + \
+                           sizeof(MLME_IE_subHeader_t)     + \
+                           sizeof(synch_IE_t)
+
+
+
 
 //=========================== module variables ================================
 
@@ -230,28 +237,34 @@ typedef struct{
 
 
 //the content for ack ie -- it is a header IE with values - element id =0x1e len=2 type=0
+PRAGMA(pack(1));
 typedef struct {
     int16_t timesync_info;
 }ack_timecorrection_IE_t;
-
+PRAGMA(pack());
 //the header for all payload IEs
+
+PRAGMA(pack(1));
 typedef struct{//11b len 4b gid 1b type
    uint16_t length_groupid_type; //bytes on the IE content- that is the embedded MLME or Header IE.
   //groupid == 0x01 MLME | type long = 1
 }payload_IE_descriptor_t; // payload descriptor. groupid will be 1 as described in 15.4e pag. 81
+PRAGMA(pack());
 
 //MLME sub id header appended to payload descriptor. we use group id=1 type=1
+PRAGMA(pack(1));
 typedef struct{
-   uint8_t length;
-   uint8_t subID_type;
+   uint16_t length_subID_type;
 }MLME_IE_subHeader_t;
+PRAGMA(pack());
 
 //the Synchronization IE. it is a payload IE with values - subid=0x1a type=0 (short) len=6 
+PRAGMA(pack(1));
 typedef struct {
     uint8_t asn[5];
     uint8_t join_priority;
 }synch_IE_t;
-
+PRAGMA(pack());
 
 //=========================== prototypes ======================================
 

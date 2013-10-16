@@ -64,7 +64,7 @@ bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
 bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
 // IEs Handling
-bool     ieee802154e_processIEs(uint16_t *     lenIE);//xv poipoi
+bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t *     lenIE);//xv poipoi
 // ASN handling
 void     incrementAsnOffset();
 void     asnStoreFromAdv(uint8_t* asn);
@@ -458,7 +458,7 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
 
 port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
-   uint16_t lenIE;//len of IEs being received if any.
+   uint16_t lenIE=0;//len of IEs being received if any.
    
    // check state
    if (ieee154e_vars.state!=S_SYNCRX) {
@@ -548,10 +548,10 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       // handle IEs -- xv poipoi
       // break if invalid ADV
-      if (ieee802514_header.valid==TRUE                                                         && 
+      if ((ieee802514_header.valid==TRUE                                                        && 
           ieee802514_header.frameType==IEEE154_TYPE_BEACON                                      && 
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID))   &&          
-          ieee802154e_processIEs(&lenIE)==FALSE) {
+          ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
          // break from the do-while loop and execute the clean-up code below
          break;
       }
@@ -603,7 +603,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 }
 
 //xv poipoi - IE Handling 
-port_INLINE bool ieee802154e_processIEs(uint16_t * lenIE)
+port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
 {
   uint8_t ptr,byte0,byte1;
   uint8_t temp_8b,gr_elem_id,subid;
@@ -613,9 +613,9 @@ port_INLINE bool ieee802154e_processIEs(uint16_t * lenIE)
   
   ptr=0;
   //candidate IE header  if type ==0 header IE if type==1 payload IE
-  temp_8b = *((uint8_t*)(ieee154e_vars.dataReceived->payload)+ptr);
+  temp_8b = *((uint8_t*)(pkt->payload)+ptr);
   ptr++;
-  temp_16b = (temp_8b << 8) +*((uint8_t*)(ieee154e_vars.dataReceived->payload)+ptr);
+  temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<< 8);
   ptr++;
   *lenIE = ptr; 
   if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) == IEEE802154E_DESC_TYPE_PAYLOAD_IE){
@@ -636,9 +636,9 @@ port_INLINE bool ieee802154e_processIEs(uint16_t * lenIE)
       //IE content can be any of the sub-IEs. Parse and see which
       do{
         //read sub IE header
-        temp_8b = *((uint8_t*)(ieee154e_vars.dataReceived->payload)+ptr);
+        temp_8b = *((uint8_t*)(pkt->payload)+ptr);
         ptr = ptr + 1;
-        temp_16b = (temp_8b << 8) +*((uint8_t*)(ieee154e_vars.dataReceived->payload)+ptr);
+        temp_16b = temp_8b  +(*((uint8_t*)(pkt->payload)+ptr) << 8);
         ptr = ptr + 1;
         len = len - 2; //remove header fields len
         if ((temp_16b & IEEE802154E_DESC_TYPE_LONG) == IEEE802154E_DESC_TYPE_LONG){
@@ -654,9 +654,9 @@ port_INLINE bool ieee802154e_processIEs(uint16_t * lenIE)
         case IEEE802154E_MLME_SYNC_IE_SUBID:
           //content is ASN and Join Priority
           if (idmanager_getIsDAGroot()==FALSE) {
-             asnStoreFromAdv((uint8_t*)(ieee154e_vars.dataReceived->payload)+ptr);
+             asnStoreFromAdv((uint8_t*)(pkt->payload)+ptr);
              ptr = ptr + 5; //add ASN len
-             joinPriorityStoreFromAdv(*((uint8_t*)(ieee154e_vars.dataReceived->payload)+ptr));
+             joinPriorityStoreFromAdv(*((uint8_t*)(pkt->payload)+ptr));
              ptr = ptr + 1;
           }
           break;
@@ -678,10 +678,10 @@ port_INLINE bool ieee802154e_processIEs(uint16_t * lenIE)
     case IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID:
       //IE content is time correction -- apply the time correction on ack received.
        if (idmanager_getIsDAGroot()==FALSE &&
-         neighbors_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop)) ) {
-         byte0 = *((uint8_t*)(ieee154e_vars.dataReceived->payload)+ptr);
+         neighbors_isPreferredParent(&(pkt->l2_nextORpreviousHop)) ) {
+         byte0 = *((uint8_t*)(pkt->payload)+ptr);
          ptr++;
-         byte1 = *((uint8_t*)(ieee154e_vars.dataReceived->payload)+ptr);
+         byte1 = *((uint8_t*)(pkt->payload)+ptr);
          ptr++;
          
          timeCorrection  = (PORT_SIGNED_INT_WIDTH)((PORT_RADIOTIMER_WIDTH)byte1<<8 | (PORT_RADIOTIMER_WIDTH)byte0);
@@ -787,26 +787,30 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
             
             //create Sync IE with JP and ASN
-            payload_IE_desc.length_groupid_type = (sizeof(MLME_IE_subHeader_t)+sizeof(synch_IE_t))<<IEEE802154E_PAYLOAD_DESC_LEN_SHIFT;
+            payload_IE_desc.length_groupid_type = (sizeof(MLME_IE_subHeader_t)+sizeof(synch_IE_t))<<IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
             payload_IE_desc.length_groupid_type |=  (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); //
             //copy header into the packet
-            packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend,sizeof(payload_IE_descriptor_t));
-            memcpy(&ieee154e_vars.dataToSend->l2_payload,&payload_IE_desc,sizeof(payload_IE_descriptor_t));
-
+            //packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend,sizeof(payload_IE_descriptor_t));
+            memcpy(ieee154e_vars.dataToSend->l2_payload,&payload_IE_desc,sizeof(payload_IE_descriptor_t));
+            ieee154e_vars.dataToSend->l2_payload+=sizeof(payload_IE_descriptor_t);
+            
             //copy mlme sub-header               
-            mlme_subHeader.length=sizeof(synch_IE_t);
-            mlme_subHeader.subID_type = (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT) | IEEE802154E_DESC_TYPE_SHORT;
+            mlme_subHeader.length_subID_type=sizeof(synch_IE_t) << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+            mlme_subHeader.length_subID_type |= (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT) | IEEE802154E_DESC_TYPE_SHORT;
              
-            packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend,sizeof(MLME_IE_subHeader_t));
-            memcpy(&ieee154e_vars.dataToSend->l2_payload,&mlme_subHeader,sizeof(MLME_IE_subHeader_t));
-            //copy synch IE 
+            memcpy(ieee154e_vars.dataToSend->l2_payload,&mlme_subHeader,sizeof(MLME_IE_subHeader_t));
+            
+            ieee154e_vars.dataToSend->l2_payload+=sizeof(MLME_IE_subHeader_t);
+            
+            //copy synch IE  -- should be Little endian???
             // fill in the ASN field of the ADV
             ieee154e_getAsn(syn_IE.asn);
             syn_IE.join_priority = 0xff; //poipoi -- use dagrank(rank) 
              
-            packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend,sizeof(synch_IE_t));
-            memcpy(&ieee154e_vars.dataToSend->l2_payload,&syn_IE,sizeof(synch_IE_t));
-             
+            //packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend,sizeof(synch_IE_t));
+            memcpy(ieee154e_vars.dataToSend->l2_payload,&syn_IE,sizeof(synch_IE_t));
+            ieee154e_vars.dataToSend->l2_payload+=sizeof(synch_IE_t);
+            
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
@@ -1181,7 +1185,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          break;
       }
       //hanlde IEs --xv poipoi
-      if (ieee802154e_processIEs(&lenIE)==FALSE){
+      if (ieee154e_processIEs(ieee154e_vars.ackReceived,&lenIE)==FALSE){
         //invalid IEs on ACK. 
         break;
       }
@@ -1373,13 +1377,11 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
       
       // handle IEs xv poipoi
-      // break if invalid ADV
-      if (ieee802514_header.valid==TRUE &&
-          ieee802514_header.frameType==IEEE154_TYPE_BEACON && 
+      
+      if ((ieee802514_header.valid==TRUE &&
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
-          ieee802154e_processIEs(&lenIE)==FALSE) {
-         // break from the do-while loop and execute the clean-up code below
-         break;
+          ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
+          //log error   
       }
       
       // toss the IEs including Synch
