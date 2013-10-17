@@ -129,7 +129,7 @@ void forwarding_receive(OpenQueueEntry_t* msg,
    
    
    //contains a 
-   if (ipv6_header.next_header==IANA_IPv6HOPOPT){
+ if (ipv6_header.next_header==IANA_IPv6HOPOPT){
       // populate packets metadata with l4 information
       msg->l4_protocol            = ipv6_hop_header.nextHeader;
       msg->l4_protocol_compressed = ipv6_hop_header.next_header_compressed; // rfc 6282   
