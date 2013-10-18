@@ -302,6 +302,7 @@ typedef struct {
    uint8_t       l2_numTxAttempts;               // number Tx attempts
    asn_t         l2_asn;                         // at what ASN the packet was Tx'ed or Rx'ed
    uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
+   uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet

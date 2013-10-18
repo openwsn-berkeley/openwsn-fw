@@ -17,7 +17,7 @@ res_vars_t res_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t res_send_internal(OpenQueueEntry_t* msg);
+owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent);
 void    sendAdv();
 void    sendKa();
 void    res_timer_cb();
@@ -55,7 +55,7 @@ bool debugPrint_myDAGrank() {
 owerror_t res_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_RES;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-   return res_send_internal(msg);
+   return res_send_internal(msg,IEEE154_IELIST_NO);
 }
 
 //======= from lower layer
@@ -193,7 +193,7 @@ IEEE802154E will handle the packet.
 
 \returns E_SUCCESS iff successful.
 */
-owerror_t res_send_internal(OpenQueueEntry_t* msg) {
+owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent) {
    // assign a number of retries
    if (packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE) {
       msg->l2_retriesLeft = 1;
@@ -211,6 +211,7 @@ owerror_t res_send_internal(OpenQueueEntry_t* msg) {
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
+                            iePresent,
                             IEEE154_SEC_NO_SECURITY,
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
@@ -231,6 +232,8 @@ readability of the code.
 */
 port_INLINE void sendAdv() {
    OpenQueueEntry_t* adv;
+   payload_IE_descriptor_t payload_IE_desc;
+   MLME_IE_subHeader_t mlme_subHeader;
    
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed
@@ -265,11 +268,30 @@ port_INLINE void sendAdv() {
    adv->owner   = COMPONENT_RES;
    
    // reserve space for ADV-specific header
-   // xv poipoi -- reserving for IEs 
-   packetfunctions_reserveHeaderSize(adv, ADV_PAYLOAD_LENGTH);
-   // the actual value of the current ASN will be written by the
+   // xv poipoi -- reserving for IEs  -- reverse order.
+   packetfunctions_reserveHeaderSize(adv, sizeof(synch_IE_t));//the asn + jp
+   adv->l2_ASNpayload               = adv->payload; //keep a pointer to where the ASN should be.
+   // the actual value of the current ASN and JP will be written by the
    // IEEE802.15.4e when transmitting
+   packetfunctions_reserveHeaderSize(adv, sizeof(MLME_IE_subHeader_t));//the MLME header
+   //copy mlme sub-header               
+   mlme_subHeader.length_subID_type=sizeof(synch_IE_t) << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+   mlme_subHeader.length_subID_type |= (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT) | IEEE802154E_DESC_TYPE_SHORT;
+   //little endian          
+   adv->payload[0]= mlme_subHeader.length_subID_type & 0xFF;
+   adv->payload[1]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+    
+   packetfunctions_reserveHeaderSize(adv, sizeof(payload_IE_descriptor_t));//the payload IE header
+   //prepare IE headers and copy them to the ADV 
+   //create Sync IE with JP and ASN
+   payload_IE_desc.length_groupid_type = (sizeof(MLME_IE_subHeader_t)+sizeof(synch_IE_t))<<IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
+   payload_IE_desc.length_groupid_type |=  (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); //
    
+   //copy header into the packet
+   //little endian
+   adv->payload[0]= payload_IE_desc.length_groupid_type & 0xFF;
+   adv->payload[1]= (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+  
    // some l2 information about this packet
    adv->l2_frameType                     = IEEE154_TYPE_BEACON;
    adv->l2_nextORpreviousHop.type        = ADDR_16B;
@@ -277,7 +299,7 @@ port_INLINE void sendAdv() {
    adv->l2_nextORpreviousHop.addr_16b[1] = 0xff;
    
    // put in queue for MAC to handle
-   res_send_internal(adv);
+   res_send_internal(adv,IEEE154_IELIST_YES);
    
    // I'm now busy sending an ADV
    res_vars.busySendingAdv = TRUE;
@@ -338,7 +360,7 @@ port_INLINE void sendKa() {
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
    // put in queue for MAC to handle
-   res_send_internal(kaPkt);
+   res_send_internal(kaPkt,IEEE154_IELIST_NO);
    
    // I'm now busy sending a KA
    res_vars.busySendingKa = TRUE;

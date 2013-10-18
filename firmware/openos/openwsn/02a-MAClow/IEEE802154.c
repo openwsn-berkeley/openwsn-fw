@@ -24,6 +24,7 @@ Note that we are writing the field from the end of the header to the beginning.
 */
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
+                              uint8_t           ielistpresent,
                               bool              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
@@ -75,6 +76,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       }
    }
    temp_8b             |= IEEE154_ADDR_EXT                << IEEE154_FCF_SRC_ADDR_MODE;
+   //poipoi xv IE list present
+   temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
+     
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
@@ -120,6 +124,9 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    // fcf, byte 2
    if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    temp_8b = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+   //poipoi xv IE list present
+   ieee802514_header->ieListPresent  = (temp_8b >> IEEE154_FCF_IELIST_PRESENT     ) & 0x01;//1b
+   
    switch ( (temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03 ) {
       case IEEE154_ADDR_NONE:
          ieee802514_header->dest.type = ADDR_NONE;

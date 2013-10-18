@@ -59,7 +59,6 @@ void     activity_rie6();
 void     activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime);
 // frame validity check
 
-bool     isValidAdv(ieee802154_header_iht*     ieee802514_header);//deprecated
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
 bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
@@ -549,6 +548,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // handle IEs -- xv poipoi
       // break if invalid ADV
       if ((ieee802514_header.valid==TRUE                                                        && 
+          ieee802514_header.ieListPresent==TRUE                                                 &&
           ieee802514_header.frameType==IEEE154_TYPE_BEACON                                      && 
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID))   &&          
           ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
@@ -560,9 +560,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       radio_rfOff();
       //compute radio duty cycle
       ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
-      
-      // record the ASN from the ADV payload -- DONE by processIE
-      //asnStoreFromAdv(ieee154e_vars.dataReceived);
       
       // toss the IEs including Synch
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
@@ -691,7 +688,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
       }
       break; 
     default:
-      *lenIE=0;//no header or not recognized.
+      *lenIE = 0;//no header or not recognized.
        return FALSE;
   }
   
@@ -705,9 +702,8 @@ port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
    open_addr_t neighbor;
    uint8_t  i;
-   payload_IE_descriptor_t payload_IE_desc;
-   MLME_IE_subHeader_t mlme_subHeader;
    synch_IE_t  syn_IE;
+
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
    
@@ -785,32 +781,13 @@ port_INLINE void activity_ti1ORri1() {
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
-            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
-            
-            //create Sync IE with JP and ASN
-            payload_IE_desc.length_groupid_type = (sizeof(MLME_IE_subHeader_t)+sizeof(synch_IE_t))<<IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
-            payload_IE_desc.length_groupid_type |=  (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); //
-            //copy header into the packet
-            //packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend,sizeof(payload_IE_descriptor_t));
-            memcpy(ieee154e_vars.dataToSend->l2_payload,&payload_IE_desc,sizeof(payload_IE_descriptor_t));
-            ieee154e_vars.dataToSend->l2_payload+=sizeof(payload_IE_descriptor_t);
-            
-            //copy mlme sub-header               
-            mlme_subHeader.length_subID_type=sizeof(synch_IE_t) << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
-            mlme_subHeader.length_subID_type |= (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT) | IEEE802154E_DESC_TYPE_SHORT;
-             
-            memcpy(ieee154e_vars.dataToSend->l2_payload,&mlme_subHeader,sizeof(MLME_IE_subHeader_t));
-            
-            ieee154e_vars.dataToSend->l2_payload+=sizeof(MLME_IE_subHeader_t);
-            
+            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;            
             //copy synch IE  -- should be Little endian???
             // fill in the ASN field of the ADV
             ieee154e_getAsn(syn_IE.asn);
             syn_IE.join_priority = 0xff; //poipoi -- use dagrank(rank) 
-             
-            //packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend,sizeof(synch_IE_t));
-            memcpy(ieee154e_vars.dataToSend->l2_payload,&syn_IE,sizeof(synch_IE_t));
-            ieee154e_vars.dataToSend->l2_payload+=sizeof(synch_IE_t);
+       
+            memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&syn_IE,sizeof(synch_IE_t));
             
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
@@ -1186,6 +1163,10 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          break;
       }
       //hanlde IEs --xv poipoi
+      if (ieee802514_header.ieListPresent==FALSE){
+         break; //ack should contain IEs.
+      }
+      
       if (ieee154e_processIEs(ieee154e_vars.ackReceived,&lenIE)==FALSE){
         //invalid IEs on ACK. 
         break;
@@ -1480,6 +1461,7 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
+                            IEEE154_IELIST_YES,//ie in ack
                             IEEE154_SEC_NO_SECURITY,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
@@ -1598,27 +1580,6 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
 //======= frame validity check
 
 /**
-\brief Decides whether the packet I just received is a valid ADV
-
-\param[in] ieee802514_header IEEE802.15.4 header of the packet I just
-            received.
-
-A valid ADV frame satisfies the following conditions:
-- its IEEE802.15.4 header is well formatted
-- it's a BEACON frame
-- it's sent to the my PANid
-- its payload length is the expected ADV payload length
-
-\returns TRUE if packet is a valid ADV, FALSE otherwise
-*/
-port_INLINE bool isValidAdv(ieee802154_header_iht* ieee802514_header) {
-   return ieee802514_header->valid==TRUE                                                         && \
-          ieee802514_header->frameType==IEEE154_TYPE_BEACON                                      && \
-          packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))   && \
-          ieee154e_vars.dataReceived->length==ADV_PAYLOAD_LENGTH;
-}
-
-/**
 \brief Decides whether the packet I just received is valid received frame.
 
 A valid Rx frame satisfies the following constraints:
@@ -1703,7 +1664,7 @@ port_INLINE void ieee154e_getAsn(uint8_t* array) {
 }
 
 port_INLINE void joinPriorityStoreFromAdv(uint8_t jp){
-//TODO poipoi xv
+  //TODO poipoi xv
   
 }
 

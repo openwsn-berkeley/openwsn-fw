@@ -244,19 +244,16 @@ typedef struct {
 PRAGMA(pack());
 //the header for all payload IEs
 
-PRAGMA(pack(1));
+
 typedef struct{//11b len 4b gid 1b type
    uint16_t length_groupid_type; //bytes on the IE content- that is the embedded MLME or Header IE.
   //groupid == 0x01 MLME | type long = 1
 }payload_IE_descriptor_t; // payload descriptor. groupid will be 1 as described in 15.4e pag. 81
-PRAGMA(pack());
 
 //MLME sub id header appended to payload descriptor. we use group id=1 type=1
-PRAGMA(pack(1));
 typedef struct{
    uint16_t length_subID_type;
 }MLME_IE_subHeader_t;
-PRAGMA(pack());
 
 //the Synchronization IE. it is a payload IE with values - subid=0x1a type=0 (short) len=6 
 PRAGMA(pack(1));

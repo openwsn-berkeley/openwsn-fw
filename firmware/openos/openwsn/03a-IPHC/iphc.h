@@ -132,7 +132,6 @@ typedef struct {
    The Hop-by-Hop Options header is identified by a Next Header value of
    0 in the IPv6 header, and has the following format:
 */
-PRAGMA(pack(1));
 typedef struct {
   /*see rfc 6282 section 4.2 The first 7 bits serve as an identifier for the IPv6 Extension Header immediately
    following the LOWPAN_NHC octet.  The remaining bit indicates whether
@@ -152,7 +151,6 @@ typedef struct {
    fragmentation.*/
    
 } ipv6_hopbyhop_ht;
-PRAGMA(pack());
 
 PRAGMA(pack(1));
 typedef struct {
