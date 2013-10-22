@@ -29,6 +29,9 @@ dummyFunc = Builder(
     suffix = '.ihex',
 )
 
+if env['toolchain'] in ['iar','iar-proj']:
+   env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
+
 if   env['toolchain']=='mspgcc':
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
@@ -67,13 +70,14 @@ if   env['toolchain']=='mspgcc':
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
 
 elif env['toolchain']=='iar':
+    
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
-        iarEw430BinDir          = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'430','bin')
+        iarEw430BinDir            = os.path.join(env['IAR_EW430_INSTALLDIR'],'430','bin')
     except KeyError as err:
-        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.4'
+        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5'
         raise
     
     # compiler
@@ -86,7 +90,7 @@ elif env['toolchain']=='iar':
     env.Append(CCFLAGS            = '--debug')
     env.Append(CCFLAGS            = '-e')
     env.Append(CCFLAGS            = '--double=32 ')
-    env.Append(CCFLAGS            = '--dlib_config "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\DLIB\\dl430fn.h"')
+    env.Append(CCFLAGS            = '--dlib_config "'+env['IAR_EW430_INSTALLDIR']+'\\430\\LIB\\DLIB\\dl430fn.h"')
     env.Append(CCFLAGS            = '--library_module')
     env.Append(CCFLAGS            = '-Ol ')
     env.Append(CCFLAGS            = '--multiplier=16')
@@ -104,9 +108,9 @@ elif env['toolchain']=='iar':
     env.Replace(LIBLINKDIRPREFIX  = '-I')
     env.Replace(LIBLINKPREFIX     = 'lib')
     env.Replace(LIBLINKSUFFIX     = '.a')
-    env.Append(LINKFLAGS          = '-f "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\config\\multiplier.xcl"')
+    env.Append(LINKFLAGS          = '-f "'+env['IAR_EW430_INSTALLDIR']+'\\430\\config\\multiplier.xcl"')
     env.Append(LINKFLAGS          = '-D_STACK_SIZE=50')
-    env.Append(LINKFLAGS          = '-rt "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\DLIB\\dl430fn.r43"')
+    env.Append(LINKFLAGS          = '-rt "'+env['IAR_EW430_INSTALLDIR']+'\\430\\LIB\\DLIB\\dl430fn.r43"')
     env.Append(LINKFLAGS          = '-e_PrintfLarge=_Printf')
     env.Append(LINKFLAGS          = '-e_ScanfLarge=_Scanf ')
     env.Append(LINKFLAGS          = '-D_DATA16_HEAP_SIZE=50')
@@ -143,9 +147,9 @@ elif env['toolchain']=='iar-proj':
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     try:
-        iarEw430CommonBinDir      = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'common','bin')
+        iarEw430CommonBinDir      = os.path.join(env['IAR_EW430_INSTALLDIR'],'common','bin')
     except KeyError as err:
-        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.4'
+        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5'
         raise
     
     iarProjBuilderFunction = Builder(
