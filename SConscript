@@ -173,6 +173,10 @@ else:
         env.Append(CPPDEFINES = {'FASTSIM':  None})
         #env.Append(CPPDEFINES = {'TRACE_ON': None})
     
+    # enabling shared library to be reallocated 
+    if os.name!='nt':
+        env.Append(CCFLAGS = '-fPIC')
+    
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
     
