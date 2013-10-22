@@ -265,6 +265,7 @@ port_INLINE void sendAdv() {
    adv->owner   = COMPONENT_RES;
    
    // reserve space for ADV-specific header
+   // xv poipoi -- reserving for IEs 
    packetfunctions_reserveHeaderSize(adv, ADV_PAYLOAD_LENGTH);
    // the actual value of the current ASN will be written by the
    // IEEE802.15.4e when transmitting

@@ -50,6 +50,7 @@ owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_he
    uint8_t      sam;
    uint8_t      dam;
    uint8_t      nh;
+   uint8_t      next_header;
    //option header
   
    // take ownership over the packet
@@ -130,15 +131,18 @@ owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_he
    ipv6_header.hop_limit--;
    
     //prepend Option hop by hop header except when src routing -- this is a little trick as src routing is using an option header set to 0x00
+   next_header=msg->l4_protocol;
    if (hopbyhop_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE){
       prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, hopbyhop_option);
+      //change nh to point to the newly added header
+      next_header=IANA_IPv6HOPOPT;// use 0x00 as NH to indicate option header -- see rfc 2460
    }
    //then regular header
    if (prependIPv6Header(msg,
             IPHC_TF_ELIDED,
             0, // value_flowlabel is not copied
             nh,
-            IANA_IPv6HOPOPT, // use 0x00 as NH to indicate option header -- see rfc 2460
+            next_header, 
             IPHC_HLIM_INLINE,
             ipv6_header.hop_limit,
             IPHC_CID_NO,

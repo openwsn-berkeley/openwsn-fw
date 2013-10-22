@@ -58,13 +58,17 @@ void     activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime);
 void     activity_rie6();
 void     activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime);
 // frame validity check
-bool     isValidAdv(ieee802154_header_iht*     ieee802514_header);
+
+bool     isValidAdv(ieee802154_header_iht*     ieee802514_header);//deprecated
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
 bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
+// IEs Handling
+bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t *     lenIE);//xv poipoi
 // ASN handling
 void     incrementAsnOffset();
-void     asnStoreFromAdv(OpenQueueEntry_t* advFrame);
+void     asnStoreFromAdv(uint8_t* asn);
+void     joinPriorityStoreFromAdv(uint8_t jp);
 // synchronization
 void     synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
@@ -454,6 +458,7 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
 
 port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
+   uint16_t lenIE=0;//len of IEs being received if any.
    
    // check state
    if (ieee154e_vars.state!=S_SYNCRX) {
@@ -537,11 +542,16 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
       
-      // toss the IEEE802.15.4 header
+      // toss the IEEE802.15.4 header -- this does not include IEs as they are processed 
+      // next.
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
       
+      // handle IEs -- xv poipoi
       // break if invalid ADV
-      if (isValidAdv(&ieee802514_header)==FALSE) {
+      if ((ieee802514_header.valid==TRUE                                                        && 
+          ieee802514_header.frameType==IEEE154_TYPE_BEACON                                      && 
+          packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID))   &&          
+          ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
          // break from the do-while loop and execute the clean-up code below
          break;
       }
@@ -551,11 +561,11 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       //compute radio duty cycle
       ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
       
-      // record the ASN from the ADV payload
-      asnStoreFromAdv(ieee154e_vars.dataReceived);
+      // record the ASN from the ADV payload -- DONE by processIE
+      //asnStoreFromAdv(ieee154e_vars.dataReceived);
       
-      // toss the ADV payload
-      packetfunctions_tossHeader(ieee154e_vars.dataReceived,ADV_PAYLOAD_LENGTH);
+      // toss the IEs including Synch
+      packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
       
       // synchronize (for the first time) to the sender's ADV
       synchronizePacket(ieee154e_vars.syncCapturedTime);
@@ -592,13 +602,112 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
    changeState(S_SYNCLISTEN);
 }
 
+//xv poipoi - IE Handling 
+port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
+{
+  uint8_t ptr,byte0,byte1;
+  uint8_t temp_8b,gr_elem_id,subid;
+  uint16_t temp_16b,len,sublen;
+  volatile PORT_SIGNED_INT_WIDTH  timeCorrection;
+  
+  
+  ptr=0;
+  //candidate IE header  if type ==0 header IE if type==1 payload IE
+  temp_8b = *((uint8_t*)(pkt->payload)+ptr);
+  ptr++;
+  temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<< 8);
+  ptr++;
+  *lenIE = ptr; 
+  if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) == IEEE802154E_DESC_TYPE_PAYLOAD_IE){
+  //payload IE - last bit is 1
+     len=(temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
+     gr_elem_id= (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT; 
+  }else {
+  //header IE - last bit is 0
+     len=(temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK)>>IEEE802154E_DESC_LEN_HEADER_IE_SHIFT;
+     gr_elem_id = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT; 
+  }
+  
+  *lenIE += len; 
+  //now determine sub elements if any
+  switch(gr_elem_id){
+    //this is the only groupID that we parse. See page 82.  
+    case IEEE802154E_MLME_IE_GROUPID:
+      //IE content can be any of the sub-IEs. Parse and see which
+      do{
+        //read sub IE header
+        temp_8b = *((uint8_t*)(pkt->payload)+ptr);
+        ptr = ptr + 1;
+        temp_16b = temp_8b  +(*((uint8_t*)(pkt->payload)+ptr) << 8);
+        ptr = ptr + 1;
+        len = len - 2; //remove header fields len
+        if ((temp_16b & IEEE802154E_DESC_TYPE_LONG) == IEEE802154E_DESC_TYPE_LONG){
+           //long sub-IE - last bit is 1
+           sublen=(temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK)>>IEEE802154E_DESC_LEN_LONG_MLME_IE_SHIFT;
+           subid= (temp_16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT; 
+        }else {
+           //short IE - last bit is 0
+           sublen =(temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK)>>IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+           subid = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
+        }
+        switch(subid){
+        case IEEE802154E_MLME_SYNC_IE_SUBID:
+          //content is ASN and Join Priority
+          if (idmanager_getIsDAGroot()==FALSE) {
+             asnStoreFromAdv((uint8_t*)(pkt->payload)+ptr);
+             ptr = ptr + 5; //add ASN len
+             joinPriorityStoreFromAdv(*((uint8_t*)(pkt->payload)+ptr));
+             ptr = ptr + 1;
+          }
+          break;
+        case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
+          //TODO
+          break;
+        case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
+          //TODO
+          break;
+        default:
+          return FALSE;
+          break;
+        }
+        len = len - sublen;
+      } while(len>0);
+      
+      break;
+    //the rest are elementID  
+    case IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID:
+      //IE content is time correction -- apply the time correction on ack received.
+       if (idmanager_getIsDAGroot()==FALSE &&
+         neighbors_isPreferredParent(&(pkt->l2_nextORpreviousHop)) ) {
+         byte0 = *((uint8_t*)(pkt->payload)+ptr);
+         ptr++;
+         byte1 = *((uint8_t*)(pkt->payload)+ptr);
+         ptr++;
+         
+         timeCorrection  = (PORT_SIGNED_INT_WIDTH)((PORT_RADIOTIMER_WIDTH)byte1<<8 | (PORT_RADIOTIMER_WIDTH)byte0);
+         timeCorrection /=  US_PER_TICK;
+         timeCorrection  = -timeCorrection;
+         synchronizeAck(timeCorrection);
+      }
+      break; 
+    default:
+      *lenIE=0;//no header or not recognized.
+       return FALSE;
+  }
+  
+  return TRUE;
+}
+
+
 //======= TX
 
 port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
    open_addr_t neighbor;
    uint8_t  i;
-   
+   payload_IE_descriptor_t payload_IE_desc;
+   MLME_IE_subHeader_t mlme_subHeader;
+   synch_IE_t  syn_IE;
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
    
@@ -677,8 +786,32 @@ port_INLINE void activity_ti1ORri1() {
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+            
+            //create Sync IE with JP and ASN
+            payload_IE_desc.length_groupid_type = (sizeof(MLME_IE_subHeader_t)+sizeof(synch_IE_t))<<IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
+            payload_IE_desc.length_groupid_type |=  (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); //
+            //copy header into the packet
+            //packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend,sizeof(payload_IE_descriptor_t));
+            memcpy(ieee154e_vars.dataToSend->l2_payload,&payload_IE_desc,sizeof(payload_IE_descriptor_t));
+            ieee154e_vars.dataToSend->l2_payload+=sizeof(payload_IE_descriptor_t);
+            
+            //copy mlme sub-header               
+            mlme_subHeader.length_subID_type=sizeof(synch_IE_t) << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+            mlme_subHeader.length_subID_type |= (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT) | IEEE802154E_DESC_TYPE_SHORT;
+             
+            memcpy(ieee154e_vars.dataToSend->l2_payload,&mlme_subHeader,sizeof(MLME_IE_subHeader_t));
+            
+            ieee154e_vars.dataToSend->l2_payload+=sizeof(MLME_IE_subHeader_t);
+            
+            //copy synch IE  -- should be Little endian???
             // fill in the ASN field of the ADV
-            ieee154e_getAsn(ieee154e_vars.dataToSend->l2_payload);
+            ieee154e_getAsn(syn_IE.asn);
+            syn_IE.join_priority = 0xff; //poipoi -- use dagrank(rank) 
+             
+            //packetfunctions_reserveHeaderSize(ieee154e_vars.dataToSend,sizeof(synch_IE_t));
+            memcpy(ieee154e_vars.dataToSend->l2_payload,&syn_IE,sizeof(synch_IE_t));
+            ieee154e_vars.dataToSend->l2_payload+=sizeof(synch_IE_t);
+            
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
@@ -959,8 +1092,7 @@ port_INLINE void activity_tie6() {
 port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
    volatile PORT_SIGNED_INT_WIDTH  timeCorrection;
-   uint8_t byte0;
-   uint8_t byte1;
+   uint16_t lenIE;
    
    // change state
    changeState(S_TXPROC);
@@ -1053,17 +1185,14 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          // break from the do-while loop and execute the clean-up code below
          break;
       }
-      
-      // resynchronize if I'm not a DAGroot and ACK from preferred parent
-      if (idmanager_getIsDAGroot()==FALSE &&
-          neighbors_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop)) ) {
-         byte0 = ieee154e_vars.ackReceived->payload[0];
-         byte1 = ieee154e_vars.ackReceived->payload[1];
-         timeCorrection  = (PORT_SIGNED_INT_WIDTH)((PORT_RADIOTIMER_WIDTH)byte1<<8 | (PORT_RADIOTIMER_WIDTH)byte0);
-         timeCorrection /=  US_PER_TICK;
-         timeCorrection  = -timeCorrection;
-         synchronizeAck(timeCorrection);
+      //hanlde IEs --xv poipoi
+      if (ieee154e_processIEs(ieee154e_vars.ackReceived,&lenIE)==FALSE){
+        //invalid IEs on ACK. 
+        break;
       }
+ 
+      // toss the IEs including ACK -- xv poipoi
+      packetfunctions_tossHeader(ieee154e_vars.ackReceived,lenIE);
       
       // inform schedule of successful transmission
       schedule_indicateTx(&ieee154e_vars.asn,TRUE);
@@ -1165,6 +1294,7 @@ port_INLINE void activity_rie3() {
 
 port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
+   uint16_t lenIE;
    
    // change state
    changeState(S_TXACKOFFSET);
@@ -1247,14 +1377,17 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
       
-      // if I just received a valid ADV, record the ASN and toss the ADV payload
-      if (isValidAdv(&ieee802514_header)==TRUE) {
-         if (idmanager_getIsDAGroot()==FALSE) {
-            asnStoreFromAdv(ieee154e_vars.dataReceived);
-         }
-         // toss the ADV payload
-         packetfunctions_tossHeader(ieee154e_vars.dataReceived,ADV_PAYLOAD_LENGTH);
+      // handle IEs xv poipoi
+      
+      if ((ieee802514_header.valid==TRUE &&
+          packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
+          ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
+          //log error   
       }
+      
+      // toss the IEs including Synch
+      packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
+      
       
       // record the captured time
       ieee154e_vars.lastCapturedTime = capturedTime;
@@ -1299,6 +1432,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 
 port_INLINE void activity_ri6() {
    PORT_SIGNED_INT_WIDTH timeCorrection;
+   header_IE_descriptor_t header_desc;
    
    // change state
    changeState(S_TXACKPREPARE);
@@ -1325,13 +1459,21 @@ port_INLINE void activity_ri6() {
    
    // calculate the time timeCorrection (this is the time when the packet arrive w.r.t the time it should be.
    timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
-   
+    
    // add the payload to the ACK (i.e. the timeCorrection)
-   packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(IEEE802154E_ACK_ht));
+   packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(ack_timecorrection_IE_t));
    timeCorrection  = -timeCorrection;
    timeCorrection *= US_PER_TICK;
    ieee154e_vars.ackToSend->payload[0] = (uint8_t)((((PORT_RADIOTIMER_WIDTH)timeCorrection)   ) & 0xff);
    ieee154e_vars.ackToSend->payload[1] = (uint8_t)((((PORT_RADIOTIMER_WIDTH)timeCorrection)>>8) & 0xff);
+   
+   // add header IE header -- xv poipoi -- pkt is filled in reverse order..
+   packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(header_IE_descriptor_t));
+   //create the header for ack IE
+   header_desc.length_elementid_type=(sizeof(ack_timecorrection_IE_t)<< IEEE802154E_DESC_LEN_HEADER_IE_SHIFT)|
+                                     (IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID << IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT)|
+                                     IEEE802154E_DESC_TYPE_SHORT; 
+   memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_descriptor_t));
    
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
@@ -1560,14 +1702,20 @@ port_INLINE void ieee154e_getAsn(uint8_t* array) {
    array[4]         =  ieee154e_vars.asn.byte4;
 }
 
-port_INLINE void asnStoreFromAdv(OpenQueueEntry_t* advFrame) {
+port_INLINE void joinPriorityStoreFromAdv(uint8_t jp){
+//TODO poipoi xv
+  
+}
+
+
+port_INLINE void asnStoreFromAdv(uint8_t* asn) {
    
    // store the ASN
-   ieee154e_vars.asn.bytes0and1   =     ieee154e_vars.dataReceived->payload[0]+
-                                    256*ieee154e_vars.dataReceived->payload[1];
-   ieee154e_vars.asn.bytes2and3   =     ieee154e_vars.dataReceived->payload[2]+
-                                    256*ieee154e_vars.dataReceived->payload[3];
-   ieee154e_vars.asn.byte4        =     ieee154e_vars.dataReceived->payload[4];
+   ieee154e_vars.asn.bytes0and1   =     asn[0]+
+                                    256*asn[1];
+   ieee154e_vars.asn.bytes2and3   =     asn[2]+
+                                    256*asn[3];
+   ieee154e_vars.asn.byte4        =     asn[4];
    
    // determine the current slotOffset
    /*

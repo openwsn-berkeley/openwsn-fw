@@ -29,6 +29,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    
+   //General IEs here (those that are carried in all packets) -- None by now.
+   
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
    // nextHop address
@@ -209,6 +211,9 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          break;
       // no need for a default, since case would have been caught above
    }
+   //TODO -- IEs to be removed here.
+   
+   
    // apply topology filter
    if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {
       // the topology filter does accept this packet, return
