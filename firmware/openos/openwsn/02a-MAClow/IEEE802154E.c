@@ -607,7 +607,6 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
   uint16_t temp_16b,len,sublen;
   volatile PORT_SIGNED_INT_WIDTH  timeCorrection;
   
-  
   ptr=0;
   //candidate IE header  if type ==0 header IE if type==1 payload IE
   temp_8b = *((uint8_t*)(pkt->payload)+ptr);
@@ -691,7 +690,12 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
       *lenIE = 0;//no header or not recognized.
        return FALSE;
   }
-  
+  if (*lenIE>127) {
+         // log the error
+      openserial_printError(COMPONENT_IEEE802154E,ERR_HEADER_TOO_LONG,
+                            (errorparameter_t)*lenIE,
+                            (errorparameter_t)1);
+  }
   return TRUE;
 }
 
@@ -1275,7 +1279,7 @@ port_INLINE void activity_rie3() {
 
 port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
-   uint16_t lenIE;
+   uint16_t lenIE=0;
    
    // change state
    changeState(S_TXACKOFFSET);
@@ -1361,15 +1365,15 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // handle IEs xv poipoi
       
       if ((ieee802514_header.valid==TRUE &&
+          ieee802514_header.ieListPresent==TRUE && 
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
           ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
-          //log error   
+          //log  that the packet is not carrying IEs
       }
       
       // toss the IEs including Synch
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
-      
-      
+            
       // record the captured time
       ieee154e_vars.lastCapturedTime = capturedTime;
       
