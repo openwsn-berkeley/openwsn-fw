@@ -169,8 +169,13 @@ else:
     if env['board'] in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
+    if env['fastsim']==1:
+        env.Append(CPPDEFINES = {'FASTSIM':  None})
+        #env.Append(CPPDEFINES = {'TRACE_ON': None})
+    
     # enabling shared library to be reallocated 
-    env.Append(CCFLAGS = '-fPIC')
+    if os.name!='nt':
+        env.Append(CCFLAGS = '-fPIC')
     
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
