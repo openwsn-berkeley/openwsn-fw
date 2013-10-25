@@ -17,7 +17,7 @@ res_vars_t res_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent);
+owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint8_t frameVersion);
 void    sendAdv();
 void    sendKa();
 void    res_timer_cb();
@@ -55,7 +55,7 @@ bool debugPrint_myDAGrank() {
 owerror_t res_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_RES;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-   return res_send_internal(msg,IEEE154_IELIST_NO);
+   return res_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
 }
 
 //======= from lower layer
@@ -193,7 +193,7 @@ IEEE802154E will handle the packet.
 
 \returns E_SUCCESS iff successful.
 */
-owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent) {
+owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent, uint8_t frameVersion) {
    // assign a number of retries
    if (packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE) {
       msg->l2_retriesLeft = 1;
@@ -212,6 +212,7 @@ owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent) {
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             iePresent,
+                            frameVersion,
                             IEEE154_SEC_NO_SECURITY,
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
@@ -299,7 +300,7 @@ port_INLINE void sendAdv() {
    adv->l2_nextORpreviousHop.addr_16b[1] = 0xff;
    
    // put in queue for MAC to handle
-   res_send_internal(adv,IEEE154_IELIST_YES);
+   res_send_internal(adv,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
    
    // I'm now busy sending an ADV
    res_vars.busySendingAdv = TRUE;
@@ -360,7 +361,7 @@ port_INLINE void sendKa() {
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
    // put in queue for MAC to handle
-   res_send_internal(kaPkt,IEEE154_IELIST_NO);
+   res_send_internal(kaPkt,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
    
    // I'm now busy sending a KA
    res_vars.busySendingKa = TRUE;
