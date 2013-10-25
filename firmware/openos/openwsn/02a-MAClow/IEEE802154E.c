@@ -64,6 +64,7 @@ bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t *     lenIE);//xv poipoi
+void     ieee154e_processSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr);//xv poipoi
 // ASN handling
 void     incrementAsnOffset();
 void     asnStoreFromAdv(uint8_t* asn);
@@ -657,7 +658,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
           }
           break;
         case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
-          //TODO
+          ieee154e_processSlotframeLinkIE(pkt,&ptr); 
           break;
         case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
           //TODO
@@ -699,6 +700,51 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
   return TRUE;
 }
 
+port_INLINE void ieee154e_processSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr){
+ uint8_t numSlotFrames,i,j,localptr;
+ slotframelink_IE_t sfInfo; 
+ linkInfo_subIE_t linkInfo;
+ localptr=*ptr; 
+  // number of slot frames 1B
+  numSlotFrames = *((uint8_t*)(pkt->payload)+localptr);
+  localptr++;
+  // for each slotframe
+  i=0;
+  while(i < numSlotFrames){
+   //1-slotftramehandle 1B
+    sfInfo.slotframehandle=*((uint8_t*)(pkt->payload)+localptr);
+    localptr++;
+    //2-slotframe size 2B
+    sfInfo.slotframesize = *((uint8_t*)(pkt->payload)+localptr);
+    localptr++;
+    sfInfo.slotframesize |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+    localptr++;;
+    //3-number of links 1B   
+    sfInfo.numlinks= *((uint8_t*)(pkt->payload)+localptr);
+    localptr++;
+   
+    for (j=0;j<sfInfo.numlinks;j++){
+      //for each link 5Bytes
+       //TimeSlot 2B
+       linkInfo.tsNum = *((uint8_t*)(pkt->payload)+localptr);
+       localptr++;
+       linkInfo.tsNum  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+       localptr++;
+       //Ch.Offset 2B
+       linkInfo.choffset = *((uint8_t*)(pkt->payload)+localptr);
+       localptr++;
+       linkInfo.choffset  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+       localptr++;
+       //LinkOption bitmap 1B
+       linkInfo.linkoptions = *((uint8_t*)(pkt->payload)+localptr);
+       localptr++;
+       //xv poipoi
+       //TODO - inform schedule of that link so it can update if needed.
+    } 
+    i++;
+  } 
+  *ptr=localptr;      
+}
 
 //======= TX
 

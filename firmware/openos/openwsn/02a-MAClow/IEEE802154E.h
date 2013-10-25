@@ -147,6 +147,14 @@ enum ieee154e_atomicdurations_enum {
 };
 
 
+//shift of bytes in the linkOption bitmap
+enum ieee154e_linkOption_enum {
+   FLAG_TX_S              = 7,
+   FLAG_RX_S              = 6,
+   FLAG_SHARED_S          = 5,
+   FLAG_TIMEKEEPING_S     = 4,   
+};
+
 // FSM timer durations (combinations of atomic durations)
 // TX
 #define DURATION_tt1 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx-maxTxDataPrepare
@@ -262,6 +270,19 @@ typedef struct {
     uint8_t join_priority;
 }synch_IE_t;
 PRAGMA(pack());
+
+//the Slotframe and Link IE
+typedef struct {
+    uint8_t slotframehandle;
+    uint16_t slotframesize;
+    uint8_t numlinks;
+}slotframelink_IE_t;
+
+typedef struct {
+    uint16_t tsNum;
+    uint16_t choffset;
+    uint8_t linkoptions;
+}linkInfo_subIE_t;
 
 //=========================== prototypes ======================================
 
