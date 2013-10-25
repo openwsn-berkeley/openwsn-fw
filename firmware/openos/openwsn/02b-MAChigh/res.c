@@ -325,42 +325,46 @@ port_INLINE uint8_t res_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv){
   //copy to adv 2B timeslot
  
   //shared cells
-  linkOption = (1<<FLAG_TX_S)||(1<<FLAG_RX_S)||(1<<FLAG_SHARED_S);
+  linkOption = (1<<FLAG_TX_S)|(1<<FLAG_RX_S)|(1<<FLAG_SHARED_S);
   while(slot>SCHEDULE_MINIMAL_6TISCH_EB_CELLS){
     packetfunctions_reserveHeaderSize(adv,5);
-    adv->payload[0]= linkOption;
-    //ch.offset as minimal draft
-    adv->payload[1]= 0x00;
-    adv->payload[2]= 0x00;
     //ts
-    adv->payload[3]= slot & 0xFF;
-    adv->payload[4]= (slot >> 8) & 0xFF;
+    adv->payload[0]= slot & 0xFF;
+    adv->payload[1]= (slot >> 8) & 0xFF;
+    //ch.offset as minimal draft
+    adv->payload[2]= 0x00;
+    adv->payload[3]= 0x00;
+    //linkOption
+    adv->payload[4]= linkOption;
     len+=5;
     slot--;
   }
  
   //eb slot
-  linkOption = (1<<FLAG_TX_S)||(1<<FLAG_RX_S)||(1<<FLAG_SHARED_S)||(1<<FLAG_TIMEKEEPING_S);
+  linkOption = (1<<FLAG_TX_S)|(1<<FLAG_RX_S)|(1<<FLAG_SHARED_S)|(1<<FLAG_TIMEKEEPING_S);
   packetfunctions_reserveHeaderSize(adv,5);
   len+=5;
-  adv->payload[0]= linkOption;
+ //ts
+  adv->payload[0]= SCHEDULE_MINIMAL_6TISCH_EB_CELLS & 0xFF;
+  adv->payload[1]= (SCHEDULE_MINIMAL_6TISCH_EB_CELLS >> 8) & 0xFF;
   //ch.offset as minimal draft
-  adv->payload[1]= 0x00;
   adv->payload[2]= 0x00;
-  //ts
-  adv->payload[3]= SCHEDULE_MINIMAL_6TISCH_EB_CELLS & 0xFF;
-  adv->payload[4]= (SCHEDULE_MINIMAL_6TISCH_EB_CELLS >> 8) & 0xFF;
+  adv->payload[3]= 0x00;
+ 
+  adv->payload[4]= linkOption;
  //now slotframe ie general fields
     //1B number of links == 6 
     //Slotframe Size 2B = 101 timeslots
     //1B slotframe handle (id)
-  packetfunctions_reserveHeaderSize(adv,4);//the asn + jp
-  len+=4;
-  adv->payload[0]= 0x06; //number of links
+  packetfunctions_reserveHeaderSize(adv,5);//
+  len+=5;
+  
+  adv->payload[0]= SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER;  
+  adv->payload[1]= SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
   adv->payload[2]= SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE & 0xFF;
-  adv->payload[4]= (SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE >> 8) & 0xFF;
-  adv->payload[3]= SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
-    
+  adv->payload[3]= (SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE >> 8) & 0xFF;
+  adv->payload[4]= 0x06; //number of links
+  
   //MLME sub IE header 
   //1b -15 short ==0x00
   //7b -8-14 Sub-ID=0x1b

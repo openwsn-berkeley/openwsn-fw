@@ -271,6 +271,19 @@ typedef struct {
 }synch_IE_t;
 PRAGMA(pack());
 
+//the Slotframe and Link IE
+typedef struct {
+    uint8_t slotframehandle;
+    uint16_t slotframesize;
+    uint8_t numlinks;
+}slotframelink_IE_t;
+
+typedef struct {
+    uint16_t tsNum;
+    uint16_t choffset;
+    uint8_t linkoptions;
+}linkInfo_subIE_t;
+
 //=========================== prototypes ======================================
 
 // admin
