@@ -50,6 +50,11 @@ does not use any backoff mechanism when a transmission fails.
 See MINBE for an explanation of backoff.
 */
 #define MAXBE                4
+//6tisch minimal draft
+#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      5
+#define SCHEDULE_MINIMAL_6TISCH_EB_CELLS                          1
+#define SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE                  101
+#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1
 
 //=========================== typedef =========================================
 
@@ -66,6 +71,7 @@ typedef enum {
    CELLTYPE_SERIALRX         = 5,
    CELLTYPE_MORESERIALRX     = 6
 } cellType_t;
+
 
 PRAGMA(pack(1));
 typedef struct {
