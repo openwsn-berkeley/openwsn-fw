@@ -294,7 +294,7 @@ typedef struct {
    open_addr_t   l3_destinationAdd;              // 128b IPv6 destination (down stack) 
    open_addr_t   l3_sourceAdd;                   // 128b IPv6 source address 
    //l2
-   owerror_t       l2_sendDoneError;               // outcome of trying to send this packet
+   owerror_t     l2_sendDoneError;               // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;           // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
    uint8_t       l2_frameType;                   // beacon, data, ack, cmd
    uint8_t       l2_dsn;                         // sequence number of the received frame
@@ -303,6 +303,8 @@ typedef struct {
    asn_t         l2_asn;                         // at what ASN the packet was Tx'ed or Rx'ed
    uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
+   uint8_t       l2_joinPriority;                // the join priority received in EB
+   bool          l2_joinPriorityPresent;
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet

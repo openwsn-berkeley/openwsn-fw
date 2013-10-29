@@ -133,7 +133,11 @@ void task_resNotifReceive() {
    // indicate reception (to update statistics)
    neighbors_indicateRx(&(msg->l2_nextORpreviousHop),
                         msg->l1_rssi,
-                        &msg->l2_asn);
+                        &msg->l2_asn,
+                        msg->l2_joinPriorityPresent,
+                        msg->l2_joinPriority);
+   
+   msg->l2_joinPriorityPresent=FALSE; //reset it to avoid race conditions with this var.
    
    // send the packet up the stack, if it qualifies
    switch (msg->l2_frameType) {

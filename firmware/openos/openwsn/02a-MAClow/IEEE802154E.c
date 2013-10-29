@@ -649,7 +649,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
         }
         switch(subid){
         case IEEE802154E_MLME_SYNC_IE_SUBID:
-          //content is ASN and Join Priority
+          //content is ASN and Join Priority 
           if (idmanager_getIsDAGroot()==FALSE) {
              asnStoreFromAdv((uint8_t*)(pkt->payload)+ptr);
              ptr = ptr + 5; //add ASN len
@@ -835,7 +835,7 @@ port_INLINE void activity_ti1ORri1() {
             //copy synch IE  -- should be Little endian???
             // fill in the ASN field of the ADV
             ieee154e_getAsn(syn_IE.asn);
-            syn_IE.join_priority = 0xff; //poipoi -- use dagrank(rank) 
+            syn_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank) 
        
             memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&syn_IE,sizeof(synch_IE_t));
             
@@ -1409,6 +1409,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
       
       // handle IEs xv poipoi
+      //reset join priority 
       
       if ((ieee802514_header.valid==TRUE &&
           ieee802514_header.ieListPresent==TRUE && 
@@ -1715,8 +1716,8 @@ port_INLINE void ieee154e_getAsn(uint8_t* array) {
 }
 
 port_INLINE void joinPriorityStoreFromAdv(uint8_t jp){
-  //TODO poipoi xv
-  
+  ieee154e_vars.dataReceived->l2_joinPriority = jp;
+  ieee154e_vars.dataReceived->l2_joinPriorityPresent = TRUE;     
 }
 
 
@@ -1851,6 +1852,7 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_RES;
+
    // post RES's Receive task
    scheduler_push_task(task_resNotifReceive,TASKPRIO_RESNOTIF_RX);
    // wake up the scheduler
@@ -1864,7 +1866,7 @@ port_INLINE void resetStats() {
    ieee154e_stats.numSyncAck      =    0;
    ieee154e_stats.minCorrection   =  127;
    ieee154e_stats.maxCorrection   = -127;
-   ieee154e_stats.dutyCycle       = 0;
+   ieee154e_stats.dutyCycle       =    0;
    // do not reset the number of de-synchronizations
 }
 
