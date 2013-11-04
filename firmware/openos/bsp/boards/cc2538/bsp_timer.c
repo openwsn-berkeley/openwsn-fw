@@ -16,6 +16,7 @@
 #include "debug.h"
 #include "interrupt.h"
 #include "sleepmode.h"
+#include "debugpins.h"
 
 //=========================== defines =========================================
 
@@ -24,6 +25,9 @@
 typedef struct {
 	bsp_timer_cbt cb;
 	PORT_TIMER_WIDTH last_compare_value;
+	bool initiated;
+	uint32_t tooclose;
+	uint32_t diff;
 } bsp_timer_vars_t;
 
 bsp_timer_vars_t bsp_timer_vars;
@@ -66,7 +70,7 @@ void bsp_timer_reset() {
 	// reset compare
 
 	// reset timer
-
+    bsp_timer_vars.initiated=false;
 	// record last timer compare value
 	bsp_timer_vars.last_compare_value = 0;
 }
@@ -92,6 +96,12 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 	PORT_TIMER_WIDTH newCompareValue, current;
 	PORT_TIMER_WIDTH temp_last_compare_value;
 
+	if (!bsp_timer_vars.initiated){
+		//as the timer runs forever the first time it is turned on has a weired value
+		bsp_timer_vars.last_compare_value=SleepModeTimerCountGet();
+		bsp_timer_vars.initiated=true;
+	}
+
 	temp_last_compare_value = bsp_timer_vars.last_compare_value;
 
 	newCompareValue = bsp_timer_vars.last_compare_value + delayTicks + 1;
@@ -100,10 +110,13 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 	current = SleepModeTimerCountGet();
 
 	if (delayTicks < current - temp_last_compare_value) {
+
 		// we're already too late, schedule the ISR right now manually
 		// setting the interrupt flag triggers an interrupt
+		bsp_timer_vars.tooclose++;
+		bsp_timer_vars.diff=(current - temp_last_compare_value);
+		bsp_timer_vars.last_compare_value = current;
 		IntPendSet(INT_SMTIM);
-
 	} else {
 		// this is the normal case, have timer expire at newCompareValue
 		SleepModeTimerCompareSet(newCompareValue);
@@ -133,6 +146,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 
 void bsp_timer_isr_private() {
 	debugpins_isr_set();
+	IntPendClear(INT_SMTIM);
 	bsp_timer_isr();
 	debugpins_isr_clr();
 }

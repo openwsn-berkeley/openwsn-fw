@@ -255,7 +255,15 @@ void openserial_startInput() {
    openserial_vars.busyReceiving  = FALSE;
    openserial_vars.mode           = MODE_INPUT;
    openserial_vars.reqFrameIdx    = 0;
+#ifdef FASTSIM
+   uart_writeBufferByLen_FASTSIM(
+      openserial_vars.reqFrame,
+      sizeof(openserial_vars.reqFrame)
+   );
+   openserial_vars.reqFrameIdx = sizeof(openserial_vars.reqFrame);
+#else
    uart_writeByte(openserial_vars.reqFrame[openserial_vars.reqFrameIdx]);
+#endif
    ENABLE_INTERRUPTS();
 }
 
@@ -324,7 +332,15 @@ void openserial_startOutput() {
    DISABLE_INTERRUPTS();
    openserial_vars.mode=MODE_OUTPUT;
    if (openserial_vars.outputBufFilled) {
+#ifdef FASTSIM
+      uart_writeCircularBuffer_FASTSIM(
+         openserial_vars.outputBuf,
+         &openserial_vars.outputBufIdxR,
+         &openserial_vars.outputBufIdxW
+      );
+#else
       uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
+#endif
    } else {
       openserial_stop();
    }

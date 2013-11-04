@@ -15,7 +15,9 @@ neighbors_vars_t neighbors_vars;
 void registerNewNeighbor(
         open_addr_t* neighborID,
         int8_t       rssi,
-        asn_t*       asnTimestamp
+        asn_t*       asnTimestamp,
+        bool         joinPrioPresent,
+        uint8_t      joinPrio
      );
 bool isNeighbor(open_addr_t* neighbor);
 void removeNeighbor(uint8_t neighborIndex);
@@ -307,7 +309,9 @@ The fields which are updated are:
 */
 void neighbors_indicateRx(open_addr_t* l2_src,
                           int8_t       rssi,
-                          asn_t*       asnTs) {
+                          asn_t*       asnTs,
+                          bool         joinPrioPresent,
+                          uint8_t      joinPrio) {
    uint8_t i;
    bool    newNeighbor;
    
@@ -323,6 +327,10 @@ void neighbors_indicateRx(open_addr_t* l2_src,
          neighbors_vars.neighbors[i].numRx++;
          neighbors_vars.neighbors[i].rssi=rssi;
          memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
+         //update jp
+         if (joinPrioPresent==TRUE){
+            neighbors_vars.neighbors[i].joinPrio=joinPrio;
+         }
          
          // update stableNeighbor, switchStabilityCounter
          if (neighbors_vars.neighbors[i].stableNeighbor==FALSE) {
@@ -354,7 +362,7 @@ void neighbors_indicateRx(open_addr_t* l2_src,
    
    // register new neighbor
    if (newNeighbor==TRUE) {
-      registerNewNeighbor(l2_src, rssi, asnTs);
+      registerNewNeighbor(l2_src, rssi, asnTs, joinPrioPresent,joinPrio);
    }
 }
 
@@ -432,11 +440,11 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
             if (
-                  neighbors_vars.dio->rank>neighbors_vars.neighbors[i].DAGrank &&
-                  neighbors_vars.dio->rank - neighbors_vars.neighbors[i].DAGrank>DEFAULTLINKCOST
+                  neighbors_vars.dio->rank > neighbors_vars.neighbors[i].DAGrank &&
+                  neighbors_vars.dio->rank - neighbors_vars.neighbors[i].DAGrank >(DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
                ) {
                 // the new DAGrank looks suspiciously high, only increment a bit
-                neighbors_vars.neighbors[i].DAGrank += DEFAULTLINKCOST;
+                neighbors_vars.neighbors[i].DAGrank += (DEFAULTLINKCOST*2*MINHOPRANKINCREASE);
                 openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
                                (errorparameter_t)neighbors_vars.dio->rank,
                                (errorparameter_t)neighbors_vars.neighbors[i].DAGrank);
@@ -486,7 +494,7 @@ routing decisions to change. Examples are:
 */
 void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint8_t   i;
-   uint8_t   linkCost;
+   uint16_t  rankIncrease;
    uint32_t  tentativeDAGrank; // 32-bit since is used to sum
    uint8_t   prefParentIdx;
    bool      prefParentFound;
@@ -511,11 +519,12 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
          neighbors_vars.neighbors[i].parentPreference=0;
          // calculate link cost to this neighbor
          if (neighbors_vars.neighbors[i].numTxACK==0) {
-            linkCost = DEFAULTLINKCOST;
+            rankIncrease = DEFAULTLINKCOST*2*MINHOPRANKINCREASE;
          } else {
-            linkCost = (uint8_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*10.0);
+        	//6TiSCH minimal draft using OF0 for rank computation
+            rankIncrease = (uint16_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*2*MINHOPRANKINCREASE);
          }
-         tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+linkCost;
+         tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
          if ( tentativeDAGrank<neighbors_vars.myDAGrank &&
               tentativeDAGrank<MAXDAGRANK) {
             // found better parent, lower my DAGrank
@@ -578,7 +587,9 @@ void debugNetPrint_neighbors(netDebugNeigborEntry_t* out){
 
 void registerNewNeighbor(open_addr_t* address,
                          int8_t       rssi,
-                         asn_t*       asnTimestamp) {
+                         asn_t*       asnTimestamp,
+                         bool         joinPrioPresent,
+                         uint8_t      joinPrio) {
    uint8_t  i,j;
    bool     iHaveAPreferedParent;
    // filter errors
@@ -607,7 +618,13 @@ void registerNewNeighbor(open_addr_t* address,
             neighbors_vars.neighbors[i].numTx                  = 0;
             neighbors_vars.neighbors[i].numTxACK               = 0;
             memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
-            // do I already have a preferred parent ?
+            //update jp
+            if (joinPrioPresent==TRUE){
+               neighbors_vars.neighbors[i].joinPrio=joinPrio;
+            }
+            
+            
+            // do I already have a preferred parent ? -- TODO change to use JP
             iHaveAPreferedParent = FALSE;
             for (j=0;j<MAXNUMNEIGHBORS;j++) {
                if (neighbors_vars.neighbors[j].parentPreference==MAXPREFERENCE) {

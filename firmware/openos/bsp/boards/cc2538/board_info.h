@@ -12,11 +12,11 @@ to return the board's description.
 
 #include <stdint.h>
 #include <string.h>
-
+#include "cpu.h"
+#include "interrupt.h"
 //=========================== defines =========================================
 
 #define port_INLINE                         inline
-#define bool uint8_t //TODO remove after.
 
 #define PRAGMA(x)  _Pragma(#x)
 #define PACK(x)     pack(x)
@@ -24,16 +24,16 @@ to return the board's description.
 //===== interrupt state
 
 #define INTERRUPT_DECLARATION()
-#define DISABLE_INTERRUPTS()
+#define DISABLE_INTERRUPTS() IntMasterDisable()
 
-#define ENABLE_INTERRUPTS()
+#define ENABLE_INTERRUPTS() IntMasterEnable()
 
 //===== timer
 
 #define PORT_TIMER_WIDTH                    uint32_t
 #define PORT_RADIOTIMER_WIDTH               uint32_t
 
-#define PORT_SIGNED_INT_WIDTH               int16_t
+#define PORT_SIGNED_INT_WIDTH               int32_t
 #define PORT_TICS_PER_MS                    33
 
 // on GINA, we use the comparatorA interrupt for the OS
@@ -43,6 +43,13 @@ to return the board's description.
 // this is a workaround from the fact that the interrupt pin for the GINA radio
 // is not connected to a pin on the MSP which allows time capture.
 #define CAPTURE_TIME()
+
+/* sleep timer interrupt */
+#define HAL_INT_PRIOR_ST        (4 << 5)
+/* MAC interrupts */
+#define HAL_INT_PRIOR_MAC       (4 << 5)
+/* UART interrupt */
+#define HAL_INT_PRIOR_UART      (5 << 5)
 
 
 //===== pinout
@@ -58,7 +65,7 @@ to return the board's description.
 //===== IEEE802154E timing
 
 // time-slot related
-#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
 // execution speed related
 #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
 #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)

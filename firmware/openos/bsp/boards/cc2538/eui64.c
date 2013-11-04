@@ -20,9 +20,9 @@
 //eui hardcoded by now..
 void eui64_get(uint8_t* addressToWrite) {
 	uint8_t temp_addressToWrite[64];
-	  temp_addressToWrite[0] = 14;
-	  temp_addressToWrite[1] = 15;
-	  temp_addressToWrite[2] = 92;
+	  temp_addressToWrite[0] = 0x14;
+	  temp_addressToWrite[1] = 0x15;
+	  temp_addressToWrite[2] = 0x92;
 	  temp_addressToWrite[3] = 0x09;
 	  temp_addressToWrite[4] = 0x02;
 	  temp_addressToWrite[5] = 0x2c;

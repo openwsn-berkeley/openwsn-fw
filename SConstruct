@@ -23,7 +23,8 @@ command_line_options = {
     'board':       ['telosb','wsn430v14','wsn430v13b','gina','z1','pc','python'],
     'toolchain':   ['mspgcc','iar','iar-proj','gcc'],
     'fet_version': ['2','3'],
-    'verbose':     ['0','1']
+    'verbose':     ['0','1'],
+    'fastsim':     ['1','0'],
 }
 
 def validate_option(key, value, env):
@@ -73,6 +74,13 @@ command_line_vars.AddVariables(
         'verbose',                                         # key
         'Print complete compile/link comand.',             # help
         command_line_options['verbose'][0],                # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'fastsim',                                         # key
+        'Compiles the firmware for fast simulation.',      # help
+        command_line_options['fastsim'][0],                # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

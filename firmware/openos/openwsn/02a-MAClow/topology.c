@@ -4,10 +4,10 @@
 
 //=========================== defines =========================================
 
-#define TOPOLOGY_MOTE1 0xB9
-#define TOPOLOGY_MOTE2 0x41
-#define TOPOLOGY_MOTE3 0xEE
-#define TOPOLOGY_MOTE4 0x80
+#define TOPOLOGY_MOTE1 0x01
+#define TOPOLOGY_MOTE2 0x02
+#define TOPOLOGY_MOTE3 0x03
+#define TOPOLOGY_MOTE4 0x04
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================

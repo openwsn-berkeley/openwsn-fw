@@ -20,6 +20,8 @@
 #include "radiotimer.h"
 #include "debugpins.h"
 #include "uart.h"
+#include "radio.h"
+
 
 
 //=========================== variables =======================================
@@ -48,6 +50,7 @@ void board_init() {
    bsp_timer_init();
    radiotimer_init();
    uart_init();
+   radio_init();
 
 }
 
@@ -180,10 +183,10 @@ void SysCtrlDeepSleepSetting(void)
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_AES);
 
   /*
-   * Disable RFC during deep sleep. Please note that this setting is
+   * Enable RF Core during deep sleep. Please note that this setting is
    * only valid for PG2.0. For PG1.0 this is just a dummy instruction.
    */
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_RFC);
+  SysCtrlPeripheralDeepSleepEnable(SYS_CTRL_PERIPH_RFC);
 }
 
 void SysCtrlSleepSetting(void)
@@ -208,10 +211,10 @@ void SysCtrlSleepSetting(void)
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_AES);
 
   /*
-   * Disable RFC during sleep. Please note that this setting is
+   * Enable RFC during sleep. Please note that this setting is
    * only valid for PG2.0. For PG1.0 this is just a dummy instruction.
    */
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_RFC);
+  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
 }
 
 

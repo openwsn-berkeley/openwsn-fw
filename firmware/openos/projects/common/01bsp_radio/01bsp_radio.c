@@ -17,9 +17,9 @@ can use this project with any platform.
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
-#define CHANNEL         26             ///< 2.480GHz
+#define CHANNEL         11             ///< 2.480GHz
 #define TIMER_PERIOD    65535          ///< 2s @ 32kHz
-#define ID              0xab           ///< byte sent in the packets
+#define ID              0x99          ///< byte sent in the packets
 
 //=========================== variables =======================================
 

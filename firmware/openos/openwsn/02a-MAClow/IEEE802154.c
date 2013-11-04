@@ -18,16 +18,22 @@ Note that we are writing the field from the end of the header to the beginning.
 
 \param[in,out] msg              The message to append the header to.
 \param[in]     frameType        Type of IEEE802.15.4 frame.
+\param[in]     ielistpresent    Is the IE list present¿
+\param[in]     frameVersion     IEEE802.15.4 frame version.
 \param[in]     securityEnabled  Is security enabled on this frame?
 \param[in]     sequenceNumber   Sequence number of this frame.
 \param[in]     nextHop          Address of the next hop
 */
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
+                              uint8_t           ielistpresent,
+                              uint8_t           frameversion,
                               bool              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
+   
+   //General IEs here (those that are carried in all packets) -- None by now.
    
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
@@ -73,6 +79,10 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       }
    }
    temp_8b             |= IEEE154_ADDR_EXT                << IEEE154_FCF_SRC_ADDR_MODE;
+   //poipoi xv IE list present
+   temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
+   temp_8b             |= frameversion                    << IEEE154_FCF_FRAME_VERSION;
+     
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
@@ -118,6 +128,14 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    // fcf, byte 2
    if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    temp_8b = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+   //poipoi xv IE list present
+   ieee802514_header->ieListPresent  = (temp_8b >> IEEE154_FCF_IELIST_PRESENT     ) & 0x01;//1b
+   ieee802514_header->frameVersion   = (temp_8b >> IEEE154_FCF_FRAME_VERSION      ) & 0x03;//2b
+
+   if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
+       return; //invalid packet accordint to p.64 IEEE15.4e
+   }
+   
    switch ( (temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03 ) {
       case IEEE154_ADDR_NONE:
          ieee802514_header->dest.type = ADDR_NONE;
@@ -209,6 +227,11 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          break;
       // no need for a default, since case would have been caught above
    }
+   
+   if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
+       return; //invalid packet accordint to p.64 IEEE15.4e
+   }
+   
    // apply topology filter
    if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {
       // the topology filter does accept this packet, return

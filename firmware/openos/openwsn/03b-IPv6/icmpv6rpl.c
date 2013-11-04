@@ -114,6 +114,10 @@ void icmpv6rpl_init() {
    
 }
 
+uint8_t icmpv6rpl_getRPLIntanceID(){
+	return icmpv6rpl_vars.dao.rplinstanceId;
+}
+
 /**
 \brief Called when DIO/DAO was sent.
 

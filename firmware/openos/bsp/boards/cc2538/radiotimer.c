@@ -149,7 +149,6 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 //===== compare
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
-
 	//select ovf cmp1 register in the selector so it can be modified
 	HWREG(RFCORE_SFR_MTMSEL) = (0x03 << RFCORE_SFR_MTMSEL_MTMOVFSEL_S) & RFCORE_SFR_MTMSEL_MTMOVFSEL_M;
 	//set value
@@ -185,14 +184,16 @@ void radiotimer_cancel() {
 //===== capture
 
 port_INLINE PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
-	 PORT_RADIOTIMER_WIDTH value=0;
+	 volatile PORT_RADIOTIMER_WIDTH value=0;
+
 	 //select period register in the selector so it can be read
 	 HWREG(RFCORE_SFR_MTMSEL) = (0x00 << RFCORE_SFR_MTMSEL_MTMOVFSEL_S) & RFCORE_SFR_MTMSEL_MTMOVFSEL_M;
 	 // compute value by adding m0 and m1 registers
 	 value = HWREG(RFCORE_SFR_MTMOVF0);
 	 value+=(HWREG(RFCORE_SFR_MTMOVF1)<<8);
      value+=(HWREG(RFCORE_SFR_MTMOVF2)<<16);
-	 return value;
+
+     return value;
 }
 
 //=========================== private =========================================

@@ -31,14 +31,16 @@ owerror_t prependIPv6Header(
    uint8_t              fw_SendOrfw_Rcv
 );
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg);
-
+//hop by hop header
+void prependIPv6HopByHopHeader(OpenQueueEntry_t* msg,uint8_t nextheader, bool nh, rpl_hopoption_ht *hopbyhop_option);
+void retrieveIPv6HopByHopHeader(OpenQueueEntry_t* msg, ipv6_hopbyhop_ht *hopbyhop_header, rpl_hopoption_ht *rpl_option);
 //=========================== public ==========================================
 
 void iphc_init() {
 }
 
 //send from upper layer: I need to add 6LoWPAN header
-owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, uint8_t fw_SendOrfw_Rcv) {
+owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, rpl_hopoption_ht *hopbyhop_option, uint8_t fw_SendOrfw_Rcv) {
    open_addr_t  temp_dest_prefix;
    open_addr_t  temp_dest_mac64b;
    open_addr_t* p_dest;
@@ -48,7 +50,9 @@ owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_he
    uint8_t      sam;
    uint8_t      dam;
    uint8_t      nh;
-   
+   uint8_t      next_header;
+   //option header
+  
    // take ownership over the packet
    msg->owner = COMPONENT_IPHC;
    
@@ -126,11 +130,19 @@ owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_he
    // decrement the packet's hop limit
    ipv6_header.hop_limit--;
    
+    //prepend Option hop by hop header except when src routing -- this is a little trick as src routing is using an option header set to 0x00
+   next_header=msg->l4_protocol;
+   if (hopbyhop_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE){
+      prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, hopbyhop_option);
+      //change nh to point to the newly added header
+      next_header=IANA_IPv6HOPOPT;// use 0x00 as NH to indicate option header -- see rfc 2460
+   }
+   //then regular header
    if (prependIPv6Header(msg,
             IPHC_TF_ELIDED,
             0, // value_flowlabel is not copied
             nh,
-            msg->l4_protocol,
+            next_header, 
             IPHC_HLIM_INLINE,
             ipv6_header.hop_limit,
             IPHC_CID_NO,
@@ -145,8 +157,12 @@ owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_he
             )==E_FAIL) {
       return E_FAIL;
    }
+   
    return res_send(msg);
 }
+
+
+
 
 //send from bridge: 6LoWPAN header already added by OpenLBR, send as is
 owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
@@ -172,18 +188,66 @@ void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
 void iphc_receive(OpenQueueEntry_t* msg) {
    ipv6_header_iht ipv6_header;
+   ipv6_hopbyhop_ht ipv6_hop_header;
+   rpl_hopoption_ht hop_by_hop_option;
+   
    msg->owner  = COMPONENT_IPHC;
+   
+   //then regular header
    ipv6_header = retrieveIPv6Header(msg);
+   
+  
    if (idmanager_getIsBridge()==FALSE ||
       packetfunctions_isBroadcastMulticast(&(ipv6_header.dest))) {
       packetfunctions_tossHeader(msg,ipv6_header.header_length);
-      forwarding_receive(msg,ipv6_header);       //up the internal stack
+      
+      if (ipv6_header.next_header==IANA_IPv6HOPOPT){
+          //retrieve hop by hop header
+          retrieveIPv6HopByHopHeader(msg,&ipv6_hop_header,&hop_by_hop_option);
+          //toss the header + option +tlv on it if any
+          packetfunctions_tossHeader(msg,IPv6HOP_HDR_LEN+ipv6_hop_header.HdrExtLen);
+      }
+      forwarding_receive(msg,ipv6_header,ipv6_hop_header,hop_by_hop_option);       //up the internal stack
    } else {
       openbridge_receive(msg);                   //out to the OpenVisualizer
    }
 }
 
 //=========================== private =========================================
+
+
+void prependIPv6HopByHopHeader(OpenQueueEntry_t *msg,uint8_t nextheader, bool nh, rpl_hopoption_ht *hopbyhop_option){
+   
+    //copy them in reverse order, first option later header
+    packetfunctions_reserveHeaderSize(msg,sizeof(rpl_hopoption_ht));
+    memcpy(msg->payload,hopbyhop_option,sizeof(rpl_hopoption_ht));
+    
+    //hdr len as defined by rfc6282 sect 4.2
+    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+   *((uint8_t*)(msg->payload)) = sizeof(rpl_hopoption_ht);
+    
+    //next header
+    switch (nh) {
+      case IPHC_NH_INLINE:
+        //add the next header inline
+         packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+         *((uint8_t*)(msg->payload)) = nextheader;
+       
+         //append NHC field on the extension header should be 1110 0000 -- see rfc 6282 sect 4.2
+         packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+         *((uint8_t*)(msg->payload)) = NHC_IPv6EXT_ID;
+         break;
+      case IPHC_NH_COMPRESSED:
+         packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+         *((uint8_t*)(msg->payload)) = NHC_IPv6EXT_ID | 0x01; //mark last bit as 1 -- see rfc 6282 sect 4.2
+        break;
+      default:
+         openserial_printCritical(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+                               (errorparameter_t)3,
+                               (errorparameter_t)nh);
+   }
+
+}
 
 owerror_t prependIPv6Header(
       OpenQueueEntry_t* msg,
@@ -375,8 +439,69 @@ owerror_t prependIPv6Header(
    return E_SUCCESS;
 }
 
+
+
+void retrieveIPv6HopByHopHeader(OpenQueueEntry_t *msg,ipv6_hopbyhop_ht *hopbyhop_header, rpl_hopoption_ht *rpl_option){
+  uint8_t temp_8b;
+  
+  hopbyhop_header->headerlen=0;
+   
+  hopbyhop_header->lowpan_nhc = *((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen);
+  hopbyhop_header->headerlen += sizeof(uint8_t);   
+  
+   //next header
+   switch ( hopbyhop_header->lowpan_nhc & NHC_HOP_NH_MASK) {
+      case IPHC_NH_INLINE:
+         // Full 8 bits for Next Header are carried in-line
+         hopbyhop_header->next_header_compressed = FALSE;
+         hopbyhop_header->nextHeader = *((uint8_t*)(msg->payload)+hopbyhop_header->headerlen);
+         hopbyhop_header->headerlen+= sizeof(uint8_t);   
+         break;
+      case IPHC_NH_COMPRESSED:
+         // the Next header field is compressed and the next header is encoded
+         // using LOWPAN_NHC, which is discussed in Section 4.1 of RFC6282
+         // we don't parse anything here, but will look at the (compressed)
+         // next header after having parsed all address fields.
+         hopbyhop_header->next_header_compressed = TRUE;
+         break;
+      default:
+         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+                               (errorparameter_t)7,
+                               (errorparameter_t)hopbyhop_header->lowpan_nhc);
+         break;
+   }
+   
+   //len of options
+   hopbyhop_header->HdrExtLen =*((uint8_t*)(msg->payload)+hopbyhop_header->headerlen);
+   hopbyhop_header->headerlen+= sizeof(uint8_t);  
+   //copy the options
+   memcpy(rpl_option,((uint8_t*)(msg->payload)+hopbyhop_header->headerlen),sizeof(rpl_hopoption_ht));
+   hopbyhop_header->headerlen+= sizeof(rpl_hopoption_ht);  
+   
+   //now in case nh compressed:
+    /*
+   During the parsing of the nh field, we found that the next header was
+   compressed. We now identify which next (compressed) header this is, and
+   populate the hopbyhop_header.nextHeader field accordingly. It's the role of the
+   appropriate transport module to decompress the header.
+   */
+   if (hopbyhop_header->next_header_compressed==TRUE) {
+      temp_8b   = *((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen);
+      if    ( (temp_8b & NHC_UDP_MASK) == NHC_UDP_ID) {
+         hopbyhop_header->nextHeader = IANA_UDP;
+      }else {
+         // the next header could be an IPv6 extension header, or misformed
+         hopbyhop_header->nextHeader = IANA_UNDEFINED;
+         openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+                               (errorparameter_t)14,
+                               (errorparameter_t)hopbyhop_header->nextHeader);
+      }
+   }
+}
+
+
 ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
-   uint8_t         temp_8b,temp_aux;
+   uint8_t         temp_8b;
    open_addr_t     temp_addr_16b;
    open_addr_t     temp_addr_64b;
    ipv6_header_iht ipv6_header;
@@ -447,11 +572,7 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
          ipv6_header.next_header_compressed = FALSE;
          ipv6_header.next_header = *((uint8_t*)(msg->payload)+ipv6_header.header_length);
          ipv6_header.header_length += sizeof(uint8_t);
-         //poipoi debug
-         if (ipv6_header.next_header==IANA_IPv6ROUTE){
-            temp_aux=1;
-            temp_aux++;
-         }
+      
          break;
       case IPHC_NH_COMPRESSED:
          // the Next header field is compressed and the next header is encoded
@@ -549,18 +670,25 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
       temp_8b   = *((uint8_t*)(msg->payload)+ipv6_header.header_length);
       if    ( (temp_8b & NHC_UDP_MASK) == NHC_UDP_ID) {
          ipv6_header.next_header = IANA_UDP;
-      } else {
+      }else if ( (temp_8b & NHC_IPv6EXT_MASK) == NHC_IPv6EXT_ID){
+        if( temp_8b & NHC_IPv6HOP_MASK == NHC_IPv6HOP_VAL){
+          //it is hop by hop header
+          ipv6_header.next_header = IANA_IPv6HOPOPT;
+        }else{
+          // the next header could be another IPv6 extension header
+          ipv6_header.next_header = IANA_UNDEFINED;
+          openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
+                               (errorparameter_t)11,
+                               (errorparameter_t)ipv6_header.next_header);
+        }
+      }else {
          // the next header could be an IPv6 extension header, or misformed
          ipv6_header.next_header = IANA_UNDEFINED;
          openserial_printError(COMPONENT_IPHC,ERR_6LOWPAN_UNSUPPORTED,
-                               (errorparameter_t)11,
+                               (errorparameter_t)12,
                                (errorparameter_t)ipv6_header.next_header);
       }
    }
-   // this is a temporary workaround for allowing multicast RAs to go through
-   //poipoi xv -- TODO -- check if this still needed. NO RAs anymore after RPL implementation.
-   /*if (m==1 && dam==IPHC_DAM_ELIDED) {
-      ipv6_header.header_length += sizeof(uint8_t);
-   }*/
+   
    return ipv6_header;
 }

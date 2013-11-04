@@ -17,10 +17,11 @@ res_vars_t res_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t res_send_internal(OpenQueueEntry_t* msg);
+owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint8_t frameVersion);
 void    sendAdv();
 void    sendKa();
 void    res_timer_cb();
+uint8_t res_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv);//returns reserved size
 
 //=========================== public ==========================================
 
@@ -44,9 +45,9 @@ status information about several modules in the OpenWSN stack.
 \returns TRUE if this function printed something, FALSE otherwise.
 */
 bool debugPrint_myDAGrank() {
-   uint8_t output=0;
+   uint16_t output=0;
    output = neighbors_getMyDAGrank();
-   openserial_printStatus(STATUS_DAGRANK,(uint8_t*)&output,sizeof(uint8_t));
+   openserial_printStatus(STATUS_DAGRANK,(uint8_t*)&output,sizeof(uint16_t));
    return TRUE;
 }
 
@@ -55,7 +56,7 @@ bool debugPrint_myDAGrank() {
 owerror_t res_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_RES;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-   return res_send_internal(msg);
+   return res_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
 }
 
 //======= from lower layer
@@ -132,7 +133,11 @@ void task_resNotifReceive() {
    // indicate reception (to update statistics)
    neighbors_indicateRx(&(msg->l2_nextORpreviousHop),
                         msg->l1_rssi,
-                        &msg->l2_asn);
+                        &msg->l2_asn,
+                        msg->l2_joinPriorityPresent,
+                        msg->l2_joinPriority);
+   
+   msg->l2_joinPriorityPresent=FALSE; //reset it to avoid race conditions with this var.
    
    // send the packet up the stack, if it qualifies
    switch (msg->l2_frameType) {
@@ -193,7 +198,7 @@ IEEE802154E will handle the packet.
 
 \returns E_SUCCESS iff successful.
 */
-owerror_t res_send_internal(OpenQueueEntry_t* msg) {
+owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent, uint8_t frameVersion) {
    // assign a number of retries
    if (packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE) {
       msg->l2_retriesLeft = 1;
@@ -211,6 +216,8 @@ owerror_t res_send_internal(OpenQueueEntry_t* msg) {
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
+                            iePresent,
+                            frameVersion,
                             IEEE154_SEC_NO_SECURITY,
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
@@ -231,6 +238,9 @@ readability of the code.
 */
 port_INLINE void sendAdv() {
    OpenQueueEntry_t* adv;
+   payload_IE_descriptor_t payload_IE_desc;
+   MLME_IE_subHeader_t mlme_subHeader;
+   uint8_t slotframeIElen=0;
    
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed
@@ -265,10 +275,33 @@ port_INLINE void sendAdv() {
    adv->owner   = COMPONENT_RES;
    
    // reserve space for ADV-specific header
-   packetfunctions_reserveHeaderSize(adv, ADV_PAYLOAD_LENGTH);
-   // the actual value of the current ASN will be written by the
+   // xv poipoi -- reserving for IEs  -- reverse order.
+   //TODO reserve here for slotframe and link IE with minimal schedule information
+   slotframeIElen = res_copySlotFrameAndLinkIE(adv);
+   //create Sync IE with JP and ASN 
+   packetfunctions_reserveHeaderSize(adv, sizeof(synch_IE_t));//the asn + jp
+   adv->l2_ASNpayload               = adv->payload; //keep a pointer to where the ASN should be.
+   // the actual value of the current ASN and JP will be written by the
    // IEEE802.15.4e when transmitting
+   packetfunctions_reserveHeaderSize(adv, sizeof(MLME_IE_subHeader_t));//the MLME header
+   //copy mlme sub-header               
+   mlme_subHeader.length_subID_type=sizeof(synch_IE_t) << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+   mlme_subHeader.length_subID_type |= (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT) | IEEE802154E_DESC_TYPE_SHORT;
+   //little endian          
+   adv->payload[0]= mlme_subHeader.length_subID_type & 0xFF;
+   adv->payload[1]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+    
+   packetfunctions_reserveHeaderSize(adv, sizeof(payload_IE_descriptor_t));//the payload IE header
+   //prepare IE headers and copy them to the ADV 
    
+   payload_IE_desc.length_groupid_type = (sizeof(MLME_IE_subHeader_t)+sizeof(synch_IE_t)+slotframeIElen)<<IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
+   payload_IE_desc.length_groupid_type |=  (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); //
+   
+   //copy header into the packet
+   //little endian
+   adv->payload[0]= payload_IE_desc.length_groupid_type & 0xFF;
+   adv->payload[1]= (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+  
    // some l2 information about this packet
    adv->l2_frameType                     = IEEE154_TYPE_BEACON;
    adv->l2_nextORpreviousHop.type        = ADDR_16B;
@@ -276,10 +309,83 @@ port_INLINE void sendAdv() {
    adv->l2_nextORpreviousHop.addr_16b[1] = 0xff;
    
    // put in queue for MAC to handle
-   res_send_internal(adv);
+   res_send_internal(adv,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
    
    // I'm now busy sending an ADV
    res_vars.busySendingAdv = TRUE;
+}
+
+port_INLINE uint8_t res_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv){
+  MLME_IE_subHeader_t mlme_subHeader;
+  uint8_t len=0;
+  uint8_t linkOption=0;
+  uint16_t slot=SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+SCHEDULE_MINIMAL_6TISCH_EB_CELLS;
+  
+  //reverse order and little endian. -- 
+ 
+  //for each link in the schedule (in basic configuration)
+  //copy to adv 1B linkOption bitmap
+  //copy to adv 2B ch.offset
+  //copy to adv 2B timeslot
+ 
+  //shared cells
+  linkOption = (1<<FLAG_TX_S)|(1<<FLAG_RX_S)|(1<<FLAG_SHARED_S);
+  while(slot>SCHEDULE_MINIMAL_6TISCH_EB_CELLS){
+    packetfunctions_reserveHeaderSize(adv,5);
+    //ts
+    adv->payload[0]= slot & 0xFF;
+    adv->payload[1]= (slot >> 8) & 0xFF;
+    //ch.offset as minimal draft
+    adv->payload[2]= 0x00;
+    adv->payload[3]= 0x00;
+    //linkOption
+    adv->payload[4]= linkOption;
+    len+=5;
+    slot--;
+  }
+ 
+  //eb slot
+  linkOption = (1<<FLAG_TX_S)|(1<<FLAG_RX_S)|(1<<FLAG_SHARED_S)|(1<<FLAG_TIMEKEEPING_S);
+  packetfunctions_reserveHeaderSize(adv,5);
+  len+=5;
+ //ts
+  adv->payload[0]= SCHEDULE_MINIMAL_6TISCH_EB_CELLS & 0xFF;
+  adv->payload[1]= (SCHEDULE_MINIMAL_6TISCH_EB_CELLS >> 8) & 0xFF;
+  //ch.offset as minimal draft
+  adv->payload[2]= 0x00;
+  adv->payload[3]= 0x00;
+ 
+  adv->payload[4]= linkOption;
+ //now slotframe ie general fields
+    //1B number of links == 6 
+    //Slotframe Size 2B = 101 timeslots
+    //1B slotframe handle (id)
+  packetfunctions_reserveHeaderSize(adv,5);//
+  len+=5;
+  
+  adv->payload[0]= SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER;  
+  adv->payload[1]= SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+  adv->payload[2]= SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE & 0xFF;
+  adv->payload[3]= (SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE >> 8) & 0xFF;
+  adv->payload[4]= 0x06; //number of links
+  
+  //MLME sub IE header 
+  //1b -15 short ==0x00
+  //7b -8-14 Sub-ID=0x1b
+  //8b - Length = 2 mlme-header + 5 slotframe general header +(6links*5bytes each) 
+  packetfunctions_reserveHeaderSize(adv, sizeof(MLME_IE_subHeader_t));//the MLME header
+   
+   
+   //copy mlme sub-header               
+  mlme_subHeader.length_subID_type = len << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+  mlme_subHeader.length_subID_type |= (IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT) | IEEE802154E_DESC_TYPE_SHORT;
+  
+  //little endian          
+  adv->payload[0]= mlme_subHeader.length_subID_type & 0xFF;
+  adv->payload[1]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+  len+=2;//count len of mlme header
+   
+  return len;
 }
 
 /**
@@ -337,7 +443,7 @@ port_INLINE void sendKa() {
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
    // put in queue for MAC to handle
-   res_send_internal(kaPkt);
+   res_send_internal(kaPkt,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
    
    // I'm now busy sending a KA
    res_vars.busySendingKa = TRUE;

@@ -21,6 +21,7 @@
 
 #define MAXDAGRANK                0xffff
 #define DEFAULTDAGRANK            MAXDAGRANK
+#define MINHOPRANKINCREASE        256  //default value in RPL and Minimal 6TiSCH draft
 
 //=========================== typedef =========================================
 
@@ -38,6 +39,7 @@ typedef struct {
    uint8_t          numTxACK;
    uint8_t          numWraps;//number of times the tx counter wraps. can be removed if memory is a restriction. also check openvisualizer then.
    asn_t            asn;
+   uint8_t          joinPrio;
 } neighborRow_t;
 PRAGMA(pack());
 
@@ -86,8 +88,11 @@ bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
 void          neighbors_indicateRx(
                    open_addr_t*        l2_src,
                    int8_t              rssi,
-                   asn_t*              asnTimestamp
+                   asn_t*              asnTimestamp,
+                   bool                joinPrioPresent,
+                   uint8_t             joinPrio
               );
+
 void          neighbors_indicateTx(
                    open_addr_t*        dest,
                    uint8_t             numTxAttempts,
