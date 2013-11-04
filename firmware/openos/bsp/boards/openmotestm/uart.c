@@ -28,8 +28,6 @@ typedef struct {
 
 uart_vars_t uart_vars;
 
-bool needSleep;  
-
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
@@ -38,8 +36,6 @@ void uart_init()
 {
     // reset local variables
     memset(&uart_vars,0,sizeof(uart_vars_t));
-    
-    needSleep = TRUE;
     
     //when this value is 0, we are send the first data
     uart_vars.startOrend = 0;
@@ -76,17 +72,6 @@ void uart_init()
     GPIO_InitStructure.GPIO_Speed   = GPIO_Speed_2MHz;
     GPIO_InitStructure.GPIO_Mode    = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOC, &GPIO_InitStructure);
-    
-    GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource11);//Connect EXTI Line11 to PC.11
-    EXTI_ClearITPendingBit(EXTI_Line11);
-    
-    //Configures EXTI line 11 to generate an interrupt on rising edge
-    EXTI_InitTypeDef  EXTI_InitStructure; 
-    EXTI_InitStructure.EXTI_Line    = EXTI_Line11;
-    EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt; 
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE; 
-    EXTI_Init(&EXTI_InitStructure);
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) 

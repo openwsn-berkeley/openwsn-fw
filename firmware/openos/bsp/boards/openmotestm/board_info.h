@@ -16,6 +16,7 @@ to return the board's description.
 #include "string.h"
 
 //=========================== defines =========================================
+#define DEBUG_MODE
 
 #define port_INLINE                         inline
 
