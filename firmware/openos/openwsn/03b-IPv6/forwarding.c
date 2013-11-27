@@ -354,8 +354,8 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_hea
          rpl_routing_hdr->SegmentsLeft--;
          
          // find next hop address in source route
-         addressposition    = numAddr-(rpl_routing_hdr->SegmentsLeft);
-         
+         //addressposition    = numAddr-(rpl_routing_hdr->SegmentsLeft);
+         addressposition    = rpl_routing_hdr->SegmentsLeft;
          // how many octets have the address? 
          if (rpl_routing_hdr->SegmentsLeft > 1){
               octetsAddressSize = LENGTH_ADDR128b - local_CmprI; //max addr length - number of prefix octets that are elided in the internal route elements
@@ -368,14 +368,14 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_hea
                msg->l2_nextORpreviousHop.type    = ADDR_16B;
                memcpy(
                   &(msg->l2_nextORpreviousHop.addr_16b),
-                  runningPointer+((addressposition-1)*octetsAddressSize),
+                  runningPointer+((addressposition)*octetsAddressSize),
                   octetsAddressSize
                );
                // write next hop
                msg->l3_destinationAdd.type       = ADDR_16B;
                memcpy(
                   &(msg->l3_destinationAdd.addr_16b),
-                  runningPointer+((addressposition-1)*octetsAddressSize),
+                  runningPointer+((addressposition)*octetsAddressSize),
                   octetsAddressSize
                );
                break;
@@ -384,7 +384,7 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_hea
                msg->l2_nextORpreviousHop.type    = ADDR_64B;
                memcpy(
                   &(msg->l2_nextORpreviousHop.addr_64b),
-                  runningPointer+((addressposition-1)*octetsAddressSize),
+                  runningPointer+((addressposition)*octetsAddressSize),
                   octetsAddressSize
                );
                
@@ -401,7 +401,7 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_hea
                
                memcpy(
                   &(msg->l3_destinationAdd.addr_128b[8]),
-                  runningPointer+((addressposition-1)*octetsAddressSize),
+                  runningPointer+((addressposition)*octetsAddressSize),
                   octetsAddressSize
                );
                
@@ -411,14 +411,14 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t *msg, ipv6_hea
                msg->l2_nextORpreviousHop.type    = ADDR_128B;
                memcpy(
                   &(msg->l2_nextORpreviousHop.addr_128b),
-                  runningPointer+((addressposition-1)*octetsAddressSize),
+                  runningPointer+((addressposition)*octetsAddressSize),
                   octetsAddressSize
                );
                // write next hop
                msg->l3_destinationAdd.type       = ADDR_128B;
                memcpy(
                   &(msg->l3_destinationAdd.addr_128b),
-                  runningPointer+((addressposition-1)*octetsAddressSize),
+                  runningPointer+((addressposition)*octetsAddressSize),
                   octetsAddressSize
                );
                break;
