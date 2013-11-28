@@ -27,7 +27,7 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void    res_init();
+void    res_init_();
 bool    debugPrint_myDAGrank();
 // from upper layer
 owerror_t res_send(OpenQueueEntry_t *msg);
