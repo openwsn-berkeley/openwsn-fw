@@ -130,9 +130,10 @@ owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_he
    // decrement the packet's hop limit
    ipv6_header.hop_limit--;
    
-    //prepend Option hop by hop header except when src routing -- this is a little trick as src routing is using an option header set to 0x00
+   //prepend Option hop by hop header except when src routing and dst is not 0xffff -- this is a little trick as src routing is using an option header set to 0x00
    next_header=msg->l4_protocol;
-   if (hopbyhop_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE){
+   if (hopbyhop_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE 
+       && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE ){
       prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, hopbyhop_option);
       //change nh to point to the newly added header
       next_header=IANA_IPv6HOPOPT;// use 0x00 as NH to indicate option header -- see rfc 2460
