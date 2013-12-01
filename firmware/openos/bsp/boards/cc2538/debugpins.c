@@ -61,35 +61,35 @@ void debugpins_frame_set() {
 
 // PC4
 void debugpins_slot_toggle() {
-	bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_4);
+	//bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_4);
 }
 void debugpins_slot_clr() {
-	GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_4, 0);
+	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_4, 0);
 }
 void debugpins_slot_set() {
-	GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_4, BSP_PINC_4);
+	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_4, BSP_PINC_4);
 }
 
 // PC5
 void debugpins_fsm_toggle() {
-	bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_5);
+	//bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_5);
 }
 void debugpins_fsm_clr() {
-	GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_5, 0);
+	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_5, 0);
 }
 void debugpins_fsm_set() {
-	GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_5, BSP_PINC_5);
+	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_5, BSP_PINC_5);
 }
 
 // PC6
 void debugpins_task_toggle() {
-	bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_6);
+	//bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_6);
 }
 void debugpins_task_clr() {
-	GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_6, 0);
+	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_6, 0);
 }
 void debugpins_task_set() {
-	GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_6, BSP_PINC_6);
+	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_6, BSP_PINC_6);
 }
 
 // PB2
@@ -105,13 +105,13 @@ void debugpins_isr_set() {
 
 // PC7
 void debugpins_radio_toggle() {
-	bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_7);
+	//bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_7);
 }
 void debugpins_radio_clr() {
-	GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_7, 0);
+	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_7, 0);
 }
 void debugpins_radio_set() {
-	GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_7, BSP_PINC_7);
+	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_7, BSP_PINC_7);
 }
 
 
