@@ -13,11 +13,19 @@
 
 
 // Board LED defines
+//#define BSP_LED_BASE            GPIO_C_BASE
+//#define BSP_LED_1               GPIO_PIN_0      //!< PC0
+//#define BSP_LED_2               GPIO_PIN_1      //!< PC1
+//#define BSP_LED_3               GPIO_PIN_2      //!< PC2
+//#define BSP_LED_4               GPIO_PIN_3      //!< PC3
+
+//openmote_cc2538
 #define BSP_LED_BASE            GPIO_C_BASE
-#define BSP_LED_1               GPIO_PIN_0      //!< PC0
-#define BSP_LED_2               GPIO_PIN_1      //!< PC1
-#define BSP_LED_3               GPIO_PIN_2      //!< PC2
-#define BSP_LED_4               GPIO_PIN_3      //!< PC3
+#define BSP_LED_1               GPIO_PIN_4      //!< PC4 -- red
+#define BSP_LED_2               GPIO_PIN_5      //!< PC5 -- orange
+#define BSP_LED_3               GPIO_PIN_6      //!< PC6 -- yellow
+#define BSP_LED_4               GPIO_PIN_7      //!< PC7 -- green
+
 #define BSP_LED_ALL             (BSP_LED_1 | \
                                  BSP_LED_2 | \
                                  BSP_LED_3 | \

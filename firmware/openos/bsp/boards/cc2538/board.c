@@ -21,6 +21,8 @@
 #include "debugpins.h"
 #include "uart.h"
 #include "radio.h"
+#include "hw_types.h"
+#include "hw_memmap.h"
 
 
 
@@ -44,6 +46,9 @@ int main() {
 
 void board_init() {
    clockInit(SYS_CTRL_32MHZ);
+   //antenna sel-- use PD4 or PD5
+   GPIOPinTypeGPIOOutput(GPIO_D_BASE, GPIO_PIN_4|GPIO_PIN_5);
+   GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_4, GPIO_PIN_4);//use antenna pin 4 .. antenna 2
 
    leds_init();
    debugpins_init();
