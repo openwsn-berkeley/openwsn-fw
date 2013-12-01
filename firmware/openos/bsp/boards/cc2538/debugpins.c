@@ -14,16 +14,16 @@
 //=========================== defines =========================================
 // Board dbPINS defines
 #define BSP_PINB_BASE           GPIO_B_BASE
-#define BSP_PINC_BASE           GPIO_C_BASE
+#define BSP_PIND_BASE           GPIO_C_BASE
 
 
 #define BSP_PINB_1              GPIO_PIN_1      //!< PB1 -- frame -RF1.5
 #define BSP_PINB_2              GPIO_PIN_2      //!< PB2 -- isr   -RF1.11
 
-#define BSP_PINC_4              GPIO_PIN_4      //!< PC4 -- slot  -RF1.6
-#define BSP_PINC_5              GPIO_PIN_5      //!< PC5 -- fsm   -RF1.8
-#define BSP_PINC_6              GPIO_PIN_6      //!< PC6 -- task  -RF1.10
-#define BSP_PINC_7              GPIO_PIN_7      //!< PC7 -- radio -RF1-12
+#define BSP_PIND_3              GPIO_PIN_3      //!< PD3 -- slot  -RF1.6
+#define BSP_PIND_2              GPIO_PIN_2      //!< PD2 -- fsm   -RF1.8
+#define BSP_PIND_1              GPIO_PIN_1      //!< PD1 -- task  -RF1.10
+#define BSP_PIND_0              GPIO_PIN_0      //!< PD0 -- radio -RF1-12
 
 
 //=========================== variables =======================================
@@ -37,7 +37,7 @@ void debugpins_init() {
 
 
    GPIOPinTypeGPIOOutput(BSP_PINB_BASE, BSP_PINB_1|BSP_PINB_2);
-   GPIOPinTypeGPIOOutput(BSP_PINC_BASE, BSP_PINC_4|BSP_PINC_5|BSP_PINC_6|BSP_PINC_7);
+   GPIOPinTypeGPIOOutput(BSP_PIND_BASE, BSP_PIND_3|BSP_PIND_2|BSP_PIND_1|BSP_PIND_0);
    
    debugpins_frame_clr();
    debugpins_slot_clr();
@@ -59,37 +59,37 @@ void debugpins_frame_set() {
     GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_1, BSP_PINB_1);
 }
 
-// PC4
+// PD3
 void debugpins_slot_toggle() {
-	//bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_4);
+	bspDBpinToggle(BSP_PIND_BASE,BSP_PIND_3);
 }
 void debugpins_slot_clr() {
-	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_4, 0);
+	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_3, 0);
 }
 void debugpins_slot_set() {
-	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_4, BSP_PINC_4);
+	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_3, BSP_PIND_3);
 }
 
-// PC5
+// PD2
 void debugpins_fsm_toggle() {
-	//bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_5);
+	bspDBpinToggle(BSP_PIND_BASE,BSP_PIND_2);
 }
 void debugpins_fsm_clr() {
-	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_5, 0);
+	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_2, 0);
 }
 void debugpins_fsm_set() {
-	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_5, BSP_PINC_5);
+	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_2, BSP_PIND_2);
 }
 
-// PC6
+// PD1
 void debugpins_task_toggle() {
-	//bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_6);
+	bspDBpinToggle(BSP_PIND_BASE,BSP_PIND_1);
 }
 void debugpins_task_clr() {
-	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_6, 0);
+	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_1, 0);
 }
 void debugpins_task_set() {
-	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_6, BSP_PINC_6);
+	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_1, BSP_PIND_1);
 }
 
 // PB2
@@ -103,15 +103,15 @@ void debugpins_isr_set() {
 	GPIOPinWrite(BSP_PINB_BASE, BSP_PINB_2, BSP_PINB_2);
 }
 
-// PC7
+// PD0
 void debugpins_radio_toggle() {
-	//bspDBpinToggle(BSP_PINC_BASE,BSP_PINC_7);
+	bspDBpinToggle(BSP_PIND_BASE,BSP_PIND_0);
 }
 void debugpins_radio_clr() {
-	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_7, 0);
+	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_0, 0);
 }
 void debugpins_radio_set() {
-	//GPIOPinWrite(BSP_PINC_BASE, BSP_PINC_7, BSP_PINC_7);
+	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_0, BSP_PIND_0);
 }
 
 
