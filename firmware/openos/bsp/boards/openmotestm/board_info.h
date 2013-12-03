@@ -90,8 +90,14 @@ to return the board's description.
 #define PORT_maxRxAckPrepare                20    //  900us (measured 171us+235) stm32
 #define PORT_maxRxDataPrepare               33    //  976us (measured 170us+235) stm32
 #define PORT_maxTxAckPrepare                20    //  900us (measured 323us+235) stm32
+
 // radio speed related
-#define PORT_delayTx                        28     //  549us (measured 315us+235) .....
+#ifndef DEBUG_MODE
+  #define PORT_delayTx                        28     //  549us (measured 315us+235) .....
+#else
+  #define PORT_delayTx                        10
+#endif
+
 #define PORT_delayRx                        0     //    0us (can not measure)
 
 
