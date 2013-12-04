@@ -13,11 +13,12 @@
 \brief Force a topology.
 
 This function is used to force a certain topology, by hard-coding the list of
-acceptable neighbors for a given mote. This function is invoke each time a
+acceptable neighbors for a given mote. This function is invoked each time a
 packet is received. If it returns FALSE, the packet is silently dropped, as if
-it were never received.
+it were never received. If it returns TRUE, the packet is accepted.
 
-An example body for this function is
+Typically, filtering packets is done by analysing the IEEE802.15.4 header. An
+example body for this function which forces a topology is:
 
    switch (idmanager_getMyID(ADDR_64B)->addr_64b[7]) {
       case TOPOLOGY_MOTE1:
@@ -39,6 +40,9 @@ An example body for this function is
          returnVal=TRUE;
    }
    return returnVal;
+
+By default, however, the function should return TRUE to *not* force any
+topology.
 
 \param[in] ieee802514_header The parsed IEEE802.15.4 MAC header.
 
