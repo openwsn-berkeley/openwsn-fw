@@ -180,8 +180,8 @@ else:
     # enabling shared library to be reallocated 
     if os.name!='nt':
         env.Append(CCFLAGS        = '-fPIC')
-        env.Append(SHLINKFLAGS    = '-Wl,-Bsymbolic-functions') # per SW-176
-        env.Append(SHCFLAGS       = '-Wl,-Bsymbolic-functions') # per SW-176
+        env.Append(SHLINKFLAGS    = '-Wl,-Bsymbolic-functions') # per FW-176
+        env.Append(SHCFLAGS       = '-Wl,-Bsymbolic-functions') # per FW-176
     
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
