@@ -25,7 +25,7 @@ uint8_t res_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv);//returns reserved siz
 
 //=========================== public ==========================================
 
-void res_init() {
+void res_init_() {
    res_vars.periodMaintenance = 872+(openrandom_get16b()&0xff); // fires every 1 sec on average
    res_vars.busySendingKa     = FALSE;
    res_vars.busySendingAdv    = FALSE;

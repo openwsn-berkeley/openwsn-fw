@@ -85,7 +85,7 @@ void openwsn_init() {
    ieee154e_init();
    //-- 02b-RES
    schedule_init();
-   res_init();
+   res_init_();
    neighbors_init();
    //-- 03a-IPHC
    openbridge_init();
