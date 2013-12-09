@@ -44,7 +44,7 @@ void NVIC_spi(void)
     NVIC_InitTypeDef NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel	                   = SPI1_IRQChannel;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority	   = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority	   = 2;
     NVIC_InitStructure.NVIC_IRQChannelCmd	           = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 #endif
@@ -62,39 +62,10 @@ void NVIC_bsptimer(void)
     NVIC_Init(&NVIC_InitStructure);
 }
 
-//configuration rtctimer interrput
-void NVIC_rtctimer(void)
-{
-    //Configure RTC global interrupt:
-    //Configure NVIC: Preemption Priority = 1 and Sub Priority = 1
-    NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = RTC_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority  = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 1;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-    
-    //Configure RTC Alarm interrupt:
-    //Configure NVIC: Preemption Priority = 0 and Sub Priority = 1
-    NVIC_InitStructure.NVIC_IRQChannel                    = RTCAlarm_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority  = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-}
-
 //configuration radiotimer interrput
 void NVIC_radiotimer(void)
 {
-    //Configure RTC global interrupt:
-    //Configure NVIC: Preemption Priority = 1 and Sub Priority = 1
     NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = RTC_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority  = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 1;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
-    
     //Configure RTC Alarm interrupt:
     //Configure NVIC: Preemption Priority = 0 and Sub Priority = 1
     NVIC_InitStructure.NVIC_IRQChannel                    = RTCAlarm_IRQChannel;
@@ -110,8 +81,8 @@ void NVIC_radio(void)
      //Configure NVIC: Preemption Priority = 2 and Sub Priority = 0
     NVIC_InitTypeDef  NVIC_InitStructure;
     NVIC_InitStructure.NVIC_IRQChannel                     = EXTI15_10_IRQChannel; 
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 0; 
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority   = 1;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority          = 1; 
     NVIC_InitStructure.NVIC_IRQChannelCmd                  = ENABLE; 
     NVIC_Init(&NVIC_InitStructure);
 }
@@ -124,12 +95,4 @@ void NVIC_Configuration(void)
   
     //2 bits for Preemption Priority and 2 bits for Sub Priority
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
-    
-    //configure every module on openmotestm32
-//     NVIC_uart();
-//     NVIC_spi();
-//     NVIC_bsptimer();
-//     NVIC_rtctimer();
-//     NVIC_radiotimer();
-    //NVIC_radio();
 }

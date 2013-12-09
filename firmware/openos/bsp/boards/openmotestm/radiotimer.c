@@ -107,13 +107,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     EXTI_Init(&EXTI_InitStructure);
     
     //Configure RTC Alarm interrupt:
-    //Configure NVIC: Preemption Priority = 1 and Sub Priority = 0
-    NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel                    = RTCAlarm_IRQChannel;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority  = 1;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority         = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                 = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+    NVIC_radiotimer();
 }
 
 //===== direct access
@@ -155,7 +149,7 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 //===== compare
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
-  
+    
     offset = offset >>1;
     
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
