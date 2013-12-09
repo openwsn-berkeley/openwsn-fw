@@ -2,6 +2,7 @@
 \brief CC2538-specific definition of the "eui64" bsp module.
 
 \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, September 2013.
+\author Pere Tuset <peretuset@uoc.edu>, December 2013.
 */
 
 #include "string.h"
@@ -9,27 +10,29 @@
 
 //=========================== defines =========================================
 
+#define BSP_EUI64_ADDRESS_HI_H      ( 0x0028002F )
+#define BSP_EUI64_ADDRESS_HI_L      ( 0x0028002C )
+#define BSP_EUI64_ADDRESS_LO_H      ( 0x0028002B )
+#define BSP_EUI64_ADDRESS_LO_L      ( 0x00280028 )
+
 //=========================== variables =======================================
-
-
 
 //=========================== prototypes ======================================
 
 //=========================== public ==========================================
 
-//eui hardcoded by now..
 void eui64_get(uint8_t* addressToWrite) {
-	uint8_t temp_addressToWrite[64];
-	  temp_addressToWrite[0] = 0x14;
-	  temp_addressToWrite[1] = 0x15;
-	  temp_addressToWrite[2] = 0x92;
-	  temp_addressToWrite[3] = 0x09;
-	  temp_addressToWrite[4] = 0x02;
-	  temp_addressToWrite[5] = 0x2c;
-	  temp_addressToWrite[6] = 0x00;
-	  temp_addressToWrite[7] = 0xdf;
+    uint8_t * eui64_flash;
 
-	  memcpy(addressToWrite,temp_addressToWrite,8);
+    eui64_flash = BSP_EUI64_ADDRESS_LO_H;
+    while(eui64_flash >= BSP_EUI64_ADDRESS_LO_L) {
+        *addressToWrite++ = *eui64_flash--;
+    }
+
+    eui64_flash = BSP_EUI64_ADDRESS_HI_H;
+    while(eui64_flash > BSP_EUI64_ADDRESS_HI_L) {
+        *addressToWrite++ = *eui64_flash--;
+    }
 }
 
 //=========================== private =========================================
