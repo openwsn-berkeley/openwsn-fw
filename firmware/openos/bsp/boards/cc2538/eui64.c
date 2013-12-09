@@ -30,7 +30,7 @@ void eui64_get(uint8_t* addressToWrite) {
     }
 
     eui64_flash = BSP_EUI64_ADDRESS_HI_H;
-    while(eui64_flash > BSP_EUI64_ADDRESS_HI_L) {
+    while(eui64_flash >= BSP_EUI64_ADDRESS_HI_L) {
         *addressToWrite++ = *eui64_flash--;
     }
 }
