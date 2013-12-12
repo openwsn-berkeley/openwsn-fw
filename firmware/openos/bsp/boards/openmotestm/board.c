@@ -93,15 +93,30 @@ void board_init()
 }
 
 void board_sleep() {
-#ifndef DEBUG_MODE
+  
+#ifdef DEBUG_RUN_MODE
+    // nothing need to do
+#endif
+  
+#ifdef DEBUG_SLEEP_MODE
+    DBGMCU_Config(DBGMCU_SLEEP, ENABLE);
+    // Enable PWR and BKP clock
+    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
+    // Desable the SRAM and FLITF clock in sleep mode
+    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM | RCC_AHBPeriph_FLITF, DISABLE);
+    // enter sleep mode
+    __WFI();
+#endif
+  
+#ifdef DEBUG_STOP_MODE
     uint16_t sleepTime = radiotimer_getPeriod() - radiotimer_getCapturedTime();
-    DBGMCU_Config(DBGMCU_STOP, ENABLE);
     
+    DBGMCU_Config(DBGMCU_STOP, ENABLE);
     // Enable PWR and BKP clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
     // Desable the SRAM and FLITF clock in Stop mode
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM | RCC_AHBPeriph_FLITF, DISABLE);
-
+    // enter stop mode
     PWR_EnterSTOPMode(PWR_Regulator_ON,PWR_STOPEntry_WFI);
     
     if(sleepTime > 0)

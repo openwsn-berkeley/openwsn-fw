@@ -23,7 +23,6 @@ void NVIC_Configuration(void);
 void NVIC_uart(void);
 void NVIC_spi(void);
 void NVIC_bsptimer(void);
-void NVIC_rtctimer(void);
 void NVIC_radiotimer(void);
 void NVIC_radio(void);
 
