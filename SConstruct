@@ -15,6 +15,59 @@ banner += [""]
 banner  = '\n'.join(banner)
 print banner
 
+#===== help text
+
+Help('''
+Usage:
+    scons [<variable>=<value> ...] <project>
+    scons docs
+    scons [help-option]
+
+project:
+    A project is represented by a subdirectory of the projects [1] 
+    directory, for a particular board. For example, the 'oos_openwsn' project
+    may be built for telosb. When specifying a project, do not include the 
+    leading digits in the directory name, like '03' for oos_openwsn.
+    
+    [1]  Specifically, firmware{0}openos{0}projects
+
+    variable=value pairs
+    These pairs qualify the type of build, and are organized here into
+    functional groups. Below each variable's description are the valid 
+    options, with the default value listed first.
+    
+    board        Board to build for. 'python' is for software simulation.
+                 telosb, wsn430v14, wsn430v13b, gina, z1, pc, python
+        
+    toolchain    Toolchain implementation. The 'python' board requires 'gcc'.
+                 mspgcc, iar, iar-proj, gcc
+    
+    Hardware variables:
+    bootload     Location of the board to bootload the binary on. 
+                 COMx for Windows, /dev entries for Linux
+                 Supports parallel operation with a comma-separated list,
+                 for example 'COM5,COM6,COM7'.
+    jtag         Location of the board to JTAG the binary to.
+                 COMx for Windows, /dev entry for Linux
+    fet_version  Firmware version running on the MSP-FET430uif for jtag.
+                 2, 3
+    
+    Simulation variables:
+    fastsim      Compiles the firmware for fast simulation.
+                 1 (on), 0 (off)
+    
+    Common variables:
+    verbose      Print each complete compile/link comand.
+                 0 (off), 1 (on)
+    
+docs:
+    Generate source documentation in build{0}docs{0}html directory
+
+help-option:
+    --help       Display help text. Also display when no parameters to the
+                 scons scommand.
+'''.format(os.sep))
+
 #============================ options =========================================
 
 #===== options
@@ -37,49 +90,49 @@ command_line_vars = Variables()
 command_line_vars.AddVariables(
     (
         'board',                                           # key
-        'Board to build for.',                             # help
+        '',                                                # help
         command_line_options['board'][0],                  # default
         validate_option,                                   # validator
         None,                                              # converter
     ),
     (
         'toolchain',                                       # key
-        'Toolchain to use.',                               # help
+        '',                                                # help
         command_line_options['toolchain'][0],              # default
         validate_option,                                   # validator
         None,                                              # converter
     ),
     (
         'jtag',                                            # key
-        'Location of the board to JTAG the binary to.',    # help
+        '',                                                # help
         '',                                                # default
         None,                                              # validator
         None,                                              # converter
     ),
     (
         'fet_version',                                     # key
-        'Firmware version running on the MSP-FET430uif.',  # help
+        '',                                                # help
         command_line_options['fet_version'][0],            # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
     (
         'bootload',                                        # key
-        'Location of the board to bootload the binary on.',# help
+        '',                                                # help
         '',                                                # default
         None,                                              # validator
         None,                                              # converter
     ),
     (
         'verbose',                                         # key
-        'Print complete compile/link comand.',             # help
+        '',                                                # help
         command_line_options['verbose'][0],                # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
     (
         'fastsim',                                         # key
-        'Compiles the firmware for fast simulation.',      # help
+        '',                                                # help
         command_line_options['fastsim'][0],                # default
         validate_option,                                   # validator
         int,                                               # converter
@@ -96,10 +149,6 @@ else:
         variables = command_line_vars,
     )
 
-#===== help text
-
-Help("\nUsage: scons board=<b> toolchain=<tc> project\n\nWhere:")
-Help(command_line_vars.GenerateHelpText(env))
 def default(env,target,source): print SCons.Script.help_text
 Default(env.Command('default', None, default))
 
