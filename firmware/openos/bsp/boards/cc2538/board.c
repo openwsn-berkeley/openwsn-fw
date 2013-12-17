@@ -46,9 +46,21 @@ int main() {
 
 void board_init() {
    clockInit(SYS_CTRL_32MHZ);
+
+   GPIOPinTypeGPIOOutput(GPIO_A_BASE, 0xFF);
+   GPIOPinTypeGPIOOutput(GPIO_B_BASE, 0xFF);
+   GPIOPinTypeGPIOOutput(GPIO_C_BASE, 0xFF);
+   GPIOPinTypeGPIOOutput(GPIO_D_BASE, 0xFF);
+
+   GPIOPinWrite(GPIO_A_BASE, 0xFF, 0);//initialize GPIOs to low
+   GPIOPinWrite(GPIO_B_BASE, 0xFF, 0);//initialize GPIOs to low
+   GPIOPinWrite(GPIO_C_BASE, 0xFF, 0);//initialize GPIOs to low
+   GPIOPinWrite(GPIO_D_BASE, 0xFF, 0);//initialize GPIOs to low
+
    //antenna sel-- use PD4 or PD5
    GPIOPinTypeGPIOOutput(GPIO_D_BASE, GPIO_PIN_4|GPIO_PIN_5);
-   GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_4, GPIO_PIN_4);//use antenna pin 4 .. antenna 2
+   GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_5, GPIO_PIN_5);//use antenna pin 5 .. antenna 1
+   GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_4, ~GPIO_PIN_4);//disable antenna pin 4 ..
 
    leds_init();
    debugpins_init();
@@ -57,10 +69,11 @@ void board_init() {
    uart_init();
    radio_init();
 
+   leds_debug_on();
 }
 
 void board_sleep() {
-	SysCtrlSleep();
+  SysCtrlSleep();
 }
 
 void board_reset() {

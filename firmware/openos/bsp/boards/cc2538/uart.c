@@ -67,17 +67,20 @@ void uart_init() {
    // Set the UART to interrupt whenever the TX FIFO is almost empty or
    // when any character is received.
    //UARTFIFOLevelSet(UART0_BASE, UART_FIFO_TX1_8, UART_FIFO_RX1_8);
-
-   //register isr in the nvic
-   UARTIntRegister(UART0_BASE, uart_isr_private);
-   //enable isr at the nvic
-   IntEnable(INT_UART0);
-   //raise interrupt at end of tx (not by fifo)
-   UARTTxIntModeSet(UART0_BASE,UART_TXINT_MODE_EOT);
    //enable UART hardware
    UARTEnable(UART0_BASE);
+
    //disable FIFO as we only one 1byte buffer
    UARTFIFODisable(UART0_BASE);
+
+   //raise interrupt at end of tx (not by fifo)
+   UARTTxIntModeSet(UART0_BASE,UART_TXINT_MODE_EOT);
+
+   //register isr in the nvic and enable isr at the nvic
+
+   UARTIntRegister(UART0_BASE, uart_isr_private);
+   //enable isr at the nvic
+   //IntEnable(INT_UART0);
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
@@ -86,15 +89,15 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
 }
 
 void    uart_enableInterrupts(){
-	UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_RT|UART_INT_TX);
+	UARTIntEnable(UART0_BASE, UART_INT_RX |UART_INT_TX);
 }
 
 void    uart_disableInterrupts(){
-  UARTIntDisable(UART0_BASE, UART_INT_RX | UART_INT_RT|UART_INT_TX);
+  UARTIntDisable(UART0_BASE, UART_INT_RX|UART_INT_TX);
 }
 
 void    uart_clearRxInterrupts(){
-  UARTIntClear(UART0_BASE, UART_INT_RX | UART_INT_RT);
+  UARTIntClear(UART0_BASE, UART_INT_RX);
 }
 
 void    uart_clearTxInterrupts(){
@@ -102,13 +105,15 @@ void    uart_clearTxInterrupts(){
 }
 
 void  uart_writeByte(uint8_t byteToWrite){
-   UARTCharPutNonBlocking(UART0_BASE, byteToWrite);
+	//UARTCharPut(UART0_BASE, byteToWrite);
+	UARTCharPutNonBlocking(UART0_BASE, byteToWrite);
    //UARTIntEnable(UART0_BASE, UART_INT_TX);
 }
 
 uint8_t uart_readByte(){
 	 int32_t i32Char;
      i32Char = UARTCharGetNonBlocking(UART0_BASE);
+     //i32Char = UARTCharGet(UART0_BASE);
 	 return (uint8_t)(i32Char & 0xFF);
 }
 
@@ -129,7 +134,7 @@ void uart_isr_private(void){
 	 	 //UARTIntDisable(UART0_BASE, UART_INT_TX);
 	}
 	//rx isr
-	if(reg & (UART_INT_RX | UART_INT_RT)) {
+	if(reg & (UART_INT_RX )) {
 		uart_rx_isr();
 	}
 	debugpins_isr_clr();
