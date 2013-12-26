@@ -1,7 +1,9 @@
 import os
 import threading
 import subprocess
+import platform
 import distutils.sysconfig
+import sconsUtils
 
 Import('env')
 
@@ -172,16 +174,30 @@ elif env['toolchain']=='iar-proj':
 else:
     if env['board'] in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
-    
+        
     if env['fastsim']==1:
-        env.Append(CPPDEFINES = {'FASTSIM':  None})
-        #env.Append(CPPDEFINES = {'TRACE_ON': None})
+        env.Append(CPPDEFINES = 'FASTSIM')
+        #env.Append(CPPDEFINES = 'TRACE_ON')
     
-    # enabling shared library to be reallocated 
     if os.name!='nt':
-        env.Append(CCFLAGS        = '-fPIC')
-        env.Append(SHLINKFLAGS    = '-Wl,-Bsymbolic-functions') # per FW-176
-        env.Append(SHCFLAGS       = '-Wl,-Bsymbolic-functions') # per FW-176
+        if env['simhost'].endswith('linux'):
+            # enabling shared library to be reallocated 
+            env.Append(CCFLAGS        = '-fPIC')
+            env.Append(SHLINKFLAGS    = '-Wl,-Bsymbolic-functions') # per FW-176
+            env.Append(SHCFLAGS       = '-Wl,-Bsymbolic-functions') # per FW-176
+            
+            if platform.architecture()[0]=='64bit' and env['simhost']=='x86-linux':
+                # Cross-compile x86 Linux target from 64-bit host. Also see
+                # firmware/openos/projects/python/SConscript.env.
+                env.Append(CCFLAGS        = '-m32')
+                # Resolves a conflict between Python's pyconfig.h, which uses 
+                # '200112'L, and libc's features.h, which uses '200809L'.
+                env.Append(CPPDEFINES     = [('_POSIX_C_SOURCE','200112L')])
+                env.Append(SHLINKFLAGS    = '-m32')
+                
+        if env['simhost'] == 'amd64-windows':
+            # Used by Python includes
+            env.Append(CPPDEFINES = 'MS_WIN64')
     
     # converts ELF to iHex
     env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
@@ -400,10 +416,26 @@ def sconscript_scanner(localEnv):
                 )
             
             # prepare environment for this build
+            if os.name!='nt' and localEnv['simhost'].endswith('-windows'):
+                # Cross-build handling -- find DLL, rather than hardcode version,
+                # like 'python27.dll'
+                pathnames = sconsUtils.findPattern('python*.dll', localEnv['simhostpy'])
+                if pathnames:
+                    pathname = pathnames[0]
+                else:
+                    raise SystemError("Can't find python dll in provided simhostpy")
+                
+                # ':' means no prefix, like 'lib', for shared library name
+                pysyslib = ':{0}'.format(os.path.basename(pathname))
+                pylibExt = '.pyd'
+            else:
+                pysyslib = 'python' + distutils.sysconfig.get_config_var('VERSION')
+                pylibExt = distutils.sysconfig.get_config_var('SO')
+            
             target = targetName
             source = [localEnv.ObjectifiedFilename(s) for s in sources_c]
             libs   = buildLibs(projectDir)
-            libs  += [['python' + distutils.sysconfig.get_config_var('VERSION')]]
+            libs  += [[pysyslib]]
             
             buildIncludePath(projectDir,localEnv)
             
@@ -414,7 +446,7 @@ def sconscript_scanner(localEnv):
                 source,
                 LIBS           = libs,
                 SHLIBPREFIX    = '',
-                SHLIBSUFFIX    = distutils.sysconfig.get_config_var('SO'),
+                SHLIBSUFFIX    = pylibExt,
             )
             
             Alias(targetName, [targetAction])
