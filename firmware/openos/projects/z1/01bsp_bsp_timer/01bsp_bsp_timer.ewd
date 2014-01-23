@@ -41,7 +41,7 @@
         </option>
         <option>
           <name>DynDriver</name>
-          <state>430FET</state>
+          <state>SIM430</state>
         </option>
         <option>
           <name>dDllSlave</name>
@@ -57,7 +57,7 @@
         </option>
         <option>
           <name>DdfFileName</name>
-          <state>$TOOLKIT_DIR$\config\MSP430F1611.ddf</state>
+          <state></state>
         </option>
         <option>
           <name>ProcTMS</name>
@@ -158,7 +158,7 @@
         </option>
         <option>
           <name>Erase</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>EMUVerifyDownloadP7</name>
@@ -191,7 +191,7 @@
         </option>
         <option>
           <name>TargetVoltage</name>
-          <state>3.3</state>
+          <state>###Uninitialized###</state>
         </option>
         <option>
           <name>AllowLockedFlashAccessP7</name>
@@ -207,7 +207,7 @@
         </option>
         <option>
           <name>CRadioProtocolType</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCRadioModuleTypeSlave</name>
@@ -236,7 +236,7 @@
         </option>
         <option>
           <name>SoftwareBreakpointEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>RadioSoftwareBreakpointType</name>
@@ -260,7 +260,7 @@
         </option>
         <option>
           <name>GPassword</name>
-          <state></state>
+          <state>###Uninitialized###</state>
         </option>
         <option>
           <name>DebugLPM5</name>
@@ -325,7 +325,7 @@
         </option>
         <option>
           <name>SimPspConfigFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\test.psp.config</state>
+          <state>###Uninitialized###</state>
         </option>
       </data>
     </settings>
@@ -540,7 +540,7 @@
         </option>
         <option>
           <name>Erase</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>EMUVerifyDownloadP7</name>
