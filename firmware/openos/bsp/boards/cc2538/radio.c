@@ -374,7 +374,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
     // - *[2B]     CRC
 
   //skip first byte is len
-    for(i = 1; i < len; i++) {
+    for(i = 0; i < len - 2; i++) {
           pBufRead[i] = HWREG(RFCORE_SFR_RFDATA);
     }
 
