@@ -76,19 +76,19 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    returnVal = PyDict_New();
    
    // callbacks
-   uart_icb_tx                    = PyInt_FromLong((long)self->uart_icb.txCb);
+   uart_icb_tx                    = PyInt_FromLong((intptr_t)self->uart_icb.txCb);
    PyDict_SetItemString(returnVal, "uart_icb_tx", uart_icb_tx);
-   uart_icb_rx                    = PyInt_FromLong((long)self->uart_icb.rxCb);
+   uart_icb_rx                    = PyInt_FromLong((intptr_t)self->uart_icb.rxCb);
    PyDict_SetItemString(returnVal, "uart_icb_rx", uart_icb_rx);
-   bsp_timer_icb_cb               = PyInt_FromLong((long)self->bsp_timer_icb.cb);
+   bsp_timer_icb_cb               = PyInt_FromLong((intptr_t)self->bsp_timer_icb.cb);
    PyDict_SetItemString(returnVal, "bsp_timer_icb_cb", bsp_timer_icb_cb);
-   radio_icb_startFrame_cb        = PyInt_FromLong((long)self->radio_icb.startFrame_cb);
+   radio_icb_startFrame_cb        = PyInt_FromLong((intptr_t)self->radio_icb.startFrame_cb);
    PyDict_SetItemString(returnVal, "radio_icb_startFrame_cb", radio_icb_startFrame_cb);
-   radio_icb_endFrame_cb          = PyInt_FromLong((long)self->radio_icb.endFrame_cb);
+   radio_icb_endFrame_cb          = PyInt_FromLong((intptr_t)self->radio_icb.endFrame_cb);
    PyDict_SetItemString(returnVal, "radio_icb_endFrame_cb", radio_icb_endFrame_cb   );
-   radiotimer_icb_overflow_cb     = PyInt_FromLong((long)self->radiotimer_icb.overflow_cb);
+   radiotimer_icb_overflow_cb     = PyInt_FromLong((intptr_t)self->radiotimer_icb.overflow_cb);
    PyDict_SetItemString(returnVal, "radiotimer_icb_overflow_cb", radiotimer_icb_overflow_cb);
-   radiotimer_icb_compare_cb      = PyInt_FromLong((long)self->radiotimer_icb.compare_cb);
+   radiotimer_icb_compare_cb      = PyInt_FromLong((intptr_t)self->radiotimer_icb.compare_cb);
    PyDict_SetItemString(returnVal, "radiotimer_icb_compare_cb", radiotimer_icb_compare_cb);
    
    // ohlone_vars
