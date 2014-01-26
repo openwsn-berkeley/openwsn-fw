@@ -24,16 +24,26 @@
 #include "hw_types.h"
 #include "hw_memmap.h"
 
-
-
 //=========================== variables =======================================
 
+#define BSP_RADIO_BASE              ( GPIO_D_BASE )
+#define BSP_RADIO_INT               ( GPIO_PIN_5 )
+#define BSP_RADIO_EXT               ( GPIO_PIN_4 )
+
 //=========================== prototypes ======================================
-void clockInit(uint32_t ui32SysClockSpeed);
-void SysCtrlDeepSleepSetting(void);
-void SysCtrlSleepSetting(void);
-void SysCtrlRunSetting(void);
-void SysCtrlWakeupSetting(void);
+
+void antenna_init();
+void antenna_internal();
+void antenna_external();
+
+static void clock_init(void);
+static void gpio_init(void);
+
+static void SysCtrlDeepSleepSetting(void);
+static void SysCtrlSleepSetting(void);
+static void SysCtrlRunSetting(void);
+static void SysCtrlWakeupSetting(void);
+
 //=========================== main ============================================
 
 extern int mote_main();
@@ -45,22 +55,11 @@ int main() {
 //=========================== public ==========================================
 
 void board_init() {
-   clockInit(SYS_CTRL_32MHZ);
+   gpio_init();
+   clock_init();
 
-   GPIOPinTypeGPIOOutput(GPIO_A_BASE, 0xFF);
-   GPIOPinTypeGPIOOutput(GPIO_B_BASE, 0xFF);
-   GPIOPinTypeGPIOOutput(GPIO_C_BASE, 0xFF);
-   GPIOPinTypeGPIOOutput(GPIO_D_BASE, 0xFF);
-
-   GPIOPinWrite(GPIO_A_BASE, 0xFF, 0);//initialize GPIOs to low
-   GPIOPinWrite(GPIO_B_BASE, 0xFF, 0);//initialize GPIOs to low
-   GPIOPinWrite(GPIO_C_BASE, 0xFF, 0);//initialize GPIOs to low
-   GPIOPinWrite(GPIO_D_BASE, 0xFF, 0);//initialize GPIOs to low
-
-   //antenna sel-- use PD4 or PD5
-   GPIOPinTypeGPIOOutput(GPIO_D_BASE, GPIO_PIN_4|GPIO_PIN_5);
-   GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_5, GPIO_PIN_5);//use antenna pin 5 .. antenna 1
-   GPIOPinWrite(GPIO_D_BASE, GPIO_PIN_4, ~GPIO_PIN_4);//disable antenna pin 4 ..
+   antenna_init();
+   antenna_external();
 
    leds_init();
    debugpins_init();
@@ -72,106 +71,103 @@ void board_init() {
    leds_debug_on();
 }
 
-void board_sleep() {
-  SysCtrlSleep();
+/**
+ * Configures the antenna using a RF switch
+ * INT is the internal antenna (chip) configured through ANT1_SEL (V1)
+ * EXT is the external antenna (connector) configured through ANT2_SEL (V2)
+ */
+void antenna_init(void) {
+    // Configure the ANT1 and ANT2 GPIO as output
+    GPIOPinTypeGPIOOutput(BSP_RADIO_BASE, BSP_RADIO_INT);
+    GPIOPinTypeGPIOOutput(BSP_RADIO_BASE, BSP_RADIO_EXT);
+
+    // By default the chip antenna is selected as the default
+    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_INT, BSP_RADIO_INT);
+    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_EXT, ~BSP_RADIO_EXT);
 }
 
+/**
+ * Selects the external (connector) antenna
+ */
+void antenna_external(void) {
+    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_EXT, BSP_RADIO_EXT);
+    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_INT, ~BSP_RADIO_INT);
+}
+
+/**
+ * Selects the internal (chip) antenna
+ */
+void antenna_internal(void) {
+    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_EXT, ~BSP_RADIO_EXT);
+    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_INT, BSP_RADIO_INT);
+}
+
+/**
+ * Puts the board to sleep
+ */
+void board_sleep() {
+    SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
+    SysCtrlSleep();
+}
+
+/**
+ * Resets the board
+ */
 void board_reset() {
 	SysCtrlReset();
 }
 
 //=========================== private =========================================
 
-
-/**************************************************************************//**
-* @brief    Function initializes the CC2538 clocks and I/O for use on
-*           SmartRF06EB.
-*
-*           The function assumes an external crystal oscillator to be available
-*           to the CC2538. The CC2538 system clock is set to the frequency given
-*           by input argument \c ui32SysClockSpeed. The clock speed of other
-*           internal clocks are set to the maximum value allowed based on the
-*           system clock speed given by \c ui32SysClockSpeed.
-*
-*           If the value of \c ui32SysClockSpeed is invalid, the system clock
-*           will be set to the highest allowed value.
-*
-* @param    ui32SysClockSpeed   The system clock speed in Hz. Must be one of
-*                               the following:
-*           \li \c SYS_CTRL_32MHZ
-*           \li \c SYS_CTRL_16MHZ
-*           \li \c SYS_CTRL_8MHZ
-*           \li \c SYS_CTRL_4MHZ
-*           \li \c SYS_CTRL_2MHZ
-*           \li \c SYS_CTRL_1MHZ
-*           \li \c SYS_CTRL_500KHZ
-*           \li \c SYS_CTRL_250KHZ
-*
-* @return   None
-******************************************************************************/
-void clockInit(uint32_t ui32SysClockSpeed)
+static void gpio_init(void)
 {
-    uint32_t ui32SysDiv;
+    /* Set GPIOs as output */
+    GPIOPinTypeGPIOOutput(GPIO_A_BASE, 0xFF);
+    GPIOPinTypeGPIOOutput(GPIO_B_BASE, 0xFF);
+    GPIOPinTypeGPIOOutput(GPIO_C_BASE, 0xFF);
+    GPIOPinTypeGPIOOutput(GPIO_D_BASE, 0xFF);
 
-    //
-    // Disable global interrupts
-    //
+    /* Initialize GPIOs to low */
+    GPIOPinWrite(GPIO_A_BASE, 0xFF, 0x00);
+    GPIOPinWrite(GPIO_B_BASE, 0xFF, 0x00);
+    GPIOPinWrite(GPIO_C_BASE, 0xFF, 0x00);
+    GPIOPinWrite(GPIO_D_BASE, 0xFF, 0x00);
+}
+
+static void clock_init(void)
+{
+    /**
+     * Disable global interrupts
+     */
     bool bIntDisabled = IntMasterDisable();
 
-    //
-    // Determine sys clock divider and realtime clock
-    //
-    switch(ui32SysClockSpeed)
-    {
-    case SYS_CTRL_250KHZ:
-        ui32SysDiv = SYS_CTRL_SYSDIV_250KHZ;
-        break;
-    case SYS_CTRL_500KHZ:
-        ui32SysDiv = SYS_CTRL_SYSDIV_500KHZ;
-        break;
-    case SYS_CTRL_1MHZ:
-        ui32SysDiv = SYS_CTRL_SYSDIV_1MHZ;
-        break;
-    case SYS_CTRL_2MHZ:
-        ui32SysDiv = SYS_CTRL_SYSDIV_2MHZ;
-        break;
-    case SYS_CTRL_4MHZ:
-        ui32SysDiv = SYS_CTRL_SYSDIV_4MHZ;
-        break;
-    case SYS_CTRL_8MHZ:
-        ui32SysDiv = SYS_CTRL_SYSDIV_8MHZ;
-        break;
-    case SYS_CTRL_16MHZ:
-        ui32SysDiv = SYS_CTRL_SYSDIV_16MHZ;
-        break;
-    case SYS_CTRL_32MHZ:
-    default:
-        ui32SysDiv = SYS_CTRL_SYSDIV_32MHZ;
-        break;
-    }
+    /**
+     * Set the system clock to use the external 32 MHz crystal
+     * Set the real-time clock to use the 32khz internal crystal
+     */
+    SysCtrlClockSet(false, false, SYS_CTRL_SYSDIV_32MHZ);
 
-    //
-    // Set system clock and realtime clock
-    // use the 32khz external crystal
-    //
-    SysCtrlClockSet(false, false, ui32SysDiv);
+    /**
+     * Set the IO clock to use the internal 16 MHz clock (PIOSC)
+     */
+    SysCtrlIOClockSet(SYS_CTRL_SYSDIV_16MHZ);
 
-    //
-    // Set IO clock to the same as system clock
-    //
-    SysCtrlIOClockSet(ui32SysDiv);
-
+    /**
+     * Wait until the selected clock configuration is stable
+     */
     while ( !((HWREG(SYS_CTRL_CLOCK_STA)) & (SYS_CTRL_CLOCK_STA_XOSC_STB)));
 
-    //define what peripherals run at each mode.
+    /**
+     * Define what peripherals run in each mode
+     */
     SysCtrlDeepSleepSetting();
     SysCtrlSleepSetting();
     SysCtrlRunSetting();
     SysCtrlWakeupSetting();
 
-    //
-    // Re-enable interrupt if initially enabled.
-    //
+    /**
+     * Re-enable interrupt if initially enabled.
+     */
     if(!bIntDisabled)
     {
         IntMasterEnable();
@@ -179,7 +175,7 @@ void clockInit(uint32_t ui32SysClockSpeed)
 }
 
 
-void SysCtrlDeepSleepSetting(void)
+static void SysCtrlDeepSleepSetting(void)
 {
   /* Disable General Purpose Timers 0, 1, 2, 3 during deep sleep */
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT0);
@@ -199,15 +195,10 @@ void SysCtrlDeepSleepSetting(void)
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_I2C);
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_PKA);
   SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_AES);
-
-  /*
-   * Enable RF Core during deep sleep. Please note that this setting is
-   * only valid for PG2.0. For PG1.0 this is just a dummy instruction.
-   */
-  SysCtrlPeripheralDeepSleepEnable(SYS_CTRL_PERIPH_RFC);
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_RFC);
 }
 
-void SysCtrlSleepSetting(void)
+static void SysCtrlSleepSetting(void)
 {
   /* Disable General Purpose Timers 0, 1, 2, 3 during sleep */
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT0);
@@ -220,7 +211,6 @@ void SysCtrlSleepSetting(void)
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_SSI1);
 
   /* Disable UART 0, 1 during sleep */
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_UART1);
 
   /* Disable I2C, PKA, AES during sleep */
@@ -228,43 +218,34 @@ void SysCtrlSleepSetting(void)
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_PKA);
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_AES);
 
-  /*
-   * Enable RFC during sleep. Please note that this setting is
-   * only valid for PG2.0. For PG1.0 this is just a dummy instruction.
-   */
+  /* Enable UART and RFC during sleep */
+  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
 }
 
 
 void SysCtrlRunSetting(void)
 {
-  /* Enable General Purpose Timers 0, 1, 2, 3 when running */
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT3);
+  /* Disable General Purpose Timers 0, 1, 2, 3 when running */
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT0);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT1);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT2);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT3);
 
-  /* Enable SSI 0, 1 when running */
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_SSI0);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_SSI1);
+  /* Disable SSI 0, 1 when running */
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI0);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI1);
 
-  /* Enable UART 0, 1 when running */
+  /* Disable UART1 when running */
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_UART1);
+
+  /* Disable I2C, AES and PKA when running */
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_I2C);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_PKA);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_AES);
+
+  /* Enable UART0 and RFC when running */
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART1);
-
-  SysCtrlPeripheralReset(SYS_CTRL_PERIPH_AES);
-  SysCtrlPeripheralReset(SYS_CTRL_PERIPH_PKA);
-
-  /* Enable I2C, AES and PKA running */
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_I2C);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_PKA);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_AES);
-
-  /*
-   * Enable RFC during run. Please note that this setting is
-   * only valid for PG2.0. For PG1.0 since the RFC is always on,
-   * this is only a dummy  instruction
-   */
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
 }
 
@@ -272,8 +253,5 @@ void SysCtrlRunSetting(void)
 void SysCtrlWakeupSetting(void)
 {
   /* SM Timer can wake up the processor */
-
   GPIOIntWakeupEnable(GPIO_IWE_SM_TIMER);
-
-
 }
