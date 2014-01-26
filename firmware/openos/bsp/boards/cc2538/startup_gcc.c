@@ -38,8 +38,6 @@
 
 #include <stdint.h>
 
-#include "hw_nvic.h"
-
 #define FLASH_START_ADDR                0x00200000
 #define BOOTLOADER_BACKDOOR_DISABLE     0xEFFFFFFF
 #define SYS_CTRL_EMUOVR                 0x400D20B4
@@ -321,7 +319,7 @@ ResetISR (void)
 
 
     /* Workaround for J-Link debug issue */
-    HWREG(NVIC_VTABLE) = (uint32_t)gVectors;
+   // HWREG(NVIC_VTABLE) = (uint32_t)gVectors;
 
     //
 	// Copy the data segment initializers from flash to SRAM.
