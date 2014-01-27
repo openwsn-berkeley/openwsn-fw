@@ -59,7 +59,7 @@ void board_init() {
    clock_init();
 
    antenna_init();
-   antenna_external();
+   antenna_internal();
 
    leds_init();
    debugpins_init();
@@ -141,11 +141,16 @@ static void clock_init(void)
      */
     bool bIntDisabled = IntMasterDisable();
 
+    GPIODirModeSet(GPIO_D_BASE, 0x40, GPIO_DIR_MODE_IN);
+    GPIODirModeSet(GPIO_D_BASE, 0x80, GPIO_DIR_MODE_IN);
+    IOCPadConfigSet(GPIO_D_BASE, 0x40, IOC_OVERRIDE_ANA);
+    IOCPadConfigSet(GPIO_D_BASE, 0x80, IOC_OVERRIDE_ANA);
+
     /**
      * Set the system clock to use the external 32 MHz crystal
      * Set the real-time clock to use the 32khz internal crystal
      */
-    SysCtrlClockSet(false, false, SYS_CTRL_SYSDIV_32MHZ);
+    SysCtrlClockSet(true, false, SYS_CTRL_SYSDIV_32MHZ);
 
     /**
      * Set the IO clock to use the internal 16 MHz clock (PIOSC)
