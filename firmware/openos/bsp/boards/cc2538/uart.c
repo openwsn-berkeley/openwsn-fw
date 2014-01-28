@@ -76,7 +76,7 @@ void uart_init() {
    UARTFIFODisable(UART0_BASE);
 
    // Raise interrupt at end of tx (not by fifo)
-   UARTTxIntModeSet(UART0_BASE,UART_TXINT_MODE_EOT);
+   UARTTxIntModeSet(UART0_BASE, UART_TXINT_MODE_EOT);
 
    // Register isr in the nvic and enable isr at the nvic
    UARTIntRegister(UART0_BASE, uart_isr_private);

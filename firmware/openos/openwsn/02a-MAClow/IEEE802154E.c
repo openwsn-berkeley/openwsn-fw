@@ -1334,7 +1334,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
    radiotimer_cancel();
 
    // turn off the radio
-   //radio_rfOff();
+   radio_rfOff();
    ieee154e_vars.radioOnTics+=radio_getTimerValue()-ieee154e_vars.radioOnInit;
    // get a buffer to put the (received) data in
    ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);

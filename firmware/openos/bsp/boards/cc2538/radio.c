@@ -128,7 +128,7 @@ void radio_init() {
    HWREG(RFCORE_XREG_FREQCTRL) = CC2538_RF_CHANNEL_MIN;
 
    /* Enable RF interrupts  see page 751  */
-//      enable_radio_interrupts();
+   // enable_radio_interrupts();
 
    //register interrupt
    IntRegister(INT_RFCORERTX, radio_isr);
