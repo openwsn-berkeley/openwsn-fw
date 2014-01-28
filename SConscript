@@ -179,8 +179,34 @@ elif env['toolchain']=='armgcc':
     if env['board'] not in ['iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
-    raise NotImplementedError()
+    # compiler (C)
+    env.Replace(CC           = 'arm-none-eabi-gcc')
+    env.Append(CCFLAGS       = '')
+    # compiler (C++)
+    env.Replace(CXX          = 'arm-none-eabi-g++')
+    # assembler
+    env.Replace(AS           = 'arm-none-eabi-as')
+    # object manipulationc
+    env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
+    env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
+    # archiver
+    env.Replace(AR           = 'arm-none-eabi-ar')
+    env.Append(ARFLAGS       = '')
+    env.Replace(RANLIB       = 'arm-none-eabi-ranlib')
+    env.Append(RANLIBFLAGS   = '')
+    # miscc
+    env.Replace(NM           = 'arm-none-eabi-nm')
+    env.Replace(SIZE         = 'arm-none-eabi-size')
     
+    # converts ELF to iHex
+    env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
+    
+    # convert ELF to bin
+    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    
+    # print sizes
+    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
+
 elif env['toolchain']=='gcc':
     
     if env['board'] not in ['python']:
