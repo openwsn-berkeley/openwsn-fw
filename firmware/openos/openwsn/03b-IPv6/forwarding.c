@@ -116,6 +116,8 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
 \param[in,out] msg         The packet just sent.
 \param[in]     ipv6_header The information contained in the 6LoWPAN header.
+\param[in]     ipv6_hop_header The hop-by-hop header present in the packet.
+\param[in]     hop_by_hop_option The hop-by-hop options present in the packet.
 */
 void forwarding_receive(OpenQueueEntry_t* msg, 
                         ipv6_header_iht ipv6_header, 
@@ -231,10 +233,16 @@ void forwarding_receive(OpenQueueEntry_t* msg,
 
 \param[in,out] msg             The packet to send.
 \param[in]     ipv6_header     The packet's IPv6 header.
+\param[in]     hopbyhop_opt    The hop-by-hop option to add in this packet.
 \param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
-owerror_t forwarding_send_internal_RoutingTable(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header, rpl_hopoption_ht hopbyhop_opt, uint8_t fw_SendOrfw_Rcv) {
+owerror_t forwarding_send_internal_RoutingTable(
+      OpenQueueEntry_t*      msg,
+      ipv6_header_iht        ipv6_header,
+      rpl_hopoption_ht       hopbyhop_opt,
+      uint8_t                fw_SendOrfw_Rcv
+   ) {
    
    // retrieve the next hop from the routing table
    forwarding_getNextHop_RoutingTable(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
