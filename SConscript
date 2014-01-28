@@ -31,10 +31,8 @@ dummyFunc = Builder(
     suffix = '.ihex',
 )
 
-if env['toolchain'] in ['iar','iar-proj']:
-   env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
-
 if   env['toolchain']=='mspgcc':
+    
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
@@ -75,6 +73,8 @@ elif env['toolchain']=='iar':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
+    env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
     
     try:
         iarEw430BinDir            = os.path.join(env['IAR_EW430_INSTALLDIR'],'430','bin')
@@ -145,8 +145,11 @@ elif env['toolchain']=='iar':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
 elif env['toolchain']=='iar-proj':
+    
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
+    env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
     
     try:
         iarEw430CommonBinDir      = os.path.join(env['IAR_EW430_INSTALLDIR'],'common','bin')
@@ -171,10 +174,18 @@ elif env['toolchain']=='iar-proj':
     # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
-else:
-    if env['board'] in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
+elif env['toolchain']=='armgcc':
+    
+    if env['board'] not in ['iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
-        
+    
+    raise NotImplementedError()
+    
+elif env['toolchain']=='gcc':
+    
+    if env['board'] not in ['python']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
     if env['fastsim']==1:
         env.Append(CPPDEFINES = 'FASTSIM')
         #env.Append(CPPDEFINES = 'TRACE_ON')
@@ -208,6 +219,10 @@ else:
     # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
+else:
+    raise SystemError('unexpected toolchain {0}'.format(env['toolchain']))
+    
+    
 #============================ upload over JTAG ================================
 
 def jtagUploadFunc(location):
@@ -485,7 +500,7 @@ buildEnv = env.SConscript(
     exports     = ['env'],
 )
 
-#bspheader
+# bspheader
 boardsDir       = os.path.join('#','firmware','openos','bsp','boards')
 boardsVarDir    = os.path.join(buildEnv['VARDIR'],'bsp','boards')
 buildEnv.SConscript(

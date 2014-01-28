@@ -82,9 +82,10 @@ help-option:
 
 #===== options
 
+# first value is default
 command_line_options = {
-    'board':       ['telosb','wsn430v14','wsn430v13b','gina','z1','pc','python'],
-    'toolchain':   ['mspgcc','iar','iar-proj','gcc'],
+    'board':       ['telosb','wsn430v14','wsn430v13b','gina','z1','pc','python','iot-lab_M3'],
+    'toolchain':   ['mspgcc','iar','iar-proj','armgcc','gcc'],
     'fet_version': ['2','3'],
     'verbose':     ['0','1'],
     'fastsim':     ['1','0'],
