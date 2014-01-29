@@ -181,7 +181,7 @@ elif env['toolchain']=='armgcc':
     
     # compiler (C)
     env.Replace(CC           = 'arm-none-eabi-gcc')
-    env.Append(CCFLAGS       = '-DHSE_VALUE=((uint32_t)16000000)')
+    env.Append(CCFLAGS       = '-DHSE_VALUE=\\(\\(uint32_t\\)16000000\\)')
     env.Append(CCFLAGS       = '-DSTM32F10X_HD')
     env.Append(CCFLAGS       = '-DUSE_STDPERIPH_DRIVER')
     env.Append(CCFLAGS       = '-ggdb')
