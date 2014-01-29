@@ -1,12 +1,10 @@
 language: c
 
-before_install:
+before_script:
  - sudo add-apt-repository -y ppa:terry.guo/gcc-arm-embedded
  - sudo apt-get update
- - sudo apt-get install libsdl1.2-dev
+# - sudo apt-get install libsdl1.2-dev
  - sudo apt-get install gcc-arm-none-eabi
-
-before_script:
  - arm-none-eabi-gcc --version
 #  - "sudo apt-get install gcc-msp430"
 #  - "msp430-gcc --version"
@@ -21,4 +19,4 @@ script:
 #  - scons board=wsn430v13b   toolchain=mspgcc oos_openwsn
 #  - scons board=gina         toolchain=mspgcc oos_openwsn
 #  - scons board=python       toolchain=gcc    oos_openwsn
- - scons board=iot-lab_M3 toolchain=armgcc oos_openwsn
+ - scons board=iot-lab_M3 toolchain=armgcc verbose=1 oos_openwsn
