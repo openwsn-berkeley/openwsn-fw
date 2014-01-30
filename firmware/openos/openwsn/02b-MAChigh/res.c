@@ -195,6 +195,9 @@ virtual component COMPONENT_RES_TO_IEEE802154E. Whenever it gets a change,
 IEEE802154E will handle the packet.
 
 \param[in] msg The packet to the transmitted
+\param[in] iePresent Indicates wheter an Information Element is present in the
+   packet.
+\param[in] frameVersion The frame version to write in the packet.
 
 \returns E_SUCCESS iff successful.
 */

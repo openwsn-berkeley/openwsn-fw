@@ -306,6 +306,9 @@ The fields which are updated are:
    the packet just received.
 \param[in] rssi   RSSI with which this packet was received.
 \param[in] asnTs  ASN at which this packet was received.
+\param[in] joinPrioPresent Whether a join priority was present in the received
+   packet.
+\param[in] joinPrio The join priority present in the packet, if any.
 */
 void neighbors_indicateRx(open_addr_t* l2_src,
                           int8_t       rssi,

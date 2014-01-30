@@ -31,10 +31,8 @@ dummyFunc = Builder(
     suffix = '.ihex',
 )
 
-if env['toolchain'] in ['iar','iar-proj']:
-   env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
-
 if   env['toolchain']=='mspgcc':
+    
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
@@ -75,6 +73,8 @@ elif env['toolchain']=='iar':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
+    env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
     
     try:
         iarEw430BinDir            = os.path.join(env['IAR_EW430_INSTALLDIR'],'430','bin')
@@ -145,8 +145,11 @@ elif env['toolchain']=='iar':
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
 elif env['toolchain']=='iar-proj':
+    
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
+    env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
     
     try:
         iarEw430CommonBinDir      = os.path.join(env['IAR_EW430_INSTALLDIR'],'common','bin')
@@ -171,10 +174,75 @@ elif env['toolchain']=='iar-proj':
     # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
-else:
-    if env['board'] in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
+elif env['toolchain']=='armgcc':
+    
+    if env['board'] not in ['iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
-        
+    
+    # compiler (C)
+    env.Replace(CC           = 'arm-none-eabi-gcc')
+    env.Append(CCFLAGS       = '-DHSE_VALUE=((uint32_t)16000000)')
+    env.Append(CCFLAGS       = '-DSTM32F10X_HD')
+    env.Append(CCFLAGS       = '-DUSE_STDPERIPH_DRIVER')
+    env.Append(CCFLAGS       = '-ggdb')
+    env.Append(CCFLAGS       = '-g3')
+    env.Append(CCFLAGS       = '-std=gnu99')
+    env.Append(CCFLAGS       = '-O0')
+    env.Append(CCFLAGS       = '-Wall')
+    #env.Append(CCFLAGS       = '-Wstrict-prototypes')
+    env.Append(CCFLAGS       = '-mcpu=cortex-m3')
+    env.Append(CCFLAGS       = '-mlittle-endian')
+    env.Append(CCFLAGS       = '-mthumb')
+    env.Append(CCFLAGS       = '-mthumb-interwork')
+    env.Append(CCFLAGS       = '-nostartfiles')
+    # compiler (C++)
+    env.Replace(CXX          = 'arm-none-eabi-g++')
+    # assembler
+    env.Replace(AS           = 'arm-none-eabi-as')
+    env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
+    # linker
+    env.Append(LINKFLAGS     = '-DUSE_STDPERIPH_DRIVER')
+    env.Append(LINKFLAGS     = '-DUSE_STM32_DISCOVERY')
+    env.Append(LINKFLAGS     = '-g3')
+    env.Append(LINKFLAGS     = '-ggdb')
+    env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
+    env.Append(LINKFLAGS     = '-mlittle-endian')
+    env.Append(LINKFLAGS     = '-static')
+    env.Append(LINKFLAGS     = '-lgcc')
+    env.Append(LINKFLAGS     = '-mthumb')
+    env.Append(LINKFLAGS     = '-mthumb-interwork')
+    env.Append(LINKFLAGS     = '-nostartfiles')
+    env.Append(LINKFLAGS     = '-Tfirmware/openos/bsp/boards/iot-lab_M3/stm32_flash.ld')
+    # object manipulation
+    env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
+    env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
+    # archiver
+    env.Replace(AR           = 'arm-none-eabi-ar')
+    env.Append(ARFLAGS       = '')
+    env.Replace(RANLIB       = 'arm-none-eabi-ranlib')
+    env.Append(RANLIBFLAGS   = '')
+    # misc
+    env.Replace(NM           = 'arm-none-eabi-nm')
+    env.Replace(SIZE         = 'arm-none-eabi-size')
+    
+    # converts ELF to iHex
+    elf2iHexFunc = Builder(
+       action = 'arm-none-eabi-objcopy -O ihex $SOURCE $TARGET',
+       suffix = '.ihex',
+    )
+    env.Append(BUILDERS = {'Elf2iHex'  : elf2iHexFunc})
+    
+    # convert ELF to bin
+    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    
+    # print sizes
+    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
+
+elif env['toolchain']=='gcc':
+    
+    if env['board'] not in ['python']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
     if env['fastsim']==1:
         env.Append(CPPDEFINES = 'FASTSIM')
         #env.Append(CPPDEFINES = 'TRACE_ON')
@@ -208,6 +276,10 @@ else:
     # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
+else:
+    raise SystemError('unexpected toolchain {0}'.format(env['toolchain']))
+    
+    
 #============================ upload over JTAG ================================
 
 def jtagUploadFunc(location):
@@ -485,7 +557,7 @@ buildEnv = env.SConscript(
     exports     = ['env'],
 )
 
-#bspheader
+# bspheader
 boardsDir       = os.path.join('#','firmware','openos','bsp','boards')
 boardsVarDir    = os.path.join(buildEnv['VARDIR'],'bsp','boards')
 buildEnv.SConscript(

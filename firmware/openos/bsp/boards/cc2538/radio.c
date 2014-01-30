@@ -128,7 +128,7 @@ void radio_init() {
    HWREG(RFCORE_XREG_FREQCTRL) = CC2538_RF_CHANNEL_MIN;
 
    /* Enable RF interrupts  see page 751  */
-//      enable_radio_interrupts();
+   // enable_radio_interrupts();
 
    //register interrupt
    IntRegister(INT_RFCORERTX, radio_isr);
@@ -373,8 +373,8 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
     // -  [1B]     RSSI
     // - *[2B]     CRC
 
-  //skip first byte is len, last 2 crc
-    for(i = 1; i < len-2; i++) {
+  //skip first byte is len
+    for(i = 0; i < len - 2; i++) {
           pBufRead[i] = HWREG(RFCORE_SFR_RFDATA);
     }
 

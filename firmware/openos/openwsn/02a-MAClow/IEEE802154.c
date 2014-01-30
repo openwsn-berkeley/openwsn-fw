@@ -27,7 +27,7 @@ Note that we are writing the field from the end of the header to the beginning.
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
                               uint8_t           ielistpresent,
-                              uint8_t           frameversion,
+                              uint8_t           frameVersion,
                               bool              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
@@ -81,7 +81,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    temp_8b             |= IEEE154_ADDR_EXT                << IEEE154_FCF_SRC_ADDR_MODE;
    //poipoi xv IE list present
    temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
-   temp_8b             |= frameversion                    << IEEE154_FCF_FRAME_VERSION;
+   temp_8b             |= frameVersion                    << IEEE154_FCF_FRAME_VERSION;
      
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)
