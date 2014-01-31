@@ -1,16 +1,21 @@
 language: c
 
 before_script:
-  - "sudo apt-get install gcc-msp430"
-  - "msp430-gcc --version"
-  - "sudo apt-get install doxygen"
-  - "doxygen --version"
+- sudo add-apt-repository -y ppa:terry.guo/gcc-arm-embedded
+- sudo apt-get update
+- sudo apt-get install gcc-arm-none-eabi
+- arm-none-eabi-gcc --version
+- sudo apt-get install gcc-msp430
+- msp430-gcc --version
+- sudo apt-get install doxygen
+- doxygen --version
 
 script:
-  - mkdir -p ./build/doc/
-  - scons docs
-  - scons board=telosb       toolchain=mspgcc oos_openwsn
-  - scons board=wsn430v14    toolchain=mspgcc oos_openwsn
-  - scons board=wsn430v13b   toolchain=mspgcc oos_openwsn
-  - scons board=gina         toolchain=mspgcc oos_openwsn
-  - scons board=python       toolchain=gcc    oos_openwsn
+- mkdir -p ./build/doc/
+- scons docs
+- scons board=telosb       toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=wsn430v14    toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=wsn430v13b   toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=gina         toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=python       toolchain=gcc    verbose=1 oos_openwsn
+- scons board=iot-lab_M3   toolchain=armgcc verbose=1 oos_openwsn
