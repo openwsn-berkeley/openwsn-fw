@@ -744,7 +744,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>lnk0t.icf</state>
+          <state>$TOOLKIT_DIR$\config\linker\ST\stm32f103xE.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -804,7 +804,7 @@
         </option>
         <option>
           <name>IlinkProgramEntryLabel</name>
-          <state></state>
+          <state>__iar_program_start</state>
         </option>
         <option>
           <name>DoFill</name>
@@ -1920,9 +1920,9 @@
   <group>
     <name>bsp</name>
     <group>
-      <name>board</name>
+      <name>boards</name>
       <group>
-        <name>stm32</name>
+        <name>openmotestm</name>
         <group>
           <name>configure</name>
           <file>
@@ -2119,7 +2119,7 @@
     </group>
   </group>
   <group>
-    <name>driver</name>
+    <name>drivers</name>
     <group>
       <name>common</name>
       <file>
