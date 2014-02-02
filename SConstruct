@@ -84,7 +84,7 @@ help-option:
 
 # first value is default
 command_line_options = {
-    'board':       ['telosb','wsn430v14','wsn430v13b','gina','z1','python','iot-lab_M3'],
+    'board':       ['telosb','wsn430v14','wsn430v13b','gina','z1','python','iot-lab_M3','openmotestm'],
     'toolchain':   ['mspgcc','iar','iar-proj','armgcc','gcc'],
     'fet_version': ['2','3'],
     'verbose':     ['0','1'],
