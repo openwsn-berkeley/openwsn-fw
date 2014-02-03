@@ -625,7 +625,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>01bsp_bothtimer.srec</state>
+          <state>01bsp_bothtimers.srec</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -679,7 +679,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>01bsp_bothtimer.out</state>
+          <state>01bsp_bothtimers.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
