@@ -8,7 +8,6 @@ Build status
 |              builder                                                   |      build               | outcome
 | ---------------------------------------------------------------------- | ------------------------ | -------
 | [Travis](https://travis-ci.org/openwsn-berkeley/openwsn-fw)            | compile                  | [![Build Status](https://travis-ci.org/openwsn-berkeley/openwsn-fw.png?branch=develop)](https://travis-ci.org/openwsn-berkeley/openwsn-fw)
-| [Jenkins](http://builder.openwsn.org/job/Firmware/)                    | compile                  | [![Build Status](http://builder.openwsn.org/job/Firmware/badge/icon)](http://builder.openwsn.org/job/Firmware/)
 | [Jenkins](http://builder.openwsn.org/job/Firmware%20GINA/)             | compile (GINA)           | [![Build Status](http://builder.openwsn.org/buildStatus/icon?job=Firmware%20GINA)](http://builder.openwsn.org/job/Firmware%20GINA/)
 | [Jenkins](http://builder.openwsn.org/job/Firmware%20IoT-LAB_M3/)       | compile (IoT-LAB_M3)     | [![Build Status](http://builder.openwsn.org/buildStatus/icon?job=Firmware%20IoT-LAB_M3)](http://builder.openwsn.org/job/Firmware%20IoT-LAB_M3/)
 | [Jenkins](http://builder.openwsn.org/job/Firmware%20OpenMoteCC2538/)   | compile (OpenMoteCC2538) | [![Build Status](http://builder.openwsn.org/buildStatus/icon?job=Firmware%20OpenMoteCC2538)](http://builder.openwsn.org/job/Firmware%20OpenMoteCC2538/)
