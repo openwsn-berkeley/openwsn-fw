@@ -289,22 +289,30 @@ else:
 #============================ upload over JTAG ================================
 
 def jtagUploadFunc(location):
-    if   env['fet_version']==2:
-        # MSP-FET430uif is running v2 Firmware
-        return Builder(
-            action      = 'mspdebug -d {0} -j uif "prog $SOURCE"'.format(location),
-            suffix      = '.phonyupload',
-            src_suffix  = '.ihex',
-        )
-    elif env['fet_version']==3:
-        # MSP-FET430uif is running v2 Firmware
-        return Builder(
-            action      = 'mspdebug tilib -d {0} "prog $SOURCE"'.format(location),
-            suffix      = '.phonyupload',
-            src_suffix  = '.ihex',
-        )
+    if env['toolchain']=='armgcc':
+        if env['board'] in ['iot-lab_M3']:
+            return Builder(
+                action      = os.path.join('firmware','openos','bsp','boards','iot-lab_M3','tools','flash.sh') + " $SOURCE",
+                suffix      = '.phonyupload',
+                src_suffix  = '.ihex',
+            )
     else:
-        raise SystemError('fet_version={0} unsupported.'.format(fet_version))
+      if env['fet_version']==2:
+          # MSP-FET430uif is running v2 Firmware
+          return Builder(
+              action      = 'mspdebug -d {0} -j uif "prog $SOURCE"'.format(location),
+              suffix      = '.phonyupload',
+              src_suffix  = '.ihex',
+          )
+      elif env['fet_version']==3:
+          # MSP-FET430uif is running v2 Firmware
+          return Builder(
+              action      = 'mspdebug tilib -d {0} "prog $SOURCE"'.format(location),
+              suffix      = '.phonyupload',
+              src_suffix  = '.ihex',
+          )
+      else:
+          raise SystemError('fet_version={0} unsupported.'.format(fet_version))
 if env['jtag']:
     env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
 
