@@ -216,6 +216,9 @@ elif env['toolchain']=='armgcc':
     env.Append(LINKFLAGS     = '-mthumb-interwork')
     env.Append(LINKFLAGS     = '-nostartfiles')
     env.Append(LINKFLAGS     = '-Tfirmware/openos/bsp/boards/iot-lab_M3/stm32_flash.ld')
+    env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','startup.o'))
+    env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','configure','stm32f10x_it.o'))
+
     # object manipulation
     env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
     env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
