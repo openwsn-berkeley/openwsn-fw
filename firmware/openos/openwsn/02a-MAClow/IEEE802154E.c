@@ -14,6 +14,10 @@
 #include "debugpins.h"
 #include "res.h"
 
+#ifdef ADAPTIVE_SYNC
+  #include "adaptive_sync.h"
+#endif
+
 //=========================== variables =======================================
 
 ieee154e_vars_t    ieee154e_vars;
@@ -170,6 +174,10 @@ void isr_ieee154e_newSlot() {
          activity_synchronize_newSlot();
       }
    } else {
+     // adaptive synchronization
+      #ifdef ADAPTIVE_SYNC
+        adaptive_sync_countCompensationTimeout();
+      #endif
       activity_ti1ORri1();
    }
    ieee154e_dbg.num_newSlot++;
@@ -1786,6 +1794,9 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    // update the stats
    ieee154e_stats.numSyncPkt++;
    updateStats(timeCorrection);
+#ifdef ADAPTIVE_SYNC
+   adaptive_sync_recordLastASN(timeCorrection, S_PACKET_SYNC);
+#endif
 }
 
 void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
@@ -1814,6 +1825,10 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    // update the stats
    ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
+   
+#ifdef ADAPTIVE_SYNC
+   adaptive_sync_recordLastASN(timeCorrection, S_ACK_SYNC);
+#endif
 }
 
 void changeIsSync(bool newIsSync) {
