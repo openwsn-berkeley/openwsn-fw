@@ -625,7 +625,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>02drv_opentimer.srec</state>
+          <state>02drv_opentimers.srec</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -679,7 +679,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>02drv_opentimer.out</state>
+          <state>02drv_opentimers.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -1916,9 +1916,9 @@
   <group>
     <name>bsp</name>
     <group>
-      <name>board</name>
+      <name>boards</name>
       <group>
-        <name>stm32</name>
+        <name>agilefox</name>
         <group>
           <name>configure</name>
           <file>
@@ -2109,7 +2109,7 @@
     </group>
   </group>
   <group>
-    <name>driver</name>
+    <name>drivers</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
     </file>

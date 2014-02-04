@@ -1916,9 +1916,9 @@
   <group>
     <name>bsp</name>
     <group>
-      <name>board</name>
+      <name>boards</name>
       <group>
-        <name>stm32</name>
+        <name>agilefox</name>
         <group>
           <name>configure</name>
           <file>
@@ -2109,7 +2109,7 @@
     </group>
   </group>
   <group>
-    <name>driver</name>
+    <name>drivers</name>
     <group>
       <name>common</name>
       <file>
