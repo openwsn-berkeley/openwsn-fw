@@ -1916,27 +1916,9 @@
   <group>
     <name>bsp</name>
     <group>
-      <name>board</name>
+      <name>boards</name>
       <group>
-        <name>chips</name>
-        <group>
-          <name>at86rf231</name>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\at86rf231.h</name>
-          </file>
-          <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\radio.c</name>
-          </file>
-        </group>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
-        </file>
-      </group>
-      <group>
-        <name>stm32</name>
+        <name>agilefox</name>
         <group>
           <name>configure</name>
           <file>
@@ -2113,9 +2095,27 @@
         <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
       </file>
     </group>
+    <group>
+      <name>chips</name>
+      <group>
+        <name>at86rf231</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\at86rf231.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\radio.c</name>
+        </file>
+      </group>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
+      </file>
+    </group>
   </group>
   <group>
-    <name>driver</name>
+    <name>drivers</name>
     <group>
       <name>common</name>
       <file>
