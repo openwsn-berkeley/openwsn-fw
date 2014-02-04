@@ -625,7 +625,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>02drv_opentimer.srec</state>
+          <state>02drv_opentimers.srec</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -679,7 +679,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>02drv_opentimer.out</state>
+          <state>02drv_opentimers.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
