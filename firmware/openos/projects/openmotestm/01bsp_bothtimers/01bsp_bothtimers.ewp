@@ -87,7 +87,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>6.60.1.5099</state>
+          <state>6.60.2.5494</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -298,11 +298,11 @@
         <option>
           <name>CCIncludePath2</name>
           <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\configure\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\inc\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\configure\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\inc\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
@@ -625,7 +625,7 @@
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>01bsp_bothtimer.srec</state>
+          <state>01bsp_bothtimers.srec</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -679,7 +679,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>01bsp_bothtimer.out</state>
+          <state>01bsp_bothtimers.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -743,7 +743,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\ewarm\stm32f10x_flash.icf</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\ewarm\stm32f10x_flash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -1060,7 +1060,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>6.60.1.5099</state>
+          <state>6.60.2.5494</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -1916,149 +1916,149 @@
   <group>
     <name>bsp</name>
     <group>
-      <name>board</name>
+      <name>boards</name>
       <group>
-        <name>stm32</name>
+        <name>openmotestm</name>
         <group>
           <name>configure</name>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\configure\stm32f10x_conf.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\configure\stm32f10x_conf.h</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\configure\stm32f10x_it.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\configure\stm32f10x_it.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\configure\stm32f10x_it.h</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\configure\stm32f10x_it.h</name>
           </file>
         </group>
         <group>
           <name>ewarm</name>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\ewarm\cortexm3_macro.s</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\ewarm\cortexm3_macro.s</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\ewarm\stm32f10x_vector.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\ewarm\stm32f10x_vector.c</name>
           </file>
         </group>
         <group>
           <name>lib</name>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_adc.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_adc.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_bkp.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_bkp.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_can.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_can.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_crc.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_crc.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_dac.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_dac.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_dbgmcu.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_dbgmcu.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_dma.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_dma.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_exti.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_exti.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_flash.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_flash.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_fsmc.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_fsmc.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_gpio.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_gpio.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_i2c.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_i2c.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_iwdg.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_iwdg.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_lib.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_lib.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_nvic.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_nvic.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_pwr.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_pwr.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_rcc.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_rcc.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_rtc.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_rtc.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_sdio.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_sdio.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_spi.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_spi.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_systick.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_systick.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_tim.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_tim.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_usart.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_usart.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_wwdg.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\library\src\stm32f10x_wwdg.c</name>
           </file>
         </group>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\board.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\board.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\board_info.h</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\board_info.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\bsp_timer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\bsp_timer.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\debugpins.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\debugpins.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\eui64.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\eui64.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\gpio.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\gpio.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\gpio.h</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\gpio.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\leds.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\leds.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\nvic.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\nvic.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\nvic.h</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\nvic.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\radiotimer.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\radiotimer.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\rcc.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\rcc.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\rcc.h</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\rcc.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\spi.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\spi.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\uart.c</name>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\uart.c</name>
         </file>
       </group>
       <file>
@@ -2109,7 +2109,7 @@
     </group>
   </group>
   <group>
-    <name>driver</name>
+    <name>drivers</name>
     <group>
       <name>common</name>
       <file>

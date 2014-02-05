@@ -40,11 +40,11 @@ typedef struct {
 spi_vars_t spi_vars;
 
 //=========================== prototypes ======================================
-//=========================== XXX ======================================
+
 inline static void RESET_CLR(void) { GPIOC->BRR = 1<<1; }
 inline static void RESET_SET(void) { GPIOC->BSRR = 1<<1; }
-inline static void CSn_SET(void) { GPIOA->BSRR = 1<<1; }
-inline static void CSn_CLR(void) { GPIOA->BRR = 1<<1; }
+inline static void CSn_SET(void)   { GPIOA->BSRR = 1<<1; }
+//inline static void CSn_CLR(void)   { GPIOA->BRR = 1<<1; }
 inline static void SLEEP_CLR(void) { GPIOA->BRR = 1<<0; }
 
 //=========================== public ==========================================

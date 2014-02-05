@@ -87,7 +87,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>6.60.1.5099</state>
+          <state>6.60.2.5494</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -1916,9 +1916,9 @@
   <group>
     <name>bsp</name>
     <group>
-      <name>board</name>
+      <name>boards</name>
       <group>
-        <name>stm32</name>
+        <name>agilefox</name>
         <group>
           <name>configure</name>
           <file>
@@ -2115,7 +2115,7 @@
     </group>
   </group>
   <group>
-    <name>driver</name>
+    <name>drivers</name>
     <group>
       <name>common</name>
       <file>

@@ -12,7 +12,7 @@
       <name>General</name>
       <archiveVersion>3</archiveVersion>
       <data>
-        <version>18</version>
+        <version>22</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -29,8 +29,8 @@
         </option>
         <option>
           <name>Variant</name>
-          <version>17</version>
-          <state>37</state>
+          <version>20</version>
+          <state>38</state>
         </option>
         <option>
           <name>GEndianMode</name>
@@ -38,8 +38,8 @@
         </option>
         <option>
           <name>Input variant</name>
-          <version>1</version>
-          <state>0</state>
+          <version>3</version>
+          <state>1</state>
         </option>
         <option>
           <name>Input description</name>
@@ -47,8 +47,8 @@
         </option>
         <option>
           <name>Output variant</name>
-          <version>0</version>
-          <state>0</state>
+          <version>2</version>
+          <state>1</state>
         </option>
         <option>
           <name>Output description</name>
@@ -60,7 +60,7 @@
         </option>
         <option>
           <name>FPU</name>
-          <version>1</version>
+          <version>2</version>
           <state>0</state>
         </option>
         <option>
@@ -87,7 +87,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>6.10.1.52170</state>
+          <state>6.60.1.5099</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -99,7 +99,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>STM32F10xxE	ST STM32F10xxE</state>
+          <state>STM32F103xE	ST STM32F103xE</state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -135,13 +135,35 @@
           <name>RTConfigPath2</name>
           <state>$TOOLKIT_DIR$\INC\c\DLib_Config_Normal.h</state>
         </option>
+        <option>
+          <name>GFPUCoreSlave</name>
+          <version>20</version>
+          <state>38</state>
+        </option>
+        <option>
+          <name>GBECoreSlave</name>
+          <version>20</version>
+          <state>38</state>
+        </option>
+        <option>
+          <name>OGUseCmsis</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>OGUseCmsisDspLib</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>GRuntimeLibThreads</name>
+          <state>0</state>
+        </option>
       </data>
     </settings>
     <settings>
       <name>ICCARM</name>
       <archiveVersion>2</archiveVersion>
       <data>
-        <version>26</version>
+        <version>29</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -276,9 +298,47 @@
         <option>
           <name>CCIncludePath2</name>
           <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\stm32\configure\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\inc\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\configure\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\inc\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
+          <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
+          <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\OpenwsnHeads\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\bbk\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udplatency\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\cross-layers\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -360,11 +420,23 @@
           <state>1</state>
         </option>
         <option>
-          <name>IccRelaxedFpPrecision</name>
+          <name>IccCppInlineSemantics</name>
           <state>0</state>
         </option>
         <option>
-          <name>IccCppInlineSemantics</name>
+          <name>IccCmsis</name>
+          <state>1</state>
+        </option>
+        <option>
+          <name>IccFloatSemantics</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>CCOptimizationNoSizeConstraints</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>CCNoLiteralPool</name>
           <state>0</state>
         </option>
       </data>
@@ -373,7 +445,7 @@
       <name>AARM</name>
       <archiveVersion>2</archiveVersion>
       <data>
-        <version>8</version>
+        <version>9</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -529,6 +601,10 @@
           <name>AExtraOptionsV2</name>
           <state></state>
         </option>
+        <option>
+          <name>AsmNoLiteralPool</name>
+          <state>0</state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -541,15 +617,15 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>00std_uart01_dante.hex</state>
+          <state>02drv_opentimers.srec</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -557,7 +633,7 @@
         </option>
         <option>
           <name>OOCObjCopyEnable</name>
-          <state>1</state>
+          <state>0</state>
         </option>
       </data>
     </settings>
@@ -586,7 +662,7 @@
       <name>ILINK</name>
       <archiveVersion>0</archiveVersion>
       <data>
-        <version>11</version>
+        <version>16</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -603,7 +679,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>00std_uart01_dante.out</state>
+          <state>02drv_opentimers.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -667,7 +743,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>F:\TestForSTM32\bsp\boards\stm32\ewarm\stm32f10x_flash.icf</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\ewarm\stm32f10x_flash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -755,10 +831,6 @@
           <state>1</state>
         </option>
         <option>
-          <name>CrcAlgo</name>
-          <state>1</state>
-        </option>
-        <option>
           <name>CrcPoly</name>
           <state>0x11021</state>
         </option>
@@ -832,6 +904,48 @@
           <name>IlinkOptExceptionsForce</name>
           <state>0</state>
         </option>
+        <option>
+          <name>IlinkCmsis</name>
+          <state>1</state>
+        </option>
+        <option>
+          <name>IlinkOptMergeDuplSections</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>IlinkOptUseVfe</name>
+          <state>1</state>
+        </option>
+        <option>
+          <name>IlinkOptForceVfe</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>IlinkStackAnalysisEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>IlinkStackControlFile</name>
+          <state></state>
+        </option>
+        <option>
+          <name>IlinkStackCallGraphFile</name>
+          <state></state>
+        </option>
+        <option>
+          <name>CrcAlgorithm</name>
+          <version>0</version>
+          <state>1</state>
+        </option>
+        <option>
+          <name>CrcUnitSize</name>
+          <version>0</version>
+          <state>0</state>
+        </option>
+        <option>
+          <name>IlinkThreadsSlave</name>
+          <state>1</state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -871,7 +985,7 @@
       <name>General</name>
       <archiveVersion>3</archiveVersion>
       <data>
-        <version>18</version>
+        <version>22</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -888,7 +1002,7 @@
         </option>
         <option>
           <name>Variant</name>
-          <version>17</version>
+          <version>20</version>
           <state>0</state>
         </option>
         <option>
@@ -897,8 +1011,8 @@
         </option>
         <option>
           <name>Input variant</name>
-          <version>1</version>
-          <state>0</state>
+          <version>3</version>
+          <state>1</state>
         </option>
         <option>
           <name>Input description</name>
@@ -906,8 +1020,8 @@
         </option>
         <option>
           <name>Output variant</name>
-          <version>0</version>
-          <state>0</state>
+          <version>2</version>
+          <state>1</state>
         </option>
         <option>
           <name>Output description</name>
@@ -919,7 +1033,7 @@
         </option>
         <option>
           <name>FPU</name>
-          <version>1</version>
+          <version>2</version>
           <state>0</state>
         </option>
         <option>
@@ -946,7 +1060,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state></state>
+          <state>6.60.1.5099</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -994,13 +1108,35 @@
           <name>RTConfigPath2</name>
           <state></state>
         </option>
+        <option>
+          <name>GFPUCoreSlave</name>
+          <version>20</version>
+          <state>0</state>
+        </option>
+        <option>
+          <name>GBECoreSlave</name>
+          <version>20</version>
+          <state>0</state>
+        </option>
+        <option>
+          <name>OGUseCmsis</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>OGUseCmsisDspLib</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>GRuntimeLibThreads</name>
+          <state>0</state>
+        </option>
       </data>
     </settings>
     <settings>
       <name>ICCARM</name>
       <archiveVersion>2</archiveVersion>
       <data>
-        <version>26</version>
+        <version>29</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1216,11 +1352,23 @@
           <state>1</state>
         </option>
         <option>
-          <name>IccRelaxedFpPrecision</name>
+          <name>IccCppInlineSemantics</name>
           <state>0</state>
         </option>
         <option>
-          <name>IccCppInlineSemantics</name>
+          <name>IccCmsis</name>
+          <state>1</state>
+        </option>
+        <option>
+          <name>IccFloatSemantics</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>CCOptimizationNoSizeConstraints</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>CCNoLiteralPool</name>
           <state>0</state>
         </option>
       </data>
@@ -1229,7 +1377,7 @@
       <name>AARM</name>
       <archiveVersion>2</archiveVersion>
       <data>
-        <version>8</version>
+        <version>9</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1385,6 +1533,10 @@
           <name>AExtraOptionsV2</name>
           <state></state>
         </option>
+        <option>
+          <name>AsmNoLiteralPool</name>
+          <state>0</state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -1442,7 +1594,7 @@
       <name>ILINK</name>
       <archiveVersion>0</archiveVersion>
       <data>
-        <version>11</version>
+        <version>16</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1611,10 +1763,6 @@
           <state>1</state>
         </option>
         <option>
-          <name>CrcAlgo</name>
-          <state>1</state>
-        </option>
-        <option>
           <name>CrcPoly</name>
           <state>0x11021</state>
         </option>
@@ -1688,6 +1836,48 @@
           <name>IlinkOptExceptionsForce</name>
           <state>0</state>
         </option>
+        <option>
+          <name>IlinkCmsis</name>
+          <state>1</state>
+        </option>
+        <option>
+          <name>IlinkOptMergeDuplSections</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>IlinkOptUseVfe</name>
+          <state>1</state>
+        </option>
+        <option>
+          <name>IlinkOptForceVfe</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>IlinkStackAnalysisEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>IlinkStackControlFile</name>
+          <state></state>
+        </option>
+        <option>
+          <name>IlinkStackCallGraphFile</name>
+          <state></state>
+        </option>
+        <option>
+          <name>CrcAlgorithm</name>
+          <version>0</version>
+          <state>1</state>
+        </option>
+        <option>
+          <name>CrcUnitSize</name>
+          <version>0</version>
+          <state>0</state>
+        </option>
+        <option>
+          <name>IlinkThreadsSlave</name>
+          <state>1</state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -1718,60 +1908,213 @@
     </settings>
   </configuration>
   <group>
-    <name>EWARM</name>
+    <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\ewarm\cortexm3_macro.s</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\ewarm\stm32f10x_vector.c</name>
+      <name>$PROJ_DIR$\..\..\common\02drv_opentimers\02drv_opentimers.c</name>
     </file>
   </group>
   <group>
-    <name>FWlib</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_flash.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_gpio.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_lib.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_nvic.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_rcc.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\library\src\stm32f10x_usart.c</name>
-    </file>
+    <name>bsp</name>
+    <group>
+      <name>boards</name>
+      <group>
+        <name>agilefox</name>
+        <group>
+          <name>configure</name>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\configure\stm32f10x_conf.h</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\configure\stm32f10x_it.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\configure\stm32f10x_it.h</name>
+          </file>
+        </group>
+        <group>
+          <name>ewarm</name>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\ewarm\cortexm3_macro.s</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\ewarm\stm32f10x_vector.c</name>
+          </file>
+        </group>
+        <group>
+          <name>lib</name>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_adc.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_bkp.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_can.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_crc.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_dac.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_dbgmcu.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_dma.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_exti.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_flash.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_fsmc.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_gpio.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_i2c.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_iwdg.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_lib.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_nvic.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_pwr.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_rcc.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_rtc.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_sdio.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_spi.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_systick.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_tim.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_usart.c</name>
+          </file>
+          <file>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\src\stm32f10x_wwdg.c</name>
+          </file>
+        </group>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\board.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\board_info.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\bsp_timer.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\debugpins.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\eui64.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\gpio.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\gpio.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\leds.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\nvic.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\nvic.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\radiotimer.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\rcc.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\rcc.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\spi.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\uart.c</name>
+        </file>
+      </group>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\sctimer.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
+      </file>
+    </group>
+    <group>
+      <name>chips</name>
+      <group>
+        <name>at86rf231</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\at86rf231.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\radio.c</name>
+        </file>
+      </group>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
+      </file>
+    </group>
   </group>
   <group>
-    <name>USER</name>
+    <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\leds.c</name>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\configure\stm32f10x_conf.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\configure\stm32f10x_it.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\configure\stm32f10x_it.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\stm32\uart.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\common\uart01_test\uart01_test.c</name>
+      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
     </file>
   </group>
 </project>
