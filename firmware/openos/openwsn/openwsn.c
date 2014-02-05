@@ -15,9 +15,6 @@
 #include "opentimers.h"
 //-- 02a-TSCH
 #include "IEEE802154E.h"
-#ifdef ADAPTIVE_SYNC
-  #include "adaptive_sync.h"
-#endif
 //-- 02b-RES
 #include "schedule.h"
 #include "res.h"
@@ -86,9 +83,6 @@ void openwsn_init() {
    opentimers_init();
    //-- 02a-TSCH
    ieee154e_init();
-#ifdef ADAPTIVE_SYNC
-   adaptive_sync_init();
-#endif
    //-- 02b-RES
    schedule_init();
    res_init();

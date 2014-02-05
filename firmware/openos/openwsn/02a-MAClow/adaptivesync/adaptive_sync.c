@@ -57,9 +57,16 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod){
     // check whether I am synchronized?
     if(ieee154e_isSynch())
     {
+      // reset compensationtTicks when synchronization happened
+      adaptive_sync_vars.compensateTicks = 0;
       // if I am synchronized, only calculated compensation interval when timeCorrection excess LIMITLARGETIMECORRECTION
       if(timeCorrection > LIMITLARGETIMECORRECTION || timeCorrection < -LIMITLARGETIMECORRECTION)
         adaptive_sync_calculateCompensatedSlots(timeCorrection, syncMethod);
+    }
+    else
+    {
+      // this is the first time for synchronization, reset variables, 
+      memset(&adaptive_sync_vars,0,sizeof(adaptive_sync_t));
     }
     // update oldASN variable by currect asn
     memcpy(&(adaptive_sync_vars.oldASN.bytes0and1), &array[0], sizeof(uint16_t));
@@ -110,7 +117,6 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syn
       while(1); // should not reach here
     }// calculate the compensation interval, uint: slots/x ticks. 2ticks is only the case of openmotestm platform, usually it should be one
     adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = COMPENSATE_ACCURACY * adaptive_sync_vars.lapsedSlots / (TC + adaptive_sync_vars.compensateTicks);
-    adaptive_sync_vars.compensateTicks = 0;
     adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
 }
 /**
