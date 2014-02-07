@@ -173,6 +173,7 @@ enum {
    COMPONENT_UDPLATENCY                = 0x2f,
    COMPONENT_TEST                      = 0x30,
    COMPONENT_R6TUS                    = 0x31,
+   COMPONENT_SWARMBAND				   = 0x32,
 };
 
 /**
