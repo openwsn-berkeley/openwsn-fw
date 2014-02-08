@@ -10,13 +10,14 @@
 #include "leds.h"
 #include "neighbors.h"
 #include "debugpins.h"
+#include "packetfunctions.h"
 
 //=========================== define ==========================================
 
 //=========================== type ============================================
 
 typedef struct {
-  open_addr_t* neighborID;
+  open_addr_t neighborID;
   uint32_t     compensationSlots; // compensation interval, counted by slots 
 }compensationInfo_t;
 
@@ -47,15 +48,19 @@ void adaptive_sync_init(){
 /**
 \brief calculated how many slots have lapsed since last synchronized.
 
-\param[in] address The address of neighbor.
+\param[in] timesource The address of neighbor.
+
+\param[in] timeCorrection time to be corrected
+
+\param[in] syncMethod packet sync or ack sync
 
 \returns the number of slots
 */
-void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod){
+void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, open_addr_t timesource){
     uint8_t array[5];
     ieee154e_getAsn(array);
-    // check whether I am synchronized?
-    if(ieee154e_isSynch())
+    // check whether I am synchronized and also check whether it's the same neighbor synchronized to last time?
+    if(ieee154e_isSynch() && packetfunctions_sameAddress(&timesource, &(adaptive_sync_vars.compensationInfo_vars[0].neighborID)))
     {
       // reset compensationtTicks when synchronization happened
       adaptive_sync_vars.compensateTicks = 0;
@@ -65,13 +70,15 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod){
     }
     else
     {
-      // this is the first time for synchronization, reset variables, 
+      // this is the first time for synchronizing to current neighbor, reset variables, 
       memset(&adaptive_sync_vars,0,sizeof(adaptive_sync_t));
     }
     // update oldASN variable by currect asn
     memcpy(&(adaptive_sync_vars.oldASN.bytes0and1), &array[0], sizeof(uint16_t));
     memcpy(&(adaptive_sync_vars.oldASN.bytes2and3), &array[2], sizeof(uint16_t));
     memcpy(&(adaptive_sync_vars.oldASN.byte4), &array[4], sizeof(uint8_t));
+    
+    memcpy(&(adaptive_sync_vars.compensationInfo_vars[0].neighborID), &timesource, sizeof(open_addr_t));
 }
 
 /**

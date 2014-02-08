@@ -1795,7 +1795,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    ieee154e_stats.numSyncPkt++;
    updateStats(timeCorrection);
 #ifdef ADAPTIVE_SYNC
-   adaptive_sync_recordLastASN(timeCorrection, S_PACKET_SYNC);
+   adaptive_sync_recordLastASN(timeCorrection, S_PACKET_SYNC, ieee154e_vars.dataReceived->l2_nextORpreviousHop);
 #endif
 }
 
@@ -1827,7 +1827,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    updateStats(timeCorrection);
    
 #ifdef ADAPTIVE_SYNC
-   adaptive_sync_recordLastASN(timeCorrection, S_ACK_SYNC);
+   adaptive_sync_recordLastASN(timeCorrection, S_ACK_SYNC, ieee154e_vars.ackReceived->l2_nextORpreviousHop);
 #endif
 }
 

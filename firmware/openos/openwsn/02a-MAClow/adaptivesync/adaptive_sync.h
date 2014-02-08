@@ -2,7 +2,7 @@
 #define __ADAPTIVE_SYNC_H
 
 #include "board_info.h"
-
+#include "openwsn.h"
 /**
 \addtogroup MAClow
 \{
@@ -36,7 +36,7 @@ typedef enum {
 //=========================== prototypes ======================================
 
 void adaptive_sync_init();
-void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod);
+void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, open_addr_t timesource);
 void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syncMethod);
 
 void adaptive_sync_countCompensationTimeout();
