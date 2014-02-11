@@ -61,7 +61,7 @@ project:
     only from an amd64-linux build host.
     simhost      Host platform and OS for simulation. Default selection is
                  the current platform/OS, which of course is not a cross-
-                 build. x86-windows cross-build requires MinGW-w64 toolchain.
+                 build. '-windows' cross-builds require MinGW-w64 toolchain.
                  amd64-linux, x86-linux, amd64-windows, x86-windows
     simhostpy    Home directory for simhost cross-build Python headers and 
                  shared library.
