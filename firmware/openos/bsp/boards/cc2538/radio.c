@@ -216,14 +216,14 @@ void radio_setFrequency(uint8_t frequency) {
    HWREG(RFCORE_XREG_FREQCTRL) = (CC2538_RF_CHANNEL_MIN
         + (frequency - CC2538_RF_CHANNEL_MIN) * CC2538_RF_CHANNEL_SPACING);
 
-   radio_on();
+   //radio_on();
    
    // change state
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
 void radio_rfOn() {
-  radio_on();
+  //radio_on();
 }
 
 void radio_rfOff() {
@@ -325,6 +325,7 @@ void radio_rxNow() {
 	//CC2538_RF_CSP_ISFLUSHRX();
 
 	//enable radio interrupts
+	CC2538_RF_CSP_ISFLUSHRX();
 	enable_radio_interrupts();
 
 	CC2538_RF_CSP_ISRXON();
@@ -406,14 +407,14 @@ port_INLINE  void disable_radio_interrupts(){
 
 
 port_INLINE void radio_on(){
-    CC2538_RF_CSP_ISFLUSHRX();
+   // CC2538_RF_CSP_ISFLUSHRX();
     CC2538_RF_CSP_ISRXON();
 }
 
 port_INLINE void radio_off(){
 	/* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
     while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
-    CC2538_RF_CSP_ISFLUSHRX();
+    //CC2538_RF_CSP_ISFLUSHRX();
 
   /* Don't turn off if we are off as this will trigger a Strobe Error */
     if(HWREG(RFCORE_XREG_RXENABLE) != 0) {
