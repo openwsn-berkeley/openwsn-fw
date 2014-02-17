@@ -40,6 +40,7 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, ope
 void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syncMethod);
 
 void adaptive_sync_countCompensationTimeout();
+void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots);
 
 /**
 \}

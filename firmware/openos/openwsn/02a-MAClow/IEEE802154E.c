@@ -904,6 +904,11 @@ port_INLINE void activity_ti1ORri1() {
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
          }
+         
+#ifdef ADAPTIVE_SYNC
+         adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
+#endif
+         
          break;
       case CELLTYPE_MORESERIALRX:
          // do nothing (not even endSlot())

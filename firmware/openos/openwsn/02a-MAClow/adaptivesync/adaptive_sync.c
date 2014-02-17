@@ -23,10 +23,11 @@ typedef struct {
 
 typedef struct {
   adaptive_sync_state_t clockState;
-  PORT_RADIOTIMER_WIDTH lapsedSlots;        // since last synchronizatino, this number of slots have  lapsed.
-  uint16_t              compensationTimeout;// decrease one every slot, when it reach zero, adjust currectly slot length by 2 tick(60us). 
-  uint16_t              compensateTicks;    // record how many ticks  are compensated 
-  asn_t                 oldASN;             // the asn when synchronized previous time
+  PORT_RADIOTIMER_WIDTH lapsedSlots;         // since last synchronizatino, this number of slots have  lapsed.
+  uint16_t              compensationTimeout; // decrease one every slot, when it reach zero, adjust currectly slot length by 2 tick(60us). 
+  uint16_t              compensateTicks;     // record how many ticks  are compensated 
+  uint16_t              timeCorrectionRecord;// record the sum of historical timeCorrection
+  asn_t                 oldASN;              // the asn when synchronized previous time
   compensationInfo_t    compensationInfo_vars[9]; //keep each time soures' compensation information
 } adaptive_sync_t;
 
@@ -66,10 +67,20 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, ope
       adaptive_sync_vars.compensateTicks = 0;
       // if I am synchronized, only calculated compensation interval when timeCorrection excess LIMITLARGETIMECORRECTION
       if(timeCorrection > LIMITLARGETIMECORRECTION || timeCorrection < -LIMITLARGETIMECORRECTION)
+      {
         adaptive_sync_calculateCompensatedSlots(timeCorrection, syncMethod);
+        adaptive_sync_vars.timeCorrectionRecord = 0;
+      }
+      else
+      {
+        adaptive_sync_vars.timeCorrectionRecord += timeCorrection;
+        return;
+      }
     }
     else
     {
+      if(packetfunctions_sameAddress(&timesource, &(adaptive_sync_vars.compensationInfo_vars[0].neighborID)) == FALSE && ieee154e_isSynch() == TRUE)
+        leds_debug_toggle();
       // this is the first time for synchronizing to current neighbor, reset variables, 
       memset(&adaptive_sync_vars,0,sizeof(adaptive_sync_t));
     }
@@ -123,7 +134,7 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syn
     default:
       while(1); // should not reach here
     }// calculate the compensation interval, uint: slots/x ticks. 2ticks is only the case of openmotestm platform, usually it should be one
-    adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = COMPENSATE_ACCURACY * adaptive_sync_vars.lapsedSlots / (TC + adaptive_sync_vars.compensateTicks);
+    adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = COMPENSATE_ACCURACY * adaptive_sync_vars.lapsedSlots / (TC + adaptive_sync_vars.compensateTicks + adaptive_sync_vars.timeCorrectionRecord);
     adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
 }
 /**
@@ -153,8 +164,48 @@ void adaptive_sync_countCompensationTimeout() {
         while(1);
       }
       // tf: for debugging
-//      GPIOC->ODR ^= 0X1000;
+      GPIOC->ODR ^= 0X1000;
       // reload compensationTimeout
       adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
     }
+}
+/**
+\brief minus compensationTimeout at each slot, when compundSlots are scheduled.(e.g. SERIALRX slots)
+*/
+void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots)
+{
+  uint8_t  temp_quotient;
+  uint16_t temp_reminder, restTimeout;
+  // the rest slots to trigger next compensation
+  restTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots - adaptive_sync_vars.compensationTimeout;
+    // if clockState is not set yet, don't compensate.
+  if(adaptive_sync_vars.clockState == S_NONE) return;
+  // calculate necessary variables for compensation
+  temp_quotient = (compoundSlots + restTimeout) / adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
+  temp_reminder = (compoundSlots + restTimeout) % adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
+  
+    // when quotient > 0, I need to do compensation by adjusting current slot length
+    if(temp_quotient > 0)
+    {
+      switch(adaptive_sync_vars.clockState)
+      {
+      case S_SLOWER:
+        radio_setTimerPeriod(TsSlotDuration*(compoundSlots + 1) - temp_quotient * COMPENSATE_ACCURACY);
+        adaptive_sync_vars.compensateTicks += temp_quotient * COMPENSATE_ACCURACY;
+        break;
+      case S_FASTER:
+        radio_setTimerPeriod(TsSlotDuration*(compoundSlots + 1) + temp_quotient * COMPENSATE_ACCURACY);
+        adaptive_sync_vars.compensateTicks += temp_quotient * COMPENSATE_ACCURACY;
+        break;
+      case S_NONE:
+        while(1);
+      default:
+        while(1);
+      }
+      for(uint8_t i=0;i<temp_quotient;i++)
+        // tf: for debugging
+        GPIOC->ODR ^= 0X1000;
+    }
+    // reload compensationTimeout
+    adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots - temp_reminder;    
 }
