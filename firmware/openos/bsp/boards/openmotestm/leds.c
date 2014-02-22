@@ -68,19 +68,19 @@ void    leds_error_blink()
 }
 
 // green
-void    leds_sync_on() 
+void    leds_radio_on() 
 {
    GPIOC->ODR |= 0X0004;
 }
-void leds_sync_off() 
+void leds_radio_off() 
 {
    GPIOC->ODR &= ~0X0004;
 }
-void leds_sync_toggle() 
+void leds_radio_toggle() 
 {
    GPIOC->ODR ^= 0X0004;
 }
-uint8_t leds_sync_isOn() 
+uint8_t leds_radio_isOn() 
 {
   u8 bitstatus = 0x00;
   if ((GPIOC->ODR & 0X0004) != (u32)0)
@@ -94,20 +94,20 @@ uint8_t leds_sync_isOn()
   return bitstatus;
 }
 
-// orange
-void leds_radio_on() 
+// blue
+void leds_sync_on() 
 {
    GPIOB->ODR |= 0X0200;
 }
-void leds_radio_off() 
+void leds_sync_off() 
 {
    GPIOB->ODR &= ~0X0200;
 }
-void leds_radio_toggle()
+void leds_sync_toggle()
 {
    GPIOB->ODR ^= 0X0200;
 }
-uint8_t leds_radio_isOn() 
+uint8_t leds_sync_isOn() 
 {
   u8 bitstatus = 0x00;
   if ((GPIOA->ODR & 0X0200) != (u32)0)
