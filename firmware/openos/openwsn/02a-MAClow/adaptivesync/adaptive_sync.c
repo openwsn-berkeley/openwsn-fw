@@ -174,15 +174,23 @@ void adaptive_sync_countCompensationTimeout() {
 */
 void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots)
 {
+  uint16_t counter;
   uint8_t  temp_quotient;
-  uint16_t temp_reminder, restTimeout;
-  // the rest slots to trigger next compensation
-  restTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots - adaptive_sync_vars.compensationTimeout;
     // if clockState is not set yet, don't compensate.
   if(adaptive_sync_vars.clockState == S_NONE) return;
-  // calculate necessary variables for compensation
-  temp_quotient = (compoundSlots + restTimeout) / adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
-  temp_reminder = (compoundSlots + restTimeout) % adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
+  
+  counter = compoundSlots; 
+  temp_quotient = 0;
+  while(counter > 0)  
+  {
+    adaptive_sync_vars.compensationTimeout--;
+    if(adaptive_sync_vars.compensationTimeout == 0)
+    {
+      temp_quotient ++;
+      adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
+    }
+    counter--;
+  }
   
     // when quotient > 0, I need to do compensation by adjusting current slot length
     if(temp_quotient > 0)
@@ -202,10 +210,10 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
       default:
         while(1);
       }
+#ifdef OPENMOTESTM
       for(uint8_t i=0;i<temp_quotient;i++)
         // tf: for debugging
         GPIOC->ODR ^= 0X1000;
-    }
-    // reload compensationTimeout
-    adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots - temp_reminder;    
+#endif
+    }  
 }
