@@ -18,7 +18,7 @@
 
 typedef struct {
   open_addr_t neighborID;
-  uint32_t     compensationSlots; // compensation interval, counted by slots 
+  uint16_t     compensationSlots; // compensation interval, counted by slots 
 }compensationInfo_t;
 
 typedef struct {
