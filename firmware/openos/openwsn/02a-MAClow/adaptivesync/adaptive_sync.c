@@ -319,9 +319,6 @@ void timers_adaptive_sync_fired()
    memcpy(&(pkt->l2_nextORpreviousHop),&(neighAddr),sizeof(open_addr_t));
    
    res_send(pkt);
-#ifdef TEOLSB
-   P6OUT ^=  0x01;
-#endif
 }
 
 void adaptive_sync_timer_cb()
