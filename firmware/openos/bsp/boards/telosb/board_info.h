@@ -16,6 +16,10 @@ to this board.
 
 //=========================== define ==========================================
 
+#define ADAPTIVE_SYNC
+#define COMPENSATE_ACCURACY  1
+#define TEOLSB
+
 // (pre-)processor scpecific commands
 
 #define port_INLINE                         inline
@@ -63,7 +67,7 @@ to this board.
 //===== IEEE802154E timing
 
 // time-slot related
-#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
 
 // execution speed related
 #define PORT_maxTxDataPrepare               100    //  2899us (measured 2420us)

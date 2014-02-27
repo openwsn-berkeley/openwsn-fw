@@ -16,6 +16,9 @@ to return the board's description.
 
 //=========================== defines =========================================
 
+#define ADAPTIVE_SYNC
+#define COMPENSATE_ACCURACY  1
+
 #define port_INLINE                         inline
 
 #define PRAGMA(x)  _Pragma(#x)
@@ -67,7 +70,7 @@ to return the board's description.
 //===== IEEE802154E timing
 
 // time-slot related
-#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
 // execution speed related
 #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
 #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)

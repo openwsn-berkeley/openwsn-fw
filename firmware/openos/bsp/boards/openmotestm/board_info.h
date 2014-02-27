@@ -20,6 +20,8 @@ to return the board's description.
 #define DEBUG_SLEEP_MODE
 //#define DEBUG_STOP_MODE
 
+#define OPENMOTESTM
+
 #define ADAPTIVE_SYNC
 
 /// this is used for compensation. because the hardware issue, openmotestm is set to 2, which means

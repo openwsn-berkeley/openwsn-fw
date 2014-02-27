@@ -175,11 +175,11 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timers_res_fired() {
-   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%10;
+   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%30;
    if (res_vars.MacMgtTaskCounter==0) {
       sendAdv(); // called every 10s
    } else {
-      sendKa();  // called every second, except once every 10s
+//      sendKa();  // called every second, except once every 10s
       //leds_debug_toggle();
    }
 }

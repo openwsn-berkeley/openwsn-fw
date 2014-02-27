@@ -21,8 +21,8 @@
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to succesfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define KATIMEOUT                   66 // in slots: @15ms per slot -> ~1 seconds
-#define DESYNCTIMEOUT              333 // in slots: @15ms per slot -> ~5 seconds
+#define KATIMEOUT                 2000 // in slots: @15ms per slot -> ~1 seconds
+#define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~5 seconds
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 
