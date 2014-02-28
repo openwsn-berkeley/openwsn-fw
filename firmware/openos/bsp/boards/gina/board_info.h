@@ -70,7 +70,9 @@ to return the board's description.
 //===== IEEE802154E timing
 
 // time-slot related
-#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+//#define PORT_TsSlotDuration                 492   // when gina mote need to communicate with OpenMoteSTM, use this value to acheive synchronization
+
 // execution speed related
 #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
 #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)

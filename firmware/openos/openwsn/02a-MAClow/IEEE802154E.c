@@ -15,7 +15,7 @@
 #include "res.h"
 
 #ifdef ADAPTIVE_SYNC
-  #include "adaptive_sync.h"
+# include "adaptive_sync.h"
 #endif
 
 //=========================== variables =======================================

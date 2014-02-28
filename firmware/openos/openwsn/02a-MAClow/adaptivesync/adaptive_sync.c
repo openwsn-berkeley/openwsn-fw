@@ -1,7 +1,7 @@
 /**
 \brief this file is used for the time synchronizatino between different hardware platform
 
-\auther Tengfei Chang <tengfei.chang@gmail.com>, Janauray ,2014.
+\auther Tengfei Chang <tengfei.chang@gmail.com>, January ,2014.
 */
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
@@ -62,11 +62,9 @@ void adaptive_sync_init(){
 /**
 \brief calculated how many slots have lapsed since last synchronized.
 
-\param[in] timesource The address of neighbor.
-
 \param[in] timeCorrection time to be corrected
-
 \param[in] syncMethod packet sync or ack sync
+\param[in] timesource The address of neighbor.
 
 \returns the number of slots
 */
@@ -84,12 +82,12 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, ope
       {
         adaptive_sync_calculateCompensatedSlots(timeCorrection, syncMethod);
         adaptive_sync_vars.timeCorrectionRecord = 0;
-        // re-start compensation
+        // re-start compensation 
         adaptive_sync_vars.timerPeriod = SCHEDULE_PERIOD;
         opentimers_setPeriod(adaptive_sync_vars.timerId,
                            TIME_MS,
                            adaptive_sync_vars.timerPeriod);
-        
+        opentimers_restart(adaptive_sync_vars.timerId);        
       }
       else
       {
@@ -100,7 +98,9 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, ope
     else
     {
       if(packetfunctions_sameAddress(&timesource, &(adaptive_sync_vars.compensationInfo_vars[0].neighborID)) == FALSE && ieee154e_isSynch() == TRUE)
+      {
         leds_debug_toggle();
+      }
       if(adaptive_sync_vars.timerStarted == FALSE)
       {
         // this is the first time for synchronizing to current neighbor, reset variables, 
@@ -122,6 +122,7 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, ope
         opentimers_setPeriod(adaptive_sync_vars.timerId,
                            TIME_MS,
                            adaptive_sync_vars.timerPeriod);
+        opentimers_restart(adaptive_sync_vars.timerId);
       }
     }
     // update oldASN variable by currect asn
@@ -135,7 +136,8 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, ope
 /**
 \brief calcluated the compensation interval, counted by number of slots.
 
-\para[in] address The address of neighbor.
+\param[in] timeCorrection time to be corrected
+\param[in] syncMethod syncrhonized using packet or ack.
 
 \returns compensationSlots the number of slots. 
 */
@@ -149,26 +151,34 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syn
       if(timeCorrection > 0)
       {
         if(adaptive_sync_vars.clockState == S_NONE)
+        {
           adaptive_sync_vars.clockState = S_FASTER;
+        }
       }
       else
       {
         TC = -timeCorrection;
         if(adaptive_sync_vars.clockState == S_NONE)
+        {
           adaptive_sync_vars.clockState = S_SLOWER;
+        }
       }
       break;
     case S_ACK_SYNC:
       if(timeCorrection > 0)
       {
         if(adaptive_sync_vars.clockState == S_NONE)
+        {
           adaptive_sync_vars.clockState = S_SLOWER;
+        }
       }
       else
       {
         TC = -timeCorrection;
         if(adaptive_sync_vars.clockState == S_NONE)
+        {
           adaptive_sync_vars.clockState = S_FASTER;
+        }
       }
       break;
     default:
@@ -178,12 +188,14 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syn
     adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
 }
 /**
-\brief minus compensationTimeout at each slot
+\brief counting compensationTimeout at each slot by minus one. Once compensationTimeout == 0, adjust currect slot length.
 */
 void adaptive_sync_countCompensationTimeout() {
-  // if clockState is not set yet, don't compensate.
-  if(adaptive_sync_vars.clockState == S_NONE) return;
-
+    // if clockState is not set yet, don't compensate.
+    if(adaptive_sync_vars.clockState == S_NONE) 
+    {
+      return;
+    }
     adaptive_sync_vars.compensationTimeout--;
     // when compensationTimeout, adjust current slot length
     if(adaptive_sync_vars.compensationTimeout == 0)
@@ -203,17 +215,15 @@ void adaptive_sync_countCompensationTimeout() {
       default:
         while(1);
       }
-#ifdef OPENMOTESTM
-      // tf: for debugging
-      GPIOC->ODR ^= 0X1000;
-#endif
 
       // reload compensationTimeout
       adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
     }
 }
 /**
-\brief minus compensationTimeout at each slot, when compundSlots are scheduled.(e.g. SERIALRX slots)
+\brief counting compensationTimeout at each slot by minus one, when compundSlots are scheduled.(e.g. SERIALRX slots)
+
+\param[in] compoundSlots how many slots will be elapsed before wakeup next time.
 */
 void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots)
 {
@@ -253,11 +263,6 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
       default:
         while(1);
       }
-#ifdef OPENMOTESTM
-      for(uint8_t i=0;i<temp_quotient;i++)
-        // tf: for debugging
-        GPIOC->ODR ^= 0X1000;
-#endif
     }  
 }
 
@@ -268,7 +273,6 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
 
 This function is called in task context by the scheduler after the adaptive_sync timer
 has fired. This timer is set to fire in one second after mote joined network.
-
 */
 void timers_adaptive_sync_fired()
 {
@@ -279,19 +283,21 @@ void timers_adaptive_sync_fired()
    {
      // re-schedule a long term packet to synchronization
      if(adaptive_sync_vars.timerPeriod * 2 < KATIMEOUT*15)
+     {
         adaptive_sync_vars.timerPeriod = adaptive_sync_vars.timerPeriod * 2;
-     else
-        adaptive_sync_vars.timerPeriod = KATIMEOUT*15;
-   }
-   // re-schedule one packet for sending
-   opentimers_setPeriod(adaptive_sync_vars.timerId,
+        // re-schedule one packet for sending
+        opentimers_setPeriod(adaptive_sync_vars.timerId,
                            TIME_MS,
                            adaptive_sync_vars.timerPeriod);
+     }
+     else
+     {
+       //stop the timer used for sending packet 
+       opentimers_stop(adaptive_sync_vars.timerId);
+     }
+   }
    
    memset(&neighAddr,0x00,sizeof(open_addr_t));
-   
-    // if clockState is already set, return.
-//   if(adaptive_sync_vars.clockState == S_NONE) return;
    
    if(neighbors_getPreferredParentEui64(&neighAddr)==FALSE)
    {
