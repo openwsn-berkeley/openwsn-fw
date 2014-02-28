@@ -11,6 +11,7 @@ sources_c = [
     os.path.join('02a-MAClow','topology.c'),
     os.path.join('02a-MAClow','IEEE802154.c'),
     os.path.join('02a-MAClow','IEEE802154E.c'),
+    os.path.join('02a-MAClow','adaptive_sync.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
     os.path.join('02b-MAChigh','res.c'),
@@ -67,6 +68,7 @@ sources_h = [
     os.path.join('02a-MAClow','topology.h'),
     os.path.join('02a-MAClow','IEEE802154.h'),
     os.path.join('02a-MAClow','IEEE802154E.h'),
+    os.path.join('02a-MAClow','adaptive_sync.h'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
     os.path.join('02b-MAChigh','res.h'),
