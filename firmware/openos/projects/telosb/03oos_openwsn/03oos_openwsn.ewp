@@ -337,7 +337,6 @@
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptivesync\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\</state>
@@ -2178,15 +2177,12 @@
     <name>openwsn</name>
     <group>
       <name>02a-MAClow</name>
-      <group>
-        <name>adaptive-sync</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptivesync\adaptive_sync.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptivesync\adaptive_sync.h</name>
-        </file>
-      </group>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptive_sync.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptive_sync.h</name>
+      </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
       </file>
