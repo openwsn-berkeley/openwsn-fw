@@ -3,6 +3,7 @@
 
 \auther Tengfei Chang <tengfei.chang@gmail.com>, January ,2014.
 */
+#ifdef ADAPTIVE_SYNC // add this, in case some board don't use the adaptive sync
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
 #include "radio.h"
@@ -331,3 +332,4 @@ void adaptive_sync_timer_cb()
 {
   scheduler_push_task(timers_adaptive_sync_fired,TASKPRIO_ADAPTIVE_SYNC);
 }
+#endif
