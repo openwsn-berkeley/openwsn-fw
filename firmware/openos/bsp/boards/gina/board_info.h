@@ -16,9 +16,6 @@ to return the board's description.
 
 //=========================== defines =========================================
 
-#define ADAPTIVE_SYNC
-#define COMPENSATE_ACCURACY  1
-
 #define port_INLINE                         inline
 
 #define PRAGMA(x)  _Pragma(#x)

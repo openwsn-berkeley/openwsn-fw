@@ -20,11 +20,6 @@ to return the board's description.
 #define DEBUG_SLEEP_MODE
 //#define DEBUG_STOP_MODE
 #define OPENMOTESTM
-#define ADAPTIVE_SYNC
-/// this is used for compensation. because the hardware issue, openmotestm is set to 2, which means
-/// when clock drift cased 2 ticks time offset (60us), adaptive sync will adjust current slot length
-/// by extending or reducing 2ticks. 
-#define COMPENSATE_ACCURACY  2
 
 #define port_INLINE                         inline
 

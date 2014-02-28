@@ -16,9 +16,6 @@ to this board.
 
 //=========================== define ==========================================
 
-#define ADAPTIVE_SYNC
-#define COMPENSATE_ACCURACY  1
-
 // (pre-)processor scpecific commands
 
 #define port_INLINE                         inline

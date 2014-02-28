@@ -13,10 +13,7 @@
 #include "neighbors.h"
 #include "debugpins.h"
 #include "res.h"
-
-#ifdef ADAPTIVE_SYNC
-# include "adaptive_sync.h"
-#endif
+#include "adaptive_sync.h"
 
 //=========================== variables =======================================
 
@@ -175,9 +172,7 @@ void isr_ieee154e_newSlot() {
       }
    } else {
      // adaptive synchronization
-      #ifdef ADAPTIVE_SYNC
-        adaptive_sync_countCompensationTimeout();
-      #endif
+      adaptive_sync_countCompensationTimeout();
       activity_ti1ORri1();
    }
    ieee154e_dbg.num_newSlot++;
@@ -904,10 +899,8 @@ port_INLINE void activity_ti1ORri1() {
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
          }
-         
-#ifdef ADAPTIVE_SYNC
+         // deal with the case when schedule multi slots
          adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
-#endif
          
          break;
       case CELLTYPE_MORESERIALRX:
@@ -1799,9 +1792,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    // update the stats
    ieee154e_stats.numSyncPkt++;
    updateStats(timeCorrection);
-#ifdef ADAPTIVE_SYNC
    adaptive_sync_recordLastASN(timeCorrection, S_PACKET_SYNC, ieee154e_vars.dataReceived->l2_nextORpreviousHop);
-#endif
 }
 
 void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
@@ -1830,10 +1821,8 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    // update the stats
    ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
-   
-#ifdef ADAPTIVE_SYNC
+   // update last asn when need sync.
    adaptive_sync_recordLastASN(timeCorrection, S_ACK_SYNC, ieee154e_vars.ackReceived->l2_nextORpreviousHop);
-#endif
 }
 
 void changeIsSync(bool newIsSync) {

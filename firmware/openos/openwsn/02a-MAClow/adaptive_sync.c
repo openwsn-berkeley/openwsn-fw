@@ -3,7 +3,6 @@
 
 \auther Tengfei Chang <tengfei.chang@gmail.com>, January ,2014.
 */
-#ifdef ADAPTIVE_SYNC // add this, in case some board don't use the adaptive sync
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
 #include "radio.h"
@@ -184,8 +183,9 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syn
       break;
     default:
       while(1); // should not reach here
-    }// calculate the compensation interval, uint: slots/x ticks. 2ticks is only the case of openmotestm platform, usually it should be one
-    adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = COMPENSATE_ACCURACY * adaptive_sync_vars.lapsedSlots / (TC + adaptive_sync_vars.compensateTicks + adaptive_sync_vars.timeCorrectionRecord);
+    }
+    // calculate the compensation interval, uint: slots/x ticks. 2ticks is only the case of openmotestm platform, usually it should be one
+    adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2 * adaptive_sync_vars.lapsedSlots / (TC + adaptive_sync_vars.compensateTicks + adaptive_sync_vars.timeCorrectionRecord);
     adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
 }
 /**
@@ -204,12 +204,12 @@ void adaptive_sync_countCompensationTimeout() {
       switch(adaptive_sync_vars.clockState)
       {
       case S_SLOWER:
-        radio_setTimerPeriod(TsSlotDuration - COMPENSATE_ACCURACY);
-        adaptive_sync_vars.compensateTicks += COMPENSATE_ACCURACY;
+        radio_setTimerPeriod(TsSlotDuration - 2);
+        adaptive_sync_vars.compensateTicks += 2;
         break;
       case S_FASTER:
-        radio_setTimerPeriod(TsSlotDuration + COMPENSATE_ACCURACY);
-        adaptive_sync_vars.compensateTicks += COMPENSATE_ACCURACY;
+        radio_setTimerPeriod(TsSlotDuration + 2);
+        adaptive_sync_vars.compensateTicks += 2;
         break;
       case S_NONE:
         while(1);
@@ -252,12 +252,12 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
       switch(adaptive_sync_vars.clockState)
       {
       case S_SLOWER:
-        radio_setTimerPeriod(TsSlotDuration*(compoundSlots + 1) - temp_quotient * COMPENSATE_ACCURACY);
-        adaptive_sync_vars.compensateTicks += temp_quotient * COMPENSATE_ACCURACY;
+        radio_setTimerPeriod(TsSlotDuration*(compoundSlots + 1) - temp_quotient * 2);
+        adaptive_sync_vars.compensateTicks += temp_quotient * 2;
         break;
       case S_FASTER:
-        radio_setTimerPeriod(TsSlotDuration*(compoundSlots + 1) + temp_quotient * COMPENSATE_ACCURACY);
-        adaptive_sync_vars.compensateTicks += temp_quotient * COMPENSATE_ACCURACY;
+        radio_setTimerPeriod(TsSlotDuration*(compoundSlots + 1) + temp_quotient * 2);
+        adaptive_sync_vars.compensateTicks += temp_quotient * 2;
         break;
       case S_NONE:
         while(1);
@@ -332,4 +332,3 @@ void adaptive_sync_timer_cb()
 {
   scheduler_push_task(timers_adaptive_sync_fired,TASKPRIO_ADAPTIVE_SYNC);
 }
-#endif
