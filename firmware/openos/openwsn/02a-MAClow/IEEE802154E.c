@@ -1792,7 +1792,13 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    // update the stats
    ieee154e_stats.numSyncPkt++;
    updateStats(timeCorrection);
+
    adaptive_sync_recordLastASN(timeCorrection, S_PACKET_SYNC, ieee154e_vars.dataReceived->l2_nextORpreviousHop);
+
+#ifdef OPENSIM
+   debugpins_syncPacket_set();
+   debugpins_syncPacket_clr();
+#endif
 }
 
 void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
@@ -1821,8 +1827,14 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    // update the stats
    ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
+
    // update last asn when need sync.
    adaptive_sync_recordLastASN(timeCorrection, S_ACK_SYNC, ieee154e_vars.ackReceived->l2_nextORpreviousHop);
+   
+#ifdef OPENSIM
+   debugpins_syncAck_set();
+   debugpins_syncAck_clr();
+#endif
 }
 
 void changeIsSync(bool newIsSync) {

@@ -402,6 +402,13 @@ port_INLINE void sendKa() {
    OpenQueueEntry_t* kaPkt;
    open_addr_t*      kaNeighAddr;
    
+/*
+#ifdef OPENSIM
+   debugpins_debug_set();
+   debugpins_debug_clr();
+#endif
+*/
+   
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed
       
@@ -450,6 +457,11 @@ port_INLINE void sendKa() {
    
    // I'm now busy sending a KA
    res_vars.busySendingKa = TRUE;
+
+#ifdef OPENSIM
+   debugpins_ka_set();
+   debugpins_ka_clr();
+#endif
 }
 
 void res_timer_cb() {

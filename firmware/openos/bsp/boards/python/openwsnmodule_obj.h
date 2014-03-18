@@ -62,6 +62,14 @@ enum {
    MOTE_NOTIF_debugpins_radio_toggle,
    MOTE_NOTIF_debugpins_radio_clr,
    MOTE_NOTIF_debugpins_radio_set,
+   MOTE_NOTIF_debugpins_ka_clr,
+   MOTE_NOTIF_debugpins_ka_set,
+   MOTE_NOTIF_debugpins_syncPacket_clr,
+   MOTE_NOTIF_debugpins_syncPacket_set,
+   MOTE_NOTIF_debugpins_syncAck_clr,
+   MOTE_NOTIF_debugpins_syncAck_set,
+   MOTE_NOTIF_debugpins_debug_clr,
+   MOTE_NOTIF_debugpins_debug_set,
    // eui64
    MOTE_NOTIF_eui64_get,
    // leds
