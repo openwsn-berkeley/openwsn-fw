@@ -46,6 +46,20 @@ void debugpins_radio_toggle();
 void debugpins_radio_clr();
 void debugpins_radio_set();
 
+#ifdef OPENSIM
+void debugpins_ka_clr();
+void debugpins_ka_set();
+
+void debugpins_syncPacket_clr();
+void debugpins_syncPacket_set();
+
+void debugpins_syncAck_clr();
+void debugpins_syncAck_set();
+
+void debugpins_debug_clr();
+void debugpins_debug_set();
+#endif
+
 /**
 \}
 \}

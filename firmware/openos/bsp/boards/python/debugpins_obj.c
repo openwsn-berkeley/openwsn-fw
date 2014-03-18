@@ -381,3 +381,159 @@ void debugpins_radio_set(OpenMote* self) {
    printf("C@0x%x: ...done.\n",self);
 #endif
 }
+
+void debugpins_ka_clr(OpenMote* self) {
+   PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: debugpins_ka_clr()... \n",self);
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_debugpins_ka_clr],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] debugpins_ka_clr() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
+void debugpins_ka_set(OpenMote* self) {
+   PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: debugpins_ka_set()... \n",self);
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_debugpins_ka_set],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] debugpins_ka_set() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
+
+void debugpins_syncPacket_clr(OpenMote* self) {
+   PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: debugpins_syncPacket_clr()... \n",self);
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_debugpins_syncPacket_clr],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] debugpins_syncPacket_clr() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
+void debugpins_syncPacket_set(OpenMote* self) {
+   PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: debugpins_syncPacket_set()... \n",self);
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_debugpins_syncPacket_set],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] debugpins_syncPacket_set() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
+
+void debugpins_syncAck_clr(OpenMote* self) {
+   PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: debugpins_syncAck_clr()... \n",self);
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_debugpins_syncAck_clr],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] debugpins_syncAck_clr() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
+void debugpins_syncAck_set(OpenMote* self) {
+   PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: debugpins_syncAck_set()... \n",self);
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_debugpins_syncAck_set],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] debugpins_syncAck_set() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
+
+void debugpins_debug_clr(OpenMote* self) {
+   PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: debugpins_debug_clr()... \n",self);
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_debugpins_debug_clr],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] debugpins_debug_clr() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
+void debugpins_debug_set(OpenMote* self) {
+   PyObject*   result;
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: debugpins_debug_set()... \n",self);
+#endif
+   
+   // forward to Python
+   result     = PyObject_CallObject(self->callback[MOTE_NOTIF_debugpins_debug_set],NULL);
+   if (result == NULL) {
+      printf("[CRITICAL] debugpins_debug_set() returned NULL\r\n");
+      return;
+   }
+   Py_DECREF(result);
+   
+#ifdef TRACE_ON
+   printf("C@0x%x: ...done.\n",self);
+#endif
+}
