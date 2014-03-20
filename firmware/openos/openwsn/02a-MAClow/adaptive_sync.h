@@ -3,6 +3,7 @@
 
 #include "board_info.h"
 #include "openwsn.h"
+#include "opentimers.h"
 /**
 \addtogroup MAClow
 \{
@@ -28,6 +29,25 @@ typedef enum {
 }adaptive_sync_methods_t;
 
 //=========================== typedef =========================================
+
+typedef struct {
+  open_addr_t neighborID;
+  uint16_t     compensationSlots; // compensation interval, counted by slots 
+}compensationInfo_t;
+
+typedef struct {
+  adaptive_sync_state_t clockState;
+  PORT_RADIOTIMER_WIDTH lapsedSlots;         // since last synchronizatino, this number of slots have  lapsed.
+  uint16_t              compensationTimeout; // decrease one every slot, when it reach zero, adjust currectly slot length by 2 tick(60us). 
+  uint16_t              compensateTicks;     // record how many ticks  are compensated 
+  uint16_t              timeCorrectionRecord;// record the sum of historical timeCorrection
+  asn_t                 oldASN;              // the asn when synchronized previous time
+  compensationInfo_t    compensationInfo_vars[1]; //keep each time soures' compensation informatio( should be 9, since there would be more timesources)
+  bool                  timerStarted;
+  opentimer_id_t        timerId; 
+  uint16_t              timerPeriod;
+  uint8_t               taskCounter;
+}adaptive_sync_t;
 
 //=========================== variables =======================================
 
