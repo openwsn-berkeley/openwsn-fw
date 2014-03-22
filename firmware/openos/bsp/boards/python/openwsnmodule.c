@@ -62,7 +62,6 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* res_vars;
    PyObject* schedule_vars;
    PyObject* schedule_dbg;
-   PyObject* adaptive_sync_vars;
    PyObject* ieee154e_vars;
    PyObject* ieee154e_stats;
    PyObject* ieee154e_dbg;
@@ -141,11 +140,6 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    schedule_dbg = PyDict_New();
    // TODO
    PyDict_SetItemString(returnVal, "schedule_dbg", schedule_dbg);
-   
-   // adaptive_sync_vars
-   adaptive_sync_vars = PyDict_New();
-   // TODO
-   PyDict_SetItemString(returnVal, "adaptive_sync_vars",adaptive_sync_vars);
    
    // ieee154e_vars
    ieee154e_vars = PyDict_New();
