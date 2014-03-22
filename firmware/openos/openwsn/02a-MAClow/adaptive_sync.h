@@ -12,21 +12,21 @@
 
 \brief adaptive sync module
 
-\author Tengfei Chang <tengfei.chang@eecs.berkeley.edu>, Janaury 2014.
+\author Tengfei Chang <tengfei.chang@eecs.berkeley.edu>, January 2014.
 */
 
 //=========================== define ==========================================
 
 typedef enum {
-  S_NONE   = 0x00,
-  S_FASTER = 0x01,
-  S_SLOWER = 0x02,
-}adaptive_sync_state_t;
+   S_NONE          = 0x00,
+   S_FASTER        = 0x01,
+   S_SLOWER        = 0x02,
+} adaptive_sync_state_t;
 
 typedef enum {
-  S_PACKET_SYNC = 0x00,
-  S_ACK_SYNC    = 0x01,
-}adaptive_sync_methods_t;
+   S_PACKET_SYNC   = 0x00,
+   S_ACK_SYNC      = 0x01,
+} adaptive_sync_methods_t;
 
 //=========================== typedef =========================================
 
