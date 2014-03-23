@@ -49,14 +49,14 @@
 //#include "udplatency.h"
 //#include "udpstorm.h"
 //-- CoAP
-#include "rleds.h"
-//#include "rt.h"
+#include "r6tus.h"
 //#include "rex.h"
 //#include "rheli.h"
+//#include "rleds.h"
 //#include "rrube.h"
+//#include "rt.h"
 //#include "rxl1.h"
 //#include "layerdebug.h"
-#include "r6tus.h"
 //-- misc
 //#include "heli.h"
 //#include "imu.h"
@@ -118,14 +118,14 @@ void openwsn_init() {
    //udplatency_init();
    //udpstorm_init();
    //-- CoAP
-   //rleds_init();
-   //rt_init();
+   r6tus_init();
    //rex_init();
    //rheli_init();
+   //rleds_init();
    //rrube_init();
+   //rt_init();
    //rxl1_init();
    //layerdebug_init();
-   r6tus_init();
    //-- misc
    //heli_init();
    //imu_init();

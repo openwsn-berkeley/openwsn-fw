@@ -80,24 +80,22 @@ typedef enum {
 } coap_code_t;
 
 typedef enum {
-   COAP_OPTION_NONE                            = 0,
-   COAP_OPTION_NUM_IFMATCH                     = 1,
-   COAP_OPTION_NUM_URIHOST                     = 3,
-   COAP_OPTION_NUM_ETAG                        = 4,
-   COAP_OPTION_NUM_IFNONEMATCH                 = 5,
-   COAP_OPTION_NUM_URIPORT                     = 7,
-   COAP_OPTION_NUM_LOCATIONPATH                = 8,
-   COAP_OPTION_NUM_URIPATH                     = 11,
-   COAP_OPTION_NUM_CONTENTFORMAT               = 12,
-   COAP_OPTION_NUM_MAXAGE                      = 14,
-   COAP_OPTION_NUM_URIQUERY                    = 15,
-   COAP_OPTION_NUM_ACCEPT                      = 16,
-   COAP_OPTION_NUM_LOCATIONQUERY               = 20,
-   COAP_OPTION_NUM_PROXYURI                    = 35,
-   COAP_OPTION_NUM_PROXYSCHEME                 = 39,
+   COAP_OPTION_NONE                    = 0,
+   COAP_OPTION_NUM_IFMATCH             = 1,
+   COAP_OPTION_NUM_URIHOST             = 3,
+   COAP_OPTION_NUM_ETAG                = 4,
+   COAP_OPTION_NUM_IFNONEMATCH         = 5,
+   COAP_OPTION_NUM_URIPORT             = 7,
+   COAP_OPTION_NUM_LOCATIONPATH        = 8,
+   COAP_OPTION_NUM_URIPATH             = 11,
+   COAP_OPTION_NUM_CONTENTFORMAT       = 12,
+   COAP_OPTION_NUM_MAXAGE              = 14,
+   COAP_OPTION_NUM_URIQUERY            = 15,
+   COAP_OPTION_NUM_ACCEPT              = 16,
+   COAP_OPTION_NUM_LOCATIONQUERY       = 20,
+   COAP_OPTION_NUM_PROXYURI            = 35,
+   COAP_OPTION_NUM_PROXYSCHEME         = 39,
 } coap_option_t;
-
-
 
 typedef enum {
    COAP_MEDTYPE_TEXTPLAIN              =  0,
@@ -153,24 +151,25 @@ typedef struct {
    bool                  busySending;
    uint8_t               delayCounter;
    uint16_t              messageID;
-   opentimer_id_t        timerId;
 } opencoap_vars_t;
 
 //=========================== prototypes ======================================
 
 // from stack
-void     opencoap_init();
-void     opencoap_receive(OpenQueueEntry_t* msg);
-void     opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+void          opencoap_init();
+void          opencoap_receive(OpenQueueEntry_t* msg);
+void          opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 
 // from CoAP resources
-void     opencoap_writeLinks(OpenQueueEntry_t* msg);
-void     opencoap_register(coap_resource_desc_t* desc);
-owerror_t  opencoap_send(OpenQueueEntry_t*     msg,
-                       coap_type_t           type,
-                       coap_code_t           code,
-                       uint8_t               numOptions,
-                       coap_resource_desc_t* descSender);
+void          opencoap_writeLinks(OpenQueueEntry_t* msg);
+void          opencoap_register(coap_resource_desc_t* desc);
+owerror_t     opencoap_send(
+    OpenQueueEntry_t*     msg,
+    coap_type_t           type,
+    coap_code_t           code,
+    uint8_t               numOptions,
+    coap_resource_desc_t* descSender
+);
 
 /**
 \}
