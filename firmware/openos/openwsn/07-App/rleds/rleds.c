@@ -25,7 +25,7 @@ void    rleds_sendDone(OpenQueueEntry_t* msg,
 
 //=========================== public ==========================================
 
-void rleds_init() {
+void rleds__init() {
    // prepare the resource descriptor for the /.well-known/core path
    rleds_vars.desc.path0len            = sizeof(rleds_path0)-1;
    rleds_vars.desc.path0val            = (uint8_t*)(&rleds_path0);
