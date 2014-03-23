@@ -14,6 +14,10 @@
 
 //=========================== variables =======================================
 
+typedef struct {
+   coap_resource_desc_t desc;
+} rleds_vars_t;
+
 //=========================== prototypes ======================================
 
 void rleds__init();

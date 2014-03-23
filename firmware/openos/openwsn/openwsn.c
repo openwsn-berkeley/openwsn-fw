@@ -108,7 +108,7 @@ void openwsn_init() {
    //-- 04-TRAN
    opentcp_init();
    openudp_init();
-   opencoap_init();    // initialize before any of the CoAP applications
+   opencoap_init();     // initialize before any of the CoAP applications
    
    //===== applications
    //+++++ TCP
@@ -134,7 +134,7 @@ void openwsn_init() {
    //- debug
    //- common
    rinfo_init();
-   //rleds_init();
+   rleds__init();
    r6tus_init();
    rwellknown_init();
    //rreg_init();

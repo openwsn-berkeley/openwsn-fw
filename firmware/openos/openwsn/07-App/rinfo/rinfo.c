@@ -18,10 +18,6 @@ const uint8_t rinfo_path0[] = "i";
 
 //=========================== variables =======================================
 
-typedef struct {
-   coap_resource_desc_t desc;
-} rinfo_vars_t;
-
 rinfo_vars_t rinfo_vars;
 
 //=========================== prototypes ======================================

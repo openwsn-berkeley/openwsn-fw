@@ -29,6 +29,8 @@
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
 #include "uart_obj.h"
+#include "rinfo.h"
+#include "rleds.h"
 
 // notifications sent from the C mote to the Python BSP
 enum {
@@ -175,11 +177,7 @@ struct OpenMote {
    bsp_timer_icb_t      bsp_timer_icb;
    radio_icb_t          radio_icb;
    radiotimer_icb_t     radiotimer_icb;
-   //===== state
-   // l7
-   ohlone_vars_t        ohlone_vars;
-   r6tus_vars_t         r6tus_vars;
-   tcpinject_vars_t     tcpinject_vars;
+   //===== stack
    // l4
    icmpv6echo_vars_t    icmpv6echo_vars;
    icmpv6rpl_vars_t     icmpv6rpl_vars;
@@ -205,6 +203,21 @@ struct OpenMote {
    // kernel
    scheduler_vars_t     scheduler_vars;
    scheduler_dbg_t      scheduler_dbg;
+   //===== applications
+   //+++++ TCP
+   //- debug
+   tcpinject_vars_t     tcpinject_vars;
+   //- common
+   ohlone_vars_t        ohlone_vars;
+   //+++++ UDP
+   //- debug
+   //- common
+   //+++++ CoAP
+   //- debug
+   //- common
+   rinfo_vars_t         rinfo_vars;
+   rleds_vars_t         rleds_vars;
+   r6tus_vars_t         r6tus_vars;
 };
 
 #endif
