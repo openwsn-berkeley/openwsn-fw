@@ -1,5 +1,5 @@
 /**
-\brief A CoAP application which registers the CoAP resources with a CoAP
+\brief A CoAP resource which registers the CoAP resources with a CoAP
    resource directory.
 */
 

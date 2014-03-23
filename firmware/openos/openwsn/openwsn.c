@@ -121,6 +121,7 @@ void openwsn_init() {
    r6tus_init();
    //rex_init();
    //rheli_init();
+   rinfo_init();
    //rleds_init();
    //rrube_init();
    //rt_init();

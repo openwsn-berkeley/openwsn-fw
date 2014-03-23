@@ -4,7 +4,7 @@
 /**
 \addtogroup AppCoAP
 \{
-\addtogroup rXL1
+\addtogroup rinfo
 \{
 */
 
