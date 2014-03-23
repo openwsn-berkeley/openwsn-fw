@@ -32,6 +32,11 @@ static const uint8_t ipAddr_motedata[]  = {0x20, 0x01, 0x04, 0x70, 0x00, 0x66, 0
 /// the maximum number of options in a RX'ed CoAP message
 #define MAX_COAP_OPTIONS               10 //3 before but we want gets with more options
 
+// This value may be reduced as a memory optimization, but would invalidate spec compliance
+#define COAP_MAX_TKL                   8
+
+#define COAP_PAYLOAD_MARKER            0xFF
+
 #define COAP_VERSION                   1
 
 typedef enum {
@@ -111,7 +116,7 @@ typedef struct {
    uint8_t       TKL;
    coap_code_t   Code;
    uint16_t      messageID;
-   uint8_t       token; //this might be an array of 8 as tkl can be 8
+   uint8_t       token[COAP_MAX_TKL];
 } coap_header_iht;
 
 typedef struct {

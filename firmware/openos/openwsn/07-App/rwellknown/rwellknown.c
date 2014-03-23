@@ -56,8 +56,11 @@ owerror_t rwellknown_receive(OpenQueueEntry_t* msg,
       msg->payload                     = &(msg->packet[127]);
       msg->length                      = 0;
       
-      // add link descriptors to the packet
+      // add link descriptors to the packet, and payload boundary
       opencoap_writeLinks(msg);
+      
+      packetfunctions_reserveHeaderSize(msg,1);
+      msg->payload[0] = COAP_PAYLOAD_MARKER;
          
       // add return option
       packetfunctions_reserveHeaderSize(msg,2);

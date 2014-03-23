@@ -90,10 +90,11 @@ owerror_t rt_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // CoAP payload (2 bytes of temperature data)
-      packetfunctions_reserveHeaderSize(msg,2);
+      packetfunctions_reserveHeaderSize(msg,3);
       sensitive_accel_temperature_get_measurement(&rawdata[0]);
-      msg->payload[0] = rawdata[8];
-      msg->payload[1] = rawdata[9];
+      msg->payload[0] = COAP_PAYLOAD_MARKER;
+      msg->payload[1] = rawdata[8];
+      msg->payload[2] = rawdata[9];
          
       // set the CoAP header
        coap_header->Code                = COAP_CODE_RESP_CONTENT;

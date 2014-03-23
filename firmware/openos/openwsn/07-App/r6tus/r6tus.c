@@ -123,8 +123,9 @@ owerror_t r6tus_receive(OpenQueueEntry_t* msg,
       // It returns the same payload  but with the correct values.
       if (outcome==E_SUCCESS) {
          // write the payload in the response.
-         packetfunctions_reserveHeaderSize(msg,sizeof(slotinfo_element_t));
-         memcpy(&msg->payload[0],&getLink_elementResponse,sizeof(slotinfo_element_t));
+         packetfunctions_reserveHeaderSize(msg,1+sizeof(slotinfo_element_t));
+         msg->payload[0] = COAP_PAYLOAD_MARKER;
+         memcpy(&msg->payload[1],&getLink_elementResponse,sizeof(slotinfo_element_t));
       }
    } else if (coap_header->Code==COAP_CODE_REQ_PUT) {     
       link_command = (r6tus_command_t*) msg->payload; 

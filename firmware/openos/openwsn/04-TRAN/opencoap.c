@@ -64,20 +64,18 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    coap_header.messageID     = msg->payload[index]*256+msg->payload[index+1];
    index+=2;
    
-   //poipoi xv. TKL tells us the length of the token. If we want to support tokens longer
-   //than one token needs to be converted to an array and memcopy here for the length of TKL
-   coap_header.token         = (msg->payload[index]);
-   index+=coap_header.TKL;
-   
-   
    // reject unsupported header
-   if (coap_header.Ver!=COAP_VERSION || coap_header.TKL>8) {
+   if (coap_header.Ver!=COAP_VERSION || coap_header.TKL>COAP_MAX_TKL) {
       openserial_printError(COMPONENT_OPENCOAP,ERR_WRONG_TRAN_PROTOCOL,
                             (errorparameter_t)0,
                             (errorparameter_t)coap_header.Ver);
       openqueue_freePacketBuffer(msg);
       return;
+   } else {
+       memcpy(&coap_header.token[0], &msg->payload[index], coap_header.TKL);
+       index+=coap_header.TKL;
    }
+   
    // initialize the coap_options
    for (i=0;i<MAX_COAP_OPTIONS;i++) {
       coap_options[i].type = COAP_OPTION_NONE;
@@ -85,7 +83,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    // fill in the coap_options
    last_option = COAP_OPTION_NONE;
    for (i=0;i<MAX_COAP_OPTIONS;i++) {
-     if (msg->payload[index]==0xFF){
+     if (msg->payload[index]==COAP_PAYLOAD_MARKER){
        //found the payload spacer, options are already parsed.
        index++; //skip it and break.
        break;
@@ -220,14 +218,14 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    
    
    // fill in CoAP header
-   packetfunctions_reserveHeaderSize(msg,5);
+   packetfunctions_reserveHeaderSize(msg,4+coap_header.TKL);
    msg->payload[0]                  = (COAP_VERSION   << 6) |
                                       (COAP_TYPE_ACK  << 4) |
                                       (coap_header.TKL << 0);
    msg->payload[1]                  = coap_header.Code;
    msg->payload[2]                  = coap_header.messageID/256;
    msg->payload[3]                  = coap_header.messageID%256;
-   msg->payload[4]                  = coap_header.token; //this will be a memcopy for TKL size
+   memcpy(&msg->payload[4], &coap_header.token[0], coap_header.TKL);
    
    if ((openudp_send(msg))==E_FAIL) {
       openqueue_freePacketBuffer(msg);

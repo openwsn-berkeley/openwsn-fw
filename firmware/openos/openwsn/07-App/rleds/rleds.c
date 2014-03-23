@@ -25,7 +25,7 @@ void    rleds_sendDone(OpenQueueEntry_t* msg,
 
 //=========================== public ==========================================
 
-void rleds__init() {
+void rleds_init() {
    // prepare the resource descriptor for the /.well-known/core path
    rleds_vars.desc.path0len            = sizeof(rleds_path0)-1;
    rleds_vars.desc.path0val            = (uint8_t*)(&rleds_path0);
@@ -51,11 +51,13 @@ owerror_t rleds_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // add CoAP payload
-      packetfunctions_reserveHeaderSize(msg,1);
+      packetfunctions_reserveHeaderSize(msg,2);
+      msg->payload[0] = COAP_PAYLOAD_MARKER;
+
       if (leds_error_isOn()==1) {
-         msg->payload[0]               = '1';
+         msg->payload[1]               = '1';
       } else {
-         msg->payload[0]               = '0';
+         msg->payload[1]               = '0';
       }
          
       // set the CoAP header
