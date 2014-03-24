@@ -31,10 +31,6 @@
 #include "opentcp.h"
 #include "openudp.h"
 #include "opencoap.h"
-//-- app (common)
-#include "rreg.h"
-#include "rwellknown.h"
-#include "rinfo.h"
 //===== applications
 //+++++ TCP
 //- debug
@@ -75,8 +71,6 @@
 
 //=========================== prototypes ======================================
 
-void openwsn_init();
-
 //=========================== public ==========================================
 
 //=========================== private =========================================
@@ -84,6 +78,8 @@ void openwsn_init();
 void openwsn_init() {
    //===== drivers
    openserial_init();
+   //heli_init();
+   //imu_init();
    
    //===== stack
    //-- cross-layer
@@ -145,8 +141,6 @@ void openwsn_init() {
    //rheli_init();
    //rt_init();
    //rxl1_init();
-   //heli_init();
-   //imu_init();
    
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,

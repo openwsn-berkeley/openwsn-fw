@@ -17,8 +17,8 @@
 //=========================== prototypes ======================================
 
 void udpprint_init();
-void udpprint_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void udpprint_receive(OpenQueueEntry_t* msg);
+void udpprint_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 bool udpprint_debugPrint();
 
 /**
