@@ -5,7 +5,7 @@
 */
 
 #include "openwsn.h"
-#include "r6tus.h"
+#include "r6t.h"
 #include "opentimers.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
@@ -16,39 +16,39 @@
 
 //=========================== defines =========================================
 
-const uint8_t r6tus_path0[] = "6t";
+const uint8_t r6t_path0[] = "6t";
 
 //=========================== variables =======================================
 
-r6tus_vars_t r6tus_vars;
+r6t_vars_t r6t_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t r6tus_receive(
+owerror_t r6t_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
    coap_option_iht*  coap_options
 );
-void    r6tus_sendDone(
+void    r6t_sendDone(
    OpenQueueEntry_t* msg,
    owerror_t error
 );
 
 //=========================== public ==========================================
 
-void r6tus_init() {
+void r6t_init() {
    if(idmanager_getIsDAGroot()==TRUE) return; 
    
    // prepare the resource descriptor for the /6t path
-   r6tus_vars.desc.path0len            = sizeof(r6tus_path0)-1;
-   r6tus_vars.desc.path0val            = (uint8_t*)(&r6tus_path0);
-   r6tus_vars.desc.path1len            = 0;
-   r6tus_vars.desc.path1val            = NULL;
-   r6tus_vars.desc.componentID         = COMPONENT_R6TUS;
-   r6tus_vars.desc.callbackRx          = &r6tus_receive;
-   r6tus_vars.desc.callbackSendDone    = &r6tus_sendDone;
+   r6t_vars.desc.path0len            = sizeof(r6t_path0)-1;
+   r6t_vars.desc.path0val            = (uint8_t*)(&r6t_path0);
+   r6t_vars.desc.path1len            = 0;
+   r6t_vars.desc.path1val            = NULL;
+   r6t_vars.desc.componentID         = COMPONENT_R6T;
+   r6t_vars.desc.callbackRx          = &r6t_receive;
+   r6t_vars.desc.callbackSendDone    = &r6t_sendDone;
    
-   opencoap_register(&r6tus_vars.desc);
+   opencoap_register(&r6t_vars.desc);
 }
 
 //=========================== private =========================================
@@ -71,7 +71,7 @@ information.
 
 \return Whether the response is prepared successfully.
 */
-owerror_t r6tus_receive(
+owerror_t r6t_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht*  coap_header,
       coap_option_iht*  coap_options
@@ -79,19 +79,19 @@ owerror_t r6tus_receive(
    
    uint8_t              i;
    owerror_t            outcome;
-   r6tus_command_t*     link_command;
-   r6tus_command_t      getResponse;
+   r6t_command_t*     link_command;
+   r6t_command_t      getResponse;
    slotinfo_element_t*  link_element;
    slotinfo_element_t   getLink_elementResponse;
    open_addr_t          temp_addr;
-   owerror_t            responses[R6TUS_MAXRESPONSES];
+   owerror_t            responses[R6T_MAXRESPONSES];
    
    switch (coap_header->Code) {
       case COAP_CODE_REQ_GET:
          
          outcome = E_SUCCESS;
          // parsing the options from header
-         // assuming the following header: /6tus/LinkComandType/targetSlot/targetAddress
+         // assuming the following header: /6t/LinkComandType/targetSlot/targetAddress
          
          getResponse.type=(link_command_t)coap_options[1].pValue[0];
          
@@ -136,7 +136,7 @@ owerror_t r6tus_receive(
       
       case COAP_CODE_REQ_PUT:
          
-         link_command = (r6tus_command_t*) msg->payload; 
+         link_command = (r6t_command_t*) msg->payload; 
          
          //so parameters should be encoded in the URI
          switch (link_command->type){
@@ -147,9 +147,9 @@ owerror_t r6tus_receive(
             case UPDATE_LINK:
                // update should be POST according to REST architecture.
                outcome=E_FAIL; 
-               if (link_command->numelem<R6TUS_MAXRESPONSES) {
+               if (link_command->numelem<R6T_MAXRESPONSES) {
                   for (i=0;i<link_command->numelem;i++) {
-                     link_element=(slotinfo_element_t*) &(msg->payload[sizeof(r6tus_command_t)+i*sizeof(slotinfo_element_t)]);
+                     link_element=(slotinfo_element_t*) &(msg->payload[sizeof(r6t_command_t)+i*sizeof(slotinfo_element_t)]);
                      temp_addr.type=ADDR_64B;
                      memcpy(&(temp_addr.addr_64b[0]), &(link_element->address[0]),LENGTH_ADDR64b);
                      responses[i]=schedule_addActiveSlot(link_element->slotOffset,link_element->link_type,link_element->shared,link_element->channelOffset,&temp_addr,(link_command->type==UPDATE_LINK));
@@ -162,7 +162,7 @@ owerror_t r6tus_receive(
                outcome=E_FAIL; 
                break;
             default:
-               openserial_printError(COMPONENT_R6TUS,ERR_COMMAND_NOT_ALLOWED,
+               openserial_printError(COMPONENT_R6T,ERR_COMMAND_NOT_ALLOWED,
                   (errorparameter_t)0,
                   (errorparameter_t)0
                );
@@ -184,13 +184,13 @@ owerror_t r6tus_receive(
          break;
       case COAP_CODE_REQ_DELETE:
          
-         link_command = (r6tus_command_t*) msg->payload; 
+         link_command = (r6t_command_t*) msg->payload; 
          switch (link_command->type){
             case DELETE_LINK:
                outcome=E_FAIL; 
-               if (link_command->numelem<R6TUS_MAXRESPONSES){    
+               if (link_command->numelem<R6T_MAXRESPONSES){    
                   for(i=0;i<link_command->numelem;i++) {
-                     link_element=(slotinfo_element_t*) &(msg->payload[sizeof(r6tus_command_t)+i*sizeof(slotinfo_element_t)]);
+                     link_element=(slotinfo_element_t*) &(msg->payload[sizeof(r6t_command_t)+i*sizeof(slotinfo_element_t)]);
                      temp_addr.type=ADDR_64B;
                      memcpy(&(temp_addr.addr_64b[0]), &(link_element->address[0]),LENGTH_ADDR64b);
                      //remove the required links.
@@ -201,7 +201,7 @@ owerror_t r6tus_receive(
                break;
             default:
                openserial_printError(
-                  COMPONENT_R6TUS,ERR_COMMAND_NOT_ALLOWED,
+                  COMPONENT_R6T,ERR_COMMAND_NOT_ALLOWED,
                   (errorparameter_t)0,
                   (errorparameter_t)0
                );
@@ -217,6 +217,6 @@ owerror_t r6tus_receive(
    return outcome;
 }
 
-void r6tus_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+void r6t_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

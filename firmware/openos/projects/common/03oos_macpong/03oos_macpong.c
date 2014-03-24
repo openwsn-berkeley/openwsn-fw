@@ -143,6 +143,6 @@ void udpprint_init()         { return; }
 
 void udprand_init()          { return; }
 
-void r6tus_init()            { return; }
+void r6t_init()              { return; }
 void rinfo_init()            { return; }
 void rwellknown_init()       { return; }

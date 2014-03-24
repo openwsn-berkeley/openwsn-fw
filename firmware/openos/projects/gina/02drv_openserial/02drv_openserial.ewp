@@ -345,7 +345,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>

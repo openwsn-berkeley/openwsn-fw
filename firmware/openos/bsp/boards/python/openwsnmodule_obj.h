@@ -23,7 +23,7 @@
 #include "opencoap_obj.h"
 #include "opentcp_obj.h"
 #include "ohlone_obj.h"
-#include "r6tus_obj.h"
+#include "r6t_obj.h"
 #include "tcpinject_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
@@ -219,7 +219,7 @@ struct OpenMote {
    rinfo_vars_t         rinfo_vars;
    rleds_vars_t         rleds_vars;
    rwellknown_vars_t    rwellknown_vars;
-   r6tus_vars_t         r6tus_vars;
+   r6t_vars_t           r6t_vars;
 };
 
 #endif

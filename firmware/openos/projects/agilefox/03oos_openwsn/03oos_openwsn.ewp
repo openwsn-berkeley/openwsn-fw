@@ -338,7 +338,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\cross-layers\</state>
         </option>
         <option>
@@ -2285,12 +2285,12 @@
         </file>
       </group>
       <group>
-        <name>r6tus</name>
+        <name>r6t</name>
         <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\r6tus.c</name>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\r6t.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\r6tus.h</name>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\r6t.h</name>
         </file>
       </group>
       <group>

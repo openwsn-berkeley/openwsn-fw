@@ -351,7 +351,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\</state>
@@ -2367,12 +2367,12 @@
         </file>
       </group>
       <group>
-        <name>r6tus</name>
+        <name>r6t</name>
         <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\r6tus.c</name>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\r6t.c</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6tus\r6tus.h</name>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\r6t.h</name>
         </file>
       </group>
       <group>
