@@ -29,8 +29,9 @@
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
 #include "uart_obj.h"
-#include "rinfo.h"
-#include "rleds.h"
+#include "rinfo_obj.h"
+#include "rleds_obj.h"
+#include "rwellknown_obj.h"
 
 // notifications sent from the C mote to the Python BSP
 enum {
@@ -217,6 +218,7 @@ struct OpenMote {
    //- common
    rinfo_vars_t         rinfo_vars;
    rleds_vars_t         rleds_vars;
+   rwellknown_vars_t    rwellknown_vars;
    r6tus_vars_t         r6tus_vars;
 };
 

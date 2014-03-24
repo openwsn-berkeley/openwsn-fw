@@ -311,28 +311,50 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
 //===== from CoAP resources
 
+/**
+\brief Writes the links to all the resources on this mote into the message.
+
+\param[out] msg The messge to write the links to.
+
+\post After this function returns, the msg contains 
+*/
 void opencoap_writeLinks(OpenQueueEntry_t* msg) {
    coap_resource_desc_t* temp_resource;
    
+   // start with the first resource in the linked list
    temp_resource = opencoap_vars.resources;
+   
+   // iterate through all resources
    while (temp_resource!=NULL) {
+      
+      // write ending '>'
       packetfunctions_reserveHeaderSize(msg,1);
       msg->payload[0] = '>';
+      
+      // write path1
       if (temp_resource->path1len>0) {
          packetfunctions_reserveHeaderSize(msg,temp_resource->path1len);
          memcpy(&msg->payload[0],temp_resource->path1val,temp_resource->path1len);
          packetfunctions_reserveHeaderSize(msg,1);
          msg->payload[0] = '/';
       }
+      
+      // write path0
       packetfunctions_reserveHeaderSize(msg,temp_resource->path0len);
       memcpy(msg->payload,temp_resource->path0val,temp_resource->path0len);
       packetfunctions_reserveHeaderSize(msg,2);
       msg->payload[1] = '/';
+      
+      // write opening '>'
       msg->payload[0] = '<';
+      
+      // write separator between links
       if (temp_resource->next!=NULL) {
          packetfunctions_reserveHeaderSize(msg,1);
          msg->payload[0] = ',';
       }
+      
+      // iterate to next resource
       temp_resource = temp_resource->next;
    }
 }
