@@ -128,6 +128,7 @@ void openwsn_init() {
    //imu_init();
    //+++++ CoAP
    //- debug
+   //- core
    //- common
    rinfo_init();
    rleds__init();
