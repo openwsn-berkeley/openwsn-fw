@@ -15,6 +15,7 @@
 #include "res.h"
 #include "scheduler.h"
 #include "openqueue.h"
+#include "openrandom.h"
 
 //=========================== define ==========================================
 
@@ -38,8 +39,14 @@ void timer_adaptive_sync_fired();
 \brief initial this module
 */
 void adaptive_sync_init(){
-   // clear this module's variables
-   memset(&adaptive_sync_vars,0,sizeof(adaptive_sync_t));
+   adaptive_sync_vars.timerPeriod          = SCHEDULE_PERIOD + (openrandom_get16b()&0xff);
+   adaptive_sync_vars.timerId              = opentimers_start(
+      adaptive_sync_vars.timerPeriod,
+      TIMER_PERIODIC,
+      TIME_MS,
+      adaptive_sync_timer_cb
+   );
+   adaptive_sync_vars.adaptiveTimerStarted  = FALSE;
 }
 
 /**
@@ -52,7 +59,6 @@ void adaptive_sync_init(){
 \return the number of slots
 */
 void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, open_addr_t timesource){
-   uint8_t tempTimerID;
    uint8_t array[5];
    
    ieee154e_getAsn(array);
@@ -73,15 +79,9 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, ope
             timeCorrection < -LIMITLARGETIMECORRECTION
          ) {
          adaptive_sync_calculateCompensatedSlots(timeCorrection, syncMethod);
-         adaptive_sync_vars.timeCorrectionRecord = 0;
-         // re-start compensation 
-         adaptive_sync_vars.timerPeriod = SCHEDULE_PERIOD;
-         opentimers_setPeriod(
-            adaptive_sync_vars.timerId,
-            TIME_MS,
-            adaptive_sync_vars.timerPeriod
-         );
-         opentimers_restart(adaptive_sync_vars.timerId);        
+         adaptive_sync_vars.timeCorrectionRecord  = 0;
+         // start adaptive sync processing  
+         adaptive_sync_vars.adaptiveTimerStarted  = TRUE;
       } else {
          adaptive_sync_vars.timeCorrectionRecord += timeCorrection;
          return;
@@ -95,31 +95,13 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, ope
          leds_debug_toggle();
       }
       
-      if (adaptive_sync_vars.timerStarted == FALSE) {
-         // this is the first time for synchronizing to current neighbor, reset variables, 
-         memset(&adaptive_sync_vars,0,sizeof(adaptive_sync_t));
-         adaptive_sync_vars.timerStarted    = TRUE;
-         adaptive_sync_vars.timerPeriod     = SCHEDULE_PERIOD;
-         adaptive_sync_vars.timerId         = opentimers_start(
-            adaptive_sync_vars.timerPeriod,
-            TIMER_PERIODIC,
-            TIME_MS,
-            adaptive_sync_timer_cb
-         );
-      } else {
-         // once timer has started, the timerId should be kept before reset adaptive_sync_vars
-         tempTimerID                        = adaptive_sync_vars.timerId;
-         memset(&adaptive_sync_vars,0,sizeof(adaptive_sync_t));
-         adaptive_sync_vars.timerStarted    = TRUE;
-         adaptive_sync_vars.timerId         = tempTimerID;
-         adaptive_sync_vars.timerPeriod     = SCHEDULE_PERIOD;
-         opentimers_setPeriod(
-            adaptive_sync_vars.timerId,
-            TIME_MS,
-            adaptive_sync_vars.timerPeriod
-         );
-        opentimers_restart(adaptive_sync_vars.timerId);
-      }
+      // when I joined the network, or changed my time parent, reset adaptive_sync relative variables
+      adaptive_sync_vars.clockState               = S_NONE;
+      adaptive_sync_vars.timeCorrectionRecord     = 0;
+      adaptive_sync_vars.elapsedSlots             = 0;
+      adaptive_sync_vars.compensationTimeout      = 0;
+      adaptive_sync_vars.compensateTicks          = 0;
+      adaptive_sync_vars.adaptiveTimerStarted     = TRUE;
    }
    
    // update oldASN variable by correct asn
@@ -151,7 +133,7 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syn
             }
          } else {
             TC = -timeCorrection;
-            if (adaptive_sync_vars.clockState == S_NONE) {
+            if (adaptive_sync_vars.clockState == S_NONE && timeCorrection != 0) {
                adaptive_sync_vars.clockState = S_SLOWER;
             }
          }
@@ -163,7 +145,7 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syn
             }
          } else {
             TC = -timeCorrection;
-            if(adaptive_sync_vars.clockState == S_NONE) {
+            if(adaptive_sync_vars.clockState == S_NONE && timeCorrection != 0) {
                adaptive_sync_vars.clockState = S_FASTER;
             }
          }
@@ -174,8 +156,10 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syn
    
    // calculate the compensation interval, uint: slots/x ticks.
    // 2ticks is only the case of openmotestm platform, usually it should be one
-   adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2 * adaptive_sync_vars.elapsedSlots / (TC + adaptive_sync_vars.compensateTicks + adaptive_sync_vars.timeCorrectionRecord);
-   adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
+   if(adaptive_sync_vars.clockState != S_NONE) {
+      adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2 * adaptive_sync_vars.elapsedSlots / (TC + adaptive_sync_vars.compensateTicks + adaptive_sync_vars.timeCorrectionRecord);
+      adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
+   }
 }
 
 /**
@@ -271,21 +255,23 @@ void timer_adaptive_sync_fired() {
    OpenQueueEntry_t* pkt;
    open_addr_t       neighAddr;
    
-   if (adaptive_sync_vars.timerPeriod != KATIMEOUT * 15) {
-      // re-schedule a long term packet to synchronization
-      if (adaptive_sync_vars.timerPeriod * 2 < KATIMEOUT*15) {
-         adaptive_sync_vars.timerPeriod = adaptive_sync_vars.timerPeriod * 2;
-         // re-schedule one packet for sending
-         opentimers_setPeriod(
-            adaptive_sync_vars.timerId,
-            TIME_MS,
-            adaptive_sync_vars.timerPeriod
-         );
-      } else {
-         //stop the timer used for sending packet 
-         opentimers_stop(adaptive_sync_vars.timerId);
-      }
+   if(adaptive_sync_vars.adaptiveTimerStarted == FALSE) {
+      return;
    }
+   
+    // re-schedule a long term packet to synchronization
+   if (adaptive_sync_vars.timerPeriod * 2 < KATIMEOUT*15) {
+      adaptive_sync_vars.timerPeriod           = adaptive_sync_vars.timerPeriod * 2;
+   } else {
+      adaptive_sync_vars.timerPeriod           = SCHEDULE_PERIOD + (openrandom_get16b()&0xff);
+      adaptive_sync_vars.adaptiveTimerStarted  = FALSE;
+    }
+    // re-schedule one packet for sending
+   opentimers_setPeriod(
+       adaptive_sync_vars.timerId,
+       TIME_MS,
+       adaptive_sync_vars.timerPeriod
+   );
    
    memset(&neighAddr,0x00,sizeof(open_addr_t));
    
@@ -318,4 +304,9 @@ void timer_adaptive_sync_fired() {
    memcpy(&(pkt->l2_nextORpreviousHop),&(neighAddr),sizeof(open_addr_t));
    
    res_send(pkt);
+   
+#ifdef OPENSIM
+   debugpins_ka_set();
+   debugpins_ka_clr();
+#endif
 }

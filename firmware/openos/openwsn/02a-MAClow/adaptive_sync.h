@@ -44,11 +44,10 @@ typedef struct {
    uint16_t                  compensateTicks;         // record how many ticks  are compensated 
    uint16_t                  timeCorrectionRecord;    // record the sum of historical timeCorrection
    asn_t                     oldASN;                  // the asn when synchronized previous time
-   compensationInfo_t        compensationInfo_vars[1];//keep each time soures' compensation informatio( should be 9, since there would be more timesources)
-   bool                      timerStarted;
+   compensationInfo_t        compensationInfo_vars[1];// keep each time soures' compensation informatio( should be 9, since there would be more timesources)
+   bool                      adaptiveTimerStarted;    
    opentimer_id_t            timerId; 
    uint16_t                  timerPeriod;
-   uint8_t                   taskCounter;
 } adaptive_sync_t;
 
 //=========================== prototypes ======================================
