@@ -42,10 +42,9 @@ typedef struct {
    PORT_RADIOTIMER_WIDTH     elapsedSlots;            // since last synchronizatino, this number of slots have elapsed.
    uint16_t                  compensationTimeout;     // decrease one every slot, when it reach zero, adjust currectly slot length by 2 tick(60us). 
    uint16_t                  compensateTicks;         // record how many ticks  are compensated 
-   uint16_t                  timeCorrectionRecord;    // record the sum of historical timeCorrection
    asn_t                     oldASN;                  // the asn when synchronized previous time
    compensationInfo_t        compensationInfo_vars[1];// keep each time soures' compensation informatio( should be 9, since there would be more timesources)
-   bool                      adaptiveTimerStarted;    
+   bool                      adaptiveProcessStarted;    
    opentimer_id_t            timerId; 
    uint16_t                  timerPeriod;
 } adaptive_sync_t;

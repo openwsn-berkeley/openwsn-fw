@@ -17,10 +17,7 @@
 #include "openqueue.h"
 #include "openrandom.h"
 
-//=========================== define ==========================================
-
-// in ms
-#define SCHEDULE_PERIOD  1000    
+//=========================== define ==========================================   
 
 //=========================== type ============================================
 
@@ -32,6 +29,7 @@ adaptive_sync_t adaptive_sync_vars;
 
 void adaptive_sync_timer_cb();
 void timer_adaptive_sync_fired();
+bool adaptive_sync_driftChanged();
 
 //=========================== public ==========================================
 
@@ -39,14 +37,15 @@ void timer_adaptive_sync_fired();
 \brief initial this module
 */
 void adaptive_sync_init(){
-   adaptive_sync_vars.timerPeriod          = SCHEDULE_PERIOD + (openrandom_get16b()&0xff);
+   adaptive_sync_vars.clockState           = S_NONE;
+   adaptive_sync_vars.timerPeriod          = 872+(openrandom_get16b()&0xff);
    adaptive_sync_vars.timerId              = opentimers_start(
       adaptive_sync_vars.timerPeriod,
       TIMER_PERIODIC,
       TIME_MS,
       adaptive_sync_timer_cb
    );
-   adaptive_sync_vars.adaptiveTimerStarted  = FALSE;
+   adaptive_sync_vars.adaptiveProcessStarted  = FALSE;
 }
 
 /**
@@ -68,23 +67,23 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, ope
          ieee154e_isSynch() &&
          packetfunctions_sameAddress(&timesource, &(adaptive_sync_vars.compensationInfo_vars[0].neighborID))
       ) {
-      
+      // if I am synchronized, I will calculate compensation interval 
+      adaptive_sync_calculateCompensatedSlots(timeCorrection, syncMethod);
       // reset compensationtTicks when synchronization happened
       adaptive_sync_vars.compensateTicks = 0;
-      
-      // if I am synchronized, only calculated compensation interval when
-      // timeCorrection exceeds LIMITLARGETIMECORRECTION
+      // following condition is used to detect the change of drift.
       if (
-            timeCorrection > LIMITLARGETIMECORRECTION ||
-            timeCorrection < -LIMITLARGETIMECORRECTION
-         ) {
-         adaptive_sync_calculateCompensatedSlots(timeCorrection, syncMethod);
-         adaptive_sync_vars.timeCorrectionRecord  = 0;
-         // start adaptive sync processing  
-         adaptive_sync_vars.adaptiveTimerStarted  = TRUE;
-      } else {
-         adaptive_sync_vars.timeCorrectionRecord += timeCorrection;
-         return;
+            adaptive_sync_driftChanged() == TRUE 
+          ) {
+          // reset adaptive_sync timer period
+          adaptive_sync_vars.timerPeriod             = 872+(openrandom_get16b()&0xff);
+          opentimers_setPeriod(
+              adaptive_sync_vars.timerId,
+              TIME_MS,
+              adaptive_sync_vars.timerPeriod
+          );
+          // start adaptive process
+          adaptive_sync_vars.adaptiveProcessStarted  = TRUE;
       }
    } else {
       
@@ -97,17 +96,20 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, ope
       
       // when I joined the network, or changed my time parent, reset adaptive_sync relative variables
       adaptive_sync_vars.clockState               = S_NONE;
-      adaptive_sync_vars.timeCorrectionRecord     = 0;
       adaptive_sync_vars.elapsedSlots             = 0;
       adaptive_sync_vars.compensationTimeout      = 0;
       adaptive_sync_vars.compensateTicks          = 0;
-      adaptive_sync_vars.adaptiveTimerStarted     = TRUE;
+      adaptive_sync_vars.adaptiveProcessStarted   = TRUE;
    }
    
    // update oldASN variable by correct asn
-   memcpy(&(adaptive_sync_vars.oldASN.bytes0and1), &array[0], sizeof(uint16_t));
-   memcpy(&(adaptive_sync_vars.oldASN.bytes2and3), &array[2], sizeof(uint16_t));
-   memcpy(&(adaptive_sync_vars.oldASN.byte4),      &array[4], sizeof(uint8_t));
+   adaptive_sync_vars.oldASN.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
+   adaptive_sync_vars.oldASN.bytes2and3           = ((uint16_t) array[3] << 8) | ((uint16_t) array[2]);
+   adaptive_sync_vars.oldASN.byte4                = array[4]; 
+   
+//   memcpy(&(adaptive_sync_vars.oldASN.bytes0and1), &array[0], sizeof(uint16_t));
+//   memcpy(&(adaptive_sync_vars.oldASN.bytes2and3), &array[2], sizeof(uint16_t));
+//   memcpy(&(adaptive_sync_vars.oldASN.byte4),      &array[4], sizeof(uint8_t));
    
    memcpy(&(adaptive_sync_vars.compensationInfo_vars[0].neighborID), &timesource, sizeof(open_addr_t));
 }
@@ -154,12 +156,49 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syn
          while(1); // should not reach here
    }
    
-   // calculate the compensation interval, uint: slots/x ticks.
-   // 2ticks is only the case of openmotestm platform, usually it should be one
-   if(adaptive_sync_vars.clockState != S_NONE) {
-      adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2 * adaptive_sync_vars.elapsedSlots / (TC + adaptive_sync_vars.compensateTicks + adaptive_sync_vars.timeCorrectionRecord);
-      adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
+   if (adaptive_sync_vars.compensateTicks == 0) {
+     // filter small timeCorrection
+     if (TC < 2) {
+       // not calculate drift when timeCorrection is too small
+     } 
+     else {
+       if (adaptive_sync_vars.clockState != S_NONE) {
+          adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2 * adaptive_sync_vars.elapsedSlots / TC;
+       }
+     }
+   
+   } else {
+     switch(adaptive_sync_vars.clockState) {
+        case S_SLOWER:
+          if (
+              (syncMethod == S_PACKET_SYNC && timeCorrection >= 0) ||
+              (syncMethod == S_ACK_SYNC    && timeCorrection <= 0)
+          ) {
+             adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2 * adaptive_sync_vars.elapsedSlots / (adaptive_sync_vars.compensateTicks - TC);  
+          } else {
+             adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2 * adaptive_sync_vars.elapsedSlots / (adaptive_sync_vars.compensateTicks + TC);
+          }
+          break;
+        case S_FASTER:
+          if (
+              (syncMethod == S_PACKET_SYNC && timeCorrection <= 0) ||
+              (syncMethod == S_ACK_SYNC    && timeCorrection >= 0)
+          ) {
+             adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2 * adaptive_sync_vars.elapsedSlots / (adaptive_sync_vars.compensateTicks - TC);  
+          } else {
+             adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2 * adaptive_sync_vars.elapsedSlots / (adaptive_sync_vars.compensateTicks + TC);
+          }
+          break;
+        case S_NONE:
+          // do nothing
+          break;
+        default:
+          // should not rearch here
+          while(1);
+     }
    }
+   
+   adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
 }
 
 /**
@@ -255,17 +294,17 @@ void timer_adaptive_sync_fired() {
    OpenQueueEntry_t* pkt;
    open_addr_t       neighAddr;
    
-   if(adaptive_sync_vars.adaptiveTimerStarted == FALSE) {
+   if(adaptive_sync_vars.adaptiveProcessStarted == FALSE) {
       return;
    }
    
     // re-schedule a long term packet to synchronization
    if (adaptive_sync_vars.timerPeriod * 2 < KATIMEOUT*15) {
-      adaptive_sync_vars.timerPeriod           = adaptive_sync_vars.timerPeriod * 2;
+      adaptive_sync_vars.timerPeriod             = adaptive_sync_vars.timerPeriod * 2;
    } else {
-      adaptive_sync_vars.timerPeriod           = SCHEDULE_PERIOD + (openrandom_get16b()&0xff);
-      adaptive_sync_vars.adaptiveTimerStarted  = FALSE;
-    }
+      adaptive_sync_vars.timerPeriod             = 872+(openrandom_get16b()&0xff);
+      adaptive_sync_vars.adaptiveProcessStarted  = FALSE;
+   }
     // re-schedule one packet for sending
    opentimers_setPeriod(
        adaptive_sync_vars.timerId,
@@ -304,9 +343,12 @@ void timer_adaptive_sync_fired() {
    memcpy(&(pkt->l2_nextORpreviousHop),&(neighAddr),sizeof(open_addr_t));
    
    res_send(pkt);
+
+}
+
+bool adaptive_sync_driftChanged() {
+   bool driftChanged = FALSE; 
+   // add some methods here to determine whether the drift is changed.
    
-#ifdef OPENSIM
-   debugpins_ka_set();
-   debugpins_ka_clr();
-#endif
+   return driftChanged;
 }
