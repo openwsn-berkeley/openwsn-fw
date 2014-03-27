@@ -17,6 +17,8 @@
 
 //=========================== define ==========================================
 
+#define SYNC_ACCURACY        1 // when using openmoteSTM, change to 2
+
 typedef enum {
    S_NONE          = 0x00,
    S_FASTER        = 0x01,

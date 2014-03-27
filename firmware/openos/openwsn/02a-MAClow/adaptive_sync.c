@@ -47,7 +47,7 @@ void adaptive_sync_init(){
       adaptive_sync_timer_cb
    );
    adaptive_sync_vars.sumOfTC                 = 0;
-   adaptive_sync_vars.compensateThreshold     = 58; // 58 slots == 872 ms
+   adaptive_sync_vars.compensateThreshold     = 58; // 58 slots == 872 ms/15ms
    adaptive_sync_vars.adaptiveProcessStarted  = FALSE;
 }
 
@@ -145,22 +145,22 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection) {
    adaptive_sync_vars.elapsedSlots = ieee154e_asnDiff(&adaptive_sync_vars.oldASN);
    
    if(isFirstSync) {
-     if(timeCorrection > 0) {
+     if(timeCorrection > 1) {
        adaptive_sync_vars.clockState = S_FASTER;
-       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2*adaptive_sync_vars.elapsedSlots/timeCorrection;
+       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots/timeCorrection;
      } else {
-       if(timeCorrection < 0) {
+       if(timeCorrection < -1) {
          adaptive_sync_vars.clockState = S_SLOWER;
-         adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2*adaptive_sync_vars.elapsedSlots/(-timeCorrection);
+         adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots/(-timeCorrection);
        } else {
-         //timeCorrection == 0, no drift is detected
+         //timeCorrection = {-1,1}, it's not accurate when timeCorrection belongs to {-1,1}
        }
      }
    } else {
      if(adaptive_sync_vars.clockState == S_SLOWER) {
-       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2*adaptive_sync_vars.elapsedSlots/(adaptive_sync_vars.compensateTicks-(timeCorrection+adaptive_sync_vars.sumOfTC));
+       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots/(adaptive_sync_vars.compensateTicks-(timeCorrection+adaptive_sync_vars.sumOfTC));
      } else {
-       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = 2*adaptive_sync_vars.elapsedSlots/(adaptive_sync_vars.compensateTicks+(timeCorrection+adaptive_sync_vars.sumOfTC));
+       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots/(adaptive_sync_vars.compensateTicks+(timeCorrection+adaptive_sync_vars.sumOfTC));
      }
    }
      
@@ -184,23 +184,14 @@ void adaptive_sync_countCompensationTimeout() {
    // when compensationTimeout, adjust current slot length
    if(adaptive_sync_vars.compensationTimeout == 0) {
      if(adaptive_sync_vars.clockState == S_SLOWER) {
-       radio_setTimerPeriod(TsSlotDuration-2);
-       adaptive_sync_vars.compensateTicks += 2;
-#ifdef OPENSIM
-   debugpins_debug_set();
-   debugpins_debug_clr();
-#endif
+       radio_setTimerPeriod(TsSlotDuration-SYNC_ACCURACY);
+       adaptive_sync_vars.compensateTicks += SYNC_ACCURACY;
      } else { // clock is fast
-       radio_setTimerPeriod(TsSlotDuration+2);
-       adaptive_sync_vars.compensateTicks += 2;
-#ifdef OPENSIM
-   debugpins_debug_set();
-   debugpins_debug_clr();
-#endif
+       radio_setTimerPeriod(TsSlotDuration+SYNC_ACCURACY);
+       adaptive_sync_vars.compensateTicks += SYNC_ACCURACY;
      }
      // reload compensationTimeout
      adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
-//     GPIOC->ODR ^= 0X1000;
    }
 }
 
@@ -231,7 +222,6 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
       if (adaptive_sync_vars.compensationTimeout == 0) {
          compensateTicks += 1;
          adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
-//         GPIOC->ODR ^= 0X1000;
       }
       counter--;
    }
@@ -239,19 +229,11 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
    // when compensateTicks > 0, I need to do compensation by adjusting current slot length
    if(compensateTicks > 0) {
      if(adaptive_sync_vars.clockState == S_SLOWER) {
-       radio_setTimerPeriod(TsSlotDuration*(compoundSlots+1)-compensateTicks*2);
-       adaptive_sync_vars.compensateTicks += compensateTicks*2;
-#ifdef OPENSIM
-   debugpins_debug_set();
-   debugpins_debug_clr();
-#endif
+       radio_setTimerPeriod(TsSlotDuration*(compoundSlots+1)-compensateTicks*SYNC_ACCURACY);
+       adaptive_sync_vars.compensateTicks += compensateTicks*SYNC_ACCURACY;
      } else { // clock is fast
-       radio_setTimerPeriod(TsSlotDuration*(compoundSlots+1)+compensateTicks*2);
-       adaptive_sync_vars.compensateTicks += compensateTicks * 2;
-#ifdef OPENSIM
-   debugpins_debug_set();
-   debugpins_debug_clr();
-#endif
+       radio_setTimerPeriod(TsSlotDuration*(compoundSlots+1)+compensateTicks*SYNC_ACCURACY);
+       adaptive_sync_vars.compensateTicks += compensateTicks * SYNC_ACCURACY;
      }
    }
 }
@@ -276,7 +258,6 @@ void timer_adaptive_sync_fired() {
    if(adaptive_sync_vars.adaptiveProcessStarted == FALSE) {
       return;
    }
-//   GPIOC->ODR ^=  0X0100;
     // re-schedule a long term packet to synchronization
    if(adaptive_sync_vars.timerPeriod*2 < KATIMEOUT*15) {   
      adaptive_sync_vars.timerPeriod             = adaptive_sync_vars.timerPeriod*2;
