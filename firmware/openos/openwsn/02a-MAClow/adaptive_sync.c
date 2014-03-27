@@ -23,7 +23,7 @@
 
 //=========================== variables =======================================
 
-adaptive_sync_t adaptive_sync_vars;
+adaptive_sync_vars_t adaptive_sync_vars;
 
 //=========================== prototypes ======================================
 
@@ -37,7 +37,7 @@ bool adaptive_sync_driftChanged();
 \brief initial this module
 */
 void adaptive_sync_init(){  
-   memset(&adaptive_sync_vars,0x00,sizeof(adaptive_sync_t));
+   memset(&adaptive_sync_vars,0x00,sizeof(adaptive_sync_vars_t));
    adaptive_sync_vars.clockState              = S_NONE;
    adaptive_sync_vars.timerPeriod             = 872+(openrandom_get16b()&0xff);
    adaptive_sync_vars.timerId                 = opentimers_start(
@@ -186,9 +186,17 @@ void adaptive_sync_countCompensationTimeout() {
      if(adaptive_sync_vars.clockState == S_SLOWER) {
        radio_setTimerPeriod(TsSlotDuration-2);
        adaptive_sync_vars.compensateTicks += 2;
+#ifdef OPENSIM
+   debugpins_debug_set();
+   debugpins_debug_clr();
+#endif
      } else { // clock is fast
        radio_setTimerPeriod(TsSlotDuration+2);
        adaptive_sync_vars.compensateTicks += 2;
+#ifdef OPENSIM
+   debugpins_debug_set();
+   debugpins_debug_clr();
+#endif
      }
      // reload compensationTimeout
      adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
@@ -233,9 +241,17 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
      if(adaptive_sync_vars.clockState == S_SLOWER) {
        radio_setTimerPeriod(TsSlotDuration*(compoundSlots+1)-compensateTicks*2);
        adaptive_sync_vars.compensateTicks += compensateTicks*2;
+#ifdef OPENSIM
+   debugpins_debug_set();
+   debugpins_debug_clr();
+#endif
      } else { // clock is fast
        radio_setTimerPeriod(TsSlotDuration*(compoundSlots+1)+compensateTicks*2);
        adaptive_sync_vars.compensateTicks += compensateTicks * 2;
+#ifdef OPENSIM
+   debugpins_debug_set();
+   debugpins_debug_clr();
+#endif
      }
    }
 }

@@ -44,7 +44,7 @@ typedef struct {
    uint16_t                  timerPeriod;
    int16_t                   sumOfTC;                 // record the sum of ticks between two time point which need to calculate compensation period.
    uint16_t                  compensateThreshold;     // number of slots. calculate the compensation period only when elapsed slot number is greater than this threshold 
-} adaptive_sync_t;
+} adaptive_sync_vars_t;
 
 //=========================== prototypes ======================================
 
