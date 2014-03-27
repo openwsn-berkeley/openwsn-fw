@@ -131,7 +131,7 @@ void openwsn_init() {
    //-- misc
    //heli_init();
    //imu_init();
-   
+      
    openserial_printInfo(COMPONENT_OPENWSN,ERR_BOOTED,
                             (errorparameter_t)0,
                             (errorparameter_t)0);

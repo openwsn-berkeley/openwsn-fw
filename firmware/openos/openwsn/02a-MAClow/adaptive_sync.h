@@ -23,11 +23,6 @@ typedef enum {
    S_SLOWER        = 0x02,
 } adaptive_sync_state_t;
 
-typedef enum {
-   S_PACKET_SYNC   = 0x00,
-   S_ACK_SYNC      = 0x01,
-} adaptive_sync_methods_t;
-
 //=========================== typedef =========================================
 
 //=========================== module variables ================================
@@ -47,13 +42,15 @@ typedef struct {
    bool                      adaptiveProcessStarted;    
    opentimer_id_t            timerId; 
    uint16_t                  timerPeriod;
+   int16_t                   sumOfTC;                 // record the sum of ticks between two time point which need to calculate compensation period.
+   uint16_t                  compensateThreshold;     // number of slots. calculate the compensation period only when elapsed slot number is greater than this threshold 
 } adaptive_sync_t;
 
 //=========================== prototypes ======================================
 
 void adaptive_sync_init();
-void adaptive_sync_recordLastASN(int16_t timeCorrection, uint8_t syncMethod, open_addr_t timesource);
-void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection, uint8_t syncMethod);
+void adaptive_sync_recordLastASN(int16_t timeCorrection, open_addr_t timesource);
+void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection);
 
 void adaptive_sync_countCompensationTimeout();
 void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots);
