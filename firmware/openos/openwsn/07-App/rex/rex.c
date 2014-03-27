@@ -1,3 +1,7 @@
+/**
+\brief An example CoAP application.
+*/
+
 #include "openwsn.h"
 #include "rex.h"
 #include "opencoap.h"

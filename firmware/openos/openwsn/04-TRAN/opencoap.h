@@ -32,6 +32,11 @@ static const uint8_t ipAddr_motedata[]  = {0x20, 0x01, 0x04, 0x70, 0x00, 0x66, 0
 /// the maximum number of options in a RX'ed CoAP message
 #define MAX_COAP_OPTIONS               10 //3 before but we want gets with more options
 
+// This value may be reduced as a memory optimization, but would invalidate spec compliance
+#define COAP_MAX_TKL                   8
+
+#define COAP_PAYLOAD_MARKER            0xFF
+
 #define COAP_VERSION                   1
 
 typedef enum {
@@ -75,24 +80,22 @@ typedef enum {
 } coap_code_t;
 
 typedef enum {
-   COAP_OPTION_NONE                            = 0,
-   COAP_OPTION_NUM_IFMATCH                     = 1,
-   COAP_OPTION_NUM_URIHOST                     = 3,
-   COAP_OPTION_NUM_ETAG                        = 4,
-   COAP_OPTION_NUM_IFNONEMATCH                 = 5,
-   COAP_OPTION_NUM_URIPORT                     = 7,
-   COAP_OPTION_NUM_LOCATIONPATH                = 8,
-   COAP_OPTION_NUM_URIPATH                     = 11,
-   COAP_OPTION_NUM_CONTENTFORMAT               = 12,
-   COAP_OPTION_NUM_MAXAGE                      = 14,
-   COAP_OPTION_NUM_URIQUERY                    = 15,
-   COAP_OPTION_NUM_ACCEPT                      = 16,
-   COAP_OPTION_NUM_LOCATIONQUERY               = 20,
-   COAP_OPTION_NUM_PROXYURI                    = 35,
-   COAP_OPTION_NUM_PROXYSCHEME                 = 39,
+   COAP_OPTION_NONE                    = 0,
+   COAP_OPTION_NUM_IFMATCH             = 1,
+   COAP_OPTION_NUM_URIHOST             = 3,
+   COAP_OPTION_NUM_ETAG                = 4,
+   COAP_OPTION_NUM_IFNONEMATCH         = 5,
+   COAP_OPTION_NUM_URIPORT             = 7,
+   COAP_OPTION_NUM_LOCATIONPATH        = 8,
+   COAP_OPTION_NUM_URIPATH             = 11,
+   COAP_OPTION_NUM_CONTENTFORMAT       = 12,
+   COAP_OPTION_NUM_MAXAGE              = 14,
+   COAP_OPTION_NUM_URIQUERY            = 15,
+   COAP_OPTION_NUM_ACCEPT              = 16,
+   COAP_OPTION_NUM_LOCATIONQUERY       = 20,
+   COAP_OPTION_NUM_PROXYURI            = 35,
+   COAP_OPTION_NUM_PROXYSCHEME         = 39,
 } coap_option_t;
-
-
 
 typedef enum {
    COAP_MEDTYPE_TEXTPLAIN              =  0,
@@ -111,7 +114,7 @@ typedef struct {
    uint8_t       TKL;
    coap_code_t   Code;
    uint16_t      messageID;
-   uint8_t       token; //this might be an array of 8 as tkl can be 8
+   uint8_t       token[COAP_MAX_TKL];
 } coap_header_iht;
 
 typedef struct {
@@ -148,24 +151,25 @@ typedef struct {
    bool                  busySending;
    uint8_t               delayCounter;
    uint16_t              messageID;
-   opentimer_id_t        timerId;
 } opencoap_vars_t;
 
 //=========================== prototypes ======================================
 
 // from stack
-void     opencoap_init();
-void     opencoap_receive(OpenQueueEntry_t* msg);
-void     opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+void          opencoap_init();
+void          opencoap_receive(OpenQueueEntry_t* msg);
+void          opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 
 // from CoAP resources
-void     opencoap_writeLinks(OpenQueueEntry_t* msg);
-void     opencoap_register(coap_resource_desc_t* desc);
-owerror_t  opencoap_send(OpenQueueEntry_t*     msg,
-                       coap_type_t           type,
-                       coap_code_t           code,
-                       uint8_t               numOptions,
-                       coap_resource_desc_t* descSender);
+void          opencoap_writeLinks(OpenQueueEntry_t* msg);
+void          opencoap_register(coap_resource_desc_t* desc);
+owerror_t     opencoap_send(
+    OpenQueueEntry_t*     msg,
+    coap_type_t           type,
+    coap_code_t           code,
+    uint8_t               numOptions,
+    coap_resource_desc_t* descSender
+);
 
 /**
 \}

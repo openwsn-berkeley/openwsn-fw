@@ -72,8 +72,8 @@ void layerdebug_init() {
                                                      layerdebug_timer_schedule_cb);
    
    // prepare the resource descriptor for the neighbors path
-   layerdebug_vars.nbsdesc.path0len             = sizeof(schedule_layerdebug_path0)-1;
-   layerdebug_vars.nbsdesc.path0val             = (uint8_t*)(&schedule_layerdebug_path0);
+   layerdebug_vars.nbsdesc.path0len             = sizeof(neighbors_layerdebug_path0)-1;
+   layerdebug_vars.nbsdesc.path0val             = (uint8_t*)(&neighbors_layerdebug_path0);
    layerdebug_vars.nbsdesc.path1len             = 0;
    layerdebug_vars.nbsdesc.path1val             = NULL;
    layerdebug_vars.nbsdesc.componentID          = COMPONENT_LAYERDEBUG;
@@ -257,8 +257,9 @@ owerror_t layerdebug_schedule_receive(OpenQueueEntry_t* msg,
       //get the schedule information from the mac layer 
       schedule_getNetDebugInfo((netDebugScheduleEntry_t*)msg->payload);
 
-      packetfunctions_reserveHeaderSize(msg,1);//reserve for the size of schedule entries
-      msg->payload[0] = MAXACTIVESLOTS;
+      packetfunctions_reserveHeaderSize(msg,2);
+      msg->payload[0] = COAP_PAYLOAD_MARKER;
+      msg->payload[1] = MAXACTIVESLOTS;
            
       // set the CoAP header
       coap_header->Code                = COAP_CODE_RESP_CONTENT;
@@ -292,9 +293,10 @@ owerror_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
   
       debugNetPrint_neighbors((netDebugNeigborEntry_t*)msg->payload);
     
-     //now we know the size of the neihbours. Put it on the packet.
-      packetfunctions_reserveHeaderSize(msg,1);//reserve for the size of neighbours entries
-      msg->payload[0] = size;
+      //now we know the size of the neighbours. Put it on the packet.
+      packetfunctions_reserveHeaderSize(msg,2);
+      msg->payload[0] = COAP_PAYLOAD_MARKER;
+      msg->payload[1] = size;
            
       // set the CoAP header
       coap_header->Code                = COAP_CODE_RESP_CONTENT;

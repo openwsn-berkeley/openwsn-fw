@@ -48,7 +48,7 @@
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/imu&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/layerdebug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/ohlone&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/r6tus&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/r6t&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rex&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rheli&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rinfo&quot;"/>
@@ -92,7 +92,7 @@
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/imu&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/layerdebug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/ohlone&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/r6tus&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/r6t&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rex&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rheli&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rinfo&quot;"/>

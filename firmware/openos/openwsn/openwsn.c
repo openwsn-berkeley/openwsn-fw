@@ -32,41 +32,46 @@
 #include "opentcp.h"
 #include "openudp.h"
 #include "opencoap.h"
-//-- app (common)
-#include "rreg.h"
-#include "rwellknown.h"
-#include "rinfo.h"
 //===== applications
-//-- TCP
+//+++++ TCP
+//- debug
 #include "tcpecho.h"
 #include "tcpinject.h"
 #include "tcpprint.h"
+//- common
 #include "ohlone.h"
-//-- UDP
+//- board-specific
+//++++ UDP
+//- debug
 #include "udpecho.h"
 #include "udpinject.h"
 #include "udpprint.h"
+//- common
 //#include "udprand.h"
 //#include "udplatency.h"
 //#include "udpstorm.h"
-//-- CoAP
+//- board-specific
+//#include "imu.h"
+//+++++ CoAP
+//- debug
+//- common
+#include "rinfo.h"
 #include "rleds.h"
-//#include "rt.h"
+#include "rwellknown.h"
+#include "r6t.h"
 //#include "rex.h"
-//#include "rheli.h"
 //#include "rrube.h"
-//#include "rxl1.h"
 //#include "layerdebug.h"
-#include "r6tus.h"
-//-- misc
+//- board-specific
+//#include "rheli.h"
+//#include "rt.h"
+//#include "rxl1.h"
 //#include "heli.h"
 //#include "imu.h"
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
-
-void openwsn_init();
 
 //=========================== public ==========================================
 
@@ -75,6 +80,8 @@ void openwsn_init();
 void openwsn_init() {
    //===== drivers
    openserial_init();
+   //heli_init();
+   //imu_init();
    
    //===== stack
    //-- cross-layer
@@ -100,39 +107,48 @@ void openwsn_init() {
    //-- 04-TRAN
    opentcp_init();
    openudp_init();
-   opencoap_init();    // initialize before any of the CoAP applications
-   //-- app (common)
-   //rreg_init();
-   rwellknown_init();
-   rinfo_init();
+   opencoap_init();     // initialize before any of the CoAP applications
    
    //===== applications
-   //-- TCP
+   //+++++ TCP
+   //- debug
    tcpecho_init();
    tcpinject_init();
    tcpprint_init();
+   //- common
    ohlone_init();
-   //-- UDP
+   //- board-specific
+   //+++++ UDP
+   //- debug
    udpecho_init();
    udpinject_init();
    udpprint_init();
+   //- common
    //udprand_init();
    //udplatency_init();
    //udpstorm_init();
-   //-- CoAP
-   //rleds_init();
-   //rt_init();
-   //rex_init();
-   //rheli_init();
-   //rrube_init();
-   //rxl1_init();
-   //layerdebug_init();
-   r6tus_init();
-   //-- misc
-   //heli_init();
+   //- board-specific
    //imu_init();
-      
-   openserial_printInfo(COMPONENT_OPENWSN,ERR_BOOTED,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+   //+++++ CoAP
+   //- debug
+   //- core
+   //- common
+   rinfo_init();
+   rleds__init();
+   rwellknown_init();
+   r6t_init();
+   //rreg_init();
+   //rex_init();
+   //rrube_init();
+   //layerdebug_init();
+   //- board-specific
+   //rheli_init();
+   //rt_init();
+   //rxl1_init();
+   
+   openserial_printInfo(
+      COMPONENT_OPENWSN,ERR_BOOTED,
+      (errorparameter_t)0,
+      (errorparameter_t)0
+   );
 }

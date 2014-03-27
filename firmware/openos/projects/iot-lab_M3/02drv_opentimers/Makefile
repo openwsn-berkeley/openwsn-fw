@@ -29,7 +29,7 @@ SRC_DIRS 	+= $(OPENOS_DIR)/openwsn/07-App/rinfo
 
 SRC_DIRS 	+= $(OPENOS_DIR)/openwsn/07-App/rleds
 
-SRC_DIRS 	+= $(OPENOS_DIR)/openwsn/07-App/r6tus
+SRC_DIRS 	+= $(OPENOS_DIR)/openwsn/07-App/r6t
 
 SRC_DIRS 	+= $(OPENOS_DIR)/openwsn/07-App/tcpinject
 SRC_DIRS 	+= $(OPENOS_DIR)/openwsn/07-App/udpinject

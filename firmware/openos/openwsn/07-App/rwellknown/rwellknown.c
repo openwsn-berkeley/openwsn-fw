@@ -5,31 +5,30 @@
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "idmanager.h"
-//=========================== variables =======================================
 
-typedef struct {
-   coap_resource_desc_t desc;
-} rwellknown_vars_t;
+//=========================== variables =======================================
 
 rwellknown_vars_t rwellknown_vars;
 
-const uint8_t rwellknown_path0[]        = ".well-known";
-const uint8_t rwellknown_path1[]        = "core";
-const uint8_t rwellknown_testlink[]  = "</led>;if=\"actuator\";rt=\"ipso:light\";ct=\"0\"";
+const uint8_t rwellknown_path0[]       = ".well-known";
+const uint8_t rwellknown_path1[]       = "core";
 
 //=========================== prototypes ======================================
 
-owerror_t rwellknown_receive(OpenQueueEntry_t* msg,
-                           coap_header_iht*  coap_header,
-                           coap_option_iht*  coap_options);
-void    rwellknown_sendDone(OpenQueueEntry_t* msg,
-                            owerror_t error);
+owerror_t rwellknown_receive(
+   OpenQueueEntry_t* msg,
+   coap_header_iht*  coap_header,
+   coap_option_iht*  coap_options
+);
+
+void    rwellknown_sendDone(
+   OpenQueueEntry_t* msg,
+   owerror_t         error
+);
 
 //=========================== public ==========================================
 
 void rwellknown_init() {
-  
-  
    if(idmanager_getIsDAGroot()==TRUE) return; 
    
    // prepare the resource descriptor for the /.well-known/core path
@@ -46,32 +45,41 @@ void rwellknown_init() {
 
 //=========================== private =========================================
 
-owerror_t rwellknown_receive(OpenQueueEntry_t* msg,
-                           coap_header_iht*  coap_header,
-                           coap_option_iht*  coap_options) {
+owerror_t rwellknown_receive(
+      OpenQueueEntry_t* msg,
+      coap_header_iht*  coap_header,
+      coap_option_iht*  coap_options
+   ) {
    owerror_t outcome;
    
-   if (coap_header->Code==COAP_CODE_REQ_GET) {
-      // reset packet payload
-      msg->payload                     = &(msg->packet[127]);
-      msg->length                      = 0;
-      
-      // add link descriptors to the packet
-      opencoap_writeLinks(msg);
+   switch(coap_header->Code) {
+      case COAP_CODE_REQ_GET:
+         // reset packet payload
+         msg->payload        = &(msg->packet[127]);
+         msg->length         = 0;
          
-      // add return option
-      packetfunctions_reserveHeaderSize(msg,2);
-      msg->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
-                                         1;
-      msg->payload[1]                  = COAP_MEDTYPE_APPLINKFORMAT;
-      
-      // set the CoAP header
-       coap_header->Code                = COAP_CODE_RESP_CONTENT;
-      
-      outcome                          = E_SUCCESS;
-   } else {
-      outcome                          = E_FAIL;
+         // have CoAP module write links to all resources
+         opencoap_writeLinks(msg);
+         
+         packetfunctions_reserveHeaderSize(msg,1);
+         msg->payload[0]     = COAP_PAYLOAD_MARKER;
+            
+         // add return option
+         packetfunctions_reserveHeaderSize(msg,2);
+         msg->payload[0]     = COAP_OPTION_NUM_CONTENTFORMAT << 4 | 1;
+         msg->payload[1]     = COAP_MEDTYPE_APPLINKFORMAT;
+         
+         // set the CoAP header
+         coap_header->Code   = COAP_CODE_RESP_CONTENT;
+         
+         outcome             = E_SUCCESS;
+         
+         break;
+      default:
+         outcome             = E_FAIL;
+         break;
    }
+   
    return outcome;
 }
 
