@@ -54,8 +54,8 @@ void      forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void      forwarding_receive(
    OpenQueueEntry_t*    msg,
    ipv6_header_iht      ipv6_header,
-   ipv6_hopbyhop_ht     ipv6_hop_header,
-   rpl_hopoption_ht     hop_by_hop_option
+   ipv6_hopbyhop_iht    ipv6_hop_header,
+   rpl_option_ht        rpl_option
 );
 
 /**

@@ -17,22 +17,22 @@
 
 //=========================== prototypes ======================================
 
-void      forwarding_getNextHop_RoutingTable(
+void      forwarding_getNextHop(
    open_addr_t*         destination,
    open_addr_t*         addressToWrite
 );
 owerror_t forwarding_send_internal_RoutingTable(
    OpenQueueEntry_t*    msg,
    ipv6_header_iht      ipv6_header,
-   rpl_hopoption_ht     hopbyhop_header,
+   rpl_option_ht        rpl_option,
    uint8_t              fw_SendOrfw_Rcv
 );
 owerror_t forwarding_send_internal_SourceRouting(
    OpenQueueEntry_t*    msg,
    ipv6_header_iht      ipv6_header
 );
-void      forwarding_createHopByHopOption(
-   rpl_hopoption_ht*    hopbyhop_opt,
+void      forwarding_createRplOption(
+   rpl_option_ht*       rpl_option,
    uint8_t              flags
 );
 
@@ -54,7 +54,7 @@ at this mote.
 */
 owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    ipv6_header_iht      ipv6_header;
-   rpl_hopoption_ht     hopbyhop_opt;
+   rpl_option_ht        rpl_option;
    open_addr_t*         myprefix;
    open_addr_t*         myadd64;
    
@@ -80,12 +80,17 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    ipv6_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
    
    // create the RPL hop-by-hop option
-   forwarding_createHopByHopOption(
-      &hopbyhop_opt,    // hopbyhop_opt to fill in
+   forwarding_createRplOption(
+      &rpl_option,      // rpl_option to fill in
       0x00              // flags
    );
    
-   return forwarding_send_internal_RoutingTable(msg,ipv6_header,hopbyhop_opt,PCKTSEND);
+   return forwarding_send_internal_RoutingTable(
+      msg,
+      ipv6_header,
+      rpl_option,
+      PCKTSEND
+   );
 }
 
 /**
@@ -140,13 +145,13 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 \param[in,out] msg               The packet just sent.
 \param[in]     ipv6_header       The information contained in the IPv6 header.
 \param[in]     ipv6_hop_header   The hop-by-hop header present in the packet.
-\param[in]     hop_by_hop_option The hop-by-hop options present in the packet.
+\param[in]     rpl_option        The hop-by-hop options present in the packet.
 */
 void forwarding_receive(
       OpenQueueEntry_t* msg,
       ipv6_header_iht   ipv6_header,
-      ipv6_hopbyhop_ht  ipv6_hop_header,
-      rpl_hopoption_ht  hop_by_hop_option
+      ipv6_hopbyhop_iht ipv6_hop_header,
+      rpl_option_ht     rpl_option
    ) {
    
    // take ownership
@@ -212,7 +217,7 @@ void forwarding_receive(
       if (ipv6_header.next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
          
-         if ((hop_by_hop_option.flags & O_FLAG)!=0){
+         if ((rpl_option.flags & O_FLAG)!=0){
             // wrong direction
             
             // log error
@@ -224,25 +229,32 @@ void forwarding_receive(
             );
          }
          
-         if (hop_by_hop_option.senderRank < neighbors_getMyDAGrank()){
+         if (rpl_option.senderRank < neighbors_getMyDAGrank()){
             // loop
             
             // set flag
-            hop_by_hop_option.flags |= R_FLAG;
+            rpl_option.flags |= R_FLAG;
             
             // log error
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_LOOP_DETECTED,
-               (errorparameter_t) hop_by_hop_option.senderRank,
+               (errorparameter_t) rpl_option.senderRank,
                (errorparameter_t) neighbors_getMyDAGrank()
             );
          }
          
-         forwarding_createHopByHopOption(&hop_by_hop_option, hop_by_hop_option.flags);
+         forwarding_createRplOption(&rpl_option, rpl_option.flags);
          
          // resend as if from upper layer
-         if (forwarding_send_internal_RoutingTable(msg, ipv6_header,hop_by_hop_option,PCKTFORWARD)==E_FAIL) {
+         if (
+               forwarding_send_internal_RoutingTable(
+                  msg,
+                  ipv6_header,
+                  rpl_option,
+                  PCKTFORWARD
+               )==E_FAIL
+            ) {
             openqueue_freePacketBuffer(msg);
          }
       } else {
@@ -272,7 +284,7 @@ void forwarding_receive(
 \param[in]  destination128b  Final IPv6 destination address.
 \param[out] addressToWrite64b Location to write the EUI64 of next hop to.
 */
-void forwarding_getNextHop_RoutingTable(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
+void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
    uint8_t         i;
    open_addr_t     temp_prefix64btoWrite;
    
@@ -296,19 +308,19 @@ void forwarding_getNextHop_RoutingTable(open_addr_t* destination128b, open_addr_
 
 \param[in,out] msg             The packet to send.
 \param[in]     ipv6_header     The packet's IPv6 header.
-\param[in]     hopbyhop_opt    The hop-by-hop option to add in this packet.
+\param[in]     rpl_option      The hop-by-hop option to add in this packet.
 \param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
 owerror_t forwarding_send_internal_RoutingTable(
       OpenQueueEntry_t*      msg,
       ipv6_header_iht        ipv6_header,
-      rpl_hopoption_ht       hopbyhop_opt,
+      rpl_option_ht          rpl_option,
       uint8_t                fw_SendOrfw_Rcv
    ) {
    
    // retrieve the next hop from the routing table
-   forwarding_getNextHop_RoutingTable(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
+   forwarding_getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
    if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
       openserial_printError(
          COMPONENT_FORWARDING,
@@ -320,7 +332,12 @@ owerror_t forwarding_send_internal_RoutingTable(
    }
    
    // send to next lower layer
-   return iphc_sendFromForwarding(msg, ipv6_header, &hopbyhop_opt,fw_SendOrfw_Rcv);
+   return iphc_sendFromForwarding(
+      msg,
+      ipv6_header,
+      &rpl_option,
+      fw_SendOrfw_Rcv
+   );
 }
 
 /**
@@ -344,10 +361,10 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t* msg, ipv6_hea
    uint8_t              octetsAddressSize;
    open_addr_t*         prefix;
    rpl_routing_ht*      rpl_routing_hdr;
-   rpl_hopoption_ht     hopbyhop_opt;
+   rpl_option_ht        rpl_option;
    
    // reset hop-by-hop option
-   memset(&hopbyhop_opt,0,sizeof(rpl_hopoption_ht));
+   memset(&rpl_option,0,sizeof(rpl_option_ht));
    
    // get my prefix
    prefix               = idmanager_getMyID(ADDR_PREFIX);
@@ -533,17 +550,26 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t* msg, ipv6_hea
    }
    
    // send to next lower layer
-   return iphc_sendFromForwarding(msg, ipv6_header,&hopbyhop_opt, PCKTFORWARD);
+   return iphc_sendFromForwarding(msg, ipv6_header,&rpl_option, PCKTFORWARD);
 }
 
-void forwarding_createHopByHopOption(rpl_hopoption_ht* hopbyhop_opt, uint8_t flags) {
+
+/**
+\brief Create a RPL option.
+
+\param[out] rpl_option A pointer to the structure to fill in.
+\param[in]  flags      The flags to indicate in the RPL option.
+*/
+void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
    // set the RPL hop-by-hop header
-   hopbyhop_opt->optionType       = RPL_HOPBYHOP_HEADER_OPTION_TYPE;
+   rpl_option->optionType         = RPL_HOPBYHOP_HEADER_OPTION_TYPE;
    
    // 8-bit field indicating the length of the option, in
    // octets, excluding the Option Type and Opt Data Len fields.
-   hopbyhop_opt->optionLen        = 0x04; //4-bytes, flags+instanceID+senderrank - no sub-tlvs
-   hopbyhop_opt->flags            = flags;
-   hopbyhop_opt->rplInstanceID    = icmpv6rpl_getRPLIntanceID(); //getit..
-   hopbyhop_opt->senderRank       = neighbors_getMyDAGrank(); //TODO change to DAGRAnk(rank) instead of rank
+   // 4-bytes, flags+instanceID+senderrank - no sub-tlvs
+   rpl_option->optionLen          = 0x04; 
+   
+   rpl_option->flags              = flags;
+   rpl_option->rplInstanceID      = icmpv6rpl_getRPLIntanceID();
+   rpl_option->senderRank         = neighbors_getMyDAGrank();
 }

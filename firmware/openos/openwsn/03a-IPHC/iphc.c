@@ -13,7 +13,7 @@
 //=========================== prototypes ======================================
 
 //===== IPv6 header
-owerror_t prependIPv6Header(
+owerror_t iphc_prependIPv6Header(
    OpenQueueEntry_t*    msg,
    uint8_t              tf,
    uint32_t             value_flowLabel,
@@ -31,19 +31,19 @@ owerror_t prependIPv6Header(
    open_addr_t*         value_src,
    uint8_t              fw_SendOrfw_Rcv
 );
-ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg);
+ipv6_header_iht iphc_retrieveIPv6Header(OpenQueueEntry_t* msg);
 
 //===== IPv6 hop-by-hop header
-void prependIPv6HopByHopHeader(
+void iphc_prependIPv6HopByHopHeader(
    OpenQueueEntry_t*    msg,
    uint8_t              nextheader,
    uint8_t              nh,
-   rpl_hopoption_ht*    hopbyhop_option
+   rpl_option_ht*       rpl_option
 );
-void retrieveIPv6HopByHopHeader(
+void iphc_retrieveIPv6HopByHopHeader(
    OpenQueueEntry_t*    msg,
-   ipv6_hopbyhop_ht*    hopbyhop_header,
-   rpl_hopoption_ht*    rpl_option
+   ipv6_hopbyhop_iht*   hopbyhop_header,
+   rpl_option_ht*       rpl_option
 );
 
 //=========================== public ==========================================
@@ -52,7 +52,12 @@ void      iphc_init() {
 }
 
 // send from upper layer: I need to add 6LoWPAN header
-owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_header, rpl_hopoption_ht *hopbyhop_option, uint8_t fw_SendOrfw_Rcv) {
+owerror_t iphc_sendFromForwarding(
+      OpenQueueEntry_t* msg,
+      ipv6_header_iht   ipv6_header,
+      rpl_option_ht*    rpl_option,
+      uint8_t           fw_SendOrfw_Rcv
+   ) {
    open_addr_t  temp_dest_prefix;
    open_addr_t  temp_dest_mac64b;
    open_addr_t* p_dest;
@@ -144,14 +149,14 @@ owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, ipv6_header_iht ipv6_he
    
    //prepend Option hop by hop header except when src routing and dst is not 0xffff -- this is a little trick as src routing is using an option header set to 0x00
    next_header=msg->l4_protocol;
-   if (hopbyhop_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE 
+   if (rpl_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE 
        && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE ){
-      prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, hopbyhop_option);
+      iphc_prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, rpl_option);
       //change nh to point to the newly added header
       next_header=IANA_IPv6HOPOPT;// use 0x00 as NH to indicate option header -- see rfc 2460
    }
    //then regular header
-   if (prependIPv6Header(msg,
+   if (iphc_prependIPv6Header(msg,
             IPHC_TF_ELIDED,
             0, // value_flowlabel is not copied
             nh,
@@ -198,13 +203,13 @@ void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
 void iphc_receive(OpenQueueEntry_t* msg) {
    ipv6_header_iht      ipv6_header;
-   ipv6_hopbyhop_ht     ipv6_hop_header;
-   rpl_hopoption_ht     hop_by_hop_option;
+   ipv6_hopbyhop_iht    ipv6_hop_header;
+   rpl_option_ht        rpl_option;
    
    msg->owner      = COMPONENT_IPHC;
    
    // then regular header
-   ipv6_header     = retrieveIPv6Header(msg);
+   ipv6_header     = iphc_retrieveIPv6Header(msg);
    
    if (idmanager_getIsBridge()==FALSE ||
       packetfunctions_isBroadcastMulticast(&(ipv6_header.dest))) {
@@ -212,11 +217,11 @@ void iphc_receive(OpenQueueEntry_t* msg) {
       
       if (ipv6_header.next_header==IANA_IPv6HOPOPT) {
           //retrieve hop by hop header
-          retrieveIPv6HopByHopHeader(msg,&ipv6_hop_header,&hop_by_hop_option);
+          iphc_retrieveIPv6HopByHopHeader(msg,&ipv6_hop_header,&rpl_option);
           //toss the header + option +tlv on it if any
           packetfunctions_tossHeader(msg,IPv6HOP_HDR_LEN+ipv6_hop_header.HdrExtLen);
       }
-      forwarding_receive(msg,ipv6_header,ipv6_hop_header,hop_by_hop_option);       //up the internal stack
+      forwarding_receive(msg,ipv6_header,ipv6_hop_header,rpl_option);       //up the internal stack
    } else {
       openbridge_receive(msg);                   //out to the OpenVisualizer
    }
@@ -229,7 +234,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
 /**
 \brief Prepend an IPv6 header to a message.
 */
-owerror_t prependIPv6Header(
+owerror_t iphc_prependIPv6Header(
       OpenQueueEntry_t* msg,
       uint8_t           tf,
       uint32_t          value_flowLabel,
@@ -455,7 +460,7 @@ owerror_t prependIPv6Header(
 /**
 \brief Retrieve an IPv6 header from a message.
 */
-ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
+ipv6_header_iht iphc_retrieveIPv6Header(OpenQueueEntry_t* msg) {
    uint8_t         temp_8b;
    open_addr_t     temp_addr_16b;
    open_addr_t     temp_addr_64b;
@@ -691,22 +696,22 @@ ipv6_header_iht retrieveIPv6Header(OpenQueueEntry_t* msg) {
 \param[in,out] msg             The message to prepend the header to.
 \param[in]     nextheader      The next header value to use.
 \param[in]     nh              Whether the next header is inline or compressed.
-\param[in]     hopbyhop_option The hop-by-hop option.
+\param[in]     rpl_option      The RPL option to include.
 */
-void prependIPv6HopByHopHeader(
+void iphc_prependIPv6HopByHopHeader(
       OpenQueueEntry_t* msg,
       uint8_t           nextheader,
       uint8_t           nh,
-      rpl_hopoption_ht* hopbyhop_option
+      rpl_option_ht*    rpl_option
    ){
    
-   // hop-by-hop options
-   packetfunctions_reserveHeaderSize(msg,sizeof(rpl_hopoption_ht));
-   memcpy(msg->payload,hopbyhop_option,sizeof(rpl_hopoption_ht));
+   // RPL option
+   packetfunctions_reserveHeaderSize(msg,sizeof(rpl_option_ht));
+   memcpy(msg->payload,rpl_option,sizeof(rpl_option_ht));
    
    // header length (http://tools.ietf.org/html/rfc6282#section-4.2)
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-   *((uint8_t*)(msg->payload)) = sizeof(rpl_hopoption_ht);
+   *((uint8_t*)(msg->payload)) = sizeof(rpl_option_ht);
    
    // next header
    switch (nh) {
@@ -742,10 +747,10 @@ void prependIPv6HopByHopHeader(
 \param[out]    rpl_option      Pointer to the structure to hold the retrievef
    RPL option.
 */
-void retrieveIPv6HopByHopHeader(
-      OpenQueueEntry_t* msg,
-      ipv6_hopbyhop_ht* hopbyhop_header,
-      rpl_hopoption_ht* rpl_option
+void iphc_retrieveIPv6HopByHopHeader(
+      OpenQueueEntry_t*      msg,
+      ipv6_hopbyhop_iht*     hopbyhop_header,
+      rpl_option_ht*         rpl_option
    ){
    uint8_t temp_8b;
    
@@ -785,9 +790,9 @@ void retrieveIPv6HopByHopHeader(
    hopbyhop_header->HdrExtLen     = *((uint8_t*)(msg->payload)+hopbyhop_header->headerlen);
    hopbyhop_header->headerlen    += sizeof(uint8_t);  
    
-   // hop-by-hop option
-   memcpy(rpl_option,((uint8_t*)(msg->payload)+hopbyhop_header->headerlen),sizeof(rpl_hopoption_ht));
-   hopbyhop_header->headerlen+= sizeof(rpl_hopoption_ht);  
+   // RPL option
+   memcpy(rpl_option,((uint8_t*)(msg->payload)+hopbyhop_header->headerlen),sizeof(rpl_option_ht));
+   hopbyhop_header->headerlen+= sizeof(rpl_option_ht);  
    
    // next header
    if (hopbyhop_header->next_header_compressed==TRUE) {
