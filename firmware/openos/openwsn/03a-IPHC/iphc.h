@@ -9,10 +9,11 @@
 */
 
 #include "openwsn.h"
+
 //=========================== define ==========================================
 
-#define IPHC_DEFAULT_HOP_LIMIT 65
-#define IPv6HOP_HDR_LEN         3
+#define IPHC_DEFAULT_HOP_LIMIT    65
+#define IPv6HOP_HDR_LEN           3
 
 enum IPHC_enums {
    IPHC_DISPATCH             = 5,
@@ -53,9 +54,9 @@ enum NHC_enums {
 };
 
 enum NHC_IPv6HOP_enums {
-   NHC_IPv6HOP_MASK        = 0x0e,
-   NHC_IPv6HOP_VAL         = 0x0e,
-   NHC_HOP_NH_MASK         = 0x01,
+   NHC_IPv6HOP_MASK          = 0x0e,
+   NHC_IPv6HOP_VAL           = 0x0e,
+   NHC_HOP_NH_MASK           = 0x01,
 };
 
 
@@ -123,10 +124,11 @@ typedef struct {
    open_addr_t src;
    open_addr_t dest;
    uint8_t     header_length;          ///< needed to toss the header
-} ipv6_header_iht; //iht for "internal header type"
+} ipv6_header_iht; // iht for "internal header type"
 
 
-/*
+/**
+\brief 
  The Hop-by-Hop Options header is used to carry optional information
    that must be examined by every node along a packet's delivery path.
    The Hop-by-Hop Options header is identified by a Next Header value of
@@ -149,7 +151,6 @@ typedef struct {
    size in 8-octet units, not including the first 8 octets.  Changing
    the Length field to be in units of octets removes wasteful internal
    fragmentation.*/
-   
 } ipv6_hopbyhop_ht;
 
 PRAGMA(pack(1));
@@ -162,19 +163,21 @@ typedef struct {
    uint16_t   senderRank;    //sender rank
 } rpl_hopoption_ht;
 PRAGMA(pack());
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-void    iphc_init();
-owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, 
-                                  ipv6_header_iht ipv6_header, 
-                                  rpl_hopoption_ht *hopbyhop_option, 
-                                  uint8_t fw_SendOrfw_Rcv);
-
-owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg);
-void    iphc_sendDone(OpenQueueEntry_t *msg, owerror_t error);
-void    iphc_receive(OpenQueueEntry_t *msg);
+void          iphc_init();
+owerror_t     iphc_sendFromForwarding(
+   OpenQueueEntry_t*    msg, 
+   ipv6_header_iht      ipv6_header, 
+   rpl_hopoption_ht*    hopbyhop_option, 
+   uint8_t              fw_SendOrfw_Rcv
+);
+owerror_t     iphc_sendFromBridge(OpenQueueEntry_t *msg);
+void          iphc_sendDone(OpenQueueEntry_t *msg, owerror_t error);
+void          iphc_receive(OpenQueueEntry_t *msg);
 
 /**
 \}
