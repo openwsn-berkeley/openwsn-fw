@@ -23,13 +23,13 @@ void      forwarding_getNextHop(
 );
 owerror_t forwarding_send_internal_RoutingTable(
    OpenQueueEntry_t*    msg,
-   ipv6_header_iht      ipv6_header,
-   rpl_option_ht        rpl_option,
+   ipv6_header_iht*     ipv6_header,
+   rpl_option_ht*       rpl_option,
    uint8_t              fw_SendOrfw_Rcv
 );
 owerror_t forwarding_send_internal_SourceRouting(
    OpenQueueEntry_t*    msg,
-   ipv6_header_iht      ipv6_header
+   ipv6_header_iht*     ipv6_header
 );
 void      forwarding_createRplOption(
    rpl_option_ht*       rpl_option,
@@ -87,8 +87,8 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    
    return forwarding_send_internal_RoutingTable(
       msg,
-      ipv6_header,
-      rpl_option,
+      &ipv6_header,
+      &rpl_option,
       PCKTSEND
    );
 }
@@ -148,40 +148,40 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 \param[in]     rpl_option        The hop-by-hop options present in the packet.
 */
 void forwarding_receive(
-      OpenQueueEntry_t* msg,
-      ipv6_header_iht   ipv6_header,
-      ipv6_hopbyhop_iht ipv6_hop_header,
-      rpl_option_ht     rpl_option
+      OpenQueueEntry_t*      msg,
+      ipv6_header_iht*       ipv6_header,
+      ipv6_hopbyhop_iht*     ipv6_hop_header,
+      rpl_option_ht*         rpl_option
    ) {
    
    // take ownership
    msg->owner                     = COMPONENT_FORWARDING;
    
    // determine L4 protocol
-   if (ipv6_header.next_header==IANA_IPv6HOPOPT){
+   if (ipv6_header->next_header==IANA_IPv6HOPOPT){
       // get information from ipv6_hop_header
       
-      msg->l4_protocol            = ipv6_hop_header.nextHeader;
-      msg->l4_protocol_compressed = ipv6_hop_header.next_header_compressed;
+      msg->l4_protocol            = ipv6_hop_header->nextHeader;
+      msg->l4_protocol_compressed = ipv6_hop_header->next_header_compressed;
    } else {
       // get information from ipv6_header
       
-      msg->l4_protocol            = ipv6_header.next_header;
-      msg->l4_protocol_compressed = ipv6_header.next_header_compressed;
+      msg->l4_protocol            = ipv6_header->next_header;
+      msg->l4_protocol_compressed = ipv6_header->next_header_compressed;
    }
    
    // populate packets metadata with L3 information
-   memcpy(&(msg->l3_destinationAdd),&ipv6_header.dest,sizeof(open_addr_t));
-   memcpy(&(msg->l3_sourceAdd),     &ipv6_header.src, sizeof(open_addr_t));
+   memcpy(&(msg->l3_destinationAdd),&ipv6_header->dest,sizeof(open_addr_t));
+   memcpy(&(msg->l3_sourceAdd),     &ipv6_header->src, sizeof(open_addr_t));
    
    if (
          (
-            idmanager_isMyAddress(&ipv6_header.dest)
+            idmanager_isMyAddress(&ipv6_header->dest)
             ||
-            packetfunctions_isBroadcastMulticast(&ipv6_header.dest)
+            packetfunctions_isBroadcastMulticast(&ipv6_header->dest)
          )
          &&
-         ipv6_header.next_header!=IANA_IPv6ROUTE
+         ipv6_header->next_header!=IANA_IPv6ROUTE
       ) {
       // this packet is for me, no source routing header.
 
@@ -214,10 +214,10 @@ void forwarding_receive(
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
       
-      if (ipv6_header.next_header!=IANA_IPv6ROUTE) {
+      if (ipv6_header->next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
          
-         if ((rpl_option.flags & O_FLAG)!=0){
+         if ((rpl_option->flags & O_FLAG)!=0){
             // wrong direction
             
             // log error
@@ -229,22 +229,22 @@ void forwarding_receive(
             );
          }
          
-         if (rpl_option.senderRank < neighbors_getMyDAGrank()){
+         if (rpl_option->senderRank < neighbors_getMyDAGrank()){
             // loop
             
             // set flag
-            rpl_option.flags |= R_FLAG;
+            rpl_option->flags |= R_FLAG;
             
             // log error
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_LOOP_DETECTED,
-               (errorparameter_t) rpl_option.senderRank,
+               (errorparameter_t) rpl_option->senderRank,
                (errorparameter_t) neighbors_getMyDAGrank()
             );
          }
          
-         forwarding_createRplOption(&rpl_option, rpl_option.flags);
+         forwarding_createRplOption(rpl_option, rpl_option->flags);
          
          // resend as if from upper layer
          if (
@@ -314,8 +314,8 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
 */
 owerror_t forwarding_send_internal_RoutingTable(
       OpenQueueEntry_t*      msg,
-      ipv6_header_iht        ipv6_header,
-      rpl_option_ht          rpl_option,
+      ipv6_header_iht*       ipv6_header,
+      rpl_option_ht*         rpl_option,
       uint8_t                fw_SendOrfw_Rcv
    ) {
    
@@ -335,7 +335,7 @@ owerror_t forwarding_send_internal_RoutingTable(
    return iphc_sendFromForwarding(
       msg,
       ipv6_header,
-      &rpl_option,
+      rpl_option,
       fw_SendOrfw_Rcv
    );
 }
@@ -351,7 +351,10 @@ http://tools.ietf.org/html/rfc6554#page-9.
 \param[in,out] msg             The packet to send.
 \param[in]     ipv6_header     The packet's IPv6 header.
 */
-owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t* msg, ipv6_header_iht ipv6_header) {
+owerror_t forwarding_send_internal_SourceRouting(
+      OpenQueueEntry_t* msg,
+      ipv6_header_iht*  ipv6_header
+   ) {
    uint8_t              local_CmprE;
    uint8_t              local_CmprI;
    uint8_t              numAddr;
@@ -550,7 +553,12 @@ owerror_t forwarding_send_internal_SourceRouting(OpenQueueEntry_t* msg, ipv6_hea
    }
    
    // send to next lower layer
-   return iphc_sendFromForwarding(msg, ipv6_header,&rpl_option, PCKTFORWARD);
+   return iphc_sendFromForwarding(
+      msg,
+      ipv6_header,
+      &rpl_option,
+      PCKTFORWARD
+   );
 }
 
 

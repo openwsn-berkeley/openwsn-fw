@@ -176,7 +176,7 @@ PRAGMA(pack());
 void          iphc_init();
 owerror_t     iphc_sendFromForwarding(
    OpenQueueEntry_t*    msg, 
-   ipv6_header_iht      ipv6_header, 
+   ipv6_header_iht*     ipv6_header, 
    rpl_option_ht*       rpl_option, 
    uint8_t              fw_SendOrfw_Rcv
 );
