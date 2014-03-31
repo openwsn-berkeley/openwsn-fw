@@ -62,6 +62,10 @@
 #define PORT_delayRx                        0     //    0us (can not measure)
 // radio watchdog
 
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       1 // when using openmoteSTM, change to 2
+
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================

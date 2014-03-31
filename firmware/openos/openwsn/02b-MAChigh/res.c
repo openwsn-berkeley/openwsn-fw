@@ -34,6 +34,7 @@ void res_init() {
    res_vars.timerId = opentimers_start(res_vars.periodMaintenance,
                                        TIMER_PERIODIC,TIME_MS,
                                        res_timer_cb);
+   res_vars.kaPeriod          = KATIMEOUT;
 }
 
 /**
@@ -57,6 +58,14 @@ owerror_t res_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_RES;
    msg->l2_frameType = IEEE154_TYPE_DATA;
    return res_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
+}
+
+void res_setKaPeriod(uint16_t kaPeriod) {
+   if(kaPeriod > KATIMEOUT) {
+     res_vars.kaPeriod = KATIMEOUT;
+   } else {
+     res_vars.kaPeriod = kaPeriod;
+   } 
 }
 
 //======= from lower layer
@@ -427,7 +436,7 @@ port_INLINE void sendKa() {
       return;
    }
    
-   kaNeighAddr = neighbors_getKANeighbor();
+   kaNeighAddr = neighbors_getKANeighbor(res_vars.kaPeriod);
    if (kaNeighAddr==NULL) {
       // don't proceed if I have no neighbor I need to send a KA to
       return;

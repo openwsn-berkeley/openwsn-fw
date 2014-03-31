@@ -63,7 +63,7 @@ to this board.
 //===== IEEE802154E timing
 
 // time-slot related
-#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
 
 // execution speed related
 #define PORT_maxTxDataPrepare               100    //  2899us (measured 2420us)
@@ -74,6 +74,10 @@ to this board.
 // radio speed related
 #define PORT_delayTx                        12    //   366us (measured  352us)
 #define PORT_delayRx                        0     //     0us (can not measure)
+
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       1     // ticks
 
 //=========================== variables =======================================
 
