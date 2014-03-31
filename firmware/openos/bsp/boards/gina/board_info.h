@@ -68,7 +68,6 @@ to return the board's description.
 
 // time-slot related
 #define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
-//#define PORT_TsSlotDuration                 492   // when gina mote need to communicate with OpenMoteSTM, use this value to acheive synchronization
 
 // execution speed related
 #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)

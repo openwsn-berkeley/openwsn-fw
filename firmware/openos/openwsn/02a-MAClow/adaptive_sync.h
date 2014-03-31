@@ -17,8 +17,6 @@
 
 //=========================== define ==========================================
 
-#define SYNC_ACCURACY        1 // when using openmoteSTM, change to 2
-
 typedef enum {
    S_NONE          = 0x00,
    S_FASTER        = 0x01,
@@ -51,7 +49,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void adaptive_sync_init();
-void adaptive_sync_recordLastASN(int16_t timeCorrection, open_addr_t timesource);
+void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource);
 void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection);
 
 void adaptive_sync_countCompensationTimeout();

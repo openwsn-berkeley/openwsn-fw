@@ -17,7 +17,10 @@
 #include "openqueue.h"
 #include "openrandom.h"
 
-//=========================== define ==========================================   
+//=========================== define ==========================================
+
+#define BASIC_SCHEDULE_PERIOD         872
+#define BASIC_COMPENSATION_THRESHOLD  58
 
 //=========================== type ============================================
 
@@ -39,7 +42,7 @@ bool adaptive_sync_driftChanged();
 void adaptive_sync_init(){  
    memset(&adaptive_sync_vars,0x00,sizeof(adaptive_sync_vars_t));
    adaptive_sync_vars.clockState              = S_NONE;
-   adaptive_sync_vars.timerPeriod             = 872+(openrandom_get16b()&0xff);
+   adaptive_sync_vars.timerPeriod             = BASIC_SCHEDULE_PERIOD+(openrandom_get16b()&0xff);
    adaptive_sync_vars.timerId                 = opentimers_start(
       adaptive_sync_vars.timerPeriod,
       TIMER_PERIODIC,
@@ -47,7 +50,7 @@ void adaptive_sync_init(){
       adaptive_sync_timer_cb
    );
    adaptive_sync_vars.sumOfTC                 = 0;
-   adaptive_sync_vars.compensateThreshold     = 58; // 58 slots == 872 ms/15ms
+   adaptive_sync_vars.compensateThreshold     = BASIC_COMPENSATION_THRESHOLD;
    adaptive_sync_vars.adaptiveProcessStarted  = FALSE;
 }
 
@@ -60,7 +63,7 @@ void adaptive_sync_init(){
 
 \return the number of slots
 */
-void adaptive_sync_recordLastASN(int16_t timeCorrection, open_addr_t timesource){
+void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource){
    uint8_t array[5];
    
    // stop calculating compensation period when compensateThreshold exceeds KATIMEOUT 
@@ -94,14 +97,14 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, open_addr_t timesource)
         // following condition is used to detect the change of drift.
         if (adaptive_sync_driftChanged() == TRUE) {
           // reset adaptive_sync timer period
-          adaptive_sync_vars.timerPeriod                 = 872+(openrandom_get16b()&0xff);
+          adaptive_sync_vars.timerPeriod                 = BASIC_SCHEDULE_PERIOD+(openrandom_get16b()&0xff);
           opentimers_setPeriod(
               adaptive_sync_vars.timerId,
               TIME_MS,
               adaptive_sync_vars.timerPeriod
           );
           adaptive_sync_vars.sumOfTC                     = 0;
-          adaptive_sync_vars.compensateThreshold         = 58;
+          adaptive_sync_vars.compensateThreshold         = BASIC_COMPENSATION_THRESHOLD;
           // update oldASN
           ieee154e_getAsn(array);
           adaptive_sync_vars.oldASN.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
@@ -136,7 +139,8 @@ void adaptive_sync_recordLastASN(int16_t timeCorrection, open_addr_t timesource)
 \returns compensationSlots the number of slots. 
 */
 void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection) {
-   bool isFirstSync; // is this the first sync after joining network?
+   bool     isFirstSync;              // is this the first sync after joining network?
+   uint16_t totalTimeCorrectionTicks; // how much error in ticks since last synchronization.
    if(adaptive_sync_vars.clockState == S_NONE) {
      isFirstSync = TRUE;
    } else {
@@ -147,20 +151,29 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection) {
    if(isFirstSync) {
      if(timeCorrection > 1) {
        adaptive_sync_vars.clockState = S_FASTER;
-       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots/timeCorrection;
+       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots  = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots;
+       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots /= timeCorrection;
      } else {
        if(timeCorrection < -1) {
          adaptive_sync_vars.clockState = S_SLOWER;
-         adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots/(-timeCorrection);
+         adaptive_sync_vars.compensationInfo_vars[0].compensationSlots  = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots;
+         adaptive_sync_vars.compensationInfo_vars[0].compensationSlots /= (-timeCorrection);
        } else {
          //timeCorrection = {-1,1}, it's not accurate when timeCorrection belongs to {-1,1}
+         //nothing is needed to do with this case.
        }
      }
    } else {
      if(adaptive_sync_vars.clockState == S_SLOWER) {
-       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots/(adaptive_sync_vars.compensateTicks-(timeCorrection+adaptive_sync_vars.sumOfTC));
+       totalTimeCorrectionTicks                                       = adaptive_sync_vars.compensateTicks;
+       totalTimeCorrectionTicks                                      -= timeCorrection+adaptive_sync_vars.sumOfTC;
+       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots  = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots;
+       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots /= totalTimeCorrectionTicks;
      } else {
-       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots/(adaptive_sync_vars.compensateTicks+(timeCorrection+adaptive_sync_vars.sumOfTC));
+       totalTimeCorrectionTicks                                       = adaptive_sync_vars.compensateTicks;
+       totalTimeCorrectionTicks                                      += timeCorrection+adaptive_sync_vars.sumOfTC;
+       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots  = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots;
+       adaptive_sync_vars.compensationInfo_vars[0].compensationSlots /= totalTimeCorrectionTicks
      }
    }
      
@@ -168,11 +181,13 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection) {
 }
 
 /**
-\brief Counts compensationTimeout at each slot by minus one.
+\brief update compensationTimeout at the beginning of each slot and adjust current slot length when the elapsed slots rearch to compensation interval.
 
-Once compensationTimeout == 0, adjust correct slot length.
+Once compensationTimeout == 0, extend or shorten current slot length for one tick.
 */
 void adaptive_sync_countCompensationTimeout() {
+   uint16_t newSlotDuration;
+   newSlotDuration  = TsSlotDuration;
    // if clockState is not set yet, don't compensate.
    if(adaptive_sync_vars.clockState == S_NONE) {
      return;
@@ -184,26 +199,28 @@ void adaptive_sync_countCompensationTimeout() {
    // when compensationTimeout, adjust current slot length
    if(adaptive_sync_vars.compensationTimeout == 0) {
      if(adaptive_sync_vars.clockState == S_SLOWER) {
-       radio_setTimerPeriod(TsSlotDuration-SYNC_ACCURACY);
+       newSlotDuration                    -= SYNC_ACCURACY;
        adaptive_sync_vars.compensateTicks += SYNC_ACCURACY;
      } else { // clock is fast
-       radio_setTimerPeriod(TsSlotDuration+SYNC_ACCURACY);
+       newSlotDuration                    += SYNC_ACCURACY;
        adaptive_sync_vars.compensateTicks += SYNC_ACCURACY;
      }
-     // reload compensationTimeout
+     // update current slot duration and reload compensationTimeout
+     radio_setTimerPeriod(newSlotDuration);
      adaptive_sync_vars.compensationTimeout = adaptive_sync_vars.compensationInfo_vars[0].compensationSlots;
    }
 }
 
 /**
-\brief Count compensationTimeout at each slot by minus one when compundSlots are scheduled (e.g. SERIALRX slots)
+\brief update compensationTimeout when compound slots are scheduled and adjust the slot when the elapsed slots rearch to compensation interval(e.g. SERIALRX slots)
 
 \param[in] compoundSlots how many slots will be elapsed before wakeup next time.
 */
 void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots) {
    uint16_t counter;
    uint8_t  compensateTicks;
- 
+   uint16_t newSlotDuration;
+   newSlotDuration  = TsSlotDuration*(compoundSlots+1);
    // if clockState is not set yet, don't compensate.
    if(adaptive_sync_vars.clockState == S_NONE) {
      return;
@@ -229,12 +246,13 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
    // when compensateTicks > 0, I need to do compensation by adjusting current slot length
    if(compensateTicks > 0) {
      if(adaptive_sync_vars.clockState == S_SLOWER) {
-       radio_setTimerPeriod(TsSlotDuration*(compoundSlots+1)-compensateTicks*SYNC_ACCURACY);
+       newSlotDuration                    -= compensateTicks*SYNC_ACCURACY;
        adaptive_sync_vars.compensateTicks += compensateTicks*SYNC_ACCURACY;
      } else { // clock is fast
-       radio_setTimerPeriod(TsSlotDuration*(compoundSlots+1)+compensateTicks*SYNC_ACCURACY);
+       newSlotDuration                    += compensateTicks*SYNC_ACCURACY;
        adaptive_sync_vars.compensateTicks += compensateTicks * SYNC_ACCURACY;
      }
+     radio_setTimerPeriod(newSlotDuration);
    }
 }
 
@@ -245,11 +263,11 @@ void adaptive_sync_timer_cb() {
 }
 
 /**
-\brief Timer handlers which triggers scheduling a packet to calculate drift.
+\brief Timer handler is scheduling a packet in twice times synchronization interval than last time.
 
 This function is called in task context by the scheduler after the
-adaptive_sync timer has fired. This timer is set to fire in one second after
-mote joined network.
+adaptive_sync timer has fired. This timer is set to fire in a period
+a little longer than BASIC_SCHEDULE_PERIOD.
 */
 void timer_adaptive_sync_fired() {
    OpenQueueEntry_t* pkt;
@@ -262,7 +280,7 @@ void timer_adaptive_sync_fired() {
    if(adaptive_sync_vars.timerPeriod*2 < KATIMEOUT*15) {   
      adaptive_sync_vars.timerPeriod             = adaptive_sync_vars.timerPeriod*2;
    } else {
-     adaptive_sync_vars.timerPeriod             = 872+(openrandom_get16b()&0xff);
+     adaptive_sync_vars.timerPeriod             = BASIC_SCHEDULE_PERIOD+(openrandom_get16b()&0xff);
      adaptive_sync_vars.adaptiveProcessStarted  = FALSE;
    }
     // re-schedule one packet for sending

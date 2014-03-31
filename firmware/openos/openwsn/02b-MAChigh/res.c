@@ -177,9 +177,9 @@ The body of this function executes one of the MAC management task.
 void timers_res_fired() {
    res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%ADVTIMEOUT;
    if (res_vars.MacMgtTaskCounter==0) {
-      sendAdv(); // called every 10s
+      sendAdv(); // called every ADVTIMEOUT seconds
    } else {
-      sendKa();  // called every second, except once every 10s.
+      sendKa();  // called every second, except once every ADVTIMEOUT seconds.
       //leds_debug_toggle();
    }
 }

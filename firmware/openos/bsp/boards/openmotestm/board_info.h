@@ -19,7 +19,8 @@ to return the board's description.
 //#define DEBUG_RUN_MODE
 #define DEBUG_SLEEP_MODE
 //#define DEBUG_STOP_MODE
-#define OPENMOTESTM
+
+#define SYNC_ACCURACY        1 // when using openmoteSTM, change to 2
 
 #define port_INLINE                         inline
 
