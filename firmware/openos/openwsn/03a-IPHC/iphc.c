@@ -751,9 +751,9 @@ void iphc_prependIPv6HopByHopHeader(
 \brief Retrieve an IPv6 hop-by-hop header from a message.
 
 \param[in,out] msg             The message to retrieve the header from.
-\param[out]    hopbyhop_option Pointer to the structure to hold the retrievef
+\param[out]    hopbyhop_header Pointer to the structure to hold the retrieved
    hop-by-hop option.
-\param[out]    rpl_option      Pointer to the structure to hold the retrievef
+\param[out]    rpl_option      Pointer to the structure to hold the retrieved
    RPL option.
 */
 void iphc_retrieveIPv6HopByHopHeader(
