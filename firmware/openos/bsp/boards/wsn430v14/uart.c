@@ -24,37 +24,20 @@ uart_vars_t uart_vars;
 //=========================== public ==========================================
 
 void uart_init() {
- 
-  // Selecting the I/O pins for UART1
-
-  P3SEL |= BIT6 + BIT7;
-
-  // Enabling UART1 TX and RX 
    
-  ME2 |= URXE1 + UTXE1;
-
-  // Selecting character format
-
-  UCTL1 |= CHAR;
-
-  // Sourcing UART module with a clock at a wanted frequency : 4.8MHz SMCLK, 115200 baud
-
-  UTCTL1 |= SSEL1;
-
-  // Setting baud rate generator 
-  //4.8 MHz/115200 = 41.66 
-
-  UBR01 = 0x41;
-  UBR11 = 0x00;
-  // UMCTL1 = 0x6D;  
-  UMCTL1 = 0x4A;
+   P3SEL      =  0x30;                           // P3.4,5 = UART0TX/RX
   
-  // Enabling UART1 state machine
-
-  UCTL1 &= ~SWRST;
-
-  
-    
+   U0CTL      =  SWRST;                          // hold UART0 module in reset
+   U0CTL     |=  CHAR;                           // 8-bit character
+   
+   //115200 baud, clocked from 4.8MHz SMCLK
+   U0TCTL    |=  SSEL1;                          // clocking from SMCLK
+   U0BR0      =  41;                             // 4.8MHz/115200 - 41.66
+   U0BR1      =  0x00;                           //
+   U0MCTL     =  0x4A;                           // modulation
+   
+   ME1       |=  UTXE0 + URXE0;                  // enable UART0 TX/RX
+   U0CTL     &= ~SWRST;                          // clear UART1 reset bit
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
@@ -63,28 +46,27 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
 }
 
 void    uart_enableInterrupts(){
-  IE2 |=  (URXIE1 | UTXIE1);  
+   IE1       |=  (URXIE0 | UTXIE0);
 }
 
 void    uart_disableInterrupts(){
-  IE2 &= ~(URXIE1 | UTXIE1);
+   IE1       &= ~(URXIE0 | UTXIE0);
 }
 
 void    uart_clearRxInterrupts(){
-  IFG2   &= ~URXIFG1;
+   IFG1      &= ~URXIFG0;
 }
 
 void    uart_clearTxInterrupts(){
-  IFG2   &= ~UTXIFG1;
+   IFG1      &= ~UTXIFG0;
 }
 
 void    uart_writeByte(uint8_t byteToWrite){
-  while (!(IFG2 & UTXIFG1));
-  U1TXBUF = byteToWrite;
+  U0TXBUF     = byteToWrite;
 }
 
 uint8_t uart_readByte(){
-  return U1RXBUF;
+  return U0RXBUF;
 }
 
 //=========================== private =========================================
