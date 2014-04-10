@@ -64,6 +64,10 @@ uint8_t leds_error_isOn()
 
 void    leds_error_blink()
 {
+  for(int i=0;i<16;i++) {
+    leds_error_toggle();
+    Delay();
+  }
   
 }
 
@@ -196,5 +200,5 @@ void leds_increment()
 void Delay(void)    //delay
 {
   unsigned long ik;
-  for(ik=0;ik<0xffff8;ik++) ;
+  for(ik=0;ik<0x7fff8;ik++) ;
 }
