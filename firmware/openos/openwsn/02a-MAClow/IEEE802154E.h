@@ -25,6 +25,7 @@
 #define DESYNCTIMEOUT              333 // in slots: @15ms per slot -> ~5 seconds
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
+#define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT              0x04
@@ -219,10 +220,11 @@ PRAGMA(pack(1));
 typedef struct {
    uint8_t                   numSyncPkt;    // how many times synchronized on a non-ACK packet
    uint8_t                   numSyncAck;    // how many times synchronized on an ACK
-   PORT_SIGNED_INT_WIDTH     minCorrection; // minimum time correction
-   PORT_SIGNED_INT_WIDTH     maxCorrection; // maximum time correction
+   int16_t                   minCorrection; // minimum time correction
+   int16_t                   maxCorrection; // maximum time correction
    uint8_t                   numDeSync;     // number of times a desync happened
-   float                     dutyCycle;     // mac dutyCycle at each superframe
+   uint32_t                  numTicsOn;     // mac dutyCycle
+   uint32_t                  numTicsTotal;     // total tics for which the dutycycle is computed
 } ieee154e_stats_t;
 PRAGMA(pack());
 
