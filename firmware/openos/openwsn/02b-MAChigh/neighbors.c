@@ -135,7 +135,7 @@ conditions:
 
 \returns A pointer to the neighbor's address, or NULL if no KA is needed.
 */
-open_addr_t* neighbors_getKANeighbor() {
+open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
    uint8_t         i;
    uint16_t        timeSinceHeard;
    open_addr_t*    addrPreferred;
@@ -149,7 +149,7 @@ open_addr_t* neighbors_getKANeighbor() {
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==1) {
          timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
-         if (timeSinceHeard>KATIMEOUT) {
+         if (timeSinceHeard>kaPeriod) {
             // this neighbor needs to be KA'ed to
             if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
                // its a preferred parent

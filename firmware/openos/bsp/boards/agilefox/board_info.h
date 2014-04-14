@@ -78,6 +78,10 @@ to return the board's description.
 #define PORT_delayTx                        10     //  549us (measured 315us+235) .....
 #define PORT_delayRx                        0     //    0us (can not measure)
 
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       2     // ticks
+
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================

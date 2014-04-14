@@ -23,6 +23,7 @@ typedef struct {
    uint8_t         dsn;                  // current data sequence number
    uint8_t         MacMgtTaskCounter;    // counter to determine what management task to do
    opentimer_id_t  timerId;
+   uint16_t        kaPeriod;             // period of sending KA
 } res_vars_t;
 
 //=========================== prototypes ======================================
@@ -34,6 +35,7 @@ owerror_t res_send(OpenQueueEntry_t *msg);
 // from lower layer
 void    task_resNotifSendDone();
 void    task_resNotifReceive();
+void    res_setKaPeriod(uint16_t kaPeriod);
 
 /**
 \}

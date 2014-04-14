@@ -14,6 +14,7 @@
 #include "openrandom.h"
 #include "opentimers.h"
 //-- 02a-TSCH
+#include "adaptive_sync.h"
 #include "IEEE802154E.h"
 //-- 02b-RES
 #include "schedule.h"
@@ -89,6 +90,7 @@ void openwsn_init() {
    openrandom_init();
    opentimers_init();
    //-- 02a-TSCH
+   adaptive_sync_init();
    ieee154e_init();
    //-- 02b-RES
    schedule_init();

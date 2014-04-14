@@ -67,7 +67,8 @@ to return the board's description.
 //===== IEEE802154E timing
 
 // time-slot related
-#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
+
 // execution speed related
 #define PORT_maxTxDataPrepare               66    // 2014us (measured 746us)
 #define PORT_maxRxAckPrepare                10    //  305us (measured  83us)
@@ -77,6 +78,10 @@ to return the board's description.
 #define PORT_delayTx                        7     //  214us (measured 219us)
 #define PORT_delayRx                        0     //    0us (can not measure)
 // radio watchdog
+
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       1     // ticks
 
 //=========================== typedef  ========================================
 
