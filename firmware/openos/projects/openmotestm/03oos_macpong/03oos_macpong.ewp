@@ -2150,6 +2150,12 @@
     <group>
       <name>02a-MAClow</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptive_sync.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptive_sync.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
       </file>
       <file>
