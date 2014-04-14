@@ -1,7 +1,7 @@
 /**
 \brief this file is used for the time synchronizatino between different hardware platform
 
-\auther Tengfei Chang <tengfei.chang@gmail.com>, January ,2014.
+\author Tengfei Chang <tengfei.chang@gmail.com>, January ,2014.
 */
 #include "openwsn.h"
 #include "adaptive_sync.h"
@@ -44,7 +44,6 @@ void adaptive_sync_init(){
 \brief Calculated how many slots have elapsed since last synchronized.
 
 \param[in] timeCorrection time to be corrected
-\param[in] syncMethod packet sync or ack sync
 \param[in] timesource The address of neighbor.
 
 \return the number of slots
@@ -107,7 +106,6 @@ void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource){
 \brief Calculate the compensation interval, in number of slots.
 
 \param[in] timeCorrection time to be corrected
-\param[in] syncMethod syncrhonized using packet or ack.
 
 \returns compensationSlots the number of slots. 
 */
