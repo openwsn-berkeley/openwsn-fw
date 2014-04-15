@@ -26,14 +26,20 @@ uint8_t res_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv);//returns reserved siz
 //=========================== public ==========================================
 
 void res_init() {
+   
    res_vars.periodMaintenance = 872+(openrandom_get16b()&0xff); // fires every 1 sec on average
    res_vars.busySendingKa     = FALSE;
    res_vars.busySendingAdv    = FALSE;
    res_vars.dsn               = 0;
    res_vars.MacMgtTaskCounter = 0;
-   res_vars.timerId = opentimers_start(res_vars.periodMaintenance,
-                                       TIMER_PERIODIC,TIME_MS,
-                                       res_timer_cb);
+   
+   res_vars.timerId = opentimers_start(
+      res_vars.periodMaintenance,
+      TIMER_PERIODIC,
+      TIME_MS,
+      res_timer_cb
+   );
+   
    res_vars.kaPeriod          = KATIMEOUT;
 }
 
@@ -185,11 +191,20 @@ The body of this function executes one of the MAC management task.
 */
 void timers_res_fired() {
    res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%ADVTIMEOUT;
-   if (res_vars.MacMgtTaskCounter==0) {
-      sendAdv(); // called every ADVTIMEOUT seconds
-   } else {
-      sendKa();  // called every second, except once every ADVTIMEOUT seconds.
-      //leds_debug_toggle();
+   
+   switch (res_vars.MacMgtTaskCounter) {
+      case 0:
+         // called every ADVTIMEOUT seconds
+         sendAdv();
+         break;
+      case 1:
+         // called every ADVTIMEOUT seconds
+         neighbors_removeOld();
+         break;
+      default:
+         // called every second, except twice every ADVTIMEOUT seconds
+         sendKa();
+         break;
    }
 }
 
