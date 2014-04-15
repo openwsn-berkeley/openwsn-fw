@@ -241,3 +241,4 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
 void adaptive_sync_driftChanged() {
    adaptive_sync_vars.driftChanged = TRUE;
 }
+
