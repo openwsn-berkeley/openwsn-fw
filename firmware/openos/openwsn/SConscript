@@ -55,6 +55,7 @@ sources_c = [
     os.path.join('07-App','udprand','udprand.c'),
     os.path.join('07-App','udplatency','udplatency.c'),
     os.path.join('07-App','udpstorm','udpstorm.c'),
+    os.path.join('07-App','sens_itf','sens_itf.c'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.c'),
     os.path.join('cross-layers','openqueue.c'),
@@ -111,6 +112,7 @@ sources_h = [
     os.path.join('07-App','udprand','udprand.h'),
     os.path.join('07-App','udplatency','udplatency.h'),
     os.path.join('07-App','udpstorm','udpstorm.h'),
+    os.path.join('07-App','sens_itf','sens_itf.h'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.h'),
     os.path.join('cross-layers','openqueue.h'),
@@ -173,6 +175,7 @@ else:
             os.path.join('#','firmware','openos','openwsn','07-App','udprand'),
             os.path.join('#','firmware','openos','openwsn','07-App','udplatency'),
             os.path.join('#','firmware','openos','openwsn','07-App','udpstorm'),
+            os.path.join('#','firmware','openos','openwsn','07-App','sens_itf'),
             os.path.join('#','firmware','openos','openwsn','cross-layers'),
         ],
     )

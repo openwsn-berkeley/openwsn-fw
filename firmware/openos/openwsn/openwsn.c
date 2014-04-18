@@ -67,7 +67,7 @@
 //#include "rxl1.h"
 //#include "heli.h"
 //#include "imu.h"
-
+#include "sens_itf.h"
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -143,6 +143,7 @@ void openwsn_init() {
    //rheli_init();
    //rt_init();
    //rxl1_init();
+   sens_itf_init();
    
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
