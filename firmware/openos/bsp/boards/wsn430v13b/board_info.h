@@ -90,6 +90,10 @@ to this board.
 #define PORT_delayTx                        12    //   366us (measured  352us)
 #define PORT_delayRx                        0     //     0us (can not measure)
 
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       1     // ticks
+
 //=========================== variables =======================================
 
 // The variables below are used by CoAP's registration engine.

@@ -22,9 +22,10 @@ typedef enum {
    TASKPRIO_RPL                = 0x04, // scheduled by timerB CCR1 interrupt
    TASKPRIO_TCP_TIMEOUT        = 0x05, // scheduled by timerB CCR2 interrupt
    TASKPRIO_COAP               = 0x06, // scheduled by timerB CCR3 interrupt
+   TASKPRIO_ADAPTIVE_SYNC      = 0x07, 
    // tasks trigger by other interrupts
-   TASKPRIO_BUTTON             = 0x07, // scheduled by P2.7 interrupt
-   TASKPRIO_MAX                = 0x08,
+   TASKPRIO_BUTTON             = 0x08, // scheduled by P2.7 interrupt
+   TASKPRIO_MAX                = 0x09,
 } task_prio_t;
 
 #define TASK_LIST_DEPTH      10

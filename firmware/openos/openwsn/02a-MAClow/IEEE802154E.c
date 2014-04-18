@@ -13,6 +13,7 @@
 #include "neighbors.h"
 #include "debugpins.h"
 #include "res.h"
+#include "adaptive_sync.h"
 
 //=========================== variables =======================================
 
@@ -170,6 +171,8 @@ void isr_ieee154e_newSlot() {
          activity_synchronize_newSlot();
       }
    } else {
+     // adaptive synchronization
+      adaptive_sync_countCompensationTimeout();
       activity_ti1ORri1();
    }
    ieee154e_dbg.num_newSlot++;
@@ -381,12 +384,7 @@ status information about several modules in the OpenWSN stack.
 */
 bool debugPrint_macStats() {
    // send current stats over serial
-   ieee154e_stats.dutyCycle/=(float)SUPERFRAME_LENGTH; //avg on the all slots of a frame
-   ieee154e_stats.dutyCycle/=STATUS_MAX;//because this is executed once every 10 times of debugprint
-   ieee154e_stats.dutyCycle*=100.0;//as is a percentage
    openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
-   ieee154e_stats.dutyCycle=0; //reset for the next superframe.
-   
    return TRUE;
 }
 
@@ -896,6 +894,9 @@ port_INLINE void activity_ti1ORri1() {
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
          }
+         // deal with the case when schedule multi slots
+         adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
+         
          break;
       case CELLTYPE_MORESERIALRX:
          // do nothing (not even endSlot())
@@ -1787,6 +1788,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    ieee154e_stats.numSyncPkt++;
    updateStats(timeCorrection);
 
+   adaptive_sync_preprocess(timeCorrection, ieee154e_vars.dataReceived->l2_nextORpreviousHop);
 #ifdef OPENSIM
    debugpins_syncPacket_set();
    debugpins_syncPacket_clr();
@@ -1819,7 +1821,9 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    // update the stats
    ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
-   
+
+   // update last asn when need sync.
+   adaptive_sync_preprocess((-timeCorrection), ieee154e_vars.ackReceived->l2_nextORpreviousHop);
 #ifdef OPENSIM
    debugpins_syncAck_set();
    debugpins_syncAck_clr();
@@ -1876,7 +1880,8 @@ port_INLINE void resetStats() {
    ieee154e_stats.numSyncAck      =    0;
    ieee154e_stats.minCorrection   =  127;
    ieee154e_stats.maxCorrection   = -127;
-   ieee154e_stats.dutyCycle       =    0;
+   ieee154e_stats.numTicsOn       =    0;
+   ieee154e_stats.numTicsTotal    =    0;
    // do not reset the number of de-synchronizations
 }
 
@@ -1979,7 +1984,6 @@ will do that for you, but assume that something went wrong.
 */
 void endSlot() {
   
-   float aux; //duty cycle helper.
    // turn off the radio
    radio_rfOff();
    // compute the duty cycle if radio has been turned on
@@ -1993,9 +1997,16 @@ void endSlot() {
    ieee154e_vars.lastCapturedTime = 0;
    ieee154e_vars.syncCapturedTime = 0;
    
-   //instant duty cycle.. average is computed at debugprint_macstats.
-   aux=(float)ieee154e_vars.radioOnTics/(float)radio_getTimerPeriod();
-   ieee154e_stats.dutyCycle+=aux;//accumulate and avg will be done on serial print
+   //computing duty cycle.
+   ieee154e_stats.numTicsOn+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
+   ieee154e_stats.numTicsTotal+=radio_getTimerPeriod();//increment total tics by timer period.
+
+   if (ieee154e_stats.numTicsTotal>DUTY_CYCLE_WINDOW_LIMIT){
+	   // keep running windows -- divide by two
+	   ieee154e_stats.numTicsTotal=ieee154e_stats.numTicsTotal>>1;
+	   ieee154e_stats.numTicsOn=ieee154e_stats.numTicsOn>>1;
+   }
+
    //clear vars for duty cycle on this slot   
    ieee154e_vars.radioOnTics=0;
    ieee154e_vars.radioOnThisSlot=FALSE;

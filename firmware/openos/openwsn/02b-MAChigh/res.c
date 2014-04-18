@@ -26,14 +26,21 @@ uint8_t res_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv);//returns reserved siz
 //=========================== public ==========================================
 
 void res_init() {
+   
    res_vars.periodMaintenance = 872+(openrandom_get16b()&0xff); // fires every 1 sec on average
    res_vars.busySendingKa     = FALSE;
    res_vars.busySendingAdv    = FALSE;
    res_vars.dsn               = 0;
    res_vars.MacMgtTaskCounter = 0;
-   res_vars.timerId = opentimers_start(res_vars.periodMaintenance,
-                                       TIMER_PERIODIC,TIME_MS,
-                                       res_timer_cb);
+   
+   res_vars.timerId = opentimers_start(
+      res_vars.periodMaintenance,
+      TIMER_PERIODIC,
+      TIME_MS,
+      res_timer_cb
+   );
+   
+   res_vars.kaPeriod          = KATIMEOUT;
 }
 
 /**
@@ -57,6 +64,14 @@ owerror_t res_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_RES;
    msg->l2_frameType = IEEE154_TYPE_DATA;
    return res_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
+}
+
+void res_setKaPeriod(uint16_t kaPeriod) {
+   if(kaPeriod > KATIMEOUT) {
+     res_vars.kaPeriod = KATIMEOUT;
+   } else {
+     res_vars.kaPeriod = kaPeriod;
+   } 
 }
 
 //======= from lower layer
@@ -175,12 +190,21 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timers_res_fired() {
-   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%10;
-   if (res_vars.MacMgtTaskCounter==0) {
-      sendAdv(); // called every 10s
-   } else {
-      sendKa();  // called every second, except once every 10s
-      //leds_debug_toggle();
+   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%ADVTIMEOUT;
+   
+   switch (res_vars.MacMgtTaskCounter) {
+      case 0:
+         // called every ADVTIMEOUT seconds
+         sendAdv();
+         break;
+      case 1:
+         // called every ADVTIMEOUT seconds
+         neighbors_removeOld();
+         break;
+      default:
+         // called every second, except twice every ADVTIMEOUT seconds
+         sendKa();
+         break;
    }
 }
 
@@ -427,7 +451,7 @@ port_INLINE void sendKa() {
       return;
    }
    
-   kaNeighAddr = neighbors_getKANeighbor();
+   kaNeighAddr = neighbors_getKANeighbor(res_vars.kaPeriod);
    if (kaNeighAddr==NULL) {
       // don't proceed if I have no neighbor I need to send a KA to
       return;

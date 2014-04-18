@@ -127,6 +127,7 @@ void board_sleep() {
 
 
 void board_reset(){
+  NVIC_GenerateSystemReset();
 }
 
 
