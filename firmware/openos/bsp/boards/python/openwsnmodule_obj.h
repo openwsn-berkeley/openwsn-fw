@@ -31,6 +31,7 @@
 #include "openrandom_obj.h"
 #include "uart_obj.h"
 #include "rinfo_obj.h"
+#include "rrt_obj.h"
 #include "rleds_obj.h"
 #include "rwellknown_obj.h"
 
@@ -219,6 +220,7 @@ struct OpenMote {
    //- debug
    //- common
    rinfo_vars_t         rinfo_vars;
+   rrt_vars_t           rrt_vars;
    rleds_vars_t         rleds_vars;
    rwellknown_vars_t    rwellknown_vars;
    r6t_vars_t           r6t_vars;
