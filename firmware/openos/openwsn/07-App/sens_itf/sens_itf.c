@@ -4,21 +4,32 @@
 #include "sens_itf.h"
 #include "packetfunctions.h"
 
+owerror_t sens_itf_receive(
+   OpenQueueEntry_t* msg,
+   coap_header_iht*  coap_header,
+   coap_option_iht*  coap_options
+);
+void sens_itf_sendDone(
+   OpenQueueEntry_t* msg,
+   owerror_t error
+);
+
 const uint8_t sens_itf_path0[]       = "sens/info";
+coap_resource_desc_t sens_itf_vars;
 
 void sens_itf_init() {
    
    // prepare the resource descriptor for the /l path
-   rleds_vars.desc.path0len            = sizeof(sens_itf_path0)-1;
-   rleds_vars.desc.path0val            = (uint8_t*)(&sens_itf_path0);
-   rleds_vars.desc.path1len            = 0;
-   rleds_vars.desc.path1val            = NULL;
-   rleds_vars.desc.componentID         = COMPONENT_SENS_ITF;
-   rleds_vars.desc.callbackRx          = &sens_itf_receive;
-   rleds_vars.desc.callbackSendDone    = &sens_itf_sendDone;
+   sens_itf_vars.path0len            = sizeof(sens_itf_path0)-1;
+   sens_itf_vars.path0val            = (uint8_t*)(&sens_itf_path0);
+   sens_itf_vars.path1len            = 0;
+   sens_itf_vars.path1val            = NULL;
+   sens_itf_vars.componentID         = COMPONENT_SENS_ITF;
+   sens_itf_vars.callbackRx          = &sens_itf_receive;
+   sens_itf_vars.callbackSendDone    = &sens_itf_sendDone;
    
    // register with the CoAP module
-   opencoap_register(&rleds_vars.desc);
+   opencoap_register(&sens_itf_vars);
 }
 
 //=========================== private =========================================

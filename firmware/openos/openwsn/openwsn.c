@@ -135,6 +135,7 @@ void openwsn_init() {
    //- common
    rinfo_init();
    rleds__init();
+   sens_itf_init();
    rwellknown_init();
    r6t_init();
    //rreg_init();
@@ -145,7 +146,7 @@ void openwsn_init() {
    //rheli_init();
    //rt_init();
    //rxl1_init();
-   sens_itf_init();
+
    
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
