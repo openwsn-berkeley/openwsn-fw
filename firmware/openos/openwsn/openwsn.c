@@ -59,6 +59,7 @@
 #include "rleds.h"
 #include "rwellknown.h"
 #include "r6t.h"
+#include "rrt.h"
 //#include "rex.h"
 //#include "rrube.h"
 //#include "layerdebug.h"
@@ -134,6 +135,7 @@ void openwsn_init() {
    //- core
    //- common
    rinfo_init();
+   rrt_init();
    rleds__init();
    sens_itf_init();
    rwellknown_init();
