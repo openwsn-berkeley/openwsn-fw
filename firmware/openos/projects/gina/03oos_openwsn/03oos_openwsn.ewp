@@ -353,6 +353,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrt\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\</state>
@@ -2424,6 +2425,15 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\rreg.h</name>
+        </file>
+      </group>
+      <group>
+        <name>rrt</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rrt\rrt.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rrt\rrt.h</name>
         </file>
       </group>
       <group>

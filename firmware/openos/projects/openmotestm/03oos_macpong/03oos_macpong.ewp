@@ -323,6 +323,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrt\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\</state>
