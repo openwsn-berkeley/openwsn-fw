@@ -1,12 +1,13 @@
-
-Building PYD
+Building oos_openwsn.pyd
 ============
 
 Run gnu target before compiling the project:
 
 	scons board=python toolchain=gcc oos_openwsn
 
-After building the oos_openwsn.pyd file will be copied to:
+Open Visual studio project oos_openwsn.sln and build the project.
+
+After building, the oos_openwsn.pyd file will be copied to:
 
 	firmware\openos\projects\common\
 
@@ -19,6 +20,4 @@ http://stackoverflow.com/questions/11713701/how-to-debug-c-extensions-for-python
 
 Otherwise, recompile Python and add python27_d.lib to the project.
 python27_d.dll will be required as well.
-
-
 
