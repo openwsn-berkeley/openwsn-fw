@@ -14,7 +14,7 @@ void sens_itf_sendDone(
    owerror_t error
 );
 
-const uint8_t sens_itf_path0[]       = "sens/info";
+const uint8_t sens_itf_path0[]       = "sens";
 coap_resource_desc_t sens_itf_vars;
 
 void sens_itf_init() {

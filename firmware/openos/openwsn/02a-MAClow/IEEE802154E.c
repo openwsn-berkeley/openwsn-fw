@@ -11,7 +11,7 @@
 #include "scheduler.h"
 #include "leds.h"
 #include "neighbors.h"
-#include "debugpins.h"
+#include "debugpins.h" 
 #include "res.h"
 #include "adaptive_sync.h"
 

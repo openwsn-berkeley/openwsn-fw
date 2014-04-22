@@ -12,10 +12,15 @@
 
 //=========================== defines =========================================
 
-#define port_INLINE                         
-
-#define PRAGMA(x)  _Pragma(#x)
-#define PACK(x)     pack(x)
+#ifdef _MSC_VER
+    #define BEGIN_PACK    __pragma(pack(1))
+    #define END_PACK      __pragma(pack())
+    #define port_INLINE   __inline
+#else
+    #define BEGIN_PACK    _Pragma("pack(1)")
+    #define END_PACK      _Pragma("pack()")
+    #define port_INLINE   inline
+#endif
 
 #define INTERRUPT_DECLARATION()             ;
 #define ENABLE_INTERRUPTS()                 ;
