@@ -56,6 +56,10 @@ void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource){
          adaptive_sync_vars.compensateThreshold  > KATIMEOUT &&
          adaptive_sync_vars.driftChanged        == FALSE
       ) {
+     if(timeCorrection > LIMITLARGETIMECORRECTION) {
+       //once I get a large time correction, it means previous calcluated drift is not accurate yet. The clock drift is changed.
+       adaptive_sync_driftChanged();
+     }
      return;
    }
    
@@ -92,6 +96,7 @@ void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource){
      adaptive_sync_vars.elapsedSlots             = 0;
      adaptive_sync_vars.compensationTimeout      = 0;
      adaptive_sync_vars.compensateTicks          = 0;
+     adaptive_sync_vars.sumOfTC                  = 0;
      // update oldASN
      ieee154e_getAsn(array);
      adaptive_sync_vars.oldASN.bytes0and1        = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
@@ -138,11 +143,14 @@ void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection) {
      if(adaptive_sync_vars.clockState == S_SLOWER) {
        totalTimeCorrectionTicks                                       = adaptive_sync_vars.compensateTicks;
        totalTimeCorrectionTicks                                      -= timeCorrection+adaptive_sync_vars.sumOfTC;
-       adaptive_sync_vars.compensationInfo_vars.compensationSlots  = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots;
-       adaptive_sync_vars.compensationInfo_vars.compensationSlots /= totalTimeCorrectionTicks;
      } else {
        totalTimeCorrectionTicks                                       = adaptive_sync_vars.compensateTicks;
        totalTimeCorrectionTicks                                      += timeCorrection+adaptive_sync_vars.sumOfTC;
+     }
+     if(totalTimeCorrectionTicks == 0) {
+       // totalTimeCorrectionTicks should be always positive if drift of clock is constant. if totalTimeCorrectionTIcks become zero, it means the drift changed for some reasons. 
+       adaptive_sync_driftChanged();
+     } else {
        adaptive_sync_vars.compensationInfo_vars.compensationSlots  = SYNC_ACCURACY*adaptive_sync_vars.elapsedSlots;
        adaptive_sync_vars.compensationInfo_vars.compensationSlots /= totalTimeCorrectionTicks;
      }
