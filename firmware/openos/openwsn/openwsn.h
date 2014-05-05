@@ -258,15 +258,15 @@ typedef uint16_t  dagrank_t;
 typedef uint8_t   owerror_t;
 #define bool uint8_t
 
-PRAGMA(pack(1));
+BEGIN_PACK;
 typedef struct {
    uint8_t  byte4;
    uint16_t bytes2and3;
    uint16_t bytes0and1;
 } asn_t;
-PRAGMA(pack());
+END_PACK;
 
-PRAGMA(pack(1));
+BEGIN_PACK;
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint8_t type;
    union {
@@ -277,7 +277,7 @@ typedef struct {                                 // always written big endian, i
       uint8_t prefix[8];
    };
 } open_addr_t;
-PRAGMA(pack());
+END_PACK;
 
 typedef struct {
    //admin
