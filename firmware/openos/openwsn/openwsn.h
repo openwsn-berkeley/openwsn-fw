@@ -175,6 +175,7 @@ enum {
    COMPONENT_R6T                       = 0x31,
    COMPONENT_SWARMBAND                 = 0x32,
    COMPONENT_RRT                       = 0x33,
+   COMPONENT_SENS_ITF                  = 0x34,
 };
 
 /**
