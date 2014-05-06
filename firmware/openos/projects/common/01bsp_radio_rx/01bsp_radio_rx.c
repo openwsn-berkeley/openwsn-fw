@@ -48,16 +48,16 @@ typedef struct {
 app_dbg_t app_dbg;
 
 typedef struct {
-   uint8_t     flags;
-   app_state_t state;
+   volatile uint8_t     flags;
+   volatile app_state_t state;
    uint8_t     packet[LENGTH_PACKET];
    uint8_t     packet_len;
    uint8_t     packet_num;
    int8_t     rxpk_rssi;
    uint8_t     rxpk_lqi;
    uint8_t     rxpk_crc;
-   uint8_t     uart_lastTxByte;
-   uint8_t     uart_end;//flag to indicate end of tx
+   volatile uint8_t     uart_lastTxByte;
+   volatile uint8_t     uart_end;//flag to indicate end of tx
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -137,7 +137,7 @@ int mote_main() {
          stringToSend[1]=app_vars.rxpk_rssi;
          stringToSend[2]=app_vars.rxpk_lqi;
          stringToSend[3]=app_vars.rxpk_crc;
-         stringToSend[4]= 0xFF;      
+         stringToSend[4]= 0xFF;
          
          //clear this interrupt.
          app_vars.flags = 0x00;
@@ -149,7 +149,7 @@ int mote_main() {
          
          uart_clearTxInterrupts();
          uart_clearRxInterrupts();
-         
+         //uart_clearTxInterrupts();
          uart_enableInterrupts();
          uart_writeByte(stringToSend[app_vars.uart_lastTxByte]);
          

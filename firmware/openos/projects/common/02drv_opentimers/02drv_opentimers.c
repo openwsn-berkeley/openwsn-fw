@@ -14,6 +14,7 @@ can use this project with any platform.
 #include "leds.h"
 // driver modules required
 #include "opentimers.h"
+#include "debugpins.h"
 
 //=========================== defines =========================================
 
@@ -67,12 +68,15 @@ int mote_main() {
 
 void cb_timer0() {
    leds_error_toggle();
+   debugpins_frame_toggle();
 }
 
 void cb_timer1() {
    leds_radio_toggle();
+   debugpins_fsm_toggle();
 }
 
 void cb_timer2() {
    leds_sync_toggle();
+   debugpins_slot_toggle();
 }

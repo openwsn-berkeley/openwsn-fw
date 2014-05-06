@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "03oos_macpong", "03oos_macpong.cproj", "{0FC34011-EED8-4BC9-8340-CDCB1995A1C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0FC34011-EED8-4BC9-8340-CDCB1995A1C7}.Debug|ARM.ActiveCfg = Debug|ARM
+		{0FC34011-EED8-4BC9-8340-CDCB1995A1C7}.Debug|ARM.Build.0 = Debug|ARM
+		{0FC34011-EED8-4BC9-8340-CDCB1995A1C7}.Release|ARM.ActiveCfg = Release|ARM
+		{0FC34011-EED8-4BC9-8340-CDCB1995A1C7}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

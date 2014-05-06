@@ -63,5 +63,6 @@ void    spi_txrx(uint8_t*     bufTx,
 
 // interrupt handlers
 kick_scheduler_t spi_isr();
+uint8_t trx_reg_read(uint8_t addr);
 
 #endif

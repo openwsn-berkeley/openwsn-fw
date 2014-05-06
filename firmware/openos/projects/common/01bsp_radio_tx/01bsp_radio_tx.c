@@ -53,7 +53,7 @@ typedef struct {
    int8_t     rxpk_rssi;
    uint8_t     rxpk_lqi;
    uint8_t     rxpk_crc;
-   uint8_t     lock;//semaphore
+   volatile uint8_t     lock;//semaphore
 } app_vars_t;
 
 app_vars_t app_vars;

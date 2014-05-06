@@ -1,0 +1,900 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>6.2</ProjectVersion>
+    <ToolchainName>com.Atmel.ARMGCC.C</ToolchainName>
+    <ProjectGuid>{ee44ce20-4422-4859-9f34-73020b4de0fc}</ProjectGuid>
+    <avrdevice>ATSAMD20J18</avrdevice>
+    <avrdeviceseries>none</avrdeviceseries>
+    <OutputType>Executable</OutputType>
+    <Language>C</Language>
+    <OutputFileName>$(MSBuildProjectName)</OutputFileName>
+    <OutputFileExtension>.elf</OutputFileExtension>
+    <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
+    <AssemblyName>01bsp_timer</AssemblyName>
+    <Name>01bsp_timer</Name>
+    <RootNamespace>01bsp_timer</RootNamespace>
+    <ToolchainFlavour>Native</ToolchainFlavour>
+    <KeepTimersRunning>true</KeepTimersRunning>
+    <OverrideVtor>false</OverrideVtor>
+    <CacheFlash>true</CacheFlash>
+    <ProgFlashFromRam>true</ProgFlashFromRam>
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
+    <UncachedRange />
+    <OverrideVtorValue>exception_table</OverrideVtorValue>
+    <BootSegment>2</BootSegment>
+    <eraseonlaunchrule>0</eraseonlaunchrule>
+    <AsfFrameworkConfig>
+      <framework-data xmlns="">
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.15.0" />
+        </dependencies>
+      </framework-data>
+    </AsfFrameworkConfig>
+    <avrtool>com.atmel.avrdbg.tool.edbg</avrtool>
+    <avrtoolinterface>SWD</avrtoolinterface>
+    <com_atmel_avrdbg_tool_edbg>
+      <ToolOptions>
+        <InterfaceProperties>
+          <JtagEnableExtResetOnStartSession>false</JtagEnableExtResetOnStartSession>
+          <SwdClock>4000000</SwdClock>
+        </InterfaceProperties>
+        <InterfaceName>SWD</InterfaceName>
+      </ToolOptions>
+      <ToolType>com.atmel.avrdbg.tool.edbg</ToolType>
+      <ToolNumber>ATML1873040200000397</ToolNumber>
+      <ToolName>XPRO-EDBG</ToolName>
+    </com_atmel_avrdbg_tool_edbg>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <ToolchainSettings>
+      <ArmGcc>
+  <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+  <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+  <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+  <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+  <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+  <armgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>DEBUG</Value>
+      <Value>EXTINT_CALLBACK_MODE=true</Value>
+      <Value>TC_ASYNC=true</Value>
+      <Value>SPI_CALLBACK_MODE=false</Value>
+      <Value>USART_CALLBACK_MODE=true</Value>
+      <Value>ARM_MATH_CM0=true</Value>
+      <Value>RTC_COUNT_ASYNC=true</Value>
+	  <Value>AT86RF231</Value>
+    </ListValues>
+  </armgcc.compiler.symbols.DefSymbols>
+  <armgcc.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samd20\include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro</Value>
+      <Value>../../../../openwsn</Value>
+      <Value>../../../../bsp/boards</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/cmsis/samd20/include</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/thirdparty/CMSIS/Include</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/cmsis/samd20/source</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/config</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/preprocessor</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common/utils</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common/utils/interrupt</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common2/services/delay/sam0/</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/header_files</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system/pinmux</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common/boards</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common2/services/delay</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/sam0/utils</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/thirdparty/CMSIS/Lib/GCC</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system/interrupt</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/cmsis/samd20/include/component</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/tc</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/cmsis/samd20/include/pio</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common2/services/delay/sam0</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/sercom/spi</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/port</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/stdio/stdio_serial</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system/clock/clock_samd20</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/sercom/usart</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/nvm</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/boards</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system/interrupt/system_interrupt_samd20</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/boards/samd20_xplained_pro</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/sercom</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common/services/serial</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/extint</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/cmsis/samd20/include/instance</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system/clock</Value>
+      <Value>../../../../bsp/chips</Value>
+      <Value>../../../../kernel/openos</Value>
+      <Value>../../../../bsp/chips/at86rf231</Value>
+      <Value>../../../../drivers/common</Value>
+      <Value>../../../../openwsn/02a-MAClow</Value>
+      <Value>../../../../openwsn/02b-MAChigh</Value>
+      <Value>../../../../openwsn/03a-IPHC</Value>
+      <Value>../../../../openwsn/03b-IPv6</Value>
+      <Value>../../../../openwsn/04-TRAN</Value>
+      <Value>../../../../openwsn/07-App</Value>
+      <Value>../../../../openwsn/07-App/layerdebug</Value>
+      <Value>../../../../openwsn/07-App/ohlone</Value>
+      <Value>../../../../openwsn/07-App/r6t</Value>
+      <Value>../../../../openwsn/07-App/rinfo</Value>
+      <Value>../../../../openwsn/07-App/rleds</Value>
+      <Value>../../../../openwsn/07-App/rreg</Value>
+      <Value>../../../../openwsn/07-App/rwellknown</Value>
+      <Value>../../../../openwsn/07-App/tcpecho</Value>
+      <Value>../../../../openwsn/07-App/tcpinject</Value>
+      <Value>../../../../openwsn/07-App/tcpprint</Value>
+      <Value>../../../../openwsn/07-App/udpecho</Value>
+      <Value>../../../../openwsn/07-App/udpinject</Value>
+      <Value>../../../../openwsn/07-App/udplatency</Value>
+      <Value>../../../../openwsn/07-App/udpprint</Value>
+      <Value>../../../../openwsn/07-App/udprand</Value>
+      <Value>../../../../openwsn/07-App/udpstorm</Value>
+      <Value>../../../../openwsn/cross-layers</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/rtc</Value>
+    </ListValues>
+  </armgcc.compiler.directories.IncludePaths>
+  <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
+  <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+  <armgcc.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </armgcc.linker.libraries.Libraries>
+  <armgcc.linker.libraries.LibrarySearchPaths>
+    <ListValues>
+      <Value>../cmsis/linkerScripts</Value>
+    </ListValues>
+  </armgcc.linker.libraries.LibrarySearchPaths>
+  <armgcc.linker.optimization.GarbageCollectUnusedSections>True</armgcc.linker.optimization.GarbageCollectUnusedSections>
+  <armgcc.linker.miscellaneous.LinkerFlags>-Tsamd20j18_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
+  <armgcc.preprocessingassembler.general.IncludePaths>
+    <ListValues>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samd20\include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+    </ListValues>
+  </armgcc.preprocessingassembler.general.IncludePaths>
+</ArmGcc>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <ToolchainSettings>
+      <ArmGcc>
+  <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+  <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+  <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+  <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+  <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+  <armgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>DEBUG</Value>
+      <Value>EXTINT_CALLBACK_MODE=true</Value>
+      <Value>TC_ASYNC=true</Value>
+      <Value>SPI_CALLBACK_MODE=false</Value>
+      <Value>USART_CALLBACK_MODE=true</Value>
+      <Value>ARM_MATH_CM0=true</Value>
+      <Value>RTC_COUNT_ASYNC=true</Value>
+	  <Value>AT86RF231</Value>
+    </ListValues>
+  </armgcc.compiler.symbols.DefSymbols>
+  <armgcc.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samd20\include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro</Value>
+      <Value>../../../../openwsn</Value>
+      <Value>../../../../bsp/boards</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/cmsis/samd20/include</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/thirdparty/CMSIS/Include</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/cmsis/samd20/source</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/config</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/preprocessor</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common/utils</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common/utils/interrupt</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common2/services/delay/sam0/</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/header_files</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system/pinmux</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common/boards</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common2/services/delay</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/sam0/utils</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/thirdparty/CMSIS/Lib/GCC</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system/interrupt</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/cmsis/samd20/include/component</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/tc</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/cmsis/samd20/include/pio</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common2/services/delay/sam0</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/sercom/spi</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/port</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/stdio/stdio_serial</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system/clock/clock_samd20</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/sercom/usart</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/nvm</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/boards</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system/interrupt/system_interrupt_samd20</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/boards/samd20_xplained_pro</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/sercom</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/common/services/serial</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/extint</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/utils/cmsis/samd20/include/instance</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/system/clock</Value>
+      <Value>../../../../bsp/chips</Value>
+      <Value>../../../../kernel/openos</Value>
+      <Value>../../../../bsp/chips/at86rf231</Value>
+      <Value>../../../../drivers/common</Value>
+      <Value>../../../../openwsn/02a-MAClow</Value>
+      <Value>../../../../openwsn/02b-MAChigh</Value>
+      <Value>../../../../openwsn/03a-IPHC</Value>
+      <Value>../../../../openwsn/03b-IPv6</Value>
+      <Value>../../../../openwsn/04-TRAN</Value>
+      <Value>../../../../openwsn/07-App</Value>
+      <Value>../../../../openwsn/07-App/layerdebug</Value>
+      <Value>../../../../openwsn/07-App/ohlone</Value>
+      <Value>../../../../openwsn/07-App/r6t</Value>
+      <Value>../../../../openwsn/07-App/rinfo</Value>
+      <Value>../../../../openwsn/07-App/rleds</Value>
+      <Value>../../../../openwsn/07-App/rreg</Value>
+      <Value>../../../../openwsn/07-App/rwellknown</Value>
+      <Value>../../../../openwsn/07-App/tcpecho</Value>
+      <Value>../../../../openwsn/07-App/tcpinject</Value>
+      <Value>../../../../openwsn/07-App/tcpprint</Value>
+      <Value>../../../../openwsn/07-App/udpecho</Value>
+      <Value>../../../../openwsn/07-App/udpinject</Value>
+      <Value>../../../../openwsn/07-App/udplatency</Value>
+      <Value>../../../../openwsn/07-App/udpprint</Value>
+      <Value>../../../../openwsn/07-App/udprand</Value>
+      <Value>../../../../openwsn/07-App/udpstorm</Value>
+      <Value>../../../../openwsn/cross-layers</Value>
+      <Value>../../../../bsp/boards/samd20_xplained_pro/ASF/drivers/rtc</Value>
+    </ListValues>
+  </armgcc.compiler.directories.IncludePaths>
+  <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
+  <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
+  <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+  <armgcc.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </armgcc.linker.libraries.Libraries>
+  <armgcc.linker.libraries.LibrarySearchPaths>
+    <ListValues>
+      <Value>../cmsis/linkerScripts</Value>
+    </ListValues>
+  </armgcc.linker.libraries.LibrarySearchPaths>
+  <armgcc.linker.optimization.GarbageCollectUnusedSections>True</armgcc.linker.optimization.GarbageCollectUnusedSections>
+  <armgcc.linker.miscellaneous.LinkerFlags>-Tsamd20j18_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
+  <armgcc.linker.memorysettings.ExternalRAM />
+  <armgcc.assembler.debugging.DebugLevel>Default (-g)</armgcc.assembler.debugging.DebugLevel>
+  <armgcc.preprocessingassembler.general.IncludePaths>
+    <ListValues>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samd20\include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+    </ListValues>
+  </armgcc.preprocessingassembler.general.IncludePaths>
+  <armgcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcc.preprocessingassembler.debugging.DebugLevel>
+</ArmGcc>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="01bsp_timer.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\common2\services\delay\delay.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\common2\services\delay\delay.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\common2\services\delay\sam0\cycle_counter.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\common2\services\delay\sam0\cycle_counter.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\common2\services\delay\sam0\cycle_counter.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\common2\services\delay\sam0\cycle_counter.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\common\utils\interrupt.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\common\utils\interrupt.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\common\utils\interrupt\interrupt_sam_nvic.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\common\utils\interrupt\interrupt_sam_nvic.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\common\utils\interrupt\interrupt_sam_nvic.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\common\utils\interrupt\interrupt_sam_nvic.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\common\utils\parts.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\common\utils\parts.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\extint\extint.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\extint\extint.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\extint\extint.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\extint\extint.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\extint\extint_callback.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\extint\extint_callback.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\extint\extint_callback.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\extint\extint_callback.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\nvm\nvm.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\nvm\nvm.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\nvm\nvm.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\nvm\nvm.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\port\port.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\port\port.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\port\port.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\port\port.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\rtc\rtc_count.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\rtc\rtc_count.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\rtc\rtc_count.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\rtc\rtc_count.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\rtc\rtc_count_interrupt.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\rtc\rtc_count_interrupt.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\rtc\rtc_count_interrupt.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\rtc\rtc_count_interrupt.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\sercom.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\sercom.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\sercom.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\sercom.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\sercom_interrupt.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\sercom_interrupt.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\sercom_interrupt.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\sercom_interrupt.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\sercom_pinout.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\sercom_pinout.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\spi\spi.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\spi\spi.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\usart\usart.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\usart\usart.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\usart\usart.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\usart\usart.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\usart\usart_interrupt.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\usart\usart_interrupt.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\usart\usart_interrupt.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\usart\usart_interrupt.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\clock.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\clock.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\clock_samd20\clock.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\clock_samd20\clock.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\clock_samd20\clock_config_check.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\clock_samd20\clock_config_check.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\clock_samd20\gclk.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\clock_samd20\gclk.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\gclk.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\gclk.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\interrupt\system_interrupt.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\interrupt\system_interrupt.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\interrupt\system_interrupt.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\interrupt\system_interrupt.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\interrupt\system_interrupt_samd20\system_interrupt_features.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\interrupt\system_interrupt_samd20\system_interrupt_features.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\pinmux\pinmux.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\pinmux\pinmux.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\pinmux\pinmux.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\pinmux\pinmux.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\system.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\system.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\system.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\system.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\tc\tc.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\tc\tc.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\tc\tc.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\tc\tc.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\tc\tc_interrupt.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\tc\tc_interrupt.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\tc\tc_interrupt.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\tc\tc_interrupt.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Include\arm_math.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Include\arm_math.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Include\core_cm0plus.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Include\core_cm0plus.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Include\core_cmFunc.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Include\core_cmFunc.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Include\core_cmInstr.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Include\core_cmInstr.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_ac.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_ac.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_adc.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_adc.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_dac.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_dac.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_dsu.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_dsu.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_eic.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_eic.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_evsys.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_evsys.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_gclk.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_gclk.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_nvmctrl.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_nvmctrl.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_pac.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_pac.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_pm.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_pm.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_port.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_port.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_rtc.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_rtc.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_sercom.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_sercom.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_sysctrl.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_sysctrl.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_tc.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_tc.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_wdt.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\component_wdt.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_ac.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_ac.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_adc.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_adc.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_dac.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_dac.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_dsu.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_dsu.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_eic.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_eic.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_evsys.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_evsys.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_gclk.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_gclk.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_nvmctrl.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_nvmctrl.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_pac0.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_pac0.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_pac1.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_pac1.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_pac2.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_pac2.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_pm.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_pm.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_port.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_port.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_rtc.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_rtc.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom0.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom0.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom1.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom1.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom2.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom2.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom3.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom3.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom4.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom4.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom5.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sercom5.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sysctrl.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_sysctrl.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc0.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc0.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc1.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc1.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc2.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc2.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc3.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc3.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc4.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc4.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc5.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc5.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc6.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc6.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc7.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_tc7.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_wdt.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\instance_wdt.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\pio\pio_samd20j18.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\pio\pio_samd20j18.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\samd20.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\samd20.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\samd20j18.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\samd20j18.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\source\gcc\startup_samd20.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\source\gcc\startup_samd20.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\source\system_samd20.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\source\system_samd20.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\source\system_samd20.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\source\system_samd20.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\compiler.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\compiler.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\header_files\io.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\header_files\io.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\mrecursion.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\mrecursion.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\mrepeat.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\mrepeat.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\preprocessor.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\preprocessor.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\stringz.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\stringz.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\tpaste.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\tpaste.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\status_codes.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\status_codes.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\stdio\read.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\stdio\read.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\stdio\stdio_serial\stdio_serial.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\stdio\stdio_serial\stdio_serial.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\stdio\write.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\stdio\write.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\utils\syscalls\gcc\syscalls.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\ASF\utils\syscalls\gcc\syscalls.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\board.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\board.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\bsp_rtc.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\bsp_rtc.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\bsp_rtc.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\bsp_rtc.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\bsp_timer.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\bsp_timer.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\debug_pins.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\debug_pins.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\eui64.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\eui64.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\flash.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\flash.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\leds.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\leds.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\radio_timer.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\radio_timer.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\spi.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\spi.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\uart.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samd20_xplained_pro\uart.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\chips\at86rf231\radio.c">
+      <SubType>compile</SubType>
+      <Link>chips\at86rf231\radio.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\drivers\common\openhdlc.c">
+      <SubType>compile</SubType>
+      <Link>drivers\common\openhdlc.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\drivers\common\openserial.c">
+      <SubType>compile</SubType>
+      <Link>drivers\common\openserial.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\drivers\common\opentimers.c">
+      <SubType>compile</SubType>
+      <Link>drivers\common\opentimers.c</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bsp" />
+    <Folder Include="bsp\boards" />
+    <Folder Include="bsp\boards\samd20_xplained_pro" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common2\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\config" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common2\services\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common2\services\delay\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common2\services\delay\sam0\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common\boards\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common\services\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common\services\serial\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common\services\serial\sam0_usart\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common\utils\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\common\utils\interrupt\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\boards\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\boards\samd20_xplained_pro\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\extint\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\extint\quick_start_callback\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\extint\quick_start_polled\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\port\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\port\quick_start\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\rtc\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\spi\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\spi\quick_start_dma\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\spi\quick_start_master\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\spi\quick_start_slave\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\sercom\usart\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\system\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\clock_samd20\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\quick_start_clock\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\system\clock\quick_start_gclk\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\system\interrupt\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\system\interrupt\quick_start\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\system\interrupt\system_interrupt_samd20\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\system\pinmux\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\system\pinmux\quick_start\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\nvm\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\drivers\tc\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\component\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\instance\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\include\pio\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\source\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\cmsis\samd20\source\gcc\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\header_files\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\linker_scripts\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\linker_scripts\samd20\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\linker_scripts\samd20\gcc\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\make\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\preprocessor\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\stdio\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\stdio\stdio_serial\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\syscalls\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\utils\syscalls\gcc\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\thirdparty\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Include\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Lib\" />
+    <Folder Include="bsp\boards\samd20_xplained_pro\ASF\thirdparty\CMSIS\Lib\GCC\" />
+    <Folder Include="chips" />
+    <Folder Include="chips\at86rf231" />
+    <Folder Include="cmsis\" />
+    <Folder Include="cmsis\linkerScripts\" />
+    <Folder Include="drivers" />
+    <Folder Include="drivers\common" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cmsis\linkerScripts\samd20j18_flash.ld">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="cmsis\linkerScripts\samd20j18_sram.ld">
+      <SubType>compile</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
+</Project>

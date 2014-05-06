@@ -74,7 +74,7 @@ enum radio_irqstatus_enum {
    /** Constant SLEEP for sub-register @ref SR_TRX_STATUS
     * @ingroup apiHalPHY230Const
     */
-#  define SLEEP                    (15)
+#define REG_SLEEP                    (15)
    /** Constant BUSY_RX_AACK for sub-register @ref SR_TRX_STATUS
     * @ingroup apiHalPHY230Const
     */
@@ -466,6 +466,12 @@ enum radio_irqstatus_enum {
     */
 #  define RF230                    (2)
 
+/** Constant RF231 for sub-register SR_PART_NUM */
+#define AT86RF231_PART_NUM   (3)
+
+/** Constant RF231 for sub-register SR_VERSION_NUM */
+#define AT86RF231_VERSION_NUM   (2)
+
 /** Offset for register VERSION_NUM
  * @ingroup apiHalPHY230Reg
  */
@@ -647,6 +653,8 @@ enum radio_irqstatus_enum {
 
 # define RG_RX_CTRL                      (0x0a)
 //controls the sensitivity of the antenna diversity mode
+
+#define RG_TRX_CTRL_1					(0x04)
 
 //=========================== typedef =========================================
 

@@ -1,0 +1,149 @@
+
+
+#include "compiler.h"
+#include "system.h"
+#include "system_interrupt.h"
+#include "port.h"
+#include "samd20_xplained_pro.h"
+#include "cycle_counter.h"
+#include "board.h"
+#include "uart.h"
+#include "bsp_rtc.h"
+#include "opentimers.h"
+#include "radiotimer.h"
+#include "radio.h"
+#include "bsp_timer.h"
+#include "delay.h"
+#include "spi.h"
+#include "debugpins.h"
+#include "leds.h"
+
+extern int mote_main();
+
+void rf_interface_init(void);
+
+/* TRX Parameter: t10 */
+#define RST_PULSE_WIDTH_US                          (10)
+/* TRX Parameter: tTR1 typical value */
+#define P_ON_TO_CLKM_AVAILABLE_TYP_US               (330)
+
+int main(void)
+{
+	SystemInit();
+	return mote_main();
+}
+
+void board_init(void)
+{
+ /* initialize the interrupt vectors */
+ irq_initialize_vectors();
+ 
+ /*  Initialize the Clock */
+ delay_init();
+ system_init(); 
+
+ /* Initialize board hardware */
+ /* SPI Init */
+ /* Configure the Radio Pins and  Like RST, SLP_TR, EXTI(IRQ on Rising Edge)  */
+ /* Configure the Board related stuffs and GPIO's */
+ /* LED's Init */
+ 
+ /* Configure the Debug Pins */
+ debugpins_init();
+ 
+ 	
+ AT86RFX_INTC_INIT();
+ CLEAR_TRX_IRQ();
+ 
+ rf_interface_init();
+ 
+ /* Radio Init */
+ radio_init();
+  
+ /* UART Init */
+ uart_init();  
+ 
+ /* BSP Timer Init  --Init the RTC before BSP Timer*/
+ bsp_timer_init(); 
+ 
+ 
+ /* Radio Timer Init */
+ radiotimer_init();
+ 
+ ENABLE_TRX_IRQ();
+ cpu_irq_enable();
+}
+
+void rf_interface_init(void)
+{
+	struct port_config pin_conf;
+	port_get_config_defaults(&pin_conf);
+
+	/* Configure LEDs as outputs, turn them off */
+	pin_conf.direction  = PORT_PIN_DIR_OUTPUT;
+	port_pin_set_config(LED_0_PIN, &pin_conf);
+	port_pin_set_output_level(LED_0_PIN, LED_0_INACTIVE);
+
+	/* Set buttons as inputs */
+	pin_conf.direction  = PORT_PIN_DIR_INPUT;
+	pin_conf.input_pull = PORT_PIN_PULL_UP;
+	port_pin_set_config(BUTTON_0_PIN, &pin_conf);
+
+	port_get_config_defaults(&pin_conf);
+	pin_conf.direction  = PORT_PIN_DIR_OUTPUT;
+	port_pin_set_config(AT86RFX_SPI_SCK, &pin_conf);
+	port_pin_set_config(AT86RFX_SPI_MOSI, &pin_conf);
+	port_pin_set_config(AT86RFX_SPI_CS, &pin_conf);
+	port_pin_set_config(AT86RFX_RST_PIN, &pin_conf);
+	port_pin_set_config(AT86RFX_SLP_PIN, &pin_conf);
+	port_pin_set_output_level(AT86RFX_SPI_SCK, true);
+	port_pin_set_output_level(AT86RFX_SPI_MOSI, true);
+	port_pin_set_output_level(AT86RFX_SPI_CS, true);
+	port_pin_set_output_level(AT86RFX_RST_PIN, true);
+	port_pin_set_output_level(AT86RFX_SLP_PIN, true);
+
+	pin_conf.direction  = PORT_PIN_DIR_INPUT;
+	port_pin_set_config(AT86RFX_SPI_MISO, &pin_conf);
+		
+	spi_init();
+		
+	/* Wait typical time of timer TR1. */
+	delay_us(P_ON_TO_CLKM_AVAILABLE_TYP_US);
+		
+	/* Initialize the transceiver */
+	PORT_PIN_RADIO_RESET_HIGH();
+	PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
+
+	/* Wait typical time of timer TR1. */
+	delay_us(P_ON_TO_CLKM_AVAILABLE_TYP_US);
+
+	/* Apply reset pulse */
+	PORT_PIN_RADIO_RESET_LOW();
+	delay_us(RST_PULSE_WIDTH_US);
+	PORT_PIN_RADIO_RESET_HIGH();
+}
+
+void board_sleep(void)
+{
+ /* Enter into sleep mode and disable the MCU and other peripherals */
+ system_interrupt_enable_global(); 
+ /* Set sleep mode to STANDBY */
+ system_set_sleepmode(/*SYSTEM_SLEEPMODE_STANDBY*/SYSTEM_SLEEPMODE_IDLE_2);
+
+ /* Stay in STANDBY sleep until low voltage is detected */
+ system_sleep();
+}
+
+void board_reset(void)
+{
+ /* Nothing to handle  here */
+}
+
+void AT86RFX_ISR(void)
+{
+	debugpins_isr_set();
+	CLEAR_TRX_IRQ();	
+	radio_isr();			
+	debugpins_isr_clr();
+}
+

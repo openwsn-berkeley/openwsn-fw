@@ -41,12 +41,15 @@ uint8_t radio_spiReadRadioInfo();
 //===== admin
 
 void radio_init() {
-
+   // clear variables
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
    
    // change state
    radio_vars.state          = RADIOSTATE_STOPPED;
+  
+  //Check the radio part number. If the H/W interface in not initialized it statys here */
+  while (trx_reg_read(RG_PART_NUM) != AT86RF231_PART_NUM);
   
    // configure the radio
    radio_spiWriteReg(RG_TRX_STATE, CMD_FORCE_TRX_OFF);    // turn radio off
@@ -55,7 +58,6 @@ void radio_init() {
                      (AT_IRQ_RX_START| AT_IRQ_TRX_END));  // tell radio to fire interrupt on TRX_END and RX_START
    radio_spiReadReg(RG_IRQ_STATUS);                       // deassert the interrupt pin in case is high
    radio_spiWriteReg(RG_ANT_DIV, RADIO_CHIP_ANTENNA);     // use chip antenna
-#define RG_TRX_CTRL_1 0x04
    radio_spiWriteReg(RG_TRX_CTRL_1, 0x20);                // have the radio calculate CRC
    //busy wait until radio status is TRX_OFF
   
@@ -111,7 +113,7 @@ void radio_setFrequency(uint8_t frequency) {
    // change state
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
    
-   // configure the radio to the right frequecy
+   // configure the radio to the right frequency
    radio_spiWriteReg(RG_PHY_CC_CCA,0x20+frequency);
    
    // change state
@@ -175,7 +177,12 @@ void radio_txNow() {
    
    // send packet by pulsing the SLP_TR_CNTL pin
    PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
+   { //65ns Delay
+	nop(); 
+	nop();
+	}   
    PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
+   ENABLE_TRX_IRQ();
    
    // The AT86RF231 does not generate an interrupt when the radio transmits the
    // SFD, which messes up the MAC state machine. The danger is that, if we leave
@@ -270,7 +277,7 @@ void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
    uint8_t spi_tx_buffer[2];
    uint8_t spi_rx_buffer[2];
    
-   spi_tx_buffer[0] = (0xC0 | reg_addr);        // turn addess in a 'reg write' address
+   spi_tx_buffer[0] = (0xC0 | reg_addr);        // turn address in a 'reg write' address
    spi_tx_buffer[1] = reg_setting;
    
    spi_txrx(spi_tx_buffer,

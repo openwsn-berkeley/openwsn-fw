@@ -100,7 +100,7 @@ void cb_compare() {
    leds_radio_toggle();
    
    // schedule a next compare, if applicable
-   app_vars.last_compare_val += RADIOTIMER_COMPARE_PERIOD;
+   app_vars.last_compare_val += RADIOTIMER_COMPARE_PERIOD;   
    app_vars.num_compares_left--;
    if (app_vars.num_compares_left>0) {
       radiotimer_schedule(app_vars.last_compare_val);
