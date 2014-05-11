@@ -128,10 +128,10 @@ static inline enum status_code dma_crc_channel_enable(uint32_t channel_id,
  * \brief Disable DMA CRC module.
  *
  */
-static inline void dma_crc_channel_disable(void)
+static inline void dma_crc_disable(void)
 {
-	DMAC->CRCCTRL.reg = 0;
 	DMAC->CTRL.reg &= ~DMAC_CTRL_CRCENABLE;
+	DMAC->CRCCTRL.reg = 0;
 }
 
 /**
@@ -141,42 +141,83 @@ static inline void dma_crc_channel_disable(void)
  */
 static inline uint32_t dma_crc_get_checksum(void)
 {
+	if (DMAC->CRCCTRL.bit.CRCSRC == DMAC_CRCCTRL_CRCSRC_IO_Val) {
+		DMAC->CRCSTATUS.reg = DMAC_CRCSTATUS_CRCBUSY;
+	}
+
 	return DMAC->CRCCHKSUM.reg;
 }
 
 /**
  * \brief Enable DMA CRC module with I/O.
  *
- * This function enables a CRC calculation with I/O mode. It will start until DMA CRC module
- * is ready. It will blocking until all the data are calculated.
+ * This function enables a CRC calculation with I/O mode.
  *
- * \param[in] buffer CRC Pointer to calculation buffer.
- * \param[in] total_beat_size Total beat size to be calculated.
  * \param[in] config CRC calculation configurations.
  *
- * \return Calculated CRC checksum value.
+ * \return Status of the DMC CRC.
+ * \retval STATUS_OK Get the DMA CRC module
+ * \retval STATUS_BUSY DMA CRC module is already taken and not ready yet
  */
-static inline uint32_t dma_crc_io_calculation(uint32_t *buffer,
-		 uint32_t total_beat_size, struct dma_crc_config *config)
+static inline enum status_code dma_crc_io_enable(
+		struct dma_crc_config *config)
 {
-	uint32_t counter = total_beat_size;
+	if (DMAC->CRCSTATUS.reg & DMAC_CRCSTATUS_CRCBUSY) {
+		return STATUS_BUSY;
+	}
+
+	if (DMAC->CTRL.reg & DMAC_CTRL_CRCENABLE) {
+		return STATUS_BUSY;
+	}
 
 	DMAC->CRCCTRL.reg = DMAC_CRCCTRL_CRCBEATSIZE(config->size) |
 		DMAC_CRCCTRL_CRCPOLY(config->type) |
-		DMAC_CRCCTRL_CRCSRC_IO_Val;
+		DMAC_CRCCTRL_CRCSRC_IO;
+
+	if (config->type == CRC_TYPE_32) {
+		DMAC->CRCCHKSUM.reg = 0xFFFFFFFF;
+	}
 
 	DMAC->CTRL.reg |= DMAC_CTRL_CRCENABLE;
 
+	return STATUS_OK;
+}
+
+/**
+ * \brief Calculate CRC with I/O.
+ *
+ * This function calculate the CRC of the input data buffer.
+ *
+ * \param[in] buffer CRC Pointer to calculation buffer.
+ * \param[in] total_beat_size Total beat size to be calculated.
+ *
+ * \return Calculated CRC checksum value.
+ */
+static inline void dma_crc_io_calculation(void *buffer,
+		 uint32_t total_beat_size)
+{
+	uint32_t counter = total_beat_size;
+	uint8_t *buffer_8;
+	uint16_t *buffer_16;
+	uint32_t *buffer_32;
+
 	for (counter=0; counter<total_beat_size; counter++) {
-		while (DMAC->CRCSTATUS.reg & DMAC_CRCSTATUS_CRCBUSY);
-
-		DMAC->CRCDATAIN.reg = buffer[counter*(config->size)];
+		if (DMAC->CRCCTRL.bit.CRCBEATSIZE == CRC_BEAT_SIZE_BYTE) {
+			buffer_8 = buffer;
+			DMAC->CRCDATAIN.reg = buffer_8[counter];
+		} else if (DMAC->CRCCTRL.bit.CRCBEATSIZE == CRC_BEAT_SIZE_HWORD) {
+			buffer_16 = buffer;
+			DMAC->CRCDATAIN.reg = buffer_16[counter];
+		} else if (DMAC->CRCCTRL.bit.CRCBEATSIZE == CRC_BEAT_SIZE_WORD) {
+			buffer_32 = buffer;
+			DMAC->CRCDATAIN.reg = buffer_32[counter];
+		}
+		/* Wait several cycle to make sure CRC complete */
+		nop();
+		nop();
+		nop();
+		nop();
 	}
-
-	DMAC->CRCCTRL.reg = 0;
-	DMAC->CTRL.reg &= ~DMAC_CTRL_CRCENABLE;
-
-	return DMAC->CRCCHKSUM.reg;
 }
 
 #ifdef __cplusplus

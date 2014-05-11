@@ -53,19 +53,16 @@ void board_init(void);
 #  pragma weak board_init=system_board_init
 #endif
 
-#define FECTRL             (*( volatile uint32_t *)0x42005400) /**< \brief (GCLK) APB Base Address */	
+
+
 
 void system_board_init(void)
 {
 	struct port_config pin_conf;
 	port_get_config_defaults(&pin_conf);
-	
 
 	/* Configure LEDs as outputs, turn them off */
 	pin_conf.direction  = PORT_PIN_DIR_OUTPUT;
-	port_pin_set_config(LED_0_PIN, &pin_conf);
-	port_pin_set_config(PIN_PA09, &pin_conf);
-	port_pin_set_config(PIN_PA12, &pin_conf);
 	port_pin_set_config(LED_0_PIN, &pin_conf);
 	port_pin_set_output_level(LED_0_PIN, LED_0_INACTIVE);
 
@@ -74,6 +71,7 @@ void system_board_init(void)
 	pin_conf.input_pull = PORT_PIN_PULL_UP;
 	port_pin_set_config(BUTTON_0_PIN, &pin_conf);
 	
+#ifdef CONF_BOARD_AT86RFX	
 
 	port_get_config_defaults(&pin_conf);
 	pin_conf.direction  = PORT_PIN_DIR_OUTPUT;
@@ -90,12 +88,14 @@ void system_board_init(void)
 
 	pin_conf.direction  = PORT_PIN_DIR_INPUT;
 	port_pin_set_config(AT86RFX_SPI_MISO, &pin_conf);
-	PM->APBCMASK.reg |= (1<<21);
-	FECTRL = 4;
+	PM->APBCMASK.reg |= (1<<PM_APBCMASK_RFCTRL_Pos);
+	REG_RFCTRL_FECFG = RFCTRL_CFG_ANT_DIV;
 	struct system_pinmux_config config_pinmux;
 	system_pinmux_get_config_defaults(&config_pinmux);
-	config_pinmux.mux_position = 5;
+	config_pinmux.mux_position = MUX_PA09F_RFCTRL_FECTRL1 ;
 	config_pinmux.direction    = SYSTEM_PINMUX_PIN_DIR_OUTPUT;
-	system_pinmux_pin_set_config(PIN_PA09, &config_pinmux);
-	system_pinmux_pin_set_config(PIN_PA12, &config_pinmux);
+	system_pinmux_pin_set_config(PIN_RFCTRL1, &config_pinmux);
+	system_pinmux_pin_set_config(PIN_RFCTRL2, &config_pinmux);
+#endif
+
 }

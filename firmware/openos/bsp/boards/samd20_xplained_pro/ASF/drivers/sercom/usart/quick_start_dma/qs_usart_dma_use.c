@@ -89,7 +89,6 @@ static void configure_dma_resource_rx(struct dma_resource *resource)
 //! [setup_rx_2]
 
 //! [setup_rx_3]
-	config.transfer_trigger = DMA_TRIGGER_PERIPHERAL;
 	config.peripheral_trigger = EDBG_CDC_SERCOM_DMAC_ID_RX;
 	config.trigger_action = DMA_TRIGGER_ACTON_BEAT;
 //! [setup_rx_3]
@@ -139,7 +138,6 @@ static void configure_dma_resource_tx(struct dma_resource *resource)
 //! [setup_tx_2]
 
 //! [setup_tx_3]
-	config.transfer_trigger = DMA_TRIGGER_PERIPHERAL;
 	config.peripheral_trigger = EDBG_CDC_SERCOM_DMAC_ID_TX;
 	config.trigger_action = DMA_TRIGGER_ACTON_BEAT;
 //! [setup_tx_3]

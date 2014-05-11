@@ -199,13 +199,10 @@ extern "C" {
  * the channels requesting access to the bus.
  *
  * \subsection asfdoc_sam0_dma_module_overview_dma_trigger DMA Triggers
- * A DMA transfer can be started only when a DMA transfer request is
- * acknowledged/granted by the arbiter.
- * A transfer request can be triggered from software, peripheral or an event
- * from the Event System.
- * There are dedicated trigger source selections for each DMA channel.
- * The function \ref dma_get_config_defaults() sets software trigger as the
- * default transfer trigger for a DMA transfer.
+ * DMA transfer can be started only when a DMA transfer request is acknowledged/granted by the arbiter. A
+ * transfer request can be triggered from software, peripheral or an event. There
+ * are dedicated source trigger selections for each DMA channel usage.
+
  *
  * \subsection asfdoc_sam0_dma_module_overview_dma_transfer_descriptor DMA Transfer Descriptor
  * The transfer descriptor resides in the SRAM and
@@ -279,11 +276,15 @@ extern "C" {
  */
 
 #include <compiler.h>
+#include "conf_dma.h"
 
 /** DMA invalid channel number */
 #define DMA_INVALID_CHANNEL        0xff
 
-/** DMA priority level. */
+/** ExInitial description section */
+extern DmacDescriptor descriptor_section[CONF_MAX_USED_CHANNEL_NUM];
+
+/** DMA priority level */
 enum dma_priority_level {
 	/** Priority level 0 */
 	DMA_PRIORITY_LEVEL_0,
@@ -390,16 +391,6 @@ enum dma_event_output_selection {
 	DMA_EVENT_OUTPUT_BEAT,
 };
 
-/** DMA transfer trigger type. */
-enum dma_transfer_trigger {
-	/** Use software as the DMA trigger */
-	DMA_TRIGGER_SOFTWARE,
-	/** Use peripheral as the DMA trigger */
-	DMA_TRIGGER_PERIPHERAL,
-	/** Use event as the DMA trigger */
-	DMA_TRIGGER_EVENT,
-};
-
 /** DMA trigger action type. */
 enum dma_transfer_trigger_action{
 	/** Perform a block transfer when triggered */
@@ -478,8 +469,6 @@ struct dma_events_config {
 struct dma_resource_config {
 	/** DMA transfer priority */
 	enum dma_priority_level priority;
-	/** DMA transfer trigger selection */
-	enum dma_transfer_trigger transfer_trigger;
 	/**DMA peripheral trigger index*/
 	uint8_t peripheral_trigger;
 	/** DMA trigger action */
@@ -612,6 +601,21 @@ static inline void dma_unregister_callback(struct dma_resource *resource,
 	Assert(resource);
 
 	resource->callback[type] = NULL;
+}
+
+/**
+ * \brief Will set a software trigger for resource
+ *
+ * This function is used to set a software trigger on the DMA channel
+ * associated with resource. If a trigger is already pending no new trigger
+ * will be generated for the channel.
+ *
+ * \param[in] resource Pointer to the DMA resource
+ */
+static inline void dma_trigger_transfer(struct dma_resource *resource) {
+	Assert(resource);
+
+	DMAC->SWTRIGCTRL.reg |= (1 << resource->channel_id);
 }
 
 /**

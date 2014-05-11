@@ -46,7 +46,7 @@
 /**
  * \internal Internal module structure to manage necassery globals
  *
- * 
+ *
  */
 struct _events_module {
 	/* Allocated channels bitmask where 1 means allocated */

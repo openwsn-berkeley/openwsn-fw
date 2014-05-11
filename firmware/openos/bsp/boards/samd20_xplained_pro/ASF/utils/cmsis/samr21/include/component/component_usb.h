@@ -1753,10 +1753,7 @@ typedef struct { /* USB is Host */
        UsbHostDescBank           HostDescBank[2]; /**< \brief Offset: 0x000 UsbHostDescBank groups */
 } UsbHostDescriptor;
 #endif /* !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__)) */
-
-#ifdef __GNUC__
- #define SECTION_USB_DESCRIPTOR       
-#endif
+#define SECTION_USB_DESCRIPTOR
 
 #if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))
 typedef union {

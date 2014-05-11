@@ -66,7 +66,6 @@
 #define REG_SERCOM4_I2CS_SYNCBUSY  (0x4200181CU) /**< \brief (SERCOM4) I2CS Syncbusy */
 #define REG_SERCOM4_I2CS_ADDR      (0x42001824U) /**< \brief (SERCOM4) I2CS Address */
 #define REG_SERCOM4_I2CS_DATA      (0x42001828U) /**< \brief (SERCOM4) I2CS Data */
-#define REG_SERCOM4_I2CS_DBGCTRL   (0x42001830U) /**< \brief (SERCOM4) I2CS Debug Control */
 #define REG_SERCOM4_SPI_CTRLA      (0x42001800U) /**< \brief (SERCOM4) SPI Control A */
 #define REG_SERCOM4_SPI_CTRLB      (0x42001804U) /**< \brief (SERCOM4) SPI Control B */
 #define REG_SERCOM4_SPI_BAUD       (0x4200180CU) /**< \brief (SERCOM4) SPI Baud Rate */
@@ -110,7 +109,6 @@
 #define REG_SERCOM4_I2CS_SYNCBUSY  (*(RoReg  *)0x4200181CU) /**< \brief (SERCOM4) I2CS Syncbusy */
 #define REG_SERCOM4_I2CS_ADDR      (*(RwReg  *)0x42001824U) /**< \brief (SERCOM4) I2CS Address */
 #define REG_SERCOM4_I2CS_DATA      (*(RwReg8 *)0x42001828U) /**< \brief (SERCOM4) I2CS Data */
-#define REG_SERCOM4_I2CS_DBGCTRL   (*(RwReg8 *)0x42001830U) /**< \brief (SERCOM4) I2CS Debug Control */
 #define REG_SERCOM4_SPI_CTRLA      (*(RwReg  *)0x42001800U) /**< \brief (SERCOM4) SPI Control A */
 #define REG_SERCOM4_SPI_CTRLB      (*(RwReg  *)0x42001804U) /**< \brief (SERCOM4) SPI Control B */
 #define REG_SERCOM4_SPI_BAUD       (*(RwReg8 *)0x4200180CU) /**< \brief (SERCOM4) SPI Baud Rate */

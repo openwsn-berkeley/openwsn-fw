@@ -66,8 +66,7 @@ typedef union {
     uint32_t RUNSTDBY:1;       /*!< bit:     11  Run in Standby                     */
     uint32_t PRESCSYNC:2;      /*!< bit: 12..13  Prescaler and Counter Synchronization Selection */
     uint32_t ALOCK:1;          /*!< bit:     14  Auto Lock                          */
-    uint32_t MSYNC:1;          /*!< bit:     15  Master Synchronization             */
-    uint32_t :8;               /*!< bit: 16..23  Reserved                           */
+    uint32_t :9;               /*!< bit: 15..23  Reserved                           */
     uint32_t CPTEN0:1;         /*!< bit:     24  Capture Channel 0 Enable           */
     uint32_t CPTEN1:1;         /*!< bit:     25  Capture Channel 1 Enable           */
     uint32_t CPTEN2:1;         /*!< bit:     26  Capture Channel 2 Enable           */
@@ -93,10 +92,10 @@ typedef union {
 #define TCC_CTRLA_RESOLUTION_Pos    5            /**< \brief (TCC_CTRLA) Enhanced Resolution */
 #define TCC_CTRLA_RESOLUTION_Msk    (0x3u << TCC_CTRLA_RESOLUTION_Pos)
 #define TCC_CTRLA_RESOLUTION(value) ((TCC_CTRLA_RESOLUTION_Msk & ((value) << TCC_CTRLA_RESOLUTION_Pos)))
-#define   TCC_CTRLA_RESOLUTION_NONE_Val   0x0u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_RESOLUTION_DITH4_Val  0x1u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_RESOLUTION_DITH5_Val  0x2u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_RESOLUTION_DITH6_Val  0x3u   /**< \brief (TCC_CTRLA)  */
+#define   TCC_CTRLA_RESOLUTION_NONE_Val   0x0u   /**< \brief (TCC_CTRLA) Dithering is disabled */
+#define   TCC_CTRLA_RESOLUTION_DITH4_Val  0x1u   /**< \brief (TCC_CTRLA) Dithering is done every 16 PWM frames. PER[3:0] and CCx[3:0] contain dithering pattern selection. */
+#define   TCC_CTRLA_RESOLUTION_DITH5_Val  0x2u   /**< \brief (TCC_CTRLA) Dithering is done every 32 PWM frames. PER[4:0] and CCx[4:0] contain dithering pattern selection. */
+#define   TCC_CTRLA_RESOLUTION_DITH6_Val  0x3u   /**< \brief (TCC_CTRLA) Dithering is done every 64 PWM frames. PER[5:0] and CCx[5:0] contain dithering pattern selection. */
 #define TCC_CTRLA_RESOLUTION_NONE   (TCC_CTRLA_RESOLUTION_NONE_Val << TCC_CTRLA_RESOLUTION_Pos)
 #define TCC_CTRLA_RESOLUTION_DITH4  (TCC_CTRLA_RESOLUTION_DITH4_Val << TCC_CTRLA_RESOLUTION_Pos)
 #define TCC_CTRLA_RESOLUTION_DITH5  (TCC_CTRLA_RESOLUTION_DITH5_Val << TCC_CTRLA_RESOLUTION_Pos)
@@ -104,14 +103,14 @@ typedef union {
 #define TCC_CTRLA_PRESCALER_Pos     8            /**< \brief (TCC_CTRLA) Prescaler */
 #define TCC_CTRLA_PRESCALER_Msk     (0x7u << TCC_CTRLA_PRESCALER_Pos)
 #define TCC_CTRLA_PRESCALER(value)  ((TCC_CTRLA_PRESCALER_Msk & ((value) << TCC_CTRLA_PRESCALER_Pos)))
-#define   TCC_CTRLA_PRESCALER_DIV1_Val    0x0u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_PRESCALER_DIV2_Val    0x1u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_PRESCALER_DIV4_Val    0x2u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_PRESCALER_DIV8_Val    0x3u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_PRESCALER_DIV16_Val   0x4u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_PRESCALER_DIV64_Val   0x5u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_PRESCALER_DIV256_Val  0x6u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_PRESCALER_DIV1024_Val 0x7u   /**< \brief (TCC_CTRLA)  */
+#define   TCC_CTRLA_PRESCALER_DIV1_Val    0x0u   /**< \brief (TCC_CTRLA) Prescaler: GCLK_TCC */
+#define   TCC_CTRLA_PRESCALER_DIV2_Val    0x1u   /**< \brief (TCC_CTRLA) Prescaler: GCLK_TCC/2 */
+#define   TCC_CTRLA_PRESCALER_DIV4_Val    0x2u   /**< \brief (TCC_CTRLA) Prescaler: GCLK_TCC/4 */
+#define   TCC_CTRLA_PRESCALER_DIV8_Val    0x3u   /**< \brief (TCC_CTRLA) Prescaler: GCLK_TCC/8 */
+#define   TCC_CTRLA_PRESCALER_DIV16_Val   0x4u   /**< \brief (TCC_CTRLA) Prescaler: GCLK_TCC/16 */
+#define   TCC_CTRLA_PRESCALER_DIV64_Val   0x5u   /**< \brief (TCC_CTRLA) Prescaler: GCLK_TCC/64 */
+#define   TCC_CTRLA_PRESCALER_DIV256_Val  0x6u   /**< \brief (TCC_CTRLA) Prescaler: GCLK_TCC/256 */
+#define   TCC_CTRLA_PRESCALER_DIV1024_Val 0x7u   /**< \brief (TCC_CTRLA) Prescaler: GCLK_TCC/1024 */
 #define TCC_CTRLA_PRESCALER_DIV1    (TCC_CTRLA_PRESCALER_DIV1_Val  << TCC_CTRLA_PRESCALER_Pos)
 #define TCC_CTRLA_PRESCALER_DIV2    (TCC_CTRLA_PRESCALER_DIV2_Val  << TCC_CTRLA_PRESCALER_Pos)
 #define TCC_CTRLA_PRESCALER_DIV4    (TCC_CTRLA_PRESCALER_DIV4_Val  << TCC_CTRLA_PRESCALER_Pos)
@@ -125,16 +124,14 @@ typedef union {
 #define TCC_CTRLA_PRESCSYNC_Pos     12           /**< \brief (TCC_CTRLA) Prescaler and Counter Synchronization Selection */
 #define TCC_CTRLA_PRESCSYNC_Msk     (0x3u << TCC_CTRLA_PRESCSYNC_Pos)
 #define TCC_CTRLA_PRESCSYNC(value)  ((TCC_CTRLA_PRESCSYNC_Msk & ((value) << TCC_CTRLA_PRESCSYNC_Pos)))
-#define   TCC_CTRLA_PRESCSYNC_GCLK_Val    0x0u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_PRESCSYNC_PRESC_Val   0x1u   /**< \brief (TCC_CTRLA)  */
-#define   TCC_CTRLA_PRESCSYNC_RESYNC_Val  0x2u   /**< \brief (TCC_CTRLA)  */
+#define   TCC_CTRLA_PRESCSYNC_GCLK_Val    0x0u   /**< \brief (TCC_CTRLA) Reload or reset Counter on next GCLK */
+#define   TCC_CTRLA_PRESCSYNC_PRESC_Val   0x1u   /**< \brief (TCC_CTRLA) Reload or reset Counter on next prescaler clock */
+#define   TCC_CTRLA_PRESCSYNC_RESYNC_Val  0x2u   /**< \brief (TCC_CTRLA) Reload or reset Counter on next GCLK */
 #define TCC_CTRLA_PRESCSYNC_GCLK    (TCC_CTRLA_PRESCSYNC_GCLK_Val  << TCC_CTRLA_PRESCSYNC_Pos)
 #define TCC_CTRLA_PRESCSYNC_PRESC   (TCC_CTRLA_PRESCSYNC_PRESC_Val << TCC_CTRLA_PRESCSYNC_Pos)
 #define TCC_CTRLA_PRESCSYNC_RESYNC  (TCC_CTRLA_PRESCSYNC_RESYNC_Val << TCC_CTRLA_PRESCSYNC_Pos)
 #define TCC_CTRLA_ALOCK_Pos         14           /**< \brief (TCC_CTRLA) Auto Lock */
 #define TCC_CTRLA_ALOCK             (0x1u << TCC_CTRLA_ALOCK_Pos)
-#define TCC_CTRLA_MSYNC_Pos         15           /**< \brief (TCC_CTRLA) Master Synchronization */
-#define TCC_CTRLA_MSYNC             (0x1u << TCC_CTRLA_MSYNC_Pos)
 #define TCC_CTRLA_CPTEN0_Pos        24           /**< \brief (TCC_CTRLA) Capture Channel 0 Enable */
 #define TCC_CTRLA_CPTEN0            (1 << TCC_CTRLA_CPTEN0_Pos)
 #define TCC_CTRLA_CPTEN1_Pos        25           /**< \brief (TCC_CTRLA) Capture Channel 1 Enable */
@@ -146,7 +143,7 @@ typedef union {
 #define TCC_CTRLA_CPTEN_Pos         24           /**< \brief (TCC_CTRLA) Capture Channel x Enable */
 #define TCC_CTRLA_CPTEN_Msk         (0xFu << TCC_CTRLA_CPTEN_Pos)
 #define TCC_CTRLA_CPTEN(value)      ((TCC_CTRLA_CPTEN_Msk & ((value) << TCC_CTRLA_CPTEN_Pos)))
-#define TCC_CTRLA_MASK              0x0F00FF63u  /**< \brief (TCC_CTRLA) MASK Register */
+#define TCC_CTRLA_MASK              0x0F007F63u  /**< \brief (TCC_CTRLA) MASK Register */
 
 /* -------- TCC_CTRLBCLR : (TCC Offset: 0x04) (R/W  8) Control B Clear -------- */
 #if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))
@@ -174,10 +171,10 @@ typedef union {
 #define TCC_CTRLBCLR_IDXCMD_Pos     3            /**< \brief (TCC_CTRLBCLR) Ramp Index Command */
 #define TCC_CTRLBCLR_IDXCMD_Msk     (0x3u << TCC_CTRLBCLR_IDXCMD_Pos)
 #define TCC_CTRLBCLR_IDXCMD(value)  ((TCC_CTRLBCLR_IDXCMD_Msk & ((value) << TCC_CTRLBCLR_IDXCMD_Pos)))
-#define   TCC_CTRLBCLR_IDXCMD_DISABLE_Val 0x0u   /**< \brief (TCC_CTRLBCLR)  */
-#define   TCC_CTRLBCLR_IDXCMD_SET_Val     0x1u   /**< \brief (TCC_CTRLBCLR)  */
-#define   TCC_CTRLBCLR_IDXCMD_CLEAR_Val   0x2u   /**< \brief (TCC_CTRLBCLR)  */
-#define   TCC_CTRLBCLR_IDXCMD_HOLD_Val    0x3u   /**< \brief (TCC_CTRLBCLR)  */
+#define   TCC_CTRLBCLR_IDXCMD_DISABLE_Val 0x0u   /**< \brief (TCC_CTRLBCLR) Command disabled: IDX toggles between cycles A and B */
+#define   TCC_CTRLBCLR_IDXCMD_SET_Val     0x1u   /**< \brief (TCC_CTRLBCLR) Set IDX: cycle B will be forced in the next cycle */
+#define   TCC_CTRLBCLR_IDXCMD_CLEAR_Val   0x2u   /**< \brief (TCC_CTRLBCLR) Clear IDX: cycle A will be forced in next cycle */
+#define   TCC_CTRLBCLR_IDXCMD_HOLD_Val    0x3u   /**< \brief (TCC_CTRLBCLR) Hold IDX: the next cycle will be the same as the current cycle. */
 #define TCC_CTRLBCLR_IDXCMD_DISABLE (TCC_CTRLBCLR_IDXCMD_DISABLE_Val << TCC_CTRLBCLR_IDXCMD_Pos)
 #define TCC_CTRLBCLR_IDXCMD_SET     (TCC_CTRLBCLR_IDXCMD_SET_Val   << TCC_CTRLBCLR_IDXCMD_Pos)
 #define TCC_CTRLBCLR_IDXCMD_CLEAR   (TCC_CTRLBCLR_IDXCMD_CLEAR_Val << TCC_CTRLBCLR_IDXCMD_Pos)
@@ -185,11 +182,11 @@ typedef union {
 #define TCC_CTRLBCLR_CMD_Pos        5            /**< \brief (TCC_CTRLBCLR) TCC Command */
 #define TCC_CTRLBCLR_CMD_Msk        (0x7u << TCC_CTRLBCLR_CMD_Pos)
 #define TCC_CTRLBCLR_CMD(value)     ((TCC_CTRLBCLR_CMD_Msk & ((value) << TCC_CTRLBCLR_CMD_Pos)))
-#define   TCC_CTRLBCLR_CMD_NONE_Val       0x0u   /**< \brief (TCC_CTRLBCLR)  */
-#define   TCC_CTRLBCLR_CMD_RETRIGGER_Val  0x1u   /**< \brief (TCC_CTRLBCLR)  */
-#define   TCC_CTRLBCLR_CMD_STOP_Val       0x2u   /**< \brief (TCC_CTRLBCLR)  */
-#define   TCC_CTRLBCLR_CMD_UPDATE_Val     0x3u   /**< \brief (TCC_CTRLBCLR)  */
-#define   TCC_CTRLBCLR_CMD_READSYNC_Val   0x4u   /**< \brief (TCC_CTRLBCLR)  */
+#define   TCC_CTRLBCLR_CMD_NONE_Val       0x0u   /**< \brief (TCC_CTRLBCLR) No action */
+#define   TCC_CTRLBCLR_CMD_RETRIGGER_Val  0x1u   /**< \brief (TCC_CTRLBCLR) Clear start, restart or retrigger */
+#define   TCC_CTRLBCLR_CMD_STOP_Val       0x2u   /**< \brief (TCC_CTRLBCLR) Force stop */
+#define   TCC_CTRLBCLR_CMD_UPDATE_Val     0x3u   /**< \brief (TCC_CTRLBCLR) Force update of double buffered registers */
+#define   TCC_CTRLBCLR_CMD_READSYNC_Val   0x4u   /**< \brief (TCC_CTRLBCLR) Force COUNT read synchronization */
 #define TCC_CTRLBCLR_CMD_NONE       (TCC_CTRLBCLR_CMD_NONE_Val     << TCC_CTRLBCLR_CMD_Pos)
 #define TCC_CTRLBCLR_CMD_RETRIGGER  (TCC_CTRLBCLR_CMD_RETRIGGER_Val << TCC_CTRLBCLR_CMD_Pos)
 #define TCC_CTRLBCLR_CMD_STOP       (TCC_CTRLBCLR_CMD_STOP_Val     << TCC_CTRLBCLR_CMD_Pos)
@@ -756,13 +753,13 @@ typedef union {
 #define TCC_EVCTRL_EVACT0_Pos       0            /**< \brief (TCC_EVCTRL) Timer/counter Input Event0 Action */
 #define TCC_EVCTRL_EVACT0_Msk       (0x7u << TCC_EVCTRL_EVACT0_Pos)
 #define TCC_EVCTRL_EVACT0(value)    ((TCC_EVCTRL_EVACT0_Msk & ((value) << TCC_EVCTRL_EVACT0_Pos)))
-#define   TCC_EVCTRL_EVACT0_OFF_Val       0x0u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT0_RETRIGGER_Val 0x1u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT0_COUNTEV_Val   0x2u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT0_START_Val     0x3u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT0_INC_Val       0x4u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT0_COUNT_Val     0x5u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT0_FAULT_Val     0x7u   /**< \brief (TCC_EVCTRL)  */
+#define   TCC_EVCTRL_EVACT0_OFF_Val       0x0u   /**< \brief (TCC_EVCTRL) Event action disabled. */
+#define   TCC_EVCTRL_EVACT0_RETRIGGER_Val 0x1u   /**< \brief (TCC_EVCTRL) Start restart or re-trigger TC on event */
+#define   TCC_EVCTRL_EVACT0_COUNTEV_Val   0x2u   /**< \brief (TCC_EVCTRL) Count on event. Increment or decrement depending on count direction. */
+#define   TCC_EVCTRL_EVACT0_START_Val     0x3u   /**< \brief (TCC_EVCTRL) Count on event.Start counting on the event rising edge. Further events will not restart the counter; it keeps on counting using prescaled GCLK_TCCx, until it reaches TOP or Zero depending on the direction. */
+#define   TCC_EVCTRL_EVACT0_INC_Val       0x4u   /**< \brief (TCC_EVCTRL) Increment TC on EVENT. Increment the counter on event, irrespective of count direction */
+#define   TCC_EVCTRL_EVACT0_COUNT_Val     0x5u   /**< \brief (TCC_EVCTRL) Count on active state of asynchronous event */
+#define   TCC_EVCTRL_EVACT0_FAULT_Val     0x7u   /**< \brief (TCC_EVCTRL) Non-recoverable Fault */
 #define TCC_EVCTRL_EVACT0_OFF       (TCC_EVCTRL_EVACT0_OFF_Val     << TCC_EVCTRL_EVACT0_Pos)
 #define TCC_EVCTRL_EVACT0_RETRIGGER (TCC_EVCTRL_EVACT0_RETRIGGER_Val << TCC_EVCTRL_EVACT0_Pos)
 #define TCC_EVCTRL_EVACT0_COUNTEV   (TCC_EVCTRL_EVACT0_COUNTEV_Val << TCC_EVCTRL_EVACT0_Pos)
@@ -773,14 +770,14 @@ typedef union {
 #define TCC_EVCTRL_EVACT1_Pos       3            /**< \brief (TCC_EVCTRL) Timer/counter Input Event1 Action */
 #define TCC_EVCTRL_EVACT1_Msk       (0x7u << TCC_EVCTRL_EVACT1_Pos)
 #define TCC_EVCTRL_EVACT1(value)    ((TCC_EVCTRL_EVACT1_Msk & ((value) << TCC_EVCTRL_EVACT1_Pos)))
-#define   TCC_EVCTRL_EVACT1_OFF_Val       0x0u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT1_RETRIGGER_Val 0x1u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT1_DIR_Val       0x2u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT1_STOP_Val      0x3u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT1_DEC_Val       0x4u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT1_PPW_Val       0x5u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT1_PWP_Val       0x6u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_EVACT1_FAULT_Val     0x7u   /**< \brief (TCC_EVCTRL)  */
+#define   TCC_EVCTRL_EVACT1_OFF_Val       0x0u   /**< \brief (TCC_EVCTRL) Event action disabled. */
+#define   TCC_EVCTRL_EVACT1_RETRIGGER_Val 0x1u   /**< \brief (TCC_EVCTRL) Re-trigger TC on event */
+#define   TCC_EVCTRL_EVACT1_DIR_Val       0x2u   /**< \brief (TCC_EVCTRL) Direction control */
+#define   TCC_EVCTRL_EVACT1_STOP_Val      0x3u   /**< \brief (TCC_EVCTRL) Stop TC on event */
+#define   TCC_EVCTRL_EVACT1_DEC_Val       0x4u   /**< \brief (TCC_EVCTRL) Decrement TC on event */
+#define   TCC_EVCTRL_EVACT1_PPW_Val       0x5u   /**< \brief (TCC_EVCTRL) Period captured into CC0 Pulse Width on CC1 */
+#define   TCC_EVCTRL_EVACT1_PWP_Val       0x6u   /**< \brief (TCC_EVCTRL) Period captured into CC1 Pulse Width on CC0 */
+#define   TCC_EVCTRL_EVACT1_FAULT_Val     0x7u   /**< \brief (TCC_EVCTRL) Non-recoverable Fault */
 #define TCC_EVCTRL_EVACT1_OFF       (TCC_EVCTRL_EVACT1_OFF_Val     << TCC_EVCTRL_EVACT1_Pos)
 #define TCC_EVCTRL_EVACT1_RETRIGGER (TCC_EVCTRL_EVACT1_RETRIGGER_Val << TCC_EVCTRL_EVACT1_Pos)
 #define TCC_EVCTRL_EVACT1_DIR       (TCC_EVCTRL_EVACT1_DIR_Val     << TCC_EVCTRL_EVACT1_Pos)
@@ -792,10 +789,10 @@ typedef union {
 #define TCC_EVCTRL_CNTSEL_Pos       6            /**< \brief (TCC_EVCTRL) Timer/counter Output Event Mode */
 #define TCC_EVCTRL_CNTSEL_Msk       (0x3u << TCC_EVCTRL_CNTSEL_Pos)
 #define TCC_EVCTRL_CNTSEL(value)    ((TCC_EVCTRL_CNTSEL_Msk & ((value) << TCC_EVCTRL_CNTSEL_Pos)))
-#define   TCC_EVCTRL_CNTSEL_START_Val     0x0u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_CNTSEL_END_Val       0x1u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_CNTSEL_BETWEEN_Val   0x2u   /**< \brief (TCC_EVCTRL)  */
-#define   TCC_EVCTRL_CNTSEL_BOUNDARY_Val  0x3u   /**< \brief (TCC_EVCTRL)  */
+#define   TCC_EVCTRL_CNTSEL_START_Val     0x0u   /**< \brief (TCC_EVCTRL) An interrupt/event is generated when a new counter cycle starts */
+#define   TCC_EVCTRL_CNTSEL_END_Val       0x1u   /**< \brief (TCC_EVCTRL) An interrupt/event is generated when a counter cycle ends */
+#define   TCC_EVCTRL_CNTSEL_BETWEEN_Val   0x2u   /**< \brief (TCC_EVCTRL) An interrupt/event is generated when a counter cycle ends, except for the first and last cycles. */
+#define   TCC_EVCTRL_CNTSEL_BOUNDARY_Val  0x3u   /**< \brief (TCC_EVCTRL) An interrupt/event is generated when a new counter cycle starts or a counter cycle ends */
 #define TCC_EVCTRL_CNTSEL_START     (TCC_EVCTRL_CNTSEL_START_Val   << TCC_EVCTRL_CNTSEL_Pos)
 #define TCC_EVCTRL_CNTSEL_END       (TCC_EVCTRL_CNTSEL_END_Val     << TCC_EVCTRL_CNTSEL_Pos)
 #define TCC_EVCTRL_CNTSEL_BETWEEN   (TCC_EVCTRL_CNTSEL_BETWEEN_Val << TCC_EVCTRL_CNTSEL_Pos)

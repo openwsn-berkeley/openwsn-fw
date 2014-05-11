@@ -361,7 +361,7 @@ void usart_abort_job(
 			usart_hw->INTFLAG.reg = SERCOM_USART_INTFLAG_RXC;
 
 			/* Clear the software reception buffer */
-			//module->remaining_rx_buffer_length = 0;
+			module->remaining_rx_buffer_length = 0;
 
 			break;
 
@@ -371,7 +371,7 @@ void usart_abort_job(
 			usart_hw->INTFLAG.reg = SERCOM_USART_INTFLAG_TXC;
 
 			/* Clear the software reception buffer */
-			//module->remaining_tx_buffer_length = 0;
+			module->remaining_tx_buffer_length = 0;
 
 			break;
 	}

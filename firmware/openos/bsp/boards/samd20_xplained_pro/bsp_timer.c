@@ -6,7 +6,7 @@
 #include "debugpins.h"
 
 #define BSP_TIMER     TC0
-#define TIMER_PERIOD UINT32_MAX
+#define TIMER_PERIOD UINT16_MAX
 typedef struct
 {
 	bsp_timer_cbt cb;
@@ -32,10 +32,10 @@ void bsp_timer_init(void)
 	tc_get_config_defaults(&timer_config);
 	/* Before that RTC must be enabled */
 	timer_config.clock_source               = GCLK_GENERATOR_2;
-	timer_config.counter_size               = TC_COUNTER_SIZE_32BIT;
+	timer_config.counter_size               = TC_COUNTER_SIZE_16BIT;
 	timer_config.wave_generation                 = TC_CTRLA_WAVEGEN_MFRQ;
-	timer_config.counter_32_bit.compare_capture_channel[0] = TIMER_PERIOD;
-	timer_config.counter_32_bit.compare_capture_channel[1] = UINT32_MAX;
+	timer_config.counter_16_bit.compare_capture_channel[0] = TIMER_PERIOD;
+	timer_config.counter_16_bit.compare_capture_channel[1] = TIMER_PERIOD;
 	timer_config.run_in_standby             = true;
 	tc_init(&tc_instance, BSP_TIMER, &timer_config);
 	
@@ -49,7 +49,6 @@ void bsp_timer_init(void)
 void bsp_timer_set_callback(bsp_timer_cbt cb)
 {
 	bsp_timer_vars.cb = cb;	
-	//tc_enable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);
 }
 
 static void tc_ovf_callback(struct tc_module *const module_instance)
@@ -74,14 +73,12 @@ static void tc_cca1_callback(struct tc_module *const module_instance)
 void bsp_timer_reset(void)
 {
 	// reset compare --- set compare value to 0 ,1
-	tc_set_compare_value(&tc_instance, TC_COMPARE_CAPTURE_CHANNEL_0, TIMER_PERIOD);
-	tc_set_compare_value(&tc_instance, TC_COMPARE_CAPTURE_CHANNEL_1, UINT32_MAX);
+	tc_set_top_value(&tc_instance, TIMER_PERIOD);
+	tc_set_compare_value(&tc_instance, TC_COMPARE_CAPTURE_CHANNEL_1, TIMER_PERIOD);
 	
-	//disable and enable will clears the compare interrupt
+	//disable will clears the compare interrupt
 	tc_disable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL0);
-	//tc_enable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL0);
 	tc_disable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);
-	//tc_enable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);
 	
 	// reset timer -- set counter to 0
 	tc_set_count_value(&tc_instance, 0);
@@ -135,7 +132,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks)
 /* Cancel the running compare */
 void bsp_timer_cancel_schedule(void)
 {
-    tc_set_compare_value(&tc_instance, TC_COMPARE_CAPTURE_CHANNEL_1, UINT32_MAX);
+    tc_set_compare_value(&tc_instance, TC_COMPARE_CAPTURE_CHANNEL_1, TIMER_PERIOD);
     tc_disable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);
 }
 

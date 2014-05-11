@@ -103,7 +103,7 @@ static enum status_code _i2c_slave_set_config(
 		tmp_ctrla = 0;
 	}
 
-	tmp_ctrla |= (uint32_t)(config->sda_hold_time |
+	tmp_ctrla |= ((uint32_t)config->sda_hold_time |
 			config->transfer_speed |
 			(config->scl_low_timeout << SERCOM_I2CS_CTRLA_LOWTOUTEN_Pos) |
 			(config->scl_stretch_only_after_ack_bit << SERCOM_I2CS_CTRLA_SCLSM_Pos) |
@@ -349,12 +349,12 @@ enum status_code i2c_slave_write_packet_wait(
 
 		if (status != STATUS_OK) {
 			/* Timeout, return */
-			return I2C_SLAVE_DIRECTION_NONE;
+			return STATUS_ERR_TIMEOUT;
 		}
 
 		if (!(i2c_hw->INTFLAG.reg & SERCOM_I2CS_INTFLAG_AMATCH)) {
 			/* Not address interrupt, something is wrong */
-			return I2C_SLAVE_DIRECTION_NONE;
+			return STATUS_ERR_DENIED;
 		}
 	}
 

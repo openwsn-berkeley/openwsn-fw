@@ -266,7 +266,7 @@ struct i2c_slave_module {
 	 * Counter used for bytes left to send in write and to count number of
 	 * obtained bytes in read
 	 */
-	volatile uint16_t buffer_remaining;
+	uint16_t buffer_remaining;
 	/** Data buffer for packet write and read */
 	volatile uint8_t *buffer;
 	/** Save direction of request from master. 1 = read, 0 = write */
@@ -599,8 +599,6 @@ enum status_code i2c_slave_read_packet_wait(
 		struct i2c_slave_module *const module,
 		struct i2c_slave_packet *const packet);
 enum i2c_slave_direction i2c_slave_get_direction_wait(
-		struct i2c_slave_module *const module);
-enum i2c_slave_direction i2c_slave_get_direction(
 		struct i2c_slave_module *const module);
 
 /** @} */

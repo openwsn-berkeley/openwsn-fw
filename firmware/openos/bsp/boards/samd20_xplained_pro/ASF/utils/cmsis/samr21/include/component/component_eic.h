@@ -498,8 +498,8 @@ typedef union {
 #if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))
 typedef union {
   struct {
-    uint32_t SENSE0:3;         /*!< bit:  0.. 2  Input Sense n Configuration        */
-    uint32_t FILTEN0:1;        /*!< bit:      3  Filter n Enable                    */
+    uint32_t SENSE0:3;         /*!< bit:  0.. 2  Input Sense 0 Configuration        */
+    uint32_t FILTEN0:1;        /*!< bit:      3  Filter 0 Enable                    */
     uint32_t SENSE1:3;         /*!< bit:  4.. 6  Input Sense 1 Configuration        */
     uint32_t FILTEN1:1;        /*!< bit:      7  Filter 1 Enable                    */
     uint32_t SENSE2:3;         /*!< bit:  8..10  Input Sense 2 Configuration        */
@@ -522,7 +522,7 @@ typedef union {
 #define EIC_CONFIG_OFFSET           0x18         /**< \brief (EIC_CONFIG offset) Configuration n */
 #define EIC_CONFIG_RESETVALUE       0x00000000   /**< \brief (EIC_CONFIG reset_value) Configuration n */
 
-#define EIC_CONFIG_SENSE0_Pos       0            /**< \brief (EIC_CONFIG) Input Sense n Configuration */
+#define EIC_CONFIG_SENSE0_Pos       0            /**< \brief (EIC_CONFIG) Input Sense 0 Configuration */
 #define EIC_CONFIG_SENSE0_Msk       (0x7u << EIC_CONFIG_SENSE0_Pos)
 #define EIC_CONFIG_SENSE0(value)    ((EIC_CONFIG_SENSE0_Msk & ((value) << EIC_CONFIG_SENSE0_Pos)))
 #define   EIC_CONFIG_SENSE0_NONE_Val      0x0u   /**< \brief (EIC_CONFIG) No detection */
@@ -537,7 +537,7 @@ typedef union {
 #define EIC_CONFIG_SENSE0_BOTH      (EIC_CONFIG_SENSE0_BOTH_Val    << EIC_CONFIG_SENSE0_Pos)
 #define EIC_CONFIG_SENSE0_HIGH      (EIC_CONFIG_SENSE0_HIGH_Val    << EIC_CONFIG_SENSE0_Pos)
 #define EIC_CONFIG_SENSE0_LOW       (EIC_CONFIG_SENSE0_LOW_Val     << EIC_CONFIG_SENSE0_Pos)
-#define EIC_CONFIG_FILTEN0_Pos      3            /**< \brief (EIC_CONFIG) Filter n Enable */
+#define EIC_CONFIG_FILTEN0_Pos      3            /**< \brief (EIC_CONFIG) Filter 0 Enable */
 #define EIC_CONFIG_FILTEN0          (0x1u << EIC_CONFIG_FILTEN0_Pos)
 #define EIC_CONFIG_SENSE1_Pos       4            /**< \brief (EIC_CONFIG) Input Sense 1 Configuration */
 #define EIC_CONFIG_SENSE1_Msk       (0x7u << EIC_CONFIG_SENSE1_Pos)

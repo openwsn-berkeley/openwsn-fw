@@ -304,8 +304,6 @@ void I2S_Handler                 ( void );
 #include "instance/instance_tc3.h"
 #include "instance/instance_tc4.h"
 #include "instance/instance_tc5.h"
-#include "instance/instance_tc6.h"
-#include "instance/instance_tc7.h"
 #include "instance/instance_tcc0.h"
 #include "instance/instance_tcc1.h"
 #include "instance/instance_tcc2.h"
@@ -352,13 +350,12 @@ void I2S_Handler                 ( void );
 #define ID_TC3           75 /**< \brief Basic Timer Counter TC (TC3) */
 #define ID_TC4           76 /**< \brief Basic Timer Counter TC (TC4) */
 #define ID_TC5           77 /**< \brief Basic Timer Counter TC (TC5) */
-#define ID_TC6           78 /**< \brief Basic Timer Counter TC (TC6) */
-#define ID_TC7           79 /**< \brief Basic Timer Counter TC (TC7) */
 #define ID_ADC           80 /**< \brief Analog Digital Converter (ADC) */
 #define ID_AC            81 /**< \brief Analog Comparators (AC) */
-#define ID_RFCTRL        82 /**< \brief RF233 control module (RFCTRL) */
+#define ID_PTC           83 /**< \brief Peripheral Touch Controller (PTC) */
+#define ID_RFCTRL        85 /**< \brief RF233 control module (RFCTRL) */
 
-#define ID_PERIPH_COUNT  83 /**< \brief Number of peripheral IDs */
+#define ID_PERIPH_COUNT  86 /**< \brief Number of peripheral IDs */
 /*@}*/
 
 /* ************************************************************************** */
@@ -401,8 +398,6 @@ void I2S_Handler                 ( void );
 #define TC3                           (0x42002C00U) /**< \brief (TC3) APB Base Address */
 #define TC4                           (0x42003000U) /**< \brief (TC4) APB Base Address */
 #define TC5                           (0x42003400U) /**< \brief (TC5) APB Base Address */
-#define TC6                           (0x42003800U) /**< \brief (TC6) APB Base Address */
-#define TC7                           (0x42003C00U) /**< \brief (TC7) APB Base Address */
 #define TCC0                          (0x42002000U) /**< \brief (TCC0) APB Base Address */
 #define TCC1                          (0x42002400U) /**< \brief (TCC1) APB Base Address */
 #define TCC2                          (0x42002800U) /**< \brief (TCC2) APB Base Address */
@@ -466,6 +461,10 @@ void I2S_Handler                 ( void );
 #define PORT_INST_NUM     1                         /**< \brief (PORT) Number of instances */
 #define PORT_INSTS        { PORT }                  /**< \brief (PORT) Instances List */
 
+#define PTC_GCLK_ID       34
+#define PTC_INST_NUM      1                         /**< \brief (PTC) Number of instances */
+#define PTC_INSTS         { PTC }                   /**< \brief (PTC) Instances List */
+
 #define RFCTRL            ((Rfctrl   *)0x42005400U) /**< \brief (RFCTRL) APB Base Address */
 #define RFCTRL_INST_NUM   1                         /**< \brief (RFCTRL) Number of instances */
 #define RFCTRL_INSTS      { RFCTRL }                /**< \brief (RFCTRL) Instances List */
@@ -490,10 +489,8 @@ void I2S_Handler                 ( void );
 #define TC3               ((Tc       *)0x42002C00U) /**< \brief (TC3) APB Base Address */
 #define TC4               ((Tc       *)0x42003000U) /**< \brief (TC4) APB Base Address */
 #define TC5               ((Tc       *)0x42003400U) /**< \brief (TC5) APB Base Address */
-#define TC6               ((Tc       *)0x42003800U) /**< \brief (TC6) APB Base Address */
-#define TC7               ((Tc       *)0x42003C00U) /**< \brief (TC7) APB Base Address */
-#define TC_INST_NUM       5                         /**< \brief (TC) Number of instances */
-#define TC_INSTS          { TC3, TC4, TC5, TC6, TC7 } /**< \brief (TC) Instances List */
+#define TC_INST_NUM       3                         /**< \brief (TC) Number of instances */
+#define TC_INSTS          { TC3, TC4, TC5 }         /**< \brief (TC) Instances List */
 
 #define TCC0              ((Tcc      *)0x42002000U) /**< \brief (TCC0) APB Base Address */
 #define TCC1              ((Tcc      *)0x42002400U) /**< \brief (TCC1) APB Base Address */
@@ -533,6 +530,10 @@ void I2S_Handler                 ( void );
 #define FLASH_ADDR            (0x00000000U) /**< FLASH base address */
 #define FLASH_USER_PAGE_ADDR  (0x00800000U) /**< FLASH_USER_PAGE base address */
 #define HMCRAMC0_ADDR         (0x20000000U) /**< HMCRAMC0 base address */
+
+#define DSU_DID_RESETVALUE    0x1001001D
+#define PORT_GROUPS           3
+#define SIP_CONFIG            RF233
 
 /* ************************************************************************** */
 /**  ELECTRICAL DEFINITIONS FOR SAMR21E17A */

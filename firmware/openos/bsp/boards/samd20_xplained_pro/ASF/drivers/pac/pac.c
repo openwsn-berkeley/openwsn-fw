@@ -92,6 +92,8 @@ __no_inline enum status_code system_peripheral_lock(
 #endif
 #ifdef PAC2
 		case 2:
+			/* Turn on the digital interface clock */
+			system_apb_clock_set_mask(SYSTEM_CLOCK_APB_APBC, PM_APBCMASK_PAC2);
 			PAC2->WPSET.reg = (1 << register_bit_pos);
 			break;
 #endif
@@ -152,6 +154,8 @@ __no_inline enum status_code system_peripheral_unlock(
 #endif
 #ifdef PAC2
 		case 2:
+			/* Turn on the digital interface clock */
+			system_apb_clock_set_mask(SYSTEM_CLOCK_APB_APBC, PM_APBCMASK_PAC2);
 			PAC2->WPCLR.reg = (1 << register_bit_pos);
 			break;
 #endif

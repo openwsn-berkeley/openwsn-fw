@@ -1366,24 +1366,6 @@ typedef union {
 #define SERCOM_I2CM_DBGCTRL_DBGSTOP (0x1u << SERCOM_I2CM_DBGCTRL_DBGSTOP_Pos)
 #define SERCOM_I2CM_DBGCTRL_MASK    0x01u        /**< \brief (SERCOM_I2CM_DBGCTRL) MASK Register */
 
-/* -------- SERCOM_I2CS_DBGCTRL : (SERCOM Offset: 0x30) (R/W  8) I2CS I2CS Debug Control -------- */
-#if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))
-typedef union {
-  struct {
-    uint8_t  DBGSTOP:1;        /*!< bit:      0  Debug Mode                         */
-    uint8_t  :7;               /*!< bit:  1.. 7  Reserved                           */
-  } bit;                       /*!< Structure used for bit  access                  */
-  uint8_t reg;                 /*!< Type      used for register access              */
-} SERCOM_I2CS_DBGCTRL_Type;
-#endif /* !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__)) */
-
-#define SERCOM_I2CS_DBGCTRL_OFFSET  0x30         /**< \brief (SERCOM_I2CS_DBGCTRL offset) I2CS Debug Control */
-#define SERCOM_I2CS_DBGCTRL_RESETVALUE 0x00         /**< \brief (SERCOM_I2CS_DBGCTRL reset_value) I2CS Debug Control */
-
-#define SERCOM_I2CS_DBGCTRL_DBGSTOP_Pos 0            /**< \brief (SERCOM_I2CS_DBGCTRL) Debug Mode */
-#define SERCOM_I2CS_DBGCTRL_DBGSTOP (0x1u << SERCOM_I2CS_DBGCTRL_DBGSTOP_Pos)
-#define SERCOM_I2CS_DBGCTRL_MASK    0x01u        /**< \brief (SERCOM_I2CS_DBGCTRL) MASK Register */
-
 /* -------- SERCOM_SPI_DBGCTRL : (SERCOM Offset: 0x30) (R/W  8) SPI SPI Debug Control -------- */
 #if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))
 typedef union {
@@ -1461,8 +1443,6 @@ typedef struct { /* I2C Slave Mode */
        RoReg8                    Reserved5[0x4];
   __IO SERCOM_I2CS_ADDR_Type     ADDR;        /**< \brief Offset: 0x24 (R/W 32) I2CS Address */
   __IO SERCOM_I2CS_DATA_Type     DATA;        /**< \brief Offset: 0x28 (R/W  8) I2CS Data */
-       RoReg8                    Reserved6[0x7];
-  __IO SERCOM_I2CS_DBGCTRL_Type  DBGCTRL;     /**< \brief Offset: 0x30 (R/W  8) I2CS Debug Control */
 } SercomI2cs;
 #endif /* !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__)) */
 

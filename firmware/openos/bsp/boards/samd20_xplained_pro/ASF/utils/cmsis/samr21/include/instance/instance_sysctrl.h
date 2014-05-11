@@ -60,6 +60,7 @@
 #define REG_SYSCTRL_DFLLMUL        (0x4000082CU) /**< \brief (SYSCTRL) DFLL48M Multiplier */
 #define REG_SYSCTRL_DFLLSYNC       (0x40000830U) /**< \brief (SYSCTRL) DFLL48M Synchronization */
 #define REG_SYSCTRL_BOD33          (0x40000834U) /**< \brief (SYSCTRL) 3.3V Brown-Out Detector (BOD33) Control */
+#define REG_SYSCTRL_VREG           (0x4000083CU) /**< \brief (SYSCTRL) Voltage Regulator System (VREG) Control */
 #define REG_SYSCTRL_VREF           (0x40000840U) /**< \brief (SYSCTRL) Voltage References System (VREF) Control */
 #define REG_SYSCTRL_DPLLCTRLA      (0x40000844U) /**< \brief (SYSCTRL) DPLL Control A */
 #define REG_SYSCTRL_DPLLRATIO      (0x40000848U) /**< \brief (SYSCTRL) DPLL Ratio Control */
@@ -80,6 +81,7 @@
 #define REG_SYSCTRL_DFLLMUL        (*(RwReg  *)0x4000082CU) /**< \brief (SYSCTRL) DFLL48M Multiplier */
 #define REG_SYSCTRL_DFLLSYNC       (*(RwReg8 *)0x40000830U) /**< \brief (SYSCTRL) DFLL48M Synchronization */
 #define REG_SYSCTRL_BOD33          (*(RwReg  *)0x40000834U) /**< \brief (SYSCTRL) 3.3V Brown-Out Detector (BOD33) Control */
+#define REG_SYSCTRL_VREG           (*(RwReg16*)0x4000083CU) /**< \brief (SYSCTRL) Voltage Regulator System (VREG) Control */
 #define REG_SYSCTRL_VREF           (*(RwReg  *)0x40000840U) /**< \brief (SYSCTRL) Voltage References System (VREF) Control */
 #define REG_SYSCTRL_DPLLCTRLA      (*(RwReg8 *)0x40000844U) /**< \brief (SYSCTRL) DPLL Control A */
 #define REG_SYSCTRL_DPLLRATIO      (*(RwReg  *)0x40000848U) /**< \brief (SYSCTRL) DPLL Ratio Control */

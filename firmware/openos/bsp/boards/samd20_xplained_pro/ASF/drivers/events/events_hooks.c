@@ -196,9 +196,11 @@ enum status_code events_ack_interrupt(struct events_resource *resource, enum eve
 void EVSYS_Handler(void)
 {
 	struct events_hook *current_hook = _events_inst.hook_list;
+	uint32_t flag;
 
 	/* Synch the interrupt flag buffer with the hardware register */
-	_events_inst.interrupt_flag_buffer |= EVSYS->INTFLAG.reg;
+	flag = EVSYS->INTFLAG.reg;
+	_events_inst.interrupt_flag_buffer |= flag;
 	/* Clear all hardware interrupt flags */
 	EVSYS->INTFLAG.reg = _EVENTS_INTFLAGS_MASK;
 
@@ -209,7 +211,8 @@ void EVSYS_Handler(void)
 	}
 
 	/* Clear acknowledged interrupt sources from the interrupt flag buffer */
-	_events_inst.interrupt_flag_buffer &= ~_events_inst.interrupt_flag_ack_buffer;
+	flag = _events_inst.interrupt_flag_ack_buffer;
+	_events_inst.interrupt_flag_buffer &= ~flag;
 }
 
 

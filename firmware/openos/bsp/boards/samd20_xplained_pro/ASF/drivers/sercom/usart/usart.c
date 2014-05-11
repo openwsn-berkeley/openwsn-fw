@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief SAM D20/D21 SERCOM USART Driver
+ * \brief SAM D20/D21/R21 SERCOM USART Driver
  *
  * Copyright (C) 2012-2014 Atmel Corporation. All rights reserved.
  *
@@ -199,9 +199,8 @@ static enum status_code _usart_set_config(
 #endif
 	}
 
-	/* Set run mode during device sleep */
-	if (config->run_in_standby) {
-		/* Enable in sleep mode */
+	/* Set whether module should run in standby. */
+	if (config->run_in_standby || system_is_debugger_present()) {
 		ctrla |= SERCOM_USART_CTRLA_RUNSTDBY;
 	}
 

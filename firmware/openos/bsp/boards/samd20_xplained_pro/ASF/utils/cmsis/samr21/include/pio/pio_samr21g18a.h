@@ -890,40 +890,6 @@
 #define MUX_PB15E_TC5_WO1                  4
 #define PINMUX_PB15E_TC5_WO1       ((PIN_PB15E_TC5_WO1 << 16) | MUX_PB15E_TC5_WO1)
 #define PORT_PB15E_TC5_WO1         (1u << 15)
-/* ========== PORT definition for TC6 peripheral ========== */
-#define PIN_PB02E_TC6_WO0                 34  /**< \brief TC6 signal: WO0 on PB02 mux E */
-#define MUX_PB02E_TC6_WO0                  4
-#define PINMUX_PB02E_TC6_WO0       ((PIN_PB02E_TC6_WO0 << 16) | MUX_PB02E_TC6_WO0)
-#define PORT_PB02E_TC6_WO0         (1u <<  2)
-#define PIN_PB16E_TC6_WO0                 48  /**< \brief TC6 signal: WO0 on PB16 mux E */
-#define MUX_PB16E_TC6_WO0                  4
-#define PINMUX_PB16E_TC6_WO0       ((PIN_PB16E_TC6_WO0 << 16) | MUX_PB16E_TC6_WO0)
-#define PORT_PB16E_TC6_WO0         (1u << 16)
-#define PIN_PB03E_TC6_WO1                 35  /**< \brief TC6 signal: WO1 on PB03 mux E */
-#define MUX_PB03E_TC6_WO1                  4
-#define PINMUX_PB03E_TC6_WO1       ((PIN_PB03E_TC6_WO1 << 16) | MUX_PB03E_TC6_WO1)
-#define PORT_PB03E_TC6_WO1         (1u <<  3)
-#define PIN_PB17E_TC6_WO1                 49  /**< \brief TC6 signal: WO1 on PB17 mux E */
-#define MUX_PB17E_TC6_WO1                  4
-#define PINMUX_PB17E_TC6_WO1       ((PIN_PB17E_TC6_WO1 << 16) | MUX_PB17E_TC6_WO1)
-#define PORT_PB17E_TC6_WO1         (1u << 17)
-/* ========== PORT definition for TC7 peripheral ========== */
-#define PIN_PA20E_TC7_WO0                 20  /**< \brief TC7 signal: WO0 on PA20 mux E */
-#define MUX_PA20E_TC7_WO0                  4
-#define PINMUX_PA20E_TC7_WO0       ((PIN_PA20E_TC7_WO0 << 16) | MUX_PA20E_TC7_WO0)
-#define PORT_PA20E_TC7_WO0         (1u << 20)
-#define PIN_PB00E_TC7_WO0                 32  /**< \brief TC7 signal: WO0 on PB00 mux E */
-#define MUX_PB00E_TC7_WO0                  4
-#define PINMUX_PB00E_TC7_WO0       ((PIN_PB00E_TC7_WO0 << 16) | MUX_PB00E_TC7_WO0)
-#define PORT_PB00E_TC7_WO0         (1u <<  0)
-#define PIN_PB22E_TC7_WO0                 54  /**< \brief TC7 signal: WO0 on PB22 mux E */
-#define MUX_PB22E_TC7_WO0                  4
-#define PINMUX_PB22E_TC7_WO0       ((PIN_PB22E_TC7_WO0 << 16) | MUX_PB22E_TC7_WO0)
-#define PORT_PB22E_TC7_WO0         (1u << 22)
-#define PIN_PB23E_TC7_WO1                 55  /**< \brief TC7 signal: WO1 on PB23 mux E */
-#define MUX_PB23E_TC7_WO1                  4
-#define PINMUX_PB23E_TC7_WO1       ((PIN_PB23E_TC7_WO1 << 16) | MUX_PB23E_TC7_WO1)
-#define PORT_PB23E_TC7_WO1         (1u << 23)
 /* ========== PORT definition for ADC peripheral ========== */
 #define PIN_PB08B_ADC_AIN2                40  /**< \brief ADC signal: AIN2 on PB08 mux B */
 #define MUX_PB08B_ADC_AIN2                 1

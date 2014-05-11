@@ -388,10 +388,7 @@ typedef struct {
        PortGroup                 Group[3];    /**< \brief Offset: 0x00 PortGroup groups [GROUPS] */
 } Port;
 #endif /* !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__)) */
-
-#ifdef __GNUC__
- #define SECTION_PORT_IOBUS           
-#endif
+#define SECTION_PORT_IOBUS
 
 /*@}*/
 

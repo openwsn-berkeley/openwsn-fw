@@ -786,7 +786,8 @@ static void _uhd_vbus_handler(void)
 			EXTINT_CALLBACK_TYPE_DETECT);
 	if (is_usb_vbus_high()) {
 		UHC_VBUS_CHANGE(true);
-	} else {
+	}
+	if (!is_usb_vbus_high()) {
 		uhd_sleep_mode(UHD_STATE_NO_VBUS);
 		UHC_VBUS_CHANGE(false);
 	}

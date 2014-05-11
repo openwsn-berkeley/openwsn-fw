@@ -43,6 +43,11 @@
 
 #include "adc.h"
 
+#if SAMD20
+/* The Die revision D number */
+#define REVISON_D_NUM    3
+#endif
+
 /**
 * \internal Configure MUX settings for the analog pins
 *
@@ -155,6 +160,9 @@ static enum status_code _adc_set_config(
 	uint8_t adjres = 0;
 	uint32_t resolution = ADC_RESOLUTION_16BIT;
 	enum adc_accumulate_samples accumulate = ADC_ACCUMULATE_DISABLE;
+#if SAMD20
+	uint8_t revision_num = ((REG_DSU_DID & DSU_DID_DIE_Msk) >> DSU_DID_DIE_Pos);
+#endif
 
 	/* Get the hardware module pointer */
 	Adc *const adc_module = module_inst->hw;
@@ -218,10 +226,36 @@ static enum status_code _adc_set_config(
 		/* 16-bit result register */
 		resolution = ADC_RESOLUTION_16BIT;
 		break;
-
+#if SAMD20
+	/* Please see $35.1.8 for ADC errata of SAM D20.
+	   The revisions before D have this issue.*/
 	case ADC_RESOLUTION_15BIT:
 		/* Increase resolution by 3 bit */
-		adjres = ADC_DIVIDE_RESULT_8;
+		if(revision_num < REVISON_D_NUM) {
+			adjres = ADC_DIVIDE_RESULT_8;
+		} else {
+			adjres = ADC_DIVIDE_RESULT_2;
+		}
+		accumulate = ADC_ACCUMULATE_SAMPLES_64;
+		/* 16-bit result register */
+		resolution = ADC_RESOLUTION_16BIT;
+		break;
+
+	case ADC_RESOLUTION_16BIT:
+		if(revision_num < REVISON_D_NUM) {
+			/* Increase resolution by 4 bit */
+			adjres = ADC_DIVIDE_RESULT_16;
+		} else {
+			adjres = ADC_DIVIDE_RESULT_DISABLE;
+		}
+		accumulate = ADC_ACCUMULATE_SAMPLES_256;
+		/* 16-bit result register */
+		resolution = ADC_RESOLUTION_16BIT;
+		break;
+#else
+	case ADC_RESOLUTION_15BIT:
+		/* Increase resolution by 3 bit */
+		adjres = ADC_DIVIDE_RESULT_2;
 		accumulate = ADC_ACCUMULATE_SAMPLES_64;
 		/* 16-bit result register */
 		resolution = ADC_RESOLUTION_16BIT;
@@ -229,10 +263,12 @@ static enum status_code _adc_set_config(
 
 	case ADC_RESOLUTION_16BIT:
 		/* Increase resolution by 4 bit */
-		adjres = ADC_DIVIDE_RESULT_16;
+		adjres = ADC_DIVIDE_RESULT_DISABLE;
 		accumulate = ADC_ACCUMULATE_SAMPLES_256;
+		/* 16-bit result register */
+		resolution = ADC_RESOLUTION_16BIT;
 		break;
-
+#endif
 	case ADC_RESOLUTION_8BIT:
 		/* 8-bit result register */
 		resolution = ADC_RESOLUTION_8BIT;

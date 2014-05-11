@@ -44,6 +44,11 @@
 #include <conf_clocks.h>
 #include <system.h>
 
+#ifndef SYSCTRL_FUSES_OSC32K_ADDR
+#  define SYSCTRL_FUSES_OSC32K_ADDR SYSCTRL_FUSES_OSC32K_CAL_ADDR
+#  define SYSCTRL_FUSES_OSC32K_Pos  SYSCTRL_FUSES_OSC32K_CAL_Pos
+#endif
+
 /**
  * \internal
  * \brief DFLL-specific data container
@@ -633,7 +638,7 @@ enum status_code system_clock_source_disable(
 bool system_clock_source_is_ready(
 		const enum system_clock_source clock_source)
 {
-	uint32_t mask;
+	uint32_t mask = 0;
 
 	switch (clock_source) {
 	case SYSTEM_CLOCK_SOURCE_OSC8M:
@@ -653,7 +658,12 @@ bool system_clock_source_is_ready(
 		break;
 
 	case SYSTEM_CLOCK_SOURCE_DFLL:
-		mask = SYSCTRL_PCLKSR_DFLLRDY;
+		if (CONF_CLOCK_DFLL_LOOP_MODE == SYSTEM_CLOCK_DFLL_LOOP_MODE_CLOSED) {
+			mask = (SYSCTRL_PCLKSR_DFLLRDY |
+			        SYSCTRL_PCLKSR_DFLLLCKF | SYSCTRL_PCLKSR_DFLLLCKC);
+		} else {
+			mask = SYSCTRL_PCLKSR_DFLLRDY;
+		}
 		break;
 
 #ifdef FEATURE_SYSTEM_CLOCK_DPLL
@@ -671,7 +681,7 @@ bool system_clock_source_is_ready(
 		return false;
 	}
 
-	return ((SYSCTRL->PCLKSR.reg & mask) != 0);
+	return ((SYSCTRL->PCLKSR.reg & mask) == mask);
 }
 
 /* Include some checks for conf_clocks.h validation */
@@ -937,7 +947,11 @@ void system_clock_init(void)
 
 	/* CPU and BUS clocks */
 	system_cpu_clock_set_divider(CONF_CLOCK_CPU_DIVIDER);
+
+#ifdef FEATURE_SYSTEM_CLOCK_FAILURE_DETECT
 	system_main_clock_set_failure_detect(CONF_CLOCK_CPU_CLOCK_FAILURE_DETECT);
+#endif
+
 	system_apb_clock_set_divider(SYSTEM_CLOCK_APB_APBA, CONF_CLOCK_APBA_DIVIDER);
 	system_apb_clock_set_divider(SYSTEM_CLOCK_APB_APBB, CONF_CLOCK_APBB_DIVIDER);
 

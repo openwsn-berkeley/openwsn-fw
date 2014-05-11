@@ -81,10 +81,8 @@ extern "C" {
  *
  * \param func Name for the function.
  */
-#ifndef ISR
 #  define ISR(func)   \
 	void func (void)
-#endif
 
 /**
  * \brief Initialize interrupt vectors

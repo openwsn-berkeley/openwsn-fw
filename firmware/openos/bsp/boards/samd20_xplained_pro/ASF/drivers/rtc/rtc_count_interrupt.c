@@ -41,7 +41,6 @@
  *
  */
 #include "rtc_count_interrupt.h"
-#include "rtc_count.h"
 
 extern struct rtc_module *_rtc_instance[RTC_INST_NUM];
 
@@ -223,12 +222,12 @@ static void _rtc_interrupt_handler(const uint32_t instance_index)
 	Rtc *const rtc_module = module->hw;
 
 	/* Combine callback registered and enabled masks */
-	uint8_t callback_mask = module->enabled_callback &
-			module->registered_callback;
+	uint8_t callback_mask = module->enabled_callback;
+	callback_mask &= module->registered_callback;
 
 	/* Read and mask interrupt flag register */
-	uint16_t interrupt_status = (rtc_module->MODE0.INTFLAG.reg &
-			rtc_module->MODE0.INTENSET.reg);
+	uint16_t interrupt_status = rtc_module->MODE0.INTFLAG.reg;
+	interrupt_status &= rtc_module->MODE0.INTENSET.reg;
 
 	if (interrupt_status & RTC_MODE0_INTFLAG_OVF) {
 		/* Overflow interrupt */

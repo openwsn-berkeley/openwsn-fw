@@ -669,36 +669,3 @@ enum status_code tc_set_top_value (
 			return STATUS_ERR_INVALID_ARG;
 	}
 }
-
-enum status_code tc_set_period_value (
-		const struct tc_module *const module_inst,
-		const uint32_t top_value)
-{
-	Assert(module_inst);
-	Assert(module_inst->hw);
-	Assert(top_value);
-
-	Tc *const tc_module = module_inst->hw;
-
-	while (tc_is_syncing(module_inst)) {
-		/* Wait for sync */
-	}
-
-	switch (module_inst->counter_size) {
-		case TC_COUNTER_SIZE_8BIT:
-			tc_module->COUNT8.PER.reg    = (uint8_t)top_value;
-			return STATUS_OK;
-
-		case TC_COUNTER_SIZE_16BIT:
-			Assert(false);
-			return STATUS_ERR_INVALID_ARG;
-
-		case TC_COUNTER_SIZE_32BIT:
-			tc_module->COUNT32.PER.reg = (uint32_t)top_value;
-			return STATUS_OK;
-
-		default:
-			Assert(false);
-			return STATUS_ERR_INVALID_ARG;
-	}
-}

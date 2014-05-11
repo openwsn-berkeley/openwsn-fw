@@ -56,13 +56,6 @@
 /* -------- PM_CTRL : (PM Offset: 0x00) (R/W  8) Control -------- */
 #if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))
 typedef union {
-  struct {
-    uint8_t  :2;               /*!< bit:  0.. 1  Reserved                           */
-    uint8_t  CFDEN:1;          /*!< bit:      2  Clock Failure Detector Enable      */
-    uint8_t  :1;               /*!< bit:      3  Reserved                           */
-    uint8_t  BKUPCLK:1;        /*!< bit:      4  Backup Clock Select                */
-    uint8_t  :3;               /*!< bit:  5.. 7  Reserved                           */
-  } bit;                       /*!< Structure used for bit  access                  */
   uint8_t reg;                 /*!< Type      used for register access              */
 } PM_CTRL_Type;
 #endif /* !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__)) */
@@ -70,11 +63,7 @@ typedef union {
 #define PM_CTRL_OFFSET              0x00         /**< \brief (PM_CTRL offset) Control */
 #define PM_CTRL_RESETVALUE          0x00         /**< \brief (PM_CTRL reset_value) Control */
 
-#define PM_CTRL_CFDEN_Pos           2            /**< \brief (PM_CTRL) Clock Failure Detector Enable */
-#define PM_CTRL_CFDEN               (0x1u << PM_CTRL_CFDEN_Pos)
-#define PM_CTRL_BKUPCLK_Pos         4            /**< \brief (PM_CTRL) Backup Clock Select */
-#define PM_CTRL_BKUPCLK             (0x1u << PM_CTRL_BKUPCLK_Pos)
-#define PM_CTRL_MASK                0x14u        /**< \brief (PM_CTRL) MASK Register */
+#define PM_CTRL_MASK                0x00u        /**< \brief (PM_CTRL) MASK Register */
 
 /* -------- PM_SLEEP : (PM Offset: 0x01) (R/W  8) Sleep Mode -------- */
 #if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))
@@ -364,11 +353,12 @@ typedef union {
     uint32_t TC3:1;            /*!< bit:     11  TC3 APB Clock Enable               */
     uint32_t TC4:1;            /*!< bit:     12  TC4 APB Clock Enable               */
     uint32_t TC5:1;            /*!< bit:     13  TC5 APB Clock Enable               */
-    uint32_t TC6:1;            /*!< bit:     14  TC6 APB Clock Enable               */
-    uint32_t TC7:1;            /*!< bit:     15  TC7 APB Clock Enable               */
+    uint32_t :2;               /*!< bit: 14..15  Reserved                           */
     uint32_t ADC:1;            /*!< bit:     16  ADC APB Clock Enable               */
     uint32_t AC:1;             /*!< bit:     17  AC APB Clock Enable                */
-    uint32_t :3;               /*!< bit: 18..20  Reserved                           */
+    uint32_t :1;               /*!< bit:     18  Reserved                           */
+    uint32_t PTC:1;            /*!< bit:     19  PTC APB Clock Enable               */
+    uint32_t :1;               /*!< bit:     20  Reserved                           */
     uint32_t RFCTRL:1;         /*!< bit:     21  RFCTRL APB Clock Enable            */
     uint32_t :10;              /*!< bit: 22..31  Reserved                           */
   } bit;                       /*!< Structure used for bit  access                  */
@@ -407,25 +397,22 @@ typedef union {
 #define PM_APBCMASK_TC4             (0x1u << PM_APBCMASK_TC4_Pos)
 #define PM_APBCMASK_TC5_Pos         13           /**< \brief (PM_APBCMASK) TC5 APB Clock Enable */
 #define PM_APBCMASK_TC5             (0x1u << PM_APBCMASK_TC5_Pos)
-#define PM_APBCMASK_TC6_Pos         14           /**< \brief (PM_APBCMASK) TC6 APB Clock Enable */
-#define PM_APBCMASK_TC6             (0x1u << PM_APBCMASK_TC6_Pos)
-#define PM_APBCMASK_TC7_Pos         15           /**< \brief (PM_APBCMASK) TC7 APB Clock Enable */
-#define PM_APBCMASK_TC7             (0x1u << PM_APBCMASK_TC7_Pos)
 #define PM_APBCMASK_ADC_Pos         16           /**< \brief (PM_APBCMASK) ADC APB Clock Enable */
 #define PM_APBCMASK_ADC             (0x1u << PM_APBCMASK_ADC_Pos)
 #define PM_APBCMASK_AC_Pos          17           /**< \brief (PM_APBCMASK) AC APB Clock Enable */
 #define PM_APBCMASK_AC              (0x1u << PM_APBCMASK_AC_Pos)
+#define PM_APBCMASK_PTC_Pos         19           /**< \brief (PM_APBCMASK) PTC APB Clock Enable */
+#define PM_APBCMASK_PTC             (0x1u << PM_APBCMASK_PTC_Pos)
 #define PM_APBCMASK_RFCTRL_Pos      21           /**< \brief (PM_APBCMASK) RFCTRL APB Clock Enable */
 #define PM_APBCMASK_RFCTRL          (0x1u << PM_APBCMASK_RFCTRL_Pos)
-#define PM_APBCMASK_MASK            0x0023FFFFu  /**< \brief (PM_APBCMASK) MASK Register */
+#define PM_APBCMASK_MASK            0x002B3FFFu  /**< \brief (PM_APBCMASK) MASK Register */
 
 /* -------- PM_INTENCLR : (PM Offset: 0x34) (R/W  8) Interrupt Enable Clear -------- */
 #if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))
 typedef union {
   struct {
     uint8_t  CKRDY:1;          /*!< bit:      0  Clock Ready Interrupt Enable       */
-    uint8_t  CFD:1;            /*!< bit:      1  Clock Failure Detector Interrupt Enable */
-    uint8_t  :6;               /*!< bit:  2.. 7  Reserved                           */
+    uint8_t  :7;               /*!< bit:  1.. 7  Reserved                           */
   } bit;                       /*!< Structure used for bit  access                  */
   uint8_t reg;                 /*!< Type      used for register access              */
 } PM_INTENCLR_Type;
@@ -436,17 +423,14 @@ typedef union {
 
 #define PM_INTENCLR_CKRDY_Pos       0            /**< \brief (PM_INTENCLR) Clock Ready Interrupt Enable */
 #define PM_INTENCLR_CKRDY           (0x1u << PM_INTENCLR_CKRDY_Pos)
-#define PM_INTENCLR_CFD_Pos         1            /**< \brief (PM_INTENCLR) Clock Failure Detector Interrupt Enable */
-#define PM_INTENCLR_CFD             (0x1u << PM_INTENCLR_CFD_Pos)
-#define PM_INTENCLR_MASK            0x03u        /**< \brief (PM_INTENCLR) MASK Register */
+#define PM_INTENCLR_MASK            0x01u        /**< \brief (PM_INTENCLR) MASK Register */
 
 /* -------- PM_INTENSET : (PM Offset: 0x35) (R/W  8) Interrupt Enable Set -------- */
 #if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))
 typedef union {
   struct {
     uint8_t  CKRDY:1;          /*!< bit:      0  Clock Ready Interrupt Enable       */
-    uint8_t  CFD:1;            /*!< bit:      1  Clock Failure Detector Interrupt Enable */
-    uint8_t  :6;               /*!< bit:  2.. 7  Reserved                           */
+    uint8_t  :7;               /*!< bit:  1.. 7  Reserved                           */
   } bit;                       /*!< Structure used for bit  access                  */
   uint8_t reg;                 /*!< Type      used for register access              */
 } PM_INTENSET_Type;
@@ -457,17 +441,14 @@ typedef union {
 
 #define PM_INTENSET_CKRDY_Pos       0            /**< \brief (PM_INTENSET) Clock Ready Interrupt Enable */
 #define PM_INTENSET_CKRDY           (0x1u << PM_INTENSET_CKRDY_Pos)
-#define PM_INTENSET_CFD_Pos         1            /**< \brief (PM_INTENSET) Clock Failure Detector Interrupt Enable */
-#define PM_INTENSET_CFD             (0x1u << PM_INTENSET_CFD_Pos)
-#define PM_INTENSET_MASK            0x03u        /**< \brief (PM_INTENSET) MASK Register */
+#define PM_INTENSET_MASK            0x01u        /**< \brief (PM_INTENSET) MASK Register */
 
 /* -------- PM_INTFLAG : (PM Offset: 0x36) (R/W  8) Interrupt Flag Status and Clear -------- */
 #if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))
 typedef union {
   struct {
     uint8_t  CKRDY:1;          /*!< bit:      0  Clock Ready                        */
-    uint8_t  CFD:1;            /*!< bit:      1  Clock Failure Detector             */
-    uint8_t  :6;               /*!< bit:  2.. 7  Reserved                           */
+    uint8_t  :7;               /*!< bit:  1.. 7  Reserved                           */
   } bit;                       /*!< Structure used for bit  access                  */
   uint8_t reg;                 /*!< Type      used for register access              */
 } PM_INTFLAG_Type;
@@ -478,9 +459,7 @@ typedef union {
 
 #define PM_INTFLAG_CKRDY_Pos        0            /**< \brief (PM_INTFLAG) Clock Ready */
 #define PM_INTFLAG_CKRDY            (0x1u << PM_INTFLAG_CKRDY_Pos)
-#define PM_INTFLAG_CFD_Pos          1            /**< \brief (PM_INTFLAG) Clock Failure Detector */
-#define PM_INTFLAG_CFD              (0x1u << PM_INTFLAG_CFD_Pos)
-#define PM_INTFLAG_MASK             0x03u        /**< \brief (PM_INTFLAG) MASK Register */
+#define PM_INTFLAG_MASK             0x01u        /**< \brief (PM_INTFLAG) MASK Register */
 
 /* -------- PM_RCAUSE : (PM Offset: 0x38) (R/   8) Reset Cause -------- */
 #if !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__))

@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief SAM D21/R21 USB dual driver file.
+ * \brief SAM USB Dual Role driver file.
  *
  * Copyright (C) 2014 Atmel Corporation. All rights reserved.
  *

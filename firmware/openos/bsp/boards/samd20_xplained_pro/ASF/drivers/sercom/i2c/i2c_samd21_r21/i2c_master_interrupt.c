@@ -70,7 +70,8 @@ static void _i2c_master_read(
 	bool sclsm_flag = i2c_module->CTRLA.bit.SCLSM;
 
 	/* Find index to save next value in buffer */
-	uint16_t buffer_index = module->buffer_length - module->buffer_remaining;
+	uint16_t buffer_index = module->buffer_length;
+	buffer_index -= module->buffer_remaining;
 
 	module->buffer_remaining--;
 
@@ -124,7 +125,8 @@ static void _i2c_master_write(struct i2c_master_module *const module)
 	}
 
 	/* Find index to get next byte in buffer */
-	uint16_t buffer_index = module->buffer_length - module->buffer_remaining;
+	uint16_t buffer_index = module->buffer_length;
+	buffer_index -= module->buffer_remaining;
 
 	module->buffer_remaining--;
 
@@ -543,8 +545,8 @@ void _i2c_master_interrupt_handler(
 	bool sclsm_flag = i2c_module->CTRLA.bit.SCLSM;
 
 	/* Combine callback registered and enabled masks */
-	uint8_t callback_mask = module->enabled_callback &
-			module->registered_callback;
+	uint8_t callback_mask = module->enabled_callback;
+	callback_mask &= module->registered_callback;
 
 	/* Check if the module should respond to address ack */
 	if ((module->buffer_length <= 0) && (module->buffer_remaining > 0)) {

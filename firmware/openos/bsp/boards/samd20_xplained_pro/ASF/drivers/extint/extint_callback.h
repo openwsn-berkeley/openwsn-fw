@@ -56,16 +56,9 @@ extern "C" {
  * @{
  */
 
-#ifndef EIC_NUMBER_OF_INTERRUPTS
-#  define EIC_NUMBER_OF_INTERRUPTS 16
-#endif
-
 /** \name Callback configuration and initialization
  * @{
  */
-
-/** Type definition for an EXTINT module callback function. */
-typedef void (*extint_callback_t)(void);
 
 /** Enum for the possible callback types for the EXTINT module. */
 enum extint_callback_type

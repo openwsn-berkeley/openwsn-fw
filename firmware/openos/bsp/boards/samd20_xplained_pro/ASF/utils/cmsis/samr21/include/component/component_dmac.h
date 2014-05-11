@@ -699,6 +699,14 @@ typedef union {
 #define DMAC_CHCTRLB_LVL_Pos        5            /**< \brief (DMAC_CHCTRLB) Channel Arbitration Level */
 #define DMAC_CHCTRLB_LVL_Msk        (0x3u << DMAC_CHCTRLB_LVL_Pos)
 #define DMAC_CHCTRLB_LVL(value)     ((DMAC_CHCTRLB_LVL_Msk & ((value) << DMAC_CHCTRLB_LVL_Pos)))
+#define   DMAC_CHCTRLB_LVL_LVL0_Val       0x0u   /**< \brief (DMAC_CHCTRLB) Channel Priority Level 0 */
+#define   DMAC_CHCTRLB_LVL_LVL1_Val       0x1u   /**< \brief (DMAC_CHCTRLB) Channel Priority Level 1 */
+#define   DMAC_CHCTRLB_LVL_LVL2_Val       0x2u   /**< \brief (DMAC_CHCTRLB) Channel Priority Level 2 */
+#define   DMAC_CHCTRLB_LVL_LVL3_Val       0x3u   /**< \brief (DMAC_CHCTRLB) Channel Priority Level 3 */
+#define DMAC_CHCTRLB_LVL_LVL0       (DMAC_CHCTRLB_LVL_LVL0_Val     << DMAC_CHCTRLB_LVL_Pos)
+#define DMAC_CHCTRLB_LVL_LVL1       (DMAC_CHCTRLB_LVL_LVL1_Val     << DMAC_CHCTRLB_LVL_Pos)
+#define DMAC_CHCTRLB_LVL_LVL2       (DMAC_CHCTRLB_LVL_LVL2_Val     << DMAC_CHCTRLB_LVL_Pos)
+#define DMAC_CHCTRLB_LVL_LVL3       (DMAC_CHCTRLB_LVL_LVL3_Val     << DMAC_CHCTRLB_LVL_Pos)
 #define DMAC_CHCTRLB_TRIGSRC_Pos    8            /**< \brief (DMAC_CHCTRLB) Peripheral Trigger Source */
 #define DMAC_CHCTRLB_TRIGSRC_Msk    (0x3Fu << DMAC_CHCTRLB_TRIGSRC_Pos)
 #define DMAC_CHCTRLB_TRIGSRC(value) ((DMAC_CHCTRLB_TRIGSRC_Msk & ((value) << DMAC_CHCTRLB_TRIGSRC_Pos)))
@@ -1018,10 +1026,7 @@ typedef struct {
 #endif
 ;
 #endif /* !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__)) */
-
-#ifdef __GNUC__
- #define SECTION_DMAC_DESCRIPTOR      
-#endif
+#define SECTION_DMAC_DESCRIPTOR
 
 /*@}*/
 

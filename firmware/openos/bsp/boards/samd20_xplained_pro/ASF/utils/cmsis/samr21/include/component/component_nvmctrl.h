@@ -349,15 +349,12 @@ typedef struct {
   __IO NVMCTRL_LOCK_Type         LOCK;        /**< \brief Offset: 0x20 (R/W 16) Lock Section */
 } Nvmctrl;
 #endif /* !(defined(__ASSEMBLY__) || defined(__IAR_SYSTEMS_ASM__)) */
-
-#ifdef __GNUC__
- #define SECTION_NVMCTRL_CAL          
- #define SECTION_NVMCTRL_LOCKBIT      
- #define SECTION_NVMCTRL_OTP1         
- #define SECTION_NVMCTRL_OTP2         
- #define SECTION_NVMCTRL_OTP4         
- #define SECTION_NVMCTRL_USER         
-#endif
+#define SECTION_NVMCTRL_CAL
+#define SECTION_NVMCTRL_LOCKBIT
+#define SECTION_NVMCTRL_OTP1
+#define SECTION_NVMCTRL_OTP2
+#define SECTION_NVMCTRL_OTP4
+#define SECTION_NVMCTRL_USER
 
 /*@}*/
 
@@ -431,25 +428,15 @@ typedef struct {
 #define SYSCTRL_FUSES_BOD33_HYST_Pos 8            /**< \brief (NVMCTRL_USER) BOD33 Hysteresis */
 #define SYSCTRL_FUSES_BOD33_HYST_Msk (0x1u << SYSCTRL_FUSES_BOD33_HYST_Pos)
 
-#define SYSCTRL_FUSES_OSC32K_ADDR   (NVMCTRL_OTP4 + 4)
-#define SYSCTRL_FUSES_OSC32K_Pos    6            /**< \brief (NVMCTRL_OTP4) OSC32K Calibration */
-#define SYSCTRL_FUSES_OSC32K_Msk    (0x7Fu << SYSCTRL_FUSES_OSC32K_Pos)
-#define SYSCTRL_FUSES_OSC32K(value) ((SYSCTRL_FUSES_OSC32K_Msk & ((value) << SYSCTRL_FUSES_OSC32K_Pos)))
+#define SYSCTRL_FUSES_DFLL48M_COARSE_CAL_ADDR (NVMCTRL_OTP4 + 4)
+#define SYSCTRL_FUSES_DFLL48M_COARSE_CAL_Pos 26           /**< \brief (NVMCTRL_OTP4) DFLL48M Coarse Calibration */
+#define SYSCTRL_FUSES_DFLL48M_COARSE_CAL_Msk (0x3Fu << SYSCTRL_FUSES_DFLL48M_COARSE_CAL_Pos)
+#define SYSCTRL_FUSES_DFLL48M_COARSE_CAL(value) ((SYSCTRL_FUSES_DFLL48M_COARSE_CAL_Msk & ((value) << SYSCTRL_FUSES_DFLL48M_COARSE_CAL_Pos)))
 
-#define USB_FUSES_TRANSN_ADDR       (NVMCTRL_OTP4 + 4)
-#define USB_FUSES_TRANSN_Pos        13           /**< \brief (NVMCTRL_OTP4) USB pad Transn calibration */
-#define USB_FUSES_TRANSN_Msk        (0x1Fu << USB_FUSES_TRANSN_Pos)
-#define USB_FUSES_TRANSN(value)     ((USB_FUSES_TRANSN_Msk & ((value) << USB_FUSES_TRANSN_Pos)))
-
-#define USB_FUSES_TRANSP_ADDR       (NVMCTRL_OTP4 + 4)
-#define USB_FUSES_TRANSP_Pos        18           /**< \brief (NVMCTRL_OTP4) USB pad Transp calibration */
-#define USB_FUSES_TRANSP_Msk        (0x1Fu << USB_FUSES_TRANSP_Pos)
-#define USB_FUSES_TRANSP(value)     ((USB_FUSES_TRANSP_Msk & ((value) << USB_FUSES_TRANSP_Pos)))
-
-#define USB_FUSES_TRIM_ADDR         (NVMCTRL_OTP4 + 4)
-#define USB_FUSES_TRIM_Pos          23           /**< \brief (NVMCTRL_OTP4) USB pad Trim calibration */
-#define USB_FUSES_TRIM_Msk          (0x7u << USB_FUSES_TRIM_Pos)
-#define USB_FUSES_TRIM(value)       ((USB_FUSES_TRIM_Msk & ((value) << USB_FUSES_TRIM_Pos)))
+#define SYSCTRL_FUSES_OSC32K_CAL_ADDR (NVMCTRL_OTP4 + 4)
+#define SYSCTRL_FUSES_OSC32K_CAL_Pos 6            /**< \brief (NVMCTRL_OTP4) OSC32K Calibration */
+#define SYSCTRL_FUSES_OSC32K_CAL_Msk (0x7Fu << SYSCTRL_FUSES_OSC32K_CAL_Pos)
+#define SYSCTRL_FUSES_OSC32K_CAL(value) ((SYSCTRL_FUSES_OSC32K_CAL_Msk & ((value) << SYSCTRL_FUSES_OSC32K_CAL_Pos)))
 
 #define WDT_FUSES_ALWAYSON_ADDR     NVMCTRL_USER
 #define WDT_FUSES_ALWAYSON_Pos      26           /**< \brief (NVMCTRL_USER) WDT Always On */

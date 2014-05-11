@@ -43,7 +43,6 @@
 
 #include <string.h>
 #include "dma.h"
-#include "conf_dma.h"
 #include "clock.h"
 #include "system_interrupt.h"
 
@@ -65,9 +64,9 @@ struct _dma_module _dma_inst = {
 /** DMA channel mask*/
 #define DMA_CHANNEL_MASK   (0x1f)
 
-/** Initial description section */
 COMPILER_ALIGNED(16)
-static DmacDescriptor _descriptor_section[CONF_MAX_USED_CHANNEL_NUM];
+DmacDescriptor descriptor_section[CONF_MAX_USED_CHANNEL_NUM];
+
 /** Initial write back memory section */
 COMPILER_ALIGNED(16)
 static DmacDescriptor _write_back_section[CONF_MAX_USED_CHANNEL_NUM];
@@ -78,15 +77,13 @@ static struct dma_resource* _dma_active_resource[CONF_MAX_USED_CHANNEL_NUM];
 /**
  * \brief Find a free channel for a DMA resource.
  *
- * Find and set the priority level for the requested DMA resource.
- *
- * \param[in]  priority         DMA resource priority level
+ * Find a channel for the requested DMA resource.
  *
  * \return Status of channel allocation
  * \retval DMA_INVALID_CHANNEL  No channel available
  * \retval count          Allocated channel for the DMA resource
  */
-static uint8_t _dma_find_first_free_channel_and_allocate(uint8_t priority)
+static uint8_t _dma_find_first_free_channel_and_allocate(void)
 {
 	uint8_t count;
 	uint32_t tmp;
@@ -116,10 +113,6 @@ static uint8_t _dma_find_first_free_channel_and_allocate(uint8_t priority)
 	if (!allocated) {
 		return DMA_INVALID_CHANNEL;
 	} else {
-		/* Set priority level for the allocated channel */
-		DMAC->CHID.reg = DMAC_CHID_ID(count);
-		DMAC->CHCTRLB.reg &= ~DMAC_CHCTRLB_LVL_Msk;
-		DMAC->CHCTRLB.reg |=  DMAC_CHCTRLB_LVL(priority);
 		return count;
 	}
 }
@@ -148,40 +141,33 @@ static void _dma_set_config(struct dma_resource *resource,
 {
 	Assert(resource);
 	Assert(resource_config);
-
+	uint32_t temp_CHCTRLB_reg;
 	system_interrupt_enter_critical_section();
 
 	/** Select the DMA channel and clear software trigger */
 	DMAC->CHID.reg = DMAC_CHID_ID(resource->channel_id);
 	DMAC->SWTRIGCTRL.reg &= (uint32_t)(~(1 << resource->channel_id));
 
-	/* Select transfer trigger */
-	switch (resource_config->transfer_trigger) {
-	case DMA_TRIGGER_SOFTWARE:
-		DMAC->SWTRIGCTRL.reg |= (1 << resource->channel_id);
-		break;
+	temp_CHCTRLB_reg = DMAC_CHCTRLB_LVL(resource_config->priority) | \
+			DMAC_CHCTRLB_TRIGSRC(resource_config->peripheral_trigger) | \
+			DMAC_CHCTRLB_TRIGACT(resource_config->trigger_action);
 
-	case DMA_TRIGGER_PERIPHERAL:
-		DMAC->CHCTRLB.reg |= DMAC_CHCTRLB_TRIGSRC(
-				resource_config->peripheral_trigger);
-		break;
 
-	case DMA_TRIGGER_EVENT:
-		DMAC->CHCTRLB.reg |= DMAC_CHCTRLB_EVIE | DMAC_CHCTRLB_EVACT(
+	if(resource_config->event_config.input_action){
+	temp_CHCTRLB_reg |= DMAC_CHCTRLB_EVIE | DMAC_CHCTRLB_EVACT(
 				resource_config->event_config.input_action);
-		break;
-
-	default:
-		break;
 	}
-	/* Configure Trigger action */
-	DMAC->CHCTRLB.bit.TRIGACT = resource_config->trigger_action;
 
 	/** Enable event output, the event output selection is configured in
 	 * each transfer descriptor  */
 	if (resource_config->event_config.event_output_enable) {
-		DMAC->CHCTRLB.reg |= DMAC_CHCTRLB_EVOE;
+		temp_CHCTRLB_reg |= DMAC_CHCTRLB_EVOE;
 	}
+
+	/* Write config to CTRLB register */
+	DMAC->CHCTRLB.reg = temp_CHCTRLB_reg;
+
+
 
 	system_interrupt_leave_critical_section();
 }
@@ -213,7 +199,7 @@ void DMAC_Handler( void )
 	isr = DMAC->CHINTFLAG.reg;
 
 	/* Calculate block transfer size of the DMA transfer */
-	total_size = _descriptor_section[resource->channel_id].BTCNT.reg;
+	total_size = descriptor_section[resource->channel_id].BTCNT.reg;
 	write_size = _write_back_section[resource->channel_id].BTCNT.reg;
 	resource->transfered_size = total_size - write_size;
 
@@ -279,9 +265,6 @@ void DMAC_Handler( void )
 void dma_get_config_defaults(struct dma_resource_config *config)
 {
 	Assert(config);
-
-	/* Using software trigger */
-	config->transfer_trigger = DMA_TRIGGER_SOFTWARE;
 	/* Set as priority 0 */
 	config->priority = DMA_PRIORITY_LEVEL_0;
 	/* Only software/event trigger */
@@ -328,7 +311,7 @@ enum status_code dma_allocate(struct dma_resource *resource,
 
 		/* Setup descriptor base address and write back section base
 		 * address */
-		DMAC->BASEADDR.reg = (uint32_t)_descriptor_section;
+		DMAC->BASEADDR.reg = (uint32_t)descriptor_section;
 		DMAC->WRBADDR.reg = (uint32_t)_write_back_section;
 
 		/* Enable all priority level at the same time */
@@ -338,12 +321,12 @@ enum status_code dma_allocate(struct dma_resource *resource,
 	}
 
 	/* Find the proper channel */
-	new_channel = _dma_find_first_free_channel_and_allocate(config->priority);
+	new_channel = _dma_find_first_free_channel_and_allocate();
 
 	/* If no channel available, return not found */
 	if (new_channel == DMA_INVALID_CHANNEL) {
 		system_interrupt_leave_critical_section();
-		
+
 		return STATUS_ERR_NOT_FOUND;
 	}
 
@@ -451,16 +434,11 @@ enum status_code dma_start_transfer_job(struct dma_resource *resource)
 	DMAC->CHINTENSET.reg = DMAC_CHINTENSET_TERR |
 			 DMAC_CHINTENSET_TCMPL | DMAC_CHINTENSET_SUSP;
 
-	if (!(DMAC->CHCTRLB.reg & (DMAC_CHCTRLB_TRIGSRC_Msk |
-								DMAC_CHCTRLB_EVACT_TRIG_Val))) {
-		DMAC->SWTRIGCTRL.reg |= (1 << resource->channel_id);
-	}
-
 	/* Set job status */
 	resource->job_status = STATUS_BUSY;
 
 	/* Set channel x descriptor 0 to the descriptor base address */
-	memcpy(&_descriptor_section[resource->channel_id], resource->descriptor,
+	memcpy(&descriptor_section[resource->channel_id], resource->descriptor,
 						sizeof(DmacDescriptor));
 
 	/* Enable the transfer channel */
@@ -501,7 +479,7 @@ void dma_abort_job(struct dma_resource *resource)
 	system_interrupt_leave_critical_section();
 
 	/* Get transferred size */
-	total_size = _descriptor_section[resource->channel_id].BTCNT.reg;
+	total_size = descriptor_section[resource->channel_id].BTCNT.reg;
 	write_size = _write_back_section[resource->channel_id].BTCNT.reg;
 	resource->transfered_size = total_size - write_size;
 

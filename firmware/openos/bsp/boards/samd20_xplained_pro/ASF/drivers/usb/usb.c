@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief SAMD21/R21 USB Driver.
+ * \brief SAM USB Driver.
  *
  * Copyright (C) 2014 Atmel Corporation. All rights reserved.
  *

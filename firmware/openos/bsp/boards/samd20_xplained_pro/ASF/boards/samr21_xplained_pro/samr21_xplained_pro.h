@@ -86,6 +86,7 @@ void system_board_init(void);
 #define LED0_PIN                  PIN_PA19
 #define LED0_ACTIVE               false
 #define LED0_INACTIVE             !LED0_ACTIVE
+#define LED0 LED0_PIN
 /** @} */
 
 /** \name SW0 definitions
@@ -110,6 +111,7 @@ void system_board_init(void);
 #define LED_0_PIN                 LED0_PIN
 #define LED_0_ACTIVE              LED0_ACTIVE
 #define LED_0_INACTIVE            LED0_INACTIVE
+#define LED0_GPIO 				  LED0_PIN
 
 #define LED_0_PWM_MODULE          TC3
 #define LED_0_PWM_CHANNEL         1
@@ -223,17 +225,17 @@ void system_board_init(void);
 /** \name Extension header #1 PWM for Control definitions
  *  @{
  */
-#define EXT1_PWM4CTRL_MODULE           TCC0
-#define EXT1_PWM4CTRL_0_CHANNEL        2
-#define EXT1_PWM4CTRL_0_OUTPUT         2
-#define EXT1_PWM4CTRL_0_PIN            PIN_PA18F_TCC0_WO2
-#define EXT1_PWM4CTRL_0_MUX            MUX_PA18F_TCC0_WO2
-#define EXT1_PWM4CTRL_0_PINMUX         PINMUX_PA18F_TCC0_WO2
-#define EXT1_PWM4CTRL_1_CHANNEL        3
-#define EXT1_PWM4CTRL_1_OUTPUT         3
-#define EXT1_PWM4CTRL_1_PIN            PIN_PA19F_TCC0_WO3
-#define EXT1_PWM4CTRL_1_MUX            MUX_PA19F_TCC0_WO3
-#define EXT1_PWM4CTRL_1_PINMUX         PINMUX_PA19F_TCC0_WO3
+#define EXT1_PWM4CTRL_MODULE      TCC0
+#define EXT1_PWM4CTRL_0_CHANNEL   2
+#define EXT1_PWM4CTRL_0_OUTPUT    2
+#define EXT1_PWM4CTRL_0_PIN       PIN_PA18F_TCC0_WO2
+#define EXT1_PWM4CTRL_0_MUX       MUX_PA18F_TCC0_WO2
+#define EXT1_PWM4CTRL_0_PINMUX    PINMUX_PA18F_TCC0_WO2
+#define EXT1_PWM4CTRL_1_CHANNEL   3
+#define EXT1_PWM4CTRL_1_OUTPUT    3
+#define EXT1_PWM4CTRL_1_PIN       PIN_PA19F_TCC0_WO3
+#define EXT1_PWM4CTRL_1_MUX       MUX_PA19F_TCC0_WO3
+#define EXT1_PWM4CTRL_1_PINMUX    PINMUX_PA19F_TCC0_WO3
 /** @} */
 
 /** \name Extension header #1 IRQ/External interrupt definitions
@@ -414,21 +416,24 @@ void system_board_init(void);
 #define EDBG_CDC_SERCOM_DMAC_ID_RX   SERCOM0_DMAC_ID_RX
 /** @} */
 
+#define RF_SPI_MODULE              SERCOM4
+#define RF_SPI_SERCOM_MUX_SETTING  SPI_SIGNAL_MUX_SETTING_E
+#define RF_SPI_SERCOM_PINMUX_PAD0  PINMUX_PC19F_SERCOM4_PAD0
+#define RF_SPI_SERCOM_PINMUX_PAD1  PINMUX_PB31D_SERCOM5_PAD1
+#define RF_SPI_SERCOM_PINMUX_PAD2  PINMUX_PB30F_SERCOM4_PAD2
+#define RF_SPI_SERCOM_PINMUX_PAD3  PINMUX_PC18F_SERCOM4_PAD3
 
-#define EXT_SPI_MODULE              SERCOM4
-#define EXT_SPI_SERCOM_MUX_SETTING  SPI_SIGNAL_MUX_SETTING_E
-#define EXT_SPI_SERCOM_PINMUX_PAD0  PINMUX_PC19F_SERCOM4_PAD0
-#define EXT_SPI_SERCOM_PINMUX_PAD1  PINMUX_PB31D_SERCOM5_PAD1
-#define EXT_SPI_SERCOM_PINMUX_PAD2  PINMUX_PB30F_SERCOM4_PAD2
-#define EXT_SPI_SERCOM_PINMUX_PAD3  PINMUX_PC18F_SERCOM4_PAD3
 
+#define RF_IRQ_MODULE           EIC
+#define RF_IRQ_INPUT            0
+#define RF_IRQ_PIN              PIN_PB00A_EIC_EXTINT0
+#define RF_IRQ_MUX              MUX_PB00A_EIC_EXTINT0
+#define RF_IRQ_PINMUX           PINMUX_PB00A_EIC_EXTINT0
 
-#define EXT_IRQ_MODULE           EIC
-#define EXT_IRQ_INPUT            0
-#define EXT_IRQ_PIN              PIN_PB00A_EIC_EXTINT0
-#define EXT_IRQ_MUX              MUX_PB00A_EIC_EXTINT0
-#define EXT_IRQ_PINMUX           PINMUX_PB00A_EIC_EXTINT0
-
+/** \name 802.15.4 TRX Interface definitions
+ * @{
+ */
+ 
 #define AT86RFX_SPI                  SERCOM4
 #define AT86RFX_RST_PIN              PIN_PB15
 #define AT86RFX_IRQ_PIN              PIN_PB00
@@ -437,24 +442,24 @@ void system_board_init(void);
 #define AT86RFX_SPI_MOSI             PIN_PB30
 #define AT86RFX_SPI_MISO             PIN_PC19
 #define AT86RFX_SPI_SCK              PIN_PC18
+#define PIN_RFCTRL1					 PIN_PA09
+#define PIN_RFCTRL2                  PIN_PA12
+#define RFCTRL_CFG_ANT_DIV			 4
 
-#define LED0 LED0_PIN
-
-//#define AT86RFX_SPI_BAUDRATE         (5000000)
 
 #define AT86RFX_SPI_CONFIG(config) \
-config.mux_setting = EXT_SPI_SERCOM_MUX_SETTING; \
+config.mux_setting = RF_SPI_SERCOM_MUX_SETTING; \
 config.mode_specific.master.baudrate = AT86RFX_SPI_BAUDRATE; \
-config.pinmux_pad0 = EXT_SPI_SERCOM_PINMUX_PAD0; \
+config.pinmux_pad0 = RF_SPI_SERCOM_PINMUX_PAD0; \
 config.pinmux_pad1 = PINMUX_UNUSED; \
-config.pinmux_pad2 = EXT_SPI_SERCOM_PINMUX_PAD2; \
-config.pinmux_pad3 = EXT_SPI_SERCOM_PINMUX_PAD3;
+config.pinmux_pad2 = RF_SPI_SERCOM_PINMUX_PAD2; \
+config.pinmux_pad3 = RF_SPI_SERCOM_PINMUX_PAD3;
 
-#define AT86RFX_IRQ_CHAN             EXT_IRQ_INPUT
+#define AT86RFX_IRQ_CHAN             RF_IRQ_INPUT
 #define AT86RFX_INTC_INIT()            			struct extint_chan_conf eint_chan_conf; \
 extint_chan_get_config_defaults(&eint_chan_conf); \
 eint_chan_conf.gpio_pin = AT86RFX_IRQ_PIN; \
-eint_chan_conf.gpio_pin_mux = EXT_IRQ_PINMUX; \
+eint_chan_conf.gpio_pin_mux = RF_IRQ_PINMUX; \
 eint_chan_conf.gpio_pin_pull      = EXTINT_PULL_NONE; \
 eint_chan_conf.wake_if_sleeping    = true; \
 eint_chan_conf.filter_input_signal = false; \
@@ -482,7 +487,8 @@ extint_chan_enable_callback(AT86RFX_IRQ_CHAN, EXTINT_CALLBACK_TYPE_DETECT);
  *  This macro restores the transceiver interrupt status
  */
 #define LEAVE_TRX_REGION()   extint_chan_enable_callback(AT86RFX_IRQ_CHAN, EXTINT_CALLBACK_TYPE_DETECT); }
-                                                
+
+/** @} */
 /**
  * \brief Turns off the specified LEDs.
  *
@@ -509,6 +515,8 @@ extint_chan_enable_callback(AT86RFX_IRQ_CHAN, EXTINT_CALLBACK_TYPE_DETECT);
  * \note The pins of the specified LEDs are set to GPIO output mode.
  */
 #define LED_Toggle(led_gpio)  port_pin_toggle_output_level(led_gpio)
+  
+
 
 #ifdef __cplusplus
 }

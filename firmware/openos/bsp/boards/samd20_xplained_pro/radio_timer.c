@@ -7,7 +7,7 @@
 #include "debugpins.h"
 
 #define TIMER1     TC2
-#define TIMER_PERIOD UINT32_MAX
+#define TIMER_PERIOD UINT16_MAX
 
 struct tc_config timer2_config;
 struct tc_module tc2_instance;
@@ -23,8 +23,6 @@ typedef struct {
 
 radiotimer_vars_t radiotimer_vars;
 
-uint32_t radio_timer_period_val = UINT32_MAX;
-
 void radiotimer_init(void)
 {
     // clear local variables
@@ -33,11 +31,10 @@ void radiotimer_init(void)
 	tc_get_config_defaults(&timer2_config);
 	/* Before that XOSC - 32.768KHz must be enabled */
 	timer2_config.clock_source               = GCLK_GENERATOR_2;
-	timer2_config.counter_32_bit.value       = 0;
+	timer2_config.counter_16_bit.value       = 0;
 	timer2_config.wave_generation = TC_CTRLA_WAVEGEN_MFRQ;
-	timer2_config.counter_32_bit.compare_capture_channel[0] = UINT32_MAX;
-	timer2_config.counter_32_bit.compare_capture_channel[1] = UINT32_MAX;
-	timer2_config.counter_size = TC_COUNTER_SIZE_32BIT;
+	timer2_config.counter_16_bit.compare_capture_channel[0] = TIMER_PERIOD;
+	timer2_config.counter_16_bit.compare_capture_channel[1] = TIMER_PERIOD;
 	timer2_config.run_in_standby = true;
 	tc_init(&tc2_instance, TIMER1, &timer2_config);		
 	
@@ -98,7 +95,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period)
 {
  tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);  
  tc_set_count_value(&tc2_instance, 0);  
- tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_0, period);  
+ tc_set_top_value(&tc2_instance, period);  
  tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
 }
 
@@ -110,7 +107,7 @@ PORT_RADIOTIMER_WIDTH radiotimer_getValue(void)
 void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period)
 {
  tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
- tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_0, period);	
+ tc_set_top_value(&tc2_instance, period);	
  tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
 }
 
@@ -129,7 +126,7 @@ void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset)
 void radiotimer_cancel(void)
 {  
   tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
-  tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, UINT32_MAX);
+  tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, TIMER_PERIOD);
 }
 
 inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void)

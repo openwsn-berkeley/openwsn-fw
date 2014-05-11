@@ -520,8 +520,8 @@ check_for_read_end:
 			*(rx_head_ptr++) = spi_hw->DATA.reg;
 		} else {
 			uint8_t dummy;
-			UNUSED(dummy);
 			dummy = spi_hw->DATA.reg;
+			UNUSED(dummy);
 		}
 		module->tx_lead_on_rx--;
 

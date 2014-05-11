@@ -216,10 +216,6 @@
 #include <pinmux.h>
 #include <conf_extint.h>
 
-#if EXTINT_CALLBACK_MODE == true
-#include "extint_callback.h"
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -330,22 +326,28 @@ struct extint_nmi_conf {
 	enum extint_detect detection_criteria;
 };
 
+#if EXTINT_CALLBACK_MODE == true
+/** Type definition for an EXTINT module callback function. */
+typedef void (*extint_callback_t)(void);
+
+#ifndef EIC_NUMBER_OF_INTERRUPTS
+#  define EIC_NUMBER_OF_INTERRUPTS 16
+#endif
+#endif
+
 #if !defined(__DOXYGEN__)
 /** \internal
  *  Internal EXTINT module device instance structure definition.
  */
-/** Type definition for an EXTINT module callback function. */
-typedef void (*extint_callback_t)(void);
-
 struct _extint_module
 {
-#if EXTINT_CALLBACK_MODE == true
+#  if EXTINT_CALLBACK_MODE == true
 	/** Asynchronous channel callback table, for user-registered handlers. */
 	extint_callback_t callbacks[EIC_NUMBER_OF_INTERRUPTS];
-#else
+#  else
 	/** Dummy value to ensure the struct has at least one member */
 	uint8_t _dummy;
-#endif
+#  endif
 };
 
 /**
@@ -617,6 +619,10 @@ static inline void extint_nmi_clear_detected(
 
 /** @} */
 
+#if EXTINT_CALLBACK_MODE == true
+#  include "extint_callback.h"
+#endif
+
 /**
  * \page asfdoc_sam0_extint_extra Extra Information for EXTINT Driver
  *
@@ -713,6 +719,11 @@ static inline void extint_nmi_clear_detected(
  *		<th>Doc. Rev.</td>
  *		<th>Date</td>
  *		<th>Comments</td>
+ *	</tr>
+ *	<tr>
+ *		<td>D</td>
+ *		<td>03/2014</td>
+ *		<td>Added support for SAMR21.</td>
  *	</tr>
  *	<tr>
  *		<td>C</td>
