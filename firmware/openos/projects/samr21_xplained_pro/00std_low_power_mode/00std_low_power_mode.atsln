@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "00std_low_power_mode", "00std_low_power_mode.cproj", "{1772410A-E9A8-4396-A5D4-05757D695F22}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1772410A-E9A8-4396-A5D4-05757D695F22}.Debug|ARM.ActiveCfg = Debug|ARM
+		{1772410A-E9A8-4396-A5D4-05757D695F22}.Debug|ARM.Build.0 = Debug|ARM
+		{1772410A-E9A8-4396-A5D4-05757D695F22}.Release|ARM.ActiveCfg = Release|ARM
+		{1772410A-E9A8-4396-A5D4-05757D695F22}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

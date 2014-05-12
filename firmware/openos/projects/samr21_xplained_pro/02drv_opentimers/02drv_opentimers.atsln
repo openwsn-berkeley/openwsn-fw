@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "02drv_opentimers", "02drv_opentimers.cproj", "{BB3B7C75-4643-47EB-BF6D-60F7559E138C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BB3B7C75-4643-47EB-BF6D-60F7559E138C}.Debug|ARM.ActiveCfg = Debug|ARM
+		{BB3B7C75-4643-47EB-BF6D-60F7559E138C}.Debug|ARM.Build.0 = Debug|ARM
+		{BB3B7C75-4643-47EB-BF6D-60F7559E138C}.Release|ARM.ActiveCfg = Release|ARM
+		{BB3B7C75-4643-47EB-BF6D-60F7559E138C}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
