@@ -16,7 +16,7 @@ typedef struct {
 
 
 
-#define USART_HOST_BAUDRATE (9600)
+#define USART_HOST_BAUDRATE (115200)
 #define USART_HOST                 EDBG_CDC_MODULE
 
 static struct usart_module cdc_uart_module;
@@ -30,9 +30,12 @@ void uart_init(void)
 	struct usart_config cdc_uart_config;
 	/* Configure USART for unit test output */
 	usart_get_config_defaults(&cdc_uart_config);
-	cdc_uart_config.mux_setting     = EDBG_CDC_SERCOM_MUX_SETTING;
-	cdc_uart_config.pinmux_pad3     = EDBG_CDC_SERCOM_PINMUX_PAD3;
-	cdc_uart_config.pinmux_pad2     = EDBG_CDC_SERCOM_PINMUX_PAD2;
+	cdc_uart_config.run_in_standby = true;
+	cdc_uart_config.mux_setting = EDBG_CDC_SERCOM_MUX_SETTING;
+	cdc_uart_config.pinmux_pad0 = EDBG_CDC_SERCOM_PINMUX_PAD0;
+	cdc_uart_config.pinmux_pad1 = EDBG_CDC_SERCOM_PINMUX_PAD1;
+	cdc_uart_config.pinmux_pad2 = EDBG_CDC_SERCOM_PINMUX_PAD2;
+	cdc_uart_config.pinmux_pad3 = EDBG_CDC_SERCOM_PINMUX_PAD3;
 	cdc_uart_config.baudrate        = USART_HOST_BAUDRATE;
 	while(usart_init(&cdc_uart_module, USART_HOST,&cdc_uart_config) != STATUS_OK){
 		}
@@ -111,7 +114,7 @@ void uart_clearTxInterrupts(void)
 
 void uart_clearRxInterrupts(void)
 {
-  usart_abort_job(&cdc_uart_module, USART_TRANSCEIVER_RX);	
+  //usart_abort_job(&cdc_uart_module, USART_TRANSCEIVER_RX);	
 }
 
 kick_scheduler_t uart_tx_isr(void) 

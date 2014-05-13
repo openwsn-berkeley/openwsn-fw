@@ -53,7 +53,7 @@ void scheduler_start() {
          scheduler_dbg.numTasksCur--;
       }
       debugpins_task_clr();
-      board_sleep();
+      //board_sleep();
       debugpins_task_set();                      // IAR should halt here if nothing to do
    }
 }
