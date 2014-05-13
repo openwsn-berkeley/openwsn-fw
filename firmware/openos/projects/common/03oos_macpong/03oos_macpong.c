@@ -42,7 +42,7 @@ int mote_main() {
    board_init();
    scheduler_init();
    openwsn_init();
-   idmanager_setIsDAGroot(FALSE);
+   idmanager_setIsDAGroot(TRUE);
    scheduler_start();   
    return 0; // this line should never be reached
 }

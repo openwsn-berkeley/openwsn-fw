@@ -69,7 +69,7 @@
       <Value>USART_CALLBACK_MODE=true</Value>
       <Value>ARM_MATH_CM0=true</Value>
       <Value>RTC_COUNT_ASYNC=true</Value>
-	  <Value>AT86RF233</Value>
+      <Value>AT86RF233</Value>
     </ListValues>
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
@@ -282,8 +282,8 @@
     </ListValues>
   </armgcc.linker.libraries.LibrarySearchPaths>
   <armgcc.linker.optimization.GarbageCollectUnusedSections>True</armgcc.linker.optimization.GarbageCollectUnusedSections>
-  <armgcc.linker.miscellaneous.LinkerFlags>-Tsamd20j18_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
   <armgcc.linker.memorysettings.ExternalRAM />
+  <armgcc.linker.miscellaneous.LinkerFlags>-Tsamd20j18_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
   <armgcc.assembler.debugging.DebugLevel>Default (-g)</armgcc.assembler.debugging.DebugLevel>
   <armgcc.preprocessingassembler.general.IncludePaths>
     <ListValues>
@@ -461,26 +461,6 @@
     <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\system\system.h">
       <SubType>compile</SubType>
       <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\system\system.h</Link>
-    </Compile>
-    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\tc\events.c">
-      <SubType>compile</SubType>
-      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\tc\events.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\tc\events.h">
-      <SubType>compile</SubType>
-      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\tc\events.h</Link>
-    </Compile>
-    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\tc\events_common.h">
-      <SubType>compile</SubType>
-      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\tc\events_common.h</Link>
-    </Compile>
-    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\tc\events_hooks.c">
-      <SubType>compile</SubType>
-      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\tc\events_hooks.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\tc\events_hooks.h">
-      <SubType>compile</SubType>
-      <Link>bsp\boards\samd20_xplained_pro\ASF\drivers\tc\events_hooks.h</Link>
     </Compile>
     <Compile Include="..\..\..\bsp\boards\samd20_xplained_pro\ASF\drivers\tc\tc.c">
       <SubType>compile</SubType>
