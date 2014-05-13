@@ -11,10 +11,8 @@ The digital outputs are:
    - P5.4: MCLK  (red LED or pad 48 on the back)
    - P5.5: SMCLK (green LED or pad 49 on the back)
    - P5.6: ACLK  (blue LED)
-
-We measure an DCO frequency of 4.8MHz. Very low, indeed.
  
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
 #include "msp430f1611.h"

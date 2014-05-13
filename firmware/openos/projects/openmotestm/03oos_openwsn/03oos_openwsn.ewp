@@ -323,6 +323,7 @@
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\</state>
+          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrt\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\</state>
@@ -2156,6 +2157,12 @@
     <group>
       <name>02a-MAClow</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptive_sync.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptive_sync.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
       </file>
       <file>
@@ -2330,6 +2337,15 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\rreg.h</name>
+        </file>
+      </group>
+      <group>
+        <name>rrt</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rrt\rrt.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\rrt\rrt.h</name>
         </file>
       </group>
       <group>

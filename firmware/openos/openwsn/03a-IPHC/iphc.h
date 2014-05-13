@@ -9,10 +9,11 @@
 */
 
 #include "openwsn.h"
+
 //=========================== define ==========================================
 
-#define IPHC_DEFAULT_HOP_LIMIT 65
-#define IPv6HOP_HDR_LEN         3
+#define IPHC_DEFAULT_HOP_LIMIT    65
+#define IPv6HOP_HDR_LEN           3
 
 enum IPHC_enums {
    IPHC_DISPATCH             = 5,
@@ -53,9 +54,9 @@ enum NHC_enums {
 };
 
 enum NHC_IPv6HOP_enums {
-   NHC_IPv6HOP_MASK        = 0x0e,
-   NHC_IPv6HOP_VAL         = 0x0e,
-   NHC_HOP_NH_MASK         = 0x01,
+   NHC_IPv6HOP_MASK          = 0x0e,
+   NHC_IPv6HOP_VAL           = 0x0e,
+   NHC_HOP_NH_MASK           = 0x01,
 };
 
 
@@ -122,59 +123,66 @@ typedef struct {
    uint8_t     hop_limit;
    open_addr_t src;
    open_addr_t dest;
-   uint8_t     header_length;          ///< needed to toss the header
-} ipv6_header_iht; //iht for "internal header type"
+   uint8_t     header_length;          ///< Counter for internal use
+} ipv6_header_iht; // iht for "internal header type"
 
+/**
+\brief IPv6 hop-by-hop option.
 
-/*
- The Hop-by-Hop Options header is used to carry optional information
-   that must be examined by every node along a packet's delivery path.
-   The Hop-by-Hop Options header is identified by a Next Header value of
-   0 in the IPv6 header, and has the following format:
+The Hop-by-Hop Options header is used to carry optional information that must
+be examined by every node along a packet's delivery path.
+The Hop-by-Hop Options header is identified by a Next Header value of 0 in the
+IPv6 header.
+
+Per http://tools.ietf.org/html/rfc6282#section-4.2, the first 7 bits serve as
+an identifier for the IPv6 Extension Header immediately following the
+LOWPAN_NHC octet. The remaining bit indicates whether or not the following
+header utilizes LOWPAN_NHC encoding.
+
+The Length field contained in a compressed IPv6 Extension Header indicates the
+number of octets that pertain to the (compressed) extension header following
+the Length field. Note that this changes the Length field definition in
+[RFC2460] from indicating the header size in 8-octet units, not including the
+first 8 octets.  Changing the Length field to be in units of octets removes
+wasteful internal fragmentation.
 */
 typedef struct {
-  /*see rfc 6282 section 4.2 The first 7 bits serve as an identifier for the IPv6 Extension Header immediately
-   following the LOWPAN_NHC octet.  The remaining bit indicates whether
-   or not the following header utilizes LOWPAN_NHC encoding. */
-   uint8_t    headerlen;// counter for internal use
+   uint8_t    headerlen;               ///< Counter for internal use
    bool       next_header_compressed;
    uint8_t    lowpan_nhc; 
-   uint8_t    nextHeader;//IPv6 hop by hop header field see rfc 2460 section 4.3 
-   uint8_t    HdrExtLen; //IPv6 hop by hop header field see rfc 6282 section 4.2 
-   /*
-   The Length field contained in a compressed IPv6 Extension Header
-   indicates the number of octets that pertain to the (compressed)
-   extension header following the Length field.  Note that this changes
-   the Length field definition in [RFC2460] from indicating the header
-   size in 8-octet units, not including the first 8 octets.  Changing
-   the Length field to be in units of octets removes wasteful internal
-   fragmentation.*/
-   
-} ipv6_hopbyhop_ht;
+   uint8_t    nextHeader;
+   uint8_t    HdrExtLen;
+} ipv6_hopbyhop_iht;
 
+/**
+\brief RPL Option header type.
+
+Described in http://tools.ietf.org/html/rfc6553#section-3
+*/
 PRAGMA(pack(1));
 typedef struct {
-   //RPL hop by hop option header as described by RFC 6553 p.3
-   uint8_t    optionType;    ///0x63.
-   uint8_t    optionLen;     /////8-bit field indicating the length of the option, in octets, excluding the Option Type and Opt Data Len fields.
-   uint8_t    flags;         //ORF00000.
-   uint8_t    rplInstanceID;  //instanceid
-   uint16_t   senderRank;    //sender rank
-} rpl_hopoption_ht;
+   uint8_t    optionType;    ///< RPL_HOPBYHOP_HEADER_OPTION_TYPE
+   uint8_t    optionLen;     ///< 8-bit field indicating the length of the option, in octets, excluding the Option Type and Opt Data Len fields.
+   uint8_t    flags;         ///< ORF00000
+   uint8_t    rplInstanceID; ///< instanceid
+   uint16_t   senderRank;    ///< RPL rank of the sender of the packet
+} rpl_option_ht;
 PRAGMA(pack());
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-void    iphc_init();
-owerror_t iphc_sendFromForwarding(OpenQueueEntry_t *msg, 
-                                  ipv6_header_iht ipv6_header, 
-                                  rpl_hopoption_ht *hopbyhop_option, 
-                                  uint8_t fw_SendOrfw_Rcv);
-
-owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg);
-void    iphc_sendDone(OpenQueueEntry_t *msg, owerror_t error);
-void    iphc_receive(OpenQueueEntry_t *msg);
+void          iphc_init();
+owerror_t     iphc_sendFromForwarding(
+   OpenQueueEntry_t*    msg, 
+   ipv6_header_iht*     ipv6_header, 
+   rpl_option_ht*       rpl_option, 
+   uint8_t              fw_SendOrfw_Rcv
+);
+owerror_t     iphc_sendFromBridge(OpenQueueEntry_t *msg);
+void          iphc_sendDone(OpenQueueEntry_t *msg, owerror_t error);
+void          iphc_receive(OpenQueueEntry_t *msg);
 
 /**
 \}

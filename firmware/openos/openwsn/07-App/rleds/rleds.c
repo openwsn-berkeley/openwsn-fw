@@ -1,6 +1,6 @@
 /**
 \brief A CoAP resource which allows an application to GET/SET the state of the
-   debug LED.
+   error LED.
 */
 
 #include "openwsn.h"
@@ -74,7 +74,7 @@ owerror_t rleds_receive(
          packetfunctions_reserveHeaderSize(msg,2);
          msg->payload[0]                  = COAP_PAYLOAD_MARKER;
 
-         if (leds_debug_isOn()==1) {
+         if (leds_error_isOn()==1) {
             msg->payload[1]               = '1';
          } else {
             msg->payload[1]               = '0';
@@ -90,11 +90,11 @@ owerror_t rleds_receive(
       
          // change the LED's state
          if (msg->payload[0]=='1') {
-            leds_debug_on();
+            leds_error_on();
          } else if (msg->payload[0]=='2') {
-            leds_debug_toggle();
+            leds_error_toggle();
          } else {
-            leds_debug_off();
+            leds_error_off();
          }
          
          // reset packet payload

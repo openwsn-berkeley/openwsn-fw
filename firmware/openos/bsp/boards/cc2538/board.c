@@ -27,14 +27,18 @@
 //=========================== variables =======================================
 
 #define BSP_RADIO_BASE              ( GPIO_D_BASE )
+#define BSP_BUTTON_BASE             ( GPIO_C_BASE )
 #define BSP_RADIO_INT               ( GPIO_PIN_5 )
 #define BSP_RADIO_EXT               ( GPIO_PIN_4 )
-
+#define BSP_USER_BUTTON             ( GPIO_PIN_3 )
 //=========================== prototypes ======================================
 
 void antenna_init();
 void antenna_internal();
 void antenna_external();
+void button_init();
+
+void GPIO_C_Isr_Handler();
 
 static void clock_init(void);
 static void gpio_init(void);
@@ -63,12 +67,35 @@ void board_init() {
 
    leds_init();
    debugpins_init();
+   button_init();
    bsp_timer_init();
    radiotimer_init();
    uart_init();
    radio_init();
 
    leds_debug_on();
+}
+
+/**
+ * Configures the used button as input source
+ * Registers gpio_c interrupt..
+ */
+void button_init(){
+	GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_USER_BUTTON);
+	GPIOIntTypeSet(BSP_BUTTON_BASE,BSP_USER_BUTTON,GPIO_FALLING_EDGE);
+	GPIOPortIntRegister(BSP_BUTTON_BASE,GPIO_C_Isr_Handler);
+	GPIOPinIntClear(BSP_BUTTON_BASE, BSP_USER_BUTTON);
+	GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_USER_BUTTON);
+}
+
+/**
+ * GPIO_C ISR handler. User button is GPIO_C_3
+ * Toggle debug led when user button is pressed
+ */
+void GPIO_C_Isr_Handler(){
+
+	GPIOPinIntClear(GPIO_C_BASE, BSP_USER_BUTTON);
+	leds_debug_toggle();//toggle led.
 }
 
 /**

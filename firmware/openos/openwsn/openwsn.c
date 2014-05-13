@@ -14,6 +14,7 @@
 #include "openrandom.h"
 #include "opentimers.h"
 //-- 02a-TSCH
+#include "adaptive_sync.h"
 #include "IEEE802154E.h"
 //-- 02b-RES
 #include "schedule.h"
@@ -58,6 +59,7 @@
 #include "rleds.h"
 #include "rwellknown.h"
 #include "r6t.h"
+#include "rrt.h"
 //#include "rex.h"
 //#include "rrube.h"
 //#include "layerdebug.h"
@@ -89,6 +91,7 @@ void openwsn_init() {
    openrandom_init();
    opentimers_init();
    //-- 02a-TSCH
+   adaptive_sync_init();
    ieee154e_init();
    //-- 02b-RES
    schedule_init();
@@ -132,6 +135,7 @@ void openwsn_init() {
    //- core
    //- common
    rinfo_init();
+   rrt_init();
    rleds__init();
    rwellknown_init();
    r6t_init();

@@ -46,10 +46,10 @@ void board_init() {
    debugpins_init();
    leds_init();
    uart_init();
-   spi_init();
+   //poipoispi_init();
    bsp_timer_init();
-   radio_init();
-   radiotimer_init();
+   //poipoiradio_init();
+   //popipoiradiotimer_init();
    
    // enable interrupts
    __bis_SR_register(GIE);
@@ -71,7 +71,7 @@ void board_reset() {
 
 // PORT2_VECTOR
 
-ISR(USART1TX){
+ISR(USART0TX){
    debugpins_isr_set();
    if (uart_tx_isr()==KICK_SCHEDULER) {          // UART; TX
       __bic_SR_register_on_exit(CPUOFF);
@@ -79,7 +79,7 @@ ISR(USART1TX){
    debugpins_isr_clr();
 }
 
-ISR(USART1RX) {
+ISR(USART0RX) {
    debugpins_isr_set();
    if (uart_rx_isr()==KICK_SCHEDULER) {          // UART: RX
       __bic_SR_register_on_exit(CPUOFF);
@@ -103,6 +103,7 @@ ISR(TIMERA0) {
 
 // USART0TX_VECTOR
 
+/*
 ISR(USART0RX) {
    debugpins_isr_set();
    if (spi_isr()==KICK_SCHEDULER) {              // SPI
@@ -110,6 +111,7 @@ ISR(USART0RX) {
    }
    debugpins_isr_clr();
 }
+*/
 
 // WDT_VECTOR
 

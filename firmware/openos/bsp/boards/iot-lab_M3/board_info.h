@@ -65,6 +65,10 @@ to return the board's description.
 #define PORT_delayRx                        0     //    0us (can not measure)
 // radio watchdog
 
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       2     // ticks
+
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[]        = "h=ucb";

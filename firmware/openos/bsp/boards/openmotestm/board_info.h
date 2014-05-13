@@ -20,7 +20,6 @@ to return the board's description.
 #define DEBUG_SLEEP_MODE
 //#define DEBUG_STOP_MODE
 
-
 #define port_INLINE                         inline
 
 #define PRAGMA(x)  _Pragma(#x)
@@ -100,9 +99,13 @@ to return the board's description.
     #define PORT_maxTxAckPrepare                30    //  900us (measured 323us+235) stm32
     
     // radio speed related
-    #define PORT_delayTx                        24     //  549us (measured 315us+235) .....
+    #define PORT_delayTx                        24    //  549us (measured 315us+235) .....
     #define PORT_delayRx                        0     //    0us (can not measure)
 #endif
+
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                           2     // by ticks
 
 //=========================== typedef  ========================================
 

@@ -150,3 +150,4 @@ void rinfo_init()            { return; }
 void rleds__init()           { return; }
 void r6t_init()              { return; }
 void rwellknown_init()       { return; }
+void rrt_init()              { return; }

@@ -1,30 +1,25 @@
- /**
+/**
 \brief This is a standalone test program for serial communication between the
-       TelosB and a computer.
+   WSN430 and a computer.
 
-The MSP430 chip speaks 2-wire UART, i.e. one two pins are used: one for sending
-bytes (UART1TX), one for receiving bytes (UART1RX). These pins are connected to
-an FTDI "UART-to-USB" converted chip. When you plug the TelosB into your
-computer, the FTDI driver install a virtual COM port. That is, when you
-read/write to that port, the bytes end up on the UART1RX/UART1TX pins.
+The MSP430 chip speaks 2-wire UART, i.e. two pins are used: one for sending
+bytes (UART0TX), one for receiving bytes (UART0RX). When you plug the WSN430
+into your computer, it appears as a serial COM port. That is, when you
+read/write to that port, the bytes end up on the UART0RX/UART0TX pins.
 
-Connect your TelosB board to your computer, download this application to your
-TelosB board and run it. On your computer, open a PuTTY client on the virtual
+Connect your WSN430 board to your computer, download this application to your
+WSN430 board and run it. On your computer, open a PuTTY client on the 
 COM port of your board, and type characters into it.
 
 Each time you type a character, you should see:
-- the small green LED (RX) blinks. It's mounted on the RX line, so "shows" you
-  when a byte passes.
 - the character prints on your terminal, as it is sent back on the TX line.
 - the red LED toggles
-- the smalll red LED (TX) blinks. It's mounted on the TX line, so "shows" you
-  when a byte passes.
 
 Uncomment the BAUDRATE_115200 line below to switch from 9600baud to 115200baud.
 
 The digital UART interface is:
-   - P3.6: UART1TX
-   - P3.7: UART1RX
+   - P3.4: UTXD0
+   - P3.5: URXD0
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
@@ -44,33 +39,33 @@ void main(void)
    DCOCTL     =  DCO0 | DCO1 | DCO2;             // MCLK at ~8MHz
    BCSCTL1    =  RSEL0 | RSEL1 | RSEL2;          // MCLK at ~8MHz
                                                  // by default, ACLK from 32kHz XTAL which is running
-   P5DIR     |=  0x70;                           // P5DIR = 0bx111xxxx for LEDs
-   P5OUT     |=  0x70;                           // P2OUT = 0bx111xxxx, all LEDs off
+   P5DIR     |=  0x70;                           // P5DIR = 0bx111xxxx, all LEDs output
+   P5OUT     |=  0x70;                           // P5OUT = 0bx111xxxx, all LEDs off
    
-   P3SEL      =  0xC0;                           // P3.6,7 = UART1TX/RX
+   P3SEL      =  0x30;                           // P3.4,5 = UART0TX/RX
   
 #ifdef BAUDRATE_115200
    //115200 baud, clocked from 4.8MHz SMCLK
-   ME2       |=  UTXE1 + URXE1;                  // enable UART1 TX/RX
-   UCTL1     |=  CHAR;                           // 8-bit character
-   UTCTL1    |=  SSEL1;                          // clocking from SMCLK
-   UBR01      =  41;                             // 4.8MHz/115200 - 41.66
-   UBR11      =  0x00;                           //
-   UMCTL1     =  0x4A;                           // modulation
-   UCTL1     &= ~SWRST;                          // clear UART1 reset bit
-   IE2       |=  URXIE1;                         // enable UART1 RX interrupt
+   ME1       |=  UTXE0 + URXE0;                  // enable UART0 TX/RX
+   U0CTL     |=  CHAR;                           // 8-bit character
+   U0TCTL    |=  SSEL1;                          // clocking from SMCLK
+   U0BR0      =  41;                             // 4.8MHz/115200 - 41.66
+   U0BR1      =  0x00;                           //
+   U0MCTL     =  0x4A;                           // modulation
+   U0CTL     &= ~SWRST;                          // clear UART1 reset bit
+   IE1       |=  URXIE0;                         // enable UART1 RX interrupt
    
    __bis_SR_register(LPM0_bits + GIE);           // sleep, leave interrupts on
 #else
    //9600 baud, clocked from 32kHz ACLK
-   ME2       |=  UTXE1 + URXE1;                  // enable UART1 TX/RX
-   UCTL1     |=  CHAR;                           // 8-bit character
-   UTCTL1    |=  SSEL0;                          // clocking from ACLK
-   UBR01      =  0x03;                           // 32768/9600 = 3.41
-   UBR11      =  0x00;                           //
-   UMCTL1     =  0x4A;                           // modulation
-   UCTL1     &= ~SWRST;                          // clear UART1 reset bit
-   IE2       |=  URXIE1;                         // enable UART1 RX interrupt
+   ME1       |=  UTXE0 + URXE0;                  // enable UART1 TX/RX
+   U0CTL     |=  CHAR;                           // 8-bit character
+   U0TCTL    |=  SSEL0;                          // clocking from ACLK
+   U0BR0      =  0x03;                           // 32768/9600 = 3.41
+   U0BR1      =  0x00;                           //
+   U0MCTL     =  0x4A;                           // modulation
+   U0CTL     &= ~SWRST;                          // clear UART0 reset bit
+   IE1       |=  URXIE0;                         // enable UART0 RX interrupt
    
    __bis_SR_register(LPM3_bits + GIE);           // sleep, leave interrupts and ACLK on
 #endif  
@@ -79,9 +74,9 @@ void main(void)
 /**
 \brief This function is called when the the UART module has received a byte.
 */
-#pragma vector = USART1RX_VECTOR
-__interrupt void USART1RX_ISR (void)
+#pragma vector = USART0RX_VECTOR
+__interrupt void USART0RX_ISR (void)
 {
-   U1TXBUF   =  U1RXBUF;                        // TX -> RXed character
+   U0TXBUF   =  U0RXBUF;                        // TX -> RXed character
    P5OUT    ^=  0x10;                           // toggle LED
 }

@@ -10,22 +10,20 @@
 
 #include "iphc.h"
 
-
 //=========================== define ==========================================
 
 #define RPL_HOPBYHOP_HEADER_OPTION_TYPE  0x63
 
 enum {
-   PCKTFORWARD     = 1,          
+   PCKTFORWARD     = 1,
    PCKTSEND        = 2,
 };
 
 enum {
-  O_FLAG   = 0x80,
-  R_FLAG   = 0x40,
-  F_FLAG   = 0x20,
+   O_FLAG          = 0x80,
+   R_FLAG          = 0x40,
+   F_FLAG          = 0x20,
 };
-
 
 //=========================== typedef =========================================
 
@@ -34,7 +32,6 @@ enum {
 
 As defined in http://tools.ietf.org/html/rfc6554#section-3.
 */
-
 PRAGMA(pack(1));
 typedef struct {
    uint8_t    nextHeader;    ///< Header immediately following.
@@ -47,18 +44,19 @@ typedef struct {
 } rpl_routing_ht;
 PRAGMA(pack());
 
-
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-void    forwarding_init();
-owerror_t forwarding_send(OpenQueueEntry_t *msg);
-void    forwarding_sendDone(OpenQueueEntry_t *msg, owerror_t error);
-void    forwarding_receive(OpenQueueEntry_t *msg, 
-                           ipv6_header_iht ipv6_header, 
-                           ipv6_hopbyhop_ht ipv6_hop_header, 
-                           rpl_hopoption_ht hop_by_hop_option);
+void      forwarding_init();
+owerror_t forwarding_send(OpenQueueEntry_t* msg);
+void      forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+void      forwarding_receive(
+   OpenQueueEntry_t*    msg,
+   ipv6_header_iht*     ipv6_header,
+   ipv6_hopbyhop_iht*   ipv6_hop_header,
+   rpl_option_ht*       rpl_option
+);
 
 /**
 \}

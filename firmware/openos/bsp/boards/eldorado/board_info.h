@@ -15,6 +15,10 @@
 #define port_INLINE                         inline
 #define PORT_RADIOTIMER_WIDTH               uint16_t
 
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       1 // ticks
+
 //=========================== variables =======================================
 
 static const uint8_t rreg_uriquery[] = "h=usp";
