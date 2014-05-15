@@ -38,13 +38,13 @@ void bsp_timer_init(void)
 	timer_config.counter_16_bit.compare_capture_channel[1] = TIMER_PERIOD;
 	timer_config.run_in_standby             = true;
 	tc_init(&tc_instance, BSP_TIMER, &timer_config);
+	tc_cont_sync_enable(&tc_instance, BSP_TIMER);
 	
 	tc_register_callback(&tc_instance,tc_ovf_callback,TC_CALLBACK_OVERFLOW);
 	tc_register_callback(&tc_instance, tc_cca0_callback, TC_CALLBACK_CC_CHANNEL0);
 	tc_register_callback(&tc_instance, tc_cca1_callback, TC_CALLBACK_CC_CHANNEL1);
 	
-	tc_enable(&tc_instance);
-	//tc_cont_sync_enable(&tc_instance, BSP_TIMER);
+	tc_enable(&tc_instance);	
 }
 
 void bsp_timer_set_callback(bsp_timer_cbt cb)
