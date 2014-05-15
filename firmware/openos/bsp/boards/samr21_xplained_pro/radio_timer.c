@@ -37,12 +37,14 @@ void radiotimer_init(void)
 	timer2_config.counter_16_bit.compare_capture_channel[1] = TIMER_PERIOD;
 	timer2_config.run_in_standby = true;
 	tc_init(&tc2_instance, TIMER1, &timer2_config);		
+	tc_cont_sync_enable(&tc2_instance, TIMER1);
 	
 	tc_register_callback(&tc2_instance, tc2_ovf_callback,  TC_CALLBACK_OVERFLOW);
 	tc_register_callback(&tc2_instance, tc2_cca0_callback, TC_CALLBACK_CC_CHANNEL0);
 	tc_register_callback(&tc2_instance, tc2_cca1_callback, TC_CALLBACK_CC_CHANNEL1);
 	
 	tc_enable(&tc2_instance);
+	
 }
 
 static void tc2_ovf_callback(struct tc_module *const module_instance)
@@ -95,19 +97,23 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period)
 {
  tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);  
  tc_set_count_value(&tc2_instance, 0);  
- tc_set_top_value(&tc2_instance, period);  
+ tc_set_top_value(&tc2_instance, period);
  tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
 }
 
 PORT_RADIOTIMER_WIDTH radiotimer_getValue(void)
 {
- return ((PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance));
+	PORT_RADIOTIMER_WIDTH time_val;
+	dbg_pin1_set();	
+	time_val = tc_get_count_value(&tc2_instance);
+    dbg_pin1_clr();    
+    return (time_val);
 }
 
 void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period)
 {
  tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
- tc_set_top_value(&tc2_instance, period);	
+ tc_set_top_value(&tc2_instance, period);
  tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
 }
 
@@ -119,7 +125,7 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void)
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset)
 {
   tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
-  tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, offset);	
+  tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, offset);
   tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
 }
 

@@ -246,7 +246,7 @@ enum status_code tc_init(
 	if (config->count_direction) {
 		ctrlbset_tmp |= TC_CTRLBSET_DIR;
 	}
-
+	
 	/* Clear old ctrlb configuration */
 	while (tc_is_syncing(module_inst)) {
 		/* Wait for sync */
@@ -368,6 +368,19 @@ enum status_code tc_init(
 	return STATUS_ERR_INVALID_ARG;
 }
 
+
+void tc_cont_sync_enable(struct tc_module *const module_inst, Tc *const hw)
+{
+		/* Sanity check arguments */
+	Assert(module_inst);
+	Assert(module_inst->hw);
+
+	while (tc_is_syncing(module_inst)) {
+		/* Wait for sync */
+	}
+	hw->COUNT16.READREQ.reg |= (TC_READREQ_RCONT | TC_READREQ_ADDR(0x10));
+}
+
 /**
  * \brief Sets TC module count value.
  *
@@ -430,30 +443,30 @@ uint32_t tc_get_count_value(
 		const struct tc_module *const module_inst)
 {
 	/* Sanity check arguments */
-	Assert(module_inst);
-	Assert(module_inst->hw);
+	//Assert(module_inst);
+	//Assert(module_inst->hw);
 
 	/* Get a pointer to the module's hardware instance */
 	Tc *const tc_module = module_inst->hw;
-
+    tc_module->COUNT16.READREQ.reg |= TC_READREQ_RREQ;
 	while (tc_is_syncing(module_inst)) {
 		/* Wait for sync */
 	}
 
 	/* Read from based on the TC counter size */
-	switch (module_inst->counter_size) {
-		case TC_COUNTER_SIZE_8BIT:
-			return (uint32_t)tc_module->COUNT8.COUNT.reg;
-
-		case TC_COUNTER_SIZE_16BIT:
+	//switch (module_inst->counter_size) {
+		//case TC_COUNTER_SIZE_8BIT:
+			//return (uint32_t)tc_module->COUNT8.COUNT.reg;
+//
+		//case TC_COUNTER_SIZE_16BIT:
 			return (uint32_t)tc_module->COUNT16.COUNT.reg;
+//
+		//case TC_COUNTER_SIZE_32BIT:
+			//return tc_module->COUNT32.COUNT.reg;
+	//}
 
-		case TC_COUNTER_SIZE_32BIT:
-			return tc_module->COUNT32.COUNT.reg;
-	}
-
-	Assert(false);
-	return 0;
+	//Assert(false);
+	//return 0;
 }
 
 /**

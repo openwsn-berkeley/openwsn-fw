@@ -46,6 +46,15 @@ void debugpins_radio_toggle();
 void debugpins_radio_clr();
 void debugpins_radio_set();
 
+#ifdef SAMR21
+void dbg_pin1_set(void);
+void dbg_pin1_clr(void);
+void dbg_pin1_toggle(void);
+void dbg_pin2_set(void);
+void dbg_pin2_clr(void);
+void dbg_pin2_toggle(void);
+#endif
+
 #ifdef OPENSIM
 void debugpins_ka_clr();
 void debugpins_ka_set();

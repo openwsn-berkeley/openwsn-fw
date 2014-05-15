@@ -44,6 +44,7 @@ void bsp_timer_init(void)
 	tc_register_callback(&tc_instance, tc_cca1_callback, TC_CALLBACK_CC_CHANNEL1);
 	
 	tc_enable(&tc_instance);
+	//tc_cont_sync_enable(&tc_instance, BSP_TIMER);
 }
 
 void bsp_timer_set_callback(bsp_timer_cbt cb)

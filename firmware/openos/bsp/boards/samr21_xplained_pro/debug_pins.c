@@ -10,6 +10,12 @@
 #define DEBUG_PIN_TASK   PIN_PA16
 #define DEBUG_PIN_ISR    PIN_PA17
 #define DEBUG_PIN_RADIO  PIN_PB03
+
+#ifdef SAMR21
+#define DBG_PIN1         PIN_PB02
+#define DBG_PIN2         PIN_PB23
+#endif
+
 #define SET_HIGH         true
 #define SET_LOW          false
 
@@ -26,6 +32,14 @@ void debugpins_init(void)
 	port_pin_set_config(DEBUG_PIN_TASK, &pin_conf);
 	port_pin_set_config(DEBUG_PIN_ISR, &pin_conf);
 	port_pin_set_config(DEBUG_PIN_RADIO, &pin_conf);
+
+#ifdef SAMR21
+    port_pin_set_config(DBG_PIN1, &pin_conf);
+	port_pin_set_config(DBG_PIN2, &pin_conf);
+	port_pin_set_output_level(DBG_PIN1, SET_LOW);
+	port_pin_set_output_level(DBG_PIN2, SET_LOW);
+#endif
+
 	port_pin_set_output_level(DEBUG_PIN_FRAME, SET_LOW);
 	port_pin_set_output_level(DEBUG_PIN_SLOT, SET_LOW);
 	port_pin_set_output_level(DEBUG_PIN_FSM, SET_LOW);
@@ -124,6 +138,38 @@ void debugpins_radio_set(void)
  port_pin_set_output_level(DEBUG_PIN_RADIO, SET_HIGH);
 }
 
+
+#ifdef SAMR21
+void dbg_pin1_set(void)
+{
+ port_pin_set_output_level(DBG_PIN1, SET_HIGH);
+}
+
+void dbg_pin1_clr(void)
+{
+	port_pin_set_output_level(DBG_PIN1, SET_LOW);
+}
+
+void dbg_pin1_toggle(void)
+{
+	port_pin_toggle_output_level(DBG_PIN1);
+}
+
+void dbg_pin2_set(void)
+{
+	port_pin_set_output_level(DBG_PIN2, SET_HIGH);
+}
+
+void dbg_pin2_clr(void)
+{
+	port_pin_set_output_level(DBG_PIN2, SET_LOW);
+}
+
+void dbg_pin2_toggle(void)
+{
+	port_pin_toggle_output_level(DBG_PIN2);
+}
+#endif
 
 #ifdef OPENSIM
 void debugpins_ka_clr(void)

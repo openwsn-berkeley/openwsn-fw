@@ -6,7 +6,7 @@
 #include "eui64.h"
 #include "compiler.h"
 
-#define DEVICE_EUI64_ID  (0x0004251918010A02UL)
+#define DEVICE_EUI64_ID  (0x0004251918010A01UL)
 
 void eui64_get(uint8_t* addressToWrite)
 {

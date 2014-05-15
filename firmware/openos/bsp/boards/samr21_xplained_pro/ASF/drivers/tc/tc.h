@@ -1094,6 +1094,9 @@ static inline void tc_disable(
 	tc_module->CTRLA.reg  &= ~TC_CTRLA_ENABLE;
 }
 
+
+void tc_cont_sync_enable(struct tc_module *const module_inst, Tc *const hw);
+
 /** @} */
 
 /**
