@@ -456,6 +456,8 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
 
 port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht ieee802514_header;
+   ieee802154_sec_hdr_t ieee802514_sec_header;
+   
    uint16_t lenIE=0;//len of IEs being received if any.
    
    // check state
@@ -554,6 +556,18 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
          // break from the do-while loop and execute the clean-up code below
          break;
       }
+      
+    if(ieee802514_header.securityEnabled) {
+        ieee802154_retrieveSecurityHeader(ieee154e_vars.dataReceived,&ieee802514_sec_header);
+        if (ieee802514_sec_header.valid==FALSE) {
+            break;
+        }
+        else {
+            // toss header and decript
+            packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_sec_header.header_length);
+            // decript, only supporte mode at this moment is AES-CTR, with AES-128 CBC mode
+        }
+    }
       
       // turn off the radio
       radio_rfOff();
