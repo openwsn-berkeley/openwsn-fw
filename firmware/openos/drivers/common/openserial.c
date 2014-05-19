@@ -443,7 +443,7 @@ bool debugPrint_outBufferIndexes() {
 /**
 \brief Start an HDLC frame in the output buffer.
 */
-inline void outputHdlcOpen() {
+port_INLINE void outputHdlcOpen() {
    // initialize the value of the CRC
    openserial_vars.outputCrc                          = HDLC_CRCINIT;
    
@@ -453,7 +453,7 @@ inline void outputHdlcOpen() {
 /**
 \brief Add a byte to the outgoing HDLC frame being built.
 */
-inline void outputHdlcWrite(uint8_t b) {
+port_INLINE void outputHdlcWrite(uint8_t b) {
    
    // iterate through CRC calculator
    openserial_vars.outputCrc = crcIteration(openserial_vars.outputCrc,b);
@@ -469,7 +469,7 @@ inline void outputHdlcWrite(uint8_t b) {
 /**
 \brief Finalize the outgoing HDLC frame.
 */
-inline void outputHdlcClose() {
+port_INLINE void outputHdlcClose() {
    uint16_t   finalCrc;
     
    // finalize the calculation of the CRC
@@ -488,7 +488,7 @@ inline void outputHdlcClose() {
 /**
 \brief Start an HDLC frame in the input buffer.
 */
-inline void inputHdlcOpen() {
+port_INLINE void inputHdlcOpen() {
    // reset the input buffer index
    openserial_vars.inputBufFill                       = 0;
    
@@ -498,7 +498,7 @@ inline void inputHdlcOpen() {
 /**
 \brief Add a byte to the incoming HDLC frame.
 */
-inline void inputHdlcWrite(uint8_t b) {
+port_INLINE void inputHdlcWrite(uint8_t b) {
    if (b==HDLC_ESCAPE) {
       openserial_vars.inputEscaping = TRUE;
    } else {
@@ -518,7 +518,7 @@ inline void inputHdlcWrite(uint8_t b) {
 /**
 \brief Finalize the incoming HDLC frame.
 */
-inline void inputHdlcClose() {
+port_INLINE void inputHdlcClose() {
    
    // verify the validity of the frame
    if (openserial_vars.inputCrc==HDLC_CRCGOOD) {

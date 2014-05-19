@@ -70,6 +70,12 @@ enum IEEE802154_fcf_addr_mode_enums {
    IEEE154_ADDR_EXT                    = 3,
 };
 
+enum IEEE802154_sec_id_mode_enums {
+    IEEE154_SEC_ID_MODE_IMPLICIT = 0,
+    IEEE154_SEC_ID_MODE_KEY_INDEX_1 = 1,
+    IEEE154_SEC_ID_MODE_KEY_INDEX_4 = 2,
+    IEEE154_SEC_ID_MODE_KEY_INDEX_8 = 3
+};
 //=========================== typedef =========================================
 
 typedef struct {
@@ -88,6 +94,29 @@ typedef struct {
    open_addr_t src;
 } ieee802154_header_iht; //iht for "internal header type"
 
+ typedef struct {
+    union {
+        uint8_t  key_src_1;
+        uint8_t  key_src_4;
+        uint64_t key_src_8;
+    } key_src;
+    uint8_t key_src_idx_size;
+    uint8_t key_idx;
+} sec_hdr_key_id_t;
+
+typedef struct {
+    uint8_t sec_level;
+    uint8_t key_id_mode;
+} sec_ctrl_t;
+
+typedef struct {
+    bool             valid;
+    uint8_t          header_length;
+    sec_ctrl_t       sec_ctrl;
+    uint32_t         frame_cntr;
+    sec_hdr_key_id_t key_id;
+} ieee802154_sec_hdr_t;
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -104,6 +133,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
 
 void ieee802154_retrieveHeader (OpenQueueEntry_t*      msg,
                                 ieee802154_header_iht* ieee802514_header);
+void ieee802154_retrieveSecurityHeader(OpenQueueEntry_t* msg,
+                               ieee802154_sec_hdr_t* sec_hdr);                                
 
 /**
 \}

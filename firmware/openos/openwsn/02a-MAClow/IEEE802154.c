@@ -102,7 +102,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
 /**
 \brief Retreieve the IEEE802.15.4 MAC header from a (just received) packet.
 
-Note We are writing the fields from the begnning of the header to the end.
+Note We are writing the fields from the beginning of the header to the end.
 
 \param[in,out] msg            The message just received.
 \param[out] ieee802514_header The internal header to write the data to.
@@ -241,4 +241,77 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    ieee802514_header->valid=TRUE;
 }
 
+void ieee802154_retrieveSecurityHeader(OpenQueueEntry_t* msg, ieee802154_sec_hdr_t* sec_hdr) {
+    uint8_t temp_8b;
+    sec_hdr->valid = FALSE;
+    // minimum size for security header
+    if(msg->length < 5)
+        return;
+    
+    temp_8b = msg->payload[0];
+    
+    if((temp_8b & 0xE0) > 0)
+        return;
+    
+    sec_hdr->sec_ctrl.sec_level = temp_8b & 0x07;
+    sec_hdr->sec_ctrl.key_id_mode = (temp_8b & 0x18) >> 3;
+    
+    // key id field is variable (0/1/5/9), minimum lenght = 5 + (0/1/5/9)
+    if(((sec_hdr->sec_ctrl.key_id_mode == IEEE154_SEC_ID_MODE_IMPLICIT) && (msg->length < 5)) || 
+       ((sec_hdr->sec_ctrl.key_id_mode == IEEE154_SEC_ID_MODE_KEY_INDEX_1) && (msg->length < 6)) ||
+       ((sec_hdr->sec_ctrl.key_id_mode == IEEE154_SEC_ID_MODE_KEY_INDEX_4) && (msg->length < 10)) ||
+       ((sec_hdr->sec_ctrl.key_id_mode == IEEE154_SEC_ID_MODE_KEY_INDEX_8) && (msg->length < 14))) {
+       return;
+    }
+    
+    // BIG OT LITTLE ??? TODO 
+    sec_hdr->frame_cntr = msg->payload[1] | 
+                         (msg->payload[2] << 8) | 
+                         (msg->payload[3] << 16) | 
+                         (msg->payload[4] << 24);
+    
+    switch(sec_hdr->sec_ctrl.key_id_mode)
+    {
+        case IEEE154_SEC_ID_MODE_IMPLICIT:
+            sec_hdr->header_length = 5;
+            sec_hdr->key_id.key_src_idx_size = 0;
+            break;
+        case IEEE154_SEC_ID_MODE_KEY_INDEX_1:
+            sec_hdr->header_length = 6;
+            sec_hdr->key_id.key_src_idx_size = 1;
+            sec_hdr->key_id.key_idx = msg->payload[5];
+            break;
+        case IEEE154_SEC_ID_MODE_KEY_INDEX_4:
+            sec_hdr->header_length = 10;
+            sec_hdr->key_id.key_src_idx_size = 4;
+            sec_hdr->key_id.key_src.key_src_4 = msg->payload[5] | 
+                                               (msg->payload[6] << 8) | 
+                                               (msg->payload[7] << 16) | 
+                                               (msg->payload[8] << 24);
+            sec_hdr->key_id.key_idx = msg->payload[9];
+            break;
+        case IEEE154_SEC_ID_MODE_KEY_INDEX_8:
+        {
+            uint32_t v1, v2;
+            sec_hdr->header_length = 14;
+            sec_hdr->key_id.key_src_idx_size = 8;
+            v1 = msg->payload[5] | 
+                (msg->payload[6] << 8) | 
+                (msg->payload[7] << 16) | 
+                (msg->payload[8] << 24);
+            v2 = msg->payload[9] | 
+                (msg->payload[10] << 8) | 
+                (msg->payload[11] << 16) | 
+                (msg->payload[12] << 24);
+            sec_hdr->key_id.key_src.key_src_8 = (((uint64_t) v1) << 32) | v2;
+            sec_hdr->key_id.key_idx = msg->payload[13];
+            break;
+        }
+        default:
+            return;
+    }
+ 
+    sec_hdr->valid = TRUE;
+}
+ 
 //=========================== private =========================================

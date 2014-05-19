@@ -16,12 +16,12 @@ to return the board's description.
 
 //=========================== defines =========================================
 
-#define port_INLINE                         inline
-
 #define MY_ID 0x00
 
-#define PRAGMA(x)  _Pragma(#x)
-#define PACK(x)     pack(x)
+#define port_INLINE                         inline
+#define BEGIN_PACK    _Pragma("pack(1)")
+#define END_PACK      _Pragma("pack()")
+
 
 #define INTERRUPT_DECLARATION() __istate_t s;
 #define DISABLE_INTERRUPTS()    s = __get_interrupt_state(); \
