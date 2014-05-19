@@ -29,7 +29,7 @@
 #define PORT_TIMER_WIDTH                    uint16_t
 #define PORT_RADIOTIMER_WIDTH               uint16_t
 
-#define PORT_SIGNED_INT_WIDTH               int32_t
+#define PORT_SIGNED_INT_WIDTH               int16_t
 #define PORT_TICS_PER_MS                    33
 #define SCHEDULER_WAKEUP()                  debugpins_isr_set();\
 										    debugpins_isr_clr();      
@@ -50,7 +50,7 @@
 #define PORT_maxRxAckPrepare                20 
 #define PORT_maxRxDataPrepare               33
 #define PORT_maxTxAckPrepare                30 
-#define PORT_delayTx                        15
+#define PORT_delayTx                        10
 #define PORT_delayRx                        0
 
 #define SYNC_ACCURACY                       1     // ticks

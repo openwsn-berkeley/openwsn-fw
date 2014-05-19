@@ -381,6 +381,17 @@ void tc_cont_sync_enable(struct tc_module *const module_inst, Tc *const hw)
 	hw->COUNT16.READREQ.reg |= (TC_READREQ_RCONT | TC_READREQ_ADDR(0x10));
 }
 
+void tc_readreq_set(const struct tc_module *const module_inst)
+{
+	/* Sanity check arguments */
+	//Assert(module_inst);
+	//Assert(module_inst->hw);
+
+	/* Get a pointer to the module's hardware instance */
+	Tc *const tc_module = module_inst->hw;
+	tc_module->COUNT16.READREQ.reg |= TC_READREQ_RREQ;
+}
+
 /**
  * \brief Sets TC module count value.
  *
@@ -448,7 +459,7 @@ uint32_t tc_get_count_value(
 
 	/* Get a pointer to the module's hardware instance */
 	Tc *const tc_module = module_inst->hw;
-    tc_module->COUNT16.READREQ.reg |= TC_READREQ_RREQ;
+    //tc_module->COUNT16.READREQ.reg |= TC_READREQ_RREQ;
 	while (tc_is_syncing(module_inst)) {
 		/* Wait for sync */
 	}

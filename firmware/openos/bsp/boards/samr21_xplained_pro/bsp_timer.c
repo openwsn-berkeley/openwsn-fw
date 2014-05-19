@@ -44,7 +44,8 @@ void bsp_timer_init(void)
 	tc_register_callback(&tc_instance, tc_cca0_callback, TC_CALLBACK_CC_CHANNEL0);
 	tc_register_callback(&tc_instance, tc_cca1_callback, TC_CALLBACK_CC_CHANNEL1);
 	
-	tc_enable(&tc_instance);	
+	tc_enable(&tc_instance);
+	tc_readreq_set(&tc_instance);	
 }
 
 void bsp_timer_set_callback(bsp_timer_cbt cb)
@@ -83,7 +84,7 @@ void bsp_timer_reset(void)
 	
 	// reset timer -- set counter to 0
 	tc_set_count_value(&tc_instance, 0);
-	
+	tc_readreq_set(&tc_instance);
 	// record last timer compare value
 	bsp_timer_vars.last_compare_value =  0;
 }
@@ -113,19 +114,21 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks)
    
    temp_last_compare_value = bsp_timer_vars.last_compare_value;
    
-   newCompareValue = bsp_timer_vars.last_compare_value+delayTicks+1;
+   newCompareValue = bsp_timer_vars.last_compare_value+delayTicks;
    bsp_timer_vars.last_compare_value = newCompareValue;
    current_value = (PORT_TIMER_WIDTH)tc_get_count_value(&tc_instance);
-   if (/*(current_value > temp_last_compare_value) && */(delayTicks < (current_value-temp_last_compare_value)))
+   tc_readreq_set(&tc_instance);
+   if (delayTicks < (current_value-temp_last_compare_value))
    {
 	   tc_set_interrupt(&tc_instance, TC_CALLBACK_CC_CHANNEL1);
    }
    else
-   {   
-	   /* Clear interrupt flag not handled */
-	   tc_disable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);	   
-	   /* this is the normal case, have timer expire at newCompareValue */
+   { 
+       /* this is the normal case, have timer expire at newCompareValue */
 	   tc_set_compare_value(&tc_instance, TC_COMPARE_CAPTURE_CHANNEL_1, newCompareValue);
+	   tc_readreq_set(&tc_instance);   
+	   /* Clear interrupt flag not handled */
+	   tc_disable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);  
 	   tc_enable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);
    }	
 }
@@ -134,13 +137,17 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks)
 void bsp_timer_cancel_schedule(void)
 {
     tc_set_compare_value(&tc_instance, TC_COMPARE_CAPTURE_CHANNEL_1, TIMER_PERIOD);
+	tc_readreq_set(&tc_instance);
     tc_disable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);
 }
 
 /* Get the current timer counter value */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue(void)
 {
- return ((PORT_TIMER_WIDTH)tc_get_count_value(&tc_instance));	
+	PORT_TIMER_WIDTH timer_count;
+	timer_count = (PORT_TIMER_WIDTH)tc_get_count_value(&tc_instance);
+	tc_readreq_set(&tc_instance);
+    return timer_count;	
 }
 
 kick_scheduler_t bsp_timer_isr(void)

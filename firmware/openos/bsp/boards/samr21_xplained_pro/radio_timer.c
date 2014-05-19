@@ -44,6 +44,7 @@ void radiotimer_init(void)
 	tc_register_callback(&tc2_instance, tc2_cca1_callback, TC_CALLBACK_CC_CHANNEL1);
 	
 	tc_enable(&tc2_instance);
+	tc_readreq_set(&tc2_instance);
 	
 }
 
@@ -99,13 +100,15 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period)
  tc_set_count_value(&tc2_instance, 0);  
  tc_set_top_value(&tc2_instance, period);
  tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
+ tc_readreq_set(&tc2_instance);
 }
 
 PORT_RADIOTIMER_WIDTH radiotimer_getValue(void)
 {
 	PORT_RADIOTIMER_WIDTH time_val;
 	dbg_pin1_set();	
-	time_val = tc_get_count_value(&tc2_instance);
+	time_val = (PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance);
+	tc_readreq_set(&tc2_instance);
     dbg_pin1_clr();    
     return (time_val);
 }
@@ -115,11 +118,16 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period)
  tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
  tc_set_top_value(&tc2_instance, period);
  tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
+ tc_readreq_set(&tc2_instance);
 }
 
 PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void)
 {
- return ((PORT_RADIOTIMER_WIDTH)tc_get_capture_value(&tc2_instance, TC_CALLBACK_CC_CHANNEL0));
+ PORT_RADIOTIMER_WIDTH timer_period_val; 
+ timer_period_val = (PORT_RADIOTIMER_WIDTH)tc_get_capture_value(&tc2_instance,\
+							TC_CALLBACK_CC_CHANNEL0);
+ tc_readreq_set(&tc2_instance);
+ return timer_period_val;
 }
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset)
@@ -127,17 +135,22 @@ void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset)
   tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
   tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, offset);
   tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
+  tc_readreq_set(&tc2_instance);
 }
 
 void radiotimer_cancel(void)
 {  
   tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
   tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, TIMER_PERIOD);
+  tc_readreq_set(&tc2_instance);
 }
 
 inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void)
 {
- return((PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance));
+  PORT_RADIOTIMER_WIDTH time_val;
+  time_val = (PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance);
+  tc_readreq_set(&tc2_instance);
+  return (time_val);
 }
 
 

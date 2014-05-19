@@ -1095,7 +1095,10 @@ static inline void tc_disable(
 }
 
 
-void tc_cont_sync_enable(struct tc_module *const module_inst, Tc *const hw);
+void tc_cont_sync_enable(struct tc_module *const module_inst,
+                                            Tc *const hw);
+											
+void tc_readreq_set(const struct tc_module *const module_inst);
 
 /** @} */
 
