@@ -183,6 +183,9 @@
     <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\udpstorm\udpstorm_obj.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\bsp\boards\python\security_obj.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\build\python_gcc\bsp\boards\python\openwsnmodule_obj.h">

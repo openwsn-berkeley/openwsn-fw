@@ -14,6 +14,7 @@
 #include "radio_obj.h"
 #include "radiotimer_obj.h"
 #include "eui64_obj.h"
+#include "security_obj.h"
 
 //=========================== variables =======================================
 
@@ -33,6 +34,7 @@ void board_init(OpenMote* self) {
    leds_init(self);
    uart_init(self);
    bsp_timer_init(self);
+   security_init(self);
    radio_init(self);
    radiotimer_init(self);
    

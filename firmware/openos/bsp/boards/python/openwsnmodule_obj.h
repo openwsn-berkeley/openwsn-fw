@@ -136,6 +136,9 @@ enum {
    MOTE_NOTIF_uart_writeCircularBuffer_FASTSIM,
    MOTE_NOTIF_uart_writeBufferByLen_FASTSIM,
    MOTE_NOTIF_uart_readByte,
+   // security
+   MOTE_NOTIF_security_init,
+   MOTE_NOTIF_security_decrypt,
    // last
    MOTE_NOTIF_LAST
 };

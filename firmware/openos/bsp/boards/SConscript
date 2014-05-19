@@ -13,6 +13,7 @@ sources_h = [
     'leds.h',
     'radio.h',
     'radiotimer.h',
+    'security.h',
     'uart.h',
 ]
 

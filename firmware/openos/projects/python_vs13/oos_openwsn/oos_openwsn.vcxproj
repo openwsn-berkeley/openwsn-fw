@@ -68,6 +68,7 @@
     <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\cross-layers\packetfunctions_obj.c" />
     <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\openwsn_obj.c" />
     <ClCompile Include="..\..\..\bsp\boards\python\openwsnmodule_obj.c" />
+    <ClCompile Include="..\..\..\bsp\boards\python\security_obj.c" />
     <ClCompile Include="..\..\common\03oos_openwsn\03oos_openwsn_obj.c" />
   </ItemGroup>
   <ItemGroup>

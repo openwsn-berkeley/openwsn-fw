@@ -17,6 +17,7 @@ sources_c = [
     'radiotimer_obj.c',
     'uart_obj.c',
     'supply_obj.c',
+    'security_obj.c',
 ]
 
 #============================ SCons targets ===================================

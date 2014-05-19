@@ -566,6 +566,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
             // toss header and decript
             packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_sec_header.header_length);
             // decript, only supporte mode at this moment is AES-CTR, with AES-128 CBC mode
+            if(!security_decrypt(ieee154e_vars.dataReceived,ieee802514_sec_header))
+                break;
         }
     }
       
