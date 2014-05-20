@@ -31,13 +31,21 @@ void bsp_timer_init(void)
 
 	tc_get_config_defaults(&timer_config);
 	/* Before that RTC must be enabled */
-	timer_config.clock_source               = GCLK_GENERATOR_2;
+	timer_config.clock_source               = GCLK_GENERATOR_0;
 	timer_config.counter_size               = TC_COUNTER_SIZE_16BIT;
 	timer_config.wave_generation                 = TC_CTRLA_WAVEGEN_MFRQ;
 	timer_config.counter_16_bit.compare_capture_channel[0] = TIMER_PERIOD;
 	timer_config.counter_16_bit.compare_capture_channel[1] = TIMER_PERIOD;
 	timer_config.run_in_standby             = true;
 	tc_init(&tc_instance, BSP_TIMER, &timer_config);
+	
+	struct tc_events tc_event;
+	memset(&tc_event, 0, sizeof(struct tc_events));
+	tc_event.on_event_perform_action = true;
+	tc_event.event_action = TC_EVENT_ACTION_INCREMENT_COUNTER;
+	tc_enable_events(&tc_instance, &tc_event);
+	
+	
 	tc_cont_sync_enable(&tc_instance, BSP_TIMER);
 	
 	tc_register_callback(&tc_instance,tc_ovf_callback,TC_CALLBACK_OVERFLOW);
@@ -84,7 +92,7 @@ void bsp_timer_reset(void)
 	
 	// reset timer -- set counter to 0
 	tc_set_count_value(&tc_instance, 0);
-	tc_readreq_set(&tc_instance);
+	//tc_readreq_set(&tc_instance);
 	// record last timer compare value
 	bsp_timer_vars.last_compare_value =  0;
 }
@@ -117,7 +125,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks)
    newCompareValue = bsp_timer_vars.last_compare_value+delayTicks;
    bsp_timer_vars.last_compare_value = newCompareValue;
    current_value = (PORT_TIMER_WIDTH)tc_get_count_value(&tc_instance);
-   tc_readreq_set(&tc_instance);
+   //tc_readreq_set(&tc_instance);
    if (delayTicks < (current_value-temp_last_compare_value))
    {
 	   tc_set_interrupt(&tc_instance, TC_CALLBACK_CC_CHANNEL1);
@@ -126,7 +134,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks)
    { 
        /* this is the normal case, have timer expire at newCompareValue */
 	   tc_set_compare_value(&tc_instance, TC_COMPARE_CAPTURE_CHANNEL_1, newCompareValue);
-	   tc_readreq_set(&tc_instance);   
+	   //tc_readreq_set(&tc_instance);   
 	   /* Clear interrupt flag not handled */
 	   tc_disable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);  
 	   tc_enable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);
@@ -137,7 +145,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks)
 void bsp_timer_cancel_schedule(void)
 {
     tc_set_compare_value(&tc_instance, TC_COMPARE_CAPTURE_CHANNEL_1, TIMER_PERIOD);
-	tc_readreq_set(&tc_instance);
+	//tc_readreq_set(&tc_instance);
     tc_disable_callback(&tc_instance, TC_CALLBACK_CC_CHANNEL1);
 }
 
@@ -146,7 +154,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue(void)
 {
 	PORT_TIMER_WIDTH timer_count;
 	timer_count = (PORT_TIMER_WIDTH)tc_get_count_value(&tc_instance);
-	tc_readreq_set(&tc_instance);
+	//tc_readreq_set(&tc_instance);
     return timer_count;	
 }
 

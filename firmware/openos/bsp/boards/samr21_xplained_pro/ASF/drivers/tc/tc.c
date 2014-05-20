@@ -459,7 +459,7 @@ uint32_t tc_get_count_value(
 
 	/* Get a pointer to the module's hardware instance */
 	Tc *const tc_module = module_inst->hw;
-    //tc_module->COUNT16.READREQ.reg |= TC_READREQ_RREQ;
+    tc_module->COUNT16.READREQ.reg |= TC_READREQ_RREQ;
 	while (tc_is_syncing(module_inst)) {
 		/* Wait for sync */
 	}

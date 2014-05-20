@@ -109,9 +109,9 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period)
 {
  tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);  
  tc_set_count_value(&tc2_instance, 0);  
- tc_set_top_value(&tc2_instance, (period>>1));//Div By 2
+ tc_set_top_value(&tc2_instance, (period));//Div By 2
  tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
- tc_readreq_set(&tc2_instance);
+ //tc_readreq_set(&tc2_instance);
 }
 
 PORT_RADIOTIMER_WIDTH radiotimer_getValue(void)
@@ -119,8 +119,8 @@ PORT_RADIOTIMER_WIDTH radiotimer_getValue(void)
 	PORT_RADIOTIMER_WIDTH time_val;
 	dbg_pin1_set();	
 	time_val = (PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance);
-	time_val = (time_val << 1);//Mul By 2
-	tc_readreq_set(&tc2_instance);
+	time_val = (time_val);//Mul By 2
+	//tc_readreq_set(&tc2_instance);
     dbg_pin1_clr();    
     return (time_val);
 }
@@ -128,9 +128,9 @@ PORT_RADIOTIMER_WIDTH radiotimer_getValue(void)
 void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period)
 {
  tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
- tc_set_top_value(&tc2_instance, (period>>1));//Div By 2
+ tc_set_top_value(&tc2_instance, (period));//Div By 2
  tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
- tc_readreq_set(&tc2_instance);
+ //tc_readreq_set(&tc2_instance);
 }
 
 PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void)
@@ -138,32 +138,32 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void)
  PORT_RADIOTIMER_WIDTH timer_period_val; 
  timer_period_val = (PORT_RADIOTIMER_WIDTH)tc_get_capture_value(&tc2_instance,\
 							TC_CALLBACK_CC_CHANNEL0);
- timer_period_val = (timer_period_val << 1);//Mul By 2
- tc_readreq_set(&tc2_instance);
+ timer_period_val = (timer_period_val);//Mul By 2
+ //tc_readreq_set(&tc2_instance);
  return timer_period_val;
 }
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset)
 {
   tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
-  tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, (offset>>1));//Div By 2
+  tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, (offset));//Div By 2
   tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
-  tc_readreq_set(&tc2_instance);
+  //tc_readreq_set(&tc2_instance);
 }
 
 void radiotimer_cancel(void)
 {  
   tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
   tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, TIMER_PERIOD);
-  tc_readreq_set(&tc2_instance);
+  //tc_readreq_set(&tc2_instance);
 }
 
 inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void)
 {
   PORT_RADIOTIMER_WIDTH time_val;
   time_val = (PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance);
-  time_val = (time_val << 1);//Mul By 2
-  tc_readreq_set(&tc2_instance);
+  time_val = (time_val);//Mul By 2
+  //tc_readreq_set(&tc2_instance);
   return (time_val);
 }
 
@@ -175,11 +175,12 @@ void configure_eve_sys(void)
 	
 	events_get_config_defaults(&config);
 	config.generator      = EVSYS_ID_GEN_TCC0_CNT;
-	config.edge_detect    = EVENTS_EDGE_DETECT_RISING;
+	config.edge_detect    = EVENTS_EDGE_DETECT_BOTH;
 	config.path           = EVENTS_PATH_SYNCHRONOUS;
 	config.clock_source   = GCLK_GENERATOR_0;
 	events_allocate(&resource_event, &config);
 	events_attach_user(&resource_event, EVSYS_ID_USER_TC4_EVU);
+	events_attach_user(&resource_event, EVSYS_ID_USER_TC3_EVU);
 	
 	while (events_is_busy(&resource_event)) {
 		/* Wait for channel */
