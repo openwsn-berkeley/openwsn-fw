@@ -8,7 +8,6 @@
 #include "cycle_counter.h"
 #include "board.h"
 #include "uart.h"
-#include "bsp_rtc.h"
 #include "opentimers.h"
 #include "radiotimer.h"
 #include "radio.h"

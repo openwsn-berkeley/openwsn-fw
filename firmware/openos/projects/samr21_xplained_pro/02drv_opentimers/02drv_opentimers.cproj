@@ -24,7 +24,7 @@
     <UncachedRange />
     <OverrideVtorValue>exception_table</OverrideVtorValue>
     <BootSegment>2</BootSegment>
-    <eraseonlaunchrule>0</eraseonlaunchrule>
+    <eraseonlaunchrule>1</eraseonlaunchrule>
     <AsfFrameworkConfig>
       <framework-data xmlns="">
         <options />
@@ -187,9 +187,10 @@
       <Value>TC_ASYNC=true</Value>
       <Value>SPI_CALLBACK_MODE=false</Value>
       <Value>USART_CALLBACK_MODE=true</Value>
-      <Value>ARM_MATH_CM0=true</Value>
+      <Value>ARM_MATH_CM0=false</Value>
       <Value>RTC_COUNT_ASYNC=true</Value>
       <Value>AT86RF233</Value>
+      <Value>TCC_ASYNC=true</Value>
     </ListValues>
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
@@ -264,9 +265,12 @@
       <Value>../../../../openwsn/07-App/udpstorm</Value>
       <Value>../../../../openwsn/cross-layers</Value>
       <Value>../../../../bsp/boards/samr21_xplained_pro/ASF/drivers/rtc</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samr21\include</Value>
+      <Value>../../../../bsp/boards/samr21_xplained_pro/ASF/drivers/tcc</Value>
+      <Value>../../../../bsp/boards/samr21_xplained_pro/ASF/drivers/events</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
-  <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
+  <armgcc.compiler.optimization.level>Optimize most (-O3)</armgcc.compiler.optimization.level>
   <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
   <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
   <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
@@ -290,6 +294,7 @@
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samr21\include</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
   <armgcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcc.preprocessingassembler.debugging.DebugLevel>
@@ -325,6 +330,14 @@
       <SubType>compile</SubType>
       <Link>bsp\boards\samr21_xplained_pro\ASF\common\utils\parts.h</Link>
     </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\ASF\drivers\events\events.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xplained_pro\ASF\drivers\events\events.c</Link>
+    </Compile>
+    <None Include="..\..\..\bsp\boards\samr21_xplained_pro\ASF\drivers\events\events_hooks.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xplained_pro\ASF\drivers\events\events_hooks.c</Link>
+    </None>
     <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\ASF\drivers\extint\extint.c">
       <SubType>compile</SubType>
       <Link>bsp\boards\samr21_xplained_pro\ASF\drivers\extint\extint.c</Link>
@@ -460,6 +473,14 @@
     <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\ASF\drivers\system\system.h">
       <SubType>compile</SubType>
       <Link>bsp\boards\samr21_xplained_pro\ASF\drivers\system\system.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\ASF\drivers\tcc\tcc.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xplained_pro\ASF\drivers\tcc\tcc.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\ASF\drivers\tcc\tcc_callback.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xplained_pro\ASF\drivers\tcc\tcc_callback.c</Link>
     </Compile>
     <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\ASF\drivers\tc\tc.c">
       <SubType>compile</SubType>
@@ -753,14 +774,6 @@
       <SubType>compile</SubType>
       <Link>bsp\boards\samr21_xplained_pro\board.c</Link>
     </Compile>
-    <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\bsp_rtc.c">
-      <SubType>compile</SubType>
-      <Link>bsp\boards\samr21_xplained_pro\bsp_rtc.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\bsp_rtc.h">
-      <SubType>compile</SubType>
-      <Link>bsp\boards\samr21_xplained_pro\bsp_rtc.h</Link>
-    </Compile>
     <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\bsp_timer.c">
       <SubType>compile</SubType>
       <Link>bsp\boards\samr21_xplained_pro\bsp_timer.c</Link>
@@ -837,6 +850,7 @@
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\extint\" />
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\extint\quick_start_callback\" />
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\extint\quick_start_polled\" />
+    <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\events\" />
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\port\" />
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\port\quick_start\" />
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\rtc\" />
@@ -858,6 +872,7 @@
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\system\pinmux\quick_start\" />
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\nvm\" />
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\tc\" />
+    <Folder Include="bsp\boards\samr21_xplained_pro\ASF\drivers\tcc\" />
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\utils\" />
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\utils\cmsis\" />
     <Folder Include="bsp\boards\samr21_xplained_pro\ASF\utils\cmsis\samr21\" />
