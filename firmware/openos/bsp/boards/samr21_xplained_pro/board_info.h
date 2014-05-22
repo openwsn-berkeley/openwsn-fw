@@ -46,11 +46,11 @@
 //===== IEEE802154E timing
 // time-slot related
 #define PORT_TsSlotDuration                 491
-#define PORT_maxTxDataPrepare               66
-#define PORT_maxRxAckPrepare                10 
-#define PORT_maxRxDataPrepare               33
-#define PORT_maxTxAckPrepare                22 
-#define PORT_delayTx                        15
+#define PORT_maxTxDataPrepare               33//66
+#define PORT_maxRxAckPrepare                10//10 
+#define PORT_maxRxDataPrepare               33//33
+#define PORT_maxTxAckPrepare                10//22 
+#define PORT_delayTx                        11//15
 #define PORT_delayRx                        0
 
 #define SYNC_ACCURACY                       1     // ticks

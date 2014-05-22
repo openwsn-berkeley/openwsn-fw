@@ -117,11 +117,11 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period)
 PORT_RADIOTIMER_WIDTH radiotimer_getValue(void)
 {
 	PORT_RADIOTIMER_WIDTH time_val;
-	dbg_pin1_set();	
+	//dbg_pin1_set();	
 	time_val = (PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance);
 	time_val = (time_val);//Mul By 2
 	//tc_readreq_set(&tc2_instance);
-    dbg_pin1_clr();    
+    //dbg_pin1_clr();    
     return (time_val);
 }
 
@@ -138,7 +138,6 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void)
  PORT_RADIOTIMER_WIDTH timer_period_val; 
  timer_period_val = (PORT_RADIOTIMER_WIDTH)tc_get_capture_value(&tc2_instance,\
 							TC_CALLBACK_CC_CHANNEL0);
- timer_period_val = (timer_period_val);//Mul By 2
  //tc_readreq_set(&tc2_instance);
  return timer_period_val;
 }
@@ -162,7 +161,6 @@ inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void)
 {
   PORT_RADIOTIMER_WIDTH time_val;
   time_val = (PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance);
-  time_val = (time_val);//Mul By 2
   //tc_readreq_set(&tc2_instance);
   return (time_val);
 }
@@ -176,7 +174,7 @@ void configure_eve_sys(void)
 	events_get_config_defaults(&config);
 	config.generator      = EVSYS_ID_GEN_TCC0_CNT;
 	config.edge_detect    = EVENTS_EDGE_DETECT_BOTH;
-	config.path           = EVENTS_PATH_SYNCHRONOUS;
+	config.path           = EVENTS_PATH_RESYNCHRONIZED;//EVENTS_PATH_SYNCHRONOUS;
 	config.clock_source   = GCLK_GENERATOR_0;
 	events_allocate(&resource_event, &config);
 	events_attach_user(&resource_event, EVSYS_ID_USER_TC4_EVU);
