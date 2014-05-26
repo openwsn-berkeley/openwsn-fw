@@ -131,21 +131,17 @@ struct tc_module *const module,
 const enum tc_callback callback_type)
 {
 	/* Sanity check arguments */
-	Assert(module);
+	//Assert(module);
 
 
 	/* Enable interrupts for this TC module */
 	system_interrupt_enable(_tc_interrupt_get_interrupt_vector(_tc_get_inst_index(module->hw)));
 	
 	if (callback_type == TC_CALLBACK_CC_CHANNEL0) {		
-		module->hw->COUNT8.INTFLAG.reg = TC_INTFLAG_MC(1);
+		module->hw->COUNT8.INTENSET.reg = TC_INTFLAG_MC(1);
 	}
 	else if (callback_type == TC_CALLBACK_CC_CHANNEL1) {		
-		module->hw->COUNT8.INTFLAG.reg = TC_INTFLAG_MC(2);
-	}
-	else {
-		module->enable_callback_mask |= (1 << callback_type);
-		module->hw->COUNT8.INTFLAG.reg = (1 << callback_type);
+		module->hw->COUNT8.INTENSET.reg = TC_INTFLAG_MC(2);
 	}
 }
 
@@ -165,7 +161,7 @@ static inline void tc_disable_callback(
 		struct tc_module *const module,
 		const enum tc_callback callback_type){
 	/* Sanity check arguments */
-	Assert(module);
+	//Assert(module);
 
 	/* Disable callback */
 	if (callback_type == TC_CALLBACK_CC_CHANNEL0) {

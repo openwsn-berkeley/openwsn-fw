@@ -433,7 +433,6 @@ void system_board_init(void);
 /** \name 802.15.4 TRX Interface definitions
  * @{
  */
-#define CONF_BOARD_AT86RFX
 
 #define MCU_SOC_NAME               "ATSAMR21G18A"
 

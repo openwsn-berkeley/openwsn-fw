@@ -29,7 +29,7 @@ typedef struct {
    opentimer_id_t  timerId;
 } macpong_vars_t;
 
-macpong_vars_t volatile macpong_vars;
+macpong_vars_t macpong_vars;
 
 //=========================== prototypes ======================================
 
@@ -42,8 +42,7 @@ int mote_main() {
    board_init();
    scheduler_init();
    openwsn_init();
-   //idmanager_setIsDAGroot(FALSE);
-   scheduler_start();   
+   scheduler_start();
    return 0; // this line should never be reached
 }
 

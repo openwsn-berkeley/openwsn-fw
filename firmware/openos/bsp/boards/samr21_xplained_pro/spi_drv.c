@@ -112,7 +112,6 @@ void spi_txrx(uint8_t*  bufTx,
    // SPI is now busy
    spi_vars.busy             =  1;
    
-   
    // lower CS signal to have slave listening
    if (spi_vars.isFirst==SPI_FIRST) {
 	  /* Start SPI transaction by pulling SEL low */
@@ -228,7 +227,7 @@ if (spi_vars.txBytesLeft>0) {
 return DO_NOT_KICK_SCHEDULER;
 #else
 // this should never happpen!
-
+while(1);
 // we can not print from within the BSP. Instead:
 // blink the error LED
 leds_error_blink();

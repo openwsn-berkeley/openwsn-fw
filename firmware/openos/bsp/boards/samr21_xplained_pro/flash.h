@@ -5,7 +5,7 @@
 #include "stdint.h"
 #include "status_codes.h"
 //=========================== defines =========================================
-#define ID_ADDRESS  (0x003FFC0)
+#define ID_ADDRESS (0x804008)
 #define ID_LENGTH   8
 //=========================== variables =======================================
 
@@ -23,4 +23,4 @@ enum status_code nvm_write(const uint32_t destination_address,
 							uint16_t length);
 status_code_t nvm_read(uint32_t address, uint8_t *const buffer,
 						uint32_t len);					
-#endif
+#endif /* __FLASH_H */

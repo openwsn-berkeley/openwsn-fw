@@ -17,8 +17,8 @@ can use this project with any platform.
 //=========================== defines =========================================
 
 #define RADIOTIMER_OVERFLOW_PERIOD     0x8000
-#define RADIOTIMER_COMPARE_PERIOD      0x1000
-#define RADIOTIMER_NUM_COMPARES             4
+#define RADIOTIMER_COMPARE_PERIOD      2
+#define RADIOTIMER_NUM_COMPARES            40
 
 //=========================== variables =======================================
 

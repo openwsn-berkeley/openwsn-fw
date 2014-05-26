@@ -917,6 +917,7 @@ port_INLINE void activity_ti1ORri1() {
 port_INLINE void activity_ti2() {
    // change state
    changeState(S_TXDATAPREPARE);
+   dbg_pin2_set();
    
    // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
@@ -937,9 +938,11 @@ port_INLINE void activity_ti2() {
    
    // change state
    changeState(S_TXDATAREADY);
+   dbg_pin2_clr();
 }
 
 port_INLINE void activity_tie1() {
+	//dbg_pin1_set();
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXTXDATAPREPARE_OVERFLOW,
                          (errorparameter_t)ieee154e_vars.state,
@@ -947,9 +950,11 @@ port_INLINE void activity_tie1() {
    
    // abort
    endSlot();
+   //dbg_pin1_clr();
 }
 
 port_INLINE void activity_ti3() {
+	//dbg_pin1_set();@e
    // change state
    changeState(S_TXDATADELAY);
    
@@ -958,9 +963,11 @@ port_INLINE void activity_ti3() {
    
    // give the 'go' to transmit
    radio_txNow();
+   //dbg_pin1_clr();@e
 }
 
 port_INLINE void activity_tie2() {
+	//dbg_pin1_set();
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -968,6 +975,7 @@ port_INLINE void activity_tie2() {
    
    // abort
    endSlot();
+   //dbg_pin1_clr();
 }
 
 //start of frame interrupt

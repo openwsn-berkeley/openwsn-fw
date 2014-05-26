@@ -411,8 +411,8 @@ enum status_code tc_set_count_value(
 		const uint32_t count)
 {
 	/* Sanity check arguments */
-	Assert(module_inst);
-	Assert(module_inst->hw);
+	//Assert(module_inst);
+	//Assert(module_inst->hw);
 
 	/* Get a pointer to the module's hardware instance*/
 	Tc *const tc_module = module_inst->hw;
@@ -421,23 +421,23 @@ enum status_code tc_set_count_value(
 		/* Wait for sync */
 	}
 
-	/* Write to based on the TC counter_size */
-	switch (module_inst->counter_size) {
-		case TC_COUNTER_SIZE_8BIT:
-			tc_module->COUNT8.COUNT.reg  = (uint8_t)count;
-			return STATUS_OK;
-
-		case TC_COUNTER_SIZE_16BIT:
+	///* Write to based on the TC counter_size */
+	//switch (module_inst->counter_size) {
+		//case TC_COUNTER_SIZE_8BIT:
+			//tc_module->COUNT8.COUNT.reg  = (uint8_t)count;
+			//return STATUS_OK;
+//
+		//case TC_COUNTER_SIZE_16BIT:
 			tc_module->COUNT16.COUNT.reg = (uint16_t)count;
 			return STATUS_OK;
-
-		case TC_COUNTER_SIZE_32BIT:
-			tc_module->COUNT32.COUNT.reg = (uint32_t)count;
-			return STATUS_OK;
-
-		default:
-			return STATUS_ERR_INVALID_ARG;
-	}
+//
+		//case TC_COUNTER_SIZE_32BIT:
+			//tc_module->COUNT32.COUNT.reg = (uint32_t)count;
+			//return STATUS_OK;
+//
+		//default:
+			//return STATUS_ERR_INVALID_ARG;
+	//}
 }
 
 /**
@@ -495,8 +495,8 @@ uint32_t tc_get_capture_value(
 		const enum tc_compare_capture_channel channel_index)
 {
 	/* Sanity check arguments */
-	Assert(module_inst);
-	Assert(module_inst->hw);
+	//Assert(module_inst);
+	//Assert(module_inst->hw);
 
 	/* Get a pointer to the module's hardware instance */
 	Tc *const tc_module = module_inst->hw;
@@ -506,28 +506,28 @@ uint32_t tc_get_capture_value(
 	}
 
 	/* Read out based on the TC counter size */
-	switch (module_inst->counter_size) {
-		case TC_COUNTER_SIZE_8BIT:
-			if (channel_index <
-					NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
-				return tc_module->COUNT8.CC[channel_index].reg;
-			}
+	//switch (module_inst->counter_size) {
+		//case TC_COUNTER_SIZE_8BIT:
+			//if (channel_index <
+					//NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
+				//return tc_module->COUNT8.CC[channel_index].reg;
+			//}
 
-		case TC_COUNTER_SIZE_16BIT:
-			if (channel_index <
-					NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
+		//case TC_COUNTER_SIZE_16BIT:
+			//if (channel_index <
+					//NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
 				return tc_module->COUNT16.CC[channel_index].reg;
-			}
+			//}
 
-		case TC_COUNTER_SIZE_32BIT:
-			if (channel_index <
-					NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
-				return tc_module->COUNT32.CC[channel_index].reg;
-			}
-	}
-
-	Assert(false);
-	return 0;
+		//case TC_COUNTER_SIZE_32BIT:
+			//if (channel_index <
+					//NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
+				//return tc_module->COUNT32.CC[channel_index].reg;
+			//}
+	//}
+//
+	//Assert(false);
+	//return 0;
 }
 
 /**
@@ -550,9 +550,9 @@ enum status_code tc_set_compare_value(
 		const uint32_t compare)
 {
 	/* Sanity check arguments */
-	Assert(module_inst);
-	Assert(module_inst->hw);
-	Assert(compare);
+	//Assert(module_inst);
+	//Assert(module_inst->hw);
+	//Assert(compare);
 
 	/* Get a pointer to the module's hardware instance */
 	Tc *const tc_module = module_inst->hw;
@@ -562,33 +562,33 @@ enum status_code tc_set_compare_value(
 	}
 
 	/* Read out based on the TC counter size */
-	switch (module_inst->counter_size) {
-		case TC_COUNTER_SIZE_8BIT:
-			if (channel_index <
-					NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
-				tc_module->COUNT8.CC[channel_index].reg  =
-						(uint8_t)compare;
-				return STATUS_OK;
-			}
-
-		case TC_COUNTER_SIZE_16BIT:
-			if (channel_index <
-					NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
+	//switch (module_inst->counter_size) {
+		//case TC_COUNTER_SIZE_8BIT:
+			//if (channel_index <
+					//NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
+				//tc_module->COUNT8.CC[channel_index].reg  =
+						//(uint8_t)compare;
+				//return STATUS_OK;
+			//}
+//
+		//case TC_COUNTER_SIZE_16BIT:
+			//if (channel_index <
+					//NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
 				tc_module->COUNT16.CC[channel_index].reg =
 						(uint16_t)compare;
 				return STATUS_OK;
-			}
+			//}
 
-		case TC_COUNTER_SIZE_32BIT:
-			if (channel_index <
-					NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
-				tc_module->COUNT32.CC[channel_index].reg =
-						(uint32_t)compare;
-				return STATUS_OK;
-			}
-	}
-
-	return STATUS_ERR_INVALID_ARG;
+		//case TC_COUNTER_SIZE_32BIT:
+			//if (channel_index <
+					//NUMBER_OF_COMPARE_CAPTURE_CHANNELS) {
+				//tc_module->COUNT32.CC[channel_index].reg =
+						//(uint32_t)compare;
+				//return STATUS_OK;
+			//}
+	//}
+//
+	//return STATUS_ERR_INVALID_ARG;
 }
 
 /**
@@ -665,31 +665,31 @@ enum status_code tc_set_top_value (
 		const struct tc_module *const module_inst,
 		const uint32_t top_value)
 {
-	Assert(module_inst);
-	Assert(module_inst->hw);
-	Assert(top_value);
+	//Assert(module_inst);
+	//Assert(module_inst->hw);
+	//Assert(top_value);
 
 	Tc *const tc_module = module_inst->hw;
 
 	while (tc_is_syncing(module_inst)) {
 		/* Wait for sync */
 	}
-
-	switch (module_inst->counter_size) {
-		case TC_COUNTER_SIZE_8BIT:
-			tc_module->COUNT8.PER.reg    = (uint8_t)top_value;
-			return STATUS_OK;
-
-		case TC_COUNTER_SIZE_16BIT:
+//
+	//switch (module_inst->counter_size) {
+		//case TC_COUNTER_SIZE_8BIT:
+			//tc_module->COUNT8.PER.reg    = (uint8_t)top_value;
+			//return STATUS_OK;
+//
+		//case TC_COUNTER_SIZE_16BIT:
 			tc_module->COUNT16.CC[0].reg = (uint16_t)top_value;
 			return STATUS_OK;
-
-		case TC_COUNTER_SIZE_32BIT:
-			tc_module->COUNT32.CC[0].reg = (uint32_t)top_value;
-			return STATUS_OK;
-
-		default:
-			Assert(false);
-			return STATUS_ERR_INVALID_ARG;
-	}
+//
+		//case TC_COUNTER_SIZE_32BIT:
+			//tc_module->COUNT32.CC[0].reg = (uint32_t)top_value;
+			//return STATUS_OK;
+//
+		//default:
+			//Assert(false);
+			//return STATUS_ERR_INVALID_ARG;
+	//}
 }

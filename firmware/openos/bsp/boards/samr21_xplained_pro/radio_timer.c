@@ -11,11 +11,9 @@
 #define TIMER1     TC4
 #define TIMER_PERIOD UINT16_MAX
 
-struct tc_config timer2_config;
 struct tc_module tc2_instance;
 
 static void tc2_ovf_callback(struct tc_module *const module_instance);
-static void tc2_cca0_callback(struct tc_module *const module_instance);
 static void tc2_cca1_callback(struct tc_module *const module_instance);
 
 void tcc_event_clk_init(void);
@@ -30,12 +28,14 @@ radiotimer_vars_t radiotimer_vars;
 
 void radiotimer_init(void)
 {
+	struct tc_config timer2_config;
     // clear local variables
     memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
 
 	tc_get_config_defaults(&timer2_config);
 	/* Before that XOSC - 32.768KHz must be enabled */
 	timer2_config.clock_source               = GCLK_GENERATOR_0;
+	timer2_config.clock_prescaler            = TC_CLOCK_PRESCALER_DIV1024;
 	timer2_config.counter_16_bit.value       = 0;
 	timer2_config.wave_generation = TC_CTRLA_WAVEGEN_MFRQ;
 	timer2_config.counter_16_bit.compare_capture_channel[0] = TIMER_PERIOD;
@@ -43,36 +43,29 @@ void radiotimer_init(void)
 	timer2_config.run_in_standby = true;
 	tc_init(&tc2_instance, TIMER1, &timer2_config);
 	
-	struct tc_events tc_event;
-	memset(&tc_event, 0, sizeof(struct tc_events));
-	tc_event.on_event_perform_action = true;
-	tc_event.event_action = TC_EVENT_ACTION_INCREMENT_COUNTER;
-	tc_enable_events(&tc2_instance, &tc_event);	
+	//struct tc_events tc_event;
+	//memset(&tc_event, 0, sizeof(struct tc_events));
+	//tc_event.on_event_perform_action = true;
+	//tc_event.event_action = TC_EVENT_ACTION_INCREMENT_COUNTER;
+	//tc_enable_events(&tc2_instance, &tc_event);	
 			
 	tc_cont_sync_enable(&tc2_instance, TIMER1);	
 	tc_register_callback(&tc2_instance, tc2_ovf_callback,  TC_CALLBACK_OVERFLOW);
-	tc_register_callback(&tc2_instance, tc2_cca0_callback, TC_CALLBACK_CC_CHANNEL0);
 	tc_register_callback(&tc2_instance, tc2_cca1_callback, TC_CALLBACK_CC_CHANNEL1);	
 	tc_enable(&tc2_instance);
-	tcc_event_clk_init();
-	configure_eve_sys();
-	tc_readreq_set(&tc2_instance);	
+	//tcc_event_clk_init();
+	//configure_eve_sys();
 }
 
 static void tc2_ovf_callback(struct tc_module *const module_instance)
 {
- //No handle
-}
-
-static void tc2_cca0_callback(struct tc_module *const module_instance)
-{
  debugpins_isr_set();
  if (radiotimer_vars.overflow_cb != NULL)
  {
-	 // call the callback
-	 radiotimer_vars.overflow_cb();	 	 
+  // call the callback
+  radiotimer_vars.overflow_cb();
  }
- debugpins_isr_clr();	
+ debugpins_isr_clr();
 }
 
 static void tc2_cca1_callback(struct tc_module *const module_instance)
@@ -107,63 +100,60 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb)
 
 void radiotimer_start(PORT_RADIOTIMER_WIDTH period)
 {
- tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);  
+ tc_disable_callback(&tc2_instance, TC_CALLBACK_OVERFLOW); 
+ tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1); 
  tc_set_count_value(&tc2_instance, 0);  
- tc_set_top_value(&tc2_instance, (period));//Div By 2
- tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
- //tc_readreq_set(&tc2_instance);
+ tc_set_top_value(&tc2_instance, period);
+ tc_enable_callback(&tc2_instance, TC_CALLBACK_OVERFLOW);
 }
 
 PORT_RADIOTIMER_WIDTH radiotimer_getValue(void)
 {
 	PORT_RADIOTIMER_WIDTH time_val;
-	//dbg_pin1_set();	
+	dbg_pin1_set();	
 	time_val = (PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance);
-	time_val = (time_val);//Mul By 2
-	//tc_readreq_set(&tc2_instance);
-    //dbg_pin1_clr();    
+    dbg_pin1_clr();    
     return (time_val);
 }
 
 void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period)
 {
- tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
- tc_set_top_value(&tc2_instance, (period));//Div By 2
- tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL0);
- //tc_readreq_set(&tc2_instance);
+ tc_disable_callback(&tc2_instance, TC_CALLBACK_OVERFLOW);
+ tc_set_top_value(&tc2_instance, period);
+ tc_enable_callback(&tc2_instance, TC_CALLBACK_OVERFLOW);
 }
 
 PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void)
 {
  PORT_RADIOTIMER_WIDTH timer_period_val; 
  timer_period_val = (PORT_RADIOTIMER_WIDTH)tc_get_capture_value(&tc2_instance,\
-							TC_CALLBACK_CC_CHANNEL0);
- //tc_readreq_set(&tc2_instance);
+							TC_COMPARE_CAPTURE_CHANNEL_0);
  return timer_period_val;
 }
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset)
-{
+{  
   tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
-  tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, (offset));//Div By 2
+  tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, offset);  
   tc_enable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
-  //tc_readreq_set(&tc2_instance);
 }
 
 void radiotimer_cancel(void)
 {  
   tc_disable_callback(&tc2_instance, TC_CALLBACK_CC_CHANNEL1);
   tc_set_compare_value(&tc2_instance, TC_COMPARE_CAPTURE_CHANNEL_1, TIMER_PERIOD);
-  //tc_readreq_set(&tc2_instance);
 }
 
 inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void)
 {
-  PORT_RADIOTIMER_WIDTH time_val;
-  time_val = (PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance);
-  //tc_readreq_set(&tc2_instance);
-  return (time_val);
+  return ((PORT_RADIOTIMER_WIDTH)tc_get_count_value(&tc2_instance));
 }
+
+
+
+
+
+
 
 
 void configure_eve_sys(void)

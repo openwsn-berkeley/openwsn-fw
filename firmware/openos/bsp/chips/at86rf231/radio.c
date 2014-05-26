@@ -41,7 +41,7 @@ uint8_t radio_spiReadRadioInfo();
 //===== admin
 
 void radio_init() {
-   // clear variables
+
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
    
@@ -113,7 +113,7 @@ void radio_setFrequency(uint8_t frequency) {
    // change state
    radio_vars.state = RADIOSTATE_SETTING_FREQUENCY;
    
-   // configure the radio to the right frequency
+   // configure the radio to the right frequecy
    radio_spiWriteReg(RG_PHY_CC_CCA,0x20+frequency);
    
    // change state
@@ -177,12 +177,7 @@ void radio_txNow() {
    
    // send packet by pulsing the SLP_TR_CNTL pin
    PORT_PIN_RADIO_SLP_TR_CNTL_HIGH();
-   { //65ns Delay
-	nop(); 
-	nop();
-	}   
    PORT_PIN_RADIO_SLP_TR_CNTL_LOW();
-   ENABLE_TRX_IRQ();
    
    // The AT86RF231 does not generate an interrupt when the radio transmits the
    // SFD, which messes up the MAC state machine. The danger is that, if we leave
@@ -277,7 +272,7 @@ void radio_spiWriteReg(uint8_t reg_addr, uint8_t reg_setting) {
    uint8_t spi_tx_buffer[2];
    uint8_t spi_rx_buffer[2];
    
-   spi_tx_buffer[0] = (0xC0 | reg_addr);        // turn address in a 'reg write' address
+   spi_tx_buffer[0] = (0xC0 | reg_addr);        // turn addess in a 'reg write' address
    spi_tx_buffer[1] = reg_setting;
    
    spi_txrx(spi_tx_buffer,
