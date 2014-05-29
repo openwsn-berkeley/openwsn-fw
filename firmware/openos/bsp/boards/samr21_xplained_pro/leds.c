@@ -14,17 +14,17 @@ void leds_init(void)
 
 void leds_error_on(void)
 {
- LED_On(LED0);
+ 
 }
 
 void leds_error_off(void)
 {
- LED_Off(LED0);
+ 
 }
 
 void leds_error_toggle(void)
 {
- LED_Toggle(LED0);
+ 
 }
 
 uint8_t leds_error_isOn(void)
@@ -40,17 +40,17 @@ void leds_error_blink(void)
 
 void leds_sync_on(void)
 {
-
+ LED_On(LED0);
 }
 
 void leds_sync_off(void)
 {
-
+ LED_Off(LED0);
 }
 
 void leds_sync_toggle(void)
 {
-
+ LED_Toggle(LED0);
 }
 
 uint8_t leds_sync_isOn(void)

@@ -470,7 +470,7 @@ uint32_t tc_get_count_value(
 			//return (uint32_t)tc_module->COUNT8.COUNT.reg;
 //
 		//case TC_COUNTER_SIZE_16BIT:
-			return (uint32_t)tc_module->COUNT16.COUNT.reg;
+			return (uint32_t)(tc_module->COUNT16.COUNT.reg + 12);
 //
 		//case TC_COUNTER_SIZE_32BIT:
 			//return tc_module->COUNT32.COUNT.reg;
