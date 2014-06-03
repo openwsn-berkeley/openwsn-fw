@@ -4,7 +4,7 @@
 #include "usart.h" //From Atmel
 #include "usart_interrupt.h"
 
-
+volatile uint8_t uart_rx_byte;
 
 
 typedef struct {
@@ -25,6 +25,7 @@ void usart_read_callback(const struct usart_module *const usart_module);
 
 void uart_init(void)
 {
+	uint16_t rxd_data;
 	struct usart_config cdc_uart_config;
 	/* Configure USART for unit test output */
 	usart_get_config_defaults(&cdc_uart_config);
@@ -48,8 +49,8 @@ void uart_init(void)
 	
 	usart_enable_transceiver(&cdc_uart_module, USART_TRANSCEIVER_TX);
 	usart_enable_transceiver(&cdc_uart_module, USART_TRANSCEIVER_RX);
-	/* Dummy Read */
-	uart_readByte();
+	/* Dummy Read to Enable the RXC Interrupt */
+	usart_read_job(&cdc_uart_module, &rxd_data);	
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb)
@@ -90,7 +91,9 @@ void uart_writeByte(uint8_t byteToWrite)
 
 uint8_t uart_readByte(void)
 {
-  uint16_t rxd_data;
+ //uint8_t data = uart_rx_byte;
+
+//uint16_t rxd_data;
   //if (cdc_uart_module.remaining_rx_buffer_length == UART_RX_BUF_MAX_SIZE)
   //{
 	  ///* No Bytes are available for read */
@@ -103,13 +106,13 @@ uint8_t uart_readByte(void)
 	  //cdc_uart_module.remaining_rx_buffer_length++;	  
 	  //return (uint8_t)rxd_data;
   //}
-  if (STATUS_OK == usart_read_job(&cdc_uart_module, &rxd_data))
-  {
-		/* Got one byte */
-		return ((uint8_t)rxd_data);
-  }
+//if (STATUS_OK == usart_read_job(&cdc_uart_module, &rxd_data))
+//{
+	///* Got one byte */
+	//return ((uint8_t)rxd_data);
+//}
   /* Failed to retrieve the data */
-  return 0;  
+  return uart_rx_byte;  
 }
 
 void uart_clearTxInterrupts(void)
