@@ -48,7 +48,7 @@
         <InterfaceName>SWD</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.edbg</ToolType>
-      <ToolNumber>ATML2127031800000903</ToolNumber>
+      <ToolNumber>ATML2127031800000934</ToolNumber>
       <ToolName>EDBG</ToolName>
     </com_atmel_avrdbg_tool_edbg>
   </PropertyGroup>
@@ -275,6 +275,10 @@
     <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\ASF\drivers\events\events.c">
       <SubType>compile</SubType>
       <Link>bsp\boards\samr21_xplained_pro\ASF\drivers\events\events.c</Link>
+    </Compile>
+    <Compile Include="..\..\common\03oos_openwsn\03oos_openwsn.c">
+      <SubType>compile</SubType>
+      <Link>03oos_openwsn.c</Link>
     </Compile>
     <None Include="..\..\..\bsp\boards\samr21_xplained_pro\ASF\drivers\events\events_hooks.c">
       <SubType>compile</SubType>
@@ -927,9 +931,6 @@
     <Compile Include="..\..\..\openwsn\openwsn.c">
       <SubType>compile</SubType>
       <Link>openwsn\openwsn.c</Link>
-    </Compile>
-    <Compile Include="03oos_openwsn.c">
-      <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>

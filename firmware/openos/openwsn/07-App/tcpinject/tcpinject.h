@@ -16,7 +16,7 @@
 
 typedef struct {
    OpenQueueEntry_t*    pkt;
-   bool                 sending;
+   BOOL                 sending;
    open_addr_t          hisAddress;
    uint16_t             hisPort;
 } tcpinject_vars_t;
@@ -24,12 +24,12 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void tcpinject_init();
-bool tcpinject_shouldIlisten();
+BOOL tcpinject_shouldIlisten();
 void tcpinject_trigger();
 void tcpinject_connectDone(owerror_t error);
 void tcpinject_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void tcpinject_receive(OpenQueueEntry_t* msg);
-bool tcpinject_debugPrint();
+BOOL tcpinject_debugPrint();
 
 /**
 \}

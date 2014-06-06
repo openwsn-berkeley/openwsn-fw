@@ -12,13 +12,12 @@
 
 #define port_INLINE                         inline
 
-#define PRAGMA(x)  _Pragma(#x)
-#define PACK(x)     pack(x)
+
 
 //TODO in case previous declaration fails in certain compilers. Remove this 
 //one if it works with GNU GCC
-//#define PACK_START  _Pragma("pack(1)")
-//#define PACK_END    _Pragma("pack()")
+#define PACK_START  COMPILER_PACK_SET(1)
+#define PACK_END    COMPILER_PACK_RESET()
 #define INTERRUPT_DECLARATION() irqflags_t irq_flags;//no declaration
 
 #define DISABLE_INTERRUPTS()    irq_flags = cpu_irq_save();

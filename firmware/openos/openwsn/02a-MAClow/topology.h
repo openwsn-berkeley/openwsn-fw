@@ -21,7 +21,7 @@
 
 //=========================== prototypes ======================================
 
-bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header);
+BOOL topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header);
 
 /**
 \}

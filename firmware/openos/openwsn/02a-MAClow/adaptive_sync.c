@@ -115,7 +115,7 @@ void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource){
 \returns compensationSlots the number of slots. 
 */
 void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection) {
-   bool     isFirstSync;              // is this the first sync after joining network?
+   BOOL     isFirstSync;              // is this the first sync after joining network?
    uint16_t totalTimeCorrectionTicks; // how much error in ticks since last synchronization.
    if(adaptive_sync_vars.clockState == S_NONE) {
      isFirstSync = TRUE;

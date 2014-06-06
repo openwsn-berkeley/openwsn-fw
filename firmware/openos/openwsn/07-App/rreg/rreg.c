@@ -82,7 +82,7 @@ owerror_t rreg_receive(
       coap_option_iht*  coap_options
    ) {
    
-   owerror_t outcome;
+   owerror_t outcome = 0;
    
    if (coap_header->Code==COAP_CODE_REQ_POST) {
       // we received the order to register now
@@ -151,8 +151,8 @@ void rreg_timer() {
    pkt->payload[sizeof(rreg_uriquery)-1] = hexToAscii((temp8b>>4) & 0x0f);
    pkt->payload[sizeof(rreg_uriquery)-0] = hexToAscii((temp8b>>0) & 0x0f);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_NUM_URIQUERY-COAP_OPTION_NUM_URIPATH) << 4 |
-      sizeof(rreg_uriquery)-1+2;
+   pkt->payload[0] = (((COAP_OPTION_NUM_URIQUERY-COAP_OPTION_NUM_URIPATH) << 4) |
+      ((sizeof(rreg_uriquery)-1)+2));
    numOptions++;
    
    // URI-path

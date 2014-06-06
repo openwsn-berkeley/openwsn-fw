@@ -13,7 +13,7 @@
 void tcpecho_init() {
 }
 
-bool tcpecho_shouldIlisten() {
+BOOL tcpecho_shouldIlisten() {
    return TRUE;
 }
 
@@ -46,7 +46,7 @@ void tcpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 void tcpecho_connectDone(owerror_t error) {
 }
 
-bool tcpecho_debugPrint() {
+BOOL tcpecho_debugPrint() {
    return FALSE;
 }
 

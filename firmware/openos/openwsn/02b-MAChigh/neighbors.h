@@ -25,11 +25,11 @@
 
 //=========================== typedef =========================================
 
-PRAGMA(pack(1));
+PACK_START
 typedef struct {
-   bool             used;
+   BOOL             used;
    uint8_t          parentPreference;
-   bool             stableNeighbor;
+   BOOL             stableNeighbor;
    uint8_t          switchStabilityCounter;
    open_addr_t      addr_64b;
    dagrank_t        DAGrank;
@@ -41,16 +41,16 @@ typedef struct {
    asn_t            asn;
    uint8_t          joinPrio;
 } neighborRow_t;
-PRAGMA(pack());
+PACK_END
 
-PRAGMA(pack(1));
+PACK_START
 typedef struct {
    uint8_t         row;
    neighborRow_t   neighborEntry;
 } debugNeighborEntry_t;
-PRAGMA(pack());
+PACK_END
 
-PRAGMA(pack(1));
+PACK_START
 typedef struct {
    uint8_t         last_addr_byte;   // last byte of the neighbor's address
    int8_t          rssi;
@@ -58,7 +58,7 @@ typedef struct {
    dagrank_t       DAGrank;
    uint16_t        asn; 
 } netDebugNeigborEntry_t;
-PRAGMA(pack());
+PACK_END
 
 //=========================== module variables ================================
    
@@ -76,27 +76,27 @@ void          neighbors_init();
 // getters
 dagrank_t     neighbors_getMyDAGrank();
 uint8_t       neighbors_getNumNeighbors();
-bool          neighbors_getPreferredParentEui64(open_addr_t* addressToWrite);
+BOOL          neighbors_getPreferredParentEui64(open_addr_t* addressToWrite);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
 
 // interrogators
-bool          neighbors_isStableNeighbor(open_addr_t* address);
-bool          neighbors_isPreferredParent(open_addr_t* address);
-bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
-bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
+BOOL          neighbors_isStableNeighbor(open_addr_t* address);
+BOOL          neighbors_isPreferredParent(open_addr_t* address);
+BOOL          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
+BOOL          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
 
 // updating neighbor information
 void          neighbors_indicateRx(
    open_addr_t*         l2_src,
    int8_t               rssi,
    asn_t*               asnTimestamp,
-   bool                 joinPrioPresent,
+   BOOL                 joinPrioPresent,
    uint8_t              joinPrio
 );
 void          neighbors_indicateTx(
    open_addr_t*         dest,
    uint8_t              numTxAttempts,
-   bool                 was_finally_acked,
+   BOOL                 was_finally_acked,
    asn_t*               asnTimestamp
 );
 void          neighbors_indicateRxDIO(OpenQueueEntry_t* msg);
@@ -108,7 +108,7 @@ void          neighbors_updateMyDAGrankAndNeighborPreference();
 // maintenance
 void          neighbors_removeOld();
 // debug
-bool          debugPrint_neighbors();
+BOOL          debugPrint_neighbors();
 void          debugNetPrint_neighbors(netDebugNeigborEntry_t* schlist);
           
 /**

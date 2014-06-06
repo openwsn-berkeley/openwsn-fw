@@ -25,7 +25,7 @@ OpenQueueEntry_t*  stupidmac_dataFrameReceived;   // !NULL between data received
 uint8_t            stupidmac_dsn;
 uint8_t            stupidmac_state;
 #ifndef SERIALINSCHEDULER
-bool               stupidmac_serialInOutputMode;
+BOOL               stupidmac_serialInOutputMode;
 #endif
 
 //=========================== prototypes ======================================
@@ -271,7 +271,7 @@ void change_state(uint8_t newstate) {
    }
 }
 
-bool stupidmac_debugPrint() {
+BOOL stupidmac_debugPrint() {
    return FALSE;
 }
 

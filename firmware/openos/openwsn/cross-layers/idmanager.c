@@ -31,8 +31,8 @@ void idmanager_init() {
 //     idmanager_setIsDAGroot(TRUE);
 }
 
-bool idmanager_getIsDAGroot() {
-   bool res;
+BOOL idmanager_getIsDAGroot() {
+   BOOL res;
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
@@ -41,7 +41,7 @@ bool idmanager_getIsDAGroot() {
    return res;
 }
 
-void idmanager_setIsDAGroot(bool newRole) {
+void idmanager_setIsDAGroot(BOOL newRole) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    idmanager_vars.isDAGroot = newRole;
@@ -49,8 +49,8 @@ void idmanager_setIsDAGroot(bool newRole) {
    ENABLE_INTERRUPTS();
 }
 
-bool idmanager_getIsBridge() {
-   bool res;
+BOOL idmanager_getIsBridge() {
+   BOOL res;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    res=idmanager_vars.isBridge;
@@ -58,7 +58,7 @@ bool idmanager_getIsBridge() {
    return res;
 }
 
-void idmanager_setIsBridge(bool newRole) {
+void idmanager_setIsBridge(BOOL newRole) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    idmanager_vars.isBridge = newRole;
@@ -125,9 +125,9 @@ owerror_t idmanager_setMyID(open_addr_t* newID) {
    return E_SUCCESS;
 }
 
-bool idmanager_isMyAddress(open_addr_t* addr) {
+BOOL idmanager_isMyAddress(open_addr_t* addr) {
    open_addr_t temp_my128bID;
-   bool res;
+   BOOL res;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
@@ -234,7 +234,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_id() {
+BOOL debugPrint_id() {
    debugIDManagerEntry_t output;
    output.isDAGroot = idmanager_vars.isDAGroot;
    output.isBridge  = idmanager_vars.isBridge;

@@ -108,8 +108,8 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          case NHC_UDP_PORTS_4S_4D:
             // source port: 0xf0b +  4 bits in-line
             // dest port:   0xf0b +  4 bits in-line
-            msg->l4_sourcePortORicmpv6Type  = 0xf0b0 + (msg->payload[0] >> 4) & 0x0f;
-            msg->l4_destination_port        = 0xf0b0 + (msg->payload[0] >> 0) & 0x0f;
+            msg->l4_sourcePortORicmpv6Type  = (0xf0b0 + ((msg->payload[0] >> 4) & 0x0f));
+            msg->l4_destination_port        = (0xf0b0 + ((msg->payload[0] >> 0) & 0x0f));
             packetfunctions_tossHeader(msg,1);
             break;
       }
@@ -151,7 +151,7 @@ void openudp_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-bool openudp_debugPrint() {
+BOOL openudp_debugPrint() {
    return FALSE;
 }
 

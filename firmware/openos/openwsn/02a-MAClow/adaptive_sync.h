@@ -41,7 +41,7 @@ typedef struct {
    compensationInfo_t        compensationInfo_vars;   // keep each time soures' compensation informatio( should be 9, since there would be more timesources)
    int16_t                   sumOfTC;                 // record the sum of ticks between two time point which need to calculate compensation period.
    uint16_t                  compensateThreshold;     // number of slots. calculate the compensation period only when elapsed slot number is greater than this threshold 
-   bool                      driftChanged;            // drift is changed or not.
+   BOOL                      driftChanged;            // drift is changed or not.
 } adaptive_sync_vars_t;
 
 //=========================== prototypes ======================================

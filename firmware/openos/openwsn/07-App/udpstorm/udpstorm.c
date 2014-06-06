@@ -19,12 +19,13 @@
 
 const uint8_t udpstorm_path0[] =  "strm";
 
-PRAGMA(pack(1));
+PACK_START
+
 typedef struct {
    uint16_t             seqNum;
 } udpstorm_payload_t;
-PRAGMA(pack());
 
+PACK_END
 //=========================== variables =======================================
 
 typedef struct {
@@ -127,8 +128,8 @@ void udpstorm_task_cb() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(udpstorm_path0)-1);
    memcpy(&pkt->payload[0],&udpstorm_path0,sizeof(udpstorm_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                = (COAP_OPTION_NUM_URIPATH) << 4 |
-                                     sizeof(udpstorm_path0)-1;
+   pkt->payload[0]                = (((COAP_OPTION_NUM_URIPATH) << 4) |
+                                     (sizeof(udpstorm_path0)-1));
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);

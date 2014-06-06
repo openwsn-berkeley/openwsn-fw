@@ -17,15 +17,15 @@ owerror_t iphc_prependIPv6Header(
    OpenQueueEntry_t*    msg,
    uint8_t              tf,
    uint32_t             value_flowLabel,
-   bool                 nh,
+   BOOL                 nh,
    uint8_t              value_nextHeader,
    uint8_t              hlim,
    uint8_t              value_hopLimit,
-   bool                 cid,
-   bool                 sac,
+   BOOL                 cid,
+   BOOL                 sac,
    uint8_t              sam,
-   bool                 m,
-   bool                 dac,
+   BOOL                 m,
+   BOOL                 dac,
    uint8_t              dam,
    open_addr_t*         value_dest,
    open_addr_t*         value_src,
@@ -254,15 +254,15 @@ owerror_t iphc_prependIPv6Header(
       OpenQueueEntry_t* msg,
       uint8_t           tf,
       uint32_t          value_flowLabel,
-      bool              nh,
+      BOOL              nh,
       uint8_t           value_nextHeader,
       uint8_t           hlim,
       uint8_t           value_hopLimit,
-      bool              cid,
-      bool              sac,
+      BOOL              cid,
+      BOOL              sac,
       uint8_t           sam,
-      bool              m,
-      bool              dac,
+      BOOL              m,
+      BOOL              dac,
       uint8_t           dam,
       open_addr_t*      value_dest,
       open_addr_t*      value_src,
@@ -482,7 +482,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
    open_addr_t     temp_addr_64b;
    uint8_t         dispatch;
    uint8_t         tf;
-   bool            nh;
+   BOOL            nh;
    uint8_t         hlim;
    uint8_t         sam;
    uint8_t         dam;
@@ -669,7 +669,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
       if        ( (temp_8b & NHC_UDP_MASK) == NHC_UDP_ID) {
          ipv6_header->next_header = IANA_UDP;
       } else if ( (temp_8b & NHC_IPv6EXT_MASK) == NHC_IPv6EXT_ID){
-         if( temp_8b & NHC_IPv6HOP_MASK == NHC_IPv6HOP_VAL){
+         if( (temp_8b & NHC_IPv6HOP_MASK) == NHC_IPv6HOP_VAL){
             // hop-by-hop header
             ipv6_header->next_header = IANA_IPv6HOPOPT;
          } else {

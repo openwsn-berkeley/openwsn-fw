@@ -15,7 +15,7 @@
 //=========================== module variables ================================
 
 typedef struct {
-   bool        busySending;
+   BOOL        busySending;
    open_addr_t hisAddress;
    uint16_t    seq;
 } icmpv6echo_vars_t;

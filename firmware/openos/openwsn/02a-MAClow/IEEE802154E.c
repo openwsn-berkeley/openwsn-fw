@@ -60,11 +60,11 @@ void     activity_rie6();
 void     activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime);
 // frame validity check
 
-bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
-bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
+BOOL     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
+BOOL     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
 // IEs Handling
-bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t *     lenIE);//xv poipoi
+BOOL     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t *     lenIE);//xv poipoi
 void     ieee154e_processSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr);//xv poipoi
 // ASN handling
 void     incrementAsnOffset();
@@ -73,7 +73,7 @@ void     joinPriorityStoreFromAdv(uint8_t jp);
 // synchronization
 void     synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
-void     changeIsSync(bool newIsSync);
+void     changeIsSync(BOOL newIsSync);
 // notifying upper layer
 void     notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error);
 void     notif_receive(OpenQueueEntry_t* packetReceived);
@@ -84,8 +84,8 @@ void     updateStats(PORT_SIGNED_INT_WIDTH timeCorrection);
 uint8_t  calculateFrequency(uint8_t channelOffset);
 void     changeState(ieee154e_state_t newstate);
 void     endSlot();
-bool     debugPrint_asn();
-bool     debugPrint_isSync();
+BOOL     debugPrint_asn();
+BOOL     debugPrint_isSync();
 
 //=========================== admin ===========================================
 
@@ -350,7 +350,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_asn() {
+BOOL debugPrint_asn() {
    asn_t output;
    output.byte4         =  ieee154e_vars.asn.byte4;
    output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
@@ -367,7 +367,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_isSync() {
+BOOL debugPrint_isSync() {
    uint8_t output=0;
    output = ieee154e_vars.isSync;
    openserial_printStatus(STATUS_ISSYNC,(uint8_t*)&output,sizeof(uint8_t));
@@ -382,7 +382,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_macStats() {
+BOOL debugPrint_macStats() {
    // send current stats over serial
    openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
    return TRUE;
@@ -599,7 +599,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 }
 
 //xv poipoi - IE Handling 
-port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
+port_INLINE BOOL ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
 {
   uint8_t ptr,byte0,byte1;
   uint8_t temp_8b,gr_elem_id,subid;
@@ -917,7 +917,6 @@ port_INLINE void activity_ti1ORri1() {
 port_INLINE void activity_ti2() {
    // change state
    changeState(S_TXDATAPREPARE);
-   dbg_pin2_set();
    
    // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
@@ -938,11 +937,9 @@ port_INLINE void activity_ti2() {
    
    // change state
    changeState(S_TXDATAREADY);
-   dbg_pin2_clr();
 }
 
 port_INLINE void activity_tie1() {
-	//dbg_pin1_set();
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXTXDATAPREPARE_OVERFLOW,
                          (errorparameter_t)ieee154e_vars.state,
@@ -950,11 +947,9 @@ port_INLINE void activity_tie1() {
    
    // abort
    endSlot();
-   //dbg_pin1_clr();
 }
 
 port_INLINE void activity_ti3() {
-	//dbg_pin1_set();@e
    // change state
    changeState(S_TXDATADELAY);
    
@@ -963,11 +958,9 @@ port_INLINE void activity_ti3() {
    
    // give the 'go' to transmit
    radio_txNow();
-   //dbg_pin1_clr();@e
 }
 
 port_INLINE void activity_tie2() {
-	//dbg_pin1_set();
    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
@@ -975,7 +968,6 @@ port_INLINE void activity_tie2() {
    
    // abort
    endSlot();
-   //dbg_pin1_clr();
 }
 
 //start of frame interrupt
@@ -1004,7 +996,7 @@ port_INLINE void activity_tie3() {
 }
 
 port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
-   bool listenForAck;
+   BOOL listenForAck;
    
    // change state
    changeState(S_RXACKOFFSET);
@@ -1252,6 +1244,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
    
    // official end of Tx slot
    endSlot();
+   timeCorrection = timeCorrection;
 }
 
 //======= RX
@@ -1653,7 +1646,7 @@ A valid Rx frame satisfies the following constraints:
 
 \returns TRUE if packet is valid received frame, FALSE otherwise
 */
-port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
+port_INLINE BOOL isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
    return ieee802514_header->valid==TRUE                                                           && \
           (
              ieee802514_header->frameType==IEEE154_TYPE_DATA                   ||
@@ -1682,7 +1675,7 @@ A packet is a valid ACK if it satisfies the following conditions:
 
 \returns TRUE if packet is a valid ACK, FALSE otherwise.
 */
-port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header, OpenQueueEntry_t* packetSent) {
+port_INLINE BOOL isValidAck(ieee802154_header_iht* ieee802514_header, OpenQueueEntry_t* packetSent) {
    /*
    return ieee802514_header->valid==TRUE                                                           && \
           ieee802514_header->frameType==IEEE154_TYPE_ACK                                           && \
@@ -1838,7 +1831,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 #endif
 }
 
-void changeIsSync(bool newIsSync) {
+void changeIsSync(BOOL newIsSync) {
    ieee154e_vars.isSync = newIsSync;
    
    if (ieee154e_vars.isSync==TRUE) {
@@ -2073,6 +2066,6 @@ void endSlot() {
    changeState(S_SLEEP);
 }
 
-bool ieee154e_isSynch(){
+BOOL ieee154e_isSynch(){
    return ieee154e_vars.isSync;
 }

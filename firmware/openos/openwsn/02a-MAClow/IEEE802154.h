@@ -73,14 +73,14 @@ enum IEEE802154_fcf_addr_mode_enums {
 //=========================== typedef =========================================
 
 typedef struct {
-   bool        valid;
+   BOOL        valid;
    uint8_t     headerLength;    //including the length field
    uint8_t     frameType;
-   bool        securityEnabled;
-   bool        framePending;
-   bool        ackRequested;
-   bool        panIDCompression;
-   bool        ieListPresent;
+   BOOL        securityEnabled;
+   BOOL        framePending;
+   BOOL        ackRequested;
+   BOOL        panIDCompression;
+   BOOL        ieListPresent;
    uint8_t     frameVersion;
    uint8_t     dsn;
    open_addr_t panid;
@@ -98,7 +98,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
                               uint8_t           ielistpresent,
                               uint8_t           frameversion,
-                              bool              securityEnabled,
+                              BOOL              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop);
 

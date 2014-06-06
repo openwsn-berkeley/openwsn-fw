@@ -19,8 +19,8 @@
 //=========================== typedef =========================================
 
 typedef struct {
-   bool          isDAGroot;
-   bool          isBridge;
+   BOOL          isDAGroot;
+   BOOL          isBridge;
    open_addr_t   my16bID;
    open_addr_t   my64bID;
    open_addr_t   myPANID;
@@ -30,8 +30,8 @@ typedef struct {
 //=========================== module variables ================================
 
 typedef struct {
-   bool          isDAGroot;
-   bool          isBridge;
+   BOOL          isDAGroot;
+   BOOL          isBridge;
    open_addr_t   my16bID;
    open_addr_t   my64bID;
    open_addr_t   myPANID;
@@ -41,17 +41,17 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void         idmanager_init();
-bool         idmanager_getIsDAGroot();
-void         idmanager_setIsDAGroot(bool newRole);
-bool         idmanager_getIsBridge();
-void         idmanager_setIsBridge(bool newRole);
+BOOL         idmanager_getIsDAGroot();
+void         idmanager_setIsDAGroot(BOOL newRole);
+BOOL         idmanager_getIsBridge();
+void         idmanager_setIsBridge(BOOL newRole);
 open_addr_t* idmanager_getMyID(uint8_t type);
 owerror_t      idmanager_setMyID(open_addr_t* newID);
-bool         idmanager_isMyAddress(open_addr_t* addr);
+BOOL         idmanager_isMyAddress(open_addr_t* addr);
 void         idmanager_triggerAboutRoot();
 void         idmanager_triggerAboutBridge();
 
-bool         debugPrint_id();
+BOOL         debugPrint_id();
 
 
 /**

@@ -49,7 +49,7 @@ topology.
 \return TRUE if the packet can be received.
 \return FALSE if the packet should be silently dropped.
 */
-bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
+BOOL topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
    return TRUE;
 }
 

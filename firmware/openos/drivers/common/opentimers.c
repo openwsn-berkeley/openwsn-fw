@@ -200,7 +200,7 @@ void opentimers_timer_callback() {
    
    opentimer_id_t   id;
    PORT_TIMER_WIDTH min_timeout;
-   bool             found;
+   BOOL             found;
     
    // step 1. Identify expired timers
    for(id=0; id<MAX_NUM_TIMERS; id++) {
@@ -285,7 +285,7 @@ void opentimers_sleepTimeCompesation(uint16_t sleepTime)
 {
    opentimer_id_t   id;
    PORT_TIMER_WIDTH min_timeout;
-   bool             found;
+   BOOL             found;
    
    //step 1. reCount the ticks_remain after waking up from sleep
    for(id=0; id<MAX_NUM_TIMERS; id++)

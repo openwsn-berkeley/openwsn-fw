@@ -98,7 +98,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_schedule() {
+BOOL debugPrint_schedule() {
    debugScheduleEntry_t temp;
    
    schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
@@ -145,7 +145,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_backoff() {
+BOOL debugPrint_backoff() {
    uint8_t temp[2];
    temp[0] = schedule_vars.backoffExponent;
    temp[1] = schedule_vars.backoff;
@@ -218,10 +218,10 @@ If udpate param is set then update it in case it exists.
 owerror_t schedule_addActiveSlot(
       slotOffset_t    slotOffset,
       cellType_t      type,
-      bool            shared,
+      BOOL            shared,
       channelOffset_t channelOffset,
       open_addr_t*    neighbor,
-      bool            isUpdate
+      BOOL            isUpdate
    ) {
    
    owerror_t outcome;
@@ -365,7 +365,7 @@ owerror_t   schedule_removeActiveSlot(slotOffset_t   slotOffset, open_addr_t*   
       previousSlotWalker                    = schedule_vars.currentScheduleEntry;
       
       while (1) {
-        if (previousSlotWalker->next=slotContainer){
+        if ((previousSlotWalker->next)=slotContainer){
             break;
          }
          previousSlotWalker                 = previousSlotWalker->next;
@@ -493,8 +493,8 @@ Note that the backoff counter is global, not per slot.
 
 \returns TRUE if it is OK to send on this slot, FALSE otherwise.
  */
-bool schedule_getOkToSend() {
-   bool returnVal;
+BOOL schedule_getOkToSend() {
+   BOOL returnVal;
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -556,7 +556,7 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
 \brief Indicate the transmission of a packet.
 */
 void schedule_indicateTx(asn_t* asnTimestamp,
-                         bool   succesfullTx) {
+                         BOOL   succesfullTx) {
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();

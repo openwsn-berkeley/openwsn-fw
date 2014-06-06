@@ -35,12 +35,12 @@ typedef enum {
 } link_command_t;
 
 // header
-PRAGMA(pack(1)); //elements for slot info 
+COMPILER_PACK_SET(1) //elements for slot info 
 typedef struct {
   link_command_t type; 
   uint8_t numelem;//number of elements 
 }r6t_command_t;
-PRAGMA(pack());
+COMPILER_PACK_RESET()
 
 //=========================== variables =======================================
 

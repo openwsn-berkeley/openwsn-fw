@@ -142,8 +142,8 @@ void layerdebug_task_schedule_cb() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(schedule_layerdebug_path0)-1);
    memcpy(&pkt->payload[0],&schedule_layerdebug_path0,sizeof(schedule_layerdebug_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
-      sizeof(schedule_layerdebug_path0)-1;
+   pkt->payload[0]                  = (((COAP_OPTION_NUM_URIPATH) << 4) |
+      (sizeof(schedule_layerdebug_path0)-1));
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
@@ -206,8 +206,8 @@ void layerdebug_task_neighbors_cb() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(neighbors_layerdebug_path0)-1);
    memcpy(&pkt->payload[0],&neighbors_layerdebug_path0,sizeof(neighbors_layerdebug_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
-      sizeof(neighbors_layerdebug_path0)-1;
+   pkt->payload[0]                  = (((COAP_OPTION_NUM_URIPATH) << 4) |
+      (sizeof(neighbors_layerdebug_path0)-1));
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);

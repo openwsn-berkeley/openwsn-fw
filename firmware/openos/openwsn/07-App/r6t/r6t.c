@@ -213,7 +213,7 @@ owerror_t r6t_receive(
          outcome  = E_FAIL;
          break;
    }
-   
+   responses[0] = responses[0];
    return outcome;
 }
 

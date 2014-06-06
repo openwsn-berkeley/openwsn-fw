@@ -79,7 +79,7 @@ void packetfunctions_mac16bToMac64b(open_addr_t* mac16b, open_addr_t* mac64btoWr
 
 //======= address recognition
 
-bool packetfunctions_isBroadcastMulticast(open_addr_t* address) {
+BOOL packetfunctions_isBroadcastMulticast(open_addr_t* address) {
    uint8_t i;
    uint8_t address_length;
    //IPv6 multicast
@@ -112,7 +112,7 @@ bool packetfunctions_isBroadcastMulticast(open_addr_t* address) {
    return TRUE;
 }
 
-bool packetfunctions_isAllRoutersMulticast(open_addr_t* address) {
+BOOL packetfunctions_isAllRoutersMulticast(open_addr_t* address) {
    if (
       address->type          == ADDR_128B &&
       address->addr_128b[0]  == 0xff &&
@@ -137,7 +137,7 @@ bool packetfunctions_isAllRoutersMulticast(open_addr_t* address) {
    return FALSE;
 }
 
-bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
+BOOL packetfunctions_isAllHostsMulticast(open_addr_t* address) {
    if (
       address->type          == ADDR_128B &&
       address->addr_128b[0]  == 0xff &&
@@ -162,7 +162,7 @@ bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
    return FALSE;
 }
 
-bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2) {
+BOOL packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2) {
    uint8_t address_length;
    
    if (address_1->type!=address_2->type) {
@@ -196,7 +196,7 @@ bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2)
 
 //======= address read/write
 
-void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* writeToAddress, bool littleEndian) {
+void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* writeToAddress, BOOL littleEndian) {
    uint8_t i;
    uint8_t address_length;
    
@@ -229,7 +229,7 @@ void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* wr
    }
 }
 
-void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, bool littleEndian) {
+void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, BOOL littleEndian) {
    uint8_t i;
    uint8_t address_length;
    
@@ -325,7 +325,7 @@ void packetfunctions_calculateCRC(OpenQueueEntry_t* msg) {
    *(msg->payload+(msg->length-1)) = crc/256;
 }
 
-bool packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
+BOOL packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
    uint16_t crc;
    uint8_t  i;
    uint8_t  count;

@@ -19,8 +19,8 @@ tcp_vars_t tcp_vars;
 
 //=========================== prototypes ======================================
 
-void prependTCPHeader(OpenQueueEntry_t* msg, bool ack, bool push, bool rst, bool syn, bool fin);
-bool containsControlBits(OpenQueueEntry_t* msg, uint8_t ack, uint8_t rst, uint8_t syn, uint8_t fin);
+void prependTCPHeader(OpenQueueEntry_t* msg, BOOL ack, BOOL push, BOOL rst, BOOL syn, BOOL fin);
+BOOL containsControlBits(OpenQueueEntry_t* msg, uint8_t ack, uint8_t rst, uint8_t syn, uint8_t fin);
 void tcp_change_state(uint8_t new_state);
 void opentcp_reset();
 void opentcp_timer_cb();
@@ -226,7 +226,7 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
 void opentcp_receive(OpenQueueEntry_t* msg) {
    OpenQueueEntry_t* tempPkt;
-   bool shouldIlisten;
+   BOOL shouldIlisten;
    msg->owner                     = COMPONENT_OPENTCP;
    msg->l4_protocol               = IANA_TCP;
    msg->l4_payload                = msg->payload;
@@ -647,7 +647,7 @@ owerror_t opentcp_close() {    //[command] teardown
    return forwarding_send(tempPkt);
 }
 
-bool tcp_debugPrint() {
+BOOL tcp_debugPrint() {
    return FALSE;
 }
 
@@ -661,11 +661,11 @@ void timers_tcp_fired() {
 //=========================== private =========================================
 
 void prependTCPHeader(OpenQueueEntry_t* msg,
-      bool ack,
-      bool push,
-      bool rst,
-      bool syn,
-      bool fin) {
+      BOOL ack,
+      BOOL push,
+      BOOL rst,
+      BOOL syn,
+      BOOL fin) {
    msg->l4_protocol = IANA_TCP;
    packetfunctions_reserveHeaderSize(msg,sizeof(tcp_ht));
    packetfunctions_htons(tcp_vars.myPort        ,(uint8_t*)&(((tcp_ht*)msg->payload)->source_port));
@@ -697,19 +697,19 @@ void prependTCPHeader(OpenQueueEntry_t* msg,
    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((tcp_ht*)msg->payload)->checksum));
 }
 
-bool containsControlBits(OpenQueueEntry_t* msg, uint8_t ack, uint8_t rst, uint8_t syn, uint8_t fin) {
-   bool return_value = TRUE;
+BOOL containsControlBits(OpenQueueEntry_t* msg, uint8_t ack, uint8_t rst, uint8_t syn, uint8_t fin) {
+   BOOL return_value = TRUE;
    if (ack!=TCP_ACK_WHATEVER){
-      return_value = return_value && ((bool)( (((tcp_ht*)msg->payload)->control_bits >> TCP_ACK) & 0x01) == ack);
+      return_value = return_value && ((BOOL)( (((tcp_ht*)msg->payload)->control_bits >> TCP_ACK) & 0x01) == ack);
    }
    if (rst!=TCP_RST_WHATEVER){
-      return_value = return_value && ((bool)( (((tcp_ht*)msg->payload)->control_bits >> TCP_RST) & 0x01) == rst);
+      return_value = return_value && ((BOOL)( (((tcp_ht*)msg->payload)->control_bits >> TCP_RST) & 0x01) == rst);
    }
    if (syn!=TCP_SYN_WHATEVER){
-      return_value = return_value && ((bool)( (((tcp_ht*)msg->payload)->control_bits >> TCP_SYN) & 0x01) == syn);
+      return_value = return_value && ((BOOL)( (((tcp_ht*)msg->payload)->control_bits >> TCP_SYN) & 0x01) == syn);
    }
    if (fin!=TCP_FIN_WHATEVER){
-      return_value = return_value && ((bool)( (((tcp_ht*)msg->payload)->control_bits >> TCP_FIN) & 0x01) == fin);
+      return_value = return_value && ((BOOL)( (((tcp_ht*)msg->payload)->control_bits >> TCP_FIN) & 0x01) == fin);
    }
    return return_value;
 }

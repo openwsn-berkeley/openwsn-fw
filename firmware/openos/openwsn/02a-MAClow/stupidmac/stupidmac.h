@@ -55,6 +55,6 @@ void    stupidmac_sendDone(OpenQueueEntry_t* packetReceived, error_t error);
 void    timer_mac_backoff_fired();
 void    timer_mac_watchdog_fired();
 void    timer_mac_periodic_fired();
-bool    stupidmac_debugPrint();
+BOOL    stupidmac_debugPrint();
 
 #endif

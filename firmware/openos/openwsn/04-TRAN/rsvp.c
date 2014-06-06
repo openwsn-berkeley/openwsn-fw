@@ -72,6 +72,9 @@ void rsvp_qos_request(uint8_t bandwith, uint16_t refresh_period, open_addr_t des
    //rsvp_vars.timerId = opentimers_start(rsvp_vars.rsvp_period,
    //                                       TIMER_PERIODIC,TIME_MS,
    //                                       res_timer_cb);
+   i = i;
+   j = j;
+   outcome = outcome;
 }
 
 void rsvp_timer_cb(){

@@ -17,7 +17,7 @@ void updateSchedule(rsvp_label_object_t* label,open_addr_t* neighbor){
    //1-find all the cycles where the node participate. This depends on its order. if its order is higher than  num_participants it does not participate.
    slotOffset_t    slotOffset;
    cellType_t      type;
-    bool            shared=FALSE;
+    BOOL            shared=FALSE;
 
     uint8_t j=0;
     uint8_t i=0;

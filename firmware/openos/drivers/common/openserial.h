@@ -70,13 +70,13 @@ typedef struct {
    uint8_t    reqFrame[1+1+2+1]; // flag (1B), command (2B), CRC (2B), flag (1B)
    uint8_t    reqFrameIdx;
    uint8_t    lastRxByte;
-   bool       busyReceiving;
-   bool       inputEscaping;
+   BOOL       busyReceiving;
+   BOOL       inputEscaping;
    uint16_t   inputCrc;
    uint8_t    inputBufFill;
    uint8_t    inputBuf[SERIAL_INPUT_BUFFER_SIZE];
    // output
-   bool       outputBufFilled;
+   BOOL       outputBufFilled;
    uint16_t   outputCrc;
    uint8_t    outputBufIdxW;
    uint8_t    outputBufIdxR;
@@ -102,7 +102,7 @@ uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes);
 void    openserial_startInput();
 void    openserial_startOutput();
 void    openserial_stop();
-bool    debugPrint_outBufferIndexes();
+BOOL    debugPrint_outBufferIndexes();
 void    openserial_echo(uint8_t* but, uint8_t bufLen);
 
 // interrupt handlers

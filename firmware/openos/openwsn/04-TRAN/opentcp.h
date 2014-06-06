@@ -111,7 +111,7 @@ typedef struct {
    open_addr_t          hisIPv6Address;
    OpenQueueEntry_t*    dataToSend;
    OpenQueueEntry_t*    dataReceived;
-   bool                 timerStarted;
+   BOOL                 timerStarted;
    opentimer_id_t       timerId;
 } tcp_vars_t;
 
@@ -123,7 +123,7 @@ owerror_t  opentcp_send(OpenQueueEntry_t* msg);
 void     opentcp_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void     opentcp_receive(OpenQueueEntry_t* msg);
 owerror_t  opentcp_close();
-bool     opentcp_debugPrint();
+BOOL     opentcp_debugPrint();
 
 /**
 \}
