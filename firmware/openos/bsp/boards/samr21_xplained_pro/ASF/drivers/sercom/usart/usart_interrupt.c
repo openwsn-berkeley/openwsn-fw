@@ -74,6 +74,47 @@ void _usart_write_buffer(
 	usart_hw->INTENSET.reg = SERCOM_USART_INTFLAG_DRE;
 }
 
+void usart_disable_interrupt(struct usart_module *const module)
+{
+	/* Get a pointer to the hardware module instance */
+	SercomUsart *const usart_hw = &(module->hw->USART);
+	/* Wait until synchronization is complete */
+	_usart_wait_for_sync(module);
+	usart_hw->INTENCLR.reg = SERCOM_USART_INTFLAG_TXC | SERCOM_USART_INTFLAG_RXC;	
+}
+
+void usart_enable_interrupt(struct usart_module *const module)
+{
+	/* Get a pointer to the hardware module instance */
+	SercomUsart *const usart_hw = &(module->hw->USART);
+	/* Wait until synchronization is complete */
+	_usart_wait_for_sync(module);
+	usart_hw->INTENSET.reg = SERCOM_USART_INTFLAG_TXC | SERCOM_USART_INTFLAG_RXC;
+}
+
+void usart_write_byte(struct usart_module *const module, uint8_t tx_data)
+{
+	uint16_t data_to_send = 0;
+	data_to_send = tx_data;
+	/* Get a pointer to the hardware module instance */
+	SercomUsart *const usart_hw = &(module->hw->USART);
+	while(!(usart_hw->INTFLAG.reg & SERCOM_USART_INTFLAG_DRE));
+	/* Wait until synchronization is complete */
+	_usart_wait_for_sync(module);
+	usart_hw->DATA.reg = (data_to_send);
+}
+
+//void usart_read_byte(struct usart_module *const module, uint8_t tx_data)
+//{
+	//uint16_t data_to_send = 0;
+	//data_to_send = tx_data;
+	///* Get a pointer to the hardware module instance */
+	//SercomUsart *const usart_hw = &(module->hw->USART);
+	///* Wait until synchronization is complete */
+	//_usart_wait_for_sync(module);
+	//usart_hw->DATA.reg = (data_to_send);
+//}
+
 /**
  * \internal
  * Asynchronous read of a buffer with a given length
@@ -463,39 +504,42 @@ void _usart_interrupt_handler(
 	/* Check if a DATA READY interrupt has occurred,
 	 * and if there is more to transfer */
 	if (interrupt_status & SERCOM_USART_INTFLAG_DRE) {
-		if (module->remaining_tx_buffer_length) {
-			/* Write value will be at least 8-bits long */
-			uint16_t data_to_send = *(module->tx_buffer_ptr);
-			/* Increment 8-bit pointer */
-			(module->tx_buffer_ptr)++;
-
-			if (module->character_size == USART_CHARACTER_SIZE_9BIT) {
-				data_to_send |= (*(module->tx_buffer_ptr) << 8);
-				/* Increment 8-bit pointer */
-				(module->tx_buffer_ptr)++;
-			}
-			/* Write the data to send */
-			usart_hw->DATA.reg = (data_to_send & SERCOM_USART_DATA_MASK);
-
-			if (--(module->remaining_tx_buffer_length) == 0) {
-				/* Disable the Data Register Empty Interrupt */
-				usart_hw->INTENCLR.reg = SERCOM_USART_INTFLAG_DRE;
-				/* Enable Transmission Complete interrupt */
-				usart_hw->INTENSET.reg = SERCOM_USART_INTFLAG_TXC;
-
-			}
-		} else {
-			usart_hw->INTENCLR.reg = SERCOM_USART_INTFLAG_DRE;
-		}
-
-	/* Check if the Transmission Complete interrupt has occurred and
-	 * that the transmit buffer is empty */
+		usart_hw->INTENCLR.reg = SERCOM_USART_INTFLAG_DRE;
+		usart_hw->INTFLAG.reg = SERCOM_USART_INTFLAG_DRE;
 	}
+		//if (module->remaining_tx_buffer_length) {
+			///* Write value will be at least 8-bits long */
+			//uint16_t data_to_send = *(module->tx_buffer_ptr);
+			///* Increment 8-bit pointer */
+			//(module->tx_buffer_ptr)++;
+//
+			//if (module->character_size == USART_CHARACTER_SIZE_9BIT) {
+				//data_to_send |= (*(module->tx_buffer_ptr) << 8);
+				///* Increment 8-bit pointer */
+				//(module->tx_buffer_ptr)++;
+			//}
+			///* Write the data to send */
+			//usart_hw->DATA.reg = (data_to_send & SERCOM_USART_DATA_MASK);
+//
+			//if (--(module->remaining_tx_buffer_length) == 0) {
+				///* Disable the Data Register Empty Interrupt */
+				//usart_hw->INTENCLR.reg = SERCOM_USART_INTFLAG_DRE;
+				///* Enable Transmission Complete interrupt */
+				//usart_hw->INTENSET.reg = SERCOM_USART_INTFLAG_TXC;
+//
+			//}
+		//} else {
+			//usart_hw->INTENCLR.reg = SERCOM_USART_INTFLAG_DRE;
+		//}
+//
+	///* Check if the Transmission Complete interrupt has occurred and
+	 //* that the transmit buffer is empty */
+	//}
 
 	if (interrupt_status & SERCOM_USART_INTFLAG_TXC) {
 
 		/* Disable TX Complete Interrupt, and set STATUS_OK */
-		usart_hw->INTENCLR.reg = SERCOM_USART_INTFLAG_TXC;
+		usart_hw->INTFLAG.reg = SERCOM_USART_INTFLAG_TXC;
 		module->tx_status = STATUS_OK;
 
 		/* Run callback if registered and enabled */
