@@ -82,6 +82,10 @@ void usart_register_callback(
 void usart_unregister_callback(
 		struct usart_module *module,
 		enum usart_callback callback_type);
+		
+void usart_enable_interrupt(struct usart_module *const module);
+void usart_disable_interrupt(struct usart_module *const module);
+void usart_write_byte(struct usart_module *const module, uint8_t tx_data);
 
 /**
  * \brief Enables callback

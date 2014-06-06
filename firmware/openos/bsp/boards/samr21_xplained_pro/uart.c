@@ -50,14 +50,16 @@ void uart_init(void)
 	usart_enable_transceiver(&cdc_uart_module, USART_TRANSCEIVER_TX);
 	usart_enable_transceiver(&cdc_uart_module, USART_TRANSCEIVER_RX);
 	/* Dummy Read to Enable the RXC Interrupt */
-	usart_read_job(&cdc_uart_module, &rxd_data);	
+	//usart_read_job(&cdc_uart_module, &rxd_data);	
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb)
 {
 	//Register Callbacks
 	uart_vars.txCb = txCb;
-	uart_vars.rxCb = rxCb;
+	uart_vars.rxCb = rxCb;	
+	usart_enable_callback(&cdc_uart_module, USART_CALLBACK_BUFFER_TRANSMITTED);
+    usart_enable_callback(&cdc_uart_module, USART_CALLBACK_BUFFER_RECEIVED);
 }
 
 void usart_write_callback(const struct usart_module *const usart_module)
@@ -72,21 +74,24 @@ void usart_read_callback(const struct usart_module *const usart_module)
 
 void uart_enableInterrupts(void)
 {
-  usart_enable_callback(&cdc_uart_module, USART_CALLBACK_BUFFER_TRANSMITTED);
-  usart_enable_callback(&cdc_uart_module, USART_CALLBACK_BUFFER_RECEIVED);
+  //usart_enable_callback(&cdc_uart_module, USART_CALLBACK_BUFFER_TRANSMITTED);
+  //usart_enable_callback(&cdc_uart_module, USART_CALLBACK_BUFFER_RECEIVED);
+  usart_enable_interrupt(&cdc_uart_module);
 }
 
 void uart_disableInterrupts(void)
 {
-  usart_disable_callback(&cdc_uart_module, USART_CALLBACK_BUFFER_TRANSMITTED);
-  usart_disable_callback(&cdc_uart_module, USART_CALLBACK_BUFFER_RECEIVED);
+  //usart_disable_callback(&cdc_uart_module, USART_CALLBACK_BUFFER_TRANSMITTED);
+  //usart_disable_callback(&cdc_uart_module, USART_CALLBACK_BUFFER_RECEIVED);
+  usart_disable_interrupt(&cdc_uart_module);
 }
 
 
 void uart_writeByte(uint8_t byteToWrite)
 {
-  uint16_t byte_to_write = byteToWrite;
-  usart_write_job(&cdc_uart_module, byte_to_write);
+  //uint16_t byte_to_write = byteToWrite;
+  //usart_write_job(&cdc_uart_module, byte_to_write);
+  usart_write_byte(&cdc_uart_module, byteToWrite);
 }
 
 uint8_t uart_readByte(void)
@@ -122,11 +127,12 @@ void uart_clearTxInterrupts(void)
 
 void uart_clearRxInterrupts(void)
 {
-  //usart_abort_job(&cdc_uart_module, USART_TRANSCEIVER_RX);	
+  usart_abort_job(&cdc_uart_module, USART_TRANSCEIVER_RX);	
 }
 
 kick_scheduler_t uart_tx_isr(void) 
 {
+  uart_clearTxInterrupts();
   if(uart_vars.txCb != NULL)
   {
 	uart_vars.txCb();    
@@ -136,6 +142,7 @@ kick_scheduler_t uart_tx_isr(void)
 
 kick_scheduler_t uart_rx_isr(void)
 {
+	uart_clearRxInterrupts();
 	if (uart_vars.rxCb != NULL)
 	{
 		uart_vars.rxCb();  

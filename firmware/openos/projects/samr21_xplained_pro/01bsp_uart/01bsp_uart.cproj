@@ -43,12 +43,12 @@
       <ToolOptions>
         <InterfaceProperties>
           <JtagEnableExtResetOnStartSession>false</JtagEnableExtResetOnStartSession>
-          <SwdClock>4000000</SwdClock>
+          <SwdClock>12000000</SwdClock>
         </InterfaceProperties>
         <InterfaceName>SWD</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.edbg</ToolType>
-      <ToolNumber>ATML2127021800000126</ToolNumber>
+      <ToolNumber>ATML2127031800000934</ToolNumber>
       <ToolName>EDBG</ToolName>
     </com_atmel_avrdbg_tool_edbg>
   </PropertyGroup>
@@ -302,6 +302,10 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\spi_drv.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xplained_pro\spi_drv.c</Link>
+    </Compile>
     <Compile Include="01bsp_uart.c">
       <SubType>compile</SubType>
     </Compile>
@@ -800,10 +804,6 @@
     <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\radio_timer.c">
       <SubType>compile</SubType>
       <Link>bsp\boards\samr21_xplained_pro\radio_timer.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\spi.c">
-      <SubType>compile</SubType>
-      <Link>bsp\boards\samr21_xplained_pro\spi.c</Link>
     </Compile>
     <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\uart.c">
       <SubType>compile</SubType>

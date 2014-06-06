@@ -211,6 +211,7 @@
       <Value>../../../../openwsn/07-App/rrt</Value>
       <Value>../../../../bsp/boards/samr21_xplained_pro/ASF/drivers/tcc</Value>
       <Value>../../../../bsp/boards/samr21_xplained_pro/ASF/drivers/events</Value>
+      <Value>../../../../openwsn/07-App/rex</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
@@ -856,6 +857,10 @@
       <SubType>compile</SubType>
       <Link>openwsn\07-App\r6t\r6t.c</Link>
     </Compile>
+    <Compile Include="..\..\..\openwsn\07-App\rex\rex.c">
+      <SubType>compile</SubType>
+      <Link>openwsn\07-App\rex\rex.c</Link>
+    </Compile>
     <Compile Include="..\..\..\openwsn\07-App\rinfo\rinfo.c">
       <SubType>compile</SubType>
       <Link>openwsn\07-App\rinfo\rinfo.c</Link>
@@ -1012,6 +1017,7 @@
     <Folder Include="kernel" />
     <Folder Include="openwsn" />
     <Folder Include="openwsn\07-App\" />
+    <Folder Include="openwsn\07-App\rex" />
     <Folder Include="openwsn\07-App\rrt" />
     <Folder Include="openwsn\02a-MAClow" />
     <Folder Include="openwsn\02b-MAChigh" />

@@ -801,9 +801,9 @@
       <SubType>compile</SubType>
       <Link>bsp\boards\samr21_xplained_pro\radio_timer.c</Link>
     </Compile>
-    <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\spi.c">
+    <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\spi_drv.c">
       <SubType>compile</SubType>
-      <Link>bsp\boards\samr21_xplained_pro\spi.c</Link>
+      <Link>bsp\boards\samr21_xplained_pro\spi_drv.c</Link>
     </Compile>
     <Compile Include="..\..\..\bsp\boards\samr21_xplained_pro\uart.c">
       <SubType>compile</SubType>
