@@ -25,7 +25,6 @@ void usart_read_callback(const struct usart_module *const usart_module);
 
 void uart_init(void)
 {
-	uint16_t rxd_data;
 	struct usart_config cdc_uart_config;
 	/* Configure USART for unit test output */
 	usart_get_config_defaults(&cdc_uart_config);
