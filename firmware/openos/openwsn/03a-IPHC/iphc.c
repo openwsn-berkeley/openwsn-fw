@@ -681,7 +681,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
       if        ( (temp_8b & NHC_UDP_MASK) == NHC_UDP_ID) {
          ipv6_header->next_header = IANA_UDP;
       } else if ( (temp_8b & NHC_IPv6EXT_MASK) == NHC_IPv6EXT_ID){
-         if( temp_8b & NHC_IPv6HOP_MASK == NHC_IPv6HOP_VAL){
+         if( (temp_8b & NHC_IPv6HOP_MASK) == NHC_IPv6HOP_VAL){
             // hop-by-hop header
             ipv6_header->next_header = IANA_IPv6HOPOPT;
          } else {
@@ -725,7 +725,7 @@ void iphc_prependIPv6HopByHopHeader(
       uint8_t           nh,
       rpl_option_ht*    rpl_option
    ){
-   
+#ifndef FLOW_LABEL_RPL_DOMAIN
    // RPL option
    packetfunctions_reserveHeaderSize(msg,sizeof(rpl_option_ht));
    memcpy(msg->payload,rpl_option,sizeof(rpl_option_ht));
@@ -757,6 +757,7 @@ void iphc_prependIPv6HopByHopHeader(
             (errorparameter_t)nh
          );
    }
+#endif
 }
 
 /**

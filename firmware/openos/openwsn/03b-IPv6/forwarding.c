@@ -232,7 +232,7 @@ void forwarding_receive(
              flags = (ipv6_header->flow_label)>>16;
              senderRank = (ipv6_header->flow_label)>>8;
          #else
-    	     flags= rpl_option->flags;
+    	     flags = rpl_option->flags;
     	     senderRank = rpl_option->senderRank;
     	 #endif
 
@@ -243,8 +243,8 @@ void forwarding_receive(
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_WRONG_DIRECTION,
-               (errorparameter_t)1,
-               (errorparameter_t)1
+               (errorparameter_t)flags,
+               (errorparameter_t)senderRank
             );
          }
          
