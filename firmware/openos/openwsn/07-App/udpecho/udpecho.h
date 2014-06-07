@@ -19,7 +19,7 @@
 void udpecho_init();
 void udpecho_receive(OpenQueueEntry_t* msg);
 void udpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error);
-BOOL udpecho_debugPrint();
+bool udpecho_debugPrint();
 
 /**
 \}

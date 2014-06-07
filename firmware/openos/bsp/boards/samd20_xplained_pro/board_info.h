@@ -17,8 +17,8 @@
 
 //TODO in case previous declaration fails in certain compilers. Remove this 
 //one if it works with GNU GCC
-//#define PACK_START  _Pragma("pack(1)")
-//#define PACK_END    _Pragma("pack()")
+#define PACK_START  _Pragma("pack(1)")
+#define PACK_END    _Pragma("pack()")
 #define INTERRUPT_DECLARATION() irqflags_t irq_flags;//no declaration
 
 #define DISABLE_INTERRUPTS()    irq_flags = cpu_irq_save();

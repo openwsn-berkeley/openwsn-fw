@@ -14,7 +14,7 @@ ohlone_vars_t ohlone_vars;
 //=========================== prototypes ======================================
 
 void ohlone_sendpkt();
-BOOL ohlone_check4chars(uint8_t c1[4], uint8_t c2[4]);
+bool ohlone_check4chars(uint8_t c1[4], uint8_t c2[4]);
 
 //=========================== public ==========================================
 
@@ -25,7 +25,7 @@ void ohlone_init() {
    ohlone_webpages_init();
 }
 
-BOOL ohlone_shouldIlisten() {
+bool ohlone_shouldIlisten() {
    return TRUE;
 }
 
@@ -65,7 +65,7 @@ void ohlone_sendpkt() {
 
 }
 
-BOOL ohlone_check4chars(uint8_t c1[4], uint8_t c2[4]) {
+bool ohlone_check4chars(uint8_t c1[4], uint8_t c2[4]) {
   return ((c1[0] == c2[0]) && 
           (c1[1] == c2[1]) && 
           (c1[2] == c2[2]) && 
@@ -106,7 +106,7 @@ void ohlone_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 void ohlone_connectDone(owerror_t error) {
 }
 
-BOOL ohlone_debugPrint() {
+bool ohlone_debugPrint() {
    return FALSE;
 }
 

@@ -77,7 +77,7 @@ static const uint8_t all_routers_multicast[] = {
 /**
 \brief Header format of a RPL DIO packet.
 */
-COMPILER_PACK_SET(1)
+PRAGMA(pack(1));
 typedef struct {
    uint8_t         rplinstanceId;      ///< set by the DODAG root.
    uint8_t         verNumb;
@@ -88,14 +88,14 @@ typedef struct {
    uint8_t         reserved;
    uint8_t         DODAGID[16];    
 } icmpv6rpl_dio_ht;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 
 //===== DAO
 
 /**
 \brief Header format of a RPL DAO packet.
 */
-COMPILER_PACK_SET(1)
+PRAGMA(pack(1));
 typedef struct {
    uint8_t         rplinstanceId;      ///< set by the DODAG root.
    uint8_t         K_D_flags;
@@ -103,12 +103,12 @@ typedef struct {
    uint8_t         DAOSequence;
    uint8_t         DODAGID[16];
 } icmpv6rpl_dao_ht;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 
 /**
 \brief Header format of a RPL DAO "Transit Information" option.
 */
-COMPILER_PACK_SET(1)
+PRAGMA(pack(1));
 typedef struct {
    uint8_t         type;               ///< set by the DODAG root.
    uint8_t         optionLength;
@@ -117,25 +117,25 @@ typedef struct {
    uint8_t         PathSequence;   
    uint8_t         PathLifetime;   
 } icmpv6rpl_dao_transit_ht;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 
 /**
 \brief Header format of a RPL DAO "Target" option.
 */
-COMPILER_PACK_SET(1)
+PRAGMA(pack(1));
 typedef struct {
    uint8_t         type;               ///< set by the DODAG root.
    uint8_t         optionLength;
    uint8_t         flags;
    uint8_t         prefixLength;  
 } icmpv6rpl_dao_target_ht;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 
 //=========================== module variables ================================
 
 typedef struct {
    // admin
-   BOOL                      busySending;             ///< currently sending DIO/DAO.
+   bool                      busySending;             ///< currently sending DIO/DAO.
    uint8_t                   DODAGIDFlagSet;          ///< is DODAGID set already?
    // DIO-related
    icmpv6rpl_dio_ht          dio;                     ///< pre-populated DIO packet.

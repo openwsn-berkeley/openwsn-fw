@@ -50,7 +50,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    uint8_t                   index;
    coap_option_t             last_option;
    coap_resource_desc_t*     temp_desc;
-   BOOL                      found;
+   bool                      found;
    owerror_t                 outcome = 0;
    // local variables passed to the handlers (with msg)
    coap_header_iht           coap_header;

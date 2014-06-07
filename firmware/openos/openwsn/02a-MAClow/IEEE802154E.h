@@ -199,7 +199,7 @@ typedef struct {
    slotOffset_t       slotOffset;           // current slot offset
    slotOffset_t       nextActiveSlotOffset; // next active slot offset
    PORT_RADIOTIMER_WIDTH   deSyncTimeout;        // how many slots left before looses sync
-   BOOL               isSync;               // TRUE iff mote is synchronized to network
+   bool               isSync;               // TRUE iff mote is synchronized to network
    // as shown on the chronogram
    ieee154e_state_t   state;                // state of the FSM
    OpenQueueEntry_t*  dataToSend;           // pointer to the data to send
@@ -214,10 +214,10 @@ typedef struct {
    
    PORT_RADIOTIMER_WIDTH radioOnInit;  //when within the slot the radio turns on
    PORT_RADIOTIMER_WIDTH radioOnTics;//how many tics within the slot the radio is on
-   BOOL             radioOnThisSlot; //to control if the radio has been turned on in a slot.
+   bool             radioOnThisSlot; //to control if the radio has been turned on in a slot.
 } ieee154e_vars_t;
 
-COMPILER_PACK_SET(1)
+PRAGMA(pack(1));
 typedef struct {
    uint8_t                   numSyncPkt;    // how many times synchronized on a non-ACK packet
    uint8_t                   numSyncAck;    // how many times synchronized on an ACK
@@ -227,7 +227,7 @@ typedef struct {
    uint32_t                  numTicsOn;     // mac dutyCycle
    uint32_t                  numTicsTotal;     // total tics for which the dutycycle is computed
 } ieee154e_stats_t;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 
 typedef struct {
    PORT_RADIOTIMER_WIDTH          num_newSlot;
@@ -247,11 +247,11 @@ typedef struct{
 
 
 //the content for ack ie -- it is a header IE with values - element id =0x1e len=2 type=0
-COMPILER_PACK_SET(1)
+PRAGMA(pack(1));
 typedef struct {
     int16_t timesync_info;
 }ack_timecorrection_IE_t;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 //the header for all payload IEs
 
 
@@ -266,12 +266,12 @@ typedef struct{
 }MLME_IE_subHeader_t;
 
 //the Synchronization IE. it is a payload IE with values - subid=0x1a type=0 (short) len=6 
-COMPILER_PACK_SET(1)
+PRAGMA(pack(1));
 typedef struct {
     uint8_t asn[5];
     uint8_t join_priority;
 }synch_IE_t;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 
 //the Slotframe and Link IE
 typedef struct {
@@ -292,15 +292,15 @@ typedef struct {
 void               ieee154e_init();
 // public
 PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
-BOOL               ieee154e_isSynch();
+bool               ieee154e_isSynch();
 void               ieee154e_getAsn(uint8_t* array);
 // events
 void               ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 // misc
-BOOL               debugPrint_asn();
-BOOL               debugPrint_isSync();
-BOOL               debugPrint_macStats();
+bool               debugPrint_asn();
+bool               debugPrint_isSync();
+bool               debugPrint_macStats();
 
 /**
 \}

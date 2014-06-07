@@ -12,7 +12,7 @@
 
 typedef struct {
    uint16_t        refreshperiod;
-   BOOL            busySending;          // TRUE when busy sending a rsvp message
+   bool            busySending;          // TRUE when busy sending a rsvp message
    opentimer_id_t  timerId;
 } mpls_vars_t;
 

@@ -18,7 +18,7 @@ extern unsigned long f_cpu_awake;
 typedef unsigned int U32;
 typedef unsigned short U16;
 typedef unsigned char U8;
-typedef unsigned char BOOL;
+typedef unsigned char bool;
 
 typedef enum openal_error_code_t {
 	SUCCESS = 0,

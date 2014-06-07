@@ -256,20 +256,19 @@ enum {
 typedef uint16_t  errorparameter_t;
 typedef uint16_t  dagrank_t;
 typedef uint8_t   owerror_t;
-#define BOOL uint8_t
+#ifndef bool
+#define bool uint8_t
+#endif
 
-PACK_START
-
+PRAGMA(pack(1));
 typedef struct {
    uint8_t  byte4;
    uint16_t bytes2and3;
    uint16_t bytes0and1;
 } asn_t;
+PRAGMA(pack());
 
-PACK_END
-
-
-PACK_START
+PRAGMA(pack(1));
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint8_t type;
    union {
@@ -280,8 +279,7 @@ typedef struct {                                 // always written big endian, i
       uint8_t prefix[8];
    };
 } open_addr_t;
-
-PACK_END
+PRAGMA(pack());
 
 typedef struct {
    //admin
@@ -291,7 +289,7 @@ typedef struct {
    uint8_t       length;                         // length in bytes of the payload
    //l4
    uint8_t       l4_protocol;                    // l4 protocol to be used
-   BOOL          l4_protocol_compressed;         // is the l4 protocol header compressed?
+   bool          l4_protocol_compressed;         // is the l4 protocol header compressed?
    uint16_t      l4_sourcePortORicmpv6Type;      // l4 source port
    uint16_t      l4_destination_port;            // l4 destination port
    uint8_t*      l4_payload;                     // pointer to the start of the payload of l4 (used for retransmits)
@@ -310,12 +308,12 @@ typedef struct {
    uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
-   BOOL          l2_joinPriorityPresent;
+   bool          l2_joinPriorityPresent;
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet
    uint8_t       l1_lqi;                         // LQI of received packet
-   BOOL          l1_crc;                         // did received packet pass CRC check?
+   bool          l1_crc;                         // did received packet pass CRC check?
    //the packet
    uint8_t       packet[1+1+125+2+1];            // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
 } OpenQueueEntry_t;

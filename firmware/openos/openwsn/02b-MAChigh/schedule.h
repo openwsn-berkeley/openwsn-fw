@@ -74,11 +74,11 @@ typedef enum {
 } cellType_t;
 
 
-COMPILER_PACK_SET(1)
+PRAGMA(pack(1));
 typedef struct {
    slotOffset_t    slotOffset;
    cellType_t      type;
-   BOOL            shared;
+   bool            shared;
    uint8_t         channelOffset;
    open_addr_t     neighbor;
    uint8_t         numRx;
@@ -87,24 +87,24 @@ typedef struct {
    asn_t           lastUsedAsn;
    void*           next;
 } scheduleEntry_t;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 
 //used to debug through ipv6 pkt. 
 
-COMPILER_PACK_SET(1)
+PRAGMA(pack(1));
 typedef struct {
    uint8_t last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
    uint8_t slotOffset;
    channelOffset_t channelOffset;
 }netDebugScheduleEntry_t;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 
-COMPILER_PACK_SET(1)
+PRAGMA(pack(1));
 typedef struct {
    uint8_t         row;
    slotOffset_t    slotOffset;
    uint8_t         type;
-   BOOL            shared;
+   bool            shared;
    uint8_t         channelOffset;
    open_addr_t     neighbor;
    uint8_t         numRx;
@@ -112,17 +112,17 @@ typedef struct {
    uint8_t         numTxACK;
    asn_t           lastUsedAsn;
 } debugScheduleEntry_t;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 
-COMPILER_PACK_SET(1) //elements for slot info 
+PRAGMA(pack(1)); //elements for slot info 
 typedef struct {
   uint8_t address[LENGTH_ADDR64b];// 
   cellType_t link_type;// rx,tx etc...
-  BOOL shared;
+  bool shared;
   slotOffset_t slotOffset;
   channelOffset_t channelOffset;
 }slotinfo_element_t;
-COMPILER_PACK_RESET()
+PRAGMA(pack());
 //=========================== variables =======================================
 
 typedef struct {
@@ -144,17 +144,17 @@ typedef struct {
 
 // admin
 void               schedule_init();
-BOOL               debugPrint_schedule();
-BOOL               debugPrint_backoff();
+bool               debugPrint_schedule();
+bool               debugPrint_backoff();
 // from uRES
 void               schedule_setFrameLength(frameLength_t newFrameLength);
 owerror_t            schedule_addActiveSlot(
                         slotOffset_t   slotOffset,
                         cellType_t     type,
-                        BOOL           shared,
+                        bool           shared,
                         uint8_t        channelOffset,
                         open_addr_t*   neighbor,
-                        BOOL isUpdate);
+                        bool isUpdate);
 
 void               schedule_getSlotInfo(slotOffset_t   slotOffset,                      
                               open_addr_t*   neighbor,
@@ -172,12 +172,12 @@ frameLength_t      schedule_getFrameLength();
 cellType_t         schedule_getType();
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset();
-BOOL               schedule_getOkToSend();
+bool               schedule_getOkToSend();
 void               schedule_resetBackoff();
 void               schedule_indicateRx(asn_t*   asnTimestamp);
 void               schedule_indicateTx(
                         asn_t*    asnTimestamp,
-                        BOOL      succesfullTx
+                        bool      succesfullTx
                    );
 void               schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist);
 

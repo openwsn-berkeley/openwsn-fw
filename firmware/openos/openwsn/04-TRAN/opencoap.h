@@ -143,7 +143,7 @@ struct coap_resource_desc_t {
 
 typedef struct {
    coap_resource_desc_t* resources;
-   BOOL                  busySending;
+   bool                  busySending;
    uint8_t               delayCounter;
    uint16_t              messageID;
 } opencoap_vars_t;

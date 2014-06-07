@@ -18,8 +18,8 @@
 
 typedef struct {
    uint16_t        periodMaintenance;
-   BOOL            busySendingKa;        // TRUE when busy sending a keep-alive
-   BOOL            busySendingAdv;       // TRUE when busy sending an advertisement
+   bool            busySendingKa;        // TRUE when busy sending a keep-alive
+   bool            busySendingAdv;       // TRUE when busy sending an advertisement
    uint8_t         dsn;                  // current data sequence number
    uint8_t         MacMgtTaskCounter;    // counter to determine what management task to do
    opentimer_id_t  timerId;
@@ -29,7 +29,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void    res_init();
-BOOL    debugPrint_myDAGrank();
+bool    debugPrint_myDAGrank();
 // from upper layer
 owerror_t res_send(OpenQueueEntry_t *msg);
 // from lower layer

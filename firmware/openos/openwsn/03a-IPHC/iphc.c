@@ -17,15 +17,15 @@ owerror_t iphc_prependIPv6Header(
    OpenQueueEntry_t*    msg,
    uint8_t              tf,
    uint32_t             value_flowLabel,
-   BOOL                 nh,
+   bool                 nh,
    uint8_t              value_nextHeader,
    uint8_t              hlim,
    uint8_t              value_hopLimit,
-   BOOL                 cid,
-   BOOL                 sac,
+   bool                 cid,
+   bool                 sac,
    uint8_t              sam,
-   BOOL                 m,
-   BOOL                 dac,
+   bool                 m,
+   bool                 dac,
    uint8_t              dam,
    open_addr_t*         value_dest,
    open_addr_t*         value_src,
@@ -254,15 +254,15 @@ owerror_t iphc_prependIPv6Header(
       OpenQueueEntry_t* msg,
       uint8_t           tf,
       uint32_t          value_flowLabel,
-      BOOL              nh,
+      bool              nh,
       uint8_t           value_nextHeader,
       uint8_t           hlim,
       uint8_t           value_hopLimit,
-      BOOL              cid,
-      BOOL              sac,
+      bool              cid,
+      bool              sac,
       uint8_t           sam,
-      BOOL              m,
-      BOOL              dac,
+      bool              m,
+      bool              dac,
       uint8_t           dam,
       open_addr_t*      value_dest,
       open_addr_t*      value_src,
@@ -482,7 +482,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
    open_addr_t     temp_addr_64b;
    uint8_t         dispatch;
    uint8_t         tf;
-   BOOL            nh;
+   bool            nh;
    uint8_t         hlim;
    uint8_t         sam;
    uint8_t         dam;

@@ -18,7 +18,7 @@
 
 typedef struct {
    OpenQueueEntry_t*    pkt;
-   BOOL                 sending;
+   bool                 sending;
    uint16_t             httpChunk;
    uint8_t              getRequest[TCP_DEFAULT_WINDOW_SIZE];
 } ohlone_vars_t;
@@ -26,11 +26,11 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void ohlone_init();
-BOOL ohlone_shouldIlisten();
+bool ohlone_shouldIlisten();
 void ohlone_receive(OpenQueueEntry_t* msg);
 void ohlone_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void ohlone_connectDone(owerror_t error);
-BOOL ohlone_debugPrint();
+bool ohlone_debugPrint();
 
 /**
 \}

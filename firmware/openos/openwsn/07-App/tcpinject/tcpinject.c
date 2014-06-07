@@ -16,7 +16,7 @@ tcpinject_vars_t tcpinject_vars;
 void tcpinject_init() {
 }
 
-BOOL tcpinject_shouldIlisten() {
+bool tcpinject_shouldIlisten() {
    return FALSE;
 }
 
@@ -81,7 +81,7 @@ void tcpinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 void tcpinject_receive(OpenQueueEntry_t* msg) {
 }
 
-BOOL tcpinject_debugPrint() {
+bool tcpinject_debugPrint() {
    return FALSE;
 }
 

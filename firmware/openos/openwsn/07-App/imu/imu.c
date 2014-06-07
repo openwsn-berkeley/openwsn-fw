@@ -69,7 +69,7 @@ void imu_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    }
 }
 
-BOOL imu_debugPrint() {
+bool imu_debugPrint() {
    return FALSE;
 }
 

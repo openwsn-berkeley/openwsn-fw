@@ -55,7 +55,7 @@ void udpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-BOOL udpecho_debugPrint() {
+bool udpecho_debugPrint() {
    return FALSE;
 }
 

@@ -63,7 +63,7 @@ void heli_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-BOOL heli_debugPrint() {
+bool heli_debugPrint() {
    return FALSE;
 }
 

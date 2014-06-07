@@ -25,14 +25,14 @@ void     packetfunctions_mac64bToMac16b(open_addr_t* mac64b, open_addr_t* mac16b
 void     packetfunctions_mac16bToMac64b(open_addr_t* mac16b, open_addr_t* mac64btoWrite);
 
 // address recognition
-BOOL     packetfunctions_isBroadcastMulticast(open_addr_t* address);
-BOOL     packetfunctions_isAllRoutersMulticast(open_addr_t* address);
-BOOL     packetfunctions_isAllHostsMulticast(open_addr_t* address);
-BOOL     packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2);
+bool     packetfunctions_isBroadcastMulticast(open_addr_t* address);
+bool     packetfunctions_isAllRoutersMulticast(open_addr_t* address);
+bool     packetfunctions_isAllHostsMulticast(open_addr_t* address);
+bool     packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2);
 
 // read/write addresses to/from packets
-void     packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* writeToAddress, BOOL littleEndian);
-void     packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, BOOL littleEndian);
+void     packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* writeToAddress, bool littleEndian);
+void     packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, bool littleEndian);
 
 // reserving/tossing headers and footers
 void     packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_length);
@@ -42,7 +42,7 @@ void     packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length
 
 // calculate CRC
 void     packetfunctions_calculateCRC(OpenQueueEntry_t* msg);
-BOOL     packetfunctions_checkCRC(OpenQueueEntry_t* msg);
+bool     packetfunctions_checkCRC(OpenQueueEntry_t* msg);
 
 // calculate checksum
 void     packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_ptr);

@@ -151,7 +151,7 @@ void openudp_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-BOOL openudp_debugPrint() {
+bool openudp_debugPrint() {
    return FALSE;
 }
 

@@ -27,7 +27,7 @@ void udpprint_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-BOOL udpprint_debugPrint() {
+bool udpprint_debugPrint() {
    return FALSE;
 }
 

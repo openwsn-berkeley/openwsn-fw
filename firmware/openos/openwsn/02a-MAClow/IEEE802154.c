@@ -28,7 +28,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
                               uint8_t           ielistpresent,
                               uint8_t           frameVersion,
-                              BOOL         securityEnabled,
+                              bool         securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;

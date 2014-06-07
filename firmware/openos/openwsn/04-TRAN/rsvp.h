@@ -52,7 +52,7 @@ typedef struct{
    uint8_t dest_port; //dest port
    uint8_t protocol_id; //protocol id
    uint8_t flags; //
-   BOOL isLSP_tunnel_session;
+   bool isLSP_tunnel_session;
    uint8_t tunnel_id;
 }rsvp_session_t;
 

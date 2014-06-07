@@ -350,7 +350,7 @@ void openserial_startOutput() {
 void openserial_stop() {
    uint8_t inputBufFill;
    uint8_t cmdByte;
-   BOOL busyReceiving;
+   bool busyReceiving;
    INTERRUPT_DECLARATION();
    
    DISABLE_INTERRUPTS();
@@ -425,7 +425,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-BOOL debugPrint_outBufferIndexes() {
+bool debugPrint_outBufferIndexes() {
    uint16_t temp_buffer[2];
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();

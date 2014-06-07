@@ -34,7 +34,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-BOOL debugPrint_queue() {
+bool debugPrint_queue() {
    debugOpenQueueEntry_t output[QUEUELENGTH];
    uint8_t i;
    for (i=0;i<QUEUELENGTH;i++) {

@@ -32,7 +32,7 @@ typedef struct {
 
 // admin
 void               openqueue_init();
-BOOL               debugPrint_queue();
+bool               debugPrint_queue();
 // called by any component
 OpenQueueEntry_t*  openqueue_getFreePacketBuffer(uint8_t creator);
 owerror_t         openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);

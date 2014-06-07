@@ -68,7 +68,7 @@ void udpinject_receive(OpenQueueEntry_t* msg) {
    openqueue_freePacketBuffer(msg);
 }
 
-BOOL udpinject_debugPrint() {
+bool udpinject_debugPrint() {
    return FALSE;
 }
 

@@ -16,12 +16,12 @@ void registerNewNeighbor(
         open_addr_t* neighborID,
         int8_t       rssi,
         asn_t*       asnTimestamp,
-        BOOL         joinPrioPresent,
+        bool         joinPrioPresent,
         uint8_t      joinPrio
      );
-BOOL isNeighbor(open_addr_t* neighbor);
+bool isNeighbor(open_addr_t* neighbor);
 void removeNeighbor(uint8_t neighborIndex);
-BOOL isThisRowMatching(
+bool isThisRowMatching(
         open_addr_t* address,
         uint8_t      rowNumber
      );
@@ -78,9 +78,9 @@ uint8_t neighbors_getNumNeighbors() {
 
 \param[out] addressToWrite Where to write the preferred parent's address to.
 */
-BOOL neighbors_getPreferredParentEui64(open_addr_t* addressToWrite) {
+bool neighbors_getPreferredParentEui64(open_addr_t* addressToWrite) {
    uint8_t   i;
-   BOOL      foundPreferred;
+   bool      foundPreferred;
    uint8_t   numNeighbors;
    dagrank_t minRankVal;
    uint8_t   minRankIdx;
@@ -187,11 +187,11 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
 
 \returns TRUE if that neighbor is stable, FALSE otherwise.
 */
-BOOL neighbors_isStableNeighbor(open_addr_t* address) {
+bool neighbors_isStableNeighbor(open_addr_t* address) {
    uint8_t     i;
    open_addr_t temp_addr_64b;
    open_addr_t temp_prefix;
-   BOOL        returnVal;
+   bool        returnVal;
    
    // by default, not stable
    returnVal  = FALSE;
@@ -226,9 +226,9 @@ BOOL neighbors_isStableNeighbor(open_addr_t* address) {
 
 \returns TRUE if that neighbor is preferred, FALSE otherwise.
 */
-BOOL neighbors_isPreferredParent(open_addr_t* address) {
+bool neighbors_isPreferredParent(open_addr_t* address) {
    uint8_t i;
-   BOOL    returnVal;
+   bool    returnVal;
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -255,8 +255,8 @@ BOOL neighbors_isPreferredParent(open_addr_t* address) {
 
 \returns TRUE if that neighbor has a lower DAG rank than me, FALSE otherwise.
 */
-BOOL neighbors_isNeighborWithLowerDAGrank(uint8_t index) {
-   BOOL    returnVal;
+bool neighbors_isNeighborWithLowerDAGrank(uint8_t index) {
+   bool    returnVal;
    
    if (neighbors_vars.neighbors[index].used==TRUE &&
        neighbors_vars.neighbors[index].DAGrank < neighbors_getMyDAGrank()) { 
@@ -276,8 +276,8 @@ BOOL neighbors_isNeighborWithLowerDAGrank(uint8_t index) {
 
 \returns TRUE if that neighbor has a lower DAG rank than me, FALSE otherwise.
 */
-BOOL neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
-   BOOL    returnVal;
+bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
+   bool    returnVal;
    
    if (neighbors_vars.neighbors[index].used==TRUE &&
        neighbors_vars.neighbors[index].DAGrank >= neighbors_getMyDAGrank()) { 
@@ -315,10 +315,10 @@ The fields which are updated are:
 void neighbors_indicateRx(open_addr_t* l2_src,
                           int8_t       rssi,
                           asn_t*       asnTs,
-                          BOOL         joinPrioPresent,
+                          bool         joinPrioPresent,
                           uint8_t      joinPrio) {
    uint8_t i;
-   BOOL    newNeighbor;
+   bool    newNeighbor;
    
    // update existing neighbor
    newNeighbor = TRUE;
@@ -391,7 +391,7 @@ The fields which are updated are:
 */
 void neighbors_indicateTx(open_addr_t* l2_dest,
                           uint8_t      numTxAttempts,
-                          BOOL         was_finally_acked,
+                          bool         was_finally_acked,
                           asn_t*       asnTs) {
    uint8_t i;
    // don't run through this function if packet was sent to broadcast address
@@ -499,7 +499,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint16_t  rankIncrease;
    uint32_t  tentativeDAGrank; // 32-bit since is used to sum
    uint8_t   prefParentIdx;
-   BOOL      prefParentFound;
+   bool      prefParentFound;
    
    // if I'm a DAGroot, my DAGrank is always 0
    if ((idmanager_getIsDAGroot())==TRUE) {
@@ -574,7 +574,7 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-BOOL debugPrint_neighbors() {
+bool debugPrint_neighbors() {
    debugNeighborEntry_t temp;
    neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
    temp.row=neighbors_vars.debugRow;
@@ -609,10 +609,10 @@ void debugNetPrint_neighbors(netDebugNeigborEntry_t* out){
 void registerNewNeighbor(open_addr_t* address,
                          int8_t       rssi,
                          asn_t*       asnTimestamp,
-                         BOOL         joinPrioPresent,
+                         bool         joinPrioPresent,
                          uint8_t      joinPrio) {
    uint8_t  i,j;
-   BOOL     iHaveAPreferedParent;
+   bool     iHaveAPreferedParent;
    // filter errors
    if (address->type!=ADDR_64B) {
       openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
@@ -668,7 +668,7 @@ void registerNewNeighbor(open_addr_t* address,
    }
 }
 
-BOOL isNeighbor(open_addr_t* neighbor) {
+bool isNeighbor(open_addr_t* neighbor) {
    uint8_t i=0;
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (isThisRowMatching(neighbor,i)) {
@@ -698,7 +698,7 @@ void removeNeighbor(uint8_t neighborIndex) {
 
 //=========================== helpers =========================================
 
-BOOL isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
+bool isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
    switch (address->type) {
       case ADDR_64B:
          return neighbors_vars.neighbors[rowNumber].used &&

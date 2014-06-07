@@ -17,11 +17,11 @@
 //=========================== prototypes ======================================
 
 void tcpprint_init();
-BOOL tcpprint_shouldIlisten();
+bool tcpprint_shouldIlisten();
 void tcpprint_receive(OpenQueueEntry_t* msg);
 void tcpprint_connectDone(owerror_t error);
 void tcpprint_sendDone(OpenQueueEntry_t* msg, owerror_t error);
-BOOL tcpprint_debugPrint();
+bool tcpprint_debugPrint();
 
 /**
 \}
