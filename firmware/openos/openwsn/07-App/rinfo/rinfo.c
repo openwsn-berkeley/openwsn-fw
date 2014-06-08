@@ -14,12 +14,12 @@
 
 //=========================== defines =========================================
 
-const uint8_t rinfo_path0[] = "i";
+const uint8_t rinfo_path0[] = "INFO";
 
 //=========================== variables =======================================
 
 rinfo_vars_t rinfo_vars;
-
+extern volatile uint8_t rex_start;
 //=========================== prototypes ======================================
 
 owerror_t     rinfo_receive(
@@ -118,6 +118,7 @@ owerror_t rinfo_receive(
          coap_header->Code                = COAP_CODE_RESP_CONTENT;
          
          outcome                          = E_SUCCESS;
+		 rex_start = TRUE;
          break;
       default:
          // return an error message

@@ -19,9 +19,9 @@
 
 /// inter-packet period (in ms)
 #define REXPERIOD    10000
-#define PAYLOADLEN    62
+#define PAYLOADLEN    20
 
-const uint8_t rex_path0[] = "rex";
+const uint8_t rex_path0[] = "ADC";
 
 //=========================== variables =======================================
 
@@ -31,6 +31,8 @@ typedef struct {
 } rex_vars_t;
 
 rex_vars_t rex_vars;
+
+volatile uint8_t rex_start=FALSE;
 
 //=========================== prototypes ======================================
 
@@ -45,6 +47,9 @@ void    rex_sendDone(OpenQueueEntry_t* msg,
 //=========================== public ==========================================
 
 void rex_init() {
+   
+    // do not run if DAGroot
+    if(idmanager_getIsDAGroot()==TRUE) return;
    
    // prepare the resource descriptor for the /rex path
    rex_vars.desc.path0len             = sizeof(rex_path0)-1;
@@ -82,11 +87,11 @@ void rex_task_cb() {
    uint8_t           numOptions;
    uint8_t           i;
    
-   uint16_t       x_int       = 0;
+   //uint16_t       x_int       = 0;
    //uint16_t*      p_x_int     = &x_int;
-   uint16_t       sum         = 0;
-   uint16_t       avg         = 0;
-   uint8_t        N_avg       = 10;
+   //uint16_t       sum         = 0;
+   static uint16_t       avg         = '0';
+   //uint8_t        N_avg       = 10;
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
@@ -97,12 +102,8 @@ void rex_task_cb() {
        return;
    }
    
-   
-   for (i = 0; i < N_avg; i++) {
-      //ADC_getvoltage(p_x_int);
-      sum += x_int;
-   }
-   avg = sum/N_avg;
+    if (rex_start == FALSE) return;
+
    
    
    // create a CoAP RD packet
@@ -122,7 +123,9 @@ void rex_task_cb() {
    for (i=0;i<PAYLOADLEN;i++) {
       pkt->payload[i] = i;
    }
-   avg = openrandom_get16b();
+   avg++;
+   if((avg == 'f') || (avg == 'F') )
+   avg = '0';
    pkt->payload[0] = (avg>>8)&0xff;
    pkt->payload[1] = (avg>>0)&0xff;
    

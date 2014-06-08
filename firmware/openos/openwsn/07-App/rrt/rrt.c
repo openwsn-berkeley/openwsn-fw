@@ -14,7 +14,7 @@
 
 //=========================== defines =========================================
 
-const uint8_t rrt_path0[] = "rt";
+const uint8_t rrt_path0[] = "STATUS";
 
 //=========================== variables =======================================
 
@@ -84,13 +84,15 @@ owerror_t rrt_receive(
          
          //=== prepare  CoAP response
          
-         packetfunctions_reserveHeaderSize(msg,6);
-         msg->payload[0] = 'p';
-         msg->payload[1] = 'o';
-         msg->payload[2] = 'i';
-         msg->payload[3] = 'p';
-         msg->payload[4] = 'o';
-         msg->payload[5] = 'i';
+         packetfunctions_reserveHeaderSize(msg,8);
+         msg->payload[0] = 'W';
+         msg->payload[1] = 'O';
+         msg->payload[2] = 'R';
+         msg->payload[3] = 'K';
+         msg->payload[4] = 'I';
+         msg->payload[5] = 'N';
+		 msg->payload[6] = 'G';
+		 msg->payload[7] = '.';
          
          // payload marker
          packetfunctions_reserveHeaderSize(msg,1);

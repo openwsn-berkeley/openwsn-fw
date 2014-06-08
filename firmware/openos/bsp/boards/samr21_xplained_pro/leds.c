@@ -6,6 +6,7 @@
 #include "samr21_xplained_pro.h"
 #include "delay.h"
 
+uint8_t sync_led_status = 0;
 
 void leds_init(void)
 {
@@ -40,22 +41,25 @@ void leds_error_blink(void)
 
 void leds_sync_on(void)
 {
+ sync_led_status = 1;
  LED_On(LED0);
 }
 
 void leds_sync_off(void)
 {
+ sync_led_status = 0;
  LED_Off(LED0);
 }
 
 void leds_sync_toggle(void)
 {
+ sync_led_status = 2;
  LED_Toggle(LED0);
 }
 
 uint8_t leds_sync_isOn(void)
 {
- return true;
+ return sync_led_status;
 }
 
 void leds_radio_on(void)

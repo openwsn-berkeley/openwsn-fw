@@ -140,7 +140,7 @@ void openwsn_init() {
    rwellknown_init();
    r6t_init();
    //rreg_init();
-   //rex_init();
+   rex_init();
    //rrube_init();
    //layerdebug_init();
    //- board-specific
