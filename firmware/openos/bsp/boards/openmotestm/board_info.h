@@ -20,10 +20,10 @@ to return the board's description.
 #define DEBUG_SLEEP_MODE
 //#define DEBUG_STOP_MODE
 
-#define port_INLINE                         inline
+#define port_INLINE   inline
+#define BEGIN_PACK    _Pragma("pack(1)")
+#define END_PACK      _Pragma("pack()")
 
-#define PRAGMA(x)  _Pragma(#x)
-#define PACK(x)     pack(x)
 
 //TODO in case previous declaration fails in certain compilers. Remove this 
 //one if it works with GNU GCC

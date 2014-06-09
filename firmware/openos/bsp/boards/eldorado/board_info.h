@@ -12,7 +12,10 @@
 #include "string.h"
 //=========================== defines =========================================
 
-#define port_INLINE                         inline
+#define port_INLINE   inline
+#define BEGIN_PACK    _Pragma("pack(1)")
+#define END_PACK      _Pragma("pack()")
+
 #define PORT_RADIOTIMER_WIDTH               uint16_t
 
 //===== adaptive_sync accuracy

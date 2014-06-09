@@ -1,0 +1,1 @@
+set PATH=%PATH%;D:\apps\mingw\bin;C:\Python27;C:\Python27\Scripts

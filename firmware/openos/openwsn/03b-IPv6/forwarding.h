@@ -32,7 +32,7 @@ enum {
 
 As defined in http://tools.ietf.org/html/rfc6554#section-3.
 */
-PRAGMA(pack(1));
+BEGIN_PACK;
 typedef struct {
    uint8_t    nextHeader;    ///< Header immediately following.
    uint8_t    HdrExtLen;     ///< In 8-octet units, excluding first 8.
@@ -42,7 +42,7 @@ typedef struct {
    uint8_t    PadRes;        ///< Number of padding octets. Set to 0 if using EUI64.
    uint16_t   Reserved;      ///< Set to 0.
 } rpl_routing_ht;
-PRAGMA(pack());
+END_PACK;
 
 //=========================== variables =======================================
 
