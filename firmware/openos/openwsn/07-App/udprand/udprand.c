@@ -26,7 +26,7 @@ udprand_vars_t udprand_vars;
 
 //=========================== prototypes ======================================
 
-void udprand_timer();
+void udprand_timer(void);
 
 //=========================== public ==========================================
 

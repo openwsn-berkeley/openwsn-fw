@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void udpstorm_init();
+void udpstorm_init(void);
 
 /**
 \}

@@ -156,7 +156,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 // from stack
-void          opencoap_init();
+void          opencoap_init(void);
 void          opencoap_receive(OpenQueueEntry_t* msg);
 void          opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 

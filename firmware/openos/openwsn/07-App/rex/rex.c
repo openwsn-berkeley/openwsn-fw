@@ -37,8 +37,8 @@ rex_vars_t rex_vars;
 owerror_t rex_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
-void    rex_timer_cb();
-void    rex_task_cb();
+void    rex_timer_cb(void);
+void    rex_task_cb(void);
 void    rex_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
 

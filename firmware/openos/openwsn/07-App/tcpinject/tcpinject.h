@@ -23,13 +23,13 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void tcpinject_init();
-bool tcpinject_shouldIlisten();
-void tcpinject_trigger();
+void tcpinject_init(void);
+bool tcpinject_shouldIlisten(void);
+void tcpinject_trigger(void);
 void tcpinject_connectDone(owerror_t error);
 void tcpinject_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void tcpinject_receive(OpenQueueEntry_t* msg);
-bool tcpinject_debugPrint();
+bool tcpinject_debugPrint(void);
 
 /**
 \}

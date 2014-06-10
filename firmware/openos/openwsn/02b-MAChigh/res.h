@@ -28,13 +28,13 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void    res_init();
-bool    debugPrint_myDAGrank();
+void    res_init(void);
+bool    debugPrint_myDAGrank(void);
 // from upper layer
 owerror_t res_send(OpenQueueEntry_t *msg);
 // from lower layer
-void    task_resNotifSendDone();
-void    task_resNotifReceive();
+void    task_resNotifSendDone(void);
+void    task_resNotifReceive(void);
 void    res_setKaPeriod(uint16_t kaPeriod);
 
 /**

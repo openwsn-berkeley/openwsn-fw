@@ -173,7 +173,7 @@ PRAGMA(pack());
 
 //=========================== prototypes ======================================
 
-void          iphc_init();
+void          iphc_init(void);
 owerror_t     iphc_sendFromForwarding(
    OpenQueueEntry_t*    msg, 
    ipv6_header_iht*     ipv6_header, 

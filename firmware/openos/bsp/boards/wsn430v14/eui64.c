@@ -32,24 +32,24 @@ enum  {
 //=========================== prototypes ======================================
 
 // 1Wire
-uint8_t ow_reset();
+uint8_t ow_reset(void);
 void    ow_write_byte(uint8_t byte);
-uint8_t ow_read_byte();
+uint8_t ow_read_byte(void);
 void    ow_write_bit(int is_one);
-uint8_t ow_read_bit();
-void    ow_write_bit_one();
-void    ow_write_bit_zero();
+uint8_t ow_read_bit(void);
+void    ow_write_bit_one(void);
+void    ow_write_bit_zero(void);
 // CRC
 uint8_t crc8_byte(uint8_t crc, uint8_t byte);
 uint8_t crc8_bytes(uint8_t crc, uint8_t* bytes, uint8_t len);
 // timer
 void    delay_us(uint16_t delay);
 // pin
-void    owpin_init();
-void    owpin_output_low();
-void    owpin_output_high();
-void    owpin_prepare_read();
-uint8_t owpin_read();
+void    owpin_init(void);
+void    owpin_output_low(void);
+void    owpin_output_high(void);
+void    owpin_prepare_read(void);
+uint8_t owpin_read(void);
 
 //=========================== public ==========================================
 

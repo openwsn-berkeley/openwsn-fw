@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void layerdebug_init();
+void layerdebug_init(void);
 
 /**
 \}

@@ -143,9 +143,9 @@ typedef struct {
 //=========================== prototypes ======================================
 
 // admin
-void               schedule_init();
-bool               debugPrint_schedule();
-bool               debugPrint_backoff();
+void               schedule_init(void);
+bool               debugPrint_schedule(void);
+bool               debugPrint_backoff(void);
 // from uRES
 void               schedule_setFrameLength(frameLength_t newFrameLength);
 owerror_t            schedule_addActiveSlot(
@@ -166,14 +166,14 @@ owerror_t               schedule_removeActiveSlot(slotOffset_t   slotOffset,
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
-void               schedule_advanceSlot();
-slotOffset_t       schedule_getNextActiveSlotOffset();
-frameLength_t      schedule_getFrameLength();
-cellType_t         schedule_getType();
+void               schedule_advanceSlot(void);
+slotOffset_t       schedule_getNextActiveSlotOffset(void);
+frameLength_t      schedule_getFrameLength(void);
+cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
-channelOffset_t    schedule_getChannelOffset();
-bool               schedule_getOkToSend();
-void               schedule_resetBackoff();
+channelOffset_t    schedule_getChannelOffset(void);
+bool               schedule_getOkToSend(void);
+void               schedule_resetBackoff(void);
 void               schedule_indicateRx(asn_t*   asnTimestamp);
 void               schedule_indicateTx(
                         asn_t*    asnTimestamp,

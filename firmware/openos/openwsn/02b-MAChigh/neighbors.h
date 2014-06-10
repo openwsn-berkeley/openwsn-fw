@@ -71,11 +71,11 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void          neighbors_init();
+void          neighbors_init(void);
 
 // getters
-dagrank_t     neighbors_getMyDAGrank();
-uint8_t       neighbors_getNumNeighbors();
+dagrank_t     neighbors_getMyDAGrank(void);
+uint8_t       neighbors_getNumNeighbors(void);
 bool          neighbors_getPreferredParentEui64(open_addr_t* addressToWrite);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
 
@@ -104,11 +104,11 @@ void          neighbors_indicateRxDIO(OpenQueueEntry_t* msg);
 // get addresses
 void          neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index);
 // managing routing info
-void          neighbors_updateMyDAGrankAndNeighborPreference();
+void          neighbors_updateMyDAGrankAndNeighborPreference(void);
 // maintenance
-void          neighbors_removeOld();
+void          neighbors_removeOld(void);
 // debug
-bool          debugPrint_neighbors();
+bool          debugPrint_neighbors(void);
 void          debugNetPrint_neighbors(netDebugNeigborEntry_t* schlist);
           
 /**

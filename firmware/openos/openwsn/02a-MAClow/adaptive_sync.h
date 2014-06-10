@@ -46,13 +46,13 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void adaptive_sync_init();
+void adaptive_sync_init(void);
 void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource);
 void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection);
 
-void adaptive_sync_countCompensationTimeout();
+void adaptive_sync_countCompensationTimeout(void);
 void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots);
-void adaptive_sync_driftChanged();
+void adaptive_sync_driftChanged(void);
 
 /**
 \}

@@ -20,12 +20,12 @@
 
 //=========================== prototypes ======================================
 
-void udplatency_init();
-void udplatency_trigger();
+void udplatency_init(void);
+void udplatency_trigger(void);
 void udplatency_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void udplatency_receive(OpenQueueEntry_t* msg);
-bool udplatency_debugPrint();
-void udplatency_task();
+bool udplatency_debugPrint(void);
+void udplatency_task(void);
 
 /**
 \}

@@ -33,12 +33,12 @@
 #define BSP_USER_BUTTON             ( GPIO_PIN_3 )
 //=========================== prototypes ======================================
 
-void antenna_init();
-void antenna_internal();
-void antenna_external();
-void button_init();
+void antenna_init(void);
+void antenna_internal(void);
+void antenna_external(void);
+void button_init(void);
 
-void GPIO_C_Isr_Handler();
+void GPIO_C_Isr_Handler(void);
 
 static void clock_init(void);
 static void gpio_init(void);
@@ -50,9 +50,9 @@ static void SysCtrlWakeupSetting(void);
 
 //=========================== main ============================================
 
-extern int mote_main();
+extern int mote_main(void);
 
-int main() {
+int main(void) {
    return mote_main();
 }
 

@@ -18,7 +18,7 @@ typedef struct {
 
 mpls_vars_t mpls_vars;
 
-void    mpls_timer_cb();
+void    mpls_timer_cb(void);
 
 void    mpls_init(){
    mpls_vars.refreshperiod = 60000; // fires every 10 s on average

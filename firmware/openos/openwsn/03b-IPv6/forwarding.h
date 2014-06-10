@@ -48,7 +48,7 @@ PRAGMA(pack());
 
 //=========================== prototypes ======================================
 
-void      forwarding_init();
+void      forwarding_init(void);
 owerror_t forwarding_send(OpenQueueEntry_t* msg);
 void      forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void      forwarding_receive(

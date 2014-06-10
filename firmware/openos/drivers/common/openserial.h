@@ -85,7 +85,7 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void    openserial_init();
+void    openserial_init(void);
 owerror_t openserial_printStatus(uint8_t statusElement, uint8_t* buffer, uint8_t length);
 owerror_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
@@ -97,17 +97,17 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
                               errorparameter_t arg1,
                               errorparameter_t arg2);
 owerror_t openserial_printData(uint8_t* buffer, uint8_t length);
-uint8_t openserial_getNumDataBytes();
+uint8_t openserial_getNumDataBytes(void);
 uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes);
-void    openserial_startInput();
-void    openserial_startOutput();
-void    openserial_stop();
-bool    debugPrint_outBufferIndexes();
+void    openserial_startInput(void);
+void    openserial_startOutput(void);
+void    openserial_stop(void);
+bool    debugPrint_outBufferIndexes(void);
 void    openserial_echo(uint8_t* but, uint8_t bufLen);
 
 // interrupt handlers
-void    isr_openserial_rx();
-void    isr_openserial_tx();
+void    isr_openserial_rx(void);
+void    isr_openserial_tx(void);
 
 /**
 \}

@@ -144,10 +144,16 @@
 
 /* In the following line adjust the value of External High Speed oscillator (HSE)
    used in your application */
+#ifdef HSE_Value
+#undef HSE_Value
+#endif
 #define HSE_Value    ((u32)16000000) /* Value of the External oscillator in Hz*/
 
 /* In the following line adjust the External High Speed oscillator (HSE) Startup 
    Timeout value */
+#ifdef HSEStartUp_TimeOut
+#undef HSEStartUp_TimeOut
+#endif
 #define HSEStartUp_TimeOut    ((u16)0x0500) /* Time out for HSE start up */
 
 /* Exported macro ------------------------------------------------------------*/

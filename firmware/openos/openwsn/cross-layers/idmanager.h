@@ -40,18 +40,18 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void         idmanager_init();
-bool         idmanager_getIsDAGroot();
+void         idmanager_init(void);
+bool         idmanager_getIsDAGroot(void);
 void         idmanager_setIsDAGroot(bool newRole);
-bool         idmanager_getIsBridge();
+bool         idmanager_getIsBridge(void);
 void         idmanager_setIsBridge(bool newRole);
 open_addr_t* idmanager_getMyID(uint8_t type);
 owerror_t      idmanager_setMyID(open_addr_t* newID);
 bool         idmanager_isMyAddress(open_addr_t* addr);
-void         idmanager_triggerAboutRoot();
-void         idmanager_triggerAboutBridge();
+void         idmanager_triggerAboutRoot(void);
+void         idmanager_triggerAboutBridge(void);
 
-bool         debugPrint_id();
+bool         debugPrint_id(void);
 
 
 /**

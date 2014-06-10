@@ -21,7 +21,7 @@ opentimers_vars_t opentimers_vars;
 
 //=========================== prototypes ======================================
 
-void opentimers_timer_callback();
+void opentimers_timer_callback(void);
 
 //=========================== public ==========================================
 

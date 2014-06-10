@@ -48,7 +48,7 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void     icmpv6_init();
+void     icmpv6_init(void);
 owerror_t  icmpv6_send(OpenQueueEntry_t* msg);
 void     icmpv6_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void     icmpv6_receive(OpenQueueEntry_t* msg);

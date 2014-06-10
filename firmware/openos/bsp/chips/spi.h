@@ -43,13 +43,13 @@ typedef enum {
    SPI_LAST             = 1,
 } spi_last_t;
 
-typedef void (*spi_cbt)();
+typedef void (*spi_cbt)(void);
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-void    spi_init();
+void    spi_init(void);
 #ifdef SPI_IN_INTERRUPT_MODE
 void    spi_setCb(spi_cbt cb);
 #endif
@@ -62,6 +62,6 @@ void    spi_txrx(uint8_t*     bufTx,
                  spi_last_t   isLast);
 
 // interrupt handlers
-kick_scheduler_t spi_isr();
+kick_scheduler_t spi_isr(void);
 
 #endif

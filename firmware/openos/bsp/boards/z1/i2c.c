@@ -55,7 +55,7 @@ unsigned char i2c_busy(int bus_num);
 
 //#define bus_num 1
 
-void i2c_init() {
+void i2c_init(void) {
    i2c_control.ctl0[0]=&UCB0CTL0;
    i2c_control.ctl0[1]=&UCB1CTL0;
    i2c_control.ctl1[0]=&UCB0CTL1;

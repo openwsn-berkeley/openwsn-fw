@@ -14,25 +14,25 @@
 
 //=========================== typedef =========================================
 
-typedef void (*rtc_timer_alarm_cbt)();
+typedef void (*rtc_timer_alarm_cbt)(void);
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
 // admin
-void     rtc_timer_init();
+void     rtc_timer_init(void);
 void     rtc_timer_setAlarmCb(rtc_timer_alarm_cbt cb);
 void     rtc_timer_start(u32 alarmValue);
 // direct access
-PORT_TIMER_WIDTH     rtc_timer_getAlarm();
-void    rtc_timer_resetCounter();
+PORT_TIMER_WIDTH     rtc_timer_getAlarm(void);
+void    rtc_timer_resetCounter(void);
 //set alarm
 
 // capture
-PORT_TIMER_WIDTH rtc_timer_getCapturedTime();
+PORT_TIMER_WIDTH rtc_timer_getCapturedTime(void);
 
 
-uint8_t  rtc_timer_isr();
+uint8_t  rtc_timer_isr(void);
 
 #endif

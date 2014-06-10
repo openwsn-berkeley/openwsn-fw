@@ -50,7 +50,7 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void r6t_init();
+void r6t_init(void);
 
 /**
 \}
