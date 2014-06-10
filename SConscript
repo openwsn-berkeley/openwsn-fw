@@ -38,6 +38,7 @@ if   env['toolchain']=='mspgcc':
     
     # compiler
     env.Replace(CC           = 'msp430-gcc')
+    env.Append(CCFLAGS       = '-Wstrict-prototypes')
     env.Append(CCFLAGS       = '')
     # archiver
     env.Replace(AR           = 'msp430-ar')
@@ -191,6 +192,7 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-mcpu=cortex-m3')
         env.Append(CCFLAGS       = '-mthumb')
         env.Append(CCFLAGS       = '-g3')
+        env.Append(CCFLAGS       = '-Wstrict-prototypes')
         # assembler
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
@@ -228,7 +230,7 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-std=gnu99')
         env.Append(CCFLAGS       = '-O0')
         env.Append(CCFLAGS       = '-Wall')
-        #env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        env.Append(CCFLAGS       = '-Wstrict-prototypes')
         env.Append(CCFLAGS       = '-mcpu=cortex-m3')
         env.Append(CCFLAGS       = '-mlittle-endian')
         env.Append(CCFLAGS       = '-mthumb')
