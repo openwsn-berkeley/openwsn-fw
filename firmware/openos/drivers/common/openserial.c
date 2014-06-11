@@ -35,13 +35,13 @@ owerror_t openserial_printInfoErrorCritical(
    errorparameter_t arg2
 );
 // HDLC output
-void outputHdlcOpen();
+void outputHdlcOpen(void);
 void outputHdlcWrite(uint8_t b);
-void outputHdlcClose();
+void outputHdlcClose(void);
 // HDLC input
-void inputHdlcOpen();
+void inputHdlcOpen(void);
 void inputHdlcWrite(uint8_t b);
-void inputHdlcClose();
+void inputHdlcClose(void);
 
 //=========================== public ==========================================
 

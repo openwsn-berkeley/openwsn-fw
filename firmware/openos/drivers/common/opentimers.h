@@ -27,7 +27,7 @@
 
 #define opentimer_id_t uint8_t
 
-typedef void (*opentimers_cbt)();
+typedef void (*opentimers_cbt)(void);
 
 //=========================== typedef =========================================
 
@@ -63,7 +63,7 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void           opentimers_init();
+void           opentimers_init(void);
 opentimer_id_t opentimers_start(uint32_t       duration,
                                 timer_type_t   type,
                                 time_type_t timetype,

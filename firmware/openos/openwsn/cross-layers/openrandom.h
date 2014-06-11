@@ -22,8 +22,8 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void     openrandom_init();
-uint16_t openrandom_get16b();
+void     openrandom_init(void);
+uint16_t openrandom_get16b(void);
 
 /**
 \}

@@ -21,20 +21,20 @@
 #define SCTIMER_TICS_MS 33
 //=========================== typedef =========================================
 
-typedef kick_scheduler_t (*sctimer_cbt)();
+typedef kick_scheduler_t (*sctimer_cbt)(void);
 
 //=========================== variables =======================================
 
 
 //=========================== prototypes ======================================
 
-void sctimer_init();
-void sctimer_stop();
+void sctimer_init(void);
+void sctimer_stop(void);
 void sctimer_schedule(PORT_TIMER_WIDTH val);
-PORT_TIMER_WIDTH sctimer_getValue();
+PORT_TIMER_WIDTH sctimer_getValue(void);
 void sctimer_setCb(sctimer_cbt cb);
-void sctimer_clearISR();
-void sctimer_reset();
+void sctimer_clearISR(void);
+void sctimer_reset(void);
 
 /**
 \}

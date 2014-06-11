@@ -25,12 +25,12 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void ohlone_init();
-bool ohlone_shouldIlisten();
+void ohlone_init(void);
+bool ohlone_shouldIlisten(void);
 void ohlone_receive(OpenQueueEntry_t* msg);
 void ohlone_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void ohlone_connectDone(owerror_t error);
-bool ohlone_debugPrint();
+bool ohlone_debugPrint(void);
 
 /**
 \}

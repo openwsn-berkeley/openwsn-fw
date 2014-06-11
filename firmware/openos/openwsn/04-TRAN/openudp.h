@@ -45,11 +45,11 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void    openudp_init();
+void    openudp_init(void);
 owerror_t openudp_send(OpenQueueEntry_t* msg);
 void    openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void    openudp_receive(OpenQueueEntry_t* msg);
-bool    openudp_debugPrint();
+bool    openudp_debugPrint(void);
 
 /**
 \}

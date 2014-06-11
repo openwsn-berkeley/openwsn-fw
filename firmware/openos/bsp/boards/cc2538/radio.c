@@ -42,11 +42,11 @@ radio_vars_t radio_vars;
 
 //=========================== prototypes ======================================
 
-port_INLINE void    radio_on();
-port_INLINE void    radio_off();
-void radio_error_isr();
-port_INLINE void enable_radio_interrupts();
-port_INLINE void disable_radio_interrupts();
+port_INLINE void    radio_on(void);
+port_INLINE void    radio_off(void);
+void radio_error_isr(void);
+port_INLINE void enable_radio_interrupts(void);
+port_INLINE void disable_radio_interrupts(void);
 //=========================== public ==========================================
 
 //===== admin
@@ -390,7 +390,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 
 //=========================== private =========================================
 
-port_INLINE  void enable_radio_interrupts(){
+port_INLINE  void enable_radio_interrupts(void){
    /* Enable RF interrupts 0, RXPKTDONE,SFD,FIFOP only -- see page 751  */
    HWREG(RFCORE_XREG_RFIRQM0) |= ((0x06|0x02|0x01) << RFCORE_XREG_RFIRQM0_RFIRQM_S) & RFCORE_XREG_RFIRQM0_RFIRQM_M;
 
@@ -398,7 +398,7 @@ port_INLINE  void enable_radio_interrupts(){
    HWREG(RFCORE_XREG_RFIRQM1) |= ((0x02) << RFCORE_XREG_RFIRQM1_RFIRQM_S) & RFCORE_XREG_RFIRQM1_RFIRQM_M;
 }
 
-port_INLINE  void disable_radio_interrupts(){
+port_INLINE  void disable_radio_interrupts(void){
    /* Enable RF interrupts 0, RXPKTDONE,SFD,FIFOP only -- see page 751  */
    HWREG(RFCORE_XREG_RFIRQM0) = 0;
    /* Enable RF interrupts 1, TXDONE only */
@@ -406,12 +406,12 @@ port_INLINE  void disable_radio_interrupts(){
 }
 
 
-port_INLINE void radio_on(){
+port_INLINE void radio_on(void){
    // CC2538_RF_CSP_ISFLUSHRX();
     CC2538_RF_CSP_ISRXON();
 }
 
-port_INLINE void radio_off(){
+port_INLINE void radio_off(void){
 	/* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
     while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
     //CC2538_RF_CSP_ISFLUSHRX();
@@ -509,7 +509,7 @@ kick_scheduler_t radio_isr() {
    return DO_NOT_KICK_SCHEDULER;
 }
 
-void radio_error_isr(){
+void radio_error_isr(void){
 	  uint8_t rferrm;
 
 	  rferrm = (uint8_t)HWREG(RFCORE_XREG_RFERRM);

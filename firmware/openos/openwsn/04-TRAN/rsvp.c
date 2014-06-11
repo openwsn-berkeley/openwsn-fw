@@ -17,7 +17,7 @@ typedef struct{
    uint8_t rsvp_timer_id;
 }rsvp_vars_t;
 
-void rsvp_timer_cb();
+void rsvp_timer_cb(void);
 
 rsvp_vars_t rsvp_vars;
 

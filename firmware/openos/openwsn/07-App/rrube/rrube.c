@@ -40,7 +40,7 @@ const uint8_t rrube_path0[]    = "g";
 owerror_t rrube_receive(OpenQueueEntry_t* msg,
                      coap_header_iht*  coap_header,
                      coap_option_iht*  coap_options);
-void    rrube_timer();
+void    rrube_timer(void);
 void    rrube_sendDone(OpenQueueEntry_t* msg,
                       owerror_t error);
 uint8_t hexToAscii(uint8_t hex);

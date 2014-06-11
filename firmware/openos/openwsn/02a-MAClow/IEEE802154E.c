@@ -24,39 +24,39 @@ ieee154e_dbg_t     ieee154e_dbg;
 //=========================== prototypes ======================================
 
 // SYNCHRONIZING
-void     activity_synchronize_newSlot();
+void     activity_synchronize_newSlot(void);
 void     activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 void     activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 // TX
-void     activity_ti1ORri1();
-void     activity_ti2();
-void     activity_tie1();
-void     activity_ti3();
-void     activity_tie2();
+void     activity_ti1ORri1(void);
+void     activity_ti2(void);
+void     activity_tie1(void);
+void     activity_ti3(void);
+void     activity_tie2(void);
 void     activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime);
-void     activity_tie3();
+void     activity_tie3(void);
 void     activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime);
-void     activity_ti6();
-void     activity_tie4();
-void     activity_ti7();
-void     activity_tie5();
+void     activity_ti6(void);
+void     activity_tie4(void);
+void     activity_ti7(void);
+void     activity_tie5(void);
 void     activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime);
-void     activity_tie6();
+void     activity_tie6(void);
 void     activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime);
 // RX
-void     activity_ri2();
-void     activity_rie1();
-void     activity_ri3();
-void     activity_rie2();
+void     activity_ri2(void);
+void     activity_rie1(void);
+void     activity_ri3(void);
+void     activity_rie2(void);
 void     activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime);
-void     activity_rie3();
+void     activity_rie3(void);
 void     activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime);
-void     activity_ri6();
-void     activity_rie4();
-void     activity_ri7();
-void     activity_rie5();
+void     activity_ri6(void);
+void     activity_rie4(void);
+void     activity_ri7(void);
+void     activity_rie5(void);
 void     activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime);
-void     activity_rie6();
+void     activity_rie6(void);
 void     activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime);
 // frame validity check
 
@@ -67,7 +67,7 @@ bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t *     lenIE);//xv poipoi
 void     ieee154e_processSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr);//xv poipoi
 // ASN handling
-void     incrementAsnOffset();
+void     incrementAsnOffset(void);
 void     asnStoreFromAdv(uint8_t* asn);
 void     joinPriorityStoreFromAdv(uint8_t jp);
 // synchronization
@@ -78,14 +78,14 @@ void     changeIsSync(bool newIsSync);
 void     notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error);
 void     notif_receive(OpenQueueEntry_t* packetReceived);
 // statistics
-void     resetStats();
+void     resetStats(void);
 void     updateStats(PORT_SIGNED_INT_WIDTH timeCorrection);
 // misc
 uint8_t  calculateFrequency(uint8_t channelOffset);
 void     changeState(ieee154e_state_t newstate);
-void     endSlot();
-bool     debugPrint_asn();
-bool     debugPrint_isSync();
+void     endSlot(void);
+bool     debugPrint_asn(void);
+bool     debugPrint_isSync(void);
 
 //=========================== admin ===========================================
 

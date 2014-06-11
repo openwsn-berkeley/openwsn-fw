@@ -22,8 +22,8 @@ tcp_vars_t tcp_vars;
 void prependTCPHeader(OpenQueueEntry_t* msg, bool ack, bool push, bool rst, bool syn, bool fin);
 bool containsControlBits(OpenQueueEntry_t* msg, uint8_t ack, uint8_t rst, uint8_t syn, uint8_t fin);
 void tcp_change_state(uint8_t new_state);
-void opentcp_reset();
-void opentcp_timer_cb();
+void opentcp_reset(void);
+void opentcp_timer_cb(void);
 
 //=========================== public ==========================================
 
@@ -647,14 +647,14 @@ owerror_t opentcp_close() {    //[command] teardown
    return forwarding_send(tempPkt);
 }
 
-bool tcp_debugPrint() {
+bool tcp_debugPrint(void) {
    return FALSE;
 }
 
 //======= timer
 
 //timer used to reset state when TCP state machine is stuck
-void timers_tcp_fired() {
+void timers_tcp_fired(void) {
    opentcp_reset();
 }
 

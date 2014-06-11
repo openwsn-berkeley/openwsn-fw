@@ -25,7 +25,7 @@ uint8_t  ohlone_insert4sensors(uint8_t *buffer, uint8_t *sensors);
 
 //=========================== public ==========================================
 
-void ohlone_webpages_init() {
+void ohlone_webpages_init(void) {
    /*
    if (*(&eui64+3)==0x09) {                      // this is a GINA board (not a basestation)
       gyro_init();

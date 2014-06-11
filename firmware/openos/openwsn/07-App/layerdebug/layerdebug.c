@@ -44,11 +44,11 @@ owerror_t layerdebug_neighbors_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
 
-void    layerdebug_timer_schedule_cb();
-void    layerdebug_timer_neighbors_cb();
+void    layerdebug_timer_schedule_cb(void);
+void    layerdebug_timer_neighbors_cb(void);
 
-void    layerdebug_task_schedule_cb();
-void    layerdebug_task_neighbors_cb();
+void    layerdebug_task_schedule_cb(void);
+void    layerdebug_task_neighbors_cb(void);
 
 void    layerdebug_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);

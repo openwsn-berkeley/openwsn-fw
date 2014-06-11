@@ -32,7 +32,7 @@ const uint8_t rreg_path0[]    = "r";
 owerror_t rreg_receive(OpenQueueEntry_t* msg,
                      coap_header_iht*  coap_header,
                      coap_option_iht*  coap_options);
-void    rreg_timer();
+void    rreg_timer(void);
 void    rreg_sendDone(OpenQueueEntry_t* msg,
                       owerror_t error);
 uint8_t hexToAscii(uint8_t hex);

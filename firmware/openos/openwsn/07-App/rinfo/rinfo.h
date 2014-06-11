@@ -22,7 +22,7 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void rinfo_init();
+void rinfo_init(void);
 
 /**
 \}

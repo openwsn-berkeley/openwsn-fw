@@ -32,7 +32,7 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-typedef void (*task_cbt)();
+typedef void (*task_cbt)(void);
 
 typedef struct task_llist_t {
    task_cbt             cb;
@@ -57,22 +57,22 @@ typedef struct {
 //=========================== prototypes ======================================
 
 // public functions
-void scheduler_init();
-void scheduler_start();
+void scheduler_init(void);
+void scheduler_start(void);
 void scheduler_push_task(task_cbt task_cb, task_prio_t prio);
 
 // interrupt handlers
-void isr_ieee154e_newSlot();
-void isr_ieee154e_timer();
-void isr_adc();
+void isr_ieee154e_newSlot(void);
+void isr_ieee154e_timer(void);
+void isr_adc(void);
 #ifdef ISR_GYRO
-void isr_gyro();
+void isr_gyro(void);
 #endif
 #ifdef ISR_LARGE_RANGE_ACCEL
-void isr_large_range_accel();
+void isr_large_range_accel(void);
 #endif
 #ifdef ISR_BUTTON
-void isr_button();
+void isr_button(void);
 #endif
 
 /**

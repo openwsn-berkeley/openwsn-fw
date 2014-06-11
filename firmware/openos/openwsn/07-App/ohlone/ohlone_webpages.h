@@ -27,7 +27,7 @@
 
 //=========================== prototypes ======================================
 
-void     ohlone_webpages_init();
+void     ohlone_webpages_init(void);
 uint8_t  ohlone_webpage(uint8_t *getRequest, uint16_t chunk, uint8_t *packet);
 
 #endif

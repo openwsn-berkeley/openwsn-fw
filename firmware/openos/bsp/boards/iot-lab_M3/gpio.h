@@ -8,6 +8,6 @@
 //=========================== prototypes ======================================
 
 void GPIO_Config_ALL_AIN(void);
-void GPIO_Configuration();
+void GPIO_Configuration(void);
 
 #endif

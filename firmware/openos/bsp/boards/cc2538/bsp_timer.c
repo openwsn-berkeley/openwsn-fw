@@ -33,7 +33,7 @@ typedef struct {
 bsp_timer_vars_t bsp_timer_vars;
 
 //=========================== prototypes ======================================
-void bsp_timer_isr_private();
+void bsp_timer_isr_private(void);
 //=========================== public ==========================================
 
 /**
@@ -144,7 +144,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 
 //=========================== private =========================================
 
-void bsp_timer_isr_private() {
+void bsp_timer_isr_private(void) {
 	debugpins_isr_set();
 	IntPendClear(INT_SMTIM);
 	bsp_timer_isr();

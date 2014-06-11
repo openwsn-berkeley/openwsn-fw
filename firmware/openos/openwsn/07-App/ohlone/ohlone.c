@@ -13,7 +13,7 @@ ohlone_vars_t ohlone_vars;
 
 //=========================== prototypes ======================================
 
-void ohlone_sendpkt();
+void ohlone_sendpkt(void);
 bool ohlone_check4chars(uint8_t c1[4], uint8_t c2[4]);
 
 //=========================== public ==========================================

@@ -18,9 +18,9 @@ res_vars_t res_vars;
 //=========================== prototypes ======================================
 
 owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint8_t frameVersion);
-void    sendAdv();
-void    sendKa();
-void    res_timer_cb();
+void    sendAdv(void);
+void    sendKa(void);
+void    res_timer_cb(void);
 uint8_t res_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv);//returns reserved size
 
 //=========================== public ==========================================
@@ -189,7 +189,7 @@ has fired. This timer is set to fire every second, on average.
 
 The body of this function executes one of the MAC management task.
 */
-void timers_res_fired() {
+void timers_res_fired(void) {
    res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%ADVTIMEOUT;
    
    switch (res_vars.MacMgtTaskCounter) {

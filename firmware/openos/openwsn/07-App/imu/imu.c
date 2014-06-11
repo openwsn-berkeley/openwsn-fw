@@ -22,8 +22,8 @@ imu_vars_t imu_vars;
 
 //=========================== prototypes ======================================
 
-void imu_send();
-void imu_reset();
+void imu_send(void);
+void imu_reset(void);
 
 //=========================== public ==========================================
 

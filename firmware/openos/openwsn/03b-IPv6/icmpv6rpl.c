@@ -18,13 +18,13 @@ icmpv6rpl_vars_t             icmpv6rpl_vars;
 //=========================== prototypes ======================================
 
 // DIO-related
-void icmpv6rpl_timer_DIO_cb();
-void icmpv6rpl_timer_DIO_task();
-void sendDIO();
+void icmpv6rpl_timer_DIO_cb(void);
+void icmpv6rpl_timer_DIO_task(void);
+void sendDIO(void);
 // DAO-related
-void icmpv6rpl_timer_DAO_cb();
-void icmpv6rpl_timer_DAO_task();
-void sendDAO();
+void icmpv6rpl_timer_DAO_cb(void);
+void icmpv6rpl_timer_DAO_task(void);
+void sendDAO(void);
 
 //=========================== public ==========================================
 

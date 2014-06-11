@@ -20,21 +20,21 @@
 
 //=========================== typedef =========================================
 
-typedef void (*bsp_timer_cbt)();
+typedef void (*bsp_timer_cbt)(void);
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-void               bsp_timer_init();
+void               bsp_timer_init(void);
 void               bsp_timer_set_callback(bsp_timer_cbt cb);
-void               bsp_timer_reset();
+void               bsp_timer_reset(void);
 void               bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks);
-void               bsp_timer_cancel_schedule();
-PORT_TIMER_WIDTH   bsp_timer_get_currentValue();
+void               bsp_timer_cancel_schedule(void);
+PORT_TIMER_WIDTH   bsp_timer_get_currentValue(void);
 
 // interrupt handlers
-kick_scheduler_t   bsp_timer_isr();
+kick_scheduler_t   bsp_timer_isr(void);
 
 /**
 \}

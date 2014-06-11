@@ -289,18 +289,18 @@ typedef struct {
 //=========================== prototypes ======================================
 
 // admin
-void               ieee154e_init();
+void               ieee154e_init(void);
 // public
 PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
-bool               ieee154e_isSynch();
+bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
 // events
 void               ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 // misc
-bool               debugPrint_asn();
-bool               debugPrint_isSync();
-bool               debugPrint_macStats();
+bool               debugPrint_asn(void);
+bool               debugPrint_isSync(void);
+bool               debugPrint_macStats(void);
 
 /**
 \}

@@ -320,6 +320,6 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void openwsn_init();
+void openwsn_init(void);
 
 #endif

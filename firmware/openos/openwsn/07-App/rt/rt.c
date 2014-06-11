@@ -30,7 +30,7 @@ rt_vars_t rt_vars;
 owerror_t rt_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options);
-void    rt_timer();
+void    rt_timer(void);
 void    rt_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
 

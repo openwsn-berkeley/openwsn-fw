@@ -31,9 +31,9 @@
 
 //=========================== main ============================================
 
-extern int mote_main();
+extern int mote_main(void);
 
-int main() {
+int main(void) {
    return mote_main();
 }
 

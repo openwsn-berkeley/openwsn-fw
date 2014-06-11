@@ -22,7 +22,7 @@ const uint8_t rheli_path0[]        = "h";
 owerror_t rheli_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options);
-void    rheli_timer();
+void    rheli_timer(void);
 void    rheli_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
 

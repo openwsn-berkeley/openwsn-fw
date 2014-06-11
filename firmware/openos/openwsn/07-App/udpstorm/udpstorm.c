@@ -40,8 +40,8 @@ udpstorm_vars_t udpstorm_vars;
 owerror_t udpstorm_receive(OpenQueueEntry_t* msg,
                          coap_header_iht*  coap_header,
                          coap_option_iht*  coap_options);
-void    udpstorm_timer_cb();
-void    udpstorm_task_cb();
+void    udpstorm_timer_cb(void);
+void    udpstorm_task_cb(void);
 void    udpstorm_sendDone(OpenQueueEntry_t* msg,
                           owerror_t           error);
 

@@ -34,7 +34,7 @@ void    radio_spiReadRxFifo(uint8_t* pBufRead,
                             uint8_t* pLenRead,
                             uint8_t  maxBufLen,
                             uint8_t* pLqi);
-uint8_t radio_spiReadRadioInfo();
+uint8_t radio_spiReadRadioInfo(void);
 
 //=========================== public ==========================================
 

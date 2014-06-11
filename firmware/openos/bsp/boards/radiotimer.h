@@ -19,7 +19,7 @@
 
 //=========================== typedef =========================================
 
-typedef void (*radiotimer_compare_cbt)();
+typedef void (*radiotimer_compare_cbt)(void);
 typedef void (*radiotimer_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 
 //=========================== variables =======================================
@@ -27,24 +27,24 @@ typedef void (*radiotimer_capture_cbt)(PORT_TIMER_WIDTH timestamp);
 //=========================== prototypes ======================================
 
 // admin
-void     radiotimer_init();
+void     radiotimer_init(void);
 void     radiotimer_setOverflowCb(radiotimer_compare_cbt cb);
 void     radiotimer_setCompareCb(radiotimer_compare_cbt cb);
 void     radiotimer_setStartFrameCb(radiotimer_capture_cbt cb);
 void     radiotimer_setEndFrameCb(radiotimer_capture_cbt cb);
 void     radiotimer_start(PORT_RADIOTIMER_WIDTH period);
 // direct access
-PORT_RADIOTIMER_WIDTH radiotimer_getValue();
+PORT_RADIOTIMER_WIDTH radiotimer_getValue(void);
 void     radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period);
-PORT_RADIOTIMER_WIDTH radiotimer_getPeriod();
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void);
 // compare
 void     radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset);
-void     radiotimer_cancel();
+void     radiotimer_cancel(void);
 // capture
-PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime();
+PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void);
 
 // interrupt handlers
-kick_scheduler_t   radiotimer_isr();
+kick_scheduler_t   radiotimer_isr(void);
 
 /**
 \}

@@ -157,7 +157,7 @@ typedef struct{
 
 
 
-void    rsvp_init();
+void    rsvp_init(void);
 void    rsvp_qos_request(uint8_t bandwith, uint16_t refresh_period,open_addr_t dest);
 
 #endif

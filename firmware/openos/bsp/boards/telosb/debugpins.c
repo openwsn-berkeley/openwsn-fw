@@ -91,7 +91,7 @@ void debugpins_radio_set() {
 }
 
 
-void    leds_toggle_2x(){
+void    leds_toggle_2x(void){
 
   uint16_t i;
   debugpins_task_toggle();
@@ -99,7 +99,7 @@ void    leds_toggle_2x(){
   for (i=0;i<0xFFFF;i++);
   debugpins_task_toggle();
 }  
-void    leds_toggle_4x(){
+void    leds_toggle_4x(void){
   uint16_t i;
   leds_toggle_2x();
   for (i=0;i<0xFFFF;i++);
