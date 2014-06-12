@@ -273,6 +273,7 @@
       <Value>../../../../openwsn/07-App/rrt</Value>
       <Value>../../../../bsp/boards/samr21_xplained_pro/ASF/drivers/tcc</Value>
       <Value>../../../../bsp/boards/samr21_xplained_pro/ASF/drivers/events</Value>
+      <Value>../../../../openwsn/07-App/rex</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>

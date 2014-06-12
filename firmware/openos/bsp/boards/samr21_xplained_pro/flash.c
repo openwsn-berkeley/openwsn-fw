@@ -14,7 +14,7 @@ uint8_t addressToWrite[ID_LENGTH];
 //=========================== prototypes ======================================
 #define NVM_MEMORY        ((volatile uint16_t *)FLASH_ADDR)
 //=========================== public ==========================================
-
+/* Init the Flash memory and set the default config */
 void flash_init(void)
 {
 	struct nvm_config config;
@@ -28,6 +28,7 @@ void flash_init(void)
 	nvm_set_config(&config);
 }
 
+/* Write the ID to Flash memory */
 void flash_write_ID(void)
 {
 	nvm_write(ID_ADDRESS, addressToWrite, ID_LENGTH);
@@ -35,18 +36,20 @@ void flash_write_ID(void)
     memset(addressToWrite , 0, ID_LENGTH);
 }
 
+/* Read the ID from Flash memory */
 void flash_read_ID(void)
 {
   nvm_read(ID_ADDRESS, addressToWrite, ID_LENGTH);
   leds_sync_toggle();
 }
 
+/* Read the Flash get ID */
 void flash_getID(uint8_t* address)
 {
  memcpy(address, (uint8_t *)addressToWrite, ID_LENGTH);
 }
 
-
+/* NVM write function */
 enum status_code nvm_write(const uint32_t destination_address,
 							uint8_t *const buffer,
 							uint16_t length)
@@ -110,7 +113,7 @@ enum status_code nvm_write(const uint32_t destination_address,
 	return error_code;
 }
 
-
+/* NVM Read Function */
 status_code_t nvm_read(uint32_t address, uint8_t *const buffer,
 						uint32_t len)
 {
@@ -146,6 +149,3 @@ status_code_t nvm_read(uint32_t address, uint8_t *const buffer,
 	}
 	return STATUS_OK;
 }
-
-
-//=========================== private =========================================

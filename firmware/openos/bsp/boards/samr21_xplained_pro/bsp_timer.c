@@ -1,22 +1,28 @@
-
 #include "compiler.h"
 #include "bsp_timer.h"
 #include "tc.h"
 #include "tc_interrupt.h"
 #include "debugpins.h"
 
+/* Timer module used for BSP Timer */
 #define BSP_TIMER     TC3
+
+/* Maximum Timer period value */
 #define TIMER_PERIOD UINT16_MAX
+
 typedef struct
 {
 	bsp_timer_cbt cb;
 	PORT_TIMER_WIDTH last_compare_value;
 } bsp_timer_vars_t;
+
 bsp_timer_vars_t bsp_timer_vars;
 
 struct tc_module tc_instance;
+/* Call back handler for capture compare */
 static void tc_cca0_callback(struct tc_module *const module_instance);
 
+/* Initialize the BSP Timer with default configuration */
 void bsp_timer_init(void)
 {
 	struct tc_config timer_config;
@@ -45,6 +51,7 @@ void bsp_timer_init(void)
 	tc_enable(&tc_instance);
 }
 
+/* Register the call back for bsp timer */
 void bsp_timer_set_callback(bsp_timer_cbt cb)
 {
 	bsp_timer_vars.cb = cb;	
@@ -61,6 +68,7 @@ static void tc_cca0_callback(struct tc_module *const module_instance)
 	debugpins_isr_clr();
 }
 
+/* reset the bsp timer to default but do not stop */
 void bsp_timer_reset(void)
 {
 	//disable will clears the compare interrupt
@@ -125,6 +133,3 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue(void)
 {
 	return ((PORT_TIMER_WIDTH)tc_get_count_value(&tc_instance));
 }
-
-
-

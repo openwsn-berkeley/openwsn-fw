@@ -60,7 +60,7 @@
 #include "rwellknown.h"
 #include "r6t.h"
 #include "rrt.h"
-#include "rex.h"
+//#include "rex.h"
 //#include "rrube.h"
 //#include "layerdebug.h"
 //- board-specific
@@ -140,7 +140,7 @@ void openwsn_init() {
    rwellknown_init();
    r6t_init();
    //rreg_init();
-   rex_init();
+   //rex_init();
    //rrube_init();
    //layerdebug_init();
    //- board-specific

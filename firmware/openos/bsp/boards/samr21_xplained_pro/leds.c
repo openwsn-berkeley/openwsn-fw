@@ -8,6 +8,7 @@
 
 uint8_t sync_led_status = 0;
 
+/* Initialize the LED Pins and Default state of each */
 void leds_init(void)
 {
  /* Nothing to be done here its already initialized in other place */

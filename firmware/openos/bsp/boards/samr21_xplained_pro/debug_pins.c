@@ -4,6 +4,7 @@
 #include "port.h"
 #include "debugpins.h"
 
+/* Create the Debug pins for debug the stack operation */
 #define DEBUG_PIN_FRAME  PIN_PA06
 #define DEBUG_PIN_SLOT   PIN_PA13
 #define DEBUG_PIN_FSM    PIN_PA18

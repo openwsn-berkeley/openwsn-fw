@@ -23,3 +23,5 @@ path.txt
 /firmware/openos/bsp/boards/python/openwsnmodule_obj.os
 *.map
 *.lst
+*.atsuo
+log.txt

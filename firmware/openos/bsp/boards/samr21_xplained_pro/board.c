@@ -1,5 +1,3 @@
-
-
 #include "compiler.h"
 #include "system.h"
 #include "system_interrupt.h"
@@ -36,25 +34,26 @@ void board_init(void)
 {
  /* initialize the interrupt vectors */
  irq_initialize_vectors();
+ /* Disable the irq before initialization */
  cpu_irq_disable();
  
  /*  Initialize the Clock */
  delay_init();
  system_init(); 
-
- /* Initialize board hardware */
- /* SPI Init */
- /* Configure the Radio Pins and  Like RST, SLP_TR, EXTI(IRQ on Rising Edge)  */
- /* Configure the Board related stuffs and GPIO's */
- /* LED's Init */
  
  /* Configure the Debug Pins */
- debugpins_init();
+ debugpins_init(); 
  
- 	
+ /* Configure the Radio Interrupt */	
  AT86RFX_INTC_INIT();
+ /* Clear the Radio Interrupt */
  CLEAR_TRX_IRQ();
- 
+
+/*  Initialize board hardware
+	SPI Init  Configure the Radio Pins and  Like RST, SLP_TR, EXTI(IRQ on Rising Edge)
+	Configure the Board related stuffs and GPIO's
+	LED's Init 
+ */
  rf_interface_init();
  
  /* Radio Init */
@@ -70,7 +69,9 @@ void board_init(void)
  /* Radio Timer Init */
  radiotimer_init();
  
+ /* Clear the Radio Interrupt */
  ENABLE_TRX_IRQ();
+ /* Enable the IRQ */
  cpu_irq_enable();
 }
 
@@ -88,7 +89,8 @@ void rf_interface_init(void)
 	pin_conf.direction  = PORT_PIN_DIR_INPUT;
 	pin_conf.input_pull = PORT_PIN_PULL_UP;
 	port_pin_set_config(BUTTON_0_PIN, &pin_conf);
-
+	
+	/* Configure the RF233 SPI Interface */
 	port_get_config_defaults(&pin_conf);
 	pin_conf.direction  = PORT_PIN_DIR_OUTPUT;
 	port_pin_set_config(AT86RFX_SPI_SCK, &pin_conf);
@@ -101,7 +103,8 @@ void rf_interface_init(void)
 	port_pin_set_output_level(AT86RFX_SPI_CS, true);
 	port_pin_set_output_level(AT86RFX_RST_PIN, true);
 	port_pin_set_output_level(AT86RFX_SLP_PIN, true);
-
+	
+	/* Enable the RF233 Internal interface with SAMR21 */
 	pin_conf.direction  = PORT_PIN_DIR_INPUT;
 	port_pin_set_config(AT86RFX_SPI_MISO, &pin_conf);
 	PM->APBCMASK.reg |= (1<<PM_APBCMASK_RFCTRL_Pos);
@@ -144,9 +147,12 @@ void board_sleep(void)
 
 void board_reset(void)
 {
- /* Nothing to handle  here */
+ /* No Handlers added */
 }
 
+/* TRX END and other Transceiver Interrupt 
+   Handler for AT86RFX
+*/
 void AT86RFX_ISR(void)
 {
 	debugpins_isr_set();
@@ -154,4 +160,5 @@ void AT86RFX_ISR(void)
 	radio_isr();			
 	debugpins_isr_clr();
 }
+
 

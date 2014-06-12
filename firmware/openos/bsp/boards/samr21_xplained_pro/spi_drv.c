@@ -1,8 +1,6 @@
-
-
 #include "compiler.h"
-#include "spi.h" //From OpenWSN
-#include "spi_drv.h" //From Atmel 
+#include "spi.h" //From OpenWSN BSP
+#include "spi_drv.h" //From SAMR21 Driver
 #include "samr21_xplained_pro.h"
 #include "leds.h"
 
@@ -32,6 +30,7 @@ struct spi_config config;
 struct spi_module master;
 struct spi_slave_inst slave;
 
+/* Initialize the SPI driver as master*/
 void spi_init(void)
 {
 	 // clear variables
@@ -46,6 +45,7 @@ void spi_init(void)
 	spi_enable(&master);
 }
 
+/* Function to read the transceiver register  */
 uint8_t trx_reg_read(uint8_t addr)
 {
 	uint16_t register_value = 0;
@@ -77,7 +77,7 @@ uint8_t trx_reg_read(uint8_t addr)
 	return register_value;
 }
 
-
+/* Register the SPI in call back mode */
 #ifdef SPI_IN_INTERRUPT_MODE
 void spi_setCallback(spi_cbt cb)
 {
@@ -85,6 +85,7 @@ void spi_setCallback(spi_cbt cb)
 }
 #endif
 
+/* SPI transmit and receive the data */
 void spi_txrx(uint8_t*  bufTx,
 			 uint8_t      lenbufTx,
 			 spi_return_t returnType,
@@ -95,7 +96,7 @@ void spi_txrx(uint8_t*  bufTx,
 {
    uint16_t register_value = 0;
 #ifdef SPI_IN_INTERRUPT_MODE	
-   //Disable the interrupts
+   /* Disable the interrupts */
    cpu_irq_disable();
 #endif
    
@@ -178,6 +179,7 @@ void spi_txrx(uint8_t*  bufTx,
 #endif			 
 }
 
+/* SPI isr call back handler */
 kick_scheduler_t spi_isr(void)
 {
 #ifdef SPI_IN_INTERRUPT_MODE
