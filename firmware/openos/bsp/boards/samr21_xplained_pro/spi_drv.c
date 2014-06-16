@@ -1,10 +1,11 @@
+/* === INCLUDES ============================================================ */
 #include "compiler.h"
 #include "spi.h" //From OpenWSN BSP
 #include "spi_drv.h" //From SAMR21 Driver
 #include "samr21_xplained_pro.h"
 #include "leds.h"
 
-
+/* === GLOBALS ============================================================= */
 typedef struct {
 	// information about the current transaction
 	uint8_t*        pNextTxByte;
@@ -30,10 +31,15 @@ struct spi_config config;
 struct spi_module master;
 struct spi_slave_inst slave;
 
-/* Initialize the SPI driver as master*/
+/*
+ * @brief spi_init Initialize the SPI driver as master
+ *
+ * @param None
+ *
+ */ 
 void spi_init(void)
 {
-	 // clear variables
+	 /* clear variables */
 	 memset(&spi_vars,0,sizeof(spi_vars_t));
 	 
 	spi_slave_inst_get_config_defaults(&slave_dev_config);
@@ -45,7 +51,14 @@ void spi_init(void)
 	spi_enable(&master);
 }
 
-/* Function to read the transceiver register  */
+/*
+ * @brief spi_init Function to read the transceiver register
+ *
+ * @param addr transceiver register address
+ *
+ * @param return uint8_t transceiver register value
+ *
+ */ 
 uint8_t trx_reg_read(uint8_t addr)
 {
 	uint16_t register_value = 0;
@@ -77,7 +90,12 @@ uint8_t trx_reg_read(uint8_t addr)
 	return register_value;
 }
 
-/* Register the SPI in call back mode */
+/*
+ * @brief spi_setCallback Register the SPI in call back mode
+ *
+ * @param cb callback function pointer
+ *
+ */
 #ifdef SPI_IN_INTERRUPT_MODE
 void spi_setCallback(spi_cbt cb)
 {
@@ -85,7 +103,18 @@ void spi_setCallback(spi_cbt cb)
 }
 #endif
 
-/* SPI transmit and receive the data */
+/*
+ * @brief spi_txrx SPI transmit and receive the data
+ *
+ * @param bufTx Transmit Buffer
+ * @param lenbufTx Length of transmit buffer
+ * @param returnType
+ * @param bufRx SPI Rx Buffer
+ * @param Max Length of Rx Buffer size
+ * @param isFirst 
+ * @param isLast
+ *
+ */
 void spi_txrx(uint8_t*  bufTx,
 			 uint8_t      lenbufTx,
 			 spi_return_t returnType,
@@ -100,7 +129,7 @@ void spi_txrx(uint8_t*  bufTx,
    cpu_irq_disable();
 #endif
    
-   // register spi frame to send
+   /* register spi frame to send */
    spi_vars.pNextTxByte      =  bufTx;
    spi_vars.numTxedBytes     =  0;
    spi_vars.txBytesLeft      =  lenbufTx;
@@ -110,10 +139,10 @@ void spi_txrx(uint8_t*  bufTx,
    spi_vars.isFirst          =  isFirst;
    spi_vars.isLast           =  isLast;
    
-   // SPI is now busy
+   /* SPI is now busy */
    spi_vars.busy             =  1;
    
-   // lower CS signal to have slave listening
+   /* lower CS signal to have slave listening */
    if (spi_vars.isFirst==SPI_FIRST) {
 	  /* Start SPI transaction by pulling SEL low */
 	  spi_select_slave(&master, &slave, true);
@@ -121,26 +150,26 @@ void spi_txrx(uint8_t*  bufTx,
    }
    
 #ifdef SPI_IN_INTERRUPT_MODE
-   // implementation 1. use a callback function when transaction finishes
+   /* implementation 1. use a callback function when transaction finishes */
    
    /* Send the Read command byte */	
    
    spi_write_buffer_wait(&master, spi_vars.pNextTxByte, 1);
    
-   // re-enable interrupts
+   /* re-enable interrupts */
    cpu_irq_enable();
 #else
-   // implementation 2. busy wait for each byte to be sent
-   // send all bytes
+   /* implementation 2. busy wait for each byte to be sent */
+   /* send all bytes */
    while (spi_vars.txBytesLeft > 0) 
    {
-	   // write next byte to TX buffer
+	   /* write next byte to TX buffer */
 	   /* Send the Read command byte */
 		while(!spi_is_ready_to_write(&master));
 		spi_write(&master, *spi_vars.pNextTxByte);
 		while(!spi_is_write_complete(&master));
 
-	   // save the byte just received in the RX buffer
+	   /* save the byte just received in the RX buffer */
 	   switch (spi_vars.returnType) {
 		   case SPI_FIRSTBYTE:
 		   if (spi_vars.numTxedBytes==0) {
@@ -161,82 +190,100 @@ void spi_txrx(uint8_t*  bufTx,
 		   *spi_vars.pNextRxByte = (uint8_t)register_value;
 		   break;
 	   }
-	   // one byte less to go
+	   /* one byte less to go */
 	   spi_vars.pNextTxByte++;
 	   spi_vars.numTxedBytes++;
 	   spi_vars.txBytesLeft--;
    }
    
-   // put CS signal high to signal end of transmission to slave
+   /* put CS signal high to signal end of transmission to slave */
    if (spi_vars.isLast==SPI_LAST) 
    {
 	   /* Stop the SPI transaction by setting SEL high */
 	   spi_select_slave(&master, &slave, false);
    }
    
-   // SPI is not busy anymore
+   /* SPI is not busy anymore */
    spi_vars.busy             =  0;
 #endif			 
 }
 
-/* SPI isr call back handler */
+/*
+ * @brief spi_isr SPI isr call back handler
+ *
+ * @param return kick_scheduler_t
+ *
+ */ 
 kick_scheduler_t spi_isr(void)
 {
 #ifdef SPI_IN_INTERRUPT_MODE
-// save the byte just received in the RX buffer
-switch (spi_vars.returnType) 
-{
+/* save the byte just received in the RX buffer */
+ switch (spi_vars.returnType) 
+ {
 	case SPI_FIRSTBYTE:
 	if (spi_vars.numTxedBytes==0) 
 	{
 		spi_read_buffer_wait(&master, spi_vars.pNextRxByte, 1, 0);
 	}
 	break;
+	
 	case SPI_BUFFER:
 	spi_read_buffer_wait(&master, spi_vars.pNextRxByte, 1, 0);
 	spi_vars.pNextRxByte++;
 	break;
+	
 	case SPI_LASTBYTE:
 	spi_read_buffer_wait(&master, spi_vars.pNextRxByte, 1, 0);
 	break;
-}
+ }
 
-// one byte less to go
-spi_vars.pNextTxByte++;
-spi_vars.numTxedBytes++;
-spi_vars.txBytesLeft--;
+ /* one byte less to go */
+ spi_vars.pNextTxByte++;
+ spi_vars.numTxedBytes++;
+ spi_vars.txBytesLeft--;
 
-if (spi_vars.txBytesLeft>0) {
-	// write next byte to TX buffer
+ if (spi_vars.txBytesLeft>0) {
+	
+	/* write next byte to TX buffer */
 	spi_write_buffer_wait(&master, spi_vars.pNextTxByte, 1);
 	} else {
-	// put CS signal high to signal end of transmission to slave
+		
+	/* put CS signal high to signal end of transmission to slave */
 	if (spi_vars.isLast==SPI_LAST) {
+		
 		/* Stop the SPI transaction by setting SEL high */
 		spi_select_slave(&master, &slave, false);
 	}
-	// SPI is not busy anymore
+	
+	/* SPI is not busy anymore */
 	spi_vars.busy             =  0;
 	
-	// SPI is done!
+	/* SPI is done! */
 	if (spi_vars.callback!=NULL) {
-		// call the callback
+		
+		/* call the callback */
 		spi_vars.callback();
-		// kick the OS
+		
+		/* kick the OS */
 		return KICK_SCHEDULER;
 	}
 }
 return DO_NOT_KICK_SCHEDULER;
+
 #else
-// this should never happpen!
+
+/* this should never happen! */
 while(1);
-// we can not print from within the BSP. Instead:
-// blink the error LED
+
+/* we can not print from within the BSP. Instead we
+   blink the error LED */
 leds_error_blink();
-// reset the board
+
+/* reset the board */
 board_reset();
 
-return DO_NOT_KICK_SCHEDULER; // we will not get here, statement to please compiler
+ /* execution will not reach here, statement to make compiler happy */
+return DO_NOT_KICK_SCHEDULER;
 #endif
 }
 

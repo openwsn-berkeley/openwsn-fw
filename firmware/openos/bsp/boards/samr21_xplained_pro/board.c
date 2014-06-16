@@ -1,3 +1,4 @@
+/* === INCLUDES ============================================================ */
 #include "compiler.h"
 #include "system.h"
 #include "system_interrupt.h"
@@ -15,21 +16,42 @@
 #include "debugpins.h"
 #include "leds.h"
 
+
+
+
+/* === MACROS ============================================================== */
+
+/* TRX Parameter: t10 */
+#define RST_PULSE_WIDTH_US                          (10)
+
+/* TRX Parameter: tTR1 typical value */
+#define P_ON_TO_CLKM_AVAILABLE_TYP_US               (330)
+
+/* === GLOBALS ============================================================= */
+
 extern int mote_main();
 
 void rf_interface_init(void);
 
-/* TRX Parameter: t10 */
-#define RST_PULSE_WIDTH_US                          (10)
-/* TRX Parameter: tTR1 typical value */
-#define P_ON_TO_CLKM_AVAILABLE_TYP_US               (330)
-
+/*
+ * @brief Main entry functions. 
+ *
+ * @param returns the value of returns by mote_main
+ *
+ */ 
 int main(void)
 {
 	SystemInit();
 	return mote_main();
 }
 
+/*
+ * @brief board_init will initialize the delay functions,
+ *        debug pins in the board, Radio External Interrupt functions,
+ *        SPI Related, UART and timers with default value.
+ * @param None
+ *
+ */
 void board_init(void)
 {
  /* initialize the interrupt vectors */
@@ -75,8 +97,17 @@ void board_init(void)
  cpu_irq_enable();
 }
 
+/*
+ * @brief rf_interface_init will initialize the SPI and RFCTRL,
+ *        This function will also Reset and initialize the Radio 
+ *        to default state
+ *
+ * @param None
+ *
+ */
 void rf_interface_init(void)
 {
+	/* Get the port default config to structure */
 	struct port_config pin_conf;
 	port_get_config_defaults(&pin_conf);
 
@@ -134,6 +165,14 @@ void rf_interface_init(void)
 	PORT_PIN_RADIO_RESET_HIGH();
 }
 
+/*
+ * @brief board_sleep This function will prepare the board to sleep
+ *        Before entering to sleep the MCU will enable the wakeup source
+ *        and set the appropriate possible power saving mode in the MCU.
+ *
+ * @param None
+ *
+ */
 void board_sleep(void)
 {
  /* Enter into sleep mode and disable the MCU and other peripherals */
@@ -145,14 +184,21 @@ void board_sleep(void)
  system_sleep();
 }
 
+/* 
+ * @brief This will reset the MCU and board to default state
+ *
+ * @param None
+ *
+ */
 void board_reset(void)
 {
  /* No Handlers added */
 }
 
-/* TRX END and other Transceiver Interrupt 
-   Handler for AT86RFX
-*/
+/* 
+ * @brief TRX END and other Transceiver Interrupt 
+ *        Handler for AT86RFX
+ */
 void AT86RFX_ISR(void)
 {
 	debugpins_isr_set();

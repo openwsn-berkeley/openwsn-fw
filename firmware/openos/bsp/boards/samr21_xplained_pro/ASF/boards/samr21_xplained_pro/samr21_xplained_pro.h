@@ -436,7 +436,7 @@ void system_board_init(void);
 
 #define MCU_SOC_NAME               "ATSAMR21G18A"
 
-#define AT86RFX_SPI_BAUDRATE        5000000UL
+#define AT86RFX_SPI_BAUDRATE        4000000UL
 
 void AT86RFX_ISR(void);
 
