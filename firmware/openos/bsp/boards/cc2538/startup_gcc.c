@@ -41,10 +41,10 @@
 #include "hw_nvic.h"
 
 #define FLASH_START_ADDR                0x00200000
-#define BOOTLOADER_BACKDOOR_DISABLE     0xEFFFFFFF
+#define BOOTLOADER_BACKDOOR_ENABLED     0xF6FFFFFF // 1111|1110 -> ENABLED: LEVEL LOW, PORT A, PIN 6  
+#define BOOTLOADER_BACKDOOR_DISABLED    0xEFFFFFFF // 1110|1110 -> DISABLED
 #define SYS_CTRL_EMUOVR                 0x400D20B4
 #define SYS_CTRL_I_MAP                  0x400D2098
-
 
 //*****************************************************************************
 //
@@ -56,11 +56,16 @@
         (*((volatile unsigned long *)(x)))
 #endif
 
-
+//*****************************************************************************
+//
+// Extern and local function prototypes. 
+//
+//*****************************************************************************
 extern int main (void);
+extern void __libc_init_array(void);
 
 void ResetISR(void);
-void NmiSR(void);
+void NmiISR(void);
 void FaultISR(void);
 void IntDefaultHandler(void);
 
@@ -70,7 +75,6 @@ void IntDefaultHandler(void);
 //
 //*****************************************************************************
 static uint32_t pui32Stack[128];
-
 
 //*****************************************************************************
 //
@@ -90,18 +94,17 @@ lockPageCCA_t;
 __attribute__ ((section(".flashcca"), used))
 const lockPageCCA_t __cca =
 {
-  BOOTLOADER_BACKDOOR_DISABLE,  // Bootloader backdoor disabled
+  BOOTLOADER_BACKDOOR_ENABLED,  // Bootloader backdoor enabled
   0,               				// Image valid bytes
   FLASH_START_ADDR 				// Vector table located at flash start address
 };
-
 
 __attribute__ ((section(".vectors"), used))
 void (* const gVectors[])(void) =
 {
    (void (*)(void))((uint32_t)pui32Stack + sizeof(pui32Stack)), // Stack pointer
    ResetISR,							   // Reset handler
-   NmiSR,                                  // The NMI handler
+   NmiISR,                                 // The NMI handler
    FaultISR,                               // The hard fault handler
    IntDefaultHandler,                      // 4 The MPU fault handler
    IntDefaultHandler,                      // 5 The bus fault handler
@@ -283,14 +286,13 @@ extern uint32_t _ebss;
 // And here are the weak interrupt handlers.
 //
 void 
-NmiSR (void) 
+NmiISR (void) 
 { 
     ResetISR(); 
     while(1)
     {
     } 
 }
-
 
 void 
 FaultISR (void) 
@@ -299,7 +301,6 @@ FaultISR (void)
     {
     } 
 }
-
 
 void 
 IntDefaultHandler (void) 
@@ -319,8 +320,9 @@ ResetISR (void)
     //
     HWREG(SYS_CTRL_EMUOVR) = 0xFF;
 
-
-    /* Workaround for J-Link debug issue */
+    //
+    // Workaround for J-Link debug issue
+    //
     HWREG(NVIC_VTABLE) = (uint32_t)gVectors;
 
     //
@@ -335,15 +337,17 @@ ResetISR (void)
     //
 	// Zero fill the bss segment.
     //
-	__asm("    ldr     r0, =_bss\n"
-		  "    ldr     r1, =_ebss\n"
-		  "    mov     r2, #0\n"
-		  "    .thumb_func\n"
-		  "zero_loop:\n"
-		  "        cmp     r0, r1\n"
-		  "        it      lt\n"
-		  "        strlt   r2, [r0], #4\n"
-		  "        blt     zero_loop");
+    pui32Src = &_ebss;
+    for(pui32Dest = &_bss; pui32Src < pui32Dest; )
+    {
+        *pui32Src++ = 0;
+    }
+
+    //
+    // Initialize standard C library
+    //
+    __libc_init_array();
+
 
 #ifdef CC2538_USE_ALTERNATE_INTERRUPT_MAP
     //
@@ -351,6 +355,7 @@ ResetISR (void)
     //
     HWREG(SYS_CTRL_I_MAP) |= 1;
 #endif
+
    //
    // Call the application's entry point.
    //
