@@ -38,6 +38,10 @@ void uart_init() {
    
    ME1       |=  UTXE0 + URXE0;                  // enable UART0 TX/RX
    U0CTL     &= ~SWRST;                          // clear UART1 reset bit
+   
+   // clear possible pending interrupts
+   uart_clearTxInterrupts();
+   uart_clearRxInterrupts();
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {

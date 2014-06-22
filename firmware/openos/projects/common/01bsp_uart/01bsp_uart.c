@@ -1,9 +1,9 @@
 /**
 \brief This is a program which shows how to use the bsp modules for the board
-       and leds.
+       and UART.
 
-\note: Since the bsp modules for different platforms have the same declaration, you
-       can use this project with any platform.
+\note: Since the bsp modules for different platforms have the same declaration,
+       you can use this project with any platform.
 
 Load this program on your board. Open a serial terminal client (e.g. PuTTY or
 TeraTerm):
@@ -25,7 +25,7 @@ TeraTerm):
 
 //=========================== defines =========================================
 
-uint8_t stringToSend[] = "~Hello World!~";
+uint8_t stringToSend[] = "Hello World!\r\n";
 
 //=========================== variables =======================================
 
@@ -45,11 +45,13 @@ void cb_uartRxCb();
 /**
 \brief The program starts executing here.
 */
-int mote_main() {
-   board_init();
+int mote_main(void) {
    
    // clear local variable
    memset(&app_vars,0,sizeof(app_vars_t));
+   
+   // initialize the board
+   board_init();
    
    // setup UART
    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
