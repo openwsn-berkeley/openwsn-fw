@@ -13,7 +13,7 @@ COM port of your board, and type characters into it.
 
 Each time you type a character, you should see:
 - the character prints on your terminal, as it is sent back on the TX line.
-- the red LED toggles
+- the red LED toggles.
 
 Uncomment the BAUDRATE_115200 line below to switch from 9600baud to 115200baud.
 
@@ -24,7 +24,8 @@ The digital UART interface is:
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
-//#define BAUDRATE_115200 // uncomment this to communicate at 115200baud
+#define BAUDRATE_115200 // uncomment this to communicate at 115200baud
+#define PERIODIC_TX     // uncomment this to have the mote send characters periodically
 
 #include "msp430f1611.h"
 #include "stdint.h"
@@ -43,7 +44,13 @@ void main(void)
    P5OUT     |=  0x70;                           // P5OUT = 0bx111xxxx, all LEDs off
    
    P3SEL      =  0x30;                           // P3.4,5 = UART0TX/RX
-  
+
+#ifdef PERIODIC_TX
+   TACCTL0    =  CCIE;                           // capture/compare interrupt enable
+   TACCR0     =  16000;                          // 16000@32kHz ~ 500ms
+   TACTL      =  MC_1+TASSEL_1;                  // up mode, using ACLK
+#endif
+   
 #ifdef BAUDRATE_115200
    //115200 baud, clocked from 4.8MHz SMCLK
    ME1       |=  UTXE0 + URXE0;                  // enable UART0 TX/RX
@@ -54,6 +61,7 @@ void main(void)
    U0MCTL     =  0x4A;                           // modulation
    U0CTL     &= ~SWRST;                          // clear UART1 reset bit
    IE1       |=  URXIE0;                         // enable UART1 RX interrupt
+   IE1       |=  UTXIE0;                         // enable UART1 TX interrupt
    
    __bis_SR_register(LPM0_bits + GIE);           // sleep, leave interrupts on
 #else
@@ -66,10 +74,23 @@ void main(void)
    U0MCTL     =  0x4A;                           // modulation
    U0CTL     &= ~SWRST;                          // clear UART0 reset bit
    IE1       |=  URXIE0;                         // enable UART0 RX interrupt
+   IE1       |=  UTXIE0;                         // enable UART1 TX interrupt
    
    __bis_SR_register(LPM3_bits + GIE);           // sleep, leave interrupts and ACLK on
 #endif  
 }
+
+#ifdef PERIODIC_TX
+/**
+\brief This function is called when the TimerA interrupt fires.
+*/
+#pragma vector = TIMERA0_VECTOR
+__interrupt void TIMERA0_ISR (void) {
+   
+   U0TXBUF    =  'a';                            // TX -> RXed character
+   P5OUT     ^=  0x20;                           // toggle LED (green)
+}
+#endif
 
 /**
 \brief This function is called when the the UART module has received a byte.
@@ -77,6 +98,17 @@ void main(void)
 #pragma vector = USART0RX_VECTOR
 __interrupt void USART0RX_ISR (void)
 {
-   U0TXBUF   =  U0RXBUF;                        // TX -> RXed character
-   P5OUT    ^=  0x10;                           // toggle LED
+   IFG1      &= ~URXIFG0;                        // clear RX interrupt flag
+   U0TXBUF    =  U0RXBUF;                        // echo received character
+   P5OUT     ^=  0x10;                           // toggle LED (red)
 }
+
+/**
+\brief This function is called when the the UART module has transmitted a byte.
+*/
+#pragma vector = USART0TX_VECTOR
+__interrupt void USART0TX_ISR (void)
+{
+   IFG1      &= ~UTXIFG0;                        // clear TX interrupt flag
+}
+
