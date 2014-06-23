@@ -64,7 +64,6 @@ int mote_main(void) {
    while(1) {
       board_sleep();
    }
-   return 0;
 }
 
 //=========================== callbacks =======================================

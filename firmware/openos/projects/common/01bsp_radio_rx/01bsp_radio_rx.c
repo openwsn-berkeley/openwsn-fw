@@ -82,7 +82,7 @@ void cb_uartRxCb();
 /**
 \brief The program starts executing here.
 */
-int mote_main() {
+int mote_main(void) {
    
    // needed since we are disabling/enabling interrupts below
    INTERRUPT_DECLARATION();

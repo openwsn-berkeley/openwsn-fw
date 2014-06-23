@@ -37,8 +37,7 @@ void cb_compare();
 /**
 \brief The program starts executing here.
 */
-int mote_main()
-{  
+int mote_main(void) {  
    // initialize board
    board_init();
 
@@ -49,7 +48,6 @@ int mote_main()
    while (1) {
       board_sleep();
    }
-   return 0;
 }
 
 //=========================== callbacks =======================================

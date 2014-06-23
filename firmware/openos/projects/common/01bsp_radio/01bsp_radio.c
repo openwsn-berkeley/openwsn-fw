@@ -70,7 +70,7 @@ void     cb_timer();
 /**
 \brief The program starts executing here.
 */
-int mote_main() {
+int mote_main(void) {
    uint8_t i;
    
    // clear local variables

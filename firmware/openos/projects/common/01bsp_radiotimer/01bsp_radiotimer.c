@@ -46,8 +46,8 @@ void cb_compare();
 /**
 \brief The program starts executing here.
 */
-int mote_main()
-{  
+int mote_main(void) {
+   
    // initialize board
    board_init();
    
@@ -57,7 +57,6 @@ int mote_main()
    // prepare radiotimer
    radiotimer_setOverflowCb(cb_overflow);
    radiotimer_setCompareCb(cb_compare);
-   
    
    // kick off first compare
    app_vars.num_compares_left  = RADIOTIMER_NUM_COMPARES-1;

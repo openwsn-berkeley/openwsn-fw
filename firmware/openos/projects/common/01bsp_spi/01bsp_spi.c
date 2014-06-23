@@ -13,7 +13,7 @@ can use this project with any platform.
 /**
 \brief The program starts executing here.
 */
-int mote_main() {
+int mote_main(void) {
    uint8_t              spi_tx_buffer[3];
    uint8_t              spi_rx_buffer[3];
 

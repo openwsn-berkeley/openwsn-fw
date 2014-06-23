@@ -19,7 +19,7 @@
 #include "idmanager.h"
 #include "neighbors.h"
 
-#define MAX_PAYLOAD 100
+#define LEN_PAYLOAD 100
 
 //=========================== variables =======================================
 
@@ -31,12 +31,12 @@ macpong_vars_t macpong_vars;
 
 //=========================== prototypes ======================================
 
-void macpong_initSend();
+void macpong_initSend(void);
 void macpong_send(uint8_t payloadCtr);
 
 //=========================== initialization ==================================
 
-int mote_main() {
+int mote_main(void) {
    board_init();
    scheduler_init();
    openwsn_init();
@@ -44,7 +44,7 @@ int mote_main() {
    return 0; // this line should never be reached
 }
 
-void macpong_initSend() {
+void macpong_initSend(void) {
    if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
       // send packet
       macpong_send(0);   
@@ -68,18 +68,18 @@ void macpong_send(uint8_t payloadCtr) {
    pkt->owner                       = COMPONENT_IPHC;
    
    neighbors_getNeighbor(&pkt->l2_nextORpreviousHop,ADDR_64B,0);
-   packetfunctions_reserveHeaderSize(pkt,MAX_PAYLOAD);
-   for (i=0;i<MAX_PAYLOAD;i++){
+   packetfunctions_reserveHeaderSize(pkt,LEN_PAYLOAD);
+   for (i=0;i<LEN_PAYLOAD;i++){
      ((uint8_t*)pkt->payload)[i]      = i;
    }
    res_send(pkt);
 }
 
-//=========================== spoofing ========================================
+//=========================== stubbing ========================================
 
 //===== IPHC
 
-void iphc_init() {
+void iphc_init(void) {
    if (idmanager_getIsDAGroot()==FALSE) {
       macpong_vars.timerId    = opentimers_start(5000,
                                                  TIMER_PERIODIC,TIME_MS,
@@ -100,51 +100,51 @@ void iphc_receive(OpenQueueEntry_t* msg) {
 
 //===== L3
 
-void forwarding_init()       { return; }
-void openbridge_init()       { return; }
-void openbridge_triggerData(){ return; }
+void forwarding_init(void)        { return; }
+void openbridge_init(void)        { return; }
+void openbridge_triggerData(void) { return; }
 
 //===== L4
 
-void icmpv6_init()           { return; }
+void icmpv6_init(void)            { return; }
 
-void icmpv6echo_init()       { return; }
-void icmpv6echo_trigger()    { return; }
+void icmpv6echo_init(void)        { return; }
+void icmpv6echo_trigger(void)     { return; }
 
-void icmpv6router_init()     { return; }
-void icmpv6router_trigger()  { return; }
+void icmpv6router_init(void)      { return; }
+void icmpv6router_trigger(void)   { return; }
 
-void icmpv6rpl_init()        { return; }
-void icmpv6rpl_trigger()     { return; }
+void icmpv6rpl_init(void)         { return; }
+void icmpv6rpl_trigger(void)      { return; }
 
-void opentcp_init()          { return; }
+void opentcp_init(void)           { return; }
 
-void openudp_init()          { return; }
+void openudp_init(void)           { return; }
 
-void opencoap_init()         { return; }
+void opencoap_init(void)          { return; }
 
 //===== L7
 
-void ohlone_init()           { return; }
+void ohlone_init(void)            { return; }
 
-void tcpecho_init()          { return; }
+void tcpecho_init(void)           { return; }
 
-void tcpinject_init()        { return; }
-void tcpinject_trigger()     { return; }
+void tcpinject_init(void)         { return; }
+void tcpinject_trigger(void)      { return; }
 
-void tcpprint_init()         { return; }
+void tcpprint_init(void)          { return; }
 
-void udpecho_init()          { return; }
+void udpecho_init(void)           { return; }
 
-void udpinject_init()        { return; }
-void udpinject_trigger()     { return; }
+void udpinject_init(void)         { return; }
+void udpinject_trigger(void)      { return; }
 
-void udpprint_init()         { return; }
+void udpprint_init(void)          { return; }
 
-void udprand_init()          { return; }
+void udprand_init(void)           { return; }
 
-void rinfo_init()            { return; }
-void rleds__init()           { return; }
-void r6t_init()              { return; }
-void rwellknown_init()       { return; }
-void rrt_init()              { return; }
+void rinfo_init(void)             { return; }
+void rleds__init(void)            { return; }
+void r6t_init(void)               { return; }
+void rwellknown_init(void)        { return; }
+void rrt_init(void)               { return; }

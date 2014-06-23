@@ -14,7 +14,7 @@
 /**
 \brief The program starts executing here.
 */
-int mote_main() {
+int mote_main(void) {
    uint16_t delay;
    
    board_init();
@@ -28,6 +28,4 @@ int mote_main() {
       debugpins_isr_toggle();
       debugpins_radio_toggle();
    }
-
-   return 0;
 }
