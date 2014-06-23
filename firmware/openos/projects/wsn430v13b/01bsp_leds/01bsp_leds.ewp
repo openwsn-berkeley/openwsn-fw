@@ -853,11 +853,11 @@
         </option>
         <option>
           <name>AllowExtraOutput</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>GenerateExtraOutput</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>XExtraOutOverride</name>
@@ -865,7 +865,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_leds.a43</state>
+          <state>01bsp_leds.hex</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
