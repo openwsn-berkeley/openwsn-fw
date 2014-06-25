@@ -1,5 +1,5 @@
 import os
-import sys  
+import sys
 import threading
 import subprocess
 import platform
