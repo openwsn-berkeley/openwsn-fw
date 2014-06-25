@@ -301,7 +301,7 @@ elif env['toolchain']=='gcc':
         if env['simhost'].endswith('linux'):
             # enabling shared library to be reallocated 
             env.Append(CCFLAGS        = '-fPIC')
-            if not sys.platform.startswith('darwin'):
+            if not sys.platform.startswith('darwin'): # line added per FW-230
                 env.Append(SHLINKFLAGS    = '-Wl,-Bsymbolic-functions') # per FW-176
                 env.Append(SHCFLAGS       = '-Wl,-Bsymbolic-functions') # per FW-176
             
