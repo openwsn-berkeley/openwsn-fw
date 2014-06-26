@@ -25,7 +25,7 @@
 
 //=========================== typedef =========================================
 
-PRAGMA(pack(1));
+BEGIN_PACK;
 typedef struct {
    bool             used;
    uint8_t          parentPreference;
@@ -41,16 +41,16 @@ typedef struct {
    asn_t            asn;
    uint8_t          joinPrio;
 } neighborRow_t;
-PRAGMA(pack());
+END_PACK;
 
-PRAGMA(pack(1));
+BEGIN_PACK;
 typedef struct {
    uint8_t         row;
    neighborRow_t   neighborEntry;
 } debugNeighborEntry_t;
-PRAGMA(pack());
+END_PACK;
 
-PRAGMA(pack(1));
+BEGIN_PACK;
 typedef struct {
    uint8_t         last_addr_byte;   // last byte of the neighbor's address
    int8_t          rssi;
@@ -58,7 +58,7 @@ typedef struct {
    dagrank_t       DAGrank;
    uint16_t        asn; 
 } netDebugNeigborEntry_t;
-PRAGMA(pack());
+END_PACK;
 
 //=========================== module variables ================================
    
