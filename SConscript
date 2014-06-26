@@ -1,4 +1,5 @@
 import os
+import sys
 import threading
 import subprocess
 import platform
@@ -300,8 +301,9 @@ elif env['toolchain']=='gcc':
         if env['simhost'].endswith('linux'):
             # enabling shared library to be reallocated 
             env.Append(CCFLAGS        = '-fPIC')
-            env.Append(SHLINKFLAGS    = '-Wl,-Bsymbolic-functions') # per FW-176
-            env.Append(SHCFLAGS       = '-Wl,-Bsymbolic-functions') # per FW-176
+            if not sys.platform.startswith('darwin'): # line added per FW-230
+                env.Append(SHLINKFLAGS    = '-Wl,-Bsymbolic-functions') # per FW-176
+                env.Append(SHCFLAGS       = '-Wl,-Bsymbolic-functions') # per FW-176
             
             if platform.architecture()[0]=='64bit' and env['simhost']=='x86-linux':
                 # Cross-compile x86 Linux target from 64-bit host. Also see
