@@ -20,8 +20,8 @@ to return the board's description.
 #define MY_ID 0x00
 
 #define port_INLINE                         inline
-#define BEGIN_PACK    _Pragma("pack(1)")
-#define END_PACK      _Pragma("pack()")
+#define START_PACK(x) _Pragma(#x)
+#define END_PACK(x)   _Pragma(#x)
 
 #define INTERRUPT_DECLARATION() __istate_t s;
 #define DISABLE_INTERRUPTS()    s = __get_interrupt_state(); \

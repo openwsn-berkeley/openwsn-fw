@@ -217,7 +217,7 @@ typedef struct {
    bool             radioOnThisSlot; //to control if the radio has been turned on in a slot.
 } ieee154e_vars_t;
 
-BEGIN_PACK;
+START_PACK(pack(1));
 typedef struct {
    uint8_t                   numSyncPkt;    // how many times synchronized on a non-ACK packet
    uint8_t                   numSyncAck;    // how many times synchronized on an ACK
@@ -227,7 +227,7 @@ typedef struct {
    uint32_t                  numTicsOn;     // mac dutyCycle
    uint32_t                  numTicsTotal;     // total tics for which the dutycycle is computed
 } ieee154e_stats_t;
-END_PACK;
+END_PACK(pack());
 
 typedef struct {
    PORT_RADIOTIMER_WIDTH          num_newSlot;
@@ -247,11 +247,11 @@ typedef struct{
 
 
 //the content for ack ie -- it is a header IE with values - element id =0x1e len=2 type=0
-BEGIN_PACK;
+START_PACK(pack(1));
 typedef struct {
     int16_t timesync_info;
 }ack_timecorrection_IE_t;
-END_PACK;
+END_PACK(pack());
 //the header for all payload IEs
 
 
@@ -266,12 +266,12 @@ typedef struct{
 }MLME_IE_subHeader_t;
 
 //the Synchronization IE. it is a payload IE with values - subid=0x1a type=0 (short) len=6 
-BEGIN_PACK;
+START_PACK(pack(1));
 typedef struct {
     uint8_t asn[5];
     uint8_t join_priority;
 }synch_IE_t;
-END_PACK;
+END_PACK(pack());
 
 //the Slotframe and Link IE
 typedef struct {

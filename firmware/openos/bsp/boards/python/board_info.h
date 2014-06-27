@@ -13,12 +13,12 @@
 //=========================== defines =========================================
 #ifdef _MSC_VER
     #define port_INLINE   __inline
-    #define BEGIN_PACK    __pragma(pack(1))
-    #define END_PACK      __pragma(pack())
+    #define START_PACK(x) __pragma(pack(push,1))
+    #define END_PACK(x)   __pragma(pack(pop))
 #else /* GCC compiler */
     #define port_INLINE   inline
-    #define BEGIN_PACK    _Pragma("pack(1)")
-    #define END_PACK      _Pragma("pack()")
+    #define START_PACK(x) _Pragma(#x)
+    #define END_PACK(x)   _Pragma(#x)
 #endif
 
 #define INTERRUPT_DECLARATION()             ;
