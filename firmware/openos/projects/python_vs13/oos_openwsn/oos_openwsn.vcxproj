@@ -1,0 +1,154 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\bsp\boards\python\board_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\bsp\boards\python\bsp_timer_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\bsp\boards\python\debugpins_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\bsp\boards\python\eui64_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\bsp\boards\python\leds_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\bsp\boards\python\radiotimer_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\bsp\boards\python\radio_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\bsp\boards\python\supply_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\bsp\boards\python\uart_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\drivers\common\openhdlc_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\drivers\common\openserial_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\drivers\common\opentimers_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\kernel\openos\scheduler_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\02a-MAClow\adaptive_sync_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\02a-MAClow\IEEE802154E_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\02a-MAClow\IEEE802154_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\02a-MAClow\topology_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\02b-MAChigh\neighbors_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\02b-MAChigh\res_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\02b-MAChigh\schedule_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\03a-IPHC\iphc_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\03a-IPHC\openbridge_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\03b-IPv6\forwarding_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\03b-IPv6\icmpv6echo_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\03b-IPv6\icmpv6rpl_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\03b-IPv6\icmpv6_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\04-TRAN\opencoap_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\04-TRAN\opentcp_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\04-TRAN\openudp_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\layerdebug\layerdebug_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\ohlone\ohlone_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\ohlone\ohlone_webpages_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\r6t\r6t_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\rex\rex_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\rinfo\rinfo_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\rleds\rleds_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\rreg\rreg_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\rrt\rrt_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\rwellknown\rwellknown_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\tcpecho\tcpecho_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\tcpinject\tcpinject_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\tcpprint\tcpprint_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\udpecho\udpecho_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\udpinject\udpinject_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\udplatency\udplatency_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\udpprint\udpprint_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\udprand\udprand_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\07-App\udpstorm\udpstorm_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\cross-layers\idmanager_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\cross-layers\openqueue_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\cross-layers\openrandom_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\cross-layers\packetfunctions_obj.c" />
+    <ClCompile Include="..\..\..\..\..\build\python_gcc\openwsn\openwsn_obj.c" />
+    <ClCompile Include="..\..\..\bsp\boards\python\openwsnmodule_obj.c" />
+    <ClCompile Include="..\..\common\03oos_openwsn\03oos_openwsn_obj.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\build\python_gcc\bsp\boards\python\openwsnmodule_obj.h" />
+    <ClInclude Include="..\..\..\build\python_gcc\openwsn\07-App\tcpecho\tcpecho.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme_debug.txt" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3D043F58-51E1-42AB-8FCE-AA2060514443}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>oos_openwsn</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <IncludePath>C:\Python27\include;$(SolutionDir)\..\..\..\..\build\python_gcc\drivers\common;$(SolutionDir)\..\..\..\..\build\python_gcc\kernel\openos;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn;$(SolutionDir)\..\..\..\..\build\python_gcc\bsp\boards\python;$(SolutionDir)\..\..\..\..\build\python_gcc\bsp\boards\;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\02a-MAClow;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\02b-MAChigh;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\03a-IPHC;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\03b-IPv6;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\04-TRAN;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\ohlone;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\rrt;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\rwellknown;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\udpinject;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\tcpinject;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\rinfo;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\cross-layers;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\r6t;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\rleds;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\udpprint;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\udprand;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\tcpecho;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\udpecho;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\tcpprint;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\udpstorm;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\udplatency;$(SolutionDir)\..\..\..\..\build\python_gcc\openwsn\07-App\sens_itf;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Python27\libs;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;OOS_OPENWSN_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>python27.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)$(TargetName).pyd</OutputFile>
+    </Link>
+    <PostBuildEvent>
+      <Command>copy $(OutDir)\oos_openwsn.pyd $(SolutionDir)\..\..\..\..\firmware\openos\projects\common\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy PYD file</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;OOS_OPENWSN_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -19,9 +19,8 @@ to return the board's description.
 //=========================== defines =========================================
 
 #define port_INLINE                         inline
-
-#define PRAGMA(x)  _Pragma(#x)
-#define PACK(x)     pack(x)
+#define BEGIN_PACK    _Pragma("pack(1)")
+#define END_PACK      _Pragma("pack()")
 
 //TODO in case previous declaration fails in certain compilers. Remove this 
 //one if it works with GNU GCC
