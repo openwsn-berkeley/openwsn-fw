@@ -17,8 +17,8 @@
 #define ID 0x45
 
 #define port_INLINE                         inline
-#define BEGIN_PACK    _Pragma("pack(1)")
-#define END_PACK      _Pragma("pack()")
+#define START_PACK(x) _Pragma(#x)
+#define END_PACK(x)   _Pragma(#x)
 
 #define PORT_TICS_PER_MS                    281
 #define PORT_TIMER_WIDTH                    uint16_t

@@ -159,7 +159,7 @@ typedef struct {
 
 Described in http://tools.ietf.org/html/rfc6553#section-3
 */
-BEGIN_PACK;
+START_PACK(pack(1));
 typedef struct {
    uint8_t    optionType;    ///< RPL_HOPBYHOP_HEADER_OPTION_TYPE
    uint8_t    optionLen;     ///< 8-bit field indicating the length of the option, in octets, excluding the Option Type and Opt Data Len fields.
@@ -167,7 +167,7 @@ typedef struct {
    uint8_t    rplInstanceID; ///< instanceid
    uint16_t   senderRank;    ///< RPL rank of the sender of the packet
 } rpl_option_ht;
-END_PACK;
+END_PACK(pack());
 
 //=========================== variables =======================================
 
