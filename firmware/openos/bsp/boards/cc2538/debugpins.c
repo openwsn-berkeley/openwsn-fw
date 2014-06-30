@@ -9,7 +9,7 @@
 #include "gpio.h"
 #include "hw_types.h"
 #include "hw_memmap.h"
-#include "board_info.h"
+#include "board.h"
 
 //=========================== defines =========================================
 // Board dbPINS defines

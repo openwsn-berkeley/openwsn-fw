@@ -9,7 +9,6 @@
 #include "string.h"
 #include "bsp_timer.h"
 #include "board.h"
-#include "board_info.h"
 #include "hw_ints.h"
 #include "hw_memmap.h"
 #include "hw_smwdthrosc.h"

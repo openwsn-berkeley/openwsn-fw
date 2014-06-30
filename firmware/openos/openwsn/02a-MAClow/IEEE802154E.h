@@ -9,7 +9,7 @@
 */
 
 #include "openwsn.h"
-#include "board_info.h"
+#include "board.h"
 #include "schedule.h"
 
 //=========================== debug define ====================================

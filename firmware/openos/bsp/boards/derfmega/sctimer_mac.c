@@ -8,7 +8,7 @@ on the derfmega we use timer 2 with asynchronous operation
 */
 
 #include <avr/io.h>
-#include "board_info.h"
+#include "board.h"
 #include "sctimer.h"
 
 //=========================== defines =========================================

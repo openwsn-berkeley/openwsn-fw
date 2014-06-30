@@ -16,11 +16,6 @@ to return the board's description.
 
 //=========================== defines =========================================
 
-#define port_INLINE                         inline
-#define BEGIN_PACK    _Pragma("pack(1)")
-#define END_PACK      _Pragma("pack()")
-
-
 //===== interrupt state
 
 #if defined(__GNUC__) && (__GNUC__==4)  && (__GNUC_MINOR__<=5) && defined(__MSP430__)

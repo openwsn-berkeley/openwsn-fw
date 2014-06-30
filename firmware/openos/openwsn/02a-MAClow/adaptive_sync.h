@@ -1,7 +1,7 @@
 #ifndef __ADAPTIVE_SYNC_H
 #define __ADAPTIVE_SYNC_H
 
-#include "board_info.h"
+#include "board.h"
 #include "openwsn.h"
 #include "opentimers.h"
 /**

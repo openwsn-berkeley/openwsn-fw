@@ -10,7 +10,6 @@ On derfmega, we use the MAC timer + COMPARE1
 #include "string.h"
 #include "bsp_timer.h"
 #include "board.h"
-#include "board_info.h"
 
 //=========================== defines =========================================
 

@@ -8,8 +8,6 @@
 #include "timer.h"
 #include "bsp_timer.h"
 #include "board.h"
-#include "board_info.h"
-
 
 typedef struct {
    bsp_timer_cbt    cb;

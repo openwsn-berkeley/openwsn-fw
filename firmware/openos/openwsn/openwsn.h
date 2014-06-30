@@ -10,7 +10,7 @@
 
 //general
 #include <stdint.h>               // needed for uin8_t, uint16_t
-#include "board_info.h"
+#include "board.h"
 
 //=========================== define ==========================================
 

@@ -9,7 +9,6 @@ On k20, we use flextimer for the bsp_timer module.
 #include "flextimer.h"
 #include "bsp_timer.h"
 #include "board.h"
-#include "board_info.h"
 
 //=========================== defines =========================================
 
