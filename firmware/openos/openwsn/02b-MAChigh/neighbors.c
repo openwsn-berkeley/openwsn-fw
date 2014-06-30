@@ -177,6 +177,37 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
       return NULL;
    }
 }
+// this function is used to get the address of neighbor, which is related to the link required to increase/decrease cells 
+// Currently only return node's time source neighor address.
+open_addr_t*  neighbors_reservationNeighbor(){
+  // should get from neighbor.c. We return a pre-define neighbor for test
+   uint8_t      i;
+  // uint16_t     timeSinceHeard;
+   open_addr_t* addrPreferred;
+   open_addr_t* addrOther;
+   // initialize
+   addrPreferred = NULL;
+   addrOther     = NULL;
+   // scan through the neighbor table, and populate addrPreferred and addrOther
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+            if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
+               // its a preferred parent
+               addrPreferred = &(neighbors_vars.neighbors[i].addr_64b);
+            } else {
+               // its not a preferred parent
+               // poipoi: don't KA to non-preferred parent
+               //addrOther =     &(neighbors_vars.neighbors[i].addr_64b);
+            }
+      }
+   // return the addr of the most urgent KA to send
+   if        (addrPreferred!=NULL) {
+      return addrPreferred;
+   } else if (addrOther!=NULL) {
+      return addrOther;
+   } else {
+      return NULL;
+   }
+}
 
 //===== interrogators
 

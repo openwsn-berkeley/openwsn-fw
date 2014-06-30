@@ -10,6 +10,8 @@
 #include "scheduler.h"
 #include "opentimers.h"
 #include "debugpins.h"
+#include "reservation.h"
+#include "IEfield.h"
 
 //=========================== variables =======================================
 
@@ -63,7 +65,7 @@ bool debugPrint_myDAGrank() {
 owerror_t res_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_RES;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-   return res_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
+   return res_send_internal(msg,msg->l2_IEListPresent,IEEE154_FRAMEVERSION_2006);
 }
 
 void res_setKaPeriod(uint16_t kaPeriod) {
@@ -160,8 +162,12 @@ void task_resNotifReceive() {
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
          if (msg->length>0) {
+           if(msg->l2_IEListPresent && msg->l2_frameType == IEEE154_TYPE_DATA){
+            IEFiled_retrieveIE(msg); 
+           } else {
             // send to upper layer
             iphc_receive(msg);
+           }
          } else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);
@@ -490,4 +496,9 @@ port_INLINE void sendKa() {
 
 void res_timer_cb() {
    scheduler_push_task(timers_res_fired,TASKPRIO_RES);
+}
+
+void    res_notifRetrieveIEDone(OpenQueueEntry_t *msg){
+  // sync IE is toss in ieee802154e
+  reservation_notifyReceiveuResCommand(msg);
 }

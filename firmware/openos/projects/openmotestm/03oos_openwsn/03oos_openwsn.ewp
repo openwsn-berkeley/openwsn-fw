@@ -2184,16 +2184,34 @@
     <group>
       <name>02b-MAChigh</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\IEfield.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\IEfield.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\reservation.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\reservation.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.c</name>

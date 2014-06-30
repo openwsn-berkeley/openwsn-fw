@@ -25,10 +25,11 @@ typedef enum {
    TASKPRIO_ADAPTIVE_SYNC      = 0x07, 
    // tasks trigger by other interrupts
    TASKPRIO_BUTTON             = 0x08, // scheduled by P2.7 interrupt
-   TASKPRIO_MAX                = 0x09,
+   TASKPRIO_RESERVATION        = 0x09,
+   TASKPRIO_MAX                = 0x0a,
 } task_prio_t;
 
-#define TASK_LIST_DEPTH      10
+#define TASK_LIST_DEPTH      11
 
 //=========================== typedef =========================================
 

@@ -1402,8 +1402,9 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       }
       
       // store header details in packet buffer
-      ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
-      ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
+      ieee154e_vars.dataReceived->l2_frameType      = ieee802514_header.frameType;
+      ieee154e_vars.dataReceived->l2_dsn            = ieee802514_header.dsn;
+      ieee154e_vars.dataReceived->l2_IEListPresent  = ieee802514_header.ieListPresent;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
       
       // toss the IEEE802.15.4 header
@@ -1417,6 +1418,10 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
           ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
           //log  that the packet is not carrying IEs
+            if(ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE)==FALSE){
+              //this packet may has ie defined in reservation, set len to 0, and do not toss IE now.
+              lenIE = 0;
+            }
       }
       
       // toss the IEs including Synch

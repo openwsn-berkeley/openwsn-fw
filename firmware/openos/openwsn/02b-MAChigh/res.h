@@ -37,6 +37,8 @@ void    task_resNotifSendDone(void);
 void    task_resNotifReceive(void);
 void    res_setKaPeriod(uint16_t kaPeriod);
 
+void    res_notifRetrieveIEDone(OpenQueueEntry_t *msg);
+
 /**
 \}
 \}
