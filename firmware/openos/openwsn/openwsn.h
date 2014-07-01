@@ -1,3 +1,4 @@
+
 /**
 \brief General OpenWSN definitions
 
@@ -32,7 +33,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define LENGTH_ADDR128b 16
 
 enum {
-   E_SUCCESS                           = 0,
+   E_SUCCESS                           = 0,          
    E_FAIL                              = 1,
 };
 
@@ -48,8 +49,8 @@ enum {
 };
 
 enum {
-   OW_LITTLE_ENDIAN                    = TRUE,
-   OW_BIG_ENDIAN                       = FALSE,
+   OW_LITTLE_ENDIAN                       = TRUE,
+   OW_BIG_ENDIAN                          = FALSE,
 };
 
 // protocol numbers, as defined by the IANA
@@ -172,9 +173,7 @@ enum {
    COMPONENT_UDPSTORM                  = 0x2e,
    COMPONENT_UDPLATENCY                = 0x2f,
    COMPONENT_TEST                      = 0x30,
-   COMPONENT_R6T                       = 0x31,
-   COMPONENT_SWARMBAND                 = 0x32,
-   COMPONENT_RRT                       = 0x33,
+   COMPONENT_R6TUS                    = 0x31,
 };
 
 /**
@@ -248,6 +247,7 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
+   ERR_OK							   = 0x3a,
 };
 
 //=========================== typedef =========================================
@@ -258,15 +258,15 @@ typedef uint16_t  dagrank_t;
 typedef uint8_t   owerror_t;
 #define bool uint8_t
 
-BEGIN_PACK;
+PRAGMA(pack(1));
 typedef struct {
    uint8_t  byte4;
    uint16_t bytes2and3;
    uint16_t bytes0and1;
 } asn_t;
-END_PACK;
+PRAGMA(pack());
 
-BEGIN_PACK;
+PRAGMA(pack(1));
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint8_t type;
    union {
@@ -277,7 +277,7 @@ typedef struct {                                 // always written big endian, i
       uint8_t prefix[8];
    };
 } open_addr_t;
-END_PACK;
+PRAGMA(pack());
 
 typedef struct {
    //admin
@@ -295,6 +295,20 @@ typedef struct {
    //l3
    open_addr_t   l3_destinationAdd;              // 128b IPv6 destination (down stack) 
    open_addr_t   l3_sourceAdd;                   // 128b IPv6 source address 
+   //START OF TELEMATICS CODE
+   //security
+   bool			 l2_security;					      //flag for security enabled/disabled
+   uint8_t		 l2_securityLevel;				   //the security level for this frame
+   uint8_t		 l2_keyIdMode;					      //the key Identifier mode for this frame
+   uint8_t      l2_keyIndex;					      //the key Index for this frame
+   uint32_t     l2_frameCounter;				      //the Frame Counter for this frame
+   open_addr_t  l2_keySource;					      //the key Source for this frame
+   uint8_t		 l2_toDiscard;					      //flag signalling if this frame has to be discarded, because it is a duplicated or because I don't know who send it
+   uint8_t 		 l2_authenticationLength;		   //the length of the authentication field
+   uint8_t		 l2_auxiliaryLength;			      //length of the Auxiliary Security Header
+   uint8_t		 commandFrameIdentifier;		   //used in case of Command Frames
+   uint8_t 		 receivedASN[5];				      //in case ASN is used instead of Frame Counter (IEEE 802.15.4e)
+   //END OF TELEMATICS CODE
    //l2
    owerror_t     l2_sendDoneError;               // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;           // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
@@ -319,7 +333,6 @@ typedef struct {
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
-
-void openwsn_init(void);
+void openwsn_init();
 
 #endif
