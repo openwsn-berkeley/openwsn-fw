@@ -35,12 +35,12 @@ typedef enum {
 } link_command_t;
 
 // header
-BEGIN_PACK; //elements for slot info 
+BEGIN_PACK
 typedef struct {
   link_command_t type; 
   uint8_t numelem;//number of elements 
-}r6t_command_t;
-END_PACK;
+} r6t_command_t;
+END_PACK
 
 //=========================== variables =======================================
 
