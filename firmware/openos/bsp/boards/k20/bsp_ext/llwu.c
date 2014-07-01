@@ -6,7 +6,7 @@
 
 #include "common.h"
 #include "llwu.h"
-#include "board_info.h"
+#include "board.h"
 
 
 extern int re_init_clk;

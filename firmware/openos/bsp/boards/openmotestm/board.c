@@ -16,7 +16,6 @@
 #include "rcc.h"
 #include "nvic.h"
 #include "debugpins.h"
-#include "board_info.h"
 #include "opentimers.h"
 #include "gpio.h"
 

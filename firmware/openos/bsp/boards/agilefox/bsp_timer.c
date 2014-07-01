@@ -7,7 +7,6 @@ On openmoteSTM32, we use TIM2 for the bsp_timer module.
 */
 #include "stm32f10x_lib.h"
 #include "string.h"
-#include "board_info.h"
 #include "bsp_timer.h"
 #include "board.h"
 

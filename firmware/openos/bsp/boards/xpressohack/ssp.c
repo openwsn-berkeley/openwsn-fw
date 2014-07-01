@@ -26,7 +26,6 @@
 #include "ssp.h"
 #include "clkpwr.h"
 #include "board.h"
-#include "board_info.h"
 
 #define _SSP
 #ifdef _SSP

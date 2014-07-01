@@ -5,7 +5,6 @@
  */
 
 #include "board.h"
-#include "board_info.h"
 #include "leds.h"
 #include "led.h"
 #include "bsp_timer.h"

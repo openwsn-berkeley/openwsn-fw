@@ -18,11 +18,6 @@
 
 //=========================== defines =========================================
 
-#define port_INLINE                         inline
-#define BEGIN_PACK    _Pragma("pack(1)")
-#define END_PACK      _Pragma("pack()")
-
-
 #define PORT_TIMER_WIDTH                    uint32_t
 #define PORT_RADIOTIMER_WIDTH               uint32_t
 #define PORT_SIGNED_INT_WIDTH               int32_t
