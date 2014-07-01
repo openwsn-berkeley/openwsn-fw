@@ -77,7 +77,7 @@ void IEFiled_prependIE  (OpenQueueEntry_t*      msg){
       temp_16b  |=      0                       <<      SUBIE_TYPE;
       //add uResLinkType IE content
       uResLinkTypeIEcontent_t*  tempuResLinkTypeIEcontent       = processIE_getuResLinkTypeIEcontent();
-      slotinfo_element_t* tempLink = NULL;
+      Link_t* tempLink = NULL;
       for(uint8_t i=0;i<tempuResLinkTypeIEcontent->numOfSlotframes;i++)
       {
         //add Links 
@@ -85,7 +85,7 @@ void IEFiled_prependIE  (OpenQueueEntry_t*      msg){
         // add links
         for(uint8_t j=0;j<tempuResLinkTypeIEcontent->slotframeInfo[i].numOfLink;j++)
         {
-          packetfunctions_reserveHeaderSize(msg,sizeof(slotinfo_element_t));
+          packetfunctions_reserveHeaderSize(msg,sizeof(Link_t));
           packetfunctions_htons(tempLink[j].slotOffset, &(msg->payload[0])); 
           packetfunctions_htons(tempLink[j].channelOffset, &(msg->payload[2]));
           msg->payload[4]     = tempLink[j].link_type;
@@ -101,7 +101,7 @@ void IEFiled_prependIE  (OpenQueueEntry_t*      msg){
         *((uint8_t*)(msg->payload))     = tempuResLinkTypeIEcontent->slotframeInfo[i].slotframeID;
       }
       //reset links
-      memset(tempLink,0,MAXACTIVESLOTS*sizeof(slotinfo_element_t));
+      memset(tempLink,0,MAXACTIVESLOTS*sizeof(Link_t));
       //add number of slotframes
       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
       *((uint8_t*)(msg->payload))     = tempuResLinkTypeIEcontent->numOfSlotframes;
@@ -140,7 +140,7 @@ void IEFiled_prependIE  (OpenQueueEntry_t*      msg){
       temp_16b  |=      0                       <<      SUBIE_TYPE;
       //add frameAndLink IE content
       frameAndLinkIEcontent_t*  tempFrameAndLinkIEcontent       = processIE_getFrameAndLinkIEcontent();
-      slotinfo_element_t* tempLink = NULL;
+      Link_t* tempLink = NULL;
       for(uint8_t i=0;i<tempFrameAndLinkIEcontent->numOfSlotframes;i++)
       {
         //add Links 
@@ -148,7 +148,7 @@ void IEFiled_prependIE  (OpenQueueEntry_t*      msg){
         // add links
         for(uint8_t j=0;j<tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;j++)
         {
-          packetfunctions_reserveHeaderSize(msg,sizeof(slotinfo_element_t));
+          packetfunctions_reserveHeaderSize(msg,5); // 2 bytes slotOffset, 2bytes channelOffset+ 1 byte link_type
           packetfunctions_htons(tempLink[j].slotOffset, &(msg->payload[0])); 
           packetfunctions_htons(tempLink[j].channelOffset, &(msg->payload[2]));
           msg->payload[4]     = tempLink[j].link_type;
@@ -164,7 +164,7 @@ void IEFiled_prependIE  (OpenQueueEntry_t*      msg){
         *((uint8_t*)(msg->payload))     = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeID;
       }
       //reset links
-      memset(tempLink,0,MAXACTIVESLOTS*sizeof(slotinfo_element_t));
+      memset(tempLink,0,MAXACTIVESLOTS*sizeof(Link_t));
       //add number of slotframes
       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
       *((uint8_t*)(msg->payload))     = tempFrameAndLinkIEcontent->numOfSlotframes;
@@ -301,7 +301,7 @@ void IEFiled_retrieveIE (OpenQueueEntry_t*      msg){
           i++;
           //sotre links
           tempFrameAndLinkIEcontent->slotframeInfo[i].links = schedule_getLinksList(j);
-          slotinfo_element_t* tempLink =  tempFrameAndLinkIEcontent->slotframeInfo[i].links;
+          Link_t* tempLink =  tempFrameAndLinkIEcontent->slotframeInfo[i].links;
           for(uint8_t k=0;k<tempFrameAndLinkIEcontent->slotframeInfo[j].numOfLink;k++)
           {
             //store slotoffset
@@ -338,7 +338,7 @@ void IEFiled_retrieveIE (OpenQueueEntry_t*      msg){
           i++;
           //sotre links
           tempuResLinkTypeIEcontent->slotframeInfo[i].links = schedule_getLinksList(j);
-          slotinfo_element_t* tempLink =  tempuResLinkTypeIEcontent->slotframeInfo[i].links;
+          Link_t* tempLink =  tempuResLinkTypeIEcontent->slotframeInfo[i].links;
           for(uint8_t k=0;k<tempuResLinkTypeIEcontent->slotframeInfo[j].numOfLink;k++)
           {
             //store slotoffset

@@ -48,7 +48,7 @@ void    reservation_notifyReceiveuResLinkRequest(OpenQueueEntry_t* msg){
   uint8_t slotframeID,numOfLink; //in Frame and Link IE
   
   //qw : indicate receiving ResLinkRequest
-  leds_debug_toggle();
+//  leds_debug_toggle();
   
   uResBandwidthIEcontent_t* tempBandwidthIE = processIE_getuResBandwidthIEcontent();
   //record bandwidth information
@@ -90,14 +90,13 @@ void    reservation_notifyReceiveuResLinkResponse(OpenQueueEntry_t* msg){
     }
     
     reservation_vars.State = S_IDLE;
-    //qw: turn off yellow led when finish
-    leds_debug_toggle();
+
+    leds_debug_off();
 }
 
 void    reservation_notifyReceiveRemoveLinkRequest(OpenQueueEntry_t* msg){
   
-  //qw: turn on yellow led when receive RemoveLink Request
-    leds_debug_toggle();
+  leds_debug_on();
     
   frameAndLinkIEcontent_t* tempFrameAndLinkIEcontent = processIE_getFrameAndLinkIEcontent();
     
@@ -111,9 +110,7 @@ void    reservation_notifyReceiveRemoveLinkRequest(OpenQueueEntry_t* msg){
   }
   
   reservation_vars.State = S_IDLE;
-  
-  //qw: turn off yellow led when finish Remove Link operation
-    leds_debug_toggle();
+  leds_debug_off();
 }
 
 void    reservation_notifyReceiveScheduleRequest(OpenQueueEntry_t* msg){
@@ -134,13 +131,10 @@ void    reservation_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         break;
       case S_WAIT_RESLINKRESPONSE_SENDDONE:
         reservation_vars.State = S_IDLE;
-        //qw turn off yellow light when finish
-        leds_debug_toggle();
         break;
       case S_WAIT_REMOVELINKREQUEST_SENDDONE:
         reservation_vars.State = S_IDLE;
-        //qw turn off yellow light when finish
-        leds_debug_toggle();
+        leds_debug_off();
         break;
       default:
         //log error
@@ -204,7 +198,7 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
   if(reservation_vars.State != S_IDLE)
     return;
   
-  leds_debug_toggle();
+//  leds_debug_toggle();
   
   if(reservationNeighAddr==NULL){
      return;
@@ -243,6 +237,9 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
 
     //set uResBandwidthIE
     processIE_setSubuResBandwidthIE(bandwidth,0);
+    
+    //set IE after set all required subIE
+    processIE_setMLME_IE();
     
     //add an IE to adv's payload
     IEFiled_prependIE(reservationPkt);
@@ -312,7 +309,7 @@ void reservation_removeLinkRequest(open_addr_t*  reservationNeighAddr){
   if(reservation_vars.State != S_IDLE)
     return;
   
-  leds_debug_toggle();
+//  leds_debug_toggle();
   
   if(reservationNeighAddr!=NULL){
     // get a free packet buffer
@@ -334,10 +331,11 @@ void reservation_removeLinkRequest(open_addr_t*  reservationNeighAddr){
     
     uint8_t numOfSlotframes = schedule_getNumSlotframe();
 #ifdef NO_UPPER_LAYER_CALLING_RESERVATION
-    slotinfo_element_t tempLink;
+    // this is the cell that will removed by neighbor
+    Link_t tempLink;
     tempLink.channelOffset      = 0;
-    tempLink.slotOffset         = 7; // By experiment, I knew slotoffset 7 is created, so I can deleted it here.  7, make sure?
-    tempLink.link_type           = CELLTYPE_RX;
+    tempLink.slotOffset         = 8; // By experiment, I knew slotoffset 8 is created, so I can deleted it here.  7, make sure?
+    tempLink.link_type           = CELLTYPE_RX;// this is for cell removed by neighbor
     //generate links to be removed
     for(uint8_t i=0;i<numOfSlotframes;i++)
       schedule_uResGenerateRemoveLinkList(i,tempLink);
@@ -443,8 +441,12 @@ void timers_reservation_fired() {
     return;
   }
   
+  if(idmanager_getIsDAGroot() == TRUE){
+    return;
+  }
+  
   if(reservation_vars.addORremove == TRUE) {
-    leds_debug_off();
+    leds_debug_on();
     reservation_vars.addORremove = FALSE;
     // I'm going to require to remove one link
     reservationNeighAddr = neighbors_reservationNeighbor();

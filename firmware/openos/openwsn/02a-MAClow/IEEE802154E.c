@@ -656,7 +656,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
           }
           break;
         case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
-          ieee154e_processSlotframeLinkIE(pkt,&ptr); 
+//          ieee154e_processSlotframeLinkIE(pkt,&ptr); 
           break;
         case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
           //TODO
@@ -829,7 +829,7 @@ port_INLINE void activity_ti1ORri1() {
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
-            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;            
+            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;         
             //copy synch IE  -- should be Little endian???
             // fill in the ASN field of the ADV
             ieee154e_getAsn(syn_IE.asn);
@@ -1416,12 +1416,9 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       if ((ieee802514_header.valid==TRUE &&
           ieee802514_header.ieListPresent==TRUE && 
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
+          ieee802514_header.frameType==IEEE154_TYPE_BEACON &&
           ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
           //log  that the packet is not carrying IEs
-            if(ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE)==FALSE){
-              //this packet may has ie defined in reservation, set len to 0, and do not toss IE now.
-              lenIE = 0;
-            }
       }
       
       // toss the IEs including Synch

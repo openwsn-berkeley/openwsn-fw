@@ -43,10 +43,10 @@ void bsp_timer_init()
     //Configure TIM2, Clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 , ENABLE);
 
-    //Configure TIM2: Period = 0xffff, prescaler = 511(16M/(511+1) = 32.768KHz), CounterMode  = upCounting mode
+    //Configure TIM2: Period = 0xffff, prescaler = 1023(32M/(1023+1) = 32.768KHz), CounterMode  = upCounting mode
     TIM_TimeBaseInitTypeDef TIM_TimeBaseStructure ;
     TIM_TimeBaseStructure.TIM_Period        = 0xFFFF;
-    TIM_TimeBaseStructure.TIM_Prescaler     = 511;;
+    TIM_TimeBaseStructure.TIM_Prescaler     = 1023;;
     TIM_TimeBaseStructure.TIM_ClockDivision = 0;
     TIM_TimeBaseStructure.TIM_CounterMode   = TIM_CounterMode_Up;
     TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure);

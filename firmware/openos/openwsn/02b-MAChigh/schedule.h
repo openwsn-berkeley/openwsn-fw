@@ -123,6 +123,15 @@ typedef struct {
   channelOffset_t channelOffset;
 }slotinfo_element_t;
 END_PACK;
+
+BEGIN_PACK; //elements for slot info 
+typedef struct {
+  cellType_t link_type;// rx,tx etc...
+  slotOffset_t slotOffset;
+  channelOffset_t channelOffset;
+}Link_t;
+END_PACK;
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -184,13 +193,13 @@ void               schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist);
 // from reservation
 uint8_t         schedule_getNumSlotframe();
 void            schedule_uResGenerateCandidataLinkList(uint8_t slotframeID);
-void            schedule_uResGenerateRemoveLinkList(uint8_t slotframeID,slotinfo_element_t tempLink);
+void            schedule_uResGenerateRemoveLinkList(uint8_t slotframeID,Link_t tempLink);
 void            schedule_allocateLinks(uint8_t slotframeID,uint8_t numOfLink,uint8_t bandwidth);
 void            schedule_addLinksToSchedule(uint8_t slotframeID,open_addr_t* previousHop,uint8_t numOfLinks,uint8_t state);
 void            schedule_removeLinksFromSchedule(uint8_t slotframeID,uint16_t slotframeSize,uint8_t numOfLink,open_addr_t* previousHop,uint8_t state);
 scheduleEntry_t* schedule_getScheduleEntry(uint16_t slotOffset);
 uint8_t         schedule_getLinksNumber(uint8_t numOfSlotframe);
-slotinfo_element_t* schedule_getLinksList(uint8_t slotframeID);
+Link_t* schedule_getLinksList(uint8_t slotframeID);
 
 /**
 \}

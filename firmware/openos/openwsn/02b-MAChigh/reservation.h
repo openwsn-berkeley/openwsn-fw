@@ -5,7 +5,7 @@
 #include "openwsn.h"
 //============================ define =========================================
 
-#define RESPERIOD 5000
+#define RESPERIOD 10000
 #define NO_UPPER_LAYER_CALLING_RESERVATION // this is used for debugging reservation
 
 //=========================== typedef =========================================

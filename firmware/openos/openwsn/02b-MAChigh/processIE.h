@@ -32,7 +32,7 @@ typedef struct{
         uint8_t         slotframeID;
         uint16_t        slotframeSize;
         uint8_t         numOfLink;
-        slotinfo_element_t*         links;
+        Link_t*         links;
 }slotframeInfo_t;
 
 typedef	struct{

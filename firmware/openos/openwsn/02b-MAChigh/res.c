@@ -12,6 +12,7 @@
 #include "debugpins.h"
 #include "reservation.h"
 #include "IEfield.h"
+#include "leds.h"
 
 //=========================== variables =======================================
 
@@ -65,7 +66,11 @@ bool debugPrint_myDAGrank() {
 owerror_t res_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_RES;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-   return res_send_internal(msg,msg->l2_IEListPresent,IEEE154_FRAMEVERSION_2006);
+   if(msg->l2_IEListPresent == IEEE154_IELIST_NO) {
+    return res_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
+   } else {
+    return res_send_internal(msg,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
+   }
 }
 
 void res_setKaPeriod(uint16_t kaPeriod) {
@@ -125,6 +130,10 @@ void task_resNotifSendDone() {
                            TIME_MS,
                            res_vars.periodMaintenance);
    } else {
+     if(msg->creator == COMPONENT_RESERVATION) {
+       reservation_sendDone(msg,msg->l2_sendDoneError);
+     }
+     else
       // send the rest up the stack
       iphc_sendDone(msg,msg->l2_sendDoneError);
    }
@@ -162,8 +171,9 @@ void task_resNotifReceive() {
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
          if (msg->length>0) {
-           if(msg->l2_IEListPresent && msg->l2_frameType == IEEE154_TYPE_DATA){
+           if(msg->l2_frameType==IEEE154_TYPE_DATA && msg->l2_IEListPresent == IEEE154_IELIST_YES){
             IEFiled_retrieveIE(msg); 
+            openqueue_freePacketBuffer(msg);
            } else {
             // send to upper layer
             iphc_receive(msg);
