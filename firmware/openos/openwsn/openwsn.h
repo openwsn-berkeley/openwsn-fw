@@ -1,4 +1,3 @@
-
 /**
 \brief General OpenWSN definitions
 
@@ -297,17 +296,17 @@ typedef struct {
    open_addr_t   l3_sourceAdd;                   // 128b IPv6 source address 
    //START OF TELEMATICS CODE
    //security
-   bool			 l2_security;					      //flag for security enabled/disabled
-   uint8_t		 l2_securityLevel;				   //the security level for this frame
-   uint8_t		 l2_keyIdMode;					      //the key Identifier mode for this frame
-   uint8_t      l2_keyIndex;					      //the key Index for this frame
-   uint32_t     l2_frameCounter;				      //the Frame Counter for this frame
-   open_addr_t  l2_keySource;					      //the key Source for this frame
-   uint8_t		 l2_toDiscard;					      //flag signalling if this frame has to be discarded, because it is a duplicated or because I don't know who send it
-   uint8_t 		 l2_authenticationLength;		   //the length of the authentication field
-   uint8_t		 l2_auxiliaryLength;			      //length of the Auxiliary Security Header
-   uint8_t		 commandFrameIdentifier;		   //used in case of Command Frames
-   uint8_t 		 receivedASN[5];				      //in case ASN is used instead of Frame Counter (IEEE 802.15.4e)
+   bool			 l2_security;					 //flag for security enabled/disabled
+   uint8_t		 l2_securityLevel;				 //the security level for this frame
+   uint8_t		 l2_keyIdMode;					 //the key Identifier mode for this frame
+   uint8_t       	 l2_keyIndex;					 //the key Index for this frame
+   uint32_t      	 l2_frameCounter;				 //the Frame Counter for this frame
+   open_addr_t   	 l2_keySource;					 //the key Source for this frame
+   uint8_t		 l2_toDiscard;					 //flag signalling if this frame has to be discarded, because it is a duplicated or because I don't know who send it
+   uint8_t 		 l2_authenticationLength;		 //the length of the authentication field
+   uint8_t		 l2_auxiliaryLength;			 //length of the Auxiliary Security Header
+   uint8_t		 commandFrameIdentifier;		 //used in case of Command Frames
+   uint8_t 		 receivedASN[5];				 //in case ASN is used instead of Frame Counter (IEEE 802.15.4e)
    //END OF TELEMATICS CODE
    //l2
    owerror_t     l2_sendDoneError;               // outcome of trying to send this packet
