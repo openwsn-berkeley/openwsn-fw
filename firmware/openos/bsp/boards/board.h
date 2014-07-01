@@ -13,6 +13,7 @@
 */
 
 #include "board_info.h"
+#include "toolchain_defs.h"
 
 //=========================== define ==========================================
 
