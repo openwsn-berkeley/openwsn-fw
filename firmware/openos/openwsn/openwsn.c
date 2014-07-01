@@ -14,12 +14,12 @@
 #include "openrandom.h"
 #include "opentimers.h"
 //-- 02a-TSCH
-#include "adaptive_sync.h"
 #include "IEEE802154E.h"
 //-- 02b-RES
 #include "schedule.h"
 #include "res.h"
 #include "neighbors.h"
+#include "security.h"
 //-- 03a-IPHC
 #include "openbridge.h"
 #include "iphc.h"
@@ -32,47 +32,41 @@
 #include "opentcp.h"
 #include "openudp.h"
 #include "opencoap.h"
+//-- app (common)
+#include "rreg.h"
+#include "rwellknown.h"
+#include "rinfo.h"
 //===== applications
-//+++++ TCP
-//- debug
+//-- TCP
 #include "tcpecho.h"
 #include "tcpinject.h"
 #include "tcpprint.h"
-//- common
 #include "ohlone.h"
-//- board-specific
-//++++ UDP
-//- debug
+//-- UDP
 #include "udpecho.h"
 #include "udpinject.h"
 #include "udpprint.h"
-//- common
-//#include "udprand.h"
-//#include "udplatency.h"
+#include "udprand.h"
+#include "udplatency.h"
 //#include "udpstorm.h"
-//- board-specific
-//#include "imu.h"
-//+++++ CoAP
-//- debug
-//- common
-#include "rinfo.h"
+//-- CoAP
 #include "rleds.h"
-#include "rwellknown.h"
-#include "r6t.h"
-#include "rrt.h"
-//#include "rex.h"
-//#include "rrube.h"
-//#include "layerdebug.h"
-//- board-specific
-//#include "rheli.h"
 //#include "rt.h"
+//#include "rex.h"
+//#include "rheli.h"
+//#include "rrube.h"
 //#include "rxl1.h"
+//#include "layerdebug.h"
+#include "r6tus.h"
+//-- misc
 //#include "heli.h"
 //#include "imu.h"
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
+
+void openwsn_init();
 
 //=========================== public ==========================================
 
@@ -81,8 +75,6 @@
 void openwsn_init() {
    //===== drivers
    openserial_init();
-   //heli_init();
-   //imu_init();
    
    //===== stack
    //-- cross-layer
@@ -91,11 +83,13 @@ void openwsn_init() {
    openrandom_init();
    opentimers_init();
    //-- 02a-TSCH
-   adaptive_sync_init();
    ieee154e_init();
    //-- 02b-RES
    schedule_init();
    res_init();
+   //START OF TELEMATICS CODE
+   security_init();
+   //END OF TELEMATICS CODE
    neighbors_init();
    //-- 03a-IPHC
    openbridge_init();
@@ -108,49 +102,40 @@ void openwsn_init() {
    //-- 04-TRAN
    opentcp_init();
    openudp_init();
-   opencoap_init();     // initialize before any of the CoAP applications
+   opencoap_init();    // initialize before any of the CoAP applications
+   //-- app (common)
+   //rreg_init();
+   rwellknown_init();
+   rinfo_init();
    
    //===== applications
-   //+++++ TCP
-   //- debug
+   //-- TCP
    tcpecho_init();
    tcpinject_init();
-   tcpprint_init();
-   //- common
-   ohlone_init();
-   //- board-specific
-   //+++++ UDP
-   //- debug
-   udpecho_init();
-   udpinject_init();
-   udpprint_init();
-   //- common
+   //tcpprint_init();
+   //ohlone_init();
+   //-- UDP
+   //udpecho_init();
+   //udpinject_init();
+   //udpprint_init();
    //udprand_init();
-   //udplatency_init();
+   udplatency_init();
    //udpstorm_init();
-   //- board-specific
-   //imu_init();
-   //+++++ CoAP
-   //- debug
-   //- core
-   //- common
-   rinfo_init();
-   rrt_init();
-   rleds__init();
-   rwellknown_init();
-   r6t_init();
-   //rreg_init();
-   //rex_init();
-   //rrube_init();
-   //layerdebug_init();
-   //- board-specific
-   //rheli_init();
+   //-- CoAP
+   //rleds_init();
    //rt_init();
+   //rex_init();
+   //rheli_init();
+   //rrube_init();
    //rxl1_init();
+   //layerdebug_init();
+   //r6tus_init();
+
+   //-- misc
+   //heli_init();
+   //imu_init();
    
-   openserial_printInfo(
-      COMPONENT_OPENWSN,ERR_BOOTED,
-      (errorparameter_t)0,
-      (errorparameter_t)0
-   );
+   openserial_printInfo(COMPONENT_OPENWSN,ERR_BOOTED,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
 }
