@@ -1,5 +1,4 @@
 /*
- * board_info.h
  *
  *  Created on: Feb 27, 2012
  *      Author: Vitor Mangueira, Branko Kerkez <bkerkez@berkeley.edu>
@@ -11,10 +10,6 @@
 #include "PE_Types.h"
 #include "string.h"
 //=========================== defines =========================================
-
-#define port_INLINE                         inline
-#define BEGIN_PACK    _Pragma("pack(1)")
-#define END_PACK      _Pragma("pack()")
 
 #define PORT_RADIOTIMER_WIDTH               uint16_t
 

@@ -14,7 +14,6 @@
 
 #include "stdint.h"
 #include "board.h"
-#include "board_info.h"
 
 //=========================== define ==========================================
 

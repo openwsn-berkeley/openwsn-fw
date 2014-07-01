@@ -9,7 +9,6 @@ On WSN430v13b, we use timerA0 for the bsp_timer module.
 #include "msp430f1611.h"
 #include "bsp_timer.h"
 #include "board.h"
-#include "board_info.h"
 
 //=========================== defines =========================================
 

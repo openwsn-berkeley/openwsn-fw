@@ -6,7 +6,6 @@
 
 #include "LPC17xx.h"
 #include "board.h"
-#include "board_info.h"
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"

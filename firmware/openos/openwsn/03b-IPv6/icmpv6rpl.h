@@ -77,7 +77,7 @@ static const uint8_t all_routers_multicast[] = {
 /**
 \brief Header format of a RPL DIO packet.
 */
-BEGIN_PACK;
+BEGIN_PACK
 typedef struct {
    uint8_t         rplinstanceId;      ///< set by the DODAG root.
    uint8_t         verNumb;
@@ -88,14 +88,14 @@ typedef struct {
    uint8_t         reserved;
    uint8_t         DODAGID[16];    
 } icmpv6rpl_dio_ht;
-END_PACK;
+END_PACK
 
 //===== DAO
 
 /**
 \brief Header format of a RPL DAO packet.
 */
-BEGIN_PACK;
+BEGIN_PACK
 typedef struct {
    uint8_t         rplinstanceId;      ///< set by the DODAG root.
    uint8_t         K_D_flags;
@@ -103,12 +103,12 @@ typedef struct {
    uint8_t         DAOSequence;
    uint8_t         DODAGID[16];
 } icmpv6rpl_dao_ht;
-END_PACK;
+END_PACK
 
 /**
 \brief Header format of a RPL DAO "Transit Information" option.
 */
-BEGIN_PACK;
+BEGIN_PACK
 typedef struct {
    uint8_t         type;               ///< set by the DODAG root.
    uint8_t         optionLength;
@@ -117,19 +117,19 @@ typedef struct {
    uint8_t         PathSequence;   
    uint8_t         PathLifetime;   
 } icmpv6rpl_dao_transit_ht;
-END_PACK;
+END_PACK
 
 /**
 \brief Header format of a RPL DAO "Target" option.
 */
-BEGIN_PACK;
+BEGIN_PACK
 typedef struct {
    uint8_t         type;               ///< set by the DODAG root.
    uint8_t         optionLength;
    uint8_t         flags;
    uint8_t         prefixLength;  
 } icmpv6rpl_dao_target_ht;
-END_PACK;
+END_PACK
 
 //=========================== module variables ================================
 

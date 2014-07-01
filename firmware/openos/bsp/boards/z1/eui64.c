@@ -7,7 +7,7 @@
 #include "string.h"
 #include "eui64.h"
 #include "msp430x26x.h"
-#include "board_info.h"
+#include "board.h"
 
 //=========================== defines =========================================
 

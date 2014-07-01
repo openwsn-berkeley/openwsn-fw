@@ -19,11 +19,11 @@
 
 const uint8_t udpstorm_path0[] =  "strm";
 
-BEGIN_PACK;
+BEGIN_PACK
 typedef struct {
    uint16_t             seqNum;
 } udpstorm_payload_t;
-END_PACK;
+END_PACK
 
 //=========================== variables =======================================
 

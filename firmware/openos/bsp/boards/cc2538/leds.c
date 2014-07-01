@@ -9,7 +9,7 @@
 #include "gpio.h"
 #include "hw_types.h"
 #include "hw_memmap.h"
-#include "board_info.h"
+#include "board.h"
 
 
 // Board LED defines

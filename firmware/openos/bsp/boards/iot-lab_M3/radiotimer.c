@@ -12,7 +12,7 @@ On openmoteSTM32, we use RTC for the radiotimer module.
 #include "stm32f10x_lib.h"
 #include "leds.h"
 #include "radiotimer.h"
-#include "board_info.h"
+#include "board.h"
 
 #include "rcc.h"
 #include "nvic.h"
