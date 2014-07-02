@@ -14,6 +14,9 @@
 
 //=========================== defines =========================================
 
+#define UDPLATENCYPERIOD 3000
+#define NUMPKTTEST 100
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -22,10 +25,9 @@ typedef struct {
 
 udplatency_vars_t udplatency_vars;
 uint16_t          seqNum;
-
 //=========================== prototypes ======================================
 
-void udplatency_timer(void);
+void udplatency_timer();
 
 //=========================== public ==========================================
 
@@ -34,30 +36,34 @@ void udplatency_init() {
    udplatency_vars.timerId    = opentimers_start(UDPLATENCYPERIOD,
                                             TIMER_PERIODIC,TIME_MS,
                                             udplatency_timer);
-}
+   }
 
 void udplatency_task() {
    OpenQueueEntry_t* pkt;
    open_addr_t * p;
    open_addr_t  q;
 
+
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
 
+   //START OF TELEMATICS CODE
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
        opentimers_stop(udplatency_vars.timerId);
        return;
    }
+   //END OF TELEMATICS CODE
 
    // prepare packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPLATENCY);
-   if (pkt==NULL) {
-      openserial_printError(COMPONENT_UDPLATENCY,ERR_NO_FREE_PACKET_BUFFER,
+   /*if (pkt==NULL) {
+	   openserial_printError(COMPONENT_UDPLATENCY,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       return;
-   }
+   }*/
+
    pkt->creator                     = COMPONENT_UDPLATENCY;
    pkt->owner                       = COMPONENT_UDPLATENCY;
    pkt->l4_protocol                 = IANA_UDP;
@@ -65,7 +71,23 @@ void udplatency_task() {
    pkt->l4_destination_port         = WKP_UDP_LATENCY;
    pkt->l3_destinationAdd.type      = ADDR_128B;
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_motedata,16);
-   
+
+   //START OF TELEMATICS CODE
+   pkt->l2_security = TRUE;
+   pkt->l2_securityLevel = 5;
+   pkt->l2_keyIdMode = 3;
+   neighbors_getPreferredParentEui64(&(pkt->l2_keySource));
+   pkt->l2_keyIndex = 1;
+
+   	   //VARIABLE PAYLOAD TEST
+//   uint8_t payloadLength,i;
+//   payloadLength = 5;
+//   packetfunctions_reserveHeaderSize(pkt, payloadLength*sizeof(uint8_t));
+//   for(i=0; i<payloadLength;i++){
+//   pkt->payload[i] = i*2;
+//  }
+   //END OF TELEMATICS CODE
+
    // the payload contains the 64bit address of the sender + the ASN
    packetfunctions_reserveHeaderSize(pkt, sizeof(asn_t));
    ieee154e_getAsn(pkt->payload);//gets asn from mac layer.
@@ -101,6 +123,8 @@ void udplatency_task() {
    pkt->payload[0]    = (seqNum >> 8) & 0xff;
    pkt->payload[1]    = seqNum & 0xff;
 
+
+
    // send packet
    if ((openudp_send(pkt)) == E_FAIL) {
       openqueue_freePacketBuffer(pkt);
@@ -111,7 +135,8 @@ void udplatency_task() {
 
    // close timer when test finish
    if (seqNum > NUMPKTTEST) {
-       opentimers_stop(udplatency_vars.timerId);
+
+      opentimers_stop(udplatency_vars.timerId);
    }
 }
 
@@ -122,9 +147,9 @@ void udplatency_timer() {
 void udplatency_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_UDPLATENCY;
    if (msg->creator!=COMPONENT_UDPLATENCY) {
-      openserial_printError(COMPONENT_UDPLATENCY,ERR_UNEXPECTED_SENDDONE,
+      /*openserial_printError(COMPONENT_UDPLATENCY,ERR_UNEXPECTED_SENDDONE,
                             (errorparameter_t)0,
-                            (errorparameter_t)0);
+                            (errorparameter_t)0);*/
    }
    openqueue_freePacketBuffer(msg);
 }

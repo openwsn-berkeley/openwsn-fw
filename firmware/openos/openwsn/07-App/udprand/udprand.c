@@ -26,7 +26,7 @@ udprand_vars_t udprand_vars;
 
 //=========================== prototypes ======================================
 
-void udprand_timer(void);
+void udprand_timer();
 
 //=========================== public ==========================================
 
@@ -56,6 +56,15 @@ void udprand_task(){
                             (errorparameter_t)0);
       return;
    }
+
+   //START OF TELEMATICS CODE
+   pkt->l2_security = TRUE;
+   pkt->l2_securityLevel = 3;
+   pkt->l2_keyIdMode = 3;
+   neighbors_getPreferredParentEui64(&(pkt->l2_keySource));
+   pkt->l2_keyIndex = 1;
+   //END OF TELEMATICS CODE
+
    pkt->creator                     = COMPONENT_UDPRAND;
    pkt->owner                       = COMPONENT_UDPRAND;
    pkt->l4_protocol                 = IANA_UDP;
