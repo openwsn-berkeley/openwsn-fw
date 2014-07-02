@@ -10,6 +10,9 @@
 #include "scheduler.h"
 #include "opentimers.h"
 #include "debugpins.h"
+//START OF TELEMATICS CODE
+#include "security.h"
+//END OF TELEMATICS CODE
 
 //=========================== variables =======================================
 
@@ -18,29 +21,22 @@ res_vars_t res_vars;
 //=========================== prototypes ======================================
 
 owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint8_t frameVersion);
-void    sendAdv(void);
-void    sendKa(void);
-void    res_timer_cb(void);
+void    sendAdv();
+void    sendKa();
+void    res_timer_cb();
 uint8_t res_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv);//returns reserved size
 
 //=========================== public ==========================================
 
 void res_init() {
-   
    res_vars.periodMaintenance = 872+(openrandom_get16b()&0xff); // fires every 1 sec on average
    res_vars.busySendingKa     = FALSE;
    res_vars.busySendingAdv    = FALSE;
    res_vars.dsn               = 0;
    res_vars.MacMgtTaskCounter = 0;
-   
-   res_vars.timerId = opentimers_start(
-      res_vars.periodMaintenance,
-      TIMER_PERIODIC,
-      TIME_MS,
-      res_timer_cb
-   );
-   
-   res_vars.kaPeriod          = KATIMEOUT;
+   res_vars.timerId = opentimers_start(res_vars.periodMaintenance,
+                                       TIMER_PERIODIC,TIME_MS,
+                                       res_timer_cb);
 }
 
 /**
@@ -66,14 +62,6 @@ owerror_t res_send(OpenQueueEntry_t *msg) {
    return res_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
 }
 
-void res_setKaPeriod(uint16_t kaPeriod) {
-   if(kaPeriod > KATIMEOUT) {
-     res_vars.kaPeriod = KATIMEOUT;
-   } else {
-     res_vars.kaPeriod = kaPeriod;
-   } 
-}
-
 //======= from lower layer
 
 void task_resNotifSendDone() {
@@ -82,9 +70,9 @@ void task_resNotifSendDone() {
    msg = openqueue_resGetSentPacket();
    if (msg==NULL) {
       // log the error
-      openserial_printCritical(COMPONENT_RES,ERR_NO_SENT_PACKET,
+      /*openserial_printCritical(COMPONENT_RES,ERR_NO_SENT_PACKET,
                             (errorparameter_t)0,
-                            (errorparameter_t)0);
+                            (errorparameter_t)0);*/
       // abort
       return;
    }
@@ -135,9 +123,9 @@ void task_resNotifReceive() {
    msg = openqueue_resGetReceivedPacket();
    if (msg==NULL) {
       // log the error
-      openserial_printCritical(COMPONENT_RES,ERR_NO_RECEIVED_PACKET,
+      /*openserial_printCritical(COMPONENT_RES,ERR_NO_RECEIVED_PACKET,
                             (errorparameter_t)0,
-                            (errorparameter_t)0);
+                            (errorparameter_t)0);*/
       // abort
       return;
    }
@@ -153,28 +141,52 @@ void task_resNotifReceive() {
                         msg->l2_joinPriority);
    
    msg->l2_joinPriorityPresent=FALSE; //reset it to avoid race conditions with this var.
+
+   //START OF TELEMATICS CODE
+
+   if(msg->l2_security== TRUE){
+    security_incomingFrame(msg);
+   }
+   //END OF TELEMATICS CODE
    
    // send the packet up the stack, if it qualifies
    switch (msg->l2_frameType) {
       case IEEE154_TYPE_BEACON:
+    	     //START OF TELEMATICS CODE
+			 openqueue_freePacketBuffer(msg);
+ 			 break;
+ 			 //END OF TELEMATICS CODE
       case IEEE154_TYPE_DATA:
-      case IEEE154_TYPE_CMD:
-         if (msg->length>0) {
-            // send to upper layer
-            iphc_receive(msg);
-         } else {
-            // free up the RAM
-            openqueue_freePacketBuffer(msg);
-         }
-         break;
-      case IEEE154_TYPE_ACK:
+    	  if (msg->length>0) {
+    		  //START OF TELEMATICS CODE
+    		  //discard duplicated packets
+    		  if(msg->l2_toDiscard == FALSE){
+    				  //END OF TELEMATICS CODE
+    				  // send to upper layer
+    				  iphc_receive(msg);
+    			  } else{
+    				  // free up the RAM
+    				  openqueue_freePacketBuffer(msg);
+
+    				  openserial_printError(COMPONENT_RES,ERR_OK,
+    				                           (errorparameter_t)0,
+    				                           (errorparameter_t)252);
+    		  }
+			  } else {
+				 // free up the RAM
+				 openqueue_freePacketBuffer(msg);
+			  }
+			  break;
+      //case IEEE154_TYPE_CMD:
+		   //break;
+      //case IEEE154_TYPE_ACK:
       default:
          // free the packet's RAM memory
          openqueue_freePacketBuffer(msg);
          // log the error
-         openserial_printError(COMPONENT_RES,ERR_MSG_UNKNOWN_TYPE,
+         /*openserial_printError(COMPONENT_RES,ERR_MSG_UNKNOWN_TYPE,
                                (errorparameter_t)msg->l2_frameType,
-                               (errorparameter_t)0);
+                               (errorparameter_t)0);*/
          break;
    }
 }
@@ -189,22 +201,25 @@ has fired. This timer is set to fire every second, on average.
 
 The body of this function executes one of the MAC management task.
 */
-void timers_res_fired(void) {
-   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%ADVTIMEOUT;
-   
-   switch (res_vars.MacMgtTaskCounter) {
-      case 0:
-         // called every ADVTIMEOUT seconds
-         sendAdv();
-         break;
-      case 1:
-         // called every ADVTIMEOUT seconds
-         neighbors_removeOld();
-         break;
-      default:
-         // called every second, except twice every ADVTIMEOUT seconds
-         sendKa();
-         break;
+void timers_res_fired() {
+   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%10;
+   leds_error_off();
+
+   	   //START OF TELEMATICS CODE
+      /*
+       * here I would reset flags
+       */
+//      if(ieee154e_isSynch()==0){
+//   	   remPubKey = 0;
+//      }
+      //END OF TELEMATICS CODE
+
+   if (res_vars.MacMgtTaskCounter==0) {
+      sendAdv(); // called every 10s
+
+   } else {
+      sendKa();  // called every second, except once every 10s
+      //leds_debug_toggle();
    }
 }
 
@@ -219,9 +234,6 @@ virtual component COMPONENT_RES_TO_IEEE802154E. Whenever it gets a change,
 IEEE802154E will handle the packet.
 
 \param[in] msg The packet to the transmitted
-\param[in] iePresent Indicates wheter an Information Element is present in the
-   packet.
-\param[in] frameVersion The frame version to write in the packet.
 
 \returns E_SUCCESS iff successful.
 */
@@ -240,12 +252,23 @@ owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent, uint8_t fr
    msg->l1_txPower = TX_POWER;
    // record the location, in the packet, where the l2 payload starts
    msg->l2_payload = msg->payload;
+
+
+   //START OF TELEMATICS CODE
+   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
+
+	   security_outgoingFrame(msg,msg->l2_securityLevel,msg->l2_keyIdMode,&msg->l2_keySource,msg->l2_keyIndex); //1 is the security Level
+   }
+   //END OF TELEMATICS CODE
+
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             iePresent,
                             frameVersion,
-                            IEEE154_SEC_NO_SECURITY,
+                            //START OF TELEMATICS CODE
+                            msg->l2_security,
+                            //END OF TELEMATICS CODE
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
@@ -253,6 +276,8 @@ owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent, uint8_t fr
    packetfunctions_reserveFooterSize(msg,2);
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_RES_TO_IEEE802154E;
+
+
    return E_SUCCESS;
 }
 
@@ -291,9 +316,9 @@ port_INLINE void sendAdv() {
    // get a free packet buffer
    adv = openqueue_getFreePacketBuffer(COMPONENT_RES);
    if (adv==NULL) {
-      openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
+      /*openserial_printError(COMPONENT_RES,ERR_OK,
                             (errorparameter_t)0,
-                            (errorparameter_t)0);
+                            (errorparameter_t)0);*/
       return;
    }
    
@@ -301,6 +326,7 @@ port_INLINE void sendAdv() {
    adv->creator = COMPONENT_RES;
    adv->owner   = COMPONENT_RES;
    
+
    // reserve space for ADV-specific header
    // xv poipoi -- reserving for IEs  -- reverse order.
    //TODO reserve here for slotframe and link IE with minimal schedule information
@@ -334,7 +360,10 @@ port_INLINE void sendAdv() {
    adv->l2_nextORpreviousHop.type        = ADDR_16B;
    adv->l2_nextORpreviousHop.addr_16b[0] = 0xff;
    adv->l2_nextORpreviousHop.addr_16b[1] = 0xff;
-   
+   //START OF TELEMATICS CODE
+   adv->l2_security 					 = FALSE;
+   //END OF TELEMATICS CODE
+
    // put in queue for MAC to handle
    res_send_internal(adv,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
    
@@ -426,13 +455,6 @@ port_INLINE void sendKa() {
    OpenQueueEntry_t* kaPkt;
    open_addr_t*      kaNeighAddr;
    
-/*
-#ifdef OPENSIM
-   debugpins_debug_set();
-   debugpins_debug_clr();
-#endif
-*/
-   
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed
       
@@ -451,7 +473,7 @@ port_INLINE void sendKa() {
       return;
    }
    
-   kaNeighAddr = neighbors_getKANeighbor(res_vars.kaPeriod);
+   kaNeighAddr = neighbors_getKANeighbor();
    if (kaNeighAddr==NULL) {
       // don't proceed if I have no neighbor I need to send a KA to
       return;
@@ -462,9 +484,9 @@ port_INLINE void sendKa() {
    // get a free packet buffer
    kaPkt = openqueue_getFreePacketBuffer(COMPONENT_RES);
    if (kaPkt==NULL) {
-      openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
+      /*openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)1,
-                            (errorparameter_t)0);
+                            (errorparameter_t)0);*/
       return;
    }
    
@@ -474,6 +496,10 @@ port_INLINE void sendKa() {
    
    // some l2 information about this packet
    kaPkt->l2_frameType = IEEE154_TYPE_DATA;
+   //START OF TELEMATICS CODE
+   kaPkt->l2_security = FALSE;
+   //kaPkt->l2_keyIdMode = 3;
+   //END OF TELEMATICS CODE
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
    // put in queue for MAC to handle
@@ -481,11 +507,6 @@ port_INLINE void sendKa() {
    
    // I'm now busy sending a KA
    res_vars.busySendingKa = TRUE;
-
-#ifdef OPENSIM
-   debugpins_ka_set();
-   debugpins_ka_clr();
-#endif
 }
 
 void res_timer_cb() {
