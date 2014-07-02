@@ -61,7 +61,7 @@ typedef struct {
    uint8_t     packet_len;
     int8_t     rxpk_rssi;
    uint8_t     rxpk_lqi;
-   uint8_t     rxpk_crc;
+   bool        rxpk_crc;
 } app_vars_t;
 
 app_vars_t app_vars;

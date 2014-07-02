@@ -195,47 +195,46 @@ typedef struct {
 
 typedef struct {
    // misc
-   asn_t              asn;                  // current absolute slot number
-   slotOffset_t       slotOffset;           // current slot offset
-   slotOffset_t       nextActiveSlotOffset; // next active slot offset
-   PORT_RADIOTIMER_WIDTH   deSyncTimeout;        // how many slots left before looses sync
-   bool               isSync;               // TRUE iff mote is synchronized to network
+   asn_t                     asn;                     // current absolute slot number
+   slotOffset_t              slotOffset;              // current slot offset
+   slotOffset_t              nextActiveSlotOffset;    // next active slot offset
+   PORT_RADIOTIMER_WIDTH     deSyncTimeout;           // how many slots left before looses sync
+   bool                      isSync;                  // TRUE iff mote is synchronized to network
    // as shown on the chronogram
-   ieee154e_state_t   state;                // state of the FSM
-   OpenQueueEntry_t*  dataToSend;           // pointer to the data to send
-   OpenQueueEntry_t*  dataReceived;         // pointer to the data received
-   OpenQueueEntry_t*  ackToSend;            // pointer to the ack to send
-   OpenQueueEntry_t*  ackReceived;          // pointer to the ack received
-   PORT_RADIOTIMER_WIDTH   lastCapturedTime;     // last captured time
-   PORT_RADIOTIMER_WIDTH   syncCapturedTime;     // captured time used to sync
-   //channel hopping
-   uint8_t            freq;                 // frequency of the current slot
-   uint8_t            asnOffset;            // offset inside the frame
+   ieee154e_state_t          state;                   // state of the FSM
+   OpenQueueEntry_t*         dataToSend;              // pointer to the data to send
+   OpenQueueEntry_t*         dataReceived;            // pointer to the data received
+   OpenQueueEntry_t*         ackToSend;               // pointer to the ack to send
+   OpenQueueEntry_t*         ackReceived;             // pointer to the ack received
+   PORT_RADIOTIMER_WIDTH     lastCapturedTime;        // last captured time
+   PORT_RADIOTIMER_WIDTH     syncCapturedTime;        // captured time used to sync
+   // channel hopping
+   uint8_t                   freq;                    // frequency of the current slot
+   uint8_t                   asnOffset;               // offset inside the frame
    
-   PORT_RADIOTIMER_WIDTH radioOnInit;  //when within the slot the radio turns on
-   PORT_RADIOTIMER_WIDTH radioOnTics;//how many tics within the slot the radio is on
-   bool             radioOnThisSlot; //to control if the radio has been turned on in a slot.
+   PORT_RADIOTIMER_WIDTH     radioOnInit;             // when within the slot the radio turns on
+   PORT_RADIOTIMER_WIDTH     radioOnTics;             // how many tics within the slot the radio is on
+   bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
 } ieee154e_vars_t;
 
 BEGIN_PACK
 typedef struct {
-   uint8_t                   numSyncPkt;    // how many times synchronized on a non-ACK packet
-   uint8_t                   numSyncAck;    // how many times synchronized on an ACK
-   int16_t                   minCorrection; // minimum time correction
-   int16_t                   maxCorrection; // maximum time correction
-   uint8_t                   numDeSync;     // number of times a desync happened
-   uint32_t                  numTicsOn;     // mac dutyCycle
-   uint32_t                  numTicsTotal;     // total tics for which the dutycycle is computed
+   uint8_t                   numSyncPkt;              // how many times synchronized on a non-ACK packet
+   uint8_t                   numSyncAck;              // how many times synchronized on an ACK
+   int16_t                   minCorrection;           // minimum time correction
+   int16_t                   maxCorrection;           // maximum time correction
+   uint8_t                   numDeSync;               // number of times a desync happened
+   uint32_t                  numTicsOn;               // mac dutyCycle
+   uint32_t                  numTicsTotal;            // total tics for which the dutycycle is computed
 } ieee154e_stats_t;
 END_PACK
 
 typedef struct {
-   PORT_RADIOTIMER_WIDTH          num_newSlot;
-   PORT_RADIOTIMER_WIDTH          num_timer;
-   PORT_RADIOTIMER_WIDTH          num_startOfFrame;
-   PORT_RADIOTIMER_WIDTH          num_endOfFrame;
+   PORT_RADIOTIMER_WIDTH     num_newSlot;
+   PORT_RADIOTIMER_WIDTH     num_timer;
+   PORT_RADIOTIMER_WIDTH     num_startOfFrame;
+   PORT_RADIOTIMER_WIDTH     num_endOfFrame;
 } ieee154e_dbg_t;
-
 
 //=========================== IEs =============================================
 //the header for all header IEs

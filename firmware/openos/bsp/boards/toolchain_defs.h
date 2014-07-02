@@ -7,6 +7,12 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, June 2014.
 */
 
+//===== types
+
+#ifndef bool
+#define bool uint8_t
+#endif
+
 //===== ISR and pragma
 
 #if defined(__GNUC__) && (__GNUC__==4)  && (__GNUC_MINOR__<=5) && defined(__MSP430__)

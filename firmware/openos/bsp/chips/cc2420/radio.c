@@ -262,7 +262,7 @@ void radio_getReceivedFrame(uint8_t* bufRead,
                             uint8_t  maxBufLen,
                              int8_t* rssi,
                             uint8_t* lqi,
-                            uint8_t* crc) {
+                               bool* crc) {
    // read the received packet from the RXFIFO
    radio_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
    
