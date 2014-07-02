@@ -128,7 +128,7 @@ void udpstorm_task_cb() {
    memcpy(&pkt->payload[0],&udpstorm_path0,sizeof(udpstorm_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
    pkt->payload[0]                = (COAP_OPTION_NUM_URIPATH) << 4 |
-                                     sizeof(udpstorm_path0)-1;
+                                     (sizeof(udpstorm_path0)-1);
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
