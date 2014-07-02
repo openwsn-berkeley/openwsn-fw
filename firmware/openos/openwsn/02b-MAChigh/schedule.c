@@ -65,17 +65,7 @@ void schedule_init() {
       running_slotOffset++;
    }
    
-   // serial RX slot(s)
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(
-      running_slotOffset,         // slot offset
-      CELLTYPE_SERIALRX,          // type of slot
-      FALSE,                      // shared?
-      0,                          // channel offset
-      &temp_neighbor,             // neighbor
-      FALSE                       //no update but insert
-   );
-   running_slotOffset++;
+
    /*
    for (i=0;i<NUMSERIALRX-1;i++) {
       schedule_addActiveSlot(
@@ -88,6 +78,48 @@ void schedule_init() {
       running_slotOffset++;
    }
    */
+
+   /*if(NUMNODE == 0){//DAG ROOT
+	   // shared TXRX anycast slot(s)
+	      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+	      temp_neighbor.type             = ADDR_ANYCAST;
+	      for (i=0;i<NUMRX;i++) {
+	         schedule_addActiveSlot(
+	            running_slotOffset,      // slot offset
+	            CELLTYPE_RX,           // type of slot
+	            FALSE,                    // shared?
+	            0,                       // channel offset
+	            &temp_neighbor,          // neighbor
+	            FALSE                    //no update but insert
+	         );
+	         running_slotOffset++;
+	      }
+   }else{//other node
+	   running_slotOffset += (NUMNODE-1);
+	   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+	   	      temp_neighbor.type             = ADDR_ANYCAST;
+	   	         schedule_addActiveSlot(
+	   	            running_slotOffset,      // slot offset
+	   	            CELLTYPE_TX,           // type of slot
+	   	            FALSE,                    // shared?
+	   	            0,                       // channel offset
+	   	            &temp_neighbor,          // neighbor
+	   	            FALSE                    //no update but insert
+	   	         );
+	   	         running_slotOffset++;
+
+   }*/
+   // serial RX slot(s)
+    memset(&temp_neighbor,0,sizeof(temp_neighbor));
+    schedule_addActiveSlot(
+       running_slotOffset,         // slot offset
+       CELLTYPE_SERIALRX,          // type of slot
+       FALSE,                      // shared?
+       0,                          // channel offset
+       &temp_neighbor,             // neighbor
+       FALSE                       //no update but insert
+    );
+    running_slotOffset++;
 }
 
 /**
@@ -98,7 +130,9 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_schedule() {
+//START OF TELEMATICS CODE
+
+/*bool debugPrint_schedule() {
    debugScheduleEntry_t temp;
    
    schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
@@ -135,8 +169,8 @@ bool debugPrint_schedule() {
    );
    
    return TRUE;
-}
-
+}*/
+//END OF TELEMATICS CODE
 /**
 \brief Trigger this module to print status information, over serial.
 
@@ -145,7 +179,8 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_backoff() {
+//START OF TELEMATICS CODE
+/*bool debugPrint_backoff() {
    uint8_t temp[2];
    temp[0] = schedule_vars.backoffExponent;
    temp[1] = schedule_vars.backoff;
@@ -153,8 +188,8 @@ bool debugPrint_backoff() {
          (uint8_t*)&temp,
          sizeof(temp));
    return TRUE;
-}
-
+}*/
+//END OF TELEMATICS CODE
 //=== from uRES (writing the schedule)
 
 /**
@@ -593,7 +628,7 @@ void schedule_indicateTx(asn_t* asnTimestamp,
    ENABLE_INTERRUPTS();
 }
 
-void schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist){  
+/*void schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist){
   uint8_t i;
   
   for (i=0;i<MAXACTIVESLOTS;i++){
@@ -601,7 +636,7 @@ void schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist){
    schlist[i].slotOffset=(uint8_t)schedule_vars.scheduleBuf[i].slotOffset&0xFF;
    schlist[i].channelOffset=schedule_vars.scheduleBuf[i].channelOffset;
   }
-}
+}*/
 //=========================== private =========================================
 
 void schedule_resetEntry(scheduleEntry_t* pScheduleEntry) {
