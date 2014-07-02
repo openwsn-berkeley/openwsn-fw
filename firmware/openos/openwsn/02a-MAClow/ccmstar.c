@@ -117,7 +117,7 @@ void Auth_Transformation(uint8_t length,unsigned long long int key,bool encOrDec
 
 
 	B[0] = B[0] <<3;
-	B[0] |= length &0x07;
+	B[0] |= length & 0x07;
 
 	//determine B0 fields
 	uint8_t i;
