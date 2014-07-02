@@ -183,6 +183,7 @@ void forwarding_receive(OpenQueueEntry_t* msg,
       msg->creator = COMPONENT_FORWARDING;
       //START OF TELEMATICS CODE
       msg->l2_keySource = *(idmanager_getMyID(ADDR_64B));
+      msg->l2_keyIdMode = 3;
       //END OF TELEMATICS CODE
       
       if (ipv6_header.next_header!=IANA_IPv6ROUTE) {
