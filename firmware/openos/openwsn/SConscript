@@ -13,7 +13,7 @@ sources_c = [
     os.path.join('02a-MAClow','IEEE802154E.c'),
     os.path.join('02a-MAClow','security.c'),
     os.path.join('02a-MAClow','ccmstar.c'),
-    os.path.join('02a-MAClow','TI_aes.c'),
+    os.path.join('02a-MAClow','TI_aes.c'), 
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
     os.path.join('02b-MAChigh','res.c'),
