@@ -131,14 +131,11 @@ This function iterates through the neighbor table and identifies the neighbor
 we need to send a KA to, if any. This neighbor satisfies the following
 conditions:
 - it is one of our preferred parents
-- we haven't heard it for over kaPeriod
-
-\param[in] kaPeriod The maximum number of slots I'm allowed not to have heard
-   it.
+- we haven't heard it for over KATIMEOUT
 
 \returns A pointer to the neighbor's address, or NULL if no KA is needed.
 */
-open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
+open_addr_t* neighbors_getKANeighbor() {
    uint8_t         i;
    uint16_t        timeSinceHeard;
    open_addr_t*    addrPreferred;
@@ -152,7 +149,7 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==1) {
          timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
-         if (timeSinceHeard>kaPeriod) {
+         if (timeSinceHeard>KATIMEOUT) {
             // this neighbor needs to be KA'ed to
             if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
                // its a preferred parent
@@ -166,9 +163,9 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
       }
    }
    
-   // return the EUI64 of the most urgent KA to send:
+   // return the addr of the most urgent KA to send:
    // - if available, preferred parent
-   // - if not, non-preferred parent
+   // - if not, non preferred parent
    if        (addrPreferred!=NULL) {
       return addrPreferred;
    } else if (addrOther!=NULL) {
@@ -177,6 +174,7 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
       return NULL;
    }
 }
+
 
 //===== interrogators
 
@@ -268,7 +266,6 @@ bool neighbors_isNeighborWithLowerDAGrank(uint8_t index) {
    return returnVal;
 }
 
-
 /**
 \brief Indicate whether some neighbor has a lower DAG rank that me.
 
@@ -308,9 +305,6 @@ The fields which are updated are:
    the packet just received.
 \param[in] rssi   RSSI with which this packet was received.
 \param[in] asnTs  ASN at which this packet was received.
-\param[in] joinPrioPresent Whether a join priority was present in the received
-   packet.
-\param[in] joinPrio The join priority present in the packet, if any.
 */
 void neighbors_indicateRx(open_addr_t* l2_src,
                           int8_t       rssi,
@@ -468,8 +462,10 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
 
 /**
 \brief Write the 64-bit address of some neighbor to some location.
+
 */
-void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t index){
+
+void  neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index){
    switch(addr_type) {
       case ADDR_64B:
          memcpy(&(address->addr_64b),&(neighbors_vars.neighbors[index].addr_64b.addr_64b),LENGTH_ADDR64b);
@@ -482,6 +478,7 @@ void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t ind
          break; 
    }
 }
+
 
 //===== managing routing info
 
@@ -517,18 +514,15 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    // loop through neighbor table, update myDAGrank
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==TRUE) {
-         
          // reset parent preference
          neighbors_vars.neighbors[i].parentPreference=0;
-         
          // calculate link cost to this neighbor
          if (neighbors_vars.neighbors[i].numTxACK==0) {
             rankIncrease = DEFAULTLINKCOST*2*MINHOPRANKINCREASE;
          } else {
-            //6TiSCH minimal draft using OF0 for rank computation
+        	//6TiSCH minimal draft using OF0 for rank computation
             rankIncrease = (uint16_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*2*MINHOPRANKINCREASE);
          }
-         
          tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
          if ( tentativeDAGrank<neighbors_vars.myDAGrank &&
               tentativeDAGrank<MAXDAGRANK) {
@@ -548,22 +542,6 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    }
 }
 
-//===== maintenance
-
-void  neighbors_removeOld() {
-   uint8_t    i;
-   uint16_t   timeSinceHeard;
-   
-   for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (neighbors_vars.neighbors[i].used==1) {
-         timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
-         if (timeSinceHeard>DESYNCTIMEOUT) {
-            removeNeighbor(i);
-         }
-      }
-   } 
-}
-
 //===== debug
 
 /**
@@ -574,7 +552,9 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_neighbors() {
+
+
+/*bool debugPrint_neighbors() {
    debugNeighborEntry_t temp;
    neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
    temp.row=neighbors_vars.debugRow;
@@ -602,8 +582,7 @@ void debugNetPrint_neighbors(netDebugNeigborEntry_t* out){
          idxOut++;
       }
    }  
-}
-
+}*/
 //=========================== private =========================================
 
 void registerNewNeighbor(open_addr_t* address,
@@ -644,6 +623,7 @@ void registerNewNeighbor(open_addr_t* address,
                neighbors_vars.neighbors[i].joinPrio=joinPrio;
             }
             
+            
             // do I already have a preferred parent ? -- TODO change to use JP
             iHaveAPreferedParent = FALSE;
             for (j=0;j<MAXNUMNEIGHBORS;j++) {
@@ -660,12 +640,13 @@ void registerNewNeighbor(open_addr_t* address,
          i++;
       }
       if (i==MAXNUMNEIGHBORS) {
-         openserial_printError(COMPONENT_NEIGHBORS,ERR_NEIGHBORS_FULL,
+         /*openserial_printError(COMPONENT_NEIGHBORS,ERR_NEIGHBORS_FULL,
                                (errorparameter_t)MAXNUMNEIGHBORS,
-                               (errorparameter_t)0);
+                               (errorparameter_t)0);*/
          return;
       }
    }
+   
 }
 
 bool isNeighbor(open_addr_t* neighbor) {
@@ -677,6 +658,53 @@ bool isNeighbor(open_addr_t* neighbor) {
    }
    return FALSE;
 }
+
+//START OF TELEMATICS CODE
+
+/*
+ * determines if I have any parent
+ */
+bool neighbors_haveSomeParent(){
+
+	uint8_t i;
+	for(i=0;i<10;i++){
+		if(neighbors_isNeighborWithLowerDAGrank(i)== TRUE){
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
+/*
+ * determines if I have ant child
+ */
+bool neighbors_haveSomeChild(){
+	uint8_t i;
+	for(i=0;i<10;i++){
+			if(neighbors_isNeighborWithHigherDAGrank(i)== TRUE){
+				return TRUE;
+			}
+		}
+		return FALSE;
+}
+
+
+bool neighbors_isChildORParent(open_addr_t* neighbor){//return TRUE if I have a lower DAG Rank
+
+	uint8_t i;
+	for(i=0; i<10; i++){
+		if(isThisRowMatching(neighbor,i)){
+			if(neighbors_getMyDAGrank() < neighbors_vars.neighbors[i].DAGrank){
+				return TRUE;
+			}
+		}
+	}
+
+	return FALSE;
+}
+
+//END OF TELEMATICS CODE
+
 
 void removeNeighbor(uint8_t neighborIndex) {
    neighbors_vars.neighbors[neighborIndex].used                      = FALSE;
