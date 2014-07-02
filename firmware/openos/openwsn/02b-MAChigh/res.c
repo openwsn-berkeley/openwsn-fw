@@ -145,7 +145,7 @@ void task_resNotifReceive() {
    //START OF TELEMATICS CODE
 
    if(msg->l2_security== TRUE){
-    security_incomingFrame(msg);
+     security_incomingFrame(msg);
    }
    //END OF TELEMATICS CODE
    
