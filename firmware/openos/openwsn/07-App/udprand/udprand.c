@@ -62,7 +62,7 @@ void udprand_task(){
    pkt->l2_securityLevel = 3;
    pkt->l2_keyIdMode = 3;
    neighbors_getPreferredParentEui64(&(pkt->l2_keySource));
-   pkt->l2_keyIndex = 1;
+   pkt->l2_keyIndex = 1; 
    //END OF TELEMATICS CODE
 
    pkt->creator                     = COMPONENT_UDPRAND;
