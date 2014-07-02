@@ -254,8 +254,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
   }
 
-
-   //END OF TELEMATICS CODE
+	//END OF TELEMATICS CODE
 
 }
 
