@@ -775,7 +775,7 @@ void remote_init(ieee802154_header_iht ieee802514_header){
 	MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIndex = 1;
 	MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.Address = *(src);
 
-	//DEVICE TABLE
+	//DEVICE TABLE 
 
 	MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = *(src);
 	MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter = 0;
