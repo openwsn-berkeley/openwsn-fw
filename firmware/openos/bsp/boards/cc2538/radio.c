@@ -1,5 +1,5 @@
 /**
-\brief cc2538-specific definition of the "radio" bsp module.
+\brief CC2538-specific definition of the "radio" bsp module.
 
 \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, Sept 2013.
 */
@@ -24,12 +24,14 @@
 
 
 //=========================== defines =========================================
+
 /* Bit Masks for the last byte in the RX FIFO */
 #define CRC_BIT_MASK 0x80
 #define LQI_BIT_MASK 0x7F
 /* RSSI Offset */
 #define RSSI_OFFSET 73
 #define CHECKSUM_LEN 2
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -47,6 +49,7 @@ port_INLINE void    radio_off(void);
 void radio_error_isr(void);
 port_INLINE void enable_radio_interrupts(void);
 port_INLINE void disable_radio_interrupts(void);
+
 //=========================== public ==========================================
 
 //===== admin
@@ -67,13 +70,14 @@ void radio_init() {
    //disable radio interrupts
    disable_radio_interrupts();
 
-   /* This CORR_THR value should be changed to 0x14 before attempting RX. Testing has shown that
-      * too many false frames are received if the reset value is used. Make it more likely to detect
-      * sync by removing the requirement that both symbols in the SFD must have a correlation value
-      * above the correlation threshold, and make sync word detection less likely by raising the
-      * correlation threshold.
-      */
-   HWREG(RFCORE_XREG_MDMCTRL1) = 0x14;
+   /*
+   This CORR_THR value should be changed to 0x14 before attempting RX. Testing has shown that
+   too many false frames are received if the reset value is used. Make it more likely to detect
+   sync by removing the requirement that both symbols in the SFD must have a correlation value
+   above the correlation threshold, and make sync word detection less likely by raising the
+   correlation threshold.
+   */
+ +   HWREG(RFCORE_XREG_MDMCTRL1)    = 0x14;
    /* tuning adjustments for optimal radio performance; details available in datasheet */
 
    HWREG(RFCORE_XREG_RXCTRL) = 0x3F;
