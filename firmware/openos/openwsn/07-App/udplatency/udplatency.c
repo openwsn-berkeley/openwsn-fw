@@ -86,6 +86,7 @@ void udplatency_task() {
 //   for(i=0; i<payloadLength;i++){
 //   pkt->payload[i] = i*2;
 //  }
+
    //END OF TELEMATICS CODE
 
    // the payload contains the 64bit address of the sender + the ASN
