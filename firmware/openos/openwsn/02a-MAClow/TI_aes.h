@@ -8,6 +8,5 @@
 uint8_t Key[64];
 
 void aes_encrypt(unsigned char *input,unsigned char *state, unsigned char *key);
-//void aes_decrypt(unsigned char *state, unsigned char *key);
 
 #endif
