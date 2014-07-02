@@ -33,8 +33,8 @@
 
 #ifdef _MSC_VER
    // visual studio
-   #define BEGIN_PACK   __pragma(#pack(1));
-   #define END_PACK     __pragma(#pack());
+   #define START_PACK __pragma(pack(push,1));
+   #define END_PACK   __pragma(pack(pop));
 #else
    // other
    #define BEGIN_PACK   _Pragma("pack(1)");
