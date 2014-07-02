@@ -307,7 +307,7 @@ typedef struct {
    uint8_t		 l2_auxiliaryLength;			 //length of the Auxiliary Security Header
    uint8_t		 commandFrameIdentifier;		 //used in case of Command Frames
    uint8_t 		 receivedASN[5];				 //in case ASN is used instead of Frame Counter (IEEE 802.15.4e)
-   //END OF TELEMATICS CODE
+   //END OF TELEMATICS CODE 
    //l2
    owerror_t     l2_sendDoneError;               // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;           // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
