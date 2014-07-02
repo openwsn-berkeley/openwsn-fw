@@ -30,5 +30,5 @@ the administrator rights and typing:
 
 python bsl --telosb -c /dev/ttyUSB0 -r -e -I -p 03oos_openwsn_prog.ihex
 
-
+ 
 Enjoy it!
