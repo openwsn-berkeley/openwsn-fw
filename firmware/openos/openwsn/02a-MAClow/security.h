@@ -160,6 +160,7 @@ uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
 
 void remote_init(ieee802154_header_iht ieee802514_header);
 void coordinator_init();
+
 /**
 \}
 \}
