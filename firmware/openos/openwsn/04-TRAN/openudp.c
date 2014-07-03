@@ -51,7 +51,7 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          appudpgina_sendDone(msg,error);
          break;
       */
-     /* case WKP_UDP_ECHO:
+      case WKP_UDP_ECHO:
          udpecho_sendDone(msg,error);
          break;
       case WKP_UDP_INJECT:
@@ -62,15 +62,15 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          break;
       case WKP_UDP_RAND:
          udprand_sendDone(msg,error);
-         break;*/
+         break;
       case WKP_UDP_LATENCY:
          udplatency_sendDone(msg,error);
          break;
          
       default:
-         /*openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
-                               (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
-                               (errorparameter_t)5);*/
+//         openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
+//                               (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
+//                               (errorparameter_t)5);
          openqueue_freePacketBuffer(msg);         
    }
 }
@@ -108,8 +108,8 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          case NHC_UDP_PORTS_4S_4D:
             // source port: 0xf0b +  4 bits in-line
             // dest port:   0xf0b +  4 bits in-line
-            msg->l4_sourcePortORicmpv6Type  = 0xf0b0 + (msg->payload[0] >> 4) & 0x0f;
-            msg->l4_destination_port        = 0xf0b0 + (msg->payload[0] >> 0) & 0x0f;
+            msg->l4_sourcePortORicmpv6Type  = 0xf0b0 + ((msg->payload[0] >> 4) & 0x0f);
+            msg->l4_destination_port        = 0xf0b0 + ((msg->payload[0] >> 0) & 0x0f);
             packetfunctions_tossHeader(msg,1);
             break;
       }
@@ -131,7 +131,7 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          imu_receive(msg);
          break;
       */
-      /*case WKP_UDP_ECHO:
+      case WKP_UDP_ECHO:
          udpecho_receive(msg);
          break;
       case WKP_UDP_INJECT:
@@ -142,11 +142,11 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          break;
       case WKP_UDP_RAND:
          udprand_receive(msg);
-         break;*/
+         break;
       default:
-         /*openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
-                               (errorparameter_t)msg->l4_destination_port,
-                               (errorparameter_t)6);*/
+//         openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
+//                               (errorparameter_t)msg->l4_destination_port,
+//                               (errorparameter_t)6);
          openqueue_freePacketBuffer(msg);         
    }
 }

@@ -574,14 +574,14 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_neighbors() {
-   debugNeighborEntry_t temp;
-   neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
-   temp.row=neighbors_vars.debugRow;
-   temp.neighborEntry=neighbors_vars.neighbors[neighbors_vars.debugRow];
-   openserial_printStatus(STATUS_NEIGHBORS,(uint8_t*)&temp,sizeof(debugNeighborEntry_t));
-   return TRUE;
-}
+//bool debugPrint_neighbors() {
+//   debugNeighborEntry_t temp;
+//   neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
+//   temp.row=neighbors_vars.debugRow;
+//   temp.neighborEntry=neighbors_vars.neighbors[neighbors_vars.debugRow];
+//   openserial_printStatus(STATUS_NEIGHBORS,(uint8_t*)&temp,sizeof(debugNeighborEntry_t));
+//   return TRUE;
+//}
 
 void debugNetPrint_neighbors(netDebugNeigborEntry_t* out){
    uint8_t idxIn;

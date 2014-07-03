@@ -10,6 +10,7 @@
 
 //general
 #include <stdint.h>               // needed for uin8_t, uint16_t
+#include "toolchain_defs.h"
 #include "board_info.h"
 
 //=========================== define ==========================================
@@ -27,12 +28,12 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define FALSE 0
 #endif
 
-#define LENGTH_ADDR16b 2
-#define LENGTH_ADDR64b 8
+#define LENGTH_ADDR16b  2
+#define LENGTH_ADDR64b  8
 #define LENGTH_ADDR128b 16
 
 enum {
-   E_SUCCESS                           = 0,          
+   E_SUCCESS                           = 0,
    E_FAIL                              = 1,
 };
 
@@ -48,8 +49,8 @@ enum {
 };
 
 enum {
-   OW_LITTLE_ENDIAN                       = TRUE,
-   OW_BIG_ENDIAN                          = FALSE,
+   OW_LITTLE_ENDIAN                    = TRUE,
+   OW_BIG_ENDIAN                       = FALSE,
 };
 
 // protocol numbers, as defined by the IANA
@@ -172,7 +173,9 @@ enum {
    COMPONENT_UDPSTORM                  = 0x2e,
    COMPONENT_UDPLATENCY                = 0x2f,
    COMPONENT_TEST                      = 0x30,
-   COMPONENT_R6TUS                    = 0x31,
+   COMPONENT_R6T                       = 0x31,
+   COMPONENT_SWARMBAND                 = 0x32,
+   COMPONENT_RRT                       = 0x33,
 };
 
 /**
@@ -246,7 +249,7 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
-   ERR_OK							   = 0x3a,
+   ERR_OK							   = 0x40, // debugging
 };
 
 //=========================== typedef =========================================
@@ -255,17 +258,16 @@ enum {
 typedef uint16_t  errorparameter_t;
 typedef uint16_t  dagrank_t;
 typedef uint8_t   owerror_t;
-#define bool uint8_t
 
-PRAGMA(pack(1));
+BEGIN_PACK
 typedef struct {
    uint8_t  byte4;
    uint16_t bytes2and3;
    uint16_t bytes0and1;
 } asn_t;
-PRAGMA(pack());
+END_PACK
 
-PRAGMA(pack(1));
+BEGIN_PACK
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint8_t type;
    union {
@@ -276,7 +278,7 @@ typedef struct {                                 // always written big endian, i
       uint8_t prefix[8];
    };
 } open_addr_t;
-PRAGMA(pack());
+END_PACK
 
 typedef struct {
    //admin
@@ -320,9 +322,6 @@ typedef struct {
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_joinPriorityPresent;
-   //START OF TELEMATICS CODE
-   bool          l2_IElistPresent; //flag for IE
-   //END OF TELEMATICS CODE
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet
@@ -335,11 +334,7 @@ typedef struct {
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
-//START OF TELEMATICS CODE
 
-//#define NUMNODE				1 //variabile del singolo nodo
-
-//END OF TELEMATICS CODE
-void openwsn_init();
+void openwsn_init(void);
 
 #endif

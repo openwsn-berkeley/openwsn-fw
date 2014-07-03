@@ -18,13 +18,13 @@ icmpv6rpl_vars_t             icmpv6rpl_vars;
 //=========================== prototypes ======================================
 
 // DIO-related
-void icmpv6rpl_timer_DIO_cb();
-void icmpv6rpl_timer_DIO_task();
-void sendDIO();
+void icmpv6rpl_timer_DIO_cb(void);
+void icmpv6rpl_timer_DIO_task(void);
+void sendDIO(void);
 // DAO-related
-void icmpv6rpl_timer_DAO_cb();
-void icmpv6rpl_timer_DAO_task();
-//void sendDAO();
+void icmpv6rpl_timer_DAO_cb(void);
+void icmpv6rpl_timer_DAO_task(void);
+void sendDAO(void);
 
 //=========================== public ==========================================
 
@@ -131,9 +131,9 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    
    // make sure I created it
    if (msg->creator!=COMPONENT_ICMPv6RPL) {
-      /*openserial_printError(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_SENDDONE,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);*/
+//      openserial_printError(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_SENDDONE,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
    }
    
    // free packet
@@ -201,16 +201,16 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
       
       case IANA_ICMPv6_RPL_DAO:
          // this should never happen
-         /*openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
-                               (errorparameter_t)0,
-                               (errorparameter_t)0);*/
+//         openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
+//                               (errorparameter_t)0,
+//                               (errorparameter_t)0);
          break;
       
       default:
          // this should never happen
-         /*openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_MSG_UNKNOWN_TYPE,
-                               (errorparameter_t)icmpv6code,
-                               (errorparameter_t)0);*/
+//         openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_MSG_UNKNOWN_TYPE,
+//                               (errorparameter_t)icmpv6code,
+//                               (errorparameter_t)0);
          break;
       
    }
@@ -303,9 +303,9 @@ void sendDIO() {
    // reserve a free packet buffer for DIO
    msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
    if (msg==NULL) {
-      /*openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);*/
+//      openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       icmpv6rpl_vars.busySending = FALSE;
       
       return;
@@ -314,14 +314,13 @@ void sendDIO() {
    // take ownership
    msg->creator                             = COMPONENT_ICMPv6RPL;
    msg->owner                               = COMPONENT_ICMPv6RPL;
-   //START OF TELEMATICS CODE
-   msg->l2_security							= FALSE;
-   //END OF TELEMATICS CODE
    
    // set transport information
    msg->l4_protocol                         = IANA_ICMPv6;
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
-   
+   //START OF TELEMATICS CODE
+   msg->l2_security = FALSE;
+   //END OF TELEMATICS CODE
    // set DIO destination
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
    
@@ -341,10 +340,6 @@ void sendDIO() {
    ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DIO;
    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//call last
    
-   /*openserial_printError(COMPONENT_ICMPv6,ERR_OK,
-                                  (errorparameter_t)0,
-                                  (errorparameter_t)99);*/
-
    //send
    if (icmpv6_send(msg)!=E_SUCCESS) {
       icmpv6rpl_vars.busySending = FALSE;
@@ -352,7 +347,6 @@ void sendDIO() {
    } else {
       icmpv6rpl_vars.busySending = FALSE; 
    }
-
 }
 
 //===== DAO-related
@@ -380,8 +374,8 @@ void icmpv6rpl_timer_DAO_task() {
    // check whether we need to send DAO
    if (icmpv6rpl_vars.delayDAO==0) {
       
-       //send DAO
-     sendDAO();
+      // send DAO
+      sendDAO();
       
       // pick a new pseudo-random periodDAO
       icmpv6rpl_vars.periodDAO = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
@@ -438,23 +432,24 @@ void sendDAO() {
    // reserve a free packet buffer for DAO
    msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
    if (msg==NULL) {
-      /*openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
-      return;*/
+//      openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
+      return;
    }
    
    // take ownership
    msg->creator                             = COMPONENT_ICMPv6RPL;
    msg->owner                               = COMPONENT_ICMPv6RPL;
-   //START OF TELEMATICS CODE
-   msg->l2_security							= FALSE;
-   //END OF TELEMATICS CODE
    
    // set transport information
    msg->l4_protocol                         = IANA_ICMPv6;
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
    
+   //START OF TELEMATICS CODE
+   msg->l2_security = FALSE;
+   //END OF TELEMATICS CODE
+
    // set DAO destination
    msg->l3_destinationAdd.type=ADDR_128B;
    memcpy(msg->l3_destinationAdd.addr_128b,icmpv6rpl_vars.dio.DODAGID,sizeof(icmpv6rpl_vars.dio.DODAGID));

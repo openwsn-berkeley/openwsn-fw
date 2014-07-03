@@ -27,14 +27,14 @@ Note that we are writing the field from the end of the header to the beginning.
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
                               uint8_t           ielistpresent,
-                              uint8_t           frameversion,
+                              uint8_t           frameVersion,
                               bool              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    
    //General IEs here (those that are carried in all packets) -- None by now.
-
+   
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
    // nextHop address
@@ -50,10 +50,10 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
          case ADDR_64B:
             packetfunctions_writeAddress(msg,nextHop,OW_LITTLE_ENDIAN);
             break;
-            /*default:
+         default:
             openserial_printCritical(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,
                                   (errorparameter_t)nextHop->type,
-                                  (errorparameter_t)1);*/
+                                  (errorparameter_t)1);
       }
       
    }
@@ -81,7 +81,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    temp_8b             |= IEEE154_ADDR_EXT                << IEEE154_FCF_SRC_ADDR_MODE;
    //poipoi xv IE list present
    temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
-   temp_8b             |= frameversion                    << IEEE154_FCF_FRAME_VERSION;
+   temp_8b             |= frameVersion                    << IEEE154_FCF_FRAME_VERSION;
      
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)
@@ -146,10 +146,10 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
       case IEEE154_ADDR_EXT:
          ieee802514_header->dest.type = ADDR_64B;
          break;
-      /*default:
+      default:
          openserial_printError(COMPONENT_IEEE802154,ERR_IEEE154_UNSUPPORTED,
                                (errorparameter_t)1,
-                               (errorparameter_t)(temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03);*/
+                               (errorparameter_t)(temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03);
          return; // this is an invalid packet, return
    }
    switch ( (temp_8b >> IEEE154_FCF_SRC_ADDR_MODE ) & 0x03 ) {
@@ -163,9 +163,9 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          ieee802514_header->src.type = ADDR_64B;
          break;
       default:
-         /*openserial_printError(COMPONENT_IEEE802154,ERR_IEEE154_UNSUPPORTED,
+         openserial_printError(COMPONENT_IEEE802154,ERR_IEEE154_UNSUPPORTED,
                                (errorparameter_t)2,
-                               (errorparameter_t)(temp_8b >> IEEE154_FCF_SRC_ADDR_MODE ) & 0x03);*/
+                               (errorparameter_t)(temp_8b >> IEEE154_FCF_SRC_ADDR_MODE ) & 0x03);
          return; // this is an invalid packet, return
    }
    ieee802514_header->headerLength += 1;
@@ -242,20 +242,20 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
 
    //START OF TELEMATICS CODE
 
-   if(ieee802514_header->securityEnabled == TRUE){
-	   msg->l2_security = TRUE;
+      if(ieee802514_header->securityEnabled == TRUE){
+   	   msg->l2_security = TRUE;
 
-	  }else{
-	   msg->l2_security = FALSE;
-	 }
+   	  }else{
+   	   msg->l2_security = FALSE;
+   	 }
 
-   //if the security is enabled, i can retrieve the Auxiliary Security Header
-   if(ieee802514_header->securityEnabled == TRUE){
-   retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
-  }
+      //if the security is enabled, i can retrieve the Auxiliary Security Header
+      if(ieee802514_header->securityEnabled == TRUE){
+      retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
+     }
 
 
-   //END OF TELEMATICS CODE
+      //END OF TELEMATICS CODE
 
 }
 

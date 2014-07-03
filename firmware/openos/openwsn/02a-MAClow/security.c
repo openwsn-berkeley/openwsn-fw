@@ -652,11 +652,6 @@ uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
 	uint8_t i;
 
 	if(KeyIdMode == 0){
-		if(neighbors_haveSomeChild() == TRUE){
-			DeviceAddress = idmanager_getMyID(ADDR_64B);
-		}else{
-			DeviceAddress = keySource;
-		}
 
 		for(i=0; i<MAXNUMKEYS; i++ ){
 			if(packetfunctions_sameAddress(DeviceAddress,MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address)
