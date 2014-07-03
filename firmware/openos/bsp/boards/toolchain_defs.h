@@ -39,7 +39,7 @@
 
 #ifdef _MSC_VER
    // visual studio
-   #define START_PACK __pragma(pack(push,1));
+   #define BEGIN_PACK __pragma(pack(push,1));
    #define END_PACK   __pragma(pack(pop));
 #else
    // other
