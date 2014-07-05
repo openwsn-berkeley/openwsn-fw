@@ -65,11 +65,11 @@ void udprand_task(){
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_motedata,16);
 
    //START OF TELEMATICS CODE
-   pkt->l2_security = TRUE;
-   pkt->l2_securityLevel = 5;
-   pkt->l2_keyIdMode = 3;
-   neighbors_getPreferredParentEui64(&(pkt->l2_keySource));
-   pkt->l2_keyIndex = 1;
+//   pkt->l2_security = TRUE;
+//   pkt->l2_securityLevel = 5;
+//   pkt->l2_keyIdMode = 3;
+//   neighbors_getPreferredParentEui64(&(pkt->l2_keySource));
+//   pkt->l2_keyIndex = 1;
 
    	   //VARIABLE PAYLOAD TEST
 //   uint8_t payloadLength,i;

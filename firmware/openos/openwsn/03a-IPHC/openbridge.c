@@ -48,9 +48,6 @@ void openbridge_triggerData() {
       pkt->creator  = COMPONENT_OPENBRIDGE;
       pkt->owner    = COMPONENT_OPENBRIDGE;
       //l2
-      //START OF TELEMATICS CODE
-      pkt->l2_security = FALSE;
-      //END OF TELEMATICS CODE
       pkt->l2_nextORpreviousHop.type = ADDR_64B;
       memcpy(&(pkt->l2_nextORpreviousHop.addr_64b[0]),&(input_buffer[0]),8);
       //payload

@@ -1,7 +1,7 @@
 /**
 \brief General Security Operations
 
-\author Savio Sciancalepore <savio.sciancalepore@gmail.com>, July 2014.
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, July 2014.
 */
 
 #include "security.h"
@@ -111,6 +111,9 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 	keypoint = &MacKeyTable.KeyDescriptorElement[match];
 
 	if(match == 25){
+		openserial_printError(COMPONENT_RES,ERR_OK,
+							(errorparameter_t)msg->creator,
+							(errorparameter_t)400);
 		return;
 	}
 

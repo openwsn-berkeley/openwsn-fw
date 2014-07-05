@@ -318,9 +318,6 @@ void sendDIO() {
    // set transport information
    msg->l4_protocol                         = IANA_ICMPv6;
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
-   //START OF TELEMATICS CODE
-   msg->l2_security = FALSE;
-   //END OF TELEMATICS CODE
    // set DIO destination
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
    
@@ -445,10 +442,6 @@ void sendDAO() {
    // set transport information
    msg->l4_protocol                         = IANA_ICMPv6;
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
-   
-   //START OF TELEMATICS CODE
-   msg->l2_security = FALSE;
-   //END OF TELEMATICS CODE
 
    // set DAO destination
    msg->l3_destinationAdd.type=ADDR_128B;

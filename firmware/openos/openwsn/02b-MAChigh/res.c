@@ -66,6 +66,21 @@ bool debugPrint_myDAGrank() {
 owerror_t res_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_RES;
    msg->l2_frameType = IEEE154_TYPE_DATA;
+
+//   //START OF TELEMATICS CODE
+   msg->l2_security = TRUE;
+   msg->l2_securityLevel = 5;
+   msg->l2_keyIdMode = 3;
+   if(idmanager_getIsDAGroot()){
+	   open_addr_t* temp_addr;
+	   temp_addr = idmanager_getMyID(ADDR_64B);
+	   memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
+   }else{
+   	   neighbors_getPreferredParentEui64(&(msg->l2_keySource));
+   }
+   msg->l2_keyIndex = 1;
+   //END OF TELEMATICS CODE
+
    return res_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
 }
 
@@ -181,11 +196,12 @@ void task_resNotifReceive() {
     				  iphc_receive(msg);
     			  } else{
     				  // free up the RAM
+    				  openserial_printError(COMPONENT_RES,ERR_OK,
+										   (errorparameter_t)msg->l2_frameType,
+										   (errorparameter_t)252);
     				  openqueue_freePacketBuffer(msg);
 
-    				  openserial_printError(COMPONENT_RES,ERR_OK,
-    				                           (errorparameter_t)0,
-    				                           (errorparameter_t)252);
+
     		  }
 			  } else {
 				 // free up the RAM

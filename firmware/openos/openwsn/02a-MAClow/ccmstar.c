@@ -1,7 +1,7 @@
 /**
 \brief CCMstar functions
 
-\author Savio Sciancalepore <savio.sciancalepore@gmail.com>, July 2014.
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, July 2014.
 */
 
 #include "ccmstar.h"
