@@ -43,11 +43,14 @@ radio_vars_t radio_vars;
 
 //=========================== prototypes ======================================
 
-port_INLINE void    radio_on(void);
-port_INLINE void    radio_off(void);
-void radio_error_isr(void);
-port_INLINE void enable_radio_interrupts(void);
-port_INLINE void disable_radio_interrupts(void);
+void     enable_radio_interrupts(void);
+void     disable_radio_interrupts(void);
+
+void     radio_on(void);
+void     radio_off(void);
+
+void     radio_error_isr(void);
+void     radio_isr_internal(void);
 
 //=========================== public ==========================================
 
@@ -133,7 +136,7 @@ void radio_init() {
    // enable_radio_interrupts();
    
    //register interrupt
-   IntRegister(INT_RFCORERTX, radio_isr);
+   IntRegister(INT_RFCORERTX, radio_isr_internal);
    IntRegister(INT_RFCOREERR, radio_error_isr);
    
    IntPrioritySet(INT_RFCORERTX, HAL_INT_PRIOR_MAC);
@@ -212,7 +215,6 @@ void radio_setFrequency(uint8_t frequency) {
    // configure the radio to the right frequecy
    if((frequency < CC2538_RF_CHANNEL_MIN) || (frequency > CC2538_RF_CHANNEL_MAX)) {
       while(1);
-      return;
    }
    
    /* Changes to FREQCTRL take effect after the next recalibration */
@@ -397,7 +399,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
 
 //=========================== private =========================================
 
-port_INLINE  void enable_radio_interrupts(void){
+void enable_radio_interrupts(void){
    /* Enable RF interrupts 0, RXPKTDONE,SFD,FIFOP only -- see page 751  */
    HWREG(RFCORE_XREG_RFIRQM0) |= ((0x06|0x02|0x01) << RFCORE_XREG_RFIRQM0_RFIRQM_S) & RFCORE_XREG_RFIRQM0_RFIRQM_M;
 
@@ -405,19 +407,19 @@ port_INLINE  void enable_radio_interrupts(void){
    HWREG(RFCORE_XREG_RFIRQM1) |= ((0x02) << RFCORE_XREG_RFIRQM1_RFIRQM_S) & RFCORE_XREG_RFIRQM1_RFIRQM_M;
 }
 
-port_INLINE  void disable_radio_interrupts(void){
+void disable_radio_interrupts(void){
    /* Enable RF interrupts 0, RXPKTDONE,SFD,FIFOP only -- see page 751  */
    HWREG(RFCORE_XREG_RFIRQM0) = 0;
    /* Enable RF interrupts 1, TXDONE only */
    HWREG(RFCORE_XREG_RFIRQM1) = 0;
 }
 
-port_INLINE void radio_on(void){
+void radio_on(void){
    // CC2538_RF_CSP_ISFLUSHRX();
     CC2538_RF_CSP_ISRXON();
 }
 
-port_INLINE void radio_off(void){
+void radio_off(void){
    /* Wait for ongoing TX to complete (e.g. this could be an outgoing ACK) */
    while(HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_TX_ACTIVE);
    //CC2538_RF_CSP_ISFLUSHRX();
@@ -434,7 +436,29 @@ port_INLINE void radio_off(void){
 
 //=========================== interrupt handlers ==============================
 
+/**
+\brief Stub function for the CC2538.
+
+In MSP430 platforms the CPU status after servicing an interrupt can be managed
+toggling some bits in a special register, e.g. CPUOFF, LPM1, etc, within the
+interrupt context itself. By default, after servicing an interrupt the CPU will
+be off so it makes sense to return a value and enable it if something has
+happened that needs the scheduler to run (a packet has been received that needs
+to be processed). Otherwise, the CPU is kept in sleep mode without even
+reaching the main loop.
+
+In the CC2538, however, the default behaviour is the contrary. After servicing
+an interrupt the CPU will be on by default and it is the responsability of the
+main thread to put it back to sleep (which is already done). This means that
+the scheduler will always be kicked in after servicing an interrupt. This
+behaviour can be changed by modifying the SLEEPEXIT field in the SYSCTRL
+regiser (see page 131 of the CC2538 manual).
+*/
 kick_scheduler_t radio_isr() {
+   return DO_NOT_KICK_SCHEDULER;
+}
+
+void radio_isr_internal(void) {
    volatile PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status0,irq_status1;
    
@@ -460,7 +484,7 @@ kick_scheduler_t radio_isr() {
          // call the callback
          radio_vars.startFrame_cb(capturedTime);
          // kick the OS
-         return KICK_SCHEDULER;
+         return;
       } else {
          while(1);
       }
@@ -474,7 +498,7 @@ kick_scheduler_t radio_isr() {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
          // kick the OS
-         return KICK_SCHEDULER;
+         return;
       } else {
          while(1);
       }
@@ -488,7 +512,7 @@ kick_scheduler_t radio_isr() {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
          // kick the OS
-         return KICK_SCHEDULER;
+         return;
       } else {
          while(1);
       }
@@ -503,13 +527,13 @@ kick_scheduler_t radio_isr() {
          // call the callback
          radio_vars.endFrame_cb(capturedTime);
          // kick the OS
-         return KICK_SCHEDULER;
+         return;
       } else {
          while(1);
       }
    }
    
-   return DO_NOT_KICK_SCHEDULER;
+   return;
 }
 
 void radio_error_isr(void){
