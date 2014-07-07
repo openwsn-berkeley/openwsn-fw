@@ -84,23 +84,18 @@ void board_reset() {
 
 //=========================== interrupt handlers ==============================
 
-#pragma vector = DAC12_VECTOR
-__interrupt void DAC12_ISR (void) {
+ISR(DAC12){
    
    debugpins_isr_set();
    while(1); // should never happen
 }
 
-#pragma vector = DMA_VECTOR
-__interrupt void DMA_ISR (void) {
-   
+ISR(DMA){
    debugpins_isr_set();
    while(1); // should never happen
 }
 
-#pragma vector = USCIAB1TX_VECTOR
-__interrupt void USCIAB1TX_ISR(void) {
-   
+ISR(USCIAB1TX){
    debugpins_isr_set();
    if ( ((UC1IFG & UCB1TXIFG) && (UC1IE & UCB1TXIE)) ||
         ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ) {
@@ -109,9 +104,7 @@ __interrupt void USCIAB1TX_ISR(void) {
    debugpins_isr_clr();
 }
 
-#pragma vector = USCIAB1RX_VECTOR
-__interrupt void USCIAB1RX_ISR(void) {
-   
+ISR(USCIAB1RX){
    debugpins_isr_set();
    if ( ((UC1IFG & UCB1RXIFG) && (UC1IE & UCB1RXIE)) ||
          (UCB1STAT & UCNACKIFG) ) {
@@ -120,18 +113,14 @@ __interrupt void USCIAB1RX_ISR(void) {
    debugpins_isr_clr();
 }
 
-
-#pragma vector = ADC12_VECTOR
-__interrupt void ADC12_ISR (void) {
-   
+ISR(ADC12){
    debugpins_isr_set();
    ADC12IFG &= ~0x1F;
    __bic_SR_register_on_exit(CPUOFF);
    debugpins_isr_clr();
 }
 
-#pragma vector = USCIAB0TX_VECTOR
-__interrupt void USCIAB0TX_ISR (void) {
+ISR(USCIAB0TX){
    debugpins_isr_set();
    if ( (UC0IFG & UCA0TXIFG) && (UC0IE & UCA0TXIE) ){
       if (uart_tx_isr()==KICK_SCHEDULER) {       // UART: TX
@@ -141,9 +130,7 @@ __interrupt void USCIAB0TX_ISR (void) {
    debugpins_isr_clr();
 }
 
-#pragma vector = USCIAB0RX_VECTOR
-__interrupt void USCIAB0RX_ISR (void) {
-   
+ISR(USCIAB0RX){
    debugpins_isr_set();
    if ( (IFG2 & UCB0RXIFG) && (IE2 & UCB0RXIE) ) {
       if (spi_isr()==KICK_SCHEDULER) {           // SPI
@@ -159,38 +146,31 @@ __interrupt void USCIAB0RX_ISR (void) {
    debugpins_isr_clr();
 }
 
-#pragma vector = TIMERA1_VECTOR
-__interrupt void TIMERA1_ISR (void) {
-   
+ISR(TIMERA1){
    debugpins_isr_set();
    while(1); // should never happen
 }
 
-#pragma vector = WDT_VECTOR
-__interrupt void WDT_ISR (void) {
-   
+ISR(WDT){
    debugpins_isr_set();
    while(1); // should never happen
 }
 
-#pragma vector = COMPARATORA_VECTOR
-__interrupt void COMPARATORA_ISR (void) {
-   
+ISR(COMPARATORA){
    debugpins_isr_set();
    __bic_SR_register_on_exit(CPUOFF);            // restart CPU
    debugpins_isr_clr();
 }
 
-#pragma vector = TIMERB1_VECTOR
-__interrupt void TIMERB1_ISR (void) {
+ISR(TIMERB1){
    debugpins_isr_set();
    if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
 }
-#pragma vector = TIMERA0_VECTOR
-__interrupt void TIMERA0_ISR (void) {
+
+ISR(TIMERA0){
    debugpins_isr_set();
    if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
       __bic_SR_register_on_exit(CPUOFF);
@@ -198,16 +178,12 @@ __interrupt void TIMERA0_ISR (void) {
    debugpins_isr_clr();
 }
 
-#pragma vector = TIMERB0_VECTOR
-__interrupt void TIMERB0_ISR (void) {
-   
+ISR(TIMERB0){
    debugpins_isr_set();
    while(1); // should never happen
 }
 
-#pragma vector = NMI_VECTOR
-__interrupt void NMI_ISR (void) {
-   
+ISR(NMI){
    debugpins_isr_set();
    debugpins_frame_set();
    while(1); // should never happen
