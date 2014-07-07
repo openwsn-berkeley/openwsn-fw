@@ -742,7 +742,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\generic.icf</state>
+          <state>$TOOLKIT_DIR$\config\linker\TexasInstruments\cx2538xf53.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -802,7 +802,7 @@
         </option>
         <option>
           <name>IlinkProgramEntryLabel</name>
-          <state></state>
+          <state>__iar_program_start</state>
         </option>
         <option>
           <name>DoFill</name>
@@ -2480,6 +2480,30 @@
     </group>
     <group>
       <name>cross-layers</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\idmanager.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\idmanager.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openqueue.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openqueue.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openrandom.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openrandom.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\packetfunctions.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\packetfunctions.h</name>
+      </file>
     </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\openwsn\openwsn.c</name>
