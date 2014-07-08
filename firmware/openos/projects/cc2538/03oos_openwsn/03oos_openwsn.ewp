@@ -666,7 +666,7 @@
         <debug>1</debug>
         <option>
           <name>IlinkOutputFile</name>
-          <state>c.out</state>
+          <state>03oos_openwsn.d43</state>
         </option>
         <option>
           <name>IlinkLibIOConfig</name>
