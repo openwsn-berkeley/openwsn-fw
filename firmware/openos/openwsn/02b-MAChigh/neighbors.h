@@ -111,7 +111,7 @@ void          neighbors_removeOld(void);
 bool          debugPrint_neighbors(void);
 void          debugNetPrint_neighbors(netDebugNeigborEntry_t* schlist);
 // reservation 
-open_addr_t*  neighbors_reservationNeighbor();
+open_addr_t*  neighbors_sixtopNeighbor();
           
 /**
 \}

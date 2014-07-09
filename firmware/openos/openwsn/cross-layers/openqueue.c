@@ -155,12 +155,12 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
 
 //======= called by RES
 
-OpenQueueEntry_t* openqueue_resGetSentPacket() {
+OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
-      if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_RES &&
+      if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_SIXTOP &&
           openqueue_vars.queue[i].creator!=COMPONENT_IEEE802154E) {
          ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
@@ -170,12 +170,12 @@ OpenQueueEntry_t* openqueue_resGetSentPacket() {
    return NULL;
 }
 
-OpenQueueEntry_t* openqueue_resGetReceivedPacket() {
+OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
-      if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_RES &&
+      if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_SIXTOP &&
           openqueue_vars.queue[i].creator==COMPONENT_IEEE802154E) {
          ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
@@ -194,7 +194,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    if (toNeighbor->type==ADDR_64B) {
       // a neighbor is specified, look for a packet unicast to that neigbhbor
       for (i=0;i<QUEUELENGTH;i++) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
+         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
             packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
@@ -204,10 +204,10 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
       // anycast case: look for a packet which is either not created by RES
       // or an KA (created by RES, but not broadcast)
       for (i=0;i<QUEUELENGTH;i++) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
-             ( openqueue_vars.queue[i].creator!=COMPONENT_RES ||
+         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+             ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
                 (
-                   openqueue_vars.queue[i].creator==COMPONENT_RES &&
+                   openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
                    packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
                 )
              )
@@ -226,8 +226,8 @@ OpenQueueEntry_t* openqueue_macGetAdvPacket() {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
-      if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
-          openqueue_vars.queue[i].creator==COMPONENT_RES              &&
+      if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+          openqueue_vars.queue[i].creator==COMPONENT_SIXTOP              &&
           packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))) {
          ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];

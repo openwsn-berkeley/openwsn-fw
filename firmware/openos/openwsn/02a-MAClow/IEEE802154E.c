@@ -1087,8 +1087,8 @@ port_INLINE void activity_tie5() {
       // indicate tx fail if no more retries left
       notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
    } else {
-      // return packet to the virtual COMPONENT_RES_TO_IEEE802154E component
-      ieee154e_vars.dataToSend->owner = COMPONENT_RES_TO_IEEE802154E;
+      // return packet to the virtual COMPONENT_SIXTOP_TO_IEEE802154E component
+      ieee154e_vars.dataToSend->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
    }
    
    // reset local variable
@@ -1853,9 +1853,9 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
    memcpy(&packetSent->l2_asn,&ieee154e_vars.asn,sizeof(asn_t));
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
-   packetSent->owner              = COMPONENT_IEEE802154E_TO_RES;
+   packetSent->owner              = COMPONENT_IEEE802154E_TO_SIXTOP;
    // post RES's sendDone task
-   scheduler_push_task(task_resNotifSendDone,TASKPRIO_RESNOTIF_TXDONE);
+   scheduler_push_task(task_sixtopNotifSendDone,TASKPRIO_SIXTOP_NOTIF_TXDONE);
    // wake up the scheduler
    SCHEDULER_WAKEUP();
 }
@@ -1866,11 +1866,11 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    // indicate reception to the schedule, to keep statistics
    schedule_indicateRx(&packetReceived->l2_asn);
    // associate this packet with the virtual component
-   // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
-   packetReceived->owner          = COMPONENT_IEEE802154E_TO_RES;
+   // COMPONENT_IEEE802154E_TO_SIXTOP so sixtop can knows it's for it
+   packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;
 
    // post RES's Receive task
-   scheduler_push_task(task_resNotifReceive,TASKPRIO_RESNOTIF_RX);
+   scheduler_push_task(task_sixtopNotifReceive,TASKPRIO_SIXTOP_NOTIF_RX);
    // wake up the scheduler
    SCHEDULER_WAKEUP();
 }
@@ -2028,8 +2028,8 @@ void endSlot() {
          // indicate tx fail if no more retries left
          notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
       } else {
-         // return packet to the virtual COMPONENT_RES_TO_IEEE802154E component
-         ieee154e_vars.dataToSend->owner = COMPONENT_RES_TO_IEEE802154E;
+         // return packet to the virtual COMPONENT_SIXTOP_TO_IEEE802154E component
+         ieee154e_vars.dataToSend->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
       }
       
       // reset local variable

@@ -179,7 +179,7 @@ open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
 }
 // this function is used to get the address of neighbor, which is related to the link required to increase/decrease cells 
 // Currently only return node's time source neighor address.
-open_addr_t*  neighbors_reservationNeighbor(){
+open_addr_t*  neighbors_sixtopNeighbor(){
   // should get from neighbor.c. We return a pre-define neighbor for test
    uint8_t      i;
   // uint16_t     timeSinceHeard;

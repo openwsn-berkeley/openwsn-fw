@@ -14,56 +14,48 @@
 #include "processIE.h"
 #include "ieee802154.h"
 #include "idmanager.h"
-//============================ define =========================================
-
-void reservation_timer_cb();
 
 //=========================== variables =======================================
 
-res_vars_t res_vars;
-//#define NO_UPPER_LAYER_CALLING_RESERVATION
-#define ONE_LINK 1
-reservation_vars_t reservation_vars;
+sixtop_vars_t sixtop_vars;
+#define NO_UPPER_LAYER_CALLING_SIXTOP
 
 //=========================== prototypes ======================================
 
-owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint8_t frameVersion);
+owerror_t sixtop_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint8_t frameVersion);
 void    sendAdv(void);
 void    sendKa(void);
-void    res_timer_cb(void);
-uint8_t res_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv);//returns reserved size
+void    sixtop_timer_cb(void);
+void    sixtop_debug_timer_cb(void);
+uint8_t sixtop_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv);//returns reserved size
 
 //=========================== public ==========================================
 
-void res_init() {
+void sixtop_init() {
    
-   res_vars.periodMaintenance = 872+(openrandom_get16b()&0xff); // fires every 1 sec on average
-   res_vars.busySendingKa     = FALSE;
-   res_vars.busySendingAdv    = FALSE;
-   res_vars.dsn               = 0;
-   res_vars.MacMgtTaskCounter = 0;
+   sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff); // fires every 1 sec on average
+   sixtop_vars.busySendingKa     = FALSE;
+   sixtop_vars.busySendingAdv    = FALSE;
+   sixtop_vars.dsn               = 0;
+   sixtop_vars.MacMgtTaskCounter = 0;
    
-   res_vars.timerId = opentimers_start(
-      res_vars.periodMaintenance,
+   sixtop_vars.timerId = opentimers_start(
+      sixtop_vars.periodMaintenance,
       TIMER_PERIODIC,
       TIME_MS,
-      res_timer_cb
+      sixtop_timer_cb
    );
    
-   memset(&reservation_vars,0,sizeof(reservation_vars_t));
-   reservation_vars.periodReservation = RESPERIOD;
-   reservation_vars.timerId = opentimers_start(
-      reservation_vars.periodReservation,
+   memset(&sixtop_vars,0,sizeof(sixtop_vars_t));
+   sixtop_vars.period_sixtop = SIXTOP_PERIOD;
+   sixtop_vars.timerId_sixtop = opentimers_start(
+      sixtop_vars.period_sixtop,
       TIMER_PERIODIC,
       TIME_MS,
-      reservation_timer_cb
+      sixtop_debug_timer_cb
    );
    
-   res_vars.kaPeriod          = KATIMEOUT;
-}
-
-//admin
-void    reservation_init(){
+   sixtop_vars.kaPeriod          = KATIMEOUT;
 }
 
 /**
@@ -83,40 +75,40 @@ bool debugPrint_myDAGrank() {
 
 //======= from upper layer
 
-owerror_t res_send(OpenQueueEntry_t *msg) {
-   msg->owner        = COMPONENT_RES;
+owerror_t sixtop_send(OpenQueueEntry_t *msg) {
+   msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
    if(msg->l2_IEListPresent == IEEE154_IELIST_NO) {
-    return res_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
+    return sixtop_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
    } else {
-    return res_send_internal(msg,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
+    return sixtop_send_internal(msg,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
    }
 }
 
-void res_setKaPeriod(uint16_t kaPeriod) {
+void sixtop_setKaPeriod(uint16_t kaPeriod) {
    if(kaPeriod > KATIMEOUT) {
-     res_vars.kaPeriod = KATIMEOUT;
+     sixtop_vars.kaPeriod = KATIMEOUT;
    } else {
-     res_vars.kaPeriod = kaPeriod;
+     sixtop_vars.kaPeriod = kaPeriod;
    } 
 }
 
 //======= from lower layer
 
-void task_resNotifSendDone() {
+void task_sixtopNotifSendDone() {
    OpenQueueEntry_t* msg;
    // get recently-sent packet from openqueue
-   msg = openqueue_resGetSentPacket();
+   msg = openqueue_sixtopGetSentPacket();
    if (msg==NULL) {
       // log the error
-      openserial_printCritical(COMPONENT_RES,ERR_NO_SENT_PACKET,
+      openserial_printCritical(COMPONENT_SIXTOP,ERR_NO_SENT_PACKET,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       // abort
       return;
    }
    // declare it as mine
-   msg->owner = COMPONENT_RES;
+   msg->owner = COMPONENT_SIXTOP;
    // indicate transmission (to update statistics)
    if (msg->l2_sendDoneError==E_SUCCESS) {
       neighbors_indicateTx(&(msg->l2_nextORpreviousHop),
@@ -130,28 +122,28 @@ void task_resNotifSendDone() {
                            &msg->l2_asn);
    }
    // send the packet to where it belongs
-   if (msg->creator == COMPONENT_RES) {
+   if (msg->creator == COMPONENT_SIXTOP) {
       if (msg->l2_frameType==IEEE154_TYPE_BEACON) {
          // this is a ADV
          
          // not busy sending ADV anymore
-         res_vars.busySendingAdv = FALSE;
+         sixtop_vars.busySendingAdv = FALSE;
       } else {
          // this is a KA
          
          // not busy sending KA anymore
-         res_vars.busySendingKa = FALSE;
+         sixtop_vars.busySendingKa = FALSE;
       }
       // discard packets
       openqueue_freePacketBuffer(msg);
       // restart a random timer
-      res_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
-      opentimers_setPeriod(res_vars.timerId,
+      sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
+      opentimers_setPeriod(sixtop_vars.timerId,
                            TIME_MS,
-                           res_vars.periodMaintenance);
+                           sixtop_vars.periodMaintenance);
    } else {
      if(msg->creator == COMPONENT_RESERVATION) {
-       reservation_sendDone(msg,msg->l2_sendDoneError);
+       sixtop_sendDone(msg,msg->l2_sendDoneError);
      }
      else
       // send the rest up the stack
@@ -159,14 +151,14 @@ void task_resNotifSendDone() {
    }
 }
 
-void task_resNotifReceive() {
+void task_sixtopNotifReceive() {
    OpenQueueEntry_t* msg;
    
    // get received packet from openqueue
-   msg = openqueue_resGetReceivedPacket();
+   msg = openqueue_sixtopGetReceivedPacket();
    if (msg==NULL) {
       // log the error
-      openserial_printCritical(COMPONENT_RES,ERR_NO_RECEIVED_PACKET,
+      openserial_printCritical(COMPONENT_SIXTOP,ERR_NO_RECEIVED_PACKET,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       // abort
@@ -174,7 +166,7 @@ void task_resNotifReceive() {
    }
    
    // declare it as mine
-   msg->owner = COMPONENT_RES;
+   msg->owner = COMPONENT_SIXTOP;
    
    // indicate reception (to update statistics)
    neighbors_indicateRx(&(msg->l2_nextORpreviousHop),
@@ -208,7 +200,7 @@ void task_resNotifReceive() {
          // free the packet's RAM memory
          openqueue_freePacketBuffer(msg);
          // log the error
-         openserial_printError(COMPONENT_RES,ERR_MSG_UNKNOWN_TYPE,
+         openserial_printError(COMPONENT_SIXTOP,ERR_MSG_UNKNOWN_TYPE,
                                (errorparameter_t)msg->l2_frameType,
                                (errorparameter_t)0);
          break;
@@ -225,10 +217,10 @@ has fired. This timer is set to fire every second, on average.
 
 The body of this function executes one of the MAC management task.
 */
-void timers_res_fired(void) {
-   res_vars.MacMgtTaskCounter = (res_vars.MacMgtTaskCounter+1)%ADVTIMEOUT;
+void timers_sixtop_fired(void) {
+   sixtop_vars.MacMgtTaskCounter = (sixtop_vars.MacMgtTaskCounter+1)%ADVTIMEOUT;
    
-   switch (res_vars.MacMgtTaskCounter) {
+   switch (sixtop_vars.MacMgtTaskCounter) {
       case 0:
          // called every ADVTIMEOUT seconds
          sendAdv();
@@ -251,7 +243,7 @@ void timers_res_fired(void) {
 
 This function adds a IEEE802.15.4 header to the packet and leaves it the 
 OpenQueue buffer. The very last thing it does is assigning this packet to the 
-virtual component COMPONENT_RES_TO_IEEE802154E. Whenever it gets a change,
+virtual component COMPONENT_SIXTOP_TO_IEEE802154E. Whenever it gets a change,
 IEEE802154E will handle the packet.
 
 \param[in] msg The packet to the transmitted
@@ -261,7 +253,7 @@ IEEE802154E will handle the packet.
 
 \returns E_SUCCESS iff successful.
 */
-owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent, uint8_t frameVersion) {
+owerror_t sixtop_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent, uint8_t frameVersion) {
    // assign a number of retries
    if (packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE) {
       msg->l2_retriesLeft = 1;
@@ -269,7 +261,7 @@ owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent, uint8_t fr
       msg->l2_retriesLeft = TXRETRIES;
    }
    // record this packet's dsn (for matching the ACK)
-   msg->l2_dsn = res_vars.dsn++;
+   msg->l2_dsn = sixtop_vars.dsn++;
    // this is a new packet which I never attempted to send
    msg->l2_numTxAttempts = 0;
    // transmit with the default TX power
@@ -288,7 +280,7 @@ owerror_t res_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent, uint8_t fr
    // reserve space for 2-byte CRC
    packetfunctions_reserveFooterSize(msg,2);
    // change owner to IEEE802154E fetches it from queue
-   msg->owner  = COMPONENT_RES_TO_IEEE802154E;
+   msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
    return E_SUCCESS;
 }
 
@@ -309,38 +301,38 @@ port_INLINE void sendAdv() {
       // I'm not sync'ed
       
       // delete packets genereted by this module (ADV and KA) from openqueue
-      openqueue_removeAllCreatedBy(COMPONENT_RES);
+      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
       
       // I'm now busy sending an ADV
-      res_vars.busySendingAdv = FALSE;
+      sixtop_vars.busySendingAdv = FALSE;
       
       // stop here
       return;
    }
    
-   if (res_vars.busySendingAdv==TRUE) {
+   if (sixtop_vars.busySendingAdv==TRUE) {
       // don't continue if I'm still sending a previous ADV
    }
    
    // if I get here, I will send an ADV
    
    // get a free packet buffer
-   adv = openqueue_getFreePacketBuffer(COMPONENT_RES);
+   adv = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
    if (adv==NULL) {
-      openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
+      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       return;
    }
    
    // declare ownership over that packet
-   adv->creator = COMPONENT_RES;
-   adv->owner   = COMPONENT_RES;
+   adv->creator = COMPONENT_SIXTOP;
+   adv->owner   = COMPONENT_SIXTOP;
    
    // reserve space for ADV-specific header
    // xv poipoi -- reserving for IEs  -- reverse order.
    //TODO reserve here for slotframe and link IE with minimal schedule information
-   slotframeIElen = res_copySlotFrameAndLinkIE(adv);
+   slotframeIElen = sixtop_copySlotFrameAndLinkIE(adv);
    //create Sync IE with JP and ASN 
    packetfunctions_reserveHeaderSize(adv, sizeof(synch_IE_t));//the asn + jp
    adv->l2_ASNpayload               = adv->payload; //keep a pointer to where the ASN should be.
@@ -372,13 +364,13 @@ port_INLINE void sendAdv() {
    adv->l2_nextORpreviousHop.addr_16b[1] = 0xff;
    
    // put in queue for MAC to handle
-   res_send_internal(adv,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
+   sixtop_send_internal(adv,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
    
    // I'm now busy sending an ADV
-   res_vars.busySendingAdv = TRUE;
+   sixtop_vars.busySendingAdv = TRUE;
 }
 
-port_INLINE uint8_t res_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv){
+port_INLINE uint8_t sixtop_copySlotFrameAndLinkIE(OpenQueueEntry_t* adv){
   MLME_IE_subHeader_t mlme_subHeader;
   uint8_t len=0;
   uint8_t linkOption=0;
@@ -473,21 +465,21 @@ port_INLINE void sendKa() {
       // I'm not sync'ed
       
       // delete packets genereted by this module (ADV and KA) from openqueue
-      openqueue_removeAllCreatedBy(COMPONENT_RES);
+      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
       
       // I'm now busy sending a KA
-      res_vars.busySendingKa = FALSE;
+      sixtop_vars.busySendingKa = FALSE;
       
       // stop here
       return;
    }
    
-   if (res_vars.busySendingKa==TRUE) {
+   if (sixtop_vars.busySendingKa==TRUE) {
       // don't proceed if I'm still sending a KA
       return;
    }
    
-   kaNeighAddr = neighbors_getKANeighbor(res_vars.kaPeriod);
+   kaNeighAddr = neighbors_getKANeighbor(sixtop_vars.kaPeriod);
    if (kaNeighAddr==NULL) {
       // don't proceed if I have no neighbor I need to send a KA to
       return;
@@ -496,27 +488,27 @@ port_INLINE void sendKa() {
    // if I get here, I will send a KA
    
    // get a free packet buffer
-   kaPkt = openqueue_getFreePacketBuffer(COMPONENT_RES);
+   kaPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
    if (kaPkt==NULL) {
-      openserial_printError(COMPONENT_RES,ERR_NO_FREE_PACKET_BUFFER,
+      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)1,
                             (errorparameter_t)0);
       return;
    }
    
    // declare ownership over that packet
-   kaPkt->creator = COMPONENT_RES;
-   kaPkt->owner   = COMPONENT_RES;
+   kaPkt->creator = COMPONENT_SIXTOP;
+   kaPkt->owner   = COMPONENT_SIXTOP;
    
    // some l2 information about this packet
    kaPkt->l2_frameType = IEEE154_TYPE_DATA;
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
    // put in queue for MAC to handle
-   res_send_internal(kaPkt,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
+   sixtop_send_internal(kaPkt,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
    
    // I'm now busy sending a KA
-   res_vars.busySendingKa = TRUE;
+   sixtop_vars.busySendingKa = TRUE;
 
 #ifdef OPENSIM
    debugpins_ka_set();
@@ -524,22 +516,19 @@ port_INLINE void sendKa() {
 #endif
 }
 
-void res_timer_cb() {
-   scheduler_push_task(timers_res_fired,TASKPRIO_RES);
+void sixtop_timer_cb() {
+   scheduler_push_task(timers_sixtop_fired,TASKPRIO_SIXTOP);
 }
 
-void    res_notifRetrieveIEDone(OpenQueueEntry_t *msg){
+void    sixtop_notifRetrieveIEDone(OpenQueueEntry_t *msg){
   // sync IE is toss in ieee802154e
-  reservation_notifyReceiveuResCommand(msg);
+  sixtop_notifyReceiveCommand(msg);
 }
 
 // reservation
-void    reservation_notifyReceiveuResLinkRequest(OpenQueueEntry_t* msg){
+void    sixtop_notifyReceiveLinkRequest(OpenQueueEntry_t* msg){
   uint8_t numOfLinksBw,slotframeIDBw; //in BW IE
   uint8_t slotframeID,numOfLink; //in Frame and Link IE
-  
-  //qw : indicate receiving ResLinkRequest
-//  leds_debug_toggle();
   
   uResBandwidthIEcontent_t* tempBandwidthIE = processIE_getuResBandwidthIEcontent();
   //record bandwidth information
@@ -558,16 +547,16 @@ void    reservation_notifyReceiveuResLinkRequest(OpenQueueEntry_t* msg){
     }
   }
   
-  schedule_addLinksToSchedule(slotframeIDBw,&(msg->l2_nextORpreviousHop),numOfLinksBw,reservation_vars.State);
+  schedule_addLinksToSchedule(slotframeIDBw,&(msg->l2_nextORpreviousHop),numOfLinksBw,sixtop_vars.State);
   
   //reservation_vars.State = S_IDLE;
   
   //call link response command
-  reservation_linkResponse(&(msg->l2_nextORpreviousHop));
+  sixtop_linkResponse(&(msg->l2_nextORpreviousHop));
   
 }
 
-void    reservation_notifyReceiveuResLinkResponse(OpenQueueEntry_t* msg){
+void  sixtop_notifyReceiveLinkResponse(OpenQueueEntry_t* msg){
 
     frameAndLinkIEcontent_t* tempFrameAndLinkIEcontent = processIE_getFrameAndLinkIEcontent();
     
@@ -576,16 +565,16 @@ void    reservation_notifyReceiveuResLinkResponse(OpenQueueEntry_t* msg){
       uint8_t slotframeID    = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeID;
       uint8_t numOfLink      = tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;
       
-      schedule_addLinksToSchedule(slotframeID,&(msg->l2_nextORpreviousHop),numOfLink,reservation_vars.State);
+      schedule_addLinksToSchedule(slotframeID,&(msg->l2_nextORpreviousHop),numOfLink,sixtop_vars.State);
 
     }
     
-    reservation_vars.State = S_IDLE;
+    sixtop_vars.State = S_IDLE;
 
     leds_debug_off();
 }
 
-void    reservation_notifyReceiveRemoveLinkRequest(OpenQueueEntry_t* msg){
+void    sixtop_notifyReceiveRemoveLinkRequest(OpenQueueEntry_t* msg){
   
   leds_debug_on();
     
@@ -597,34 +586,34 @@ void    reservation_notifyReceiveRemoveLinkRequest(OpenQueueEntry_t* msg){
     uint16_t slotframeSize = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeSize;
     uint8_t numOfLink      = tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;
 
-    schedule_removeLinksFromSchedule(slotframeID,slotframeSize,numOfLink,&(msg->l2_nextORpreviousHop),reservation_vars.State);
+    schedule_removeLinksFromSchedule(slotframeID,slotframeSize,numOfLink,&(msg->l2_nextORpreviousHop),sixtop_vars.State);
   }
   
-  reservation_vars.State = S_IDLE;
+  sixtop_vars.State = S_IDLE;
   leds_debug_off();
 }
 
-void    reservation_notifyReceiveScheduleRequest(OpenQueueEntry_t* msg){
+void    sixtop_notifyReceiveScheduleRequest(OpenQueueEntry_t* msg){
 }
 
-void    reservation_notifyReceiveScheduleResponse(OpenQueueEntry_t* msg){
+void    sixtop_notifyReceiveScheduleResponse(OpenQueueEntry_t* msg){
 }
 
 
 //call res layer
-void    reservation_sendDone(OpenQueueEntry_t* msg, owerror_t error){
+void    sixtop_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       msg->owner = COMPONENT_RESERVATION;
 
-      switch (reservation_vars.State)
+      switch (sixtop_vars.State)
       {
-      case S_WAIT_RESLINKREQUEST_SENDDONE:
-        reservation_vars.State = S_WAIT_FORRESPONSE;
+      case S_WAIT_SIXTOP_LINKREQUEST_SENDDONE:
+        sixtop_vars.State = S_WAIT_FORRESPONSE;
         break;
-      case S_WAIT_RESLINKRESPONSE_SENDDONE:
-        reservation_vars.State = S_IDLE;
+      case S_WAIT_SIXTOP_LINKRESPONSE_SENDDONE:
+        sixtop_vars.State = S_IDLE;
         break;
       case S_WAIT_REMOVELINKREQUEST_SENDDONE:
-        reservation_vars.State = S_IDLE;
+        sixtop_vars.State = S_IDLE;
         leds_debug_off();
         break;
       default:
@@ -636,7 +625,7 @@ void    reservation_sendDone(OpenQueueEntry_t* msg, owerror_t error){
 }
 
 
-void    reservation_notifyReceiveuResCommand(OpenQueueEntry_t* msg){
+void    sixtop_notifyReceiveCommand(OpenQueueEntry_t* msg){
       //reset sub IE
       resetSubIE();
   
@@ -644,36 +633,36 @@ void    reservation_notifyReceiveuResCommand(OpenQueueEntry_t* msg){
       switch(tempuResCommandIEcontent->uResCommandID)
       {
       case 0:
-        if(reservation_vars.State == S_IDLE)
+        if(sixtop_vars.State == S_IDLE)
         {
-          reservation_vars.State = S_RESLINKREQUEST_RECEIVE;
+          sixtop_vars.State = S_SIXTOP_LINKREQUEST_RECEIVE;
           //received uResCommand is reserve link request
-          reservation_notifyReceiveuResLinkRequest(msg);
+          sixtop_notifyReceiveLinkRequest(msg);
         }
         break;
       case 1:
-        if(reservation_vars.State == S_WAIT_FORRESPONSE)
+        if(sixtop_vars.State == S_WAIT_FORRESPONSE)
         {
-          reservation_vars.State = S_RESLINKRESPONSE_RECEIVE;
+          sixtop_vars.State = S_SIXTOP_LINKRESPONSE_RECEIVE;
           //received uResCommand is reserve link response
-          reservation_notifyReceiveuResLinkResponse(msg);
+          sixtop_notifyReceiveLinkResponse(msg);
         }
         break;
       case 2:
-        if(reservation_vars.State == S_IDLE)
+        if(sixtop_vars.State == S_IDLE)
         {
-          reservation_vars.State = S_REMOVELINKREQUEST_RECEIVE;
+          sixtop_vars.State = S_REMOVELINKREQUEST_RECEIVE;
           //received uResComand is remove link request
-          reservation_notifyReceiveRemoveLinkRequest(msg);
+          sixtop_notifyReceiveRemoveLinkRequest(msg);
         }
         break;
       case 3:
         //received uResCommand is schedule request
-        reservation_notifyReceiveScheduleRequest(msg);
+        sixtop_notifyReceiveScheduleRequest(msg);
         break;
       case 4:
         //received uResCommand is schedule response
-        reservation_notifyReceiveScheduleResponse(msg);
+        sixtop_notifyReceiveScheduleResponse(msg);
         break;
       default:
          // log the error
@@ -682,22 +671,20 @@ void    reservation_notifyReceiveuResCommand(OpenQueueEntry_t* msg){
 }
 
 //call by up layer to reserve a link with a neighbour
-void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwidth) {
+void sixtop_linkRequest(open_addr_t*  sixtopNeighAddr, uint16_t bandwidth) {
   
-  OpenQueueEntry_t* reservationPkt;
+  OpenQueueEntry_t* sixtopPkt;
   
-  if(reservation_vars.State != S_IDLE)
+  if(sixtop_vars.State != S_IDLE)
     return;
   
-//  leds_debug_toggle();
-  
-  if(reservationNeighAddr==NULL){
+  if(sixtopNeighAddr==NULL){
      return;
   }
     // get a free packet buffer
-    reservationPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
+    sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
   
-    if (reservationPkt==NULL) {
+    if (sixtopPkt==NULL) {
       openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
@@ -705,17 +692,17 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
     }
     
     //change state to resLinkRequest command
-    reservation_vars.State = S_RESLINKREQUEST_SEND;
+    sixtop_vars.State = S_SIXTOP_LINKREQUEST_SEND;
     
     // declare ownership over that packet
-    reservationPkt->creator = COMPONENT_RESERVATION;
-    reservationPkt->owner   = COMPONENT_RESERVATION;
+    sixtopPkt->creator = COMPONENT_RESERVATION;
+    sixtopPkt->owner   = COMPONENT_RESERVATION;
          
-    memcpy(&(reservationPkt->l2_nextORpreviousHop),reservationNeighAddr,sizeof(open_addr_t));
+    memcpy(&(sixtopPkt->l2_nextORpreviousHop),sixtopNeighAddr,sizeof(open_addr_t));
     
     uint8_t numOfSlotframes = schedule_getNumSlotframe();
     
-#ifdef NO_UPPER_LAYER_CALLING_RESERVATION
+#ifdef NO_UPPER_LAYER_CALLING_SIXTOP
     //generate candidata links
     for(uint8_t i=0;i<numOfSlotframes;i++)
       schedule_uResGenerateCandidataLinkList(i);
@@ -724,7 +711,7 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
     //set SubFrameAndLinkIE
     processIE_setSubFrameAndLinkIE();
     //set uResCommandIE
-    processIE_setSubuResCommandIE(RESERCATIONLINKREQ);
+    processIE_setSubuResCommandIE(SIXTOP_LINKREQ);
 
     //set uResBandwidthIE
     processIE_setSubuResBandwidthIE(bandwidth,0);
@@ -733,10 +720,10 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
     processIE_setMLME_IE();
     
     //add an IE to adv's payload
-    IEFiled_prependIE(reservationPkt);
+    IEFiled_prependIE(sixtopPkt);
     
     //I has an IE in my payload
-    reservationPkt->l2_IEListPresent = IEEE154_IELIST_YES;
+    sixtopPkt->l2_IEListPresent = IEEE154_IELIST_YES;
     //debug
 //    packetfunctions_reserveHeaderSize(reservationPkt,10);
     
@@ -745,19 +732,19 @@ void reservation_linkRequest(open_addr_t*  reservationNeighAddr, uint16_t bandwi
 //       reservationPkt->payload[i]=0x09;
 //    }   
     
-    res_send(reservationPkt);
+    sixtop_send(sixtopPkt);
     
-    reservation_vars.State = S_WAIT_RESLINKREQUEST_SENDDONE;
+    sixtop_vars.State = S_WAIT_SIXTOP_LINKREQUEST_SENDDONE;
 }
 
-void  reservation_linkResponse(open_addr_t* tempNeighbor){
+void  sixtop_linkResponse(open_addr_t* tempNeighbor){
   
-  OpenQueueEntry_t* reservationPkt;
+  OpenQueueEntry_t* sixtopPkt;
   
     // get a free packet buffer
-    reservationPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
+    sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
   
-    if (reservationPkt==NULL) {
+    if (sixtopPkt==NULL) {
       openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
@@ -765,68 +752,66 @@ void  reservation_linkResponse(open_addr_t* tempNeighbor){
     }
     
     //changing state to resLinkRespone command
-    reservation_vars.State = S_RESLINKRESPONSE_SEND;
+    sixtop_vars.State = S_SIXTOP_LINKRESPONSE_SEND;
     
     // declare ownership over that packet
-    reservationPkt->creator = COMPONENT_RESERVATION;
-    reservationPkt->owner   = COMPONENT_RESERVATION;
+    sixtopPkt->creator = COMPONENT_RESERVATION;
+    sixtopPkt->owner   = COMPONENT_RESERVATION;
     
-    memcpy(&(reservationPkt->l2_nextORpreviousHop),tempNeighbor,sizeof(open_addr_t));
+    memcpy(&(sixtopPkt->l2_nextORpreviousHop),tempNeighbor,sizeof(open_addr_t));
 
     //set SubFrameAndLinkIE
     processIE_setSubFrameAndLinkIE();
     
     //set uResCommandIE  //set uRes command ID
-    processIE_setSubuResCommandIE(RESERCATIONLINKRESPONSE);
+    processIE_setSubuResCommandIE(SIXTOP_LINKRESPONSE);
 
     //set IE after set all required subIE
     processIE_setMLME_IE();
     
-    IEFiled_prependIE(reservationPkt);
+    IEFiled_prependIE(sixtopPkt);
     
     //I has an IE in my payload
-    reservationPkt->l2_IEListPresent = IEEE154_IELIST_YES;
+    sixtopPkt->l2_IEListPresent = IEEE154_IELIST_YES;
   
-    res_send(reservationPkt);
+    sixtop_send(sixtopPkt);
   
-    reservation_vars.State = S_WAIT_RESLINKRESPONSE_SENDDONE;
+    sixtop_vars.State = S_WAIT_SIXTOP_LINKRESPONSE_SENDDONE;
 }
 
 //remove one link command
-void reservation_removeLinkRequest(open_addr_t*  reservationNeighAddr){
+void sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr){
   
-  OpenQueueEntry_t* reservationPkt;
+  OpenQueueEntry_t* sixtopPkt;
   
-  if(reservation_vars.State != S_IDLE)
+  if(sixtop_vars.State != S_IDLE)
     return;
   
-//  leds_debug_toggle();
-  
-  if(reservationNeighAddr!=NULL){
+  if(sixtopNeighAddr!=NULL){
     // get a free packet buffer
-    reservationPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
+    sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
   
-    if (reservationPkt==NULL) {
+    if (sixtopPkt==NULL) {
       openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       return;
     }
     // change state to sending removeLinkRequest Command
-    reservation_vars.State = S_REMOVELINKREQUEST_SEND;
+    sixtop_vars.State = S_REMOVELINKREQUEST_SEND;
     // declare ownership over that packet
-    reservationPkt->creator = COMPONENT_RESERVATION;
-    reservationPkt->owner   = COMPONENT_RESERVATION;
+    sixtopPkt->creator = COMPONENT_RESERVATION;
+    sixtopPkt->owner   = COMPONENT_RESERVATION;
          
-    memcpy(&(reservationPkt->l2_nextORpreviousHop),reservationNeighAddr,sizeof(open_addr_t));
+    memcpy(&(sixtopPkt->l2_nextORpreviousHop),sixtopNeighAddr,sizeof(open_addr_t));
     
     uint8_t numOfSlotframes = schedule_getNumSlotframe();
-#ifdef NO_UPPER_LAYER_CALLING_RESERVATION
+#ifdef NO_UPPER_LAYER_CALLING_SIXTOP
     // this is the cell that will removed by neighbor
     Link_t tempLink;
     tempLink.channelOffset      = 0;
-    tempLink.slotOffset         = 8; // By experiment, I knew slotoffset 8 is created, so I can deleted it here.  7, make sure?
-    tempLink.link_type           = CELLTYPE_RX;// this is for cell removed by neighbor
+    tempLink.slotOffset         = 8; // By experiment, I knew slotoffset 8 is created, so I can deleted it here.
+    tempLink.link_type           = CELLTYPE_RX;// this is the cell removed by neighbor
     //generate links to be removed
     for(uint8_t i=0;i<numOfSlotframes;i++)
       schedule_uResGenerateRemoveLinkList(i,tempLink);
@@ -843,23 +828,24 @@ void reservation_removeLinkRequest(open_addr_t*  reservationNeighAddr){
       uint16_t slotframeSize = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeSize;
       uint8_t numOfLink      = tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;
 
-      schedule_removeLinksFromSchedule(slotframeID,slotframeSize,numOfLink,&(reservationPkt->l2_nextORpreviousHop),reservation_vars.State);
+      schedule_removeLinksFromSchedule(slotframeID,slotframeSize,numOfLink,&(sixtopPkt->l2_nextORpreviousHop),sixtop_vars.State);
     }
     
     //set uResCommandIE
-    processIE_setSubuResCommandIE(RESERVATIONREMOVELINKREQUEST);
+    processIE_setSubuResCommandIE(SIXTOP_REMOVELINKREQUEST);
 
     //set IE after set all required subIE
     processIE_setMLME_IE();
     //add an IE to adv's payload
-    IEFiled_prependIE(reservationPkt);
+    IEFiled_prependIE(sixtopPkt);
     
     //I has an IE in my payload
-    reservationPkt->l2_IEListPresent = IEEE154_IELIST_YES;
+    sixtopPkt->l2_IEListPresent = IEEE154_IELIST_YES;
   
-    res_send(reservationPkt);
+    sixtop_send(sixtopPkt);
     
-    reservation_vars.State = S_WAIT_REMOVELINKREQUEST_SENDDONE;
+    sixtop_vars.State = S_WAIT_REMOVELINKREQUEST_SENDDONE;
+
   }
 }
 
@@ -908,7 +894,7 @@ void reservation_removeLinkRequest(open_addr_t*  reservationNeighAddr){
 //  }
 //}
 
-void reservation_pretendReceiveData(OpenQueueEntry_t* msg){
+void sixtop_pretendReceiveData(OpenQueueEntry_t* msg){
     uint8_t  Halloween[6];
     Halloween[0]  = msg->payload[0];
     Halloween[1]  = msg->payload[1];
@@ -926,8 +912,8 @@ void reservation_pretendReceiveData(OpenQueueEntry_t* msg){
 /**
 \brief this function is going to schedule or remove one link.
 */
-void timers_reservation_fired() {
-  open_addr_t*  reservationNeighAddr;
+void timers_sixtop_debug_fired() {
+  open_addr_t*  sixtopNeighAddr;
   if(ieee154e_isSynch()==FALSE) {
     return;
   }
@@ -936,50 +922,50 @@ void timers_reservation_fired() {
     return;
   }
   
-  if(reservation_vars.addORremove == TRUE) {
+  if(sixtop_vars.addORremove == TRUE) {
     leds_debug_on();
-    reservation_vars.addORremove = FALSE;
+    sixtop_vars.addORremove = FALSE;
     // I'm going to require to remove one link
-    reservationNeighAddr = neighbors_reservationNeighbor();
-    reservation_removeLinkRequest(reservationNeighAddr);
+    sixtopNeighAddr = neighbors_sixtopNeighbor();
+    sixtop_removeLinkRequest(sixtopNeighAddr);
   } else {
     leds_debug_on();
-    reservation_vars.addORremove = TRUE;
+    sixtop_vars.addORremove = TRUE;
     // I'm going to require to add one link
-    reservationNeighAddr = neighbors_reservationNeighbor();
-    reservation_linkRequest(reservationNeighAddr,1);
+    sixtopNeighAddr = neighbors_sixtopNeighbor();
+    sixtop_linkRequest(sixtopNeighAddr,1);
   }
   
 }
 
 //========================== private =========================================
 
-void reservation_timer_cb() {
-  scheduler_push_task(timers_reservation_fired,TASKPRIO_RESERVATION);
+void sixtop_debug_timer_cb() {
+  scheduler_push_task(timers_sixtop_debug_fired,TASKPRIO_SIXTOP_DEBUG);
 }
 
 //event
-void isr_reservation_button() {
-  open_addr_t*  reservationNeighAddr;
+void isr_sixtop_button() {
+  open_addr_t*  sixtopNeighAddr;
   
-  switch (reservation_vars.button_event){
+  switch (sixtop_vars.button_event){
   case 0:
   case 1:
     //set slotframeID and bandwidth
   
-    reservationNeighAddr = neighbors_reservationNeighbor();
-    reservation_linkRequest(reservationNeighAddr,2);
+    sixtopNeighAddr = neighbors_sixtopNeighbor();
+    sixtop_linkRequest(sixtopNeighAddr,2);
     break;
   case 2:
-    reservationNeighAddr = neighbors_reservationNeighbor();
+    sixtopNeighAddr = neighbors_sixtopNeighbor();
   
-    reservation_removeLinkRequest(reservationNeighAddr);
+    sixtop_removeLinkRequest(sixtopNeighAddr);
     break;
   default:
     //pretend that uppler is sending a data
-    reservation_pretendSendData();
+    sixtop_pretendSendData();
   }
   
-  reservation_vars.button_event += 1;
+  sixtop_vars.button_event += 1;
   //reservation_vars.button_event = (reservation_vars.button_event+1)%3;
 }

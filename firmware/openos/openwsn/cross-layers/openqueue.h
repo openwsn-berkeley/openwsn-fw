@@ -39,8 +39,8 @@ owerror_t         openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 void               openqueue_removeAllOwnedBy(uint8_t owner);
 // called by res
-OpenQueueEntry_t*  openqueue_resGetSentPacket(void);
-OpenQueueEntry_t*  openqueue_resGetReceivedPacket(void);
+OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
+OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor);
 OpenQueueEntry_t*  openqueue_macGetAdvPacket(void);

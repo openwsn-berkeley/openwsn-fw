@@ -701,7 +701,7 @@ void schedule_addLinksToSchedule(uint8_t slotframeID,open_addr_t* previousHop,ui
       if(links[i].link_type == CELLTYPE_TX)
       {
         switch(state) {
-          case S_RESLINKREQUEST_RECEIVE:
+          case S_SIXTOP_LINKREQUEST_RECEIVE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
             //add a RX link
             schedule_addActiveSlot(links[i].slotOffset,
@@ -711,7 +711,7 @@ void schedule_addLinksToSchedule(uint8_t slotframeID,open_addr_t* previousHop,ui
               &temp_neighbor,
               FALSE);
             break;
-          case S_RESLINKRESPONSE_RECEIVE:
+          case S_SIXTOP_LINKRESPONSE_RECEIVE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
             //add a TX link
             schedule_addActiveSlot(links[i].slotOffset,
