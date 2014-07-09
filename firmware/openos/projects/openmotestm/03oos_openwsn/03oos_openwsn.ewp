@@ -2190,12 +2190,6 @@
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\6top.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\IEfield.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\IEfield.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.c</name>
       </file>
       <file>

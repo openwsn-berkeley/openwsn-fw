@@ -10,7 +10,6 @@
 #include "scheduler.h"
 #include "opentimers.h"
 #include "debugpins.h"
-#include "IEfield.h"
 #include "leds.h"
 #include "processIE.h"
 #include "ieee802154.h"
