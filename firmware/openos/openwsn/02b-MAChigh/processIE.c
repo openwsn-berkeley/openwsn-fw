@@ -1,5 +1,4 @@
 #include "processIE.h"
-#include "reservation.h"
 #include "openwsn.h"
 #include "res.h"
 #include "idmanager.h"
