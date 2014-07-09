@@ -12,7 +12,7 @@
 #include "neighbors.h"
 #include "debugpins.h"
 #include "packetfunctions.h"
-#include "res.h"
+#include "6top.h"
 #include "scheduler.h"
 #include "openqueue.h"
 #include "openrandom.h"

@@ -12,7 +12,7 @@
 #include "leds.h"
 #include "neighbors.h"
 #include "debugpins.h"
-#include "res.h"
+#include "6top.h"
 #include "adaptive_sync.h"
 
 //=========================== variables =======================================

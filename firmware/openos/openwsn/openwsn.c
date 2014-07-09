@@ -18,9 +18,8 @@
 #include "IEEE802154E.h"
 //-- 02b-RES
 #include "schedule.h"
-#include "res.h"
+#include "6top.h"
 #include "neighbors.h"
-#include "reservation.h"
 //-- 03a-IPHC
 #include "openbridge.h"
 #include "iphc.h"
@@ -98,7 +97,7 @@ void openwsn_init() {
    schedule_init();
    res_init();
    neighbors_init();
-   reservation_init();
+   /*
    //-- 03a-IPHC
    openbridge_init();
    iphc_init();
@@ -149,7 +148,7 @@ void openwsn_init() {
    //rheli_init();
    //rt_init();
    //rxl1_init();
-
+*/
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
       (errorparameter_t)0,
