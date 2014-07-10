@@ -139,6 +139,7 @@ void udpstorm_task_cb() {
    if(udp_storm_period == 0) {
       // stop the periodic timer
       opentimers_stop(udpstorm_vars.timerId);
+      return;
    }
    
    // if you get here, send a packet
