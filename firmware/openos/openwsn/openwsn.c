@@ -49,7 +49,7 @@
 //- common
 //#include "udprand.h"
 //#include "udplatency.h"
-//#include "udpstorm.h"
+#include "udpstorm.h"
 //- board-specific
 //#include "imu.h"
 //+++++ CoAP
@@ -127,7 +127,7 @@ void openwsn_init() {
    //- common
    //udprand_init();
    //udplatency_init();
-   //udpstorm_init();
+   udpstorm_init();
    //- board-specific
    //imu_init();
    //+++++ CoAP
