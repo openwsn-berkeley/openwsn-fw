@@ -50,10 +50,10 @@ void udpstorm_init(void) {
    opencoap_register(&udpstorm_vars.desc);
    
    /*
-   udpstorm_vars.udp_storm_period           = 0;
+   udpstorm_vars.period           = 0;
    
    udpstorm_vars.timerId                    = opentimers_start(
-      udpstorm_vars.udp_storm_period,
+      udpstorm_vars.period,
       TIMER_PERIODIC,TIME_MS,
       udpstorm_timer_cb
    );
@@ -76,48 +76,53 @@ owerror_t udpstorm_receive(
       case COAP_CODE_REQ_GET:
          
          // reset packet payload
-         msg->payload        = &(msg->packet[127]);
-         msg->length         = 0;
+         msg->payload             = &(msg->packet[127]);
+         msg->length              = 0;
          
          // add CoAP payload
          packetfunctions_reserveHeaderSize(msg, 3);
-         msg->payload[0]     = COAP_PAYLOAD_MARKER;
+         msg->payload[0]          = COAP_PAYLOAD_MARKER;
          
          // return as big endian
-         msg->payload[1]     = (uint8_t)(udpstorm_vars.udp_storm_period >> 8);
-         msg->payload[2]     = (uint8_t)(udpstorm_vars.udp_storm_period & 0xff);
+         msg->payload[1]          = (uint8_t)(udpstorm_vars.period >> 8);
+         msg->payload[2]          = (uint8_t)(udpstorm_vars.period & 0xff);
          
          // set the CoAP header
-         coap_header->Code   = COAP_CODE_RESP_CONTENT;
+         coap_header->Code        = COAP_CODE_RESP_CONTENT;
          
-         outcome             = E_SUCCESS;
+         outcome                  = E_SUCCESS;
          break;
       
       case COAP_CODE_REQ_PUT:
-         outcome = E_FAIL;
-         coap_header->Code = COAP_CODE_RESP_BADOPTION;
+         
+         if (msg->length!=2) {
+            outcome               = E_FAIL;
+            coap_header->Code     = COAP_CODE_RESP_BADREQ;
+         }
          
          // read the new period
-         udpstorm_vars.udp_storm_period = (msg->payload[0] << 8) | msg->payload[1];
+         udpstorm_vars.period     = 0;
+         udpstorm_vars.period    |= (msg->payload[0] << 8);
+         udpstorm_vars.period    |= msg->payload[1];
          
          /*
-         // stop and start again only if udp_storm_period > 0
+         // stop and start again only if period > 0
          opentimers_stop(udpstorm_vars.timerId);
          
-         if(udpstorm_vars.udp_storm_period > 0) {
-            opentimers_setPeriod(udpstorm_vars.timerId,TIME_MS,udpstorm_vars.udp_storm_period);
+         if(udpstorm_vars.period > 0) {
+            opentimers_setPeriod(udpstorm_vars.timerId,TIME_MS,udpstorm_vars.period);
             opentimers_restart(udpstorm_vars.timerId);
          }
          */
          
          // reset packet payload
-         msg->payload        = &(msg->packet[127]);
-         msg->length         = 0;
+         msg->payload             = &(msg->packet[127]);
+         msg->length              = 0;
          
          // set the CoAP header
-         coap_header->Code   = COAP_CODE_RESP_CHANGED;
+         coap_header->Code        = COAP_CODE_RESP_CHANGED;
          
-         outcome             = E_SUCCESS;
+         outcome                  = E_SUCCESS;
          break;
       
       default:
@@ -150,7 +155,7 @@ void udpstorm_task_cb() {
       return;
    }
    
-   if(udpstorm_vars.udp_storm_period == 0) {
+   if(udpstorm_vars.period == 0) {
       // stop the periodic timer
       opentimers_stop(udpstorm_vars.timerId);
       return;
