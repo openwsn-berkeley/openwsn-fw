@@ -142,6 +142,7 @@ void udpinject_trigger(void)      { return; }
 void udpprint_init(void)          { return; }
 
 void udprand_init(void)           { return; }
+void udpstorm_init(void)          { return; }
 
 void rinfo_init(void)             { return; }
 void rleds__init(void)            { return; }
