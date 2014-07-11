@@ -2477,6 +2477,15 @@
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\udprand.h</name>
         </file>
       </group>
+      <group>
+        <name>udpstorm</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\udpstorm.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\udpstorm.h</name>
+        </file>
+      </group>
     </group>
     <group>
       <name>cross-layers</name>
