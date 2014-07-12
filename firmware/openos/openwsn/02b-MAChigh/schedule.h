@@ -9,6 +9,7 @@
 */
 
 #include "openwsn.h"
+#include "processIE.h"
 
 //=========================== define ==========================================
 
@@ -124,15 +125,6 @@ typedef struct {
   channelOffset_t channelOffset;
 }slotinfo_element_t;
 END_PACK
-
-// links for link IE
-BEGIN_PACK //elements for slot info 
-typedef struct {
-  cellType_t link_type;// rx,tx etc...
-  slotOffset_t slotOffset;
-  channelOffset_t channelOffset;
-}Link_t;
-END_PACK
 //=========================== variables =======================================
 
 typedef struct {
@@ -158,7 +150,7 @@ bool               debugPrint_schedule(void);
 bool               debugPrint_backoff(void);
 // from uRES
 void               schedule_setFrameLength(frameLength_t newFrameLength);
-owerror_t            schedule_addActiveSlot(
+owerror_t          schedule_addActiveSlot(
                         slotOffset_t   slotOffset,
                         cellType_t     type,
                         bool           shared,
@@ -170,8 +162,13 @@ void               schedule_getSlotInfo(slotOffset_t   slotOffset,
                               open_addr_t*   neighbor,
                               slotinfo_element_t* info);
 
-owerror_t               schedule_removeActiveSlot(slotOffset_t   slotOffset,                      
+owerror_t          schedule_removeActiveSlot(slotOffset_t   slotOffset,                      
                               open_addr_t*   neighbor);
+
+bool               schedule_availableCells(uint8_t frameID, 
+                                           uint8_t numOfCells, 
+                                           sixtop_linkInfo_subIE_t* linklist, 
+                                           uint8_t bandwidth);
 
 
 // from IEEE802154E
@@ -193,14 +190,11 @@ void               schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist);
 
 // from reservation
 uint8_t         schedule_getNumSlotframe();
-void            schedule_uResGenerateCandidataLinkList(uint8_t slotframeID);
-void            schedule_uResGenerateRemoveLinkList(uint8_t slotframeID,Link_t tempLink);
-void            schedule_allocateLinks(uint8_t slotframeID,uint8_t numOfLink,uint8_t bandwidth);
-void            schedule_addLinksToSchedule(uint8_t slotframeID,open_addr_t* previousHop,uint8_t numOfLinks,uint8_t state);
-void            schedule_removeLinksFromSchedule(uint8_t slotframeID,uint16_t slotframeSize,uint8_t numOfLink,open_addr_t* previousHop,uint8_t state);
+void            schedule_uResGenerateCandidataLinkList(uint8_t* type,uint8_t* frameID,uint8_t* flag,sixtop_linkInfo_subIE_t* linklist);
+void            schedule_uResGenerateRemoveLinkList(uint8_t* type,uint8_t* frameID,uint8_t* flag,sixtop_linkInfo_subIE_t* linklist);
+void            schedule_addLinksToSchedule(uint8_t slotframeID,uint8_t numOfLinks,sixtop_linkInfo_subIE_t* linklist,open_addr_t* previousHop,uint8_t state);
+void            schedule_removeLinksFromSchedule(uint8_t slotframeID,uint8_t numOfLink,sixtop_linkInfo_subIE_t* linklist,open_addr_t* previousHop,uint8_t state);
 scheduleEntry_t* schedule_getScheduleEntry(uint16_t slotOffset);
-uint8_t         schedule_getLinksNumber(uint8_t numOfSlotframe);
-Link_t* schedule_getLinksList(uint8_t slotframeID);
 
 /**
 \}

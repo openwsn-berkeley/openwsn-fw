@@ -14,6 +14,7 @@
 #include "debugpins.h"
 #include "6top.h"
 #include "adaptive_sync.h"
+#include "processIE.h"
 
 //=========================== variables =======================================
 
@@ -612,11 +613,11 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
   ptr++;
   temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<< 8);
   ptr++;
-  *lenIE = ptr; 
+  *lenIE = ptr;
   if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) == IEEE802154E_DESC_TYPE_PAYLOAD_IE){
   //payload IE - last bit is 1
      len=(temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
-     gr_elem_id= (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT; 
+     gr_elem_id= (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT;
   }else {
   //header IE - last bit is 0
      len=(temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK)>>IEEE802154E_DESC_LEN_HEADER_IE_SHIFT;
@@ -656,7 +657,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
           }
           break;
         case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
-//          ieee154e_processSlotframeLinkIE(pkt,&ptr); 
+            processIE_retrieveSlotframeLinkIE(pkt,&ptr);
           break;
         case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
           //TODO
@@ -700,8 +701,8 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
 
 port_INLINE void ieee154e_processSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr){
  uint8_t numSlotFrames,i,j,localptr;
- slotframelink_IE_t sfInfo; 
- linkInfo_subIE_t linkInfo;
+ sixtop_slotframelink_subIE_t sfInfo; 
+ sixtop_linkInfo_subIE_t linkInfo;
  localptr=*ptr; 
   // number of slot frames 1B
   numSlotFrames = *((uint8_t*)(pkt->payload)+localptr);
@@ -1411,14 +1412,14 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
       
       // handle IEs xv poipoi
-      //reset join priority 
-      
+      // reset join priority 
+      // retrieve IE in 6top
       if ((ieee802514_header.valid==TRUE &&
           ieee802514_header.ieListPresent==TRUE && 
+          ieee802514_header.frameType==IEEE154_TYPE_BEACON && // if it is not a beacon and have ie, the ie will be processed in 6top
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
-          ieee802514_header.frameType==IEEE154_TYPE_BEACON &&
           ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
-          //log  that the packet is not carrying IEs
+          //log  that the packet is not carrying IEsx
       }
       
       // toss the IEs including Synch

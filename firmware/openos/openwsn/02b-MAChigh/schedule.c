@@ -5,21 +5,16 @@
 #include "packetfunctions.h"
 #include "6top.h"
 
+
 //=========================== variables =======================================
 
 schedule_vars_t schedule_vars;
 schedule_dbg_t schedule_dbg;
-Link_t links[MAXACTIVESLOTS];
 
 //=========================== prototypes ======================================
 
 void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 bool schedule_checkExistSchedule(uint16_t slotOffset);
-
-//=========================== private ========================================
-
-bool isOneAvailableLink(Link_t tempLink);
-bool isOneRequestedLink(Link_t tempLink);
 
 //=========================== public ==========================================
 
@@ -448,21 +443,6 @@ frameLength_t schedule_getFrameLength() {
    
    return res;
 }
-      
-uint8_t schedule_getLinksNumber(uint8_t slotframeID){
-    uint8_t i;
-    for (i=0;i<MAXACTIVESLOTS;i++){
-      if(links[i].link_type == CELLTYPE_OFF)
-        break;
-   }
-   return i;
-
-}
-
-Link_t* schedule_getLinksList(uint8_t slotframeID){
-    //return link list
-    return links;
-}
 
 /**
 \brief Get the type of the current schedule entry.
@@ -632,49 +612,65 @@ uint8_t schedule_getNumSlotframe(){
   return SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER;
 }
 
-void schedule_uResGenerateCandidataLinkList(uint8_t slotframeID){
-    uint8_t j = 0;
-    Link_t tempLink;
-    // for test
-     for (uint8_t i=0;i<MAXACTIVESLOTS;i++)
-     {
-        tempLink.channelOffset = 0;
-        tempLink.slotOffset = i;
-        tempLink.link_type = CELLTYPE_TX;
-        if(isOneAvailableLink(tempLink) && isOneRequestedLink(tempLink)){
-          links[j].channelOffset = tempLink.channelOffset;
-          links[j].slotOffset = tempLink.slotOffset;
-          links[j].link_type = tempLink.link_type;
-          j++;
-        }
-      }
+void schedule_uResGenerateCandidataLinkList(uint8_t* type,uint8_t* frameID,uint8_t* flag, sixtop_linkInfo_subIE_t* linklist){
+  //implement your algorithm here to geenreate candidata link list
+  *type = 1;
+  *frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+  
+  linklist[0].tsNum = 8;
+  linklist[0].choffset = 0;
+  linklist[0].linkoptions = CELLTYPE_TX;
+  *flag = 1;
 }
 
-void schedule_uResGenerateRemoveLinkList(uint8_t slotframeID,Link_t tempLink){
-    // this function should be called by upper layers to generate links to be remove
-    // if someone want to use reservation to remove links, they should be added to links[MAXACTIVESLOTS]
-        links[0] = tempLink;
+void schedule_uResGenerateRemoveLinkList(uint8_t* type,uint8_t* frameID,uint8_t* flag,sixtop_linkInfo_subIE_t* linklist){
+  //implement your algorithm here to geenreate candidata link list
+  *type = 1;
+  *frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+  
+  linklist[0].tsNum = 8;
+  linklist[0].choffset = 0;
+  linklist[0].linkoptions = CELLTYPE_TX;
+  *flag = 1;
 }
 
-void schedule_allocateLinks(uint8_t slotframeID,uint8_t numOfLink,uint8_t bandwidth){
+bool schedule_availableCells(uint8_t frameID, uint8_t numOfCells, sixtop_linkInfo_subIE_t* linklist, uint8_t bandwidth){
+  uint8_t i=0,j,bw=bandwidth;
   
-  uint8_t j = 0;
-  
-  for(uint8_t i=0;i<numOfLink;i++)
-  {
-    if(isOneAvailableLink(links[i]))
-    {
-      if(i>j)
-        memcpy(&(links[j]),&(links[i]),sizeof(Link_t));
-      j++;
-      if(j == bandwidth)
-      {
-        memset(&(links[j]),0,(MAXACTIVESLOTS-j)*sizeof(Link_t));
-        return;
-      }
-    }
+  if(bw == 0 || bw>MAXSCHEDULEDCELLS || numOfCells>MAXSCHEDULEDCELLS){
+    // log wrong parameter error TODO
+    
+    return FALSE;
   }
-  memset(&(links[0]),0,MAXACTIVESLOTS*sizeof(Link_t));
+    
+  do{
+    for(j=0;j<MAXACTIVESLOTS;j++){
+      if(
+          linklist[i].linkoptions != CELLTYPE_OFF                                &&
+          schedule_vars.scheduleBuf[j].slotOffset ==  linklist[i].tsNum          &&
+          schedule_vars.scheduleBuf[j].type == CELLTYPE_OFF
+        ){
+        bw--;
+        break;
+        }
+    }
+    if(j==MAXACTIVESLOTS){
+      // the link can't be scheduled and mark it as off type
+      linklist[i].linkoptions = CELLTYPE_OFF; 
+    }
+    i++;
+  }while(i<numOfCells && bw>0);
+    
+  if(bw==0){
+    //the rest link will not be scheduled, mark them as off type
+    while(i<numOfCells){
+      linklist[i].linkoptions = CELLTYPE_OFF;
+      i++;
+    }
+    return TRUE;// local schedule can statisfy the bandwidth of cell request.
+  } else {
+    return FALSE;// local schedule can't statisfy the bandwidth of cell request
+  }
 }
 
 scheduleEntry_t* schedule_getScheduleEntry(uint16_t slotOffset){
@@ -691,57 +687,50 @@ scheduleEntry_t* schedule_getScheduleEntry(uint16_t slotOffset){
   return NULL;
 }
 
-void schedule_addLinksToSchedule(uint8_t slotframeID,open_addr_t* previousHop,uint8_t numOfLinks,uint8_t state){
+void schedule_addLinksToSchedule(uint8_t slotframeID,uint8_t numOfLinks,sixtop_linkInfo_subIE_t* linklist,open_addr_t* previousHop,uint8_t state){
     //set schedule according links
   open_addr_t temp_neighbor;
   for(uint8_t i = 0;i<numOfLinks;i++)
   {
-    if(schedule_checkExistSchedule(links[i].slotOffset) == FALSE)
-    {
-      if(links[i].link_type == CELLTYPE_TX)
+      //only schedule when the request side wants to schedule a tx cell
+      if(linklist[i].linkoptions == CELLTYPE_TX)
       {
         switch(state) {
           case S_SIXTOP_LINKREQUEST_RECEIVE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
             //add a RX link
-            schedule_addActiveSlot(links[i].slotOffset,
+            schedule_addActiveSlot(linklist[i].tsNum,
               CELLTYPE_RX,
               FALSE,
-              links[i].channelOffset,
+              linklist[i].choffset,
               &temp_neighbor,
               FALSE);
             break;
           case S_SIXTOP_LINKRESPONSE_RECEIVE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
             //add a TX link
-            schedule_addActiveSlot(links[i].slotOffset,
+            schedule_addActiveSlot(linklist[i].tsNum,
               CELLTYPE_TX,
               FALSE,
-              links[i].channelOffset,
+              linklist[i].choffset,
               &temp_neighbor,
               FALSE);
-            memset(&(links[i]),0,sizeof(Link_t));
             break;
           default:
           //log error
             break;
         }
       }
-    }
   }
-// memset(&(links[0]),0,MAXACTIVESLOTS*sizeof(Link_t));
 }
 
-void schedule_removeLinksFromSchedule(uint8_t slotframeID,uint16_t slotframeSize,uint8_t numOfLink,open_addr_t* previousHop,uint8_t state){
+void schedule_removeLinksFromSchedule(uint8_t slotframeID,uint8_t numOfLink,sixtop_linkInfo_subIE_t* linklist,open_addr_t* previousHop,uint8_t state){
   //set schedule according links
   open_addr_t temp_neighbor;
   scheduleEntry_t* tempScheduleEntry;
   for(uint8_t i = 0;i<numOfLink;i++)
   {
-    if(schedule_checkExistSchedule(links[i].slotOffset))
-    {
-      tempScheduleEntry = schedule_getScheduleEntry(links[i].slotOffset);
-      
+      tempScheduleEntry = schedule_getScheduleEntry(linklist[i].tsNum);
       if(tempScheduleEntry == NULL)
       {
         //log error
@@ -750,54 +739,28 @@ void schedule_removeLinksFromSchedule(uint8_t slotframeID,uint16_t slotframeSize
       //get reference neighbor of Slot
       memcpy(&(temp_neighbor),&(tempScheduleEntry->neighbor),sizeof(open_addr_t));
       
-      if((links[i].link_type == CELLTYPE_RX || links[i].link_type == CELLTYPE_TX) && packetfunctions_sameAddress(&(temp_neighbor),previousHop))
+      if((linklist[i].linkoptions == CELLTYPE_TX) && packetfunctions_sameAddress(&(temp_neighbor),previousHop))
       {
         switch (state){
           case S_REMOVELINKREQUEST_SEND:
               // remove CELLTYPE_TX link from shedule
-            schedule_removeActiveSlot(links[i].slotOffset,
+            schedule_removeActiveSlot(linklist[i].tsNum,
               &(temp_neighbor));
             break;
           case S_REMOVELINKREQUEST_RECEIVE:
             //remove CELLTYPE_RX link from shedule
-            schedule_removeActiveSlot(links[i].slotOffset,
+            schedule_removeActiveSlot(linklist[i].tsNum,
               &(temp_neighbor));
-              memset(links,0,MAXACTIVESLOTS*sizeof(Link_t));
             break;
         default:
           //log error
           break;
         }
-
       }
-    }
   }
 }
 
 //=========================== private =========================================
-
-bool isOneAvailableLink(Link_t tempLink){
-  scheduleEntry_t* tempScheduleEntry = schedule_vars.currentScheduleEntry;
-  
-  do
-  {
-    if(tempLink.slotOffset == tempScheduleEntry->slotOffset)
-      return FALSE;
-    
-    tempScheduleEntry = tempScheduleEntry->next;
-    
-  }while(tempScheduleEntry != schedule_vars.currentScheduleEntry);
-  return TRUE;
-}
-
-bool isOneRequestedLink(Link_t tempLink){
-  for(uint8_t i=0;i<MAXACTIVESLOTS;i++)
-  {
-    if(tempLink.slotOffset == links[i].slotOffset)
-      return FALSE;
-  }
-  return TRUE;
-}
 
 bool schedule_checkExistSchedule(uint16_t slotOffset){
    for (uint8_t i=0;i<MAXACTIVESLOTS;i++){

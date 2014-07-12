@@ -14,11 +14,11 @@
 //=========================== define ==========================================
 
 enum sixtop_CommandID_num{
-  SIXTOP_LINKREQ            = 0x00,
-  SIXTOP_LINKRESPONSE       = 0x01,
-  SIXTOP_REMOVELINKREQUEST  = 0x02,
-  SIXTOP_SCHEDULERREQUEST   = 0x03,
-  SIXTOP_SCHEDULERESPONSE   = 0x04,
+  SIXTOP_SOFT_CELL_REQ            = 0x00,
+  SIXTOP_SOFT_CELL_RESPONSE       = 0x01,
+  SIXTOP_REMOVE_SOFT_CELL_REQUEST = 0x02,
+  SIXTOP_HARD_CELL_REQ            = 0x03,
+  SIXTOP_REMOVE_HARD_CELL         = 0x04,
 };
 
 // the different states of the reservation state machine
@@ -71,35 +71,18 @@ void    sixtop_init(void);
 bool    debugPrint_myDAGrank(void);
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
+void    sixtop_linkRequest(open_addr_t* sixtopNeighAddr,uint16_t bandwidth);
+void    sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr);
+
 // from lower layer
 void    task_sixtopNotifSendDone(void);
+void    sixtop_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void    task_sixtopNotifReceive(void);
+
 void    sixtop_setKaPeriod(uint16_t kaPeriod);
 
-void    sixtop_notifRetrieveIEDone(OpenQueueEntry_t *msg);
-
-//public
-//by neighbors to add a link
-void             sixtop_addLinkToNode(open_addr_t* addressToWrite);
-
-void             sixtop_notifyReceiveLinkRequest(OpenQueueEntry_t* msg);
-void             sixtop_notifyReceiveLinkResponse(OpenQueueEntry_t* msg);
-void             sixtop_notifyReceiveRemoveLinkRequest(OpenQueueEntry_t* msg);
-void             sixtop_notifyReceiveScheduleRequest(OpenQueueEntry_t* msg);
-void             sixtop_notifyReceiveScheduleResponse(OpenQueueEntry_t* msg);
-
-void             sixtop_linkResponse(open_addr_t* tempNeighbor);
-// call by res
-void             sixtop_sendDone(OpenQueueEntry_t* msg, owerror_t error);
-void             sixtop_notifyReceiveCommand(OpenQueueEntry_t* msg);
-// call by up layer
-void             sixtop_linkRequest(open_addr_t*  sixtopNeighAddr,uint16_t bandwidth);
-void             sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr);
-//"reservation" pretends it is upplayer and sending a data
-void             sixtop_pretendSendData();
-void             sixtop_pretendReceiveData(OpenQueueEntry_t* msg);
 // events
-void             isr_sixtop_button();
+void    isr_sixtop_button();
 
 /**
 \}

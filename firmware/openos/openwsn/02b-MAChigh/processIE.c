@@ -12,640 +12,349 @@
 #include "packetfunctions.h"
 
 //=========================== variables =======================================
-IEHeader_t                IEHeader_vars;
-subIE_t                   syncIE_vars;
-subIE_t                   frameAndLinkIE_vars;
-subIE_t                   timeslotIE_vars;
-subIE_t                   channelHoppingIE_vars;
-subIE_t                   uResLinkTypeIE_vars;
-subIE_t                   uResCommandIE_vars;
-subIE_t                   uResBandwidthIE_vars;
-subIE_t                   uResGeneralScheduleIE_vars;
-syncIEcontent_t           syncIEcontent_vars;
-frameAndLinkIEcontent_t   frameAndLinkIEcontent_vars;
-timeslotIEcontent_t       timeslotIEcontent_vars;
-channelHoppingIEcontent_t channelHoppingIEcontent_vars;
-uResLinkTypeIEcontent_t   uResLinkTypeIEcontent_vars;
-uResCommandIEcontent_t    uResCommandIEcontent_vars;
-uResBandwidthIEcontent_t  uResBandwidthIEcontent_vars;
-uResGeneralScheduleIEcontent_t   uResScheduleGeneralIEcontent_vars;
-//========================== private ==========================================
 
 //=========================== public ==========================================
-//admin
-void processIE_init() {
-     // initialize IE
-    memset(&IEHeader_vars,0,sizeof(IEHeader_t));
-    // initialize sync IE
-    memset(&syncIE_vars,0,sizeof(subIE_t));
-    memset(&syncIEcontent_vars,0,sizeof(syncIEcontent_t));
-    // initialize frame&link IE 
-    memset(&frameAndLinkIE_vars,0,sizeof(subIE_t));
-    memset(&frameAndLinkIEcontent_vars,0,sizeof(frameAndLinkIEcontent_t));
-    // initialize timeslot IE  
-    memset(&timeslotIE_vars,0,sizeof(subIE_t));
-    memset(&timeslotIEcontent_vars,0,sizeof(timeslotIEcontent_t));
-    // initialize channel hopping IE 
-    memset(&channelHoppingIE_vars,0,sizeof(subIE_t));
-    memset(&channelHoppingIEcontent_vars,0,sizeof(channelHoppingIEcontent_t));
-    // initialize uRes link type IE
-    memset(&uResLinkTypeIE_vars,0,sizeof(subIE_t));
-    memset(&uResLinkTypeIEcontent_vars,0,sizeof(uResLinkTypeIEcontent_t));
-    // initialize uRes command IE    
-    memset(&uResCommandIE_vars,0,sizeof(subIE_t));
-    memset(&uResCommandIEcontent_vars,0,sizeof(uResCommandIEcontent_t));
-    // initialize uRes bandwidth IE   
-    memset(&uResBandwidthIE_vars,0,sizeof(subIE_t)); 
-    memset(&uResBandwidthIEcontent_vars,0,sizeof(uResBandwidthIEcontent_t));
-    // initialize uRes schedule IE   
-    memset(&uResGeneralScheduleIE_vars,0,sizeof(subIE_t));
-    memset(&uResScheduleGeneralIEcontent_vars,0,sizeof(uResGeneralScheduleIEcontent_t));
-}
 
-//==================set========================
-void processIE_setMLME_IE (){
-  //set IE length,groupID and type fields
-  IEHeader_vars.Length  = 0;
-  IEHeader_vars.GroupID = IE_MLME;
-  IEHeader_vars.Type    = IE_TYPE_PAYLOA;
-  IEHeader_vars.Length  += 2;
-  IEHeader_vars.Length  += syncIE_vars.length;
-  IEHeader_vars.Length  += frameAndLinkIE_vars.length;
-  IEHeader_vars.Length  += timeslotIE_vars.length;
-  IEHeader_vars.Length  += channelHoppingIE_vars.length;
-  IEHeader_vars.Length  += uResLinkTypeIE_vars.length;
-  IEHeader_vars.Length  += uResCommandIE_vars.length;
-  IEHeader_vars.Length  += uResBandwidthIE_vars.length;
-}
-
-void processIE_setSubSyncIE(){
-  //set subIE length,subID and type fields
-  /*********************************
-  ** the syncIE is added in uRes when sending ADV
-  ** the right place to add syncIE should be here.
+port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
+  MLME_IE_subHeader_t mlme_subHeader;
+  uint8_t len = 0;
+  //asn + jp 
+  packetfunctions_reserveHeaderSize(pkt, sizeof(synch_IE_t));
+  pkt->l2_ASNpayload               = pkt->payload; //keep a pointer to where the ASN should be.
+  // the actual value of the current ASN and JP will be written by the
+  // IEEE802.15.4e when transmitting
+  len += sizeof(synch_IE_t);
   
-  uint8_t length = 0;
-  syncIE_vars.SubID = 26;
-  syncIE_vars.type = 0;
-  length += 2;
-  //set asn(asn will be added in IEEE802154e, res_getADVasn() return 0)
-  syncIEcontent_vars.asn = res_getADVasn();
-  length += 5;
-  syncIEcontent_vars.joinPriority = res_getJoinPriority();
-  length += 1;
-  syncIE_vars.length = length;
-  **
-  ** end*/
+  //subIE header
+  packetfunctions_reserveHeaderSize(pkt, sizeof(MLME_IE_subHeader_t));//the MLME header
+  //copy mlme sub-header               
+  mlme_subHeader.length_subID_type=sizeof(synch_IE_t) << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+  mlme_subHeader.length_subID_type |= (IEEE802154E_MLME_SYNC_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT) | IEEE802154E_DESC_TYPE_SHORT;
+  //little endian          
+  pkt->payload[0]= mlme_subHeader.length_subID_type & 0xFF;
+  pkt->payload[1]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+  len += 2;
+
+  return len;
 }	
 
-void processIE_setSubFrameAndLinkIE(){
-  //set subIE length,subID and type fields
-  uint8_t length = 0;
-  frameAndLinkIE_vars.SubID                             = 0x1b;
-  frameAndLinkIE_vars.type                              = 0;
-  length += 2;
-  frameAndLinkIEcontent_vars.numOfSlotframes            = schedule_getNumSlotframe();
-  length += 1;
-
-  for(uint8_t i=0;i<frameAndLinkIEcontent_vars.numOfSlotframes;i++)
-  {
-    //set SlotframeInfo
-    frameAndLinkIEcontent_vars.slotframeInfo[i].slotframeID               = i;
-    length += 1;
-    frameAndLinkIEcontent_vars.slotframeInfo[i].slotframeSize             = schedule_getFrameLength();
-    length += 2;
-    frameAndLinkIEcontent_vars.slotframeInfo[i].numOfLink                 = schedule_getLinksNumber(i);
-    length += 1;
-    frameAndLinkIEcontent_vars.slotframeInfo[i].links                     = schedule_getLinksList(i);
-    length += 5 * frameAndLinkIEcontent_vars.slotframeInfo[i].numOfLink;
-  }
-  frameAndLinkIE_vars.length = length;
-}
-
-void processIE_setSubTimeslotIE(){
-  uint8_t length = 0;
-  timeslotIE_vars.SubID     = 0x1c;
-  timeslotIE_vars.type      = 0;
-  //set timeslotIE's length
-  timeslotIE_vars.length    = length;
-}
-
-void processIE_setSubChannelHoppingIE(){
-  uint8_t length = 0;
-  channelHoppingIE_vars.SubID     = 0x9;
-  channelHoppingIE_vars.type      = 1;
-  //set channelHoppingIE's lenght
-  channelHoppingIE_vars.length    = length;
-}
-
-void processIE_setSubuResLinkTypeIE(){
-  //set subIE length,subID and type fields
-  uint8_t length = 0;
-  uResLinkTypeIE_vars.SubID       = 0x40;
-  uResLinkTypeIE_vars.type        = 0;
-  length = length + 2;
-  uResLinkTypeIEcontent_vars.numOfSlotframes            = schedule_getNumSlotframe();
-  length += 1;
-
-  for(uint8_t i=0;i<uResLinkTypeIEcontent_vars.numOfSlotframes;i++)
-  {
-    //set SlotframeInfo
-    uResLinkTypeIEcontent_vars.slotframeInfo[i].slotframeID               = i;
-    length += 1;
-    uResLinkTypeIEcontent_vars.slotframeInfo[i].slotframeSize             = schedule_getFrameLength();
-    length += 2;
-    uResLinkTypeIEcontent_vars.slotframeInfo[i].numOfLink                 = schedule_getLinksNumber(i);
-    length += 1;
-    uResLinkTypeIEcontent_vars.slotframeInfo[i].links                     = schedule_getLinksList(i);
-    length += 5 * uResLinkTypeIEcontent_vars.slotframeInfo[i].numOfLink;
-  }
-  uResLinkTypeIE_vars.length = length;
-}
-
-void processIE_setSubuResCommandIE(uint8_t uResCommandID){
-  //set subIE length,subID and type fields
-  uint8_t length = 0;
-  uResCommandIE_vars.SubID = 0x41;
-  uResCommandIE_vars.type  = 0;
-  length = length + 2;
-  // set uRes Command ID
-  uResCommandIEcontent_vars.uResCommandID = uResCommandID;
-  length = length + 1;
-  uResCommandIE_vars.length = length;
-}
-
-void processIE_setSubuResBandwidthIE(uint8_t numOfLinks, uint8_t slotframeID){
-  //set subIE length,subID and type fields
-  uint8_t length = 0;
-  uResBandwidthIE_vars.SubID = 0x42;
-  uResBandwidthIE_vars.type  = 0;
-  length = length + 2;
+port_INLINE uint8_t processIE_prependFrameLinkIE(OpenQueueEntry_t* pkt){
+  MLME_IE_subHeader_t mlme_subHeader;
+  uint8_t len=0;
+  uint8_t linkOption=0;
+  uint16_t slot=SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+SCHEDULE_MINIMAL_6TISCH_EB_CELLS;
   
-  uResBandwidthIEcontent_vars.numOfLinks = numOfLinks;
-  length = length + 1;
-  uResBandwidthIEcontent_vars.slotframeID = slotframeID;
-  length = length + 1;
-  uResBandwidthIE_vars.length = length;
+  //reverse order and little endian. -- 
+ 
+  //for each link in the schedule (in basic configuration)
+  //copy to adv 1B linkOption bitmap
+  //copy to adv 2B ch.offset
+  //copy to adv 2B timeslot
+ 
+  //shared cells
+  linkOption = (1<<FLAG_TX_S)|(1<<FLAG_RX_S)|(1<<FLAG_SHARED_S);
+  while(slot>SCHEDULE_MINIMAL_6TISCH_EB_CELLS){
+    packetfunctions_reserveHeaderSize(pkt,5);
+    //ts
+    pkt->payload[0]= slot & 0xFF;
+    pkt->payload[1]= (slot >> 8) & 0xFF;
+    //ch.offset as minimal draft
+    pkt->payload[2]= 0x00;
+    pkt->payload[3]= 0x00;
+    //linkOption
+    pkt->payload[4]= linkOption;
+    len+=5;
+    slot--;
+  }
+ 
+  //eb slot
+  linkOption = (1<<FLAG_TX_S)|(1<<FLAG_RX_S)|(1<<FLAG_SHARED_S)|(1<<FLAG_TIMEKEEPING_S);
+  packetfunctions_reserveHeaderSize(pkt,5);
+  len+=5;
+ //ts
+  pkt->payload[0]= SCHEDULE_MINIMAL_6TISCH_EB_CELLS & 0xFF;
+  pkt->payload[1]= (SCHEDULE_MINIMAL_6TISCH_EB_CELLS >> 8) & 0xFF;
+  //ch.offset as minimal draft
+  pkt->payload[2]= 0x00;
+  pkt->payload[3]= 0x00;
+ 
+  pkt->payload[4]= linkOption;
+ //now slotframe ie general fields
+    //1B number of links == 6 
+    //Slotframe Size 2B = 101 timeslots
+    //1B slotframe handle (id)
+  packetfunctions_reserveHeaderSize(pkt,5);//
+  len+=5;
+  
+  pkt->payload[0]= SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER;  
+  pkt->payload[1]= SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+  pkt->payload[2]= SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE & 0xFF;
+  pkt->payload[3]= (SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE >> 8) & 0xFF;
+  pkt->payload[4]= 0x06; //number of links
+  
+  //MLME sub IE header 
+  //1b -15 short ==0x00
+  //7b -8-14 Sub-ID=0x1b
+  //8b - Length = 2 mlme-header + 5 slotframe general header +(6links*5bytes each) 
+  packetfunctions_reserveHeaderSize(pkt, sizeof(MLME_IE_subHeader_t));//the MLME header
+   
+   
+   //copy mlme sub-header               
+  mlme_subHeader.length_subID_type = len << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+  mlme_subHeader.length_subID_type |= (IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID << IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT) | IEEE802154E_DESC_TYPE_SHORT;
+  
+  //little endian          
+  pkt->payload[0]= mlme_subHeader.length_subID_type & 0xFF;
+  pkt->payload[1]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+  len+=2;//count len of mlme header
+   
+  return len;
 }
 
-void processIE_setSubuResGeneralSheduleIE(){
+port_INLINE uint8_t processIE_prependTimeslotIE(OpenQueueEntry_t* pkt){
+  //tengfei-todo
+  return 0;
 }
 
-//=====================get============================= 
-void processIE_getMLME_IE(){
+port_INLINE uint8_t processIE_prependChannelHoppingIE(OpenQueueEntry_t* pkt){
+  //tengfei-todo
+  return 0;
 }
 
-subIE_t* processIE_getSubSyncIE(){
-    return      &syncIE_vars;
-}	
+port_INLINE uint8_t processIE_prependSixtopLinkTypeIE(OpenQueueEntry_t* pkt){
+  //tengfei-todo
+  return 0;
+}
 
-subIE_t* processIE_getSubFrameAndLinkIE(){
-    return      &frameAndLinkIE_vars;
+port_INLINE uint8_t processIE_prependSixtopOpcodeIE(OpenQueueEntry_t* pkt,uint8_t uResCommandID){
+  uint8_t len = 0;
+  MLME_IE_subHeader_t mlme_subHeader;
+  
+  //OpcodeID
+  packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+  *((uint8_t*)(pkt->payload)) = uResCommandID;
+  len += 1;  
+  
+  //subIE
+  mlme_subHeader.length_subID_type  = len << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+  mlme_subHeader.length_subID_type |= SIXTOP_MLME_RES_OPCODE_IE_SUBID << SIXTOP_MLME_RES_OPCODE_IE_SUBID_SHIFT | IEEE802154E_DESC_TYPE_SHORT;
+  packetfunctions_reserveHeaderSize(pkt, sizeof(MLME_IE_subHeader_t));//the MLME header
+  //little endian          
+  pkt->payload[0] = mlme_subHeader.length_subID_type & 0xFF;
+  pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+  len += 2;
+  
+  return len;
+}
+
+port_INLINE uint8_t processIE_prependSixtopBandwidthIE(OpenQueueEntry_t* pkt, uint8_t numOfLinks, uint8_t slotframeID){
+  uint8_t len = 0;
+  MLME_IE_subHeader_t mlme_subHeader;
+  
+  //numcell
+  packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+  *((uint8_t*)(pkt->payload)) = numOfLinks;
+  len += 1;
+  
+  //slotframeID
+  packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+  *((uint8_t*)(pkt->payload)) = slotframeID;
+  len += 1;
+  
+  //subIE header
+  mlme_subHeader.length_subID_type  = len << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+  mlme_subHeader.length_subID_type |= SIXTOP_MLME_RES_BANDWIDTH_IE_SUBID << SIXTOP_MLME_RES_BANDWIDTH_IE_SUBID_SHIFT | IEEE802154E_DESC_TYPE_SHORT;
+  packetfunctions_reserveHeaderSize(pkt, sizeof(MLME_IE_subHeader_t));//the MLME header
+  //little endian          
+  pkt->payload[0] = mlme_subHeader.length_subID_type & 0xFF;
+  pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+  len += 2;
+  
+  return len;
+}
+
+// add ScheduleIE to packet, using TLV structure (type-length-value)
+port_INLINE uint8_t processIE_prependSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,uint8_t type,uint8_t frameID,uint8_t flag,sixtop_linkInfo_subIE_t* linklist){
+  uint8_t i,len = 0;
+  uint8_t temp8b;
+  uint8_t numOfCells = 0;
+  MLME_IE_subHeader_t mlme_subHeader;
+  for(i=0;i<MAXSCHEDULEDCELLS;i++) {
+    if(linklist[i].linkoptions != CELLTYPE_OFF){
+      // cellobjects
+      packetfunctions_reserveHeaderSize(pkt,5); // 2 bytes slotOffset, 2bytes channelOffset+ 1 byte link_type
+      packetfunctions_htons(linklist[i].tsNum, &(pkt->payload[0])); 
+      packetfunctions_htons(linklist[i].choffset, &(pkt->payload[2]));
+      pkt->payload[4] = linklist[i].linkoptions;
+      len += 5;
+      numOfCells++;
+    }
+  }
+  // record the position of cellObjects
+  pkt->l2_scheduleIE_numOfCells  = numOfCells;
+  pkt->l2_scheduleIE_cellObjects = pkt->payload;
+  
+  // numcell + F, 1B
+  temp8b  = 0;
+  temp8b |= numOfCells << 1;
+  temp8b |= flag << 0;
+  packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+  *((uint8_t*)(pkt->payload)) = temp8b;
+  len += 1;
+  
+  // slotframeID
+  temp8b = frameID;
+  packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+  *((uint8_t*)(pkt->payload)) = temp8b;
+  len += 1;
+  
+  //record the frameID (use for removing the cell when removelink request commad was transimitted successufully)
+  pkt->l2_scheduleIE_frameID = frameID;
+  
+  // length
+  temp8b = len;
+  packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+  *((uint8_t*)(pkt->payload)) = temp8b;
+  len += 1;
+  
+  // type
+  temp8b = type;
+  packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+  *((uint8_t*)(pkt->payload)) = temp8b;
+  len += 1;
+  
+  //subIE header
+  mlme_subHeader.length_subID_type  = len << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+  mlme_subHeader.length_subID_type |= SIXTOP_MLME_RES_GENERAL_SCHEDULE_IE_SUBID << SIXTOP_MLME_RES_GENERAL_SCHEDULE_IE_SUBID_SHIFT | IEEE802154E_DESC_TYPE_SHORT;
+  packetfunctions_reserveHeaderSize(pkt, sizeof(MLME_IE_subHeader_t));//the MLME header
+  //little endian          
+  pkt->payload[0] = mlme_subHeader.length_subID_type & 0xFF;
+  pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+  len+=2;
+  
+  return len;
+}
+
+//===================== process sub IE============================= 
+
+port_INLINE void processIE_retrieveSyncIEcontent(OpenQueueEntry_t* pkt,uint8_t * ptr){
+}
+
+port_INLINE void processIE_retrieveSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr){
+  uint8_t numSlotFrames,i,j,localptr;
+  sixtop_slotframelink_subIE_t sfInfo; 
+  sixtop_linkInfo_subIE_t linkInfo;
+  localptr=*ptr; 
+  // number of slot frames 1B
+  numSlotFrames = *((uint8_t*)(pkt->payload)+localptr);
+  localptr++;
+  // for each slotframe
+  i=0;
+  while(i < numSlotFrames){
+   //1-slotftramehandle 1B
+    sfInfo.slotframehandle=*((uint8_t*)(pkt->payload)+localptr);
+    localptr++;
+    //2-slotframe size 2B
+    sfInfo.slotframesize = *((uint8_t*)(pkt->payload)+localptr);
+    localptr++;
+    sfInfo.slotframesize |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+    localptr++;;
+    //3-number of links 1B   
+    sfInfo.numlinks= *((uint8_t*)(pkt->payload)+localptr);
+    localptr++;
+   
+    for (j=0;j<sfInfo.numlinks;j++){
+      //for each link 5Bytes
+       //TimeSlot 2B
+       linkInfo.tsNum = *((uint8_t*)(pkt->payload)+localptr);
+       localptr++;
+       linkInfo.tsNum  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+       localptr++;
+       //Ch.Offset 2B
+       linkInfo.choffset = *((uint8_t*)(pkt->payload)+localptr);
+       localptr++;
+       linkInfo.choffset  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+       localptr++;
+       //LinkOption bitmap 1B
+       linkInfo.linkoptions = *((uint8_t*)(pkt->payload)+localptr);
+       localptr++;
+       //xv poipoi
+       //TODO - inform schedule of that link so it can update if needed.
+    } 
+    i++;
+  } 
+  *ptr=localptr;     
 } 
 
-subIE_t* processIE_getSubChannelHoppingIE(){
-    return      &channelHoppingIE_vars;
+port_INLINE void processIE_retrieveChannelHoppingIE(OpenQueueEntry_t* pkt,uint8_t * ptr){
 } 
 
-subIE_t* processIE_getSubTimeslotIE(){
-    return      &timeslotIE_vars;
+port_INLINE void processIE_retrieveTimeslotIE(OpenQueueEntry_t* pkt,uint8_t * ptr){
+}
+
+port_INLINE void processIE_retrieveSixtopLinkTypeIE(OpenQueueEntry_t* pkt,uint8_t * ptr){
+}
+
+port_INLINE void processIE_retrieveSixtopOpcodeIE(OpenQueueEntry_t* pkt,uint8_t * ptr,sixtop_opcode_subIE_t* opcodeInfo){
+  uint8_t localptr;
+  localptr=*ptr; 
+  // OpCode 1B
+  opcodeInfo->opcode = *((uint8_t*)(pkt->payload)+localptr);
+  localptr++;
+  
+  *ptr=localptr; 
 } 
 
-subIE_t* processIE_getSubuResLinkTypeIE(){
-  return        &uResLinkTypeIE_vars;
-} 
-
-subIE_t* processIE_getSubuResCommandIE(){
-  return        &uResCommandIE_vars;
-} 
-
-subIE_t* processIE_getSubuResBandwidthIE(){
-  return        &uResBandwidthIE_vars;
-} 
-
-subIE_t* processIE_getSubuResGeneralSheduleIE(){
-  return        &uResGeneralScheduleIE_vars;
+port_INLINE void processIE_retrieveSixtopBandwidthIE(OpenQueueEntry_t* pkt,uint8_t * ptr,sixtop_bandwidth_subIE_t* bandwidthInfo){
+  uint8_t localptr;
+  localptr=*ptr; 
+  // slotframeID 1B
+  bandwidthInfo->slotframeID = *((uint8_t*)(pkt->payload)+localptr);
+  localptr++;
+  // number of cells 1B
+  bandwidthInfo->numOfLinks = *((uint8_t*)(pkt->payload)+localptr);
+  localptr++;
+  *ptr=localptr; 
 }
 
-syncIEcontent_t*  processIE_getSyncIEcontent(){
-  return        &syncIEcontent_vars;
-}
-
-frameAndLinkIEcontent_t*        processIE_getFrameAndLinkIEcontent(){
-  return        &frameAndLinkIEcontent_vars;
-}
-
-timeslotIEcontent_t*     processIE_getTimeslotIEcontent(){
-  return        &timeslotIEcontent_vars;
-}
-
-channelHoppingIEcontent_t*  processIE_getChannelHoppingIEcontent(){
-  return        &channelHoppingIEcontent_vars;
-}
-
-uResLinkTypeIEcontent_t*        processIE_getuResLinkTypeIEcontent(){
-  return        &uResLinkTypeIEcontent_vars;
-}
-
-uResBandwidthIEcontent_t*       processIE_getuResBandwidthIEcontent(){
-  return        &uResBandwidthIEcontent_vars;
-}
-
-uResCommandIEcontent_t*         processIE_getuResCommandIEcontent(){
-  return        &uResCommandIEcontent_vars;
-}
-
-IEHeader_t*       processIE_getIEHeader(){
-  return        &IEHeader_vars;
-}
-
-void resetSubIE(){
-     // initialize IE
-    memset(&IEHeader_vars,0,sizeof(IEHeader_t));
-    // initialize sync IE
-    memset(&syncIE_vars,0,sizeof(subIE_t));
-    // initialize frame&link IE 
-    memset(&frameAndLinkIE_vars,0,sizeof(subIE_t));
-    // initialize timeslot IE  
-    memset(&timeslotIE_vars,0,sizeof(subIE_t));
-    // initialize channel hopping IE 
-    memset(&channelHoppingIE_vars,0,sizeof(subIE_t));
-    // initialize uRes link type IE
-    memset(&uResLinkTypeIE_vars,0,sizeof(subIE_t));
-    // initialize uRes command IE    
-    memset(&uResCommandIE_vars,0,sizeof(subIE_t));
-    // initialize uRes bandwidth IE   
-    memset(&uResBandwidthIE_vars,0,sizeof(subIE_t)); 
-    // initialize uRes schedule IE   
-    memset(&uResGeneralScheduleIE_vars,0,sizeof(subIE_t));
-}
-
-//add IE to packet
-
-void IEFiled_prependIE  (OpenQueueEntry_t*      msg){
-    subIE_t* tempSubIE;
-    uint16_t temp_16b = 0;
-    
-    //add uResBandwidthIE to msg's payload
-    temp_16b = 0;
-    tempSubIE = processIE_getSubuResBandwidthIE();
-    if(tempSubIE->length != 0)
-    {
-      temp_16b  |=      tempSubIE->length       <<      SUBIE_SHORT_LENGTH;
-      temp_16b  |=      SUBIE_RES_BANDWIDTH     <<      SUBIE_SUBID;
-      temp_16b  |=      0                       <<      SUBIE_TYPE;
-      //add uRes bandwidth IE content
-      uResBandwidthIEcontent_t* tempuResBandwidthIEcontent      = processIE_getuResBandwidthIEcontent();
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))                               = tempuResBandwidthIEcontent->numOfLinks;
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))                               = tempuResBandwidthIEcontent->slotframeID;
-      //add length subID and subType
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b>>8);
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b);
-      //reset bandwidth
-      memset(&tempuResBandwidthIEcontent,0,sizeof(uResBandwidthIEcontent_t));
-    }
-    //reset subIE
-    memset(tempSubIE,0,sizeof(subIE_t));
-    
-    //add uResCommandIE to msg's payload
-    temp_16b = 0;
-    tempSubIE = processIE_getSubuResCommandIE();
-    if(tempSubIE->length != 0)
-    {
-      temp_16b  |=      tempSubIE->length       <<      SUBIE_SHORT_LENGTH;
-      temp_16b  |=      SUBIE_RES_COMMAND       <<      SUBIE_SUBID;
-      temp_16b  |=      0                       <<      SUBIE_TYPE;
-      //add uResCommandIE content
-      uResCommandIEcontent_t*   tempuResCommmandIEcontent       = processIE_getuResCommandIEcontent();
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))                               = tempuResCommmandIEcontent->uResCommandID;
-      //add length subID and subType
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b>>8);
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b);
-      //reset uResCommandIE
-      memset(tempuResCommmandIEcontent,0,sizeof(uResCommandIEcontent_t));
-    }
-    //reset subIE
-    memset(tempSubIE,0,sizeof(subIE_t));
-    
-    //add uResLinkTypeIE to msg's payload
-    temp_16b = 0;
-    tempSubIE = processIE_getSubuResLinkTypeIE();
-    if(tempSubIE->length != 0)
-    {
-      temp_16b  |=      tempSubIE->length       <<      SUBIE_SHORT_LENGTH;
-      temp_16b  |=      SUBIE_LINKTYPE          <<      SUBIE_SUBID;
-      temp_16b  |=      0                       <<      SUBIE_TYPE;
-      //add uResLinkType IE content
-      uResLinkTypeIEcontent_t*  tempuResLinkTypeIEcontent       = processIE_getuResLinkTypeIEcontent();
-      Link_t* tempLink = NULL;
-      for(uint8_t i=0;i<tempuResLinkTypeIEcontent->numOfSlotframes;i++)
-      {
-        //add Links 
-        tempLink = tempuResLinkTypeIEcontent->slotframeInfo[i].links;
-        // add links
-        for(uint8_t j=0;j<tempuResLinkTypeIEcontent->slotframeInfo[i].numOfLink;j++)
-        {
-          packetfunctions_reserveHeaderSize(msg,sizeof(Link_t));
-          packetfunctions_htons(tempLink[j].slotOffset, &(msg->payload[0])); 
-          packetfunctions_htons(tempLink[j].channelOffset, &(msg->payload[2]));
-          msg->payload[4]     = tempLink[j].link_type;
-        }
-        //add number of links
-        packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-        *((uint8_t*)(msg->payload))     = tempuResLinkTypeIEcontent->slotframeInfo[i].numOfLink;
-        //add slotframe length
-        packetfunctions_reserveHeaderSize(msg,sizeof(frameLength_t));
-        packetfunctions_htons(tempuResLinkTypeIEcontent->slotframeInfo[i].slotframeSize, &(msg->payload[0]));
-        //add slotframeID
-        packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-        *((uint8_t*)(msg->payload))     = tempuResLinkTypeIEcontent->slotframeInfo[i].slotframeID;
-      }
-      //reset links
-      memset(tempLink,0,MAXACTIVESLOTS*sizeof(Link_t));
-      //add number of slotframes
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))     = tempuResLinkTypeIEcontent->numOfSlotframes;
-      //add length subID and subType
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b>>8);
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b);
-      //reset subIEcontent
-      memset(tempuResLinkTypeIEcontent,0,sizeof(uResLinkTypeIEcontent_t));
-    }
-    //reset subIE
-    memset(tempSubIE,0,sizeof(subIE_t));
-    
-    /*
-    //add subIE to msg's payload
-    temp_16b = 0;
-    if(tempSubIE->length != 0)
-    {
-
-    }
-    
-    temp_16b = 0;
-    if(tempSubIE->length != 0)
-    {
-
-    }
-    */
-    //add FrameAndLinksIE to msg's paylaod
-    temp_16b = 0;
-    tempSubIE = processIE_getSubFrameAndLinkIE();
-    if(tempSubIE->length != 0)
-    {
-      temp_16b  |=      tempSubIE->length       <<      SUBIE_SHORT_LENGTH;
-      temp_16b  |=      SUBIE_FRAME_AND_LINK    <<      SUBIE_SUBID;
-      temp_16b  |=      0                       <<      SUBIE_TYPE;
-      //add frameAndLink IE content
-      frameAndLinkIEcontent_t*  tempFrameAndLinkIEcontent       = processIE_getFrameAndLinkIEcontent();
-      Link_t* tempLink = NULL;
-      for(uint8_t i=0;i<tempFrameAndLinkIEcontent->numOfSlotframes;i++)
-      {
-        //add Links 
-        tempLink = tempFrameAndLinkIEcontent->slotframeInfo[i].links;
-        // add links
-        for(uint8_t j=0;j<tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;j++)
-        {
-          packetfunctions_reserveHeaderSize(msg,5); // 2 bytes slotOffset, 2bytes channelOffset+ 1 byte link_type
-          packetfunctions_htons(tempLink[j].slotOffset, &(msg->payload[0])); 
-          packetfunctions_htons(tempLink[j].channelOffset, &(msg->payload[2]));
-          msg->payload[4]     = tempLink[j].link_type;
-        }
-        //add number of links
-        packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-        *((uint8_t*)(msg->payload))     = tempFrameAndLinkIEcontent->slotframeInfo[i].numOfLink;
-        //add slotframe length
-        packetfunctions_reserveHeaderSize(msg,sizeof(frameLength_t));
-        packetfunctions_htons(tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeSize, &(msg->payload[0]));
-        //add slotframeID
-        packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-        *((uint8_t*)(msg->payload))     = tempFrameAndLinkIEcontent->slotframeInfo[i].slotframeID;
-      }
-      //reset links
-      memset(tempLink,0,MAXACTIVESLOTS*sizeof(Link_t));
-      //add number of slotframes
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))     = tempFrameAndLinkIEcontent->numOfSlotframes;
-      //add length subID and subType
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b>>8);
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b);
-      //reset subIEcontent
-      memset(tempFrameAndLinkIEcontent,0,sizeof(frameAndLinkIEcontent_t));
-    }
-    //reset subIE
-    memset(tempSubIE,0,sizeof(subIE_t));
-    
-    //add syncIE to msg's payload
-    temp_16b = 0;
-    tempSubIE = processIE_getSubSyncIE();
-    if(tempSubIE->length != 0)
-    {
-      temp_16b  |=      tempSubIE->length       <<      SUBIE_SHORT_LENGTH;
-      temp_16b  |=      SUBIE_SYNC              <<      SUBIE_SUBID;
-      temp_16b  |=      0                       <<      SUBIE_TYPE;
-      //add joinPriority
-      syncIEcontent_t*    tempSyncIEcontent       = processIE_getSyncIEcontent();
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))                 = tempSyncIEcontent->joinPriority;
-      //reserve asn field
-      packetfunctions_reserveHeaderSize(msg,sizeof(asn_t));
-      //packetfunctions_writeASN(msg, tempSyncIEcontent->asn);
-      msg->l2_ASNpayload       = msg->payload;
-      //add length subID and subType
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b>>8);
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b);
-      //reset subIEcontent
-      memset(tempSyncIEcontent,0,sizeof(syncIEcontent_t));
-    }
-    //reset subIE
-    memset(tempSubIE,0,sizeof(subIE_t));
-
-
-    //add IE to msg's payload
-    temp_16b = 0;
-    IEHeader_t* tempIE = processIE_getIEHeader();
-    temp_16b    |=      tempIE->Length   <<      IE_LENGTH;
-    temp_16b    |=      tempIE->GroupID  <<      IE_GROUPID;
-    temp_16b    |=      tempIE->Type     <<      IE_TYPE;
-    //add length groupID and Type
-    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-    *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b>>8);
-    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-    *((uint8_t*)(msg->payload))               = (uint8_t)(temp_16b);
-    //reset IEHeader
-    memset(tempIE,0,sizeof(IEHeader_t));
-    
-}
-
-void IEFiled_retrieveIE (OpenQueueEntry_t*      msg){
-     uint8_t       i    = 0;
-     //temp subIE variables
-     subIE_t      tempSubIE;
-     subIE_t*     tempSyncIE;
-     subIE_t*     tempFrameAndLinkIE;
-     subIE_t*     tempuResLinkTypeIE;
-     subIE_t*     tempuResCommandIE;
-     subIE_t*     tempuResBandwidthIE;
-     //temp subIEContent variables
-     syncIEcontent_t*    tempSyncIEcontent;
-     frameAndLinkIEcontent_t*  tempFrameAndLinkIEcontent;
-     uResLinkTypeIEcontent_t*  tempuResLinkTypeIEcontent;
-     uResCommandIEcontent_t*   tempuResCommmandIEcontent;
-     uResBandwidthIEcontent_t*  tempuResBandwidthIEcontent;
-     
-     IEHeader_t* tempIE   = processIE_getIEHeader();
-     tempIE->Length     = 0;
-     uint16_t temp_16b  = msg->payload[i]+256*msg->payload[i+1];
-     i =i + 2;
-
-     tempIE->Length     = (temp_16b               >>      IE_LENGTH)&0x07FF;//11b
-     tempIE->GroupID    = (uint8_t)((temp_16b     >>      IE_GROUPID)&0x000F);//4b
-     tempIE->Type       = (uint8_t)((temp_16b     >>      IE_TYPE)&0x0001);//1b
-
-     //subIE
-     if(i>tempIE->Length)       {return;}
-     do{
-      temp_16b  = msg->payload[i]+256*msg->payload[i+1];
-      i = i + 2;
-      tempSubIE.type            = (uint8_t)((temp_16b     >>      SUBIE_TYPE)&0x0001);//1b
-      if(tempSubIE.type == SUBIE_TYPE_SHORT)
-      {
-            tempSubIE.length    = (temp_16b               >>      SUBIE_SHORT_LENGTH)&0x00FF;//8b
-            tempSubIE.SubID     = (uint8_t)((temp_16b     >>      SUBIE_SUBID)&0x007F);//7b       
-      }
-      else
-      {
-            tempSubIE.length    = (temp_16b               >>      SUBIE_LONG_LENGTH)&0x07FF;//11b
-            tempSubIE.SubID     = (uint8_t)((temp_16b     >>      SUBIE_SUBID)&0x000F);//4b   
-      }
-      switch(tempSubIE.SubID)
-      {
-      case 0x1a:        //syncIE(subID = 0x1a)
-        tempSyncIE = processIE_getSubSyncIE();
-        tempSyncIE->length        = tempSubIE.length;
-        tempSyncIE->SubID         = tempSubIE.SubID;
-        tempSyncIE->type          = tempSubIE.type;
-        tempSyncIEcontent = processIE_getSyncIEcontent();
-        //length of asn(asn had been stored by ieee802154e)
-        i = i+5;
-        //store joinPriority
-        tempSyncIEcontent->joinPriority     = *((uint8_t*)(msg->payload)+i);
-        i++;
-        break;
-
-      case 0x1b:        //frameAndLinkIE(subID = 0x1b)
-        tempFrameAndLinkIE = processIE_getSubFrameAndLinkIE();
-        tempFrameAndLinkIE->length      = tempSubIE.length;
-        tempFrameAndLinkIE->SubID       = tempSubIE.SubID;
-        tempFrameAndLinkIE->type        = tempSubIE.type;
-        tempFrameAndLinkIEcontent = processIE_getFrameAndLinkIEcontent();
-        //store number of slotframes
-        tempFrameAndLinkIEcontent->numOfSlotframes = *((uint8_t*)(msg->payload)+i);
-        i++;
-        for(uint8_t j=0;j<tempFrameAndLinkIEcontent->numOfSlotframes;j++)
-        {
-          //store slotframeID
-          tempFrameAndLinkIEcontent->slotframeInfo[j].slotframeID = *((uint8_t*)(msg->payload)+i);
-          i++;
-          //store length of slotframe
-          tempFrameAndLinkIEcontent->slotframeInfo[j].slotframeSize = packetfunctions_ntohs(&(msg->payload[i]));
-          i = i + 2;
-          //store number of links
-          tempFrameAndLinkIEcontent->slotframeInfo[j].numOfLink = *((uint8_t*)(msg->payload)+i);
-          i++;
-          //sotre links
-          tempFrameAndLinkIEcontent->slotframeInfo[i].links = schedule_getLinksList(j);
-          Link_t* tempLink =  tempFrameAndLinkIEcontent->slotframeInfo[i].links;
-          for(uint8_t k=0;k<tempFrameAndLinkIEcontent->slotframeInfo[j].numOfLink;k++)
-          {
-            //store slotoffset
-            tempLink[k].slotOffset = packetfunctions_ntohs(&(msg->payload[i]));
-            i = i + 2;
-            //store channeloffset
-            tempLink[k].channelOffset = packetfunctions_ntohs(&(msg->payload[i]));
-            i  = i + 2;
-            //store link type
-            tempLink[k].link_type = *((uint8_t*)(msg->payload)+i);
-            i++;
-          }
-        }
-        break;
-      case 0x40:        //uResLinkTypeIE(subID = 0x40)
-        tempuResLinkTypeIE = processIE_getSubuResLinkTypeIE();
-        tempuResLinkTypeIE->length      = tempSubIE.length;
-        tempuResLinkTypeIE->SubID       = tempSubIE.SubID;
-        tempuResLinkTypeIE->type        = tempSubIE.type;
-        tempuResLinkTypeIEcontent = processIE_getuResLinkTypeIEcontent();
-        //store number of slotframes
-        tempuResLinkTypeIEcontent->numOfSlotframes = *((uint8_t*)(msg->payload)+i);
-        i++;
-        for(uint8_t j=0;j<tempuResLinkTypeIEcontent->numOfSlotframes;j++)
-        {
-          //store slotframeID
-          tempuResLinkTypeIEcontent->slotframeInfo[j].slotframeID = *((uint8_t*)(msg->payload)+i);
-          i++;
-          //store length of slotframe
-          tempuResLinkTypeIEcontent->slotframeInfo[j].slotframeSize = packetfunctions_ntohs(&(msg->payload[i]));
-          i = i + 2;
-          //store number of links
-          tempuResLinkTypeIEcontent->slotframeInfo[j].numOfLink = *((uint8_t*)(msg->payload)+i);
-          i++;
-          //sotre links
-          tempuResLinkTypeIEcontent->slotframeInfo[i].links = schedule_getLinksList(j);
-          Link_t* tempLink =  tempuResLinkTypeIEcontent->slotframeInfo[i].links;
-          for(uint8_t k=0;k<tempuResLinkTypeIEcontent->slotframeInfo[j].numOfLink;k++)
-          {
-            //store slotoffset
-            tempLink[k].slotOffset = packetfunctions_ntohs(&(msg->payload[i]));
-            i = i + 2;
-            //store channeloffset
-            tempLink[k].channelOffset = packetfunctions_ntohs(&(msg->payload[i]));
-            i  = i + 2;
-            //store link type
-            tempLink[k].link_type = *((uint8_t*)(msg->payload)+i);
-            i++;
-          }
-        }
-        break;
-      case 0x41:
-        tempuResCommandIE = processIE_getSubuResCommandIE();
-        tempuResCommandIE->length      = tempSubIE.length;
-        tempuResCommandIE->SubID       = tempSubIE.SubID;
-        tempuResCommandIE->type        = tempSubIE.type;
-        tempuResCommmandIEcontent       = processIE_getuResCommandIEcontent();
-        tempuResCommmandIEcontent->uResCommandID                  = *((uint8_t*)(msg->payload)+i);
-        i++;
-        break;
-      case 0x42:
-        tempuResBandwidthIE = processIE_getSubuResBandwidthIE();
-        tempuResBandwidthIE->length      = tempSubIE.length;
-        tempuResBandwidthIE->SubID       = tempSubIE.SubID;
-        tempuResBandwidthIE->type        = tempSubIE.type;
-        tempuResBandwidthIEcontent    = processIE_getuResBandwidthIEcontent();
-        tempuResBandwidthIEcontent->slotframeID                  =  *((uint8_t*)(msg->payload)+i);
-        i++;
-        tempuResBandwidthIEcontent->numOfLinks                   =  *((uint8_t*)(msg->payload)+i);
-        i++;
-        break;
-      default:
-        return;
-      }
-     } while(i<tempIE->Length);
-
-     packetfunctions_tossHeader(msg, tempIE->Length);
-
-     sixtop_notifRetrieveIEDone(msg);
+port_INLINE void processIE_retrieveSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,uint8_t * ptr,sixtop_generalschedule_subIE_t* scheduleInfo){
+  uint8_t i,temp8b,localptr;
+  localptr=*ptr; 
+  //type 1B
+  scheduleInfo->type = *((uint8_t*)(pkt->payload)+localptr);
+  localptr++;
+  //length 1B
+  scheduleInfo->length = *((uint8_t*)(pkt->payload)+localptr);
+  localptr++;
+  //frameID 1B
+  scheduleInfo->frameID = *((uint8_t*)(pkt->payload)+localptr);
+  localptr++;
+  //number of cell and flag 1B
+  temp8b = *((uint8_t*)(pkt->payload)+localptr);
+  scheduleInfo->numberOfcells = temp8b >> 1;
+  scheduleInfo->flag = temp8b & 0xFE ? TRUE : FALSE;
+  localptr++;
+  
+  if(scheduleInfo->length > MAXSCHEDULEDCELLS) {
+    //log error
+    return;
+  }
+  
+  for (i=0;i<scheduleInfo->length;i++){
+    //for each cell 5Bytes
+     //TimeSlot 2B
+     scheduleInfo->linklist[i].tsNum = *((uint8_t*)(pkt->payload)+localptr);
+     localptr++;
+     scheduleInfo->linklist[i].tsNum  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+     localptr++;
+     //Ch.Offset 2B
+     scheduleInfo->linklist[i].choffset = *((uint8_t*)(pkt->payload)+localptr);
+     localptr++;
+     scheduleInfo->linklist[i].choffset  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+     localptr++;
+     //LinkOption bitmap 1B
+     scheduleInfo->linklist[i].linkoptions = *((uint8_t*)(pkt->payload)+localptr);
+     localptr++;
+  }
+  *ptr=localptr; 
 }
