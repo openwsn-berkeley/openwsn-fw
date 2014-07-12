@@ -13,8 +13,9 @@ sources_c = [
     os.path.join('02a-MAClow','IEEE802154E.c'),
     os.path.join('02a-MAClow','adaptive_sync.c'),
     #=== 02b-MAChigh
+    os.path.join('02b-MAChigh','6top.c'),
     os.path.join('02b-MAChigh','neighbors.c'),
-    os.path.join('02b-MAChigh','res.c'),
+    os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
     #=== 02.5-MPLS
     # TODO
