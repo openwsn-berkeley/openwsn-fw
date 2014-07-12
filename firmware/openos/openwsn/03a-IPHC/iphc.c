@@ -164,7 +164,12 @@ owerror_t iphc_sendFromForwarding(
    //then regular header
 
 #ifdef FLOW_LABEL_RPL_DOMAIN
-   tf=IPHC_TF_3B;
+   if(fw_SendOrfw_Rcv==PCKTSEND  && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE)   {
+	   //only for upstream traffic
+	   tf=IPHC_TF_3B;
+   }else {
+	   tf=IPHC_TF_ELIDED;
+   }
 #endif
 
    if (iphc_prependIPv6Header(msg,

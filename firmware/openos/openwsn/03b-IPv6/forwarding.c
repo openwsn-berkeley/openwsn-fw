@@ -164,7 +164,9 @@ void forwarding_receive(
       ipv6_hopbyhop_iht*     ipv6_hop_header,
       rpl_option_ht*         rpl_option
    ) {
-   uint8_t flags,senderRank;
+   uint8_t flags;
+   uint16_t senderRank;
+   
    // take ownership
    msg->owner                     = COMPONENT_FORWARDING;
    
@@ -228,9 +230,10 @@ void forwarding_receive(
       if (ipv6_header->next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
          //check if flow label rpl header
-    	 #ifdef FLOW_LABEL_RPL_DOMAIN
-             flags = (ipv6_header->flow_label)>>16;
-             senderRank = (ipv6_header->flow_label)>>8;
+    	 #ifdef FLOW_LABEL_RPL_DOMAIN             
+             flags = (uint8_t)((uint32_t)((ipv6_header->flow_label)>>16)&0xFF);
+             senderRank = (uint16_t)((uint32_t)(ipv6_header->flow_label)>>8)&0xFFFF;
+             senderRank = senderRank*MINHOPRANKINCREASE;//shift it according to HopRank Increase
          #else
     	     flags = rpl_option->flags;
     	     senderRank = rpl_option->senderRank;
@@ -255,7 +258,7 @@ void forwarding_receive(
             // set flag
             #ifdef FLOW_LABEL_RPL_DOMAIN
         	    flags |= R_FLAG;
-        	    ipv6_header->flow_label|= (flags<<16);
+        	    ipv6_header->flow_label|= ((uint32_t)flags<<16);
             #else
         	    rpl_option->flags |= R_FLAG;
             #endif
@@ -264,7 +267,7 @@ void forwarding_receive(
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_LOOP_DETECTED,
-               (errorparameter_t) rpl_option->senderRank,
+               (errorparameter_t) senderRank,
                (errorparameter_t) neighbors_getMyDAGrank()
             );
          }
@@ -622,6 +625,6 @@ void forwarding_createFlowLabel(uint32_t* flow_label,uint8_t flags){
      instanceId=icmpv6rpl_getRPLIntanceID();
      rank=neighbors_getMyDAGrank();
      flrank=(uint8_t)(rank/MINHOPRANKINCREASE);
-     *flow_label = instanceId | (flrank<<8) | flags<<16;
+     *flow_label = (uint32_t)instanceId | ((uint32_t)flrank<<8) | (uint32_t)flags<<16;
 }
 #endif
