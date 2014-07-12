@@ -687,87 +687,108 @@ scheduleEntry_t* schedule_getScheduleEntry(uint16_t slotOffset){
   return NULL;
 }
 
-void schedule_addLinksToSchedule(uint8_t slotframeID,uint8_t numOfLinks,sixtop_linkInfo_subIE_t* linklist,open_addr_t* previousHop,uint8_t state){
-    //set schedule according links
-  open_addr_t temp_neighbor;
-  for(uint8_t i = 0;i<numOfLinks;i++)
-  {
+void schedule_addLinksToSchedule(
+      uint8_t                     slotframeID,
+      uint8_t                     numOfLinks,
+      sixtop_linkInfo_subIE_t*    linklist,
+      open_addr_t*                previousHop,
+      uint8_t                     state
+   ){
+   open_addr_t     temp_neighbor;
+   uint8_t         i;
+   
+   for(i=0;i<numOfLinks;i++) {
       //only schedule when the request side wants to schedule a tx cell
-      if(linklist[i].linkoptions == CELLTYPE_TX)
-      {
-        switch(state) {
-          case S_SIXTOP_LINKREQUEST_RECEIVE:
-            memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-            //add a RX link
-            schedule_addActiveSlot(linklist[i].tsNum,
-              CELLTYPE_RX,
-              FALSE,
-              linklist[i].choffset,
-              &temp_neighbor,
-              FALSE);
-            break;
-          case S_SIXTOP_LINKRESPONSE_RECEIVE:
-            memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-            //add a TX link
-            schedule_addActiveSlot(linklist[i].tsNum,
-              CELLTYPE_TX,
-              FALSE,
-              linklist[i].choffset,
-              &temp_neighbor,
-              FALSE);
-            break;
-          default:
-          //log error
-            break;
-        }
+      if(linklist[i].linkoptions == CELLTYPE_TX) {
+         switch(state) {
+            case S_SIXTOP_LINKREQUEST_RECEIVE:
+               memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+               //add a RX link
+               schedule_addActiveSlot(
+                  linklist[i].tsNum,
+                  CELLTYPE_RX,
+                  FALSE,
+                  linklist[i].choffset,
+                  &temp_neighbor,
+                  FALSE
+               );
+               break;
+            case S_SIXTOP_LINKRESPONSE_RECEIVE:
+               memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+               //add a TX link
+               schedule_addActiveSlot(
+                  linklist[i].tsNum,
+                  CELLTYPE_TX,
+                  FALSE,
+                  linklist[i].choffset,
+                  &temp_neighbor,
+                  FALSE
+               );
+               break;
+            default:
+               //log error
+               break;
+         }
       }
-  }
+   }
 }
 
-void schedule_removeLinksFromSchedule(uint8_t slotframeID,uint8_t numOfLink,sixtop_linkInfo_subIE_t* linklist,open_addr_t* previousHop,uint8_t state){
-  //set schedule according links
-  open_addr_t temp_neighbor;
-  scheduleEntry_t* tempScheduleEntry;
-  for(uint8_t i = 0;i<numOfLink;i++)
-  {
+void schedule_removeLinksFromSchedule(
+      uint8_t                     slotframeID,
+      uint8_t                     numOfLink,
+      sixtop_linkInfo_subIE_t*    linklist,
+      open_addr_t*                previousHop,
+      uint8_t                     state
+   ){
+   open_addr_t          temp_neighbor;
+   scheduleEntry_t*     tempScheduleEntry;
+   uint8_t              i;
+   
+   //set schedule according links
+   for(i = 0;i<numOfLink;i++) {
       tempScheduleEntry = schedule_getScheduleEntry(linklist[i].tsNum);
-      if(tempScheduleEntry == NULL)
-      {
-        //log error
-        return;
+      if(tempScheduleEntry == NULL) {
+         //log error
+         return;
       }
+      
       //get reference neighbor of Slot
       memcpy(&(temp_neighbor),&(tempScheduleEntry->neighbor),sizeof(open_addr_t));
       
-      if((linklist[i].linkoptions == CELLTYPE_TX) && packetfunctions_sameAddress(&(temp_neighbor),previousHop))
-      {
-        switch (state){
-          case S_REMOVELINKREQUEST_SEND:
-              // remove CELLTYPE_TX link from shedule
-            schedule_removeActiveSlot(linklist[i].tsNum,
-              &(temp_neighbor));
-            break;
-          case S_REMOVELINKREQUEST_RECEIVE:
-            //remove CELLTYPE_RX link from shedule
-            schedule_removeActiveSlot(linklist[i].tsNum,
-              &(temp_neighbor));
-            break;
-        default:
-          //log error
-          break;
-        }
+      if (
+            (linklist[i].linkoptions == CELLTYPE_TX) &&
+            packetfunctions_sameAddress(&(temp_neighbor),previousHop)
+         ) {
+         switch (state){
+            case S_REMOVELINKREQUEST_SEND:
+               // remove CELLTYPE_TX link from shedule
+               schedule_removeActiveSlot(linklist[i].tsNum,
+               &(temp_neighbor));
+               break;
+            case S_REMOVELINKREQUEST_RECEIVE:
+               //remove CELLTYPE_RX link from shedule
+               schedule_removeActiveSlot(linklist[i].tsNum,
+               &(temp_neighbor));
+               break;
+            default:
+               //log error
+               break;
+         }
       }
-  }
+   }
 }
 
 //=========================== private =========================================
 
 bool schedule_checkExistSchedule(uint16_t slotOffset){
-   for (uint8_t i=0;i<MAXACTIVESLOTS;i++){
-      if(schedule_vars.scheduleBuf[i].slotOffset == slotOffset)
-        return TRUE;
+   uint8_t i;
+   
+   for (i=0;i<MAXACTIVESLOTS;i++){
+      if(schedule_vars.scheduleBuf[i].slotOffset == slotOffset) {
+         return TRUE;
+      }
    }
-  return FALSE;
+   return FALSE;
 }
 
 void schedule_resetEntry(scheduleEntry_t* pScheduleEntry) {
