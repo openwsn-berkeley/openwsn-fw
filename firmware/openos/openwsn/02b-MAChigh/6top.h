@@ -38,7 +38,7 @@ typedef enum {
     S_REMOVELINKREQUEST_SEND            = 0x08,   // generating resLinkRespone command packet  
     S_WAIT_REMOVELINKREQUEST_SENDDONE   = 0x09,    // waiting for SendDone confirmation
     S_REMOVELINKREQUEST_RECEIVE         = 0x0a
-}sixtop_state_t;
+} sixtop_state_t;
 
 //=========================== typedef =========================================
 
@@ -63,7 +63,7 @@ typedef struct {
    sixtop_state_t       State;
    uint8_t              commandID;
    uint8_t              button_event; //when requestOrRemoveLink%3 is 0 or 1, call uResLinkRequest; when the value is 2, call uResRemoveLink.
-}sixtop_vars_t;
+} sixtop_vars_t;
 
 //=========================== prototypes ======================================
 

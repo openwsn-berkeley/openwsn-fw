@@ -17,7 +17,7 @@
 #include "IEEE802154E_obj.h"
 #include "adaptive_sync_obj.h"
 #include "neighbors_obj.h"
-#include "res_obj.h"
+#include "6top_obj.h"
 #include "schedule_obj.h"
 #include "icmpv6echo_obj.h"
 #include "icmpv6rpl_obj.h"
@@ -189,8 +189,8 @@ struct OpenMote {
    tcp_vars_t           tcp_vars;
    // l3
    // l2b
+   sixtop_vars_t        sixtop_vars;
    neighbors_vars_t     neighbors_vars;
-   res_vars_t           res_vars;
    schedule_vars_t      schedule_vars;
    schedule_dbg_t       schedule_dbg;
    // l2a
