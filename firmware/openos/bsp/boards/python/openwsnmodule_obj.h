@@ -31,6 +31,7 @@
 #include "openrandom_obj.h"
 #include "uart_obj.h"
 #include "rinfo_obj.h"
+#include "udpstorm_obj.h"
 #include "rrt_obj.h"
 #include "rleds_obj.h"
 #include "rwellknown_obj.h"
@@ -216,6 +217,7 @@ struct OpenMote {
    //+++++ UDP
    //- debug
    //- common
+   udpstorm_vars_t      udpstorm_vars;
    //+++++ CoAP
    //- debug
    //- common

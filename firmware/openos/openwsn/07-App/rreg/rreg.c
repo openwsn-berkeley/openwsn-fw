@@ -152,7 +152,7 @@ void rreg_timer() {
    pkt->payload[sizeof(rreg_uriquery)-0] = hexToAscii((temp8b>>0) & 0x0f);
    packetfunctions_reserveHeaderSize(pkt,1);
    pkt->payload[0] = (COAP_OPTION_NUM_URIQUERY-COAP_OPTION_NUM_URIPATH) << 4 |
-      sizeof(rreg_uriquery)-1+2;
+      (sizeof(rreg_uriquery)-1+2);
    numOptions++;
    
    // URI-path

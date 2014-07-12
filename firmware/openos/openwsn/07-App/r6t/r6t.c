@@ -79,12 +79,11 @@ owerror_t r6t_receive(
    
    uint8_t              i;
    owerror_t            outcome;
-   r6t_command_t*     link_command;
-   r6t_command_t      getResponse;
+   r6t_command_t*       link_command;
+   r6t_command_t        getResponse;
    slotinfo_element_t*  link_element;
    slotinfo_element_t   getLink_elementResponse;
    open_addr_t          temp_addr;
-   owerror_t            responses[R6T_MAXRESPONSES];
    
    switch (coap_header->Code) {
       case COAP_CODE_REQ_GET:
@@ -152,7 +151,7 @@ owerror_t r6t_receive(
                      link_element=(slotinfo_element_t*) &(msg->payload[sizeof(r6t_command_t)+i*sizeof(slotinfo_element_t)]);
                      temp_addr.type=ADDR_64B;
                      memcpy(&(temp_addr.addr_64b[0]), &(link_element->address[0]),LENGTH_ADDR64b);
-                     responses[i]=schedule_addActiveSlot(link_element->slotOffset,link_element->link_type,link_element->shared,link_element->channelOffset,&temp_addr,(link_command->type==UPDATE_LINK));
+                     schedule_addActiveSlot(link_element->slotOffset,link_element->link_type,link_element->shared,link_element->channelOffset,&temp_addr,(link_command->type==UPDATE_LINK));
                   }
                   outcome=E_SUCCESS; 
                }
@@ -194,7 +193,7 @@ owerror_t r6t_receive(
                      temp_addr.type=ADDR_64B;
                      memcpy(&(temp_addr.addr_64b[0]), &(link_element->address[0]),LENGTH_ADDR64b);
                      //remove the required links.
-                     responses[i]=schedule_removeActiveSlot(link_element->slotOffset,&temp_addr);
+                     schedule_removeActiveSlot(link_element->slotOffset,&temp_addr);
                   }
                   outcome=E_SUCCESS; 
                }

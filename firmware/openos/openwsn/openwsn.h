@@ -259,10 +259,6 @@ typedef uint16_t  errorparameter_t;
 typedef uint16_t  dagrank_t;
 typedef uint8_t   owerror_t;
 
-#ifndef bool
-#define bool uint8_t
-#endif
-
 BEGIN_PACK
 typedef struct {
    uint8_t  byte4;

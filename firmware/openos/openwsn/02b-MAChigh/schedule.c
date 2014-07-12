@@ -368,7 +368,7 @@ owerror_t   schedule_removeActiveSlot(slotOffset_t   slotOffset, open_addr_t*   
       previousSlotWalker                    = schedule_vars.currentScheduleEntry;
       
       while (1) {
-        if (previousSlotWalker->next=slotContainer){
+        if (previousSlotWalker->next==slotContainer){
             break;
          }
          previousSlotWalker                 = previousSlotWalker->next;

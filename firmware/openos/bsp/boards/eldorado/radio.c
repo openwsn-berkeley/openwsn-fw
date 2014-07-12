@@ -215,7 +215,7 @@ void radio_getReceivedFrame(uint8_t* bufRead,
                             uint8_t  maxBufLen,
                                 int* rssi,
                             uint8_t* lqi,
-                            uint8_t* crc) {
+                               bool* crc) {
    uint16_t temp;
    uint8_t len;
    uint8_t junk;

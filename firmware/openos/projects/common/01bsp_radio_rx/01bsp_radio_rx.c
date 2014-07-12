@@ -55,7 +55,7 @@ typedef struct {
    uint8_t     packet_num;
    int8_t     rxpk_rssi;
    uint8_t     rxpk_lqi;
-   uint8_t     rxpk_crc;
+   bool        rxpk_crc;
    uint8_t     uart_lastTxByte;
    uint8_t     uart_end;//flag to indicate end of tx
 } app_vars_t;

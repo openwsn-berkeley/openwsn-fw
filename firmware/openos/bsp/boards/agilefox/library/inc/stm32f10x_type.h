@@ -52,7 +52,8 @@ typedef volatile unsigned long  const vuc32;  /* Read Only */
 typedef volatile unsigned short const vuc16;  /* Read Only */
 typedef volatile unsigned char  const vuc8;   /* Read Only */
 
-typedef enum {FALSE = 0, TRUE = !FALSE} bool;
+// OpenWSN: removed this declaration, which conflicts
+//typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 
 typedef enum {RESET = 0, SET = !RESET} FlagStatus, ITStatus;
 
