@@ -18,7 +18,7 @@
 #include "IEEE802154E.h"
 //-- 02b-RES
 #include "schedule.h"
-#include "6top.h"
+#include "sixtop.h"
 #include "neighbors.h"
 //-- 03a-IPHC
 #include "openbridge.h"

@@ -1,6 +1,6 @@
 #include "openwsn.h"
 #include "processIE.h"
-#include "6top.h"
+#include "sixtop.h"
 #include "idmanager.h"
 #include "openserial.h"
 #include "IEEE802154.h"

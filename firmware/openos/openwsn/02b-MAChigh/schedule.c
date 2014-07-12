@@ -3,8 +3,7 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "packetfunctions.h"
-#include "6top.h"
-
+#include "sixtop.h"
 
 //=========================== variables =======================================
 

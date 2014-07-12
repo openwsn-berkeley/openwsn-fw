@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "6top.h"
+#include "sixtop.h"
 #include "openserial.h"
 #include "openqueue.h"
 #include "neighbors.h"
