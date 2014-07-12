@@ -12,7 +12,7 @@
 #include "debugpins.h"
 #include "leds.h"
 #include "processIE.h"
-#include "ieee802154.h"
+#include "IEEE802154.h"
 #include "idmanager.h"
 
 //=========================== variables =======================================
