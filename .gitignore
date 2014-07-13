@@ -21,5 +21,6 @@ path.txt
 /firmware/openos/projects/common/oos_openwsn.*
 /firmware/openos/bsp/boards/python/openwsnmodule_obj.c
 /firmware/openos/bsp/boards/python/openwsnmodule_obj.os
+/firmware/openos/projects/python_vs13/oos_openwsn.sdf
 *.map
 *.lst

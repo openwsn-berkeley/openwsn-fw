@@ -48,8 +48,13 @@
 #include "udpprint.h"
 //- common
 //#include "udprand.h"
+<<<<<<< HEAD
 #include "udplatency.h"
 //#include "udpstorm.h"
+=======
+//#include "udplatency.h"
+#include "udpstorm.h"
+>>>>>>> develop-master
 //- board-specific
 //#include "imu.h"
 //+++++ CoAP
@@ -59,7 +64,7 @@
 #include "rleds.h"
 #include "rwellknown.h"
 #include "r6t.h"
-#include "rrt.h"
+//#include "rrt.h"
 //#include "rex.h"
 //#include "rrube.h"
 //#include "layerdebug.h"
@@ -129,8 +134,13 @@ void openwsn_init() {
    udpprint_init();
    //- common
    //udprand_init();
+<<<<<<< HEAD
    udplatency_init();
    //udpstorm_init();
+=======
+   //udplatency_init();
+   udpstorm_init();
+>>>>>>> develop-master
    //- board-specific
    //imu_init();
    //+++++ CoAP

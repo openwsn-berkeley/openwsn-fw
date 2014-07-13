@@ -25,6 +25,7 @@ owerror_t forwarding_send_internal_RoutingTable(
    OpenQueueEntry_t*    msg,
    ipv6_header_iht*     ipv6_header,
    rpl_option_ht*       rpl_option,
+   uint32_t*             flow_label,
    uint8_t              fw_SendOrfw_Rcv
 );
 owerror_t forwarding_send_internal_SourceRouting(
@@ -36,6 +37,9 @@ void      forwarding_createRplOption(
    uint8_t              flags
 );
 
+#ifdef FLOW_LABEL_RPL_DOMAIN
+void forwarding_createFlowLabel(uint32_t* flow_label,uint8_t flags);
+#endif
 //=========================== public ==========================================
 
 /**
@@ -57,6 +61,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    rpl_option_ht        rpl_option;
    open_addr_t*         myprefix;
    open_addr_t*         myadd64;
+   uint32_t             flow_label = 0;
    
    // take ownership over the packet
    msg->owner                = COMPONENT_FORWARDING;
@@ -80,15 +85,21 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    ipv6_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
    
    // create the RPL hop-by-hop option
+
    forwarding_createRplOption(
       &rpl_option,      // rpl_option to fill in
       0x00              // flags
    );
-   
+
+#ifdef FLOW_LABEL_RPL_DOMAIN
+   forwarding_createFlowLabel(&flow_label,0x00);
+#endif
+
    return forwarding_send_internal_RoutingTable(
       msg,
       &ipv6_header,
       &rpl_option,
+      &flow_label,
       PCKTSEND
    );
 }
@@ -153,6 +164,8 @@ void forwarding_receive(
       ipv6_hopbyhop_iht*     ipv6_hop_header,
       rpl_option_ht*         rpl_option
    ) {
+   uint8_t flags;
+   uint16_t senderRank;
    
    // take ownership
    msg->owner                     = COMPONENT_FORWARDING;
@@ -220,42 +233,79 @@ void forwarding_receive(
 
       if (ipv6_header->next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
-         
-         if ((rpl_option->flags & O_FLAG)!=0){
+         //check if flow label rpl header
+    	 #ifdef FLOW_LABEL_RPL_DOMAIN             
+             flags = (uint8_t)((uint32_t)((ipv6_header->flow_label)>>16)&0xFF);
+             senderRank = (uint16_t)((uint32_t)(ipv6_header->flow_label)>>8)&0xFFFF;
+             senderRank = senderRank*MINHOPRANKINCREASE;//shift it according to HopRank Increase
+         #else
+    	     flags = rpl_option->flags;
+    	     senderRank = rpl_option->senderRank;
+    	 #endif
+
+         if ((flags & O_FLAG)!=0){
             // wrong direction
             
             // log error
+<<<<<<< HEAD
 //            openserial_printError(
 //               COMPONENT_FORWARDING,
 //               ERR_WRONG_DIRECTION,
 //               (errorparameter_t)1,
 //               (errorparameter_t)1
 //            );
+=======
+            openserial_printError(
+               COMPONENT_FORWARDING,
+               ERR_WRONG_DIRECTION,
+               (errorparameter_t)flags,
+               (errorparameter_t)senderRank
+            );
+>>>>>>> develop-master
          }
          
-         if (rpl_option->senderRank < neighbors_getMyDAGrank()){
+
+         if (senderRank < neighbors_getMyDAGrank()){
             // loop
             
             // set flag
-            rpl_option->flags |= R_FLAG;
-            
+            #ifdef FLOW_LABEL_RPL_DOMAIN
+        	    flags |= R_FLAG;
+        	    ipv6_header->flow_label|= ((uint32_t)flags<<16);
+            #else
+        	    rpl_option->flags |= R_FLAG;
+            #endif
+
             // log error
+<<<<<<< HEAD
 //            openserial_printError(
 //               COMPONENT_FORWARDING,
 //               ERR_LOOP_DETECTED,
 //               (errorparameter_t) rpl_option->senderRank,
 //               (errorparameter_t) neighbors_getMyDAGrank()
 //            );
+=======
+            openserial_printError(
+               COMPONENT_FORWARDING,
+               ERR_LOOP_DETECTED,
+               (errorparameter_t) senderRank,
+               (errorparameter_t) neighbors_getMyDAGrank()
+            );
+>>>>>>> develop-master
          }
          
+
          forwarding_createRplOption(rpl_option, rpl_option->flags);
-         
+         #ifdef FLOW_LABEL_RPL_DOMAIN
+             forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
+         #endif
          // resend as if from upper layer
          if (
                forwarding_send_internal_RoutingTable(
                   msg,
                   ipv6_header,
                   rpl_option,
+                  &(ipv6_header->flow_label),
                   PCKTFORWARD
                )==E_FAIL
             ) {
@@ -320,6 +370,7 @@ owerror_t forwarding_send_internal_RoutingTable(
       OpenQueueEntry_t*      msg,
       ipv6_header_iht*       ipv6_header,
       rpl_option_ht*         rpl_option,
+      uint32_t*              flow_label,
       uint8_t                fw_SendOrfw_Rcv
    ) {
    
@@ -340,6 +391,7 @@ owerror_t forwarding_send_internal_RoutingTable(
       msg,
       ipv6_header,
       rpl_option,
+      flow_label,
       fw_SendOrfw_Rcv
    );
 }
@@ -561,6 +613,7 @@ owerror_t forwarding_send_internal_SourceRouting(
       msg,
       ipv6_header,
       &rpl_option,
+      &ipv6_header->flow_label,
       PCKTFORWARD
    );
 }
@@ -585,3 +638,15 @@ void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
    rpl_option->rplInstanceID      = icmpv6rpl_getRPLIntanceID();
    rpl_option->senderRank         = neighbors_getMyDAGrank();
 }
+
+#ifdef FLOW_LABEL_RPL_DOMAIN
+void forwarding_createFlowLabel(uint32_t* flow_label,uint8_t flags){
+     uint8_t instanceId,flrank;
+     uint16_t rank;
+
+     instanceId=icmpv6rpl_getRPLIntanceID();
+     rank=neighbors_getMyDAGrank();
+     flrank=(uint8_t)(rank/MINHOPRANKINCREASE);
+     *flow_label = (uint32_t)instanceId | ((uint32_t)flrank<<8) | (uint32_t)flags<<16;
+}
+#endif
