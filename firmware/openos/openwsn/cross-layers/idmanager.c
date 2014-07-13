@@ -26,9 +26,6 @@ void idmanager_init() {
 
    eui64_get(idmanager_vars.my64bID.addr_64b);
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
-   
-   if(idmanager_vars.my16bID.addr_16b[1] == 0x01)
-     idmanager_setIsDAGroot(TRUE);
 }
 
 bool idmanager_getIsDAGroot() {
