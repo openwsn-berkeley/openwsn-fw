@@ -108,7 +108,7 @@ owerror_t iphc_sendFromForwarding(
         if (fw_SendOrfw_Rcv==PCKTFORWARD){
             sam = IPHC_SAM_64B;    //case forwarding a packet
             p_src = &temp_src_mac64b;
-            //poipoi xv forcing elided addresses on src routing, this needs to be fixed so any type of address should be supported supported.
+            //poipoi xv forcing elided addresses on src routing, this needs to be fixed so any type of address should be supported.
         } else if (fw_SendOrfw_Rcv==PCKTSEND){
             sam = IPHC_SAM_ELIDED;
             p_src = NULL;
@@ -164,8 +164,8 @@ owerror_t iphc_sendFromForwarding(
    //then regular header
 
 #ifdef FLOW_LABEL_RPL_DOMAIN
-   if(fw_SendOrfw_Rcv==PCKTSEND  && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE)   {
-	   //only for upstream traffic
+   if(ipv6_header->next_header!=IANA_IPv6ROUTE  && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE)   {
+	   //only for upstream traffic and not DIOs
 	   tf=IPHC_TF_3B;
    }else {
 	   tf=IPHC_TF_ELIDED;
@@ -780,7 +780,7 @@ void iphc_retrieveIPv6HopByHopHeader(
       rpl_option_ht*         rpl_option
    ){
    uint8_t temp_8b;
-   
+#ifndef FLOW_LABEL_RPL_DOMAIN
    // initialize the header length (will increment at each field)
    hopbyhop_header->headerlen     = 0;
    
@@ -844,4 +844,5 @@ void iphc_retrieveIPv6HopByHopHeader(
          );
       }
    }
+#endif
 }
