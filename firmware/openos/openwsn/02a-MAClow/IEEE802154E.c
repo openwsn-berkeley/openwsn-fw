@@ -842,7 +842,7 @@ port_INLINE void activity_ti1ORri1() {
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
-            if (celltype==CELLTYPE_ADV) { // I will be sending an ADV
+            if (cellType==CELLTYPE_ADV) { // I will be sending an ADV
 			   //copy synch IE  -- should be Little endian???
 			   // fill in the ASN field of the ADV
 			   ieee154e_getAsn(syn_IE.asn);
