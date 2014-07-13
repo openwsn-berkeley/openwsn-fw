@@ -55,11 +55,6 @@ typedef struct {
    uint8_t              MacMgtTaskCounter;    // counter to determine what management task to do
    opentimer_id_t       timerId;
    uint16_t             kaPeriod;             // period of sending KA
-   bool                 busySending;     // TRUE when busy sending an reservation command
-   opentimer_id_t       timerId_sixtop;           // this timer is used to simulate uplayer's requirement for new links
-   uint16_t             period_sixtop;
-   bool                 addORremove;     // when FALSE, add one link, when TRUE, remove one link.
-   open_addr_t          sixtop_NeighborAddr;
    sixtop_state_t       State;
    uint8_t              commandID;
    uint8_t              button_event; //when requestOrRemoveLink%3 is 0 or 1, call uResLinkRequest; when the value is 2, call uResRemoveLink.

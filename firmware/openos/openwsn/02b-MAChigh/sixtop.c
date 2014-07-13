@@ -26,7 +26,6 @@ owerror_t     sixtop_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint
 void          sendAdv(void);
 void          sendKa(void);
 void          sixtop_timer_cb(void);
-void          sixtop_debug_timer_cb(void);
 bool          sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE);
 void          sixtop_linkResponse(
    bool                                success,
@@ -87,8 +86,6 @@ void          sixtop_removeLinksFromSchedule(
    open_addr_t* previousHop
 );
 
-void          timers_sixtop_debug_fired();
-
 //=========================== public ==========================================
 
 void sixtop_init() {
@@ -105,14 +102,6 @@ void sixtop_init() {
       TIMER_PERIODIC,
       TIME_MS,
       sixtop_timer_cb
-   );
-   
-   sixtop_vars.period_sixtop = SIXTOP_PERIOD;
-   sixtop_vars.timerId_sixtop = opentimers_start(
-      sixtop_vars.period_sixtop,
-      TIMER_PERIODIC,
-      TIME_MS,
-      sixtop_debug_timer_cb
    );
 }
 
@@ -1024,42 +1013,6 @@ port_INLINE void sendKa() {
 void sixtop_timer_cb() {
    scheduler_push_task(timers_sixtop_fired,TASKPRIO_SIXTOP);
 }
-
-void sixtop_debug_timer_cb() {
-  scheduler_push_task(timers_sixtop_debug_fired,TASKPRIO_SIXTOP_DEBUG);
-}
-
-//=========================== task ============================================
-
-/**
-\brief this function is going to schedule or remove one link.
-*/
-void timers_sixtop_debug_fired() {
-  open_addr_t*  sixtopNeighAddr;
-  if(ieee154e_isSynch()==FALSE) {
-    return;
-  }
-  
-  if(idmanager_getIsDAGroot() == TRUE){
-    return;
-  }
-  
-  if(sixtop_vars.addORremove == TRUE) {
-    leds_debug_on();
-    sixtop_vars.addORremove = FALSE;
-    // I'm going to require to remove one link
-    sixtopNeighAddr = neighbors_sixtopNeighbor();
-    sixtop_removeLinkRequest(sixtopNeighAddr);
-  } else {
-    leds_debug_on();
-    sixtop_vars.addORremove = TRUE;
-    // I'm going to require to add one link
-    sixtopNeighAddr = neighbors_sixtopNeighbor();
-    sixtop_linkRequest(sixtopNeighAddr,1);
-  }
-  
-}
-
 //========================== private =========================================
 
 //event
