@@ -134,13 +134,10 @@ void openwsn_init() {
    udpprint_init();
    //- common
    //udprand_init();
-<<<<<<< HEAD
    udplatency_init();
    //udpstorm_init();
-=======
    //udplatency_init();
    udpstorm_init();
->>>>>>> develop-master
    //- board-specific
    //imu_init();
    //+++++ CoAP
