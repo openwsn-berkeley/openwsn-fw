@@ -247,21 +247,21 @@ void forwarding_receive(
             // wrong direction
             
             // log error
-<<<<<<< HEAD
+
 //            openserial_printError(
 //               COMPONENT_FORWARDING,
 //               ERR_WRONG_DIRECTION,
 //               (errorparameter_t)1,
 //               (errorparameter_t)1
 //            );
-=======
+
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_WRONG_DIRECTION,
                (errorparameter_t)flags,
                (errorparameter_t)senderRank
             );
->>>>>>> develop-master
+
          }
          
 
@@ -277,21 +277,18 @@ void forwarding_receive(
             #endif
 
             // log error
-<<<<<<< HEAD
 //            openserial_printError(
 //               COMPONENT_FORWARDING,
 //               ERR_LOOP_DETECTED,
 //               (errorparameter_t) rpl_option->senderRank,
 //               (errorparameter_t) neighbors_getMyDAGrank()
 //            );
-=======
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_LOOP_DETECTED,
                (errorparameter_t) senderRank,
                (errorparameter_t) neighbors_getMyDAGrank()
             );
->>>>>>> develop-master
          }
          
 

@@ -48,13 +48,10 @@
 #include "udpprint.h"
 //- common
 //#include "udprand.h"
-<<<<<<< HEAD
 #include "udplatency.h"
 //#include "udpstorm.h"
-=======
 //#include "udplatency.h"
 #include "udpstorm.h"
->>>>>>> develop-master
 //- board-specific
 //#include "imu.h"
 //+++++ CoAP

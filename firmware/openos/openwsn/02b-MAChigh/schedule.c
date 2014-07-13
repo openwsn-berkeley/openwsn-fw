@@ -264,9 +264,9 @@ owerror_t schedule_addActiveSlot(
    if (slotContainer>&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
       // schedule has overflown
       outcome=E_FAIL;
-      openserial_printCritical(COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printCritical(COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       
       
    }
