@@ -9,7 +9,6 @@
 */
 
 #include "openwsn.h"
-#include "processIE.h"
 
 //=========================== define ==========================================
 
@@ -165,11 +164,6 @@ void               schedule_getSlotInfo(slotOffset_t   slotOffset,
 owerror_t          schedule_removeActiveSlot(slotOffset_t   slotOffset,                      
                               open_addr_t*   neighbor);
 
-bool               schedule_availableCells(uint8_t frameID, 
-                                           uint8_t numOfCells, 
-                                           sixtop_linkInfo_subIE_t* linklist, 
-                                           uint8_t bandwidth);
-
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
@@ -187,14 +181,6 @@ void               schedule_indicateTx(
                         bool      succesfullTx
                    );
 void               schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist);
-
-// from reservation
-uint8_t         schedule_getNumSlotframe();
-void            schedule_uResGenerateCandidataLinkList(uint8_t* type,uint8_t* frameID,uint8_t* flag,sixtop_linkInfo_subIE_t* linklist);
-void            schedule_uResGenerateRemoveLinkList(uint8_t* type,uint8_t* frameID,uint8_t* flag,sixtop_linkInfo_subIE_t* linklist);
-void            schedule_addLinksToSchedule(uint8_t slotframeID,uint8_t numOfLinks,sixtop_linkInfo_subIE_t* linklist,open_addr_t* previousHop,uint8_t state);
-void            schedule_removeLinksFromSchedule(uint8_t slotframeID,uint8_t numOfLink,sixtop_linkInfo_subIE_t* linklist,open_addr_t* previousHop,uint8_t state);
-scheduleEntry_t* schedule_getScheduleEntry(uint16_t slotOffset);
 
 /**
 \}
