@@ -2207,6 +2207,12 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\sixtop.h</name>
       </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.h</name>
+      </file>
     </group>
     <group>
       <name>03a-IPHC</name>
