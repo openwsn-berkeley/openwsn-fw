@@ -1607,7 +1607,7 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    
    // cancel rt8
    radiotimer_cancel();
-   
+  
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
    

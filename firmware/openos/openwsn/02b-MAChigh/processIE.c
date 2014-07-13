@@ -335,22 +335,22 @@ port_INLINE void processIE_retrieveSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,
   scheduleInfo->flag = temp8b & 0xFE ? TRUE : FALSE;
   localptr++;
   
-  if(scheduleInfo->length > MAXSCHEDULEDCELLS) {
+  if(scheduleInfo->numberOfcells > MAXSCHEDULEDCELLS) {
     //log error
     return;
   }
   
-  for (i=0;i<scheduleInfo->length;i++){
+  for (i=0;i<scheduleInfo->numberOfcells;i++){
     //for each cell 5Bytes
      //TimeSlot 2B
-     scheduleInfo->linklist[i].tsNum = *((uint8_t*)(pkt->payload)+localptr);
+     scheduleInfo->linklist[i].tsNum = (*((uint8_t*)(pkt->payload)+localptr))<<8;
      localptr++;
-     scheduleInfo->linklist[i].tsNum  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+     scheduleInfo->linklist[i].tsNum  |= *((uint8_t*)(pkt->payload)+localptr);
      localptr++;
      //Ch.Offset 2B
-     scheduleInfo->linklist[i].choffset = *((uint8_t*)(pkt->payload)+localptr);
+     scheduleInfo->linklist[i].choffset = (*((uint8_t*)(pkt->payload)+localptr))<<8;
      localptr++;
-     scheduleInfo->linklist[i].choffset  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+     scheduleInfo->linklist[i].choffset  |= *((uint8_t*)(pkt->payload)+localptr);
      localptr++;
      //LinkOption bitmap 1B
      scheduleInfo->linklist[i].linkoptions = *((uint8_t*)(pkt->payload)+localptr);
