@@ -553,9 +553,10 @@ void sixtop_uResGenerateRemoveLinkList(uint8_t* type,uint8_t* frameID,uint8_t* f
 }
 
 void sixtop_addLinksToSchedule(uint8_t slotframeID,uint8_t numOfLinks,sixtop_linkInfo_subIE_t* linklist,open_addr_t* previousHop,uint8_t state){
+  uint8_t i;
   //set schedule according links
   open_addr_t temp_neighbor;
-  for(uint8_t i = 0;i<numOfLinks;i++)
+  for(i = 0;i<numOfLinks;i++)
   {
       //only schedule when the request side wants to schedule a tx cell
       if(linklist[i].linkoptions == CELLTYPE_TX)

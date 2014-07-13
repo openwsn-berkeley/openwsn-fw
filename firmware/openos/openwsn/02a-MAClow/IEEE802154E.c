@@ -1418,7 +1418,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
           ieee802514_header.frameType==IEEE154_TYPE_BEACON && // if it is not a beacon and have ie, the ie will be processed in sixtop
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
           ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
-          //log  that the packet is not carrying IEsx
+          //log  that the packet is not carrying IEs
       }
       
       // toss the IEs including Synch
