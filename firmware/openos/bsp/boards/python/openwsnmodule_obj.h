@@ -17,6 +17,7 @@
 #include "IEEE802154E_obj.h"
 #include "adaptive_sync_obj.h"
 #include "neighbors_obj.h"
+#include "processIE_obj.h"
 #include "sixtop_obj.h"
 #include "schedule_obj.h"
 #include "icmpv6echo_obj.h"

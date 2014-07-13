@@ -699,52 +699,6 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
   return TRUE;
 }
 
-port_INLINE void ieee154e_processSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr){
- uint8_t numSlotFrames,i,j,localptr;
- sixtop_slotframelink_subIE_t sfInfo; 
- sixtop_linkInfo_subIE_t linkInfo;
- localptr=*ptr; 
-  // number of slot frames 1B
-  numSlotFrames = *((uint8_t*)(pkt->payload)+localptr);
-  localptr++;
-  // for each slotframe
-  i=0;
-  while(i < numSlotFrames){
-   //1-slotftramehandle 1B
-    sfInfo.slotframehandle=*((uint8_t*)(pkt->payload)+localptr);
-    localptr++;
-    //2-slotframe size 2B
-    sfInfo.slotframesize = *((uint8_t*)(pkt->payload)+localptr);
-    localptr++;
-    sfInfo.slotframesize |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
-    localptr++;;
-    //3-number of links 1B   
-    sfInfo.numlinks= *((uint8_t*)(pkt->payload)+localptr);
-    localptr++;
-   
-    for (j=0;j<sfInfo.numlinks;j++){
-      //for each link 5Bytes
-       //TimeSlot 2B
-       linkInfo.tsNum = *((uint8_t*)(pkt->payload)+localptr);
-       localptr++;
-       linkInfo.tsNum  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
-       localptr++;
-       //Ch.Offset 2B
-       linkInfo.choffset = *((uint8_t*)(pkt->payload)+localptr);
-       localptr++;
-       linkInfo.choffset  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
-       localptr++;
-       //LinkOption bitmap 1B
-       linkInfo.linkoptions = *((uint8_t*)(pkt->payload)+localptr);
-       localptr++;
-       //xv poipoi
-       //TODO - inform schedule of that link so it can update if needed.
-    } 
-    i++;
-  } 
-  *ptr=localptr;      
-}
-
 //======= TX
 
 port_INLINE void activity_ti1ORri1() {
