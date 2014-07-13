@@ -636,7 +636,6 @@ void sixtop_notifyReceiveLinkRequest(sixtop_bandwidth_subIE_t* bandwidth_ie, six
 
 void sixtop_notifyReceiveLinkResponse(sixtop_bandwidth_subIE_t* bandwidth_ie, sixtop_generalschedule_subIE_t* schedule_ie,open_addr_t* addr){
   uint8_t bw,numOfcells,frameID;
-  bool sucess;
   frameID = schedule_ie->frameID;
   numOfcells = schedule_ie->numberOfcells;
   bw = bandwidth_ie->numOfLinks;
@@ -650,10 +649,8 @@ void sixtop_notifyReceiveLinkResponse(sixtop_bandwidth_subIE_t* bandwidth_ie, si
     if(bw != numOfcells                                                ||
        schedule_ie->frameID != bandwidth_ie->slotframeID               ||
        schedule_availableCells(frameID, numOfcells, schedule_ie->linklist, bw) == FALSE){
-       sucess = FALSE;
     } else {
       schedule_addLinksToSchedule(frameID,bw,schedule_ie->linklist,addr,sixtop_vars.State);
-      sucess = TRUE;
     }
   }
 }
