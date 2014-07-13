@@ -111,9 +111,9 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 	keypoint = &MacKeyTable.KeyDescriptorElement[match];
 
 	if(match == 25){
-		openserial_printError(COMPONENT_RES,ERR_OK,
-							(errorparameter_t)msg->creator,
-							(errorparameter_t)400);
+//		openserial_printError(COMPONENT_RES,ERR_OK,
+//							(errorparameter_t)msg->creator,
+//							(errorparameter_t)400);
 		return;
 	}
 
@@ -642,7 +642,7 @@ uint8_t deviceDescriptorLookup(open_addr_t* Address,
 		}
 	}
 
-	return 25;
+	//return 25;
 }
 
 uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
