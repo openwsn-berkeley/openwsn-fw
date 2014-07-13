@@ -1,13 +1,12 @@
 /**
-\brief CoAP schedule manager application.
+\brief CoAP 6top application
 
-\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, Feb. 2013.
-
+\author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, February 2013.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, July 2014
 */
 
-
-#ifndef __RSCHED_H
-#define __RSCHED_H
+#ifndef __R6T_H
+#define __R6T_H
 
 /**
 \addtogroup AppCoAP
@@ -22,24 +21,20 @@
 
 //=========================== define ==========================================
 
-#define R6T_MAXRESPONSES 20 ///< maximum number of elements to be processed by a command
-
 //=========================== typedef =========================================
-
-// CRUD operations for cells
-typedef enum {
-   CREATE_LINK                           = 0,
-   READ_LINK                             = 1,
-   UPDATE_LINK                           = 2,
-   DELETE_LINK                           = 3,
-} link_command_t;
 
 // header
 BEGIN_PACK
 typedef struct {
-  link_command_t type; 
-  uint8_t numelem;//number of elements 
-} r6t_command_t;
+  uint8_t        eui64[8];
+  uint8_t        numCells;
+} r6t_add_ht;
+END_PACK
+
+BEGIN_PACK
+typedef struct {
+  uint8_t        eui64[8];
+} r6t_delete_ht;
 END_PACK
 
 //=========================== variables =======================================

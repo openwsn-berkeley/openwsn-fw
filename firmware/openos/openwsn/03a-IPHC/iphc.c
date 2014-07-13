@@ -3,7 +3,7 @@
 #include "packetfunctions.h"
 #include "idmanager.h"
 #include "openserial.h"
-#include "6top.h"
+#include "sixtop.h"
 #include "forwarding.h"
 #include "neighbors.h"
 #include "openbridge.h"
@@ -56,6 +56,7 @@ owerror_t iphc_sendFromForwarding(
       OpenQueueEntry_t* msg,
       ipv6_header_iht*  ipv6_header,
       rpl_option_ht*    rpl_option,
+      uint32_t*         flow_label,
       uint8_t           fw_SendOrfw_Rcv
    ) {
    open_addr_t  temp_dest_prefix;
@@ -68,6 +69,7 @@ owerror_t iphc_sendFromForwarding(
    uint8_t      dam;
    uint8_t      nh;
    uint8_t      next_header;
+   uint8_t      tf=IPHC_TF_ELIDED;
    //option header
   
    // take ownership over the packet
@@ -147,18 +149,32 @@ owerror_t iphc_sendFromForwarding(
    // decrement the packet's hop limit
    ipv6_header->hop_limit--;
    
-   //prepend Option hop by hop header except when src routing and dst is not 0xffff -- this is a little trick as src routing is using an option header set to 0x00
+   //prepend Option hop by hop header except when src routing and dst is not 0xffff
+   //-- this is a little trick as src routing is using an option header set to 0x00
    next_header=msg->l4_protocol;
+   #ifndef FLOW_LABEL_RPL_DOMAIN
    if (rpl_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE 
-       && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE ){
+       && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE
+       ){
       iphc_prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, rpl_option);
       //change nh to point to the newly added header
       next_header=IANA_IPv6HOPOPT;// use 0x00 as NH to indicate option header -- see rfc 2460
    }
+   #endif
    //then regular header
+
+#ifdef FLOW_LABEL_RPL_DOMAIN
+   if(fw_SendOrfw_Rcv==PCKTSEND  && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE)   {
+	   //only for upstream traffic
+	   tf=IPHC_TF_3B;
+   }else {
+	   tf=IPHC_TF_ELIDED;
+   }
+#endif
+
    if (iphc_prependIPv6Header(msg,
-            IPHC_TF_ELIDED,
-            0, // value_flowlabel is not copied
+            tf,
+            *flow_label, // value_flowlabel
             nh,
             next_header, 
             IPHC_HLIM_INLINE,
@@ -429,12 +445,12 @@ owerror_t iphc_prependIPv6Header(
    // flowlabel
    switch (tf) {
       case IPHC_TF_3B:
-         packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-         *((uint8_t*)(msg->payload)) = ((uint32_t)(value_flowLabel & 0x000000ff) >> 0);
-         packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-         *((uint8_t*)(msg->payload)) = ((uint32_t)(value_flowLabel & 0x0000ff00) >> 8);
-         packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-         *((uint8_t*)(msg->payload)) = ((uint32_t)(value_flowLabel & 0x00ff0000) >> 16);
+             packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+			 *((uint8_t*)(msg->payload)) = ((uint32_t)(value_flowLabel & 0x000000ff) >> 0);
+			 packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+			 *((uint8_t*)(msg->payload)) = ((uint32_t)(value_flowLabel & 0x0000ff00) >> 8);
+			 packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+			 *((uint8_t*)(msg->payload)) = ((uint32_t)(value_flowLabel & 0x00ff0000) >> 16);
          break;            
       case IPHC_TF_ELIDED:
          break;
@@ -522,6 +538,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
    // flowlabel
    switch (tf) {
       case IPHC_TF_3B:
+
          ipv6_header->flow_label        = 0;
          ipv6_header->flow_label       |= ((uint32_t) *((uint8_t*)(msg->payload)+ipv6_header->header_length)) << 0;
          ipv6_header->header_length    += sizeof(uint8_t);
@@ -713,7 +730,7 @@ void iphc_prependIPv6HopByHopHeader(
       uint8_t           nh,
       rpl_option_ht*    rpl_option
    ){
-   
+#ifndef FLOW_LABEL_RPL_DOMAIN
    // RPL option
    packetfunctions_reserveHeaderSize(msg,sizeof(rpl_option_ht));
    memcpy(msg->payload,rpl_option,sizeof(rpl_option_ht));
@@ -745,6 +762,7 @@ void iphc_prependIPv6HopByHopHeader(
             (errorparameter_t)nh
          );
    }
+#endif
 }
 
 /**

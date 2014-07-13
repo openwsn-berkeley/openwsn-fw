@@ -12,7 +12,7 @@
 #include "leds.h"
 #include "neighbors.h"
 #include "debugpins.h"
-#include "6top.h"
+#include "sixtop.h"
 #include "adaptive_sync.h"
 #include "processIE.h"
 
@@ -1412,10 +1412,10 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       
       // handle IEs xv poipoi
       // reset join priority 
-      // retrieve IE in 6top
+      // retrieve IE in sixtop
       if ((ieee802514_header.valid==TRUE &&
           ieee802514_header.ieListPresent==TRUE && 
-          ieee802514_header.frameType==IEEE154_TYPE_BEACON && // if it is not a beacon and have ie, the ie will be processed in 6top
+          ieee802514_header.frameType==IEEE154_TYPE_BEACON && // if it is not a beacon and have ie, the ie will be processed in sixtop
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
           ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
           //log  that the packet is not carrying IEsx

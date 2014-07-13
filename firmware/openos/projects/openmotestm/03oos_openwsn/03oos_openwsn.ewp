@@ -2184,12 +2184,6 @@
     <group>
       <name>02b-MAChigh</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\6top.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\6top.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
@@ -2206,6 +2200,18 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\sixtop.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\sixtop.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.h</name>
       </file>
     </group>
     <group>

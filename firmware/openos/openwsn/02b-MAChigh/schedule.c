@@ -3,8 +3,7 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "packetfunctions.h"
-#include "6top.h"
-
+#include "sixtop.h"
 
 //=========================== variables =======================================
 
@@ -605,15 +604,17 @@ void schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist){
    schlist[i].channelOffset=schedule_vars.scheduleBuf[i].channelOffset;
   }
 }
-
 //=========================== private =========================================
 
 bool schedule_checkExistSchedule(uint16_t slotOffset){
-   for (uint8_t i=0;i<MAXACTIVESLOTS;i++){
-      if(schedule_vars.scheduleBuf[i].slotOffset == slotOffset)
-        return TRUE;
+   uint8_t i;
+   
+   for (i=0;i<MAXACTIVESLOTS;i++){
+      if(schedule_vars.scheduleBuf[i].slotOffset == slotOffset) {
+         return TRUE;
+      }
    }
-  return FALSE;
+   return FALSE;
 }
 
 void schedule_resetEntry(scheduleEntry_t* pScheduleEntry) {
