@@ -180,6 +180,7 @@ enum {
    COMPONENT_R6T                       = 0x32,
    COMPONENT_SWARMBAND                 = 0x33,
    COMPONENT_RRT                       = 0x34,
+   COMPONENT_RES		       = 0X35,
 };
 
 /**
