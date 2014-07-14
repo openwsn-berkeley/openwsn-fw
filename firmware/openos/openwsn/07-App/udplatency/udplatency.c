@@ -53,9 +53,9 @@ void udplatency_task() {
    // prepare packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPLATENCY);
    if (pkt==NULL) {
-      openserial_printError(COMPONENT_UDPLATENCY,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_UDPLATENCY,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       return;
    }
    pkt->creator                     = COMPONENT_UDPLATENCY;
@@ -66,6 +66,22 @@ void udplatency_task() {
    pkt->l3_destinationAdd.type      = ADDR_128B;
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_motedata,16);
    
+   //START OF TELEMATICS CODE
+//   pkt->l2_security = TRUE;
+//   pkt->l2_securityLevel = 5;
+//   pkt->l2_keyIdMode = 3;
+//   neighbors_getPreferredParentEui64(&(pkt->l2_keySource));
+//   pkt->l2_keyIndex = 1;
+
+   	   //VARIABLE PAYLOAD TEST
+//   uint8_t payloadLength,i;
+//   payloadLength = 5;
+//   packetfunctions_reserveHeaderSize(pkt, payloadLength*sizeof(uint8_t));
+//   for(i=0; i<payloadLength;i++){
+//   pkt->payload[i] = i*2;
+//  }
+   //END OF TELEMATICS CODE
+
    // the payload contains the 64bit address of the sender + the ASN
    packetfunctions_reserveHeaderSize(pkt, sizeof(asn_t));
    ieee154e_getAsn(pkt->payload);//gets asn from mac layer.
@@ -122,9 +138,9 @@ void udplatency_timer() {
 void udplatency_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_UDPLATENCY;
    if (msg->creator!=COMPONENT_UDPLATENCY) {
-      openserial_printError(COMPONENT_UDPLATENCY,ERR_UNEXPECTED_SENDDONE,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_UDPLATENCY,ERR_UNEXPECTED_SENDDONE,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
    }
    openqueue_freePacketBuffer(msg);
 }

@@ -48,6 +48,8 @@
 #include "udpprint.h"
 //- common
 //#include "udprand.h"
+#include "udplatency.h"
+//#include "udpstorm.h"
 //#include "udplatency.h"
 #include "udpstorm.h"
 //- board-specific
@@ -96,6 +98,9 @@ void openwsn_init() {
    //-- 02b-RES
    schedule_init();
    res_init();
+   //START OF TELEMATICS CODE
+   security_init();
+   //END OF TELEMATICS CODE
    neighbors_init();
    //-- 03a-IPHC
    openbridge_init();
@@ -126,6 +131,8 @@ void openwsn_init() {
    udpprint_init();
    //- common
    //udprand_init();
+   udplatency_init();
+   //udpstorm_init();
    //udplatency_init();
    udpstorm_init();
    //- board-specific

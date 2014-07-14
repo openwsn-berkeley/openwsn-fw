@@ -18,7 +18,7 @@ Note that we are writing the field from the end of the header to the beginning.
 
 \param[in,out] msg              The message to append the header to.
 \param[in]     frameType        Type of IEEE802.15.4 frame.
-\param[in]     ielistpresent    Is the IE list present¿
+\param[in]     ielistpresent    Is the IE list presentï¿½
 \param[in]     frameVersion     IEEE802.15.4 frame version.
 \param[in]     securityEnabled  Is security enabled on this frame?
 \param[in]     sequenceNumber   Sequence number of this frame.
@@ -239,6 +239,24 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    }
    // if you reach this, the header is valid
    ieee802514_header->valid=TRUE;
+
+   //START OF TELEMATICS CODE
+
+      if(ieee802514_header->securityEnabled == TRUE){
+   	   msg->l2_security = TRUE;
+
+   	  }else{
+   	   msg->l2_security = FALSE;
+   	 }
+
+      //if the security is enabled, i can retrieve the Auxiliary Security Header
+      if(ieee802514_header->securityEnabled == TRUE){
+      retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
+     }
+
+
+      //END OF TELEMATICS CODE
+
 }
 
 //=========================== private =========================================

@@ -98,44 +98,44 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_schedule() {
-   debugScheduleEntry_t temp;
-   
-   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
-   
-   temp.row                            = schedule_vars.debugPrintRow;
-   temp.slotOffset                     = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
-   temp.type                           = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
-   temp.shared                         = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
-   temp.channelOffset                  = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
-   memcpy(
-      &temp.neighbor,
-      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
-      sizeof(open_addr_t)
-   );
-   temp.numRx                          = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
-   temp.numTx                          = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
-   temp.numTxACK                       = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
-   memcpy(
-      &temp.lastUsedAsn,
-      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
-      sizeof(asn_t)
-   );
-   
-   openserial_printStatus(STATUS_SCHEDULE,
-         (uint8_t*)&temp,
-         sizeof(debugScheduleEntry_t)
-   );
-   
-   return TRUE;
-}
+//bool debugPrint_schedule() {
+//   debugScheduleEntry_t temp;
+//
+//   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
+//
+//   temp.row                            = schedule_vars.debugPrintRow;
+//   temp.slotOffset                     = \
+//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
+//   temp.type                           = \
+//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
+//   temp.shared                         = \
+//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
+//   temp.channelOffset                  = \
+//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+//   memcpy(
+//      &temp.neighbor,
+//      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
+//      sizeof(open_addr_t)
+//   );
+//   temp.numRx                          = \
+//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
+//   temp.numTx                          = \
+//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
+//   temp.numTxACK                       = \
+//      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+//   memcpy(
+//      &temp.lastUsedAsn,
+//      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
+//      sizeof(asn_t)
+//   );
+//
+//   openserial_printStatus(STATUS_SCHEDULE,
+//         (uint8_t*)&temp,
+//         sizeof(debugScheduleEntry_t)
+//   );
+//
+//   return TRUE;
+//}
 
 /**
 \brief Trigger this module to print status information, over serial.
@@ -145,15 +145,15 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_backoff() {
-   uint8_t temp[2];
-   temp[0] = schedule_vars.backoffExponent;
-   temp[1] = schedule_vars.backoff;
-   openserial_printStatus(STATUS_BACKOFF,
-         (uint8_t*)&temp,
-         sizeof(temp));
-   return TRUE;
-}
+//bool debugPrint_backoff() {
+//   uint8_t temp[2];
+//   temp[0] = schedule_vars.backoffExponent;
+//   temp[1] = schedule_vars.backoff;
+//   openserial_printStatus(STATUS_BACKOFF,
+//         (uint8_t*)&temp,
+//         sizeof(temp));
+//   return TRUE;
+//}
 
 //=== from uRES (writing the schedule)
 
@@ -264,9 +264,9 @@ owerror_t schedule_addActiveSlot(
    if (slotContainer>&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
       // schedule has overflown
       outcome=E_FAIL;
-      openserial_printCritical(COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printCritical(COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       
       
    }

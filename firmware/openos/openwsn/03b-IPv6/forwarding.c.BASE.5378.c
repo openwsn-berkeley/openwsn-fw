@@ -25,7 +25,6 @@ owerror_t forwarding_send_internal_RoutingTable(
    OpenQueueEntry_t*    msg,
    ipv6_header_iht*     ipv6_header,
    rpl_option_ht*       rpl_option,
-   uint32_t*             flow_label,
    uint8_t              fw_SendOrfw_Rcv
 );
 owerror_t forwarding_send_internal_SourceRouting(
@@ -37,9 +36,6 @@ void      forwarding_createRplOption(
    uint8_t              flags
 );
 
-#ifdef FLOW_LABEL_RPL_DOMAIN
-void forwarding_createFlowLabel(uint32_t* flow_label,uint8_t flags);
-#endif
 //=========================== public ==========================================
 
 /**
@@ -61,7 +57,6 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    rpl_option_ht        rpl_option;
    open_addr_t*         myprefix;
    open_addr_t*         myadd64;
-   uint32_t             flow_label = 0;
    
    // take ownership over the packet
    msg->owner                = COMPONENT_FORWARDING;
@@ -85,21 +80,15 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    ipv6_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
    
    // create the RPL hop-by-hop option
-
    forwarding_createRplOption(
       &rpl_option,      // rpl_option to fill in
       0x00              // flags
    );
-
-#ifdef FLOW_LABEL_RPL_DOMAIN
-   forwarding_createFlowLabel(&flow_label,0x00);
-#endif
-
+   
    return forwarding_send_internal_RoutingTable(
       msg,
       &ipv6_header,
       &rpl_option,
-      &flow_label,
       PCKTSEND
    );
 }
@@ -137,12 +126,12 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          default:
             
             // log error
-//            openserial_printCritical(
-//               COMPONENT_FORWARDING,
-//               ERR_WRONG_TRAN_PROTOCOL,
-//               (errorparameter_t)msg->l4_protocol,
-//               (errorparameter_t)0
-//            );
+            openserial_printCritical(
+               COMPONENT_FORWARDING,
+               ERR_WRONG_TRAN_PROTOCOL,
+               (errorparameter_t)msg->l4_protocol,
+               (errorparameter_t)0
+            );
             
             // free packet
             openqueue_freePacketBuffer(msg);
@@ -164,8 +153,6 @@ void forwarding_receive(
       ipv6_hopbyhop_iht*     ipv6_hop_header,
       rpl_option_ht*         rpl_option
    ) {
-   uint8_t flags;
-   uint16_t senderRank;
    
    // take ownership
    msg->owner                     = COMPONENT_FORWARDING;
@@ -212,11 +199,11 @@ void forwarding_receive(
          default:
             
             // log error
-//            openserial_printError(
-//               COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
-//               (errorparameter_t)msg->l4_protocol,
-//               (errorparameter_t)1
-//            );
+            openserial_printError(
+               COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
+               (errorparameter_t)msg->l4_protocol,
+               (errorparameter_t)1
+            );
             
             // free packet
             openqueue_freePacketBuffer(msg);
@@ -227,84 +214,45 @@ void forwarding_receive(
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
       
-      //START OF TELEMATICS CODE
-      msg->l2_keySource = *(idmanager_getMyID(ADDR_64B));
-      //END OF TELEMATICS CODE
-
       if (ipv6_header->next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
-         //check if flow label rpl header
-    	 #ifdef FLOW_LABEL_RPL_DOMAIN             
-             flags = (uint8_t)((uint32_t)((ipv6_header->flow_label)>>16)&0xFF);
-             senderRank = (uint16_t)((uint32_t)(ipv6_header->flow_label)>>8)&0xFFFF;
-             senderRank = senderRank*MINHOPRANKINCREASE;//shift it according to HopRank Increase
-         #else
-    	     flags = rpl_option->flags;
-    	     senderRank = rpl_option->senderRank;
-    	 #endif
-
-         if ((flags & O_FLAG)!=0){
+         
+         if ((rpl_option->flags & O_FLAG)!=0){
             // wrong direction
             
             // log error
-
-//            openserial_printError(
-//               COMPONENT_FORWARDING,
-//               ERR_WRONG_DIRECTION,
-//               (errorparameter_t)1,
-//               (errorparameter_t)1
-//            );
-
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_WRONG_DIRECTION,
-               (errorparameter_t)flags,
-               (errorparameter_t)senderRank
+               (errorparameter_t)1,
+               (errorparameter_t)1
             );
-
          }
          
-
-         if (senderRank < neighbors_getMyDAGrank()){
+         if (rpl_option->senderRank < neighbors_getMyDAGrank()){
             // loop
             
             // set flag
-            #ifdef FLOW_LABEL_RPL_DOMAIN
-        	    flags |= R_FLAG;
-        	    ipv6_header->flow_label|= ((uint32_t)flags<<16);
-            #else
-        	    rpl_option->flags |= R_FLAG;
-            #endif
-
+            rpl_option->flags |= R_FLAG;
+            
             // log error
-//            openserial_printError(
-//               COMPONENT_FORWARDING,
-//               ERR_LOOP_DETECTED,
-//               (errorparameter_t) rpl_option->senderRank,
-//               (errorparameter_t) neighbors_getMyDAGrank()
-//            );
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_LOOP_DETECTED,
-               (errorparameter_t) senderRank,
+               (errorparameter_t) rpl_option->senderRank,
                (errorparameter_t) neighbors_getMyDAGrank()
             );
          }
          
-
          forwarding_createRplOption(rpl_option, rpl_option->flags);
-         #ifdef FLOW_LABEL_RPL_DOMAIN
-         // do not recreate flow label, relay the same but adding current flags
-         //forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
-         #endif
+         
          // resend as if from upper layer
          if (
                forwarding_send_internal_RoutingTable(
                   msg,
                   ipv6_header,
                   rpl_option,
-                  &(ipv6_header->flow_label),
-                  PCKTFORWARD 
+                  PCKTFORWARD
                )==E_FAIL
             ) {
             openqueue_freePacketBuffer(msg);
@@ -317,12 +265,12 @@ void forwarding_receive(
             // already freed by send_internal
             
             // log error
-//            openserial_printError(
-//               COMPONENT_FORWARDING,
-//               ERR_INVALID_FWDMODE,
-//               (errorparameter_t)0,
-//               (errorparameter_t)0
-//            );
+            openserial_printError(
+               COMPONENT_FORWARDING,
+               ERR_INVALID_FWDMODE,
+               (errorparameter_t)0,
+               (errorparameter_t)0
+            );
          }
       }
    }
@@ -368,19 +316,18 @@ owerror_t forwarding_send_internal_RoutingTable(
       OpenQueueEntry_t*      msg,
       ipv6_header_iht*       ipv6_header,
       rpl_option_ht*         rpl_option,
-      uint32_t*              flow_label,
       uint8_t                fw_SendOrfw_Rcv
    ) {
    
    // retrieve the next hop from the routing table
    forwarding_getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
    if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
-//      openserial_printError(
-//         COMPONENT_FORWARDING,
-//         ERR_NO_NEXTHOP,
-//         (errorparameter_t)0,
-//         (errorparameter_t)0
-//      );
+      openserial_printError(
+         COMPONENT_FORWARDING,
+         ERR_NO_NEXTHOP,
+         (errorparameter_t)0,
+         (errorparameter_t)0
+      );
       return E_FAIL;
    }
    
@@ -389,7 +336,6 @@ owerror_t forwarding_send_internal_RoutingTable(
       msg,
       ipv6_header,
       rpl_option,
-      flow_label,
       fw_SendOrfw_Rcv
    );
 }
@@ -471,12 +417,12 @@ owerror_t forwarding_send_internal_SourceRouting(
             icmpv6_receive(msg);
             break;
          default:
-//            openserial_printError(
-//               COMPONENT_FORWARDING,
-//               ERR_WRONG_TRAN_PROTOCOL,
-//               (errorparameter_t)msg->l4_protocol,
-//               (errorparameter_t)1
-//            );
+            openserial_printError(
+               COMPONENT_FORWARDING,
+               ERR_WRONG_TRAN_PROTOCOL,
+               (errorparameter_t)msg->l4_protocol,
+               (errorparameter_t)1
+            );
             //not sure that this is correct as iphc will free it?
             openqueue_freePacketBuffer(msg);
             return E_FAIL;
@@ -493,12 +439,12 @@ owerror_t forwarding_send_internal_SourceRouting(
          
          // TODO: send ICMPv6 packet (code 0) to originator
          
-//         openserial_printError(
-//            COMPONENT_FORWARDING,
-//            ERR_NO_NEXTHOP,
-//            (errorparameter_t)0,
-//            (errorparameter_t)0
-//         );
+         openserial_printError(
+            COMPONENT_FORWARDING,
+            ERR_NO_NEXTHOP,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+         );
          openqueue_freePacketBuffer(msg);
          return E_FAIL;
       
@@ -594,12 +540,12 @@ owerror_t forwarding_send_internal_SourceRouting(
             default:
                // any other value is not supported by now
                
-//               openserial_printError(
-//                  COMPONENT_FORWARDING,
-//                  ERR_INVALID_PARAM,
-//                  (errorparameter_t)1,
-//                  (errorparameter_t)0
-//               );
+               openserial_printError(
+                  COMPONENT_FORWARDING,
+                  ERR_INVALID_PARAM,
+                  (errorparameter_t)1,
+                  (errorparameter_t)0
+               );
                openqueue_freePacketBuffer(msg);
                return E_FAIL;
          }
@@ -611,7 +557,6 @@ owerror_t forwarding_send_internal_SourceRouting(
       msg,
       ipv6_header,
       &rpl_option,
-      &ipv6_header->flow_label,
       PCKTFORWARD
    );
 }
@@ -636,15 +581,3 @@ void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
    rpl_option->rplInstanceID      = icmpv6rpl_getRPLIntanceID();
    rpl_option->senderRank         = neighbors_getMyDAGrank();
 }
-
-#ifdef FLOW_LABEL_RPL_DOMAIN
-void forwarding_createFlowLabel(uint32_t* flow_label,uint8_t flags){
-     uint8_t instanceId,flrank;
-     uint16_t rank;
-
-     instanceId=icmpv6rpl_getRPLIntanceID();
-     rank=neighbors_getMyDAGrank();
-     flrank=(uint8_t)(rank/MINHOPRANKINCREASE);
-     *flow_label = (uint32_t)instanceId | ((uint32_t)flrank<<8) | (uint32_t)flags<<16;
-}
-#endif

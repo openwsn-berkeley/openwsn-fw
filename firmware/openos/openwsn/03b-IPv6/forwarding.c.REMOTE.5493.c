@@ -137,12 +137,12 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          default:
             
             // log error
-//            openserial_printCritical(
-//               COMPONENT_FORWARDING,
-//               ERR_WRONG_TRAN_PROTOCOL,
-//               (errorparameter_t)msg->l4_protocol,
-//               (errorparameter_t)0
-//            );
+            openserial_printCritical(
+               COMPONENT_FORWARDING,
+               ERR_WRONG_TRAN_PROTOCOL,
+               (errorparameter_t)msg->l4_protocol,
+               (errorparameter_t)0
+            );
             
             // free packet
             openqueue_freePacketBuffer(msg);
@@ -212,11 +212,11 @@ void forwarding_receive(
          default:
             
             // log error
-//            openserial_printError(
-//               COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
-//               (errorparameter_t)msg->l4_protocol,
-//               (errorparameter_t)1
-//            );
+            openserial_printError(
+               COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
+               (errorparameter_t)msg->l4_protocol,
+               (errorparameter_t)1
+            );
             
             // free packet
             openqueue_freePacketBuffer(msg);
@@ -227,10 +227,6 @@ void forwarding_receive(
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
       
-      //START OF TELEMATICS CODE
-      msg->l2_keySource = *(idmanager_getMyID(ADDR_64B));
-      //END OF TELEMATICS CODE
-
       if (ipv6_header->next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
          //check if flow label rpl header
@@ -247,21 +243,12 @@ void forwarding_receive(
             // wrong direction
             
             // log error
-
-//            openserial_printError(
-//               COMPONENT_FORWARDING,
-//               ERR_WRONG_DIRECTION,
-//               (errorparameter_t)1,
-//               (errorparameter_t)1
-//            );
-
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_WRONG_DIRECTION,
                (errorparameter_t)flags,
                (errorparameter_t)senderRank
             );
-
          }
          
 
@@ -277,12 +264,6 @@ void forwarding_receive(
             #endif
 
             // log error
-//            openserial_printError(
-//               COMPONENT_FORWARDING,
-//               ERR_LOOP_DETECTED,
-//               (errorparameter_t) rpl_option->senderRank,
-//               (errorparameter_t) neighbors_getMyDAGrank()
-//            );
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_LOOP_DETECTED,
@@ -294,8 +275,7 @@ void forwarding_receive(
 
          forwarding_createRplOption(rpl_option, rpl_option->flags);
          #ifdef FLOW_LABEL_RPL_DOMAIN
-         // do not recreate flow label, relay the same but adding current flags
-         //forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
+             forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
          #endif
          // resend as if from upper layer
          if (
@@ -304,7 +284,7 @@ void forwarding_receive(
                   ipv6_header,
                   rpl_option,
                   &(ipv6_header->flow_label),
-                  PCKTFORWARD 
+                  PCKTFORWARD
                )==E_FAIL
             ) {
             openqueue_freePacketBuffer(msg);
@@ -317,12 +297,12 @@ void forwarding_receive(
             // already freed by send_internal
             
             // log error
-//            openserial_printError(
-//               COMPONENT_FORWARDING,
-//               ERR_INVALID_FWDMODE,
-//               (errorparameter_t)0,
-//               (errorparameter_t)0
-//            );
+            openserial_printError(
+               COMPONENT_FORWARDING,
+               ERR_INVALID_FWDMODE,
+               (errorparameter_t)0,
+               (errorparameter_t)0
+            );
          }
       }
    }
@@ -375,12 +355,12 @@ owerror_t forwarding_send_internal_RoutingTable(
    // retrieve the next hop from the routing table
    forwarding_getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
    if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
-//      openserial_printError(
-//         COMPONENT_FORWARDING,
-//         ERR_NO_NEXTHOP,
-//         (errorparameter_t)0,
-//         (errorparameter_t)0
-//      );
+      openserial_printError(
+         COMPONENT_FORWARDING,
+         ERR_NO_NEXTHOP,
+         (errorparameter_t)0,
+         (errorparameter_t)0
+      );
       return E_FAIL;
    }
    
@@ -471,12 +451,12 @@ owerror_t forwarding_send_internal_SourceRouting(
             icmpv6_receive(msg);
             break;
          default:
-//            openserial_printError(
-//               COMPONENT_FORWARDING,
-//               ERR_WRONG_TRAN_PROTOCOL,
-//               (errorparameter_t)msg->l4_protocol,
-//               (errorparameter_t)1
-//            );
+            openserial_printError(
+               COMPONENT_FORWARDING,
+               ERR_WRONG_TRAN_PROTOCOL,
+               (errorparameter_t)msg->l4_protocol,
+               (errorparameter_t)1
+            );
             //not sure that this is correct as iphc will free it?
             openqueue_freePacketBuffer(msg);
             return E_FAIL;
@@ -493,12 +473,12 @@ owerror_t forwarding_send_internal_SourceRouting(
          
          // TODO: send ICMPv6 packet (code 0) to originator
          
-//         openserial_printError(
-//            COMPONENT_FORWARDING,
-//            ERR_NO_NEXTHOP,
-//            (errorparameter_t)0,
-//            (errorparameter_t)0
-//         );
+         openserial_printError(
+            COMPONENT_FORWARDING,
+            ERR_NO_NEXTHOP,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+         );
          openqueue_freePacketBuffer(msg);
          return E_FAIL;
       
@@ -594,12 +574,12 @@ owerror_t forwarding_send_internal_SourceRouting(
             default:
                // any other value is not supported by now
                
-//               openserial_printError(
-//                  COMPONENT_FORWARDING,
-//                  ERR_INVALID_PARAM,
-//                  (errorparameter_t)1,
-//                  (errorparameter_t)0
-//               );
+               openserial_printError(
+                  COMPONENT_FORWARDING,
+                  ERR_INVALID_PARAM,
+                  (errorparameter_t)1,
+                  (errorparameter_t)0
+               );
                openqueue_freePacketBuffer(msg);
                return E_FAIL;
          }

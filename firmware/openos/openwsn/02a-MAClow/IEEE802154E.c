@@ -14,6 +14,9 @@
 #include "debugpins.h"
 #include "res.h"
 #include "adaptive_sync.h"
+//START OF TELEMATICS CODE
+#include "security.h"
+//END OF TELEMATICS CODE
 
 //=========================== variables =======================================
 
@@ -166,6 +169,10 @@ void isr_ieee154e_newSlot() {
    radio_setTimerPeriod(TsSlotDuration);
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
+    	  //START OF TELEMATICS CODE
+		 //If I'm the DAG Root, here I can store the Key
+		 scheduler_push_task(coordinator_init,TASKPRIO_RESNOTIF_RX);
+		 //END OF TELEMATICS CODE
          changeIsSync(TRUE);
       } else {
          activity_synchronize_newSlot();
@@ -247,9 +254,9 @@ void isr_ieee154e_timer() {
          break;
       default:
          // log the error
-         openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_TIMERFIRES,
-                               (errorparameter_t)ieee154e_vars.state,
-                               (errorparameter_t)ieee154e_vars.slotOffset);
+//         openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_TIMERFIRES,
+//                               (errorparameter_t)ieee154e_vars.state,
+//                               (errorparameter_t)ieee154e_vars.slotOffset);
          // abort
          endSlot();
          break;
@@ -294,9 +301,9 @@ void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
             break;
          default:
             // log the error
-            openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_NEWSLOT,
-                                  (errorparameter_t)ieee154e_vars.state,
-                                  (errorparameter_t)ieee154e_vars.slotOffset);
+//            openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_NEWSLOT,
+//                                  (errorparameter_t)ieee154e_vars.state,
+//                                  (errorparameter_t)ieee154e_vars.slotOffset);
             // abort
             endSlot();
             break;
@@ -329,9 +336,9 @@ void ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
             break;
          default:
             // log the error
-            openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_ENDOFFRAME,
-                                  (errorparameter_t)ieee154e_vars.state,
-                                  (errorparameter_t)ieee154e_vars.slotOffset);
+//            openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_ENDOFFRAME,
+//                                  (errorparameter_t)ieee154e_vars.state,
+//                                  (errorparameter_t)ieee154e_vars.slotOffset);
             // abort
             endSlot();
             break;
@@ -350,14 +357,14 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_asn() {
-   asn_t output;
-   output.byte4         =  ieee154e_vars.asn.byte4;
-   output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
-   output.bytes0and1    =  ieee154e_vars.asn.bytes0and1;
-   openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(output));
-   return TRUE;
-}
+//bool debugPrint_asn() {
+//   asn_t output;
+//   output.byte4         =  ieee154e_vars.asn.byte4;
+//   output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
+//   output.bytes0and1    =  ieee154e_vars.asn.bytes0and1;
+//   openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(output));
+//   return TRUE;
+//}
 
 /**
 \brief Trigger this module to print status information, over serial.
@@ -367,12 +374,12 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_isSync() {
-   uint8_t output=0;
-   output = ieee154e_vars.isSync;
-   openserial_printStatus(STATUS_ISSYNC,(uint8_t*)&output,sizeof(uint8_t));
-   return TRUE;
-}
+//bool debugPrint_isSync() {
+//   uint8_t output=0;
+//   output = ieee154e_vars.isSync;
+//   openserial_printStatus(STATUS_ISSYNC,(uint8_t*)&output,sizeof(uint8_t));
+//   return TRUE;
+//}
 
 /**
 \brief Trigger this module to print status information, over serial.
@@ -382,11 +389,11 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_macStats() {
-   // send current stats over serial
-   openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
-   return TRUE;
-}
+//bool debugPrint_macStats() {
+//   // send current stats over serial
+//   openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
+//   return TRUE;
+//}
 
 //=========================== private =========================================
 
@@ -461,9 +468,9 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
    // check state
    if (ieee154e_vars.state!=S_SYNCRX) {
       // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_ENDFRAME_SYNC,
-                            (errorparameter_t)ieee154e_vars.state,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_ENDFRAME_SYNC,
+//                            (errorparameter_t)ieee154e_vars.state,
+//                            (errorparameter_t)0);
       // abort
       endSlot();
    }
@@ -475,9 +482,9 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
    ieee154e_vars.dataReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
    if (ieee154e_vars.dataReceived==NULL) {
       // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       // abort
       endSlot();
       return;
@@ -511,9 +518,9 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // break if packet too short
       if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX) {
          // break from the do-while loop and execute abort code below
-          openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
-                            (errorparameter_t)0,
-                            ieee154e_vars.dataReceived->length);
+//          openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
+//                            (errorparameter_t)0,
+//                            ieee154e_vars.dataReceived->length);
          break;
       }
       
@@ -529,6 +536,14 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // parse the IEEE802.15.4 header (synchronize, end of frame)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
       
+      //START OF TELEMATICS CODE
+      //if I'm not the DAG Root and I'm not synch, I can store the Key
+		if(idmanager_getIsDAGroot()==FALSE && ieee154e_isSynch() == FALSE
+		   && ieee802514_header.frameType == IEEE154_TYPE_BEACON){
+			remote_init(ieee802514_header);
+	  }
+	  //END OF TELEMATICS CODE
+
       // break if invalid IEEE802.15.4 header
       if (ieee802514_header.valid==FALSE) {
          // break from the do-while loop and execute the clean-up code below
@@ -570,9 +585,9 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       changeIsSync(TRUE);
       
       // log the info
-      openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
-                            (errorparameter_t)ieee154e_vars.slotOffset,
-                            (errorparameter_t)0);
+//      openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
+//                            (errorparameter_t)ieee154e_vars.slotOffset,
+//                            (errorparameter_t)0);
       
       // send received ADV up the stack so RES can update statistics (synchronizing)
       notif_receive(ieee154e_vars.dataReceived);
@@ -691,9 +706,9 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
   }
   if (*lenIE>127) {
          // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_HEADER_TOO_LONG,
-                            (errorparameter_t)*lenIE,
-                            (errorparameter_t)1);
+//      openserial_printError(COMPONENT_IEEE802154E,ERR_HEADER_TOO_LONG,
+//                            (errorparameter_t)*lenIE,
+//                            (errorparameter_t)1);
   }
   return TRUE;
 }
@@ -769,9 +784,9 @@ port_INLINE void activity_ti1ORri1() {
          changeIsSync(FALSE);
         
          // log the error
-         openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
-                               (errorparameter_t)ieee154e_vars.slotOffset,
-                               (errorparameter_t)0);
+//         openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
+//                               (errorparameter_t)ieee154e_vars.slotOffset,
+//                               (errorparameter_t)0);
             
          // update the statistics
          ieee154e_stats.numDeSync++;

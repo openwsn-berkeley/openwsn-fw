@@ -247,21 +247,21 @@ void forwarding_receive(
             // wrong direction
             
             // log error
-
+<<<<<<< HEAD
 //            openserial_printError(
 //               COMPONENT_FORWARDING,
 //               ERR_WRONG_DIRECTION,
 //               (errorparameter_t)1,
 //               (errorparameter_t)1
 //            );
-
+=======
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_WRONG_DIRECTION,
                (errorparameter_t)flags,
                (errorparameter_t)senderRank
             );
-
+>>>>>>> develop-master
          }
          
 
@@ -277,25 +277,27 @@ void forwarding_receive(
             #endif
 
             // log error
+<<<<<<< HEAD
 //            openserial_printError(
 //               COMPONENT_FORWARDING,
 //               ERR_LOOP_DETECTED,
 //               (errorparameter_t) rpl_option->senderRank,
 //               (errorparameter_t) neighbors_getMyDAGrank()
 //            );
+=======
             openserial_printError(
                COMPONENT_FORWARDING,
                ERR_LOOP_DETECTED,
                (errorparameter_t) senderRank,
                (errorparameter_t) neighbors_getMyDAGrank()
             );
+>>>>>>> develop-master
          }
          
 
          forwarding_createRplOption(rpl_option, rpl_option->flags);
          #ifdef FLOW_LABEL_RPL_DOMAIN
-         // do not recreate flow label, relay the same but adding current flags
-         //forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
+             forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
          #endif
          // resend as if from upper layer
          if (
@@ -304,7 +306,7 @@ void forwarding_receive(
                   ipv6_header,
                   rpl_option,
                   &(ipv6_header->flow_label),
-                  PCKTFORWARD 
+                  PCKTFORWARD
                )==E_FAIL
             ) {
             openqueue_freePacketBuffer(msg);
