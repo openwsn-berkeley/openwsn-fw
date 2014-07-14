@@ -48,8 +48,8 @@ void schedule_init() {
          &temp_neighbor,          // neighbor
          FALSE                    //no update but insert
       );
+      running_slotOffset++;
    }
-   running_slotOffset++;
    
    // serial RX slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
