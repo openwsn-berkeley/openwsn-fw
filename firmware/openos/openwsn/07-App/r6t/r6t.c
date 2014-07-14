@@ -67,30 +67,31 @@ owerror_t r6t_receive(
    ) {
    
    owerror_t            outcome;
-   r6t_add_ht*          add_h;
-   r6t_delete_ht*       delete_h;
    open_addr_t          neighbor;
+   bool                 foundNeighbor;
    
    switch (coap_header->Code) {
       
-      case COAP_CODE_REQ_POST:
+      case COAP_CODE_REQ_PUT:
          // add a slot
          
          // make sure request length correct
-         if (msg->length!=sizeof(r6t_add_ht)) {
+         if (msg->length!=0) {
             outcome               = E_FAIL;
             coap_header->Code     = COAP_CODE_RESP_BADREQ;
          }
          
-         // parse header
-         add_h = (r6t_add_ht*)msg->payload;
+         // get preferred parent
+         foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+         if (foundNeighbor==FALSE) {
+            outcome               = E_FAIL;
+            coap_header->Code     = COAP_CODE_RESP_PRECONDFAILED;
+         }
          
          // call sixtop
-         neighbor.type = ADDR_64B;
-         memcpy(&(neighbor.addr_64b[0]),&(add_h->eui64[0]),LENGTH_ADDR64b);
          sixtop_linkRequest(
             &neighbor,
-            add_h->numCells
+            1
          );
          
          outcome = E_SUCCESS;
@@ -99,17 +100,19 @@ owerror_t r6t_receive(
          // delete a slot
          
          // make sure request length correct
-         if (msg->length!=sizeof(r6t_delete_ht)) {
+         if (msg->length!=0) {
             outcome               = E_FAIL;
             coap_header->Code     = COAP_CODE_RESP_BADREQ;
          }
          
-         // parse header
-         delete_h = (r6t_delete_ht*)msg->payload;
+         // get preferred parent
+         foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+         if (foundNeighbor==FALSE) {
+            outcome               = E_FAIL;
+            coap_header->Code     = COAP_CODE_RESP_PRECONDFAILED;
+         }
          
          // call sixtop
-         neighbor.type = ADDR_64B;
-         memcpy(&(neighbor.addr_64b[0]),&(delete_h->eui64[0]),LENGTH_ADDR64b);
          sixtop_removeLinkRequest(
             &neighbor
          );

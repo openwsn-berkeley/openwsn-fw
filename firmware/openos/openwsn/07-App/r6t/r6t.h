@@ -23,20 +23,6 @@
 
 //=========================== typedef =========================================
 
-// header
-BEGIN_PACK
-typedef struct {
-  uint8_t        eui64[8];
-  uint8_t        numCells;
-} r6t_add_ht;
-END_PACK
-
-BEGIN_PACK
-typedef struct {
-  uint8_t        eui64[8];
-} r6t_delete_ht;
-END_PACK
-
 //=========================== variables =======================================
 
 typedef struct {
