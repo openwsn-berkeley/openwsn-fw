@@ -10,6 +10,7 @@
 #include "sixtop.h"
 #include "idmanager.h"
 #include "openqueue.h"
+#include "neighbors.h"
 
 //=========================== defines =========================================
 
@@ -75,17 +76,16 @@ owerror_t r6t_receive(
       case COAP_CODE_REQ_PUT:
          // add a slot
          
-         // make sure request length correct
-         if (msg->length!=0) {
-            outcome               = E_FAIL;
-            coap_header->Code     = COAP_CODE_RESP_BADREQ;
-         }
+         // reset packet payload
+         msg->payload                  = &(msg->packet[127]);
+         msg->length                   = 0;
          
          // get preferred parent
          foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
          if (foundNeighbor==FALSE) {
-            outcome               = E_FAIL;
-            coap_header->Code     = COAP_CODE_RESP_PRECONDFAILED;
+            outcome                    = E_FAIL;
+            coap_header->Code          = COAP_CODE_RESP_PRECONDFAILED;
+            break;
          }
          
          // call sixtop
@@ -94,22 +94,25 @@ owerror_t r6t_receive(
             1
          );
          
-         outcome = E_SUCCESS;
+         // set the CoAP header
+         coap_header->Code             = COAP_CODE_RESP_CHANGED;
+         
+         outcome                       = E_SUCCESS;
+         break;
       
       case COAP_CODE_REQ_DELETE:
          // delete a slot
          
-         // make sure request length correct
-         if (msg->length!=0) {
-            outcome               = E_FAIL;
-            coap_header->Code     = COAP_CODE_RESP_BADREQ;
-         }
+         // reset packet payload
+         msg->payload                  = &(msg->packet[127]);
+         msg->length                   = 0;
          
          // get preferred parent
          foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
          if (foundNeighbor==FALSE) {
-            outcome               = E_FAIL;
-            coap_header->Code     = COAP_CODE_RESP_PRECONDFAILED;
+            outcome                    = E_FAIL;
+            coap_header->Code          = COAP_CODE_RESP_PRECONDFAILED;
+            break;
          }
          
          // call sixtop
@@ -117,10 +120,14 @@ owerror_t r6t_receive(
             &neighbor
          );
          
-         outcome = E_SUCCESS;
+         // set the CoAP header
+         coap_header->Code             = COAP_CODE_RESP_CHANGED;
+         
+         outcome                       = E_SUCCESS;
+         break;
          
       default:
-         outcome  = E_FAIL;
+         outcome = E_FAIL;
          break;
    }
    
