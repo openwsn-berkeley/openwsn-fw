@@ -275,7 +275,8 @@ void forwarding_receive(
 
          forwarding_createRplOption(rpl_option, rpl_option->flags);
          #ifdef FLOW_LABEL_RPL_DOMAIN
-             forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
+         // do not recreate flow label, relay the same but adding current flags
+         //forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
          #endif
          // resend as if from upper layer
          if (
@@ -284,7 +285,7 @@ void forwarding_receive(
                   ipv6_header,
                   rpl_option,
                   &(ipv6_header->flow_label),
-                  PCKTFORWARD
+                  PCKTFORWARD 
                )==E_FAIL
             ) {
             openqueue_freePacketBuffer(msg);
