@@ -111,9 +111,6 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 	keypoint = &MacKeyTable.KeyDescriptorElement[match];
 
 	if(match == 25){
-		openserial_printError(COMPONENT_RES,ERR_OK,
-							(errorparameter_t)msg->creator,
-							(errorparameter_t)400);
 		return;
 	}
 
@@ -735,7 +732,7 @@ void coordinator_init(){
 
 	m_macDefaultKeySource = *(my);
 
-	openserial_printError(COMPONENT_RES,ERR_OK,
+	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
 						(errorparameter_t)M_k,
 						(errorparameter_t)102);
 
@@ -776,7 +773,7 @@ void remote_init(ieee802154_header_iht ieee802514_header){
 
 	MacKeyTable.KeyDescriptorElement[0].DeviceTable = &MacDeviceTable;
 
-	openserial_printError(COMPONENT_RES,ERR_OK,
+	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
 						(errorparameter_t)M_k,
 						(errorparameter_t)201);
 
