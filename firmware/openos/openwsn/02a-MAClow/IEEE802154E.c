@@ -815,8 +815,6 @@ port_INLINE void activity_ti1ORri1() {
    // check the schedule to see what type of slot this is
    cellType = schedule_getType();
    switch (cellType) {
-      case CELLTYPE_ADV:
-      case CELLTYPE_TXRX:
       case CELLTYPE_TX:
          // stop using serial
          openserial_stop();
@@ -826,29 +824,55 @@ port_INLINE void activity_ti1ORri1() {
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-            if (ieee154e_vars.dataToSend==NULL) {
-               if (cellType==CELLTYPE_ADV) {
-            	  // look for an ADV packet in the queue
-            	  ieee154e_vars.dataToSend = openqueue_macGetAdvPacket();
-               } else if (cellType==CELLTYPE_TX) {
-            	  // abort
-            	  endSlot();
-            	  break;
-               }
-            }
          }
          if (ieee154e_vars.dataToSend!=NULL) {   // I have a packet to send
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
-            if (cellType==CELLTYPE_ADV) { // I will be sending an ADV
-			   //copy synch IE  -- should be Little endian???
-			   // fill in the ASN field of the ADV
-			   ieee154e_getAsn(syn_IE.asn);
-			   syn_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank)
-			   memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&syn_IE,sizeof(synch_IE_t));
-            }
+            // record that I attempt to transmit this packet
+            ieee154e_vars.dataToSend->l2_numTxAttempts++;
+            // arm tt1
+            radiotimer_schedule(DURATION_tt1);
+         } else {
+            // abort
+            endSlot();
+         }
+         break;
+      case CELLTYPE_TXRX:
+         // stop using serial
+         openserial_stop();
+         // assuming that there is nothing to send
+         ieee154e_vars.dataToSend = NULL;
+         // check whether we can send
+         if (schedule_getOkToSend()) {
+            schedule_getNeighbor(&neighbor);
+            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
+         }
+         if (ieee154e_vars.dataToSend!=NULL) {   // I have a packet to send
+            // change state
+            changeState(S_TXDATAOFFSET);
+            // change owner
+            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+            // record that I attempt to transmit this packet
+            ieee154e_vars.dataToSend->l2_numTxAttempts++;
+            // arm tt1
+            radiotimer_schedule(DURATION_tt1);
+            break;
+         } else {
+            // look for an ADV packet in the queue
+            ieee154e_vars.dataToSend = openqueue_macGetAdvPacket();
+         }
+         if (ieee154e_vars.dataToSend!=NULL) { // I will be sending an ADV
+            // change state
+            changeState(S_TXDATAOFFSET);
+            // change owner
+            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+            //copy synch IE  -- should be Little endian???
+            // fill in the ASN field of the ADV
+            ieee154e_getAsn(syn_IE.asn);
+            syn_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank)
+            memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&syn_IE,sizeof(synch_IE_t));
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
