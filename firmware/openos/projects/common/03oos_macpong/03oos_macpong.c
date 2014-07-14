@@ -15,7 +15,7 @@
 #include "IEEE802154E.h"
 #include "openserial.h"
 #include "packetfunctions.h"
-#include "res.h"
+#include "sixtop.h"
 #include "idmanager.h"
 #include "neighbors.h"
 
@@ -72,7 +72,7 @@ void macpong_send(uint8_t payloadCtr) {
    for (i=0;i<LEN_PAYLOAD;i++){
      ((uint8_t*)pkt->payload)[i]      = i;
    }
-   res_send(pkt);
+   sixtop_send(pkt);
 }
 
 //=========================== stubbing ========================================

@@ -3,7 +3,7 @@
 #include "packetfunctions.h"
 #include "idmanager.h"
 #include "openserial.h"
-#include "res.h"
+#include "sixtop.h"
 #include "forwarding.h"
 #include "neighbors.h"
 #include "openbridge.h"
@@ -192,7 +192,7 @@ owerror_t iphc_sendFromForwarding(
       return E_FAIL;
    }
    
-   return res_send(msg);
+   return sixtop_send(msg);
 }
 
 //send from bridge: 6LoWPAN header already added by OpenLBR, send as is
@@ -205,7 +205,7 @@ owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
                             (errorparameter_t)0);
       return E_FAIL;
    }
-   return res_send(msg);
+   return sixtop_send(msg);
 }
 
 void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {

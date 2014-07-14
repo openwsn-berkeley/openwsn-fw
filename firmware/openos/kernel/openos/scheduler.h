@@ -13,19 +13,20 @@
 //=========================== define ==========================================
 
 typedef enum {
-   TASKPRIO_NONE               = 0x00,
+   TASKPRIO_NONE                   = 0x00,
    // tasks trigger by radio
-   TASKPRIO_RESNOTIF_RX        = 0x01, // scheduled by IEEE802.15.4e
-   TASKPRIO_RESNOTIF_TXDONE    = 0x02, // scheduled by IEEE802.15.4e
+   TASKPRIO_SIXTOP_NOTIF_RX        = 0x01, // scheduled by IEEE802.15.4e
+   TASKPRIO_SIXTOP_NOTIF_TXDONE    = 0x02, // scheduled by IEEE802.15.4e
    // tasks triggered by timers
-   TASKPRIO_RES                = 0x03, // scheduled by timerB CCR0 interrupt
-   TASKPRIO_RPL                = 0x04, // scheduled by timerB CCR1 interrupt
-   TASKPRIO_TCP_TIMEOUT        = 0x05, // scheduled by timerB CCR2 interrupt
-   TASKPRIO_COAP               = 0x06, // scheduled by timerB CCR3 interrupt
-   TASKPRIO_ADAPTIVE_SYNC      = 0x07, 
+   TASKPRIO_SIXTOP                 = 0x03, // scheduled by timerB CCR0 interrupt
+   TASKPRIO_RPL                    = 0x04, // scheduled by timerB CCR1 interrupt
+   TASKPRIO_TCP_TIMEOUT            = 0x05, // scheduled by timerB CCR2 interrupt
+   TASKPRIO_COAP                   = 0x06, // scheduled by timerB CCR3 interrupt
+   TASKPRIO_ADAPTIVE_SYNC          = 0x07, 
    // tasks trigger by other interrupts
-   TASKPRIO_BUTTON             = 0x08, // scheduled by P2.7 interrupt
-   TASKPRIO_MAX                = 0x09,
+   TASKPRIO_BUTTON                 = 0x08, // scheduled by P2.7 interrupt
+   TASKPRIO_SIXTOP_TIMEOUT         = 0x09,
+   TASKPRIO_MAX                    = 0x0a,
 } task_prio_t;
 
 #define TASK_LIST_DEPTH      10

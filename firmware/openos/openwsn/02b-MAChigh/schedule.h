@@ -149,7 +149,7 @@ bool               debugPrint_schedule(void);
 bool               debugPrint_backoff(void);
 // from uRES
 void               schedule_setFrameLength(frameLength_t newFrameLength);
-owerror_t            schedule_addActiveSlot(
+owerror_t          schedule_addActiveSlot(
                         slotOffset_t   slotOffset,
                         cellType_t     type,
                         bool           shared,
@@ -161,8 +161,9 @@ void               schedule_getSlotInfo(slotOffset_t   slotOffset,
                               open_addr_t*   neighbor,
                               slotinfo_element_t* info);
 
-owerror_t               schedule_removeActiveSlot(slotOffset_t   slotOffset,                      
+owerror_t          schedule_removeActiveSlot(slotOffset_t   slotOffset,                      
                               open_addr_t*   neighbor);
+bool               schedule_checkAvailableSchedule(uint16_t slotOffset);
 
 
 // from IEEE802154E

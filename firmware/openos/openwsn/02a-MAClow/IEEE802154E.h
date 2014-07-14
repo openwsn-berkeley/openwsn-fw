@@ -264,27 +264,6 @@ typedef struct{
    uint16_t length_subID_type;
 }MLME_IE_subHeader_t;
 
-//the Synchronization IE. it is a payload IE with values - subid=0x1a type=0 (short) len=6 
-BEGIN_PACK
-typedef struct {
-    uint8_t asn[5];
-    uint8_t join_priority;
-}synch_IE_t;
-END_PACK
-
-//the Slotframe and Link IE
-typedef struct {
-    uint8_t slotframehandle;
-    uint16_t slotframesize;
-    uint8_t numlinks;
-}slotframelink_IE_t;
-
-typedef struct {
-    uint16_t tsNum;
-    uint16_t choffset;
-    uint8_t linkoptions;
-}linkInfo_subIE_t;
-
 //=========================== prototypes ======================================
 
 // admin

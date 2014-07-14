@@ -3,6 +3,7 @@
 #include "openserial.h"
 #include "openrandom.h"
 #include "packetfunctions.h"
+#include "sixtop.h"
 
 //=========================== variables =======================================
 
@@ -12,6 +13,7 @@ schedule_dbg_t schedule_dbg;
 //=========================== prototypes ======================================
 
 void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
+bool schedule_checkExistSchedule(uint16_t slotOffset);
 
 //=========================== public ==========================================
 
@@ -391,7 +393,22 @@ owerror_t   schedule_removeActiveSlot(slotOffset_t   slotOffset, open_addr_t*   
     return outcome;
 }
 
-
+bool schedule_checkAvailableSchedule(uint16_t slotOffset){
+  INTERRUPT_DECLARATION();
+  DISABLE_INTERRUPTS();
+  scheduleEntry_t* tempScheduleEntry = schedule_vars.currentScheduleEntry;
+  do
+  {
+    if(slotOffset == tempScheduleEntry->slotOffset){
+      return FALSE;
+    }
+    
+    tempScheduleEntry = tempScheduleEntry->next;
+    
+  }while(tempScheduleEntry != schedule_vars.currentScheduleEntry);
+  ENABLE_INTERRUPTS();
+  return TRUE;
+}
 
 
 //=== from IEEE802154E: reading the schedule and updating statistics
@@ -603,6 +620,17 @@ void schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist){
   }
 }
 //=========================== private =========================================
+
+bool schedule_checkExistSchedule(uint16_t slotOffset){
+   uint8_t i;
+   
+   for (i=0;i<MAXACTIVESLOTS;i++){
+      if(schedule_vars.scheduleBuf[i].slotOffset == slotOffset) {
+         return TRUE;
+      }
+   }
+   return FALSE;
+}
 
 void schedule_resetEntry(scheduleEntry_t* pScheduleEntry) {
    pScheduleEntry->type                     = CELLTYPE_OFF;
