@@ -545,8 +545,8 @@ void sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr){
 bool sixtop_availableCells(uint8_t frameID, uint8_t numOfCells, sixtop_linkInfo_subIE_t* linklist, uint8_t bandwidth){
   uint8_t i=0,bw=bandwidth;
   bool available = FALSE;
-  
-  
+  INTERRUPT_DECLARATION();
+  DISABLE_INTERRUPTS();
   if(bw == 0 || bw>MAXSCHEDULEDCELLS || numOfCells>MAXSCHEDULEDCELLS){
     // log wrong parameter error TODO
     
@@ -641,12 +641,8 @@ void sixtop_addLinksToSchedule(uint8_t slotframeID,uint8_t numOfLinks,sixtop_lin
   DISABLE_INTERRUPTS();
   //set schedule according links
   open_addr_t temp_neighbor;
-  printf("numOflinks: %d\r\n",numOfLinks);
-  printf("state:      %d\r\n",state);
   for(i = 0;i<MAXSCHEDULEDCELLS;i++)
   {
-    printf("linklist %d slotoffset :   %d\r\n",i,linklist[i].tsNum);
-    printf("linklist %d linkoptions :  %d\r\n",i,linklist[i].linkoptions);
       //only schedule when the request side wants to schedule a tx cell
       if(linklist[i].linkoptions == CELLTYPE_TX)
       {
