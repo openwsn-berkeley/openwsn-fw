@@ -58,7 +58,6 @@ typedef struct {
    uint16_t             kaPeriod;             // period of sending KA
    sixtop_state_t       State;
    uint8_t              commandID;
-   uint8_t              button_event; //when requestOrRemoveLink%3 is 0 or 1, call uResLinkRequest; when the value is 2, call uResRemoveLink.
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================
@@ -76,9 +75,6 @@ void    sixtop_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void    task_sixtopNotifReceive(void);
 
 void    sixtop_setKaPeriod(uint16_t kaPeriod);
-
-// events
-void    isr_sixtop_button();
 
 /**
 \}

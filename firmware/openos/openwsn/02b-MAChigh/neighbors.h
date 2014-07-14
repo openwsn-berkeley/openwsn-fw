@@ -110,8 +110,6 @@ void          neighbors_removeOld(void);
 // debug
 bool          debugPrint_neighbors(void);
 void          debugNetPrint_neighbors(netDebugNeigborEntry_t* schlist);
-// reservation 
-open_addr_t*  neighbors_sixtopNeighbor();
           
 /**
 \}

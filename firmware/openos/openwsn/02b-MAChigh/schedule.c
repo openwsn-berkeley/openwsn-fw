@@ -394,6 +394,8 @@ owerror_t   schedule_removeActiveSlot(slotOffset_t   slotOffset, open_addr_t*   
 }
 
 bool schedule_checkAvailableSchedule(uint16_t slotOffset){
+  INTERRUPT_DECLARATION();
+  DISABLE_INTERRUPTS();
   scheduleEntry_t* tempScheduleEntry = schedule_vars.currentScheduleEntry;
   do
   {
@@ -404,6 +406,7 @@ bool schedule_checkAvailableSchedule(uint16_t slotOffset){
     tempScheduleEntry = tempScheduleEntry->next;
     
   }while(tempScheduleEntry != schedule_vars.currentScheduleEntry);
+  ENABLE_INTERRUPTS();
   return TRUE;
 }
 
