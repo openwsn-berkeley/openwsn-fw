@@ -354,10 +354,6 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 		return;
 	}
 
-//	  openserial_printError(COMPONENT_RES,ERR_OK,
-//	                           (errorparameter_t)msg->l2_keySource.addr_16b[0],
-//	                           (errorparameter_t)21);
-
 	//retrieve the KeyIndex
 	if(msg->l2_keyIdMode != 0){
 		temp8b = *((uint8_t*)(msg->payload)+tempheader->headerLength);

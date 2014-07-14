@@ -117,7 +117,7 @@ uint8_t nonce[13];
 //=========================== prototypes ======================================
 
 //admin
-void security_init();
+void security_init(void);
 //public
 void security_outgoingFrameSec(OpenQueueEntry_t*  msg,
                                 uint8_t           securityLevel,
@@ -159,7 +159,7 @@ uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
 						 	uint8_t			frameType);
 
 void remote_init(ieee802154_header_iht ieee802514_header);
-void coordinator_init();
+void coordinator_init(void);
 /**
 \}
 \}

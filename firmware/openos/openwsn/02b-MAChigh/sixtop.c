@@ -15,6 +15,9 @@
 #include "IEEE802154.h"
 #include "idmanager.h"
 #include "schedule.h"
+//START OF TELEMATICS CODE
+#include "security.h"
+//END OF TELEMATICS CODE
 
 //=========================== variables =======================================
 
@@ -134,6 +137,21 @@ bool debugPrint_myDAGrank() {
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
+
+  //START OF TELEMATICS CODE
+  msg->l2_security = TRUE;
+  msg->l2_securityLevel = 5;
+  msg->l2_keyIdMode = 3;
+  if(idmanager_getIsDAGroot()){
+   open_addr_t* temp_addr;
+   temp_addr = idmanager_getMyID(ADDR_64B);
+   memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
+  }else{
+	   neighbors_getPreferredParentEui64(&(msg->l2_keySource));
+  }
+  msg->l2_keyIndex = 1;
+  //END OF TELEMATICS CODE
+
    if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
       return sixtop_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
    } else {
@@ -157,9 +175,9 @@ void task_sixtopNotifSendDone() {
    msg = openqueue_sixtopGetSentPacket();
    if (msg==NULL) {
       // log the error
-      openserial_printCritical(COMPONENT_SIXTOP,ERR_NO_SENT_PACKET,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printCritical(COMPONENT_SIXTOP,ERR_NO_SENT_PACKET,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       // abort
       return;
    }
@@ -271,9 +289,9 @@ void task_sixtopNotifReceive() {
    msg = openqueue_sixtopGetReceivedPacket();
    if (msg==NULL) {
       // log the error
-      openserial_printCritical(COMPONENT_SIXTOP,ERR_NO_RECEIVED_PACKET,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printCritical(COMPONENT_SIXTOP,ERR_NO_RECEIVED_PACKET,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       // abort
       return;
    }
@@ -302,17 +320,33 @@ void task_sixtopNotifReceive() {
    
    msg->l2_joinPriorityPresent=FALSE; //reset it to avoid race conditions with this var.
    
+   //START OF TELEMATICS CODE
+
+   if(msg->l2_security== TRUE){
+    security_incomingFrame(msg);
+   }
+   //END OF TELEMATICS CODE
+
    // send the packet up the stack, if it qualifies
    switch (msg->l2_frameType) {
       case IEEE154_TYPE_BEACON:
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
          if (msg->length>0) {
-            // send to upper layer
-            iphc_receive(msg);
-         } else {
+        	 //START OF TELEMATICS CODE
+			  //discard duplicated packets
+			  if(msg->l2_toDiscard == FALSE){
+			  //END OF TELEMATICS CODE
+					  // send to upper layer
+					  iphc_receive(msg);
+				  }
+             else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);
+         }
+      }else{
+        	 // free up the RAM
+        	  openqueue_freePacketBuffer(msg);
          }
          break;
       case IEEE154_TYPE_ACK:
@@ -320,9 +354,9 @@ void task_sixtopNotifReceive() {
          // free the packet's RAM memory
          openqueue_freePacketBuffer(msg);
          // log the error
-         openserial_printError(COMPONENT_SIXTOP,ERR_MSG_UNKNOWN_TYPE,
-                               (errorparameter_t)msg->l2_frameType,
-                               (errorparameter_t)0);
+//         openserial_printError(COMPONENT_SIXTOP,ERR_MSG_UNKNOWN_TYPE,
+//                               (errorparameter_t)msg->l2_frameType,
+//                               (errorparameter_t)0);
          break;
    }
 }
@@ -359,9 +393,9 @@ void sixtop_linkRequest(open_addr_t*  sixtopNeighAddr, uint16_t bandwidth) {
     sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
   
     if (sixtopPkt==NULL) {
-      openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       return;
    }
    
@@ -426,9 +460,9 @@ void sixtop_linkResponse(bool success, open_addr_t* tempNeighbor,uint8_t bandwid
     sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
   
     if (sixtopPkt==NULL) {
-      openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       return;
     }
     
@@ -495,9 +529,9 @@ void sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr){
     sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
   
     if (sixtopPkt==NULL) {
-      openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       return;
     }
     // change state to sending removeLinkRequest Command
@@ -813,9 +847,9 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
   }
   if (*lenIE>127) {
          // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_HEADER_TOO_LONG,
-                            (errorparameter_t)*lenIE,
-                            (errorparameter_t)1);
+//      openserial_printError(COMPONENT_IEEE802154E,ERR_HEADER_TOO_LONG,
+//                            (errorparameter_t)*lenIE,
+//                            (errorparameter_t)1);
   }
   
   if(*lenIE>0) {
@@ -979,12 +1013,22 @@ owerror_t sixtop_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent, uint8_t
    msg->l1_txPower = TX_POWER;
    // record the location, in the packet, where the l2 payload starts
    msg->l2_payload = msg->payload;
+
+   //START OF TELEMATICS CODE
+    if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
+
+ 	   security_outgoingFrame(msg,msg->l2_securityLevel,msg->l2_keyIdMode,&msg->l2_keySource,msg->l2_keyIndex);
+    }
+    //END OF TELEMATICS CODE
+
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             iePresent,
                             frameVersion,
-                            IEEE154_SEC_NO_SECURITY,
+                            //START OF TELEMATICS CODE
+							msg->l2_security,
+							//END OF TELEMATICS CODE
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
@@ -1029,9 +1073,9 @@ port_INLINE void sendAdv() {
    // get a free packet buffer
    adv = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
    if (adv==NULL) {
-      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       return;
    }
    
@@ -1039,6 +1083,10 @@ port_INLINE void sendAdv() {
    adv->creator = COMPONENT_SIXTOP;
    adv->owner   = COMPONENT_SIXTOP;
    
+   //START OF TELEMATICS CODE
+   adv->l2_security 					 = FALSE;
+   //END OF TELEMATICS CODE
+
    // reserve space for ADV-specific header
    // xv poipoi -- reserving for IEs  -- reverse order.
    //TODO reserve here for slotframe and link IE with minimal schedule information
@@ -1119,9 +1167,9 @@ port_INLINE void sendKa() {
    // get a free packet buffer
    kaPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
    if (kaPkt==NULL) {
-      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)1,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)1,
+//                            (errorparameter_t)0);
       return;
    }
    
@@ -1129,6 +1177,10 @@ port_INLINE void sendKa() {
    kaPkt->creator = COMPONENT_SIXTOP;
    kaPkt->owner   = COMPONENT_SIXTOP;
    
+   //START OF TELEMATICS CODE
+   kaPkt->l2_security = FALSE;
+   //END OF TELEMATICS CODE
+
    // some l2 information about this packet
    kaPkt->l2_frameType = IEEE154_TYPE_DATA;
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));

@@ -223,9 +223,9 @@ uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes) {
    ENABLE_INTERRUPTS();
    
    if (maxNumBytes<inputBufFill-1) {
-      openserial_printError(COMPONENT_OPENSERIAL,ERR_GETDATA_ASKS_TOO_FEW_BYTES,
-                            (errorparameter_t)maxNumBytes,
-                            (errorparameter_t)inputBufFill-1);
+//      openserial_printError(COMPONENT_OPENSERIAL,ERR_GETDATA_ASKS_TOO_FEW_BYTES,
+//                            (errorparameter_t)maxNumBytes,
+//                            (errorparameter_t)inputBufFill-1);
       numBytesWritten = 0;
    } else {
       numBytesWritten = inputBufFill-1;
@@ -239,9 +239,9 @@ void openserial_startInput() {
    INTERRUPT_DECLARATION();
    
    if (openserial_vars.inputBufFill>0) {
-      openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUTBUFFER_LENGTH,
-                            (errorparameter_t)openserial_vars.inputBufFill,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUTBUFFER_LENGTH,
+//                            (errorparameter_t)openserial_vars.inputBufFill,
+//                            (errorparameter_t)0);
       DISABLE_INTERRUPTS();
       openserial_vars.inputBufFill=0;
       ENABLE_INTERRUPTS();
@@ -377,9 +377,9 @@ void openserial_stop() {
    //the inputBuffer has to be reset if it is not reset where the data is read.
    //or the function openserial_getInputBuffer is called (which resets the buffer)
    if (busyReceiving==TRUE){
-      openserial_printError(COMPONENT_OPENSERIAL,ERR_BUSY_RECEIVING,
-                                  (errorparameter_t)0,
-                                  (errorparameter_t)inputBufFill);
+//      openserial_printError(COMPONENT_OPENSERIAL,ERR_BUSY_RECEIVING,
+//                                  (errorparameter_t)0,
+//                                  (errorparameter_t)inputBufFill);
    }
    
    if (busyReceiving == FALSE && inputBufFill>0) {
@@ -410,9 +410,9 @@ void openserial_stop() {
             openserial_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
             break;   
          default:
-            openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
-                                  (errorparameter_t)cmdByte,
-                                  (errorparameter_t)0);
+//            openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
+//                                  (errorparameter_t)cmdByte,
+//                                  (errorparameter_t)0);
             //reset here as it is not being reset in any other callback
             DISABLE_INTERRUPTS();
             openserial_vars.inputBufFill = 0;
@@ -609,9 +609,9 @@ void isr_openserial_rx() {
       inputHdlcWrite(rxbyte);
       if (openserial_vars.inputBufFill+1>SERIAL_INPUT_BUFFER_SIZE){
          // input buffer overflow
-         openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUT_BUFFER_OVERFLOW,
-                               (errorparameter_t)0,
-                               (errorparameter_t)0);
+//         openserial_printError(COMPONENT_OPENSERIAL,ERR_INPUT_BUFFER_OVERFLOW,
+//                               (errorparameter_t)0,
+//                               (errorparameter_t)0);
          openserial_vars.inputBufFill       = 0;
          openserial_vars.busyReceiving      = FALSE;
          openserial_stop();
@@ -627,9 +627,9 @@ void isr_openserial_rx() {
          
          if (openserial_vars.inputBufFill==0){
             // invalid HDLC frame
-            openserial_printError(COMPONENT_OPENSERIAL,ERR_WRONG_CRC_INPUT,
-                                  (errorparameter_t)inputBufFill,
-                                  (errorparameter_t)0);
+//            openserial_printError(COMPONENT_OPENSERIAL,ERR_WRONG_CRC_INPUT,
+//                                  (errorparameter_t)inputBufFill,
+//                                  (errorparameter_t)0);
          
          }
          

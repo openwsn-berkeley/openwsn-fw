@@ -45,20 +45,20 @@
 //- debug
 #include "udpecho.h"
 #include "udpinject.h"
-#include "udpprint.h"
+//#include "udpprint.h"
 //- common
 //#include "udprand.h"
-//#include "udplatency.h"
-#include "udpstorm.h"
+#include "udplatency.h"
+//#include "udpstorm.h"
 //- board-specific
 //#include "imu.h"
 //+++++ CoAP
 //- debug
 //- common
-#include "rinfo.h"
-#include "rleds.h"
-#include "rwellknown.h"
-#include "r6t.h"
+//#include "rinfo.h"
+//#include "rleds.h"
+//#include "rwellknown.h"
+//#include "r6t.h"
 //#include "rrt.h"
 //#include "rex.h"
 //#include "rrube.h"
@@ -93,6 +93,7 @@ void openwsn_init() {
    //-- 02a-TSCH
    adaptive_sync_init();
    ieee154e_init();
+   security_init();
    //-- 02b-RES
    schedule_init();
    sixtop_init();
@@ -113,32 +114,32 @@ void openwsn_init() {
    //===== applications
    //+++++ TCP
    //- debug
-   tcpecho_init();
-   tcpinject_init();
-   tcpprint_init();
+   //tcpecho_init();
+   //tcpinject_init();
+   //tcpprint_init();
    //- common
-   ohlone_init();
+   //ohlone_init();
    //- board-specific
    //+++++ UDP
    //- debug
-   udpecho_init();
-   udpinject_init();
-   udpprint_init();
+   //udpecho_init();
+   //udpinject_init();
+   //udpprint_init();
    //- common
    //udprand_init();
-   //udplatency_init();
-   udpstorm_init();
+   udplatency_init();
+   //udpstorm_init();
    //- board-specific
    //imu_init();
    //+++++ CoAP
    //- debug
    //- core
    //- common
-   rinfo_init();
+   //rinfo_init();
    //rrt_init();
-   rleds__init();
-   rwellknown_init();
-   r6t_init();
+   //rleds__init();
+   //rwellknown_init();
+   //r6t_init();
    //rreg_init();
    //rex_init();
    //rrube_init();
@@ -148,9 +149,9 @@ void openwsn_init() {
    //rt_init();
    //rxl1_init();
    
-   openserial_printInfo(
-      COMPONENT_OPENWSN,ERR_BOOTED,
-      (errorparameter_t)0,
-      (errorparameter_t)0
-   );
+//   openserial_printInfo(
+//      COMPONENT_OPENWSN,ERR_BOOTED,
+//      (errorparameter_t)0,
+//      (errorparameter_t)0
+//   );
 }

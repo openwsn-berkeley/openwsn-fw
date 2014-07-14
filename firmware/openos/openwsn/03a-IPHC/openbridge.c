@@ -27,9 +27,9 @@ void openbridge_triggerData() {
    // MAC header is 13B + 8 next hop so we cannot accept packets that are longer than 118B
    if (numDataBytes>(136 - 21) || numDataBytes<8){
    //to prevent too short or too long serial frames to kill the stack  
-       openserial_printError(COMPONENT_OPENBRIDGE,ERR_INPUTBUFFER_LENGTH,
-                   (errorparameter_t)numDataBytes,
-                   (errorparameter_t)0);
+//       openserial_printError(COMPONENT_OPENBRIDGE,ERR_INPUTBUFFER_LENGTH,
+//                   (errorparameter_t)numDataBytes,
+//                   (errorparameter_t)0);
        return;
    }
   
@@ -39,9 +39,9 @@ void openbridge_triggerData() {
    if (idmanager_getIsBridge()==TRUE && numDataBytes>0) {
       pkt = openqueue_getFreePacketBuffer(COMPONENT_OPENBRIDGE);
       if (pkt==NULL) {
-         openserial_printError(COMPONENT_OPENBRIDGE,ERR_NO_FREE_PACKET_BUFFER,
-                               (errorparameter_t)0,
-                               (errorparameter_t)0);
+//         openserial_printError(COMPONENT_OPENBRIDGE,ERR_NO_FREE_PACKET_BUFFER,
+//                               (errorparameter_t)0,
+//                               (errorparameter_t)0);
          return;
       }
       //admin
@@ -56,9 +56,9 @@ void openbridge_triggerData() {
       
       //this is to catch the too short packet. remove it after fw-103 is solved.
       if (numDataBytes<16){
-              openserial_printError(COMPONENT_OPENBRIDGE,ERR_INVALIDSERIALFRAME,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//              openserial_printError(COMPONENT_OPENBRIDGE,ERR_INVALIDSERIALFRAME,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       }        
       //send
       if ((iphc_sendFromBridge(pkt))==E_FAIL) {
@@ -70,9 +70,9 @@ void openbridge_triggerData() {
 void openbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_OPENBRIDGE;
    if (msg->creator!=COMPONENT_OPENBRIDGE) {
-      openserial_printError(COMPONENT_OPENBRIDGE,ERR_UNEXPECTED_SENDDONE,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_OPENBRIDGE,ERR_UNEXPECTED_SENDDONE,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
    }
    openqueue_freePacketBuffer(msg);
 }
