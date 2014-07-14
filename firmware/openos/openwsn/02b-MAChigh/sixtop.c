@@ -26,6 +26,7 @@ owerror_t     sixtop_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint
 void          sendAdv(void);
 void          sendKa(void);
 void          sixtop_timer_cb(void);
+void          sixtop_timeout_timer_cb(void);
 bool          sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE);
 void          sixtop_linkResponse(
    bool                                success,
@@ -103,6 +104,13 @@ void sixtop_init() {
       TIMER_PERIODIC,
       TIME_MS,
       sixtop_timer_cb
+   );
+   
+   sixtop_vars.TOtimerId = opentimers_start(
+      SIXTOP_PERIOD,
+      TIMER_ONESHOT,
+      TIME_MS,
+      sixtop_timeout_timer_cb                                  
    );
 }
 
@@ -208,6 +216,12 @@ void    sixtop_sendDone(OpenQueueEntry_t* msg, owerror_t error){
   ptr = msg->l2_scheduleIE_cellObjects;
   numOfCells = msg->l2_scheduleIE_numOfCells;
   msg->owner = COMPONENT_RESERVATION;
+  
+  if(error == E_FAIL) {
+    sixtop_vars.State = S_IDLE;
+    openqueue_freePacketBuffer(msg);
+    return;
+  }
 
   switch (sixtop_vars.State)
   {
@@ -374,6 +388,9 @@ void sixtop_linkRequest(open_addr_t*  sixtopNeighAddr, uint16_t bandwidth) {
    sixtop_send(sixtopPkt);
    
    sixtop_vars.State = S_WAIT_SIXTOP_LINKREQUEST_SENDDONE;
+   
+   //start the timeout timer
+   opentimers_setPeriod(sixtop_vars.TOtimerId,TIME_MS,SIXTOP_PERIOD);
 }
 
 void sixtop_linkResponse(bool success, open_addr_t* tempNeighbor,uint8_t bandwidth, sixtop_generalschedule_subIE_t* schedule_ie){
@@ -1053,6 +1070,11 @@ port_INLINE void sendKa() {
 
 void sixtop_timer_cb() {
    scheduler_push_task(timers_sixtop_fired,TASKPRIO_SIXTOP);
+}
+
+void sixtop_timeout_timer_cb() {
+  // timeout timer fired, reset the state of sixtop to idle
+   sixtop_vars.State = S_IDLE;
 }
 //========================== private =========================================
 

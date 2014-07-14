@@ -42,7 +42,7 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-#define SIXTOP_PERIOD 10000
+#define SIXTOP_PERIOD 2000
 #define NO_UPPER_LAYER_CALLING_SIXTOP // this is used for debugging reservation
 
 //=========================== module variables ================================
@@ -54,6 +54,7 @@ typedef struct {
    uint8_t              dsn;                  // current data sequence number
    uint8_t              MacMgtTaskCounter;    // counter to determine what management task to do
    opentimer_id_t       timerId;
+   opentimer_id_t       TOtimerId;            // TimeOut timer id
    uint16_t             kaPeriod;             // period of sending KA
    sixtop_state_t       State;
    uint8_t              commandID;
