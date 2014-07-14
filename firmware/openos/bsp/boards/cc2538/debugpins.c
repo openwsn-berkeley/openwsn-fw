@@ -28,7 +28,7 @@
 
 //=========================== prototypes ======================================
 
-port_INLINE void bspDBpinToggle(uint32_t base,uint8_t ui8Pin);
+void bspDBpinToggle(uint32_t base,uint8_t ui8Pin);
 
 //=========================== public ==========================================
 
@@ -42,7 +42,7 @@ void debugpins_init() {
 
 // PA4
 void debugpins_frame_toggle() {
-	bspDBpinToggle(BSP_PINA_BASE, BSP_PINA_4);
+   bspDBpinToggle(BSP_PINA_BASE, BSP_PINA_4);
 }
 void debugpins_frame_clr() {
     GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_4, 0);
@@ -108,7 +108,7 @@ void debugpins_radio_set() {
 
 //------------ private ------------//
 
-port_INLINE void bspDBpinToggle(uint32_t base, uint8_t ui8Pin)
+void bspDBpinToggle(uint32_t base, uint8_t ui8Pin)
 {
     //
     // Get current pin values of selected bits

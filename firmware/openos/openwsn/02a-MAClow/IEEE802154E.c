@@ -12,11 +12,9 @@
 #include "leds.h"
 #include "neighbors.h"
 #include "debugpins.h"
-#include "res.h"
+#include "sixtop.h"
 #include "adaptive_sync.h"
-//START OF TELEMATICS CODE
-#include "security.h"
-//END OF TELEMATICS CODE
+#include "processIE.h"
 
 //=========================== variables =======================================
 
@@ -169,10 +167,6 @@ void isr_ieee154e_newSlot() {
    radio_setTimerPeriod(TsSlotDuration);
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
-    	  //START OF TELEMATICS CODE
-		 //If I'm the DAG Root, here I can store the Key
-		 scheduler_push_task(coordinator_init,TASKPRIO_RESNOTIF_RX);
-		 //END OF TELEMATICS CODE
          changeIsSync(TRUE);
       } else {
          activity_synchronize_newSlot();
@@ -357,14 +351,14 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_asn() {
-//   asn_t output;
-//   output.byte4         =  ieee154e_vars.asn.byte4;
-//   output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
-//   output.bytes0and1    =  ieee154e_vars.asn.bytes0and1;
-//   openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(output));
-//   return TRUE;
-//}
+bool debugPrint_asn() {
+   asn_t output;
+   output.byte4         =  ieee154e_vars.asn.byte4;
+   output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
+   output.bytes0and1    =  ieee154e_vars.asn.bytes0and1;
+   openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(output));
+   return TRUE;
+}
 
 /**
 \brief Trigger this module to print status information, over serial.
@@ -374,12 +368,12 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_isSync() {
-//   uint8_t output=0;
-//   output = ieee154e_vars.isSync;
-//   openserial_printStatus(STATUS_ISSYNC,(uint8_t*)&output,sizeof(uint8_t));
-//   return TRUE;
-//}
+bool debugPrint_isSync() {
+   uint8_t output=0;
+   output = ieee154e_vars.isSync;
+   openserial_printStatus(STATUS_ISSYNC,(uint8_t*)&output,sizeof(uint8_t));
+   return TRUE;
+}
 
 /**
 \brief Trigger this module to print status information, over serial.
@@ -389,11 +383,11 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_macStats() {
-//   // send current stats over serial
-//   openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
-//   return TRUE;
-//}
+bool debugPrint_macStats() {
+   // send current stats over serial
+   openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
+   return TRUE;
+}
 
 //=========================== private =========================================
 
@@ -536,14 +530,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // parse the IEEE802.15.4 header (synchronize, end of frame)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
       
-      //START OF TELEMATICS CODE
-      //if I'm not the DAG Root and I'm not synch, I can store the Key
-		if(idmanager_getIsDAGroot()==FALSE && ieee154e_isSynch() == FALSE
-		   && ieee802514_header.frameType == IEEE154_TYPE_BEACON){
-			remote_init(ieee802514_header);
-	  }
-	  //END OF TELEMATICS CODE
-
       // break if invalid IEEE802.15.4 header
       if (ieee802514_header.valid==FALSE) {
          // break from the do-while loop and execute the clean-up code below
@@ -627,11 +613,11 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
   ptr++;
   temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<< 8);
   ptr++;
-  *lenIE = ptr; 
+  *lenIE = ptr;
   if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) == IEEE802154E_DESC_TYPE_PAYLOAD_IE){
   //payload IE - last bit is 1
      len=(temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
-     gr_elem_id= (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT; 
+     gr_elem_id= (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT;
   }else {
   //header IE - last bit is 0
      len=(temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK)>>IEEE802154E_DESC_LEN_HEADER_IE_SHIFT;
@@ -671,7 +657,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
           }
           break;
         case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
-          ieee154e_processSlotframeLinkIE(pkt,&ptr); 
+            processIE_retrieveSlotframeLinkIE(pkt,&ptr);
           break;
         case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
           //TODO
@@ -711,52 +697,6 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE)
                             (errorparameter_t)1);
   }
   return TRUE;
-}
-
-port_INLINE void ieee154e_processSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr){
- uint8_t numSlotFrames,i,j,localptr;
- slotframelink_IE_t sfInfo; 
- linkInfo_subIE_t linkInfo;
- localptr=*ptr; 
-  // number of slot frames 1B
-  numSlotFrames = *((uint8_t*)(pkt->payload)+localptr);
-  localptr++;
-  // for each slotframe
-  i=0;
-  while(i < numSlotFrames){
-   //1-slotftramehandle 1B
-    sfInfo.slotframehandle=*((uint8_t*)(pkt->payload)+localptr);
-    localptr++;
-    //2-slotframe size 2B
-    sfInfo.slotframesize = *((uint8_t*)(pkt->payload)+localptr);
-    localptr++;
-    sfInfo.slotframesize |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
-    localptr++;;
-    //3-number of links 1B   
-    sfInfo.numlinks= *((uint8_t*)(pkt->payload)+localptr);
-    localptr++;
-   
-    for (j=0;j<sfInfo.numlinks;j++){
-      //for each link 5Bytes
-       //TimeSlot 2B
-       linkInfo.tsNum = *((uint8_t*)(pkt->payload)+localptr);
-       localptr++;
-       linkInfo.tsNum  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
-       localptr++;
-       //Ch.Offset 2B
-       linkInfo.choffset = *((uint8_t*)(pkt->payload)+localptr);
-       localptr++;
-       linkInfo.choffset  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
-       localptr++;
-       //LinkOption bitmap 1B
-       linkInfo.linkoptions = *((uint8_t*)(pkt->payload)+localptr);
-       localptr++;
-       //xv poipoi
-       //TODO - inform schedule of that link so it can update if needed.
-    } 
-    i++;
-  } 
-  *ptr=localptr;      
 }
 
 //======= TX
@@ -844,7 +784,7 @@ port_INLINE void activity_ti1ORri1() {
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
-            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;            
+            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;         
             //copy synch IE  -- should be Little endian???
             // fill in the ASN field of the ADV
             ieee154e_getAsn(syn_IE.asn);
@@ -1102,8 +1042,8 @@ port_INLINE void activity_tie5() {
       // indicate tx fail if no more retries left
       notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
    } else {
-      // return packet to the virtual COMPONENT_RES_TO_IEEE802154E component
-      ieee154e_vars.dataToSend->owner = COMPONENT_RES_TO_IEEE802154E;
+      // return packet to the virtual COMPONENT_SIXTOP_TO_IEEE802154E component
+      ieee154e_vars.dataToSend->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
    }
    
    // reset local variable
@@ -1416,18 +1356,20 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       }
       
       // store header details in packet buffer
-      ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
-      ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
+      ieee154e_vars.dataReceived->l2_frameType      = ieee802514_header.frameType;
+      ieee154e_vars.dataReceived->l2_dsn            = ieee802514_header.dsn;
+      ieee154e_vars.dataReceived->l2_IEListPresent  = ieee802514_header.ieListPresent;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
       
       // handle IEs xv poipoi
-      //reset join priority 
-      
+      // reset join priority 
+      // retrieve IE in sixtop
       if ((ieee802514_header.valid==TRUE &&
           ieee802514_header.ieListPresent==TRUE && 
+          ieee802514_header.frameType==IEEE154_TYPE_BEACON && // if it is not a beacon and have ie, the ie will be processed in sixtop
           packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
           ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
           //log  that the packet is not carrying IEs
@@ -1619,7 +1561,7 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    
    // cancel rt8
    radiotimer_cancel();
-   
+  
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
    
@@ -1865,9 +1807,9 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
    memcpy(&packetSent->l2_asn,&ieee154e_vars.asn,sizeof(asn_t));
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
-   packetSent->owner              = COMPONENT_IEEE802154E_TO_RES;
+   packetSent->owner              = COMPONENT_IEEE802154E_TO_SIXTOP;
    // post RES's sendDone task
-   scheduler_push_task(task_resNotifSendDone,TASKPRIO_RESNOTIF_TXDONE);
+   scheduler_push_task(task_sixtopNotifSendDone,TASKPRIO_SIXTOP_NOTIF_TXDONE);
    // wake up the scheduler
    SCHEDULER_WAKEUP();
 }
@@ -1878,11 +1820,11 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    // indicate reception to the schedule, to keep statistics
    schedule_indicateRx(&packetReceived->l2_asn);
    // associate this packet with the virtual component
-   // COMPONENT_IEEE802154E_TO_RES so RES can knows it's for it
-   packetReceived->owner          = COMPONENT_IEEE802154E_TO_RES;
+   // COMPONENT_IEEE802154E_TO_SIXTOP so sixtop can knows it's for it
+   packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;
 
    // post RES's Receive task
-   scheduler_push_task(task_resNotifReceive,TASKPRIO_RESNOTIF_RX);
+   scheduler_push_task(task_sixtopNotifReceive,TASKPRIO_SIXTOP_NOTIF_RX);
    // wake up the scheduler
    SCHEDULER_WAKEUP();
 }
@@ -2040,8 +1982,8 @@ void endSlot() {
          // indicate tx fail if no more retries left
          notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
       } else {
-         // return packet to the virtual COMPONENT_RES_TO_IEEE802154E component
-         ieee154e_vars.dataToSend->owner = COMPONENT_RES_TO_IEEE802154E;
+         // return packet to the virtual COMPONENT_SIXTOP_TO_IEEE802154E component
+         ieee154e_vars.dataToSend->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
       }
       
       // reset local variable

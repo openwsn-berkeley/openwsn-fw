@@ -17,8 +17,9 @@ sources_c = [
     os.path.join('02a-MAClow','TI_aes.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
-    os.path.join('02b-MAChigh','res.c'),
+    os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
+    os.path.join('02b-MAChigh','sixtop.c'),
     #=== 02.5-MPLS
     # TODO
     #=== 03a-IPHC
@@ -78,8 +79,9 @@ sources_h = [
     os.path.join('02a-MAClow','TI_aes.h'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
-    os.path.join('02b-MAChigh','res.h'),
+    os.path.join('02b-MAChigh','processIE.h'),
     os.path.join('02b-MAChigh','schedule.h'),
+    os.path.join('02b-MAChigh','sixtop.h'),
     #=== 02.5-MPLS
     # TODO
     #=== 03a-IPHC
