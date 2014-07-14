@@ -393,7 +393,19 @@ owerror_t   schedule_removeActiveSlot(slotOffset_t   slotOffset, open_addr_t*   
     return outcome;
 }
 
-
+bool schedule_checkAvailableSchedule(uint16_t slotOffset){
+  scheduleEntry_t* tempScheduleEntry = schedule_vars.currentScheduleEntry;
+  do
+  {
+    if(slotOffset == tempScheduleEntry->slotOffset){
+      return FALSE;
+    }
+    
+    tempScheduleEntry = tempScheduleEntry->next;
+    
+  }while(tempScheduleEntry != schedule_vars.currentScheduleEntry);
+  return TRUE;
+}
 
 
 //=== from IEEE802154E: reading the schedule and updating statistics

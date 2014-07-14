@@ -375,7 +375,7 @@ void sixtop_linkResponse(bool success, open_addr_t* tempNeighbor,uint8_t bandwid
     uint8_t bw;
     uint8_t type,frameID,flag;
     sixtop_linkInfo_subIE_t* linklist;
-    payload_IE_descriptor_t payload_IE_desc;    
+    payload_IE_descriptor_t payload_IE_desc;  
     
     // get parameters for scheduleIE
     type = schedule_ie->type;
@@ -491,7 +491,6 @@ void sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr){
 
 bool sixtop_availableCells(uint8_t frameID, uint8_t numOfCells, sixtop_linkInfo_subIE_t* linklist, uint8_t bandwidth){
   uint8_t i=0,bw=bandwidth;
-  slotinfo_element_t   info;
   
   if(bw == 0 || bw>MAXSCHEDULEDCELLS || numOfCells>MAXSCHEDULEDCELLS){
     // log wrong parameter error TODO
@@ -500,8 +499,7 @@ bool sixtop_availableCells(uint8_t frameID, uint8_t numOfCells, sixtop_linkInfo_
   }
     
   do{
-    schedule_getSlotInfo(linklist[i].tsNum,NULL,&info);
-    if(info.link_type == CELLTYPE_OFF){
+    if(schedule_checkAvailableSchedule(linklist[i].tsNum) == TRUE){
       bw--;
     }
     i++;

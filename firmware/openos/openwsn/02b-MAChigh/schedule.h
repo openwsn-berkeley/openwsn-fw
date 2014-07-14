@@ -163,6 +163,7 @@ void               schedule_getSlotInfo(slotOffset_t   slotOffset,
 
 owerror_t          schedule_removeActiveSlot(slotOffset_t   slotOffset,                      
                               open_addr_t*   neighbor);
+bool               schedule_checkAvailableSchedule(uint16_t slotOffset);
 
 
 // from IEEE802154E
