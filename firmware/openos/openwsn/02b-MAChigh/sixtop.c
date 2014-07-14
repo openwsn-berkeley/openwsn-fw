@@ -60,17 +60,18 @@ bool          sixtop_availableCells(
    sixtop_linkInfo_subIE_t* linklist, 
    uint8_t bandwidth
 );
-void          sixtop_uResGenerateCandidataLinkList(
+bool          sixtop_uResGenerateCandidataLinkList(
    uint8_t* type,
    uint8_t* frameID,
    uint8_t* flag,
    sixtop_linkInfo_subIE_t* linklist
 );
-void          sixtop_uResGenerateRemoveLinkList(
+bool          sixtop_uResGenerateRemoveLinkList(
    uint8_t* type,
    uint8_t* frameID,
    uint8_t* flag,
-   sixtop_linkInfo_subIE_t* linklist
+   sixtop_linkInfo_subIE_t* linklist,
+   open_addr_t* neighbor
 );
 void          sixtop_addLinksToSchedule(
    uint8_t slotframeID,
@@ -309,6 +310,7 @@ void sixtop_linkRequest(open_addr_t*  sixtopNeighAddr, uint16_t bandwidth) {
   OpenQueueEntry_t* sixtopPkt;
   uint8_t len=0;
   uint8_t type,frameID,flag;
+  bool success;
   sixtop_linkInfo_subIE_t linklist[MAXSCHEDULEDCELLS];
   payload_IE_descriptor_t payload_IE_desc;
   
@@ -321,6 +323,14 @@ void sixtop_linkRequest(open_addr_t*  sixtopNeighAddr, uint16_t bandwidth) {
   if(sixtopNeighAddr==NULL){
      return;
   }
+  
+   //generate candidata links
+   success = sixtop_uResGenerateCandidataLinkList(&type,&frameID,&flag,linklist);
+   
+   if(success == FALSE) {
+     //there is no cell available to be schedule
+     return;
+   }
     // get a free packet buffer
     sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
   
@@ -339,9 +349,6 @@ void sixtop_linkRequest(open_addr_t*  sixtopNeighAddr, uint16_t bandwidth) {
    sixtopPkt->owner   = COMPONENT_RESERVATION;
    
    memcpy(&(sixtopPkt->l2_nextORpreviousHop),sixtopNeighAddr,sizeof(open_addr_t));
-   
-   //generate candidata links
-   sixtop_uResGenerateCandidataLinkList(&type,&frameID,&flag,linklist);
    
    //set SubFrameAndLinkIE
    len += processIE_prependSixtopGeneralSheduleIE(sixtopPkt,type,frameID,flag,linklist);
@@ -437,6 +444,7 @@ void sixtop_linkResponse(bool success, open_addr_t* tempNeighbor,uint8_t bandwid
 void sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr){
   OpenQueueEntry_t* sixtopPkt;
   uint8_t len=0;
+  bool success;
   uint8_t type,frameID,flag;
   sixtop_linkInfo_subIE_t linklist[MAXSCHEDULEDCELLS];
   payload_IE_descriptor_t payload_IE_desc;
@@ -463,7 +471,14 @@ void sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr){
          
     memcpy(&(sixtopPkt->l2_nextORpreviousHop),sixtopNeighAddr,sizeof(open_addr_t));
     
-    sixtop_uResGenerateRemoveLinkList(&type, &frameID, &flag,linklist);
+    success = sixtop_uResGenerateRemoveLinkList(&type, &frameID, &flag, linklist, sixtopNeighAddr);
+    
+    if(success == FALSE){
+      // free the packet
+      openqueue_freePacketBuffer(sixtopPkt);
+      sixtop_vars.State = S_IDLE;
+      return;
+    }
     //set SubFrameAndLinkIE
     len += processIE_prependSixtopGeneralSheduleIE(sixtopPkt,type,frameID,flag,linklist);
     //set uResopcodeIE
@@ -517,26 +532,54 @@ bool sixtop_availableCells(uint8_t frameID, uint8_t numOfCells, sixtop_linkInfo_
   }
 }
 
-void sixtop_uResGenerateCandidataLinkList(uint8_t* type,uint8_t* frameID,uint8_t* flag, sixtop_linkInfo_subIE_t* linklist){
+bool sixtop_uResGenerateCandidataLinkList(uint8_t* type,uint8_t* frameID,uint8_t* flag, sixtop_linkInfo_subIE_t* linklist){
+  uint8_t i,j=0;
   //implement your algorithm here to generate candidate link list
   *type = 1;
   *frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+  *flag = 1; // the cells listed in linklist are available to be schedule.
   
-  linklist[0].tsNum = 8;
-  linklist[0].choffset = 0;
-  linklist[0].linkoptions = CELLTYPE_TX;
-  *flag = 1;
+  for(i=0;i<MAXACTIVESLOTS;i++){
+    if(schedule_checkAvailableSchedule(i) == TRUE){
+      linklist[j].tsNum = i;
+      linklist[j].choffset = 0;  // default channeloffset
+      linklist[j].linkoptions = CELLTYPE_TX; // always schedule tx 
+      j++;
+      if(j==MAXSCHEDULEDCELLS){
+        break;
+      }
+    }
+  }
+  if(j==0){
+    return FALSE;
+  }else{
+    return TRUE;
+  }
 }
 
-void sixtop_uResGenerateRemoveLinkList(uint8_t* type,uint8_t* frameID,uint8_t* flag,sixtop_linkInfo_subIE_t* linklist){
-  //implement your algorithm here to geenreate candidata link list
+bool sixtop_uResGenerateRemoveLinkList(uint8_t* type,uint8_t* frameID,uint8_t* flag,sixtop_linkInfo_subIE_t* linklist,open_addr_t* neighbor){
+  uint8_t i,j=0;
+  //implement your algorithm here to generate candidata link list
   *type = 1;
   *frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
-  
-  linklist[0].tsNum = 8;
-  linklist[0].choffset = 0;
-  linklist[0].linkoptions = CELLTYPE_TX;
   *flag = 1;
+  slotinfo_element_t  info;
+  
+  for(i=0;i<MAXACTIVESLOTS;i++){
+    schedule_getSlotInfo(i,neighbor,&info);
+    if(info.link_type == CELLTYPE_TX){
+      linklist[j].tsNum = i;
+      linklist[j].choffset = info.channelOffset;  // default channeloffset
+      linklist[j].linkoptions = CELLTYPE_TX; // always schedule tx 
+      j++;
+      break; // only delete one cell
+    }
+  }
+  if(j==0){
+    return FALSE;
+  }else{
+    return TRUE;
+  }
 }
 
 void sixtop_addLinksToSchedule(uint8_t slotframeID,uint8_t numOfLinks,sixtop_linkInfo_subIE_t* linklist,open_addr_t* previousHop,uint8_t state){
