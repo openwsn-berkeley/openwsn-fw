@@ -545,7 +545,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
       
       // handle IEs -- xv poipoi
-      // break if invalid ADV
+      // break if invalid EB
       if ((ieee802514_header.valid==TRUE                                                        && 
           ieee802514_header.ieListPresent==TRUE                                                 &&
           ieee802514_header.frameType==IEEE154_TYPE_BEACON                                      && 
@@ -563,7 +563,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // toss the IEs including Synch
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
       
-      // synchronize (for the first time) to the sender's ADV
+      // synchronize (for the first time) to the sender's EB
       synchronizePacket(ieee154e_vars.syncCapturedTime);
       
       // declare synchronized
@@ -574,7 +574,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
                             (errorparameter_t)ieee154e_vars.slotOffset,
                             (errorparameter_t)0);
       
-      // send received ADV up the stack so RES can update statistics (synchronizing)
+      // send received EB up the stack so RES can update statistics (synchronizing)
       notif_receive(ieee154e_vars.dataReceived);
       
       // clear local variable
@@ -750,7 +750,7 @@ port_INLINE void activity_ti1ORri1() {
    cellType_t  cellType;
    open_addr_t neighbor;
    uint8_t  i;
-   uint8_t  advCheck;
+   uint8_t  willSendEB;
    synch_IE_t  syn_IE;
 
    // increment ASN (do this first so debug pins are in sync)
@@ -827,16 +827,16 @@ port_INLINE void activity_ti1ORri1() {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
          }
-         advCheck=FALSE;
+         willSendEB=FALSE;
          if (ieee154e_vars.dataToSend==NULL) {
             if (cellType==CELLTYPE_TX) {
                // abort
                endSlot();
                break;
             } else {
-               // look for an ADV packet in the queue
+               // look for an EB packet in the queue
                ieee154e_vars.dataToSend = openqueue_macGetAdvPacket();
-               advCheck=TRUE;
+               willSendEB=TRUE;
             }
          }
          if (ieee154e_vars.dataToSend!=NULL) {   // I have a packet to send
@@ -844,9 +844,8 @@ port_INLINE void activity_ti1ORri1() {
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
-            if (advCheck) { // I will be sending an ADV
-               //copy synch IE  -- should be Little endian???
-               // fill in the ASN field of the ADV
+            if (willSendEB) { // I will be sending an EB
+               // fill in the ASN field of the EB
                ieee154e_getAsn(syn_IE.asn);
                syn_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank)
                memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&syn_IE,sizeof(synch_IE_t));
@@ -1719,7 +1718,7 @@ port_INLINE void asnStoreFromAdv(uint8_t* asn) {
    // determine the current slotOffset
    /*
    Note: this is a bit of a hack. Normally, slotOffset=ASN%slotlength. But since
-   the ADV is exchanged in slot 0, we know that we're currently at slotOffset==0
+   the EB is exchanged in slot 0, we know that we're currently at slotOffset==0
    */
    ieee154e_vars.slotOffset       = 0;
    schedule_syncSlotOffset(ieee154e_vars.slotOffset);
