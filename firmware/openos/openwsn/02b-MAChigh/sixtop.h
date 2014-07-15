@@ -61,18 +61,20 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
+// admin
 void      sixtop_init(void);
-bool      debugPrint_myDAGrank(void);
-// configuration
-void      sixtop_setKaPeriod(uint16_t kaPeriod);
-// scheduling
-void      sixtop_linkRequest(open_addr_t* sixtopNeighAddr,uint16_t bandwidth);
-void      sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr);
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
+void      sixtop_linkRequest(open_addr_t* sixtopNeighAddr,uint16_t bandwidth);
+void      sixtop_linkResponse(bool success,open_addr_t* tempNeighbor,uint8_t bandwidth,sixtop_generalschedule_subIE_t* schedule_ie);
+void      sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr);
 // from lower layer
 void      task_sixtopNotifSendDone(void);
 void      task_sixtopNotifReceive(void);
+// helper functions
+void      sixtop_setKaPeriod(uint16_t kaPeriod);
+// debugging
+bool      debugPrint_myDAGrank(void);
 
 /**
 \}

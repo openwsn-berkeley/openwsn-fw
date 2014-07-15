@@ -22,19 +22,19 @@ sixtop_vars_t sixtop_vars;
 
 //=========================== prototypes ======================================
 
-void          sixtop_sendDone(OpenQueueEntry_t* msg, owerror_t error);
-owerror_t     sixtop_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint8_t frameVersion);
+// sixtop command adv/keep alive
 void          sendAdv(void);
 void          sendKa(void);
+
+// timer interrupt callback
 void          sixtop_timer_cb(void);
 void          sixtop_timeout_timer_cb(void);
+
+// process the packet if it was related to sixtop
+void          sixtop_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 bool          sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE);
-void          sixtop_linkResponse(
-   bool                                success,
-   open_addr_t*                        tempNeighbor,
-   uint8_t                             bandwidth,
-   sixtop_generalschedule_subIE_t*     schedule_ie
-);
+
+// process the packet if it was a packet related to link reservation
 void          sixtop_notifyReceiveCommand(
    sixtop_opcode_subIE_t*              opcode_ie, 
    sixtop_bandwidth_subIE_t*           bandwidth_ie, 
@@ -56,6 +56,10 @@ void          sixtop_notifyReceiveRemoveLinkRequest(
    open_addr_t*                        addr
 );
 
+// send internal
+owerror_t     sixtop_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint8_t frameVersion);
+
+// help functions
 bool          sixtop_availableCells(
    uint8_t frameID, 
    uint8_t numOfCells, 
