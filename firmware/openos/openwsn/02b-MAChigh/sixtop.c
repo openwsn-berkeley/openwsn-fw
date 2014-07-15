@@ -22,6 +22,7 @@ sixtop_vars_t sixtop_vars;
 
 //=========================== prototypes ======================================
 
+void          sixtop_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 owerror_t     sixtop_send_internal(OpenQueueEntry_t* msg, uint8_t iePresent,uint8_t frameVersion);
 void          sendAdv(void);
 void          sendKa(void);
@@ -107,7 +108,7 @@ void sixtop_init() {
    );
    
    sixtop_vars.TOtimerId = opentimers_start(
-      SIXTOP_PERIOD,
+      SIXTOP2SIXTOP_TIMEOUT_MS,
       TIMER_ONESHOT,
       TIME_MS,
       sixtop_timeout_timer_cb                                  
@@ -129,17 +130,7 @@ bool debugPrint_myDAGrank() {
    return TRUE;
 }
 
-//======= from upper layer
-
-owerror_t sixtop_send(OpenQueueEntry_t *msg) {
-   msg->owner        = COMPONENT_SIXTOP;
-   msg->l2_frameType = IEEE154_TYPE_DATA;
-   if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
-      return sixtop_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
-   } else {
-      return sixtop_send_internal(msg,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
-   }
-}
+//======= configuration
 
 void sixtop_setKaPeriod(uint16_t kaPeriod) {
    if(kaPeriod > KATIMEOUT) {
@@ -149,183 +140,7 @@ void sixtop_setKaPeriod(uint16_t kaPeriod) {
    } 
 }
 
-//======= from lower layer
-
-void task_sixtopNotifSendDone() {
-   OpenQueueEntry_t* msg;
-   // get recently-sent packet from openqueue
-   msg = openqueue_sixtopGetSentPacket();
-   if (msg==NULL) {
-      // log the error
-      openserial_printCritical(COMPONENT_SIXTOP,ERR_NO_SENT_PACKET,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
-      // abort
-      return;
-   }
-   // declare it as mine
-   msg->owner = COMPONENT_SIXTOP;
-   // indicate transmission (to update statistics)
-   if (msg->l2_sendDoneError==E_SUCCESS) {
-      neighbors_indicateTx(&(msg->l2_nextORpreviousHop),
-                           msg->l2_numTxAttempts,
-                           TRUE,
-                           &msg->l2_asn);
-   } else {
-      neighbors_indicateTx(&(msg->l2_nextORpreviousHop),
-                           msg->l2_numTxAttempts,
-                           FALSE,
-                           &msg->l2_asn);
-   }
-   // send the packet to where it belongs
-   if (msg->creator == COMPONENT_SIXTOP) {
-      if (msg->l2_frameType==IEEE154_TYPE_BEACON) {
-         // this is a ADV
-         
-         // not busy sending ADV anymore
-         sixtop_vars.busySendingAdv = FALSE;
-      } else {
-         // this is a KA
-         
-         // not busy sending KA anymore
-         sixtop_vars.busySendingKa = FALSE;
-      }
-      // discard packets
-      openqueue_freePacketBuffer(msg);
-      // restart a random timer
-      sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
-      opentimers_setPeriod(sixtop_vars.timerId,
-                           TIME_MS,
-                           sixtop_vars.periodMaintenance);
-   } else {
-     if(msg->creator == COMPONENT_RESERVATION) {
-       sixtop_sendDone(msg,msg->l2_sendDoneError);
-     }
-     else
-      // send the rest up the stack
-      iphc_sendDone(msg,msg->l2_sendDoneError);
-   }
-}
-
-void    sixtop_sendDone(OpenQueueEntry_t* msg, owerror_t error){
-  uint8_t i,numOfCells;
-  uint8_t* ptr;
-  sixtop_linkInfo_subIE_t linklist[MAXSCHEDULEDCELLS];
-  
-  INTERRUPT_DECLARATION();
-  DISABLE_INTERRUPTS();
-  
-  memset(linklist,0,MAXSCHEDULEDCELLS*sizeof(sixtop_linkInfo_subIE_t));
-  
-  ptr = msg->l2_scheduleIE_cellObjects;
-  numOfCells = msg->l2_scheduleIE_numOfCells;
-  msg->owner = COMPONENT_RESERVATION;
-  
-  if(error == E_FAIL) {
-    sixtop_vars.State = S_IDLE;
-    openqueue_freePacketBuffer(msg);
-    return;
-  }
-
-  switch (sixtop_vars.State)
-  {
-  case S_WAIT_SIXTOP_LINKREQUEST_SENDDONE:
-    sixtop_vars.State = S_WAIT_FORRESPONSE;
-    break;
-  case S_WAIT_SIXTOP_LINKRESPONSE_SENDDONE:
-    sixtop_vars.State = S_IDLE;
-    break;
-  case S_WAIT_REMOVELINKREQUEST_SENDDONE:
-    if(error == E_SUCCESS && numOfCells > 0){
-        for (i=0;i<numOfCells;i++){
-         //TimeSlot 2B
-         linklist[i].tsNum = (*(ptr))<<8;
-         linklist[i].tsNum  |= *(ptr+1);
-         //Ch.Offset 2B
-         linklist[i].choffset = (*(ptr+2))<<8;
-         linklist[i].choffset  |= *(ptr+3);
-         //LinkOption bitmap 1B
-         linklist[i].linkoptions = *(ptr+4);
-         ptr += 5;
-      }
-      sixtop_removeLinksFromSchedule(msg->l2_scheduleIE_frameID,numOfCells,linklist,&(msg->l2_nextORpreviousHop));
-    }
-    sixtop_vars.State = S_IDLE;
-    leds_debug_off();
-    break;
-  default:
-    //log error
-    break;
-  }
-  
-  // discard reservation packets this component has created
-  openqueue_freePacketBuffer(msg);
-  
-  ENABLE_INTERRUPTS();
-}
-
-void task_sixtopNotifReceive() {
-   OpenQueueEntry_t* msg;
-   uint16_t lenIE=0;//len of IEs being received if any.
-   // get received packet from openqueue
-   msg = openqueue_sixtopGetReceivedPacket();
-   if (msg==NULL) {
-      // log the error
-      openserial_printCritical(COMPONENT_SIXTOP,ERR_NO_RECEIVED_PACKET,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
-      // abort
-      return;
-   }
-   
-   // declare it as mine
-   msg->owner = COMPONENT_SIXTOP;
-   
-   if(msg->l2_IEListPresent == IEEE154_IELIST_YES       &&
-      msg->l2_frameType == IEEE154_TYPE_DATA            &&
-      sixtop_processIEs(msg, &lenIE) == FALSE) {
-       // free the packet's RAM memory
-       openqueue_freePacketBuffer(msg);
-       //log error
-       return;
-   }
-   
-   // toss the IEs including Synch
-   packetfunctions_tossHeader(msg,lenIE);
-   
-   // indicate reception (to update statistics)
-   neighbors_indicateRx(&(msg->l2_nextORpreviousHop),
-                        msg->l1_rssi,
-                        &msg->l2_asn,
-                        msg->l2_joinPriorityPresent,
-                        msg->l2_joinPriority);
-   
-   msg->l2_joinPriorityPresent=FALSE; //reset it to avoid race conditions with this var.
-   
-   // send the packet up the stack, if it qualifies
-   switch (msg->l2_frameType) {
-      case IEEE154_TYPE_BEACON:
-      case IEEE154_TYPE_DATA:
-      case IEEE154_TYPE_CMD:
-         if (msg->length>0) {
-            // send to upper layer
-            iphc_receive(msg);
-         } else {
-            // free up the RAM
-            openqueue_freePacketBuffer(msg);
-         }
-         break;
-      case IEEE154_TYPE_ACK:
-      default:
-         // free the packet's RAM memory
-         openqueue_freePacketBuffer(msg);
-         // log the error
-         openserial_printError(COMPONENT_SIXTOP,ERR_MSG_UNKNOWN_TYPE,
-                               (errorparameter_t)msg->l2_frameType,
-                               (errorparameter_t)0);
-         break;
-   }
-}
+//======= scheduling
 
 void sixtop_linkRequest(open_addr_t*  sixtopNeighAddr, uint16_t bandwidth) {
   OpenQueueEntry_t* sixtopPkt;
@@ -401,8 +216,268 @@ void sixtop_linkRequest(open_addr_t*  sixtopNeighAddr, uint16_t bandwidth) {
    
    //start the timeout timer
    opentimers_restart(sixtop_vars.TOtimerId);
-   opentimers_setPeriod(sixtop_vars.TOtimerId,TIME_MS,SIXTOP_PERIOD);
+   opentimers_setPeriod(sixtop_vars.TOtimerId,TIME_MS,SIXTOP2SIXTOP_TIMEOUT_MS);
    ENABLE_INTERRUPTS();
+}
+
+void sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr){
+  OpenQueueEntry_t* sixtopPkt;
+  uint8_t len=0;
+  bool success;
+  uint8_t type,frameID,flag;
+  sixtop_linkInfo_subIE_t linklist[MAXSCHEDULEDCELLS];
+  payload_IE_descriptor_t payload_IE_desc;
+  
+  INTERRUPT_DECLARATION();
+  DISABLE_INTERRUPTS();
+  
+  memset(linklist,0,MAXSCHEDULEDCELLS*sizeof(sixtop_linkInfo_subIE_t));
+  
+  if(sixtop_vars.State != S_IDLE)
+    return;
+  
+  if(sixtopNeighAddr!=NULL){
+    // get a free packet buffer
+    sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
+  
+    if (sixtopPkt==NULL) {
+      openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
+      return;
+    }
+    // change state to sending removeLinkRequest Command
+    sixtop_vars.State = S_REMOVELINKREQUEST_SEND;
+    // declare ownership over that packet
+    sixtopPkt->creator = COMPONENT_RESERVATION;
+    sixtopPkt->owner   = COMPONENT_RESERVATION;
+         
+    memcpy(&(sixtopPkt->l2_nextORpreviousHop),sixtopNeighAddr,sizeof(open_addr_t));
+    
+    success = sixtop_uResGenerateRemoveLinkList(&type, &frameID, &flag, linklist, sixtopNeighAddr);
+    
+    if(success == FALSE){
+      // free the packet
+      openqueue_freePacketBuffer(sixtopPkt);
+      sixtop_vars.State = S_IDLE;
+      return;
+    }
+    //set SubFrameAndLinkIE
+    len += processIE_prependSixtopGeneralSheduleIE(sixtopPkt,type,frameID,flag,linklist);
+    //set uResopcodeIE
+    len += processIE_prependSixtopOpcodeIE(sixtopPkt,SIXTOP_REMOVE_SOFT_CELL_REQUEST);
+
+    packetfunctions_reserveHeaderSize(sixtopPkt, sizeof(payload_IE_descriptor_t));//the payload IE header
+    //prepare IE headers and copy them to the sixtopPkt
+   
+    payload_IE_desc.length_groupid_type  = len<<IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
+    payload_IE_desc.length_groupid_type |= (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); //
+   
+    //copy header into the packet
+    //little endian
+    sixtopPkt->payload[0]= payload_IE_desc.length_groupid_type & 0xFF;
+    sixtopPkt->payload[1]= (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+    
+    //I has an IE in my payload
+    sixtopPkt->l2_IEListPresent = IEEE154_IELIST_YES;
+  
+    sixtop_send(sixtopPkt);
+    
+    sixtop_vars.State = S_WAIT_REMOVELINKREQUEST_SENDDONE;
+  }
+  ENABLE_INTERRUPTS();
+}
+
+//======= from upper layer
+
+owerror_t sixtop_send(OpenQueueEntry_t *msg) {
+   msg->owner        = COMPONENT_SIXTOP;
+   msg->l2_frameType = IEEE154_TYPE_DATA;
+   if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
+      return sixtop_send_internal(msg,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
+   } else {
+      return sixtop_send_internal(msg,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
+   }
+}
+
+//======= from lower layer
+
+void task_sixtopNotifSendDone() {
+   OpenQueueEntry_t* msg;
+   // get recently-sent packet from openqueue
+   msg = openqueue_sixtopGetSentPacket();
+   if (msg==NULL) {
+      // log the error
+      openserial_printCritical(COMPONENT_SIXTOP,ERR_NO_SENT_PACKET,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
+      // abort
+      return;
+   }
+   // declare it as mine
+   msg->owner = COMPONENT_SIXTOP;
+   // indicate transmission (to update statistics)
+   if (msg->l2_sendDoneError==E_SUCCESS) {
+      neighbors_indicateTx(&(msg->l2_nextORpreviousHop),
+                           msg->l2_numTxAttempts,
+                           TRUE,
+                           &msg->l2_asn);
+   } else {
+      neighbors_indicateTx(&(msg->l2_nextORpreviousHop),
+                           msg->l2_numTxAttempts,
+                           FALSE,
+                           &msg->l2_asn);
+   }
+   // send the packet to where it belongs
+   if (msg->creator == COMPONENT_SIXTOP) {
+      if (msg->l2_frameType==IEEE154_TYPE_BEACON) {
+         // this is a ADV
+         
+         // not busy sending ADV anymore
+         sixtop_vars.busySendingAdv = FALSE;
+      } else {
+         // this is a KA
+         
+         // not busy sending KA anymore
+         sixtop_vars.busySendingKa = FALSE;
+      }
+      // discard packets
+      openqueue_freePacketBuffer(msg);
+      // restart a random timer
+      sixtop_vars.periodMaintenance = 872+(openrandom_get16b()&0xff);
+      opentimers_setPeriod(sixtop_vars.timerId,
+                           TIME_MS,
+                           sixtop_vars.periodMaintenance);
+   } else {
+     if(msg->creator == COMPONENT_RESERVATION) {
+       sixtop_sendDone(msg,msg->l2_sendDoneError);
+     }
+     else
+      // send the rest up the stack
+      iphc_sendDone(msg,msg->l2_sendDoneError);
+   }
+}
+
+void task_sixtopNotifReceive() {
+   OpenQueueEntry_t* msg;
+   uint16_t lenIE=0;//len of IEs being received if any.
+   // get received packet from openqueue
+   msg = openqueue_sixtopGetReceivedPacket();
+   if (msg==NULL) {
+      // log the error
+      openserial_printCritical(COMPONENT_SIXTOP,ERR_NO_RECEIVED_PACKET,
+                            (errorparameter_t)0,
+                            (errorparameter_t)0);
+      // abort
+      return;
+   }
+   
+   // declare it as mine
+   msg->owner = COMPONENT_SIXTOP;
+   
+   if(msg->l2_IEListPresent == IEEE154_IELIST_YES       &&
+      msg->l2_frameType == IEEE154_TYPE_DATA            &&
+      sixtop_processIEs(msg, &lenIE) == FALSE) {
+       // free the packet's RAM memory
+       openqueue_freePacketBuffer(msg);
+       //log error
+       return;
+   }
+   
+   // toss the IEs including Synch
+   packetfunctions_tossHeader(msg,lenIE);
+   
+   // indicate reception (to update statistics)
+   neighbors_indicateRx(&(msg->l2_nextORpreviousHop),
+                        msg->l1_rssi,
+                        &msg->l2_asn,
+                        msg->l2_joinPriorityPresent,
+                        msg->l2_joinPriority);
+   
+   msg->l2_joinPriorityPresent=FALSE; //reset it to avoid race conditions with this var.
+   
+   // send the packet up the stack, if it qualifies
+   switch (msg->l2_frameType) {
+      case IEEE154_TYPE_BEACON:
+      case IEEE154_TYPE_DATA:
+      case IEEE154_TYPE_CMD:
+         if (msg->length>0) {
+            // send to upper layer
+            iphc_receive(msg);
+         } else {
+            // free up the RAM
+            openqueue_freePacketBuffer(msg);
+         }
+         break;
+      case IEEE154_TYPE_ACK:
+      default:
+         // free the packet's RAM memory
+         openqueue_freePacketBuffer(msg);
+         // log the error
+         openserial_printError(COMPONENT_SIXTOP,ERR_MSG_UNKNOWN_TYPE,
+                               (errorparameter_t)msg->l2_frameType,
+                               (errorparameter_t)0);
+         break;
+   }
+}
+
+//=========================== private =========================================
+
+void sixtop_sendDone(OpenQueueEntry_t* msg, owerror_t error){
+  uint8_t i,numOfCells;
+  uint8_t* ptr;
+  sixtop_linkInfo_subIE_t linklist[MAXSCHEDULEDCELLS];
+  
+  INTERRUPT_DECLARATION();
+  DISABLE_INTERRUPTS();
+  
+  memset(linklist,0,MAXSCHEDULEDCELLS*sizeof(sixtop_linkInfo_subIE_t));
+  
+  ptr = msg->l2_scheduleIE_cellObjects;
+  numOfCells = msg->l2_scheduleIE_numOfCells;
+  msg->owner = COMPONENT_RESERVATION;
+  
+  if(error == E_FAIL) {
+    sixtop_vars.State = S_IDLE;
+    openqueue_freePacketBuffer(msg);
+    return;
+  }
+
+  switch (sixtop_vars.State)
+  {
+  case S_WAIT_SIXTOP_LINKREQUEST_SENDDONE:
+    sixtop_vars.State = S_WAIT_FORRESPONSE;
+    break;
+  case S_WAIT_SIXTOP_LINKRESPONSE_SENDDONE:
+    sixtop_vars.State = S_IDLE;
+    break;
+  case S_WAIT_REMOVELINKREQUEST_SENDDONE:
+    if(error == E_SUCCESS && numOfCells > 0){
+        for (i=0;i<numOfCells;i++){
+         //TimeSlot 2B
+         linklist[i].tsNum = (*(ptr))<<8;
+         linklist[i].tsNum  |= *(ptr+1);
+         //Ch.Offset 2B
+         linklist[i].choffset = (*(ptr+2))<<8;
+         linklist[i].choffset  |= *(ptr+3);
+         //LinkOption bitmap 1B
+         linklist[i].linkoptions = *(ptr+4);
+         ptr += 5;
+      }
+      sixtop_removeLinksFromSchedule(msg->l2_scheduleIE_frameID,numOfCells,linklist,&(msg->l2_nextORpreviousHop));
+    }
+    sixtop_vars.State = S_IDLE;
+    leds_debug_off();
+    break;
+  default:
+    //log error
+    break;
+  }
+  
+  // discard reservation packets this component has created
+  openqueue_freePacketBuffer(msg);
+  
+  ENABLE_INTERRUPTS();
 }
 
 void sixtop_linkResponse(bool success, open_addr_t* tempNeighbor,uint8_t bandwidth, sixtop_generalschedule_subIE_t* schedule_ie){
@@ -471,75 +546,6 @@ void sixtop_linkResponse(bool success, open_addr_t* tempNeighbor,uint8_t bandwid
   
     sixtop_vars.State = S_WAIT_SIXTOP_LINKRESPONSE_SENDDONE;
     ENABLE_INTERRUPTS();
-}
-
-//remove one link command
-void sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr){
-  OpenQueueEntry_t* sixtopPkt;
-  uint8_t len=0;
-  bool success;
-  uint8_t type,frameID,flag;
-  sixtop_linkInfo_subIE_t linklist[MAXSCHEDULEDCELLS];
-  payload_IE_descriptor_t payload_IE_desc;
-  
-  INTERRUPT_DECLARATION();
-  DISABLE_INTERRUPTS();
-  
-  memset(linklist,0,MAXSCHEDULEDCELLS*sizeof(sixtop_linkInfo_subIE_t));
-  
-  if(sixtop_vars.State != S_IDLE)
-    return;
-  
-  if(sixtopNeighAddr!=NULL){
-    // get a free packet buffer
-    sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_RESERVATION);
-  
-    if (sixtopPkt==NULL) {
-      openserial_printError(COMPONENT_RESERVATION,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
-      return;
-    }
-    // change state to sending removeLinkRequest Command
-    sixtop_vars.State = S_REMOVELINKREQUEST_SEND;
-    // declare ownership over that packet
-    sixtopPkt->creator = COMPONENT_RESERVATION;
-    sixtopPkt->owner   = COMPONENT_RESERVATION;
-         
-    memcpy(&(sixtopPkt->l2_nextORpreviousHop),sixtopNeighAddr,sizeof(open_addr_t));
-    
-    success = sixtop_uResGenerateRemoveLinkList(&type, &frameID, &flag, linklist, sixtopNeighAddr);
-    
-    if(success == FALSE){
-      // free the packet
-      openqueue_freePacketBuffer(sixtopPkt);
-      sixtop_vars.State = S_IDLE;
-      return;
-    }
-    //set SubFrameAndLinkIE
-    len += processIE_prependSixtopGeneralSheduleIE(sixtopPkt,type,frameID,flag,linklist);
-    //set uResopcodeIE
-    len += processIE_prependSixtopOpcodeIE(sixtopPkt,SIXTOP_REMOVE_SOFT_CELL_REQUEST);
-
-    packetfunctions_reserveHeaderSize(sixtopPkt, sizeof(payload_IE_descriptor_t));//the payload IE header
-    //prepare IE headers and copy them to the sixtopPkt
-   
-    payload_IE_desc.length_groupid_type  = len<<IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
-    payload_IE_desc.length_groupid_type |= (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); //
-   
-    //copy header into the packet
-    //little endian
-    sixtopPkt->payload[0]= payload_IE_desc.length_groupid_type & 0xFF;
-    sixtopPkt->payload[1]= (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
-    
-    //I has an IE in my payload
-    sixtopPkt->l2_IEListPresent = IEEE154_IELIST_YES;
-  
-    sixtop_send(sixtopPkt);
-    
-    sixtop_vars.State = S_WAIT_REMOVELINKREQUEST_SENDDONE;
-  }
-  ENABLE_INTERRUPTS();
 }
 
 bool sixtop_availableCells(uint8_t frameID, uint8_t numOfCells, sixtop_linkInfo_subIE_t* linklist, uint8_t bandwidth){
@@ -733,8 +739,6 @@ void timers_sixtop_timeout_fired(void) {
    sixtop_vars.State = S_IDLE;
    ENABLE_INTERRUPTS();
 }
-
-//=========================== private =========================================
 
 port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
   uint8_t ptr;
