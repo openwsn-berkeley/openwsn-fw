@@ -174,18 +174,18 @@ port_INLINE uint8_t processIE_prependSixtopBandwidthIE(OpenQueueEntry_t* pkt, ui
 }
 
 // add ScheduleIE to packet, using TLV structure (type-length-value)
-port_INLINE uint8_t processIE_prependSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,uint8_t type,uint8_t frameID,uint8_t flag,sixtop_linkInfo_subIE_t* linklist){
+port_INLINE uint8_t processIE_prependSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,uint8_t type,uint8_t frameID,uint8_t flag,sixtop_cellInfo_subIE_t* celllist){
   uint8_t i,len = 0;
   uint8_t temp8b;
   uint8_t numOfCells = 0;
   MLME_IE_subHeader_t mlme_subHeader;
   for(i=0;i<MAXSCHEDULEDCELLS;i++) {
-    if(linklist[i].linkoptions != CELLTYPE_OFF){
+    if(celllist[i].linkoptions != CELLTYPE_OFF){
       // cellobjects
       packetfunctions_reserveHeaderSize(pkt,5); // 2 bytes slotOffset, 2bytes channelOffset+ 1 byte link_type
-      packetfunctions_htons(linklist[i].tsNum, &(pkt->payload[0])); 
-      packetfunctions_htons(linklist[i].choffset, &(pkt->payload[2]));
-      pkt->payload[4] = linklist[i].linkoptions;
+      packetfunctions_htons(celllist[i].tsNum, &(pkt->payload[0])); 
+      packetfunctions_htons(celllist[i].choffset, &(pkt->payload[2]));
+      pkt->payload[4] = celllist[i].linkoptions;
       len += 5;
       numOfCells++;
     }
@@ -243,7 +243,7 @@ port_INLINE void processIE_retrieveSyncIEcontent(OpenQueueEntry_t* pkt,uint8_t *
 port_INLINE void processIE_retrieveSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr){
   uint8_t numSlotFrames,i,j,localptr;
   sixtop_slotframelink_subIE_t sfInfo; 
-  sixtop_linkInfo_subIE_t linkInfo;
+  sixtop_cellInfo_subIE_t linkInfo;
   localptr=*ptr; 
   // number of slot frames 1B
   numSlotFrames = *((uint8_t*)(pkt->payload)+localptr);
@@ -343,17 +343,17 @@ port_INLINE void processIE_retrieveSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,
   for (i=0;i<scheduleInfo->numberOfcells;i++){
     //for each cell 5Bytes
      //TimeSlot 2B
-     scheduleInfo->linklist[i].tsNum = (*((uint8_t*)(pkt->payload)+localptr))<<8;
+     scheduleInfo->celllist[i].tsNum = (*((uint8_t*)(pkt->payload)+localptr))<<8;
      localptr++;
-     scheduleInfo->linklist[i].tsNum  |= *((uint8_t*)(pkt->payload)+localptr);
+     scheduleInfo->celllist[i].tsNum  |= *((uint8_t*)(pkt->payload)+localptr);
      localptr++;
      //Ch.Offset 2B
-     scheduleInfo->linklist[i].choffset = (*((uint8_t*)(pkt->payload)+localptr))<<8;
+     scheduleInfo->celllist[i].choffset = (*((uint8_t*)(pkt->payload)+localptr))<<8;
      localptr++;
-     scheduleInfo->linklist[i].choffset  |= *((uint8_t*)(pkt->payload)+localptr);
+     scheduleInfo->celllist[i].choffset  |= *((uint8_t*)(pkt->payload)+localptr);
      localptr++;
      //LinkOption bitmap 1B
-     scheduleInfo->linklist[i].linkoptions = *((uint8_t*)(pkt->payload)+localptr);
+     scheduleInfo->celllist[i].linkoptions = *((uint8_t*)(pkt->payload)+localptr);
      localptr++;
   }
   *ptr=localptr; 

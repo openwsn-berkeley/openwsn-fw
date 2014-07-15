@@ -105,7 +105,7 @@ typedef struct {
     uint16_t tsNum;
     uint16_t choffset;
     uint8_t linkoptions;
-}sixtop_linkInfo_subIE_t;
+}sixtop_cellInfo_subIE_t;
 
 typedef	struct{
     //TLV structure
@@ -114,7 +114,7 @@ typedef	struct{
     uint8_t frameID;
     uint8_t numberOfcells;
     bool flag;
-    sixtop_linkInfo_subIE_t linklist[MAXSCHEDULEDCELLS];
+    sixtop_cellInfo_subIE_t celllist[MAXSCHEDULEDCELLS];
 }sixtop_generalschedule_subIE_t;
 
 //=========================== variables =======================================
@@ -129,7 +129,7 @@ uint8_t processIE_prependChannelHoppingIE(OpenQueueEntry_t* pkt);
 uint8_t processIE_prependSixtopLinkTypeIE(OpenQueueEntry_t* pkt);
 uint8_t processIE_prependSixtopOpcodeIE(OpenQueueEntry_t* pkt,uint8_t uResCommandID);
 uint8_t processIE_prependSixtopBandwidthIE(OpenQueueEntry_t* pkt,uint8_t numOfLinks, uint8_t slotframeID);
-uint8_t processIE_prependSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,uint8_t type,uint8_t frameID,uint8_t flag,sixtop_linkInfo_subIE_t* linklist);
+uint8_t processIE_prependSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,uint8_t type,uint8_t frameID,uint8_t flag,sixtop_cellInfo_subIE_t* celllist);
 
 void processIE_retrieveSyncIEcontent(OpenQueueEntry_t* pkt,uint8_t * ptr);	 
 void processIE_retrieveSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr); 

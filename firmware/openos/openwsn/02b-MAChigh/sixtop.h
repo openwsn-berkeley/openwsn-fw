@@ -9,6 +9,7 @@
 */
 
 #include "opentimers.h"
+#include "processIE.h"
 #include "openwsn.h"
 
 //=========================== define ==========================================
