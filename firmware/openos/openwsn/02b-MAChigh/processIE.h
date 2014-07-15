@@ -120,6 +120,11 @@ typedef	struct{
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
+
+void             process_prependMLMEIEHeader(
+   OpenQueueEntry_t* pkt,
+   uint8_t len
+);
 //prepend subIE
 uint8_t          processIE_prependSyncIE(
    OpenQueueEntry_t* pkt

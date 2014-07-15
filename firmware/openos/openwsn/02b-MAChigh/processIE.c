@@ -15,6 +15,24 @@
 
 //=========================== public ==========================================
 
+port_INLINE void process_prependMLMEIEHeader(
+   OpenQueueEntry_t* pkt, 
+   uint8_t len){
+   payload_IE_descriptor_t payload_IE_desc;
+   
+   packetfunctions_reserveHeaderSize(pkt, 
+                                     sizeof(payload_IE_descriptor_t));
+   //prepare MLME IE headers and copy them to the sixtopPkt
+   payload_IE_desc.length_groupid_type = 
+      len << IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
+   payload_IE_desc.length_groupid_type |= 
+      (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); 
+   //copy header into the packet
+   //little endian
+   pkt->payload[0]= payload_IE_desc.length_groupid_type & 0xFF;
+   pkt->payload[1]= (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+}
+
 port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
    MLME_IE_subHeader_t mlme_subHeader;
    uint8_t len;

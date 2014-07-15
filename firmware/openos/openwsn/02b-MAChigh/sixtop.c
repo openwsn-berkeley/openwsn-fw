@@ -157,7 +157,6 @@ void sixtop_linkRequest(open_addr_t*  sixtopNeighAddr, uint16_t bandwidth){
    uint8_t len,type,frameID,flag;
    bool listGenerateSuccess;
    sixtop_cellInfo_subIE_t celllist[MAXSCHEDULEDCELLS];
-   payload_IE_descriptor_t payload_IE_desc;
    
    len = 0;
    frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
@@ -206,29 +205,18 @@ void sixtop_linkRequest(open_addr_t*  sixtopNeighAddr, uint16_t bandwidth){
           sixtopNeighAddr,
           sizeof(open_addr_t));
    
-   //set SubFrameAndLinkIE
+   //add scheduleIE
    len += processIE_prependSixtopGeneralSheduleIE(sixtopPkt,
                                                   type,
                                                   frameID,
                                                   flag,
                                                   celllist);
-   //set uResBandwidthIE
+   //add BandwidthIE
    len += processIE_prependSixtopBandwidthIE(sixtopPkt,bandwidth,frameID);
-   //set uResopcodeIE
+   //add opcodeIE
    len += processIE_prependSixtopOpcodeIE(sixtopPkt,SIXTOP_SOFT_CELL_REQ);
-   
-   packetfunctions_reserveHeaderSize(sixtopPkt, 
-                                     sizeof(payload_IE_descriptor_t));
-   //prepare IE headers and copy them to the sixtopPkt
-   payload_IE_desc.length_groupid_type = 
-      len << IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
-   payload_IE_desc.length_groupid_type |= 
-      (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); 
-   
-   //copy header into the packet
-   //little endian
-   sixtopPkt->payload[0]= payload_IE_desc.length_groupid_type & 0xFF;
-   sixtopPkt->payload[1]= (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+   //add IE header 
+   process_prependMLMEIEHeader(sixtopPkt,len);
    
    //I has an IE in my payload
    sixtopPkt->l2_IEListPresent = IEEE154_IELIST_YES;
@@ -250,7 +238,6 @@ void sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr){
    bool listGenerateSuccess;
    uint8_t len,type,frameID,flag;
    sixtop_cellInfo_subIE_t celllist[MAXSCHEDULEDCELLS];
-   payload_IE_descriptor_t payload_IE_desc;
   
    len =0;
   
@@ -272,61 +259,50 @@ void sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr){
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          return;
-    }
-    // change state to sending removeLinkRequest Command
-    sixtop_vars.State = S_REMOVELINKREQUEST_SEND;
-    // declare ownership over that packet
-    sixtopPkt->creator = COMPONENT_RESERVATION;
-    sixtopPkt->owner   = COMPONENT_RESERVATION;
+      }
+      // change state to sending removeLinkRequest Command
+      sixtop_vars.State = S_REMOVELINKREQUEST_SEND;
+      // declare ownership over that packet
+      sixtopPkt->creator = COMPONENT_RESERVATION;
+      sixtopPkt->owner   = COMPONENT_RESERVATION;
          
-    memcpy(&(sixtopPkt->l2_nextORpreviousHop),
-           sixtopNeighAddr,
-           sizeof(open_addr_t));
+      memcpy(&(sixtopPkt->l2_nextORpreviousHop),
+             sixtopNeighAddr,
+             sizeof(open_addr_t));
     
-    listGenerateSuccess = sixtop_generateToBeRemovedCellList(&type, 
-                                                             &frameID,
-                                                             &flag, 
-                                                             celllist, 
-                                                             sixtopNeighAddr);
+      listGenerateSuccess = sixtop_generateToBeRemovedCellList(&type, 
+                                                               &frameID,
+                                                               &flag, 
+                                                               celllist, 
+                                                               sixtopNeighAddr);
     
-    if(listGenerateSuccess == FALSE){
-       // free the packet
-       openqueue_freePacketBuffer(sixtopPkt);
-       sixtop_vars.State = S_IDLE;
-       return;
-    }
-    //set SubFrameAndLinkIE
-    len += processIE_prependSixtopGeneralSheduleIE(sixtopPkt,
-                                                   type,
-                                                   frameID, 
-                                                   flag,
-                                                   celllist);
-    //set uResopcodeIE
-    len += processIE_prependSixtopOpcodeIE(sixtopPkt,
-                                           SIXTOP_REMOVE_SOFT_CELL_REQUEST);
+      if(listGenerateSuccess == FALSE){
+         // free the packet
+         openqueue_freePacketBuffer(sixtopPkt);
+         sixtop_vars.State = S_IDLE;
+         return;
+      }
+      //add scheduleIE
+      len += processIE_prependSixtopGeneralSheduleIE(sixtopPkt,
+                                                     type,
+                                                     frameID, 
+                                                     flag,
+                                                     celllist);
+      //add opcodeIE
+      len += processIE_prependSixtopOpcodeIE(sixtopPkt,
+                                             SIXTOP_REMOVE_SOFT_CELL_REQUEST);
 
-    packetfunctions_reserveHeaderSize(sixtopPkt, 
-                                      sizeof(payload_IE_descriptor_t));
-    //prepare IE headers and copy them to the sixtopPkt
-   
-    payload_IE_desc.length_groupid_type  = 
-       len<<IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
-    payload_IE_desc.length_groupid_type |= 
-       (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME | IEEE802154E_DESC_TYPE_LONG);
-   
-    //copy header into the packet
-    //little endian
-    sixtopPkt->payload[0]= payload_IE_desc.length_groupid_type & 0xFF;
-    sixtopPkt->payload[1]= (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+       //add IE header 
+       process_prependMLMEIEHeader(sixtopPkt,len);   
     
-    //I has an IE in my payload
-    sixtopPkt->l2_IEListPresent = IEEE154_IELIST_YES;
+      //I has an IE in my payload
+      sixtopPkt->l2_IEListPresent = IEEE154_IELIST_YES;
   
-    sixtop_send(sixtopPkt);
+      sixtop_send(sixtopPkt);
     
-    sixtop_vars.State = S_WAIT_REMOVELINKREQUEST_SENDDONE;
-  }
-  ENABLE_INTERRUPTS();
+      sixtop_vars.State = S_WAIT_REMOVELINKREQUEST_SENDDONE;
+   }
+   ENABLE_INTERRUPTS();
 }
 
 //============ from lower layer
@@ -495,7 +471,6 @@ readability of the code.
 */
 port_INLINE void sendAdv() {
    OpenQueueEntry_t* adv;
-   payload_IE_descriptor_t payload_IE_desc;
    uint8_t len;
    
    len = 0;
@@ -537,19 +512,8 @@ port_INLINE void sendAdv() {
    len += processIE_prependFrameLinkIE(adv);
    len += processIE_prependSyncIE(adv);
    
-   //the payload IE header 
-   packetfunctions_reserveHeaderSize(adv, sizeof(payload_IE_descriptor_t));
-   
-   //prepare IE headers and copy them to the ADV 
-   payload_IE_desc.length_groupid_type = 
-      len<<IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
-   payload_IE_desc.length_groupid_type |=  
-      (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG);
-   
-   //copy header into the packet
-   //little endian
-   adv->payload[0]= payload_IE_desc.length_groupid_type & 0xFF;
-   adv->payload[1]= (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+   //add IE header 
+   process_prependMLMEIEHeader(adv,len);
   
    // some l2 information about this packet
    adv->l2_frameType                     = IEEE154_TYPE_BEACON;
@@ -957,7 +921,6 @@ void sixtop_linkResponse(
    uint8_t bw;
    uint8_t type,frameID,flag;
    sixtop_cellInfo_subIE_t* celllist;
-   payload_IE_descriptor_t payload_IE_desc;  
     
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -999,23 +962,12 @@ void sixtop_linkResponse(
    } else {
       bw = 0;
    }
-   //set uResBandwidthIE
+   //add BandwidthIE
    len += processIE_prependSixtopBandwidthIE(sixtopPkt,bw,frameID);
-   //set uResopcodeIE
+   //add opcodeIE
    len += processIE_prependSixtopOpcodeIE(sixtopPkt,SIXTOP_SOFT_CELL_RESPONSE);
-
-   packetfunctions_reserveHeaderSize(sixtopPkt, 
-                                     sizeof(payload_IE_descriptor_t));
-   //prepare IE headers and copy them to the sixtopPkt
-   payload_IE_desc.length_groupid_type  = 
-      len<<IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
-   payload_IE_desc.length_groupid_type |= 
-      (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG);
-   
-   //copy header into the packet
-   //little endian
-   sixtopPkt->payload[0]= payload_IE_desc.length_groupid_type & 0xFF;
-   sixtopPkt->payload[1]= (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+   //add IE header 
+   process_prependMLMEIEHeader(sixtopPkt,len);
     
    //I has an IE in my payload
    sixtopPkt->l2_IEListPresent = IEEE154_IELIST_YES;
