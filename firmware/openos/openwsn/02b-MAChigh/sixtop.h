@@ -9,7 +9,6 @@
 */
 
 #include "opentimers.h"
-#include "processIE.h"
 #include "openwsn.h"
 
 //=========================== define ==========================================
@@ -67,7 +66,6 @@ void      sixtop_init(void);
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 void      sixtop_linkRequest(open_addr_t* sixtopNeighAddr,uint16_t bandwidth);
-void      sixtop_linkResponse(bool success,open_addr_t* tempNeighbor,uint8_t bandwidth,sixtop_generalschedule_subIE_t* schedule_ie);
 void      sixtop_removeLinkRequest(open_addr_t*  sixtopNeighAddr);
 // from lower layer
 void      task_sixtopNotifSendDone(void);

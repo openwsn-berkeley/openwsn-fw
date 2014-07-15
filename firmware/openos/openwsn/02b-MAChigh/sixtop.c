@@ -46,6 +46,12 @@ void          sixtop_notifyReceiveLinkRequest(
    sixtop_generalschedule_subIE_t*     schedule_ie,
    open_addr_t*                        addr
 );
+void          sixtop_linkResponse(
+   bool success,
+   open_addr_t* tempNeighbor,
+   uint8_t bandwidth,
+   sixtop_generalschedule_subIE_t* schedule_ie
+);
 void          sixtop_notifyReceiveLinkResponse(
    sixtop_bandwidth_subIE_t*           bandwidth_ie,
    sixtop_generalschedule_subIE_t*     schedule_ie,
