@@ -189,7 +189,7 @@ void  schedule_getSlotInfo(
   
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
-   while (slotContainer->type!=CELLTYPE_OFF && slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+   while (slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
        //check that this entry for that neighbour and timeslot is not already scheduled.
        if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
                //it exists so this is an update.
