@@ -342,6 +342,7 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
 \param[in,out] msg             The packet to send.
 \param[in]     ipv6_header     The packet's IPv6 header.
 \param[in]     rpl_option      The hop-by-hop option to add in this packet.
+\param[in]     flow_label      The flowlabel to add in the 6LoWPAN header.
 \param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */
