@@ -23,20 +23,27 @@ enum sixtop_CommandID_num{
 
 // the different states of the reservation state machine
 typedef enum {
-   S_IDLE                              = 0x00,   // ready for next event
-   // send,receive and sendDone state of resLinkRequest
-   S_SIXTOP_LINKREQUEST_SEND           = 0x01,   // generating resLinkRequest command packet
-   S_WAIT_SIXTOP_LINKREQUEST_SENDDONE  = 0x02,   // waiting for SendDone confirmation
-   S_SIXTOP_LINKREQUEST_RECEIVE        = 0x03,   // 
-   // wait respone command
-   S_WAIT_FORRESPONSE                  = 0x04,   // waiting for response from the neighbor
-   // send,receive and sendDone state of resLinkRespone
-   S_SIXTOP_LINKRESPONSE_SEND          = 0x05,   // generating resLinkRespone command packet       
-   S_WAIT_SIXTOP_LINKRESPONSE_SENDDONE = 0x06,   // waiting for SendDone confirmation
+   // ready for next event
+   S_IDLE                              = 0x00,   
+   // generating LinkRequest command packet
+   S_SIXTOP_LINKREQUEST_SEND           = 0x01, 
+   // waiting for SendDone confirmation   
+   S_WAIT_SIXTOP_LINKREQUEST_SENDDONE  = 0x02,
+   // I received the link request command   
+   S_SIXTOP_LINKREQUEST_RECEIVE        = 0x03, 
+   // waiting for response from the neighbor
+   S_WAIT_FORRESPONSE                  = 0x04,  
+   // generating resLinkRespone command packet
+   S_SIXTOP_LINKRESPONSE_SEND          = 0x05,      
+    // waiting for SendDone confirmation
+   S_WAIT_SIXTOP_LINKRESPONSE_SENDDONE = 0x06, 
+   // I received the link response request command   
    S_SIXTOP_LINKRESPONSE_RECEIVE       = 0x07,
-   // send,receive and sendDone state of removeLinkRequest
-   S_REMOVELINKREQUEST_SEND            = 0x08,   // generating resLinkRespone command packet  
-   S_WAIT_REMOVELINKREQUEST_SENDDONE   = 0x09,   // waiting for SendDone confirmation
+   // generating resLinkRespone command packet 
+   S_REMOVELINKREQUEST_SEND            = 0x08,   
+   // waiting for SendDone confirmation   
+   S_WAIT_REMOVELINKREQUEST_SENDDONE   = 0x09,   
+   // I received the remove link request command
    S_REMOVELINKREQUEST_RECEIVE         = 0x0a
 } sixtop_state_t;
 

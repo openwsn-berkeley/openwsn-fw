@@ -120,24 +120,73 @@ typedef	struct{
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
-
-uint8_t processIE_prependMLME_IE (OpenQueueEntry_t* pkt);
-uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt);	
-uint8_t processIE_prependFrameLinkIE(OpenQueueEntry_t* pkt);
-uint8_t processIE_prependTimeslotIE(OpenQueueEntry_t* pkt);
-uint8_t processIE_prependChannelHoppingIE(OpenQueueEntry_t* pkt);
-uint8_t processIE_prependSixtopLinkTypeIE(OpenQueueEntry_t* pkt);
-uint8_t processIE_prependSixtopOpcodeIE(OpenQueueEntry_t* pkt,uint8_t uResCommandID);
-uint8_t processIE_prependSixtopBandwidthIE(OpenQueueEntry_t* pkt,uint8_t numOfLinks, uint8_t slotframeID);
-uint8_t processIE_prependSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,uint8_t type,uint8_t frameID,uint8_t flag,sixtop_cellInfo_subIE_t* celllist);
-
-void processIE_retrieveSyncIEcontent(OpenQueueEntry_t* pkt,uint8_t * ptr);	 
-void processIE_retrieveSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr); 
-void processIE_retrieveChannelHoppingIE(OpenQueueEntry_t* pkt,uint8_t * ptr); 
-void processIE_retrieveTimeslotIE(OpenQueueEntry_t* pkt,uint8_t * ptr); 
-void processIE_retrieveSixtopLinkTypeIE(OpenQueueEntry_t* pkt,uint8_t * ptr); 
-void processIE_retrieveSixtopOpcodeIE(OpenQueueEntry_t* pkt,uint8_t * ptr,sixtop_opcode_subIE_t* opcodeIE); 
-void processIE_retrieveSixtopBandwidthIE(OpenQueueEntry_t* pkt,uint8_t * ptr,sixtop_bandwidth_subIE_t* bandwidthIE); 
-void processIE_retrieveSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,uint8_t * ptr,sixtop_generalschedule_subIE_t* schedule_ie);
+//prepend subIE
+uint8_t processIE_prependSyncIE(
+   OpenQueueEntry_t* pkt
+);
+uint8_t processIE_prependFrameLinkIE(
+   OpenQueueEntry_t* pkt
+);
+uint8_t processIE_prependTimeslotIE(
+   OpenQueueEntry_t* pkt
+);
+uint8_t processIE_prependChannelHoppingIE(
+   OpenQueueEntry_t* pkt
+);
+uint8_t processIE_prependSixtopLinkTypeIE(
+   OpenQueueEntry_t* pkt
+);
+uint8_t processIE_prependSixtopOpcodeIE(
+   OpenQueueEntry_t* pkt,
+   uint8_t uResCommandID
+);
+uint8_t processIE_prependSixtopBandwidthIE(
+   OpenQueueEntry_t* pkt,
+   uint8_t numOfLinks, 
+   uint8_t slotframeID
+);
+uint8_t processIE_prependSixtopGeneralSheduleIE(
+   OpenQueueEntry_t* pkt,
+   uint8_t type,
+   uint8_t frameID,
+   uint8_t flag,
+   sixtop_cellInfo_subIE_t* celllist
+);
+//retrieve subIE
+void processIE_retrieveSyncIEcontent(
+   OpenQueueEntry_t* pkt,
+   uint8_t * ptr
+); 
+void processIE_retrieveSlotframeLinkIE(
+   OpenQueueEntry_t* pkt,
+   uint8_t * ptr
+); 
+void processIE_retrieveChannelHoppingIE(
+   OpenQueueEntry_t* pkt,
+   uint8_t * ptr
+); 
+void processIE_retrieveTimeslotIE(
+   OpenQueueEntry_t* pkt,
+   uint8_t * ptr
+); 
+void processIE_retrieveSixtopLinkTypeIE(
+   OpenQueueEntry_t* pkt,
+   uint8_t * ptr
+); 
+void processIE_retrieveSixtopOpcodeIE(
+   OpenQueueEntry_t* pkt,
+   uint8_t * ptr,
+   sixtop_opcode_subIE_t* opcodeIE
+); 
+void processIE_retrieveSixtopBandwidthIE(
+   OpenQueueEntry_t* pkt,
+   uint8_t * ptr,
+   sixtop_bandwidth_subIE_t* bandwidthIE
+); 
+void processIE_retrieveSixtopGeneralSheduleIE(
+   OpenQueueEntry_t* pkt,
+   uint8_t * ptr,
+   sixtop_generalschedule_subIE_t* schedule_ie
+);
 
 #endif
