@@ -121,31 +121,31 @@ typedef	struct{
 
 //=========================== prototypes ======================================
 //prepend subIE
-uint8_t processIE_prependSyncIE(
+uint8_t          processIE_prependSyncIE(
    OpenQueueEntry_t* pkt
 );
-uint8_t processIE_prependFrameLinkIE(
+uint8_t          processIE_prependFrameLinkIE(
    OpenQueueEntry_t* pkt
 );
-uint8_t processIE_prependTimeslotIE(
+uint8_t          processIE_prependTimeslotIE(
    OpenQueueEntry_t* pkt
 );
-uint8_t processIE_prependChannelHoppingIE(
+uint8_t          processIE_prependChannelHoppingIE(
    OpenQueueEntry_t* pkt
 );
-uint8_t processIE_prependSixtopLinkTypeIE(
+uint8_t          processIE_prependSixtopLinkTypeIE(
    OpenQueueEntry_t* pkt
 );
-uint8_t processIE_prependSixtopOpcodeIE(
+uint8_t          processIE_prependSixtopOpcodeIE(
    OpenQueueEntry_t* pkt,
    uint8_t uResCommandID
 );
-uint8_t processIE_prependSixtopBandwidthIE(
+uint8_t          processIE_prependSixtopBandwidthIE(
    OpenQueueEntry_t* pkt,
    uint8_t numOfLinks, 
    uint8_t slotframeID
 );
-uint8_t processIE_prependSixtopGeneralSheduleIE(
+uint8_t          processIE_prependSixtopGeneralSheduleIE(
    OpenQueueEntry_t* pkt,
    uint8_t type,
    uint8_t frameID,
@@ -153,37 +153,37 @@ uint8_t processIE_prependSixtopGeneralSheduleIE(
    sixtop_cellInfo_subIE_t* celllist
 );
 //retrieve subIE
-void processIE_retrieveSyncIEcontent(
+void             processIE_retrieveSyncIEcontent(
    OpenQueueEntry_t* pkt,
    uint8_t * ptr
 ); 
-void processIE_retrieveSlotframeLinkIE(
+void             processIE_retrieveSlotframeLinkIE(
    OpenQueueEntry_t* pkt,
    uint8_t * ptr
 ); 
-void processIE_retrieveChannelHoppingIE(
+void             processIE_retrieveChannelHoppingIE(
    OpenQueueEntry_t* pkt,
    uint8_t * ptr
 ); 
-void processIE_retrieveTimeslotIE(
+void             processIE_retrieveTimeslotIE(
    OpenQueueEntry_t* pkt,
    uint8_t * ptr
 ); 
-void processIE_retrieveSixtopLinkTypeIE(
+void             processIE_retrieveSixtopLinkTypeIE(
    OpenQueueEntry_t* pkt,
    uint8_t * ptr
 ); 
-void processIE_retrieveSixtopOpcodeIE(
+void             processIE_retrieveSixtopOpcodeIE(
    OpenQueueEntry_t* pkt,
    uint8_t * ptr,
    sixtop_opcode_subIE_t* opcodeIE
 ); 
-void processIE_retrieveSixtopBandwidthIE(
+void             processIE_retrieveSixtopBandwidthIE(
    OpenQueueEntry_t* pkt,
    uint8_t * ptr,
    sixtop_bandwidth_subIE_t* bandwidthIE
 ); 
-void processIE_retrieveSixtopGeneralSheduleIE(
+void             processIE_retrieveSixtopGeneralSheduleIE(
    OpenQueueEntry_t* pkt,
    uint8_t * ptr,
    sixtop_generalschedule_subIE_t* schedule_ie

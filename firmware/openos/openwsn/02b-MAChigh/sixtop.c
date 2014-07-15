@@ -801,7 +801,10 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
            temp_16b = temp_8b  +(*((uint8_t*)(pkt->payload)+ptr) << 8);
            ptr = ptr + 1;
            len = len - 2; //remove header fields len
-           if ((temp_16b & IEEE802154E_DESC_TYPE_LONG) == IEEE802154E_DESC_TYPE_LONG){
+           if(
+              (temp_16b & IEEE802154E_DESC_TYPE_LONG) == 
+              IEEE802154E_DESC_TYPE_LONG
+              ){
               //long sub-IE - last bit is 1
               sublen =
                  (temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK)>>
@@ -928,7 +931,10 @@ void sixtop_notifyReceiveLinkRequest(
                                             bw) == FALSE){
       scheduleCellSuccess = FALSE;
    } else {
-      sixtop_addCellsByState(frameID,bw,schedule_ie->celllist,addr,sixtop_vars.State);
+      sixtop_addCellsByState(
+         frameID,
+         bw,
+         schedule_ie->celllist,addr,sixtop_vars.State);
       scheduleCellSuccess = TRUE;
    }
   
