@@ -53,10 +53,10 @@ void          sixtop_notifyReceiveLinkRequest(
    open_addr_t*                        addr
 );
 void          sixtop_linkResponse(
-   bool success,
-   open_addr_t* tempNeighbor,
-   uint8_t bandwidth,
-   sixtop_generalschedule_subIE_t* schedule_ie
+   bool                                success,
+   open_addr_t*                        tempNeighbor,
+   uint8_t                             bandwidth,
+   sixtop_generalschedule_subIE_t*     schedule_ie
 );
 void          sixtop_notifyReceiveLinkResponse(
    sixtop_bandwidth_subIE_t*           bandwidth_ie,
@@ -70,43 +70,43 @@ void          sixtop_notifyReceiveRemoveLinkRequest(
 
 // send internal
 owerror_t     sixtop_send_internal(
-   OpenQueueEntry_t* msg,
-   uint8_t iePresent,
-   uint8_t frameVersion
+   OpenQueueEntry_t*                   msg,
+   uint8_t                             iePresent,
+   uint8_t                             frameVersion
 );
 
 // help functions
 bool          sixtop_generateCandidataCellList(
-   uint8_t* type,
-   uint8_t* frameID,
-   uint8_t* flag,
-   sixtop_cellInfo_subIE_t* celllist
+   uint8_t*                            type,
+   uint8_t*                            frameID,
+   uint8_t*                            flag,
+   sixtop_cellInfo_subIE_t*            celllist
 );
 bool          sixtop_generateToBeRemovedCellList(
-   uint8_t* type,
-   uint8_t* frameID,
-   uint8_t* flag,
-   sixtop_cellInfo_subIE_t* celllist,
+   uint8_t*                            type,
+   uint8_t*                            frameID,
+   uint8_t*                            flag,
+   sixtop_cellInfo_subIE_t*            celllist,
    open_addr_t* neighbor
 );
 void          sixtop_addCellsByState(
-   uint8_t slotframeID,
-   uint8_t numOfLinks,
-   sixtop_cellInfo_subIE_t* celllist,
-   open_addr_t* previousHop,
-   uint8_t state
+   uint8_t                             slotframeID,
+   uint8_t                             numOfLinks,
+   sixtop_cellInfo_subIE_t*            celllist,
+   open_addr_t*                        previousHop,
+   uint8_t                             state
 );
 void          sixtop_removeCellsByState(
-   uint8_t slotframeID,
-   uint8_t numOfLink,
-   sixtop_cellInfo_subIE_t* celllist,
-   open_addr_t* previousHop
+   uint8_t                             slotframeID,
+   uint8_t                             numOfLink,
+   sixtop_cellInfo_subIE_t*            celllist,
+   open_addr_t*                        previousHop
 );
 bool          sixtop_areAvailableCellsToBeScheduled(
-   uint8_t frameID, 
-   uint8_t numOfCells, 
-   sixtop_cellInfo_subIE_t* celllist, 
-   uint8_t bandwidth
+   uint8_t                             frameID, 
+   uint8_t                             numOfCells, 
+   sixtop_cellInfo_subIE_t*            celllist, 
+   uint8_t                             bandwidth
 );
 
 //=========================== public ==========================================
