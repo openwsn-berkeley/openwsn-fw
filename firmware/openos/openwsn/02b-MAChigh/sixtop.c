@@ -553,7 +553,7 @@ bool sixtop_availableCells(uint8_t frameID, uint8_t numOfCells, sixtop_linkInfo_
     available = FALSE;
   } else {
     do{
-      if(schedule_checkAvailableSchedule(linklist[i].tsNum) == TRUE){
+      if(schedule_isSlotOffsetAvailable(linklist[i].tsNum) == TRUE){
         bw--;
       } else {
         linklist[i].linkoptions = CELLTYPE_OFF;
@@ -587,7 +587,7 @@ bool sixtop_uResGenerateCandidataLinkList(uint8_t* type,uint8_t* frameID,uint8_t
   DISABLE_INTERRUPTS();
   
   for(i=0;i<MAXACTIVESLOTS;i++){
-    if(schedule_checkAvailableSchedule(i) == TRUE){
+    if(schedule_isSlotOffsetAvailable(i) == TRUE){
       linklist[j].tsNum = i;
       linklist[j].choffset = 0;  // default channeloffset
       linklist[j].linkoptions = CELLTYPE_TX; // always schedule tx 
@@ -654,8 +654,8 @@ void sixtop_addLinksToSchedule(uint8_t slotframeID,uint8_t numOfLinks,sixtop_lin
               CELLTYPE_RX,
               FALSE,
               linklist[i].choffset,
-              &temp_neighbor,
-              FALSE);
+              &temp_neighbor
+            );
             break;
           case S_SIXTOP_LINKRESPONSE_RECEIVE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
@@ -664,8 +664,8 @@ void sixtop_addLinksToSchedule(uint8_t slotframeID,uint8_t numOfLinks,sixtop_lin
               CELLTYPE_TX,
               FALSE,
               linklist[i].choffset,
-              &temp_neighbor,
-              FALSE);
+              &temp_neighbor
+            );
             break;
           default:
           //log error

@@ -193,7 +193,6 @@ struct OpenMote {
    sixtop_vars_t        sixtop_vars;
    neighbors_vars_t     neighbors_vars;
    schedule_vars_t      schedule_vars;
-   schedule_dbg_t       schedule_dbg;
    // l2a
    adaptive_sync_vars_t adaptive_sync_vars;
    ieee154e_vars_t      ieee154e_vars;
