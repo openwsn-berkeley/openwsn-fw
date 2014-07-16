@@ -89,7 +89,7 @@ owerror_t r6t_receive(
          }
          
          // call sixtop
-         sixtop_linkRequest(
+         sixtop_addCells(
             &neighbor,
             1
          );
@@ -116,7 +116,7 @@ owerror_t r6t_receive(
          }
          
          // call sixtop
-         sixtop_removeLinkRequest(
+         sixtop_removeCell(
             &neighbor
          );
          
