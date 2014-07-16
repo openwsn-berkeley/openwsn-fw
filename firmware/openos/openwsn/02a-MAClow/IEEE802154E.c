@@ -15,6 +15,9 @@
 #include "sixtop.h"
 #include "adaptive_sync.h"
 #include "processIE.h"
+//START OF TELEMATICS CODE
+#include "security.h"
+//END OF TELEMATICS CODE
 
 //=========================== variables =======================================
 
@@ -167,6 +170,10 @@ void isr_ieee154e_newSlot() {
    radio_setTimerPeriod(TsSlotDuration);
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
+     	 //START OF TELEMATICS CODE
+ 		 //If I'm the DAG Root, here I can store the Key
+ 		 scheduler_push_task(coordinator_init,TASKPRIO_SIXTOP_NOTIF_RX);
+ 		 //END OF TELEMATICS CODE
          changeIsSync(TRUE);
       } else {
          activity_synchronize_newSlot();
@@ -530,6 +537,14 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // parse the IEEE802.15.4 header (synchronize, end of frame)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
       
+      //START OF TELEMATICS CODE
+      //if I'm not the DAG Root and I'm not synch, I can store the Key
+		if(idmanager_getIsDAGroot()==FALSE && ieee154e_isSynch() == FALSE
+		   && ieee802514_header.frameType == IEEE154_TYPE_BEACON){
+			remote_init(ieee802514_header);
+	  }
+	  //END OF TELEMATICS CODE
+
       // break if invalid IEEE802.15.4 header
       if (ieee802514_header.valid==FALSE) {
          // break from the do-while loop and execute the clean-up code below

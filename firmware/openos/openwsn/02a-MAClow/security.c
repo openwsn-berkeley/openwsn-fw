@@ -126,13 +126,13 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 	case 0: //no KeyIDMode field
 	case 1:
 		break;
-	case 2: //keySource with 16b address
-		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
-		*((uint8_t*)(msg->payload)) = keySource->addr_64b[6];
-
-		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
-		*((uint8_t*)(msg->payload)) = keySource->addr_64b[7];
-		break;
+//	case 2: //keySource with 16b address
+//		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+//		*((uint8_t*)(msg->payload)) = keySource->addr_64b[6];
+//
+//		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+//		*((uint8_t*)(msg->payload)) = keySource->addr_64b[7];
+//		break;
 	case 3: //keySource with 64b address
 		packetfunctions_writeAddress(msg,keySource,OW_LITTLE_ENDIAN);
 		break;
