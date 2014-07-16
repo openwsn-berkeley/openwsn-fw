@@ -321,7 +321,6 @@ void task_sixtopNotifReceive() {
    msg->l2_joinPriorityPresent=FALSE; //reset it to avoid race conditions with this var.
    
    //START OF TELEMATICS CODE
-
    if(msg->l2_security== TRUE){
     security_incomingFrame(msg);
    }

@@ -1105,6 +1105,10 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
    
+//   openserial_printError(COMPONENT_SIXTOP,ERR_OK,
+//      						(errorparameter_t)0,
+//      						(errorparameter_t)600);
+
    // get a buffer to put the (received) ACK in
    ieee154e_vars.ackReceived = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
    if (ieee154e_vars.ackReceived==NULL) {
@@ -1120,7 +1124,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
    // declare ownership over that packet
    ieee154e_vars.ackReceived->creator = COMPONENT_IEEE802154E;
    ieee154e_vars.ackReceived->owner   = COMPONENT_IEEE802154E;
-   
+
    /*
    The do-while loop that follows is a little parsing trick.
    Because it contains a while(0) condition, it gets executed only once.
@@ -1169,6 +1173,19 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          break;
       }
       
+      //START OF TELEMATICS CODE
+      if(ieee154e_vars.ackReceived->l2_security== TRUE){
+         security_incomingFrame(ieee154e_vars.ackReceived);
+      }
+      //END OF TELEMATICS CODE
+
+//     	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
+//      						(errorparameter_t)ieee154e_vars.ackReceived->payload[0],
+//      						(errorparameter_t)601);
+//     	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
+//      						(errorparameter_t)ieee154e_vars.ackReceived->payload[1],
+//      						(errorparameter_t)602);
+
       // store header details in packet buffer
       ieee154e_vars.ackReceived->l2_frameType  = ieee802514_header.frameType;
       ieee154e_vars.ackReceived->l2_dsn        = ieee802514_header.dsn;
@@ -1479,14 +1496,50 @@ port_INLINE void activity_ri6() {
                                      IEEE802154E_DESC_TYPE_SHORT; 
    memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_descriptor_t));
    
+   //START OF TELEMATICS CODE
+   ieee154e_vars.ackToSend->l2_security = TRUE;
+   ieee154e_vars.ackToSend->l2_securityLevel = 5;
+   ieee154e_vars.ackToSend->l2_keyIdMode = 3;
+   if(idmanager_getIsDAGroot()){
+    open_addr_t* temp_addr;
+    temp_addr = idmanager_getMyID(ADDR_64B);
+    memcpy(&(ieee154e_vars.ackToSend->l2_keySource), temp_addr, sizeof(open_addr_t));
+   }else{
+ 	   neighbors_getPreferredParentEui64(&(ieee154e_vars.ackToSend->l2_keySource));
+   }
+   ieee154e_vars.ackToSend->l2_keyIndex = 1;
+   //END OF TELEMATICS CODE
+
+//   	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
+//    						(errorparameter_t)ieee154e_vars.ackToSend->payload[14],
+//    						(errorparameter_t)501);
+//   	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
+//    						(errorparameter_t)ieee154e_vars.ackToSend->payload[15],
+//    						(errorparameter_t)502);
+
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
+
+   //START OF TELEMATICS CODE
+   if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+
+    	   security_outgoingFrame(ieee154e_vars.ackToSend,
+    			   	   	   	   	  ieee154e_vars.ackToSend->l2_securityLevel,
+    			   	   	          ieee154e_vars.ackToSend->l2_keyIdMode,
+    			   	   	          &ieee154e_vars.ackToSend->l2_keySource,
+    			   	   	          ieee154e_vars.ackToSend->l2_keyIndex);
+       }
+   //END OF TELEMATICS CODE
+
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
                             IEEE154_IELIST_YES,//ie in ack
                             IEEE154_FRAMEVERSION,//enhanced ack
-                            IEEE154_SEC_NO_SECURITY,
+                            //START OF TELEMATICS CODE
+                            //IEEE154_SEC_NO_SECURITY,
+                            ieee154e_vars.ackToSend->l2_security,
+                            //END OF TELEMATICS CODE
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
@@ -1510,7 +1563,7 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.radioOnThisSlot=TRUE;
    // arm rt6
    radiotimer_schedule(DURATION_rt6);
-   
+
    // change state
    changeState(S_TXACKREADY);
 }
@@ -1531,7 +1584,7 @@ port_INLINE void activity_ri7() {
    
    // arm rt7
    radiotimer_schedule(DURATION_rt7);
-   
+
    // give the 'go' to transmit
    radio_txNow(); 
 }
@@ -2018,6 +2071,10 @@ void endSlot() {
    // clean up ackToSend
    if (ieee154e_vars.ackToSend!=NULL) {
       // free ackToSend so corresponding RAM memory can be recycled
+	      openserial_printError(COMPONENT_SIXTOP,ERR_MAXTXACKPREPARE_OVERFLOWS,
+	                            (errorparameter_t)ieee154e_vars.state,
+	                            (errorparameter_t)ieee154e_vars.slotOffset);
+
       openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
       // reset local variable
       ieee154e_vars.ackToSend = NULL;
