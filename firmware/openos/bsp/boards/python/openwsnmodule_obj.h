@@ -17,7 +17,8 @@
 #include "IEEE802154E_obj.h"
 #include "adaptive_sync_obj.h"
 #include "neighbors_obj.h"
-#include "res_obj.h"
+#include "processIE_obj.h"
+#include "sixtop_obj.h"
 #include "schedule_obj.h"
 #include "icmpv6echo_obj.h"
 #include "icmpv6rpl_obj.h"
@@ -31,6 +32,7 @@
 #include "openrandom_obj.h"
 #include "uart_obj.h"
 #include "rinfo_obj.h"
+#include "udpstorm_obj.h"
 #include "rrt_obj.h"
 #include "rleds_obj.h"
 #include "rwellknown_obj.h"
@@ -188,10 +190,9 @@ struct OpenMote {
    tcp_vars_t           tcp_vars;
    // l3
    // l2b
+   sixtop_vars_t        sixtop_vars;
    neighbors_vars_t     neighbors_vars;
-   res_vars_t           res_vars;
    schedule_vars_t      schedule_vars;
-   schedule_dbg_t       schedule_dbg;
    // l2a
    adaptive_sync_vars_t adaptive_sync_vars;
    ieee154e_vars_t      ieee154e_vars;
@@ -216,6 +217,7 @@ struct OpenMote {
    //+++++ UDP
    //- debug
    //- common
+   udpstorm_vars_t      udpstorm_vars;
    //+++++ CoAP
    //- debug
    //- common

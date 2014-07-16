@@ -15,8 +15,8 @@
 #define RPL_HOPBYHOP_HEADER_OPTION_TYPE  0x63
 
 enum {
-   PCKTFORWARD     = 1,
-   PCKTSEND        = 2,
+   PCKTFORWARD     = 1, // used by the node to indicate is forwarding a packet  -- either upstream or downstream
+   PCKTSEND        = 2, // used by the node to indicate is sending a packet
 };
 
 enum {

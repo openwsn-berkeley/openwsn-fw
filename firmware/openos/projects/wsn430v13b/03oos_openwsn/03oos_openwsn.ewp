@@ -2212,10 +2212,16 @@
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.c</name>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\sixtop.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.h</name>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\sixtop.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.c</name>
@@ -2494,6 +2500,15 @@
         </file>
         <file>
           <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\udprand.h</name>
+        </file>
+      </group>
+      <group>
+        <name>udpstorm</name>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\udpstorm.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\udpstorm.h</name>
         </file>
       </group>
     </group>

@@ -20,6 +20,9 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_MINOR     4
 #define OPENWSN_VERSION_PATCH     1
 
+//to delimit the implementation of draft-thubert-6man-flow-label-for-rpl-03
+#define FLOW_LABEL_RPL_DOMAIN 1
+
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -58,7 +61,7 @@ enum {
    IANA_IPv6HOPOPT                     = 0x00,
    IANA_TCP                            = 0x06,
    IANA_UDP                            = 0x11,
-   IANA_IPv6ROUTE                      = 0x2b,
+   IANA_IPv6ROUTE                      = 0x2b,//used for source routing
    IANA_ICMPv6                         = 0x3a,
    IANA_ICMPv6_ECHO_REQUEST            =  128,
    IANA_ICMPv6_ECHO_REPLY              =  129,
@@ -128,54 +131,55 @@ enum {
    //when the mote is not synch
    
    //MAClow<->MAChigh ("virtual components")
-   COMPONENT_RES_TO_IEEE802154E        = 0x0a,
-   COMPONENT_IEEE802154E_TO_RES        = 0x0b,
+   COMPONENT_SIXTOP_TO_IEEE802154E     = 0x0a,
+   COMPONENT_IEEE802154E_TO_SIXTOP     = 0x0b,
    //MAChigh
-   COMPONENT_RES                       = 0x0c,
+   COMPONENT_SIXTOP                    = 0x0c,
    COMPONENT_NEIGHBORS                 = 0x0d,
    COMPONENT_SCHEDULE                  = 0x0e,
+   COMPONENT_SIXTOP_RES                = 0x0f,
    //IPHC
-   COMPONENT_OPENBRIDGE                = 0x0f,
-   COMPONENT_IPHC                      = 0x10,
+   COMPONENT_OPENBRIDGE                = 0x10,
+   COMPONENT_IPHC                      = 0x11,
    //IPv6
-   COMPONENT_FORWARDING                = 0x11,
-   COMPONENT_ICMPv6                    = 0x12,
-   COMPONENT_ICMPv6ECHO                = 0x13,
-   COMPONENT_ICMPv6ROUTER              = 0x14,
-   COMPONENT_ICMPv6RPL                 = 0x15,
+   COMPONENT_FORWARDING                = 0x12,
+   COMPONENT_ICMPv6                    = 0x13,
+   COMPONENT_ICMPv6ECHO                = 0x14,
+   COMPONENT_ICMPv6ROUTER              = 0x15,
+   COMPONENT_ICMPv6RPL                 = 0x16,
    //TRAN
-   COMPONENT_OPENTCP                   = 0x16,
-   COMPONENT_OPENUDP                   = 0x17,
-   COMPONENT_OPENCOAP                  = 0x18,
+   COMPONENT_OPENTCP                   = 0x17,
+   COMPONENT_OPENUDP                   = 0x18,
+   COMPONENT_OPENCOAP                  = 0x19,
    //App test
-   COMPONENT_TCPECHO                   = 0x19,
-   COMPONENT_TCPINJECT                 = 0x1a,
-   COMPONENT_TCPPRINT                  = 0x1b,
-   COMPONENT_UDPECHO                   = 0x1c,
-   COMPONENT_UDPINJECT                 = 0x1d,
-   COMPONENT_UDPPRINT                  = 0x1e,
-   COMPONENT_RSVP                      = 0x1f,
+   COMPONENT_TCPECHO                   = 0x1a,
+   COMPONENT_TCPINJECT                 = 0x1b,
+   COMPONENT_TCPPRINT                  = 0x1c,
+   COMPONENT_UDPECHO                   = 0x1d,
+   COMPONENT_UDPINJECT                 = 0x1e,
+   COMPONENT_UDPPRINT                  = 0x1f,
+   COMPONENT_RSVP                      = 0x20,
    //App
-   COMPONENT_OHLONE                    = 0x20,
-   COMPONENT_HELI                      = 0x21,
-   COMPONENT_IMU                       = 0x22,
-   COMPONENT_RLEDS                     = 0x23,
-   COMPONENT_RREG                      = 0x24,
-   COMPONENT_RWELLKNOWN                = 0x25,
-   COMPONENT_RT                        = 0x26,
-   COMPONENT_REX                       = 0x27,
-   COMPONENT_RXL1                      = 0x28,
-   COMPONENT_RINFO                     = 0x29,
-   COMPONENT_RHELI                     = 0x2a,
-   COMPONENT_RRUBE                     = 0x2b,
-   COMPONENT_LAYERDEBUG                = 0x2c,
-   COMPONENT_UDPRAND                   = 0x2d,
-   COMPONENT_UDPSTORM                  = 0x2e,
-   COMPONENT_UDPLATENCY                = 0x2f,
-   COMPONENT_TEST                      = 0x30,
-   COMPONENT_R6T                       = 0x31,
-   COMPONENT_SWARMBAND                 = 0x32,
-   COMPONENT_RRT                       = 0x33,
+   COMPONENT_OHLONE                    = 0x21,
+   COMPONENT_HELI                      = 0x22,
+   COMPONENT_IMU                       = 0x23,
+   COMPONENT_RLEDS                     = 0x24,
+   COMPONENT_RREG                      = 0x25,
+   COMPONENT_RWELLKNOWN                = 0x26,
+   COMPONENT_RT                        = 0x27,
+   COMPONENT_REX                       = 0x28,
+   COMPONENT_RXL1                      = 0x29,
+   COMPONENT_RINFO                     = 0x2a,
+   COMPONENT_RHELI                     = 0x2b,
+   COMPONENT_RRUBE                     = 0x2c,
+   COMPONENT_LAYERDEBUG                = 0x2d,
+   COMPONENT_UDPRAND                   = 0x2e,
+   COMPONENT_UDPSTORM                  = 0x2f,
+   COMPONENT_UDPLATENCY                = 0x30,
+   COMPONENT_TEST                      = 0x31,
+   COMPONENT_R6T                       = 0x32,
+   COMPONENT_SWARMBAND                 = 0x33,
+   COMPONENT_RRT                       = 0x34,
 };
 
 /**
@@ -304,8 +308,12 @@ typedef struct {
    uint8_t       l2_numTxAttempts;               // number Tx attempts
    asn_t         l2_asn;                         // at what ASN the packet was Tx'ed or Rx'ed
    uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
+   uint8_t*      l2_scheduleIE_cellObjects;      // pointer to the start of cell Objects in scheduleIE
+   uint8_t       l2_scheduleIE_numOfCells;       // number of cells were going to be scheduled or removed.
+   uint8_t       l2_scheduleIE_frameID;          // frameID in scheduleIE
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
+   bool          l2_IEListPresent;               //did have IE field?
    bool          l2_joinPriorityPresent;
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
