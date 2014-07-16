@@ -1,143 +1,184 @@
 #ifndef __PROCESSIE_H
 #define __PROCESSIE_H
 
-#define         MAXLINKNEIGHBORS    10
-
 #include "openwsn.h"
 
-//=========================== define =========================================
-// maximum of cells can be scheduled or removed
-#define MAXSCHEDULEDCELLS   3
+//=========================== define ==========================================
 
-// subIE's ID and shift
-#define SIXTOP_MLME_SYNC_IE_SUBID                        0x1A
-#define SIXTOP_MLME_SYNC_IE_SUBID_SHIFT                  1
-#define SIXTOP_MLME_SLOTFRAME_LINK_IE_SUBID              0x1B
-#define SIXTOP_MLME_SLOTFRAME_LINK_IE_SUBID_SHIFT        1
-#define SIXTOP_MLME_TIMESLOT_IE_SUBID                    0x1c
-#define SIXTOP_MLME_TIMESLOT_IE_SUBID_SHIFT              1
-#define SIXTOP_MLME_CHANNELHOPPING_IE_SUBID              0x09
-#define SIXTOP_MLME_CHANNELHOPPING_IE_SUBID_SHIFT        1
-#define SIXTOP_MLME_LINKTYPE_IE_SUBID                    0x40
-#define SIXTOP_MLME_LINKTYPE_IE_SUBID_SHIFT              1
-#define SIXTOP_MLME_RES_OPCODE_IE_SUBID                  0x41
-#define SIXTOP_MLME_RES_OPCODE_IE_SUBID_SHIFT            1
-#define SIXTOP_MLME_RES_BANDWIDTH_IE_SUBID               0x42
-#define SIXTOP_MLME_RES_BANDWIDTH_IE_SUBID_SHIFT         1
-#define SIXTOP_MLME_RES_TRACKID_IE_SUBID                 0x43
-#define SIXTOP_MLME_RES_TRACKID_IE_SUBID_SHIFT           1
-#define SIXTOP_MLME_RES_GENERAL_SCHEDULE_IE_SUBID        0x44
-#define SIXTOP_MLME_RES_GENERAL_SCHEDULE_IE_SUBID_SHIFT  1
+// maximum of cells in a Schedule IE
+#define SCHEDULEIEMAXNUMCELLS 3
+
+// subIE shift
+#define MLME_IE_SUBID_SHIFT            1
+
+// subIEs identifier
+#define MLME_IE_SUBID_CHANNELHOPPING   0x09
+#define MLME_IE_SUBID_SYNC             0x1A
+#define MLME_IE_SUBID_SLOTFRAME_LINK   0x1B
+#define MLME_IE_SUBID_TIMESLOT         0x1c
+#define MLME_IE_SUBID_LINKTYPE         0x40
+#define MLME_IE_SUBID_OPCODE           0x41
+#define MLME_IE_SUBID_BANDWIDTH        0x42
+#define MLME_IE_SUBID_TRACKID          0x43
+#define MLME_IE_SUBID_SCHEDULE         0x44
+
+// ========================== typedef =========================================
+
+BEGIN_PACK
+
+typedef struct {
+   uint16_t        tsNum;
+   uint16_t        choffset;
+   uint8_t         linkoptions;
+} cellInfo_ht;
 
 
-// should those IE related define place here? (There are existed in IEEE802154e)
-//======================= ieee802154e =====================
-/*
-// group id of IE for MLME
-#define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME   (0x01 << 1) //includes shift 1
-
-// type of IE
-#define IEEE802154E_DESC_TYPE_SHORT              0x00
-#define IEEE802154E_DESC_TYPE_LONG               0x01
-
-// identity of header IE and payloadIE
-#define IEEE802154E_DESC_TYPE_HEADER_IE          0x00
-#define IEEE802154E_DESC_TYPE_PAYLOAD_IE         0x01
-
-//length field on PAYLOAD/HEADER DESC
-#define IEEE802154E_DESC_LEN_HEADER_IE_MASK      0xFE00
-#define IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK     0xFFE0
-
-// length shift on PAYLOAD/HEADER DESC
-#define IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT    5
-#define IEEE802154E_DESC_LEN_HEADER_IE_SHIFT     9
-
-//groupID/elementID field on PAYLOAD/HEADER DESC
-#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK     0x01FE
-#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK      0x001E
-
-//groupID/elementID shift on PAYLOAD/HEADER DESC
-#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT    1
-#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT     1
-
-// IE ids
-#define IEEE802154E_MLME_IE_GROUPID                   0x01
-#define IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID 0x1E
-
-// length/subID field on MLME SubIE LONG 
-#define IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK        0xFFE0
-#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK      0x001E
-
-// length/subID feild on MLME SubIE SHORT page 82
-#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK       0xFF00
-#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK     0x00FE
-
-// length shift for short type subIE and long type subIE
-#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT      8
-#define IEEE802154E_DESC_LEN_LONG_MLME_IE_SHIFT       5
-// subID shift for short type subIE and long type subIE
-#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT     1
-#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT    1
+/**
+\brief Header of header IEs.
 */
-// ============================== typedef ================================
+typedef struct{
+   uint16_t length_elementid_type; 
+} header_IE_ht; 
+
+/**
+\brief Header of payload IEs.
+*/
+typedef struct{
+   uint16_t length_groupid_type;
+} payload_IE_ht;
+
+//======= header IEs
+
+/**
+\brief TSCH ACK/NACK TimeCorrection IE
+
+IEEE802.15.4e-2012, Section 5.2.4.11, p. 88.
+*/
 typedef struct {
-    uint8_t asn[5];
-    uint8_t join_priority;
-}synch_IE_t;
+   int16_t        timesync_info;
+} timecorrection_IE_ht;
 
-//the Slotframe and Link IE
+//======= payload IEs
+
+/**
+\brief MLME IE common header
+
+IEEE802.15.4e-2012, Section 5.2.4.5, p. 82.
+*/
+typedef struct{
+   uint16_t        length_subID_type;
+} mlme_IE_ht;
+
+/**
+\brief TSCH Synchronization IE
+
+http://tools.ietf.org/html/draft-wang-6tisch-6top-sublayer-01#section-4.1.1.1
+*/
 typedef struct {
-    uint8_t slotframehandle;
-    uint16_t slotframesize;
-    uint8_t numlinks;
-}sixtop_slotframelink_subIE_t;
+   uint8_t         asn[5];
+   uint8_t         join_priority;
+} sync_IE_ht;
 
+/**
+\brief TSCH Slotframe and Link IE
+
+http://tools.ietf.org/html/draft-wang-6tisch-6top-sublayer-01#section-4.1.1.2
+*/
 typedef struct {
-    uint8_t opcode;
-}sixtop_opcode_subIE_t;
+   uint8_t         slotframehandle;
+   uint16_t        slotframesize;
+   uint8_t         numlinks;
+} slotframeLink_IE_ht;
 
-typedef	struct{
-    uint8_t slotframeID;
-    uint8_t numOfLinks;
-}sixtop_bandwidth_subIE_t;
+/**
+\brief 6top Opcode IE
 
+http://tools.ietf.org/html/draft-wang-6tisch-6top-sublayer-01#section-4.1.1.5
+*/
 typedef struct {
-    uint16_t tsNum;
-    uint16_t choffset;
-    uint8_t linkoptions;
-}sixtop_linkInfo_subIE_t;
+   uint8_t         opcode;
+} opcode_IE_ht;
 
-typedef	struct{
-    //TLV structure
-    uint8_t type;
-    uint8_t length;
-    uint8_t frameID;
-    uint8_t numberOfcells;
-    bool flag;
-    sixtop_linkInfo_subIE_t linklist[MAXSCHEDULEDCELLS];
-}sixtop_generalschedule_subIE_t;
+/**
+\brief 6top Bandwidth IE
+
+http://tools.ietf.org/html/draft-wang-6tisch-6top-sublayer-01#section-4.1.1.6
+*/
+typedef struct{
+   uint8_t         slotframeID;
+   uint8_t         numOfLinks;
+} bandwidth_IE_ht;
+
+/**
+\brief 6top Generic Schedule IE
+
+http://tools.ietf.org/html/draft-wang-6tisch-6top-sublayer-01#section-4.1.1.8
+*/
+typedef struct{
+   uint8_t         type;
+   uint8_t         length;
+   uint8_t         frameID;
+   uint8_t         numberOfcells;
+   bool            flag;
+   cellInfo_ht     cellList[SCHEDULEIEMAXNUMCELLS];
+} schedule_IE_ht;
+
+END_PACK
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-uint8_t processIE_prependMLME_IE (OpenQueueEntry_t* pkt);
-uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt);	
-uint8_t processIE_prependFrameLinkIE(OpenQueueEntry_t* pkt);
-uint8_t processIE_prependTimeslotIE(OpenQueueEntry_t* pkt);
-uint8_t processIE_prependChannelHoppingIE(OpenQueueEntry_t* pkt);
-uint8_t processIE_prependSixtopLinkTypeIE(OpenQueueEntry_t* pkt);
-uint8_t processIE_prependSixtopOpcodeIE(OpenQueueEntry_t* pkt,uint8_t uResCommandID);
-uint8_t processIE_prependSixtopBandwidthIE(OpenQueueEntry_t* pkt,uint8_t numOfLinks, uint8_t slotframeID);
-uint8_t processIE_prependSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,uint8_t type,uint8_t frameID,uint8_t flag,sixtop_linkInfo_subIE_t* linklist);
+void             processIE_prependMLMEIE(
+   OpenQueueEntry_t*    pkt,
+   uint8_t              len
+);
 
-void processIE_retrieveSyncIEcontent(OpenQueueEntry_t* pkt,uint8_t * ptr);	 
-void processIE_retrieveSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr); 
-void processIE_retrieveChannelHoppingIE(OpenQueueEntry_t* pkt,uint8_t * ptr); 
-void processIE_retrieveTimeslotIE(OpenQueueEntry_t* pkt,uint8_t * ptr); 
-void processIE_retrieveSixtopLinkTypeIE(OpenQueueEntry_t* pkt,uint8_t * ptr); 
-void processIE_retrieveSixtopOpcodeIE(OpenQueueEntry_t* pkt,uint8_t * ptr,sixtop_opcode_subIE_t* opcodeIE); 
-void processIE_retrieveSixtopBandwidthIE(OpenQueueEntry_t* pkt,uint8_t * ptr,sixtop_bandwidth_subIE_t* bandwidthIE); 
-void processIE_retrieveSixtopGeneralSheduleIE(OpenQueueEntry_t* pkt,uint8_t * ptr,sixtop_generalschedule_subIE_t* schedule_ie);
+//===== prepend IEs
+
+uint8_t          processIE_prependSyncIE(
+   OpenQueueEntry_t*    pkt
+);
+uint8_t          processIE_prependSlotframeLinkIE(
+   OpenQueueEntry_t*    pkt
+);
+uint8_t          processIE_prependOpcodeIE(
+   OpenQueueEntry_t*    pkt,
+   uint8_t              uResCommandID
+);
+uint8_t          processIE_prependBandwidthIE(
+   OpenQueueEntry_t*    pkt,
+   uint8_t              numOfLinks, 
+   uint8_t              slotframeID
+);
+uint8_t          processIE_prependSheduleIE(
+   OpenQueueEntry_t*    pkt,
+   uint8_t              type,
+   uint8_t              frameID,
+   uint8_t              flag,
+   cellInfo_ht*         cellList
+);
+
+//===== retrieve IEs
+
+void             processIE_retrieveSlotframeLinkIE(
+   OpenQueueEntry_t*    pkt,
+   uint8_t * ptr
+); 
+void             processIE_retrieveOpcodeIE(
+   OpenQueueEntry_t*    pkt,
+   uint8_t*             ptr,
+   opcode_IE_ht*        opcodeIE
+); 
+void             processIE_retrieveBandwidthIE(
+   OpenQueueEntry_t*    pkt,
+   uint8_t *            ptr,
+   bandwidth_IE_ht*     bandwidthIE
+); 
+void             processIE_retrieveSheduleIE(
+   OpenQueueEntry_t*    pkt,
+   uint8_t *            ptr,
+   schedule_IE_ht*      schedule_ie
+);
 
 #endif
