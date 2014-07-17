@@ -131,13 +131,13 @@ enum {
    //when the mote is not synch
    
    //MAClow<->MAChigh ("virtual components")
-   COMPONENT_SIXTOP_TO_IEEE802154E        = 0x0a,
+   COMPONENT_SIXTOP_TO_IEEE802154E     = 0x0a,
    COMPONENT_IEEE802154E_TO_SIXTOP     = 0x0b,
    //MAChigh
    COMPONENT_SIXTOP                    = 0x0c,
    COMPONENT_NEIGHBORS                 = 0x0d,
    COMPONENT_SCHEDULE                  = 0x0e,
-   COMPONENT_RESERVATION               = 0x0f,
+   COMPONENT_SIXTOP_RES                = 0x0f,
    //IPHC
    COMPONENT_OPENBRIDGE                = 0x10,
    COMPONENT_IPHC                      = 0x11,

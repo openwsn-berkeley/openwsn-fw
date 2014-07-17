@@ -53,7 +53,7 @@ void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource){
    
    // stop calculating compensation period when compensateThreshold exceeds KATIMEOUT and drift is not changed
    if(
-         adaptive_sync_vars.compensateThreshold  > KATIMEOUT &&
+         adaptive_sync_vars.compensateThreshold  > MAXKAPERIOD &&
          adaptive_sync_vars.driftChanged        == FALSE
       ) {
      if(timeCorrection > LIMITLARGETIMECORRECTION) {
@@ -247,6 +247,8 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
 \brief set driftChanged to true.
 */
 void adaptive_sync_driftChanged() {
+#ifndef NOADAPTIVESYNC
    adaptive_sync_vars.driftChanged = TRUE;
+#endif
 }
 

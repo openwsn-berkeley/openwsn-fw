@@ -779,8 +779,9 @@ void iphc_retrieveIPv6HopByHopHeader(
       ipv6_hopbyhop_iht*     hopbyhop_header,
       rpl_option_ht*         rpl_option
    ){
-   uint8_t temp_8b;
 #ifndef FLOW_LABEL_RPL_DOMAIN
+   uint8_t temp_8b;
+   
    // initialize the header length (will increment at each field)
    hopbyhop_header->headerlen     = 0;
    
