@@ -45,20 +45,20 @@
 //- debug
 #include "udpecho.h"
 #include "udpinject.h"
-//#include "udpprint.h"
+#include "udpprint.h"
 //- common
 //#include "udprand.h"
-#include "udplatency.h"
-//#include "udpstorm.h"
+//#include "udplatency.h"
+#include "udpstorm.h"
 //- board-specific
 //#include "imu.h"
 //+++++ CoAP
 //- debug
 //- common
-//#include "rinfo.h"
-//#include "rleds.h"
-//#include "rwellknown.h"
-//#include "r6t.h"
+#include "rinfo.h"
+#include "rleds.h"
+#include "rwellknown.h"
+#include "r6t.h"
 //#include "rrt.h"
 //#include "rex.h"
 //#include "rrube.h"
@@ -92,7 +92,9 @@ void openwsn_init() {
    //-- 02a-TSCH
    adaptive_sync_init();
    ieee154e_init();
+   //START OF TELEMATICS CODE
    security_init();
+   //END OF TELEMATICS CODE
    //-- 02b-RES
    schedule_init();
    sixtop_init();

@@ -288,12 +288,10 @@ void openserial_startOutput() {
          if (debugPrint_id()==TRUE) {
             break;
          }
-         break;
       case STATUS_DAGRANK:
          if (debugPrint_myDAGrank()==TRUE) {
             break;
          }
-         break;
       case STATUS_OUTBUFFERINDEXES:
 //         if (debugPrint_outBufferIndexes()==TRUE) {
 //            break;
@@ -313,7 +311,7 @@ void openserial_startOutput() {
 //         if(debugPrint_schedule()==TRUE) {
 //            break;
 //         }
-//         break;
+         break;
       case STATUS_BACKOFF:
 //         if(debugPrint_backoff()==TRUE) {
 //            break;

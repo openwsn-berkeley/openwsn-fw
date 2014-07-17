@@ -17,7 +17,7 @@
 
 //=========================== define ==========================================
 
-#define SYNCHRONIZING_CHANNEL       23 // channel the mote listens on to synchronize
+#define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
@@ -131,7 +131,7 @@ enum ieee154e_atomicdurations_enum {
    TsLongGT                  =   43,                  //  1300us
    TsTxAckDelay              =  151,                  //  4606us
    TsShortGT                 =   16,                  //   500us
-   TsSlotDuration            =  PORT_TsSlotDuration*10,  // 15000us
+   TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,

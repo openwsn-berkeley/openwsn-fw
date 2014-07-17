@@ -17,8 +17,8 @@ void idmanager_init() {
    idmanager_vars.isDAGroot            = FALSE;
    idmanager_vars.isBridge             = FALSE;
    idmanager_vars.myPANID.type         = ADDR_PANID;
-   idmanager_vars.myPANID.panid[0]     = 0xcd;
-   idmanager_vars.myPANID.panid[1]     = 0xfd;
+   idmanager_vars.myPANID.panid[0]     = 0xca;
+   idmanager_vars.myPANID.panid[1]     = 0xfe;
 
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
    memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
@@ -239,7 +239,7 @@ bool debugPrint_id() {
    output.my64bID   = idmanager_vars.my64bID;
    output.myPANID   = idmanager_vars.myPANID;
    output.myPrefix  = idmanager_vars.myPrefix;
-   openserial_printStatus(STATUS_ID,(uint8_t*)&output,sizeof(debugIDManagerEntry_t));
+   //openserial_printStatus(STATUS_ID,(uint8_t*)&output,sizeof(debugIDManagerEntry_t));
    return TRUE;
 }
 

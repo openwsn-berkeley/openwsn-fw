@@ -137,12 +137,12 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          default:
             
             // log error
-//            openserial_printCritical(
-//               COMPONENT_FORWARDING,
-//               ERR_WRONG_TRAN_PROTOCOL,
-//               (errorparameter_t)msg->l4_protocol,
-//               (errorparameter_t)0
-//            );
+            openserial_printCritical(
+               COMPONENT_FORWARDING,
+               ERR_WRONG_TRAN_PROTOCOL,
+               (errorparameter_t)msg->l4_protocol,
+               (errorparameter_t)0
+            );
             
             // free packet
             openqueue_freePacketBuffer(msg);

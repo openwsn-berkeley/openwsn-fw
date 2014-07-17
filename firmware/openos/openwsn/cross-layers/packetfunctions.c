@@ -60,8 +60,8 @@ void packetfunctions_mac64bToMac16b(open_addr_t* mac64b, open_addr_t* mac16btoWr
 }
 void packetfunctions_mac16bToMac64b(open_addr_t* mac16b, open_addr_t* mac64btoWrite) {
    if (mac16b->type!=ADDR_16B) {
-//      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
-//                            (errorparameter_t)mac16b->type,
+//     openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+//                             (errorparameter_t)mac16b->type,
 //                            (errorparameter_t)3);
       mac64btoWrite->type=ADDR_NONE;
       return;

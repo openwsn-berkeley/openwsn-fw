@@ -754,7 +754,7 @@ void iphc_prependIPv6HopByHopHeader(
          packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
          *((uint8_t*)(msg->payload)) = NHC_IPv6EXT_ID | 0x01; // mark last bit as 1
          break;
-      //default:
+      default:
 //         openserial_printCritical(
 //            COMPONENT_IPHC,
 //            ERR_6LOWPAN_UNSUPPORTED,
@@ -811,7 +811,7 @@ void iphc_retrieveIPv6HopByHopHeader(
 //            ERR_6LOWPAN_UNSUPPORTED,
 //            (errorparameter_t)7,
 //            (errorparameter_t)hopbyhop_header->lowpan_nhc);
-         break;
+//         break;
    }
    
    // option length

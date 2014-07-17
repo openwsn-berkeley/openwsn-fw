@@ -318,6 +318,7 @@ void sendDIO() {
    // set transport information
    msg->l4_protocol                         = IANA_ICMPv6;
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
+   
    // set DIO destination
    memcpy(&(msg->l3_destinationAdd),&icmpv6rpl_vars.dioDestination,sizeof(open_addr_t));
    
@@ -442,7 +443,7 @@ void sendDAO() {
    // set transport information
    msg->l4_protocol                         = IANA_ICMPv6;
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
-
+   
    // set DAO destination
    msg->l3_destinationAdd.type=ADDR_128B;
    memcpy(msg->l3_destinationAdd.addr_128b,icmpv6rpl_vars.dio.DODAGID,sizeof(icmpv6rpl_vars.dio.DODAGID));

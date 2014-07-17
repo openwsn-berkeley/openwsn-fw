@@ -202,9 +202,9 @@ bool neighbors_isStableNeighbor(open_addr_t* address) {
          packetfunctions_ip128bToMac64b(address,&temp_prefix,&temp_addr_64b);
          break;
       default:
-//         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
-//                               (errorparameter_t)address->type,
-//                               (errorparameter_t)0);
+         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+                               (errorparameter_t)address->type,
+                               (errorparameter_t)0);
          return returnVal;
    }
    
@@ -450,9 +450,9 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
                ) {
                 // the new DAGrank looks suspiciously high, only increment a bit
                 neighbors_vars.neighbors[i].DAGrank += (DEFAULTLINKCOST*2*MINHOPRANKINCREASE);
-//                openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
-//                               (errorparameter_t)neighbors_vars.dio->rank,
-//                               (errorparameter_t)neighbors_vars.neighbors[i].DAGrank);
+                openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
+                               (errorparameter_t)neighbors_vars.dio->rank,
+                               (errorparameter_t)neighbors_vars.neighbors[i].DAGrank);
             } else {
                neighbors_vars.neighbors[i].DAGrank = neighbors_vars.dio->rank;
             }
@@ -476,9 +476,9 @@ void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t ind
          address->type=ADDR_64B;
          break;
       default:
-//         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
-//                               (errorparameter_t)addr_type,
-//                               (errorparameter_t)1);
+         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+                               (errorparameter_t)addr_type,
+                               (errorparameter_t)1);
          break; 
    }
 }
@@ -583,26 +583,26 @@ status information about several modules in the OpenWSN stack.
 //   return TRUE;
 //}
 
-void debugNetPrint_neighbors(netDebugNeigborEntry_t* out){
-   uint8_t idxIn;
-   uint8_t idxOut;
-   
-   idxOut=0;
-   for (idxIn=0;idxIn<MAXNUMNEIGHBORS;idxIn++) {
-      if(neighbors_vars.neighbors[idxIn].used) {
-         out[idxOut].last_addr_byte = neighbors_vars.neighbors[idxIn].addr_64b.addr_64b[7];//last byte of the address; poipoi could be [0]; endianness
-         out[idxOut].rssi = neighbors_vars.neighbors[idxIn].rssi;
-         out[idxOut].parentPreference = neighbors_vars.neighbors[idxIn].parentPreference;
-         out[idxOut].DAGrank = neighbors_vars.neighbors[idxIn].DAGrank;
-         memcpy(
-            &out[idxOut].asn,
-            &neighbors_vars.neighbors[idxIn].asn.bytes0and1,
-            sizeof(neighbors_vars.neighbors[idxIn].asn.bytes0and1)
-         );
-         idxOut++;
-      }
-   }  
-}
+//void debugNetPrint_neighbors(netDebugNeigborEntry_t* out){
+//   uint8_t idxIn;
+//   uint8_t idxOut;
+//
+//   idxOut=0;
+//   for (idxIn=0;idxIn<MAXNUMNEIGHBORS;idxIn++) {
+//      if(neighbors_vars.neighbors[idxIn].used) {
+//         out[idxOut].last_addr_byte = neighbors_vars.neighbors[idxIn].addr_64b.addr_64b[7];//last byte of the address; poipoi could be [0]; endianness
+//         out[idxOut].rssi = neighbors_vars.neighbors[idxIn].rssi;
+//         out[idxOut].parentPreference = neighbors_vars.neighbors[idxIn].parentPreference;
+//         out[idxOut].DAGrank = neighbors_vars.neighbors[idxIn].DAGrank;
+//         memcpy(
+//            &out[idxOut].asn,
+//            &neighbors_vars.neighbors[idxIn].asn.bytes0and1,
+//            sizeof(neighbors_vars.neighbors[idxIn].asn.bytes0and1)
+//         );
+//         idxOut++;
+//      }
+//   }
+//}
 
 //=========================== private =========================================
 
@@ -615,9 +615,9 @@ void registerNewNeighbor(open_addr_t* address,
    bool     iHaveAPreferedParent;
    // filter errors
    if (address->type!=ADDR_64B) {
-//      openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
-//                            (errorparameter_t)address->type,
-//                            (errorparameter_t)2);
+      openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+                            (errorparameter_t)address->type,
+                            (errorparameter_t)2);
       return;
    }
    // add this neighbor
@@ -660,9 +660,9 @@ void registerNewNeighbor(open_addr_t* address,
          i++;
       }
       if (i==MAXNUMNEIGHBORS) {
-//         openserial_printError(COMPONENT_NEIGHBORS,ERR_NEIGHBORS_FULL,
-//                               (errorparameter_t)MAXNUMNEIGHBORS,
-//                               (errorparameter_t)0);
+         openserial_printError(COMPONENT_NEIGHBORS,ERR_NEIGHBORS_FULL,
+                               (errorparameter_t)MAXNUMNEIGHBORS,
+                               (errorparameter_t)0);
          return;
       }
    }
@@ -704,9 +704,9 @@ bool isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
          return neighbors_vars.neighbors[rowNumber].used &&
                 packetfunctions_sameAddress(address,&neighbors_vars.neighbors[rowNumber].addr_64b);
       default:
-//         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
-//                               (errorparameter_t)address->type,
-//                               (errorparameter_t)3);
+         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+                               (errorparameter_t)address->type,
+                               (errorparameter_t)3);
          return FALSE;
    }
 }

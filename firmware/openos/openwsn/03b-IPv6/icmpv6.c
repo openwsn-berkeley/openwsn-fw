@@ -32,9 +32,9 @@ void icmpv6_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          icmpv6rpl_sendDone(msg, error);
          break;
       default:
-//         openserial_printCritical(COMPONENT_ICMPv6,ERR_UNSUPPORTED_ICMPV6_TYPE,
-//                               (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
-//                               (errorparameter_t)0);
+         openserial_printCritical(COMPONENT_ICMPv6,ERR_UNSUPPORTED_ICMPV6_TYPE,
+                               (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
+                               (errorparameter_t)0);
          // free the corresponding packet buffer
          openqueue_freePacketBuffer(msg);
          break;
