@@ -568,7 +568,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // toss the IEs
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
       
-      // synchronize (for the first time) to the sender's ADV
+      // synchronize (for the first time) to the sender's EB
       synchronizePacket(ieee154e_vars.syncCapturedTime);
       
       // declare synchronized
@@ -579,7 +579,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
                             (errorparameter_t)ieee154e_vars.slotOffset,
                             (errorparameter_t)0);
       
-      // send received ADV up the stack so RES can update statistics (synchronizing)
+      // send received EB up the stack so RES can update statistics (synchronizing)
       notif_receive(ieee154e_vars.dataReceived);
       
       // clear local variable
@@ -749,6 +749,7 @@ port_INLINE void activity_ti1ORri1() {
    open_addr_t neighbor;
    uint8_t     i;
    sync_IE_ht  sync_IE;
+   uint8_t     willSendEB;
 
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -813,60 +814,44 @@ port_INLINE void activity_ti1ORri1() {
    // check the schedule to see what type of slot this is
    cellType = schedule_getType();
    switch (cellType) {
-      case CELLTYPE_ADV:
-         // stop using serial
-         openserial_stop();
-         // look for an ADV packet in the queue
-         ieee154e_vars.dataToSend = openqueue_macGetAdvPacket();
-         if (ieee154e_vars.dataToSend==NULL) {   // I will be listening for an ADV
-            // change state
-            changeState(S_RXDATAOFFSET);
-            // arm rt1
-            radiotimer_schedule(DURATION_rt1);
-         } else {                                // I will be sending an ADV
-            // change state
-            changeState(S_TXDATAOFFSET);
-            // change owner
-            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;         
-            //copy synch IE  -- should be Little endian???
-            // fill in the ASN field of the ADV
-            ieee154e_getAsn(sync_IE.asn);
-            sync_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank) 
-       
-            memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
-            
-            // record that I attempt to transmit this packet
-            ieee154e_vars.dataToSend->l2_numTxAttempts++;
-            // arm tt1
-            radiotimer_schedule(DURATION_tt1);
-         }
-         break;
       case CELLTYPE_TXRX:
       case CELLTYPE_TX:
          // stop using serial
          openserial_stop();
+         // assuming that there is nothing to send
+         ieee154e_vars.dataToSend = NULL;
          // check whether we can send
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-         } else {
-            ieee154e_vars.dataToSend = NULL;
+         }
+         willSendEB=FALSE;
+         if (ieee154e_vars.dataToSend==NULL) {
+            if (cellType==CELLTYPE_TX) {
+               // abort
+               endSlot();
+               break;
+            } else {
+               // look for an EB packet in the queue
+               ieee154e_vars.dataToSend = openqueue_macGetAdvPacket();
+               willSendEB=TRUE;
+            }
          }
          if (ieee154e_vars.dataToSend!=NULL) {   // I have a packet to send
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+            if (willSendEB) { // I will be sending an EB
+               // fill in the ASN field of the EB
+               ieee154e_getAsn(sync_IE.asn);
+               sync_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank)
+               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
+            }
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
             radiotimer_schedule(DURATION_tt1);
-         } else if (cellType==CELLTYPE_TX){
-            // abort
-            endSlot();
-         }
-         if (cellType==CELLTYPE_TX || 
-             (cellType==CELLTYPE_TXRX && ieee154e_vars.dataToSend!=NULL)) {
             break;
          }
       case CELLTYPE_RX:
@@ -1733,7 +1718,7 @@ port_INLINE void asnStoreFromAdv(uint8_t* asn) {
    // determine the current slotOffset
    /*
    Note: this is a bit of a hack. Normally, slotOffset=ASN%slotlength. But since
-   the ADV is exchanged in slot 0, we know that we're currently at slotOffset==0
+   the EB is exchanged in slot 0, we know that we're currently at slotOffset==0
    */
    ieee154e_vars.slotOffset       = 0;
    schedule_syncSlotOffset(ieee154e_vars.slotOffset);
