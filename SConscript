@@ -32,6 +32,9 @@ dummyFunc = Builder(
     suffix = '.ihex',
 )
 
+if   env['plugfest']==1:
+    env.Append(CPPDEFINES    = 'PLUGFEST')
+
 if   env['toolchain']=='mspgcc':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:

@@ -110,7 +110,8 @@ command_line_options = {
     'verbose':     ['0','1'],
     'fastsim':     ['1','0'],
     'simhost':     ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
-    'simhostpy':   ['']                                # No reasonable default
+    'simhostpy':   [''],                               # No reasonable default
+    'plugfest':    ['0','1'],
 }
 
 def validate_option(key, value, env):
@@ -189,6 +190,13 @@ command_line_vars.AddVariables(
         command_line_options['simhostpy'][0],              # default
         None,                                              # validator
         None,                                              # converter
+    ),
+    (
+        'plugfest',                                        # key
+        '',                                                # help
+        command_line_options['plugfest'][0],               # default
+        validate_option,                                   # validator
+        int,                                               # converter
     ),
 )
 
