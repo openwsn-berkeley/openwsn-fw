@@ -247,6 +247,8 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
 \brief set driftChanged to true.
 */
 void adaptive_sync_driftChanged() {
+#ifndef NOADAPTIVESYNC
    adaptive_sync_vars.driftChanged = TRUE;
+#endif
 }
 

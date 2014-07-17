@@ -34,6 +34,8 @@ dummyFunc = Builder(
 
 if   env['plugfest']==1:
     env.Append(CPPDEFINES    = 'PLUGFEST')
+    if  env['board']=='cc2538':
+        env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
 
 if   env['toolchain']=='mspgcc':
     

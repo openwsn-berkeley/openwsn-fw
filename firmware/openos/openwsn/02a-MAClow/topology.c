@@ -1,5 +1,6 @@
 #include "openwsn.h"
 #include "topology.h"
+#include "idmanager.h"
 
 //=========================== defines =========================================
 
