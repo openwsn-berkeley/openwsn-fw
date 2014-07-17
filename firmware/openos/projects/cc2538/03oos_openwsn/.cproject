@@ -88,7 +88,7 @@
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.debugging.gprof.385301536" name="Generate gprof information (-pg)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.debugging.gprof"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.debugging.other.1066373320" name="Other debugging flags" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.debugging.other"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform.367112493" isAbstract="false" osList="all" superClass="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform"/>
-							<builder arguments="board=cc2538 toolchain=armgcc verbose=1 oos_openwsn" buildPath="${OPENWSN_FW_HOME}" command="scons.bat" id="ilg.gnuarmeclipse.managedbuild.cross.builder.1751346215" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.builder"/>
+							<builder arguments="board=cc2538 toolchain=armgcc verbose=1 oos_openwsn" buildPath="${OPENWSN_FW_HOME}" cleanBuildTarget="-c" command="scons.bat" id="ilg.gnuarmeclipse.managedbuild.cross.builder.1751346215" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="ilg.gnuarmeclipse.managedbuild.cross.builder"/>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.1766042913" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor.1884070731" name="Use preprocessor" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor" value="true" valueType="boolean"/>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input.718558581" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input"/>
@@ -128,8 +128,8 @@
 					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.150332160" name="rt.h" rcbsApplicability="disable" resourcePath="openwsn/07-App/rt/rt.h" toolsToInvoke=""/>
 					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1313075029" name="imu.h" rcbsApplicability="disable" resourcePath="openwsn/07-App/imu/imu.h" toolsToInvoke=""/>
 					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1192361047" name="heli.h" rcbsApplicability="disable" resourcePath="openwsn/07-App/heli/heli.h" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.277610318" name="stupidmac.h" rcbsApplicability="disable" resourcePath="openwsn/02a-MAClow/stupidmac/stupidmac.h" toolsToInvoke=""/>
 					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1366760274" name="rsvp.h" rcbsApplicability="disable" resourcePath="openwsn/04-TRAN/rsvp.h" toolsToInvoke=""/>
+					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.277610318" name="stupidmac.h" rcbsApplicability="disable" resourcePath="openwsn/02a-MAClow/stupidmac/stupidmac.h" toolsToInvoke=""/>
 					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1327526621" name="cfres.h" rcbsApplicability="disable" resourcePath="openwsn/02.5-MPLS/cfres.h" toolsToInvoke=""/>
 					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1381623881" name="gmpls.h" rcbsApplicability="disable" resourcePath="openwsn/02.5-MPLS/gmpls.h" toolsToInvoke=""/>
 					<sourceEntries>
