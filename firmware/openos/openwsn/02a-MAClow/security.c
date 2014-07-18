@@ -626,6 +626,8 @@ m_securityLevelDescriptor* securityLevelDescriptorLookup( uint8_t frameType,
 uint8_t deviceDescriptorLookup(open_addr_t* Address,
 							   open_addr_t* PANId,
 							   m_keyDescriptor* keydescr){
+	  INTERRUPT_DECLARATION();
+	   DISABLE_INTERRUPTS();
 
 	uint8_t i;
 
@@ -635,10 +637,11 @@ uint8_t deviceDescriptorLookup(open_addr_t* Address,
 			&&
 			(packetfunctions_sameAddress(PANId, MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId))
 				){
+			ENABLE_INTERRUPTS();
 			return i;
 		}
 	}
-
+	ENABLE_INTERRUPTS();
 	return 25;
 }
 
