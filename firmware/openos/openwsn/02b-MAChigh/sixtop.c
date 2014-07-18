@@ -1095,7 +1095,7 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    sixtop_removeCellsByState(frameID,numOfCells,cellList,addr);
   
    sixtop_vars.six2six_state = SIX_IDLE;
-   
+
    leds_debug_off();
 }
 
