@@ -1,0 +1,10 @@
+/**
+\defgroup otf otf
+
+\brief Implementation of 6TiSCH On-the-Fly Scheduling.
+
+6top is defined in the following draft:
+- http://tools.ietf.org/id/draft-dujovne-6tisch-on-the-fly-03.txt
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, July 2014.
+*/
