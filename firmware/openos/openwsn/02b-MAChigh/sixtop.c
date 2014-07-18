@@ -5,6 +5,7 @@
 #include "neighbors.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
+#include "otf.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "scheduler.h"
@@ -168,7 +169,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    if (neighbor==NULL){
       return;
    }
-  
+   
    // generate candidate cell list
    outcome = sixtop_candidateAddCellList(
       &type,
@@ -756,38 +757,44 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       return;
    }
 
-   switch (sixtop_vars.six2six_state)
-   {
-   case SIX_WAIT_ADDREQUEST_SENDDONE:
-      sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
-      break;
-   case SIX_WAIT_ADDRESPONSE_SENDDONE:
-      sixtop_vars.six2six_state = SIX_IDLE;
-      break;
-   case SIX_WAIT_REMOVEREQUEST_SENDDONE:
-      if(error == E_SUCCESS && numOfCells > 0){
-         for (i=0;i<numOfCells;i++){
-            //TimeSlot 2B
-            cellList[i].tsNum = (*(ptr))<<8;
-            cellList[i].tsNum  |= *(ptr+1);
-            //Ch.Offset 2B
-            cellList[i].choffset = (*(ptr+2))<<8;
-            cellList[i].choffset  |= *(ptr+3);
-            //LinkOption bitmap 1B
-            cellList[i].linkoptions = *(ptr+4);
-            ptr += 5;
-      }
-      sixtop_removeCellsByState(msg->l2_scheduleIE_frameID,
-                                numOfCells,
-                                cellList,
-                                &(msg->l2_nextORpreviousHop));
-      }
-      sixtop_vars.six2six_state = SIX_IDLE;
-      leds_debug_off();
-      break;
-   default:
-      //log error
-      break;
+   switch (sixtop_vars.six2six_state) {
+      case SIX_WAIT_ADDREQUEST_SENDDONE:
+         sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
+         break;
+      case SIX_WAIT_ADDRESPONSE_SENDDONE:
+         
+         sixtop_vars.six2six_state = SIX_IDLE;
+         
+         // notify OTF
+         otf_notif_addedCell();
+         
+         break;
+      case SIX_WAIT_REMOVEREQUEST_SENDDONE:
+         if(error == E_SUCCESS && numOfCells > 0){
+            for (i=0;i<numOfCells;i++){
+               //TimeSlot 2B
+               cellList[i].tsNum       = (*(ptr))<<8;
+               cellList[i].tsNum      |= *(ptr+1);
+               //Ch.Offset 2B
+               cellList[i].choffset    = (*(ptr+2))<<8;
+               cellList[i].choffset   |= *(ptr+3);
+               //LinkOption bitmap 1B
+               cellList[i].linkoptions = *(ptr+4);
+               ptr += 5;
+            }
+            sixtop_removeCellsByState(
+               msg->l2_scheduleIE_frameID,
+               numOfCells,
+               cellList,
+               &(msg->l2_nextORpreviousHop)
+            );
+         }
+         sixtop_vars.six2six_state = SIX_IDLE;
+         leds_debug_off();
+         break;
+      default:
+         //log error
+         break;
    }
   
    // discard reservation packets this component has created
@@ -1091,9 +1098,12 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    cellList = schedule_ie->cellList;
    
    leds_debug_on();
-  
+   
    sixtop_removeCellsByState(frameID,numOfCells,cellList,addr);
-  
+   
+   // notify OTF
+   otf_notif_removedCell();
+   
    sixtop_vars.six2six_state = SIX_IDLE;
 
    leds_debug_off();
@@ -1188,21 +1198,27 @@ void sixtop_addCellsByState(
          switch(state) {
             case SIX_ADDREQUEST_RECEIVED:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+               
                //add a RX link
-               schedule_addActiveSlot(cellList[i].tsNum,
-                                      CELLTYPE_RX,
-                                      FALSE,
-                                      cellList[i].choffset,
-                                      &temp_neighbor);
+               schedule_addActiveSlot(
+                  cellList[i].tsNum,
+                  CELLTYPE_RX,
+                  FALSE,
+                  cellList[i].choffset,
+                  &temp_neighbor
+               );
+               
                break;
             case SIX_ADDRESPONSE_RECEIVED:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
                //add a TX link
-               schedule_addActiveSlot(cellList[i].tsNum,
-                                      CELLTYPE_TX,
-                                      FALSE,
-                                      cellList[i].choffset,
-                                      &temp_neighbor);
+               schedule_addActiveSlot(
+                  cellList[i].tsNum,
+                  CELLTYPE_TX,
+                  FALSE,
+                  cellList[i].choffset,
+                  &temp_neighbor
+               );
                break;
             default:
                //log error

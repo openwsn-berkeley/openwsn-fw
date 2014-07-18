@@ -2202,6 +2202,12 @@
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\otf.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\otf.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\sixtop.c</name>
       </file>
       <file>
