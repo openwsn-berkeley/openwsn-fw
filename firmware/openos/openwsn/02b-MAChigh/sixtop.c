@@ -321,8 +321,8 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    // set metadata
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-   
-   //START OF TELEMATICS CODE
+
+    //START OF TELEMATICS CODE
      msg->l2_security = TRUE;
      msg->l2_securityLevel = 5;
      msg->l2_keyIdMode = 3;
@@ -335,7 +335,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
      }
      msg->l2_keyIndex = 1;
      //END OF TELEMATICS CODE
-
+   
    if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
       return sixtop_send_internal(
          msg,
@@ -471,9 +471,9 @@ void task_sixtopNotifReceive() {
    );
    
    // reset it to avoid race conditions with this var.
-   msg->l2_joinPriorityPresent = FALSE; 
-   
-   //START OF TELEMATICS CODE
+   msg->l2_joinPriorityPresent = FALSE;
+
+ //START OF TELEMATICS CODE
       if(msg->l2_security== TRUE){
        security_incomingFrame(msg);
       }
@@ -574,8 +574,7 @@ owerror_t sixtop_send_internal(
    msg->l1_txPower = TX_POWER;
    // record the location, in the packet, where the l2 payload starts
    msg->l2_payload = msg->payload;
-
-   //START OF TELEMATICS CODE
+    //START OF TELEMATICS CODE
        if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
 
     	   security_outgoingFrame(msg,msg->l2_securityLevel,msg->l2_keyIdMode,&msg->l2_keySource,msg->l2_keyIndex);
@@ -683,11 +682,12 @@ port_INLINE void sixtop_sendEB() {
    // declare ownership over that packet
    adv->creator = COMPONENT_SIXTOP;
    adv->owner   = COMPONENT_SIXTOP;
-   
+
    //START OF TELEMATICS CODE
   adv->l2_security 					 = FALSE;
   //END OF TELEMATICS CODE
 
+   
    // reserve space for ADV-specific header
    // reserving for IEs.
    len += processIE_prependSlotframeLinkIE(adv);
@@ -761,11 +761,11 @@ port_INLINE void sixtop_sendKA() {
    // declare ownership over that packet
    kaPkt->creator = COMPONENT_SIXTOP;
    kaPkt->owner   = COMPONENT_SIXTOP;
-   
+
    //START OF TELEMATICS CODE
       kaPkt->l2_security = FALSE;
       //END OF TELEMATICS CODE
-
+   
    // some l2 information about this packet
    kaPkt->l2_frameType = IEEE154_TYPE_DATA;
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
@@ -1145,7 +1145,7 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    sixtop_removeCellsByState(frameID,numOfCells,cellList,addr);
   
    sixtop_vars.six2six_state = SIX_IDLE;
-   
+
    leds_debug_off();
 }
 
