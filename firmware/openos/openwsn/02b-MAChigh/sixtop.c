@@ -162,11 +162,6 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    
    memset(cellList,0,sizeof(cellList));
    
-   printf(
-      "[%d] sixtop_addCells 1\r\n",
-      idmanager_getMyID(ADDR_64B)->addr_64b[7]
-   );
-   
    // filter parameters
    if(sixtop_vars.six2six_state!=SIX_IDLE){
       return;
@@ -175,11 +170,6 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
       return;
    }
    
-   printf(
-      "[%d] sixtop_addCells 2\r\n",
-      idmanager_getMyID(ADDR_64B)->addr_64b[7]
-   );
-  
    // generate candidate cell list
    outcome = sixtop_candidateAddCellList(
       &type,
@@ -1108,7 +1098,7 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    cellList = schedule_ie->cellList;
    
    leds_debug_on();
-  
+   
    sixtop_removeCellsByState(frameID,numOfCells,cellList,addr);
    
    // notify OTF
