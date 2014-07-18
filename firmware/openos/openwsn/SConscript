@@ -14,6 +14,7 @@ sources_c = [
     os.path.join('02a-MAClow','adaptive_sync.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
+    os.path.join('02b-MAChigh','otf.c'),
     os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
     os.path.join('02b-MAChigh','sixtop.c'),
@@ -73,6 +74,7 @@ sources_h = [
     os.path.join('02a-MAClow','adaptive_sync.h'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
+    os.path.join('02b-MAChigh','otf.h'),
     os.path.join('02b-MAChigh','processIE.h'),
     os.path.join('02b-MAChigh','schedule.h'),
     os.path.join('02b-MAChigh','sixtop.h'),
