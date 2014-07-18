@@ -72,8 +72,9 @@ void board_init() {
    radiotimer_init();
    uart_init();
    radio_init();
-
+#ifndef PLUGFEST
    leds_debug_on();
+#endif
 }
 
 /**
