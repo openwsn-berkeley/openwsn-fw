@@ -632,8 +632,8 @@ uint8_t deviceDescriptorLookup(open_addr_t* Address,
 	for(i=0; i<MAXNUMNEIGHBORS; i++){
 
 		if((packetfunctions_sameAddress(Address,keydescr->DeviceTable->DeviceDescriptorEntry[i].deviceAddress)== TRUE)
-			//&&
-			//(packetfunctions_sameAddress(PANId, MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId))
+			&&
+			(packetfunctions_sameAddress(PANId, MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId))
 				){
 			return i;
 		}
@@ -737,9 +737,9 @@ void coordinator_init(){
 
 	m_macDefaultKeySource = *(my);
 
-	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
-						(errorparameter_t)M_k,
-						(errorparameter_t)102);
+//	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
+//						(errorparameter_t)M_k,
+//						(errorparameter_t)102);
 
 }
 
@@ -779,9 +779,9 @@ void remote_init(ieee802154_header_iht ieee802514_header){
 
 	MacKeyTable.KeyDescriptorElement[0].DeviceTable = &MacDeviceTable;
 
-	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
-						(errorparameter_t)M_k,
-						(errorparameter_t)201);
+//	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
+//						(errorparameter_t)M_k,
+//						(errorparameter_t)201);
 
 }
 
