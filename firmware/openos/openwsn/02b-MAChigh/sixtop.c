@@ -783,9 +783,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                                 &(msg->l2_nextORpreviousHop));
       }
       sixtop_vars.six2six_state = SIX_IDLE;
-#ifndef PLUGFEST
       leds_debug_off();
-#endif
       break;
    default:
       //log error
@@ -1075,9 +1073,7 @@ void sixtop_notifyReceiveLinkResponse(
       // link request success,inform uplayer
       }
    }
-#ifndef PLUGFEST
    leds_debug_off();
-#endif
    sixtop_vars.six2six_state = SIX_IDLE;
   
    opentimers_stop(sixtop_vars.timeoutTimerId);
@@ -1094,17 +1090,13 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    frameID = schedule_ie->frameID;
    cellList = schedule_ie->cellList;
    
-#ifndef PLUGFEST
    leds_debug_on();
-#endif
   
    sixtop_removeCellsByState(frameID,numOfCells,cellList,addr);
   
    sixtop_vars.six2six_state = SIX_IDLE;
 
-#ifndef PLUGFEST
    leds_debug_off();
-#endif
 }
 
 //======= helper functions
