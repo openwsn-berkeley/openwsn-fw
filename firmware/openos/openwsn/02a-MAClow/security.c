@@ -628,14 +628,14 @@ uint8_t deviceDescriptorLookup(open_addr_t* Address,
 							   m_keyDescriptor* keydescr){
 
 	uint8_t i;
-//
-//	for(i=0; i<MAXNUMNEIGHBORS; i++){
+
+	for(i=0; i<MAXNUMNEIGHBORS; i++){
 //
 //		if((packetfunctions_sameAddress(Address,keydescr->DeviceTable->DeviceDescriptorEntry[i].deviceAddress)== TRUE)
 //			&& (packetfunctions_sameAddress(PANId, MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId))){
 //			return i;
 //		}
-//	}
+	}
 //
 	return 25;
 }
