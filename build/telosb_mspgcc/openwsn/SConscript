@@ -20,6 +20,7 @@ sources_c = [
     os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
     os.path.join('02b-MAChigh','sixtop.c'),
+    os.path.join('02b-MAChigh','otf.c'),
     #=== 02.5-MPLS
     # TODO
     #=== 03a-IPHC
@@ -82,6 +83,7 @@ sources_h = [
     os.path.join('02b-MAChigh','processIE.h'),
     os.path.join('02b-MAChigh','schedule.h'),
     os.path.join('02b-MAChigh','sixtop.h'),
+    os.path.join('02b-MAChigh','otf.h'),
     #=== 02.5-MPLS
     # TODO
     #=== 03a-IPHC

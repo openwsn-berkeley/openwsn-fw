@@ -80,8 +80,8 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 	//max length of MAC frames
 
 	// length of authentication Tag
-	authLengthChecking(securityLevel);
-	msg->l2_authenticationLength = authlen;
+	msg->l2_authenticationLength = authLengthChecking(securityLevel);
+	//msg->l2_authenticationLength = authlen;
 
 	//length of auxiliary security header
 	msg->l2_auxiliaryLength = auxLengthChecking(keyIdMode, frameCounterSuppression, m_macFrameCounterMode); //length of Key ID field
@@ -281,8 +281,8 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 
 	msg->l2_securityLevel = (temp8b >> ASH_SCF_SECURITY_LEVEL)& 0x07;//3b
 
-	authLengthChecking(msg->l2_securityLevel);
-	msg->l2_authenticationLength = authlen;
+	msg->l2_authenticationLength = authLengthChecking(msg->l2_securityLevel);
+	//msg->l2_authenticationLength = authlen;
 
 	//retrieve the KeyIdMode field
 	msg->l2_keyIdMode = (temp8b >> ASH_SCF_KEY_IDENTIFIER_MODE)& 0x03;//2b
@@ -485,7 +485,9 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 
 }
 
-void authLengthChecking(uint8_t securityLevel){
+uint8_t authLengthChecking(uint8_t securityLevel){
+
+	uint8_t authlen;
 
 	switch (securityLevel) {
 	 case 0 :
@@ -513,6 +515,8 @@ void authLengthChecking(uint8_t securityLevel){
 		 authlen = 16; //udplatency not function!
 	 		 break;
 	}
+
+	return authlen;
 
 }
 
@@ -626,6 +630,8 @@ m_securityLevelDescriptor* securityLevelDescriptorLookup( uint8_t frameType,
 uint8_t deviceDescriptorLookup(open_addr_t* Address,
 							   open_addr_t* PANId,
 							   m_keyDescriptor* keydescr){
+	  INTERRUPT_DECLARATION();
+	   DISABLE_INTERRUPTS();
 
 	uint8_t i;
 
@@ -635,10 +641,11 @@ uint8_t deviceDescriptorLookup(open_addr_t* Address,
 			&&
 			(packetfunctions_sameAddress(PANId, MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId))
 				){
+			ENABLE_INTERRUPTS();
 			return i;
 		}
 	}
-
+	ENABLE_INTERRUPTS();
 	return 25;
 }
 

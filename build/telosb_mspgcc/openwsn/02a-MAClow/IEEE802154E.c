@@ -255,9 +255,9 @@ void isr_ieee154e_timer() {
          break;
       default:
          // log the error
-         openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_TIMERFIRES,
-                               (errorparameter_t)ieee154e_vars.state,
-                               (errorparameter_t)ieee154e_vars.slotOffset);
+//         openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_TIMERFIRES,
+//                               (errorparameter_t)ieee154e_vars.state,
+//                               (errorparameter_t)ieee154e_vars.slotOffset);
          // abort
          endSlot();
          break;
@@ -302,9 +302,9 @@ void ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
             break;
          default:
             // log the error
-            openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_NEWSLOT,
-                                  (errorparameter_t)ieee154e_vars.state,
-                                  (errorparameter_t)ieee154e_vars.slotOffset);
+//            openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_NEWSLOT,
+//                                  (errorparameter_t)ieee154e_vars.state,
+//                                  (errorparameter_t)ieee154e_vars.slotOffset);
             // abort
             endSlot();
             break;
@@ -337,9 +337,9 @@ void ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime) {
             break;
          default:
             // log the error
-            openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_ENDOFFRAME,
-                                  (errorparameter_t)ieee154e_vars.state,
-                                  (errorparameter_t)ieee154e_vars.slotOffset);
+//            openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_ENDOFFRAME,
+//                                  (errorparameter_t)ieee154e_vars.state,
+//                                  (errorparameter_t)ieee154e_vars.slotOffset);
             // abort
             endSlot();
             break;
@@ -469,9 +469,9 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
    // check state
    if (ieee154e_vars.state!=S_SYNCRX) {
       // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_ENDFRAME_SYNC,
-                            (errorparameter_t)ieee154e_vars.state,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_ENDFRAME_SYNC,
+//                            (errorparameter_t)ieee154e_vars.state,
+//                            (errorparameter_t)0);
       // abort
       endSlot();
    }
@@ -782,9 +782,9 @@ port_INLINE void activity_ti1ORri1() {
          changeIsSync(FALSE);
         
          // log the error
-         openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
-                               (errorparameter_t)ieee154e_vars.slotOffset,
-                               (errorparameter_t)0);
+//         openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
+//                               (errorparameter_t)ieee154e_vars.slotOffset,
+//                               (errorparameter_t)0);
             
          // update the statistics
          ieee154e_stats.numDeSync++;
@@ -798,9 +798,9 @@ port_INLINE void activity_ti1ORri1() {
    // if the previous slot took too long, we will not be in the right state
    if (ieee154e_vars.state!=S_SLEEP) {
       // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
-                            (errorparameter_t)ieee154e_vars.state,
-                            (errorparameter_t)ieee154e_vars.slotOffset);
+//      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
+//                            (errorparameter_t)ieee154e_vars.state,
+//                            (errorparameter_t)ieee154e_vars.slotOffset);
       // abort
       endSlot();
       return;
@@ -975,9 +975,9 @@ port_INLINE void activity_ti3() {
 
 port_INLINE void activity_tie2() {
    // log the error
-   openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
-                         (errorparameter_t)ieee154e_vars.state,
-                         (errorparameter_t)ieee154e_vars.slotOffset);
+//   openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
+//                         (errorparameter_t)ieee154e_vars.state,
+//                         (errorparameter_t)ieee154e_vars.slotOffset);
    
    // abort
    endSlot();
@@ -1530,7 +1530,7 @@ port_INLINE void activity_ri6() {
    memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_ht));
    
    //START OF TELEMATICS CODE
-      ieee154e_vars.ackToSend->l2_security = TRUE;
+      ieee154e_vars.ackToSend->l2_security = FALSE;
       ieee154e_vars.ackToSend->l2_securityLevel = 5;
       ieee154e_vars.ackToSend->l2_keyIdMode = 3;
       if(idmanager_getIsDAGroot()){

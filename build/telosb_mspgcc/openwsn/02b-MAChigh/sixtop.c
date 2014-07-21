@@ -5,6 +5,7 @@
 #include "neighbors.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
+#include "otf.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "scheduler.h"
@@ -171,7 +172,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    if (neighbor==NULL){
       return;
    }
-  
+   
    // generate candidate cell list
    outcome = sixtop_candidateAddCellList(
       &type,
@@ -471,36 +472,36 @@ void task_sixtopNotifReceive() {
    );
    
    // reset it to avoid race conditions with this var.
-   msg->l2_joinPriorityPresent = FALSE;
+   msg->l2_joinPriorityPresent = FALSE; 
 
- //START OF TELEMATICS CODE
+    //START OF TELEMATICS CODE
       if(msg->l2_security== TRUE){
        security_incomingFrame(msg);
       }
       //END OF TELEMATICS CODE
-
+   
    // send the packet up the stack, if it qualifies
    switch (msg->l2_frameType) {
       case IEEE154_TYPE_BEACON:
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
-    	  if (msg->length>0) {
-    	          	 //START OF TELEMATICS CODE
-    	  			  //discard duplicated packets
-    	  			  if(msg->l2_toDiscard == FALSE){
-    	  			  //END OF TELEMATICS CODE
-    	  					  // send to upper layer
-    	  					  iphc_receive(msg);
-    	  				  }
-    	               else {
-    	              // free up the RAM
-    	              openqueue_freePacketBuffer(msg);
-    	           }
-    	        }else{
-    	          	 // free up the RAM
-    	          	  openqueue_freePacketBuffer(msg);
-    	           }
-    	           break;
+         if (msg->length>0) {
+	  	 //START OF TELEMATICS CODE
+			  //discard duplicated packets
+			  if(msg->l2_toDiscard == FALSE){
+			  //END OF TELEMATICS CODE
+					  // send to upper layer
+					  iphc_receive(msg);
+				  }
+	       else {
+	      // free up the RAM
+	      openqueue_freePacketBuffer(msg);
+	   }
+	}else{
+	  	 // free up the RAM
+	  	  openqueue_freePacketBuffer(msg);
+	   }
+	   break;
       case IEEE154_TYPE_ACK:
       default:
          // free the packet's RAM memory
@@ -574,7 +575,7 @@ owerror_t sixtop_send_internal(
    msg->l1_txPower = TX_POWER;
    // record the location, in the packet, where the l2 payload starts
    msg->l2_payload = msg->payload;
-    //START OF TELEMATICS CODE
+   //START OF TELEMATICS CODE
        if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
 
     	   security_outgoingFrame(msg,msg->l2_securityLevel,msg->l2_keyIdMode,&msg->l2_keySource,msg->l2_keyIndex);
@@ -683,10 +684,9 @@ port_INLINE void sixtop_sendEB() {
    adv->creator = COMPONENT_SIXTOP;
    adv->owner   = COMPONENT_SIXTOP;
 
-   //START OF TELEMATICS CODE
+ //START OF TELEMATICS CODE
   adv->l2_security 					 = FALSE;
   //END OF TELEMATICS CODE
-
    
    // reserve space for ADV-specific header
    // reserving for IEs.
@@ -762,9 +762,10 @@ port_INLINE void sixtop_sendKA() {
    kaPkt->creator = COMPONENT_SIXTOP;
    kaPkt->owner   = COMPONENT_SIXTOP;
 
-   //START OF TELEMATICS CODE
+ //START OF TELEMATICS CODE
       kaPkt->l2_security = FALSE;
       //END OF TELEMATICS CODE
+   
    
    // some l2 information about this packet
    kaPkt->l2_frameType = IEEE154_TYPE_DATA;
@@ -806,38 +807,44 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       return;
    }
 
-   switch (sixtop_vars.six2six_state)
-   {
-   case SIX_WAIT_ADDREQUEST_SENDDONE:
-      sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
-      break;
-   case SIX_WAIT_ADDRESPONSE_SENDDONE:
-      sixtop_vars.six2six_state = SIX_IDLE;
-      break;
-   case SIX_WAIT_REMOVEREQUEST_SENDDONE:
-      if(error == E_SUCCESS && numOfCells > 0){
-         for (i=0;i<numOfCells;i++){
-            //TimeSlot 2B
-            cellList[i].tsNum = (*(ptr))<<8;
-            cellList[i].tsNum  |= *(ptr+1);
-            //Ch.Offset 2B
-            cellList[i].choffset = (*(ptr+2))<<8;
-            cellList[i].choffset  |= *(ptr+3);
-            //LinkOption bitmap 1B
-            cellList[i].linkoptions = *(ptr+4);
-            ptr += 5;
-      }
-      sixtop_removeCellsByState(msg->l2_scheduleIE_frameID,
-                                numOfCells,
-                                cellList,
-                                &(msg->l2_nextORpreviousHop));
-      }
-      sixtop_vars.six2six_state = SIX_IDLE;
-      leds_debug_off();
-      break;
-   default:
-      //log error
-      break;
+   switch (sixtop_vars.six2six_state) {
+      case SIX_WAIT_ADDREQUEST_SENDDONE:
+         sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
+         break;
+      case SIX_WAIT_ADDRESPONSE_SENDDONE:
+         
+         sixtop_vars.six2six_state = SIX_IDLE;
+         
+         // notify OTF
+         otf_notif_addedCell();
+         
+         break;
+      case SIX_WAIT_REMOVEREQUEST_SENDDONE:
+         if(error == E_SUCCESS && numOfCells > 0){
+            for (i=0;i<numOfCells;i++){
+               //TimeSlot 2B
+               cellList[i].tsNum       = (*(ptr))<<8;
+               cellList[i].tsNum      |= *(ptr+1);
+               //Ch.Offset 2B
+               cellList[i].choffset    = (*(ptr+2))<<8;
+               cellList[i].choffset   |= *(ptr+3);
+               //LinkOption bitmap 1B
+               cellList[i].linkoptions = *(ptr+4);
+               ptr += 5;
+            }
+            sixtop_removeCellsByState(
+               msg->l2_scheduleIE_frameID,
+               numOfCells,
+               cellList,
+               &(msg->l2_nextORpreviousHop)
+            );
+         }
+         sixtop_vars.six2six_state = SIX_IDLE;
+         leds_debug_off();
+         break;
+      default:
+         //log error
+         break;
    }
   
    // discard reservation packets this component has created
@@ -1141,9 +1148,12 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    cellList = schedule_ie->cellList;
    
    leds_debug_on();
-  
+   
    sixtop_removeCellsByState(frameID,numOfCells,cellList,addr);
-  
+   
+   // notify OTF
+   otf_notif_removedCell();
+   
    sixtop_vars.six2six_state = SIX_IDLE;
 
    leds_debug_off();
@@ -1238,21 +1248,27 @@ void sixtop_addCellsByState(
          switch(state) {
             case SIX_ADDREQUEST_RECEIVED:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+               
                //add a RX link
-               schedule_addActiveSlot(cellList[i].tsNum,
-                                      CELLTYPE_RX,
-                                      FALSE,
-                                      cellList[i].choffset,
-                                      &temp_neighbor);
+               schedule_addActiveSlot(
+                  cellList[i].tsNum,
+                  CELLTYPE_RX,
+                  FALSE,
+                  cellList[i].choffset,
+                  &temp_neighbor
+               );
+               
                break;
             case SIX_ADDRESPONSE_RECEIVED:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
                //add a TX link
-               schedule_addActiveSlot(cellList[i].tsNum,
-                                      CELLTYPE_TX,
-                                      FALSE,
-                                      cellList[i].choffset,
-                                      &temp_neighbor);
+               schedule_addActiveSlot(
+                  cellList[i].tsNum,
+                  CELLTYPE_TX,
+                  FALSE,
+                  cellList[i].choffset,
+                  &temp_neighbor
+               );
                break;
             default:
                //log error

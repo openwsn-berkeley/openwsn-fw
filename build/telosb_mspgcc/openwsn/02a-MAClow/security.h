@@ -101,14 +101,25 @@ m_macKeyTable				MacKeyTable;
 m_macDeviceTable			MacDeviceTable;
 m_macSecurityLevelTable 	MacSecurityLevelTable;
 
-uint8_t payloadToEncrypt[128];
-uint8_t CipherText[128];
-
-//Length of the Auth Field
-uint8_t authlen;
-
 //MASTER KEY
 uint32_t M_k;
+
+////NONCE STRING
+//uint8_t nonce[13];
+
+//typedef struct{
+//	uint32_t 		m_macFrameCounter;
+//	uint8_t			m_macFrameCounterMode;
+//	uint8_t 		m_macAutoRequestKeyIdMode;
+//	uint8_t			m_macAutoRequestSecurityLevel;
+//	uint8_t 		m_macAutoReququestKeyIndex;
+//	open_addr_t		m_macDefaultKeySource;
+//	m_macKeyTable				MacKeyTable;
+//	m_macDeviceTable			MacDeviceTable;
+//	m_macSecurityLevelTable 	MacSecurityLevelTable;
+//	//MASTER KEY
+//	uint32_t M_k;
+//}security_vars_t;
 
 //NONCE STRING
 uint8_t nonce[13];
@@ -129,7 +140,7 @@ void retrieve_ASH(OpenQueueEntry_t*      msg,
 
 void security_incomingFrameSec (OpenQueueEntry_t*      msg);
 
-void authLengthChecking(uint8_t securityLevel); //it determines the length of the Authentication field(not standard)
+uint8_t authLengthChecking(uint8_t securityLevel); //it determines the length of the Authentication field(not standard)
 
 uint8_t auxLengthChecking(uint8_t KeyIdMode,
 					   bool frameCounterSuppression,
@@ -143,7 +154,7 @@ bool incomingSecurityLevelChecking(m_securityLevelDescriptor* seclevdesc,
 								   uint8_t seclevel,
 								   bool exempt);
 
-m_securityLevelDescriptor* securityLevelDescriptorLookup(	uint8_t frameType,
+m_securityLevelDescriptor* securityLevelDescriptorLookup(uint8_t frameType,
 														uint8_t cfi,
 														m_securityLevelDescriptor* answer);
 
