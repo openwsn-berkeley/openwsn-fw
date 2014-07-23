@@ -11,7 +11,7 @@
 //=========================== define ==========================================
 
 /// inter-packet period (in mseconds)
-#define UDPLATENCYPERIOD     3000
+#define UDPLATENCYPERIOD     2000
 #define NUMPKTTEST           300
 
 //=========================== typedef =========================================

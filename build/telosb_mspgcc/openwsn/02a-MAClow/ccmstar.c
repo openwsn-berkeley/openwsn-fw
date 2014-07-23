@@ -8,8 +8,9 @@
 
 ccmstar_vars_t ccmstar_vars;
 
-void CCMstar(OpenQueueEntry_t* pkt,
-		     unsigned long long int key){
+void CCMstar(OpenQueueEntry_t* 		pkt,
+		     unsigned long long int key,
+		     uint8_t*			    nonce){
 
 	uint8_t i;
 
@@ -31,7 +32,8 @@ void CCMstar(OpenQueueEntry_t* pkt,
 			            key,
 			            0,
 			            pkt->l2_securityLevel,
-			            pkt->l2_authenticationLength);
+			            pkt->l2_authenticationLength,
+			            nonce);
 
 	Encr_Transformation(ccmstar_vars.payloadToEncrypt,
 			            ccmstar_vars.length,
@@ -39,7 +41,8 @@ void CCMstar(OpenQueueEntry_t* pkt,
 			            ccmstar_vars.T,
 			            0,
 			            pkt->l2_securityLevel,
-			            pkt->l2_authenticationLength);
+			            pkt->l2_authenticationLength,
+			            nonce);
 
 	packetfunctions_reserveFooterSize(pkt,pkt->l2_authenticationLength);
 
@@ -116,7 +119,8 @@ void Auth_Transformation(uint8_t 				length,
 						 unsigned long long int key,
 						 bool 					encOrDec,
 						 uint8_t 				secLev,
-						 uint8_t				authentication_length){
+						 uint8_t				authentication_length,
+						 uint8_t*				nonce){
 
 	if(secLev == 4) return; /*in case Security Level is 4, packet is only encrypted
 							and not authenticated */
@@ -222,7 +226,8 @@ void Encr_Transformation(uint8_t*  				payload,
 		                 uint8_t*  				Ta,
 		                 bool      				cipher,
 		                 uint8_t   				secLevel,
-		                 uint8_t   				authentication_length){
+		                 uint8_t   				authentication_length,
+		                 uint8_t*				nonce){
 
 	uint8_t PlainTextData[16];
 	uint8_t i;
@@ -328,8 +333,9 @@ void Encr_Transformation(uint8_t*  				payload,
 
 }
 
-void CCMstarInverse(OpenQueueEntry_t* pkt,
-		            unsigned long long int key){
+void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
+		            unsigned long long int key,
+		            uint8_t*			   nonce){
 
 	ccmstar_vars.length = pkt->length;
 	if(ccmstar_vars.length == 0) return;
@@ -347,10 +353,20 @@ void CCMstarInverse(OpenQueueEntry_t* pkt,
 		ccmstar_vars.MACTag[i] = 0;
 	}
 
-	decr_Transformation(ccmstar_vars.payloadToEncrypt,ccmstar_vars.length,pkt->l2_authenticationLength,key,pkt->l2_securityLevel);
+	decr_Transformation(ccmstar_vars.payloadToEncrypt,
+			            ccmstar_vars.length,
+			            pkt->l2_authenticationLength,
+			            key,
+			            pkt->l2_securityLevel,
+			            nonce);
 
 	if(pkt->l2_securityLevel != 4){
-		auth_checking(ccmstar_vars.payloadToEncrypt,ccmstar_vars.length,key,pkt->l2_securityLevel,pkt->l2_authenticationLength);
+		auth_checking(ccmstar_vars.payloadToEncrypt,
+				      ccmstar_vars.length,
+				      key,
+				      pkt->l2_securityLevel,
+				      pkt->l2_authenticationLength,
+				      nonce);
 	}
 
 	for(i=0;i<ccmstar_vars.length;i++){
@@ -367,7 +383,8 @@ void decr_Transformation(uint8_t* 				cipherData,
 		                 uint8_t 				length,
 						 uint8_t 				authentication_length,
 						 unsigned long long int key,
-						 uint8_t 				secLev){
+						 uint8_t 				secLev,
+						 uint8_t*				nonce){
 
 	uint8_t i;
 	for(i=0 ;i< 16; i++){
@@ -410,7 +427,8 @@ void decr_Transformation(uint8_t* 				cipherData,
 			            ccmstar_vars.U,
 			            1,
 			            secLev,
-			            authentication_length);
+			            authentication_length,
+			            nonce);
 
 	//parsing m|T
 
@@ -428,7 +446,8 @@ bool auth_checking(uint8_t* 				ciphertext,
 		           uint8_t  				length,
 		           unsigned long long int 	key,
 		           uint8_t 					secLev,
-		           uint8_t					authentication_length){
+		           uint8_t					authentication_length,
+		           uint8_t*					nonce){
 
 	uint8_t messageDecr[128];
 	uint8_t i;
@@ -442,7 +461,12 @@ bool auth_checking(uint8_t* 				ciphertext,
 
 	Input_Transformation(messageDecr,length,authentication_length);
 
-	Auth_Transformation(length-authentication_length,key,1,secLev,authentication_length);
+	Auth_Transformation(length-authentication_length,
+			            key,
+			            1,
+			            secLev,
+			            authentication_length,
+			            nonce);
 
 	for(i=0;i<16;i++){
 		if(ccmstar_vars.W[i] == ccmstar_vars.MACTag[i]){

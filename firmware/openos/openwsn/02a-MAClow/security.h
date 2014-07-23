@@ -89,41 +89,25 @@ typedef struct{
 
 //=========================== variables =======================================
 
-uint32_t 		m_macFrameCounter;
-uint8_t			m_macFrameCounterMode;
-uint8_t 		m_macAutoRequestKeyIdMode;
-uint8_t			m_macAutoRequestSecurityLevel;
-uint8_t 		m_macAutoReququestKeyIndex;
-open_addr_t		m_macDefaultKeySource;
 
+BEGIN_PACK
+typedef struct{
+	uint32_t 					m_macFrameCounter;
+	uint8_t						m_macFrameCounterMode;
+	uint8_t 					m_macAutoRequestKeyIdMode;
+	uint8_t						m_macAutoRequestSecurityLevel;
+	uint8_t 					m_macAutoReququestKeyIndex;
+	open_addr_t					m_macDefaultKeySource;
+	m_macKeyTable				MacKeyTable;
+	m_macDeviceTable			MacDeviceTable;
+	m_macSecurityLevelTable 	MacSecurityLevelTable;
+	//MASTER KEY
+	uint32_t M_k;
+	//NONCE STRING
+	uint8_t nonce[13];
+}security_vars_t;
 
-m_macKeyTable				MacKeyTable;
-m_macDeviceTable			MacDeviceTable;
-m_macSecurityLevelTable 	MacSecurityLevelTable;
-
-//MASTER KEY
-uint32_t M_k;
-
-////NONCE STRING
-//uint8_t nonce[13];
-
-//typedef struct{
-//	uint32_t 		m_macFrameCounter;
-//	uint8_t			m_macFrameCounterMode;
-//	uint8_t 		m_macAutoRequestKeyIdMode;
-//	uint8_t			m_macAutoRequestSecurityLevel;
-//	uint8_t 		m_macAutoReququestKeyIndex;
-//	open_addr_t		m_macDefaultKeySource;
-//	m_macKeyTable				MacKeyTable;
-//	m_macDeviceTable			MacDeviceTable;
-//	m_macSecurityLevelTable 	MacSecurityLevelTable;
-//	//MASTER KEY
-//	uint32_t M_k;
-//}security_vars_t;
-
-//NONCE STRING
-uint8_t nonce[13];
-
+END_PACK
 
 //=========================== prototypes ======================================
 
@@ -135,8 +119,8 @@ void security_outgoingFrameSec(OpenQueueEntry_t*  msg,
                                 uint8_t           keyIdMode,
                                 open_addr_t*      keySource,
                                 uint8_t           keyIndex);
-void retrieve_ASH(OpenQueueEntry_t*      msg,
-                  ieee802154_header_iht* tempheader);
+void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
+                  	  	  	  	  	  ieee802154_header_iht* tempheader);
 
 void security_incomingFrameSec (OpenQueueEntry_t*      msg);
 

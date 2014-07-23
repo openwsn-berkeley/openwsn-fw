@@ -495,6 +495,9 @@ void task_sixtopNotifReceive() {
 				  }
 	       else {
 	      // free up the RAM
+//	    	   openserial_printError(COMPONENT_SIXTOP,ERR_OK,
+//									(errorparameter_t)1,
+//									(errorparameter_t)msg->payload[0]);
 	      openqueue_freePacketBuffer(msg);
 	   }
 	}else{
