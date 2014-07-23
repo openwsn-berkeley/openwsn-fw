@@ -24,36 +24,29 @@ uart_vars_t uart_vars;
 //=========================== public ==========================================
 
 void uart_init() {
- 
-  //UART1
-
-  // Selecting the I/O pins for UART1
-
-  P3SEL |= BIT6 + BIT7;
-
-  // Enabling UART1 TX and RX 
    
-  ME2 |= URXE1 + UTXE1;
-
-  // Selecting character format
-
-  UCTL1 |= CHAR;
-
-  // Sourcing UART module with a clock at a wanted frequency : 4.8MHz SMCLK, 115200 baud
-
-  UTCTL1 |= SSEL1;
-
-  // Setting baud rate generator 
-  //4.8 MHz/115200 = 41.66 
- 
-  UBR01 = 0x41;
-  UBR11 = 0x00;
-  //UMCTL1 = 0x6D;  
-  UMCTL1 = 0x4A;
-  
-  // Enabling UART1 state machine
-
-  UCTL1 &= ~SWRST;
+   P3SEL                    |=  0xc0;            // P3.6,7 = UART1TX/RX
+   
+   UCTL1                     =  SWRST;           // hold UART1 module in reset
+   UCTL1                    |=  CHAR;            // 8-bit character
+   
+   /*
+   //   9600 baud, clocked from 32kHz ACLK
+   UTCTL1                   |=  SSEL0;           // clocking from ACLK
+   UBR01                     =  0x03;            // 32768/9600 = 3.41
+   UBR11                     =  0x00;            //
+   UMCTL1                    =  0x4A;            // modulation
+   */
+   
+   // 115200 baud, clocked from 4.8MHz SMCLK
+   UTCTL1                   |=  SSEL1;           // clocking from SMCLK
+   UBR01                     =  41;              // 4.8MHz/115200 - 41.66
+   UBR11                     =  0x00;            //
+   UMCTL1                    =  0x4A;            // modulation
+   
+   
+   ME2                      |=  UTXE1 + URXE1;   // enable UART1 TX/RX
+   UCTL1                    &= ~SWRST;           // clear UART1 reset bit
 
 }
 
