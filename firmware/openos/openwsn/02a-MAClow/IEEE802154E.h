@@ -131,7 +131,7 @@ enum ieee154e_atomicdurations_enum {
    TsLongGT                  =   43,                  //  1300us
    TsTxAckDelay              =  151,                  //  4606us
    TsShortGT                 =   16,                  //   500us
-   TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
+   TsSlotDuration            =  2*PORT_TsSlotDuration+200,  // 15000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
@@ -162,7 +162,7 @@ enum ieee154e_linkOption_enum {
 #define DURATION_tt4 ieee154e_vars.lastCapturedTime+wdDataDuration
 #define DURATION_tt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx-maxRxAckPrepare
 #define DURATION_tt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx
-#define DURATION_tt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay+TsShortGT
+#define DURATION_tt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay+TsShortGT+350
 #define DURATION_tt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 // RX
 #define DURATION_rt1 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx-maxRxDataPrepare
@@ -170,7 +170,7 @@ enum ieee154e_linkOption_enum {
 #define DURATION_rt3 ieee154e_vars.lastCapturedTime+TsTxOffset+TsLongGT
 #define DURATION_rt4 ieee154e_vars.lastCapturedTime+wdDataDuration
 #define DURATION_rt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx-maxTxAckPrepare
-#define DURATION_rt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx
+#define DURATION_rt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+350
 #define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
 #define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 

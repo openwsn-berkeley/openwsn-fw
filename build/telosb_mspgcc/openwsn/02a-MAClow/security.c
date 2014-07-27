@@ -67,6 +67,19 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
                             open_addr_t*        keySource,
                             uint8_t          	keyIndex){
 
+	asn_t init;
+
+//	if(msg->l2_frameType == IEEE154_TYPE_ACK){
+//
+//		uint8_t start[5];
+//
+//		ieee154e_getAsn(start);
+//
+//		init.bytes0and1 = start[0]+256*start[1];
+//		init.bytes2and3 = start[2]+256*start[3];
+//		init.byte4 = start[4];
+//	}
+
 	uint8_t auxlen;
 	uint8_t temp8b;
 	uint8_t match;
@@ -132,13 +145,13 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 	case 0: //no KeyIDMode field
 	case 1:
 		break;
-//	case 2: //keySource with 16b address
-//		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
-//		*((uint8_t*)(msg->payload)) = keySource->addr_64b[6];
-//
-//		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
-//		*((uint8_t*)(msg->payload)) = keySource->addr_64b[7];
-//		break;
+	case 2: //keySource with 16b address
+		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+		*((uint8_t*)(msg->payload)) = keySource->addr_64b[6];
+
+		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+		*((uint8_t*)(msg->payload)) = keySource->addr_64b[7];
+		break;
 	case 3: //keySource with 64b address
 		packetfunctions_writeAddress(msg,keySource,OW_LITTLE_ENDIAN);
 		break;
@@ -164,15 +177,15 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 
 			packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
 			*((uint8_t*)(msg->payload)) = temp;
-		} //else{
-//			//here I have to insert the ASN
-//			ieee154e_getAsn(vectASN);//gets asn from mac layer.
-//			for(i=0;i<5;i++){
-//				packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
-//				*((uint8_t*)(msg->payload)) = vectASN[i];
-//			}
-//
-//		}
+		} else{
+			//here I have to insert the ASN
+			ieee154e_getAsn(vectASN);//gets asn from mac layer.
+			for(i=0;i<5;i++){
+				packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+				*((uint8_t*)(msg->payload)) = vectASN[i];
+			}
+
+		}
 	} //otherwise the frame counter is not in the frame
 
 
@@ -195,20 +208,20 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 
 	//cryptographic block
 	switch(keyIdMode){
-	case 0:
-	case 1:
-		for(i=0; i<8; i++){
-			security_vars.nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
-			}
-		break;
-	case 2:
-		for(i=0; i<2; i++){
-			security_vars.nonce[i] = keySource->addr_64b[6+i];
-				}
-		for(i=2; i<8; i++){
-			security_vars.nonce[i] = 0;
-		}
-		break;
+//	case 0:
+//	case 1:
+//		for(i=0; i<8; i++){
+//			security_vars.nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
+//			}
+//		break;
+//	case 2:
+//		for(i=0; i<2; i++){
+//			security_vars.nonce[i] = keySource->addr_64b[6+i];
+//				}
+//		for(i=2; i<8; i++){
+//			security_vars.nonce[i] = 0;
+//		}
+//		break;
 	case 3:
 		for(i=0; i<8; i++){
 			security_vars.nonce[i] = keySource->addr_64b[i];
@@ -228,39 +241,21 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 		for(i=0;i<5;i++){
 			security_vars.nonce[8+i] = vectASN[i];
 		}
-
-
 	}
 
-//		CRYPTO TEST
-//		asn_t init;
-//
-//		if(msg->l2_frameType == IEEE154_TYPE_DATA){
-//
-//		uint8_t start[5];
-//
-//		ieee154e_getAsn(start);
-//
-//		init.bytes0and1 = start[0]+256*start[1];
-//		init.bytes2and3 = start[2]+256*start[3];
-//		init.byte4 = start[4];
-//		}
-
-	//if(msg->l2_frameType != IEEE154_TYPE_ACK){
-		CCMstar(msg,key,security_vars.nonce);
-	//}
-
-//		if(msg->l2_frameType == IEEE154_TYPE_ACK){
-//		uint16_t diff;
-//		diff = ieee154e_asnDiff(&init);
-//
-//		openserial_printError(COMPONENT_SIXTOP,ERR_OK,
-//							(errorparameter_t)0,
-//							(errorparameter_t)201);
-//		}
+	CCMstar(msg,key,security_vars.nonce);
 
 	//h increment the Frame Counter and save.
-		security_vars.m_macFrameCounter++;
+	security_vars.m_macFrameCounter++;
+
+//	if(msg->l2_frameType == IEEE154_TYPE_ACK){
+//				uint16_t diff;
+//				diff = ieee154e_asnDiff(&init);
+//
+//				openserial_printError(COMPONENT_SIXTOP,ERR_OK,
+//									(errorparameter_t)diff,
+//									(errorparameter_t)201);
+//		}
 
 }
 
@@ -337,14 +332,14 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 	case 0:
 	case 1:
 		break;
-//	case 2:
-//		packetfunctions_readAddress(
-//									((uint8_t*)(msg->payload)+tempheader->headerLength),
-//									ADDR_16B,
-//									&msg->l2_keySource,
-//									OW_LITTLE_ENDIAN);
-//		tempheader->headerLength = tempheader->headerLength+2;
-//		break;
+	case 2:
+		packetfunctions_readAddress(
+									((uint8_t*)(msg->payload)+tempheader->headerLength),
+									ADDR_16B,
+									&msg->l2_keySource,
+									OW_LITTLE_ENDIAN);
+		tempheader->headerLength = tempheader->headerLength+2;
+		break;
 	case 3:
 		packetfunctions_readAddress(
 							((uint8_t*)(msg->payload)+tempheader->headerLength),
@@ -384,7 +379,6 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	}*/
 
 	//f key descriptor lookup
-
 	match = keyDescriptorLookup(msg->l2_keyIdMode,
 								&msg->l2_keySource,
 								msg->l2_keyIndex,
@@ -400,6 +394,8 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 		return;
 	}
 
+
+
 	//g device descriptor lookup
 
 	match = deviceDescriptorLookup(&msg->l2_keySource,
@@ -413,8 +409,6 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	secLevel = securityLevelDescriptorLookup(msg->l2_frameType,
 								  	  	  	 msg->commandFrameIdentifier,
 								  	  	  	 secLevel);
-
-
 	//i+j+k
 
 	if(incomingSecurityLevelChecking(secLevel,msg->l2_securityLevel,devpoint->Exempt)==FALSE){
@@ -441,7 +435,7 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 		case 0:
 //		case 1:
 //			for(i=0; i<8; i++){
-//					 security_vars.nonce[i] = m_macDefaultKeySource.addr_64b[i];
+//					 security_vars.nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
 //				}
 //			break;
 //		case 2:
@@ -617,7 +611,7 @@ m_securityLevelDescriptor* securityLevelDescriptorLookup( uint8_t frameType,
 
 			return answer;
 		}
-
+//
 //		if(security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType == IEEE154_TYPE_CMD
 //			&& frameType == security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType
 //			&& cfi == security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].CommandFrameIdentifier)
@@ -670,31 +664,31 @@ uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
 
 	}
 
-//	if (KeyIdMode == 1){
-//		for(i=0; i<MAXNUMKEYS; i++ ){
-//
-//				if(KeyIndex == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex
-//							&& packetfunctions_sameAddress(keySource,m_macDefaultKeySource)){
-//							return i;
-//							}
-//						}
-//			}
-//
-//	if (KeyIdMode == 2){
-//
-//			for(i=0; i<MAXNUMKEYS; i++ ){
-//					if(KeyIndex == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex){
-//
-//					if( keySource->addr_16b[0] == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource.addr_16b[0] &&
-//							keySource->addr_16b[1] == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource.addr_16b[1]
-//							&& packetfunctions_sameAddress(panID, security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)
-//							){
-//					return i;
-//					}
-//
-//				}
-//			}
-//		}
+	if (KeyIdMode == 1){
+		for(i=0; i<MAXNUMKEYS; i++ ){
+
+				if(KeyIndex == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex
+							&& packetfunctions_sameAddress(keySource,security_vars.m_macDefaultKeySource)){
+							return i;
+							}
+						}
+			}
+
+	if (KeyIdMode == 2){
+
+			for(i=0; i<MAXNUMKEYS; i++ ){
+					if(KeyIndex == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex){
+
+					if( keySource->addr_16b[0] == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource.addr_16b[0] &&
+							keySource->addr_16b[1] == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource.addr_16b[1]
+							&& packetfunctions_sameAddress(panID, security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)
+							){
+					return i;
+					}
+
+				}
+			}
+		}
 
 	if (KeyIdMode == 3){
 

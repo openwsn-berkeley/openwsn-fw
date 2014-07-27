@@ -168,6 +168,7 @@ This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
    radio_setTimerPeriod(TsSlotDuration);
+
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
     	  //START OF TELEMATICS CODE
@@ -747,12 +748,12 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    
    if(*lenIE>127) {
       // log the error
-      openserial_printError(
-         COMPONENT_IEEE802154E,
-         ERR_HEADER_TOO_LONG,
-         (errorparameter_t)*lenIE,
-         (errorparameter_t)1
-      );
+//      openserial_printError(
+//         COMPONENT_IEEE802154E,
+//         ERR_HEADER_TOO_LONG,
+//         (errorparameter_t)*lenIE,
+//         (errorparameter_t)1
+//      );
    }
    return TRUE;
 }
@@ -798,9 +799,9 @@ port_INLINE void activity_ti1ORri1() {
    // if the previous slot took too long, we will not be in the right state
    if (ieee154e_vars.state!=S_SLEEP) {
       // log the error
-//      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
-//                            (errorparameter_t)ieee154e_vars.state,
-//                            (errorparameter_t)ieee154e_vars.slotOffset);
+      openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_STARTSLOT,
+                            (errorparameter_t)ieee154e_vars.state,
+                            (errorparameter_t)ieee154e_vars.slotOffset);
       // abort
       endSlot();
       return;
@@ -918,9 +919,9 @@ port_INLINE void activity_ti1ORri1() {
          // stop using serial
          openserial_stop();
          // log the error
-         openserial_printCritical(COMPONENT_IEEE802154E,ERR_WRONG_CELLTYPE,
-                               (errorparameter_t)cellType,
-                               (errorparameter_t)ieee154e_vars.slotOffset);
+//         openserial_printCritical(COMPONENT_IEEE802154E,ERR_WRONG_CELLTYPE,
+//                               (errorparameter_t)cellType,
+//                               (errorparameter_t)ieee154e_vars.slotOffset);
          // abort
          endSlot();
          break;
@@ -1070,9 +1071,9 @@ port_INLINE void activity_ti6() {
 
 port_INLINE void activity_tie4() {
    // log the error
-//   openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
-//                         (errorparameter_t)ieee154e_vars.state,
-//                         (errorparameter_t)ieee154e_vars.slotOffset);
+   openserial_printError(COMPONENT_IEEE802154E,ERR_MAXRXACKPREPARE_OVERFLOWS,
+                         (errorparameter_t)ieee154e_vars.state,
+                         (errorparameter_t)ieee154e_vars.slotOffset);
    
    // abort
    endSlot();
@@ -1163,7 +1164,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
    // declare ownership over that packet
    ieee154e_vars.ackReceived->creator = COMPONENT_IEEE802154E;
    ieee154e_vars.ackReceived->owner   = COMPONENT_IEEE802154E;
-   
+
    /*
    The do-while loop that follows is a little parsing trick.
    Because it contains a while(0) condition, it gets executed only once.
@@ -1211,13 +1212,6 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          // break from the do-while loop and execute the clean-up code below
          break;
       }
-      
-      //START OF TELEMATICS CODE
-      if(ieee154e_vars.ackReceived->l2_security== TRUE){
-         security_incomingFrame(ieee154e_vars.ackReceived);
-      }
-      //END OF TELEMATICS CODE
-
 
       // store header details in packet buffer
       ieee154e_vars.ackReceived->l2_frameType  = ieee802514_header.frameType;
@@ -1232,6 +1226,13 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          // break from the do-while loop and execute the clean-up code below
          break;
       }
+
+      //START OF TELEMATICS CODE
+	   if(ieee154e_vars.ackReceived->l2_security== TRUE){
+		  security_incomingFrame(ieee154e_vars.ackReceived);
+	   }
+	   //END OF TELEMATICS CODE
+
       //hanlde IEs --xv poipoi
       if (ieee802514_header.ieListPresent==FALSE){
          break; //ack should contain IEs.
@@ -1530,25 +1531,18 @@ port_INLINE void activity_ri6() {
    memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_ht));
    
    //START OF TELEMATICS CODE
-      ieee154e_vars.ackToSend->l2_security = FALSE;
-      ieee154e_vars.ackToSend->l2_securityLevel = 5;
-      ieee154e_vars.ackToSend->l2_keyIdMode = 3;
-      if(idmanager_getIsDAGroot()){
-       open_addr_t* temp_addr;
-       temp_addr = idmanager_getMyID(ADDR_64B);
-       memcpy(&(ieee154e_vars.ackToSend->l2_keySource), temp_addr, sizeof(open_addr_t));
-      }else{
-    	   neighbors_getPreferredParentEui64(&(ieee154e_vars.ackToSend->l2_keySource));
-      }
-      ieee154e_vars.ackToSend->l2_keyIndex = 1;
-      //END OF TELEMATICS CODE
-
-   //   	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
-   //    						(errorparameter_t)ieee154e_vars.ackToSend->payload[14],
-   //    						(errorparameter_t)501);
-   //   	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
-   //    						(errorparameter_t)ieee154e_vars.ackToSend->payload[15],
-   //    						(errorparameter_t)502);
+  ieee154e_vars.ackToSend->l2_security = TRUE;
+  ieee154e_vars.ackToSend->l2_securityLevel = 5;
+  ieee154e_vars.ackToSend->l2_keyIdMode = 3;
+  if(idmanager_getIsDAGroot()){
+   open_addr_t* temp_addr;
+   temp_addr = idmanager_getMyID(ADDR_64B);
+   memcpy(&(ieee154e_vars.ackToSend->l2_keySource), temp_addr, sizeof(open_addr_t));
+  }else{
+	   neighbors_getPreferredParentEui64(&(ieee154e_vars.ackToSend->l2_keySource));
+  }
+  ieee154e_vars.ackToSend->l2_keyIndex = 1;
+  //END OF TELEMATICS CODE
 
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
@@ -1598,6 +1592,7 @@ port_INLINE void activity_ri6() {
    
    // change state
    changeState(S_TXACKREADY);
+
 }
 
 port_INLINE void activity_rie4() {
@@ -1613,12 +1608,13 @@ port_INLINE void activity_rie4() {
 port_INLINE void activity_ri7() {
    // change state
    changeState(S_TXACKDELAY);
-   
+
    // arm rt7
    radiotimer_schedule(DURATION_rt7);
    
    // give the 'go' to transmit
    radio_txNow(); 
+
 }
 
 port_INLINE void activity_rie5() {
@@ -2049,8 +2045,8 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot() {
-  
-   // turn off the radio
+
+	// turn off the radio
    radio_rfOff();
    // compute the duty cycle if radio has been turned on
    if (ieee154e_vars.radioOnThisSlot==TRUE){  
@@ -2125,6 +2121,7 @@ void endSlot() {
       ieee154e_vars.ackReceived = NULL;
    }
    
+
    
    // change state
    changeState(S_SLEEP);

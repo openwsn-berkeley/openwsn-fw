@@ -187,12 +187,12 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    // get a free packet buffer
    pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
    if (pkt==NULL) {
-      openserial_printError(
-         COMPONENT_SIXTOP_RES,
-         ERR_NO_FREE_PACKET_BUFFER,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
+//      openserial_printError(
+//         COMPONENT_SIXTOP_RES,
+//         ERR_NO_FREE_PACKET_BUFFER,
+//         (errorparameter_t)0,
+//         (errorparameter_t)0
+//      );
       return;
    }
    
@@ -268,12 +268,12 @@ void sixtop_removeCell(open_addr_t* neighbor){
    // get a free packet buffer
    pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
    if(pkt==NULL) {
-      openserial_printError(
-         COMPONENT_SIXTOP_RES,
-         ERR_NO_FREE_PACKET_BUFFER,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
+//      openserial_printError(
+//         COMPONENT_SIXTOP_RES,
+//         ERR_NO_FREE_PACKET_BUFFER,
+//         (errorparameter_t)0,
+//         (errorparameter_t)0
+//      );
       return;
    }
    
@@ -360,12 +360,12 @@ void task_sixtopNotifSendDone() {
    // get recently-sent packet from openqueue
    msg = openqueue_sixtopGetSentPacket();
    if (msg==NULL) {
-      openserial_printCritical(
-         COMPONENT_SIXTOP,
-         ERR_NO_SENT_PACKET,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
+//      openserial_printCritical(
+//         COMPONENT_SIXTOP,
+//         ERR_NO_SENT_PACKET,
+//         (errorparameter_t)0,
+//         (errorparameter_t)0
+//      );
       return;
    }
    
@@ -434,12 +434,12 @@ void task_sixtopNotifReceive() {
    // get received packet from openqueue
    msg = openqueue_sixtopGetReceivedPacket();
    if (msg==NULL) {
-      openserial_printCritical(
-         COMPONENT_SIXTOP,
-         ERR_NO_RECEIVED_PACKET,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
+//      openserial_printCritical(
+//         COMPONENT_SIXTOP,
+//         ERR_NO_RECEIVED_PACKET,
+//         (errorparameter_t)0,
+//         (errorparameter_t)0
+//      );
       return;
    }
    
@@ -510,12 +510,12 @@ void task_sixtopNotifReceive() {
          // free the packet's RAM memory
          openqueue_freePacketBuffer(msg);
          // log the error
-         openserial_printError(
-            COMPONENT_SIXTOP,
-            ERR_MSG_UNKNOWN_TYPE,
-            (errorparameter_t)msg->l2_frameType,
-            (errorparameter_t)0
-         );
+//         openserial_printError(
+//            COMPONENT_SIXTOP,
+//            ERR_MSG_UNKNOWN_TYPE,
+//            (errorparameter_t)msg->l2_frameType,
+//            (errorparameter_t)0
+//         );
          break;
    }
 }
@@ -531,12 +531,12 @@ status information about several modules in the OpenWSN stack.
 \returns TRUE if this function printed something, FALSE otherwise.
 */
 bool debugPrint_myDAGrank() {
-   uint16_t output;
+   //uint16_t output;
    
-   output = 0;
+   //output = 0;
    
-   output = neighbors_getMyDAGrank();
-   openserial_printStatus(STATUS_DAGRANK,(uint8_t*)&output,sizeof(uint16_t));
+   //output = neighbors_getMyDAGrank();
+   //openserial_printStatus(STATUS_DAGRANK,(uint8_t*)&output,sizeof(uint16_t));
    return TRUE;
 }
 
@@ -677,9 +677,9 @@ port_INLINE void sixtop_sendEB() {
    // get a free packet buffer
    adv = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
    if (adv==NULL) {
-      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       return;
    }
    
@@ -755,9 +755,9 @@ port_INLINE void sixtop_sendKA() {
    // get a free packet buffer
    kaPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
    if (kaPkt==NULL) {
-      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)1,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)1,
+//                            (errorparameter_t)0);
       return;
    }
    
@@ -951,9 +951,9 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
    }
    if (*lenIE>127) {
          // log the error
-     openserial_printError(COMPONENT_IEEE802154E,ERR_HEADER_TOO_LONG,
-                           (errorparameter_t)*lenIE,
-                           (errorparameter_t)1);
+//     openserial_printError(COMPONENT_IEEE802154E,ERR_HEADER_TOO_LONG,
+//                           (errorparameter_t)*lenIE,
+//                           (errorparameter_t)1);
    }
   
    if(*lenIE>0) {
@@ -1058,9 +1058,9 @@ void sixtop_linkResponse(
    sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
   
    if(sixtopPkt==NULL) {
-      openserial_printError(COMPONENT_SIXTOP_RES,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+//      openserial_printError(COMPONENT_SIXTOP_RES,ERR_NO_FREE_PACKET_BUFFER,
+//                            (errorparameter_t)0,
+//                            (errorparameter_t)0);
       return;
     }
     
