@@ -1,0 +1,32 @@
+import os
+import distutils.sysconfig
+
+Import('env')
+
+localEnv = env.Clone()
+
+target =  'libbsp'
+sources_c = [
+    'board_obj.c',
+    'bsp_timer_obj.c',
+    'debugpins_obj.c',
+    'eui64_obj.c',
+    'leds_obj.c',
+    #'openwsnmodule.c', # Note: added to main build target
+    'radio_obj.c',
+    'radiotimer_obj.c',
+    'uart_obj.c',
+    'supply_obj.c',
+]
+
+#============================ SCons targets ===================================
+
+assert(localEnv['board']=='python')
+
+
+libbsp = localEnv.Library(
+    target  = target,
+    source  = sources_c,
+    #CCFLAGS = '-D TRACE_ON',
+)
+Alias('libbsp', libbsp)

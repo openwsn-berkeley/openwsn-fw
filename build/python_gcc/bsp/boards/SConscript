@@ -1,0 +1,32 @@
+import os
+import distutils.sysconfig
+
+Import('env')
+
+localEnv = env.Clone()
+
+sources_h = [
+    'board.h',
+    'bsp_timer.h',
+    'debugpins.h',
+    'eui64.h',
+    'leds.h',
+    'radio.h',
+    'radiotimer.h',
+    'uart.h',
+]
+
+#============================ SCons targets ===================================
+
+if localEnv['board']=='python':
+    
+    actions = []
+    
+    for s in sources_h:
+        action = localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+        actions += [action]
+    
+    Alias('objectifybspheaders', actions)

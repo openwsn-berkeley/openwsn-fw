@@ -12,12 +12,16 @@ sources_c = [
     os.path.join('02a-MAClow','IEEE802154.c'),
     os.path.join('02a-MAClow','IEEE802154E.c'),
     os.path.join('02a-MAClow','adaptive_sync.c'),
+    os.path.join('02a-MAClow','security.c'),
+    os.path.join('02a-MAClow','ccmstar.c'),
+    os.path.join('02a-MAClow','TI_aes.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
     os.path.join('02b-MAChigh','otf.c'),
     os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
     os.path.join('02b-MAChigh','sixtop.c'),
+    os.path.join('02b-MAChigh','otf.c'),
     #=== 02.5-MPLS
     # TODO
     #=== 03a-IPHC
@@ -72,12 +76,16 @@ sources_h = [
     os.path.join('02a-MAClow','IEEE802154.h'),
     os.path.join('02a-MAClow','IEEE802154E.h'),
     os.path.join('02a-MAClow','adaptive_sync.h'),
+    os.path.join('02a-MAClow','security.h'),
+    os.path.join('02a-MAClow','ccmstar.h'),
+    os.path.join('02a-MAClow','TI_aes.h'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
     os.path.join('02b-MAChigh','otf.h'),
     os.path.join('02b-MAChigh','processIE.h'),
     os.path.join('02b-MAChigh','schedule.h'),
     os.path.join('02b-MAChigh','sixtop.h'),
+    os.path.join('02b-MAChigh','otf.h'),
     #=== 02.5-MPLS
     # TODO
     #=== 03a-IPHC
