@@ -17,7 +17,7 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD     8192 // @32kHz = 1s
+#define BSP_TIMER_PERIOD     32768 // @32kHz = 1s
 
 //=========================== variables =======================================
 
@@ -62,7 +62,7 @@ void cb_compare() {
    // increment counter
    app_vars.num_compare++;
    app_vars.prev+=BSP_TIMER_PERIOD;
+   
    // schedule again
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
-
 }

@@ -1,7 +1,7 @@
 /**
 \brief WSN430v14-specific definition of the "bsp_timer" bsp module.
 
-On WSN430v14, we use timerA0 for the bsp_timer module.
+On WSN430v14, we use timerB0 for the bsp_timer module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
 */
@@ -36,12 +36,12 @@ void bsp_timer_init() {
    // clear local variables
    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
-   // set CCRA0 registers
-   TACCR0               =  0;
-   TACCTL0              =  0;
+   // set CCRB0 registers
+   TBCCTL0              =  0;
+   TBCCR0               =  0;
    
-   //start TimerA
-   TACTL                =  MC_2+TASSEL_1;        // continuous mode, from ACLK
+   // start TimerB
+   TBCTL                =  MC_2+TBSSEL_1;        // continuous mode, from ACLK
 }
 
 /**
@@ -61,10 +61,10 @@ counter, and cancels a possible pending compare event.
 */
 void bsp_timer_reset() {
    // reset compare
-   TACCR0               =  0;
-   TACCTL0              =  0;
+   TBCCR0               =  0;
+   TBCCTL0              =  0;
    // reset timer
-   TAR                  = 0;
+   TBR                  =  0;
    // record last timer compare value
    bsp_timer_vars.last_compare_value =  0;
 }
@@ -95,15 +95,15 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    newCompareValue      =  bsp_timer_vars.last_compare_value+delayTicks;
    bsp_timer_vars.last_compare_value   =  newCompareValue;
    
-   if (delayTicks<TAR-temp_last_compare_value) {
+   if (delayTicks<TBR-temp_last_compare_value) {
       // we're already too late, schedule the ISR right now, manually
       
       // setting the interrupt flag triggers an interrupt
-      TACCTL0          |=  CCIFG;
+      TBCCTL0          |=  CCIFG;
    } else {
       // this is the normal case, have timer expire at newCompareValue
-      TACCR0            =  newCompareValue;
-      TACCTL0          |=  CCIE;
+      TBCCR0            =  newCompareValue;
+      TBCCTL0          |=  CCIE;
    }
 }
 
@@ -111,8 +111,8 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 \brief Cancel a running compare.
 */
 void bsp_timer_cancel_schedule() {
-   TACCR0               =  0;
-   TACCTL0             &= ~CCIE;
+   TBCCR0               =  0;
+   TBCCTL0             &= ~CCIE;
 }
 
 /**

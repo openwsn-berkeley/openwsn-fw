@@ -46,12 +46,12 @@ to this board.
 
 //===== pins
 
-// [P4.5] radio VREG
-#define PORT_PIN_RADIO_VREG_HIGH()          P4OUT |=  0x20;
-#define PORT_PIN_RADIO_VREG_LOW()           P4OUT &= ~0x20;
-// [P4.6] radio RESET
-#define PORT_PIN_RADIO_RESET_HIGH()         P4OUT |=  0x40;
-#define PORT_PIN_RADIO_RESET_LOW()          P4OUT &= ~0x40;  
+// [P3.0] radio VREG
+#define PORT_PIN_RADIO_VREG_HIGH()          P3OUT |=  0x01;
+#define PORT_PIN_RADIO_VREG_LOW()           P3OUT &= ~0x01;
+// [P1.7] radio RESET
+#define PORT_PIN_RADIO_RESET_HIGH()         P1OUT |=  0x80;
+#define PORT_PIN_RADIO_RESET_LOW()          P1OUT &= ~0x80;  
 
 //===== IEEE802154E timing
 

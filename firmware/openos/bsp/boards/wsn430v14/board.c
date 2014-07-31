@@ -19,6 +19,8 @@
 
 //=========================== prototypes ======================================
 
+kick_scheduler_t radiotimer_isr_sfd();
+
 //=========================== main ============================================
 
 extern int mote_main(void);
@@ -39,17 +41,21 @@ void board_init() {
                                                  // by default, ACLK from 32kHz XTAL which is running
    
    // initialize pins
-   P4DIR     |=  0x20;                           // [P4.5] radio VREG:  output
-   P4DIR     |=  0x40;                           // [P4.6] radio reset: output
+   P3DIR     |=  0x01;                           // [P3.0] radio VREG:  output
+   P1DIR     |=  0x80;                           // [P1.7] radio reset: output
+   P1DIR     &= ~0x20;                           // [P1.5] radio SFD:   input
+   P1IES     &= ~0x20;                           // [P1.5] radio SFD:   low->high
+   P1IFG     &= ~0x20;                           // [P1.5] radio SFD:   clear interrupt flag
+   P1IE      |=  0x20;                           // [P1.5] radio SFD:   interrupt enabled
    
    // initialize bsp modules
    debugpins_init();
    leds_init();
    uart_init();
-   //poipoispi_init();
+   spi_init();
    bsp_timer_init();
-   //poipoiradio_init();
-   //popipoiradiotimer_init();
+   radio_init();
+   radiotimer_init();
    
    // enable interrupts
    __bis_SR_register(GIE);
@@ -60,7 +66,7 @@ void board_sleep() {
 }
 
 void board_reset() {
-   WDTCTL = (WDTPW+0x1200) + WDTHOLD; // writing a wrong watchdog password to causes handler to reset
+   WDTCTL = (WDTPW+0x1200) + WDTHOLD;            // writing a wrong watchdog password to causes handler to reset
 }
 
 //=========================== private =========================================
@@ -87,13 +93,24 @@ ISR(USART0RX) {
    debugpins_isr_clr();
 }
 
-// PORT1_VECTOR
-
-// TIMERA1_VECTOR
-
-ISR(TIMERA0) {
+ISR(PORT1) {
    debugpins_isr_set();
-   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
+   if (P1IFG & 0x20) {
+      P1IFG &= ~0x20;
+      if (radiotimer_isr_sfd()==KICK_SCHEDULER) {         // radio:  SFD pin [P1.6]
+         __bic_SR_register_on_exit(CPUOFF);
+      }
+   } else {
+      while (1); // should never happen
+   }
+   debugpins_isr_clr();
+}
+
+// TIMERA0_VECTOR
+
+ISR(TIMERA1) {
+   debugpins_isr_set();
+   if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
@@ -121,15 +138,15 @@ ISR(COMPARATORA) {
    debugpins_isr_clr();
 }
 
-ISR(TIMERB1) {
+ISR(TIMERB0) {
    debugpins_isr_set();
-   if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
+   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
 }
 
-// TIMERB0_VECTOR
+// TIMERB1_VECTOR
 
 // NMI_VECTOR
 
