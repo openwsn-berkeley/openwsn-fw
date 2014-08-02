@@ -18,7 +18,7 @@ The "inputs" are:
 The debug pins are:
    - P2.1 toggles when interrupt TIMERA0_VECTOR fires
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "msp430f1611.h"
