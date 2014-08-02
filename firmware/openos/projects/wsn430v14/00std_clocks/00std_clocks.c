@@ -1,18 +1,18 @@
 /**
-\brief This is a standalone test program for the clocks on the TelosB
+\brief This is a standalone test program for the clocks on the WSN430v14
        board.
 
-Download the program to a TelosB board, run it. It will output its
+Download the program to a WSN430v14 board, run it. It will output its
 clocks on the pins below. Note that these pins are connected to the
 LEDs, so they will blink (so fast they will appear simply on to your slow eyes).
 Use a scope probe to see the clock signals and measure their frequency.
 
 The digital outputs are:
-   - P5.4: MCLK  (red LED or pad 48 on the back)
-   - P5.5: SMCLK (green LED or pad 49 on the back)
+   - P5.4: MCLK  (red LED)
+   - P5.5: SMCLK (green LED)
    - P5.6: ACLK  (blue LED)
  
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "msp430f1611.h"
