@@ -3,7 +3,7 @@
 
 On WSN430v14, we use timerB0 for the bsp_timer module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "msp430f1611.h"
@@ -99,7 +99,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
       // we're already too late, schedule the ISR right now, manually
       
       // setting the interrupt flag triggers an interrupt
-      TBCCTL0          |=  CCIFG;
+      TBCCTL0          |=  CCIE+CCIFG;
    } else {
       // this is the normal case, have timer expire at newCompareValue
       TBCCR0            =  newCompareValue;
