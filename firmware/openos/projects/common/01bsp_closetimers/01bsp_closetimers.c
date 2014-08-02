@@ -2,11 +2,26 @@
 \brief This program uses of both the "bsp_timer" and "radiotimer" bsp modules
        and schedules timers very close together, with long ISRs.
 
-This project is used to verify the correct behavior of the timer scheduling,
-which is particularly important when using the sctimer timer abstractor.
-
 Since the bsp modules for different platforms have the same declaration, you
 can use this project with any platform.
+
+This project is to verify all is well when the BSP timer and radiotimer are
+fire at about the same time.
+
+Load this program onto your board, and start running. It will enable the BSP
+timer and radiotimer:
+- the BSP timer is periodic, of period BSP_TIMER_PERIOD ticks. Each time it
+  elapses:
+    - the frame debugpin toggles
+    - the error LED toggles
+- the radiotimer overflows every RADIOTIMER_OVERFLOW_PERIOD. Each time it
+  elapses:
+    - the slot debugpin toggles
+    - the radio LED toggles
+
+Because the values of BSP_TIMER_PERIOD and RADIOTIMER_OVERFLOW_PERIOD are so
+close, you should see the LEDs (and debugpins) slowly go out of phase and in
+phase.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2012.
 */
@@ -27,13 +42,6 @@ can use this project with any platform.
 
 //=========================== variables =======================================
 
-/*
-typedef struct {
-} app_vars_t;
-
-app_vars_t app_vars;
-*/
-
 typedef struct {
    uint16_t bsp_timer_num_compare;
    uint16_t radiotimer_num_overflow;
@@ -46,6 +54,7 @@ app_dbg_t app_dbg;
 void bsp_timer_cb_compare();
 void radiotimer_cb_overflow();
 void radiotimer_cb_compare();
+void small_delay();
 
 //=========================== main ============================================
 
@@ -78,10 +87,9 @@ int mote_main(void) {
 //=========================== callbacks =======================================
 
 void bsp_timer_cb_compare() {
-   uint16_t delay;
    
    // toggle pin
-   debugpins_fsm_toggle();
+   debugpins_frame_toggle();
    
    // toggle error led
    leds_error_toggle();
@@ -93,25 +101,29 @@ void bsp_timer_cb_compare() {
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    
    // wait a bit
-   for (delay=0;delay<ISR_DELAY;delay++);
+   small_delay();
 }
 
 void radiotimer_cb_overflow() {
-   uint16_t delay;
    
    // toggle pin
-   debugpins_frame_toggle();
+   debugpins_slot_toggle();
    
    // switch radio LED on
    leds_radio_toggle();
    
-   // increment debug counter
+   // increment counter
    app_dbg.radiotimer_num_overflow++;
    
    // wait a bit
-   for (delay=0;delay<ISR_DELAY;delay++);
+   small_delay();
 }
 
 void radiotimer_cb_compare() {
    while(1);
+}
+
+void small_delay() {
+   volatile uint16_t delay;
+   for (delay=0;delay<ISR_DELAY;delay++);
 }
