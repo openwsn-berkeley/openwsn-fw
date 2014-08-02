@@ -5,7 +5,40 @@
 Since the bsp modules for different platforms have the same declaration, you
 can use this project with any platform.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2012.
+Load this program onto your board, and start running. It will enable the BSP
+timer and radiotimer:
+- the BSP timer is periodic, of period BSP_TIMER_PERIOD ticks. Each time it
+  elapses:
+    - the frame debugpin toggles
+    - the sync LED toggles
+- the radiotimer:
+    - overflows every RADIOTIMER_OVERFLOW_PERIOD
+    - during that period, RADIOTIMER_NUM_COMPARES compare events fire,
+      every RADIOTIMER_COMPARE_PERIOD ticks.
+
+The resulting signal of the radiotimer is:
+
+   |         RADIOTIMER_OVERFLOW_PERIOD       |
+   |<---------------------------------------->|
+   |                                          |
+   v                                          v
+overflow                                  overflow
+
+   :      RADIOTIMER_COMPARE_PERIOD
+   :              >---------<
+   :       |       |       |       |
+   :       |       |       |       |
+   :       v       v       v       v
+   :    compare compare compare compare
+
+- At each radiotimer overflow:
+    - the slot debugpin toggles
+    - the error LED toggles
+- At each radiotimer compare:
+    - the fsm debugpin toggles
+    - the radio LED toggles
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "stdint.h"
@@ -106,7 +139,6 @@ void radiotimer_cb_overflow() {
    
    // switch radio LED on
    leds_error_toggle();
-   leds_radio_off();
    
    // reset the counter for number of remaining compares
    app_vars.radiotimer_num_compares_left  = RADIOTIMER_NUM_COMPARES;
