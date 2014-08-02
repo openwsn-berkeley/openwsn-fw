@@ -16,6 +16,15 @@
 //=========================== public ==========================================
 
 void debugpins_init() {
+   // all pins off
+   debugpins_frame_clr();
+   debugpins_slot_clr();
+   debugpins_fsm_clr();
+   debugpins_task_clr();
+   debugpins_isr_clr();
+   debugpins_radio_clr();
+   
+   // all pins as output
    P2DIR |=  0x02;      // frame [P2.1]
    P6DIR |=  0x02;      // slot  [P6.1]
    P2DIR |=  0x04;      // fsm   [P2.2]
