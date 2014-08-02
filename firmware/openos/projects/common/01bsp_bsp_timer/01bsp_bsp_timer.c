@@ -4,7 +4,13 @@
 Since the bsp modules for different platforms have the same declaration, you
 can use this project with any platform.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2012.
+Load this program onto your board, and start running. It will enable the BSP
+timer. The BSP timer is periodic, of period BSP_TIMER_PERIOD ticks. Each time
+it elapses:
+    - the frame debugpin toggles
+    - the error LED toggles
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "stdint.h"
@@ -14,7 +20,6 @@ can use this project with any platform.
 #include "leds.h"
 #include "bsp_timer.h"
 
-
 //=========================== defines =========================================
 
 #define BSP_TIMER_PERIOD     32768 // @32kHz = 1s
@@ -23,7 +28,6 @@ can use this project with any platform.
 
 typedef struct {
    uint16_t num_compare;
-   PORT_TIMER_WIDTH prev;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -40,11 +44,10 @@ void cb_compare();
 int mote_main(void) {  
    // initialize board
    board_init();
-
-   app_vars.prev=BSP_TIMER_PERIOD;
    
    bsp_timer_set_callback(cb_compare);
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
+   
    while (1) {
       board_sleep();
    }
@@ -53,15 +56,15 @@ int mote_main(void) {
 //=========================== callbacks =======================================
 
 void cb_compare() {
+   
    // toggle pin
-   debugpins_fsm_toggle();
+   debugpins_frame_toggle();
    
    // toggle error led
-   leds_sync_toggle();
+   leds_error_toggle();
    
    // increment counter
    app_vars.num_compare++;
-   app_vars.prev+=BSP_TIMER_PERIOD;
    
    // schedule again
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
