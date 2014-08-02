@@ -7,12 +7,10 @@ can use this project with any platform.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
-
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
 #include "bsp_timer.h"
-
 
 //=========================== defines =========================================
 
@@ -35,30 +33,29 @@ typedef enum {
 } app_state_t;
 
 typedef struct {
-   uint8_t num_radioTimerOverflows;
-   uint8_t num_radioTimerCompare;
-   uint8_t num_startFrame;
-   uint8_t num_endFrame;
-   uint8_t num_timer;
+   uint8_t         num_radioTimerOverflows;
+   uint8_t         num_radioTimerCompare;
+   uint8_t         num_startFrame;
+   uint8_t         num_endFrame;
+   uint8_t         num_timer;
 } app_dbg_t;
 
 app_dbg_t app_dbg;
 
 typedef struct {
-   uint8_t     flags;
-   app_state_t state;
-   uint8_t     packet[LENGTH_PACKET];
-   uint8_t     packet_len;
-    int8_t     rxpk_rssi;
-   uint8_t     rxpk_lqi;
-   bool        rxpk_crc;
+   uint8_t         flags;
+   app_state_t     state;
+   uint8_t         packet[LENGTH_PACKET];
+   uint8_t         packet_len;
+    int8_t         rxpk_rssi;
+   uint8_t         rxpk_lqi;
+   bool            rxpk_crc;
 } app_vars_t;
 
 app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-uint16_t getRandomPeriod();
 void     cb_radioTimerOverflows();
 void     cb_radioTimerCompare();
 void     cb_startFrame(uint16_t timestamp);
@@ -107,26 +104,33 @@ int mote_main(void) {
    app_vars.flags |= APP_FLAG_TIMER;
 
    while (1) {
+      
       // sleep while waiting for at least one of the flags to be set
       while (app_vars.flags==0x00) {
          board_sleep();
       }
+      
       // handle and clear every flag
       while (app_vars.flags) {
-
-    	  if (app_vars.flags & APP_FLAG_START_FRAME) {
+         
+         if (app_vars.flags & APP_FLAG_START_FRAME) {
             // start of frame
             
             switch (app_vars.state) {
                case APP_STATE_RX:
                   // started receiving a packet
+                  
+                  // led
                   leds_error_on();
                   break;
                case APP_STATE_TX:
                   // started sending a packet
+                  
+                  // led
                   leds_sync_on();
                   break;
             }
+            
             // clear flag
             app_vars.flags &= ~APP_FLAG_START_FRAME;
          }
@@ -135,20 +139,23 @@ int mote_main(void) {
             // end of frame
             
             switch (app_vars.state) {
+               
                case APP_STATE_RX:
-                  // done receiving a packet
-            	   app_vars.packet_len = sizeof(app_vars.packet);
-            	     for (i=0;i<app_vars.packet_len;i++) {
-            	        app_vars.packet[i] = 0;
-            	     }
-                  // get packet from radio
-                  radio_getReceivedFrame(app_vars.packet,
-                                         &app_vars.packet_len,
-                                         sizeof(app_vars.packet),
-                                         &app_vars.rxpk_rssi,
-                                         &app_vars.rxpk_lqi,
-                                         &app_vars.rxpk_crc);
                   
+                  // done receiving a packet
+                  app_vars.packet_len = sizeof(app_vars.packet);
+                  
+                  // get packet from radio
+                  radio_getReceivedFrame(
+                     app_vars.packet,
+                     &app_vars.packet_len,
+                     sizeof(app_vars.packet),
+                     &app_vars.rxpk_rssi,
+                     &app_vars.rxpk_lqi,
+                     &app_vars.rxpk_crc
+                  );
+                  
+                  // led
                   leds_error_off();
                   break;
                case APP_STATE_TX:
@@ -158,6 +165,7 @@ int mote_main(void) {
                   radio_rxEnable();
                   app_vars.state = APP_STATE_RX;
                   
+                  // led
                   leds_sync_off();
                   break;
             }
@@ -196,16 +204,19 @@ int mote_main(void) {
 //=========================== callbacks =======================================
 
 void cb_radioTimerOverflows() {
+   // update debug stats
    app_dbg.num_radioTimerOverflows++;
 }
 
 void cb_radioTimerCompare() {
+   // update debug stats
    app_dbg.num_radioTimerCompare++;
 }
 
 void cb_startFrame(uint16_t timestamp) {
    // set flag
    app_vars.flags |= APP_FLAG_START_FRAME;
+   
    // update debug stats
    app_dbg.num_startFrame++;
 }
@@ -213,6 +224,7 @@ void cb_startFrame(uint16_t timestamp) {
 void cb_endFrame(uint16_t timestamp) {
    // set flag
    app_vars.flags |= APP_FLAG_END_FRAME;
+   
    // update debug stats
    app_dbg.num_endFrame++;
 }
@@ -220,8 +232,10 @@ void cb_endFrame(uint16_t timestamp) {
 void cb_timer() {
    // set flag
    app_vars.flags |= APP_FLAG_TIMER;
+   
    // update debug stats
    app_dbg.num_timer++;
+   
    // schedule again
    bsp_timer_scheduleIn(TIMER_PERIOD);
 }

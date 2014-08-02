@@ -7,7 +7,7 @@
 
 Load this program on your boards. The LEDs should start blinking furiously.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "stdint.h"
@@ -56,7 +56,6 @@ int mote_main(void) {uint8_t i;
    leds_error_on();          some_delay();
    for (i=0;i<9;i++) {
       leds_circular_shift(); some_delay();
-      
    }
    
    board_reset();
