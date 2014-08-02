@@ -74,19 +74,19 @@ uint8_t leds_sync_isOn() {
    return (uint8_t)(P5OUT & 0x40)>>6;
 }
 
-void    leds_debug_on() {
+// no debug LED on the WSN430v14 :(
+void    leds_debug_on() {  
 }
-
 void    leds_debug_off() {
 }
 
 void    leds_debug_toggle() {
 }
-
 uint8_t leds_debug_isOn() {
    return 0;
 }
 
+// all leds
 void    leds_all_on() {
    P5OUT     &= ~0x70;
 }
