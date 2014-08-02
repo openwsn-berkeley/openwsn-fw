@@ -16,78 +16,78 @@
 //=========================== public ==========================================
 
 void debugpins_init() {
-   P6DIR |=  0x40;      // frame [P6.6]
-   P6DIR |=  0x80;      // slot  [P6.7]
-   P2DIR |=  0x08;      // fsm   [P2.3]
-   P2DIR |=  0x40;      // task  [P2.6]
-   P6DIR |=  0x01;      // isr   [P6.0]
-   P6DIR |=  0x02;      // radio [P6.1] 
+   P2DIR |=  0x02;      // frame [P2.1]
+   P6DIR |=  0x02;      // slot  [P6.1]
+   P2DIR |=  0x04;      // fsm   [P2.2]
+   P2DIR |=  0x08;      // task  [P2.3]
+   P2DIR |=  0x01;      // isr   [P2.0]
+   P6DIR |=  0x01;      // radio [P6.0]
 }
 
-// P6.6
+// frame [P2.1]
 void debugpins_frame_toggle() {
-   P6OUT ^=  0x40;
+   P2OUT ^=  0x02;
 }
 void debugpins_frame_clr() {
-   P6OUT &= ~0x40;
+   P2OUT &= ~0x02;
 }
 void debugpins_frame_set() {
-   P6OUT |=  0x40;
+   P2OUT |=  0x02;
 }
 
-// P6.7
+// slot [P6.1]
 void debugpins_slot_toggle() {
-   P6OUT ^=  0x80;
+   P6OUT ^=  0x02;
 }
 void debugpins_slot_clr() {
-   P6OUT &= ~0x80;
+   P6OUT &= ~0x02;
 }
 void debugpins_slot_set() {
-   P6OUT |=  0x80;
+   P6OUT |=  0x02;
 }
 
-// P2.3
+// fsm [P2.2]
 void debugpins_fsm_toggle() {
-   P2OUT ^=  0x08;
+   P2OUT ^=  0x04;
 }
 void debugpins_fsm_clr() {
-   P2OUT &= ~0x08;
+   P2OUT &= ~0x04;
 }
 void debugpins_fsm_set() {
+   P2OUT |=  0x04;
+}
+
+// task [P2.3]
+void debugpins_task_toggle() {
+   P2OUT ^=  0x08;
+}
+void debugpins_task_clr() {
+   P2OUT &= ~0x08;
+}
+void debugpins_task_set() {
    P2OUT |=  0x08;
 }
 
-// P2.6
-void debugpins_task_toggle() {
-   P2OUT ^=  0x40;
-}
-void debugpins_task_clr() {
-   P2OUT &= ~0x40;
-}
-void debugpins_task_set() {
-   P2OUT |=  0x40;
-}
-
-// P6.0
+// isr [P2.0]
 void debugpins_isr_toggle() {
-   P6OUT ^=  0x01;
+   P2OUT ^=  0x01;
 }
 void debugpins_isr_clr() {
-   P6OUT &= ~0x01;
+   P2OUT &= ~0x01;
 }
 void debugpins_isr_set() {
-   P6OUT |=  0x01;
+   P2OUT |=  0x01;
 }
 
-// P6.1
+// radio [P6.0]
 void debugpins_radio_toggle() {
-   P6OUT ^=  0x02;
+   P6OUT ^=  0x01;
 }
 void debugpins_radio_clr() {
-   P6OUT &= ~0x02;
+   P6OUT &= ~0x01;
 }
 void debugpins_radio_set() {
-   P6OUT |=  0x02;
+   P6OUT |=  0x01;
 }
 
 //=========================== private =========================================
