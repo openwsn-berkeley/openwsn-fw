@@ -16,39 +16,55 @@ Load this program on your boards. The LEDs should start blinking furiously.
 #include "board.h"
 #include "leds.h"
 
+void some_delay();
+
 /**
 \brief The program starts executing here.
 */
-int mote_main(void) {
-   volatile uint16_t delay;
-   uint8_t i;
+int mote_main(void) {uint8_t i;
    
    board_init();
    
-   leds_error_on();
-   leds_error_off();
-   leds_error_toggle();
-   leds_radio_on();
-   leds_radio_off();
-   leds_radio_toggle();
-   leds_sync_on();
-   leds_sync_off();
-   leds_sync_toggle();
-   leds_debug_on();
-   leds_debug_off();
-   leds_debug_toggle();
-   leds_sync_toggle();
-   leds_circular_shift();
+   leds_error_on();          some_delay();
+   leds_error_off();         some_delay();
+   leds_error_toggle();      some_delay();
+   leds_error_blink();       some_delay();
    
-   for (i=0;i<20;i++) {
-      for (delay=0xffff;delay>0;delay--);
-      leds_increment();
-      for (delay=0xffff;delay>0;delay--);
-      leds_circular_shift();
+   leds_radio_on();          some_delay();
+   leds_radio_off();         some_delay();
+   leds_radio_toggle();      some_delay();
+   
+   leds_sync_on();           some_delay();
+   leds_sync_off();          some_delay();
+   leds_sync_toggle();       some_delay();
+   
+   leds_debug_on();          some_delay();
+   leds_debug_off();         some_delay();
+   leds_debug_toggle();      some_delay();
+   
+   leds_all_off();           some_delay();
+   leds_all_on();            some_delay();
+   leds_all_off();           some_delay();
+   leds_all_toggle();        some_delay();
+   
+   leds_all_off();           some_delay();
+   for (i=0;i<9;i++) {
+      leds_increment();      some_delay();
    }
    
-   leds_error_blink();
+   leds_all_off();           some_delay();
+   leds_error_on();          some_delay();
+   for (i=0;i<9;i++) {
+      leds_circular_shift(); some_delay();
+      
+   }
    
    board_reset();
+   
    return 0;
+}
+
+void some_delay() {
+   volatile uint16_t delay;
+   for (delay=0xffff;delay>0;delay--);
 }
