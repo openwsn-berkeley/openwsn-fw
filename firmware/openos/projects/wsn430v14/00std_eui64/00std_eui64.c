@@ -1,6 +1,6 @@
 /**
 \brief This is a standalone test program for retrieving the unique identifier
-      from the DS2411 chip on the TelosB.
+      from the DS2411 chip on the WSN430v14.
 
 The datasheet of the chip at http://pdfserv.maxim-ic.com/en/ds/DS2411.pdf.
 
@@ -10,7 +10,7 @@ there, watch variable eui. I contains the 64-bits read from the DS2411, i.e.
 - [6B] unique 48-bit identifier
 - [1B] always 0x01
  
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "msp430f1611.h"
