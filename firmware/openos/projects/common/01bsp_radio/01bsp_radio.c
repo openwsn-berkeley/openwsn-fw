@@ -4,7 +4,17 @@
 Since the bsp modules for different platforms have the same declaration, you
 can use this project with any platform.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
+After loading this program, your board will switch on its radio on frequency
+CHANNEL.
+
+While receiving a packet (i.e. from the start of frame event to the end of 
+frame event), it will turn on its sync LED.
+
+Every TIMER_PERIOD, it will also send a packet containing LENGTH_PACKET bytes
+set to ID. While sending a packet (i.e. from the start of frame event to the
+end of frame event), it will turn on its error LED.
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "board.h"
@@ -15,8 +25,8 @@ can use this project with any platform.
 //=========================== defines =========================================
 
 #define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
-#define CHANNEL         11             ///< 2.480GHz
-#define TIMER_PERIOD    65535          ///< 2s @ 32kHz
+#define CHANNEL         11             ///< 11=2.480GHz
+#define TIMER_PERIOD    0xffff         ///< 0xffff = 2s@32kHz
 #define ID              0x99           ///< byte sent in the packets
 
 //=========================== variables =======================================
@@ -113,6 +123,9 @@ int mote_main(void) {
       // handle and clear every flag
       while (app_vars.flags) {
          
+         
+         //==== APP_FLAG_START_FRAME (TX or RX)
+         
          if (app_vars.flags & APP_FLAG_START_FRAME) {
             // start of frame
             
@@ -134,6 +147,9 @@ int mote_main(void) {
             // clear flag
             app_vars.flags &= ~APP_FLAG_START_FRAME;
          }
+         
+         
+         //==== APP_FLAG_END_FRAME (TX or RX)
          
          if (app_vars.flags & APP_FLAG_END_FRAME) {
             // end of frame
@@ -172,6 +188,9 @@ int mote_main(void) {
             // clear flag
             app_vars.flags &= ~APP_FLAG_END_FRAME;
          }
+         
+         
+         //==== APP_FLAG_TIMER
          
          if (app_vars.flags & APP_FLAG_TIMER) {
             // timer fired
