@@ -46,4 +46,7 @@ while True:
             rxpk_crc
         )
         
+        if rxpk_len>127:
+            print "ERROR: frame too long.\a"
+        
         rawFrame = []

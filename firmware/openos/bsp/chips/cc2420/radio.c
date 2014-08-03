@@ -97,9 +97,11 @@ void radio_reset(void) {
    cc2420_MDMCTRL0_reg.PAN_COORDINATOR      = 0;
    cc2420_MDMCTRL0_reg.RESERVED_FRAME_MODE  = 1; // accept all frame types
    cc2420_MDMCTRL0_reg.reserved_w0          = 0;
-   radio_spiWriteReg(CC2420_MDMCTRL0_ADDR,
-                     &radio_vars.radioStatusByte,
-                     *(uint16_t*)&cc2420_MDMCTRL0_reg);
+   radio_spiWriteReg(
+      CC2420_MDMCTRL0_ADDR,
+      &radio_vars.radioStatusByte,
+      *(uint16_t*)&cc2420_MDMCTRL0_reg
+   );
    
    // speed up time to TX
    cc2420_TXCTRL_reg.PA_LEVEL               = 31;// max. TX power (~0dBm)
@@ -109,9 +111,11 @@ void radio_reset(void) {
    cc2420_TXCTRL_reg.TXMIX_CAP_ARRAY        = 0;
    cc2420_TXCTRL_reg.TX_TURNAROUND          = 0; // faster STXON->SFD timing (128us)
    cc2420_TXCTRL_reg.TXMIXBUF_CUR           = 2;
-   radio_spiWriteReg(CC2420_TXCTRL_ADDR,
-                     &radio_vars.radioStatusByte,
-                     *(uint16_t*)&cc2420_TXCTRL_reg);
+   radio_spiWriteReg(
+      CC2420_TXCTRL_ADDR,
+      &radio_vars.radioStatusByte,
+      *(uint16_t*)&cc2420_TXCTRL_reg
+   );
    
    // apply correction recommended in datasheet
    cc2420_RXCTRL1_reg.RXMIX_CURRENT         = 2;
@@ -125,9 +129,11 @@ void radio_reset(void) {
    cc2420_RXCTRL1_reg.RXBPF_MIDCUR          = 0;
    cc2420_RXCTRL1_reg.RXBPF_LOCUR           = 1; // use this setting as per datasheet
    cc2420_RXCTRL1_reg.reserved_w0           = 0;
-   radio_spiWriteReg(CC2420_RXCTRL1_ADDR,
-                     &radio_vars.radioStatusByte,
-                     *(uint16_t*)&cc2420_RXCTRL1_reg);
+   radio_spiWriteReg(
+      CC2420_RXCTRL1_ADDR,
+      &radio_vars.radioStatusByte,
+      *(uint16_t*)&cc2420_RXCTRL1_reg
+   );
 }
 
 //===== timer
@@ -165,9 +171,11 @@ void radio_setFrequency(uint8_t frequency) {
    cc2420_FSCTRL_reg.CAL_DONE     = 0;
    cc2420_FSCTRL_reg.LOCK_THR     = 1;
    
-   radio_spiWriteReg(CC2420_FSCTRL_ADDR,
-                     &radio_vars.radioStatusByte,
-                     *(uint16_t*)&cc2420_FSCTRL_reg);
+   radio_spiWriteReg(
+      CC2420_FSCTRL_ADDR,
+      &radio_vars.radioStatusByte,
+      *(uint16_t*)&cc2420_FSCTRL_reg
+   );
    
    // change state
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
@@ -257,12 +265,15 @@ void radio_rxNow(void) {
    // nothing to do, the radio is already listening.
 }
 
-void radio_getReceivedFrame(uint8_t* bufRead,
-                            uint8_t* lenRead,
-                            uint8_t  maxBufLen,
-                             int8_t* rssi,
-                            uint8_t* lqi,
-                               bool* crc) {
+void radio_getReceivedFrame(
+      uint8_t* bufRead,
+      uint8_t* lenRead,
+      uint8_t  maxBufLen,
+      int8_t*  rssi,
+      uint8_t* lqi,
+      bool*    crc
+   ) {
+   
    // read the received packet from the RXFIFO
    radio_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
    
@@ -283,13 +294,15 @@ void radio_spiStrobe(uint8_t strobe, cc2420_status_t* statusRead) {
    
    spi_tx_buffer[0]     = (CC2420_FLAG_WRITE | CC2420_FLAG_REG | strobe);
    
-   spi_txrx(spi_tx_buffer,
-            sizeof(spi_tx_buffer),
-            SPI_FIRSTBYTE,
-            (uint8_t*)statusRead,
-            1,
-            SPI_FIRST,
-            SPI_LAST);
+   spi_txrx(
+      spi_tx_buffer,              // bufTx
+      sizeof(spi_tx_buffer),      // lenbufTx
+      SPI_FIRSTBYTE,              // returnType
+      (uint8_t*)statusRead,       // bufRx
+      1,                          // maxLenBufRx
+      SPI_FIRST,                  // isFirst
+      SPI_LAST                    // isLast
+   );
 }
 
 void radio_spiWriteReg(uint8_t reg, cc2420_status_t* statusRead, uint16_t regValueToWrite) {
@@ -299,13 +312,15 @@ void radio_spiWriteReg(uint8_t reg, cc2420_status_t* statusRead, uint16_t regVal
    spi_tx_buffer[1]     = regValueToWrite/256;
    spi_tx_buffer[2]     = regValueToWrite%256;
    
-   spi_txrx(spi_tx_buffer,
-            sizeof(spi_tx_buffer),
-            SPI_FIRSTBYTE,
-            (uint8_t*)statusRead,
-            1,
-            SPI_FIRST,
-            SPI_LAST);
+   spi_txrx(
+      spi_tx_buffer,              // bufTx
+      sizeof(spi_tx_buffer),      // lenbufTx
+      SPI_FIRSTBYTE,              // returnType
+      (uint8_t*)statusRead,       // bufRx
+      1,                          // maxLenBufRx
+      SPI_FIRST,                  // isFirst
+      SPI_LAST                    // isLast
+   );
 }
 
 void radio_spiReadReg(uint8_t reg, cc2420_status_t* statusRead, uint8_t* regValueRead) {
@@ -316,13 +331,15 @@ void radio_spiReadReg(uint8_t reg, cc2420_status_t* statusRead, uint8_t* regValu
    spi_tx_buffer[1]     = 0x00;
    spi_tx_buffer[2]     = 0x00;
    
-   spi_txrx(spi_tx_buffer,
-            sizeof(spi_tx_buffer),
-            SPI_BUFFER,
-            spi_rx_buffer,
-            sizeof(spi_rx_buffer),
-            SPI_FIRST,
-            SPI_LAST);
+   spi_txrx(
+      spi_tx_buffer,              // bufTx
+      sizeof(spi_tx_buffer),      // lenbufTx
+      SPI_BUFFER,                 // returnType
+      spi_rx_buffer,              // bufRx
+      sizeof(spi_rx_buffer),      // maxLenBufRx
+      SPI_FIRST,                  // isFirst
+      SPI_LAST                    // isLast
+   );
    
    *statusRead          = *(cc2420_status_t*)&spi_rx_buffer[0];
    *(regValueRead+0)    = spi_rx_buffer[2];
@@ -336,22 +353,26 @@ void radio_spiWriteTxFifo(cc2420_status_t* statusRead, uint8_t* bufToWrite, uint
    spi_tx_buffer[0]     = (CC2420_FLAG_WRITE | CC2420_FLAG_REG | CC2420_TXFIFO_ADDR);
    spi_tx_buffer[1]     = len;
    
-   spi_txrx(spi_tx_buffer,
-            sizeof(spi_tx_buffer),
-            SPI_FIRSTBYTE,
-            (uint8_t*)statusRead,
-            1,
-            SPI_FIRST,
-            SPI_NOTLAST);
+   spi_txrx(
+      spi_tx_buffer,              // bufTx
+      sizeof(spi_tx_buffer),      // lenbufTx
+      SPI_FIRSTBYTE,              // returnType
+      (uint8_t*)statusRead,       // bufRx
+      1,                          // maxLenBufRx
+      SPI_FIRST,                  // isFirst
+      SPI_NOTLAST                 // isLast
+   );
    
    // step 2. send payload
-   spi_txrx(bufToWrite,
-            len,
-            SPI_LASTBYTE,
-            (uint8_t*)statusRead,
-            1,
-            SPI_NOTFIRST,
-            SPI_LAST);
+   spi_txrx(
+      bufToWrite,                 // bufTx
+      len,                        // lenbufTx
+      SPI_LASTBYTE,               // returnType
+      (uint8_t*)statusRead,       // bufRx
+      1,                          // maxLenBufRx
+      SPI_NOTFIRST,               // isFirst
+      SPI_LAST                    // isLast
+   );
 }
 
 void radio_spiReadRxFifo(cc2420_status_t* statusRead,
@@ -369,13 +390,15 @@ void radio_spiReadRxFifo(cc2420_status_t* statusRead,
    spi_tx_buffer[0]     = (CC2420_FLAG_READ | CC2420_FLAG_REG | CC2420_RXFIFO_ADDR);
    
    // 2 first bytes
-   spi_txrx(spi_tx_buffer,
-            2,
-            SPI_BUFFER,
-            spi_rx_buffer,
-            sizeof(spi_rx_buffer),
-            SPI_FIRST,
-            SPI_NOTLAST);
+   spi_txrx(
+      spi_tx_buffer,              // bufTx
+      2,                          // lenbufTx
+      SPI_BUFFER,                 // returnType
+      spi_rx_buffer,              // bufRx
+      sizeof(spi_rx_buffer),      // maxLenBufRx
+      SPI_FIRST,                  // isFirst
+      SPI_NOTLAST                 // isLast
+   );
    
    *statusRead          = *(cc2420_status_t*)&spi_rx_buffer[0];
    *pLenRead            = spi_rx_buffer[1];
@@ -384,25 +407,43 @@ void radio_spiReadRxFifo(cc2420_status_t* statusRead,
       // valid length
       
       //read packet
-      spi_txrx(spi_tx_buffer,
-               *pLenRead,
-               SPI_BUFFER,
-               pBufRead,
-               125,
-               SPI_NOTFIRST,
-               SPI_LAST);
+      spi_txrx(
+         spi_tx_buffer,           // bufTx
+         *pLenRead,               // lenbufTx
+         SPI_BUFFER,              // returnType
+         pBufRead,                // bufRx
+         125,                     // maxLenBufRx
+         SPI_NOTFIRST,            // isFirst
+         SPI_LAST                 // isLast
+      );
       
    } else {
       // invalid length
       
       // read a just byte to close spi
-      spi_txrx(spi_tx_buffer,
-               1,
-               SPI_BUFFER,
-               spi_rx_buffer,
-               sizeof(spi_rx_buffer),
-               SPI_NOTFIRST,
-               SPI_LAST);
+      spi_txrx(
+         spi_tx_buffer,           // bufTx
+         1,                       // lenbufTx
+         SPI_BUFFER,              // returnType
+         spi_rx_buffer,           // bufRx
+         sizeof(spi_rx_buffer),   // maxLenBufRx
+         SPI_NOTFIRST,            // isFirst
+         SPI_LAST                 // isLast
+      );
+      
+      /*
+      A SFLUSHRX command strobe is required 
+      after an RXFIFO overflow to enable 
+      reception of new data. Note that the 
+      SFLUSHRX command strobe should be 
+      issued twice to ensure that the SFD pin 
+      goes back to its inactive state.
+      */
+      
+      radio_spiStrobe(CC2420_SFLUSHRX, &radio_vars.radioStatusByte);
+      radio_spiStrobe(CC2420_SFLUSHRX, &radio_vars.radioStatusByte);
+      
+
    }
 }
 
