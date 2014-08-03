@@ -4,7 +4,12 @@
 Since the bsp modules for different platforms have the same declaration, you
 can use this project with any platform.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
+The board running this program will send a packet on channel CHANNEL every
+TIMER_PERIOD ticks. The packet contains LENGTH_PACKET bytes. The first byte
+is the packet number, which increments for each transmitted packet. The
+remainder of the packet contains an incrementing bytes.
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "stdint.h"
@@ -16,22 +21,11 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   30+LENGTH_CRC  // maximum length is 127 bytes
-#define CHANNEL         20             // 2.480GHz
-#define TIMER_PERIOD    (32768>>1)     // 500ms @ 32kHz
+#define LENGTH_PACKET   125+LENGTH_CRC // maximum length is 127 bytes
+#define CHANNEL         11             // 11 = 2.405GHz
+#define TIMER_PERIOD    (32768>>1)     // (32768>>1) = 500ms @ 32kHz
 
 //=========================== variables =======================================
-
-enum {
-   APP_FLAG_START_FRAME = 0x01,
-   APP_FLAG_END_FRAME   = 0x02,
-   APP_FLAG_TIMER       = 0x04,
-};
-
-typedef enum {
-   APP_STATE_TX         = 0x01,
-   APP_STATE_RX         = 0x02,
-} app_state_t;
 
 typedef struct {
    uint8_t              num_radioTimerCompare;
@@ -43,18 +37,18 @@ typedef struct {
 app_dbg_t app_dbg;
 
 typedef struct {
-   uint8_t              packet[LENGTH_PACKET];
-   uint8_t              packet_len;
-   uint8_t              packet_num;
-   uint8_t              sendPacket;
+   uint8_t              txpk_txNow;
+   uint8_t              txpk_buf[LENGTH_PACKET];
+   uint8_t              txpk_len;
+   uint8_t              txpk_num;
 } app_vars_t;
 
 app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_radioTimerOverflows();
-void cb_radioTimerCompare();
+void cb_radioTimerOverflows(void);
+void cb_radioTimerCompare(void);
 void cb_startFrame(uint16_t timestamp);
 void cb_endFrame(uint16_t timestamp);
 
@@ -78,12 +72,6 @@ int mote_main(void) {
    radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
    
-   // prepare packet
-   app_vars.packet_len = sizeof(app_vars.packet);
-   for (i=0;i<app_vars.packet_len;i++) {
-      app_vars.packet[i] = i;
-   }
-   
    // prepare radio
    radio_rfOn();
    radio_setFrequency(CHANNEL); 
@@ -95,8 +83,8 @@ int mote_main(void) {
    while(1) {
       
       // wait for timer to elapse
-      app_vars.sendPacket = 0;
-      while (app_vars.sendPacket==0) {
+      app_vars.txpk_txNow = 0;
+      while (app_vars.txpk_txNow==0) {
          board_sleep();
       }
       
@@ -104,11 +92,15 @@ int mote_main(void) {
       leds_error_toggle();
       
       // prepare packet
-      app_vars.packet_num++;
-      app_vars.packet[0]  = app_vars.packet_num;
+      app_vars.txpk_num++;
+      app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
+      app_vars.txpk_buf[0]        = app_vars.txpk_num;
+      for (i=1;i<app_vars.txpk_len;i++) {
+         app_vars.txpk_buf[i] = i;
+      }
       
       // send packet
-      radio_loadPacket(app_vars.packet,app_vars.packet_len);
+      radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
       radio_txEnable();
       radio_txNow();
    }
@@ -116,20 +108,23 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void cb_radioTimerCompare() {
+void cb_radioTimerCompare(void) {
+   
    // update debug vals
    app_dbg.num_radioTimerCompare++;
 }
 
-void cb_radioTimerOverflows() {
+void cb_radioTimerOverflows(void) {
+   
    // update debug vals
    app_dbg.num_radioTimerOverflows++;
    
    // ready to send next packet
-   app_vars.sendPacket = 1;
+   app_vars.txpk_txNow = 1;
 }
 
 void cb_startFrame(uint16_t timestamp) {
+   
    // update debug vals
    app_dbg.num_startFrame++;
    
@@ -138,6 +133,7 @@ void cb_startFrame(uint16_t timestamp) {
 }
 
 void cb_endFrame(uint16_t timestamp) {
+   
    // update debug vals
    app_dbg.num_endFrame++;
    
