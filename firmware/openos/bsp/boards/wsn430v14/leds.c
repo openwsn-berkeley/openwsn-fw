@@ -16,8 +16,8 @@
 //=========================== public ==========================================
 
 void    leds_init(void) {
-   P5DIR     |=  0x70;                           // P5DIR = 0bx111xxxx for LEDs
-   P5OUT     |=  0x70;                           // P2OUT = 0bx111xxxx, all LEDs off
+   P5OUT     |=  0x70;       // P5OUT = 0bx111xxxx, all LEDs off
+   P5DIR     |=  0x70;       // P5DIR = 0bx111xxxx, all LEDs output
 }
 
 // red = LED1 = P5.4
