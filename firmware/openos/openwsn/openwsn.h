@@ -107,7 +107,8 @@ enum {
    STATUS_BACKOFF                      =  7,
    STATUS_QUEUE                        =  8,
    STATUS_NEIGHBORS                    =  9,
-   STATUS_MAX                          = 10,
+   STATUS_KAPERIOD                     = 10,
+   STATUS_MAX                          = 11,
 };
 
 //component identifiers

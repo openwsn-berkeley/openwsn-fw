@@ -505,6 +505,27 @@ bool debugPrint_myDAGrank() {
    return TRUE;
 }
 
+/**
+\brief Trigger this module to print status information, over serial.
+
+debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+
+\returns TRUE if this function printed something, FALSE otherwise.
+*/
+bool debugPrint_kaPeriod() {
+   uint16_t output;
+   
+   output = sixtop_vars.kaPeriod;
+   
+   openserial_printStatus(
+       STATUS_KAPERIOD,
+       (uint8_t*)&output,
+       sizeof(output)
+   );
+   return TRUE;
+}
+
 //=========================== private =========================================
 
 /**

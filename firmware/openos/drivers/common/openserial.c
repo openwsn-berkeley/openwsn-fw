@@ -319,6 +319,10 @@ void openserial_startOutput() {
          if (debugPrint_neighbors()==TRUE) {
             break;
          }
+      case STATUS_KAPERIOD:
+         if (debugPrint_kaPeriod()==TRUE) {
+            break;
+         }
       default:
          DISABLE_INTERRUPTS();
          openserial_vars.debugPrintCounter=0;
