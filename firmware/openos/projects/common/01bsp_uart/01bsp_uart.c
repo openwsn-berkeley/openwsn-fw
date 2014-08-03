@@ -7,8 +7,7 @@
 
 Load this program on your board. Open a serial terminal client (e.g. PuTTY or
 TeraTerm):
-- when you start the program, you should read "Hello World!" on your terminal
-  client.
+- You will read "Hello World!" printed over and over on your terminal client.
 - when you enter a character on the client, the board echoes it back (i.e. you
   see the character on the terminal client) and the "ERROR" led blinks.
 
@@ -31,14 +30,15 @@ uint8_t stringToSend[] = "Hello World!\r\n";
 
 typedef struct {
    uint8_t uart_lastTxByteIndex;
+   uint8_t uartDone;
 } app_vars_t;
 
 app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_uartTxDone();
-void cb_uartRxCb();
+void cb_uartTxDone(void);
+void cb_uartRxCb(void);
 
 //=========================== main ============================================
 
@@ -58,24 +58,31 @@ int mote_main(void) {
    uart_enableInterrupts();
    
    // send stringToSend over UART
-   app_vars.uart_lastTxByteIndex = 0;
+   app_vars.uartDone              = 0;
+   app_vars.uart_lastTxByteIndex  = 0;
    uart_writeByte(stringToSend[app_vars.uart_lastTxByteIndex]);
    
-   while(1) {
-      board_sleep();
-   }
+   // budy wait for all bytes to be printed
+   while(app_vars.uartDone==0);
+   
+   // reset the board, so the program starts running again
+   board_reset();
+   
+   return 0;
 }
 
 //=========================== callbacks =======================================
 
-void cb_uartTxDone() {
+void cb_uartTxDone(void) {
    app_vars.uart_lastTxByteIndex++;
    if (app_vars.uart_lastTxByteIndex<sizeof(stringToSend)) {
       uart_writeByte(stringToSend[app_vars.uart_lastTxByteIndex]);
+   } else {
+      app_vars.uartDone = 1;
    }
 }
 
-void cb_uartRxCb() {
+void cb_uartRxCb(void) {
    uint8_t byte;
    
    // toggle LED
