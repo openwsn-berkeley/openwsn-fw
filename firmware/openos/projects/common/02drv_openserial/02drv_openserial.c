@@ -13,19 +13,28 @@ can use this project with any platform.
 #include "board.h"
 #include "leds.h"
 #include "uart.h"
+#include "bsp_timer.h"
 
 // driver modules required
 #include "openserial.h"
 
 //=========================== defines =========================================
 
+#define BSP_TIMER_PERIOD (32768/10)
 
 //=========================== variables =======================================
 
+typedef struct {
+   uint8_t     timerFired;
+   uint8_t     outputting;
+   open_addr_t addr;
+} app_vars_t;
+
+app_vars_t app_vars;
+
 //=========================== prototypes ======================================
 
-void isr_serie_tx();
-void isr_serie_rx();
+void cb_compare(void);
 
 //=========================== main ============================================
 
@@ -39,37 +48,82 @@ int mote_main(void) {
    board_init();
    openserial_init();
    
-   uart_clearTxInterrupts();
-   uart_clearRxInterrupts();          // clear possible pending interrupts
-   uart_enableInterrupts(); 
-  
-   openserial_startInput();
-      
+   bsp_timer_set_callback(cb_compare);
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
+   
    while(1) {
       board_sleep();
+      if (app_vars.timerFired==1) {
+         app_vars.timerFired = 0;
+         if (app_vars.outputting==1) {
+            openserial_startInput();
+            app_vars.outputting = 0;
+         } else {
+            openserial_startOutput();
+            app_vars.outputting = 1;
+         }
+      }
    }
 }
 
 //=========================== callbacks =======================================
 
-void isr_serie_tx(){
-   
-   leds_all_toggle();
-   uart_clearTxInterrupts();
-   uart_clearRxInterrupts();          // clear possible pending interrupts
-   uart_enableInterrupts(); 
-   
-   openserial_startInput();
+void cb_compare(void) {
+   app_vars.timerFired = 1;
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
 }
 
-void isr_serie_rx(){
-   uint8_t bytes;
-   uint8_t bufferToWrite[136];
-   
-   leds_all_toggle();
-   bytes=openserial_getNumDataBytes();
-   openserial_getInputBuffer(bufferToWrite, bytes);
-   
-   openserial_printData(bufferToWrite, bytes);
-   openserial_startOutput();
+//=========================== stub functions ==================================
+
+open_addr_t* idmanager_getMyID(uint8_t type) {
+   return &app_vars.addr;
+}
+
+void ieee154e_getAsn(uint8_t* array) {
+   array[0]   = 0x00;
+   array[1]   = 0x01;
+   array[2]   = 0x02;
+   array[3]   = 0x03;
+   array[4]   = 0x04;
+}
+
+void idmanager_triggerAboutRoot(void) {
+}
+void idmanager_triggerAboutBridge(void) {
+}
+void openbridge_triggerData(void) {
+}
+void tcpinject_trigger(void) {
+}
+void udpinject_trigger(void) {
+}
+void icmpv6echo_trigger(void) {
+}
+
+bool debugPrint_isSync(void) {
+   return FALSE;
+}
+bool debugPrint_id(void) {
+   return FALSE;
+}
+bool debugPrint_myDAGrank(void) {
+   return FALSE;
+}
+bool debugPrint_asn(void) {
+   return FALSE;
+}
+bool debugPrint_macStats(void) {
+   return FALSE;
+}
+bool debugPrint_schedule(void) {
+   return FALSE;
+}
+bool debugPrint_backoff(void) {
+   return FALSE;
+}
+bool debugPrint_queue(void) {
+   return FALSE;
+}
+bool debugPrint_neighbors(void) {
+   return FALSE;
 }
