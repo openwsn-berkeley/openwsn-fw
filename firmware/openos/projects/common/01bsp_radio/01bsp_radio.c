@@ -17,7 +17,7 @@ can use this project with any platform.
 #define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
 #define CHANNEL         11             ///< 2.480GHz
 #define TIMER_PERIOD    65535          ///< 2s @ 32kHz
-#define ID              0x99          ///< byte sent in the packets
+#define ID              0x99           ///< byte sent in the packets
 
 //=========================== variables =======================================
 
@@ -33,34 +33,34 @@ typedef enum {
 } app_state_t;
 
 typedef struct {
-   uint8_t         num_radioTimerOverflows;
-   uint8_t         num_radioTimerCompare;
-   uint8_t         num_startFrame;
-   uint8_t         num_endFrame;
-   uint8_t         num_timer;
+   uint8_t              num_radioTimerOverflows;
+   uint8_t              num_radioTimerCompare;
+   uint8_t              num_startFrame;
+   uint8_t              num_endFrame;
+   uint8_t              num_timer;
 } app_dbg_t;
 
 app_dbg_t app_dbg;
 
 typedef struct {
-   uint8_t         flags;
-   app_state_t     state;
-   uint8_t         packet[LENGTH_PACKET];
-   uint8_t         packet_len;
-    int8_t         rxpk_rssi;
-   uint8_t         rxpk_lqi;
-   bool            rxpk_crc;
+   uint8_t              flags;
+   app_state_t          state;
+   uint8_t              packet[LENGTH_PACKET];
+   uint8_t              packet_len;
+    int8_t              rxpk_rssi;
+   uint8_t              rxpk_lqi;
+   bool                 rxpk_crc;
 } app_vars_t;
 
 app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void     cb_radioTimerOverflows();
-void     cb_radioTimerCompare();
+void     cb_radioTimerOverflows(void);
+void     cb_radioTimerCompare(void);
 void     cb_startFrame(uint16_t timestamp);
 void     cb_endFrame(uint16_t timestamp);
-void     cb_timer();
+void     cb_timer(void);
 
 //=========================== main ============================================
 
@@ -87,7 +87,7 @@ int mote_main(void) {
    for (i=0;i<app_vars.packet_len;i++) {
       app_vars.packet[i] = ID;
    }
-
+   
    // start bsp timer
    bsp_timer_set_callback(cb_timer);
    bsp_timer_scheduleIn(TIMER_PERIOD);
@@ -102,7 +102,7 @@ int mote_main(void) {
    
    // start by a transmit
    app_vars.flags |= APP_FLAG_TIMER;
-
+   
    while (1) {
       
       // sleep while waiting for at least one of the flags to be set
@@ -203,12 +203,12 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void cb_radioTimerOverflows() {
+void cb_radioTimerOverflows(void) {
    // update debug stats
    app_dbg.num_radioTimerOverflows++;
 }
 
-void cb_radioTimerCompare() {
+void cb_radioTimerCompare(void) {
    // update debug stats
    app_dbg.num_radioTimerCompare++;
 }
@@ -229,7 +229,7 @@ void cb_endFrame(uint16_t timestamp) {
    app_dbg.num_endFrame++;
 }
 
-void cb_timer() {
+void cb_timer(void) {
    // set flag
    app_vars.flags |= APP_FLAG_TIMER;
    

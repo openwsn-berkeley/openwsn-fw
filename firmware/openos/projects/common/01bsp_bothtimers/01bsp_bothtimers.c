@@ -76,9 +76,9 @@ app_dbg_t app_dbg;
 
 //=========================== prototypes ======================================
 
-void bsp_timer_cb_compare();
-void radiotimer_cb_overflow();
-void radiotimer_cb_compare();
+void bsp_timer_cb_compare(void);
+void radiotimer_cb_overflow(void);
+void radiotimer_cb_compare(void);
 
 //=========================== main ============================================
 
@@ -117,7 +117,7 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void bsp_timer_cb_compare() {
+void bsp_timer_cb_compare(void) {
    // toggle pin
    debugpins_frame_toggle();
    
@@ -131,7 +131,7 @@ void bsp_timer_cb_compare() {
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
 }
 
-void radiotimer_cb_overflow() {
+void radiotimer_cb_overflow(void) {
    volatile uint16_t delay;
    
    // toggle pin
@@ -152,7 +152,7 @@ void radiotimer_cb_overflow() {
    for (delay=0;delay<ISR_DELAY;delay++);
 }
 
-void radiotimer_cb_compare() {
+void radiotimer_cb_compare(void) {
    // toggle pin
    debugpins_fsm_toggle();
    

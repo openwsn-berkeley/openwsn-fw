@@ -16,7 +16,7 @@ Load this program on your boards. The LEDs should start blinking furiously.
 #include "board.h"
 #include "leds.h"
 
-void some_delay();
+void some_delay(void);
 
 /**
 \brief The program starts executing here.
@@ -71,7 +71,7 @@ int mote_main(void) {uint8_t i;
    return 0;
 }
 
-void some_delay() {
+void some_delay(void) {
    volatile uint16_t delay;
    for (delay=0xffff;delay>0;delay--);
 }

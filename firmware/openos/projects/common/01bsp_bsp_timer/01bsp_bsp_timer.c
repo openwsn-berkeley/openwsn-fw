@@ -34,7 +34,7 @@ app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_compare();
+void cb_compare(void);
 
 //=========================== main ============================================
 
@@ -55,7 +55,7 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void cb_compare() {
+void cb_compare(void) {
    
    // toggle pin
    debugpins_frame_toggle();

@@ -19,7 +19,7 @@ they will transition 4 times.
 #include "debugpins.h"
 #include "leds.h"
 
-void some_delay();
+void some_delay(void);
 
 /**
 \brief The program starts executing here.
@@ -64,7 +64,7 @@ int mote_main(void) {
    return 0;
 }
 
-void some_delay() {
+void some_delay(void) {
    volatile uint8_t delay;
    for (delay=0xff;delay>0;delay--);
 }

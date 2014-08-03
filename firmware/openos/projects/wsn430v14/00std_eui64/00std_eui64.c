@@ -41,24 +41,24 @@ enum  {
 // chip
 void    owchip_geteui(uint8_t* eui);
 // 1Wire
-uint8_t ow_reset();
+uint8_t ow_reset(void);
 void    ow_write_byte(uint8_t byte);
-uint8_t ow_read_byte();
+uint8_t ow_read_byte(void);
 void    ow_write_bit(int is_one);
-uint8_t ow_read_bit();
-void    ow_write_bit_one();
-void    ow_write_bit_zero();
+uint8_t ow_read_bit(void);
+void    ow_write_bit_one(void);
+void    ow_write_bit_zero(void);
 // CRC
 uint8_t crc8_byte(uint8_t crc, uint8_t byte);
 uint8_t crc8_bytes(uint8_t crc, uint8_t* bytes, uint8_t len);
 // timer
 void    delay_us(uint16_t delay);
 // pin
-void    owpin_init();
-void    owpin_output_low();
-void    owpin_output_high();
-void    owpin_prepare_read();
-uint8_t owpin_read();
+void    owpin_init(void);
+void    owpin_output_low(void);
+void    owpin_output_high(void);
+void    owpin_prepare_read(void);
+uint8_t owpin_read(void);
 
 //=========================== main ============================================
 
@@ -68,14 +68,14 @@ uint8_t owpin_read();
 int main(void) {
    uint8_t eui[8];
    
-   WDTCTL     =  WDTPW + WDTHOLD;                // disable watchdog timer
+   WDTCTL     =  WDTPW + WDTHOLD;           // disable watchdog timer
    
-   DCOCTL     =  DCO0 | DCO1 | DCO2;             // MCLK at 8MHz
-   BCSCTL1    =  RSEL0 | RSEL1 | RSEL2;          // MCLK at 8MHz
+   DCOCTL     =  DCO0 | DCO1 | DCO2;        // MCLK at 8MHz
+   BCSCTL1    =  RSEL0 | RSEL1 | RSEL2;     // MCLK at 8MHz
    
    owchip_geteui(eui);
    
-   __bis_SR_register(GIE+LPM4_bits);             // sleep
+   __bis_SR_register(GIE+LPM4_bits);        // sleep
 }
 
 //=========================== private =========================================
@@ -122,27 +122,27 @@ void owchip_geteui(uint8_t* eui) {          // >= 6000us
 
 // admin
 
-uint8_t ow_reset() {                    // >= 960us 
+uint8_t ow_reset(void) {                    // >= 960us 
    int present;
    owpin_output_low();
-   delay_us(OW_DLY_H);             // t_RSTL
+   delay_us(OW_DLY_H);                      // t_RSTL
    owpin_prepare_read();
-   delay_us(OW_DLY_I);             // t_MSP
+   delay_us(OW_DLY_I);                      // t_MSP
    present = owpin_read();
-   delay_us(OW_DLY_J);             // t_REC
+   delay_us(OW_DLY_J);                      // t_REC
    return (present==0);
 }
 
 // byte-level access
 
-void ow_write_byte(uint8_t byte) {   // >= 560us
+void ow_write_byte(uint8_t byte) {          // >= 560us
    uint8_t bit;
    for(bit=0x01;bit!=0;bit<<=1) {
       ow_write_bit(byte & bit);
    }
 }
 
-uint8_t ow_read_byte() {             // >= 560us
+uint8_t ow_read_byte(void) {                // >= 560us
    uint8_t byte = 0;
    uint8_t bit;
    for( bit=0x01; bit!=0; bit<<=1 ) {
@@ -155,7 +155,7 @@ uint8_t ow_read_byte() {             // >= 560us
 
 // bit-level access
 
-void ow_write_bit(int is_one) {      // >= 70us
+void ow_write_bit(int is_one) {             // >= 70us
    if(is_one) {
       ow_write_bit_one();
    } else {
@@ -163,29 +163,29 @@ void ow_write_bit(int is_one) {      // >= 70us
    }
 }
 
-uint8_t ow_read_bit() {                 // >= 70us
+uint8_t ow_read_bit(void) {                 // >= 70us
    int bit;
    owpin_output_low();
-   delay_us(OW_DLY_A);             // t_RL
+   delay_us(OW_DLY_A);                      // t_RL
    owpin_prepare_read();
-   delay_us(OW_DLY_E);             // near-max t_MSR
+   delay_us(OW_DLY_E);                      // near-max t_MSR
    bit = owpin_read();
-   delay_us(OW_DLY_F);             // t_REC
+   delay_us(OW_DLY_F);                      // t_REC
    return bit;
 }
 
-void ow_write_bit_one() {            // >= 70us
+void ow_write_bit_one(void) {               // >= 70us
    owpin_output_low();
-   delay_us(OW_DLY_A);             // t_W1L
+   delay_us(OW_DLY_A);                      // t_W1L
    owpin_output_high();
-   delay_us(OW_DLY_B);             // t_SLOT - t_W1L
+   delay_us(OW_DLY_B);                      // t_SLOT - t_W1L
 }
 
-void ow_write_bit_zero() {           // >= 70us
+void ow_write_bit_zero(void) {              // >= 70us
    owpin_output_low();
-   delay_us(OW_DLY_C);             // t_W0L
+   delay_us(OW_DLY_C);                      // t_W0L
    owpin_output_high();
-   delay_us(OW_DLY_D);             // t_SLOT - t_W0L
+   delay_us(OW_DLY_D);                      // t_SLOT - t_W0L
 }
 
 //===== CRC
@@ -220,23 +220,23 @@ void delay_us(uint16_t delay) {
 
 //===== pin
 
-void    owpin_init() {
+void    owpin_init(void) {
    P2DIR &= ~PIN_1WIRE; // set as input
    P2OUT &= ~PIN_1WIRE; // pull low
 }
 
-void    owpin_output_low() {
+void    owpin_output_low(void) {
    P2DIR |=  PIN_1WIRE; // set as output
 }
 
-void    owpin_output_high() {
+void    owpin_output_high(void) {
    P2DIR &= ~PIN_1WIRE; // set as input
 }
 
-void    owpin_prepare_read() {
+void    owpin_prepare_read(void) {
    P2DIR &= ~PIN_1WIRE; // set as input
 }
 
-uint8_t owpin_read() {
+uint8_t owpin_read(void) {
    return (P2IN & PIN_1WIRE);
 }

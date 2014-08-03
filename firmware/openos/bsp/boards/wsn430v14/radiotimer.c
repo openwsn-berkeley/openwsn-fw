@@ -25,7 +25,7 @@ radiotimer_vars_t radiotimer_vars;
 
 //===== admin
 
-void radiotimer_init() {
+void radiotimer_init(void) {
    // clear local variables
    memset(&radiotimer_vars,0,sizeof(radiotimer_vars_t));
 }
@@ -63,7 +63,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
 
 //===== direct access
 
-PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
+PORT_RADIOTIMER_WIDTH radiotimer_getValue(void) {
    return TAR;
 }
 
@@ -71,7 +71,7 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
    TACCR0   =  period;
 }
 
-PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod(void) {
    return TACCR0;
 }
 
@@ -85,7 +85,7 @@ void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
    TACCTL1  =  CCIE;
 }
 
-void radiotimer_cancel() {
+void radiotimer_cancel(void) {
    // reset compare value (also resets interrupt flag)
    TACCR1   =  0;
    
@@ -95,7 +95,7 @@ void radiotimer_cancel() {
 
 //===== capture
 
-inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
+inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime(void) {
    return TAR;
 }
 
@@ -106,7 +106,7 @@ inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 /**
 \brief TimerA CCR1-6 interrupt service routine
 */
-kick_scheduler_t radiotimer_isr() {
+kick_scheduler_t radiotimer_isr(void) {
    PORT_RADIOTIMER_WIDTH taiv_local;
    
    // reading TAIV returns the value of the highest pending interrupt flag
@@ -138,7 +138,7 @@ kick_scheduler_t radiotimer_isr() {
    return DO_NOT_KICK_SCHEDULER;
 }
 
-kick_scheduler_t radiotimer_isr_sfd() {
+kick_scheduler_t radiotimer_isr_sfd(void) {
    uint16_t now;
    now = radiotimer_getCapturedTime();
    if (P1IES & 0x20) {
