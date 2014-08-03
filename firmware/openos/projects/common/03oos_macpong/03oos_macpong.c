@@ -1,7 +1,7 @@
 /**
 \brief A simple application to test MAC connectivity.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, November 2012.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 // stack initialization
@@ -40,7 +40,9 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    openwsn_init();
-   //idmanager_setIsDAGroot(TRUE);
+   if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0xbb) {
+      idmanager_setIsDAGroot(TRUE);
+   }
    scheduler_start();
    return 0; // this line should never be reached
 }
@@ -51,7 +53,7 @@ void macpong_initSend(void) {
    }
    if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
       // send packet
-      macpong_send(0);   
+      //poipoimacpong_send(0);   
       // cancel timer
       opentimers_stop(macpong_vars.timerId);
    }
