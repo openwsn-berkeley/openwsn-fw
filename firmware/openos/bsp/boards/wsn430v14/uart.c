@@ -25,19 +25,14 @@ uart_vars_t uart_vars;
 
 void uart_init(void) {
    
-   P3SEL      =  0x30;                           // P3.4,5 = UART0TX/RX
-  
-   U0CTL      =  SWRST;                          // hold UART0 module in reset
-   U0CTL     |=  CHAR;                           // 8-bit character
-   
-   //115200 baud, clocked from 4.8MHz SMCLK
-   U0TCTL    |=  SSEL1;                          // clocking from SMCLK
-   U0BR0      =  41;                             // 4.8MHz/115200 - 41.66
-   U0BR1      =  0x00;                           //
-   U0MCTL     =  0x4A;                           // modulation
-   
+   P3SEL      =  0x30;                           // P3.4,5 = UTXD0/URXD0
    ME1       |=  UTXE0 + URXE0;                  // enable UART0 TX/RX
-   U0CTL     &= ~SWRST;                          // clear UART1 reset bit
+   U0CTL     |=  CHAR;                           // 8-bit character
+   U0TCTL    |=  SSEL1;                          // clocking from SMCLK
+   U0BR0      =  0x08;                           // 115200 baud, using 1MHz SMCLK
+   U0BR1      =  0x00;
+   UMCTL0     =  0x5B;
+   U0CTL     &= ~SWRST;                          // clear UART0 reset bit
    
    // clear possible pending interrupts
    uart_clearTxInterrupts();
@@ -66,7 +61,7 @@ void    uart_clearTxInterrupts(void){
 }
 
 void    uart_writeByte(uint8_t byteToWrite){
-  U0TXBUF     = byteToWrite;
+   U0TXBUF    =  byteToWrite;
 }
 
 uint8_t uart_readByte(void){

@@ -32,15 +32,33 @@ int main(void) {
 //=========================== public ==========================================
 
 void board_init(void) {
+   uint8_t delay;
+   
    // disable watchdog timer
    WDTCTL     =  WDTPW + WDTHOLD;
    
-   // setup clock speed
-   DCOCTL    |=  DCO0 | DCO1 | DCO2;             // MCLK at ~8MHz
-   BCSCTL1   |=  RSEL0 | RSEL1 | RSEL2;          // MCLK at ~8MHz
-                                                 // by default, ACLK from 32kHz XTAL which is running
+   //===== clocking
    
-   // initialize pins
+   DCOCTL     = 0;                               // we are not using the DCO
+   BCSCTL1    = 0;                               // we are not using the DCO
+   BCSCTL2    = SELM_2 | (SELS | DIVS_3) ;       // MCLK=XT2, SMCLK=XT2/8
+   
+   // the MSP detected that the crystal is not running (it's normal, it is
+   // starting). It set the OFIFG flag, causing the MSP430 to switch back to
+   // the DC0. By software, we need to clear that flag, causing the MSP430 to
+   // switch back to using the XT2 as a clocking source, but verify that it
+   // stays cleared. This is explained in detail in Section 4.2.6 "Basic Clock
+   // Module Fail-Safe Operation" of slau049f, pdf page 119.
+   
+   do {
+      IFG1   &= ~OFIFG;                          // clear OSCFault flag
+      for (delay=0;delay<0xff;delay++) {         // busy wait for at least 50us
+          __no_operation();
+      }
+   } while ((IFG1 & OFIFG) != 0);                // repeat until OSCFault flag stays cleared
+   
+   //===== pins
+   
    P3DIR     |=  0x01;                           // [P3.0] radio VREG:  output
    P1DIR     |=  0x80;                           // [P1.7] radio reset: output
    P1DIR     &= ~0x20;                           // [P1.5] radio SFD:   input
@@ -48,7 +66,8 @@ void board_init(void) {
    P1IFG     &= ~0x20;                           // [P1.5] radio SFD:   clear interrupt flag
    P1IE      |=  0x20;                           // [P1.5] radio SFD:   interrupt enabled
    
-   // initialize bsp modules
+   //===== bsp modules
+   
    debugpins_init();
    leds_init();
    uart_init();
@@ -57,7 +76,8 @@ void board_init(void) {
    radio_init();
    radiotimer_init();
    
-   // enable interrupts
+   //===== enable interrupts
+   
    __bis_SR_register(GIE);
 }
 
@@ -97,7 +117,7 @@ ISR(PORT1) {
    debugpins_isr_set();
    if (P1IFG & 0x20) {
       P1IFG &= ~0x20;
-      if (radiotimer_isr_sfd()==KICK_SCHEDULER) {         // radio:  SFD pin [P1.6]
+      if (radiotimer_isr_sfd()==KICK_SCHEDULER){ // radio:  SFD pin [P1.6]
          __bic_SR_register_on_exit(CPUOFF);
       }
    } else {
