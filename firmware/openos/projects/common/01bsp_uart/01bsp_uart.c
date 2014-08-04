@@ -20,23 +20,27 @@ TeraTerm):
 // bsp modules required
 #include "board.h"
 #include "uart.h"
+#include "bsp_timer.h"
 #include "leds.h"
 
 //=========================== defines =========================================
 
-uint8_t stringToSend[] = "Hello World!\r\n";
+#define BSP_TIMER_PERIOD     0xffff // 0xffff@32kHz = 2s
+uint8_t stringToSend[]       = "Hello, World!\r\n";
 
 //=========================== variables =======================================
 
 typedef struct {
    uint8_t uart_lastTxByteIndex;
    uint8_t uartDone;
+   uint8_t uartSendNow;
 } app_vars_t;
 
 app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
+void cb_compare(void);
 void cb_uartTxDone(void);
 void cb_uartRxCb(void);
 
@@ -57,21 +61,34 @@ int mote_main(void) {
    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
    uart_enableInterrupts();
    
-   // send stringToSend over UART
-   app_vars.uartDone              = 0;
-   app_vars.uart_lastTxByteIndex  = 0;
-   uart_writeByte(stringToSend[app_vars.uart_lastTxByteIndex]);
+   // setup BSP timer
+   bsp_timer_set_callback(cb_compare);
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    
-   // budy wait for all bytes to be printed
-   while(app_vars.uartDone==0);
-   
-   // reset the board, so the program starts running again
-   board_reset();
-   
-   return 0;
+   while(1) {
+      
+      // wait for timer to elapse
+      while (app_vars.uartSendNow==0);
+      app_vars.uartSendNow = 0;
+      
+      // send string over UART
+      app_vars.uartDone              = 0;
+      app_vars.uart_lastTxByteIndex  = 0;
+      uart_writeByte(stringToSend[app_vars.uart_lastTxByteIndex]);
+      while(app_vars.uartDone==0);
+   }
 }
 
 //=========================== callbacks =======================================
+
+void cb_compare(void) {
+   
+   // have main "task" send over UART
+   app_vars.uartSendNow = 1;
+   
+   // schedule again
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
+}
 
 void cb_uartTxDone(void) {
    app_vars.uart_lastTxByteIndex++;
