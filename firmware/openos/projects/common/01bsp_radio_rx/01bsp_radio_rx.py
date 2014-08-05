@@ -1,6 +1,7 @@
 import sys
 import serial
 import struct
+import socket
 
 banner  = []
 banner += [""]
