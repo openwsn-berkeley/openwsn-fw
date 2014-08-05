@@ -14,8 +14,12 @@ serial port for each received packet is formatted as follows:
 - [1B] whether the receive packet passed CRC (1) or not (0)
 - [3B] closing flags, each of value 0xff
 
-You can run the 01bsp_radio_rx.py script to listen to the serial port of your
-mote and parse those serial frames. An examlpe output is:
+You can run the 01bsp_radio_rx.py script to listen to your mote and parse those 
+serial frames. The application can connect directly to the mote's serial port,
+or to its TCP port when running on the IoT-LAB platform.
+
+Example when running locally:
+----------------------------
 
  ___                 _ _ _  ___  _ _
 | . | ___  ___ ._ _ | | | |/ __>| \ |
@@ -23,19 +27,36 @@ mote and parse those serial frames. An examlpe output is:
 `___'|  _/\___.|_|_||__/_/ <___/|_\_|
      |_|                  openwsn.org
 
-name of serial port (e.g. COM10): COM10
-len=127 num=153 rssi=-66  lqi=106 crc=1
-len=127 num=153 rssi=-62  lqi=107 crc=1
-len=127 num=153 rssi=-63  lqi=105 crc=1
-len=127 num=153 rssi=-70  lqi=106 crc=1
-len=127 num=153 rssi=-70  lqi=106 crc=1
-len=127 num=153 rssi=-76  lqi=106 crc=1
-len=127 num=153 rssi=-88  lqi=103 crc=1
-len=127 num=153 rssi=-26  lqi=101 crc=1
-len=127 num=153 rssi=-68  lqi=100 crc=1
-len=127 num=153 rssi=-58  lqi=106 crc=1
-len=127 num=153 rssi=-57  lqi=105 crc=1
-len=127 num=153 rssi=-56  lqi=105 crc=1
+running IoT-lAB? (Y|N): N
+name of serial port (e.g. COM10): COM25
+len=127 num=176 rssi=-43  lqi=107 crc=1
+len=127 num=177 rssi=-43  lqi=107 crc=1
+len=127 num=178 rssi=-43  lqi=106 crc=1
+len=127 num=179 rssi=-43  lqi=107 crc=1
+len=127 num=180 rssi=-43  lqi=108 crc=1
+len=127 num=181 rssi=-43  lqi=107 crc=1
+len=127 num=182 rssi=-43  lqi=107 crc=1
+len=127 num=183 rssi=-43  lqi=107 crc=1
+
+
+Example when running on the IoT-LAB platform:
+--------------------------------------------
+
+ ___                 _ _ _  ___  _ _
+| . | ___  ___ ._ _ | | | |/ __>| \ |
+| | || . \/ ._>| ' || | | |\__ \|   |
+`___'|  _/\___.|_|_||__/_/ <___/|_\_|
+     |_|                  openwsn.org
+
+running IoT-lAB? (Y|N): Y
+motename? (e.g. wsn430-35): wsn430-35
+len=17  num=84  rssi=-80  lqi=107 crc=1
+len=17  num=84  rssi=-81  lqi=107 crc=1
+len=17  num=84  rssi=-80  lqi=107 crc=1
+len=17  num=84  rssi=-81  lqi=105 crc=1
+len=17  num=84  rssi=-80  lqi=108 crc=1
+len=17  num=84  rssi=-81  lqi=108 crc=1
+
 
 \author Xavi Vilajosana xvilajosana@eecs.berkeley.edu>, June 2012.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
