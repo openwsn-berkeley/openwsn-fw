@@ -112,6 +112,9 @@ bool debugPrint_isSync(void) {
 bool debugPrint_id(void) {
    return FALSE;
 }
+bool debugPrint_kaPeriod(void) {
+   return FALSE;
+}
 bool debugPrint_myDAGrank(void) {
    return FALSE;
 }
