@@ -2163,6 +2163,9 @@
   </group>
   <group>
     <name>kernel</name>
+    <excluded>
+      <configuration>Debug</configuration>
+    </excluded>
     <file>
       <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
     </file>
