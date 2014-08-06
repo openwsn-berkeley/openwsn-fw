@@ -88,17 +88,17 @@ app_dbg_t app_dbg;
 
 typedef struct {
    // rx packet
-   uint8_t    rxpk_done;
-   uint8_t    rxpk_buf[LENGTH_PACKET];
-   uint8_t    rxpk_len;
-   uint8_t    rxpk_num;
-   int8_t     rxpk_rssi;
-   uint8_t    rxpk_lqi;
-   bool       rxpk_crc;
+   volatile   uint8_t    rxpk_done;
+              uint8_t    rxpk_buf[LENGTH_PACKET];
+              uint8_t    rxpk_len;
+              uint8_t    rxpk_num;
+              int8_t     rxpk_rssi;
+              uint8_t    rxpk_lqi;
+              bool       rxpk_crc;
    // uart
-   uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
-   uint8_t    uart_lastTxByte;
-   uint8_t    uart_done;
+              uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
+              uint8_t    uart_lastTxByte;
+   volatile   uint8_t    uart_done;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -250,7 +250,7 @@ void cb_uartTxDone(void) {
    
    if (app_vars.uart_lastTxByte<sizeof(app_vars.uart_txFrame)) {
       uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
-   }else{
+   } else {
       app_vars.uart_done=1;
    }
 }

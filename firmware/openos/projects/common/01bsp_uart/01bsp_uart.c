@@ -31,9 +31,9 @@ uint8_t stringToSend[]       = "Hello, World!\r\n";
 //=========================== variables =======================================
 
 typedef struct {
-   uint8_t uart_lastTxByteIndex;
-   uint8_t uartDone;
-   uint8_t uartSendNow;
+              uint8_t uart_lastTxByteIndex;
+   volatile   uint8_t uartDone;
+   volatile   uint8_t uartSendNow;
 } app_vars_t;
 
 app_vars_t app_vars;
