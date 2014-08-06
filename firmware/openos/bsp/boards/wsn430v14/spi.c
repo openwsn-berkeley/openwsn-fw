@@ -65,21 +65,21 @@ void spi_init(void) {
    // clear variables
    memset(&spi_vars,0,sizeof(spi_vars_t));
    
-   // hold USART state machine in reset mode during configuration
-   U1CTL      =  SWRST;                          // [b0] SWRST=1: Enabled. USART logic held in reset state
-   
    // configure SPI-related pins
    MOSI_SEL  |=  MOSI_PIN;                       // MOSI mode
    MOSI_DIR  |=  MOSI_PIN;                       // MOSI output
    MISO_SEL  |=  MISO_PIN;                       // MISO mode
-   MISO_DIR  |=  MISO_PIN;                       // MISO output
+   MISO_DIR  &= ~MISO_PIN;                       // MISO output
    SCK_SEL   |=  SCK_PIN;                        // SCK  mode
    SCK_DIR   |=  SCK_PIN;                        // SCK  output 
    CS_OUT    |=  CS_PIN;                         // CS   hold high
    CS_DIR    |=  CS_PIN;                         // CS   output
    
+   // hold USART state machine in reset mode during configuration
+   U1CTL      =  SWRST;                          // [b0] SWRST=1: Enabled. USART logic held in reset state
+   
    // initialize USART registers
-   U1CTL     |=  CHAR | SYNC | MM ;              // [b7]          0: unused
+   U1CTL      =  CHAR | SYNC | MM | SWRST;       // [b7]          0: unused
                                                  // [b6]          0: unused
                                                  // [b5]      I2C=0: SPI mode (not I2C)   
                                                  // [b4]     CHAR=1: 8-bit data
@@ -88,7 +88,7 @@ void spi_init(void) {
                                                  // [b1]       MM=1: USART is master
                                                  // [b0]    SWRST=x: don't change
    
-   U1TCTL     =  CKPH | SSEL1 | STC | TXEPT;     // [b7]     CKPH=1: UCLK is delayed by one half cycle
+   U1TCTL     =  CKPH | SSEL1 | STC;             // [b7]     CKPH=1: UCLK is delayed by one half cycle
                                                  // [b6]     CKPL=0: normal clock polarity
                                                  // [b5]    SSEL1=1:
                                                  // [b4]    SSEL0=0: SMCLK
@@ -97,19 +97,13 @@ void spi_init(void) {
                                                  // [b1]      STC=1: 3-pin SPI mode
                                                  // [b0]    TXEPT=1: UxTXBUF and TX shift register are empty
    
-   U1BR1      =  0x00;
+   U1RCTL     =  0x00;                           // clear errors
    U1BR0      =  0x02;                           // U1BR = [U1BR1<<8|U0BR0] = 2
+   U1BR1      =  0x00;
    U1MCTL     =  0x00;                           // no modulation needed in SPI mode
       
    // enable USART module
-   ME2       |=  UTXE1 | URXE1;                  // [b7]    UTXE1=1: USART1 transmit enabled
-                                                 // [b6]    URXE1=1: USART1 receive enabled
-                                                 // [b5]          x: don't touch!
-                                                 // [b4]          x: don't touch!
-                                                 // [b3]          x: don't touch!
-                                                 // [b2]          x: don't touch!
-                                                 // [b1]          x: don't touch!
-                                                 // [b0]          x: don't touch!
+   ME2       |=  USPIE1;                         // enable USART1 SPI
    
    // clear USART state machine from reset, starting operation
    U1CTL     &= ~SWRST;
