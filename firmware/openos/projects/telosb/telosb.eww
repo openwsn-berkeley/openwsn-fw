@@ -5,6 +5,9 @@
     <path>$WS_DIR$\00std_button\00std_button.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\00std_chromatic\00std_chromatic.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\00std_clocks\00std_clocks.ewp</path>
   </project>
   <project>
