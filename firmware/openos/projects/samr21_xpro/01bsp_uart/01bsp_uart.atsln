@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "01bsp_uart", "01bsp_uart.cproj", "{FBCFD0EB-DE67-49D0-97EF-66A80F250358}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|ARM = Debug|ARM
+		Release|ARM = Release|ARM
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FBCFD0EB-DE67-49D0-97EF-66A80F250358}.Debug|ARM.ActiveCfg = Debug|ARM
+		{FBCFD0EB-DE67-49D0-97EF-66A80F250358}.Debug|ARM.Build.0 = Debug|ARM
+		{FBCFD0EB-DE67-49D0-97EF-66A80F250358}.Release|ARM.ActiveCfg = Release|ARM
+		{FBCFD0EB-DE67-49D0-97EF-66A80F250358}.Release|ARM.Build.0 = Release|ARM
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
