@@ -191,6 +191,18 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\..\openwsn\02b-MAChigh\otf.c">
+      <SubType>compile</SubType>
+      <Link>openwsn\02b-MAChigh\otf.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openwsn\02b-MAChigh\processIE.c">
+      <SubType>compile</SubType>
+      <Link>openwsn\02b-MAChigh\processIE.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openwsn\02b-MAChigh\sixtop.c">
+      <SubType>compile</SubType>
+      <Link>openwsn\02b-MAChigh\sixtop.c</Link>
+    </Compile>
     <Compile Include="cmsis\src\startup_samr21.c">
       <SubType>compile</SubType>
     </Compile>
@@ -360,10 +372,6 @@
     <Compile Include="..\..\..\openwsn\02b-MAChigh\neighbors.c">
       <SubType>compile</SubType>
       <Link>openwsn\02b-MAChigh\neighbors.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\02b-MAChigh\res.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\02b-MAChigh\res.c</Link>
     </Compile>
     <Compile Include="..\..\..\openwsn\02b-MAChigh\schedule.c">
       <SubType>compile</SubType>
