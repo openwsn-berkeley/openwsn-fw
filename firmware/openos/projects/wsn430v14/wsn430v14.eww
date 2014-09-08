@@ -18,6 +18,9 @@
   </project>
   
   <project>
+    <path>$WS_DIR$\01bsp_aila\01bsp_aila.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_bothtimers\01bsp_bothtimers.ewp</path>
   </project>
   <project>
