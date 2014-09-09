@@ -18,9 +18,6 @@
   </project>
   
   <project>
-    <path>$WS_DIR$\01bsp_aila\01bsp_aila.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\01bsp_bothtimers\01bsp_bothtimers.ewp</path>
   </project>
   <project>
@@ -34,6 +31,9 @@
   </project>
   <project>
     <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_mercator\01bsp_mercator.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>
