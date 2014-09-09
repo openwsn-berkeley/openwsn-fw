@@ -671,7 +671,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_aila.d43</state>
+          <state>01bsp_mercator.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -865,7 +865,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_aila.hex</state>
+          <state>01bsp_mercator.hex</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -2016,7 +2016,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_aila\01bsp_aila.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_mercator\01bsp_mercator.c</name>
     </file>
   </group>
   <group>
