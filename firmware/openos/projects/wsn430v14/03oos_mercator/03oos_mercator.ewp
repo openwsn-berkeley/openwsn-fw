@@ -333,42 +333,8 @@
           <state>$PROJ_DIR$\..\..\..\drivers\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\wsn430v14\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\..\openwsn\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrt\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rsched\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udplatency\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\cross-layers\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\common</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -905,7 +871,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>03oos_openwsn.hex</state>
+          <state>03oos_mercator.ihex</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -2151,9 +2117,15 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
+      <excluded>
+        <configuration>Debug</configuration>
+      </excluded>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
