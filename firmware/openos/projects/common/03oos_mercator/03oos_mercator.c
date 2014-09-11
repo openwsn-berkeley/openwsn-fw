@@ -28,54 +28,59 @@
 #define TYPE_REQ_RX          6 
 #define TYPE_IND_RX          7
 
+#define ST_IDLE              1
+#define ST_TX                2
+#define ST_TXDONE            3
+#define ST_RX                4
+
 //=========================== structs =========================================
 
 BEGIN_PACK
 
 typedef struct {
-   uint8_t    type;
+   uint8_t         type;
 } REQ_ST_ht;
 
 typedef struct {
-   uint8_t    type;
-   uint8_t    status;
-   uint16_t   numnotifications;
+   uint8_t         type;
+   uint8_t         status;
+   uint16_t        numnotifications;
 } RESP_ST_ht;
 
 typedef struct {
-   uint8_t    type;
+   uint8_t         type;
 } REQ_IDLE_ht;
 
 typedef struct {
-   uint8_t    type;
-   uint8_t    frequency;
-    int8_t    txpower;
-   uint8_t    transctr;
-   uint16_t   txnumpk;
-   uint16_t   txifdur;
-   uint8_t    txlength;
-   uint8_t    txfillbyte;
+   uint8_t         type;
+   uint8_t         frequency;
+    int8_t         txpower;
+   uint8_t         transctr;
+   uint16_t        txnumpk;
+   uint16_t        txifdur;
+   uint8_t         txlength;
+   uint8_t         txfillbyte;
 } REQ_TX_ht;
 
 typedef struct {
-   uint8_t    type;
+   uint8_t         type;
 } IND_TXDONE_ht;
 
 typedef struct {
-   uint8_t    type;
-   uint8_t    frequency;
-   uint8_t    srcmac[8];
-   uint8_t    transctr;
-   uint8_t    txlength;
-   uint8_t    txfillbyte;
+   uint8_t         type;
+   uint8_t         frequency;
+   uint8_t         srcmac[8];
+   uint8_t         transctr;
+   uint8_t         txlength;
+   uint8_t         txfillbyte;
 } REQ_RX_ht;
 
 typedef struct {
-   uint8_t    type;
-   uint8_t    length;
-   uint8_t    rssi;
-   uint8_t    flags;
-   uint16_t   pkctr;
+   uint8_t         type;
+   uint8_t         length;
+   uint8_t         rssi;
+   uint8_t         flags;
+   uint16_t        pkctr;
 } IND_RX_ht;
 
 END_PACK
@@ -143,6 +148,9 @@ uint16_t htons(uint16_t val);
 //=========================== initialization ==================================
 
 int mote_main(void) {
+   
+   memset(&mercator_vars,0,sizeof(mercator_vars_t));
+   mercator_vars.status = ST_IDLE;
    
    board_init();
    scheduler_init();
@@ -374,11 +382,11 @@ void isr_openserial_rx(void) {
    rxbyte = uart_readByte();
    
    // handle byte
-   if        (
-                mercator_vars.uartrxbusy==FALSE  &&
-                mercator_vars.uartlastRxByte==HDLC_FLAG &&
-                rxbyte!=HDLC_FLAG
-              ) {
+   if (
+         mercator_vars.uartrxbusy==FALSE  &&
+         mercator_vars.uartlastRxByte==HDLC_FLAG &&
+         rxbyte!=HDLC_FLAG
+      ) {
       // start of frame
       
       // I'm now receiving
@@ -393,9 +401,9 @@ void isr_openserial_rx(void) {
       // add the byte just received
       inputHdlcWrite(rxbyte);
    } else if (
-                mercator_vars.uartrxbusy==TRUE   &&
-                rxbyte!=HDLC_FLAG
-             ) {
+         mercator_vars.uartrxbusy==TRUE   &&
+         rxbyte!=HDLC_FLAG
+      ) {
       // middle of frame
       
       // add the byte just received
@@ -405,9 +413,9 @@ void isr_openserial_rx(void) {
          mercator_vars.uartrxbusy        = FALSE;
       }
    } else if (
-                mercator_vars.uartrxbusy==TRUE   &&
-                rxbyte==HDLC_FLAG
-              ) {
+         mercator_vars.uartrxbusy==TRUE   &&
+         rxbyte==HDLC_FLAG
+      ) {
          // end of frame
          
          // verify the validity of the frame
