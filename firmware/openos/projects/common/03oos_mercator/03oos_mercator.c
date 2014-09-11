@@ -12,13 +12,73 @@
 #include "leds.h"
 #include "uart.h"
 
-//=========================== define ==========================================
+//=========================== defines ==========================================
 
 #define UART_BUF_LEN         30
 #define RF_BUF_LEN           128
 
 #define TASK_PRIO_SERIAL     TASKPRIO_MAX
 #define TASK_PRIO_WIRELESS   TASKPRIO_SIXTOP_TIMEOUT
+
+#define TYPE_REQ_ST          1
+#define TYPE_RESP_ST         2
+#define TYPE_REQ_IDLE        3
+#define TYPE_REQ_TX          4
+#define TYPE_IND_TXDONE      5
+#define TYPE_REQ_RX          6 
+#define TYPE_IND_RX          7
+
+//=========================== structs =========================================
+
+BEGIN_PACK
+
+typedef struct {
+   uint8_t    type;
+} REQ_ST_ht;
+
+typedef struct {
+   uint8_t    type;
+   uint8_t    status;
+   uint16_t   numnotifications;
+} RESP_ST_ht;
+
+typedef struct {
+   uint8_t    type;
+} REQ_IDLE_ht;
+
+typedef struct {
+   uint8_t    type;
+   uint8_t    frequency;
+    int8_t    txpower;
+   uint8_t    transctr;
+   uint16_t   txnumpk;
+   uint16_t   txifdur;
+   uint8_t    txlength;
+   uint8_t    txfillbyte;
+} REQ_TX_ht;
+
+typedef struct {
+   uint8_t    type;
+} IND_TXDONE_ht;
+
+typedef struct {
+   uint8_t    type;
+   uint8_t    frequency;
+   uint8_t    srcmac[8];
+   uint8_t    transctr;
+   uint8_t    txlength;
+   uint8_t    txfillbyte;
+} REQ_RX_ht;
+
+typedef struct {
+   uint8_t    type;
+   uint8_t    length;
+   uint8_t    rssi;
+   uint8_t    flags;
+   uint16_t   pkctr;
+} IND_RX_ht;
+
+END_PACK
 
 //=========================== variables =======================================
 
@@ -42,7 +102,15 @@ typedef struct {
    uint16_t        uartrxcrc;
    uint8_t         uartrxbusy;
    
-   // RF
+   //=== stats
+   uint16_t        uartNumRxCrcOk;
+   uint16_t        uartNumRxCrcWrong;
+   uint16_t        uartNumTx;
+   uint16_t        serialNumRxOk;
+   uint16_t        serialNumRxWrongLength;
+   uint16_t        serialNumRxUnknownRequest;
+   
+   //=== RF
    uint8_t         rfbuftx[RF_BUF_LEN];
    uint8_t         rfbufrx[RF_BUF_LEN];
    
@@ -56,7 +124,11 @@ void mercator_poipoi(void);
 
 void serial_enable(void);
 void serial_flushtx(void);
-void serial_handlerx(void);
+void serial_handle_all(void);
+void serial_handle_REQ_ST(void);
+void serial_handle_REQ_IDLE(void);
+void serial_handle_REQ_TX(void);
+void serial_handle_REQ_RX(void);
 void serial_disable(void);
 
 void isr_openserial_tx(void);
@@ -120,17 +192,93 @@ void serial_flushtx(void) {
       return;
    }
    
+   // update stats
+   mercator_vars.uartNumTx++;
+   
+   // initialize HDLC variables
    mercator_vars.uarttxcrc             = HDLC_CRCINIT;
    mercator_vars.uartbufrdidx          = 0;
    mercator_vars.uarttxcrcAdded        = 0;
    mercator_vars.uarttxclosingSent     = 0;
+   
+   // start sending over UART
    uart_writeByte(HDLC_FLAG);
 }
 
-void serial_handlerx(void) {
-   __no_operation();
+void serial_handle_all(void) {
+   do {
+      if (mercator_vars.uartbufrxfill<1){
+         // update stats
+         mercator_vars.serialNumRxWrongLength++;
+         break;
+      }
+      
+      switch(mercator_vars.uartbufrx[0]) {
+         case TYPE_REQ_ST:
+            serial_handle_REQ_ST();
+            break;
+         case TYPE_REQ_IDLE:
+            serial_handle_REQ_IDLE();
+            break;
+         case TYPE_REQ_TX:
+            serial_handle_REQ_TX();
+            break;
+         case TYPE_REQ_RX:
+            serial_handle_REQ_RX();
+            break;
+         default:
+            // update stats
+            mercator_vars.serialNumRxUnknownRequest++;
+            break;
+      }
+      
+   } while(0);
    
    serial_enable();
+}
+
+void serial_handle_REQ_ST(void) {
+   if (mercator_vars.uartbufrxfill!=sizeof(REQ_ST_ht)){
+      // update stats
+      mercator_vars.serialNumRxWrongLength++;
+      return;
+   }
+   
+   // TODO
+   __no_operation();
+}
+
+void serial_handle_REQ_IDLE(void) {
+   if (mercator_vars.uartbufrxfill!=sizeof(REQ_IDLE_ht)){
+      // update stats
+      mercator_vars.serialNumRxWrongLength++;
+      return;
+   }
+   
+   // TODO
+   __no_operation();
+}
+
+void serial_handle_REQ_TX(void) {
+   if (mercator_vars.uartbufrxfill!=sizeof(REQ_TX_ht)){
+      // update stats
+      mercator_vars.serialNumRxWrongLength++;
+      return;
+   }
+   
+   // TODO
+   __no_operation();
+}
+
+void serial_handle_REQ_RX(void) {
+   if (mercator_vars.uartbufrxfill!=sizeof(REQ_RX_ht)){
+      // update stats
+      mercator_vars.serialNumRxWrongLength++;
+      return;
+   }
+   
+   // TODO
+   __no_operation();
 }
 
 void serial_disable(void) {
@@ -254,6 +402,9 @@ void isr_openserial_rx(void) {
          if (mercator_vars.uartrxcrc==HDLC_CRCGOOD) {
             // the CRC is correct
             
+            // update stats
+            mercator_vars.uartNumRxCrcOk++;
+            
             // remove the CRC from the input buffer
             mercator_vars.uartbufrxfill    -= 2;
             
@@ -261,9 +412,12 @@ void isr_openserial_rx(void) {
             serial_disable();
             
             // schedule task to handle frame
-            scheduler_push_task(serial_handlerx,TASK_PRIO_SERIAL);
+            scheduler_push_task(serial_handle_all,TASK_PRIO_SERIAL);
          } else {
             // the CRC is incorrect
+            
+            // update stats
+            mercator_vars.uartNumRxCrcWrong++;
          }
          
          mercator_vars.uartrxbusy      = FALSE;
