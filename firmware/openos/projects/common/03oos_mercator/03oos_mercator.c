@@ -14,8 +14,11 @@
 
 //=========================== define ==========================================
 
-#define UART_BUF_LEN    30
-#define RF_BUF_LEN      128
+#define UART_BUF_LEN         30
+#define RF_BUF_LEN           128
+
+#define TASK_PRIO_SERIAL     TASKPRIO_MAX
+#define TASK_PRIO_WIRELESS   TASKPRIO_SIXTOP_TIMEOUT
 
 //=========================== variables =======================================
 
@@ -35,6 +38,9 @@ typedef struct {
    uint8_t         uartbufrx[UART_BUF_LEN];
    uint8_t         uartbufrxfill;
    uint8_t         uartlastRxByte;
+   uint8_t         uartrxescaping;
+   uint16_t        uartrxcrc;
+   uint8_t         uartrxbusy;
    
    // RF
    uint8_t         rfbuftx[RF_BUF_LEN];
@@ -48,9 +54,10 @@ mercator_vars_t mercator_vars;
 
 void mercator_poipoi(void);
 
-void uart_enable(void);
-void uart_flushtx(void);
-void uart_disable(void);
+void serial_enable(void);
+void serial_flushtx(void);
+void serial_handlerx(void);
+void serial_disable(void);
 
 void isr_openserial_tx(void);
 void isr_openserial_rx(void);
@@ -68,7 +75,7 @@ int mote_main(void) {
       isr_openserial_tx,
       isr_openserial_rx
    );
-   uart_enable();
+   serial_enable();
    
    mercator_vars.timerId  = opentimers_start(
       500,
@@ -95,18 +102,18 @@ void mercator_poipoi(void) {
    mercator_vars.uartbuftx[9] = 0x99;
    
    mercator_vars.uartbuftxfill = 10;
-   uart_flushtx();
+   serial_flushtx();
 }
 
 //===== uart
 
-void uart_enable(void) {
+void serial_enable(void) {
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();      // clear possible pending interrupts
    uart_enableInterrupts();       // Enable USCI_A1 TX & RX interrupt
 }
 
-void uart_flushtx(void) {
+void serial_flushtx(void) {
    
    // abort if nothing to print
    if (mercator_vars.uartbuftxfill==0) {
@@ -120,17 +127,21 @@ void uart_flushtx(void) {
    uart_writeByte(HDLC_FLAG);
 }
 
-void uart_disable(void) {
+void serial_handlerx(void) {
+   __no_operation();
+   
+   serial_enable();
+}
+
+void serial_disable(void) {
    uart_disableInterrupts();      // disable USCI_A1 TX & RX interrupt
 }
 
 //===== interrupt handlers
 
-uint8_t  b;
-
 //executed in ISR, called from scheduler.c
 void isr_openserial_tx(void) {
-   
+   uint8_t  b;
    uint16_t finalCrc;
    
    // led
@@ -174,6 +185,24 @@ void isr_openserial_tx(void) {
    leds_sync_off();
 }
 
+void inputHdlcWrite(uint8_t b) {
+   if (b==HDLC_ESCAPE) {
+      mercator_vars.uartrxescaping = TRUE;
+   } else {
+      if (mercator_vars.uartrxescaping==TRUE) {
+         b                             = b^HDLC_ESCAPE_MASK;
+         mercator_vars.uartrxescaping = FALSE;
+      }
+      
+      // add byte to input buffer
+      mercator_vars.uartbufrx[mercator_vars.uartbufrxfill] = b;
+      mercator_vars.uartbufrxfill++;
+      
+      // iterate through CRC calculator
+      mercator_vars.uartrxcrc = crcIteration(mercator_vars.uartrxcrc,b);
+   }
+}
+
 // executed in ISR, called from scheduler.c
 void isr_openserial_rx(void) {
    uint8_t rxbyte;
@@ -183,6 +212,62 @@ void isr_openserial_rx(void) {
    
    // read byte just received
    rxbyte = uart_readByte();
+   
+   // handle byte
+   if        (
+                mercator_vars.uartrxbusy==FALSE  &&
+                mercator_vars.uartlastRxByte==HDLC_FLAG &&
+                rxbyte!=HDLC_FLAG
+              ) {
+      // start of frame
+      
+      // I'm now receiving
+      mercator_vars.uartrxbusy           = TRUE;
+      
+      // reset the input buffer index
+      mercator_vars.uartbufrxfill            = 0;
+      
+      // initialize the value of the CRC
+      mercator_vars.uartrxcrc                = HDLC_CRCINIT;
+      
+      // add the byte just received
+      inputHdlcWrite(rxbyte);
+   } else if (
+                mercator_vars.uartrxbusy==TRUE   &&
+                rxbyte!=HDLC_FLAG
+             ) {
+      // middle of frame
+      
+      // add the byte just received
+      inputHdlcWrite(rxbyte);
+      if (mercator_vars.uartbufrxfill+1>UART_BUF_LEN){
+         mercator_vars.uartbufrxfill         = 0;
+         mercator_vars.uartrxbusy        = FALSE;
+      }
+   } else if (
+                mercator_vars.uartrxbusy==TRUE   &&
+                rxbyte==HDLC_FLAG
+              ) {
+         // end of frame
+         
+         // verify the validity of the frame
+         if (mercator_vars.uartrxcrc==HDLC_CRCGOOD) {
+            // the CRC is correct
+            
+            // remove the CRC from the input buffer
+            mercator_vars.uartbufrxfill    -= 2;
+            
+            // stop receiving (until frame handled)
+            serial_disable();
+            
+            // schedule task to handle frame
+            scheduler_push_task(serial_handlerx,TASK_PRIO_SERIAL);
+         } else {
+            // the CRC is incorrect
+         }
+         
+         mercator_vars.uartrxbusy      = FALSE;
+   }
    
    // store byte
    mercator_vars.uartlastRxByte = rxbyte;
