@@ -85,6 +85,10 @@ END_PACK
 typedef struct {
    opentimer_id_t  timerId;
    
+   //=== state machine
+   uint8_t         status;
+   uint16_t        numnotifications;
+   
    //=== UART
    // tx
    uint8_t         uartbuftx[UART_BUF_LEN];
@@ -120,19 +124,21 @@ mercator_vars_t mercator_vars;
 
 //=========================== prototypes ======================================
 
-void mercator_poipoi(void);
-
 void serial_enable(void);
-void serial_flushtx(void);
-void serial_handle_all(void);
-void serial_handle_REQ_ST(void);
-void serial_handle_REQ_IDLE(void);
-void serial_handle_REQ_TX(void);
-void serial_handle_REQ_RX(void);
 void serial_disable(void);
+void serial_flushtx(void);
+
+void serial_rx_all(void);
+void serial_rx_REQ_ST(void);
+void serial_tx_RESP_ST(void);
+void serial_rx_REQ_IDLE(void);
+void serial_rx_REQ_TX(void);
+void serial_rx_REQ_RX(void);
 
 void isr_openserial_tx(void);
 void isr_openserial_rx(void);
+
+uint16_t htons(uint16_t val);
 
 //=========================== initialization ==================================
 
@@ -149,40 +155,30 @@ int mote_main(void) {
    );
    serial_enable();
    
+   /*
    mercator_vars.timerId  = opentimers_start(
       500,
       TIMER_PERIODIC,TIME_MS,
       mercator_poipoi
    );
+   */
+   
    scheduler_start();
    return 0; // this line should never be reached
 }
 
 //=========================== private =========================================
 
-void mercator_poipoi(void) {
-   
-   mercator_vars.uartbuftx[0] = 0x00;
-   mercator_vars.uartbuftx[1] = 0x11;
-   mercator_vars.uartbuftx[2] = 0x22;
-   mercator_vars.uartbuftx[3] = 0x33;
-   mercator_vars.uartbuftx[4] = 0x44;
-   mercator_vars.uartbuftx[5] = 0x7e;
-   mercator_vars.uartbuftx[6] = 0x66;
-   mercator_vars.uartbuftx[7] = 0x77;
-   mercator_vars.uartbuftx[8] = 0x88;
-   mercator_vars.uartbuftx[9] = 0x99;
-   
-   mercator_vars.uartbuftxfill = 10;
-   serial_flushtx();
-}
-
-//===== uart
+//===== serial
 
 void serial_enable(void) {
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();      // clear possible pending interrupts
    uart_enableInterrupts();       // Enable USCI_A1 TX & RX interrupt
+}
+
+void serial_disable(void) {
+   uart_disableInterrupts();      // disable USCI_A1 TX & RX interrupt
 }
 
 void serial_flushtx(void) {
@@ -205,7 +201,7 @@ void serial_flushtx(void) {
    uart_writeByte(HDLC_FLAG);
 }
 
-void serial_handle_all(void) {
+void serial_rx_all(void) {
    do {
       if (mercator_vars.uartbufrxfill<1){
          // update stats
@@ -215,16 +211,16 @@ void serial_handle_all(void) {
       
       switch(mercator_vars.uartbufrx[0]) {
          case TYPE_REQ_ST:
-            serial_handle_REQ_ST();
+            serial_rx_REQ_ST();
             break;
          case TYPE_REQ_IDLE:
-            serial_handle_REQ_IDLE();
+            serial_rx_REQ_IDLE();
             break;
          case TYPE_REQ_TX:
-            serial_handle_REQ_TX();
+            serial_rx_REQ_TX();
             break;
          case TYPE_REQ_RX:
-            serial_handle_REQ_RX();
+            serial_rx_REQ_RX();
             break;
          default:
             // update stats
@@ -237,18 +233,32 @@ void serial_handle_all(void) {
    serial_enable();
 }
 
-void serial_handle_REQ_ST(void) {
+void serial_rx_REQ_ST(void) {
    if (mercator_vars.uartbufrxfill!=sizeof(REQ_ST_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
    
-   // TODO
-   __no_operation();
+   // trigger a RESP_ST transmission
+   scheduler_push_task(serial_tx_RESP_ST,TASK_PRIO_SERIAL);
 }
 
-void serial_handle_REQ_IDLE(void) {
+void serial_tx_RESP_ST(void) {
+   RESP_ST_ht* resp;
+   
+   resp = (RESP_ST_ht*)mercator_vars.uartbuftx;
+   
+   resp->type                     = TYPE_RESP_ST;
+   resp->status                   = mercator_vars.status;
+   resp->numnotifications         = htons(mercator_vars.numnotifications);
+   
+   mercator_vars.uartbuftxfill    = sizeof(RESP_ST_ht);
+   
+   serial_flushtx();
+}
+
+void serial_rx_REQ_IDLE(void) {
    if (mercator_vars.uartbufrxfill!=sizeof(REQ_IDLE_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
@@ -259,7 +269,7 @@ void serial_handle_REQ_IDLE(void) {
    __no_operation();
 }
 
-void serial_handle_REQ_TX(void) {
+void serial_rx_REQ_TX(void) {
    if (mercator_vars.uartbufrxfill!=sizeof(REQ_TX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
@@ -270,7 +280,7 @@ void serial_handle_REQ_TX(void) {
    __no_operation();
 }
 
-void serial_handle_REQ_RX(void) {
+void serial_rx_REQ_RX(void) {
    if (mercator_vars.uartbufrxfill!=sizeof(REQ_RX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
@@ -281,8 +291,10 @@ void serial_handle_REQ_RX(void) {
    __no_operation();
 }
 
-void serial_disable(void) {
-   uart_disableInterrupts();      // disable USCI_A1 TX & RX interrupt
+//===== helpers
+
+uint16_t htons(uint16_t val) {
+   return (((uint16_t)(val>>0)&0xff)<<8) | (((uint16_t)(val>>8)&0xff)<<0);
 }
 
 //===== interrupt handlers
@@ -412,7 +424,10 @@ void isr_openserial_rx(void) {
             serial_disable();
             
             // schedule task to handle frame
-            scheduler_push_task(serial_handle_all,TASK_PRIO_SERIAL);
+            scheduler_push_task(serial_rx_all,TASK_PRIO_SERIAL);
+            
+            // wakeup the scheduler
+            SCHEDULER_WAKEUP();
          } else {
             // the CRC is incorrect
             
