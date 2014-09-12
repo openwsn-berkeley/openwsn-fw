@@ -52,6 +52,7 @@ enum {
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT            ((uint8_t)'R')
 #define SERFRAME_PC2MOTE_SETBRIDGE          ((uint8_t)'B')
+#define SERFRAME_PC2MOTE_SETROOTBRIDGE      ((uint8_t)'Z')
 #define SERFRAME_PC2MOTE_DATA               ((uint8_t)'D')
 #define SERFRAME_PC2MOTE_TRIGGERTCPINJECT   ((uint8_t)'T')
 #define SERFRAME_PC2MOTE_TRIGGERUDPINJECT   ((uint8_t)'U')
