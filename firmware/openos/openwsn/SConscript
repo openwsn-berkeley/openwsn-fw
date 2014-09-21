@@ -4,57 +4,20 @@ Import('env')
 
 localEnv = env.Clone()
 
-localEnv.Append(
-    CPPPATH =  [
-        # kernel
-        os.path.join('#','firmware','openos','kernel','openos'),
-        # drivers
-        os.path.join('#','firmware','openos','drivers','common'),
-        # openstack
-        os.path.join('#','firmware','openos','openwsn'),
-        os.path.join('#','firmware','openos','openwsn','02.5-MPLS'),
-        os.path.join('#','firmware','openos','openwsn','02a-MAClow'),
-        os.path.join('#','firmware','openos','openwsn','02b-MAChigh'),
-        os.path.join('#','firmware','openos','openwsn','03a-IPHC'),
-        os.path.join('#','firmware','openos','openwsn','03b-IPv6'),
-        os.path.join('#','firmware','openos','openwsn','04-TRAN'),
-        os.path.join('#','firmware','openos','openwsn','07-App'),
-        os.path.join('#','firmware','openos','openwsn','07-App','heli'),
-        os.path.join('#','firmware','openos','openwsn','07-App','imu'),
-        os.path.join('#','firmware','openos','openwsn','07-App','layerdebug'),
-        os.path.join('#','firmware','openos','openwsn','07-App','ohlone'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rex'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rheli'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rinfo'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rleds'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rreg'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rrube'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rt'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rwellknown'),
-        os.path.join('#','firmware','openos','openwsn','07-App','rxl1'),
-        os.path.join('#','firmware','openos','openwsn','07-App','tcpecho'),
-        os.path.join('#','firmware','openos','openwsn','07-App','tcpinject'),
-        os.path.join('#','firmware','openos','openwsn','07-App','tcpprint'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udpecho'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udpinject'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udpprint'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udprand'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udplatency'),
-        os.path.join('#','firmware','openos','openwsn','07-App','udpstorm'),
-        os.path.join('#','firmware','openos','openwsn','cross-layers'),
-    ],
-)
-                   
-source = [
+target = 'libopenstack'
+sources_c = [
     'openwsn.c',
     #=== 02a-MAClow
     os.path.join('02a-MAClow','topology.c'),
     os.path.join('02a-MAClow','IEEE802154.c'),
     os.path.join('02a-MAClow','IEEE802154E.c'),
+    os.path.join('02a-MAClow','adaptive_sync.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
-    os.path.join('02b-MAChigh','res.c'),
+    os.path.join('02b-MAChigh','otf.c'),
+    os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
+    os.path.join('02b-MAChigh','sixtop.c'),
     #=== 02.5-MPLS
     # TODO
     #=== 03a-IPHC
@@ -74,14 +37,16 @@ source = [
     #os.path.join('07-App','heli','heli.c'),
     #os.path.join('07-App','imu','imu.c'),
     os.path.join('07-App','layerdebug','layerdebug.c'),
+    os.path.join('07-App','r6t','r6t.c'),
     os.path.join('07-App','ohlone','ohlone.c'),
     os.path.join('07-App','ohlone','ohlone_webpages.c'),
-    #os.path.join('07-App','rex','rex.c'),
-    os.path.join('07-App','rheli','rheli.c'),
+    os.path.join('07-App','rex','rex.c'),
+    #os.path.join('07-App','rheli','rheli.c'),
     os.path.join('07-App','rinfo','rinfo.c'),
+    os.path.join('07-App','rrt','rrt.c'),
     os.path.join('07-App','rleds','rleds.c'),
     os.path.join('07-App','rreg','rreg.c'),
-    os.path.join('07-App','rrube','rrube.c'),
+    #os.path.join('07-App','rrube','rrube.c'),
     #os.path.join('07-App','rt','rt.c'),
     os.path.join('07-App','rwellknown','rwellknown.c'),
     #os.path.join('07-App','rxl1','rxl1.c'),
@@ -100,10 +65,130 @@ source = [
     os.path.join('cross-layers','openrandom.c'),
     os.path.join('cross-layers','packetfunctions.c'),
 ]
+sources_h = [
+    'openwsn.h',
+    #=== 02a-MAClow
+    os.path.join('02a-MAClow','topology.h'),
+    os.path.join('02a-MAClow','IEEE802154.h'),
+    os.path.join('02a-MAClow','IEEE802154E.h'),
+    os.path.join('02a-MAClow','adaptive_sync.h'),
+    #=== 02b-MAChigh
+    os.path.join('02b-MAChigh','neighbors.h'),
+    os.path.join('02b-MAChigh','otf.h'),
+    os.path.join('02b-MAChigh','processIE.h'),
+    os.path.join('02b-MAChigh','schedule.h'),
+    os.path.join('02b-MAChigh','sixtop.h'),
+    #=== 02.5-MPLS
+    # TODO
+    #=== 03a-IPHC
+    os.path.join('03a-IPHC','iphc.h'),
+    os.path.join('03a-IPHC','openbridge.h'),
+    #=== 03b-IPv6
+    os.path.join('03b-IPv6','forwarding.h'),
+    os.path.join('03b-IPv6','icmpv6.h'),
+    os.path.join('03b-IPv6','icmpv6echo.h'),
+    os.path.join('03b-IPv6','icmpv6rpl.h'),
+    #=== 04-TRAN
+    os.path.join('04-TRAN','opencoap.h'),
+    os.path.join('04-TRAN','opentcp.h'),
+    os.path.join('04-TRAN','openudp.h'),
+    os.path.join('04-TRAN','rsvp.h'),
+    #=== 07-App
+    #os.path.join('07-App','heli','heli.h'),
+    #os.path.join('07-App','imu','imu.h'),
+    os.path.join('07-App','layerdebug','layerdebug.h'),
+    os.path.join('07-App','ohlone','ohlone.h'),
+    os.path.join('07-App','ohlone','ohlone_webpages.h'),
+    os.path.join('07-App','r6t','r6t.h'),
+    os.path.join('07-App','rex','rex.h'),
+    #os.path.join('07-App','rheli','rheli.h'),
+    os.path.join('07-App','rinfo','rinfo.h'),
+    os.path.join('07-App','rrt','rrt.h'),
+    os.path.join('07-App','rleds','rleds.h'),
+    os.path.join('07-App','rreg','rreg.h'),
+    #os.path.join('07-App','rrube','rrube.h'),
+    #os.path.join('07-App','rt','rt.h'),
+    os.path.join('07-App','rwellknown','rwellknown.h'),
+    #os.path.join('07-App','rxl1','rxl1.h'),
+    os.path.join('07-App','tcpecho','tcpecho.h'),
+    os.path.join('07-App','tcpinject','tcpinject.h'),
+    os.path.join('07-App','tcpprint','tcpprint.h'),
+    os.path.join('07-App','udpecho','udpecho.h'),
+    os.path.join('07-App','udpinject','udpinject.h'),
+    os.path.join('07-App','udpprint','udpprint.h'),
+    os.path.join('07-App','udprand','udprand.h'),
+    os.path.join('07-App','udplatency','udplatency.h'),
+    os.path.join('07-App','udpstorm','udpstorm.h'),
+    #=== cross-layers
+    os.path.join('cross-layers','idmanager.h'),
+    os.path.join('cross-layers','openqueue.h'),
+    os.path.join('cross-layers','openrandom.h'),
+    os.path.join('cross-layers','packetfunctions.h'),
+]
 
-target = 'libopenstack'
-libopenstack = localEnv.Library(
-    target=target,
-    source=source,
-)
+if localEnv['board']=='python':
+    
+    for s in sources_c+sources_h:
+        temp = localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+        #localEnv.AlwaysBuild(temp)
+    
+    libopenstack = localEnv.Library(
+        target = target,
+        source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
+    )
+    localEnv.Depends(libopenstack,[localEnv.ObjectifiedFilename(s) for s in sources_h])
+    
+else:
+    
+    localEnv.Append(
+        CPPPATH =  [
+            # kernel
+            os.path.join('#','firmware','openos','kernel','openos'),
+            # drivers
+            os.path.join('#','firmware','openos','drivers','common'),
+            # openstack
+            os.path.join('#','firmware','openos','openwsn'),
+            os.path.join('#','firmware','openos','openwsn','02.5-MPLS'),
+            os.path.join('#','firmware','openos','openwsn','02a-MAClow'),
+            os.path.join('#','firmware','openos','openwsn','02b-MAChigh'),
+            os.path.join('#','firmware','openos','openwsn','03a-IPHC'),
+            os.path.join('#','firmware','openos','openwsn','03b-IPv6'),
+            os.path.join('#','firmware','openos','openwsn','04-TRAN'),
+            os.path.join('#','firmware','openos','openwsn','07-App'),
+            os.path.join('#','firmware','openos','openwsn','07-App','heli'),
+            os.path.join('#','firmware','openos','openwsn','07-App','imu'),
+            os.path.join('#','firmware','openos','openwsn','07-App','layerdebug'),
+            os.path.join('#','firmware','openos','openwsn','07-App','ohlone'),
+            os.path.join('#','firmware','openos','openwsn','07-App','r6t'),
+            os.path.join('#','firmware','openos','openwsn','07-App','rex'),
+            os.path.join('#','firmware','openos','openwsn','07-App','rheli'),
+            os.path.join('#','firmware','openos','openwsn','07-App','rinfo'),
+            os.path.join('#','firmware','openos','openwsn','07-App','rrt'),
+            os.path.join('#','firmware','openos','openwsn','07-App','rleds'),
+            os.path.join('#','firmware','openos','openwsn','07-App','rreg'),
+            os.path.join('#','firmware','openos','openwsn','07-App','rrube'),
+            os.path.join('#','firmware','openos','openwsn','07-App','rt'),
+            os.path.join('#','firmware','openos','openwsn','07-App','rwellknown'),
+            os.path.join('#','firmware','openos','openwsn','07-App','rxl1'),
+            os.path.join('#','firmware','openos','openwsn','07-App','tcpecho'),
+            os.path.join('#','firmware','openos','openwsn','07-App','tcpinject'),
+            os.path.join('#','firmware','openos','openwsn','07-App','tcpprint'),
+            os.path.join('#','firmware','openos','openwsn','07-App','udpecho'),
+            os.path.join('#','firmware','openos','openwsn','07-App','udpinject'),
+            os.path.join('#','firmware','openos','openwsn','07-App','udpprint'),
+            os.path.join('#','firmware','openos','openwsn','07-App','udprand'),
+            os.path.join('#','firmware','openos','openwsn','07-App','udplatency'),
+            os.path.join('#','firmware','openos','openwsn','07-App','udpstorm'),
+            os.path.join('#','firmware','openos','openwsn','cross-layers'),
+        ],
+    )
+    
+    libopenstack = localEnv.Library(
+        target = target,
+        source = sources_c,
+    )
+
 Alias('libopenstack', libopenstack)

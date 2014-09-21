@@ -2,7 +2,7 @@
 #define __IMU_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup imu
 \{
@@ -16,11 +16,11 @@
 
 //=========================== prototypes ======================================
 
-void imu_init();
-void imu_trigger();
-void imu_sendDone(OpenQueueEntry_t* msg, error_t error);
+void imu_init(void);
+void imu_trigger(void);
+void imu_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void imu_receive(OpenQueueEntry_t* msg);
-bool imu_debugPrint();
+bool imu_debugPrint(void);
 
 /**
 \}

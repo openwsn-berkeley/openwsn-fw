@@ -8,6 +8,8 @@
 \{
 */
 
+#include "opentimers.h"
+
 //=========================== define ==========================================
 
 #define TIMER_DIO_TIMEOUT         1700
@@ -47,6 +49,10 @@
 #define Prf_A_dio_options         0<<4
 #define Prf_B_dio_options         0<<3
 
+// max number of parents and children to send in DAO
+//section 8.2.1 pag 67 RFC6550 -- using a subset
+#define MAX_TARGET_PARENTS        0x01
+
 enum{
   OPTION_ROUTE_INFORMATION_TYPE   = 0x03,
   OPTION_DODAG_CONFIGURATION_TYPE = 0x04,
@@ -71,7 +77,7 @@ static const uint8_t all_routers_multicast[] = {
 /**
 \brief Header format of a RPL DIO packet.
 */
-PRAGMA(pack(1));
+BEGIN_PACK
 typedef struct {
    uint8_t         rplinstanceId;      ///< set by the DODAG root.
    uint8_t         verNumb;
@@ -82,27 +88,27 @@ typedef struct {
    uint8_t         reserved;
    uint8_t         DODAGID[16];    
 } icmpv6rpl_dio_ht;
-PRAGMA(pack());
+END_PACK
 
 //===== DAO
 
 /**
 \brief Header format of a RPL DAO packet.
 */
-PRAGMA(pack(1));
+BEGIN_PACK
 typedef struct {
    uint8_t         rplinstanceId;      ///< set by the DODAG root.
    uint8_t         K_D_flags;
    uint8_t         reserved;
-   uint8_t         DAOSequance;
+   uint8_t         DAOSequence;
    uint8_t         DODAGID[16];
 } icmpv6rpl_dao_ht;
-PRAGMA(pack());
+END_PACK
 
 /**
 \brief Header format of a RPL DAO "Transit Information" option.
 */
-PRAGMA(pack(1));
+BEGIN_PACK
 typedef struct {
    uint8_t         type;               ///< set by the DODAG root.
    uint8_t         optionLength;
@@ -111,26 +117,47 @@ typedef struct {
    uint8_t         PathSequence;   
    uint8_t         PathLifetime;   
 } icmpv6rpl_dao_transit_ht;
-PRAGMA(pack());
+END_PACK
 
 /**
 \brief Header format of a RPL DAO "Target" option.
 */
-PRAGMA(pack(1));
+BEGIN_PACK
 typedef struct {
    uint8_t         type;               ///< set by the DODAG root.
    uint8_t         optionLength;
    uint8_t         flags;
    uint8_t         prefixLength;  
 } icmpv6rpl_dao_target_ht;
-PRAGMA(pack());
+END_PACK
 
+//=========================== module variables ================================
+
+typedef struct {
+   // admin
+   bool                      busySending;             ///< currently sending DIO/DAO.
+   uint8_t                   DODAGIDFlagSet;          ///< is DODAGID set already?
+   // DIO-related
+   icmpv6rpl_dio_ht          dio;                     ///< pre-populated DIO packet.
+   open_addr_t               dioDestination;          ///< IPv6 destination address for DIOs.
+   uint16_t                  periodDIO;               ///< duration, in ms, of a timerIdDIO timeout.
+   opentimer_id_t            timerIdDIO;              ///< ID of the timer used to send DIOs.
+   uint8_t                   delayDIO;                ///< number of timerIdDIO events before actually sending a DIO.
+   // DAO-related
+   icmpv6rpl_dao_ht          dao;                     ///< pre-populated DAO packet.
+   icmpv6rpl_dao_transit_ht  dao_transit;             ///< pre-populated DAO "Transit Info" option header.
+   icmpv6rpl_dao_target_ht  dao_target;             ///< pre-populated DAO "Transit Info" option header.
+   opentimer_id_t            timerIdDAO;              ///< ID of the timer used to send DAOs.
+   uint16_t                  periodDAO;               ///< duration, in ms, of a timerIdDAO timeout.
+   uint8_t                   delayDAO;                ///< number of timerIdDIO events before actually sending a DAO.
+} icmpv6rpl_vars_t;
 
 //=========================== prototypes ======================================
 
-void icmpv6rpl_init();
-void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, error_t error);
+void icmpv6rpl_init(void);
+void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void icmpv6rpl_receive(OpenQueueEntry_t* msg);
+uint8_t icmpv6rpl_getRPLIntanceID(void);
 
 /**
 \}

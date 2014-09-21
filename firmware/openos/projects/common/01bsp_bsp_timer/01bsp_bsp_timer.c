@@ -4,7 +4,13 @@
 Since the bsp modules for different platforms have the same declaration, you
 can use this project with any platform.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2012.
+Load this program onto your board, and start running. It will enable the BSP
+timer. The BSP timer is periodic, of period BSP_TIMER_PERIOD ticks. Each time
+it elapses:
+    - the frame debugpin toggles
+    - the error LED toggles
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "stdint.h"
@@ -13,48 +19,35 @@ can use this project with any platform.
 #include "debugpins.h"
 #include "leds.h"
 #include "bsp_timer.h"
-#include "flextimer.h"
-#include "opentimers.h"
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD     281 // @32kHz = 1s
+#define BSP_TIMER_PERIOD     32768 // @32kHz = 1s
 
 //=========================== variables =======================================
 
 typedef struct {
    uint16_t num_compare;
-   uint16_t prev;
 } app_vars_t;
 
 app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_compare();
+void cb_compare(void);
 
 //=========================== main ============================================
 
 /**
 \brief The program starts executing here.
 */
-int mote_main(void)
-{  
+int mote_main(void) {  
    // initialize board
    board_init();
-//   flextimer_init();
-//   flextimer_setCb(cb_compare);
-//   app_vars.prev=0;
-//   app_vars.num_compare=0;
-//    
-//   
-//   flextimer_schedule(BSP_TIMER_PERIOD);
-   app_vars.prev=BSP_TIMER_PERIOD;
    
-  // bsp_timer_set_callback(cb_compare);
-  // bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
-   opentimers_init();
-   opentimers_start(1000,TIMER_ONESHOT,TIME_MS,cb_compare);
+   bsp_timer_set_callback(cb_compare);
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
+   
    while (1) {
       board_sleep();
    }
@@ -62,18 +55,17 @@ int mote_main(void)
 
 //=========================== callbacks =======================================
 
-void cb_compare() {
+void cb_compare(void) {
+   
    // toggle pin
-   debugpins_fsm_toggle();
+   debugpins_frame_toggle();
    
    // toggle error led
    leds_error_toggle();
    
    // increment counter
    app_vars.num_compare++;
-   app_vars.prev+=BSP_TIMER_PERIOD;
+   
    // schedule again
-  // bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
-  // flextimer_schedule(app_vars.prev);
-   opentimers_start(3000,TIMER_ONESHOT,TIME_MS,cb_compare);
+   bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
 }

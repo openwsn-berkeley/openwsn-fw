@@ -1,5 +1,4 @@
 /*
- * board_info.h
  *
  *  Created on: Feb 27, 2012
  *      Author: Vitor Mangueira, Branko Kerkez <bkerkez@berkeley.edu>
@@ -12,7 +11,11 @@
 #include "string.h"
 //=========================== defines =========================================
 
-#define port_INLINE                         inline
+#define PORT_RADIOTIMER_WIDTH               uint16_t
+
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       1 // ticks
 
 //=========================== variables =======================================
 

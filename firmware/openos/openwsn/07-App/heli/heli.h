@@ -2,12 +2,14 @@
 #define __HELI_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup Heli
 \{
 */
 
+
+#include "openwsn.h"
 //=========================== define ==========================================
 
 //=========================== typedef =========================================
@@ -16,11 +18,11 @@
 
 //=========================== prototypes ======================================
 
-void heli_init();
-void heli_trigger();
-void heli_sendDone(OpenQueueEntry_t* msg, error_t error);
+void heli_init(void);
+void heli_trigger(void);
+void heli_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void heli_receive(OpenQueueEntry_t* msg);
-bool heli_debugPrint();
+bool heli_debugPrint(void);
 
 /**
 \}

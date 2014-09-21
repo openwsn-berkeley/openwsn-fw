@@ -6,10 +6,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   OpenQueueEntry_t queue[QUEUELENGTH];
-} openqueue_vars_t;
-
 openqueue_vars_t openqueue_vars;
 
 //=========================== prototypes ======================================
@@ -98,7 +94,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 \returns E_SUCCESS when the freeing was succeful.
 \returns E_FAIL when the module could not find the specified packet buffer.
 */
-error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
+owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -126,7 +122,7 @@ error_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
 /**
 \brief Free all the packet buffers created by a specific module.
 
-\param owner The identifier of the component, taken in COMPONENT_*.
+\param creator The identifier of the component, taken in COMPONENT_*.
 */
 void openqueue_removeAllCreatedBy(uint8_t creator) {
    uint8_t i;
@@ -159,12 +155,12 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
 
 //======= called by RES
 
-OpenQueueEntry_t* openqueue_resGetSentPacket() {
+OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
-      if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_RES &&
+      if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_SIXTOP &&
           openqueue_vars.queue[i].creator!=COMPONENT_IEEE802154E) {
          ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
@@ -174,12 +170,12 @@ OpenQueueEntry_t* openqueue_resGetSentPacket() {
    return NULL;
 }
 
-OpenQueueEntry_t* openqueue_resGetReceivedPacket() {
+OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
-      if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_RES &&
+      if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_SIXTOP &&
           openqueue_vars.queue[i].creator==COMPONENT_IEEE802154E) {
          ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
@@ -198,7 +194,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    if (toNeighbor->type==ADDR_64B) {
       // a neighbor is specified, look for a packet unicast to that neigbhbor
       for (i=0;i<QUEUELENGTH;i++) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
+         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
             packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
@@ -208,10 +204,10 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
       // anycast case: look for a packet which is either not created by RES
       // or an KA (created by RES, but not broadcast)
       for (i=0;i<QUEUELENGTH;i++) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
-             ( openqueue_vars.queue[i].creator!=COMPONENT_RES ||
+         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+             ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
                 (
-                   openqueue_vars.queue[i].creator==COMPONENT_RES &&
+                   openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
                    packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
                 )
              )
@@ -230,8 +226,8 @@ OpenQueueEntry_t* openqueue_macGetAdvPacket() {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
-      if (openqueue_vars.queue[i].owner==COMPONENT_RES_TO_IEEE802154E &&
-          openqueue_vars.queue[i].creator==COMPONENT_RES              &&
+      if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+          openqueue_vars.queue[i].creator==COMPONENT_SIXTOP              &&
           packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))) {
          ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
@@ -258,4 +254,5 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_nextORpreviousHop.type    = ADDR_NONE;
    entry->l2_frameType                 = IEEE154_TYPE_UNDEFINED;
    entry->l2_retriesLeft               = 0;
+   entry->l2_IEListPresent             = 0;
 }

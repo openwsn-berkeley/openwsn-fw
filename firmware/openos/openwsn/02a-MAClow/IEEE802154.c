@@ -16,20 +16,27 @@
 
 Note that we are writing the field from the end of the header to the beginning.
 
-\param msg             [in,out] The message to append the header to.
-\param frameType       [in]     Type of IEEE802.15.4 frame.
-\param securityEnabled [in]     Is security enabled on this frame?
-\param nextHop         [in]     Address of the next hop
+\param[in,out] msg              The message to append the header to.
+\param[in]     frameType        Type of IEEE802.15.4 frame.
+\param[in]     ielistpresent    Is the IE list present¿
+\param[in]     frameVersion     IEEE802.15.4 frame version.
+\param[in]     securityEnabled  Is security enabled on this frame?
+\param[in]     sequenceNumber   Sequence number of this frame.
+\param[in]     nextHop          Address of the next hop
 */
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
+                              uint8_t           ielistpresent,
+                              uint8_t           frameVersion,
                               bool              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    
+   //General IEs here (those that are carried in all packets) -- None by now.
+   
    // previousHop address (always 64-bit)
-   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),LITTLE_ENDIAN);
+   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
    // nextHop address
    if (packetfunctions_isBroadcastMulticast(nextHop)) {
       //broadcast address is always 16-bit
@@ -41,7 +48,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       switch (nextHop->type) {
          case ADDR_16B:
          case ADDR_64B:
-            packetfunctions_writeAddress(msg,nextHop,LITTLE_ENDIAN);
+            packetfunctions_writeAddress(msg,nextHop,OW_LITTLE_ENDIAN);
             break;
          default:
             openserial_printCritical(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,
@@ -51,7 +58,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       
    }
    // destpan
-   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),LITTLE_ENDIAN);
+   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
    //dsn
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
    *((uint8_t*)(msg->payload)) = sequenceNumber;
@@ -72,6 +79,10 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       }
    }
    temp_8b             |= IEEE154_ADDR_EXT                << IEEE154_FCF_SRC_ADDR_MODE;
+   //poipoi xv IE list present
+   temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
+   temp_8b             |= frameVersion                    << IEEE154_FCF_FRAME_VERSION;
+     
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
@@ -93,8 +104,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
 
 Note We are writing the fields from the begnning of the header to the end.
 
-\param msg               [in,out] The message just received.
-\param ieee802514_header [out]    The internal header to write the data to.
+\param[in,out] msg            The message just received.
+\param[out] ieee802514_header The internal header to write the data to.
 */
 void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                                ieee802154_header_iht* ieee802514_header) {
@@ -117,6 +128,14 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    // fcf, byte 2
    if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    temp_8b = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+   //poipoi xv IE list present
+   ieee802514_header->ieListPresent  = (temp_8b >> IEEE154_FCF_IELIST_PRESENT     ) & 0x01;//1b
+   ieee802514_header->frameVersion   = (temp_8b >> IEEE154_FCF_FRAME_VERSION      ) & 0x03;//2b
+
+   if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
+       return; //invalid packet accordint to p.64 IEEE15.4e
+   }
+   
    switch ( (temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03 ) {
       case IEEE154_ADDR_NONE:
          ieee802514_header->dest.type = ADDR_NONE;
@@ -159,7 +178,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
                                ADDR_PANID,
                                &ieee802514_header->panid,
-                               LITTLE_ENDIAN);
+                               OW_LITTLE_ENDIAN);
    ieee802514_header->headerLength += 2;
    // dest
    if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
@@ -171,7 +190,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
              ((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
              ADDR_16B,
              &ieee802514_header->dest,
-             LITTLE_ENDIAN
+             OW_LITTLE_ENDIAN
          );
          ieee802514_header->headerLength += 2;
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
@@ -180,7 +199,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
                                      ADDR_64B,
                                      &ieee802514_header->dest,
-                                     LITTLE_ENDIAN);
+                                     OW_LITTLE_ENDIAN);
          ieee802514_header->headerLength += 8;
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
          break;
@@ -194,7 +213,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
                                      ADDR_16B,
                                      &ieee802514_header->src,
-                                     LITTLE_ENDIAN);
+                                     OW_LITTLE_ENDIAN);
          ieee802514_header->headerLength += 2;
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
          break;
@@ -202,12 +221,17 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
                                      ADDR_64B,
                                      &ieee802514_header->src,
-                                     LITTLE_ENDIAN);
+                                     OW_LITTLE_ENDIAN);
          ieee802514_header->headerLength += 8;
          if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
          break;
       // no need for a default, since case would have been caught above
    }
+   
+   if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
+       return; //invalid packet accordint to p.64 IEEE15.4e
+   }
+   
    // apply topology filter
    if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {
       // the topology filter does accept this packet, return

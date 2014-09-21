@@ -2,7 +2,7 @@
 #define __RREG_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rReg
 \{
@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void rreg_init();
+void rreg_init(void);
 
 /**
 \}

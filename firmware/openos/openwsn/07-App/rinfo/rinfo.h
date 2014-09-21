@@ -2,11 +2,13 @@
 #define __RINFO_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
-\addtogroup rXL1
+\addtogroup rinfo
 \{
 */
+
+#include "opencoap.h"
 
 //=========================== define ==========================================
 
@@ -14,9 +16,13 @@
 
 //=========================== variables =======================================
 
+typedef struct {
+   coap_resource_desc_t desc;
+} rinfo_vars_t;
+
 //=========================== prototypes ======================================
 
-void rinfo_init();
+void rinfo_init(void);
 
 /**
 \}

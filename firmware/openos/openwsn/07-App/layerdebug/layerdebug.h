@@ -2,7 +2,7 @@
 #define __LAYERDEBUG_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rT
 \{
@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void layerdebug_init();
+void layerdebug_init(void);
 
 /**
 \}

@@ -22,24 +22,28 @@ typedef struct {
    uint8_t  owner;
 } debugOpenQueueEntry_t;
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+
+typedef struct {
+   OpenQueueEntry_t queue[QUEUELENGTH];
+} openqueue_vars_t;
 
 //=========================== prototypes ======================================
 
 // admin
-void               openqueue_init();
-bool               debugPrint_queue();
+void               openqueue_init(void);
+bool               debugPrint_queue(void);
 // called by any component
 OpenQueueEntry_t*  openqueue_getFreePacketBuffer(uint8_t creator);
-error_t            openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
+owerror_t         openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 void               openqueue_removeAllOwnedBy(uint8_t owner);
 // called by res
-OpenQueueEntry_t*  openqueue_resGetSentPacket();
-OpenQueueEntry_t*  openqueue_resGetReceivedPacket();
+OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
+OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor);
-OpenQueueEntry_t*  openqueue_macGetAdvPacket();
+OpenQueueEntry_t*  openqueue_macGetAdvPacket(void);
 
 /**
 \}

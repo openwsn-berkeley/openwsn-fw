@@ -14,7 +14,7 @@
 
 #define ABSTIMER_GUARD_TICKS 2
 
-typedef void (*abstimer_cbt)(void);
+typedef void (*abstimer_cbt)();
 
 enum abstimer_irqstatus_enum{
 	RADIOTIMER_NONE = 0,
@@ -36,7 +36,7 @@ typedef struct {
    // timer values
    abstimer_cbt              callback[ABSTIMER_SRC_MAX];
    // radiotimers-specific variables
-   uint16_t                  radiotimer_period;
+   PORT_RADIOTIMER_WIDTH                  radiotimer_period;
    
    uint8_t                   overflowORcompare;
 } abstimer_vars_t;
@@ -62,7 +62,7 @@ void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
    abstimer_vars.callback[ABSTIMER_SRC_RADIOTIMER_COMPARE]      = cb;
 }
 
-void radiotimer_start(uint16_t period) {
+void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    // remember the period
@@ -80,7 +80,7 @@ PORT_TIMER_WIDTH radiotimer_getValue() {
    return x;
 }
 
-void radiotimer_setPeriod(uint16_t period) {
+void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    //why??
@@ -92,11 +92,11 @@ void radiotimer_setPeriod(uint16_t period) {
    ENABLE_INTERRUPTS();  
 }
 
-uint16_t radiotimer_getPeriod() {
+PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
    return abstimer_vars.radiotimer_period; 
 }
 
-void radiotimer_schedule(uint16_t offset) {
+void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    sctimer_schedule(offset);
@@ -115,7 +115,7 @@ void radiotimer_cancel() {
 }
 
 // the current value as we do not have a capture register.
-uint16_t radiotimer_getCapturedTime() {
+PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
    return radiotimer_getValue();
 }
 

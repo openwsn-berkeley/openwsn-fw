@@ -54,7 +54,7 @@ void udpinject_trigger() {
    }
 }
 
-void udpinject_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void udpinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_UDPINJECT;
    if (msg->creator!=COMPONENT_UDPINJECT) {
       openserial_printError(COMPONENT_UDPINJECT,ERR_UNEXPECTED_SENDDONE,

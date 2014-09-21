@@ -2,9 +2,9 @@
 #define __OPENRANDOM_H
 
 /**
-\addtogroup helpers
+\addtogroup cross-layers
 \{
-\addtogroup Random
+\addtogroup OpenRandom
 \{
 */
 
@@ -14,12 +14,16 @@
 
 //=========================== typedef =========================================
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+
+typedef struct {
+   uint16_t shift_reg;  // Galois shift register used to obtain a pseudo-random number
+} random_vars_t;
 
 //=========================== prototypes ======================================
 
-void     openrandom_init();
-uint16_t openrandom_get16b();
+void     openrandom_init(void);
+uint16_t openrandom_get16b(void);
 
 /**
 \}

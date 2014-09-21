@@ -34,7 +34,7 @@ void    radio_spiReadRxFifo(uint8_t* pBufRead,
                             uint8_t* pLenRead,
                             uint8_t  maxBufLen,
                             uint8_t* pLqi);
-uint8_t radio_spiReadRadioInfo();
+uint8_t radio_spiReadRadioInfo(void);
 
 //=========================== public ==========================================
 
@@ -220,7 +220,7 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                             uint8_t  maxBufLen,
                              int8_t* pRssi,
                             uint8_t* pLqi,
-                            uint8_t* pCrc) {
+                               bool* pCrc) {
    uint8_t temp_reg_value;
    
    //===== crc
@@ -399,10 +399,10 @@ void radio_spiReadRxFifo(uint8_t* pBufRead,
 kick_scheduler_t radio_isr() {
    PORT_TIMER_WIDTH capturedTime;
    uint8_t  irq_status;
-   
-   
+
    // capture the time
    capturedTime = radiotimer_getCapturedTime();
+
    // reading IRQ_STATUS causes radio's IRQ pin to go low
    irq_status = radio_spiReadReg(RG_IRQ_STATUS);
     

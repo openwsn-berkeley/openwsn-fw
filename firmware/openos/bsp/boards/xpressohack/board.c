@@ -6,7 +6,6 @@
 
 #include "LPC17xx.h"
 #include "board.h"
-#include "board_info.h"
 #include "leds.h"
 #include "uart.h"
 #include "spi.h"
@@ -25,9 +24,9 @@ extern void EINT3_IRQHandler(void);
 
 //=========================== public ==========================================
 
+extern int mote_main();
 
-extern int mote_main(void);
-int main(void) {
+int main() {
    return mote_main();
 }
 

@@ -10,17 +10,18 @@
 
 //general
 #include <stdint.h>               // needed for uin8_t, uint16_t
+#include "toolchain_defs.h"
 #include "board_info.h"
 
 //=========================== define ==========================================
 
 static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_MAJOR     1
-#define OPENWSN_VERSION_MINOR     2
+#define OPENWSN_VERSION_MINOR     4
 #define OPENWSN_VERSION_PATCH     1
 
-// enter the last byte of your mote's address if you want it to be an LBR
-#define DEBUG_MOTEID_MASTER       0xe8
+//to delimit the implementation of draft-thubert-6man-flow-label-for-rpl-03
+#define FLOW_LABEL_RPL_DOMAIN 1
 
 #ifndef TRUE
 #define TRUE 1
@@ -30,12 +31,13 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define FALSE 0
 #endif
 
-#define LENGTH_ADDR16b 2
-#define LENGTH_ADDR64b 8
+#define LENGTH_ADDR16b  2
+#define LENGTH_ADDR64b  8
 #define LENGTH_ADDR128b 16
 
+
 enum {
-   E_SUCCESS                           = 0,          
+   E_SUCCESS                           = 0,
    E_FAIL                              = 1,
 };
 
@@ -51,16 +53,16 @@ enum {
 };
 
 enum {
-   LITTLE_ENDIAN                       = TRUE,
-   BIG_ENDIAN                          = FALSE,
+   OW_LITTLE_ENDIAN                    = TRUE,
+   OW_BIG_ENDIAN                       = FALSE,
 };
 
 // protocol numbers, as defined by the IANA
 enum {
-   IANA_UNDEFINED                      = 0x00,
+   IANA_IPv6HOPOPT                     = 0x00,
    IANA_TCP                            = 0x06,
    IANA_UDP                            = 0x11,
-   IANA_IPv6ROUTE                      =   43,
+   IANA_IPv6ROUTE                      = 0x2b,//used for source routing
    IANA_ICMPv6                         = 0x3a,
    IANA_ICMPv6_ECHO_REQUEST            =  128,
    IANA_ICMPv6_ECHO_REPLY              =  129,
@@ -69,11 +71,13 @@ enum {
    IANA_ICMPv6_RA_PREFIX_INFORMATION   =    3,
    IANA_ICMPv6_RPL                     =  155,
    IANA_ICMPv6_RPL_DIO                 = 0x01,
-   IANA_ICMPv6_RPL_DAO                 = 0x04,
+   IANA_ICMPv6_RPL_DAO                 = 0x02,
    IANA_RSVP                           =   46,
+   IANA_UNDEFINED                      =  250, //use an unassigned
 };
 
 // well known ports (which we define)
+// warning: first 4 MSB of 2° octect may coincide with previous protocol number
 enum {
    //TCP
    WKP_TCP_HTTP                        =    80,
@@ -103,7 +107,8 @@ enum {
    STATUS_BACKOFF                      =  7,
    STATUS_QUEUE                        =  8,
    STATUS_NEIGHBORS                    =  9,
-   STATUS_MAX                          = 10,
+   STATUS_KAPERIOD                     = 10,
+   STATUS_MAX                          = 11,
 };
 
 //component identifiers
@@ -128,51 +133,55 @@ enum {
    //when the mote is not synch
    
    //MAClow<->MAChigh ("virtual components")
-   COMPONENT_RES_TO_IEEE802154E        = 0x0a,
-   COMPONENT_IEEE802154E_TO_RES        = 0x0b,
+   COMPONENT_SIXTOP_TO_IEEE802154E     = 0x0a,
+   COMPONENT_IEEE802154E_TO_SIXTOP     = 0x0b,
    //MAChigh
-   COMPONENT_RES                       = 0x0c,
+   COMPONENT_SIXTOP                    = 0x0c,
    COMPONENT_NEIGHBORS                 = 0x0d,
    COMPONENT_SCHEDULE                  = 0x0e,
+   COMPONENT_SIXTOP_RES                = 0x0f,
    //IPHC
-   COMPONENT_OPENBRIDGE                = 0x0f,
-   COMPONENT_IPHC                      = 0x10,
+   COMPONENT_OPENBRIDGE                = 0x10,
+   COMPONENT_IPHC                      = 0x11,
    //IPv6
-   COMPONENT_FORWARDING                = 0x11,
-   COMPONENT_ICMPv6                    = 0x12,
-   COMPONENT_ICMPv6ECHO                = 0x13,
-   COMPONENT_ICMPv6ROUTER              = 0x14,
-   COMPONENT_ICMPv6RPL                 = 0x15,
+   COMPONENT_FORWARDING                = 0x12,
+   COMPONENT_ICMPv6                    = 0x13,
+   COMPONENT_ICMPv6ECHO                = 0x14,
+   COMPONENT_ICMPv6ROUTER              = 0x15,
+   COMPONENT_ICMPv6RPL                 = 0x16,
    //TRAN
-   COMPONENT_OPENTCP                   = 0x16,             
-   COMPONENT_OPENUDP                   = 0x17,
-   COMPONENT_OPENCOAP                  = 0x18,
+   COMPONENT_OPENTCP                   = 0x17,
+   COMPONENT_OPENUDP                   = 0x18,
+   COMPONENT_OPENCOAP                  = 0x19,
    //App test
-   COMPONENT_TCPECHO                   = 0x19,
-   COMPONENT_TCPINJECT                 = 0x1a,
-   COMPONENT_TCPPRINT                  = 0x1b,
-   COMPONENT_UDPECHO                   = 0x1c,
-   COMPONENT_UDPINJECT                 = 0x1d,
-   COMPONENT_UDPPRINT                  = 0x1e,
-   COMPONENT_RSVP                      = 0x1f,
+   COMPONENT_TCPECHO                   = 0x1a,
+   COMPONENT_TCPINJECT                 = 0x1b,
+   COMPONENT_TCPPRINT                  = 0x1c,
+   COMPONENT_UDPECHO                   = 0x1d,
+   COMPONENT_UDPINJECT                 = 0x1e,
+   COMPONENT_UDPPRINT                  = 0x1f,
+   COMPONENT_RSVP                      = 0x20,
    //App
-   COMPONENT_OHLONE                    = 0x20,
-   COMPONENT_HELI                      = 0x21,
-   COMPONENT_IMU                       = 0x22,
-   COMPONENT_RLEDS                     = 0x23,
-   COMPONENT_RREG                      = 0x24,
-   COMPONENT_RWELLKNOWN                = 0x25,
-   COMPONENT_RT                        = 0x26,
-   COMPONENT_REX                       = 0x27,
-   COMPONENT_RXL1                      = 0x28,
-   COMPONENT_RINFO                     = 0x29,
-   COMPONENT_RHELI                     = 0x2a,
-   COMPONENT_RRUBE                     = 0x2b,
-   COMPONENT_LAYERDEBUG                = 0x2c,
-   COMPONENT_UDPRAND                   = 0x2d,
-   COMPONENT_UDPSTORM                  = 0x2e,
-   COMPONENT_UDPLATENCY                = 0x2f,
-   COMPONENT_TEST                      = 0x30,
+   COMPONENT_OHLONE                    = 0x21,
+   COMPONENT_HELI                      = 0x22,
+   COMPONENT_IMU                       = 0x23,
+   COMPONENT_RLEDS                     = 0x24,
+   COMPONENT_RREG                      = 0x25,
+   COMPONENT_RWELLKNOWN                = 0x26,
+   COMPONENT_RT                        = 0x27,
+   COMPONENT_REX                       = 0x28,
+   COMPONENT_RXL1                      = 0x29,
+   COMPONENT_RINFO                     = 0x2a,
+   COMPONENT_RHELI                     = 0x2b,
+   COMPONENT_RRUBE                     = 0x2c,
+   COMPONENT_LAYERDEBUG                = 0x2d,
+   COMPONENT_UDPRAND                   = 0x2e,
+   COMPONENT_UDPSTORM                  = 0x2f,
+   COMPONENT_UDPLATENCY                = 0x30,
+   COMPONENT_TEST                      = 0x31,
+   COMPONENT_R6T                       = 0x32,
+   COMPONENT_SWARMBAND                 = 0x33,
+   COMPONENT_RRT                       = 0x34,
 };
 
 /**
@@ -188,77 +197,82 @@ enum {
    ERR_RCVD_ECHO_REPLY                 = 0x02, // received an echo reply
    ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x03, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
    ERR_INPUT_BUFFER_OVERFLOW           = 0x04, // the input buffer has overflown
+   ERR_COMMAND_NOT_ALLOWED             = 0x05, // the command is not allowerd, command = {0} 
    // l4
-   ERR_WRONG_TRAN_PROTOCOL             = 0x05, // unknown transport protocol {0} (code location {1})
-   ERR_WRONG_TCP_STATE                 = 0x06, // wrong TCP state {0} (code location {1})
-   ERR_TCP_RESET                       = 0x07, // TCP reset while in state {0} (code location {1})
-   ERR_UNSUPPORTED_PORT_NUMBER         = 0x08, // unsupported port number {0} (code location {1})
+   ERR_WRONG_TRAN_PROTOCOL             = 0x06, // unknown transport protocol {0} (code location {1})
+   ERR_WRONG_TCP_STATE                 = 0x07, // wrong TCP state {0} (code location {1})
+   ERR_TCP_RESET                       = 0x08, // TCP reset while in state {0} (code location {1})
+   ERR_UNSUPPORTED_PORT_NUMBER         = 0x09, // unsupported port number {0} (code location {1})
    // l3
-   ERR_UNEXPECTED_DAO                  = 0x09, // unexpected DAO (code location {0})
-   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x0a, // unsupported ICMPv6 type {0} (code location {1})
-   ERR_6LOWPAN_UNSUPPORTED             = 0x0b, // unsupported 6LoWPAN parameter {1} at location {0}
-   ERR_NO_NEXTHOP                      = 0x0c, // no next hop
-   ERR_INVALID_PARAM                   = 0x0d, // invalid parameter
-   ERR_INVALID_FWDMODE                 = 0x0e, // invalid forward mode
-   ERR_LARGE_DAGRANK                   = 0x0f, // large DAGrank {0}, set to {1}
-   ERR_HOP_LIMIT_REACHED               = 0x10, // packet discarded hop limit reached
+   ERR_UNEXPECTED_DAO                  = 0x0a, // unexpected DAO (code location {0})
+   ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x0b, // unsupported ICMPv6 type {0} (code location {1})
+   ERR_6LOWPAN_UNSUPPORTED             = 0x0c, // unsupported 6LoWPAN parameter {1} at location {0}
+   ERR_NO_NEXTHOP                      = 0x0d, // no next hop
+   ERR_INVALID_PARAM                   = 0x0e, // invalid parameter
+   ERR_INVALID_FWDMODE                 = 0x0f, // invalid forward mode
+   ERR_LARGE_DAGRANK                   = 0x10, // large DAGrank {0}, set to {1}
+   ERR_HOP_LIMIT_REACHED               = 0x11, // packet discarded hop limit reached
+   ERR_LOOP_DETECTED                   = 0x12, // loop detected due to previous rank {0} lower than current node rank {1}
+   ERR_WRONG_DIRECTION                 = 0x13, // upstream packet set to be downstream, possible loop.
    // l2b
-   ERR_NEIGHBORS_FULL                  = 0x11, // neighbors table is full (max number of neighbor is {0})
-   ERR_NO_SENT_PACKET                  = 0x12, // there is no sent packet in queue
-   ERR_NO_RECEIVED_PACKET              = 0x13, // there is no received packet in queue
-   ERR_SCHEDULE_OVERFLOWN              = 0x14, // schedule overflown
+   ERR_NEIGHBORS_FULL                  = 0x14, // neighbors table is full (max number of neighbor is {0})
+   ERR_NO_SENT_PACKET                  = 0x15, // there is no sent packet in queue
+   ERR_NO_RECEIVED_PACKET              = 0x16, // there is no received packet in queue
+   ERR_SCHEDULE_OVERFLOWN              = 0x17, // schedule overflown
    // l2a
-   ERR_WRONG_CELLTYPE                  = 0x15, // wrong celltype {0} at slotOffset {1}
-   ERR_IEEE154_UNSUPPORTED             = 0x16, // unsupported IEEE802.15.4 parameter {1} at location {0}
-   ERR_DESYNCHRONIZED                  = 0x17, // got desynchronized at slotOffset {0}
-   ERR_SYNCHRONIZED                    = 0x18, // synchronized at slotOffset {0}
-   ERR_LARGE_TIMECORRECTION            = 0x19, // large timeCorr.: {0} ticks (code loc. {1})
-   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x1a, // wrong state {0} in end of frame+sync
-   ERR_WRONG_STATE_IN_STARTSLOT        = 0x1b, // wrong state {0} in startSlot, at slotOffset {1}
-   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x1c, // wrong state {0} in timer fires, at slotOffset {1}
-   ERR_WRONG_STATE_IN_NEWSLOT          = 0x1d, // wrong state {0} in start of frame, at slotOffset {1}
-   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x1e, // wrong state {0} in end of frame, at slotOffset {1}
-   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x1f, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x20, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
-   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x21, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x22, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
-   ERR_WDDATADURATION_OVERFLOWS        = 0x23, // wdDataDuration overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIO_OVERFLOWS               = 0x24, // wdRadio overflows while at state {0} in slotOffset {1}
-   ERR_WDRADIOTX_OVERFLOWS             = 0x25, // wdRadioTx overflows while at state {0} in slotOffset {1}
-   ERR_WDACKDURATION_OVERFLOWS         = 0x26, // wdAckDuration overflows while at state {0} in slotOffset {1}
+   ERR_WRONG_CELLTYPE                  = 0x18, // wrong celltype {0} at slotOffset {1}
+   ERR_IEEE154_UNSUPPORTED             = 0x19, // unsupported IEEE802.15.4 parameter {1} at location {0}
+   ERR_DESYNCHRONIZED                  = 0x1a, // got desynchronized at slotOffset {0}
+   ERR_SYNCHRONIZED                    = 0x1b, // synchronized at slotOffset {0}
+   ERR_LARGE_TIMECORRECTION            = 0x1c, // large timeCorr.: {0} ticks (code loc. {1})
+   ERR_WRONG_STATE_IN_ENDFRAME_SYNC    = 0x1d, // wrong state {0} in end of frame+sync
+   ERR_WRONG_STATE_IN_STARTSLOT        = 0x1e, // wrong state {0} in startSlot, at slotOffset {1}
+   ERR_WRONG_STATE_IN_TIMERFIRES       = 0x1f, // wrong state {0} in timer fires, at slotOffset {1}
+   ERR_WRONG_STATE_IN_NEWSLOT          = 0x20, // wrong state {0} in start of frame, at slotOffset {1}
+   ERR_WRONG_STATE_IN_ENDOFFRAME       = 0x21, // wrong state {0} in end of frame, at slotOffset {1}
+   ERR_MAXTXDATAPREPARE_OVERFLOW       = 0x22, // maxTxDataPrepare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXACKPREPARE_OVERFLOWS       = 0x23, // maxRxAckPrepapare overflows while at state {0} in slotOffset {1}
+   ERR_MAXRXDATAPREPARE_OVERFLOWS      = 0x24, // maxRxDataPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_MAXTXACKPREPARE_OVERFLOWS       = 0x25, // maxTxAckPrepapre overflows while at state {0} in slotOffset {1}
+   ERR_WDDATADURATION_OVERFLOWS        = 0x26, // wdDataDuration overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIO_OVERFLOWS               = 0x27, // wdRadio overflows while at state {0} in slotOffset {1}
+   ERR_WDRADIOTX_OVERFLOWS             = 0x28, // wdRadioTx overflows while at state {0} in slotOffset {1}
+   ERR_WDACKDURATION_OVERFLOWS         = 0x29, // wdAckDuration overflows while at state {0} in slotOffset {1}
    // general
-   ERR_BUSY_SENDING                    = 0x27, // busy sending
-   ERR_UNEXPECTED_SENDDONE             = 0x28, // sendDone for packet I didn't send
-   ERR_NO_FREE_PACKET_BUFFER           = 0x29, // no free packet buffer (code location {0})
-   ERR_FREEING_UNUSED                  = 0x2a, // freeing unused memory
-   ERR_FREEING_ERROR                   = 0x2b, // freeing memory unsupported memory
-   ERR_UNSUPPORTED_COMMAND             = 0x2c, // unsupported command {0}
-   ERR_MSG_UNKNOWN_TYPE                = 0x2d, // unknown message type {0}
-   ERR_WRONG_ADDR_TYPE                 = 0x2e, // wrong address type {0} (code location {1})
-   ERR_BRIDGE_MISMATCH                 = 0x2f, // isBridge mismatch (code location {0})
-   ERR_HEADER_TOO_LONG                 = 0x30, // header too long, length {1} (code location {0})
-   ERR_INPUTBUFFER_LENGTH              = 0x31, // input length problem, length={0}
-   ERR_BOOTED                          = 0x32, // booted
-   ERR_INVALIDSERIALFRAME              = 0x33, // invalid serial frame
-   ERR_INVALIDPACKETFROMRADIO          = 0x34, // invalid packet from radio, length {1} (code location {0})
+   ERR_BUSY_SENDING                    = 0x2a, // busy sending
+   ERR_UNEXPECTED_SENDDONE             = 0x2b, // sendDone for packet I didn't send
+   ERR_NO_FREE_PACKET_BUFFER           = 0x2c, // no free packet buffer (code location {0})
+   ERR_FREEING_UNUSED                  = 0x2d, // freeing unused memory
+   ERR_FREEING_ERROR                   = 0x2e, // freeing memory unsupported memory
+   ERR_UNSUPPORTED_COMMAND             = 0x2f, // unsupported command {0}
+   ERR_MSG_UNKNOWN_TYPE                = 0x30, // unknown message type {0}
+   ERR_WRONG_ADDR_TYPE                 = 0x31, // wrong address type {0} (code location {1})
+   ERR_BRIDGE_MISMATCH                 = 0x32, // isBridge mismatch (code location {0})
+   ERR_HEADER_TOO_LONG                 = 0x33, // header too long, length {1} (code location {0})
+   ERR_INPUTBUFFER_LENGTH              = 0x34, // input length problem, length={0}
+   ERR_BOOTED                          = 0x35, // booted
+   ERR_INVALIDSERIALFRAME              = 0x36, // invalid serial frame
+   ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
+   ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
+   ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
 };
 
 //=========================== typedef =========================================
 
+
 typedef uint16_t  errorparameter_t;
 typedef uint16_t  dagrank_t;
-typedef uint8_t   error_t;
-#define bool uint8_t
+typedef uint8_t   owerror_t;
 
-PRAGMA(pack(1));
+BEGIN_PACK
 typedef struct {
    uint8_t  byte4;
    uint16_t bytes2and3;
    uint16_t bytes0and1;
 } asn_t;
-PRAGMA(pack());
+END_PACK
 
-PRAGMA(pack(1));
+BEGIN_PACK
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
    uint8_t type;
    union {
@@ -269,7 +283,7 @@ typedef struct {                                 // always written big endian, i
       uint8_t prefix[8];
    };
 } open_addr_t;
-PRAGMA(pack());
+END_PACK
 
 typedef struct {
    //admin
@@ -288,7 +302,7 @@ typedef struct {
    open_addr_t   l3_destinationAdd;              // 128b IPv6 destination (down stack) 
    open_addr_t   l3_sourceAdd;                   // 128b IPv6 source address 
    //l2
-   error_t       l2_sendDoneError;               // outcome of trying to send this packet
+   owerror_t     l2_sendDoneError;               // outcome of trying to send this packet
    open_addr_t   l2_nextORpreviousHop;           // 64b IEEE802.15.4 next (down stack) or previous (up) hop address
    uint8_t       l2_frameType;                   // beacon, data, ack, cmd
    uint8_t       l2_dsn;                         // sequence number of the received frame
@@ -296,6 +310,13 @@ typedef struct {
    uint8_t       l2_numTxAttempts;               // number Tx attempts
    asn_t         l2_asn;                         // at what ASN the packet was Tx'ed or Rx'ed
    uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
+   uint8_t*      l2_scheduleIE_cellObjects;      // pointer to the start of cell Objects in scheduleIE
+   uint8_t       l2_scheduleIE_numOfCells;       // number of cells were going to be scheduled or removed.
+   uint8_t       l2_scheduleIE_frameID;          // frameID in scheduleIE
+   uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
+   uint8_t       l2_joinPriority;                // the join priority received in EB
+   bool          l2_IEListPresent;               //did have IE field?
+   bool          l2_joinPriorityPresent;
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet
@@ -309,6 +330,6 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void openwsn_init();
+void openwsn_init(void);
 
 #endif

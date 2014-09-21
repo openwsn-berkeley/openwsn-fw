@@ -8,13 +8,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   neighborRow_t        neighbors[MAXNUMNEIGHBORS];
-   dagrank_t            myDAGrank;
-   uint8_t              debugRow;
-   icmpv6rpl_dio_ht*    dio; //keep it global to be able to debug correctly.
-} neighbors_vars_t;
-
 neighbors_vars_t neighbors_vars;
 
 //=========================== prototypes ======================================
@@ -22,7 +15,9 @@ neighbors_vars_t neighbors_vars;
 void registerNewNeighbor(
         open_addr_t* neighborID,
         int8_t       rssi,
-        asn_t*       asnTimestamp
+        asn_t*       asnTimestamp,
+        bool         joinPrioPresent,
+        uint8_t      joinPrio
      );
 bool isNeighbor(open_addr_t* neighbor);
 void removeNeighbor(uint8_t neighborIndex);
@@ -81,7 +76,7 @@ uint8_t neighbors_getNumNeighbors() {
 /**
 \brief Retrieve my preferred parent's EUI64 address.
 
-\param [out] addressToWrite Where to write the preferred parent's address to.
+\param[out] addressToWrite Where to write the preferred parent's address to.
 */
 bool neighbors_getPreferredParentEui64(open_addr_t* addressToWrite) {
    uint8_t   i;
@@ -136,11 +131,14 @@ This function iterates through the neighbor table and identifies the neighbor
 we need to send a KA to, if any. This neighbor satisfies the following
 conditions:
 - it is one of our preferred parents
-- we haven't heard it for over KATIMEOUT
+- we haven't heard it for over kaPeriod
+
+\param[in] kaPeriod The maximum number of slots I'm allowed not to have heard
+   it.
 
 \returns A pointer to the neighbor's address, or NULL if no KA is needed.
 */
-open_addr_t* neighbors_getKANeighbor() {
+open_addr_t* neighbors_getKANeighbor(uint16_t kaPeriod) {
    uint8_t         i;
    uint16_t        timeSinceHeard;
    open_addr_t*    addrPreferred;
@@ -154,7 +152,7 @@ open_addr_t* neighbors_getKANeighbor() {
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==1) {
          timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
-         if (timeSinceHeard>KATIMEOUT) {
+         if (timeSinceHeard>kaPeriod) {
             // this neighbor needs to be KA'ed to
             if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
                // its a preferred parent
@@ -168,9 +166,9 @@ open_addr_t* neighbors_getKANeighbor() {
       }
    }
    
-   // return the addr of the most urgent KA to send:
+   // return the EUI64 of the most urgent KA to send:
    // - if available, preferred parent
-   // - if not, non preferred parent
+   // - if not, non-preferred parent
    if        (addrPreferred!=NULL) {
       return addrPreferred;
    } else if (addrOther!=NULL) {
@@ -185,7 +183,7 @@ open_addr_t* neighbors_getKANeighbor() {
 /**
 \brief Indicate whether some neighbor is a stable neighbor
 
-\param address [in] The address of the neighbor, a full 128-bit IPv6 addres.
+\param[in] address The address of the neighbor, a full 128-bit IPv6 addres.
 
 \returns TRUE if that neighbor is stable, FALSE otherwise.
 */
@@ -224,7 +222,7 @@ bool neighbors_isStableNeighbor(open_addr_t* address) {
 /**
 \brief Indicate whether some neighbor is a preferred neighbor.
 
-\param address [in] The EUI64 address of the neighbor.
+\param[in] address The EUI64 address of the neighbor.
 
 \returns TRUE if that neighbor is preferred, FALSE otherwise.
 */
@@ -253,7 +251,7 @@ bool neighbors_isPreferredParent(open_addr_t* address) {
 /**
 \brief Indicate whether some neighbor has a lower DAG rank that me.
 
-\param index [in] The index of that neighbor in the neighbor table.
+\param[in] index The index of that neighbor in the neighbor table.
 
 \returns TRUE if that neighbor has a lower DAG rank than me, FALSE otherwise.
 */
@@ -274,7 +272,7 @@ bool neighbors_isNeighborWithLowerDAGrank(uint8_t index) {
 /**
 \brief Indicate whether some neighbor has a lower DAG rank that me.
 
-\param index [in] The index of that neighbor in the neighbor table.
+\param[in] index The index of that neighbor in the neighbor table.
 
 \returns TRUE if that neighbor has a lower DAG rank than me, FALSE otherwise.
 */
@@ -306,14 +304,19 @@ The fields which are updated are:
 - stableNeighbor
 - switchStabilityCounter
 
-\param l2_src [in] MAC source address of the packet, i.e. the neighbor who sent
-                   the packet just received.
-\param rssi   [in] RSSI with which this packet was received.
-\param asnTs  [in] ASN at which this packet was received.
+\param[in] l2_src MAC source address of the packet, i.e. the neighbor who sent
+   the packet just received.
+\param[in] rssi   RSSI with which this packet was received.
+\param[in] asnTs  ASN at which this packet was received.
+\param[in] joinPrioPresent Whether a join priority was present in the received
+   packet.
+\param[in] joinPrio The join priority present in the packet, if any.
 */
 void neighbors_indicateRx(open_addr_t* l2_src,
                           int8_t       rssi,
-                          asn_t*       asnTs) {
+                          asn_t*       asnTs,
+                          bool         joinPrioPresent,
+                          uint8_t      joinPrio) {
    uint8_t i;
    bool    newNeighbor;
    
@@ -329,6 +332,10 @@ void neighbors_indicateRx(open_addr_t* l2_src,
          neighbors_vars.neighbors[i].numRx++;
          neighbors_vars.neighbors[i].rssi=rssi;
          memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
+         //update jp
+         if (joinPrioPresent==TRUE){
+            neighbors_vars.neighbors[i].joinPrio=joinPrio;
+         }
          
          // update stableNeighbor, switchStabilityCounter
          if (neighbors_vars.neighbors[i].stableNeighbor==FALSE) {
@@ -360,7 +367,7 @@ void neighbors_indicateRx(open_addr_t* l2_src,
    
    // register new neighbor
    if (newNeighbor==TRUE) {
-      registerNewNeighbor(l2_src, rssi, asnTs);
+      registerNewNeighbor(l2_src, rssi, asnTs, joinPrioPresent,joinPrio);
    }
 }
 
@@ -375,12 +382,12 @@ The fields which are updated are:
 - numTxACK
 - asn
 
-\param l2_dest [in] MAC destination address of the packet, i.e. the neighbor
-                    who I just sent the packet to.
-\param numTxAttempts [in] Number of transmission attempts to this neighbor.
-\param was_finally_acked [in] TRUE iff the packet was ACK'ed by the neighbor
-               on final transmission attempt.
-\param asnTs   [in] ASN of the last transmission attempt.
+\param[in] l2_dest MAC destination address of the packet, i.e. the neighbor
+   who I just sent the packet to.
+\param[in] numTxAttempts Number of transmission attempts to this neighbor.
+\param[in] was_finally_acked TRUE iff the packet was ACK'ed by the neighbor
+   on final transmission attempt.
+\param[in] asnTs ASN of the last transmission attempt.
 */
 void neighbors_indicateTx(open_addr_t* l2_dest,
                           uint8_t      numTxAttempts,
@@ -423,8 +430,8 @@ routing information in the neighbor table can be updated.
 The fields which are updated are:
 - DAGrank
 
-\param msg  [in] The received message with msg->payload pointing to the DIO
-                 header.
+\param[in] msg The received message with msg->payload pointing to the DIO
+   header.
 */
 void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
    uint8_t          i;
@@ -438,11 +445,11 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
             if (
-                  neighbors_vars.dio->rank>neighbors_vars.neighbors[i].DAGrank &&
-                  neighbors_vars.dio->rank - neighbors_vars.neighbors[i].DAGrank>DEFAULTLINKCOST
+                  neighbors_vars.dio->rank > neighbors_vars.neighbors[i].DAGrank &&
+                  neighbors_vars.dio->rank - neighbors_vars.neighbors[i].DAGrank >(DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
                ) {
                 // the new DAGrank looks suspiciously high, only increment a bit
-                neighbors_vars.neighbors[i].DAGrank += DEFAULTLINKCOST;
+                neighbors_vars.neighbors[i].DAGrank += (DEFAULTLINKCOST*2*MINHOPRANKINCREASE);
                 openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,
                                (errorparameter_t)neighbors_vars.dio->rank,
                                (errorparameter_t)neighbors_vars.neighbors[i].DAGrank);
@@ -461,10 +468,8 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
 
 /**
 \brief Write the 64-bit address of some neighbor to some location.
-
 */
-
-void  neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index){
+void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t index){
    switch(addr_type) {
       case ADDR_64B:
          memcpy(&(address->addr_64b),&(neighbors_vars.neighbors[index].addr_64b.addr_64b),LENGTH_ADDR64b);
@@ -477,7 +482,6 @@ void  neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index
          break; 
    }
 }
-
 
 //===== managing routing info
 
@@ -492,7 +496,7 @@ routing decisions to change. Examples are:
 */
 void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint8_t   i;
-   uint8_t   linkCost;
+   uint16_t  rankIncrease;
    uint32_t  tentativeDAGrank; // 32-bit since is used to sum
    uint8_t   prefParentIdx;
    bool      prefParentFound;
@@ -513,15 +517,19 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    // loop through neighbor table, update myDAGrank
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==TRUE) {
+         
          // reset parent preference
          neighbors_vars.neighbors[i].parentPreference=0;
+         
          // calculate link cost to this neighbor
          if (neighbors_vars.neighbors[i].numTxACK==0) {
-            linkCost = DEFAULTLINKCOST;
+            rankIncrease = DEFAULTLINKCOST*2*MINHOPRANKINCREASE;
          } else {
-            linkCost = (uint8_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*10.0);
+            //6TiSCH minimal draft using OF0 for rank computation
+            rankIncrease = (uint16_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*2*MINHOPRANKINCREASE);
          }
-         tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+linkCost;
+         
+         tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
          if ( tentativeDAGrank<neighbors_vars.myDAGrank &&
               tentativeDAGrank<MAXDAGRANK) {
             // found better parent, lower my DAGrank
@@ -538,6 +546,22 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
       neighbors_vars.neighbors[prefParentIdx].stableNeighbor         = TRUE;
       neighbors_vars.neighbors[prefParentIdx].switchStabilityCounter = 0;
    }
+}
+
+//===== maintenance
+
+void  neighbors_removeOld() {
+   uint8_t    i;
+   uint16_t   timeSinceHeard;
+   
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (neighbors_vars.neighbors[i].used==1) {
+         timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
+         if (timeSinceHeard>DESYNCTIMEOUT) {
+            removeNeighbor(i);
+         }
+      }
+   } 
 }
 
 //===== debug
@@ -584,7 +608,9 @@ void debugNetPrint_neighbors(netDebugNeigborEntry_t* out){
 
 void registerNewNeighbor(open_addr_t* address,
                          int8_t       rssi,
-                         asn_t*       asnTimestamp) {
+                         asn_t*       asnTimestamp,
+                         bool         joinPrioPresent,
+                         uint8_t      joinPrio) {
    uint8_t  i,j;
    bool     iHaveAPreferedParent;
    // filter errors
@@ -613,7 +639,12 @@ void registerNewNeighbor(open_addr_t* address,
             neighbors_vars.neighbors[i].numTx                  = 0;
             neighbors_vars.neighbors[i].numTxACK               = 0;
             memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
-            // do I already have a preferred parent ?
+            //update jp
+            if (joinPrioPresent==TRUE){
+               neighbors_vars.neighbors[i].joinPrio=joinPrio;
+            }
+            
+            // do I already have a preferred parent ? -- TODO change to use JP
             iHaveAPreferedParent = FALSE;
             for (j=0;j<MAXNUMNEIGHBORS;j++) {
                if (neighbors_vars.neighbors[j].parentPreference==MAXPREFERENCE) {
@@ -635,7 +666,6 @@ void registerNewNeighbor(open_addr_t* address,
          return;
       }
    }
-   
 }
 
 bool isNeighbor(open_addr_t* neighbor) {

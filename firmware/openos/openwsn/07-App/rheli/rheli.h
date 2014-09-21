@@ -2,7 +2,7 @@
 #define __RHELI_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rHeli
 \{
@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void rheli_init();
+void rheli_init(void);
 
 /**
 \}

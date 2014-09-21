@@ -14,16 +14,13 @@
 #include <stdint.h>
 
 //=========================== defines =========================================
+
 #define ID 0x45
-
-#define port_INLINE                         inline
-
-#define PRAGMA(x)  _Pragma(#x)
-#define PACK(x)     pack(x)
-
 
 #define PORT_TICS_PER_MS                    281
 #define PORT_TIMER_WIDTH                    uint16_t
+#define PORT_RADIOTIMER_WIDTH               uint16_t
+
 #define PORT_SIGNED_INT_WIDTH               int16_t
 
 #define CAPTURE_TIME()   //the timer does not have a capture register so do nothing
@@ -51,6 +48,10 @@
 #define PORT_delayTx                        12     //  214us (measured 219us)
 #define PORT_delayRx                        0     //    0us (can not measure)
 // radio watchdog
+
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       1    // ticks 
 
 
 //=========================== variables =======================================

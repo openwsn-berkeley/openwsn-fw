@@ -4,6 +4,17 @@
 Since the bsp modules for different platforms have the same declaration, you
 can use this project with any platform.
 
+This application can be used to test the radiotimer. It arms the timer to
+overflow every RADIOTIMER_OVERFLOW_PERIOD. During that period, it schedules
+RADIOTIMER_NUM_COMPARES events, one every RADIOTIMER_COMPARE_PERIOD.
+
+Each time the radiotimer overflows:
+- the frame debugpin toggles
+- the error led toggles
+Each time a radiotimer compare event happens:
+- the slot debugpin toggles
+- the radio led toggles
+
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
@@ -16,8 +27,8 @@ can use this project with any platform.
 
 //=========================== defines =========================================
 
-#define RADIOTIMER_OVERFLOW_PERIOD     0x8000
-#define RADIOTIMER_COMPARE_PERIOD      0x1000
+#define RADIOTIMER_OVERFLOW_PERIOD      20000
+#define RADIOTIMER_COMPARE_PERIOD        2000
 #define RADIOTIMER_NUM_COMPARES             4
 
 //=========================== variables =======================================
@@ -38,32 +49,30 @@ app_dbg_t app_dbg;
 
 //=========================== prototypes ======================================
 
-void cb_overflow();
-void cb_compare();
+void cb_overflow(void);
+void cb_compare(void);
 
 //=========================== main ============================================
 
 /**
 \brief The program starts executing here.
 */
-int mote_main(void)
-{  
+int mote_main(void) {
+   
    // initialize board
    board_init();
-   
-   // switch radio LED on
-   leds_radio_on();
    
    // prepare radiotimer
    radiotimer_setOverflowCb(cb_overflow);
    radiotimer_setCompareCb(cb_compare);
    
-   // start periodic overflow
-   radiotimer_start(RADIOTIMER_OVERFLOW_PERIOD);
-   
    // kick off first compare
    app_vars.num_compares_left  = RADIOTIMER_NUM_COMPARES-1;
    app_vars.last_compare_val   = RADIOTIMER_COMPARE_PERIOD;
+
+   // start periodic overflow
+   radiotimer_start(RADIOTIMER_OVERFLOW_PERIOD);
+   leds_radio_on();
    radiotimer_schedule(app_vars.last_compare_val);
    
    while (1) {
@@ -73,13 +82,13 @@ int mote_main(void)
 
 //=========================== callbacks =======================================
 
-void cb_overflow() {
+void cb_overflow(void) {
+   
    // toggle pin
    debugpins_frame_toggle();
    
    // switch radio LED on
    leds_error_toggle();
-   leds_radio_off();
    
    // reset the counter for number of remaining compares
    app_vars.num_compares_left  = RADIOTIMER_NUM_COMPARES;
@@ -90,9 +99,10 @@ void cb_overflow() {
    app_dbg.num_overflow++;
 }
 
-void cb_compare() {
+void cb_compare(void) {
+   
    // toggle pin
-   debugpins_fsm_toggle();
+   debugpins_slot_toggle();
    
    // toggle radio LED
    leds_radio_toggle();

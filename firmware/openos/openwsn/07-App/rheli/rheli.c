@@ -19,12 +19,12 @@ const uint8_t rheli_path0[]        = "h";
 
 //=========================== prototypes ======================================
 
-error_t rheli_receive(OpenQueueEntry_t* msg,
+owerror_t rheli_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options);
-void    rheli_timer();
+void    rheli_timer(void);
 void    rheli_sendDone(OpenQueueEntry_t* msg,
-                       error_t error);
+                       owerror_t error);
 
 //=========================== public ==========================================
 
@@ -49,10 +49,10 @@ void rheli_init() {
 
 //=========================== private =========================================
 
-error_t rheli_receive(OpenQueueEntry_t* msg,
+owerror_t rheli_receive(OpenQueueEntry_t* msg,
                       coap_header_iht*  coap_header,
                       coap_option_iht*  coap_options) {      
-   error_t outcome;
+   owerror_t outcome;
    
    if (coap_header->Code==COAP_CODE_REQ_POST) {
       
@@ -64,7 +64,6 @@ error_t rheli_receive(OpenQueueEntry_t* msg,
       msg->length                      = 0;
       
       // set the CoAP header
-      coap_header->OC                  = 0;
       coap_header->Code                = COAP_CODE_RESP_CHANGED;
       
       outcome                          = E_SUCCESS;
@@ -79,6 +78,6 @@ void rheli_timer() {
    heli_off();
 }
 
-void rheli_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void rheli_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

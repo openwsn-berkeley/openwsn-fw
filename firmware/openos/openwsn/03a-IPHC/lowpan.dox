@@ -1,5 +1,5 @@
 /**
-\defgroup LoWPAN LoWPAN
+\defgroup LoWPAN 03a-IPHC
 
 \brief Implementation of IPv6 header compression.
 */

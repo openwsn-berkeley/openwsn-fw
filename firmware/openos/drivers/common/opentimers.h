@@ -9,6 +9,13 @@
 
 #include "openwsn.h"
 
+/**
+\addtogroup drivers
+\{
+\addtogroup OpenTimers
+\{
+*/
+
 //=========================== define ==========================================
 
 /// Maximum number of timers that can run concurrently
@@ -46,9 +53,17 @@ typedef struct {
    bool                 hasExpired;         // whether the callback has to be called
 } opentimers_t;
 
+//=========================== module variables ================================
+
+typedef struct {
+   opentimers_t         timersBuf[MAX_NUM_TIMERS];
+   bool                 running;
+   PORT_TIMER_WIDTH     currentTimeout; // current timeout, in ticks
+} opentimers_vars_t;
+
 //=========================== prototypes ======================================
 
-void           opentimers_init();
+void           opentimers_init(void);
 opentimer_id_t opentimers_start(uint32_t       duration,
                                 timer_type_t   type,
                                 time_type_t timetype,
@@ -56,5 +71,12 @@ opentimer_id_t opentimers_start(uint32_t       duration,
 void           opentimers_setPeriod(opentimer_id_t id,time_type_t timetype, uint32_t       newPeriod);
 void           opentimers_stop(opentimer_id_t id);
 void           opentimers_restart(opentimer_id_t id);
+
+void           opentimers_sleepTimeCompesation(uint16_t sleepTime);
+
+/**
+\}
+\}
+*/
 
 #endif

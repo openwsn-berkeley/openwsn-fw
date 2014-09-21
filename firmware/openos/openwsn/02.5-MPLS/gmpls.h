@@ -12,7 +12,7 @@
 #include "openqueue.h"
 
 
-void    mpls_init();
+void    mpls_init(void);
 // from upper layer
 error_t mpls_send(OpenQueueEntry_t *msg);
 // from lower layer

@@ -2,7 +2,7 @@
 #define __PACKETFUNCTIONS_H
 
 /**
-\addtogroup helpers
+\addtogroup cross-layers
 \{
 \addtogroup PacketFunctions
 \{

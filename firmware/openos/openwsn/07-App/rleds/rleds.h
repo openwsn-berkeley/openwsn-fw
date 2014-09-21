@@ -2,11 +2,13 @@
 #define __RLEDS_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup netLeds
 \{
 */
+
+#include "opencoap.h"
 
 //=========================== define ==========================================
 
@@ -14,9 +16,13 @@
 
 //=========================== variables =======================================
 
+typedef struct {
+   coap_resource_desc_t desc;
+} rleds_vars_t;
+
 //=========================== prototypes ======================================
 
-void rleds_init();
+void rleds__init(void);
 
 /**
 \}

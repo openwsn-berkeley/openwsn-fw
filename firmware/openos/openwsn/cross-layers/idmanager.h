@@ -12,6 +12,10 @@
 
 //=========================== define ==========================================
 
+#define ACTION_YES      'Y'
+#define ACTION_NO       'N'
+#define ACTION_TOGGLE   'T'
+
 //=========================== typedef =========================================
 
 typedef struct {
@@ -23,22 +27,31 @@ typedef struct {
    open_addr_t   myPrefix;
 } debugIDManagerEntry_t;
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+
+typedef struct {
+   bool          isDAGroot;
+   bool          isBridge;
+   open_addr_t   my16bID;
+   open_addr_t   my64bID;
+   open_addr_t   myPANID;
+   open_addr_t   myPrefix;
+} idmanager_vars_t;
 
 //=========================== prototypes ======================================
 
-void         idmanager_init();
-bool         idmanager_getIsDAGroot();
+void         idmanager_init(void);
+bool         idmanager_getIsDAGroot(void);
 void         idmanager_setIsDAGroot(bool newRole);
-bool         idmanager_getIsBridge();
+bool         idmanager_getIsBridge(void);
 void         idmanager_setIsBridge(bool newRole);
 open_addr_t* idmanager_getMyID(uint8_t type);
-error_t      idmanager_setMyID(open_addr_t* newID);
+owerror_t      idmanager_setMyID(open_addr_t* newID);
 bool         idmanager_isMyAddress(open_addr_t* addr);
-void         idmanager_triggerAboutRoot();
-void         idmanager_triggerAboutBridge();
+void         idmanager_triggerAboutRoot(void);
+void         idmanager_triggerAboutBridge(void);
 
-bool         debugPrint_id();
+bool         debugPrint_id(void);
 
 
 /**

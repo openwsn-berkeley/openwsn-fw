@@ -1,4 +1,10 @@
 import os
+import sys
+import threading
+import subprocess
+import platform
+import distutils.sysconfig
+import sconsUtils
 
 Import('env')
 
@@ -7,15 +13,16 @@ Import('env')
 env['VARDIR']  = os.path.join('#','build','{0}_{1}'.format(env['board'],env['toolchain']))
 
 # common include paths
-env.Append(
-    CPPPATH = [
-        os.path.join('#','firmware','openos','openwsn'),
-        os.path.join('#','firmware','openos','bsp','boards'),
-        os.path.join('#','firmware','openos','bsp','chips'),
-        os.path.join('#','firmware','openos','kernel','openos'),
-        os.path.join('#','firmware','openos','drivers','common'),
-    ]
-)
+if env['board']!='python':
+    env.Append(
+        CPPPATH = [
+            os.path.join('#','firmware','openos','openwsn'),
+            os.path.join('#','firmware','openos','bsp','boards'),
+            os.path.join('#','firmware','openos','bsp','chips'),
+            os.path.join('#','firmware','openos','kernel','openos'),
+            os.path.join('#','firmware','openos','drivers','common'),
+        ]
+    )
 
 #============================ toolchain =======================================
 
@@ -25,10 +32,19 @@ dummyFunc = Builder(
     suffix = '.ihex',
 )
 
+if   env['plugfest']==1:
+    env.Append(CPPDEFINES    = 'PLUGFEST')
+    if  env['board']=='cc2538':
+        env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
+
 if   env['toolchain']=='mspgcc':
+    
+    if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     # compiler
     env.Replace(CC           = 'msp430-gcc')
+    env.Append(CCFLAGS       = '-Wstrict-prototypes')
     env.Append(CCFLAGS       = '')
     # archiver
     env.Replace(AR           = 'msp430-ar')
@@ -49,7 +65,7 @@ if   env['toolchain']=='mspgcc':
     # convert ELF to bin
     elf2BinFunc = Builder(
        action = 'msp430-objcopy --output-target=binary $SOURCE $TARGET',
-       suffix = '.ihex',
+       suffix = '.bin',
     )
     env.Append(BUILDERS = {'Elf2iBin' : elf2BinFunc})
     
@@ -62,10 +78,15 @@ if   env['toolchain']=='mspgcc':
 
 elif env['toolchain']=='iar':
     
+    if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
+    env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
+    
     try:
-        iarEw430BinDir          = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'430','bin')
+        iarEw430BinDir            = os.path.join(env['IAR_EW430_INSTALLDIR'],'430','bin')
     except KeyError as err:
-        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.4'
+        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5'
         raise
     
     # compiler
@@ -78,7 +99,7 @@ elif env['toolchain']=='iar':
     env.Append(CCFLAGS            = '--debug')
     env.Append(CCFLAGS            = '-e')
     env.Append(CCFLAGS            = '--double=32 ')
-    env.Append(CCFLAGS            = '--dlib_config "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\DLIB\\dl430fn.h"')
+    env.Append(CCFLAGS            = '--dlib_config "'+env['IAR_EW430_INSTALLDIR']+'\\430\\LIB\\DLIB\\dl430fn.h"')
     env.Append(CCFLAGS            = '--library_module')
     env.Append(CCFLAGS            = '-Ol ')
     env.Append(CCFLAGS            = '--multiplier=16')
@@ -96,9 +117,9 @@ elif env['toolchain']=='iar':
     env.Replace(LIBLINKDIRPREFIX  = '-I')
     env.Replace(LIBLINKPREFIX     = 'lib')
     env.Replace(LIBLINKSUFFIX     = '.a')
-    env.Append(LINKFLAGS          = '-f "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\config\\multiplier.xcl"')
+    env.Append(LINKFLAGS          = '-f "'+env['IAR_EW430_INSTALLDIR']+'\\430\\config\\multiplier.xcl"')
     env.Append(LINKFLAGS          = '-D_STACK_SIZE=50')
-    env.Append(LINKFLAGS          = '-rt "C:\\Program Files\\IAR Systems\\Embedded Workbench 6.4\\430\\LIB\\DLIB\\dl430fn.r43"')
+    env.Append(LINKFLAGS          = '-rt "'+env['IAR_EW430_INSTALLDIR']+'\\430\\LIB\\DLIB\\dl430fn.r43"')
     env.Append(LINKFLAGS          = '-e_PrintfLarge=_Printf')
     env.Append(LINKFLAGS          = '-e_ScanfLarge=_Scanf ')
     env.Append(LINKFLAGS          = '-D_DATA16_HEAP_SIZE=50')
@@ -132,10 +153,15 @@ elif env['toolchain']=='iar':
 
 elif env['toolchain']=='iar-proj':
     
+    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','cc2538']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
+    env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
+    
     try:
-        iarEw430CommonBinDir      = os.path.join(os.environ['IAR_EW430_INSTALLDIR'],'common','bin')
+        iarEw430CommonBinDir      = os.path.join(env['IAR_EW430_INSTALLDIR'],'common','bin')
     except KeyError as err:
-        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.4'
+        print 'You need to install environment variable IAR_EW430_INSTALLDIR which points to the installation directory of IAR Embedded Workbench for MSP430. Example: C:\Program Files\IAR Systems\Embedded Workbench 6.5'
         raise
     
     iarProjBuilderFunction = Builder(
@@ -155,42 +181,247 @@ elif env['toolchain']=='iar-proj':
     # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
     
-else:
-    raise SystemError('toolchain={0} unsupported.'.format(toolchain))
-
-# upload over JTAG
-def jtagUploadFunc(location):
-    if   env['fet_version']==2:
-        # MSP-FET430uif is running v2 Firmware
-        return Builder(
-            action      = 'mspdebug -d {0} -j uif "prog $SOURCE"'.format(location),
-            suffix      = '.phonyupload',
-            src_suffix  = '.ihex',
-        )
-    elif env['fet_version']==3:
-        # MSP-FET430uif is running v2 Firmware
-        return Builder(
-            action      = 'mspdebug tilib -d {0} "prog $SOURCE"'.format(location),
-            suffix      = '.phonyupload',
-            src_suffix  = '.ihex',
-        )
+elif env['toolchain']=='armgcc':
+    
+    if env['board'] not in ['cc2538','iot-lab_M3']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
+    if   env['board']=='cc2538':
+        
+        # compiler (C)
+        env.Replace(CC           = 'arm-none-eabi-gcc')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wa,-adhlns=${TARGET.base}.lst')
+        env.Append(CCFLAGS       = '-c')
+        env.Append(CCFLAGS       = '-fmessage-length=0')
+        env.Append(CCFLAGS       = '-mcpu=cortex-m3')
+        env.Append(CCFLAGS       = '-mthumb')
+        env.Append(CCFLAGS       = '-g3')
+        env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        # assembler
+        env.Replace(AS           = 'arm-none-eabi-as')
+        env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
+        # linker
+        env.Append(LINKFLAGS     = '-Tfirmware/openos/bsp/boards/cc2538/cc2538.lds')
+        env.Append(LINKFLAGS     = '-nostartfiles')
+        env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
+        env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
+        env.Append(LINKFLAGS     = '-mthumb')
+        env.Append(LINKFLAGS     = '-g3')
+        # object manipulation
+        env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
+        env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
+        # archiver
+        env.Replace(AR           = 'arm-none-eabi-ar')
+        env.Append(ARFLAGS       = '')
+        env.Replace(RANLIB       = 'arm-none-eabi-ranlib')
+        env.Append(RANLIBFLAGS   = '')
+        # misc
+        env.Replace(NM           = 'arm-none-eabi-nm')
+        env.Replace(SIZE         = 'arm-none-eabi-size')
+        
+    elif env['board']=='iot-lab_M3':
+        
+         # compiler (C)
+        env.Replace(CC           = 'arm-none-eabi-gcc')
+        if os.name=='nt':
+            env.Append(CCFLAGS   = '-DHSE_VALUE=((uint32_t)16000000)')
+        else:
+            env.Append(CCFLAGS   = '-DHSE_VALUE=\\(\\(uint32_t\\)16000000\\)')
+        env.Append(CCFLAGS       = '-DSTM32F10X_HD')
+        env.Append(CCFLAGS       = '-DUSE_STDPERIPH_DRIVER')
+        env.Append(CCFLAGS       = '-ggdb')
+        env.Append(CCFLAGS       = '-g3')
+        env.Append(CCFLAGS       = '-std=gnu99')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        env.Append(CCFLAGS       = '-mcpu=cortex-m3')
+        env.Append(CCFLAGS       = '-mlittle-endian')
+        env.Append(CCFLAGS       = '-mthumb')
+        env.Append(CCFLAGS       = '-mthumb-interwork')
+        env.Append(CCFLAGS       = '-nostartfiles')
+        # compiler (C++)
+        env.Replace(CXX          = 'arm-none-eabi-g++')
+        # assembler
+        env.Replace(AS           = 'arm-none-eabi-as')
+        env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
+        # linker
+        env.Append(LINKFLAGS     = '-DUSE_STDPERIPH_DRIVER')
+        env.Append(LINKFLAGS     = '-DUSE_STM32_DISCOVERY')
+        env.Append(LINKFLAGS     = '-g3')
+        env.Append(LINKFLAGS     = '-ggdb')
+        env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
+        env.Append(LINKFLAGS     = '-mlittle-endian')
+        env.Append(LINKFLAGS     = '-static')
+        env.Append(LINKFLAGS     = '-lgcc')
+        env.Append(LINKFLAGS     = '-mthumb')
+        env.Append(LINKFLAGS     = '-mthumb-interwork')
+        env.Append(LINKFLAGS     = '-nostartfiles')
+        env.Append(LINKFLAGS     = '-Tfirmware/openos/bsp/boards/iot-lab_M3/stm32_flash.ld')
+        env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','startup.o'))
+        env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','configure','stm32f10x_it.o'))
+        # object manipulation
+        env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
+        env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
+        # archiver
+        env.Replace(AR           = 'arm-none-eabi-ar')
+        env.Append(ARFLAGS       = '')
+        env.Replace(RANLIB       = 'arm-none-eabi-ranlib')
+        env.Append(RANLIBFLAGS   = '')
+        # misc
+        env.Replace(NM           = 'arm-none-eabi-nm')
+        env.Replace(SIZE         = 'arm-none-eabi-size')
+        
     else:
-        raise SystemError('fet_version={0} unsupported.'.format(fet_version))
+        raise SystemError('unexpected board={0}'.format(env['board']))
+    
+    # converts ELF to iHex
+    elf2iHexFunc = Builder(
+       action = 'arm-none-eabi-objcopy -O ihex $SOURCE $TARGET',
+       suffix = '.ihex',
+    )
+    env.Append(BUILDERS = {'Elf2iHex'  : elf2iHexFunc})
+    
+    # convert ELF to bin
+    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    
+    # print sizes
+    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
+
+elif env['toolchain']=='gcc':
+    
+    if env['board'] not in ['python']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+    
+    if env['board'] in ['python']:
+        env.Append(CPPDEFINES = 'OPENSIM')
+    
+    if env['fastsim']==1:
+        env.Append(CPPDEFINES = 'FASTSIM')
+        #env.Append(CPPDEFINES = 'TRACE_ON')
+    
+    if os.name!='nt':
+        if env['simhost'].endswith('linux'):
+            # enabling shared library to be reallocated 
+            env.Append(CCFLAGS        = '-fPIC')
+            if not sys.platform.startswith('darwin'): # line added per FW-230
+                env.Append(SHLINKFLAGS    = '-Wl,-Bsymbolic-functions') # per FW-176
+                env.Append(SHCFLAGS       = '-Wl,-Bsymbolic-functions') # per FW-176
+            
+            if platform.architecture()[0]=='64bit' and env['simhost']=='x86-linux':
+                # Cross-compile x86 Linux target from 64-bit host. Also see
+                # firmware/openos/projects/python/SConscript.env.
+                env.Append(CCFLAGS        = '-m32')
+                # Resolves a conflict between Python's pyconfig.h, which uses 
+                # '200112'L, and libc's features.h, which uses '200809L'.
+                env.Append(CPPDEFINES     = [('_POSIX_C_SOURCE','200112L')])
+                env.Append(SHLINKFLAGS    = '-m32')
+                
+        if env['simhost'] == 'amd64-windows':
+            # Used by Python includes
+            env.Append(CPPDEFINES = 'MS_WIN64')
+    
+    # converts ELF to iHex
+    env.Append(BUILDERS = {'Elf2iHex'  : dummyFunc})
+    
+    # convert ELF to bin
+    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    
+    # print sizes
+    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
+
+else:
+    raise SystemError('unexpected toolchain {0}'.format(env['toolchain']))
+    
+    
+#============================ upload over JTAG ================================
+
+def jtagUploadFunc(location):
+    if env['toolchain']=='armgcc':
+        if env['board'] in ['iot-lab_M3']:
+            return Builder(
+                action      = os.path.join('firmware','openos','bsp','boards','iot-lab_M3','tools','flash.sh') + " $SOURCE",
+                suffix      = '.phonyupload',
+                src_suffix  = '.ihex',
+            )
+    else:
+        if env['fet_version']==2:
+            # MSP-FET430uif is running v2 Firmware
+            return Builder(
+                action      = 'mspdebug -d {0} -j uif "prog $SOURCE"'.format(location),
+                suffix      = '.phonyupload',
+                src_suffix  = '.ihex',
+            )
+        elif env['fet_version']==3:
+            # MSP-FET430uif is running v2 Firmware
+            return Builder(
+                action      = 'mspdebug tilib -d {0} "prog $SOURCE"'.format(location),
+                suffix      = '.phonyupload',
+                src_suffix  = '.ihex',
+            )
+        else:
+            raise SystemError('fet_version={0} unsupported.'.format(fet_version))
 if env['jtag']:
     env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
 
+#============================ bootload ========================================
+
+class telosb_bootloadThread(threading.Thread):
+    def __init__(self,comPort,hexFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.hexFile         = hexFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'telosb_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(self.comPort,self.hexFile),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+
+def telosb_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        bootloadThreads += [
+            telosb_bootloadThread(
+                comPort      = comPort,
+                hexFile      = source[0],
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+
 # bootload
-def BootloadFunc(location):
+def BootloadFunc():
     if   env['board']=='telosb':
         return Builder(
-            action      = 'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "$SOURCE"'.format(location),
+            action      = telosb_bootload,
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
 if env['bootload']:
-    env.Append(BUILDERS = {'Bootload' : BootloadFunc(env['bootload'])})
+    env.Append(BUILDERS = {'Bootload' : BootloadFunc()})
 
 # PostBuildExtras is a method called after a program (not a library) is built.
 # You can any addition step in this function, such as converting the binary
@@ -246,7 +477,11 @@ def populateTargetGroup(localEnv,targetName):
             env['targets']['all_'+prefix].append(targetName)
 
 def sconscript_scanner(localEnv):
-    
+    '''
+    This function is called from the following directories:
+    - projects\common\
+    - projects\<board>\
+    '''
     # list subdirectories
     subdirs = [name for name in os.listdir('.') if os.path.isdir(os.path.join('.', name)) ]
     
@@ -261,7 +496,8 @@ def sconscript_scanner(localEnv):
         
         if   (
                 ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
-                (localEnv['toolchain']!='iar-proj')
+                (localEnv['toolchain']!='iar-proj') and 
+                (localEnv['board']!='python')
              ):
             
             localEnv.VariantDir(
@@ -275,16 +511,79 @@ def sconscript_scanner(localEnv):
             libs   = buildLibs(projectDir)
             
             buildIncludePath(projectDir,localEnv)
-
-            #fix for problem on having the same target as directory name and failing to compile in linux. Appending something to the target solves the isse.
+            
+            # In Linux, you cannot have the same target name as the name of the
+            # directory name.
             target=target+"_prog"
-
+            
             exe = localEnv.Program(
                 target  = target,
                 source  = source,
                 LIBS    = libs,
             )
             targetAction = localEnv.PostBuildExtras(exe)
+            
+            Alias(targetName, [targetAction])
+            added = True
+        
+        elif (
+                ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
+                (localEnv['board']=='python')
+             ):
+            
+            # build the artifacts in a separate directory
+            localEnv.VariantDir(
+                variant_dir = variant_dir,
+                src_dir     = src_dir,
+                duplicate   = 1,
+            )
+            
+            # build both the application's and the Python module's main files
+            sources_c = [
+                os.path.join(projectDir,'{0}.c'.format(projectDir)),
+                os.path.join('#','firmware','openos','bsp','boards','python','openwsnmodule.c'),
+            ]
+            
+            # objectify those two files
+            for s in sources_c:
+                temp = localEnv.Objectify(
+                    target = localEnv.ObjectifiedFilename(s),
+                    source = s,
+                )
+            
+            # prepare environment for this build
+            if os.name!='nt' and localEnv['simhost'].endswith('-windows'):
+                # Cross-build handling -- find DLL, rather than hardcode version,
+                # like 'python27.dll'
+                pathnames = sconsUtils.findPattern('python*.dll', localEnv['simhostpy'])
+                if pathnames:
+                    pathname = pathnames[0]
+                else:
+                    raise SystemError("Can't find python dll in provided simhostpy")
+                
+                # ':' means no prefix, like 'lib', for shared library name
+                pysyslib = ':{0}'.format(os.path.basename(pathname))
+                pylibExt = '.pyd'
+            else:
+                pysyslib = 'python' + distutils.sysconfig.get_config_var('VERSION')
+                pylibExt = distutils.sysconfig.get_config_var('SO')
+            
+            target = targetName
+            source = [localEnv.ObjectifiedFilename(s) for s in sources_c]
+            libs   = buildLibs(projectDir)
+            libs  += [[pysyslib]]
+            
+            buildIncludePath(projectDir,localEnv)
+            
+            # build a shared library (a Python extension module) rather than an exe
+            
+            targetAction = localEnv.SharedLibrary(
+                target,
+                source,
+                LIBS           = libs,
+                SHLIBPREFIX    = '',
+                SHLIBSUFFIX    = pylibExt,
+            )
             
             Alias(targetName, [targetAction])
             added = True
@@ -313,7 +612,7 @@ def sconscript_scanner(localEnv):
             populateTargetGroup(localEnv,targetName)
 
 env.AddMethod(sconscript_scanner, 'SconscriptScanner')
-    
+
 #============================ board ===========================================
 
 # Get build environment from platform directory
@@ -322,9 +621,18 @@ buildEnv = env.SConscript(
     exports     = ['env'],
 )
 
+# bspheader
+boardsDir       = os.path.join('#','firmware','openos','bsp','boards')
+boardsVarDir    = os.path.join(buildEnv['VARDIR'],'bsp','boards')
+buildEnv.SConscript(
+    os.path.join(boardsDir,'SConscript'),
+    exports     = {'env': buildEnv},
+    variant_dir = boardsVarDir,
+)
+
 # bsp
 bspDir          = os.path.join('#','firmware','openos','bsp','boards',buildEnv['BSP'])
-bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp')
+bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp','boards',buildEnv['BSP'])
 buildEnv.Append(CPPPATH = [bspDir])
 buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),

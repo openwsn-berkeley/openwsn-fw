@@ -2,7 +2,7 @@
 #define __RRUBE_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rRube
 \{
@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void rrube_init();
+void rrube_init(void);
 
 /**
 \}

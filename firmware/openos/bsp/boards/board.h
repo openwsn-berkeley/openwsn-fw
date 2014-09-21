@@ -1,13 +1,19 @@
+#ifndef __BOARD_H
+#define __BOARD_H
+
 /**
+\addtogroup BSP
+\{
+\addtogroup board
+\{
+
 \brief Cross-platform declaration "board" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#ifndef __BOARD_H
-#define __BOARD_H
-
 #include "board_info.h"
+#include "toolchain_defs.h"
 
 //=========================== define ==========================================
 
@@ -22,8 +28,13 @@ typedef enum {
 
 //=========================== prototypes ======================================
 
-void board_init();
-void board_sleep();
-void board_reset();
+void board_init(void);
+void board_sleep(void);
+void board_reset(void);
+
+/**
+\}
+\}
+*/
 
 #endif

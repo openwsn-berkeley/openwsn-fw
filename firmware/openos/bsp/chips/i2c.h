@@ -23,19 +23,18 @@
 
 //=========================== prototypes ======================================
 
-void i2c_init();
+void i2c_init(void);
 void i2c_read_registers(uint8_t bus_num,uint8_t slave_addr,
                              uint8_t reg_addr,
                              uint8_t numBytes,
                              uint8_t* spaceToWrite);
-void i2c_write_register(uint8_t bus_num,uint8_t slave_addr,
-                             uint8_t reg_addr,
-                             uint8_t reg_setting);
-unsigned char i2c_slave_present(int bus_num,unsigned char slave_address);
+void i2c_write_register(uint8_t bus_num, uint8_t slave_addr, uint8_t length, uint8_t* data);
+
+uint8_t i2c_slave_present(uint8_t bus_num,uint8_t slave_address);
 
 // interrupt handlers
-void isr_i2c_tx(int bus_num);
-void isr_i2c_rx(int bus_num);
+void isr_i2c_tx(uint8_t bus_num);
+void isr_i2c_rx(uint8_t bus_num);
 
 /**
 \}

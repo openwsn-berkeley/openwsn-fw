@@ -2,7 +2,7 @@
 #define __RT_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rT
 \{
@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void rt_init();
+void rt_init(void);
 
 /**
 \}

@@ -2,7 +2,7 @@
 #define __TCPPRINT_H
 
 /**
-\addtogroup App
+\addtogroup AppTcp
 \{
 \addtogroup tcpPrint
 \{
@@ -16,12 +16,12 @@
 
 //=========================== prototypes ======================================
 
-void tcpprint_init();
-bool tcpprint_shouldIlisten();
+void tcpprint_init(void);
+bool tcpprint_shouldIlisten(void);
 void tcpprint_receive(OpenQueueEntry_t* msg);
-void tcpprint_connectDone(error_t error);
-void tcpprint_sendDone(OpenQueueEntry_t* msg, error_t error);
-bool tcpprint_debugPrint();
+void tcpprint_connectDone(owerror_t error);
+void tcpprint_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+bool tcpprint_debugPrint(void);
 
 /**
 \}

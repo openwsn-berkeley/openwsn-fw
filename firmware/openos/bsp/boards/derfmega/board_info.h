@@ -17,12 +17,13 @@ to return the board's description.
 
 //=========================== defines =========================================
 
-#define port_INLINE                         inline
 #define PORT_SIGNED_INT_WIDTH				int32_t
 
 //===== timer
 
 #define PORT_TIMER_WIDTH                    uint32_t
+#define PORT_RADIOTIMER_WIDTH               uint32_t
+
 #define PORT_TICS_PER_MS                    33
 /*
 #define SCHEDULER_WAKEUP()                  radiotimer_isr()
@@ -51,6 +52,10 @@ to return the board's description.
 #define PORT_delayTx                        7     //  214us (measured 219us)
 #define PORT_delayRx                        0     //    0us (can not measure)
 // radio watchdog
+
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       1     // ticks
 
 //=========================== typedef  ========================================
 

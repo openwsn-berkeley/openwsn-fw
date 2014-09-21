@@ -2,7 +2,7 @@
 #define __RXL1_H
 
 /**
-\addtogroup App
+\addtogroup AppCoAP
 \{
 \addtogroup rXL1
 \{
@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void rxl1_init();
+void rxl1_init(void);
 
 /**
 \}

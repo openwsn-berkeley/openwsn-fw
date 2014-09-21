@@ -1,0 +1,11 @@
+/**
+\defgroup sixtop sixtop
+
+\brief Implementation of the 6TiSCH Operation Sublayer (6top).
+
+6top is defined in the following drafts:
+- http://tools.ietf.org/id/draft-wang-6tisch-6top-sublayer-01.txt
+- http://tools.ietf.org/wg/6tisch/draft-ietf-6tisch-6top-interface/
+
+\author Tengfei Chang <tengfei.chang@eecs.berkeley.edu>, July 2014.
+*/

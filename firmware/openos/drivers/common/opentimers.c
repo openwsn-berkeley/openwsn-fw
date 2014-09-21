@@ -16,18 +16,12 @@ at most MAX_NUM_TIMERS timers.
 
 //=========================== variables =======================================
 
-typedef struct {
-   opentimers_t         timersBuf[MAX_NUM_TIMERS];
-   bool                 running;
-   PORT_TIMER_WIDTH     currentTimeout; // current timeout, in ticks
-} opentimers_vars_t;
-
 opentimers_vars_t opentimers_vars;
 //uint32_t counter; //counts the elapsed time.
 
 //=========================== prototypes ======================================
 
-void opentimers_timer_callback();
+void opentimers_timer_callback(void);
 
 //=========================== public ==========================================
 
@@ -64,7 +58,12 @@ The timer works as follows:
 - if not, insert it in the list
 
 \param duration Number milli-seconds after which the timer will fire.
-\param type     The type of timer, indicating whether it's a one-shot or a period timer.
+\param type     Type of timer:
+   - #TIMER_PERIODIC for a periodic timer.
+   - #TIMER_ONESHOT for a on-shot timer.
+\param timetype Units of the <tt>duration</tt>:
+   - #TIME_MS when <tt>duration</tt> is in ms.
+   - #TIME_TICS when <tt>duration</tt> is in clock ticks.
 \param callback The function to call when the timer fires.
 
 \returns The id of the timer (which serves as a handler to stop it) if the
@@ -282,3 +281,83 @@ void opentimers_timer_callback() {
    }
 }
 
+void opentimers_sleepTimeCompesation(uint16_t sleepTime)
+{
+   opentimer_id_t   id;
+   PORT_TIMER_WIDTH min_timeout;
+   bool             found;
+   
+   //step 1. reCount the ticks_remain after waking up from sleep
+   for(id=0; id<MAX_NUM_TIMERS; id++)
+   {
+     if (opentimers_vars.timersBuf[id].isrunning==TRUE) 
+     {
+       if(opentimers_vars.timersBuf[id].ticks_remaining > sleepTime)
+       {
+         opentimers_vars.timersBuf[id].ticks_remaining -= sleepTime;
+       }
+       else
+       {
+         if(opentimers_vars.timersBuf[id].wraps_remaining > 0)
+         {
+           opentimers_vars.timersBuf[id].wraps_remaining--;
+           opentimers_vars.timersBuf[id].ticks_remaining += (MAX_TICKS_IN_SINGLE_CLOCK - sleepTime);
+         }
+         else
+         {
+           opentimers_vars.timersBuf[id].hasExpired  = TRUE;
+         }
+       }
+     }
+   }
+   
+   // step 2. call callbacks of expired timers
+   for(id=0; id<MAX_NUM_TIMERS; id++) {
+      if (opentimers_vars.timersBuf[id].hasExpired==TRUE){
+
+         // call the callback
+         opentimers_vars.timersBuf[id].callback();
+         opentimers_vars.timersBuf[id].hasExpired     = FALSE;
+
+         // reload the timer, if applicable
+         if (opentimers_vars.timersBuf[id].type==TIMER_PERIODIC) {
+            opentimers_vars.timersBuf[id].wraps_remaining   = (opentimers_vars.timersBuf[id].period_ticks/MAX_TICKS_IN_SINGLE_CLOCK);//65535=maxValue of uint16_t
+            //if the number of ticks falls below a 16bit value, use it, otherwise set to max 16bit value
+            if(opentimers_vars.timersBuf[id].wraps_remaining==0)                                                
+               opentimers_vars.timersBuf[id].ticks_remaining   = opentimers_vars.timersBuf[id].period_ticks;
+            else
+               opentimers_vars.timersBuf[id].ticks_remaining = MAX_TICKS_IN_SINGLE_CLOCK;
+
+         } else {
+            opentimers_vars.timersBuf[id].isrunning   = FALSE;
+         }
+      }
+
+   }
+   
+   // step 3. find the minimum remaining timeout among running timers
+   found = FALSE;
+   for(id=0;id<MAX_NUM_TIMERS;id++) {
+      if (
+            opentimers_vars.timersBuf[id].isrunning==TRUE &&
+            (
+                  found==FALSE
+                  ||
+                  opentimers_vars.timersBuf[id].ticks_remaining < min_timeout
+            )
+      ) {
+         min_timeout    = opentimers_vars.timersBuf[id].ticks_remaining;
+         found          = TRUE;
+      }
+   }
+
+   // step 4. schedule next timeout
+   if (found==TRUE) {
+      // at least one timer pending
+      opentimers_vars.currentTimeout = min_timeout;
+      bsp_timer_scheduleIn(opentimers_vars.currentTimeout);
+   } else {
+      // no more timers pending
+      opentimers_vars.running = FALSE;
+   }
+}

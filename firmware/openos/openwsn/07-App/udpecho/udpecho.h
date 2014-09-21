@@ -2,7 +2,7 @@
 #define __UDPECHO_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup udpEcho
 \{
@@ -16,10 +16,10 @@
 
 //=========================== prototypes ======================================
 
-void udpecho_init();
+void udpecho_init(void);
 void udpecho_receive(OpenQueueEntry_t* msg);
-void udpecho_sendDone(OpenQueueEntry_t* msg, error_t error);
-bool udpecho_debugPrint();
+void udpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+bool udpecho_debugPrint(void);
 
 /**
 \}

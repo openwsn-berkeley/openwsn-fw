@@ -28,13 +28,13 @@ extern uint8_t radiotimer_overflow_isr();
 //=========================== main ============================================
 volatile uint8_t reset_source;
 
-extern int mote_main(void);
-int main(void) {
+extern int mote_main();
+
+int main() {
    reset_source = MCUSR;
    MCUSR = 0;   
    return mote_main();
 }
-
 
 //=========================== public ==========================================
 

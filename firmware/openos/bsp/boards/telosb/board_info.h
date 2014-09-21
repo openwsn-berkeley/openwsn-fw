@@ -16,21 +16,27 @@ to this board.
 
 //=========================== define ==========================================
 
-// (pre-)processor scpecific commands
+//===== interrupt state
 
-#define port_INLINE                         inline
-
-#define PRAGMA(x)  _Pragma(#x)
-#define PACK(x)     pack(x)
-
-#define INTERRUPT_DECLARATION()   __istate_t s;
-#define DISABLE_INTERRUPTS()      s = __get_interrupt_state(); \
-                                  __disable_interrupt();
-#define ENABLE_INTERRUPTS()       __set_interrupt_state(s);
+#if defined(__GNUC__) && (__GNUC__==4)  && (__GNUC_MINOR__<=5) && defined(__MSP430__)
+   // mspgcc <4.5.x
+   #define INTERRUPT_DECLARATION()          unsigned short s;
+   #define DISABLE_INTERRUPTS()             s = READ_SR&0x0008; \
+                                            __disable_interrupt();
+   #define ENABLE_INTERRUPTS()              __asm__("bis %0,r2" : : "ir" ((uint16_t) s));
+#else
+   // other
+   #define INTERRUPT_DECLARATION()          __istate_t s;
+   #define DISABLE_INTERRUPTS()             s = __get_interrupt_state(); \
+                                            __disable_interrupt();
+   #define ENABLE_INTERRUPTS()              __set_interrupt_state(s);
+#endif
 
 //===== timer
 
 #define PORT_TIMER_WIDTH                    uint16_t
+#define PORT_RADIOTIMER_WIDTH               uint16_t
+
 #define PORT_SIGNED_INT_WIDTH               int16_t
 #define PORT_TICS_PER_MS                    33
 
@@ -50,7 +56,7 @@ to this board.
 //===== IEEE802154E timing
 
 // time-slot related
-#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
+#define PORT_TsSlotDuration                 492   // counter counts one extra count, see datasheet
 
 // execution speed related
 #define PORT_maxTxDataPrepare               100    //  2899us (measured 2420us)
@@ -61,6 +67,10 @@ to this board.
 // radio speed related
 #define PORT_delayTx                        12    //   366us (measured  352us)
 #define PORT_delayRx                        0     //     0us (can not measure)
+
+//===== adaptive_sync accuracy
+
+#define SYNC_ACCURACY                       1     // ticks
 
 //=========================== variables =======================================
 

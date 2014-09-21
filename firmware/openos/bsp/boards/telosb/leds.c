@@ -31,7 +31,7 @@ void    leds_error_toggle() {
    P5OUT     ^=  0x10;
 }
 uint8_t leds_error_isOn() {
-   return (uint8_t)(P5OUT & 0x10)>>4;
+   return (uint8_t)(~P5OUT & 0x10)>>4;
 }
 void leds_error_blink() {
    uint8_t i;
@@ -57,7 +57,7 @@ void    leds_radio_toggle() {
    P5OUT     ^=  0x20;
 }
 uint8_t leds_radio_isOn() {
-   return (uint8_t)(P5OUT & 0x20)>>5;
+   return (uint8_t)(~P5OUT & 0x20)>>5;
 }
 
 // blue = LED3 = P5.6
@@ -71,7 +71,7 @@ void    leds_sync_toggle() {
    P5OUT     ^=  0x40;
 }
 uint8_t leds_sync_isOn() {
-   return (uint8_t)(P5OUT & 0x40)>>6;
+   return (uint8_t)(~P5OUT & 0x40)>>6;
 }
 
 void    leds_debug_on() {

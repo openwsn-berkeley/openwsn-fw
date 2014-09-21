@@ -9,13 +9,12 @@
 
 #include "stdint.h"
 #include "board.h"
-#include "board_info.h"
 
 //=========================== define ==========================================
 
 //=========================== typedef =========================================
 
-typedef kick_scheduler_t (*flextimer_cbt)(void);
+typedef kick_scheduler_t (*flextimer_cbt)();
 
 //=========================== variables =======================================
 

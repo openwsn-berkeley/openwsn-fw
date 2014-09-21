@@ -1,11 +1,16 @@
+#ifndef __RADIO_H
+#define __RADIO_H
+
 /**
+\addtogroup BSP
+\{
+\addtogroup radio
+\{
+
 \brief Cross-platform declaration "radio" bsp module.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
-
-#ifndef __RADIO_H
-#define __RADIO_H
 
 #include "radiotimer.h"
 
@@ -44,37 +49,42 @@ typedef enum {
 //=========================== prototypes ======================================
 
 // admin
-void     radio_init();
+void     radio_init(void);
 void     radio_setOverflowCb(radiotimer_compare_cbt cb);
 void     radio_setCompareCb(radiotimer_compare_cbt cb);
 void     radio_setStartFrameCb(radiotimer_capture_cbt cb);
 void     radio_setEndFrameCb(radiotimer_capture_cbt cb);
 // reset
-void     radio_reset();
+void     radio_reset(void);
 // timer
 void     radio_startTimer(PORT_TIMER_WIDTH period);
-PORT_TIMER_WIDTH radio_getTimerValue();
+PORT_TIMER_WIDTH radio_getTimerValue(void);
 void     radio_setTimerPeriod(PORT_TIMER_WIDTH period);
-PORT_TIMER_WIDTH radio_getTimerPeriod();
+PORT_TIMER_WIDTH radio_getTimerPeriod(void);
 // RF admin
 void     radio_setFrequency(uint8_t frequency);
-void     radio_rfOn();
-void     radio_rfOff();
+void     radio_rfOn(void);
+void     radio_rfOff(void);
 // TX
 void     radio_loadPacket(uint8_t* packet, uint8_t len);
-void     radio_txEnable();
-void     radio_txNow();
+void     radio_txEnable(void);
+void     radio_txNow(void);
 // RX
-void     radio_rxEnable();
-void     radio_rxNow();
+void     radio_rxEnable(void);
+void     radio_rxNow(void);
 void     radio_getReceivedFrame(uint8_t* bufRead,
                                 uint8_t* lenRead,
                                 uint8_t  maxBufLen,
                                  int8_t* rssi,
                                 uint8_t* lqi,
-                                uint8_t* crc);
+                                   bool* crc);
 
 // interrupt handlers
-kick_scheduler_t   radio_isr();
+kick_scheduler_t   radio_isr(void);
+
+/**
+\}
+\}
+*/
 
 #endif

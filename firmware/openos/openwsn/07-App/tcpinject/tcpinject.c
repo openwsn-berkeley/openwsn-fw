@@ -7,13 +7,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   OpenQueueEntry_t*    pkt;
-   bool                 sending;
-   open_addr_t          hisAddress;
-   uint16_t             hisPort;
-} tcpinject_vars_t;
-
 tcpinject_vars_t tcpinject_vars;
 
 //=========================== prototypes ======================================
@@ -45,7 +38,7 @@ void tcpinject_trigger() {
    opentcp_connect(&tcpinject_vars.hisAddress,tcpinject_vars.hisPort,WKP_TCP_INJECT);
 }
 
-void tcpinject_connectDone(error_t error) {
+void tcpinject_connectDone(owerror_t error) {
    if (error==E_SUCCESS) {
       tcpinject_vars.pkt = openqueue_getFreePacketBuffer(COMPONENT_TCPINJECT);
       if (tcpinject_vars.pkt==NULL) {
@@ -74,7 +67,7 @@ void tcpinject_connectDone(error_t error) {
    }
 }
 
-void tcpinject_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void tcpinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_TCPINJECT;
    if (msg->creator!=COMPONENT_TCPINJECT) {
       openserial_printError(COMPONENT_TCPINJECT,ERR_UNEXPECTED_SENDDONE,

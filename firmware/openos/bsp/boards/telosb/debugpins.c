@@ -3,7 +3,7 @@
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
-
+#include <stdint.h>               // needed for uin8_t, uint16_t
 #include "msp430f1611.h"
 #include "debugpins.h"
 
@@ -88,6 +88,23 @@ void debugpins_radio_clr() {
 }
 void debugpins_radio_set() {
    P6OUT |=  0x02;
+}
+
+
+void    leds_toggle_2x(void){
+
+  uint16_t i;
+  debugpins_task_toggle();
+  for (i=0;i<0xFFFF;i++);
+  for (i=0;i<0xFFFF;i++);
+  debugpins_task_toggle();
+}  
+void    leds_toggle_4x(void){
+  uint16_t i;
+  leds_toggle_2x();
+  for (i=0;i<0xFFFF;i++);
+  for (i=0;i<0xFFFF;i++);
+  leds_toggle_2x();
 }
 
 //=========================== private =========================================

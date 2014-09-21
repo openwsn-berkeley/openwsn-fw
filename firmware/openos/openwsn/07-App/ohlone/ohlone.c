@@ -9,18 +9,11 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   OpenQueueEntry_t*    pkt;
-   bool                 sending;
-   uint16_t             httpChunk;
-   uint8_t              getRequest[TCP_DEFAULT_WINDOW_SIZE];
-} ohlone_vars_t;
-
 ohlone_vars_t ohlone_vars;
 
 //=========================== prototypes ======================================
 
-void ohlone_sendpkt();
+void ohlone_sendpkt(void);
 bool ohlone_check4chars(uint8_t c1[4], uint8_t c2[4]);
 
 //=========================== public ==========================================
@@ -98,7 +91,7 @@ void ohlone_receive(OpenQueueEntry_t* msg) {
    openqueue_freePacketBuffer(msg);
 }
 
-void ohlone_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void ohlone_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_OHLONE;
    if (msg->creator!=COMPONENT_OHLONE) {
       openserial_printError(COMPONENT_OHLONE,ERR_UNEXPECTED_SENDDONE,
@@ -110,7 +103,7 @@ void ohlone_sendDone(OpenQueueEntry_t* msg, error_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-void ohlone_connectDone(error_t error) {
+void ohlone_connectDone(owerror_t error) {
 }
 
 bool ohlone_debugPrint() {

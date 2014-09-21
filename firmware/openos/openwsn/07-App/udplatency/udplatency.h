@@ -2,13 +2,17 @@
 #define __UDPLATENCY_H
 
 /**
-\addtogroup App
-
-\addtogroup udpLatency
+\addtogroup AppUdp
+\{
+\addtogroup UdpLatency
 \{
 */
 
 //=========================== define ==========================================
+
+/// inter-packet period (in mseconds)
+#define UDPLATENCYPERIOD     3000
+#define NUMPKTTEST           300
 
 //=========================== typedef =========================================
 
@@ -16,12 +20,12 @@
 
 //=========================== prototypes ======================================
 
-void udplatency_init();
-void udplatency_trigger();
-void udplatency_sendDone(OpenQueueEntry_t* msg, error_t error);
+void udplatency_init(void);
+void udplatency_trigger(void);
+void udplatency_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void udplatency_receive(OpenQueueEntry_t* msg);
-bool udplatency_debugPrint();
-void udplatency_task();
+bool udplatency_debugPrint(void);
+void udplatency_task(void);
 
 /**
 \}

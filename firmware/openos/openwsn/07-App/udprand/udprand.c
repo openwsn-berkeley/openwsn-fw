@@ -8,6 +8,8 @@
 #include "openrandom.h"
 #include "opencoap.h"
 #include "scheduler.h"
+#include "idmanager.h"
+#include "IEEE802154E.h"
 
 //=========================== defines =========================================
 
@@ -24,7 +26,7 @@ udprand_vars_t udprand_vars;
 
 //=========================== prototypes ======================================
 
-void udprand_timer();
+void udprand_timer(void);
 
 //=========================== public ==========================================
 
@@ -36,6 +38,16 @@ void udprand_init() {
 
 void udprand_task(){
     OpenQueueEntry_t* pkt;
+   
+   // don't run if not synch
+   if (ieee154e_isSynch() == FALSE) return;
+    
+    // don't run on dagroot
+   if (idmanager_getIsDAGroot()) {
+      opentimers_stop(udprand_vars.timerId);
+      return;
+   }
+   
    //prepare packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPRAND);
    if (pkt==NULL) {
@@ -64,7 +76,7 @@ void udprand_timer() {
   scheduler_push_task(udprand_task,TASKPRIO_COAP);
 }
 
-void udprand_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void udprand_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_UDPRAND;
    if (msg->creator!=COMPONENT_UDPRAND) {
       openserial_printError(COMPONENT_UDPRAND,ERR_UNEXPECTED_SENDDONE,

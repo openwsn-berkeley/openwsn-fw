@@ -2,7 +2,7 @@
 #define __REX_H
 
 /**
-\addtogroup App
+\addtogroup AppUdp
 \{
 \addtogroup rT
 \{
@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void rex_init();
+void rex_init(void);
 
 /**
 \}

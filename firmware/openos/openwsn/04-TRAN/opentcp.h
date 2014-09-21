@@ -4,9 +4,11 @@
 /**
 \addtogroup Transport
 \{
-\addtogroup TCP
+\addtogroup OpenTcp
 \{
 */
+
+#include "opentimers.h"
 
 //=========================== define ==========================================
 
@@ -98,17 +100,30 @@ typedef struct {
    uint16_t urgent_pointer;
 } tcp_ht;
 
-//=========================== variables =======================================
+//=========================== module variables ================================
+
+typedef struct {
+   uint8_t              state;
+   uint32_t             mySeqNum;
+   uint16_t             myPort;
+   uint32_t             hisNextSeqNum;
+   uint16_t             hisPort;
+   open_addr_t          hisIPv6Address;
+   OpenQueueEntry_t*    dataToSend;
+   OpenQueueEntry_t*    dataReceived;
+   bool                 timerStarted;
+   opentimer_id_t       timerId;
+} tcp_vars_t;
 
 //=========================== prototypes ======================================
 
-void     opentcp_init();
-error_t  opentcp_connect(open_addr_t* dest, uint16_t param_hisPort, uint16_t param_myPort);
-error_t  opentcp_send(OpenQueueEntry_t* msg);
-void     opentcp_sendDone(OpenQueueEntry_t* msg, error_t error);
+void     opentcp_init(void);
+owerror_t  opentcp_connect(open_addr_t* dest, uint16_t param_hisPort, uint16_t param_myPort);
+owerror_t  opentcp_send(OpenQueueEntry_t* msg);
+void     opentcp_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void     opentcp_receive(OpenQueueEntry_t* msg);
-error_t  opentcp_close();
-bool     opentcp_debugPrint();
+owerror_t  opentcp_close(void);
+bool     opentcp_debugPrint(void);
 
 /**
 \}

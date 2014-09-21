@@ -2,7 +2,7 @@
 #define __TCPECHO_H
 
 /**
-\addtogroup App
+\addtogroup AppTcp
 \{
 \addtogroup tcpEcho
 \{
@@ -16,12 +16,12 @@
 
 //=========================== prototypes ======================================
 
-void tcpecho_init();
-bool tcpecho_shouldIlisten();
+void tcpecho_init(void);
+bool tcpecho_shouldIlisten(void);
 void tcpecho_receive(OpenQueueEntry_t* msg);
-void tcpecho_sendDone(OpenQueueEntry_t* msg, error_t error);
-void tcpecho_connectDone();
-bool tcpecho_debugPrint();
+void tcpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+void tcpecho_connectDone(owerror_t error);
+bool tcpecho_debugPrint(void);
 
 /**
 \}

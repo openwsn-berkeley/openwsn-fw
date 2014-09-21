@@ -15,19 +15,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   uint8_t              state;
-   uint32_t             mySeqNum;
-   uint16_t             myPort;
-   uint32_t             hisNextSeqNum;
-   uint16_t             hisPort;
-   open_addr_t          hisIPv6Address;
-   OpenQueueEntry_t*    dataToSend;
-   OpenQueueEntry_t*    dataReceived;
-   bool                 timerStarted;
-   opentimer_id_t       timerId;
-} tcp_vars_t;
-
 tcp_vars_t tcp_vars;
 
 //=========================== prototypes ======================================
@@ -35,8 +22,8 @@ tcp_vars_t tcp_vars;
 void prependTCPHeader(OpenQueueEntry_t* msg, bool ack, bool push, bool rst, bool syn, bool fin);
 bool containsControlBits(OpenQueueEntry_t* msg, uint8_t ack, uint8_t rst, uint8_t syn, uint8_t fin);
 void tcp_change_state(uint8_t new_state);
-void reset();
-void opentcp_timer_cb();
+void opentcp_reset(void);
+void opentcp_timer_cb(void);
 
 //=========================== public ==========================================
 
@@ -44,10 +31,10 @@ void opentcp_init() {
    // reset local variables
    memset(&tcp_vars,0,sizeof(tcp_vars_t));   
    // reset state machine
-   reset();
+   opentcp_reset();
 }
 
-error_t opentcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16_t param_tcp_myPort) {
+owerror_t opentcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16_t param_tcp_myPort) {
    //[command] establishment
    OpenQueueEntry_t* tempPkt;
    if (tcp_vars.state!=TCP_STATE_CLOSED) {
@@ -81,7 +68,7 @@ error_t opentcp_connect(open_addr_t* dest, uint16_t param_tcp_hisPort, uint16_t 
    return forwarding_send(tempPkt);
 }
 
-error_t opentcp_send(OpenQueueEntry_t* msg) {             //[command] data
+owerror_t opentcp_send(OpenQueueEntry_t* msg) {             //[command] data
    msg->owner = COMPONENT_OPENTCP;
    if (tcp_vars.state!=TCP_STATE_ESTABLISHED) {
       openserial_printError(COMPONENT_OPENTCP,ERR_WRONG_TCP_STATE,
@@ -114,7 +101,7 @@ error_t opentcp_send(OpenQueueEntry_t* msg) {             //[command] data
    return forwarding_send(tcp_vars.dataToSend);
 }
 
-void opentcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
+void opentcp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    OpenQueueEntry_t* tempPkt;
    msg->owner = COMPONENT_OPENTCP;
    switch (tcp_vars.state) {
@@ -196,7 +183,7 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, error_t error) {
          openqueue_freePacketBuffer(msg);
          tcp_change_state(TCP_STATE_TIME_WAIT);
          //TODO implement waiting timer
-         reset();
+         opentcp_reset();
          break;
 
       case TCP_STATE_ALMOST_CLOSE_WAIT:                           //[sendDone] teardown
@@ -259,7 +246,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
    }
    if (containsControlBits(msg,TCP_ACK_WHATEVER,TCP_RST_YES,TCP_SYN_WHATEVER,TCP_FIN_WHATEVER)) {
       //I receive RST[+*], I reset
-      reset();
+      opentcp_reset();
       openqueue_freePacketBuffer(msg);
    }
    switch (tcp_vars.state) {
@@ -311,7 +298,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
                   tcp_change_state(TCP_STATE_ALMOST_SYN_RECEIVED);
                   forwarding_send(tempPkt);
                } else {
-                  reset();
+                  opentcp_reset();
                   openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                         (errorparameter_t)tcp_vars.state,
                                         (errorparameter_t)0);
@@ -366,7 +353,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             tcp_change_state(TCP_STATE_ALMOST_SYN_RECEIVED);
             forwarding_send(tempPkt);
          } else {
-            reset();
+            opentcp_reset();
             openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                   (errorparameter_t)tcp_vars.state,
                                   (errorparameter_t)1);
@@ -379,7 +366,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             //I receive ACK, the virtual circuit is established
             tcp_change_state(TCP_STATE_ESTABLISHED);
          } else {
-            reset();
+            opentcp_reset();
             openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                   (errorparameter_t)tcp_vars.state,
                                   (errorparameter_t)2);
@@ -435,7 +422,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             tcp_vars.dataReceived = msg;
             tcp_change_state(TCP_STATE_ALMOST_DATA_RECEIVED);
          } else {
-            reset();
+            opentcp_reset();
             openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                   (errorparameter_t)tcp_vars.state,
                                   (errorparameter_t)3);
@@ -510,7 +497,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             forwarding_send(tempPkt);
             tcp_change_state(TCP_STATE_ALMOST_CLOSE_WAIT);
          } else {
-            reset();
+            opentcp_reset();
             openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                   (errorparameter_t)tcp_vars.state,
                                   (errorparameter_t)4);
@@ -567,7 +554,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             //I receive ACK, I will receive FIN later
             tcp_change_state(TCP_STATE_FIN_WAIT_2);
          } else {
-            reset();
+            opentcp_reset();
             openserial_printError(COMPONENT_OPENTCP,ERR_TCP_RESET,
                                   (errorparameter_t)tcp_vars.state,
                                   (errorparameter_t)5);
@@ -607,7 +594,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             //I receive ACK, I do nothing
             tcp_change_state(TCP_STATE_TIME_WAIT);
             //TODO implement waiting timer
-            reset();
+            opentcp_reset();
          }
          openqueue_freePacketBuffer(msg);
          break;
@@ -615,7 +602,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
       case TCP_STATE_LAST_ACK:                                    //[receive] teardown
          if (containsControlBits(msg,TCP_ACK_YES,TCP_RST_NO,TCP_SYN_NO,TCP_FIN_NO)) {
             //I receive ACK, I reset
-            reset();
+            opentcp_reset();
          }
          openqueue_freePacketBuffer(msg);
          break;
@@ -628,7 +615,7 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-error_t opentcp_close() {    //[command] teardown
+owerror_t opentcp_close() {    //[command] teardown
    OpenQueueEntry_t* tempPkt;
    if (  tcp_vars.state==TCP_STATE_ALMOST_CLOSE_WAIT ||
          tcp_vars.state==TCP_STATE_CLOSE_WAIT        ||
@@ -660,15 +647,15 @@ error_t opentcp_close() {    //[command] teardown
    return forwarding_send(tempPkt);
 }
 
-bool tcp_debugPrint() {
+bool tcp_debugPrint(void) {
    return FALSE;
 }
 
 //======= timer
 
 //timer used to reset state when TCP state machine is stuck
-void timers_tcp_fired() {
-   reset();
+void timers_tcp_fired(void) {
+   opentcp_reset();
 }
 
 //=========================== private =========================================
@@ -727,7 +714,7 @@ bool containsControlBits(OpenQueueEntry_t* msg, uint8_t ack, uint8_t rst, uint8_
    return return_value;
 }
 
-void reset() {
+void opentcp_reset() {
    tcp_change_state(TCP_STATE_CLOSED);
    tcp_vars.mySeqNum            = TCP_INITIAL_SEQNUM; 
    tcp_vars.hisNextSeqNum       = 0;
