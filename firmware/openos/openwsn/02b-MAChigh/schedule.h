@@ -17,10 +17,10 @@
 
 The superframe repears over time and can be arbitrarly long.
 */
-#define SUPERFRAME_LENGTH    9
+#define SUPERFRAME_LENGTH    11 //should be 101
 
 #define NUMADVSLOTS          1
-#define NUMSHAREDTXRX        4
+#define NUMSHAREDTXRX        5 
 #define NUMSERIALRX          3
 
 /**
@@ -50,7 +50,12 @@ does not use any backoff mechanism when a transmission fails.
 See MINBE for an explanation of backoff.
 */
 #define MAXBE                4
-
+//6tisch minimal draft
+#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      5
+#define SCHEDULE_MINIMAL_6TISCH_EB_CELLS                          1
+#define SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE                  101
+#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
+#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 //=========================== typedef =========================================
 
@@ -68,8 +73,6 @@ typedef enum {
    CELLTYPE_MORESERIALRX     = 6
 } cellType_t;
 
-//not packed as does not fly on the network
-//PRAGMA(pack(1));
 typedef struct {
    slotOffset_t    slotOffset;
    cellType_t      type;
@@ -82,13 +85,12 @@ typedef struct {
    asn_t           lastUsedAsn;
    void*           next;
 } scheduleEntry_t;
-//PRAGMA(pack());
 
-//copy of the previous one but without the pointer and packed
-PRAGMA(pack(1));
+BEGIN_PACK
 typedef struct {
+   uint8_t         row;
    slotOffset_t    slotOffset;
-   cellType_t      type;
+   uint8_t         type;
    bool            shared;
    uint8_t         channelOffset;
    open_addr_t     neighbor;
@@ -96,59 +98,72 @@ typedef struct {
    uint8_t         numTx;
    uint8_t         numTxACK;
    asn_t           lastUsedAsn;
-} scheduleEntryDebug_t;
-PRAGMA(pack());
-
-//used to debug through ipv6 pkt. 
-
-PRAGMA(pack(1));
-typedef struct {
-   uint8_t last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
-   uint8_t slotOffset;
-   uint8_t channelOffset;
-}netDebugScheduleEntry_t;
-PRAGMA(pack());
-
-PRAGMA(pack(1));
-typedef struct {
-   uint8_t         row;
-   scheduleEntryDebug_t scheduleEntry;
 } debugScheduleEntry_t;
-PRAGMA(pack());
+END_PACK
+
+typedef struct {
+  uint8_t          address[LENGTH_ADDR64b];
+  cellType_t       link_type;
+  bool             shared;
+  slotOffset_t     slotOffset;
+  channelOffset_t  channelOffset;
+}slotinfo_element_t;
 
 //=========================== variables =======================================
+
+typedef struct {
+   scheduleEntry_t  scheduleBuf[MAXACTIVESLOTS];
+   scheduleEntry_t* currentScheduleEntry;
+   uint16_t         frameLength;
+   uint8_t          backoffExponent;
+   uint8_t          backoff;
+   uint8_t          debugPrintRow;
+} schedule_vars_t;
 
 //=========================== prototypes ======================================
 
 // admin
-void               schedule_init();
-bool               debugPrint_schedule();
-bool               debugPrint_backoff();
-// from uRES
+void               schedule_init(void);
+bool               debugPrint_schedule(void);
+bool               debugPrint_backoff(void);
+
+// from 6top
 void               schedule_setFrameLength(frameLength_t newFrameLength);
-void               schedule_addActiveSlot(
-                        slotOffset_t   slotOffset,
-                        cellType_t     type,
-                        bool           shared,
-                        uint8_t        channelOffset,
-                        open_addr_t*   neighbor
-                   );
+owerror_t          schedule_addActiveSlot(
+   slotOffset_t         slotOffset,
+   cellType_t           type,
+   bool                 shared,
+   uint8_t              channelOffset,
+   open_addr_t*         neighbor
+);
+
+void               schedule_getSlotInfo(
+   slotOffset_t         slotOffset,                      
+   open_addr_t*         neighbor,
+   slotinfo_element_t*  info
+);
+
+owerror_t          schedule_removeActiveSlot(
+   slotOffset_t         slotOffset,
+   open_addr_t*         neighbor
+);
+bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
+
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
-void               schedule_advanceSlot();
-slotOffset_t       schedule_getNextActiveSlotOffset();
-frameLength_t      schedule_getFrameLength();
-cellType_t         schedule_getType();
+void               schedule_advanceSlot(void);
+slotOffset_t       schedule_getNextActiveSlotOffset(void);
+frameLength_t      schedule_getFrameLength(void);
+cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
-channelOffset_t    schedule_getChannelOffset();
-bool               schedule_getOkToSend();
-void               schedule_resetBackoff();
+channelOffset_t    schedule_getChannelOffset(void);
+bool               schedule_getOkToSend(void);
+void               schedule_resetBackoff(void);
 void               schedule_indicateRx(asn_t*   asnTimestamp);
 void               schedule_indicateTx(
                         asn_t*    asnTimestamp,
                         bool      succesfullTx
                    );
-void               schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist);
 
 /**
 \}
