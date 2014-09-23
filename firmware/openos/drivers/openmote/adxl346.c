@@ -157,6 +157,8 @@ uint16_t read_x(void)
     i2c_read_byte(ADXL346_ADDRESS, &acceleration[1]);
 
     x = (acceleration[0] << 8) | acceleration[1];
+
+    return x;
 }
 
 uint16_t read_y(void)
@@ -170,6 +172,8 @@ uint16_t read_y(void)
     i2c_read_byte(ADXL346_ADDRESS, &acceleration[1]);
 
     y = (acceleration[0] << 8) | acceleration[1];
+    
+    return y;
 }
 
 uint16_t read_z(void)
@@ -183,6 +187,8 @@ uint16_t read_z(void)
     i2c_read_byte(ADXL346_ADDRESS, &acceleration[1]);
 
     z = (acceleration[0] << 8) | acceleration[1];
+    
+    return z;
 }
 
 //=========================== private =========================================

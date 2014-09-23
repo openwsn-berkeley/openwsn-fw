@@ -112,7 +112,7 @@ uint16_t read_light(void)
 {
     uint8_t exponent, mantissa;
     uint8_t max44009_data[2];
-    uint16_t lux;
+    uint16_t result;
 
     i2c_write_byte(MAX44009_ADDRESS, MAX44009_LUX_HIGH_ADDR);
     i2c_read_byte(MAX44009_ADDRESS, &max44009_data[0]);
@@ -122,22 +122,22 @@ uint16_t read_light(void)
     exponent = (( max44009_data[0] >> 4 )  & 0x0E);
     mantissa = (( max44009_data[0] & 0x0F ) << 4) | (max44009_data[1] & 0x0F);
 
-    lux = ( (uint16_t) exponent << 8 ) | ( (uint16_t) mantissa << 0);
+    result = ( (uint16_t) exponent << 8 ) | ( (uint16_t) mantissa << 0);
     
-    return lux;
+    return result;
 }
 
 float convert_light(uint16_t lux)
 {
     uint8_t exponent, mantissa;
-    float lux = 0.045;
+    float result = 0.045;
     
     exponent = (lux >> 8) & 0xFF;
     mantissa = (lux >> 0) & 0xFF;
     
-    lux *= 2^exponent * mantissa;
+    result *= 2^exponent * mantissa;
     
-    return lux;
+    return result;
 }
 
 //=========================== private =========================================

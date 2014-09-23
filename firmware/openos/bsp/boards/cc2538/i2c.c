@@ -4,7 +4,8 @@
 \author Pere Tuset <peretuset@openmote.com>, September 2014.
 */
 
-#include "i2c.h"
+#include "gpio.h"
+#include "source/i2c.h"
 #include "ioc.h"
 #include "sys_ctrl.h"
 
@@ -31,6 +32,8 @@
 
 void i2c_init(void)
 {
+    uint8_t status;
+    
     // Reset peripheral previous to configuring it
     SysCtrlPeripheralReset(I2C_PERIPHERAL);
 
@@ -75,9 +78,9 @@ void i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length)
             ;
 
         *buffer++ = I2CMasterDataGet();
-        size--;
+        length--;
 
-        if (size == 1)
+        if (length == 1)
         {
             I2CMasterControl(I2C_MASTER_CMD_BURST_RECEIVE_FINISH);
         } else
@@ -115,7 +118,7 @@ void i2c_write_bytes(uint8_t address, uint8_t* buffer, uint32_t length)
         I2CMasterDataPut(*buffer++);
         length--;
 
-        if (size == 0)
+        if (length == 0)
         {
             I2CMasterControl(I2C_MASTER_CMD_BURST_SEND_FINISH);
         }
