@@ -2184,10 +2184,22 @@
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.c</name>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\otf.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\res.h</name>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\otf.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\sixtop.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\sixtop.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.c</name>

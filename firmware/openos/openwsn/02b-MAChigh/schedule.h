@@ -73,8 +73,6 @@ typedef enum {
    CELLTYPE_MORESERIALRX     = 6
 } cellType_t;
 
-
-BEGIN_PACK
 typedef struct {
    slotOffset_t    slotOffset;
    cellType_t      type;
@@ -87,17 +85,6 @@ typedef struct {
    asn_t           lastUsedAsn;
    void*           next;
 } scheduleEntry_t;
-END_PACK
-
-//used to debug through ipv6 pkt. 
-
-BEGIN_PACK
-typedef struct {
-   uint8_t last_addr_byte;//last byte of the address; poipoi could be [0]; endianness
-   uint8_t slotOffset;
-   channelOffset_t channelOffset;
-}netDebugScheduleEntry_t;
-END_PACK
 
 BEGIN_PACK
 typedef struct {
@@ -114,16 +101,14 @@ typedef struct {
 } debugScheduleEntry_t;
 END_PACK
 
-// elements for slot info
-BEGIN_PACK
 typedef struct {
-  uint8_t address[LENGTH_ADDR64b];// 
-  cellType_t link_type;// rx,tx etc...
-  bool shared;
-  slotOffset_t slotOffset;
-  channelOffset_t channelOffset;
+  uint8_t          address[LENGTH_ADDR64b];
+  cellType_t       link_type;
+  bool             shared;
+  slotOffset_t     slotOffset;
+  channelOffset_t  channelOffset;
 }slotinfo_element_t;
-END_PACK
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -132,14 +117,8 @@ typedef struct {
    uint16_t         frameLength;
    uint8_t          backoffExponent;
    uint8_t          backoff;
-   slotOffset_t     debugPrintRow;
+   uint8_t          debugPrintRow;
 } schedule_vars_t;
-
-typedef struct {
-   uint8_t          numActiveSlotsCur;
-   uint8_t          numActiveSlotsMax;
-   uint8_t          numUpdatedSlotsCur;
-} schedule_dbg_t;
 
 //=========================== prototypes ======================================
 
@@ -147,23 +126,28 @@ typedef struct {
 void               schedule_init(void);
 bool               debugPrint_schedule(void);
 bool               debugPrint_backoff(void);
-// from uRES
+
+// from 6top
 void               schedule_setFrameLength(frameLength_t newFrameLength);
-owerror_t            schedule_addActiveSlot(
-                        slotOffset_t   slotOffset,
-                        cellType_t     type,
-                        bool           shared,
-                        uint8_t        channelOffset,
-                        open_addr_t*   neighbor,
-                        bool isUpdate);
+owerror_t          schedule_addActiveSlot(
+   slotOffset_t         slotOffset,
+   cellType_t           type,
+   bool                 shared,
+   uint8_t              channelOffset,
+   open_addr_t*         neighbor
+);
 
-void               schedule_getSlotInfo(slotOffset_t   slotOffset,                      
-                              open_addr_t*   neighbor,
-                              slotinfo_element_t* info);
+void               schedule_getSlotInfo(
+   slotOffset_t         slotOffset,                      
+   open_addr_t*         neighbor,
+   slotinfo_element_t*  info
+);
 
-owerror_t               schedule_removeActiveSlot(slotOffset_t   slotOffset,                      
-                              open_addr_t*   neighbor);
-
+owerror_t          schedule_removeActiveSlot(
+   slotOffset_t         slotOffset,
+   open_addr_t*         neighbor
+);
+bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
@@ -180,7 +164,6 @@ void               schedule_indicateTx(
                         asn_t*    asnTimestamp,
                         bool      succesfullTx
                    );
-void               schedule_getNetDebugInfo(netDebugScheduleEntry_t* schlist);
 
 /**
 \}

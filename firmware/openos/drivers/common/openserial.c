@@ -8,7 +8,7 @@
 #include "openserial.h"
 #include "IEEE802154E.h"
 #include "neighbors.h"
-#include "res.h"
+#include "sixtop.h"
 #include "icmpv6echo.h"
 #include "idmanager.h"
 #include "openqueue.h"
@@ -317,6 +317,10 @@ void openserial_startOutput() {
          }
       case STATUS_NEIGHBORS:
          if (debugPrint_neighbors()==TRUE) {
+            break;
+         }
+      case STATUS_KAPERIOD:
+         if (debugPrint_kaPeriod()==TRUE) {
             break;
          }
       default:

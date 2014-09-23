@@ -18,7 +18,7 @@
 #include "IEEE802154E.h"
 //-- 02b-RES
 #include "schedule.h"
-#include "res.h"
+#include "sixtop.h"
 #include "neighbors.h"
 //-- 03a-IPHC
 #include "openbridge.h"
@@ -62,7 +62,6 @@
 //#include "rrt.h"
 //#include "rex.h"
 //#include "rrube.h"
-//#include "layerdebug.h"
 //- board-specific
 //#include "rheli.h"
 //#include "rt.h"
@@ -95,7 +94,7 @@ void openwsn_init() {
    ieee154e_init();
    //-- 02b-RES
    schedule_init();
-   res_init();
+   sixtop_init();
    neighbors_init();
    //-- 03a-IPHC
    openbridge_init();
@@ -135,7 +134,7 @@ void openwsn_init() {
    //- core
    //- common
    rinfo_init();
-   rrt_init();
+   //rrt_init();
    rleds__init();
    rwellknown_init();
    r6t_init();

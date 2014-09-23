@@ -668,7 +668,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>00std_button.d43</state>
+          <state>00std_chromatic.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -850,24 +850,24 @@
         </option>
         <option>
           <name>AllowExtraOutput</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>GenerateExtraOutput</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>XExtraOutOverride</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>00std_button.hex</state>
+          <state>00std_chromatic.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
           <version>11</version>
-          <state>22</state>
+          <state>23</state>
         </option>
         <option>
           <name>ExtraFormatVariant</name>
@@ -992,7 +992,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>$PROJ_FNAME$.ulp</state>
+          <state></state>
         </option>
         <option>
           <name>ULPStatus</name>
@@ -2011,7 +2011,7 @@
     </settings>
   </configuration>
   <file>
-    <name>$PROJ_DIR$\00std_button.c</name>
+    <name>$PROJ_DIR$\00std_chromatic.c</name>
   </file>
 </project>
 

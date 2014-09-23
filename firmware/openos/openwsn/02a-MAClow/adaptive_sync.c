@@ -12,7 +12,7 @@
 #include "neighbors.h"
 #include "debugpins.h"
 #include "packetfunctions.h"
-#include "res.h"
+#include "sixtop.h"
 #include "scheduler.h"
 #include "openqueue.h"
 #include "openrandom.h"
@@ -53,7 +53,7 @@ void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource){
    
    // stop calculating compensation period when compensateThreshold exceeds KATIMEOUT and drift is not changed
    if(
-         adaptive_sync_vars.compensateThreshold  > KATIMEOUT &&
+         adaptive_sync_vars.compensateThreshold  > MAXKAPERIOD &&
          adaptive_sync_vars.driftChanged        == FALSE
       ) {
      if(timeCorrection > LIMITLARGETIMECORRECTION) {
@@ -78,7 +78,7 @@ void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource){
           adaptive_sync_vars.sumOfTC                     = 0;
           // update threshold
           adaptive_sync_vars.compensateThreshold        *= 2;
-          res_setKaPeriod(adaptive_sync_vars.compensateThreshold);
+          sixtop_setKaPeriod(adaptive_sync_vars.compensateThreshold);
           // update oldASN
           ieee154e_getAsn(array);
           adaptive_sync_vars.oldASN.bytes0and1           = ((uint16_t) array[1] << 8) | ((uint16_t) array[0]);
@@ -90,7 +90,7 @@ void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource){
         }
    } else {
      adaptive_sync_vars.compensateThreshold      = BASIC_COMPENSATION_THRESHOLD;
-     res_setKaPeriod(adaptive_sync_vars.compensateThreshold);
+     sixtop_setKaPeriod(adaptive_sync_vars.compensateThreshold);
      // when I joined the network, or changed my time parent, reset adaptive_sync relative variables
      adaptive_sync_vars.clockState               = S_NONE;
      adaptive_sync_vars.elapsedSlots             = 0;
@@ -247,6 +247,8 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
 \brief set driftChanged to true.
 */
 void adaptive_sync_driftChanged() {
+#ifndef NOADAPTIVESYNC
    adaptive_sync_vars.driftChanged = TRUE;
+#endif
 }
 

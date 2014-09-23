@@ -72,8 +72,6 @@ void board_init() {
    radiotimer_init();
    uart_init();
    radio_init();
-
-   leds_debug_on();
 }
 
 /**

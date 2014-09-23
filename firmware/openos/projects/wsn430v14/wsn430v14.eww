@@ -2,16 +2,10 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\00std_button\00std_button.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\00std_clocks\00std_clocks.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\00std_eui64\00std_eui64.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\00std_i2c\00std_i2c.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\00std_leds_xtal\00std_leds_xtal.ewp</path>
@@ -23,6 +17,9 @@
     <path>$WS_DIR$\00std_uart\00std_uart.ewp</path>
   </project>
   
+  <project>
+    <path>$WS_DIR$\01bsp_aila\01bsp_aila.ewp</path>
+  </project>
   <project>
     <path>$WS_DIR$\01bsp_bothtimers\01bsp_bothtimers.ewp</path>
   </project>

@@ -3,7 +3,7 @@
 #include "packetfunctions.h"
 #include "idmanager.h"
 #include "openserial.h"
-#include "res.h"
+#include "sixtop.h"
 #include "forwarding.h"
 #include "neighbors.h"
 #include "openbridge.h"
@@ -108,7 +108,7 @@ owerror_t iphc_sendFromForwarding(
         if (fw_SendOrfw_Rcv==PCKTFORWARD){
             sam = IPHC_SAM_64B;    //case forwarding a packet
             p_src = &temp_src_mac64b;
-            //poipoi xv forcing elided addresses on src routing, this needs to be fixed so any type of address should be supported supported.
+            //poipoi xv forcing elided addresses on src routing, this needs to be fixed so any type of address should be supported.
         } else if (fw_SendOrfw_Rcv==PCKTSEND){
             sam = IPHC_SAM_ELIDED;
             p_src = NULL;
@@ -164,8 +164,8 @@ owerror_t iphc_sendFromForwarding(
    //then regular header
 
 #ifdef FLOW_LABEL_RPL_DOMAIN
-   if(fw_SendOrfw_Rcv==PCKTSEND  && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE)   {
-	   //only for upstream traffic
+   if(ipv6_header->next_header!=IANA_IPv6ROUTE  && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE)   {
+	   //only for upstream traffic and not DIOs
 	   tf=IPHC_TF_3B;
    }else {
 	   tf=IPHC_TF_ELIDED;
@@ -192,7 +192,7 @@ owerror_t iphc_sendFromForwarding(
       return E_FAIL;
    }
    
-   return res_send(msg);
+   return sixtop_send(msg);
 }
 
 //send from bridge: 6LoWPAN header already added by OpenLBR, send as is
@@ -205,7 +205,7 @@ owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
                             (errorparameter_t)0);
       return E_FAIL;
    }
-   return res_send(msg);
+   return sixtop_send(msg);
 }
 
 void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -779,6 +779,7 @@ void iphc_retrieveIPv6HopByHopHeader(
       ipv6_hopbyhop_iht*     hopbyhop_header,
       rpl_option_ht*         rpl_option
    ){
+#ifndef FLOW_LABEL_RPL_DOMAIN
    uint8_t temp_8b;
    
    // initialize the header length (will increment at each field)
@@ -844,4 +845,5 @@ void iphc_retrieveIPv6HopByHopHeader(
          );
       }
    }
+#endif
 }

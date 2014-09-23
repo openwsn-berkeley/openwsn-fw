@@ -1,10 +1,10 @@
 /**
 \brief This is a standalone test program for the LEDs and 32kHz crystal of the
-       TelosB board.
+       WSN430v14 board.
 
 \note The term "crystal" is usually written "XTAL" by embedded geeks.
        
-Download the program to a TelosB board, run it, you should see the 3 LEDs
+Download the program to a WSN430v14 board, run it, you should see the 3 LEDs
 blinking in sequence with a 500ms period.
 
 The digital outputs are:
@@ -16,9 +16,9 @@ The "inputs" are:
    - XIN, XOUT: 32768Hz crystal oscillator
 
 The debug pins are:
-   - P6.6 toggles when interrupt TIMERA0_VECTOR fires
+   - P2.1 toggles when interrupt TIMERA0_VECTOR fires
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "msp430f1611.h"
@@ -37,7 +37,7 @@ int main(void)
    P5DIR     |=  0x70;                           // P5DIR = 0bx111xxxx for LEDs
    P5OUT     |=  0x70;                           // P2OUT = 0bx111xxxx, all LEDs off
    
-   P6DIR     |=  0x40;                           // P4DIR = 0bx1xxxxxx for debug
+   P2DIR     |=  0x02;                           // P2DIR = 0bxxxxxx1x for debug
 
    TACCTL0    =  CCIE;                           // capture/compare interrupt enable
    TACCR0     =  16000;                          // 16000@32kHz ~ 500ms
@@ -68,5 +68,5 @@ __interrupt void TIMERA0_ISR (void) {
    P5OUT     |=  (~leds_on & 0x70);              // switch on the leds marked '1' in leds_on
    P5OUT     &= ~( leds_on & 0x70);              // switch off the leds marked '0' in leds_on
    
-   P6OUT     ^=  0x40;                           // toggle P6.6 for debug
+   P2OUT     ^=  0x02;                           // toggle P2.1 for debug
 }

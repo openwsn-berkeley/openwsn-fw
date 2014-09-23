@@ -4,7 +4,13 @@
 Since the driver modules for different platforms have the same declaration, you
 can use this project with any platform.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
+This application allows you to verify the correct functioning of the opentimers
+drivers. It starts 3 periodic timers, with periods APP_DLY_TIMER0_ms,
+APP_DLY_TIMER1_ms and APP_DLY_TIMER2_ms. Each timer is attached an LED (error.
+radio and sync). When you run the application, you should see the LEDs
+"counting".
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "stdint.h"
@@ -33,9 +39,9 @@ app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void cb_timer0();
-void cb_timer1();
-void cb_timer2();
+void cb_timer0(void);
+void cb_timer1(void);
+void cb_timer2(void);
 
 //=========================== main ============================================
 
@@ -74,14 +80,14 @@ int mote_main(void) {
 
 //=========================== callbacks =======================================
 
-void cb_timer0() {
+void cb_timer0(void) {
    leds_error_toggle();
 }
 
-void cb_timer1() {
+void cb_timer1(void) {
    leds_radio_toggle();
 }
 
-void cb_timer2() {
+void cb_timer2(void) {
    leds_sync_toggle();
 }

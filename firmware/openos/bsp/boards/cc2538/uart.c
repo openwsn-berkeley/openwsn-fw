@@ -41,10 +41,10 @@ static void uart_isr_private(void);
 
 //=========================== public ==========================================
 
-void uart_init() {
+void uart_init() { 
    // reset local variables
    memset(&uart_vars,0,sizeof(uart_vars_t));
-
+   
    // Disable UART function
    UARTDisable(UART0_BASE);
 
@@ -91,15 +91,15 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
 }
 
 void uart_enableInterrupts(){
-    UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_TX);
+    UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_TX | UART_INT_RT);
 }
 
 void uart_disableInterrupts(){
-    UARTIntDisable(UART0_BASE, UART_INT_RX | UART_INT_TX);
+    UARTIntDisable(UART0_BASE, UART_INT_RX | UART_INT_TX | UART_INT_RT);
 }
 
 void uart_clearRxInterrupts(){
-    UARTIntClear(UART0_BASE, UART_INT_RX);
+    UARTIntClear(UART0_BASE, UART_INT_RX | UART_INT_RT);
 }
 
 void uart_clearTxInterrupts(){
@@ -134,7 +134,7 @@ static void uart_isr_private(void){
 	}
 
 	// Process RX interrupt
-	if(reg & (UART_INT_RX )) {
+	if((reg & (UART_INT_RX)) || (reg & (UART_INT_RT))) {
 		uart_rx_isr();
 	}
 
@@ -151,7 +151,7 @@ kick_scheduler_t uart_tx_isr() {
 
 kick_scheduler_t uart_rx_isr() {
    uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
-   if (uart_vars.txCb != NULL) {
+   if (uart_vars.rxCb != NULL) {
        uart_vars.rxCb();
    }
    return DO_NOT_KICK_SCHEDULER;

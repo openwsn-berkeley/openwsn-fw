@@ -275,7 +275,8 @@ void forwarding_receive(
 
          forwarding_createRplOption(rpl_option, rpl_option->flags);
          #ifdef FLOW_LABEL_RPL_DOMAIN
-             forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
+         // do not recreate flow label, relay the same but adding current flags
+         //forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
          #endif
          // resend as if from upper layer
          if (
@@ -284,7 +285,7 @@ void forwarding_receive(
                   ipv6_header,
                   rpl_option,
                   &(ipv6_header->flow_label),
-                  PCKTFORWARD
+                  PCKTFORWARD 
                )==E_FAIL
             ) {
             openqueue_freePacketBuffer(msg);
@@ -341,6 +342,7 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
 \param[in,out] msg             The packet to send.
 \param[in]     ipv6_header     The packet's IPv6 header.
 \param[in]     rpl_option      The hop-by-hop option to add in this packet.
+\param[in]     flow_label      The flowlabel to add in the 6LoWPAN header.
 \param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
    (PCKTSEND), or forwarded (PCKTFORWARD).
 */

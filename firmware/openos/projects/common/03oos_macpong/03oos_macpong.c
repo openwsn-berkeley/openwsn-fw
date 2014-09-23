@@ -1,7 +1,7 @@
 /**
 \brief A simple application to test MAC connectivity.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, November 2012.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 // stack initialization
@@ -15,7 +15,7 @@
 #include "IEEE802154E.h"
 #include "openserial.h"
 #include "packetfunctions.h"
-#include "res.h"
+#include "sixtop.h"
 #include "idmanager.h"
 #include "neighbors.h"
 
@@ -40,14 +40,20 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    openwsn_init();
+   if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0xbb) {
+      idmanager_setIsDAGroot(TRUE);
+   }
    scheduler_start();
    return 0; // this line should never be reached
 }
 
 void macpong_initSend(void) {
+   if (idmanager_getIsDAGroot()==TRUE) {
+      return;
+   }
    if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
       // send packet
-      macpong_send(0);   
+      //poipoimacpong_send(0);   
       // cancel timer
       opentimers_stop(macpong_vars.timerId);
    }
@@ -59,20 +65,24 @@ void macpong_send(uint8_t payloadCtr) {
    
    pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPRAND);
    if (pkt==NULL) {
-      openserial_printError(COMPONENT_IPHC,ERR_NO_FREE_PACKET_BUFFER,
-                            (errorparameter_t)0,
-                            (errorparameter_t)0);
+      openserial_printError(
+         COMPONENT_IPHC,
+         ERR_NO_FREE_PACKET_BUFFER,
+         (errorparameter_t)0,
+         (errorparameter_t)0
+      );
       return;
    }
-   pkt->creator                     = COMPONENT_IPHC;
-   pkt->owner                       = COMPONENT_IPHC;
+   pkt->creator                   = COMPONENT_IPHC;
+   pkt->owner                     = COMPONENT_IPHC;
    
    neighbors_getNeighbor(&pkt->l2_nextORpreviousHop,ADDR_64B,0);
    packetfunctions_reserveHeaderSize(pkt,LEN_PAYLOAD);
-   for (i=0;i<LEN_PAYLOAD;i++){
-     ((uint8_t*)pkt->payload)[i]      = i;
+   ((uint8_t*)pkt->payload)[0]    = payloadCtr;
+   for (i=1;i<LEN_PAYLOAD;i++){
+     ((uint8_t*)pkt->payload)[i]  = i;
    }
-   res_send(pkt);
+   sixtop_send(pkt);
 }
 
 //=========================== stubbing ========================================
@@ -80,11 +90,11 @@ void macpong_send(uint8_t payloadCtr) {
 //===== IPHC
 
 void iphc_init(void) {
-   if (idmanager_getIsDAGroot()==FALSE) {
-      macpong_vars.timerId    = opentimers_start(5000,
-                                                 TIMER_PERIODIC,TIME_MS,
-                                                 macpong_initSend);
-   }
+   macpong_vars.timerId    = opentimers_start(
+      5000,
+      TIMER_PERIODIC,TIME_MS,
+      macpong_initSend
+   );
 }
 
 void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {

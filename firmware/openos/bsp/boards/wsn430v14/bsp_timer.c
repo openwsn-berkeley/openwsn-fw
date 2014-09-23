@@ -1,9 +1,9 @@
 /**
 \brief WSN430v14-specific definition of the "bsp_timer" bsp module.
 
-On WSN430v14, we use timerA0 for the bsp_timer module.
+On WSN430v14, we use timerB0 for the bsp_timer module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
 
 #include "msp430f1611.h"
@@ -31,17 +31,17 @@ bsp_timer_vars_t bsp_timer_vars;
 This functions starts the timer, i.e. the counter increments, but doesn't set
 any compare registers, so no interrupt will fire.
 */
-void bsp_timer_init() {
+void bsp_timer_init(void) {
    
    // clear local variables
    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
-   // set CCRA0 registers
-   TACCR0               =  0;
-   TACCTL0              =  0;
+   // set CCRB0 registers
+   TBCCTL0              =  0;
+   TBCCR0               =  0;
    
-   //start TimerA
-   TACTL                =  MC_2+TASSEL_1;        // continuous mode, from ACLK
+   // start TimerB
+   TBCTL                =  MC_2+TBSSEL_1;        // continuous mode, from ACLK
 }
 
 /**
@@ -59,12 +59,12 @@ void bsp_timer_set_callback(bsp_timer_cbt cb) {
 This function does not stop the timer, it rather resets the value of the
 counter, and cancels a possible pending compare event.
 */
-void bsp_timer_reset() {
+void bsp_timer_reset(void) {
    // reset compare
-   TACCR0               =  0;
-   TACCTL0              =  0;
+   TBCCR0               =  0;
+   TBCCTL0              =  0;
    // reset timer
-   TAR                  = 0;
+   TBR                  =  0;
    // record last timer compare value
    bsp_timer_vars.last_compare_value =  0;
 }
@@ -95,24 +95,24 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    newCompareValue      =  bsp_timer_vars.last_compare_value+delayTicks;
    bsp_timer_vars.last_compare_value   =  newCompareValue;
    
-   if (delayTicks<TAR-temp_last_compare_value) {
+   if (delayTicks<TBR-temp_last_compare_value) {
       // we're already too late, schedule the ISR right now, manually
       
       // setting the interrupt flag triggers an interrupt
-      TACCTL0          |=  CCIFG;
+      TBCCTL0          |=  CCIE+CCIFG;
    } else {
       // this is the normal case, have timer expire at newCompareValue
-      TACCR0            =  newCompareValue;
-      TACCTL0          |=  CCIE;
+      TBCCR0            =  newCompareValue;
+      TBCCTL0          |=  CCIE;
    }
 }
 
 /**
 \brief Cancel a running compare.
 */
-void bsp_timer_cancel_schedule() {
-   TACCR0               =  0;
-   TACCTL0             &= ~CCIE;
+void bsp_timer_cancel_schedule(void) {
+   TBCCR0               =  0;
+   TBCCTL0             &= ~CCIE;
 }
 
 /**
@@ -120,7 +120,7 @@ void bsp_timer_cancel_schedule() {
 
 \returns The current value of the timer's counter.
 */
-PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
+PORT_TIMER_WIDTH bsp_timer_get_currentValue(void) {
    return TBR;
 }
 
@@ -128,7 +128,7 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 
 //=========================== interrup handlers ===============================
 
-kick_scheduler_t bsp_timer_isr() {
+kick_scheduler_t bsp_timer_isr(void) {
    // call the callback
    bsp_timer_vars.cb();
    // kick the OS
