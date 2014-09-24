@@ -16,6 +16,8 @@
 #include "hw_sys_ctrl.h"
 #include "hw_types.h"
 
+//=========================== define ==========================================
+
 #define I2C_PERIPHERAL          ( SYS_CTRL_PERIPH_I2C )
 #define I2C_BASE                ( GPIO_B_BASE )
 #define I2C_SCL                 ( GPIO_PIN_3 )
@@ -55,7 +57,7 @@ void i2c_init(void)
     I2CMasterEnable();
 }
 
-void i2c_read_byte(uint8_t address, uint8_t* buffer)
+void i2c_read_byte(uint8_t address, uint8_t* byte)
 {
     I2CMasterSlaveAddrSet(address, true); // read
 
@@ -64,7 +66,7 @@ void i2c_read_byte(uint8_t address, uint8_t* buffer)
     while (I2CMasterBusy())
         ;
 
-    *buffer = I2CMasterDataGet();
+    *byte = I2CMasterDataGet();
 }
 
 void i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length)
@@ -90,11 +92,11 @@ void i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length)
     }
 }
 
-void i2c_write_byte(uint8_t address, uint8_t register_)
+void i2c_write_byte(uint8_t address, uint8_t byte)
 {
     I2CMasterSlaveAddrSet(address, false); // write
 
-    I2CMasterDataPut(register_);
+    I2CMasterDataPut(byte);
 
     I2CMasterControl(I2C_MASTER_CMD_SINGLE_SEND);
 
