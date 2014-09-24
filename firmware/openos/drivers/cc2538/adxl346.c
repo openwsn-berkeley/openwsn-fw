@@ -8,6 +8,8 @@
 #include "i2c.h"
 #include "adxl346.h"
 
+//=========================== define ==========================================
+
 /* ADDRESS AND IDENTIFIER */
 #define ADXL346_ADDRESS                     ( 0x53 )
 #define ADXL346_DEVID_VALUE                 ( 0xE6 )

@@ -8,6 +8,8 @@
 #include "i2c.h"
 #include "sht21.h"
 
+//=========================== define ==========================================
+
 #define SHT21_ADDRESS                   ( 0x40 )
 
 #define SHT21_USER_REG_READ             ( 0xE7 )

@@ -8,6 +8,8 @@
 #include "i2c.h"
 #include "max44009.h"
 
+//=========================== define ==========================================
+
 /* ADDRESS AND NOT_FOUND VALUE */
 #define MAX44009_ADDRESS                    ( 0x4A )
 #define MAX44009_NOT_FOUND                  ( 0x00 )
