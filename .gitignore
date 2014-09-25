@@ -25,3 +25,4 @@ path.txt
 *.map
 *.lst
 /firmware/openos/projects/wsn430v14/03oos_mercator/*.ewd
+*~
