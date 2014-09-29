@@ -8,12 +8,12 @@
 #ifndef __ADXL346_H__
 #define __ADXL346_H__
 
-void init(void);
-void reset(void);
-uint8_t is_present(void);
-uint16_t read_x(void);
-uint16_t read_y(void);
-uint16_t read_z(void);
+void adx346_init(void);
+void adx346_reset(void);
+uint8_t adx346_is_present(void);
+uint16_t adx346_read_x(void);
+uint16_t adx346_read_y(void);
+uint16_t adx346_read_z(void);
 
 #endif /* ifndef __ADXL346_H__ */
 

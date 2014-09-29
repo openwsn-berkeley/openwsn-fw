@@ -51,7 +51,7 @@
 
 //=========================== public ==========================================
 
-void init(void)
+void sht21_init(void)
 {
     uint8_t config[2];
 
@@ -73,13 +73,13 @@ void init(void)
     i2c_write_byte(SHT21_ADDRESS, config, sizeof(config));
 }
 
-void reset(void)
+void sht21_reset(void)
 {
     // Send a soft-reset command according to the datasheet (pag. 9, fig. 17)
     i2c_write_byte(SHT21_ADDRESS, SHT21_RESET_CMD);
 }
 
-uint8_t is_present(void)
+uint8_t sht21_is_present(void)
 {
     uint8_t is_present;
 
@@ -93,7 +93,7 @@ uint8_t is_present(void)
     return (is_present == SHT21_DEFAULT_CONFIG);
 }
 
-uint16_t read_temperature(void)
+uint16_t sht21_read_temperature(void)
 {
     uint8_t sht21_temperature[2];
     uint16_t temperature;
@@ -107,7 +107,7 @@ uint16_t read_temperature(void)
     return temperature;
 }
 
-float convert_temperature(uint16_t temperature)
+float sht21_convert_temperature(uint16_t temperature)
 {
     float result;
     
@@ -117,7 +117,7 @@ float convert_temperature(uint16_t temperature)
     return result;
 }
 
-uint16_t read_humidity(void)
+uint16_t sht21_read_humidity(void)
 {
     uint8_t sht21_humidity[2];
     uint16_t humidity;
@@ -131,7 +131,7 @@ uint16_t read_humidity(void)
     return humidity;
 }
 
-float convert_humidity(uint16_t humidity)
+float sht21_convert_humidity(uint16_t humidity)
 {
     float result;
     

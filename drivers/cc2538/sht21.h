@@ -8,13 +8,13 @@
 #ifndef __SHT21_H__
 #define __SHT21_H__
 
-void init(void);
-void reset(void);
-uint8_t is_present(void);
-uint16_t read_temperature(void);
-float convert_temperature(uint16_t temperature);
-uint16_t read_humidity(void);
-float convert_humidity(uint16_t humidity);
+void sht21_init(void);
+void sht21_reset(void);
+uint8_t sht21_is_present(void);
+uint16_t sht21_read_temperature(void);
+float sht21_convert_temperature(uint16_t temperature);
+uint16_t sht21_read_humidity(void);
+float sht21_convert_humidity(uint16_t humidity);
 
 #endif /* ifndef __SHT21_H__ */
 
