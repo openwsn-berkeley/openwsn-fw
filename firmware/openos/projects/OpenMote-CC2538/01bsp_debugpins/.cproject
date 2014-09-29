@@ -5,11 +5,11 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528" moduleId="org.eclipse.cdt.core.settings" name="Debug">
 				<externalSettings/>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -23,94 +23,26 @@
 							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.target.thumb.1049934001" name="Thumb (-mthumb)" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.target.thumb" value="true" valueType="boolean"/>
 							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.target.endiannes.1333580163" name="Endiannes" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.target.endiannes" value="org.eclipse.cdt.cross.arm.gnu.base.option.target.endiannes.default" valueType="enumerated"/>
 							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.target.thumbinterwork.812836606" name="Thumb interwork (-mthumb-interwork)" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.target.thumbinterwork" value="false" valueType="boolean"/>
-							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.addtools.createflash.131709224" name="Create Flash Image" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.addtools.createflash" value="false" valueType="boolean"/>
-							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.addtools.createlisting.440024371" name="Create Extended Listing" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.addtools.createlisting" value="false" valueType="boolean"/>
-							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.addtools.printsize.329991958" name="Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.addtools.printsize" value="false" valueType="boolean"/>
 							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.windows.elf.platform.debug.213835330" isAbstract="false" name="Linux Platform" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.platform.debug"/>
-							<builder autoBuildTarget="all" buildPath="${workspace_loc:/03oos_macpong}/Debug" cleanBuildTarget="clean" id="org.eclipse.cdt.build.core.internal.builder.572260918" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/01bsp_debugpins}/Debug" cleanBuildTarget="clean" id="org.eclipse.cdt.build.core.internal.builder.572260918" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="org.eclipse.cdt.build.core.internal.builder"/>
 							<tool command="arm-none-eabi-gcc" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.assembler.debug.516487918" name="ARM Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.assembler.debug">
 								<option id="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths.162547698" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.assembler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/cc2538&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/cross-layers&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/projects/common/03oos_macpong&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/cc2538/source&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/OpenMote-CC2538&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/projects/common/01bsp_debugpins&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/OpenMote-CC2538/source&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/cc2538/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/04-TRAN&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/03b-IPv6&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/03a-IPHC&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/02b-MAChigh&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/02a-MAClow&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/kernel/openos&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/drivers/common&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/heli&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/imu&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/layerdebug&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/ohlone&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/r6t&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rex&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rheli&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rinfo&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rleds&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rreg&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rrube&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rt&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rwellknown&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rxl1&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/tcpecho&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/tcpinject&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/tcpprint&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udpecho&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udpinject&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udplatency&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udpprint&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udprand&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udpstorm&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/OpenMote-CC2538/inc&quot;"/>
 								</option>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.windows.assembler.base.input.1546964571" superClass="org.eclipse.cdt.cross.arm.gnu.windows.assembler.base.input"/>
 							</tool>
 							<tool command="arm-none-eabi-gcc" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.compiler.debug.1981469427" name="ARM Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.compiler.debug">
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level.597449205" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths.1321049553" name="Include paths (-I)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/projects/common/03oos_macpong&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/cc2538/source&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/cc2538/inc&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/cc2538&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/kernel/openos&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/drivers/common&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/02a-MAClow&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/02b-MAChigh&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/03a-IPHC&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/03b-IPv6&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/04-TRAN&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/cross-layers&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/heli&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/imu&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/layerdebug&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/ohlone&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/r6t&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rex&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rheli&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rinfo&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rleds&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rreg&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rrube&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rt&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rwellknown&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/rxl1&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/tcpecho&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/tcpinject&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/tcpprint&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udpecho&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udpinject&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udplatency&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udpprint&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udprand&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/openwsn/07-App/udpstorm&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/projects/common/01bsp_debugpins&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/OpenMote-CC2538/source&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/OpenMote-CC2538/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/OpenMote-CC2538&quot;"/>
 								</option>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.verbose.1716279763" name="Verbose (-v)" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.verbose" value="false" valueType="boolean"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.otherflags.495262531" name="Other flags" superClass="org.eclipse.cdt.cross.arm.gnu.c.compiler.option.other.otherflags" value="-c -fmessage-length=0 " valueType="string"/>
@@ -120,7 +52,7 @@
 								<option id="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level.1602019665" name="Optimization level" superClass="org.eclipse.cdt.cross.arm.gnu.cpp.compiler.option.optimization.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.optimization.level.none" valueType="enumerated"/>
 							</tool>
 							<tool command="arm-none-eabi-gcc" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.linker.debug.630680942" name="ARM Windows GCC C Linker" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.linker.debug">
-								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.592372655" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/cc2538/cc2538.lds" valueType="string"/>
+								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile.592372655" name="Script file (-T)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.scriptfile" value="&quot;${OPENWSN_FW_HOME}/firmware/openos/bsp/boards/OpenMote-CC2538/cc2538.lds&quot;" valueType="string"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths.206232975" name="Library search path (-L)" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.paths"/>
 								<option id="org.eclipse.cdt.cross.arm.gnu.c.link.option.otherflags.463389339" name="Other flags" superClass="org.eclipse.cdt.cross.arm.gnu.c.link.option.otherflags" value="" valueType="string"/>
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.c.linker.input.1141726442" superClass="org.eclipse.cdt.cross.arm.gnu.c.linker.input">
@@ -143,18 +75,11 @@
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1935404970" name="cc2538.lds" rcbsApplicability="disable" resourcePath="linker/cc2538.lds" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.50511102" name="rrube.h" rcbsApplicability="disable" resourcePath="openwsn/07-App/rrube/rrube.h" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1404532256" name="rxl1.h" rcbsApplicability="disable" resourcePath="openwsn/07-App/rxl1/rxl1.h" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.742357968" name="rheli.h" rcbsApplicability="disable" resourcePath="openwsn/07-App/rheli/rheli.h" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.150332160" name="rt.h" rcbsApplicability="disable" resourcePath="openwsn/07-App/rt/rt.h" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1313075029" name="imu.h" rcbsApplicability="disable" resourcePath="openwsn/07-App/imu/imu.h" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1192361047" name="heli.h" rcbsApplicability="disable" resourcePath="openwsn/07-App/heli/heli.h" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.277610318" name="stupidmac.h" rcbsApplicability="disable" resourcePath="openwsn/02a-MAClow/stupidmac/stupidmac.h" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1366760274" name="rsvp.h" rcbsApplicability="disable" resourcePath="openwsn/04-TRAN/rsvp.h" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1327526621" name="cfres.h" rcbsApplicability="disable" resourcePath="openwsn/02.5-MPLS/cfres.h" toolsToInvoke=""/>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1381623881" name="gmpls.h" rcbsApplicability="disable" resourcePath="openwsn/02.5-MPLS/gmpls.h" toolsToInvoke=""/>
+					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.1309772053" name="bsp_timer.c" rcbsApplicability="disable" resourcePath="OpenMote-CC2538/bsp_timer.c" toolsToInvoke="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.compiler.debug.1981469427.306633032">
+						<tool id="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.compiler.debug.1981469427.306633032" name="ARM Windows GCC C Compiler" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.c.compiler.debug.1981469427"/>
+					</fileInfo>
 					<sourceEntries>
-						<entry excluding="openwsn/07-App/udpstorm/udpstorm.c|openwsn/07-App/udprand/udprand.c|openwsn/07-App/udpprint/udpprint.c|openwsn/07-App/udplatency/udplatency.c|openwsn/07-App/udpinject/udpinject.c|openwsn/07-App/udpecho/udpecho.c|openwsn/07-App/tcpprint/tcpprint.c|openwsn/07-App/tcpinject/tcpinject.c|openwsn/07-App/tcpecho/tcpecho.c|openwsn/07-App/rwellknown/rwellknown.c|openwsn/07-App/rreg/rreg.c|openwsn/07-App/rleds/rleds.c|openwsn/07-App/rinfo/rinfo.c|openwsn/07-App/rex/rex.c|openwsn/07-App/r6t/r6t.c|openwsn/07-App/ohlone/ohlone.c|openwsn/07-App/ohlone/ohlone_webpages.c|openwsn/07-App/layerdebug/layerdebug.c|openwsn/04-TRAN/openudp.c|openwsn/04-TRAN/opentcp.c|openwsn/04-TRAN/opencoap.c|openwsn/03b-IPv6/icmpv6rpl.c|openwsn/03b-IPv6/icmpv6echo.c|openwsn/03b-IPv6/icmpv6.c|openwsn/03b-IPv6/forwarding.c|openwsn/03a-IPHC/openbridge.c|openwsn/03a-IPHC/iphc.c|openwsn/07-App/rrube/rrube.h|openwsn/07-App/rrube/rrube.c|openwsn/07-App/rheli/rheli.h|openwsn/07-App/rheli/rheli.c|openwsn/07-App/rt/rt.h|openwsn/07-App/rt/rt.c|openwsn/07-App/imu/imu.h|openwsn/07-App/imu/imu.c|openwsn/04-TRAN/rsvp.c|openwsn/04-TRAN/rsvp.h|openwsn/07-App/rxl1/rxl1.h|openwsn/07-App/rxl1/rxl1.c|03oos_macpong/03oos_macpong_obj.c|openwsn/07-App/heli/heli.h|openwsn/07-App/heli/heli.c|openwsn/02a-MAClow/stupidmac/stupidmac.h|openwsn/02a-MAClow/stupidmac/stupidmac.c|openwsn/02.5-MPLS/cfres.h|openwsn/02.5-MPLS/gmpls.c|openwsn/02.5-MPLS/gmpls.h|openwsn/02.5-MPLS/cfres.c|03oos_macpong/uarttest.c|cc2538/source/__startup.h|cc2538/source/__startup.c|bsp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="OpenMote-CC2538/radio.c|OpenMote-CC2538/source/__startup.h|OpenMote-CC2538/source/__startup.c|OpenMote-CC2538/eui64.c|bsp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -164,13 +89,13 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.release.1465004599" moduleId="org.eclipse.cdt.core.settings" name="Release">
 				<externalSettings/>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.MakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.GNU_ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -179,7 +104,7 @@
 						<toolChain id="org.eclipse.cdt.cross.arm.gnu.windows.elf.toolchain.release.1751139137" name="ARM Windows GCC (GNUARM, WinARM)" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.toolchain.release">
 							<option id="org.eclipse.cdt.cross.arm.gnu.windows.option.debugging.level.88005519" name="Debug level" superClass="org.eclipse.cdt.cross.arm.gnu.windows.option.debugging.level" value="org.eclipse.cdt.cross.arm.gnu.base.option.debugging.level.none" valueType="enumerated"/>
 							<targetPlatform id="org.eclipse.cdt.cross.arm.gnu.windows.elf.platform.release.602411214" isAbstract="false" name="Linux Platform" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.platform.release"/>
-							<builder buildPath="${workspace_loc:/03oos_macpong}/Release" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.builder.release.1546976664" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="ARM Windows GNU Make builder" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.builder.release"/>
+							<builder buildPath="${workspace_loc:/01bsp_debugpins}/Release" id="org.eclipse.cdt.cross.arm.gnu.windows.elf.builder.release.1546976664" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="ARM Windows GNU Make builder" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.builder.release"/>
 							<tool id="org.eclipse.cdt.cross.arm.gnu.windows.elf.assembler.release.759237681" name="ARM Windows GCC Assembler" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.assembler.release">
 								<inputType id="org.eclipse.cdt.cross.arm.gnu.windows.assembler.base.input.1806432933" superClass="org.eclipse.cdt.cross.arm.gnu.windows.assembler.base.input"/>
 							</tool>
@@ -203,9 +128,8 @@
 							<tool id="org.eclipse.cdt.cross.arm.gnu.windows.elf.printsize.release.1524825938" name="ARM Windows GNU Print Size" superClass="org.eclipse.cdt.cross.arm.gnu.windows.elf.printsize.release"/>
 						</toolChain>
 					</folderInfo>
-					<fileInfo id="org.eclipse.cdt.cross.arm.gnu.windows.elf.release.1465004599.104525115" name="imu.h" rcbsApplicability="disable" resourcePath="openwsn/07-App/imu/imu.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="openwsn/07-App/udpstorm/udpstorm.c|openwsn/07-App/udprand/udprand.c|openwsn/07-App/udpprint/udpprint.c|openwsn/07-App/udplatency/udplatency.c|openwsn/07-App/udpinject/udpinject.c|openwsn/07-App/udpecho/udpecho.c|openwsn/07-App/tcpprint/tcpprint.c|openwsn/07-App/tcpinject/tcpinject.c|openwsn/07-App/tcpecho/tcpecho.c|openwsn/07-App/rwellknown/rwellknown.c|openwsn/07-App/rreg/rreg.c|openwsn/07-App/rleds/rleds.c|openwsn/07-App/rinfo/rinfo.c|openwsn/07-App/rex/rex.c|openwsn/07-App/r6t/r6t.c|openwsn/07-App/ohlone/ohlone.c|openwsn/07-App/ohlone/ohlone_webpages.c|openwsn/07-App/layerdebug/layerdebug.c|openwsn/04-TRAN/openudp.c|openwsn/04-TRAN/opentcp.c|openwsn/04-TRAN/opencoap.c|openwsn/03b-IPv6/icmpv6rpl.c|openwsn/03b-IPv6/icmpv6echo.c|openwsn/03b-IPv6/icmpv6.c|openwsn/03b-IPv6/forwarding.c|openwsn/03a-IPHC/openbridge.c|openwsn/03a-IPHC/iphc.c|openwsn/07-App/rrube/rrube.c|openwsn/07-App/rheli/rheli.c|openwsn/07-App/rt/rt.c|openwsn/07-App/imu/imu.c|openwsn/07-App/heli/heli.c|openwsn/02a-MAClow/stupidmac/stupidmac.c|bsp|cc2538/debugpins.c|cc2538/eui64.c|cc2538/radiotimer.c|cc2538/uart.c|cc2538/bsp_timer.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="bsp|OpenMote-CC2538/debugpins.c|OpenMote-CC2538/eui64.c|OpenMote-CC2538/radiotimer.c|OpenMote-CC2538/uart.c|OpenMote-CC2538/bsp_timer.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="bsp"/>
 					</sourceEntries>
 				</configuration>
@@ -214,15 +138,15 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="03oos_macpong.org.eclipse.cdt.cross.arm.gnu.windows.elf.1710185323" name="ARM Cross Target Application" projectType="org.eclipse.cdt.cross.arm.gnu.windows.elf"/>
+		<project id="01bsp_debugpins.org.eclipse.cdt.cross.arm.gnu.windows.elf.1710185323" name="ARM Cross Target Application" projectType="org.eclipse.cdt.cross.arm.gnu.windows.elf"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/03oos_macpong"/>
+			<resource resourceType="PROJECT" workspacePath="/01bsp_debugpins"/>
 		</configuration>
 		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/03oos_macpong"/>
+			<resource resourceType="PROJECT" workspacePath="/01bsp_debugpins"/>
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
@@ -244,6 +168,9 @@
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.windows.elf.release.1465004599;org.eclipse.cdt.cross.arm.gnu.windows.elf.release.1465004599.;org.eclipse.cdt.cross.arm.gnu.windows.elf.assembler.release.759237681;org.eclipse.cdt.cross.arm.gnu.windows.assembler.base.input.1806432933">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.windows.elf.release.1465004599;org.eclipse.cdt.cross.arm.gnu.windows.elf.release.1465004599.;org.eclipse.cdt.cross.arm.gnu.windows.elf.c.compiler.release.744749404;org.eclipse.cdt.cross.arm.gnu.windows.c.compiler.base.input.850612250">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_GCCWinManagedMakePerProjectProfileC"/>
+		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528;org.eclipse.cdt.cross.arm.gnu.windows.elf.debug.339977528.;org.eclipse.cdt.cross.arm.gnu.windows.elf.assembler.debug.516487918;org.eclipse.cdt.cross.arm.gnu.windows.assembler.base.input.1546964571">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_GCCWinManagedMakePerProjectProfileC"/>
 			<profile id="org.eclipse.cdt.cross.arm.gnu.ARM_GCCWinManagedMakePerProjectProfileC">
@@ -256,9 +183,6 @@
 					<parser enabled="true"/>
 				</scannerInfoProvider>
 			</profile>
-		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="org.eclipse.cdt.cross.arm.gnu.windows.elf.release.1465004599;org.eclipse.cdt.cross.arm.gnu.windows.elf.release.1465004599.;org.eclipse.cdt.cross.arm.gnu.windows.elf.c.compiler.release.744749404;org.eclipse.cdt.cross.arm.gnu.windows.c.compiler.base.input.850612250">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.cross.arm.gnu.ARM_GCCWinManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
 </cproject>

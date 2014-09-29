@@ -13,11 +13,11 @@ before_script:
 script:
 - mkdir -p ./build/doc/
 - scons docs
-- scons board=telosb       toolchain=mspgcc verbose=1 oos_openwsn
-- scons board=wsn430v14    toolchain=mspgcc verbose=1 oos_openwsn
-- scons board=wsn430v13b   toolchain=mspgcc verbose=1 oos_openwsn
-- scons board=gina         toolchain=mspgcc verbose=1 oos_openwsn
-- scons board=z1           toolchain=mspgcc verbose=1 oos_openwsn
-- scons board=python       toolchain=gcc    verbose=1 oos_openwsn
-- scons board=iot-lab_M3   toolchain=armgcc verbose=1 oos_openwsn
-- scons board=cc2538       toolchain=armgcc verbose=1 oos_openwsn
+- scons board=telosb              toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=wsn430v14           toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=wsn430v13b          toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=gina                toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=z1                  toolchain=mspgcc verbose=1 oos_openwsn
+- scons board=python              toolchain=gcc    verbose=1 oos_openwsn
+- scons board=iot-lab_M3          toolchain=armgcc verbose=1 oos_openwsn
+- scons board=OpenMote-CC2538     toolchain=armgcc verbose=1 oos_openwsn

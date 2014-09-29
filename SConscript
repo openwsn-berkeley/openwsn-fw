@@ -34,7 +34,7 @@ dummyFunc = Builder(
 
 if   env['plugfest']==1:
     env.Append(CPPDEFINES    = 'PLUGFEST')
-    if  env['board']=='cc2538':
+    if  env['board']=='OpenMote-CC2538':
         env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
 
 if   env['toolchain']=='mspgcc':
@@ -153,7 +153,7 @@ elif env['toolchain']=='iar':
 
 elif env['toolchain']=='iar-proj':
     
-    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','cc2538']:
+    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','OpenMote-CC2538']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -183,10 +183,10 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['cc2538','iot-lab_M3']:
+    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
-    if   env['board']=='cc2538':
+    if   env['board']=='OpenMote-CC2538':
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -203,7 +203,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
         # linker
-        env.Append(LINKFLAGS     = '-Tfirmware/openos/bsp/boards/cc2538/cc2538.lds')
+        env.Append(LINKFLAGS     = '-Tfirmware/openos/bsp/boards/OpenMote-CC2538/cc2538.lds')
         env.Append(LINKFLAGS     = '-nostartfiles')
         env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>01bsp_leds</name>
+	<name>01bsp_uart</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -25,44 +25,49 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>01bsp_leds</name>
+			<name>01bsp_uart</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/projects/common/01bsp_leds</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/projects/common/01bsp_uart</locationURI>
 		</link>
 		<link>
-			<name>cc2538</name>
+			<name>OpenMote-CC2538</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/cc2538</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/OpenMote-CC2538</locationURI>
 		</link>
 		<link>
-			<name>cc2538/board.h</name>
+			<name>OpenMote-CC2538/board.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/board.h</locationURI>
 		</link>
 		<link>
-			<name>cc2538/bsp_timer.h</name>
+			<name>OpenMote-CC2538/bsp_timer.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/bsp_timer.h</locationURI>
 		</link>
 		<link>
-			<name>cc2538/leds.h</name>
+			<name>OpenMote-CC2538/debugpins.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/debugpins.h</locationURI>
+		</link>
+		<link>
+			<name>OpenMote-CC2538/leds.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/leds.h</locationURI>
 		</link>
 		<link>
-			<name>cc2538/radiotimer.h</name>
+			<name>OpenMote-CC2538/radiotimer.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/radiotimer.h</locationURI>
 		</link>
 		<link>
-			<name>cc2538/uart.h</name>
+			<name>OpenMote-CC2538/uart.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/uart.h</locationURI>
+			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/uart.h</location>
 		</link>
 		<link>
 			<name>linker/cc2538.lds</name>
 			<type>1</type>
-			<locationURI>OPENWSN_HOME/bsp/boards/cc2538/cc2538.lds</locationURI>
+			<locationURI>OPENWSN_HOME/bsp/boards/OpenMote-CC2538/cc2538.lds</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
