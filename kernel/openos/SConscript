@@ -31,16 +31,6 @@ else:
     
     localEnv.Append(
         CPPPATH =  [
-            os.path.join('#','openwsn'),
-            os.path.join('#','openwsn','02a-MAClow'),
-            os.path.join('#','openwsn','02b-MAChigh'),
-            os.path.join('#','openwsn','03a-IPHC'),
-            os.path.join('#','openwsn','03b-IPv6'),
-            os.path.join('#','openwsn','04-TRAN'),
-            os.path.join('#','openwsn','07-App','tcpinject'),
-            os.path.join('#','openwsn','07-App','udpinject'),
-            os.path.join('#','openwsn','cross-layers'),
-            os.path.join('#','drivers','common'),
         ],
     )
     
