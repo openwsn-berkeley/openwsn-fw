@@ -25,11 +25,10 @@ Usage:
     scons [help-option]
 
 project:
-    A project is represented by a subdirectory of the 
-    firmware{0}openos{0}projects directory, for a particular board. For 
-    example, the 'oos_openwsn' project may be built for telosb. To specify a 
-    project, exclude the leading digits in the directory name, like '03' for 
-    oos_openwsn.
+    A project is represented by a subdirectory of the projects directory, for
+    a particular board. For example, the 'oos_openwsn' project may be built for
+    telosb. To specify a project, exclude the leading digits in the directory
+    name, like '03' for oos_openwsn.
 
     variable=value pairs
     These pairs qualify how the project is built, and are organized here into
@@ -246,7 +245,6 @@ env['targets'] = {
 }
 
 # include docs SConscript
-# which will discover targets for this board/toolchain
 env.SConscript(
     os.path.join('docs','SConscript'),
     exports = ['env'],

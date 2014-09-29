@@ -1,0 +1,121 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+target = 'libopenapps'
+sources_c = [
+    #os.path.join('heli','heli.c'),
+    #os.path.join('imu','imu.c'),
+    os.path.join('layerdebug','layerdebug.c'),
+    os.path.join('r6t','r6t.c'),
+    os.path.join('ohlone','ohlone.c'),
+    os.path.join('ohlone','ohlone_webpages.c'),
+    os.path.join('rex','rex.c'),
+    #os.path.join('rheli','rheli.c'),
+    os.path.join('rinfo','rinfo.c'),
+    os.path.join('rrt','rrt.c'),
+    os.path.join('rleds','rleds.c'),
+    os.path.join('rreg','rreg.c'),
+    #os.path.join('rrube','rrube.c'),
+    #os.path.join('rt','rt.c'),
+    os.path.join('rwellknown','rwellknown.c'),
+    #os.path.join('rxl1','rxl1.c'),
+    os.path.join('tcpecho','tcpecho.c'),
+    os.path.join('tcpinject','tcpinject.c'),
+    os.path.join('tcpprint','tcpprint.c'),
+    os.path.join('udpecho','udpecho.c'),
+    os.path.join('udpinject','udpinject.c'),
+    os.path.join('udpprint','udpprint.c'),
+    os.path.join('udprand','udprand.c'),
+    os.path.join('udplatency','udplatency.c'),
+    os.path.join('udpstorm','udpstorm.c'),
+]
+sources_h = [
+    #os.path.join('heli','heli.h'),
+    #os.path.join('imu','imu.h'),
+    os.path.join('layerdebug','layerdebug.h'),
+    os.path.join('ohlone','ohlone.h'),
+    os.path.join('ohlone','ohlone_webpages.h'),
+    os.path.join('r6t','r6t.h'),
+    os.path.join('rex','rex.h'),
+    #os.path.join('rheli','rheli.h'),
+    os.path.join('rinfo','rinfo.h'),
+    os.path.join('rrt','rrt.h'),
+    os.path.join('rleds','rleds.h'),
+    os.path.join('rreg','rreg.h'),
+    #os.path.join('rrube','rrube.h'),
+    #os.path.join('rt','rt.h'),
+    os.path.join('rwellknown','rwellknown.h'),
+    #os.path.join('rxl1','rxl1.h'),
+    os.path.join('tcpecho','tcpecho.h'),
+    os.path.join('tcpinject','tcpinject.h'),
+    os.path.join('tcpprint','tcpprint.h'),
+    os.path.join('udpecho','udpecho.h'),
+    os.path.join('udpinject','udpinject.h'),
+    os.path.join('udpprint','udpprint.h'),
+    os.path.join('udprand','udprand.h'),
+    os.path.join('udplatency','udplatency.h'),
+    os.path.join('udpstorm','udpstorm.h'),
+]
+
+if localEnv['board']=='python':
+    
+    for s in sources_c+sources_h:
+        temp = localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+        #localEnv.AlwaysBuild(temp)
+    
+    libopenapps = localEnv.Library(
+        target = target,
+        source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
+    )
+    localEnv.Depends(libopenapps,[localEnv.ObjectifiedFilename(s) for s in sources_h])
+    
+else:
+    
+    localEnv.Append(
+        CPPPATH =  [
+            os.path.join('#','openapps'),
+            os.path.join('#','openapps','heli'),
+            os.path.join('#','openapps','imu'),
+            os.path.join('#','openapps','layerdebug'),
+            os.path.join('#','openapps','ohlone'),
+            os.path.join('#','openapps','r6t'),
+            os.path.join('#','openapps','rex'),
+            os.path.join('#','openapps','rheli'),
+            os.path.join('#','openapps','rinfo'),
+            os.path.join('#','openapps','rrt'),
+            os.path.join('#','openapps','rleds'),
+            os.path.join('#','openapps','rreg'),
+            os.path.join('#','openapps','rrube'),
+            os.path.join('#','openapps','rt'),
+            os.path.join('#','openapps','rwellknown'),
+            os.path.join('#','openapps','rxl1'),
+            os.path.join('#','openapps','tcpecho'),
+            os.path.join('#','openapps','tcpinject'),
+            os.path.join('#','openapps','tcpprint'),
+            os.path.join('#','openapps','udpecho'),
+            os.path.join('#','openapps','udpinject'),
+            os.path.join('#','openapps','udpprint'),
+            os.path.join('#','openapps','udprand'),
+            os.path.join('#','openapps','udplatency'),
+            os.path.join('#','openapps','udpstorm'),
+            # openstack
+            os.path.join('#','openstack','04-TRAN'),
+            os.path.join('#','openstack','cross-layers'),
+            os.path.join('#','openstack','02a-MAClow'),
+            os.path.join('#','openstack','02b-MAChigh'),
+            os.path.join('#','openstack','03b-IPv6'),
+        ],
+    )
+    
+    libopenapps = localEnv.Library(
+        target = target,
+        source = sources_c,
+    )
+
+Alias('libopenapps', libopenapps)

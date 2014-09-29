@@ -11,7 +11,7 @@ localEnv = env.Clone()
 # variant_dir, or else the build will occur directly in the chips directory.
 
 cc1101 = localEnv.SConscript(
-    os.path.join('#','firmware','openos','bsp','chips','cc1101','SConscript'),
+    os.path.join('#','bsp','chips','cc1101','SConscript'),
     variant_dir    = 'cc1101',
     exports        = {'env': env},
 )

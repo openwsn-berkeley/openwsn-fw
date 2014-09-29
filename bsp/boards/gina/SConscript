@@ -11,7 +11,7 @@ localEnv = env.Clone()
 # or else the build will occur directly in the chips directory.
 
 rf231 = localEnv.SConscript(
-    os.path.join('#','firmware','openos','bsp','chips','at86rf231','SConscript'),
+    os.path.join('#','bsp','chips','at86rf231','SConscript'),
     variant_dir = 'rf231',
     exports     = {'env': env},
 )
