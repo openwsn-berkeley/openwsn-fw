@@ -381,6 +381,10 @@ void openserial_stop() {
       cmdByte = openserial_vars.inputBuf[0];
       ENABLE_INTERRUPTS();
       switch (cmdByte) {
+         case SERFRAME_PC2MOTE_SETROOTBRIDGE:
+            idmanager_triggerAboutRoot();
+            idmanager_triggerAboutBridge();
+            break;
          case SERFRAME_PC2MOTE_SETROOT:
             idmanager_triggerAboutRoot();
             break;
