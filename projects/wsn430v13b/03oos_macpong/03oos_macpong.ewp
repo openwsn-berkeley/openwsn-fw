@@ -333,41 +333,41 @@
           <state>$PROJ_DIR$\..\..\..\drivers\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\wsn430v13b\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrt\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rsched\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udplatency\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\cross-layers\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\heli\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\imu\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\layerdebug\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\r6t\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rleds\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rreg\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rwellknown\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rt\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rex\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rinfo\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rheli\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rxl1\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rsched\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rrube\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\ohlone\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\tcpecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\tcpinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\tcpprint\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpprint\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udprand\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpstorm\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udplatency\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common</state>
         </option>
         <option>
@@ -2179,95 +2179,95 @@
     <group>
       <name>02a-MAClow</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptive_sync.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\adaptive_sync.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\adaptive_sync.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\IEEE802154E.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\topology.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\topology.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\topology.h</name>
       </file>
     </group>
     <group>
       <name>02b-MAChigh</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\neighbors.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\otf.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\otf.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\sixtop.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\sixtop.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\processIE.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\schedule.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
       </file>
     </group>
     <group>
       <name>cross-layers</name>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\idmanager.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\idmanager.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\idmanager.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\idmanager.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openqueue.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openqueue.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openqueue.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openqueue.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openrandom.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openrandom.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\openrandom.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openrandom.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\packetfunctions.c</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\packetfunctions.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openwsn\cross-layers\packetfunctions.h</name>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\packetfunctions.h</name>
       </file>
     </group>
     <file>
-      <name>$PROJ_DIR$\..\..\..\openwsn\openwsn.c</name>
+      <name>$PROJ_DIR$\..\..\..\openstack\openwsn.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\openwsn\openwsn.h</name>
+      <name>$PROJ_DIR$\..\..\..\openstack\openwsn.h</name>
     </file>
   </group>
 </project>

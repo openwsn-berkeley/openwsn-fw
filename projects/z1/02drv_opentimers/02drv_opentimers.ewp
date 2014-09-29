@@ -330,7 +330,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>

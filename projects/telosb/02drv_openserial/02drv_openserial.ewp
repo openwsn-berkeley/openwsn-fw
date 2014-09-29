@@ -333,40 +333,40 @@
           <state>$PROJ_DIR$\..\..\..\drivers\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\telosb\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\02a-MAClow\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\02b-MAChigh\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\03a-IPHC\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\03b-IPv6\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\04-TRAN\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\heli\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\imu\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\layerdebug\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\r6t\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rleds\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rreg\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rt\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrt\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rex\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rinfo\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rheli\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rxl1\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\rrube\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\ohlone\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\tcpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udprand\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udpstorm\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\07-App\udplatency\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\cross-layers\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\heli\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\imu\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\layerdebug\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\r6t\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rleds\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rreg\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rwellknown\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rt\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rex\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rinfo\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rheli\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rxl1\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rrube\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\ohlone\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\tcpecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\tcpinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\tcpprint\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpprint\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udprand\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpstorm\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udplatency\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common</state>
         </option>
         <option>

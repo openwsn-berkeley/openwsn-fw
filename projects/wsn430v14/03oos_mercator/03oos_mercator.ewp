@@ -334,7 +334,7 @@
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\wsn430v14\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
-          <state>$PROJ_DIR$\..\..\..\openwsn\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
