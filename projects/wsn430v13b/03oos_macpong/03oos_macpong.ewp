@@ -2175,7 +2175,7 @@
     </file>
   </group>
   <group>
-    <name>openwsn</name>
+    <name>openstack</name>
     <group>
       <name>02a-MAClow</name>
       <file>
@@ -2218,12 +2218,6 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.c</name>
       </file>
       <file>
@@ -2234,6 +2228,12 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.h</name>
       </file>
     </group>
     <group>
