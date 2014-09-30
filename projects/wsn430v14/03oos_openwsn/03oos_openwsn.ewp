@@ -2392,6 +2392,9 @@
         <name>$PROJ_DIR$\..\..\..\openapps\udpstorm\udpstorm.h</name>
       </file>
     </group>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\openapps\openapps.c</name>
+    </file>
   </group>
   <group>
     <name>openstack</name>
