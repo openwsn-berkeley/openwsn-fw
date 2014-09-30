@@ -6,6 +6,7 @@ localEnv = env.Clone()
 
 target = 'libopenapps'
 sources_c = [
+    os.path.join('openapps.c'),
     #os.path.join('heli','heli.c'),
     #os.path.join('imu','imu.c'),
     os.path.join('layerdebug','layerdebug.c'),
@@ -33,6 +34,7 @@ sources_c = [
     os.path.join('udpstorm','udpstorm.c'),
 ]
 sources_h = [
+    os.path.join('openapps.h'),
     #os.path.join('heli','heli.h'),
     #os.path.join('imu','imu.h'),
     os.path.join('layerdebug','layerdebug.h'),
