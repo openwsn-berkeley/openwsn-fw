@@ -11,6 +11,7 @@
 #include "openhdlc.h"
 #include "leds.h"
 #include "uart.h"
+#include "radio.h"
 
 //=========================== defines ==========================================
 
@@ -155,7 +156,9 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    opentimers_init();
-   
+   radio_init();
+
+
    // initial UART
    uart_setCallbacks(
       isr_openserial_tx,
@@ -274,7 +277,8 @@ void serial_rx_REQ_IDLE(void) {
    }
    
    // TODO
-   __no_operation();
+   // __no_operation();
+   radio_rfOff();
 }
 
 void serial_rx_REQ_TX(void) {
@@ -283,7 +287,19 @@ void serial_rx_REQ_TX(void) {
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
-   
+   uint8_t  frequency   =  (uint8_t)   mercator_vars.uartbufrx[1];
+   int8_t   txpower     =  (int8_t)    mercator_vars.uartbufrx[2];
+   uint8_t  transctr    =  (uint8_t)   mercator_vars.uartbufrx[3];
+   uint16_t txnumpk;       memcpy(txnumpk, mercator_vars.uartbufrx + 4, 2);
+   uint16_t txifdur;       memcpy(txifdur, mercator_vars.uartbufrx + 6, 2);
+   uint8_t  txlength    =  (uint8_t)   mercator_vars.uartbufrx[8];
+   uint8_t  txfillbyte  =  (uint8_t)   mercator_vars.uartbufrx[9];
+
+   char *packet   
+
+   radio_rfOn();
+   radio_setFrequency(frequency);
+
    // TODO
    __no_operation();
 }
