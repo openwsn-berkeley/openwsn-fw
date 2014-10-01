@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "rwellknown.h"
+#include "cwellknown.h"
 #include "opencoap.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
@@ -8,44 +8,44 @@
 
 //=========================== variables =======================================
 
-rwellknown_vars_t rwellknown_vars;
+cwellknown_vars_t cwellknown_vars;
 
-const uint8_t rwellknown_path0[]       = ".well-known";
-const uint8_t rwellknown_path1[]       = "core";
+const uint8_t cwellknown_path0[]       = ".well-known";
+const uint8_t cwellknown_path1[]       = "core";
 
 //=========================== prototypes ======================================
 
-owerror_t rwellknown_receive(
+owerror_t cwellknown_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
    coap_option_iht*  coap_options
 );
 
-void    rwellknown_sendDone(
+void    cwellknown_sendDone(
    OpenQueueEntry_t* msg,
    owerror_t         error
 );
 
 //=========================== public ==========================================
 
-void rwellknown_init() {
+void cwellknown_init() {
    if(idmanager_getIsDAGroot()==TRUE) return; 
    
    // prepare the resource descriptor for the /.well-known/core path
-   rwellknown_vars.desc.path0len            = sizeof(rwellknown_path0)-1;
-   rwellknown_vars.desc.path0val            = (uint8_t*)(&rwellknown_path0);
-   rwellknown_vars.desc.path1len            = sizeof(rwellknown_path1)-1;
-   rwellknown_vars.desc.path1val            = (uint8_t*)(&rwellknown_path1);
-   rwellknown_vars.desc.componentID         = COMPONENT_RWELLKNOWN;
-   rwellknown_vars.desc.callbackRx          = &rwellknown_receive;
-   rwellknown_vars.desc.callbackSendDone    = &rwellknown_sendDone;
+   cwellknown_vars.desc.path0len            = sizeof(cwellknown_path0)-1;
+   cwellknown_vars.desc.path0val            = (uint8_t*)(&cwellknown_path0);
+   cwellknown_vars.desc.path1len            = sizeof(cwellknown_path1)-1;
+   cwellknown_vars.desc.path1val            = (uint8_t*)(&cwellknown_path1);
+   cwellknown_vars.desc.componentID         = COMPONENT_CWELLKNOWN;
+   cwellknown_vars.desc.callbackRx          = &cwellknown_receive;
+   cwellknown_vars.desc.callbackSendDone    = &cwellknown_sendDone;
    
-   opencoap_register(&rwellknown_vars.desc);
+   opencoap_register(&cwellknown_vars.desc);
 }
 
 //=========================== private =========================================
 
-owerror_t rwellknown_receive(
+owerror_t cwellknown_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht*  coap_header,
       coap_option_iht*  coap_options
@@ -83,6 +83,6 @@ owerror_t rwellknown_receive(
    return outcome;
 }
 
-void rwellknown_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+void cwellknown_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

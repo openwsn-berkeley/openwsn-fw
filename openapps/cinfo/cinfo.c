@@ -3,7 +3,7 @@
 */
 
 #include "openwsn.h"
-#include "rinfo.h"
+#include "cinfo.h"
 #include "opencoap.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
@@ -14,20 +14,20 @@
 
 //=========================== defines =========================================
 
-const uint8_t rinfo_path0[] = "i";
+const uint8_t cinfo_path0[] = "i";
 
 //=========================== variables =======================================
 
-rinfo_vars_t rinfo_vars;
+cinfo_vars_t cinfo_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t     rinfo_receive(
+owerror_t     cinfo_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
    coap_option_iht*  coap_options
 );
-void          rinfo_sendDone(
+void          cinfo_sendDone(
    OpenQueueEntry_t* msg,
    owerror_t error
 );
@@ -37,21 +37,21 @@ void          rinfo_sendDone(
 /**
 \brief Initialize this module.
 */
-void rinfo_init() {
+void cinfo_init() {
    // do not run if DAGroot
    if(idmanager_getIsDAGroot()==TRUE) return; 
    
    // prepare the resource descriptor for the /i path
-   rinfo_vars.desc.path0len             = sizeof(rinfo_path0)-1;
-   rinfo_vars.desc.path0val             = (uint8_t*)(&rinfo_path0);
-   rinfo_vars.desc.path1len             = 0;
-   rinfo_vars.desc.path1val             = NULL;
-   rinfo_vars.desc.componentID          = COMPONENT_RINFO;
-   rinfo_vars.desc.callbackRx           = &rinfo_receive;
-   rinfo_vars.desc.callbackSendDone     = &rinfo_sendDone;
+   cinfo_vars.desc.path0len             = sizeof(cinfo_path0)-1;
+   cinfo_vars.desc.path0val             = (uint8_t*)(&cinfo_path0);
+   cinfo_vars.desc.path1len             = 0;
+   cinfo_vars.desc.path1val             = NULL;
+   cinfo_vars.desc.componentID          = COMPONENT_CINFO;
+   cinfo_vars.desc.callbackRx           = &cinfo_receive;
+   cinfo_vars.desc.callbackSendDone     = &cinfo_sendDone;
    
    // register with the CoAP module
-   opencoap_register(&rinfo_vars.desc);
+   opencoap_register(&cinfo_vars.desc);
 }
 
 //=========================== private =========================================
@@ -66,7 +66,7 @@ void rinfo_init() {
 
 \return Whether the response is prepared successfully.
 */
-owerror_t rinfo_receive(
+owerror_t cinfo_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht* coap_header,
       coap_option_iht* coap_options
@@ -133,6 +133,6 @@ owerror_t rinfo_receive(
 \param[in] msg The CoAP message just sent.
 \param[in] error The outcome of sending it.
 */
-void rinfo_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+void cinfo_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

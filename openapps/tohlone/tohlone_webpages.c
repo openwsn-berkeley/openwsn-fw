@@ -5,7 +5,7 @@
 */
 
 #include "openwsn.h"
-#include "ohlone_webpages.h"
+#include "tohlone_webpages.h"
 
 /*
 #include "gyro.h"
@@ -18,14 +18,14 @@
 
 //=========================== prototypes ======================================
 
-uint16_t ohlone_replace_digit(uint8_t *buffer, uint16_t value, uint16_t place);
-void     ohlone_line_replace16(uint8_t *buffer, uint16_t value);
-uint8_t  ohlone_insert3sensors(uint8_t *buffer, uint8_t *sensors); 
-uint8_t  ohlone_insert4sensors(uint8_t *buffer, uint8_t *sensors); 
+uint16_t tohlone_replace_digit(uint8_t *buffer, uint16_t value, uint16_t place);
+void     tohlone_line_replace16(uint8_t *buffer, uint16_t value);
+uint8_t  tohlone_insert3sensors(uint8_t *buffer, uint8_t *sensors); 
+uint8_t  tohlone_insert4sensors(uint8_t *buffer, uint8_t *sensors); 
 
 //=========================== public ==========================================
 
-void ohlone_webpages_init(void) {
+void tohlone_webpages_init(void) {
    /*
    if (*(&eui64+3)==0x09) {                      // this is a GINA board (not a basestation)
       gyro_init();
@@ -36,7 +36,7 @@ void ohlone_webpages_init(void) {
    */
 }
 
-uint8_t ohlone_webpage(uint8_t *getRequest, uint16_t chunk, uint8_t *packet) {
+uint8_t tohlone_webpage(uint8_t *getRequest, uint16_t chunk, uint8_t *packet) {
   // TODO : enforce max of TCP_DEFAULT_WINDOW_SIZE
   uint8_t len = 0;
   uint8_t current_line = 0;
@@ -56,7 +56,7 @@ uint8_t ohlone_webpage(uint8_t *getRequest, uint16_t chunk, uint8_t *packet) {
 
 //=========================== private =========================================
 
-uint16_t ohlone_replace_digit(uint8_t *buffer, uint16_t value, uint16_t place) {
+uint16_t tohlone_replace_digit(uint8_t *buffer, uint16_t value, uint16_t place) {
   uint8_t digit = '0';
   while (value > place) {
     value -= place;
@@ -66,29 +66,29 @@ uint16_t ohlone_replace_digit(uint8_t *buffer, uint16_t value, uint16_t place) {
   return value;
 }
 
-void ohlone_line_replace16(uint8_t *buffer, uint16_t value) {
-  value = ohlone_replace_digit(buffer++, value, 10000);
-  value = ohlone_replace_digit(buffer++, value, 1000);
-  value = ohlone_replace_digit(buffer++, value, 100);
-  value = ohlone_replace_digit(buffer++, value, 10);
-  value = ohlone_replace_digit(buffer++, value, 1);
+void tohlone_line_replace16(uint8_t *buffer, uint16_t value) {
+  value = tohlone_replace_digit(buffer++, value, 10000);
+  value = tohlone_replace_digit(buffer++, value, 1000);
+  value = tohlone_replace_digit(buffer++, value, 100);
+  value = tohlone_replace_digit(buffer++, value, 10);
+  value = tohlone_replace_digit(buffer++, value, 1);
 }
 
-uint8_t ohlone_insert3sensors(uint8_t *buffer, uint8_t *sensordata) {
+uint8_t tohlone_insert3sensors(uint8_t *buffer, uint8_t *sensordata) {
   uint8_t len = 0;
-  ohlone_line_replace16(buffer + len, (sensordata[0] << 8) + sensordata[1]);
+  tohlone_line_replace16(buffer + len, (sensordata[0] << 8) + sensordata[1]);
   len += 5; buffer[len++] = ',';    
-  ohlone_line_replace16(buffer + len, (sensordata[2] << 8) + sensordata[3]);
+  tohlone_line_replace16(buffer + len, (sensordata[2] << 8) + sensordata[3]);
   len += 5; buffer[len++] = ',';    
-  ohlone_line_replace16(buffer + len, (sensordata[4] << 8) + sensordata[5]);
+  tohlone_line_replace16(buffer + len, (sensordata[4] << 8) + sensordata[5]);
   len += 5;
   return len;
 }
 
-uint8_t ohlone_insert4sensors(uint8_t *buffer, uint8_t *sensordata) {
-  uint8_t len = ohlone_insert3sensors(buffer, sensordata);
+uint8_t tohlone_insert4sensors(uint8_t *buffer, uint8_t *sensordata) {
+  uint8_t len = tohlone_insert3sensors(buffer, sensordata);
   buffer[len++] = ',';
-  ohlone_line_replace16(buffer + len, (sensordata[6] << 8) + sensordata[7]);
+  tohlone_line_replace16(buffer + len, (sensordata[6] << 8) + sensordata[7]);
   len += 5; 
   return len;
 }

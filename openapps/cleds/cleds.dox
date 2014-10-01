@@ -1,7 +1,7 @@
 /**
-\defgroup netLeds netLeds
+\defgroup cleds cleds
 
-\brief UDP LEDs application
+\brief CoAP LEDs application
 
-\author Ankur Mehta <mehtank@eecs.berkeley.edu>, September 2010
+\author Ankur Mehta <mehtank@eecs.berkeley.edu>, September 2010.
 */

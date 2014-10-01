@@ -4,7 +4,7 @@
 */
 
 #include "openwsn.h"
-#include "rleds.h"
+#include "cleds.h"
 #include "opencoap.h"
 #include "packetfunctions.h"
 #include "leds.h"
@@ -12,37 +12,37 @@
 
 //=========================== variables =======================================
 
-rleds_vars_t rleds_vars;
+cleds_vars_t cleds_vars;
 
-const uint8_t rleds_path0[]       = "l";
+const uint8_t cleds_path0[]       = "l";
 
 //=========================== prototypes ======================================
 
-owerror_t rleds_receive(
+owerror_t cleds_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
    coap_option_iht*  coap_options
 );
-void     rleds_sendDone(
+void     cleds_sendDone(
    OpenQueueEntry_t* msg,
    owerror_t error
 );
 
 //=========================== public ==========================================
 
-void rleds__init() {
+void cleds__init() {
    
    // prepare the resource descriptor for the /l path
-   rleds_vars.desc.path0len            = sizeof(rleds_path0)-1;
-   rleds_vars.desc.path0val            = (uint8_t*)(&rleds_path0);
-   rleds_vars.desc.path1len            = 0;
-   rleds_vars.desc.path1val            = NULL;
-   rleds_vars.desc.componentID         = COMPONENT_RLEDS;
-   rleds_vars.desc.callbackRx          = &rleds_receive;
-   rleds_vars.desc.callbackSendDone    = &rleds_sendDone;
+   cleds_vars.desc.path0len            = sizeof(cleds_path0)-1;
+   cleds_vars.desc.path0val            = (uint8_t*)(&cleds_path0);
+   cleds_vars.desc.path1len            = 0;
+   cleds_vars.desc.path1val            = NULL;
+   cleds_vars.desc.componentID         = COMPONENT_CLEDS;
+   cleds_vars.desc.callbackRx          = &cleds_receive;
+   cleds_vars.desc.callbackSendDone    = &cleds_sendDone;
    
    // register with the CoAP module
-   opencoap_register(&rleds_vars.desc);
+   opencoap_register(&cleds_vars.desc);
 }
 
 //=========================== private =========================================
@@ -57,7 +57,7 @@ void rleds__init() {
 
 \return Whether the response is prepared successfully.
 */
-owerror_t rleds_receive(
+owerror_t cleds_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht*  coap_header,
       coap_option_iht*  coap_options
@@ -121,6 +121,6 @@ owerror_t rleds_receive(
 \param[in] msg The CoAP message just sent.
 \param[in] error The outcome of sending it.
 */
-void rleds_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+void cleds_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

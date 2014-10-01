@@ -3,7 +3,7 @@
 */
 
 #include "openwsn.h"
-#include "rex.h"
+#include "cexample.h"
 #include "opencoap.h"
 #include "opentimers.h"
 #include "openqueue.h"
@@ -18,53 +18,53 @@
 //=========================== defines =========================================
 
 /// inter-packet period (in ms)
-#define REXPERIOD    10000
-#define PAYLOADLEN    62
+#define CEXAMPLEPERIOD  10000
+#define PAYLOADLEN      62
 
-const uint8_t rex_path0[] = "rex";
+const uint8_t cexample_path0[] = "ex";
 
 //=========================== variables =======================================
 
 typedef struct {
    coap_resource_desc_t desc;
-   opentimer_id_t  timerId;
-} rex_vars_t;
+   opentimer_id_t       timerId;
+} cexample_vars_t;
 
-rex_vars_t rex_vars;
+cexample_vars_t cexample_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t rex_receive(OpenQueueEntry_t* msg,
+owerror_t cexample_receive(OpenQueueEntry_t* msg,
                     coap_header_iht*  coap_header,
                     coap_option_iht*  coap_options);
-void    rex_timer_cb(void);
-void    rex_task_cb(void);
-void    rex_sendDone(OpenQueueEntry_t* msg,
+void    cexample_timer_cb(void);
+void    cexample_task_cb(void);
+void    cexample_sendDone(OpenQueueEntry_t* msg,
                        owerror_t error);
 
 //=========================== public ==========================================
 
-void rex_init() {
+void cexample_init() {
    
-   // prepare the resource descriptor for the /rex path
-   rex_vars.desc.path0len             = sizeof(rex_path0)-1;
-   rex_vars.desc.path0val             = (uint8_t*)(&rex_path0);
-   rex_vars.desc.path1len             = 0;
-   rex_vars.desc.path1val             = NULL;
-   rex_vars.desc.componentID          = COMPONENT_REX;
-   rex_vars.desc.callbackRx           = &rex_receive;
-   rex_vars.desc.callbackSendDone     = &rex_sendDone;
+   // prepare the resource descriptor for the /ex path
+   cexample_vars.desc.path0len             = sizeof(cexample_path0)-1;
+   cexample_vars.desc.path0val             = (uint8_t*)(&cexample_path0);
+   cexample_vars.desc.path1len             = 0;
+   cexample_vars.desc.path1val             = NULL;
+   cexample_vars.desc.componentID          = COMPONENT_CEXAMPLE;
+   cexample_vars.desc.callbackRx           = &cexample_receive;
+   cexample_vars.desc.callbackSendDone     = &cexample_sendDone;
    
    
-   opencoap_register(&rex_vars.desc);
-   rex_vars.timerId    = opentimers_start(REXPERIOD,
+   opencoap_register(&cexample_vars.desc);
+   cexample_vars.timerId    = opentimers_start(CEXAMPLEPERIOD,
                                                 TIMER_PERIODIC,TIME_MS,
-                                                rex_timer_cb);
+                                                cexample_timer_cb);
 }
 
 //=========================== private =========================================
 
-owerror_t rex_receive(OpenQueueEntry_t* msg,
+owerror_t cexample_receive(OpenQueueEntry_t* msg,
                       coap_header_iht* coap_header,
                       coap_option_iht* coap_options) {
    return E_FAIL;
@@ -72,11 +72,11 @@ owerror_t rex_receive(OpenQueueEntry_t* msg,
 
 //timer fired, but we don't want to execute task in ISR mode
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
-void rex_timer_cb(){
-   scheduler_push_task(rex_task_cb,TASKPRIO_COAP);
+void cexample_timer_cb(){
+   scheduler_push_task(cexample_task_cb,TASKPRIO_COAP);
 }
 
-void rex_task_cb() {
+void cexample_task_cb() {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
    uint8_t              numOptions;
@@ -92,7 +92,7 @@ void rex_task_cb() {
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers_stop(rex_vars.timerId);
+      opentimers_stop(cexample_vars.timerId);
       return;
    }
    
@@ -102,10 +102,10 @@ void rex_task_cb() {
    avg = sum/N_avg;
    
    // create a CoAP RD packet
-   pkt = openqueue_getFreePacketBuffer(COMPONENT_REX);
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_CEXAMPLE);
    if (pkt==NULL) {
       openserial_printError(
-         COMPONENT_REX,
+         COMPONENT_CEXAMPLE,
          ERR_NO_FREE_PACKET_BUFFER,
          (errorparameter_t)0,
          (errorparameter_t)0
@@ -114,8 +114,8 @@ void rex_task_cb() {
       return;
    }
    // take ownership over that packet
-   pkt->creator                   = COMPONENT_REX;
-   pkt->owner                     = COMPONENT_REX;
+   pkt->creator                   = COMPONENT_CEXAMPLE;
+   pkt->owner                     = COMPONENT_CEXAMPLE;
    // CoAP payload
    packetfunctions_reserveHeaderSize(pkt,PAYLOADLEN);
    for (i=0;i<PAYLOADLEN;i++) {
@@ -127,10 +127,10 @@ void rex_task_cb() {
    
    numOptions = 0;
    // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(rex_path0)-1);
-   memcpy(&pkt->payload[0],&rex_path0,sizeof(rex_path0)-1);
+   packetfunctions_reserveHeaderSize(pkt,sizeof(cexample_path0)-1);
+   memcpy(&pkt->payload[0],&cexample_path0,sizeof(cexample_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                = ((COAP_OPTION_NUM_URIPATH) << 4) | (sizeof(rex_path0)-1);
+   pkt->payload[0]                = ((COAP_OPTION_NUM_URIPATH) << 4) | (sizeof(cexample_path0)-1);
    numOptions++;
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
@@ -149,7 +149,7 @@ void rex_task_cb() {
       COAP_TYPE_NON,
       COAP_CODE_REQ_PUT,
       numOptions,
-      &rex_vars.desc
+      &cexample_vars.desc
    );
    
    // avoid overflowing the queue if fails
@@ -160,6 +160,6 @@ void rex_task_cb() {
    return;
 }
 
-void rex_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+void cexample_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

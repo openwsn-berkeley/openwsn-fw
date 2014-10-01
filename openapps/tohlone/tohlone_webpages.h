@@ -4,8 +4,8 @@
 \author Ankur Mehta <mehtank@eecs.berkeley.edu>, September 2010
 */
 
-#ifndef __OHLONEWEBPAGES_H
-#define __OHLONEWEBPAGES_H
+#ifndef __TOHLONE_WEBPAGES_H
+#define __TOHLONE_WEBPAGES_H
 
 //=========================== define ==========================================
 
@@ -18,7 +18,7 @@
 
 #define HTTP_LINE_REPLACE16(offset, value) {     \
   if (chunk == current_line)                     \
-    ohlone_line_replace16(packet+offset, value); \
+    tohlone_line_replace16(packet+offset, value); \
 }
 
 //=========================== typedef =========================================
@@ -27,7 +27,7 @@
 
 //=========================== prototypes ======================================
 
-void     ohlone_webpages_init(void);
-uint8_t  ohlone_webpage(uint8_t *getRequest, uint16_t chunk, uint8_t *packet);
+void     tohlone_webpages_init(void);
+uint8_t  tohlone_webpage(uint8_t *getRequest, uint16_t chunk, uint8_t *packet);
 
 #endif

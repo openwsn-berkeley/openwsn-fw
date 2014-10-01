@@ -1,12 +1,12 @@
 /**
-\brief CoAP 6top application
+\brief CoAP 6top application.
 
 \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, February 2013.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, July 2014
 */
 
 #include "openwsn.h"
-#include "r6t.h"
+#include "c6t.h"
 #include "sixtop.h"
 #include "idmanager.h"
 #include "openqueue.h"
@@ -14,39 +14,39 @@
 
 //=========================== defines =========================================
 
-const uint8_t r6t_path0[] = "6t";
+const uint8_t c6t_path0[] = "6t";
 
 //=========================== variables =======================================
 
-r6t_vars_t r6t_vars;
+c6t_vars_t c6t_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t r6t_receive(
+owerror_t c6t_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
    coap_option_iht*  coap_options
 );
-void    r6t_sendDone(
+void    c6t_sendDone(
    OpenQueueEntry_t* msg,
    owerror_t         error
 );
 
 //=========================== public ==========================================
 
-void r6t_init() {
+void c6t_init() {
    if(idmanager_getIsDAGroot()==TRUE) return; 
    
    // prepare the resource descriptor for the /6t path
-   r6t_vars.desc.path0len            = sizeof(r6t_path0)-1;
-   r6t_vars.desc.path0val            = (uint8_t*)(&r6t_path0);
-   r6t_vars.desc.path1len            = 0;
-   r6t_vars.desc.path1val            = NULL;
-   r6t_vars.desc.componentID         = COMPONENT_R6T;
-   r6t_vars.desc.callbackRx          = &r6t_receive;
-   r6t_vars.desc.callbackSendDone    = &r6t_sendDone;
+   c6t_vars.desc.path0len            = sizeof(c6t_path0)-1;
+   c6t_vars.desc.path0val            = (uint8_t*)(&c6t_path0);
+   c6t_vars.desc.path1len            = 0;
+   c6t_vars.desc.path1val            = NULL;
+   c6t_vars.desc.componentID         = COMPONENT_R6T;
+   c6t_vars.desc.callbackRx          = &c6t_receive;
+   c6t_vars.desc.callbackSendDone    = &c6t_sendDone;
    
-   opencoap_register(&r6t_vars.desc);
+   opencoap_register(&c6t_vars.desc);
 }
 
 //=========================== private =========================================
@@ -61,7 +61,7 @@ void r6t_init() {
 
 \return Whether the response is prepared successfully.
 */
-owerror_t r6t_receive(
+owerror_t c6t_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht*  coap_header,
       coap_option_iht*  coap_options
@@ -134,6 +134,6 @@ owerror_t r6t_receive(
    return outcome;
 }
 
-void r6t_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+void c6t_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }

@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "tcpecho.h"
+#include "techo.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "opentcp.h"
@@ -10,18 +10,18 @@
 
 //=========================== public ==========================================
 
-void tcpecho_init() {
+void techo_init() {
 }
 
-bool tcpecho_shouldIlisten() {
+bool techo_shouldIlisten() {
    return TRUE;
 }
 
-void tcpecho_receive(OpenQueueEntry_t* msg) {
+void techo_receive(OpenQueueEntry_t* msg) {
    uint16_t temp_l4_destination_port;
-   msg->owner   = COMPONENT_TCPECHO;
+   msg->owner                     = COMPONENT_TECHO;
    //reply with the same OpenQueueEntry_t
-   msg->creator                   = COMPONENT_TCPECHO;
+   msg->creator                   = COMPONENT_TECHO;
    msg->l4_protocol               = IANA_TCP;
    temp_l4_destination_port       = msg->l4_destination_port;
    msg->l4_destination_port       = msg->l4_sourcePortORicmpv6Type;
@@ -31,10 +31,10 @@ void tcpecho_receive(OpenQueueEntry_t* msg) {
    }
 }
 
-void tcpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
-   msg->owner = COMPONENT_TCPECHO;
-   if (msg->creator!=COMPONENT_TCPECHO) {
-      openserial_printError(COMPONENT_TCPECHO,ERR_UNEXPECTED_SENDDONE,
+void techo_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+   msg->owner = COMPONENT_TECHO;
+   if (msg->creator!=COMPONENT_TECHO) {
+      openserial_printError(COMPONENT_TECHO,ERR_UNEXPECTED_SENDDONE,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }
@@ -43,10 +43,10 @@ void tcpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-void tcpecho_connectDone(owerror_t error) {
+void techo_connectDone(owerror_t error) {
 }
 
-bool tcpecho_debugPrint() {
+bool techo_debugPrint() {
    return FALSE;
 }
 

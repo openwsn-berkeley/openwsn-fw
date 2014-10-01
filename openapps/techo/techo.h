@@ -1,10 +1,10 @@
-#ifndef __TCPECHO_H
-#define __TCPECHO_H
+#ifndef __TECHO_H
+#define __TECHO_H
 
 /**
 \addtogroup AppTcp
 \{
-\addtogroup tcpEcho
+\addtogroup techo
 \{
 */
 
@@ -16,12 +16,12 @@
 
 //=========================== prototypes ======================================
 
-void tcpecho_init(void);
-bool tcpecho_shouldIlisten(void);
-void tcpecho_receive(OpenQueueEntry_t* msg);
-void tcpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error);
-void tcpecho_connectDone(owerror_t error);
-bool tcpecho_debugPrint(void);
+void techo_init(void);
+bool techo_shouldIlisten(void);
+void techo_receive(OpenQueueEntry_t* msg);
+void techo_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+void techo_connectDone(owerror_t error);
+bool techo_debugPrint(void);
 
 /**
 \}

@@ -1,5 +1,5 @@
 #include "openwsn.h"
-#include "udpecho.h"
+#include "uecho.h"
 #include "openudp.h"
 #include "openqueue.h"
 #include "openserial.h"
@@ -11,10 +11,10 @@
 
 //=========================== public ==========================================
 
-void udpecho_init() {
+void uecho_init() {
 }
 
-void udpecho_receive(OpenQueueEntry_t* request) {
+void uecho_receive(OpenQueueEntry_t* request) {
    uint16_t          temp_l4_destination_port;
    OpenQueueEntry_t* reply;
    
@@ -51,11 +51,11 @@ void udpecho_receive(OpenQueueEntry_t* request) {
    }
 }
 
-void udpecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+void uecho_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
-bool udpecho_debugPrint() {
+bool uecho_debugPrint() {
    return FALSE;
 }
 

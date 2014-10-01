@@ -1,10 +1,10 @@
-#ifndef __RLEDS_H
-#define __RLEDS_H
+#ifndef __CLEDS_H
+#define __CLEDS_H
 
 /**
 \addtogroup AppCoAP
 \{
-\addtogroup netLeds
+\addtogroup cleds
 \{
 */
 
@@ -18,11 +18,11 @@
 
 typedef struct {
    coap_resource_desc_t desc;
-} rleds_vars_t;
+} cleds_vars_t;
 
 //=========================== prototypes ======================================
 
-void rleds__init(void);
+void cleds__init(void);
 
 /**
 \}

@@ -1,10 +1,10 @@
-#ifndef __RINFO_H
-#define __RINFO_H
+#ifndef __CINFO_H
+#define __CINFO_H
 
 /**
 \addtogroup AppCoAP
 \{
-\addtogroup rinfo
+\addtogroup cinfo
 \{
 */
 
@@ -18,11 +18,11 @@
 
 typedef struct {
    coap_resource_desc_t desc;
-} rinfo_vars_t;
+} cinfo_vars_t;
 
 //=========================== prototypes ======================================
 
-void rinfo_init(void);
+void cinfo_init(void);
 
 /**
 \}

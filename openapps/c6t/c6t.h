@@ -5,13 +5,13 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, July 2014
 */
 
-#ifndef __R6T_H
-#define __R6T_H
+#ifndef __C6T_H
+#define __C6T_H
 
 /**
 \addtogroup AppCoAP
 \{
-\addtogroup r6t
+\addtogroup c6t
 \{
 */
 
@@ -27,11 +27,11 @@
 
 typedef struct {
    coap_resource_desc_t desc;
-} r6t_vars_t;
+} c6t_vars_t;
 
 //=========================== prototypes ======================================
 
-void r6t_init(void);
+void c6t_init(void);
 
 /**
 \}

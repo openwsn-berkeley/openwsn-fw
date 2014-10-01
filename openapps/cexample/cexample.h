@@ -1,10 +1,10 @@
-#ifndef __REX_H
-#define __REX_H
+#ifndef __CEXAMPLE_H
+#define __CEXAMPLE_H
 
 /**
 \addtogroup AppUdp
 \{
-\addtogroup rT
+\addtogroup cexample
 \{
 */
 
@@ -16,7 +16,7 @@
 
 //=========================== prototypes ======================================
 
-void rex_init(void);
+void cexample_init(void);
 
 /**
 \}

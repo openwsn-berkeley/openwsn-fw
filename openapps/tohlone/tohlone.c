@@ -1,89 +1,89 @@
 #include "openwsn.h"
-#include "ohlone.h"
+#include "tohlone.h"
 #include "openqueue.h"
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "opentcp.h"
 
-#include "ohlone_webpages.h"
+#include "tohlone_webpages.h"
 
 //=========================== variables =======================================
 
-ohlone_vars_t ohlone_vars;
+tohlone_vars_t tohlone_vars;
 
 //=========================== prototypes ======================================
 
-void ohlone_sendpkt(void);
-bool ohlone_check4chars(uint8_t c1[4], uint8_t c2[4]);
+void tohlone_sendpkt(void);
+bool tohlone_check4chars(uint8_t c1[4], uint8_t c2[4]);
 
 //=========================== public ==========================================
 
-void ohlone_init() {
-   ohlone_vars.httpChunk = 0;
-   ohlone_vars.getRequest[0] = '/';
-   ohlone_vars.getRequest[1] = ' ';
-   ohlone_webpages_init();
+void tohlone_init() {
+   tohlone_vars.httpChunk = 0;
+   tohlone_vars.getRequest[0] = '/';
+   tohlone_vars.getRequest[1] = ' ';
+   tohlone_webpages_init();
 }
 
-bool ohlone_shouldIlisten() {
+bool tohlone_shouldIlisten() {
    return TRUE;
 }
 
-void ohlone_sendpkt() {
+void tohlone_sendpkt() {
    uint8_t buffer[TCP_DEFAULT_WINDOW_SIZE];
    uint8_t buffer_len;
   
-   buffer_len = ohlone_webpage(ohlone_vars.getRequest, ohlone_vars.httpChunk++, buffer);
+   buffer_len = tohlone_webpage(tohlone_vars.getRequest, tohlone_vars.httpChunk++, buffer);
    
    if (buffer_len == 0) {
       // No more to send
       // close TCP session, but keep listening
-      ohlone_vars.getRequest[0] = '/';
-      ohlone_vars.getRequest[1] = ' ';
+      tohlone_vars.getRequest[0] = '/';
+      tohlone_vars.getRequest[1] = ' ';
       opentcp_close();
       return;
    }
 
-   ohlone_vars.pkt = openqueue_getFreePacketBuffer(COMPONENT_OHLONE);
-   if (ohlone_vars.pkt==NULL) {
-      openserial_printError(COMPONENT_OHLONE,ERR_NO_FREE_PACKET_BUFFER,
+   tohlone_vars.pkt = openqueue_getFreePacketBuffer(COMPONENT_TOHLONE);
+   if (tohlone_vars.pkt==NULL) {
+      openserial_printError(COMPONENT_TOHLONE,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       opentcp_close();
       return;
    }
-   ohlone_vars.pkt->creator = COMPONENT_OHLONE;
-   ohlone_vars.pkt->owner   = COMPONENT_OHLONE;
+   tohlone_vars.pkt->creator = COMPONENT_TOHLONE;
+   tohlone_vars.pkt->owner   = COMPONENT_TOHLONE;
    
-   packetfunctions_reserveHeaderSize(ohlone_vars.pkt, buffer_len);
-   memcpy(ohlone_vars.pkt->payload, buffer, buffer_len);
+   packetfunctions_reserveHeaderSize(tohlone_vars.pkt, buffer_len);
+   memcpy(tohlone_vars.pkt->payload, buffer, buffer_len);
    
-   if ((opentcp_send(ohlone_vars.pkt))==E_FAIL) {
-      openqueue_freePacketBuffer(ohlone_vars.pkt);
+   if ((opentcp_send(tohlone_vars.pkt))==E_FAIL) {
+      openqueue_freePacketBuffer(tohlone_vars.pkt);
       opentcp_close();
    }
 
 }
 
-bool ohlone_check4chars(uint8_t c1[4], uint8_t c2[4]) {
+bool tohlone_check4chars(uint8_t c1[4], uint8_t c2[4]) {
   return ((c1[0] == c2[0]) && 
           (c1[1] == c2[1]) && 
           (c1[2] == c2[2]) && 
           (c1[3] == c2[3]));
 }
 
-void ohlone_receive(OpenQueueEntry_t* msg) {
+void tohlone_receive(OpenQueueEntry_t* msg) {
    uint8_t payload_index;
    
    for (payload_index=0;payload_index<msg->length-3;payload_index++) {
-      if (ohlone_check4chars(msg->payload+payload_index,(unsigned char *) "GET "))
-         memcpy(ohlone_vars.getRequest, 
+      if (tohlone_check4chars(msg->payload+payload_index,(unsigned char *) "GET "))
+         memcpy(tohlone_vars.getRequest, 
                 msg->payload + payload_index + 4, 
                 msg->length - payload_index - 4);
 
-      if (ohlone_check4chars(msg->payload+payload_index, (unsigned char *)"\r\n\r\n")) {
-         ohlone_vars.httpChunk = 0;
-         ohlone_sendpkt();
+      if (tohlone_check4chars(msg->payload+payload_index, (unsigned char *)"\r\n\r\n")) {
+         tohlone_vars.httpChunk = 0;
+         tohlone_sendpkt();
          return;
       }
    }
@@ -91,22 +91,22 @@ void ohlone_receive(OpenQueueEntry_t* msg) {
    openqueue_freePacketBuffer(msg);
 }
 
-void ohlone_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
-   msg->owner = COMPONENT_OHLONE;
-   if (msg->creator!=COMPONENT_OHLONE) {
-      openserial_printError(COMPONENT_OHLONE,ERR_UNEXPECTED_SENDDONE,
+void tohlone_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+   msg->owner = COMPONENT_TOHLONE;
+   if (msg->creator!=COMPONENT_TOHLONE) {
+      openserial_printError(COMPONENT_TOHLONE,ERR_UNEXPECTED_SENDDONE,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }
    
-   ohlone_sendpkt();
+   tohlone_sendpkt();
    openqueue_freePacketBuffer(msg);
 }
 
-void ohlone_connectDone(owerror_t error) {
+void tohlone_connectDone(owerror_t error) {
 }
 
-bool ohlone_debugPrint() {
+bool tohlone_debugPrint() {
    return FALSE;
 }
 

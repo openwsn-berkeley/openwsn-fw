@@ -1,10 +1,10 @@
-#ifndef __OHLONE_H
-#define __OHLONE_H
+#ifndef __TOHLONE_H
+#define __TOHLONE_H
 
 /**
 \addtogroup AppTcp
 \{
-\addtogroup ohlone
+\addtogroup tohlone
 \{
 */
 
@@ -21,16 +21,16 @@ typedef struct {
    bool                 sending;
    uint16_t             httpChunk;
    uint8_t              getRequest[TCP_DEFAULT_WINDOW_SIZE];
-} ohlone_vars_t;
+} tohlone_vars_t;
 
 //=========================== prototypes ======================================
 
-void ohlone_init(void);
-bool ohlone_shouldIlisten(void);
-void ohlone_receive(OpenQueueEntry_t* msg);
-void ohlone_sendDone(OpenQueueEntry_t* msg, owerror_t error);
-void ohlone_connectDone(owerror_t error);
-bool ohlone_debugPrint(void);
+void tohlone_init(void);
+bool tohlone_shouldIlisten(void);
+void tohlone_receive(OpenQueueEntry_t* msg);
+void tohlone_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+void tohlone_connectDone(owerror_t error);
+bool tohlone_debugPrint(void);
 
 /**
 \}
