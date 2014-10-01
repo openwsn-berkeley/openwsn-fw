@@ -9,12 +9,8 @@
 //=== default applications
 // TCP
 #include "tcpecho.h"
-#include "tcpinject.h"
-#include "tcpprint.h"
 // UDP
 #include "udpecho.h"
-#include "udpinject.h"
-#include "udpprint.h"
 // CoAP
 #include "rinfo.h"
 #include "rleds.h"
@@ -37,12 +33,8 @@ void openapps_init(void) {
    //=== default applications
    // TCP
    tcpecho_init();
-   tcpinject_init();
-   tcpprint_init();
    // UDP
    udpecho_init();
-   udpinject_init();
-   udpprint_init();
    // CoAP
    r6t_init();
    rinfo_init();
