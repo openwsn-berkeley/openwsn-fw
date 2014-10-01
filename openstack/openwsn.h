@@ -82,17 +82,9 @@ enum {
    //TCP
    WKP_TCP_HTTP                        =    80,
    WKP_TCP_ECHO                        =     7,
-   WKP_TCP_INJECT                      =  2188,
-   WKP_TCP_DISCARD                     =     9,
    //UDP
    WKP_UDP_COAP                        =  5683,
-   WKP_UDP_HELI                        =  2192,
-   WKP_UDP_IMU                         =  2190,
    WKP_UDP_ECHO                        =     7,
-   WKP_UDP_INJECT                      =  2188,
-   WKP_UDP_DISCARD                     =     9,
-   WKP_UDP_RAND                        = 61000,
-   WKP_UDP_LATENCY                     = 61001,
 };
 
 //status elements
@@ -128,9 +120,9 @@ enum {
    COMPONENT_IEEE802154                = 0x08,
    COMPONENT_IEEE802154E               = 0x09,
    
-   //All components with higher component id than COMPONENT_IEEE802154E
-   //won't be able to get free packets from the queue 
-   //when the mote is not synch
+   // all components with higher component id than COMPONENT_IEEE802154E
+   // won't be able to get free packets from the queue 
+   // when the mote is not synch
    
    //MAClow<->MAChigh ("virtual components")
    COMPONENT_SIXTOP_TO_IEEE802154E     = 0x0a,
@@ -153,35 +145,16 @@ enum {
    COMPONENT_OPENTCP                   = 0x17,
    COMPONENT_OPENUDP                   = 0x18,
    COMPONENT_OPENCOAP                  = 0x19,
-   //App test
-   COMPONENT_TCPECHO                   = 0x1a,
-   COMPONENT_TCPINJECT                 = 0x1b,
-   COMPONENT_TCPPRINT                  = 0x1c,
-   COMPONENT_UDPECHO                   = 0x1d,
-   COMPONENT_UDPINJECT                 = 0x1e,
-   COMPONENT_UDPPRINT                  = 0x1f,
-   COMPONENT_RSVP                      = 0x20,
-   //App
-   COMPONENT_OHLONE                    = 0x21,
-   COMPONENT_HELI                      = 0x22,
-   COMPONENT_IMU                       = 0x23,
-   COMPONENT_RLEDS                     = 0x24,
-   COMPONENT_RREG                      = 0x25,
-   COMPONENT_RWELLKNOWN                = 0x26,
-   COMPONENT_RT                        = 0x27,
-   COMPONENT_REX                       = 0x28,
-   COMPONENT_RXL1                      = 0x29,
-   COMPONENT_RINFO                     = 0x2a,
-   COMPONENT_RHELI                     = 0x2b,
-   COMPONENT_RRUBE                     = 0x2c,
-   COMPONENT_LAYERDEBUG                = 0x2d,
-   COMPONENT_UDPRAND                   = 0x2e,
-   COMPONENT_UDPSTORM                  = 0x2f,
-   COMPONENT_UDPLATENCY                = 0x30,
-   COMPONENT_TEST                      = 0x31,
-   COMPONENT_R6T                       = 0x32,
-   COMPONENT_SWARMBAND                 = 0x33,
-   COMPONENT_RRT                       = 0x34,
+   // applications
+   COMPONENT_C6T                       = 0x1a,
+   COMPONENT_CEXAMPLE                  = 0x1b,
+   COMPONENT_CINFO                     = 0x1c,
+   COMPONENT_CLEDS                     = 0x1d,
+   COMPONENT_CSTORM                    = 0x1e,
+   COMPONENT_CWELLKNOWN                = 0x1f,
+   COMPONENT_TECHO                     = 0x20,
+   COMPONENT_TOHLONE                   = 0x21,
+   COMPONENT_UECHO                     = 0x22,
 };
 
 /**

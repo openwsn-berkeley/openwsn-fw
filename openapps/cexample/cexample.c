@@ -25,11 +25,6 @@ const uint8_t cexample_path0[] = "ex";
 
 //=========================== variables =======================================
 
-typedef struct {
-   coap_resource_desc_t desc;
-   opentimer_id_t       timerId;
-} cexample_vars_t;
-
 cexample_vars_t cexample_vars;
 
 //=========================== prototypes ======================================

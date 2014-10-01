@@ -12,8 +12,6 @@
 #include "icmpv6echo.h"
 #include "idmanager.h"
 #include "openqueue.h"
-#include "tcpinject.h"
-#include "udpinject.h"
 #include "openbridge.h"
 #include "leds.h"
 #include "schedule.h"
@@ -393,15 +391,6 @@ void openserial_stop() {
             break;
          case SERFRAME_PC2MOTE_DATA:
             openbridge_triggerData();
-            break;
-         case SERFRAME_PC2MOTE_TRIGGERTCPINJECT:
-            tcpinject_trigger();
-            break;
-         case SERFRAME_PC2MOTE_TRIGGERUDPINJECT:
-            udpinject_trigger();
-            break;
-         case SERFRAME_PC2MOTE_TRIGGERICMPv6ECHO:
-            icmpv6echo_trigger();
             break;
          case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
             //echo function must reset input buffer after reading the data.

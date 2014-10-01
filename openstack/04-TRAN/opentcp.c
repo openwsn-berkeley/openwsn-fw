@@ -7,11 +7,9 @@
 #include "bsp_timer.h"
 #include "scheduler.h"
 #include "opentimers.h"
-//TCP applications
-#include "ohlone.h"
-#include "tcpecho.h"
-#include "tcpinject.h"
-#include "tcpprint.h"
+// applications
+#include "tohlone.h"
+#include "techo.h"
 
 //=========================== variables =======================================
 
@@ -120,16 +118,10 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          tcp_change_state(TCP_STATE_ESTABLISHED);
          switch(tcp_vars.myPort) {
             case WKP_TCP_HTTP:
-               ohlone_connectDone(E_SUCCESS);
+               tohlone_connectDone(E_SUCCESS);
                break;
             case WKP_TCP_ECHO:
-               tcpecho_connectDone(E_SUCCESS);
-               break;
-            case WKP_TCP_INJECT:
-               tcpinject_connectDone(E_SUCCESS);
-               break;   
-            case WKP_TCP_DISCARD:
-               tcpprint_connectDone(E_SUCCESS);
+               techo_connectDone(E_SUCCESS);
                break;
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
@@ -148,16 +140,10 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          tcp_change_state(TCP_STATE_ESTABLISHED);
          switch(tcp_vars.myPort) {
             case WKP_TCP_HTTP:
-               ohlone_receive(tcp_vars.dataReceived);
+               tohlone_receive(tcp_vars.dataReceived);
                break;
             case WKP_TCP_ECHO:
-               tcpecho_receive(tcp_vars.dataReceived);
-               break;
-            case WKP_TCP_INJECT:
-               tcpinject_receive(tcp_vars.dataReceived);
-               break;
-            case WKP_TCP_DISCARD:
-               tcpprint_receive(tcp_vars.dataReceived);
+               techo_receive(tcp_vars.dataReceived);
                break;
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
@@ -253,16 +239,10 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
       case TCP_STATE_CLOSED:                                      //[receive] establishement
          switch(msg->l4_destination_port) {
             case WKP_TCP_HTTP:
-               shouldIlisten = ohlone_shouldIlisten();
+               shouldIlisten = tohlone_shouldIlisten();
                break;
             case WKP_TCP_ECHO:
-               shouldIlisten = tcpecho_shouldIlisten();
-               break;
-            case WKP_TCP_INJECT:
-               shouldIlisten = tcpinject_shouldIlisten();
-               break;   
-            case WKP_TCP_DISCARD:
-               shouldIlisten = tcpprint_shouldIlisten();
+               shouldIlisten = techo_shouldIlisten();
                break;
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
@@ -435,16 +415,10 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             //I receive ACK, data message sent
             switch(tcp_vars.myPort) {
                case WKP_TCP_HTTP:
-                  ohlone_sendDone(tcp_vars.dataToSend,E_SUCCESS);
+                  tohlone_sendDone(tcp_vars.dataToSend,E_SUCCESS);
                   break;
                case WKP_TCP_ECHO:
-                  tcpecho_sendDone(tcp_vars.dataToSend,E_SUCCESS);
-                  break;
-               case WKP_TCP_INJECT:
-                  tcpinject_sendDone(tcp_vars.dataToSend,E_SUCCESS);
-                  break;
-               case WKP_TCP_DISCARD:
-                  tcpprint_sendDone(tcp_vars.dataToSend,E_SUCCESS);
+                  techo_sendDone(tcp_vars.dataToSend,E_SUCCESS);
                   break;
                default:
                   openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
@@ -458,16 +432,10 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
             //I receive FIN[+ACK], I send ACK
             switch(tcp_vars.myPort) {
                case WKP_TCP_HTTP:
-                  ohlone_sendDone(tcp_vars.dataToSend,E_SUCCESS);
+                  tohlone_sendDone(tcp_vars.dataToSend,E_SUCCESS);
                   break;
                case WKP_TCP_ECHO:
-                  tcpecho_sendDone(tcp_vars.dataToSend,E_SUCCESS);
-                  break;
-               case WKP_TCP_INJECT:
-                  tcpinject_sendDone(tcp_vars.dataToSend,E_SUCCESS);
-                  break;
-               case WKP_TCP_DISCARD:
-                  tcpprint_sendDone(tcp_vars.dataToSend,E_SUCCESS);
+                  techo_sendDone(tcp_vars.dataToSend,E_SUCCESS);
                   break;
                default:
                   openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,

@@ -54,9 +54,6 @@ enum {
 #define SERFRAME_PC2MOTE_SETBRIDGE          ((uint8_t)'B')
 #define SERFRAME_PC2MOTE_SETROOTBRIDGE      ((uint8_t)'Z')
 #define SERFRAME_PC2MOTE_DATA               ((uint8_t)'D')
-#define SERFRAME_PC2MOTE_TRIGGERTCPINJECT   ((uint8_t)'T')
-#define SERFRAME_PC2MOTE_TRIGGERUDPINJECT   ((uint8_t)'U')
-#define SERFRAME_PC2MOTE_TRIGGERICMPv6ECHO  ((uint8_t)'E')
 #define SERFRAME_PC2MOTE_TRIGGERSERIALECHO  ((uint8_t)'S')
 
 //=========================== typedef =========================================

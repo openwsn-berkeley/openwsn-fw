@@ -18,10 +18,10 @@ void uecho_receive(OpenQueueEntry_t* request) {
    uint16_t          temp_l4_destination_port;
    OpenQueueEntry_t* reply;
    
-   reply = openqueue_getFreePacketBuffer(COMPONENT_UDPECHO);
+   reply = openqueue_getFreePacketBuffer(COMPONENT_UECHO);
    if (reply==NULL) {
       openserial_printError(
-         COMPONENT_UDPLATENCY,
+         COMPONENT_UECHO,
          ERR_NO_FREE_PACKET_BUFFER,
          (errorparameter_t)0,
          (errorparameter_t)0
@@ -29,10 +29,10 @@ void uecho_receive(OpenQueueEntry_t* request) {
       return;
    }
    
-   reply->owner                         = COMPONENT_UDPECHO;
+   reply->owner                         = COMPONENT_UECHO;
    
    // reply with the same OpenQueueEntry_t
-   reply->creator                       = COMPONENT_UDPECHO;
+   reply->creator                       = COMPONENT_UECHO;
    reply->l4_protocol                   = IANA_UDP;
    temp_l4_destination_port           = request->l4_destination_port;
    reply->l4_destination_port           = request->l4_sourcePortORicmpv6Type;

@@ -24,18 +24,20 @@
 #include "icmpv6rpl_obj.h"
 #include "opencoap_obj.h"
 #include "opentcp_obj.h"
-#include "ohlone_obj.h"
-#include "r6t_obj.h"
-#include "tcpinject_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
-#include "uart_obj.h"
-#include "rinfo_obj.h"
-#include "udpstorm_obj.h"
-#include "rrt_obj.h"
-#include "rleds_obj.h"
-#include "rwellknown_obj.h"
+// applications
+#include "c6t_obj.h"
+#include "cexample_obj.h"
+#include "cinfo_obj.h"
+#include "cleds_obj.h"
+#include "cstorm_obj.h"
+#include "cwellknown_obj.h"
+#include "techo_obj.h"
+#include "tohlone_obj.h"
+#include "tohlone_obj.h"
+#include "uecho_obj.h"
 
 // notifications sent from the C mote to the Python BSP
 enum {
@@ -182,7 +184,7 @@ struct OpenMote {
    bsp_timer_icb_t      bsp_timer_icb;
    radio_icb_t          radio_icb;
    radiotimer_icb_t     radiotimer_icb;
-   //===== stack
+   //===== openstack
    // l4
    icmpv6echo_vars_t    icmpv6echo_vars;
    icmpv6rpl_vars_t     icmpv6rpl_vars;
@@ -208,24 +210,15 @@ struct OpenMote {
    // kernel
    scheduler_vars_t     scheduler_vars;
    scheduler_dbg_t      scheduler_dbg;
-   //===== applications
-   //+++++ TCP
-   //- debug
-   tcpinject_vars_t     tcpinject_vars;
-   //- common
-   ohlone_vars_t        ohlone_vars;
-   //+++++ UDP
-   //- debug
-   //- common
-   udpstorm_vars_t      udpstorm_vars;
-   //+++++ CoAP
-   //- debug
-   //- common
-   rinfo_vars_t         rinfo_vars;
-   rrt_vars_t           rrt_vars;
-   rleds_vars_t         rleds_vars;
-   rwellknown_vars_t    rwellknown_vars;
-   r6t_vars_t           r6t_vars;
+   //===== openapps
+   c6t_vars_t           c6t_vars;
+   cexample_vars_t      cexample_vars;
+   cinfo_vars_t         cinfo_vars;
+   cleds_vars_t         cleds_vars;
+   cstorm_vars_t        cstorm_vars;
+   cwellknown_vars_t    cwellknown_vars;
+   tohlone_vars_t       tohlone_vars;
+   
 };
 
 #endif

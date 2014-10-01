@@ -4,16 +4,9 @@
 #include "packetfunctions.h"
 #include "forwarding.h"
 #include "openqueue.h"
-//UDP applications
+// applications
 #include "opencoap.h"
-#include "udpecho.h"
-#include "udpinject.h"
-#include "udpprint.h"
-#include "udprand.h"
-#include "udpstorm.h"
-#include "udplatency.h"
-//#include "heli.h"
-//#include "imu.h"
+#include "uecho.h"
 
 //=========================== variables =======================================
 
@@ -43,30 +36,9 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
       case WKP_UDP_COAP:
          opencoap_sendDone(msg,error);
          break;
-      /*    
-      case WKP_UDP_HELI:
-         appudpheli_sendDone(msg,error);
-         break;
-      case WKP_UDP_IMU:
-         appudpgina_sendDone(msg,error);
-         break;
-      */
       case WKP_UDP_ECHO:
-         udpecho_sendDone(msg,error);
+         uecho_sendDone(msg,error);
          break;
-      case WKP_UDP_INJECT:
-         udpinject_sendDone(msg,error);
-         break;
-      case WKP_UDP_DISCARD:
-         udpprint_sendDone(msg,error);
-         break;
-      case WKP_UDP_RAND:
-         udprand_sendDone(msg,error);
-         break;
-      case WKP_UDP_LATENCY:
-         udplatency_sendDone(msg,error);
-         break;
-         
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
                                (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
@@ -123,25 +95,8 @@ void openudp_receive(OpenQueueEntry_t* msg) {
       case WKP_UDP_COAP:
          opencoap_receive(msg);
          break;
-      /* 
-      case WKP_UDP_HELI:
-         appudpheli_receive(msg);
-         break;
-      case WKP_UDP_IMU:
-         imu_receive(msg);
-         break;
-      */
       case WKP_UDP_ECHO:
-         udpecho_receive(msg);
-         break;
-      case WKP_UDP_INJECT:
-         udpinject_receive(msg);
-         break;
-      case WKP_UDP_DISCARD:
-         udpprint_receive(msg);
-         break;
-      case WKP_UDP_RAND:
-         udprand_receive(msg);
+         uecho_receive(msg);
          break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,

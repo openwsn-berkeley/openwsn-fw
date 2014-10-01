@@ -101,21 +101,15 @@ else:
             os.path.join('#','openstack','cross-layers'),
             # openapps
             # TODO: remove once cleaned-up?
-            os.path.join('#','openapps','tcpecho'),
-            os.path.join('#','openapps','tcpinject'),
-            os.path.join('#','openapps','tcpprint'),
-            os.path.join('#','openapps','ohlone'),
-            os.path.join('#','openapps','udpecho'),
-            os.path.join('#','openapps','udpinject'),
-            os.path.join('#','openapps','udpprint'),
-            os.path.join('#','openapps','udpstorm'),
-            os.path.join('#','openapps','rinfo'),
-            os.path.join('#','openapps','rleds'),
-            os.path.join('#','openapps','rwellknown'),
-            os.path.join('#','openapps','r6t'),
-            os.path.join('#','openapps','udprand'),
-            os.path.join('#','openapps','udplatency'),
-            
+            os.path.join('#','openapps','c6t'),
+            os.path.join('#','openapps','cexample'),
+            os.path.join('#','openapps','cinfo'),
+            os.path.join('#','openapps','cleds'),
+            os.path.join('#','openapps','cstorm'),
+            os.path.join('#','openapps','cwellknown'),
+            os.path.join('#','openapps','techo'),
+            os.path.join('#','openapps','tohlone'),
+            os.path.join('#','openapps','uecho'),
         ],
     )
     
