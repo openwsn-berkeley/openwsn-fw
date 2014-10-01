@@ -1,10 +1,10 @@
-#ifndef __UDPSTORM_H
-#define __UDPSTORM_H
+#ifndef __CSTORM_H
+#define __CSTORM_H
 
 /**
 \addtogroup AppUdp
 \{
-\addtogroup udpStorm
+\addtogroup cstorm
 \{
 */
 
@@ -20,11 +20,11 @@ typedef struct {
    coap_resource_desc_t desc;
    opentimer_id_t       timerId;
    uint16_t             period;   ///< inter-packet period (in ms)
-} udpstorm_vars_t;
+} cstorm_vars_t;
 
 //=========================== prototypes ======================================
 
-void udpstorm_init(void);
+void cstorm_init(void);
 
 /**
 \}
