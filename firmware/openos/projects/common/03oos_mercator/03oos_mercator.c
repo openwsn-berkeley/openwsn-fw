@@ -12,11 +12,13 @@
 #include "leds.h"
 #include "uart.h"
 #include "radio.h"
+#include "idmanager.h"
 
 //=========================== defines ==========================================
 
 #define UART_BUF_LEN         30
 #define RF_BUF_LEN           128
+#define TIMER_PERIOD    (32768>>1)     // (32768>>1) = 500ms @ 32kHz
 
 #define TASK_PRIO_SERIAL     TASKPRIO_MAX
 #define TASK_PRIO_WIRELESS   TASKPRIO_SIXTOP_TIMEOUT
@@ -83,6 +85,15 @@ typedef struct {
    uint8_t         flags;
    uint16_t        pkctr;
 } IND_RX_ht;
+
+typedef struct {
+   uint8_t              num_radioTimerCompare;
+   uint8_t              num_radioTimerOverflows;
+   uint8_t              num_startFrame;
+   uint8_t              num_endFrame;
+} app_dbg_t;
+
+app_dbg_t app_dbg;
 
 END_PACK
 
@@ -276,8 +287,6 @@ void serial_rx_REQ_IDLE(void) {
       return;
    }
    
-   // TODO
-   // __no_operation();
    radio_rfOff();
 }
 
@@ -287,21 +296,38 @@ void serial_rx_REQ_TX(void) {
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
-   uint8_t  frequency   =  (uint8_t)   mercator_vars.uartbufrx[1];
-   int8_t   txpower     =  (int8_t)    mercator_vars.uartbufrx[2];
-   uint8_t  transctr    =  (uint8_t)   mercator_vars.uartbufrx[3];
-   uint16_t txnumpk;       memcpy(txnumpk, mercator_vars.uartbufrx + 4, 2);
-   uint16_t txifdur;       memcpy(txifdur, mercator_vars.uartbufrx + 6, 2);
-   uint8_t  txlength    =  (uint8_t)   mercator_vars.uartbufrx[8];
-   uint8_t  txfillbyte  =  (uint8_t)   mercator_vars.uartbufrx[9];
+   REQ_TX_ht* req;
 
-   char *packet   
+   req = &mercator_vars.uartbufrx[0];
 
+   //prepare packet
+   memcpy(mercator_vars.rfbuftx[0], idmanager_getMyID(ADDR_64B)->addr_64b, 8);
+   mercator_vars.rfbuftx[8] = req->transctr;
+   memcpy(mercator_vars.rfbuftx[9], req->pkctr, 2);
+   int i;
+   for (i = 11; i < req->txlength; i++){
+      mercator_vars.rfbuftx[i] = req->txfillbyte;
+   }
+
+   // turn on error led
+   leds_error_on();
+
+   // prepare radio
    radio_rfOn();
-   radio_setFrequency(frequency);
+   radio_setFrequency(req->frequency);
 
-   // TODO
-   __no_operation();
+   for (i = 0; i < req->txnumpk; i++){
+      // Send a packet
+      radio_loadPacket(mercator_vars.rfbuftx, req->txlength);
+      radio_txEnable();
+      radio_txNow();
+   }
+
+   // finishing TX
+   radio_rfOff();
+   leds_error_off();
+
+
 }
 
 void serial_rx_REQ_RX(void) {
@@ -310,9 +336,7 @@ void serial_rx_REQ_RX(void) {
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
-   
-   // TODO
-   __no_operation();
+
 }
 
 //===== helpers
