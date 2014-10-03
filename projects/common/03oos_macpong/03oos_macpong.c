@@ -63,7 +63,7 @@ void macpong_send(uint8_t payloadCtr) {
    OpenQueueEntry_t* pkt;
    uint8_t i;
    
-   pkt = openqueue_getFreePacketBuffer(COMPONENT_UDPRAND);
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_UECHO);
    if (pkt==NULL) {
       openserial_printError(
          COMPONENT_IPHC,
@@ -144,18 +144,12 @@ void tcpinject_trigger(void)      { return; }
 
 void tcpprint_init(void)          { return; }
 
-void udpecho_init(void)           { return; }
+void c6t_init(void)               { return; }
+void cinfo_init(void)             { return; }
+void cleds__init(void)            { return; }
+void cwellknown_init(void)        { return; }
+   // TCP
+void techo_init(void)             { return; }
+   // UDP
+void uecho_init(void)             { return; }
 
-void udpinject_init(void)         { return; }
-void udpinject_trigger(void)      { return; }
-
-void udpprint_init(void)          { return; }
-
-void udprand_init(void)           { return; }
-void udpstorm_init(void)          { return; }
-
-void rinfo_init(void)             { return; }
-void rleds__init(void)            { return; }
-void r6t_init(void)               { return; }
-void rwellknown_init(void)        { return; }
-void rrt_init(void)               { return; }

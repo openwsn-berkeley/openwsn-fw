@@ -44,7 +44,11 @@
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/drivers/cc2538</locationURI>
 		</link>
-		
+		<link>
+			<name>openapps</name>
+			<type>2</type>
+			<location>C:/Users/vilajosa/Documents/personal/research/openwsn-fw/openapps</location>
+		</link>
 		<link>
 			<name>openos</name>
 			<type>2</type>
