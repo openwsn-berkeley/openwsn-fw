@@ -18,7 +18,6 @@
 
 #define UART_BUF_LEN         30
 #define RF_BUF_LEN           128
-#define TIMER_PERIOD    (32768>>1)     // (32768>>1) = 500ms @ 32kHz
 
 #define TASK_PRIO_SERIAL     TASKPRIO_MAX
 #define TASK_PRIO_WIRELESS   TASKPRIO_SIXTOP_TIMEOUT
@@ -132,8 +131,18 @@ typedef struct {
    uint16_t        serialNumRxUnknownRequest;
    
    //=== RF
+   // tx
    uint8_t         rfbuftx[RF_BUF_LEN];
-   uint8_t         rfbufrx[RF_BUF_LEN];
+   uint8_t         txpk_num;
+   uint8_t         txpk_txNow;
+   // rx
+   uint8_t         rxpk_done;
+   uint8_t         rxpk_buf[RF_BUF_LEN];
+   uint8_t         rxpk_len;
+   uint8_t         rxpk_num;
+    int8_t         rxpk_rssi;
+   uint8_t         rxpk_lqi;
+      bool         rxpk_crc;
    
 } mercator_vars_t;
 
@@ -152,10 +161,13 @@ void serial_rx_REQ_IDLE(void);
 void serial_rx_REQ_TX(void);
 void serial_rx_REQ_RX(void);
 
-void isr_openserial_tx(void);
-void isr_openserial_rx(void);
+void isr_openserial_tx_mod(void);
+void isr_openserial_rx_mod(void);
 
 uint16_t htons(uint16_t val);
+
+void cb_txRadioTimerOverflows(void);
+void cb_endFrame(uint16_t timestamp);
 
 //=========================== initialization ==================================
 
@@ -172,8 +184,8 @@ int mote_main(void) {
 
    // initial UART
    uart_setCallbacks(
-      isr_openserial_tx,
-      isr_openserial_rx
+      isr_openserial_tx_mod,
+      isr_openserial_rx_mod
    );
    serial_enable();
    
@@ -288,6 +300,7 @@ void serial_rx_REQ_IDLE(void) {
    }
    
    radio_rfOff();
+   leds_radio_off();
 }
 
 void serial_rx_REQ_TX(void) {
@@ -300,33 +313,55 @@ void serial_rx_REQ_TX(void) {
 
    req = &mercator_vars.uartbufrx[0];
 
+   mercator_vars.txpk_num = 0;
+
    //prepare packet
    memcpy(mercator_vars.rfbuftx[0], idmanager_getMyID(ADDR_64B)->addr_64b, 8);
    mercator_vars.rfbuftx[8] = req->transctr;
-   memcpy(mercator_vars.rfbuftx[9], req->pkctr, 2);
+   memcpy(mercator_vars.rfbuftx[9], mercator_vars.txpk_num++, 2);
    int i;
    for (i = 11; i < req->txlength; i++){
       mercator_vars.rfbuftx[i] = req->txfillbyte;
    }
 
-   // turn on error led
-   leds_error_on();
-
    // prepare radio
+   radio_setOverflowCb(cb_txRadioTimerOverflows);
    radio_rfOn();
    radio_setFrequency(req->frequency);
+   //TODO set TX Power
+   radio_rfOff();
 
-   for (i = 0; i < req->txnumpk; i++){
-      // Send a packet
+   // start periodic overflow
+   radiotimer_start(req->txifdur);
+
+   mercator_vars.status = ST_TX;
+   // Send packets
+   while(1) {
+      // wait for timer to elapse
+      mercator_vars.txpk_txNow = 0;
+      while (mercator_vars.txpk_txNow==0) {
+         board_sleep();
+      }
+
+      leds_error_on();
+
+      // update pkctr
+      memcpy(mercator_vars.rfbuftx[9], mercator_vars.txpk_num++, 2);
+
       radio_loadPacket(mercator_vars.rfbuftx, req->txlength);
       radio_txEnable();
       radio_txNow();
+
+      leds_error_off();
+
+      if (mercator_vars.txpk_num == req->txnumpk) break;
    }
 
    // finishing TX
    radio_rfOff();
    leds_error_off();
 
+   mercator_vars.status = ST_TXDONE;
 
 }
 
@@ -336,7 +371,51 @@ void serial_rx_REQ_RX(void) {
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
+   if (mercator_vars.uartbufrxfill!=sizeof(REQ_RX_ht)){
+      // update stats
+      mercator_vars.serialNumRxWrongLength++;
+      return;
+   }
 
+   REQ_RX_ht* req; 
+   req = &mercator_vars.uartbufrx[0];
+
+   // turn on radio leds
+   leds_radio_on();
+
+   // add callback functions radio
+   radio_setEndFrameCb(cb_endFrame);
+
+   // prepare radio
+   radio_rfOn();
+   radio_setFrequency(req->frequency);
+
+   // switch in RX
+   radio_rxEnable();
+
+   // change status to RX
+   mercator_vars.status = ST_RX;
+
+   while (1) {
+      
+      // sleep while waiting for at least one of the rxpk_done to be set
+      mercator_vars.rxpk_done = 0;
+      while (mercator_vars.rxpk_done==0) {
+         board_sleep();
+      }
+
+      // get packet from radio
+      radio_getReceivedFrame(
+         mercator_vars.rxpk_buf,
+         &mercator_vars.rxpk_len,
+         sizeof(mercator_vars.rxpk_buf),
+         &mercator_vars.rxpk_rssi,
+         &mercator_vars.rxpk_lqi,
+         &mercator_vars.rxpk_crc
+      );
+
+      // TODO send notification over serial port
+   }
 }
 
 //===== helpers
@@ -348,7 +427,7 @@ uint16_t htons(uint16_t val) {
 //===== interrupt handlers
 
 //executed in ISR, called from scheduler.c
-void isr_openserial_tx(void) {
+void isr_openserial_tx_mod(void) {
    uint8_t  b;
    uint16_t finalCrc;
    
@@ -393,7 +472,7 @@ void isr_openserial_tx(void) {
    leds_sync_off();
 }
 
-void inputHdlcWrite(uint8_t b) {
+void inputHdlcWriteMod(uint8_t b) {
    if (b==HDLC_ESCAPE) {
       mercator_vars.uartrxescaping = TRUE;
    } else {
@@ -412,7 +491,7 @@ void inputHdlcWrite(uint8_t b) {
 }
 
 // executed in ISR, called from scheduler.c
-void isr_openserial_rx(void) {
+void isr_openserial_rx_mod(void) {
    uint8_t rxbyte;
    
    // led
@@ -439,7 +518,7 @@ void isr_openserial_rx(void) {
       mercator_vars.uartrxcrc                = HDLC_CRCINIT;
       
       // add the byte just received
-      inputHdlcWrite(rxbyte);
+      inputHdlcWriteMod(rxbyte);
    } else if (
          mercator_vars.uartrxbusy==TRUE   &&
          rxbyte!=HDLC_FLAG
@@ -447,7 +526,7 @@ void isr_openserial_rx(void) {
       // middle of frame
       
       // add the byte just received
-      inputHdlcWrite(rxbyte);
+      inputHdlcWriteMod(rxbyte);
       if (mercator_vars.uartbufrxfill+1>UART_BUF_LEN){
          mercator_vars.uartbufrxfill         = 0;
          mercator_vars.uartrxbusy        = FALSE;
@@ -491,4 +570,26 @@ void isr_openserial_rx(void) {
    
    // led
    leds_sync_off();
+}
+
+//=========================== callbacks =======================================
+
+
+
+//=========================== callbacks =======================================
+
+//===== radiotimer
+
+void cb_txRadioTimerOverflows(void) {
+   
+   // ready to send next packet
+   mercator_vars.txpk_txNow = 1;
+}
+
+//===== radio
+
+void cb_endFrame(uint16_t timestamp) {
+
+   // indicate I just received a packet
+   mercator_vars.rxpk_done = 1;
 }
