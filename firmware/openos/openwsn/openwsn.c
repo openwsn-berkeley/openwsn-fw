@@ -134,7 +134,7 @@ void openwsn_init() {
    //- core
    //- common
    rinfo_init();
-   //rrt_init();
+   rrt_init();
    rleds__init();
    rwellknown_init();
    r6t_init();

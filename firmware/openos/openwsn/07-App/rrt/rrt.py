@@ -14,4 +14,10 @@ c = coap.coap()
 p = c.GET('coap://[{0}]/rt'.format(MOTE_IP))
 print ''.join([chr(b) for b in p])
 
+p = c.PUT(
+    'coap://[{0}]/rt'.format(MOTE_IP),
+    payload = [ord('2')],
+)
+print ''.join([chr(b) for b in p])
+
 raw_input("Done. Press enter to close.")

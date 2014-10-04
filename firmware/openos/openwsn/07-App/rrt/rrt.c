@@ -31,6 +31,10 @@ void          rrt_sendDone(
    OpenQueueEntry_t* msg,
    owerror_t error
 );
+void setGETRespMsg(
+   OpenQueueEntry_t* msg,
+   bool discovered   
+);
 
 //=========================== public ==========================================
 
@@ -50,6 +54,8 @@ void rrt_init() {
    rrt_vars.desc.componentID          = COMPONENT_RRT;
    rrt_vars.desc.callbackRx           = &rrt_receive;
    rrt_vars.desc.callbackSendDone     = &rrt_sendDone;
+
+   rrt_vars.discovered                = FALSE; //if this mote has been discovered by ringmaster
    
    // register with the CoAP module
    opencoap_register(&rrt_vars.desc);
@@ -83,14 +89,8 @@ owerror_t rrt_receive(
          msg->length                      = 0;
          
          //=== prepare  CoAP response
+         setGETRespMsg(msg, rrt_vars.discovered);
          
-         packetfunctions_reserveHeaderSize(msg,6);
-         msg->payload[0] = 'p';
-         msg->payload[1] = 'o';
-         msg->payload[2] = 'i';
-         msg->payload[3] = 'p';
-         msg->payload[4] = 'o';
-         msg->payload[5] = 'i';
          
          // payload marker
          packetfunctions_reserveHeaderSize(msg,1);
@@ -101,6 +101,23 @@ owerror_t rrt_receive(
          
          outcome                          = E_SUCCESS;
          break;
+      case COAP_CODE_REQ_PUT:
+         // reset packet payload
+         msg->payload                     = &(msg->packet[127]);
+         msg->length                      = 0;
+
+         packetfunctions_reserveHeaderSize(msg, 1);
+         msg->payload[0] = 'y';
+
+         //payload marker
+         packetfunctions_reserveHeaderSize(msg, 1);
+         msg->payload[0] = COAP_PAYLOAD_MARKER;
+
+         //set the CoAP header
+         coap_header->Code                = COAP_CODE_RESP_CHANGED;
+
+         outcome                          = E_SUCCESS;
+         break;
       default:
          // return an error message
          outcome = E_FAIL;
@@ -108,6 +125,40 @@ owerror_t rrt_receive(
    
    return outcome;
 }
+
+void setGETRespMsg(OpenQueueEntry_t* msg, bool registered) {
+         if (registered == FALSE) {
+             packetfunctions_reserveHeaderSize(msg,11);
+             msg->payload[0] = 'r';
+             msg->payload[1] = 'e';
+             msg->payload[2] = 'g';
+             msg->payload[3] = 'i';
+             msg->payload[4] = 's';
+             msg->payload[5] = 't';
+             msg->payload[6] = 'e';
+             msg->payload[7] = 'r';
+             msg->payload[8] = 'i';
+             msg->payload[9] = 'n';
+             msg->payload[10] = 'g';
+
+             //send packet to local with 'D' here
+             //sendDiscoveryToRingmaster();
+
+         } else {
+             packetfunctions_reserveHeaderSize(msg,10);
+             msg->payload[0] = 'r';
+             msg->payload[1] = 'e';
+             msg->payload[2] = 'g';
+             msg->payload[3] = 'i';
+             msg->payload[4] = 's';
+             msg->payload[5] = 't';
+             msg->payload[6] = 'e';
+             msg->payload[7] = 'r';
+             msg->payload[8] = 'e';
+             msg->payload[9] = 'd';
+         }
+}
+
 
 /**
 \brief The stack indicates that the packet was sent.

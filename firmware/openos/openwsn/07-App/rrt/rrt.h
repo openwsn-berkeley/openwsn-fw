@@ -18,6 +18,7 @@
 
 typedef struct {
    coap_resource_desc_t desc;
+   bool discovered;
 } rrt_vars_t;
 
 //=========================== prototypes ======================================
