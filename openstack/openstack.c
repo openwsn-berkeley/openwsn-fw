@@ -8,6 +8,7 @@
 //===== drivers
 #include "openserial.h"
 //===== stack
+#include "openstack.h"
 //-- cross-layer
 #include "idmanager.h"
 #include "openqueue.h"
@@ -47,6 +48,7 @@ void openstack_init(void) {
    
    //===== drivers
    openserial_init();
+   
    //===== stack
    //-- cross-layer
    idmanager_init();    // call first since initializes EUI64 and isDAGroot
@@ -72,6 +74,7 @@ void openstack_init(void) {
    opentcp_init();
    openudp_init();
    opencoap_init();     // initialize before any of the CoAP applications
+   
    //===== applications
    openapps_init();
    
