@@ -44,11 +44,9 @@
 //=========================== private =========================================
 
 void openstack_init() {
+   
    //===== drivers
    openserial_init();
-   //heli_init();
-   //imu_init();
-   
    //===== stack
    //-- cross-layer
    idmanager_init();    // call first since initializes EUI64 and isDAGroot
@@ -74,7 +72,6 @@ void openstack_init() {
    opentcp_init();
    openudp_init();
    opencoap_init();     // initialize before any of the CoAP applications
-   
    //===== applications
    openapps_init();
    
