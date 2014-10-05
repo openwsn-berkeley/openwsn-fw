@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "opencoap.h"
 #include "openudp.h"
 #include "openqueue.h"

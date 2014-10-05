@@ -12,7 +12,7 @@
 #include "magnetometer.h"
 
 //openwsn
-#include "openwsn.h"
+#include "opendefs.h"
 #include "scheduler.h"
 #include "packetfunctions.h"
 #include "openqueue.h"

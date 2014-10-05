@@ -3,7 +3,7 @@
    error LED.
 */
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "cleds.h"
 #include "opencoap.h"
 #include "packetfunctions.h"

@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "magnetometer.h"
 
 //=========================== variables =======================================

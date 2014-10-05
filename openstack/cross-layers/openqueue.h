@@ -8,7 +8,7 @@
 \{
 */
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "IEEE802154.h"
 
 //=========================== define ==========================================

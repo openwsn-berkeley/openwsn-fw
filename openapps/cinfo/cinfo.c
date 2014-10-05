@@ -2,7 +2,7 @@
 \brief A CoAP resource which indicates the board its running on.
 */
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "cinfo.h"
 #include "opencoap.h"
 #include "openqueue.h"

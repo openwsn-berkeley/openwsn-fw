@@ -4,7 +4,7 @@
 \author Fabien Chraim <chraim@eecs.berkeley.edu>, March 2012.
 */
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "openserial.h"
 #include "IEEE802154E.h"
 #include "neighbors.h"

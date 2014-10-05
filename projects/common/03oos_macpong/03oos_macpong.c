@@ -5,10 +5,10 @@
 */
 
 // stack initialization
-#include "openwsn.h"
+#include "opendefs.h"
 #include "board.h"
 #include "scheduler.h"
-#include "openwsn.h"
+#include "opendefs.h"
 // needed for spoofing
 #include "openqueue.h"
 #include "opentimers.h"
@@ -39,7 +39,7 @@ void macpong_send(uint8_t payloadCtr);
 int mote_main(void) {
    board_init();
    scheduler_init();
-   openwsn_init();
+   openstack_init();
    if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0xbb) {
       idmanager_setIsDAGroot(TRUE);
    }

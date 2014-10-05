@@ -2,7 +2,7 @@
 #define __ADAPTIVE_SYNC_H
 
 #include "board.h"
-#include "openwsn.h"
+#include "opendefs.h"
 #include "opentimers.h"
 /**
 \addtogroup MAClow

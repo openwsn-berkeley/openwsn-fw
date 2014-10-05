@@ -6,7 +6,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, May 2012.
  */
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "bsp_timer.h"
 #include "radiotimer.h"
 #include "sctimer.h"

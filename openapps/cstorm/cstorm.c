@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "cstorm.h"
 #include "opencoap.h"
 #include "opentimers.h"

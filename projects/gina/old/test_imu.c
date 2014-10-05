@@ -32,7 +32,7 @@ Speed:
 
 #include "msp430x26x.h"
 #include "stdint.h"
-#include "openwsn.h"
+#include "opendefs.h"
 #include "gyro.h"
 #include "large_range_accel.h"
 #include "magnetometer.h"

@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "sixtop.h"
 #include "openserial.h"
 #include "openqueue.h"

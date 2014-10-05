@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "large_range_accel.h"
 
 //=========================== variables =======================================

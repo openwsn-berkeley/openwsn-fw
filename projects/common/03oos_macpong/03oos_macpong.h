@@ -8,7 +8,7 @@
 #ifndef __openwsn_H
 #define __openwsn_H
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "iphc.h"
 
 void bridge_sendDone(OpenQueueEntry_t* pkt, error_t error);

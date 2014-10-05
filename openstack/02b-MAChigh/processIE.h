@@ -1,7 +1,7 @@
 #ifndef __PROCESSIE_H
 #define __PROCESSIE_H
 
-#include "openwsn.h"
+#include "opendefs.h"
 
 //=========================== define ==========================================
 

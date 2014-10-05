@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "iphc.h"
 #include "packetfunctions.h"
 #include "idmanager.h"

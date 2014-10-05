@@ -27,7 +27,7 @@ Speed:
 #include "msp430x26x.h"
 #include "stdint.h"
 #include "leds.h"
-#include "openwsn.h"
+#include "opendefs.h"
 #include "magnetometer.h"
 
 uint8_t  magnetometer_data[6];

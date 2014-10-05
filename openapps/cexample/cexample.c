@@ -2,7 +2,7 @@
 \brief An example CoAP application.
 */
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "cexample.h"
 #include "opencoap.h"
 #include "opentimers.h"

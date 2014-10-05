@@ -39,7 +39,7 @@ Speed:
 #include "magnetometer.h"
 #include "sensitive_accel_temperature.h"
 //openwsn
-#include "openwsn.h"
+#include "opendefs.h"
 #include "scheduler.h"
 #include "packetfunctions.h"
 #include "openqueue.h"

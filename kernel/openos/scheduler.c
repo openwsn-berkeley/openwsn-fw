@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 */
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "scheduler.h"
 #include "board.h"
 #include "debugpins.h"

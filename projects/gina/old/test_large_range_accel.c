@@ -29,7 +29,7 @@ Speed: one measurement takes ~738us
 #include "msp430x26x.h"
 #include "stdint.h"
 #include "leds.h"
-#include "openwsn.h"
+#include "opendefs.h"
 #include "large_range_accel.h"
 
 uint8_t  large_range_accel_data[6];

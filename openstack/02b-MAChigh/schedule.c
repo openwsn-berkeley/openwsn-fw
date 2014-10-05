@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "schedule.h"
 #include "openserial.h"
 #include "openrandom.h"

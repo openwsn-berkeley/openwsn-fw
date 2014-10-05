@@ -3,7 +3,7 @@
 
 \author Tengfei Chang <tengfei.chang@gmail.com>, January ,2014.
 */
-#include "openwsn.h"
+#include "opendefs.h"
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
 #include "radio.h"

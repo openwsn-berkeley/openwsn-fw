@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "otf.h"
 #include "neighbors.h"
 #include "sixtop.h"

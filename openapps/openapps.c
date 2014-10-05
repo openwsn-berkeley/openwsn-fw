@@ -4,7 +4,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, September 2014.
 */
 
-#include "openwsn.h"
+#include "opendefs.h"
 
 //=== default applications
 // CoAP

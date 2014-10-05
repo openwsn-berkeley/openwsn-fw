@@ -10,7 +10,7 @@
 #include "leds.h"
 #include "button.h"
 //openwsn
-#include "openwsn.h"
+#include "opendefs.h"
 #include "scheduler.h"
 #include "packetfunctions.h"
 #include "openqueue.h"

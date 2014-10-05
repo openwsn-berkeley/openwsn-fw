@@ -6,7 +6,7 @@ localEnv = env.Clone()
 
 target = 'libopenstack'
 sources_c = [
-    'openwsn.c',
+    'openstack.c',
     #=== 02a-MAClow
     os.path.join('02a-MAClow','topology.c'),
     os.path.join('02a-MAClow','IEEE802154.c'),
@@ -37,7 +37,7 @@ sources_c = [
     os.path.join('cross-layers','packetfunctions.c'),
 ]
 sources_h = [
-    'openwsn.h',
+    'openstack.h',
     #=== 02a-MAClow
     os.path.join('02a-MAClow','topology.h'),
     os.path.join('02a-MAClow','IEEE802154.h'),
@@ -87,6 +87,8 @@ else:
     
     localEnv.Append(
         CPPPATH =  [
+            # inc
+            os.path.join('#','inc'),
             # kernel
             os.path.join('#','kernel','openos'),
             # drivers

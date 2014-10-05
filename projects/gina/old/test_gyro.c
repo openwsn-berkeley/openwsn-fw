@@ -28,7 +28,7 @@ Speed: one measurement takes ~293us
 #include "msp430x26x.h"
 #include "stdint.h"
 #include "leds.h"
-#include "openwsn.h"
+#include "opendefs.h"
 #include "gyro.h"
 
 uint8_t  gyro_data[8];

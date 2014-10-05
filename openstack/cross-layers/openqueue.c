@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "openqueue.h"
 #include "openserial.h"
 #include "packetfunctions.h"

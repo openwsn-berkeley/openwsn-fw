@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "icmpv6rpl.h"
 #include "icmpv6.h"
 #include "openserial.h"

@@ -9,7 +9,7 @@
 */
 
 #include "opentimers.h"
-#include "openwsn.h"
+#include "opendefs.h"
 
 //=========================== define ==========================================
 

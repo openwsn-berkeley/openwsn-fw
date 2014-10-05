@@ -16,6 +16,7 @@ env['VARDIR']  = os.path.join('#','build','{0}_{1}'.format(env['board'],env['too
 if env['board']!='python':
     env.Append(
         CPPPATH = [
+            os.path.join('#','inc'),
             os.path.join('#','bsp','boards'),
             os.path.join('#','bsp','chips'),
             os.path.join('#','drivers','common'),
@@ -620,6 +621,15 @@ env.AddMethod(sconscript_scanner, 'SconscriptScanner')
 buildEnv = env.SConscript(
     os.path.join('projects',env['board'],'SConscript.env'),
     exports     = ['env'],
+)
+
+# inc
+incDir          = os.path.join('#','inc')
+incVarDir       = os.path.join(buildEnv['VARDIR'],'inc')
+buildEnv.SConscript(
+    os.path.join(incDir,'SConscript'),
+    exports     = {'env': buildEnv},
+    variant_dir = incVarDir,
 )
 
 # bspheader

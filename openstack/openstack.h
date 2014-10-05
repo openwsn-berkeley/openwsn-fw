@@ -1,12 +1,11 @@
-#ifndef __HELI_H
-#define __HELI_H
-
 /**
-\addtogroup drivers
-\{
-\addtogroup Heli
-\{
+\brief Entry point for accessing the OpenWSN stack.
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, October 2014.
 */
+
+#ifndef __OPENSTACK_H
+#define __OPENSTACK_H
 
 #include "opendefs.h"
 
@@ -18,13 +17,6 @@
 
 //=========================== prototypes ======================================
 
-void heli_init();
-void heli_on();
-void heli_off();
-
-/**
-\}
-\}
-*/
+void openwsn_stack(void);
 
 #endif

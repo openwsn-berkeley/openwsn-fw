@@ -4,7 +4,7 @@
 \author Ankur Mehta <mehtank@eecs.berkeley.edu>, September 2010
 */
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "tohlone_webpages.h"
 
 /*

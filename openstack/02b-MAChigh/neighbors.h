@@ -7,7 +7,7 @@
 \addtogroup Neighbors
 \{
 */
-#include "openwsn.h"
+#include "opendefs.h"
 #include "icmpv6rpl.h"
 
 //=========================== define ==========================================

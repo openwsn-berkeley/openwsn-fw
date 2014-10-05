@@ -1,10 +1,10 @@
 /**
-\brief General OpenWSN definitions
+\brief Entry point for accessing the OpenWSN stack.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, September 2012
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, October 2014.
 */
 
-#include "openwsn.h"
+#include "opendefs.h"
 //===== drivers
 #include "openserial.h"
 //===== stack
@@ -43,7 +43,7 @@
 
 //=========================== private =========================================
 
-void openwsn_init() {
+void openstack_init() {
    //===== drivers
    openserial_init();
    //heli_init();

@@ -51,6 +51,9 @@ else:
     
     localEnv.Append(
         CPPPATH =  [
+            # inc
+            os.path.join('#','inc'),
+            # openapps
             os.path.join('#','openapps'),
             os.path.join('#','openapps','c6t'),
             os.path.join('#','openapps','cexample'),

@@ -7,7 +7,7 @@ at most MAX_NUM_TIMERS timers.
 \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, March 2012.
  */
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "opentimers.h"
 #include "bsp_timer.h"
 #include "leds.h"

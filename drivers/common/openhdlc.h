@@ -8,7 +8,7 @@
 #ifndef __OPENHDLC_H
 #define __OPENHDLC_H
 
-#include "openwsn.h"
+#include "opendefs.h"
 
 /**
 \addtogroup drivers

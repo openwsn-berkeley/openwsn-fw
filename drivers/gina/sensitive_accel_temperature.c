@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "sensitive_accel_temperature.h"
 #include "msp430x26x.h"
 

@@ -7,7 +7,7 @@
 #ifndef __OPENTIMERS_H
 #define __OPENTIMERS_H
 
-#include "openwsn.h"
+#include "opendefs.h"
 
 /**
 \addtogroup drivers

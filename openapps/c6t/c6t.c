@@ -5,7 +5,7 @@
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, July 2014
 */
 
-#include "openwsn.h"
+#include "opendefs.h"
 #include "c6t.h"
 #include "sixtop.h"
 #include "idmanager.h"

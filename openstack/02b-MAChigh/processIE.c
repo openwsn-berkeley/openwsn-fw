@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "processIE.h"
 #include "sixtop.h"
 #include "idmanager.h"

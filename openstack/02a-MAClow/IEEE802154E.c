@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "IEEE802154E.h"
 #include "radio.h"
 #include "radiotimer.h"

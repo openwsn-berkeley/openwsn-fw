@@ -1,4 +1,4 @@
-#include "openwsn.h"
+#include "opendefs.h"
 #include "openrandom.h"
 #include "idmanager.h"
 
