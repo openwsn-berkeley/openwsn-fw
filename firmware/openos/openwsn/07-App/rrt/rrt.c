@@ -142,7 +142,7 @@ void setGETRespMsg(OpenQueueEntry_t* msg, bool registered) {
              msg->payload[10] = 'g';
 
              //send packet to local with 'D' here
-             //sendDiscoveryToRingmaster();
+             sendDiscoveryToRingmaster();
 
          } else {
              packetfunctions_reserveHeaderSize(msg,10);
@@ -159,6 +159,55 @@ void setGETRespMsg(OpenQueueEntry_t* msg, bool registered) {
          }
 }
 
+void sendDiscoveryToRingmaster() {
+      OpenQueueEntry_t* pkt;
+      owerror_t outcome;
+      uint8_t numOptions;
+
+      pkt = openqueue_getFreePacketBuffer(COMPONENT_RRT);
+      if (pkt == NULL) {
+          openserial_printError(COMPONENT_RRT,ERR_BUSY_SENDING,
+                                (errorparameter_t)0,
+                                (errorparameter_t)0);
+          openqueue_freePacketBuffer(pkt);
+          return;
+      }
+
+      pkt->creator   = COMPONENT_RRT;
+      pkt->owner      = COMPONENT_RRT;
+      pkt->l4_protocol  = IANA_UDP;
+
+      packetfunctions_reserveHeaderSize(pkt, 1);
+      pkt->payload[0] = 'D';
+
+      numOptions = 0;
+      // location-path option
+      packetfunctions_reserveHeaderSize(pkt,sizeof(rrt_path0)-1);
+      memcpy(&pkt->payload[0],&rrt_path0,sizeof(rrt_path0)-1);
+      packetfunctions_reserveHeaderSize(pkt,1);
+      pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
+         sizeof(rrt_path0)-1;
+       numOptions++;
+      // content-type option
+      packetfunctions_reserveHeaderSize(pkt,2);
+      pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
+         1;
+      pkt->payload[1]                  = COAP_MEDTYPE_APPOCTETSTREAM;
+      numOptions++;
+
+      //metada
+      pkt->l4_destination_port   = WKP_UDP_RINGMASTER; 
+      pkt->l4_sourcePortORicmpv6Type   = WKP_UDP_RINGMASTER;
+      pkt->l3_destinationAdd.type = ADDR_128B;
+      memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_ringmaster, 16);
+      //send
+      outcome = openudp_send(pkt);
+      
+
+      if (outcome == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+      }
+}
 
 /**
 \brief The stack indicates that the packet was sent.

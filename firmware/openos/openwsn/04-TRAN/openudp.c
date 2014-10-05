@@ -66,6 +66,10 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
       case WKP_UDP_LATENCY:
          udplatency_sendDone(msg,error);
          break;
+      case WKP_UDP_RINGMASTER:
+         //udpprint_sendDone(msg, error);
+         openqueue_freePacketBuffer(msg);
+         break;
          
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
@@ -142,6 +146,10 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          break;
       case WKP_UDP_RAND:
          udprand_receive(msg);
+         break;
+      case WKP_UDP_RINGMASTER:
+         //udpprint_receive(msg);
+         openqueue_freePacketBuffer(msg);
          break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
