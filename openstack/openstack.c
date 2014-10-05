@@ -43,7 +43,7 @@
 
 //=========================== private =========================================
 
-void openstack_init() {
+void openstack_init(void) {
    
    //===== drivers
    openserial_init();
