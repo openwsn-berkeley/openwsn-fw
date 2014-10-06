@@ -52,7 +52,7 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* radio_icb_endFrame_cb;
    PyObject* radiotimer_icb_overflow_cb;
    PyObject* radiotimer_icb_compare_cb;
-   PyObject* ohlone_vars;
+   //PyObject* ohlone_vars;
    PyObject* tcpinject_vars;
    PyObject* icmpv6echo_vars;
    PyObject* icmpv6rpl_vars;
@@ -92,9 +92,11 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyDict_SetItemString(returnVal, "radiotimer_icb_compare_cb", radiotimer_icb_compare_cb);
    
    // ohlone_vars
+   /*
    ohlone_vars = PyDict_New();
    // TODO
    PyDict_SetItemString(returnVal, "ohlone_vars", ohlone_vars);
+   */
    
    // tcpinject_vars
    tcpinject_vars = PyDict_New();

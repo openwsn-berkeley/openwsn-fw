@@ -35,8 +35,8 @@
 #include "cstorm_obj.h"
 #include "cwellknown_obj.h"
 #include "techo_obj.h"
-#include "tohlone_obj.h"
-#include "tohlone_obj.h"
+//#include "tohlone_obj.h"
+//#include "tohlone_obj.h"
 #include "uecho_obj.h"
 
 // notifications sent from the C mote to the Python BSP
@@ -217,7 +217,7 @@ struct OpenMote {
    cleds_vars_t         cleds_vars;
    cstorm_vars_t        cstorm_vars;
    cwellknown_vars_t    cwellknown_vars;
-   tohlone_vars_t       tohlone_vars;
+   //tohlone_vars_t       tohlone_vars;
 };
 
 #endif

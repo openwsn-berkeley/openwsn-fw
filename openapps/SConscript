@@ -15,6 +15,11 @@ defaultApps   = [
     'techo',
     'uecho',
 ]
+if localEnv['board']=='python':
+    defaultApps  += [
+        'cexample',
+        'cstorm',
+    ]
 
 # additional apps the user wants to build
 if localEnv['apps']:
@@ -75,12 +80,19 @@ localEnv.Alias('dynapps', dynapps)
 #===== pick the correct source files
 
 target = 'libopenapps'
-sources_c = [
-    os.path.join('openapps_dyn.c'),
-]+[os.path.join(a,a+'.c') for a in apps]
-sources_h = [
-    os.path.join('openapps.h'),
-]+[os.path.join(a,a+'.c') for a in apps]
+
+sources_c          = []
+sources_h          = []
+
+if localEnv['board']=='python':
+    sources_c     += ['openapps.c']
+else:
+    sources_c     += ['openapps_dyn.c']
+sources_h         += ['openapps.h']
+
+for a in apps:
+    sources_c     += [os.path.join(a,a+'.c')]
+    sources_h     += [os.path.join(a,a+'.h')]
 
 #===== build the openapps library
 
