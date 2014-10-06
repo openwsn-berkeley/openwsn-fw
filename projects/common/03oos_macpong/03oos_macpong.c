@@ -8,7 +8,7 @@
 #include "opendefs.h"
 #include "board.h"
 #include "scheduler.h"
-#include "opendefs.h"
+#include "openstack.h"
 // needed for spoofing
 #include "openqueue.h"
 #include "opentimers.h"
@@ -134,6 +134,8 @@ void openudp_init(void)           { return; }
 void opencoap_init(void)          { return; }
 
 //===== L7
+
+void openapps_init(void)          { return; }
 
 void ohlone_init(void)            { return; }
 

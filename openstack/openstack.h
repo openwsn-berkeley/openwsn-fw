@@ -17,6 +17,6 @@
 
 //=========================== prototypes ======================================
 
-void openwsn_stack(void);
+void openstack_init(void);
 
 #endif

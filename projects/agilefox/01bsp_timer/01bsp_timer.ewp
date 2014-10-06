@@ -87,7 +87,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>6.60.1.5099</state>
+          <state>6.60.2.5494</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -305,40 +305,8 @@
           <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
-          <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\OpenwsnHeads\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\bbk\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\heli\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\imu\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\layerdebug\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rleds\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rreg\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rt\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rex\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rinfo\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rheli\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rxl1\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\rrube\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\ohlone\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tcpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tcpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tcpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udpecho\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udpinject\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udplatency\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udpprint\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udprand\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\udpstorm\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2119,6 +2087,12 @@
         <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
       </file>
     </group>
+  </group>
+  <group>
+    <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
+    </file>
   </group>
 </project>
 

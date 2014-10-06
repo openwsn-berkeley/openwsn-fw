@@ -7,14 +7,12 @@ can use this project with any platform.
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012
 */
 
-
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
 #include "bsp_timer.h"
 #include "nvic.h"
 #include "gpio.h"
-
 
 //=========================== defines =========================================
 

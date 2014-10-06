@@ -298,17 +298,17 @@
         <option>
           <name>CCIncludePath2</name>
           <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\configure\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\inc\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\configure\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\agilefox\library\inc\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
-          <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
+          <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\OpenwsnHeads\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
@@ -2126,6 +2126,12 @@
     </group>
   </group>
   <group>
+    <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
+    </file>
+  </group>
+  <group>
     <name>kernel</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
@@ -2362,10 +2368,10 @@
       </file>
     </group>
     <file>
-      <name>$PROJ_DIR$\..\..\..\openstack\openwsn.c</name>
+      <name>$PROJ_DIR$\..\..\..\openstack\openstack.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\openstack\openwsn.h</name>
+      <name>$PROJ_DIR$\..\..\..\openstack\openstack.h</name>
     </file>
   </group>
 </project>
