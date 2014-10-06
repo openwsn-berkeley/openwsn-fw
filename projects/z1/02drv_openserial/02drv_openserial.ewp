@@ -333,6 +333,7 @@
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\z1\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
@@ -2173,6 +2174,12 @@
         <name>$PROJ_DIR$\..\..\..\drivers\z1\tmp102.h</name>
       </file>
     </group>
+  </group>
+  <group>
+    <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
+    </file>
   </group>
 </project>
 
