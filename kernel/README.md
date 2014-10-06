@@ -1,0 +1,1 @@
+The kernel is responsible for scheduling the different tasks to execute on the board. Several kernel are supported, including `openos`, the single-threading run-to-completion scheduler built as part of the OpenWSN project.

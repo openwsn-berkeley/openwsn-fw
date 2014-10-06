@@ -25,11 +25,10 @@ Usage:
     scons [help-option]
 
 project:
-    A project is represented by a subdirectory of the 
-    firmware{0}openos{0}projects directory, for a particular board. For 
-    example, the 'oos_openwsn' project may be built for telosb. To specify a 
-    project, exclude the leading digits in the directory name, like '03' for 
-    oos_openwsn.
+    A project is represented by a subdirectory of the projects directory, for
+    a particular board. For example, the 'oos_openwsn' project may be built for
+    telosb. To specify a project, exclude the leading digits in the directory
+    name, like '03' for oos_openwsn.
 
     variable=value pairs
     These pairs qualify how the project is built, and are organized here into
@@ -80,8 +79,6 @@ help-option:
 
 #============================ options =========================================
 
-#===== options
-
 # first value is default
 command_line_options = {
     'board':       [
@@ -116,9 +113,25 @@ command_line_options = {
 
 def validate_option(key, value, env):
     if key not in command_line_options:
-       raise ValueError("Unknown switch {0}.".format(key))
+        raise ValueError("Unknown switch {0}.".format(key))
     if value not in command_line_options[key]:
-       raise ValueError("Unknown {0} \"{1}\". Options are {2}.\n\n".format(key,value,','.join(command_line_options[key])))
+        raise ValueError("Unknown {0} \"{1}\". Options are {2}.\n\n".format(key,value,','.join(command_line_options[key])))
+
+def validate_apps(key, value, env):
+    assert key=='apps'
+    if not value.strip():
+        return
+    requestedApps = value.split(',')
+    availableApps = [f for f in os.listdir('openapps') if not os.path.isfile(os.path.join('openapps',f))]
+    unknownApps   = list(set(requestedApps) - set(availableApps))
+    
+    if unknownApps:
+        raise ValueError(
+            "Unknown app(s) {0}. Available apps are {1}.\n\n".format(
+                ','.join(unknownApps),
+                ','.join(availableApps),
+            )
+        )
 
 # Define default value for simhost option
 if os.name=='nt':
@@ -198,6 +211,13 @@ command_line_vars.AddVariables(
         validate_option,                                   # validator
         int,                                               # converter
     ),
+    (
+        'apps',                                            # key
+        'comma-separated list of user applications',       # help
+        '',                                                # default
+        validate_apps,                                     # validator
+        None,                                              # converter
+    ),
 )
 
 if os.name=='nt':
@@ -246,7 +266,6 @@ env['targets'] = {
 }
 
 # include docs SConscript
-# which will discover targets for this board/toolchain
 env.SConscript(
     os.path.join('docs','SConscript'),
     exports = ['env'],
