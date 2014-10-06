@@ -335,6 +335,7 @@
           <state>$PROJ_DIR$\..\..\..\drivers\wsn430v14\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
@@ -2159,6 +2160,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
+    </file>
+  </group>
+  <group>
+    <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
     </file>
   </group>
 </project>

@@ -330,6 +330,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
         </option>
         <option>
@@ -2106,6 +2107,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
+    </file>
+  </group>
+  <group>
+    <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
     </file>
   </group>
 </project>
