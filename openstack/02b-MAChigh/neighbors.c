@@ -583,27 +583,6 @@ bool debugPrint_neighbors() {
    return TRUE;
 }
 
-void debugNetPrint_neighbors(netDebugNeigborEntry_t* out){
-   uint8_t idxIn;
-   uint8_t idxOut;
-   
-   idxOut=0;
-   for (idxIn=0;idxIn<MAXNUMNEIGHBORS;idxIn++) {
-      if(neighbors_vars.neighbors[idxIn].used) {
-         out[idxOut].last_addr_byte = neighbors_vars.neighbors[idxIn].addr_64b.addr_64b[7];//last byte of the address; poipoi could be [0]; endianness
-         out[idxOut].rssi = neighbors_vars.neighbors[idxIn].rssi;
-         out[idxOut].parentPreference = neighbors_vars.neighbors[idxIn].parentPreference;
-         out[idxOut].DAGrank = neighbors_vars.neighbors[idxIn].DAGrank;
-         memcpy(
-            &out[idxOut].asn,
-            &neighbors_vars.neighbors[idxIn].asn.bytes0and1,
-            sizeof(neighbors_vars.neighbors[idxIn].asn.bytes0and1)
-         );
-         idxOut++;
-      }
-   }  
-}
-
 //=========================== private =========================================
 
 void registerNewNeighbor(open_addr_t* address,
