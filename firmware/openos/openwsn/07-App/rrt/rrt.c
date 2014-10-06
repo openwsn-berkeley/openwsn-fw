@@ -80,6 +80,7 @@ owerror_t rrt_receive(
    ) {
    
    owerror_t outcome;
+   uint8_t mssgRecvd;
    
    switch (coap_header->Code) {
       case COAP_CODE_REQ_GET:
@@ -102,16 +103,15 @@ owerror_t rrt_receive(
          outcome                          = E_SUCCESS;
          break;
       case COAP_CODE_REQ_PUT:
+         mssgRecvd = msg->payload[0];
+         
+         if (mssgRecvd == 'C') {
+            rrt_vars.discovered = TRUE;
+         }
+
          // reset packet payload
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
-
-         packetfunctions_reserveHeaderSize(msg, 1);
-         msg->payload[0] = 'y';
-
-         //payload marker
-         packetfunctions_reserveHeaderSize(msg, 1);
-         msg->payload[0] = COAP_PAYLOAD_MARKER;
 
          //set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CHANGED;
