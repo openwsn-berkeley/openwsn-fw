@@ -329,6 +329,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\boards\gina\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\inc\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2108,6 +2109,12 @@
         <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
       </file>
     </group>
+  </group>
+  <group>
+    <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
+    </file>
   </group>
 </project>
 
