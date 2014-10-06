@@ -36,6 +36,8 @@ void setGETRespMsg(
    bool discovered   
 );
 
+void sendMsgToRingmaster(char actionMsg);
+
 //=========================== public ==========================================
 
 /**
@@ -107,6 +109,10 @@ owerror_t rrt_receive(
          
          if (mssgRecvd == 'C') {
             rrt_vars.discovered = TRUE;
+         } else if (mssgRecvd == 'B') {
+            //blink mote
+            //send packet back saying
+            //sendMsgToRingmaster('B');
          }
 
          // reset packet payload
@@ -116,8 +122,43 @@ owerror_t rrt_receive(
          //set the CoAP header
          coap_header->Code                = COAP_CODE_RESP_CHANGED;
 
+         //outcome                          = E_SUCCESS;
+         break;
+
+      case COAP_CODE_REQ_POST:
+          mssgRecvd = msg->payload[0];
+
+          if (mssgRecvd == 'B') {
+            //blink - reply with action just perfromed - Blink
+            
+          }
+
+          // reset packet payload
+          msg->payload                     = &(msg->packet[127]);
+          msg->length                      = 0;
+
+          //set the CoAP header
+          coap_header->Code                = COAP_CODE_RESP_CHANGED;
+
+          outcome                          = E_SUCCESS;
+
+          break;
+      case COAP_CODE_REQ_DELETE:
+         msg->payload                     = &(msg->packet[127]);
+         msg->length                      = 0;
+
+         rrt_vars.discovered = FALSE;
+         
+         // payload marker
+         packetfunctions_reserveHeaderSize(msg,1);
+         msg->payload[0] = COAP_PAYLOAD_MARKER;
+         
+         // set the CoAP header
+         coap_header->Code                = COAP_CODE_RESP_CONTENT;
+         
          outcome                          = E_SUCCESS;
          break;
+
       default:
          // return an error message
          outcome = E_FAIL;
@@ -141,8 +182,7 @@ void setGETRespMsg(OpenQueueEntry_t* msg, bool registered) {
              msg->payload[9] = 'n';
              msg->payload[10] = 'g';
 
-             //send packet to local with 'D' here
-             sendDiscoveryToRingmaster();
+             sendMsgToRingmaster('D'); //'D' stands for discovery
 
          } else {
              packetfunctions_reserveHeaderSize(msg,10);
@@ -159,7 +199,7 @@ void setGETRespMsg(OpenQueueEntry_t* msg, bool registered) {
          }
 }
 
-void sendDiscoveryToRingmaster() {
+void sendMsgToRingmaster(char actionMsg) {
       OpenQueueEntry_t* pkt;
       owerror_t outcome;
       uint8_t numOptions;
@@ -178,7 +218,7 @@ void sendDiscoveryToRingmaster() {
       pkt->l4_protocol  = IANA_UDP;
 
       packetfunctions_reserveHeaderSize(pkt, 1);
-      pkt->payload[0] = 'D';
+      pkt->payload[0] = actionMsg;
 
       numOptions = 0;
       // location-path option
