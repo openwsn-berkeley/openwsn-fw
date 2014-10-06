@@ -307,6 +307,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\OpenwsnHeads\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
@@ -2116,6 +2117,9 @@
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
     </file>
+  </group>
+  <group>
+    <name>inc</name>
   </group>
 </project>
 
