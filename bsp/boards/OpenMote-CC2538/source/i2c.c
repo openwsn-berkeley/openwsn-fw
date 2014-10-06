@@ -44,11 +44,11 @@
 //
 //*****************************************************************************
 
-#include "hw_i2cm.h"
-#include "hw_i2cs.h"
-#include "hw_ints.h"
-#include "hw_memmap.h"
-#include "hw_sys_ctrl.h"
+#include <headers/hw_i2cm.h>
+#include <headers/hw_i2cs.h>
+#include <headers/hw_ints.h>
+#include <headers/hw_memmap.h>
+#include <headers/hw_sys_ctrl.h>
 #include "debug.h"
 #include "i2c.h"
 #include "interrupt.h"

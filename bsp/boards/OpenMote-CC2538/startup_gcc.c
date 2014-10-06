@@ -36,9 +36,9 @@
 //  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //****************************************************************************/
 
+#include <headers/hw_nvic.h>
 #include <stdint.h>
 
-#include "hw_nvic.h"
 
 #define FLASH_START_ADDR                0x00200000
 #define BOOTLOADER_BACKDOOR_ENABLE      0xF6FFFFFF // ENABLED: PORT A, PIN 6, LOW

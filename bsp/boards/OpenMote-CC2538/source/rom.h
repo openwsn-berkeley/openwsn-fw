@@ -51,7 +51,7 @@ extern "C"
 {
 #endif
 
-#include "hw_types.h"
+#include <headers/hw_types.h>
 
 //
 // Start address of the ROM hard API access table (located after the ROM FW rev field)

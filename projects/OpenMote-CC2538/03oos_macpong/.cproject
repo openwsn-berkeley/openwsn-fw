@@ -44,7 +44,8 @@
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.614902933" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor.1426851169" name="Use preprocessor" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor" value="true" valueType="boolean"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths.1951832335" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538/headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/inc&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538/source&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/cross-layers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538&quot;"/>
@@ -75,7 +76,7 @@
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.947595233" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths.711603150" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538/inc&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538/headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538/source&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/cross-layers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538&quot;"/>
@@ -98,6 +99,7 @@
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openapps/cwellknown&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openapps/techo&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openapps/uecho&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/inc&quot;"/>
 								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.580777158" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
 							</tool>
@@ -195,8 +197,13 @@
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.command.rm.1889291552.331902685" name="Remove command" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.command.rm.1889291552"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createflash.50217527.216776289" name="Create flash image" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.createflash.50217527"/>
 							<option id="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize.1096339710.127500234" name="Print size" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.addtools.printsize.1096339710"/>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.1362957662" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.614902933"/>
-							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1561659704" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.947595233"/>
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform" isAbstract="false" osList="all" superClass="ilg.gnuarmeclipse.managedbuild.cross.targetPlatform"/>
+							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.1362957662" name="Cross ARM GNU Assembler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.614902933">
+								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input.1232782656" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input"/>
+							</tool>
+							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.1561659704" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.947595233">
+								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.464842930" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
+							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.101922352" name="Cross ARM C++ Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.1147655240"/>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.1937924179" name="Cross ARM C Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.1517573154"/>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.1325641533" name="Cross ARM C++ Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.1905652169"/>

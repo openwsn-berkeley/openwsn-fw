@@ -44,9 +44,9 @@
 //
 //*****************************************************************************
 
-#include "hw_sys_ctrl.h"
-#include "hw_udma.h"
-#include "hw_udmachctl.h"
+#include <headers/hw_sys_ctrl.h>
+#include <headers/hw_udma.h>
+#include <headers/hw_udmachctl.h>
 #include "debug.h"
 #include "interrupt.h"
 #include "udma.h"

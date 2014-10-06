@@ -6,12 +6,12 @@
  \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, August 2013.
  */
 
+#include <headers/hw_ints.h>
+#include <headers/hw_memmap.h>
+#include <headers/hw_smwdthrosc.h>
 #include "string.h"
 #include "bsp_timer.h"
 #include "board.h"
-#include "hw_ints.h"
-#include "hw_memmap.h"
-#include "hw_smwdthrosc.h"
 #include "debug.h"
 #include "interrupt.h"
 #include "sleepmode.h"

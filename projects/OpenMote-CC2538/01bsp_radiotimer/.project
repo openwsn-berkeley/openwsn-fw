@@ -60,6 +60,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/radiotimer.h</locationURI>
 		</link>
 		<link>
+			<name>OpenMote-CC2538/toolchain_defs.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/toolchain_defs.h</locationURI>
+		</link>
+		<link>
 			<name>linker/cc2538.lds</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/OpenMote-CC2538/cc2538.lds</locationURI>

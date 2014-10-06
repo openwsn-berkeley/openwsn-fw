@@ -44,9 +44,9 @@
 //
 //*****************************************************************************
 
-#include "hw_ints.h"
-#include "hw_memmap.h"
-#include "hw_soc_adc.h"
+#include <headers/hw_ints.h>
+#include <headers/hw_memmap.h>
+#include <headers/hw_soc_adc.h>
 #include "debug.h"
 #include "interrupt.h"
 #include "adc.h"

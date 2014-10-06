@@ -44,10 +44,10 @@
 //
 //*****************************************************************************
 
-#include "hw_ints.h"
-#include "hw_memmap.h"
-#include "hw_pka.h"
-#include "hw_types.h"
+#include <headers/hw_ints.h>
+#include <headers/hw_memmap.h>
+#include <headers/hw_pka.h>
+#include <headers/hw_types.h>
 #include "interrupt.h"
 #include "pka.h"
 #include "sys_ctrl.h"

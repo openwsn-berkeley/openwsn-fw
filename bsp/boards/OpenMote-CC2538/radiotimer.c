@@ -5,15 +5,15 @@
 */
 
 
+#include <headers/hw_ints.h>
+#include <headers/hw_rfcore_sfr.h>
+#include <headers/hw_types.h>
 #include "stdio.h"
 #include "string.h"
 #include "radiotimer.h"
 #include "debugpins.h"
-#include "hw_rfcore_sfr.h"
 #include "interrupt.h"
 #include "sys_ctrl.h"
-#include "hw_ints.h"
-#include "hw_types.h"
 #include "sys_ctrl.h"
 
 

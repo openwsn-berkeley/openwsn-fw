@@ -44,8 +44,8 @@
 //
 //*****************************************************************************
 
-#include "hw_flash_ctrl.h"
-#include "hw_memmap.h"
+#include <headers/hw_flash_ctrl.h>
+#include <headers/hw_memmap.h>
 #include "debug.h"
 #include "flash.h"
 #include "rom.h"

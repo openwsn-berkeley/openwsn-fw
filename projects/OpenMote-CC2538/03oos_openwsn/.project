@@ -45,6 +45,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/drivers/cc2538</locationURI>
 		</link>
 		<link>
+			<name>inc</name>
+			<type>2</type>
+			<location>C:/Users/vilajosa/Documents/personal/research/openwsn-fw/inc</location>
+		</link>
+		<link>
 			<name>openapps</name>
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/openapps</locationURI>
@@ -93,6 +98,11 @@
 			<name>OpenMote-CC2538/radiotimer.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/radiotimer.h</locationURI>
+		</link>
+		<link>
+			<name>OpenMote-CC2538/toolchain_defs.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/toolchain_defs.h</locationURI>
 		</link>
 		<link>
 			<name>OpenMote-CC2538/uart.h</name>

@@ -44,10 +44,10 @@
 //
 //*****************************************************************************
 
-#include "hw_ints.h"
-#include "hw_sys_ctrl.h"
-#include "hw_flash_ctrl.h"
-#include "hw_nvic.h"
+#include <headers/hw_flash_ctrl.h>
+#include <headers/hw_ints.h>
+#include <headers/hw_nvic.h>
+#include <headers/hw_sys_ctrl.h>
 #include "cpu.h"
 #include "debug.h"
 #include "interrupt.h"

@@ -5,10 +5,10 @@
 */
 
 
+#include <headers/hw_memmap.h>
+#include <headers/hw_types.h>
 #include "debugpins.h"
 #include "gpio.h"
-#include "hw_types.h"
-#include "hw_memmap.h"
 #include "board.h"
 
 //=========================== defines =========================================

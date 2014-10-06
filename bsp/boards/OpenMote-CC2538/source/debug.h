@@ -40,7 +40,7 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
-#include "hw_types.h"
+#include <headers/hw_types.h>
 
 //*****************************************************************************
 //

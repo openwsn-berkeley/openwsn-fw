@@ -4,11 +4,11 @@
 \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, August 2013.
 */
 
+#include <headers/hw_memmap.h>
+#include <headers/hw_types.h>
 #include "stdint.h"
 #include "leds.h"
 #include "gpio.h"
-#include "hw_types.h"
-#include "hw_memmap.h"
 #include "board.h"
 
 
