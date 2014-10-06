@@ -40,7 +40,7 @@
 #ifndef __CCM_H__
 #define __CCM_H__
 
-#include "hw_types.h"
+#include <headers/hw_types.h>
 
 //*****************************************************************************
 //

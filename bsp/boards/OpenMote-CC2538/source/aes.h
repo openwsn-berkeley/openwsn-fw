@@ -40,10 +40,10 @@
 #ifndef __AES_H__
 #define __AES_H__
 
-#include "hw_types.h"
-#include "hw_aes.h"
+#include <headers/hw_aes.h>
+#include <headers/hw_ints.h>
+#include <headers/hw_types.h>
 #include "interrupt.h"
-#include "hw_ints.h"
 
 //*****************************************************************************
 //

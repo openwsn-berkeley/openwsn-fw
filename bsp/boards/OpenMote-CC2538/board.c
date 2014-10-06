@@ -5,13 +5,15 @@
 */
 
 
+#include <headers/hw_ioc.h>             // Access to IOC register defines
+#include <headers/hw_memmap.h>
+#include <headers/hw_ssi.h>             // Access to SSI register defines
+#include <headers/hw_sys_ctrl.h>        // Clocking control
+#include <headers/hw_types.h>
 #include "board.h"
 
 // bsp modules
 #include "leds.h"
-#include "hw_ioc.h"             // Access to IOC register defines
-#include "hw_ssi.h"             // Access to SSI register defines
-#include "hw_sys_ctrl.h"        // Clocking control
 #include "ioc.h"                // Access to driverlib ioc fns
 #include "gpio.h"               // Access to driverlib gpio fns
 #include "sys_ctrl.h"           // Access to driverlib SysCtrl fns
@@ -21,8 +23,6 @@
 #include "debugpins.h"
 #include "uart.h"
 #include "radio.h"
-#include "hw_types.h"
-#include "hw_memmap.h"
 
 //=========================== variables =======================================
 

@@ -62,7 +62,7 @@
 		<link>
 			<name>OpenMote-CC2538/uart.h</name>
 			<type>1</type>
-			<location>C:/Users/xvilajosana/Documents/workspaces/openwsn_git/openwsn-fw/firmware/openos/bsp/boards/uart.h</location>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/uart.h</locationURI>
 		</link>
 		<link>
 			<name>linker/cc2538.lds</name>

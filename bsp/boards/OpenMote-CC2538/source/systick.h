@@ -40,7 +40,7 @@
 #ifndef __SYSTICK_H__
 #define __SYSTICK_H__
 
-#include "hw_types.h"
+#include <headers/hw_types.h>
 
 //*****************************************************************************
 //
@@ -53,7 +53,7 @@ extern "C"
 {
 #endif
 
-#include "hw_types.h"
+#include <headers/hw_types.h>
   
 //*****************************************************************************
 //

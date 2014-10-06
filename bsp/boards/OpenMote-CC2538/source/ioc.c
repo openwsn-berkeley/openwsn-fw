@@ -44,9 +44,9 @@
 //
 //*****************************************************************************
 
-#include "hw_ioc.h"
-#include "hw_gpio.h"
-#include "hw_memmap.h"
+#include <headers/hw_gpio.h>
+#include <headers/hw_ioc.h>
+#include <headers/hw_memmap.h>
 #include "debug.h"
 #include "ioc.h"
 #include "gpio.h"

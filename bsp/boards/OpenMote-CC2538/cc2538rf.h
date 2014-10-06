@@ -9,8 +9,8 @@
 #define CC2538RF_H_
 
 
-#include "hw_rfcore_xreg.h"
-#include "hw_rfcore_sfr.h"
+#include <headers/hw_rfcore_sfr.h>
+#include <headers/hw_rfcore_xreg.h>
 
 
 /*---------------------------------------------------------------------------

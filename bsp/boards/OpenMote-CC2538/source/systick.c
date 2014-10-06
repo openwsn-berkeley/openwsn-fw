@@ -44,8 +44,8 @@
 //
 //*****************************************************************************
 
-#include "hw_ints.h"
-#include "hw_nvic.h"
+#include <headers/hw_ints.h>
+#include <headers/hw_nvic.h>
 #include "debug.h"
 #include "interrupt.h"
 #include "systick.h"

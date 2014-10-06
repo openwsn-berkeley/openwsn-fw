@@ -51,7 +51,7 @@ extern "C"
 {
 #endif
 
-#include "hw_types.h"
+#include <headers/hw_types.h>
 
 //*****************************************************************************
 //

@@ -5,20 +5,20 @@
 */
 
 
+#include <headers/hw_ints.h>
+#include <headers/hw_ioc.h>
+#include <headers/hw_memmap.h>
+#include <headers/hw_types.h>
 #include "stdint.h"
 #include "stdio.h"
 #include "string.h"
 #include "uart.h"
 #include "uarthal.h"
-#include "hw_ints.h"
 #include "interrupt.h"
 #include "sys_ctrl.h"
 #include "gpio.h"
-#include "hw_types.h"
-#include "hw_memmap.h"
 #include "board.h"
 #include "ioc.h"
-#include "hw_ioc.h"
 #include "debugpins.h"
 
 //=========================== defines =========================================

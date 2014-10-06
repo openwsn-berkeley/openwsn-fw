@@ -44,10 +44,10 @@
 //
 //*****************************************************************************
 
-#include "hw_ints.h"
-#include "hw_memmap.h"
-#include "hw_sys_ctrl.h"
-#include "hw_uart.h"
+#include <headers/hw_ints.h>
+#include <headers/hw_memmap.h>
+#include <headers/hw_sys_ctrl.h>
+#include <headers/hw_uart.h>
 #include "debug.h"
 #include "interrupt.h"
 #include "uarthal.h"

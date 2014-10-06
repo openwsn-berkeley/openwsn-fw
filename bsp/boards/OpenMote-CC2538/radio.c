@@ -4,6 +4,12 @@
 \author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, Sept 2013.
 */
 
+#include <headers/hw_ana_regs.h>
+#include <headers/hw_ints.h>
+#include <headers/hw_rfcore_sfr.h>
+#include <headers/hw_rfcore_sfr.h>
+#include <headers/hw_rfcore_xreg.h>
+#include <headers/hw_types.h>
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
@@ -11,16 +17,10 @@
 #include "string.h"
 #include "radiotimer.h"
 #include "debugpins.h"
-#include "hw_rfcore_sfr.h"
 #include "interrupt.h"
 #include "sys_ctrl.h"
-#include "hw_ints.h"
-#include "hw_types.h"
 #include "sys_ctrl.h"
-#include "hw_rfcore_xreg.h"
-#include "hw_rfcore_sfr.h"
 #include "cc2538rf.h"
-#include "hw_ana_regs.h"
 
 //=========================== defines =========================================
 
