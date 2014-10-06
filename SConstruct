@@ -119,6 +119,8 @@ def validate_option(key, value, env):
 
 def validate_apps(key, value, env):
     assert key=='apps'
+    if not value.strip():
+        return
     requestedApps = value.split(',')
     availableApps = [f for f in os.listdir('openapps') if not os.path.isfile(os.path.join('openapps',f))]
     unknownApps   = list(set(requestedApps) - set(availableApps))

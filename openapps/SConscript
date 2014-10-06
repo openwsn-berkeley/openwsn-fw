@@ -2,37 +2,92 @@ import os
 
 Import('env')
 
-localEnv = env.Clone()
+localEnv      = env.Clone()
+
+#===== retrieve the list of apps to build
+
+# apps which should always be present
+defaultApps   = [
+    'c6t',
+    'cinfo',
+    'cleds',
+    'cwellknown',
+    'techo',
+    'uecho',
+]
+
+# additional apps the user wants to build
+if localEnv['apps']:
+    userApps  = localEnv['apps'].split(',')
+else:
+    userApps  = []
+
+# union of default and additional apps (without duplicates)
+apps = sorted(list(set(defaultApps+userApps)))
+
+#===== rule to create a (temporary) openapps_dyn.c file
+
+def dynify(env,target,source):
+    
+    assert len(target)==1
+    assert len(source)==1
+    
+    target = target[0].abspath
+    source = source[0].abspath
+    
+    #=== create file
+    
+    dynfile = '''
+    #include "opendefs.h"
+    {HEADERS_FILES}
+
+    void openapps_init(void) {{
+    {INIT_FUNCTIONS}
+    }}
+    '''.format(
+        HEADERS_FILES  = '\n'.join(['#include "{0}.h"'.format(a) for a in apps]),
+        INIT_FUNCTIONS = '\n'.join(['   {0}_init();'.format(a) for a in apps]),
+    )
+    
+    # this is a workaround for the fact that leds_init() is called leds__init()
+    # which itself it due to possible confusion in the objecticication process
+    # between leds_init() and rleds_init()
+    dynfile = dynfile.replace('leds_init','leds__init')
+    
+    #=== write
+    
+    with open(target,'w') as f:
+        f.write(dynfile)
+
+dynifyBuilder = Builder(
+    action = Action(dynify,'Dynifying $TARGET')
+)
+
+localEnv.Append(BUILDERS = {'Dynify' : dynifyBuilder})
+
+dynapps = localEnv.Dynify(
+    target = 'openapps_dyn.c',
+    source = 'openapps.c'
+)
+localEnv.AlwaysBuild(dynapps)
+localEnv.Alias('dynapps', dynapps)
+
+#===== pick the correct source files
 
 target = 'libopenapps'
 sources_c = [
-    os.path.join('openapps.c'),
-    os.path.join('c6t',           'c6t.c'),
-    os.path.join('cexample',      'cexample.c'),
-    os.path.join('cinfo',         'cinfo.c'),
-    os.path.join('cleds',         'cleds.c'),
-    os.path.join('cstorm',        'cstorm.c'),
-    os.path.join('cwellknown',    'cwellknown.c'),
-    os.path.join('techo',         'techo.c'),
-    os.path.join('tohlone',       'tohlone.c'),
-    os.path.join('tohlone',       'tohlone_webpages.c'),
-    os.path.join('uecho',         'uecho.c'),
-]
+    os.path.join('openapps_dyn.c'),
+]+[os.path.join(a,a+'.c') for a in apps]
 sources_h = [
     os.path.join('openapps.h'),
-    os.path.join('c6t',           'c6t.h'),
-    os.path.join('cexample',      'cexample.h'),
-    os.path.join('cinfo',         'cinfo.h'),
-    os.path.join('cleds',         'cleds.h'),
-    os.path.join('cstorm',        'cstorm.h'),
-    os.path.join('cwellknown',    'cwellknown.h'),
-    os.path.join('techo',         'techo.h'),
-    os.path.join('tohlone',       'tohlone.h'),
-    os.path.join('tohlone',       'tohlone_webpages.h'),
-    os.path.join('uecho',         'uecho.h'),
-]
+]+[os.path.join(a,a+'.c') for a in apps]
+
+#===== build the openapps library
 
 if localEnv['board']=='python':
+    
+    if userApps:
+        raise SystemError("Dynamic app creation not yet supported in simulation mode")
     
     for s in sources_c+sources_h:
         temp = localEnv.Objectify(
@@ -53,24 +108,15 @@ else:
         CPPPATH =  [
             # inc
             os.path.join('#','inc'),
-            # openapps
-            os.path.join('#','openapps'),
-            os.path.join('#','openapps','c6t'),
-            os.path.join('#','openapps','cexample'),
-            os.path.join('#','openapps','cinfo'),
-            os.path.join('#','openapps','cleds'),
-            os.path.join('#','openapps','cstorm'),
-            os.path.join('#','openapps','cwellknown'),
-            os.path.join('#','openapps','techo'),
-            os.path.join('#','openapps','tohlone'),
-            os.path.join('#','openapps','uecho'),
             # openstack
             os.path.join('#','openstack','04-TRAN'),
             os.path.join('#','openstack','cross-layers'),
             os.path.join('#','openstack','02a-MAClow'),
             os.path.join('#','openstack','02b-MAChigh'),
             os.path.join('#','openstack','03b-IPv6'),
-        ],
+            # openapps
+            os.path.join('#','openapps'),
+        ]+[os.path.join('#','openapps',a) for a in apps],
     )
     
     libopenapps = localEnv.Library(

@@ -218,7 +218,6 @@ struct OpenMote {
    cstorm_vars_t        cstorm_vars;
    cwellknown_vars_t    cwellknown_vars;
    tohlone_vars_t       tohlone_vars;
-   
 };
 
 #endif
