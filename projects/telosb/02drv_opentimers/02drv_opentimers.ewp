@@ -325,12 +325,23 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
+          <state>$PROJ_DIR$</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
+          <state>$PROJ_DIR$\..\..\..\drivers\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
+          <state>$PROJ_DIR$\..\..\..\drivers\telosb\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
+          <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2106,6 +2117,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
+    </file>
+  </group>
+  <group>
+    <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
     </file>
   </group>
 </project>

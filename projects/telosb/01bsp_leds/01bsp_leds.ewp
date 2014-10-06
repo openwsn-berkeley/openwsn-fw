@@ -329,6 +329,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2084,6 +2085,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
+    </file>
+  </group>
+  <group>
+    <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
     </file>
   </group>
 </project>

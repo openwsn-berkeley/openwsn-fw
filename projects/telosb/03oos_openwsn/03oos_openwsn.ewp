@@ -333,6 +333,7 @@
           <state>$PROJ_DIR$\..\..\..\drivers\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\telosb\</state>
+          <state>$PROJ_DIR$\..\..\..\inc\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
@@ -2147,6 +2148,12 @@
     </file>
   </group>
   <group>
+    <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
+    </file>
+  </group>
+  <group>
     <name>kernel</name>
     <file>
       <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
@@ -2383,10 +2390,10 @@
       </file>
     </group>
     <file>
-      <name>$PROJ_DIR$\..\..\..\openstack\openwsn.c</name>
+      <name>$PROJ_DIR$\..\..\..\openstack\openstack.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\openstack\openwsn.h</name>
+      <name>$PROJ_DIR$\..\..\..\openstack\openstack.h</name>
     </file>
   </group>
 </project>
