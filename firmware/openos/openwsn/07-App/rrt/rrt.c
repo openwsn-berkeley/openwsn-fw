@@ -107,35 +107,44 @@ owerror_t rrt_receive(
       case COAP_CODE_REQ_PUT:
          mssgRecvd = msg->payload[0];
          
-         if (mssgRecvd == 'C') {
-            rrt_vars.discovered = TRUE;
-         } else if (mssgRecvd == 'B') {
-            //blink mote
-            //send packet back saying
-            //sendMsgToRingmaster('B');
-         }
+         //TODO implement receiving forwarding message
 
          // reset packet payload
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
 
-         //set the CoAP header
-         coap_header->Code                = COAP_CODE_RESP_CHANGED;
+         if (mssgRecvd == 'C') {
+            rrt_vars.discovered = TRUE;
+         } else if (mssgRecvd == 'B') {
+            //blink mote
+            printf("Mote performed blink");
+            //send packet back saying it did action B - blink
+            //sendMsgToRingmaster('B');
 
-         //outcome                          = E_SUCCESS;
+            packetfunctions_reserveHeaderSize(msg, 1);
+            msg->payload[0] = 'B';
+         }
+
+         packetfunctions_reserveHeaderSize(msg, 1);
+         msg->payload[0] = COAP_PAYLOAD_MARKER;
+
+         //set the CoAP header
+         coap_header->Code                = COAP_CODE_RESP_CONTENT;
+
+         outcome                          = E_SUCCESS;
          break;
 
       case COAP_CODE_REQ_POST:
-          mssgRecvd = msg->payload[0];
-
-          if (mssgRecvd == 'B') {
-            //blink - reply with action just perfromed - Blink
-            
-          }
-
           // reset packet payload
           msg->payload                     = &(msg->packet[127]);
           msg->length                      = 0;
+
+          packetfunctions_reserveHeaderSize(msg, 1);
+          msg->payload[0] = 'B';
+
+
+          packetfunctions_reserveHeaderSize(msg, 1);
+          msg->payload[0] = COAP_PAYLOAD_MARKER;
 
           //set the CoAP header
           coap_header->Code                = COAP_CODE_RESP_CHANGED;
