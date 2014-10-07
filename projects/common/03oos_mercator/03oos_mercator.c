@@ -331,21 +331,19 @@ void serial_rx_REQ_TX(void) {
    // prepare radio
    radio_rfOn();
    radio_setFrequency(req->frequency);
+   
    //TODO set TX Power
 
    // start periodic overflow
    radiotimer_start(req->txifdur);
 
-   // uncomment this to change the waiting method to send packets
+   // send packets
    mercator_vars.timerId  = opentimers_start(
       req->txifdur,
       TIMER_PERIODIC,
       TIME_MS,
       cb_sendPacket
    );
-   
-
-   // send packets
    while(mercator_vars.txpk_num < mercator_vars.txpk_totalnumpk) {
       board_sleep();
    }
@@ -354,7 +352,7 @@ void serial_rx_REQ_TX(void) {
    radio_rfOff();
    mercator_vars.status = ST_TXDONE;
 
-   //TODO send IND_TXDONE 
+   //TODO send TYPE_IND_TXDONE over serial port 
    mercator_vars.numnotifications++;
 }
 
@@ -366,10 +364,13 @@ void serial_rx_REQ_RX(void) {
    }
    // change status to RX
    mercator_vars.status = ST_RX;
+
+   // reset notifications counter
    mercator_vars.numnotifications = 0;
 
    REQ_RX_ht* req; 
    req = (REQ_RX_ht*)mercator_vars.uartbufrx;
+
    // turn on radio leds
    leds_radio_on();
 
@@ -400,7 +401,7 @@ void serial_rx_REQ_RX(void) {
          &mercator_vars.rxpk_crc
       );
 
-      // TODO send notification over serial port
+      // TODO send TYPE_IND_RX over serial port
       mercator_vars.numnotifications++;
    }
 }
@@ -582,17 +583,19 @@ void cb_endFrame(uint16_t timestamp) {
 }
 
 void cb_sendPacket(void){
-   leds_error_on();
-
+   
    // update pkctr
    memcpy(mercator_vars.rfbuftx + 9, &mercator_vars.txpk_num, 2);
 
    // send packet
+   leds_error_on();
+
    radio_loadPacket(mercator_vars.rfbuftx, mercator_vars.txpk_len);
    radio_txEnable();
    radio_txNow();
 
    leds_error_off();
+
    mercator_vars.txpk_num++;
    if (mercator_vars.txpk_num == mercator_vars.txpk_totalnumpk) {
       opentimers_stop(mercator_vars.timerId);
