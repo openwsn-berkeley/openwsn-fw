@@ -654,8 +654,8 @@ buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
 
 # kernel
-kernelDir       = os.path.join('#','kernel','openos')
-kernelVarDir    = os.path.join(buildEnv['VARDIR'],'kernel','openos')
+kernelDir       = os.path.join('#','kernel',buildEnv['kernel'])
+kernelVarDir    = os.path.join(buildEnv['VARDIR'],'kernel',buildEnv['kernel'])
 buildEnv.SConscript(
     os.path.join(kernelDir,'SConscript'),
     exports     = {'env': buildEnv},
