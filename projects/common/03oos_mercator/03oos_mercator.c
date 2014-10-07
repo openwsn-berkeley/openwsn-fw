@@ -344,16 +344,8 @@ void serial_rx_REQ_TX(void) {
       TIME_MS,
       cb_sendPacket
    );
-   while(mercator_vars.txpk_num < mercator_vars.txpk_totalnumpk) {
-      board_sleep();
-   }
 
-   // finishing TX
-   radio_rfOff();
-   mercator_vars.status = ST_TXDONE;
-
-   //TODO send TYPE_IND_TXDONE over serial port 
-   mercator_vars.numnotifications++;
+   return;
 }
 
 void serial_rx_REQ_RX(void) {
@@ -571,15 +563,17 @@ void isr_openserial_rx_mod(void) {
 void cb_txRadioTimerOverflows(void) {
    
    // ready to send next packet
-   if (mercator_vars.status == ST_TX)
+   if (mercator_vars.status == ST_TX){
       mercator_vars.txpk_txNow = 1;
+   }
 }
 
 void cb_endFrame(uint16_t timestamp) {
 
    // indicate I just received a packet
-   if (mercator_vars.status == ST_RX)
+   if (mercator_vars.status == ST_RX){
       mercator_vars.rxpk_done = 1;
+   }
 }
 
 void cb_sendPacket(void){
@@ -599,5 +593,15 @@ void cb_sendPacket(void){
    mercator_vars.txpk_num++;
    if (mercator_vars.txpk_num == mercator_vars.txpk_totalnumpk) {
       opentimers_stop(mercator_vars.timerId);
+      scheduler_push_task(cb_finishTx, TASK_PRIO_WIRELESS);
    }
+}
+
+void cb_finishTx(void){
+   // finishing TX
+   radio_rfOff();
+   mercator_vars.status = ST_TXDONE;
+
+   //TODO send TYPE_IND_TXDONE over serial port 
+   mercator_vars.numnotifications++;
 }
