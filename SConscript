@@ -447,7 +447,7 @@ def buildLibs(projectDir):
         '00std': [                                                              ],
         '01bsp': [                                                      'libbsp'],
         '02drv': [                                         'libdrivers','libbsp'],
-        '03oos': ['libopenstack','libopenapps','libopenos','libdrivers','libbsp'], # this order needed for mspgcc
+        '03oos': ['libopenstack','libopenapps','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
     returnVal = None
@@ -661,7 +661,7 @@ buildEnv.SConscript(
     exports     = {'env': buildEnv},
     variant_dir = kernelVarDir,
 )
-buildEnv.Clean('libopenos', Dir(kernelVarDir).abspath)
+buildEnv.Clean('libkernel', Dir(kernelVarDir).abspath)
 buildEnv.Append(LIBPATH = [kernelVarDir])
 
 # drivers

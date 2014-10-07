@@ -4,7 +4,7 @@ Import('env')
 
 localEnv = env.Clone()
 
-target    =  'libopenos'
+target    =  'libkernel'
 sources_c = [
     'scheduler.c',
 ]
@@ -21,11 +21,11 @@ if localEnv['board']=='python':
         )
         #localEnv.AlwaysBuild(temp)
     
-    libopenos = localEnv.Library(
+    libkernel = localEnv.Library(
         target = target,
         source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
     )
-    localEnv.Depends(libopenos,[localEnv.ObjectifiedFilename(s) for s in sources_h])
+    localEnv.Depends(libkernel,[localEnv.ObjectifiedFilename(s) for s in sources_h])
 
 else:
     
@@ -34,9 +34,9 @@ else:
         ],
     )
     
-    libopenos = localEnv.Library(
+    libkernel = localEnv.Library(
         target = target,
         source = sources_c,
     )
 
-Alias('libopenos', libopenos)
+Alias('libkernel', libkernel)
