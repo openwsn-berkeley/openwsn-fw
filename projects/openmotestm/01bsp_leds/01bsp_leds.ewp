@@ -305,7 +305,7 @@
           <state>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\at86rf231\</state>
-          <state>$PROJ_DIR$\..\..\..\kernel\openos\</state>
+          <state>$PROJ_DIR$\..\..\..\kernel\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\inc\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>

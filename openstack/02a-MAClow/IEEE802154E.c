@@ -59,8 +59,8 @@ void     activity_rie5(void);
 void     activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime);
 void     activity_rie6(void);
 void     activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime);
-// frame validity check
 
+// frame validity check
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
 bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
@@ -87,6 +87,9 @@ void     changeState(ieee154e_state_t newstate);
 void     endSlot(void);
 bool     debugPrint_asn(void);
 bool     debugPrint_isSync(void);
+// interrupts
+void     isr_ieee154e_newSlot(void);
+void     isr_ieee154e_timer(void);
 
 //=========================== admin ===========================================
 

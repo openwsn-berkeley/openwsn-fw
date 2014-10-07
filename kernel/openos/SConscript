@@ -8,24 +8,19 @@ target    =  'libkernel'
 sources_c = [
     'scheduler.c',
 ]
-sources_h = [
-    'scheduler.h',
-]
 
 if localEnv['board']=='python':
     
-    for s in sources_c+sources_h:
+    for s in sources_c:
         temp = localEnv.Objectify(
             target = localEnv.ObjectifiedFilename(s),
             source = s,
         )
-        #localEnv.AlwaysBuild(temp)
     
     libkernel = localEnv.Library(
         target = target,
         source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
     )
-    localEnv.Depends(libkernel,[localEnv.ObjectifiedFilename(s) for s in sources_h])
 
 else:
     
