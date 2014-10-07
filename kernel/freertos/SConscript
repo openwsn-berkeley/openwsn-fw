@@ -1,0 +1,28 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+target    =  'libkernel'
+sources_c = [
+    'scheduler.c',
+]
+
+if localEnv['board']=='python':
+    
+    raise SystemError("FreeRTOS kernel not supported in simulation mode")
+
+else:
+    
+    localEnv.Append(
+        CPPPATH =  [
+        ],
+    )
+    
+    libkernel = localEnv.Library(
+        target = target,
+        source = sources_c,
+    )
+
+Alias('libkernel', libkernel)
