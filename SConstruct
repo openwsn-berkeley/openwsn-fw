@@ -103,6 +103,10 @@ command_line_options = {
         'armgcc',
         'gcc',
     ],
+    'kernel': [
+        'openos',
+        'freertos',
+    ],
     'fet_version': ['2','3'],
     'verbose':     ['0','1'],
     'fastsim':     ['1','0'],
@@ -152,6 +156,13 @@ command_line_vars.AddVariables(
         'toolchain',                                       # key
         '',                                                # help
         command_line_options['toolchain'][0],              # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'kernel',                                          # key
+        '',                                                # help
+        command_line_options['kernel'][0],                 # default
         validate_option,                                   # validator
         None,                                              # converter
     ),
