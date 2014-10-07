@@ -20,7 +20,7 @@ if env['board']!='python':
             os.path.join('#','bsp','boards'),
             os.path.join('#','bsp','chips'),
             os.path.join('#','drivers','common'),
-            os.path.join('#','kernel','openos'),
+            os.path.join('#','kernel'),
             os.path.join('#','openapps'),
             os.path.join('#','openstack'),
         ]
@@ -633,12 +633,12 @@ buildEnv.SConscript(
 )
 
 # bspheader
-boardsDir       = os.path.join('#','bsp','boards')
-boardsVarDir    = os.path.join(buildEnv['VARDIR'],'bsp','boards')
+bspHDir         = os.path.join('#','bsp','boards')
+bspHVarDir      = os.path.join(buildEnv['VARDIR'],'bsp','boards')
 buildEnv.SConscript(
-    os.path.join(boardsDir,'SConscript'),
+    os.path.join(bspHDir,'SConscript'),
     exports     = {'env': buildEnv},
-    variant_dir = boardsVarDir,
+    variant_dir = bspHVarDir,
 )
 
 # bsp
@@ -652,6 +652,15 @@ buildEnv.SConscript(
 )
 buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
+
+# kernelheader
+kernelHDir      = os.path.join('#','kernel')
+kernelHVarDir   = os.path.join(buildEnv['VARDIR'],'kernel')
+buildEnv.SConscript(
+    os.path.join(kernelHDir,'SConscript'),
+    exports     = {'env': buildEnv},
+    variant_dir = kernelHVarDir,
+)
 
 # kernel
 kernelDir       = os.path.join('#','kernel',buildEnv['kernel'])
