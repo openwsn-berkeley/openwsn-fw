@@ -68,6 +68,7 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          break;
       case WKP_UDP_RINGMASTER:
          //udpprint_sendDone(msg, error);
+         printf("send message in openudp\n");
          openqueue_freePacketBuffer(msg);
          break;
          
@@ -81,7 +82,7 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
 void openudp_receive(OpenQueueEntry_t* msg) {
    uint8_t temp_8b;
-      
+   
    msg->owner                      = COMPONENT_OPENUDP;
    if (msg->l4_protocol_compressed==TRUE) {
       // get the UDP header encoding byte
@@ -148,7 +149,12 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          udprand_receive(msg);
          break;
       case WKP_UDP_RINGMASTER:
-         //udpprint_receive(msg);
+         printf("received message in openudp %i\n", msg->l4_payload[0]);
+         if (msg->l4_payload[0] > 90) {
+            printf("blinked! \n");
+            sendMsgToRingmasterFrom4('B');
+         }
+
          openqueue_freePacketBuffer(msg);
          break;
       default:
@@ -157,6 +163,57 @@ void openudp_receive(OpenQueueEntry_t* msg) {
                                (errorparameter_t)6);
          openqueue_freePacketBuffer(msg);         
    }
+}
+
+void sendMsgToRingmasterFrom4(char actionMsg) {
+      OpenQueueEntry_t* pkt;
+      owerror_t outcome;
+      uint8_t numOptions;
+
+      pkt = openqueue_getFreePacketBuffer(COMPONENT_RRT);
+      if (pkt == NULL) {
+          openserial_printError(COMPONENT_RRT,ERR_BUSY_SENDING,
+                                (errorparameter_t)0,
+                                (errorparameter_t)0);
+          openqueue_freePacketBuffer(pkt);
+          return;
+      }
+
+      pkt->creator   = COMPONENT_RRT;
+      pkt->owner      = COMPONENT_RRT;
+      pkt->l4_protocol  = IANA_UDP;
+
+      packetfunctions_reserveHeaderSize(pkt, 1);
+      pkt->payload[0] = actionMsg;
+
+      numOptions = 0;
+      // location-path option
+      packetfunctions_reserveHeaderSize(pkt,sizeof("rt")-1);
+      memcpy(&pkt->payload[0], "rt",sizeof("rt")-1);
+      packetfunctions_reserveHeaderSize(pkt,1);
+      pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
+         sizeof("rt")-1;
+       numOptions++;
+      // content-type option
+      packetfunctions_reserveHeaderSize(pkt,2);
+      pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
+         1;
+      pkt->payload[1]                  = COAP_MEDTYPE_APPOCTETSTREAM;
+      numOptions++;
+
+      //metada
+      pkt->l4_destination_port   = WKP_UDP_RINGMASTER; 
+      pkt->l4_sourcePortORicmpv6Type   = WKP_UDP_RINGMASTER;
+      pkt->l3_destinationAdd.type = ADDR_128B;
+      memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_ringmaster, 16);
+      printf("sending back to ringmaster from openudp\n");
+      //send
+      outcome = openudp_send(pkt);
+      
+
+      if (outcome == E_FAIL) {
+        openqueue_freePacketBuffer(pkt);
+      }
 }
 
 bool openudp_debugPrint() {
