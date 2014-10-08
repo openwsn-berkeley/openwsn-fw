@@ -85,15 +85,6 @@ typedef struct {
    uint16_t        pkctr;
 } IND_RX_ht;
 
-typedef struct {
-   uint8_t              num_radioTimerCompare;
-   uint8_t              num_radioTimerOverflows;
-   uint8_t              num_startFrame;
-   uint8_t              num_endFrame;
-} app_dbg_t;
-
-app_dbg_t app_dbg;
-
 END_PACK
 
 //=========================== variables =======================================
@@ -133,8 +124,7 @@ typedef struct {
    //=== RF
    // tx
    uint8_t         rfbuftx[RF_BUF_LEN];
-   uint8_t         txpk_num;
-   uint8_t         txpk_txNow;
+   uint8_t         txpk_numpk;
    uint8_t         txpk_len;
    uint8_t         txpk_totalnumpk;
    // rx
@@ -168,9 +158,9 @@ void isr_openserial_rx_mod(void);
 
 uint16_t htons(uint16_t val);
 
-void cb_txRadioTimerOverflows(void);
 void cb_endFrame(uint16_t timestamp);
 void cb_sendPacket(void);
+void cb_finishTx(void);
 
 //=========================== initialization ==================================
 
@@ -183,9 +173,9 @@ int mote_main(void) {
    scheduler_init();
    opentimers_init();
    radio_init();
+   leds_init();
 
    // initial radio
-   radio_setOverflowCb(cb_txRadioTimerOverflows);
    radio_setEndFrameCb(cb_endFrame);
 
    // initial UART
@@ -296,9 +286,14 @@ void serial_rx_REQ_IDLE(void) {
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
-   
+   if (mercator_vars.status == ST_TX){
+      opentimers_stop(mercator_vars.timerId);
+   }
+   else if (mercator_vars.status == ST_RX){
+      leds_radio_off();
+   }
    radio_rfOff();
-   leds_radio_off();
+   mercator_vars.status = ST_IDLE;
 }
 
 void serial_rx_REQ_TX(void) {
@@ -311,18 +306,17 @@ void serial_rx_REQ_TX(void) {
    mercator_vars.numnotifications = 0;
 
    REQ_TX_ht* req;
-
    req = (REQ_TX_ht*)mercator_vars.uartbufrx;
 
-   mercator_vars.txpk_num        = 0;
+   mercator_vars.txpk_numpk        = 1;
    mercator_vars.txpk_len        = req->txlength;
    mercator_vars.txpk_totalnumpk = req->txnumpk;
 
    //prepare packet
    memcpy(mercator_vars.rfbuftx, idmanager_getMyID(ADDR_64B)->addr_64b, 8);
    memcpy(mercator_vars.rfbuftx + 8, &req->transctr, 1);
-   memcpy(mercator_vars.rfbuftx + 9, &mercator_vars.txpk_num, 2);
-   mercator_vars.txpk_num++;
+   memcpy(mercator_vars.rfbuftx + 9, &mercator_vars.txpk_numpk, 2);
+   mercator_vars.txpk_numpk++;
    int i;
    for (i = 11; i < mercator_vars.txpk_len; i++){
       mercator_vars.rfbuftx[i] = req->txfillbyte;
@@ -334,10 +328,7 @@ void serial_rx_REQ_TX(void) {
    
    //TODO set TX Power
 
-   // start periodic overflow
-   radiotimer_start(req->txifdur);
-
-   // send packets
+   // init opentimers to send packets periodically
    mercator_vars.timerId  = opentimers_start(
       req->txifdur,
       TIMER_PERIODIC,
@@ -360,6 +351,8 @@ void serial_rx_REQ_RX(void) {
    // reset notifications counter
    mercator_vars.numnotifications = 0;
 
+   mercator_vars.rxpk_done = 0;
+
    REQ_RX_ht* req; 
    req = (REQ_RX_ht*)mercator_vars.uartbufrx;
 
@@ -373,15 +366,13 @@ void serial_rx_REQ_RX(void) {
    // switch in RX
    radio_rxEnable();
 
-   
-
-   while (1) {
+   while (mercator_vars.status == ST_RX) {
       
       // sleep while waiting for at least one of the rxpk_done to be set
-      mercator_vars.rxpk_done = 0;
       while (mercator_vars.rxpk_done==0) {
          board_sleep();
       }
+      mercator_vars.rxpk_done = 0;
 
       // get packet from radio
       radio_getReceivedFrame(
@@ -394,6 +385,25 @@ void serial_rx_REQ_RX(void) {
       );
 
       // TODO send TYPE_IND_RX over serial port
+      /*
+      IND_RX_ht* resp;
+      resp = (IND_RX_ht*)mercator_vars.uartbuftx;
+
+      resp.type      = TYPE_IND_RX;
+      resp.length    = sizeof(mercator_vars.rxpk_len);
+      resp.rssi      = mercator_vars.rxpk_rssi;
+      resp.flags
+      
+      /*
+      typedef struct {
+         uint8_t         type;
+         uint8_t         length;
+         uint8_t         rssi;
+         uint8_t         flags;
+         uint16_t        pkctr;
+      } IND_RX_ht;
+      */
+
       mercator_vars.numnotifications++;
    }
 }
@@ -560,14 +570,6 @@ void isr_openserial_rx_mod(void) {
 
 //===== radiotimer
 
-void cb_txRadioTimerOverflows(void) {
-   
-   // ready to send next packet
-   if (mercator_vars.status == ST_TX){
-      mercator_vars.txpk_txNow = 1;
-   }
-}
-
 void cb_endFrame(uint16_t timestamp) {
 
    // indicate I just received a packet
@@ -578,9 +580,6 @@ void cb_endFrame(uint16_t timestamp) {
 
 void cb_sendPacket(void){
    
-   // update pkctr
-   memcpy(mercator_vars.rfbuftx + 9, &mercator_vars.txpk_num, 2);
-
    // send packet
    leds_error_on();
 
@@ -590,18 +589,31 @@ void cb_sendPacket(void){
 
    leds_error_off();
 
-   mercator_vars.txpk_num++;
-   if (mercator_vars.txpk_num == mercator_vars.txpk_totalnumpk) {
+   if (mercator_vars.txpk_numpk == mercator_vars.txpk_totalnumpk) {
       opentimers_stop(mercator_vars.timerId);
       scheduler_push_task(cb_finishTx, TASK_PRIO_WIRELESS);
+      return;
    }
+
+   // update pkctr
+   memcpy(mercator_vars.rfbuftx + 9, &mercator_vars.txpk_numpk, 2);
+   mercator_vars.txpk_numpk++;
 }
 
 void cb_finishTx(void){
+
    // finishing TX
    radio_rfOff();
    mercator_vars.status = ST_TXDONE;
 
-   //TODO send TYPE_IND_TXDONE over serial port 
+   // send IND_TXDONE
+   IND_TXDONE_ht* resp;
+   resp = (IND_TXDONE_ht*)mercator_vars.uartbuftx;
+   resp->type = TYPE_IND_TXDONE;
+
+   mercator_vars.uartbuftxfill = sizeof(IND_TXDONE_ht);
+
+   serial_flushtx();
+
    mercator_vars.numnotifications++;
 }
