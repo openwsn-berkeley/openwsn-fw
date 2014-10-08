@@ -50,14 +50,14 @@
 			<location>C:/Users/vilajosa/Documents/personal/research/openwsn-fw/inc</location>
 		</link>
 		<link>
+			<name>kernel</name>
+			<type>2</type>
+			<location>C:/Users/vilajosa/Documents/personal/research/openwsn-fw/kernel</location>
+		</link>
+		<link>
 			<name>openapps</name>
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/openapps</locationURI>
-		</link>
-		<link>
-			<name>openos</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/kernel/openos</locationURI>
 		</link>
 		<link>
 			<name>openstack</name>
