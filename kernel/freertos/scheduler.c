@@ -1,7 +1,9 @@
 /**
  \brief Task scheduler.
 
- \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, October 2014.
+ \author Thomas Watteyne <watteyne@eecs.berkeley.edu>,
+ \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>,
+ \author Pere Tuset <peretuset@openmote.com>, October 2014.
  */
 
 #include "opendefs.h"
@@ -11,6 +13,11 @@
 #include "leds.h"
 //freertos includes
 #include "projdefs.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "semphr.h"
+#include "portable.h"
+#include "queue.h"
 
 #define STACK_SIZE 256
 #define tskIDLE_PRIORITY 2
@@ -39,7 +46,6 @@ void vStackRxTask(void * pvParameters);
 //=========================== public ==========================================
 
 void scheduler_init() {
-	// TODO: fill in as part of FW-16.
 
 	xGlobalMutex = xSemaphoreCreateMutex();
 	if (xGlobalMutex == NULL) {
@@ -69,12 +75,13 @@ void scheduler_init() {
 }
 
 void scheduler_start() {
+	/* Start the tasks running. */
+	vTaskStartScheduler();
 
-    while(1){
-    	debugpins_task_clr();
-    	board_sleep(); //loop here as the tasks are already created.
-    	debugpins_task_set();
-    }
+	/* If all is well we will never reach here as the scheduler will now be
+		running.  If we do reach here then it is likely that there was insufficient
+		heap available for the idle task to be created. */
+	for( ;; );
 }
 
 void scheduler_push_task(task_cbt cb, task_prio_t prio) {

@@ -45,12 +45,21 @@
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor.1426851169" name="Use preprocessor" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.usepreprocessor" value="true" valueType="boolean"/>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths.1951832335" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538/headers&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/MemMang&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/GCC/ARM_CM3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/GCC&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538/source&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/cross-layers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/drivers/common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/openos&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/drivers/cc2538&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/02a-MAClow&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/02b-MAChigh&quot;"/>
@@ -71,11 +80,21 @@
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openapps/uecho&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/inc&quot;"/>
 								</option>
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.files.1534080309" name="Include files (-include)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.assembler.include.files" valueType="includeFiles">
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel&quot;"/>
+								</option>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input.349415347" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.assembler.input"/>
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.947595233" name="Cross ARM C Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler">
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths.711603150" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/MemMang&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/include&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/GCC/ARM_CM3&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/GCC&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2/FreeRTOS&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos/FreeRTOSV8.1.2&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538/headers&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards/OpenMote-CC2538/source&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/cross-layers&quot;"/>
@@ -83,6 +102,8 @@
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/bsp/boards&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/drivers/common&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/openos&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/drivers/cc2538&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/02a-MAClow&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/02b-MAChigh&quot;"/>
@@ -175,7 +196,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="openapps/imu|openapps/rxl1|openapps/heli|openapps/rt|03oos_openwsn/03oos_openwsn_obj.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/MemMang/heap_5.c|kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/MemMang/heap_3.c|kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/MemMang/heap_4.c|kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/MemMang/heap_2.c|kernel/openos|kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/IAR|kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/GCC/MSP430F449|kernel/freertos/FreeRTOSV8.1.2/FreeRTOS/Source/portable/GCC/ARM_CM4F|openapps/imu|openapps/rxl1|openapps/heli|openapps/rt|03oos_openwsn/03oos_openwsn_obj.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
