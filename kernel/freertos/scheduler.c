@@ -92,10 +92,11 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
 
 /* Task to handle reception of packets up to the stack. */
 void vStackRxTask(void * pvParameters) {
+	uint16_t i=0;
 	while (1) {
 
 		leds_debug_toggle();
-		for (uint16_t i = 0; i < 0xffff; i++)
+		for (i = 0; i < 0xffff; i++)
 			;	      //delay
 
 	}
@@ -103,10 +104,11 @@ void vStackRxTask(void * pvParameters) {
 
 /* Task to handle app packets downstream the stack up to be queued at MAC. */
 void vAppStackTask(void * pvParameters) {
+	uint16_t i=0;
 	while (1) {
 
 		leds_sync_toggle();
-		for (uint16_t i = 0; i < 0x3fff; i++)
+		for ( i = 0; i < 0x3fff; i++)
 			;	      //delay
 
 	}
@@ -114,10 +116,11 @@ void vAppStackTask(void * pvParameters) {
 
 /* Task to handle senddone notification and app level pushed tasks (from timers). */
 void vSendDoneAndTimerTask(void * pvParameters) {
+	uint16_t i=0;
 	while (1) {
 
 		leds_radio_toggle();
-		for (uint16_t i = 0; i < 0x0fff; i++)
+		for ( i = 0; i < 0x0fff; i++)
 			;	      //delay
 
 	}
