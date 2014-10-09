@@ -39,10 +39,20 @@ TaskHandle_t xStackRxHandle = NULL;
 //GLOBAL variables to be moved to some rtos.h file
 SemaphoreHandle_t xGlobalMutex;
 
+//semaphores to block tasks until there is something to be done.
+SemaphoreHandle_t xSchedulerAppStackSemaphore;
+SemaphoreHandle_t xSchedulerStackRxSemaphore;
+SemaphoreHandle_t xSchedulerSendDoneAndTimerSemaphore;
+
+
+SemaphoreHandle_t xSchedulerMutex; //for mutual exclusion
+
 //=========================== prototypes ======================================
 void vAppStackTask(void * pvParameters);
 void vSendDoneAndTimerTask(void * pvParameters);
 void vStackRxTask(void * pvParameters);
+
+void initializeTaskSemaphores(SemaphoreHandle_t * sem);
 //=========================== public ==========================================
 
 void scheduler_init() {
@@ -50,11 +60,17 @@ void scheduler_init() {
 	xGlobalMutex = xSemaphoreCreateMutex();
 	if (xGlobalMutex == NULL) {
 		//fail
+	    return;
 	}
 	//give it
 	if (xSemaphoreGive(xGlobalMutex) != pdTRUE) {
 		//TODO handle failure
+		return;
 	}
+
+	initializeTaskSemaphores(&xSchedulerAppStackSemaphore);
+	initializeTaskSemaphores(&xSchedulerStackRxSemaphore);
+	initializeTaskSemaphores(&xSchedulerSendDoneAndTimerSemaphore);
 
 	//create the tasks
 	xTaskCreate(vStackRxTask, "StackRX", STACK_SIZE, NULL, tskIDLE_PRIORITY,
@@ -126,3 +142,17 @@ void vSendDoneAndTimerTask(void * pvParameters) {
 	}
 }
 
+/* helper functions */
+void initializeTaskSemaphores(SemaphoreHandle_t * sem ){
+
+	*sem = xSemaphoreCreateBinary();
+	if (*sem == NULL) {
+		//fail
+	    return;
+	}
+	//give it
+	if (xSemaphoreGive(*sem) != pdTRUE) {
+		//TODO handle failure
+		return;
+	}
+}
