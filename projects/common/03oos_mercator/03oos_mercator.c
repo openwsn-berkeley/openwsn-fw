@@ -366,6 +366,12 @@ void serial_rx_REQ_RX(void) {
    // switch in RX
    radio_rxEnable();
 
+   // local vars
+   uint8_t  srcmac[8];
+   uint8_t  transctr;
+   uint16_t pkctr;
+   uint8_t  txfillbyte;
+
    while (mercator_vars.status == ST_RX) {
       
       // sleep while waiting for at least one of the rxpk_done to be set
@@ -384,25 +390,44 @@ void serial_rx_REQ_RX(void) {
          &mercator_vars.rxpk_crc
       );
 
-      // TODO send TYPE_IND_RX over serial port
-      /*
+      memcpy(srcmac,       mercator_vars.rxpk_buf     , 8);
+      memcpy(&transctr,    mercator_vars.rxpk_buf + 8 , 1);
+      memcpy(&pkctr,       mercator_vars.rxpk_buf + 9 , 2);
+      memcpy(&txfillbyte,  mercator_vars.rxpk_buf + 11, 1);
+
+      bool is_expected = TRUE;
+      int i;
+
+      // check srcmac
+      for(i = 0; i < 8; i++){
+         if(srcmac[i] != req->srcmac[i]){
+            is_expected = FALSE;
+            break;
+         }
+      }
+
+      // check transctr
+      if (transctr != req->transctr){
+         is_expected = FALSE;
+      }
+
+      // check txfillbyte
+      if (txfillbyte != req->txfillbyte){
+         is_expected = FALSE;
+      }
+      
       IND_RX_ht* resp;
       resp = (IND_RX_ht*)mercator_vars.uartbuftx;
 
-      resp.type      = TYPE_IND_RX;
-      resp.length    = sizeof(mercator_vars.rxpk_len);
-      resp.rssi      = mercator_vars.rxpk_rssi;
-      resp.flags
-      
-      /*
-      typedef struct {
-         uint8_t         type;
-         uint8_t         length;
-         uint8_t         rssi;
-         uint8_t         flags;
-         uint16_t        pkctr;
-      } IND_RX_ht;
-      */
+      resp->type     =  TYPE_IND_RX;
+      resp->length   =  sizeof(mercator_vars.rxpk_len);
+      resp->rssi     =  mercator_vars.rxpk_rssi;
+      resp->flags    =  mercator_vars.rxpk_crc << 8 | is_expected << 7;
+      resp->pkctr    =  htons(pkctr);
+
+      mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
+
+      serial_flushtx();
 
       mercator_vars.numnotifications++;
    }
