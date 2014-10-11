@@ -128,7 +128,6 @@ typedef struct {
    uint8_t         txpk_len;
    uint8_t         txpk_totalnumpk;
    // rx
-   uint8_t         rxpk_done;
    uint8_t         rxpk_buf[RF_BUF_LEN];
    uint8_t         rxpk_len;
    uint8_t         rxpk_num;
@@ -345,13 +344,9 @@ void serial_rx_REQ_RX(void) {
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
-   // change status to RX
-   mercator_vars.status = ST_RX;
-
+   
    // reset notifications counter
    mercator_vars.numnotifications = 0;
-
-   mercator_vars.rxpk_done = 0;
 
    REQ_RX_ht* req; 
    req = (REQ_RX_ht*)mercator_vars.uartbufrx;
@@ -366,71 +361,10 @@ void serial_rx_REQ_RX(void) {
    // switch in RX
    radio_rxEnable();
 
-   // local vars
-   uint8_t  srcmac[8];
-   uint8_t  transctr;
-   uint16_t pkctr;
-   uint8_t  txfillbyte;
+   // change status to RX
+   mercator_vars.status = ST_RX;
 
-   while (mercator_vars.status == ST_RX) {
-      
-      // sleep while waiting for at least one of the rxpk_done to be set
-      while (mercator_vars.rxpk_done==0) {
-         board_sleep();
-      }
-      mercator_vars.rxpk_done = 0;
-
-      // get packet from radio
-      radio_getReceivedFrame(
-         mercator_vars.rxpk_buf,
-         &mercator_vars.rxpk_len,
-         sizeof(mercator_vars.rxpk_buf),
-         &mercator_vars.rxpk_rssi,
-         &mercator_vars.rxpk_lqi,
-         &mercator_vars.rxpk_crc
-      );
-
-      memcpy(srcmac,       mercator_vars.rxpk_buf     , 8);
-      memcpy(&transctr,    mercator_vars.rxpk_buf + 8 , 1);
-      memcpy(&pkctr,       mercator_vars.rxpk_buf + 9 , 2);
-      memcpy(&txfillbyte,  mercator_vars.rxpk_buf + 11, 1);
-
-      bool is_expected = TRUE;
-      int i;
-
-      // check srcmac
-      for(i = 0; i < 8; i++){
-         if(srcmac[i] != req->srcmac[i]){
-            is_expected = FALSE;
-            break;
-         }
-      }
-
-      // check transctr
-      if (transctr != req->transctr){
-         is_expected = FALSE;
-      }
-
-      // check txfillbyte
-      if (txfillbyte != req->txfillbyte){
-         is_expected = FALSE;
-      }
-      
-      IND_RX_ht* resp;
-      resp = (IND_RX_ht*)mercator_vars.uartbuftx;
-
-      resp->type     =  TYPE_IND_RX;
-      resp->length   =  sizeof(mercator_vars.rxpk_len);
-      resp->rssi     =  mercator_vars.rxpk_rssi;
-      resp->flags    =  mercator_vars.rxpk_crc << 8 | is_expected << 7;
-      resp->pkctr    =  htons(pkctr);
-
-      mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
-
-      serial_flushtx();
-
-      mercator_vars.numnotifications++;
-   }
+   return;
 }
 
 //===== helpers
@@ -597,9 +531,65 @@ void isr_openserial_rx_mod(void) {
 
 void cb_endFrame(uint16_t timestamp) {
 
-   // indicate I just received a packet
    if (mercator_vars.status == ST_RX){
-      mercator_vars.rxpk_done = 1;
+      // local vars
+      uint8_t  srcmac[8];
+      uint8_t  transctr;
+      uint16_t pkctr;
+      uint8_t  txfillbyte;
+      REQ_RX_ht* req; 
+      req = (REQ_RX_ht*)mercator_vars.uartbufrx;
+
+      // get packet from radio
+      radio_getReceivedFrame(
+         mercator_vars.rxpk_buf,
+         &mercator_vars.rxpk_len,
+         sizeof(mercator_vars.rxpk_buf),
+         &mercator_vars.rxpk_rssi,
+         &mercator_vars.rxpk_lqi,
+         &mercator_vars.rxpk_crc
+      );
+
+      memcpy(srcmac,       mercator_vars.rxpk_buf     , 8);
+      memcpy(&transctr,    mercator_vars.rxpk_buf + 8 , 1);
+      memcpy(&pkctr,       mercator_vars.rxpk_buf + 9 , 2);
+      memcpy(&txfillbyte,  mercator_vars.rxpk_buf + 11, 1);
+
+      bool is_expected = TRUE;
+      int i;
+
+      // check srcmac
+      for(i = 0; i < 8; i++){
+         if(srcmac[i] != req->srcmac[i]){
+            is_expected = FALSE;
+            break;
+         }
+      }
+
+      // check transctr
+      if (transctr != req->transctr){
+         is_expected = FALSE;
+      }
+
+      // check txfillbyte
+      if (txfillbyte != req->txfillbyte){
+         is_expected = FALSE;
+      }
+      
+      IND_RX_ht* resp;
+      resp = (IND_RX_ht*)mercator_vars.uartbuftx;
+
+      resp->type     =  TYPE_IND_RX;
+      resp->length   =  sizeof(mercator_vars.rxpk_len);
+      resp->rssi     =  mercator_vars.rxpk_rssi;
+      resp->flags    =  mercator_vars.rxpk_crc << 8 | is_expected << 7;
+      resp->pkctr    =  htons(pkctr);
+
+      mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
+
+      serial_flushtx();
+
+      mercator_vars.numnotifications++;
    }
 }
 
