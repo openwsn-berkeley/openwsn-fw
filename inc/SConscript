@@ -1,0 +1,24 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+sources_h = [
+    'opendefs.h',
+]
+
+#============================ SCons targets ===================================
+
+if localEnv['board']=='python':
+    
+    actions = []
+    
+    for s in sources_h:
+        action = localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+        actions += [action]
+    
+    Alias('objectifyinc', actions)

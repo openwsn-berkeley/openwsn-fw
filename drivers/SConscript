@@ -1,0 +1,60 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+target =  'libdrivers'
+sources_c = [
+    os.path.join('common','openhdlc.c'),
+    os.path.join('common','openserial.c'),
+    os.path.join('common','opentimers.c'),
+]
+sources_h = [
+    os.path.join('common','openhdlc.h'),
+    os.path.join('common','openserial.h'),
+    os.path.join('common','opentimers.h'),
+]
+
+if localEnv['board']=='python':
+    
+    for s in sources_c+sources_h:
+        temp = localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+        #localEnv.AlwaysBuild(temp)
+    
+    libdrivers = localEnv.Library(
+        target = target,
+        source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
+    )
+    localEnv.Depends(libdrivers,[localEnv.ObjectifiedFilename(s) for s in sources_h])
+
+else:
+    
+    localEnv.Append(
+        CPPPATH =  [
+            os.path.join('#','drivers','common'),
+            # openstack
+            os.path.join('#','openstack'),
+            os.path.join('#','openstack','02a-MAClow'),
+            os.path.join('#','openstack','02b-MAChigh'),
+            os.path.join('#','openstack','03a-IPHC'),
+            os.path.join('#','openstack','03b-IPv6'),
+            os.path.join('#','openstack','04-TRAN'),
+            os.path.join('#','openstack','07-App','tcpinject'),
+            os.path.join('#','openstack','07-App','udpinject'),
+            os.path.join('#','openstack','cross-layers'),
+            # openapps
+            os.path.join('#','openapps','tcpinject'),
+            os.path.join('#','openapps','udpinject'),
+        ],
+    )
+    
+    libdrivers = localEnv.Library(
+        target = target,
+        source = sources_c,
+    )
+
+Alias('libdrivers', libdrivers)

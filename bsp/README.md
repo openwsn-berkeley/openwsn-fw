@@ -1,0 +1,2 @@
+The Board Support Package (BSP) is a set of functions which abstracts each board behind a set of functions to do atomic hardware functions such as setting a LED or loading a packet into the radio.
+A "port" of OpenWSN consist in implementing these function for your board.
