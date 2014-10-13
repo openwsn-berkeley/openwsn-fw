@@ -124,7 +124,7 @@ typedef struct {
    //=== RF
    // tx
    uint8_t         rfbuftx[RF_BUF_LEN];
-   uint8_t         txpk_numpk;
+   uint16_t        txpk_numpk;
    uint8_t         txpk_len;
    uint8_t         txpk_totalnumpk;
    // rx
@@ -313,7 +313,7 @@ void serial_rx_REQ_TX(void) {
 
    mercator_vars.txpk_numpk         = 1;
    mercator_vars.txpk_len           = req->txlength;
-   mercator_vars.txpk_totalnumpk    = req->txnumpk;
+   mercator_vars.txpk_totalnumpk    = htons(req->txnumpk);
 
    //prepare packet
    memcpy(mercator_vars.rfbuftx, idmanager_getMyID(ADDR_64B)->addr_64b, 8);
@@ -331,7 +331,7 @@ void serial_rx_REQ_TX(void) {
 
    // init opentimers to send packets periodically
    mercator_vars.timerId  = opentimers_start(
-      req->txifdur,
+      htons(req->txifdur),
       TIMER_PERIODIC,
       TIME_MS,
       cb_sendPacket
@@ -560,6 +560,7 @@ void cb_endFrame(uint16_t timestamp) {
       memcpy(srcmac,       mercator_vars.rxpk_buf     , 8);
       memcpy(&transctr,    &mercator_vars.rxpk_buf[8] , 1);
       memcpy(&pkctr,       mercator_vars.rxpk_buf + 9 , 2);
+      pkctr = htons(pkctr);
       memcpy(&txfillbyte,  &mercator_vars.rxpk_buf[11], 1);
 
       // check srcmac
