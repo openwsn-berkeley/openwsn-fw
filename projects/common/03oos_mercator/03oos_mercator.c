@@ -80,7 +80,7 @@ typedef struct {
 typedef struct {
    uint8_t         type;
    uint8_t         length;
-   uint8_t         rssi;
+   int8_t          rssi;
    uint8_t         flags;
    uint16_t        pkctr;
 } IND_RX_ht;
@@ -300,6 +300,8 @@ void serial_rx_REQ_IDLE(void) {
 void serial_rx_REQ_TX(void) {
    int i;
    uint16_t pkctr;
+   REQ_TX_ht* req;
+
    if (mercator_vars.uartbufrxfill!=sizeof(REQ_TX_ht)){
       // update stats
       mercator_vars.serialNumRxWrongLength++;
@@ -308,10 +310,9 @@ void serial_rx_REQ_TX(void) {
    mercator_vars.status = ST_TX;
    mercator_vars.numnotifications = 0;
 
-   REQ_TX_ht* req;
    req = (REQ_TX_ht*)mercator_vars.uartbufrx;
 
-   mercator_vars.txpk_numpk         = 1;
+   mercator_vars.txpk_numpk         = 0;
    mercator_vars.txpk_len           = req->txlength;
    mercator_vars.txpk_totalnumpk    = htons(req->txnumpk);
 
@@ -320,7 +321,6 @@ void serial_rx_REQ_TX(void) {
    memcpy(&mercator_vars.rfbuftx[8], &req->transctr, 1);
    pkctr = htons(mercator_vars.txpk_numpk);
    memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
-   mercator_vars.txpk_numpk++;
    memset(mercator_vars.rfbuftx + 11, req->txfillbyte, mercator_vars.txpk_len - 11);
 
    // prepare radio
@@ -581,9 +581,9 @@ void cb_endFrame(uint16_t timestamp) {
       resp = (IND_RX_ht*)mercator_vars.uartbuftx;
 
       resp->type     =  TYPE_IND_RX;
-      resp->length   =  sizeof(mercator_vars.rxpk_len);
+      resp->length   =  mercator_vars.rxpk_len;
       resp->rssi     =  mercator_vars.rxpk_rssi;
-      resp->flags    =  mercator_vars.rxpk_crc << 8 | is_expected << 7;
+      resp->flags    =  mercator_vars.rxpk_crc << 7 | is_expected << 6;
       resp->pkctr    =  htons(pkctr);
 
       mercator_vars.uartbuftxfill = sizeof(IND_RX_ht);
@@ -627,8 +627,8 @@ void cb_sendPacket(void){
    }
 
    // update pkctr
+   mercator_vars.txpk_numpk++;
    pkctr = htons(mercator_vars.txpk_numpk);
    memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
-   mercator_vars.txpk_numpk++;
    return;
 }
