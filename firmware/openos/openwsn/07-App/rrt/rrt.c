@@ -114,14 +114,14 @@ owerror_t rrt_receive(
          
          printf("message received: %i\n", mssgRecvd);
 
-         //TODO implement receiving forwarding message
-
          if (mssgRecvd == 'C') {
             rrt_vars.discovered = TRUE;
          } else if (mssgRecvd == 'B') {
             //blink mote
             printf("Mote performed blink\n");
             //send packet back saying it did action B - blink
+            //TODO - call blink method here
+
             sendMsgToRingmaster('B');
          } else if (mssgRecvd == 'F') {
             nextMoteIfNeeded = msg->payload[1];
@@ -240,7 +240,11 @@ void sendMsgToRingmaster(char actionMsg) {
       pkt->l3_destinationAdd.type = ADDR_128B;
       memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_ringmaster, 16);
       //send
-      outcome = openudp_send(pkt);
+      outcome = opencoap_send(pkt,
+                              COAP_TYPE_CON,
+                              COAP_CODE_REQ_PUT,
+                              numOptions,
+                              &rrt_vars.desc);
       
 
       if (outcome == E_FAIL) {

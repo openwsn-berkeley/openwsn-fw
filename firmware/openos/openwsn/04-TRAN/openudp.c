@@ -208,7 +208,11 @@ void sendMsgToRingmasterFrom4(char actionMsg) {
       memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_ringmaster, 16);
       printf("sending back to ringmaster from openudp\n");
       //send
-      outcome = openudp_send(pkt);
+      outcome = opencoap_send(pkt,
+                              COAP_TYPE_CON,
+                              COAP_CODE_REQ_PUT,
+                              numOptions,
+                              &rrt_vars.desc);
       
 
       if (outcome == E_FAIL) {
