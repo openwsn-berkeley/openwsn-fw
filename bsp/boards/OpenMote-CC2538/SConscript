@@ -17,11 +17,16 @@ rf231 = localEnv.SConscript(
 )
 
 target   = 'libbsp'
-bsp_dir  = os.path.join('#','bsp','boards','iot-lab_M3')
 source   = \
     Glob('*.c') + \
     Glob('source/*.c') + \
     [rf231]
+
+localEnv.Append(
+        CPPPATH =  [
+            os.path.join('#','bsp','boards','OpenMote-CC2538','headers'),
+        ],
+    )
 
 libbsp = localEnv.Library(
     target=target,
