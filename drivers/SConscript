@@ -52,6 +52,13 @@ else:
         ],
     )
     
+    if localEnv['board']=='OpenMote-CC2538':
+        sources_c += [
+            os.path.join('cc2538','adxl346.c'),
+            os.path.join('cc2538','max44009.c'),
+            os.path.join('cc2538','sht21.c'),
+        ]
+    
     libdrivers = localEnv.Library(
         target = target,
         source = sources_c,
