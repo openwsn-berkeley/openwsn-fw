@@ -23,6 +23,7 @@
 #include "uart.h"
 #include "radio.h"
 #include "flash.h"
+#include "i2c.h"
 
 //=========================== variables =======================================
 
@@ -77,6 +78,7 @@ void board_init() {
    radiotimer_init();
    uart_init();
    radio_init();
+   i2c_init();
 }
 
 /**
