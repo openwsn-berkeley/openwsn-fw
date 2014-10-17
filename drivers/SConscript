@@ -5,8 +5,8 @@ Import('env')
 localEnv = env.Clone()
 
 target =  'libdrivers'
-sources_c = Glob('common/*.c') # + Glob(localEnv['board']+'/*.c')
-sources_h = Glob('common/*.h')
+sources_c = Glob('common/*.c',strings=True) # + Glob(localEnv['board']+'/*.c')
+sources_h = Glob('common/*.h',strings=True)
 
 if localEnv['board']=='python':
     
@@ -46,7 +46,7 @@ else:
     
     # after fixing gina and z1 driver build, delete the following 2 lines and uncomment code at line 8
     if env['board']=='OpenMote-CC2538':
-        sources_c += Glob(localEnv['board']+'/*.c')
+        sources_c += Glob(localEnv['board']+'/*.c',strings=True)
     
     libdrivers = localEnv.Library(
         target = target,
