@@ -47,12 +47,12 @@
 		<link>
 			<name>inc</name>
 			<type>2</type>
-			<location>C:/Users/vilajosa/Documents/personal/research/openwsn-fw/inc</location>
+			<locationURI>PARENT-3-PROJECT_LOC/inc</locationURI>
 		</link>
 		<link>
 			<name>kernel</name>
 			<type>2</type>
-			<location>C:/Users/vilajosa/Documents/personal/research/openwsn-fw/kernel</location>
+			<locationURI>PARENT-3-PROJECT_LOC/kernel</locationURI>
 		</link>
 		<link>
 			<name>openapps</name>
