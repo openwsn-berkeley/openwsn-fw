@@ -90,7 +90,7 @@ else:
             # inc
             os.path.join('#','inc'),
             # kernel
-            os.path.join('#','kernel','openos'),
+            os.path.join('#','kernel'),
             # drivers
             os.path.join('#','drivers','common'),
             # openstack

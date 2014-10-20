@@ -1,0 +1,36 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+FREERTOS_VERSION = 'FreeRTOSV8.1.2'
+
+target    =  'libkernel'
+sources_c = [
+    'scheduler.c',
+    os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','tasks.c'),
+    os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','queue.c'),
+    os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','list.c'),
+]
+
+if localEnv['board']=='python':
+    
+    raise SystemError("FreeRTOS kernel not supported in simulation mode")
+
+else:
+    
+    localEnv.Append(
+        CPPPATH =  [
+            os.path.join('.'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','include'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','GCC','MSP430F449'),
+        ],
+    )
+    
+    libkernel = localEnv.Library(
+        target = target,
+        source = sources_c,
+    )
+
+Alias('libkernel', libkernel)

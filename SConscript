@@ -20,7 +20,7 @@ if env['board']!='python':
             os.path.join('#','bsp','boards'),
             os.path.join('#','bsp','chips'),
             os.path.join('#','drivers','common'),
-            os.path.join('#','kernel','openos'),
+            os.path.join('#','kernel'),
             os.path.join('#','openapps'),
             os.path.join('#','openstack'),
         ]
@@ -119,7 +119,7 @@ elif env['toolchain']=='iar':
     env.Replace(LIBLINKDIRPREFIX  = '-I')
     env.Replace(LIBLINKPREFIX     = 'lib')
     env.Replace(LIBLINKSUFFIX     = '.a')
-    env.Append(LINKFLAGS          = '-f "'+env['IAR_EW430_INSTALLDIR']+'\\430\\config\\multiplier.xcl"')
+    env.Append(LINKFLAGS          = '-f "'+env['IAR_EW430_INSTALLDIR']+'\\430\\config\\linker\\multiplier.xcl"')
     env.Append(LINKFLAGS          = '-D_STACK_SIZE=50')
     env.Append(LINKFLAGS          = '-rt "'+env['IAR_EW430_INSTALLDIR']+'\\430\\LIB\\DLIB\\dl430fn.r43"')
     env.Append(LINKFLAGS          = '-e_PrintfLarge=_Printf')
@@ -447,7 +447,7 @@ def buildLibs(projectDir):
         '00std': [                                                              ],
         '01bsp': [                                                      'libbsp'],
         '02drv': [                                         'libdrivers','libbsp'],
-        '03oos': ['libopenstack','libopenapps','libopenos','libdrivers','libbsp'], # this order needed for mspgcc
+        '03oos': ['libopenstack','libopenapps','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
     returnVal = None
@@ -633,12 +633,12 @@ buildEnv.SConscript(
 )
 
 # bspheader
-boardsDir       = os.path.join('#','bsp','boards')
-boardsVarDir    = os.path.join(buildEnv['VARDIR'],'bsp','boards')
+bspHDir         = os.path.join('#','bsp','boards')
+bspHVarDir      = os.path.join(buildEnv['VARDIR'],'bsp','boards')
 buildEnv.SConscript(
-    os.path.join(boardsDir,'SConscript'),
+    os.path.join(bspHDir,'SConscript'),
     exports     = {'env': buildEnv},
-    variant_dir = boardsVarDir,
+    variant_dir = bspHVarDir,
 )
 
 # bsp
@@ -653,15 +653,24 @@ buildEnv.SConscript(
 buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
 
+# kernelheader
+kernelHDir      = os.path.join('#','kernel')
+kernelHVarDir   = os.path.join(buildEnv['VARDIR'],'kernel')
+buildEnv.SConscript(
+    os.path.join(kernelHDir,'SConscript'),
+    exports     = {'env': buildEnv},
+    variant_dir = kernelHVarDir,
+)
+
 # kernel
-kernelDir       = os.path.join('#','kernel','openos')
-kernelVarDir    = os.path.join(buildEnv['VARDIR'],'kernel','openos')
+kernelDir       = os.path.join('#','kernel',buildEnv['kernel'])
+kernelVarDir    = os.path.join(buildEnv['VARDIR'],'kernel',buildEnv['kernel'])
 buildEnv.SConscript(
     os.path.join(kernelDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = kernelVarDir,
 )
-buildEnv.Clean('libopenos', Dir(kernelVarDir).abspath)
+buildEnv.Clean('libkernel', Dir(kernelVarDir).abspath)
 buildEnv.Append(LIBPATH = [kernelVarDir])
 
 # drivers
