@@ -12,6 +12,8 @@ sources_c = [
     os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','tasks.c'),
     os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','queue.c'),
     os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','list.c'),
+    os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','MemMang','heap_1.c'),
+    os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','GCC','MSP430F449','port.c'),
 ]
 
 if localEnv['board']=='python':
