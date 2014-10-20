@@ -179,6 +179,9 @@ int mote_main(void) {
    radio_init();
    leds_init();
 
+   // get mac
+   eui64_get(mercator_vars.mac);
+   
    // initial radio
    radio_setEndFrameCb(cb_endFrame);
 
@@ -279,7 +282,6 @@ void serial_tx_RESP_ST(void) {
    resp->status                   = mercator_vars.status;
    resp->numnotifications         = htons(mercator_vars.numnotifications);
 
-   eui64_get(mercator_vars.mac);
    memcpy(resp->mac, mercator_vars.mac, 8);
 
    mercator_vars.uartbuftxfill    = sizeof(RESP_ST_ht);
@@ -322,7 +324,6 @@ void serial_rx_REQ_TX(void) {
    mercator_vars.txpk_totalnumpk    = htons(req->txnumpk);
 
    //prepare packet
-   eui64_get(mercator_vars.mac);
    memcpy(mercator_vars.rfbuftx, mercator_vars.mac, 8);
    memcpy(&mercator_vars.rfbuftx[8], &req->transctr, 1);
    pkctr = htons(mercator_vars.txpk_numpk);
