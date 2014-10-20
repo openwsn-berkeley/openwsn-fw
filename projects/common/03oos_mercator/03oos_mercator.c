@@ -128,6 +128,7 @@ typedef struct {
    uint16_t        txpk_numpk;
    uint8_t         txpk_len;
    uint8_t         txpk_totalnumpk;
+   uint8_t         mac[8];
    // rx
    uint8_t         rxpk_buf[RF_BUF_LEN];
    uint8_t         rxpk_len;
@@ -278,9 +279,8 @@ void serial_tx_RESP_ST(void) {
    resp->status                   = mercator_vars.status;
    resp->numnotifications         = htons(mercator_vars.numnotifications);
 
-   uint8_t* mac;
-   eui64_get(mac);
-   memcpy(resp->mac, mac, 8);
+   eui64_get(mercator_vars.mac);
+   memcpy(resp->mac, mercator_vars.mac, 8);
 
    mercator_vars.uartbuftxfill    = sizeof(RESP_ST_ht);
    
@@ -322,9 +322,8 @@ void serial_rx_REQ_TX(void) {
    mercator_vars.txpk_totalnumpk    = htons(req->txnumpk);
 
    //prepare packet
-   uint8_t* mac;
-   eui64_get(mac);
-   memcpy(mercator_vars.rfbuftx, mac, 8);
+   eui64_get(mercator_vars.mac);
+   memcpy(mercator_vars.rfbuftx, mercator_vars.mac, 8);
    memcpy(&mercator_vars.rfbuftx[8], &req->transctr, 1);
    pkctr = htons(mercator_vars.txpk_numpk);
    memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
