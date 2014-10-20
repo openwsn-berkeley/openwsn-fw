@@ -47,6 +47,7 @@ typedef struct {
    uint8_t         type;
    uint8_t         status;
    uint16_t        numnotifications;
+   uint8_t         mac[8];
 } RESP_ST_ht;
 
 typedef struct {
@@ -276,7 +277,8 @@ void serial_tx_RESP_ST(void) {
    resp->type                     = TYPE_RESP_ST;
    resp->status                   = mercator_vars.status;
    resp->numnotifications         = htons(mercator_vars.numnotifications);
-   
+   memcpy(resp->mac, idmanager_getMyID(ADDR_64B)->addr_64b, 8);
+
    mercator_vars.uartbuftxfill    = sizeof(RESP_ST_ht);
    
    serial_flushtx();
