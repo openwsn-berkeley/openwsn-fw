@@ -70,7 +70,7 @@ void sht21_init(void)
     // Set the configuration bits without changing those reserved
     config[1] |= SHT21_USER_CONFIG;
 
-    i2c_write_byte(SHT21_ADDRESS, config, sizeof(config));
+    i2c_write_bytes(SHT21_ADDRESS, config, sizeof(config));
 }
 
 void sht21_reset(void)
