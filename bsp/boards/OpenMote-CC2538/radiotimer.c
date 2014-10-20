@@ -1,13 +1,14 @@
 /**
-\brief cc2538-specific definition of the "radiotimer" bsp module.
-
-\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, August 2013.
-*/
-
+ * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
+ *         Pere Tuset (peretuset@openmote.com)
+ * Date:   July 2013
+ * Description: CC2538-specific definition of the "radiotimer" bsp module.
+ */
 
 #include <headers/hw_ints.h>
 #include <headers/hw_rfcore_sfr.h>
 #include <headers/hw_types.h>
+
 #include "stdio.h"
 #include "string.h"
 #include "radiotimer.h"
@@ -17,7 +18,8 @@
 #include "sys_ctrl.h"
 
 
-#define RADIOTIMER_32MHZ_TICS_PER_32KHZ_TIC 976  //32Mhz to 32Khz ratio
+#define RADIOTIMER_32MHZ_TICS_PER_32KHZ_TIC     ( 976 ) // 32 MHz to 32 kHz ratio
+
 //=========================== variables =======================================
 
 typedef struct {
@@ -28,8 +30,10 @@ typedef struct {
 radiotimer_vars_t radiotimer_vars;
 
 //=========================== prototypes ======================================
+
 void radiotimer_isr_private(void);
 port_INLINE uint16_t get_real_counter(void);
+
 //=========================== public ==========================================
 
 //===== admin
@@ -209,8 +213,6 @@ port_INLINE uint16_t get_real_counter(void){
 
 //=========================== interrupt handlers ==============================
 
-
-
 void radiotimer_isr_private(){
 	debugpins_isr_set();
 	radiotimer_isr();
@@ -260,3 +262,4 @@ kick_scheduler_t radiotimer_isr() {
    }
    return DO_NOT_KICK_SCHEDULER;
 }
+

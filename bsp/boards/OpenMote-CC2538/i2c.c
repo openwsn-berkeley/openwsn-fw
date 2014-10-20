@@ -1,20 +1,21 @@
 /**
-\brief CC2538-specific definition of the I2C bsp module.
-
-\author Pere Tuset <peretuset@openmote.com>, September 2014.
-*/
+ * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
+ *         Pere Tuset (peretuset@openmote.com)
+ * Date:   July 2013
+ * Description:CC2538-specific definition of the "i2c" bsp module.
+ */
 
 #include "gpio.h"
 #include "source/i2c.h"
 #include "ioc.h"
 #include "sys_ctrl.h"
 
-#include "hw_gpio.h"
-#include "hw_i2cm.h"
-#include "hw_ioc.h"
-#include "hw_memmap.h"
-#include "hw_sys_ctrl.h"
-#include "hw_types.h"
+#include "headers/hw_gpio.h"
+#include "headers/hw_i2cm.h"
+#include "headers/hw_ioc.h"
+#include "headers/hw_memmap.h"
+#include "headers/hw_sys_ctrl.h"
+#include "headers/hw_types.h"
 
 //=========================== define ==========================================
 

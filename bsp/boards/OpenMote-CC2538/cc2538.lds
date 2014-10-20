@@ -1,26 +1,19 @@
-
-
-/*
-Authors: Xavier Vilajosana
-         Pere Tuset 
-*/
-
-/*
- * cc2538 linker configuration file. This is not the actual file used at link
- * stage. Rather, it is used as input for the auto-generation of the actual
- * ld script, which is called cc2538.ld and will be in the project directory
+/**
+ * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
+ *         Pere Tuset (peretuset@openmote.com)
+ * Date:   July 2013
+ * Description: CC2538-specific linker script configuration file.
  */
  
- /*
-  * Indicate to the linker the entry point.
-  */
+/**
+ * Indicate to the linker the entry point.
+ */
 ENTRY(ResetISR)
 
-/*
- *   RAM is 16KB retention and 16kb no retention
- *   NOW we are using 32KB as retention which is not right.
- *   NON-RETENTION RAM starts at 0x20000000 with length 0x00004000 
- *   RETENTION RAM starts at  0x20004000 with length 0x00004000
+/**
+ * RAM is 16 KB retention and 16 KB no retention
+ * NON-RETENTION RAM starts at 0x20000000 with length 0x00004000 
+ * RETENTION RAM starts at  0x20004000 with length 0x00004000
  */
 MEMORY
 {
@@ -38,7 +31,7 @@ SECTIONS
         *(.text*)
         *(.rodata*)
         _etext = .;
-    } > FLASH= 0
+    } > FLASH=0
 
     .data :
     {
