@@ -1,8 +1,9 @@
 /**
-\brief CC2538-specific definition of the "radio" bsp module.
-
-\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, Sept 2013.
-*/
+ * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
+ *         Pere Tuset (peretuset@openmote.com)
+ * Date:   July 2013
+ * Description: CC2538-specific definition of the "radio" bsp module.
+ */
 
 #include <headers/hw_ana_regs.h>
 #include <headers/hw_ints.h>
@@ -10,6 +11,7 @@
 #include <headers/hw_rfcore_sfr.h>
 #include <headers/hw_rfcore_xreg.h>
 #include <headers/hw_types.h>
+
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
@@ -27,6 +29,7 @@
 /* Bit Masks for the last byte in the RX FIFO */
 #define CRC_BIT_MASK 0x80
 #define LQI_BIT_MASK 0x7F
+
 /* RSSI Offset */
 #define RSSI_OFFSET 73
 #define CHECKSUM_LEN 2
