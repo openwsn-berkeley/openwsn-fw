@@ -12,7 +12,7 @@
 #include "leds.h"
 #include "uart.h"
 #include "radio.h"
-#include "idmanager.h"
+#include "eui64.h"
 
 //=========================== defines ==========================================
 
@@ -277,7 +277,10 @@ void serial_tx_RESP_ST(void) {
    resp->type                     = TYPE_RESP_ST;
    resp->status                   = mercator_vars.status;
    resp->numnotifications         = htons(mercator_vars.numnotifications);
-   memcpy(resp->mac, idmanager_getMyID(ADDR_64B)->addr_64b, 8);
+
+   uint8_t* mac;
+   eui64_get(mac);
+   memcpy(resp->mac, mac, 8);
 
    mercator_vars.uartbuftxfill    = sizeof(RESP_ST_ht);
    
@@ -319,7 +322,9 @@ void serial_rx_REQ_TX(void) {
    mercator_vars.txpk_totalnumpk    = htons(req->txnumpk);
 
    //prepare packet
-   memcpy(mercator_vars.rfbuftx, idmanager_getMyID(ADDR_64B)->addr_64b, 8);
+   uint8_t* mac;
+   eui64_get(mac);
+   memcpy(mercator_vars.rfbuftx, mac, 8);
    memcpy(&mercator_vars.rfbuftx[8], &req->transctr, 1);
    pkctr = htons(mercator_vars.txpk_numpk);
    memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
