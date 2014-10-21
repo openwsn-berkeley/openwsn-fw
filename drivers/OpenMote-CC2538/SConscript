@@ -5,7 +5,7 @@ Import('env')
 localEnv = env.Clone()
 
 source = ['adxl346.c',
-          'max44009.c'
+          'max44009.c',
           'sht21.c'
          ]
 
