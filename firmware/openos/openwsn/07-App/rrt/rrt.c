@@ -11,6 +11,7 @@
 #include "openrandom.h"
 #include "board.h"
 #include "idmanager.h"
+#include "leds.h"
 
 //=========================== defines =========================================
 
@@ -36,9 +37,7 @@ void setGETRespMsg(
    bool discovered   
 );
 
-void sendMsgToRingmaster(char actionMsg);
-
-void sendMsgToMote(char actionMsg, uint8_t mote);
+void sendCoAPMsg(char actionMsg, uint8_t mote);
 
 //=========================== public ==========================================
 
@@ -120,13 +119,13 @@ owerror_t rrt_receive(
             //blink mote
             printf("Mote performed blink\n");
             //send packet back saying it did action B - blink
-            //TODO - call blink method here
+            leds_error_toggle();
 
-            sendMsgToRingmaster('B');
+            sendCoAPMsg('B', 0); //0 for ringmaster
          } else if (mssgRecvd == 'F') {
             nextMoteIfNeeded = msg->payload[1];
             actionToFwd = msg->payload[2];
-            sendMsgToMote(actionToFwd, nextMoteIfNeeded);
+            sendCoAPMsg(actionToFwd, nextMoteIfNeeded);
          }
 
          // reset packet payload
@@ -169,19 +168,19 @@ owerror_t rrt_receive(
 void setGETRespMsg(OpenQueueEntry_t* msg, bool registered) {
          if (registered == FALSE) {
              packetfunctions_reserveHeaderSize(msg,11);
-             msg->payload[0] = 'r';
-             msg->payload[1] = 'e';
-             msg->payload[2] = 'g';
-             msg->payload[3] = 'i';
-             msg->payload[4] = 's';
-             msg->payload[5] = 't';
-             msg->payload[6] = 'e';
-             msg->payload[7] = 'r';
-             msg->payload[8] = 'i';
-             msg->payload[9] = 'n';
+             msg->payload[0]  =  'r';
+             msg->payload[1]  =  'e';
+             msg->payload[2]  =  'g';
+             msg->payload[3]  =  'i';
+             msg->payload[4]  =  's';
+             msg->payload[5]  =  't';
+             msg->payload[6]  =  'e';
+             msg->payload[7]  =  'r';
+             msg->payload[8]  =  'i';
+             msg->payload[9]  =  'n';
              msg->payload[10] = 'g';
 
-             sendMsgToRingmaster('D'); //'D' stands for discovery
+             sendCoAPMsg('D', 0); //'D' stands for discovery, 0 for ringmaster
 
          } else {
              packetfunctions_reserveHeaderSize(msg,10);
@@ -198,61 +197,10 @@ void setGETRespMsg(OpenQueueEntry_t* msg, bool registered) {
          }
 }
 
-void sendMsgToRingmaster(char actionMsg) {
-      OpenQueueEntry_t* pkt;
-      owerror_t outcome;
-      uint8_t numOptions;
-
-      pkt = openqueue_getFreePacketBuffer(COMPONENT_RRT);
-      if (pkt == NULL) {
-          openserial_printError(COMPONENT_RRT,ERR_BUSY_SENDING,
-                                (errorparameter_t)0,
-                                (errorparameter_t)0);
-          openqueue_freePacketBuffer(pkt);
-          return;
-      }
-
-      pkt->creator   = COMPONENT_RRT;
-      pkt->owner      = COMPONENT_RRT;
-      pkt->l4_protocol  = IANA_UDP;
-
-      packetfunctions_reserveHeaderSize(pkt, 1);
-      pkt->payload[0] = actionMsg;
-
-      numOptions = 0;
-      // location-path option
-      packetfunctions_reserveHeaderSize(pkt,sizeof(rrt_path0)-1);
-      memcpy(&pkt->payload[0],&rrt_path0,sizeof(rrt_path0)-1);
-      packetfunctions_reserveHeaderSize(pkt,1);
-      pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
-         sizeof(rrt_path0)-1;
-       numOptions++;
-      // content-type option
-      packetfunctions_reserveHeaderSize(pkt,2);
-      pkt->payload[0]                  = COAP_OPTION_NUM_CONTENTFORMAT << 4 |
-         1;
-      pkt->payload[1]                  = COAP_MEDTYPE_APPOCTETSTREAM;
-      numOptions++;
-
-      //metada
-      pkt->l4_destination_port   = WKP_UDP_RINGMASTER; 
-      pkt->l4_sourcePortORicmpv6Type   = WKP_UDP_RINGMASTER;
-      pkt->l3_destinationAdd.type = ADDR_128B;
-      memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_ringmaster, 16);
-      //send
-      outcome = opencoap_send(pkt,
-                              COAP_TYPE_CON,
-                              COAP_CODE_REQ_PUT,
-                              numOptions,
-                              &rrt_vars.desc);
-      
-
-      if (outcome == E_FAIL) {
-        openqueue_freePacketBuffer(pkt);
-      }
-}
-
-void sendMsgToMote(char actionMsg, uint8_t mote) {
+/**
+ * if mote is 0, then send to the ringmater, defined by ipAddr_ringmaster
+**/
+void sendCoAPMsg(char actionMsg, uint8_t mote) {
       OpenQueueEntry_t* pkt;
       owerror_t outcome;
       uint8_t numOptions;
@@ -294,8 +242,15 @@ void sendMsgToMote(char actionMsg, uint8_t mote) {
       pkt->l4_destination_port   = WKP_UDP_RINGMASTER; 
       pkt->l4_sourcePortORicmpv6Type   = WKP_UDP_RINGMASTER;
       pkt->l3_destinationAdd.type = ADDR_128B;
-      memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_simMotes, 16);
-      pkt->l3_destinationAdd.addr_128b[15] = (mote - 0x30);
+      
+      // set destination address here
+      if (mote == 0) {  //if mote == 0, then send to ringmaster
+        memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_ringmaster, 16);
+      } else {
+        memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_simMotes, 16);
+        pkt->l3_destinationAdd.addr_128b[15] = (mote - 0x30);  //adjust for ascii encoding here
+      }
+
       //send
       outcome = openudp_send(pkt);
       

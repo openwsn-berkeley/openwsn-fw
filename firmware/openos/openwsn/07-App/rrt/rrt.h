@@ -25,6 +25,7 @@ typedef struct {
 
 void rrt_init(void);
 
+void sendCoAPMsg(char actionMsg, uint8_t mote);
 /**
 \}
 \}
