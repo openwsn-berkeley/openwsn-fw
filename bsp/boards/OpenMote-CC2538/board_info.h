@@ -1,19 +1,19 @@
 /**
-\brief CC2538-specific board information bsp module.
-
-This module simply defines some strings describing the board, which CoAP uses
-to return the board's description.
-
-\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, August 2013.
-*/
+ * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
+ *         Pere Tuset (peretuset@openmote.com)
+ * Date:   July 2013
+ * Description: CC2538-specific board information bsp module.
+ */
 
 #ifndef __BOARD_INFO_H
 #define __BOARD_INFO_H
 
 #include <stdint.h>
 #include <string.h>
+
 #include "cpu.h"
 #include "interrupt.h"
+
 //=========================== defines =========================================
 
 //===== interrupt state
@@ -45,7 +45,6 @@ to return the board's description.
 #define HAL_INT_PRIOR_MAC       (4 << 5)
 /* UART interrupt */
 #define HAL_INT_PRIOR_UART      (5 << 5)
-
 
 //===== pinout
 

@@ -119,7 +119,7 @@ elif env['toolchain']=='iar':
     env.Replace(LIBLINKDIRPREFIX  = '-I')
     env.Replace(LIBLINKPREFIX     = 'lib')
     env.Replace(LIBLINKSUFFIX     = '.a')
-    env.Append(LINKFLAGS          = '-f "'+env['IAR_EW430_INSTALLDIR']+'\\430\\config\\multiplier.xcl"')
+    env.Append(LINKFLAGS          = '-f "'+env['IAR_EW430_INSTALLDIR']+'\\430\\config\\linker\\multiplier.xcl"')
     env.Append(LINKFLAGS          = '-D_STACK_SIZE=50')
     env.Append(LINKFLAGS          = '-rt "'+env['IAR_EW430_INSTALLDIR']+'\\430\\LIB\\DLIB\\dl430fn.r43"')
     env.Append(LINKFLAGS          = '-e_PrintfLarge=_Printf')
