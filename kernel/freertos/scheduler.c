@@ -57,19 +57,20 @@ scheduler_dbg_t  scheduler_dbg;
 //=========================== prototypes ======================================
 
 //=== tasks
-void vAppTask(void* pvParameters);
-void vSendDoneTask(void* pvParameters);
-void vRxTask(void* pvParameters);
+static void vAppTask(void* pvParameters);
+static void vSendDoneTask(void* pvParameters);
+static void vRxTask(void* pvParameters);
 
 //=== helpers
 void scheduler_createSem(SemaphoreHandle_t* sem);
 void scheduler_push_task_internal(task_cbt cb, task_prio_t prio);
-bool scheduler_find_next_task(
+static bool scheduler_find_next_task(
    task_prio_t          minprio,
    task_prio_t          maxprio,
    taskList_item_t*     pThisTas
 );
-void scheduler_executeTask(taskList_item_t* pThisTask);
+static void scheduler_executeTask(taskList_item_t* pThisTask);
+void vApplicationIdleHook( void);
 
 //=========================== public ==========================================
 
@@ -85,21 +86,13 @@ void scheduler_init() {
       //TODO handle failure
       return;
    }
-   /*// by default, stack isn't locked
-   if (xSemaphoreGive(xStackLock) != pdTRUE) {
-      //TODO handle failure
-      return;
-   }*/
 
-   //=== scheduler lock
-   // TODO?
    
    //=== app task
    // task
    // semaphore
+
    scheduler_createSem(&xAppSem);
-
-
    xTaskCreate(
       vAppTask,
       "app",
@@ -198,7 +191,7 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
 Handle application packets, brinding them down the stack until they are queued,
 ready for the lowwe MAC to consume.
 */
-void vAppTask(void* pvParameters) {
+static void vAppTask(void* pvParameters) {
    bool found = FALSE;
    taskList_item_t* pThisTask = NULL;
    
@@ -220,7 +213,7 @@ void vAppTask(void* pvParameters) {
 /**
 Handle sendDone notifications.
 */
-void vSendDoneTask(void* pvParameters) {
+static void vSendDoneTask(void* pvParameters) {
    bool found;
    taskList_item_t* pThisTask = NULL;
    
@@ -242,7 +235,7 @@ void vSendDoneTask(void* pvParameters) {
 /**
 Handle received packets, bringing them up to the stack.
 */
-void vRxTask(void* pvParameters) {
+static void vRxTask(void* pvParameters) {
    bool found = FALSE;
    taskList_item_t* pThisTask = NULL;
    
@@ -275,12 +268,8 @@ void scheduler_createSem(SemaphoreHandle_t* sem) {
       // TODO handle failure
       return;
    }
-   
-   // give semaphore
-   if (xSemaphoreGive(*sem) != pdTRUE) {
-      // TODO handle failure
-      return;
-   }
+   //take it so it starts at 1 and tasks block
+   xSemaphoreTake(*sem, portMAX_DELAY);
 }
 
 /**
@@ -343,7 +332,7 @@ void scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
 
 \param[out] pThisTask The taskList item to return.
 */
-bool scheduler_find_next_task (
+static bool scheduler_find_next_task (
       task_prio_t       minprio,
       task_prio_t       maxprio,
       taskList_item_t*  pThisTask
@@ -395,7 +384,7 @@ bool scheduler_find_next_task (
 /**
 \brief Execute a task.
 */
-void scheduler_executeTask(taskList_item_t* pThisTask) {
+static void scheduler_executeTask(taskList_item_t* pThisTask) {
    
    // execute the current task
    pThisTask->cb();
@@ -407,4 +396,8 @@ void scheduler_executeTask(taskList_item_t* pThisTask) {
    
    // update debug stats
    scheduler_dbg.numTasksCur--;
+}
+
+void vApplicationIdleHook( void ){
+	leds_debug_toggle();
 }

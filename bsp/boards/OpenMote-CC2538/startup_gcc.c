@@ -57,6 +57,10 @@
 #endif
 
 extern int main (void);
+extern void vPortSVCHandler(void);
+extern void xPortPendSVHandler(void);
+extern void xPortSysTickHandler(void);
+
 
 void ResetISR(void);
 void NmiSR(void);
@@ -107,11 +111,11 @@ void (* const gVectors[])(void) =
    0,                                      // 8 Reserved
    0,                                      // 9 Reserved
    0,                                      // 10 Reserved
-   IntDefaultHandler,                      // 11 SVCall handler
+   vPortSVCHandler,                        // 11 SVCall handler
    IntDefaultHandler,                      // 12 Debug monitor handler
    0,                                      // 13 Reserved
-   IntDefaultHandler,                      // 14 The PendSV handler
-   IntDefaultHandler,                      // 15 The SysTick handler
+   xPortPendSVHandler,                     // 14 The PendSV handler
+   xPortSysTickHandler,                  // 15 The SysTick handler
    IntDefaultHandler,                      // 16 GPIO Port A
    IntDefaultHandler,                      // 17 GPIO Port B
    IntDefaultHandler,                      // 18 GPIO Port C
@@ -303,6 +307,8 @@ IntDefaultHandler (void)
 { 
     while(1)
     {
+
+
     }
 }
 
