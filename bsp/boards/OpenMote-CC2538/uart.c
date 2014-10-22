@@ -1,14 +1,15 @@
 /**
-\brief CC2538-specific definition of the "uart" bsp module.
-
-\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, September 2013.
-*/
-
+ * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
+ *         Pere Tuset (peretuset@openmote.com)
+ * Date:   July 2013
+ * Description: CC2538-specific definition of the "uart" bsp module.
+ */
 
 #include <headers/hw_ints.h>
 #include <headers/hw_ioc.h>
 #include <headers/hw_memmap.h>
 #include <headers/hw_types.h>
+
 #include "stdint.h"
 #include "stdio.h"
 #include "string.h"

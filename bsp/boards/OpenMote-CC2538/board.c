@@ -1,41 +1,47 @@
 /**
-\brief CC2538-specific definition of the "board" bsp module.
+ * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
+ *         Pere Tuset (peretuset@openmote.com)
+ * Date:   July 2013
+ * Description: CC2538-specific definition of the "board" bsp module.
+ */
 
-\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, August 2013.
-*/
-
-
-#include <headers/hw_ioc.h>             // Access to IOC register defines
+#include <headers/hw_ioc.h>
 #include <headers/hw_memmap.h>
-#include <headers/hw_ssi.h>             // Access to SSI register defines
-#include <headers/hw_sys_ctrl.h>        // Clocking control
+#include <headers/hw_ssi.h>
+#include <headers/hw_sys_ctrl.h>
 #include <headers/hw_types.h>
-#include "board.h"
 
-// bsp modules
+#include "board.h"
 #include "leds.h"
-#include "ioc.h"                // Access to driverlib ioc fns
-#include "gpio.h"               // Access to driverlib gpio fns
-#include "sys_ctrl.h"           // Access to driverlib SysCtrl fns
-#include "interrupt.h"          // Access to driverlib interrupt fns
+#include "ioc.h"
+#include "gpio.h"
+#include "sys_ctrl.h"
+#include "interrupt.h"
 #include "bsp_timer.h"
 #include "radiotimer.h"
 #include "debugpins.h"
 #include "uart.h"
 #include "radio.h"
+#include "flash.h"
+#include "i2c.h"
 
 //=========================== variables =======================================
 
-#define BSP_RADIO_BASE              ( GPIO_D_BASE )
-#define BSP_BUTTON_BASE             ( GPIO_C_BASE )
-#define BSP_RADIO_INT               ( GPIO_PIN_5 )
-#define BSP_RADIO_EXT               ( GPIO_PIN_4 )
-#define BSP_USER_BUTTON             ( GPIO_PIN_3 )
+#define BSP_ANTENNA_BASE                ( GPIO_D_BASE )
+#define BSP_ANTENNA_INT                 ( GPIO_PIN_5 )
+#define BSP_ANTENNA_EXT                 ( GPIO_PIN_4 )
+
+#define BSP_BUTTON_BASE                 ( GPIO_C_BASE )
+#define BSP_BUTTON_USER                 ( GPIO_PIN_3 )
+
+#define CC2538_FLASH_ADDRESS            ( 0x0027F800 )
+
 //=========================== prototypes ======================================
 
 void antenna_init(void);
 void antenna_internal(void);
 void antenna_external(void);
+
 void button_init(void);
 
 void GPIO_C_Isr_Handler(void);
@@ -72,28 +78,28 @@ void board_init() {
    radiotimer_init();
    uart_init();
    radio_init();
+   i2c_init();
 }
 
 /**
- * Configures the used button as input source
- * Registers gpio_c interrupt..
+ * Configures the user button as input source
  */
 void button_init(){
-	GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_USER_BUTTON);
-	GPIOIntTypeSet(BSP_BUTTON_BASE,BSP_USER_BUTTON,GPIO_FALLING_EDGE);
-	GPIOPortIntRegister(BSP_BUTTON_BASE,GPIO_C_Isr_Handler);
-	GPIOPinIntClear(BSP_BUTTON_BASE, BSP_USER_BUTTON);
-	GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_USER_BUTTON);
+	GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_BUTTON_USER);
+	GPIOIntTypeSet(BSP_BUTTON_BASE, BSP_BUTTON_USER,GPIO_FALLING_EDGE);
+	GPIOPortIntRegister(BSP_BUTTON_BASE, GPIO_C_Isr_Handler);
+	GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
+	GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
 }
 
 /**
  * GPIO_C ISR handler. User button is GPIO_C_3
- * Toggle debug led when user button is pressed
+ * Erases a Flash sector to trigger the bootloader backdoor
  */
 void GPIO_C_Isr_Handler(){
-
-	GPIOPinIntClear(GPIO_C_BASE, BSP_USER_BUTTON);
-	leds_debug_toggle();//toggle led.
+    IntMasterDisable();
+    FlashMainPageErase(CC2538_FLASH_ADDRESS);
+    SysCtrlReset();
 }
 
 /**
@@ -103,28 +109,28 @@ void GPIO_C_Isr_Handler(){
  */
 void antenna_init(void) {
     // Configure the ANT1 and ANT2 GPIO as output
-    GPIOPinTypeGPIOOutput(BSP_RADIO_BASE, BSP_RADIO_INT);
-    GPIOPinTypeGPIOOutput(BSP_RADIO_BASE, BSP_RADIO_EXT);
+    GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_INT);
+    GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT);
 
     // By default the chip antenna is selected as the default
-    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_INT, BSP_RADIO_INT);
-    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_EXT, ~BSP_RADIO_EXT);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_INT, BSP_ANTENNA_INT);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT, ~BSP_ANTENNA_EXT);
 }
 
 /**
  * Selects the external (connector) antenna
  */
 void antenna_external(void) {
-    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_EXT, BSP_RADIO_EXT);
-    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_INT, ~BSP_RADIO_INT);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT, BSP_ANTENNA_EXT);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_INT, ~BSP_ANTENNA_INT);
 }
 
 /**
  * Selects the internal (chip) antenna
  */
 void antenna_internal(void) {
-    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_EXT, ~BSP_RADIO_EXT);
-    GPIOPinWrite(BSP_RADIO_BASE, BSP_RADIO_INT, BSP_RADIO_INT);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT, ~BSP_ANTENNA_EXT);
+    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_INT, BSP_ANTENNA_INT);
 }
 
 /**

@@ -121,41 +121,33 @@
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
-      <Value>../../../../openwsn</Value>
+      <Value>../../../../inc</Value>
+      <Value>../../../../openapps</Value>
+      <Value>../../../../openstack</Value>
       <Value>../../../../bsp/boards</Value>
       <Value>../../../../bsp/chips</Value>
-      <Value>../../../../kernel/openos</Value>
+      <Value>../../../../kernel</Value>
       <Value>../../../../bsp/boards/samr21_xpro</Value>
       <Value>../../../../bsp/boards</Value>
       <Value>../../../../bsp/chips/at86rf233</Value>
       <Value>../../../../drivers/common</Value>
       <Value>../../../../kernel/openos</Value>
-      <Value>../../../../openwsn/02a-MAClow</Value>
-      <Value>../../../../openwsn/02b-MAChigh</Value>
-      <Value>../../../../openwsn/03a-IPHC</Value>
-      <Value>../../../../openwsn/03b-IPv6</Value>
-      <Value>../../../../openwsn/04-TRAN</Value>
-      <Value>../../../../openwsn/07-App</Value>
-      <Value>../../../../openwsn/07-App/layerdebug</Value>
-      <Value>../../../../openwsn/07-App/ohlone</Value>
-      <Value>../../../../openwsn/07-App/r6t</Value>
-      <Value>../../../../openwsn/07-App/rinfo</Value>
-      <Value>../../../../openwsn/07-App/rleds</Value>
-      <Value>../../../../openwsn/07-App/rreg</Value>
-      <Value>../../../../openwsn/07-App/rwellknown</Value>
-      <Value>../../../../openwsn/07-App/tcpecho</Value>
-      <Value>../../../../openwsn/07-App/tcpinject</Value>
-      <Value>../../../../openwsn/07-App/tcpprint</Value>
-      <Value>../../../../openwsn/07-App/udpecho</Value>
-      <Value>../../../../openwsn/07-App/udpinject</Value>
-      <Value>../../../../openwsn/07-App/udplatency</Value>
-      <Value>../../../../openwsn/07-App/udpprint</Value>
-      <Value>../../../../openwsn/07-App/udprand</Value>
-      <Value>../../../../openwsn/07-App/udpstorm</Value>
-      <Value>../../../../openwsn/cross-layers</Value>
-      <Value>../../../../openwsn</Value>
-      <Value>../../../../openwsn/07-App/rrt</Value>
-      <Value>../../../../openwsn/07-App/rex</Value>
+      <Value>../../../../openstack/02a-MAClow</Value>
+      <Value>../../../../openstack/02b-MAChigh</Value>
+      <Value>../../../../openstack/03a-IPHC</Value>
+      <Value>../../../../openstack/03b-IPv6</Value>
+      <Value>../../../../openstack/04-TRAN</Value>
+      <Value>../../../../openapps/c6t</Value>
+      <Value>../../../../openapps/cexample</Value>
+      <Value>../../../../openapps/cinfo</Value>
+      <Value>../../../../openapps/cleds</Value>
+      <Value>../../../../openapps/cstorm</Value>
+      <Value>../../../../openapps/cwellknown</Value>
+      <Value>../../../../openapps/techo</Value>
+      <Value>../../../../openapps/tohlone</Value>
+      <Value>../../../../openapps/uecho</Value>
+      <Value>../../../../openstack/cross-layers</Value>
+      <Value>../../../../openstack</Value>
       <Value>../../../../bsp/boards/samr21_xpro/drivers/inc</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
@@ -191,17 +183,21 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\openwsn\02b-MAChigh\otf.c">
+    <Compile Include="..\..\..\openapps\openapps.c">
       <SubType>compile</SubType>
-      <Link>openwsn\02b-MAChigh\otf.c</Link>
+      <Link>openapps\openapps.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\02b-MAChigh\processIE.c">
+    <Compile Include="..\..\..\openstack\02b-MAChigh\otf.c">
       <SubType>compile</SubType>
-      <Link>openwsn\02b-MAChigh\processIE.c</Link>
+      <Link>openstack\02b-MAChigh\otf.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\02b-MAChigh\sixtop.c">
+    <Compile Include="..\..\..\openstack\02b-MAChigh\processIE.c">
       <SubType>compile</SubType>
-      <Link>openwsn\02b-MAChigh\sixtop.c</Link>
+      <Link>openstack\02b-MAChigh\processIE.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02b-MAChigh\sixtop.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02b-MAChigh\sixtop.c</Link>
     </Compile>
     <Compile Include="cmsis\src\startup_samr21.c">
       <SubType>compile</SubType>
@@ -353,165 +349,121 @@
       <SubType>compile</SubType>
       <Link>kernel\scheduler.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\02a-MAClow\adaptive_sync.c">
+    <Compile Include="..\..\..\openstack\02a-MAClow\adaptive_sync.c">
       <SubType>compile</SubType>
-      <Link>openwsn\02a-MAClow\adaptive_sync.c</Link>
+      <Link>openstack\02a-MAClow\adaptive_sync.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\02a-MAClow\IEEE802154.c">
+    <Compile Include="..\..\..\openstack\02a-MAClow\IEEE802154.c">
       <SubType>compile</SubType>
-      <Link>openwsn\02a-MAClow\IEEE802154.c</Link>
+      <Link>openstack\02a-MAClow\IEEE802154.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\02a-MAClow\IEEE802154E.c">
+    <Compile Include="..\..\..\openstack\02a-MAClow\IEEE802154E.c">
       <SubType>compile</SubType>
-      <Link>openwsn\02a-MAClow\IEEE802154E.c</Link>
+      <Link>openstack\02a-MAClow\IEEE802154E.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\02a-MAClow\topology.c">
+    <Compile Include="..\..\..\openstack\02a-MAClow\topology.c">
       <SubType>compile</SubType>
-      <Link>openwsn\02a-MAClow\topology.c</Link>
+      <Link>openstack\02a-MAClow\topology.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\02b-MAChigh\neighbors.c">
+    <Compile Include="..\..\..\openstack\02b-MAChigh\neighbors.c">
       <SubType>compile</SubType>
-      <Link>openwsn\02b-MAChigh\neighbors.c</Link>
+      <Link>openstack\02b-MAChigh\neighbors.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\02b-MAChigh\schedule.c">
+    <Compile Include="..\..\..\openstack\02b-MAChigh\schedule.c">
       <SubType>compile</SubType>
-      <Link>openwsn\02b-MAChigh\schedule.c</Link>
+      <Link>openstack\02b-MAChigh\schedule.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\03a-IPHC\iphc.c">
+    <Compile Include="..\..\..\openstack\03a-IPHC\iphc.c">
       <SubType>compile</SubType>
-      <Link>openwsn\03a-IPHC\iphc.c</Link>
+      <Link>openstack\03a-IPHC\iphc.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\03a-IPHC\openbridge.c">
+    <Compile Include="..\..\..\openstack\03a-IPHC\openbridge.c">
       <SubType>compile</SubType>
-      <Link>openwsn\03a-IPHC\openbridge.c</Link>
+      <Link>openstack\03a-IPHC\openbridge.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\03b-IPv6\forwarding.c">
+    <Compile Include="..\..\..\openstack\03b-IPv6\forwarding.c">
       <SubType>compile</SubType>
-      <Link>openwsn\03b-IPV6\forwarding.c</Link>
+      <Link>openstack\03b-IPV6\forwarding.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\03b-IPv6\icmpv6.c">
+    <Compile Include="..\..\..\openstack\03b-IPv6\icmpv6.c">
       <SubType>compile</SubType>
-      <Link>openwsn\03b-IPV6\icmpv6.c</Link>
+      <Link>openstack\03b-IPV6\icmpv6.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\03b-IPv6\icmpv6echo.c">
+    <Compile Include="..\..\..\openstack\03b-IPv6\icmpv6echo.c">
       <SubType>compile</SubType>
-      <Link>openwsn\03b-IPV6\icmpv6echo.c</Link>
+      <Link>openstack\03b-IPV6\icmpv6echo.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\03b-IPv6\icmpv6rpl.c">
+    <Compile Include="..\..\..\openstack\03b-IPv6\icmpv6rpl.c">
       <SubType>compile</SubType>
-      <Link>openwsn\03b-IPV6\icmpv6rpl.c</Link>
+      <Link>openstack\03b-IPV6\icmpv6rpl.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\04-TRAN\opencoap.c">
+    <Compile Include="..\..\..\openstack\04-TRAN\opencoap.c">
       <SubType>compile</SubType>
-      <Link>openwsn\04-TRAN\opencoap.c</Link>
+      <Link>openstack\04-TRAN\opencoap.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\04-TRAN\opentcp.c">
+    <Compile Include="..\..\..\openstack\04-TRAN\opentcp.c">
       <SubType>compile</SubType>
-      <Link>openwsn\04-TRAN\opentcp.c</Link>
+      <Link>openstack\04-TRAN\opentcp.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\04-TRAN\openudp.c">
+    <Compile Include="..\..\..\openstack\04-TRAN\openudp.c">
       <SubType>compile</SubType>
-      <Link>openwsn\04-TRAN\openudp.c</Link>
+      <Link>openstack\04-TRAN\openudp.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\04-TRAN\rsvp.c">
+    <Compile Include="..\..\..\openstack\cross-layers\idmanager.c">
       <SubType>compile</SubType>
-      <Link>openwsn\04-TRAN\rsvp.c</Link>
+      <Link>openstack\cross-layers\idmanager.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\layerdebug\layerdebug.c">
+    <Compile Include="..\..\..\openstack\cross-layers\openqueue.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\layerdebug\layerdebug.c</Link>
+      <Link>openstack\cross-layers\openqueue.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\ohlone\ohlone.c">
+    <Compile Include="..\..\..\openstack\cross-layers\openrandom.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\ohlone\ohlone.c</Link>
+      <Link>openstack\cross-layers\openrandom.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\ohlone\ohlone_webpages.c">
+    <Compile Include="..\..\..\openstack\cross-layers\packetfunctions.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\ohlone\ohlone_webpages.c</Link>
+      <Link>openstack\cross-layers\packetfunctions.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\r6t\r6t.c">
+    <Compile Include="..\..\..\openstack\openstack.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\r6t\r6t.c</Link>
+      <Link>openstack\openstack.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\rex\rex.c">
+    <Compile Include="..\..\..\openapps\c6t\c6t.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\rex\rex.c</Link>
+      <Link>openapps\c6t\c6t.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\rinfo\rinfo.c">
+    <Compile Include="..\..\..\openapps\cexample\cexample.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\rinfo\rinfo.c</Link>
+      <Link>openapps\cexample\cexample.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\rleds\rleds.c">
+    <Compile Include="..\..\..\openapps\cinfo\cinfo.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\rleds\rleds.c</Link>
+      <Link>openapps\cinfo\cinfo.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\rreg\rreg.c">
+    <Compile Include="..\..\..\openapps\cleds\cleds.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\rreg\rreg.c</Link>
+      <Link>openapps\cleds\cleds.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\rrt\rrt.c">
+    <Compile Include="..\..\..\openapps\cstorm\cstorm.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\rrt\rrt.c</Link>
+      <Link>openapps\cstorm\cstorm.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\rwellknown\rwellknown.c">
+    <Compile Include="..\..\..\openapps\cwellknown\cwellknown.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\rwellknow\rwellknown.c</Link>
+      <Link>openapps\cwellknown\cwellknown.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\tcpecho\tcpecho.c">
+    <Compile Include="..\..\..\openapps\techo\techo.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\tcpecho\tcpecho.c</Link>
+      <Link>openapps\techo\techo.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\tcpinject\tcpinject.c">
+    <Compile Include="..\..\..\openapps\tohlone\tohlone.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\tcpinject\tcpinject.c</Link>
+      <Link>openapps\tohlone\tohlone.c</Link>
     </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\tcpprint\tcpprint.c">
+    <Compile Include="..\..\..\openapps\uecho\uecho.c">
       <SubType>compile</SubType>
-      <Link>openwsn\07-App\tcprpint\tcpprint.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\udpecho\udpecho.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\07-App\udpecho\udpecho.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\udpinject\udpinject.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\07-App\udpinject\udpinject.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\udplatency\udplatency.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\07-App\udplatency\udplatency.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\udpprint\udpprint.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\07-App\udpprint\udpprint.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\udprand\udprand.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\07-App\udprand\udprand.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\07-App\udpstorm\udpstorm.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\07-App\udpstorm\udpstorm.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\cross-layers\idmanager.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\cross-layers\idmanager.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\cross-layers\openqueue.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\cross-layers\openqueue.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\cross-layers\openrandom.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\cross-layers\openrandom.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\cross-layers\packetfunctions.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\cross-layers\packetfunctions.c</Link>
-    </Compile>
-    <Compile Include="..\..\..\openwsn\openwsn.c">
-      <SubType>compile</SubType>
-      <Link>openwsn\openwsn.c</Link>
+      <Link>openapps\uecho\uecho.c</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -529,34 +481,23 @@
     <Folder Include="drivers\" />
     <Folder Include="drivers\common\" />
     <Folder Include="kernel" />
-    <Folder Include="openwsn" />
-    <Folder Include="openwsn\07-App\" />
-    <Folder Include="openwsn\07-App\rex" />
-    <Folder Include="openwsn\07-App\rrt" />
-    <Folder Include="openwsn\02a-MAClow" />
-    <Folder Include="openwsn\02b-MAChigh" />
-    <Folder Include="openwsn\03a-IPHC" />
-    <Folder Include="openwsn\03b-IPV6" />
-    <Folder Include="openwsn\04-TRAN" />
-    <Folder Include="openwsn\07-App" />
-    <Folder Include="openwsn\07-App\layerdebug" />
-    <Folder Include="openwsn\07-App\ohlone" />
-    <Folder Include="openwsn\07-App\r6t" />
-    <Folder Include="openwsn\07-App\rinfo" />
-    <Folder Include="openwsn\07-App\rleds" />
-    <Folder Include="openwsn\07-App\rreg" />
-    <Folder Include="openwsn\07-App\rrt" />
-    <Folder Include="openwsn\07-App\rwellknow" />
-    <Folder Include="openwsn\07-App\tcpecho" />
-    <Folder Include="openwsn\07-App\tcpinject" />
-    <Folder Include="openwsn\07-App\tcprpint" />
-    <Folder Include="openwsn\07-App\udpecho" />
-    <Folder Include="openwsn\07-App\udpinject" />
-    <Folder Include="openwsn\07-App\udplatency" />
-    <Folder Include="openwsn\07-App\udpprint" />
-    <Folder Include="openwsn\07-App\udprand" />
-    <Folder Include="openwsn\07-App\udpstorm" />
-    <Folder Include="openwsn\cross-layers" />
+    <Folder Include="openstack" />
+    <Folder Include="openapps\" />
+    <Folder Include="openstack\02a-MAClow" />
+    <Folder Include="openstack\02b-MAChigh" />
+    <Folder Include="openstack\03a-IPHC" />
+    <Folder Include="openstack\03b-IPV6" />
+    <Folder Include="openstack\04-TRAN" />
+    <Folder Include="openapps\c6t" />
+    <Folder Include="openapps\cexample" />
+    <Folder Include="openapps\cinfo" />
+    <Folder Include="openapps\cleds" />
+    <Folder Include="openapps\cstorm" />
+    <Folder Include="openapps\cwellknown" />
+    <Folder Include="openapps\techo" />
+    <Folder Include="openapps\tohlone" />
+    <Folder Include="openapps\uecho" />
+    <Folder Include="openstack\cross-layers" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cmsis\linkerScripts\samr21g18a_flash.ld">

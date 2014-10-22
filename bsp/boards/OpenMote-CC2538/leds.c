@@ -1,11 +1,13 @@
 /**
-\brief cc2538-specific definition of the "leds" bsp module.
-
-\author Xavier Vilajosana <xvilajosana@eecs.berkeley.edu>, August 2013.
-*/
+ * Author: Xavier Vilajosana (xvilajosana@eecs.berkeley.edu)
+ *         Pere Tuset (peretuset@openmote.com)
+ * Date:   July 2013
+ * Description: CC2538-specific definition of the "leds" bsp module.
+ */
 
 #include <headers/hw_memmap.h>
 #include <headers/hw_types.h>
+
 #include "stdint.h"
 #include "leds.h"
 #include "gpio.h"
@@ -13,13 +15,6 @@
 
 
 // Board LED defines
-//#define BSP_LED_BASE            GPIO_C_BASE
-//#define BSP_LED_1               GPIO_PIN_0      //!< PC0
-//#define BSP_LED_2               GPIO_PIN_1      //!< PC1
-//#define BSP_LED_3               GPIO_PIN_2      //!< PC2
-//#define BSP_LED_4               GPIO_PIN_3      //!< PC3
-
-//openmote_cc2538
 #define BSP_LED_BASE            GPIO_C_BASE
 #define BSP_LED_1               GPIO_PIN_4      //!< PC4 -- red
 #define BSP_LED_2               GPIO_PIN_5      //!< PC5 -- orange
@@ -31,16 +26,16 @@
                                  BSP_LED_3 | \
                                  BSP_LED_4)     //!< Bitmask of all LEDs
 
-
-
 //=========================== defines =========================================
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
+
 void bspLedSet(uint8_t ui8Leds);
 void bspLedClear(uint8_t ui8Leds);
 void bspLedToggle(uint8_t ui8Leds);
+
 //=========================== public ==========================================
 
 void leds_init() {
@@ -108,6 +103,7 @@ uint8_t leds_debug_isOn() {
 	return (uint8_t)(ui32Toggle & BSP_LED_4)>>3;
 }
 
+// all
 void leds_all_on() {
 	bspLedSet(BSP_LED_ALL);
 }
@@ -121,25 +117,23 @@ void leds_all_toggle() {
 void leds_error_blink() {
    uint8_t i;
    volatile uint16_t delay;
+   
    // turn all LEDs off
    bspLedClear(BSP_LED_ALL);
      
    // blink error LED for ~10s
    for (i=0;i<80;i++) {
-	  bspLedToggle(BSP_LED_1); //10 seconds more or less..
+	  bspLedToggle(BSP_LED_1);
       for (delay=0xffff;delay>0;delay--);
       for (delay=0xffff;delay>0;delay--);
    }
 }
 
 void leds_circular_shift() {
-
 }
 
 void leds_increment() {
-
 }
-
 
 //=========================== private =========================================
 
@@ -151,7 +145,6 @@ port_INLINE void bspLedSet(uint8_t ui8Leds)
     GPIOPinWrite(BSP_LED_BASE, ui8Leds, ui8Leds);
 }
 
-
 port_INLINE void bspLedClear(uint8_t ui8Leds)
 {
     //
@@ -159,7 +152,6 @@ port_INLINE void bspLedClear(uint8_t ui8Leds)
     //
     GPIOPinWrite(BSP_LED_BASE, ui8Leds, 0);
 }
-
 
 port_INLINE void bspLedToggle(uint8_t ui8Leds)
 {
@@ -178,3 +170,4 @@ port_INLINE void bspLedToggle(uint8_t ui8Leds)
     //
     GPIOPinWrite(BSP_LED_BASE, ui8Leds, ui32Toggle);
 }
+
