@@ -29,7 +29,7 @@
 #define SCHEDULER_STACK_PRIO_BOUNDARY  4
 #define SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY 8
 
-#define INTERRUPT_DECLARATION()        (xStackLock != NULL ?: ( xStackLock = xSemaphoreCreateMutex()))
+#define INTERRUPT_DECLARATION()        (xStackLock != NULL ? (xStackLock=xStackLock) : ( xStackLock = xSemaphoreCreateMutex()))
 #define DISABLE_INTERRUPTS()           xSemaphoreTake( xStackLock, portMAX_DELAY )
 #define ENABLE_INTERRUPTS()            xSemaphoreGive( xStackLock )
 

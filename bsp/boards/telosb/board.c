@@ -15,6 +15,8 @@
 #include "radio.h"
 #include "radiotimer.h"
 
+#include "portmacro.h"
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -94,6 +96,7 @@ ISR(USART1RX) {
 ISR(TIMERA0) {
    debugpins_isr_set();
    if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
+      portYIELD();
       __bic_SR_register_on_exit(CPUOFF);
    }
    debugpins_isr_clr();
@@ -130,4 +133,3 @@ ISR(TIMERB1) {
 // TIMERB0_VECTOR
 
 // NMI_VECTOR
-

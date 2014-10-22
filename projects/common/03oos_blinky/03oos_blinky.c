@@ -55,6 +55,11 @@ int mote_main(void) {
    return 0; // this line should never be reached
 }
 
+
+void vApplicationIdleHook( void ) {
+	board_sleep();
+}
+
 //=========================== private =========================================
 
 void cb_errorLedTimer(void) {

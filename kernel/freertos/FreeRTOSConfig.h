@@ -66,7 +66,7 @@
 #ifndef FREERTOS_CONFIG_H
 #define FREERTOS_CONFIG_H
 
-
+#include "msp430f1611.h"
 
 /*
 Two interrupt examples are provided -
@@ -113,13 +113,13 @@ occurs.
 #define configUSE_PREEMPTION                    1
 #define configUSE_PORT_OPTIMISED_TASK_SELECTION 0
 #define configUSE_TICKLESS_IDLE                 1
-#define configCPU_CLOCK_HZ                      60000000
-#define configTICK_RATE_HZ                      250
-#define configMAX_PRIORITIES                    3
-#define configMINIMAL_STACK_SIZE                128
-#define configTOTAL_HEAP_SIZE                   200
+#define configCPU_CLOCK_HZ                      ( ( unsigned long ) 7995392 )
+#define configTICK_RATE_HZ			( ( TickType_t ) 1000 )
+#define configMAX_PRIORITIES                    5
+#define configMINIMAL_STACK_SIZE	( ( unsigned short ) 50 )
+#define configTOTAL_HEAP_SIZE                   1000
 #define configMAX_TASK_NAME_LEN                 16
-#define configUSE_16_BIT_TICKS                  0
+#define configUSE_16_BIT_TICKS                  1
 #define configIDLE_SHOULD_YIELD                 1
 #define configUSE_MUTEXES                       1
 #define configUSE_RECURSIVE_MUTEXES             0
@@ -132,7 +132,7 @@ occurs.
 #define configENABLE_BACKWARD_COMPATIBILITY     0
 
 /* Hook function related definitions. */
-#define configUSE_IDLE_HOOK                     0
+#define configUSE_IDLE_HOOK                     1
 #define configUSE_TICK_HOOK                     0
 #define configCHECK_FOR_STACK_OVERFLOW          0
 #define configUSE_MALLOC_FAILED_HOOK            0
