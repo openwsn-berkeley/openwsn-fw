@@ -29,9 +29,9 @@
 #define SCHEDULER_STACK_PRIO_BOUNDARY  4
 #define SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY 8
 
-#define INTERRUPT_DECLARATION()        (xStackLock != NULL ? (xStackLock=xStackLock) : ( xStackLock = xSemaphoreCreateMutex()))
-#define DISABLE_INTERRUPTS()           xSemaphoreTake( xStackLock, portMAX_DELAY )
-#define ENABLE_INTERRUPTS()            xSemaphoreGive( xStackLock )
+#define INTERRUPT_DECLARATION()       // (xStackLock != NULL ? (xStackLock=xStackLock) : ( xStackLock = xSemaphoreCreateMutex()))
+#define DISABLE_INTERRUPTS()         //  xSemaphoreTake( xStackLock, portMAX_DELAY )
+#define ENABLE_INTERRUPTS()           // xSemaphoreGive( xStackLock )
 
 //=========================== variables =======================================
 
@@ -40,16 +40,16 @@ scheduler_dbg_t  scheduler_dbg;
 
 //typedef struct {
    /// global stack lock
-   SemaphoreHandle_t    xStackLock;
+ static  SemaphoreHandle_t    xStackLock;
    /// application task (takes the packet until it goes into the MAC queue)
-   TaskHandle_t         xAppHandle;                   // task
-   SemaphoreHandle_t    xAppSem;                      // semaphore to unlock task
+ static   TaskHandle_t         xAppHandle;                   // task
+ static   SemaphoreHandle_t    xAppSem;                      // semaphore to unlock task
    /// stack task which signals sendDone
-   TaskHandle_t         xSendDoneHandle;              // task
-   SemaphoreHandle_t    xSendDoneSem;                 // semaphore to unlock task
+ static  TaskHandle_t         xSendDoneHandle;              // task
+ static SemaphoreHandle_t    xSendDoneSem;                 // semaphore to unlock task
    /// stack task which signals packet reception
-   TaskHandle_t         xRxHandle;                    // task
-   SemaphoreHandle_t    xRxSem;                       // semaphore to unlock task
+ static TaskHandle_t         xRxHandle;                    // task
+ static   SemaphoreHandle_t    xRxSem;                       // semaphore to unlock task
 //} rtos_sched_v_t;
 
 //rtos_sched_v_t rtos_sched_v;
@@ -62,7 +62,7 @@ static void vSendDoneTask(void* pvParameters);
 static void vRxTask(void* pvParameters);
 
 //=== helpers
-void scheduler_createSem(SemaphoreHandle_t* sem);
+static void scheduler_createSem(SemaphoreHandle_t* sem);
 void scheduler_push_task_internal(task_cbt cb, task_prio_t prio);
 static bool scheduler_find_next_task(
    task_prio_t          minprio,
@@ -194,7 +194,7 @@ ready for the lowwe MAC to consume.
 static void vAppTask(void* pvParameters) {
    bool found = FALSE;
    taskList_item_t* pThisTask = NULL;
-   
+   xSemaphoreTake(xAppSem, portMAX_DELAY);//take it for the first time so it blocks right after.
    while (1) {
       xSemaphoreTake(xAppSem, portMAX_DELAY);
       found = scheduler_find_next_task(
@@ -216,7 +216,7 @@ Handle sendDone notifications.
 static void vSendDoneTask(void* pvParameters) {
    bool found;
    taskList_item_t* pThisTask = NULL;
-   
+   xSemaphoreTake(xSendDoneSem, portMAX_DELAY);//take it for the first time so it blocks right after.
    while (1) {
       xSemaphoreTake(xSendDoneSem, portMAX_DELAY);
       found = scheduler_find_next_task(
@@ -238,7 +238,7 @@ Handle received packets, bringing them up to the stack.
 static void vRxTask(void* pvParameters) {
    bool found = FALSE;
    taskList_item_t* pThisTask = NULL;
-   
+   xSemaphoreTake(xRxSem, portMAX_DELAY); //take it for the first time so it blocks right after.
    while (1) {
       xSemaphoreTake(xRxSem, portMAX_DELAY);
       found = scheduler_find_next_task(
@@ -260,7 +260,7 @@ static void vRxTask(void* pvParameters) {
 /**
 \brief Create and give a semaphore.
 */
-void scheduler_createSem(SemaphoreHandle_t* sem) {
+static void scheduler_createSem(SemaphoreHandle_t* sem) {
    
    // create semaphore
    *sem = xSemaphoreCreateBinary();
@@ -269,7 +269,7 @@ void scheduler_createSem(SemaphoreHandle_t* sem) {
       return;
    }
    //take it so it starts at 1 and tasks block
-   xSemaphoreTake(*sem, portMAX_DELAY);
+  // xSemaphoreTake(*sem, portMAX_DELAY);
 }
 
 /**
