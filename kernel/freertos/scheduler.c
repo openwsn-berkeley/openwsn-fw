@@ -85,17 +85,21 @@ void scheduler_init() {
       //TODO handle failure
       return;
    }
-   // by default, stack isn't locked
+   /*// by default, stack isn't locked
    if (xSemaphoreGive(xStackLock) != pdTRUE) {
       //TODO handle failure
       return;
-   }
-   
+   }*/
+
    //=== scheduler lock
    // TODO?
    
    //=== app task
    // task
+   // semaphore
+   scheduler_createSem(&xAppSem);
+
+
    xTaskCreate(
       vAppTask,
       "app",
@@ -105,11 +109,12 @@ void scheduler_init() {
       &xAppHandle
    );
    configASSERT(xAppHandle);
-   // semaphore
-   scheduler_createSem(&xAppSem);
+
    
    //=== stack task sendDone
    // task
+   // semaphore
+   scheduler_createSem(&xSendDoneSem);
    xTaskCreate(
       vSendDoneTask,
       "sendDone",
@@ -119,10 +124,11 @@ void scheduler_init() {
       &xSendDoneHandle
    );
    configASSERT(xSendDoneHandle);
-   // semaphore
-   scheduler_createSem(&xSendDoneSem);
+
    
    //=== stack task rx
+   // semaphore
+   scheduler_createSem(&xRxSem);
    // task
    xTaskCreate(
       vRxTask,
@@ -133,8 +139,7 @@ void scheduler_init() {
       &xRxHandle
    );
    configASSERT(xRxHandle);
-   // semaphore
-   scheduler_createSem(&xRxSem);
+
 }
 
 void scheduler_start() {
