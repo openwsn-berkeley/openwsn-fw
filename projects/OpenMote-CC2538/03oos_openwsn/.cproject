@@ -60,7 +60,7 @@
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/openos&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/drivers/cc2538&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/drivers/OpenMote-CC2538&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/02a-MAClow&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/02b-MAChigh&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/03a-IPHC&quot;"/>
@@ -104,7 +104,7 @@
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/openos&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel/freertos&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/kernel&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/drivers/cc2538&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/drivers/OpenMote-CC2538&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/02a-MAClow&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/02b-MAChigh&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${OPENWSN_FW_HOME}/openstack/03a-IPHC&quot;"/>

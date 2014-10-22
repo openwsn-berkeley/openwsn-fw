@@ -42,7 +42,7 @@
 		<link>
 			<name>drivers</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/drivers/cc2538</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/drivers/OpenMote-CC2538</locationURI>
 		</link>
 		<link>
 			<name>inc</name>
