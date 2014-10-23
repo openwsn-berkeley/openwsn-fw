@@ -69,7 +69,7 @@ static inline bool scheduler_find_next_task_and_execute(
    task_prio_t          maxprio,
    taskList_item_t*     pThisTas
 );
-static inline void scheduler_executeTask(taskList_item_t* pThisTask);
+static inline void scheduler_executeTask(taskList_item_t** pThisTask);
 void vApplicationIdleHook( void);
 
 //=========================== public ==========================================
@@ -337,7 +337,7 @@ static inline bool scheduler_find_next_task_and_execute (
       if ((*prevTask)->prio >= minprio && (*prevTask)->prio < maxprio) {
          pThisTask = (*prevTask);
          scheduler_vars.task_list = pThisTask->next;
-         scheduler_executeTask(pThisTask);
+         scheduler_executeTask(&pThisTask);
          return TRUE;
       }
       //it is not the first so let's look at the next one if nothing return
@@ -365,7 +365,8 @@ static inline bool scheduler_find_next_task_and_execute (
          //found
          //link the list again and remove the selected task
          (*prevTask)->next = pThisTask->next;
-         scheduler_executeTask(pThisTask);
+         scheduler_executeTask(&pThisTask);
+
          return TRUE;
       }
    }
@@ -375,15 +376,15 @@ static inline bool scheduler_find_next_task_and_execute (
 /**
 \brief Execute a task.
 */
-static inline void scheduler_executeTask(taskList_item_t* pThisTask) {
+static inline void scheduler_executeTask(taskList_item_t** pThisTask) {
    
    // execute the current task
-   pThisTask->cb();
+   (*pThisTask)->cb();
    
    // free up this task container
-   pThisTask->cb   = NULL;
-   pThisTask->prio = TASKPRIO_NONE;
-   pThisTask->next = NULL;
+   (*pThisTask)->cb   = NULL;
+   (*pThisTask)->prio = TASKPRIO_NONE;
+   (*pThisTask)->next = NULL;
    
    // update debug stats
    scheduler_dbg.numTasksCur--;
