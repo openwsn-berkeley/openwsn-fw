@@ -62,14 +62,14 @@ static void vSendDoneTask(void* pvParameters);
 static void vRxTask(void* pvParameters);
 
 //=== helpers
-static void scheduler_createSem(SemaphoreHandle_t* sem);
-void scheduler_push_task_internal(task_cbt cb, task_prio_t prio);
-static bool scheduler_find_next_task(
+static inline void scheduler_createSem(SemaphoreHandle_t* sem);
+static inline void scheduler_push_task_internal(task_cbt cb, task_prio_t prio);
+static inline bool scheduler_find_next_task_and_execute(
    task_prio_t          minprio,
    task_prio_t          maxprio,
    taskList_item_t*     pThisTas
 );
-static void scheduler_executeTask(taskList_item_t* pThisTask);
+static inline void scheduler_executeTask(taskList_item_t* pThisTask);
 void vApplicationIdleHook( void);
 
 //=========================== public ==========================================
@@ -197,15 +197,12 @@ static void vAppTask(void* pvParameters) {
    xSemaphoreTake(xAppSem, portMAX_DELAY);//take it for the first time so it blocks right after.
    while (1) {
       xSemaphoreTake(xAppSem, portMAX_DELAY);
-      found = scheduler_find_next_task(
+      found = scheduler_find_next_task_and_execute(
          SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY,
          SCHEDULER_APP_PRIO_BOUNDARY,
          pThisTask
       );
-      if (found) {
-         // execute the current task
-         scheduler_executeTask(pThisTask);
-      }
+
       leds_sync_toggle();
    }
 }
@@ -219,15 +216,12 @@ static void vSendDoneTask(void* pvParameters) {
    xSemaphoreTake(xSendDoneSem, portMAX_DELAY);//take it for the first time so it blocks right after.
    while (1) {
       xSemaphoreTake(xSendDoneSem, portMAX_DELAY);
-      found = scheduler_find_next_task(
+      found = scheduler_find_next_task_and_execute(
          SCHEDULER_STACK_PRIO_BOUNDARY,
          SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY,
          pThisTask
       );
-      if (found) {
-         // execute the current task
-         scheduler_executeTask(pThisTask);
-      }
+
       leds_radio_toggle();
    }
 }
@@ -241,15 +235,12 @@ static void vRxTask(void* pvParameters) {
    xSemaphoreTake(xRxSem, portMAX_DELAY); //take it for the first time so it blocks right after.
    while (1) {
       xSemaphoreTake(xRxSem, portMAX_DELAY);
-      found = scheduler_find_next_task(
+      found = scheduler_find_next_task_and_execute(
          0,
          SCHEDULER_STACK_PRIO_BOUNDARY,
          pThisTask
       );
-      if (found) {
-         // execute the current task
-         scheduler_executeTask(pThisTask);
-      }
+
 
       leds_debug_toggle();
    }
@@ -260,7 +251,7 @@ static void vRxTask(void* pvParameters) {
 /**
 \brief Create and give a semaphore.
 */
-static void scheduler_createSem(SemaphoreHandle_t* sem) {
+static inline void scheduler_createSem(SemaphoreHandle_t* sem) {
    
    // create semaphore
    *sem = xSemaphoreCreateBinary();
@@ -268,14 +259,12 @@ static void scheduler_createSem(SemaphoreHandle_t* sem) {
       // TODO handle failure
       return;
    }
-   //take it so it starts at 1 and tasks block
-  // xSemaphoreTake(*sem, portMAX_DELAY);
 }
 
 /**
 \brief Insert task into the task list, according to its priority.
 */
-void scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
+static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    taskList_item_t*     taskContainer;
    taskList_item_t**    taskListWalker;
    INTERRUPT_DECLARATION();
@@ -332,7 +321,7 @@ void scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
 
 \param[out] pThisTask The taskList item to return.
 */
-static bool scheduler_find_next_task (
+static inline bool scheduler_find_next_task_and_execute (
       task_prio_t       minprio,
       task_prio_t       maxprio,
       taskList_item_t*  pThisTask
@@ -348,15 +337,16 @@ static bool scheduler_find_next_task (
       if ((*prevTask)->prio >= minprio && (*prevTask)->prio < maxprio) {
          pThisTask = (*prevTask);
          scheduler_vars.task_list = pThisTask->next;
+         scheduler_executeTask(pThisTask);
          return TRUE;
       }
-      
+      //it is not the first so let's look at the next one if nothing return
       if ((*prevTask)->next != NULL) {
          pThisTask = (*prevTask)->next;
       } else {
          return FALSE;
       }
-      
+      //move throught the list until we find the first element in the priority group
       while (
          !(pThisTask->prio >= minprio && pThisTask->prio < maxprio)
          &&
@@ -375,6 +365,7 @@ static bool scheduler_find_next_task (
          //found
          //link the list again and remove the selected task
          (*prevTask)->next = pThisTask->next;
+         scheduler_executeTask(pThisTask);
          return TRUE;
       }
    }
@@ -384,7 +375,7 @@ static bool scheduler_find_next_task (
 /**
 \brief Execute a task.
 */
-static void scheduler_executeTask(taskList_item_t* pThisTask) {
+static inline void scheduler_executeTask(taskList_item_t* pThisTask) {
    
    // execute the current task
    pThisTask->cb();
