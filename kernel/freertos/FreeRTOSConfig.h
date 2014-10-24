@@ -68,7 +68,7 @@
 
 
 #define configUSE_TICKLESS_IDLE			        0
-#define configCPU_CLOCK_HZ				        16000000
+#define configCPU_CLOCK_HZ				        32000000
 #define configTICK_RATE_HZ				        ( ( TickType_t ) 100 )
 
 #define configPRE_SLEEP_PROCESSING(x)           ( )

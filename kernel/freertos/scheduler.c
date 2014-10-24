@@ -17,6 +17,7 @@
 #include "task.h"
 #include "semphr.h"
 #include "portable.h"
+#include "portmacro.h"
 #include "queue.h"
 
 #define STACK_SIZE                     50
@@ -69,7 +70,7 @@ static inline bool scheduler_find_next_task_and_execute(
    task_prio_t          maxprio,
    taskList_item_t*     pThisTas
 );
-static inline void scheduler_executeTask(taskList_item_t** pThisTask);
+static inline void scheduler_executeTask(taskList_item_t* pThisTask);
 void vApplicationIdleHook( void);
 
 //=========================== public ==========================================
@@ -146,7 +147,8 @@ void scheduler_start() {
 }
 
 void scheduler_push_task(task_cbt cb, task_prio_t prio) {
-   
+    BaseType_t xHigherPriorityTaskWoken;
+	xHigherPriorityTaskWoken = pdFALSE;
    //=== step 1. insert the task into the task list
    scheduler_push_task_internal(cb, prio);
    
@@ -154,35 +156,27 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
    if (
          prio <= SCHEDULER_STACK_PRIO_BOUNDARY
       ) {
-      
-      if (xSemaphoreGive(xRxSem) != pdTRUE) {
-         // TODO handle failure
-         return;
-      }
+	   xSemaphoreGiveFromISR(xRxSem,&xHigherPriorityTaskWoken );
+
    } else if (
          prio >  SCHEDULER_STACK_PRIO_BOUNDARY
          &&
          prio <= SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY
       ) {
-      
-      if (xSemaphoreGive(xSendDoneSem) != pdTRUE) {
-         // TODO handle failure
-         return;
-      }
+	   xSemaphoreGiveFromISR(xSendDoneSem,&xHigherPriorityTaskWoken );
+
    } else if (
          prio >  SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY
          &&
          prio <= SCHEDULER_APP_PRIO_BOUNDARY
       ) {
-      
-      if (xSemaphoreGive(xAppSem) != pdTRUE) {
-         // TODO handle failure
-         return;
-      }
+      xSemaphoreGiveFromISR(xAppSem,&xHigherPriorityTaskWoken );
    } else {
       // TODO handle failure
       while (1) ;
    }
+
+   portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
 }
 
 //=========================== private =========================================
@@ -267,9 +261,9 @@ static inline void scheduler_createSem(SemaphoreHandle_t* sem) {
 static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    taskList_item_t*     taskContainer;
    taskList_item_t**    taskListWalker;
-   INTERRUPT_DECLARATION();
+   //INTERRUPT_DECLARATION();
 
-   DISABLE_INTERRUPTS();
+   //DISABLE_INTERRUPTS();
 
    // find an empty task container
    taskContainer = &scheduler_vars.taskBuf[0];
@@ -312,8 +306,8 @@ static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    if (scheduler_dbg.numTasksCur > scheduler_dbg.numTasksMax) {
       scheduler_dbg.numTasksMax = scheduler_dbg.numTasksCur;
    }
-
-   ENABLE_INTERRUPTS();
+   leds_sync_toggle();
+  // ENABLE_INTERRUPTS();
 }
 
 /**
@@ -337,7 +331,7 @@ static inline bool scheduler_find_next_task_and_execute (
       if ((*prevTask)->prio >= minprio && (*prevTask)->prio < maxprio) {
          pThisTask = (*prevTask);
          scheduler_vars.task_list = pThisTask->next;
-         scheduler_executeTask(&pThisTask);
+         scheduler_executeTask(pThisTask);
          return TRUE;
       }
       //it is not the first so let's look at the next one if nothing return
@@ -365,7 +359,7 @@ static inline bool scheduler_find_next_task_and_execute (
          //found
          //link the list again and remove the selected task
          (*prevTask)->next = pThisTask->next;
-         scheduler_executeTask(&pThisTask);
+         scheduler_executeTask(pThisTask);
 
          return TRUE;
       }
@@ -376,20 +370,23 @@ static inline bool scheduler_find_next_task_and_execute (
 /**
 \brief Execute a task.
 */
-static inline void scheduler_executeTask(taskList_item_t** pThisTask) {
+static inline void scheduler_executeTask(taskList_item_t* pThisTask) {
    
    // execute the current task
-   (*pThisTask)->cb();
+   pThisTask->cb();
    
    // free up this task container
-   (*pThisTask)->cb   = NULL;
-   (*pThisTask)->prio = TASKPRIO_NONE;
-   (*pThisTask)->next = NULL;
+   pThisTask->cb   = NULL;
+   pThisTask->prio = TASKPRIO_NONE;
+   pThisTask->next = NULL;
    
+   leds_radio_toggle();
+
    // update debug stats
    scheduler_dbg.numTasksCur--;
 }
 
-void vApplicationIdleHook( void ){
+/*void vApplicationIdleHook( void ){
 	leds_debug_toggle();
 }
+*/
