@@ -197,7 +197,7 @@ static void vAppTask(void* pvParameters) {
          pThisTask
       );
 
-      leds_sync_toggle();
+      //leds_sync_toggle();
    }
 }
 
@@ -216,7 +216,7 @@ static void vSendDoneTask(void* pvParameters) {
          pThisTask
       );
 
-      leds_radio_toggle();
+     // leds_radio_toggle();
    }
 }
 
@@ -236,7 +236,7 @@ static void vRxTask(void* pvParameters) {
       );
 
 
-      leds_debug_toggle();
+     // leds_debug_toggle();
    }
 }
 
@@ -306,7 +306,7 @@ static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    if (scheduler_dbg.numTasksCur > scheduler_dbg.numTasksMax) {
       scheduler_dbg.numTasksMax = scheduler_dbg.numTasksCur;
    }
-   leds_sync_toggle();
+  // leds_sync_toggle();
   // ENABLE_INTERRUPTS();
 }
 
@@ -380,7 +380,7 @@ static inline void scheduler_executeTask(taskList_item_t* pThisTask) {
    pThisTask->prio = TASKPRIO_NONE;
    pThisTask->next = NULL;
    
-   leds_radio_toggle();
+   //leds_radio_toggle();
 
    // update debug stats
    scheduler_dbg.numTasksCur--;
