@@ -14,7 +14,11 @@ idmanager_vars_t idmanager_vars;
 //=========================== public ==========================================
 
 void idmanager_init() {
+#ifdef DAGROOT
+   idmanager_vars.isDAGroot            = TRUE;
+#else
    idmanager_vars.isDAGroot            = FALSE;
+#endif
    idmanager_vars.myPANID.type         = ADDR_PANID;
    idmanager_vars.myPANID.panid[0]     = 0xca;
    idmanager_vars.myPANID.panid[1]     = 0xfe;
