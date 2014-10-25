@@ -15,7 +15,6 @@ idmanager_vars_t idmanager_vars;
 
 void idmanager_init() {
    idmanager_vars.isDAGroot            = FALSE;
-   idmanager_vars.isBridge             = FALSE;
    idmanager_vars.myPANID.type         = ADDR_PANID;
    idmanager_vars.myPANID.panid[0]     = 0xca;
    idmanager_vars.myPANID.panid[1]     = 0xfe;
@@ -44,23 +43,6 @@ void idmanager_setIsDAGroot(bool newRole) {
    idmanager_vars.isDAGroot = newRole;
    neighbors_updateMyDAGrankAndNeighborPreference();
    ENABLE_INTERRUPTS();
-}
-
-bool idmanager_getIsBridge() {
-   bool res;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   res=idmanager_vars.isBridge;
-   ENABLE_INTERRUPTS();
-   return res;
-}
-
-void idmanager_setIsBridge(bool newRole) {
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   idmanager_vars.isBridge = newRole;
-   ENABLE_INTERRUPTS();
-
 }
 
 open_addr_t* idmanager_getMyID(uint8_t type) {
@@ -193,36 +175,6 @@ void idmanager_triggerAboutRoot() {
    return;
 }
 
-void idmanager_triggerAboutBridge() {
-   uint8_t number_bytes_from_input_buffer;
-   uint8_t input_buffer;
-   //get command from OpenSerial
-   number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer,sizeof(input_buffer));
-   if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
-      openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
-            (errorparameter_t)number_bytes_from_input_buffer,
-            (errorparameter_t)1);
-      return;
-   };
-   //handle command
-   switch (input_buffer) {
-     case ACTION_YES:
-        idmanager_setIsBridge(TRUE);
-        break;
-     case ACTION_NO:
-        idmanager_setIsBridge(FALSE);
-        break;
-     case ACTION_TOGGLE:
-        if (idmanager_getIsBridge()) {
-           idmanager_setIsBridge(FALSE);
-        } else {
-           idmanager_setIsBridge(TRUE);
-        }
-        break;
-   }
-   return;
-}
-
 /**
 \brief Trigger this module to print status information, over serial.
 
@@ -233,12 +185,13 @@ status information about several modules in the OpenWSN stack.
 */
 bool debugPrint_id() {
    debugIDManagerEntry_t output;
+   
    output.isDAGroot = idmanager_vars.isDAGroot;
-   output.isBridge  = idmanager_vars.isBridge;
-   output.my16bID   = idmanager_vars.my16bID;
-   output.my64bID   = idmanager_vars.my64bID;
-   output.myPANID   = idmanager_vars.myPANID;
-   output.myPrefix  = idmanager_vars.myPrefix;
+   memcpy(output.myPANID,idmanager_vars.myPANID.panid,2);
+   memcpy(output.my16bID,idmanager_vars.my16bID.addr_16b,2);
+   memcpy(output.my64bID,idmanager_vars.my64bID.addr_64b,8);
+   memcpy(output.myPrefix,idmanager_vars.myPrefix.prefix,8);
+   
    openserial_printStatus(STATUS_ID,(uint8_t*)&output,sizeof(debugIDManagerEntry_t));
    return TRUE;
 }
