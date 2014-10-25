@@ -79,7 +79,7 @@ owerror_t iphc_sendFromForwarding(
    nh=IPHC_NH_INLINE;
    
    // error checking
-   if (idmanager_getIsBridge()==TRUE &&
+   if (idmanager_getIsDAGroot()==TRUE &&
       packetfunctions_isAllRoutersMulticast(&(msg->l3_destinationAdd))==FALSE) {
       openserial_printCritical(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
                             (errorparameter_t)0,
@@ -199,7 +199,7 @@ owerror_t iphc_sendFromForwarding(
 owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
    msg->owner = COMPONENT_IPHC;
    // error checking
-   if (idmanager_getIsBridge()==FALSE) {
+   if (idmanager_getIsDAGroot()==FALSE) {
       openserial_printCritical(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
                             (errorparameter_t)1,
                             (errorparameter_t)0);
@@ -227,7 +227,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
    // then regular header
    iphc_retrieveIPv6Header(msg,&ipv6_header);
    
-   if (idmanager_getIsBridge()==FALSE ||
+   if (idmanager_getIsDAGroot()==FALSE ||
       packetfunctions_isBroadcastMulticast(&(ipv6_header.dest))) {
       packetfunctions_tossHeader(msg,ipv6_header.header_length);
       
