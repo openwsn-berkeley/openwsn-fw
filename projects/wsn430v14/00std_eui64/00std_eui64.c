@@ -73,6 +73,8 @@ int main(void) {
    DCOCTL     =  DCO0 | DCO1 | DCO2;        // MCLK at 8MHz
    BCSCTL1    =  RSEL0 | RSEL1 | RSEL2;     // MCLK at 8MHz
    
+   memset(eui,0,8);
+   
    owchip_geteui(eui);
    
    __bis_SR_register(GIE+LPM4_bits);        // sleep
