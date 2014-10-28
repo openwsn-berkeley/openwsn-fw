@@ -10,6 +10,7 @@
 #include "c6t.h"
 #include "cinfo.h"
 #include "cleds.h"
+#include "cstorm.h"
 #include "cwellknown.h"
 // TCP
 #include "techo.h"
@@ -29,6 +30,7 @@ void openapps_init(void) {
    c6t_init();
    cinfo_init();
    cleds__init();
+   cstorm_init();
    cwellknown_init();
    // TCP
    techo_init();
