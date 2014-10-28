@@ -19,7 +19,7 @@ there, watch variable eui. I contains the 64-bits read from the DS2411, i.e.
 
 //=========================== defines =========================================
 
-#define PIN_1WIRE 0x10
+#define PIN_1WIRE 0x10 // of P2: P2.4
 
 //=========================== enums ===========================================
 
