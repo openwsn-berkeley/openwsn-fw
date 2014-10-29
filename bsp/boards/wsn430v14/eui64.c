@@ -83,9 +83,6 @@ void eui64_get(uint8_t* addressToWrite) {    // >= 6000us
          }
          if(crc==0) {
             // CRC valid
-            *(addressToWrite+0) = 0x14;
-            *(addressToWrite+1) = 0x15;
-            *(addressToWrite+2) = 0x92;
             memcpy(addressToWrite+3,id+1,5);
             break;
          }

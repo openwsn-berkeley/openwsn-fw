@@ -58,11 +58,11 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430fn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430fn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -731,7 +731,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_leds.d43</state>
+          <state>01bsp_eui64.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -797,7 +797,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F1611.xcl</state>
+          <state>$TOOLKIT_DIR$\config\linker\lnk430F1611.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -925,7 +925,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_leds.hex</state>
+          <state>01bsp_eui64.hex</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
