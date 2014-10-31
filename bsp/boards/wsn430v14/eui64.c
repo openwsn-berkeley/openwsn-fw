@@ -60,16 +60,19 @@ void eui64_get(uint8_t* addressToWrite) {    // >= 6000us
    uint8_t* byte;
    uint16_t oldTactl;
    
-   retry = 5;
-   memset(addressToWrite,0,8);
+   // reset EUI64 to default value
+   memset(addressToWrite,0x00,8);
    
    // store current value of TACTL
    oldTactl   = TACTL;
    
    // start timer in continuous mode at 1MHz
-   TACTL      = TASSEL_2 | ID_2 | MC_2;
+   TACTL      = TASSEL_2 | ID_0 | MC_2;
    
+   // initializer 1-Wire pin
    owpin_init();
+   
+   retry = 10;
    while (retry-- > 0) {
       crc = 0;
       
@@ -80,10 +83,8 @@ void eui64_get(uint8_t* addressToWrite) {    // >= 6000us
          }
          if(crc==0) {
             // CRC valid
-            *(addressToWrite+0) = 0x14;
-            *(addressToWrite+1) = 0x15;
-            *(addressToWrite+2) = 0x92;
             memcpy(addressToWrite+3,id+1,5);
+            break;
          }
       }
    }

@@ -65,8 +65,15 @@ project:
     simhostpy    Home directory for simhost cross-build Python headers and 
                  shared library.
     
+    Variables for special use cases.
+    dagroot      Setting a mote as DAG root is typically done through
+                 OpenVisualizer. In some rare cases when the OpenVisualizer
+                 cannot send commands to the mote (e.g. IoT-LAB platform), use
+                 this flag to build a firmware image which is, by default, in
+                 DAG root mode.
+    
     Common variables:
-    verbose      Print each complete compile/link comand.
+    verbose      Print each complete compile/link command.
                  0 (off), 1 (on)
     
 docs:
@@ -113,6 +120,7 @@ command_line_options = {
     'simhost':     ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
     'simhostpy':   [''],                               # No reasonable default
     'plugfest':    ['0','1'],
+    'dagroot':     ['0','1'],
 }
 
 def validate_option(key, value, env):
@@ -219,6 +227,13 @@ command_line_vars.AddVariables(
         'plugfest',                                        # key
         '',                                                # help
         command_line_options['plugfest'][0],               # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'dagroot',                                         # key
+        '',                                                # help
+        command_line_options['dagroot'][0],                # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

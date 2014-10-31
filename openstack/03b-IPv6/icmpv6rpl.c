@@ -165,8 +165,8 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
    switch (icmpv6code) {
       
       case IANA_ICMPv6_RPL_DIO:
-         if (idmanager_getIsBridge()==TRUE) {
-            // stop here if I'm in bridge mode
+         if (idmanager_getIsDAGroot()==TRUE) {
+            // stop here if I'm in the DAG root
             break; // break, don't return
          }
          
@@ -280,8 +280,8 @@ void sendDIO() {
       return;
    }
       
-   // do not send DIO if I'm in in bridge mode
-   if (idmanager_getIsBridge()==TRUE) {
+   // do not send DIO if I'm in in the DAG root
+   if (idmanager_getIsDAGroot()==TRUE) {
       return;
    }
    
@@ -410,8 +410,8 @@ void sendDAO() {
       return;
    }
    
-   // dont' send a DAO if you're in bridge mode
-   if (idmanager_getIsBridge()==TRUE) {
+   // dont' send a DAO if you're the DAG root
+   if (idmanager_getIsDAGroot()==TRUE) {
       return;
    }
    

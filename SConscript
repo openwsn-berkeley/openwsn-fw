@@ -34,6 +34,9 @@ dummyFunc = Builder(
     suffix = '.ihex',
 )
 
+if   env['dagroot']==1:
+    env.Append(CPPDEFINES    = 'DAGROOT')
+
 if   env['plugfest']==1:
     env.Append(CPPDEFINES    = 'PLUGFEST')
     if  env['board']=='OpenMote-CC2538':
