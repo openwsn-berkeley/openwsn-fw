@@ -14,9 +14,9 @@
 //=========================== defines =========================================
 
 const uint8_t cstorm_path0[]    = "storm";
-const uint8_t cstorm_payload[]  = "yo";
+const uint8_t cstorm_payload[]  = "OpenWSN";
 static const uint8_t dst_addr[]   = {
-   0xcc, 0xcc, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
 
@@ -49,8 +49,9 @@ void cstorm_init(void) {
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
    opencoap_register(&cstorm_vars.desc);
    
-   
-   cstorm_vars.period           = 65534;
+   /*
+   //start a periodic timer
+   cstorm_vars.period           = 65534; //ticks
    
    cstorm_vars.timerId                    = opentimers_start(
       cstorm_vars.period,
@@ -58,8 +59,9 @@ void cstorm_init(void) {
       cstorm_timer_cb
    );
    
+   //stop 
    //opentimers_stop(cstorm_vars.timerId);
-   
+   */
 }
 
 //=========================== private =========================================
@@ -69,7 +71,6 @@ owerror_t cstorm_receive(
       coap_header_iht*  coap_header,
       coap_option_iht*  coap_options
    ) {
-   return E_FAIL;
    owerror_t outcome;
    
    switch (coap_header->Code) {
@@ -177,95 +178,36 @@ void cstorm_task_cb() {
    // take ownership over that packet
    pkt->creator    = COMPONENT_CSTORM;
    pkt->owner      = COMPONENT_CSTORM;
-	
-	/*from example
-	uint8_t              i;
    
-   uint16_t             x_int       = 0;
-   uint16_t             sum         = 0;
-   uint16_t             avg         = 0;
-   uint8_t              N_avg       = 10;
+   //The contents of the message are written in reverse order : the payload first
+   //packetfunctions_reserveHeaderSize moves the index pkt->payload
    
-   
-   for (i = 0; i < N_avg; i++) {
-      sum += x_int;
-   }
-   avg = sum/N_avg;
-
-	// CoAP payload
-   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
-   for (i=0;i<sizeof(cstorm_payload)-1;i++) {
-      pkt->payload[i]             = i;
-   }
-   avg = openrandom_get16b();
-   pkt->payload[0]                = (avg>>8)&0xff;
-   pkt->payload[1]                = (avg>>0)&0xff;
-   
-   numOptions = 0;
-   // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
-   memcpy(&pkt->payload[0],&cstorm_path0,sizeof(cstorm_path0)-1);
-   packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0]                = ((COAP_OPTION_NUM_URIPATH) << 4) | (sizeof(cstorm_path0)-1);
-   numOptions++;
-   // content-type option
-   packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                = (COAP_OPTION_NUM_CONTENTFORMAT << 4) | 1;
-   pkt->payload[1]                = COAP_MEDTYPE_APPOCTETSTREAM;
-   numOptions++;
-   
-   // metadata
-   pkt->l4_destination_port       = WKP_UDP_COAP;
-   pkt->l3_destinationAdd.type    = ADDR_128B;
-   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&dst_addr,16);
-   
-   // send
-   outcome = opencoap_send(
-      pkt,
-      COAP_TYPE_NON,
-      COAP_CODE_REQ_PUT,
-      numOptions,
-      &cstorm_vars.desc
-   );
-	*/
-	//end from example
-   
-   //from cstorm but ok for uecho
-	// add payload
-   //packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
-   //memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
-   
-   //------- from uecho
-	// metadata
-   pkt->l4_protocol                   = IANA_UDP;
-   pkt->l4_destination_port = WKP_UDP_ECHO;
-   pkt->l4_sourcePortORicmpv6Type     = WKP_UDP_ECHO;
-   pkt->l3_destinationAdd.type = ADDR_128B;
-   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&dst_addr,16);
-   
-   // send
-   outcome = openudp_send(pkt);
-   //-----------
-	//
-
-   // from origin cstorm
-	/*
    // add payload
    packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
    memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
    
+   //set the TKL byte as a counter of Options
+   //TODO: This is not conform with RFC7252, but yes with current dissector WS v1.10.6
    numOptions = 0;
-   // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
-   memcpy(&pkt->payload[0],&cstorm_path0,sizeof(cstorm_path0)-1);
-   packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 | (sizeof(cstorm_path0)-1);
-   numOptions++;
+   
+   //Biggers Options last in message, first in the code (as it is in reverse order) 
+   //Deltas are calculated between too consecutive lengthes.
    
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0] = COAP_OPTION_NUM_CONTENTFORMAT << 4 | 1;
+   pkt->payload[0] = (COAP_OPTION_NUM_CONTENTFORMAT-COAP_OPTION_NUM_URIPATH) << 4 | 1; 
    pkt->payload[1] = COAP_MEDTYPE_APPOCTETSTREAM;
+   numOptions++;
+   
+   // location-path option
+   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
+   memcpy(&pkt->payload[0],cstorm_path0,sizeof(cstorm_path0)-1);
+   packetfunctions_reserveHeaderSize(pkt,1);
+   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH-7) << 4 | (sizeof(cstorm_path0)-1);
+   numOptions++;
+   
+   // length of uri-port option added directly by opencoap_send
+   packetfunctions_reserveHeaderSize(pkt,11);
    numOptions++;
    
    // metadata
@@ -281,8 +223,7 @@ void cstorm_task_cb() {
       numOptions,
       &cstorm_vars.desc
    );
-   */
-
+   
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
@@ -292,3 +233,4 @@ void cstorm_task_cb() {
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
+
