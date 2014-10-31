@@ -16,7 +16,7 @@
 const uint8_t cstorm_path0[]    = "storm";
 const uint8_t cstorm_payload[]  = "yo";
 static const uint8_t dst_addr[]   = {
-   0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0xcc, 0xcc, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
 
@@ -177,50 +177,112 @@ void cstorm_task_cb() {
    // take ownership over that packet
    pkt->creator    = COMPONENT_CSTORM;
    pkt->owner      = COMPONENT_CSTORM;
+	
+	/*from example
+	uint8_t              i;
    
+   uint16_t             x_int       = 0;
+   uint16_t             sum         = 0;
+   uint16_t             avg         = 0;
+   uint8_t              N_avg       = 10;
+   
+   
+   for (i = 0; i < N_avg; i++) {
+      sum += x_int;
+   }
+   avg = sum/N_avg;
+
+	// CoAP payload
+   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
+   for (i=0;i<sizeof(cstorm_payload)-1;i++) {
+      pkt->payload[i]             = i;
+   }
+   avg = openrandom_get16b();
+   pkt->payload[0]                = (avg>>8)&0xff;
+   pkt->payload[1]                = (avg>>0)&0xff;
+   
+   numOptions = 0;
+   // location-path option
+   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
+   memcpy(&pkt->payload[0],&cstorm_path0,sizeof(cstorm_path0)-1);
+   packetfunctions_reserveHeaderSize(pkt,1);
+   pkt->payload[0]                = ((COAP_OPTION_NUM_URIPATH) << 4) | (sizeof(cstorm_path0)-1);
+   numOptions++;
+   // content-type option
+   packetfunctions_reserveHeaderSize(pkt,2);
+   pkt->payload[0]                = (COAP_OPTION_NUM_CONTENTFORMAT << 4) | 1;
+   pkt->payload[1]                = COAP_MEDTYPE_APPOCTETSTREAM;
+   numOptions++;
+   
+   // metadata
+   pkt->l4_destination_port       = WKP_UDP_COAP;
+   pkt->l3_destinationAdd.type    = ADDR_128B;
+   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&dst_addr,16);
+   
+   // send
+   outcome = opencoap_send(
+      pkt,
+      COAP_TYPE_NON,
+      COAP_CODE_REQ_PUT,
+      numOptions,
+      &cstorm_vars.desc
+   );
+	*/
+	//end from example
+   
+   //from cstorm but ok for uecho
+	// add payload
+   //packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
+   //memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
+   
+   //------- from uecho
+	// metadata
+   pkt->l4_protocol                   = IANA_UDP;
+   pkt->l4_destination_port = WKP_UDP_ECHO;
+   pkt->l4_sourcePortORicmpv6Type     = WKP_UDP_ECHO;
+   pkt->l3_destinationAdd.type = ADDR_128B;
+   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&dst_addr,16);
+   
+   // send
+   outcome = openudp_send(pkt);
+   //-----------
+	//
+
+   // from origin cstorm
+	/*
    // add payload
    packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
    memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
    
    numOptions = 0;
    // location-path option
-   //packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
-   //memcpy(&pkt->payload[0],&cstorm_path0,sizeof(cstorm_path0)-1);
-   //packetfunctions_reserveHeaderSize(pkt,1);
-   //pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 | (sizeof(cstorm_path0)-1);
-   //numOptions++;
+   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
+   memcpy(&pkt->payload[0],&cstorm_path0,sizeof(cstorm_path0)-1);
+   packetfunctions_reserveHeaderSize(pkt,1);
+   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 | (sizeof(cstorm_path0)-1);
+   numOptions++;
    
    // content-type option
-   //packetfunctions_reserveHeaderSize(pkt,2);
-   //pkt->payload[0] = COAP_OPTION_NUM_CONTENTFORMAT << 4 | 1;
-   //pkt->payload[1] = COAP_MEDTYPE_APPOCTETSTREAM;
-   //numOptions++;
+   packetfunctions_reserveHeaderSize(pkt,2);
+   pkt->payload[0] = COAP_OPTION_NUM_CONTENTFORMAT << 4 | 1;
+   pkt->payload[1] = COAP_MEDTYPE_APPOCTETSTREAM;
+   numOptions++;
    
    // metadata
-   pkt->l4_protocol                   = IANA_UDP;
    pkt->l4_destination_port = WKP_UDP_COAP;
-   pkt->l4_sourcePortORicmpv6Type     = WKP_UDP_COAP;
    pkt->l3_destinationAdd.type = ADDR_128B;
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],&dst_addr,16);
    
-   /*-------
-
-   // copy source to destination to echo.
-
-   
-   packetfunctions_reserveHeaderSize(reply,request->length);
-   memcpy(&reply->payload[0],&request->payload[0],request->length);
-   openqueue_freePacketBuffer(request);
-   -----------*/
    // send
-   outcome = openudp_send(pkt);
-   /*   pkt,
+   outcome = opencoap_send(
+      pkt,
       COAP_TYPE_NON,
       COAP_CODE_REQ_PUT,
       numOptions,
       &cstorm_vars.desc
-   );*/
-   
+   );
+   */
+
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
