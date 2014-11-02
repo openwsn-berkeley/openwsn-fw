@@ -58,11 +58,11 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430fn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430fn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -101,15 +101,15 @@
         </option>
         <option>
           <name>GStackHeapOverride</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>GStackSize2</name>
-          <state>200</state>
+          <state>80</state>
         </option>
         <option>
           <name>GHeapSize2</name>
-          <state>200</state>
+          <state>80</state>
         </option>
         <option>
           <name>RadioDataModelType</name>
@@ -244,7 +244,7 @@
         </option>
         <option>
           <name>CCListCFile</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCListCMnemonics</name>
@@ -381,17 +381,10 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state>$PROJ_DIR$</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
-          <state>$PROJ_DIR$\..\..\..\drivers\wsn430v14\</state>
-          <state>$PROJ_DIR$\..\..\..\kernel\</state>
-          <state>$PROJ_DIR$\..\..\..\inc\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -738,7 +731,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>03oos_mercator.d43</state>
+          <state>01bsp_eui64.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -804,7 +797,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F1611.xcl</state>
+          <state>$TOOLKIT_DIR$\config\linker\lnk430F1611.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -932,7 +925,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>03oos_mercator.ihex</state>
+          <state>01bsp_eui64.hex</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -2163,127 +2156,70 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_mercator\03oos_mercator.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_eui64\01bsp_eui64.c</name>
     </file>
   </group>
   <group>
     <name>bsp</name>
-    <group>
-      <name>boards</name>
-      <group>
-        <name>wsn430v14</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\board.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\board_info.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\bsp_timer.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\debugpins.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\eui64.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\leds.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\radiotimer.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\spi.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\uart.c</name>
-        </file>
-      </group>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
-      </file>
-    </group>
-    <group>
-      <name>chips</name>
-      <group>
-        <name>cc2420</name>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
-        </file>
-      </group>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\chips\i2c.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
-      </file>
-    </group>
-  </group>
-  <group>
-    <name>drivers</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\board.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openhdlc.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.c</name>
-      <excluded>
-        <configuration>Debug</configuration>
-      </excluded>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\openserial.h</name>
-      <excluded>
-        <configuration>Debug</configuration>
-      </excluded>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\bsp_timer.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\drivers\common\opentimers.h</name>
-    </file>
-  </group>
-  <group>
-    <name>inc</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\inc\opendefs.h</name>
-    </file>
-  </group>
-  <group>
-    <name>kernel</name>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\kernel\openos\scheduler.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\kernel\scheduler.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\debugpins.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\eui64.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\leds.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\radio.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\radiotimer.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\spi.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\uart.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
     </file>
   </group>
 </project>

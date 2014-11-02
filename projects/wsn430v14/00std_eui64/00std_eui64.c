@@ -19,7 +19,7 @@ there, watch variable eui. I contains the 64-bits read from the DS2411, i.e.
 
 //=========================== defines =========================================
 
-#define PIN_1WIRE 0x10
+#define PIN_1WIRE 0x10 // of P2: P2.4
 
 //=========================== enums ===========================================
 
@@ -72,6 +72,8 @@ int main(void) {
    
    DCOCTL     =  DCO0 | DCO1 | DCO2;        // MCLK at 8MHz
    BCSCTL1    =  RSEL0 | RSEL1 | RSEL2;     // MCLK at 8MHz
+   
+   memset(eui,0,8);
    
    owchip_geteui(eui);
    
