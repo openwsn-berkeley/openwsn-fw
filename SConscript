@@ -37,8 +37,8 @@ dummyFunc = Builder(
 if   env['dagroot']==1:
     env.Append(CPPDEFINES    = 'DAGROOT')
 
-if   env['plugfest']==1:
-    env.Append(CPPDEFINES    = 'PLUGFEST')
+if   env['forcetopology']==1:
+    env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
     if  env['board']=='OpenMote-CC2538':
         env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
 
