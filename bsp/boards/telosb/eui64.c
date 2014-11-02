@@ -60,6 +60,8 @@ void eui64_get(uint8_t* addressToWrite) {    // >= 6000us
    uint8_t* byte;
    uint16_t oldTactl;
    
+   return;//poipoi
+   
    retry = 5;
    memset(addressToWrite,0,8);
    

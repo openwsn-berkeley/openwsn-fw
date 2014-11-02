@@ -76,6 +76,8 @@
  *-----------------------------------------------------------
  */
 
+#include <in430.h>
+
 /* Type definitions. */
 #define portCHAR		char
 #define portFLOAT		float
@@ -103,6 +105,7 @@ typedef unsigned short UBaseType_t;
 /* Interrupt control macros. */
 #define portDISABLE_INTERRUPTS()	_DINT(); _NOP()
 #define portENABLE_INTERRUPTS()		_EINT(); _NOP()
+        
 /*-----------------------------------------------------------*/
 
 /* Critical section control macros. */

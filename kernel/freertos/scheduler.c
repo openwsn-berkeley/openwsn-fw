@@ -30,30 +30,30 @@
 #define SCHEDULER_STACK_PRIO_BOUNDARY  4
 #define SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY 8
 
-#define INTERRUPT_DECLARATION()       // (xStackLock != NULL ? (xStackLock=xStackLock) : ( xStackLock = xSemaphoreCreateMutex()))
-#define DISABLE_INTERRUPTS()         //  xSemaphoreTake( xStackLock, portMAX_DELAY )
-#define ENABLE_INTERRUPTS()           // xSemaphoreGive( xStackLock )
+#define INTERRUPT_DECLARATION()        (rtos_sched_v.xStackLock != NULL ? (rtos_sched_v.xStackLock=rtos_sched_v.xStackLock) : ( rtos_sched_v.xStackLock = xSemaphoreCreateMutex()))
+#define DISABLE_INTERRUPTS()            xSemaphoreTake( rtos_sched_v.xStackLock, portMAX_DELAY )
+#define ENABLE_INTERRUPTS()             xSemaphoreGive( rtos_sched_v.xStackLock )
 
 //=========================== variables =======================================
 
 scheduler_vars_t scheduler_vars;
 scheduler_dbg_t  scheduler_dbg;
 
-//typedef struct {
+typedef struct {
    /// global stack lock
- static  SemaphoreHandle_t    xStackLock;
+   SemaphoreHandle_t    xStackLock;
    /// application task (takes the packet until it goes into the MAC queue)
- static   TaskHandle_t         xAppHandle;                   // task
- static   SemaphoreHandle_t    xAppSem;                      // semaphore to unlock task
+   TaskHandle_t         xAppHandle;                   // task
+   SemaphoreHandle_t    xAppSem;                      // semaphore to unlock task
    /// stack task which signals sendDone
- static  TaskHandle_t         xSendDoneHandle;              // task
- static SemaphoreHandle_t    xSendDoneSem;                 // semaphore to unlock task
+   TaskHandle_t         xSendDoneHandle;              // task
+   SemaphoreHandle_t    xSendDoneSem;                 // semaphore to unlock task
    /// stack task which signals packet reception
- static TaskHandle_t         xRxHandle;                    // task
- static   SemaphoreHandle_t    xRxSem;                       // semaphore to unlock task
-//} rtos_sched_v_t;
+   TaskHandle_t         xRxHandle;                    // task
+   SemaphoreHandle_t    xRxSem;                       // semaphore to unlock task
+} rtos_sched_v_t;
 
-//rtos_sched_v_t rtos_sched_v;
+rtos_sched_v_t rtos_sched_v;
 
 //=========================== prototypes ======================================
 
@@ -71,58 +71,61 @@ static inline bool scheduler_find_next_task_and_execute(
    taskList_item_t*     pThisTas
 );
 static inline void scheduler_executeTask(taskList_item_t* pThisTask);
-void vApplicationIdleHook( void);
+void vApplicationIdleHook(void);
+void scheduler_handleErrror(void);
 
 //=========================== public ==========================================
 
 void scheduler_init() {
    
    // clear module variables
-   //memset(&rtos_sched_v,0,sizeof(rtos_sched_v_t));
+   memset(&rtos_sched_v,0,sizeof(rtos_sched_v_t));
    
    //=== stack lock
    // create
-   xStackLock = xSemaphoreCreateMutex();
-   if (xStackLock == NULL) {
-      //TODO handle failure
-      return;
+   rtos_sched_v.xStackLock = xSemaphoreCreateMutex();
+   if (rtos_sched_v.xStackLock == NULL) {
+      // handle error
+      scheduler_handleErrror();
    }
-
    
    //=== app task
-   // task
    // semaphore
-
-   scheduler_createSem(&xAppSem);
+   scheduler_createSem(&rtos_sched_v.xAppSem);
+   // task
    xTaskCreate(
       vAppTask,
       "app",
       STACK_SIZE,
       NULL,
       tskAPP_PRIORITY,
-      &xAppHandle
+      &rtos_sched_v.xAppHandle
    );
-   configASSERT(xAppHandle);
-
+   if(rtos_sched_v.xAppHandle==NULL)  {
+      // handle error
+      scheduler_handleErrror();
+   }
    
    //=== stack task sendDone
-   // task
    // semaphore
-   scheduler_createSem(&xSendDoneSem);
+   scheduler_createSem(&rtos_sched_v.xSendDoneSem);
+   // task
    xTaskCreate(
       vSendDoneTask,
       "sendDone",
       STACK_SIZE,
       NULL,
       tskSENDDONE_PRIORITY,
-      &xSendDoneHandle
+      &rtos_sched_v.xSendDoneHandle
    );
-   configASSERT(xSendDoneHandle);
-
+   if(rtos_sched_v.xSendDoneHandle==NULL)  {
+      // handle error
+      scheduler_handleErrror();
+   }
    
    //=== stack task rx
    // semaphore
-   scheduler_createSem(&xRxSem);
+   scheduler_createSem(&rtos_sched_v.xRxSem);
    // task
    xTaskCreate(
       vRxTask,
@@ -130,25 +133,30 @@ void scheduler_init() {
       STACK_SIZE,
       NULL,
       tskRX_PRIORITY,
-      &xRxHandle
+      &rtos_sched_v.xRxHandle
    );
-   configASSERT(xRxHandle);
-
+   if(rtos_sched_v.xRxHandle==NULL)  {
+      // handle error
+      scheduler_handleErrror();
+   }
 }
 
 void scheduler_start() {
+   
    // start scheduling tasks
    vTaskStartScheduler();
-
+   
    // If all is well we will never reach here as the scheduler will now be
    // running.  If we do reach here then it is likely that there was
    // insufficient heap available for the idle task to be created.
-   for (;;) ;
+   for (;;);
 }
 
 void scheduler_push_task(task_cbt cb, task_prio_t prio) {
-    BaseType_t xHigherPriorityTaskWoken;
-	xHigherPriorityTaskWoken = pdFALSE;
+   BaseType_t xHigherPriorityTaskWoken;
+   
+   xHigherPriorityTaskWoken = pdFALSE;
+   
    //=== step 1. insert the task into the task list
    scheduler_push_task_internal(cb, prio);
    
@@ -156,48 +164,48 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
    if (
          prio <= SCHEDULER_STACK_PRIO_BOUNDARY
       ) {
-	   xSemaphoreGiveFromISR(xRxSem,&xHigherPriorityTaskWoken );
-
+      xSemaphoreGiveFromISR(rtos_sched_v.xRxSem,&xHigherPriorityTaskWoken);
+      
    } else if (
          prio >  SCHEDULER_STACK_PRIO_BOUNDARY
          &&
          prio <= SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY
       ) {
-	   xSemaphoreGiveFromISR(xSendDoneSem,&xHigherPriorityTaskWoken );
-
+      xSemaphoreGiveFromISR(rtos_sched_v.xSendDoneSem,&xHigherPriorityTaskWoken);
+      
    } else if (
          prio >  SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY
          &&
          prio <= SCHEDULER_APP_PRIO_BOUNDARY
       ) {
-      xSemaphoreGiveFromISR(xAppSem,&xHigherPriorityTaskWoken );
+      xSemaphoreGiveFromISR(rtos_sched_v.xAppSem,&xHigherPriorityTaskWoken);
+   
    } else {
-      // TODO handle failure
-      while (1) ;
+      // handle error
+      scheduler_handleErrror();
    }
-
-   portYIELD_FROM_ISR( xHigherPriorityTaskWoken );
+   
+   portYIELD();
 }
 
 //=========================== private =========================================
 
 /**
-Handle application packets, brinding them down the stack until they are queued,
-ready for the lowwe MAC to consume.
+Handle application packets, brinGing them down the stack until they are queued,
+ready for the lower MAC to consume.
 */
 static void vAppTask(void* pvParameters) {
-   bool found = FALSE;
    taskList_item_t* pThisTask = NULL;
-   xSemaphoreTake(xAppSem, portMAX_DELAY);//take it for the first time so it blocks right after.
+   xSemaphoreTake(rtos_sched_v.xAppSem, portMAX_DELAY);//take it for the first time so it blocks right after.
    while (1) {
-      xSemaphoreTake(xAppSem, portMAX_DELAY);
-      found = scheduler_find_next_task_and_execute(
+      xSemaphoreTake(rtos_sched_v.xAppSem, portMAX_DELAY);
+      scheduler_find_next_task_and_execute(
          SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY,
          SCHEDULER_APP_PRIO_BOUNDARY,
          pThisTask
       );
 
-      //leds_sync_toggle();
+      leds_sync_toggle();
    }
 }
 
@@ -205,18 +213,17 @@ static void vAppTask(void* pvParameters) {
 Handle sendDone notifications.
 */
 static void vSendDoneTask(void* pvParameters) {
-   bool found;
    taskList_item_t* pThisTask = NULL;
-   xSemaphoreTake(xSendDoneSem, portMAX_DELAY);//take it for the first time so it blocks right after.
+   xSemaphoreTake(rtos_sched_v.xSendDoneSem, portMAX_DELAY);//take it for the first time so it blocks right after.
    while (1) {
-      xSemaphoreTake(xSendDoneSem, portMAX_DELAY);
-      found = scheduler_find_next_task_and_execute(
+      xSemaphoreTake(rtos_sched_v.xSendDoneSem, portMAX_DELAY);
+      scheduler_find_next_task_and_execute(
          SCHEDULER_STACK_PRIO_BOUNDARY,
          SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY,
          pThisTask
       );
 
-     // leds_radio_toggle();
+      leds_radio_toggle();
    }
 }
 
@@ -224,19 +231,17 @@ static void vSendDoneTask(void* pvParameters) {
 Handle received packets, bringing them up to the stack.
 */
 static void vRxTask(void* pvParameters) {
-   bool found = FALSE;
    taskList_item_t* pThisTask = NULL;
-   xSemaphoreTake(xRxSem, portMAX_DELAY); //take it for the first time so it blocks right after.
+   xSemaphoreTake(rtos_sched_v.xRxSem, portMAX_DELAY); //take it for the first time so it blocks right after.
    while (1) {
-      xSemaphoreTake(xRxSem, portMAX_DELAY);
-      found = scheduler_find_next_task_and_execute(
+      xSemaphoreTake(rtos_sched_v.xRxSem, portMAX_DELAY);
+      scheduler_find_next_task_and_execute(
          0,
          SCHEDULER_STACK_PRIO_BOUNDARY,
          pThisTask
       );
-
-
-     // leds_debug_toggle();
+      
+      leds_debug_toggle();
    }
 }
 
@@ -250,8 +255,8 @@ static inline void scheduler_createSem(SemaphoreHandle_t* sem) {
    // create semaphore
    *sem = xSemaphoreCreateBinary();
    if (*sem == NULL) {
-      // TODO handle failure
-      return;
+      // handle error
+      scheduler_handleErrror();
    }
 }
 
@@ -276,12 +281,9 @@ static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    }
    if (taskContainer > &scheduler_vars.taskBuf[TASK_LIST_DEPTH - 1]) {
       // task list has overflown. This should never happen!
-
-      // we can not print from within the kernel. Instead:
-      // blink the error LED
-      leds_error_blink();
-      // reset the board
-      board_reset();
+      
+      // error
+      scheduler_handleErrror();
    }
    // fill that task container with this task
    taskContainer->cb    = cb;
@@ -306,8 +308,8 @@ static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    if (scheduler_dbg.numTasksCur > scheduler_dbg.numTasksMax) {
       scheduler_dbg.numTasksMax = scheduler_dbg.numTasksCur;
    }
-  // leds_sync_toggle();
-  // ENABLE_INTERRUPTS();
+   // leds_sync_toggle();
+   // ENABLE_INTERRUPTS();
 }
 
 /**
@@ -386,7 +388,13 @@ static inline void scheduler_executeTask(taskList_item_t* pThisTask) {
    scheduler_dbg.numTasksCur--;
 }
 
-/*void vApplicationIdleHook( void ){
-	leds_debug_toggle();
+void vApplicationIdleHook( void ){
+   leds_debug_toggle();
 }
-*/
+
+void scheduler_handleErrror(void) {
+   // blink the error LED
+   leds_error_blink();
+   // reset the board
+   board_reset();
+}

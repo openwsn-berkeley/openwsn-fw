@@ -182,29 +182,32 @@ void vPortEndScheduler( void )
  * Hardware initialisation to generate the RTOS tick.  This uses timer 0
  * but could alternatively use the watchdog timer or timer 1.
  */
+/* OpenWSN: no RTOS tick
 void vPortSetupTimerInterrupt( void )
 {
-	/* Ensure the timer is stopped. */
+	// Ensure the timer is stopped.
 	TACTL = 0;
 
-	/* Run the timer of the ACLK. */
+	// Run the timer of the ACLK.
 	TACTL = TASSEL_1;
 
-	/* Clear everything to start with. */
+	// Clear everything to start with.
 	TACTL |= TACLR;
 
-	/* Set the compare match value according to the tick rate we want. */
+	// Set the compare match value according to the tick rate we want.
 	TACCR0 = portACLK_FREQUENCY_HZ / configTICK_RATE_HZ;
 
-	/* Enable the interrupts. */
+	// Enable the interrupts.
 	TACCTL0 = CCIE;
 
-	/* Start up clean. */
+	// Start up clean.
 	TACTL |= TACLR;
 
-	/* Up mode. */
+	// Up mode.
 	TACTL |= MC_1;
 }
+*/
+
 /*-----------------------------------------------------------*/
 
 

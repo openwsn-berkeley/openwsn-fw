@@ -38,14 +38,14 @@ int mote_main(void) {
    opentimers_init();
    
    blinky_vars.errorLedTimerId  = opentimers_start(
-      50,
+      500,
       TIMER_PERIODIC,
       TIME_MS,
       cb_errorLedTimer
    );
    
    blinky_vars.radioLedTimerId  = opentimers_start(
-      500,
+      600,
       TIMER_PERIODIC,
       TIME_MS,
       cb_radioLedTimer
@@ -53,11 +53,6 @@ int mote_main(void) {
    
    scheduler_start();
    return 0; // this line should never be reached
-}
-
-
-void vApplicationIdleHook( void ) {
-	board_sleep();
 }
 
 //=========================== private =========================================
@@ -75,7 +70,5 @@ void cb_radioLedTimer(void) {
 }
 
 void task_blink_radioLed(void) {
-   //while(1) {
-      leds_radio_toggle();
-   //}
+   leds_radio_toggle();
 }
