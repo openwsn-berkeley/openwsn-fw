@@ -35,46 +35,48 @@ project:
     functional groups. Below each variable's description are the valid 
     options, with the default value listed first.
     
-    board        Board to build for. 'python' is for software simulation.
-                 telosb, wsn430v14, wsn430v13b, gina, z1, python, iot-lab_M3
+    board          Board to build for. 'python' is for software simulation.
+                   telosb, wsn430v14, wsn430v13b, gina, z1, python, iot-lab_M3
         
-    toolchain    Toolchain implementation. The 'python' board requires gcc
-                 (MinGW on Windows build host).
-                 mspgcc, iar, iar-proj, gcc
+    toolchain      Toolchain implementation. The 'python' board requires gcc
+                   (MinGW on Windows build host).
+                   mspgcc, iar, iar-proj, gcc
     
     Connected hardware variables:
-    bootload     Location of the board to bootload the binary on. 
-                 COMx for Windows, /dev entries for Linux
-                 Supports parallel operation with a comma-separated list,
-                 for example 'COM5,COM6,COM7'.
-    jtag         Location of the board to JTAG the binary to.
-                 COMx for Windows, /dev entry for Linux
-    fet_version  Firmware version running on the MSP-FET430uif for jtag.
-                 2, 3
+    bootload       Location of the board to bootload the binary on. 
+                   COMx for Windows, /dev entries for Linux
+                   Supports parallel operation with a comma-separated list,
+                   for example 'COM5,COM6,COM7'.
+    jtag           Location of the board to JTAG the binary to.
+                   COMx for Windows, /dev entry for Linux
+    fet_version    Firmware version running on the MSP-FET430uif for jtag.
+                   2, 3
     
     Simulation variables:
-    fastsim      Compiles the firmware for fast simulation.
-                 1 (on), 0 (off)
+    fastsim        Compiles the firmware for fast simulation.
+                   1 (on), 0 (off)
 
     These simulation variables are for a cross-platform build, and are valid
     only from an amd64-linux build host.
-    simhost      Host platform and OS for simulation. Default selection is
-                 the current platform/OS, which of course is not a cross-
-                 build. '-windows' cross-builds require MinGW-w64 toolchain.
-                 amd64-linux, x86-linux, amd64-windows, x86-windows
-    simhostpy    Home directory for simhost cross-build Python headers and 
-                 shared library.
+    simhost        Host platform and OS for simulation. Default selection is
+                   the current platform/OS, which of course is not a cross-
+                   build. '-windows' cross-builds require MinGW-w64 toolchain.
+                   amd64-linux, x86-linux, amd64-windows, x86-windows
+    simhostpy      Home directory for simhost cross-build Python headers and 
+                   shared library.
     
     Variables for special use cases.
-    dagroot      Setting a mote as DAG root is typically done through
-                 OpenVisualizer. In some rare cases when the OpenVisualizer
-                 cannot send commands to the mote (e.g. IoT-LAB platform), use
-                 this flag to build a firmware image which is, by default, in
-                 DAG root mode.
+    dagroot        Setting a mote as DAG root is typically done through
+                   OpenVisualizer. In some rare cases when the OpenVisualizer
+                   cannot send commands to the mote (e.g. IoT-LAB platform), 
+                   use this flag to build a firmware image which is, by 
+                   default, in DAG root mode.
+    forcetopology  Force the topology to the one indicated in the
+                   openstack/02a-MAClow/topology.c file.
     
     Common variables:
-    verbose      Print each complete compile/link command.
-                 0 (off), 1 (on)
+    verbose        Print each complete compile/link command.
+                   0 (off), 1 (on)
     
 docs:
     Generate source documentation in build{0}docs{0}html directory
@@ -114,13 +116,13 @@ command_line_options = {
         'openos',
         'freertos',
     ],
-    'fet_version': ['2','3'],
-    'verbose':     ['0','1'],
-    'fastsim':     ['1','0'],
-    'simhost':     ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
-    'simhostpy':   [''],                               # No reasonable default
-    'plugfest':    ['0','1'],
-    'dagroot':     ['0','1'],
+    'fet_version':      ['2','3'],
+    'verbose':          ['0','1'],
+    'fastsim':          ['1','0'],
+    'simhost':          ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
+    'simhostpy':        [''],                               # No reasonable default
+    'forcetopology':    ['0','1'],
+    'dagroot':          ['0','1'],
 }
 
 def validate_option(key, value, env):
@@ -224,9 +226,9 @@ command_line_vars.AddVariables(
         None,                                              # converter
     ),
     (
-        'plugfest',                                        # key
+        'forcetopology',                                   # key
         '',                                                # help
-        command_line_options['plugfest'][0],               # default
+        command_line_options['forcetopology'][0],          # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
