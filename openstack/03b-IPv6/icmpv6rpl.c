@@ -279,11 +279,6 @@ void sendDIO() {
       // stop here
       return;
    }
-      
-   // do not send DIO if I'm in in the DAG root
-   if (idmanager_getIsDAGroot()==TRUE) {
-      return;
-   }
    
    // do not send DIO if I have the default DAG rank
    if (neighbors_getMyDAGrank()==DEFAULTDAGRANK) {
