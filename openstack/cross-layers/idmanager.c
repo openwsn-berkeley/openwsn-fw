@@ -150,18 +150,23 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
 }
 
 void idmanager_triggerAboutRoot() {
-   uint8_t number_bytes_from_input_buffer;
-   uint8_t input_buffer;
-   // get command from OpenSerial
-   number_bytes_from_input_buffer = openserial_getInputBuffer(&input_buffer,sizeof(input_buffer));
+   uint8_t         number_bytes_from_input_buffer;
+   uint8_t         input_buffer[9];
+   open_addr_t     myPrefix;
+   
+   //=== get command from OpenSerial
+   number_bytes_from_input_buffer = openserial_getInputBuffer(input_buffer,sizeof(input_buffer));
    if (number_bytes_from_input_buffer!=sizeof(input_buffer)) {
       openserial_printError(COMPONENT_IDMANAGER,ERR_INPUTBUFFER_LENGTH,
             (errorparameter_t)number_bytes_from_input_buffer,
             (errorparameter_t)0);
       return;
    };
-   // handle command
-   switch (input_buffer) {
+   
+   //=== handle command
+   
+   // [byte 0] action
+   switch (input_buffer[0]) {
      case ACTION_YES:
         idmanager_setIsDAGroot(TRUE);
         break;
@@ -176,6 +181,16 @@ void idmanager_triggerAboutRoot() {
         }
         break;
    }
+   
+   // [byte 1-8] prefix
+   myPrefix.type = ADDR_PREFIX;
+   memcpy(
+      myPrefix.prefix,
+      &input_buffer[1],
+      sizeof(myPrefix.prefix)
+   );
+   idmanager_setMyID(&myPrefix);
+   
    return;
 }
 
