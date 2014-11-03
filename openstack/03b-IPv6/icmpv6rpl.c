@@ -39,7 +39,7 @@ void icmpv6rpl_init() {
    //=== admin
    
    icmpv6rpl_vars.busySending               = FALSE;
-   icmpv6rpl_vars.DODAGIDFlagSet            = 0;
+   icmpv6rpl_vars.fDodagidWritten           = 0;
    
    //=== DIO-related
    
@@ -114,8 +114,26 @@ void icmpv6rpl_init() {
    
 }
 
+void  icmpv6rpl_writeDODAGid(uint8_t* dodagid) {
+   
+   // write DODAGID to DIO/DAO
+   memcpy(
+      &(icmpv6rpl_vars.dio.DODAGID[0]),
+      dodagid,
+      sizeof(icmpv6rpl_vars.dio.DODAGID)
+   );
+   memcpy(
+      &(icmpv6rpl_vars.dao.DODAGID[0]),
+      dodagid,
+      sizeof(icmpv6rpl_vars.dao.DODAGID)
+   );
+   
+   // remember I got a DODAGID
+   icmpv6rpl_vars.fDodagidWritten = 1;
+}
+
 uint8_t icmpv6rpl_getRPLIntanceID(){
-	return icmpv6rpl_vars.dao.rplinstanceId;
+   return icmpv6rpl_vars.dao.rplinstanceId;
 }
 
 /**
@@ -173,20 +191,8 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
          // update neighbor table
          neighbors_indicateRxDIO(msg);
          
-         // update DODAGID in DIO/DAO
-         memcpy(
-            &(icmpv6rpl_vars.dio.DODAGID[0]),
-            &(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]),
-            sizeof(icmpv6rpl_vars.dio.DODAGID)
-         );
-         memcpy(
-            &(icmpv6rpl_vars.dao.DODAGID[0]),
-            &(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]),
-            sizeof(icmpv6rpl_vars.dao.DODAGID)
-         );
-         
-         // remember I got a DODAGID
-         icmpv6rpl_vars.DODAGIDFlagSet=1;
+         // write DODAGID in DIO and DAO
+         icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
          
          // update my prefix
          myPrefix.type = ADDR_PREFIX;

@@ -124,7 +124,7 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
         ENABLE_INTERRUPTS();
         return res;
      case ADDR_128B:
-        //build temporary my128bID
+        // build temporary my128bID
         temp_my128bID.type = ADDR_128B;
         memcpy(&temp_my128bID.addr_128b[0],&idmanager_vars.myPrefix.prefix,8);
         memcpy(&temp_my128bID.addr_128b[8],&idmanager_vars.my64bID.addr_64b,8);
@@ -153,6 +153,7 @@ void idmanager_triggerAboutRoot() {
    uint8_t         number_bytes_from_input_buffer;
    uint8_t         input_buffer[9];
    open_addr_t     myPrefix;
+   uint8_t         dodagid[16];
    
    //=== get command from OpenSerial
    number_bytes_from_input_buffer = openserial_getInputBuffer(input_buffer,sizeof(input_buffer));
@@ -165,7 +166,7 @@ void idmanager_triggerAboutRoot() {
    
    //=== handle command
    
-   // [byte 0] action
+   // take action (byte 0)
    switch (input_buffer[0]) {
      case ACTION_YES:
         idmanager_setIsDAGroot(TRUE);
@@ -182,7 +183,7 @@ void idmanager_triggerAboutRoot() {
         break;
    }
    
-   // [byte 1-8] prefix
+   // store prefix (bytes 1-8)
    myPrefix.type = ADDR_PREFIX;
    memcpy(
       myPrefix.prefix,
@@ -190,6 +191,11 @@ void idmanager_triggerAboutRoot() {
       sizeof(myPrefix.prefix)
    );
    idmanager_setMyID(&myPrefix);
+   
+   // indicate new DODAGid to RPL
+   memcpy(&dodagid[0],&idmanager_vars.myPrefix.prefix,8); // prefix
+   memcpy(&dodagid[8],idmanager_vars.my64bID.addr_64b,8); // eui64
+   icmpv6rpl_writeDODAGid(dodagid);
    
    return;
 }
