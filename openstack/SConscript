@@ -109,6 +109,7 @@ else:
             os.path.join('#','openapps','cleds'),
             os.path.join('#','openapps','cstorm'),
             os.path.join('#','openapps','cwellknown'),
+            os.path.join('#','openapps','rrt'),
             os.path.join('#','openapps','techo'),
             os.path.join('#','openapps','tohlone'),
             os.path.join('#','openapps','uecho'),
