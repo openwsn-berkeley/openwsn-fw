@@ -1,10 +1,10 @@
 /**
 \brief Mercator firmware, see https://github.com/openwsn-berkeley/mercator/.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
+\author Constanza Perez Garcia <constanza.perezgarcia@gmail.com>, November 2014.
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, November 2014.
 */
 
-// stack initialization
 #include "board.h"
 #include "scheduler.h"
 #include "opentimers.h"
@@ -35,25 +35,30 @@
 #define ST_TXDONE            3
 #define ST_RX                4
 
-//=========================== structs =========================================
+//=========================== frame formats ===================================
 
 BEGIN_PACK
-
 typedef struct {
    uint8_t         type;
 } REQ_ST_ht;
+END_PACK
 
+BEGIN_PACK
 typedef struct {
    uint8_t         type;
    uint8_t         status;
    uint16_t        numnotifications;
    uint8_t         mac[8];
 } RESP_ST_ht;
+END_PACK
 
+BEGIN_PACK
 typedef struct {
    uint8_t         type;
 } REQ_IDLE_ht;
+END_PACK
 
+BEGIN_PACK
 typedef struct {
    uint8_t         type;
    uint8_t         frequency;
@@ -64,11 +69,15 @@ typedef struct {
    uint8_t         txlength;
    uint8_t         txfillbyte;
 } REQ_TX_ht;
+END_PACK
 
+BEGIN_PACK
 typedef struct {
    uint8_t         type;
 } IND_TXDONE_ht;
+END_PACK
 
+BEGIN_PACK
 typedef struct {
    uint8_t         type;
    uint8_t         frequency;
@@ -77,7 +86,9 @@ typedef struct {
    uint8_t         txlength;
    uint8_t         txfillbyte;
 } REQ_RX_ht;
+END_PACK
 
+BEGIN_PACK
 typedef struct {
    uint8_t         type;
    uint8_t         length;
@@ -85,13 +96,12 @@ typedef struct {
    uint8_t         flags;
    uint16_t        pkctr;
 } IND_RX_ht;
-
 END_PACK
 
 //=========================== variables =======================================
 
 typedef struct {
-   opentimer_id_t  timerId;
+   opentimer_id_t  sendTimerId;             ///< Each time expires, a packet is sent.
    
    //=== state machine
    uint8_t         status;
@@ -296,7 +306,7 @@ void serial_rx_REQ_IDLE(void) {
       return;
    }
    if (mercator_vars.status == ST_TX){
-      opentimers_stop(mercator_vars.timerId);
+      opentimers_stop(mercator_vars.sendTimerId);
    } else if (mercator_vars.status == ST_RX){
       leds_radio_off();
    }
@@ -305,7 +315,6 @@ void serial_rx_REQ_IDLE(void) {
 }
 
 void serial_rx_REQ_TX(void) {
-   int i;
    uint16_t pkctr;
    REQ_TX_ht* req;
 
@@ -334,10 +343,10 @@ void serial_rx_REQ_TX(void) {
    radio_rfOn();
    radio_setFrequency(req->frequency);
    
-   //TODO set TX Power
+   // TODO set TX Power
 
    // init opentimers to send packets periodically
-   mercator_vars.timerId  = opentimers_start(
+   mercator_vars.sendTimerId  = opentimers_start(
       htons(req->txifdur),
       TIMER_PERIODIC,
       TIME_MS,
@@ -550,8 +559,7 @@ void cb_endFrame(uint16_t timestamp) {
       uint8_t  txfillbyte;
          bool  is_expected = TRUE;
    IND_RX_ht*  resp;
-          int  i;
-
+   
    if (mercator_vars.status == ST_RX){
       
       // get packet from radio
@@ -614,7 +622,7 @@ void cb_sendPacket(void){
    leds_error_off();
 
    if (mercator_vars.txpk_numpk == mercator_vars.txpk_totalnumpk) {
-      opentimers_stop(mercator_vars.timerId);
+      opentimers_stop(mercator_vars.sendTimerId);
 
       // finishing TX
       radio_rfOff();
