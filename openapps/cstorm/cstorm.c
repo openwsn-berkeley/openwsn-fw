@@ -49,7 +49,7 @@ void cstorm_init(void) {
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
    opencoap_register(&cstorm_vars.desc);
    
-   /*
+   
    //start a periodic timer
    cstorm_vars.period           = 65534; //ticks
    
@@ -58,7 +58,7 @@ void cstorm_init(void) {
       TIMER_PERIODIC,TIME_MS,
       cstorm_timer_cb
    );
-   
+   /*
    //stop 
    //opentimers_stop(cstorm_vars.timerId);
    */
@@ -195,7 +195,7 @@ void cstorm_task_cb() {
    
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0] = (COAP_OPTION_NUM_CONTENTFORMAT-COAP_OPTION_NUM_URIPATH) << 4 | 1; 
+   pkt->payload[0] = (COAP_OPTION_NUM_CONTENTFORMAT-COAP_OPTION_NUM_URIPATH) << 4 | sizeof(cstorm_payload)-1; 
    pkt->payload[1] = COAP_MEDTYPE_APPOCTETSTREAM;
    numOptions++;
    
