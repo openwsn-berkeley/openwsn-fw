@@ -73,6 +73,7 @@ project:
                    default, in DAG root mode.
     forcetopology  Force the topology to the one indicated in the
                    openstack/02a-MAClow/topology.c file.
+    noadaptivesync Do not use adaptive synchronization.
     
     Common variables:
     verbose        Print each complete compile/link command.
@@ -121,8 +122,9 @@ command_line_options = {
     'fastsim':          ['1','0'],
     'simhost':          ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
     'simhostpy':        [''],                               # No reasonable default
-    'forcetopology':    ['0','1'],
     'dagroot':          ['0','1'],
+    'forcetopology':    ['0','1'],
+    'noadaptivesync':   ['0','1'],
 }
 
 def validate_option(key, value, env):
@@ -226,6 +228,13 @@ command_line_vars.AddVariables(
         None,                                              # converter
     ),
     (
+        'dagroot',                                         # key
+        '',                                                # help
+        command_line_options['dagroot'][0],                # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
         'forcetopology',                                   # key
         '',                                                # help
         command_line_options['forcetopology'][0],          # default
@@ -233,9 +242,9 @@ command_line_vars.AddVariables(
         int,                                               # converter
     ),
     (
-        'dagroot',                                         # key
+        'noadaptivesync',                                  # key
         '',                                                # help
-        command_line_options['dagroot'][0],                # default
+        command_line_options['noadaptivesync'][0],         # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
