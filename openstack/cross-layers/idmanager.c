@@ -14,20 +14,42 @@ idmanager_vars_t idmanager_vars;
 //=========================== public ==========================================
 
 void idmanager_init() {
+   
+   // reset local variables
+   memset(&idmanager_vars, 0, sizeof(idmanager_vars_t));
+   
+   // isDAGroot
 #ifdef DAGROOT
    idmanager_vars.isDAGroot            = TRUE;
 #else
    idmanager_vars.isDAGroot            = FALSE;
 #endif
+   
+   // myPANID
    idmanager_vars.myPANID.type         = ADDR_PANID;
    idmanager_vars.myPANID.panid[0]     = 0xca;
    idmanager_vars.myPANID.panid[1]     = 0xfe;
-
+   
+   // myPrefix
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
+#ifdef DAGROOT
+   idmanager_vars.myPrefix.prefix[0]   = 0xbb;
+   idmanager_vars.myPrefix.prefix[1]   = 0xbb;
+   idmanager_vars.myPrefix.prefix[2]   = 0x00;
+   idmanager_vars.myPrefix.prefix[3]   = 0x00;
+   idmanager_vars.myPrefix.prefix[4]   = 0x00;
+   idmanager_vars.myPrefix.prefix[5]   = 0x00;
+   idmanager_vars.myPrefix.prefix[6]   = 0x00;
+   idmanager_vars.myPrefix.prefix[7]   = 0x00;
+#else
    memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
+#endif
+   
+   // my64bID
    idmanager_vars.my64bID.type         = ADDR_64B;
-
    eui64_get(idmanager_vars.my64bID.addr_64b);
+   
+   // my16bID
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
 }
 
@@ -192,8 +214,8 @@ void idmanager_triggerAboutRoot() {
    );
    idmanager_setMyID(&myPrefix);
    
-   // indicate new DODAGid to RPL
-   memcpy(&dodagid[0],&idmanager_vars.myPrefix.prefix,8); // prefix
+   // indicate DODAGid to RPL
+   memcpy(&dodagid[0],idmanager_vars.myPrefix.prefix,8);  // prefix
    memcpy(&dodagid[8],idmanager_vars.my64bID.addr_64b,8); // eui64
    icmpv6rpl_writeDODAGid(dodagid);
    

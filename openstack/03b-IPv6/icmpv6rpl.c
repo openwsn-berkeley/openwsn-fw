@@ -32,6 +32,11 @@ void sendDAO(void);
 \brief Initialize this module.
 */
 void icmpv6rpl_init() {
+   uint8_t         dodagid[16];
+   
+   // retrieve my prefix and EUI64
+   memcpy(&dodagid[0],idmanager_getMyID(ADDR_PREFIX)->prefix,8); // prefix
+   memcpy(&dodagid[8],idmanager_getMyID(ADDR_64B)->addr_64b,8);  // eui64
    
    //===== reset local variables
    memset(&icmpv6rpl_vars,0,sizeof(icmpv6rpl_vars_t));
@@ -41,7 +46,7 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.busySending               = FALSE;
    icmpv6rpl_vars.fDodagidWritten           = 0;
    
-   //=== DIO-related
+   //=== DIO
    
    icmpv6rpl_vars.dio.rplinstanceId         = 0x00;        ///< TODO: put correct value
    icmpv6rpl_vars.dio.verNumb               = 0x00;        ///< TODO: put correct value
@@ -56,7 +61,11 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dio.DTSN                  = 0x33;        ///< TODO: put correct value
    icmpv6rpl_vars.dio.flags                 = 0x00;
    icmpv6rpl_vars.dio.reserved              = 0x00;
-   // DODAGID: to be populated upon receiving DIO
+   memcpy(
+      &(icmpv6rpl_vars.dio.DODAGID[0]),
+      dodagid,
+      sizeof(icmpv6rpl_vars.dio.DODAGID)
+   ); // can be replaced later
    
    icmpv6rpl_vars.dioDestination.type = ADDR_128B;
    memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_multicast));
@@ -69,7 +78,7 @@ void icmpv6rpl_init() {
                                                 icmpv6rpl_timer_DIO_cb
                                              );
    
-   //=== DAO-related
+   //=== DAO
    
    icmpv6rpl_vars.dao.rplinstanceId         = 0x00;        ///< TODO: put correct value
    icmpv6rpl_vars.dao.K_D_flags             = FLAG_DAO_A   | \
@@ -83,7 +92,11 @@ void icmpv6rpl_init() {
                                               K_DAO;
    icmpv6rpl_vars.dao.reserved              = 0x00;
    icmpv6rpl_vars.dao.DAOSequence           = 0x00;
-   // DODAGID: to be populated upon receiving DIO
+   memcpy(
+      &(icmpv6rpl_vars.dao.DODAGID[0]),
+      dodagid,
+      sizeof(icmpv6rpl_vars.dao.DODAGID)
+   );  // can be replaced later
    
    icmpv6rpl_vars.dao_transit.type          = OPTION_TRANSIT_INFORMATION_TYPE;
    // optionLength: to be populated upon TX
