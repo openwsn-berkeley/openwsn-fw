@@ -49,16 +49,17 @@ void cstorm_init(void) {
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
    opencoap_register(&cstorm_vars.desc);
    
-   
+   /*
    //start a periodic timer
-   cstorm_vars.period           = 65534; //ticks
+   //comment : not running by default
+   cstorm_vars.period           = 65534; 
    
    cstorm_vars.timerId                    = opentimers_start(
       cstorm_vars.period,
       TIMER_PERIODIC,TIME_MS,
       cstorm_timer_cb
    );
-   /*
+   
    //stop 
    //opentimers_stop(cstorm_vars.timerId);
    */
