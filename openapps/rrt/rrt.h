@@ -18,7 +18,7 @@
 
 typedef struct {
    coap_resource_desc_t desc;
-   bool discovered;
+   uint8_t discovered;
 } rrt_vars_t;
 
 //=========================== prototypes ======================================

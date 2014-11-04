@@ -34,7 +34,7 @@ void          rrt_sendDone(
 );
 void setGETRespMsg(
    OpenQueueEntry_t* msg,
-   bool discovered   
+   uint8_t discovered   
 );
 
 void sendCoAPMsg(char actionMsg, uint8_t mote);
@@ -58,7 +58,7 @@ void rrt_init() {
    rrt_vars.desc.callbackRx           = &rrt_receive;
    rrt_vars.desc.callbackSendDone     = &rrt_sendDone;
 
-   rrt_vars.discovered                = FALSE; //if this mote has been discovered by ringmaster
+   rrt_vars.discovered                = 0; //if this mote has been discovered by ringmaster
    
    // register with the CoAP module
    opencoap_register(&rrt_vars.desc);
@@ -114,7 +114,7 @@ owerror_t rrt_receive(
          printf("message received: %i\n", mssgRecvd);
 
          if (mssgRecvd == 'C') {
-            rrt_vars.discovered = TRUE;
+            rrt_vars.discovered = 1;
          } else if (mssgRecvd == 'B') {
             //blink mote
             printf("Mote performed blink\n");
@@ -145,7 +145,7 @@ owerror_t rrt_receive(
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
 
-         rrt_vars.discovered = FALSE;
+         rrt_vars.discovered = 0;
          
          // payload marker
          packetfunctions_reserveHeaderSize(msg,1);
