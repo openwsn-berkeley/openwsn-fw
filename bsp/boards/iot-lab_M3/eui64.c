@@ -2,6 +2,7 @@
 \brief iot-lab_M3 definition of the "eui64" bsp module.
 
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
+\amend Guillaume Gaillard <guillaume.gaillard.maze@gmail.com>, January 2014.
 */
 
 #include "string.h"
@@ -27,15 +28,22 @@ const uint8_t const *luid = (const uint8_t *const) UNIQUE_ID_LAST_ADDRESS;
 
 void eui64_get(uint8_t* addressToWrite)
 {
+  //first byte of IoT-Lab 2-bytes uid
+  uint8_t iotlab=(luid[4] | (luid[6] << 7));
   
+  //Pseudo-OUI 
   addressToWrite[0] = uid[3];
   addressToWrite[1] = luid[7];
   addressToWrite[2] = uid[0];
   addressToWrite[3] = uid[1];
+  //some variable bytes in the register
   addressToWrite[4] = luid[6];
   addressToWrite[5] = uid[2];
-  addressToWrite[6] = luid[5];
-  addressToWrite[7] = luid[4];
+  //IoT-Lab uid
+  addressToWrite[6] = iotlab;//luid[4];
+  addressToWrite[7] = luid[5];
+
+
 }
 
 //=========================== private =========================================
