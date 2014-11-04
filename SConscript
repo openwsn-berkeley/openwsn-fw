@@ -34,10 +34,12 @@ dummyFunc = Builder(
     suffix = '.ihex',
 )
 
-if   env['plugfest']==1:
-    env.Append(CPPDEFINES    = 'PLUGFEST')
-    if  env['board']=='OpenMote-CC2538':
-        env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
+if env['dagroot']==1:
+    env.Append(CPPDEFINES    = 'DAGROOT')
+if env['forcetopology']==1:
+    env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
+if env['noadaptivesync']==1:
+    env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
 
 if   env['toolchain']=='mspgcc':
     

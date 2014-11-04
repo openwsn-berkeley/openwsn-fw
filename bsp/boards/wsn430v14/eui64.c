@@ -1,6 +1,20 @@
 /**
 \brief WSN430v14-specific definition of the "eui64" bsp module.
 
+This reads a 64-bit identifier from the DS2411 chip 
+(http://datasheets.maximintegrated.com/en/ds/DS2411.pdf), which is formatted
+as follows:
+- [1B] CRC code
+- [6B] serial number
+- [1B] family code
+
+This module will create an EUI64 as follows:
+- extract the identifier from the DS2411, and only continue if the 8-bit CRC
+matches
+- create a EUI as follows:
+    . [3B] OpenWSN OUI hex(14-15-92)
+    . [5B] 5 last bytes from 6-byte serial number
+
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
 */
 
@@ -60,16 +74,19 @@ void eui64_get(uint8_t* addressToWrite) {    // >= 6000us
    uint8_t* byte;
    uint16_t oldTactl;
    
-   retry = 5;
-   memset(addressToWrite,0,8);
+   // reset EUI64 to default value
+   memset(addressToWrite,0x00,8);
    
    // store current value of TACTL
    oldTactl   = TACTL;
    
    // start timer in continuous mode at 1MHz
-   TACTL      = TASSEL_2 | ID_2 | MC_2;
+   TACTL      = TASSEL_2 | ID_0 | MC_2;
    
+   // initializer 1-Wire pin
    owpin_init();
+   
+   retry = 10;
    while (retry-- > 0) {
       crc = 0;
       
@@ -80,10 +97,17 @@ void eui64_get(uint8_t* addressToWrite) {    // >= 6000us
          }
          if(crc==0) {
             // CRC valid
-            *(addressToWrite+0) = 0x14;
-            *(addressToWrite+1) = 0x15;
-            *(addressToWrite+2) = 0x92;
-            memcpy(addressToWrite+3,id+1,5);
+            
+            // create EUI64
+            addressToWrite[0] = 0x14;   // OpenWSN OUI
+            addressToWrite[1] = 0x15;
+            addressToWrite[2] = 0x92;
+            addressToWrite[3] = id[2]; // last 5 bytes of 6B board ID
+            addressToWrite[4] = id[3];
+            addressToWrite[5] = id[4];
+            addressToWrite[6] = id[5];
+            addressToWrite[7] = id[6];
+            break;
          }
       }
    }
