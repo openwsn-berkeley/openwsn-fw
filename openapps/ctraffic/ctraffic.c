@@ -1,5 +1,5 @@
 #include "opendefs.h"
-#include "cstorm.h"
+#include "ctraffic.h"
 #include "opencoap.h"
 #include "opentimers.h"
 #include "openqueue.h"
@@ -13,8 +13,8 @@
 
 //=========================== defines =========================================
 
-const uint8_t cstorm_path0[]    = "storm";
-const uint8_t cstorm_payload[]  = "OpenWSN";
+const uint8_t ctraffic_path0[]    = "traffic";
+const uint8_t ctraffic_payload[]  = "OpenWSN";
 static const uint8_t dst_addr[]   = {
    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
@@ -22,56 +22,57 @@ static const uint8_t dst_addr[]   = {
 
 //=========================== variables =======================================
 
-cstorm_vars_t cstorm_vars;
+ctraffic_vars_t ctraffic_vars;
 
 //=========================== prototypes ======================================
 
-owerror_t cstorm_receive(
+owerror_t ctraffic_receive(
    OpenQueueEntry_t* msg,
    coap_header_iht*  coap_header,
    coap_option_iht*  coap_options
 );
-void cstorm_timer_cb(void);
-void cstorm_task_cb(void);
-void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+void ctraffic_timer_cb(void);
+void ctraffic_task_cb(void);
+void ctraffic_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 
 //=========================== public ==========================================
 
-void cstorm_init(void) {
+void ctraffic_init(void) {
    
    // register to OpenCoAP module
-   cstorm_vars.desc.path0len              = sizeof(cstorm_path0)-1;
-   cstorm_vars.desc.path0val              = (uint8_t*)(&cstorm_path0);
-   cstorm_vars.desc.path1len              = 0;
-   cstorm_vars.desc.path1val              = NULL;
-   cstorm_vars.desc.componentID           = COMPONENT_CSTORM;
-   cstorm_vars.desc.callbackRx            = &cstorm_receive;
-   cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
-   opencoap_register(&cstorm_vars.desc);
+   ctraffic_vars.desc.path0len              = sizeof(ctraffic_path0)-1;
+   ctraffic_vars.desc.path0val              = (uint8_t*)(&ctraffic_path0);
+   ctraffic_vars.desc.path1len              = 0;
+   ctraffic_vars.desc.path1val              = NULL;
+   ctraffic_vars.desc.componentID           = COMPONENT_CSTORM;
+   ctraffic_vars.desc.callbackRx            = &ctraffic_receive;
+   ctraffic_vars.desc.callbackSendDone      = &ctraffic_sendDone;
+   opencoap_register(&ctraffic_vars.desc);
    
-   /*
+   
    //start a periodic timer
    //comment : not running by default
-   cstorm_vars.period           = 6553; 
+   ctraffic_vars.period           = 65533; 
    
-   cstorm_vars.timerId                    = opentimers_start(
-      cstorm_vars.period,
+   ctraffic_vars.timerId                    = opentimers_start(
+      ctraffic_vars.period,
       TIMER_PERIODIC,TIME_MS,
-      cstorm_timer_cb
+      ctraffic_timer_cb
    );
-   
+   /*
    //stop 
-   //opentimers_stop(cstorm_vars.timerId);
+   //opentimers_stop(ctraffic_vars.timerId);
    */
 }
 
 //=========================== private =========================================
 
-owerror_t cstorm_receive(
+owerror_t ctraffic_receive(
       OpenQueueEntry_t* msg,
       coap_header_iht*  coap_header,
       coap_option_iht*  coap_options
    ) {
+   return E_FAIL;
    owerror_t outcome;
    
    switch (coap_header->Code) {
@@ -87,8 +88,8 @@ owerror_t cstorm_receive(
          msg->payload[0]          = COAP_PAYLOAD_MARKER;
          
          // return as big endian
-         msg->payload[1]          = (uint8_t)(cstorm_vars.period >> 8);
-         msg->payload[2]          = (uint8_t)(cstorm_vars.period & 0xff);
+         msg->payload[1]          = (uint8_t)(ctraffic_vars.period >> 8);
+         msg->payload[2]          = (uint8_t)(ctraffic_vars.period & 0xff);
          
          // set the CoAP header
          coap_header->Code        = COAP_CODE_RESP_CONTENT;
@@ -104,17 +105,17 @@ owerror_t cstorm_receive(
          }
          
          // read the new period
-         cstorm_vars.period     = 0;
-         cstorm_vars.period    |= (msg->payload[0] << 8);
-         cstorm_vars.period    |= msg->payload[1];
+         ctraffic_vars.period     = 0;
+         ctraffic_vars.period    |= (msg->payload[0] << 8);
+         ctraffic_vars.period    |= msg->payload[1];
          
          /*
          // stop and start again only if period > 0
-         opentimers_stop(cstorm_vars.timerId);
+         opentimers_stop(ctraffic_vars.timerId);
          
-         if(cstorm_vars.period > 0) {
-            opentimers_setPeriod(cstorm_vars.timerId,TIME_MS,cstorm_vars.period);
-            opentimers_restart(cstorm_vars.timerId);
+         if(ctraffic_vars.period > 0) {
+            opentimers_setPeriod(ctraffic_vars.timerId,TIME_MS,ctraffic_vars.period);
+            opentimers_restart(ctraffic_vars.timerId);
          }
          */
          
@@ -140,11 +141,11 @@ owerror_t cstorm_receive(
 \note timer fired, but we don't want to execute task in ISR mode instead, push
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
-void cstorm_timer_cb(){
-   scheduler_push_task(cstorm_task_cb,TASKPRIO_COAP);
+void ctraffic_timer_cb(){
+   scheduler_push_task(ctraffic_task_cb,TASKPRIO_COAP);
 }
 
-void cstorm_task_cb() {
+void ctraffic_task_cb() {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
    uint8_t              numOptions;
@@ -154,13 +155,13 @@ void cstorm_task_cb() {
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
-      opentimers_stop(cstorm_vars.timerId);
+      opentimers_stop(ctraffic_vars.timerId);
       return;
    }
    
-   if(cstorm_vars.period == 0) {
+   if(ctraffic_vars.period == 0) {
       // stop the periodic timer
-      opentimers_stop(cstorm_vars.timerId);
+      opentimers_stop(ctraffic_vars.timerId);
       return;
    }
    
@@ -184,8 +185,8 @@ void cstorm_task_cb() {
    //packetfunctions_reserveHeaderSize moves the index pkt->payload
    
    // add payload
-   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
-   memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
+   packetfunctions_reserveHeaderSize(pkt,sizeof(ctraffic_payload)-1);
+   memcpy(&pkt->payload[0],ctraffic_payload,sizeof(ctraffic_payload)-1);
    
    //set the TKL byte as a counter of Options
    //TODO: This is not conform with RFC7252, but yes with current dissector WS v1.10.6
@@ -201,10 +202,10 @@ void cstorm_task_cb() {
    numOptions++;
    
    // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
-   memcpy(&pkt->payload[0],cstorm_path0,sizeof(cstorm_path0)-1);
+   packetfunctions_reserveHeaderSize(pkt,sizeof(ctraffic_path0)-1);
+   memcpy(&pkt->payload[0],ctraffic_path0,sizeof(ctraffic_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH-7) << 4 | (sizeof(cstorm_path0)-1);
+   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH-7) << 4 | (sizeof(ctraffic_path0)-1);
    numOptions++;
    
    // length of uri-port option added directly by opencoap_send
@@ -220,9 +221,9 @@ void cstorm_task_cb() {
    outcome = opencoap_send(
       pkt,
       COAP_TYPE_NON,
-      COAP_CODE_REQ_PUT,
+      COAP_CODE_REQ_POST,
       numOptions,
-      &cstorm_vars.desc
+      &ctraffic_vars.desc
    );
    
    // avoid overflowing the queue if fails
@@ -231,7 +232,7 @@ void cstorm_task_cb() {
    }
 }
 
-void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+void ctraffic_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
 
