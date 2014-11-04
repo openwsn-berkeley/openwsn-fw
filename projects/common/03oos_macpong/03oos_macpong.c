@@ -126,6 +126,7 @@ void icmpv6router_trigger(void)   { return; }
 
 void icmpv6rpl_init(void)         { return; }
 void icmpv6rpl_trigger(void)      { return; }
+void icmpv6rpl_writeDODAGid(uint8_t* dodagid) { return; }
 
 void opentcp_init(void)           { return; }
 
