@@ -289,11 +289,19 @@ elif env['toolchain']=='armgcc':
     env.Append(BUILDERS = {'Elf2iHex'  : elf2iHexFunc})
     
     # convert ELF to bin
-    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    elf2BinFunc = Builder(
+       action = 'arm-none-eabi-objcopy -O binary $SOURCE $TARGET',
+       suffix = '.bin',
+    )
+    env.Append(BUILDERS = {'Elf2iBin'  : elf2BinFunc})
     
     # print sizes
-    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
-
+    printSizeFunc = Builder(
+        action = 'arm-none-eabi-size --format=berkeley -x --totals $SOURCE',
+        suffix = '.phonysize',
+    )
+    env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
+    
 elif env['toolchain']=='gcc':
     
     if env['board'] not in ['python']:
