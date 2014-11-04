@@ -58,11 +58,11 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430fn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430fn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -382,10 +382,9 @@
         <option>
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\telosb\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
-          <state>$PROJ_DIR$\..\..\..\inc\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -732,7 +731,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>01bsp_spi.d43</state>
+          <state>01bsp_eui64.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -798,7 +797,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F1611.xcl</state>
+          <state>$TOOLKIT_DIR$\config\linker\lnk430F1611.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -914,24 +913,24 @@
         </option>
         <option>
           <name>AllowExtraOutput</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>GenerateExtraOutput</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>XExtraOutOverride</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>01bsp_spi.a43</state>
+          <state>01bsp_eui64.hex</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
           <version>11</version>
-          <state>23</state>
+          <state>22</state>
         </option>
         <option>
           <name>ExtraFormatVariant</name>
@@ -1051,7 +1050,11 @@
         <debug>1</debug>
         <option>
           <name>CUTest</name>
-          <state>###Uninitialized###</state>
+          <state>-I$TOOLKIT_DIR$\inc</state>
+          <state>-@$TOOLKIT_DIR$\bin\iar.cmd</state>
+          <state>-@$PROJ_DIR$\source.txt</state>
+          <state>-@$PROJ_DIR$\include.txt</state>
+          <state>--preinclude=$PROJ_DIR$\IAR_ULPAdvisor_Defs.h</state>
         </option>
         <option>
           <name>ULPRules</name>
@@ -1064,7 +1067,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state></state>
+          <state>$PROJ_FNAME$.ulp</state>
         </option>
         <option>
           <name>ULPStatus</name>
@@ -2153,22 +2156,22 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_spi\01bsp_spi.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_eui64\01bsp_eui64.c</name>
     </file>
   </group>
   <group>
     <name>bsp</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\board.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\board_info.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\bsp_timer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\bsp_timer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
@@ -2177,13 +2180,19 @@
       <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\debugpins.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\leds.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\eui64.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\eui64.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\leds.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
@@ -2195,26 +2204,23 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\radiotimer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\radiotimer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\spi.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\spi.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\chips\spi.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\uart.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\wsn430v14\uart.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
     </file>
-  </group>
-  <group>
-    <name>inc</name>
   </group>
 </project>
 

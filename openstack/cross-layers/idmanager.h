@@ -18,23 +18,25 @@
 
 //=========================== typedef =========================================
 
+BEGIN_PACK
+
 typedef struct {
    bool          isDAGroot;
-   bool          isBridge;
-   open_addr_t   my16bID;
-   open_addr_t   my64bID;
-   open_addr_t   myPANID;
-   open_addr_t   myPrefix;
+   uint8_t       myPANID[2];
+   uint8_t       my16bID[2];
+   uint8_t       my64bID[8];
+   uint8_t       myPrefix[8];
 } debugIDManagerEntry_t;
+
+END_PACK
 
 //=========================== module variables ================================
 
 typedef struct {
    bool          isDAGroot;
-   bool          isBridge;
+   open_addr_t   myPANID;
    open_addr_t   my16bID;
    open_addr_t   my64bID;
-   open_addr_t   myPANID;
    open_addr_t   myPrefix;
 } idmanager_vars_t;
 
@@ -43,16 +45,12 @@ typedef struct {
 void         idmanager_init(void);
 bool         idmanager_getIsDAGroot(void);
 void         idmanager_setIsDAGroot(bool newRole);
-bool         idmanager_getIsBridge(void);
-void         idmanager_setIsBridge(bool newRole);
 open_addr_t* idmanager_getMyID(uint8_t type);
-owerror_t      idmanager_setMyID(open_addr_t* newID);
+owerror_t    idmanager_setMyID(open_addr_t* newID);
 bool         idmanager_isMyAddress(open_addr_t* addr);
 void         idmanager_triggerAboutRoot(void);
-void         idmanager_triggerAboutBridge(void);
 
 bool         debugPrint_id(void);
-
 
 /**
 \}

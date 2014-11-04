@@ -95,8 +95,6 @@ void ieee154e_getAsn(uint8_t* array) {
 
 void idmanager_triggerAboutRoot(void) {
 }
-void idmanager_triggerAboutBridge(void) {
-}
 void openbridge_triggerData(void) {
 }
 void tcpinject_trigger(void) {
