@@ -2,16 +2,13 @@
 \brief A CoAP resource which indicates the board its running on.
 */
 
-#include "rrt.h"
-#include "opencoap.h"
-#include "openqueue.h"
-#include "packetfunctions.h"
-#include "openserial.h"
-#include "openrandom.h"
-#include "board.h"
-#include "idmanager.h"
-#include "leds.h"
+
 #include "opendefs.h"
+#include "rrt.h"
+#include "sixtop.h"
+#include "idmanager.h"
+#include "openqueue.h"
+#include "neighbors.h"
 
 //=========================== defines =========================================
 

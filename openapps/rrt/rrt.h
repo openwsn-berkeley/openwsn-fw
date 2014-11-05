@@ -8,7 +8,9 @@
 \{
 */
 
+#include "opendefs.h"
 #include "opencoap.h"
+#include "schedule.h"
 
 //=========================== define ==========================================
 
