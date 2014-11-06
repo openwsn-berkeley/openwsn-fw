@@ -249,7 +249,14 @@ void sendCoAPMsg(char actionMsg, uint8_t mote) {
       }
 
       //send
-      outcome = openudp_send(pkt);
+      //outcome = openudp_send(pkt);
+      outcome = opencoap_send(
+              pkt,
+              COAP_TYPE_NON,
+              COAP_CODE_REQ_PUT,
+              numOptions,
+              &rrt_vars.desc
+              );
       
 
       if (outcome == E_FAIL) {
