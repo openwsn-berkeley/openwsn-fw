@@ -7,6 +7,7 @@
 // applications
 #include "opencoap.h"
 #include "uecho.h"
+#include "rrt.h"
 
 //=========================== variables =======================================
 
@@ -38,6 +39,11 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          break;
       case WKP_UDP_ECHO:
          uecho_sendDone(msg,error);
+         break;
+      case WKP_UDP_RINGMASTER:
+	 //udpprint_sendDone(msg, error);
+         printf("send message in openudp\n");
+         rrt_sendDone(msg);
          break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
@@ -94,6 +100,16 @@ void openudp_receive(OpenQueueEntry_t* msg) {
    switch(msg->l4_destination_port) {
       case WKP_UDP_COAP:
          opencoap_receive(msg);
+         break;
+      case WKP_UDP_RINGMASTER:
+	 printf("received message in openudp %i\n", msg->l4_payload[0]); //somewhat arbitrary here
+         if (msg->l4_payload[0] > 90) {
+            printf("blinked! \n");
+            sendCoAPMsg('B', 0);
+         }
+
+         openqueue_freePacketBuffer(msg);
+         break;
          break;
       case WKP_UDP_ECHO:
          uecho_receive(msg);

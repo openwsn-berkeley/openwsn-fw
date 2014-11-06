@@ -122,7 +122,7 @@ owerror_t rrt_receive(
          } else if (mssgRecvd == 'F') {
             nextMoteIfNeeded = msg->payload[1];
             actionToFwd = msg->payload[2];
-            sendCoAPMsg('B', 0);
+            sendCoAPMsg(actionToFwd, nextMoteIfNeeded);
          }
 
          // reset packet payload
