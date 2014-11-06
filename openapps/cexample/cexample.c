@@ -123,7 +123,7 @@ void cexample_task_cb() {
    numOptions = 0;
    // location-path option
    packetfunctions_reserveHeaderSize(pkt,sizeof(cexample_path0)-1);
-   memcpy(&pkt->payload[0],&cexample_path0,sizeof(cexample_path0)-1);
+   memcpy(&pkt->payload[0],cexample_path0,sizeof(cexample_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
    pkt->payload[0]                = ((COAP_OPTION_NUM_URIPATH) << 4) | (sizeof(cexample_path0)-1);
    numOptions++;
