@@ -42,7 +42,6 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          break;
       case WKP_UDP_RINGMASTER:
 	 //udpprint_sendDone(msg, error);
-         printf("send message in openudp\n");
          rrt_sendDone(msg);
          break;
       default:
@@ -102,9 +101,7 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          opencoap_receive(msg);
          break;
       case WKP_UDP_RINGMASTER:
-	 printf("received message in openudp %i\n", msg->l4_payload[0]); //somewhat arbitrary here
          if (msg->l4_payload[0] > 90) {
-            printf("blinked! \n");
             sendCoAPMsg('B', 0);
          }
 

@@ -108,16 +108,13 @@ owerror_t rrt_receive(
       case COAP_CODE_REQ_POST:
          mssgRecvd = msg->payload[0];
          
-         printf("message received: %i\n", mssgRecvd);
-
          if (mssgRecvd == 'C') {
             rrt_vars.discovered = 1;
          } else if (mssgRecvd == 'B') {
             //blink mote
-            printf("Mote performed blink\n");
-            //send packet back saying it did action B - blink
             leds_error_toggle();
 
+            //send packet back saying it did action B - blink
             sendCoAPMsg('B', 0); //0 for ringmaster
          } else if (mssgRecvd == 'F') {
             nextMoteIfNeeded = msg->payload[1];
@@ -201,8 +198,6 @@ void sendCoAPMsg(char actionMsg, uint8_t mote) {
       OpenQueueEntry_t* pkt;
       owerror_t outcome;
       uint8_t numOptions;
-
-      printf("sending mssg to mote: %i\n", mote);
 
       pkt = openqueue_getFreePacketBuffer(COMPONENT_RRT);
       if (pkt == NULL) {
