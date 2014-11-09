@@ -159,8 +159,8 @@ owerror_t rrt_receive(
    return outcome;
 }
 
-void setGETRespMsg(OpenQueueEntry_t* msg, bool registered) {
-         if (registered == FALSE) {
+void setGETRespMsg(OpenQueueEntry_t* msg, uint8_t registered) {
+         if (registered == 0) {
              packetfunctions_reserveHeaderSize(msg,11);
              msg->payload[0]  =  'r';
              msg->payload[1]  =  'e';
