@@ -20,24 +20,26 @@
 #include "portmacro.h"
 #include "queue.h"
 
-#define STACK_SIZE                     50
+#define STACK_SIZE                     250
 
-#define tskAPP_PRIORITY                1
-#define tskSENDDONE_PRIORITY           2
-#define tskRX_PRIORITY                 3
+#define tskAPP_PRIORITY                configMAX_PRIORITIES - 3
+#define tskSENDDONE_PRIORITY           configMAX_PRIORITIES - 2
+#define tskRX_PRIORITY                 configMAX_PRIORITIES - 1
 
 #define SCHEDULER_APP_PRIO_BOUNDARY    TASKPRIO_MAX
 #define SCHEDULER_STACK_PRIO_BOUNDARY  4
 #define SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY 8
 
-#define INTERRUPT_DECLARATION()       // (xStackLock != NULL ? (xStackLock=xStackLock) : ( xStackLock = xSemaphoreCreateMutex()))
-#define DISABLE_INTERRUPTS()         //  xSemaphoreTake( xStackLock, portMAX_DELAY )
-#define ENABLE_INTERRUPTS()           // xSemaphoreGive( xStackLock )
+#define INTERRUPT_DECLARATION()        (xStackLock != NULL ? (xStackLock=xStackLock) : ( xStackLock = xSemaphoreCreateMutex()))
+#define DISABLE_INTERRUPTS()           xSemaphoreTakeFromISR( xStackLock, &globalPriorityTaskWoken )
+#define ENABLE_INTERRUPTS()            xSemaphoreGiveFromISR( xStackLock,globalPriorityTaskWoken )
 
 //=========================== variables =======================================
 
 scheduler_vars_t scheduler_vars;
 scheduler_dbg_t  scheduler_dbg;
+
+BaseType_t globalPriorityTaskWoken = pdFALSE;
 
 //typedef struct {
    /// global stack lock
@@ -51,6 +53,8 @@ scheduler_dbg_t  scheduler_dbg;
    /// stack task which signals packet reception
  static TaskHandle_t         xRxHandle;                    // task
  static   SemaphoreHandle_t    xRxSem;                       // semaphore to unlock task
+
+ static uint16_t counter =0;
 //} rtos_sched_v_t;
 
 //rtos_sched_v_t rtos_sched_v;
@@ -87,12 +91,12 @@ void scheduler_init() {
       //TODO handle failure
       return;
    }
-
+   //take it so next time someone ta
+   //xSemaphoreTake( xStackLock, portMAX_DELAY );
    
    //=== app task
    // task
    // semaphore
-
    scheduler_createSem(&xAppSem);
    xTaskCreate(
       vAppTask,
@@ -151,24 +155,25 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
 	xHigherPriorityTaskWoken = pdFALSE;
    //=== step 1. insert the task into the task list
    scheduler_push_task_internal(cb, prio);
+   debugpins_slot_toggle();
    
    //=== step 2. toggle the appropriate semaphore so the corresponding handler takes care of it
    if (
-         prio <= SCHEDULER_STACK_PRIO_BOUNDARY
+         prio < SCHEDULER_STACK_PRIO_BOUNDARY
       ) {
 	   xSemaphoreGiveFromISR(xRxSem,&xHigherPriorityTaskWoken );
 
    } else if (
-         prio >  SCHEDULER_STACK_PRIO_BOUNDARY
+         prio >=  SCHEDULER_STACK_PRIO_BOUNDARY
          &&
-         prio <= SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY
+         prio < SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY
       ) {
 	   xSemaphoreGiveFromISR(xSendDoneSem,&xHigherPriorityTaskWoken );
 
    } else if (
-         prio >  SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY
+         prio >=  SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY
          &&
-         prio <= SCHEDULER_APP_PRIO_BOUNDARY
+         prio < SCHEDULER_APP_PRIO_BOUNDARY
       ) {
       xSemaphoreGiveFromISR(xAppSem,&xHigherPriorityTaskWoken );
    } else {
@@ -191,6 +196,7 @@ static void vAppTask(void* pvParameters) {
    xSemaphoreTake(xAppSem, portMAX_DELAY);//take it for the first time so it blocks right after.
    while (1) {
       xSemaphoreTake(xAppSem, portMAX_DELAY);
+      debugpins_fsm_toggle();
       found = scheduler_find_next_task_and_execute(
          SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY,
          SCHEDULER_APP_PRIO_BOUNDARY,
@@ -210,6 +216,7 @@ static void vSendDoneTask(void* pvParameters) {
    xSemaphoreTake(xSendDoneSem, portMAX_DELAY);//take it for the first time so it blocks right after.
    while (1) {
       xSemaphoreTake(xSendDoneSem, portMAX_DELAY);
+      debugpins_radio_toggle();
       found = scheduler_find_next_task_and_execute(
          SCHEDULER_STACK_PRIO_BOUNDARY,
          SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY,
@@ -229,6 +236,9 @@ static void vRxTask(void* pvParameters) {
    xSemaphoreTake(xRxSem, portMAX_DELAY); //take it for the first time so it blocks right after.
    while (1) {
       xSemaphoreTake(xRxSem, portMAX_DELAY);
+
+      debugpins_frame_toggle();
+
       found = scheduler_find_next_task_and_execute(
          0,
          SCHEDULER_STACK_PRIO_BOUNDARY,
@@ -261,9 +271,13 @@ static inline void scheduler_createSem(SemaphoreHandle_t* sem) {
 static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    taskList_item_t*     taskContainer;
    taskList_item_t**    taskListWalker;
-   //INTERRUPT_DECLARATION();
 
-   //DISABLE_INTERRUPTS();
+   counter++;
+   INTERRUPT_DECLARATION();
+
+   DISABLE_INTERRUPTS();
+
+
 
    // find an empty task container
    taskContainer = &scheduler_vars.taskBuf[0];
@@ -286,6 +300,7 @@ static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    // fill that task container with this task
    taskContainer->cb    = cb;
    taskContainer->prio  = prio;
+   taskContainer->counter  = counter;
 
    // find position in queue
    taskListWalker = &scheduler_vars.task_list;
@@ -307,7 +322,7 @@ static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
       scheduler_dbg.numTasksMax = scheduler_dbg.numTasksCur;
    }
   // leds_sync_toggle();
-  // ENABLE_INTERRUPTS();
+  ENABLE_INTERRUPTS();
 }
 
 /**
@@ -321,8 +336,13 @@ static inline bool scheduler_find_next_task_and_execute (
       taskList_item_t*  pThisTask
    ) {
    //to shift
+
    taskList_item_t** prevTask;
+   task_cbt cb;
    
+   INTERRUPT_DECLARATION();
+
+   DISABLE_INTERRUPTS();
    if (scheduler_vars.task_list != NULL) {
       // start searching by the task at the head of the queue
       prevTask = &scheduler_vars.task_list;
@@ -331,13 +351,29 @@ static inline bool scheduler_find_next_task_and_execute (
       if ((*prevTask)->prio >= minprio && (*prevTask)->prio < maxprio) {
          pThisTask = (*prevTask);
          scheduler_vars.task_list = pThisTask->next;
-         scheduler_executeTask(pThisTask);
+         //scheduler_executeTask(pThisTask);
+         cb = pThisTask->cb;
+
+          // free up this task container
+          pThisTask->cb   = NULL;
+          pThisTask->prio = TASKPRIO_NONE;
+          pThisTask->next = NULL;
+
+          //leds_radio_toggle();
+
+          // update debug stats
+          scheduler_dbg.numTasksCur--;
+          ENABLE_INTERRUPTS();
+          cb();
+
          return TRUE;
       }
       //it is not the first so let's look at the next one if nothing return
       if ((*prevTask)->next != NULL) {
          pThisTask = (*prevTask)->next;
       } else {
+    	  ENABLE_INTERRUPTS();
+
          return FALSE;
       }
       //move throught the list until we find the first element in the priority group
@@ -354,16 +390,33 @@ static inline bool scheduler_find_next_task_and_execute (
 
       if (pThisTask == NULL) {
          //not found
+    	  ENABLE_INTERRUPTS();
+
          return FALSE;
       } else {
          //found
          //link the list again and remove the selected task
          (*prevTask)->next = pThisTask->next;
-         scheduler_executeTask(pThisTask);
+         //scheduler_executeTask(pThisTask);
+        // pThisTask->cb();
+         cb = pThisTask->cb;
 
+          // free up this task container
+          pThisTask->cb   = NULL;
+          pThisTask->prio = TASKPRIO_NONE;
+          pThisTask->next = NULL;
+
+          //leds_radio_toggle();
+
+          // update debug stats
+          scheduler_dbg.numTasksCur--;
+          ENABLE_INTERRUPTS();
+          cb();
          return TRUE;
       }
    }
+   ENABLE_INTERRUPTS();
+
    return FALSE;
 }
 

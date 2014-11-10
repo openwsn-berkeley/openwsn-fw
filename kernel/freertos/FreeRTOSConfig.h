@@ -111,6 +111,20 @@
 #define INCLUDE_vTaskSuspend			        1
 #define INCLUDE_vTaskDelayUntil			        1
 #define INCLUDE_vTaskDelay				        1
+#define INCLUDE_vTaskSuspend                    1
+#define INCLUDE_xResumeFromISR                  1
+
+
+#define INCLUDE_xResumeFromISR                  1
+#define INCLUDE_xTaskGetSchedulerState          1
+#define INCLUDE_xTaskGetCurrentTaskHandle       1
+#define INCLUDE_uxTaskGetStackHighWaterMark     0
+#define INCLUDE_xTaskGetIdleTaskHandle          1
+#define INCLUDE_xTimerGetTimerDaemonTaskHandle  0
+#define INCLUDE_pcTaskGetTaskName               0
+#define INCLUDE_eTaskGetState                   0
+#define INCLUDE_xEventGroupSetBitFromISR        0
+#define INCLUDE_xTimerPendFunctionCall          0
 
 /* Cortex-M specific definitions. */
 #ifdef __NVIC_PRIO_BITS

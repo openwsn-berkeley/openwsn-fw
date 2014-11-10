@@ -40,6 +40,7 @@ typedef struct task_llist_t {
    task_cbt                       cb;
    task_prio_t                    prio;
    void*                          next;
+   uint16_t                           counter;
 } taskList_item_t;
 
 //=========================== module variables ================================
