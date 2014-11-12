@@ -62,7 +62,7 @@
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\lib\dlib\dl430fn.r43</state>
+          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -390,7 +390,6 @@
           <state>$PROJ_DIR$\..\..\..\drivers\common\</state>
           <state>$PROJ_DIR$\..\..\..\drivers\telosb\</state>
           <state>$PROJ_DIR$\..\..\..\inc\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\kernel\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\</state>
@@ -398,16 +397,34 @@
           <state>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\</state>
           <state>$PROJ_DIR$\..\..\..\openstack\04-TRAN\</state>
-          <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
-          <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\heli\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\imu\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\layerdebug\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\r6t\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rleds\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rreg\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rwellknown\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rt\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rex\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rinfo\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rheli\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rxl1\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rsched\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rrube\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\ohlone\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\tcpecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\tcpinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\tcpprint\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpprint\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udprand\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udpstorm\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\udplatency\</state>
+          <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
+          <state>$PROJ_DIR$\..\..\..\drivers\common</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -754,7 +771,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>03oos_openwsn.d43</state>
+          <state>03oos_mercator.d43</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -948,7 +965,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state>03oos_openwsn.a43</state>
+          <state>03oos_macpong.a43</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>
@@ -2179,10 +2196,7 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\common\03oos_openwsn\03oos_openwsn.h</name>
+      <name>$PROJ_DIR$\..\..\common\03oos_mercator\03oos_mercator.c</name>
     </file>
   </group>
   <group>
@@ -2300,91 +2314,10 @@
     </file>
   </group>
   <group>
-    <name>openapps</name>
-    <group>
-      <name>c6t</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\c6t\c6t.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\c6t\c6t.h</name>
-      </file>
-    </group>
-    <group>
-      <name>cinfo</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.h</name>
-      </file>
-    </group>
-    <group>
-      <name>cleds</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cleds\cleds.h</name>
-      </file>
-    </group>
-    <group>
-      <name>cstorm</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.h</name>
-      </file>
-    </group>
-    <group>
-      <name>cwellknown</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.h</name>
-      </file>
-    </group>
-    <group>
-      <name>techo</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\techo\techo.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\techo\techo.h</name>
-      </file>
-    </group>
-    <group>
-      <name>tohlone</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone_webpages.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\tohlone\tohlone_webpages.h</name>
-      </file>
-    </group>
-    <group>
-      <name>uecho</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.h</name>
-      </file>
-    </group>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\openapps\openapps.c</name>
-    </file>
-  </group>
-  <group>
     <name>openstack</name>
+    <excluded>
+      <configuration>Debug</configuration>
+    </excluded>
     <group>
       <name>02a-MAClow</name>
       <file>
@@ -2443,69 +2376,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.h</name>
-      </file>
-    </group>
-    <group>
-      <name>03a-IPHC</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\iphc.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03a-IPHC\openbridge.h</name>
-      </file>
-    </group>
-    <group>
-      <name>03b-IPv6</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\forwarding.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6echo.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\03b-IPv6\icmpv6rpl.h</name>
-      </file>
-    </group>
-    <group>
-      <name>04-TRAN</name>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opencoap.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opencoap.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\openudp.h</name>
       </file>
     </group>
     <group>
