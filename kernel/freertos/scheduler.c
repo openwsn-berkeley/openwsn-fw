@@ -74,8 +74,6 @@ static inline bool scheduler_find_next_task_and_execute(
    task_prio_t          maxprio,
    taskList_item_t*     pThisTas
 );
-static inline void scheduler_executeTask(taskList_item_t* pThisTask);
-void vApplicationIdleHook( void);
 
 //=========================== public ==========================================
 
@@ -202,8 +200,6 @@ static void vAppTask(void* pvParameters) {
          SCHEDULER_APP_PRIO_BOUNDARY,
          pThisTask
       );
-
-      //leds_sync_toggle();
    }
 }
 
@@ -222,8 +218,6 @@ static void vSendDoneTask(void* pvParameters) {
          SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY,
          pThisTask
       );
-
-     // leds_radio_toggle();
    }
 }
 
@@ -244,9 +238,6 @@ static void vRxTask(void* pvParameters) {
          SCHEDULER_STACK_PRIO_BOUNDARY,
          pThisTask
       );
-
-
-     // leds_debug_toggle();
    }
 }
 
@@ -261,6 +252,7 @@ static inline void scheduler_createSem(SemaphoreHandle_t* sem) {
    *sem = xSemaphoreCreateBinary();
    if (*sem == NULL) {
       // TODO handle failure
+	  leds_error_blink();
       return;
    }
 }
@@ -273,11 +265,10 @@ static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    taskList_item_t**    taskListWalker;
 
    counter++;
+
    INTERRUPT_DECLARATION();
 
    DISABLE_INTERRUPTS();
-
-
 
    // find an empty task container
    taskContainer = &scheduler_vars.taskBuf[0];
@@ -321,7 +312,7 @@ static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    if (scheduler_dbg.numTasksCur > scheduler_dbg.numTasksMax) {
       scheduler_dbg.numTasksMax = scheduler_dbg.numTasksCur;
    }
-  // leds_sync_toggle();
+
   ENABLE_INTERRUPTS();
 }
 
@@ -340,6 +331,7 @@ static inline bool scheduler_find_next_task_and_execute (
    taskList_item_t** prevTask;
    task_cbt cb;
    
+   //mutual exclusion to the task list
    INTERRUPT_DECLARATION();
 
    DISABLE_INTERRUPTS();
@@ -351,20 +343,19 @@ static inline bool scheduler_find_next_task_and_execute (
       if ((*prevTask)->prio >= minprio && (*prevTask)->prio < maxprio) {
          pThisTask = (*prevTask);
          scheduler_vars.task_list = pThisTask->next;
-         //scheduler_executeTask(pThisTask);
+         //keep the cb to be called after mutual exclusion
          cb = pThisTask->cb;
 
-          // free up this task container
-          pThisTask->cb   = NULL;
-          pThisTask->prio = TASKPRIO_NONE;
-          pThisTask->next = NULL;
+         // free up this task container
+		 pThisTask->cb   = NULL;
+		 pThisTask->prio = TASKPRIO_NONE;
+		 pThisTask->next = NULL;
 
-          //leds_radio_toggle();
-
-          // update debug stats
-          scheduler_dbg.numTasksCur--;
-          ENABLE_INTERRUPTS();
-          cb();
+	     // update debug stats
+		 scheduler_dbg.numTasksCur--;
+		 ENABLE_INTERRUPTS();
+		 //end of the mutual exclusion to the task list
+		 cb(); //call the cb -- task list has been cleaned
 
          return TRUE;
       }
@@ -372,7 +363,7 @@ static inline bool scheduler_find_next_task_and_execute (
       if ((*prevTask)->next != NULL) {
          pThisTask = (*prevTask)->next;
       } else {
-    	  ENABLE_INTERRUPTS();
+    	 ENABLE_INTERRUPTS();
 
          return FALSE;
       }
@@ -397,49 +388,24 @@ static inline bool scheduler_find_next_task_and_execute (
          //found
          //link the list again and remove the selected task
          (*prevTask)->next = pThisTask->next;
-         //scheduler_executeTask(pThisTask);
-        // pThisTask->cb();
+         //keep the cb to be exectued after mutual exclusion
          cb = pThisTask->cb;
 
-          // free up this task container
-          pThisTask->cb   = NULL;
-          pThisTask->prio = TASKPRIO_NONE;
-          pThisTask->next = NULL;
+         // free up this task container
+         pThisTask->cb   = NULL;
+         pThisTask->prio = TASKPRIO_NONE;
+         pThisTask->next = NULL;
 
-          //leds_radio_toggle();
+         // update debug stats
+         scheduler_dbg.numTasksCur--;
+         ENABLE_INTERRUPTS();
+         //call the cb
+         cb();
 
-          // update debug stats
-          scheduler_dbg.numTasksCur--;
-          ENABLE_INTERRUPTS();
-          cb();
          return TRUE;
       }
    }
    ENABLE_INTERRUPTS();
-
    return FALSE;
 }
 
-/**
-\brief Execute a task.
-*/
-static inline void scheduler_executeTask(taskList_item_t* pThisTask) {
-   
-   // execute the current task
-   pThisTask->cb();
-   
-   // free up this task container
-   pThisTask->cb   = NULL;
-   pThisTask->prio = TASKPRIO_NONE;
-   pThisTask->next = NULL;
-   
-   //leds_radio_toggle();
-
-   // update debug stats
-   scheduler_dbg.numTasksCur--;
-}
-
-/*void vApplicationIdleHook( void ){
-	leds_debug_toggle();
-}
-*/

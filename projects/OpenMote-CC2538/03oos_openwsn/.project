@@ -109,10 +109,5 @@
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/uart.h</locationURI>
 		</link>
-		<link>
-			<name>linker/cc2538.lds</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/OpenMote-CC2538/cc2538.lds</locationURI>
-		</link>
 	</linkedResources>
 </projectDescription>
