@@ -34,7 +34,7 @@ void setGETRespMsg(
    uint8_t discovered   
 );
 
-void sendCoAPMsg(char actionMsg, uint8_t mote);
+void sendCoAPMsg(char actionMsg, uint8_t *ipv6mote);
 
 //=========================== public ==========================================
 
@@ -81,7 +81,7 @@ owerror_t rrt_receive(
    
    owerror_t outcome;
    uint8_t mssgRecvd;
-   uint8_t nextMoteIfNeeded;
+   uint8_t moteToSendTo[16];
    uint8_t actionToFwd;
 
    switch (coap_header->Code) {
@@ -115,11 +115,11 @@ owerror_t rrt_receive(
             leds_error_toggle();
 
             //send packet back saying it did action B - blink
-            sendCoAPMsg('B', 0); //0 for ringmaster
-         } else if (mssgRecvd == 'F') {
-            nextMoteIfNeeded = msg->payload[1];
-            actionToFwd = msg->payload[2];
-            sendCoAPMsg(actionToFwd, nextMoteIfNeeded);
+            sendCoAPMsg('B', NULL); //NULL for ringmaster
+         } else if (mssgRecvd == 'F') { //format - FB[ipv6]:w
+            actionToFwd = msg->payload[1];
+            memcpy(&moteToSendTo, &msg->payload[2], 16);
+            sendCoAPMsg(actionToFwd, moteToSendTo);
          }
 
          // reset packet payload
@@ -138,8 +138,9 @@ owerror_t rrt_receive(
       case COAP_CODE_REQ_DELETE:
          msg->payload                     = &(msg->packet[127]);
          msg->length                      = 0;
-
-         rrt_vars.discovered = 0;
+         
+         //unregister the current mote as 'discovered' by ringmaster
+         rrt_vars.discovered = 0; 
          
          // payload marker
          packetfunctions_reserveHeaderSize(msg,1);
@@ -174,7 +175,7 @@ void setGETRespMsg(OpenQueueEntry_t* msg, uint8_t registered) {
              msg->payload[9]  =  'n';
              msg->payload[10] = 'g';
 
-             sendCoAPMsg('D', 0); //'D' stands for discovery, 0 for ringmaster
+             sendCoAPMsg('D', NULL); //'D' stands for discovery, 0 for ringmaster
 
          } else {
              packetfunctions_reserveHeaderSize(msg,10);
@@ -194,7 +195,7 @@ void setGETRespMsg(OpenQueueEntry_t* msg, uint8_t registered) {
 /**
  * if mote is 0, then send to the ringmater, defined by ipAddr_ringmaster
 **/
-void sendCoAPMsg(char actionMsg, uint8_t mote) {
+void sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
       OpenQueueEntry_t* pkt;
       owerror_t outcome;
       uint8_t numOptions;
@@ -236,15 +237,13 @@ void sendCoAPMsg(char actionMsg, uint8_t mote) {
       pkt->l3_destinationAdd.type = ADDR_128B;
       
       // set destination address here
-      if (mote == 0) {  //if mote == 0, then send to ringmaster
+      if (!ipv6mote) {  //if mote ptr is NULL, then send to ringmaster
         memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_ringmaster, 16);
       } else {
-        memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipAddr_simMotes, 16);
-        pkt->l3_destinationAdd.addr_128b[15] = (mote - 0x30);  //adjust for ascii encoding here
+        memcpy(&pkt->l3_destinationAdd.addr_128b[0], &ipv6mote[0], 16);
       }
 
       //send
-      //outcome = openudp_send(pkt);
       outcome = opencoap_send(
               pkt,
               COAP_TYPE_NON,
