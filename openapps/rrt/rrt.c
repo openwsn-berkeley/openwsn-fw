@@ -29,12 +29,12 @@ void          rrt_sendDone(
    OpenQueueEntry_t* msg,
    owerror_t error
 );
-void setGETRespMsg(
+void rrt_setGETRespMsg(
    OpenQueueEntry_t* msg,
    uint8_t discovered   
 );
 
-void sendCoAPMsg(char actionMsg, uint8_t *ipv6mote);
+void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote);
 
 //=========================== public ==========================================
 
@@ -92,7 +92,7 @@ owerror_t rrt_receive(
          msg->length                      = 0;
          
          //=== prepare  CoAP response
-         setGETRespMsg(msg, rrt_vars.discovered);
+         rrt_setGETRespMsg(msg, rrt_vars.discovered);
          
          
          // payload marker
@@ -115,11 +115,11 @@ owerror_t rrt_receive(
             leds_error_toggle();
 
             //send packet back saying it did action B - blink
-            sendCoAPMsg('B', NULL); //NULL for ringmaster
+            rrt_sendCoAPMsg('B', NULL); //NULL for ringmaster
          } else if (mssgRecvd == 'F' && rrt_vars.discovered == 1) { //format - FB[ipv6]
             actionToFwd = msg->payload[1];
             memcpy(&moteToSendTo, &msg->payload[2], 16);
-            sendCoAPMsg(actionToFwd, moteToSendTo);
+            rrt_sendCoAPMsg(actionToFwd, moteToSendTo);
          }
 
          // reset packet payload
@@ -160,7 +160,7 @@ owerror_t rrt_receive(
    return outcome;
 }
 
-void setGETRespMsg(OpenQueueEntry_t* msg, uint8_t registered) {
+void rrt_setGETRespMsg(OpenQueueEntry_t* msg, uint8_t registered) {
          if (registered == 0) {
              packetfunctions_reserveHeaderSize(msg,11);
              msg->payload[0]  =  'r';
@@ -175,7 +175,7 @@ void setGETRespMsg(OpenQueueEntry_t* msg, uint8_t registered) {
              msg->payload[9]  =  'n';
              msg->payload[10] = 'g';
 
-             sendCoAPMsg('D', NULL); //'D' stands for discovery, 0 for ringmaster
+             rrt_sendCoAPMsg('D', NULL); //'D' stands for discovery, 0 for ringmaster
 
          } else {
              packetfunctions_reserveHeaderSize(msg,10);
@@ -195,7 +195,7 @@ void setGETRespMsg(OpenQueueEntry_t* msg, uint8_t registered) {
 /**
  * if mote is 0, then send to the ringmater, defined by ipAddr_ringmaster
 **/
-void sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
+void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
       OpenQueueEntry_t* pkt;
       owerror_t outcome;
       uint8_t numOptions;

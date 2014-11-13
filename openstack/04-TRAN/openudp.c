@@ -102,7 +102,7 @@ void openudp_receive(OpenQueueEntry_t* msg) {
          break;
       case WKP_UDP_RINGMASTER:
          if (msg->l4_payload[0] > 90) {
-            sendCoAPMsg('B', NULL);
+            rrt_sendCoAPMsg('B', NULL);
          }
 
          openqueue_freePacketBuffer(msg);
