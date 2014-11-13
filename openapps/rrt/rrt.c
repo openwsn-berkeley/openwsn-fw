@@ -110,13 +110,13 @@ owerror_t rrt_receive(
          
          if (mssgRecvd == 'C') {
             rrt_vars.discovered = 1;
-         } else if (mssgRecvd == 'B') {
+         } else if (mssgRecvd == 'B' && rrt_vars.discovered == 1) {
             //blink mote
             leds_error_toggle();
 
             //send packet back saying it did action B - blink
             sendCoAPMsg('B', NULL); //NULL for ringmaster
-         } else if (mssgRecvd == 'F') { //format - FB[ipv6]:w
+         } else if (mssgRecvd == 'F' && rrt_vars.discovered == 1) { //format - FB[ipv6]
             actionToFwd = msg->payload[1];
             memcpy(&moteToSendTo, &msg->payload[2], 16);
             sendCoAPMsg(actionToFwd, moteToSendTo);
