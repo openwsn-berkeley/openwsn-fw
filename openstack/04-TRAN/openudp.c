@@ -107,7 +107,6 @@ void openudp_receive(OpenQueueEntry_t* msg) {
 
          openqueue_freePacketBuffer(msg);
          break;
-         break;
       case WKP_UDP_ECHO:
          uecho_receive(msg);
          break;
