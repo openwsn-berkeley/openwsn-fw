@@ -17,11 +17,11 @@ void otf_init(void) {
 }
 
 void otf_notif_addedCell(void) {
-   scheduler_push_task(otf_addCell_task,TASKPRIO_OTF);
+   scheduler_push_task(otf_addCell_task,TASKPRIO_SENDDONE_RECEIVE_6TOP);
 }
 
 void otf_notif_removedCell(void) {
-   scheduler_push_task(otf_removeCell_task,TASKPRIO_OTF);
+   scheduler_push_task(otf_removeCell_task,TASKPRIO_SENDDONE_RECEIVE_6TOP);
 }
 
 //=========================== private =========================================

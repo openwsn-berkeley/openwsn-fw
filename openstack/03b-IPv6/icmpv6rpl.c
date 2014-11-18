@@ -249,7 +249,7 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
    task.
 */
 void icmpv6rpl_timer_DIO_cb() {
-   scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_RPL);
+   scheduler_push_task(icmpv6rpl_timer_DIO_task,TASKPRIO_STACK_ROUTING);
 }
 
 /**
@@ -370,7 +370,7 @@ void sendDIO() {
    task.
 */
 void icmpv6rpl_timer_DAO_cb() {
-   scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_RPL);
+   scheduler_push_task(icmpv6rpl_timer_DAO_task,TASKPRIO_STACK_ROUTING);
 }
 
 /**

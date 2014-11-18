@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
 
-typedef enum {
+/*typedef enum {
    TASKPRIO_NONE                  = 0x00,
    // tasks trigger by radio
    TASKPRIO_SIXTOP_NOTIF_RX       = 0x01,
@@ -28,6 +28,28 @@ typedef enum {
    TASKPRIO_BUTTON                = 0x09,
    TASKPRIO_SIXTOP_TIMEOUT        = 0x0a,
    TASKPRIO_MAX                   = 0x0b,
+} task_prio_t;
+*/
+typedef enum {
+   TASKPRIO_NONE                  = 0x00,
+   // tasks trigger by the stack -- down
+   TASKPRIO_STACK_LOWMAC          = 0x01,
+   TASKPRIO_STACK_HIGHMAC         = 0x02,
+   TASKPRIO_STACK_6TOP            = 0x03,
+   TASKPRIO_STACK_IP              = 0x04,
+   TASKPRIO_STACK_ROUTING         = 0x05,
+   TASKPRIO_STACK_TRANSPORT       = 0x06,
+ // tasks going up the stack
+   TASKPRIO_SENDDONE_RECEIVE_MAC          = 0x07,
+   TASKPRIO_SENDDONE_RECEIVE_6TOP         = 0x08,
+   TASKPRIO_SENDDONE_RECEIVE_IP           = 0x09,
+   TASKPRIO_SENDDONE_RECEIVE_TRANSPORT    = 0x09,
+//app tasks
+   TASKPRIO_APP_HIGH              = 0x0a,
+   TASKPRIO_APP_MED               = 0x0b,
+   TASKPRIO_APP_LOW               = 0x0c,
+
+   TASKPRIO_MAX                   = 0x0d,
 } task_prio_t;
 
 #define TASK_LIST_DEPTH           10

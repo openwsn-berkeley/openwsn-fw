@@ -27,8 +27,8 @@
 #define tskRX_PRIORITY                 configMAX_PRIORITIES - 1
 
 #define SCHEDULER_APP_PRIO_BOUNDARY    TASKPRIO_MAX
-#define SCHEDULER_STACK_PRIO_BOUNDARY  4
-#define SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY 8
+#define SCHEDULER_STACK_PRIO_BOUNDARY  TASKPRIO_SENDDONE_RECEIVE_MAC
+#define SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY TASKPRIO_APP_HIGH
 
 #define INTERRUPT_DECLARATION()        (xStackLock != NULL ? (xStackLock=xStackLock) : ( xStackLock = xSemaphoreCreateMutex()))
 #define DISABLE_INTERRUPTS()           xSemaphoreTakeFromISR( xStackLock, &globalPriorityTaskWoken )
@@ -87,10 +87,9 @@ void scheduler_init() {
    xStackLock = xSemaphoreCreateMutex();
    if (xStackLock == NULL) {
       //TODO handle failure
+	   leds_error_blink();
       return;
    }
-   //take it so next time someone ta
-   //xSemaphoreTake( xStackLock, portMAX_DELAY );
    
    //=== app task
    // task
@@ -105,12 +104,11 @@ void scheduler_init() {
       &xAppHandle
    );
    configASSERT(xAppHandle);
-
    
    //=== stack task sendDone
-   // task
    // semaphore
    scheduler_createSem(&xSendDoneSem);
+   // task
    xTaskCreate(
       vSendDoneTask,
       "sendDone",
@@ -171,11 +169,11 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
    } else if (
          prio >=  SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY
          &&
-         prio < SCHEDULER_APP_PRIO_BOUNDARY
+         prio <= SCHEDULER_APP_PRIO_BOUNDARY //includes TASKPRIO_MAX
       ) {
       xSemaphoreGiveFromISR(xAppSem,&xHigherPriorityTaskWoken );
    } else {
-      // TODO handle failure
+      leds_error_blink();
       while (1) ;
    }
 
@@ -251,9 +249,8 @@ static inline void scheduler_createSem(SemaphoreHandle_t* sem) {
    // create semaphore
    *sem = xSemaphoreCreateBinary();
    if (*sem == NULL) {
-      // TODO handle failure
 	  leds_error_blink();
-      return;
+	  board_reset();
    }
 }
 
@@ -267,7 +264,6 @@ static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
    counter++;
 
    INTERRUPT_DECLARATION();
-
    DISABLE_INTERRUPTS();
 
    // find an empty task container
@@ -326,8 +322,6 @@ static inline bool scheduler_find_next_task_and_execute (
       task_prio_t       maxprio,
       taskList_item_t*  pThisTask
    ) {
-   //to shift
-
    taskList_item_t** prevTask;
    task_cbt cb;
    
@@ -356,7 +350,6 @@ static inline bool scheduler_find_next_task_and_execute (
 		 ENABLE_INTERRUPTS();
 		 //end of the mutual exclusion to the task list
 		 cb(); //call the cb -- task list has been cleaned
-
          return TRUE;
       }
       //it is not the first so let's look at the next one if nothing return
@@ -364,7 +357,6 @@ static inline bool scheduler_find_next_task_and_execute (
          pThisTask = (*prevTask)->next;
       } else {
     	 ENABLE_INTERRUPTS();
-
          return FALSE;
       }
       //move throught the list until we find the first element in the priority group
@@ -381,7 +373,7 @@ static inline bool scheduler_find_next_task_and_execute (
 
       if (pThisTask == NULL) {
          //not found
-    	  ENABLE_INTERRUPTS();
+    	 ENABLE_INTERRUPTS();
 
          return FALSE;
       } else {

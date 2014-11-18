@@ -141,7 +141,7 @@ owerror_t cstorm_receive(
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
 void cstorm_timer_cb(){
-   scheduler_push_task(cstorm_task_cb,TASKPRIO_COAP);
+   scheduler_push_task(cstorm_task_cb,TASKPRIO_STACK_TRANSPORT);
 }
 
 void cstorm_task_cb() {
