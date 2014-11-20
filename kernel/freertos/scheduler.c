@@ -27,7 +27,7 @@
 #define tskRX_PRIORITY                 configMAX_PRIORITIES - 1
 
 #define SCHEDULER_APP_PRIO_BOUNDARY    TASKPRIO_MAX
-#define SCHEDULER_STACK_PRIO_BOUNDARY  TASKPRIO_SENDDONE_RECEIVE_MAC
+#define SCHEDULER_STACK_PRIO_BOUNDARY  TASKPRIO_SENDDONE_TIMERS_MAC
 #define SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY TASKPRIO_APP_HIGH
 
 #define INTERRUPT_DECLARATION()        (xStackLock != NULL ? (xStackLock=xStackLock) : ( xStackLock = xSemaphoreCreateMutex()))
@@ -184,7 +184,7 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
 
 /**
 Handle application packets, brinding them down the stack until they are queued,
-ready for the lowwe MAC to consume.
+ready for the lowwer MAC to consume.
 */
 static void vAppTask(void* pvParameters) {
    bool found = FALSE;
@@ -202,7 +202,7 @@ static void vAppTask(void* pvParameters) {
 }
 
 /**
-Handle sendDone notifications.
+Handle sendDone notifications and timers.
 */
 static void vSendDoneTask(void* pvParameters) {
    bool found;

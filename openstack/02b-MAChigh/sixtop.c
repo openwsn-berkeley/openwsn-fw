@@ -583,11 +583,11 @@ owerror_t sixtop_send_internal(
 // timer interrupt callbacks
 
 void sixtop_maintenance_timer_cb() {
-   scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_STACK_6TOP);
+   scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SENDDONE_TIMERS_6TOP);
 }
 
 void sixtop_timeout_timer_cb() {
-   scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_STACK_6TOP);
+   scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SENDDONE_TIMERS_6TOP);
 }
 
 //======= EB/KA task

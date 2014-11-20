@@ -32,24 +32,27 @@
 */
 typedef enum {
    TASKPRIO_NONE                  = 0x00,
-   // tasks trigger by the stack -- down
+   // tasks trigger by the stack rx
    TASKPRIO_STACK_LOWMAC          = 0x01,
    TASKPRIO_STACK_HIGHMAC         = 0x02,
    TASKPRIO_STACK_6TOP            = 0x03,
    TASKPRIO_STACK_IP              = 0x04,
    TASKPRIO_STACK_ROUTING         = 0x05,
    TASKPRIO_STACK_TRANSPORT       = 0x06,
- // tasks going up the stack
-   TASKPRIO_SENDDONE_RECEIVE_MAC          = 0x07,
-   TASKPRIO_SENDDONE_RECEIVE_6TOP         = 0x08,
-   TASKPRIO_SENDDONE_RECEIVE_IP           = 0x09,
-   TASKPRIO_SENDDONE_RECEIVE_TRANSPORT    = 0x09,
-//app tasks
-   TASKPRIO_APP_HIGH              = 0x0a,
-   TASKPRIO_APP_MED               = 0x0b,
-   TASKPRIO_APP_LOW               = 0x0c,
 
-   TASKPRIO_MAX                   = 0x0d,
+   // tasks going up the stack - sendone and timers
+   TASKPRIO_SENDDONE_TIMERS_MAC          = 0x07,
+   TASKPRIO_SENDDONE_TIMERS_6TOP         = 0x08,
+   TASKPRIO_SENDDONE_TIMERS_IP           = 0x09,
+   TASKPRIO_SENDDONE_TIMERS_ROUTING      = 0x0a,
+   TASKPRIO_SENDDONE_TIMERS_TRANSPORT    = 0x0b,
+
+   //app tasks - down the stack
+   TASKPRIO_APP_HIGH              = 0x0c,
+   TASKPRIO_APP_MED               = 0x0d,
+   TASKPRIO_APP_LOW               = 0x0e,
+
+   TASKPRIO_MAX                   = 0x0f,
 } task_prio_t;
 
 #define TASK_LIST_DEPTH           10
