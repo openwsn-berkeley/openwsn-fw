@@ -45,14 +45,14 @@
 			<locationURI>PARENT-2-PROJECT_LOC/inc</locationURI>
 		</link>
 		<link>
+			<name>kernel</name>
+			<type>2</type>
+			<locationURI>PARENT-2-PROJECT_LOC/kernel</locationURI>
+		</link>
+		<link>
 			<name>openapps</name>
 			<type>2</type>
 			<locationURI>PARENT-2-PROJECT_LOC/openapps</locationURI>
-		</link>
-		<link>
-			<name>openos</name>
-			<type>2</type>
-			<locationURI>PARENT-2-PROJECT_LOC/kernel/openos</locationURI>
 		</link>
 		<link>
 			<name>openstack</name>
@@ -113,11 +113,6 @@
 			<name>OpenMote-CC2538/uart.h</name>
 			<type>1</type>
 			<locationURI>PARENT-2-PROJECT_LOC/bsp/boards/uart.h</locationURI>
-		</link>
-		<link>
-			<name>openos/scheduler.h</name>
-			<type>1</type>
-			<locationURI>PARENT-2-PROJECT_LOC/kernel/scheduler.h</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
