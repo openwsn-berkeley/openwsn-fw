@@ -120,34 +120,4 @@
 			<locationURI>PARENT-2-PROJECT_LOC/kernel/scheduler.h</locationURI>
 		</link>
 	</linkedResources>
-	<variableList>
-		<variable>
-			<name>copy_PARENT</name>
-			<value>$%7BPARENT-2-PROJECT_LOC%7D/Desktop/openwsn-current</value>
-		</variable>
-		<variable>
-			<name>copy_PARENT1</name>
-			<value>$%7Bcopy_PARENT%7D/openwsn-fw</value>
-		</variable>
-		<variable>
-			<name>copy_PARENT11</name>
-			<value>$%7Bcopy_PARENT12%7D/openwsn-fw</value>
-		</variable>
-		<variable>
-			<name>copy_PARENT111</name>
-			<value>$%7Bcopy_PARENT121%7D/openwsn-fw</value>
-		</variable>
-		<variable>
-			<name>copy_PARENT12</name>
-			<value>$%7Bcopy_PARENT1%7D/Desktop/openwsn-current</value>
-		</variable>
-		<variable>
-			<name>copy_PARENT121</name>
-			<value>$%7Bcopy_PARENT11%7D/Desktop/openwsn-current</value>
-		</variable>
-		<variable>
-			<name>copy_PARENT1211</name>
-			<value>$%7Bcopy_PARENT111%7D/Desktop/openwsn-current</value>
-		</variable>
-	</variableList>
 </projectDescription>
