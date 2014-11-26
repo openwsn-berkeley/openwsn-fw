@@ -27,6 +27,7 @@ Configuring the Eclipse environment:
 
 - Go to Window -> Preferences -> C/C++ -> Build -> Environment and add a new environment variable SCONS, whose value is "scons" for UNIX/Linux/MACOS users or "scons.bat" for Windows users
 - Go to Window -> Preferences -> Run/Debug -> String Substitution and set the jlink_path variable to the path of the SEGGER J-Link installation folder
+- For Windows users, it is suggested to embed the J-Link Server into Eclipse: go to Window -> Preferences -> Run/Debug -> String Substitution and set jlink_gdbserver to JLinkGDBServerCL
 
 
 Importing OpenMote-CC2538 project:
