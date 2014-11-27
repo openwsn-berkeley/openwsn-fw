@@ -10,7 +10,7 @@ Software required:
 - SEGGER jlink software - https://www.segger.com/jlink-software.html
 
 
-Eclipse J-Link plugin intallation:
+Eclipse J-Link Debugging plug-in intallation:
 ---------------------------------
 
 - Run Eclipse
@@ -18,7 +18,7 @@ Eclipse J-Link plugin intallation:
 - Close the initial Welcome screen
 - Go to Help -> Install New Software
 - Add into "Work with:" the following repository: "GNU ARM Eclipse Plug-ins - http://gnuarmeclipse.sourceforge.net/updates"
-- Under "GNU ARM C/C++ Cross Development Tools" select all the GNU ARM C/C++ options (you can skip Documentation and Experimental)
+- Under "GNU ARM C/C++ Cross Development Tools" select GNU ARM C/C++ J-Link Debugging
 - Press Finish and go ahead accepting the installation
 
 
@@ -45,6 +45,6 @@ Building and Debugging:
 
 - On the right window go to the "Make Target" tab and compile a target, e.g., oos_openwsn
 - You can check that building is ok into the bottom window on the Console tab
-- Go to Run -> Debug Configurations -> GDB SEGGER J-Link Debugging and go into the sub-configuration "OpenMote-CC2538 Debug"
+- Go to Run -> Debug Configurations -> GDB SEGGER J-Link Debugging and go into the sub-configuration "OpenWSN Debug"
 - In the Main tab go to C/C++ Application and press "Search Project": you will see the executable you want to flash to the mote, select it and press Debug
 - You can now flash the code on your mote and debug the code
