@@ -10,17 +10,10 @@ localEnv = env.Clone()
 # which can be appended to the source list. Don't forget to specify a variant_dir,
 # or else the build will occur directly in the chips directory.
 
-rf231 = localEnv.SConscript(
-    os.path.join('#','bsp','chips','at86rf231','SConscript'),
-    variant_dir = 'rf231',
-    exports     = {'env': env},
-)
-
 target   = 'libbsp'
 source   = \
     Glob('*.c') + \
-    Glob('source/*.c') + \
-    [rf231]
+    Glob('source/*.c')
 
 localEnv.Append(
         CPPPATH =  [
