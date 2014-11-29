@@ -640,6 +640,7 @@ buildEnv.SConscript(
     os.path.join(incDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = incVarDir,
+    duplicate   = 0,
 )
 
 # bspheader
@@ -649,6 +650,7 @@ buildEnv.SConscript(
     os.path.join(bspHDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = bspHVarDir,
+    duplicate   = 0,
 )
 
 # bsp
@@ -659,6 +661,7 @@ buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = bspVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
@@ -670,6 +673,7 @@ buildEnv.SConscript(
     os.path.join(kernelHDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = kernelHVarDir,
+    duplicate   = 0,
 )
 
 # kernel
@@ -679,6 +683,7 @@ buildEnv.SConscript(
     os.path.join(kernelDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = kernelVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libkernel', Dir(kernelVarDir).abspath)
 buildEnv.Append(LIBPATH = [kernelVarDir])
@@ -690,6 +695,7 @@ buildEnv.SConscript(
     os.path.join(driversDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = driversVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libdrivers', Dir(driversVarDir).abspath)
 buildEnv.Append(LIBPATH = [driversVarDir])
@@ -701,6 +707,7 @@ buildEnv.SConscript(
     os.path.join(openstackDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = openstackVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libopenstack', Dir(openstackVarDir).abspath)
 buildEnv.Append(LIBPATH = [openstackVarDir])
@@ -712,6 +719,7 @@ buildEnv.SConscript(
     os.path.join(openappsDir,'SConscript'),
     exports        = {'env': buildEnv},
     variant_dir    = openappsVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libopenapps', Dir(openappsVarDir).abspath)
 buildEnv.Append(LIBPATH = [openappsVarDir])
