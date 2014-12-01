@@ -1,0 +1,413 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>6.2</ProjectVersion>
+    <ToolchainName>com.Atmel.ARMGCC.C</ToolchainName>
+    <ProjectGuid>{fbcfd0eb-de67-49d0-97ef-66a80f250358}</ProjectGuid>
+    <avrdevice>ATSAMR21G18A</avrdevice>
+    <avrdeviceseries>none</avrdeviceseries>
+    <OutputType>Executable</OutputType>
+    <Language>C</Language>
+    <OutputFileName>$(MSBuildProjectName)</OutputFileName>
+    <OutputFileExtension>.elf</OutputFileExtension>
+    <OutputDirectory>$(MSBuildProjectDirectory)\$(Configuration)</OutputDirectory>
+    <AssemblyName>01bsp_leds</AssemblyName>
+    <Name>01bsp_leds</Name>
+    <RootNamespace>01bsp_leds</RootNamespace>
+    <ToolchainFlavour>Native</ToolchainFlavour>
+    <KeepTimersRunning>true</KeepTimersRunning>
+    <OverrideVtor>false</OverrideVtor>
+    <CacheFlash>true</CacheFlash>
+    <ProgFlashFromRam>true</ProgFlashFromRam>
+    <RamSnippetAddress>0x20000000</RamSnippetAddress>
+    <UncachedRange />
+    <OverrideVtorValue>exception_table</OverrideVtorValue>
+    <BootSegment>2</BootSegment>
+    <eraseonlaunchrule>0</eraseonlaunchrule>
+    <AsfFrameworkConfig>
+      <framework-data xmlns="">
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.17.0" />
+        </dependencies>
+      </framework-data>
+    </AsfFrameworkConfig>
+    <avrtool>com.atmel.avrdbg.tool.edbg</avrtool>
+    <avrtoolinterface>SWD</avrtoolinterface>
+    <com_atmel_avrdbg_tool_edbg>
+      <ToolOptions>
+        <InterfaceProperties>
+          <SwdClock>12000000</SwdClock>
+        </InterfaceProperties>
+        <InterfaceName>SWD</InterfaceName>
+      </ToolOptions>
+      <ToolType>com.atmel.avrdbg.tool.edbg</ToolType>
+      <ToolNumber>ATML2127021800000126</ToolNumber>
+      <ToolName>EDBG</ToolName>
+    </com_atmel_avrdbg_tool_edbg>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <ToolchainSettings>
+      <ArmGcc>
+  <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+  <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+  <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+  <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+  <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+  <armgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>NDEBUG</Value>
+      <Value>ARM_MATH_CM0=true</Value>
+      <Value>AT86RF233</Value>
+    </ListValues>
+  </armgcc.compiler.symbols.DefSymbols>
+  <armgcc.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samr21\include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+    </ListValues>
+  </armgcc.compiler.directories.IncludePaths>
+  <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
+  <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+  <armgcc.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </armgcc.linker.libraries.Libraries>
+  <armgcc.linker.libraries.LibrarySearchPaths>
+    <ListValues>
+      <Value>../cmsis/linkerScripts</Value>
+    </ListValues>
+  </armgcc.linker.libraries.LibrarySearchPaths>
+  <armgcc.linker.optimization.GarbageCollectUnusedSections>True</armgcc.linker.optimization.GarbageCollectUnusedSections>
+  <armgcc.linker.miscellaneous.LinkerFlags>-Tsamr21g18a_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
+  <armgcc.preprocessingassembler.general.IncludePaths>
+    <ListValues>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samr21\include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+    </ListValues>
+  </armgcc.preprocessingassembler.general.IncludePaths>
+</ArmGcc>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <ToolchainSettings>
+      <ArmGcc>
+  <armgcc.common.outputfiles.hex>True</armgcc.common.outputfiles.hex>
+  <armgcc.common.outputfiles.lss>True</armgcc.common.outputfiles.lss>
+  <armgcc.common.outputfiles.eep>True</armgcc.common.outputfiles.eep>
+  <armgcc.common.outputfiles.bin>True</armgcc.common.outputfiles.bin>
+  <armgcc.common.outputfiles.srec>True</armgcc.common.outputfiles.srec>
+  <armgcc.compiler.symbols.DefSymbols>
+    <ListValues>
+      <Value>NDEBUG</Value>
+      <Value>ARM_MATH_CM0=false</Value>
+      <Value>AT86RF233</Value>
+    </ListValues>
+  </armgcc.compiler.symbols.DefSymbols>
+  <armgcc.compiler.directories.IncludePaths>
+    <ListValues>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samr21\include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+      <Value>../../../../inc</Value>
+      <Value>../../../../openstack</Value>
+      <Value>../../../../bsp/boards</Value>
+      <Value>../../../../bsp/chips</Value>
+      <Value>../../../../kernel</Value>
+      <Value>../../../../bsp/boards/samr21_xpro</Value>
+      <Value>../../../../bsp/boards</Value>
+      <Value>../../../../bsp/chips/at86rf233</Value>
+      <Value>../../../../drivers/common</Value>
+      <Value>../../../../kernel/openos</Value>
+      <Value>../../../../openstack/02a-MAClow</Value>
+      <Value>../../../../openstack/02b-MAChigh</Value>
+      <Value>../../../../openstack/03a-IPHC</Value>
+      <Value>../../../../openstack/03b-IPv6</Value>
+      <Value>../../../../openstack/04-TRAN</Value>
+      <Value>../../../../openstack/cross-layers</Value>
+      <Value>../../../../openstack</Value>
+      <Value>../../../../bsp/boards/samr21_xpro/drivers/inc</Value>
+      <Value>../../../../openapps</Value>
+    </ListValues>
+  </armgcc.compiler.directories.IncludePaths>
+  <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
+  <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
+  <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+  <armgcc.linker.general.UseNewlibNano>True</armgcc.linker.general.UseNewlibNano>
+  <armgcc.linker.libraries.Libraries>
+    <ListValues>
+      <Value>libm</Value>
+    </ListValues>
+  </armgcc.linker.libraries.Libraries>
+  <armgcc.linker.libraries.LibrarySearchPaths>
+    <ListValues>
+      <Value>../cmsis/linkerScripts</Value>
+    </ListValues>
+  </armgcc.linker.libraries.LibrarySearchPaths>
+  <armgcc.linker.optimization.GarbageCollectUnusedSections>True</armgcc.linker.optimization.GarbageCollectUnusedSections>
+  <armgcc.linker.memorysettings.ExternalRAM />
+  <armgcc.linker.miscellaneous.LinkerFlags>-Tsamr21g18a_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
+  <armgcc.assembler.debugging.DebugLevel>Default (-g)</armgcc.assembler.debugging.DebugLevel>
+  <armgcc.preprocessingassembler.general.IncludePaths>
+    <ListValues>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samr21\include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
+      <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+    </ListValues>
+  </armgcc.preprocessingassembler.general.IncludePaths>
+  <armgcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcc.preprocessingassembler.debugging.DebugLevel>
+</ArmGcc>
+    </ToolchainSettings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\openstack\02b-MAChigh\otf.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02b-MAChigh\otf.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02b-MAChigh\processIE.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02b-MAChigh\processIE.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02b-MAChigh\sixtop.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02b-MAChigh\sixtop.c</Link>
+    </Compile>
+    <Compile Include="cmsis\src\startup_samr21.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cmsis\src\system_samr21.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\base_type.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\base_type.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\cm0plus_interrupt.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\cm0plus_interrupt.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\samr21_extint.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\samr21_extint.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\samr21_flash.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\samr21_flash.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\samr21_gclk.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\samr21_gclk.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\samr21_gpio.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\samr21_gpio.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\samr21_radio.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\samr21_radio.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\samr21_spi.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\samr21_spi.h</Link>
+    </Compile>
+    <Compile Include="..\..\common\01bsp_leds\01bsp_leds.c">
+      <SubType>compile</SubType>
+      <Link>01bsp_leds.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\samr21_sysctrl.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\samr21_sysctrl.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\samr21_timer.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\samr21_timer.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\samr21_uart.h">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\inc\samr21_uart.h</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\src\cm0plus_interrupt.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\src\cm0plus_interrupt.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\src\cm0_handler.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\src\cm0_handler.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\src\samr21_extint.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\src\samr21_extint.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\src\samr21_flash.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\src\samr21_flash.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\src\samr21_gclk.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\src\samr21_gclk.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\src\samr21_gpio.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\src\samr21_gpio.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\src\samr21_spi.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\src\samr21_spi.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\src\samr21_sysctrl.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\src\samr21_sysctrl.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\src\samr21_timer.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\src\samr21_timer.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\src\samr21_uart.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\drivers\src\samr21_uart.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\board.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\board.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\bsp_timer.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\bsp_timer.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\debug_pins.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\debug_pins.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\eui64.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\eui64.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\flash.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\flash.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\leds.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\leds.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\radio_timer.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\radio_timer.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\spi_drv.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\spi_drv.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\boards\samr21_xpro\uart.c">
+      <SubType>compile</SubType>
+      <Link>bsp\boards\samr21_xpro\uart.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\bsp\chips\at86rf233\radio.c">
+      <SubType>compile</SubType>
+      <Link>chips\at86rf233\radio.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\drivers\common\openhdlc.c">
+      <SubType>compile</SubType>
+      <Link>drivers\common\openhdlc.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\drivers\common\openserial.c">
+      <SubType>compile</SubType>
+      <Link>drivers\common\openserial.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\drivers\common\opentimers.c">
+      <SubType>compile</SubType>
+      <Link>drivers\common\opentimers.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\kernel\openos\scheduler.c">
+      <SubType>compile</SubType>
+      <Link>kernel\scheduler.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02a-MAClow\adaptive_sync.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02a-MAClow\adaptive_sync.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02a-MAClow\IEEE802154.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02a-MAClow\IEEE802154.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02a-MAClow\IEEE802154E.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02a-MAClow\IEEE802154E.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02a-MAClow\topology.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02a-MAClow\topology.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02b-MAChigh\neighbors.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02b-MAChigh\neighbors.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\02b-MAChigh\schedule.c">
+      <SubType>compile</SubType>
+      <Link>openstack\02b-MAChigh\schedule.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\cross-layers\idmanager.c">
+      <SubType>compile</SubType>
+      <Link>openstack\cross-layers\idmanager.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\cross-layers\openqueue.c">
+      <SubType>compile</SubType>
+      <Link>openstack\cross-layers\openqueue.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\cross-layers\openrandom.c">
+      <SubType>compile</SubType>
+      <Link>openstack\cross-layers\openrandom.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\cross-layers\packetfunctions.c">
+      <SubType>compile</SubType>
+      <Link>openstack\cross-layers\packetfunctions.c</Link>
+    </Compile>
+    <Compile Include="..\..\..\openstack\openstack.c">
+      <SubType>compile</SubType>
+      <Link>openstack\openstack.c</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bsp" />
+    <Folder Include="bsp\boards" />
+    <Folder Include="bsp\boards\samr21_xpro" />
+    <Folder Include="chips" />
+    <Folder Include="chips\at86rf233" />
+    <Folder Include="cmsis\" />
+    <Folder Include="cmsis\linkerScripts\" />
+    <Folder Include="cmsis\src\" />
+    <Folder Include="bsp\boards\samr21_xpro\drivers" />
+    <Folder Include="bsp\boards\samr21_xpro\drivers\inc" />
+    <Folder Include="bsp\boards\samr21_xpro\drivers\src" />
+    <Folder Include="drivers\" />
+    <Folder Include="drivers\common\" />
+    <Folder Include="kernel" />
+    <Folder Include="openstack" />
+    <Folder Include="openstack\02a-MAClow" />
+    <Folder Include="openstack\02b-MAChigh" />
+    <Folder Include="openstack\cross-layers" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cmsis\linkerScripts\samr21g18a_flash.ld">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="cmsis\linkerScripts\samr21g18a_sram.ld">
+      <SubType>compile</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(AVRSTUDIO_EXE_PATH)\\Vs\\Compiler.targets" />
+</Project>

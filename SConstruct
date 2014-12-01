@@ -25,50 +25,59 @@ Usage:
     scons [help-option]
 
 project:
-    A project is represented by a subdirectory of the 
-    firmware{0}openos{0}projects directory, for a particular board. For 
-    example, the 'oos_openwsn' project may be built for telosb. To specify a 
-    project, exclude the leading digits in the directory name, like '03' for 
-    oos_openwsn.
+    A project is represented by a subdirectory of the projects directory, for
+    a particular board. For example, the 'oos_openwsn' project may be built for
+    telosb. To specify a project, exclude the leading digits in the directory
+    name, like '03' for oos_openwsn.
 
     variable=value pairs
     These pairs qualify how the project is built, and are organized here into
     functional groups. Below each variable's description are the valid 
     options, with the default value listed first.
     
-    board        Board to build for. 'python' is for software simulation.
-                 telosb, wsn430v14, wsn430v13b, gina, z1, python, iot-lab_M3
+    board          Board to build for. 'python' is for software simulation.
+                   telosb, wsn430v14, wsn430v13b, gina, z1, python, iot-lab_M3
         
-    toolchain    Toolchain implementation. The 'python' board requires gcc
-                 (MinGW on Windows build host).
-                 mspgcc, iar, iar-proj, gcc
+    toolchain      Toolchain implementation. The 'python' board requires gcc
+                   (MinGW on Windows build host).
+                   mspgcc, iar, iar-proj, gcc
     
     Connected hardware variables:
-    bootload     Location of the board to bootload the binary on. 
-                 COMx for Windows, /dev entries for Linux
-                 Supports parallel operation with a comma-separated list,
-                 for example 'COM5,COM6,COM7'.
-    jtag         Location of the board to JTAG the binary to.
-                 COMx for Windows, /dev entry for Linux
-    fet_version  Firmware version running on the MSP-FET430uif for jtag.
-                 2, 3
+    bootload       Location of the board to bootload the binary on. 
+                   COMx for Windows, /dev entries for Linux
+                   Supports parallel operation with a comma-separated list,
+                   for example 'COM5,COM6,COM7'.
+    jtag           Location of the board to JTAG the binary to.
+                   COMx for Windows, /dev entry for Linux
+    fet_version    Firmware version running on the MSP-FET430uif for jtag.
+                   2, 3
     
     Simulation variables:
-    fastsim      Compiles the firmware for fast simulation.
-                 1 (on), 0 (off)
+    fastsim        Compiles the firmware for fast simulation.
+                   1 (on), 0 (off)
 
     These simulation variables are for a cross-platform build, and are valid
     only from an amd64-linux build host.
-    simhost      Host platform and OS for simulation. Default selection is
-                 the current platform/OS, which of course is not a cross-
-                 build. '-windows' cross-builds require MinGW-w64 toolchain.
-                 amd64-linux, x86-linux, amd64-windows, x86-windows
-    simhostpy    Home directory for simhost cross-build Python headers and 
-                 shared library.
+    simhost        Host platform and OS for simulation. Default selection is
+                   the current platform/OS, which of course is not a cross-
+                   build. '-windows' cross-builds require MinGW-w64 toolchain.
+                   amd64-linux, x86-linux, amd64-windows, x86-windows
+    simhostpy      Home directory for simhost cross-build Python headers and 
+                   shared library.
+    
+    Variables for special use cases.
+    dagroot        Setting a mote as DAG root is typically done through
+                   OpenVisualizer. In some rare cases when the OpenVisualizer
+                   cannot send commands to the mote (e.g. IoT-LAB platform), 
+                   use this flag to build a firmware image which is, by 
+                   default, in DAG root mode.
+    forcetopology  Force the topology to the one indicated in the
+                   openstack/02a-MAClow/topology.c file.
+    noadaptivesync Do not use adaptive synchronization.
     
     Common variables:
-    verbose      Print each complete compile/link comand.
-                 0 (off), 1 (on)
+    verbose        Print each complete compile/link command.
+                   0 (off), 1 (on)
     
 docs:
     Generate source documentation in build{0}docs{0}html directory
@@ -80,8 +89,6 @@ help-option:
 
 #============================ options =========================================
 
-#===== options
-
 # first value is default
 command_line_options = {
     'board':       [
@@ -92,7 +99,7 @@ command_line_options = {
         'wsn430v14',
         'z1',
         # Cortex-M3
-        'cc2538', # TODO: replace by openmotecc2538 when directory renamed
+        'OpenMote-CC2538',
         'openmotestm',
         'iot-lab_M3',
         'agilefox',
@@ -106,19 +113,41 @@ command_line_options = {
         'armgcc',
         'gcc',
     ],
-    'fet_version': ['2','3'],
-    'verbose':     ['0','1'],
-    'fastsim':     ['1','0'],
-    'simhost':     ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
-    'simhostpy':   [''],                               # No reasonable default
-    'plugfest':    ['0','1'],
+    'kernel': [
+        'openos',
+        'freertos',
+    ],
+    'fet_version':      ['2','3'],
+    'verbose':          ['0','1'],
+    'fastsim':          ['1','0'],
+    'simhost':          ['amd64-linux','x86-linux','amd64-windows','x86-windows'],
+    'simhostpy':        [''],                               # No reasonable default
+    'dagroot':          ['0','1'],
+    'forcetopology':    ['0','1'],
+    'noadaptivesync':   ['0','1'],
 }
 
 def validate_option(key, value, env):
     if key not in command_line_options:
-       raise ValueError("Unknown switch {0}.".format(key))
+        raise ValueError("Unknown switch {0}.".format(key))
     if value not in command_line_options[key]:
-       raise ValueError("Unknown {0} \"{1}\". Options are {2}.\n\n".format(key,value,','.join(command_line_options[key])))
+        raise ValueError("Unknown {0} \"{1}\". Options are {2}.\n\n".format(key,value,','.join(command_line_options[key])))
+
+def validate_apps(key, value, env):
+    assert key=='apps'
+    if not value.strip():
+        return
+    requestedApps = value.split(',')
+    availableApps = [f for f in os.listdir('openapps') if not os.path.isfile(os.path.join('openapps',f))]
+    unknownApps   = list(set(requestedApps) - set(availableApps))
+    
+    if unknownApps:
+        raise ValueError(
+            "Unknown app(s) {0}. Available apps are {1}.\n\n".format(
+                ','.join(unknownApps),
+                ','.join(availableApps),
+            )
+        )
 
 # Define default value for simhost option
 if os.name=='nt':
@@ -139,6 +168,13 @@ command_line_vars.AddVariables(
         'toolchain',                                       # key
         '',                                                # help
         command_line_options['toolchain'][0],              # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'kernel',                                          # key
+        '',                                                # help
+        command_line_options['kernel'][0],                 # default
         validate_option,                                   # validator
         None,                                              # converter
     ),
@@ -192,11 +228,32 @@ command_line_vars.AddVariables(
         None,                                              # converter
     ),
     (
-        'plugfest',                                        # key
+        'dagroot',                                         # key
         '',                                                # help
-        command_line_options['plugfest'][0],               # default
+        command_line_options['dagroot'][0],                # default
         validate_option,                                   # validator
         int,                                               # converter
+    ),
+    (
+        'forcetopology',                                   # key
+        '',                                                # help
+        command_line_options['forcetopology'][0],          # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'noadaptivesync',                                  # key
+        '',                                                # help
+        command_line_options['noadaptivesync'][0],         # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'apps',                                            # key
+        'comma-separated list of user applications',       # help
+        '',                                                # default
+        validate_apps,                                     # validator
+        None,                                              # converter
     ),
 )
 
@@ -246,7 +303,6 @@ env['targets'] = {
 }
 
 # include docs SConscript
-# which will discover targets for this board/toolchain
 env.SConscript(
     os.path.join('docs','SConscript'),
     exports = ['env'],

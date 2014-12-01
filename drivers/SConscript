@@ -1,0 +1,56 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+target =  'libdrivers'
+sources_c = Glob('common/*.c',strings=True) # + Glob(localEnv['board']+'/*.c')
+sources_h = Glob('common/*.h',strings=True)
+
+if localEnv['board']=='python':
+    
+    for s in sources_c+sources_h:
+        temp = localEnv.Objectify(
+            target = localEnv.ObjectifiedFilename(s),
+            source = s,
+        )
+        #localEnv.AlwaysBuild(temp)
+    
+    libdrivers = localEnv.Library(
+        target = target,
+        source = [localEnv.ObjectifiedFilename(s) for s in sources_c],
+    )
+    localEnv.Depends(libdrivers,[localEnv.ObjectifiedFilename(s) for s in sources_h])
+
+else:
+    
+    localEnv.Append(
+        CPPPATH =  [
+            os.path.join('#','drivers','common'),
+            # openstack
+            os.path.join('#','openstack'),
+            os.path.join('#','openstack','02a-MAClow'),
+            os.path.join('#','openstack','02b-MAChigh'),
+            os.path.join('#','openstack','03a-IPHC'),
+            os.path.join('#','openstack','03b-IPv6'),
+            os.path.join('#','openstack','04-TRAN'),
+            os.path.join('#','openstack','07-App','tcpinject'),
+            os.path.join('#','openstack','07-App','udpinject'),
+            os.path.join('#','openstack','cross-layers'),
+            # openapps
+            os.path.join('#','openapps','tcpinject'),
+            os.path.join('#','openapps','udpinject'),
+        ],
+    )
+    
+    # after fixing gina and z1 driver build, delete the following 2 lines and uncomment code at line 8
+    if env['board']=='OpenMote-CC2538':
+        sources_c += Glob(localEnv['board']+'/*.c',strings=True)
+    
+    libdrivers = localEnv.Library(
+        target = target,
+        source = sources_c,
+    )
+    
+Alias('libdrivers', libdrivers)

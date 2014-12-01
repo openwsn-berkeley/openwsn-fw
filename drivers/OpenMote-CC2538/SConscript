@@ -1,0 +1,14 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+source = ['adxl346.c',
+          'max44009.c',
+          'sht21.c'
+         ]
+
+cc2538_drivers = localEnv.Object(source=source)
+
+Return('cc2538_drivers')

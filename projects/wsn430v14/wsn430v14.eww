@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\00std_clocks\00std_clocks.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_eui64\00std_eui64.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_leds_xtal\00std_leds_xtal.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_spi\00std_spi.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_uart\00std_uart.ewp</path>
+  </project>
+  
+  <project>
+    <path>$WS_DIR$\01bsp_bothtimers\01bsp_bothtimers.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_bsp_timer\01bsp_bsp_timer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_closetimers\01bsp_closetimers.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_debugpins\01bsp_debugpins.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_eui64\01bsp_eui64.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_radio_rx\01bsp_radio_rx.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_radio_tx\01bsp_radio_tx.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_radiotimer\01bsp_radiotimer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_uart\01bsp_uart.ewp</path>
+  </project>
+  
+  <project>
+    <path>$WS_DIR$\02drv_openserial\02drv_openserial.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\02drv_opentimers\02drv_opentimers.ewp</path>
+  </project>
+  
+  <project>
+    <path>$WS_DIR$\03oos_macpong\03oos_macpong.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\03oos_mercator\03oos_mercator.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\03oos_openwsn\03oos_openwsn.ewp</path>
+  </project>
+  <batchBuild/>
+</workspace>
+
+

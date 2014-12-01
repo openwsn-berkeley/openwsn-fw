@@ -16,11 +16,13 @@ env['VARDIR']  = os.path.join('#','build','{0}_{1}'.format(env['board'],env['too
 if env['board']!='python':
     env.Append(
         CPPPATH = [
-            os.path.join('#','firmware','openos','openwsn'),
-            os.path.join('#','firmware','openos','bsp','boards'),
-            os.path.join('#','firmware','openos','bsp','chips'),
-            os.path.join('#','firmware','openos','kernel','openos'),
-            os.path.join('#','firmware','openos','drivers','common'),
+            os.path.join('#','inc'),
+            os.path.join('#','bsp','boards'),
+            os.path.join('#','bsp','chips'),
+            os.path.join('#','drivers','common'),
+            os.path.join('#','kernel'),
+            os.path.join('#','openapps'),
+            os.path.join('#','openstack'),
         ]
     )
 
@@ -32,10 +34,12 @@ dummyFunc = Builder(
     suffix = '.ihex',
 )
 
-if   env['plugfest']==1:
-    env.Append(CPPDEFINES    = 'PLUGFEST')
-    if  env['board']=='cc2538':
-        env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
+if env['dagroot']==1:
+    env.Append(CPPDEFINES    = 'DAGROOT')
+if env['forcetopology']==1:
+    env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
+if env['noadaptivesync']==1:
+    env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
 
 if   env['toolchain']=='mspgcc':
     
@@ -117,7 +121,7 @@ elif env['toolchain']=='iar':
     env.Replace(LIBLINKDIRPREFIX  = '-I')
     env.Replace(LIBLINKPREFIX     = 'lib')
     env.Replace(LIBLINKSUFFIX     = '.a')
-    env.Append(LINKFLAGS          = '-f "'+env['IAR_EW430_INSTALLDIR']+'\\430\\config\\multiplier.xcl"')
+    env.Append(LINKFLAGS          = '-f "'+env['IAR_EW430_INSTALLDIR']+'\\430\\config\\linker\\multiplier.xcl"')
     env.Append(LINKFLAGS          = '-D_STACK_SIZE=50')
     env.Append(LINKFLAGS          = '-rt "'+env['IAR_EW430_INSTALLDIR']+'\\430\\LIB\\DLIB\\dl430fn.r43"')
     env.Append(LINKFLAGS          = '-e_PrintfLarge=_Printf')
@@ -153,7 +157,7 @@ elif env['toolchain']=='iar':
 
 elif env['toolchain']=='iar-proj':
     
-    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','cc2538']:
+    if env['board'] not in ['telosb','gina','wsn430v13b','wsn430v14','z1','openmotestm','agilefox','OpenMote-CC2538']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     env['IAR_EW430_INSTALLDIR'] = os.environ['IAR_EW430_INSTALLDIR']
@@ -183,10 +187,10 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['cc2538','iot-lab_M3']:
+    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
-    if   env['board']=='cc2538':
+    if   env['board']=='OpenMote-CC2538':
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -203,7 +207,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
         # linker
-        env.Append(LINKFLAGS     = '-Tfirmware/openos/bsp/boards/cc2538/cc2538.lds')
+        env.Append(LINKFLAGS     = '-Tbsp/boards/OpenMote-CC2538/cc2538.lds')
         env.Append(LINKFLAGS     = '-nostartfiles')
         env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
         env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
@@ -259,7 +263,7 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-mthumb')
         env.Append(LINKFLAGS     = '-mthumb-interwork')
         env.Append(LINKFLAGS     = '-nostartfiles')
-        env.Append(LINKFLAGS     = '-Tfirmware/openos/bsp/boards/iot-lab_M3/stm32_flash.ld')
+        env.Append(LINKFLAGS     = '-Tbsp/boards/iot-lab_M3/stm32_flash.ld')
         env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','startup.o'))
         env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','configure','stm32f10x_it.o'))
         # object manipulation
@@ -285,11 +289,19 @@ elif env['toolchain']=='armgcc':
     env.Append(BUILDERS = {'Elf2iHex'  : elf2iHexFunc})
     
     # convert ELF to bin
-    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    elf2BinFunc = Builder(
+       action = 'arm-none-eabi-objcopy -O binary $SOURCE $TARGET',
+       suffix = '.bin',
+    )
+    env.Append(BUILDERS = {'Elf2iBin'  : elf2BinFunc})
     
     # print sizes
-    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
-
+    printSizeFunc = Builder(
+        action = 'arm-none-eabi-size --format=berkeley -x --totals $SOURCE',
+        suffix = '.phonysize',
+    )
+    env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
+    
 elif env['toolchain']=='gcc':
     
     if env['board'] not in ['python']:
@@ -312,7 +324,7 @@ elif env['toolchain']=='gcc':
             
             if platform.architecture()[0]=='64bit' and env['simhost']=='x86-linux':
                 # Cross-compile x86 Linux target from 64-bit host. Also see
-                # firmware/openos/projects/python/SConscript.env.
+                # projects/python/SConscript.env.
                 env.Append(CCFLAGS        = '-m32')
                 # Resolves a conflict between Python's pyconfig.h, which uses 
                 # '200112'L, and libc's features.h, which uses '200809L'.
@@ -342,7 +354,7 @@ def jtagUploadFunc(location):
     if env['toolchain']=='armgcc':
         if env['board'] in ['iot-lab_M3']:
             return Builder(
-                action      = os.path.join('firmware','openos','bsp','boards','iot-lab_M3','tools','flash.sh') + " $SOURCE",
+                action      = os.path.join('bsp','boards','iot-lab_M3','tools','flash.sh') + " $SOURCE",
                 suffix      = '.phonyupload',
                 src_suffix  = '.ihex',
             )
@@ -383,7 +395,7 @@ class telosb_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('firmware','openos','bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(self.comPort,self.hexFile),
+            'python '+os.path.join('bootloader','telosb','bsl')+' --telosb -c {0} -r -e -I -p "{1}"'.format(self.comPort,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -442,10 +454,10 @@ env.AddMethod(extras, 'PostBuildExtras')
 
 def buildLibs(projectDir):
     libs_dict = {
-        '00std': [                                                ],
-        '01bsp': [                                        'libbsp'],
-        '02drv': [                           'libdrivers','libbsp'],
-        '03oos': ['libopenstack','libopenos','libdrivers','libbsp'], # this order needed for mspgcc
+        '00std': [                                                              ],
+        '01bsp': [                                                      'libbsp'],
+        '02drv': [                                         'libdrivers','libbsp'],
+        '03oos': ['libopenstack','libopenapps','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
     returnVal = None
@@ -461,12 +473,12 @@ def buildIncludePath(projectDir,localEnv):
     if projectDir.startswith('03oos_'):
         localEnv.Append(
             CPPPATH = [
-                os.path.join('#','firmware','openos','openwsn'),
-                os.path.join('#','firmware','openos','openwsn','03b-IPv6'),
-                os.path.join('#','firmware','openos','openwsn','02b-MAChigh'),
-                os.path.join('#','firmware','openos','openwsn','02a-MAClow'),
-                os.path.join('#','firmware','openos','openwsn','cross-layers'),
-                os.path.join('#','firmware','openos','drivers','common'),
+                os.path.join('#','openstack'),
+                os.path.join('#','openstack','03b-IPv6'),
+                os.path.join('#','openstack','02b-MAChigh'),
+                os.path.join('#','openstack','02a-MAClow'),
+                os.path.join('#','openstack','cross-layers'),
+                os.path.join('#','drivers','common'),
             ]
         )
 
@@ -541,7 +553,7 @@ def sconscript_scanner(localEnv):
             # build both the application's and the Python module's main files
             sources_c = [
                 os.path.join(projectDir,'{0}.c'.format(projectDir)),
-                os.path.join('#','firmware','openos','bsp','boards','python','openwsnmodule.c'),
+                os.path.join('#','bsp','boards','python','openwsnmodule.c'),
             ]
             
             # objectify those two files
@@ -617,67 +629,104 @@ env.AddMethod(sconscript_scanner, 'SconscriptScanner')
 
 # Get build environment from platform directory
 buildEnv = env.SConscript(
-    os.path.join('firmware','openos','projects',env['board'],'SConscript.env'),
+    os.path.join('projects',env['board'],'SConscript.env'),
     exports     = ['env'],
 )
 
-# bspheader
-boardsDir       = os.path.join('#','firmware','openos','bsp','boards')
-boardsVarDir    = os.path.join(buildEnv['VARDIR'],'bsp','boards')
+# inc
+incDir          = os.path.join('#','inc')
+incVarDir       = os.path.join(buildEnv['VARDIR'],'inc')
 buildEnv.SConscript(
-    os.path.join(boardsDir,'SConscript'),
+    os.path.join(incDir,'SConscript'),
     exports     = {'env': buildEnv},
-    variant_dir = boardsVarDir,
+    variant_dir = incVarDir,
+    duplicate   = 0,
+)
+
+# bspheader
+bspHDir         = os.path.join('#','bsp','boards')
+bspHVarDir      = os.path.join(buildEnv['VARDIR'],'bsp','boards')
+buildEnv.SConscript(
+    os.path.join(bspHDir,'SConscript'),
+    exports     = {'env': buildEnv},
+    variant_dir = bspHVarDir,
+    duplicate   = 0,
 )
 
 # bsp
-bspDir          = os.path.join('#','firmware','openos','bsp','boards',buildEnv['BSP'])
+bspDir          = os.path.join('#','bsp','boards',buildEnv['BSP'])
 bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp','boards',buildEnv['BSP'])
 buildEnv.Append(CPPPATH = [bspDir])
 buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = bspVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
 
+# kernelheader
+kernelHDir      = os.path.join('#','kernel')
+kernelHVarDir   = os.path.join(buildEnv['VARDIR'],'kernel')
+buildEnv.SConscript(
+    os.path.join(kernelHDir,'SConscript'),
+    exports     = {'env': buildEnv},
+    variant_dir = kernelHVarDir,
+    duplicate   = 0,
+)
+
 # kernel
-kernelDir       = os.path.join('#','firmware','openos','kernel','openos')
-kernelVarDir    = os.path.join(buildEnv['VARDIR'],'kernel','openos')
+kernelDir       = os.path.join('#','kernel',buildEnv['kernel'])
+kernelVarDir    = os.path.join(buildEnv['VARDIR'],'kernel',buildEnv['kernel'])
 buildEnv.SConscript(
     os.path.join(kernelDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = kernelVarDir,
+    duplicate   = 0,
 )
-buildEnv.Clean('libopenos', Dir(kernelVarDir).abspath)
+buildEnv.Clean('libkernel', Dir(kernelVarDir).abspath)
 buildEnv.Append(LIBPATH = [kernelVarDir])
 
 # drivers
-driversDir      = os.path.join('#','firmware','openos','drivers')
+driversDir      = os.path.join('#','drivers')
 driversVarDir   = os.path.join(buildEnv['VARDIR'],'drivers')
 buildEnv.SConscript(
     os.path.join(driversDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = driversVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libdrivers', Dir(driversVarDir).abspath)
 buildEnv.Append(LIBPATH = [driversVarDir])
 
 # openstack
-openstackDir    = os.path.join('#','firmware','openos','openwsn')
-openstackVarDir = os.path.join(buildEnv['VARDIR'],'openwsn')
+openstackDir    = os.path.join('#','openstack')
+openstackVarDir = os.path.join(buildEnv['VARDIR'],'openstack')
 buildEnv.SConscript(
     os.path.join(openstackDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = openstackVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libopenstack', Dir(openstackVarDir).abspath)
 buildEnv.Append(LIBPATH = [openstackVarDir])
 
+# openapps
+openappsDir        = os.path.join('#','openapps')
+openappsVarDir     = os.path.join(buildEnv['VARDIR'],'openapps')
+buildEnv.SConscript(
+    os.path.join(openappsDir,'SConscript'),
+    exports        = {'env': buildEnv},
+    variant_dir    = openappsVarDir,
+    duplicate   = 0,
+)
+buildEnv.Clean('libopenapps', Dir(openappsVarDir).abspath)
+buildEnv.Append(LIBPATH = [openappsVarDir])
+
 # projects
 buildEnv.SConscript(
-    os.path.join('#','firmware','openos','projects','SConscript'),
+    os.path.join('#','projects','SConscript'),
     exports     = {'env': buildEnv},
     #variant_dir = os.path.join(env['VARDIR'],'projects'),
 )
