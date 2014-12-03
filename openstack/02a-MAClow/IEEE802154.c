@@ -18,7 +18,7 @@ Note that we are writing the field from the end of the header to the beginning.
 
 \param[in,out] msg              The message to append the header to.
 \param[in]     frameType        Type of IEEE802.15.4 frame.
-\param[in]     ielistpresent    Is the IE list present¿
+\param[in]     ielistpresent    Is the IE list presentï¿½
 \param[in]     frameVersion     IEEE802.15.4 frame version.
 \param[in]     securityEnabled  Is security enabled on this frame?
 \param[in]     sequenceNumber   Sequence number of this frame.
@@ -95,7 +95,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    } else {
       temp_8b          |= IEEE154_ACK_YES_ACK_REQ         << IEEE154_FCF_ACK_REQ;
    }
-   temp_8b             |= IEEE154_PANID_COMPRESSED        << IEEE154_FCF_INTRAPAN;
+   temp_8b             |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
    *((uint8_t*)(msg->payload)) = temp_8b;
 }
 
