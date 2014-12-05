@@ -26,3 +26,5 @@ path.txt
 *.lst
 /firmware/openos/projects/wsn430v14/03oos_mercator/*.ewd
 *~
+bsp
+*.os

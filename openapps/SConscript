@@ -9,6 +9,7 @@ localEnv      = env.Clone()
 # apps which should always be present
 defaultApps   = [
     'c6t',
+    'cexample',
     'cinfo',
     'cleds',
     'cwellknown',

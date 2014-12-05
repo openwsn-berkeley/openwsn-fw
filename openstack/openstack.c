@@ -61,6 +61,7 @@ void openstack_init(void) {
    //-- 02b-RES
    schedule_init();
    sixtop_init();
+   otf_init();
    neighbors_init();
    //-- 03a-IPHC
    openbridge_init();

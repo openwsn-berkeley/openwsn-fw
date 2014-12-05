@@ -17,7 +17,7 @@ sources_c = [
     os.path.join('02b-MAChigh','otf.c'),
     os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
-    os.path.join('02b-MAChigh','sixtop.c'),
+   os.path.join('02b-MAChigh','sixtop.c'),
     #=== 03a-IPHC
     os.path.join('03a-IPHC','iphc.c'),
     os.path.join('03a-IPHC','openbridge.c'),

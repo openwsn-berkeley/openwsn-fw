@@ -226,7 +226,14 @@ owerror_t schedule_addActiveSlot(
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
    scheduleEntry_t* nextSlotWalker;
-   
+
+   //debug (with the inserted slot/channel offset)
+   openserial_printInfo(COMPONENT_SCHEDULE,
+                        ERR_CELL_INFO,
+                        (errorparameter_t)slotOffset,
+                        (errorparameter_t)channelOffset);
+
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    

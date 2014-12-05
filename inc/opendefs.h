@@ -155,6 +155,8 @@ enum {
    COMPONENT_TECHO                     = 0x20,
    COMPONENT_TOHLONE                   = 0x21,
    COMPONENT_UECHO                     = 0x22,
+   //fabrice
+   COMPONENT_OTF                       = 0x23,
 };
 
 /**
@@ -228,6 +230,11 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
+//fabrice debug
+   ERR_OTF_NEWPK                       = 0x3a, // a packet is pushed to the lower layer
+   ERR_CEXAMPLE_GEN                    = 0x3b, // a CoAP packet was generated
+   ERR_CELL_INFO                       = 0x3c, // channel ofsset and timeslot present in the schedule
+   ERR_GENERIC                         = 0x3d, // generic error for debug
 };
 
 //=========================== typedef =========================================

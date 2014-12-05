@@ -353,7 +353,15 @@ owerror_t forwarding_send_internal_RoutingTable(
       uint32_t*              flow_label,
       uint8_t                fw_SendOrfw_Rcv
    ) {
-   
+
+   //pk generation error
+   openserial_printInfo(COMPONENT_CEXAMPLE,
+                        ERR_GENERIC,
+                        (owerror_t)2,
+                        (owerror_t)0);
+
+
+
    // retrieve the next hop from the routing table
    forwarding_getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
    if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
@@ -365,7 +373,7 @@ owerror_t forwarding_send_internal_RoutingTable(
       );
       return E_FAIL;
    }
-   
+
    // send to next lower layer
    return iphc_sendFromForwarding(
       msg,
@@ -374,6 +382,15 @@ owerror_t forwarding_send_internal_RoutingTable(
       flow_label,
       fw_SendOrfw_Rcv
    );
+   
+   //otf to verify the current allocation
+   otf_packetenqueued(
+                      msg,
+                      ipv6_header,
+                      rpl_option,
+                      flow_label,
+                      fw_SendOrfw_Rcv
+                      );
 }
 
 /**

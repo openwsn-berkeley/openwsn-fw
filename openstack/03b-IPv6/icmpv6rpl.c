@@ -264,7 +264,7 @@ void icmpv6rpl_timer_DIO_task() {
    
    // check whether we need to send DIO
    if (icmpv6rpl_vars.delayDIO==0) {
-      
+
       // send DIO
       sendDIO();
       
