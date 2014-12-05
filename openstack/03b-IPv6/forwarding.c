@@ -62,8 +62,8 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    open_addr_t*         myprefix;
    open_addr_t*         myadd64;
    uint32_t             flow_label = 0;
-   
-   // take ownership over the packet
+
+  // take ownership over the packet
    msg->owner                = COMPONENT_FORWARDING;
    
    // retrieve my prefix and EUI64
@@ -166,7 +166,9 @@ void forwarding_receive(
    ) {
    uint8_t flags;
    uint16_t senderRank;
-   
+
+
+
    // take ownership
    msg->owner                     = COMPONENT_FORWARDING;
    
@@ -186,7 +188,15 @@ void forwarding_receive(
    // populate packets metadata with L3 information
    memcpy(&(msg->l3_destinationAdd),&ipv6_header->dest,sizeof(open_addr_t));
    memcpy(&(msg->l3_sourceAdd),     &ipv6_header->src, sizeof(open_addr_t));
-   
+
+   uint16_t err1 = ipv6_header->dest.addr_128b[14] <<8 + ipv6_header->dest.addr_128b[15];
+   uint16_t err2 = ipv6_header->dest.addr_128b[12] <<8 + ipv6_header->dest.addr_128b[13];
+   openserial_printInfo(COMPONENT_FORWARDING,
+                        ERR_GENERIC,
+                        (owerror_t)ipv6_header->dest.addr_128b[15],
+                        (owerror_t)ipv6_header->dest.addr_128b[14]);
+
+
    if (
          (
             idmanager_isMyAddress(&ipv6_header->dest)
@@ -353,13 +363,6 @@ owerror_t forwarding_send_internal_RoutingTable(
       uint32_t*              flow_label,
       uint8_t                fw_SendOrfw_Rcv
    ) {
-
-   //pk generation error
-   openserial_printInfo(COMPONENT_CEXAMPLE,
-                        ERR_GENERIC,
-                        (owerror_t)2,
-                        (owerror_t)0);
-
 
 
    // retrieve the next hop from the routing table

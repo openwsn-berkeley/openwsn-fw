@@ -87,8 +87,8 @@ void cexample_task_cb() {
 
       //pk generation error
       openserial_printInfo(COMPONENT_CEXAMPLE,
-                           ERR_CEXAMPLE_GEN,
-                           (owerror_t)outcome,
+                           ERR_GENERIC,
+                           (owerror_t)3,
                            (owerror_t)0);
       return;
    }
@@ -157,7 +157,7 @@ void cexample_task_cb() {
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
    pkt->l3_destinationAdd.type    = ADDR_128B;
-   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_motesEecs,16);
+   memcpy(&pkt->l3_destinationAdd.addr_128b[0],&ipAddr_unistra,16);
 
 
 
