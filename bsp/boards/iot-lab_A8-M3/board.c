@@ -1,5 +1,5 @@
 /**
-\brief iot-lab_M3 definition of the "board" bsp module.
+\brief iot-lab_A8-M3 definition of the "board" bsp module.
 
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>, January 2014.
 */

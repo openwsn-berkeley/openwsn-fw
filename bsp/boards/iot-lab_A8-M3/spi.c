@@ -1,5 +1,5 @@
 /**
-\brief iot-lab_M3 definition of the "spi" bsp module (based on openmoteSTM32 code).
+\brief iot-lab_A8-M3 definition of the "spi" bsp module (based on openmoteSTM32 code).
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.

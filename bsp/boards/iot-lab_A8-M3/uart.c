@@ -1,5 +1,5 @@
 /**
-\brief iot-lab_M3 definition of the "uart" bsp module (based on openmoteSTM32 code).
+\brief iot-lab_A8-M3 definition of the "uart" bsp module (based on openmoteSTM32 code).
 
 \author Chang Tengfei <tengfei.chang@gmail.com>,  July 2012.
 \author Alaeddine Weslati <alaeddine.weslati@inria.fr>,  January 2014.

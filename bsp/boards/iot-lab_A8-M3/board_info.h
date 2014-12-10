@@ -1,5 +1,5 @@
 /**
-\brief iot-lab_M3 board information bsp module (based on openmoteSTM32 code).
+\brief iot-lab_A8-M3 board information bsp module (based on openmoteSTM32 code).
 
 This module simply defines some strings describing the board, which CoAP uses
 to return the board's description.
