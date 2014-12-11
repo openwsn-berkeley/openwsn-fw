@@ -193,8 +193,14 @@ void forwarding_receive(
    uint16_t err2 = ipv6_header->dest.addr_128b[12] <<8 + ipv6_header->dest.addr_128b[13];
    openserial_printInfo(COMPONENT_FORWARDING,
                         ERR_GENERIC,
-                        (owerror_t)ipv6_header->dest.addr_128b[15],
-                        (owerror_t)ipv6_header->dest.addr_128b[14]);
+                        (owerror_t)err1,
+                        (owerror_t)err2);
+   err1 = ipv6_header->dest.addr_128b[10] <<8 + ipv6_header->dest.addr_128b[11];
+   err2 = ipv6_header->dest.addr_128b[8] <<8 + ipv6_header->dest.addr_128b[9];
+   openserial_printInfo(COMPONENT_FORWARDING,
+                        ERR_GENERIC,
+                        (owerror_t)err1,
+                        (owerror_t)err2);
 
 
    if (
