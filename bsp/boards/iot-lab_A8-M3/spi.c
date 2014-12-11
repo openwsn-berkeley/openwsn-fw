@@ -57,6 +57,7 @@ void spi_init() {
   //enable SPI2, GPIOA, GPIOB and GPIOC, Clock
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB, ENABLE);
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
    
   //Configure SPI-related pins: PB.13 as SCLK pin ,PB.14 as MISO pin, PB.15 as MOSI pin, PA.4 as /SEL pin
