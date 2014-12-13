@@ -65,7 +65,7 @@
 		<buildTargets>
 			<target name="bsp_bsp_timer" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>bsp_bsp_timer</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -73,7 +73,7 @@
 			</target>
 			<target name="bsp_debugpins" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>bsp_debugpins</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -81,15 +81,15 @@
 			</target>
 			<target name="bsp_leds" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
-				<buildTarget>bsp_leds</buildTarget>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>verbose=1 bsp_leds</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
 			</target>
 			<target name="bsp_radio" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>bsp_radio</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -97,7 +97,7 @@
 			</target>
 			<target name="bsp_radiotimer" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>bsp_radiotimer</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -105,7 +105,7 @@
 			</target>
 			<target name="bsp_uart" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>bsp_uart</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -113,7 +113,7 @@
 			</target>
 			<target name="oos_macpong" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>oos_macpong</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -121,7 +121,7 @@
 			</target>
 			<target name="oos_openwsn" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>oos_openwsn</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -129,7 +129,7 @@
 			</target>
 			<target name="bsp_bsp_timer (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>-c bsp_bsp_timer</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -137,7 +137,7 @@
 			</target>
 			<target name="bsp_debugpins (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>-c bsp_debugpins</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -145,7 +145,7 @@
 			</target>
 			<target name="bsp_leds (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>-c bsp_leds</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -153,7 +153,7 @@
 			</target>
 			<target name="bsp_radio (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>-c bsp_radio</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -161,7 +161,7 @@
 			</target>
 			<target name="bsp_radiotimer (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>-c bsp_radiotimer</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -169,7 +169,7 @@
 			</target>
 			<target name="bsp_uart (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>-c bsp_uart</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -177,7 +177,7 @@
 			</target>
 			<target name="oos_macpong (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>-c oos_macpong</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
@@ -185,7 +185,7 @@
 			</target>
 			<target name="oos_openwsn (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
-				<buildArguments>board=OpenMote-CC2538 toolchain=armgcc</buildArguments>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
 				<buildTarget>-c oos_openwsn</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
