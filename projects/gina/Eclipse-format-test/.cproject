@@ -22,7 +22,7 @@
 					<folderInfo id="dk.xpg.msp430eclipse.configuration.app.debug.2132042267." name="/" resourcePath="">
 						<toolChain id="dk.xpg.msp430eclipse.toolchain.gcc.app.debug.1390328792" name="MSP430 GCC Toolchain" superClass="dk.xpg.msp430eclipse.toolchain.gcc.app.debug">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="dk.xpg.msp430eclipse.targetplatform.msp430.1961934336" isAbstract="false" name="MSP430 Cross-Target" osList="all" superClass="dk.xpg.msp430eclipse.targetplatform.msp430"/>
-							<builder arguments="board=gina toolchain=mspgcc" autoBuildTarget="all" buildPath="${ProjDirPath}\..\..\..\" cleanBuildTarget="-c" command="${SCONS}" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="dk.xpg.msp430eclipse.target.gnu.builder.1860504408" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="MSP430 GNU Make Builder" parallelBuildOn="false" superClass="dk.xpg.msp430eclipse.target.gnu.builder"/>
+							<builder autoBuildTarget="all" buildPath="${workspace_loc:/OpenWSN}/Debug" cleanBuildTarget="clean" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="dk.xpg.msp430eclipse.target.gnu.builder.1860504408" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="MSP430 GNU Make Builder" parallelBuildOn="false" superClass="dk.xpg.msp430eclipse.target.gnu.builder"/>
 							<tool id="dk.xpg.msp430eclipse.tool.compiler.gcc.1719800437" name="MSP430 C Compiler" superClass="dk.xpg.msp430eclipse.tool.compiler.gcc">
 								<option defaultValue="dk.xpg.msp430eclipse.compiler.option.optimization.level.none" id="dk.xpg.msp430eclipse.compiler.option.optimization.level.931813301" name="Optimization Level" superClass="dk.xpg.msp430eclipse.compiler.option.optimization.level" valueType="enumerated"/>
 								<option defaultValue="dk.xpg.msp430eclipse.compiler.option.debugging.level.default" id="dk.xpg.msp430eclipse.compiler.option.debugging.level.1475401393" name="Debugging Level" superClass="dk.xpg.msp430eclipse.compiler.option.debugging.level" valueType="enumerated"/>
@@ -44,7 +44,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="gina/sctimer.c|inc|drivers|common|kernel|openapps|openstack|projects/03oos_openwsn|projects/03oos_mercator|projects/03oos_macpong|projects/02drv_opentimers|projects/02drv_openserial|projects/01bsp_uart|projects/01bsp_spi|projects/01bsp_radiotimer|projects/01bsp_radio_tx|projects/01bsp_radio_rx|projects/01bsp_radio|projects/01bsp_eui64|projects/01bsp_debugpins|projects/01bsp_closetimers|projects/01bsp_bsp_timer|projects/01bsp_bothtimers" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="projects/03oos_openwsn|openstack|openapps|kernel|inc|drivers|common|gina/sctimer.c|projects/03oos_mercator|projects/03oos_macpong|projects/02drv_opentimers|projects/02drv_openserial|projects/01bsp_uart|projects/01bsp_spi|projects/01bsp_radiotimer|projects/01bsp_radio_tx|projects/01bsp_radio_rx|projects/01bsp_radio|projects/01bsp_eui64|projects/01bsp_debugpins|projects/01bsp_closetimers|projects/01bsp_bsp_timer|projects/01bsp_bothtimers" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
