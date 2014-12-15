@@ -82,7 +82,7 @@
 			<target name="bsp_leds" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
 				<buildCommand>${SCONS}</buildCommand>
 				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
-				<buildTarget>verbose=1 bsp_leds</buildTarget>
+				<buildTarget>debug=1 bsp_leds</buildTarget>
 				<stopOnError>true</stopOnError>
 				<useDefaultCommand>true</useDefaultCommand>
 				<runAllBuilders>true</runAllBuilders>
