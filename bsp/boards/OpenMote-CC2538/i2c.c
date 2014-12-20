@@ -37,6 +37,11 @@ void i2c_init(void)
 {
     uint8_t status;
     
+    // Enable peripheral except in deep sleep modes (e.g. LPM1, LPM2, LPM3)
+    SysCtrlPeripheralEnable(I2C_PERIPHERAL);
+    SysCtrlPeripheralSleepEnable(I2C_PERIPHERAL);
+    SysCtrlPeripheralDeepSleepDisable(I2C_PERIPHERAL);
+
     // Reset peripheral previous to configuring it
     SysCtrlPeripheralReset(I2C_PERIPHERAL);
 
