@@ -793,19 +793,6 @@ void SPI3_IRQHandler(void)
 *******************************************************************************/
 void UART4_IRQHandler(void)
 {
-//    debugpins_isr_set();
-//    if(USART_GetFlagStatus(UART4,USART_FLAG_RXNE) != RESET)
-//    {
-//      USART_ClearFlag(UART4,USART_FLAG_RXNE);
-//      
-//        uart_rx_isr();
-//    }
-//  
-//    if(USART_GetFlagStatus(UART4,USART_FLAG_TXE) != RESET)
-//    { 
-//        uart_tx_isr(); 
-//    }
-//    debugpins_isr_clr();
 }
 
 /*******************************************************************************
