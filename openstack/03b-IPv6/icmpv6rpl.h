@@ -136,7 +136,7 @@ END_PACK
 typedef struct {
    // admin
    bool                      busySending;             ///< currently sending DIO/DAO.
-   uint8_t                   DODAGIDFlagSet;          ///< is DODAGID set already?
+   uint8_t                   fDodagidWritten;         ///< is DODAGID already written to DIO/DAO?
    // DIO-related
    icmpv6rpl_dio_ht          dio;                     ///< pre-populated DIO packet.
    open_addr_t               dioDestination;          ///< IPv6 destination address for DIOs.
@@ -146,7 +146,7 @@ typedef struct {
    // DAO-related
    icmpv6rpl_dao_ht          dao;                     ///< pre-populated DAO packet.
    icmpv6rpl_dao_transit_ht  dao_transit;             ///< pre-populated DAO "Transit Info" option header.
-   icmpv6rpl_dao_target_ht  dao_target;             ///< pre-populated DAO "Transit Info" option header.
+   icmpv6rpl_dao_target_ht   dao_target;              ///< pre-populated DAO "Transit Info" option header.
    opentimer_id_t            timerIdDAO;              ///< ID of the timer used to send DAOs.
    uint16_t                  periodDAO;               ///< duration, in ms, of a timerIdDAO timeout.
    uint8_t                   delayDAO;                ///< number of timerIdDIO events before actually sending a DAO.
@@ -154,10 +154,11 @@ typedef struct {
 
 //=========================== prototypes ======================================
 
-void icmpv6rpl_init(void);
-void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error);
-void icmpv6rpl_receive(OpenQueueEntry_t* msg);
-uint8_t icmpv6rpl_getRPLIntanceID(void);
+void     icmpv6rpl_init(void);
+void     icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error);
+void     icmpv6rpl_receive(OpenQueueEntry_t* msg);
+void     icmpv6rpl_writeDODAGid(uint8_t* dodagid);
+uint8_t  icmpv6rpl_getRPLIntanceID(void);
 
 /**
 \}

@@ -47,7 +47,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void adaptive_sync_init(void);
-void adaptive_sync_preprocess(int16_t timeCorrection, open_addr_t timesource);
+void adaptive_sync_indicateTimeCorrection(int16_t timeCorrection, open_addr_t timesource);
 void adaptive_sync_calculateCompensatedSlots(int16_t timeCorrection);
 
 void adaptive_sync_countCompensationTimeout(void);

@@ -36,7 +36,7 @@ void openbridge_triggerData() {
    //copying the buffer once we know it is not too big
    openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
   
-   if (idmanager_getIsBridge()==TRUE && numDataBytes>0) {
+   if (idmanager_getIsDAGroot()==TRUE && numDataBytes>0) {
       pkt = openqueue_getFreePacketBuffer(COMPONENT_OPENBRIDGE);
       if (pkt==NULL) {
          openserial_printError(COMPONENT_OPENBRIDGE,ERR_NO_FREE_PACKET_BUFFER,

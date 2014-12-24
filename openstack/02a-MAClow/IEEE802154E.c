@@ -1777,6 +1777,9 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
    
+   // indicate time correction to adaptive sync module
+   adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
+   
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    
@@ -1796,8 +1799,6 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    // update the stats
    ieee154e_stats.numSyncPkt++;
    updateStats(timeCorrection);
-
-   adaptive_sync_preprocess(timeCorrection, ieee154e_vars.dataReceived->l2_nextORpreviousHop);
    
 #ifdef OPENSIM
    debugpins_syncPacket_set();
@@ -1815,8 +1816,13 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
+   
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
+   
+   // indicate time correction to adaptive sync module
+   adaptive_sync_indicateTimeCorrection((-timeCorrection),ieee154e_vars.ackReceived->l2_nextORpreviousHop);
+   
    // log a large timeCorrection
    if (
          ieee154e_vars.isSync==TRUE &&
@@ -1832,9 +1838,6 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    // update the stats
    ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
-
-   // update last asn when need sync.
-   adaptive_sync_preprocess((-timeCorrection), ieee154e_vars.ackReceived->l2_nextORpreviousHop);
    
 #ifdef OPENSIM
    debugpins_syncAck_set();

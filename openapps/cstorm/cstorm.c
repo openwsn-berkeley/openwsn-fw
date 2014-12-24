@@ -50,7 +50,9 @@ void cstorm_init(void) {
    opencoap_register(&cstorm_vars.desc);
    
    /*
-   cstorm_vars.period           = 0;
+   //start a periodic timer
+   //comment : not running by default
+   cstorm_vars.period           = 6553; 
    
    cstorm_vars.timerId                    = opentimers_start(
       cstorm_vars.period,
@@ -58,7 +60,8 @@ void cstorm_init(void) {
       cstorm_timer_cb
    );
    
-   opentimers_stop(cstorm_vars.timerId);
+   //stop 
+   //opentimers_stop(cstorm_vars.timerId);
    */
 }
 
@@ -177,22 +180,35 @@ void cstorm_task_cb() {
    pkt->creator    = COMPONENT_CSTORM;
    pkt->owner      = COMPONENT_CSTORM;
    
+   //The contents of the message are written in reverse order : the payload first
+   //packetfunctions_reserveHeaderSize moves the index pkt->payload
+   
    // add payload
    packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
    memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
    
+   //set the TKL byte as a counter of Options
+   //TODO: This is not conform with RFC7252, but yes with current dissector WS v1.10.6
    numOptions = 0;
-   // location-path option
-   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
-   memcpy(&pkt->payload[0],&cstorm_path0,sizeof(cstorm_path0)-1);
-   packetfunctions_reserveHeaderSize(pkt,1);
-   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH) << 4 | (sizeof(cstorm_path0)-1);
-   numOptions++;
+   
+   //Bigger Options last in message, first in the code (as it is in reverse order) 
+   //Deltas are calculated between too consecutive lengthes.
    
    // content-type option
    packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0] = COAP_OPTION_NUM_CONTENTFORMAT << 4 | 1;
+   pkt->payload[0] = (COAP_OPTION_NUM_CONTENTFORMAT-COAP_OPTION_NUM_URIPATH) << 4 | 1; 
    pkt->payload[1] = COAP_MEDTYPE_APPOCTETSTREAM;
+   numOptions++;
+   
+   // location-path option
+   packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_path0)-1);
+   memcpy(&pkt->payload[0],cstorm_path0,sizeof(cstorm_path0)-1);
+   packetfunctions_reserveHeaderSize(pkt,1);
+   pkt->payload[0] = (COAP_OPTION_NUM_URIPATH-7) << 4 | (sizeof(cstorm_path0)-1);
+   numOptions++;
+   
+   // length of uri-port option added directly by opencoap_send
+   packetfunctions_reserveHeaderSize(pkt,11);
    numOptions++;
    
    // metadata
@@ -218,3 +234,4 @@ void cstorm_task_cb() {
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
 }
+

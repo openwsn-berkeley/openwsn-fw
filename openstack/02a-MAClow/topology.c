@@ -51,7 +51,7 @@ topology.
 \return FALSE if the packet should be silently dropped.
 */
 bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
-#ifdef PLUGFEST
+#ifdef FORCETOPOLOGY
    bool returnVal;
    
    returnVal=FALSE;

@@ -51,7 +51,7 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    coap_option_t             last_option;
    coap_resource_desc_t*     temp_desc;
    bool                      found;
-   owerror_t                 outcome;
+   owerror_t                 outcome = 0;
    // local variables passed to the handlers (with msg)
    coap_header_iht           coap_header;
    coap_option_iht           coap_options[MAX_COAP_OPTIONS];

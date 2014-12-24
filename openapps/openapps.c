@@ -10,7 +10,9 @@
 #include "c6t.h"
 #include "cinfo.h"
 #include "cleds.h"
+#include "cstorm.h"
 #include "cwellknown.h"
+#include "rrt.h"
 // TCP
 #include "techo.h"
 // UDP
@@ -29,7 +31,9 @@ void openapps_init(void) {
    c6t_init();
    cinfo_init();
    cleds__init();
+   cstorm_init();
    cwellknown_init();
+   rrt_init();
    // TCP
    techo_init();
    // UDP

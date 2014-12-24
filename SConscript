@@ -34,10 +34,12 @@ dummyFunc = Builder(
     suffix = '.ihex',
 )
 
-if   env['plugfest']==1:
-    env.Append(CPPDEFINES    = 'PLUGFEST')
-    if  env['board']=='OpenMote-CC2538':
-        env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
+if env['dagroot']==1:
+    env.Append(CPPDEFINES    = 'DAGROOT')
+if env['forcetopology']==1:
+    env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
+if env['noadaptivesync']==1:
+    env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
 
 if   env['toolchain']=='mspgcc':
     
@@ -287,11 +289,19 @@ elif env['toolchain']=='armgcc':
     env.Append(BUILDERS = {'Elf2iHex'  : elf2iHexFunc})
     
     # convert ELF to bin
-    env.Append(BUILDERS = {'Elf2iBin'  : dummyFunc})
+    elf2BinFunc = Builder(
+       action = 'arm-none-eabi-objcopy -O binary $SOURCE $TARGET',
+       suffix = '.bin',
+    )
+    env.Append(BUILDERS = {'Elf2iBin'  : elf2BinFunc})
     
     # print sizes
-    env.Append(BUILDERS = {'PrintSize' : dummyFunc})
-
+    printSizeFunc = Builder(
+        action = 'arm-none-eabi-size --format=berkeley -x --totals $SOURCE',
+        suffix = '.phonysize',
+    )
+    env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
+    
 elif env['toolchain']=='gcc':
     
     if env['board'] not in ['python']:
@@ -630,6 +640,7 @@ buildEnv.SConscript(
     os.path.join(incDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = incVarDir,
+    duplicate   = 0,
 )
 
 # bspheader
@@ -639,6 +650,7 @@ buildEnv.SConscript(
     os.path.join(bspHDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = bspHVarDir,
+    duplicate   = 0,
 )
 
 # bsp
@@ -649,6 +661,7 @@ buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = bspVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
@@ -660,6 +673,7 @@ buildEnv.SConscript(
     os.path.join(kernelHDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = kernelHVarDir,
+    duplicate   = 0,
 )
 
 # kernel
@@ -669,6 +683,7 @@ buildEnv.SConscript(
     os.path.join(kernelDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = kernelVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libkernel', Dir(kernelVarDir).abspath)
 buildEnv.Append(LIBPATH = [kernelVarDir])
@@ -680,6 +695,7 @@ buildEnv.SConscript(
     os.path.join(driversDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = driversVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libdrivers', Dir(driversVarDir).abspath)
 buildEnv.Append(LIBPATH = [driversVarDir])
@@ -691,6 +707,7 @@ buildEnv.SConscript(
     os.path.join(openstackDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = openstackVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libopenstack', Dir(openstackVarDir).abspath)
 buildEnv.Append(LIBPATH = [openstackVarDir])
@@ -702,6 +719,7 @@ buildEnv.SConscript(
     os.path.join(openappsDir,'SConscript'),
     exports        = {'env': buildEnv},
     variant_dir    = openappsVarDir,
+    duplicate   = 0,
 )
 buildEnv.Clean('libopenapps', Dir(openappsVarDir).abspath)
 buildEnv.Append(LIBPATH = [openappsVarDir])

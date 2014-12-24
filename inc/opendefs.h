@@ -85,6 +85,7 @@ enum {
    //UDP
    WKP_UDP_COAP                        =  5683,
    WKP_UDP_ECHO                        =     7,
+   WKP_UDP_RINGMASTER                  = 15000,
 };
 
 //status elements
@@ -155,6 +156,7 @@ enum {
    COMPONENT_TECHO                     = 0x20,
    COMPONENT_TOHLONE                   = 0x21,
    COMPONENT_UECHO                     = 0x22,
+   COMPONENT_RRT                       = 0x23,
 };
 
 /**
@@ -220,7 +222,7 @@ enum {
    ERR_UNSUPPORTED_COMMAND             = 0x2f, // unsupported command {0}
    ERR_MSG_UNKNOWN_TYPE                = 0x30, // unknown message type {0}
    ERR_WRONG_ADDR_TYPE                 = 0x31, // wrong address type {0} (code location {1})
-   ERR_BRIDGE_MISMATCH                 = 0x32, // isBridge mismatch (code location {0})
+   ERR_BRIDGE_MISMATCH                 = 0x32, // bridge mismatch (code location {0})
    ERR_HEADER_TOO_LONG                 = 0x33, // header too long, length {1} (code location {0})
    ERR_INPUTBUFFER_LENGTH              = 0x34, // input length problem, length={0}
    ERR_BOOTED                          = 0x35, // booted
