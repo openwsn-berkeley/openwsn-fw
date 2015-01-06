@@ -15,6 +15,7 @@ defaultApps   = [
     'cwellknown',
     'techo',
     'uecho',
+    'rrt',
 ]
 if localEnv['board']=='python':
     defaultApps  += [

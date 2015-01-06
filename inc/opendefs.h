@@ -85,6 +85,7 @@ enum {
    //UDP
    WKP_UDP_COAP                        =  5683,
    WKP_UDP_ECHO                        =     7,
+   WKP_UDP_RINGMASTER                  = 15000,
 };
 
 //status elements
@@ -155,6 +156,7 @@ enum {
    COMPONENT_TECHO                     = 0x20,
    COMPONENT_TOHLONE                   = 0x21,
    COMPONENT_UECHO                     = 0x22,
+   COMPONENT_RRT                       = 0x23,
    //fabrice
    COMPONENT_OTF                       = 0x23,
 };
