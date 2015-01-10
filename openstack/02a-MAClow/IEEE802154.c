@@ -57,7 +57,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       }
       
    }
-   // destpan
+   // destpan -- se page 41 of 15.4-2011 std. DEST PANID only sent as it is equal to SRC PANID
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
    //dsn
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
@@ -95,7 +95,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    } else {
       temp_8b          |= IEEE154_ACK_YES_ACK_REQ         << IEEE154_FCF_ACK_REQ;
    }
-   temp_8b             |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
+   temp_8b             |= IEEE154_PANID_COMPRESSED      << IEEE154_FCF_INTRAPAN;
    *((uint8_t*)(msg->payload)) = temp_8b;
 }
 
