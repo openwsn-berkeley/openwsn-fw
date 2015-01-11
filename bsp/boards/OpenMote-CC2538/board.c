@@ -202,9 +202,9 @@ static void clock_init(void)
     /**
      * Define what peripherals run in each mode
      */
-    SysCtrlDeepSleepSetting();
-    SysCtrlSleepSetting();
     SysCtrlRunSetting();
+    SysCtrlSleepSetting();
+    SysCtrlDeepSleepSetting();
     SysCtrlWakeupSetting();
 
     /**
@@ -216,28 +216,29 @@ static void clock_init(void)
     }
 }
 
-
-static void SysCtrlDeepSleepSetting(void)
+void SysCtrlRunSetting(void)
 {
-  /* Disable General Purpose Timers 0, 1, 2, 3 during deep sleep */
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT2);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT3);
+  /* Disable General Purpose Timers 0, 1, 2, 3 when running */
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT0);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT1);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT2);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT3);
 
-  /* Disable SSI 0, 1 during deep sleep */
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI0);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI1);
+  /* Disable SSI 0, 1 when running */
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI0);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI1);
 
-  /* Disable UART 0, 1 during deep sleep */
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART0);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART1);
+  /* Disable UART1 when running */
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_UART1);
 
-  /* Disable I2C, PKA, AES during deep sleep */
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_I2C);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_PKA);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_AES);
-  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_RFC);
+  /* Disable I2C, AES and PKA when running */
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_I2C);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_PKA);
+  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_AES);
+
+  /* Enable UART0 and RFC when running */
+  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
+  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
 }
 
 static void SysCtrlSleepSetting(void)
@@ -265,32 +266,28 @@ static void SysCtrlSleepSetting(void)
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
 }
 
-
-void SysCtrlRunSetting(void)
+static void SysCtrlDeepSleepSetting(void)
 {
-  /* Disable General Purpose Timers 0, 1, 2, 3 when running */
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT2);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT3);
+  /* Disable General Purpose Timers 0, 1, 2, 3 during deep sleep */
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT0);
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT1);
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT2);
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_GPT3);
 
-  /* Disable SSI 0, 1 when running */
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI0);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_SSI1);
+  /* Disable SSI 0, 1 during deep sleep */
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI0);
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_SSI1);
 
-  /* Disable UART1 when running */
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_UART1);
+  /* Disable UART 0, 1 during deep sleep */
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART0);
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_UART1);
 
-  /* Disable I2C, AES and PKA when running */
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_I2C);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_PKA);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_AES);
-
-  /* Enable UART0 and RFC when running */
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
-  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
+  /* Disable I2C, PKA, AES during deep sleep */
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_I2C);
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_PKA);
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_AES);
+  SysCtrlPeripheralDeepSleepDisable(SYS_CTRL_PERIPH_RFC);
 }
-
 
 void SysCtrlWakeupSetting(void)
 {
