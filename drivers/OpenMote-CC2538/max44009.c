@@ -65,20 +65,15 @@ void max44009_init(void)
     uint8_t max44009_address[5] = {MAX44009_INT_ENABLE_ADDR, MAX44009_CONFIG_ADDR, \
                                    MAX44009_THR_HIGH_ADDR, MAX44009_THR_LOW_ADDR, \
                                    MAX44009_THR_TIMER_ADDR};
-    uint8_t max44009_value[5];
+    uint8_t max44009_value[5]   = {MAX44009_INT_STATUS_ON, MAX44009_DEFAULT_CONFIGURATION, \
+                                   0xFF, 0x00, 0xFF};
     uint8_t max44009_data[2];
     uint8_t i;
 
-    max44009_value[0] = (MAX44009_INT_STATUS_ON);
-    max44009_value[1] = (MAX44009_DEFAULT_CONFIGURATION);
-    max44009_value[2] = (0xFF);
-    max44009_value[3] = (0x00);
-    max44009_value[4] = (0xFF);
-
     for (i = 0; i < sizeof(max44009_address); i++)
     {
-        max44009_data[0] = max44009_value[i];
-        max44009_data[1] = max44009_data[i];
+        max44009_data[0] = max44009_address[i];
+        max44009_data[1] = max44009_value[i];
         i2c_write_bytes(MAX44009_ADDRESS, max44009_data, 2);
     }
 }
@@ -88,14 +83,14 @@ void max44009_reset(void)
     uint8_t max44009_address[5] = {MAX44009_INT_ENABLE_ADDR, MAX44009_CONFIG_ADDR, \
                                    MAX44009_THR_HIGH_ADDR, MAX44009_THR_LOW_ADDR, \
                                    MAX44009_THR_TIMER_ADDR};
-    uint8_t max44009_value[5] = {0x00, 0x03, 0xFF, 0x00, 0xFF};
+    uint8_t max44009_value[5]   = {0x00, 0x03, 0xFF, 0x00, 0xFF};
     uint8_t max44009_data[2];
     uint8_t i;
     
     for (i = 0; i < sizeof(max44009_address); i++)
     {
-        max44009_data[0] = max44009_value[i];
-        max44009_data[1] = max44009_data[i];
+        max44009_data[0] = max44009_address[i];
+        max44009_data[1] = max44009_value[i];
         i2c_write_bytes(MAX44009_ADDRESS, max44009_data, 2);
     }
 }
@@ -122,7 +117,7 @@ uint16_t max44009_read_light(void)
     i2c_read_byte(MAX44009_ADDRESS, &max44009_data[1]);
 
     exponent = (( max44009_data[0] >> 4 )  & 0x0E);
-    mantissa = (( max44009_data[0] & 0x0F ) << 4) | (max44009_data[1] & 0x0F);
+    mantissa = (( max44009_data[0] & 0x0F ) << 4) | ((max44009_data[1] & 0x0F));
 
     result = ( (uint16_t) exponent << 8 ) | ( (uint16_t) mantissa << 0);
     
