@@ -60,8 +60,7 @@
 
 //=========================== public ==========================================
 
-void max44009_init(void)
-{
+void max44009_init(void) {
     uint8_t max44009_address[5] = {MAX44009_INT_ENABLE_ADDR, MAX44009_CONFIG_ADDR, \
                                    MAX44009_THR_HIGH_ADDR, MAX44009_THR_LOW_ADDR, \
                                    MAX44009_THR_TIMER_ADDR};
@@ -70,16 +69,14 @@ void max44009_init(void)
     uint8_t max44009_data[2];
     uint8_t i;
 
-    for (i = 0; i < sizeof(max44009_address); i++)
-    {
+    for (i = 0; i < sizeof(max44009_address); i++) {
         max44009_data[0] = max44009_address[i];
         max44009_data[1] = max44009_value[i];
         i2c_write_bytes(MAX44009_ADDRESS, max44009_data, 2);
     }
 }
 
-void max44009_reset(void)
-{
+void max44009_reset(void) {
     uint8_t max44009_address[5] = {MAX44009_INT_ENABLE_ADDR, MAX44009_CONFIG_ADDR, \
                                    MAX44009_THR_HIGH_ADDR, MAX44009_THR_LOW_ADDR, \
                                    MAX44009_THR_TIMER_ADDR};
@@ -87,16 +84,14 @@ void max44009_reset(void)
     uint8_t max44009_data[2];
     uint8_t i;
     
-    for (i = 0; i < sizeof(max44009_address); i++)
-    {
+    for (i = 0; i < sizeof(max44009_address); i++) {
         max44009_data[0] = max44009_address[i];
         max44009_data[1] = max44009_value[i];
         i2c_write_bytes(MAX44009_ADDRESS, max44009_data, 2);
     }
 }
 
-uint8_t max44009_is_present(void)
-{
+uint8_t max44009_is_present(void) {
     uint8_t is_present;
 
     i2c_write_byte(MAX44009_ADDRESS, MAX44009_CONFIG_ADDR);
@@ -105,8 +100,7 @@ uint8_t max44009_is_present(void)
     return (is_present != MAX44009_NOT_FOUND);
 }
 
-uint16_t max44009_read_light(void)
-{
+uint16_t max44009_read_light(void) {
     uint8_t exponent, mantissa;
     uint8_t max44009_data[2];
     uint16_t result;
@@ -124,8 +118,7 @@ uint16_t max44009_read_light(void)
     return result;
 }
 
-float max44009_convert_light(uint16_t lux)
-{
+float max44009_convert_light(uint16_t lux) {
     uint8_t exponent, mantissa;
     float result = 0.045;
     
@@ -138,5 +131,3 @@ float max44009_convert_light(uint16_t lux)
 }
 
 //=========================== private =========================================
-
-

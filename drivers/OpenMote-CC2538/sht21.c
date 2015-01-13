@@ -5,6 +5,9 @@
  *         Pere Tuset, OpenMote <peretuset@openmote.com>
  */
 
+#include "stdint.h"
+#include "stdbool.h"
+
 #include "i2c.h"
 #include "sht21.h"
 
@@ -45,15 +48,17 @@
 
 //=========================== variables =======================================
 
-
 //=========================== prototypes ======================================
 
+static void sht21_pre_init(void);
 
 //=========================== public ==========================================
 
-void sht21_init(void)
-{
+void sht21_init(void) {
     uint8_t config[2];
+
+    // Pre-init the STH21 if required
+    sht21_pre_init();
 
     // Setup the configuration vector, the first position holds address
     // and the second position holds the actual configuration
@@ -73,15 +78,16 @@ void sht21_init(void)
     i2c_write_bytes(SHT21_ADDRESS, config, sizeof(config));
 }
 
-void sht21_reset(void)
-{
+void sht21_reset(void) {
     // Send a soft-reset command according to the datasheet (pag. 9, fig. 17)
     i2c_write_byte(SHT21_ADDRESS, SHT21_RESET_CMD);
 }
 
-uint8_t sht21_is_present(void)
-{
+uint8_t sht21_is_present(void) {
     uint8_t is_present;
+
+    // Pre-init the STH21 if required
+    sht21_pre_init();
 
     // Read the current configuration according to the datasheet (pag. 9, fig. 18)
     i2c_write_byte(SHT21_ADDRESS, SHT21_USER_REG_READ);
@@ -93,8 +99,7 @@ uint8_t sht21_is_present(void)
     return (is_present == SHT21_DEFAULT_CONFIG);
 }
 
-uint16_t sht21_read_temperature(void)
-{
+uint16_t sht21_read_temperature(void) {
     uint8_t sht21_temperature[2];
     uint16_t temperature;
 
@@ -107,18 +112,16 @@ uint16_t sht21_read_temperature(void)
     return temperature;
 }
 
-float sht21_convert_temperature(uint16_t temperature)
-{
+float sht21_convert_temperature(uint16_t temperature) {
     float result;
     
-    result = -46.85;
+    result  = -46.85;
     result += 175.72 * temperature / 65536;
     
     return result;
 }
 
-uint16_t sht21_read_humidity(void)
-{
+uint16_t sht21_read_humidity(void) {
     uint8_t sht21_humidity[2];
     uint16_t humidity;
 
@@ -131,11 +134,10 @@ uint16_t sht21_read_humidity(void)
     return humidity;
 }
 
-float sht21_convert_humidity(uint16_t humidity)
-{
+float sht21_convert_humidity(uint16_t humidity) {
     float result;
     
-    result = -6.0;
+    result  = -6.0;
     result += 125.0 * humidity / 65536;
     
     return result;
@@ -143,3 +145,13 @@ float sht21_convert_humidity(uint16_t humidity)
 
 //=========================== private =========================================
 
+static void sht21_pre_init(void) {
+    static bool is_initialized = false;
+    volatile uint32_t i;
+
+    if (is_initialized == false) {
+        // Delay needed for the SHT21 to startup
+        for (i = 0x1FFFF; i != 0; i--);
+        is_initialized = true;
+    }
+}
