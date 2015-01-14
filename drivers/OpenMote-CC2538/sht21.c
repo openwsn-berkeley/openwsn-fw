@@ -96,7 +96,7 @@ uint8_t sht21_is_present(void) {
     // Clear the reserved bits according to the datasheet (pag. 9, tab. 8)
     is_present &= ~SHT21_USER_REG_RESERVED_BITS;
 
-    return (is_present == SHT21_DEFAULT_CONFIG);
+    return (is_present == SHT21_DEFAULT_CONFIG || is_present == SHT21_USER_CONFIG);
 }
 
 uint16_t sht21_read_temperature(void) {

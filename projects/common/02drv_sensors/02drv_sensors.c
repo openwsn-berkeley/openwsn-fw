@@ -37,10 +37,6 @@ int mote_main(void) {
     board_init();
     scheduler_init();
 
-    // Delay needed for sensors to startup
-    volatile uint32_t i;
-    for (i = 0x1FFFF; i != 0; i--);
-
     if (adxl346_is_present()) {
         adxl346_init();
         leds_debug_on();
