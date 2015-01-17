@@ -28,6 +28,7 @@ typedef struct {
 void rrt_init(void);
 
 void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote);
+void rrt_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 /**
 \}
 \}
