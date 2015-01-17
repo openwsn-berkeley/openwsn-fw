@@ -37,6 +37,8 @@ int mote_main(void) {
     board_init();
     scheduler_init();
 
+    leds_all_off();
+
     if (adxl346_is_present()) {
         adxl346_init();
         leds_debug_on();
@@ -51,6 +53,8 @@ int mote_main(void) {
         sht21_init();
         leds_error_on();
     }
+
+    leds_radio_on();
 
     scheduler_start();
     return 0;

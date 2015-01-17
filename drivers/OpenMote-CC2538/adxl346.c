@@ -129,7 +129,7 @@ void adxl346_init(void) {
     i2c_write_bytes(ADXL346_ADDRESS, config, sizeof(config));
 
     config[0] = ADXL346_POWER_CTL_ADDR;
-    config[1] = (ADXL346_POWER_CTL_MEASURE);
+    config[1] = ADXL346_POWER_CTL_MEASURE;
     i2c_write_bytes(ADXL346_ADDRESS, config, sizeof(config));
 }
 

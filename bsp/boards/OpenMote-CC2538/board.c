@@ -15,6 +15,7 @@
 #include "leds.h"
 #include "ioc.h"
 #include "gpio.h"
+#include "gptimer.h"
 #include "sys_ctrl.h"
 #include "interrupt.h"
 #include "bsp_timer.h"
@@ -42,6 +43,11 @@ void antenna_init(void);
 void antenna_internal(void);
 void antenna_external(void);
 
+void board_timer_init(void);
+uint32_t board_timer_get(void);
+bool board_timer_expired(uint32_t future);
+
+
 static void clock_init(void);
 static void gpio_init(void);
 static void button_init(void);
@@ -67,6 +73,8 @@ void board_init(void) {
    gpio_init();
    clock_init();
 
+   board_timer_init();
+
    antenna_init();
    antenna_external();
 
@@ -86,6 +94,49 @@ void board_init(void) {
 void board_sleep(void) {
     SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
     SysCtrlSleep();
+}
+
+/**
+ * Timer runs at 32 MHz and is 32-bit wide
+ * The timer is divided by 32, whichs gives a 1 microsecond ticks
+ */
+void board_timer_init(void) {
+	// Configure the timer
+	TimerConfigure(GPTIMER2_BASE, GPTIMER_CFG_PERIODIC_UP);
+	
+	// Enable the timer
+    TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
+}
+
+/**
+ * Returns the current value of the timer
+ * The timer is divided by 32, whichs gives a 1 microsecond ticks
+ */
+uint32_t board_timer_get(void) {
+    uint32_t current;
+    
+    current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
+    
+    return current;
+}
+
+/**
+ * Returns true if the timer has expired
+ * The timer is divided by 32, whichs gives a 1 microsecond ticks
+ */
+bool board_timer_expired(uint32_t future) {
+    uint32_t current;
+    int32_t remaining;
+
+    current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
+
+    remaining = (int32_t) (future - current);
+    
+    if (remaining > 0) {
+        return false;
+    } else {
+        return true;
+    }
 }
 
 /**
@@ -202,7 +253,6 @@ static void SysCtrlRunSetting(void) {
   /* Disable General Purpose Timers 0, 1, 2, 3 when running */
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT0);
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT2);
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT3);
 
   /* Disable SSI 0, 1 when running */
@@ -218,6 +268,7 @@ static void SysCtrlRunSetting(void) {
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_AES);
 
   /* Enable UART0 and RFC when running */
+  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
 }
@@ -226,7 +277,6 @@ static void SysCtrlSleepSetting(void) {
   /* Disable General Purpose Timers 0, 1, 2, 3 during sleep */
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT0);
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT1);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT2);
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT3);
 
   /* Disable SSI 0, 1 during sleep */
@@ -242,6 +292,7 @@ static void SysCtrlSleepSetting(void) {
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_AES);
 
   /* Enable UART and RFC during sleep */
+  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT2);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
 }
