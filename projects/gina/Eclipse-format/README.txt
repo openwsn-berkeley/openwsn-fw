@@ -6,7 +6,9 @@ Software required:
 -----------------
 
 - MSP-430 GCC (mspgcc) toolchain - http://sourceforge.net/projects/mspgcc/files/Windows/mingw32/
+   -in ubuntu (apt-get install gcc-msp430)
 - mspdebug executable installed in the mspgcc folder (including usb and fet libraries, e.g., MSP430.dll and HIL.dll under Windows)
+   -in ubuntu (apt-get install mspdebug)    
 - Eclipse CDT Kepler - http://www.eclipse.org/downloads/packages/eclipse-standard-432/keplersr2
 
 
@@ -30,7 +32,7 @@ Configuring the Eclipse environment:
 - go to Window -> Preferences -> Run/Debug -> String Substitution and set the mspdebug_gdbserver to "mspdebug.exe" (for Windows users) or "mspdebug" (for UNIX/Linux users). Do not put quotes.
 
 
-Importing OpenMote-CC2538 project:
+Importing GINA or other msp430 projects:
 ---------------------------------
 
 - Go into ${openwsn-fw}/projects/gina and create a copy of the Eclipse-format folder
