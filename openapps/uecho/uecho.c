@@ -26,6 +26,7 @@ void uecho_receive(OpenQueueEntry_t* request) {
          (errorparameter_t)0,
          (errorparameter_t)0
       );
+      openqueue_freePacketBuffer(request); //clear the request packet as well
       return;
    }
    

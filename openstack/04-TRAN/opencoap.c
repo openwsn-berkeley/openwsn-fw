@@ -11,8 +11,6 @@
 
 //=========================== defines =========================================
 
-#define COAP_TOKEN 123 // TODO: make dynamic
-
 //=========================== variables =======================================
 
 opencoap_vars_t opencoap_vars;
@@ -97,9 +95,13 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    for (i=0;i<MAX_COAP_OPTIONS;i++) {
       
       // detect when done parsing options
-      if (msg->payload[index]==COAP_PAYLOAD_MARKER){
+      if (msg->payload[index]==COAP_PAYLOAD_MARKER) {
          // found the payload marker, done parsing options.
          index++; // skip marker and stop parsing options
+         break;
+      }
+      if (msg->length<=index) {
+         // end of message, no payload
          break;
       }
       
@@ -177,7 +179,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       }
    
    } else {
-      // this is a response: target resource is indicated by message ID
+      // this is a response: target resource is indicated by token, and message ID
+      // if an ack for a confirmable message, or a reset
       // find the resource which matches
       
       // start with the first resource in the linked list
@@ -186,11 +189,21 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       // iterate until matching resource found, or no match
       while (found==FALSE) {
          
-         if (coap_header.messageID==temp_desc->messageID) {
-            found=TRUE;
+         if (
+                coap_header.TKL==temp_desc->last_request.TKL                                       &&
+                memcmp(&coap_header.token[0],&temp_desc->last_request.token[0],coap_header.TKL)==0
+            ) {
+                
+            if (coap_header.T==COAP_TYPE_ACK || coap_header.T==COAP_TYPE_RES) {
+                if (coap_header.messageID==temp_desc->last_request.messageID) {
+                    found=TRUE;
+                }
+            } else {
+                found=TRUE;
+            }
             
             // call the resource's callback
-            if (temp_desc->callbackRx!=NULL) {
+            if (found==TRUE && temp_desc->callbackRx!=NULL) {
                temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
             }
          }
@@ -401,7 +414,7 @@ This function is NOT called for a response.
    CoAP header.
 \param[in] type The CoAP type of the message.
 \param[in] code The CoAP code of the message.
-\param[in] TKL  The Token Length of the message.
+\param[in] TKL  The Token Length of the message, sanitized to a max of COAP_MAX_TKL (8).
 \param[out] descSender A pointer to the description of the calling CoAP
    resource.
 
@@ -417,9 +430,14 @@ owerror_t opencoap_send(
       uint8_t                TKL,
       coap_resource_desc_t*  descSender
    ) {
+   uint16_t token;
+   uint8_t tokenPos=0;
+   coap_header_iht* request;
    
-   // pick a new (global) messageID
-   opencoap_vars.messageID          = openrandom_get16b();
+   // increment the (global) messageID
+   if (opencoap_vars.messageID++ == 0xffff) {
+      opencoap_vars.messageID = 0;
+   }
    
    // take ownership over the packet
    msg->owner                       = COMPONENT_OPENCOAP;
@@ -427,19 +445,29 @@ owerror_t opencoap_send(
    // fill in packet metadata
    msg->l4_sourcePortORicmpv6Type   = WKP_UDP_COAP;
    
+   // update the last_request header
+   request                          = &descSender->last_request;
+   request->T                       = type;
+   request->Code                    = code;
+   request->messageID               = opencoap_vars.messageID;
+   request->TKL                     = TKL<COAP_MAX_TKL ? TKL : COAP_MAX_TKL;
+   
+   while (tokenPos<request->TKL) {
+       token = openrandom_get16b();
+       memcpy(&request->token[tokenPos],&token,2);
+       tokenPos+=2;
+   }
+   
    // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
-   packetfunctions_reserveHeaderSize(msg,5);
+   packetfunctions_reserveHeaderSize(msg,4+request->TKL);
    msg->payload[0]                  = (COAP_VERSION   << 6) |
                                       (type           << 4) |
-                                      (TKL            << 0);
+                                      (request->TKL   << 0);
    msg->payload[1]                  = code;
-   msg->payload[2]                  = (opencoap_vars.messageID>>8) & 0xff;
-   msg->payload[3]                  = (opencoap_vars.messageID>>0) & 0xff;
-   msg->payload[4]                  = COAP_TOKEN;
-  
-   // indicate the messageID used to the sender
-   descSender->messageID            = opencoap_vars.messageID;
-   descSender->token                = COAP_TOKEN;
+   msg->payload[2]                  = (request->messageID>>8) & 0xff;
+   msg->payload[3]                  = (request->messageID>>0) & 0xff;
+
+   memcpy(&msg->payload[4],&token,request->TKL);
    
    return openudp_send(msg);
 }

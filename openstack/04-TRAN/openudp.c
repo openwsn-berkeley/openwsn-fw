@@ -42,7 +42,7 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          break;
       case WKP_UDP_RINGMASTER:
 	 //udpprint_sendDone(msg, error);
-         rrt_sendDone(msg);
+         rrt_sendDone(msg, error);
          break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
