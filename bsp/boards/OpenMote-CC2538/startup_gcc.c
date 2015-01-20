@@ -72,7 +72,7 @@ void IntDefaultHandler(void);
 // Reserve space for the system stack.
 //
 //*****************************************************************************
-static uint32_t pui32Stack[128];
+static uint32_t pui32Stack[512];
 
 //*****************************************************************************
 //

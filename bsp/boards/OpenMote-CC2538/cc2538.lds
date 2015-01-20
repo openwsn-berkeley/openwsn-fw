@@ -34,12 +34,13 @@ SECTIONS
     } > FLASH=0
 
     .data :
+    AT (ADDR (.text) + SIZEOF (.text))
     {
         _data = .;
         *(vtable)
         *(.data*)
         _edata = .;
-    } > SRAM AT > FLASH
+    } > SRAM
 
     .ARM.exidx :
     {

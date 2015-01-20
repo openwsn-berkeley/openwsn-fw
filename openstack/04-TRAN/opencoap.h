@@ -23,6 +23,10 @@ static const uint8_t ipAddr_local[]     = {0x26, 0x07, 0xf1, 0x40, 0x04, 0x00, 0
 static const uint8_t ipAddr_motedata[]  = {0x20, 0x01, 0x04, 0x70, 0x00, 0x66, 0x00, 0x17, \
                                            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02};
 
+//bbbb::1415:92cc:0:3 PORT:5683
+static const uint8_t ipAddr_ringmaster[] = {0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
+                                           0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01};
+
 /// the maximum number of options in a RX'ed CoAP message
 #define MAX_COAP_OPTIONS               10 //3 before but we want gets with more options
 
@@ -131,10 +135,9 @@ struct coap_resource_desc_t {
    uint8_t               path1len;
    uint8_t*              path1val;
    uint8_t               componentID;
-   uint16_t              messageID;
-   uint8_t               token; //should be 8bytes
    callbackRx_cbt        callbackRx;
    callbackSendDone_cbt  callbackSendDone;
+   coap_header_iht       last_request;
    coap_resource_desc_t* next;
 };
 
