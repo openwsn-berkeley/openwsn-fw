@@ -124,6 +124,7 @@ command_line_options = {
     'simhostpy':        [''],                               # No reasonable default
     'dagroot':          ['0','1'],
     'forcetopology':    ['0','1'],
+    'debug':            ['0','1'],
     'noadaptivesync':   ['0','1'],
 }
 
@@ -238,6 +239,13 @@ command_line_vars.AddVariables(
         'forcetopology',                                   # key
         '',                                                # help
         command_line_options['forcetopology'][0],          # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'debug',                                           # key
+        '',                                                # help
+        command_line_options['debug'][0],                  # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
