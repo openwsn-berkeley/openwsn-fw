@@ -19,7 +19,7 @@
 
 /// inter-packet period (in ms)
 #define CEXAMPLEPERIOD  10000
-#define PAYLOADLEN      62
+#define PAYLOADLEN      40
 
 const uint8_t cexample_path0[] = "ex";
 
@@ -74,7 +74,6 @@ void cexample_timer_cb(){
 void cexample_task_cb() {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
-   uint8_t              numOptions;
    uint8_t              i;
    
    uint16_t             x_int       = 0;
@@ -119,19 +118,20 @@ void cexample_task_cb() {
    avg = openrandom_get16b();
    pkt->payload[0]                = (avg>>8)&0xff;
    pkt->payload[1]                = (avg>>0)&0xff;
+
+   packetfunctions_reserveHeaderSize(pkt,1);
+   pkt->payload[0] = COAP_PAYLOAD_MARKER;
    
-   numOptions = 0;
+   // content-type option
+   packetfunctions_reserveHeaderSize(pkt,2);
+   pkt->payload[0]                = (COAP_OPTION_NUM_CONTENTFORMAT - COAP_OPTION_NUM_URIPATH) << 4
+                                    | 1;
+   pkt->payload[1]                = COAP_MEDTYPE_APPOCTETSTREAM;
    // location-path option
    packetfunctions_reserveHeaderSize(pkt,sizeof(cexample_path0)-1);
    memcpy(&pkt->payload[0],cexample_path0,sizeof(cexample_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
    pkt->payload[0]                = ((COAP_OPTION_NUM_URIPATH) << 4) | (sizeof(cexample_path0)-1);
-   numOptions++;
-   // content-type option
-   packetfunctions_reserveHeaderSize(pkt,2);
-   pkt->payload[0]                = (COAP_OPTION_NUM_CONTENTFORMAT << 4) | 1;
-   pkt->payload[1]                = COAP_MEDTYPE_APPOCTETSTREAM;
-   numOptions++;
    
    // metadata
    pkt->l4_destination_port       = WKP_UDP_COAP;
@@ -143,7 +143,7 @@ void cexample_task_cb() {
       pkt,
       COAP_TYPE_NON,
       COAP_CODE_REQ_PUT,
-      numOptions,
+      1,
       &cexample_vars.desc
    );
    
