@@ -67,7 +67,6 @@ void i2c_init(void) {
 
 bool i2c_read_byte(uint8_t address, uint8_t* byte) {
     uint32_t future = I2C_MAX_DELAY_US;
-    bool expired = false;
     
     // Receive operation
     I2CMasterSlaveAddrSet(address, true);
@@ -79,23 +78,20 @@ bool i2c_read_byte(uint8_t address, uint8_t* byte) {
     future += board_timer_get();
 
     // Wait until complete or timeout
-    while (I2CMasterBusy() && !expired) {
-        // Update timeout status
-        expired = board_timer_expired(future);
+    while (I2CMasterBusy()) {
+        // Update timeout status and return if expired
+        if (board_timer_expired(future)) return false;
     }
 
-    // If not timeout, read
-    if (!expired) {
-        *byte = I2CMasterDataGet();
-    }
+    // Read data from I2C
+    *byte = I2CMasterDataGet();
     
     // Return status
-    return expired;
+    return true;
 }
 
 uint32_t i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
     uint32_t future = I2C_MAX_DELAY_US;
-    bool expired = false;
     
     // Receive operation
     I2CMasterSlaveAddrSet(address, true);
@@ -104,31 +100,23 @@ uint32_t i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
     I2CMasterControl(I2C_MASTER_CMD_BURST_RECEIVE_START);
 
     // Calculate timeout
-    future  = I2C_MAX_DELAY_US + board_timer_get();
+    future += board_timer_get();
 
     // Iterate overall all bytes
     while (length) {
-        // If not timeout, read
-        while (I2CMasterBusy() && !expired) {
-            // Update timeout status
-            expired = board_timer_expired(future);
+        // Wait until complete or timeout
+        while (I2CMasterBusy()) {
+            // Update timeout status and return if expired
+            if (board_timer_expired(future)) return length;
         }
         
-        // If expired, return bytes read
-        if (expired) {
-            return length;
-        }
-
-        // If not timeout, read
+        // Read data from I2C
         *buffer++ = I2CMasterDataGet();
         length--;
 
         // Check if it's the last byte
-        if (length == 1) {
-            I2CMasterControl(I2C_MASTER_CMD_BURST_RECEIVE_FINISH);
-        } else {
-            I2CMasterControl(I2C_MASTER_CMD_BURST_RECEIVE_CONT);
-        }
+        if (length == 1) I2CMasterControl(I2C_MASTER_CMD_BURST_RECEIVE_FINISH);
+        else             I2CMasterControl(I2C_MASTER_CMD_BURST_RECEIVE_CONT);
     }
     
     // Return bytes read
@@ -137,7 +125,6 @@ uint32_t i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
 
 bool i2c_write_byte(uint8_t address, uint8_t byte) {   
     uint32_t future = I2C_MAX_DELAY_US;
-    bool expired = false;
     
     // Transmit operation
     I2CMasterSlaveAddrSet(address, false);
@@ -152,18 +139,16 @@ bool i2c_write_byte(uint8_t address, uint8_t byte) {
     future += board_timer_get();
 
     // Wait until complete or timeout
-    while (I2CMasterBusy() && !expired) {
-        // Update timeout status
-        expired = board_timer_expired(future);
+    while (I2CMasterBusy()) {
+        // Check timeout status and return if expired
+        if (board_timer_expired(future)) return false;
     }
     
-    // Return status
-    return expired;
+    return true;
 }
 
 uint32_t i2c_write_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
     uint32_t future = I2C_MAX_DELAY_US;
-    bool expired = false;
     
     // Transmit operation
     I2CMasterSlaveAddrSet(address, false);
@@ -179,14 +164,9 @@ uint32_t i2c_write_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
     future += board_timer_get();
 
     // Wait until complete or timeout
-    while (I2CMasterBusy() && !expired) {
-        // Update timeout status
-        expired = board_timer_expired(future);
-    }
-    
-    // If expired, return
-    if (expired) {
-        return length;
+    while (I2CMasterBusy()) {
+        // Check timeout status and return if expired
+        if (board_timer_expired(future)) return length;
     }
 
     // Iterate overall all bytes
@@ -195,21 +175,13 @@ uint32_t i2c_write_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
         I2CMasterDataPut(*buffer++);
 
         // Check if it's the last byte
-        if (length == 1) {
-            I2CMasterControl(I2C_MASTER_CMD_BURST_SEND_FINISH);
-        } else {
-            I2CMasterControl(I2C_MASTER_CMD_BURST_SEND_CONT);
-        }
+        if (length == 1) I2CMasterControl(I2C_MASTER_CMD_BURST_SEND_FINISH);
+        else             I2CMasterControl(I2C_MASTER_CMD_BURST_SEND_CONT);
 
-        // If not timeout, write
-        while (I2CMasterBusy() && !expired) {
-            // Update timeout status
-            expired = board_timer_expired(future);
-        }
-        
-        // If expired, return
-        if (expired) {
-            return length;
+        // Wait until complete or timeout
+        while (I2CMasterBusy()) {
+            // Check timeout status and return if expired
+            if (board_timer_expired(future)) return length;
         }
 
         // Update the length
