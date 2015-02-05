@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+	<storageModule moduleId="org.eclipse.cdt.core.settings">
+		<cconfiguration id="cdt.managedbuild.config.gnu.cross.exe.debug.580840232">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.cross.exe.debug.580840232" moduleId="org.eclipse.cdt.core.settings" name="Debug">
+				<externalSettings/>
+				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
+				</extensions>
+			</storageModule>
+			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe,org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.cross.exe.debug.580840232" name="Debug" parent="cdt.managedbuild.config.gnu.cross.exe.debug">
+					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.580840232." name="/" resourcePath="">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.1930137339" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug">
+							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1028080542" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
+							<builder arguments="board=gina toolchain=mspgcc" buildPath="${ProjDirPath}/../../../" cleanBuildTarget="-c" command="${SCONS}" enabledIncrementalBuild="true" id="cdt.managedbuild.builder.gnu.cross.1731891423" incrementalBuildTarget="" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1653300433" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
+								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.option.optimization.level.1733828483" name="Optimization Level" superClass="gnu.c.compiler.option.optimization.level" useByScannerDiscovery="false" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.debugging.level.454737374" name="Debug Level" superClass="gnu.c.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1398911105" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.2113466100" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler">
+								<option id="gnu.cpp.compiler.option.optimization.level.982588523" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
+								<option id="gnu.cpp.compiler.option.debugging.level.816686208" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.282739587" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker">
+								<inputType id="cdt.managedbuild.tool.gnu.c.linker.input.213659482" superClass="cdt.managedbuild.tool.gnu.c.linker.input">
+									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
+									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
+								</inputType>
+							</tool>
+							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.184126114" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.759992655" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver"/>
+							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.133194079" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler">
+								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.529631154" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
+							</tool>
+						</toolChain>
+					</folderInfo>
+				</configuration>
+			</storageModule>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+		</cconfiguration>
+	</storageModule>
+	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
+		<project id="OpenWSN.cdt.managedbuild.target.gnu.cross.exe.1879468974" name="Executable" projectType="cdt.managedbuild.target.gnu.cross.exe"/>
+	</storageModule>
+	<storageModule moduleId="scannerConfiguration">
+		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.cross.exe.debug.580840232;cdt.managedbuild.config.gnu.cross.exe.debug.580840232.;cdt.managedbuild.tool.gnu.cross.c.compiler.1653300433;cdt.managedbuild.tool.gnu.c.compiler.input.1398911105">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/OpenWSN"/>
+		</configuration>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+		<buildTargets>
+			<target name="bsp_bsp_timer" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_bsp_timer</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_debugpins" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_debugpins</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_leds (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_leds</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_radio</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radiotimer" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_radiotimer</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_uart" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_uart</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="oos_macpong" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>oos_macpong</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="oos_openwsn" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>oos_openwsn</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_bsp_timer (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_bsp_timer</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_debugpins (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_debugpins</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_leds (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_leds</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_radio</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radiotimer (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_radiotimer</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_uart (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_uart</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="oos_macpong (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c oos_macpong</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="oos_openwsn (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c oos_openwsn</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_bothtimers" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_bothtimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_closetimers" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_closetimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio_rx" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_radio_rx</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio_tx" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_radio_tx</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_spi" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_spi</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="drv_openserial" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>drv_openserial</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="drv_opentimers" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>drv_opentimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_bothtimers (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_bothtimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_closetimers (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_closetimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio_rx (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_radio_rx</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio_tx (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_radio_tx</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_spi (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c bsp_spi</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="drv_openserial (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c drv_openserial</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="drv_opentimers (clean)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>-c drv_opentimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_bothtimers (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_bothtimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_bsp_timer (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_bsp_timer</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_closetimers (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_closetimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_debugpins (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_debugpins</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_leds" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>bsp_leds</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_radio</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio_rx (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_radio_rx</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio_tx (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_radio_tx</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radiotimer (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_radiotimer</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_spi (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_spi</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_uart (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 bsp_uart</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="drv_openserial (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 drv_openserial</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="drv_opentimers (debug)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>debug=1 drv_opentimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="oos_openwsn (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 oos_openwsn</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="oos_macpong (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 oos_macpong</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_bothtimers (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_bothtimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_bsp_timer (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_bsp_timer</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_closetimers (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_closetimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_debugpins (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_debugpins</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_leds (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_leds</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_radio</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio_rx (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_radio_rx</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radio_tx (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_radio_tx</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_radiotimer (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_radiotimer</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_spi (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_spi</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="bsp_uart (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 bsp_uart</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="drv_openserial (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 drv_openserial</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+			<target name="drv_opentimers (flash over fet)" path="" targetID="org.eclipse.cdt.build.MakeTargetBuilder">
+				<buildCommand>${SCONS}</buildCommand>
+				<buildArguments>board=gina toolchain=mspgcc</buildArguments>
+				<buildTarget>jtag=default fet_version=3 drv_opentimers</buildTarget>
+				<stopOnError>true</stopOnError>
+				<useDefaultCommand>true</useDefaultCommand>
+				<runAllBuilders>true</runAllBuilders>
+			</target>
+		</buildTargets>
+	</storageModule>
+</cproject>
