@@ -21,9 +21,9 @@ radio and sync). When you run the application, you should see the LEDs
 #include "leds.h"
 #include "scheduler.h"
 
-#include "../../../drivers/OpenMote-CC2538/adxl346.h"
-#include "../../../drivers/OpenMote-CC2538/max44009.h"
-#include "../../../drivers/OpenMote-CC2538/sht21.h"
+#include "adxl346.h"
+#include "max44009.h"
+#include "sht21.h"
 
 //=========================== defines =========================================
 
