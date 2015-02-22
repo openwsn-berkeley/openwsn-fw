@@ -135,10 +135,9 @@ struct coap_resource_desc_t {
    uint8_t               path1len;
    uint8_t*              path1val;
    uint8_t               componentID;
-   uint16_t              messageID;
-   uint8_t               token; //should be 8bytes
    callbackRx_cbt        callbackRx;
    callbackSendDone_cbt  callbackSendDone;
+   coap_header_iht       last_request;
    coap_resource_desc_t* next;
 };
 

@@ -9,6 +9,9 @@
 #include "idmanager.h"
 #include "openqueue.h"
 #include "neighbors.h"
+#include "packetfunctions.h"
+#include "leds.h"
+#include "openserial.h"
 
 //=========================== defines =========================================
 
@@ -222,7 +225,7 @@ void rrt_sendCoAPMsg(char actionMsg, uint8_t *ipv6mote) {
       memcpy(&pkt->payload[0],&rrt_path0,sizeof(rrt_path0)-1);
       packetfunctions_reserveHeaderSize(pkt,1);
       pkt->payload[0]                  = (COAP_OPTION_NUM_URIPATH) << 4 |
-         sizeof(rrt_path0)-1;
+         (sizeof(rrt_path0)-1);
        numOptions++;
       // content-type option
       packetfunctions_reserveHeaderSize(pkt,2);
