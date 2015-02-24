@@ -235,7 +235,7 @@ void opentimers_timer_callback() {
       if (opentimers_vars.timersBuf[id].hasExpired==TRUE){
 
          // call the callback
-         opentimers_vars.timersBuf[id].callback();
+         opentimers_vars.timersBuf[id].callback(id);
          opentimers_vars.timersBuf[id].hasExpired     = FALSE;
 
          // reload the timer, if applicable
@@ -316,7 +316,7 @@ void opentimers_sleepTimeCompesation(uint16_t sleepTime)
       if (opentimers_vars.timersBuf[id].hasExpired==TRUE){
 
          // call the callback
-         opentimers_vars.timersBuf[id].callback();
+         opentimers_vars.timersBuf[id].callback(id);
          opentimers_vars.timersBuf[id].hasExpired     = FALSE;
 
          // reload the timer, if applicable
