@@ -783,7 +783,25 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
          break;
       case SIX_WAIT_ADDRESPONSE_SENDDONE:
-         
+         if (error == E_SUCCESS && numOfCells > 0){
+             for (i=0;i<numOfCells;i++){
+               //TimeSlot 2B
+               cellList[i].tsNum       = (*(ptr))<<8;
+               cellList[i].tsNum      |= *(ptr+1);
+               //Ch.Offset 2B
+               cellList[i].choffset    = (*(ptr+2))<<8;
+               cellList[i].choffset   |= *(ptr+3);
+               //LinkOption bitmap 1B
+               cellList[i].linkoptions = *(ptr+4);
+               ptr += 5;
+             }
+             sixtop_addCellsByState(
+                 msg->l2_scheduleIE_frameID,
+                 numOfCells,
+                 cellList,
+                 &(msg->l2_nextORpreviousHop),
+                 sixtop_vars.six2six_state);
+         }
          sixtop_vars.six2six_state = SIX_IDLE;
          
          // notify OTF
@@ -990,10 +1008,6 @@ void sixtop_notifyReceiveLinkRequest(
                                             bw) == FALSE){
       scheduleCellSuccess = FALSE;
    } else {
-      sixtop_addCellsByState(
-         frameID,
-         bw,
-         schedule_ie->cellList,addr,sixtop_vars.six2six_state);
       scheduleCellSuccess = TRUE;
    }
   
@@ -1217,7 +1231,7 @@ void sixtop_addCellsByState(
       //only schedule when the request side wants to schedule a tx cell
       if(cellList[i].linkoptions == CELLTYPE_TX){
          switch(state) {
-            case SIX_ADDREQUEST_RECEIVED:
+            case SIX_WAIT_ADDRESPONSE_SENDDONE:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
                
                //add a RX link
