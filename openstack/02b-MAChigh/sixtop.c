@@ -31,8 +31,8 @@ owerror_t     sixtop_send_internal(
 );
 
 // timer interrupt callbacks
-void          sixtop_maintenance_timer_cb(void);
-void          sixtop_timeout_timer_cb(void);
+void          sixtop_maintenance_timer_cb(opentimer_id_t id);
+void          sixtop_timeout_timer_cb(opentimer_id_t id);
 
 //=== EB/KA task
 
@@ -582,11 +582,11 @@ owerror_t sixtop_send_internal(
 
 // timer interrupt callbacks
 
-void sixtop_maintenance_timer_cb() {
+void sixtop_maintenance_timer_cb(opentimer_id_t id) {
    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
 }
 
-void sixtop_timeout_timer_cb() {
+void sixtop_timeout_timer_cb(opentimer_id_t id) {
    scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
 }
 
