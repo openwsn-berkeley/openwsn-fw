@@ -31,7 +31,7 @@ macpong_vars_t macpong_vars;
 
 //=========================== prototypes ======================================
 
-void macpong_initSend(void);
+void macpong_initSend(opentimer_id_t id);
 void macpong_send(uint8_t payloadCtr);
 
 //=========================== initialization ==================================
@@ -47,7 +47,7 @@ int mote_main(void) {
    return 0; // this line should never be reached
 }
 
-void macpong_initSend(void) {
+void macpong_initSend(opentimer_id_t id) {
    if (idmanager_getIsDAGroot()==TRUE) {
       return;
    }
