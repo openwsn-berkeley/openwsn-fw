@@ -20,7 +20,7 @@ void prependTCPHeader(OpenQueueEntry_t* msg, bool ack, bool push, bool rst, bool
 bool containsControlBits(OpenQueueEntry_t* msg, uint8_t ack, uint8_t rst, uint8_t syn, uint8_t fin);
 void tcp_change_state(uint8_t new_state);
 void opentcp_reset(void);
-void opentcp_timer_cb(void);
+void opentcp_timer_cb(opentimer_id_t id);
 
 //=========================== public ==========================================
 
@@ -694,6 +694,6 @@ void tcp_change_state(uint8_t new_tcp_state) {
    }
 }
 
-void opentcp_timer_cb() {
+void opentcp_timer_cb(opentimer_id_t id) {
    scheduler_push_task(timers_tcp_fired,TASKPRIO_TCP_TIMEOUT);
 }
