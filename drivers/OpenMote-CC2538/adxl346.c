@@ -115,7 +115,7 @@
 
 //=========================== public ==========================================
 
-void adx346_init(void)
+void adxl346_init(void)
 {
     uint8_t config[2];
 
@@ -134,11 +134,11 @@ void adx346_init(void)
     i2c_write_bytes(ADXL346_ADDRESS, config, sizeof(config));
 }
 
-void adx346_reset(void)
+void adxl346_reset(void)
 {
 }
 
-uint8_t adx346_is_present(void)
+uint8_t adxl346_is_present(void)
 {
     uint8_t is_present;
 
@@ -148,7 +148,7 @@ uint8_t adx346_is_present(void)
     return (is_present == ADXL346_DEVID_VALUE);
 }
 
-uint16_t adx346_read_x(void)
+uint16_t adxl346_read_x(void)
 {
     uint8_t acceleration[2];
     uint16_t x;
@@ -163,7 +163,7 @@ uint16_t adx346_read_x(void)
     return x;
 }
 
-uint16_t adx346_read_y(void)
+uint16_t adxl346_read_y(void)
 {
     uint8_t acceleration[2];
     uint16_t y;
@@ -178,7 +178,7 @@ uint16_t adx346_read_y(void)
     return y;
 }
 
-uint16_t adx346_read_z(void)
+uint16_t adxl346_read_z(void)
 {
     uint8_t acceleration[2];
     uint16_t z;
