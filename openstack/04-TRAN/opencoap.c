@@ -331,7 +331,7 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 
 \post After this function returns, the msg contains 
 */
-void opencoap_writeLinks(OpenQueueEntry_t* msg) {
+void opencoap_writeLinks(OpenQueueEntry_t* msg, uint8_t componentID) {
    coap_resource_desc_t* temp_resource;
    
    // start with the first resource in the linked list
@@ -340,33 +340,42 @@ void opencoap_writeLinks(OpenQueueEntry_t* msg) {
    // iterate through all resources
    while (temp_resource!=NULL) {
       
-      // write ending '>'
-      packetfunctions_reserveHeaderSize(msg,1);
-      msg->payload[0] = '>';
-      
-      // write path1
-      if (temp_resource->path1len>0) {
-         packetfunctions_reserveHeaderSize(msg,temp_resource->path1len);
-         memcpy(&msg->payload[0],temp_resource->path1val,temp_resource->path1len);
+      if (  
+            (temp_resource->discoverable==TRUE) &&
+            (
+               ((componentID==0) && (temp_resource->path1len==0))
+               || 
+               ((temp_resource->componentID==componentID) && (temp_resource->path1len!=0))
+            )
+         ) {
+          
+         // write ending '>'
          packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = '/';
+         msg->payload[0] = '>';
+         
+         // write path1
+         if (temp_resource->path1len>0) {
+            packetfunctions_reserveHeaderSize(msg,temp_resource->path1len);
+            memcpy(&msg->payload[0],temp_resource->path1val,temp_resource->path1len);
+            packetfunctions_reserveHeaderSize(msg,1);
+            msg->payload[0] = '/';
+         }
+         
+         // write path0
+         packetfunctions_reserveHeaderSize(msg,temp_resource->path0len);
+         memcpy(msg->payload,temp_resource->path0val,temp_resource->path0len);
+         packetfunctions_reserveHeaderSize(msg,2);
+         msg->payload[1] = '/';
+         
+         // write opening '>'
+         msg->payload[0] = '<';
+         
+         // write separator between links
+         if (temp_resource->next!=NULL) {
+            packetfunctions_reserveHeaderSize(msg,1);
+            msg->payload[0] = ',';
+         }
       }
-      
-      // write path0
-      packetfunctions_reserveHeaderSize(msg,temp_resource->path0len);
-      memcpy(msg->payload,temp_resource->path0val,temp_resource->path0len);
-      packetfunctions_reserveHeaderSize(msg,2);
-      msg->payload[1] = '/';
-      
-      // write opening '>'
-      msg->payload[0] = '<';
-      
-      // write separator between links
-      if (temp_resource->next!=NULL) {
-         packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = ',';
-      }
-      
       // iterate to next resource
       temp_resource = temp_resource->next;
    }

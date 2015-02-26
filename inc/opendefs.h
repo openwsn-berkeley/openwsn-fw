@@ -151,12 +151,13 @@ enum {
    COMPONENT_CEXAMPLE                  = 0x1b,
    COMPONENT_CINFO                     = 0x1c,
    COMPONENT_CLEDS                     = 0x1d,
-   COMPONENT_CSTORM                    = 0x1e,
-   COMPONENT_CWELLKNOWN                = 0x1f,
-   COMPONENT_TECHO                     = 0x20,
-   COMPONENT_TOHLONE                   = 0x21,
-   COMPONENT_UECHO                     = 0x22,
-   COMPONENT_RRT                       = 0x23,
+   COMPONENT_CSENSORS                  = 0x1e,
+   COMPONENT_CSTORM                    = 0x1f,
+   COMPONENT_CWELLKNOWN                = 0x20,
+   COMPONENT_TECHO                     = 0x21,
+   COMPONENT_TOHLONE                   = 0x22,
+   COMPONENT_UECHO                     = 0x23,
+   COMPONENT_RRT                       = 0x24,
 };
 
 /**
