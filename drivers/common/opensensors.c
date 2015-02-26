@@ -18,7 +18,7 @@ void opensensors_register(uint8_t path1len,
    opensensors_vars.numSensors++;
 }
 
-opensensors_vars_t opensensors_read(void) {
+opensensors_vars_t* opensensors_read(void) {
    return &opensensors_vars;
 }
 
