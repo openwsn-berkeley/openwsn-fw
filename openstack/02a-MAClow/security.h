@@ -40,9 +40,9 @@ enum Auxiliary_Security_Header_slf_enums{ //Security Level Field
 
 
 typedef struct{//identifier of the device which is using the key
-	open_addr_t	 deviceAddress;
-	uint32_t 	 FrameCounter;
-	bool 		 Exempt;
+	open_addr_t	    deviceAddress;
+	macFrameCounter FrameCounter;
+	bool 		    Exempt;
 	} m_deviceDescriptor;
 
 typedef struct{//descriptor of the key we are looking for
@@ -92,7 +92,7 @@ typedef struct{
 
 BEGIN_PACK
 typedef struct{
-	uint32_t 					m_macFrameCounter;
+	macFrameCounter 			m_macFrameCounter;
 	uint8_t						m_macFrameCounterMode;
 	uint8_t 					m_macAutoRequestKeyIdMode;
 	uint8_t						m_macAutoRequestSecurityLevel;

@@ -16,9 +16,7 @@ void CCMstar(OpenQueueEntry_t* 		pkt,
 
 	ccmstar_vars.length = pkt->length-pkt->l2_auxiliaryLength;
 
-	for(i=0; i<128;i++){
-		ccmstar_vars.payloadToEncrypt[i] = 0;
-	}
+	memcpy(&ccmstar_vars.payloadToEncrypt, 0, 128);
 
 	for(i=0; i<ccmstar_vars.length;i++){
 		ccmstar_vars.payloadToEncrypt[i] = pkt->payload[pkt->l2_auxiliaryLength+i];
@@ -57,14 +55,9 @@ void Input_Transformation(uint8_t* payload,
 		                  uint8_t  authentication_length){
 
 	//initialize AuthData
-//	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
-//	                            (errorparameter_t)0,
-//	                            (errorparameter_t)authentication_length);
 
 	uint8_t l,i;
-	for(i=0; i<132;i++){
-		ccmstar_vars.authData[i] = 0;
-		}
+	memcpy(&ccmstar_vars.authData, 0, sizeof(ccmstar_vars.authData));
 	ccmstar_vars.authDataLength = 0;
 
 	uint32_t La;
@@ -103,9 +96,10 @@ void Input_Transformation(uint8_t* payload,
 	ccmstar_vars.authData[i] = authentication_length;
 	ccmstar_vars.authDataLength = i+1;
 
-	for(i=0;i<ccmstar_vars.authDataLength+length;i++){
-		ccmstar_vars.authData[ccmstar_vars.authDataLength+i] = payload[i];
-	}
+	memcpy(&ccmstar_vars.authData[ccmstar_vars.authDataLength],
+		       &payload,
+		       ccmstar_vars.authDataLength+length);
+
 	ccmstar_vars.authDataLength = ccmstar_vars.authDataLength+length;
 
 	uint8_t count;
@@ -158,9 +152,7 @@ void Auth_Transformation(uint8_t 				length,
 		B[i+1] = nonce[i];
 	}
 
-	for(i=0;i<16;i++){
-		ccmstar_vars.T[i] = 0;
-	}
+	memcpy(&ccmstar_vars.T, 0, 16);
 
 	uint32_t auxlen;
 	auxlen = length;
@@ -169,31 +161,17 @@ void Auth_Transformation(uint8_t 				length,
 	B[15] = auxlen <<8;
 
 	//initialize X, for me IN
-	for(i=0;i<16;i++){
-		in[i] = 0;
-	}
+	memcpy(&in, 0, 16);
+
 	//IV
 	for(i=0;i<16;i++){
 		in[i] = in[i]^B[i];
 	}
 
 //	//Key Expansion phase, before the crypto block
-//	if(encOrDec==0){
-//		unsigned long long int temp_key;
-//		temp_key = key;
-//		for(i=0;i<8;i++){
-//				Key[i] = temp_key;
-//				temp_key = temp_key >> 8;
-//			}
-//	}
-	for(i=0;i<8;i++){
-				Key[i] = key[i];
-			}
+	memcpy(&Key, &key, 8);
 
-
-	for(i=0;i<16;i++){
-		out[i] = in[i];
-	}
+	memcpy(&out, &in, 16);
 
 	//crypto block
 	uint8_t j;
@@ -203,25 +181,19 @@ void Auth_Transformation(uint8_t 				length,
 			in[j-16*i] = B[j-16*i]^in[j-16*i];
 		}
 
-		if(secLev > 3){
-			aes_encrypt(in,out,Key);
-		}
+		aes_encrypt(in,out,Key);
 
-		for(j=0;j<16;j++){
-			in[j] = out[j];
-		}
+		memcpy(&in, &out, 16);
 
 	}
 
+	if(encOrDec==0){
+		memcpy(&ccmstar_vars.T, &out, authentication_length);
+	}
+	if(encOrDec==1){
+		memcpy(&ccmstar_vars.MACTag, &out, authentication_length);
+	}
 
-	for(i=0;i<authentication_length;i++){
-		if(encOrDec==0){
-			ccmstar_vars.T[i] = out[i];
-		}
-		if(encOrDec==1){
-			ccmstar_vars.MACTag[i] = out[i];
-		}
-		}
 }
 
 void Encr_Transformation(uint8_t*  				payload,
@@ -239,24 +211,11 @@ void Encr_Transformation(uint8_t*  				payload,
 	uint8_t in[16], out[16];
 
 //	//Key Expansion phase, before the crypto block
-//	if(cipher==0){
-//		unsigned long long int newkey;
-//		newkey = key;
-//		for(i=0;i<8;i++){
-//				Key[i] = newkey;
-//				newkey = newkey >> 8;
-//			}
-//	}
-	for(i=0;i<8;i++){
-				Key[i] = key[i];
-			}
-
+	memcpy(Key, key, 8);
 
 	cnt = 0;
 	//initialization of CipherText
-	for(i=0;i<128;i++){
-		ccmstar_vars.CipherText[i] = 0;
-	}
+	memcpy(&ccmstar_vars.CipherText, 0, 128);
 
 	//Ai
 	in[0] = 0;
@@ -269,12 +228,7 @@ void Encr_Transformation(uint8_t*  				payload,
 	in[14] = cnt;
 	in[15] = cnt << 8;
 
-
-	for(i=0;i<16;i++){
-		out[i] = in[i];
-	}
-
-
+	memcpy(&out, &in, 16);
 
 	// auth tag
 	if(secLevel > 3){
@@ -285,7 +239,6 @@ void Encr_Transformation(uint8_t*  				payload,
 		for(i=0;i<authentication_length;i++){
 			ccmstar_vars.U[i] = out[i] ^ Ta[i];
 		}
-
 	}
 
 	if(cipher==1){
@@ -304,10 +257,7 @@ void Encr_Transformation(uint8_t*  				payload,
 		in[14] = cnt;
 		in[15] = cnt << 8;
 
-		uint8_t jj;
-		for(jj=0;jj<16;jj++){
-			out[jj] = in[jj];
-		}
+		memcpy(&out, &in, 16);
 
 		if(secLevel > 3){
 			aes_encrypt(in,out,Key);
@@ -328,15 +278,15 @@ void Encr_Transformation(uint8_t*  				payload,
 	}
 
 	if(cipher==0){
-		for(i=0;i<authentication_length;i++){
-			ccmstar_vars.CipherText[length+i] = ccmstar_vars.U[i];
-		}
+		memcpy(&ccmstar_vars.CipherText[length],
+					  &ccmstar_vars.U,
+					  authentication_length);
 	}
 
 	if(cipher==1){
-		for(i=0;i<authentication_length;i++){
-			ccmstar_vars.CipherText[length+i] = ccmstar_vars.W[i];
-				}
+		memcpy(&ccmstar_vars.CipherText[length],
+							  &ccmstar_vars.W,
+							  authentication_length);
 	}
 
 }
@@ -349,17 +299,13 @@ void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
 	if(ccmstar_vars.length == 0) return;
 
 	uint8_t i;
-	for(i=0; i<128;i++){
-		ccmstar_vars.payloadToEncrypt[i] = 0;
-			}
+	memcpy(&ccmstar_vars.payloadToEncrypt, 0, 128);
 
-	for(i=0; i<ccmstar_vars.length;i++){
-		ccmstar_vars.payloadToEncrypt[i] = pkt->payload[i];
-	}
+	memcpy(ccmstar_vars.payloadToEncrypt,
+			pkt->payload,
+			ccmstar_vars.length);
 
-	for(i=0;i<16;i++){
-		ccmstar_vars.MACTag[i] = 0;
-	}
+	memcpy(&ccmstar_vars.MACTag, 0, 16);
 
 	decr_Transformation(ccmstar_vars.payloadToEncrypt,
 			            ccmstar_vars.length,
@@ -377,9 +323,7 @@ void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
 				      nonce);
 	}
 
-	for(i=0;i<ccmstar_vars.length;i++){
-		pkt->payload[i] = ccmstar_vars.CipherText[i];
-	}
+	memcpy(pkt->payload, ccmstar_vars.CipherText, ccmstar_vars.length);
 
 	if(pkt->l2_securityLevel != 4){
 		packetfunctions_tossFooter(pkt,pkt->l2_authenticationLength);
@@ -395,42 +339,28 @@ void decr_Transformation(uint8_t* 				cipherData,
 						 uint8_t*				nonce){
 
 	uint8_t i;
-	for(i=0 ;i< 16; i++){
-		ccmstar_vars.U[i] = 0;
-		}
-	for(i=0 ;i< authentication_length; i++){
-		ccmstar_vars.U[i] = cipherData[length-authentication_length+i];
-	}
+	memcpy(&ccmstar_vars.U, 0, 16);
+
+	memcpy(&ccmstar_vars.U,
+			   &cipherData[length-authentication_length],
+			   authentication_length);
 
 	uint8_t newlen;
 	newlen = length - authentication_length;
 
 	uint8_t CipherTextdec[130];
-	for(i=0;i<130;i++){
-			CipherTextdec[i] = 0;
-		}
-	for(i=0;i<newlen;i++){
-		CipherTextdec[i] = cipherData[i];
-	}
 
+	memcpy(&CipherTextdec, 0, 130);
+
+	memcpy(CipherTextdec, cipherData, newlen);
 
 	uint8_t count;
 	count = 16-(newlen-((newlen/16)*16));
 
-	for(i=newlen;i<count;i++){
-		CipherTextdec[i] = 0;
-	}
+	memcpy(&CipherTextdec[newlen], 0, count);
 
 //	//key expansion phase
-//	unsigned long long int temp_key;
-//	temp_key = key;
-//	for(i=0;i<8;i++){
-//			Key[i] = temp_key;
-//			temp_key = temp_key >> 8;
-//		}
-	for(i=0;i<8;i++){
-				Key[i] = key[i];
-			}
+	memcpy(&Key, &key, 8);
 
 
 	Encr_Transformation(CipherTextdec,
@@ -443,14 +373,10 @@ void decr_Transformation(uint8_t* 				cipherData,
 			            nonce);
 
 	//parsing m|T
-
-	for(i=0;i<newlen;i++){
-		cipherData[i] = ccmstar_vars.CipherText[i];//this will be the payload in plain text
-	}
-
-	for(i=0;i<authentication_length;i++){
-		ccmstar_vars.T[i] = ccmstar_vars.CipherText[newlen+i];
-	}
+	memcpy(cipherData, ccmstar_vars.CipherText, newlen);
+	memcpy(&ccmstar_vars.T,
+			   &ccmstar_vars.CipherText[newlen],
+			   authentication_length);
 
 }
 
@@ -463,13 +389,11 @@ bool auth_checking(uint8_t* 				ciphertext,
 
 	uint8_t messageDecr[128];
 	uint8_t i;
-	for(i=0;i<128;i++){
-			messageDecr[i] = 0;
-		}
+	memcpy(&messageDecr, 0, 128);
 
-	for(i=0;i<length-authentication_length;i++){
-		messageDecr[i] = ccmstar_vars.CipherText[i];
-	}
+	memcpy(&messageDecr,
+			&ccmstar_vars.CipherText,
+			length-authentication_length);
 
 	Input_Transformation(messageDecr,length,authentication_length);
 

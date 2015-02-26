@@ -1,4 +1,3 @@
-//#include "openwsn.h"
 #include "IEEE802154.h"
 #include "idmanager.h"
 #include "security.h"
