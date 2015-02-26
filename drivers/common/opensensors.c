@@ -20,6 +20,5 @@ void opensensors_register(uint8_t path1len,
 
 void opensensors_read(void) {
 }
-}
 
 
