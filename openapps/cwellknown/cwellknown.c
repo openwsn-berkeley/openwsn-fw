@@ -37,6 +37,7 @@ void cwellknown_init() {
    cwellknown_vars.desc.path1len            = sizeof(cwellknown_path1)-1;
    cwellknown_vars.desc.path1val            = (uint8_t*)(&cwellknown_path1);
    cwellknown_vars.desc.componentID         = COMPONENT_CWELLKNOWN;
+   cwellknown_vars.desc.discoverable        = FALSE;
    cwellknown_vars.desc.callbackRx          = &cwellknown_receive;
    cwellknown_vars.desc.callbackSendDone    = &cwellknown_sendDone;
    
@@ -59,7 +60,7 @@ owerror_t cwellknown_receive(
          msg->length         = 0;
          
          // have CoAP module write links to all resources
-         opencoap_writeLinks(msg);
+         opencoap_writeLinks(msg,0);
          
          packetfunctions_reserveHeaderSize(msg,1);
          msg->payload[0]     = COAP_PAYLOAD_MARKER;
