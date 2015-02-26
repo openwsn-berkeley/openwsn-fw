@@ -25,6 +25,6 @@ void opensensors_register(uint8_t path1len,
    callbackRead_cbt callbackRead,
    callbackConvert_cbt callbackConvert
 );
-void opensensors_read(void);
+opensensors_vars_t opensensors_read(void);
 
 #endif // __OPENSENSORS_H__
