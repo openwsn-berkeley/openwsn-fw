@@ -15,6 +15,7 @@ const uint8_t cputemp[] = "c";
 
 void sensors_init(void) {
 
+   opensensors_init();
    // if (sht21_is_present()==1) {
       // sht21_init();
       // opensensors_register(
