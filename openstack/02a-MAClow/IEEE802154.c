@@ -237,6 +237,21 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
       // the topology filter does accept this packet, return
       return;
    }
+
+   //START OF TELEMATICS CODE
+   if(ieee802514_header->securityEnabled == TRUE){
+	   msg->l2_security = TRUE;
+
+   }else{
+	   msg->l2_security = FALSE;
+   }
+
+   //if the security is enabled, i can retrieve the Auxiliary Security Header
+   if(ieee802514_header->securityEnabled == TRUE){
+	   retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
+    }
+  //END OF TELEMATICS CODE
+
    // if you reach this, the header is valid
    ieee802514_header->valid=TRUE;
 }
