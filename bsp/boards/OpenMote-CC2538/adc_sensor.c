@@ -10,25 +10,25 @@
 #define OFFSET_0C (OFFSET_DATASHEET_25C - (25 * TEMP_COEFF))
 
 void adc_sensor_init(void) {
-    HWREG(CCTEST_TR0) |= CCTEST_TR0_ADCTM;
-    HWREG(RFCORE_XREG_ATEST) = 0x01;
-    SOCADCSingleConfigure(SOCADC_12_BIT, SOCADC_REF_INTERNAL);
-    adc_sens_read_temperature();
+   HWREG(CCTEST_TR0) |= CCTEST_TR0_ADCTM;
+   HWREG(RFCORE_XREG_ATEST) = 0x01;
+   SOCADCSingleConfigure(SOCADC_12_BIT, SOCADC_REF_INTERNAL);
+   adc_sens_read_temperature();
 }
 
 uint16_t adc_sens_read_temperature(void) {
-	uint16_t ui16Dummy;
+   uint16_t ui16Dummy;
 
-    SOCADCSingleStart(SOCADC_TEMP_SENS);
-    while(!SOCADCEndOfCOnversionGet());
-    ui16Dummy = SOCADCDataGet() >> SOCADC_12_BIT_RSHIFT;
-    return ui16Dummy;
+   SOCADCSingleStart(SOCADC_TEMP_SENS);
+   while(!SOCADCEndOfCOnversionGet());
+   ui16Dummy = SOCADCDataGet() >> SOCADC_12_BIT_RSHIFT;
+   return ui16Dummy;
 }
 
 float adc_sens_convert_temperature(uint16_t cputemp) {
-	double dOutputVoltage;
+   double dOutputVoltage;
 
-	dOutputVoltage = cputemp * CONST;
-	dOutputVoltage = ((dOutputVoltage - OFFSET_0C) / TEMP_COEFF);
-	return dOutputVoltage;
+   dOutputVoltage = cputemp * CONST;
+   dOutputVoltage = ((dOutputVoltage - OFFSET_0C) / TEMP_COEFF);
+   return dOutputVoltage;
 }
