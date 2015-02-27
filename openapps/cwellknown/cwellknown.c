@@ -60,7 +60,7 @@ owerror_t cwellknown_receive(
          msg->length         = 0;
          
          // have CoAP module write links to all resources
-         opencoap_writeLinks(msg,0);
+         opencoap_writeLinks(msg,COMPONENT_CWELLKNOWN);
          
          packetfunctions_reserveHeaderSize(msg,1);
          msg->payload[0]     = COAP_PAYLOAD_MARKER;
