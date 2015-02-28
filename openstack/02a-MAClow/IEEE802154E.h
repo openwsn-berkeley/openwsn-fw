@@ -12,6 +12,9 @@
 #include "board.h"
 #include "schedule.h"
 #include "processIE.h"
+//START OF TELEMATICS CODE
+#include "security.h"
+//END OF TELEMATICS CODE
 
 //=========================== debug define ====================================
 

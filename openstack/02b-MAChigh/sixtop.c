@@ -610,7 +610,9 @@ owerror_t sixtop_send_internal(
                             msg->l2_frameType,
                             iePresent,
                             frameVersion,
-                            IEEE154_SEC_NO_SECURITY,
+                            //START OF TELEMATICS CODE
+                            msg->l2_security,
+                            //END OF TELEMATICS CODE
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
