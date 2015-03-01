@@ -132,14 +132,14 @@ enum ieee154e_atomicdurations_enum {
    // time-slot related
    TsTxOffset                =  131,                  //  4000us
    TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151,                  //  4606us
+   TsTxAckDelay              =  151+425,                  //  4606us
    TsShortGT                 =   16,                  //   500us
-   TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
+   TsSlotDuration            =  PORT_TsSlotDuration+800,  // 15000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
    maxRxDataPrepare          =  PORT_maxRxDataPrepare,
-   maxTxAckPrepare           =  PORT_maxTxAckPrepare,
+   maxTxAckPrepare           =  PORT_maxTxAckPrepare+425,
    // radio speed related
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening

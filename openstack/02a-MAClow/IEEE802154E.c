@@ -1225,6 +1225,13 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          // break from the do-while loop and execute the clean-up code below
          break;
       }
+
+      //START OF TELEMATICS CODE
+	   if(ieee154e_vars.ackReceived->l2_security== TRUE){
+		  security_incomingFrame(ieee154e_vars.ackReceived);
+	   }
+	   //END OF TELEMATICS CODE
+
       //hanlde IEs --xv poipoi
       if (ieee802514_header.ieListPresent==FALSE){
          break; //ack should contain IEs.
@@ -1522,14 +1529,42 @@ port_INLINE void activity_ri6() {
                                      IEEE802154E_DESC_TYPE_SHORT; 
    memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_ht));
    
+   //START OF TELEMATICS CODE
+   ieee154e_vars.ackToSend->l2_security = TRUE;
+   ieee154e_vars.ackToSend->l2_securityLevel = 1;
+   ieee154e_vars.ackToSend->l2_keyIdMode = 3;
+   if(idmanager_getIsDAGroot()){
+	   open_addr_t* temp_addr;
+	   temp_addr = idmanager_getMyID(ADDR_64B);
+	   memcpy(&(ieee154e_vars.ackToSend->l2_keySource), temp_addr, sizeof(open_addr_t));
+  }else{
+	   neighbors_getPreferredParentEui64(&(ieee154e_vars.ackToSend->l2_keySource));
+  }
+
+   ieee154e_vars.ackToSend->l2_keyIndex = 1;
+   //END OF TELEMATICS CODE
+
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
+   //START OF TELEMATICS CODE
+   if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+
+	   security_outgoingFrame(ieee154e_vars.ackToSend,
+							  ieee154e_vars.ackToSend->l2_securityLevel,
+							  ieee154e_vars.ackToSend->l2_keyIdMode,
+							  &ieee154e_vars.ackToSend->l2_keySource,
+							  ieee154e_vars.ackToSend->l2_keyIndex);
+	  }
+   //END OF TELEMATICS CODE
+
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
                             IEEE154_IELIST_YES,//ie in ack
                             IEEE154_FRAMEVERSION,//enhanced ack
-                            IEEE154_SEC_NO_SECURITY,
+                            //START OF TELEMATICS CODE
+							ieee154e_vars.ackToSend->l2_security,
+							//END OF TELEMATICS CODE
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
