@@ -18,17 +18,11 @@
 
 //=========================== defines =========================================
 
-/// task list used for matching callbacks from scheduler to the related timers
-#define CSENSORSTASKLIST 40
-
 const uint8_t csensors_path0[]       = "s";
 
 //=========================== variables =======================================
 
 csensors_vars_t               csensors_vars;
-uint8_t                       cb_vars[CSENSORSTASKLIST];
-uint8_t                       cb_put = 0;
-uint8_t                       cb_get = 0;
 
 //=========================== prototypes ======================================
 
@@ -86,6 +80,8 @@ void csensors_init() {
 
    opensensors = opensensors_read();
    csensors_vars.numSensors = opensensors->numSensors;
+   csensors_vars.cb_put = 0;
+   csensors_vars.cb_get = 0;
 
    for(i=0;i<csensors_vars.numSensors;i++) {
       csensors_vars.csensors_resource[i].timerId = MAX_NUM_TIMERS;
@@ -129,7 +125,8 @@ owerror_t csensors_receive(
       coap_option_iht*  coap_options
    ) {
    owerror_t outcome;
-   uint8_t   id,i;
+   uint8_t   id;
+   uint8_t   i;
    uint32_t  period;
 
 
@@ -237,8 +234,8 @@ void csensors_timer_cb(opentimer_id_t id){
 
    for(i=0;i<csensors_vars.numSensors;i++) {
       if (csensors_vars.csensors_resource[i].timerId == id) {
-         cb_vars[cb_put] = i;
-         cb_put = (cb_put+1)%CSENSORSTASKLIST;
+         csensors_vars.cb_list[csensors_vars.cb_put] = i;
+         csensors_vars.cb_put = (csensors_vars.cb_put+1)%CSENSORSTASKLIST;
          opentimers_setPeriod(
             csensors_vars.csensors_resource[i].timerId,
             TIME_MS,
@@ -253,7 +250,7 @@ void csensors_timer_cb(opentimer_id_t id){
 void csensors_task_cb() {
    OpenQueueEntry_t*          pkt;
    owerror_t                  outcome;
-   uint8_t                    id = cb_vars[cb_get];
+   uint8_t                    id;
 
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
@@ -263,6 +260,8 @@ void csensors_task_cb() {
       opentimers_stop(csensors_vars.csensors_resource[id].timerId);
       return;
    }
+
+   id = csensors_vars.cb_list[csensors_vars.cb_get];
 
    // create a CoAP RD packet
    pkt = openqueue_getFreePacketBuffer(COMPONENT_CSENSORS);
@@ -316,7 +315,7 @@ void csensors_task_cb() {
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    } else {
-      cb_get = (cb_get+1)%CSENSORSTASKLIST;
+	   csensors_vars.cb_get = (csensors_vars.cb_get+1)%CSENSORSTASKLIST;
    }
 
    return;
@@ -332,8 +331,11 @@ void csensors_task_cb() {
 void csensors_setPeriod(uint32_t period,
       uint8_t id) {
 
-   uint32_t old_period = csensors_vars.csensors_resource[id].period;
-   float denominator = 65535;
+   uint32_t old_period;
+   float denominator;
+
+   old_period = csensors_vars.csensors_resource[id].period;
+   denominator = 65535;
 
    if (period>0) {
       csensors_vars.csensors_resource[id].period = period;
