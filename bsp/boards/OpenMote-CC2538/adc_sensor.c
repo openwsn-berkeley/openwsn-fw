@@ -26,7 +26,7 @@ uint16_t adc_sens_read_temperature(void) {
 }
 
 float adc_sens_convert_temperature(uint16_t cputemp) {
-   double dOutputVoltage;
+   float dOutputVoltage;
 
    dOutputVoltage = cputemp * CONST;
    dOutputVoltage = ((dOutputVoltage - OFFSET_0C) / TEMP_COEFF);
