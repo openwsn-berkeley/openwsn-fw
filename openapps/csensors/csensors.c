@@ -47,7 +47,7 @@ void csensors_timer_cb(opentimer_id_t id);
 
 void csensors_task_cb(void);
 
-void csensors_changebehavior(
+void csensors_setPeriod(
    uint32_t period,
    uint8_t id
 );
@@ -204,12 +204,12 @@ owerror_t csensors_receive(
                }
             }
 
-            csensors_changebehavior(period,id);
+            csensors_setPeriod(period,id);
 
          } else {
 
             for(id=0;id<csensors_vars.numSensors;id++) {
-               csensors_changebehavior(period,id);
+               csensors_setPeriod(period,id);
             }
          }
 
@@ -329,7 +329,7 @@ void csensors_task_cb() {
 \param[in] id           Resource id in sensors array.
 
 */
-void csensors_changebehavior(uint32_t period,
+void csensors_setPeriod(uint32_t period,
       uint8_t id) {
 
    uint32_t old_period = csensors_vars.csensors_resource[id].period;
