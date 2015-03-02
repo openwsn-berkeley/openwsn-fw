@@ -105,10 +105,9 @@ void csensors_init() {
 void csensors_register(
       csensors_resource_t* csensors_resource
    ) {
-   uint8_t sensorType=csensors_resource->opensensors_resource->sensorType;
    csensors_resource->desc.path0len         = sizeof(csensors_path0)-1;
    csensors_resource->desc.path0val         = (uint8_t*)(&csensors_path0);
-   switch (sensorType) {
+   switch (csensors_resource->opensensors_resource->sensorType) {
       case SENSOR_TEMPERATURE:
          csensors_resource->desc.path1len   = sizeof(csensors_temperature_path1)-1;
          csensors_resource->desc.path1val   = (uint8_t*)(&csensors_temperature_path1);
