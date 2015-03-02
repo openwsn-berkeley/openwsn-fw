@@ -252,15 +252,6 @@ void csensors_task_cb() {
    owerror_t                  outcome;
    uint8_t                    id;
 
-   // don't run if not synch
-   if (ieee154e_isSynch() == FALSE) return;
-
-   // don't run on dagroot
-   if (idmanager_getIsDAGroot()) {
-      opentimers_stop(csensors_vars.csensors_resource[id].timerId);
-      return;
-   }
-
    id = csensors_vars.cb_list[csensors_vars.cb_get];
 
    // create a CoAP RD packet
