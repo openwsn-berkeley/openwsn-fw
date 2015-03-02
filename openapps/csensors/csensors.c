@@ -357,10 +357,8 @@ void csensors_setPeriod(uint32_t period,
       uint8_t id) {
 
    uint32_t old_period;
-   float denominator;
 
    old_period = csensors_vars.csensors_resource[id].period;
-   denominator = 65535;
 
    if (period>0) {
       csensors_vars.csensors_resource[id].period = period;
@@ -368,13 +366,13 @@ void csensors_setPeriod(uint32_t period,
          opentimers_setPeriod(
             csensors_vars.csensors_resource[id].timerId,
             TIME_MS,
-            (uint32_t)(period*(openrandom_get16b()/denominator)));
+            (uint32_t)((period*openrandom_get16b())/0xffff));
          if (old_period==0) {
             opentimers_restart(csensors_vars.csensors_resource[id].timerId);
          }
       } else {
          csensors_vars.csensors_resource[id].timerId = opentimers_start(
-            (uint32_t)(period*(openrandom_get16b()/denominator)),
+            (uint32_t)((period*openrandom_get16b())/0xffff),
             TIMER_PERIODIC,TIME_MS,
             csensors_timer_cb);
       }
