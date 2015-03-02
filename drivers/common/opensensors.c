@@ -1,12 +1,36 @@
+/**
+\brief Definition of the "opensensors" driver.
+
+\author Nicola Accettura <nicola.accettura@eecs.berkeley.edu>, March 2015.
+*/
+
 #include "opendefs.h"
 #include "opensensors.h"
 
+//=========================== defines =========================================
+
+//=========================== variables =======================================
+
+//=========================== prototypes ======================================
+
 opensensors_vars_t opensensors_vars;
 
+//=========================== public ==========================================
+
+/**
+   \brief Initialize OpenSensors
+*/
 void opensensors_init(void) {
    memset(&opensensors_vars,0,sizeof(opensensors_vars_t));
 }
 
+/**
+   \brief Register a OpenSensors resource
+
+   \param[in] sensorType the sensor type representation.
+   \param[in] callbackRead callback to read rough sensor data.
+   \param[in] callbackConvert callback to convert rough sensor data to human understandable.
+*/
 void opensensors_register(uint8_t sensorType,
                       callbackRead_cbt callbackRead,
                       callbackConvert_cbt callbackConvert) {
@@ -16,10 +40,21 @@ void opensensors_register(uint8_t sensorType,
    opensensors_vars.numSensors++;
 }
 
+/**
+   \brief Return the number of registered OpenSensors
+   \param[out] the number of registered OpenSensors.
+*/
 uint8_t opensensors_getNumSensors(void) {
    return opensensors_vars.numSensors;
 }
 
+/**
+   \brief Return an OpenSensors resource structure
+   \param[in] index Index of the OpenSensors resource within Opensensors vars.
+   \param[out] the OpenSensors resource within Opensensors vars.
+*/
 opensensors_resource_desc_t* opensensors_getResource(uint8_t index) {
    return &(opensensors_vars.opensensors_resource[index]);
 }
+
+//=========================== private =========================================

@@ -1,6 +1,7 @@
 /**
-\brief A CoAP resource which allows an application to GET/SET the state of
+    \brief Definition of the "csensors" app. A CoAP resource which allows an application to GET/SET the state of
    sensors.
+    \author Nicola Accettura <nicola.accettura@eecs.berkeley.edu>, March 2015.
 */
 
 #include "opendefs.h"
@@ -66,6 +67,9 @@ void csensors_sendDone(
 
 //=========================== public ==========================================
 
+/**
+   \brief Initialize csensors and registers opensensors resources.
+*/
 void csensors_init() {
    uint8_t i;
    uint8_t numSensors;
@@ -102,6 +106,10 @@ void csensors_init() {
 
 //=========================== private =========================================
 
+/**
+   \brief Register a csensor resource into opencoap.
+   \param[in] csensors_resource The resource to be registered.
+*/
 void csensors_register(
       csensors_resource_t* csensors_resource
    ) {
@@ -261,8 +269,13 @@ owerror_t csensors_receive(
    return outcome;
 }
 
-//timer fired, but we don't want to execute task in ISR mode
-//instead, push task to scheduler with COAP priority, and let scheduler take care of it
+/**
+   \brief   Called back from opentimers when a CoAP message is received for this resource. 
+      Timer fired, but we don't want to execute task in ISR mode.
+      Instead, push task to scheduler with COAP priority, and let scheduler take care of it.
+   \param[in] id The opentimer identifier used to resolve the csensor resource associated
+      parsed.
+*/
 void csensors_timer_cb(opentimer_id_t id){
    uint8_t i;
    
@@ -281,6 +294,9 @@ void csensors_timer_cb(opentimer_id_t id){
    scheduler_push_task(csensors_task_cb,TASKPRIO_COAP);
 }
 
+/**
+   \brief   Called back from scheduler, when a task must be executed.
+*/
 void csensors_task_cb() {
    OpenQueueEntry_t*          pkt;
    owerror_t                  outcome;
@@ -347,7 +363,7 @@ void csensors_task_cb() {
 }
 
 /**
-\brief Called when receiving a CoAP PUT.
+\brief Called when receiving a CoAP PUT to set a timer.
 
 \param[in] period       The period used for reporting data.
 \param[in] id           Resource id in sensors array.
@@ -393,16 +409,15 @@ void csensors_setPeriod(uint32_t period,
 */
 void csensors_fillpayload(OpenQueueEntry_t* msg,
       uint8_t id) {
-
+   
    uint16_t              value;
 
    value=csensors_vars.csensors_resource[id].opensensors_resource->callbackRead();
-
    packetfunctions_reserveHeaderSize(msg,3);
-
+   
    // add CoAP payload
    msg->payload[0]                  = COAP_PAYLOAD_MARKER;
-
+   
    // add value
    msg->payload[1]                  = (value>>8) & 0x00ff;
    msg->payload[2]                  = value & 0x00ff;

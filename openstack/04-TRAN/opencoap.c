@@ -328,6 +328,7 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 \brief Writes the links to all the resources on this mote into the message.
 
 \param[out] msg The messge to write the links to.
+\param[in] componentID The componentID calling this function.
 
 \post After this function returns, the msg contains 
 */

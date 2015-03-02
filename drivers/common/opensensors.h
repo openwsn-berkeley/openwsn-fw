@@ -1,11 +1,23 @@
+/**
+    \brief Declaration of the "opensensors" driver.
+    \author Nicola Accettura <nicola.accettura@eecs.berkeley.edu>, March 2015.
+*/
+
 #ifndef __OPENSENSORS_H__
 #define __OPENSENSORS_H__
 
 #include "sensors.h"
 
+/**
+\addtogroup drivers
+\{
+\addtogroup OpenSensors
+\{
+*/
+
 //=========================== define ==========================================
 
-// Sensor types
+/// Sensor types
 enum {
    SENSOR_TEMPERATURE,
    SENSOR_HUMIDITY,
@@ -28,6 +40,8 @@ typedef struct {
    callbackRead_cbt                 callbackRead;
    callbackConvert_cbt              callbackConvert;
 } opensensors_resource_desc_t;
+
+//=========================== module variables ================================
 
 typedef struct {
    opensensors_resource_desc_t      opensensors_resource[NUMSENSORS];

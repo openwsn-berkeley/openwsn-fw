@@ -1,3 +1,8 @@
+/**
+    \brief Definition of the "sensors" board-specif driver.
+    \author Nicola Accettura <nicola.accettura@eecs.berkeley.edu>, March 2015.
+*/
+
 #include "opendefs.h"
 #include "adxl346.h"
 #include "max44009.h"
@@ -5,6 +10,17 @@
 #include "adc_sensor.h"
 #include "opensensors.h"
 
+//=========================== defines =========================================
+
+//=========================== variables =======================================
+
+//=========================== prototype =======================================
+
+//=========================== public ==========================================
+
+/**
+   \brief Initialize sensors on the board, registering them through opensensors
+*/
 void sensors_init(void) {
 
    opensensors_init();
@@ -56,3 +72,5 @@ void sensors_init(void) {
    );
 
 }
+
+//=========================== private =========================================
