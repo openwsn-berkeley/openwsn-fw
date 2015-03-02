@@ -16,17 +16,10 @@ void opensensors_register(uint8_t sensorType,
    opensensors_vars.numSensors++;
 }
 
-opensensors_resource_desc_t* opensensors_get(uint8_t sensorType) {
-   uint8_t                          i;
-   opensensors_resource_desc_t*     returnResource;
-   
-   for (i=0;i<opensensors_vars.numSensors;i++) {
-      if (opensensors_vars.opensensors_resource[i].sensorType == sensorType) {
-         returnResource = &opensensors_vars.opensensors_resource[i];
-         break;
-      }
-   }
-   return returnResource;
+uint8_t opensensors_getNumSensors(void) {
+   return opensensors_vars.numSensors;
 }
 
-
+opensensors_resource_desc_t* opensensors_getResource(uint8_t index) {
+   return &(opensensors_vars.opensensors_resource[index]);
+}

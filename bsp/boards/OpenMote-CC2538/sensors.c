@@ -5,14 +5,6 @@
 #include "adc_sensor.h"
 #include "opensensors.h"
 
-const uint8_t temperature[] = "t";
-const uint8_t humidity[] = "h";
-const uint8_t light[] = "l";
-const uint8_t x[] = "x";
-const uint8_t y[] = "y";
-const uint8_t z[] = "z";
-const uint8_t cputemp[] = "c";
-
 void sensors_init(void) {
 
    opensensors_init();

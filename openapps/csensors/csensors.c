@@ -10,6 +10,7 @@
 #include "openqueue.h"
 #include "idmanager.h"
 #include "opensensors.h"
+#include "sensors.h"
 #include "opentimers.h"
 #include "scheduler.h"
 #include "openserial.h"
@@ -18,7 +19,15 @@
 
 //=========================== defines =========================================
 
-const uint8_t csensors_path0[]       = "s";
+const uint8_t csensors_path0[]                  = "s";
+const uint8_t csensors_temperature_path1[]      = "t";
+const uint8_t csensors_humidity_path1[]         = "h";
+const uint8_t csensors_light_path1[]            = "l";
+const uint8_t csensors_x_path1[]                = "x";
+const uint8_t csensors_y_path1[]                = "y";
+const uint8_t csensors_z_path1[]                = "z";
+const uint8_t csensors_cputemp_path1[]          = "c";
+const uint8_t csensors_default_path1[]          = "d";
 
 //=========================== variables =======================================
 
@@ -27,8 +36,7 @@ csensors_vars_t               csensors_vars;
 //=========================== prototypes ======================================
 
 void csensors_register(
-   csensors_resource_t* csensors_resource,
-   opensensors_resource_desc_t* opensensors_resource_desc
+   csensors_resource_t* csensors_resource
 );
 
 owerror_t csensors_receive(
@@ -42,8 +50,8 @@ void csensors_timer_cb(opentimer_id_t id);
 void csensors_task_cb(void);
 
 void csensors_setPeriod(
-   uint32_t period,
-   uint8_t id
+   uint32_t          period,
+   uint8_t           id
 );
 
 void csensors_fillpayload(
@@ -53,53 +61,88 @@ void csensors_fillpayload(
 
 void csensors_sendDone(
    OpenQueueEntry_t* msg,
-   owerror_t error
+   owerror_t         error
 );
 
 //=========================== public ==========================================
 
 void csensors_init() {
    uint8_t i;
-   opensensors_vars_t* opensensors;
+   uint8_t numSensors;
 
    // do not run if DAGroot
    if(idmanager_getIsDAGroot()==TRUE) return;
 
    memset(&csensors_vars,0,sizeof(csensors_vars_t));
 
-   csensors_vars.desc.path0len         = sizeof(csensors_path0)-1;
-   csensors_vars.desc.path0val         = (uint8_t*)(&csensors_path0);
-   csensors_vars.desc.path1len         = 0;
-   csensors_vars.desc.path1val         = NULL;
-   csensors_vars.desc.componentID      = COMPONENT_CSENSORS;
-   csensors_vars.desc.discoverable     = TRUE;
-   csensors_vars.desc.callbackRx       = &csensors_receive;
-   csensors_vars.desc.callbackSendDone = &csensors_sendDone;
+   csensors_vars.desc.path0len               = sizeof(csensors_path0)-1;
+   csensors_vars.desc.path0val               = (uint8_t*)(&csensors_path0);
+   csensors_vars.desc.path1len               = 0;
+   csensors_vars.desc.path1val               = NULL;
+   csensors_vars.desc.componentID            = COMPONENT_CSENSORS;
+   csensors_vars.desc.discoverable           = TRUE;
+   csensors_vars.desc.callbackRx             = &csensors_receive;
+   csensors_vars.desc.callbackSendDone       = &csensors_sendDone;
    // register with the CoAP module
    opencoap_register(&csensors_vars.desc);
 
-   opensensors = opensensors_read();
-   csensors_vars.numSensors = opensensors->numSensors;
-   csensors_vars.cb_put = 0;
-   csensors_vars.cb_get = 0;
+   numSensors = opensensors_getNumSensors();
+   csensors_vars.cb_put                      = 0;
+   csensors_vars.cb_get                      = 0;
+   csensors_vars.numCsensors                 = 0;
 
-   for(i=0;i<csensors_vars.numSensors;i++) {
-      csensors_vars.csensors_resource[i].timerId = MAX_NUM_TIMERS;
-      csensors_vars.csensors_resource[i].period  = 0;
-      csensors_register(&csensors_vars.csensors_resource[i],&opensensors->opensensors_resource[i]);
+   for(i=0;i<numSensors;i++) {
+      csensors_vars.csensors_resource[i].timerId               = MAX_NUM_TIMERS;
+      csensors_vars.csensors_resource[i].period                = 0;
+      csensors_vars.csensors_resource[i].opensensors_resource  = opensensors_getResource(i);
+      csensors_register(&csensors_vars.csensors_resource[i]);
+      csensors_vars.numCsensors++;
    }
 }
 
 //=========================== private =========================================
 
 void csensors_register(
-      csensors_resource_t* csensors_resource,
-      opensensors_resource_desc_t* opensensors_resource_desc
+      csensors_resource_t* csensors_resource
    ) {
+   uint8_t sensorType=csensors_resource->opensensors_resource->sensorType;
    csensors_resource->desc.path0len         = sizeof(csensors_path0)-1;
    csensors_resource->desc.path0val         = (uint8_t*)(&csensors_path0);
-   csensors_resource->desc.path1len         = opensensors_resource_desc->path1len;
-   csensors_resource->desc.path1val         = opensensors_resource_desc->path1val;
+   switch (sensorType) {
+      case SENSOR_TEMPERATURE:
+         csensors_resource->desc.path1len   = sizeof(csensors_temperature_path1)-1;
+         csensors_resource->desc.path1val   = (uint8_t*)(&csensors_temperature_path1);
+         break;
+      case SENSOR_HUMIDITY:
+         csensors_resource->desc.path1len   = sizeof(csensors_humidity_path1)-1;
+         csensors_resource->desc.path1val   = (uint8_t*)(&csensors_humidity_path1);
+         break;
+      case SENSOR_LIGHT:
+         csensors_resource->desc.path1len   = sizeof(csensors_light_path1)-1;
+         csensors_resource->desc.path1val   = (uint8_t*)(&csensors_light_path1);
+         break;
+      case SENSOR_XACCELERATION:
+         csensors_resource->desc.path1len   = sizeof(csensors_x_path1)-1;
+         csensors_resource->desc.path1val   = (uint8_t*)(&csensors_x_path1);
+         break;
+      case SENSOR_YACCELERATION:
+         csensors_resource->desc.path1len   = sizeof(csensors_y_path1)-1;
+         csensors_resource->desc.path1val   = (uint8_t*)(&csensors_y_path1);
+         break;
+      case SENSOR_ZACCELERATION:
+         csensors_resource->desc.path1len   = sizeof(csensors_z_path1)-1;
+         csensors_resource->desc.path1val   = (uint8_t*)(&csensors_z_path1);
+         break;
+      case SENSOR_ADCTEMPERATURE:
+         csensors_resource->desc.path1len   = sizeof(csensors_cputemp_path1)-1;
+         csensors_resource->desc.path1val   = (uint8_t*)(&csensors_cputemp_path1);
+         break;
+      default:
+         csensors_resource->desc.path1len   = sizeof(csensors_default_path1)-1;
+         csensors_resource->desc.path1val   = (uint8_t*)(&csensors_default_path1);
+         break;
+         
+   }
    csensors_resource->desc.componentID      = COMPONENT_CSENSORS;
    csensors_resource->desc.discoverable     = TRUE;
    csensors_resource->desc.callbackRx       = &csensors_receive;
@@ -150,8 +193,7 @@ owerror_t csensors_receive(
             msg->payload[1]     = COAP_MEDTYPE_APPLINKFORMAT;
 
          } else {
-
-            for(id=0;id<csensors_vars.numSensors;id++) {
+            for(id=0;id<csensors_vars.numCsensors;id++) {
                if (
                   memcmp(
                      coap_options[1].pValue,
@@ -175,9 +217,7 @@ owerror_t csensors_receive(
          break;
 
       case COAP_CODE_REQ_PUT:
-
          period = 0;
-
          for(i=0;i<msg->length;i++) {
             if ((uint8_t)msg->payload[i]>=(uint8_t)'0' && (uint8_t)msg->payload[i]<=(uint8_t)'0'+9) {
                period = period*10 + (uint8_t)msg->payload[i] - (uint8_t)'0';
@@ -186,10 +226,8 @@ owerror_t csensors_receive(
                break;
             }
          }
-
          if (coap_options[1].type == COAP_OPTION_NUM_URIPATH) {
-
-            for(id=0;id<csensors_vars.numSensors;id++) {
+            for(id=0;id<csensors_vars.numCsensors;id++) {
                if (
                   memcmp(
                      coap_options[1].pValue,
@@ -200,12 +238,9 @@ owerror_t csensors_receive(
                   break;
                }
             }
-
             csensors_setPeriod(period,id);
-
          } else {
-
-            for(id=0;id<csensors_vars.numSensors;id++) {
+            for(id=0;id<csensors_vars.numCsensors;id++) {
                csensors_setPeriod(period,id);
             }
          }
@@ -231,8 +266,8 @@ owerror_t csensors_receive(
 //instead, push task to scheduler with COAP priority, and let scheduler take care of it
 void csensors_timer_cb(opentimer_id_t id){
    uint8_t i;
-
-   for(i=0;i<csensors_vars.numSensors;i++) {
+   
+   for(i=0;i<csensors_vars.numCsensors;i++) {
       if (csensors_vars.csensors_resource[i].timerId == id) {
          csensors_vars.cb_list[csensors_vars.cb_put] = i;
          csensors_vars.cb_put = (csensors_vars.cb_put+1)%CSENSORSTASKLIST;
@@ -306,7 +341,7 @@ void csensors_task_cb() {
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    } else {
-	   csensors_vars.cb_get = (csensors_vars.cb_get+1)%CSENSORSTASKLIST;
+      csensors_vars.cb_get = (csensors_vars.cb_get+1)%CSENSORSTASKLIST;
    }
 
    return;
@@ -363,9 +398,8 @@ void csensors_fillpayload(OpenQueueEntry_t* msg,
       uint8_t id) {
 
    uint16_t              value;
-   opensensors_vars_t*   opensensors = opensensors_read();
 
-   value=opensensors->opensensors_resource[id].callbackRead();
+   value=csensors_vars.csensors_resource[id].opensensors_resource->callbackRead();
 
    packetfunctions_reserveHeaderSize(msg,3);
 
