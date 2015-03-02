@@ -187,7 +187,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3']:
+    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='OpenMote-CC2538':
@@ -225,7 +225,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
         
-    elif env['board']=='iot-lab_M3':
+    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3']:
         
          # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -263,9 +263,9 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-mthumb')
         env.Append(LINKFLAGS     = '-mthumb-interwork')
         env.Append(LINKFLAGS     = '-nostartfiles')
-        env.Append(LINKFLAGS     = '-Tbsp/boards/iot-lab_M3/stm32_flash.ld')
-        env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','startup.o'))
-        env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','configure','stm32f10x_it.o'))
+        env.Append(LINKFLAGS     = '-Tbsp/boards/'+env['board']+'/stm32_flash.ld')
+        env.Append(LINKFLAGS     = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'startup.o'))
+        env.Append(LINKFLAGS     = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'configure','stm32f10x_it.o'))
         # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
@@ -352,9 +352,9 @@ else:
 
 def jtagUploadFunc(location):
     if env['toolchain']=='armgcc':
-        if env['board'] in ['iot-lab_M3']:
+        if env['board'] in ['iot-lab_M3','iot-lab_A8-M3']:
             return Builder(
-                action      = os.path.join('bsp','boards','iot-lab_M3','tools','flash.sh') + " $SOURCE",
+                action      = os.path.join('bsp','boards',env['board'],'tools','flash.sh') + " $SOURCE",
                 suffix      = '.phonyupload',
                 src_suffix  = '.ihex',
             )
@@ -463,7 +463,7 @@ def buildLibs(projectDir):
     libs_dict = {
         '00std': [                                                              ],
         '01bsp': [                                                      'libbsp'],
-        '02drv': [                                         'libdrivers','libbsp'],
+        '02drv': [                             'libkernel','libdrivers','libbsp'],
         '03oos': ['libopenstack','libopenapps','libkernel','libbsp','libdrivers'], # this order needed for mspgcc
     }
     

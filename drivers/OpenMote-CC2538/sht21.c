@@ -5,6 +5,9 @@
  *         Pere Tuset, OpenMote <peretuset@openmote.com>
  */
 
+#include "stdint.h"
+#include "stdbool.h"
+
 #include "i2c.h"
 #include "sht21.h"
 
@@ -33,6 +36,8 @@
 #define SHT21_HUMIDITY_NHM_CMD          ( 0xF5 )
 #define SHT21_RESET_CMD                 ( 0xFE )
 
+#define SHT21_STATUS_MASK               ( 0xFC )
+
 #define SHT21_DEFAULT_CONFIG            ( SHT21_RESOLUTION_12b_14b | \
                                           SHT21_ONCHIP_HEATER_DISABLE | \
                                           SHT21_BATTERY_ABOVE_2V25 | \
@@ -45,15 +50,17 @@
 
 //=========================== variables =======================================
 
-
 //=========================== prototypes ======================================
 
+static void sht21_pre_init(void);
 
 //=========================== public ==========================================
 
-void sht21_init(void)
-{
+void sht21_init(void) {
     uint8_t config[2];
+
+    // Pre-init the STH21 if required
+    sht21_pre_init();
 
     // Setup the configuration vector, the first position holds address
     // and the second position holds the actual configuration
@@ -73,15 +80,16 @@ void sht21_init(void)
     i2c_write_bytes(SHT21_ADDRESS, config, sizeof(config));
 }
 
-void sht21_reset(void)
-{
+void sht21_reset(void) {
     // Send a soft-reset command according to the datasheet (pag. 9, fig. 17)
     i2c_write_byte(SHT21_ADDRESS, SHT21_RESET_CMD);
 }
 
-uint8_t sht21_is_present(void)
-{
+uint8_t sht21_is_present(void) {
     uint8_t is_present;
+
+    // Pre-init the STH21 if required
+    sht21_pre_init();
 
     // Read the current configuration according to the datasheet (pag. 9, fig. 18)
     i2c_write_byte(SHT21_ADDRESS, SHT21_USER_REG_READ);
@@ -90,11 +98,10 @@ uint8_t sht21_is_present(void)
     // Clear the reserved bits according to the datasheet (pag. 9, tab. 8)
     is_present &= ~SHT21_USER_REG_RESERVED_BITS;
 
-    return (is_present == SHT21_DEFAULT_CONFIG);
+    return (is_present == SHT21_DEFAULT_CONFIG || is_present == SHT21_USER_CONFIG);
 }
 
-uint16_t sht21_read_temperature(void)
-{
+uint16_t sht21_read_temperature(void) {
     uint8_t sht21_temperature[2];
     uint16_t temperature;
 
@@ -102,23 +109,21 @@ uint16_t sht21_read_temperature(void)
     i2c_write_byte(SHT21_ADDRESS, SHT21_TEMPERATURE_HM_CMD);
     i2c_read_bytes(SHT21_ADDRESS, sht21_temperature, sizeof(sht21_temperature));
     
-    temperature = (sht21_temperature[1] << 8) | sht21_temperature[0];
+    temperature = (sht21_temperature[0] << 8) | (sht21_temperature[1] & SHT21_STATUS_MASK);
     
     return temperature;
 }
 
-float sht21_convert_temperature(uint16_t temperature)
-{
+float sht21_convert_temperature(uint16_t temperature) {
     float result;
     
-    result = -46.85;
+    result  = -46.85;
     result += 175.72 * temperature / 65536;
     
     return result;
 }
 
-uint16_t sht21_read_humidity(void)
-{
+uint16_t sht21_read_humidity(void) {
     uint8_t sht21_humidity[2];
     uint16_t humidity;
 
@@ -126,16 +131,15 @@ uint16_t sht21_read_humidity(void)
     i2c_write_byte(SHT21_ADDRESS, SHT21_HUMIDITY_HM_CMD);
     i2c_read_bytes(SHT21_ADDRESS, sht21_humidity, sizeof(sht21_humidity));
 
-    humidity = (sht21_humidity[1] << 8) | sht21_humidity[0];
+    humidity = (sht21_humidity[0] << 8) | (sht21_humidity[1] & SHT21_STATUS_MASK);
 
     return humidity;
 }
 
-float sht21_convert_humidity(uint16_t humidity)
-{
+float sht21_convert_humidity(uint16_t humidity) {
     float result;
     
-    result = -6.0;
+    result  = -6.0;
     result += 125.0 * humidity / 65536;
     
     return result;
@@ -143,3 +147,13 @@ float sht21_convert_humidity(uint16_t humidity)
 
 //=========================== private =========================================
 
+static void sht21_pre_init(void) {
+    static bool is_initialized = false;
+    volatile uint32_t i;
+
+    if (is_initialized == false) {
+        // Delay needed for the SHT21 to startup
+        for (i = 0x1FFFF; i != 0; i--);
+        is_initialized = true;
+    }
+}

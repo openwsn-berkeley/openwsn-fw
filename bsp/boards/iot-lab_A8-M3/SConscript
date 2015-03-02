@@ -1,0 +1,34 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+# scons doesn't let us look to parent directories for source, so the
+# bsp/chips/at86rf231/radio.c is off limits from this file. To keep things
+# simple, each SConscript file in bsp/chips/* will return a list of objects
+# which can be appended to the source list. Don't forget to specify a variant_dir,
+# or else the build will occur directly in the chips directory.
+
+rf231 = localEnv.SConscript(
+    os.path.join('#','bsp','chips','at86rf231','SConscript'),
+    variant_dir = 'rf231',
+    exports     = {'env': env},
+    duplicate   = 0,
+)
+
+target   = 'libbsp'
+bsp_dir  = os.path.join('#','bsp','boards','iot-lab_M3')
+source   = \
+    Glob('*.c') + \
+    Glob('*.s') + \
+    Glob('configure/*.c') + \
+    Glob('library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/*.c') + \
+    [rf231]
+
+libbsp = localEnv.Library(
+    target=target,
+    source=source,
+)
+
+Alias('libbsp', libbsp)
