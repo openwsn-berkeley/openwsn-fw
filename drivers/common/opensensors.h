@@ -16,9 +16,6 @@ enum {
    SENSOR_ADCTEMPERATURE,
    SENSOR_DEFAULT
 };
-// the following define MUST match the exact number of sensor types decleared 
-// in the previous enum
-#define NUMOPENSENSORS 8
 
 //=========================== typedef =========================================
 

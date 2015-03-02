@@ -3,7 +3,9 @@
 
 //=========================== define ==========================================
 
-#define NUMSENSORS 7
+#ifndef NUMSENSORS
+#define NUMSENSORS 10
+#endif  // NUMSENSORS
 
 //=========================== prototypes ======================================
 

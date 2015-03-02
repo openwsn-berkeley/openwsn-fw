@@ -28,7 +28,7 @@ typedef struct {
 
 typedef struct {
    coap_resource_desc_t         desc;
-   csensors_resource_t          csensors_resource[NUMOPENSENSORS];
+   csensors_resource_t          csensors_resource[NUMSENSORS];
    uint8_t                      numCsensors;
    uint8_t                      cb_list[CSENSORSTASKLIST];
    uint8_t                      cb_put;
