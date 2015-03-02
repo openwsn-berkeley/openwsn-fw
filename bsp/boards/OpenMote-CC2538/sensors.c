@@ -19,14 +19,12 @@ void sensors_init(void) {
    if (sht21_is_present()==1) {
       sht21_init();
       opensensors_register(
-         sizeof(temperature)-1,
-         (uint8_t*)(&temperature),
+         SENSOR_TEMPERATURE,
          &sht21_read_temperature,
          &sht21_convert_temperature
       );
       opensensors_register(
-         sizeof(humidity)-1,
-         (uint8_t*)(&humidity),
+         SENSOR_HUMIDITY,
          &sht21_read_humidity,
          &sht21_convert_humidity
       );
@@ -34,8 +32,7 @@ void sensors_init(void) {
    if (max44009_is_present()==1) {
       max44009_init();
       opensensors_register(
-         sizeof(light)-1,
-         (uint8_t*)(&light),
+         SENSOR_LIGHT,
          &max44009_read_light,
          &max44009_convert_light
       );
@@ -43,20 +40,17 @@ void sensors_init(void) {
    if (adxl346_is_present()==1) {
       adxl346_init();
       opensensors_register(
-         sizeof(x)-1,
-         (uint8_t*)(&x),
+         SENSOR_XACCELERATION,
          &adxl346_read_x,
          NULL
       );
       opensensors_register(
-         sizeof(y)-1,
-         (uint8_t*)(&y),
+         SENSOR_YACCELERATION,
          &adxl346_read_y,
          NULL
       );
       opensensors_register(
-         sizeof(z)-1,
-         (uint8_t*)(&z),
+         SENSOR_ZACCELERATION,
          &adxl346_read_z,
          NULL
       );
@@ -64,8 +58,7 @@ void sensors_init(void) {
 
    adc_sensor_init();
    opensensors_register(
-      sizeof(cputemp)-1,
-      (uint8_t*)(&cputemp),
+      SENSOR_ADCTEMPERATURE,
       &adc_sens_read_temperature,
       &adc_sens_convert_temperature
    );
