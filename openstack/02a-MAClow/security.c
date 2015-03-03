@@ -760,6 +760,7 @@ void remote_init(ieee802154_header_iht ieee802514_header){
 //						(errorparameter_t)M_k,
 //						(errorparameter_t)201);
 
+	//this is necessary if multihop secure communications need to be estabilished
 	coordinator_init();
 
 }

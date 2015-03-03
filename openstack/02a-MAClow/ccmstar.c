@@ -1,5 +1,5 @@
 /**
-\brief CCMstar functions
+\brief CCMstar procedure
 
 \author Savio Sciancalepore <savio.sciancalepore@poliba.it>, July 2014.
 */
@@ -68,26 +68,26 @@ void Input_Transformation(uint8_t* payload,
 		l = 0;
 	}
 	//authentication field of 32 bit
-	if(authentication_length > 0 && authentication_length < 65280 ){//65280 = 2^16-2^8
+	if(authentication_length ==4){//65280 = 2^16-2^8
 		La = authentication_length;
 		l = authentication_length;
 	}
 
 	//authentication field of 64 bit
-	/*if(authlen >= 65280){
+	if(authentication_length ==8){
 		La = 0xFF;
 		La |= 0xFE << 8;
-		La |= ((uint32_t)authlen) << 16;
-		l = authlen + 2;
+		La |= ((uint32_t)authentication_length) << 16;
+		l = authentication_length + 2;
 	}
 
 	//authentication field of 128 bit
-	/*if(authLen > (2^32)){
-		L = 0xFF;
-		L |= 0xFE <<8;
-		L |= authLen <<16;
-		l = authLen + 2;
-	}*/
+	if(authentication_length == 16){
+		La = 0xFF;
+		La |= 0xFF <<8;
+		La |= ((uint32_t)authentication_length) <<16;
+		l = authentication_length + 2;
+	}
 
 	for(i=0; i<4;i++){
 		ccmstar_vars.authData[i] = La << 8*i;
@@ -122,7 +122,7 @@ void Auth_Transformation(uint8_t 				length,
 	uint8_t B[16];
 	uint8_t X[16];
 
-	uint8_t in[16],out[16]; //Key[16];
+	uint8_t in[16],out[16];
 
 	//determine Flags Field
 	B[0] = 0;
