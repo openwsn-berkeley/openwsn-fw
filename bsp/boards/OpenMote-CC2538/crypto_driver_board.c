@@ -7,11 +7,8 @@
 #include "crypto_driver.h"
 #include "aes_ccms.h"
 #include "aes_ctr.h"
-#include "aes_ctr_board.h"
 #include "aes_cbc_mac.h"
-#include "aes_cbc_mac_board.h"
 #include "aes_ecb.h"
-#include "aes_ecb_board.h"
 #include "crypto_driver_board.h"
 
 int crypto_driver_board_init(crypto_driver_t *crypto_driver)
