@@ -8,6 +8,7 @@ localEnv = env.Clone()
 sources_h = [
     'board.h',
     'bsp_timer.h',
+    'crypto_driver_board.h',
     'debugpins.h',
     'eui64.h',
     'leds.h',

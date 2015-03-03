@@ -4,7 +4,7 @@ Import('env')
 
 localEnv = env.Clone()
 
-source   = []
+source   = ['aes_cbc_mac.c', 'aes_ccms.c', 'aes_ctr.c', 'aes_ecb.c', 'crypto_driver.c']
 
 localEnv.Append(
         CPPPATH =  [ \
@@ -14,3 +14,4 @@ localEnv.Append(
 common  = localEnv.Object(source=source)
 
 Return('common')
+

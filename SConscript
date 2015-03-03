@@ -18,6 +18,7 @@ if env['board']!='python':
         CPPPATH = [
             os.path.join('#','inc'),
             os.path.join('#','bsp','boards'),
+            os.path.join('#','bsp','boards','common'),
             os.path.join('#','bsp','chips'),
             os.path.join('#','drivers','common'),
             os.path.join('#','kernel'),
