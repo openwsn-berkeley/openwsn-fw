@@ -492,6 +492,9 @@ void task_sixtopNotifReceive() {
         		 // send to upper layer
         		 iphc_receive(msg);
         	 } else {
+//			openserial_printError(COMPONENT_SIXTOP,ERR_6LOWPAN_UNSUPPORTED,
+//								(errorparameter_t)msg->l2_keySource.addr_64b[7],
+//								(errorparameter_t)501);
         	// free up the RAM
         		 openqueue_freePacketBuffer(msg);
         	 }
@@ -692,6 +695,10 @@ port_INLINE void sixtop_sendEB() {
       // don't continue if I'm still sending a previous ADV
    }
    
+   //START OF TELEMATICS CODE
+//   if(!idmanager_getIsDAGroot() && )
+   //END OF TELEMATICS CODE
+
    // if I get here, I will send an ADV
    
    // get a free packet buffer

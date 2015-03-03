@@ -733,32 +733,34 @@ void remote_init(ieee802154_header_iht ieee802514_header){
 
 	open_addr_t* src;
 	src= &ieee802514_header.src;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIdMode = 3;
-	//security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIdMode = 2;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource = *(src);
-//	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource.type = ADDR_16B;
-//	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource.addr_16b[0] = (src)->addr_16b[0];
-//	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource.addr_16b[1] = (src)->addr_16b[1];
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.PANId = ieee802514_header.panid;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIndex = 1;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.Address = (ieee802514_header.src);
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[1].FrameType = IEEE154_TYPE_DATA;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[0].FrameType = IEEE154_TYPE_ACK;
+	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIdMode = 3;
+	//security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIdMode = 2;
+	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource = *(src);
+//	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource.type = ADDR_16B;
+//	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource.addr_16b[0] = (src)->addr_16b[0];
+//	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource.addr_16b[1] = (src)->addr_16b[1];
+	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.PANId = ieee802514_header.panid;
+	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIndex = 1;
+	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.Address = (ieee802514_header.src);
+	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyUsageList[1].FrameType = IEEE154_TYPE_DATA;
+	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyUsageList[0].FrameType = IEEE154_TYPE_ACK;
 	uint8_t j;
 	for(j=0;j<16;j++){
-		security_vars.MacKeyTable.KeyDescriptorElement[0].key[j] = security_vars.M_k[j];
+		security_vars.MacKeyTable.KeyDescriptorElement[1].key[j] = security_vars.M_k[j];
 	}
 	security_vars.m_macDefaultKeySource = *(src);
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIndex = 1;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.Address = *(src);
-	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = *(src);
-//	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter = 0;
-	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter.bytes0and1 = 0;
-	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter.bytes2and3 = 0;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &security_vars.MacDeviceTable;
+	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIndex = 1;
+	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.Address = *(src);
+	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].deviceAddress = *(src);
+//	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter = 0;
+	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter.bytes0and1 = 0;
+	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter.bytes2and3 = 0;
+	security_vars.MacKeyTable.KeyDescriptorElement[1].DeviceTable = &security_vars.MacDeviceTable;
 //	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
 //						(errorparameter_t)M_k,
 //						(errorparameter_t)201);
+
+	coordinator_init();
 
 }
 
