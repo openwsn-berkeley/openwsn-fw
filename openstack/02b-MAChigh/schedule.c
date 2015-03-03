@@ -40,19 +40,6 @@ void schedule_init() {
    // start at slot 0
    running_slotOffset = 0;
    
-   // advertisement slot(s)
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   for (i=0;i<NUMADVSLOTS;i++) {
-      schedule_addActiveSlot(
-         running_slotOffset,      // slot offset
-         CELLTYPE_ADV,            // type of slot
-         FALSE,                   // shared?
-         0,                       // channel offset
-         &temp_neighbor           // neighbor
-      );
-      running_slotOffset++;
-   } 
-   
    // shared TXRX anycast slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
