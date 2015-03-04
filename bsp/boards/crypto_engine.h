@@ -17,7 +17,7 @@ extern "C" {
 #ifdef CRYPTO_ENGINE_SCONS
 #define CRYPTO_ENGINE CRYPTO_ENGINE_SCONS
 #else /* CRYPTO_ENGINE_SCONS */
-#define CRYPTO_ENGINE firmware_crypto_engine
+#define CRYPTO_ENGINE dummy_crypto_engine
 #endif /* CRYPTO_ENGINE_SCONS */
 
 typedef int (*fp_aes_ccms_enc)(uint8_t *a, uint8_t len_a, uint8_t *m, uint8_t *len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t *key);
