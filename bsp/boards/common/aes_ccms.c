@@ -17,11 +17,9 @@ int aes_ccms_enc(uint8_t *a,
 {
    uint8_t mac[CBC_MAC_SIZE];
 
-   const crypto_driver_t* drv = crypto_driver_get();
-
-   if (drv->aes_cbc_mac_enc(a, len_a, m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == 0)
+   if (CRYPTO_ENGINE.aes_cbc_mac_enc(a, len_a, m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == 0)
    {
-      if (drv->aes_ctr_enc(m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == 0)
+      if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == 0)
       {
          memcpy(&m[*len_m], mac, CBC_MAC_SIZE);
          *len_m += CBC_MAC_SIZE;
@@ -44,14 +42,12 @@ int aes_ccms_dec(uint8_t *a,
    uint8_t mac[CBC_MAC_SIZE];
    uint8_t orig_mac[CBC_MAC_SIZE];
 
-   const crypto_driver_t* drv = crypto_driver_get();
-
    *len_m -= CBC_MAC_SIZE;
    memcpy(mac, &m[*len_m], CBC_MAC_SIZE);
 
-   if (drv->aes_ctr_enc(m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == 0)
+   if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == 0)
    {
-      if (drv->aes_cbc_mac_enc(a, len_a, m, *len_m, saddr, asn, key, orig_mac, CBC_MAC_SIZE) == 0)
+      if (CRYPTO_ENGINE.aes_cbc_mac_enc(a, len_a, m, *len_m, saddr, asn, key, orig_mac, CBC_MAC_SIZE) == 0)
       {
          if (memcmp(mac, orig_mac, CBC_MAC_SIZE) == 0)
             return 0;

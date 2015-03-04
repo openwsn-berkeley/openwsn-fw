@@ -11,12 +11,10 @@ int aes_cbc_mac_enc_raw(uint8_t *buffer, uint8_t len, uint8_t key[16])
 {
    uint8_t n, k, nb, *pbuf;
 
-   const crypto_driver_t* drv = crypto_driver_get();
-
    nb = len >> 4;
    for (n = 0; n < nb; n++) {
       pbuf = &buffer[16 * n];
-      drv->aes_ecb_enc(pbuf,key);
+      CRYPTO_ENGINE.aes_ecb_enc(pbuf,key);
       if (n < (nb - 1)) {
          // may be faster if vector are aligned to 4 bytes (use long instead char in xor)
          for (k = 0; k < 16; k++){
@@ -41,8 +39,6 @@ int aes_cbc_mac_enc(uint8_t *a,
    uint8_t pad_len;
    uint8_t len;
    uint8_t buffer[128+16]; // max buffer plus IV
-
-   const crypto_driver_t* drv = crypto_driver_get();
 
    // asserts here
    if (!((len_mac == 4) || (len_mac == 8) || (len_mac == 16)))
@@ -85,7 +81,7 @@ int aes_cbc_mac_enc(uint8_t *a,
    memset(&buffer[len], 0, pad_len);
    len += pad_len;
 
-   drv->aes_cbc_mac_enc_raw(buffer, len, key);
+   CRYPTO_ENGINE.aes_cbc_mac_enc_raw(buffer, len, key);
 
    // copy MAC
    memcpy(mac, &buffer[len - 16], len_mac);
