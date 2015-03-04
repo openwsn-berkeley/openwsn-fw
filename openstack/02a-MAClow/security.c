@@ -756,13 +756,9 @@ void remote_init(ieee802154_header_iht ieee802514_header){
 	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter.bytes0and1 = 0;
 	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter.bytes2and3 = 0;
 	security_vars.MacKeyTable.KeyDescriptorElement[1].DeviceTable = &security_vars.MacDeviceTable;
-//	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
-//						(errorparameter_t)M_k,
-//						(errorparameter_t)201);
 
 	//this is necessary if multihop secure communications need to be estabilished
 	coordinator_init();
-
 }
 
 //=========================== private =========================================

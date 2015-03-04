@@ -1446,6 +1446,12 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // record the captured time
       ieee154e_vars.lastCapturedTime = capturedTime;
       
+	  //START OF TELEMATICS CODE
+	  if(ieee154e_vars.dataReceived->l2_security== TRUE){
+		  security_incomingFrame(ieee154e_vars.dataReceived);
+	  }
+	//END OF TELEMATICS CODE
+
       // if I just received an invalid frame, stop
       if (isValidRxFrame(&ieee802514_header)==FALSE) {
          // jump to the error code below this do-while loop

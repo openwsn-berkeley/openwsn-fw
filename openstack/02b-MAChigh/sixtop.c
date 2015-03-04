@@ -475,9 +475,9 @@ void task_sixtopNotifReceive() {
    msg->l2_joinPriorityPresent = FALSE; 
    
    //START OF TELEMATICS CODE
-   if(msg->l2_security== TRUE){
-	  security_incomingFrame(msg);
-	  }
+//   if(msg->l2_security== TRUE){
+//	  security_incomingFrame(msg);
+//	  }
    //END OF TELEMATICS CODE
 
    // send the packet up the stack, if it qualifies
