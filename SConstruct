@@ -75,6 +75,8 @@ project:
     forcetopology  Force the topology to the one indicated in the
                    openstack/02a-MAClow/topology.c file.
     noadaptivesync Do not use adaptive synchronization.
+    cryptoengine   Select appropriate crypto engine implementation
+                   (dummy, firmware implementation, board specific).
     
     Common variables:
     verbose        Print each complete compile/link command.
@@ -128,6 +130,7 @@ command_line_options = {
     'forcetopology':    ['0','1'],
     'debug':            ['0','1'],
     'noadaptivesync':   ['0','1'],
+    'cryptoengine':     [''],                               # Can be any board-specific name
 }
 
 def validate_option(key, value, env):
@@ -243,6 +246,13 @@ command_line_vars.AddVariables(
         command_line_options['forcetopology'][0],          # default
         validate_option,                                   # validator
         int,                                               # converter
+    ),
+    (
+        'cryptoengine',                                    # key
+        '',                                                # help
+        command_line_options['cryptoengine'][0],           # default
+        None,                                              # validator
+        None,                                              # converter
     ),
     (
         'debug',                                           # key
