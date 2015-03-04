@@ -1410,10 +1410,10 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          // jump to the error code below this do-while loop
          break;
       }
-      
+
       // parse the IEEE802.15.4 header (RX DATA)
-      ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
-      
+  	  ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
+
       // break if invalid IEEE802.15.4 header
       if (ieee802514_header.valid==FALSE) {
          // break from the do-while loop and execute the clean-up code below
@@ -1537,7 +1537,7 @@ port_INLINE void activity_ri6() {
    
    //START OF TELEMATICS CODE
    ieee154e_vars.ackToSend->l2_security = TRUE;
-   ieee154e_vars.ackToSend->l2_securityLevel = 1;
+   ieee154e_vars.ackToSend->l2_securityLevel = 5;
    ieee154e_vars.ackToSend->l2_keyIdMode = 3;
    if(idmanager_getIsDAGroot()){
 	   open_addr_t* temp_addr;
@@ -1553,14 +1553,14 @@ port_INLINE void activity_ri6() {
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
-   //START OF TELEMATICS CODE
-   if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
 
-	   security_outgoingFrame(ieee154e_vars.ackToSend,
-							  ieee154e_vars.ackToSend->l2_securityLevel,
-							  ieee154e_vars.ackToSend->l2_keyIdMode,
-							  &ieee154e_vars.ackToSend->l2_keySource,
-							  ieee154e_vars.ackToSend->l2_keyIndex);
+   //START OF TELEMATICS CODE
+   ieee154e_vars.ackToSend->l2_payload = ieee154e_vars.ackToSend->payload;
+   ieee154e_vars.ackToSend->l2_length = ieee154e_vars.ackToSend->length;
+
+   if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+	   //security_outgoingFrame(ieee154e_vars.ackToSend);
+	   prepend_AuxiliarySecurityHeader(ieee154e_vars.ackToSend);
 	  }
    //END OF TELEMATICS CODE
 
@@ -1575,9 +1575,15 @@ port_INLINE void activity_ri6() {
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
    
+   //START OF TELEMATICS CODE
+   if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+	   security_outgoingFrame(ieee154e_vars.ackToSend);
+	  }
+   //END OF TELEMATICS CODE
+
    // space for 2-byte CRC
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
-   
+
     // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    

@@ -40,9 +40,9 @@ enum Auxiliary_Security_Header_slf_enums{ //Security Level Field
 
 
 typedef struct{//identifier of the device which is using the key
-	open_addr_t	    deviceAddress;
-	macFrameCounter FrameCounter;
-	bool 		    Exempt;
+	open_addr_t	      deviceAddress;
+	macFrameCounter_t FrameCounter;
+	bool 		      Exempt;
 	} m_deviceDescriptor;
 
 typedef struct{//descriptor of the key we are looking for
@@ -92,7 +92,7 @@ typedef struct{
 
 BEGIN_PACK
 typedef struct{
-	macFrameCounter 			m_macFrameCounter;
+	macFrameCounter_t 			m_macFrameCounter;
 	uint8_t						m_macFrameCounterMode;
 	uint8_t 					m_macAutoRequestKeyIdMode;
 	uint8_t						m_macAutoRequestSecurityLevel;
@@ -114,15 +114,11 @@ END_PACK
 //admin
 void security_init(void);
 //public
-void security_outgoingFrameSec(OpenQueueEntry_t*  msg,
-                                uint8_t           securityLevel,
-                                uint8_t           keyIdMode,
-                                open_addr_t*      keySource,
-                                uint8_t           keyIndex);
+void security_outgoingFrame(OpenQueueEntry_t*  msg);
 void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
                   	  	  	  	  	  ieee802154_header_iht* tempheader);
 
-void security_incomingFrameSec (OpenQueueEntry_t*      msg);
+void security_incomingFrame(OpenQueueEntry_t* msg);
 
 uint8_t authLengthChecking(uint8_t securityLevel); //it determines the length of the Authentication field(not standard)
 

@@ -15,12 +15,12 @@ security_vars_t security_vars;
 //=========================== prototypes ======================================
 
 void increment_FrameCounter(void);
-void security_getFrameCounter(macFrameCounter reference,
+void security_getFrameCounter(macFrameCounter_t reference,
 		                      uint8_t* array);
 void security_StoreFrameCounter(OpenQueueEntry_t* msg,
 		                        uint8_t* asn);
-bool compareFrameCounter(macFrameCounter fromFrame,
-                             macFrameCounter stored);
+bool compareFrameCounter(macFrameCounter_t fromFrame,
+                         macFrameCounter_t stored);
 
 //=========================== admin ===========================================
 
@@ -68,52 +68,25 @@ void security_init(){
 		}
 
 	//Initialization of Frame Counter
-	security_vars.m_macFrameCounter.bytes0and1 = 0;
-	security_vars.m_macFrameCounter.bytes2and3 = 0;
-
-	security_vars.m_macFrameCounterMode = 0x04; //0x04 or 0x05
+	security_vars.m_macFrameCounterMode = 0x05; //0x04 or 0x05
 
 }
 
 //=========================== public ==========================================
+void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
 
-void security_outgoingFrame(OpenQueueEntry_t*   msg,
-                            uint8_t             securityLevel,
-                            uint8_t             keyIdMode,
-                            open_addr_t*        keySource,
-                            uint8_t          	keyIndex){
-
-	asn_t init;
-
-//	if(msg->l2_frameType == IEEE154_TYPE_ACK){
-//
-//		uint8_t start[5];
-//
-//		ieee154e_getAsn(start);
-//
-//		init.bytes0and1 = start[0]+256*start[1];
-//		init.bytes2and3 = start[2]+256*start[3];
-//		init.byte4 = start[4];
-//	}
-
-	uint8_t auxlen;
+	bool frameCounterSuppression;
 	uint8_t temp8b;
 	uint8_t match;
-	bool frameCounterSuppression;
+	uint8_t i;
 	frameCounterSuppression = 0; //the frame counter is carried in the frame, otherwise 1;
 
-	if(security_vars.m_macFrameCounter.bytes2and3 == (0xffff)){
-		msg->l2_toDiscard = TRUE;
-		return;
-	}
-
 	//max length of MAC frames
-
 	// length of authentication Tag
-	msg->l2_authenticationLength = authLengthChecking(securityLevel);
+	msg->l2_authenticationLength = authLengthChecking(msg->l2_securityLevel);
 
 	//length of auxiliary security header
-	msg->l2_auxiliaryLength = auxLengthChecking(keyIdMode,
+	msg->l2_auxiliaryLength = auxLengthChecking(msg->l2_keyIdMode,
 												frameCounterSuppression,
 												security_vars.m_macFrameCounterMode); //length of Key ID field
 
@@ -122,87 +95,75 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 		return;
 	}
 
-	//check if SecurityLevel is not zero
-	//in my impl. secLevel may not be zero if i'm here.
-	/*if(securityLevel == ASH_SLF_TYPE_NOSEC){
-		return;
-	}*/
-
 	open_addr_t* nextHop;
 	nextHop = &msg->l2_nextORpreviousHop;
 
-
 	//search for a key
-	match = keyDescriptorLookup(keyIdMode,
-								keySource,
-								keyIndex,
+	match = keyDescriptorLookup(msg->l2_keyIdMode,
+								&msg->l2_keySource,
+								msg->l2_keyIndex,
 								nextHop,
 								(idmanager_getMyID(ADDR_PANID)),
 								msg->l2_frameType);
 
-	uint8_t key[16];
-	memcpy(&key,
+	//uint8_t key[16];
+	memcpy(&msg->l2_key,
 		   &security_vars.MacKeyTable.KeyDescriptorElement[match].key,
-		   sizeof(key));
+		   sizeof(msg->l2_key));
 
 	if(match == 25){
 		return;
 	}
 
 	//start setting the Auxiliary Security Header
-	if(keyIdMode !=0){//if the KeyIdMode is zero, keyIndex and KeySource are omitted
-		temp8b = keyIndex; //key index field
+	if(msg->l2_keyIdMode !=0){//if the KeyIdMode is zero, keyIndex and KeySource are omitted
+		temp8b = msg->l2_keyIndex; //key index field
 
 		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
 		*((uint8_t*)(msg->payload)) = temp8b;
 	}
 
+	open_addr_t* temp_keySource;
+	temp_keySource = &msg->l2_keySource;
 	switch(msg->l2_keyIdMode){
 	case 0: //no KeyIDMode field
 	case 1:
 		break;
 	case 2: //keySource with 16b address
 		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
-		*((uint8_t*)(msg->payload)) = keySource->addr_64b[6];
+		*((uint8_t*)(msg->payload)) = temp_keySource->addr_64b[6];
 
 		packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
-		*((uint8_t*)(msg->payload)) = keySource->addr_64b[7];
+		*((uint8_t*)(msg->payload)) = temp_keySource->addr_64b[7];
 		break;
 	case 3: //keySource with 64b address
-		packetfunctions_writeAddress(msg,keySource,OW_LITTLE_ENDIAN);
+		packetfunctions_writeAddress(msg,temp_keySource,OW_LITTLE_ENDIAN);
 		break;
 	default:
 		return;
 	}
 
 	//Frame Counter
-	uint32_t temp;
-	uint8_t i;
+	//here I have to insert the ASN: I can only reserve the space and
+	//save the pointer. The ASN will be added by activity_ti1OrR11 procedure
 
-	uint8_t vectASN[5];
+    // reserve space
+    packetfunctions_reserveHeaderSize(
+	  msg,
+	  sizeof(macFrameCounter_t)
+    );
 
-	if(frameCounterSuppression == 0){//the frame Counter is carried in the frame
-		if(security_vars.m_macFrameCounterMode == 0x04){ //it is a counter, as described in IEEE802.15.4
-			packetfunctions_reserveHeaderSize(msg,sizeof(macFrameCounter));
-			security_getFrameCounter(security_vars.m_macFrameCounter,
-					                 msg->payload);//gets the Frame Counter.
-		} else{
-			//here I have to insert the ASN
-			ieee154e_getAsn(vectASN);//gets asn from mac layer.
-			for(i=0;i<5;i++){
-				packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
-				*((uint8_t*)(msg->payload)) = vectASN[i];
-			}
-
-		}
-	} //otherwise the frame counter is not in the frame
+    // Keep a pointer to where the ASN will be
+    // Note: the actual value of the current ASN will be written by the
+    //    IEEE802.15.4e when transmitting
+    msg->l2_ASNFrameCounter = msg->payload;
 
 	//security control field
 	packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
 
 	temp8b = 0;
-	temp8b |= securityLevel << ASH_SCF_SECURITY_LEVEL;//3b
-	temp8b |= keyIdMode << ASH_SCF_KEY_IDENTIFIER_MODE;//2b
+	temp8b |= msg->l2_securityLevel << ASH_SCF_SECURITY_LEVEL;//3b
+	temp8b |= msg->l2_keyIdMode << ASH_SCF_KEY_IDENTIFIER_MODE;//2b
 	temp8b |= frameCounterSuppression << ASH_SCF_FRAME_CNT_MODE; //1b
 
 	if(security_vars.m_macFrameCounterMode == 0x04){
@@ -214,8 +175,32 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 	temp8b |= 0 << 1;//1b reserved
 	*((uint8_t*)(msg->payload)) = temp8b;
 
-	//cryptographic block
-	switch(keyIdMode){
+}
+
+
+void security_outgoingFrame(OpenQueueEntry_t*   msg){
+
+	uint8_t temp8b;
+	uint8_t match;
+	bool frameCounterSuppression;
+	frameCounterSuppression = 0; //the frame counter is carried in the frame, otherwise 1;
+
+	uint8_t vectASN[5];
+	if(frameCounterSuppression == 0){//the frame Counter is carried in the frame
+		ieee154e_getAsn(vectASN);//gets asn from mac layer.
+		//save the frame counter of the current frame
+		msg->l2_frameCounter.bytes0and1 = vectASN[0]+256*vectASN[1];
+		msg->l2_frameCounter.bytes2and3 = vectASN[2]+256*vectASN[3];
+		msg->l2_frameCounter.byte4 = vectASN[4];
+
+		security_getFrameCounter(msg->l2_frameCounter,
+								 //msg->payload);
+								msg->l2_ASNFrameCounter);
+	} //otherwise the frame counter is not in the frame
+
+//	//cryptographic block
+	uint8_t i;
+	switch(msg->l2_keyIdMode){
 	case 0:
 	case 1:
 		for(i=0; i<8; i++){
@@ -224,7 +209,7 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 		break;
 	case 2:
 		for(i=0; i<2; i++){
-			security_vars.nonce[i] = keySource->addr_64b[6+i];
+			security_vars.nonce[i] = msg->l2_keySource.addr_64b[6+i];
 				}
 		for(i=2; i<8; i++){
 			security_vars.nonce[i] = 0;
@@ -232,30 +217,16 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg,
 		break;
 	case 3:
 		for(i=0; i<8; i++){
-			security_vars.nonce[i] = keySource->addr_64b[i];
+			security_vars.nonce[i] = msg->l2_keySource.addr_64b[i];
 		}
 		break;
 	}
 
-	if(security_vars.m_macFrameCounterMode == 0x04){
-		uint8_t tempFrameCounter[4];
-		security_getFrameCounter(security_vars.m_macFrameCounter,
-				                 tempFrameCounter);
-		for(i=8;i<12;i++){
-			security_vars.nonce[i] = tempFrameCounter[i-8];
-		}
-
-		security_vars.nonce[12] = securityLevel;
-	} else{
-		for(i=0;i<5;i++){
-			security_vars.nonce[8+i] = vectASN[i];
-		}
+	for(i=0;i<5;i++){
+		security_vars.nonce[8+i] = vectASN[i];
 	}
 
-	CCMstar(msg,key,security_vars.nonce);
-
-	//h increment the Frame Counter and save.
-	increment_FrameCounter();
+	CCMstar(msg,msg->l2_key,security_vars.nonce);
 
 }
 
@@ -299,22 +270,20 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 	temp = 0;
 
 	if(frameCnt_Suppression == 0){//the frame counter is here
+		//the frame counter size is 5 bytes, because we have the ASN
+		for(i=0;i<5;i++){
+			msg->receivedASN[i] = *((uint8_t*)(msg->payload)+tempheader->headerLength);
+			tempheader->headerLength = tempheader->headerLength+1;
+	}
 
-		if(frameCnt_Size == 0){//the frame counter size is 4 bytes
-			security_StoreFrameCounter(msg,
-					 (uint8_t*)(msg->payload)+tempheader->headerLength);
-			tempheader->headerLength = tempheader->headerLength+4;
-		} else{ //the frame counter size is 5 bytes, because we have the ASN
-			for(i=0;i<5;i++){
-				msg->receivedASN[i] = *((uint8_t*)(msg->payload)+tempheader->headerLength);
-				tempheader->headerLength = tempheader->headerLength+1;
-			}
-		}
+	msg->l2_frameCounter.bytes0and1 = msg->receivedASN[0]+256*msg->receivedASN[1];
+	msg->l2_frameCounter.bytes2and3 = msg->receivedASN[2]+256*msg->receivedASN[3];
+	msg->l2_frameCounter.byte4 = msg->receivedASN[4];
 
-		if(msg->l2_frameCounter.bytes2and3 == (0xffff)){
-			msg->l2_toDiscard = TRUE;
-			return; // frame counter overflow
-			}
+//		if(msg->l2_frameCounter.bytes2and3 == (0xffff)){
+//			msg->l2_toDiscard = TRUE;
+//			return; // frame counter overflow
+//			}
 	}
 
    //retrieve the Key Identifier field
@@ -353,8 +322,9 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 }
 
 void security_incomingFrame(OpenQueueEntry_t*      msg){
-	uint8_t match;
 
+	uint8_t match;
+	uint8_t vectASN[5];
 
 	m_deviceDescriptor			*devpoint;
 	m_keyDescriptor 			*keypoint;
@@ -396,16 +366,18 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 								  	  	  	 msg->commandFrameIdentifier,
 								  	  	  	 secLevel);
 	//i+j+k
-
 	if(incomingSecurityLevelChecking(secLevel,msg->l2_securityLevel,devpoint->Exempt)==FALSE){
 		//return;
 	}
 
 	//l+m Anti-Replay
-
 	if(compareFrameCounter(msg->l2_frameCounter,
 			 devpoint->FrameCounter) == FALSE){
-		msg->l2_toDiscard = TRUE;
+
+	  openserial_printInfo(COMPONENT_IEEE802154,ERR_OK,
+							(errorparameter_t)0,
+							(errorparameter_t)200);
+		//msg->l2_toDiscard = TRUE;
 	}
 
 	//n Control of key used
@@ -441,27 +413,16 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 			break;
 		}
 
-	if(security_vars.m_macFrameCounterMode == 0x04){
-		uint8_t tempFrameCounter[4];
-		security_getFrameCounter(msg->l2_frameCounter, tempFrameCounter);
-		for(i=8;i<12;i++){
-			security_vars.nonce[i] = tempFrameCounter[i-8];
-		}
-
-		security_vars.nonce[12] = msg->l2_securityLevel;
-	} else{
-		//ASN
-		for(i=0;i<5;i++){
-			security_vars.nonce[8+i] = msg->receivedASN[4-i];
-		}
-
+	//Frame Counter (ASN)
+	for(i=0;i<5;i++){
+		security_getFrameCounter(msg->l2_frameCounter,
+								 vectASN);//gets the Frame Counter.
+		security_vars.nonce[8+i] = vectASN[i];
 	}
 
 	CCMstarInverse(msg,keypoint->key,security_vars.nonce);
 
-	//q increment frame counter and save
-//	msg->l2_frameCounter +=1;
-
+	//q save the frame counter
 	devpoint->FrameCounter = msg->l2_frameCounter;
 
 }
@@ -718,9 +679,8 @@ void coordinator_init(){
 	}
 
 	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = *(my);
-//	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter = 0;
-	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter.bytes0and1 = 0;
-	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter.bytes2and3 = 0;
+//	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter.macFrameCounter_5bytes.bytes0and1 = 0;
+//	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter.bytes2and3 = 0;
 	security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &security_vars.MacDeviceTable;
 	security_vars.m_macDefaultKeySource = *(my);
 
@@ -777,12 +737,13 @@ void increment_FrameCounter(){
 /*
  * Store in the array the reference value
  */
-void security_getFrameCounter(macFrameCounter reference,
+void security_getFrameCounter(macFrameCounter_t reference,
 		                      uint8_t* array) {
    array[0]         = (reference.bytes0and1     & 0xff);
    array[1]         = (reference.bytes0and1/256 & 0xff);
    array[2]         = (reference.bytes2and3     & 0xff);
    array[3]         = (reference.bytes2and3/256 & 0xff);
+   array[4]         =  reference.byte4;
 }
 
 /*
@@ -803,19 +764,24 @@ void security_StoreFrameCounter(OpenQueueEntry_t* msg,
 
 /*
  * return FALSE if the frame counter of the received frame is less
- * or equal than the frame counter stored in the relative Device Descr.
+ * than the frame counter stored in the relative Device Descr.
  */
 
-bool compareFrameCounter(macFrameCounter fromFrame,
-                             macFrameCounter stored){
+bool compareFrameCounter(macFrameCounter_t fromFrame,
+                             macFrameCounter_t stored){
 
-	if (fromFrame.bytes2and3 >= stored.bytes2and3){
+	if(fromFrame.byte4 > stored.byte4){
 		return TRUE;
-	} else if(fromFrame.bytes2and3 == stored.bytes2and3){
-		if(fromFrame.bytes0and1 >= stored.bytes0and1){
+	} else if (fromFrame.byte4 == stored.byte4){
+		if (fromFrame.bytes2and3 > stored.bytes2and3){
 			return TRUE;
+		} else if(fromFrame.bytes2and3 == stored.bytes2and3){
+			if(fromFrame.bytes0and1 >= stored.bytes0and1){
+				return TRUE;
+			}
 		}
 	}
+
 	return FALSE;
 
 }

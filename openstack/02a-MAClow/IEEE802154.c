@@ -50,10 +50,10 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
          case ADDR_64B:
             packetfunctions_writeAddress(msg,nextHop,OW_LITTLE_ENDIAN);
             break;
-         default:
-            openserial_printCritical(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,
-                                  (errorparameter_t)nextHop->type,
-                                  (errorparameter_t)1);
+//         default:
+//            openserial_printCritical(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,
+//                                  (errorparameter_t)nextHop->type,
+//                                  (errorparameter_t)1);
       }
       
    }
@@ -133,7 +133,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    ieee802514_header->frameVersion   = (temp_8b >> IEEE154_FCF_FRAME_VERSION      ) & 0x03;//2b
 
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
-       return; //invalid packet accordint to p.64 IEEE15.4e
+       return; //invalid packet according to p.64 IEEE15.4e
    }
    
    switch ( (temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03 ) {

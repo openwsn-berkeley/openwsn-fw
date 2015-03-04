@@ -492,9 +492,9 @@ void task_sixtopNotifReceive() {
         		 // send to upper layer
         		 iphc_receive(msg);
         	 } else {
-//			openserial_printError(COMPONENT_SIXTOP,ERR_6LOWPAN_UNSUPPORTED,
-//								(errorparameter_t)msg->l2_keySource.addr_64b[7],
-//								(errorparameter_t)501);
+			openserial_printError(COMPONENT_SIXTOP,ERR_OK,
+								(errorparameter_t)0,
+								(errorparameter_t)501);
         	// free up the RAM
         		 openqueue_freePacketBuffer(msg);
         	 }
@@ -598,15 +598,13 @@ owerror_t sixtop_send_internal(
    msg->l1_txPower = TX_POWER;
    // record the location, in the packet, where the l2 payload starts
    msg->l2_payload = msg->payload;
+   msg->l2_length = msg->length;
 
    //START OF TELEMATICS CODE
    if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
-	   	   security_outgoingFrame(msg,
-    			   	   	   	   	  msg->l2_securityLevel,
-    			   	   	   	   	  msg->l2_keyIdMode,
-    			   	   	   	   	  &msg->l2_keySource,
-    			   	   	   	   	  msg->l2_keyIndex);
-       }
+	   //security_outgoingFrame(msg);
+	   prepend_AuxiliarySecurityHeader(msg);
+   }
    //END OF TELEMATICS CODE
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
@@ -619,8 +617,16 @@ owerror_t sixtop_send_internal(
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
+
+   //START OF TELEMATICS CODE
+   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
+	   security_outgoingFrame(msg);
+   }
+   //END OF TELEMATICS CODE
+
    // reserve space for 2-byte CRC
    packetfunctions_reserveFooterSize(msg,2);
+
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
    return E_SUCCESS;
@@ -694,10 +700,6 @@ port_INLINE void sixtop_sendEB() {
    if (sixtop_vars.busySendingEB==TRUE) {
       // don't continue if I'm still sending a previous ADV
    }
-   
-   //START OF TELEMATICS CODE
-//   if(!idmanager_getIsDAGroot() && )
-   //END OF TELEMATICS CODE
 
    // if I get here, I will send an ADV
    

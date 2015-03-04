@@ -27,8 +27,8 @@ void idmanager_init() {
    
    // myPANID
    idmanager_vars.myPANID.type         = ADDR_PANID;
-   idmanager_vars.myPANID.panid[0]     = 0xca;
-   idmanager_vars.myPANID.panid[1]     = 0xfe;
+   idmanager_vars.myPANID.panid[0]     = 0xba;
+   idmanager_vars.myPANID.panid[1]     = 0xbe;
    
    // myPrefix
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
@@ -120,9 +120,9 @@ owerror_t idmanager_setMyID(open_addr_t* newID) {
      case ADDR_128B:
         //don't set 128b, but rather prefix and 64b
      default:
-        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
-              (errorparameter_t)newID->type,
-              (errorparameter_t)1);
+//        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
+//              (errorparameter_t)newID->type,
+//              (errorparameter_t)1);
         ENABLE_INTERRUPTS();
         return E_FAIL;
    }
@@ -163,9 +163,9 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
         ENABLE_INTERRUPTS();
         return res;
      default:
-        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
-              (errorparameter_t)addr->type,
-              (errorparameter_t)2);
+//        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
+//              (errorparameter_t)addr->type,
+//              (errorparameter_t)2);
         ENABLE_INTERRUPTS();
         return FALSE;
    }

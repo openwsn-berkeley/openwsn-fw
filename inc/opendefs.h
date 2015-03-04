@@ -228,6 +228,7 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
+   ERR_OK = 0x40,
 };
 
 //=========================== typedef =========================================
@@ -246,10 +247,7 @@ typedef struct {
 END_PACK
 
 //START OF TELEMATICS CODE
-typedef struct{
-	   uint16_t bytes2and3;
-	   uint16_t bytes0and1;
-}macFrameCounter;
+typedef asn_t  macFrameCounter_t ;
 //END OF TELEMATICS CODE
 
 BEGIN_PACK
@@ -299,18 +297,21 @@ typedef struct {
    bool          l2_joinPriorityPresent;
    //START OF TELEMATICS CODE
    //security
-   bool			 	l2_security;				 //flag for security enabled/disabled
-   uint8_t		 	l2_securityLevel;			 //the security level for this frame
-   uint8_t		 	l2_keyIdMode;				 //the key Identifier mode for this frame
-   uint8_t       	l2_keyIndex;				 //the key Index for this frame
-   macFrameCounter  l2_frameCounter;			 //the Frame Counter for this frame
-   open_addr_t   	l2_keySource;				 //the key Source for this frame
-   uint8_t		 	l2_toDiscard;				 //if TRUE, security-related errors have occurred
-   uint8_t 		 	l2_authenticationLength;	 //the length of the authentication field
-   uint8_t		 	l2_auxiliaryLength;			 //length of the Auxiliary Security Header
-   uint8_t		 	commandFrameIdentifier;		 //used in case of Command Frames
-   uint8_t 		 	receivedASN[5];				 //in case ASN is used instead of Frame Counter (IEEE 802.15.4e)
-  //END OF TELEMATICS CODE
+   bool			 	 l2_security;				 //flag for security enabled/disabled
+   uint8_t		 	 l2_securityLevel;			 //the security level for this frame
+   uint8_t		 	 l2_keyIdMode;				 //the key Identifier mode for this frame
+   uint8_t       	 l2_keyIndex;				 //the key Index for this frame
+   macFrameCounter_t l2_frameCounter;			 //the Frame Counter for this frame
+   open_addr_t   	 l2_keySource;				 //the key Source for this frame
+   uint8_t           l2_key[16];                 //the key used to protect the frame
+   uint8_t		 	 l2_toDiscard;				 //if TRUE, security-related errors have occurred
+   uint8_t 		 	 l2_authenticationLength;	 //the length of the authentication field
+   uint8_t		 	 l2_auxiliaryLength;	     //length of the Auxiliary Security Header
+   uint8_t		 	 commandFrameIdentifier;	 //used in case of Command Frames
+   uint8_t 		 	 receivedASN[5];			 //in case ASN is used instead of Frame Counter (IEEE 802.15.4e)
+   uint8_t*			 l2_ASNFrameCounter;		 //pointer to the Frame Counter
+   uint8_t			 l2_length;                  //length of L2 payload
+   //END OF TELEMATICS CODE
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet
