@@ -1,14 +1,16 @@
 /**
-  \brief Crypto driver initialization
+  \brief Crypto engine initialization
   
   \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>
  */
 #include <stdint.h>
 #include <string.h>
-#include "crypto_driver.h"
-#include "crypto_driver_board.h"
-
-static crypto_driver_t crypto_driver;
+#include "opendefs.h"
+#include "firmware_crypto_engine.h"
+#include "aes_ccms.h"
+#include "aes_ctr.h"
+#include "aes_cbc_mac.h"
+#include "aes_ecb.h"
 
 static int translate_addr(open_addr_t *saddr, uint8_t _saddr[8])
 {
@@ -59,14 +61,21 @@ static int translate_asn(asn_t *asn, uint8_t _asn[5])
    return 0;
 }
 
-int crypto_driver_init(void)
+static int init(void)
 {
-   crypto_driver_board_init(&crypto_driver);
-
    return 0;
 }
 
-const crypto_driver_t* crypto_driver_get(void)
-{
-   return &crypto_driver;
-}
+/*---------------------------------------------------------------------------*/
+const struct crypto_engine firmware_crypto_engine = {
+   aes_ccms_enc,
+   aes_ccms_dec,
+   aes_cbc_mac_enc,
+   aes_cbc_mac_enc_raw,
+   aes_ctr_enc,
+   aes_ctr_enc_raw,
+   aes_ecb_enc,
+   init,
+};
+/*---------------------------------------------------------------------------*/
+

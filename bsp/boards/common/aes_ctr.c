@@ -5,7 +5,7 @@
  */
 #include <string.h>
 #include <stdint.h>
-#include "crypto_driver.h"
+#include "crypto_engine.h"
 
 static void inc_counter(uint8_t *counter) 
 {
