@@ -12,9 +12,6 @@ void CCMstar(OpenQueueEntry_t* 		pkt,
 		     uint8_t 				key[16],
 		     uint8_t*			    nonce){
 
-	uint8_t i;
-
-//	ccmstar_vars.length = pkt->length-pkt->l2_auxiliaryLength;
 	ccmstar_vars.length = pkt->l2_length;
 
 	memcpy(&ccmstar_vars.payloadToEncrypt, 0, 128);
@@ -46,8 +43,8 @@ void CCMstar(OpenQueueEntry_t* 		pkt,
 	packetfunctions_reserveFooterSize(pkt,pkt->l2_authenticationLength);
 
 	memcpy(pkt->l2_payload,
-					   ccmstar_vars.CipherText,
-					   ccmstar_vars.length+pkt->l2_authenticationLength);
+		   ccmstar_vars.CipherText,
+		   ccmstar_vars.length+pkt->l2_authenticationLength);
 }
 
 
@@ -57,7 +54,7 @@ void Input_Transformation(uint8_t* payload,
 
 	//initialize AuthData
 
-	uint8_t l,i;
+	uint8_t l;
 	memcpy(&ccmstar_vars.authData, 0, sizeof(ccmstar_vars.authData));
 	ccmstar_vars.authDataLength = 0;
 
@@ -90,6 +87,7 @@ void Input_Transformation(uint8_t* payload,
 		l = authentication_length + 2;
 	}
 
+	uint8_t i;
 	for(i=0; i<4;i++){
 		ccmstar_vars.authData[i] = La << 8*i;
 	}

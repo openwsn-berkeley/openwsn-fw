@@ -304,11 +304,11 @@ typedef struct {
    macFrameCounter_t l2_frameCounter;			 //the Frame Counter for this frame
    open_addr_t   	 l2_keySource;				 //the key Source for this frame
    uint8_t           l2_key[16];                 //the key used to protect the frame
+   uint8_t           l2_nonce[13];               //the nonce for security operations
    uint8_t		 	 l2_toDiscard;				 //if TRUE, security-related errors have occurred
    uint8_t 		 	 l2_authenticationLength;	 //the length of the authentication field
    uint8_t		 	 l2_auxiliaryLength;	     //length of the Auxiliary Security Header
    uint8_t		 	 commandFrameIdentifier;	 //used in case of Command Frames
-   uint8_t 		 	 receivedASN[5];			 //in case ASN is used instead of Frame Counter (IEEE 802.15.4e)
    uint8_t*			 l2_ASNFrameCounter;		 //pointer to the Frame Counter
    uint8_t			 l2_length;                  //length of L2 payload
    //END OF TELEMATICS CODE

@@ -29,9 +29,10 @@ void security_init(){
 	//Setting UP Phase
 	uint8_t i;
 
-	memcpy(&security_vars.M_k, 0, 16);
 
-	//MASTER KEY
+
+	//MASTER KEY: OpenWSN
+	memcpy(&security_vars.M_k, 0, 16);
 	security_vars.M_k[0] = 0x4e;
 	security_vars.M_k[1] = 0x53;
 	security_vars.M_k[2] = 0x57;
@@ -39,10 +40,6 @@ void security_init(){
 	security_vars.M_k[4] = 0x65;
 	security_vars.M_k[5] = 0x70;
 	security_vars.M_k[6] = 0x4f;
-
-
-	//Initialization of Nonce String
-	memcpy(&security_vars.nonce, 0, 13);
 
 	//Initialization of the MAC Security Level Table
 	for(i=0; i<2; i++){
@@ -204,29 +201,29 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg){
 	case 0:
 	case 1:
 		for(i=0; i<8; i++){
-			security_vars.nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
+			msg->l2_nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
 			}
 		break;
 	case 2:
 		for(i=0; i<2; i++){
-			security_vars.nonce[i] = msg->l2_keySource.addr_64b[6+i];
+			msg->l2_nonce[i] = msg->l2_keySource.addr_64b[6+i];
 				}
 		for(i=2; i<8; i++){
-			security_vars.nonce[i] = 0;
+			msg->l2_nonce[i] = 0;
 		}
 		break;
 	case 3:
 		for(i=0; i<8; i++){
-			security_vars.nonce[i] = msg->l2_keySource.addr_64b[i];
+			msg->l2_nonce[i] = msg->l2_keySource.addr_64b[i];
 		}
 		break;
 	}
 
 	for(i=0;i<5;i++){
-		security_vars.nonce[8+i] = vectASN[i];
+		msg->l2_nonce[8+i] = vectASN[i];
 	}
 
-	CCMstar(msg,msg->l2_key,security_vars.nonce);
+	CCMstar(msg,msg->l2_key,msg->l2_nonce);
 
 }
 
@@ -270,15 +267,16 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 	temp = 0;
 
 	if(frameCnt_Suppression == 0){//the frame counter is here
+		uint8_t receivedASN[5];
 		//the frame counter size is 5 bytes, because we have the ASN
 		for(i=0;i<5;i++){
-			msg->receivedASN[i] = *((uint8_t*)(msg->payload)+tempheader->headerLength);
+			receivedASN[i] = *((uint8_t*)(msg->payload)+tempheader->headerLength);
 			tempheader->headerLength = tempheader->headerLength+1;
 	}
 
-	msg->l2_frameCounter.bytes0and1 = msg->receivedASN[0]+256*msg->receivedASN[1];
-	msg->l2_frameCounter.bytes2and3 = msg->receivedASN[2]+256*msg->receivedASN[3];
-	msg->l2_frameCounter.byte4 = msg->receivedASN[4];
+	msg->l2_frameCounter.bytes0and1 = receivedASN[0]+256*receivedASN[1];
+	msg->l2_frameCounter.bytes2and3 = receivedASN[2]+256*receivedASN[3];
+	msg->l2_frameCounter.byte4 = receivedASN[4];
 
 //		if(msg->l2_frameCounter.bytes2and3 == (0xffff)){
 //			msg->l2_toDiscard = TRUE;
@@ -394,21 +392,21 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 		case 0:
 		case 1:
 			for(i=0; i<8; i++){
-					 security_vars.nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
+				msg->l2_nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
 				}
 			break;
 		case 2:
 			for(i=0; i<2; i++){
-						 security_vars.nonce[i] = msg->l2_keySource.addr_16b[i];
+				msg->l2_nonce[i] = msg->l2_keySource.addr_16b[i];
 					}
 			for(i=2; i<8; i++){
-				security_vars.nonce[i] = 0;
+				msg->l2_nonce[i] = 0;
 			}
 
 			break;
 		case 3:
 			for(i=0; i<8; i++){
-				security_vars.nonce[i] = msg->l2_keySource.addr_64b[i];
+				msg->l2_nonce[i] = msg->l2_keySource.addr_64b[i];
 			}
 			break;
 		}
@@ -417,10 +415,10 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	for(i=0;i<5;i++){
 		security_getFrameCounter(msg->l2_frameCounter,
 								 vectASN);//gets the Frame Counter.
-		security_vars.nonce[8+i] = vectASN[i];
+		msg->l2_nonce[8+i] = vectASN[i];
 	}
 
-	CCMstarInverse(msg,keypoint->key,security_vars.nonce);
+	CCMstarInverse(msg,keypoint->key,msg->l2_nonce);
 
 	//q save the frame counter
 	devpoint->FrameCounter = msg->l2_frameCounter;

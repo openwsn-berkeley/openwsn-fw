@@ -103,10 +103,7 @@ typedef struct{
 	m_macSecurityLevelTable 	MacSecurityLevelTable;
 	//MASTER KEY
 	uint8_t 					M_k[16];
-	//NONCE STRING
-	uint8_t 					nonce[13];
 }security_vars_t;
-
 END_PACK
 
 //=========================== prototypes ======================================
