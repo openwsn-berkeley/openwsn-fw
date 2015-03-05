@@ -17,18 +17,12 @@ rf231 = localEnv.SConscript(
     duplicate   = 0,
 )
 
-target   = 'libbsp'
-bsp_dir  = os.path.join('#','bsp','boards','iot-lab_M3')
 source   = \
     Glob('*.c') + \
     Glob('*.s') + \
     Glob('configure/*.c') + \
-    Glob('library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/*.c') + \
-    [rf231]
+    Glob('library/STM32F10x_StdPeriph_Lib_V3.5.0/Libraries/STM32F10x_StdPeriph_Driver/src/*.c')
 
-libbsp = localEnv.Library(
-    target=target,
-    source=source,
-)
+board  = localEnv.Object(source=source) + rf231
 
-Alias('libbsp', libbsp)
+Return('board')
