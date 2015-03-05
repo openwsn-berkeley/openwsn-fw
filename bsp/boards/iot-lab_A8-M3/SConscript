@@ -26,4 +26,3 @@ source   = \
 board  = localEnv.Object(source=source) + rf231
 
 Return('board')
-

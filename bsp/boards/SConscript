@@ -16,8 +16,6 @@ sources_h = [
     'uart.h',
 ]
 
-
-
 #============================ SCons targets ===================================
 
 if localEnv['board']=='python':
