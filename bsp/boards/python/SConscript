@@ -23,10 +23,6 @@ sources_c = [
 
 assert(localEnv['board']=='python')
 
+board  = localEnv.Object(source=sources_c)
 
-libbsp = localEnv.Library(
-    target  = target,
-    source  = sources_c,
-    #CCFLAGS = '-D TRACE_ON',
-)
-Alias('libbsp', libbsp)
+Return('board')
