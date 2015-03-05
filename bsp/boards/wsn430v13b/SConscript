@@ -17,7 +17,6 @@ cc1101 = localEnv.SConscript(
     duplicate   = 0,
 )
 
-target = 'libbsp'
 source = [
     'board.c',
     'bsp_timer.c',
@@ -27,12 +26,8 @@ source = [
     'radiotimer.c',
     'spi.c',
     'uart.c',
-    cc1101,
 ]
 
-libbsp = localEnv.Library(
-    target=target,
-    source=source,
-)
+board  = localEnv.Object(source=source) + cc1101
 
-Alias('libbsp', libbsp)
+Return('board')

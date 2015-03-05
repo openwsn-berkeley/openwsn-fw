@@ -650,19 +650,9 @@ buildEnv.SConscript(
     duplicate   = 0,
 )
 
-# bspheader
-bspHDir         = os.path.join('#','bsp','boards')
-bspHVarDir      = os.path.join(buildEnv['VARDIR'],'bsp','boards')
-buildEnv.SConscript(
-    os.path.join(bspHDir,'SConscript'),
-    exports     = {'env': buildEnv},
-    variant_dir = bspHVarDir,
-    duplicate   = 0,
-)
-
 # bsp
-bspDir          = os.path.join('#','bsp','boards',buildEnv['BSP'])
-bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp','boards',buildEnv['BSP'])
+bspDir          = os.path.join('#','bsp','boards')
+bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp','boards')
 buildEnv.Append(CPPPATH = [bspDir])
 buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),
