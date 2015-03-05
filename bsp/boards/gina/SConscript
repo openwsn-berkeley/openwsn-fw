@@ -27,9 +27,8 @@ source = [
     'spi.c',
     'uart.c',
     'i2c.c',
-    rf231,
 ]
 
-board  = localEnv.Object(source=source)
+board  = localEnv.Object(source=source) + rf231
 
 Return('board')
