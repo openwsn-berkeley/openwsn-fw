@@ -1,7 +1,8 @@
 /**
   \brief Crypto engine initialization
   
-  \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>
+  \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
+  \author Malisa Vucinic <malishav@gmail.com>, March 2015.
  */
 #include <stdint.h>
 #include <string.h>
@@ -12,8 +13,7 @@
 #include "aes_cbc_mac.h"
 #include "aes_ecb.h"
 
-static int translate_addr(open_addr_t *saddr, uint8_t _saddr[8])
-{
+static int translate_addr(open_addr_t* saddr, uint8_t _saddr[8]) {
    int n;
    int addr_size;
 
@@ -35,23 +35,26 @@ static int translate_addr(open_addr_t *saddr, uint8_t _saddr[8])
          break;
    }
 
-   if (addr_size == -1)
+   if (addr_size == -1) {
       return -1;
+   }
 
-   if (addr_size > 8)
+   if (addr_size > 8) {
       addr_size = 8;
+   }
 
-   for (n = 0; n < addr_size; n++)
+   for (n = 0; n < addr_size; n++) {
       _saddr[n] = saddr->addr_128b[n];
+   }
 
-   if (addr_size < 8)
+   if (addr_size < 8) {
       memset(&_saddr[addr_size], 0, 8 - addr_size);
+   }
 
    return 0;
 }
 
-static int translate_asn(asn_t *asn, uint8_t _asn[5])
-{
+static int translate_asn(asn_t* asn, uint8_t _asn[5]) {
    _asn[0] = (uint8_t) (asn->bytes0and1 >> 8);
    _asn[1] = (uint8_t) asn->bytes0and1;
    _asn[2] = (uint8_t) (asn->bytes2and3 >> 8);
@@ -61,8 +64,7 @@ static int translate_asn(asn_t *asn, uint8_t _asn[5])
    return 0;
 }
 
-static int init(void)
-{
+static int init(void) {
    return 0;
 }
 

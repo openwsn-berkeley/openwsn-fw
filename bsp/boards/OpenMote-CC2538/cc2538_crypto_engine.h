@@ -1,7 +1,7 @@
 /**
-\brief Definitions for crypto engine initialization
+\brief CC2538 crypto engine implementation header
 
-\author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>
+\author Malisa Vucinic <malishav@gmail.com>, March 2015.
 */
 #ifndef __CC2538_CRYPTO_ENGINE_H__
 #define __CC2538_CRYPTO_ENGINE_H__

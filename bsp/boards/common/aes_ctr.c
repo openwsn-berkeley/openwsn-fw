@@ -1,14 +1,13 @@
 /**
   \brief AES CTR implementation
   
-  \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>
+  \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
  */
 #include <string.h>
 #include <stdint.h>
 #include "crypto_engine.h"
 
-static void inc_counter(uint8_t *counter) 
-{
+static void inc_counter(uint8_t* counter) {
    // from openssl
    uint32_t n = 16;
    uint8_t  c;
@@ -21,9 +20,11 @@ static void inc_counter(uint8_t *counter)
    } while (n);
 }
 
-int aes_ctr_enc_raw(uint8_t *buffer, uint8_t len, uint8_t *key, uint8_t iv[16])
-{
-   uint8_t n, k, nb, *pbuf;
+int aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t* key, uint8_t iv[16]) {
+   uint8_t n;
+   uint8_t k;
+   uint8_t nb;
+   uint8_t* pbuf;
    uint8_t eiv[16];
 
    nb = len >> 4;
@@ -32,35 +33,36 @@ int aes_ctr_enc_raw(uint8_t *buffer, uint8_t len, uint8_t *key, uint8_t iv[16])
       memcpy(eiv, iv, 16);
       CRYPTO_ENGINE.aes_ecb_enc(eiv, key); 
       // may be faster if vector are aligned to 4 bytes (use long instead char in xor)
-      for (k = 0; k < 16; k++){
+      for (k = 0; k < 16; k++) {
          pbuf[k] ^= eiv[k];
       }
       inc_counter(iv);
    }
 
    return 0;
-
 }
 
-int aes_ctr_enc(uint8_t *m,
-      uint8_t len_m,
-      uint8_t saddr[8],
-      uint8_t asn[5],
-      uint8_t *key,
-      uint8_t *mac,
-      uint8_t len_mac)
-{
+int aes_ctr_enc(uint8_t* m,
+         uint8_t len_m,
+         uint8_t saddr[8],
+         uint8_t asn[5],
+         uint8_t* key,
+         uint8_t* mac,
+         uint8_t len_mac) {
+
    uint8_t pad_len;
    uint8_t len;
    uint8_t iv[16];
    uint8_t buffer[128 + 16]; // max buffer plus mac
 
    // asserts here
-   if (!((len_mac == 4) || (len_mac == 8) || (len_mac == 16)))
+   if (!((len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
       return -1;
+   }
 
-   if (len_m > 127)
+   if (len_m > 127) {
       return -2;
+   }
 
    // iv (flag (1B) | source addr (8B) | ASN (5B) | cnt (2B)
    iv[0] = 0x01;

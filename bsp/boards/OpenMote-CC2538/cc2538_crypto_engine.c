@@ -1,7 +1,7 @@
 /**
   \brief Crypto engine implementation for OpenMote-CC2538
   
-  \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>
+  \author Malisa Vucinic <malishav@gmail.com>, March 2015.
  */
 #include <stdint.h>
 #include "cc2538_crypto_engine.h"
@@ -10,8 +10,7 @@
 #include "aes_cbc_mac.h"
 #include "aes_ecb.h"
 
-static int init(void)
-{
+static int init(void) {
    return 0;
 }
 /*---------------------------------------------------------------------------*/

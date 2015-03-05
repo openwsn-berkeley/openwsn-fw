@@ -1,7 +1,8 @@
 /**
 \brief Definitions for crypto engine initialization
 
-\author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>
+\author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
+\author Malisa Vucinic <malishav@gmail.com>, March 2015.
 */
 #ifndef __FIRMWARE_CRYPTO_ENGINE_H__
 #define __FIRMWARE_CRYPTO_ENGINE_H__

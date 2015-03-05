@@ -1,7 +1,7 @@
 /**
-\brief Implementation of a dummy crypto engine that does nothing
+\brief Implementation of a crypto engine that does nothing
 
-\author Malisa Vucinic <malishav@gmail.com>
+\author Malisa Vucinic <malishav@gmail.com>, March 2015.
 */
 #ifndef __DUMMY_CRYPTO_ENGINE_H__
 #define __DUMMY_CRYPTO_ENGINE_H__
