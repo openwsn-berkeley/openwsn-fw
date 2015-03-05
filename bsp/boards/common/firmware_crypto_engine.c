@@ -1,9 +1,9 @@
 /**
-  \brief Crypto engine initialization
+\brief Crypto engine initialization
   
-  \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
-  \author Malisa Vucinic <malishav@gmail.com>, March 2015.
- */
+\author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
+\author Malisa Vucinic <malishav@gmail.com>, March 2015.
+*/
 #include <stdint.h>
 #include <string.h>
 #include "opendefs.h"

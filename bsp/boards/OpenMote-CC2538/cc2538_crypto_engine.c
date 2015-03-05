@@ -1,8 +1,8 @@
 /**
-  \brief Crypto engine implementation for OpenMote-CC2538
+\brief Crypto engine implementation for OpenMote-CC2538
   
-  \author Malisa Vucinic <malishav@gmail.com>, March 2015.
- */
+\author Malisa Vucinic <malishav@gmail.com>, March 2015.
+*/
 #include <stdint.h>
 #include "cc2538_crypto_engine.h"
 #include "aes_ccms.h"

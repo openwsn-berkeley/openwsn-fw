@@ -1,8 +1,8 @@
 /**
-  \brief AES CCMS implementation
+\brief AES CCMS implementation
   
-  \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
- */
+\author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
+*/
 #include <string.h>
 #include <stdint.h>
 #include "crypto_engine.h"
