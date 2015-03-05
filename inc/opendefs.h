@@ -155,6 +155,9 @@ enum {
    COMPONENT_TECHO                     = 0x20,
    COMPONENT_TOHLONE                   = 0x21,
    COMPONENT_UECHO                     = 0x22,
+   //START OF TELEMATICS CODE
+   COMPONENT_SECURITY                  = 0x23,
+   //END OF TELEMATICS CODE
 };
 
 /**
@@ -228,7 +231,7 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
-   ERR_OK = 0x40,
+   ERR_SECURITY = 0x40,
 };
 
 //=========================== typedef =========================================

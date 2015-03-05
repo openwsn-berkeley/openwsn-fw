@@ -488,12 +488,12 @@ void task_sixtopNotifReceive() {
          if (msg->length>0) {
         	 //START OF TELEMATICS CODE
         	 //discard duplicated packets
-        	 if(msg->l2_toDiscard == FALSE){
+        	 if(msg->l2_toDiscard == 0){
         		 // send to upper layer
         		 iphc_receive(msg);
         	 } else {
-			openserial_printError(COMPONENT_SIXTOP,ERR_OK,
-								(errorparameter_t)0,
+			   openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+								(errorparameter_t)msg->l2_toDiscard,
 								(errorparameter_t)501);
         	// free up the RAM
         		 openqueue_freePacketBuffer(msg);
@@ -598,9 +598,11 @@ owerror_t sixtop_send_internal(
    msg->l1_txPower = TX_POWER;
    // record the location, in the packet, where the l2 payload starts
    msg->l2_payload = msg->payload;
-   msg->l2_length = msg->length;
+
 
    //START OF TELEMATICS CODE
+   msg->l2_length = msg->length;
+
    if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
 	   //security_outgoingFrame(msg);
 	   prepend_AuxiliarySecurityHeader(msg);

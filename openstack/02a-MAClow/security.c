@@ -306,7 +306,7 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 		tempheader->headerLength = tempheader->headerLength+8;
 		break;
 	default:
-		msg->l2_toDiscard = TRUE;
+		msg->l2_toDiscard = 4;
 		return;
 	}
 
@@ -346,7 +346,7 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	keypoint = &keydesc;
 
 	if(match == 25){
-		msg->l2_toDiscard = TRUE;
+		msg->l2_toDiscard = 1;
 		return;
 	}
 
@@ -371,11 +371,7 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	//l+m Anti-Replay
 	if(compareFrameCounter(msg->l2_frameCounter,
 			 devpoint->FrameCounter) == FALSE){
-
-	  openserial_printInfo(COMPONENT_IEEE802154,ERR_OK,
-							(errorparameter_t)0,
-							(errorparameter_t)200);
-		//msg->l2_toDiscard = TRUE;
+		msg->l2_toDiscard = 2;
 	}
 
 	//n Control of key used
@@ -384,7 +380,7 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 									  0
 									  )  ==FALSE){
 
-		msg->l2_toDiscard = TRUE; // improper key used
+		msg->l2_toDiscard = 3; // improper key used
 	}
 
 	uint8_t i;
@@ -682,9 +678,6 @@ void coordinator_init(){
 	security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &security_vars.MacDeviceTable;
 	security_vars.m_macDefaultKeySource = *(my);
 
-//	openserial_printError(COMPONENT_SIXTOP,ERR_OK,
-//						(errorparameter_t)M_k,
-//						(errorparameter_t)102);
 }
 
 void remote_init(ieee802154_header_iht ieee802514_header){
@@ -768,13 +761,14 @@ void security_StoreFrameCounter(OpenQueueEntry_t* msg,
 bool compareFrameCounter(macFrameCounter_t fromFrame,
                              macFrameCounter_t stored){
 
-	if(fromFrame.byte4 > stored.byte4){
+
+	if(fromFrame.bytes0and1 > stored.bytes0and1){
 		return TRUE;
-	} else if (fromFrame.byte4 == stored.byte4){
+	} else if (fromFrame.bytes0and1 == stored.bytes0and1){
 		if (fromFrame.bytes2and3 > stored.bytes2and3){
 			return TRUE;
 		} else if(fromFrame.bytes2and3 == stored.bytes2and3){
-			if(fromFrame.bytes0and1 >= stored.bytes0and1){
+			if(fromFrame.byte4 >= stored.byte4){
 				return TRUE;
 			}
 		}

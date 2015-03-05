@@ -28,7 +28,8 @@ void CCMstar(OpenQueueEntry_t*     pkt,
 
 void Input_Transformation(uint8_t* payload,
 						  uint8_t  length,
-						  uint8_t  authentication_length);
+						  uint8_t  authentication_length,
+						  uint8_t  encOrdec);
 
 void Auth_Transformation(uint8_t 			    length,
 		                 uint8_t 				key[16],
