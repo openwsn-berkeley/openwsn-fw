@@ -14,7 +14,9 @@ Source: http://is.gd/o9RSPq
 extern "C" {
 #endif
 
-int aes_ecb_enc(uint8_t *buffer, uint8_t *key);
+//=========================== prototypes ======================================
+
+int aes_ecb_enc(uint8_t* buffer, uint8_t* key);
 
 #ifdef  __cplusplus
 }

@@ -12,6 +12,8 @@ extern "C" {
 
 #include "crypto_engine.h"
 
+//=========================== module variables ================================
+
 extern const struct crypto_engine dummy_crypto_engine;   
 
 #ifdef  __cplusplus
