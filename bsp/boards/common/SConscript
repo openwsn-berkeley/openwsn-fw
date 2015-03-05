@@ -1,0 +1,16 @@
+import os
+
+Import('env')
+
+localEnv = env.Clone()
+
+source   = []
+
+localEnv.Append(
+        CPPPATH =  [ \
+        ],
+    )
+
+common  = localEnv.Object(source=source)
+
+Return('common')
