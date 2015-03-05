@@ -16,6 +16,26 @@ sources_h = [
     'uart.h',
 ]
 
+board = localEnv.SConscript(
+    os.path.join('#','bsp','boards',localEnv['board'],'SConscript'),
+    variant_dir = localEnv['board'],
+    exports     = {'env': env},
+    duplicate   = 0,
+)
+
+source = [board] \
+#    + Glob('common/*.c')+\
+    
+
+target = 'libbsp'
+
+libbsp = localEnv.Library(
+    target=target,
+    source=source,
+)
+
+Alias('libbsp', libbsp)
+
 #============================ SCons targets ===================================
 
 if localEnv['board']=='python':
