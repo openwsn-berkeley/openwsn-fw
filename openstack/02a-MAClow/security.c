@@ -408,11 +408,17 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 		}
 
 	//Frame Counter (ASN)
+	uint8_t myASN[5];
+	ieee154e_getAsn(myASN);
 	for(i=0;i<5;i++){
-		security_getFrameCounter(msg->l2_frameCounter,
-								 vectASN);//gets the Frame Counter.
-		msg->l2_nonce[8+i] = vectASN[i];
+		msg->l2_nonce[8+i] = myASN[i];
 	}
+
+//	security_getFrameCounter(msg->l2_frameCounter,
+//								 vectASN);//gets the Frame Counter.
+//	for(i=0;i<5;i++){
+//		msg->l2_nonce[8+i] = vectASN[i];
+//	}
 
 	CCMstarInverse(msg,keypoint->key,msg->l2_nonce);
 
