@@ -872,6 +872,12 @@ port_INLINE void activity_ti1ORri1() {
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+
+            //START OF TELEMATICS CODE
+            if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+         	   security_outgoingFrame(ieee154e_vars.dataToSend);
+            }
+            //END OF TELEMATICS CODE
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
@@ -1030,8 +1036,9 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    } else {
       listenForAck = TRUE;
    }
-   
+
    if (listenForAck==TRUE) {
+
       // arm tt5
       radiotimer_schedule(DURATION_tt5);
    } else {
@@ -1047,6 +1054,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
 }
 
 port_INLINE void activity_ti6() {
+
    // change state
    changeState(S_RXACKPREPARE);
    
@@ -1401,7 +1409,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
                             ieee154e_vars.dataReceived->length);
          break;
       }
-      
+
       // toss CRC (2 last bytes)
       packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
       

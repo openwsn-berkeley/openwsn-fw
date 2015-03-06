@@ -620,11 +620,11 @@ owerror_t sixtop_send_internal(
                             &(msg->l2_nextORpreviousHop)
                             );
 
-   //START OF TELEMATICS CODE
-   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
-	   security_outgoingFrame(msg);
-   }
-   //END OF TELEMATICS CODE
+//   //START OF TELEMATICS CODE
+//   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
+//	   security_outgoingFrame(msg);
+//   }
+//   //END OF TELEMATICS CODE
 
    // reserve space for 2-byte CRC
    packetfunctions_reserveFooterSize(msg,2);

@@ -12,7 +12,7 @@ typedef struct{
 	uint8_t MACTag[16];
 	uint8_t U[16];
 	uint8_t W[4];
-	uint8_t authData[148];
+	uint8_t authData[160];
 	uint8_t authDataLength;
 	uint8_t length;
 	uint8_t payloadToEncrypt[128];

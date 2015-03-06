@@ -14,11 +14,11 @@ security_vars_t security_vars;
 
 //=========================== prototypes ======================================
 
-void increment_FrameCounter(void);
+//void increment_FrameCounter(void);
 void security_getFrameCounter(macFrameCounter_t reference,
 		                      uint8_t* array);
-void security_StoreFrameCounter(OpenQueueEntry_t* msg,
-		                        uint8_t* asn);
+//void security_StoreFrameCounter(OpenQueueEntry_t* msg,
+//		                        uint8_t* asn);
 bool compareFrameCounter(macFrameCounter_t fromFrame,
                          macFrameCounter_t stored);
 
@@ -32,7 +32,7 @@ void security_init(){
 
 
 	//MASTER KEY: OpenWSN
-	memcpy(&security_vars.M_k, 0, 16);
+	memcpy(security_vars.M_k, 0, 16);
 	security_vars.M_k[0] = 0x4e;
 	security_vars.M_k[1] = 0x53;
 	security_vars.M_k[2] = 0x57;
@@ -52,16 +52,16 @@ void security_init(){
 
 	//Initialization of MAC KEY TABLE
 	for(i=0; i<MAXNUMKEYS;i++){
-		memcpy(&security_vars.MacKeyTable.KeyDescriptorElement[i].key,
-				0,
-				16);
+		memcpy(security_vars.MacKeyTable.KeyDescriptorElement[i].key,
+			   0,
+			   16);
 	}
 
 	//Initialization of MAC DEVICE TABLE
 		for(i=0; i<MAXNUMNEIGHBORS; i++){
-			memcpy(&security_vars.MacDeviceTable.DeviceDescriptorEntry[i].deviceAddress.addr_64b,
-					0,
-					8);
+			memcpy(security_vars.MacDeviceTable.DeviceDescriptorEntry[i].deviceAddress.addr_64b,
+				   0,
+				   8);
 		}
 
 	//Initialization of Frame Counter
@@ -104,8 +104,8 @@ void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
 								msg->l2_frameType);
 
 	//uint8_t key[16];
-	memcpy(&msg->l2_key,
-		   &security_vars.MacKeyTable.KeyDescriptorElement[match].key,
+	memcpy(msg->l2_key,
+		   security_vars.MacKeyTable.KeyDescriptorElement[match].key,
 		   sizeof(msg->l2_key));
 
 	if(match == 25){
@@ -717,13 +717,13 @@ void remote_init(ieee802154_header_iht ieee802514_header){
 /*
  * Increment the macFrameCounter by 1
  */
-void increment_FrameCounter(){
-	   // increment the Frame Counter
-	   security_vars.m_macFrameCounter.bytes0and1++;
-	   if (security_vars.m_macFrameCounter.bytes0and1==0) {
-		   security_vars.m_macFrameCounter.bytes2and3++;
-	   }
-}
+//void increment_FrameCounter(){
+//	   // increment the Frame Counter
+//	   security_vars.m_macFrameCounter.bytes0and1++;
+//	   if (security_vars.m_macFrameCounter.bytes0and1==0) {
+//		   security_vars.m_macFrameCounter.bytes2and3++;
+//	   }
+//}
 
 /*
  * Store in the array the reference value
@@ -742,16 +742,16 @@ void security_getFrameCounter(macFrameCounter_t reference,
  * "value"
  */
 
-void security_StoreFrameCounter(OpenQueueEntry_t* msg,
-		                        uint8_t* value) {
-   // store the FrameCounter
-   msg->l2_frameCounter.bytes0and1   =     value[0]+
-                                    256*value[1];
-   msg->l2_frameCounter.bytes2and3   =     value[2]+
-                                    256*value[3];
-
-
-}
+//void security_StoreFrameCounter(OpenQueueEntry_t* msg,
+//		                        uint8_t* value) {
+//   // store the FrameCounter
+//   msg->l2_frameCounter.bytes0and1   =     value[0]+
+//                                    256*value[1];
+//   msg->l2_frameCounter.bytes2and3   =     value[2]+
+//                                    256*value[3];
+//
+//
+//}
 
 /*
  * return FALSE if the frame counter of the received frame is less

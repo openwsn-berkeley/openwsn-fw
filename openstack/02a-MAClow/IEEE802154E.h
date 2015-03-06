@@ -130,11 +130,11 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-   TsTxOffset                =  131,                  //  4000us
+   TsTxOffset                =  131+1555,                  //  4000us
    TsLongGT                  =   43,                  //  1300us
-   TsTxAckDelay              =  151+1050+425,                  //  4606us
+   TsTxAckDelay              =  151+1350+425,                  //  4606us
    TsShortGT                 =   16,                  //   500us
-   TsSlotDuration            =  PORT_TsSlotDuration+1050+800,  // 15000us
+   TsSlotDuration            =  PORT_TsSlotDuration+3500,//+1050+800,  // 15000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
@@ -159,18 +159,18 @@ enum ieee154e_linkOption_enum {
 
 // FSM timer durations (combinations of atomic durations)
 // TX
-#define DURATION_tt1 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx-maxTxDataPrepare
-#define DURATION_tt2 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx
+#define DURATION_tt1 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx-maxTxDataPrepare//+1500
+#define DURATION_tt2 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx//+1500
 #define DURATION_tt3 ieee154e_vars.lastCapturedTime+TsTxOffset-delayTx+wdRadioTx
 #define DURATION_tt4 ieee154e_vars.lastCapturedTime+wdDataDuration
-#define DURATION_tt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx-maxRxAckPrepare
+#define DURATION_tt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx-maxRxAckPrepare//+7500
 #define DURATION_tt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-TsShortGT-delayRx
 #define DURATION_tt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay+TsShortGT
 #define DURATION_tt8 ieee154e_vars.lastCapturedTime+wdAckDuration
 // RX
-#define DURATION_rt1 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx-maxRxDataPrepare
-#define DURATION_rt2 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx
-#define DURATION_rt3 ieee154e_vars.lastCapturedTime+TsTxOffset+TsLongGT
+#define DURATION_rt1 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx-maxRxDataPrepare//+1500
+#define DURATION_rt2 ieee154e_vars.lastCapturedTime+TsTxOffset-TsLongGT-delayRx//+1500
+#define DURATION_rt3 ieee154e_vars.lastCapturedTime+TsTxOffset+TsLongGT//+1500
 #define DURATION_rt4 ieee154e_vars.lastCapturedTime+wdDataDuration
 #define DURATION_rt5 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx-maxTxAckPrepare
 #define DURATION_rt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx
