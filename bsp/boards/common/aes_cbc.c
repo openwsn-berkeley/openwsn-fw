@@ -9,6 +9,14 @@
 #include "aes_cbc.h"
 #include "crypto_engine.h"
 
+/**
+\brief Raw AES-CBC encryption.
+\param[in,out] buffer Message to be encrypted. Will be overwritten by ciphertext.
+\param[in] len Message length. Must be multiple of 16 octets.
+\param[in] key Buffer containing the secret key (16 octets).
+
+\returns E_SUCCESS when the encryption was successful. 
+*/
 owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
    uint8_t  n;
    uint8_t  k;
@@ -30,6 +38,20 @@ owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
    return E_SUCCESS;
 }
 
+/**
+\brief CBC-MAC generation specific to IEEE 802.15.4E.
+\param[in] a Pointer to the authentication only data.
+\param[in] len_a Length of authentication only data.
+\param[in] m Pointer to the data that is both authenticated and encrypted.
+\param[in] len_m Length of data that is both authenticated and encrypted.
+\param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
+\param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
+\param[in] key Buffer containing the secret key (16 octets).
+\param[out] mac Buffer where the value of the CBC-MAC tag will be written.
+\param[in] len_mac Length of the CBC-MAC tag. Must be 4, 8 or 16 octets.
+
+\returns E_SUCCESS when the generation was successful, E_FAIL otherwise. 
+*/
 owerror_t aes_cbc_mac(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,

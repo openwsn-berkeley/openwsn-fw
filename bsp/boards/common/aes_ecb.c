@@ -346,8 +346,14 @@ void aes_decr(unsigned char *state, unsigned char *expandedKey)
 
 
 }
+/**
+\brief Basic AES encryption of a single 16-octet block.
+\param[in,out] buffer Single block plaintext. Will be overwritten by ciphertext.
+\param[in] key Buffer containing the secret key (16 octets).
 
-owerror_t aes_ecb_enc(uint8_t* buffer, uint8_t* key)
+\returns E_SUCCESS when the encryption was successful. 
+*/
+owerror_t aes_ecb_enc(uint8_t buffer[16], uint8_t key[16])
 {
     uint8_t expandedKey[176];
 

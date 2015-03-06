@@ -22,6 +22,15 @@ static void inc_counter(uint8_t* counter) {
    } while (n);
 }
 
+/**
+\brief Raw AES-CTR encryption.
+\param[in,out] buffer Message to be encrypted. Will be overwritten by ciphertext.
+\param[in] len Message length. Must be multiple of 16 octets.
+\param[in] key Buffer containing the secret key (16 octets).
+\param[in] iv Buffer containing the Initialization Vector (16 octets).
+
+\returns E_SUCCESS when the encryption was successful. 
+*/
 owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]) {
    uint8_t n;
    uint8_t k;
@@ -44,6 +53,21 @@ owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t
    return E_SUCCESS;
 }
 
+/**
+\brief Counter (CTR) mode encryption specific to IEEE 802.15.4E.
+\param[in,out] m Pointer to the data that is both authenticated and encrypted. Data is
+   overwritten by ciphertext (i.e. plaintext in case of inverse CCM*).
+\param[in] len_m Length of data that is both authenticated and encrypted.
+\param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
+\param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
+\param[in] key Buffer containing the secret key (16 octets).
+\param[in,out] mac Buffer containing the unencrypted or encrypted CBC-MAC tag, which depends
+   on weather the function is called as part of CCM* forward or inverse transformation. It
+   is overwrriten by the encrypted, i.e unencrypted, tag on return.
+\param[in] len_mac Length of the CBC-MAC tag. Must be 4, 8 or 16 octets.
+
+\returns E_SUCCESS when the encryption was successful, E_FAIL otherwise. 
+*/
 owerror_t aes_ctr_enc(uint8_t* m,
          uint8_t len_m,
          uint8_t saddr[8],
