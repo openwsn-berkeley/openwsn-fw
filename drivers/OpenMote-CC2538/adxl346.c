@@ -115,8 +115,7 @@
 
 //=========================== public ==========================================
 
-void adx346_init(void)
-{
+void adxl346_init(void) {
     uint8_t config[2];
 
     config[0] = ADXL346_BW_RATE_ADDR;
@@ -130,16 +129,14 @@ void adx346_init(void)
     i2c_write_bytes(ADXL346_ADDRESS, config, sizeof(config));
 
     config[0] = ADXL346_POWER_CTL_ADDR;
-    config[1] = (ADXL346_POWER_CTL_MEASURE);
+    config[1] = ADXL346_POWER_CTL_MEASURE;
     i2c_write_bytes(ADXL346_ADDRESS, config, sizeof(config));
 }
 
-void adx346_reset(void)
-{
+void adxl346_reset(void) {
 }
 
-uint8_t adx346_is_present(void)
-{
+uint8_t adxl346_is_present(void) {
     uint8_t is_present;
 
     i2c_write_byte(ADXL346_ADDRESS, ADXL346_DEVID_ADDR);
@@ -148,8 +145,7 @@ uint8_t adx346_is_present(void)
     return (is_present == ADXL346_DEVID_VALUE);
 }
 
-uint16_t adx346_read_x(void)
-{
+uint16_t adxl346_read_x(void) {
     uint8_t acceleration[2];
     uint16_t x;
 
@@ -163,8 +159,7 @@ uint16_t adx346_read_x(void)
     return x;
 }
 
-uint16_t adx346_read_y(void)
-{
+uint16_t adxl346_read_y(void) {
     uint8_t acceleration[2];
     uint16_t y;
     
@@ -178,8 +173,7 @@ uint16_t adx346_read_y(void)
     return y;
 }
 
-uint16_t adx346_read_z(void)
-{
+uint16_t adxl346_read_z(void) {
     uint8_t acceleration[2];
     uint16_t z;
     
