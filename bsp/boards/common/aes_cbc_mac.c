@@ -9,7 +9,7 @@
 #include "aes_cbc_mac.h"
 #include "crypto_engine.h"
 
-owerror_t aes_cbc_mac_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
+owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
    uint8_t  n;
    uint8_t  k;
    uint8_t  nb;
@@ -30,7 +30,7 @@ owerror_t aes_cbc_mac_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
    return E_SUCCESS;
 }
 
-owerror_t aes_cbc_mac_enc(uint8_t* a,
+owerror_t aes_cbc_mac(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t len_m,
@@ -88,7 +88,7 @@ owerror_t aes_cbc_mac_enc(uint8_t* a,
    memset(&buffer[len], 0, pad_len);
    len += pad_len;
 
-   CRYPTO_ENGINE.aes_cbc_mac_enc_raw(buffer, len, key);
+   CRYPTO_ENGINE.aes_cbc_enc_raw(buffer, len, key);
 
    // copy MAC
    memcpy(mac, &buffer[len - 16], len_mac);

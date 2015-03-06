@@ -8,11 +8,11 @@
 #include <string.h>
 #include "dummy_crypto_engine.h"
 
-static owerror_t aes_cbc_mac_enc_raw_identity(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
+static owerror_t aes_cbc_enc_raw_identity(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
    return E_SUCCESS;
 }
 
-static owerror_t aes_cbc_mac_enc_identity(uint8_t* a,
+static owerror_t aes_cbc_mac_identity(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t len_m,
@@ -74,8 +74,8 @@ static owerror_t init(void) {
 const struct crypto_engine dummy_crypto_engine = {
    aes_ccms_enc_identity,
    aes_ccms_dec_identity,
-   aes_cbc_mac_enc_identity,
-   aes_cbc_mac_enc_raw_identity,
+   aes_cbc_mac_identity,
+   aes_cbc_enc_raw_identity,
    aes_ctr_enc_identity,
    aes_ctr_enc_raw_identity,
    aes_ecb_enc_identity,

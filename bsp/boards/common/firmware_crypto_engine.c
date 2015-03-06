@@ -21,8 +21,8 @@ static owerror_t init(void) {
 const struct crypto_engine firmware_crypto_engine = {
    aes_ccms_enc,
    aes_ccms_dec,
-   aes_cbc_mac_enc,
-   aes_cbc_mac_enc_raw,
+   aes_cbc_mac,
+   aes_cbc_enc_raw,
    aes_ctr_enc,
    aes_ctr_enc_raw,
    aes_ecb_enc,

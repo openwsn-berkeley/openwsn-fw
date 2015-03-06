@@ -19,7 +19,7 @@ owerror_t aes_ccms_enc(uint8_t* a,
 
    uint8_t mac[CBC_MAC_SIZE];
 
-   if (CRYPTO_ENGINE.aes_cbc_mac_enc(a, len_a, m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == E_SUCCESS) {
+   if (CRYPTO_ENGINE.aes_cbc_mac(a, len_a, m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == E_SUCCESS) {
       if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == E_SUCCESS) {
          memcpy(&m[*len_m], mac, CBC_MAC_SIZE);
          *len_m += CBC_MAC_SIZE;
@@ -46,7 +46,7 @@ owerror_t aes_ccms_dec(uint8_t* a,
    memcpy(mac, &m[*len_m], CBC_MAC_SIZE);
 
    if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == E_SUCCESS) {
-      if (CRYPTO_ENGINE.aes_cbc_mac_enc(a, len_a, m, *len_m, saddr, asn, key, orig_mac, CBC_MAC_SIZE) == E_SUCCESS) {
+      if (CRYPTO_ENGINE.aes_cbc_mac(a, len_a, m, *len_m, saddr, asn, key, orig_mac, CBC_MAC_SIZE) == E_SUCCESS) {
          if (memcmp(mac, orig_mac, CBC_MAC_SIZE) == 0) {
             return E_SUCCESS;
          }
