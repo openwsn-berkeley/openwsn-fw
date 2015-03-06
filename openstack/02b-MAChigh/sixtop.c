@@ -647,6 +647,7 @@ port_INLINE void sixtop_sendEB() {
    
    if (sixtop_vars.busySendingEB==TRUE) {
       // don't continue if I'm still sending a previous ADV
+      return;
    }
    
    // if I get here, I will send an ADV
