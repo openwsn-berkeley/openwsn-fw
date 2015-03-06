@@ -12,8 +12,8 @@ extern "C" {
 
 //=========================== prototypes ======================================
 
-int aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t* key, uint8_t iv[16]);
-int aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t* key, uint8_t* mac, uint8_t len_mac);
+owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t* key, uint8_t iv[16]);
+owerror_t aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t* key, uint8_t* mac, uint8_t len_mac);
 
 #ifdef  __cplusplus
 }

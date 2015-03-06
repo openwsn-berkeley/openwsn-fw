@@ -5,9 +5,11 @@
 */
 #include <string.h>
 #include <stdint.h>
+#include "opendefs.h"
+#include "aes_cbc_mac.h"
 #include "crypto_engine.h"
 
-int aes_cbc_mac_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
+owerror_t aes_cbc_mac_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
    uint8_t  n;
    uint8_t  k;
    uint8_t  nb;
@@ -25,10 +27,10 @@ int aes_cbc_mac_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
       }
    }
 
-   return 0;
+   return E_SUCCESS;
 }
 
-int aes_cbc_mac_enc(uint8_t* a,
+owerror_t aes_cbc_mac_enc(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t len_m,
@@ -44,15 +46,15 @@ int aes_cbc_mac_enc(uint8_t* a,
 
    // asserts here
    if (!((len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
-      return -1;
+      return E_FAIL;
    }
 
    if ((len_a > 127) || (len_m > 127) || ((len_a + len_m) > 127)) {
-      return -2;
+      return E_FAIL;
    }
 
    if (mac == 0) {
-      return -3;
+      return E_FAIL;
    }
 
    // IV: flags (1B) | SADDR (8B) | ASN (5B) | len(m) (2B)
@@ -91,5 +93,5 @@ int aes_cbc_mac_enc(uint8_t* a,
    // copy MAC
    memcpy(mac, &buffer[len - 16], len_mac);
 
-   return 0;
+   return E_SUCCESS;
 }

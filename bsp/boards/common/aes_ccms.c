@@ -5,9 +5,11 @@
 */
 #include <string.h>
 #include <stdint.h>
+#include "opendefs.h"
+#include "aes_ccms.h"
 #include "crypto_engine.h"
 
-int aes_ccms_enc(uint8_t* a,
+owerror_t aes_ccms_enc(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
@@ -17,19 +19,19 @@ int aes_ccms_enc(uint8_t* a,
 
    uint8_t mac[CBC_MAC_SIZE];
 
-   if (CRYPTO_ENGINE.aes_cbc_mac_enc(a, len_a, m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == 0) {
-      if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == 0) {
+   if (CRYPTO_ENGINE.aes_cbc_mac_enc(a, len_a, m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == E_SUCCESS) {
+      if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == E_SUCCESS) {
          memcpy(&m[*len_m], mac, CBC_MAC_SIZE);
          *len_m += CBC_MAC_SIZE;
 
-         return 0;
+         return E_SUCCESS;
       }
    }
 
-   return -1;
+   return E_FAIL;
 }
 
-int aes_ccms_dec(uint8_t* a,
+owerror_t aes_ccms_dec(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
@@ -43,13 +45,13 @@ int aes_ccms_dec(uint8_t* a,
    *len_m -= CBC_MAC_SIZE;
    memcpy(mac, &m[*len_m], CBC_MAC_SIZE);
 
-   if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == 0) {
-      if (CRYPTO_ENGINE.aes_cbc_mac_enc(a, len_a, m, *len_m, saddr, asn, key, orig_mac, CBC_MAC_SIZE) == 0) {
+   if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, saddr, asn, key, mac, CBC_MAC_SIZE) == E_SUCCESS) {
+      if (CRYPTO_ENGINE.aes_cbc_mac_enc(a, len_a, m, *len_m, saddr, asn, key, orig_mac, CBC_MAC_SIZE) == E_SUCCESS) {
          if (memcmp(mac, orig_mac, CBC_MAC_SIZE) == 0) {
-            return 0;
+            return E_SUCCESS;
          }
       }
    }
 
-   return -1;
+   return E_FAIL;
 }

@@ -5,6 +5,8 @@
 */
 #include <string.h>
 #include <stdint.h>
+#include "opendefs.h"
+#include "aes_ctr.h"
 #include "crypto_engine.h"
 
 static void inc_counter(uint8_t* counter) {
@@ -20,7 +22,7 @@ static void inc_counter(uint8_t* counter) {
    } while (n);
 }
 
-int aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t* key, uint8_t iv[16]) {
+owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t* key, uint8_t iv[16]) {
    uint8_t n;
    uint8_t k;
    uint8_t nb;
@@ -39,10 +41,10 @@ int aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t* key, uint8_t iv[16]) 
       inc_counter(iv);
    }
 
-   return 0;
+   return E_SUCCESS;
 }
 
-int aes_ctr_enc(uint8_t* m,
+owerror_t aes_ctr_enc(uint8_t* m,
          uint8_t len_m,
          uint8_t saddr[8],
          uint8_t asn[5],
@@ -57,11 +59,11 @@ int aes_ctr_enc(uint8_t* m,
 
    // asserts here
    if (!((len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
-      return -1;
+      return E_FAIL;
    }
 
    if (len_m > 127) {
-      return -2;
+      return E_FAIL;
    }
 
    // iv (flag (1B) | source addr (8B) | ASN (5B) | cnt (2B)
@@ -90,5 +92,5 @@ int aes_ctr_enc(uint8_t* m,
    memcpy(m, &buffer[16], len_m);
    memcpy(mac, buffer, len_mac);
 
-   return 0;
+   return E_SUCCESS;
 }

@@ -8,6 +8,7 @@ ECCN 5D002 TSU - Technology / Software Unrestricted
 Source: http://is.gd/o9RSPq
 **************************************************************/
 #include <stdint.h>
+#include "opendefs.h"
 #include "aes_ecb.h"
 
 // foreward sbox
@@ -346,13 +347,13 @@ void aes_decr(unsigned char *state, unsigned char *expandedKey)
 
 }
 
-int aes_ecb_enc(uint8_t *buffer, uint8_t *key)
+owerror_t aes_ecb_enc(uint8_t* buffer, uint8_t* key)
 {
     uint8_t expandedKey[176];
 
     expandKey(expandedKey, key);       // expand the key into 176 bytes
     aes_encr(buffer, expandedKey);
 
-    return 0;
+    return E_SUCCESS;
 }
 

@@ -13,8 +13,8 @@
 #include "aes_cbc_mac.h"
 #include "aes_ecb.h"
 
-static int init(void) {
-   return 0;
+static owerror_t init(void) {
+   return E_SUCCESS;
 }
 
 /*---------------------------------------------------------------------------*/
