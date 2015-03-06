@@ -632,8 +632,8 @@ port_INLINE void sixtop_sendEB() {
    
    len = 0;
    
-   if (ieee154e_isSynch()==FALSE) {
-      // I'm not sync'ed
+   if ((ieee154e_isSynch()==FALSE) || (neighbors_getMyDAGrank()==DEFAULTDAGRANK)){
+      // I'm not sync'ed or I did not acquire a DAGrank
       
       // delete packets genereted by this module (ADV and KA) from openqueue
       openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
