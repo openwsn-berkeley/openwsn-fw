@@ -10,7 +10,7 @@
 #include "firmware_crypto_engine.h"
 #include "aes_ccms.h"
 #include "aes_ctr.h"
-#include "aes_cbc_mac.h"
+#include "aes_cbc.h"
 #include "aes_ecb.h"
 
 static owerror_t init(void) {

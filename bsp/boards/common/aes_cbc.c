@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "opendefs.h"
-#include "aes_cbc_mac.h"
+#include "aes_cbc.h"
 #include "crypto_engine.h"
 
 owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
