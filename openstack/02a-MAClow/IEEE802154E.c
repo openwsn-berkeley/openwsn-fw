@@ -752,6 +752,8 @@ port_INLINE void activity_ti1ORri1() {
    open_addr_t neighbor;
    uint8_t     i;
    sync_IE_ht  sync_IE;
+   bool        changeToRX=FALSE;
+   bool        couldSendEB=FALSE;
 
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -816,65 +818,53 @@ port_INLINE void activity_ti1ORri1() {
    // check the schedule to see what type of slot this is
    cellType = schedule_getType();
    switch (cellType) {
-      case CELLTYPE_ADV:
-         // stop using serial
-         openserial_stop();
-         // look for an ADV packet in the queue
-         ieee154e_vars.dataToSend = openqueue_macGetAdvPacket();
-         if (ieee154e_vars.dataToSend==NULL) {   // I will be listening for an ADV
-            // change state
-            changeState(S_RXDATAOFFSET);
-            // arm rt1
-            radiotimer_schedule(DURATION_rt1);
-         } else {                                // I will be sending an ADV
-            // change state
-            changeState(S_TXDATAOFFSET);
-            // change owner
-            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;         
-            //copy synch IE  -- should be Little endian???
-            // fill in the ASN field of the ADV
-            ieee154e_getAsn(sync_IE.asn);
-            sync_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank) 
-       
-            memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
-            
-            // record that I attempt to transmit this packet
-            ieee154e_vars.dataToSend->l2_numTxAttempts++;
-            // arm tt1
-            radiotimer_schedule(DURATION_tt1);
-         }
-         break;
       case CELLTYPE_TXRX:
       case CELLTYPE_TX:
          // stop using serial
          openserial_stop();
+         // assuming that there is nothing to send
+         ieee154e_vars.dataToSend = NULL;
          // check whether we can send
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-         } else {
-            ieee154e_vars.dataToSend = NULL;
+            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+               couldSendEB=TRUE;
+               // look for an EB packet in the queue
+               ieee154e_vars.dataToSend = openqueue_macGetAdvPacket();
+            }
          }
-         if (ieee154e_vars.dataToSend!=NULL) {   // I have a packet to send
+         if (ieee154e_vars.dataToSend==NULL) {
+            if (cellType==CELLTYPE_TX) {
+               // abort
+               endSlot();
+               break;
+            } else {
+               changeToRX=TRUE;
+            }
+         } else {
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+            if (couldSendEB==TRUE) {        // I will be sending an EB
+               //copy synch IE  -- should be Little endian???
+               // fill in the ASN field of the EB
+               ieee154e_getAsn(sync_IE.asn);
+               sync_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank)
+               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
+            }
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
             radiotimer_schedule(DURATION_tt1);
-         } else if (cellType==CELLTYPE_TX){
-            // abort
-            endSlot();
-         }
-         if (cellType==CELLTYPE_TX || 
-             (cellType==CELLTYPE_TXRX && ieee154e_vars.dataToSend!=NULL)) {
             break;
          }
       case CELLTYPE_RX:
-         // stop using serial
-         openserial_stop();
+         if (changeToRX==FALSE) {
+            // stop using serial
+            openserial_stop();
+         }
          // change state
          changeState(S_RXDATAOFFSET);
          // arm rt1
