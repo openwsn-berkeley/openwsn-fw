@@ -22,7 +22,7 @@ static void inc_counter(uint8_t* counter) {
    } while (n);
 }
 
-owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t* key, uint8_t iv[16]) {
+owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]) {
    uint8_t n;
    uint8_t k;
    uint8_t nb;
@@ -48,7 +48,7 @@ owerror_t aes_ctr_enc(uint8_t* m,
          uint8_t len_m,
          uint8_t saddr[8],
          uint8_t asn[5],
-         uint8_t* key,
+         uint8_t key[16],
          uint8_t* mac,
          uint8_t len_mac) {
 

@@ -36,7 +36,7 @@ owerror_t aes_cbc_mac(uint8_t* a,
          uint8_t len_m,
          uint8_t saddr[8],
          uint8_t asn[5],
-         uint8_t* key,
+         uint8_t key[16],
          uint8_t* mac,
          uint8_t len_mac) {
    

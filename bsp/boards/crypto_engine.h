@@ -24,13 +24,13 @@ extern "C" {
 
 //=========================== typedef =========================================
 
-typedef owerror_t (*fp_aes_ccms_enc)(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t* len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t* key);
-typedef owerror_t (*fp_aes_ccms_dec)(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t* len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t* key);
-typedef owerror_t (*fp_aes_cbc_mac)(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t* key, uint8_t* mac, uint8_t len_mac);
+typedef owerror_t (*fp_aes_ccms_enc)(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t* len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t key[16]);
+typedef owerror_t (*fp_aes_ccms_dec)(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t* len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t key[16]);
+typedef owerror_t (*fp_aes_cbc_mac)(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t key[16], uint8_t* mac, uint8_t len_mac);
 typedef owerror_t (*fp_aes_cbc_enc_raw)(uint8_t* buffer, uint8_t len, uint8_t key[16]);
-typedef owerror_t (*fp_aes_ctr_enc)(uint8_t* m, uint8_t len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t* key, uint8_t* mac, uint8_t len_mac);
-typedef owerror_t (*fp_aes_ctr_enc_raw)(uint8_t* buffer, uint8_t len, uint8_t* key, uint8_t iv[16]);
-typedef owerror_t (*fp_aes_ecb_enc)(uint8_t* buffer, uint8_t* key);
+typedef owerror_t (*fp_aes_ctr_enc)(uint8_t* m, uint8_t len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t key[16], uint8_t* mac, uint8_t len_mac);
+typedef owerror_t (*fp_aes_ctr_enc_raw)(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]);
+typedef owerror_t (*fp_aes_ecb_enc)(uint8_t buffer[16], uint8_t key[16]);
 typedef owerror_t (*fp_init)(void);
 
 //=========================== module variables ================================

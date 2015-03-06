@@ -15,7 +15,7 @@ owerror_t aes_ccms_enc(uint8_t* a,
          uint8_t* len_m,
          uint8_t saddr[8],
          uint8_t asn[5],
-         uint8_t* key) {
+         uint8_t key[16]) {
 
    uint8_t mac[CBC_MAC_SIZE];
 
@@ -37,7 +37,7 @@ owerror_t aes_ccms_dec(uint8_t* a,
          uint8_t* len_m,
          uint8_t saddr[8],
          uint8_t asn[5],
-         uint8_t* key) {
+         uint8_t key[16]) {
 
    uint8_t mac[CBC_MAC_SIZE];
    uint8_t orig_mac[CBC_MAC_SIZE];
