@@ -8,10 +8,12 @@
 \{
 */
 
-//#include "openwsn.h"
 #include "IEEE802154.h"
 #include "neighbors.h"
 #include "idmanager.h"
+#include "openserial.h"
+#include "opendefs.h"
+#include "packetfunctions.h"
 
 //=========================== define ==========================================
 
@@ -92,6 +94,7 @@ typedef struct{
 
 BEGIN_PACK
 typedef struct{
+	uint8_t						busy;
 	macFrameCounter_t 			m_macFrameCounter;
 	uint8_t						m_macFrameCounterMode;
 	uint8_t 					m_macAutoRequestKeyIdMode;
@@ -101,6 +104,7 @@ typedef struct{
 	m_macKeyTable				MacKeyTable;
 	m_macDeviceTable			MacDeviceTable;
 	m_macSecurityLevelTable 	MacSecurityLevelTable;
+	uint8_t						nonce[13];
 	//MASTER KEY
 	uint8_t 					M_k[16];
 }security_vars_t;
@@ -111,6 +115,7 @@ END_PACK
 //admin
 void security_init(void);
 //public
+void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg);
 void security_outgoingFrame(OpenQueueEntry_t*  msg);
 void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
                   	  	  	  	  	  ieee802154_header_iht* tempheader);
@@ -148,6 +153,8 @@ uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
 
 void remote_init(ieee802154_header_iht ieee802514_header);
 void coordinator_init(void);
+
+uint8_t security_getBusyvalue(void);
 /**
 \}
 \}

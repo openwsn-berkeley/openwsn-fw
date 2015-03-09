@@ -2,6 +2,8 @@
 #include "idmanager.h"
 #include "security.h"
 #include "TI_aes.h"
+#include "packetfunctions.h"
+#include "opendefs.h"
 
 //=========================== define ==========================================
 
@@ -16,6 +18,7 @@ typedef struct{
 	uint8_t authDataLength;
 	uint8_t length;
 	uint8_t payloadToEncrypt[128];
+	uint8_t payloadToDecrypt[128];
 	uint8_t CipherText[128];
 }ccmstar_vars_t;
 //=========================== variables =======================================

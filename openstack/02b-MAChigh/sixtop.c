@@ -604,7 +604,12 @@ owerror_t sixtop_send_internal(
    msg->l2_length = msg->length;
 
    if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
-	   //security_outgoingFrame(msg);
+	  	  uint8_t kj;
+		  do{
+			  kj++;
+	  		   leds_error_on();
+	  	   } while ((security_getBusyvalue() == 1)|| kj >5);
+	  	   leds_error_off();
 	   prepend_AuxiliarySecurityHeader(msg);
    }
    //END OF TELEMATICS CODE
@@ -626,8 +631,12 @@ owerror_t sixtop_send_internal(
 //   }
 //   //END OF TELEMATICS CODE
 
-   // reserve space for 2-byte CRC
-   packetfunctions_reserveFooterSize(msg,2);
+   // reserve space for 2-byte CRC, only if security is disabled
+   //START OF TELEMATICS CODE
+   if(msg->l2_security == FALSE){
+	   packetfunctions_reserveFooterSize(msg,2);
+   }
+   //END OF TELEMATICS CODE
 
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;

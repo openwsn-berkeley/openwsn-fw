@@ -4,6 +4,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "topology.h"
+#include "security.h"
 
 //=========================== variables =======================================
 

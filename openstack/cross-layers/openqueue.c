@@ -258,5 +258,13 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //START OF TELEMATICS CODE
    entry->l2_security                  = FALSE;
    entry->l2_toDiscard                 = 0;
+//   uint8_t i;
+//   for(i=0;i<13;i++){
+//	   entry->l2_nonce[i] = 0;
+//	   entry->l2_key[i] = 0;
+//   }
+//   entry->l2_key[13] = 0;
+//   entry->l2_key[14] = 0;
+//   entry->l2_key[15] = 0;
    //END OF TELEMATICS CODE
 }

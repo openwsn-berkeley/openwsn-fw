@@ -875,8 +875,16 @@ port_INLINE void activity_ti1ORri1() {
 
             //START OF TELEMATICS CODE
             if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-         	   security_outgoingFrame(ieee154e_vars.dataToSend);
+              uint8_t kj;
+          	  do{
+          		  kj++;
+            	  leds_error_on();
+            	  } while ((security_getBusyvalue() == 1)|| kj >5);
+             leds_error_off();
+         	 security_outgoingFrame(ieee154e_vars.dataToSend);
+         	 packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
             }
+
             //END OF TELEMATICS CODE
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
@@ -1236,6 +1244,12 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       //START OF TELEMATICS CODE
 	   if(ieee154e_vars.ackReceived->l2_security== TRUE){
+		  	  uint8_t kj;
+			  do{
+				  kj++;
+		  		   leds_error_on();
+		  	   } while ((security_getBusyvalue() == 1)|| kj >5);
+		  	   leds_error_off();
 		  security_incomingFrame(ieee154e_vars.ackReceived);
 	   }
 	   //END OF TELEMATICS CODE
@@ -1456,6 +1470,12 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       
 	  //START OF TELEMATICS CODE
 	  if(ieee154e_vars.dataReceived->l2_security== TRUE){
+	  	  uint8_t kj;
+		  do{
+			  kj++;
+	  		   leds_error_on();
+	  	   } while ((security_getBusyvalue() == 1)|| kj >5);
+	  	   leds_error_off();
 		  security_incomingFrame(ieee154e_vars.dataReceived);
 	  }
 	//END OF TELEMATICS CODE
@@ -1567,7 +1587,12 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->l2_length = ieee154e_vars.ackToSend->length;
 
    if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-	   //security_outgoingFrame(ieee154e_vars.ackToSend);
+	  	  uint8_t kj;
+		  do{
+			  kj++;
+	  		   leds_error_on();
+	  	   } while ((security_getBusyvalue() == 1)|| kj >5);
+	  	   leds_error_off();
 	   prepend_AuxiliarySecurityHeader(ieee154e_vars.ackToSend);
 	  }
    //END OF TELEMATICS CODE
@@ -1585,6 +1610,12 @@ port_INLINE void activity_ri6() {
    
    //START OF TELEMATICS CODE
    if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+	  	  uint8_t kj;
+		  do{
+			  kj++;
+	  		   leds_error_on();
+	  	   } while ((security_getBusyvalue() == 1)|| kj >5);
+	  	   leds_error_off();
 	   security_outgoingFrame(ieee154e_vars.ackToSend);
 	  }
    //END OF TELEMATICS CODE
