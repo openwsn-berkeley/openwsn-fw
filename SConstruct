@@ -36,7 +36,8 @@ project:
     options, with the default value listed first.
     
     board          Board to build for. 'python' is for software simulation.
-                   telosb, wsn430v14, wsn430v13b, gina, z1, python, iot-lab_M3
+                   telosb, wsn430v14, wsn430v13b, gina, z1, python,
+                   iot-lab_M3, iot-lab_A8-M3
         
     toolchain      Toolchain implementation. The 'python' board requires gcc
                    (MinGW on Windows build host).
@@ -102,6 +103,7 @@ command_line_options = {
         'OpenMote-CC2538',
         'openmotestm',
         'iot-lab_M3',
+        'iot-lab_A8-M3',
         'agilefox',
         # misc.
         'python',

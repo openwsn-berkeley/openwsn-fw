@@ -32,6 +32,11 @@ owerror_t openserial_printInfoErrorCritical(
    errorparameter_t arg1,
    errorparameter_t arg2
 );
+
+void openserial_board_reset_cb(
+   opentimer_id_t id
+);
+
 // HDLC output
 void outputHdlcOpen(void);
 void outputHdlcWrite(uint8_t b);
@@ -189,7 +194,7 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
    // schedule for the mote to reboot in 10s
    opentimers_start(10000,
                     TIMER_ONESHOT,TIME_MS,
-                    board_reset);
+                    openserial_board_reset_cb);
    
    return openserial_printInfoErrorCritical(
       SERFRAME_MOTE2PC_CRITICAL,
@@ -198,6 +203,10 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
       arg1,
       arg2
    );
+}
+
+void openserial_board_reset_cb(opentimer_id_t id) {
+   board_reset();
 }
 
 uint8_t openserial_getNumDataBytes() {
