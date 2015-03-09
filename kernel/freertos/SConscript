@@ -58,14 +58,14 @@ else:
             os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','queue.c'),
             os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','list.c'),
             os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','MemMang','heap_1.c'),
-            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','IAR','MSP430F449','port.c'),
+            os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','IAR','MSP430','port.c'),
        ]
            
        localEnv.Append(
            CPPPATH =  [
                os.path.join('.'),
                os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','include'),
-               os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','IAR','MSP430F449'),
+               os.path.join(FREERTOS_VERSION,'FreeRTOS','Source','portable','IAR','MSP430'),
            ],
        )
     
