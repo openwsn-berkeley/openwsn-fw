@@ -155,7 +155,11 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
    DISABLE_INTERRUPTS();
    
    schedule_vars.frameLength = newFrameLength;
-   
+   if (newFrameLength > MAXACTIVESLOTS) {
+      schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
+   } else {
+	   schedule_vars.maxActiveSlots = newFrameLength;
+   }
    ENABLE_INTERRUPTS();
 }
 

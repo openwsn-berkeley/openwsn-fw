@@ -114,6 +114,7 @@ typedef struct {
    scheduleEntry_t  scheduleBuf[MAXACTIVESLOTS];
    scheduleEntry_t* currentScheduleEntry;
    uint16_t         frameLength;
+   uint8_t          maxActiveSlots;
    uint8_t          backoffExponent;
    uint8_t          backoff;
    uint8_t          debugPrintRow;
