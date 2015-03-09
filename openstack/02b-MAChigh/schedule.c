@@ -4,6 +4,7 @@
 #include "openrandom.h"
 #include "packetfunctions.h"
 #include "sixtop.h"
+#include "idmanager.h"
 
 //=========================== variables =======================================
 
@@ -34,8 +35,10 @@ void schedule_init() {
    }
    schedule_vars.backoffExponent = MINBE-1;
 
-   // set frame length
-   schedule_setFrameLength(SUPERFRAME_LENGTH);
+   if (idmanager_getIsDAGroot()) {
+      // set frame length
+      schedule_setFrameLength(SUPERFRAME_LENGTH);
+   }
    
    // start at slot 0
    running_slotOffset = 0;
