@@ -59,14 +59,16 @@ void schedule_init() {
    
    // serial RX slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(
-      running_slotOffset,         // slot offset
-      CELLTYPE_SERIALRX,          // type of slot
-      FALSE,                      // shared?
-      0,                          // channel offset
-      &temp_neighbor              // neighbor
-   );
-   running_slotOffset++;
+   for (i=0;i<NUMSERIALRX;i++) {
+      schedule_addActiveSlot(
+         running_slotOffset,         // slot offset
+         CELLTYPE_SERIALRX,          // type of slot
+         FALSE,                      // shared?
+         0,                          // channel offset
+         &temp_neighbor              // neighbor
+      );
+      running_slotOffset++;
+   }
 }
 
 /**
@@ -205,7 +207,7 @@ void  schedule_getSlotInfo(
 
 \param[out] maximum number of active slots
 */
-uint16_t  schedule_getSlotInfo() {
+uint16_t  schedule_getMaxActiveSlots() {
    return schedule_vars.maxActiveSlots;
 }
 
