@@ -143,6 +143,8 @@ void               schedule_getSlotInfo(
    slotinfo_element_t*  info
 );
 
+uint16_t           schedule_getMaxActiveSlots(void);
+
 owerror_t          schedule_removeActiveSlot(
    slotOffset_t         slotOffset,
    open_addr_t*         neighbor

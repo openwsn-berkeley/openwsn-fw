@@ -81,7 +81,7 @@ bool debugPrint_schedule() {
    debugScheduleEntry_t temp;
    
    // increment the row just printed
-   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
+   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%schedule_vars.maxActiveSlots;
    
    // gather status data
    temp.row                            = schedule_vars.debugPrintRow;
@@ -161,7 +161,7 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
    if (newFrameLength > MAXACTIVESLOTS) {
       schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
    } else {
-	   schedule_vars.maxActiveSlots = newFrameLength;
+      schedule_vars.maxActiveSlots = newFrameLength;
    }
    ENABLE_INTERRUPTS();
 }
@@ -183,7 +183,7 @@ void  schedule_getSlotInfo(
   
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
-   while (slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+   while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
        //check that this entry for that neighbour and timeslot is not already scheduled.
        if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
                //it exists so this is an update.
@@ -198,6 +198,15 @@ void  schedule_getSlotInfo(
    info->link_type                 = CELLTYPE_OFF;
    info->shared                    = FALSE;
    info->channelOffset             = 0;//set to zero if not set.                          
+}
+
+/**
+\brief Get the maximum number of active slots.
+
+\param[out] maximum number of active slots
+*/
+uint16_t  schedule_getSlotInfo() {
+   return schedule_vars.maxActiveSlots;
 }
 
 /**
@@ -228,13 +237,13 @@ owerror_t schedule_addActiveSlot(
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (
          slotContainer->type!=CELLTYPE_OFF &&
-         slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]
+         slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]
       ) {
       slotContainer++;
    }
    
    // abort it schedule overflow
-   if (slotContainer>&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+   if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       ENABLE_INTERRUPTS();
       openserial_printCritical(
          COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
@@ -312,7 +321,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
    
    // find the schedule entry
    slotContainer = &schedule_vars.scheduleBuf[0];
-   while (slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+   while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       if (
             slotContainer->slotOffset==slotOffset
             &&
@@ -324,7 +333,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
    }
    
    // abort it could not find
-   if (slotContainer>&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+   if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       ENABLE_INTERRUPTS();
       openserial_printCritical(
          COMPONENT_SCHEDULE,ERR_FREEING_ERROR,

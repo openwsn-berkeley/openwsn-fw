@@ -1161,7 +1161,7 @@ bool sixtop_candidateAddCellList(
    *flag = 1; // the cells listed in cellList are available to be schedule.
    
    numCandCells=0;
-   for(i=0;i<MAXACTIVESLOTS;i++){
+   for(i=0;i<schedule_getMaxActiveSlots();i++){
       if(schedule_isSlotOffsetAvailable(i)==TRUE){
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = 0;
@@ -1196,7 +1196,7 @@ bool sixtop_candidateRemoveCellList(
    *flag           = 1;
   
    numCandCells    = 0;
-   for(i=0;i<MAXACTIVESLOTS;i++){
+   for(i=0;i<schedule_getMaxActiveSlots();i++){
       schedule_getSlotInfo(i,neighbor,&info);
       if(info.link_type == CELLTYPE_TX){
          cellList[numCandCells].tsNum       = i;
