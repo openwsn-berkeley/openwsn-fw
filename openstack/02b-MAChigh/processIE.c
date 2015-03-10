@@ -380,6 +380,7 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
    uint8_t              localptr;
    slotframeLink_IE_ht  sfInfo; 
    cellInfo_ht          linkInfo;
+   open_addr_t          temp_neighbor;
    
    localptr = *ptr; 
   
@@ -395,11 +396,15 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
       sfInfo.slotframehandle =*((uint8_t*)(pkt->payload)+localptr);
       localptr++;
       
+      schedule_setFrameHandle(sfInfo.slotframehandle);
+      
       // [2B] slotframe size
       sfInfo.slotframesize   = *((uint8_t*)(pkt->payload)+localptr);
       localptr++;
       sfInfo.slotframesize  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
       localptr++;;
+      
+      schedule_setFrameLength(sfInfo.slotframesize);
       
       // [1B] number of links
       sfInfo.numlinks        = *((uint8_t*)(pkt->payload)+localptr);
@@ -423,9 +428,19 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
          linkInfo.linkoptions = *((uint8_t*)(pkt->payload)+localptr);
          localptr++;
          
-         // TODO: inform schedule of that link so it can update if needed.
+         // shared TXRX anycast slot(s)
+         memset(&temp_neighbor,0,sizeof(temp_neighbor));
+         temp_neighbor.type             = ADDR_ANYCAST;
+         schedule_addActiveSlot(
+            linkInfo.tsNum,                     // slot offset
+            CELLTYPE_TXRX,                      // type of slot
+            TRUE,                               // shared?
+            linkInfo.choffset,                  // channel offset
+            &temp_neighbor                      // neighbor
+         );
       } 
       i++;
+      break; //TODO: this break is put since a single slotframe is managed
    }
    
    *ptr=localptr;
