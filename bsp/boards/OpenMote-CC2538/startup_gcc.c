@@ -57,10 +57,11 @@
 #endif
 
 extern int main (void);
+#ifdef USE_FREERTOS
 extern void vPortSVCHandler(void);
 extern void xPortPendSVHandler(void);
 extern void xPortSysTickHandler(void);
-
+#endif
 
 void ResetISR(void);
 void NmiSR(void);

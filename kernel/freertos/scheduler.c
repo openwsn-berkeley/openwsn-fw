@@ -9,6 +9,7 @@
 #include "opendefs.h"
 #include "scheduler.h"
 #include "board.h"
+#include "board_info.h"
 #include "debugpins.h"
 #include "leds.h"
 // freertos includes
@@ -30,9 +31,11 @@
 #define SCHEDULER_STACK_PRIO_BOUNDARY  TASKPRIO_SENDDONE_TIMERS_MAC
 #define SCHEDULER_SENDDONETIMER_PRIO_BOUNDARY TASKPRIO_APP_HIGH
 
+#ifdef USE_FREERTOS
 #define INTERRUPT_DECLARATION()        (rtos_sched_v.xStackLock != NULL ? (rtos_sched_v.xStackLock=rtos_sched_v.xStackLock) : ( rtos_sched_v.xStackLock = xSemaphoreCreateMutex()))
 #define DISABLE_INTERRUPTS()           xSemaphoreTakeFromISR( (rtos_sched_v.xStackLock), &globalPriorityTaskWoken )
 #define ENABLE_INTERRUPTS()            xSemaphoreGiveFromISR( (rtos_sched_v.xStackLock),&globalPriorityTaskWoken )
+#endif
 
 //=========================== variables =======================================
 
