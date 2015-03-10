@@ -69,6 +69,7 @@ bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 void     ieee154e_processSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr);
 // ASN handling
 void     incrementAsnOffset(void);
+void     ieee154e_syncSlotOffset(void);
 void     asnStoreFromAdv(uint8_t* asn);
 void     joinPriorityStoreFromAdv(uint8_t jp);
 // synchronization
@@ -617,6 +618,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    uint16_t              len;
    uint16_t              sublen;
    PORT_SIGNED_INT_WIDTH timeCorrection;
+   bool                  synchronizeSlotoffset;
    
    ptr=0;
    
@@ -651,7 +653,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
       
       case IEEE802154E_MLME_IE_GROUPID:
          // MLME IE
-         
+         synchronizeSlotoffset = FALSE;
          do {
             
             //read sub IE header
@@ -682,6 +684,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                   if (idmanager_getIsDAGroot()==FALSE) {
                      // ASN
                      asnStoreFromAdv((uint8_t*)(pkt->payload)+ptr);
+                     synchronizeSlotoffset = TRUE;
                      ptr = ptr + 5;
                      // join priority
                      joinPriorityStoreFromAdv(*((uint8_t*)(pkt->payload)+ptr));
@@ -690,7 +693,9 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                   break;
                
                case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
-                  processIE_retrieveSlotframeLinkIE(pkt,&ptr);
+                  if ((idmanager_getIsDAGroot()==FALSE) && (schedule_getFrameLength()==0)) {
+                     processIE_retrieveSlotframeLinkIE(pkt,&ptr);
+                  }
                   break;
                
                case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
@@ -704,7 +709,9 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             
             len = len - sublen;
          } while(len>0);
-         
+         if (synchronizeSlotoffset == TRUE) {
+            ieee154e_syncSlotOffset();
+         }
          break;
       
       case IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID:
@@ -1722,13 +1729,24 @@ port_INLINE void asnStoreFromAdv(uint8_t* asn) {
    ieee154e_vars.asn.bytes2and3   =     asn[2]+
                                     256*asn[3];
    ieee154e_vars.asn.byte4        =     asn[4];
-   
    // determine the current slotOffset
-   /*
-   Note: this is a bit of a hack. Normally, slotOffset=ASN%slotlength. But since
-   the ADV is exchanged in slot 0, we know that we're currently at slotOffset==0
-   */
-   ieee154e_vars.slotOffset       = 0;
+}
+
+port_INLINE void ieee154e_syncSlotOffset() {
+   frameLength_t frameLength;
+   uint32_t slotOffset;
+   
+   frameLength = schedule_getFrameLength();
+   slotOffset = ieee154e_vars.asn.byte4;
+   slotOffset = slotOffset % frameLength;
+   slotOffset = slotOffset << 16;
+   slotOffset = slotOffset + ieee154e_vars.asn.bytes2and3;
+   slotOffset = slotOffset % frameLength;
+   slotOffset = slotOffset << 16;
+   slotOffset = slotOffset + ieee154e_vars.asn.bytes0and1;
+   slotOffset = slotOffset % frameLength;
+   
+   ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
    schedule_syncSlotOffset(ieee154e_vars.slotOffset);
    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
    
