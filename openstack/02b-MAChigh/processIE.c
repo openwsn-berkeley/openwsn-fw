@@ -87,14 +87,15 @@ port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
 
 port_INLINE uint8_t processIE_prependSlotframeLinkIE(OpenQueueEntry_t* pkt){
    mlme_IE_ht mlme_subHeader;
-   uint8_t    len;
-   uint8_t    linkOption;
-   uint16_t   slot;
+   uint8_t           len;
+   uint8_t           linkOption;
+   slotOffset_t      slotOffset;
+   slotOffset_t      lastSlotOffset;
+   frameLength_t     frameLength;
   
-   len        = 0;
-   linkOption = 0;
-   slot       = SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+\
-                SCHEDULE_MINIMAL_6TISCH_EB_CELLS;
+   len            = 0;
+   linkOption     = 0;
+   lastSlotOffset = SCHEDULE_MINIMAL_6TISCH_TIMESLOT + SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS - 1;
    
    // for each link in the default schedule, add:
    // - [1B] linkOption bitmap
@@ -104,43 +105,28 @@ port_INLINE uint8_t processIE_prependSlotframeLinkIE(OpenQueueEntry_t* pkt){
    //===== shared cells
    
    linkOption = (1<<FLAG_TX_S)|(1<<FLAG_RX_S)|(1<<FLAG_SHARED_S);
-   while(slot>SCHEDULE_MINIMAL_6TISCH_EB_CELLS){
+   for (slotOffset=lastSlotOffset;slotOffset>=SCHEDULE_MINIMAL_6TISCH_TIMESLOT;slotOffset--) {
       packetfunctions_reserveHeaderSize(pkt,5);
-      pkt->payload[0]   =  slot       & 0xFF;
-      pkt->payload[1]   = (slot >> 8) & 0xFF;
-      pkt->payload[2]   = 0x00;             // channel offset
+      pkt->payload[0]   = slotOffset        & 0xFF;
+      pkt->payload[1]   = (slotOffset >> 8) & 0xFF;
+      pkt->payload[2]   = SCHEDULE_MINIMAL_6TISCH_CHANNEL;     // channel offset
       pkt->payload[3]   = 0x00;
-      pkt->payload[4]   = linkOption;       // linkOption
+      pkt->payload[4]   = linkOption;                          // linkOption
       len+=5;
-      slot--;
    }
- 
-   //===== EB cell
-   
-   linkOption = (1<<FLAG_TX_S)          |
-                (1<<FLAG_RX_S)          |
-                (1<<FLAG_SHARED_S)      |
-                (1<<FLAG_TIMEKEEPING_S);
-   packetfunctions_reserveHeaderSize(pkt,5);
-   pkt->payload[0] =  SCHEDULE_MINIMAL_6TISCH_EB_CELLS       & 0xFF;
-   pkt->payload[1] = (SCHEDULE_MINIMAL_6TISCH_EB_CELLS >> 8) & 0xFF;
-   pkt->payload[2] = 0x00; //  channel offset
-   pkt->payload[3] = 0x00;
-   pkt->payload[4] = linkOption;
-   
-   len+=5;
    
    //===== slotframe IE header
    
    // - [1B] number of links (6)
    // - [2B] Slotframe Size (101)
    // - [1B] slotframe handle (id)
+   frameLength = schedule_getFrameLength();
    packetfunctions_reserveHeaderSize(pkt,5);
    pkt->payload[0] = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER;  
    pkt->payload[1] = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
-   pkt->payload[2] =  SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE       & 0xFF;
-   pkt->payload[3] = (SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE >> 8) & 0xFF;
-   pkt->payload[4] = 0x06; //number of links
+   pkt->payload[2] =  frameLength       & 0xFF;
+   pkt->payload[3] = (frameLength >> 8) & 0xFF;
+   pkt->payload[4] = SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS; //number of links
   
    len+=5;
    
