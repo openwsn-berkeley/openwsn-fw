@@ -34,7 +34,9 @@ struct crypto_engine {
       ciphertext and the trailing authentication tag. Buffer must hold len_m + CBC_MAC_SIZE.
    \param[in,out] len_m Length of data that is both authenticated and encrypted. Accounts for
       the added authentication tag of CBC_MAC_SIZE octets on return.
-   \param[in] nonce Buffer containing nonce (13 octets).
+   \param[in] nonce Buffer containing nonce (max 13 octets).
+   \param[in] l CCM parameter L that allows selection of different nonce length which is (15 - L).
+      For example, l = 2 selects 13-octet long nonce which is used for IEEE 802.15.4 security. 
    \param[in] key Buffer containing the secret key (16 octets).
    \param[in] len_mac Length of the authentication tag.
    */
@@ -42,7 +44,8 @@ struct crypto_engine {
       uint8_t len_a,
       uint8_t* m,
       uint8_t* len_m,
-      uint8_t nonce[13],
+      uint8_t* nonce,
+      uint8_t l,
       uint8_t key[16],
       uint8_t len_mac);
 
@@ -55,7 +58,9 @@ struct crypto_engine {
    \param[in,out] len_m Length of data that is both authenticated and encrypted, including the
       trailing authentication tag. On return it is reduced for CBC_MAC_SIZE octets to account for the
       removed authentication tag.
-   \param[in] nonce Buffer containing nonce (13 octets).
+   \param[in] nonce Buffer containing nonce (max 13 octets).
+   \param[in] l CCM parameter L that allows selection of different nonce length which is (15 - L).
+      For example, l = 2 selects 13-octet long nonce which is used for IEEE 802.15.4 security.
    \param[in] key Buffer containing the secret key (16 octets).
    \param[in] len_mac Length of the authentication tag.
    */
@@ -63,7 +68,8 @@ struct crypto_engine {
       uint8_t len_a,
       uint8_t* m,
       uint8_t* len_m,
-      uint8_t nonce[13],
+      uint8_t* nonce,
+      uint8_t l,
       uint8_t key[16],
       uint8_t len_mac);  
 
@@ -82,7 +88,7 @@ struct crypto_engine {
       uint8_t len_a,
       uint8_t* m,
       uint8_t len_m,
-      uint8_t nonce[13],
+      uint8_t* nonce,
       uint8_t key[16],
       uint8_t* mac,
       uint8_t len_mac);
@@ -111,7 +117,7 @@ struct crypto_engine {
    */
    owerror_t (* aes_ctr_enc)(uint8_t* m,
       uint8_t len_m,
-      uint8_t nonce[13],
+      uint8_t* nonce,
       uint8_t key[16],
       uint8_t* mac,
       uint8_t len_mac);

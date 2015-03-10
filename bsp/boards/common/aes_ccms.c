@@ -18,6 +18,8 @@
 \param[in,out] len_m Length of data that is both authenticated and encrypted. Accounts for
    the added authentication tag of len_mac octets on return.
 \param[in] nonce Buffer containing nonce (13 octets).
+\param[in] l CCM parameter L that allows selection of different nonce length. This implementation
+   supports l = 2 (i.e. 13 octet long nonce) only.
 \param[in] key Buffer containing the secret key (16 octets).
 \param[in] len_mac Length of the authentication tag.
 
@@ -27,13 +29,14 @@ owerror_t aes_ccms_enc(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
-         uint8_t nonce[13],
+         uint8_t* nonce,
+         uint8_t l,
          uint8_t key[16],
          uint8_t len_mac) {
 
    uint8_t mac[CBC_MAX_MAC_SIZE];
 
-   if(len_mac > CBC_MAX_MAC_SIZE) {
+   if ((len_mac > CBC_MAX_MAC_SIZE) || (l != 2)) {
       return E_FAIL;
    }
 
@@ -59,6 +62,8 @@ owerror_t aes_ccms_enc(uint8_t* a,
    trailing authentication tag. On return it is reduced for len_mac octets to account for the
    removed authentication tag.
 \param[in] nonce Buffer containing nonce (13 octets).
+\param[in] l CCM parameter L that allows selection of different nonce length. This implementation
+   supports l = 2 (i.e. 13 octet long nonce) only.
 \param[in] key Buffer containing the secret key (16 octets).
 \param[in] len_mac Length of the authentication tag.
 
@@ -68,14 +73,15 @@ owerror_t aes_ccms_dec(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
-         uint8_t nonce[13],
+         uint8_t* nonce,
+         uint8_t l,
          uint8_t key[16],
          uint8_t len_mac) {
 
    uint8_t mac[CBC_MAX_MAC_SIZE];
    uint8_t orig_mac[CBC_MAX_MAC_SIZE];
 
-   if (len_mac > CBC_MAX_MAC_SIZE) {
+   if ((len_mac > CBC_MAX_MAC_SIZE) || (l != 2)) {
       return E_FAIL;
    }
 

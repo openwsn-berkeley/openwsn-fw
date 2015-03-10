@@ -69,7 +69,7 @@ owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t
 */
 owerror_t aes_ctr_enc(uint8_t* m,
          uint8_t len_m,
-         uint8_t nonce[13],
+         uint8_t* nonce,
          uint8_t key[16],
          uint8_t* mac,
          uint8_t len_mac) {
