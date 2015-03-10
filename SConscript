@@ -224,7 +224,9 @@ elif env['toolchain']=='armgcc':
         # misc
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
-        
+        if ['kernel'] == 'freertos':
+		    env.Append(CCFLAGS       = '-DUSE_FREERTOS')
+		
     elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3']:
         
          # compiler (C)

@@ -17,11 +17,11 @@
 //=========================== defines =========================================
 
 //===== interrupt state
-
+#ifndef USE_FREERTOS
 #define INTERRUPT_DECLARATION()
 #define DISABLE_INTERRUPTS() //IntMasterDisable()
-
 #define ENABLE_INTERRUPTS() //IntMasterEnable()
+#endif
 
 //===== timer
 
