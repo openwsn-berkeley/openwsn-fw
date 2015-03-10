@@ -24,15 +24,41 @@ typedef struct {
    uint8_t expected_ciphertext[16];
 } aes_ecb_suite_t;
 
+static int hang(uint8_t error_code) {
+
+   error_code ? leds_error_on() : leds_radio_on();
+
+   while (1);
+   
+   return 0;
+}
+
+static owerror_t run_aes_ecb_suite(aes_ecb_suite_t *suite, uint8_t test_suite_len) {
+   uint8_t i;
+   uint8_t success;
+   
+   for(i = 0; i < test_suite_len; i++) {
+      if(CRYPTO_ENGINE.aes_ecb_enc(suite[i].buffer, suite[i].key) == E_SUCCESS) {
+         if (memcmp(suite[i].buffer, suite[i].expected_ciphertext, 16) == 0) {
+            success++;
+         }
+         else {
+            return E_FAIL;
+         }
+      }
+      else {
+         return E_FAIL;
+      }
+   }
+   
+   return success == test_suite_len ? E_SUCCESS : E_FAIL; 
+}
 /**
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   uint8_t i;
-   uint8_t ret;
-   uint8_t ret_fails = 0;
-   uint8_t success = 0;
- 
+   uint8_t fail = 0;
+
    aes_ecb_suite_t aes_ecb_suite[] = {
       {
          { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c },
@@ -66,30 +92,10 @@ int mote_main(void) {
    // Init the CRYPTO_ENGINE driver
    CRYPTO_ENGINE.init();
 
-   /* AES-ECB Test Suite */
-   for(i = 0; i < sizeof(aes_ecb_suite)/sizeof(aes_ecb_suite[0]); i++) {
-   
-	   ret = CRYPTO_ENGINE.aes_ecb_enc(aes_ecb_suite[i].buffer, aes_ecb_suite[i].key);
-
-      if (ret == E_FAIL) {
-         ret_fails++;
-      }
-      else if (memcmp(aes_ecb_suite[i].buffer, aes_ecb_suite[i].expected_ciphertext, 16) == 0) {
-         success++;
-      }
+   if (run_aes_ecb_suite(aes_ecb_suite, sizeof(aes_ecb_suite)/sizeof(aes_ecb_suite[0])) == E_FAIL) {
+      fail++;
    }
 
-   if (success == sizeof(aes_ecb_suite)/sizeof(aes_ecb_suite[0])) {
-      do {
-         leds_radio_on();
-      } while(1);
-   }
-   else {
-      do {
-         leds_error_on();
-      } while(1);
-   }
-   
-   return 0;
+   return hang(fail);
 }
 
