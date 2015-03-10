@@ -58,8 +58,7 @@ owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t
 \param[in,out] m Pointer to the data that is both authenticated and encrypted. Data is
    overwritten by ciphertext (i.e. plaintext in case of inverse CCM*).
 \param[in] len_m Length of data that is both authenticated and encrypted.
-\param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
-\param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
+\param[in] nonce Buffer containing nonce (13 octets).
 \param[in] key Buffer containing the secret key (16 octets).
 \param[in,out] mac Buffer containing the unencrypted or encrypted CBC-MAC tag, which depends
    on weather the function is called as part of CCM* forward or inverse transformation. It
@@ -70,8 +69,7 @@ owerror_t aes_ctr_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t
 */
 owerror_t aes_ctr_enc(uint8_t* m,
          uint8_t len_m,
-         uint8_t saddr[8],
-         uint8_t asn[5],
+         uint8_t nonce[13],
          uint8_t key[16],
          uint8_t* mac,
          uint8_t len_mac) {
@@ -92,8 +90,7 @@ owerror_t aes_ctr_enc(uint8_t* m,
 
    // iv (flag (1B) | source addr (8B) | ASN (5B) | cnt (2B)
    iv[0] = 0x01;
-   memcpy(&iv[1], saddr, 8);
-   memcpy(&iv[9], asn, 5); // assign byte by byte or copy ?
+   memcpy(&iv[1], nonce, 13);
    iv[14] = 0x00;
    iv[15] = 0x00;
 

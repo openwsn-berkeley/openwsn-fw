@@ -34,8 +34,7 @@ struct crypto_engine {
       ciphertext and the trailing authentication tag. Buffer must hold len_m + CBC_MAC_SIZE.
    \param[in,out] len_m Length of data that is both authenticated and encrypted. Accounts for
       the added authentication tag of CBC_MAC_SIZE octets on return.
-   \param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
-   \param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
+   \param[in] nonce Buffer containing nonce (13 octets).
    \param[in] key Buffer containing the secret key (16 octets).
    \param[in] len_mac Length of the authentication tag.
    */
@@ -43,8 +42,7 @@ struct crypto_engine {
       uint8_t len_a,
       uint8_t* m,
       uint8_t* len_m,
-      uint8_t saddr[8],
-      uint8_t asn[5],
+      uint8_t nonce[13],
       uint8_t key[16],
       uint8_t len_mac);
 
@@ -57,8 +55,7 @@ struct crypto_engine {
    \param[in,out] len_m Length of data that is both authenticated and encrypted, including the
       trailing authentication tag. On return it is reduced for CBC_MAC_SIZE octets to account for the
       removed authentication tag.
-   \param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
-   \param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
+   \param[in] nonce Buffer containing nonce (13 octets).
    \param[in] key Buffer containing the secret key (16 octets).
    \param[in] len_mac Length of the authentication tag.
    */
@@ -66,8 +63,7 @@ struct crypto_engine {
       uint8_t len_a,
       uint8_t* m,
       uint8_t* len_m,
-      uint8_t saddr[8],
-      uint8_t asn[5],
+      uint8_t nonce[13],
       uint8_t key[16],
       uint8_t len_mac);  
 
@@ -77,8 +73,7 @@ struct crypto_engine {
    \param[in] len_a Length of authentication only data.
    \param[in] m Pointer to the data that is both authenticated and encrypted.
    \param[in] len_m Length of data that is both authenticated and encrypted.
-   \param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
-   \param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
+   \param[in] nonce Buffer containing nonce (13 octets).
    \param[in] key Buffer containing the secret key (16 octets).
    \param[out] mac Buffer where the value of the CBC-MAC tag will be written.
    \param[in] len_mac Length of the CBC-MAC tag.
@@ -87,8 +82,7 @@ struct crypto_engine {
       uint8_t len_a,
       uint8_t* m,
       uint8_t len_m,
-      uint8_t saddr[8],
-      uint8_t asn[5],
+      uint8_t nonce[13],
       uint8_t key[16],
       uint8_t* mac,
       uint8_t len_mac);
@@ -108,8 +102,7 @@ struct crypto_engine {
    \param[in,out] m Pointer to the data that is both authenticated and encrypted. Data is
       overwritten by ciphertext (i.e. plaintext in case of inverse CCM*).
    \param[in] len_m Length of data that is both authenticated and encrypted.
-   \param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
-   \param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
+   \param[in] nonce Buffer containing nonce (13 octets).
    \param[in] key Buffer containing the secret key (16 octets).
    \param[in,out] mac Buffer containing the unencrypted or encrypted CBC-MAC tag, which depends
       on weather the function is called as part of CCM* forward or inverse transformation. It
@@ -118,8 +111,7 @@ struct crypto_engine {
    */
    owerror_t (* aes_ctr_enc)(uint8_t* m,
       uint8_t len_m,
-      uint8_t saddr[8],
-      uint8_t asn[5],
+      uint8_t nonce[13],
       uint8_t key[16],
       uint8_t* mac,
       uint8_t len_mac);

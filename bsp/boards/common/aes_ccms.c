@@ -17,8 +17,7 @@
    ciphertext and the trailing authentication tag. Buffer must hold len_m + CBC_MAC_SIZE.
 \param[in,out] len_m Length of data that is both authenticated and encrypted. Accounts for
    the added authentication tag of len_mac octets on return.
-\param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
-\param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
+\param[in] nonce Buffer containing nonce (13 octets).
 \param[in] key Buffer containing the secret key (16 octets).
 \param[in] len_mac Length of the authentication tag.
 
@@ -28,8 +27,7 @@ owerror_t aes_ccms_enc(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
-         uint8_t saddr[8],
-         uint8_t asn[5],
+         uint8_t nonce[13],
          uint8_t key[16],
          uint8_t len_mac) {
 
@@ -39,8 +37,8 @@ owerror_t aes_ccms_enc(uint8_t* a,
       return E_FAIL;
    }
 
-   if (CRYPTO_ENGINE.aes_cbc_mac(a, len_a, m, *len_m, saddr, asn, key, mac, len_mac) == E_SUCCESS) {
-      if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, saddr, asn, key, mac, len_mac) == E_SUCCESS) {
+   if (CRYPTO_ENGINE.aes_cbc_mac(a, len_a, m, *len_m, nonce, key, mac, len_mac) == E_SUCCESS) {
+      if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac) == E_SUCCESS) {
          memcpy(&m[*len_m], mac, len_mac);
          *len_m += len_mac;
 
@@ -60,8 +58,7 @@ owerror_t aes_ccms_enc(uint8_t* a,
 \param[in,out] len_m Length of data that is both authenticated and encrypted, including the
    trailing authentication tag. On return it is reduced for len_mac octets to account for the
    removed authentication tag.
-\param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
-\param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
+\param[in] nonce Buffer containing nonce (13 octets).
 \param[in] key Buffer containing the secret key (16 octets).
 \param[in] len_mac Length of the authentication tag.
 
@@ -71,8 +68,7 @@ owerror_t aes_ccms_dec(uint8_t* a,
          uint8_t len_a,
          uint8_t* m,
          uint8_t* len_m,
-         uint8_t saddr[8],
-         uint8_t asn[5],
+         uint8_t nonce[13],
          uint8_t key[16],
          uint8_t len_mac) {
 
@@ -86,8 +82,8 @@ owerror_t aes_ccms_dec(uint8_t* a,
    *len_m -= len_mac;
    memcpy(mac, &m[*len_m], len_mac);
 
-   if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, saddr, asn, key, mac, len_mac) == E_SUCCESS) {
-      if (CRYPTO_ENGINE.aes_cbc_mac(a, len_a, m, *len_m, saddr, asn, key, orig_mac, len_mac) == E_SUCCESS) {
+   if (CRYPTO_ENGINE.aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac) == E_SUCCESS) {
+      if (CRYPTO_ENGINE.aes_cbc_mac(a, len_a, m, *len_m, nonce, key, orig_mac, len_mac) == E_SUCCESS) {
          if (memcmp(mac, orig_mac, len_mac) == 0) {
             return E_SUCCESS;
          }

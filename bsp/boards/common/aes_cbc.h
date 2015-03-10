@@ -12,7 +12,7 @@ extern "C" {
 
 //=========================== prototypes ======================================
 
-owerror_t aes_cbc_mac(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t saddr[8], uint8_t asn[5], uint8_t key[16], uint8_t* mac, uint8_t len_mac);
+owerror_t aes_cbc_mac(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t nonce[13], uint8_t key[16], uint8_t* mac, uint8_t len_mac);
 owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]);
 
 #ifdef  __cplusplus
