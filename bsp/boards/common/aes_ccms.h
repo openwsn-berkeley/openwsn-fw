@@ -12,8 +12,8 @@ extern "C" {
 
 //=========================== prototypes ======================================
 
-owerror_t aes_ccms_enc(uint8_t* a,uint8_t len_a,uint8_t* m,uint8_t* len_m,uint8_t saddr[8],uint8_t asn[5],uint8_t key[16]);
-owerror_t aes_ccms_dec(uint8_t* a,uint8_t len_a,uint8_t* m,uint8_t* len_m,uint8_t saddr[8],uint8_t asn[5],uint8_t key[16]);
+owerror_t aes_ccms_enc(uint8_t* a,uint8_t len_a,uint8_t* m,uint8_t* len_m,uint8_t saddr[8],uint8_t asn[5],uint8_t key[16], uint8_t len_mac);
+owerror_t aes_ccms_dec(uint8_t* a,uint8_t len_a,uint8_t* m,uint8_t* len_m,uint8_t saddr[8],uint8_t asn[5],uint8_t key[16], uint8_t len_mac);
 
 #ifdef  __cplusplus
 }

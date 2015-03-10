@@ -31,7 +31,8 @@ static owerror_t aes_ccms_enc_identity(uint8_t* a,
          uint8_t* len_m,
          uint8_t saddr[8],
          uint8_t asn[5],
-         uint8_t key[16]) {
+         uint8_t key[16],
+         uint8_t len_mac) {
    
    return E_SUCCESS;
 }
@@ -42,7 +43,8 @@ static owerror_t aes_ccms_dec_identity(uint8_t* a,
          uint8_t* len_m,
          uint8_t saddr[8],
          uint8_t asn[5],
-         uint8_t key[16]) {
+         uint8_t key[16],
+         uint8_t len_mac) {
    
    return E_SUCCESS;
 }

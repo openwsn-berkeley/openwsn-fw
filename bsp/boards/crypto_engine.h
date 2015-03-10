@@ -14,7 +14,7 @@ extern "C" {
 #include "opendefs.h"
 
 //=========================== define ==========================================
-#define CBC_MAC_SIZE  4
+#define CBC_MAX_MAC_SIZE  16
 
 #ifdef CRYPTO_ENGINE_SCONS
 #define CRYPTO_ENGINE CRYPTO_ENGINE_SCONS
@@ -37,6 +37,7 @@ struct crypto_engine {
    \param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
    \param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
    \param[in] key Buffer containing the secret key (16 octets).
+   \param[in] len_mac Length of the authentication tag.
    */
    owerror_t (* aes_ccms_enc)(uint8_t* a,
       uint8_t len_a,
@@ -44,7 +45,8 @@ struct crypto_engine {
       uint8_t* len_m,
       uint8_t saddr[8],
       uint8_t asn[5],
-      uint8_t key[16]);
+      uint8_t key[16],
+      uint8_t len_mac);
 
    /**
    \brief CCM* inverse transformation (i.e. decryption + tag verification) specific to IEEE 802.15.4E.
@@ -58,6 +60,7 @@ struct crypto_engine {
    \param[in] saddr Buffer containing source address (8 octets). Used to create a nonce.
    \param[in] asn Buffer containing the Absolute Slot Number (5 octets). Used to create a nonce.
    \param[in] key Buffer containing the secret key (16 octets).
+   \param[in] len_mac Length of the authentication tag.
    */
    owerror_t (* aes_ccms_dec)(uint8_t* a,
       uint8_t len_a,
@@ -65,7 +68,8 @@ struct crypto_engine {
       uint8_t* len_m,
       uint8_t saddr[8],
       uint8_t asn[5],
-      uint8_t key[16]);  
+      uint8_t key[16],
+      uint8_t len_mac);  
 
    /**
    \brief CBC-MAC generation specific to IEEE 802.15.4E.
