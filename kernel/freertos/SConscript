@@ -8,10 +8,10 @@ FREERTOS_VERSION = 'FreeRTOSV8.1.2'
 
 target    =  'libkernel'
 
-if localEnv['board']=='python':
+if localEnv['board'] not in ['OpenMote-CC2538']:
     
-    raise SystemError("FreeRTOS kernel not supported in simulation mode")
-
+    raise SystemError('kernel {0} can not be used for board {1}'.format(localEnv['kernel'],localEnv['board']))		
+	
 else:
     
     if localEnv['toolchain']=='armgcc':

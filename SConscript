@@ -41,11 +41,6 @@ if env['forcetopology']==1:
 if env['noadaptivesync']==1:
     env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
 	
-if env['kernel']=='freertos':
-    
-    if env['board'] not in ['OpenMote-CC2538']:
-        raise SystemError('kernel {0} can not be used for board {1}'.format(env['kernel'],env['board']))	
-	
 if   env['toolchain']=='mspgcc':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:

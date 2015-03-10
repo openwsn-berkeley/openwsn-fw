@@ -1,9 +1,9 @@
 /**
- \brief Task scheduler.
+ \brief FreeRTOS Task scheduler.
 
- \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, October 2014.
- \author Pere Tuset <peretuset@openmote.com>, October 2014.
- \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, October 2014.
+ \author Xavi Vilajosana <xvilajosana@eecs.berkeley.edu>, Dec 2014.
+ \author Pere Tuset <peretuset@openmote.com>, Dec 2014.
+ \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, Dec 2014.
  */
 
 #include "opendefs.h"
@@ -46,13 +46,13 @@ typedef struct {
 	SemaphoreHandle_t xStackLock;
 	/// application task (takes the packet until it goes into the MAC queue)
 	TaskHandle_t xAppHandle;                   // task
-	SemaphoreHandle_t xAppSem;                      // semaphore to unlock task
+	SemaphoreHandle_t xAppSem;                 // semaphore to unlock task
 	/// stack task which signals sendDone
 	TaskHandle_t xSendDoneHandle;              // task
-	SemaphoreHandle_t xSendDoneSem;                 // semaphore to unlock task
+	SemaphoreHandle_t xSendDoneSem;            // semaphore to unlock task
 	/// stack task which signals packet reception
 	TaskHandle_t xRxHandle;                    // task
-	SemaphoreHandle_t xRxSem;                       // semaphore to unlock task
+	SemaphoreHandle_t xRxSem;                  // semaphore to unlock task
 
 	uint16_t counter;
 } rtos_sched_v_t;
@@ -73,7 +73,9 @@ static inline bool scheduler_find_next_task_and_execute(task_prio_t minprio,
 		task_prio_t maxprio, taskList_item_t* pThisTas);
 
 //=========================== public ==========================================
-
+/**
+ \brief initializes the scheduler. Creates 3 tasks to handle openwsn internals.
+ */
 void scheduler_init() {
 
 	// clear module variables
@@ -87,30 +89,37 @@ void scheduler_init() {
 		leds_error_blink();
 		return;
 	}
-
 	//=== app task
 	// task
 	// semaphore
 	scheduler_createSem(&(rtos_sched_v.xAppSem));
 	xTaskCreate(vAppTask, "app", STACK_SIZE, NULL, tskAPP_PRIORITY,
-			&(rtos_sched_v.xAppHandle)); configASSERT(rtos_sched_v.xAppHandle);
+			&(rtos_sched_v.xAppHandle));
+
+	configASSERT(rtos_sched_v.xAppHandle);
 
 	//=== stack task sendDone
 	// semaphore
 	scheduler_createSem(&(rtos_sched_v.xSendDoneSem));
 	// task
 	xTaskCreate(vSendDoneTask, "sendDone", STACK_SIZE, NULL,
-			tskSENDDONE_PRIORITY, &(rtos_sched_v.xSendDoneHandle)); configASSERT(rtos_sched_v.xSendDoneHandle);
+			tskSENDDONE_PRIORITY, &(rtos_sched_v.xSendDoneHandle)); 
+			
+	configASSERT(rtos_sched_v.xSendDoneHandle);
 
 	//=== stack task rx
 	// semaphore
 	scheduler_createSem(&(rtos_sched_v.xRxSem));
 	// task
 	xTaskCreate(vRxTask, "rx", STACK_SIZE, NULL, tskRX_PRIORITY,
-			&(rtos_sched_v.xRxHandle)); configASSERT(rtos_sched_v.xRxHandle);
-
+			&(rtos_sched_v.xRxHandle)); 
+			
+	configASSERT(rtos_sched_v.xRxHandle);
 }
 
+/**
+ \brief Calls FreeRTOS to start.
+ */
 void scheduler_start() {
 	// start scheduling tasks
 	vTaskStartScheduler();
@@ -122,6 +131,10 @@ void scheduler_start() {
 		;
 }
 
+/**
+ \brief Determines which task has to execute the newly pushed callback. 
+        Uses the priority to decide between them.
+ */
 void scheduler_push_task(task_cbt cb, task_prio_t prio) {
 	BaseType_t xHigherPriorityTaskWoken;
 	xHigherPriorityTaskWoken = pdFALSE;
@@ -154,8 +167,8 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
 //=========================== private =========================================
 
 /**
- Handle application packets, brinding them down the stack until they are queued,
- ready for the lowwer MAC to consume.
+ \brief Handles application packets, brinding them down the stack until they are queued,
+        ready for the lowwer MAC to consume.
  */
 static void vAppTask(void* pvParameters) {
 	taskList_item_t* pThisTask = NULL;
@@ -169,7 +182,7 @@ static void vAppTask(void* pvParameters) {
 }
 
 /**
- Handle sendDone notifications and timers.
+  \brief  Handle sendDone notifications and timers.
  */
 static void vSendDoneTask(void* pvParameters) {
 	taskList_item_t* pThisTask = NULL;
@@ -184,7 +197,7 @@ static void vSendDoneTask(void* pvParameters) {
 }
 
 /**
- Handle received packets, bringing them up to the stack.
+  \brief  Handle received packets, bringing them up to the stack.
  */
 static void vRxTask(void* pvParameters) {
 	taskList_item_t* pThisTask = NULL;
@@ -235,7 +248,6 @@ static void inline scheduler_push_task_internal(task_cbt cb, task_prio_t prio) {
 	}
 	if (taskContainer > &scheduler_vars.taskBuf[TASK_LIST_DEPTH - 1]) {
 		// task list has overflown. This should never happen!
-
 		// we can not print from within the kernel. Instead:
 		// blink the error LED
 		leds_error_blink();
