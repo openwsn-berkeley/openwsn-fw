@@ -27,7 +27,7 @@ The superframe repears over time and can be arbitrarly long.
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 #define NUMSERIALRX          1
-#define NUMSLOTSOFF          7
+#define NUMSLOTSOFF          1
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -127,6 +127,7 @@ typedef struct {
 
 // admin
 void               schedule_init(void);
+void               schedule_startDAGroot(void);
 bool               debugPrint_schedule(void);
 bool               debugPrint_backoff(void);
 
