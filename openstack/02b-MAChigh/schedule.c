@@ -24,50 +24,47 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 \post Call this function before calling any other function in this module.
 */
 void schedule_init() {
-   uint8_t         i;
+   slotOffset_t    start_slotOffset;
    slotOffset_t    running_slotOffset;
    open_addr_t     temp_neighbor;
 
    // reset local variables
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
-   for (i=0;i<MAXACTIVESLOTS;i++) {
-      schedule_resetEntry(&schedule_vars.scheduleBuf[i]);
+   for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
+      schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
    }
    schedule_vars.backoffExponent = MINBE-1;
-
+   
+   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_TIMESLOT;
    if (idmanager_getIsDAGroot()) {
       // set frame length
       schedule_setFrameLength(SUPERFRAME_LENGTH);
-   }
-   
-   // start at slot 0
-   running_slotOffset = 0;
-   
-   // shared TXRX anycast slot(s)
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   for (i=0;i<NUMSHAREDTXRX;i++) {
-      schedule_addActiveSlot(
-         running_slotOffset,      // slot offset
-         CELLTYPE_TXRX,           // type of slot
-         TRUE,                    // shared?
-         0,                       // channel offset
-         &temp_neighbor           // neighbor
-      );
-      running_slotOffset++;
+      
+      // shared TXRX anycast slot(s)
+      memset(&temp_neighbor,0,sizeof(temp_neighbor));
+      temp_neighbor.type             = ADDR_ANYCAST;
+      for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
+         schedule_addActiveSlot(
+            running_slotOffset,                 // slot offset
+            CELLTYPE_TXRX,                      // type of slot
+            TRUE,                               // shared?
+            SCHEDULE_MINIMAL_6TISCH_CHANNEL,    // channel offset
+            &temp_neighbor                      // neighbor
+         );
+      }
    }
    
    // serial RX slot(s)
+   start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   for (i=0;i<NUMSERIALRX;i++) {
+   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
       schedule_addActiveSlot(
-         running_slotOffset,         // slot offset
-         CELLTYPE_SERIALRX,          // type of slot
-         FALSE,                      // shared?
-         0,                          // channel offset
-         &temp_neighbor              // neighbor
+         running_slotOffset,                    // slot offset
+         CELLTYPE_SERIALRX,                     // type of slot
+         FALSE,                                 // shared?
+         0,                                     // channel offset
+         &temp_neighbor                         // neighbor
       );
-      running_slotOffset++;
    }
 }
 

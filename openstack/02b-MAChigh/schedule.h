@@ -19,7 +19,15 @@ The superframe repears over time and can be arbitrarly long.
 */
 #define SUPERFRAME_LENGTH    11 //should be 101
 
-#define NUMSHAREDTXRX        1
+//6tisch minimal draft
+#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      1
+#define SCHEDULE_MINIMAL_6TISCH_TIMESLOT                          0
+#define SCHEDULE_MINIMAL_6TISCH_CHANNEL                           0
+#define SCHEDULE_MINIMAL_6TISCH_EB_CELLS                          1
+#define SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE                  101
+#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
+#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
+
 #define NUMSERIALRX          1
 #define NUMSLOTSOFF          7
 
@@ -33,7 +41,7 @@ in that table; a slot is "active" when it is not of type CELLTYPE_OFF.
 Set this number to the exact number of active slots you are planning on having
 in your schedule, so not to waste RAM.
 */
-#define MAXACTIVESLOTS       (NUMSHAREDTXRX+NUMSERIALRX+NUMSLOTSOFF)
+#define MAXACTIVESLOTS       (SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+NUMSERIALRX+NUMSLOTSOFF)
 
 /**
 \brief Minimum backoff exponent.
@@ -50,12 +58,6 @@ does not use any backoff mechanism when a transmission fails.
 See MINBE for an explanation of backoff.
 */
 #define MAXBE                4
-//6tisch minimal draft
-#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      5
-#define SCHEDULE_MINIMAL_6TISCH_EB_CELLS                          1
-#define SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE                  101
-#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
-#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 //=========================== typedef =========================================
 
