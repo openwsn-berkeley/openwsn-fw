@@ -158,7 +158,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    bool              outcome;
    cellInfo_ht       cellList[SCHEDULEIEMAXNUMCELLS];
    
-   frameID    = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+   frameID    = schedule_getFrameHandle();
    
    memset(cellList,0,sizeof(cellList));
    
@@ -1157,7 +1157,7 @@ bool sixtop_candidateAddCellList(
    uint8_t numCandCells;
    
    *type = 1;
-   *frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+   *frameID = schedule_getFrameHandle();
    *flag = 1; // the cells listed in cellList are available to be schedule.
    
    numCandCells=0;
@@ -1192,7 +1192,7 @@ bool sixtop_candidateRemoveCellList(
    slotinfo_element_t   info;
    
    *type           = 1;
-   *frameID        = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+   *frameID        = schedule_getFrameHandle();
    *flag           = 1;
   
    numCandCells    = 0;

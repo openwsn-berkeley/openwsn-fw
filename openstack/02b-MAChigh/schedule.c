@@ -37,8 +37,10 @@ void schedule_init() {
    
    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_TIMESLOT;
    if (idmanager_getIsDAGroot()) {
-      // set frame length
+      // set frame length, handle and number (default 1 by now)
       schedule_setFrameLength(SUPERFRAME_LENGTH);
+      schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
+      schedule_setFrameNumber(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER);
       
       // shared TXRX anycast slot(s)
       memset(&temp_neighbor,0,sizeof(temp_neighbor));
@@ -162,6 +164,36 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
    } else {
       schedule_vars.maxActiveSlots = newFrameLength;
    }
+   ENABLE_INTERRUPTS();
+}
+
+/**
+\brief Set frame handle.
+
+\param frameHandle The new frame handle.
+*/
+void schedule_setFrameHandle(uint8_t frameHandle) {
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   schedule_vars.frameHandle = frameHandle;
+   
+   ENABLE_INTERRUPTS();
+}
+
+/**
+\brief Set frame number.
+
+\param frameNumber The new frame number.
+*/
+void schedule_setFrameNumber(uint8_t frameNumber) {
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   schedule_vars.frameNumber = frameNumber;
+   
    ENABLE_INTERRUPTS();
 }
 
@@ -463,6 +495,41 @@ frameLength_t schedule_getFrameLength() {
    return returnVal;
 }
 
+/**
+\brief Get the frame handle.
+
+\returns The frame handle.
+*/
+uint8_t schedule_getFrameHandle() {
+   uint8_t returnVal;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   returnVal = schedule_vars.frameHandle;
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
+
+/**
+\brief Get the frame number.
+
+\returns The frame number.
+*/
+uint8_t schedule_getFrameNumber() {
+   uint8_t returnVal;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   returnVal = schedule_vars.frameNumber;
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
 /**
 \brief Get the type of the current schedule entry.
 

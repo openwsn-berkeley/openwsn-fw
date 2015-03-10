@@ -122,8 +122,8 @@ port_INLINE uint8_t processIE_prependSlotframeLinkIE(OpenQueueEntry_t* pkt){
    // - [1B] slotframe handle (id)
    frameLength = schedule_getFrameLength();
    packetfunctions_reserveHeaderSize(pkt,5);
-   pkt->payload[0] = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER;  
-   pkt->payload[1] = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+   pkt->payload[0] = schedule_getFrameNumber();  
+   pkt->payload[1] = schedule_getFrameHandle();
    pkt->payload[2] =  frameLength       & 0xFF;
    pkt->payload[3] = (frameLength >> 8) & 0xFF;
    pkt->payload[4] = SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS; //number of links

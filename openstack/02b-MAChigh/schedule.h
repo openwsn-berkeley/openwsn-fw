@@ -114,8 +114,10 @@ typedef struct {
 typedef struct {
    scheduleEntry_t  scheduleBuf[MAXACTIVESLOTS];
    scheduleEntry_t* currentScheduleEntry;
-   uint16_t         frameLength;
-   uint8_t          maxActiveSlots;
+   frameLength_t    frameLength;
+   frameLength_t    maxActiveSlots;
+   uint8_t          frameHandle;
+   uint8_t          frameNumber;
    uint8_t          backoffExponent;
    uint8_t          backoff;
    uint8_t          debugPrintRow;
@@ -130,6 +132,8 @@ bool               debugPrint_backoff(void);
 
 // from 6top
 void               schedule_setFrameLength(frameLength_t newFrameLength);
+void               schedule_setFrameHandle(uint8_t frameHandle);
+void               schedule_setFrameNumber(uint8_t frameNumber);
 owerror_t          schedule_addActiveSlot(
    slotOffset_t         slotOffset,
    cellType_t           type,
@@ -157,6 +161,8 @@ void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
 void               schedule_advanceSlot(void);
 slotOffset_t       schedule_getNextActiveSlotOffset(void);
 frameLength_t      schedule_getFrameLength(void);
+uint8_t            schedule_getFrameHandle(void);
+uint8_t            schedule_getFrameNumber(void);
 cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset(void);
