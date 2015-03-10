@@ -13,13 +13,13 @@ void CCMstar(OpenQueueEntry_t* 		pkt,
 	uint8_t payloadToEncrypt[128];
 	uint8_t CipherText[128];
 	uint8_t authData[128];
+	uint8_t T[16];
+	uint8_t T_temp[16];
 
 	memset(&authData[0], 0, sizeof(authData));
-
 	uint8_t authDataLength = 0;
-	uint8_t T[16];
+
 	memset(&T[0], 0, sizeof(T));
-	uint8_t T_temp[16];
 	memset(&T_temp[0], 0, sizeof(T_temp));
 
 	//copy the payload to be encrypted
@@ -33,10 +33,9 @@ void CCMstar(OpenQueueEntry_t* 		pkt,
 	//calculate AuthData
 	Input_Transformation(payloadToEncrypt,
 						 pkt->l2_length,
-			             pkt->l2_authenticationLength,
-			             0,
 			             authDataLength,
-			             authData);
+			             authData,
+			             pkt->aData);
 
 	//calculate the authentication tag
 	Auth_Transformation(pkt->l2_length,
@@ -74,70 +73,27 @@ void CCMstar(OpenQueueEntry_t* 		pkt,
 
 void Input_Transformation(uint8_t* payload,
 		                  uint8_t  length,
-		                  uint8_t  authentication_length,
-		                  uint8_t  encOrdec,
 		                  uint8_t authDataLength,
-		                  uint8_t* authData){
+		                  uint8_t* authData,
+		                  uint8_t* aData){
 
-	//initialize AuthData
+	// La || a || 0 || m || 0
 
-	uint8_t i,l;
-	authDataLength = 0;
+    authDataLength = aData[0];
+    memcpy(&authData[0],
+    		&aData[0],
+    		authDataLength);
 
-	uint8_t La[4];
-	for(i=0;i<4;i++){
-		La[i] = 0;
-	}
-
-	//no authentication
-	if(authentication_length == 0){
-		l = 0;
-	}
-	//authentication field of 32 bit
-	if(authentication_length == 4){
-		La[3] = authentication_length;
-		l = authentication_length;
-	}
-
-	//authentication field of 64 bit
-	if(authentication_length == 8){
-		La[3] = 0xFF;
-		La[2] = 0xFE;
-		La[1] = 0;
-		La[0] = authentication_length;
-		l = authentication_length + 2;
-	}
-
-	//authentication field of 128 bit
-	if(authentication_length == 16){
-		La[3] = 0xFF;
-		La[2] = 0xFF;
-		La[1] = 0;
-		La[0] = authentication_length;
-		l = authentication_length + 2;
-	}
-
-	for(i=0; i<4;i++){
-		authData[i] = La[i];
-	}
-
-	authData[i] = authentication_length;
-	authDataLength = i+1;
-
-	if(encOrdec == 1){
-		 length = length - authentication_length;
-	}
-
-	//the payload is part of data to be authenticated, with a length multiple of 16
-	for(i=0;i< authDataLength+length;i++){
-		authData[authDataLength+i] = payload[i];
-	}
+	//PlainText data
+	memcpy(&authData[authDataLength],
+		   &payload[0],
+		   authDataLength+length);
 
 	authDataLength = authDataLength+length;
 
+	//padding
 	uint8_t count;
 	count = 16-(authDataLength-((authDataLength/16)*16));
-
 	authDataLength = authDataLength+count;
 
 }
@@ -183,9 +139,8 @@ void Auth_Transformation(uint8_t 				length,
 	B[0] |= length &0x07;
 
 	//determine B0 fields
-	for(i=0;i<13;i++){
-		B[i+1] = nonce[i];
-	}
+	memcpy(&B[1],
+		   &nonce[0],13);
 
 	uint16_t auxlen;
 	auxlen = length;
@@ -194,9 +149,6 @@ void Auth_Transformation(uint8_t 				length,
 	B[15] = auxlen <<8;
 
 	//initialize X, for me IN
-//	for(i=0;i<16;i++){
-//		in[i] = 0;
-//	}
 	memset(&in[0], 0, sizeof(in));
 
 	//IV
@@ -212,6 +164,7 @@ void Auth_Transformation(uint8_t 				length,
 	for(i=0;i<16;i++){
 		out[i] = in[i];
 	}
+//	memcpy(&out[0], &in[0], 16);
 
 	//determine the upper bound
 	uint8_t limit;
@@ -226,16 +179,14 @@ void Auth_Transformation(uint8_t 				length,
 		}
 		aes_encrypt(in,out,Key);
 
-		uint8_t jj;
-		for(jj=0;jj<16;jj++){
-			in[j] = out[j];
-		}
+		memcpy(&in[0], &out[0], 16);
 	}
 
 	//store the authentication tag
 	for(i=0;i<authentication_length;i++){
 		MACTag[i] = out[i];
 	}
+//	memcpy(&MACTag[0], &out[0], authentication_length);
 
 }
 
@@ -361,10 +312,9 @@ void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
 	uint8_t CipherText[128];
 	uint8_t T_reconstructed[16];
 	uint8_t MACTag[16];
+    uint8_t authData[128];
 
-	uint8_t authData[128];
 	memset(&authData[0], 0, sizeof(authData));
-
 	memset(&T_reconstructed[0], 0, sizeof(T_reconstructed));
 
 	if(pkt->length == 0) return;
@@ -387,16 +337,20 @@ void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
 			            CipherText,
 			            T_reconstructed);
 
+	uint8_t payload_length;
+	payload_length = pkt->length - pkt->l2_authenticationLength;
+
 	if(pkt->l2_securityLevel != 4){
 		if(auth_checking(payloadToDecrypt,//ccmstar_vars.payloadToEncrypt,
-						 pkt->length,
+						 payload_length,
 				         key,
 				         pkt->l2_securityLevel,
 				         pkt->l2_authenticationLength,
 				         nonce,
 				         CipherText,
 				         T_reconstructed,
-				         MACTag, authData) == FALSE){
+				         MACTag, authData,
+				         pkt->aData) == FALSE){
 			pkt->l2_toDiscard = 5;
 		}
 	}
@@ -478,7 +432,8 @@ bool auth_checking(uint8_t* ciphertext,
 		           uint8_t*  CipherText,
 		           uint8_t* T_reconstructed,
 		           uint8_t* MACTag,
-		           uint8_t* authData){
+		           uint8_t* authData,
+		           uint8_t* aData){
 
 	uint8_t messageDecr[128];
 	uint8_t authDataLength = 0;
@@ -488,20 +443,19 @@ bool auth_checking(uint8_t* ciphertext,
 	for(i=0;i<128;i++){
 		messageDecr[i] = 0;
 	}
-	for(i=0;i<length-authentication_length;i++){
+	for(i=0;i<length;i++){
 		messageDecr[i] = CipherText[i];
 	}
 
 	//recalculate AuthData
 	Input_Transformation(messageDecr,
 			             length,
-			             authentication_length,
-			             1,
 			             authDataLength,
-			             authData);
+			             authData,
+			             aData);
 
 	//recalculate the authentication tag
-	Auth_Transformation(length-authentication_length,
+	Auth_Transformation(length,
 			            key,
 			            1,
 			            secLev,

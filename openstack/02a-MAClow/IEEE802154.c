@@ -34,6 +34,10 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    
+   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
+	   prepend_AuxiliarySecurityHeader(msg);
+   }
+
    //General IEs here (those that are carried in all packets) -- None by now.
    
    // previousHop address (always 64-bit)
@@ -243,18 +247,6 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    //if the security is enabled, the Auxiliary Security Header can be retrieved
    if(ieee802514_header->securityEnabled == TRUE){
 	   msg->l2_security = TRUE;
-//	  	  uint8_t kj;
-//	  	  kj = 0;
-//		  do{
-//			  kj++;
-//	  		  leds_error_on();
-//	  	   } while ((security_getBusyvalue() == 1));
-//	  	   leds_error_off();
-//	  	   if(kj > 1){
-//			   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
-//									 (errorparameter_t)kj,
-//									 (errorparameter_t)406);
-//	  	   }
 	   retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
 
    }else{

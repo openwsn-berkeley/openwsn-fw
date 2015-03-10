@@ -18,11 +18,10 @@ void CCMstar(OpenQueueEntry_t*     pkt,
 		     uint8_t*			   nonce);
 
 void Input_Transformation(uint8_t* payload,
-						  uint8_t  length,
-						  uint8_t  authentication_length,
-						  uint8_t  encOrdec,
-						  uint8_t  authDataLength,
-						  uint8_t* authData);
+		                  uint8_t  length,
+		                  uint8_t  authDataLength,
+		                  uint8_t* authData,
+		                  uint8_t* aData);
 
 void Auth_Transformation(uint8_t 			    length,
 		                 uint8_t* 				key,
@@ -67,5 +66,6 @@ bool auth_checking(uint8_t* 			  ciphertext,
 		           uint8_t*				  CipherText,
 		           uint8_t*               T_reconstructed,
 		           uint8_t*				  MACTag,
-		           uint8_t* authData);
+		           uint8_t* 			  authData,
+		           uint8_t* aData);
 //----------------------------------------------------------------------

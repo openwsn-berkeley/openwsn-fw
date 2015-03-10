@@ -46,16 +46,14 @@ void security_init(){
 	}
 
 	//Initialization of MAC KEY TABLE
-		memset(&security_vars.MacKeyTable,
-			   0,
-			   sizeof(m_macKeyTable));
+	memset(&security_vars.MacKeyTable,
+		   0,
+		   sizeof(m_macKeyTable));
 
 	//Initialization of MAC DEVICE TABLE
-//		for(i=0; i<MAXNUMNEIGHBORS; i++){
-			memset(&security_vars.MacDeviceTable,//.DeviceDescriptorEntry[i].deviceAddress.addr_64b[0],
-				   0,
-				   sizeof(m_macDeviceTable));
-//		}
+	memset(&security_vars.MacDeviceTable,
+		   0,
+		   sizeof(m_macDeviceTable));
 
 	//Initialization of Frame Counter
 	security_vars.m_macFrameCounterMode = 0x05; //0x04 or 0x05
@@ -189,36 +187,40 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg){
 
 	uint8_t i;
 	uint8_t nonce[13];
-	for(i=0;i<13;i++){
-		nonce[i] = 0;
-	}
+	memset(&nonce[0], 0, 13);
 
 	//	//cryptographic block
 	switch(msg->l2_keyIdMode){
-	case 0:
-	case 1:
-		for(i=0; i<8; i++){
-			nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
-			}
-		break;
-	case 2:
-		for(i=0; i<2; i++){
-			nonce[i] = msg->l2_keySource.addr_64b[6+i];
+		case 0:
+		case 1:
+			for(i=0; i<8; i++){
+				nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
 				}
-		for(i=2; i<8; i++){
-			nonce[i] = 0;
+			break;
+		case 2:
+			for(i=0; i<2; i++){
+				nonce[i] = msg->l2_keySource.addr_16b[i];
+					}
+			for(i=2; i<8; i++){
+				nonce[i] = 0;
+			}
+			break;
+		case 3:
+			for(i=0; i<8; i++){
+				nonce[i] = msg->l2_keySource.addr_64b[i];
+			}
+			break;
 		}
-		break;
-	case 3:
-		for(i=0; i<8; i++){
-			nonce[i] = msg->l2_keySource.addr_64b[i];
-		}
-		break;
-	}
 
+	//memcpy(&nonce[8], &vectASN[0], 5);
 	for(i=0;i<5;i++){
 		nonce[8+i] = vectASN[i];
 	}
+
+	//aData string
+	memset(&msg->aData[0], 0, 128);
+	msg->aData[0] = msg->length-msg->l2_length;
+	memcpy(&msg->aData[1], &msg->payload[0], msg->length-msg->l2_length);
 
 	CCMstar(msg,key,nonce);
 
@@ -314,6 +316,11 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 		tempheader->headerLength = tempheader->headerLength+1;
 	}
 
+	//aData string
+	memset(&msg->aData[0], 0, 128);
+	msg->aData[0] = tempheader->headerLength;
+	memcpy(&msg->aData[1], &msg->payload[0], tempheader->headerLength);
+
 }
 
 void security_incomingFrame(OpenQueueEntry_t*      msg){
@@ -377,13 +384,10 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 		msg->l2_toDiscard = 4; // improper key used
 	}
 
-	uint8_t i;
 	uint8_t nonce[13];
-	for(i=0;i<13;i++){
-		nonce[i] = 0;
-	}
+	memset(&nonce[0], 0, 13);
 
-
+	uint8_t i;
 	switch(msg->l2_keyIdMode){
 		case 0:
 		case 1:
@@ -398,7 +402,6 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 			for(i=2; i<8; i++){
 				nonce[i] = 0;
 			}
-
 			break;
 		case 3:
 			for(i=0; i<8; i++){
@@ -727,17 +730,6 @@ void remote_init(ieee802154_header_iht ieee802514_header){
 //=========================== private =========================================
 
 /*
- * Increment the macFrameCounter by 1
- */
-//void increment_FrameCounter(){
-//	   // increment the Frame Counter
-//	   security_vars.m_macFrameCounter.bytes0and1++;
-//	   if (security_vars.m_macFrameCounter.bytes0and1==0) {
-//		   security_vars.m_macFrameCounter.bytes2and3++;
-//	   }
-//}
-
-/*
  * Store in the array the reference value
  */
 void security_getFrameCounter(macFrameCounter_t reference,
@@ -748,22 +740,6 @@ void security_getFrameCounter(macFrameCounter_t reference,
    array[3]         = (reference.bytes2and3/256 & 0xff);
    array[4]         =  reference.byte4;
 }
-
-/*
- * Store in the l2_frameCounter variable of the packet the value
- * "value"
- */
-
-//void security_StoreFrameCounter(OpenQueueEntry_t* msg,
-//		                        uint8_t* value) {
-//   // store the FrameCounter
-//   msg->l2_frameCounter.bytes0and1   =     value[0]+
-//                                    256*value[1];
-//   msg->l2_frameCounter.bytes2and3   =     value[2]+
-//                                    256*value[3];
-//
-//
-//}
 
 /*
  * return FALSE if the frame counter of the received frame is less

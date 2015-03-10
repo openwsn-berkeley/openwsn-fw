@@ -1465,9 +1465,6 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       
 	  //START OF TELEMATICS CODE
 	  if(ieee154e_vars.dataReceived->l2_security== TRUE){
-//		   	openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
-//		    						 (errorparameter_t)ieee154e_vars.dataReceived->length,
-//		    						 (errorparameter_t)402);
 		  security_incomingFrame(ieee154e_vars.dataReceived);
 	  }
 	//END OF TELEMATICS CODE
@@ -1577,10 +1574,6 @@ port_INLINE void activity_ri6() {
    //START OF TELEMATICS CODE
    ieee154e_vars.ackToSend->l2_payload = ieee154e_vars.ackToSend->payload;
    ieee154e_vars.ackToSend->l2_length = ieee154e_vars.ackToSend->length;
-
-   if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-	   prepend_AuxiliarySecurityHeader(ieee154e_vars.ackToSend);
-	  }
    //END OF TELEMATICS CODE
 
    ieee802154_prependHeader(ieee154e_vars.ackToSend,

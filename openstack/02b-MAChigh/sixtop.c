@@ -601,14 +601,6 @@ owerror_t sixtop_send_internal(
 
    //START OF TELEMATICS CODE
    msg->l2_length = msg->length;
-
-   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
-//			   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
-//									 (errorparameter_t)msg->length,
-//									 (errorparameter_t)msg->creator);
-//	  	   }
-	   prepend_AuxiliarySecurityHeader(msg);
-   }
    //END OF TELEMATICS CODE
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
