@@ -94,7 +94,6 @@ typedef struct{
 
 BEGIN_PACK
 typedef struct{
-	uint8_t						busy;
 	macFrameCounter_t 			m_macFrameCounter;
 	uint8_t						m_macFrameCounterMode;
 	uint8_t 					m_macAutoRequestKeyIdMode;
@@ -104,8 +103,6 @@ typedef struct{
 	m_macKeyTable				MacKeyTable;
 	m_macDeviceTable			MacDeviceTable;
 	m_macSecurityLevelTable 	MacSecurityLevelTable;
-	uint8_t						nonce[13];
-	//MASTER KEY
 	uint8_t 					M_k[16];
 }security_vars_t;
 END_PACK
@@ -152,9 +149,7 @@ uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
 						 	uint8_t			frameType);
 
 void remote_init(ieee802154_header_iht ieee802514_header);
-void coordinator_init(void);
-
-uint8_t security_getBusyvalue(void);
+void coordinatorORParent_init(void);
 /**
 \}
 \}

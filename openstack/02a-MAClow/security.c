@@ -14,11 +14,8 @@ security_vars_t security_vars;
 
 //=========================== prototypes ======================================
 
-//void increment_FrameCounter(void);
 void security_getFrameCounter(macFrameCounter_t reference,
 		                      uint8_t* array);
-//void security_StoreFrameCounter(OpenQueueEntry_t* msg,
-//		                        uint8_t* asn);
 bool compareFrameCounter(macFrameCounter_t fromFrame,
                          macFrameCounter_t stored);
 
@@ -27,15 +24,9 @@ bool compareFrameCounter(macFrameCounter_t fromFrame,
 void security_init(){
 
 	//Setting UP Phase
-	security_vars.busy = 0;
-	uint8_t i;
-	for(i=0;i<13;i++){
-		security_vars.nonce[i] = 0;
-	}
-
 
 	//MASTER KEY: OpenWSN
-//	memcpy(security_vars.M_k, 0, 16);
+	memcpy(&security_vars.M_k[0], 0, 16);
 	security_vars.M_k[0] = 0x4e;
 	security_vars.M_k[1] = 0x53;
 	security_vars.M_k[2] = 0x57;
@@ -43,11 +34,9 @@ void security_init(){
 	security_vars.M_k[4] = 0x65;
 	security_vars.M_k[5] = 0x70;
 	security_vars.M_k[6] = 0x4f;
-	for(i=7;i<16;i++){
-		security_vars.M_k[i]=0;
-	}
 
 	//Initialization of the MAC Security Level Table
+	uint8_t i;
 	for(i=0; i<2; i++){
 		security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType = i;
 		security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].CommandFrameIdentifier = 0;
@@ -57,18 +46,16 @@ void security_init(){
 	}
 
 	//Initialization of MAC KEY TABLE
-	for(i=0; i<MAXNUMKEYS;i++){
-		memcpy(security_vars.MacKeyTable.KeyDescriptorElement[i].key,
+		memset(&security_vars.MacKeyTable,
 			   0,
-			   16);
-	}
+			   sizeof(m_macKeyTable));
 
 	//Initialization of MAC DEVICE TABLE
-		for(i=0; i<MAXNUMNEIGHBORS; i++){
-			memcpy(security_vars.MacDeviceTable.DeviceDescriptorEntry[i].deviceAddress.addr_64b,
+//		for(i=0; i<MAXNUMNEIGHBORS; i++){
+			memset(&security_vars.MacDeviceTable,//.DeviceDescriptorEntry[i].deviceAddress.addr_64b[0],
 				   0,
-				   8);
-		}
+				   sizeof(m_macDeviceTable));
+//		}
 
 	//Initialization of Frame Counter
 	security_vars.m_macFrameCounterMode = 0x05; //0x04 or 0x05
@@ -78,12 +65,9 @@ void security_init(){
 //=========================== public ==========================================
 void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
 
-	security_vars.busy = 1;
-
 	bool frameCounterSuppression;
 	uint8_t temp8b;
-	uint8_t match;
-	uint8_t i;
+
 	frameCounterSuppression = 0; //the frame counter is carried in the frame, otherwise 1;
 
 	//max length of MAC frames
@@ -160,14 +144,10 @@ void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
 	temp8b |= 0 << 1;//1b reserved
 	*((uint8_t*)(msg->payload)) = temp8b;
 
-	security_vars.busy = 0;
-
 }
 
 
 void security_outgoingFrame(OpenQueueEntry_t*   msg){
-
-	security_vars.busy = 1;
 
 	uint8_t temp8b;
 	uint8_t match;
@@ -185,9 +165,6 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg){
 								(idmanager_getMyID(ADDR_PANID)),
 								msg->l2_frameType);
 
-//	memcpy(msg->l2_key,
-//		   security_vars.MacKeyTable.KeyDescriptorElement[match].key,
-//		   sizeof(msg->l2_key));
 	uint8_t j;
 	uint8_t key[16];
 	for(j=0;j<16;j++){
@@ -211,8 +188,9 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg){
 	} //otherwise the frame counter is not in the frame
 
 	uint8_t i;
+	uint8_t nonce[13];
 	for(i=0;i<13;i++){
-		security_vars.nonce[i] = 0;
+		nonce[i] = 0;
 	}
 
 	//	//cryptographic block
@@ -220,36 +198,29 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg){
 	case 0:
 	case 1:
 		for(i=0; i<8; i++){
-			security_vars.nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
+			nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
 			}
 		break;
 	case 2:
 		for(i=0; i<2; i++){
-			security_vars.nonce[i] = msg->l2_keySource.addr_64b[6+i];
+			nonce[i] = msg->l2_keySource.addr_64b[6+i];
 				}
 		for(i=2; i<8; i++){
-			security_vars.nonce[i] = 0;
+			nonce[i] = 0;
 		}
 		break;
 	case 3:
 		for(i=0; i<8; i++){
-			security_vars.nonce[i] = msg->l2_keySource.addr_64b[i];
+			nonce[i] = msg->l2_keySource.addr_64b[i];
 		}
 		break;
 	}
 
 	for(i=0;i<5;i++){
-		security_vars.nonce[8+i] = vectASN[i];
-	}
-
-	uint8_t nonce[13];
-	for(i=0;i<13;i++){
-		nonce[i] = security_vars.nonce[i];
+		nonce[8+i] = vectASN[i];
 	}
 
 	CCMstar(msg,key,nonce);
-
-	security_vars.busy = 0;
 
 }
 
@@ -260,8 +231,6 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 //	if(tempheader->securityEnabled == TRUE){
 //		msg->l2_security = IEEE154_SEC_YES_SECURITY;
 //	}
-
-	security_vars.busy = 1;
 
 	uint8_t frameCnt_Suppression;
 	uint8_t frameCnt_Size;
@@ -345,16 +314,11 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 		tempheader->headerLength = tempheader->headerLength+1;
 	}
 
-	security_vars.busy = 0;
-
 }
 
 void security_incomingFrame(OpenQueueEntry_t*      msg){
 
-	security_vars.busy = 1;
-
 	uint8_t match;
-	uint8_t vectASN[5];
 
 	m_deviceDescriptor			*devpoint;
 	m_keyDescriptor 			*keypoint;
@@ -378,12 +342,11 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	keypoint = &keydesc;
 
 	if(match == 25){
-		msg->l2_toDiscard = 2;
+		msg->l2_toDiscard = 2; //can't find the key
 		return;
 	}
 
 	//g device descriptor lookup
-
 	match = deviceDescriptorLookup(&msg->l2_keySource,
 						   	       idmanager_getMyID(ADDR_PANID),
 						   	   	   keypoint);
@@ -391,7 +354,6 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	devpoint = &security_vars.MacDeviceTable.DeviceDescriptorEntry[match];
 
 	//h Security Level lookup
-
 	secLevel = securityLevelDescriptorLookup(msg->l2_frameType,
 								  	  	  	 msg->commandFrameIdentifier,
 								  	  	  	 secLevel);
@@ -403,7 +365,7 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	//l+m Anti-Replay
 	if(compareFrameCounter(msg->l2_frameCounter,
 			 devpoint->FrameCounter) == FALSE){
-		msg->l2_toDiscard = 3;
+		msg->l2_toDiscard = 3; //old packet
 	}
 
 	//n Control of key used
@@ -416,8 +378,9 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	}
 
 	uint8_t i;
+	uint8_t nonce[13];
 	for(i=0;i<13;i++){
-		security_vars.nonce[i] = 0;
+		nonce[i] = 0;
 	}
 
 
@@ -425,21 +388,21 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 		case 0:
 		case 1:
 			for(i=0; i<8; i++){
-				security_vars.nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
+				nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
 				}
 			break;
 		case 2:
 			for(i=0; i<2; i++){
-				security_vars.nonce[i] = msg->l2_keySource.addr_16b[i];
+				nonce[i] = msg->l2_keySource.addr_16b[i];
 					}
 			for(i=2; i<8; i++){
-				security_vars.nonce[i] = 0;
+				nonce[i] = 0;
 			}
 
 			break;
 		case 3:
 			for(i=0; i<8; i++){
-				security_vars.nonce[i] = msg->l2_keySource.addr_64b[i];
+				nonce[i] = msg->l2_keySource.addr_64b[i];
 			}
 			break;
 		}
@@ -448,26 +411,25 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	uint8_t myASN[5];
 	ieee154e_getAsn(myASN);
 	for(i=0;i<5;i++){
-		security_vars.nonce[8+i] = myASN[i];
+		nonce[8+i] = myASN[i];
 	}
 
-//	security_getFrameCounter(msg->l2_frameCounter,
-//								 vectASN);//gets the Frame Counter.
-//	for(i=0;i<5;i++){
-//		msg->l2_nonce[8+i] = vectASN[i];
+//	asn_t now;
+//	uint8_t cmp;
+//	now.bytes0and1 = myASN[0]+256*myASN[1];
+//	now.bytes2and3 = myASN[2]+256*myASN[3];
+//	now.byte4 = myASN[4];
+//	cmp = compareFrameCounter(msg->l2_frameCounter,now);
+//	if(cmp == 0){
+//	   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
+//							 (errorparameter_t)now.bytes0and1,
+//							 (errorparameter_t)msg->l2_frameCounter.bytes0and1);
 //	}
-
-	uint8_t nonce[13];
-	for(i=0;i<13;i++){
-		nonce[i] = security_vars.nonce[i];
-	}
 
 	CCMstarInverse(msg,keypoint->key,nonce);
 
 	//q save the frame counter
 	devpoint->FrameCounter = msg->l2_frameCounter;
-
-	security_vars.busy = 0;
 
 }
 
@@ -701,7 +663,7 @@ uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
  * Bootstrap Phase for the Parent Node
  */
 
-void coordinator_init(){
+void coordinatorORParent_init(void){
 
 	open_addr_t*  my;
 	my = idmanager_getMyID(ADDR_64B);
@@ -759,7 +721,7 @@ void remote_init(ieee802154_header_iht ieee802514_header){
 	security_vars.MacKeyTable.KeyDescriptorElement[1].DeviceTable = &security_vars.MacDeviceTable;
 
 	//this is necessary if multihop secure communications need to be estabilished
-	coordinator_init();
+	coordinatorORParent_init();
 }
 
 //=========================== private =========================================
@@ -825,10 +787,5 @@ bool compareFrameCounter(macFrameCounter_t fromFrame,
 	}
 
 	return FALSE;
-}
-
-uint8_t security_getBusyvalue(void){
-
-	return security_vars.busy;
 }
 

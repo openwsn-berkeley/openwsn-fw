@@ -599,17 +599,14 @@ owerror_t sixtop_send_internal(
    // record the location, in the packet, where the l2 payload starts
    msg->l2_payload = msg->payload;
 
-
    //START OF TELEMATICS CODE
    msg->l2_length = msg->length;
 
    if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
-	  	  uint8_t kj;
-		  do{
-			  kj++;
-	  		   leds_error_on();
-	  	   } while ((security_getBusyvalue() == 1)|| kj >5);
-	  	   leds_error_off();
+//			   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
+//									 (errorparameter_t)msg->length,
+//									 (errorparameter_t)msg->creator);
+//	  	   }
 	   prepend_AuxiliarySecurityHeader(msg);
    }
    //END OF TELEMATICS CODE
@@ -625,16 +622,18 @@ owerror_t sixtop_send_internal(
                             &(msg->l2_nextORpreviousHop)
                             );
 
-//   //START OF TELEMATICS CODE
-//   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
-//	   security_outgoingFrame(msg);
-//   }
-//   //END OF TELEMATICS CODE
-
    // reserve space for 2-byte CRC, only if security is disabled
    //START OF TELEMATICS CODE
    if(msg->l2_security == FALSE){
 	   packetfunctions_reserveFooterSize(msg,2);
+   }
+   //END OF TELEMATICS CODE
+
+   //START OF TELEMATICS CODE
+   msg->temp_length = msg->length;
+   uint8_t i;
+   for(i=0;i<msg->length;i++){
+	   msg->temp_payload[i] = msg->l2_payload[i];
    }
    //END OF TELEMATICS CODE
 

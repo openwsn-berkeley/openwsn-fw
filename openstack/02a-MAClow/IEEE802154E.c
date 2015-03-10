@@ -172,7 +172,7 @@ void isr_ieee154e_newSlot() {
       if (idmanager_getIsDAGroot()==TRUE) {
        	 //START OF TELEMATICS CODE
 		 //If I'm the DAG Root, here I can store the Key
-		 scheduler_push_task(coordinator_init,TASKPRIO_SIXTOP);
+		 scheduler_push_task(coordinatorORParent_init,TASKPRIO_SIXTOP);
 		 //END OF TELEMATICS CODE
          changeIsSync(TRUE);
       } else {
@@ -875,12 +875,13 @@ port_INLINE void activity_ti1ORri1() {
 
             //START OF TELEMATICS CODE
             if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-              uint8_t kj;
-          	  do{
-          		  kj++;
-            	  leds_error_on();
-            	  } while ((security_getBusyvalue() == 1)|| kj >5);
-             leds_error_off();
+             if(ieee154e_vars.dataToSend->length != ieee154e_vars.dataToSend->temp_length){
+                 ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->temp_length;
+                 uint8_t i;
+                 for(i=0;i<ieee154e_vars.dataToSend->length; i++){
+                 	ieee154e_vars.dataToSend->l2_payload[i] = ieee154e_vars.dataToSend->temp_payload[i];
+                 }
+             }
          	 security_outgoingFrame(ieee154e_vars.dataToSend);
          	 packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
             }
@@ -1244,12 +1245,6 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       //START OF TELEMATICS CODE
 	   if(ieee154e_vars.ackReceived->l2_security== TRUE){
-		  	  uint8_t kj;
-			  do{
-				  kj++;
-		  		   leds_error_on();
-		  	   } while ((security_getBusyvalue() == 1)|| kj >5);
-		  	   leds_error_off();
 		  security_incomingFrame(ieee154e_vars.ackReceived);
 	   }
 	   //END OF TELEMATICS CODE
@@ -1470,12 +1465,9 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       
 	  //START OF TELEMATICS CODE
 	  if(ieee154e_vars.dataReceived->l2_security== TRUE){
-	  	  uint8_t kj;
-		  do{
-			  kj++;
-	  		   leds_error_on();
-	  	   } while ((security_getBusyvalue() == 1)|| kj >5);
-	  	   leds_error_off();
+//		   	openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
+//		    						 (errorparameter_t)ieee154e_vars.dataReceived->length,
+//		    						 (errorparameter_t)402);
 		  security_incomingFrame(ieee154e_vars.dataReceived);
 	  }
 	//END OF TELEMATICS CODE
@@ -1587,12 +1579,6 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->l2_length = ieee154e_vars.ackToSend->length;
 
    if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-	  	  uint8_t kj;
-		  do{
-			  kj++;
-	  		   leds_error_on();
-	  	   } while ((security_getBusyvalue() == 1)|| kj >5);
-	  	   leds_error_off();
 	   prepend_AuxiliarySecurityHeader(ieee154e_vars.ackToSend);
 	  }
    //END OF TELEMATICS CODE
@@ -1610,12 +1596,6 @@ port_INLINE void activity_ri6() {
    
    //START OF TELEMATICS CODE
    if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-	  	  uint8_t kj;
-		  do{
-			  kj++;
-	  		   leds_error_on();
-	  	   } while ((security_getBusyvalue() == 1)|| kj >5);
-	  	   leds_error_off();
 	   security_outgoingFrame(ieee154e_vars.ackToSend);
 	  }
    //END OF TELEMATICS CODE

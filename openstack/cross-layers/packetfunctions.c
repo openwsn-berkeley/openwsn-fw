@@ -183,9 +183,9 @@ bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2)
          break;
     
       default:
-//         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
-//                               (errorparameter_t)address_1->type,
-//                               (errorparameter_t)5);
+         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+                               (errorparameter_t)address_1->type,
+                               (errorparameter_t)5);
          return FALSE;
    }
    if (memcmp((void*)address_1->addr_128b,(void*)address_2->addr_128b,address_length)==0) {
@@ -214,9 +214,9 @@ void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* wr
          address_length = 16;
          break;
       default:
-//         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
-//                               (errorparameter_t)type,
-//                               (errorparameter_t)6);
+         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+                               (errorparameter_t)type,
+                               (errorparameter_t)6);
          return;
    }
    
@@ -246,9 +246,9 @@ void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, b
          address_length = 16;
          break;
       default:
-//         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
-//                               (errorparameter_t)address->type,
-//                               (errorparameter_t)7);
+         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+                               (errorparameter_t)address->type,
+                               (errorparameter_t)7);
          return;
    }
    
@@ -269,9 +269,9 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_len
    pkt->payload -= header_length;
    pkt->length  += header_length;
    if ( (uint8_t*)(pkt->payload) < (uint8_t*)(pkt->packet) ) {
-//      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
-//                            (errorparameter_t)0,
-//                            (errorparameter_t)pkt->length);
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+                            (errorparameter_t)0,
+                            (errorparameter_t)pkt->length);
    }
 }
 
@@ -279,27 +279,27 @@ void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length) {
    pkt->payload += header_length;
    pkt->length  -= header_length;
    if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+126) ) {
-//      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
-//                            (errorparameter_t)1,
-//                            (errorparameter_t)pkt->length);
+      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+                            (errorparameter_t)1,
+                            (errorparameter_t)pkt->length);
    }
 }
 
 void packetfunctions_reserveFooterSize(OpenQueueEntry_t* pkt, uint8_t header_length) {
    pkt->length  += header_length;
    if (pkt->length>127) {
-//      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
-//                            (errorparameter_t)2,
-//                            (errorparameter_t)pkt->length);
+      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+                            (errorparameter_t)2,
+                            (errorparameter_t)pkt->length);
    }
 }
 
 void packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length) {
    pkt->length  -= header_length;
    if (pkt->length>128) {//wraps around, so a negative value will be >128
-//      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
-//                            (errorparameter_t)3,
-//                            (errorparameter_t)pkt->length);
+      openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+                            (errorparameter_t)3,
+                            (errorparameter_t)pkt->length);
    }
 }
 

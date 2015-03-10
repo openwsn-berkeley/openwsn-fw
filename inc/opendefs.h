@@ -306,14 +306,14 @@ typedef struct {
    uint8_t       	 l2_keyIndex;				 //the key Index for this frame
    macFrameCounter_t l2_frameCounter;			 //the Frame Counter for this frame
    open_addr_t   	 l2_keySource;				 //the key Source for this frame
-//   uint8_t           l2_key[16];                 //the key used to protect the frame
-//   uint8_t           l2_nonce[13];               //the nonce for security operations
    uint8_t		 	 l2_toDiscard;				 //if TRUE, security-related errors have occurred
    uint8_t 		 	 l2_authenticationLength;	 //the length of the authentication field
    uint8_t		 	 l2_auxiliaryLength;	     //length of the Auxiliary Security Header
    uint8_t		 	 commandFrameIdentifier;	 //used in case of Command Frames
    uint8_t*			 l2_ASNFrameCounter;		 //pointer to the Frame Counter
    uint8_t			 l2_length;                  //length of L2 payload
+   uint8_t temp_length;
+   uint8_t          temp_payload[128];
    //END OF TELEMATICS CODE
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at

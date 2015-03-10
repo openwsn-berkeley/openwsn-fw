@@ -120,9 +120,9 @@ owerror_t idmanager_setMyID(open_addr_t* newID) {
      case ADDR_128B:
         //don't set 128b, but rather prefix and 64b
      default:
-//        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
-//              (errorparameter_t)newID->type,
-//              (errorparameter_t)1);
+        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
+              (errorparameter_t)newID->type,
+              (errorparameter_t)1);
         ENABLE_INTERRUPTS();
         return E_FAIL;
    }
@@ -163,9 +163,9 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
         ENABLE_INTERRUPTS();
         return res;
      default:
-//        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
-//              (errorparameter_t)addr->type,
-//              (errorparameter_t)2);
+        openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,
+              (errorparameter_t)addr->type,
+              (errorparameter_t)2);
         ENABLE_INTERRUPTS();
         return FALSE;
    }

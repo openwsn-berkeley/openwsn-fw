@@ -6,53 +6,68 @@
 
 #include "ccmstar.h"
 
-ccmstar_vars_t ccmstar_vars;
-
 void CCMstar(OpenQueueEntry_t* 		pkt,
-		     uint8_t 				key[16],
+		     uint8_t* 				key,
 		     uint8_t*			    nonce){
 
-	uint8_t i;
-	//store length parameter to be used
-	ccmstar_vars.length = pkt->l2_length;
+	uint8_t payloadToEncrypt[128];
+	uint8_t CipherText[128];
+	uint8_t authData[128];
+
+	memset(&authData[0], 0, sizeof(authData));
+
+	uint8_t authDataLength = 0;
+	uint8_t T[16];
+	memset(&T[0], 0, sizeof(T));
+	uint8_t T_temp[16];
+	memset(&T_temp[0], 0, sizeof(T_temp));
 
 	//copy the payload to be encrypted
-	for(i=0;i<128;i++){
-		ccmstar_vars.payloadToEncrypt[i] = 0;
-	}
-	for(i=0;i<ccmstar_vars.length;i++){
-		ccmstar_vars.payloadToEncrypt[i] = pkt->l2_payload[i];
-	}
+	memset(&payloadToEncrypt, 0,
+			sizeof(payloadToEncrypt));
+
+	memcpy(&payloadToEncrypt[0],
+			&pkt->l2_payload[0],
+			pkt->l2_length);
 
 	//calculate AuthData
-	Input_Transformation(ccmstar_vars.payloadToEncrypt,
-			             ccmstar_vars.length,
-			             pkt->l2_authenticationLength,0);
+	Input_Transformation(payloadToEncrypt,
+						 pkt->l2_length,
+			             pkt->l2_authenticationLength,
+			             0,
+			             authDataLength,
+			             authData);
 
 	//calculate the authentication tag
-	Auth_Transformation(ccmstar_vars.length,
+	Auth_Transformation(pkt->l2_length,
 			            key,
 			            0,
 			            pkt->l2_securityLevel,
 			            pkt->l2_authenticationLength,
-			            nonce);
+			            nonce,
+			            authDataLength,
+			            T,
+			            authData);//unused here
 
 	//encrypt the payload
-	Encr_Transformation(ccmstar_vars.payloadToEncrypt,
-			            ccmstar_vars.length,
+	Encr_Transformation(payloadToEncrypt,
+						pkt->l2_length,
 			            key,
-			            ccmstar_vars.T,
+			            T,
 			            0,
 			            pkt->l2_securityLevel,
 			            pkt->l2_authenticationLength,
-			            nonce);
+			            nonce,
+			            CipherText,
+			            T_temp);
+
 	//reserve space for the authentication tag
 	packetfunctions_reserveFooterSize(pkt,pkt->l2_authenticationLength);
 
 	//copy the encrypted payload and the authentication tag
-	for(i=0;i<ccmstar_vars.length+pkt->l2_authenticationLength;i++){
-		pkt->l2_payload[i] = ccmstar_vars.CipherText[i];
-	}
+	memcpy(&pkt->l2_payload[0],
+			&CipherText[0],
+			pkt->l2_length+pkt->l2_authenticationLength);
 
 }
 
@@ -60,15 +75,14 @@ void CCMstar(OpenQueueEntry_t* 		pkt,
 void Input_Transformation(uint8_t* payload,
 		                  uint8_t  length,
 		                  uint8_t  authentication_length,
-		                  uint8_t  encOrdec){
+		                  uint8_t  encOrdec,
+		                  uint8_t authDataLength,
+		                  uint8_t* authData){
 
 	//initialize AuthData
 
 	uint8_t i,l;
-	for(i=0;i<148;i++){
-		ccmstar_vars.authData[i] = 0;
-	}
-	ccmstar_vars.authDataLength = 0;
+	authDataLength = 0;
 
 	uint8_t La[4];
 	for(i=0;i<4;i++){
@@ -104,36 +118,39 @@ void Input_Transformation(uint8_t* payload,
 	}
 
 	for(i=0; i<4;i++){
-		ccmstar_vars.authData[i] = La[i];
+		authData[i] = La[i];
 	}
 
-	ccmstar_vars.authData[i] = authentication_length;
-	ccmstar_vars.authDataLength = i+1;
+	authData[i] = authentication_length;
+	authDataLength = i+1;
 
 	if(encOrdec == 1){
 		 length = length - authentication_length;
 	}
 
 	//the payload is part of data to be authenticated, with a length multiple of 16
-	for(i=0;i< ccmstar_vars.authDataLength+length;i++){
-		ccmstar_vars.authData[ccmstar_vars.authDataLength+i] = payload[i];
+	for(i=0;i< authDataLength+length;i++){
+		authData[authDataLength+i] = payload[i];
 	}
 
-	ccmstar_vars.authDataLength = ccmstar_vars.authDataLength+length;
+	authDataLength = authDataLength+length;
 
 	uint8_t count;
-	count = 16-(ccmstar_vars.authDataLength-((ccmstar_vars.authDataLength/16)*16));
+	count = 16-(authDataLength-((authDataLength/16)*16));
 
-	ccmstar_vars.authDataLength = ccmstar_vars.authDataLength+count;
+	authDataLength = authDataLength+count;
 
 }
 
 void Auth_Transformation(uint8_t 				length,
-						 uint8_t 				key[16],
+						 uint8_t* 				key,
 						 bool 					encOrDec,
 						 uint8_t 				secLev,
 						 uint8_t				authentication_length,
-						 uint8_t*				nonce){
+						 uint8_t*				nonce,
+						 uint8_t 				authDataLength,
+						 uint8_t*               MACTag,
+						 uint8_t*               authData){
 
 	if(secLev == 4) return; /*in case Security Level is 4, packet is only encrypted
 							and not authenticated */
@@ -170,13 +187,6 @@ void Auth_Transformation(uint8_t 				length,
 		B[i+1] = nonce[i];
 	}
 
-	//initialize T
-	if(encOrDec == 0){
-		for(i=0;i<16;i++){
-			ccmstar_vars.T[i] = 0;
-		}
-	}
-
 	uint16_t auxlen;
 	auxlen = length;
 
@@ -184,23 +194,19 @@ void Auth_Transformation(uint8_t 				length,
 	B[15] = auxlen <<8;
 
 	//initialize X, for me IN
-	for(i=0;i<16;i++){
-		in[i] = 0;
-	}
+//	for(i=0;i<16;i++){
+//		in[i] = 0;
+//	}
+	memset(&in[0], 0, sizeof(in));
 
 	//IV
 	for(i=0;i<16;i++){
 		in[i] = in[i]^B[i];
 	}
 
-//	//Key Expansion phase, before the crypto block
-	//TODO
-	for(i=0;i<16;i++){
-			Key[i] = key[i];
-		}
-	for(i=16;i<64;i++){
-		Key[i] = 0;
-	}
+	//copy the key
+	memset(&Key[0], 0, sizeof(Key));
+	memcpy(&Key[0], &key[0], sizeof(key));
 
 	//initialize out
 	for(i=0;i<16;i++){
@@ -209,64 +215,59 @@ void Auth_Transformation(uint8_t 				length,
 
 	//determine the upper bound
 	uint8_t limit;
-	limit = (ccmstar_vars.authDataLength/16)+1;
+	limit = (authDataLength/16)+1;
 
 	//crypto block
 	uint8_t j;
 	for(i=0;i<limit;i++){
 		for(j=i*16;j<(i*16+16);j++){
-			B[j-16*i] = ccmstar_vars.authData[j];
+			B[j-16*i] = authData[j];
 			in[j-16*i] = B[j-16*i]^in[j-16*i];
 		}
-
 		aes_encrypt(in,out,Key);
 
-		for(j=0;j<16;j++){
+		uint8_t jj;
+		for(jj=0;jj<16;jj++){
 			in[j] = out[j];
 		}
 	}
 
 	//store the authentication tag
-	if(encOrDec==0){
-		for(i=0;i<authentication_length;i++){
-			ccmstar_vars.T[i] = out[i];
-		}
-	}
-	if(encOrDec==1){
-		for(i=0;i<authentication_length;i++){
-			ccmstar_vars.MACTag[i] = out[i];
-		}
+	for(i=0;i<authentication_length;i++){
+		MACTag[i] = out[i];
 	}
 
 }
 
 void Encr_Transformation(uint8_t*  				payload,
 						 uint8_t   				length,
-		                 uint8_t 				key[16],
+		                 uint8_t* 				key,
 		                 uint8_t*  				Ta,
 		                 bool      				cipher,
 		                 uint8_t   				secLevel,
 		                 uint8_t   				authentication_length,
-/*CONTROLLA*/		                 uint8_t*				nonce){
+		                 uint8_t*				nonce,
+		                 uint8_t*				CipherText,
+		                 uint8_t*               T_reconstructed){
 
 	uint8_t PlainTextData[16];
 	uint8_t i;
 	uint16_t cnt;
 	uint8_t in[16], out[16];
+	uint8_t W[16];
+	uint8_t U[16];
 
-//	//Key Expansion phase, before the crypto block
-	//TODO
-	for(i=0;i<16;i++){
-		Key[i] = key[i];
-	}
-	for(i=16;i<64;i++){
-		Key[i] = 0;
-	}
+	memset(&W[0], 0, sizeof(W));
+	memset(&U[0], 0, sizeof(U));
+
+	//copy the key
+	memset(&Key[0], 0, sizeof(Key));
+	memcpy(&Key[0], &key[0], sizeof(key));
 
 	cnt = 0;
 	//initialization of CipherText
 	for(i=0;i<128;i++){
-		ccmstar_vars.CipherText[i] = 0;
+		CipherText[i] = 0;
 	}
 
 	//Ai
@@ -291,21 +292,15 @@ void Encr_Transformation(uint8_t*  				payload,
 
 	if(cipher==0){
 		for(i=0;i<authentication_length;i++){
-			ccmstar_vars.U[i] = out[i] ^ Ta[i];
+			U[i] = out[i] ^ Ta[i];
 		}
 	}
 
 	if(cipher==1){
 		for(i=0;i<authentication_length;i++){
-			ccmstar_vars.W[i] = out[i] ^ Ta[i];
+			W[i] = out[i] ^ Ta[i];
 				}
 	}
-
-//	if(cipher == 1){
-//	   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
-//							 (errorparameter_t)payload[0],
-//							 (errorparameter_t)payload[1]);
-//	}
 
 	uint8_t j;
 	uint8_t limit;
@@ -331,7 +326,7 @@ void Encr_Transformation(uint8_t*  				payload,
 		cnt++;
 		for(j=0;j<16;j++){
 			out[j] = out[j] ^ PlainTextData[j];
-			ccmstar_vars.CipherText[j+16*i] = out[j];
+			CipherText[j+16*i] = out[j];
 		}
 	}
 
@@ -339,75 +334,77 @@ void Encr_Transformation(uint8_t*  				payload,
 	uint8_t count;
 	count = 16-(length-((length/16)*16));
 	for(i=(count-1);i>(length-1);i--){
-		ccmstar_vars.CipherText[i] = 0;
+		CipherText[i] = 0;
 	}
 
 	if(authentication_length !=0){
 		if(cipher==0){
 			for(i=0;i<authentication_length;i++){
-				ccmstar_vars.CipherText[length+i] = ccmstar_vars.U[i];
+				CipherText[length+i] = U[i];
 			}
 		}
 
 		if(cipher==1){
 			for(i=0;i<authentication_length;i++){
-				ccmstar_vars.T[i] = ccmstar_vars.W[i];
+				T_reconstructed[i] = W[i];
 			}
 		}
 	}
 
-//	if(cipher == 0){
-//	   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
-//							 (errorparameter_t)ccmstar_vars.CipherText[0],
-//							 (errorparameter_t)ccmstar_vars.CipherText[1]);
-//	}
-
 }
 
 void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
-		            uint8_t 			   key[16],
+		            uint8_t* 			   key,
 		            uint8_t*			   nonce){
 
-	uint8_t i;
-	ccmstar_vars.length = pkt->length;
-	if(ccmstar_vars.length == 0) return;
+	uint8_t payloadToDecrypt[128];
+	uint8_t CipherText[128];
+	uint8_t T_reconstructed[16];
+	uint8_t MACTag[16];
 
-	for(i=0;i<128;i++){
-//		ccmstar_vars.payloadToEncrypt[i] = 0;
-		ccmstar_vars.payloadToDecrypt[i] = 0;
-	}
+	uint8_t authData[128];
+	memset(&authData[0], 0, sizeof(authData));
 
-	for(i=0;i<ccmstar_vars.length;i++){
-//			ccmstar_vars.payloadToEncrypt[i] = pkt->payload[i];
-		ccmstar_vars.payloadToDecrypt[i] = pkt->payload[i];
-		}
+	memset(&T_reconstructed[0], 0, sizeof(T_reconstructed));
 
-	for(i=0;i<16;i++){
-		ccmstar_vars.MACTag[i] = 0;
-	}
+	if(pkt->length == 0) return;
 
-	decr_Transformation(ccmstar_vars.payloadToDecrypt,//ccmstar_vars.payloadToEncrypt,
-			            ccmstar_vars.length,
+	memset(&payloadToDecrypt[0], 0,
+			sizeof(payloadToDecrypt));
+
+	memcpy(&payloadToDecrypt[0],
+			&pkt->payload[0],
+			pkt->length);
+
+	memset(&MACTag[0],0, sizeof(MACTag));
+
+	decr_Transformation(payloadToDecrypt,
+						pkt->length,
 			            pkt->l2_authenticationLength,
 			            key,
 			            pkt->l2_securityLevel,
-			            nonce);
+			            nonce,
+			            CipherText,
+			            T_reconstructed);
 
 	if(pkt->l2_securityLevel != 4){
-		if(auth_checking(ccmstar_vars.payloadToDecrypt,//ccmstar_vars.payloadToEncrypt,
-				         ccmstar_vars.length,
+		if(auth_checking(payloadToDecrypt,//ccmstar_vars.payloadToEncrypt,
+						 pkt->length,
 				         key,
 				         pkt->l2_securityLevel,
 				         pkt->l2_authenticationLength,
-				         nonce) == FALSE){
+				         nonce,
+				         CipherText,
+				         T_reconstructed,
+				         MACTag, authData) == FALSE){
 			pkt->l2_toDiscard = 5;
 		}
 	}
 
 	//copy the decrypted payload
-	for(i=0;i<ccmstar_vars.length;i++){
-		pkt->payload[i] = ccmstar_vars.CipherText[i];
-	}
+	memcpy(&pkt->payload[0],
+			&CipherText[0],
+			pkt->length);
 
 	if(pkt->l2_securityLevel != 4){
 		packetfunctions_tossFooter(pkt,pkt->l2_authenticationLength);
@@ -418,20 +415,20 @@ void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
 void decr_Transformation(uint8_t* 				cipherData,
 		                 uint8_t 				length,
 						 uint8_t 				authentication_length,
-						 uint8_t 				key[16],
+						 uint8_t* 				key,
 						 uint8_t 				secLev,
-						 uint8_t*				nonce){
+						 uint8_t*				nonce,
+						 uint8_t*               CipherText,
+						 uint8_t*               T_reconstructed){
 
 	uint8_t i;
-	//initialize U and T
-	for(i=0;i<16;i++){
-		ccmstar_vars.U[i] = 0;
-		ccmstar_vars.T[i] = 0;
-	}
+
+	uint8_t U_rec[16];
+	memset(&U_rec[0], 0, sizeof(U_rec));
 
 	//U is the final part of the payload
 	for(i=0;i<authentication_length;i++){
-		ccmstar_vars.U[i] = cipherData[length-authentication_length+i];
+		U_rec[i] = cipherData[length-authentication_length+i];
 	}
 
 	uint8_t newlen;
@@ -457,27 +454,34 @@ void decr_Transformation(uint8_t* 				cipherData,
 	Encr_Transformation(CipherTextdec,
 			            newlen,
 			            key,
-			            ccmstar_vars.U,
+			            U_rec,
 			            1,
 			            secLev,
 			            authentication_length,
-			            nonce);
+			            nonce,
+			            CipherText,
+			            T_reconstructed);
 
 	//copy the decrypted payload
 	for(i=0;i<newlen;i++){
-		cipherData[i] = ccmstar_vars.CipherText[i];
+		cipherData[i] = CipherText[i];
 	}
 
 }
 
 bool auth_checking(uint8_t* ciphertext,
 		           uint8_t  length,
-		           uint8_t 	key[16],
+		           uint8_t* key,
 		           uint8_t 	secLev,
 		           uint8_t	authentication_length,
-		           uint8_t*	nonce){
+		           uint8_t*	nonce,
+		           uint8_t*  CipherText,
+		           uint8_t* T_reconstructed,
+		           uint8_t* MACTag,
+		           uint8_t* authData){
 
 	uint8_t messageDecr[128];
+	uint8_t authDataLength = 0;
 
 	//copy the decrypted payload in temporal vector
 	uint8_t i;
@@ -485,11 +489,16 @@ bool auth_checking(uint8_t* ciphertext,
 		messageDecr[i] = 0;
 	}
 	for(i=0;i<length-authentication_length;i++){
-		messageDecr[i] = ccmstar_vars.CipherText[i];
+		messageDecr[i] = CipherText[i];
 	}
 
 	//recalculate AuthData
-	Input_Transformation(messageDecr,length,authentication_length,1);
+	Input_Transformation(messageDecr,
+			             length,
+			             authentication_length,
+			             1,
+			             authDataLength,
+			             authData);
 
 	//recalculate the authentication tag
 	Auth_Transformation(length-authentication_length,
@@ -497,42 +506,19 @@ bool auth_checking(uint8_t* ciphertext,
 			            1,
 			            secLev,
 			            authentication_length,
-			            nonce);
+			            nonce, authDataLength, MACTag, authData);
 
 	//verify the tag
 	for(i=0;i<16;i++){
-		if(ccmstar_vars.T[i] == ccmstar_vars.MACTag[i]){
+		if(T_reconstructed[i] == MACTag[i]){
 		}
 		else{
-//			  openserial_printInfo(COMPONENT_IEEE802154,ERR_SECURITY,
-//									(errorparameter_t)nonce[0],
-//									(errorparameter_t)nonce[1]);
-//			  openserial_printInfo(COMPONENT_IEEE802154,ERR_SECURITY,
-//									(errorparameter_t)nonce[2],
-//									(errorparameter_t)nonce[3]);
-//			  openserial_printInfo(COMPONENT_IEEE802154,ERR_SECURITY,
-//									(errorparameter_t)nonce[4],
-//									(errorparameter_t)nonce[5]);
-//			  openserial_printInfo(COMPONENT_IEEE802154,ERR_SECURITY,
-//									(errorparameter_t)nonce[6],
-//									(errorparameter_t)nonce[7]);
-//			  openserial_printInfo(COMPONENT_IEEE802154,ERR_SECURITY,
-//									(errorparameter_t)nonce[8],
-//									(errorparameter_t)nonce[9]);
-//			  openserial_printInfo(COMPONENT_IEEE802154,ERR_SECURITY,
-//									(errorparameter_t)nonce[10],
-//									(errorparameter_t)nonce[11]);
-//			  openserial_printInfo(COMPONENT_IEEE802154,ERR_SECURITY,
-//									(errorparameter_t)nonce[12],
-//									(errorparameter_t)nonce[13]);
-//			  openserial_printInfo(COMPONENT_IEEE802154,ERR_SECURITY,
-//									(errorparameter_t)nonce[14],
-//									(errorparameter_t)nonce[15]);
 			return FALSE;
 		}
 	}
 
 	return TRUE;
 }
+
 
 //---------------------------------------------------------------------------

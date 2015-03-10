@@ -51,10 +51,10 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
          case ADDR_64B:
             packetfunctions_writeAddress(msg,nextHop,OW_LITTLE_ENDIAN);
             break;
-//         default:
-//            openserial_printCritical(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,
-//                                  (errorparameter_t)nextHop->type,
-//                                  (errorparameter_t)1);
+         default:
+            openserial_printCritical(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,
+                                  (errorparameter_t)nextHop->type,
+                                  (errorparameter_t)1);
       }
       
    }
@@ -243,6 +243,18 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    //if the security is enabled, the Auxiliary Security Header can be retrieved
    if(ieee802514_header->securityEnabled == TRUE){
 	   msg->l2_security = TRUE;
+//	  	  uint8_t kj;
+//	  	  kj = 0;
+//		  do{
+//			  kj++;
+//	  		  leds_error_on();
+//	  	   } while ((security_getBusyvalue() == 1));
+//	  	   leds_error_off();
+//	  	   if(kj > 1){
+//			   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
+//									 (errorparameter_t)kj,
+//									 (errorparameter_t)406);
+//	  	   }
 	   retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
 
    }else{
