@@ -381,6 +381,7 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
    slotframeLink_IE_ht  sfInfo; 
    cellInfo_ht          linkInfo;
    open_addr_t          temp_neighbor;
+   frameLength_t        oldFrameLength;
    
    localptr = *ptr; 
   
@@ -404,41 +405,45 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
       sfInfo.slotframesize  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
       localptr++;;
       
+      oldFrameLength = schedule_getFrameLength();
       schedule_setFrameLength(sfInfo.slotframesize);
       
       // [1B] number of links
       sfInfo.numlinks        = *((uint8_t*)(pkt->payload)+localptr);
       localptr++;
       
-      for (j=0;j<sfInfo.numlinks;j++){
+      if (oldFrameLength == 0) {
          
-         // [2B] TimeSlot
-         linkInfo.tsNum = *((uint8_t*)(pkt->payload)+localptr);
-         localptr++;
-         linkInfo.tsNum  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
-         localptr++;
-         
-         // [2B] Ch.Offset
-         linkInfo.choffset = *((uint8_t*)(pkt->payload)+localptr);
-         localptr++;
-         linkInfo.choffset  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
-         localptr++;
-         
-         // [1B] LinkOption bitmap
-         linkInfo.linkoptions = *((uint8_t*)(pkt->payload)+localptr);
-         localptr++;
-         
-         // shared TXRX anycast slot(s)
-         memset(&temp_neighbor,0,sizeof(temp_neighbor));
-         temp_neighbor.type             = ADDR_ANYCAST;
-         schedule_addActiveSlot(
-            linkInfo.tsNum,                     // slot offset
-            CELLTYPE_TXRX,                      // type of slot
-            TRUE,                               // shared?
-            linkInfo.choffset,                  // channel offset
-            &temp_neighbor                      // neighbor
-         );
-      } 
+         for (j=0;j<sfInfo.numlinks;j++){
+            
+            // [2B] TimeSlot
+            linkInfo.tsNum = *((uint8_t*)(pkt->payload)+localptr);
+            localptr++;
+            linkInfo.tsNum  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+            localptr++;
+            
+            // [2B] Ch.Offset
+            linkInfo.choffset = *((uint8_t*)(pkt->payload)+localptr);
+            localptr++;
+            linkInfo.choffset  |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+            localptr++;
+            
+            // [1B] LinkOption bitmap
+            linkInfo.linkoptions = *((uint8_t*)(pkt->payload)+localptr);
+            localptr++;
+            
+            // shared TXRX anycast slot(s)
+            memset(&temp_neighbor,0,sizeof(temp_neighbor));
+            temp_neighbor.type             = ADDR_ANYCAST;
+            schedule_addActiveSlot(
+               linkInfo.tsNum,                     // slot offset
+               CELLTYPE_TXRX,                      // type of slot
+               TRUE,                               // shared?
+               linkInfo.choffset,                  // channel offset
+               &temp_neighbor                      // neighbor
+            );
+         }
+      }
       i++;
       break; //TODO: this break is put since a single slotframe is managed
    }
