@@ -312,9 +312,7 @@ typedef struct {
    uint8_t		 	 commandFrameIdentifier;	 //used in case of Command Frames
    uint8_t*			 l2_ASNFrameCounter;		 //pointer to the Frame Counter
    uint8_t			 l2_length;                  //length of L2 payload
-   uint8_t 			 temp_length;
-   uint8_t           temp_payload[128];
-   uint8_t			 aData[128];
+   uint8_t			 aData[128];				 //additional data for security
    //END OF TELEMATICS CODE
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at

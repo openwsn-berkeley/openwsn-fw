@@ -351,7 +351,7 @@ void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
 				         T_reconstructed,
 				         MACTag, authData,
 				         pkt->aData) == FALSE){
-			pkt->l2_toDiscard = 5;
+			pkt->l2_toDiscard = 6;
 		}
 	}
 

@@ -559,7 +559,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // toss the IEEE802.15.4 header -- this does not include IEs as they are processed 
       // next.
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-      
+
       // process IEs
       lenIE = 0;
       if (
@@ -849,7 +849,7 @@ port_INLINE void activity_ti1ORri1() {
             sync_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank) 
        
             memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
-            
+
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
             // arm tt1
@@ -875,13 +875,6 @@ port_INLINE void activity_ti1ORri1() {
 
             //START OF TELEMATICS CODE
             if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-             if(ieee154e_vars.dataToSend->length != ieee154e_vars.dataToSend->temp_length){
-                 ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->temp_length;
-                 uint8_t i;
-                 for(i=0;i<ieee154e_vars.dataToSend->length; i++){
-                 	ieee154e_vars.dataToSend->l2_payload[i] = ieee154e_vars.dataToSend->temp_payload[i];
-                 }
-             }
          	 security_outgoingFrame(ieee154e_vars.dataToSend);
          	 packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
             }

@@ -254,6 +254,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    }
   //END OF TELEMATICS CODE
 
+
    // if you reach this, the header is valid
    ieee802514_header->valid=TRUE;
 }

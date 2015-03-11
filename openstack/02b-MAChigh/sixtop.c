@@ -621,14 +621,6 @@ owerror_t sixtop_send_internal(
    }
    //END OF TELEMATICS CODE
 
-   //START OF TELEMATICS CODE
-   msg->temp_length = msg->length;
-   uint8_t i;
-   for(i=0;i<msg->length;i++){
-	   msg->temp_payload[i] = msg->l2_payload[i];
-   }
-   //END OF TELEMATICS CODE
-
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
    return E_SUCCESS;
@@ -717,7 +709,7 @@ port_INLINE void sixtop_sendEB() {
    // declare ownership over that packet
    adv->creator = COMPONENT_SIXTOP;
    adv->owner   = COMPONENT_SIXTOP;
-   
+
    // reserve space for ADV-specific header
    // reserving for IEs.
    len += processIE_prependSlotframeLinkIE(adv);
