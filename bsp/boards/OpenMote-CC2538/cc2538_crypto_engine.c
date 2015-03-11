@@ -7,7 +7,6 @@
 #include <headers/hw_sys_ctrl.h>
 #include "sys_ctrl.h"
 #include "cc2538_crypto_engine.h"
-#include "aes_ccms.h"
 #include "aes_ctr.h"
 #include "aes_cbc.h"
 #include "aes.h"  // CC2538 specific headers
@@ -37,6 +36,93 @@ static owerror_t init(void) {
    return E_SUCCESS;
 }
 
+static owerror_t aes_ccms_enc_cc2538(uint8_t* a,
+         uint8_t len_a,
+         uint8_t* m,
+         uint8_t* len_m,
+         uint8_t* nonce,
+         uint8_t l,
+         uint8_t key[16],
+         uint8_t len_mac) {
+
+   bool encrypt;
+  
+   encrypt = *len_m > 0 ? true : false;
+
+   if(load_key(key) == E_SUCCESS) {
+      if(CCMAuthEncryptStart(encrypt,
+                              len_mac,
+                              nonce,
+                              m,
+                              (uint16_t) *len_m,
+                              a,
+                              (uint16_t) len_a,
+                              DEFAULT_KEY_AREA,
+                              &m[*len_m],
+                              l,
+                              /* polling */ 0) == AES_SUCCESS) {
+
+         do {
+            ASM_NOP;
+         } while(CCMAuthEncryptCheckResult() == 0);
+        
+         if(CCMAuthEncryptGetResult(len_mac, 
+                                    (uint16_t) *len_m,
+                                    &m[*len_m]) == AES_SUCCESS) {
+
+            *len_m += len_mac;
+            return E_SUCCESS;
+         }
+      }
+   }
+
+   return E_FAIL;
+}
+
+static owerror_t aes_ccms_dec_cc2538(uint8_t* a,
+         uint8_t len_a,
+         uint8_t* m,
+         uint8_t* len_m,
+         uint8_t* nonce,
+         uint8_t l,
+         uint8_t key[16],
+         uint8_t len_mac) {
+
+   bool decrypt;
+   uint8_t tag[CBC_MAX_MAC_SIZE];
+  
+   decrypt = *len_m - len_mac > 0 ? true : false;
+
+   if(load_key(key) == E_SUCCESS) {
+      if(CCMInvAuthDecryptStart(decrypt,
+                              len_mac,
+                              nonce,
+                              m,
+                              (uint16_t) *len_m,
+                              a,
+                              (uint16_t) len_a,
+                              DEFAULT_KEY_AREA,
+                              tag,
+                              l,
+                              /* polling */ 0) == AES_SUCCESS) {
+
+         do {
+            ASM_NOP;
+         } while(CCMInvAuthDecryptCheckResult() == 0);
+       
+         if(CCMInvAuthDecryptGetResult(len_mac, 
+                                       m,
+                                       (uint16_t) *len_m,
+                                       tag) == AES_SUCCESS) {
+
+            *len_m -= len_mac;
+            return E_SUCCESS;
+         }
+      }
+   }
+   return E_FAIL;
+}
+
 static owerror_t aes_ecb_enc_cc2538(uint8_t* buffer, uint8_t* key) {
    if(load_key(key) == E_SUCCESS) {
       // Polling
@@ -54,8 +140,8 @@ static owerror_t aes_ecb_enc_cc2538(uint8_t* buffer, uint8_t* key) {
 }
 /*---------------------------------------------------------------------------*/
 const struct crypto_engine board_crypto_engine = {
-   aes_ccms_enc,
-   aes_ccms_dec,
+   aes_ccms_enc_cc2538,
+   aes_ccms_dec_cc2538,
    aes_cbc_enc_raw,
    aes_ctr_enc_raw,
    aes_ecb_enc_cc2538,      // AES stand-alone encryption
