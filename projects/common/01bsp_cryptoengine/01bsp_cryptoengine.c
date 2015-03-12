@@ -35,7 +35,20 @@ typedef struct
     uint8_t len_m;
     uint8_t l;
     uint8_t expected_ciphertext[24];
-} aes_ccms_enc_suite_t; 
+} aes_ccms_enc_suite_t;
+
+typedef struct
+{
+    uint8_t key[16];
+    uint8_t len_tag;
+    uint8_t nonce[13];
+    uint8_t a[15];
+    uint8_t c[20 + 4];
+    uint8_t len_a;
+    uint8_t len_c;
+    uint8_t l;
+    uint8_t expected_plaintext[20];
+} aes_ccms_dec_suite_t; 
 
 static int hang(uint8_t error_code) {
 
@@ -83,6 +96,28 @@ static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t *suite, uint8_t tes
    return success == test_suite_len ? E_SUCCESS : E_FAIL; 
 }
 
+static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t *suite, uint8_t test_suite_len) {
+   uint8_t i;
+   uint8_t success;
+
+   for(i = 0; i < test_suite_len; i++) {
+
+	   if(CRYPTO_ENGINE.aes_ccms_dec(suite[i].a,
+                                       suite[i].len_a,
+                                       suite[i].c,
+                                       &suite[i].len_c,
+                                       suite[i].nonce,
+                                       suite[i].l,
+                                       suite[i].key,
+                                       suite[i].len_tag) == E_SUCCESS) {
+         
+         if(memcmp(suite[i].c, suite[i].expected_plaintext, suite[i].len_c) == 0) {
+            success++;
+         }
+      }
+   }
+   return success == test_suite_len ? E_SUCCESS : E_FAIL; 
+}
 /**
 \brief The program starts executing here.
 */
@@ -147,6 +182,37 @@ int mote_main(void) {
             0x61, 0x01, 0x4e, 0x7b, 0x34, 0x4f, 0x09 } /* expected ciphertext */
       },
    };
+   
+   aes_ccms_dec_suite_t aes_ccms_dec_suite[] = {
+
+    { 
+        { 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, /* key */
+        0, /* tag len */
+        { 0x00, 0x00, 0xf0, 0xe0, 0xd0, 0xc0, 0xb0, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x05 }, /* nonce */
+        { 0x69, 0x98, 0x03, 0x33, 0x63, 0xbb, 0xaa, 0x01, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x03}, /* a vector */
+        { 0x92, 0xe8, 0xad, 0xca, 0x53, 0x81, 0xbf, 0xd0, 0x5b, 0xdd, 0xf3, 0x61, 0x09, 0x09, 0x82, 0xe6, 0x2c,
+           0x61, 0x01, 0x4e, 0x7b, 0x34, 0x4f, 0x09}, /* c vector (m + tag) */
+        0, /* len_a */
+        20, /* len_m */
+        2, /* CCM L */
+        { 0x14, 0xaa, 0xbb, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b,
+            0x0c, 0x0d, 0x0e, 0x0f } /* expected plaintext */
+    },
+      {
+        { 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, /* key */
+        4, /* tag len */
+        { 0x00, 0x00, 0xf0, 0xe0, 0xd0, 0xc0, 0xb0, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x05 }, /* nonce */
+        { 0x69, 0x98, 0x03, 0x33, 0x63, 0xbb, 0xaa, 0x01, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x03 }, /* a vector */
+        { 0x92, 0xe8, 0xad, 0xca, 0x53, 0x81, 0xbf, 0xd0, 0x5b, 0xdd, 0xf3, 0x61, 0x09, 0x09, 0x82, 0xe6, 0x2c,
+            0x61, 0x01, 0x4e, 0x7b, 0x34, 0x4f, 0x09 }, /* c vector (m + tag) */
+        15, /* len_a */
+        24, /* len_c */
+        2, /* CCM L */
+        { 0x14, 0xaa, 0xbb, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b,
+            0x0c, 0x0d, 0x0e, 0x0f } /* expected plaintext */
+      },
+   };
+
 
    board_init();
    
@@ -158,6 +224,9 @@ int mote_main(void) {
    }
 
    if (run_aes_ccms_enc_suite(aes_ccms_enc_suite, sizeof(aes_ccms_enc_suite)/sizeof(aes_ccms_enc_suite[0])) == E_FAIL) {
+      fail++;
+   }
+   if (run_aes_ccms_dec_suite(aes_ccms_dec_suite, sizeof(aes_ccms_dec_suite)/sizeof(aes_ccms_dec_suite[0])) == E_FAIL) {
       fail++;
    }
 
