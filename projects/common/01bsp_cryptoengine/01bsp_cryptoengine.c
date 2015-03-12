@@ -18,6 +18,12 @@ tests passed. If there was an error, we use the Error LED to signal.
 #include "crypto_engine.h"
 #include "leds.h"
 
+#define TEST_AES_ECB                   1
+#define TEST_AES_CCMS_ENC              1
+#define TEST_AES_CCMS_DEC              1
+#define TEST_AES_CCMS_AUTH_FORWARD     1
+#define TEST_AES_CCMS_AUTH_INVERSE     1
+
 typedef struct {
    uint8_t key[16];
    uint8_t buffer[16];
@@ -73,6 +79,7 @@ static int hang(uint8_t error_code) {
    return 0;
 }
 
+#if TEST_AES_ECB
 static owerror_t run_aes_ecb_suite(aes_ecb_suite_t *suite, uint8_t test_suite_len) {
    uint8_t i = 0;
    uint8_t success = 0;
@@ -87,7 +94,9 @@ static owerror_t run_aes_ecb_suite(aes_ecb_suite_t *suite, uint8_t test_suite_le
    
    return success == test_suite_len ? E_SUCCESS : E_FAIL; 
 }
+#endif /* TEST_AES_ECB */
 
+#if TEST_AES_CCMS_ENC
 static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t *suite, uint8_t test_suite_len) {
    uint8_t i = 0;
    uint8_t success = 0;
@@ -109,7 +118,9 @@ static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t *suite, uint8_t tes
    }
    return success == test_suite_len ? E_SUCCESS : E_FAIL; 
 }
+#endif /* TEST_AES_CCMS_ENC */
 
+#if TEST_AES_CCMS_DEC
 static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t *suite, uint8_t test_suite_len) {
    uint8_t i = 0;
    uint8_t success = 0;
@@ -132,7 +143,9 @@ static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t *suite, uint8_t tes
    }
    return success == test_suite_len ? E_SUCCESS : E_FAIL; 
 }
+#endif /* TEST_AES_CCMS_DEC */
 
+#if TEST_AES_CCMS_AUTH_FORWARD
 static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t *suite,
                      uint8_t test_suite_len) {
    uint8_t i = 0;
@@ -155,6 +168,9 @@ static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t *
    }
    return success == test_suite_len ? E_SUCCESS : E_FAIL; 
 }
+#endif /* TEST_AES_CCMS_AUTH_FORWARD */
+
+#if TEST_AES_CCMS_AUTH_INVERSE
 static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t *suite,
                      uint8_t test_suite_len) {
    uint8_t i = 0;
@@ -178,6 +194,7 @@ static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t *
    }
    return success == test_suite_len ? E_SUCCESS : E_FAIL; 
 }
+#endif /* TEST_AES_CCMS_AUTH_INVERSE */
 
 /**
 \brief The program starts executing here.
@@ -185,6 +202,7 @@ static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t *
 int mote_main(void) {
    uint8_t fail = 0;
 
+#if TEST_AES_ECB
    aes_ecb_suite_t aes_ecb_suite[] = {
       {
          { 0x2b, 0x7e, 0x15, 0x16, 0x28, 0xae, 0xd2, 0xa6, 0xab, 0xf7, 0x15, 0x88, 0x09, 0xcf, 0x4f, 0x3c },
@@ -212,8 +230,10 @@ int mote_main(void) {
          { 0x83, 0x78, 0x10, 0x60, 0x0e, 0x13, 0x93, 0x9b, 0x27, 0xe0, 0xd7, 0xe4, 0x58, 0xf0, 0xa9, 0xd1 },
       },
    };
+#endif /* TEST_AES_ECB */
 
 /* Test vectors from TI's example implementation */
+#if TEST_AES_CCMS_ENC
    aes_ccms_enc_suite_t aes_ccms_enc_suite[] = {
 
       { /* example case len_a and Mval = 0 */
@@ -243,7 +263,9 @@ int mote_main(void) {
             0x61, 0x01, 0x4e, 0x7b, 0x34, 0x4f, 0x09 } /* expected ciphertext */
       },
    };
-   
+#endif /* TEST_AES_CCMS_ENC */
+
+#if TEST_AES_CCMS_DEC
    aes_ccms_dec_suite_t aes_ccms_dec_suite[] = {
 
     { 
@@ -273,7 +295,9 @@ int mote_main(void) {
             0x0c, 0x0d, 0x0e, 0x0f } /* expected plaintext */
       },
    };
+#endif /* TEST_AES_CCMS_DEC */
 
+#if TEST_AES_CCMS_AUTH_FORWARD
    aes_ccms_auth_forward_suite_t aes_ccms_auth_forward_suite[] = {
 
     {
@@ -289,6 +313,9 @@ int mote_main(void) {
         { 0x22, 0x3B, 0xC1, 0xEC, 0x84, 0x1A, 0xB5, 0x53 } /* expected tag */
     }
    };
+#endif /* TEST_AES_CCMS_AUTH_FORWARD */
+
+#if TEST_AES_CCMS_AUTH_INVERSE
    aes_ccms_auth_forward_suite_t aes_ccms_auth_inverse_suite[] = {
     { 
         {0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF}, /* key */
@@ -303,30 +330,43 @@ int mote_main(void) {
         { 0x22, 0x3B, 0xC1, 0xEC, 0x84, 0x1A, 0xB5, 0x53 } /* expected tag */
     }
 };
+#endif /* TEST_AES_CCMS_AUTH_INVERSE */
 
    board_init();
    
    // Init the CRYPTO_ENGINE driver
    CRYPTO_ENGINE.init();
-/*
+#if TEST_AES_ECB
    if (run_aes_ecb_suite(aes_ecb_suite, sizeof(aes_ecb_suite)/sizeof(aes_ecb_suite[0])) == E_FAIL) {
       fail++;
    }
+#endif /* TEST_AES_ECB */
 
+#if TEST_AES_CCMS_ENC
    if (run_aes_ccms_enc_suite(aes_ccms_enc_suite, sizeof(aes_ccms_enc_suite)/sizeof(aes_ccms_enc_suite[0])) == E_FAIL) {
       fail++;
    }
+#endif /* TEST_AES_CCMS_ENC */
+
+#if TEST_AES_CCMS_DEC
    if (run_aes_ccms_dec_suite(aes_ccms_dec_suite, sizeof(aes_ccms_dec_suite)/sizeof(aes_ccms_dec_suite[0])) == E_FAIL) {
       fail++;
    }
-*/
-   if (run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite, sizeof(aes_ccms_auth_forward_suite)/sizeof(aes_ccms_auth_forward_suite[0])) == E_FAIL) {
+#endif /* TEST_AES_CCMS_DEC */
+
+#if TEST_AES_CCMS_AUTH_FORWARD
+   if (run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite, 
+            sizeof(aes_ccms_auth_forward_suite)/sizeof(aes_ccms_auth_forward_suite[0])) == E_FAIL) {
       fail++;
    }
+#endif /* TEST_AES_CCMS_AUTH_FORWARD */
+
+#if TEST_AES_CCMS_AUTH_INVERSE
    if (run_aes_ccms_auth_inverse_suite(aes_ccms_auth_inverse_suite, 
             sizeof(aes_ccms_auth_inverse_suite)/sizeof(aes_ccms_auth_inverse_suite[0])) == E_FAIL) {
       fail++;
    }
+#endif /* TEST_AES_CCMS_AUTH_INVERSE */
 
    return hang(fail);
 }
