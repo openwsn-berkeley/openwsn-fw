@@ -48,7 +48,21 @@ typedef struct
     uint8_t len_c;
     uint8_t l;
     uint8_t expected_plaintext[20];
-} aes_ccms_dec_suite_t; 
+} aes_ccms_dec_suite_t;
+
+typedef struct
+{
+    uint8_t key[16];
+    uint8_t len_tag;
+    uint8_t nonce[13];
+    uint8_t a[26];
+    uint8_t m[8];               
+    uint8_t len_a;
+    uint8_t len_m;
+    uint8_t l;
+    uint8_t expected_ciphertext[8];
+} aes_ccms_auth_forward_suite_t;
+
 
 static int hang(uint8_t error_code) {
 
@@ -118,6 +132,30 @@ static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t *suite, uint8_t tes
    }
    return success == test_suite_len ? E_SUCCESS : E_FAIL; 
 }
+
+static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t *suite,
+                     uint8_t test_suite_len) {
+   uint8_t i;
+   uint8_t success;
+
+   for(i = 0; i < test_suite_len; i++) {
+      if(CRYPTO_ENGINE.aes_ccms_enc(suite[i].a,
+                                       suite[i].len_a,
+                                       suite[i].m,
+                                       &suite[i].len_m,
+                                       suite[i].nonce,
+                                       suite[i].l,
+                                       suite[i].key,
+                                       suite[i].len_tag) == E_SUCCESS) {
+         
+         if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_m) == 0) {
+            success++;
+         }
+      }
+   }
+   return success == test_suite_len ? E_SUCCESS : E_FAIL; 
+}
+
 /**
 \brief The program starts executing here.
 */
@@ -213,12 +251,27 @@ int mote_main(void) {
       },
    };
 
+   aes_ccms_auth_forward_suite_t aes_ccms_auth_forward_suite[] = {
+
+    {
+        { 0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF }, /* key */
+        8, /* tag len */
+        { 0xAC, 0xDE, 0x48, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x05, 0x02 }, /* nonce */
+        { 0x08, 0xD0, 0x84, 0x21, 0x43, 0x01, 0x00, 0x00, 0x00, 0x00, 0x48, 0xDE, 0xAC, 0x02, 0x05, 0x00,
+         0x00, 0x00, 0x55, 0xCF, 0x00, 0x00, 0x51, 0x52, 0x53, 0x54 }, /* a vector */
+        { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, /* empty m vector with 8 octets to hold the tag*/
+        26, /* len_a */
+        0, /* len_m */
+        2, /* CCM L */
+        { 0x22, 0x3B, 0xC1, 0xEC, 0x84, 0x1A, 0xB5, 0x53 } /* expected tag */
+    }
+   };
 
    board_init();
    
    // Init the CRYPTO_ENGINE driver
    CRYPTO_ENGINE.init();
-
+/*
    if (run_aes_ecb_suite(aes_ecb_suite, sizeof(aes_ecb_suite)/sizeof(aes_ecb_suite[0])) == E_FAIL) {
       fail++;
    }
@@ -227,6 +280,10 @@ int mote_main(void) {
       fail++;
    }
    if (run_aes_ccms_dec_suite(aes_ccms_dec_suite, sizeof(aes_ccms_dec_suite)/sizeof(aes_ccms_dec_suite[0])) == E_FAIL) {
+      fail++;
+   }
+*/
+   if (run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite, sizeof(aes_ccms_auth_forward_suite)/sizeof(aes_ccms_auth_forward_suite[0])) == E_FAIL) {
       fail++;
    }
 
