@@ -17,12 +17,14 @@ tests passed. If there was an error, we use the Error LED to signal.
 #include "board.h"
 #include "crypto_engine.h"
 #include "leds.h"
+#include "bsp_timer.h"
 
 #define TEST_AES_ECB                   1
 #define TEST_AES_CCMS_ENC              1
 #define TEST_AES_CCMS_DEC              1
 #define TEST_AES_CCMS_AUTH_FORWARD     1
 #define TEST_AES_CCMS_AUTH_INVERSE     1
+#define TEST_BENCHMARK_CCMS            1
 
 typedef struct {
    uint8_t key[16];
@@ -367,6 +369,67 @@ int mote_main(void) {
       fail++;
    }
 #endif /* TEST_AES_CCMS_AUTH_INVERSE */
+
+#if TEST_BENCHMARK_CCMS
+
+#define A_LEN 30
+#define M_LEN 93
+#define TAG_LEN 4
+#define L 2
+
+   uint8_t a[A_LEN];
+   uint8_t m[M_LEN + TAG_LEN];
+   uint8_t nonce[] = { 0x00, 0x00, 0xf0, 0xe0, 0xd0, 0xc0, 0xb0, 0xa0, 0x00, 0x00, 0x00, 0x00, 0x05 };
+   uint8_t key[16] = { 0x12, 0x34, 0x56, 0x78, 0x9a, 0xbc, 0xde, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+   uint8_t len_m = M_LEN;
+   uint8_t ret;
+
+   memset(a, 0xfe, A_LEN);
+   memset(m, 0xab, M_LEN);
+   
+   PORT_TIMER_WIDTH time1 = 0;
+   PORT_TIMER_WIDTH time2 = 0;
+   PORT_TIMER_WIDTH enc = 0;
+   PORT_TIMER_WIDTH dec = 0;
+
+   time1 = bsp_timer_get_currentValue();
+   ret = CRYPTO_ENGINE.aes_ccms_enc(a,
+                                       A_LEN,
+                                       m,
+                                       &len_m,
+                                       nonce,
+                                       L,
+                                       key,
+                                       TAG_LEN);
+   time2 = bsp_timer_get_currentValue();
+
+   if (ret == E_SUCCESS) {
+      enc = time2 - time1;
+   }
+   else {
+      fail++;
+   }
+
+   time1 = bsp_timer_get_currentValue();
+   ret = CRYPTO_ENGINE.aes_ccms_dec(a,
+                                       A_LEN,
+                                       m,
+                                       &len_m,
+                                       nonce,
+                                       L,
+                                       key,
+                                       TAG_LEN);
+   time2 = bsp_timer_get_currentValue();
+
+   if (ret == E_SUCCESS) {
+      dec = time2 - time1;
+   }
+   else {
+      fail++;
+   }
+
+   time1 = enc + dec; // to avoid compiler warnings
+#endif /* TEST_BENCHMARK_CCMS */
 
    return hang(fail);
 }
