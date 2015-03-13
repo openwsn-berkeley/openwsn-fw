@@ -74,8 +74,8 @@ static int hang(uint8_t error_code) {
 }
 
 static owerror_t run_aes_ecb_suite(aes_ecb_suite_t *suite, uint8_t test_suite_len) {
-   uint8_t i;
-   uint8_t success;
+   uint8_t i = 0;
+   uint8_t success = 0;
    
    for(i = 0; i < test_suite_len; i++) {
       if(CRYPTO_ENGINE.aes_ecb_enc(suite[i].buffer, suite[i].key) == E_SUCCESS) {
@@ -89,8 +89,8 @@ static owerror_t run_aes_ecb_suite(aes_ecb_suite_t *suite, uint8_t test_suite_le
 }
 
 static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t *suite, uint8_t test_suite_len) {
-   uint8_t i;
-   uint8_t success;
+   uint8_t i = 0;
+   uint8_t success = 0;
 
    for(i = 0; i < test_suite_len; i++) {
       if(CRYPTO_ENGINE.aes_ccms_enc(suite[i].a,
@@ -111,8 +111,8 @@ static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t *suite, uint8_t tes
 }
 
 static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t *suite, uint8_t test_suite_len) {
-   uint8_t i;
-   uint8_t success;
+   uint8_t i = 0;
+   uint8_t success = 0;
 
    for(i = 0; i < test_suite_len; i++) {
 
@@ -135,8 +135,8 @@ static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t *suite, uint8_t tes
 
 static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t *suite,
                      uint8_t test_suite_len) {
-   uint8_t i;
-   uint8_t success;
+   uint8_t i = 0;
+   uint8_t success = 0;
 
    for(i = 0; i < test_suite_len; i++) {
       if(CRYPTO_ENGINE.aes_ccms_enc(suite[i].a,
@@ -157,8 +157,8 @@ static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t *
 }
 static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t *suite,
                      uint8_t test_suite_len) {
-   uint8_t i;
-   uint8_t success;
+   uint8_t i = 0;
+   uint8_t success = 0;
 
    for(i = 0; i < test_suite_len; i++) {
 
@@ -171,9 +171,9 @@ static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t *
                                        suite[i].key,
                                        suite[i].len_tag) == E_SUCCESS) {
          
-//         if(memcmp(suite[i].c, suite[i].expected_plaintext, suite[i].len_c) == 0) {
+         if(memcmp(suite[i].m, suite[i].expected_ciphertext, suite[i].len_m) == 0) {
             success++;
-//         }
+         }
       }
    }
    return success == test_suite_len ? E_SUCCESS : E_FAIL; 
