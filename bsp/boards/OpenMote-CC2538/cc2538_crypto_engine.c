@@ -13,8 +13,11 @@
 #include "ccm.h"  // CC2538 specific headers
 
 #define DEFAULT_KEY_AREA KEY_AREA_0
-
-static owerror_t load_key(uint8_t key[16]) {
+/**
+\brief On success, returns by reference the location in key RAM where the 
+   new/existing key is stored.
+*/
+static owerror_t load_key(uint8_t key[16], uint8_t* /* out */ key_location) {
    static uint8_t loaded_key[16];
    
    if(memcmp(loaded_key, key, 16) != 0) {
@@ -24,6 +27,7 @@ static owerror_t load_key(uint8_t key[16]) {
          return E_FAIL;
       }
    }
+   *key_location = DEFAULT_KEY_AREA;
    return E_SUCCESS;
 }
 
@@ -46,10 +50,11 @@ static owerror_t aes_ccms_enc_cc2538(uint8_t* a,
          uint8_t len_mac) {
 
    bool encrypt;
+   uint8_t key_location;
   
    encrypt = *len_m > 0 ? true : false;
 
-   if(load_key(key) == E_SUCCESS) {
+   if(load_key(key, &key_location) == E_SUCCESS) {
       if(CCMAuthEncryptStart(encrypt,
                               len_mac,
                               nonce,
@@ -57,7 +62,7 @@ static owerror_t aes_ccms_enc_cc2538(uint8_t* a,
                               (uint16_t) *len_m,
                               a,
                               (uint16_t) len_a,
-                              DEFAULT_KEY_AREA,
+                              key_location,
                               &m[*len_m],
                               l,
                               /* polling */ 0) == AES_SUCCESS) {
@@ -89,11 +94,12 @@ static owerror_t aes_ccms_dec_cc2538(uint8_t* a,
          uint8_t len_mac) {
 
    bool decrypt;
+   uint8_t key_location;
    uint8_t tag[CBC_MAX_MAC_SIZE];
   
    decrypt = *len_m - len_mac > 0 ? true : false;
 
-   if(load_key(key) == E_SUCCESS) {
+   if(load_key(key, &key_location) == E_SUCCESS) {
       if(CCMInvAuthDecryptStart(decrypt,
                               len_mac,
                               nonce,
@@ -101,7 +107,7 @@ static owerror_t aes_ccms_dec_cc2538(uint8_t* a,
                               (uint16_t) *len_m,
                               a,
                               (uint16_t) len_a,
-                              DEFAULT_KEY_AREA,
+                              key_location,
                               tag,
                               l,
                               /* polling */ 0) == AES_SUCCESS) {
@@ -124,9 +130,10 @@ static owerror_t aes_ccms_dec_cc2538(uint8_t* a,
 }
 
 static owerror_t aes_ecb_enc_cc2538(uint8_t* buffer, uint8_t* key) {
-   if(load_key(key) == E_SUCCESS) {
+   uint8_t key_location;
+   if(load_key(key, &key_location) == E_SUCCESS) {
       // Polling
-      if(AESECBStart(buffer, buffer, DEFAULT_KEY_AREA, 1, 0) == AES_SUCCESS) {
+      if(AESECBStart(buffer, buffer, key_location, 1, 0) == AES_SUCCESS) {
          do {
             ASM_NOP;
          } while(AESECBCheckResult() == 0);
