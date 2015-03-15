@@ -389,6 +389,8 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
    numSlotFrames = *((uint8_t*)(pkt->payload)+localptr);
    localptr++;
    
+   schedule_setFrameNumber(numSlotFrames);
+
    // for each slotframe
    i=0;
    while(i < numSlotFrames){
