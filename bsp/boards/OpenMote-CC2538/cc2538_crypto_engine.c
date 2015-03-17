@@ -14,7 +14,7 @@ static owerror_t init(void) {
    return E_SUCCESS;
 }
 /*---------------------------------------------------------------------------*/
-const struct crypto_engine cc2538_crypto_engine = {
+const struct crypto_engine board_crypto_engine = {
    aes_ccms_enc,
    aes_ccms_dec,
    aes_cbc_enc_raw,

@@ -14,7 +14,7 @@ extern "C" {
 
 //=========================== module variables ================================
 
-extern const struct crypto_engine cc2538_crypto_engine;   
+extern const struct crypto_engine board_crypto_engine;   
 
 #ifdef  __cplusplus
 }
