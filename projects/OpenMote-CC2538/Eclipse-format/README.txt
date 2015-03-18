@@ -6,7 +6,7 @@ Software required:
 ---------------------
 
 - GNU ARM Gcc toolchain - https://launchpad.net/gcc-arm-embedded
-- Eclipse CDT Kepler - http://www.eclipse.org/downloads/packages/eclipse-standard-432/keplersr2
+- Eclipse CDT Kepler - http://www.eclipse.org/downloads/packages/eclipse-ide-cc-developers/keplersr2
 - SEGGER jlink software - https://www.segger.com/jlink-software.html
 
 
