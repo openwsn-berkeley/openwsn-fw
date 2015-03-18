@@ -26,6 +26,7 @@ source = [
     'radiotimer.c',
     'spi.c',
     'uart.c',
+    'board_crypto_engine.c',
 ]
 
 board  = localEnv.Object(source=source) + cc2420
