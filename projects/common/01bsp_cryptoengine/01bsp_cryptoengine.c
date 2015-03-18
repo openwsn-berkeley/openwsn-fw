@@ -100,7 +100,7 @@ static int hang(uint8_t error_code) {
 }
 
 #if TEST_AES_ECB
-static owerror_t run_aes_ecb_suite(aes_ecb_suite_t *suite, uint8_t test_suite_len) {
+static owerror_t run_aes_ecb_suite(aes_ecb_suite_t* suite, uint8_t test_suite_len) {
    uint8_t i = 0;
    uint8_t success = 0;
    
@@ -117,7 +117,7 @@ static owerror_t run_aes_ecb_suite(aes_ecb_suite_t *suite, uint8_t test_suite_le
 #endif /* TEST_AES_ECB */
 
 #if TEST_AES_CCMS_ENC
-static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t *suite, uint8_t test_suite_len) {
+static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t* suite, uint8_t test_suite_len) {
    uint8_t i = 0;
    uint8_t success = 0;
 
@@ -141,7 +141,7 @@ static owerror_t run_aes_ccms_enc_suite(aes_ccms_enc_suite_t *suite, uint8_t tes
 #endif /* TEST_AES_CCMS_ENC */
 
 #if TEST_AES_CCMS_DEC
-static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t *suite, uint8_t test_suite_len) {
+static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t* suite, uint8_t test_suite_len) {
    uint8_t i = 0;
    uint8_t success = 0;
 
@@ -166,7 +166,7 @@ static owerror_t run_aes_ccms_dec_suite(aes_ccms_dec_suite_t *suite, uint8_t tes
 #endif /* TEST_AES_CCMS_DEC */
 
 #if TEST_AES_CCMS_AUTH_FORWARD
-static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t *suite,
+static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t* suite,
                      uint8_t test_suite_len) {
    uint8_t i = 0;
    uint8_t success = 0;
@@ -191,7 +191,7 @@ static owerror_t run_aes_ccms_auth_forward_suite(aes_ccms_auth_forward_suite_t *
 #endif /* TEST_AES_CCMS_AUTH_FORWARD */
 
 #if TEST_AES_CCMS_AUTH_INVERSE
-static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t *suite,
+static owerror_t run_aes_ccms_auth_inverse_suite(aes_ccms_auth_forward_suite_t* suite,
                      uint8_t test_suite_len) {
    uint8_t i = 0;
    uint8_t success = 0;
