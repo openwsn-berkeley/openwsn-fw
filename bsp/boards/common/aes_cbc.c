@@ -24,17 +24,14 @@ owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
    uint8_t* pbuf;
 
    nb = len >> 4;
-   for (n = 0; n < nb; n++) {
+   for (n = 0; n < (nb - 1); n++) {
       pbuf = &buffer[16 * n];
-      CRYPTO_ENGINE.aes_ecb_enc(pbuf,key);
-      if (n < (nb - 1)) {
-         // may be faster if vector are aligned to 4 bytes (use long instead char in xor)
-         for (k = 0; k < 16; k++) {
-            pbuf[16 + k] ^= pbuf[k];
-         }
+      // may be faster if vector are aligned to 4 bytes (use long instead char in xor)
+      for (k = 0; k < 16; k++) {
+         pbuf[16 + k] ^= pbuf[k];
       }
+      CRYPTO_ENGINE.aes_ecb_enc(&pbuf[16],key);
    }
-
    return E_SUCCESS;
 }
 
