@@ -18,6 +18,7 @@ if env['board']!='python':
         CPPPATH = [
             os.path.join('#','inc'),
             os.path.join('#','bsp','boards'),
+            os.path.join('#','bsp','boards','common'),
             os.path.join('#','bsp','chips'),
             os.path.join('#','drivers','common'),
             os.path.join('#','kernel'),
@@ -40,6 +41,8 @@ if env['forcetopology']==1:
     env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
 if env['noadaptivesync']==1:
     env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
+if env['cryptoengine']:
+    env.Append(CPPDEFINES    = {'CRYPTO_ENGINE_SCONS' : env['cryptoengine']})
 
 if   env['toolchain']=='mspgcc':
     
