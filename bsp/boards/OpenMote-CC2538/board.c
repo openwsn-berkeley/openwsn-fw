@@ -25,6 +25,7 @@
 #include "radio.h"
 #include "flash.h"
 #include "i2c.h"
+#include "sensors.h"
 
 //=========================== variables =======================================
 
@@ -86,6 +87,7 @@ void board_init(void) {
    uart_init();
    radio_init();
    i2c_init();
+   sensors_init();
 }
 
 /**
