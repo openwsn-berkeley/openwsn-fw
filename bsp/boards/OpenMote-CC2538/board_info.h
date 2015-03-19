@@ -74,6 +74,10 @@
 
 #define SYNC_ACCURACY                       1     // ticks
 
+//===== per-board number of sensors
+
+#define NUMSENSORS 7
+
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================
