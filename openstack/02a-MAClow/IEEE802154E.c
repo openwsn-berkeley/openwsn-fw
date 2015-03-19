@@ -66,7 +66,6 @@ bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
-void     ieee154e_processSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr);
 // ASN handling
 void     incrementAsnOffset(void);
 void     ieee154e_syncSlotOffset(void);
