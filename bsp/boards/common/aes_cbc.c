@@ -14,10 +14,11 @@
 \param[in,out] buffer Message to be encrypted. Will be overwritten by ciphertext.
 \param[in] len Message length. Must be multiple of 16 octets.
 \param[in] key Buffer containing the secret key (16 octets).
+\param[in] iv Buffer containing the Initialization Vector (16 octets).
 
 \returns E_SUCCESS when the encryption was successful. 
 */
-owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
+owerror_t aes_cbc_enc_raw(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]) {
    uint8_t  n;
    uint8_t  k;
    uint8_t  nb;

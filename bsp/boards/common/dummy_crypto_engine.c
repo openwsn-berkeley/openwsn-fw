@@ -8,7 +8,7 @@
 #include <string.h>
 #include "dummy_crypto_engine.h"
 
-static owerror_t aes_cbc_enc_raw_identity(uint8_t* buffer, uint8_t len, uint8_t key[16]) {
+static owerror_t aes_cbc_enc_raw_identity(uint8_t* buffer, uint8_t len, uint8_t key[16], uint8_t iv[16]) {
    return E_SUCCESS;
 }
 
