@@ -127,7 +127,8 @@ static owerror_t aes_cbc_mac(uint8_t* a,
    
    uint8_t  pad_len;
    uint8_t  len;
-   uint8_t  buffer[128+16]; // max buffer plus IV
+   uint8_t  cbc_mac_iv[16];
+   uint8_t  buffer[128+16+16]; // max buffer plus IV
 
    // asserts here
    if (!((len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
@@ -141,6 +142,8 @@ static owerror_t aes_cbc_mac(uint8_t* a,
    if (mac == 0) {
       return E_FAIL;
    }
+
+   memset(cbc_mac_iv, 0x00, 16); // CBC-MAC Initialization Vector is a zero string
 
    // IV: flags (1B) | SADDR (8B) | ASN (5B) | len(m) (2B)
    // X0 xor IV in first 16 bytes of buffer: set buffer[:16] as IV)
@@ -172,7 +175,7 @@ static owerror_t aes_cbc_mac(uint8_t* a,
    memset(&buffer[len], 0, pad_len);
    len += pad_len;
 
-   CRYPTO_ENGINE.aes_cbc_enc_raw(buffer, len, key);
+   CRYPTO_ENGINE.aes_cbc_enc_raw(buffer, len, key, cbc_mac_iv);
 
    // copy MAC
    memcpy(mac, &buffer[len - 16], len_mac);
