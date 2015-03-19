@@ -78,10 +78,12 @@ struct crypto_engine {
    \param[in,out] buffer Message to be encrypted. Will be overwritten by ciphertext.
    \param[in] len Message length. 
    \param[in] key Buffer containing the secret key (16 octets).
+   \param[in] iv Buffer containing the Initialization Vector (16 octets).
    */  
    owerror_t (* aes_cbc_enc_raw)(uint8_t* buffer,
       uint8_t len,
-      uint8_t key[16]);
+      uint8_t key[16],
+      uint8_t iv[16]);
 
    /**
    \brief Raw AES-CTR encryption.

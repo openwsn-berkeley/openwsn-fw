@@ -2,6 +2,7 @@
 \brief AES CCMS implementation
   
 \author Marcelo Barros de Almeida <marcelobarrosalmeida@gmail.com>, March 2015.
+\author Malisa Vucinic <malishav@gmail.com>, March 2015.
 */
 #include <string.h>
 #include <stdint.h>
@@ -9,12 +10,12 @@
 #include "aes_ccms.h"
 #include "crypto_engine.h"
 
-static owerror_t aes_cbc_mac(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac);
+static owerror_t aes_cbc_mac(uint8_t* a, uint8_t len_a, uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac, uint8_t l);
 
-static owerror_t aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac);
+static owerror_t aes_ctr_enc(uint8_t* m, uint8_t len_m, uint8_t* nonce, uint8_t key[16], uint8_t* mac, uint8_t len_mac, uint8_t l);
 
 /**
-\brief CCM* forward transformation (i.e. encryption + authentication) specific to IEEE 802.15.4E.
+\brief CCM* forward transformation (i.e. encryption + authentication).
 \param[in] a Pointer to the authentication only data.
 \param[in] len_a Length of authentication only data.
 \param[in,out] m Pointer to the data that is both authenticated and encrypted. Overwritten by
@@ -44,8 +45,8 @@ owerror_t aes_ccms_enc(uint8_t* a,
       return E_FAIL;
    }
 
-   if (aes_cbc_mac(a, len_a, m, *len_m, nonce, key, mac, len_mac) == E_SUCCESS) {
-      if (aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac) == E_SUCCESS) {
+   if (aes_cbc_mac(a, len_a, m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
+      if (aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
          memcpy(&m[*len_m], mac, len_mac);
          *len_m += len_mac;
 
@@ -57,7 +58,7 @@ owerror_t aes_ccms_enc(uint8_t* a,
 }
 
 /**
-\brief CCM* inverse transformation (i.e. decryption + tag verification) specific to IEEE 802.15.4E.
+\brief CCM* inverse transformation (i.e. decryption + tag verification).
 \param[in] a Pointer to the authentication only data.
 \param[in] len_a Length of authentication only data.
 \param[in,out] m Pointer to the data that is both authenticated and encrypted. Overwritten by
@@ -92,8 +93,8 @@ owerror_t aes_ccms_dec(uint8_t* a,
    *len_m -= len_mac;
    memcpy(mac, &m[*len_m], len_mac);
 
-   if (aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac) == E_SUCCESS) {
-      if (aes_cbc_mac(a, len_a, m, *len_m, nonce, key, orig_mac, len_mac) == E_SUCCESS) {
+   if (aes_ctr_enc(m, *len_m, nonce, key, mac, len_mac, l) == E_SUCCESS) {
+      if (aes_cbc_mac(a, len_a, m, *len_m, nonce, key, orig_mac, len_mac, l) == E_SUCCESS) {
          if (memcmp(mac, orig_mac, len_mac) == 0) {
             return E_SUCCESS;
          }
@@ -104,7 +105,7 @@ owerror_t aes_ccms_dec(uint8_t* a,
 }
 
 /**
-\brief CBC-MAC generation specific to IEEE 802.15.4E.
+\brief CBC-MAC generation specific to CCM*.
 \param[in] a Pointer to the authentication only data.
 \param[in] len_a Length of authentication only data.
 \param[in] m Pointer to the data that is both authenticated and encrypted.
@@ -113,6 +114,7 @@ owerror_t aes_ccms_dec(uint8_t* a,
 \param[in] key Buffer containing the secret key (16 octets).
 \param[out] mac Buffer where the value of the CBC-MAC tag will be written.
 \param[in] len_mac Length of the CBC-MAC tag. Must be 4, 8 or 16 octets.
+\param[in] l CCM parameter L that allows selection of different nonce length.
 
 \returns E_SUCCESS when the generation was successful, E_FAIL otherwise. 
 */
@@ -123,14 +125,16 @@ static owerror_t aes_cbc_mac(uint8_t* a,
          uint8_t* nonce,
          uint8_t key[16],
          uint8_t* mac,
-         uint8_t len_mac) {
+         uint8_t len_mac,
+         uint8_t l) {
    
    uint8_t  pad_len;
    uint8_t  len;
-   uint8_t  buffer[128+16]; // max buffer plus IV
+   uint8_t  cbc_mac_iv[16];
+   uint8_t  buffer[128+16+16]; // max buffer plus IV
 
    // asserts here
-   if (!((len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
+   if (!((len_mac == 0) || (len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
       return E_FAIL;
    }
 
@@ -142,22 +146,36 @@ static owerror_t aes_cbc_mac(uint8_t* a,
       return E_FAIL;
    }
 
+   memset(cbc_mac_iv, 0x00, 16); // CBC-MAC Initialization Vector is a zero string
+
    // IV: flags (1B) | SADDR (8B) | ASN (5B) | len(m) (2B)
    // X0 xor IV in first 16 bytes of buffer: set buffer[:16] as IV)
-   buffer[0] = 0;
-   buffer[1] = len_m;
-   memcpy(&buffer[2], nonce, 13); // assign byte by byte or copy ?
-   buffer[15] = 0x49;
-   len = 16;
+   buffer[0] = 0x00; // set flags to zero including reserved
+   buffer[0] |= 0x07 & (l-1); // field L
+   // (len_mac - 2)/2 shifted left 3 times corresponds to (len_mac - 2) << 2
+   buffer[0] |= len_mac == 0 ? 0 : (0x07 & (len_mac - 2)) << 2; // field M
+   buffer[0] |= len_a != 0 ? 0x40 : 0; // field Adata
+   
+   memcpy(&buffer[1], nonce, 13);
 
+   if (l == 3) {
+      buffer[13] = 0;
+   }
+
+   buffer[14] = 0;
+   buffer[15] = len_m;
+
+   len = 16;
    // len(a)
-   buffer[16] = 0;
-   buffer[17] = len_a;
-   len += 2;
+   if(len_a > 0) {
+      buffer[16] = 0;
+      buffer[17] = len_a;
+      len += 2;
+   }
 
    //  (((x >> 4) + 1)<<4) - x   or    16 - (x % 16) ?
    // a + padding
-   pad_len = ((((len_a + 2) >> 4) + 1) << 4) - (len_a + 2);
+   pad_len = ((((len_a + len - 16) >> 4) + 1) << 4) - (len_a + len - 16);
    pad_len = pad_len == 16 ? 0 : pad_len;
    memcpy(&buffer[len], a, len_a);
    len += len_a;
@@ -172,7 +190,7 @@ static owerror_t aes_cbc_mac(uint8_t* a,
    memset(&buffer[len], 0, pad_len);
    len += pad_len;
 
-   CRYPTO_ENGINE.aes_cbc_enc_raw(buffer, len, key);
+   CRYPTO_ENGINE.aes_cbc_enc_raw(buffer, len, key, cbc_mac_iv);
 
    // copy MAC
    memcpy(mac, &buffer[len - 16], len_mac);
@@ -191,6 +209,7 @@ static owerror_t aes_cbc_mac(uint8_t* a,
    on weather the function is called as part of CCM* forward or inverse transformation. It
    is overwrriten by the encrypted, i.e unencrypted, tag on return.
 \param[in] len_mac Length of the CBC-MAC tag. Must be 4, 8 or 16 octets.
+\param[in] l CCM parameter L that allows selection of different nonce length.
 
 \returns E_SUCCESS when the encryption was successful, E_FAIL otherwise. 
 */
@@ -199,7 +218,8 @@ static owerror_t aes_ctr_enc(uint8_t* m,
          uint8_t* nonce,
          uint8_t key[16],
          uint8_t* mac,
-         uint8_t len_mac) {
+         uint8_t len_mac,
+         uint8_t l) {
 
    uint8_t pad_len;
    uint8_t len;
@@ -207,7 +227,7 @@ static owerror_t aes_ctr_enc(uint8_t* m,
    uint8_t buffer[128 + 16]; // max buffer plus mac
 
    // asserts here
-   if (!((len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
+   if (!((len_mac == 0) || (len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
       return E_FAIL;
    }
 
@@ -216,7 +236,9 @@ static owerror_t aes_ctr_enc(uint8_t* m,
    }
 
    // iv (flag (1B) | source addr (8B) | ASN (5B) | cnt (2B)
-   iv[0] = 0x01;
+   iv[0] = 0x00;
+   iv[0] |= 0x07 & (l-1); // field L
+
    memcpy(&iv[1], nonce, 13);
    iv[14] = 0x00;
    iv[15] = 0x00;
