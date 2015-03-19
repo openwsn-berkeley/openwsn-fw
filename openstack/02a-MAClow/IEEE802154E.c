@@ -69,8 +69,8 @@ bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 // ASN handling
 void     incrementAsnOffset(void);
 void     ieee154e_syncSlotOffset(void);
-void     asnStoreFromAdv(uint8_t* asn);
-void     joinPriorityStoreFromAdv(uint8_t jp);
+void     asnStoreFromEB(uint8_t* asn);
+void     joinPriorityStoreFromEB(uint8_t jp);
 // synchronization
 void     synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
@@ -571,7 +571,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // toss the IEs
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
       
-      // synchronize (for the first time) to the sender's ADV
+      // synchronize (for the first time) to the sender's EB
       synchronizePacket(ieee154e_vars.syncCapturedTime);
       
       // declare synchronized
@@ -582,7 +582,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
                             (errorparameter_t)ieee154e_vars.slotOffset,
                             (errorparameter_t)0);
       
-      // send received ADV up the stack so RES can update statistics (synchronizing)
+      // send received EB up the stack so RES can update statistics (synchronizing)
       notif_receive(ieee154e_vars.dataReceived);
       
       // clear local variable
@@ -683,13 +683,13 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                   
                   if (idmanager_getIsDAGroot()==FALSE) {
                      // ASN
-                     asnStoreFromAdv((uint8_t*)(pkt->payload)+ptr);
+                     asnStoreFromEB((uint8_t*)(pkt->payload)+ptr);
                      // ASN is known, but the frame length is not
                      // frame length will be known after parsing the frame and link IE
                      f_asn2slotoffset = TRUE;
                      ptr = ptr + 5;
                      // join priority
-                     joinPriorityStoreFromAdv(*((uint8_t*)(pkt->payload)+ptr));
+                     joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
                      ptr = ptr + 1;
                   }
                   break;
@@ -842,7 +842,7 @@ port_INLINE void activity_ti1ORri1() {
             if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
                couldSendEB=TRUE;
                // look for an EB packet in the queue
-               ieee154e_vars.dataToSend = openqueue_macGetAdvPacket();
+               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
             }
          }
          if (ieee154e_vars.dataToSend==NULL) {
@@ -1719,13 +1719,13 @@ port_INLINE void ieee154e_getAsn(uint8_t* array) {
    array[4]         =  ieee154e_vars.asn.byte4;
 }
 
-port_INLINE void joinPriorityStoreFromAdv(uint8_t jp){
+port_INLINE void joinPriorityStoreFromEB(uint8_t jp){
   ieee154e_vars.dataReceived->l2_joinPriority = jp;
   ieee154e_vars.dataReceived->l2_joinPriorityPresent = TRUE;     
 }
 
 
-port_INLINE void asnStoreFromAdv(uint8_t* asn) {
+port_INLINE void asnStoreFromEB(uint8_t* asn) {
    
    // store the ASN
    ieee154e_vars.asn.bytes0and1   =     asn[0]+
