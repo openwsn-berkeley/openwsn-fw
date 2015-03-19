@@ -19,9 +19,15 @@ The superframe repears over time and can be arbitrarly long.
 */
 #define SUPERFRAME_LENGTH    11 //should be 101
 
-#define NUMADVSLOTS          1
-#define NUMSHAREDTXRX        5 
-#define NUMSERIALRX          3
+//draft-ietf-6tisch-minimal-06
+#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      1
+#define SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET                        0
+#define SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET                     0
+#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
+#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
+
+#define NUMSERIALRX          1
+#define NUMSLOTSOFF          1
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -33,7 +39,7 @@ in that table; a slot is "active" when it is not of type CELLTYPE_OFF.
 Set this number to the exact number of active slots you are planning on having
 in your schedule, so not to waste RAM.
 */
-#define MAXACTIVESLOTS       (NUMADVSLOTS+NUMSHAREDTXRX+NUMSERIALRX)
+#define MAXACTIVESLOTS       (SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+NUMSERIALRX+NUMSLOTSOFF)
 
 /**
 \brief Minimum backoff exponent.
@@ -50,12 +56,6 @@ does not use any backoff mechanism when a transmission fails.
 See MINBE for an explanation of backoff.
 */
 #define MAXBE                4
-//6tisch minimal draft
-#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      5
-#define SCHEDULE_MINIMAL_6TISCH_EB_CELLS                          1
-#define SCHEDULE_MINIMAL_6TISCH_SLOTFRAME_SIZE                  101
-#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
-#define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 //=========================== typedef =========================================
 
@@ -114,7 +114,10 @@ typedef struct {
 typedef struct {
    scheduleEntry_t  scheduleBuf[MAXACTIVESLOTS];
    scheduleEntry_t* currentScheduleEntry;
-   uint16_t         frameLength;
+   frameLength_t    frameLength;
+   frameLength_t    maxActiveSlots;
+   uint8_t          frameHandle;
+   uint8_t          frameNumber;
    uint8_t          backoffExponent;
    uint8_t          backoff;
    uint8_t          debugPrintRow;
@@ -124,11 +127,14 @@ typedef struct {
 
 // admin
 void               schedule_init(void);
+void               schedule_startDAGroot(void);
 bool               debugPrint_schedule(void);
 bool               debugPrint_backoff(void);
 
 // from 6top
 void               schedule_setFrameLength(frameLength_t newFrameLength);
+void               schedule_setFrameHandle(uint8_t frameHandle);
+void               schedule_setFrameNumber(uint8_t frameNumber);
 owerror_t          schedule_addActiveSlot(
    slotOffset_t         slotOffset,
    cellType_t           type,
@@ -143,6 +149,8 @@ void               schedule_getSlotInfo(
    slotinfo_element_t*  info
 );
 
+uint16_t           schedule_getMaxActiveSlots(void);
+
 owerror_t          schedule_removeActiveSlot(
    slotOffset_t         slotOffset,
    open_addr_t*         neighbor
@@ -154,6 +162,8 @@ void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
 void               schedule_advanceSlot(void);
 slotOffset_t       schedule_getNextActiveSlotOffset(void);
 frameLength_t      schedule_getFrameLength(void);
+uint8_t            schedule_getFrameHandle(void);
+uint8_t            schedule_getFrameNumber(void);
 cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset(void);

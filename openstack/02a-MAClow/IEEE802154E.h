@@ -22,7 +22,7 @@
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define ADVTIMEOUT                  30 // in seconds: sending ADV every 30 seconds
+#define EBTIMEOUT                  30 // in seconds: sending EB every 30 seconds
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -182,7 +182,7 @@ typedef struct {
 } IEEE802154E_ACK_ht;
 
 // includes payload header IE short + MLME short Header + Sync IE
-#define ADV_PAYLOAD_LENGTH sizeof(payload_IE_ht) + \
+#define EB_PAYLOAD_LENGTH sizeof(payload_IE_ht) + \
                            sizeof(mlme_IE_ht)     + \
                            sizeof(sync_IE_ht)
 

@@ -221,7 +221,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    return NULL;
 }
 
-OpenQueueEntry_t* openqueue_macGetAdvPacket() {
+OpenQueueEntry_t* openqueue_macGetEBPacket() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
