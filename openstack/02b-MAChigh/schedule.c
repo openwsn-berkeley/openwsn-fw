@@ -36,7 +36,7 @@ void schedule_init() {
    schedule_vars.backoffExponent = MINBE-1;
    schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
    
-   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_TIMESLOT;
+   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    if (idmanager_getIsDAGroot()==TRUE) {
       schedule_startDAGroot();
    }
@@ -63,7 +63,7 @@ void schedule_startDAGroot() {
    slotOffset_t    running_slotOffset;
    open_addr_t     temp_neighbor;
    
-   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_TIMESLOT;
+   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    // set frame length, handle and number (default 1 by now)
    schedule_setFrameLength(SUPERFRAME_LENGTH);
    schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
@@ -77,7 +77,7 @@ void schedule_startDAGroot() {
          running_slotOffset,                 // slot offset
          CELLTYPE_TXRX,                      // type of slot
          TRUE,                               // shared?
-         SCHEDULE_MINIMAL_6TISCH_CHANNEL,    // channel offset
+         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
          &temp_neighbor                      // neighbor
       );
    }

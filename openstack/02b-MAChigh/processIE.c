@@ -95,7 +95,7 @@ port_INLINE uint8_t processIE_prependSlotframeLinkIE(OpenQueueEntry_t* pkt){
   
    len            = 0;
    linkOption     = 0;
-   lastSlotOffset = SCHEDULE_MINIMAL_6TISCH_TIMESLOT + SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
+   lastSlotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET + SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
    
    // for each link in the default schedule, add:
    // - [1B] linkOption bitmap
@@ -105,11 +105,11 @@ port_INLINE uint8_t processIE_prependSlotframeLinkIE(OpenQueueEntry_t* pkt){
    //===== shared cells
    
    linkOption = (1<<FLAG_TX_S)|(1<<FLAG_RX_S)|(1<<FLAG_SHARED_S);
-   for (slotOffset=lastSlotOffset;slotOffset>SCHEDULE_MINIMAL_6TISCH_TIMESLOT;slotOffset--) {
+   for (slotOffset=lastSlotOffset;slotOffset>SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;slotOffset--) {
       packetfunctions_reserveHeaderSize(pkt,5);
       pkt->payload[0]   = (slotOffset-1)        & 0xFF;
       pkt->payload[1]   = ((slotOffset-1) >> 8) & 0xFF;
-      pkt->payload[2]   = SCHEDULE_MINIMAL_6TISCH_CHANNEL;     // channel offset
+      pkt->payload[2]   = SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET;     // channel offset
       pkt->payload[3]   = 0x00;
       pkt->payload[4]   = linkOption;                          // linkOption
       len+=5;
