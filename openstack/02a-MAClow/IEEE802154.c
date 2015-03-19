@@ -4,7 +4,6 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "topology.h"
-#include "security.h"
 
 //=========================== variables =======================================
 
@@ -34,12 +33,17 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    
+   //General IEs here (those that are carried in all packets) -- None by now.
+   
+   //START OF TELEMATICS CODE
+   /*if security is enabled, the Auxiliary Security Header need to be
+    * added to the IEEE802.15.4 MAC header
+    */
    if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
 	   prepend_AuxiliarySecurityHeader(msg);
    }
+   //END OF TELEMATICS CODE
 
-   //General IEs here (those that are carried in all packets) -- None by now.
-   
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
    // nextHop address
@@ -62,7 +66,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       }
       
    }
-   // destpan
+   // destpan -- se page 41 of 15.4-2011 std. DEST PANID only sent as it is equal to SRC PANID
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
    //dsn
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
@@ -100,7 +104,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    } else {
       temp_8b          |= IEEE154_ACK_YES_ACK_REQ         << IEEE154_FCF_ACK_REQ;
    }
-   temp_8b             |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
+   temp_8b             |= IEEE154_PANID_COMPRESSED      << IEEE154_FCF_INTRAPAN;
    *((uint8_t*)(msg->payload)) = temp_8b;
 }
 
@@ -138,7 +142,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    ieee802514_header->frameVersion   = (temp_8b >> IEEE154_FCF_FRAME_VERSION      ) & 0x03;//2b
 
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
-       return; //invalid packet according to p.64 IEEE15.4e
+       return; //invalid packet accordint to p.64 IEEE15.4e
    }
    
    switch ( (temp_8b >> IEEE154_FCF_DEST_ADDR_MODE ) & 0x03 ) {
@@ -234,17 +238,11 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    }
    
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
-       return; //invalid packet according to p.64 IEEE15.4e
+       return; //invalid packet accordint to p.64 IEEE15.4e
    }
    
-   // apply topology filter
-   if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {
-      // the topology filter does accept this packet, return
-      return;
-   }
-
    //START OF TELEMATICS CODE
-   //if the security is enabled, the Auxiliary Security Header can be retrieved
+   //if security is enabled, Auxiliary Security Header can be retrieved
    if(ieee802514_header->securityEnabled == TRUE){
 	   msg->l2_security = TRUE;
 	   retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
@@ -254,7 +252,11 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    }
   //END OF TELEMATICS CODE
 
-
+   // apply topology filter
+   if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {
+      // the topology filter does accept this packet, return
+      return;
+   }
    // if you reach this, the header is valid
    ieee802514_header->valid=TRUE;
 }

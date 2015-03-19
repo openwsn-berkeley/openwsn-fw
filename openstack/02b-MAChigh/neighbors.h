@@ -56,7 +56,7 @@ typedef struct {
    int8_t          rssi;
    uint8_t         parentPreference;
    dagrank_t       DAGrank;
-   uint16_t        asn;
+   uint16_t        asn; 
 } netDebugNeigborEntry_t;
 END_PACK
 

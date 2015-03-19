@@ -202,7 +202,7 @@ bool neighbors_isStableNeighbor(open_addr_t* address) {
          packetfunctions_ip128bToMac64b(address,&temp_prefix,&temp_addr_64b);
          break;
       default:
-         openserial_printError(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
                                (errorparameter_t)0);
          return returnVal;
@@ -476,7 +476,7 @@ void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t ind
          address->type=ADDR_64B;
          break;
       default:
-         openserial_printError(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)addr_type,
                                (errorparameter_t)1);
          break; 
@@ -574,14 +574,14 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_neighbors() {
-//   debugNeighborEntry_t temp;
-//   neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
-//   temp.row=neighbors_vars.debugRow;
-//   temp.neighborEntry=neighbors_vars.neighbors[neighbors_vars.debugRow];
-//   openserial_printStatus(STATUS_NEIGHBORS,(uint8_t*)&temp,sizeof(debugNeighborEntry_t));
-//   return TRUE;
-//}
+bool debugPrint_neighbors() {
+   debugNeighborEntry_t temp;
+   neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
+   temp.row=neighbors_vars.debugRow;
+   temp.neighborEntry=neighbors_vars.neighbors[neighbors_vars.debugRow];
+   openserial_printStatus(STATUS_NEIGHBORS,(uint8_t*)&temp,sizeof(debugNeighborEntry_t));
+   return TRUE;
+}
 
 //=========================== private =========================================
 
@@ -594,7 +594,7 @@ void registerNewNeighbor(open_addr_t* address,
    bool     iHaveAPreferedParent;
    // filter errors
    if (address->type!=ADDR_64B) {
-      openserial_printError(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+      openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                             (errorparameter_t)address->type,
                             (errorparameter_t)2);
       return;
@@ -683,7 +683,7 @@ bool isThisRowMatching(open_addr_t* address, uint8_t rowNumber) {
          return neighbors_vars.neighbors[rowNumber].used &&
                 packetfunctions_sameAddress(address,&neighbors_vars.neighbors[rowNumber].addr_64b);
       default:
-         openserial_printError(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
+         openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
                                (errorparameter_t)address->type,
                                (errorparameter_t)3);
          return FALSE;

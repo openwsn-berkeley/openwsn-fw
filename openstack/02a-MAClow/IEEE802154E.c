@@ -15,6 +15,10 @@
 #include "sixtop.h"
 #include "adaptive_sync.h"
 #include "processIE.h"
+//START OF TELEMATICS CODE
+//include security modules
+#include "security.h"
+//END OF TELEMATICS CODE
 
 //=========================== variables =======================================
 
@@ -66,11 +70,11 @@ bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
-void     ieee154e_processSlotframeLinkIE(OpenQueueEntry_t* pkt,uint8_t * ptr);
 // ASN handling
 void     incrementAsnOffset(void);
-void     asnStoreFromAdv(uint8_t* asn);
-void     joinPriorityStoreFromAdv(uint8_t jp);
+void     ieee154e_syncSlotOffset(void);
+void     asnStoreFromEB(uint8_t* asn);
+void     joinPriorityStoreFromEB(uint8_t jp);
 // synchronization
 void     synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
@@ -170,11 +174,11 @@ void isr_ieee154e_newSlot() {
    radio_setTimerPeriod(TsSlotDuration);
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
+         changeIsSync(TRUE);
        	 //START OF TELEMATICS CODE
-		 //If I'm the DAG Root, here I can store the Key
+		 //If DAG Root, store the Key
 		 scheduler_push_task(coordinatorORParent_init,TASKPRIO_SIXTOP);
 		 //END OF TELEMATICS CODE
-         changeIsSync(TRUE);
       } else {
          activity_synchronize_newSlot();
       }
@@ -358,14 +362,14 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_asn() {
-//   asn_t output;
-//   output.byte4         =  ieee154e_vars.asn.byte4;
-//   output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
-//   output.bytes0and1    =  ieee154e_vars.asn.bytes0and1;
-//   openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(output));
-//   return TRUE;
-//}
+bool debugPrint_asn() {
+   asn_t output;
+   output.byte4         =  ieee154e_vars.asn.byte4;
+   output.bytes2and3    =  ieee154e_vars.asn.bytes2and3;
+   output.bytes0and1    =  ieee154e_vars.asn.bytes0and1;
+   openserial_printStatus(STATUS_ASN,(uint8_t*)&output,sizeof(output));
+   return TRUE;
+}
 
 /**
 \brief Trigger this module to print status information, over serial.
@@ -390,11 +394,11 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_macStats() {
-//   // send current stats over serial
-//   openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
-//   return TRUE;
-//}
+bool debugPrint_macStats() {
+   // send current stats over serial
+   openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
+   return TRUE;
+}
 
 //=========================== private =========================================
 
@@ -538,7 +542,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
       
       //START OF TELEMATICS CODE
-      //if I'm not the DAG Root and I'm not synch, I can store the Key
+      //if not DAG Root and not synch, store the Key
   	  if(idmanager_getIsDAGroot()==FALSE && ieee154e_isSynch() == FALSE
   		 && ieee802514_header.frameType == IEEE154_TYPE_BEACON){
   		  remote_init(ieee802514_header);
@@ -559,7 +563,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // toss the IEEE802.15.4 header -- this does not include IEs as they are processed 
       // next.
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-
+      
       // process IEs
       lenIE = 0;
       if (
@@ -583,7 +587,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // toss the IEs
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
       
-      // synchronize (for the first time) to the sender's ADV
+      // synchronize (for the first time) to the sender's EB
       synchronizePacket(ieee154e_vars.syncCapturedTime);
       
       // declare synchronized
@@ -594,7 +598,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
                             (errorparameter_t)ieee154e_vars.slotOffset,
                             (errorparameter_t)0);
       
-      // send received ADV up the stack so RES can update statistics (synchronizing)
+      // send received EB up the stack so RES can update statistics (synchronizing)
       notif_receive(ieee154e_vars.dataReceived);
       
       // clear local variable
@@ -629,6 +633,8 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    uint16_t              len;
    uint16_t              sublen;
    PORT_SIGNED_INT_WIDTH timeCorrection;
+   // flag used for understanding if the slotoffset should be inferred from both ASN and slotframe length
+   bool                  f_asn2slotoffset;
    
    ptr=0;
    
@@ -663,7 +669,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
       
       case IEEE802154E_MLME_IE_GROUPID:
          // MLME IE
-         
+         f_asn2slotoffset = FALSE;
          do {
             
             //read sub IE header
@@ -693,16 +699,21 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                   
                   if (idmanager_getIsDAGroot()==FALSE) {
                      // ASN
-                     asnStoreFromAdv((uint8_t*)(pkt->payload)+ptr);
+                     asnStoreFromEB((uint8_t*)(pkt->payload)+ptr);
+                     // ASN is known, but the frame length is not
+                     // frame length will be known after parsing the frame and link IE
+                     f_asn2slotoffset = TRUE;
                      ptr = ptr + 5;
                      // join priority
-                     joinPriorityStoreFromAdv(*((uint8_t*)(pkt->payload)+ptr));
+                     joinPriorityStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
                      ptr = ptr + 1;
                   }
                   break;
                
                case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
-                  processIE_retrieveSlotframeLinkIE(pkt,&ptr);
+                  if ((idmanager_getIsDAGroot()==FALSE) && (ieee154e_isSynch()==FALSE)) {
+                     processIE_retrieveSlotframeLinkIE(pkt,&ptr);
+                  }
                   break;
                
                case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
@@ -716,7 +727,11 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             
             len = len - sublen;
          } while(len>0);
-         
+         if (f_asn2slotoffset == TRUE) {
+            // at this point, ASN and frame length are known
+            // the current slotoffset can be inferred
+            ieee154e_syncSlotOffset();
+         }
          break;
       
       case IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID:
@@ -764,6 +779,8 @@ port_INLINE void activity_ti1ORri1() {
    open_addr_t neighbor;
    uint8_t     i;
    sync_IE_ht  sync_IE;
+   bool        changeToRX=FALSE;
+   bool        couldSendEB=FALSE;
 
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -828,73 +845,82 @@ port_INLINE void activity_ti1ORri1() {
    // check the schedule to see what type of slot this is
    cellType = schedule_getType();
    switch (cellType) {
-      case CELLTYPE_ADV:
-         // stop using serial
-         openserial_stop();
-         // look for an ADV packet in the queue
-         ieee154e_vars.dataToSend = openqueue_macGetAdvPacket();
-         if (ieee154e_vars.dataToSend==NULL) {   // I will be listening for an ADV
-            // change state
-            changeState(S_RXDATAOFFSET);
-            // arm rt1
-            radiotimer_schedule(DURATION_rt1);
-         } else {                                // I will be sending an ADV
-            // change state
-            changeState(S_TXDATAOFFSET);
-            // change owner
-            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;         
-            //copy synch IE  -- should be Little endian???
-            // fill in the ASN field of the ADV
-            ieee154e_getAsn(sync_IE.asn);
-            sync_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank) 
-       
-            memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
-
-            // record that I attempt to transmit this packet
-            ieee154e_vars.dataToSend->l2_numTxAttempts++;
-            // arm tt1
-            radiotimer_schedule(DURATION_tt1);
-         }
-         break;
       case CELLTYPE_TXRX:
       case CELLTYPE_TX:
          // stop using serial
          openserial_stop();
+         // assuming that there is nothing to send
+         ieee154e_vars.dataToSend = NULL;
          // check whether we can send
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-         } else {
-            ieee154e_vars.dataToSend = NULL;
+            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+               couldSendEB=TRUE;
+               // look for an EB packet in the queue
+               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+            }
          }
-         if (ieee154e_vars.dataToSend!=NULL) {   // I have a packet to send
+         if (ieee154e_vars.dataToSend==NULL) {
+            if (cellType==CELLTYPE_TX) {
+               // abort
+               endSlot();
+               break;
+            } else {
+               changeToRX=TRUE;
+            }
+         } else {
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
             ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
-
-            //START OF TELEMATICS CODE
-            if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-         	 security_outgoingFrame(ieee154e_vars.dataToSend);
-         	 packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
+            if (couldSendEB==TRUE) {        // I will be sending an EB
+               //copy synch IE  -- should be Little endian???
+               // fill in the ASN field of the EB
+               ieee154e_getAsn(sync_IE.asn);
+               sync_IE.join_priority = neighbors_getMyDAGrank()/(2*MINHOPRANKINCREASE); //poipoi -- use dagrank(rank)
+               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
             }
-
-            //END OF TELEMATICS CODE
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
+
+            //START OF TELEMATICS CODE
+            /*
+             * if security is enabled on the current frame,
+             * I have to encrypt it before sending.
+             * Note that if this is not the first attempt, the
+             * clearText has to be encrypted again.
+             */
+            if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+            	//if it is a retransmission, recover the clearText packet
+            	if(ieee154e_vars.dataToSend->l2_numTxAttempts != 1){
+					 ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->clearText_length;
+					 uint8_t i;
+					 for(i=0;i<ieee154e_vars.dataToSend->length; i++){
+						ieee154e_vars.dataToSend->l2_payload[i] = ieee154e_vars.dataToSend->clearText[i];
+					 }
+				 }
+
+            	security_outgoingFrame(ieee154e_vars.dataToSend);
+            	packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
+            }
+            //END OF TELEMATICS CODE
+
+            if(ieee154e_vars.dataToSend->l2_numTxAttempts != 1){
+  			   openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+  								(errorparameter_t)ieee154e_vars.dataToSend->l2_numTxAttempts,
+  								(errorparameter_t)100);
+            }
+
             // arm tt1
             radiotimer_schedule(DURATION_tt1);
-         } else if (cellType==CELLTYPE_TX){
-            // abort
-            endSlot();
-         }
-         if (cellType==CELLTYPE_TX || 
-             (cellType==CELLTYPE_TXRX && ieee154e_vars.dataToSend!=NULL)) {
             break;
          }
       case CELLTYPE_RX:
-         // stop using serial
-         openserial_stop();
+         if (changeToRX==FALSE) {
+            // stop using serial
+            openserial_stop();
+         }
          // change state
          changeState(S_RXDATAOFFSET);
          // arm rt1
@@ -1038,9 +1064,8 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    } else {
       listenForAck = TRUE;
    }
-
+   
    if (listenForAck==TRUE) {
-
       // arm tt5
       radiotimer_schedule(DURATION_tt5);
    } else {
@@ -1056,7 +1081,6 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
 }
 
 port_INLINE void activity_ti6() {
-
    // change state
    changeState(S_RXACKPREPARE);
    
@@ -1230,18 +1254,18 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
       
-      // break if invalid ACK
-      if (isValidAck(&ieee802514_header,ieee154e_vars.dataToSend)==FALSE) {
-         // break from the do-while loop and execute the clean-up code below
-         break;
-      }
-
       //START OF TELEMATICS CODE
+      //if security is enabled, unsecuring operations can occur
 	   if(ieee154e_vars.ackReceived->l2_security== TRUE){
 		  security_incomingFrame(ieee154e_vars.ackReceived);
 	   }
 	   //END OF TELEMATICS CODE
 
+      // break if invalid ACK
+      if (isValidAck(&ieee802514_header,ieee154e_vars.dataToSend)==FALSE) {
+         // break from the do-while loop and execute the clean-up code below
+         break;
+      }
       //hanlde IEs --xv poipoi
       if (ieee802514_header.ieListPresent==FALSE){
          break; //ack should contain IEs.
@@ -1411,7 +1435,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
                             ieee154e_vars.dataReceived->length);
          break;
       }
-
+      
       // toss CRC (2 last bytes)
       packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
       
@@ -1420,10 +1444,10 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          // jump to the error code below this do-while loop
          break;
       }
-
+      
       // parse the IEEE802.15.4 header (RX DATA)
-  	  ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
-
+      ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
+      
       // break if invalid IEEE802.15.4 header
       if (ieee802514_header.valid==FALSE) {
          // break from the do-while loop and execute the clean-up code below
@@ -1457,10 +1481,11 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       ieee154e_vars.lastCapturedTime = capturedTime;
       
 	  //START OF TELEMATICS CODE
+      //if security is enabled on the received frame, unsecure it
 	  if(ieee154e_vars.dataReceived->l2_security== TRUE){
 		  security_incomingFrame(ieee154e_vars.dataReceived);
 	  }
-	//END OF TELEMATICS CODE
+	  //END OF TELEMATICS CODE
 
       // if I just received an invalid frame, stop
       if (isValidRxFrame(&ieee802514_header)==FALSE) {
@@ -1546,6 +1571,7 @@ port_INLINE void activity_ri6() {
    memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_ht));
    
    //START OF TELEMATICS CODE
+   //security options on ACK
    ieee154e_vars.ackToSend->l2_security = TRUE;
    ieee154e_vars.ackToSend->l2_securityLevel = 7;
    ieee154e_vars.ackToSend->l2_keyIdMode = 3;
@@ -1565,15 +1591,18 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
 
    //START OF TELEMATICS CODE
+   //record positions where l2_payload starts and l2_payload length
    ieee154e_vars.ackToSend->l2_payload = ieee154e_vars.ackToSend->payload;
    ieee154e_vars.ackToSend->l2_length = ieee154e_vars.ackToSend->length;
    //END OF TELEMATICS CODE
+
 
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
                             IEEE154_IELIST_YES,//ie in ack
                             IEEE154_FRAMEVERSION,//enhanced ack
                             //START OF TELEMATICS CODE
+                            //dynamic security management
 							ieee154e_vars.ackToSend->l2_security,
 							//END OF TELEMATICS CODE
                             ieee154e_vars.dataReceived->l2_dsn,
@@ -1581,6 +1610,7 @@ port_INLINE void activity_ri6() {
                             );
    
    //START OF TELEMATICS CODE
+   //if security is enabled, secure the frame
    if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
 	   security_outgoingFrame(ieee154e_vars.ackToSend);
 	  }
@@ -1588,7 +1618,7 @@ port_INLINE void activity_ri6() {
 
    // space for 2-byte CRC
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
-
+   
     // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
@@ -1782,13 +1812,13 @@ port_INLINE void ieee154e_getAsn(uint8_t* array) {
    array[4]         =  ieee154e_vars.asn.byte4;
 }
 
-port_INLINE void joinPriorityStoreFromAdv(uint8_t jp){
+port_INLINE void joinPriorityStoreFromEB(uint8_t jp){
   ieee154e_vars.dataReceived->l2_joinPriority = jp;
   ieee154e_vars.dataReceived->l2_joinPriorityPresent = TRUE;     
 }
 
 
-port_INLINE void asnStoreFromAdv(uint8_t* asn) {
+port_INLINE void asnStoreFromEB(uint8_t* asn) {
    
    // store the ASN
    ieee154e_vars.asn.bytes0and1   =     asn[0]+
@@ -1796,13 +1826,24 @@ port_INLINE void asnStoreFromAdv(uint8_t* asn) {
    ieee154e_vars.asn.bytes2and3   =     asn[2]+
                                     256*asn[3];
    ieee154e_vars.asn.byte4        =     asn[4];
-   
    // determine the current slotOffset
-   /*
-   Note: this is a bit of a hack. Normally, slotOffset=ASN%slotlength. But since
-   the ADV is exchanged in slot 0, we know that we're currently at slotOffset==0
-   */
-   ieee154e_vars.slotOffset       = 0;
+}
+
+port_INLINE void ieee154e_syncSlotOffset() {
+   frameLength_t frameLength;
+   uint32_t slotOffset;
+   
+   frameLength = schedule_getFrameLength();
+   slotOffset = ieee154e_vars.asn.byte4;
+   slotOffset = slotOffset % frameLength;
+   slotOffset = slotOffset << 16;
+   slotOffset = slotOffset + ieee154e_vars.asn.bytes2and3;
+   slotOffset = slotOffset % frameLength;
+   slotOffset = slotOffset << 16;
+   slotOffset = slotOffset + ieee154e_vars.asn.bytes0and1;
+   slotOffset = slotOffset % frameLength;
+   
+   ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
    schedule_syncSlotOffset(ieee154e_vars.slotOffset);
    ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
    

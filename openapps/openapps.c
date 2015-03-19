@@ -12,6 +12,7 @@
 #include "cleds.h"
 #include "cstorm.h"
 #include "cwellknown.h"
+#include "rrt.h"
 // TCP
 #include "techo.h"
 // UDP
@@ -32,6 +33,7 @@ void openapps_init(void) {
    cleds__init();
    cstorm_init();
    cwellknown_init();
+   rrt_init();
    // TCP
    techo_init();
    // UDP

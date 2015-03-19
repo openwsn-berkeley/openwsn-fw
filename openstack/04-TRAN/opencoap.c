@@ -11,8 +11,6 @@
 
 //=========================== defines =========================================
 
-#define COAP_TOKEN 123 // TODO: make dynamic
-
 //=========================== variables =======================================
 
 opencoap_vars_t opencoap_vars;
@@ -74,11 +72,11 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    
    // reject unsupported header
    if (coap_header.Ver!=COAP_VERSION || coap_header.TKL>COAP_MAX_TKL) {
-//      openserial_printError(
-//         COMPONENT_OPENCOAP,ERR_WRONG_TRAN_PROTOCOL,
-//         (errorparameter_t)0,
-//         (errorparameter_t)coap_header.Ver
-//      );
+      openserial_printError(
+         COMPONENT_OPENCOAP,ERR_WRONG_TRAN_PROTOCOL,
+         (errorparameter_t)0,
+         (errorparameter_t)coap_header.Ver
+      );
       openqueue_freePacketBuffer(msg);
       return;
    }
@@ -97,9 +95,13 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    for (i=0;i<MAX_COAP_OPTIONS;i++) {
       
       // detect when done parsing options
-      if (msg->payload[index]==COAP_PAYLOAD_MARKER){
+      if (msg->payload[index]==COAP_PAYLOAD_MARKER) {
          // found the payload marker, done parsing options.
          index++; // skip marker and stop parsing options
+         break;
+      }
+      if (msg->length<=index) {
+         // end of message, no payload
          break;
       }
       
@@ -177,7 +179,8 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       }
    
    } else {
-      // this is a response: target resource is indicated by message ID
+      // this is a response: target resource is indicated by token, and message ID
+      // if an ack for a confirmable message, or a reset
       // find the resource which matches
       
       // start with the first resource in the linked list
@@ -186,11 +189,21 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
       // iterate until matching resource found, or no match
       while (found==FALSE) {
          
-         if (coap_header.messageID==temp_desc->messageID) {
-            found=TRUE;
+         if (
+                coap_header.TKL==temp_desc->last_request.TKL                                       &&
+                memcmp(&coap_header.token[0],&temp_desc->last_request.token[0],coap_header.TKL)==0
+            ) {
+                
+            if (coap_header.T==COAP_TYPE_ACK || coap_header.T==COAP_TYPE_RES) {
+                if (coap_header.messageID==temp_desc->last_request.messageID) {
+                    found=TRUE;
+                }
+            } else {
+                found=TRUE;
+            }
             
             // call the resource's callback
-            if (temp_desc->callbackRx!=NULL) {
+            if (found==TRUE && temp_desc->callbackRx!=NULL) {
                temp_desc->callbackRx(msg,&coap_header,&coap_options[0]);
             }
          }
@@ -301,11 +314,11 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    
    // if you get here, no valid creator was found
    
-//   openserial_printError(
-//      COMPONENT_OPENCOAP,ERR_UNEXPECTED_SENDDONE,
-//      (errorparameter_t)0,
-//      (errorparameter_t)0
-//   );
+   openserial_printError(
+      COMPONENT_OPENCOAP,ERR_UNEXPECTED_SENDDONE,
+      (errorparameter_t)0,
+      (errorparameter_t)0
+   );
    openqueue_freePacketBuffer(msg);
 }
 
@@ -315,10 +328,11 @@ void opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 \brief Writes the links to all the resources on this mote into the message.
 
 \param[out] msg The messge to write the links to.
+\param[in] componentID The componentID calling this function.
 
 \post After this function returns, the msg contains 
 */
-void opencoap_writeLinks(OpenQueueEntry_t* msg) {
+void opencoap_writeLinks(OpenQueueEntry_t* msg, uint8_t componentID) {
    coap_resource_desc_t* temp_resource;
    
    // start with the first resource in the linked list
@@ -327,33 +341,42 @@ void opencoap_writeLinks(OpenQueueEntry_t* msg) {
    // iterate through all resources
    while (temp_resource!=NULL) {
       
-      // write ending '>'
-      packetfunctions_reserveHeaderSize(msg,1);
-      msg->payload[0] = '>';
-      
-      // write path1
-      if (temp_resource->path1len>0) {
-         packetfunctions_reserveHeaderSize(msg,temp_resource->path1len);
-         memcpy(&msg->payload[0],temp_resource->path1val,temp_resource->path1len);
+      if (  
+            (temp_resource->discoverable==TRUE) &&
+            (
+               ((componentID==COMPONENT_CWELLKNOWN) && (temp_resource->path1len==0))
+               || 
+               ((componentID==temp_resource->componentID) && (temp_resource->path1len!=0))
+            )
+         ) {
+          
+         // write ending '>'
          packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = '/';
+         msg->payload[0] = '>';
+         
+         // write path1
+         if (temp_resource->path1len>0) {
+            packetfunctions_reserveHeaderSize(msg,temp_resource->path1len);
+            memcpy(&msg->payload[0],temp_resource->path1val,temp_resource->path1len);
+            packetfunctions_reserveHeaderSize(msg,1);
+            msg->payload[0] = '/';
+         }
+         
+         // write path0
+         packetfunctions_reserveHeaderSize(msg,temp_resource->path0len);
+         memcpy(msg->payload,temp_resource->path0val,temp_resource->path0len);
+         packetfunctions_reserveHeaderSize(msg,2);
+         msg->payload[1] = '/';
+         
+         // write opening '>'
+         msg->payload[0] = '<';
+         
+         // write separator between links
+         if (temp_resource->next!=NULL) {
+            packetfunctions_reserveHeaderSize(msg,1);
+            msg->payload[0] = ',';
+         }
       }
-      
-      // write path0
-      packetfunctions_reserveHeaderSize(msg,temp_resource->path0len);
-      memcpy(msg->payload,temp_resource->path0val,temp_resource->path0len);
-      packetfunctions_reserveHeaderSize(msg,2);
-      msg->payload[1] = '/';
-      
-      // write opening '>'
-      msg->payload[0] = '<';
-      
-      // write separator between links
-      if (temp_resource->next!=NULL) {
-         packetfunctions_reserveHeaderSize(msg,1);
-         msg->payload[0] = ',';
-      }
-      
       // iterate to next resource
       temp_resource = temp_resource->next;
    }
@@ -401,7 +424,7 @@ This function is NOT called for a response.
    CoAP header.
 \param[in] type The CoAP type of the message.
 \param[in] code The CoAP code of the message.
-\param[in] TKL  The Token Length of the message.
+\param[in] TKL  The Token Length of the message, sanitized to a max of COAP_MAX_TKL (8).
 \param[out] descSender A pointer to the description of the calling CoAP
    resource.
 
@@ -417,9 +440,14 @@ owerror_t opencoap_send(
       uint8_t                TKL,
       coap_resource_desc_t*  descSender
    ) {
+   uint16_t token;
+   uint8_t tokenPos=0;
+   coap_header_iht* request;
    
-   // pick a new (global) messageID
-   opencoap_vars.messageID          = openrandom_get16b();
+   // increment the (global) messageID
+   if (opencoap_vars.messageID++ == 0xffff) {
+      opencoap_vars.messageID = 0;
+   }
    
    // take ownership over the packet
    msg->owner                       = COMPONENT_OPENCOAP;
@@ -427,19 +455,29 @@ owerror_t opencoap_send(
    // fill in packet metadata
    msg->l4_sourcePortORicmpv6Type   = WKP_UDP_COAP;
    
+   // update the last_request header
+   request                          = &descSender->last_request;
+   request->T                       = type;
+   request->Code                    = code;
+   request->messageID               = opencoap_vars.messageID;
+   request->TKL                     = TKL<COAP_MAX_TKL ? TKL : COAP_MAX_TKL;
+   
+   while (tokenPos<request->TKL) {
+       token = openrandom_get16b();
+       memcpy(&request->token[tokenPos],&token,2);
+       tokenPos+=2;
+   }
+   
    // pre-pend CoAP header (version,type,TKL,code,messageID,Token)
-   packetfunctions_reserveHeaderSize(msg,5);
+   packetfunctions_reserveHeaderSize(msg,4+request->TKL);
    msg->payload[0]                  = (COAP_VERSION   << 6) |
                                       (type           << 4) |
-                                      (TKL            << 0);
+                                      (request->TKL   << 0);
    msg->payload[1]                  = code;
-   msg->payload[2]                  = (opencoap_vars.messageID>>8) & 0xff;
-   msg->payload[3]                  = (opencoap_vars.messageID>>0) & 0xff;
-   msg->payload[4]                  = COAP_TOKEN;
-  
-   // indicate the messageID used to the sender
-   descSender->messageID            = opencoap_vars.messageID;
-   descSender->token                = COAP_TOKEN;
+   msg->payload[2]                  = (request->messageID>>8) & 0xff;
+   msg->payload[3]                  = (request->messageID>>0) & 0xff;
+
+   memcpy(&msg->payload[4],&token,request->TKL);
    
    return openudp_send(msg);
 }

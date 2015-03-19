@@ -17,6 +17,10 @@
 //-- 02a-TSCH
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
+//START OF TELEMATICS CODE
+//include security modules
+#include "security.h"
+//END OF TELEMATICS CODE
 //-- 02b-RES
 #include "schedule.h"
 #include "sixtop.h"
@@ -58,13 +62,14 @@ void openstack_init(void) {
    //-- 02a-TSCH
    adaptive_sync_init();
    ieee154e_init();
+   //START OF TELEMATICS CODE
+   //bootstrapping procedures for security
+   security_init();
+   //END OF TELEMATICS CODE
    //-- 02b-RES
    schedule_init();
    sixtop_init();
    neighbors_init();
-   //START OF TELEMATICS CODE
-   security_init();
-   //END OF TELEMATICS CODE
    //-- 03a-IPHC
    openbridge_init();
    iphc_init();

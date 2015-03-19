@@ -26,16 +26,16 @@
     <BootSegment>2</BootSegment>
     <eraseonlaunchrule>0</eraseonlaunchrule>
     <AsfFrameworkConfig>
-      <framework-data xmlns="">
-        <options />
-        <configurations />
-        <files />
-        <documentation help="" />
-        <offline-documentation help="" />
-        <dependencies>
-          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.17.0" />
-        </dependencies>
-      </framework-data>
+      <framework-data>
+  <options />
+  <configurations />
+  <files />
+  <documentation help="" />
+  <offline-documentation help="" />
+  <dependencies>
+    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.20.1" />
+  </dependencies>
+</framework-data>
     </AsfFrameworkConfig>
     <avrtool>com.atmel.avrdbg.tool.edbg</avrtool>
     <avrtoolinterface>SWD</avrtoolinterface>
@@ -50,6 +50,7 @@
       <ToolNumber>ATML2127021800000126</ToolNumber>
       <ToolName>EDBG</ToolName>
     </com_atmel_avrdbg_tool_edbg>
+    <preserveEEPROM>true</preserveEEPROM>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
@@ -62,7 +63,7 @@
   <armgcc.compiler.symbols.DefSymbols>
     <ListValues>
       <Value>NDEBUG</Value>
-      <Value>ARM_MATH_CM0=true</Value>
+      <Value>ARM_MATH_CM0=false</Value>
       <Value>AT86RF233</Value>
     </ListValues>
   </armgcc.compiler.symbols.DefSymbols>
@@ -72,11 +73,42 @@
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel</Value>
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\CMSIS\Include</Value>
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
+      <Value>../../../../inc</Value>
+      <Value>../../../../openapps</Value>
+      <Value>../../../../openstack</Value>
+      <Value>../../../../bsp/boards</Value>
+      <Value>../../../../bsp/chips</Value>
+      <Value>../../../../kernel</Value>
+      <Value>../../../../bsp/boards/samr21_xpro</Value>
+      <Value>../../../../bsp/boards</Value>
+      <Value>../../../../bsp/chips/at86rf233</Value>
+      <Value>../../../../drivers/common</Value>
+      <Value>../../../../kernel/openos</Value>
+      <Value>../../../../openstack/02a-MAClow</Value>
+      <Value>../../../../openstack/02b-MAChigh</Value>
+      <Value>../../../../openstack/03a-IPHC</Value>
+      <Value>../../../../openstack/03b-IPv6</Value>
+      <Value>../../../../openstack/04-TRAN</Value>
+      <Value>../../../../openapps/c6t</Value>
+      <Value>../../../../openapps/cexample</Value>
+      <Value>../../../../openapps/cinfo</Value>
+      <Value>../../../../openapps/cleds</Value>
+      <Value>../../../../openapps/cstorm</Value>
+      <Value>../../../../openapps/cwellknown</Value>
+      <Value>../../../../openapps/techo</Value>
+      <Value>../../../../openapps/tohlone</Value>
+      <Value>../../../../openapps/uecho</Value>
+      <Value>../../../../openapps/rrt</Value>
+      <Value>../../../../openstack/cross-layers</Value>
+      <Value>../../../../openstack</Value>
+      <Value>../../../../bsp/boards/samr21_xpro/drivers/inc</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
-  <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
+  <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
   <armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcc.compiler.optimization.PrepareFunctionsForGarbageCollection>
+  <armgcc.compiler.optimization.DebugLevel>Maximum (-g3)</armgcc.compiler.optimization.DebugLevel>
   <armgcc.compiler.warnings.AllWarnings>True</armgcc.compiler.warnings.AllWarnings>
+  <armgcc.linker.general.UseNewlibNano>True</armgcc.linker.general.UseNewlibNano>
   <armgcc.linker.libraries.Libraries>
     <ListValues>
       <Value>libm</Value>
@@ -88,7 +120,9 @@
     </ListValues>
   </armgcc.linker.libraries.LibrarySearchPaths>
   <armgcc.linker.optimization.GarbageCollectUnusedSections>True</armgcc.linker.optimization.GarbageCollectUnusedSections>
+  <armgcc.linker.memorysettings.ExternalRAM />
   <armgcc.linker.miscellaneous.LinkerFlags>-Tsamr21g18a_flash.ld</armgcc.linker.miscellaneous.LinkerFlags>
+  <armgcc.assembler.debugging.DebugLevel>Default (-g)</armgcc.assembler.debugging.DebugLevel>
   <armgcc.preprocessingassembler.general.IncludePaths>
     <ListValues>
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL\samr21\include</Value>
@@ -97,6 +131,7 @@
       <Value>%24(ToolchainDir)\..\..\CMSIS_Atmel\Device\ATMEL</Value>
     </ListValues>
   </armgcc.preprocessingassembler.general.IncludePaths>
+  <armgcc.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcc.preprocessingassembler.debugging.DebugLevel>
 </ArmGcc>
     </ToolchainSettings>
   </PropertyGroup>
@@ -146,6 +181,7 @@
       <Value>../../../../openapps/techo</Value>
       <Value>../../../../openapps/tohlone</Value>
       <Value>../../../../openapps/uecho</Value>
+      <Value>../../../../openapps/rrt</Value>
       <Value>../../../../openstack/cross-layers</Value>
       <Value>../../../../openstack</Value>
       <Value>../../../../bsp/boards/samr21_xpro/drivers/inc</Value>
@@ -198,12 +234,6 @@
     <Compile Include="..\..\..\openstack\02b-MAChigh\sixtop.c">
       <SubType>compile</SubType>
       <Link>openstack\02b-MAChigh\sixtop.c</Link>
-    </Compile>
-    <Compile Include="cmsis\src\startup_samr21.c">
-      <SubType>compile</SubType>
-    </Compile>
-    <Compile Include="cmsis\src\system_samr21.c">
-      <SubType>compile</SubType>
     </Compile>
     <Compile Include="..\..\..\bsp\boards\samr21_xpro\drivers\inc\base_type.h">
       <SubType>compile</SubType>
@@ -465,6 +495,16 @@
       <SubType>compile</SubType>
       <Link>openapps\uecho\uecho.c</Link>
     </Compile>
+    <Compile Include="..\..\..\openapps\rrt\rrt.c">
+      <SubType>compile</SubType>
+      <Link>openapps\rrt\rrt.c</Link>
+    </Compile>
+    <Compile Include="cmsis\src\startup_samr21.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="cmsis\src\system_samr21.c">
+      <SubType>compile</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="bsp" />
@@ -497,6 +537,7 @@
     <Folder Include="openapps\techo" />
     <Folder Include="openapps\tohlone" />
     <Folder Include="openapps\uecho" />
+    <Folder Include="openapps\rrt" />
     <Folder Include="openstack\cross-layers" />
   </ItemGroup>
   <ItemGroup>

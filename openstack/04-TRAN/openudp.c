@@ -7,6 +7,7 @@
 // applications
 #include "opencoap.h"
 #include "uecho.h"
+#include "rrt.h"
 
 //=========================== variables =======================================
 
@@ -39,10 +40,14 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
       case WKP_UDP_ECHO:
          uecho_sendDone(msg,error);
          break;
+      case WKP_UDP_RINGMASTER:
+	 //udpprint_sendDone(msg, error);
+         rrt_sendDone(msg, error);
+         break;
       default:
-//         openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
-//                               (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
-//                               (errorparameter_t)5);
+         openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
+                               (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
+                               (errorparameter_t)5);
          openqueue_freePacketBuffer(msg);         
    }
 }
@@ -95,13 +100,20 @@ void openudp_receive(OpenQueueEntry_t* msg) {
       case WKP_UDP_COAP:
          opencoap_receive(msg);
          break;
+      case WKP_UDP_RINGMASTER:
+         if (msg->l4_payload[0] > 90) {
+            rrt_sendCoAPMsg('B', NULL);
+         }
+
+         openqueue_freePacketBuffer(msg);
+         break;
       case WKP_UDP_ECHO:
          uecho_receive(msg);
          break;
       default:
-//         openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
-//                               (errorparameter_t)msg->l4_destination_port,
-//                               (errorparameter_t)6);
+         openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
+                               (errorparameter_t)msg->l4_destination_port,
+                               (errorparameter_t)6);
          openqueue_freePacketBuffer(msg);         
    }
 }

@@ -4,6 +4,7 @@
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "neighbors.h"
+#include "schedule.h"
 
 //=========================== variables =======================================
 
@@ -27,8 +28,8 @@ void idmanager_init() {
    
    // myPANID
    idmanager_vars.myPANID.type         = ADDR_PANID;
-   idmanager_vars.myPANID.panid[0]     = 0xba;
-   idmanager_vars.myPANID.panid[1]     = 0xbe;
+   idmanager_vars.myPANID.panid[0]     = 0xca;
+   idmanager_vars.myPANID.panid[1]     = 0xfe;
    
    // myPrefix
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
@@ -68,6 +69,7 @@ void idmanager_setIsDAGroot(bool newRole) {
    DISABLE_INTERRUPTS();
    idmanager_vars.isDAGroot = newRole;
    neighbors_updateMyDAGrankAndNeighborPreference();
+   schedule_startDAGroot();
    ENABLE_INTERRUPTS();
 }
 

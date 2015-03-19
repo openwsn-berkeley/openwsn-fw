@@ -32,6 +32,11 @@ owerror_t openserial_printInfoErrorCritical(
    errorparameter_t arg1,
    errorparameter_t arg2
 );
+
+void openserial_board_reset_cb(
+   opentimer_id_t id
+);
+
 // HDLC output
 void outputHdlcOpen(void);
 void outputHdlcWrite(uint8_t b);
@@ -189,7 +194,7 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
    // schedule for the mote to reboot in 10s
    opentimers_start(10000,
                     TIMER_ONESHOT,TIME_MS,
-                    board_reset);
+                    openserial_board_reset_cb);
    
    return openserial_printInfoErrorCritical(
       SERFRAME_MOTE2PC_CRITICAL,
@@ -198,6 +203,10 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
       arg1,
       arg2
    );
+}
+
+void openserial_board_reset_cb(opentimer_id_t id) {
+   board_reset();
 }
 
 uint8_t openserial_getNumDataBytes() {
@@ -290,45 +299,37 @@ void openserial_startOutput() {
             break;
          }
       case STATUS_OUTBUFFERINDEXES:
-//         if (debugPrint_outBufferIndexes()==TRUE) {
-//            break;
-//         }
-         break;
+         if (debugPrint_outBufferIndexes()==TRUE) {
+            break;
+         }
       case STATUS_ASN:
-//         if (debugPrint_asn()==TRUE) {
-//            break;
-//         }
-         break;
+         if (debugPrint_asn()==TRUE) {
+            break;
+         }
       case STATUS_MACSTATS:
-//         if (debugPrint_macStats()==TRUE) {
-//            break;
-//         }
-         break;
+         if (debugPrint_macStats()==TRUE) {
+            break;
+         }
       case STATUS_SCHEDULE:
-//         if(debugPrint_schedule()==TRUE) {
-//            break;
-//         }
-         break;
+         if(debugPrint_schedule()==TRUE) {
+            break;
+         }
       case STATUS_BACKOFF:
-//         if(debugPrint_backoff()==TRUE) {
-//            break;
-//         }
-         break;
+         if(debugPrint_backoff()==TRUE) {
+            break;
+         }
       case STATUS_QUEUE:
-//         if(debugPrint_queue()==TRUE) {
-//            break;
-//         }
-         break;
+         if(debugPrint_queue()==TRUE) {
+            break;
+         }
       case STATUS_NEIGHBORS:
-//         if (debugPrint_neighbors()==TRUE) {
-//            break;
-//         }
-         break;
+         if (debugPrint_neighbors()==TRUE) {
+            break;
+         }
       case STATUS_KAPERIOD:
-//         if (debugPrint_kaPeriod()==TRUE) {
-//            break;
-//         }
-         break;
+         if (debugPrint_kaPeriod()==TRUE) {
+            break;
+         }
       default:
          DISABLE_INTERRUPTS();
          openserial_vars.debugPrintCounter=0;
@@ -423,16 +424,16 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_outBufferIndexes() {
-//   uint16_t temp_buffer[2];
-//   INTERRUPT_DECLARATION();
-//   DISABLE_INTERRUPTS();
-//   temp_buffer[0] = openserial_vars.outputBufIdxW;
-//   temp_buffer[1] = openserial_vars.outputBufIdxR;
-//   ENABLE_INTERRUPTS();
-//   openserial_printStatus(STATUS_OUTBUFFERINDEXES,(uint8_t*)temp_buffer,sizeof(temp_buffer));
-//   return TRUE;
-//}
+bool debugPrint_outBufferIndexes() {
+   uint16_t temp_buffer[2];
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   temp_buffer[0] = openserial_vars.outputBufIdxW;
+   temp_buffer[1] = openserial_vars.outputBufIdxR;
+   ENABLE_INTERRUPTS();
+   openserial_printStatus(STATUS_OUTBUFFERINDEXES,(uint8_t*)temp_buffer,sizeof(temp_buffer));
+   return TRUE;
+}
 
 //=========================== private =========================================
 

@@ -36,7 +36,8 @@ project:
     options, with the default value listed first.
     
     board          Board to build for. 'python' is for software simulation.
-                   telosb, wsn430v14, wsn430v13b, gina, z1, python, iot-lab_M3
+                   telosb, wsn430v14, wsn430v13b, gina, z1, python,
+                   iot-lab_M3, iot-lab_A8-M3
         
     toolchain      Toolchain implementation. The 'python' board requires gcc
                    (MinGW on Windows build host).
@@ -74,6 +75,9 @@ project:
     forcetopology  Force the topology to the one indicated in the
                    openstack/02a-MAClow/topology.c file.
     noadaptivesync Do not use adaptive synchronization.
+    cryptoengine   Select appropriate crypto engine implementation
+                   (dummy_crypto_engine, firmware_crypto_engine, 
+                   board_crypto_engine).
     
     Common variables:
     verbose        Print each complete compile/link command.
@@ -102,6 +106,7 @@ command_line_options = {
         'OpenMote-CC2538',
         'openmotestm',
         'iot-lab_M3',
+        'iot-lab_A8-M3',
         'agilefox',
         # misc.
         'python',
@@ -124,7 +129,9 @@ command_line_options = {
     'simhostpy':        [''],                               # No reasonable default
     'dagroot':          ['0','1'],
     'forcetopology':    ['0','1'],
+    'debug':            ['0','1'],
     'noadaptivesync':   ['0','1'],
+    'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
 }
 
 def validate_option(key, value, env):
@@ -238,6 +245,20 @@ command_line_vars.AddVariables(
         'forcetopology',                                   # key
         '',                                                # help
         command_line_options['forcetopology'][0],          # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'cryptoengine',                                    # key
+        '',                                                # help
+        command_line_options['cryptoengine'][0],           # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
+        'debug',                                           # key
+        '',                                                # help
+        command_line_options['debug'][0],                  # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

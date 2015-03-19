@@ -85,6 +85,7 @@ enum {
    //UDP
    WKP_UDP_COAP                        =  5683,
    WKP_UDP_ECHO                        =     7,
+   WKP_UDP_RINGMASTER                  = 15000,
 };
 
 //status elements
@@ -150,11 +151,13 @@ enum {
    COMPONENT_CEXAMPLE                  = 0x1b,
    COMPONENT_CINFO                     = 0x1c,
    COMPONENT_CLEDS                     = 0x1d,
-   COMPONENT_CSTORM                    = 0x1e,
-   COMPONENT_CWELLKNOWN                = 0x1f,
-   COMPONENT_TECHO                     = 0x20,
-   COMPONENT_TOHLONE                   = 0x21,
-   COMPONENT_UECHO                     = 0x22,
+   COMPONENT_CSENSORS                  = 0x1e,
+   COMPONENT_CSTORM                    = 0x1f,
+   COMPONENT_CWELLKNOWN                = 0x20,
+   COMPONENT_TECHO                     = 0x21,
+   COMPONENT_TOHLONE                   = 0x22,
+   COMPONENT_UECHO                     = 0x23,
+   COMPONENT_RRT                       = 0x24,
    //START OF TELEMATICS CODE
    COMPONENT_SECURITY                  = 0x23,
    //END OF TELEMATICS CODE
@@ -231,7 +234,9 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
-   ERR_SECURITY = 0x40,
+   //START OF TELEMATICS CODE
+   ERR_SECURITY 					   = 0x3a,
+   //END OF TELEMATICS CODE
 };
 
 //=========================== typedef =========================================
@@ -250,7 +255,7 @@ typedef struct {
 END_PACK
 
 //START OF TELEMATICS CODE
-typedef asn_t  macFrameCounter_t ;
+typedef asn_t  macFrameCounter_t;
 //END OF TELEMATICS CODE
 
 BEGIN_PACK
@@ -313,6 +318,8 @@ typedef struct {
    uint8_t*			 l2_ASNFrameCounter;		 //pointer to the Frame Counter
    uint8_t			 l2_length;                  //length of L2 payload
    uint8_t			 aData[128];				 //additional data for security
+   uint8_t			 clearText[128];			 //the payload in clear, used in case retransmission occurs
+   uint8_t			 clearText_length;			 //length of the packet in clear
    //END OF TELEMATICS CODE
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at

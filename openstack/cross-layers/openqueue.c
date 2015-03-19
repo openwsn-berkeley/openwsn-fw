@@ -34,16 +34,16 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-//bool debugPrint_queue() {
-//   debugOpenQueueEntry_t output[QUEUELENGTH];
-//   uint8_t i;
-//   for (i=0;i<QUEUELENGTH;i++) {
-//      output[i].creator = openqueue_vars.queue[i].creator;
-//      output[i].owner   = openqueue_vars.queue[i].owner;
-//   }
-//   openserial_printStatus(STATUS_QUEUE,(uint8_t*)&output,QUEUELENGTH*sizeof(debugOpenQueueEntry_t));
-//   return TRUE;
-//}
+bool debugPrint_queue() {
+   debugOpenQueueEntry_t output[QUEUELENGTH];
+   uint8_t i;
+   for (i=0;i<QUEUELENGTH;i++) {
+      output[i].creator = openqueue_vars.queue[i].creator;
+      output[i].owner   = openqueue_vars.queue[i].owner;
+   }
+   openserial_printStatus(STATUS_QUEUE,(uint8_t*)&output,QUEUELENGTH*sizeof(debugOpenQueueEntry_t));
+   return TRUE;
+}
 
 //======= called by any component
 
@@ -221,7 +221,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    return NULL;
 }
 
-OpenQueueEntry_t* openqueue_macGetAdvPacket() {
+OpenQueueEntry_t* openqueue_macGetEBPacket() {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -258,13 +258,5 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //START OF TELEMATICS CODE
    entry->l2_security                  = FALSE;
    entry->l2_toDiscard                 = 0;
-//   uint8_t i;
-//   for(i=0;i<13;i++){
-//	   entry->l2_nonce[i] = 0;
-//	   entry->l2_key[i] = 0;
-//   }
-//   entry->l2_key[13] = 0;
-//   entry->l2_key[14] = 0;
-//   entry->l2_key[15] = 0;
    //END OF TELEMATICS CODE
 }

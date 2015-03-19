@@ -18,6 +18,7 @@ if env['board']!='python':
         CPPPATH = [
             os.path.join('#','inc'),
             os.path.join('#','bsp','boards'),
+            os.path.join('#','bsp','boards','common'),
             os.path.join('#','bsp','chips'),
             os.path.join('#','drivers','common'),
             os.path.join('#','kernel'),
@@ -40,6 +41,8 @@ if env['forcetopology']==1:
     env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
 if env['noadaptivesync']==1:
     env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
+if env['cryptoengine']:
+    env.Append(CPPDEFINES    = {'CRYPTO_ENGINE_SCONS' : env['cryptoengine']})
 
 if   env['toolchain']=='mspgcc':
     
@@ -187,7 +190,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3']:
+    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='OpenMote-CC2538':
@@ -225,7 +228,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
         
-    elif env['board']=='iot-lab_M3':
+    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3']:
         
          # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -263,9 +266,9 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-mthumb')
         env.Append(LINKFLAGS     = '-mthumb-interwork')
         env.Append(LINKFLAGS     = '-nostartfiles')
-        env.Append(LINKFLAGS     = '-Tbsp/boards/iot-lab_M3/stm32_flash.ld')
-        env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','startup.o'))
-        env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','configure','stm32f10x_it.o'))
+        env.Append(LINKFLAGS     = '-Tbsp/boards/'+env['board']+'/stm32_flash.ld')
+        env.Append(LINKFLAGS     = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'startup.o'))
+        env.Append(LINKFLAGS     = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'configure','stm32f10x_it.o'))
         # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
@@ -352,9 +355,9 @@ else:
 
 def jtagUploadFunc(location):
     if env['toolchain']=='armgcc':
-        if env['board'] in ['iot-lab_M3']:
+        if env['board'] in ['iot-lab_M3','iot-lab_A8-M3']:
             return Builder(
-                action      = os.path.join('bsp','boards','iot-lab_M3','tools','flash.sh') + " $SOURCE",
+                action      = os.path.join('bsp','boards',env['board'],'tools','flash.sh') + " $SOURCE",
                 suffix      = '.phonyupload',
                 src_suffix  = '.ihex',
             )
@@ -368,11 +371,18 @@ def jtagUploadFunc(location):
             )
         elif env['fet_version']==3:
             # MSP-FET430uif is running v2 Firmware
-            return Builder(
-                action      = 'mspdebug tilib -d {0} "prog $SOURCE"'.format(location),
+            if location in 'default':
+                return Builder(
+                action      = 'mspdebug tilib "prog $SOURCE"',
                 suffix      = '.phonyupload',
                 src_suffix  = '.ihex',
-            )
+                )
+            else:
+                return Builder(
+                    action      = 'mspdebug tilib -d {0} "prog $SOURCE"'.format(location),
+                    suffix      = '.phonyupload',
+                    src_suffix  = '.ihex',
+                )
         else:
             raise SystemError('fet_version={0} unsupported.'.format(fet_version))
 if env['jtag']:
@@ -455,9 +465,9 @@ env.AddMethod(extras, 'PostBuildExtras')
 def buildLibs(projectDir):
     libs_dict = {
         '00std': [                                                              ],
-        '01bsp': [                                                      'libbsp'],
-        '02drv': [                                         'libdrivers','libbsp'],
-        '03oos': ['libopenstack','libopenapps','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
+        '01bsp': [                                         'libbsp','libdrivers'],
+        '02drv': [                             'libkernel','libbsp','libdrivers'],
+        '03oos': ['libopenstack','libopenapps','libkernel','libbsp','libdrivers'], # this order needed for mspgcc
     }
     
     returnVal = None
@@ -643,19 +653,9 @@ buildEnv.SConscript(
     duplicate   = 0,
 )
 
-# bspheader
-bspHDir         = os.path.join('#','bsp','boards')
-bspHVarDir      = os.path.join(buildEnv['VARDIR'],'bsp','boards')
-buildEnv.SConscript(
-    os.path.join(bspHDir,'SConscript'),
-    exports     = {'env': buildEnv},
-    variant_dir = bspHVarDir,
-    duplicate   = 0,
-)
-
 # bsp
-bspDir          = os.path.join('#','bsp','boards',buildEnv['BSP'])
-bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp','boards',buildEnv['BSP'])
+bspDir          = os.path.join('#','bsp','boards')
+bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp','boards')
 buildEnv.Append(CPPPATH = [bspDir])
 buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),
