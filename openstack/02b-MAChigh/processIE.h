@@ -151,7 +151,7 @@ uint8_t          processIE_prependBandwidthIE(
    uint8_t              numOfLinks, 
    uint8_t              slotframeID
 );
-uint8_t          processIE_prependSheduleIE(
+uint8_t          processIE_prependScheduleIE(
    OpenQueueEntry_t*    pkt,
    uint8_t              type,
    uint8_t              frameID,
@@ -175,7 +175,7 @@ void             processIE_retrieveBandwidthIE(
    uint8_t *            ptr,
    bandwidth_IE_ht*     bandwidthIE
 ); 
-void             processIE_retrieveSheduleIE(
+void             processIE_retrieveScheduleIE(
    OpenQueueEntry_t*    pkt,
    uint8_t *            ptr,
    schedule_IE_ht*      schedule_ie

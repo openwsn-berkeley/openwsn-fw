@@ -208,7 +208,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    
    // create packet
    len  = 0;
-   len += processIE_prependSheduleIE(pkt,type,frameID,flag,cellList);
+   len += processIE_prependScheduleIE(pkt,type,frameID,flag,cellList);
    len += processIE_prependBandwidthIE(pkt,numCells,frameID);
    len += processIE_prependOpcodeIE(pkt,SIXTOP_SOFT_CELL_REQ);
    processIE_prependMLMEIE(pkt,len);
@@ -290,7 +290,7 @@ void sixtop_removeCell(open_addr_t* neighbor){
    
    // create packet
    len  = 0;
-   len += processIE_prependSheduleIE(pkt,type,frameID, flag,cellList);
+   len += processIE_prependScheduleIE(pkt,type,frameID, flag,cellList);
    len += processIE_prependOpcodeIE(pkt,SIXTOP_REMOVE_SOFT_CELL_REQUEST);
    processIE_prependMLMEIE(pkt,len);
  
@@ -922,7 +922,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
               case MLME_IE_SUBID_TRACKID:
               break;
               case MLME_IE_SUBID_SCHEDULE:
-              processIE_retrieveSheduleIE(pkt,&ptr,&schedule_ie);
+              processIE_retrieveScheduleIE(pkt,&ptr,&schedule_ie);
               break;
           default:
              return FALSE;
@@ -1057,7 +1057,7 @@ void sixtop_linkResponse(
    memcpy(&(sixtopPkt->l2_nextORpreviousHop),tempNeighbor,sizeof(open_addr_t));
     
    // set SubFrameAndLinkIE
-   len += processIE_prependSheduleIE(sixtopPkt,
+   len += processIE_prependScheduleIE(sixtopPkt,
                                                   type,
                                                   frameID,
                                                   flag,

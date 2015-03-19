@@ -251,7 +251,7 @@ port_INLINE uint8_t processIE_prependBandwidthIE(
    return len;
 }
 
-port_INLINE uint8_t processIE_prependSheduleIE(
+port_INLINE uint8_t processIE_prependScheduleIE(
       OpenQueueEntry_t* pkt,
       uint8_t           type,
       uint8_t           frameID,
@@ -488,7 +488,7 @@ port_INLINE void processIE_retrieveBandwidthIE(
    *ptr=localptr; 
 }
 
-port_INLINE void processIE_retrieveSheduleIE(
+port_INLINE void processIE_retrieveScheduleIE(
       OpenQueueEntry_t* pkt,
       uint8_t*          ptr,
       schedule_IE_ht*   scheduleInfo
