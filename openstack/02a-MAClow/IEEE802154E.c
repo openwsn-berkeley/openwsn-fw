@@ -618,7 +618,8 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    uint16_t              len;
    uint16_t              sublen;
    PORT_SIGNED_INT_WIDTH timeCorrection;
-   bool                  synchronizeSlotoffset;
+   // flag used for understanding if the slotoffset should be inferred from both ASN and slotframe length
+   bool                  f_asn2slotoffset;
    
    ptr=0;
    
@@ -653,7 +654,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
       
       case IEEE802154E_MLME_IE_GROUPID:
          // MLME IE
-         synchronizeSlotoffset = FALSE;
+         f_asn2slotoffset = FALSE;
          do {
             
             //read sub IE header
@@ -684,7 +685,9 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                   if (idmanager_getIsDAGroot()==FALSE) {
                      // ASN
                      asnStoreFromAdv((uint8_t*)(pkt->payload)+ptr);
-                     synchronizeSlotoffset = TRUE;
+                     // ASN is known, but the frame length is not
+                     // frame length will be known after parsing the frame and link IE
+                     f_asn2slotoffset = TRUE;
                      ptr = ptr + 5;
                      // join priority
                      joinPriorityStoreFromAdv(*((uint8_t*)(pkt->payload)+ptr));
@@ -709,7 +712,9 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             
             len = len - sublen;
          } while(len>0);
-         if (synchronizeSlotoffset == TRUE) {
+         if (f_asn2slotoffset == TRUE) {
+            // at this point, ASN and frame length are known
+            // the current slotoffset can be inferred
             ieee154e_syncSlotOffset();
          }
          break;
