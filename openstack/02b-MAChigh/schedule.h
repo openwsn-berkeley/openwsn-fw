@@ -65,12 +65,11 @@ typedef uint16_t   frameLength_t;
 
 typedef enum {
    CELLTYPE_OFF              = 0,
-   CELLTYPE_ADV              = 1,
-   CELLTYPE_TX               = 2,
-   CELLTYPE_RX               = 3,
-   CELLTYPE_TXRX             = 4,
-   CELLTYPE_SERIALRX         = 5,
-   CELLTYPE_MORESERIALRX     = 6
+   CELLTYPE_TX               = 1,
+   CELLTYPE_RX               = 2,
+   CELLTYPE_TXRX             = 3,
+   CELLTYPE_SERIALRX         = 4,
+   CELLTYPE_MORESERIALRX     = 5
 } cellType_t;
 
 typedef struct {
