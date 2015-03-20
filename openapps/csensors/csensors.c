@@ -77,6 +77,7 @@ void csensors_init() {
    // do not run if DAGroot
    if(idmanager_getIsDAGroot()==TRUE) return;
 
+   opensensors_init();
    memset(&csensors_vars,0,sizeof(csensors_vars_t));
 
    csensors_vars.desc.path0len               = sizeof(csensors_path0)-1;

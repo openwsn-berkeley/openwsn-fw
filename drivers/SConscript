@@ -44,10 +44,6 @@ else:
         ],
     )
     
-    # after fixing gina and z1 driver build, delete the following 2 lines and uncomment code at line 8
-    if env['board']=='OpenMote-CC2538':
-        sources_c += Glob(localEnv['board']+'/*.c',strings=True)
-    
     libdrivers = localEnv.Library(
         target = target,
         source = sources_c,

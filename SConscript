@@ -465,9 +465,9 @@ env.AddMethod(extras, 'PostBuildExtras')
 def buildLibs(projectDir):
     libs_dict = {
         '00std': [                                                              ],
-        '01bsp': [                                         'libbsp','libdrivers'],
-        '02drv': [                             'libkernel','libbsp','libdrivers'],
-        '03oos': ['libopenstack','libopenapps','libkernel','libbsp','libdrivers'], # this order needed for mspgcc
+        '01bsp': [                                                      'libbsp'],
+        '02drv': [                             'libkernel','libdrivers','libbsp'],
+        '03oos': ['libopenstack','libopenapps','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
     returnVal = None
