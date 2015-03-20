@@ -6,14 +6,19 @@
 
 #include "opendefs.h"
 #include "opensensors.h"
+#include "sensors.h"
 
 //=========================== defines =========================================
 
 //=========================== variables =======================================
 
+opensensors_vars_t opensensors_vars;
+
 //=========================== prototypes ======================================
 
-opensensors_vars_t opensensors_vars;
+void opensensors_register(
+   uint8_t sensorType
+);
 
 //=========================== public ==========================================
 
@@ -21,23 +26,12 @@ opensensors_vars_t opensensors_vars;
    \brief Initialize OpenSensors
 */
 void opensensors_init(void) {
+   uint8_t sensorType;
+   
    memset(&opensensors_vars,0,sizeof(opensensors_vars_t));
-}
-
-/**
-   \brief Register a OpenSensors resource
-
-   \param[in] sensorType the sensor type representation.
-   \param[in] callbackRead callback to read rough sensor data.
-   \param[in] callbackConvert callback to convert rough sensor data to human understandable.
-*/
-void opensensors_register(uint8_t sensorType,
-                      callbackRead_cbt callbackRead,
-                      callbackConvert_cbt callbackConvert) {
-   opensensors_vars.opensensors_resource[opensensors_vars.numSensors].sensorType      = sensorType;
-   opensensors_vars.opensensors_resource[opensensors_vars.numSensors].callbackRead    = callbackRead;
-   opensensors_vars.opensensors_resource[opensensors_vars.numSensors].callbackConvert = callbackConvert;
-   opensensors_vars.numSensors++;
+   for (sensorType=SENSOR_ZERO+1;sensorType<SENSOR_LAST;sensorType++) {
+      opensensors_register(sensorType);
+   }
 }
 
 /**
@@ -58,3 +52,19 @@ opensensors_resource_desc_t* opensensors_getResource(uint8_t index) {
 }
 
 //=========================== private =========================================
+
+/**
+   \brief Register a OpenSensors resource
+
+   \param[in] sensorType the sensor type representation.
+   \param[in] callbackRead callback to read rough sensor data.
+   \param[in] callbackConvert callback to convert rough sensor data to human understandable.
+*/
+void opensensors_register(uint8_t sensorType) {
+   if (sensors_is_present(sensorType)) {
+      opensensors_vars.opensensors_resource[opensensors_vars.numSensors].sensorType      = sensorType;
+      opensensors_vars.opensensors_resource[opensensors_vars.numSensors].callbackRead    = sensors_getCallbackRead(sensorType);
+      opensensors_vars.opensensors_resource[opensensors_vars.numSensors].callbackConvert = sensors_getCallbackConvert(sensorType);
+      opensensors_vars.numSensors++;
+   }
+}
