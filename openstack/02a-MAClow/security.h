@@ -1,3 +1,9 @@
+/**
+\brief General Security Definitions
+
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
+*/
+
 #ifndef __SECURITY_H
 #define __SECURITY_H
 
@@ -122,31 +128,30 @@ void security_incomingFrame(OpenQueueEntry_t* msg);
 uint8_t authLengthChecking(uint8_t securityLevel); //it determines the length of the Authentication field(not standard)
 
 uint8_t auxLengthChecking(uint8_t KeyIdMode,
-					   bool frameCounterSuppression,
-					   uint8_t frameCounterSize); //it determines the length of the Auxiliary Security Header (not standard)
+					   	  bool frameCounterSuppression,
+					   	  uint8_t frameCounterSize); //it determines the length of the Auxiliary Security Header (not standard)
 
 bool incomingKeyUsagePolicyChecking(m_keyDescriptor* keydesc,
 									uint8_t frameType,
 									uint8_t cfi);
 
-bool incomingSecurityLevelChecking(m_securityLevelDescriptor* seclevdesc,
-								   uint8_t seclevel,
+bool incomingSecurityLevelChecking(m_securityLevelDescriptor* secLevDesc,
+								   uint8_t secLevel,
 								   bool exempt);
 
 m_securityLevelDescriptor* securityLevelDescriptorLookup(uint8_t frameType,
-														uint8_t cfi,
-														m_securityLevelDescriptor* answer);
+														 uint8_t cfi);
 
-uint8_t deviceDescriptorLookup(open_addr_t* address,
-								open_addr_t* PANID,
-								m_keyDescriptor* keydescr);
+m_deviceDescriptor* deviceDescriptorLookup(open_addr_t* address,
+										   open_addr_t* PANID,
+										   m_keyDescriptor* keyDescriptor);
 
-uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
-						 	open_addr_t*	keySource,
-						 	uint8_t 		KeyIndex,
-						 	open_addr_t*	DeviceAddress,
-						 	open_addr_t*	panID,
-						 	uint8_t			frameType);
+m_keyDescriptor* keyDescriptorLookup(uint8_t  		KeyIdMode,
+						 		     open_addr_t*	keySource,
+						 		     uint8_t 		KeyIndex,
+						 		     open_addr_t*	DeviceAddress,
+						 		     open_addr_t*	panID,
+						 		     uint8_t		frameType);
 
 void remote_init(ieee802154_header_iht ieee802514_header);
 void coordinatorORParent_init(void);

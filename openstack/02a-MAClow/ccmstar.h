@@ -1,3 +1,10 @@
+/**
+\brief CCMstar software procedure definitions
+
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
+*/
+
+
 #include "IEEE802154.h"
 #include "idmanager.h"
 #include "security.h"

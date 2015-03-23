@@ -1,7 +1,7 @@
 /**
-\brief CCMstar procedure
+\brief CCMstar software procedure
 
-\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, July 2014.
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
 */
 
 #include "ccmstar.h"
@@ -177,7 +177,6 @@ void Auth_Transformation(uint8_t 				length,
 	for(i=0;i<authentication_length;i++){
 		MACTag[i] = out[i];
 	}
-//	memcpy(&MACTag[0], &out[0], authentication_length);
 
 }
 
@@ -307,7 +306,7 @@ void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
 	payload_length = pkt->length - pkt->l2_authenticationLength;
 
 	if(pkt->l2_securityLevel != 4){
-		if(auth_checking(payloadToDecrypt,//ccmstar_vars.payloadToEncrypt,
+		if(auth_checking(payloadToDecrypt,
 						 payload_length,
 				         key,
 				         pkt->l2_authenticationLength,
@@ -316,7 +315,7 @@ void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
 				         U_rec,
 				         MACTag, authData,
 				         pkt->aData) == FALSE){
-			pkt->l2_toDiscard = 6;
+			pkt->l2_toDiscard = 7;
 		}
 	}
 

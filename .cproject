@@ -3,8 +3,8 @@
 
 <cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
-		<cconfiguration id="0.1772765947">
-			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="0.1772765947" moduleId="org.eclipse.cdt.core.settings" name="Default">
+		<cconfiguration id="0.470208452">
+			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="0.470208452" moduleId="org.eclipse.cdt.core.settings" name="Default">
 				<externalSettings/>
 				<extensions>
 					<extension id="org.eclipse.cdt.core.VCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
@@ -16,29 +16,32 @@
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-				<configuration buildProperties="" description="" id="0.1772765947" name="Default" parent="org.eclipse.cdt.build.core.prefbase.cfg">
-					<folderInfo id="0.1772765947." name="/" resourcePath="">
-						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.437449781" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
-							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.437449781.770244877" name=""/>
-							<builder id="org.eclipse.cdt.build.core.settings.default.builder.1638024429" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
-							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.1001836782" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
-							<tool id="org.eclipse.cdt.build.core.settings.holder.1701766773" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
-								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1857180756" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+				<configuration buildProperties="" description="" id="0.470208452" name="Default" parent="org.eclipse.cdt.build.core.prefbase.cfg">
+					<folderInfo id="0.470208452." name="/" resourcePath="">
+						<toolChain id="org.eclipse.cdt.build.core.prefbase.toolchain.1557815664" name="No ToolChain" resourceTypeBasedDiscovery="false" superClass="org.eclipse.cdt.build.core.prefbase.toolchain">
+							<targetPlatform id="org.eclipse.cdt.build.core.prefbase.toolchain.1557815664.679266714" name=""/>
+							<builder id="org.eclipse.cdt.build.core.settings.default.builder.1850838202" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="org.eclipse.cdt.build.core.settings.default.builder"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.libs.1268221925" name="holder for library settings" superClass="org.eclipse.cdt.build.core.settings.holder.libs"/>
+							<tool id="org.eclipse.cdt.build.core.settings.holder.575325176" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1623646955" languageId="org.eclipse.cdt.core.assembly" languageName="Assembly" sourceContentType="org.eclipse.cdt.core.asmSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
-							<tool id="org.eclipse.cdt.build.core.settings.holder.1420681993" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
-								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.78104555" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+							<tool id="org.eclipse.cdt.build.core.settings.holder.179951128" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.258648859" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/kernel"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openstack"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openstack/03b-IPv6"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openstack/02b-MAChigh"/>
-									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/boards/telosb"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/inc"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/drivers/common"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openstack/02a-MAClow"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openapps"/>
+									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/boards/OpenMote-CC2538"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openstack/cross-layers"/>
+									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/boards/common"/>
+									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/boards/OpenMote-CC2538/source"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/boards"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/chips"/>
+									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/drivers/OpenMote-CC2538"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.6/backward"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.6/i686-linux-gnu"/>
 									<listOptionValue builtIn="false" value="/usr/lib/gcc/i686-linux-gnu/4.6/include-fixed"/>
@@ -48,7 +51,7 @@
 									<listOptionValue builtIn="false" value="/usr/include/i386-linux-gnu"/>
 									<listOptionValue builtIn="false" value="/usr/include/c++/4.6"/>
 								</option>
-								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.1915389915" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.2062911476" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__FLOAT_WORD_ORDER__=__ORDER_LITTLE_ENDIAN__"/>
 									<listOptionValue builtIn="false" value="__gnu_linux__=1"/>
 									<listOptionValue builtIn="false" value="__UINT8_MAX__=255"/>
@@ -264,29 +267,32 @@
 									<listOptionValue builtIn="false" value="__GNUC__=4"/>
 									<listOptionValue builtIn="false" value="__DEC_EVAL_METHOD__=2"/>
 								</option>
-								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.866109757" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1370091179" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
-							<tool id="org.eclipse.cdt.build.core.settings.holder.1213478918" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
-								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.2023024383" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
+							<tool id="org.eclipse.cdt.build.core.settings.holder.1259854140" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
+								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.1219042482" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/kernel"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openstack"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openstack/03b-IPv6"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openstack/02b-MAChigh"/>
-									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/boards/telosb"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/inc"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/drivers/common"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openstack/02a-MAClow"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openapps"/>
+									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/boards/OpenMote-CC2538"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/openstack/cross-layers"/>
+									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/boards/common"/>
+									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/boards/OpenMote-CC2538/source"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/boards"/>
 									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/bsp/chips"/>
+									<listOptionValue builtIn="false" value="/home/savio/github_feb/openwsn-fw/drivers/OpenMote-CC2538"/>
 									<listOptionValue builtIn="false" value="/usr/local/include"/>
 									<listOptionValue builtIn="false" value="/usr/include/i386-linux-gnu"/>
 									<listOptionValue builtIn="false" value="/usr/lib/gcc/i686-linux-gnu/4.6/include"/>
 									<listOptionValue builtIn="false" value="/usr/include"/>
 									<listOptionValue builtIn="false" value="/usr/lib/gcc/i686-linux-gnu/4.6/include-fixed"/>
 								</option>
-								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.1432157660" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.1422718975" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__FLOAT_WORD_ORDER__=__ORDER_LITTLE_ENDIAN__"/>
 									<listOptionValue builtIn="false" value="__gnu_linux__=1"/>
 									<listOptionValue builtIn="false" value="__UINT8_MAX__=255"/>
@@ -495,7 +501,7 @@
 									<listOptionValue builtIn="false" value="__GNUC__=4"/>
 									<listOptionValue builtIn="false" value="__DEC_EVAL_METHOD__=2"/>
 								</option>
-								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1781927223" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.431231348" languageId="org.eclipse.cdt.core.gcc" languageName="GNU C" sourceContentType="org.eclipse.cdt.core.cSource,org.eclipse.cdt.core.cHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
@@ -505,11 +511,14 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="openwsn-fw-github_new.null.1089751439" name="openwsn-fw-github_new"/>
+		<project id="openwsn-fw-github_new.null.547657814" name="openwsn-fw-github_new"/>
 	</storageModule>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		<scannerConfigBuildInfo instanceId="0.419337468">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
+		</scannerConfigBuildInfo>
+		<scannerConfigBuildInfo instanceId="0.470208452">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
 		</scannerConfigBuildInfo>
 	</storageModule>

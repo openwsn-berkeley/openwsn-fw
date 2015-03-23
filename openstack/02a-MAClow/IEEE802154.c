@@ -14,6 +14,8 @@
 /**
 \brief Prepend the IEEE802.15.4 MAC header to a (to be transmitted) packet.
 
+\note Modified by Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
+
 Note that we are writing the field from the end of the header to the beginning.
 
 \param[in,out] msg              The message to append the header to.
@@ -110,6 +112,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
 
 /**
 \brief Retreieve the IEEE802.15.4 MAC header from a (just received) packet.
+
+\note Modified by Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
 
 Note We are writing the fields from the begnning of the header to the end.
 

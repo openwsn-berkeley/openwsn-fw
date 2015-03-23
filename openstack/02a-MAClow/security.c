@@ -1,7 +1,7 @@
 /**
 \brief General Security Operations
 
-\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, July 2014.
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
 */
 
 #include "security.h"
@@ -155,29 +155,30 @@ void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
 void security_outgoingFrame(OpenQueueEntry_t*   msg){
 
 
-	uint8_t match;
 	bool frameCounterSuppression;
 	frameCounterSuppression = 0; //the frame counter is carried in the frame, otherwise 1;
+	m_keyDescriptor* keyDescriptor;
 
 	//search for a key
-	match = keyDescriptorLookup(msg->l2_keyIdMode,
-								&msg->l2_keySource,
-								msg->l2_keyIndex,
-								&msg->l2_keySource,
-								(idmanager_getMyID(ADDR_PANID)),
-								msg->l2_frameType);
+	keyDescriptor = keyDescriptorLookup(msg->l2_keyIdMode,
+										&msg->l2_keySource,
+										msg->l2_keyIndex,
+										&msg->l2_keySource,
+										(idmanager_getMyID(ADDR_PANID)),
+										msg->l2_frameType);
 
-	uint8_t j;
-	uint8_t key[16];
-	for(j=0;j<16;j++){
-		key[j] = security_vars.MacKeyTable.KeyDescriptorElement[match].key[j];
-	}
-
-	if(match == 25){
+	if(keyDescriptor==NULL){
 	    openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
 							 (errorparameter_t)0,
 							 (errorparameter_t)500);
 		return;
+	}
+
+
+	uint8_t j;
+	uint8_t key[16];
+	for(j=0;j<16;j++){
+		key[j] = keyDescriptor->key[j];
 	}
 
 	uint8_t vectASN[5];
@@ -219,7 +220,6 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg){
 			break;
 		}
 
-	//memcpy(&nonce[8], &vectASN[0], 5);
 	for(i=0;i<5;i++){
 		nonce[8+i] = vectASN[i];
 	}
@@ -279,14 +279,9 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 			tempheader->headerLength = tempheader->headerLength+1;
 	}
 
-	msg->l2_frameCounter.bytes0and1 = receivedASN[0]+256*receivedASN[1];
-	msg->l2_frameCounter.bytes2and3 = receivedASN[2]+256*receivedASN[3];
-	msg->l2_frameCounter.byte4 = receivedASN[4];
-
-//		if(msg->l2_frameCounter.bytes2and3 == (0xffff)){
-//			msg->l2_toDiscard = TRUE;
-//			return; // frame counter overflow
-//			}
+		msg->l2_frameCounter.bytes0and1 = receivedASN[0]+256*receivedASN[1];
+		msg->l2_frameCounter.bytes2and3 = receivedASN[2]+256*receivedASN[3];
+		msg->l2_frameCounter.byte4 = receivedASN[4];
 	}
 
    //retrieve the Key Identifier field
@@ -338,17 +333,9 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 
 void security_incomingFrame(OpenQueueEntry_t*      msg){
 
-	uint8_t match;
-
-	m_deviceDescriptor			*devpoint;
-	m_keyDescriptor 			*keypoint;
-	m_securityLevelDescriptor	*secLevel;
-	m_keyDescriptor				keydesc;
-
-
-	memset(&secLevel,
-		   0,
-		   sizeof(m_securityLevelDescriptor));
+	m_deviceDescriptor*			deviceDescriptor;
+	m_keyDescriptor*			keyDescriptor;
+	m_securityLevelDescriptor*	securityLevelDescriptor;
 
 	//check that Security Level is not zero, impossible for me
 	/*if(msg->securityLevel == 0){
@@ -356,51 +343,53 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	}*/
 
 	//f key descriptor lookup
-	match = keyDescriptorLookup(msg->l2_keyIdMode,
-								&msg->l2_keySource,
-								msg->l2_keyIndex,
-								&msg->l2_keySource,
-								idmanager_getMyID(ADDR_PANID),
-								msg->l2_frameType);
+	keyDescriptor = keyDescriptorLookup(msg->l2_keyIdMode,
+										&msg->l2_keySource,
+										msg->l2_keyIndex,
+										&msg->l2_keySource,
+										idmanager_getMyID(ADDR_PANID),
+										msg->l2_frameType);
 
-	keydesc = security_vars.MacKeyTable.KeyDescriptorElement[match];
-	keypoint = &keydesc;
-
-	if(match == 25){
+	if(keyDescriptor==NULL){
 		msg->l2_toDiscard = 2; //can't find the key
 		return;
 	}
 
 	//g device descriptor lookup
-	match = deviceDescriptorLookup(&msg->l2_keySource,
-						   	       idmanager_getMyID(ADDR_PANID),
-						   	   	   keypoint);
+	deviceDescriptor = deviceDescriptorLookup(&msg->l2_keySource,
+						   	       	   	   	  idmanager_getMyID(ADDR_PANID),
+						   	       	   	   	  keyDescriptor);
 
-	devpoint = &security_vars.MacDeviceTable.DeviceDescriptorEntry[match];
+	if(deviceDescriptor==NULL){
+		msg->l2_toDiscard = 3;
+		return;
+	}
 
 	//h Security Level lookup
-	secLevel = securityLevelDescriptorLookup(msg->l2_frameType,
-								  	  	  	 msg->commandFrameIdentifier,
-								  	  	  	 secLevel);
+	securityLevelDescriptor = securityLevelDescriptorLookup(msg->l2_frameType,
+								  	  	  	 msg->commandFrameIdentifier);
+
 	//i+j+k
-	if(incomingSecurityLevelChecking(secLevel,msg->l2_securityLevel,devpoint->Exempt)==FALSE){
-		msg->l2_toDiscard = 3; //security level not allowed
-		//return;
+	if(incomingSecurityLevelChecking(securityLevelDescriptor,
+									 msg->l2_securityLevel,
+									 deviceDescriptor->Exempt)==FALSE){
+		msg->l2_toDiscard = 4; //security level not allowed
 	}
 
 	//l+m Anti-Replay
 	if(compareFrameCounter(msg->l2_frameCounter,
-			 devpoint->FrameCounter) == FALSE){
-		msg->l2_toDiscard = 4; //old packet
+						   deviceDescriptor->FrameCounter)
+						   == FALSE){
+		msg->l2_toDiscard = 5; //old packet
 	}
 
 	//n Control of key used
-	if(incomingKeyUsagePolicyChecking(keypoint,
+	if(incomingKeyUsagePolicyChecking(keyDescriptor,
 									  msg->l2_frameType,
 									  0
 									  )  ==FALSE){
 
-		msg->l2_toDiscard = 5; // improper key used
+		msg->l2_toDiscard = 6; // improper key used
 	}
 
 	uint8_t nonce[13];
@@ -448,10 +437,10 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 //							 (errorparameter_t)msg->l2_frameCounter.bytes0and1);
 //	}
 
-	CCMstarInverse(msg,keypoint->key,nonce);
+	CCMstarInverse(msg,keyDescriptor->key,nonce);
 
 	//q save the frame counter
-	devpoint->FrameCounter = msg->l2_frameCounter;
+	deviceDescriptor->FrameCounter = msg->l2_frameCounter;
 
 }
 
@@ -524,21 +513,27 @@ uint8_t auxLengthChecking(uint8_t KeyIdMode, bool frameCounterSuppression, uint8
 	return auxilary_len;
 }
 
-bool incomingKeyUsagePolicyChecking(m_keyDescriptor* keydesc,
+bool incomingKeyUsagePolicyChecking(m_keyDescriptor* keyDescriptor,
 									uint8_t frameType,
 									uint8_t cfi){
 
 	uint8_t i;
+	INTERRUPT_DECLARATION();
+	DISABLE_INTERRUPTS();
 	for(i=0; i<MAXNUMNEIGHBORS; i++){
-		if (frameType != IEEE154_TYPE_CMD && frameType == keydesc->KeyUsageList[i].FrameType){
+		if (frameType != IEEE154_TYPE_CMD && frameType == keyDescriptor->KeyUsageList[i].FrameType){
+			ENABLE_INTERRUPTS();
 			return TRUE;
 		}
 
-		if (frameType == IEEE154_TYPE_CMD && frameType == keydesc->KeyUsageList[i].FrameType && cfi == keydesc->KeyUsageList[i].CommandFrameIdentifier){
+		if (frameType == IEEE154_TYPE_CMD && frameType == keyDescriptor->KeyUsageList[i].FrameType &&
+			cfi == keyDescriptor->KeyUsageList[i].CommandFrameIdentifier){
+			ENABLE_INTERRUPTS();
 			return TRUE;
 		}
 	}
 
+	ENABLE_INTERRUPTS();
 	return FALSE;
 }
 
@@ -571,67 +566,74 @@ bool incomingSecurityLevelChecking(m_securityLevelDescriptor* seclevdesc,
 }
 
 m_securityLevelDescriptor* securityLevelDescriptorLookup( uint8_t frameType,
-									uint8_t cfi,
-									m_securityLevelDescriptor* answer){
+									uint8_t cfi){
 
 	uint8_t i;
+	INTERRUPT_DECLARATION();
+	DISABLE_INTERRUPTS();
 	for(i=0; i<4; i++){
 
 		if(security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType != IEEE154_TYPE_CMD
 			&& frameType == security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType){
 
-			answer = &security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i];
-
-			return answer;
+			ENABLE_INTERRUPTS();
+			return &security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i];
 		}
 
 		if(security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType == IEEE154_TYPE_CMD
 			&& frameType == security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType
-			&& cfi == security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].CommandFrameIdentifier)
-		{
+			&& cfi == security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].CommandFrameIdentifier){
 
-			answer = &security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i];
-			return answer;
+			ENABLE_INTERRUPTS();
+			return &security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i];
 		}
 	}
 
-	return answer;
+	ENABLE_INTERRUPTS();
+	return NULL;
 }
 
-uint8_t deviceDescriptorLookup(open_addr_t* Address,
+m_deviceDescriptor* deviceDescriptorLookup(open_addr_t* Address,
 							   open_addr_t* PANId,
-							   m_keyDescriptor* keydescr){
+							   m_keyDescriptor* keyDescriptor){
 
 	uint8_t i;
+	INTERRUPT_DECLARATION();
+	DISABLE_INTERRUPTS();
 
 	for(i=0; i<MAXNUMNEIGHBORS; i++){
-
-		if((packetfunctions_sameAddress(Address,&keydescr->DeviceTable->DeviceDescriptorEntry[i].deviceAddress)== TRUE)
-			&&
-			(packetfunctions_sameAddress(PANId, &security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId))
+		if((packetfunctions_sameAddress(Address,
+				&keyDescriptor->DeviceTable->DeviceDescriptorEntry[i].deviceAddress)== TRUE)
+			&&(packetfunctions_sameAddress(PANId,
+				&security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId))
 				){
-			return i;
+			ENABLE_INTERRUPTS();
+			return &keyDescriptor->DeviceTable->DeviceDescriptorEntry[i];
 		}
 	}
 
-	return 25;
+	ENABLE_INTERRUPTS();
+	return NULL;
 }
 
-uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
-					     	open_addr_t*	keySource,
-						 	uint8_t 		KeyIndex,
-						 	open_addr_t* 	DeviceAddress,
-						 	open_addr_t*	panID,
-						 	uint8_t			frameType){
+m_keyDescriptor* keyDescriptorLookup(uint8_t  		KeyIdMode,
+					     			 open_addr_t*	keySource,
+					     			 uint8_t 		KeyIndex,
+					     			 open_addr_t* 	DeviceAddress,
+					     			 open_addr_t*	panID,
+					     			 uint8_t		frameType){
 
 	uint8_t i;
+	INTERRUPT_DECLARATION();
+	DISABLE_INTERRUPTS();
 
-		if(KeyIdMode == 0){
-		for(i=0; i<MAXNUMKEYS; i++ ){
-			if(security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address.type == ADDR_64B){
-				if(packetfunctions_sameAddress(DeviceAddress,&security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address)
-						&& packetfunctions_sameAddress(panID,&security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)){
-					return i;
+	if(KeyIdMode == 0){
+	for(i=0; i<MAXNUMKEYS; i++ ){
+		if(security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address.type == ADDR_64B){
+			if(packetfunctions_sameAddress(DeviceAddress,&security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address)
+					&& packetfunctions_sameAddress(panID,&security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)){
+				ENABLE_INTERRUPTS();
+				return &security_vars.MacKeyTable.KeyDescriptorElement[i];
 				}
 			}
 		}
@@ -642,7 +644,8 @@ uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
 		for(i=0; i<MAXNUMKEYS; i++ ){
 				if(KeyIndex == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex
 							&& packetfunctions_sameAddress(keySource,&security_vars.m_macDefaultKeySource)){
-							return i;
+					ENABLE_INTERRUPTS();
+					return &security_vars.MacKeyTable.KeyDescriptorElement[i];
 							}
 						}
 			}
@@ -656,7 +659,8 @@ uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
 							keySource->addr_16b[1] == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource.addr_16b[1]
 							&& packetfunctions_sameAddress(panID, &security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)
 							){
-					return i;
+						ENABLE_INTERRUPTS();
+						return &security_vars.MacKeyTable.KeyDescriptorElement[i];
 					}
 
 				}
@@ -671,14 +675,17 @@ uint8_t keyDescriptorLookup(uint8_t  		KeyIdMode,
 				if( packetfunctions_sameAddress(keySource,&security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource)
 						&& packetfunctions_sameAddress(panID, &security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)
 						){
-				return i;
+					ENABLE_INTERRUPTS();
+					return &security_vars.MacKeyTable.KeyDescriptorElement[i];
 				}
 
 			}
 		}
 	}
 
-	return 25;//no matches
+	//no matches
+	ENABLE_INTERRUPTS();
+	return NULL;
 
 }
 
@@ -771,7 +778,7 @@ void security_getFrameCounter(macFrameCounter_t reference,
  */
 
 bool compareFrameCounter(macFrameCounter_t fromFrame,
-                             macFrameCounter_t stored){
+                         macFrameCounter_t stored){
 
 
 	if(fromFrame.bytes0and1 > stored.bytes0and1){

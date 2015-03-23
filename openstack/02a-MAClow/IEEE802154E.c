@@ -1,3 +1,9 @@
+/**
+\brief IEEE802.15.4e module
+
+\note Modified by Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
+*/
+
 #include "opendefs.h"
 #include "IEEE802154E.h"
 #include "radio.h"

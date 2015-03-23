@@ -314,6 +314,10 @@ void sixtop_removeCell(open_addr_t* neighbor){
 
 //======= from upper layer
 
+/*
+ * \note Modified by Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
+ */
+
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    
    // set metadata
@@ -425,6 +429,9 @@ void task_sixtopNotifSendDone() {
    }
 }
 
+/*
+ * \note Modified by Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
+ */
 void task_sixtopNotifReceive() {
    OpenQueueEntry_t* msg;
    uint16_t          lenIE;
@@ -556,6 +563,8 @@ bool debugPrint_kaPeriod() {
 
 /**
 \brief Transfer packet to MAC.
+
+\note Modified by Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
 
 This function adds a IEEE802.15.4 header to the packet and leaves it the 
 OpenQueue buffer. The very last thing it does is assigning this packet to the 
