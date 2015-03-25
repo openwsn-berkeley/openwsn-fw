@@ -179,6 +179,7 @@ extern void TimerIntDisable(uint32_t ui32Base, uint32_t ui32IntFlags);
 extern uint32_t TimerIntStatus(uint32_t ui32Base, bool bMasked);
 extern void TimerIntClear(uint32_t ui32Base, uint32_t ui32IntFlags);
 extern void TimerSynchronize(uint32_t ui32Base, uint32_t ui32Timers);
+extern void TimerClearCounter(uint32_t ui32Base, uint32_t ui32Timer);
 
 
 //*****************************************************************************

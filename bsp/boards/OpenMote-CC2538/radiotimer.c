@@ -123,7 +123,7 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
 	// Enable the timer
 	TimerEnable(GPTIMER1_BASE, GPTIMER_BOTH);
 
-	TimerClearCounter(GPTIMER1_BASE, GPTIMER_A);
+	//TimerClearCounter(GPTIMER1_BASE, GPTIMER_A);
 
 	value =  TimerValueGet(GPTIMER1_BASE, GPTIMER_A);
 	radiotimer_vars.sleepCorrection = 0;
@@ -147,6 +147,7 @@ void radiotimer_suspend(void) {
 	// Stall the timer while debugging
 	HWREG(GPTIMER1_STALL) |= 0x02;
 }
+
 #define MARGIN 100
 void radiotimer_wakeup(PORT_TIMER_WIDTH elapsed) {
     PORT_TIMER_WIDTH period, compare,value;

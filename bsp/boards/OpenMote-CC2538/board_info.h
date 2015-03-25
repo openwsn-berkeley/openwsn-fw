@@ -89,6 +89,18 @@ static const uint8_t infoRadioName[]        = "CC2538 SoC";
 
 //=========================== prototypes ======================================
 
+
+
+void uart_wakeup(void);
+bool uart_isActive(void);
+void radio_wakeup(void);
+bool radio_isActive(void);
+
+PORT_TIMER_WIDTH bsp_timer_get_remainingValue(void);
+PORT_RADIOTIMER_WIDTH radiotimer_get_remainingValue(void);
+void bsp_timer_suspend(void);
+void radiotimer_suspend(void);
+void radiotimer_wakeup(PORT_TIMER_WIDTH elapsed);
 //=========================== public ==========================================
 
 //=========================== private =========================================

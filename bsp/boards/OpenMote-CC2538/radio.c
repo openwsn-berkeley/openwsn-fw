@@ -40,6 +40,7 @@ typedef struct {
    radiotimer_capture_cbt    startFrame_cb;
    radiotimer_capture_cbt    endFrame_cb;
    radio_state_t             state; 
+   bool                      isActive;
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -63,97 +64,106 @@ void radio_init() {
    
    // clear variables
    memset(&radio_vars,0,sizeof(radio_vars_t));
-   
-   // change state
-   radio_vars.state          = RADIOSTATE_STOPPED;
-   //flush fifos
-   CC2538_RF_CSP_ISFLUSHRX();
-   CC2538_RF_CSP_ISFLUSHTX();
-   
-   radio_off();
-   
-   //disable radio interrupts
-   disable_radio_interrupts();
-   
-   /*
-   This CORR_THR value should be changed to 0x14 before attempting RX. Testing has shown that
-   too many false frames are received if the reset value is used. Make it more likely to detect
-   sync by removing the requirement that both symbols in the SFD must have a correlation value
-   above the correlation threshold, and make sync word detection less likely by raising the
-   correlation threshold.
-   */
-   HWREG(RFCORE_XREG_MDMCTRL1)    = 0x14;
-   /* tuning adjustments for optimal radio performance; details available in datasheet */
-   
-   HWREG(RFCORE_XREG_RXCTRL)      = 0x3F;
-   /* Adjust current in synthesizer; details available in datasheet. */
-   HWREG(RFCORE_XREG_FSCTRL)      = 0x55;
-   
-     /* Makes sync word detection less likely by requiring two zero symbols before the sync word.
-      * details available in datasheet.
-      */
-   HWREG(RFCORE_XREG_MDMCTRL0)    = 0x85;
-   
-   /* Adjust current in VCO; details available in datasheet. */
-   HWREG(RFCORE_XREG_FSCAL1)      = 0x01;
-   /* Adjust target value for AGC control loop; details available in datasheet. */
-   HWREG(RFCORE_XREG_AGCCTRL1)    = 0x15;
-   
-   /* Tune ADC performance, details available in datasheet. */
-   HWREG(RFCORE_XREG_ADCTEST0)    = 0x10;
-   HWREG(RFCORE_XREG_ADCTEST1)    = 0x0E;
-   HWREG(RFCORE_XREG_ADCTEST2)    = 0x03;
-   
-   //update CCA register to -81db as indicated by manual.. won't be used..
-   HWREG(RFCORE_XREG_CCACTRL0)    = 0xF8;
-   /*
-    * Changes from default values
-    * See User Guide, section "Register Settings Update"
-    */
-   HWREG(RFCORE_XREG_TXFILTCFG)   = 0x09;    /** TX anti-aliasing filter bandwidth */
-   HWREG(RFCORE_XREG_AGCCTRL1)    = 0x15;     /** AGC target value */
-   HWREG(ANA_REGS_O_IVCTRL)       = 0x0B;        /** Bias currents */
-   
-   /* disable the CSPT register compare function */
-   HWREG(RFCORE_XREG_CSPT)        = 0xFFUL;
-   /*
-    * Defaults:
-    * Auto CRC; Append RSSI, CRC-OK and Corr. Val.; CRC calculation;
-    * RX and TX modes with FIFOs
-    */
-   HWREG(RFCORE_XREG_FRMCTRL0)    = RFCORE_XREG_FRMCTRL0_AUTOCRC;
-   
-   //poipoi disable frame filtering by now.. sniffer mode.
-   HWREG(RFCORE_XREG_FRMFILT0)   &= ~RFCORE_XREG_FRMFILT0_FRAME_FILTER_EN;
-   
-   /* Disable source address matching and autopend */
-   HWREG(RFCORE_XREG_SRCMATCH)    = 0;
-   
-   /* MAX FIFOP threshold */
-   HWREG(RFCORE_XREG_FIFOPCTRL)   = CC2538_RF_MAX_PACKET_LEN;
-   
-   HWREG(RFCORE_XREG_TXPOWER)     = CC2538_RF_TX_POWER;
-   HWREG(RFCORE_XREG_FREQCTRL)    = CC2538_RF_CHANNEL_MIN;
-   
-   /* Enable RF interrupts  see page 751  */
-   // enable_radio_interrupts();
-   
-   //register interrupt
-   IntRegister(INT_RFCORERTX, radio_isr_internal);
-   IntRegister(INT_RFCOREERR, radio_error_isr);
-   
-   IntPrioritySet(INT_RFCORERTX, HAL_INT_PRIOR_MAC);
-   IntPrioritySet(INT_RFCOREERR, HAL_INT_PRIOR_MAC);
-   
-   IntEnable(INT_RFCORERTX);
-   
-   /* Enable all RF Error interrupts */
-   HWREG(RFCORE_XREG_RFERRM)      = RFCORE_XREG_RFERRM_RFERRM_M; //all errors
-   IntEnable(INT_RFCOREERR);
-   //radio_on();
-   
-   // change state
-   radio_vars.state               = RADIOSTATE_RFOFF;
+   radio_wakeup();
+
+}
+
+bool radio_isActive(void){
+	return radio_vars.isActive;
+}
+
+void radio_wakeup(){
+	   // change state
+	   radio_vars.state          = RADIOSTATE_STOPPED;
+	   //flush fifos
+	   CC2538_RF_CSP_ISFLUSHRX();
+	   CC2538_RF_CSP_ISFLUSHTX();
+
+	   radio_off();
+
+	   //disable radio interrupts
+	   disable_radio_interrupts();
+
+	   /*
+	   This CORR_THR value should be changed to 0x14 before attempting RX. Testing has shown that
+	   too many false frames are received if the reset value is used. Make it more likely to detect
+	   sync by removing the requirement that both symbols in the SFD must have a correlation value
+	   above the correlation threshold, and make sync word detection less likely by raising the
+	   correlation threshold.
+	   */
+	   HWREG(RFCORE_XREG_MDMCTRL1)    = 0x14;
+	   /* tuning adjustments for optimal radio performance; details available in datasheet */
+
+	   HWREG(RFCORE_XREG_RXCTRL)      = 0x3F;
+	   /* Adjust current in synthesizer; details available in datasheet. */
+	   HWREG(RFCORE_XREG_FSCTRL)      = 0x55;
+
+	     /* Makes sync word detection less likely by requiring two zero symbols before the sync word.
+	      * details available in datasheet.
+	      */
+	   HWREG(RFCORE_XREG_MDMCTRL0)    = 0x85;
+
+	   /* Adjust current in VCO; details available in datasheet. */
+	   HWREG(RFCORE_XREG_FSCAL1)      = 0x01;
+	   /* Adjust target value for AGC control loop; details available in datasheet. */
+	   HWREG(RFCORE_XREG_AGCCTRL1)    = 0x15;
+
+	   /* Tune ADC performance, details available in datasheet. */
+	   HWREG(RFCORE_XREG_ADCTEST0)    = 0x10;
+	   HWREG(RFCORE_XREG_ADCTEST1)    = 0x0E;
+	   HWREG(RFCORE_XREG_ADCTEST2)    = 0x03;
+
+	   //update CCA register to -81db as indicated by manual.. won't be used..
+	   HWREG(RFCORE_XREG_CCACTRL0)    = 0xF8;
+	   /*
+	    * Changes from default values
+	    * See User Guide, section "Register Settings Update"
+	    */
+	   HWREG(RFCORE_XREG_TXFILTCFG)   = 0x09;    /** TX anti-aliasing filter bandwidth */
+	   HWREG(RFCORE_XREG_AGCCTRL1)    = 0x15;     /** AGC target value */
+	   HWREG(ANA_REGS_O_IVCTRL)       = 0x0B;        /** Bias currents */
+
+	   /* disable the CSPT register compare function */
+	   HWREG(RFCORE_XREG_CSPT)        = 0xFFUL;
+	   /*
+	    * Defaults:
+	    * Auto CRC; Append RSSI, CRC-OK and Corr. Val.; CRC calculation;
+	    * RX and TX modes with FIFOs
+	    */
+	   HWREG(RFCORE_XREG_FRMCTRL0)    = RFCORE_XREG_FRMCTRL0_AUTOCRC;
+
+	   //poipoi disable frame filtering by now.. sniffer mode.
+	   HWREG(RFCORE_XREG_FRMFILT0)   &= ~RFCORE_XREG_FRMFILT0_FRAME_FILTER_EN;
+
+	   /* Disable source address matching and autopend */
+	   HWREG(RFCORE_XREG_SRCMATCH)    = 0;
+
+	   /* MAX FIFOP threshold */
+	   HWREG(RFCORE_XREG_FIFOPCTRL)   = CC2538_RF_MAX_PACKET_LEN;
+
+	   HWREG(RFCORE_XREG_TXPOWER)     = CC2538_RF_TX_POWER;
+	   HWREG(RFCORE_XREG_FREQCTRL)    = CC2538_RF_CHANNEL_MIN;
+
+	   /* Enable RF interrupts  see page 751  */
+	   // enable_radio_interrupts();
+
+	   //register interrupt
+	   IntRegister(INT_RFCORERTX, radio_isr_internal);
+	   IntRegister(INT_RFCOREERR, radio_error_isr);
+
+	   IntPrioritySet(INT_RFCORERTX, HAL_INT_PRIOR_MAC);
+	   IntPrioritySet(INT_RFCOREERR, HAL_INT_PRIOR_MAC);
+
+	   IntEnable(INT_RFCORERTX);
+
+	   /* Enable all RF Error interrupts */
+	   HWREG(RFCORE_XREG_RFERRM)      = RFCORE_XREG_RFERRM_RFERRM_M; //all errors
+	   IntEnable(INT_RFCOREERR);
+	   //radio_on();
+
+	   // change state
+	   radio_vars.state               = RADIOSTATE_RFOFF;
+
 }
 
 void radio_setOverflowCb(radiotimer_compare_cbt cb) {
@@ -225,6 +235,8 @@ void radio_setFrequency(uint8_t frequency) {
       + (frequency - CC2538_RF_CHANNEL_MIN) * CC2538_RF_CHANNEL_SPACING);
    
    //radio_on();
+   //keep it active as it is configured
+   radio_vars.isActive=true;
    
    // change state
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
@@ -244,7 +256,7 @@ void radio_rfOff() {
    leds_radio_off();
    //enable radio interrupts
    disable_radio_interrupts();
-   
+   radio_vars.isActive=false;
    // change state
    radio_vars.state = RADIOSTATE_RFOFF;
 }
@@ -285,7 +297,8 @@ void radio_txEnable() {
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
-   
+   //keep the radio as active. prevent going to sleep now
+   radio_vars.isActive=true;
    //do nothing -- radio is activated by the strobe on rx or tx
    //radio_rfOn();
    
@@ -344,6 +357,7 @@ void radio_rxNow() {
    CC2538_RF_CSP_ISRXON();
    // busy wait until radio really listening
    while(!((HWREG(RFCORE_XREG_FSMSTAT1) & RFCORE_XREG_FSMSTAT1_RX_ACTIVE)));
+   radio_vars.isActive=true;
 }
 
 void radio_getReceivedFrame(uint8_t* pBufRead,
@@ -432,7 +446,9 @@ void radio_off(void){
       CC2538_RF_CSP_ISRFOFF();
       //clear fifo isr flag
       HWREG(RFCORE_SFR_RFIRQF0) = ~(RFCORE_SFR_RFIRQF0_FIFOP|RFCORE_SFR_RFIRQF0_RXPKTDONE);
+
    }
+   radio_vars.isActive=false;
 }
 
 //=========================== callbacks =======================================
@@ -484,9 +500,12 @@ void radio_isr_internal(void) {
       // change state
       radio_vars.state = RADIOSTATE_RECEIVING;
       if (radio_vars.startFrame_cb!=NULL) {
-         // call the callback
-         radio_vars.startFrame_cb(capturedTime);
+         // we cannot sleep now, starting to receive a frame
+    	  radio_vars.isActive=true;
+    	  // call the callback
+    	  radio_vars.startFrame_cb(capturedTime);
          // kick the OS
+
          return;
       } else {
          while(1);
@@ -499,8 +518,10 @@ void radio_isr_internal(void) {
       radio_vars.state = RADIOSTATE_TXRX_DONE;
       if (radio_vars.endFrame_cb!=NULL) {
          // call the callback
-         radio_vars.endFrame_cb(capturedTime);
-         // kick the OS
+    	 radio_vars.endFrame_cb(capturedTime);
+
+
+    	 // kick the OS
          return;
       } else {
          while(1);

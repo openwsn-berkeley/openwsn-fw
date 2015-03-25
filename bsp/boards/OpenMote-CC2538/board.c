@@ -5,17 +5,19 @@
  * Description: CC2538-specific definition of the "board" bsp module.
  */
 
+#include <headers/hw_ints.h>
 #include <headers/hw_ioc.h>
 #include <headers/hw_memmap.h>
 #include <headers/hw_ssi.h>
 #include <headers/hw_sys_ctrl.h>
 #include <headers/hw_types.h>
 
+#include <source/sleepmode.h>
+
 #include "board.h"
 #include "leds.h"
 #include "ioc.h"
 #include "gpio.h"
-#include "gptimer.h"
 #include "sys_ctrl.h"
 #include "interrupt.h"
 #include "bsp_timer.h"
@@ -25,9 +27,13 @@
 #include "radio.h"
 #include "flash.h"
 #include "i2c.h"
+#include "gptimer.h"
 #include "sensors.h"
 
 //=========================== variables =======================================
+#define BOARD_REVISION_D                ( 4 )
+#define BOARD_REVISION_E                ( 5 )
+#define BOARD_REVISION                  ( BOARD_REVISION_E )
 
 #define BSP_ANTENNA_BASE                ( GPIO_D_BASE )
 #define BSP_ANTENNA_INT                 ( GPIO_PIN_5 )
@@ -38,7 +44,17 @@
 
 #define CC2538_FLASH_ADDRESS            ( 0x0027F800 )
 
+#define LPM1_MINIMUM_IDLE_TICKS         ( 10 )
+#define LPM1_WAKEUP_TICKS               ( 0 )
+#define LPM2_MINIMUM_IDLE_TICKS         ( 100 )
+#define LPM2_WAKEUP_TICKS               ( 9 )
+
 //=========================== prototypes ======================================
+
+
+static void board_suspend(void);
+static void board_wakeup(bool uart, bool radio);
+static void board_isr_wakeup(void);
 
 void antenna_init(void);
 void antenna_internal(void);
@@ -47,7 +63,6 @@ void antenna_external(void);
 void board_timer_init(void);
 uint32_t board_timer_get(void);
 bool board_timer_expired(uint32_t future);
-
 
 static void clock_init(void);
 static void gpio_init(void);
@@ -94,8 +109,108 @@ void board_init(void) {
  * Puts the board to sleep
  */
 void board_sleep(void) {
-    SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
-    SysCtrlSleep();
+    PORT_TIMER_WIDTH current_ticks, sleep_ticks;
+    PORT_TIMER_WIDTH bsp_ticks, radio_ticks, wakeup_ticks;
+    bool radio_is_active;
+    bool uart_is_active;
+    bool deep_sleep;
+
+    // Get the next wake-up time, needs to be the minimum
+    // between the bsp_timer and the radio_timer
+    // Both bsp_timer and radiotimer operate at 32 MHz
+    // but return a number of ticks at 32.768 kHz
+    bsp_ticks    = bsp_timer_get_remainingValue();
+    radio_ticks  = radiotimer_get_remainingValue();
+    sleep_ticks  = (bsp_ticks < radio_ticks ? bsp_ticks : radio_ticks);
+    sleep_ticks  = radio_ticks;
+
+    // Check if uart or radio are active
+    // If so, we cannot go to deep sleep
+    radio_is_active = radio_isActive();
+    uart_is_active  = uart_isActive();
+    radio_is_active = false;
+    uart_is_active  = false;
+
+    // Decide the low power mode based on the expected sleep time
+    if (sleep_ticks < LPM1_MINIMUM_IDLE_TICKS || radio_is_active || uart_is_active) { // Go to LPM0
+        deep_sleep = false;
+    	SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
+    } else if (sleep_ticks < LPM2_MINIMUM_IDLE_TICKS) { // Go to LPM1
+        deep_sleep = true;
+        wakeup_ticks = 0;
+    	SysCtrlPowerModeSet(SYS_CTRL_PM_1);
+    } else { // Go to LPM2
+        deep_sleep = true;
+        wakeup_ticks = 5;
+        SysCtrlPowerModeSet(SYS_CTRL_PM_2);
+    }
+
+    // If we can go to deep sleep, we need to setup the sleep timer to wake us up
+    if (deep_sleep) {
+        // If we go to deep sleep we need to stop the
+        // bsp_timer and radiotimer modules
+        bsp_timer_suspend();
+        radiotimer_suspend();
+
+        // Register and enable the wake-up interrupt
+        IntRegister(INT_SMTIM, board_isr_wakeup);
+        IntEnable(INT_SMTIM);
+
+        // Get the present number of ticks
+        current_ticks = SleepModeTimerCountGet();
+
+        // Set the compare register
+        SleepModeTimerCompareSet(current_ticks + sleep_ticks - wakeup_ticks);
+
+        // Suspend the hardware
+        board_suspend();
+
+        // Go to the selected sleep mode
+        SysCtrlDeepSleep();
+    } else {
+        SysCtrlSleep();
+    }
+
+    // Wake-up will take place at board_isr_wakeup
+    // and will eventually come back here
+
+    // Check if we went to deep-sleep
+    if (deep_sleep) {
+        // Disable the wake-up interrupt
+        IntDisable(INT_SMTIM);
+
+        // Re-enable the hardware
+        board_wakeup(uart_is_active, radio_is_active);
+
+        // If we went to deep sleep we need to re-enable
+        // the bsp_timer and the radiotimer
+        // Notice callbacks will be executed here
+        // bsp_timer_wakeup(sleep_ticks);
+        radiotimer_wakeup(sleep_ticks);
+    }
+}
+
+
+/**
+ * Readies the board to go to sleep
+ */
+static void board_suspend(void) {
+    // Disable the radio and uart
+    // radio_suspend();
+    // uart_suspend();
+}
+
+/**
+ * Recovers the board from sleep
+ */
+static void board_wakeup(bool uart, bool radio) {
+    if (uart) {
+        uart_init();
+    }
+
+    if (radio) {
+        radio_init();
+    }
 }
 
 /**
@@ -341,4 +456,13 @@ static void GPIO_C_Handler(void) {
 
     /* Reset the board */
     SysCtrlReset();
+}
+
+static void board_isr_wakeup(void) {
+    // Wait until the clocks are stable
+    while(HWREG(SYS_CTRL_CLOCK_STA) & SYS_CTRL_CLOCK_STA_SYNC_32K);
+    while((!HWREG(SYS_CTRL_CLOCK_STA)) & SYS_CTRL_CLOCK_STA_SYNC_32K);
+
+    // Clear the timer interrupt
+    IntPendClear(INT_SMTIM);
 }

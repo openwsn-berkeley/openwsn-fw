@@ -103,6 +103,28 @@ TimerEnable(uint32_t ui32Base, uint32_t ui32Timer)
     HWREG(ui32Base + GPTIMER_O_CTL) |= ui32Timer & (GPTIMER_CTL_TAEN | GPTIMER_CTL_TBEN);
 }
 
+
+void
+TimerClearCounter(uint32_t ui32Base, uint32_t ui32Timer)
+{
+    //
+    // Check the arguments.
+    //
+    ASSERT(TimerBaseValid(ui32Base));
+    ASSERT((ui32Timer == GPTIMER_A) || (ui32Timer == GPTIMER_B));
+
+
+
+    //
+    // Clear the timer(s) , stop and start it again.
+    //
+    TimerDisable(ui32Base,ui32Timer);
+    TimerEnable(ui32Base,ui32Timer);
+
+}
+
+
+
 //*****************************************************************************
 //
 //! Disables the timer(s)
@@ -229,9 +251,15 @@ TimerConfigure(uint32_t ui32Base, uint32_t ui32Config)
     // configuration is ignored by the hardware in 32-bit modes.
     //
     HWREG(ui32Base + GPTIMER_O_TAMR) = (ui32Config & 255) | GPTIMER_TAMR_TAPWMIE;
+    //force timer to update match value at each cycle
+    HWREG(ui32Base + GPTIMER_O_TAMR) &=	~GPTIMER_TAMR_TAMRSU;
+
+
     HWREG(ui32Base + GPTIMER_O_TBMR) =
         ((ui32Config >> 8) & 255) | GPTIMER_TBMR_TBPWMIE;
+    HWREG(ui32Base + GPTIMER_O_TAMR) &=	~GPTIMER_TBMR_TBMRSU;
 }
+
 
 //*****************************************************************************
 //

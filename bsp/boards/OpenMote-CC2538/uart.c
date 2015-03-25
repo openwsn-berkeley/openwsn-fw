@@ -10,6 +10,7 @@
 #include <headers/hw_memmap.h>
 #include <headers/hw_types.h>
 
+#include "board_info.h"
 #include "stdint.h"
 #include "stdio.h"
 #include "string.h"
@@ -32,6 +33,7 @@
 typedef struct {
    uart_tx_cbt txCb;
    uart_rx_cbt rxCb;
+   bool isActive;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -45,7 +47,15 @@ static void uart_isr_private(void);
 void uart_init() { 
    // reset local variables
    memset(&uart_vars,0,sizeof(uart_vars_t));
-   
+   uart_wakeup();
+}
+
+bool uart_isActive(void){
+    return uart_vars.isActive;
+}
+
+//to be used after recovering from deep sleep and do not lose the callbacks.
+void uart_wakeup(void) {
    // Disable UART function
    UARTDisable(UART0_BASE);
 
@@ -91,19 +101,21 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
     uart_vars.rxCb = rxCb;
 }
 
-void uart_enableInterrupts(){
+void uart_enableInterrupts(void) {
     UARTIntEnable(UART0_BASE, UART_INT_RX | UART_INT_TX | UART_INT_RT);
+    uart_vars.isActive = true;
 }
 
-void uart_disableInterrupts(){
+void uart_disableInterrupts(void) {
     UARTIntDisable(UART0_BASE, UART_INT_RX | UART_INT_TX | UART_INT_RT);
+    uart_vars.isActive = false;
 }
 
-void uart_clearRxInterrupts(){
+void uart_clearRxInterrupts(void) {
     UARTIntClear(UART0_BASE, UART_INT_RX | UART_INT_RT);
 }
 
-void uart_clearTxInterrupts(){
+void uart_clearTxInterrupts(void) {
     UARTIntClear(UART0_BASE, UART_INT_TX);
 }
 
@@ -111,7 +123,7 @@ void  uart_writeByte(uint8_t byteToWrite){
 	UARTCharPut(UART0_BASE, byteToWrite);
 }
 
-uint8_t uart_readByte(){
+uint8_t uart_readByte(void) {
 	 int32_t i32Char;
      i32Char = UARTCharGet(UART0_BASE);
 	 return (uint8_t)(i32Char & 0xFF);
@@ -119,7 +131,7 @@ uint8_t uart_readByte(){
 
 //=========================== interrupt handlers ==============================
 
-static void uart_isr_private(void){
+static void uart_isr_private(void) {
 	uint32_t reg;
 	debugpins_isr_set();
 

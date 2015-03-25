@@ -14,25 +14,27 @@
 #include "board.h"
 #include "debug.h"
 #include "interrupt.h"
-#include "sleepmode.h"
+#include "gptimer.h"
 #include "debugpins.h"
 
 //=========================== defines =========================================
+
+#define BSP_TIMER_32MHZ_TICS_PER_32KHZ_TIC  ( 976 )
+
+#define GPTIMER0_STALL                      ( 0x4003000C )
 
 //=========================== variables =======================================
 
 typedef struct {
 	bsp_timer_cbt cb;
-	PORT_TIMER_WIDTH last_compare_value;
-	bool initiated;
-	uint32_t tooclose;
-	uint32_t diff;
 } bsp_timer_vars_t;
 
-bsp_timer_vars_t bsp_timer_vars;
+static bsp_timer_vars_t bsp_timer_vars;
 
 //=========================== prototypes ======================================
+
 void bsp_timer_isr_private(void);
+
 //=========================== public ==========================================
 
 /**
@@ -42,12 +44,14 @@ void bsp_timer_isr_private(void);
  any compare registers, so no interrupt will fire.
  */
 void bsp_timer_init() {
-
-	// clear local variables
+	// Clear local variables
 	memset(&bsp_timer_vars, 0, sizeof(bsp_timer_vars_t));
 
-	// enable peripheral Sleeptimer
-	IntRegister(INT_SMTIM, bsp_timer_isr_private);
+	// Configure the timer as a 32-bit timer
+	TimerConfigure(GPTIMER0_BASE, GPTIMER_CFG_ONE_SHOT);
+
+	// Stall the timer while debugging
+	HWREG(GPTIMER0_STALL) |= 0x02;
 }
 
 /**
@@ -66,12 +70,52 @@ void bsp_timer_set_callback(bsp_timer_cbt cb) {
  counter, and cancels a possible pending compare event.
  */
 void bsp_timer_reset() {
-	// reset compare
+    // Disable the timer interrupt
+    TimerIntDisable(GPTIMER0_BASE, INT_TIMER0A);
 
-	// reset timer
-    bsp_timer_vars.initiated=false;
-	// record last timer compare value
-	bsp_timer_vars.last_compare_value = 0;
+    // Disable the timer
+	TimerDisable(GPTIMER0_BASE, GPTIMER_CFG_ONE_SHOT);
+}
+
+void bsp_timer_suspend(void) {
+    // Disable the timer interrupt
+    TimerIntDisable(GPTIMER0_BASE, INT_TIMER0A);
+
+    // Disable the timer
+    TimerDisable(GPTIMER0_BASE, GPTIMER_BOTH);
+
+    // Stall the timer while debugging
+    HWREG(GPTIMER0_STALL) |= 0x02;
+}
+
+void bsp_timer_wakeup(PORT_TIMER_WIDTH elapsed) {
+    PORT_TIMER_WIDTH current;
+    int32_t remaining;
+
+    // Scale up from 32.768 kHz to 32 MHz
+    elapsed *= BSP_TIMER_32MHZ_TICS_PER_32KHZ_TIC;
+
+    // Get the remaining number of ticks
+    // Remember that this is a down-counter!
+    current = bsp_timer_get_currentValue();
+
+    // The remaining is the current minus the elapsed
+    remaining = current - elapsed;
+
+    // If there is nothing remaining
+    if (remaining <= BSP_TIMER_32MHZ_TICS_PER_32KHZ_TIC) {
+        // Enable the timer interrupt
+        IntPendSet(INT_TIMER0A);
+    } else {
+        // Set the timer compare value to the remaining value
+        TimerLoadSet(GPTIMER0_BASE, GPTIMER_A, (uint32_t) remaining);
+
+        // Enable the interrupt
+        TimerIntEnable(GPTIMER0_BASE, GPTIMER_TIMA_TIMEOUT);
+
+        // Enable the timer
+        TimerEnable(GPTIMER0_BASE, GPTIMER_BOTH);
+    }
 }
 
 /**
@@ -92,44 +136,32 @@ void bsp_timer_reset() {
  last compare event.
  */
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
-	PORT_TIMER_WIDTH newCompareValue, current;
-	PORT_TIMER_WIDTH temp_last_compare_value;
+    // Scale up from 32.768 kHz to 32 MHz
+    delayTicks *= BSP_TIMER_32MHZ_TICS_PER_32KHZ_TIC;
 
-	if (!bsp_timer_vars.initiated){
-		//as the timer runs forever the first time it is turned on has a weired value
-		bsp_timer_vars.last_compare_value=SleepModeTimerCountGet();
-		bsp_timer_vars.initiated=true;
-	}
+    // Set the timer compare value
+    TimerLoadSet(GPTIMER0_BASE, GPTIMER_A, delayTicks);
 
-	temp_last_compare_value = bsp_timer_vars.last_compare_value;
+    // Register the timer interrupt and enable it
+    TimerIntRegister(GPTIMER0_BASE, GPTIMER_BOTH, bsp_timer_isr_private);
+    TimerIntEnable(GPTIMER0_BASE, GPTIMER_TIMA_TIMEOUT);
 
-	newCompareValue = bsp_timer_vars.last_compare_value + delayTicks + 1;
-	bsp_timer_vars.last_compare_value = newCompareValue;
+    // Enable the timer interrupt
+    IntEnable(INT_TIMER0A);
 
-	current = SleepModeTimerCountGet();
-
-	if (delayTicks < current - temp_last_compare_value) {
-
-		// we're already too late, schedule the ISR right now manually
-		// setting the interrupt flag triggers an interrupt
-		bsp_timer_vars.tooclose++;
-		bsp_timer_vars.diff=(current - temp_last_compare_value);
-		bsp_timer_vars.last_compare_value = current;
-		IntPendSet(INT_SMTIM);
-	} else {
-		// this is the normal case, have timer expire at newCompareValue
-		SleepModeTimerCompareSet(newCompareValue);
-	}
-	//enable interrupt
-	IntEnable(INT_SMTIM);
+    // Enable the timer
+    TimerEnable(GPTIMER0_BASE, GPTIMER_BOTH);
 }
 
 /**
  \brief Cancel a running compare.
  */
 void bsp_timer_cancel_schedule() {
-	// Disable the Timer0B interrupt.
-	IntDisable(INT_SMTIM);
+    // Disable the timer interrupt
+    TimerIntDisable(GPTIMER0_BASE, INT_TIMER0A);
+
+    // Disable the timer
+    TimerDisable(GPTIMER0_BASE, GPTIMER_BOTH);
 }
 
 /**
@@ -138,25 +170,45 @@ void bsp_timer_cancel_schedule() {
  \returns The current value of the timer's counter.
  */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
-	return SleepModeTimerCountGet();
+	return TimerLoadGet(GPTIMER0_BASE, GPTIMER_A);
+}
+
+/**
+ \brief Return the remaining value of the timer's counter.
+
+ \returns The value that remains of the timer's counter.
+ */
+PORT_TIMER_WIDTH bsp_timer_get_remainingValue() {
+    PORT_TIMER_WIDTH current;
+
+    current  = TimerValueGet(GPTIMER0_BASE, GPTIMER_A);
+    current /= BSP_TIMER_32MHZ_TICS_PER_32KHZ_TIC;
+
+    return  current;
 }
 
 //=========================== private =========================================
 
 void bsp_timer_isr_private(void) {
 	debugpins_isr_set();
-	IntPendClear(INT_SMTIM);
+
+	// Clear the pending interrupt
+	TimerIntClear(GPTIMER0_BASE, GPTIMER_TIMA_TIMEOUT);
+
+	// Execute the interrupt
 	bsp_timer_isr();
+
 	debugpins_isr_clr();
 }
 
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t bsp_timer_isr() {
+    // Execute the callback
+    if (bsp_timer_vars.cb != NULL) {
+        bsp_timer_vars.cb();
+    }
 
-	// call the callback
-	bsp_timer_vars.cb();
-	// kick the OS
-	return KICK_SCHEDULER;
+	// Don't kick the OS
+	return DO_NOT_KICK_SCHEDULER;
 }
-
