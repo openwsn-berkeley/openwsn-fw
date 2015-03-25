@@ -304,6 +304,11 @@ void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
 
 	uint8_t payload_length;
 	payload_length = pkt->length - pkt->l2_authenticationLength;
+	
+	//copy the decrypted payload
+	memcpy(&pkt->payload[0],
+			&CipherText[0],
+			pkt->length);
 
 	if(pkt->l2_securityLevel != 4){
 		if(auth_checking(payloadToDecrypt,
@@ -318,11 +323,6 @@ void CCMstarInverse(OpenQueueEntry_t* 	   pkt,
 			pkt->l2_toDiscard = 7;
 		}
 	}
-
-	//copy the decrypted payload
-	memcpy(&pkt->payload[0],
-			&CipherText[0],
-			pkt->length);
 
 	if(pkt->l2_securityLevel != 4){
 		packetfunctions_tossFooter(pkt,pkt->l2_authenticationLength);
