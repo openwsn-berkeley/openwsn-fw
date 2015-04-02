@@ -68,7 +68,7 @@ bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 // ASN handling
 void     incrementAsnOffset(void);
-void     ieee154e_syncSlotOffset(frameLength_t frameLength);
+void     ieee154e_syncSlotOffset(void);
 void     asnStoreFromEB(uint8_t* asn);
 void     joinPriorityStoreFromEB(uint8_t jp);
 // synchronization
@@ -171,6 +171,8 @@ void isr_ieee154e_newSlot() {
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
          changeIsSync(TRUE);
+         incrementAsnOffset();
+         ieee154e_syncSlotOffset();
       } else {
          activity_synchronize_newSlot();
       }
@@ -619,7 +621,6 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    PORT_SIGNED_INT_WIDTH timeCorrection;
    // flag used for understanding if the slotoffset should be inferred from both ASN and slotframe length
    bool                  f_asn2slotoffset;
-   frameLength_t         frameLength;
    
    ptr=0;
    
@@ -713,10 +714,15 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             len = len - sublen;
          } while(len>0);
          if (f_asn2slotoffset == TRUE) {
-            frameLength = schedule_getFrameLength();
             // at this point, ASN and frame length are known
             // the current slotoffset can be inferred
-            ieee154e_syncSlotOffset(frameLength);
+            ieee154e_syncSlotOffset();
+            schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+            /* 
+            infer the asnOffset based on the fact that
+            ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
+            */
+            ieee154e_vars.asnOffset = ieee154e_vars.freq - 11 - schedule_getChannelOffset();
          }
          break;
       
@@ -1696,6 +1702,8 @@ port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header, OpenQueueE
 //======= ASN handling
 
 port_INLINE void incrementAsnOffset() {
+   frameLength_t frameLength;
+   
    // increment the asn
    ieee154e_vars.asn.bytes0and1++;
    if (ieee154e_vars.asn.bytes0and1==0) {
@@ -1704,8 +1712,14 @@ port_INLINE void incrementAsnOffset() {
          ieee154e_vars.asn.byte4++;
       }
    }
+   
    // increment the offsets
-   ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%schedule_getFrameLength();
+   frameLength = schedule_getFrameLength();
+   if (frameLength != 0) {
+      ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%frameLength;
+   } else {
+      ieee154e_vars.slotOffset  = ieee154e_vars.slotOffset + 1;
+   }
    ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)%16;
 }
 
@@ -1734,8 +1748,11 @@ port_INLINE void asnStoreFromEB(uint8_t* asn) {
    ieee154e_vars.asn.byte4        =     asn[4];
 }
 
-port_INLINE void ieee154e_syncSlotOffset(frameLength_t frameLength) {
+port_INLINE void ieee154e_syncSlotOffset() {
+   frameLength_t frameLength;
    uint32_t slotOffset;
+   
+   frameLength = schedule_getFrameLength();
    
    // determine the current slotOffset
    slotOffset = ieee154e_vars.asn.byte4;
@@ -1748,14 +1765,6 @@ port_INLINE void ieee154e_syncSlotOffset(frameLength_t frameLength) {
    slotOffset = slotOffset % frameLength;
    
    ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
-
-   schedule_syncSlotOffset(ieee154e_vars.slotOffset);
-   
-   /* 
-   infer the asnOffset based on the fact that
-   ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
-   */
-   ieee154e_vars.asnOffset = ieee154e_vars.freq - 11 - schedule_getChannelOffset();
 }
 
 //======= synchronization

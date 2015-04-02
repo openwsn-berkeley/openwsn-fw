@@ -481,7 +481,7 @@ slotOffset_t schedule_getNextActiveSlotOffset() {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    
-   res = ((scheduleEntry_t*)(schedule_vars.currentScheduleEntry->next))->slotOffset;
+   res = ((scheduleEntry_t*)(schedule_vars.currentScheduleEntry))->slotOffset;
    
    ENABLE_INTERRUPTS();
    
