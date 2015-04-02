@@ -192,6 +192,7 @@ typedef struct {
    // misc
    asn_t                     asn;                     // current absolute slot number
    slotOffset_t              slotOffset;              // current slot offset
+   slotOffset_t              nextActiveSlotOffset;    // next active slot offset
    PORT_RADIOTIMER_WIDTH     deSyncTimeout;           // how many slots left before looses sync
    bool                      isSync;                  // TRUE iff mote is synchronized to network
    // as shown on the chronogram

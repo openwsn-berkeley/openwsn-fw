@@ -173,6 +173,7 @@ void isr_ieee154e_newSlot() {
          changeIsSync(TRUE);
          incrementAsnOffset();
          ieee154e_syncSlotOffset();
+         ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
       } else {
          activity_synchronize_newSlot();
       }
@@ -718,6 +719,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             // the current slotoffset can be inferred
             ieee154e_syncSlotOffset();
             schedule_syncSlotOffset(ieee154e_vars.slotOffset);
+            ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
             /* 
             infer the asnOffset based on the fact that
             ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
@@ -815,11 +817,14 @@ port_INLINE void activity_ti1ORri1() {
       return;
    }
    
-   if (ieee154e_vars.slotOffset == schedule_getNextActiveSlotOffset()) {
+   if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
       // this is the next active slot
       
       // advance the schedule
       schedule_advanceSlot();
+      
+      // find the next one
+      ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
    } else {
       // this is NOT the next active slot, abort
       // stop using serial
