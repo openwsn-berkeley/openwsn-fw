@@ -68,7 +68,7 @@ bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 // ASN handling
 void     incrementAsnOffset(void);
-void     ieee154e_syncSlotOffset(void);
+void     ieee154e_syncSlotOffset(frameLength_t frameLength);
 void     asnStoreFromEB(uint8_t* asn);
 void     joinPriorityStoreFromEB(uint8_t jp);
 // synchronization
@@ -619,6 +619,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    PORT_SIGNED_INT_WIDTH timeCorrection;
    // flag used for understanding if the slotoffset should be inferred from both ASN and slotframe length
    bool                  f_asn2slotoffset;
+   frameLength_t         frameLength;
    
    ptr=0;
    
@@ -712,9 +713,10 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             len = len - sublen;
          } while(len>0);
          if (f_asn2slotoffset == TRUE) {
+            frameLength = schedule_getFrameLength();
             // at this point, ASN and frame length are known
             // the current slotoffset can be inferred
-            ieee154e_syncSlotOffset();
+            ieee154e_syncSlotOffset(frameLength);
          }
          break;
       
@@ -807,14 +809,11 @@ port_INLINE void activity_ti1ORri1() {
       return;
    }
    
-   if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
+   if (ieee154e_vars.slotOffset == schedule_getNextActiveSlotOffset()) {
       // this is the next active slot
       
       // advance the schedule
       schedule_advanceSlot();
-      
-      // find the next one
-      ieee154e_vars.nextActiveSlotOffset    = schedule_getNextActiveSlotOffset();
    } else {
       // this is NOT the next active slot, abort
       // stop using serial
@@ -1733,14 +1732,12 @@ port_INLINE void asnStoreFromEB(uint8_t* asn) {
    ieee154e_vars.asn.bytes2and3   =     asn[2]+
                                     256*asn[3];
    ieee154e_vars.asn.byte4        =     asn[4];
-   // determine the current slotOffset
 }
 
-port_INLINE void ieee154e_syncSlotOffset() {
-   frameLength_t frameLength;
+port_INLINE void ieee154e_syncSlotOffset(frameLength_t frameLength) {
    uint32_t slotOffset;
    
-   frameLength = schedule_getFrameLength();
+   // determine the current slotOffset
    slotOffset = ieee154e_vars.asn.byte4;
    slotOffset = slotOffset % frameLength;
    slotOffset = slotOffset << 16;
@@ -1751,8 +1748,8 @@ port_INLINE void ieee154e_syncSlotOffset() {
    slotOffset = slotOffset % frameLength;
    
    ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
+
    schedule_syncSlotOffset(ieee154e_vars.slotOffset);
-   ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
    
    /* 
    infer the asnOffset based on the fact that
