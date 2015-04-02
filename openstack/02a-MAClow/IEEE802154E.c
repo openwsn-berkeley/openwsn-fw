@@ -1720,10 +1720,10 @@ port_INLINE void incrementAsnOffset() {
    
    // increment the offsets
    frameLength = schedule_getFrameLength();
-   if (frameLength != 0) {
-      ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%frameLength;
+   if (frameLength == 0) {
+      ieee154e_vars.slotOffset++;
    } else {
-      ieee154e_vars.slotOffset  = ieee154e_vars.slotOffset + 1;
+      ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%frameLength;
    }
    ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)%16;
 }
