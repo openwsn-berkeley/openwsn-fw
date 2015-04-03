@@ -440,8 +440,8 @@ void radio_spiReadRxFifo(cc2420_status_t* statusRead,
       goes back to its inactive state.
       */
       
-      radio_spiStrobe(CC2420_SFLUSHRX, &radio_vars.radioStatusByte);
-      radio_spiStrobe(CC2420_SFLUSHRX, &radio_vars.radioStatusByte);
+      radio_spiStrobe(CC2420_SFLUSHRX, statusRead);
+      radio_spiStrobe(CC2420_SFLUSHRX, statusRead);
       
 
    }
