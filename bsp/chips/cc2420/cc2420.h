@@ -404,4 +404,12 @@ typedef struct {
 /// [R/W] Receiver FIFO Byte Register
 #define CC2420_RXFIFO_ADDR        0x3f
 
+//=========================== prototypes ======================================
+
+void radio_spiStrobe     (uint8_t strobe, cc2420_status_t* statusRead);
+void radio_spiWriteReg   (uint8_t reg,    cc2420_status_t* statusRead, uint16_t regValueToWrite);
+void radio_spiReadReg    (uint8_t reg,    cc2420_status_t* statusRead, uint8_t* regValueRead);
+void radio_spiWriteTxFifo(                cc2420_status_t* statusRead, uint8_t* bufToWrite, uint8_t  lenToWrite);
+void radio_spiReadRxFifo (                cc2420_status_t* statusRead, uint8_t* bufRead,    uint8_t* lenRead, uint8_t maxBufLen);
+
 #endif
