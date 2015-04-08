@@ -404,6 +404,23 @@ typedef struct {
 /// [R/W] Receiver FIFO Byte Register
 #define CC2420_RXFIFO_ADDR        0x3f
 
+//=========================== RAM addresses ===================================
+
+/// CC2420 RAM Memory Space
+#define CC2420_RAM_TXFIFO_ADDR      0x000     
+#define CC2420_RAM_RXFIFO_ADDR      0x080
+#define CC2420_RAM_KEY0_ADDR        0x100
+#define CC2420_RAM_RXNONCE_ADDR     0x110    // RX nonce for authentication
+#define CC2420_RAM_RXCTR_ADDR       0x110    // RX counter for decryption
+#define CC2420_RAM_SABUF_ADDR       0x120    // stand-alone encryption buffer
+#define CC2420_RAM_KEY1_ADDR        0x130
+#define CC2420_RAM_TXNONCE_ADDR     0x140    // TX nonce for authentication
+#define CC2420_RAM_TXCTR_ADDR       0x140    // TX counter for encryption
+#define CC2420_RAM_CBCSTATE_ADDR    0x150
+#define CC2420_RAM_IEEEADR_ADDR     0x160
+#define CC2420_RAM_PANID_ADDR       0x168
+#define CC2420_RAM_SHORTADR_ADDR    0x16A
+
 //=========================== prototypes ======================================
 
 void radio_spiStrobe     (uint8_t strobe, cc2420_status_t* statusRead);
