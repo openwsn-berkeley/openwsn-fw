@@ -1241,13 +1241,6 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       
       // parse the IEEE802.15.4 header (RX ACK)
       ieee802154_retrieveHeader(ieee154e_vars.ackReceived,&ieee802514_header);
-
-      //START OF TELEMATICS CODE
-      //if security is enabled, unsecuring operations can occur
-	   if(ieee154e_vars.ackReceived->l2_security== TRUE){
-		  security_incomingFrame(ieee154e_vars.ackReceived);
-	   }
-     //END OF TELEMATICS CODE
       
       // break if invalid IEEE802.15.4 header
       if (ieee802514_header.valid==FALSE) {
@@ -1262,6 +1255,13 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
+
+      //START OF TELEMATICS CODE
+      //if security is enabled, unsecuring operations can occur
+	   if(ieee154e_vars.ackReceived->l2_security== TRUE){
+		  security_incomingFrame(ieee154e_vars.ackReceived);
+	   }
+     //END OF TELEMATICS CODE
       
       // break if invalid ACK
       if (isValidAck(&ieee802514_header,ieee154e_vars.dataToSend)==FALSE) {
@@ -1449,13 +1449,6 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       
       // parse the IEEE802.15.4 header (RX DATA)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
-
-      //START OF TELEMATICS CODE
-      //if security is enabled on the received frame, unsecure it
-	  if(ieee154e_vars.dataReceived->l2_security== TRUE){
-		  security_incomingFrame(ieee154e_vars.dataReceived);
-	  }
-      //END OF TELEMATICS CODE
       
       // break if invalid IEEE802.15.4 header
       if (ieee802514_header.valid==FALSE) {
@@ -1471,6 +1464,13 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
+
+      //START OF TELEMATICS CODE
+      //if security is enabled on the received frame, unsecure it
+	  if(ieee154e_vars.dataReceived->l2_security== TRUE){
+		  security_incomingFrame(ieee154e_vars.dataReceived);
+	  }
+      //END OF TELEMATICS CODE
       
       // handle IEs xv poipoi
       // reset join priority 
