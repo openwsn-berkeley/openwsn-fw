@@ -2392,6 +2392,9 @@
       <group>
         <name>cc2420</name>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.c</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
         </file>
         <file>
