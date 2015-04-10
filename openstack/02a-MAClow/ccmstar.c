@@ -220,10 +220,8 @@ void Encr_Transformation(uint8_t*  				payload,
 
 	memcpy(&out[0], &in[0], 16);
 
-	// auth tag
-	if(secLevel > 3){
-		aes_encrypt(in,out,Key);
-	}
+	// encrypted auth tag
+	aes_encrypt(in,out,Key);
 
 	for(i=0;i<authentication_length;i++){
 		U[i] = out[i] ^ Ta[i];
