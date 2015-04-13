@@ -139,7 +139,7 @@ void radiotimer_suspend(void) {
 	HWREG(GPTIMER1_STALL) |= 0x02;
 }
 
-#define MARGIN 100
+#define MARGIN 200
 void radiotimer_wakeup(PORT_TIMER_WIDTH elapsed) {
     PORT_TIMER_WIDTH period, newcounter,value;
 
