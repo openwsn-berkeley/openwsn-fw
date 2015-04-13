@@ -128,7 +128,6 @@ void radiotimer_suspend(void) {
 	//keep the timeouts for wakeup
 	radiotimer_vars.period_value = TimerLoadGet(GPTIMER1_BASE,GPTIMER_A);
 	radiotimer_vars.compare_value = TimerMatchGet(GPTIMER1_BASE,GPTIMER_A);
-	//radiotimer_vars.sleepCorrection += value;
 
 	// Disable the timer interrupt
 	TimerIntDisable(GPTIMER1_BASE, INT_TIMER1A);
@@ -140,7 +139,7 @@ void radiotimer_suspend(void) {
 	HWREG(GPTIMER1_STALL) |= 0x02;
 }
 
-#define MARGIN 300
+#define MARGIN 100
 void radiotimer_wakeup(PORT_TIMER_WIDTH elapsed) {
     PORT_TIMER_WIDTH period, newcounter,value;
 
@@ -163,7 +162,6 @@ void radiotimer_wakeup(PORT_TIMER_WIDTH elapsed) {
     if (newcounter+MARGIN > radiotimer_vars.period_value){
     	//we are too late, pend the isr
     	TimerUpdateCounter(GPTIMER1_BASE,GPTIMER_A,0);
-
 
     	TimerIntEnable(GPTIMER1_BASE, GPTIMER_TIMA_TIMEOUT);
     	radiotimer_vars.isPeriodPending=true;
@@ -198,7 +196,6 @@ PORT_RADIOTIMER_WIDTH radiotimer_getValue(void) {
 	PORT_RADIOTIMER_WIDTH current;
 
 	current = TimerValueGet(GPTIMER1_BASE, GPTIMER_A);
-	//current += radiotimer_vars.sleepCorrection; //take into account the time we've been sleeping
 	current /= RADIOTIMER_32MHZ_TICS_PER_32KHZ_TIC;
 
 	return current;
@@ -267,9 +264,6 @@ void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
 }
 
 
-PORT_RADIOTIMER_WIDTH remaininglist[10];
-uint8_t remainingcount = 0;
-
 PORT_RADIOTIMER_WIDTH radiotimer_get_remainingValue(void) {
 	PORT_RADIOTIMER_WIDTH result, current, remaining;
 	int32_t diff;
@@ -285,16 +279,7 @@ PORT_RADIOTIMER_WIDTH radiotimer_get_remainingValue(void) {
 	diff =  (int32_t) ((uint32_t) remaining - (uint32_t)current); //this should always be positive as current < period (always!)
 	result = (uint32_t) diff;
 
-    if (diff<0){
-    	//dbg
-    	remaininglist[remainingcount] = (uint32_t)(diff/RADIOTIMER_32MHZ_TICS_PER_32KHZ_TIC);
-    	remainingcount++;
-    	remainingcount = remainingcount % 10;
-        //reset it, we are 32khz 1-tic off due to rounding
-    	result = 0;
-    }
-
-	result /= RADIOTIMER_32MHZ_TICS_PER_32KHZ_TIC;
+  	result /= RADIOTIMER_32MHZ_TICS_PER_32KHZ_TIC;
 
 	return result;
 }
@@ -378,7 +363,6 @@ kick_scheduler_t radiotimer_period_isr(void) {
 }
 
 kick_scheduler_t radiotimer_compare_isr(void) {
-
 
 	if (radiotimer_vars.compare_cb != NULL && radiotimer_vars.isCompareActive) {
     	radiotimer_vars.compare_value   = 0;
