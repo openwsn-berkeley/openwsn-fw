@@ -27,6 +27,7 @@
 
 typedef struct {
 	bsp_timer_cbt cb;
+	bool active;
 } bsp_timer_vars_t;
 
 static bsp_timer_vars_t bsp_timer_vars;
@@ -52,6 +53,7 @@ void bsp_timer_init() {
 
 	// Stall the timer while debugging
 	HWREG(GPTIMER0_STALL) |= 0x02;
+
 }
 
 /**
@@ -151,6 +153,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 
     // Enable the timer
     TimerEnable(GPTIMER0_BASE, GPTIMER_BOTH);
+    bsp_timer_vars.active=true;
 }
 
 /**
@@ -162,6 +165,7 @@ void bsp_timer_cancel_schedule() {
 
     // Disable the timer
     TimerDisable(GPTIMER0_BASE, GPTIMER_BOTH);
+    bsp_timer_vars.active=false;
 }
 
 /**
@@ -205,7 +209,10 @@ void bsp_timer_isr_private(void) {
 
 kick_scheduler_t bsp_timer_isr() {
     // Execute the callback
-    if (bsp_timer_vars.cb != NULL) {
+	//the timer expired, as this are one shot this is marked as ended.
+	bsp_timer_vars.active=false;
+
+	if (bsp_timer_vars.cb != NULL) {
         bsp_timer_vars.cb();
     }
 

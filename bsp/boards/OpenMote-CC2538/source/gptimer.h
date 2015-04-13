@@ -181,6 +181,7 @@ extern void TimerIntClear(uint32_t ui32Base, uint32_t ui32IntFlags);
 extern void TimerSynchronize(uint32_t ui32Base, uint32_t ui32Timers);
 extern void TimerClearCounter(uint32_t ui32Base, uint32_t ui32Timer);
 
+extern void TimerUpdateCounter(uint32_t ui32Base, uint32_t ui32Timer, uint32_t val);
 
 //*****************************************************************************
 //

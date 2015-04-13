@@ -96,13 +96,14 @@ void board_init(void) {
 
    leds_init();
    debugpins_init();
-   button_init();
+ //  button_init();
    bsp_timer_init();
    radiotimer_init();
    uart_init();
    radio_init();
    i2c_init();
    sensors_init();
+  // leds_all_on();
 }
 
 /**
@@ -119,9 +120,17 @@ void board_sleep(void) {
     // between the bsp_timer and the radio_timer
     // Both bsp_timer and radiotimer operate at 32 MHz
     // but return a number of ticks at 32.768 kHz
-    bsp_ticks    = bsp_timer_get_remainingValue();
+
+
+   //FAKE
+   /* SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
+    SysCtrlSleep();
+    return;
+   */
+
+//    bsp_ticks    = bsp_timer_get_remainingValue();
     radio_ticks  = radiotimer_get_remainingValue();
-    sleep_ticks  = (bsp_ticks < radio_ticks ? bsp_ticks : radio_ticks);
+  //  sleep_ticks  = (bsp_ticks < radio_ticks ? bsp_ticks : radio_ticks);
     sleep_ticks  = radio_ticks;
 
     // Check if uart or radio are active
@@ -130,6 +139,8 @@ void board_sleep(void) {
     uart_is_active  = uart_isActive();
     radio_is_active = false;
     uart_is_active  = false;
+
+
 
     // Decide the low power mode based on the expected sleep time
     if (sleep_ticks < LPM1_MINIMUM_IDLE_TICKS || radio_is_active || uart_is_active) { // Go to LPM0
@@ -149,7 +160,7 @@ void board_sleep(void) {
     if (deep_sleep) {
         // If we go to deep sleep we need to stop the
         // bsp_timer and radiotimer modules
-        bsp_timer_suspend();
+    //    bsp_timer_suspend();
         radiotimer_suspend();
 
         // Register and enable the wake-up interrupt
@@ -368,8 +379,7 @@ static void button_init(void) {
 
 static void SysCtrlRunSetting(void) {
   /* Disable General Purpose Timers 0, 1, 2, 3 when running */
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT1);
+
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_GPT3);
 
   /* Disable SSI 0, 1 when running */
@@ -385,6 +395,8 @@ static void SysCtrlRunSetting(void) {
   SysCtrlPeripheralDisable(SYS_CTRL_PERIPH_AES);
 
   /* Enable UART0 and RFC when running */
+  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT0);
+  SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT1);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_GPT2);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_RFC);
@@ -392,8 +404,6 @@ static void SysCtrlRunSetting(void) {
 
 static void SysCtrlSleepSetting(void) {
   /* Disable General Purpose Timers 0, 1, 2, 3 during sleep */
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT0);
-  SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT1);
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_GPT3);
 
   /* Disable SSI 0, 1 during sleep */
@@ -409,6 +419,8 @@ static void SysCtrlSleepSetting(void) {
   SysCtrlPeripheralSleepDisable(SYS_CTRL_PERIPH_AES);
 
   /* Enable UART and RFC during sleep */
+  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT0);
+  SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT1);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_GPT2);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_UART0);
   SysCtrlPeripheralSleepEnable(SYS_CTRL_PERIPH_RFC);
