@@ -96,14 +96,14 @@ void board_init(void) {
 
    leds_init();
    debugpins_init();
- //  button_init();
+   button_init();
    bsp_timer_init();
    radiotimer_init();
    uart_init();
    radio_init();
    i2c_init();
    sensors_init();
-  // leds_all_on();
+
 }
 
 /**
@@ -121,26 +121,20 @@ void board_sleep(void) {
     // Both bsp_timer and radiotimer operate at 32 MHz
     // but return a number of ticks at 32.768 kHz
 
-
-   //FAKE
+    //FAKE
    /* SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
     SysCtrlSleep();
     return;
    */
 
-//    bsp_ticks    = bsp_timer_get_remainingValue();
+    bsp_ticks    = bsp_timer_get_remainingValue();
     radio_ticks  = radiotimer_get_remainingValue();
-  //  sleep_ticks  = (bsp_ticks < radio_ticks ? bsp_ticks : radio_ticks);
-    sleep_ticks  = radio_ticks;
+    sleep_ticks  = (bsp_ticks < radio_ticks ? bsp_ticks : radio_ticks);
 
     // Check if uart or radio are active
     // If so, we cannot go to deep sleep
     radio_is_active = radio_isActive();
     uart_is_active  = uart_isActive();
-    radio_is_active = false;
-    uart_is_active  = false;
-
-
 
     // Decide the low power mode based on the expected sleep time
     if (sleep_ticks < LPM1_MINIMUM_IDLE_TICKS || radio_is_active || uart_is_active) { // Go to LPM0
@@ -158,9 +152,9 @@ void board_sleep(void) {
 
     // If we can go to deep sleep, we need to setup the sleep timer to wake us up
     if (deep_sleep) {
-        // If we go to deep sleep we need to stop the
-        // bsp_timer and radiotimer modules
-    //    bsp_timer_suspend();
+    // If we go to deep sleep we need to stop the
+    // bsp_timer and radiotimer modules
+        bsp_timer_suspend();
         radiotimer_suspend();
 
         // Register and enable the wake-up interrupt
