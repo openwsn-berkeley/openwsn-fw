@@ -29,6 +29,12 @@ source = [
     'board_crypto_engine.c',
 ]
 
+localEnv.Append(
+        CPPPATH =  [
+            os.path.join('#','bsp','chips','cc2420'),
+        ],
+)
+
 board  = localEnv.Object(source=source) + cc2420
 
 Return('board')

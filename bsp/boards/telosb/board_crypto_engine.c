@@ -9,6 +9,7 @@
 #include "aes_ctr.h"
 #include "aes_cbc.h"
 #include "aes_ccms.h"
+#include "cc2420_crypto.h"
 
 static owerror_t init(void) {
    return E_SUCCESS;
@@ -44,11 +45,11 @@ return E_SUCCESS;
 }
 /*---------------------------------------------------------------------------*/
 const struct crypto_engine board_crypto_engine = {
-   aes_ccms_enc,
+   cc2420_crypto_ccms_enc,
    aes_ccms_dec,
    aes_cbc_enc_raw,
    aes_ctr_enc_raw,
-   aes_ecb_enc,      // AES stand-alone encryption
+   cc2420_crypto_aes_ecb_enc,      // AES stand-alone encryption
    init,
 };
 /*---------------------------------------------------------------------------*/
