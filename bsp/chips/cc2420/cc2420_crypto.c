@@ -28,6 +28,8 @@ static void create_cc2420_nonce(uint8_t l,
                            uint8_t* nonce154,
                            uint8_t* buffer);
 
+static void reverse(uint8_t* in, uint8_t len);
+
 //=========================== public ==========================================
 
 owerror_t cc2420_crypto_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
@@ -154,8 +156,13 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
 static owerror_t cc2420_crypto_load_key(uint8_t key[16], uint8_t* /* out */ key_index) {
    cc2420_status_t status;
 
+   uint8_t reversed[16];
+   memcpy(reversed, key, CC2420_KEY_LEN);
+   reverse(reversed, CC2420_KEY_LEN);
+
    // Load the key in key RAM
-   radio_spiWriteRam(CC2420_RAM_KEY0_ADDR, &status, key, CC2420_KEY_LEN);
+   radio_spiWriteRam(CC2420_RAM_KEY0_ADDR, &status, reversed, CC2420_KEY_LEN);
+
    *key_index = CC2420_SECCTRL0_KEY_SEL_KEY0;
    return E_SUCCESS;
 }
@@ -218,5 +225,16 @@ static void create_cc2420_nonce(uint8_t l,
    if (l == 3) { buffer[13] = 0; }
    buffer[14] = 0x00;
    buffer[15] = 0x00; // should this be zero or one?
+}
+
+static void reverse(uint8_t *start, uint8_t len) {
+   uint8_t *lo = start;
+   uint8_t *hi = start + len - 1;
+   uint8_t swap;
+   while (lo < hi) {
+      swap = *lo;
+      *lo++ = *hi;
+      *hi-- = swap;
+   }
 }
 
