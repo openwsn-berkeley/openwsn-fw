@@ -109,8 +109,8 @@ app_vars_t app_vars;
 void cb_radioTimerOverflows(void);
 void cb_radioTimerCompare(void);
 // radio
-void cb_startFrame(uint16_t timestamp);
-void cb_endFrame(uint16_t timestamp);
+void cb_startFrame(PORT_TIMER_WIDTH timestamp);
+void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 // uart
 void cb_uartTxDone(void);
 void cb_uartRxCb(void);
@@ -224,13 +224,13 @@ void cb_radioTimerCompare(void) {
 
 //===== radio
 
-void cb_startFrame(uint16_t timestamp) {
+void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
    
    // update debug stats
    app_dbg.num_startFrame++;
 }
 
-void cb_endFrame(uint16_t timestamp) {
+void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    
    // update debug stats
    app_dbg.num_endFrame++;
