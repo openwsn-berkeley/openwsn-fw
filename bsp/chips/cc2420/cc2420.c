@@ -177,7 +177,7 @@ void radio_spiReadRam(uint16_t addr,
 
 // step 1. send SPI address
    spi_tx_buffer[0] = (CC2420_FLAG_RAM | (addr & 0x7F));
-   spi_tx_buffer[1] = ((addr >> 1) & 0xC0) | CC2420_FLAG_READ;
+   spi_tx_buffer[1] = ((addr >> 1) & 0xC0) | CC2420_FLAG_RAM_READ;
  
    // 2 first bytes
    spi_txrx(
@@ -212,7 +212,7 @@ void radio_spiWriteRam(uint16_t addr,
 
 // step 1. send SPI address
    spi_tx_buffer[0] = (CC2420_FLAG_RAM | (addr & 0x7F));
-   spi_tx_buffer[1] = ((addr >> 1) & 0xC0) | CC2420_FLAG_WRITE;
+   spi_tx_buffer[1] = ((addr >> 1) & 0xC0) | CC2420_FLAG_RAM_WRITE;
    
    spi_txrx(
       spi_tx_buffer,              // bufTx

@@ -12,6 +12,9 @@
 #define CC2420_FLAG_READ          0x40
 #define CC2420_FLAG_WRITE         0x00
 
+#define CC2420_FLAG_RAM_READ      0x20
+#define CC2420_FLAG_RAM_WRITE     0x00
+
 #define CC2420_FLAG_RAM           0x80
 #define CC2420_FLAG_REG           0x00
 
