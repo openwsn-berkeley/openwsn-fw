@@ -10,8 +10,10 @@
 #include "aes_cbc.h"
 #include "aes_ccms.h"
 #include "cc2420_crypto.h"
+#include "radio.h"
 
 static owerror_t init(void) {
+   radio_rfOn();  // turn the crystal oscillator on in order to access CC2420 RAM
    return E_SUCCESS;
 }
 
