@@ -142,7 +142,6 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
 
       // flush TX Fifo ???
       radio_spiStrobe(CC2420_SFLUSHTX, &status);
-      radio_spiStrobe(CC2420_SFLUSHTX, &status);
    }
    return E_FAIL;
 }
@@ -157,14 +156,21 @@ static owerror_t cc2420_crypto_load_key(uint8_t key[16], uint8_t* /* out */ key_
    cc2420_status_t status;
 
    uint8_t reversed[16];
-   memcpy(reversed, key, CC2420_KEY_LEN);
-   reverse(reversed, CC2420_KEY_LEN);
 
-   // Load the key in key RAM
-   radio_spiWriteRam(CC2420_RAM_KEY0_ADDR, &status, reversed, CC2420_KEY_LEN);
+   // verify if crystal oscillator is stable
+   radio_spiStrobe(CC2420_SNOP, &status);
 
-   *key_index = CC2420_SECCTRL0_KEY_SEL_KEY0;
-   return E_SUCCESS;
+   if (status.xosc16m_stable) {
+      memcpy(reversed, key, CC2420_KEY_LEN);
+      reverse(reversed, CC2420_KEY_LEN);
+
+      // Load the key in key RAM
+      radio_spiWriteRam(CC2420_RAM_KEY0_ADDR, &status, reversed, CC2420_KEY_LEN);
+
+      *key_index = CC2420_SECCTRL0_KEY_SEL_KEY0;
+      return E_SUCCESS;
+   }
+   return E_FAIL;
 }
 
 // private function launching both authentication + encryption 
