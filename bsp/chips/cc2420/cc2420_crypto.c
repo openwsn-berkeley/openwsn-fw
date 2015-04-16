@@ -50,9 +50,10 @@ owerror_t cc2420_crypto_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
       
       // launch stand-alone AES encryption
       radio_spiStrobe(CC2420_SAES, &status);
-      while (status.enc_busy == 1) {
+      do {
          radio_spiStrobe(CC2420_SNOP, &status);
       }
+      while (status.enc_busy == 1);
       
       // read the ciphertext and overwrite the original buffer
       radio_spiReadRam(CC2420_RAM_SABUF_ADDR, &status, buffer, 16);
@@ -94,7 +95,7 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       memcpy(buffer, &total_message_len, 1);
       memcpy(&buffer[1], a, len_a);
       memcpy(&buffer[len_a + 1], m, *len_m);
-      memcpy(&buffer[len_a + *len_m + 1], 0x00, len_mac ); // CC2420 expects MIC and CRC bytes allocated 
+      memset(&buffer[len_a + *len_m + 1], 0x00, len_mac + LENGTH_CRC); // CC2420 expects MIC and CRC bytes allocated 
 
       // Write the message to the TX FIFO for encryption and/or authentication
       radio_spiWriteRam(CC2420_RAM_TXFIFO_ADDR, &status, buffer, 16, total_message_len + 1);
@@ -118,9 +119,10 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       }
    
       // Once command is launched, busy wait for the crypt block to finish
-      while (status.enc_busy == 1) {
+      do {
          radio_spiStrobe(CC2420_SNOP, &status);
       }
+      while (status.enc_busy == 1);
 
       // FOR DEBUGGING: read the ciphertext from TX fifo with ReadRam()
       radio_spiReadRam(CC2420_RAM_TXFIFO_ADDR,
