@@ -226,13 +226,12 @@ static void create_cc2420_nonce(uint8_t l,
    // Create nonce
    buffer[0] = 0x00; // set flags to zero including reserved
    buffer[0] |= 0x07 & (l-1); // field L
-   // (len_mac - 2)/2 shifted left 3 times corresponds to (len_mac - 2) << 2
-   buffer[0] |= len_mac == 0 ? 0 : (0x07 & (len_mac - 2)) << 2; // field M
-   buffer[0] |= len_a != 0 ? 0x40 : 0; // field Adata
-   memcpy(&buffer[1], nonce154, 13);
+   buffer[0] |= len_a != 0 ? 0x08 : 0; // field Adata in CC2420's nonce (see datasheet)
+   memcpy(&buffer[1], nonce154, 13); 
    if (l == 3) { buffer[13] = 0; }
-   buffer[14] = 0x00;
-   buffer[15] = 0x00; // should this be zero or one?
+   buffer[14] = 0x00; // block counter
+   buffer[15] = 0x01; // block counter
+   reverse(buffer, 16);
 }
 
 static void reverse(uint8_t *start, uint8_t len) {
