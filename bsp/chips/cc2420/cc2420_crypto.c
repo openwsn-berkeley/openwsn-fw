@@ -91,14 +91,13 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
    if (cc2420_crypto_load_key(key, &key_index) == E_SUCCESS) {
          
       // make sure the Additional Data is concatenated with plaintext
-      // add the length byte at the beginning that CC2420 expects
-      memcpy(buffer, &total_message_len, 1);
-      memcpy(&buffer[1], a, len_a);
-      memcpy(&buffer[len_a + 1], m, *len_m);
-      memset(&buffer[len_a + *len_m + 1], 0x00, len_mac + LENGTH_CRC); // CC2420 expects MIC and CRC bytes allocated 
+      memcpy(buffer, a, len_a);
+      memcpy(&buffer[len_a], m, *len_m);
 
-      // Write the message to the TX FIFO for encryption and/or authentication
-      radio_spiWriteRam(CC2420_RAM_TXFIFO_ADDR, &status, buffer, 16, total_message_len + 1);
+      radio_spiStrobe(CC2420_SFLUSHTX, &status);
+
+      // Message must be transfered to TX FIFO using its special purpose register.
+      radio_spiWriteFifo(&status, buffer, total_message_len, CC2420_TXFIFO_ADDR);
 
       // Create and write the nonce to the CC2420 RAM
       create_cc2420_nonce(l, len_mac, len_a, nonce, cc2420_nonce);
@@ -144,6 +143,7 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
 
       // flush TX Fifo ???
       radio_spiStrobe(CC2420_SFLUSHTX, &status);
+      return E_SUCCESS;
    }
    return E_FAIL;
 }
