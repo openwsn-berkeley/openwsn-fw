@@ -12,12 +12,25 @@
 #include "spi.h"
 #include "debugpins.h"
 
-#define CC2420_KEY_LEN        16
+#define CC2420_KEY_LEN           16
+
+// type of operation
+#define CC2420_SEC_STANDALONE    CC2420_SECCTRL0_SEC_MODE_DISABLE
+#define CC2420_SEC_CBC_MAC       CC2420_SECCTRL0_SEC_MODE_CBC_MAC
+#define CC2420_SEC_CTR           CC2420_SECCTRL0_SEC_MODE_CTR
+#define CC2420_SEC_CCM           CC2420_SECCTRL0_SEC_MODE_CCM
+
+// encryption/decryption
+#define CC2420_SEC_SA_ENC        0
+#define CC2420_SEC_ENC           1
+#define CC2420_SEC_DEC           2
 
 //=========================== prototypes ======================================
 static owerror_t cc2420_crypto_load_key(uint8_t key[16], uint8_t* /* out */ key_index);
 
-static owerror_t cc2420_launch_enc_and_auth(uint8_t len_a,
+static owerror_t cc2420_conf_sec_regs(uint8_t mode,
+                                 uint8_t enc_flag,
+                                 uint8_t offset,
                                  uint8_t len_mac,
                                  uint8_t key_index,
                                  cc2420_status_t *status);
@@ -38,12 +51,8 @@ owerror_t cc2420_crypto_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
    uint8_t key_index;
 
    if (cc2420_crypto_load_key(key, &key_index) == E_SUCCESS) {
-      memset(&cc2420_SECCTRL0_reg, 0x00, sizeof(cc2420_SECCTRL0_reg_t));
-      // configure the SECCTRL register to use the loaded key
-      cc2420_SECCTRL0_reg.SEC_SAKEYSEL = key_index;
-      radio_spiWriteReg(CC2420_SECCTRL0_ADDR, 
-                     &status,
-                     *(uint16_t*)&cc2420_SECCTRL0_reg);
+
+      cc2420_conf_sec_regs(CC2420_SEC_STANDALONE, CC2420_SEC_SA_ENC, 0, 0, key_index, &status);
 
       // write plaintext to the stand-alone buffer
       radio_spiWriteRam(CC2420_RAM_SABUF_ADDR, &status, buffer, 16);
@@ -106,7 +115,12 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       // need to separate the calls to mimic CC2420 operation
       // both encryption and authentication
       if (len_mac > 0 && *len_m > 0) {
-         cc2420_launch_enc_and_auth(len_a, len_mac, key_index, &status);
+         cc2420_conf_sec_regs(CC2420_SEC_CCM,
+                                 CC2420_SEC_ENC,
+                                 len_a,
+                                 len_mac,
+                                 key_index,
+                                 &status);
       }
       // authentication only
       else if (len_mac > 0 && *len_m == 0) {
@@ -116,7 +130,10 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       else if (len_mac == 0 && *len_m > 0) {
          return E_FAIL;
       }
-   
+      
+      // issue STXENC to encrypt but not start the transmission
+      radio_spiStrobe(CC2420_STXENC, &status);
+
       // Once command is launched, busy wait for the crypt block to finish
       do {
          radio_spiStrobe(CC2420_SNOP, &status);
@@ -175,34 +192,45 @@ static owerror_t cc2420_crypto_load_key(uint8_t key[16], uint8_t* /* out */ key_
    return E_FAIL;
 }
 
-// private function launching both authentication + encryption 
-static owerror_t cc2420_launch_enc_and_auth(uint8_t len_a,
+// private function that configures registers for different encryption modes 
+static owerror_t cc2420_conf_sec_regs(uint8_t mode,
+                                 uint8_t enc_flag,
+                                 uint8_t offset,
                                  uint8_t len_mac,
                                  uint8_t key_index,
                                  cc2420_status_t *status) {
    cc2420_SECCTRL0_reg_t cc2420_SECCTRL0_reg;
    cc2420_SECCTRL1_reg_t cc2420_SECCTRL1_reg;
 
-   //configure SECCTRL0 and SECTRL1
-   // key selection for TX
-   // write nonce for TX
-   // SECCTRL0.SEC_MODE = CCM
+   memset(&cc2420_SECCTRL0_reg, 0x00, sizeof(cc2420_SECCTRL0_reg_t));
+   memset(&cc2420_SECCTRL1_reg, 0x00, sizeof(cc2420_SECCTRL1_reg_t));
 
-   cc2420_SECCTRL0_reg.SEC_MODE = CC2420_SECCTRL0_SEC_MODE_CCM;
+   //configure SECCTRL0 and SECTRL1
+   cc2420_SECCTRL0_reg.SEC_MODE = mode;
    cc2420_SECCTRL0_reg.SEC_M = (len_mac - 2) >> 1; // (M-2)/2
-   cc2420_SECCTRL0_reg.SEC_RXKEYSEL = 0;
-   cc2420_SECCTRL0_reg.SEC_TXKEYSEL = key_index;
-   cc2420_SECCTRL0_reg.SEC_SAKEYSEL = 0;
-   cc2420_SECCTRL0_reg.SEC_CBC_HEAD = 1; // use len_a as first byte of authenticated data
+
+   switch (enc_flag) {
+      case CC2420_SEC_ENC:
+         cc2420_SECCTRL0_reg.SEC_TXKEYSEL = key_index;
+         cc2420_SECCTRL1_reg.SEC_TXL = offset; 
+         break;
+      case CC2420_SEC_DEC:
+         cc2420_SECCTRL0_reg.SEC_RXKEYSEL = key_index;
+         cc2420_SECCTRL1_reg.SEC_RXL = offset;
+         break;
+      case CC2420_SEC_SA_ENC:
+         cc2420_SECCTRL0_reg.SEC_SAKEYSEL = key_index;
+         break;
+      default:
+         return E_FAIL;
+   }
+
+   cc2420_SECCTRL0_reg.SEC_CBC_HEAD = 1; // use offset as first byte of authenticated data
    cc2420_SECCTRL0_reg.RXFIFO_PROTECTION = 0;
    cc2420_SECCTRL0_reg.reserved_w0 = 0;
 
-   /// Security Control Register 1
-   cc2420_SECCTRL1_reg.SEC_RXL = 0;
    cc2420_SECCTRL1_reg.reserved_1_w0 = 0;
-   cc2420_SECCTRL1_reg.SEC_TXL = len_a; // number of bytes until first encrypted byte
    cc2420_SECCTRL1_reg.reserved_2_w0 = 0;
-
 
    // Write to two CC2420 security registers
    radio_spiWriteReg(CC2420_SECCTRL0_ADDR, 
@@ -213,8 +241,6 @@ static owerror_t cc2420_launch_enc_and_auth(uint8_t len_a,
                      status,
                      *(uint16_t*)&cc2420_SECCTRL1_reg);
 
-   // issue STXENC to encrypt but not start the transmission
-   radio_spiStrobe(CC2420_STXENC, status);
    return E_SUCCESS;
 }
 
