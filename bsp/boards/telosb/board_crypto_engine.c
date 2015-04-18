@@ -48,7 +48,7 @@ return E_SUCCESS;
 /*---------------------------------------------------------------------------*/
 const struct crypto_engine board_crypto_engine = {
    cc2420_crypto_ccms_enc,
-   aes_ccms_dec,
+   cc2420_crypto_ccms_dec,
    aes_cbc_enc_raw,
    aes_ctr_enc_raw,
    cc2420_crypto_aes_ecb_enc,      // AES stand-alone encryption

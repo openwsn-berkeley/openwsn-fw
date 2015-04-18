@@ -14,6 +14,9 @@
 
 #define CC2420_KEY_LEN           16
 
+#define CC2420_FLAG_MIC_SUCCESS       0x00
+#define CC2420_FLAG_MIC_FAIL          0xFF
+
 // type of operation
 #define CC2420_SEC_STANDALONE    CC2420_SECCTRL0_SEC_MODE_DISABLE
 #define CC2420_SEC_CBC_MAC       CC2420_SECCTRL0_SEC_MODE_CBC_MAC
@@ -76,6 +79,95 @@ owerror_t cc2420_crypto_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
    }
    return E_FAIL;
 }
+
+owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
+                        uint8_t len_a,
+                        uint8_t* m,
+                        uint8_t* len_m,
+                        uint8_t* nonce,
+                        uint8_t l,
+                        uint8_t key[16],
+                        uint8_t len_mac) {
+   uint8_t key_index;
+   uint8_t total_message_len;
+   uint8_t buffer[128];
+   uint8_t cc2420_nonce[16];
+   cc2420_status_t status;
+   uint8_t mode;
+   uint8_t offset;
+
+   if (!((len_mac == 0) || (len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
+      return E_FAIL;
+   }
+
+   // CRC needs to be accounted for in the message len but does not affect encryption
+   total_message_len = len_a + *len_m + LENGTH_CRC;
+
+   if (total_message_len > 127) { // CC2420 FIFO size is the limiting factor
+      return E_FAIL;
+   }
+
+   // load key
+   if (cc2420_crypto_load_key(key, &key_index) == E_SUCCESS) {
+         
+      // make sure the Additional Data is concatenated with plaintext
+      // add len byte at the beginning for CC2420 processing
+      buffer[0] = total_message_len;
+      memcpy(&buffer[1], a, len_a);
+      memcpy(&buffer[1 + len_a], m, *len_m);
+
+      radio_spiStrobe(CC2420_SFLUSHRX, &status);
+      radio_spiStrobe(CC2420_SFLUSHRX, &status);
+
+      // We have to write message directly to RX FIFO RAM address for in-line decryption. 
+      radio_spiWriteRam(CC2420_RAM_RXFIFO_ADDR, &status, buffer, total_message_len + 1);
+
+      // Create and write the nonce to the CC2420 RAM
+      create_cc2420_nonce(l, len_mac, len_a, nonce, cc2420_nonce);
+      radio_spiWriteRam(CC2420_RAM_RXNONCE_ADDR, &status, cc2420_nonce, 16);
+      
+      if (set_cc2420_mode_and_offset(len_a, *len_m, len_mac, &mode, &offset) == E_FAIL) {
+         return E_FAIL;
+      }
+      cc2420_conf_sec_regs(mode, CC2420_SEC_DEC, offset, len_mac, key_index, &status);
+     
+      // issue STXENC to encrypt but not start the transmission
+      radio_spiStrobe(CC2420_SRXDEC, &status);
+
+      // Once command is launched, busy wait for the crypt block to finish
+      do {
+         radio_spiStrobe(CC2420_SNOP, &status);
+      } while (status.enc_busy == 1);
+
+      // FOR DEBUGGING: read the ciphertext from TX fifo with ReadRam()
+      radio_spiReadRam(CC2420_RAM_RXFIFO_ADDR,
+                         &status,
+                         buffer,
+                         total_message_len + 1); // plus one for the length byte
+      // assert on message len
+      if (buffer[0] != total_message_len) {
+         return E_FAIL;
+      }
+
+      // verify MIC flag replaced by CC2420 in the last byte of the message
+      if (len_mac == 0 || buffer[total_message_len - LENGTH_CRC] == CC2420_FLAG_MIC_SUCCESS) {
+         // Write plaintext to vector m[]
+         radio_spiReadRam(CC2420_RAM_RXFIFO_ADDR + 1 + offset, // one for the length byte
+                         &status,
+                         m,
+                         *len_m + len_mac); // plaintext plus MIC
+
+         *len_m -= len_mac;
+
+         // clean up
+         radio_spiStrobe(CC2420_SFLUSHRX, &status);
+         radio_spiStrobe(CC2420_SFLUSHRX, &status);
+         return E_SUCCESS;
+      }
+   }
+   return E_FAIL;
+}
+
 
 owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
                         uint8_t len_a,

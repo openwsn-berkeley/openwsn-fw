@@ -30,4 +30,13 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
                         uint8_t key[16],
                         uint8_t len_mac);
 
+owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
+                        uint8_t len_a,
+                        uint8_t* m,
+                        uint8_t* len_m,
+                        uint8_t* nonce,
+                        uint8_t l,
+                        uint8_t key[16],
+                        uint8_t len_mac);
+
 #endif /* __CC2420_CRYPTO_H__ */
