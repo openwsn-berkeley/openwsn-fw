@@ -84,6 +84,8 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
    uint8_t buffer[128];
    uint8_t cc2420_nonce[16];
    cc2420_status_t status;
+   uint8_t mode;
+   uint8_t offset;
 
    if (!((len_mac == 0) || (len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
       return E_FAIL;
@@ -113,45 +115,40 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       radio_spiWriteRam(CC2420_RAM_TXNONCE_ADDR, &status, cc2420_nonce, 16);
       
       // need to separate the calls to mimic CC2420 operation
-      // both encryption and authentication
-      if (len_mac > 0 && *len_m > 0) {
-         cc2420_conf_sec_regs(CC2420_SEC_CCM,
-                                 CC2420_SEC_ENC,
-                                 len_a,
-                                 len_mac,
-                                 key_index,
-                                 &status);
-      }
-      // authentication only
-      else if (len_mac > 0 && *len_m == 0) {
+      if (len_mac > 0 && *len_m > 0) { // auth + encrypt
+         mode = CC2420_SEC_CCM;
+         offset = len_a;
+      } else if (len_mac > 0 && *len_m == 0) { // authentication only
+         mode = CC2420_SEC_CBC_MAC;
+         offset = 0; // no offset for authentication
+      } else if (len_mac == 0 && *len_m > 0) {  // encryption only (not really secure)
+         mode = CC2420_SEC_CTR;
+         offset = len_a;
+      } else {
          return E_FAIL;
       }
-      //encryption only (insecure)
-      else if (len_mac == 0 && *len_m > 0) {
-         return E_FAIL;
-      }
-      
+      cc2420_conf_sec_regs(mode, CC2420_SEC_ENC, offset, len_mac, key_index, &status);
+     
       // issue STXENC to encrypt but not start the transmission
       radio_spiStrobe(CC2420_STXENC, &status);
 
       // Once command is launched, busy wait for the crypt block to finish
       do {
          radio_spiStrobe(CC2420_SNOP, &status);
-      }
-      while (status.enc_busy == 1);
+      } while (status.enc_busy == 1);
 
       // FOR DEBUGGING: read the ciphertext from TX fifo with ReadRam()
       radio_spiReadRam(CC2420_RAM_TXFIFO_ADDR,
                          &status,
                          buffer,
                          total_message_len + 1); // plus one for the length byte
-
+      // assert on message len
       if (buffer[0] != total_message_len) {
          return E_FAIL;
       }
 
       // Write ciphertext to vector m[]
-      radio_spiReadRam(CC2420_RAM_TXFIFO_ADDR + 1 + len_a, // one for the length byte
+      radio_spiReadRam(CC2420_RAM_TXFIFO_ADDR + 1 + offset, // one for the length byte
                          &status,
                          m,
                          *len_m + len_mac); // ciphertext plus MIC
