@@ -1,7 +1,10 @@
 /**
 \brief General Security Operations
 
-\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, April 2015.
+\author Giuseppe Piro <giuseppe.piro@poliba.it>,
+\author Gennaro Boggia <gennaro.boggia@poliba.it>,
+\author Luigi Alfredo Grieco <alfredo.grieco@poliba.it>
 */
 
 #include "security.h"
@@ -74,8 +77,8 @@ void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
 
 	//length of auxiliary security header
 	msg->l2_auxiliaryLength = auxLengthChecking(msg->l2_keyIdMode,
-												frameCounterSuppression,
-												security_vars.m_macFrameCounterMode); //length of Key ID field
+                                                    frameCounterSuppression,
+                                                    security_vars.m_macFrameCounterMode); //length of Key ID field
 
 
 	if((msg->length+msg->l2_auxiliaryLength+msg->l2_authenticationLength+2) >= 130 ){ //2 bytes of CRC, 130 MaxPHYPacketSize
@@ -91,7 +94,6 @@ void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
 	}
 
 	open_addr_t* temp_keySource;
-//	temp_keySource = &msg->l2_keySource;
 	switch(msg->l2_keyIdMode){
 	case 0: //no KeyIDMode field
 		temp_keySource = &security_vars.m_macDefaultKeySource;
@@ -132,23 +134,22 @@ void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg){
     //    IEEE802.15.4e when transmitting
     msg->l2_ASNFrameCounter = msg->payload;
 
-	//security control field
-	packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
+    //security control field
+    packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
 
-	temp8b = 0;
-	temp8b |= msg->l2_securityLevel << ASH_SCF_SECURITY_LEVEL;//3b
-	temp8b |= msg->l2_keyIdMode << ASH_SCF_KEY_IDENTIFIER_MODE;//2b
-	temp8b |= frameCounterSuppression << ASH_SCF_FRAME_CNT_MODE; //1b
+    temp8b = 0;
+    temp8b |= msg->l2_securityLevel << ASH_SCF_SECURITY_LEVEL;//3b
+    temp8b |= msg->l2_keyIdMode << ASH_SCF_KEY_IDENTIFIER_MODE;//2b
+    temp8b |= frameCounterSuppression << ASH_SCF_FRAME_CNT_MODE; //1b
 
-	if(security_vars.m_macFrameCounterMode == 0x04){
-		temp8b |= 0 << ASH_SCF_FRAME_CNT_SIZE; //1b
-	} else{
-		temp8b |= 1 << ASH_SCF_FRAME_CNT_SIZE; //1b
-	}
+    if(security_vars.m_macFrameCounterMode == 0x04){
+	temp8b |= 0 << ASH_SCF_FRAME_CNT_SIZE; //1b
+     } else{
+	temp8b |= 1 << ASH_SCF_FRAME_CNT_SIZE; //1b
+    }
 
-	temp8b |= 0 << 1;//1b reserved
-	*((uint8_t*)(msg->payload)) = temp8b;
-
+    temp8b |= 0 << 1;//1b reserved
+    *((uint8_t*)(msg->payload)) = temp8b;
 }
 
 
@@ -161,17 +162,17 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg){
 
 	//search for a key
 	keyDescriptor = keyDescriptorLookup(msg->l2_keyIdMode,
-										&msg->l2_keySource,
-										msg->l2_keyIndex,
-										&msg->l2_keySource,
-										(idmanager_getMyID(ADDR_PANID)),
-										msg->l2_frameType);
+                                            &msg->l2_keySource,
+                                            msg->l2_keyIndex,
+                                            &msg->l2_keySource,
+                                            (idmanager_getMyID(ADDR_PANID)),
+                                            msg->l2_frameType);
 
 	if(keyDescriptor==NULL){
 	    openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
-							 (errorparameter_t)0,
-							 (errorparameter_t)500);
-		return;
+                                (errorparameter_t)0,
+                                (errorparameter_t)500);
+            return;
 	}
 
 
@@ -197,7 +198,7 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg){
 	uint8_t nonce[13];
 	memset(&nonce[0], 0, 13);
 
-	//	//cryptographic block
+	//cryptographic block
 	switch(msg->l2_keyIdMode){
 		case 0:
 		case 1:
@@ -233,21 +234,13 @@ void security_outgoingFrame(OpenQueueEntry_t*   msg){
 
 }
 
-void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
-                  	  	  	  	      ieee802154_header_iht* tempheader){
-
-	//a check if security is enabled, for me it not useful. If I'm here, security is enabled.
-//	if(tempheader->securityEnabled == TRUE){
-//		msg->l2_security = IEEE154_SEC_YES_SECURITY;
-//	}
+void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg, 
+                                      ieee802154_header_iht* tempheader){
 
 	uint8_t frameCnt_Suppression;
 	uint8_t frameCnt_Size;
-
 	uint8_t temp8b;
-
-	//b check if 802.15.4 header is valid
-	//if the header is not valid, I'm not here..
+        uint8_t i;
 
 	//c retrieve the Security Control field
 	//1byte, Security Control Field
@@ -266,10 +259,8 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 
 	tempheader->headerLength = tempheader->headerLength+1;
 
-	//retrieve the FrameCounter field, if it is here, and control it is not in overflow
-
 	//Frame Counter field, //l
-	uint8_t i;
+	
 
 	if(frameCnt_Suppression == 0){//the frame counter is here
 		uint8_t receivedASN[5];
@@ -284,34 +275,32 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 		msg->l2_frameCounter.byte4 = receivedASN[4];
 	}
 
-   //retrieve the Key Identifier field
+        //retrieve the Key Identifier field
 	open_addr_t* temp_addr;
 	switch(msg->l2_keyIdMode){
 	case 0:
-		//key is derived implicitly
+            //key is derived implicitly
 	    temp_addr = &security_vars.m_macDefaultKeySource;
 	    memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
-		break;
+	break;
 	case 2:
-		packetfunctions_readAddress(
-									((uint8_t*)(msg->payload)+tempheader->headerLength),
-									ADDR_16B,
-									&msg->l2_keySource,
-									OW_LITTLE_ENDIAN);
-		tempheader->headerLength = tempheader->headerLength+2;
-		break;
+             packetfunctions_readAddress(((uint8_t*)(msg->payload)+tempheader->headerLength),
+                                         ADDR_16B,
+                                         &msg->l2_keySource,
+                                         OW_LITTLE_ENDIAN);
+             tempheader->headerLength = tempheader->headerLength+2;
+        break;
 	case 1:
 	case 3:
-		packetfunctions_readAddress(
-							((uint8_t*)(msg->payload)+tempheader->headerLength),
-							ADDR_64B,
-							&msg->l2_keySource,
-							OW_LITTLE_ENDIAN);
-		tempheader->headerLength = tempheader->headerLength+8;
-		break;
+             packetfunctions_readAddress(((uint8_t*)(msg->payload)+tempheader->headerLength),
+                                          ADDR_64B,
+                                          &msg->l2_keySource,
+                                          OW_LITTLE_ENDIAN);
+	     tempheader->headerLength = tempheader->headerLength+8;
+	break;
 	default:
-		msg->l2_toDiscard = 1;
-		return;
+	     msg->l2_toDiscard = 1;
+	     return;
 	}
 
 	//retrieve the KeyIndex
@@ -333,22 +322,19 @@ void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
 
 void security_incomingFrame(OpenQueueEntry_t*      msg){
 
-	m_deviceDescriptor*			deviceDescriptor;
-	m_keyDescriptor*			keyDescriptor;
-	m_securityLevelDescriptor*	securityLevelDescriptor;
-
-	//check that Security Level is not zero, impossible for me
-	/*if(msg->securityLevel == 0){
-		return;
-	}*/
+	m_deviceDescriptor*        deviceDescriptor;
+	m_keyDescriptor*           keyDescriptor;
+	m_securityLevelDescriptor* securityLevelDescriptor;
+        uint8_t nonce[13];
+        uint8_t i;
 
 	//f key descriptor lookup
 	keyDescriptor = keyDescriptorLookup(msg->l2_keyIdMode,
-										&msg->l2_keySource,
-										msg->l2_keyIndex,
-										&msg->l2_keySource,
-										idmanager_getMyID(ADDR_PANID),
-										msg->l2_frameType);
+					    &msg->l2_keySource,
+					    msg->l2_keyIndex,
+					    &msg->l2_keySource,
+					    idmanager_getMyID(ADDR_PANID),
+					    msg->l2_frameType);
 
 	if(keyDescriptor==NULL){
 		msg->l2_toDiscard = 2; //can't find the key
@@ -357,8 +343,8 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 
 	//g device descriptor lookup
 	deviceDescriptor = deviceDescriptorLookup(&msg->l2_keySource,
-						   	       	   	   	  idmanager_getMyID(ADDR_PANID),
-						   	       	   	   	  keyDescriptor);
+						  idmanager_getMyID(ADDR_PANID),
+						  keyDescriptor);
 
 	if(deviceDescriptor==NULL){
 		msg->l2_toDiscard = 3;
@@ -367,35 +353,34 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 
 	//h Security Level lookup
 	securityLevelDescriptor = securityLevelDescriptorLookup(msg->l2_frameType,
-								  	  	  	 msg->commandFrameIdentifier);
+								msg->commandFrameIdentifier);
 
 	//i+j+k
 	if(incomingSecurityLevelChecking(securityLevelDescriptor,
-									 msg->l2_securityLevel,
-									 deviceDescriptor->Exempt)==FALSE){
+				         msg->l2_securityLevel,
+				         deviceDescriptor->Exempt)==FALSE){
 		msg->l2_toDiscard = 4; //security level not allowed
 	}
 
 	//l+m Anti-Replay
 	if(compareFrameCounter(msg->l2_frameCounter,
-						   deviceDescriptor->FrameCounter)
-						   == FALSE){
+			       deviceDescriptor->FrameCounter)
+			       == FALSE){
 		msg->l2_toDiscard = 5; //old packet
 	}
 
 	//n Control of key used
 	if(incomingKeyUsagePolicyChecking(keyDescriptor,
-									  msg->l2_frameType,
-									  0
-									  )  ==FALSE){
+					  msg->l2_frameType,
+					  0
+					  )  ==FALSE){
 
 		msg->l2_toDiscard = 6; // improper key used
 	}
 
-	uint8_t nonce[13];
+	
 	memset(&nonce[0], 0, 13);
-
-	uint8_t i;
+	
 	switch(msg->l2_keyIdMode){
 		case 0:
 		case 1:
@@ -424,18 +409,6 @@ void security_incomingFrame(OpenQueueEntry_t*      msg){
 	for(i=0;i<5;i++){
 		nonce[8+i] = myASN[i];
 	}
-
-//	asn_t now;
-//	uint8_t cmp;
-//	now.bytes0and1 = myASN[0]+256*myASN[1];
-//	now.bytes2and3 = myASN[2]+256*myASN[3];
-//	now.byte4 = myASN[4];
-//	cmp = compareFrameCounter(msg->l2_frameCounter,now);
-//	if(cmp == 0){
-//	   openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
-//							 (errorparameter_t)now.bytes0and1,
-//							 (errorparameter_t)msg->l2_frameCounter.bytes0and1);
-//	}
 
 	CCMstarInverse(msg,keyDescriptor->key,nonce);
 
@@ -514,8 +487,8 @@ uint8_t auxLengthChecking(uint8_t KeyIdMode, bool frameCounterSuppression, uint8
 }
 
 bool incomingKeyUsagePolicyChecking(m_keyDescriptor* keyDescriptor,
-									uint8_t frameType,
-									uint8_t cfi){
+				    uint8_t          frameType,
+				    uint8_t          cfi){
 
 	uint8_t i;
 	INTERRUPT_DECLARATION();
@@ -538,14 +511,13 @@ bool incomingKeyUsagePolicyChecking(m_keyDescriptor* keyDescriptor,
 }
 
 bool incomingSecurityLevelChecking(m_securityLevelDescriptor* seclevdesc,
-								   uint8_t seclevel,
-								   bool exempt){
+				   uint8_t seclevel,
+				   bool exempt){
 
 	if (seclevdesc->AllowedSecurityLevels == 0){
 		if(seclevel <= seclevdesc->SecurityMinimum){
 			return TRUE;
-		}
-		else{
+		}else{
 			return FALSE;
 		}
 	}
@@ -565,8 +537,8 @@ bool incomingSecurityLevelChecking(m_securityLevelDescriptor* seclevdesc,
 	return FALSE;
 }
 
-m_securityLevelDescriptor* securityLevelDescriptorLookup( uint8_t frameType,
-									uint8_t cfi){
+m_securityLevelDescriptor* securityLevelDescriptorLookup(uint8_t frameType,
+							 uint8_t cfi){
 
 	uint8_t i;
 	INTERRUPT_DECLARATION();
@@ -594,8 +566,8 @@ m_securityLevelDescriptor* securityLevelDescriptorLookup( uint8_t frameType,
 }
 
 m_deviceDescriptor* deviceDescriptorLookup(open_addr_t* Address,
-							   open_addr_t* PANId,
-							   m_keyDescriptor* keyDescriptor){
+					   open_addr_t* PANId,
+					   m_keyDescriptor* keyDescriptor){
 
 	uint8_t i;
 	INTERRUPT_DECLARATION();
@@ -616,12 +588,12 @@ m_deviceDescriptor* deviceDescriptorLookup(open_addr_t* Address,
 	return NULL;
 }
 
-m_keyDescriptor* keyDescriptorLookup(uint8_t  		KeyIdMode,
-					     			 open_addr_t*	keySource,
-					     			 uint8_t 		KeyIndex,
-					     			 open_addr_t* 	DeviceAddress,
-					     			 open_addr_t*	panID,
-					     			 uint8_t		frameType){
+m_keyDescriptor* keyDescriptorLookup(uint8_t      KeyIdMode,
+	     			     open_addr_t* keySource,
+	     			     uint8_t      KeyIndex,
+	     			     open_addr_t* DeviceAddress,
+	     			     open_addr_t* panID,
+	     			     uint8_t      frameType){
 
 	uint8_t i;
 	INTERRUPT_DECLARATION();
@@ -693,15 +665,14 @@ m_keyDescriptor* keyDescriptorLookup(uint8_t  		KeyIdMode,
  * Bootstrap Phase for the Parent Node
  */
 
-void coordinatorORParent_init(void){
+void security_DAGRoot_init(void){
 
 	open_addr_t*  my;
+        uint8_t j;
 	my = idmanager_getMyID(ADDR_64B);
-	//my = idmanager_getMyID(ADDR_16B);
 
 	//Creation of the KeyDescriptor
 	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIdMode = 3;
-	//security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIdMode = 2;
 	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIndex = 1;
 	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource = *(my);
 	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.Address = *(my);
@@ -710,52 +681,42 @@ void coordinatorORParent_init(void){
 	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[0].FrameType = IEEE154_TYPE_ACK;
 	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[2].FrameType = IEEE154_TYPE_BEACON;
 
-	uint8_t j;
 	for(j=0;j<16;j++){
-		security_vars.MacKeyTable.KeyDescriptorElement[0].key[j] = security_vars.M_k[j];
+	    security_vars.MacKeyTable.KeyDescriptorElement[0].key[j] = security_vars.M_k[j];
 	}
 
 	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = *(my);
-//	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter.macFrameCounter_5bytes.bytes0and1 = 0;
-//	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].FrameCounter.bytes2and3 = 0;
 	security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &security_vars.MacDeviceTable;
 	security_vars.m_macDefaultKeySource.type = ADDR_64B;
 	security_vars.m_macDefaultKeySource = *(my);
 
 }
 
-void remote_init(ieee802154_header_iht ieee802514_header){
+void security_ChildsInit(ieee802154_header_iht ieee802514_header){
 
 	open_addr_t* src;
+        uint8_t j;
 	src= &ieee802514_header.src;
 	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIdMode = 3;
-	//security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIdMode = 2;
 	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource = *(src);
-//	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource.type = ADDR_16B;
-//	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource.addr_16b[0] = (src)->addr_16b[0];
-//	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource.addr_16b[1] = (src)->addr_16b[1];
 	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.PANId = ieee802514_header.panid;
 	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIndex = 1;
-	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.Address = *(src);//(ieee802514_header.src);
+	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.Address = *(src);
 	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyUsageList[1].FrameType = IEEE154_TYPE_DATA;
 	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyUsageList[0].FrameType = IEEE154_TYPE_ACK;
 	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[2].FrameType = IEEE154_TYPE_BEACON;
-	uint8_t j;
 	for(j=0;j<16;j++){
 		security_vars.MacKeyTable.KeyDescriptorElement[1].key[j] = security_vars.M_k[j];
 	}
 	security_vars.m_macDefaultKeySource.type = ADDR_64B;
 	security_vars.m_macDefaultKeySource = *(src);
-//	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIndex = 1;
-//	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.Address = *(src);
 	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].deviceAddress = *(src);
-//	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter = 0;
 	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter.bytes0and1 = 0;
 	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter.bytes2and3 = 0;
 	security_vars.MacKeyTable.KeyDescriptorElement[1].DeviceTable = &security_vars.MacDeviceTable;
 
 	//this is necessary if multihop secure communications need to be estabilished
-	//coordinatorORParent_init();
+	coordinatorORParent_init();
 }
 
 //=========================== private =========================================
@@ -764,7 +725,7 @@ void remote_init(ieee802154_header_iht ieee802514_header){
  * Store in the array the reference value
  */
 void security_getFrameCounter(macFrameCounter_t reference,
-		                      uint8_t* array) {
+		              uint8_t* array) {
    array[0]         = (reference.bytes0and1     & 0xff);
    array[1]         = (reference.bytes0and1/256 & 0xff);
    array[2]         = (reference.bytes2and3     & 0xff);
