@@ -322,7 +322,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
    //set l2-security attributes
    msg->l2_security = TRUE;
-   msg->l2_securityLevel = 7;
+   msg->l2_securityLevel = 5;
    msg->l2_keyIdMode = 3;
    if(idmanager_getIsDAGroot()){
       open_addr_t* temp_addr;
@@ -476,22 +476,22 @@ void task_sixtopNotifReceive() {
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
          if (msg->length>0) {
- 	 //process packets which don't have security problems
- 	 if (msg->l2_toDiscard==0){
- 	    // send to upper layer
- 	    iphc_receive(msg);
- 	 } else {
-	    openserial_printError(COMPONENT_SIXTOP,ERR_SECURITY,
-                                 (errorparameter_t)msg->l2_toDiscard,
-				 (errorparameter_t)501);
-	    // free up the RAM
- 	    openqueue_freePacketBuffer(msg);
- 	 }
-  } else {
-     // free up the RAM
-     openqueue_freePacketBuffer(msg);
-  }
-  break;
+         //process packets which don't have security problems
+         if (msg->l2_toDiscard==0){
+            // send to upper layer
+            iphc_receive(msg);
+         } else {
+           openserial_printError(COMPONENT_SIXTOP,ERR_SECURITY,
+                                (errorparameter_t)msg->l2_toDiscard,
+		                (errorparameter_t)501);
+           // free up the RAM
+           openqueue_freePacketBuffer(msg);
+           }
+        } else {
+          // free up the RAM
+          openqueue_freePacketBuffer(msg);
+        }
+        break;
 case IEEE154_TYPE_ACK:
       default:
          // free the packet's RAM memory
@@ -570,6 +570,8 @@ owerror_t sixtop_send_internal(
    uint8_t iePresent, 
    uint8_t frameVersion) {
 
+   uint8_t i;
+
    // assign a number of retries
    if (
       packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE
@@ -603,7 +605,6 @@ owerror_t sixtop_send_internal(
    }
    //save the L2_payload in clear, in case retransmission occurs
    msg->clearText_length = msg->length;
-   uint8_t i;
    for(i=0;i<msg->length;i++){
 	   msg->clearText[i] = msg->l2_payload[i];
    }

@@ -1,7 +1,10 @@
 /**
-\brief General Security Definitions
+\brief Security operations defined by IEEE802.15.4 standard
 
-\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, March 2015.
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, April 2015.
+\author Giuseppe Piro <giuseppe.piro@poliba.it>,
+\author Gennaro Boggia <gennaro.boggia@poliba.it>,
+\author Luigi Alfredo Grieco <alfredo.grieco@poliba.it>
 */
 
 #ifndef __SECURITY_H
@@ -20,6 +23,7 @@
 #include "openserial.h"
 #include "opendefs.h"
 #include "packetfunctions.h"
+#include "crypto_engine.h"
 
 //=========================== define ==========================================
 
@@ -51,15 +55,15 @@ typedef struct{//identifier of the device which is using the key
 	open_addr_t	      deviceAddress;
 	macFrameCounter_t FrameCounter;
 	bool 		      Exempt;
-	} m_deviceDescriptor;
+} m_deviceDescriptor;
 
 typedef struct{//descriptor of the key we are looking for
 	uint8_t      KeyIdMode;
 	uint8_t      KeyIndex;
 	open_addr_t  KeySource;
 	open_addr_t  PANId;
-	open_addr_t  Address;//struct in which there are PANID,Short Address, Extended Address
-	} m_keyIdLookupDescriptor;
+	open_addr_t  Address;
+} m_keyIdLookupDescriptor;
 
 typedef struct{//descriptor of the Security Level for this type of communication
 	uint8_t FrameType;
@@ -67,16 +71,16 @@ typedef struct{//descriptor of the Security Level for this type of communication
 	uint8_t SecurityMinimum; //minimum required
 	bool 	DeviceOverrideSecurityMinimum; //if true, this indicate that the minimum can be overridden
 	uint8_t AllowedSecurityLevels; //set of Security Levels Allowed for incoming MAC frames
-	} m_securityLevelDescriptor;
+} m_securityLevelDescriptor;
 
 typedef struct{//defines what kind of frame the key is intended
 	uint8_t	FrameType;
 	uint8_t	CommandFrameIdentifier;
-	} m_keyUsageDescriptor;
+} m_keyUsageDescriptor;
 
 typedef struct{//Table which contains the device that are currently using this key
 	m_deviceDescriptor    DeviceDescriptorEntry[MAXNUMNEIGHBORS];
-	} m_macDeviceTable;
+} m_macDeviceTable;
 
 
 typedef struct{//descriptor of the key
@@ -84,15 +88,15 @@ typedef struct{//descriptor of the key
 	m_macDeviceTable*       DeviceTable;
 	m_keyUsageDescriptor    KeyUsageList[3];
 	uint8_t                 key[16];
-	} m_keyDescriptor;
+} m_keyDescriptor;
 
 typedef struct{
 	m_keyDescriptor KeyDescriptorElement[MAXNUMKEYS];
-	} m_macKeyTable;
+} m_macKeyTable;
 
 typedef struct{
 	m_securityLevelDescriptor SecurityDescriptorEntry[5];
-	} m_macSecurityLevelTable;
+} m_macSecurityLevelTable;
 
 
 //=========================== variables =======================================
@@ -112,45 +116,17 @@ typedef struct{
 //=========================== prototypes ======================================
 
 //admin
-void security_init(void);
+void IEEE802154security_init(void);
 //public
-void prepend_AuxiliarySecurityHeader(OpenQueueEntry_t* msg);
-void security_outgoingFrame(OpenQueueEntry_t* msg);
-void retrieve_AuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
-                  	  	      ieee802154_header_iht* tempheader);
+void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg);
+void IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t* msg);
+void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
+                                                        ieee802154_header_iht* tempheader);
 
-void security_incomingFrame(OpenQueueEntry_t* msg);
+void IEEE802154security_incomingFrame(OpenQueueEntry_t* msg);
 
-uint8_t authLengthChecking(uint8_t securityLevel); //it determines the length of the Authentication field(not standard)
-
-uint8_t auxLengthChecking(uint8_t KeyIdMode,
-		   	  bool frameCounterSuppression,
-		   	  uint8_t frameCounterSize); //it determines the length of the Auxiliary Security Header (not standard)
-
-bool incomingKeyUsagePolicyChecking(m_keyDescriptor* keydesc,
-				    uint8_t frameType,
-				    uint8_t cfi);
-
-bool incomingSecurityLevelChecking(m_securityLevelDescriptor* secLevDesc,
-				   uint8_t secLevel,
-				   bool exempt);
-
-m_securityLevelDescriptor* securityLevelDescriptorLookup(uint8_t frameType,
-							 uint8_t cfi);
-
-m_deviceDescriptor* deviceDescriptorLookup(open_addr_t* address,
-					   open_addr_t* PANID,
-					   m_keyDescriptor* keyDescriptor);
-
-m_keyDescriptor* keyDescriptorLookup(uint8_t      KeyIdMode,
-		 		     open_addr_t* keySource,
-		 		     uint8_t      KeyIndex,
-		 		     open_addr_t* DeviceAddress,
-		 		     open_addr_t* panID,
-		 		     uint8_t      frameType);
-
-void security_ChildsInit(ieee802154_header_iht ieee802514_header);
-void security_DAGRoot_init(void);
+void IEEE802154security_ChildsInit(ieee802154_header_iht ieee802514_header);
+void IEEE802154security_DAGRoot_init(void);
 /**
 \}
 \}

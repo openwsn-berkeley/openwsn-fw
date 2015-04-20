@@ -2,6 +2,9 @@
 \brief Entry point for accessing the OpenWSN stack.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, October 2014.
+
+Modified by:
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, April 2015
 */
 
 #include "opendefs.h"
@@ -58,9 +61,7 @@ void openstack_init(void) {
    //-- 02a-TSCH
    adaptive_sync_init();
    ieee154e_init();
-   //START OF TELEMATICS CODE
-   security_init();
-   //END OF TELEMATICS CODE
+   IEEE802154security_init();
    //-- 02b-RES
    schedule_init();
    sixtop_init();

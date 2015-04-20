@@ -173,7 +173,7 @@ void isr_ieee154e_newSlot() {
       if (idmanager_getIsDAGroot()==TRUE) {
          changeIsSync(TRUE);
          //If DAG Root, store the Key
-         security_DAGRoot_init();
+         IEEE802154security_DAGRoot_init();
          incrementAsnOffset();
          ieee154e_syncSlotOffset();
          ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
@@ -542,7 +542,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       //if not DAG Root and not synch, store the Key
       if(idmanager_getIsDAGroot()==FALSE && ieee154e_isSynch() == FALSE
          && ieee802514_header.frameType == IEEE154_TYPE_BEACON){
-            security_ChildsInit(ieee802514_header);
+            IEEE802154security_ChildsInit(ieee802514_header);
       }
       
       // break if invalid IEEE802.15.4 header
@@ -889,12 +889,14 @@ port_INLINE void activity_ti1ORri1() {
 
             //if security is enabled on the current frame, copy the clearText and encrypt before sending
             if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-                   ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->clearText_length;
-                   memcpy(&ieee154e_vars.dataToSend->l2_payload[0],
-                          &ieee154e_vars.dataToSend->clearText[0],ieee154e_vars.dataToSend->length);
+                 ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->clearText_length;
+                 for(i=0;i<ieee154e_vars.dataToSend->length; i++){
+                    ieee154e_vars.dataToSend->l2_payload[i] = ieee154e_vars.dataToSend->clearText[i];
+		 }
 
-                   security_outgoingFrame(ieee154e_vars.dataToSend);
-            	   packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
+                 IEEE802154security_outgoingFrameSecurity(ieee154e_vars.dataToSend);
+                 //reserve space for 2B CRC
+            	 packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
             }
             // arm tt1
             radiotimer_schedule(DURATION_tt1);
@@ -1240,7 +1242,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       //if security is enabled, unsecuring operations can occur
       if(ieee154e_vars.ackReceived->l2_security== TRUE){
-         security_incomingFrame(ieee154e_vars.ackReceived);
+         IEEE802154security_incomingFrame(ieee154e_vars.ackReceived);
       }
       
       // break if invalid ACK
@@ -1447,7 +1449,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       //if security is enabled on the received frame, perform unsecuring operations
       if(ieee154e_vars.dataReceived->l2_security== TRUE){
-         security_incomingFrame(ieee154e_vars.dataReceived);
+         IEEE802154security_incomingFrame(ieee154e_vars.dataReceived);
       }
 
       // handle IEs xv poipoi
@@ -1552,7 +1554,7 @@ port_INLINE void activity_ri6() {
 
    //security options on ACK
    ieee154e_vars.ackToSend->l2_security = TRUE;
-   ieee154e_vars.ackToSend->l2_securityLevel = 7;
+   ieee154e_vars.ackToSend->l2_securityLevel = 5;
    ieee154e_vars.ackToSend->l2_keyIdMode = 3;
    if(idmanager_getIsDAGroot()){
       open_addr_t* temp_addr;
@@ -1582,7 +1584,7 @@ port_INLINE void activity_ri6() {
 
    //if security is enabled, perform security operations
    if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-      security_outgoingFrame(ieee154e_vars.ackToSend);
+      IEEE802154security_outgoingFrameSecurity(ieee154e_vars.ackToSend);
    }
    
    // space for 2-byte CRC
