@@ -34,21 +34,10 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint8_t temp_8b;
    
    //General IEs here (those that are carried in all packets) -- None by now.
-<<<<<<< HEAD
    //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
    if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
       IEEE802154security_prependAuxiliarySecurityHeader(msg);
    }
-=======
-   //START OF TELEMATICS CODE
-   /*if security is enabled, the Auxiliary Security Header need to be
-    * added to the IEEE802.15.4 MAC header
-    */
-   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
-	   prepend_AuxiliarySecurityHeader(msg);
-   }
-   //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
