@@ -12,7 +12,15 @@ sources_c = [
     os.path.join('02a-MAClow','IEEE802154.c'),
     os.path.join('02a-MAClow','IEEE802154E.c'),
     os.path.join('02a-MAClow','adaptive_sync.c'),
+<<<<<<< HEAD
     os.path.join('02a-MAClow','IEEE802154_security.c'),
+=======
+    #START OF TELEMATICS CODE
+    os.path.join('02a-MAClow','security.c'),
+    os.path.join('02a-MAClow','ccmstar.c'),
+    os.path.join('02a-MAClow','TI_aes.c'),
+    #END OF TELEMATICS CODE
+>>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
     os.path.join('02b-MAChigh','otf.c'),
@@ -44,7 +52,15 @@ sources_h = [
     os.path.join('02a-MAClow','IEEE802154.h'),
     os.path.join('02a-MAClow','IEEE802154E.h'),
     os.path.join('02a-MAClow','adaptive_sync.h'),
+<<<<<<< HEAD
     os.path.join('02a-MAClow','IEEE802154_security.h'),
+=======
+    #START OF TELEMATICS CODE
+    os.path.join('02a-MAClow','security.h'),
+    os.path.join('02a-MAClow','ccmstar.h'),
+    os.path.join('02a-MAClow','TI_aes.h'),
+    #END OF TELEMATICS CODE
+>>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
     os.path.join('02b-MAChigh','otf.h'),

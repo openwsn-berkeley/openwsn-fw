@@ -34,10 +34,21 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint8_t temp_8b;
    
    //General IEs here (those that are carried in all packets) -- None by now.
+<<<<<<< HEAD
    //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
    if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
       IEEE802154security_prependAuxiliarySecurityHeader(msg);
    }
+=======
+   //START OF TELEMATICS CODE
+   /*if security is enabled, the Auxiliary Security Header need to be
+    * added to the IEEE802.15.4 MAC header
+    */
+   if(msg->l2_security == IEEE154_SEC_YES_SECURITY){
+	   prepend_AuxiliarySecurityHeader(msg);
+   }
+   //END OF TELEMATICS CODE
+>>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
@@ -236,6 +247,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
        return; //invalid packet accordint to p.64 IEEE15.4e
    }
 
+<<<<<<< HEAD
    //if security is enabled, Auxiliary Security Header can be retrieved
    if(ieee802514_header->securityEnabled == TRUE){
       msg->l2_security = TRUE;
@@ -243,6 +255,18 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    }else{
       msg->l2_security = FALSE;
    }
+=======
+   //START OF TELEMATICS CODE
+   //if security is enabled, Auxiliary Security Header can be retrieved
+   if(ieee802514_header->securityEnabled == TRUE){
+	   msg->l2_security = TRUE;
+	   retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
+
+   }else{
+	   msg->l2_security = FALSE;
+   }
+  //END OF TELEMATICS CODE
+>>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    
    // apply topology filter
    if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {
