@@ -320,29 +320,9 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
 
-<<<<<<< HEAD
    //set l2-security attributes
    msg->l2_security = TRUE;
    msg->l2_securityLevel = 5;
-=======
-   //START OF TELEMATICS CODE
-   //set security attributes
-   msg->l2_security = TRUE;
-   msg->l2_securityLevel = 7;
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
-   msg->l2_keyIdMode = 3;
-   if(idmanager_getIsDAGroot()){
-      open_addr_t* temp_addr;
-      temp_addr = idmanager_getMyID(ADDR_64B);
-      memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
-    }else{
-  	  neighbors_getPreferredParentEui64(&(msg->l2_keySource));
-    }
-   msg->l2_keyIndex = 1;
-<<<<<<< HEAD
-=======
-   //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    
    if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
       return sixtop_send_internal(
@@ -486,7 +466,6 @@ void task_sixtopNotifReceive() {
       case IEEE154_TYPE_BEACON:
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
-<<<<<<< HEAD
          if (msg->length>0) {
          //process packets which don't have security problems
          if (msg->l2_toDiscard==0){
@@ -505,28 +484,6 @@ void task_sixtopNotifReceive() {
         }
         break;
 case IEEE154_TYPE_ACK:
-=======
-                 if (msg->length>0) {
-         	 //START OF TELEMATICS CODE
-         	 //discard packets with security problems
-         	 if(msg->l2_toDiscard == 0){
-         		 // send to upper layer
-         		 iphc_receive(msg);
-         	 } else {
- 			   openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
- 								(errorparameter_t)msg->l2_toDiscard,
- 								(errorparameter_t)501);
- 			   // free up the RAM
-         	   openqueue_freePacketBuffer(msg);
-         	 }
-         	 //END OF TELEMATICS CODE
-          } else {
-             // free up the RAM
-             openqueue_freePacketBuffer(msg);
-          }
-          break;
-      case IEEE154_TYPE_ACK:
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
       default:
          // free the packet's RAM memory
          openqueue_freePacketBuffer(msg);
@@ -622,21 +579,13 @@ owerror_t sixtop_send_internal(
    msg->l1_txPower = TX_POWER;
    // record the location, in the packet, where the l2 payload starts
    msg->l2_payload = msg->payload;
-<<<<<<< HEAD
    //save the position where L2 payload starts
    msg->l2_length = msg->length;
-=======
-   //START OF TELEMATICS CODE
-   //save the position where L2 payload starts
-   msg->l2_length = msg->length;
-   //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             iePresent,
                             frameVersion,
-<<<<<<< HEAD
                             msg->l2_security,
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
@@ -650,30 +599,6 @@ owerror_t sixtop_send_internal(
    for(i=0;i<msg->length;i++){
 	   msg->clearText[i] = msg->l2_payload[i];
    }
-=======
-                            //START OF TELEMATICS CODE
-                            //dynamic security management
-                            msg->l2_security,
-                            //END OF TELEMATICS CODE
-                            msg->l2_dsn,
-                            &(msg->l2_nextORpreviousHop)
-                            );
-   //START OF TELEMATICS CODE
-   /*if security is not enabled, space for CRC can be reserved
-    * otherwise, you have to wait until encryption procedures
-    */
-   if(msg->l2_security == FALSE){
-	   packetfunctions_reserveFooterSize(msg,2);
-   }
-
-   //save the L2_payload in clear, in case retransmission occurs
-   msg->clearText_length = msg->length;
-   uint8_t i;
-   for(i=0;i<msg->length;i++){
-	   msg->clearText[i] = msg->l2_payload[i];
-   }
-   //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
    return E_SUCCESS;

@@ -61,13 +61,7 @@ void openstack_init(void) {
    //-- 02a-TSCH
    adaptive_sync_init();
    ieee154e_init();
-<<<<<<< HEAD
    IEEE802154security_init();
-=======
-   //START OF TELEMATICS CODE
-   security_init();
-   //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    //-- 02b-RES
    schedule_init();
    sixtop_init();

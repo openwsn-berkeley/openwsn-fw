@@ -15,14 +15,7 @@
 #include "sixtop.h"
 #include "adaptive_sync.h"
 #include "processIE.h"
-<<<<<<< HEAD
 #include "IEEE802154_security.h"
-=======
-//START OF TELEMATICS CODE
-//include security modules
-#include "security.h"
-//END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
 
 //=========================== variables =======================================
 
@@ -179,15 +172,8 @@ void isr_ieee154e_newSlot() {
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
          changeIsSync(TRUE);
-<<<<<<< HEAD
          //If DAG Root, store the Key
          IEEE802154security_DAGRoot_init();
-=======
-	 //START OF TELEMATICS CODE
-         //If DAG Root, store the Key
-	 scheduler_push_task(coordinatorORParent_init,TASKPRIO_SIXTOP);
-	 //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
          incrementAsnOffset();
          ieee154e_syncSlotOffset();
          ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
@@ -553,21 +539,11 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // parse the IEEE802.15.4 header (synchronize, end of frame)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
 
-<<<<<<< HEAD
       //if not DAG Root and not synch, store the Key
       if(idmanager_getIsDAGroot()==FALSE && ieee154e_isSynch() == FALSE
          && ieee802514_header.frameType == IEEE154_TYPE_BEACON){
             IEEE802154security_ChildsInit(ieee802514_header);
       }
-=======
-      //START OF TELEMATICS CODE
-      //if not DAG Root and not synch, store the Key
-  	  if(idmanager_getIsDAGroot()==FALSE && ieee154e_isSynch() == FALSE
-  		 && ieee802514_header.frameType == IEEE154_TYPE_BEACON){
-  		  remote_init(ieee802514_header);
-  	  }
-  	  //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
       
       // break if invalid IEEE802.15.4 header
       if (ieee802514_header.valid==FALSE) {
@@ -910,7 +886,6 @@ port_INLINE void activity_ti1ORri1() {
             }
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
-<<<<<<< HEAD
 
             //if security is enabled on the current frame, copy the clearText and encrypt before sending
             if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
@@ -923,29 +898,7 @@ port_INLINE void activity_ti1ORri1() {
                  //reserve space for 2B CRC
             	 packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
             }
-=======
-            //START OF TELEMATICS CODE
-            /*
-             * if security is enabled on the current frame,
-             * I have to encrypt it before sending.
-             * Note that if this is not the first attempt, the
-             * clearText has to be encrypted again.
-             */
-            if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-            	//if it is a retransmission, recover the clearText packet
-            	if(ieee154e_vars.dataToSend->l2_numTxAttempts != 1){
-					 ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->clearText_length;
-					 uint8_t i;
-					 for(i=0;i<ieee154e_vars.dataToSend->length; i++){
-						ieee154e_vars.dataToSend->l2_payload[i] = ieee154e_vars.dataToSend->clearText[i];
-					 }
-				 }
 
-            	security_outgoingFrame(ieee154e_vars.dataToSend);
-            	packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
-            }
-            //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
             // arm tt1
             radiotimer_schedule(DURATION_tt1);
             break;
@@ -1288,19 +1241,10 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
 
-<<<<<<< HEAD
       //if security is enabled, unsecuring operations can occur
       if(ieee154e_vars.ackReceived->l2_security== TRUE){
          IEEE802154security_incomingFrame(ieee154e_vars.ackReceived);
       }
-=======
-      //START OF TELEMATICS CODE
-      //if security is enabled, unsecuring operations can occur
-	   if(ieee154e_vars.ackReceived->l2_security== TRUE){
-		  security_incomingFrame(ieee154e_vars.ackReceived);
-	   }
-     //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
       
       // break if invalid ACK
       if (isValidAck(&ieee802514_header,ieee154e_vars.dataToSend)==FALSE) {
@@ -1504,21 +1448,11 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
 
-<<<<<<< HEAD
       //if security is enabled on the received frame, perform unsecuring operations
       if(ieee154e_vars.dataReceived->l2_security== TRUE){
          IEEE802154security_incomingFrame(ieee154e_vars.dataReceived);
       }
 
-=======
-      //START OF TELEMATICS CODE
-      //if security is enabled on the received frame, unsecure it
-	  if(ieee154e_vars.dataReceived->l2_security== TRUE){
-		  security_incomingFrame(ieee154e_vars.dataReceived);
-	  }
-      //END OF TELEMATICS CODE
-      
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
       // handle IEs xv poipoi
       // reset join priority 
       // retrieve IE in sixtop
@@ -1619,7 +1553,6 @@ port_INLINE void activity_ri6() {
                                      IEEE802154E_DESC_TYPE_SHORT; 
    memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_ht));
 
-<<<<<<< HEAD
    //security options on ACK
    ieee154e_vars.ackToSend->l2_security = TRUE;
    ieee154e_vars.ackToSend->l2_securityLevel = 5;
@@ -1632,69 +1565,28 @@ port_INLINE void activity_ri6() {
       neighbors_getPreferredParentEui64(&(ieee154e_vars.ackToSend->l2_keySource));
    }
    ieee154e_vars.ackToSend->l2_keyIndex = 1;
-=======
-   //START OF TELEMATICS CODE
-   //security options on ACK
-   ieee154e_vars.ackToSend->l2_security = TRUE;
-   ieee154e_vars.ackToSend->l2_securityLevel = 7;
-   ieee154e_vars.ackToSend->l2_keyIdMode = 3;
-   if(idmanager_getIsDAGroot()){
-	   open_addr_t* temp_addr;
-	   temp_addr = idmanager_getMyID(ADDR_64B);
-	   memcpy(&(ieee154e_vars.ackToSend->l2_keySource), temp_addr, sizeof(open_addr_t));
-  }else{
-	   neighbors_getPreferredParentEui64(&(ieee154e_vars.ackToSend->l2_keySource));
-  }
-
-   ieee154e_vars.ackToSend->l2_keyIndex = 1;
-   //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
 
-<<<<<<< HEAD
    //record positions where l2_payload starts and l2_payload length
    ieee154e_vars.ackToSend->l2_payload = ieee154e_vars.ackToSend->payload;
    ieee154e_vars.ackToSend->l2_length = ieee154e_vars.ackToSend->length;
-=======
-   //START OF TELEMATICS CODE
-   //record positions where l2_payload starts and l2_payload length
-   ieee154e_vars.ackToSend->l2_payload = ieee154e_vars.ackToSend->payload;
-   ieee154e_vars.ackToSend->l2_length = ieee154e_vars.ackToSend->length;
-   //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
 
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
                             IEEE154_IELIST_YES,//ie in ack
                             IEEE154_FRAMEVERSION,//enhanced ack
-<<<<<<< HEAD
                             ieee154e_vars.ackToSend->l2_security,
-=======
-                            //START OF TELEMATICS CODE
-                            //dynamic security management
-							ieee154e_vars.ackToSend->l2_security,
-							//END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
 
-<<<<<<< HEAD
    //if security is enabled, perform security operations
    if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
       IEEE802154security_outgoingFrameSecurity(ieee154e_vars.ackToSend);
    }
-=======
-   //START OF TELEMATICS CODE
-   //if security is enabled, secure the frame
-   if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-	   security_outgoingFrame(ieee154e_vars.ackToSend);
-	  }
-   //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    
    // space for 2-byte CRC
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);

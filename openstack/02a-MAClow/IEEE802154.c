@@ -247,7 +247,6 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
        return; //invalid packet accordint to p.64 IEEE15.4e
    }
 
-<<<<<<< HEAD
    //if security is enabled, Auxiliary Security Header can be retrieved
    if(ieee802514_header->securityEnabled == TRUE){
       msg->l2_security = TRUE;
@@ -255,18 +254,6 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    }else{
       msg->l2_security = FALSE;
    }
-=======
-   //START OF TELEMATICS CODE
-   //if security is enabled, Auxiliary Security Header can be retrieved
-   if(ieee802514_header->securityEnabled == TRUE){
-	   msg->l2_security = TRUE;
-	   retrieve_AuxiliarySecurityHeader(msg,ieee802514_header);
-
-   }else{
-	   msg->l2_security = FALSE;
-   }
-  //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    
    // apply topology filter
    if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {

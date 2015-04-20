@@ -162,13 +162,7 @@ enum {
    COMPONENT_TOHLONE                   = 0x22,
    COMPONENT_UECHO                     = 0x23,
    COMPONENT_RRT                       = 0x24,
-<<<<<<< HEAD
    COMPONENT_SECURITY                  = 0x25,
-=======
-   //START OF TELEMATICS CODE
-   COMPONENT_SECURITY                  = 0x23,
-   //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
 };
 
 /**
@@ -242,13 +236,7 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
-<<<<<<< HEAD
    ERR_SECURITY                        = 0x3a, // security problems (code location {1})
-=======
-   //START OF TELEMATICS CODE
-   ERR_SECURITY 					   = 0x3a,
-   //END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
 };
 
 //=========================== typedef =========================================
@@ -266,13 +254,7 @@ typedef struct {
 } asn_t;
 END_PACK
 
-<<<<<<< HEAD
 typedef asn_t  macFrameCounter_t;
-=======
-//START OF TELEMATICS CODE
-typedef asn_t  macFrameCounter_t;
-//END OF TELEMATICS CODE
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
 
 BEGIN_PACK
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
@@ -319,7 +301,6 @@ typedef struct {
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_IEListPresent;               //did have IE field?
    bool          l2_joinPriorityPresent;
-<<<<<<< HEAD
    //layer-2 security
    bool          l2_security;                    //flag for security enabled/disabled
    uint8_t       l2_securityLevel;               //the security level specified for the current frame
@@ -336,26 +317,6 @@ typedef struct {
    uint8_t       aData[128];                     //additional data for security
    uint8_t       clearText[128];                 //the layer-2 payload in clear, used in case retransmission occurs
    uint8_t       clearText_length;               //length of the packet in clear
-=======
-   //START OF TELEMATICS CODE
-   //security
-   bool			 	 l2_security;				 //flag for security enabled/disabled
-   uint8_t		 	 l2_securityLevel;			 //the security level for this frame
-   uint8_t		 	 l2_keyIdMode;				 //the key Identifier mode for this frame
-   uint8_t       	 l2_keyIndex;				 //the key Index for this frame
-   macFrameCounter_t l2_frameCounter;			 //the Frame Counter for this frame
-   open_addr_t   	 l2_keySource;				 //the key Source for this frame
-   uint8_t		 	 l2_toDiscard;				 //if TRUE, security-related errors have occurred
-   uint8_t 		 	 l2_authenticationLength;	 //the length of the authentication field
-   uint8_t		 	 l2_auxiliaryLength;	     //length of the Auxiliary Security Header
-   uint8_t		 	 commandFrameIdentifier;	 //used in case of Command Frames
-   uint8_t*			 l2_ASNFrameCounter;		 //pointer to the Frame Counter
-   uint8_t			 l2_length;                  //length of L2 payload
-   uint8_t			 aData[128];				 //additional data for security
-   uint8_t			 clearText[128];			 //the payload in clear, used in case retransmission occurs
-   uint8_t			 clearText_length;			 //length of the packet in clear
-   //END OF TELEMATICS CODE 
->>>>>>> e70a566e760b1b6cb9a0f68b48c057b228ca5d82
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet
