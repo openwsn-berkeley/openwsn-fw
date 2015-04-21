@@ -320,6 +320,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
 
+#ifdef CRYPTO_ENGINE_SCONS
    //set l2-security attributes
    msg->l2_security = TRUE;
    msg->l2_securityLevel = 5;
@@ -332,6 +333,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
   	  neighbors_getPreferredParentEui64(&(msg->l2_keySource));
     }
    msg->l2_keyIndex = 1;
+#endif
    
    if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
       return sixtop_send_internal(
