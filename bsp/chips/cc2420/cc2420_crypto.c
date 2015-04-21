@@ -236,7 +236,7 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       }
 
       // Write ciphertext to vector m[]
-      radio_spiReadRam(CC2420_RAM_TXFIFO_ADDR + 1 + offset, // one for the length byte
+      radio_spiReadRam(CC2420_RAM_TXFIFO_ADDR + 1 + len_a, // one for the length byte
                          &status,
                          m,
                          *len_m + len_mac); // ciphertext plus MIC
@@ -292,7 +292,7 @@ static owerror_t cc2420_conf_sec_regs(uint8_t mode,
 
    //configure SECCTRL0 and SECTRL1
    cc2420_SECCTRL0_reg.SEC_MODE = mode;
-   cc2420_SECCTRL0_reg.SEC_M = (len_mac - 2) >> 1; // (M-2)/2
+   cc2420_SECCTRL0_reg.SEC_M = len_mac != 0 ? (len_mac - 2) >> 1 : 0; // (M-2)/2 or 0
 
    switch (enc_flag) {
       case CC2420_SEC_ENC:
