@@ -106,12 +106,6 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
       memcpy(buffer, a, len_a);
       memcpy(&buffer[len_a], m, *len_m);
 
-      radio_spiStrobe(CC2420_SFLUSHRX, &status);
-      radio_spiStrobe(CC2420_SFLUSHRX, &status);
-
-      // To launch decryption in RX FIFO, we must write to it over its register, not direct RAM access
-      radio_spiWriteFifo(&status, buffer, total_message_len, CC2420_RXFIFO_ADDR);
-
       // Create and write the nonce to the CC2420 RAM
       create_cc2420_nonce(l, len_mac, len_a, nonce, cc2420_nonce);
       radio_spiWriteRam(CC2420_RAM_RXNONCE_ADDR, &status, cc2420_nonce, 16);
@@ -120,7 +114,13 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
       // decryption only. For the decryption only case, we then use directly MODE_CTR.
       cc2420_conf_sec_regs(len_mac != 0 ? CC2420_SECCTRL0_SEC_MODE_CCM : CC2420_SECCTRL0_SEC_MODE_CTR,
                            CC2420_SEC_DEC, len_a, len_mac, key_index, &status);
-     
+
+      // Now is the time to transfer the message to FIFO
+      radio_spiStrobe(CC2420_SFLUSHRX, &status);
+      radio_spiStrobe(CC2420_SFLUSHRX, &status);
+      // To launch decryption in RX FIFO, we must write to it over its register, not direct RAM access
+      radio_spiWriteFifo(&status, buffer, total_message_len, CC2420_RXFIFO_ADDR);
+
       // issue STXENC to encrypt but not start the transmission
       radio_spiStrobe(CC2420_SRXDEC, &status);
 
@@ -181,11 +181,6 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       memcpy(buffer, a, len_a);
       memcpy(&buffer[len_a], m, *len_m);
 
-      radio_spiStrobe(CC2420_SFLUSHTX, &status);
-
-      // Message must be transfered to TX FIFO using its special purpose register.
-      radio_spiWriteFifo(&status, buffer, total_message_len, CC2420_TXFIFO_ADDR);
-
       // Create and write the nonce to the CC2420 RAM
       create_cc2420_nonce(l, len_mac, len_a, nonce, cc2420_nonce);
       radio_spiWriteRam(CC2420_RAM_TXNONCE_ADDR, &status, cc2420_nonce, 16);
@@ -194,7 +189,12 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       // encryption only. For the encryption only case, we then use directly MODE_CTR.
       cc2420_conf_sec_regs(len_mac != 0 ? CC2420_SECCTRL0_SEC_MODE_CCM : CC2420_SECCTRL0_SEC_MODE_CTR,
                            CC2420_SEC_ENC, len_a, len_mac, key_index, &status);
-     
+ 
+      // Now is the time to transfer the message to FIFO
+      radio_spiStrobe(CC2420_SFLUSHTX, &status);
+      // Message must be transfered to TX FIFO using its special purpose register.
+      radio_spiWriteFifo(&status, buffer, total_message_len, CC2420_TXFIFO_ADDR);
+    
       // issue STXENC to encrypt but not start the transmission
       radio_spiStrobe(CC2420_STXENC, &status);
 
