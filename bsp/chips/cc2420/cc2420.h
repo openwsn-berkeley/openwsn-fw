@@ -429,7 +429,7 @@ typedef struct {
 void radio_spiStrobe     (uint8_t strobe, cc2420_status_t* statusRead);
 void radio_spiWriteReg   (uint8_t reg,    cc2420_status_t* statusRead, uint16_t regValueToWrite);
 void radio_spiReadReg    (uint8_t reg,    cc2420_status_t* statusRead, uint8_t* regValueRead);
-void radio_spiWriteTxFifo(                cc2420_status_t* statusRead, uint8_t* bufToWrite, uint8_t  lenToWrite);
+void radio_spiWriteFifo(                  cc2420_status_t* statusRead, uint8_t* bufToWrite, uint8_t  lenToWrite, uint8_t addr);
 void radio_spiReadRxFifo (                cc2420_status_t* statusRead, uint8_t* bufRead,    uint8_t* lenRead, uint8_t maxBufLen);
 void radio_spiWriteRam   (uint16_t addr,  cc2420_status_t* statusRead, uint8_t* bufToWrite,  uint8_t len);
 void radio_spiReadRam    (uint16_t addr,  cc2420_status_t* statusRead, uint8_t* pBufRead,    uint8_t len);

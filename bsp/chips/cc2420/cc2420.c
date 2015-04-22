@@ -66,11 +66,11 @@ void radio_spiReadReg(uint8_t reg, cc2420_status_t* statusRead, uint8_t* regValu
    *(regValueRead+1)    = spi_rx_buffer[1];
 }
 
-void radio_spiWriteTxFifo(cc2420_status_t* statusRead, uint8_t* bufToWrite, uint8_t len) {
+void radio_spiWriteFifo(cc2420_status_t* statusRead, uint8_t* bufToWrite, uint8_t len, uint8_t addr) {
    uint8_t              spi_tx_buffer[2];
    
    // step 1. send SPI address and length byte
-   spi_tx_buffer[0]     = (CC2420_FLAG_WRITE | CC2420_FLAG_REG | CC2420_TXFIFO_ADDR);
+   spi_tx_buffer[0]     = (CC2420_FLAG_WRITE | CC2420_FLAG_REG | addr);
    spi_tx_buffer[1]     = len;
    
    spi_txrx(
