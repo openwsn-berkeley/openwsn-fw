@@ -58,17 +58,17 @@ owerror_t cc2420_crypto_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
       cc2420_conf_sec_regs(CC2420_SEC_STANDALONE, CC2420_SEC_SA_ENC, 0, 0, key_index, &status);
 
       // write plaintext to the stand-alone buffer
-      radio_spiWriteRam(CC2420_RAM_SABUF_ADDR, &status, buffer, 16);
+      cc2420_spiWriteRam(CC2420_RAM_SABUF_ADDR, &status, buffer, 16);
       
       // launch stand-alone AES encryption
-      radio_spiStrobe(CC2420_SAES, &status);
+      cc2420_spiStrobe(CC2420_SAES, &status);
       do {
-         radio_spiStrobe(CC2420_SNOP, &status);
+         cc2420_spiStrobe(CC2420_SNOP, &status);
       }
       while (status.enc_busy == 1);
       
       // read the ciphertext and overwrite the original buffer
-      radio_spiReadRam(CC2420_RAM_SABUF_ADDR, &status, buffer, 16);
+      cc2420_spiReadRam(CC2420_RAM_SABUF_ADDR, &status, buffer, 16);
       return E_SUCCESS;
    }
    return E_FAIL;
@@ -108,7 +108,7 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
 
       // Create and write the nonce to the CC2420 RAM
       create_cc2420_nonce(l, len_mac, len_a, nonce, cc2420_nonce);
-      radio_spiWriteRam(CC2420_RAM_RXNONCE_ADDR, &status, cc2420_nonce, 16);
+      cc2420_spiWriteRam(CC2420_RAM_RXNONCE_ADDR, &status, cc2420_nonce, 16);
      
       // It seems that MODE_CCM of CC2420 can do authentication only but not
       // decryption only. For the decryption only case, we then use directly MODE_CTR.
@@ -116,20 +116,20 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
                            CC2420_SEC_DEC, len_a, len_mac, key_index, &status);
 
       // Now is the time to transfer the message to FIFO
-      radio_spiStrobe(CC2420_SFLUSHRX, &status);
-      radio_spiStrobe(CC2420_SFLUSHRX, &status);
+      cc2420_spiStrobe(CC2420_SFLUSHRX, &status);
+      cc2420_spiStrobe(CC2420_SFLUSHRX, &status);
       // To launch decryption in RX FIFO, we must write to it over its register, not direct RAM access
-      radio_spiWriteFifo(&status, buffer, total_message_len, CC2420_RXFIFO_ADDR);
+      cc2420_spiWriteFifo(&status, buffer, total_message_len, CC2420_RXFIFO_ADDR);
 
       // issue STXENC to encrypt but not start the transmission
-      radio_spiStrobe(CC2420_SRXDEC, &status);
+      cc2420_spiStrobe(CC2420_SRXDEC, &status);
 
       // Once command is launched, busy wait for the crypt block to finish
       do {
-         radio_spiStrobe(CC2420_SNOP, &status);
+         cc2420_spiStrobe(CC2420_SNOP, &status);
       } while (status.enc_busy == 1);
 
-      radio_spiReadRam(CC2420_RAM_RXFIFO_ADDR + 1 + len_a, // one for the length byte
+      cc2420_spiReadRam(CC2420_RAM_RXFIFO_ADDR + 1 + len_a, // one for the length byte
                          &status,
                          buffer,
                          *len_m); // length that includes MIC
@@ -140,8 +140,8 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
          memcpy(m, buffer, *len_m);
 
          // clean up
-         radio_spiStrobe(CC2420_SFLUSHRX, &status);
-         radio_spiStrobe(CC2420_SFLUSHRX, &status);
+         cc2420_spiStrobe(CC2420_SFLUSHRX, &status);
+         cc2420_spiStrobe(CC2420_SFLUSHRX, &status);
          return E_SUCCESS;
       }
    }
@@ -183,7 +183,7 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
 
       // Create and write the nonce to the CC2420 RAM
       create_cc2420_nonce(l, len_mac, len_a, nonce, cc2420_nonce);
-      radio_spiWriteRam(CC2420_RAM_TXNONCE_ADDR, &status, cc2420_nonce, 16);
+      cc2420_spiWriteRam(CC2420_RAM_TXNONCE_ADDR, &status, cc2420_nonce, 16);
  
       // It seems that MODE_CCM of CC2420 can do authentication only but not
       // encryption only. For the encryption only case, we then use directly MODE_CTR.
@@ -191,20 +191,20 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
                            CC2420_SEC_ENC, len_a, len_mac, key_index, &status);
  
       // Now is the time to transfer the message to FIFO
-      radio_spiStrobe(CC2420_SFLUSHTX, &status);
+      cc2420_spiStrobe(CC2420_SFLUSHTX, &status);
       // Message must be transfered to TX FIFO using its special purpose register.
-      radio_spiWriteFifo(&status, buffer, total_message_len, CC2420_TXFIFO_ADDR);
+      cc2420_spiWriteFifo(&status, buffer, total_message_len, CC2420_TXFIFO_ADDR);
     
       // issue STXENC to encrypt but not start the transmission
-      radio_spiStrobe(CC2420_STXENC, &status);
+      cc2420_spiStrobe(CC2420_STXENC, &status);
 
       // Once command is launched, busy wait for the crypt block to finish
       do {
-         radio_spiStrobe(CC2420_SNOP, &status);
+         cc2420_spiStrobe(CC2420_SNOP, &status);
       } while (status.enc_busy == 1);
 
       // Write ciphertext to vector m[]
-      radio_spiReadRam(CC2420_RAM_TXFIFO_ADDR + 1 + len_a, // one for the length byte
+      cc2420_spiReadRam(CC2420_RAM_TXFIFO_ADDR + 1 + len_a, // one for the length byte
                          &status,
                          m,
                          *len_m + len_mac); // ciphertext plus MIC
@@ -212,7 +212,7 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       *len_m += len_mac;
 
       // flush TX Fifo ???
-      radio_spiStrobe(CC2420_SFLUSHTX, &status);
+      cc2420_spiStrobe(CC2420_SFLUSHTX, &status);
       return E_SUCCESS;
    }
    return E_FAIL;
@@ -234,7 +234,7 @@ static owerror_t cc2420_crypto_load_key(uint8_t key[16], uint8_t* /* out */ key_
    uint8_t next_key_index;
 
    // verify if crystal oscillator is stable
-   radio_spiStrobe(CC2420_SNOP, &status);
+   cc2420_spiStrobe(CC2420_SNOP, &status);
 
    if (status.xosc16m_stable) {  // green light only if CC2420 is ready
 
@@ -253,7 +253,7 @@ static owerror_t cc2420_crypto_load_key(uint8_t key[16], uint8_t* /* out */ key_
       reverse(reversed, CC2420_KEY_LEN);
 
        // Load the key in key RAM
-      radio_spiWriteRam(next_key_index == 0 ? CC2420_RAM_KEY0_ADDR : CC2420_RAM_KEY1_ADDR,
+      cc2420_spiWriteRam(next_key_index == 0 ? CC2420_RAM_KEY0_ADDR : CC2420_RAM_KEY1_ADDR,
                         &status, reversed, CC2420_KEY_LEN);
 
       *key_index = next_key_index;
@@ -304,11 +304,11 @@ static owerror_t cc2420_conf_sec_regs(uint8_t mode,
    cc2420_SECCTRL1_reg.reserved_2_w0 = 0;
 
    // Write to two CC2420 security registers
-   radio_spiWriteReg(CC2420_SECCTRL0_ADDR, 
+   cc2420_spiWriteReg(CC2420_SECCTRL0_ADDR, 
                      status,
                      *(uint16_t*)&cc2420_SECCTRL0_reg);
                
-   radio_spiWriteReg(CC2420_SECCTRL1_ADDR, 
+   cc2420_spiWriteReg(CC2420_SECCTRL1_ADDR, 
                      status,
                      *(uint16_t*)&cc2420_SECCTRL1_reg);
 
