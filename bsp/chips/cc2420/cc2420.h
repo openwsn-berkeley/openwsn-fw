@@ -12,6 +12,9 @@
 #define CC2420_FLAG_READ          0x40
 #define CC2420_FLAG_WRITE         0x00
 
+#define CC2420_FLAG_RAM_READ      0x20
+#define CC2420_FLAG_RAM_WRITE     0x00
+
 #define CC2420_FLAG_RAM           0x80
 #define CC2420_FLAG_REG           0x00
 
@@ -404,12 +407,31 @@ typedef struct {
 /// [R/W] Receiver FIFO Byte Register
 #define CC2420_RXFIFO_ADDR        0x3f
 
+//=========================== RAM addresses ===================================
+
+/// CC2420 RAM Memory Space
+#define CC2420_RAM_TXFIFO_ADDR      0x000     
+#define CC2420_RAM_RXFIFO_ADDR      0x080
+#define CC2420_RAM_KEY0_ADDR        0x100
+#define CC2420_RAM_RXNONCE_ADDR     0x110    // RX nonce for authentication
+#define CC2420_RAM_RXCTR_ADDR       0x110    // RX counter for decryption
+#define CC2420_RAM_SABUF_ADDR       0x120    // stand-alone encryption buffer
+#define CC2420_RAM_KEY1_ADDR        0x130
+#define CC2420_RAM_TXNONCE_ADDR     0x140    // TX nonce for authentication
+#define CC2420_RAM_TXCTR_ADDR       0x140    // TX counter for encryption
+#define CC2420_RAM_CBCSTATE_ADDR    0x150
+#define CC2420_RAM_IEEEADR_ADDR     0x160
+#define CC2420_RAM_PANID_ADDR       0x168
+#define CC2420_RAM_SHORTADR_ADDR    0x16A
+
 //=========================== prototypes ======================================
 
 void radio_spiStrobe     (uint8_t strobe, cc2420_status_t* statusRead);
 void radio_spiWriteReg   (uint8_t reg,    cc2420_status_t* statusRead, uint16_t regValueToWrite);
 void radio_spiReadReg    (uint8_t reg,    cc2420_status_t* statusRead, uint8_t* regValueRead);
-void radio_spiWriteTxFifo(                cc2420_status_t* statusRead, uint8_t* bufToWrite, uint8_t  lenToWrite);
+void radio_spiWriteFifo(                  cc2420_status_t* statusRead, uint8_t* bufToWrite, uint8_t  lenToWrite, uint8_t addr);
 void radio_spiReadRxFifo (                cc2420_status_t* statusRead, uint8_t* bufRead,    uint8_t* lenRead, uint8_t maxBufLen);
+void radio_spiWriteRam   (uint16_t addr,  cc2420_status_t* statusRead, uint8_t* bufToWrite,  uint8_t len);
+void radio_spiReadRam    (uint16_t addr,  cc2420_status_t* statusRead, uint8_t* pBufRead,    uint8_t len);
 
 #endif

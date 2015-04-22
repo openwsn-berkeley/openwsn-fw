@@ -203,7 +203,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
    
    radio_spiStrobe(CC2420_SFLUSHTX, &radio_vars.radioStatusByte);
-   radio_spiWriteTxFifo(&radio_vars.radioStatusByte, packet, len);
+   radio_spiWriteFifo(&radio_vars.radioStatusByte, packet, len, CC2420_TXFIFO_ADDR);
    
    // change state
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
