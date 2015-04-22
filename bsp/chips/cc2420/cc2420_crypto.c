@@ -44,12 +44,6 @@ static void create_cc2420_nonce(uint8_t l,
                            uint8_t* nonce154,
                            uint8_t* buffer);
 
-static owerror_t set_cc2420_mode_and_offset(uint8_t len_a,
-                                 uint8_t len_m,
-                                 uint8_t len_mac,
-                                 uint8_t* mode,
-                                 uint8_t* offset);
-
 static void reverse(uint8_t* in, uint8_t len);
 
 //=========================== public ==========================================
@@ -93,8 +87,6 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
    uint8_t buffer[128];
    uint8_t cc2420_nonce[16];
    cc2420_status_t status;
-   uint8_t mode;
-   uint8_t offset;
 
    if (!((len_mac == 0) || (len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
       return E_FAIL;
@@ -123,11 +115,11 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
       // Create and write the nonce to the CC2420 RAM
       create_cc2420_nonce(l, len_mac, len_a, nonce, cc2420_nonce);
       radio_spiWriteRam(CC2420_RAM_RXNONCE_ADDR, &status, cc2420_nonce, 16);
-      
-      if (set_cc2420_mode_and_offset(len_a, *len_m, len_mac, &mode, &offset) == E_FAIL) {
-         return E_FAIL;
-      }
-      cc2420_conf_sec_regs(mode, CC2420_SEC_DEC, offset, len_mac, key_index, &status);
+     
+      // It seems that MODE_CCM of CC2420 can do authentication only but not
+      // decryption only. For the decryption only case, we then use directly MODE_CTR.
+      cc2420_conf_sec_regs(len_mac != 0 ? CC2420_SECCTRL0_SEC_MODE_CCM : CC2420_SECCTRL0_SEC_MODE_CTR,
+                           CC2420_SEC_DEC, len_a, len_mac, key_index, &status);
      
       // issue STXENC to encrypt but not start the transmission
       radio_spiStrobe(CC2420_SRXDEC, &status);
@@ -180,8 +172,6 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
    uint8_t buffer[128];
    uint8_t cc2420_nonce[16];
    cc2420_status_t status;
-   uint8_t mode;
-   uint8_t offset;
 
    if (!((len_mac == 0) || (len_mac == 4) || (len_mac == 8) || (len_mac == 16))) {
       return E_FAIL;
@@ -209,11 +199,11 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       // Create and write the nonce to the CC2420 RAM
       create_cc2420_nonce(l, len_mac, len_a, nonce, cc2420_nonce);
       radio_spiWriteRam(CC2420_RAM_TXNONCE_ADDR, &status, cc2420_nonce, 16);
-      
-      if (set_cc2420_mode_and_offset(len_a, *len_m, len_mac, &mode, &offset) == E_FAIL) {
-         return E_FAIL;
-      }
-      cc2420_conf_sec_regs(mode, CC2420_SEC_ENC, offset, len_mac, key_index, &status);
+ 
+      // It seems that MODE_CCM of CC2420 can do authentication only but not
+      // encryption only. For the encryption only case, we then use directly MODE_CTR.
+      cc2420_conf_sec_regs(len_mac != 0 ? CC2420_SECCTRL0_SEC_MODE_CCM : CC2420_SECCTRL0_SEC_MODE_CTR,
+                           CC2420_SEC_ENC, len_a, len_mac, key_index, &status);
      
       // issue STXENC to encrypt but not start the transmission
       radio_spiStrobe(CC2420_STXENC, &status);
@@ -341,27 +331,6 @@ static void create_cc2420_nonce(uint8_t l,
    buffer[14] = 0x00; // block counter
    buffer[15] = 0x01; // block counter
    reverse(buffer, 16);
-}
-
-static owerror_t set_cc2420_mode_and_offset(uint8_t len_a,
-                                 uint8_t len_m,
-                                 uint8_t len_mac,
-                                 uint8_t* mode,
-                                 uint8_t* offset) {
-   // need to separate the calls to mimic CC2420 operation
-   if (len_mac > 0 && len_m > 0) { // auth + encrypt
-      *mode = CC2420_SEC_CCM;
-      *offset = len_a;
-   } else if (len_mac > 0 && len_m == 0) { // authentication only
-      *mode = CC2420_SEC_CBC_MAC;
-      *offset = 0; // no offset for authentication
-   } else if (len_mac == 0 && len_m > 0) {  // encryption only (not really secure)
-      *mode = CC2420_SEC_CTR;
-      *offset = len_a;
-   } else {
-      return E_FAIL;
-   }
-   return E_SUCCESS;
 }
 
 static void reverse(uint8_t *start, uint8_t len) {
