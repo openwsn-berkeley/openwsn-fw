@@ -497,7 +497,7 @@ int mote_main(void) {
 #if TEST_BENCHMARK_CCMS
 
 #define A_LEN 30
-#define M_LEN 93
+#define M_LEN 91
 #define TAG_LEN 4
 #define L 2
 
