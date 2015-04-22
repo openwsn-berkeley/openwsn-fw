@@ -111,16 +111,14 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
    if (cc2420_crypto_load_key(key, &key_index) == E_SUCCESS) {
          
       // make sure the Additional Data is concatenated with plaintext
-      // add len byte at the beginning for CC2420 processing
-      buffer[0] = total_message_len;
-      memcpy(&buffer[1], a, len_a);
-      memcpy(&buffer[1 + len_a], m, *len_m);
+      memcpy(buffer, a, len_a);
+      memcpy(&buffer[len_a], m, *len_m);
 
       radio_spiStrobe(CC2420_SFLUSHRX, &status);
       radio_spiStrobe(CC2420_SFLUSHRX, &status);
 
-      // We have to write message directly to RX FIFO RAM address for in-line decryption. 
-      radio_spiWriteRam(CC2420_RAM_RXFIFO_ADDR, &status, buffer, total_message_len + 1);
+      // To launch decryption in RX FIFO, we must write to it over its register, not direct RAM access
+      radio_spiWriteFifo(&status, buffer, total_message_len, CC2420_RXFIFO_ADDR);
 
       // Create and write the nonce to the CC2420 RAM
       create_cc2420_nonce(l, len_mac, len_a, nonce, cc2420_nonce);
@@ -149,15 +147,15 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
          return E_FAIL;
       }
 
-      // verify MIC flag replaced by CC2420 in the last byte of the message
-      if (len_mac == 0 || buffer[total_message_len - LENGTH_CRC] == CC2420_FLAG_MIC_SUCCESS) {
-         // Write plaintext to vector m[]
-         radio_spiReadRam(CC2420_RAM_RXFIFO_ADDR + 1 + offset, // one for the length byte
+      radio_spiReadRam(CC2420_RAM_RXFIFO_ADDR + 1 + len_a, // one for the length byte
                          &status,
-                         m,
-                         *len_m + len_mac); // plaintext plus MIC
+                         buffer,
+                         *len_m); // length that includes MIC
 
+      // verify MIC flag replaced by CC2420 in the last byte of the message
+      if (len_mac == 0 || buffer[*len_m - 1] == CC2420_FLAG_MIC_SUCCESS) {
          *len_m -= len_mac;
+         memcpy(m, buffer, *len_m);
 
          // clean up
          radio_spiStrobe(CC2420_SFLUSHRX, &status);
