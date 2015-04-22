@@ -102,7 +102,7 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
    // load key
    if (cc2420_crypto_load_key(key, &key_index) == E_SUCCESS) {
          
-      // make sure the Additional Data is concatenated with plaintext
+      // make sure the Associated Data is concatenated with plaintext
       memcpy(buffer, a, len_a);
       memcpy(&buffer[len_a], m, *len_m);
 
@@ -177,7 +177,7 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
    // load key
    if (cc2420_crypto_load_key(key, &key_index) == E_SUCCESS) {
          
-      // make sure the Additional Data is concatenated with plaintext
+      // make sure the Associated Data is concatenated with plaintext
       memcpy(buffer, a, len_a);
       memcpy(&buffer[len_a], m, *len_m);
 
@@ -222,24 +222,42 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
 
 /**
 \brief On success, returns by reference the location in key RAM where the 
-   new/existing key is stored.
+   new/existing key is stored. Minimizes SPI transfer at the cost of RAM usage.
 */
 static owerror_t cc2420_crypto_load_key(uint8_t key[16], uint8_t* /* out */ key_index) {
+   static uint8_t loaded_key[2][16];   // to save some SPI transfers, keep a copy of
+                                       // loaded keys in MCU RAM.
+   static uint8_t num_keys_loaded = 0;
    cc2420_status_t status;
-
    uint8_t reversed[16];
+   uint8_t i;
+   uint8_t next_key_index;
 
    // verify if crystal oscillator is stable
    radio_spiStrobe(CC2420_SNOP, &status);
 
-   if (status.xosc16m_stable) {
-      memcpy(reversed, key, CC2420_KEY_LEN);
+   if (status.xosc16m_stable) {  // green light only if CC2420 is ready
+
+      for (i = 0; i < 2; i++) {
+         if (num_keys_loaded > i && memcmp(loaded_key[i], key, 16) == 0) { // first cond. to avoid all zero key hit
+            *key_index = i;
+            return E_SUCCESS;
+         }
+      }
+
+      next_key_index = num_keys_loaded & 0x01;
+
+      memcpy(loaded_key[next_key_index], key, CC2420_KEY_LEN);
+      memcpy(reversed, loaded_key[next_key_index], CC2420_KEY_LEN);
+      // Need to transfer it little-endian
       reverse(reversed, CC2420_KEY_LEN);
 
-      // Load the key in key RAM
-      radio_spiWriteRam(CC2420_RAM_KEY0_ADDR, &status, reversed, CC2420_KEY_LEN);
+       // Load the key in key RAM
+      radio_spiWriteRam(next_key_index == 0 ? CC2420_RAM_KEY0_ADDR : CC2420_RAM_KEY1_ADDR,
+                        &status, reversed, CC2420_KEY_LEN);
 
-      *key_index = CC2420_SECCTRL0_KEY_SEL_KEY0;
+      *key_index = next_key_index;
+      num_keys_loaded++;
       return E_SUCCESS;
    }
    return E_FAIL;

@@ -13,10 +13,6 @@
 #define CC2420_SECCTRL0_SEC_MODE_CTR         2
 #define CC2420_SECCTRL0_SEC_MODE_CCM         3
 
-// Generic Key Selector
-#define CC2420_SECCTRL0_KEY_SEL_KEY0         0
-#define CC2420_SECCTRL0_KEY_SEL_KEY1         1
-
 //=========================== prototypes ======================================
 
 owerror_t cc2420_crypto_aes_ecb_enc(uint8_t* buffer, uint8_t* key);
