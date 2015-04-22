@@ -129,16 +129,6 @@ owerror_t cc2420_crypto_ccms_dec(uint8_t* a,
          radio_spiStrobe(CC2420_SNOP, &status);
       } while (status.enc_busy == 1);
 
-      // FOR DEBUGGING: read the ciphertext from TX fifo with ReadRam()
-      radio_spiReadRam(CC2420_RAM_RXFIFO_ADDR,
-                         &status,
-                         buffer,
-                         total_message_len + 1); // plus one for the length byte
-      // assert on message len
-      if (buffer[0] != total_message_len) {
-         return E_FAIL;
-      }
-
       radio_spiReadRam(CC2420_RAM_RXFIFO_ADDR + 1 + len_a, // one for the length byte
                          &status,
                          buffer,
@@ -212,16 +202,6 @@ owerror_t cc2420_crypto_ccms_enc(uint8_t* a,
       do {
          radio_spiStrobe(CC2420_SNOP, &status);
       } while (status.enc_busy == 1);
-
-      // FOR DEBUGGING: read the ciphertext from TX fifo with ReadRam()
-      radio_spiReadRam(CC2420_RAM_TXFIFO_ADDR,
-                         &status,
-                         buffer,
-                         total_message_len + 1); // plus one for the length byte
-      // assert on message len
-      if (buffer[0] != total_message_len) {
-         return E_FAIL;
-      }
 
       // Write ciphertext to vector m[]
       radio_spiReadRam(CC2420_RAM_TXFIFO_ADDR + 1 + len_a, // one for the length byte
