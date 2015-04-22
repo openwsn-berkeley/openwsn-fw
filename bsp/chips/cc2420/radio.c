@@ -89,7 +89,7 @@ void radio_reset(void) {
    cc2420_MDMCTRL0_reg.PAN_COORDINATOR      = 0;
    cc2420_MDMCTRL0_reg.RESERVED_FRAME_MODE  = 1; // accept all frame types
    cc2420_MDMCTRL0_reg.reserved_w0          = 0;
-   radio_spiWriteReg(
+   cc2420_spiWriteReg(
       CC2420_MDMCTRL0_ADDR,
       &radio_vars.radioStatusByte,
       *(uint16_t*)&cc2420_MDMCTRL0_reg
@@ -103,7 +103,7 @@ void radio_reset(void) {
    cc2420_TXCTRL_reg.TXMIX_CAP_ARRAY        = 0;
    cc2420_TXCTRL_reg.TX_TURNAROUND          = 0; // faster STXON->SFD timing (128us)
    cc2420_TXCTRL_reg.TXMIXBUF_CUR           = 2;
-   radio_spiWriteReg(
+   cc2420_spiWriteReg(
       CC2420_TXCTRL_ADDR,
       &radio_vars.radioStatusByte,
       *(uint16_t*)&cc2420_TXCTRL_reg
@@ -121,7 +121,7 @@ void radio_reset(void) {
    cc2420_RXCTRL1_reg.RXBPF_MIDCUR          = 0;
    cc2420_RXCTRL1_reg.RXBPF_LOCUR           = 1; // use this setting as per datasheet
    cc2420_RXCTRL1_reg.reserved_w0           = 0;
-   radio_spiWriteReg(
+   cc2420_spiWriteReg(
       CC2420_RXCTRL1_ADDR,
       &radio_vars.radioStatusByte,
       *(uint16_t*)&cc2420_RXCTRL1_reg
@@ -163,7 +163,7 @@ void radio_setFrequency(uint8_t frequency) {
    cc2420_FSCTRL_reg.CAL_DONE     = 0;
    cc2420_FSCTRL_reg.LOCK_THR     = 1;
    
-   radio_spiWriteReg(
+   cc2420_spiWriteReg(
       CC2420_FSCTRL_ADDR,
       &radio_vars.radioStatusByte,
       *(uint16_t*)&cc2420_FSCTRL_reg
@@ -174,9 +174,9 @@ void radio_setFrequency(uint8_t frequency) {
 }
 
 void radio_rfOn(void) {   
-   radio_spiStrobe(CC2420_SXOSCON, &radio_vars.radioStatusByte);
+   cc2420_spiStrobe(CC2420_SXOSCON, &radio_vars.radioStatusByte);
    while (radio_vars.radioStatusByte.xosc16m_stable==0) {
-      radio_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
+      cc2420_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
    }
 }
 
@@ -185,7 +185,7 @@ void radio_rfOff(void) {
    // change state
    radio_vars.state = RADIOSTATE_TURNING_OFF;
    
-   radio_spiStrobe(CC2420_SRFOFF, &radio_vars.radioStatusByte);
+   cc2420_spiStrobe(CC2420_SRFOFF, &radio_vars.radioStatusByte);
    // poipoipoi wait until off
    
    // wiggle debug pin
@@ -202,8 +202,8 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
    // change state
    radio_vars.state = RADIOSTATE_LOADING_PACKET;
    
-   radio_spiStrobe(CC2420_SFLUSHTX, &radio_vars.radioStatusByte);
-   radio_spiWriteFifo(&radio_vars.radioStatusByte, packet, len, CC2420_TXFIFO_ADDR);
+   cc2420_spiStrobe(CC2420_SFLUSHTX, &radio_vars.radioStatusByte);
+   cc2420_spiWriteFifo(&radio_vars.radioStatusByte, packet, len, CC2420_TXFIFO_ADDR);
    
    // change state
    radio_vars.state = RADIOSTATE_PACKET_LOADED;
@@ -227,7 +227,7 @@ void radio_txNow(void) {
    // change state
    radio_vars.state = RADIOSTATE_TRANSMITTING;
    
-   radio_spiStrobe(CC2420_STXON, &radio_vars.radioStatusByte);
+   cc2420_spiStrobe(CC2420_STXON, &radio_vars.radioStatusByte);
 }
 
 //===== RX
@@ -237,8 +237,8 @@ void radio_rxEnable(void) {
    radio_vars.state = RADIOSTATE_ENABLING_RX;
    
    // put radio in reception mode
-   radio_spiStrobe(CC2420_SRXON, &radio_vars.radioStatusByte);
-   radio_spiStrobe(CC2420_SFLUSHRX, &radio_vars.radioStatusByte);
+   cc2420_spiStrobe(CC2420_SRXON, &radio_vars.radioStatusByte);
+   cc2420_spiStrobe(CC2420_SFLUSHRX, &radio_vars.radioStatusByte);
    
    // wiggle debug pin
    debugpins_radio_set();
@@ -246,7 +246,7 @@ void radio_rxEnable(void) {
    
    // busy wait until radio really listening
    while (radio_vars.radioStatusByte.rssi_valid==0) {
-      radio_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
+      cc2420_spiStrobe(CC2420_SNOP, &radio_vars.radioStatusByte);
    }
    
    // change state
@@ -267,7 +267,7 @@ void radio_getReceivedFrame(
    ) {
    
    // read the received packet from the RXFIFO
-   radio_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
+   cc2420_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
    
    // On reception, when MODEMCTRL0.AUTOCRC is set, the CC2420 replaces the
    // received CRC by:
