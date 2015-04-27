@@ -1555,8 +1555,8 @@ port_INLINE void activity_ri6() {
 
    //security options on ACK
 #ifdef CRYPTO_ENGINE_SCONS
-   ieee154e_vars.ackToSend->l2_security = TRUE;
-   ieee154e_vars.ackToSend->l2_securityLevel = 5;
+   ieee154e_vars.ackToSend->l2_security = ieee154e_vars.dataReceived->l2_security;
+   ieee154e_vars.ackToSend->l2_securityLevel = ieee154e_vars.dataReceived->l2_securityLevel;
    ieee154e_vars.ackToSend->l2_keyIdMode = 3;
    if(idmanager_getIsDAGroot()){
       open_addr_t* temp_addr;
