@@ -150,21 +150,18 @@ void cc2420_spiReadRxFifo(cc2420_status_t* statusRead,
          SPI_NOTFIRST,            // isFirst
          SPI_LAST                 // isLast
       );
-      
-      /*
-      A SFLUSHRX command strobe is required 
-      after an RXFIFO overflow to enable 
-      reception of new data. Note that the 
-      SFLUSHRX command strobe should be 
-      issued twice to ensure that the SFD pin 
-      goes back to its inactive state.
-      */
-      
-      cc2420_spiStrobe(CC2420_SFLUSHRX, statusRead);
-      cc2420_spiStrobe(CC2420_SFLUSHRX, statusRead);
-      
-
    }
+   /*
+   A SFLUSHRX command strobe is required 
+   after an RXFIFO overflow to enable 
+   reception of new data. Note that the 
+   SFLUSHRX command strobe should be 
+   issued twice to ensure that the SFD pin 
+   goes back to its inactive state.
+   */
+   
+   cc2420_spiStrobe(CC2420_SFLUSHRX, statusRead);
+   cc2420_spiStrobe(CC2420_SFLUSHRX, statusRead);
 }
 
 void cc2420_spiReadRam(uint16_t addr,
