@@ -398,7 +398,7 @@ void sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor){
         linkInfo.choffset    = info.channelOffset;
         linkInfo.linkoptions = info.link_type;
         sixtop_removeCellByInfo(neighbor, &linkInfo);
-        sixtop_vars.maintenanceEnabled = TRUE;
+        sixtop_vars.isMaintaning = TRUE;
     } else {
         //should log this error
         
@@ -925,9 +925,9 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          }
          sixtop_vars.six2six_state = SIX_IDLE;
          leds_debug_off();
-         if (sixtop_vars.maintenanceEnabled == TRUE){
+         if (sixtop_vars.isMaintaning == TRUE){
              sixtop_addCells(&(msg->l2_nextORpreviousHop),1);
-             sixtop_vars.maintenanceEnabled = FALSE;
+             sixtop_vars.isMaintaning = FALSE;
          }
          break;
       default:

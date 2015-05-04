@@ -55,7 +55,7 @@ typedef struct {
    uint16_t             kaPeriod;                // period of sending KA
    six2six_state_t      six2six_state;
    uint8_t              commandID;
-   bool                 maintenanceEnabled;
+   bool                 isMaintaning;
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================
@@ -69,7 +69,6 @@ void      sixtop_removeCell(open_addr_t*  neighbor);
 void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 // maintaining
 void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);
-
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer
