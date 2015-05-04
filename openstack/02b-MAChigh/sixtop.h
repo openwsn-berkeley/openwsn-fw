@@ -55,7 +55,7 @@ typedef struct {
    uint16_t             kaPeriod;                // period of sending KA
    six2six_state_t      six2six_state;
    uint8_t              commandID;
-   bool                 maintanceEnabled;
+   bool                 maintenanceEnabled;
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================
