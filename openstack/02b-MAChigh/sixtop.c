@@ -695,6 +695,7 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
+   scheduleEntry_t entry;
    sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%EBTIMEOUT;
    
    switch (sixtop_vars.mgtTaskCounter) {
@@ -706,8 +707,14 @@ void timer_sixtop_management_fired(void) {
          // called every EBTIMEOUT seconds
          neighbors_removeOld();
          break;
+      case 2:
+         // called every EBTIMEOUT seconds
+         schedule_statistic_poorLinkQuality(&entry);
+         if (entry.type != CELLTYPE_OFF){
+             sixtop_maintaining(entry.slotOffset,&(entry.neighbor));
+         }
       default:
-         // called every second, except twice every EBTIMEOUT seconds
+         // called every second, except third times every EBTIMEOUT seconds
          sixtop_sendKA();
          break;
    }

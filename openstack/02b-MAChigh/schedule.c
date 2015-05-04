@@ -445,6 +445,26 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
+void schedule_statistic_poorLinkQuality(scheduleEntry_t* entry){
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   entry->type = CELLTYPE_OFF;
+   
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(PDR_THRESHOLD > 100*scheduleWalker->numTxACK/scheduleWalker->numTx){
+         entry = scheduleWalker;
+         break;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   ENABLE_INTERRUPTS();
+}
+
 //=== from IEEE802154E: reading the schedule and updating statistics
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
