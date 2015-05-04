@@ -10,7 +10,7 @@
 
 #include "opentimers.h"
 #include "opendefs.h"
-
+#include "processIE.h"
 //=========================== define ==========================================
 
 enum sixtop_CommandID_num{
@@ -55,6 +55,7 @@ typedef struct {
    uint16_t             kaPeriod;                // period of sending KA
    six2six_state_t      six2six_state;
    uint8_t              commandID;
+   bool                 maintanceEnabled;
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================
@@ -65,6 +66,10 @@ void      sixtop_setKaPeriod(uint16_t kaPeriod);
 // scheduling
 void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells);
 void      sixtop_removeCell(open_addr_t*  neighbor);
+void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
+// maintaining
+void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);
+
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer

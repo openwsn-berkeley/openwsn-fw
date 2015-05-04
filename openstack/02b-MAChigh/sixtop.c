@@ -312,6 +312,100 @@ void sixtop_removeCell(open_addr_t* neighbor){
    opentimers_restart(sixtop_vars.timeoutTimerId);
 }
 
+void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
+   OpenQueueEntry_t* pkt;
+   uint8_t           len;
+   uint8_t           type;
+   uint8_t           frameID;
+   uint8_t           flag;
+   cellInfo_ht       cellList[SCHEDULEIEMAXNUMCELLS];
+   
+   memset(cellList,0,sizeof(cellList));
+   
+   // filter parameters
+   if (sixtop_vars.six2six_state!=SIX_IDLE){
+      return;
+   }
+   if (neighbor==NULL){
+      return;
+   }
+   
+   // set cell list. only the first one
+   type           = 1;
+   frameID        = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+   flag           = 1;
+   memcpy(&(cellList[0]),cellInfo,sizeof(cellInfo_ht));
+   
+   
+   // get a free packet buffer
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
+   if(pkt==NULL) {
+      openserial_printError(
+         COMPONENT_SIXTOP_RES,
+         ERR_NO_FREE_PACKET_BUFFER,
+         (errorparameter_t)0,
+         (errorparameter_t)0
+      );
+      return;
+   }
+   
+   // update state
+   sixtop_vars.six2six_state = SIX_SENDING_REMOVEREQUEST;
+   
+   // declare ownership over that packet
+   pkt->creator = COMPONENT_SIXTOP_RES;
+   pkt->owner   = COMPONENT_SIXTOP_RES;
+      
+   memcpy(
+      &(pkt->l2_nextORpreviousHop),
+      neighbor,
+      sizeof(open_addr_t)
+   );
+ 
+   
+   // create packet
+   len  = 0;
+   len += processIE_prependScheduleIE(pkt,type,frameID, flag,cellList);
+   len += processIE_prependOpcodeIE(pkt,SIXTOP_REMOVE_SOFT_CELL_REQUEST);
+   processIE_prependMLMEIE(pkt,len);
+ 
+   // indicate IEs present
+   pkt->l2_IEListPresent = IEEE154_IELIST_YES;
+   
+   // send packet
+   sixtop_send(pkt);
+   
+   // update state
+   sixtop_vars.six2six_state = SIX_WAIT_REMOVEREQUEST_SENDDONE;
+   
+   // arm timeout
+   opentimers_setPeriod(
+      sixtop_vars.timeoutTimerId,
+      TIME_MS,
+      SIX2SIX_TIMEOUT_MS
+   );
+   opentimers_restart(sixtop_vars.timeoutTimerId);
+
+}
+
+//======= maintaning 
+void sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor){
+    slotinfo_element_t info;
+    cellInfo_ht linkInfo;
+    schedule_getSlotInfo(slotOffset,neighbor,&info);
+    if(info.link_type != CELLTYPE_OFF){
+        linkInfo.tsNum       = slotOffset;
+        linkInfo.choffset    = info.channelOffset;
+        linkInfo.linkoptions = info.link_type;
+        sixtop_removeCellByInfo(neighbor, &linkInfo);
+        sixtop_vars.maintanceEnabled = TRUE;
+    } else {
+        //should log this error
+        
+        return;
+    }
+}
+
 //======= from upper layer
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
@@ -831,6 +925,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          }
          sixtop_vars.six2six_state = SIX_IDLE;
          leds_debug_off();
+         if (sixtop_vars.maintanceEnabled == TRUE){
+             sixtop_addCells(&(msg->l2_nextORpreviousHop),1);
+             sixtop_vars.maintanceEnabled = FALSE;
+         }
          break;
       default:
          //log error
