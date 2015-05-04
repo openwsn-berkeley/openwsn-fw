@@ -710,7 +710,10 @@ void timer_sixtop_management_fired(void) {
       case 2:
          // called every EBTIMEOUT seconds
          schedule_statistic_poorLinkQuality(&entry);
-         if (entry.type != CELLTYPE_OFF){
+         if (
+             entry.type != CELLTYPE_OFF      && \
+             entry.type != CELLTYPE_TXRX
+         ){
              sixtop_maintaining(entry.slotOffset,&(entry.neighbor));
          }
       default:

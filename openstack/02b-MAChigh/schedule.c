@@ -455,7 +455,10 @@ void schedule_statistic_poorLinkQuality(scheduleEntry_t* entry){
    
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
-      if(PDR_THRESHOLD > 100*scheduleWalker->numTxACK/scheduleWalker->numTx){
+      if(
+         scheduleWalker->numTx > (0xFF/2)                                   &&\
+         PDR_THRESHOLD > 100*scheduleWalker->numTxACK/scheduleWalker->numTx
+      ){
          entry = scheduleWalker;
          break;
       }
