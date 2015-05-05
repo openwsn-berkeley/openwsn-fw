@@ -40,7 +40,7 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-#define SIX2SIX_TIMEOUT_MS 2000
+#define SIX2SIX_TIMEOUT_MS 4000
 
 //=========================== module variables ================================
 
@@ -55,7 +55,7 @@ typedef struct {
    uint16_t             kaPeriod;                // period of sending KA
    six2six_state_t      six2six_state;
    uint8_t              commandID;
-   bool                 isMaintaning;
+   bool                 isMaintaining;
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================
