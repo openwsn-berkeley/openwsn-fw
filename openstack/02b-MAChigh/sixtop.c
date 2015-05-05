@@ -397,7 +397,6 @@ void sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor){
         linkInfo.tsNum       = slotOffset;
         linkInfo.choffset    = info.channelOffset;
         linkInfo.linkoptions = info.link_type;
-        printf("slotoffset = %d to be removed\n",slotOffset);
         sixtop_removeCellByInfo(neighbor, &linkInfo);
         sixtop_vars.isMaintaining = TRUE;
     } else {
@@ -717,7 +716,6 @@ void timer_sixtop_management_fired(void) {
              entry->type != CELLTYPE_TXRX     && \
              sixtop_vars.isMaintaining == FALSE // 
          ){
-             printf("slot %d PDR = %d\n",entry->slotOffset,100*entry->numTxACK/entry->numTx);
              sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
          }
       default:
@@ -919,7 +917,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          
          break;
       case SIX_WAIT_REMOVEREQUEST_SENDDONE:
-         printf("***slot %d to be removed****\n",cellList[0].tsNum);
          if(error == E_SUCCESS && numOfCells > 0){
             for (i=0;i<numOfCells;i++){
                //TimeSlot 2B
@@ -1072,7 +1069,6 @@ void sixtop_notifyReceiveCommand(
    bandwidth_IE_ht* bandwidth_ie, 
    schedule_IE_ht* schedule_ie,
    open_addr_t* addr){
-   printf("****My state is %d!****\n",sixtop_vars.six2six_state);
    switch(opcode_ie->opcode){
       case SIXTOP_SOFT_CELL_REQ:
          if(sixtop_vars.six2six_state == SIX_IDLE)
