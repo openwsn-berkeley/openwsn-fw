@@ -435,7 +435,8 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
       if(slotOffset == scheduleWalker->slotOffset){
-         return FALSE;
+          ENABLE_INTERRUPTS();
+          return FALSE;
       }
       scheduleWalker = scheduleWalker->next;
    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
