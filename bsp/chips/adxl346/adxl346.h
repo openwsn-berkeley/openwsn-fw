@@ -11,9 +11,9 @@
 void adxl346_init(void);
 void adxl346_reset(void);
 uint8_t adxl346_is_present(void);
-uint16_t adxl346_read_x(void);
-uint16_t adxl346_read_y(void);
-uint16_t adxl346_read_z(void);
+int16_t adxl346_read_x(void);
+int16_t adxl346_read_y(void);
+int16_t adxl346_read_z(void);
+float adxl346_convert_acceleration(int16_t acceleration);
 
 #endif /* ifndef __ADXL346_H__ */
-
