@@ -760,8 +760,8 @@ void timer_sixtop_management_fired(void) {
              entry       != NULL                        && \
              entry->type != CELLTYPE_OFF                && \
              entry->type != CELLTYPE_TXRX               && \
-             // maintaining only if current I am not in the maintaining process
-             sixtop_vars.handler != SIX_HANDLER_MAINTAIN  
+             // maintaining only if current sixtop is not handled by other
+             sixtop_vars.handler == SIX_HANDLER_NONE  
          ){
              sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
          }
@@ -993,6 +993,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             );
          }
          sixtop_vars.six2six_state = SIX_IDLE;
+         opentimers_stop(sixtop_vars.timeoutTimerId);
          leds_debug_off();
          if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
              sixtop_addCells(&(msg->l2_nextORpreviousHop),1);
@@ -1311,6 +1312,7 @@ void sixtop_notifyReceiveLinkResponse(
    }
    leds_debug_off();
    sixtop_vars.six2six_state = SIX_IDLE;
+   sixtop_vars.handler = SIX_HANDLER_NONE;
   
    opentimers_stop(sixtop_vars.timeoutTimerId);
 }
