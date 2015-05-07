@@ -38,6 +38,12 @@ typedef enum {
    SIX_REMOVEREQUEST_RECEIVED          = 0x0a    // I received the remove link request command
 } six2six_state_t;
 
+// handler of sixtop-to-sixtop request
+typedef enum {
+   SIX_HANDLER_OTF                     = 0x00,
+   SIX_HANDLER_MAINTAIN                = 0x01
+} six2six_handler_t;
+
 //=========================== typedef =========================================
 
 #define SIX2SIX_TIMEOUT_MS 4000
@@ -55,7 +61,7 @@ typedef struct {
    uint16_t             kaPeriod;                // period of sending KA
    six2six_state_t      six2six_state;
    uint8_t              commandID;
-   bool                 isMaintaining;
+   six2six_handler_t    handler;
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================

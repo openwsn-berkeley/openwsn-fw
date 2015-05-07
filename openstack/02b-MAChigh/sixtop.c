@@ -398,7 +398,7 @@ void sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor){
         linkInfo.choffset    = info.channelOffset;
         linkInfo.linkoptions = info.link_type;
         sixtop_removeCellByInfo(neighbor, &linkInfo);
-        sixtop_vars.isMaintaining = TRUE;
+        sixtop_vars.handler  = SIX_HANDLER_MAINTAIN;
     } else {
         //should log this error
         
@@ -711,10 +711,11 @@ void timer_sixtop_management_fired(void) {
          // called every EBTIMEOUT seconds
          entry = schedule_statistic_poorLinkQuality();
          if (
-             entry       != NULL              && \
-             entry->type != CELLTYPE_OFF      && \
-             entry->type != CELLTYPE_TXRX     && \
-             sixtop_vars.isMaintaining == FALSE // 
+             entry       != NULL                        && \
+             entry->type != CELLTYPE_OFF                && \
+             entry->type != CELLTYPE_TXRX               && \
+             // maintaining only if current I am not in the maintaining process
+             sixtop_vars.handler != SIX_HANDLER_MAINTAIN  
          ){
              sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
          }
@@ -938,9 +939,9 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          }
          sixtop_vars.six2six_state = SIX_IDLE;
          leds_debug_off();
-         if (sixtop_vars.isMaintaining == TRUE){
+         if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
              sixtop_addCells(&(msg->l2_nextORpreviousHop),1);
-             sixtop_vars.isMaintaining = FALSE;
+             sixtop_vars.handler = SIX_HANDLER_OTF;
          }
          break;
       default:
