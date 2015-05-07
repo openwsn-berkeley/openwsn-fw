@@ -38,10 +38,11 @@ typedef enum {
    SIX_REMOVEREQUEST_RECEIVED          = 0x0a    // I received the remove link request command
 } six2six_state_t;
 
-// handler of sixtop-to-sixtop request
+// before sixtop protocol is called, sixtop handler must be set
 typedef enum {
-   SIX_HANDLER_OTF                     = 0x00,
-   SIX_HANDLER_MAINTAIN                = 0x01
+   SIX_HANDLER_NONE                    = 0x00, // when complete reservation, handler must be set to none
+   SIX_HANDLER_MAINTAIN                = 0x01, // the handler is maintenance process
+   SIX_HANDLER_OTF                     = 0x02  // the handler is otf
 } six2six_handler_t;
 
 //=========================== typedef =========================================
@@ -69,6 +70,7 @@ typedef struct {
 // admin
 void      sixtop_init(void);
 void      sixtop_setKaPeriod(uint16_t kaPeriod);
+void      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
 void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells);
 void      sixtop_removeCell(open_addr_t*  neighbor);

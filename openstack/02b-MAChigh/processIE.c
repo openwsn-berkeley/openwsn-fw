@@ -256,7 +256,8 @@ port_INLINE uint8_t processIE_prependScheduleIE(
       uint8_t           type,
       uint8_t           frameID,
       uint8_t           flag,
-      cellInfo_ht*      cellList
+      cellInfo_ht*      cellList,
+      uint8_t           subId 
    ){
    uint8_t    i;
    uint8_t    len;
@@ -355,8 +356,7 @@ port_INLINE uint8_t processIE_prependScheduleIE(
    mlme_subHeader.length_subID_type  = 
       len << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
    mlme_subHeader.length_subID_type |= 
-      (MLME_IE_SUBID_SCHEDULE << 
-         MLME_IE_SUBID_SHIFT) | 
+      (subId << MLME_IE_SUBID_SHIFT) | 
       IEEE802154E_DESC_TYPE_SHORT;
    
    // copy header

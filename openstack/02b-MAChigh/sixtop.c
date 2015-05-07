@@ -147,6 +147,10 @@ void sixtop_setKaPeriod(uint16_t kaPeriod) {
    } 
 }
 
+void sixtop_setHandler(six2six_handler_t handler) {
+    sixtop_vars.handler = handler;
+}
+
 //======= scheduling
 
 void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
@@ -157,6 +161,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    uint8_t           flag;
    bool              outcome;
    cellInfo_ht       cellList[SCHEDULEIEMAXNUMCELLS];
+   uint8_t           scheduleID_subId;
    
    frameID    = schedule_getFrameHandle();
    
@@ -168,6 +173,11 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    }
    if (neighbor==NULL){
       return;
+   }
+   
+   if (sixtop_vars.handler == SIX_HANDLER_NONE) {
+       // sxitop handler must not be NONE
+       return;
    }
    
    // generate candidate cell list
@@ -208,7 +218,16 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    
    // create packet
    len  = 0;
-   len += processIE_prependScheduleIE(pkt,type,frameID,flag,cellList);
+   if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
+       scheduleID_subId = MLME_IE_SUBID_SCHEDULE_MT;
+   } else {
+       if (sixtop_vars.handler == SIX_HANDLER_OTF) {
+           scheduleID_subId = MLME_IE_SUBID_SCHEDULE;
+       } else {
+           // any other handler
+       }
+   }
+   len += processIE_prependScheduleIE(pkt,type,frameID,flag,cellList,scheduleID_subId);
    len += processIE_prependBandwidthIE(pkt,numCells,frameID);
    len += processIE_prependOpcodeIE(pkt,SIXTOP_SOFT_CELL_REQ);
    processIE_prependMLMEIE(pkt,len);
@@ -239,6 +258,7 @@ void sixtop_removeCell(open_addr_t* neighbor){
    uint8_t           frameID;
    uint8_t           flag;
    cellInfo_ht       cellList[SCHEDULEIEMAXNUMCELLS];
+   uint8_t           scheduleIE_subId;
    
    memset(cellList,0,sizeof(cellList));
    
@@ -290,7 +310,17 @@ void sixtop_removeCell(open_addr_t* neighbor){
    
    // create packet
    len  = 0;
-   len += processIE_prependScheduleIE(pkt,type,frameID, flag,cellList);
+   if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
+       scheduleIE_subId = MLME_IE_SUBID_SCHEDULE_MT;
+   } else {
+       if (sixtop_vars.handler == SIX_HANDLER_OTF) {
+           scheduleIE_subId = MLME_IE_SUBID_SCHEDULE;
+       } else {
+           // if there are anyother handler
+       }
+       
+   }
+   len += processIE_prependScheduleIE(pkt,type,frameID, flag,cellList,scheduleIE_subId);
    len += processIE_prependOpcodeIE(pkt,SIXTOP_REMOVE_SOFT_CELL_REQUEST);
    processIE_prependMLMEIE(pkt,len);
  
@@ -319,6 +349,7 @@ void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
    uint8_t           frameID;
    uint8_t           flag;
    cellInfo_ht       cellList[SCHEDULEIEMAXNUMCELLS];
+   uint8_t           scheduleIE_subId;
    
    memset(cellList,0,sizeof(cellList));
    
@@ -328,6 +359,10 @@ void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
    }
    if (neighbor==NULL){
       return;
+   }
+   if (sixtop_vars.handler == SIX_HANDLER_NONE) {
+       // sixtop handler must not be NONE
+       return;
    }
    
    // set cell list. only the first one
@@ -365,7 +400,18 @@ void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
    
    // create packet
    len  = 0;
-   len += processIE_prependScheduleIE(pkt,type,frameID, flag,cellList);
+   if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
+       scheduleIE_subId = MLME_IE_SUBID_SCHEDULE_MT;
+   } else {
+       if (sixtop_vars.handler == SIX_HANDLER_OTF) {
+           scheduleIE_subId = MLME_IE_SUBID_SCHEDULE;
+       } else {
+           // if there are anyother handler
+       }
+       
+   }
+       
+   len += processIE_prependScheduleIE(pkt,type,frameID, flag,cellList,scheduleIE_subId);
    len += processIE_prependOpcodeIE(pkt,SIXTOP_REMOVE_SOFT_CELL_REQUEST);
    processIE_prependMLMEIE(pkt,len);
  
@@ -397,8 +443,8 @@ void sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor){
         linkInfo.tsNum       = slotOffset;
         linkInfo.choffset    = info.channelOffset;
         linkInfo.linkoptions = info.link_type;
-        sixtop_removeCellByInfo(neighbor, &linkInfo);
         sixtop_vars.handler  = SIX_HANDLER_MAINTAIN;
+        sixtop_removeCellByInfo(neighbor, &linkInfo);
     } else {
         //should log this error
         
@@ -867,6 +913,7 @@ port_INLINE void sixtop_sendKA() {
 void timer_sixtop_six2six_timeout_fired(void) {
    // timeout timer fired, reset the state of sixtop to idle
    sixtop_vars.six2six_state = SIX_IDLE;
+   sixtop_vars.handler = SIX_HANDLER_NONE;
    opentimers_stop(sixtop_vars.timeoutTimerId);
 }
 
@@ -912,9 +959,17 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                  sixtop_vars.six2six_state);
          }
          sixtop_vars.six2six_state = SIX_IDLE;
-         
-         // notify OTF
-         otf_notif_addedCell();
+         if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
+             sixtop_vars.handler = SIX_HANDLER_NONE;
+         } else {
+             if (sixtop_vars.handler == SIX_HANDLER_OTF) {
+                // notify OTF
+                otf_notif_addedCell();
+                sixtop_vars.handler = SIX_HANDLER_NONE;
+             } else {
+                 //other handlers
+             }
+         }
          
          break;
       case SIX_WAIT_REMOVEREQUEST_SENDDONE:
@@ -941,7 +996,13 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          leds_debug_off();
          if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
              sixtop_addCells(&(msg->l2_nextORpreviousHop),1);
-             sixtop_vars.handler = SIX_HANDLER_OTF;
+             sixtop_vars.handler = SIX_HANDLER_NONE;
+         } else {
+             if (sixtop_vars.handler == SIX_HANDLER_OTF) {
+                 sixtop_vars.handler = SIX_HANDLER_NONE;
+             } else {
+                 // any other sixtop handlers
+             }
          }
          break;
       default:
@@ -1034,6 +1095,16 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
               case MLME_IE_SUBID_TRACKID:
               break;
               case MLME_IE_SUBID_SCHEDULE:
+              case MLME_IE_SUBID_SCHEDULE_MT:
+              if (subid == MLME_IE_SUBID_SCHEDULE_MT) {
+                  sixtop_vars.handler = SIX_HANDLER_MAINTAIN;
+              } else {
+                  if (subid == MLME_IE_SUBID_SCHEDULE) {
+                      sixtop_vars.handler = SIX_HANDLER_OTF;
+                  } else {
+                      // other cases if have
+                  }
+              }
               processIE_retrieveScheduleIE(pkt,&ptr,&schedule_ie);
               break;
           default:
@@ -1141,6 +1212,7 @@ void sixtop_linkResponse(
    uint8_t bw;
    uint8_t type,frameID,flag;
    cellInfo_ht* cellList;
+   uint8_t scheduleID_subId; 
     
    // get parameters for scheduleIE
    type = schedule_ie->type;
@@ -1167,12 +1239,22 @@ void sixtop_linkResponse(
     
    memcpy(&(sixtopPkt->l2_nextORpreviousHop),tempNeighbor,sizeof(open_addr_t));
     
+   if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
+       scheduleID_subId = MLME_IE_SUBID_SCHEDULE_MT;
+   } else {
+       if (sixtop_vars.handler == SIX_HANDLER_OTF) {
+           scheduleID_subId = MLME_IE_SUBID_SCHEDULE;
+       } else {
+           // any other handler
+       }
+   }
    // set SubFrameAndLinkIE
    len += processIE_prependScheduleIE(sixtopPkt,
                                                   type,
                                                   frameID,
                                                   flag,
-                                                  cellList);
+                                                  cellList,
+                                                  scheduleID_subId);
     
    if(scheduleCellSuccess){
       bw = bandwidth;
@@ -1248,8 +1330,17 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    
    sixtop_removeCellsByState(frameID,numOfCells,cellList,addr);
    
-   // notify OTF
-   otf_notif_removedCell();
+   if (sixtop_vars.handler == SIX_HANDLER_OTF) {
+     // notify OTF
+     otf_notif_removedCell();
+   } else {
+       if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
+           // if sixtop remove request handler is 
+           sixtop_vars.handler = SIX_HANDLER_NONE;
+       } else {
+           // if any other handlers exist
+       }
+   }
    
    sixtop_vars.six2six_state = SIX_IDLE;
 
