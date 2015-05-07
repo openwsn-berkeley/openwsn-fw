@@ -455,7 +455,7 @@ scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
       if(
-         scheduleWalker->numTx > (10)                                   &&\
+         scheduleWalker->numTx > MIN_NUMTX_FOR_PDR                     &&\
          PDR_THRESHOLD > 100*scheduleWalker->numTxACK/scheduleWalker->numTx
       ){
          break;

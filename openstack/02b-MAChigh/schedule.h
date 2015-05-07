@@ -60,7 +60,8 @@ See MINBE for an explanation of backoff.
 /**
 \brief a threshold used for triggering the maintaining process.uint: percent
 */
-#define PDR_THRESHOLD        80 // 80 means 80%
+#define PDR_THRESHOLD      80 // 80 means 80%
+#define MIN_NUMTX_FOR_PDR  50 // don't calculate PDR when numTx is lower than this value 
 
 //=========================== typedef =========================================
 
