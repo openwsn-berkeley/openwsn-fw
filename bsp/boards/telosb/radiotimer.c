@@ -15,6 +15,7 @@ typedef struct {
    radiotimer_compare_cbt    compareCb;
    radiotimer_capture_cbt    startFrameCb;
    radiotimer_capture_cbt    endFrameCb;
+   uint8_t                   f_SFDreceived;
 } radiotimer_vars_t;
 
 radiotimer_vars_t radiotimer_vars;
@@ -137,13 +138,17 @@ kick_scheduler_t radiotimer_isr() {
             // SFD pin is high: this was the start of a frame
             if (radiotimer_vars.startFrameCb!=NULL) {
                radiotimer_vars.startFrameCb(TBCCR1);
+               radiotimer_vars.f_SFDreceived = 1;
                // kick the OS
                return KICK_SCHEDULER;
             }
          } else {
             // SFD pin is low: this was the end of a frame
             if (radiotimer_vars.endFrameCb!=NULL) {
-               radiotimer_vars.endFrameCb(TBCCR1);
+               if (radiotimer_vars.f_SFDreceived == 1) {
+                  radiotimer_vars.endFrameCb(TBCCR1);
+                  radiotimer_vars.f_SFDreceived = 0;
+               }
                TBCCTL1 &= ~COV;
                TBCCTL1 &= ~CCIFG;
                // kick the OS
