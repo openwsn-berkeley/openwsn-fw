@@ -144,6 +144,8 @@ kick_scheduler_t radiotimer_isr() {
             // SFD pin is low: this was the end of a frame
             if (radiotimer_vars.endFrameCb!=NULL) {
                radiotimer_vars.endFrameCb(TBCCR1);
+               TBCCTL1 &= ~COV;
+               TBCCTL1 &= ~CCIFG;
                // kick the OS
                return KICK_SCHEDULER;
             }
