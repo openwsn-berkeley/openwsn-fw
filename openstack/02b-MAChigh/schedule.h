@@ -57,6 +57,12 @@ See MINBE for an explanation of backoff.
 */
 #define MAXBE                4
 
+/**
+\brief a threshold used for triggering the maintaining process.uint: percent
+*/
+#define PDR_THRESHOLD      80 // 80 means 80%
+#define MIN_NUMTX_FOR_PDR  50 // don't calculate PDR when numTx is lower than this value 
+
 //=========================== typedef =========================================
 
 typedef uint8_t    channelOffset_t;
@@ -155,6 +161,8 @@ owerror_t          schedule_removeActiveSlot(
    open_addr_t*         neighbor
 );
 bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
+// return the slot info which has a poor quality
+scheduleEntry_t*  schedule_statistic_poorLinkQuality();
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
