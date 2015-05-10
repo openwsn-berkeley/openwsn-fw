@@ -507,9 +507,8 @@ def sconscript_scanner(localEnv):
     
     # list subdirectories
     PATH_TO_PROJECTS = os.path.join('..','..','..','..','projects',os.path.split(os.getcwd())[-1])
-    if os.path.split(os.getcwd())[-1]=='common':
-        allsubdirs = os.listdir(os.path.join(PATH_TO_PROJECTS))
-    subdirs = [name for name in allsubdirs if os.path.isdir(os.path.join(PATH_TO_PROJECTS,name)) ]
+    allsubdirs     = os.listdir(os.path.join(PATH_TO_PROJECTS))
+    subdirs        = [name for name in allsubdirs if os.path.isdir(os.path.join(PATH_TO_PROJECTS,name)) ]
     
     # parse dirs and build targets
     for projectDir in subdirs:
@@ -623,7 +622,7 @@ def sconscript_scanner(localEnv):
             added = True
             
         elif (
-                ('{0}.ewp'.format(projectDir) in os.listdir(projectDir)) and
+                ('{0}.ewp'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
                 (localEnv['toolchain']=='iar-proj')
              ):
             
