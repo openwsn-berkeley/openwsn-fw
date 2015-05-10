@@ -5,8 +5,19 @@ Import('env')
 localEnv = env.Clone()
 
 target =  'libdrivers'
-sources_c = Glob('common/*.c',strings=True) # + Glob(localEnv['board']+'/*.c')
-sources_h = Glob('common/*.h',strings=True)
+
+sources_c = [
+    os.path.join('common','openhdlc.c'),
+    os.path.join('common','opensensors.c'),
+    os.path.join('common','openserial.c'),
+    os.path.join('common','opentimers.c'),
+]
+sources_h = [
+    os.path.join('common','openhdlc.h'),
+    os.path.join('common','opensensors.h'),
+    os.path.join('common','openserial.h'),
+    os.path.join('common','opentimers.h'),
+]
 
 if localEnv['board']=='python':
     
