@@ -49,8 +49,8 @@ app_vars_t app_vars;
 
 void cb_radioTimerOverflows(void);
 void cb_radioTimerCompare(void);
-void cb_startFrame(uint16_t timestamp);
-void cb_endFrame(uint16_t timestamp);
+void cb_startFrame(PORT_TIMER_WIDTH timestamp);
+void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 
 //=========================== main ============================================
 
@@ -123,7 +123,7 @@ void cb_radioTimerOverflows(void) {
    app_vars.txpk_txNow = 1;
 }
 
-void cb_startFrame(uint16_t timestamp) {
+void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
    
    // update debug vals
    app_dbg.num_startFrame++;
@@ -132,7 +132,7 @@ void cb_startFrame(uint16_t timestamp) {
    leds_sync_on();
 }
 
-void cb_endFrame(uint16_t timestamp) {
+void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    
    // update debug vals
    app_dbg.num_endFrame++;
