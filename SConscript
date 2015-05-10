@@ -567,12 +567,20 @@ def sconscript_scanner(localEnv):
             # build both the application's and the Python module's main files
             sources_c = [
                 os.path.join(projectDir,'{0}.c'.format(projectDir)),
-                os.path.join('#','bsp','boards','python','openwsnmodule.c'),
+                os.path.join(projectDir,'openwsnmodule.c'),
             ]
+            
+            localEnv.Command(
+                os.path.join(projectDir,'openwsnmodule.c'),
+                os.path.join('#','bsp','boards','python','openwsnmodule.c'),
+                [
+                    Copy('$TARGET', '$SOURCE')
+                ]
+            )
             
             # objectify those two files
             for s in sources_c:
-                temp = localEnv.Objectify(
+                localEnv.Objectify(
                     target = localEnv.ObjectifiedFilename(s),
                     source = s,
                 )
