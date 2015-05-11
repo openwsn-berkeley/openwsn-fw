@@ -51,6 +51,7 @@ if   env['toolchain']=='mspgcc':
     
     # compiler
     env.Replace(CC           = 'msp430-gcc')
+    env.Append(CCFLAGS       = '-Wall')
     env.Append(CCFLAGS       = '-Wstrict-prototypes')
     env.Append(CCFLAGS       = '')
     # archiver
