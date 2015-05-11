@@ -76,11 +76,11 @@ callbackRead_cbt sensors_getCallbackRead(uint8_t sensorType) {
       case SENSOR_LIGHT:
          return &max44009_read_light;
       case SENSOR_XACCELERATION:
-         return &adxl346_read_x;
+         return (callbackRead_cbt) &adxl346_read_x;
       case SENSOR_YACCELERATION:
-         return &adxl346_read_y;
+         return (callbackRead_cbt) &adxl346_read_y;
       case SENSOR_ZACCELERATION:
-         return &adxl346_read_z;
+         return (callbackRead_cbt) &adxl346_read_z;
       case SENSOR_ADCTEMPERATURE:
          return &adc_sens_read_temperature;
       default:
