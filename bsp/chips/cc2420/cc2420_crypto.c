@@ -49,7 +49,6 @@ static void reverse(uint8_t* in, uint8_t len);
 //=========================== public ==========================================
 
 owerror_t cc2420_crypto_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
-   cc2420_SECCTRL0_reg_t cc2420_SECCTRL0_reg;
    cc2420_status_t status;
    uint8_t key_index;
 
@@ -306,11 +305,11 @@ static owerror_t cc2420_conf_sec_regs(uint8_t mode,
    // Write to two CC2420 security registers
    cc2420_spiWriteReg(CC2420_SECCTRL0_ADDR, 
                      status,
-                     *(uint16_t*)&cc2420_SECCTRL0_reg);
+                     (cc2420_generic_reg_t *) &cc2420_SECCTRL0_reg);
                
    cc2420_spiWriteReg(CC2420_SECCTRL1_ADDR, 
                      status,
-                     *(uint16_t*)&cc2420_SECCTRL1_reg);
+                     (cc2420_generic_reg_t *) &cc2420_SECCTRL1_reg);
 
    return E_SUCCESS;
 }

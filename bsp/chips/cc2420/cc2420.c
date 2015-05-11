@@ -25,12 +25,12 @@ void cc2420_spiStrobe(uint8_t strobe, cc2420_status_t* statusRead) {
    );
 }
 
-void cc2420_spiWriteReg(uint8_t reg, cc2420_status_t* statusRead, uint16_t regValueToWrite) {
+void cc2420_spiWriteReg(uint8_t reg, cc2420_status_t* statusRead, cc2420_generic_reg_t *regValueToWrite) {
    uint8_t              spi_tx_buffer[3];
    
    spi_tx_buffer[0]     = (CC2420_FLAG_WRITE | CC2420_FLAG_REG | reg);
-   spi_tx_buffer[1]     = regValueToWrite/256;
-   spi_tx_buffer[2]     = regValueToWrite%256;
+   spi_tx_buffer[1]     = (*(uint16_t *)regValueToWrite)/256;
+   spi_tx_buffer[2]     = (*(uint16_t *)regValueToWrite)%256;
    
    spi_txrx(
       spi_tx_buffer,              // bufTx

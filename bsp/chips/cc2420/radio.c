@@ -92,7 +92,7 @@ void radio_reset(void) {
    cc2420_spiWriteReg(
       CC2420_MDMCTRL0_ADDR,
       &radio_vars.radioStatusByte,
-      *(uint16_t*)&cc2420_MDMCTRL0_reg
+      (cc2420_generic_reg_t *) &cc2420_MDMCTRL0_reg
    );
    
    // speed up time to TX
@@ -106,7 +106,7 @@ void radio_reset(void) {
    cc2420_spiWriteReg(
       CC2420_TXCTRL_ADDR,
       &radio_vars.radioStatusByte,
-      *(uint16_t*)&cc2420_TXCTRL_reg
+      (cc2420_generic_reg_t *) &cc2420_TXCTRL_reg
    );
    
    // apply correction recommended in datasheet
@@ -124,7 +124,7 @@ void radio_reset(void) {
    cc2420_spiWriteReg(
       CC2420_RXCTRL1_ADDR,
       &radio_vars.radioStatusByte,
-      *(uint16_t*)&cc2420_RXCTRL1_reg
+      (cc2420_generic_reg_t *) &cc2420_RXCTRL1_reg
    );
 }
 
@@ -166,7 +166,7 @@ void radio_setFrequency(uint8_t frequency) {
    cc2420_spiWriteReg(
       CC2420_FSCTRL_ADDR,
       &radio_vars.radioStatusByte,
-      *(uint16_t*)&cc2420_FSCTRL_reg
+      (cc2420_generic_reg_t *) &cc2420_FSCTRL_reg
    );
    
    // change state

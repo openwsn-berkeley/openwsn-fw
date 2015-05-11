@@ -399,6 +399,10 @@ typedef struct {
    uint16_t reserved_w0:8;
 } cc2420_TOPTST_reg_t;
 
+/// Generic CC2420 register value to avoid warnings
+typedef struct {
+   uint16_t reg_value;
+} cc2420_generic_reg_t;
 //=========================== buffer ==========================================
 
 /// [  W] Transmit FIFO Byte Register
@@ -427,7 +431,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void cc2420_spiStrobe     (uint8_t strobe, cc2420_status_t* statusRead);
-void cc2420_spiWriteReg   (uint8_t reg,    cc2420_status_t* statusRead, uint16_t regValueToWrite);
+void cc2420_spiWriteReg   (uint8_t reg,    cc2420_status_t* statusRead, cc2420_generic_reg_t* regValueToWrite);
 void cc2420_spiReadReg    (uint8_t reg,    cc2420_status_t* statusRead, uint8_t* regValueRead);
 void cc2420_spiWriteFifo(                  cc2420_status_t* statusRead, uint8_t* bufToWrite, uint8_t  lenToWrite, uint8_t addr);
 void cc2420_spiReadRxFifo (                cc2420_status_t* statusRead, uint8_t* bufRead,    uint8_t* lenRead, uint8_t maxBufLen);
