@@ -230,7 +230,7 @@ elif env['toolchain']=='armgcc':
         
     elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3']:
         
-         # compiler (C)
+        # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         if os.name=='nt':
             env.Append(CCFLAGS   = '-DHSE_VALUE=((uint32_t)16000000)')
@@ -306,6 +306,9 @@ elif env['toolchain']=='armgcc':
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
     
 elif env['toolchain']=='gcc':
+    
+    # compiler (C)
+    env.Append(CCFLAGS       = '-Wall')
     
     if env['board'] not in ['python']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
@@ -504,39 +507,43 @@ def sconscript_scanner(localEnv):
     - projects\common\
     - projects\<board>\
     '''
+    
     # list subdirectories
-    subdirs = [name for name in os.listdir('.') if os.path.isdir(os.path.join('.', name)) ]
+    PATH_TO_PROJECTS = os.path.join('..','..','..','..','projects',os.path.split(os.getcwd())[-1])
+    allsubdirs     = os.listdir(os.path.join(PATH_TO_PROJECTS))
+    subdirs        = [name for name in allsubdirs if os.path.isdir(os.path.join(PATH_TO_PROJECTS,name)) ]
     
     # parse dirs and build targets
     for projectDir in subdirs:
         
-        src_dir     = os.path.join(os.getcwd(),projectDir)
-        variant_dir = os.path.join(env['VARDIR'],'projects',projectDir),
+        src_dir         = os.path.join(PATH_TO_PROJECTS,projectDir)
+        variant_dir     = os.path.join(env['VARDIR'],'projects',projectDir)
         
-        added      = False
-        targetName = projectDir[2:]
+        added           = False
+        targetName      = projectDir[2:]
         
-        if   (
-                ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
+        if  (
+                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
                 (localEnv['toolchain']!='iar-proj') and 
                 (localEnv['board']!='python')
-             ):
+            ):
             
             localEnv.VariantDir(
-                variant_dir = variant_dir,
                 src_dir     = src_dir,
-                duplicate   = 0,
+                variant_dir = variant_dir,
             )
-    
+            
             target =  projectDir
-            source = [os.path.join(projectDir,'{0}.c'.format(projectDir))]
+            source = [
+                os.path.join(projectDir,'{0}.c'.format(projectDir)),
+            ]
             libs   = buildLibs(projectDir)
             
             buildIncludePath(projectDir,localEnv)
             
             # In Linux, you cannot have the same target name as the name of the
             # directory name.
-            target=target+"_prog"
+            target = target+"_prog"
             
             exe = localEnv.Program(
                 target  = target,
@@ -549,26 +556,33 @@ def sconscript_scanner(localEnv):
             added = True
         
         elif (
-                ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
+                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
                 (localEnv['board']=='python')
-             ):
+            ):
             
             # build the artifacts in a separate directory
             localEnv.VariantDir(
-                variant_dir = variant_dir,
                 src_dir     = src_dir,
-                duplicate   = 1,
+                variant_dir = variant_dir,
             )
             
             # build both the application's and the Python module's main files
             sources_c = [
                 os.path.join(projectDir,'{0}.c'.format(projectDir)),
-                os.path.join('#','bsp','boards','python','openwsnmodule.c'),
+                os.path.join(projectDir,'openwsnmodule.c'),
             ]
+            
+            localEnv.Command(
+                os.path.join(projectDir,'openwsnmodule.c'),
+                os.path.join('#','bsp','boards','python','openwsnmodule.c'),
+                [
+                    Copy('$TARGET', '$SOURCE')
+                ]
+            )
             
             # objectify those two files
             for s in sources_c:
-                temp = localEnv.Objectify(
+                localEnv.Objectify(
                     target = localEnv.ObjectifiedFilename(s),
                     source = s,
                 )
@@ -611,14 +625,13 @@ def sconscript_scanner(localEnv):
             added = True
             
         elif (
-                ('{0}.ewp'.format(projectDir) in os.listdir(projectDir)) and
+                ('{0}.ewp'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
                 (localEnv['toolchain']=='iar-proj')
              ):
             
             VariantDir(
-                variant_dir = variant_dir,
                 src_dir     = src_dir,
-                duplicate   = 0,
+                variant_dir = variant_dir,
             )
             
             source = [os.path.join(projectDir,'{0}.ewp'.format(projectDir))]
@@ -650,7 +663,6 @@ buildEnv.SConscript(
     os.path.join(incDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = incVarDir,
-    duplicate   = 0,
 )
 
 # bsp
@@ -661,7 +673,6 @@ buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = bspVarDir,
-    duplicate   = 0,
 )
 buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
@@ -673,7 +684,6 @@ buildEnv.SConscript(
     os.path.join(kernelHDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = kernelHVarDir,
-    duplicate   = 0,
 )
 
 # kernel
@@ -683,7 +693,6 @@ buildEnv.SConscript(
     os.path.join(kernelDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = kernelVarDir,
-    duplicate   = 0,
 )
 buildEnv.Clean('libkernel', Dir(kernelVarDir).abspath)
 buildEnv.Append(LIBPATH = [kernelVarDir])
@@ -695,7 +704,6 @@ buildEnv.SConscript(
     os.path.join(driversDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = driversVarDir,
-    duplicate   = 0,
 )
 buildEnv.Clean('libdrivers', Dir(driversVarDir).abspath)
 buildEnv.Append(LIBPATH = [driversVarDir])
@@ -707,7 +715,6 @@ buildEnv.SConscript(
     os.path.join(openstackDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = openstackVarDir,
-    duplicate   = 0,
 )
 buildEnv.Clean('libopenstack', Dir(openstackVarDir).abspath)
 buildEnv.Append(LIBPATH = [openstackVarDir])
@@ -719,14 +726,15 @@ buildEnv.SConscript(
     os.path.join(openappsDir,'SConscript'),
     exports        = {'env': buildEnv},
     variant_dir    = openappsVarDir,
-    duplicate   = 0,
 )
 buildEnv.Clean('libopenapps', Dir(openappsVarDir).abspath)
 buildEnv.Append(LIBPATH = [openappsVarDir])
 
 # projects
+projectsDir        = os.path.join('#','projects')
+projectsVarDir     = os.path.join(buildEnv['VARDIR'],'projects')
 buildEnv.SConscript(
-    os.path.join('#','projects','SConscript'),
-    exports     = {'env': buildEnv},
-    #variant_dir = os.path.join(env['VARDIR'],'projects'),
+    os.path.join(projectsDir,'SConscript'),
+    exports        = {'env': buildEnv},
+    variant_dir    = projectsVarDir,
 )
