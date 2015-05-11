@@ -230,7 +230,7 @@ elif env['toolchain']=='armgcc':
         
     elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3']:
         
-         # compiler (C)
+        # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         if os.name=='nt':
             env.Append(CCFLAGS   = '-DHSE_VALUE=((uint32_t)16000000)')
@@ -306,6 +306,9 @@ elif env['toolchain']=='armgcc':
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
     
 elif env['toolchain']=='gcc':
+    
+    # compiler (C)
+    env.Append(CCFLAGS       = '-Wall')
     
     if env['board'] not in ['python']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))

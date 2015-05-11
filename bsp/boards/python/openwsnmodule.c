@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include "openwsnmodule.h"
 
+#include "bsp_timer.h"
+
 //=========================== OpenMote Class ==================================
 
 //===== members
@@ -400,8 +402,6 @@ static PyTypeObject openwsn_OpenMoteType = {
 //=========================== openwsn module ==================================
 
 //===== members
-
-static PyObject* my_callback  = NULL;
 
 //===== methods
 

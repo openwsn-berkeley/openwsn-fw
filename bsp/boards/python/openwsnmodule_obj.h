@@ -40,6 +40,27 @@
 //#include "tohlone_obj.h"
 #include "uecho_obj.h"
 
+//=========================== prototypes ======================================
+
+// radio
+void radio_intr_startOfFrame(OpenMote* self, uint16_t capturedTime);
+void radio_intr_endOfFrame(OpenMote* self, uint16_t capturedTime);
+
+// radiotimer
+void radiotimer_intr_compare(OpenMote* self);
+void radiotimer_intr_overflow(OpenMote* self);
+
+// uart
+void uart_intr_tx(OpenMote* self);
+void uart_intr_rx(OpenMote* self);
+void uart_writeBufferByLen_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t len);
+
+// supply
+void supply_on(OpenMote* self);
+void supply_off(OpenMote* self);
+
+//=========================== enums ===========================================
+
 // notifications sent from the C mote to the Python BSP
 enum {
    // board
@@ -145,6 +166,8 @@ enum {
    MOTE_NOTIF_LAST
 };
 
+//=========================== typedef =========================================
+
 typedef void (*uart_tx_cbt)(OpenMote* self);
 typedef void (*uart_rx_cbt)(OpenMote* self);
 
@@ -172,6 +195,8 @@ typedef struct {
    radiotimer_compare_cbt    overflow_cb;
    radiotimer_compare_cbt    compare_cb;
 } radiotimer_icb_t;
+
+//=========================== struct ==========================================
 
 /**
 \brief Memory footprint of an OpenMote instance.
