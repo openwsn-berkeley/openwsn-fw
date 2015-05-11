@@ -42,6 +42,9 @@
 
 //=========================== prototypes ======================================
 
+// app
+int mote_main(OpenMote* self);
+
 // radio
 void radio_intr_startOfFrame(OpenMote* self, uint16_t capturedTime);
 void radio_intr_endOfFrame(OpenMote* self, uint16_t capturedTime);
@@ -54,6 +57,7 @@ void radiotimer_intr_overflow(OpenMote* self);
 void uart_intr_tx(OpenMote* self);
 void uart_intr_rx(OpenMote* self);
 void uart_writeBufferByLen_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t len);
+void uart_writeCircularBuffer_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t* outputBufIdxR, uint8_t* outputBufIdxW);
 
 // supply
 void supply_on(OpenMote* self);
