@@ -61,7 +61,7 @@ void cc2420_spiReadReg(uint8_t reg, cc2420_status_t* statusRead, uint8_t* regVal
       SPI_LAST                    // isLast
    );
    
-   *statusRead          = *(cc2420_status_t*)&spi_rx_buffer[0];
+   memcpy(statusRead, &spi_rx_buffer[0], sizeof(cc2420_status_t));
    *(regValueRead+0)    = spi_rx_buffer[2];
    *(regValueRead+1)    = spi_rx_buffer[1];
 }
@@ -120,7 +120,7 @@ void cc2420_spiReadRxFifo(cc2420_status_t* statusRead,
       SPI_NOTLAST                 // isLast
    );
    
-   *statusRead          = *(cc2420_status_t*)&spi_rx_buffer[0];
+   memcpy(statusRead, &spi_rx_buffer[0], sizeof(cc2420_status_t));
    *pLenRead            = spi_rx_buffer[1];
    
    if (*pLenRead>2 && *pLenRead<=127) {
@@ -187,7 +187,7 @@ void cc2420_spiReadRam(uint16_t addr,
       SPI_NOTLAST                 // isLast
    );
    
-   *statusRead          = *(cc2420_status_t*)&spi_rx_buffer[0];
+   memcpy(statusRead, &spi_rx_buffer[0], sizeof(cc2420_status_t));
    
    //read the actual bytes in RAM
    spi_txrx(
