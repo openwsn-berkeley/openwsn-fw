@@ -435,6 +435,49 @@ def telosb_bootload(target, source, env):
     for t in bootloadThreads:
         countingSem.acquire()
 
+class OpenMoteCC2538_bootloadThread(threading.Thread):
+    def __init__(self,comPort,hexFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.hexFile         = hexFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'OpenMoteCC2538_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+os.path.join('bootloader','OpenMote-CC2538','cc2538-bsl.py')+' -e -w -b 115200 -p {0} --bsl {1}'.format(self.comPort,self.hexFile),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def OpenMoteCC2538_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        bootloadThreads += [
+            OpenMoteCC2538_bootloadThread(
+                comPort      = comPort,
+                #hexFile      = os.path.split(source[0].path)[1].split('.')[0]+'.bin',
+                hexFile      = source[0].path.split('.')[0]+'.bin',
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+
 # bootload
 def BootloadFunc():
     if   env['board']=='telosb':
@@ -442,6 +485,12 @@ def BootloadFunc():
             action      = telosb_bootload,
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
+        )
+    elif env['board']=='OpenMote-CC2538':
+        return Builder(
+            action      = OpenMoteCC2538_bootload,
+            suffix      = '.phonyupload',
+            src_suffix  = '.bin',
         )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
