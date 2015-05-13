@@ -1,4 +1,22 @@
 -------------------------------------------------------------------------------
+License and Acknowledgment:
+-------------------------------------------------------------------------------
+BSL script 'iotlab-m3-bsl.py' for iot-lab_M3 nodes is a Python version of 
+'doFlash.sh' script from 
+[https://github.com/adjih/exp-iotlab/blob/master/tools/misc/doFlash.sh] with
+additions regarding the openocd handling. 'doFlash.sh' script is itself an 
+adaptation of code from 
+[https://github.com/iot-lab/openlab/tree/master/platform].
+
+OpenOCD config file 'iotlab-m3.cfg' is a copy of
+[https://github.com/iot-lab/openlab/blob/master/platform/scripts/iotlab-m3.cfg]
+, and the same license and copyright applies.
+
+We are grateful to Cedric Adjih and the Iot-Lab team, in particular
+Roger Pissard-Gibollet and Gaetan Harter, for their help and for making this
+code available.
+
+-------------------------------------------------------------------------------
 Windows environment config in order to program (i.e. flash) iot-lab_M3.
 -------------------------------------------------------------------------------
 
