@@ -478,6 +478,52 @@ def OpenMoteCC2538_bootload(target, source, env):
     for t in bootloadThreads:
         countingSem.acquire()
 
+class IotLabM3_bootloadThread(threading.Thread):
+    def __init__(self,comPort,binaryFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.binaryFile      = binaryFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'IotLabM3_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+ os.path.join('bootloader','iot-lab_M3','iotlab-m3-bsl.py' + ' -i {0} -p {1}'.format(self.binaryFile, self.comPort)),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def IotLabM3_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        if os.name=='nt':
+            suffix = '.exe'
+        else:
+            suffix = ''
+        bootloadThreads += [
+            IotLabM3_bootloadThread(
+                comPort      = comPort,
+                binaryFile   = source[0].path.split('.')[0]+suffix,
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+
 # bootload
 def BootloadFunc():
     if   env['board']=='telosb':
@@ -492,6 +538,12 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.bin',
         )
+    elif env['board']=='iot-lab_M3':
+         return Builder(
+            action      = IotLabM3_bootload,
+            suffix      = '.phonyupload',
+            src_suffix  = ''
+         )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
 if env['bootload']:
