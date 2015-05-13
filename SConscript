@@ -506,10 +506,14 @@ def IotLabM3_bootload(target, source, env):
     countingSem     = threading.Semaphore(0)
     # create threads
     for comPort in env['bootload'].split(','):
+        if os.name=='nt':
+            suffix = '.exe'
+        else:
+            suffix = ''
         bootloadThreads += [
             IotLabM3_bootloadThread(
                 comPort      = comPort,
-                binaryFile   = source[0].path.split('.')[0],
+                binaryFile   = source[0].path.split('.')[0]+suffix,
                 countingSem  = countingSem,
             )
         ]

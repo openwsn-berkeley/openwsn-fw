@@ -14,6 +14,11 @@ GDB_PORT = '3' + OOCD_PORT
 TELNET_PORT = '4' + OOCD_PORT
 TCL_PORT = '5' + OOCD_PORT
 
+if os.name=='nt':
+   extension = '.exe'
+else:
+   extension = ''
+
 def usage():
     print("""Usage: %s [-i binary file] [-p port] 
 Examples:
@@ -40,7 +45,7 @@ def which(program):
     raise RuntimeError('Command not found.')
 
 try:
-   OPENOCD = which('openocd')
+   OPENOCD = which('openocd' + extension)
 except RuntimeError as e:
     print('ERROR: {} requires OpenOCD with ft2232 interface.'.format(sys.argv[0]))
     print('')
@@ -72,6 +77,9 @@ except:
    print('ERROR: Binary file not found/specified.')
    usage()
    sys.exit(2)
+
+if os.name=='nt':
+   binary = '{' + binary + '}'
 
 call([OPENOCD,
    '-f', os.path.join(currentDir, OOCD_ITF),
