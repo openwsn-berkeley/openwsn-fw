@@ -86,34 +86,27 @@ port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
 }
 
 port_INLINE uint8_t processIE_prependSlotframeLinkIE(OpenQueueEntry_t* pkt){
-   mlme_IE_ht mlme_subHeader;
+   mlme_IE_ht        mlme_subHeader;
    uint8_t           len;
-   uint8_t           linkOption;
    slotOffset_t      slotOffset;
-   slotOffset_t      lastSlotOffset;
    frameLength_t     frameLength;
-  
+   
    len            = 0;
-   linkOption     = 0;
-   lastSlotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET + SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
    
    // for each link in the default schedule, add:
    // - [1B] linkOption bitmap
    // - [2B] channel offset
    // - [2B] timeslot
  
-   //===== shared cells
+   //===== shared cell
    
-   linkOption = (1<<FLAG_TX_S)|(1<<FLAG_RX_S)|(1<<FLAG_SHARED_S);
-   for (slotOffset=lastSlotOffset;slotOffset>SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;slotOffset--) {
-      packetfunctions_reserveHeaderSize(pkt,5);
-      pkt->payload[0]   = (slotOffset-1)        & 0xFF;
-      pkt->payload[1]   = ((slotOffset-1) >> 8) & 0xFF;
-      pkt->payload[2]   = SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET;     // channel offset
-      pkt->payload[3]   = 0x00;
-      pkt->payload[4]   = linkOption;                          // linkOption
-      len+=5;
-   }
+   packetfunctions_reserveHeaderSize(pkt,5);
+   pkt->payload[0]      = 0x00;   // slotoffset [1/2]
+   pkt->payload[1]      = 0x00;
+   pkt->payload[2]      = 0x00;   // channeloffset
+   pkt->payload[3]      = 0x00;
+   pkt->payload[4]      = (1<<FLAG_TX_S)|(1<<FLAG_RX_S)|(1<<FLAG_SHARED_S);
+   len+=5;
    
    //===== slotframe IE header
    
@@ -126,8 +119,7 @@ port_INLINE uint8_t processIE_prependSlotframeLinkIE(OpenQueueEntry_t* pkt){
    pkt->payload[1] = schedule_getFrameHandle();
    pkt->payload[2] =  frameLength       & 0xFF;
    pkt->payload[3] = (frameLength >> 8) & 0xFF;
-   pkt->payload[4] = SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS; //number of links
-  
+   pkt->payload[4] = 1; //number of links
    len+=5;
    
    //===== MLME IE header
@@ -374,6 +366,10 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
       OpenQueueEntry_t* pkt,
       uint8_t*          ptr
    ){
+   
+   schedule_setFrameLength(SUPERFRAME_LENGTH);
+   
+   /*
    uint8_t              numSlotFrames;
    uint8_t              i;
    uint8_t              j;
@@ -451,6 +447,7 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
    }
    
    *ptr=localptr;
+   */
 } 
 
 port_INLINE void processIE_retrieveOpcodeIE(
