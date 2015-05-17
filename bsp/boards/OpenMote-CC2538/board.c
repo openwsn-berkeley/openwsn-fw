@@ -96,7 +96,7 @@ void board_init(void) {
 
    leds_init();
    debugpins_init();
-   button_init();
+  // button_init();
    bsp_timer_init();
    radiotimer_init();
    uart_init();
@@ -122,10 +122,9 @@ void board_sleep(void) {
     // but return a number of ticks at 32.768 kHz
 
     //FAKE
-   /* SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
-    SysCtrlSleep();
-    return;
-   */
+//    SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
+//    SysCtrlSleep();
+//    return;
 
     bsp_ticks    = bsp_timer_get_remainingValue();
     radio_ticks  = radiotimer_get_remainingValue();
@@ -145,6 +144,7 @@ void board_sleep(void) {
         wakeup_ticks = 0;
     	SysCtrlPowerModeSet(SYS_CTRL_PM_1);
     } else { // Go to LPM2
+    	leds_debug_toggle();
         deep_sleep = true;
         wakeup_ticks = 5;
         SysCtrlPowerModeSet(SYS_CTRL_PM_2);
@@ -171,6 +171,8 @@ void board_sleep(void) {
         board_suspend();
 
         // Go to the selected sleep mode
+        debugpins_frame_set();
+        //SysCtrlSleep();
         SysCtrlDeepSleep();
     } else {
         SysCtrlSleep();
@@ -184,13 +186,15 @@ void board_sleep(void) {
         // Disable the wake-up interrupt
         IntDisable(INT_SMTIM);
 
+        //leds_debug_toggle();
         // Re-enable the hardware
         board_wakeup(uart_is_active, radio_is_active);
-
+        debugpins_frame_clr();
+       // leds_debug_off();
         // If we went to deep sleep we need to re-enable
         // the bsp_timer and the radiotimer
         // Notice callbacks will be executed here
-        // bsp_timer_wakeup(sleep_ticks);
+        bsp_timer_wakeup(sleep_ticks);
         radiotimer_wakeup(sleep_ticks);
     }
 }
@@ -201,7 +205,7 @@ void board_sleep(void) {
  */
 static void board_suspend(void) {
     // Disable the radio and uart
-    // radio_suspend();
+   //  radio_off();
     // uart_suspend();
 }
 
@@ -213,9 +217,9 @@ static void board_wakeup(bool uart, bool radio) {
         uart_init();
     }
 
-    if (radio) {
-        radio_init();
-    }
+   // if (radio) {
+        radio_wakeup();
+   // }
 }
 
 /**

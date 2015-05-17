@@ -144,16 +144,19 @@ void radiotimer_wakeup(PORT_TIMER_WIDTH elapsed) {
     PORT_TIMER_WIDTH period, newcounter,value;
 
     value =  TimerValueGet(GPTIMER1_BASE, GPTIMER_A);
+   // value = radiotimer_vars.sleepCounterValue;
     //it takes 93 tics from sleep to wake up.
-    if (radiotimer_vars.sleepCounterValue+MARGIN < value){
-    	while(1);
-    }
+   // if (radiotimer_vars.sleepCounterValue+MARGIN < value){
+   // 	while(1);
+   // }
 
     // Scale up from 32.768 kHz to 32 MHz
+
 	elapsed *= RADIOTIMER_32MHZ_TICS_PER_32KHZ_TIC;
     //add to the counter the time we have been sleeping
 
     newcounter= value + elapsed;
+
     //restore the values
     TimerLoadSet(GPTIMER1_BASE, GPTIMER_A,radiotimer_vars.period_value);
    	TimerMatchSet(GPTIMER1_BASE, GPTIMER_A,radiotimer_vars.compare_value);
@@ -162,7 +165,7 @@ void radiotimer_wakeup(PORT_TIMER_WIDTH elapsed) {
     if (newcounter+MARGIN > radiotimer_vars.period_value){
     	//we are too late, pend the isr
     	TimerUpdateCounter(GPTIMER1_BASE,GPTIMER_A,0);
-
+       // leds_debug_toggle();
     	TimerIntEnable(GPTIMER1_BASE, GPTIMER_TIMA_TIMEOUT);
     	radiotimer_vars.isPeriodPending=true;
     	TimerEnable(GPTIMER1_BASE, GPTIMER_BOTH);
