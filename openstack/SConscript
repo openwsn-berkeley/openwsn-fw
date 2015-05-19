@@ -113,6 +113,7 @@ else:
             os.path.join('#','openapps','techo'),
             os.path.join('#','openapps','tohlone'),
             os.path.join('#','openapps','uecho'),
+            os.path.join('#','openapps','uinject'),
         ],
     )
     
