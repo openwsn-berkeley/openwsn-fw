@@ -37,11 +37,6 @@ void uinject_init() {
 }
 
 void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
-   
-   if (error!=E_SUCCESS) {
-      leds_error_toggle();;
-   }
-   
    openqueue_freePacketBuffer(msg);
 }
 
@@ -70,7 +65,6 @@ void uinject_timer_cb(opentimer_id_t id){
 
 void uinject_task_cb() {
    OpenQueueEntry_t*    pkt;
-   owerror_t            outcome;
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
