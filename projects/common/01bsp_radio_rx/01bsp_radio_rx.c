@@ -72,7 +72,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 //=========================== defines =========================================
 
 #define LENGTH_PACKET        125+LENGTH_CRC ///< maximum length is 127 bytes
-#define CHANNEL              11             ///< 11 = 2.405GHz
+#define CHANNEL              20             ///< 11 = 2.405GHz
 #define LENGTH_SERIAL_FRAME  8              ///< length of the serial frame
 
 //=========================== variables =======================================
@@ -109,8 +109,8 @@ app_vars_t app_vars;
 void cb_radioTimerOverflows(void);
 void cb_radioTimerCompare(void);
 // radio
-void cb_startFrame(uint16_t timestamp);
-void cb_endFrame(uint16_t timestamp);
+void cb_startFrame(PORT_TIMER_WIDTH timestamp);
+void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 // uart
 void cb_uartTxDone(void);
 void cb_uartRxCb(void);
@@ -157,27 +157,11 @@ int mote_main(void) {
       //===== get packet from radio
       
       // led
-      leds_sync_on();
-      
-      // get packet from radio
-      radio_getReceivedFrame(
-         app_vars.rxpk_buf,
-         &app_vars.rxpk_len,
-         sizeof(app_vars.rxpk_buf),
-         &app_vars.rxpk_rssi,
-         &app_vars.rxpk_lqi,
-         &app_vars.rxpk_crc
-      );
-      
-      // read the packet number
-      app_vars.rxpk_num = app_vars.rxpk_buf[0];
-      
-      // led
-      leds_sync_off();
+
       
       //===== send notification over serial port
       
-      // led
+      // // led
       leds_error_on();
       
       // format frame to send over serial port
@@ -224,19 +208,36 @@ void cb_radioTimerCompare(void) {
 
 //===== radio
 
-void cb_startFrame(uint16_t timestamp) {
+void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
    
    // update debug stats
    app_dbg.num_startFrame++;
 }
 
-void cb_endFrame(uint16_t timestamp) {
+void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    
    // update debug stats
    app_dbg.num_endFrame++;
-   
    // indicate I just received a packet
    app_vars.rxpk_done = 1;
+
+   leds_sync_on();
+
+   // get packet from radio
+   radio_getReceivedFrame(
+      app_vars.rxpk_buf,
+      &app_vars.rxpk_len,
+      sizeof(app_vars.rxpk_buf),
+      &app_vars.rxpk_rssi,
+      &app_vars.rxpk_lqi,
+      &app_vars.rxpk_crc
+   );
+
+   // read the packet number
+   app_vars.rxpk_num = app_vars.rxpk_buf[0];
+
+   // led
+   leds_sync_off();
 }
 
 //===== uart

@@ -123,8 +123,7 @@ void adxl346_init(void) {
     i2c_write_bytes(ADXL346_ADDRESS, config, sizeof(config));
 
     config[0] = ADXL346_DATA_FORMAT_ADDR;
-    config[1] = (ADXL346_DATA_FORMAT_SELF_TEST |
-                 ADXL346_DATA_FORMAT_FULL_RES  |
+    config[1] = (ADXL346_DATA_FORMAT_FULL_RES |
                  ADXL346_DATA_FORMAT_RANGE_PM_16g);
     i2c_write_bytes(ADXL346_ADDRESS, config, sizeof(config));
 
@@ -145,46 +144,52 @@ uint8_t adxl346_is_present(void) {
     return (is_present == ADXL346_DEVID_VALUE);
 }
 
-uint16_t adxl346_read_x(void) {
+int16_t adxl346_read_x(void) {
     uint8_t acceleration[2];
-    uint16_t x;
+    int16_t x;
 
     i2c_write_byte(ADXL346_ADDRESS, ADXL346_DATAX0_ADDR);
     i2c_read_byte(ADXL346_ADDRESS, &acceleration[0]);
     i2c_write_byte(ADXL346_ADDRESS, ADXL346_DATAX1_ADDR);
     i2c_read_byte(ADXL346_ADDRESS, &acceleration[1]);
 
-    x = (acceleration[0] << 8) | acceleration[1];
+    x = (acceleration[1] << 8) | acceleration[0];
 
     return x;
 }
 
-uint16_t adxl346_read_y(void) {
+int16_t adxl346_read_y(void) {
     uint8_t acceleration[2];
-    uint16_t y;
+    int16_t y;
     
     i2c_write_byte(ADXL346_ADDRESS, ADXL346_DATAY0_ADDR);
     i2c_read_byte(ADXL346_ADDRESS, &acceleration[0]);
     i2c_write_byte(ADXL346_ADDRESS, ADXL346_DATAY1_ADDR);
     i2c_read_byte(ADXL346_ADDRESS, &acceleration[1]);
 
-    y = (acceleration[0] << 8) | acceleration[1];
+    y = (acceleration[1] << 8) | acceleration[0];
     
     return y;
 }
 
-uint16_t adxl346_read_z(void) {
+int16_t adxl346_read_z(void) {
     uint8_t acceleration[2];
-    uint16_t z;
+    int16_t z;
     
     i2c_write_byte(ADXL346_ADDRESS, ADXL346_DATAZ0_ADDR);
     i2c_read_byte(ADXL346_ADDRESS, &acceleration[0]);
     i2c_write_byte(ADXL346_ADDRESS, ADXL346_DATAZ1_ADDR);
     i2c_read_byte(ADXL346_ADDRESS, &acceleration[1]);
 
-    z = (acceleration[0] << 8) | acceleration[1];
+    z = (acceleration[1] << 8) | acceleration[0];
     
     return z;
+}
+
+float adxl346_convert_acceleration(int16_t acceleration) {
+    float result = 4.0;
+    result *= (acceleration & 0x9FFF);
+    return result;
 }
 
 //=========================== private =========================================

@@ -305,11 +305,11 @@ Default(env.Command('default', None, default))
 #============================ verbose =========================================
 
 if not env['verbose']:
-   env[    'CCCOMSTR']  = "Compiling $TARGET"
+   env[    'CCCOMSTR']  = "Compiling          $TARGET"
    env[  'SHCCCOMSTR']  = "Compiling (shared) $TARGET"
-   env[    'ARCOMSTR']  = "Archiving $TARGET"
-   env['RANLIBCOMSTR']  = "Indexing  $TARGET"
-   env[  'LINKCOMSTR']  = "Linking   $TARGET"
+   env[    'ARCOMSTR']  = "Archiving          $TARGET"
+   env['RANLIBCOMSTR']  = "Indexing           $TARGET"
+   env[  'LINKCOMSTR']  = "Linking            $TARGET"
    env['SHLINKCOMSTR']  = "Linking (shared)   $TARGET"
 
 #============================ load SConscript's ===============================

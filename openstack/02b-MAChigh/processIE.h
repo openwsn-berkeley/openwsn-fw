@@ -20,8 +20,8 @@
 #define MLME_IE_SUBID_OPCODE           0x41
 #define MLME_IE_SUBID_BANDWIDTH        0x42
 #define MLME_IE_SUBID_TRACKID          0x43
-#define MLME_IE_SUBID_SCHEDULE         0x44
-
+#define MLME_IE_SUBID_SCHEDULE         0x44 // schedule IE subId is 44 when six request is otf
+#define MLME_IE_SUBID_SCHEDULE_MT      0x45 // schedule IE subId is 45 when six request is sixtop maintenance
 // ========================== typedef =========================================
 
 BEGIN_PACK
@@ -156,7 +156,8 @@ uint8_t          processIE_prependScheduleIE(
    uint8_t              type,
    uint8_t              frameID,
    uint8_t              flag,
-   cellInfo_ht*         cellList
+   cellInfo_ht*         cellList,
+   uint8_t              subId 
 );
 
 //===== retrieve IEs

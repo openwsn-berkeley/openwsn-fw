@@ -14,21 +14,18 @@ adxl346 = localEnv.SConscript(
     os.path.join('#','bsp','chips','adxl346','SConscript'),
     variant_dir = 'adxl346',
     exports     = {'env': env},
-    duplicate   = 0,
 )
 
 max44009 = localEnv.SConscript(
     os.path.join('#','bsp','chips','max44009','SConscript'),
     variant_dir = 'max44009',
     exports     = {'env': env},
-    duplicate   = 0,
 )
 
 sht21 = localEnv.SConscript(
     os.path.join('#','bsp','chips','sht21','SConscript'),
     variant_dir = 'sht21',
     exports     = {'env': env},
-    duplicate   = 0,
 )
 
 source   = \
@@ -36,13 +33,13 @@ source   = \
     Glob('source/*.c')
 
 localEnv.Append(
-        CPPPATH =  [
-            os.path.join('#','bsp','boards','OpenMote-CC2538','headers'),
-            os.path.join('#','bsp','chips','adxl346'),
-            os.path.join('#','bsp','chips','max44009'),
-            os.path.join('#','bsp','chips','sht21'),
-        ],
-    )
+    CPPPATH =  [
+        os.path.join('#','bsp','boards','OpenMote-CC2538','headers'),
+        os.path.join('#','bsp','chips','adxl346'),
+        os.path.join('#','bsp','chips','max44009'),
+        os.path.join('#','bsp','chips','sht21'),
+    ],
+)
 
 board  = localEnv.Object(source=source) + adxl346 + max44009 + sht21
 
