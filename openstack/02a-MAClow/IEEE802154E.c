@@ -886,20 +886,10 @@ port_INLINE void activity_ti1ORri1() {
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
 
-            //if security is enabled on the current frame, copy the clearText and encrypt before sending
-            if(ieee154e_vars.dataToSend->l2_securityLevel != 0){
-                 ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->clearText_length;
-                 for(i=0;i<ieee154e_vars.dataToSend->length; i++){
-                     ieee154e_vars.dataToSend->l2_payload[i] = ieee154e_vars.dataToSend->clearText[i];
-		 }
-
-                 if((IEEE802154security_outgoingFrameSecurity(ieee154e_vars.dataToSend)) == E_FAIL){
-                    openqueue_freePacketBuffer(ieee154e_vars.dataToSend);
-	            endSlot();
-	            return;
-                 }
-                 //reserve space for 2B CRC
-            	 packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
+            // TODO check where else to reserve CRC bytes 
+            if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+               //reserve space for 2B CRC
+               packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
             }
 
             // arm tt1
@@ -952,8 +942,27 @@ port_INLINE void activity_ti1ORri1() {
 }
 
 port_INLINE void activity_ti2() {
+   OpenQueueEntry_t  ciphertext;
+   OpenQueueEntry_t* frame_for_transmission; 
+   
    // change state
    changeState(S_TXDATAPREPARE);
+
+   // check if packet needs to be encrypted/authenticated before transmission 
+   if (ieee154e_vars.dataToSend->l2_securityLevel == ASH_SLF_TYPE_NOSEC) { // no security
+      // transmit plaintext
+      frame_for_transmission = ieee154e_vars.dataToSend;
+   } else { // security enabled
+      memcpy(&cipherText, ieee154e_vars.dataToSend, sizeof(OpenQueueEntry_t)); // make a local copy where we will encrypt
+      
+      if (IEEE802154security_outgoingFrameSecurity(&ciphertext) == E_FAIL) {
+         openqueue_freePacketBuffer(ieee154e_vars.dataToSend);
+         endSlot(); // abort
+         return;
+      }
+      // transmit ciphertext
+      frame_for_transmission = &ciphertext;
+   }
    
    // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
@@ -962,8 +971,8 @@ port_INLINE void activity_ti2() {
    radio_setFrequency(ieee154e_vars.freq);
    
    // load the packet in the radio's Tx buffer
-   radio_loadPacket(ieee154e_vars.dataToSend->payload,
-                    ieee154e_vars.dataToSend->length);
+   radio_loadPacket(frame_for_transmission->payload,
+                    frame_for_transmission->length);
    
    // enable the radio in Tx mode. This does not send the packet.
    radio_txEnable();
