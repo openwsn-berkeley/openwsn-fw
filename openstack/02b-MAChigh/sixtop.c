@@ -460,12 +460,12 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
 
-#ifdef CRYPTO_ENGINE_SCONS
+#ifdef L2_SECURITY_ACTIVE
    //set l2-security attributes
    msg->l2_securityLevel = 5;
    msg->l2_keyIdMode = 1;
    msg->l2_keyIndex = 1;
-#endif
+#endif // L2_SECURITY_ACTIVE
    
    if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
       return sixtop_send_internal(
@@ -613,10 +613,10 @@ void task_sixtopNotifReceive() {
             // send to upper layer
             iphc_receive(msg);
          } else {
-           // free up the RAM
-           openqueue_freePacketBuffer(msg);
-        }
-        break;
+            // free up the RAM
+            openqueue_freePacketBuffer(msg);
+         }
+         break;
       case IEEE154_TYPE_ACK:
       default:
          // free the packet's RAM memory
@@ -695,9 +695,7 @@ owerror_t sixtop_send_internal(
    uint8_t iePresent, 
    uint8_t frameVersion) {
 
-   uint8_t i;
    uint8_t securityEnabled;
-
    // assign a number of retries
    if (
       packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE
@@ -717,11 +715,7 @@ owerror_t sixtop_send_internal(
    //save the position where L2 payload starts
    msg->l2_lengthORauth_length = msg->length;
    //identify if security is enabled on the current frame
-   if(msg->l2_securityLevel != 0){
-	   securityEnabled = IEEE154_SEC_YES_SECURITY;
-   } else {
-	   securityEnabled = IEEE154_SEC_NO_SECURITY;
-   }
+   securityEnabled = msg->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? 0 : 1;
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
@@ -732,13 +726,8 @@ owerror_t sixtop_send_internal(
                             &(msg->l2_nextORpreviousHop)
                             );
    //if security is not enabled, space for CRC can be reserved here
-   if (securityEnabled == IEEE154_SEC_NO_SECURITY){
+   if (securityEnabled){
       packetfunctions_reserveFooterSize(msg,2);
-   }
-   //save the L2_payload in clear, in case retransmission occurs
-   msg->clearText_length = msg->length;
-   for(i=0;i<msg->length;i++){
-	   msg->clearText[i] = msg->l2_payload[i];
    }
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
