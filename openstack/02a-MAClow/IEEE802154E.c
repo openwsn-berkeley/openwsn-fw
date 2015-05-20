@@ -172,8 +172,6 @@ void isr_ieee154e_newSlot() {
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
          changeIsSync(TRUE);
-         //If DAG Root, store the Key
-         IEEE802154security_DAGRoot_init();
          incrementAsnOffset();
          ieee154e_syncSlotOffset();
          ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
@@ -538,12 +536,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       // parse the IEEE802.15.4 header (synchronize, end of frame)
       ieee802154_retrieveHeader(ieee154e_vars.dataReceived,&ieee802514_header);
-
-      //if not DAG Root and not synch, store the Key
-      if(idmanager_getIsDAGroot()==FALSE && ieee154e_isSynch() == FALSE
-         && ieee802514_header.frameType == IEEE154_TYPE_BEACON){
-            IEEE802154security_ChildsInit(ieee802514_header);
-      }
       
       // break if invalid IEEE802.15.4 header
       if (ieee802514_header.valid==FALSE) {
@@ -579,6 +571,13 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       // compute radio duty cycle
       ieee154e_vars.radioOnTics += (radio_getTimerValue()-ieee154e_vars.radioOnInit);
+
+      //verify beacon authentication
+      if(ieee154e_vars.dataReceived->l2_securityLevel != 0){
+         if((IEEE802154security_incomingFrame(ieee154e_vars.dataReceived)) == E_FAIL){
+	    break;
+         }
+      }
       
       // toss the IEs
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
@@ -888,13 +887,17 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
 
             //if security is enabled on the current frame, copy the clearText and encrypt before sending
-            if(ieee154e_vars.dataToSend->l2_security == IEEE154_SEC_YES_SECURITY){
+            if(ieee154e_vars.dataToSend->l2_securityLevel != 0){
                  ieee154e_vars.dataToSend->length = ieee154e_vars.dataToSend->clearText_length;
                  for(i=0;i<ieee154e_vars.dataToSend->length; i++){
-                    ieee154e_vars.dataToSend->l2_payload[i] = ieee154e_vars.dataToSend->clearText[i];
+                     ieee154e_vars.dataToSend->l2_payload[i] = ieee154e_vars.dataToSend->clearText[i];
 		 }
 
-                 IEEE802154security_outgoingFrameSecurity(ieee154e_vars.dataToSend);
+                 if((IEEE802154security_outgoingFrameSecurity(ieee154e_vars.dataToSend)) == E_FAIL){
+                    openqueue_freePacketBuffer(ieee154e_vars.dataToSend);
+	            endSlot();
+	            return;
+                 }
                  //reserve space for 2B CRC
             	 packetfunctions_reserveFooterSize(ieee154e_vars.dataToSend,2);
             }
@@ -1242,8 +1245,10 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
 
       //if security is enabled, unsecuring operations can occur
-      if(ieee154e_vars.ackReceived->l2_security== TRUE){
-         IEEE802154security_incomingFrame(ieee154e_vars.ackReceived);
+      if(ieee154e_vars.ackReceived->l2_securityLevel != 0){
+          if((IEEE802154security_incomingFrame(ieee154e_vars.ackReceived)) == E_FAIL){
+         	 break;
+          }
       }
       
       // break if invalid ACK
@@ -1448,11 +1453,6 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
 
-      //if security is enabled on the received frame, perform unsecuring operations
-      if(ieee154e_vars.dataReceived->l2_security== TRUE){
-         IEEE802154security_incomingFrame(ieee154e_vars.dataReceived);
-      }
-
       // handle IEs xv poipoi
       // reset join priority 
       // retrieve IE in sixtop
@@ -1464,6 +1464,13 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
           //log  that the packet is not carrying IEs
       }
       
+      //if security is enabled on the received frame, perform unsecuring operations
+      if(ieee154e_vars.dataReceived->l2_securityLevel != 0){
+         if((IEEE802154security_incomingFrame(ieee154e_vars.dataReceived)) == E_FAIL){
+        	 break;
+         }
+      }
+
       // toss the IEs including Synch
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
             
@@ -1511,6 +1518,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 port_INLINE void activity_ri6() {
    PORT_SIGNED_INT_WIDTH timeCorrection;
    header_IE_ht header_desc;
+   bool securityEnabled;
    
    // change state
    changeState(S_TXACKPREPARE);
@@ -1555,38 +1563,41 @@ port_INLINE void activity_ri6() {
 
    //security options on ACK
 #ifdef CRYPTO_ENGINE_SCONS
-   ieee154e_vars.ackToSend->l2_security = ieee154e_vars.dataReceived->l2_security;
-   ieee154e_vars.ackToSend->l2_securityLevel = ieee154e_vars.dataReceived->l2_securityLevel;
-   ieee154e_vars.ackToSend->l2_keyIdMode = 3;
-   if(idmanager_getIsDAGroot()){
-      open_addr_t* temp_addr;
-      temp_addr = idmanager_getMyID(ADDR_64B);
-      memcpy(&(ieee154e_vars.ackToSend->l2_keySource), temp_addr, sizeof(open_addr_t));
-   }else{
-      neighbors_getPreferredParentEui64(&(ieee154e_vars.ackToSend->l2_keySource));
-   }
+   ieee154e_vars.ackToSend->l2_securityLevel = 5;
+   ieee154e_vars.ackToSend->l2_keyIdMode = 1;
    ieee154e_vars.ackToSend->l2_keyIndex = 1;
-#endif   
+#endif 
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
 
    //record positions where l2_payload starts and l2_payload length
    ieee154e_vars.ackToSend->l2_payload = ieee154e_vars.ackToSend->payload;
-   ieee154e_vars.ackToSend->l2_length = ieee154e_vars.ackToSend->length;
+   ieee154e_vars.ackToSend->l2_lengthORauth_length = ieee154e_vars.ackToSend->length;
+
+   //decide whether to enable security
+   if(ieee154e_vars.ackToSend->l2_securityLevel == 0){
+	   securityEnabled = IEEE154_SEC_NO_SECURITY;
+   } else {
+	   securityEnabled = IEEE154_SEC_YES_SECURITY;
+   }
 
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
                             IEEE154_IELIST_YES,//ie in ack
                             IEEE154_FRAMEVERSION,//enhanced ack
-                            ieee154e_vars.ackToSend->l2_security,
+                            securityEnabled,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
 
    //if security is enabled, perform security operations
-   if(ieee154e_vars.ackToSend->l2_security == IEEE154_SEC_YES_SECURITY){
-      IEEE802154security_outgoingFrameSecurity(ieee154e_vars.ackToSend);
+   if(ieee154e_vars.ackToSend->l2_securityLevel != 0){
+      if((IEEE802154security_outgoingFrameSecurity(ieee154e_vars.ackToSend)) == E_FAIL){
+     	 openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
+     	 endSlot();
+     	 return;
+      }
    }
    
    // space for 2-byte CRC

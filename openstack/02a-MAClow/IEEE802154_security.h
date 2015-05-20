@@ -119,14 +119,12 @@ typedef struct{
 void IEEE802154security_init(void);
 //public
 void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg);
-void IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t* msg);
+owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t* msg);
 void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
                                                         ieee802154_header_iht* tempheader);
 
-void IEEE802154security_incomingFrame(OpenQueueEntry_t* msg);
+owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t* msg);
 
-void IEEE802154security_ChildsInit(ieee802154_header_iht ieee802514_header);
-void IEEE802154security_DAGRoot_init(void);
 /**
 \}
 \}

@@ -302,19 +302,13 @@ typedef struct {
    bool          l2_IEListPresent;               //did have IE field?
    bool          l2_joinPriorityPresent;
    //layer-2 security
-   bool          l2_security;                    //flag for security enabled/disabled
    uint8_t       l2_securityLevel;               //the security level specified for the current frame
    uint8_t       l2_keyIdMode;                   //the key Identifier mode specified for the current frame
    uint8_t       l2_keyIndex;                    //the key Index specified for the current frame
-   macFrameCounter_t l2_frameCounter;            //the Frame Counter specified for the current frame
    open_addr_t   l2_keySource;                   //the key Source specified for the current frame
-   uint8_t       l2_toDiscard;                   //if TRUE, security-related errors have occurred
    uint8_t       l2_authenticationLength;        //the length of the authentication field
-   uint8_t       l2_auxiliaryLength;             //length of the Auxiliary Security Header
    uint8_t       commandFrameIdentifier;         //used in case of Command Frames
-   uint8_t*      l2_ASNFrameCounter;	         //pointer to the Frame Counter
-   uint8_t       l2_length;                      //length of L2 payload
-   uint8_t       aData[128];                     //additional data for security
+   uint8_t       l2_lengthORauth_length;         //length of L2 payload
    uint8_t       clearText[128];                 //the layer-2 payload in clear, used in case retransmission occurs
    uint8_t       clearText_length;               //length of the packet in clear
    //l1 (drivers)

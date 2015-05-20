@@ -89,6 +89,36 @@ void IEEE802154security_init(){
 	//Initialization of Frame Counter
 	security_vars.m_macFrameCounterMode = 0x05; //0x04 or 0x05
 
+	//macDefaultKeySource - shared
+	security_vars.m_macDefaultKeySource.type = ADDR_64B;
+	security_vars.m_macDefaultKeySource.addr_64b[0] = 0x14;
+	security_vars.m_macDefaultKeySource.addr_64b[1] = 0x15;
+	security_vars.m_macDefaultKeySource.addr_64b[2] = 0x92;
+	security_vars.m_macDefaultKeySource.addr_64b[3] = 0x00;
+	security_vars.m_macDefaultKeySource.addr_64b[4] = 0x00;
+	security_vars.m_macDefaultKeySource.addr_64b[5] = 0x15;
+	security_vars.m_macDefaultKeySource.addr_64b[6] = 0x16;
+	security_vars.m_macDefaultKeySource.addr_64b[7] = 0x5a;
+
+	//store the key and related attributes
+	//Creation of the KeyDescriptor
+	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIdMode = 1;//3;
+	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIndex = 1;
+	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource.type = ADDR_64B;
+	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource = security_vars.m_macDefaultKeySource;
+
+	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.Address = security_vars.m_macDefaultKeySource;
+	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.PANId = *(idmanager_getMyID(ADDR_PANID));
+	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[1].FrameType = IEEE154_TYPE_DATA;
+	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[0].FrameType = IEEE154_TYPE_ACK;
+	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[2].FrameType = IEEE154_TYPE_BEACON;
+
+	memcpy(&security_vars.MacKeyTable.KeyDescriptorElement[0].key[0],
+		   &security_vars.M_k[0], 16);
+
+	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = security_vars.m_macDefaultKeySource;
+	security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &security_vars.MacDeviceTable;
+
 }
 
 //=========================== public ==========================================
@@ -100,20 +130,21 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
         bool frameCounterSuppression;
         uint8_t temp8b;
         open_addr_t* temp_keySource;
+        uint8_t auxiliaryLength;
 
-	frameCounterSuppression = 0; //the frame counter is carried in the frame, otherwise 1;
+	frameCounterSuppression = 0; //the frame counter is carried in the frame
 
 	//max length of MAC frames
 	// length of authentication Tag
 	msg->l2_authenticationLength = IEEE802154security_authLengthChecking(msg->l2_securityLevel);
 
 	//length of auxiliary security header
-	msg->l2_auxiliaryLength = IEEE802154security_auxLengthChecking(msg->l2_keyIdMode,
+	auxiliaryLength = IEEE802154security_auxLengthChecking(msg->l2_keyIdMode,
                                                                        frameCounterSuppression,
                                                                        security_vars.m_macFrameCounterMode); //length of Key ID field
 
 
-	if((msg->length+msg->l2_auxiliaryLength+msg->l2_authenticationLength+2) >= 130 ){ //2 bytes of CRC, 130 MaxPHYPacketSize
+	if((msg->length+auxiliaryLength+msg->l2_authenticationLength+2) >= 130 ){ //2 bytes of CRC, 130 MaxPHYPacketSize
 		return;
 	}
 
@@ -131,8 +162,7 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 	    memcpy(&(msg->l2_keySource), temp_keySource, sizeof(open_addr_t));
 		break;
 	case 1:
-		temp_keySource = &security_vars.m_macDefaultKeySource;
-		packetfunctions_writeAddress(msg,temp_keySource,OW_LITTLE_ENDIAN);
+		msg->l2_keySource = security_vars.m_macDefaultKeySource;
 		break;
 	case 2: //keySource with 16b address
 		temp_keySource = &msg->l2_keySource;
@@ -151,16 +181,18 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
         }
 
         //Frame Counter
-        //here I have to insert the ASN: I can only reserve the space and
-        //save the pointer. The ASN will be added by activity_ti1OrR11 procedure
+        if(frameCounterSuppression==0){
+           //here I have to insert the ASN: I can only reserve the space and
+           //save the pointer. The ASN will be added by activity_ti1OrR11 procedure
 
-        // reserve space
-        packetfunctions_reserveHeaderSize(msg,sizeof(macFrameCounter_t));
+           // reserve space
+           packetfunctions_reserveHeaderSize(msg,sizeof(macFrameCounter_t));
 
-        // Keep a pointer to where the ASN will be
-        // Note: the actual value of the current ASN will be written by the
-        //    IEEE802.15.4e when transmitting
-        msg->l2_ASNFrameCounter = msg->payload;
+           // Keep a pointer to where the ASN will be
+           // Note: the actual value of the current ASN will be written by the
+           //    IEEE802.15.4e when transmitting
+           msg->l2_ASNpayload = msg->payload;
+         }
 
         //security control field
         packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
@@ -183,19 +215,21 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 /**
 \brief Key searching and encryption/authentication operations.
 */
-void IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
+owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 
 	bool frameCounterSuppression;
 	m_keyDescriptor* keyDescriptor;
-        uint8_t i;
-        uint8_t j;
-        uint8_t nonce[13];
+    uint8_t i;
+    uint8_t j;
+    uint8_t nonce[13];
 	uint8_t key[16];
+	owerror_t outStatus;
 
-	frameCounterSuppression = 0; //the frame counter is carried in the frame, otherwise 1;
+    //the frame counter is carried in the frame, otherwise 1;
+    frameCounterSuppression = 0;
 
-	//search for a key
-	keyDescriptor = IEEE802154security_keyDescriptorLookup(msg->l2_keyIdMode,
+    //search for a key
+    keyDescriptor = IEEE802154security_keyDescriptorLookup(msg->l2_keyIdMode,
                                             &msg->l2_keySource,
                                             msg->l2_keyIndex,
                                             &msg->l2_keySource,
@@ -206,7 +240,7 @@ void IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 	    openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
                                 (errorparameter_t)0,
                                 (errorparameter_t)500);
-            return;
+        return E_FAIL;
 	}
 
 	for(j=0;j<16;j++){
@@ -214,15 +248,16 @@ void IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 	}
 
 	uint8_t vectASN[5];
+	macFrameCounter_t l2_frameCounter;
 	if(frameCounterSuppression == 0){//the frame Counter is carried in the frame
            ieee154e_getAsn(vectASN);//gets asn from mac layer.
            //save the frame counter of the current frame
-           msg->l2_frameCounter.bytes0and1 = vectASN[0]+256*vectASN[1];
-           msg->l2_frameCounter.bytes2and3 = vectASN[2]+256*vectASN[3];
-           msg->l2_frameCounter.byte4 = vectASN[4];
+           l2_frameCounter.bytes0and1 = vectASN[0]+256*vectASN[1];
+           l2_frameCounter.bytes2and3 = vectASN[2]+256*vectASN[3];
+           l2_frameCounter.byte4 = vectASN[4];
 
-           IEEE802154security_getFrameCounter(msg->l2_frameCounter,
-                                              msg->l2_ASNFrameCounter);
+           IEEE802154security_getFrameCounter(l2_frameCounter,
+                                              msg->l2_ASNpayload);
 	} //otherwise the frame counter is not in the frame
 
 	memset(&nonce[0], 0, 13);
@@ -254,25 +289,65 @@ void IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 		nonce[8+i] = vectASN[i];
 	}
 
-	//aData string
-	memset(&msg->aData[0], 0, 128);
-	msg->aData[0] = msg->length-msg->l2_length;
-	memcpy(&msg->aData[1], &msg->payload[0], msg->length-msg->l2_length);
+	//aData string and input string
+	uint8_t aData_len;
+	uint8_t input_length;
+	uint8_t input[128];
+	uint8_t aData[128];
+	memset(&input[0],
+		   0,
+		   128);
+	memset(&aData[0],
+		   0,
+		   128);
+	if(msg->l2_securityLevel > 3){
+		input_length = msg->l2_lengthORauth_length;
+		for(i=0;i<msg->l2_lengthORauth_length;i++){
+			input[i] = msg->l2_payload[i];
+		}
+		aData_len = msg->length-msg->l2_lengthORauth_length;
+	} else {
+		input_length = 0;
+		memset(&input[0],
+			   0,
+			   128);
 
-        //Encryption and/or authentication 
-        CRYPTO_ENGINE.aes_ccms_enc(msg->aData,
-                                   msg->length-msg->l2_length,
-                                   msg->l2_payload,
-                                   &msg->l2_length,
-                                   nonce,
-                                   2,
-                                   key,
-                                   msg->l2_authenticationLength);
-
-	if(msg->l2_authenticationLength!=0){
-           packetfunctions_reserveFooterSize(msg,msg->l2_authenticationLength);
+		memcpy(&aData[0],
+			   &msg->payload[0],
+			   msg->length);
+		aData_len = msg->length;
 	}
 
+	//Encryption and/or authentication
+
+	outStatus = CRYPTO_ENGINE.aes_ccms_enc(aData,
+							   aData_len,
+							   input,
+							   &input_length,
+							   nonce,
+							   2,
+							   key,
+							   msg->l2_authenticationLength);
+
+
+	if (outStatus != E_SUCCESS) return E_FAIL;
+
+	//update the length
+	input_length+=msg->l2_authenticationLength;
+
+	//copy the encrypted payload in the payload of the packet
+	if(msg->l2_securityLevel > 3){
+		memcpy(msg->l2_payload,
+			   &input,
+			   input_length);
+	}
+
+	if(msg->l2_authenticationLength != 0){
+		//update the length of the packet
+		packetfunctions_reserveFooterSize(msg,msg->l2_authenticationLength);
+	}
+
+	return E_SUCCESS;
 }
 
 /**
@@ -287,6 +362,7 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
         uint8_t i;
         uint8_t receivedASN[5];
         open_addr_t* temp_addr;
+
 
 	//c retrieve the Security Control field
 	//1byte, Security Control Field
@@ -306,6 +382,7 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
 	tempheader->headerLength = tempheader->headerLength+1;
 
 	//Frame Counter field, //l
+	macFrameCounter_t l2_frameCounter;
 	if(frameCnt_Suppression == 0){//the frame counter is here
 		//the frame counter size is 5 bytes, because we have the ASN
 		for(i=0;i<5;i++){
@@ -313,9 +390,9 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
 			tempheader->headerLength = tempheader->headerLength+1;
 	}
 
-		msg->l2_frameCounter.bytes0and1 = receivedASN[0]+256*receivedASN[1];
-		msg->l2_frameCounter.bytes2and3 = receivedASN[2]+256*receivedASN[3];
-		msg->l2_frameCounter.byte4 = receivedASN[4];
+		l2_frameCounter.bytes0and1 = receivedASN[0]+256*receivedASN[1];
+		l2_frameCounter.bytes2and3 = receivedASN[2]+256*receivedASN[3];
+		l2_frameCounter.byte4 = receivedASN[4];
 	}
 
         //retrieve the Key Identifier field
@@ -333,6 +410,8 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
              tempheader->headerLength = tempheader->headerLength+2;
         break;
 	case 1:
+		msg->l2_keySource = security_vars.m_macDefaultKeySource;
+		break;
 	case 3:
          packetfunctions_readAddress(((uint8_t*)(msg->payload)+tempheader->headerLength),
 						              ADDR_64B,
@@ -341,7 +420,6 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
 	     tempheader->headerLength = tempheader->headerLength+8;
 	break;
 	default:
-	     msg->l2_toDiscard = 1;
 	     return;
 	}
 
@@ -355,36 +433,34 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
 		msg->l2_keyIndex = 1;
 	}
 
-	//aData string
-	memset(&msg->aData[0], 0, 128);
-	msg->aData[0] = tempheader->headerLength;
-	memcpy(&msg->aData[1], &msg->payload[0], tempheader->headerLength);
+	msg->l2_lengthORauth_length = tempheader->headerLength;
 
 }
 
 /**
 \brief Identification of the key used to protect the frame and unsecuring operations.
 */
-void IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
+owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
 
 	m_deviceDescriptor*        deviceDescriptor;
 	m_keyDescriptor*           keyDescriptor;
 	m_securityLevelDescriptor* securityLevelDescriptor;
-        uint8_t nonce[13];
-        uint8_t i;
-        uint8_t myASN[5];
+    uint8_t nonce[13];
+    uint8_t i;
+    uint8_t myASN[5];
+    owerror_t outStatus;
 
 	//f key descriptor lookup
 	keyDescriptor = IEEE802154security_keyDescriptorLookup(msg->l2_keyIdMode,
-                                                               &msg->l2_keySource,
-                                                               msg->l2_keyIndex,
+                                                           &msg->l2_keySource,
+                                                           msg->l2_keyIndex,
                                                                &msg->l2_keySource,
                                                                idmanager_getMyID(ADDR_PANID),
                                                                msg->l2_frameType);
 
 	if(keyDescriptor==NULL){
-           msg->l2_toDiscard = 2; //can't find the key
-           return;
+           //can't find the key
+           return E_FAIL;
 	}
 
 	//g device descriptor lookup
@@ -393,8 +469,8 @@ void IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
                                                                      keyDescriptor);
 
 	if(deviceDescriptor==NULL){
-           msg->l2_toDiscard = 3;
-           return;
+           //can't find the device
+           return E_FAIL;
 	}
 
 	//h Security Level lookup
@@ -405,7 +481,8 @@ void IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
 	if(IEEE802154security_incomingSecurityLevelChecking(securityLevelDescriptor,
 				         msg->l2_securityLevel,
 				         deviceDescriptor->Exempt)==FALSE){
-           msg->l2_toDiscard = 4; //security level not allowed
+           //security level not allowed
+           return E_FAIL;
 	}
 
 	//l+m Anti-Replay - not needed for TSCH mode
@@ -415,7 +492,8 @@ void IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
                                                              msg->l2_frameType,
                                                              0
                                                              )  ==FALSE){
-           msg->l2_toDiscard = 6; // improper key used
+           // improper key used
+           return E_FAIL;
 	}
 
 	
@@ -449,78 +527,63 @@ void IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
 		nonce[8+i] = myASN[i];
 	}
 
-	CRYPTO_ENGINE.aes_ccms_dec(msg->aData,
-				   msg->aData[0],
-				   msg->payload,
-				   &msg->length,
+	uint8_t aData_len;
+	uint8_t input_length;
+	uint8_t input[128];
+	uint8_t aData[128];
+	memset(&input[0],
+		   0,
+		   128);
+	memset(&aData[0],
+		   0,
+		   128);
+	if(msg->l2_securityLevel > 3){
+		//set the input length
+		input_length = msg->length;
+
+		//set the payload to decrypt
+		uint8_t j;
+		for(j=0;j<msg->length;j++){
+			input[j] = msg->payload[j];
+		}
+		aData_len = msg->l2_lengthORauth_length;
+	} else {
+		input_length = msg->l2_authenticationLength;
+
+		for(i=0 ;i< msg->l2_authenticationLength ;i++){
+			input[i] = msg->payload[msg->length - msg->l2_authenticationLength + i];
+		}
+
+		for(i=0;i<msg->length-msg->l2_authenticationLength;i++){
+			aData[msg->l2_lengthORauth_length+i] = msg->payload[i];
+		}
+		aData_len = msg->l2_lengthORauth_length + msg->length - msg->l2_authenticationLength;
+
+	}
+
+
+	outStatus = CRYPTO_ENGINE.aes_ccms_dec(aData,
+				   aData_len,
+				   input,
+				   &input_length,
 				   nonce,
 				   2,
 				   keyDescriptor->key,
 				   msg->l2_authenticationLength);
 
-	//q save the frame counter
-	deviceDescriptor->FrameCounter = msg->l2_frameCounter;
+	if(outStatus != E_SUCCESS) return E_FAIL; //authentication not verified
 
-}
-
-/**
-\brief Initialization of shared key for the DAG Root.
-*/
-
-void IEEE802154security_DAGRoot_init(void){
-
-	open_addr_t*  my;
-        uint8_t j;
-	my = idmanager_getMyID(ADDR_64B);
-
-	//Creation of the KeyDescriptor
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIdMode = 3;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIndex = 1;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource = *(my);
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.Address = *(my);
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.PANId = *(idmanager_getMyID(ADDR_PANID));
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[1].FrameType = IEEE154_TYPE_DATA;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[0].FrameType = IEEE154_TYPE_ACK;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[2].FrameType = IEEE154_TYPE_BEACON;
-
-	for(j=0;j<16;j++){
-	    security_vars.MacKeyTable.KeyDescriptorElement[0].key[j] = security_vars.M_k[j];
+	if(msg->l2_securityLevel > 3){
+			uint8_t j;
+			for(j=0;j<msg->length;j++){
+				msg->payload[j] = input[j];
+			}
 	}
 
-	security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = *(my);
-	security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &security_vars.MacDeviceTable;
-	security_vars.m_macDefaultKeySource.type = ADDR_64B;
-	security_vars.m_macDefaultKeySource = *(my);
-}
+	packetfunctions_tossFooter(msg,msg->l2_authenticationLength);
 
-/**
-\brief Initialization of shared key for nodes that are not the DAG Root.
-*/
-void IEEE802154security_ChildsInit(ieee802154_header_iht ieee802514_header){
+	return E_SUCCESS;
 
-	open_addr_t* src;
-        uint8_t j;
-	src= &ieee802514_header.src;
-	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIdMode = 3;
-	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource = *(src);
-	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.PANId = ieee802514_header.panid;
-	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIndex = 1;
-	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.Address = *(src);
-	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyUsageList[1].FrameType = IEEE154_TYPE_DATA;
-	security_vars.MacKeyTable.KeyDescriptorElement[1].KeyUsageList[0].FrameType = IEEE154_TYPE_ACK;
-	security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[2].FrameType = IEEE154_TYPE_BEACON;
-	for(j=0;j<16;j++){
-		security_vars.MacKeyTable.KeyDescriptorElement[1].key[j] = security_vars.M_k[j];
-	}
-	security_vars.m_macDefaultKeySource.type = ADDR_64B;
-	security_vars.m_macDefaultKeySource = *(src);
-	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].deviceAddress = *(src);
-	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter.bytes0and1 = 0;
-	security_vars.MacDeviceTable.DeviceDescriptorEntry[1].FrameCounter.bytes2and3 = 0;
-	security_vars.MacKeyTable.KeyDescriptorElement[1].DeviceTable = &security_vars.MacDeviceTable;
-
-	//this is necessary if multihop secure communications need to be estabilished
-	IEEE802154security_DAGRoot_init();
 }
 
 //=========================== private =========================================

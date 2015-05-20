@@ -322,16 +322,8 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
 #ifdef CRYPTO_ENGINE_SCONS
    //set l2-security attributes
-   msg->l2_security = TRUE;
    msg->l2_securityLevel = 5;
-   msg->l2_keyIdMode = 3;
-   if(idmanager_getIsDAGroot()){
-      open_addr_t* temp_addr;
-      temp_addr = idmanager_getMyID(ADDR_64B);
-      memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
-    }else{
-  	  neighbors_getPreferredParentEui64(&(msg->l2_keySource));
-    }
+   msg->l2_keyIdMode = 1;
    msg->l2_keyIndex = 1;
 #endif
    
@@ -478,23 +470,14 @@ void task_sixtopNotifReceive() {
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
          if (msg->length>0) {
-         //process packets which don't have security problems
-         if (msg->l2_toDiscard==0){
             // send to upper layer
             iphc_receive(msg);
          } else {
-           openserial_printError(COMPONENT_SIXTOP,ERR_SECURITY,
-                                (errorparameter_t)msg->l2_toDiscard,
-		                (errorparameter_t)501);
            // free up the RAM
            openqueue_freePacketBuffer(msg);
-           }
-        } else {
-          // free up the RAM
-          openqueue_freePacketBuffer(msg);
         }
         break;
-case IEEE154_TYPE_ACK:
+      case IEEE154_TYPE_ACK:
       default:
          // free the packet's RAM memory
          openqueue_freePacketBuffer(msg);
@@ -573,6 +556,7 @@ owerror_t sixtop_send_internal(
    uint8_t frameVersion) {
 
    uint8_t i;
+   uint8_t securityEnabled;
 
    // assign a number of retries
    if (
@@ -591,18 +575,24 @@ owerror_t sixtop_send_internal(
    // record the location, in the packet, where the l2 payload starts
    msg->l2_payload = msg->payload;
    //save the position where L2 payload starts
-   msg->l2_length = msg->length;
+   msg->l2_lengthORauth_length = msg->length;
+   //identify if security is enabled on the current frame
+   if(msg->l2_securityLevel != 0){
+	   securityEnabled = IEEE154_SEC_YES_SECURITY;
+   } else {
+	   securityEnabled = IEEE154_SEC_NO_SECURITY;
+   }
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             iePresent,
                             frameVersion,
-                            msg->l2_security,
+                            securityEnabled,
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
    //if security is not enabled, space for CRC can be reserved here
-   if (msg->l2_security == FALSE){
+   if (securityEnabled == IEEE154_SEC_NO_SECURITY){
       packetfunctions_reserveFooterSize(msg,2);
    }
    //save the L2_payload in clear, in case retransmission occurs
