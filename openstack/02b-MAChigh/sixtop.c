@@ -725,10 +725,6 @@ owerror_t sixtop_send_internal(
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
-   //if security is not enabled, space for CRC can be reserved here
-   if (securityEnabled){
-      packetfunctions_reserveFooterSize(msg,2);
-   }
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
    return E_SUCCESS;
