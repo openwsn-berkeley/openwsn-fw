@@ -1577,8 +1577,8 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->l2_keyIdMode     = ieee154e_vars.dataReceived->l2_keyIdMode;
    ieee154e_vars.ackToSend->l2_keyIndex      = ieee154e_vars.dataReceived->l2_keyIndex;
 
-   //record positions where l2_payload starts and l2_payload length
-   ieee154e_vars.ackToSend->l2_lengthORauth_length = ieee154e_vars.ackToSend->length; // TODO add logic for encrypting/authenticating fields as per 15.4 standard
+   //record position where L2 payload starts in order to start encrypting here
+   ieee154e_vars.ackToSend->l2_payload = ieee154e_vars.ackToSend->payload;
 
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,

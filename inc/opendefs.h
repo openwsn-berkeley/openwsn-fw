@@ -310,9 +310,6 @@ typedef struct {
    open_addr_t   l2_keySource;                   //the key Source specified for the current frame
    uint8_t       l2_authenticationLength;        //the length of the authentication field
    uint8_t       commandFrameIdentifier;         //used in case of Command Frames
-   uint8_t       l2_lengthORauth_length;         //length of L2 payload
-   uint8_t       clearText[128];                 //the layer-2 payload in clear, used in case retransmission occurs
-   uint8_t       clearText_length;               //length of the packet in clear
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet
