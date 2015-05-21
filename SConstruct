@@ -78,6 +78,7 @@ project:
     cryptoengine   Select appropriate crypto engine implementation
                    (dummy_crypto_engine, firmware_crypto_engine, 
                    board_crypto_engine).
+    l2_security   Use hop-by-hop encryption and authentication.
     
     Common variables:
     verbose        Print each complete compile/link command.
@@ -132,6 +133,7 @@ command_line_options = {
     'debug':            ['0','1'],
     'noadaptivesync':   ['0','1'],
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
+    'l2_security':      ['0','1']
 }
 
 def validate_option(key, value, env):
@@ -266,6 +268,13 @@ command_line_vars.AddVariables(
         'noadaptivesync',                                  # key
         '',                                                # help
         command_line_options['noadaptivesync'][0],         # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'l2_security',                                     # key
+        '',                                                # help
+        command_line_options['l2_security'][0],            # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

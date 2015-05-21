@@ -14,6 +14,7 @@
 #include "leds.h"
 #include "processIE.h"
 #include "IEEE802154.h"
+#include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
 
@@ -459,7 +460,23 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    // set metadata
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-   
+
+#ifdef L2_SECURITY_ACTIVE
+// TODO use parameters passed by SCons
+#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_CRYPTO_MIC32
+#define IEEE802154E_SECURITY_KEYIDMODE       1 // TODO define enum like for security level
+#define IEEE802154E_SECURITY_KEY_INDEX       1
+#else
+#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_NOSEC
+#define IEEE802154E_SECURITY_KEYIDMODE       0
+#define IEEE802154E_SECURITY_KEY_INDEX       0
+#endif // L2_SECURITY_ACTIVE
+
+   // set l2-security attributes
+   msg->l2_securityLevel   = IEEE802154E_SECURITY_LEVEL;
+   msg->l2_keyIdMode       = IEEE802154E_SECURITY_KEYIDMODE; 
+   msg->l2_keyIndex        = IEEE802154E_SECURITY_KEY_INDEX;
+
    if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
       return sixtop_send_internal(
          msg,
@@ -702,19 +719,18 @@ owerror_t sixtop_send_internal(
    msg->l2_numTxAttempts = 0;
    // transmit with the default TX power
    msg->l1_txPower = TX_POWER;
-   // record the location, in the packet, where the l2 payload starts
+   // record the location, in the packet, where the l2 payload starts in order to
+   // start encrypting from here
    msg->l2_payload = msg->payload;
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             iePresent,
                             frameVersion,
-                            IEEE154_SEC_NO_SECURITY,
+                            msg->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? false : true, // security enabled
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
-   // reserve space for 2-byte CRC
-   packetfunctions_reserveFooterSize(msg,2);
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
    return E_SUCCESS;

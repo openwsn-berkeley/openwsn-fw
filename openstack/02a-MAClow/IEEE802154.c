@@ -4,6 +4,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "topology.h"
+#include "IEEE802154_security.h"
 
 //=========================== variables =======================================
 
@@ -34,6 +35,10 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint8_t temp_8b;
    
    //General IEs here (those that are carried in all packets) -- None by now.
+   //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
+   if(securityEnabled == TRUE){
+      IEEE802154security_prependAuxiliarySecurityHeader(msg);
+   }
    
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
@@ -230,6 +235,11 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
        return; //invalid packet accordint to p.64 IEEE15.4e
+   }
+
+   //if security is enabled, Auxiliary Security Header can be retrieved
+   if(ieee802514_header->securityEnabled == TRUE){
+      IEEE802154security_retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
    }
    
    // apply topology filter

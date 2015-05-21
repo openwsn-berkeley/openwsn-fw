@@ -43,6 +43,8 @@ if env['noadaptivesync']==1:
     env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
 if env['cryptoengine']:
     env.Append(CPPDEFINES    = {'CRYPTO_ENGINE_SCONS' : env['cryptoengine']})
+if env['l2_security']==1:
+    env.Append(CPPDEFINES    = 'L2_SECURITY_ACTIVE')
 
 if   env['toolchain']=='mspgcc':
     
