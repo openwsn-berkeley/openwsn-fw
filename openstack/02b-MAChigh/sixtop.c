@@ -14,6 +14,7 @@
 #include "leds.h"
 #include "processIE.h"
 #include "IEEE802154.h"
+#include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
 
@@ -461,12 +462,21 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->l2_frameType = IEEE154_TYPE_DATA;
 
 #ifdef L2_SECURITY_ACTIVE
-   //set l2-security attributes
-   msg->l2_securityLevel = 5;
-   msg->l2_keyIdMode = 1;
-   msg->l2_keyIndex = 1;
+// TODO use parameters passed by SCons
+#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_CRYPTO_MIC32
+#define IEEE802154E_SECURITY_KEYIDMODE       1 // TODO define enum like for security level
+#define IEEE802154E_SECURITY_KEY_INDEX       1
+#else
+#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_NOSEC
+#define IEEE802154E_SECURITY_KEYIDMODE       0
+#define IEEE802154E_SECURITY_KEY_INDEX       0
 #endif // L2_SECURITY_ACTIVE
-   
+
+   // set l2-security attributes
+   msg->l2_securityLevel   = IEEE802154E_SECURITY_LEVEL;
+   msg->l2_keyIdMode       = IEEE802154E_SECURITY_KEYIDMODE; 
+   msg->l2_keyIndex        = IEEE802154E_SECURITY_KEY_INDEX;
+
    if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
       return sixtop_send_internal(
          msg,
@@ -695,7 +705,6 @@ owerror_t sixtop_send_internal(
    uint8_t iePresent, 
    uint8_t frameVersion) {
 
-   uint8_t securityEnabled;
    // assign a number of retries
    if (
       packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE
@@ -714,14 +723,12 @@ owerror_t sixtop_send_internal(
    msg->l2_payload = msg->payload;
    //save the position where L2 payload starts
    msg->l2_lengthORauth_length = msg->length;
-   //identify if security is enabled on the current frame
-   securityEnabled = msg->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? 0 : 1;
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             iePresent,
                             frameVersion,
-                            securityEnabled,
+                            msg->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? false : true, // security enabled
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
