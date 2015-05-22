@@ -727,7 +727,7 @@ owerror_t sixtop_send_internal(
                             msg->l2_frameType,
                             iePresent,
                             frameVersion,
-                            msg->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? false : true, // security enabled
+                            msg->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? 0 : 1, // security enabled
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );

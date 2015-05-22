@@ -1584,7 +1584,7 @@ port_INLINE void activity_ri6() {
                             ieee154e_vars.ackToSend->l2_frameType,
                             IEEE154_IELIST_YES,//ie in ack
                             IEEE154_FRAMEVERSION,//enhanced ack
-                            ieee154e_vars.ackToSend->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? false : true,
+                            ieee154e_vars.ackToSend->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? 0 : 1,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
