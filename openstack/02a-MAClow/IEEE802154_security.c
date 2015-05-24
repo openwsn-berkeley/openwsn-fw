@@ -216,14 +216,19 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 \brief Key searching and encryption/authentication operations.
 */
 owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
+   bool frameCounterSuppression;
+   m_keyDescriptor* keyDescriptor;
+   uint8_t i;
+   uint8_t j;
+   uint8_t nonce[13];
+   uint8_t key[16];
+   owerror_t outStatus;
+   uint8_t* a;
+   uint8_t len_a;
+   uint8_t* m;
+   uint8_t len_m;
 
-	bool frameCounterSuppression;
-	m_keyDescriptor* keyDescriptor;
-    uint8_t i;
-    uint8_t j;
-    uint8_t nonce[13];
-	uint8_t key[16];
-	owerror_t outStatus;
+
 
     //the frame counter is carried in the frame, otherwise 1;
     frameCounterSuppression = 0;
@@ -289,65 +294,56 @@ owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 		nonce[8+i] = vectASN[i];
 	}
 
-	//aData string and input string
-	uint8_t aData_len;
-	uint8_t input_length;
-	uint8_t input[128];
-	uint8_t aData[128];
-	memset(&input[0],
-		   0,
-		   128);
-	memset(&aData[0],
-		   0,
-		   128);
-	if(msg->l2_securityLevel > 3){
-		input_length = msg->l2_lengthORauth_length;
-		for(i=0;i<msg->l2_lengthORauth_length;i++){
-			input[i] = msg->l2_payload[i];
-		}
-		aData_len = msg->length-msg->l2_lengthORauth_length;
-	} else {
-		input_length = 0;
-		memset(&input[0],
-			   0,
-			   128);
+   switch (msg->l2_securityLevel) {
+      case ASH_SLF_TYPE_MIC_32:  // authentication only cases
+      case ASH_SLF_TYPE_MIC_64:
+	case ASH_SLF_TYPE_MIC_128: 
+            a = msg->payload;    // first byte of the frame
+            len_a = msg->length; // whole frame
+            m = msg->payload;    // we don't care
+            len_m = 0;           // length of the encrypted part
+            break;
+      case ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
+	case ASH_SLF_TYPE_CRYPTO_MIC64:
+	case ASH_SLF_TYPE_CRYPTO_MIC128:
+         a = msg->payload;             // first byte of the frame
+         m = msg->l2_payload;          // first byte where we should start encrypting (see 15.4 std)
+                                       // TODO make sure l2_payload points to the right position for all frame types
+                                       // and takes into account header/payload IEs
 
-		memcpy(&aData[0],
-			   &msg->payload[0],
-			   msg->length);
-		aData_len = msg->length;
-	}
+         len_a = m - a;                // part that is only authenticated is the difference of two pointers
+         len_m = msg->length - len_a;  // part that is encrypted+authenticated is the rest of the frame
+         break;
+      case ASH_SLF_TYPE_ONLYCRYPTO:    // encryption only
+         // unsecure, should not support it
+         return E_FAIL;
+      default:
+         // reject anything else
+         return E_FAIL;
+   }
 
-	//Encryption and/or authentication
+   // assert
+   if (len_a + len_m > 125) {
+      return E_FAIL;
+   }
 
-	outStatus = CRYPTO_ENGINE.aes_ccms_enc(aData,
-							   aData_len,
-							   input,
-							   &input_length,
-							   nonce,
-							   2,
-							   key,
-							   msg->l2_authenticationLength);
+   if (msg->l2_authenticationLength != 0) {
+      //update the length of the packet
+      packetfunctions_reserveFooterSize(msg,msg->l2_authenticationLength);
+   }
 
-
-	if (outStatus != E_SUCCESS) return E_FAIL;
-
-	//update the length
-	input_length+=msg->l2_authenticationLength;
-
-	//copy the encrypted payload in the payload of the packet
-	if(msg->l2_securityLevel > 3){
-		memcpy(msg->l2_payload,
-			   &input,
-			   input_length);
-	}
-
-	if(msg->l2_authenticationLength != 0){
-		//update the length of the packet
-		packetfunctions_reserveFooterSize(msg,msg->l2_authenticationLength);
-	}
-
-	return E_SUCCESS;
+   //Encryption and/or authentication
+   // CRYPTO_ENGINE overwrites m[] with ciphertext and appends the MIC
+   outStatus = CRYPTO_ENGINE.aes_ccms_enc(a,
+							len_a,
+							m,
+							&len_m,
+							nonce,
+							2, // L=2 in 15.4 std
+							key,
+							msg->l2_authenticationLength);
+   
+   return outStatus;
 }
 
 /**
@@ -432,23 +428,29 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
 		//key is derived implicitly
 		msg->l2_keyIndex = 1;
 	}
-
-	msg->l2_lengthORauth_length = tempheader->headerLength;
-
+   
+      // Record the position where we should start decrypting
+      msg->l2_payload = &msg->payload[tempheader->headerLength];
 }
 
 /**
 \brief Identification of the key used to protect the frame and unsecuring operations.
 */
 owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
+   
+   m_deviceDescriptor*        deviceDescriptor;
+   m_keyDescriptor*           keyDescriptor;
+   m_securityLevelDescriptor* securityLevelDescriptor;
+   uint8_t nonce[13];
+   uint8_t i;
+   uint8_t myASN[5];
+   owerror_t outStatus;
+   uint8_t* a;
+   uint8_t len_a;
+   uint8_t* m;
+   uint8_t len_m;
 
-	m_deviceDescriptor*        deviceDescriptor;
-	m_keyDescriptor*           keyDescriptor;
-	m_securityLevelDescriptor* securityLevelDescriptor;
-    uint8_t nonce[13];
-    uint8_t i;
-    uint8_t myASN[5];
-    owerror_t outStatus;
+
 
 	//f key descriptor lookup
 	keyDescriptor = IEEE802154security_keyDescriptorLookup(msg->l2_keyIdMode,
@@ -527,63 +529,51 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
 		nonce[8+i] = myASN[i];
 	}
 
-	uint8_t aData_len;
-	uint8_t input_length;
-	uint8_t input[128];
-	uint8_t aData[128];
-	memset(&input[0],
-		   0,
-		   128);
-	memset(&aData[0],
-		   0,
-		   128);
-	if(msg->l2_securityLevel > 3){
-		//set the input length
-		input_length = msg->length;
+   switch (msg->l2_securityLevel) {
+      case ASH_SLF_TYPE_MIC_32:  // authentication only cases
+      case ASH_SLF_TYPE_MIC_64:
+	case ASH_SLF_TYPE_MIC_128: 
+            a = msg->payload;    // first byte of the frame
+            len_a = msg->length; // whole frame
+            m = msg->payload;    // we don't care
+            len_m = 0;           // length of the encrypted part
+            break;
+      case ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
+	case ASH_SLF_TYPE_CRYPTO_MIC64:
+	case ASH_SLF_TYPE_CRYPTO_MIC128:
+         a = msg->payload;             // first byte of the frame
+         m = msg->l2_payload;          // first byte where we should start decrypting 
+                                       // TODO make sure l2_payload points to the right position for all frame types
+                                       // and takes into account header/payload IEs
 
-		//set the payload to decrypt
-		uint8_t j;
-		for(j=0;j<msg->length;j++){
-			input[j] = msg->payload[j];
-		}
-		aData_len = msg->l2_lengthORauth_length;
-	} else {
-		input_length = msg->l2_authenticationLength;
+         len_a = m - a;                // part that is only authenticated is the difference of two pointers
+         len_m = msg->length - len_a;  // part that is decrypted+authenticated is the rest of the frame
+         break;
+      case ASH_SLF_TYPE_ONLYCRYPTO:    // encryption only
+         // unsecure, should not support it
+         return E_FAIL;
+      default:
+         // reject anything else
+         return E_FAIL;
+   }
 
-		for(i=0 ;i< msg->l2_authenticationLength ;i++){
-			input[i] = msg->payload[msg->length - msg->l2_authenticationLength + i];
-		}
+   // assert
+   if (len_a + len_m > 125) {
+      return E_FAIL;
+   }
 
-		for(i=0;i<msg->length-msg->l2_authenticationLength;i++){
-			aData[msg->l2_lengthORauth_length+i] = msg->payload[i];
-		}
-		aData_len = msg->l2_lengthORauth_length + msg->length - msg->l2_authenticationLength;
+   outStatus = CRYPTO_ENGINE.aes_ccms_dec(a,
+				                  len_a,
+				                  m,
+				                  &len_m,
+				                  nonce,
+				                  2,
+				                  keyDescriptor->key,
+				                  msg->l2_authenticationLength);
+                                          
+   packetfunctions_tossFooter(msg,msg->l2_authenticationLength);
 
-	}
-
-
-	outStatus = CRYPTO_ENGINE.aes_ccms_dec(aData,
-				   aData_len,
-				   input,
-				   &input_length,
-				   nonce,
-				   2,
-				   keyDescriptor->key,
-				   msg->l2_authenticationLength);
-
-	if(outStatus != E_SUCCESS) return E_FAIL; //authentication not verified
-
-	if(msg->l2_securityLevel > 3){
-			uint8_t j;
-			for(j=0;j<msg->length;j++){
-				msg->payload[j] = input[j];
-			}
-	}
-
-	packetfunctions_tossFooter(msg,msg->l2_authenticationLength);
-
-	return E_SUCCESS;
-
+   return outStatus;
 }
 
 //=========================== private =========================================
