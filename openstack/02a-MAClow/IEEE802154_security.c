@@ -132,7 +132,7 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
         open_addr_t* temp_keySource;
         uint8_t auxiliaryLength;
 
-	frameCounterSuppression = 0; //the frame counter is carried in the frame
+	frameCounterSuppression = 1; //the frame counter is carried in the frame
 
 	//max length of MAC frames
 	// length of authentication Tag
@@ -183,7 +183,7 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
         //Frame Counter
         if(frameCounterSuppression==0){
            //here I have to insert the ASN: I can only reserve the space and
-           //save the pointer. The ASN will be added by activity_ti1OrR11 procedure
+           //save the pointer. The ASN will be added by IEEE802.15.4e
 
            // reserve space
            packetfunctions_reserveHeaderSize(msg,sizeof(macFrameCounter_t));
@@ -231,7 +231,7 @@ owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 
 
     //the frame counter is carried in the frame, otherwise 1;
-    frameCounterSuppression = 0;
+    frameCounterSuppression = 1;
 
     //search for a key
     keyDescriptor = IEEE802154security_keyDescriptorLookup(msg->l2_keyIdMode,
@@ -254,8 +254,8 @@ owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 
 	uint8_t vectASN[5];
 	macFrameCounter_t l2_frameCounter;
+	ieee154e_getAsn(vectASN);//gets asn from mac layer.
 	if(frameCounterSuppression == 0){//the frame Counter is carried in the frame
-           ieee154e_getAsn(vectASN);//gets asn from mac layer.
            //save the frame counter of the current frame
            l2_frameCounter.bytes0and1 = vectASN[0]+256*vectASN[1];
            l2_frameCounter.bytes2and3 = vectASN[2]+256*vectASN[3];
