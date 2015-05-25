@@ -1243,17 +1243,17 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          break;
       }
 
+      // store header details in packet buffer
+      ieee154e_vars.ackReceived->l2_frameType  = ieee802514_header.frameType;
+      ieee154e_vars.ackReceived->l2_dsn        = ieee802514_header.dsn;
+      memcpy(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
+
       // check the security level of the ACK frame and decrypt/authenticate
       if (ieee154e_vars.ackReceived->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
           if (IEEE802154security_incomingFrame(ieee154e_vars.ackReceived) == E_FAIL) {
          	 break;
           }
       }
-      
-      // store header details in packet buffer
-      ieee154e_vars.ackReceived->l2_frameType  = ieee802514_header.frameType;
-      ieee154e_vars.ackReceived->l2_dsn        = ieee802514_header.dsn;
-      memcpy(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
@@ -1451,18 +1451,18 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          break;
       }
 
+      // store header details in packet buffer
+      ieee154e_vars.dataReceived->l2_frameType      = ieee802514_header.frameType;
+      ieee154e_vars.dataReceived->l2_dsn            = ieee802514_header.dsn;
+      ieee154e_vars.dataReceived->l2_IEListPresent  = ieee802514_header.ieListPresent;
+      memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
+
       // if security is enabled, decrypt/authenticate the frame.
       if (ieee154e_vars.dataReceived->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
          if (IEEE802154security_incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
         	 break;
          }
       }
-      
-      // store header details in packet buffer
-      ieee154e_vars.dataReceived->l2_frameType      = ieee802514_header.frameType;
-      ieee154e_vars.dataReceived->l2_dsn            = ieee802514_header.dsn;
-      ieee154e_vars.dataReceived->l2_IEListPresent  = ieee802514_header.ieListPresent;
-      memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
