@@ -851,6 +851,17 @@ port_INLINE void sixtop_sendEB() {
    //I has an IE in my payload
    eb->l2_IEListPresent = IEEE154_IELIST_YES;
    
+#ifdef L2_SECURITY_ACTIVE
+// TODO use parameters passed by SCons
+#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_MIC_32
+#define IEEE802154E_SECURITY_KEYIDMODE       1 // TODO define enum like for security level
+#define IEEE802154E_SECURITY_KEY_INDEX       1
+#else
+#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_NOSEC
+#define IEEE802154E_SECURITY_KEYIDMODE       0
+#define IEEE802154E_SECURITY_KEY_INDEX       0
+#endif // L2_SECURITY_ACTIVE
+
    // put in queue for MAC to handle
    sixtop_send_internal(eb,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
    
