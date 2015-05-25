@@ -464,7 +464,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 #ifdef L2_SECURITY_ACTIVE
 // TODO use parameters passed by SCons
 #define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_CRYPTO_MIC32
-#define IEEE802154E_SECURITY_KEYIDMODE       1 // TODO define enum like for security level
+#define IEEE802154E_SECURITY_KEYIDMODE       ASH_KEYIDMODE_DEFAULTKEYSOURCE
 #define IEEE802154E_SECURITY_KEY_INDEX       1
 #else
 #define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_NOSEC
@@ -854,7 +854,7 @@ port_INLINE void sixtop_sendEB() {
 #ifdef L2_SECURITY_ACTIVE
 // TODO use parameters passed by SCons
 #define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_MIC_32
-#define IEEE802154E_SECURITY_KEYIDMODE       1 // TODO define enum like for security level
+#define IEEE802154E_SECURITY_KEYIDMODE       ASH_KEYIDMODE_DEFAULTKEYSOURCE
 #define IEEE802154E_SECURITY_KEY_INDEX       1
 #else
 #define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_NOSEC

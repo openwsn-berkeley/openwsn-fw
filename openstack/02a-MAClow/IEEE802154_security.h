@@ -48,6 +48,13 @@ enum Auxiliary_Security_Header_slf_enums{ //Security Level Field
 		ASH_SLF_TYPE_CRYPTO_MIC128 = 7,
 };
 
+enum Auxiliary_Security_Header_keyIdMode_enums{ //Key Identifier Mode Field
+	ASH_KEYIDMODE_IMPLICIT = 0,
+	ASH_KEYIDMODE_DEFAULTKEYSOURCE = 1,
+	ASH_KEYIDMODE_EXPLICIT_16 = 2,
+	ASH_KEYIDMODE_EXPLICIT_64 = 3,
+};
+
 //=========================== typedef =========================================
 
 
