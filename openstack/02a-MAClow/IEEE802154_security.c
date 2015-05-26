@@ -340,7 +340,7 @@ owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
                                           2, // L=2 in 15.4 std
                                           key,
                                           msg->l2_authenticationLength);
-   
+
    return outStatus;
 }
 
