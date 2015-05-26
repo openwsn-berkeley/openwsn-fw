@@ -18,6 +18,7 @@
 */
 
 #include "IEEE802154.h"
+#include "IEEE802154E.h"
 #include "neighbors.h"
 #include "idmanager.h"
 #include "openserial.h"
@@ -76,7 +77,7 @@ typedef struct{//descriptor of the Security Level for this type of communication
    uint8_t CommandFrameIdentifier; //if the FrameType is a command, this specify what kind of command is
    uint8_t SecurityMinimum; //minimum required
    bool    DeviceOverrideSecurityMinimum; //if true, this indicate that the minimum can be overridden
-   uint8_t AllowedSecurityLevels; //set of Security Levels Allowed for incoming MAC frames
+   uint8_t AllowedSecurityLevels[7]; //set of Security Levels Allowed for incoming MAC frames
 } m_securityLevelDescriptor;
 
 typedef struct{//defines what kind of frame the key is intended

@@ -20,6 +20,7 @@ Modified by:
 //-- 02a-TSCH
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
+#include "IEEE802154_security.h"
 //-- 02b-RES
 #include "schedule.h"
 #include "sixtop.h"

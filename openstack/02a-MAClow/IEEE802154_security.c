@@ -72,7 +72,10 @@ void IEEE802154security_init(){
       security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType = i;
       security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].CommandFrameIdentifier = 0;
       security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].DeviceOverrideSecurityMinimum = FALSE;
-      security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels = 7;
+      //list of allowed security levels
+      security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = 5;
+      security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = 6;
+      security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = 7;
       security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].SecurityMinimum = 5;
    }
 
@@ -673,6 +676,7 @@ bool IEEE802154security_incomingSecurityLevelChecking(m_securityLevelDescriptor*
                                                       uint8_t                    seclevel,
                                                       bool                       exempt){
 
+   uint8_t i;
    if (seclevdesc->AllowedSecurityLevels == 0){
       if (seclevel <= seclevdesc->SecurityMinimum){
          return TRUE;
@@ -681,8 +685,11 @@ bool IEEE802154security_incomingSecurityLevelChecking(m_securityLevelDescriptor*
       }
    }
 
-   if (seclevel <= seclevdesc->AllowedSecurityLevels){
-      return TRUE;
+
+   for (i=0;i<7;i++){
+      if (seclevel == seclevdesc->AllowedSecurityLevels[i]){
+         return TRUE;
+      }
    }
 
    if (seclevel == 0 && seclevdesc->DeviceOverrideSecurityMinimum ==TRUE ){
