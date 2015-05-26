@@ -547,19 +547,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
-
-      // This is the case where we first hear an EB and do not yet know the ASN used
-      // to generate the nonce. Frame cannot successfully pass security processing
-      // at this point so we need to accept it in any case.
-      if (ieee154e_vars.dataReceived->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154security_incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
-            if (ieee802514_header.frameType != IEEE154_TYPE_BEACON) {
-               break; // reject anything but EBs here
-            }
-	      // accepting EB even though security processing failed
-            // TODO log the event
-         }
-      }
       
        // toss the IEEE802.15.4 header -- this does not include IEs as they are processed 
       // next.
@@ -584,6 +571,19 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       // compute radio duty cycle
       ieee154e_vars.radioOnTics += (radio_getTimerValue()-ieee154e_vars.radioOnInit);
+
+      // This is the case where we first hear an EB and do not yet know the ASN used
+      // to generate the nonce. Frame cannot successfully pass security processing
+      // at this point so we need to accept it in any case.
+      if (ieee154e_vars.dataReceived->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
+         if (IEEE802154security_incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
+            if (ieee802514_header.frameType != IEEE154_TYPE_BEACON) {
+               break; // reject anything but EBs here
+            }
+	      // accepting EB even though security processing failed
+            // TODO log the event
+         }
+      }
      
       // toss the IEs
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
