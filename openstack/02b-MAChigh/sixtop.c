@@ -461,16 +461,6 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
 
-#ifdef L2_SECURITY_ACTIVE
-// TODO use parameters passed by SCons
-#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_CRYPTO_MIC32
-#define IEEE802154E_SECURITY_KEYIDMODE       ASH_KEYIDMODE_DEFAULTKEYSOURCE
-#define IEEE802154E_SECURITY_KEY_INDEX       1
-#else
-#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_NOSEC
-#define IEEE802154E_SECURITY_KEYIDMODE       0
-#define IEEE802154E_SECURITY_KEY_INDEX       0
-#endif // L2_SECURITY_ACTIVE
 
    // set l2-security attributes
    msg->l2_securityLevel   = IEEE802154E_SECURITY_LEVEL;
@@ -850,21 +840,9 @@ port_INLINE void sixtop_sendEB() {
    
    //I has an IE in my payload
    eb->l2_IEListPresent = IEEE154_IELIST_YES;
-   
-#ifdef L2_SECURITY_ACTIVE
-// TODO use parameters passed by SCons
-#define IEEE802154E_BEACONS_SECURITY_LEVEL     ASH_SLF_TYPE_MIC_32
-#define IEEE802154E_SECURITY_KEYIDMODE         ASH_KEYIDMODE_DEFAULTKEYSOURCE
-#define IEEE802154E_SECURITY_KEY_INDEX         1
-#else
-#define IEEE802154E_SECURITY_LEVEL             ASH_SLF_TYPE_NOSEC
-#define IEEE802154E_SECURITY_KEYIDMODE         0
-#define IEEE802154E_SECURITY_KEY_INDEX         0
-#endif // L2_SECURITY_ACTIVE
-
 
    // set l2-security attributes
-   eb->l2_securityLevel   = 0;//IEEE802154E_BEACONS_SECURITY_LEVEL;
+   eb->l2_securityLevel   = IEEE802154E_SECURITY_LEVEL_BEACON;
    eb->l2_keyIdMode       = IEEE802154E_SECURITY_KEYIDMODE;
    eb->l2_keyIndex        = IEEE802154E_SECURITY_KEY_INDEX;
 

@@ -28,8 +28,20 @@
 
 //=========================== define ==========================================
 
-#define MAXNUMKEYS           MAXNUMNEIGHBORS+1
+#ifdef L2_SECURITY_ACTIVE
+// TODO use parameters passed by SCons
+#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_CRYPTO_MIC32
+#define IEEE802154E_SECURITY_LEVEL_BEACON    ASH_SLF_TYPE_MIC_32
+#define IEEE802154E_SECURITY_KEYIDMODE       ASH_KEYIDMODE_DEFAULTKEYSOURCE
+#define IEEE802154E_SECURITY_KEY_INDEX       1
+#else
+#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_NOSEC
+#define IEEE802154E_SECURITY_LEVEL_BEACON    ASH_SLF_TYPE_NOSEC 
+#define IEEE802154E_SECURITY_KEYIDMODE       0
+#define IEEE802154E_SECURITY_KEY_INDEX       0
+#endif // L2_SECURITY_ACTIVE
 
+#define MAXNUMKEYS           MAXNUMNEIGHBORS+1
 
 enum Auxiliary_Security_Header_scf_enums{ //Security Control Field
    ASH_SCF_SECURITY_LEVEL = 0,
