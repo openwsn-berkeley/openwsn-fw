@@ -907,6 +907,11 @@ port_INLINE void sixtop_sendKA() {
    kaPkt->l2_frameType = IEEE154_TYPE_DATA;
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
+   // set l2-security attributes
+   kaPkt->l2_securityLevel   = IEEE802154E_SECURITY_LEVEL;
+   kaPkt->l2_keyIdMode       = IEEE802154E_SECURITY_KEYIDMODE;
+   kaPkt->l2_keyIndex        = IEEE802154E_SECURITY_KEY_INDEX;
+
    // put in queue for MAC to handle
    sixtop_send_internal(kaPkt,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
    
