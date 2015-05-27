@@ -245,9 +245,9 @@ owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
                                                           msg->l2_frameType);
 
    if (keyDescriptor==NULL){
-      openserial_printInfo(COMPONENT_SECURITY,ERR_SECURITY,
+      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
                           (errorparameter_t)0,
-                          (errorparameter_t)1);
+                          (errorparameter_t)0);
       return E_FAIL;
    }
 
@@ -344,6 +344,12 @@ owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
                                           2, // L=2 in 15.4 std
                                           key,
                                           msg->l2_authenticationLength);
+
+   if (outStatus!=0){
+      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+      (errorparameter_t)0,
+      (errorparameter_t)1);
+   }
 
    return outStatus;
 }
@@ -467,6 +473,9 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
 
    if (keyDescriptor==NULL){
       //can't find the key
+      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                           (errorparameter_t)0,
+                           (errorparameter_t)1);
       return E_FAIL;
    }
 
@@ -477,6 +486,9 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
 
    if (deviceDescriptor==NULL){
       //can't find the device
+      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                           (errorparameter_t)0,
+                           (errorparameter_t)2);
       return E_FAIL;
    }
 
@@ -484,12 +496,23 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
    securityLevelDescriptor = IEEE802154security_securityLevelDescriptorLookup(msg->l2_frameType,
                                                                               msg->commandFrameIdentifier);
 
+   if (securityLevelDescriptor == NULL){
+	      //can't find the frame type
+	      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+	                           (errorparameter_t)0,
+	                           (errorparameter_t)3);
+	      return E_FAIL;
+   }
+
    //i+j+k
    if (IEEE802154security_incomingSecurityLevelChecking(securityLevelDescriptor,
                                                         msg->l2_securityLevel,
                                                         deviceDescriptor->Exempt) ==FALSE) 
       {
       //security level not allowed
+      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                           (errorparameter_t)0,
+                           (errorparameter_t)4);
       return E_FAIL;
    }
 
@@ -498,9 +521,11 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
    //n Control of key used
    if (IEEE802154security_incomingKeyUsagePolicyChecking(keyDescriptor,
                                                          msg->l2_frameType,
-                                                         0)==FALSE)
-     {
+                                                         0)==FALSE){
      // improper key used
+     openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                          (errorparameter_t)0,
+                          (errorparameter_t)5);
      return E_FAIL;
    }
 
@@ -575,6 +600,12 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
                                           2,
                                           keyDescriptor->key,
                                           msg->l2_authenticationLength);
+
+   if (outStatus!=0){
+      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+      (errorparameter_t)0,
+      (errorparameter_t)6);
+   }
 
    packetfunctions_tossFooter(msg,msg->l2_authenticationLength);
    return outStatus;
