@@ -1253,6 +1253,9 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
           if (IEEE802154security_incomingFrame(ieee154e_vars.ackReceived) == E_FAIL) {
          	 break;
           }
+      } else {
+       	  //deny permission to continue if security is enabled
+          if (IEEE802154E_SECURITY_LEVEL) break;
       }
       
       // toss the IEEE802.15.4 header
@@ -1462,6 +1465,9 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          if (IEEE802154security_incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
         	 break;
          }
+      } else {
+    	  //deny permission to continue if security is enabled
+    	  if (IEEE802154E_SECURITY_LEVEL) break;
       }
       
       // toss the IEEE802.15.4 header
