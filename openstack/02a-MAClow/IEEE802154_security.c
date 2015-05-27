@@ -300,10 +300,10 @@ owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
       case ASH_SLF_TYPE_MIC_32:  // authentication only cases
       case ASH_SLF_TYPE_MIC_64:
       case ASH_SLF_TYPE_MIC_128: 
-         a = msg->payload;    // first byte of the frame
-         len_a = msg->length; // whole frame
-         m = msg->payload;    // we don't care
-         len_m = 0;           // length of the encrypted part
+         a = msg->payload;             // first byte of the frame
+         len_a = msg->length;          // whole frame
+         m = &msg->payload[len_a];     // concatenate MIC at the end of the frame
+         len_m = 0;                    // length of the encrypted part
          break;
     case ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
     case ASH_SLF_TYPE_CRYPTO_MIC64:
@@ -531,10 +531,10 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
       case ASH_SLF_TYPE_MIC_32:  // authentication only cases
       case ASH_SLF_TYPE_MIC_64:
       case ASH_SLF_TYPE_MIC_128: 
-         a = msg->payload;    // first byte of the frame
-         len_a = msg->length; // whole frame
-         m = msg->payload;    // we don't care
-         len_m = 0;           // length of the encrypted part
+         a = msg->payload;                                           // first byte of the frame
+         len_a = msg->length;                                        // whole frame
+         m = &msg->payload[len_a - msg->l2_authenticationLength];    // MIC is at the end of the frame
+         len_m = msg->l2_authenticationLength;                       // length of the encrypted part
          break;
       case ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
       case ASH_SLF_TYPE_CRYPTO_MIC64:
