@@ -380,15 +380,22 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
    //Frame Counter field, //l
    macFrameCounter_t l2_frameCounter;
    if (frameCnt_Suppression == 0){//the frame counter is here
-      //the frame counter size is 5 bytes, because we have the ASN
-      for (i=0;i<5;i++){
+      //the frame counter size can be 4 or 5 bytes
+      for (i=0;i<frameCnt_Size;i++){
           receivedASN[i] = *((uint8_t*)(msg->payload)+tempheader->headerLength);
           tempheader->headerLength = tempheader->headerLength+1;
       }
 
-   l2_frameCounter.bytes0and1 = receivedASN[0]+256*receivedASN[1];
-   l2_frameCounter.bytes2and3 = receivedASN[2]+256*receivedASN[3];
-   l2_frameCounter.byte4 = receivedASN[4];
+      l2_frameCounter.bytes0and1 = receivedASN[0]+256*receivedASN[1];
+      l2_frameCounter.bytes2and3 = receivedASN[2]+256*receivedASN[3];
+      if(frameCnt_Size == 0x04){
+         l2_frameCounter.byte4 = receivedASN[4];
+      }
+
+      if (l2_frameCounter.byte4 == 0xff){
+         return;
+      }
+
    }
 
    //retrieve the Key Identifier field
