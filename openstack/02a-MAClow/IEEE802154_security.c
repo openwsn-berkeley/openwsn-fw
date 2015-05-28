@@ -74,13 +74,15 @@ void IEEE802154security_init(){
       security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].DeviceOverrideSecurityMinimum = FALSE;
       //list of allowed security levels
       if (i==0){
-         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = 1;
+         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = ASH_SLF_TYPE_MIC_32;
+         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = ASH_SLF_TYPE_MIC_64;
+         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = ASH_SLF_TYPE_MIC_128;
       } else {
-         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = 5;
-         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = 6;
-         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = 7;
+         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = ASH_SLF_TYPE_CRYPTO_MIC32;
+         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = ASH_SLF_TYPE_CRYPTO_MIC64;
+         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = ASH_SLF_TYPE_CRYPTO_MIC128;
       }
-      security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].SecurityMinimum = 5;
+      security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].SecurityMinimum = ASH_SLF_TYPE_CRYPTO_MIC32;
    }
 
    //Initialization of MAC KEY TABLE
