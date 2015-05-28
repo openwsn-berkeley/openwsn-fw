@@ -564,8 +564,8 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
       case ASH_SLF_TYPE_MIC_64:
       case ASH_SLF_TYPE_MIC_128: 
          a = msg->payload;                                           // first byte of the frame
-         len_a = msg->length;                                        // whole frame
-         m = &msg->payload[len_a - msg->l2_authenticationLength];    // MIC is at the end of the frame
+         len_a = msg->length-msg->l2_authenticationLength;           // whole frame
+         m = &msg->payload[len_a];                                   // MIC is at the end of the frame
          len_m = msg->l2_authenticationLength;                       // length of the encrypted part
          break;
       case ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
@@ -589,6 +589,9 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
 
    // assert
    if (len_a + len_m > 125) {
+      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                           (errorparameter_t)0,
+                           (errorparameter_t)6);
       return E_FAIL;
    }
 
@@ -603,8 +606,8 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
 
    if (outStatus!=0){
       openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
-      (errorparameter_t)0,
-      (errorparameter_t)6);
+                           (errorparameter_t)0,
+                           (errorparameter_t)7);
    }
 
    packetfunctions_tossFooter(msg,msg->l2_authenticationLength);
