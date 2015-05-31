@@ -469,29 +469,35 @@ owerror_t forwarding_send_internal_SourceRouting(
    local_CmprI          = rpl_routing_hdr->CmprICmprE & 0xf0;
    local_CmprI          = local_CmprI>>4;
    
-   numAddr              = (((rpl_routing_hdr->HdrExtLen*8)-rpl_routing_hdr->PadRes-(16-local_CmprE))/(16-local_CmprI))+1;
+   // since NH is set,  The Length field contained in a compressed IPv6 Extension Header
+   // indicates the number of octets that pertain to the (compressed)
+   // extension header following the Length field. this changes
+   // the Length field definition in [RFC2460] from indicating the header
+   // size in 8-octet units, not including the first 8 octets.  Changing
+   // the Length field to be in units of octets removes wasteful internal
+   // fragmentation.
+//   numAddr              = (((rpl_routing_hdr->HdrExtLen*8)-rpl_routing_hdr->PadRes-(16-local_CmprE))/(16-local_CmprI))+1;
+   numAddr               = ((rpl_routing_hdr->HdrExtLen-6-(16-local_CmprE))/(16-local_CmprI))+1;
    
    if (rpl_routing_hdr->SegmentsLeft==0){
       // no more segments left, this is the last hop
       
       // push packet up the stack
       msg->l4_protocol  = rpl_routing_hdr->nextHeader;
-      hlen              = rpl_routing_hdr->HdrExtLen; //in 8-octet units
+      hlen              = rpl_routing_hdr->HdrExtLen; //in units
       
       // toss RPL routing header
       packetfunctions_tossHeader(msg,sizeof(rpl_routing_ht));
       
       // toss source route addresses
-      octetsAddressSize = LENGTH_ADDR128b - local_CmprE; //total length - number of octets that are elided
-      packetfunctions_tossHeader(msg,octetsAddressSize*hlen);
+      packetfunctions_tossHeader(msg,hlen-6); //total hlen - 6(type, cmprE+cmprI,pad,reserved)
+
       
       // toss ipv6 NHC header
       packetfunctions_tossHeader(msg,sizeof(uint8_t));
       msg->l4_protocol = ipv6_inner_header->next_header;
       // toss iphc inner header
       packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
-      // toss next header (icmpv6)
-      packetfunctions_tossHeader(msg,sizeof(uint8_t));
       
       // indicate reception to upper layer
       switch(msg->l4_protocol) {
@@ -541,16 +547,16 @@ owerror_t forwarding_send_internal_SourceRouting(
          // decrement number of segments left
          rpl_routing_hdr->SegmentsLeft--;
          
-         // find next hop address in source route
-         // addressposition    = numAddr-(rpl_routing_hdr->SegmentsLeft);
-         addressposition     = rpl_routing_hdr->SegmentsLeft;
+         // find next hop address in source route, start from 0
+          addressposition    = numAddr-(rpl_routing_hdr->SegmentsLeft)-1;
+//         addressposition     = rpl_routing_hdr->SegmentsLeft;
          
          // how many octets have the address?
-         if (rpl_routing_hdr->SegmentsLeft > 1){
+         if (rpl_routing_hdr->SegmentsLeft > 0){
             // max addr length - number of prefix octets that are elided in the internal route elements
             octetsAddressSize = LENGTH_ADDR128b - local_CmprI;
          } else {
-            // max addr length - number of prefix octets that are elided in the internal route elements
+            // max addr length - number of prefix octets that are elided in the last route elements
             octetsAddressSize = LENGTH_ADDR128b - local_CmprE;
          }
          

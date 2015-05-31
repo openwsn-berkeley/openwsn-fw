@@ -240,7 +240,6 @@ void iphc_receive(OpenQueueEntry_t* msg) {
          );
          
          // toss the headers
-         // tengfei: poipoi why IPv6HOP_HDR_LEN is 3?
          packetfunctions_tossHeader(
             msg,
             IPv6HOP_HDR_LEN+ipv6_hop_header.HdrExtLen
