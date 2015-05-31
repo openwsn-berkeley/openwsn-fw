@@ -23,14 +23,16 @@ void      forwarding_getNextHop(
 );
 owerror_t forwarding_send_internal_RoutingTable(
    OpenQueueEntry_t*    msg,
-   ipv6_header_iht*     ipv6_header,
+   ipv6_header_iht*     ipv6_outer_header,
+   ipv6_header_iht*     ipv6_inner_header,
    rpl_option_ht*       rpl_option,
    uint32_t*             flow_label,
    uint8_t              fw_SendOrfw_Rcv
 );
 owerror_t forwarding_send_internal_SourceRouting(
    OpenQueueEntry_t*    msg,
-   ipv6_header_iht*     ipv6_header
+   ipv6_header_iht*     ipv6_outer_header,
+   ipv6_header_iht*     ipv6_inner_header
 );
 void      forwarding_createRplOption(
    rpl_option_ht*       rpl_option,
@@ -57,7 +59,8 @@ at this mote.
 \param[in,out] msg Packet to send.
 */
 owerror_t forwarding_send(OpenQueueEntry_t* msg) {
-   ipv6_header_iht      ipv6_header;
+   ipv6_header_iht      ipv6_outer_header;
+   ipv6_header_iht      ipv6_inner_header;
    rpl_option_ht        rpl_option;
    open_addr_t*         myprefix;
    open_addr_t*         myadd64;
@@ -76,13 +79,14 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    memcpy(&(msg->l3_sourceAdd.addr_128b[8]),myadd64->addr_64b,8);
    
    // initialize IPv6 header
-   memset(&ipv6_header,0,sizeof(ipv6_header_iht));
+   memset(&ipv6_outer_header,0,sizeof(ipv6_header_iht));
+   memset(&ipv6_inner_header,0,sizeof(ipv6_header_iht));
    
    // Set hop limit to the default in-network value as this packet is being
    // sent from upper layer. This is done here as send_internal() is used by
    // forwarding of packets as well which carry a hlim. This value is required
    // to be set to a value as the following function can decrement it.
-   ipv6_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
+   ipv6_outer_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
    
    // create the RPL hop-by-hop option
 
@@ -94,10 +98,40 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
 #ifdef FLOW_LABEL_RPL_DOMAIN
    forwarding_createFlowLabel(&flow_label,0x00);
 #endif
+   
+   //tengfei: IPHC inner header and NHC IPv6 header will be added at here
+   iphc_prependIPv6Header(
+      msg,
+      IPHC_TF_ELIDED,
+      flow_label,
+      IPHC_NH_INLINE,
+      IANA_ICMPv6,
+      IPHC_HLIM_64,
+      ipv6_outer_header.hop_limit,
+      IPHC_CID_NO,
+      IPHC_SAC_STATELESS,
+      IPHC_SAM_64B,
+      IPHC_M_NO,
+      IPHC_DAC_STATELESS,
+      IPHC_DAM_ELIDED,
+      &(msg->l3_destinationAdd),
+      &(msg->l3_sourceAdd),            
+      PCKTSEND
+   );
+   // preprend NHC ipv6 next header
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+   *((uint8_t*)(msg->payload)) = (uint8_t)(NHC_IPv6EXT_ID + \
+                                 (uint8_t)(NHC_EID_IPv6_VAL << 1) + \
+                                 (uint8_t)(NHC_NH_INLINE));
+//   msg->l4_protocol                         = *((uint8_t*)(msg->payload));
+   // for IPHC outer header its next header is option hopByhop header OR NHC ipv6.
+   // both of them are compressed
+   ipv6_outer_header.next_header_compressed = TRUE;
 
    return forwarding_send_internal_RoutingTable(
       msg,
-      &ipv6_header,
+      &ipv6_outer_header,
+      &ipv6_inner_header,
       &rpl_option,
       &flow_label,
       PCKTSEND
@@ -160,7 +194,8 @@ void forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 */
 void forwarding_receive(
       OpenQueueEntry_t*      msg,
-      ipv6_header_iht*       ipv6_header,
+      ipv6_header_iht*       ipv6_outer_header,
+      ipv6_header_iht*       ipv6_inner_header,
       ipv6_hopbyhop_iht*     ipv6_hop_header,
       rpl_option_ht*         rpl_option
    ) {
@@ -171,7 +206,7 @@ void forwarding_receive(
    msg->owner                     = COMPONENT_FORWARDING;
    
    // determine L4 protocol
-   if (ipv6_header->next_header==IANA_IPv6HOPOPT){
+   if (ipv6_outer_header->next_header==IANA_IPv6HOPOPT){
       // get information from ipv6_hop_header
       
       msg->l4_protocol            = ipv6_hop_header->nextHeader;
@@ -179,25 +214,30 @@ void forwarding_receive(
    } else {
       // get information from ipv6_header
       
-      msg->l4_protocol            = ipv6_header->next_header;
-      msg->l4_protocol_compressed = ipv6_header->next_header_compressed;
+      msg->l4_protocol            = ipv6_outer_header->next_header;
+      msg->l4_protocol_compressed = ipv6_outer_header->next_header_compressed;
    }
    
    // populate packets metadata with L3 information
-   memcpy(&(msg->l3_destinationAdd),&ipv6_header->dest,sizeof(open_addr_t));
-   memcpy(&(msg->l3_sourceAdd),     &ipv6_header->src, sizeof(open_addr_t));
-   
+   memcpy(&(msg->l3_destinationAdd),&ipv6_outer_header->dest,sizeof(open_addr_t));
+   memcpy(&(msg->l3_sourceAdd),     &ipv6_outer_header->src, sizeof(open_addr_t));
+
    if (
          (
-            idmanager_isMyAddress(&ipv6_header->dest)
+            idmanager_isMyAddress(&ipv6_outer_header->dest)
             ||
-            packetfunctions_isBroadcastMulticast(&ipv6_header->dest)
+            packetfunctions_isBroadcastMulticast(&ipv6_outer_header->dest)
          )
          &&
-         ipv6_header->next_header!=IANA_IPv6ROUTE
+         ipv6_outer_header->next_header!=IANA_IPv6ROUTE
       ) {
       // this packet is for me, no source routing header.
-
+      // toss ipv6 NHC header
+      packetfunctions_tossHeader(msg,sizeof(uint8_t));
+      msg->l4_protocol = ipv6_inner_header->next_header;
+      // toss iphc inner header
+      packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
+          
       // indicate received packet to upper layer
       switch(msg->l4_protocol) {
          case IANA_TCP:
@@ -227,12 +267,12 @@ void forwarding_receive(
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
       
-      if (ipv6_header->next_header!=IANA_IPv6ROUTE) {
+      if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
          //check if flow label rpl header
     	 #ifdef FLOW_LABEL_RPL_DOMAIN             
-             flags = (uint8_t)((uint32_t)((ipv6_header->flow_label)>>16)&0xFF);
-             senderRank = (uint16_t)((uint32_t)(ipv6_header->flow_label)>>8)&0xFFFF;
+             flags = (uint8_t)((uint32_t)((ipv6_outer_header->flow_label)>>16)&0xFF);
+             senderRank = (uint16_t)((uint32_t)(ipv6_outer_header->flow_label)>>8)&0xFFFF;
              senderRank = senderRank*MINHOPRANKINCREASE;//shift it according to HopRank Increase
          #else
     	     flags = rpl_option->flags;
@@ -258,7 +298,7 @@ void forwarding_receive(
             // set flag
             #ifdef FLOW_LABEL_RPL_DOMAIN
         	    flags |= R_FLAG;
-        	    ipv6_header->flow_label|= ((uint32_t)flags<<16);
+        	    ipv6_outer_header->flow_label|= ((uint32_t)flags<<16);
             #else
         	    rpl_option->flags |= R_FLAG;
             #endif
@@ -276,15 +316,16 @@ void forwarding_receive(
          forwarding_createRplOption(rpl_option, rpl_option->flags);
          #ifdef FLOW_LABEL_RPL_DOMAIN
          // do not recreate flow label, relay the same but adding current flags
-         //forwarding_createFlowLabel(&(ipv6_header->flow_label),flags);
+         forwarding_createFlowLabel(&(ipv6_outer_header->flow_label),flags);
          #endif
          // resend as if from upper layer
          if (
                forwarding_send_internal_RoutingTable(
                   msg,
-                  ipv6_header,
+                  ipv6_outer_header,
+                  ipv6_inner_header,
                   rpl_option,
-                  &(ipv6_header->flow_label),
+                  &(ipv6_outer_header->flow_label),
                   PCKTFORWARD 
                )==E_FAIL
             ) {
@@ -293,7 +334,7 @@ void forwarding_receive(
       } else {
          // source routing header present
          
-         if (forwarding_send_internal_SourceRouting(msg, ipv6_header)==E_FAIL) {
+         if (forwarding_send_internal_SourceRouting(msg,ipv6_outer_header,ipv6_inner_header)==E_FAIL) {
             
             // already freed by send_internal
             
@@ -348,7 +389,8 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
 */
 owerror_t forwarding_send_internal_RoutingTable(
       OpenQueueEntry_t*      msg,
-      ipv6_header_iht*       ipv6_header,
+      ipv6_header_iht*       ipv6_outer_header,
+      ipv6_header_iht*       ipv6_inner_header,
       rpl_option_ht*         rpl_option,
       uint32_t*              flow_label,
       uint8_t                fw_SendOrfw_Rcv
@@ -369,7 +411,8 @@ owerror_t forwarding_send_internal_RoutingTable(
    // send to next lower layer
    return iphc_sendFromForwarding(
       msg,
-      ipv6_header,
+      ipv6_outer_header,
+      ipv6_inner_header,
       rpl_option,
       flow_label,
       fw_SendOrfw_Rcv
@@ -389,7 +432,8 @@ http://tools.ietf.org/html/rfc6554#page-9.
 */
 owerror_t forwarding_send_internal_SourceRouting(
       OpenQueueEntry_t* msg,
-      ipv6_header_iht*  ipv6_header
+      ipv6_header_iht*  ipv6_outer_header,
+      ipv6_header_iht*  ipv6_inner_header
    ) {
    uint8_t              local_CmprE;
    uint8_t              local_CmprI;
@@ -440,6 +484,14 @@ owerror_t forwarding_send_internal_SourceRouting(
       // toss source route addresses
       octetsAddressSize = LENGTH_ADDR128b - local_CmprE; //total length - number of octets that are elided
       packetfunctions_tossHeader(msg,octetsAddressSize*hlen);
+      
+      // toss ipv6 NHC header
+      packetfunctions_tossHeader(msg,sizeof(uint8_t));
+      msg->l4_protocol = ipv6_inner_header->next_header;
+      // toss iphc inner header
+      packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
+      // toss next header (icmpv6)
+      packetfunctions_tossHeader(msg,sizeof(uint8_t));
       
       // indicate reception to upper layer
       switch(msg->l4_protocol) {
@@ -591,9 +643,10 @@ owerror_t forwarding_send_internal_SourceRouting(
    // send to next lower layer
    return iphc_sendFromForwarding(
       msg,
-      ipv6_header,
+      ipv6_outer_header,
+      ipv6_inner_header,
       &rpl_option,
-      &ipv6_header->flow_label,
+      &ipv6_outer_header->flow_label,
       PCKTFORWARD
    );
 }
