@@ -5,6 +5,21 @@
 #include "openserial.h"
 #include "topology.h"
 
+//=========================== define ==========================================
+
+#define TerminationIE_Length           2
+// the header ternimation IE when payload IE follows header. 
+// length(b0~b6):0   ID(b7~b14):0x7E   type(b15): 0
+#define Header_PayloadIE_TerminationIE 0x00FC
+
+// the header ternimation IE when payload follows header.
+// length(b0~b6):0   ID(b7~b14):0x7F   type(b15): 0
+#define Header_Payload_TerminationIE   0x00FE
+
+// the payload ternimation IE when payload follows payloadIE.
+// length(b0~b10):0   ID(b11~b14):0x0F   type(b15): 1
+#define Payload_TerminationIE         0x001F
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -33,7 +48,28 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    
-   //General IEs here (those that are carried in all packets) -- None by now.
+   // General IEs here (those that are carried in all packets)
+   // add termination IE accordingly 
+   if (ielistpresent == IEEE154_IELIST_YES) {
+       //add header termination IE (id=0x7e)
+       packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
+       msg->payload[0] = (Header_PayloadIE_TerminationIE >> 8) & 0xFF;
+       msg->payload[1] = Header_PayloadIE_TerminationIE        & 0xFF;
+       
+       
+   } else {
+       // check whether I have payload, if yes, add header termination IE (0x7F)
+       // or ternimation IE will be omitted. For example, Keep alive doesn't have
+      // any payload, so there is no ternimation IE for it.
+       if (msg->length != 0) {
+           //add header termination IE (id=0x7f)
+           packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
+           msg->payload[0] = (Header_Payload_TerminationIE >> 8) & 0xFF;
+           msg->payload[1] = Header_Payload_TerminationIE        & 0xFF;
+       } else {
+           // no payload, termination IE is omitted 
+       }
+   }
    
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
@@ -109,7 +145,8 @@ Note We are writing the fields from the begnning of the header to the end.
 */
 void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                                ieee802154_header_iht* ieee802514_header) {
-   uint8_t temp_8b;
+   uint8_t  temp_8b;
+   uint16_t temp_16b;
    
    // by default, let's assume the header is not valid, in case we leave this
    // function because the packet ends up being shorter than the header.
@@ -230,6 +267,37 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
        return; //invalid packet accordint to p.64 IEEE15.4e
+   }
+   
+   // remove termination IE accordingly 
+   if (ieee802514_header->ieListPresent == TRUE) {
+       // following is payload IE, remove the header termination IE with ID=0x7E
+       temp_8b  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+       ieee802514_header->headerLength += 1;
+       temp_16b = (temp_8b << 8) | *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+       ieee802514_header->headerLength += 1;
+       if (temp_16b != Header_PayloadIE_TerminationIE) {
+           // termination IE is wrong, log this error
+           
+           return;
+       }
+       if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
+   } else {
+       if (msg->length > ieee802514_header->headerLength) {
+           // there are payload following, remove the header termination IE with ID=0x7F
+           temp_8b  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+           ieee802514_header->headerLength += 1;
+           temp_16b = (temp_8b << 8) | *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+           ieee802514_header->headerLength += 1;
+           if (temp_16b != Header_Payload_TerminationIE) {
+               // termination IE is wrong, log this error
+               
+               return;
+           }
+           if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
+       } else {
+           // no payload, termination IE is omitted 
+       }
    }
    
    // apply topology filter
