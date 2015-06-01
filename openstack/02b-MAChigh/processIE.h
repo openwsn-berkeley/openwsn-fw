@@ -12,10 +12,10 @@
 #define MLME_IE_SUBID_SHIFT            1
 
 // subIEs identifier
-#define MLME_IE_SUBID_CHANNELHOPPING   0x09
 #define MLME_IE_SUBID_SYNC             0x1A
 #define MLME_IE_SUBID_SLOTFRAME_LINK   0x1B
 #define MLME_IE_SUBID_TIMESLOT         0x1c
+#define MLME_IE_SUBID_CHANNELHOPPING   0x1d
 #define MLME_IE_SUBID_LINKTYPE         0x40
 #define MLME_IE_SUBID_OPCODE           0x41
 #define MLME_IE_SUBID_BANDWIDTH        0x42
@@ -140,6 +140,12 @@ uint8_t          processIE_prependSyncIE(
    OpenQueueEntry_t*    pkt
 );
 uint8_t          processIE_prependSlotframeLinkIE(
+   OpenQueueEntry_t*    pkt
+);
+uint8_t          processIE_prependTSCHTimeslotIE(
+   OpenQueueEntry_t*    pkt
+);
+uint8_t          processIE_prependChannelHoppingIE(
    OpenQueueEntry_t*    pkt
 );
 uint8_t          processIE_prependOpcodeIE(
