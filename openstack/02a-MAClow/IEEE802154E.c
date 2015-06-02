@@ -1526,8 +1526,7 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
-                            IEEE154_IELIST_YES,//ie in ack
-                            IEEE154_FRAMEVERSION,//enhanced ack
+                            TRUE,//ie in ack
                             IEEE154_SEC_NO_SECURITY,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)

@@ -41,16 +41,19 @@ Note that we are writing the field from the end of the header to the beginning.
 */
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
-                              uint8_t           ielistpresent,
-                              uint8_t           frameVersion,
+                              bool              payloadIEPresent,
                               bool              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
+   uint8_t ielistpresent = IEEE154_IELIST_NO;
+   uint8_t frameVersion;
    
    // General IEs here (those that are carried in all packets)
    // add termination IE accordingly 
-   if (ielistpresent == IEEE154_IELIST_YES) {
+   if (payloadIEPresent == TRUE) {
+       ielistpresent = IEEE154_IELIST_YES; 
+       frameVersion  = IEEE154_FRAMEVERSION;
        //add header termination IE (id=0x7e)
        packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
        msg->payload[0] = (Header_PayloadIE_TerminationIE >> 8) & 0xFF;
@@ -63,11 +66,14 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       // any payload, so there is no ternimation IE for it.
        if (msg->length != 0) {
            //add header termination IE (id=0x7f)
+           ielistpresent = IEEE154_IELIST_YES; // at least I have a termination IE
+           frameVersion  = IEEE154_FRAMEVERSION;
            packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
            msg->payload[0] = (Header_Payload_TerminationIE >> 8) & 0xFF;
            msg->payload[1] = Header_Payload_TerminationIE        & 0xFF;
        } else {
-           // no payload, termination IE is omitted 
+           // no payload, termination IE is omitted
+           frameVersion = IEEE154_FRAMEVERSION_2006;
        }
    }
    
@@ -147,6 +153,10 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                                ieee802154_header_iht* ieee802514_header) {
    uint8_t  temp_8b;
    uint16_t temp_16b;
+   
+   if (msg->length > 70 && msg->length < 80) {
+       ieee802514_header->valid=FALSE;
+   }
    
    // by default, let's assume the header is not valid, in case we leave this
    // function because the packet ends up being shorter than the header.
@@ -271,32 +281,23 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    
    // remove termination IE accordingly 
    if (ieee802514_header->ieListPresent == TRUE) {
-       // following is payload IE, remove the header termination IE with ID=0x7E
-       temp_8b  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
-       ieee802514_header->headerLength += 1;
-       temp_16b = (temp_8b << 8) | *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
-       ieee802514_header->headerLength += 1;
-       if (temp_16b != Header_PayloadIE_TerminationIE) {
-           // termination IE is wrong, log this error
-           
-           return;
-       }
-       if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
-   } else {
-       if (msg->length > ieee802514_header->headerLength) {
-           // there are payload following, remove the header termination IE with ID=0x7F
+       while(1) {
+           // I have IE in frame. phase the IE in header first
            temp_8b  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
            ieee802514_header->headerLength += 1;
            temp_16b = (temp_8b << 8) | *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
            ieee802514_header->headerLength += 1;
-           if (temp_16b != Header_Payload_TerminationIE) {
-               // termination IE is wrong, log this error
-               
-               return;
+           // stop when I got a header termination IE
+           if (temp_16b == Header_PayloadIE_TerminationIE) {
+               // I have payloadIE following
+               msg->l2_payloadIEpresent = TRUE;
+               break;
+           }
+           if (temp_16b == Header_Payload_TerminationIE) {
+               // I have payload following
+               break;
            }
            if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
-       } else {
-           // no payload, termination IE is omitted 
        }
    }
    

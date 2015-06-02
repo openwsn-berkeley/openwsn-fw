@@ -326,6 +326,7 @@
           <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2233,6 +2234,15 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.h</name>
+      </file>
+    </group>
+    <group>
+      <name>uinject</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.h</name>
       </file>
     </group>
     <file>

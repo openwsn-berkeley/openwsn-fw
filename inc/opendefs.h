@@ -294,6 +294,7 @@ typedef struct {
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_IEListPresent;               //did have IE field?
+   bool          l2_payloadIEpresent;            // did I have payload IE field
    bool          l2_joinPriorityPresent;
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
