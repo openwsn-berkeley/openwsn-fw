@@ -635,7 +635,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    temp_8b    = *((uint8_t*)(pkt->payload)+ptr);
    ptr++;
    
-   temp_16b   = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<< 8);
+   temp_16b   = (temp_8b << 8) + (*((uint8_t*)(pkt->payload)+ptr));
    ptr++;
    
    *lenIE     = ptr;
@@ -666,7 +666,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             //read sub IE header
             temp_8b     = *((uint8_t*)(pkt->payload)+ptr);
             ptr         = ptr + 1;
-            temp_16b    = temp_8b  +(*((uint8_t*)(pkt->payload)+ptr) << 8);
+            temp_16b    = (temp_8b << 8)  + (*((uint8_t*)(pkt->payload)+ptr));
             ptr         = ptr + 1;
             
             len         = len - 2; //remove header fields len

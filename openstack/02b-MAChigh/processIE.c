@@ -34,8 +34,8 @@ port_INLINE void processIE_prependMLMEIE(
       (IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME  | IEEE802154E_DESC_TYPE_LONG); 
    
    // copy header
-   pkt->payload[0] =  payload_IE_desc.length_groupid_type       & 0xFF;
-   pkt->payload[1] = (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+   pkt->payload[0] = (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+   pkt->payload[1] = payload_IE_desc.length_groupid_type        & 0xFF;
 }
 
 //===== prepend IEs
@@ -77,8 +77,8 @@ port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
       IEEE802154E_DESC_TYPE_SHORT;
    
    // copy header
-   pkt->payload[0]= mlme_subHeader.length_subID_type & 0xFF;
-   pkt->payload[1]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[0]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[1]= mlme_subHeader.length_subID_type        & 0xFF;
    
    len += 2;
    
@@ -150,8 +150,8 @@ port_INLINE uint8_t processIE_prependSlotframeLinkIE(OpenQueueEntry_t* pkt){
       IEEE802154E_DESC_TYPE_SHORT;
   
    // copy header
-   pkt->payload[0]=  mlme_subHeader.length_subID_type       & 0xFF;
-   pkt->payload[1]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[0]= (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[1]= mlme_subHeader.length_subID_type        & 0xFF;
    
    len+=2;
    
@@ -184,8 +184,8 @@ port_INLINE uint8_t processIE_prependTSCHTimeslotIE(OpenQueueEntry_t* pkt){
       IEEE802154E_DESC_TYPE_SHORT;
    
    // copy header
-   pkt->payload[0] =  mlme_subHeader.length_subID_type       & 0xFF;
-   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[0] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[1] = mlme_subHeader.length_subID_type        & 0xFF;
    
    len += 2;
   
@@ -211,14 +211,14 @@ port_INLINE uint8_t processIE_prependChannelHoppingIE(OpenQueueEntry_t* pkt){
    
    // prepare header
    mlme_subHeader.length_subID_type  = 
-      len << IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+      len << IEEE802154E_DESC_LEN_LONG_MLME_IE_SHIFT;
    mlme_subHeader.length_subID_type |= 
       MLME_IE_SUBID_CHANNELHOPPING << MLME_IE_SUBID_SHIFT|
-      IEEE802154E_DESC_TYPE_SHORT;
+      IEEE802154E_DESC_TYPE_LONG;
    
    // copy header
-   pkt->payload[0] =  mlme_subHeader.length_subID_type       & 0xFF;
-   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[0] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[1] = mlme_subHeader.length_subID_type        & 0xFF;
    
    len += 2;
   
@@ -257,8 +257,8 @@ port_INLINE uint8_t processIE_prependOpcodeIE(
       IEEE802154E_DESC_TYPE_SHORT;
    
    // copy header
-   pkt->payload[0] =  mlme_subHeader.length_subID_type       & 0xFF;
-   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[0] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[1] = mlme_subHeader.length_subID_type        & 0xFF;
    
    len += 2;
   
@@ -310,8 +310,8 @@ port_INLINE uint8_t processIE_prependBandwidthIE(
       IEEE802154E_DESC_TYPE_SHORT;
    
    // copy header
-   pkt->payload[0] =  mlme_subHeader.length_subID_type       & 0xFF;
-   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[0] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[1] = mlme_subHeader.length_subID_type        & 0xFF;
    
    len += 2;
   
@@ -427,8 +427,8 @@ port_INLINE uint8_t processIE_prependScheduleIE(
       IEEE802154E_DESC_TYPE_SHORT;
    
    // copy header
-   pkt->payload[0] = mlme_subHeader.length_subID_type & 0xFF;
-   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
+   pkt->payload[0] = (mlme_subHeader.length_subID_type >> 8)& 0xFF;
+   pkt->payload[1] = mlme_subHeader.length_subID_type       & 0xFF;
    
    len+=2;
   
