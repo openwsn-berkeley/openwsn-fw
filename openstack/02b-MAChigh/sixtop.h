@@ -72,7 +72,7 @@ typedef struct {
 // admin
 void      sixtop_init(void);
 void      sixtop_setKaPeriod(uint16_t kaPeriod);
-void      sixtop_setEBPeriod(uint16_t ebPeriod);
+void      sixtop_setEBPeriod(uint8_t ebPeriod);
 void      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
 void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells);

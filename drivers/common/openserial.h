@@ -53,9 +53,23 @@ enum {
 #define SERFRAME_PC2MOTE_SETROOT            ((uint8_t)'R')
 #define SERFRAME_PC2MOTE_DATA               ((uint8_t)'D')
 #define SERFRAME_PC2MOTE_TRIGGERSERIALECHO  ((uint8_t)'S')
-#define SERFRAME_PC2MOTE_SETKAPERIOD        ((uint8_t)'K')
+#define SERFRAME_PC2MOTE_COMMAND_GD         ((uint8_t)'G')
 
 //=========================== typedef =========================================
+
+enum {
+   COMMAND_SET_EBPERIOD          =  0,
+   COMMAND_SET_CHANNEL           =  1,
+   COMMAND_SET_KAPERIOD          =  2,
+   COMMAND_SET_DIOPERIOD         =  3,
+   COMMAND_SET_DAOPERIOD         =  4,
+   COMMAND_PING_MOTE             =  5,
+   COMMAND_SET_DAGRANK           =  6,
+   COMMAND_SET_SECURITY_STATUS   =  7,
+   COMMAND_SET_FRAMELENGTH       =  8,
+   COMMAND_SET_ACK_STATUS        =  9,
+   COMMAND_MAX                   = 10,
+};
 
 //=========================== module variables ================================
 

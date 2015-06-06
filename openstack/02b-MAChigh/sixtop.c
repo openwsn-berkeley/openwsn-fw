@@ -148,7 +148,7 @@ void sixtop_setKaPeriod(uint16_t kaPeriod) {
    } 
 }
 
-void sixtop_setEBPeriod(uint16_t ebPeriod) {
+void sixtop_setEBPeriod(uint8_t ebPeriod) {
    if(ebPeriod < SIXTOP_MINIMAL_EBPERIOD) {
       sixtop_vars.ebPeriod = SIXTOP_MINIMAL_EBPERIOD;
    } else {

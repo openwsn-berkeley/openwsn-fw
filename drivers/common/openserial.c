@@ -18,6 +18,8 @@
 #include "uart.h"
 #include "opentimers.h"
 #include "openhdlc.h"
+#include "schedule.h"
+#include "icmpv6rpl.h"
 
 //=========================== variables =======================================
 
@@ -36,6 +38,8 @@ owerror_t openserial_printInfoErrorCritical(
 void openserial_board_reset_cb(
    opentimer_id_t id
 );
+
+void openserial_goldenImageCommands();
 
 // HDLC output
 void outputHdlcOpen(void);
@@ -398,13 +402,9 @@ void openserial_stop() {
             //echo function must reset input buffer after reading the data.
             openserial_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
             break;   
-         case SERFRAME_PC2MOTE_SETKAPERIOD:
-            sixtop_setKaPeriod(((openserial_vars.inputBuf[1]<<8) & 0xFF00) | 
-                               (openserial_vars.inputBuf[2]      & 0x00FF)
-                              );
-            printf("byte 0: %x byte 1: %x\n",
-                   openserial_vars.inputBuf[1],
-                   openserial_vars.inputBuf[2]);
+         case SERFRAME_PC2MOTE_COMMAND_GD: 
+             // golden image command
+            openserial_goldenImageCommands();
             break;
          default:
             openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
@@ -422,6 +422,79 @@ void openserial_stop() {
    openserial_vars.inputBufFill  = 0;
    openserial_vars.busyReceiving = FALSE;
    ENABLE_INTERRUPTS();
+}
+
+void openserial_goldenImageCommands(){
+   uint8_t  input_buffer[7];
+   uint8_t  numDataBytes;
+   uint8_t  version;
+   uint8_t  type;
+   uint8_t  commandId;
+   uint8_t  commandLen;
+   uint8_t  comandParam_8;
+   uint16_t comandParam_16;
+   
+   numDataBytes = openserial_getNumDataBytes();
+   //copying the buffer
+   openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
+   version = openserial_vars.inputBuf[1];
+   type    = openserial_vars.inputBuf[2];
+   if (version != GOLDEN_IMAGE_VERSION && type != GOLDEN_IMAGE_TYPE) {
+      // the version of command and image type are wrong
+      // log this info and return
+      return;
+   }
+   commandId  = openserial_vars.inputBuf[3];
+   commandLen = openserial_vars.inputBuf[4];
+   
+   if (commandLen>2 || commandLen == 0) {
+       // the max command Len is 2, except ping commands
+       return;
+   } else {
+       if (commandLen == 1) {
+           comandParam_8 = openserial_vars.inputBuf[5];
+       } else {
+           // commandLen == 2
+           comandParam_16 = (openserial_vars.inputBuf[5]      & 0x00ff) | \
+                            ((openserial_vars.inputBuf[6]<<8) & 0xff00); 
+       }
+   }
+   
+   switch(commandId) {
+       case COMMAND_SET_EBPERIOD:
+           sixtop_setEBPeriod(comandParam_8); // one byte, in seconds
+           break;
+       case COMMAND_SET_CHANNEL:
+           ieee154e_setSingleChannel(comandParam_8); // one byte
+           break;
+       case COMMAND_SET_KAPERIOD: // two bytes, in slots
+           sixtop_setKaPeriod(comandParam_16);
+           break;
+       case COMMAND_SET_DIOPERIOD: // two bytes, in mili-seconds
+           icmpv6rpl_setDIOPeriod(comandParam_16);
+           break;
+       case COMMAND_SET_DAOPERIOD: // two bytes, in mili-seconds
+           icmpv6rpl_setDAOPeriod(comandParam_16);
+           break;
+       case COMMAND_PING_MOTE:
+           // this should not happen
+           break;
+       case COMMAND_SET_DAGRANK: // two bytes
+           neighbors_setMyDAGrank(comandParam_16);
+           break;
+       case COMMAND_SET_SECURITY_STATUS: // one byte
+           ieee154e_setIsSecurityEnabled(comandParam_8);
+           break;
+       case COMMAND_SET_FRAMELENGTH: // two bytes
+           schedule_setCustomFrameLength(comandParam_16);
+           break;
+       case COMMAND_SET_ACK_STATUS:
+           ieee154e_setIsAckEnabled(comandParam_8);
+           break;
+       default:
+           // wrong command ID
+           break;
+   }
 }
 
 /**
