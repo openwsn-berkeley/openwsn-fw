@@ -123,6 +123,7 @@ void sixtop_init() {
    sixtop_vars.dsn                = 0;
    sixtop_vars.mgtTaskCounter     = 0;
    sixtop_vars.kaPeriod           = MAXKAPERIOD;
+   sixtop_vars.ebPeriod           = EBTIMEOUT;
    
    sixtop_vars.maintenanceTimerId = opentimers_start(
       sixtop_vars.periodMaintenance,
@@ -144,6 +145,14 @@ void sixtop_setKaPeriod(uint16_t kaPeriod) {
       sixtop_vars.kaPeriod = MAXKAPERIOD;
    } else {
       sixtop_vars.kaPeriod = kaPeriod;
+   } 
+}
+
+void sixtop_setEBPeriod(uint16_t ebPeriod) {
+   if(ebPeriod < SIXTOP_MINIMAL_EBPERIOD) {
+      sixtop_vars.ebPeriod = SIXTOP_MINIMAL_EBPERIOD;
+   } else {
+      sixtop_vars.ebPeriod = ebPeriod;
    } 
 }
 
@@ -742,7 +751,7 @@ The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
    scheduleEntry_t* entry;
-   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%EBTIMEOUT;
+   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
    
    switch (sixtop_vars.mgtTaskCounter) {
       case 0:

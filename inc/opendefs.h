@@ -20,6 +20,11 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_MINOR     9
 #define OPENWSN_VERSION_PATCH     0
 
+// golden image version and type
+#define GOLDEN_IMAGE_VERSION      1
+#define GOLDEN_IMAGE_TYPE         1 // dagroot
+
+
 //to delimit the implementation of draft-thubert-6man-flow-label-for-rpl-03
 #define FLOW_LABEL_RPL_DOMAIN 1
 

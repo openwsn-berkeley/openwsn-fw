@@ -398,6 +398,14 @@ void openserial_stop() {
             //echo function must reset input buffer after reading the data.
             openserial_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
             break;   
+         case SERFRAME_PC2MOTE_SETKAPERIOD:
+            sixtop_setKaPeriod(((openserial_vars.inputBuf[1]<<8) & 0xFF00) | 
+                               (openserial_vars.inputBuf[2]      & 0x00FF)
+                              );
+            printf("byte 0: %x byte 1: %x\n",
+                   openserial_vars.inputBuf[1],
+                   openserial_vars.inputBuf[2]);
+            break;
          default:
             openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
                                   (errorparameter_t)cmdByte,

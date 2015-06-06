@@ -53,6 +53,7 @@ enum {
 #define SERFRAME_PC2MOTE_SETROOT            ((uint8_t)'R')
 #define SERFRAME_PC2MOTE_DATA               ((uint8_t)'D')
 #define SERFRAME_PC2MOTE_TRIGGERSERIALECHO  ((uint8_t)'S')
+#define SERFRAME_PC2MOTE_SETKAPERIOD        ((uint8_t)'K')
 
 //=========================== typedef =========================================
 

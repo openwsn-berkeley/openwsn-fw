@@ -483,6 +483,12 @@ void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t ind
    }
 }
 
+//===== setters
+
+void neighbors_setMyDAGrank(dagrank_t rank){
+    neighbors_vars.myDAGrank = rank;
+}
+
 //===== managing routing info
 
 /**

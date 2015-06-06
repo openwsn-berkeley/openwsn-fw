@@ -15,6 +15,11 @@
 
 //=========================== debug define ====================================
 
+//=========================== static ==========================================
+static const uint8_t chTemplate_default[] = {
+   5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
+};
+
 //=========================== define ==========================================
 
 #define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
@@ -206,10 +211,16 @@ typedef struct {
    // channel hopping
    uint8_t                   freq;                    // frequency of the current slot
    uint8_t                   asnOffset;               // offset inside the frame
+   uint8_t                   singleChannel;           // the single channel used for transmission
+   uint8_t                   chTemplate[16];          // storing the template of hopping sequence
    
    PORT_RADIOTIMER_WIDTH     radioOnInit;             // when within the slot the radio turns on
    PORT_RADIOTIMER_WIDTH     radioOnTics;             // how many tics within the slot the radio is on
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
+   
+   //control
+   bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
+   bool                      isSecurityEnabled;       // whether security is applied
 } ieee154e_vars_t;
 
 BEGIN_PACK
@@ -239,6 +250,11 @@ void               ieee154e_init(void);
 PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
+void               ieee154e_setIsAckEnabled(bool isEnabled);
+void               ieee154e_setSingleChannel(uint8_t channel);
+void               ieee154e_setIsSecurityEnabled(bool isEnabled);
+
+
 // events
 void               ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);

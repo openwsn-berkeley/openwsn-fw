@@ -105,6 +105,16 @@ void ieee154e_init() {
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
+   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
+   ieee154e_vars.isAckEnabled      = TRUE;
+   ieee154e_vars.isSecurityEnabled = FALSE;
+   // default hopping template
+   memcpy(
+       &(ieee154e_vars.chTemplate[0]),
+       chTemplate_default,
+       sizeof(ieee154e_vars.chTemplate)
+   );
+   
    if (idmanager_getIsDAGroot()==TRUE) {
       changeIsSync(TRUE);
    } else {
@@ -1445,7 +1455,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       }
       
       // check if ack requested
-      if (ieee802514_header.ackRequested==1) {
+      if (ieee802514_header.ackRequested==1 && ieee154e_vars.isAckEnabled == TRUE) {
          // arm rt5
          radiotimer_schedule(DURATION_rt5);
       } else {
@@ -1772,6 +1782,19 @@ port_INLINE void ieee154e_syncSlotOffset() {
    ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
 }
 
+
+void ieee154e_setIsAckEnabled(bool isEnabled){
+    ieee154e_vars.isAckEnabled = isEnabled;
+}
+
+void ieee154e_setSingleChannel(uint8_t channel){
+    ieee154e_vars.singleChannel = channel;
+}
+
+void ieee154e_setIsSecurityEnabled(bool isEnabled){
+    ieee154e_vars.isSecurityEnabled = isEnabled;
+}
+
 //======= synchronization
 
 void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
@@ -1956,7 +1979,12 @@ different channel offsets in the same slot.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
    // comment the following line out to disable channel hopping
-   return SYNCHRONIZING_CHANNEL; // single channel
+    if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
+        return ieee154e_vars.singleChannel; // single channel
+    } else {
+        // channel hopping enabled, use the channel depending on hopping template
+        return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%16];
+    }
    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
 

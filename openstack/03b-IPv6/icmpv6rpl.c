@@ -563,3 +563,21 @@ void sendDAO() {
       openqueue_freePacketBuffer(msg);
    }
 }
+
+void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
+    icmpv6rpl_vars.periodDIO = dioPeriod;
+    opentimers_setPeriod(
+        icmpv6rpl_vars.timerIdDIO,
+        TIME_MS,
+        icmpv6rpl_vars.periodDIO
+     );
+}
+
+void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
+    icmpv6rpl_vars.periodDAO = daoPeriod;
+    opentimers_setPeriod(
+        icmpv6rpl_vars.timerIdDAO,
+        TIME_MS,
+        icmpv6rpl_vars.periodDAO
+     );
+}
