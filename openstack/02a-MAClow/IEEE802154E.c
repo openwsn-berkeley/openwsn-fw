@@ -1788,6 +1788,13 @@ void ieee154e_setIsAckEnabled(bool isEnabled){
 }
 
 void ieee154e_setSingleChannel(uint8_t channel){
+    if (
+        (channel < 11 || channel > 26) &&
+         channel != 0   // channel == 0 means channel hopping is enabled
+    ) {
+        // log wrong channel, should be  : (0, or 11~26)
+        return;
+    }
     ieee154e_vars.singleChannel = channel;
 }
 

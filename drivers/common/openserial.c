@@ -483,13 +483,31 @@ void openserial_goldenImageCommands(){
            neighbors_setMyDAGrank(comandParam_16);
            break;
        case COMMAND_SET_SECURITY_STATUS: // one byte
-           ieee154e_setIsSecurityEnabled(comandParam_8);
+           if (comandParam_8 ==1) {
+               ieee154e_setIsSecurityEnabled(TRUE);
+           } else {
+               if (comandParam_8 == 0) {
+                  ieee154e_setIsSecurityEnabled(FALSE);
+               } else {
+                   // security only can be 1 or 0 
+                   break;
+               }
+           }
            break;
        case COMMAND_SET_FRAMELENGTH: // two bytes
            schedule_setCustomFrameLength(comandParam_16);
            break;
        case COMMAND_SET_ACK_STATUS:
-           ieee154e_setIsAckEnabled(comandParam_8);
+           if (comandParam_8 == 1) {
+               ieee154e_setIsAckEnabled(TRUE);
+           } else {
+               if (comandParam_8 == 0) {
+                   ieee154e_setIsAckEnabled(FALSE);
+               } else {
+                   // ack reply
+                   break;
+               }
+           }
            break;
        default:
            // wrong command ID
