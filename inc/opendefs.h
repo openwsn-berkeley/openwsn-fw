@@ -22,7 +22,9 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 
 // golden image version and type
 #define GOLDEN_IMAGE_VERSION      1
-#define GOLDEN_IMAGE_TYPE         1 // dagroot
+// define golden image type: only one can be used
+#define GOLDEN_IMAGE_ROOT         1 // dagroot
+//#define GOLDEN_IMAGE_SNIFFER        2 // sniffer
 
 
 //to delimit the implementation of draft-thubert-6man-flow-label-for-rpl-03

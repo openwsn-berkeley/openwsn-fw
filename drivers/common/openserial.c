@@ -162,6 +162,44 @@ owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
    return E_SUCCESS;
 }
 
+owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length) {
+   uint8_t  i;
+   INTERRUPT_DECLARATION();
+   
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_PACKET);
+   for (i=0;i<length;i++){
+      outputHdlcWrite(buffer[i]);
+   }
+   outputHdlcClose();
+   
+      // flush buffer
+   uart_clearTxInterrupts();
+   uart_clearRxInterrupts();          // clear possible pending interrupts
+   uart_enableInterrupts();           // Enable USCI_A1 TX & RX interrupt
+   openserial_vars.mode=MODE_OUTPUT;
+   if (openserial_vars.outputBufFilled) {
+#ifdef FASTSIM
+      uart_writeCircularBuffer_FASTSIM(
+         openserial_vars.outputBuf,
+         &openserial_vars.outputBufIdxR,
+         &openserial_vars.outputBufIdxW
+      );
+#else
+      uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
+#endif
+   } else {
+      openserial_stop();
+   }
+   
+   
+   ENABLE_INTERRUPTS();
+   
+   return E_SUCCESS;
+}
+
 owerror_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {
@@ -439,11 +477,24 @@ void openserial_goldenImageCommands(){
    openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
    version = openserial_vars.inputBuf[1];
    type    = openserial_vars.inputBuf[2];
-   if (version != GOLDEN_IMAGE_VERSION && type != GOLDEN_IMAGE_TYPE) {
-      // the version of command and image type are wrong
+   if (version != GOLDEN_IMAGE_VERSION) {
+      // the version of command is wrong
       // log this info and return
       return;
    }
+   
+#ifdef GOLDEN_IMAGE_ROOT 
+   if ( type != GOLDEN_IMAGE_ROOT ){
+       // image type is wrong
+       return;
+   }
+#endif
+#ifdef GOLDEN_IMAGE_SNIFFER
+   if (type != GOLDEN_IMAGE_SNIFFER) {
+       // image type is wrong
+       return;
+   }
+#endif
    commandId  = openserial_vars.inputBuf[3];
    commandLen = openserial_vars.inputBuf[4];
    
@@ -465,7 +516,14 @@ void openserial_goldenImageCommands(){
            sixtop_setEBPeriod(comandParam_8); // one byte, in seconds
            break;
        case COMMAND_SET_CHANNEL:
-           ieee154e_setSingleChannel(comandParam_8); // one byte
+#ifdef GOLDEN_IMAGE_ROOT
+               //  this is dagroot image
+               ieee154e_setSingleChannel(comandParam_8); // one byte
+#endif
+#ifdef GOLDEN_IMAGE_SNIFFER
+               // this is sniffer image
+               sniffer_setListeningChannel(comandParam_8); // one byte
+#endif
            break;
        case COMMAND_SET_KAPERIOD: // two bytes, in slots
            sixtop_setKaPeriod(comandParam_16);
