@@ -7,8 +7,8 @@
 \author Luigi Alfredo Grieco <alfredo.grieco@poliba.it>
 */
 
-#ifndef __SECURITY_H
-#define __SECURITY_H
+#ifndef __IEEE802154_SECURITY_H
+#define __IEEE802154_SECURITY_H
 
 /**
 \addtogroup helpers
