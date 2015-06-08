@@ -821,6 +821,8 @@ port_INLINE void sixtop_sendEB() {
    // reserve space for EB-specific header
    // reserving for IEs.
    len += processIE_prependSlotframeLinkIE(eb);
+   len += processIE_prependChannelHoppingIE(eb);
+   len += processIE_prependTSCHTimeslotIE(eb);
    len += processIE_prependSyncIE(eb);
    
    //add IE header 
@@ -1031,7 +1033,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
    //candidate IE header  if type ==0 header IE if type==1 payload IE
    temp_8b = *((uint8_t*)(pkt->payload)+ptr);
    ptr++;
-   temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<< 8);
+   temp_16b = (temp_8b<<8) + (*((uint8_t*)(pkt->payload)+ptr));
    ptr++;
    *lenIE = ptr;
    if(
@@ -1064,7 +1066,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
            //read sub IE header
            temp_8b = *((uint8_t*)(pkt->payload)+ptr);
            ptr = ptr + 1;
-           temp_16b = temp_8b  +(*((uint8_t*)(pkt->payload)+ptr) << 8);
+           temp_16b = (temp_8b << 8) + (*((uint8_t*)(pkt->payload)+ptr));
            ptr = ptr + 1;
            len = len - 2; //remove header fields len
            if(

@@ -71,6 +71,8 @@
 #define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID_SHIFT     1
 #define IEEE802154E_MLME_TIMESLOT_IE_SUBID                 0x1c
 #define IEEE802154E_MLME_TIMESLOT_IE_SUBID_SHIFT           1
+#define IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID           0x09
+#define IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID_SHIFT     1
 
 #define IEEE802154E_MLME_IE_GROUPID                        0x01
 #define IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID      0x1E
@@ -120,6 +122,9 @@ typedef enum {
    S_TXACK                   = 0x18,   // Tx ACK SFD received, sending bytes
    S_RXPROC                  = 0x19,   // processing received data
 } ieee154e_state_t;
+
+#define  TIMESLOT_TEMPLATE_ID         0x00
+#define  CHANNELHOPPING_TEMPLATE_ID   0x00
 
 // Atomic durations
 // expressed in 32kHz ticks:
@@ -206,6 +211,9 @@ typedef struct {
    // channel hopping
    uint8_t                   freq;                    // frequency of the current slot
    uint8_t                   asnOffset;               // offset inside the frame
+   // template ID
+   uint8_t                   tsTemplateId;            // timeslot template id
+   uint8_t                   chTemplateId;            // channel hopping tempalte id
    
    PORT_RADIOTIMER_WIDTH     radioOnInit;             // when within the slot the radio turns on
    PORT_RADIOTIMER_WIDTH     radioOnTics;             // how many tics within the slot the radio is on
