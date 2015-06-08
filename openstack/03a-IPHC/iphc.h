@@ -13,7 +13,7 @@
 //=========================== define ==========================================
 
 #define IPHC_DEFAULT_HOP_LIMIT    65
-#define IPv6HOP_HDR_LEN           3
+#define IPv6HOP_HDR_LEN           2  // tengfei: should be 2
 
 enum IPHC_enums {
    IPHC_DISPATCH             = 5,
@@ -51,14 +51,18 @@ enum NHC_enums {
    // UDP Header Encoding            starts with b1111 0xxx
    NHC_UDP_MASK              = 0xf8,          // b1111 1000
    NHC_UDP_ID                = 0xf0,          // b1111 0000
+   // EID Encoding
+   NHC_EID_MASK              = 0x0e,
+   NHC_EID_HOP_VAL           = 0x00,
+   NHC_EID_ROUTING_VAL       = 0x01,
+   NHC_EID_IPv6_VAL          = 0x07,
 };
 
-enum NHC_IPv6HOP_enums {
-   NHC_IPv6HOP_MASK          = 0x0e,
-   NHC_IPv6HOP_VAL           = 0x0e,
-   NHC_HOP_NH_MASK           = 0x01,
+enum NHC_NH_enums {
+   NHC_NH_MASK               = 0x01,
+   NHC_NH_INLINE             = 0x00,
+   NHC_NH_COMPRESSED         = 0x01,
 };
-
 
 enum NHC_UDP_enums {
    NHC_UDP_C_MASK            = 0x40,
@@ -113,6 +117,11 @@ enum IPHC_DAM_enums {
    IPHC_DAM_ELIDED           = 3,
 };
 
+enum IPHC_OUTER_INNER_enums {
+    IPHC_OUTER               = 0,
+    IPHC_INNER               = 1,
+};
+
 //=========================== typedef =========================================
 
 typedef struct {
@@ -120,6 +129,8 @@ typedef struct {
    uint32_t    flow_label;
    bool        next_header_compressed;
    uint8_t     next_header;
+   uint8_t*    routing_header;
+   uint8_t*    hopByhop_option;
    uint8_t     hop_limit;
    open_addr_t src;
    open_addr_t dest;
@@ -176,7 +187,8 @@ END_PACK
 void          iphc_init(void);
 owerror_t     iphc_sendFromForwarding(
    OpenQueueEntry_t*    msg, 
-   ipv6_header_iht*     ipv6_header, 
+   ipv6_header_iht*     ipv6_outer_header, 
+   ipv6_header_iht*     ipv6_inner_header, 
    rpl_option_ht*       rpl_option, 
    uint32_t*            flow_label,
    uint8_t              fw_SendOrfw_Rcv
@@ -184,6 +196,25 @@ owerror_t     iphc_sendFromForwarding(
 owerror_t     iphc_sendFromBridge(OpenQueueEntry_t *msg);
 void          iphc_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 void          iphc_receive(OpenQueueEntry_t *msg);
+// called by forwarding when IPHC inner header required
+owerror_t iphc_prependIPv6Header(
+   OpenQueueEntry_t*    msg,
+   uint8_t              tf,
+   uint32_t             value_flowLabel,
+   bool                 nh,
+   uint8_t              value_nextHeader,
+   uint8_t              hlim,
+   uint8_t              value_hopLimit,
+   bool                 cid,
+   bool                 sac,
+   uint8_t              sam,
+   bool                 m,
+   bool                 dac,
+   uint8_t              dam,
+   open_addr_t*         value_dest,
+   open_addr_t*         value_src,
+   uint8_t              fw_SendOrfw_Rcv
+);
 
 /**
 \}

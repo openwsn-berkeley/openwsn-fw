@@ -34,8 +34,8 @@ As defined in http://tools.ietf.org/html/rfc6554#section-3.
 */
 BEGIN_PACK
 typedef struct {
-   uint8_t    nextHeader;    ///< Header immediately following.
-   uint8_t    HdrExtLen;     ///< In 8-octet units, excluding first 8.
+   uint8_t    nextHeader;    ///< Header immediately following in NHC encoding.
+   uint8_t    HdrExtLen;     ///< In octet units, excluding first 2.
    uint8_t    RoutingType;   ///< Set to 3 for "Source Routing Header".
    uint8_t    SegmentsLeft;  ///< Number of addresses still to visit.
    uint8_t    CmprICmprE;    ///< Number of prefix octets elided for all (CmprI) and last (CmprE) segment
@@ -53,7 +53,8 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg);
 void      forwarding_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void      forwarding_receive(
    OpenQueueEntry_t*    msg,
-   ipv6_header_iht*     ipv6_header,
+   ipv6_header_iht*     ipv6_outer_header,
+   ipv6_header_iht*     ipv6_inner_header,
    ipv6_hopbyhop_iht*   ipv6_hop_header,
    rpl_option_ht*       rpl_option
 );

@@ -13,25 +13,22 @@
 //=========================== prototypes ======================================
 
 //===== IPv6 header
-owerror_t iphc_prependIPv6Header(
-   OpenQueueEntry_t*    msg,
-   uint8_t              tf,
-   uint32_t             value_flowLabel,
-   bool                 nh,
-   uint8_t              value_nextHeader,
-   uint8_t              hlim,
-   uint8_t              value_hopLimit,
-   bool                 cid,
-   bool                 sac,
-   uint8_t              sam,
-   bool                 m,
-   bool                 dac,
-   uint8_t              dam,
-   open_addr_t*         value_dest,
-   open_addr_t*         value_src,
-   uint8_t              fw_SendOrfw_Rcv
+void iphc_retrieveIPv6Header(
+   OpenQueueEntry_t* msg, 
+   ipv6_header_iht* ipv6_outer_header,
+   ipv6_header_iht* ipv6_inner_header
 );
-void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header);
+void iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
+   open_addr_t*         temp_addr_64b,
+   uint8_t*             dispatch,
+   uint8_t*             tf,
+   bool*                nh,
+   uint8_t*             hlim,
+   uint8_t*             sam,
+   uint8_t*             dam,
+   OpenQueueEntry_t*    msg,
+   ipv6_header_iht*     ipv6_header,
+   uint8_t              previousLen);
 
 //===== IPv6 hop-by-hop header
 void iphc_prependIPv6HopByHopHeader(
@@ -54,7 +51,8 @@ void      iphc_init() {
 // send from upper layer: I need to add 6LoWPAN header
 owerror_t iphc_sendFromForwarding(
       OpenQueueEntry_t* msg,
-      ipv6_header_iht*  ipv6_header,
+      ipv6_header_iht*  ipv6_outer_header,
+      ipv6_header_iht*  ipv6_inner_header,
       rpl_option_ht*    rpl_option,
       uint32_t*         flow_label,
       uint8_t           fw_SendOrfw_Rcv
@@ -88,7 +86,7 @@ owerror_t iphc_sendFromForwarding(
    }
    
    //discard the packet.. hop limit reached.
-   if (ipv6_header->hop_limit==0) {
+   if (ipv6_outer_header->hop_limit==0) {
       openserial_printError(COMPONENT_IPHC,ERR_HOP_LIMIT_REACHED,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
@@ -129,7 +127,7 @@ owerror_t iphc_sendFromForwarding(
    } else {
      //not the same prefix. so the packet travels to another network
      //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
-     if(ipv6_header->next_header!=IANA_IPv6ROUTE){ 
+     if(ipv6_outer_header->next_header!=IANA_IPv6ROUTE){ 
       sam = IPHC_SAM_128B;
       dam = IPHC_DAM_128B;
       p_dest = &(msg->l3_destinationAdd);
@@ -144,14 +142,16 @@ owerror_t iphc_sendFromForwarding(
    }
    //check if we are forwarding a packet and it comes with the next header compressed. We want to preserve that state in the following hop.
    
-   if ((fw_SendOrfw_Rcv==PCKTFORWARD) && ipv6_header->next_header_compressed) nh=IPHC_NH_COMPRESSED;
+//   if ((fw_SendOrfw_Rcv==PCKTFORWARD) && ipv6_outer_header->next_header_compressed) nh=IPHC_NH_COMPRESSED;
+   // the next header will be compressed if it's set to "compressed"
+   if (ipv6_outer_header->next_header_compressed) nh=IPHC_NH_COMPRESSED;
    
    // decrement the packet's hop limit
-   ipv6_header->hop_limit--;
+   ipv6_outer_header->hop_limit--;
    
    //prepend Option hop by hop header except when src routing and dst is not 0xffff
    //-- this is a little trick as src routing is using an option header set to 0x00
-   next_header=msg->l4_protocol;
+   next_header=*((uint8_t*)(msg->payload)); // next_header is nhc ipv6 header
    #ifndef FLOW_LABEL_RPL_DOMAIN
    if (rpl_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE 
        && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE
@@ -164,7 +164,7 @@ owerror_t iphc_sendFromForwarding(
    //then regular header
 
 #ifdef FLOW_LABEL_RPL_DOMAIN
-   if(ipv6_header->next_header!=IANA_IPv6ROUTE  && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE)   {
+   if(ipv6_outer_header->next_header!=IANA_IPv6ROUTE  && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE)   {
 	   //only for upstream traffic and not DIOs
 	   tf=IPHC_TF_3B;
    }else {
@@ -178,7 +178,7 @@ owerror_t iphc_sendFromForwarding(
             nh,
             next_header, 
             IPHC_HLIM_INLINE,
-            ipv6_header->hop_limit,
+            ipv6_outer_header->hop_limit,
             IPHC_CID_NO,
             IPHC_SAC_STATELESS,
             sam,
@@ -191,7 +191,6 @@ owerror_t iphc_sendFromForwarding(
             )==E_FAIL) {
       return E_FAIL;
    }
-   
    return sixtop_send(msg);
 }
 
@@ -218,21 +217,21 @@ void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 }
 
 void iphc_receive(OpenQueueEntry_t* msg) {
-   ipv6_header_iht      ipv6_header;
+   ipv6_header_iht      ipv6_outer_header;
+   ipv6_header_iht      ipv6_inner_header;
    ipv6_hopbyhop_iht    ipv6_hop_header;
    rpl_option_ht        rpl_option;
    
    msg->owner      = COMPONENT_IPHC;
    
    // then regular header
-   iphc_retrieveIPv6Header(msg,&ipv6_header);
+   iphc_retrieveIPv6Header(msg,&ipv6_outer_header,&ipv6_inner_header);
    
    if (idmanager_getIsDAGroot()==FALSE ||
-      packetfunctions_isBroadcastMulticast(&(ipv6_header.dest))) {
-      packetfunctions_tossHeader(msg,ipv6_header.header_length);
+      packetfunctions_isBroadcastMulticast(&(ipv6_outer_header.dest))) {
+      packetfunctions_tossHeader(msg,ipv6_outer_header.header_length);
       
-      if (ipv6_header.next_header==IANA_IPv6HOPOPT) {
-         
+      if (ipv6_outer_header.next_header==IANA_IPv6HOPOPT) {
          // retrieve hop-by-hop header (includes RPL option)
          iphc_retrieveIPv6HopByHopHeader(
             msg,
@@ -250,7 +249,8 @@ void iphc_receive(OpenQueueEntry_t* msg) {
       // send up the stack
       forwarding_receive(
          msg,
-         &ipv6_header,
+         &ipv6_outer_header,
+         &ipv6_inner_header,
          &ipv6_hop_header,
          &rpl_option
       );
@@ -492,7 +492,7 @@ owerror_t iphc_prependIPv6Header(
 /**
 \brief Retrieve an IPv6 header from a message.
 */
-void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header) {
+void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_header, ipv6_header_iht* ipv6_inner_header) {
    uint8_t         temp_8b;
    open_addr_t     temp_addr_16b;
    open_addr_t     temp_addr_64b;
@@ -503,26 +503,142 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
    uint8_t         sam;
    uint8_t         dam;
    
-   ipv6_header->header_length = 0;
+   uint8_t         extention_header_length;
    
+   ipv6_outer_header->header_length = 0;
+   ipv6_inner_header->header_length = 0;
+   // four steps to retrieve:
+   // step 1. IPHC outer header
+   // step 2. IPv6 extention header (NHC format)
+   // step 3. IPv6 header (NHC format)
+   // step 4. IPv6 inner header
+   
+   //======================= 1. IPHC outer header ==============================
+   iphc_retrieveIphcHeader(&temp_addr_16b, &temp_addr_64b,&dispatch,&tf,&nh,&hlim,
+                           &sam,
+                           &dam,
+                           msg,
+                           ipv6_outer_header,
+                           0);
+   
+   //======================= 2. IPv6 extention header ==========================
+   extention_header_length = 0;
+   if (ipv6_outer_header->next_header_compressed==TRUE) {
+      // During the parsing of the nh field, we found that the next header was
+      // compressed. We now identify which next (compressed) header this is, and
+      // populate the ipv6_header->next_header field accordingly. It's the role of
+      // the appropriate transport module to decompress the header.
+      
+      temp_8b   = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length);
+      
+      if        ( (temp_8b & NHC_UDP_MASK) == NHC_UDP_ID) {
+         ipv6_outer_header->next_header = IANA_UDP;
+      } else {
+          switch((temp_8b & NHC_EID_MASK)>>1) {
+          case NHC_EID_HOP_VAL:
+              // hop-by-hop header
+              ipv6_outer_header->next_header     = IANA_IPv6HOPOPT;
+//              ipv6_outer_header->next_header_compressed 
+//                                                 = temp_8b & NHC_NH_MASK;
+              ipv6_outer_header->hopByhop_option = (uint8_t*)(msg->payload) + \
+                                                   ipv6_outer_header->header_length;
+              // hopByhop option header legnth
+              extention_header_length           += 2+(*((uint8_t*)(msg->payload)+ipv6_outer_header->header_length+1));
+              break;
+          case NHC_EID_ROUTING_VAL:
+              // routing header
+              ipv6_outer_header->next_header     = IANA_IPv6ROUTE;
+//              ipv6_outer_header->next_header_compressed 
+//                                                 = temp_8b & NHC_NH_MASK;
+              ipv6_outer_header->routing_header  = (uint8_t*)(msg->payload) + \
+                                                   ipv6_outer_header->header_length;
+              extention_header_length           += 2+(*((uint8_t*)(msg->payload)+ipv6_outer_header->header_length+1));
+              break;
+          case NHC_EID_IPv6_VAL:
+              // next header is IPHC inner header, we will process below
+              break;
+          default:
+              // the next header could be another IPv6 extension header
+              ipv6_outer_header->next_header = IANA_UNDEFINED;
+              openserial_printError(
+                 COMPONENT_IPHC,
+                 ERR_6LOWPAN_UNSUPPORTED,
+                 (errorparameter_t)11,
+                 (errorparameter_t)ipv6_outer_header->next_header
+              );
+          }
+      } 
+   } else {
+         // the next header could be an IPv6 extension header, or malformed
+         ipv6_outer_header->next_header = IANA_UNDEFINED;
+         openserial_printError(
+            COMPONENT_IPHC,
+            ERR_6LOWPAN_UNSUPPORTED,
+            (errorparameter_t)12,
+            (errorparameter_t)ipv6_outer_header->next_header
+         );
+   }
+   //======================= 3. IPv6 header ====================================
+   temp_8b = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length + \
+                                        extention_header_length);
+   if (((temp_8b & NHC_EID_MASK)>>1) == NHC_EID_IPv6_VAL) {
+       if (extention_header_length == 0 && ipv6_outer_header->next_header != IANA_UNDEFINED) {
+           // no next header found at step 2, set next header as my IPv6 header
+           // since there is no IANA for ipv6 header yet, use the NHC extention  
+           // header identifier instead temporarily. 
+           ipv6_outer_header->next_header = temp_8b;
+       }
+       extention_header_length += sizeof(uint8_t);
+   } else {
+         // the next header could be an IPv6 extension header, or malformed
+         ipv6_outer_header->next_header = IANA_UNDEFINED;
+         openserial_printError(
+            COMPONENT_IPHC,
+            ERR_6LOWPAN_UNSUPPORTED,
+            (errorparameter_t)13,
+            (errorparameter_t)ipv6_outer_header->next_header
+         );
+   }
+   //======================= 4. IPHC inner header ==============================
+   iphc_retrieveIphcHeader(&temp_addr_16b, &temp_addr_64b,&dispatch,&tf,&nh,&hlim,
+                           &sam,
+                           &dam,
+                           msg,
+                           ipv6_inner_header,
+                           extention_header_length + ipv6_outer_header->header_length);
+}
+
+void iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
+   open_addr_t*         temp_addr_64b,
+   uint8_t*             dispatch,
+   uint8_t*             tf,
+   bool*                nh,
+   uint8_t*             hlim,
+   uint8_t*             sam,
+   uint8_t*             dam,
+   OpenQueueEntry_t*    msg,
+   ipv6_header_iht*     ipv6_header,
+   uint8_t              previousLen){
+       
+   uint8_t temp_8b;
    // header
-   temp_8b    = *((uint8_t*)(msg->payload)+ipv6_header->header_length);
-   dispatch   = (temp_8b >> IPHC_DISPATCH)  & 0x07;   // 3b
-   tf         = (temp_8b >> IPHC_TF)        & 0x03;   // 2b
-   nh         = (temp_8b >> IPHC_NH)        & 0x01;   // 1b
-   hlim       = (temp_8b >> IPHC_HLIM)      & 0x03;   // 2b
+   temp_8b    = *((uint8_t*)(msg->payload)+ipv6_header->header_length+previousLen);
+   *dispatch  = (temp_8b >> IPHC_DISPATCH)  & 0x07;   // 3b
+   *tf        = (temp_8b >> IPHC_TF)        & 0x03;   // 2b
+   *nh        = (temp_8b >> IPHC_NH)        & 0x01;   // 1b
+   *hlim      = (temp_8b >> IPHC_HLIM)      & 0x03;   // 2b
    ipv6_header->header_length += sizeof(uint8_t);
-   temp_8b    = *((uint8_t*)(msg->payload)+ipv6_header->header_length);
+   temp_8b    = *((uint8_t*)(msg->payload)+ipv6_header->header_length+previousLen);
    // cid unused
    // sac unused
-   sam        = (temp_8b >> IPHC_SAM)       & 0x03;   // 2b
+   *sam       = (temp_8b >> IPHC_SAM)       & 0x03;   // 2b
    // m unused
    // dac unused
-   dam        = (temp_8b >> IPHC_DAM)       & 0x03;   // 2b
+   *dam       = (temp_8b >> IPHC_DAM)       & 0x03;   // 2b
    ipv6_header->header_length += sizeof(uint8_t);
    
    // dispatch
-   switch (dispatch) {
+   switch (*dispatch) {
       case IPHC_DISPATCH_IPHC:
          break;
       default:
@@ -530,21 +646,21 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
             COMPONENT_IPHC,
             ERR_6LOWPAN_UNSUPPORTED,
             (errorparameter_t)5,
-            (errorparameter_t)dispatch
+            (errorparameter_t)(*dispatch)
          );
          break;
    }
    
    // flowlabel
-   switch (tf) {
+   switch (*tf) {
       case IPHC_TF_3B:
 
          ipv6_header->flow_label        = 0;
-         ipv6_header->flow_label       |= ((uint32_t) *((uint8_t*)(msg->payload)+ipv6_header->header_length)) << 0;
+         ipv6_header->flow_label       |= ((uint32_t) *((uint8_t*)(msg->payload)+ipv6_header->header_length+previousLen)) << 0;
          ipv6_header->header_length    += sizeof(uint8_t);
-         ipv6_header->flow_label       |= ((uint32_t) *((uint8_t*)(msg->payload)+ipv6_header->header_length)) << 8;
+         ipv6_header->flow_label       |= ((uint32_t) *((uint8_t*)(msg->payload)+ipv6_header->header_length+previousLen)) << 8;
          ipv6_header->header_length    += sizeof(uint8_t);
-         ipv6_header->flow_label       |= ((uint32_t) *((uint8_t*)(msg->payload)+ipv6_header->header_length)) << 16;
+         ipv6_header->flow_label       |= ((uint32_t) *((uint8_t*)(msg->payload)+ipv6_header->header_length+previousLen)) << 16;
          ipv6_header->header_length    += sizeof(uint8_t);
          break;            
       case IPHC_TF_ELIDED:
@@ -559,17 +675,17 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
             COMPONENT_IPHC,
             ERR_6LOWPAN_UNSUPPORTED,
             (errorparameter_t)6,
-            (errorparameter_t)tf
+            (errorparameter_t)(*tf)
          );
          break;
    }
    
    // next header
-   switch (nh) {
+   switch (*nh) {
       case IPHC_NH_INLINE:
          // Full 8 bits for Next Header are carried in-line
          ipv6_header->next_header_compressed = FALSE;
-         ipv6_header->next_header            = *((uint8_t*)(msg->payload)+ipv6_header->header_length);
+         ipv6_header->next_header            = *((uint8_t*)(msg->payload)+ipv6_header->header_length+previousLen);
          ipv6_header->header_length         += sizeof(uint8_t);
       
          break;
@@ -585,15 +701,15 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
             COMPONENT_IPHC,
             ERR_6LOWPAN_UNSUPPORTED,
             (errorparameter_t)7,
-            (errorparameter_t)nh
+            (errorparameter_t)(*nh)
          );
          break;
    }
    
    // hop limit
-   switch (hlim) {
+   switch (*hlim) {
       case IPHC_HLIM_INLINE:
-         ipv6_header->hop_limit         = *((uint8_t*)(msg->payload+ipv6_header->header_length));
+         ipv6_header->hop_limit         = *((uint8_t*)(msg->payload+ipv6_header->header_length+previousLen));
          ipv6_header->header_length    += sizeof(uint8_t);
          break;
       case IPHC_HLIM_1:
@@ -610,29 +726,29 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
             COMPONENT_IPHC,
             ERR_6LOWPAN_UNSUPPORTED,
             (errorparameter_t)8,
-            (errorparameter_t)hlim
+            (errorparameter_t)(*hlim)
          );
          break;
    }
    
    // source address
-   switch (sam) {
+   switch (*sam) {
       case IPHC_SAM_ELIDED:
          packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&(msg->l2_nextORpreviousHop),&ipv6_header->src);
          break;
       case IPHC_SAM_16B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length)),ADDR_16B,&temp_addr_16b,OW_BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length+previousLen)),ADDR_16B,temp_addr_16b,OW_BIG_ENDIAN);
          ipv6_header->header_length += 2*sizeof(uint8_t);
-         packetfunctions_mac16bToMac64b(&temp_addr_16b,&temp_addr_64b);
-         packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&temp_addr_64b,&ipv6_header->src);
+         packetfunctions_mac16bToMac64b(temp_addr_16b,temp_addr_64b);
+         packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),temp_addr_64b,&ipv6_header->src);
          break;
       case IPHC_SAM_64B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length)),ADDR_64B,&temp_addr_64b,OW_BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length+previousLen)),ADDR_64B,temp_addr_64b,OW_BIG_ENDIAN);
          ipv6_header->header_length += 8*sizeof(uint8_t);
-         packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&temp_addr_64b,&ipv6_header->src);
+         packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),temp_addr_64b,&ipv6_header->src);
          break;
       case IPHC_SAM_128B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length)),ADDR_128B,&ipv6_header->src,OW_BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length+previousLen)),ADDR_128B,&ipv6_header->src,OW_BIG_ENDIAN);
          ipv6_header->header_length += 16*sizeof(uint8_t);
          break;
       default:
@@ -640,29 +756,29 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
             COMPONENT_IPHC,
             ERR_6LOWPAN_UNSUPPORTED,
             (errorparameter_t)9,
-            (errorparameter_t)sam
+            (errorparameter_t)(*sam)
          );
          break;
    }
    
    // destination address
-   switch (dam) {
+   switch (*dam) {
       case IPHC_DAM_ELIDED:
          packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),idmanager_getMyID(ADDR_64B),&(ipv6_header->dest));
          break;
       case IPHC_DAM_16B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length)),ADDR_16B,&temp_addr_16b,OW_BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length+previousLen)),ADDR_16B,temp_addr_16b,OW_BIG_ENDIAN);
          ipv6_header->header_length += 2*sizeof(uint8_t);
-         packetfunctions_mac16bToMac64b(&temp_addr_16b,&temp_addr_64b);
-         packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&temp_addr_64b,&ipv6_header->dest);
+         packetfunctions_mac16bToMac64b(temp_addr_16b,temp_addr_64b);
+         packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),temp_addr_64b,&ipv6_header->dest);
          break;
       case IPHC_DAM_64B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length)),ADDR_64B,&temp_addr_64b,OW_BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length+previousLen)),ADDR_64B,temp_addr_64b,OW_BIG_ENDIAN);
          ipv6_header->header_length += 8*sizeof(uint8_t);
-         packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&temp_addr_64b,&ipv6_header->dest);
+         packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),temp_addr_64b,&ipv6_header->dest);
          break;
       case IPHC_DAM_128B:
-         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length)),ADDR_128B,&ipv6_header->dest,OW_BIG_ENDIAN);
+         packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length+previousLen)),ADDR_128B,&ipv6_header->dest,OW_BIG_ENDIAN);
          ipv6_header->header_length += 16*sizeof(uint8_t);
          break;
       default:
@@ -670,45 +786,9 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_header
             COMPONENT_IPHC,
             ERR_6LOWPAN_UNSUPPORTED,
             (errorparameter_t)10,
-            (errorparameter_t)dam
+            (errorparameter_t)(*dam)
          );
          break;
-   }
-   
-   if (ipv6_header->next_header_compressed==TRUE) {
-      // During the parsing of the nh field, we found that the next header was
-      // compressed. We now identify which next (compressed) header this is, and
-      // populate the ipv6_header->next_header field accordingly. It's the role of
-      // the appropriate transport module to decompress the header.
-      
-      temp_8b   = *((uint8_t*)(msg->payload)+ipv6_header->header_length);
-      
-      if        ( (temp_8b & NHC_UDP_MASK) == NHC_UDP_ID) {
-         ipv6_header->next_header = IANA_UDP;
-      } else if ( (temp_8b & NHC_IPv6EXT_MASK) == NHC_IPv6EXT_ID){
-         if( (temp_8b & NHC_IPv6HOP_MASK) == NHC_IPv6HOP_VAL){
-            // hop-by-hop header
-            ipv6_header->next_header = IANA_IPv6HOPOPT;
-         } else {
-            // the next header could be another IPv6 extension header
-            ipv6_header->next_header = IANA_UNDEFINED;
-            openserial_printError(
-               COMPONENT_IPHC,
-               ERR_6LOWPAN_UNSUPPORTED,
-               (errorparameter_t)11,
-               (errorparameter_t)ipv6_header->next_header
-            );
-         }
-      } else {
-         // the next header could be an IPv6 extension header, or malformed
-         ipv6_header->next_header = IANA_UNDEFINED;
-         openserial_printError(
-            COMPONENT_IPHC,
-            ERR_6LOWPAN_UNSUPPORTED,
-            (errorparameter_t)12,
-            (errorparameter_t)ipv6_header->next_header
-         );
-      }
    }
 }
 
@@ -789,7 +869,7 @@ void iphc_retrieveIPv6HopByHopHeader(
    hopbyhop_header->headerlen    += sizeof(uint8_t);
    
    // next header
-   switch (hopbyhop_header->lowpan_nhc & NHC_HOP_NH_MASK) {
+   switch (hopbyhop_header->lowpan_nhc & NHC_NH_MASK) {
       case IPHC_NH_INLINE:
          // full 8 bits for Next Header are carried in-line
          
@@ -834,15 +914,26 @@ void iphc_retrieveIPv6HopByHopHeader(
       if ( (temp_8b & NHC_UDP_MASK) == NHC_UDP_ID) {
          hopbyhop_header->nextHeader = IANA_UDP;
       } else {
-         // the next header could be an IPv6 extension header, or malformed
-         hopbyhop_header->nextHeader = IANA_UNDEFINED;
-         
-         openserial_printError(
-            COMPONENT_IPHC,
-            ERR_6LOWPAN_UNSUPPORTED,
-            (errorparameter_t)14,
-            (errorparameter_t)hopbyhop_header->nextHeader
-         );
+          if ((temp_8b & NHC_IPv6EXT_MASK) == NHC_IPv6EXT_ID) {
+              switch ((temp_8b & NHC_EID_MASK) >> 1) {
+              case NHC_EID_IPv6_VAL:
+                  // current IANA do not assign a number for ipv6 header yet
+                  // http://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#ipv6-parameters-1
+                  // mark as NHC ipv6 header identifier temporarily 
+                  hopbyhop_header->nextHeader = temp_8b;
+                  break;
+              default:
+                 // the next header could be an IPv6 extension header, or malformed
+                 hopbyhop_header->nextHeader = IANA_UNDEFINED;
+                 
+                 openserial_printError(
+                    COMPONENT_IPHC,
+                    ERR_6LOWPAN_UNSUPPORTED,
+                    (errorparameter_t)14,
+                    (errorparameter_t)hopbyhop_header->nextHeader
+                 );
+              }
+          }
       }
    }
 #endif

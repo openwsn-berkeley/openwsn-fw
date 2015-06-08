@@ -69,6 +69,7 @@ enum {
    IANA_IPv6HOPOPT                     = 0x00,
    IANA_TCP                            = 0x06,
    IANA_UDP                            = 0x11,
+   IANA_IPv6ROUTING                    = 0x03,
    IANA_IPv6ROUTE                      = 0x2b,//used for source routing
    IANA_ICMPv6                         = 0x3a,
    IANA_ICMPv6_ECHO_REQUEST            =  128,
@@ -301,6 +302,7 @@ typedef struct {
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_IEListPresent;               //did have IE field?
+   bool          l2_payloadIEpresent;            // did I have payload IE field
    bool          l2_joinPriorityPresent;
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
