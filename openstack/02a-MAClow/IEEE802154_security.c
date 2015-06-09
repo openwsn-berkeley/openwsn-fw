@@ -19,7 +19,7 @@
 
 //=========================== variables =======================================
 
-security_vars_t security_vars;
+ieee802154_security_vars_t ieee802154_security_vars;
 
 //=========================== prototypes ======================================
 
@@ -58,89 +58,89 @@ m_keyDescriptor* IEEE802154security_keyDescriptorLookup(uint8_t      KeyIdMode,
 /**
 \brief Initialization of security tables and parameters.
 */
-void IEEE802154security_init(){
+void IEEE802154_security_init(){
 
    //Setting UP Phase
 
    //MASTER KEY: OpenWSN
-   memset(&security_vars.M_k[0], 0, 16);
-   security_vars.M_k[0] = 0x4e;
-   security_vars.M_k[1] = 0x53;
-   security_vars.M_k[2] = 0x57;
-   security_vars.M_k[3] = 0x6e;
-   security_vars.M_k[4] = 0x65;
-   security_vars.M_k[5] = 0x70;
-   security_vars.M_k[6] = 0x4f;
+   memset(&ieee802154_security_vars.M_k[0], 0, 16);
+   ieee802154_security_vars.M_k[0] = 0x4e;
+   ieee802154_security_vars.M_k[1] = 0x53;
+   ieee802154_security_vars.M_k[2] = 0x57;
+   ieee802154_security_vars.M_k[3] = 0x6e;
+   ieee802154_security_vars.M_k[4] = 0x65;
+   ieee802154_security_vars.M_k[5] = 0x70;
+   ieee802154_security_vars.M_k[6] = 0x4f;
 
    //Initialization of the MAC Security Level Table
    uint8_t i;
    for (i=0; i<5; i++){
-      security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType = i;
-      security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].CommandFrameIdentifier = 0;
-      security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].DeviceOverrideSecurityMinimum = FALSE;
+      ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType = i;
+      ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].CommandFrameIdentifier = 0;
+      ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].DeviceOverrideSecurityMinimum = FALSE;
       //list of allowed security levels
       if (i==0){
-         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = ASH_SLF_TYPE_MIC_32;
-         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = ASH_SLF_TYPE_MIC_64;
-         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = ASH_SLF_TYPE_MIC_128;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = ASH_SLF_TYPE_MIC_32;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = ASH_SLF_TYPE_MIC_64;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = ASH_SLF_TYPE_MIC_128;
       } else {
-         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = ASH_SLF_TYPE_CRYPTO_MIC32;
-         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = ASH_SLF_TYPE_CRYPTO_MIC64;
-         security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = ASH_SLF_TYPE_CRYPTO_MIC128;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = ASH_SLF_TYPE_CRYPTO_MIC32;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = ASH_SLF_TYPE_CRYPTO_MIC64;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = ASH_SLF_TYPE_CRYPTO_MIC128;
       }
-      security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].SecurityMinimum = ASH_SLF_TYPE_CRYPTO_MIC32;
+      ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].SecurityMinimum = ASH_SLF_TYPE_CRYPTO_MIC32;
    }
 
    //Initialization of MAC KEY TABLE
-   memset(&security_vars.MacKeyTable,
+   memset(&ieee802154_security_vars.MacKeyTable,
           0,
           sizeof(m_macKeyTable));
 
    //Initialization of MAC DEVICE TABLE
-   memset(&security_vars.MacDeviceTable,
+   memset(&ieee802154_security_vars.MacDeviceTable,
           0,
           sizeof(m_macDeviceTable));
 
    //Initialization of Frame Counter
-   security_vars.m_macFrameCounterMode = 0x05; //0x04 or 0x05
+   ieee802154_security_vars.m_macFrameCounterMode = 0x05; //0x04 or 0x05
 
    //macDefaultKeySource - shared
-   security_vars.m_macDefaultKeySource.type = ADDR_64B;
-   security_vars.m_macDefaultKeySource.addr_64b[0] = 0x14;
-   security_vars.m_macDefaultKeySource.addr_64b[1] = 0x15;
-   security_vars.m_macDefaultKeySource.addr_64b[2] = 0x92;
-   security_vars.m_macDefaultKeySource.addr_64b[3] = 0x00;
-   security_vars.m_macDefaultKeySource.addr_64b[4] = 0x00;
-   security_vars.m_macDefaultKeySource.addr_64b[5] = 0x15;
-   security_vars.m_macDefaultKeySource.addr_64b[6] = 0x16;
-   security_vars.m_macDefaultKeySource.addr_64b[7] = 0x5a;
+   ieee802154_security_vars.m_macDefaultKeySource.type = ADDR_64B;
+   ieee802154_security_vars.m_macDefaultKeySource.addr_64b[0] = 0x14;
+   ieee802154_security_vars.m_macDefaultKeySource.addr_64b[1] = 0x15;
+   ieee802154_security_vars.m_macDefaultKeySource.addr_64b[2] = 0x92;
+   ieee802154_security_vars.m_macDefaultKeySource.addr_64b[3] = 0x00;
+   ieee802154_security_vars.m_macDefaultKeySource.addr_64b[4] = 0x00;
+   ieee802154_security_vars.m_macDefaultKeySource.addr_64b[5] = 0x15;
+   ieee802154_security_vars.m_macDefaultKeySource.addr_64b[6] = 0x16;
+   ieee802154_security_vars.m_macDefaultKeySource.addr_64b[7] = 0x5a;
 
    //store the key and related attributes
    //Creation of the KeyDescriptor
-   security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIdMode = 1;
-   security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIndex = 1;
-   security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource.type = ADDR_64B;
-   security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource = security_vars.m_macDefaultKeySource;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIdMode = 1;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIndex = 1;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource.type = ADDR_64B;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource = ieee802154_security_vars.m_macDefaultKeySource;
 
-   security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.Address = security_vars.m_macDefaultKeySource;
-   security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.PANId = *(idmanager_getMyID(ADDR_PANID));
-   security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[1].FrameType = IEEE154_TYPE_DATA;
-   security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[0].FrameType = IEEE154_TYPE_ACK;
-   security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[2].FrameType = IEEE154_TYPE_BEACON;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.Address = ieee802154_security_vars.m_macDefaultKeySource;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.PANId = *(idmanager_getMyID(ADDR_PANID));
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[1].FrameType = IEEE154_TYPE_DATA;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[0].FrameType = IEEE154_TYPE_ACK;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[2].FrameType = IEEE154_TYPE_BEACON;
 
-   memcpy(&security_vars.MacKeyTable.KeyDescriptorElement[0].key[0],
-          &security_vars.M_k[0], 
+   memcpy(&ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].key[0],
+          &ieee802154_security_vars.M_k[0], 
           16);
 
-   security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = security_vars.m_macDefaultKeySource;
-   security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &security_vars.MacDeviceTable;
+   ieee802154_security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = ieee802154_security_vars.m_macDefaultKeySource;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &ieee802154_security_vars.MacDeviceTable;
 }
 
 //=========================== public ==========================================
 /**
 \brief Adding of Auxiliary Security Header to the IEEE802.15.4 MAC header
 */
-void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
+void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 
    bool frameCounterSuppression;
    uint8_t temp8b;
@@ -156,7 +156,7 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
    //length of auxiliary security header
    auxiliaryLength = IEEE802154security_auxLengthChecking(msg->l2_keyIdMode,
                                                           frameCounterSuppression,
-                                                          security_vars.m_macFrameCounterMode); //length of Key ID field
+                                                          ieee802154_security_vars.m_macFrameCounterMode); //length of Key ID field
 
 
    if ((msg->length+auxiliaryLength+msg->l2_authenticationLength+2) >= 130 ){ //2 bytes of CRC, 130 MaxPHYPacketSize
@@ -172,11 +172,11 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 
    switch (msg->l2_keyIdMode){
       case 0: //no KeyIDMode field - implicit
-    	 temp_keySource = &security_vars.m_macDefaultKeySource;
+    	 temp_keySource = &ieee802154_security_vars.m_macDefaultKeySource;
          memcpy(&(msg->l2_keySource), temp_keySource, sizeof(open_addr_t));
          break;
       case 1:// macDefaultKeySource
-         msg->l2_keySource = security_vars.m_macDefaultKeySource;
+         msg->l2_keySource = ieee802154_security_vars.m_macDefaultKeySource;
          break;
       case 2: //keySource with 16b address
          temp_keySource = &msg->l2_keySource;
@@ -215,7 +215,7 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
    temp8b |= msg->l2_keyIdMode << ASH_SCF_KEY_IDENTIFIER_MODE;//2b
    temp8b |= frameCounterSuppression << ASH_SCF_FRAME_CNT_MODE; //1b
 
-   if (security_vars.m_macFrameCounterMode == 0x04){
+   if (ieee802154_security_vars.m_macFrameCounterMode == 0x04){
       temp8b |= 0 << ASH_SCF_FRAME_CNT_SIZE; //1b
    } else{
       temp8b |= 1 << ASH_SCF_FRAME_CNT_SIZE; //1b
@@ -228,7 +228,7 @@ void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 /**
 \brief Key searching and encryption/authentication operations.
 */
-owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
+owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    bool frameCounterSuppression;
    m_keyDescriptor* keyDescriptor;
    uint8_t i;
@@ -282,7 +282,7 @@ owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
       case 0:
       case 1:
          for (i=0; i<8; i++){
-            nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
+            nonce[i] = ieee802154_security_vars.m_macDefaultKeySource.addr_64b[i];
          }
          break;
       case 2:
@@ -368,7 +368,7 @@ owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 /**
 \brief Parsing of IEEE802.15.4 Auxiliary Security Header.
 */
-void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      msg, 
+void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      msg, 
                                                         ieee802154_header_iht* tempheader){
 
    uint8_t frameCnt_Suppression;
@@ -419,7 +419,7 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
    switch (msg->l2_keyIdMode){
       case 0:
          //key is derived implicitly
-         temp_addr = &security_vars.m_macDefaultKeySource;
+         temp_addr = &ieee802154_security_vars.m_macDefaultKeySource;
          memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
          break;
       case 2:
@@ -430,7 +430,7 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
       tempheader->headerLength = tempheader->headerLength+2;
       break;
       case 1:
-         msg->l2_keySource = security_vars.m_macDefaultKeySource;
+         msg->l2_keySource = ieee802154_security_vars.m_macDefaultKeySource;
          break;
       case 3:
          packetfunctions_readAddress(((uint8_t*)(msg->payload)+tempheader->headerLength),
@@ -460,7 +460,7 @@ void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      m
 /**
 \brief Identification of the key used to protect the frame and unsecuring operations.
 */
-owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
+owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
    
    m_deviceDescriptor*        deviceDescriptor;
    m_keyDescriptor*           keyDescriptor;
@@ -546,7 +546,7 @@ owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t*      msg){
       case 0:
       case 1:
          for (i=0; i<8; i++){
-            nonce[i] = security_vars.m_macDefaultKeySource.addr_64b[i];
+            nonce[i] = ieee802154_security_vars.m_macDefaultKeySource.addr_64b[i];
           }
          break;
       case 2:
@@ -767,19 +767,19 @@ m_securityLevelDescriptor* IEEE802154security_securityLevelDescriptorLookup(uint
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0; i<4; i++){
-      if (security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType != IEEE154_TYPE_CMD
-         && frameType == security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType){
+      if (ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType != IEEE154_TYPE_CMD
+         && frameType == ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType){
 
          ENABLE_INTERRUPTS();
-         return &security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i];
+         return &ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i];
       }
 
-      if (security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType == IEEE154_TYPE_CMD
-         && frameType == security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType
-         && cfi == security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].CommandFrameIdentifier){
+      if (ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType == IEEE154_TYPE_CMD
+         && frameType == ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType
+         && cfi == ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].CommandFrameIdentifier){
 
          ENABLE_INTERRUPTS();
-         return &security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i];
+         return &ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i];
       }
    }
 
@@ -801,7 +801,7 @@ m_deviceDescriptor* IEEE802154security_deviceDescriptorLookup(open_addr_t* Addre
       if ((packetfunctions_sameAddress(Address,
          &keyDescriptor->DeviceTable->DeviceDescriptorEntry[i].deviceAddress)== TRUE)
          &&(packetfunctions_sameAddress(PANId,
-         &security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId))
+         &ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId))
          ){
             ENABLE_INTERRUPTS();
             return &keyDescriptor->DeviceTable->DeviceDescriptorEntry[i];
@@ -827,12 +827,12 @@ m_keyDescriptor* IEEE802154security_keyDescriptorLookup(uint8_t      KeyIdMode,
 
    if (KeyIdMode == 0){
       for (i=0; i<MAXNUMKEYS; i++ ){
-         if (security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address.type == ADDR_64B){
-            if (packetfunctions_sameAddress(DeviceAddress,&security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address)
+         if (ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address.type == ADDR_64B){
+            if (packetfunctions_sameAddress(DeviceAddress,&ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address)
                                            &&packetfunctions_sameAddress(panID,
-                                           &security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)){
+                                           &ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)){
                ENABLE_INTERRUPTS();
-               return &security_vars.MacKeyTable.KeyDescriptorElement[i];
+               return &ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i];
              }
          }
       }
@@ -840,23 +840,23 @@ m_keyDescriptor* IEEE802154security_keyDescriptorLookup(uint8_t      KeyIdMode,
 
    if (KeyIdMode == 1){
       for (i=0; i<MAXNUMKEYS; i++ ){
-         if (KeyIndex == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex
-             && packetfunctions_sameAddress(keySource,&security_vars.m_macDefaultKeySource)){
+         if (KeyIndex == ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex
+             && packetfunctions_sameAddress(keySource,&ieee802154_security_vars.m_macDefaultKeySource)){
             ENABLE_INTERRUPTS();
-            return &security_vars.MacKeyTable.KeyDescriptorElement[i];
+            return &ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i];
          }
       }
    }
 
    if (KeyIdMode == 2){
       for (i=0; i<MAXNUMKEYS; i++ ){
-         if (KeyIndex == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex){
-            if (keySource->addr_16b[0] == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource.addr_16b[0] &&
-               keySource->addr_16b[1] == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource.addr_16b[1]
-               && packetfunctions_sameAddress(panID, &security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)
+         if (KeyIndex == ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex){
+            if (keySource->addr_16b[0] == ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource.addr_16b[0] &&
+               keySource->addr_16b[1] == ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource.addr_16b[1]
+               && packetfunctions_sameAddress(panID, &ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)
                ){
                ENABLE_INTERRUPTS();
-               return &security_vars.MacKeyTable.KeyDescriptorElement[i];
+               return &ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i];
             }
          }
       }
@@ -864,12 +864,12 @@ m_keyDescriptor* IEEE802154security_keyDescriptorLookup(uint8_t      KeyIdMode,
 
    if (KeyIdMode == 3){
       for (i=0; i<MAXNUMKEYS; i++ ){
-         if (KeyIndex == security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex){
-            if (packetfunctions_sameAddress(keySource,&security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource)
-                && packetfunctions_sameAddress(panID, &security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)
+         if (KeyIndex == ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex){
+            if (packetfunctions_sameAddress(keySource,&ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource)
+                && packetfunctions_sameAddress(panID, &ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.PANId)
                ){
                ENABLE_INTERRUPTS();
-               return &security_vars.MacKeyTable.KeyDescriptorElement[i];
+               return &ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i];
             }
          }
       }
@@ -894,11 +894,11 @@ void IEEE802154security_getFrameCounter(macFrameCounter_t reference,
 
 /*---------------------------------------------------------------------------*/
 const struct ieee802154_security_driver IEEE802154_security = {
-   IEEE802154security_init,
-   IEEE802154security_prependAuxiliarySecurityHeader,
-   IEEE802154security_retrieveAuxiliarySecurityHeader,
-   IEEE802154security_outgoingFrameSecurity,
-   IEEE802154security_incomingFrame,
+   IEEE802154_security_init,
+   IEEE802154_security_prependAuxiliarySecurityHeader,
+   IEEE802154_security_retrieveAuxiliarySecurityHeader,
+   IEEE802154_security_outgoingFrameSecurity,
+   IEEE802154_security_incomingFrame,
 };
 /*---------------------------------------------------------------------------*/
 

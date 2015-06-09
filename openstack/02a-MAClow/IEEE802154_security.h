@@ -88,7 +88,7 @@ typedef struct{
    m_macDeviceTable        MacDeviceTable;
    m_macSecurityLevelTable MacSecurityLevelTable;
    uint8_t                 M_k[16];
-}security_vars_t;
+} ieee802154_security_vars_t;
 
 //=========================== prototypes ======================================
 
