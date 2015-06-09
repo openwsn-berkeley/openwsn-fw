@@ -1859,17 +1859,20 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    
    // log a large timeCorrection
-   if (
-         ieee154e_vars.isSync==TRUE &&
-         (
-            timeCorrection<-LIMITLARGETIMECORRECTION ||
-            timeCorrection> LIMITLARGETIMECORRECTION
-         )
-      ) {
-      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
-                            (errorparameter_t)timeCorrection,
-                            (errorparameter_t)0);
-   }
+//   if (
+//         ieee154e_vars.isSync==TRUE &&
+//         (
+//            timeCorrection<-LIMITLARGETIMECORRECTION ||
+//            timeCorrection> LIMITLARGETIMECORRECTION
+//         )
+//      ) {
+//      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
+//                            (errorparameter_t)timeCorrection,
+//                            (errorparameter_t)0);
+//   }
+   openserial_printInfo(COMPONENT_IEEE802154E,ERR_PACKET_SYNC,
+                      (errorparameter_t)ieee154e_vars.asn.bytes0and1,
+                      (errorparameter_t)timeCorrection);
    
    // update the stats
    ieee154e_stats.numSyncPkt++;
@@ -1899,17 +1902,20 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    adaptive_sync_indicateTimeCorrection((-timeCorrection),ieee154e_vars.ackReceived->l2_nextORpreviousHop);
    
    // log a large timeCorrection
-   if (
-         ieee154e_vars.isSync==TRUE &&
-         (
-            timeCorrection<-LIMITLARGETIMECORRECTION ||
-            timeCorrection> LIMITLARGETIMECORRECTION
-         )
-      ) {
-      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
-                            (errorparameter_t)timeCorrection,
-                            (errorparameter_t)1);
-   }
+//   if (
+//         ieee154e_vars.isSync==TRUE &&
+//         (
+//            timeCorrection<-LIMITLARGETIMECORRECTION ||
+//            timeCorrection> LIMITLARGETIMECORRECTION
+//         )
+//      ) {
+//      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
+//                            (errorparameter_t)timeCorrection,
+//                            (errorparameter_t)1);
+//   }
+   openserial_printInfo(COMPONENT_IEEE802154E,ERR_PACKET_SYNC,
+                   (errorparameter_t)ieee154e_vars.asn.bytes0and1,
+                   (errorparameter_t)timeCorrection);
    // update the stats
    ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
