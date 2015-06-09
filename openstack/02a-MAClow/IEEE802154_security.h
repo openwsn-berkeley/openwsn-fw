@@ -17,15 +17,9 @@
 \{
 */
 
-#include "ieee802154_security_driver.h"
-#include "IEEE802154.h"
-#include "IEEE802154E.h"
-#include "neighbors.h"
-#include "idmanager.h"
-#include "openserial.h"
 #include "opendefs.h"
-#include "packetfunctions.h"
-#include "crypto_engine.h"
+#include "ieee802154_security_driver.h"
+#include "neighbors.h"
 
 extern const struct ieee802154_security_driver IEEE802154_security;
 

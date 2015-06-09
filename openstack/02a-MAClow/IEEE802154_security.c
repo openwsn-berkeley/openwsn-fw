@@ -7,6 +7,12 @@
 \author Luigi Alfredo Grieco <alfredo.grieco@poliba.it>
 */
 
+#include "packetfunctions.h"
+#include "crypto_engine.h"
+#include "IEEE802154.h"
+#include "IEEE802154E.h"
+#include "idmanager.h"
+#include "openserial.h"
 #include "IEEE802154_security.h"
 
 //=============================define==========================================
