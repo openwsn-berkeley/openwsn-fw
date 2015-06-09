@@ -5,6 +5,7 @@
 \author Giuseppe Piro <giuseppe.piro@poliba.it>,
 \author Gennaro Boggia <gennaro.boggia@poliba.it>,
 \author Luigi Alfredo Grieco <alfredo.grieco@poliba.it>
+\author Malisa Vucinic <malishav@gmail.com>, June 2015.
 */
 
 #ifndef __IEEE802154_SECURITY_H

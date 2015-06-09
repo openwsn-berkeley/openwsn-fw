@@ -5,6 +5,7 @@
 \author Giuseppe Piro <giuseppe.piro@poliba.it>,
 \author Gennaro Boggia <gennaro.boggia@poliba.it>,
 \author Luigi Alfredo Grieco <alfredo.grieco@poliba.it>
+\author Malisa Vucinic <malishav@gmail.com>, June 2015.
 */
 
 #include "packetfunctions.h"
@@ -23,30 +24,30 @@ ieee802154_security_vars_t ieee802154_security_vars;
 
 //=========================== prototypes ======================================
 
-void IEEE802154security_getFrameCounter(macFrameCounter_t reference,
+void IEEE802154_security_getFrameCounter(macFrameCounter_t reference,
                                         uint8_t*          array);
-uint8_t IEEE802154security_authLengthChecking(uint8_t securityLevel);
+uint8_t IEEE802154_security_authLengthChecking(uint8_t securityLevel);
 
-uint8_t IEEE802154security_auxLengthChecking(uint8_t KeyIdMode,
+uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
                                              bool    frameCounterSuppression,
                                              uint8_t frameCounterSize);
 
-bool IEEE802154security_incomingKeyUsagePolicyChecking(m_keyDescriptor* keydesc,
+bool IEEE802154_security_incomingKeyUsagePolicyChecking(m_keyDescriptor* keydesc,
                                                        uint8_t          frameType,
                                                        uint8_t          cfi);
 
-bool IEEE802154security_incomingSecurityLevelChecking(m_securityLevelDescriptor* secLevDesc,
+bool IEEE802154_security_incomingSecurityLevelChecking(m_securityLevelDescriptor* secLevDesc,
                                                       uint8_t                    secLevel,
                                                       bool                       exempt);
 
-m_securityLevelDescriptor* IEEE802154security_securityLevelDescriptorLookup(uint8_t frameType,
+m_securityLevelDescriptor* IEEE802154_security_securityLevelDescriptorLookup(uint8_t frameType,
                                                                             uint8_t cfi);
 
-m_deviceDescriptor* IEEE802154security_deviceDescriptorLookup(open_addr_t*     address,
+m_deviceDescriptor* IEEE802154_security_deviceDescriptorLookup(open_addr_t*     address,
                                                               open_addr_t*     PANID,
                                                               m_keyDescriptor* keyDescriptor);
 
-m_keyDescriptor* IEEE802154security_keyDescriptorLookup(uint8_t      KeyIdMode,
+m_keyDescriptor* IEEE802154_security_keyDescriptorLookup(uint8_t      KeyIdMode,
                                                         open_addr_t* keySource,
                                                         uint8_t      KeyIndex,
                                                         open_addr_t* DeviceAddress,
@@ -151,10 +152,10 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 
    //max length of MAC frames
    // length of authentication Tag
-   msg->l2_authenticationLength = IEEE802154security_authLengthChecking(msg->l2_securityLevel);
+   msg->l2_authenticationLength = IEEE802154_security_authLengthChecking(msg->l2_securityLevel);
 
    //length of auxiliary security header
-   auxiliaryLength = IEEE802154security_auxLengthChecking(msg->l2_keyIdMode,
+   auxiliaryLength = IEEE802154_security_auxLengthChecking(msg->l2_keyIdMode,
                                                           frameCounterSuppression,
                                                           ieee802154_security_vars.m_macFrameCounterMode); //length of Key ID field
 
@@ -245,7 +246,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    frameCounterSuppression = 1;
 
    //search for a key
-   keyDescriptor = IEEE802154security_keyDescriptorLookup(msg->l2_keyIdMode,
+   keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
                                                           &msg->l2_keySource,
                                                           msg->l2_keyIndex,
                                                           &msg->l2_keySource,
@@ -272,7 +273,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
       l2_frameCounter.bytes2and3 = vectASN[2]+256*vectASN[3];
       l2_frameCounter.byte4 = vectASN[4];
 
-      IEEE802154security_getFrameCounter(l2_frameCounter,
+      IEEE802154_security_getFrameCounter(l2_frameCounter,
                                          msg->l2_ASNpayload);
    } //otherwise the frame counter is not in the frame
 
@@ -384,7 +385,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
    temp8b = *((uint8_t*)(msg->payload)+tempheader->headerLength);
    msg->l2_securityLevel = (temp8b >> ASH_SCF_SECURITY_LEVEL)& 0x07;//3b
 
-   msg->l2_authenticationLength = IEEE802154security_authLengthChecking(msg->l2_securityLevel);
+   msg->l2_authenticationLength = IEEE802154_security_authLengthChecking(msg->l2_securityLevel);
 
    //retrieve the KeyIdMode field
    msg->l2_keyIdMode = (temp8b >> ASH_SCF_KEY_IDENTIFIER_MODE)& 0x03;//2b
@@ -475,7 +476,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
    uint8_t len_m;
 
    //f key descriptor lookup
-   keyDescriptor = IEEE802154security_keyDescriptorLookup(msg->l2_keyIdMode,
+   keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
                                                           &msg->l2_keySource,
                                                           msg->l2_keyIndex,
                                                           &msg->l2_keySource,
@@ -491,7 +492,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
    }
 
    //g device descriptor lookup
-   deviceDescriptor = IEEE802154security_deviceDescriptorLookup(&msg->l2_keySource,
+   deviceDescriptor = IEEE802154_security_deviceDescriptorLookup(&msg->l2_keySource,
                                                                 idmanager_getMyID(ADDR_PANID),
                                                                 keyDescriptor);
 
@@ -504,7 +505,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
    }
 
    //h Security Level lookup
-   securityLevelDescriptor = IEEE802154security_securityLevelDescriptorLookup(msg->l2_frameType,
+   securityLevelDescriptor = IEEE802154_security_securityLevelDescriptorLookup(msg->l2_frameType,
                                                                               msg->commandFrameIdentifier);
 
    if (securityLevelDescriptor == NULL){
@@ -516,7 +517,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
    }
 
    //i+j+k
-   if (IEEE802154security_incomingSecurityLevelChecking(securityLevelDescriptor,
+   if (IEEE802154_security_incomingSecurityLevelChecking(securityLevelDescriptor,
                                                         msg->l2_securityLevel,
                                                         deviceDescriptor->Exempt) ==FALSE) 
       {
@@ -530,7 +531,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
    //l+m Anti-Replay - not needed for TSCH mode
 
    //n Control of key used
-   if (IEEE802154security_incomingKeyUsagePolicyChecking(keyDescriptor,
+   if (IEEE802154_security_incomingKeyUsagePolicyChecking(keyDescriptor,
                                                          msg->l2_frameType,
                                                          0)==FALSE){
      // improper key used
@@ -630,7 +631,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
 /**
 \brief Identification of the length of the MIC.
 */
-uint8_t IEEE802154security_authLengthChecking(uint8_t securityLevel){
+uint8_t IEEE802154_security_authLengthChecking(uint8_t securityLevel){
 
    uint8_t authlen;
    switch (securityLevel) {
@@ -665,7 +666,7 @@ uint8_t IEEE802154security_authLengthChecking(uint8_t securityLevel){
 /**
 \brief Length of the IEEE802.15.4 Auxiliary Security Header.
 */
-uint8_t IEEE802154security_auxLengthChecking(uint8_t KeyIdMode, 
+uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode, 
                                              bool frameCounterSuppression, 
                                              uint8_t frameCounterSize){
    uint8_t auxilary_len;
@@ -702,7 +703,7 @@ uint8_t IEEE802154security_auxLengthChecking(uint8_t KeyIdMode,
 /**
 \brief Verify if the key used to protect the frame has been used properly.
 */
-bool IEEE802154security_incomingKeyUsagePolicyChecking(m_keyDescriptor* keyDescriptor,
+bool IEEE802154_security_incomingKeyUsagePolicyChecking(m_keyDescriptor* keyDescriptor,
                                                        uint8_t          frameType,
                                                        uint8_t          cfi){
    uint8_t i;
@@ -728,7 +729,7 @@ bool IEEE802154security_incomingKeyUsagePolicyChecking(m_keyDescriptor* keyDescr
 /**
 \brief Verify if the Security Level of the incoming Frame is acceptable or not.
 */
-bool IEEE802154security_incomingSecurityLevelChecking(m_securityLevelDescriptor* seclevdesc,
+bool IEEE802154_security_incomingSecurityLevelChecking(m_securityLevelDescriptor* seclevdesc,
                                                       uint8_t                    seclevel,
                                                       bool                       exempt){
 
@@ -761,7 +762,7 @@ return FALSE;
 /**
 \brief Searching for the Security Level Descriptor.
 */
-m_securityLevelDescriptor* IEEE802154security_securityLevelDescriptorLookup(uint8_t frameType,
+m_securityLevelDescriptor* IEEE802154_security_securityLevelDescriptorLookup(uint8_t frameType,
                                                                             uint8_t cfi){
    uint8_t i;
    INTERRUPT_DECLARATION();
@@ -790,7 +791,7 @@ m_securityLevelDescriptor* IEEE802154security_securityLevelDescriptorLookup(uint
 /**
 \brief Searching for the Device Descriptor.
 */
-m_deviceDescriptor* IEEE802154security_deviceDescriptorLookup(open_addr_t* Address,
+m_deviceDescriptor* IEEE802154_security_deviceDescriptorLookup(open_addr_t* Address,
                                                               open_addr_t* PANId,
                                                               m_keyDescriptor* keyDescriptor){
    uint8_t i;
@@ -815,7 +816,7 @@ m_deviceDescriptor* IEEE802154security_deviceDescriptorLookup(open_addr_t* Addre
 /**
 \brief Searching for the Key Descriptor.
 */
-m_keyDescriptor* IEEE802154security_keyDescriptorLookup(uint8_t      KeyIdMode,
+m_keyDescriptor* IEEE802154_security_keyDescriptorLookup(uint8_t      KeyIdMode,
                                                         open_addr_t* keySource,
                                                         uint8_t      KeyIndex,
                                                         open_addr_t* DeviceAddress,
@@ -883,7 +884,7 @@ m_keyDescriptor* IEEE802154security_keyDescriptorLookup(uint8_t      KeyIdMode,
 /*
  * Store in the array the reference value 
  */
-void IEEE802154security_getFrameCounter(macFrameCounter_t reference,
+void IEEE802154_security_getFrameCounter(macFrameCounter_t reference,
                                         uint8_t*          array) {
    array[0] = (reference.bytes0and1     & 0xff);
    array[1] = (reference.bytes0and1/256 & 0xff);

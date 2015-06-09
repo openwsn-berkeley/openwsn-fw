@@ -224,7 +224,7 @@ struct OpenMote {
    schedule_vars_t      schedule_vars;
    // l2a
    adaptive_sync_vars_t adaptive_sync_vars;
-   security_vars_t     security_vars;
+   ieee802154_security_vars_t ieee802154_security_vars;
    ieee154e_vars_t      ieee154e_vars;
    ieee154e_stats_t     ieee154e_stats;
    ieee154e_dbg_t       ieee154e_dbg;
