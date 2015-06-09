@@ -2296,6 +2296,12 @@
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\idmanager.h</name>
       </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\packetfunctions.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\packetfunctions.h</name>
+      </file>
     </group>
   </group>
 </project>

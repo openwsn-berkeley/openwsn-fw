@@ -11,6 +11,7 @@
 #include "scheduler.h"
 #include "03oos_sniffer.h"
 #include "openserial.h"
+#include "idmanager.h"
 
 //=========================== defines =========================================
 
@@ -63,6 +64,7 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    openserial_init();
+   idmanager_init();
  
    // add callback functions radio
    radio_setStartFrameCb(cb_startFrame);
