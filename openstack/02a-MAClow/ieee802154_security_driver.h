@@ -11,12 +11,24 @@
 
 //=========================== define ==========================================
 
-#ifdef L2_SECURITY_ACTIVE
-#define IEEE802154_SECURITY IEEE802154_security
-#define IEEE802154_SECURITY_ENABLED 1
+#ifdef L2_SECURITY_ACTIVE  // Configuring security levels
+
+#define IEEE802154_SECURITY                  IEEE802154_security // implementation
+#define IEEE802154_SECURITY_ENABLED          1
+#define IEEE802154_SECURITY_LEVEL            ASH_SLF_TYPE_CRYPTO_MIC32
+#define IEEE802154_SECURITY_LEVEL_BEACON     ASH_SLF_TYPE_MIC_32
+#define IEEE802154_SECURITY_KEYIDMODE        ASH_KEYIDMODE_DEFAULTKEYSOURCE
+#define IEEE802154_SECURITY_KEY_INDEX        1
+
 #else /* L2_SECURITY_ACTIVE */
-#define IEEE802154_SECURITY IEEE802154_dummy_security
-#define IEEE802154_SECURITY_ENABLED 0
+
+#define IEEE802154_SECURITY                  IEEE802154_dummy_security // dummy implementation that always returns success
+#define IEEE802154_SECURITY_ENABLED          0
+#define IEEE802154_SECURITY_LEVEL            ASH_SLF_TYPE_NOSEC 
+#define IEEE802154_SECURITY_LEVEL_BEACON     ASH_SLF_TYPE_NOSEC 
+#define IEEE802154_SECURITY_KEYIDMODE        0
+#define IEEE802154_SECURITY_KEY_INDEX        0
+
 #endif /* L2_SECURITY_ACTIVE */
 
 //=========================== module variables ================================

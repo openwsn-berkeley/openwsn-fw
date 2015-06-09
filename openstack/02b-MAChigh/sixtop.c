@@ -463,9 +463,9 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
 
    // set l2-security attributes
-   msg->l2_securityLevel   = IEEE802154E_SECURITY_LEVEL;
-   msg->l2_keyIdMode       = IEEE802154E_SECURITY_KEYIDMODE; 
-   msg->l2_keyIndex        = IEEE802154E_SECURITY_KEY_INDEX;
+   msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
+   msg->l2_keyIndex        = IEEE802154_SECURITY_KEY_INDEX;
 
    if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
       return sixtop_send_internal(
@@ -842,9 +842,9 @@ port_INLINE void sixtop_sendEB() {
    eb->l2_IEListPresent = IEEE154_IELIST_YES;
 
    // set l2-security attributes
-   eb->l2_securityLevel   = IEEE802154E_SECURITY_LEVEL_BEACON;
-   eb->l2_keyIdMode       = IEEE802154E_SECURITY_KEYIDMODE;
-   eb->l2_keyIndex        = IEEE802154E_SECURITY_KEY_INDEX;
+   eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
+   eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   eb->l2_keyIndex        = IEEE802154_SECURITY_KEY_INDEX;
 
    // put in queue for MAC to handle
    sixtop_send_internal(eb,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
@@ -908,9 +908,9 @@ port_INLINE void sixtop_sendKA() {
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
    // set l2-security attributes
-   kaPkt->l2_securityLevel   = IEEE802154E_SECURITY_LEVEL;
-   kaPkt->l2_keyIdMode       = IEEE802154E_SECURITY_KEYIDMODE;
-   kaPkt->l2_keyIndex        = IEEE802154E_SECURITY_KEY_INDEX;
+   kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   kaPkt->l2_keyIndex        = IEEE802154_SECURITY_KEY_INDEX;
 
    // put in queue for MAC to handle
    sixtop_send_internal(kaPkt,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);

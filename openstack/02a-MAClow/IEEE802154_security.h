@@ -30,12 +30,6 @@
 extern const struct ieee802154_security_driver IEEE802154_security;
 
 //=========================== define ==========================================
-
-#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_CRYPTO_MIC32
-#define IEEE802154E_SECURITY_LEVEL_BEACON    ASH_SLF_TYPE_MIC_32
-#define IEEE802154E_SECURITY_KEYIDMODE       ASH_KEYIDMODE_DEFAULTKEYSOURCE
-#define IEEE802154E_SECURITY_KEY_INDEX       1
-
 #define MAXNUMKEYS           MAXNUMNEIGHBORS+1
 
 //=========================== typedef =========================================
