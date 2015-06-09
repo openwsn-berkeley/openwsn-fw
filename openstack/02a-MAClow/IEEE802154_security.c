@@ -885,3 +885,14 @@ void IEEE802154security_getFrameCounter(macFrameCounter_t reference,
    array[3] = (reference.bytes2and3/256 & 0xff);
    array[4] =  reference.byte4;
 }
+
+/*---------------------------------------------------------------------------*/
+const struct ieee802154_security_driver IEEE802154_security = {
+   IEEE802154security_init,
+   IEEE802154security_prependAuxiliarySecurityHeader,
+   IEEE802154security_retrieveAuxiliarySecurityHeader,
+   IEEE802154security_outgoingFrameSecurity,
+   IEEE802154security_incomingFrame,
+};
+/*---------------------------------------------------------------------------*/
+

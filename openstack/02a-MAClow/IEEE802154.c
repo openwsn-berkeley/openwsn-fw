@@ -4,7 +4,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "topology.h"
-#include "IEEE802154_security.h"
+#include "ieee802154_security_driver.h"
 
 //=========================== variables =======================================
 
@@ -36,8 +36,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    
    //General IEs here (those that are carried in all packets) -- None by now.
    //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
-   if(securityEnabled == TRUE){
-      IEEE802154security_prependAuxiliarySecurityHeader(msg);
+   if(securityEnabled){
+      IEEE802154_SECURITY.prependAuxiliarySecurityHeader(msg);
    }
    
    // previousHop address (always 64-bit)
@@ -238,8 +238,14 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    }
 
    //if security is enabled, Auxiliary Security Header can be retrieved
-   if(ieee802514_header->securityEnabled == TRUE){
-      IEEE802154security_retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
+   if(ieee802514_header->securityEnabled) {
+      if (IEEE802154_SECURITY_ENABLED) {
+         IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
+      }
+      else {
+         // Received a frame with security enabled but project compiled with no security support
+         return;
+      }
    }
    
    // apply topology filter

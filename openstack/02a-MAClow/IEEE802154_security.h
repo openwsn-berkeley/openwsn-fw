@@ -17,6 +17,7 @@
 \{
 */
 
+#include "ieee802154_security_driver.h"
 #include "IEEE802154.h"
 #include "IEEE802154E.h"
 #include "neighbors.h"
@@ -26,47 +27,16 @@
 #include "packetfunctions.h"
 #include "crypto_engine.h"
 
+extern const struct ieee802154_security_driver IEEE802154_security;
+
 //=========================== define ==========================================
 
-#ifdef L2_SECURITY_ACTIVE
-// TODO use parameters passed by SCons
 #define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_CRYPTO_MIC32
 #define IEEE802154E_SECURITY_LEVEL_BEACON    ASH_SLF_TYPE_MIC_32
 #define IEEE802154E_SECURITY_KEYIDMODE       ASH_KEYIDMODE_DEFAULTKEYSOURCE
 #define IEEE802154E_SECURITY_KEY_INDEX       1
-#else
-#define IEEE802154E_SECURITY_LEVEL           ASH_SLF_TYPE_NOSEC
-#define IEEE802154E_SECURITY_LEVEL_BEACON    ASH_SLF_TYPE_NOSEC 
-#define IEEE802154E_SECURITY_KEYIDMODE       0
-#define IEEE802154E_SECURITY_KEY_INDEX       0
-#endif // L2_SECURITY_ACTIVE
 
 #define MAXNUMKEYS           MAXNUMNEIGHBORS+1
-
-enum Auxiliary_Security_Header_scf_enums{ //Security Control Field
-   ASH_SCF_SECURITY_LEVEL = 0,
-   ASH_SCF_KEY_IDENTIFIER_MODE = 3,
-   ASH_SCF_FRAME_CNT_MODE = 5,
-   ASH_SCF_FRAME_CNT_SIZE = 6,
-};
-
-enum Auxiliary_Security_Header_slf_enums{ //Security Level Field
-   ASH_SLF_TYPE_NOSEC = 0,
-   ASH_SLF_TYPE_MIC_32 = 1,
-   ASH_SLF_TYPE_MIC_64 = 2,
-   ASH_SLF_TYPE_MIC_128 = 3,
-   ASH_SLF_TYPE_ONLYCRYPTO = 4,
-   ASH_SLF_TYPE_CRYPTO_MIC32 = 5,
-   ASH_SLF_TYPE_CRYPTO_MIC64= 6,
-   ASH_SLF_TYPE_CRYPTO_MIC128 = 7,
-};
-
-enum Auxiliary_Security_Header_keyIdMode_enums{ //Key Identifier Mode Field
-   ASH_KEYIDMODE_IMPLICIT = 0,
-   ASH_KEYIDMODE_DEFAULTKEYSOURCE = 1,
-   ASH_KEYIDMODE_EXPLICIT_16 = 2,
-   ASH_KEYIDMODE_EXPLICIT_64 = 3,
-};
 
 //=========================== typedef =========================================
 
@@ -133,16 +103,6 @@ typedef struct{
 }security_vars_t;
 
 //=========================== prototypes ======================================
-
-//admin
-void IEEE802154security_init(void);
-//public
-void IEEE802154security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg);
-owerror_t IEEE802154security_outgoingFrameSecurity(OpenQueueEntry_t* msg);
-void IEEE802154security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      msg,
-                                                        ieee802154_header_iht* tempheader);
-
-owerror_t IEEE802154security_incomingFrame(OpenQueueEntry_t* msg);
 
 /**
 \}
