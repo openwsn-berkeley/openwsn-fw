@@ -72,6 +72,10 @@ void     incrementAsnOffset(void);
 void     ieee154e_syncSlotOffset(void);
 void     asnStoreFromEB(uint8_t* asn);
 void     joinPriorityStoreFromEB(uint8_t jp);
+// timeslot template handling
+void     timeslotTemplateIDStoreFromEB(uint8_t id);
+// channelhopping template handling
+void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // synchronization
 void     synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
@@ -645,7 +649,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    temp_8b    = *((uint8_t*)(pkt->payload)+ptr);
    ptr++;
    
-   temp_16b   = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<< 8);
+   temp_16b   = (temp_8b << 8) + (*((uint8_t*)(pkt->payload)+ptr));
    ptr++;
    
    *lenIE     = ptr;
@@ -676,7 +680,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             //read sub IE header
             temp_8b     = *((uint8_t*)(pkt->payload)+ptr);
             ptr         = ptr + 1;
-            temp_16b    = temp_8b  +(*((uint8_t*)(pkt->payload)+ptr) << 8);
+            temp_16b    = (temp_8b << 8)  + (*((uint8_t*)(pkt->payload)+ptr));
             ptr         = ptr + 1;
             
             len         = len - 2; //remove header fields len
@@ -718,9 +722,20 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                   break;
                
                case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
-                  //TODO
+                  if (idmanager_getIsDAGroot()==FALSE) {
+                      // timelsot template ID
+                      timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+                      ptr = ptr + 1;
+                  }
                   break;
-               
+                  
+              case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
+                  if (idmanager_getIsDAGroot()==FALSE) {
+                      // timelsot template ID
+                      channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+                      ptr = ptr + 1;
+                  }
+                  break;
                default:
                   return FALSE;
                   break;
@@ -1589,8 +1604,7 @@ port_INLINE void activity_ri6() {
 
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
-                            IEEE154_IELIST_YES,//ie in ack
-                            IEEE154_FRAMEVERSION,//enhanced ack
+                            TRUE,//ie in ack
                             ieee154e_vars.ackToSend->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? 0 : 1,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
@@ -1841,6 +1855,16 @@ port_INLINE void ieee154e_syncSlotOffset() {
    slotOffset = slotOffset % frameLength;
    
    ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
+}
+
+// timeslot template handling
+port_INLINE void timeslotTemplateIDStoreFromEB(uint8_t id){
+    ieee154e_vars.tsTemplateId = id;
+}
+
+// channelhopping template handling
+port_INLINE void channelhoppingTemplateIDStoreFromEB(uint8_t id){
+    ieee154e_vars.chTemplateId = id;
 }
 
 //======= synchronization
