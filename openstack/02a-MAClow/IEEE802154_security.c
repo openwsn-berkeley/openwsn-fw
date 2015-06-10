@@ -160,7 +160,7 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
                                                           ieee802154_security_vars.m_macFrameCounterMode); //length of Key ID field
 
 
-   if ((msg->length+auxiliaryLength+msg->l2_authenticationLength+2) >= 130 ){ //2 bytes of CRC, 130 MaxPHYPacketSize
+   if ((msg->length+auxiliaryLength+msg->l2_authenticationLength+2) >= 128 ){ //2 bytes of CRC, 127 MaxPHYPacketSize
       return;
    }
 
