@@ -555,7 +555,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // This is the case where we first hear an EB and do not yet know the ASN used
       // to generate the nonce. Frame cannot successfully pass security processing
       // at this point so we need to accept it in any case.
-      if (ieee154e_vars.dataReceived->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
+      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
          if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
             if (ieee802514_header.frameType != IEEE154_TYPE_BEACON) {
                break; // reject anything but EBs here
@@ -965,7 +965,7 @@ port_INLINE void activity_ti2() {
    memcpy(&local_copy_for_transmission, ieee154e_vars.dataToSend, sizeof(OpenQueueEntry_t));
 
    // check if packet needs to be encrypted/authenticated before transmission 
-   if (local_copy_for_transmission.l2_securityLevel != ASH_SLF_TYPE_NOSEC) { // security enabled
+   if (local_copy_for_transmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
       // encrypt in a local copy
       if (IEEE802154_SECURITY.outgoingFrame(&local_copy_for_transmission) == E_FAIL) {
          // keep the frame in the OpenQueue in order to retry later
@@ -1264,7 +1264,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       memcpy(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
       // check the security level of the ACK frame and decrypt/authenticate
-      if (ieee154e_vars.ackReceived->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
+      if (ieee154e_vars.ackReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
           if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) == E_FAIL) {
          	 break;
           }
@@ -1476,7 +1476,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
       // if security is enabled, decrypt/authenticate the frame.
-      if (ieee154e_vars.dataReceived->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
+      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
          if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
         	 break;
          }
@@ -1605,13 +1605,13 @@ port_INLINE void activity_ri6() {
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
                             TRUE,//ie in ack
-                            ieee154e_vars.ackToSend->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? 0 : 1,
+                            ieee154e_vars.ackToSend->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
    
    // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
-   if (ieee154e_vars.ackToSend->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
+   if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
       if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) == E_FAIL) {
      	   openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
      	   endSlot();

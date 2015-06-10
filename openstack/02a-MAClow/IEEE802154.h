@@ -71,28 +71,28 @@ enum IEEE802154_fcf_addr_mode_enums {
 };
 
 enum IEEE802154_ash_scf_enums { // Security Control Field
-   ASH_SCF_SECURITY_LEVEL              = 0,
-   ASH_SCF_KEY_IDENTIFIER_MODE         = 3,
-   ASH_SCF_FRAME_CNT_MODE              = 5,
-   ASH_SCF_FRAME_CNT_SIZE              = 6,
+   IEEE154_ASH_SCF_SECURITY_LEVEL         = 0,
+   IEEE154_ASH_SCF_KEY_IDENTIFIER_MODE    = 3,
+   IEEE154_ASH_SCF_FRAME_CNT_MODE         = 5,
+   IEEE154_ASH_SCF_FRAME_CNT_SIZE         = 6,
 };
 
 enum IEEE802154_ash_slf_enums { // Security Level Field
-   ASH_SLF_TYPE_NOSEC                  = 0,
-   ASH_SLF_TYPE_MIC_32                 = 1,
-   ASH_SLF_TYPE_MIC_64                 = 2,
-   ASH_SLF_TYPE_MIC_128                = 3,
-   ASH_SLF_TYPE_ONLYCRYPTO             = 4,
-   ASH_SLF_TYPE_CRYPTO_MIC32           = 5,
-   ASH_SLF_TYPE_CRYPTO_MIC64           = 6,
-   ASH_SLF_TYPE_CRYPTO_MIC128          = 7,
+   IEEE154_ASH_SLF_TYPE_NOSEC             = 0,
+   IEEE154_ASH_SLF_TYPE_MIC_32            = 1,
+   IEEE154_ASH_SLF_TYPE_MIC_64            = 2,
+   IEEE154_ASH_SLF_TYPE_MIC_128           = 3,
+   IEEE154_ASH_SLF_TYPE_ONLYCRYPTO        = 4,
+   IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32      = 5,
+   IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64      = 6,
+   IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128     = 7,
 };
 
 enum IEEE802154_ash_keyIdMode_enums { // Key Identifier Mode Field
-   ASH_KEYIDMODE_IMPLICIT              = 0,
-   ASH_KEYIDMODE_DEFAULTKEYSOURCE      = 1,
-   ASH_KEYIDMODE_EXPLICIT_16           = 2,
-   ASH_KEYIDMODE_EXPLICIT_64           = 3,
+   IEEE154_ASH_KEYIDMODE_IMPLICIT         = 0,
+   IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE = 1,
+   IEEE154_ASH_KEYIDMODE_EXPLICIT_16      = 2,
+   IEEE154_ASH_KEYIDMODE_EXPLICIT_64      = 3,
 };
 
 //=========================== typedef =========================================

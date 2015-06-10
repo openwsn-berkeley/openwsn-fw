@@ -81,15 +81,15 @@ void IEEE802154_security_init(){
       ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].DeviceOverrideSecurityMinimum = FALSE;
       //list of allowed security levels
       if (i==0){
-         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = ASH_SLF_TYPE_MIC_32;
-         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = ASH_SLF_TYPE_MIC_64;
-         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = ASH_SLF_TYPE_MIC_128;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = IEEE154_ASH_SLF_TYPE_MIC_32;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = IEEE154_ASH_SLF_TYPE_MIC_64;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = IEEE154_ASH_SLF_TYPE_MIC_128;
       } else {
-         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = ASH_SLF_TYPE_CRYPTO_MIC32;
-         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = ASH_SLF_TYPE_CRYPTO_MIC64;
-         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = ASH_SLF_TYPE_CRYPTO_MIC128;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128;
       }
-      ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].SecurityMinimum = ASH_SLF_TYPE_CRYPTO_MIC32;
+      ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].SecurityMinimum = IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32;
    }
 
    //Initialization of MAC KEY TABLE
@@ -212,14 +212,14 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
    packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
  
    temp8b = 0;
-   temp8b |= msg->l2_securityLevel << ASH_SCF_SECURITY_LEVEL;//3b
-   temp8b |= msg->l2_keyIdMode << ASH_SCF_KEY_IDENTIFIER_MODE;//2b
-   temp8b |= frameCounterSuppression << ASH_SCF_FRAME_CNT_MODE; //1b
+   temp8b |= msg->l2_securityLevel << IEEE154_ASH_SCF_SECURITY_LEVEL;//3b
+   temp8b |= msg->l2_keyIdMode << IEEE154_ASH_SCF_KEY_IDENTIFIER_MODE;//2b
+   temp8b |= frameCounterSuppression << IEEE154_ASH_SCF_FRAME_CNT_MODE; //1b
 
    if (ieee802154_security_vars.m_macFrameCounterMode == 0x04){
-      temp8b |= 0 << ASH_SCF_FRAME_CNT_SIZE; //1b
+      temp8b |= 0 << IEEE154_ASH_SCF_FRAME_CNT_SIZE; //1b
    } else{
-      temp8b |= 1 << ASH_SCF_FRAME_CNT_SIZE; //1b
+      temp8b |= 1 << IEEE154_ASH_SCF_FRAME_CNT_SIZE; //1b
    }
 
    temp8b |= 0 << 1;//1b reserved
@@ -306,17 +306,17 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    }
 
    switch (msg->l2_securityLevel) {
-      case ASH_SLF_TYPE_MIC_32:  // authentication only cases
-      case ASH_SLF_TYPE_MIC_64:
-      case ASH_SLF_TYPE_MIC_128: 
+      case IEEE154_ASH_SLF_TYPE_MIC_32:  // authentication only cases
+      case IEEE154_ASH_SLF_TYPE_MIC_64:
+      case IEEE154_ASH_SLF_TYPE_MIC_128: 
          a = msg->payload;             // first byte of the frame
          len_a = msg->length;          // whole frame
          m = &msg->payload[len_a];     // concatenate MIC at the end of the frame
          len_m = 0;                    // length of the encrypted part
          break;
-    case ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
-    case ASH_SLF_TYPE_CRYPTO_MIC64:
-    case ASH_SLF_TYPE_CRYPTO_MIC128:
+    case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
+    case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64:
+    case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128:
        a = msg->payload;             // first byte of the frame
        m = msg->l2_payload;          // first byte where we should start encrypting (see 15.4 std)
                                      // TODO make sure l2_payload points to the right position for all frame types
@@ -325,7 +325,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
        len_a = m - a;                // part that is only authenticated is the difference of two pointers
        len_m = msg->length - len_a;  // part that is encrypted+authenticated is the rest of the frame
        break;
-    case ASH_SLF_TYPE_ONLYCRYPTO:    // encryption only
+    case IEEE154_ASH_SLF_TYPE_ONLYCRYPTO:    // encryption only
        // unsecure, should not support it
        return E_FAIL;
     default:
@@ -383,15 +383,15 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
    //1byte, Security Control Field
 
    temp8b = *((uint8_t*)(msg->payload)+tempheader->headerLength);
-   msg->l2_securityLevel = (temp8b >> ASH_SCF_SECURITY_LEVEL)& 0x07;//3b
+   msg->l2_securityLevel = (temp8b >> IEEE154_ASH_SCF_SECURITY_LEVEL)& 0x07;//3b
 
    msg->l2_authenticationLength = IEEE802154_security_authLengthChecking(msg->l2_securityLevel);
 
    //retrieve the KeyIdMode field
-   msg->l2_keyIdMode = (temp8b >> ASH_SCF_KEY_IDENTIFIER_MODE)& 0x03;//2b
+   msg->l2_keyIdMode = (temp8b >> IEEE154_ASH_SCF_KEY_IDENTIFIER_MODE)& 0x03;//2b
 
-   frameCnt_Suppression = (temp8b >> ASH_SCF_FRAME_CNT_MODE)& 0x01;//1b
-   frameCnt_Size = (temp8b >> ASH_SCF_FRAME_CNT_SIZE)& 0x01;//1b
+   frameCnt_Suppression = (temp8b >> IEEE154_ASH_SCF_FRAME_CNT_MODE)& 0x01;//1b
+   frameCnt_Size = (temp8b >> IEEE154_ASH_SCF_FRAME_CNT_SIZE)& 0x01;//1b
 
    tempheader->headerLength = tempheader->headerLength+1;
 
@@ -572,17 +572,17 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
       }
 
    switch (msg->l2_securityLevel) {
-      case ASH_SLF_TYPE_MIC_32:  // authentication only cases
-      case ASH_SLF_TYPE_MIC_64:
-      case ASH_SLF_TYPE_MIC_128: 
+      case IEEE154_ASH_SLF_TYPE_MIC_32:  // authentication only cases
+      case IEEE154_ASH_SLF_TYPE_MIC_64:
+      case IEEE154_ASH_SLF_TYPE_MIC_128: 
          a = msg->payload;                                           // first byte of the frame
          len_a = msg->length-msg->l2_authenticationLength;           // whole frame
          m = &msg->payload[len_a];                                   // MIC is at the end of the frame
          len_m = msg->l2_authenticationLength;                       // length of the encrypted part
          break;
-      case ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
-      case ASH_SLF_TYPE_CRYPTO_MIC64:
-      case ASH_SLF_TYPE_CRYPTO_MIC128:
+      case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
+      case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64:
+      case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128:
          a = msg->payload;             // first byte of the frame
          m = msg->l2_payload;          // first byte where we should start decrypting 
                                        // TODO make sure l2_payload points to the right position for all frame types
@@ -591,7 +591,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
          len_a = m - a;                // part that is only authenticated is the difference of two pointers
          len_m = msg->length - len_a;  // part that is decrypted+authenticated is the rest of the frame
          break;
-      case ASH_SLF_TYPE_ONLYCRYPTO:    // encryption only
+      case IEEE154_ASH_SLF_TYPE_ONLYCRYPTO:    // encryption only
          // unsecure, should not support it
          return E_FAIL;
       default:
