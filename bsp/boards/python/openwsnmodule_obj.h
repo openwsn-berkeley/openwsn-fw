@@ -15,6 +15,7 @@
 #include "opentimers_obj.h"
 #include "scheduler_obj.h"
 #include "IEEE802154E_obj.h"
+#include "IEEE802154_security_obj.h"
 #include "adaptive_sync_obj.h"
 #include "neighbors_obj.h"
 #include "processIE_obj.h"
@@ -223,6 +224,7 @@ struct OpenMote {
    schedule_vars_t      schedule_vars;
    // l2a
    adaptive_sync_vars_t adaptive_sync_vars;
+   ieee802154_security_vars_t ieee802154_security_vars;
    ieee154e_vars_t      ieee154e_vars;
    ieee154e_stats_t     ieee154e_stats;
    ieee154e_dbg_t       ieee154e_dbg;

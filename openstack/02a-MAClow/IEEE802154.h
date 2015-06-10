@@ -70,6 +70,31 @@ enum IEEE802154_fcf_addr_mode_enums {
    IEEE154_ADDR_EXT                    = 3,
 };
 
+enum IEEE802154_ash_scf_enums { // Security Control Field
+   ASH_SCF_SECURITY_LEVEL              = 0,
+   ASH_SCF_KEY_IDENTIFIER_MODE         = 3,
+   ASH_SCF_FRAME_CNT_MODE              = 5,
+   ASH_SCF_FRAME_CNT_SIZE              = 6,
+};
+
+enum IEEE802154_ash_slf_enums { // Security Level Field
+   ASH_SLF_TYPE_NOSEC                  = 0,
+   ASH_SLF_TYPE_MIC_32                 = 1,
+   ASH_SLF_TYPE_MIC_64                 = 2,
+   ASH_SLF_TYPE_MIC_128                = 3,
+   ASH_SLF_TYPE_ONLYCRYPTO             = 4,
+   ASH_SLF_TYPE_CRYPTO_MIC32           = 5,
+   ASH_SLF_TYPE_CRYPTO_MIC64           = 6,
+   ASH_SLF_TYPE_CRYPTO_MIC128          = 7,
+};
+
+enum IEEE802154_ash_keyIdMode_enums { // Key Identifier Mode Field
+   ASH_KEYIDMODE_IMPLICIT              = 0,
+   ASH_KEYIDMODE_DEFAULTKEYSOURCE      = 1,
+   ASH_KEYIDMODE_EXPLICIT_16           = 2,
+   ASH_KEYIDMODE_EXPLICIT_64           = 3,
+};
+
 //=========================== typedef =========================================
 
 typedef struct {
@@ -96,8 +121,7 @@ typedef struct {
 
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
-                              uint8_t           ielistpresent,
-                              uint8_t           frameversion,
+                              bool              payloadIEPresent,
                               bool              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop);

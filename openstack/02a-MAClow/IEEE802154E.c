@@ -3,7 +3,7 @@
 #include "radio.h"
 #include "radiotimer.h"
 #include "IEEE802154.h"
-#include "IEEE802154_security.h"
+#include "ieee802154_security_driver.h"
 #include "openqueue.h"
 #include "idmanager.h"
 #include "openserial.h"
@@ -72,6 +72,10 @@ void     incrementAsnOffset(void);
 void     ieee154e_syncSlotOffset(void);
 void     asnStoreFromEB(uint8_t* asn);
 void     joinPriorityStoreFromEB(uint8_t jp);
+// timeslot template handling
+void     timeslotTemplateIDStoreFromEB(uint8_t id);
+// channelhopping template handling
+void     channelhoppingTemplateIDStoreFromEB(uint8_t id);
 // synchronization
 void     synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived);
 void     synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection);
@@ -552,7 +556,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // to generate the nonce. Frame cannot successfully pass security processing
       // at this point so we need to accept it in any case.
       if (ieee154e_vars.dataReceived->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154security_incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
+         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
             if (ieee802514_header.frameType != IEEE154_TYPE_BEACON) {
                break; // reject anything but EBs here
             }
@@ -645,7 +649,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    temp_8b    = *((uint8_t*)(pkt->payload)+ptr);
    ptr++;
    
-   temp_16b   = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<< 8);
+   temp_16b   = (temp_8b << 8) + (*((uint8_t*)(pkt->payload)+ptr));
    ptr++;
    
    *lenIE     = ptr;
@@ -676,7 +680,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             //read sub IE header
             temp_8b     = *((uint8_t*)(pkt->payload)+ptr);
             ptr         = ptr + 1;
-            temp_16b    = temp_8b  +(*((uint8_t*)(pkt->payload)+ptr) << 8);
+            temp_16b    = (temp_8b << 8)  + (*((uint8_t*)(pkt->payload)+ptr));
             ptr         = ptr + 1;
             
             len         = len - 2; //remove header fields len
@@ -718,9 +722,20 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                   break;
                
                case IEEE802154E_MLME_TIMESLOT_IE_SUBID:
-                  //TODO
+                  if (idmanager_getIsDAGroot()==FALSE) {
+                      // timelsot template ID
+                      timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+                      ptr = ptr + 1;
+                  }
                   break;
-               
+                  
+              case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
+                  if (idmanager_getIsDAGroot()==FALSE) {
+                      // timelsot template ID
+                      channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
+                      ptr = ptr + 1;
+                  }
+                  break;
                default:
                   return FALSE;
                   break;
@@ -952,7 +967,7 @@ port_INLINE void activity_ti2() {
    // check if packet needs to be encrypted/authenticated before transmission 
    if (local_copy_for_transmission.l2_securityLevel != ASH_SLF_TYPE_NOSEC) { // security enabled
       // encrypt in a local copy
-      if (IEEE802154security_outgoingFrameSecurity(&local_copy_for_transmission) == E_FAIL) {
+      if (IEEE802154_SECURITY.outgoingFrame(&local_copy_for_transmission) == E_FAIL) {
          // keep the frame in the OpenQueue in order to retry later
          endSlot(); // abort
          return;
@@ -1250,12 +1265,12 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       // check the security level of the ACK frame and decrypt/authenticate
       if (ieee154e_vars.ackReceived->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
-          if (IEEE802154security_incomingFrame(ieee154e_vars.ackReceived) == E_FAIL) {
+          if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) == E_FAIL) {
          	 break;
           }
-      } else {
-       	  //deny permission to continue if security is enabled
-          if (IEEE802154E_SECURITY_LEVEL) break;
+      } else if (IEEE802154_SECURITY_ENABLED) {
+         //deny permission to continue if security is enabled
+         break;
       }
       
       // toss the IEEE802.15.4 header
@@ -1462,13 +1477,14 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       // if security is enabled, decrypt/authenticate the frame.
       if (ieee154e_vars.dataReceived->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154security_incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
+         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
         	 break;
          }
-      } else {
-    	  //deny permission to continue if security is enabled
-    	  if (IEEE802154E_SECURITY_LEVEL) break;
+      } else if (IEEE802154_SECURITY_ENABLED) {
+         //deny permission to continue if security is enabled
+         break;
       }
+
 
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
@@ -1588,8 +1604,7 @@ port_INLINE void activity_ri6() {
 
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
-                            IEEE154_IELIST_YES,//ie in ack
-                            IEEE154_FRAMEVERSION,//enhanced ack
+                            TRUE,//ie in ack
                             ieee154e_vars.ackToSend->l2_securityLevel == ASH_SLF_TYPE_NOSEC ? 0 : 1,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
@@ -1597,7 +1612,7 @@ port_INLINE void activity_ri6() {
    
    // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
    if (ieee154e_vars.ackToSend->l2_securityLevel != ASH_SLF_TYPE_NOSEC) {
-      if (IEEE802154security_outgoingFrameSecurity(ieee154e_vars.ackToSend) == E_FAIL) {
+      if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) == E_FAIL) {
      	   openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
      	   endSlot();
      	   return;
@@ -1840,6 +1855,16 @@ port_INLINE void ieee154e_syncSlotOffset() {
    slotOffset = slotOffset % frameLength;
    
    ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
+}
+
+// timeslot template handling
+port_INLINE void timeslotTemplateIDStoreFromEB(uint8_t id){
+    ieee154e_vars.tsTemplateId = id;
+}
+
+// channelhopping template handling
+port_INLINE void channelhoppingTemplateIDStoreFromEB(uint8_t id){
+    ieee154e_vars.chTemplateId = id;
 }
 
 //======= synchronization
