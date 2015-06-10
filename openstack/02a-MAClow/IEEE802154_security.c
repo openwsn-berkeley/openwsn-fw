@@ -319,9 +319,6 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
     case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128:
        a = msg->payload;             // first byte of the frame
        m = msg->l2_payload;          // first byte where we should start encrypting (see 15.4 std)
-                                     // TODO make sure l2_payload points to the right position for all frame types
-                                     // and takes into account header/payload IEs
-
        len_a = m - a;                // part that is only authenticated is the difference of two pointers
        len_m = msg->length - len_a;  // part that is encrypted+authenticated is the rest of the frame
        break;
@@ -454,8 +451,6 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
      msg->l2_keyIndex = 1;
    }
 
-   // Record the position where we should start decrypting
-   msg->l2_payload = &msg->payload[tempheader->headerLength];
 }
 
 /**
@@ -585,9 +580,6 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
       case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128:
          a = msg->payload;             // first byte of the frame
          m = msg->l2_payload;          // first byte where we should start decrypting 
-                                       // TODO make sure l2_payload points to the right position for all frame types
-                                       // and takes into account header/payload IEs
-
          len_a = m - a;                // part that is only authenticated is the difference of two pointers
          len_m = msg->length - len_a;  // part that is decrypted+authenticated is the rest of the frame
          break;

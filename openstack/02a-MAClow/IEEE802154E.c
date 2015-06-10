@@ -1268,10 +1268,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
           if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) == E_FAIL) {
          	 break;
           }
-      } else if (IEEE802154_SECURITY_ENABLED) {
-         //deny permission to continue if security is enabled
-         break;
-      }
+      } // checked if unsecured frame should pass during header retrieval
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
@@ -1480,11 +1477,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
         	 break;
          }
-      } else if (IEEE802154_SECURITY_ENABLED) {
-         //deny permission to continue if security is enabled
-         break;
-      }
-
+      } // checked if unsecured frame should pass during header retrieval
 
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
@@ -1598,9 +1591,6 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->l2_securityLevel = ieee154e_vars.dataReceived->l2_securityLevel;
    ieee154e_vars.ackToSend->l2_keyIdMode     = ieee154e_vars.dataReceived->l2_keyIdMode;
    ieee154e_vars.ackToSend->l2_keyIndex      = ieee154e_vars.dataReceived->l2_keyIndex;
-
-   //record position where L2 payload starts in order to start encrypting here
-   ieee154e_vars.ackToSend->l2_payload = ieee154e_vars.ackToSend->payload;
 
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
