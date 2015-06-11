@@ -134,11 +134,21 @@ void ieee154e_setSingleChannel(uint8_t channel){return;}
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod) {return;}
 void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod) {return;}
 void neighbors_setMyDAGrank(uint16_t rank) {return;}
-void sixtop_setKaPeriod(uint8_t kaPeriod) {return;}
+void sixtop_setKaPeriod(uint16_t kaPeriod) {return;}
 void ieee154e_setIsSecurityEnabled(bool isEnabled) {return;}
 void schedule_setCustomFrameLength(uint16_t frameLength) {return;}
-void icmpv6rpl_writeDODAGid() {return;}
+void icmpv6rpl_writeDODAGid(uint8_t* dodagid) {return;}
 void ieee154e_setIsAckEnabled(bool isEnabled) {return;}
-void ieee154e_getAsn() {return;}
+void ieee154e_getAsn(uint8_t* array) {return;}
 void neighbors_updateMyDAGrankAndNeighborPreference() {return;}
 void schedule_startDAGroot() {return;}
+
+bool debugPrint_asn(void)       {return TRUE;}
+bool debugPrint_isSync(void)    {return TRUE;}
+bool debugPrint_macStats(void)  {return TRUE;}
+bool debugPrint_schedule(void)  {return TRUE;}
+bool debugPrint_backoff(void)   {return TRUE;}
+bool debugPrint_queue(void)     {return TRUE;}
+bool debugPrint_neighbors(void) {return TRUE;}
+bool debugPrint_myDAGrank(void) {return TRUE;}
+bool debugPrint_kaPeriod(void)  {return TRUE;}
