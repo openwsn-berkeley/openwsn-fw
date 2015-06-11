@@ -4,6 +4,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "topology.h"
+#include "ieee802154_security_driver.h"
 
 //=========================== define ==========================================
 
@@ -49,6 +50,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint8_t ielistpresent = IEEE154_IELIST_NO;
    uint8_t frameVersion;
    
+   msg->l2_payload = msg->payload; // save the position where to start encrypting if security is enabled 
+ 
    // General IEs here (those that are carried in all packets)
    // add termination IE accordingly 
    if (payloadIEPresent == TRUE) {
@@ -75,8 +78,13 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
            // no payload, termination IE is omitted
            frameVersion = IEEE154_FRAMEVERSION_2006;
        }
+  } 
+
+   //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
+   if(securityEnabled){
+      IEEE802154_SECURITY.prependAuxiliarySecurityHeader(msg);
    }
-   
+ 
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
    // nextHop address
@@ -278,6 +286,17 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
        return; //invalid packet accordint to p.64 IEEE15.4e
    }
+
+   // security decision tree.
+   // pass header parsing iff: 
+   // - received unsecured frame and security disabled locally
+   // - received secured frame and security is enabled locally
+   if (ieee802514_header->securityEnabled && IEEE802154_SECURITY_ENABLED) {
+       IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
+   }
+   else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_ENABLED) {
+      return;
+   }
    
    // remove termination IE accordingly 
    if (ieee802514_header->ieListPresent == TRUE) {
@@ -300,7 +319,10 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
            if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
        }
    }
-   
+
+   // Record the position where we should start decrypting if security is enabled
+   msg->l2_payload = &msg->payload[ieee802514_header->headerLength];
+
    // apply topology filter
    if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {
       // the topology filter does accept this packet, return

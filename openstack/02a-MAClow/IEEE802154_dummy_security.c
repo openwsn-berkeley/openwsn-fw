@@ -1,0 +1,38 @@
+/**
+\brief Dummy IEEE802154 security implementation
+  
+\author Malisa Vucinic <malishav@gmail.com>, June 2015.
+*/
+
+#include "IEEE802154_dummy_security.h"
+
+static void init(void) {
+   return;
+}
+
+static void prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
+   return;
+}
+
+static void retrieveAuxiliarySecurityHeader(OpenQueueEntry_t* msg, ieee802154_header_iht* tempheader) {
+   return;
+}
+
+static owerror_t outgoingFrame(OpenQueueEntry_t* msg) {
+   return E_SUCCESS;
+}
+
+static owerror_t incomingFrame(OpenQueueEntry_t* msg) {
+   return E_SUCCESS;
+}
+
+/*---------------------------------------------------------------------------*/
+const struct ieee802154_security_driver IEEE802154_dummy_security = {
+   init,
+   prependAuxiliarySecurityHeader,
+   retrieveAuxiliarySecurityHeader,
+   outgoingFrame,
+   incomingFrame,
+};
+/*---------------------------------------------------------------------------*/
+

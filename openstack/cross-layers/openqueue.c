@@ -256,4 +256,6 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_retriesLeft               = 0;
    entry->l2_IEListPresent             = 0;
    entry->l2_payloadIEpresent          = 0;
+   //l2-security
+   entry->l2_securityLevel             = 0;
 }

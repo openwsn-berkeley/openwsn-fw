@@ -3,6 +3,7 @@
 #include "radio.h"
 #include "radiotimer.h"
 #include "IEEE802154.h"
+#include "ieee802154_security_driver.h"
 #include "openqueue.h"
 #include "idmanager.h"
 #include "openserial.h"
@@ -560,11 +561,24 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       ieee154e_vars.dataReceived->l2_frameType = ieee802514_header.frameType;
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
-      
-      // toss the IEEE802.15.4 header -- this does not include IEs as they are processed 
+
+      // This is the case where we first hear an EB and do not yet know the ASN used
+      // to generate the nonce. Frame cannot successfully pass security processing
+      // at this point so we need to accept it in any case.
+      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
+            if (ieee802514_header.frameType != IEEE154_TYPE_BEACON) {
+               break; // reject anything but EBs here
+            }
+	      // accepting EB even though security processing failed
+            // TODO log the event
+         }
+      }
+
+      // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
       // next.
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-      
+     
       // process IEs
       lenIE = 0;
       if (
@@ -578,13 +592,13 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
          // break from the do-while loop and execute the clean-up code below
          break;
       }
-      
+    
       // turn off the radio
       radio_rfOff();
       
       // compute radio duty cycle
       ieee154e_vars.radioOnTics += (radio_getTimerValue()-ieee154e_vars.radioOnInit);
-      
+
       // toss the IEs
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
       
@@ -952,8 +966,26 @@ port_INLINE void activity_ti1ORri1() {
 }
 
 port_INLINE void activity_ti2() {
+   OpenQueueEntry_t local_copy_for_transmission; 
+   
    // change state
    changeState(S_TXDATAPREPARE);
+
+   // make a local copy of the frame
+   memcpy(&local_copy_for_transmission, ieee154e_vars.dataToSend, sizeof(OpenQueueEntry_t));
+
+   // check if packet needs to be encrypted/authenticated before transmission 
+   if (local_copy_for_transmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
+      // encrypt in a local copy
+      if (IEEE802154_SECURITY.outgoingFrame(&local_copy_for_transmission) == E_FAIL) {
+         // keep the frame in the OpenQueue in order to retry later
+         endSlot(); // abort
+         return;
+      }
+   }
+   
+   // add 2 CRC bytes only to the local copy as we end up here for each retransmission
+   packetfunctions_reserveFooterSize(&local_copy_for_transmission, 2);
    
    // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
@@ -962,8 +994,8 @@ port_INLINE void activity_ti2() {
    radio_setFrequency(ieee154e_vars.freq);
    
    // load the packet in the radio's Tx buffer
-   radio_loadPacket(ieee154e_vars.dataToSend->payload,
-                    ieee154e_vars.dataToSend->length);
+   radio_loadPacket(local_copy_for_transmission.payload,
+                    local_copy_for_transmission.length);
    
    // enable the radio in Tx mode. This does not send the packet.
    radio_txEnable();
@@ -1235,15 +1267,22 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          // break from the do-while loop and execute the clean-up code below
          break;
       }
-      
+
       // store header details in packet buffer
       ieee154e_vars.ackReceived->l2_frameType  = ieee802514_header.frameType;
       ieee154e_vars.ackReceived->l2_dsn        = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
+
+      // check the security level of the ACK frame and decrypt/authenticate
+      if (ieee154e_vars.ackReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+          if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) == E_FAIL) {
+         	 break;
+          }
+      } // checked if unsecured frame should pass during header retrieval
       
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.ackReceived,ieee802514_header.headerLength);
-      
+    
       // break if invalid ACK
       if (isValidAck(&ieee802514_header,ieee154e_vars.dataToSend)==FALSE) {
          // break from the do-while loop and execute the clean-up code below
@@ -1436,16 +1475,23 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          // break from the do-while loop and execute the clean-up code below
          break;
       }
-      
+
       // store header details in packet buffer
       ieee154e_vars.dataReceived->l2_frameType      = ieee802514_header.frameType;
       ieee154e_vars.dataReceived->l2_dsn            = ieee802514_header.dsn;
       ieee154e_vars.dataReceived->l2_IEListPresent  = ieee802514_header.ieListPresent;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
-      
+
+      // if security is enabled, decrypt/authenticate the frame.
+      if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
+        	 break;
+         }
+      } // checked if unsecured frame should pass during header retrieval
+
       // toss the IEEE802.15.4 header
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,ieee802514_header.headerLength);
-      
+
       // handle IEs xv poipoi
       // reset join priority 
       // retrieve IE in sixtop
@@ -1457,7 +1503,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
           //log  that the packet is not carrying IEs
       }
       
-      // toss the IEs including Synch
+     // toss the IEs including Synch
       packetfunctions_tossHeader(ieee154e_vars.dataReceived,lenIE);
             
       // record the captured time
@@ -1545,21 +1591,36 @@ port_INLINE void activity_ri6() {
                                      (IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID << IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT)|
                                      IEEE802154E_DESC_TYPE_SHORT; 
    memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_ht));
-   
+
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
+
+   // To send ACK, we use the same security level (including NOSEC) and keys
+   // that were present in the DATA packet.
+   ieee154e_vars.ackToSend->l2_securityLevel = ieee154e_vars.dataReceived->l2_securityLevel;
+   ieee154e_vars.ackToSend->l2_keyIdMode     = ieee154e_vars.dataReceived->l2_keyIdMode;
+   ieee154e_vars.ackToSend->l2_keyIndex      = ieee154e_vars.dataReceived->l2_keyIndex;
+
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
                             TRUE,//ie in ack
-                            IEEE154_SEC_NO_SECURITY,
+                            ieee154e_vars.ackToSend->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
    
-   // space for 2-byte CRC
+   // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
+   if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+      if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) == E_FAIL) {
+     	   openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
+     	   endSlot();
+     	   return;
+      }
+   }
+    // space for 2-byte CRC
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
-   
+  
     // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
