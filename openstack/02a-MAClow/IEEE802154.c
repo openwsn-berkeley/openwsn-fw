@@ -291,10 +291,10 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    // pass header parsing iff: 
    // - received unsecured frame and security disabled locally
    // - received secured frame and security is enabled locally
-   if (ieee802514_header->securityEnabled && IEEE802154_SECURITY_ENABLED) {
+   if (ieee802514_header->securityEnabled && IEEE802154_SECURITY_SUPPORTED) {
        IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
    }
-   else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_ENABLED) {
+   else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_SUPPORTED) {
       return;
    }
    
