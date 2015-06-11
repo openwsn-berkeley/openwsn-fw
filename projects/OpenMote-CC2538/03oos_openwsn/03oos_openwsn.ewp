@@ -2178,6 +2178,12 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\bsp_timer.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\cc2538_crypto_engine.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\cc2538_crypto_engine.h</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\cc2538rf.h</name>
         </file>
         <file>
@@ -2453,6 +2459,21 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_dummy_security.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_dummy_security.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>
