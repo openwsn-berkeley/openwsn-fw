@@ -50,7 +50,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint8_t ielistpresent = IEEE154_IELIST_NO;
    uint8_t frameVersion;
    
-  
+   msg->l2_payload = msg->payload; // save the position where to start encrypting if security is enabled 
+ 
    // General IEs here (those that are carried in all packets)
    // add termination IE accordingly 
    if (payloadIEPresent == TRUE) {
@@ -286,15 +287,15 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
        return; //invalid packet accordint to p.64 IEEE15.4e
    }
 
-   //if security is enabled, Auxiliary Security Header can be retrieved
-   if(ieee802514_header->securityEnabled) {
-      if (IEEE802154_SECURITY_ENABLED) {
-         IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
-      }
-      else {
-         // Received a frame with security enabled but project compiled with no security support
-         return;
-      }
+   // security decision tree.
+   // pass header parsing iff: 
+   // - received unsecured frame and security disabled locally
+   // - received secured frame and security is enabled locally
+   if (ieee802514_header->securityEnabled && IEEE802154_SECURITY_ENABLED) {
+       IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
+   }
+   else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_ENABLED) {
+      return;
    }
    
    // remove termination IE accordingly 
@@ -318,7 +319,10 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
            if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
        }
    }
-   
+
+   // Record the position where we should start decrypting if security is enabled
+   msg->l2_payload = &msg->payload[ieee802514_header->headerLength];
+
    // apply topology filter
    if (topology_isAcceptablePacket(ieee802514_header)==FALSE) {
       // the topology filter does accept this packet, return
