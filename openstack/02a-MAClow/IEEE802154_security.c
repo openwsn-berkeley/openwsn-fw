@@ -279,28 +279,10 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 
    //nonce creation
    memset(&nonce[0], 0, 13);
-   switch (msg->l2_keyIdMode){
-      case 0:
-      case 1:
-         for (i=0; i<8; i++){
-            nonce[i] = ieee802154_security_vars.m_macDefaultKeySource.addr_64b[i];
-         }
-         break;
-      case 2:
-         for (i=0; i<2; i++){
-            nonce[i] = msg->l2_keySource.addr_16b[i];
-         }
-         for (i=2; i<8; i++){
-            nonce[i] = 0;
-         }
-         break;
-      case 3:
-         for (i=0; i<8; i++){
-            nonce[i] = msg->l2_keySource.addr_64b[i];
-         }
-         break;
-   }
+   //first 8 bytes of the nonce are always the source address of the frame
+   memcpy(&nonce[0],idmanager_getMyID(ADDR_64B)->addr_64b,8);
 
+   //Frame Counter (ASN)
    for (i=0;i<5;i++){
       nonce[8+i] = vectASN[i];
    }
@@ -538,27 +520,8 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
 
    //create nonce
    memset(&nonce[0], 0, 13);
-   switch (msg->l2_keyIdMode){
-      case 0:
-      case 1:
-         for (i=0; i<8; i++){
-            nonce[i] = ieee802154_security_vars.m_macDefaultKeySource.addr_64b[i];
-          }
-         break;
-      case 2:
-         for (i=0; i<2; i++){
-            nonce[i] = msg->l2_keySource.addr_16b[i];
-            }
-         for (i=2; i<8; i++){
-            nonce[i] = 0;
-            }
-         break;
-      case 3:
-         for (i=0; i<8; i++){
-            nonce[i] = msg->l2_keySource.addr_64b[i];
-            }
-         break;
-   }
+   //first 8 bytes of the nonce are always the source address of the frame
+   memcpy(&nonce[0],msg->l2_nextORpreviousHop.addr_64b,8);
 
    //Frame Counter (ASN)
    ieee154e_getAsn(myASN);
