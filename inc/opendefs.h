@@ -312,6 +312,7 @@ typedef struct {
    open_addr_t   l2_keySource;                   //the key Source specified for the current frame
    uint8_t       l2_authenticationLength;        //the length of the authentication field
    uint8_t       commandFrameIdentifier;         //used in case of Command Frames
+   uint8_t*      l2_FrameCounter;                //pointer to the FrameCounter in the MAC header
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet

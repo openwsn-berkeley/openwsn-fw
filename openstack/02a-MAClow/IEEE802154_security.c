@@ -205,7 +205,7 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
       // Keep a pointer to where the ASN will be
       // Note: the actual value of the current ASN will be written by the
       //    IEEE802.15.4e when transmitting
-      msg->l2_ASNpayload = msg->payload;
+      msg->l2_FrameCounter = msg->payload;
    }
 
    //security control field
@@ -274,7 +274,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
       l2_frameCounter.byte4 = vectASN[4];
 
       IEEE802154_security_getFrameCounter(l2_frameCounter,
-                                         msg->l2_ASNpayload);
+                                         msg->l2_FrameCounter);
    } //otherwise the frame counter is not in the frame
 
    //nonce creation
