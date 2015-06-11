@@ -956,7 +956,7 @@ port_INLINE void activity_ti1ORri1() {
 }
 
 port_INLINE void activity_ti2() {
-   OpenQueueEntry_t local_copy_for_transmission; 
+   static OpenQueueEntry_t local_copy_for_transmission; // keep in BSS to prevent stack overflow 
    
    // change state
    changeState(S_TXDATAPREPARE);
