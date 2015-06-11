@@ -296,20 +296,20 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
          m = &msg->payload[len_a];     // concatenate MIC at the end of the frame
          len_m = 0;                    // length of the encrypted part
          break;
-    case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
-    case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64:
-    case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128:
-       a = msg->payload;             // first byte of the frame
-       m = msg->l2_payload;          // first byte where we should start encrypting (see 15.4 std)
-       len_a = m - a;                // part that is only authenticated is the difference of two pointers
-       len_m = msg->length - len_a;  // part that is encrypted+authenticated is the rest of the frame
-       break;
+      case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
+      case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64:
+      case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128:
+         a = msg->payload;             // first byte of the frame
+         m = msg->l2_payload;          // first byte where we should start encrypting (see 15.4 std)
+         len_a = m - a;                // part that is only authenticated is the difference of two pointers
+         len_m = msg->length - len_a;  // part that is encrypted+authenticated is the rest of the frame
+         break;
     case IEEE154_ASH_SLF_TYPE_ONLYCRYPTO:    // encryption only
-       // unsecure, should not support it
-       return E_FAIL;
+         // unsecure, should not support it
+         return E_FAIL;
     default:
-       // reject anything else
-       return E_FAIL;
+         // reject anything else
+         return E_FAIL;
    }
 
    // assert
@@ -336,7 +336,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
                                           key,
                                           msg->l2_authenticationLength);
 
-   if (outStatus!=0){
+   if (outStatus != E_SUCCESS) {
       openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
       (errorparameter_t)msg->l2_frameType,
       (errorparameter_t)2);
@@ -449,8 +449,8 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
    owerror_t outStatus;
    uint8_t* a;
    uint8_t len_a;
-   uint8_t* m;
-   uint8_t len_m;
+   uint8_t* c;
+   uint8_t len_c;
 
    //f key descriptor lookup
    keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
@@ -535,16 +535,16 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
       case IEEE154_ASH_SLF_TYPE_MIC_128: 
          a = msg->payload;                                           // first byte of the frame
          len_a = msg->length-msg->l2_authenticationLength;           // whole frame
-         m = &msg->payload[len_a];                                   // MIC is at the end of the frame
-         len_m = msg->l2_authenticationLength;                       // length of the encrypted part
+         c = &msg->payload[len_a];                                   // MIC is at the end of the frame
+         len_c = msg->l2_authenticationLength;                       // length of the encrypted part
          break;
       case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
       case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64:
       case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128:
          a = msg->payload;             // first byte of the frame
-         m = msg->l2_payload;          // first byte where we should start decrypting 
-         len_a = m - a;                // part that is only authenticated is the difference of two pointers
-         len_m = msg->length - len_a;  // part that is decrypted+authenticated is the rest of the frame
+         c = msg->l2_payload;          // first byte where we should start decrypting 
+         len_a = c - a;                // part that is only authenticated is the difference of two pointers
+         len_c = msg->length - len_a;  // part that is decrypted+authenticated is the rest of the frame
          break;
       case IEEE154_ASH_SLF_TYPE_ONLYCRYPTO:    // encryption only
          // unsecure, should not support it
@@ -555,7 +555,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
     }
 
    // assert
-   if (len_a + len_m > 125) {
+   if (len_a + len_c > 125) {
       openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
                            (errorparameter_t)msg->l2_frameType,
                            (errorparameter_t)7);
@@ -564,14 +564,14 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
 
    outStatus = CRYPTO_ENGINE.aes_ccms_dec(a,
                                           len_a,
-                                          m,
-                                          &len_m,
+                                          c,
+                                          &len_c,
                                           nonce,
                                           2,
                                           keyDescriptor->key,
                                           msg->l2_authenticationLength);
 
-   if (outStatus!=0){
+   if (outStatus != E_SUCCESS){
       openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
                            (errorparameter_t)msg->l2_frameType,
                            (errorparameter_t)8);

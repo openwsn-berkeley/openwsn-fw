@@ -294,9 +294,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    if (ieee802514_header->securityEnabled && IEEE802154_SECURITY_SUPPORTED) {
        IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
    }
-   else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_SUPPORTED) {
-      return;
-   }
+   else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_SUPPORTED) { return; }
    
    // remove termination IE accordingly 
    if (ieee802514_header->ieListPresent == TRUE) {
