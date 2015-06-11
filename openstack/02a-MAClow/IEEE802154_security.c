@@ -59,7 +59,7 @@ m_keyDescriptor* IEEE802154_security_keyDescriptorLookup(uint8_t      KeyIdMode,
 /**
 \brief Initialization of security tables and parameters.
 */
-void IEEE802154_security_init(){
+void IEEE802154_security_init(void){
 
    //Setting UP Phase
 
