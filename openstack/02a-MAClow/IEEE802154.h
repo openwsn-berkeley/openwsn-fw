@@ -82,10 +82,10 @@ enum IEEE802154_ash_slf_enums { // Security Level Field
    IEEE154_ASH_SLF_TYPE_MIC_32            = 1,
    IEEE154_ASH_SLF_TYPE_MIC_64            = 2,
    IEEE154_ASH_SLF_TYPE_MIC_128           = 3,
-   IEEE154_ASH_SLF_TYPE_ONLYCRYPTO        = 4,
-   IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32      = 5,
-   IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64      = 6,
-   IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128     = 7,
+   IEEE154_ASH_SLF_TYPE_ENC               = 4,
+   IEEE154_ASH_SLF_TYPE_ENC_MIC_32        = 5,
+   IEEE154_ASH_SLF_TYPE_ENC_MIC_64        = 6,
+   IEEE154_ASH_SLF_TYPE_ENC_MIC_128       = 7,
 };
 
 enum IEEE802154_ash_keyIdMode_enums { // Key Identifier Mode Field
