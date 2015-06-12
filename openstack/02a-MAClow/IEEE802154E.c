@@ -556,7 +556,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       // to generate the nonce. Frame cannot successfully pass security processing
       // at this point so we need to accept it in any case.
       if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
+         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
             if (ieee802514_header.frameType != IEEE154_TYPE_BEACON) {
                break; // reject anything but EBs here
             }
@@ -956,7 +956,7 @@ port_INLINE void activity_ti1ORri1() {
 }
 
 port_INLINE void activity_ti2() {
-   OpenQueueEntry_t local_copy_for_transmission; 
+   static OpenQueueEntry_t local_copy_for_transmission; // keep in BSS to prevent stack overflow 
    
    // change state
    changeState(S_TXDATAPREPARE);
@@ -967,7 +967,7 @@ port_INLINE void activity_ti2() {
    // check if packet needs to be encrypted/authenticated before transmission 
    if (local_copy_for_transmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
       // encrypt in a local copy
-      if (IEEE802154_SECURITY.outgoingFrame(&local_copy_for_transmission) == E_FAIL) {
+      if (IEEE802154_SECURITY.outgoingFrame(&local_copy_for_transmission) != E_SUCCESS) {
          // keep the frame in the OpenQueue in order to retry later
          endSlot(); // abort
          return;
@@ -1265,7 +1265,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       // check the security level of the ACK frame and decrypt/authenticate
       if (ieee154e_vars.ackReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-          if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) == E_FAIL) {
+          if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.ackReceived) != E_SUCCESS) {
          	 break;
           }
       } // checked if unsecured frame should pass during header retrieval
@@ -1474,7 +1474,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 
       // if security is enabled, decrypt/authenticate the frame.
       if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) == E_FAIL) {
+         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
         	 break;
          }
       } // checked if unsecured frame should pass during header retrieval
@@ -1602,7 +1602,7 @@ port_INLINE void activity_ri6() {
    
    // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
    if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-      if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) == E_FAIL) {
+      if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
      	   openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
      	   endSlot();
      	   return;
