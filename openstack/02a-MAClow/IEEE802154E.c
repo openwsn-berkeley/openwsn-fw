@@ -1580,7 +1580,8 @@ port_INLINE void activity_ri6() {
    header_desc.length_elementid_type=(sizeof(timecorrection_IE_ht)<< IEEE802154E_DESC_LEN_HEADER_IE_SHIFT)|
                                      (IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID << IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT)|
                                      IEEE802154E_DESC_TYPE_SHORT; 
-   memcpy(ieee154e_vars.ackToSend->payload,&header_desc,sizeof(header_IE_ht));
+   ieee154e_vars.ackToSend->payload[0] = ((header_desc.length_elementid_type) >> 8) & 0xFF;
+   ieee154e_vars.ackToSend->payload[1] = (header_desc.length_elementid_type)        & 0xFF;
 
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
