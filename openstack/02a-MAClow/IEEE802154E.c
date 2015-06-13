@@ -193,8 +193,10 @@ void isr_ieee154e_newSlot() {
          activity_synchronize_newSlot();
       }
    } else {
+#ifdef ADAPTIVE_SYNC
      // adaptive synchronization
       adaptive_sync_countCompensationTimeout();
+#endif
       activity_ti1ORri1();
    }
    ieee154e_dbg.num_newSlot++;
@@ -945,9 +947,10 @@ port_INLINE void activity_ti1ORri1() {
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
          }
+#ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
          adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
-         
+#endif
          break;
       case CELLTYPE_MORESERIALRX:
          // do nothing (not even endSlot())
@@ -1576,6 +1579,9 @@ port_INLINE void activity_ri6() {
    
    // calculate the time timeCorrection (this is the time when the packet arrive w.r.t the time it should be.
    timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
+   
+   // record the timeCorrection and print out at end of slot
+   ieee154e_vars.dataReceived->l2_timeCorrection = timeCorrection;
     
    // add the payload to the ACK (i.e. the timeCorrection)
    packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(timecorrection_IE_ht));
@@ -1913,28 +1919,25 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
-   
+#ifdef
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
-   
+#endif
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    
    // log a large timeCorrection
-//   if (
-//         ieee154e_vars.isSync==TRUE &&
-//         (
-//            timeCorrection<-LIMITLARGETIMECORRECTION ||
-//            timeCorrection> LIMITLARGETIMECORRECTION
-//         )
-//      ) {
-//      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
-//                            (errorparameter_t)timeCorrection,
-//                            (errorparameter_t)0);
-//   }
-   openserial_printInfo(COMPONENT_IEEE802154E,ERR_PACKET_SYNC,
-                      (errorparameter_t)ieee154e_vars.asn.bytes0and1,
-                      (errorparameter_t)timeCorrection);
+   if (
+         ieee154e_vars.isSync==TRUE &&
+         (
+            timeCorrection<-LIMITLARGETIMECORRECTION ||
+            timeCorrection> LIMITLARGETIMECORRECTION
+         )
+      ) {
+      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
+                            (errorparameter_t)timeCorrection,
+                            (errorparameter_t)0);
+   }
    
    // update the stats
    ieee154e_stats.numSyncPkt++;
@@ -1959,25 +1962,23 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
-   
+#ifdef
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection((-timeCorrection),ieee154e_vars.ackReceived->l2_nextORpreviousHop);
-   
+#endif
    // log a large timeCorrection
-//   if (
-//         ieee154e_vars.isSync==TRUE &&
-//         (
-//            timeCorrection<-LIMITLARGETIMECORRECTION ||
-//            timeCorrection> LIMITLARGETIMECORRECTION
-//         )
-//      ) {
-//      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
-//                            (errorparameter_t)timeCorrection,
-//                            (errorparameter_t)1);
-//   }
-   openserial_printInfo(COMPONENT_IEEE802154E,ERR_PACKET_SYNC,
-                   (errorparameter_t)ieee154e_vars.asn.bytes0and1,
-                   (errorparameter_t)timeCorrection);
+   if (
+         ieee154e_vars.isSync==TRUE &&
+         (
+            timeCorrection<-LIMITLARGETIMECORRECTION ||
+            timeCorrection> LIMITLARGETIMECORRECTION
+         )
+      ) {
+      openserial_printError(COMPONENT_IEEE802154E,ERR_LARGE_TIMECORRECTION,
+                            (errorparameter_t)timeCorrection,
+                            (errorparameter_t)1);
+   }
+
    // update the stats
    ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
@@ -2024,6 +2025,10 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_SIXTOP so sixtop can knows it's for it
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;
+   
+   openserial_printInfo(COMPONENT_IEEE802154E,ERR_PACKET_SYNC,
+                   (errorparameter_t)packetReceived->l2_asn.bytes0and1,
+                   (errorparameter_t)packetReceived->l2_timeCorrection);
 
    // post RES's Receive task
    scheduler_push_task(task_sixtopNotifReceive,TASKPRIO_SIXTOP_NOTIF_RX);
