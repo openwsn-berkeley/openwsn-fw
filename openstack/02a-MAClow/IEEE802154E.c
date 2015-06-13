@@ -1919,7 +1919,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
-#ifdef
+#ifdef ADAPTIVE_SYNC
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
 #endif
@@ -1962,7 +1962,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
-#ifdef
+#ifdef ADAPTIVE_SYNC
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection((-timeCorrection),ieee154e_vars.ackReceived->l2_nextORpreviousHop);
 #endif
