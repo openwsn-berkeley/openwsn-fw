@@ -303,6 +303,39 @@ void packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length) {
    }
 }
 
+//======= packet duplication
+
+void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* src) {
+   uint8_t offset;
+
+   // make a copy of the frame
+   memcpy(dst, src, sizeof(OpenQueueEntry_t));
+
+   // Calculate where payload starts in the buffer
+   offset = src->payload - src->packet;
+   dst->payload = &dst->packet[offset]; // update pointers
+
+   // update l2_FrameCounter pointer
+   offset = src->l2_FrameCounter - src->payload;
+   dst->l2_FrameCounter = dst->payload + offset;
+
+   // update l2_ASNpayload pointer
+   offset = src->l2_ASNpayload - src->payload;
+   dst->l2_ASNpayload = dst->payload + offset;
+
+   // update l2_scheduleIE_cellObjects pointer
+   offset = src->l2_scheduleIE_cellObjects - src->payload;
+   dst->l2_scheduleIE_cellObjects = dst->payload + offset;
+
+   // update l2_payload pointer
+   offset = src->l2_payload - src->payload;
+   dst->l2_payload = dst->payload + offset;
+
+   // update l4_payload pointer
+   offset = src->l4_payload - src->payload;
+   dst->l4_payload = dst->payload + offset;
+}
+
 //======= CRC calculation
 
 void packetfunctions_calculateCRC(OpenQueueEntry_t* msg) {

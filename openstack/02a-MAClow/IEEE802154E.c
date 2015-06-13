@@ -962,7 +962,7 @@ port_INLINE void activity_ti2() {
    changeState(S_TXDATAPREPARE);
 
    // make a local copy of the frame
-   memcpy(&local_copy_for_transmission, ieee154e_vars.dataToSend, sizeof(OpenQueueEntry_t));
+   packetfunctions_duplicatePacket(&local_copy_for_transmission, ieee154e_vars.dataToSend);
 
    // check if packet needs to be encrypted/authenticated before transmission 
    if (local_copy_for_transmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled

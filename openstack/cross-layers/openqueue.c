@@ -3,6 +3,7 @@
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
+#include "ieee802154_security_driver.h"
 
 //=========================== variables =======================================
 
@@ -243,7 +244,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //admin
    entry->creator                      = COMPONENT_NULL;
    entry->owner                        = COMPONENT_NULL;
-   entry->payload                      = &(entry->packet[127]);
+   entry->payload                      = &(entry->packet[127 - IEEE802154_SECURITY_TAG_LEN]); // Footer is longer if security is used
    entry->length                       = 0;
    //l4
    entry->l4_protocol                  = IANA_UNDEFINED;
