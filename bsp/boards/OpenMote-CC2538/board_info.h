@@ -67,7 +67,11 @@
 #define PORT_maxRxDataPrepare                4    //  122us (measured  22us)
 #define PORT_maxTxAckPrepare                10    //  122us (measured  94us)
 // radio speed related
+#ifdef L2_SECURITY_ACTIVE
 #define PORT_delayTx                         7    //  366us (measured xxxus)
+#else
+#define PORT_delayTx                        12    //  366us (measured xxxus)
+#endif
 #define PORT_delayRx                         0    //    0us (can not measure)
 // radio watchdog
 
