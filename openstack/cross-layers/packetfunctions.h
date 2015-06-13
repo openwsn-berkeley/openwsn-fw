@@ -40,6 +40,9 @@ void     packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length
 void     packetfunctions_reserveFooterSize(OpenQueueEntry_t* pkt, uint8_t header_length);
 void     packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length);
 
+// packet duplication
+void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* src);
+
 // calculate CRC
 void     packetfunctions_calculateCRC(OpenQueueEntry_t* msg);
 bool     packetfunctions_checkCRC(OpenQueueEntry_t* msg);

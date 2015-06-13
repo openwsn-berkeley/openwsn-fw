@@ -59,7 +59,7 @@ m_keyDescriptor* IEEE802154_security_keyDescriptorLookup(uint8_t      KeyIdMode,
 /**
 \brief Initialization of security tables and parameters.
 */
-void IEEE802154_security_init(){
+void IEEE802154_security_init(void){
 
    //Setting UP Phase
 
@@ -85,11 +85,11 @@ void IEEE802154_security_init(){
          ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = IEEE154_ASH_SLF_TYPE_MIC_64;
          ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = IEEE154_ASH_SLF_TYPE_MIC_128;
       } else {
-         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32;
-         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64;
-         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = IEEE154_ASH_SLF_TYPE_ENC_MIC_32;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = IEEE154_ASH_SLF_TYPE_ENC_MIC_64;
+         ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = IEEE154_ASH_SLF_TYPE_ENC_MIC_128;
       }
-      ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].SecurityMinimum = IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32;
+      ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].SecurityMinimum = IEEE154_ASH_SLF_TYPE_ENC_MIC_32;
    }
 
    //Initialization of MAC KEY TABLE
@@ -205,7 +205,7 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
       // Keep a pointer to where the ASN will be
       // Note: the actual value of the current ASN will be written by the
       //    IEEE802.15.4e when transmitting
-      msg->l2_ASNpayload = msg->payload;
+      msg->l2_FrameCounter = msg->payload;
    }
 
    //security control field
@@ -274,33 +274,15 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
       l2_frameCounter.byte4 = vectASN[4];
 
       IEEE802154_security_getFrameCounter(l2_frameCounter,
-                                         msg->l2_ASNpayload);
+                                         msg->l2_FrameCounter);
    } //otherwise the frame counter is not in the frame
 
    //nonce creation
    memset(&nonce[0], 0, 13);
-   switch (msg->l2_keyIdMode){
-      case 0:
-      case 1:
-         for (i=0; i<8; i++){
-            nonce[i] = ieee802154_security_vars.m_macDefaultKeySource.addr_64b[i];
-         }
-         break;
-      case 2:
-         for (i=0; i<2; i++){
-            nonce[i] = msg->l2_keySource.addr_16b[i];
-         }
-         for (i=2; i<8; i++){
-            nonce[i] = 0;
-         }
-         break;
-      case 3:
-         for (i=0; i<8; i++){
-            nonce[i] = msg->l2_keySource.addr_64b[i];
-         }
-         break;
-   }
+   //first 8 bytes of the nonce are always the source address of the frame
+   memcpy(&nonce[0],idmanager_getMyID(ADDR_64B)->addr_64b,8);
 
+   //Frame Counter (ASN)
    for (i=0;i<5;i++){
       nonce[8+i] = vectASN[i];
    }
@@ -314,20 +296,20 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
          m = &msg->payload[len_a];     // concatenate MIC at the end of the frame
          len_m = 0;                    // length of the encrypted part
          break;
-    case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
-    case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64:
-    case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128:
-       a = msg->payload;             // first byte of the frame
-       m = msg->l2_payload;          // first byte where we should start encrypting (see 15.4 std)
-       len_a = m - a;                // part that is only authenticated is the difference of two pointers
-       len_m = msg->length - len_a;  // part that is encrypted+authenticated is the rest of the frame
-       break;
-    case IEEE154_ASH_SLF_TYPE_ONLYCRYPTO:    // encryption only
-       // unsecure, should not support it
-       return E_FAIL;
+      case IEEE154_ASH_SLF_TYPE_ENC_MIC_32:  // authentication + encryption cases
+      case IEEE154_ASH_SLF_TYPE_ENC_MIC_64:
+      case IEEE154_ASH_SLF_TYPE_ENC_MIC_128:
+         a = msg->payload;             // first byte of the frame
+         m = msg->l2_payload;          // first byte where we should start encrypting (see 15.4 std)
+         len_a = m - a;                // part that is only authenticated is the difference of two pointers
+         len_m = msg->length - len_a;  // part that is encrypted+authenticated is the rest of the frame
+         break;
+    case IEEE154_ASH_SLF_TYPE_ENC:    // encryption only
+         // unsecure, should not support it
+         return E_FAIL;
     default:
-       // reject anything else
-       return E_FAIL;
+         // reject anything else
+         return E_FAIL;
    }
 
    // assert
@@ -354,7 +336,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
                                           key,
                                           msg->l2_authenticationLength);
 
-   if (outStatus!=0){
+   if (outStatus != E_SUCCESS) {
       openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
       (errorparameter_t)msg->l2_frameType,
       (errorparameter_t)2);
@@ -467,8 +449,8 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
    owerror_t outStatus;
    uint8_t* a;
    uint8_t len_a;
-   uint8_t* m;
-   uint8_t len_m;
+   uint8_t* c;
+   uint8_t len_c;
 
    //f key descriptor lookup
    keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
@@ -538,27 +520,8 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
 
    //create nonce
    memset(&nonce[0], 0, 13);
-   switch (msg->l2_keyIdMode){
-      case 0:
-      case 1:
-         for (i=0; i<8; i++){
-            nonce[i] = ieee802154_security_vars.m_macDefaultKeySource.addr_64b[i];
-          }
-         break;
-      case 2:
-         for (i=0; i<2; i++){
-            nonce[i] = msg->l2_keySource.addr_16b[i];
-            }
-         for (i=2; i<8; i++){
-            nonce[i] = 0;
-            }
-         break;
-      case 3:
-         for (i=0; i<8; i++){
-            nonce[i] = msg->l2_keySource.addr_64b[i];
-            }
-         break;
-   }
+   //first 8 bytes of the nonce are always the source address of the frame
+   memcpy(&nonce[0],msg->l2_nextORpreviousHop.addr_64b,8);
 
    //Frame Counter (ASN)
    ieee154e_getAsn(myASN);
@@ -572,18 +535,18 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
       case IEEE154_ASH_SLF_TYPE_MIC_128: 
          a = msg->payload;                                           // first byte of the frame
          len_a = msg->length-msg->l2_authenticationLength;           // whole frame
-         m = &msg->payload[len_a];                                   // MIC is at the end of the frame
-         len_m = msg->l2_authenticationLength;                       // length of the encrypted part
+         c = &msg->payload[len_a];                                   // MIC is at the end of the frame
+         len_c = msg->l2_authenticationLength;                       // length of the encrypted part
          break;
-      case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC32:  // authentication + encryption cases
-      case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC64:
-      case IEEE154_ASH_SLF_TYPE_CRYPTO_MIC128:
+      case IEEE154_ASH_SLF_TYPE_ENC_MIC_32:  // authentication + encryption cases
+      case IEEE154_ASH_SLF_TYPE_ENC_MIC_64:
+      case IEEE154_ASH_SLF_TYPE_ENC_MIC_128:
          a = msg->payload;             // first byte of the frame
-         m = msg->l2_payload;          // first byte where we should start decrypting 
-         len_a = m - a;                // part that is only authenticated is the difference of two pointers
-         len_m = msg->length - len_a;  // part that is decrypted+authenticated is the rest of the frame
+         c = msg->l2_payload;          // first byte where we should start decrypting 
+         len_a = c - a;                // part that is only authenticated is the difference of two pointers
+         len_c = msg->length - len_a;  // part that is decrypted+authenticated is the rest of the frame
          break;
-      case IEEE154_ASH_SLF_TYPE_ONLYCRYPTO:    // encryption only
+      case IEEE154_ASH_SLF_TYPE_ENC:    // encryption only
          // unsecure, should not support it
          return E_FAIL;
       default:
@@ -592,7 +555,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
     }
 
    // assert
-   if (len_a + len_m > 125) {
+   if (len_a + len_c > 125) {
       openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
                            (errorparameter_t)msg->l2_frameType,
                            (errorparameter_t)7);
@@ -601,14 +564,14 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
 
    outStatus = CRYPTO_ENGINE.aes_ccms_dec(a,
                                           len_a,
-                                          m,
-                                          &len_m,
+                                          c,
+                                          &len_c,
                                           nonce,
                                           2,
                                           keyDescriptor->key,
                                           msg->l2_authenticationLength);
 
-   if (outStatus!=0){
+   if (outStatus != E_SUCCESS){
       openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
                            (errorparameter_t)msg->l2_frameType,
                            (errorparameter_t)8);
@@ -892,6 +855,7 @@ const struct ieee802154_security_driver IEEE802154_security = {
    IEEE802154_security_retrieveAuxiliarySecurityHeader,
    IEEE802154_security_outgoingFrameSecurity,
    IEEE802154_security_incomingFrame,
+   IEEE802154_security_authLengthChecking,
 };
 /*---------------------------------------------------------------------------*/
 

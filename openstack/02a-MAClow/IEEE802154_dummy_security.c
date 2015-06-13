@@ -26,6 +26,10 @@ static owerror_t incomingFrame(OpenQueueEntry_t* msg) {
    return E_SUCCESS;
 }
 
+static uint8_t authenticationTagLen(uint8_t sec_level) {
+   return (uint8_t) 0;
+}
+
 /*---------------------------------------------------------------------------*/
 const struct ieee802154_security_driver IEEE802154_dummy_security = {
    init,
@@ -33,6 +37,7 @@ const struct ieee802154_security_driver IEEE802154_dummy_security = {
    retrieveAuxiliarySecurityHeader,
    outgoingFrame,
    incomingFrame,
+   authenticationTagLen,
 };
 /*---------------------------------------------------------------------------*/
 
