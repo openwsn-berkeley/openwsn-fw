@@ -1518,6 +1518,9 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          break;
       }
       
+      // record the timeCorrection and print out at end of slot
+      ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
+      
       // check if ack requested
       if (ieee802514_header.ackRequested==1 && ieee154e_vars.isAckEnabled == TRUE) {
          // arm rt5
@@ -1579,9 +1582,6 @@ port_INLINE void activity_ri6() {
    
    // calculate the time timeCorrection (this is the time when the packet arrive w.r.t the time it should be.
    timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
-   
-   // record the timeCorrection and print out at end of slot
-   ieee154e_vars.dataReceived->l2_timeCorrection = timeCorrection;
     
    // add the payload to the ACK (i.e. the timeCorrection)
    packetfunctions_reserveHeaderSize(ieee154e_vars.ackToSend,sizeof(timecorrection_IE_ht));
