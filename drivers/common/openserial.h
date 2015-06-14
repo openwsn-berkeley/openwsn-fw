@@ -109,7 +109,7 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
                               errorparameter_t arg1,
                               errorparameter_t arg2);
 owerror_t openserial_printData(uint8_t* buffer, uint8_t length);
-owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length);
+owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channel);
 uint8_t openserial_getNumDataBytes(void);
 uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes);
 void    openserial_startInput(void);

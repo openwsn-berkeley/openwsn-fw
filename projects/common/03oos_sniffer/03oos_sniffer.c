@@ -40,6 +40,7 @@ typedef struct {
     int8_t              rxpk_rssi;
    uint8_t              rxpk_lqi;
    bool                 rxpk_crc;
+   uint8_t              channel;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -73,6 +74,7 @@ int mote_main(void) {
    // prepare radio
    radio_rfOn();
    radio_setFrequency(CHANNEL);
+   app_vars.channel = CHANNEL;
    
    // switch in RX by default
    radio_rxEnable();
@@ -88,6 +90,7 @@ void sniffer_setListeningChannel(uint8_t channel){
     while(app_vars.flag != APP_FLAG_IDLE);
         radio_rfOn();
         radio_setFrequency(channel);
+        app_vars.channel = channel;
         radio_rxEnable();
         radio_rxNow();
 }
@@ -125,7 +128,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 
 // ================================ task =======================================
 void task_uploadPacket(){
-    openserial_printPacket(&(app_vars.packet[0]),app_vars.packet_len);
+    openserial_printPacket(&(app_vars.packet[0]),app_vars.packet_len,app_vars.channel);
 }
 // ================================= stubbing ==================================
 void openbridge_triggerData(){return;}

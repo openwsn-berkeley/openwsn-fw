@@ -162,7 +162,7 @@ owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
    return E_SUCCESS;
 }
 
-owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length) {
+owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channel) {
    uint8_t  i;
    INTERRUPT_DECLARATION();
    
@@ -175,6 +175,7 @@ owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length) {
    for (i=0;i<length;i++){
       outputHdlcWrite(buffer[i]);
    }
+   outputHdlcWrite(channel);
    outputHdlcClose();
    
       // flush buffer
