@@ -509,9 +509,11 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    
    // if I'm a DAGroot, my DAGrank is always 0
    if ((idmanager_getIsDAGroot())==TRUE) {
-      // the dagrank will be set through GD_IM_SCRIPT setting command 
-       //      neighbors_vars.myDAGrank=0;
-      return;
+       if (neighbors_vars.myDAGrank == MAXDAGRANK) {
+           // the dagrank is not set through setting command, set rank to zero here 
+           neighbors_vars.myDAGrank=0;   
+       }
+       return;
    }
    
    // reset my DAG rank to max value. May be lowered below.
