@@ -509,7 +509,8 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    
    // if I'm a DAGroot, my DAGrank is always 0
    if ((idmanager_getIsDAGroot())==TRUE) {
-      neighbors_vars.myDAGrank=0;
+      // the dagrank will be set through GD_IM_SCRIPT setting command 
+       //      neighbors_vars.myDAGrank=0;
       return;
    }
    
