@@ -269,7 +269,7 @@ void icmpv6rpl_timer_DIO_task() {
       sendDIO();
       
       // pick a new pseudo-random periodDIO
-      icmpv6rpl_vars.periodDIO = TIMER_DIO_TIMEOUT+(openrandom_get16b()&0xff);
+//      icmpv6rpl_vars.periodDIO = TIMER_DIO_TIMEOUT+(openrandom_get16b()&0xff);
       
       // arm the DIO timer with this new value
       opentimers_setPeriod(
@@ -390,7 +390,7 @@ void icmpv6rpl_timer_DAO_task() {
       sendDAO();
       
       // pick a new pseudo-random periodDAO
-      icmpv6rpl_vars.periodDAO = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
+//      icmpv6rpl_vars.periodDAO = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
       
       // arm the DAO timer with this new value
       opentimers_setPeriod(
@@ -562,4 +562,22 @@ void sendDAO() {
    } else {
       openqueue_freePacketBuffer(msg);
    }
+}
+
+void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
+    icmpv6rpl_vars.periodDIO = dioPeriod/5; // delayDIO will skip 4 times in 5 dio period
+    opentimers_setPeriod(
+        icmpv6rpl_vars.timerIdDIO,
+        TIME_MS,
+        icmpv6rpl_vars.periodDIO
+     );
+}
+
+void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
+    icmpv6rpl_vars.periodDAO = daoPeriod/5; // delayDAO will skip 4 times in 5 dao period
+    opentimers_setPeriod(
+        icmpv6rpl_vars.timerIdDAO,
+        TIME_MS,
+        icmpv6rpl_vars.periodDAO
+     );
 }

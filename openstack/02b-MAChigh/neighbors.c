@@ -483,6 +483,12 @@ void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t ind
    }
 }
 
+//===== setters
+
+void neighbors_setMyDAGrank(dagrank_t rank){
+    neighbors_vars.myDAGrank = rank;
+}
+
 //===== managing routing info
 
 /**
@@ -503,8 +509,11 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    
    // if I'm a DAGroot, my DAGrank is always 0
    if ((idmanager_getIsDAGroot())==TRUE) {
-      neighbors_vars.myDAGrank=0;
-      return;
+       if (neighbors_vars.myDAGrank == MAXDAGRANK) {
+           // the dagrank is not set through setting command, set rank to zero here 
+           neighbors_vars.myDAGrank=0;   
+       }
+       return;
    }
    
    // reset my DAG rank to max value. May be lowered below.

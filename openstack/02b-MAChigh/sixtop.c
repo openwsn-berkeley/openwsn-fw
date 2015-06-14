@@ -14,6 +14,7 @@
 #include "leds.h"
 #include "processIE.h"
 #include "IEEE802154.h"
+#include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
 
@@ -122,6 +123,7 @@ void sixtop_init() {
    sixtop_vars.dsn                = 0;
    sixtop_vars.mgtTaskCounter     = 0;
    sixtop_vars.kaPeriod           = MAXKAPERIOD;
+   sixtop_vars.ebPeriod           = EBTIMEOUT;
    
    sixtop_vars.maintenanceTimerId = opentimers_start(
       sixtop_vars.periodMaintenance,
@@ -143,6 +145,14 @@ void sixtop_setKaPeriod(uint16_t kaPeriod) {
       sixtop_vars.kaPeriod = MAXKAPERIOD;
    } else {
       sixtop_vars.kaPeriod = kaPeriod;
+   } 
+}
+
+void sixtop_setEBPeriod(uint8_t ebPeriod) {
+   if(ebPeriod < SIXTOP_MINIMAL_EBPERIOD) {
+      sixtop_vars.ebPeriod = SIXTOP_MINIMAL_EBPERIOD;
+   } else {
+      sixtop_vars.ebPeriod = ebPeriod;
    } 
 }
 
@@ -458,7 +468,13 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    // set metadata
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-   
+
+
+   // set l2-security attributes
+   msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
+   msg->l2_keyIndex        = IEEE802154_SECURITY_KEY_INDEX;
+
    if (msg->l2_payloadIEpresent == FALSE) {
       return sixtop_send_internal(
          msg,
@@ -698,18 +714,14 @@ owerror_t sixtop_send_internal(
    msg->l2_numTxAttempts = 0;
    // transmit with the default TX power
    msg->l1_txPower = TX_POWER;
-   // record the location, in the packet, where the l2 payload starts
-   msg->l2_payload = msg->payload;
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             payloadIEPresent,
-                            IEEE154_SEC_NO_SECURITY,
+                            msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1, // security enabled
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
-   // reserve space for 2-byte CRC
-   packetfunctions_reserveFooterSize(msg,2);
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
    return E_SUCCESS;
@@ -737,7 +749,7 @@ The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
    scheduleEntry_t* entry;
-   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%EBTIMEOUT;
+   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
    
    switch (sixtop_vars.mgtTaskCounter) {
       case 0:
@@ -831,7 +843,12 @@ port_INLINE void sixtop_sendEB() {
    
    //I has an IE in my payload
    eb->l2_payloadIEpresent = TRUE;
-   
+
+   // set l2-security attributes
+   eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
+   eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   eb->l2_keyIndex        = IEEE802154_SECURITY_KEY_INDEX;
+
    // put in queue for MAC to handle
    sixtop_send_internal(eb,eb->l2_payloadIEpresent);
    
@@ -893,6 +910,11 @@ port_INLINE void sixtop_sendKA() {
    kaPkt->l2_frameType = IEEE154_TYPE_DATA;
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
+   // set l2-security attributes
+   kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   kaPkt->l2_keyIndex        = IEEE802154_SECURITY_KEY_INDEX;
+
    // put in queue for MAC to handle
    sixtop_send_internal(kaPkt,FALSE);
    

@@ -70,6 +70,31 @@ enum IEEE802154_fcf_addr_mode_enums {
    IEEE154_ADDR_EXT                    = 3,
 };
 
+enum IEEE802154_ash_scf_enums { // Security Control Field
+   IEEE154_ASH_SCF_SECURITY_LEVEL         = 0,
+   IEEE154_ASH_SCF_KEY_IDENTIFIER_MODE    = 3,
+   IEEE154_ASH_SCF_FRAME_CNT_MODE         = 5,
+   IEEE154_ASH_SCF_FRAME_CNT_SIZE         = 6,
+};
+
+enum IEEE802154_ash_slf_enums { // Security Level Field
+   IEEE154_ASH_SLF_TYPE_NOSEC             = 0,
+   IEEE154_ASH_SLF_TYPE_MIC_32            = 1,
+   IEEE154_ASH_SLF_TYPE_MIC_64            = 2,
+   IEEE154_ASH_SLF_TYPE_MIC_128           = 3,
+   IEEE154_ASH_SLF_TYPE_ENC               = 4,
+   IEEE154_ASH_SLF_TYPE_ENC_MIC_32        = 5,
+   IEEE154_ASH_SLF_TYPE_ENC_MIC_64        = 6,
+   IEEE154_ASH_SLF_TYPE_ENC_MIC_128       = 7,
+};
+
+enum IEEE802154_ash_keyIdMode_enums { // Key Identifier Mode Field
+   IEEE154_ASH_KEYIDMODE_IMPLICIT         = 0,
+   IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE = 1,
+   IEEE154_ASH_KEYIDMODE_EXPLICIT_16      = 2,
+   IEEE154_ASH_KEYIDMODE_EXPLICIT_64      = 3,
+};
+
 //=========================== typedef =========================================
 
 typedef struct {

@@ -2,6 +2,9 @@
 \brief Entry point for accessing the OpenWSN stack.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, October 2014.
+
+Modified by:
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, April 2015
 */
 
 #include "opendefs.h"
@@ -17,6 +20,7 @@
 //-- 02a-TSCH
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
+#include "ieee802154_security_driver.h"
 //-- 02b-RES
 #include "schedule.h"
 #include "sixtop.h"
@@ -58,6 +62,7 @@ void openstack_init(void) {
    //-- 02a-TSCH
    adaptive_sync_init();
    ieee154e_init();
+   IEEE802154_SECURITY.init();
    //-- 02b-RES
    schedule_init();
    sixtop_init();

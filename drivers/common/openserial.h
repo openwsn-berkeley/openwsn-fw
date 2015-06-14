@@ -48,13 +48,29 @@ enum {
 #define SERFRAME_MOTE2PC_ERROR              ((uint8_t)'E')
 #define SERFRAME_MOTE2PC_CRITICAL           ((uint8_t)'C')
 #define SERFRAME_MOTE2PC_REQUEST            ((uint8_t)'R')
+#define SERFRAME_MOTE2PC_PACKET             ((uint8_t)'P')
 
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT            ((uint8_t)'R')
 #define SERFRAME_PC2MOTE_DATA               ((uint8_t)'D')
 #define SERFRAME_PC2MOTE_TRIGGERSERIALECHO  ((uint8_t)'S')
+#define SERFRAME_PC2MOTE_COMMAND_GD         ((uint8_t)'G')
 
 //=========================== typedef =========================================
+
+enum {
+   COMMAND_SET_EBPERIOD          =  0,
+   COMMAND_SET_CHANNEL           =  1,
+   COMMAND_SET_KAPERIOD          =  2,
+   COMMAND_SET_DIOPERIOD         =  3,
+   COMMAND_SET_DAOPERIOD         =  4,
+   COMMAND_PING_MOTE             =  5,
+   COMMAND_SET_DAGRANK           =  6,
+   COMMAND_SET_SECURITY_STATUS   =  7,
+   COMMAND_SET_FRAMELENGTH       =  8,
+   COMMAND_SET_ACK_STATUS        =  9,
+   COMMAND_MAX                   = 10,
+};
 
 //=========================== module variables ================================
 
@@ -93,6 +109,7 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
                               errorparameter_t arg1,
                               errorparameter_t arg2);
 owerror_t openserial_printData(uint8_t* buffer, uint8_t length);
+owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channel);
 uint8_t openserial_getNumDataBytes(void);
 uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes);
 void    openserial_startInput(void);

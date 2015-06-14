@@ -3,6 +3,10 @@
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2010
 \author Ankur Mehta <mehtank@eecs.berkeley.edu>, September 2010
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, TelematicsLab April 2015
+\author Giuseppe Piro <giuseppe.piro@poliba.it>,
+\author Gennaro Boggia <gennaro.boggia@poliba.it>,
+\author Luigi Alfredo Grieco <alfredo.grieco@poliba.it>
 */
 
 #ifndef __OPENDEFS_H
@@ -19,6 +23,13 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_MAJOR     1
 #define OPENWSN_VERSION_MINOR     9
 #define OPENWSN_VERSION_PATCH     0
+
+// golden image version and type
+#define GOLDEN_IMAGE_VERSION      1
+// define golden image type: only one can be used
+#define GD_TYPE_ROOT         1 // dagroot
+#define GD_TYPE_SNIFFER      2 // sniffer
+
 
 //to delimit the implementation of draft-thubert-6man-flow-label-for-rpl-03
 #define FLOW_LABEL_RPL_DOMAIN 1
@@ -161,6 +172,7 @@ enum {
    COMPONENT_UECHO                     = 0x23,
    COMPONENT_UINJECT                   = 0x24,
    COMPONENT_RRT                       = 0x25,
+   COMPONENT_SECURITY                  = 0x26,
 };
 
 /**
@@ -234,6 +246,8 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
+   ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
+   ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
 };
 
 //=========================== typedef =========================================
@@ -250,6 +264,8 @@ typedef struct {
    uint16_t bytes0and1;
 } asn_t;
 END_PACK
+
+typedef asn_t  macFrameCounter_t;
 
 BEGIN_PACK
 typedef struct {                                 // always written big endian, i.e. MSB in addr[0]
@@ -297,6 +313,15 @@ typedef struct {
    bool          l2_IEListPresent;               //did have IE field?
    bool          l2_payloadIEpresent;            // did I have payload IE field
    bool          l2_joinPriorityPresent;
+   int16_t       l2_timeCorrection;              // record the timeCorrection and print out at endOfslot
+   //layer-2 security
+   uint8_t       l2_securityLevel;               //the security level specified for the current frame
+   uint8_t       l2_keyIdMode;                   //the key Identifier mode specified for the current frame
+   uint8_t       l2_keyIndex;                    //the key Index specified for the current frame
+   open_addr_t   l2_keySource;                   //the key Source specified for the current frame
+   uint8_t       l2_authenticationLength;        //the length of the authentication field
+   uint8_t       commandFrameIdentifier;         //used in case of Command Frames
+   uint8_t*      l2_FrameCounter;                //pointer to the FrameCounter in the MAC header
    //l1 (drivers)
    uint8_t       l1_txPower;                     // power for packet to Tx at
    int8_t        l1_rssi;                        // RSSI of received packet
