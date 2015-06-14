@@ -178,26 +178,6 @@ owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channe
    outputHdlcWrite(channel);
    outputHdlcClose();
    
-      // flush buffer
-   uart_clearTxInterrupts();
-   uart_clearRxInterrupts();          // clear possible pending interrupts
-   uart_enableInterrupts();           // Enable USCI_A1 TX & RX interrupt
-   openserial_vars.mode=MODE_OUTPUT;
-   if (openserial_vars.outputBufFilled) {
-#ifdef FASTSIM
-      uart_writeCircularBuffer_FASTSIM(
-         openserial_vars.outputBuf,
-         &openserial_vars.outputBufIdxR,
-         &openserial_vars.outputBufIdxW
-      );
-#else
-      uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
-#endif
-   } else {
-      openserial_stop();
-   }
-   
-   
    ENABLE_INTERRUPTS();
    
    return E_SUCCESS;
@@ -487,13 +467,13 @@ void openserial_goldenImageCommands(){
    }
    
 #ifdef GOLDEN_IMAGE_ROOT 
-   if ( type != GOLDEN_IMAGE_ROOT ){
+   if ( type != GD_TYPE_ROOT ){
        // image type is wrong
        return;
    }
 #endif
 #ifdef GOLDEN_IMAGE_SNIFFER
-   if (type != GOLDEN_IMAGE_SNIFFER) {
+   if (type != GD_TYPE_SNIFFER) {
        // image type is wrong
        return;
    }
