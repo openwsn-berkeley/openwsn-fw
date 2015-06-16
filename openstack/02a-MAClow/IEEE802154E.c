@@ -960,18 +960,17 @@ port_INLINE void activity_ti1ORri1() {
 }
 
 port_INLINE void activity_ti2() {
-   static OpenQueueEntry_t local_copy_for_transmission; // keep in BSS to prevent stack overflow 
    
    // change state
    changeState(S_TXDATAPREPARE);
 
    // make a local copy of the frame
-   packetfunctions_duplicatePacket(&local_copy_for_transmission, ieee154e_vars.dataToSend);
+   packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
 
    // check if packet needs to be encrypted/authenticated before transmission 
-   if (local_copy_for_transmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
+   if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
       // encrypt in a local copy
-      if (IEEE802154_SECURITY.outgoingFrame(&local_copy_for_transmission) != E_SUCCESS) {
+      if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
          // keep the frame in the OpenQueue in order to retry later
          endSlot(); // abort
          return;
@@ -979,7 +978,7 @@ port_INLINE void activity_ti2() {
    }
    
    // add 2 CRC bytes only to the local copy as we end up here for each retransmission
-   packetfunctions_reserveFooterSize(&local_copy_for_transmission, 2);
+   packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
    
    // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
@@ -988,8 +987,8 @@ port_INLINE void activity_ti2() {
    radio_setFrequency(ieee154e_vars.freq);
    
    // load the packet in the radio's Tx buffer
-   radio_loadPacket(local_copy_for_transmission.payload,
-                    local_copy_for_transmission.length);
+   radio_loadPacket(ieee154e_vars.localCopyForTransmission.payload,
+                    ieee154e_vars.localCopyForTransmission.length);
    
    // enable the radio in Tx mode. This does not send the packet.
    radio_txEnable();
