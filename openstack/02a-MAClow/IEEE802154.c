@@ -36,19 +36,20 @@ Note that we are writing the field from the end of the header to the beginning.
 \param[in]     frameType        Type of IEEE802.15.4 frame.
 \param[in]     ielistpresent    Is the IE list present�
 \param[in]     frameVersion     IEEE802.15.4 frame version.
-\param[in]     securityEnabled  Is security enabled on this frame?
 \param[in]     sequenceNumber   Sequence number of this frame.
 \param[in]     nextHop          Address of the next hop
 */
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
                               bool              payloadIEPresent,
-                              bool              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    uint8_t ielistpresent = IEEE154_IELIST_NO;
    uint8_t frameVersion;
+   bool    securityEnabled;
+
+   securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
    
    msg->l2_payload = msg->payload; // save the position where to start encrypting if security is enabled 
  

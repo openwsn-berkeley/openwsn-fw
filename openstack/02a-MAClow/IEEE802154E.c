@@ -1599,7 +1599,6 @@ port_INLINE void activity_ri6() {
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
                             TRUE,//ie in ack
-                            ieee154e_vars.ackToSend->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
