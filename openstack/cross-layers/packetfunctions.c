@@ -304,7 +304,9 @@ void packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length) {
 }
 
 //======= packet duplication
-
+// function duplicates a frame from one OpenQueueEntry structure to the other,
+// updating pointers to the new memory location. Used to make a local copy of
+// the frame before transmission (where it can possibly be encrypted). 
 void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* src) {
    uint8_t offset;
 
