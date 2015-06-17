@@ -65,6 +65,7 @@ void     activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime);
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
 bool     isValidAck(ieee802154_header_iht*     ieee802514_header,
                     OpenQueueEntry_t*          packetSent);
+bool     isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader); 
 // IEs Handling
 bool     ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE);
 // ASN handling
@@ -72,6 +73,7 @@ void     incrementAsnOffset(void);
 void     ieee154e_syncSlotOffset(void);
 void     asnStoreFromEB(uint8_t* asn);
 void     joinPriorityStoreFromEB(uint8_t jp);
+
 // timeslot template handling
 void     timeslotTemplateIDStoreFromEB(uint8_t id);
 // channelhopping template handling
@@ -552,18 +554,20 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       ieee154e_vars.dataReceived->l2_dsn       = ieee802514_header.dsn;
       memcpy(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop),&(ieee802514_header.src),sizeof(open_addr_t));
 
-      // This is the case where we first hear an EB and do not yet know the ASN used
-      // to generate the nonce. Frame cannot successfully pass security processing
-      // at this point so we need to accept it in any case.
       if (ieee154e_vars.dataReceived->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-         if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
-            if (ieee802514_header.frameType != IEEE154_TYPE_BEACON) {
-               break; // reject anything but EBs here
+         // If we are not synced, we need to parse IEs and retrieve the ASN
+         // before authenticating the beacon, because nonce is created from the ASN
+         if (!ieee154e_vars.isSync && ieee802514_header.frameType == IEEE154_TYPE_BEACON) {
+            if (!isValidJoin(ieee154e_vars.dataReceived, &ieee802514_header)) {
+               // invalidate variables
+               memset(&ieee154e_vars, 0, sizeof(ieee154e_vars_t));
+               break;
             }
-	      // accepting EB even though security processing failed
-            // TODO log the event
          }
-      }
+         else if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
+            break;
+         }
+      } // checked if unsecured frame should pass during header retrieval
 
       // toss the IEEE802.15.4 header -- this does not include IEs as they are processed
       // next.
@@ -956,18 +960,17 @@ port_INLINE void activity_ti1ORri1() {
 }
 
 port_INLINE void activity_ti2() {
-   static OpenQueueEntry_t local_copy_for_transmission; // keep in BSS to prevent stack overflow 
    
    // change state
    changeState(S_TXDATAPREPARE);
 
    // make a local copy of the frame
-   packetfunctions_duplicatePacket(&local_copy_for_transmission, ieee154e_vars.dataToSend);
+   packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
 
    // check if packet needs to be encrypted/authenticated before transmission 
-   if (local_copy_for_transmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
+   if (ieee154e_vars.localCopyForTransmission.l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) { // security enabled
       // encrypt in a local copy
-      if (IEEE802154_SECURITY.outgoingFrame(&local_copy_for_transmission) != E_SUCCESS) {
+      if (IEEE802154_SECURITY.outgoingFrame(&ieee154e_vars.localCopyForTransmission) != E_SUCCESS) {
          // keep the frame in the OpenQueue in order to retry later
          endSlot(); // abort
          return;
@@ -975,7 +978,7 @@ port_INLINE void activity_ti2() {
    }
    
    // add 2 CRC bytes only to the local copy as we end up here for each retransmission
-   packetfunctions_reserveFooterSize(&local_copy_for_transmission, 2);
+   packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
    
    // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
@@ -984,8 +987,8 @@ port_INLINE void activity_ti2() {
    radio_setFrequency(ieee154e_vars.freq);
    
    // load the packet in the radio's Tx buffer
-   radio_loadPacket(local_copy_for_transmission.payload,
-                    local_copy_for_transmission.length);
+   radio_loadPacket(ieee154e_vars.localCopyForTransmission.payload,
+                    ieee154e_vars.localCopyForTransmission.length);
    
    // enable the radio in Tx mode. This does not send the packet.
    radio_txEnable();
@@ -1596,7 +1599,6 @@ port_INLINE void activity_ri6() {
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
                             TRUE,//ie in ack
-                            ieee154e_vars.ackToSend->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
@@ -1818,6 +1820,40 @@ port_INLINE void joinPriorityStoreFromEB(uint8_t jp){
   ieee154e_vars.dataReceived->l2_joinPriorityPresent = TRUE;     
 }
 
+// This function parses IEs from an EB to get to the ASN before security
+// processing is invoked. It should be called *only* when a node has no/lost sync.
+// This way, we can authenticate EBs and reject unwanted ones.
+bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
+   uint16_t              lenIE;
+
+   // toss the header in order to get to IEs
+   packetfunctions_tossHeader(eb, parsedHeader->headerLength);
+     
+   // process IEs
+   // at this stage, this can work only if EB is authenticated but not encrypted
+   lenIE = 0;
+   if (
+         (
+            parsedHeader->valid==TRUE                                                       &&
+            parsedHeader->ieListPresent==TRUE                                               &&
+            parsedHeader->frameType==IEEE154_TYPE_BEACON                                    &&
+            packetfunctions_sameAddress(&parsedHeader->panid,idmanager_getMyID(ADDR_PANID)) &&
+            ieee154e_processIEs(eb,&lenIE)
+         )==FALSE) {
+      return;
+   }
+   
+   // put everything back in place in order to invoke security-incoming on the
+   // correct frame length and correct pointers (first byte of the frame)
+   packetfunctions_reserveHeaderSize(eb, parsedHeader->headerLength);
+
+   // verify EB's authentication tag
+   if (IEEE802154_SECURITY.incomingFrame(eb) == E_SUCCESS) {
+      return TRUE;
+   }
+
+   return FALSE;
+}
 
 port_INLINE void asnStoreFromEB(uint8_t* asn) {
    

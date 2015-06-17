@@ -122,7 +122,6 @@ typedef struct {
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
                               bool              payloadIEPresent,
-                              bool              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop);
 

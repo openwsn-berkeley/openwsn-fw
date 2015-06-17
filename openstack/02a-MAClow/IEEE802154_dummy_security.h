@@ -1,5 +1,5 @@
 /**
-\brief Dummy IEEE802154 security implementation header
+\brief Dummy IEEE802154 security implementation header that is used when security is disabled.
   
 \author Malisa Vucinic <malishav@gmail.com>, June 2015.
 */

@@ -200,6 +200,7 @@ typedef struct {
    slotOffset_t              nextActiveSlotOffset;    // next active slot offset
    PORT_RADIOTIMER_WIDTH     deSyncTimeout;           // how many slots left before looses sync
    bool                      isSync;                  // TRUE iff mote is synchronized to network
+   OpenQueueEntry_t          localCopyForTransmission;// copy of the frame used for current TX
    // as shown on the chronogram
    ieee154e_state_t          state;                   // state of the FSM
    OpenQueueEntry_t*         dataToSend;              // pointer to the data to send

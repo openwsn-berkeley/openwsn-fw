@@ -709,7 +709,6 @@ owerror_t sixtop_send_internal(
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             payloadIEPresent,
-                            msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1, // security enabled
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
