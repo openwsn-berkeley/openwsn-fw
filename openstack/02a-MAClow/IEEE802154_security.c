@@ -709,6 +709,12 @@ uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
 
 /**
 \brief Verify if the key used to protect the frame has been used properly.
+       Each key can be used to secure a particular frame type, according to
+       security policies defined in the initialization phase and stored in the
+       Mac Key Table.
+       The procedure verifies if the frame type parameter associated to the key
+       is the same than the packet for which the key has been used and returns
+       TRUE if the check is verified, FALSE otherwise.
 */
 bool IEEE802154_security_incomingKeyUsagePolicyChecking(m_keyDescriptor* keyDescriptor,
                                                        uint8_t          frameType,
@@ -734,7 +740,8 @@ bool IEEE802154_security_incomingKeyUsagePolicyChecking(m_keyDescriptor* keyDesc
 }
 
 /**
-\brief Verify if the Security Level of the incoming Frame is acceptable or not.
+\brief Verify if the Security Level of the incoming Frame conforms to local
+       security policies, i.e., it is between the allowed security levels.
 */
 bool IEEE802154_security_incomingSecurityLevelChecking(m_securityLevelDescriptor* seclevdesc,
                                                       uint8_t                    seclevel,
