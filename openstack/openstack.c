@@ -2,9 +2,6 @@
 \brief Entry point for accessing the OpenWSN stack.
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, October 2014.
-
-Modified by:
-\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, April 2015
 */
 
 #include "opendefs.h"
