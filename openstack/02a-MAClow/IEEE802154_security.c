@@ -649,31 +649,24 @@ uint8_t IEEE802154_security_authLengthChecking(uint8_t securityLevel){
 
    uint8_t authlen;
    switch (securityLevel) {
-      case 0 :
+      case IEEE154_ASH_SLF_TYPE_NOSEC:
+      case IEEE154_ASH_SLF_TYPE_ENC:
          authlen = 0;
          break;
-      case 1 :
+      case IEEE154_ASH_SLF_TYPE_MIC_32:
+      case IEEE154_ASH_SLF_TYPE_ENC_MIC_32:
          authlen = 4;
          break;
-      case 2 :
+      case IEEE154_ASH_SLF_TYPE_MIC_64:
+      case IEEE154_ASH_SLF_TYPE_ENC_MIC_64:
          authlen = 8;
          break;
-      case 3 :
-         authlen = 16;
-         break;
-      case 4 :
-         authlen = 0;
-         break;
-      case 5 :
-         authlen = 4;
-         break;
-      case 6 :
-         authlen = 8;
-         break;
-      case 7 :
+      case IEEE154_ASH_SLF_TYPE_MIC_128:
+      case IEEE154_ASH_SLF_TYPE_ENC_MIC_128:
          authlen = 16;
          break;
       }
+
    return authlen;
 }
 
