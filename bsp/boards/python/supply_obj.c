@@ -15,6 +15,8 @@
 
 //=========================== public ==========================================
 
+extern int mote_main();
+
 void supply_init(OpenMote* self) {
    
 #ifdef TRACE_ON
