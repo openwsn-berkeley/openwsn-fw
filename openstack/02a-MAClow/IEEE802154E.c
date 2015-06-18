@@ -1840,7 +1840,7 @@ bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
             packetfunctions_sameAddress(&parsedHeader->panid,idmanager_getMyID(ADDR_PANID)) &&
             ieee154e_processIEs(eb,&lenIE)
          )==FALSE) {
-      return;
+      return FALSE;
    }
    
    // put everything back in place in order to invoke security-incoming on the
