@@ -756,7 +756,6 @@ bool IEEE802154_security_incomingSecurityLevelChecking(m_securityLevelDescriptor
       }
    }
 
-
    for (i=0;i<7;i++){
       if (seclevel == seclevdesc->AllowedSecurityLevels[i]){
          return TRUE;
@@ -840,7 +839,7 @@ m_keyDescriptor* IEEE802154_security_keyDescriptorLookup(uint8_t      KeyIdMode,
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
-   if (KeyIdMode == 0){
+   if (KeyIdMode == IEEE154_ASH_KEYIDMODE_IMPLICIT){
       for (i=0; i<MAXNUMKEYS; i++ ){
          if (ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address.type == ADDR_64B){
             if (packetfunctions_sameAddress(DeviceAddress,&ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.Address)
@@ -853,7 +852,7 @@ m_keyDescriptor* IEEE802154_security_keyDescriptorLookup(uint8_t      KeyIdMode,
       }
    }
 
-   if (KeyIdMode == 1){
+   if (KeyIdMode == IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE){
       for (i=0; i<MAXNUMKEYS; i++ ){
          if (KeyIndex == ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex
              && packetfunctions_sameAddress(keySource,&ieee802154_security_vars.m_macDefaultKeySource)){
@@ -863,7 +862,7 @@ m_keyDescriptor* IEEE802154_security_keyDescriptorLookup(uint8_t      KeyIdMode,
       }
    }
 
-   if (KeyIdMode == 2){
+   if (KeyIdMode == IEEE154_ASH_KEYIDMODE_EXPLICIT_16){
       for (i=0; i<MAXNUMKEYS; i++ ){
          if (KeyIndex == ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex){
             if (keySource->addr_16b[0] == ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource.addr_16b[0] &&
@@ -877,7 +876,7 @@ m_keyDescriptor* IEEE802154_security_keyDescriptorLookup(uint8_t      KeyIdMode,
       }
    }
 
-   if (KeyIdMode == 3){
+   if (KeyIdMode == IEEE154_ASH_KEYIDMODE_EXPLICIT_64){
       for (i=0; i<MAXNUMKEYS; i++ ){
          if (KeyIndex == ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeyIndex){
             if (packetfunctions_sameAddress(keySource,&ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[i].KeyIdLookupList.KeySource)
