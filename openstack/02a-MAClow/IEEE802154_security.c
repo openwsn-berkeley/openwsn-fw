@@ -133,9 +133,7 @@ void IEEE802154_security_init(void){
 
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.Address = ieee802154_security_vars.m_macDefaultKeySource;
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.PANId = *(idmanager_getMyID(ADDR_PANID));
-   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[1].FrameType = IEEE154_TYPE_DATA;
-   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[0].FrameType = IEEE154_TYPE_ACK;
-   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[2].FrameType = IEEE154_TYPE_BEACON;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[0].FrameType = IEEE154_TYPE_BEACON;
 
    memcpy(&ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].key[0],
           &ieee802154_security_vars.Key_1[0],
@@ -143,6 +141,45 @@ void IEEE802154_security_init(void){
 
    ieee802154_security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = ieee802154_security_vars.m_macDefaultKeySource;
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &ieee802154_security_vars.MacDeviceTable;
+
+   //KEY 2
+   memset(&ieee802154_security_vars.Key_2[0], 0, 16);
+   ieee802154_security_vars.Key_2[0] = 0xde;
+   ieee802154_security_vars.Key_2[1] = 0xad;
+   ieee802154_security_vars.Key_2[2] = 0xbe;
+   ieee802154_security_vars.Key_2[3] = 0xef;
+   ieee802154_security_vars.Key_2[4] = 0xfa;
+   ieee802154_security_vars.Key_2[5] = 0xce;
+   ieee802154_security_vars.Key_2[6] = 0xca;
+   ieee802154_security_vars.Key_2[7] = 0xfe;
+   ieee802154_security_vars.Key_2[8] = 0xde;
+   ieee802154_security_vars.Key_2[9] = 0xad;
+   ieee802154_security_vars.Key_2[10] = 0xbe;
+   ieee802154_security_vars.Key_2[11] = 0xef;
+   ieee802154_security_vars.Key_2[12] = 0xfa;
+   ieee802154_security_vars.Key_2[13] = 0xce;
+   ieee802154_security_vars.Key_2[14] = 0xca;
+   ieee802154_security_vars.Key_2[15] = 0xfe;
+
+   //store the key 2 and related attributes
+   //Creation of the KeyDescriptor - Key 2 should be used to encrypt and authenticate data, command and ack frames
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIdMode = 1;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIndex = 2;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource.type = ADDR_64B;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource = ieee802154_security_vars.m_macDefaultKeySource;
+
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.Address = ieee802154_security_vars.m_macDefaultKeySource;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.PANId = *(idmanager_getMyID(ADDR_PANID));
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyUsageList[0].FrameType = IEEE154_TYPE_DATA;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyUsageList[1].FrameType = IEEE154_TYPE_ACK;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyUsageList[2].FrameType = IEEE154_TYPE_CMD;
+
+   memcpy(&ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].key[0],
+          &ieee802154_security_vars.Key_2[0],
+          16);
+
+   ieee802154_security_vars.MacDeviceTable.DeviceDescriptorEntry[1].deviceAddress = ieee802154_security_vars.m_macDefaultKeySource;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].DeviceTable = &ieee802154_security_vars.MacDeviceTable;
 }
 
 //=========================== public ==========================================
