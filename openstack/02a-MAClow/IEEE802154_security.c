@@ -63,15 +63,23 @@ void IEEE802154_security_init(void){
 
    //Setting UP Phase
 
-   //MASTER KEY: OpenWSN
-   memset(&ieee802154_security_vars.M_k[0], 0, 16);
-   ieee802154_security_vars.M_k[0] = 0x4e;
-   ieee802154_security_vars.M_k[1] = 0x53;
-   ieee802154_security_vars.M_k[2] = 0x57;
-   ieee802154_security_vars.M_k[3] = 0x6e;
-   ieee802154_security_vars.M_k[4] = 0x65;
-   ieee802154_security_vars.M_k[5] = 0x70;
-   ieee802154_security_vars.M_k[6] = 0x4f;
+   //KEY 1: 6TiSCHminimal15
+   memset(&ieee802154_security_vars.Key_1[0], 0, 16);
+   ieee802154_security_vars.Key_1[0] = 0x36;
+   ieee802154_security_vars.Key_1[1] = 0x54;
+   ieee802154_security_vars.Key_1[2] = 0x69;
+   ieee802154_security_vars.Key_1[3] = 0x53;
+   ieee802154_security_vars.Key_1[4] = 0x43;
+   ieee802154_security_vars.Key_1[5] = 0x48;
+   ieee802154_security_vars.Key_1[6] = 0x6d;
+   ieee802154_security_vars.Key_1[7] = 0x69;
+   ieee802154_security_vars.Key_1[8] = 0x6e;
+   ieee802154_security_vars.Key_1[9] = 0x69;
+   ieee802154_security_vars.Key_1[10] = 0x6d;
+   ieee802154_security_vars.Key_1[11] = 0x61;
+   ieee802154_security_vars.Key_1[12] = 0x6c;
+   ieee802154_security_vars.Key_1[13] = 0x31;
+   ieee802154_security_vars.Key_1[14] = 0x35;
 
    //Initialization of the MAC Security Level Table
    uint8_t i;
@@ -130,7 +138,7 @@ void IEEE802154_security_init(void){
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyUsageList[2].FrameType = IEEE154_TYPE_BEACON;
 
    memcpy(&ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].key[0],
-          &ieee802154_security_vars.M_k[0], 
+          &ieee802154_security_vars.Key_1[0],
           16);
 
    ieee802154_security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = ieee802154_security_vars.m_macDefaultKeySource;
