@@ -23,6 +23,7 @@
 #include "neighbors.h"
 
 //=========================== define ==========================================
+
 #define MAXNUMKEYS           MAXNUMNEIGHBORS+1
 
 //=========================== typedef =========================================
@@ -74,8 +75,8 @@ typedef struct{
    m_securityLevelDescriptor SecurityDescriptorEntry[5];
 } m_macSecurityLevelTable;
 
-
 //=========================== variables =======================================
+
 typedef struct{
    macFrameCounter_t       m_macFrameCounter;
    uint8_t                 m_macFrameCounterMode;
