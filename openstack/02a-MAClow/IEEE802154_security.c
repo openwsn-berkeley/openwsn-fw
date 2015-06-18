@@ -678,8 +678,8 @@ uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
                                              uint8_t frameCounterSize){
    uint8_t auxilary_len;
    uint8_t frameCntLength;
-   if (frameCounterSuppression == 0){
-      if (frameCounterSize == 0x04){
+   if (frameCounterSuppression == IEEE154_ASH_FRAMECOUNTER_PRESENT){
+      if (frameCounterSize == 4){
          frameCntLength = 4;
       } else {
          frameCntLength = 5;
