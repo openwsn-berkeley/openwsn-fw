@@ -406,7 +406,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
    uint8_t receivedASN[5];
    open_addr_t* temp_addr;
 
-   //c retrieve the Security Control field
+   //Retrieve the Security Control field
    //1byte, Security Control Field
 
    temp8b = *((uint8_t*)(msg->payload)+tempheader->headerLength);
@@ -513,7 +513,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
    uint8_t* c;
    uint8_t len_c;
 
-   //f key descriptor lookup
+   //key descriptor lookup
    keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
                                                           &msg->l2_keySource,
                                                           msg->l2_keyIndex,
@@ -529,7 +529,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
       return E_FAIL;
    }
 
-   //g device descriptor lookup
+   //device descriptor lookup
    deviceDescriptor = IEEE802154_security_deviceDescriptorLookup(&msg->l2_keySource,
                                                                 idmanager_getMyID(ADDR_PANID),
                                                                 keyDescriptor);
@@ -542,7 +542,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
       return E_FAIL;
    }
 
-   //h Security Level lookup
+   //Security Level lookup
    securityLevelDescriptor = IEEE802154_security_securityLevelDescriptorLookup(msg->l2_frameType,
                                                                               msg->commandFrameIdentifier);
 
@@ -554,11 +554,11 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
 	      return E_FAIL;
    }
 
-   //i+j+k
-   if (IEEE802154_security_incomingSecurityLevelChecking(securityLevelDescriptor,
-                                                        msg->l2_securityLevel,
-                                                        deviceDescriptor->Exempt) ==FALSE) 
-      {
+   //incoming security level checking
+   outStatus = IEEE802154_security_incomingSecurityLevelChecking(securityLevelDescriptor,
+                                                                 msg->l2_securityLevel,
+                                                                 deviceDescriptor->Exempt);
+   if(outStatus == FALSE) {
       //security level not allowed
       openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
                            (errorparameter_t)msg->l2_frameType,
@@ -566,13 +566,11 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
       return E_FAIL;
    }
 
-   //l+m Anti-Replay - not needed for TSCH mode
-
-   //n Control of key used
-   if (IEEE802154_security_incomingKeyUsagePolicyChecking(keyDescriptor,
-                                                         msg->l2_frameType,
-                                                         0)==FALSE){
-     // improper key used
+   //incoming key usage policy checking
+   outStatus = IEEE802154_security_incomingKeyUsagePolicyChecking(keyDescriptor,
+                                                                  msg->l2_frameType,
+                                                                  0);
+   if(outStatus == FALSE){// improper key used
      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
                           (errorparameter_t)msg->l2_frameType,
                           (errorparameter_t)10);
