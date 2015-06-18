@@ -95,9 +95,14 @@ enum IEEE802154_ash_keyIdMode_enums { // Key Identifier Mode Field
    IEEE154_ASH_KEYIDMODE_EXPLICIT_64      = 3,
 };
 
-enum IEEE802154_ash_FrameCounterSuppression_enums { // Key Identifier Mode Field
+enum IEEE802154_ash_FrameCounterSuppression_enums { // Frame Counter Suppression Field
 	IEEE154_ASH_FRAMECOUNTER_PRESENT    = 0,
 	IEEE154_ASH_FRAMECOUNTER_SUPPRESSED = 1,
+};
+
+enum IEEE802154_ash_FrameCounterSize_enums { // Frame Counter Size Field
+	IEEE154_ASH_FRAMECOUNTER_COUNTER    = 0,
+	IEEE154_ASH_FRAMECOUNTER_ASN        = 1,
 };
 
 //=========================== typedef =========================================

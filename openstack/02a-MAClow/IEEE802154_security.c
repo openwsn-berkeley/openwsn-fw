@@ -420,11 +420,18 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
    frameCnt_Suppression = (temp8b >> IEEE154_ASH_SCF_FRAME_CNT_MODE)& 0x01;//1b
    frameCnt_Size = (temp8b >> IEEE154_ASH_SCF_FRAME_CNT_SIZE)& 0x01;//1b
 
+   //if the frame counter is zero, it is 4-bytes long, 5 otherwise
+   if(frameCnt_Size == IEEE154_ASH_FRAMECOUNTER_COUNTER) {
+	   frameCnt_Size = 4;
+   } else {
+	   frameCnt_Size = 5;
+   }
+
    tempheader->headerLength++;
 
-   //Frame Counter field, //l
+   //Frame Counter field
    macFrameCounter_t l2_frameCounter;
-   if (frameCnt_Suppression == 0){//the frame counter is here
+   if (frameCnt_Suppression == IEEE154_ASH_FRAMECOUNTER_PRESENT){//the frame counter is here
       //the frame counter size can be 4 or 5 bytes
       for (i=0;i<frameCnt_Size;i++){
           receivedASN[i] = *((uint8_t*)(msg->payload)+tempheader->headerLength);
@@ -433,7 +440,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
 
       l2_frameCounter.bytes0and1 = receivedASN[0]+256*receivedASN[1];
       l2_frameCounter.bytes2and3 = receivedASN[2]+256*receivedASN[3];
-      if(frameCnt_Size == 0x04){
+      if(frameCnt_Size == 5){ //we have the ASN as the frame counter
          l2_frameCounter.byte4 = receivedASN[4];
       }
 
@@ -448,22 +455,22 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
 
    //retrieve the Key Identifier field
    switch (msg->l2_keyIdMode){
-      case 0:
+      case IEEE154_ASH_KEYIDMODE_IMPLICIT:
          //key is derived implicitly
          temp_addr = &ieee802154_security_vars.m_macDefaultKeySource;
          memcpy(&(msg->l2_keySource), temp_addr, sizeof(open_addr_t));
          break;
-      case 2:
-      packetfunctions_readAddress(((uint8_t*)(msg->payload)+tempheader->headerLength),
-                                  ADDR_16B,
-                                  &msg->l2_keySource,
-                                  OW_LITTLE_ENDIAN);
-      tempheader->headerLength+=2;
-      break;
-      case 1:
+      case IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE:
          msg->l2_keySource = ieee802154_security_vars.m_macDefaultKeySource;
          break;
-      case 3:
+      case IEEE154_ASH_KEYIDMODE_EXPLICIT_16:
+         packetfunctions_readAddress(((uint8_t*)(msg->payload)+tempheader->headerLength),
+                                     ADDR_16B,
+                                     &msg->l2_keySource,
+                                     OW_LITTLE_ENDIAN);
+         tempheader->headerLength+=2;
+         break;
+      case IEEE154_ASH_KEYIDMODE_EXPLICIT_64:
          packetfunctions_readAddress(((uint8_t*)(msg->payload)+tempheader->headerLength),
                                      ADDR_64B,
                                      &msg->l2_keySource,
@@ -478,7 +485,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
       }
 
    //retrieve the KeyIndex
-   if (msg->l2_keyIdMode != 0){
+   if (msg->l2_keyIdMode != IEEE154_ASH_KEYIDMODE_IMPLICIT){
       temp8b = *((uint8_t*)(msg->payload)+tempheader->headerLength);
       msg->l2_keyIndex = (temp8b);
       tempheader->headerLength++;
