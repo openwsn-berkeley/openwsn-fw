@@ -95,6 +95,11 @@ enum IEEE802154_ash_keyIdMode_enums { // Key Identifier Mode Field
    IEEE154_ASH_KEYIDMODE_EXPLICIT_64      = 3,
 };
 
+enum IEEE802154_ash_FrameCounterSuppression_enums { // Key Identifier Mode Field
+	IEEE154_ASH_FRAMECOUNTER_PRESENT    = 0,
+	IEEE154_ASH_FRAMECOUNTER_SUPPRESSED = 1,
+};
+
 //=========================== typedef =========================================
 
 typedef struct {

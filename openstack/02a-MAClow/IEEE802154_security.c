@@ -210,28 +210,28 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
    }
 
    //start setting the Auxiliary Security Header
-   if (msg->l2_keyIdMode !=0){//if the KeyIdMode is zero, keyIndex and KeySource are omitted
+   if (msg->l2_keyIdMode != IEEE154_ASH_KEYIDMODE_IMPLICIT){//if the KeyIdMode is zero, keyIndex and KeySource are omitted
       temp8b = msg->l2_keyIndex; //key index field
       packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
       *((uint8_t*)(msg->payload)) = temp8b;
    }
 
    switch (msg->l2_keyIdMode){
-      case 0: //no KeyIDMode field - implicit
+      case IEEE154_ASH_KEYIDMODE_IMPLICIT: //no KeyIDMode field - implicit
     	 temp_keySource = &ieee802154_security_vars.m_macDefaultKeySource;
          memcpy(&(msg->l2_keySource), temp_keySource, sizeof(open_addr_t));
          break;
-      case 1:// macDefaultKeySource
+      case IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE:// macDefaultKeySource
          msg->l2_keySource = ieee802154_security_vars.m_macDefaultKeySource;
          break;
-      case 2: //keySource with 16b address
+      case IEEE154_ASH_KEYIDMODE_EXPLICIT_16: //keySource with 16b address
          temp_keySource = &msg->l2_keySource;
          packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
          *((uint8_t*)(msg->payload)) = temp_keySource->addr_64b[6];
          packetfunctions_reserveHeaderSize(msg, sizeof(uint8_t));
          *((uint8_t*)(msg->payload)) = temp_keySource->addr_64b[7];
          break;
-      case 3: //keySource with 64b address
+      case IEEE154_ASH_KEYIDMODE_EXPLICIT_64: //keySource with 64b address
          temp_keySource = &msg->l2_keySource;
          packetfunctions_writeAddress(msg,temp_keySource,OW_LITTLE_ENDIAN);
          break;
@@ -240,7 +240,7 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
    }
 
    //Frame Counter
-   if (frameCounterSuppression==0){
+   if (frameCounterSuppression== IEEE154_ASH_FRAMECOUNTER_PRESENT){
       //here I have to insert the ASN: I can only reserve the space and
       //save the pointer. The ASN will be added by IEEE802.15.4e
 
