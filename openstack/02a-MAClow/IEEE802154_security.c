@@ -420,7 +420,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
    frameCnt_Suppression = (temp8b >> IEEE154_ASH_SCF_FRAME_CNT_MODE)& 0x01;//1b
    frameCnt_Size = (temp8b >> IEEE154_ASH_SCF_FRAME_CNT_SIZE)& 0x01;//1b
 
-   tempheader->headerLength = tempheader->headerLength+1;
+   tempheader->headerLength++;
 
    //Frame Counter field, //l
    macFrameCounter_t l2_frameCounter;
@@ -428,7 +428,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
       //the frame counter size can be 4 or 5 bytes
       for (i=0;i<frameCnt_Size;i++){
           receivedASN[i] = *((uint8_t*)(msg->payload)+tempheader->headerLength);
-          tempheader->headerLength = tempheader->headerLength+1;
+          tempheader->headerLength++;
       }
 
       l2_frameCounter.bytes0and1 = receivedASN[0]+256*receivedASN[1];
@@ -458,7 +458,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
                                   ADDR_16B,
                                   &msg->l2_keySource,
                                   OW_LITTLE_ENDIAN);
-      tempheader->headerLength = tempheader->headerLength+2;
+      tempheader->headerLength+=2;
       break;
       case 1:
          msg->l2_keySource = ieee802154_security_vars.m_macDefaultKeySource;
@@ -468,7 +468,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
                                      ADDR_64B,
                                      &msg->l2_keySource,
                                      OW_LITTLE_ENDIAN);
-         tempheader->headerLength = tempheader->headerLength+8;
+         tempheader->headerLength+=8;
          break;
       default:
          openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
@@ -481,7 +481,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
    if (msg->l2_keyIdMode != 0){
       temp8b = *((uint8_t*)(msg->payload)+tempheader->headerLength);
       msg->l2_keyIndex = (temp8b);
-      tempheader->headerLength = tempheader->headerLength+1;
+      tempheader->headerLength++;
    } else {
      //key is derived implicitly
      msg->l2_keyIndex = 1;
