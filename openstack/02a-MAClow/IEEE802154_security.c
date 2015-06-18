@@ -25,34 +25,34 @@ ieee802154_security_vars_t ieee802154_security_vars;
 //=========================== prototypes ======================================
 
 void IEEE802154_security_getFrameCounter(macFrameCounter_t reference,
-                                        uint8_t*          array);
+                                         uint8_t*          array);
 uint8_t IEEE802154_security_authLengthChecking(uint8_t securityLevel);
 
 uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
-                                             bool    frameCounterSuppression,
-                                             uint8_t frameCounterSize);
+                                              bool    frameCounterSuppression,
+                                              uint8_t frameCounterSize);
 
 bool IEEE802154_security_incomingKeyUsagePolicyChecking(m_keyDescriptor* keydesc,
-                                                       uint8_t          frameType,
-                                                       uint8_t          cfi);
+                                                        uint8_t          frameType,
+                                                        uint8_t          cfi);
 
 bool IEEE802154_security_incomingSecurityLevelChecking(m_securityLevelDescriptor* secLevDesc,
-                                                      uint8_t                    secLevel,
-                                                      bool                       exempt);
+                                                       uint8_t                    secLevel,
+                                                       bool                       exempt);
 
 m_securityLevelDescriptor* IEEE802154_security_securityLevelDescriptorLookup(uint8_t frameType,
-                                                                            uint8_t cfi);
+                                                                             uint8_t cfi);
 
 m_deviceDescriptor* IEEE802154_security_deviceDescriptorLookup(open_addr_t*     address,
-                                                              open_addr_t*     PANID,
-                                                              m_keyDescriptor* keyDescriptor);
+                                                               open_addr_t*     PANID,
+                                                               m_keyDescriptor* keyDescriptor);
 
 m_keyDescriptor* IEEE802154_security_keyDescriptorLookup(uint8_t      KeyIdMode,
-                                                        open_addr_t* keySource,
-                                                        uint8_t      KeyIndex,
-                                                        open_addr_t* DeviceAddress,
-                                                        open_addr_t* panID,
-                                                        uint8_t      frameType);
+                                                         open_addr_t* keySource,
+                                                         uint8_t      KeyIndex,
+                                                         open_addr_t* DeviceAddress,
+                                                         open_addr_t* panID,
+                                                         uint8_t      frameType);
 
 //=========================== admin ===========================================
 
@@ -303,8 +303,8 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
 
    if (keyDescriptor==NULL){
       openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
-                          (errorparameter_t)msg->l2_frameType,
-                          (errorparameter_t)1);
+                           (errorparameter_t)msg->l2_frameType,
+                           (errorparameter_t)1);
       return E_FAIL;
    }
 
@@ -421,10 +421,10 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
    frameCnt_Size = (temp8b >> IEEE154_ASH_SCF_FRAME_CNT_SIZE)& 0x01;//1b
 
    //if the frame counter is zero, it is 4-bytes long, 5 otherwise
-   if(frameCnt_Size == IEEE154_ASH_FRAMECOUNTER_COUNTER) {
-	   frameCnt_Size = 4;
+   if (frameCnt_Size == IEEE154_ASH_FRAMECOUNTER_COUNTER) {
+      frameCnt_Size = 4;
    } else {
-	   frameCnt_Size = 5;
+      frameCnt_Size = 5;
    }
 
    tempheader->headerLength++;
@@ -444,7 +444,7 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
          l2_frameCounter.byte4 = receivedASN[4];
       }
 
-      if (l2_frameCounter.byte4 == 0xff){
+      if (l2_frameCounter.byte4 == 0xff){ //frame counter overflow
          openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
                               (errorparameter_t)msg->l2_frameType,
                               (errorparameter_t)4);
@@ -490,8 +490,8 @@ void IEEE802154_security_retrieveAuxiliarySecurityHeader(OpenQueueEntry_t*      
       msg->l2_keyIndex = (temp8b);
       tempheader->headerLength++;
    } else {
-     //key is derived implicitly
-     msg->l2_keyIndex = 1;
+      //key is derived implicitly
+      msg->l2_keyIndex = 1;
    }
 
 }
@@ -547,11 +547,11 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t*      msg){
                                                                               msg->commandFrameIdentifier);
 
    if (securityLevelDescriptor == NULL){
-	      //can't find the frame type
-	      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
-	                           (errorparameter_t)msg->l2_frameType,
-	                           (errorparameter_t)8);
-	      return E_FAIL;
+      //can't find the frame type
+      openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
+                           (errorparameter_t)msg->l2_frameType,
+                           (errorparameter_t)8);
+      return E_FAIL;
    }
 
    //incoming security level checking
