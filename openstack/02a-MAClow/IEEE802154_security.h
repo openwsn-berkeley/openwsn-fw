@@ -22,8 +22,6 @@
 #include "ieee802154_security_driver.h"
 #include "neighbors.h"
 
-extern const struct ieee802154_security_driver IEEE802154_security;
-
 //=========================== define ==========================================
 #define MAXNUMKEYS           MAXNUMNEIGHBORS+1
 
@@ -91,6 +89,8 @@ typedef struct{
    uint8_t                 Key_1[16];
    uint8_t                 Key_2[16];
 } ieee802154_security_vars_t;
+
+extern const struct ieee802154_security_driver IEEE802154_security;
 
 //=========================== prototypes ======================================
 
