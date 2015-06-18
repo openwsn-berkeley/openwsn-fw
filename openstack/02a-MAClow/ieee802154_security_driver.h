@@ -16,7 +16,8 @@
 #define IEEE802154_SECURITY_LEVEL            IEEE154_ASH_SLF_TYPE_ENC_MIC_32  // encryption + 4 byte authentication tag   
 #define IEEE802154_SECURITY_LEVEL_BEACON     IEEE154_ASH_SLF_TYPE_MIC_32      // authentication tag len used for beacons must match the tag len of other frames 
 #define IEEE802154_SECURITY_KEYIDMODE        IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE
-#define IEEE802154_SECURITY_KEY_INDEX        1
+#define IEEE802154_SECURITY_BEACON_KEY_INDEX 1
+#define IEEE802154_SECURITY_DATA_KEY_INDEX   2
 #define IEEE802154_SECURITY_TAG_LEN          IEEE802154_SECURITY.authenticationTagLen(IEEE802154_SECURITY_LEVEL)
 #else /* L2_SECURITY_ACTIVE */
 #define IEEE802154_SECURITY                  IEEE802154_dummy_security        // dummy implementation that always returns success
