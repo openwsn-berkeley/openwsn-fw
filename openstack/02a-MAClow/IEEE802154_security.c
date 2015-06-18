@@ -71,15 +71,16 @@ void IEEE802154_security_init(void){
    ieee802154_security_vars.Key_1[3] = 0x53;
    ieee802154_security_vars.Key_1[4] = 0x43;
    ieee802154_security_vars.Key_1[5] = 0x48;
-   ieee802154_security_vars.Key_1[6] = 0x6d;
-   ieee802154_security_vars.Key_1[7] = 0x69;
-   ieee802154_security_vars.Key_1[8] = 0x6e;
-   ieee802154_security_vars.Key_1[9] = 0x69;
-   ieee802154_security_vars.Key_1[10] = 0x6d;
-   ieee802154_security_vars.Key_1[11] = 0x61;
-   ieee802154_security_vars.Key_1[12] = 0x6c;
-   ieee802154_security_vars.Key_1[13] = 0x31;
-   ieee802154_security_vars.Key_1[14] = 0x35;
+   ieee802154_security_vars.Key_1[6] = 0x20;
+   ieee802154_security_vars.Key_1[7] = 0x6d;
+   ieee802154_security_vars.Key_1[8] = 0x69;
+   ieee802154_security_vars.Key_1[9] = 0x6e;
+   ieee802154_security_vars.Key_1[10] = 0x69;
+   ieee802154_security_vars.Key_1[11] = 0x6d;
+   ieee802154_security_vars.Key_1[12] = 0x61;
+   ieee802154_security_vars.Key_1[13] = 0x6c;
+   ieee802154_security_vars.Key_1[14] = 0x31;
+   ieee802154_security_vars.Key_1[15] = 0x35;
 
    //Initialization of the MAC Security Level Table
    uint8_t i;
