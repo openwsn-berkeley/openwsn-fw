@@ -1,6 +1,6 @@
 #include "opendefs.h"
 #include "IEEE802154.h"
-#include "IEEE802154e.h"
+#include "IEEE802154E.h"
 #include "processIE.h" 
 #include "packetfunctions.h"
 #include "idmanager.h"
