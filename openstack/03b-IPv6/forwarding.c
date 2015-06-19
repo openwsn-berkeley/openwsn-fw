@@ -99,13 +99,18 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    forwarding_createFlowLabel(&flow_label,0x00);
 #endif
    
-   //tengfei: IPHC inner header and NHC IPv6 header will be added at here
+   //IPHC inner header and NHC IPv6 header will be added at here
    iphc_prependIPv6Header(
       msg,
       IPHC_TF_ELIDED,
       flow_label,
-      IPHC_NH_INLINE,
-      IANA_ICMPv6,
+      // we should pass the parameter "msg->l4_protocol_compressed" here.
+      // but since currectly the upper layers doesn't set the l4_protocol_compressed
+      // parameter and the OPENQUEUE COMPONEN didn't reset this value either. So using 
+      // "msg->l4_protocol_compressed" here may cause wrong result. 
+      // Using IPHC_NH_INLINE instead temporarily. This should be fixed later.
+      IPHC_NH_INLINE, 
+      msg->l4_protocol,
       IPHC_HLIM_64,
       ipv6_outer_header.hop_limit,
       IPHC_CID_NO,
@@ -496,6 +501,7 @@ owerror_t forwarding_send_internal_SourceRouting(
       // toss ipv6 NHC header
       packetfunctions_tossHeader(msg,sizeof(uint8_t));
       msg->l4_protocol = ipv6_inner_header->next_header;
+      msg->l4_protocol_compressed = ipv6_inner_header->next_header_compressed;
       // toss iphc inner header
       packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
       
