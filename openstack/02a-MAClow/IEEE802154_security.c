@@ -59,11 +59,12 @@ m_keyDescriptor* IEEE802154_security_keyDescriptorLookup(uint8_t      KeyIdMode,
 /**
 \brief Initialization of security tables and parameters.
 */
-void IEEE802154_security_init(void){
+void IEEE802154_security_init(void) {
+   uint8_t i;
 
    //Setting UP Phase
 
-   //KEY 1: 6TiSCHminimal15 - should be used for authenticating beacon frames
+   //KEY 1: '6TiSCH minimal15' - used to authenticate beacon frames
    memset(&ieee802154_security_vars.Key_1[0], 0, 16);
    ieee802154_security_vars.Key_1[0] = 0x36;
    ieee802154_security_vars.Key_1[1] = 0x54;
@@ -83,17 +84,16 @@ void IEEE802154_security_init(void){
    ieee802154_security_vars.Key_1[15] = 0x35;
 
    //Initialization of the MAC Security Level Table
-   uint8_t i;
-   for (i=0; i<5; i++){
+   for (i = 0; i < IEEE154_TYPE_UNDEFINED; i++) { // iterate through all frame types
       ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].FrameType = i;
       ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].CommandFrameIdentifier = 0;
       ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].DeviceOverrideSecurityMinimum = FALSE;
       //list of allowed security levels
-      if (i==0){
+      if (i == IEEE154_TYPE_BEACON){   // beacons can only be authenticated but not encrypted
          ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = IEEE154_ASH_SLF_TYPE_MIC_32;
          ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = IEEE154_ASH_SLF_TYPE_MIC_64;
          ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = IEEE154_ASH_SLF_TYPE_MIC_128;
-      } else {
+      } else { // all other frame types are encrypted + authenticated
          ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[0] = IEEE154_ASH_SLF_TYPE_ENC_MIC_32;
          ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[1] = IEEE154_ASH_SLF_TYPE_ENC_MIC_64;
          ieee802154_security_vars.MacSecurityLevelTable.SecurityDescriptorEntry[i].AllowedSecurityLevels[2] = IEEE154_ASH_SLF_TYPE_ENC_MIC_128;
@@ -112,7 +112,7 @@ void IEEE802154_security_init(void){
           sizeof(m_macDeviceTable));
 
    //Initialization of Frame Counter
-   ieee802154_security_vars.m_macFrameCounterMode = 0x05; //0x04 or 0x05
+   ieee802154_security_vars.m_macFrameCounterMode = 0x05; // For TSCH, we use implicit 5 byte Frame Counter (ASN) 
 
    //macDefaultKeySource - shared
    ieee802154_security_vars.m_macDefaultKeySource.type = ADDR_64B;
@@ -127,8 +127,8 @@ void IEEE802154_security_init(void){
 
    //store the key and related attributes
    //Creation of the KeyDescriptor
-   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIdMode = 1;
-   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIndex = 1;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIdMode = IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeyIndex = IEEE802154_SECURITY_K1_KEY_INDEX;
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource.type = ADDR_64B;
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].KeyIdLookupList.KeySource = ieee802154_security_vars.m_macDefaultKeySource;
 
@@ -143,7 +143,7 @@ void IEEE802154_security_init(void){
    ieee802154_security_vars.MacDeviceTable.DeviceDescriptorEntry[0].deviceAddress = ieee802154_security_vars.m_macDefaultKeySource;
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[0].DeviceTable = &ieee802154_security_vars.MacDeviceTable;
 
-   //KEY 2: deadbeeffacecafedeadbeeffacecafe
+   //KEY 2: 'deadbeeffacecafedeadbeeffacecafe'
    memset(&ieee802154_security_vars.Key_2[0], 0, 16);
    ieee802154_security_vars.Key_2[0] = 0xde;
    ieee802154_security_vars.Key_2[1] = 0xad;
@@ -164,8 +164,8 @@ void IEEE802154_security_init(void){
 
    //store the key 2 and related attributes
    //Creation of the KeyDescriptor - Key 2 should be used to encrypt and authenticate data, command and ack frames
-   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIdMode = 1;
-   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIndex = 2;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIdMode = IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE;
+   ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeyIndex = IEEE802154_SECURITY_K2_KEY_INDEX;
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource.type = ADDR_64B;
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].KeyIdLookupList.KeySource = ieee802154_security_vars.m_macDefaultKeySource;
 
@@ -266,9 +266,9 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
    temp8b |= msg->l2_keyIdMode << IEEE154_ASH_SCF_KEY_IDENTIFIER_MODE;//2b
    temp8b |= frameCounterSuppression << IEEE154_ASH_SCF_FRAME_CNT_MODE; //1b
 
-   if (ieee802154_security_vars.m_macFrameCounterMode == 0x04){
+   if (ieee802154_security_vars.m_macFrameCounterMode == 0x04) { // 4 byte Frame Counter
       temp8b |= 0 << IEEE154_ASH_SCF_FRAME_CNT_SIZE; //1b
-   } else{
+   } else { // 5 byte Frame Counter
       temp8b |= 1 << IEEE154_ASH_SCF_FRAME_CNT_SIZE; //1b
    }
 
