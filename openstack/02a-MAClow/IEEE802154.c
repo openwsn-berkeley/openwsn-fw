@@ -88,7 +88,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    }
    
    if (frameType == IEEE154_TYPE_ACK) {
-       timeCorrection = ieee154e_getTimeCorrection();
+       timeCorrection = (int16_t)(ieee154e_getTimeCorrection());
        // add the payload to the ACK (i.e. the timeCorrection)
        packetfunctions_reserveHeaderSize(msg,sizeof(timecorrection_IE_ht));
        timeCorrection  = -timeCorrection;
@@ -334,23 +334,26 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
               
                switch(gr_elem_id){
                    case IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID:
-                          // timecorrection IE
-                          
-                          byte0 = *((uint8_t*)(msg->payload));
-                          byte1 = *((uint8_t*)(msg->payload)+1);
+                       // timecorrection IE
+                       byte0 = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+                       byte1 = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength+1);
 
-                          timeCorrection  = (int16_t)((uint16_t)byte1<<8 | (uint16_t)byte0);
-                          timeCorrection  = (timeCorrection / (PORT_SIGNED_INT_WIDTH)US_PER_TICK);
-                          timeCorrection  = -timeCorrection;
-                          
-                          ieee802514_header->timeCorrection = timeCorrection;
-                          ieee802514_header->headerLength  += 2;
+                       timeCorrection  = (int16_t)((uint16_t)byte1<<8 | (uint16_t)byte0);
+                       timeCorrection  = (timeCorrection / (PORT_SIGNED_INT_WIDTH)US_PER_TICK);
+                       timeCorrection  = -timeCorrection;
+                       
+                       ieee802514_header->timeCorrection = timeCorrection;
+                       ieee802514_header->headerLength  += len;
                        break;
                    default:
                        break;
                }
            }
-           
+           if (ieee802514_header->headerLength==msg->length) {
+               // nothing left, no payloadIE, no payload, this is the end of packet!
+               ieee802514_header->valid=TRUE;
+               return;
+           }
            if (ieee802514_header->headerLength>msg->length) {  return; } // no more to read!
        }
    }

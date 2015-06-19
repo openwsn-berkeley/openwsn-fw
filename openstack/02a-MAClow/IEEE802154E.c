@@ -1146,7 +1146,6 @@ port_INLINE void activity_tie6() {
 
 port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee802154_header_iht     ieee802514_header;
-   uint16_t                  lenIE;
    
    // change state
    changeState(S_TXPROC);
@@ -1246,9 +1245,6 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          ) {
          synchronizeAck(ieee802514_header.timeCorrection);
       }
- 
-      // toss the IEs
-      packetfunctions_tossHeader(ieee154e_vars.ackReceived,lenIE);
       
       // inform schedule of successful transmission
       schedule_indicateTx(&ieee154e_vars.asn,TRUE);
@@ -1490,8 +1486,6 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 }
 
 port_INLINE void activity_ri6() {
-   int16_t timeCorrection;
-   header_IE_ht header_desc;
    
    // change state
    changeState(S_TXACKPREPARE);
@@ -1524,7 +1518,7 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
-                            TRUE,//ie in ack
+                            FALSE,//no payloadIE in ack
                             IEEE154_SEC_NO_SECURITY,
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
@@ -1734,8 +1728,12 @@ port_INLINE void ieee154e_getAsn(uint8_t* array) {
    array[4]         =  ieee154e_vars.asn.byte4;
 }
 
-PORT_SIGNED_INT_WIDTH   ieee154e_getTimeCorrection() {
-    return ieee154e_vars.timeCorrection;
+port_INLINE uint16_t ieee154e_getTimeCorrection() {
+    int16_t returnVal;
+    
+    returnVal = (uint16_t)(ieee154e_vars.timeCorrection);
+    
+    return returnVal;
 }
 
 port_INLINE void joinPriorityStoreFromEB(uint8_t jp){
