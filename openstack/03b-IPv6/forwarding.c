@@ -240,6 +240,7 @@ void forwarding_receive(
       // toss ipv6 NHC header
       packetfunctions_tossHeader(msg,sizeof(uint8_t));
       msg->l4_protocol = ipv6_inner_header->next_header;
+      msg->l4_protocol_compressed = ipv6_inner_header->next_header_compressed;
       // toss iphc inner header
       packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
           
