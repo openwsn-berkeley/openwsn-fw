@@ -615,27 +615,24 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 
 port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    uint8_t               ptr;
-   uint8_t               byte0;
-   uint8_t               byte1;
    uint8_t               temp_8b;
    uint8_t               gr_elem_id;
    uint8_t               subid;
    uint16_t              temp_16b;
    uint16_t              len;
    uint16_t              sublen;
-   PORT_SIGNED_INT_WIDTH timeCorrection;
    // flag used for understanding if the slotoffset should be inferred from both ASN and slotframe length
    bool                  f_asn2slotoffset;
    
    ptr=0;
    
-   //===== header or payload IE header
+   // payload IE header, header IE is processed before when retrieve header  
    
    //candidate IE header  if type ==0 header IE if type==1 payload IE
    temp_8b    = *((uint8_t*)(pkt->payload)+ptr);
    ptr++;
    
-   temp_16b   = (temp_8b << 8) + (*((uint8_t*)(pkt->payload)+ptr));
+   temp_16b   = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr)) << 8);
    ptr++;
    
    *lenIE     = ptr;
@@ -643,12 +640,12 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) == IEEE802154E_DESC_TYPE_PAYLOAD_IE){
       // payload IE
       
-      len          = (temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
+      len          = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
       gr_elem_id   = (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT;
    } else {
       // header IE
       
-      len          = (temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK)>>IEEE802154E_DESC_LEN_HEADER_IE_SHIFT;
+      len          = temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK;
       gr_elem_id   = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT; 
    }
    
@@ -666,7 +663,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             //read sub IE header
             temp_8b     = *((uint8_t*)(pkt->payload)+ptr);
             ptr         = ptr + 1;
-            temp_16b    = (temp_8b << 8)  + (*((uint8_t*)(pkt->payload)+ptr));
+            temp_16b    = temp_8b  + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
             ptr         = ptr + 1;
             
             len         = len - 2; //remove header fields len
@@ -674,12 +671,12 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             if ((temp_16b & IEEE802154E_DESC_TYPE_LONG) == IEEE802154E_DESC_TYPE_LONG){
                // long sub-IE
                
-               sublen   = (temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK)>>IEEE802154E_DESC_LEN_LONG_MLME_IE_SHIFT;
+               sublen   = temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK;
                subid    = (temp_16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT; 
             } else {
                // short sub-IE
                
-               sublen   = (temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK)>>IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+               sublen   = temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK;
                subid    = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
             }
             
@@ -715,7 +712,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                   }
                   break;
                   
-              case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
+               case IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID:
                   if (idmanager_getIsDAGroot()==FALSE) {
                       // timelsot template ID
                       channelhoppingTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
@@ -740,27 +737,6 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
             */
             ieee154e_vars.asnOffset = ieee154e_vars.freq - 11 - schedule_getChannelOffset();
-         }
-         break;
-      
-      case IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID:
-         // timecorrection IE
-         
-         if (
-               idmanager_getIsDAGroot()==FALSE &&
-               neighbors_isPreferredParent(&(pkt->l2_nextORpreviousHop))
-            ) {
-            
-            byte0 = *((uint8_t*)(pkt->payload)+ptr);
-            ptr++;
-            byte1 = *((uint8_t*)(pkt->payload)+ptr);
-            ptr++;
-
-            timeCorrection  = (int16_t)((uint16_t)byte1<<8 | (uint16_t)byte0);
-            timeCorrection  = (timeCorrection / (PORT_SIGNED_INT_WIDTH)US_PER_TICK);
-            timeCorrection  = -timeCorrection;
-            
-            synchronizeAck(timeCorrection);
          }
          break;
          

@@ -12,15 +12,15 @@
 #define TerminationIE_Length           2
 // the header ternimation IE when payload IE follows header. 
 // length(b0~b6):0   ID(b7~b14):0x7E   type(b15): 0
-#define Header_PayloadIE_TerminationIE 0x00FC
+#define Header_PayloadIE_TerminationIE 0x3F00
 
 // the header ternimation IE when payload follows header.
 // length(b0~b6):0   ID(b7~b14):0x7F   type(b15): 0
-#define Header_Payload_TerminationIE   0x00FE
+#define Header_Payload_TerminationIE   0x3F80
 
 // the payload ternimation IE when payload follows payloadIE.
 // length(b0~b10):0   ID(b11~b14):0x0F   type(b15): 1
-#define Payload_TerminationIE         0x001F
+#define Payload_TerminationIE         0xF800
 
 //=========================== variables =======================================
 
@@ -60,8 +60,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        frameVersion  = IEEE154_FRAMEVERSION;
        //add header termination IE (id=0x7e)
        packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
-       msg->payload[0] = (Header_PayloadIE_TerminationIE >> 8) & 0xFF;
-       msg->payload[1] = Header_PayloadIE_TerminationIE        & 0xFF;
+       msg->payload[0] = Header_PayloadIE_TerminationIE         & 0xFF;
+       msg->payload[1] = (Header_PayloadIE_TerminationIE  >> 8) & 0xFF;
        
        
    } else {
@@ -73,8 +73,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
            ielistpresent = IEEE154_IELIST_YES; // at least I have a termination IE
            frameVersion  = IEEE154_FRAMEVERSION;
            packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
-           msg->payload[0] = (Header_Payload_TerminationIE >> 8) & 0xFF;
-           msg->payload[1] = Header_Payload_TerminationIE        & 0xFF;
+           msg->payload[0] = Header_Payload_TerminationIE        & 0xFF;
+           msg->payload[1] = (Header_Payload_TerminationIE >> 8) & 0xFF;
        } else {
            // no payload, termination IE is omitted. check whether timeCorrection IE
            // presents. 
@@ -99,11 +99,11 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        // add header IE header -- xv poipoi -- pkt is filled in reverse order..
        packetfunctions_reserveHeaderSize(msg,sizeof(header_IE_ht));
        //create the header for ack IE
-       header_desc.length_elementid_type=(sizeof(timecorrection_IE_ht)<< IEEE802154E_DESC_LEN_HEADER_IE_SHIFT)|
+       header_desc.length_elementid_type=sizeof(timecorrection_IE_ht)|
                                          (IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID << IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT)|
-                                         IEEE802154E_DESC_TYPE_SHORT; 
-       msg->payload[0] = ((header_desc.length_elementid_type) >> 8) & 0xFF;
-       msg->payload[1] = (header_desc.length_elementid_type)        & 0xFF;
+                                         (IEEE802154E_DESC_TYPE_SHORT << IEEE802154E_DESC_TYPE_IE_SHIFT); 
+       msg->payload[0] = (header_desc.length_elementid_type)        & 0xFF;
+       msg->payload[1] = ((header_desc.length_elementid_type) >> 8) & 0xFF;
    }
    
    // previousHop address (always 64-bit)
@@ -314,7 +314,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
            // I have IE in frame. phase the IE in header first
            temp_8b  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
            ieee802514_header->headerLength += 1;
-           temp_16b = (temp_8b << 8) | *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+           temp_16b = temp_8b | (*((uint8_t*)(msg->payload)+ieee802514_header->headerLength) << 8);
            ieee802514_header->headerLength += 1;
            // stop when I got a header termination IE
            if (temp_16b == Header_PayloadIE_TerminationIE) {
@@ -329,7 +329,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
            }
            if ((temp_16b & IEEE802154E_DESC_TYPE_PAYLOAD_IE) != IEEE802154E_DESC_TYPE_PAYLOAD_IE) {
                // only process header IE here
-               len          = (temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK)>>IEEE802154E_DESC_LEN_HEADER_IE_SHIFT;
+               len          = temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK;
                gr_elem_id   = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT;
               
                switch(gr_elem_id){
