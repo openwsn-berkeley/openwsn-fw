@@ -121,6 +121,7 @@ typedef struct {
    open_addr_t panid;
    open_addr_t dest;
    open_addr_t src;
+   int16_t     timeCorrection;
 } ieee802154_header_iht; //iht for "internal header type"
 
 //=========================== variables =======================================

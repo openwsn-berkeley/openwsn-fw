@@ -31,48 +31,49 @@
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
-#define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME             (1<<1)
-#define IEEE802154E_DESC_TYPE_LONG                         0x01
-#define IEEE802154E_DESC_TYPE_SHORT                        0x00
+#define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME             (1<<11)
+#define IEEE802154E_PAYLOAD_DESC_TYPE_MLME                 (1<<15)
+#define IEEE802154E_DESC_TYPE_LONG                         (1<<15)
+#define IEEE802154E_DESC_TYPE_SHORT                        (0<<15)
 
-#define IEEE802154E_DESC_TYPE_HEADER_IE                    0x00
-#define IEEE802154E_DESC_TYPE_PAYLOAD_IE                   0x01
+#define IEEE802154E_DESC_TYPE_HEADER_IE                    0x0000
+#define IEEE802154E_DESC_TYPE_PAYLOAD_IE                   0x8000
 //len field on PAYLOAD/HEADER DESC
-#define IEEE802154E_DESC_LEN_HEADER_IE_MASK                0xFE00
-#define IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK               0xFFE0
-
-#define IEEE802154E_DESC_LEN_HEADER_IE_SHIFT               9
-#define IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT              5
+#define IEEE802154E_DESC_LEN_HEADER_IE_MASK                0x007F
+#define IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK               0x07FF
 
 //groupID/elementID field on PAYLOAD/HEADER DESC
-#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK          0x01FE
-#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK           0x001E
+#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK          0x7F80
+#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK           0x7800
 
-#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT         1
-#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT          1
+#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT         7
+#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT          11
+
+//type field on PAYLOAD/HEADER DESC
+#define IEEE802154E_DESC_TYPE_IE_MASK                      0x8000
+
+#define IEEE802154E_DESC_TYPE_IE_SHIFT                     15
 
 //MLME Sub IE LONG page 83
-#define IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK             0xFFE0
-#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK           0x001E
+#define IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK             0x07FF
+#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK           0x7800
 
-#define IEEE802154E_DESC_LEN_LONG_MLME_IE_SHIFT            5
-#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT          1
+#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT          11
 
 //MLME Sub IE SHORT page 82
-#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK            0xFF00
-#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK          0x00FE
+#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK            0x00FF
+#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK          0x7F00
 
-#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT           8
-#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT         1
+#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT         8
 
 #define IEEE802154E_MLME_SYNC_IE_SUBID                     0x1A
-#define IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT               1
+#define IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT               8
 #define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID           0x1B
-#define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID_SHIFT     1
+#define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID_SHIFT     8
 #define IEEE802154E_MLME_TIMESLOT_IE_SUBID                 0x1c
-#define IEEE802154E_MLME_TIMESLOT_IE_SUBID_SHIFT           1
+#define IEEE802154E_MLME_TIMESLOT_IE_SUBID_SHIFT           8
 #define IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID           0x09
-#define IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID_SHIFT     1
+#define IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID_SHIFT     11
 
 #define IEEE802154E_MLME_IE_GROUPID                        0x01
 #define IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID      0x1E
@@ -219,6 +220,9 @@ typedef struct {
    PORT_RADIOTIMER_WIDTH     radioOnInit;             // when within the slot the radio turns on
    PORT_RADIOTIMER_WIDTH     radioOnTics;             // how many tics within the slot the radio is on
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
+   
+   // time correction
+   int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
 } ieee154e_vars_t;
 
 BEGIN_PACK
@@ -248,6 +252,7 @@ void               ieee154e_init(void);
 PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
+uint16_t           ieee154e_getTimeCorrection(void);
 // events
 void               ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
