@@ -9,7 +9,7 @@
 #define SCHEDULEIEMAXNUMCELLS 3
 
 // subIE shift
-#define MLME_IE_SUBID_SHIFT            1
+#define MLME_IE_SUBID_SHIFT            8
 
 // subIEs identifier
 #define MLME_IE_SUBID_SYNC             0x1A
