@@ -17,6 +17,7 @@
 //-- 02a-TSCH
 #include "adaptive_sync.h"
 #include "IEEE802154E.h"
+#include "ieee802154_security_driver.h"
 //-- 02b-RES
 #include "schedule.h"
 #include "sixtop.h"
@@ -58,6 +59,7 @@ void openstack_init(void) {
    //-- 02a-TSCH
    adaptive_sync_init();
    ieee154e_init();
+   IEEE802154_SECURITY.init();
    //-- 02b-RES
    schedule_init();
    sixtop_init();

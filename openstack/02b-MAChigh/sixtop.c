@@ -14,6 +14,7 @@
 #include "leds.h"
 #include "processIE.h"
 #include "IEEE802154.h"
+#include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
 
@@ -458,7 +459,13 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    // set metadata
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-   
+
+
+   // set l2-security attributes
+   msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
+   msg->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+
    if (msg->l2_payloadIEpresent == FALSE) {
       return sixtop_send_internal(
          msg,
@@ -698,18 +705,13 @@ owerror_t sixtop_send_internal(
    msg->l2_numTxAttempts = 0;
    // transmit with the default TX power
    msg->l1_txPower = TX_POWER;
-   // record the location, in the packet, where the l2 payload starts
-   msg->l2_payload = msg->payload;
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             payloadIEPresent,
-                            IEEE154_SEC_NO_SECURITY,
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
-   // reserve space for 2-byte CRC
-   packetfunctions_reserveFooterSize(msg,2);
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
    return E_SUCCESS;
@@ -831,7 +833,12 @@ port_INLINE void sixtop_sendEB() {
    
    //I has an IE in my payload
    eb->l2_payloadIEpresent = TRUE;
-   
+
+   // set l2-security attributes
+   eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
+   eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   eb->l2_keyIndex        = IEEE802154_SECURITY_K1_KEY_INDEX;
+
    // put in queue for MAC to handle
    sixtop_send_internal(eb,eb->l2_payloadIEpresent);
    
@@ -893,6 +900,11 @@ port_INLINE void sixtop_sendKA() {
    kaPkt->l2_frameType = IEEE154_TYPE_DATA;
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
+   // set l2-security attributes
+   kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   kaPkt->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+
    // put in queue for MAC to handle
    sixtop_send_internal(kaPkt,FALSE);
    
