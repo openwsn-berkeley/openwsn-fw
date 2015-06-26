@@ -49,14 +49,12 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    uint8_t temp_8b;
    uint8_t ielistpresent = IEEE154_IELIST_NO;
    uint8_t frameVersion;
-
    bool    securityEnabled;
-
-   securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
-
    int16_t timeCorrection;
    header_IE_ht header_desc;
    
+   securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
+
    msg->l2_payload = msg->payload; // save the position where to start encrypting if security is enabled 
  
    // General IEs here (those that are carried in all packets)
@@ -91,12 +89,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                frameVersion = IEEE154_FRAMEVERSION;
            }
        }
-  } 
-
-   //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
-   if(securityEnabled){
-      IEEE802154_SECURITY.prependAuxiliarySecurityHeader(msg);
-   }
+  }
 
    if (frameType == IEEE154_TYPE_ACK) {
        timeCorrection = (int16_t)(ieee154e_getTimeCorrection());
@@ -106,7 +99,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        timeCorrection *= US_PER_TICK;
        msg->payload[0] = (uint8_t)((((uint16_t)timeCorrection)   ) & 0xff);
        msg->payload[1] = (uint8_t)((((uint16_t)timeCorrection)>>8) & 0xff);
-       
+
        // add header IE header -- xv poipoi -- pkt is filled in reverse order..
        packetfunctions_reserveHeaderSize(msg,sizeof(header_IE_ht));
        //create the header for ack IE
@@ -117,6 +110,11 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        msg->payload[1] = ((header_desc.length_elementid_type) >> 8) & 0xFF;
    }
    
+   //if security is enabled, the Auxiliary Security Header need to be added to the IEEE802.15.4 MAC header
+   if(securityEnabled){
+      IEEE802154_SECURITY.prependAuxiliarySecurityHeader(msg);
+   }
+
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
    // nextHop address
@@ -327,7 +325,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
        IEEE802154_SECURITY.retrieveAuxiliarySecurityHeader(msg,ieee802514_header);
    }
    else if (ieee802514_header->securityEnabled != IEEE802154_SECURITY_SUPPORTED) { return; }
-   
+
    // remove termination IE accordingly 
    if (ieee802514_header->ieListPresent == TRUE) {
        while(1) {
@@ -351,7 +349,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                // only process header IE here
                len          = temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK;
                gr_elem_id   = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT;
-              
+
                switch(gr_elem_id){
                    case IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID:
                        // timecorrection IE
