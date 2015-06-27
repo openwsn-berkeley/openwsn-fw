@@ -149,9 +149,14 @@ owerror_t iphc_sendFromForwarding(
    // decrement the packet's hop limit
    ipv6_outer_header->hop_limit--;
    
+   if(packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE) {
+       next_header=*((uint8_t*)(msg->payload)); // next_header is nhc ipv6 header
+   } else {
+       next_header=msg->l4_protocol;
+   }
+   
    //prepend Option hop by hop header except when src routing and dst is not 0xffff
    //-- this is a little trick as src routing is using an option header set to 0x00
-   next_header=*((uint8_t*)(msg->payload)); // next_header is nhc ipv6 header
    #ifndef FLOW_LABEL_RPL_DOMAIN
    if (rpl_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE 
        && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE
@@ -520,7 +525,10 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                            msg,
                            ipv6_outer_header,
                            0);
-   
+   if (packetfunctions_isAllRoutersMulticast(&(ipv6_outer_header->dest))){
+       // this is a DIO packet, no extention header, no other ip inner header
+       return;
+   }
    //======================= 2. IPv6 extention header ==========================
    extention_header_length = 0;
    if (ipv6_outer_header->next_header_compressed==TRUE) {
