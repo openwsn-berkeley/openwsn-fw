@@ -52,6 +52,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    bool    securityEnabled;
    int16_t timeCorrection;
    header_IE_ht header_desc;
+   bool    headerIEPresent = FALSE;
    
    securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
 
@@ -73,12 +74,18 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
        // or ternimation IE will be omitted. For example, Keep alive doesn't have
       // any payload, so there is no ternimation IE for it.
        if (msg->length != 0) {
-           //add header termination IE (id=0x7f)
-           ielistpresent = IEEE154_IELIST_YES; // at least I have a termination IE
-           frameVersion  = IEEE154_FRAMEVERSION;
-           packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
-           msg->payload[0] = Header_Payload_TerminationIE        & 0xFF;
-           msg->payload[1] = (Header_Payload_TerminationIE >> 8) & 0xFF;
+           //add header termination IE (id=0x7f)if I have header IE list, OR 
+           // no need for termination IE.
+           if (headerIEPresent == TRUE){
+               ielistpresent = IEEE154_IELIST_YES;
+               frameVersion  = IEEE154_FRAMEVERSION;
+               packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
+               msg->payload[0] = Header_Payload_TerminationIE        & 0xFF;
+               msg->payload[1] = (Header_Payload_TerminationIE >> 8) & 0xFF;
+           } else {
+               // no header IE present, no payload IE, no termination IE
+               frameVersion = IEEE154_FRAMEVERSION_2006;
+           }
        } else {
            // no payload, termination IE is omitted. check whether timeCorrection IE
            // presents. 
