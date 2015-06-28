@@ -362,8 +362,6 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                        
                        ieee802514_header->timeCorrection = timeCorrection;
                        ieee802514_header->headerLength  += len;
-                       // Record the position where we should start decrypting if security is enabled
-                        msg->l2_payload = &msg->payload[ieee802514_header->headerLength];
                        break;
                    default:
                        break;
