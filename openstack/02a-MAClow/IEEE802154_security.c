@@ -694,16 +694,16 @@ uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
    }
 
    switch (KeyIdMode){
-      case 0:
+      case IEEE154_ASH_KEYIDMODE_IMPLICIT:
          auxilary_len = frameCntLength + 1; //only SecLev and FrameCnt
          break;
-      case 1:
+      case IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE:
          auxilary_len = frameCntLength + 1 + 1; //SecLev, FrameCnt, KeyIndex
          break;
-      case 2:
+      case IEEE154_ASH_KEYIDMODE_EXPLICIT_16:
          auxilary_len = frameCntLength + 1 + 3; //SecLev, FrameCnt, KeyIdMode (2 bytes) and KeyIndex
          break;
-      case 3:
+      case IEEE154_ASH_KEYIDMODE_EXPLICIT_64:
          auxilary_len = frameCntLength + 1 + 9; //SecLev, FrameCnt, KeyIdMode (8 bytes) and KeyIndex
          break;
       default:
