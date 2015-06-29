@@ -17,6 +17,7 @@
 #include "techo.h"
 // UDP
 #include "uecho.h"
+#include "uinject.h"
 
 //=========================== variables =======================================
 

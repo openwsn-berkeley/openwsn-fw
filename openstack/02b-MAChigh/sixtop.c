@@ -473,7 +473,7 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    // set l2-security attributes
    msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
    msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
-   msg->l2_keyIndex        = IEEE802154_SECURITY_KEY_INDEX;
+   msg->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
 
    if (msg->l2_payloadIEpresent == FALSE) {
       return sixtop_send_internal(
@@ -718,7 +718,6 @@ owerror_t sixtop_send_internal(
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
                             payloadIEPresent,
-                            msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1, // security enabled
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
@@ -847,7 +846,7 @@ port_INLINE void sixtop_sendEB() {
    // set l2-security attributes
    eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
    eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
-   eb->l2_keyIndex        = IEEE802154_SECURITY_KEY_INDEX;
+   eb->l2_keyIndex        = IEEE802154_SECURITY_K1_KEY_INDEX;
 
    // put in queue for MAC to handle
    sixtop_send_internal(eb,eb->l2_payloadIEpresent);
@@ -913,7 +912,7 @@ port_INLINE void sixtop_sendKA() {
    // set l2-security attributes
    kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
    kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
-   kaPkt->l2_keyIndex        = IEEE802154_SECURITY_KEY_INDEX;
+   kaPkt->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
 
    // put in queue for MAC to handle
    sixtop_send_internal(kaPkt,FALSE);
@@ -1050,7 +1049,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
    //candidate IE header  if type ==0 header IE if type==1 payload IE
    temp_8b = *((uint8_t*)(pkt->payload)+ptr);
    ptr++;
-   temp_16b = (temp_8b<<8) + (*((uint8_t*)(pkt->payload)+ptr));
+   temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
    ptr++;
    *lenIE = ptr;
    if(
@@ -1058,17 +1057,13 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
       IEEE802154E_DESC_TYPE_PAYLOAD_IE
    ){
    //payload IE - last bit is 1
-      len = 
-         (temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK) >> 
-         IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
+      len = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
       gr_elem_id = 
          (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>
          IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT;
    }else {
    //header IE - last bit is 0
-      len = 
-         (temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK)>>
-         IEEE802154E_DESC_LEN_HEADER_IE_SHIFT;
+      len = temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK;
       gr_elem_id = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>
          IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT; 
    }
@@ -1083,7 +1078,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
            //read sub IE header
            temp_8b = *((uint8_t*)(pkt->payload)+ptr);
            ptr = ptr + 1;
-           temp_16b = (temp_8b << 8) + (*((uint8_t*)(pkt->payload)+ptr));
+           temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
            ptr = ptr + 1;
            len = len - 2; //remove header fields len
            if(
@@ -1091,17 +1086,13 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
               IEEE802154E_DESC_TYPE_LONG
               ){
               //long sub-IE - last bit is 1
-              sublen =
-                 (temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK)>>
-                 IEEE802154E_DESC_LEN_LONG_MLME_IE_SHIFT;
+              sublen = temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK;
               subid= 
                  (temp_16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>
                  IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT; 
            } else {
               //short IE - last bit is 0
-              sublen = 
-                 (temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK)>>
-                 IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+              sublen = temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK;
               subid = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>
                  IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
            }

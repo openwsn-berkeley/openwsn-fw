@@ -304,36 +304,30 @@ void packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length) {
 }
 
 //======= packet duplication
-
+// function duplicates a frame from one OpenQueueEntry structure to the other,
+// updating pointers to the new memory location. Used to make a local copy of
+// the frame before transmission (where it can possibly be encrypted). 
 void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* src) {
-   uint8_t offset;
-
    // make a copy of the frame
    memcpy(dst, src, sizeof(OpenQueueEntry_t));
 
    // Calculate where payload starts in the buffer
-   offset = src->payload - src->packet;
-   dst->payload = &dst->packet[offset]; // update pointers
+   dst->payload = &dst->packet[src->payload - src->packet]; // update pointers
 
    // update l2_FrameCounter pointer
-   offset = src->l2_FrameCounter - src->payload;
-   dst->l2_FrameCounter = dst->payload + offset;
+   dst->l2_FrameCounter = dst->payload + (src->l2_FrameCounter - src->payload);
 
    // update l2_ASNpayload pointer
-   offset = src->l2_ASNpayload - src->payload;
-   dst->l2_ASNpayload = dst->payload + offset;
+   dst->l2_ASNpayload = dst->payload + (src->l2_ASNpayload - src->payload);
 
    // update l2_scheduleIE_cellObjects pointer
-   offset = src->l2_scheduleIE_cellObjects - src->payload;
-   dst->l2_scheduleIE_cellObjects = dst->payload + offset;
+   dst->l2_scheduleIE_cellObjects = dst->payload + (src->l2_scheduleIE_cellObjects - src->payload);
 
    // update l2_payload pointer
-   offset = src->l2_payload - src->payload;
-   dst->l2_payload = dst->payload + offset;
+   dst->l2_payload = dst->payload + (src->l2_payload - src->payload);
 
    // update l4_payload pointer
-   offset = src->l4_payload - src->payload;
-   dst->l4_payload = dst->payload + offset;
+   dst->l4_payload = dst->payload + (src->l4_payload - src->payload);
 }
 
 //======= CRC calculation

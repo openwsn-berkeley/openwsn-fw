@@ -98,35 +98,42 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
 #ifdef FLOW_LABEL_RPL_DOMAIN
    forwarding_createFlowLabel(&flow_label,0x00);
 #endif
-   
-   //tengfei: IPHC inner header and NHC IPv6 header will be added at here
-   iphc_prependIPv6Header(
-      msg,
-      IPHC_TF_ELIDED,
-      flow_label,
-      IPHC_NH_INLINE,
-      IANA_ICMPv6,
-      IPHC_HLIM_64,
-      ipv6_outer_header.hop_limit,
-      IPHC_CID_NO,
-      IPHC_SAC_STATELESS,
-      IPHC_SAM_64B,
-      IPHC_M_NO,
-      IPHC_DAC_STATELESS,
-      IPHC_DAM_ELIDED,
-      &(msg->l3_destinationAdd),
-      &(msg->l3_sourceAdd),            
-      PCKTSEND
-   );
-   // preprend NHC ipv6 next header
-   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-   *((uint8_t*)(msg->payload)) = (uint8_t)(NHC_IPv6EXT_ID + \
-                                 (uint8_t)(NHC_EID_IPv6_VAL << 1) + \
-                                 (uint8_t)(NHC_NH_INLINE));
-//   msg->l4_protocol                         = *((uint8_t*)(msg->payload));
-   // for IPHC outer header its next header is option hopByhop header OR NHC ipv6.
-   // both of them are compressed
-   ipv6_outer_header.next_header_compressed = TRUE;
+   // inner header is required only when the destination address is NOT broadcast address
+   if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd)) == FALSE) {
+       //IPHC inner header and NHC IPv6 header will be added at here
+       iphc_prependIPv6Header(
+          msg,
+          IPHC_TF_ELIDED,
+          flow_label,
+          // we should pass the parameter "msg->l4_protocol_compressed" here.
+          // but since currectly the upper layers doesn't set the l4_protocol_compressed
+          // parameter and the OPENQUEUE COMPONEN didn't reset this value either. So using 
+          // "msg->l4_protocol_compressed" here may cause wrong result. 
+          // Using IPHC_NH_INLINE instead temporarily. This should be fixed later.
+          IPHC_NH_INLINE, 
+          msg->l4_protocol,
+          IPHC_HLIM_64,
+          ipv6_outer_header.hop_limit,
+          IPHC_CID_NO,
+          IPHC_SAC_STATELESS,
+          IPHC_SAM_64B,
+          IPHC_M_NO,
+          IPHC_DAC_STATELESS,
+          IPHC_DAM_ELIDED,
+          &(msg->l3_destinationAdd),
+          &(msg->l3_sourceAdd),            
+          PCKTSEND
+       );
+       // preprend NHC ipv6 next header
+       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+       *((uint8_t*)(msg->payload)) = (uint8_t)(NHC_IPv6EXT_ID + \
+                                     (uint8_t)(NHC_EID_IPv6_VAL << 1) + \
+                                     (uint8_t)(NHC_NH_INLINE));
+       //   msg->l4_protocol                         = *((uint8_t*)(msg->payload));
+       // for IPHC outer header its next header is option hopByhop header OR NHC ipv6.
+       // both of them are compressed
+       ipv6_outer_header.next_header_compressed = TRUE;
+   }
 
    return forwarding_send_internal_RoutingTable(
       msg,
@@ -233,10 +240,13 @@ void forwarding_receive(
       ) {
       // this packet is for me, no source routing header.
       // toss ipv6 NHC header
-      packetfunctions_tossHeader(msg,sizeof(uint8_t));
-      msg->l4_protocol = ipv6_inner_header->next_header;
-      // toss iphc inner header
-      packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
+      if (packetfunctions_isBroadcastMulticast(&ipv6_outer_header->dest)==FALSE) {
+          packetfunctions_tossHeader(msg,sizeof(uint8_t));
+          msg->l4_protocol = ipv6_inner_header->next_header;
+          msg->l4_protocol_compressed = ipv6_inner_header->next_header_compressed;
+          // toss iphc inner header
+          packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
+      }
           
       // indicate received packet to upper layer
       switch(msg->l4_protocol) {
@@ -496,6 +506,7 @@ owerror_t forwarding_send_internal_SourceRouting(
       // toss ipv6 NHC header
       packetfunctions_tossHeader(msg,sizeof(uint8_t));
       msg->l4_protocol = ipv6_inner_header->next_header;
+      msg->l4_protocol_compressed = ipv6_inner_header->next_header_compressed;
       // toss iphc inner header
       packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
       

@@ -95,6 +95,16 @@ enum IEEE802154_ash_keyIdMode_enums { // Key Identifier Mode Field
    IEEE154_ASH_KEYIDMODE_EXPLICIT_64      = 3,
 };
 
+enum IEEE802154_ash_FrameCounterSuppression_enums { // Frame Counter Suppression Field
+	IEEE154_ASH_FRAMECOUNTER_PRESENT    = 0,
+	IEEE154_ASH_FRAMECOUNTER_SUPPRESSED = 1,
+};
+
+enum IEEE802154_ash_FrameCounterSize_enums { // Frame Counter Size Field
+	IEEE154_ASH_FRAMECOUNTER_COUNTER    = 0,
+	IEEE154_ASH_FRAMECOUNTER_ASN        = 1,
+};
+
 //=========================== typedef =========================================
 
 typedef struct {
@@ -111,6 +121,7 @@ typedef struct {
    open_addr_t panid;
    open_addr_t dest;
    open_addr_t src;
+   int16_t     timeCorrection;
 } ieee802154_header_iht; //iht for "internal header type"
 
 //=========================== variables =======================================
@@ -122,7 +133,6 @@ typedef struct {
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
                               bool              payloadIEPresent,
-                              bool              securityEnabled,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop);
 

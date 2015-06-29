@@ -1,5 +1,5 @@
 /**
-\brief Dummy IEEE802154 security implementation
+\brief Dummy IEEE802154 security implementation that is linked when security is disabled.
   
 \author Malisa Vucinic <malishav@gmail.com>, June 2015.
 */

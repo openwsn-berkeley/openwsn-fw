@@ -1,10 +1,10 @@
 /**
 \brief Security operations defined by IEEE802.15.4 standard
 
-\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, April 2015.
-\author Giuseppe Piro <giuseppe.piro@poliba.it>,
-\author Gennaro Boggia <gennaro.boggia@poliba.it>,
-\author Luigi Alfredo Grieco <alfredo.grieco@poliba.it>
+\author Savio Sciancalepore <savio.sciancalepore@poliba.it>, June 2015.
+\author Giuseppe Piro <giuseppe.piro@poliba.it>, June 2015
+\author Gennaro Boggia <gennaro.boggia@poliba.it>, June 2015
+\author Luigi Alfredo Grieco <alfredo.grieco@poliba.it>, June 2015
 \author Malisa Vucinic <malishav@gmail.com>, June 2015.
 */
 
@@ -22,9 +22,8 @@
 #include "ieee802154_security_driver.h"
 #include "neighbors.h"
 
-extern const struct ieee802154_security_driver IEEE802154_security;
-
 //=========================== define ==========================================
+
 #define MAXNUMKEYS           MAXNUMNEIGHBORS+1
 
 //=========================== typedef =========================================
@@ -76,8 +75,8 @@ typedef struct{
    m_securityLevelDescriptor SecurityDescriptorEntry[5];
 } m_macSecurityLevelTable;
 
-
 //=========================== variables =======================================
+
 typedef struct{
    macFrameCounter_t       m_macFrameCounter;
    uint8_t                 m_macFrameCounterMode;
@@ -88,8 +87,11 @@ typedef struct{
    m_macKeyTable           MacKeyTable;
    m_macDeviceTable        MacDeviceTable;
    m_macSecurityLevelTable MacSecurityLevelTable;
-   uint8_t                 M_k[16];
+   uint8_t                 Key_1[16];
+   uint8_t                 Key_2[16];
 } ieee802154_security_vars_t;
+
+extern const struct ieee802154_security_driver IEEE802154_security;
 
 //=========================== prototypes ======================================
 

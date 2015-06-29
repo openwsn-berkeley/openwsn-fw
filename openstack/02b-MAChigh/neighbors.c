@@ -507,11 +507,11 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint8_t   prefParentIdx;
    bool      prefParentFound;
    
-   // if I'm a DAGroot, my DAGrank is always 0
+   // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
    if ((idmanager_getIsDAGroot())==TRUE) {
        if (neighbors_vars.myDAGrank == MAXDAGRANK) {
-           // the dagrank is not set through setting command, set rank to zero here 
-           neighbors_vars.myDAGrank=0;   
+           // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here 
+           neighbors_vars.myDAGrank=MINHOPRANKINCREASE;   
        }
        return;
    }
