@@ -921,6 +921,7 @@ const struct ieee802154_security_driver IEEE802154_security = {
    IEEE802154_security_outgoingFrameSecurity,
    IEEE802154_security_incomingFrame,
    IEEE802154_security_authLengthChecking,
+   IEEE802154_security_auxLengthChecking,
 };
 /*---------------------------------------------------------------------------*/
 
