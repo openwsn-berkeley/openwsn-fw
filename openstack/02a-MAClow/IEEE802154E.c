@@ -653,6 +653,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    uint16_t              sublen;
    // flag used for understanding if the slotoffset should be inferred from both ASN and slotframe length
    bool                  f_asn2slotoffset;
+   uint8_t               i; // used for find the index in channel hopping template
    
    ptr=0;
    
@@ -766,7 +767,12 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             infer the asnOffset based on the fact that
             ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
             */
-            ieee154e_vars.asnOffset = ieee154e_vars.freq - 11 - schedule_getChannelOffset();
+            for (i=0;i<16;i++){
+                if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
+                    break;
+                }
+            }
+            ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
          }
          break;
          
@@ -2076,14 +2082,14 @@ different channel offsets in the same slot.
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
-   // comment the following line out to disable channel hopping
+    // comment the following line out to disable channel hopping
     if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
         return ieee154e_vars.singleChannel; // single channel
     } else {
         // channel hopping enabled, use the channel depending on hopping template
         return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%16];
     }
-   //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
+    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
 
 /**
