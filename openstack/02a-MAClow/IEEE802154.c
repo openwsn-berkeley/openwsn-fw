@@ -369,6 +369,9 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
                        
                        ieee802514_header->timeCorrection = timeCorrection;
                        ieee802514_header->headerLength  += len;
+
+                       // Record the position where we should start decrypting the ACK, if security is enabled
+                       msg->l2_payload = &msg->payload[ieee802514_header->headerLength];
                        break;
                    default:
                        break;
@@ -376,6 +379,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
            }
            if (ieee802514_header->headerLength==msg->length) {
                // nothing left, no payloadIE, no payload, this is the end of packet!
+
                ieee802514_header->valid=TRUE;
                return;
            }

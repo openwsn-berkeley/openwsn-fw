@@ -30,6 +30,10 @@ static uint8_t authenticationTagLen(uint8_t sec_level) {
    return (uint8_t) 0;
 }
 
+static uint8_t auxiliaryHeaderLen(uint8_t kid, uint8_t sup, uint8_t size) {
+   return (uint8_t) 0;
+}
+
 /*---------------------------------------------------------------------------*/
 const struct ieee802154_security_driver IEEE802154_dummy_security = {
    init,
@@ -38,6 +42,7 @@ const struct ieee802154_security_driver IEEE802154_dummy_security = {
    outgoingFrame,
    incomingFrame,
    authenticationTagLen,
+   auxiliaryHeaderLen,
 };
 /*---------------------------------------------------------------------------*/
 

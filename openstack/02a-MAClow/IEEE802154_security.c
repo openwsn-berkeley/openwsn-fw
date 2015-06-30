@@ -29,7 +29,7 @@ void IEEE802154_security_getFrameCounter(macFrameCounter_t reference,
 uint8_t IEEE802154_security_authLengthChecking(uint8_t securityLevel);
 
 uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
-                                              bool    frameCounterSuppression,
+                                              uint8_t    frameCounterSuppression,
                                               uint8_t frameCounterSize);
 
 bool IEEE802154_security_incomingKeyUsagePolicyChecking(m_keyDescriptor* keydesc,
@@ -189,12 +189,12 @@ void IEEE802154_security_init(void) {
 */
 void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 
-   bool frameCounterSuppression;
+   uint8_t frameCounterSuppression;
    uint8_t temp8b;
    open_addr_t* temp_keySource;
    uint8_t auxiliaryLength;
 
-   frameCounterSuppression = 1; //the frame counter is carried in the frame
+   frameCounterSuppression = IEEE154_ASH_FRAMECOUNTER_SUPPRESSED; //the frame counter is carried in the frame
 
    //max length of MAC frames
    // length of authentication Tag
@@ -245,7 +245,7 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
    }
 
    //Frame Counter
-   if (frameCounterSuppression== IEEE154_ASH_FRAMECOUNTER_PRESENT){
+   if (frameCounterSuppression == IEEE154_ASH_FRAMECOUNTER_PRESENT){
       //here I have to insert the ASN: I can only reserve the space and
       //save the pointer. The ASN will be added by IEEE802.15.4e
 
@@ -280,7 +280,7 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 \brief Key searching and encryption/authentication operations.
 */
 owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
-   bool frameCounterSuppression;
+   uint8_t frameCounterSuppression;
    m_keyDescriptor* keyDescriptor;
    uint8_t i;
    uint8_t j;
@@ -293,7 +293,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    uint8_t len_m;
 
    //the frame counter is carried in the frame, otherwise 1;
-   frameCounterSuppression = 1;
+   frameCounterSuppression = IEEE154_ASH_FRAMECOUNTER_SUPPRESSED;
 
    //search for a key
    keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
@@ -317,7 +317,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    uint8_t vectASN[5];
    macFrameCounter_t l2_frameCounter;
    ieee154e_getAsn(vectASN);//gets asn from mac layer.
-   if (frameCounterSuppression == 0){//the frame Counter is carried in the frame
+   if (frameCounterSuppression == IEEE154_ASH_FRAMECOUNTER_PRESENT){//the frame Counter is carried in the frame
       //save the frame counter of the current frame
       l2_frameCounter.bytes0and1 = vectASN[0]+256*vectASN[1];
       l2_frameCounter.bytes2and3 = vectASN[2]+256*vectASN[3];
@@ -679,7 +679,7 @@ uint8_t IEEE802154_security_authLengthChecking(uint8_t securityLevel){
 \brief Identification of the length of the IEEE802.15.4 Auxiliary Security Header.
 */
 uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode, 
-                                             bool frameCounterSuppression, 
+                                             uint8_t frameCounterSuppression, 
                                              uint8_t frameCounterSize){
    uint8_t auxilary_len;
    uint8_t frameCntLength;
@@ -694,16 +694,16 @@ uint8_t IEEE802154_security_auxLengthChecking(uint8_t KeyIdMode,
    }
 
    switch (KeyIdMode){
-      case 0:
+      case IEEE154_ASH_KEYIDMODE_IMPLICIT:
          auxilary_len = frameCntLength + 1; //only SecLev and FrameCnt
          break;
-      case 1:
+      case IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE:
          auxilary_len = frameCntLength + 1 + 1; //SecLev, FrameCnt, KeyIndex
          break;
-      case 2:
+      case IEEE154_ASH_KEYIDMODE_EXPLICIT_16:
          auxilary_len = frameCntLength + 1 + 3; //SecLev, FrameCnt, KeyIdMode (2 bytes) and KeyIndex
          break;
-      case 3:
+      case IEEE154_ASH_KEYIDMODE_EXPLICIT_64:
          auxilary_len = frameCntLength + 1 + 9; //SecLev, FrameCnt, KeyIdMode (8 bytes) and KeyIndex
          break;
       default:
@@ -921,6 +921,7 @@ const struct ieee802154_security_driver IEEE802154_security = {
    IEEE802154_security_outgoingFrameSecurity,
    IEEE802154_security_incomingFrame,
    IEEE802154_security_authLengthChecking,
+   IEEE802154_security_auxLengthChecking,
 };
 /*---------------------------------------------------------------------------*/
 
