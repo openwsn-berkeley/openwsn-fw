@@ -165,7 +165,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    //poipoi xv IE list present
    temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
    temp_8b             |= IEEE154_FRAMEVERSION_2012       << IEEE154_FCF_FRAME_VERSION;
-   temp_8b             |= IEEE154_SUPPRESSION_YES         << IEEE154_FCF_DSN_SUPPRESSION;
+   temp_8b             |= IEEE154_DSN_SUPPRESSION_YES     << IEEE154_FCF_DSN_SUPPRESSION;
      
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)

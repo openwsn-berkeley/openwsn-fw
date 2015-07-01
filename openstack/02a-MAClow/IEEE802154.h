@@ -51,8 +51,8 @@ enum IEEE802154_fcf_ielist_enums {
 };
 
 enum IEEE802154_fcf_dsn_enums {
-   IEEE154_SUPPRESSION_NO              = 0,
-   IEEE154_SUPPRESSION_YES             = 1,
+   IEEE154_DSN_SUPPRESSION_NO          = 0,
+   IEEE154_DSN_SUPPRESSION_YES         = 1,
 };
 
 enum IEEE802154_fcf_pending_enums {
