@@ -15,12 +15,15 @@
 #define TIMER_DIO_TIMEOUT         1700
 #define TIMER_DAO_TIMEOUT         10000
 
-#define MOP_DIO_A                 1<<5
-#define MOP_DIO_B                 1<<4
+// Non-Storing Mode of Operation (1)
+#define MOP_DIO_A                 0<<5
+#define MOP_DIO_B                 0<<4
 #define MOP_DIO_C                 1<<3
+// least preferred (0)
 #define PRF_DIO_A                 0<<2
 #define PRF_DIO_B                 0<<1
 #define PRF_DIO_C                 0<<0
+// Grounded (1)
 #define G_DIO                     1<<7
 
 #define FLAG_DAO_A                0<<0
@@ -67,7 +70,7 @@ enum{
 */
 static const uint8_t all_routers_multicast[] = {
    0xff, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, \
-   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02
+   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1a
 };
 
 //=========================== typedef =========================================
