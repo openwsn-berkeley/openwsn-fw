@@ -222,7 +222,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    ieee802514_header->frameVersion   = (temp_8b >> IEEE154_FCF_FRAME_VERSION      ) & 0x03;//2b
    ieee802514_header->dsn_suppressed = (temp_8b >> IEEE154_FCF_DSN_SUPPRESSION    ) & 0x01;//1b
 
-   if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
+   if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION_2012){
        return; //invalid packet accordint to p.64 IEEE15.4e
    }
    
@@ -322,7 +322,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
       // no need for a default, since case would have been caught above
    }
    
-   if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
+   if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION_2012){
        return; //invalid packet accordint to p.64 IEEE15.4e
    }
 
