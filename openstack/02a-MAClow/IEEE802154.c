@@ -62,7 +62,6 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    // add termination IE accordingly 
    if (payloadIEPresent == TRUE) {
        ielistpresent = IEEE154_IELIST_YES; 
-//       frameVersion  = IEEE154_FRAMEVERSION;
        //add header termination IE (id=0x7e)
        packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
        msg->payload[0] = Header_PayloadIE_TerminationIE         & 0xFF;
@@ -78,7 +77,6 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
            // no need for termination IE.
            if (headerIEPresent == TRUE){
                ielistpresent = IEEE154_IELIST_YES;
-//               frameVersion  = IEEE154_FRAMEVERSION;
                packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
                msg->payload[0] = Header_Payload_TerminationIE        & 0xFF;
                msg->payload[1] = (Header_Payload_TerminationIE >> 8) & 0xFF;
@@ -90,10 +88,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
            // no payload, termination IE is omitted. check whether timeCorrection IE
            // presents. 
            if (frameType != IEEE154_TYPE_ACK) {
-//               frameVersion = IEEE154_FRAMEVERSION_2006;
            } else {
                ielistpresent = IEEE154_IELIST_YES; // I will have a timeCorrection IE later
-//               frameVersion = IEEE154_FRAMEVERSION;
            }
        }
   }
@@ -146,9 +142,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    }
    // destpan -- se page 41 of 15.4-2011 std. DEST PANID only sent as it is equal to SRC PANID
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
-//   //dsn
-//   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-//   *((uint8_t*)(msg->payload)) = sequenceNumber;
+   
+   //dsn is suppressed
+
    //fcf (2nd byte)
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
    temp_8b              = 0;
@@ -168,7 +164,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    temp_8b             |= IEEE154_ADDR_EXT                << IEEE154_FCF_SRC_ADDR_MODE;
    //poipoi xv IE list present
    temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
-   temp_8b             |= IEEE154_FRAMEVERSION            << IEEE154_FCF_FRAME_VERSION;
+   temp_8b             |= IEEE154_FRAMEVERSION_2012       << IEEE154_FCF_FRAME_VERSION;
    temp_8b             |= IEEE154_SUPPRESSION_YES         << IEEE154_FCF_DSN_SUPPRESSION;
      
    *((uint8_t*)(msg->payload)) = temp_8b;

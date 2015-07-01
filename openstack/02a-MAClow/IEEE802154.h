@@ -29,7 +29,7 @@ enum IEEE802154_fcf_enums {
 enum IEEE802154_fcf_frameversion_enums {
    IEEE154_FRAMEVERSION_2003           = 0, //ieee154-2003
    IEEE154_FRAMEVERSION_2006           = 1, //ieee154-2006
-   IEEE154_FRAMEVERSION                = 2, //ieee154
+   IEEE154_FRAMEVERSION_2012           = 2, //ieee154e-2012
 };
 
 enum IEEE802154_fcf_type_enums {
