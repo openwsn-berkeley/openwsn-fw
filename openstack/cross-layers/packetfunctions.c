@@ -130,7 +130,7 @@ bool packetfunctions_isAllRoutersMulticast(open_addr_t* address) {
       address->addr_128b[12] == 0x00 &&
       address->addr_128b[13] == 0x00 &&
       address->addr_128b[14] == 0x00 &&
-      address->addr_128b[15] == 0x02
+      address->addr_128b[15] == 0x1a
    ) {
       return TRUE;
    }
