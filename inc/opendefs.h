@@ -24,9 +24,6 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_MINOR     9
 #define OPENWSN_VERSION_PATCH     0
 
-//to delimit the implementation of draft-thubert-6man-flow-label-for-rpl-03
-#define FLOW_LABEL_RPL_DOMAIN 1
-
 #ifndef TRUE
 #define TRUE 1
 #endif
