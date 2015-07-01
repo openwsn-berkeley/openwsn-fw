@@ -19,6 +19,8 @@
 #define IEEE802154_SECURITY_K1_KEY_INDEX     1
 #define IEEE802154_SECURITY_K2_KEY_INDEX     2
 #define IEEE802154_SECURITY_TAG_LEN          IEEE802154_SECURITY.authenticationTagLen(IEEE802154_SECURITY_LEVEL)
+#define IEEE802154_SECURITY_HEADER_LEN       IEEE802154_SECURITY.auxiliaryHeaderLen(IEEE802154_SECURITY_KEYIDMODE, IEEE154_ASH_FRAMECOUNTER_SUPPRESSED, 5) // For TSCH we always use implicit 5 byte ASN as Frame Counter
+#define IEEE802154_SECURITY_TOTAL_OVERHEAD   IEEE802154_SECURITY_TAG_LEN + IEEE802154_SECURITY_HEADER_LEN
 #else /* L2_SECURITY_ACTIVE */
 #define IEEE802154_SECURITY                  IEEE802154_dummy_security        // dummy implementation that always returns success
 #define IEEE802154_SECURITY_SUPPORTED        0
@@ -28,6 +30,8 @@
 #define IEEE802154_SECURITY_K1_KEY_INDEX     0
 #define IEEE802154_SECURITY_K2_KEY_INDEX     0
 #define IEEE802154_SECURITY_TAG_LEN          0
+#define IEEE802154_SECURITY_HEADER_LEN       0
+#define IEEE802154_SECURITY_TOTAL_OVERHEAD   0
 #endif /* L2_SECURITY_ACTIVE */
 
 //=========================== module variables ================================
@@ -45,6 +49,8 @@ struct ieee802154_security_driver {
    owerror_t (* incomingFrame)(OpenQueueEntry_t* msg);
 
    uint8_t (* authenticationTagLen)(uint8_t);
+
+   uint8_t (* auxiliaryHeaderLen)(uint8_t keyIdMode, uint8_t frameCounterSuppression, uint8_t frameCounterSize);
 
 }; // struct ieee802154_security_driver 
 
