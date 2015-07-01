@@ -22,13 +22,14 @@ enum IEEE802154_fcf_enums {
    IEEE154_FCF_DEST_ADDR_MODE          = 2,
    IEEE154_FCF_FRAME_VERSION           = 4,
    IEEE154_FCF_SRC_ADDR_MODE           = 6,
+   IEEE154_FCF_DSN_SUPPRESSION         = 0,
 };
 
 
 enum IEEE802154_fcf_frameversion_enums {
    IEEE154_FRAMEVERSION_2003           = 0, //ieee154-2003
    IEEE154_FRAMEVERSION_2006           = 1, //ieee154-2006
-   IEEE154_FRAMEVERSION                = 2, //ieee154
+   IEEE154_FRAMEVERSION_2012           = 2, //ieee154e-2012
 };
 
 enum IEEE802154_fcf_type_enums {
@@ -47,6 +48,11 @@ enum IEEE802154_fcf_sec_enums {
 enum IEEE802154_fcf_ielist_enums {
    IEEE154_IELIST_NO                   = 0,
    IEEE154_IELIST_YES                  = 1,
+};
+
+enum IEEE802154_fcf_dsn_enums {
+   IEEE154_DSN_SUPPRESSION_NO          = 0,
+   IEEE154_DSN_SUPPRESSION_YES         = 1,
 };
 
 enum IEEE802154_fcf_pending_enums {
@@ -118,6 +124,7 @@ typedef struct {
    bool        ieListPresent;
    uint8_t     frameVersion;
    uint8_t     dsn;
+   bool        dsn_suppressed;
    open_addr_t panid;
    open_addr_t dest;
    open_addr_t src;
