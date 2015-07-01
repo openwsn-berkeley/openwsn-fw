@@ -346,6 +346,10 @@ void sendDIO() {
       sizeof(icmpv6rpl_dio_ht)
    );
    
+   // reverse the rank bytes order in Big Endian
+   *(msg->payload+2) = (icmpv6rpl_vars.dio.rank >> 8) & 0xFF;
+   *(msg->payload+3) = icmpv6rpl_vars.dio.rank        & 0xFF;
+   
    //===== ICMPv6 header
    packetfunctions_reserveHeaderSize(msg,sizeof(ICMPv6_ht));
    ((ICMPv6_ht*)(msg->payload))->type       = msg->l4_sourcePortORicmpv6Type;
