@@ -48,7 +48,9 @@ if env['l2_security']==1:
 if env['goldenImage']=='sniffer':
     env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_SNIFFER')
 else:
-    env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_ROOT')
+    if env['goldenImage']=='root':
+        env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_ROOT')
+        
 
 if   env['toolchain']=='mspgcc':
     
