@@ -127,17 +127,25 @@ owerror_t iphc_sendFromForwarding(
    } else {
      //not the same prefix. so the packet travels to another network
      //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
-     if(ipv6_outer_header->next_header!=IANA_IPv6ROUTE){ 
-      sam = IPHC_SAM_128B;
-      dam = IPHC_DAM_128B;
-      p_dest = &(msg->l3_destinationAdd);
-      p_src = &(msg->l3_sourceAdd);
-     }else{
-       //source routing
-      sam = IPHC_SAM_128B;
-      dam = IPHC_DAM_ELIDED; //poipoi xv not true, should not be elided.
-      p_dest = NULL;
-      p_src = &(msg->l3_sourceAdd);
+     if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
+         if(ipv6_outer_header->next_header!=IANA_IPv6ROUTE){ 
+          sam = IPHC_SAM_128B;
+          dam = IPHC_DAM_128B;
+          p_dest = &(msg->l3_destinationAdd);
+          p_src = &(msg->l3_sourceAdd);
+         }else{
+           //source routing
+          sam = IPHC_SAM_128B;
+          dam = IPHC_DAM_ELIDED; //poipoi xv not true, should not be elided.
+          p_dest = NULL;
+          p_src = &(msg->l3_sourceAdd);
+         }
+     } else {
+          // this is DIO packet, using link local address for source address
+          sam = IPHC_SAM_16B;
+          dam = IPHC_DAM_128B;
+          p_dest = &(msg->l3_destinationAdd);
+          p_src = &(msg->l3_sourceAdd);
      }
    }
    //check if we are forwarding a packet and it comes with the next header compressed. We want to preserve that state in the following hop.
