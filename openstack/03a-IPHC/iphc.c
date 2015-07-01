@@ -132,7 +132,7 @@ owerror_t iphc_sendFromForwarding(
    } else {
      //not the same prefix. so the packet travels to another network
      //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
-     if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE) {
+     if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
          if(ipv6_outer_header->next_header!=IANA_IPv6ROUTE){ 
           sam = IPHC_SAM_128B;
           dam = IPHC_DAM_128B;
@@ -171,7 +171,6 @@ owerror_t iphc_sendFromForwarding(
    
    //prepend Option hop by hop header except when src routing and dst is not 0xffff
    //-- this is a little trick as src routing is using an option header set to 0x00
-   #ifndef FLOW_LABEL_RPL_DOMAIN
    if (rpl_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE 
        && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE
        ){
@@ -179,17 +178,8 @@ owerror_t iphc_sendFromForwarding(
       //change nh to point to the newly added header
       next_header=IANA_IPv6HOPOPT;// use 0x00 as NH to indicate option header -- see rfc 2460
    }
-   #endif
    //then regular header
 
-#ifdef FLOW_LABEL_RPL_DOMAIN
-   if(ipv6_outer_header->next_header!=IANA_IPv6ROUTE  && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE)   {
-	   //only for upstream traffic and not DIOs
-	   tf=IPHC_TF_3B;
-   }else {
-	   tf=IPHC_TF_ELIDED;
-   }
-#endif
 
    if (iphc_prependIPv6Header(msg,
             tf,
@@ -883,7 +873,6 @@ void iphc_prependIPv6HopByHopHeader(
       uint8_t           nh,
       rpl_option_ht*    rpl_option
    ){
-#ifndef FLOW_LABEL_RPL_DOMAIN
    // RPL option
    packetfunctions_reserveHeaderSize(msg,sizeof(rpl_option_ht));
    memcpy(msg->payload,rpl_option,sizeof(rpl_option_ht));
@@ -915,7 +904,6 @@ void iphc_prependIPv6HopByHopHeader(
             (errorparameter_t)nh
          );
    }
-#endif
 }
 
 /**
@@ -932,7 +920,6 @@ void iphc_retrieveIPv6HopByHopHeader(
       ipv6_hopbyhop_iht*     hopbyhop_header,
       rpl_option_ht*         rpl_option
    ){
-#ifndef FLOW_LABEL_RPL_DOMAIN
    uint8_t temp_8b;
    
    // initialize the header length (will increment at each field)
@@ -1009,5 +996,4 @@ void iphc_retrieveIPv6HopByHopHeader(
           }
       }
    }
-#endif
 }
