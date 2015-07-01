@@ -62,7 +62,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    // add termination IE accordingly 
    if (payloadIEPresent == TRUE) {
        ielistpresent = IEEE154_IELIST_YES; 
-       frameVersion  = IEEE154_FRAMEVERSION;
+//       frameVersion  = IEEE154_FRAMEVERSION;
        //add header termination IE (id=0x7e)
        packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
        msg->payload[0] = Header_PayloadIE_TerminationIE         & 0xFF;
@@ -78,7 +78,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
            // no need for termination IE.
            if (headerIEPresent == TRUE){
                ielistpresent = IEEE154_IELIST_YES;
-               frameVersion  = IEEE154_FRAMEVERSION;
+//               frameVersion  = IEEE154_FRAMEVERSION;
                packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
                msg->payload[0] = Header_Payload_TerminationIE        & 0xFF;
                msg->payload[1] = (Header_Payload_TerminationIE >> 8) & 0xFF;
@@ -90,10 +90,10 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
            // no payload, termination IE is omitted. check whether timeCorrection IE
            // presents. 
            if (frameType != IEEE154_TYPE_ACK) {
-               frameVersion = IEEE154_FRAMEVERSION_2006;
+//               frameVersion = IEEE154_FRAMEVERSION_2006;
            } else {
                ielistpresent = IEEE154_IELIST_YES; // I will have a timeCorrection IE later
-               frameVersion = IEEE154_FRAMEVERSION;
+//               frameVersion = IEEE154_FRAMEVERSION;
            }
        }
   }
@@ -146,9 +146,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    }
    // destpan -- se page 41 of 15.4-2011 std. DEST PANID only sent as it is equal to SRC PANID
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
-   //dsn
-   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-   *((uint8_t*)(msg->payload)) = sequenceNumber;
+//   //dsn
+//   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+//   *((uint8_t*)(msg->payload)) = sequenceNumber;
    //fcf (2nd byte)
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
    temp_8b              = 0;
@@ -168,7 +168,8 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    temp_8b             |= IEEE154_ADDR_EXT                << IEEE154_FCF_SRC_ADDR_MODE;
    //poipoi xv IE list present
    temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
-   temp_8b             |= frameVersion                    << IEEE154_FCF_FRAME_VERSION;
+   temp_8b             |= IEEE154_FRAMEVERSION            << IEEE154_FCF_FRAME_VERSION;
+   temp_8b             |= IEEE154_SUPPRESSION_YES         << IEEE154_FCF_DSN_SUPPRESSION;
      
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)
@@ -223,6 +224,7 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
    //poipoi xv IE list present
    ieee802514_header->ieListPresent  = (temp_8b >> IEEE154_FCF_IELIST_PRESENT     ) & 0x01;//1b
    ieee802514_header->frameVersion   = (temp_8b >> IEEE154_FCF_FRAME_VERSION      ) & 0x03;//2b
+   ieee802514_header->dsn_suppressed = (temp_8b >> IEEE154_FCF_DSN_SUPPRESSION    ) & 0x01;//1b
 
    if (ieee802514_header->ieListPresent==TRUE && ieee802514_header->frameVersion!=IEEE154_FRAMEVERSION){
        return; //invalid packet accordint to p.64 IEEE15.4e
@@ -261,10 +263,14 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
          return; // this is an invalid packet, return
    }
    ieee802514_header->headerLength += 1;
-   // sequenceNumber
-   if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
-   ieee802514_header->dsn  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
-   ieee802514_header->headerLength += 1;
+   
+   if (ieee802514_header->dsn_suppressed==FALSE) {
+       // sequenceNumber
+       if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
+       ieee802514_header->dsn  = *((uint8_t*)(msg->payload)+ieee802514_header->headerLength);
+       ieee802514_header->headerLength += 1;
+   }
+   
    // panID
    if (ieee802514_header->headerLength>msg->length) { return; } // no more to read!
    packetfunctions_readAddress(((uint8_t*)(msg->payload)+ieee802514_header->headerLength),
