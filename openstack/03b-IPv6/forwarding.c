@@ -39,9 +39,7 @@ void      forwarding_createRplOption(
    uint8_t              flags
 );
 
-#ifdef FLOW_LABEL_RPL_DOMAIN
-void forwarding_createFlowLabel(uint32_t* flow_label,uint8_t flags);
-#endif
+
 //=========================== public ==========================================
 
 /**
@@ -95,9 +93,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
       0x00              // flags
    );
 
-#ifdef FLOW_LABEL_RPL_DOMAIN
-   forwarding_createFlowLabel(&flow_label,0x00);
-#endif
+
    // inner header is required only when the destination address is NOT broadcast address
    if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd)) == FALSE) {
        //IPHC inner header and NHC IPv6 header will be added at here
@@ -280,14 +276,9 @@ void forwarding_receive(
       if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
          //check if flow label rpl header
-    	 #ifdef FLOW_LABEL_RPL_DOMAIN             
-             flags = (uint8_t)((uint32_t)((ipv6_outer_header->flow_label)>>16)&0xFF);
-             senderRank = (uint16_t)((uint32_t)(ipv6_outer_header->flow_label)>>8)&0xFFFF;
-             senderRank = senderRank*MINHOPRANKINCREASE;//shift it according to HopRank Increase
-         #else
-    	     flags = rpl_option->flags;
-    	     senderRank = rpl_option->senderRank;
-    	 #endif
+
+ 	     flags = rpl_option->flags;
+  	     senderRank = rpl_option->senderRank;
 
          if ((flags & O_FLAG)!=0){
             // wrong direction
@@ -303,15 +294,9 @@ void forwarding_receive(
          
 
          if (senderRank < neighbors_getMyDAGrank()){
-            // loop
-            
+            // loop detected
             // set flag
-            #ifdef FLOW_LABEL_RPL_DOMAIN
-        	    flags |= R_FLAG;
-        	    ipv6_outer_header->flow_label|= ((uint32_t)flags<<16);
-            #else
-        	    rpl_option->flags |= R_FLAG;
-            #endif
+       	    rpl_option->flags |= R_FLAG;
 
             // log error
             openserial_printError(
@@ -324,10 +309,6 @@ void forwarding_receive(
          
 
          forwarding_createRplOption(rpl_option, rpl_option->flags);
-         #ifdef FLOW_LABEL_RPL_DOMAIN
-         // do not recreate flow label, relay the same but adding current flags
-         forwarding_createFlowLabel(&(ipv6_outer_header->flow_label),flags);
-         #endif
          // resend as if from upper layer
          if (
                forwarding_send_internal_RoutingTable(
@@ -689,14 +670,3 @@ void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
    rpl_option->senderRank         = neighbors_getMyDAGrank();
 }
 
-#ifdef FLOW_LABEL_RPL_DOMAIN
-void forwarding_createFlowLabel(uint32_t* flow_label,uint8_t flags){
-     uint8_t instanceId,flrank;
-     uint16_t rank;
-
-     instanceId=icmpv6rpl_getRPLIntanceID();
-     rank=neighbors_getMyDAGrank();
-     flrank=(uint8_t)(rank/MINHOPRANKINCREASE);
-     *flow_label = (uint32_t)instanceId | ((uint32_t)flrank<<8) | (uint32_t)flags<<16;
-}
-#endif

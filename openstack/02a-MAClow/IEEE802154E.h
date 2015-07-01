@@ -170,12 +170,12 @@ enum ieee154e_atomicdurations_enum {
 #endif
 };
 
-//shift of bytes in the linkOption bitmap
+//shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
 enum ieee154e_linkOption_enum {
-   FLAG_TX_S                 = 7,
-   FLAG_RX_S                 = 6,
-   FLAG_SHARED_S             = 5,
-   FLAG_TIMEKEEPING_S        = 4,   
+   FLAG_TX_S                 = 0,
+   FLAG_RX_S                 = 1,
+   FLAG_SHARED_S             = 2,
+   FLAG_TIMEKEEPING_S        = 3,   
 };
 
 // FSM timer durations (combinations of atomic durations)

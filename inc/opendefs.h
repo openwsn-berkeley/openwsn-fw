@@ -30,10 +30,6 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define GD_TYPE_ROOT         1 // dagroot
 #define GD_TYPE_SNIFFER      2 // sniffer
 
-
-//to delimit the implementation of draft-thubert-6man-flow-label-for-rpl-03
-#define FLOW_LABEL_RPL_DOMAIN 1
-
 #ifndef TRUE
 #define TRUE 1
 #endif

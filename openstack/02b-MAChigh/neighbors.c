@@ -435,12 +435,16 @@ The fields which are updated are:
 */
 void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
    uint8_t          i;
+   uint8_t          temp_8b;
   
    // take ownership over the packet
    msg->owner = COMPONENT_NEIGHBORS;
    
    // update rank of that neighbor in table
    neighbors_vars.dio = (icmpv6rpl_dio_ht*)(msg->payload);
+   // retrieve rank
+   temp_8b            = *(msg->payload+2);
+   neighbors_vars.dio->rank = (temp_8b << 8) + *(msg->payload+3);
    if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
