@@ -123,7 +123,7 @@ void sixtop_init() {
    sixtop_vars.dsn                = 0;
    sixtop_vars.mgtTaskCounter     = 0;
    sixtop_vars.kaPeriod           = MAXKAPERIOD;
-   sixtop_vars.ebPeriod           = EBTIMEOUT;
+   sixtop_vars.ebPeriod           = EBPERIOD;
    
    sixtop_vars.maintenanceTimerId = opentimers_start(
       sixtop_vars.periodMaintenance,
@@ -752,15 +752,15 @@ void timer_sixtop_management_fired(void) {
    
    switch (sixtop_vars.mgtTaskCounter) {
       case 0:
-         // called every EBTIMEOUT seconds
+         // called every EBPERIOD seconds
          sixtop_sendEB();
          break;
       case 1:
-         // called every EBTIMEOUT seconds
+         // called every EBPERIOD seconds
          neighbors_removeOld();
          break;
       case 2:
-         // called every EBTIMEOUT seconds
+         // called every EBPERIOD seconds
          entry = schedule_statistic_poorLinkQuality();
          if (
              entry       != NULL                        && \
@@ -772,7 +772,7 @@ void timer_sixtop_management_fired(void) {
              sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
          }
       default:
-         // called every second, except third times every EBTIMEOUT seconds
+         // called every second, except third times every EBPERIOD seconds
          sixtop_sendKA();
          break;
    }
