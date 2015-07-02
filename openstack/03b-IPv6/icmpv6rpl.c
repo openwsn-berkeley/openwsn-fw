@@ -258,23 +258,16 @@ void icmpv6rpl_timer_DIO_cb(opentimer_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DIO_task() {
-   
-   // update the delayDIO
-   icmpv6rpl_vars.delayDIO = (icmpv6rpl_vars.delayDIO+1)%5;
-   
-   // check whether we need to send DIO
-   if (icmpv6rpl_vars.delayDIO==0) {
       
-      // send DIO
-      sendDIO();
-      
-      // arm the DIO timer with this new value
-      opentimers_setPeriod(
-         icmpv6rpl_vars.timerIdDIO,
-         TIME_MS,
-         icmpv6rpl_vars.dioPeriod
-      );
-   }
+    // send DIO
+    sendDIO();
+    
+    // arm the DIO timer with this new value
+    opentimers_setPeriod(
+       icmpv6rpl_vars.timerIdDIO,
+       TIME_MS,
+       icmpv6rpl_vars.dioPeriod
+    );
 }
 
 /**
@@ -380,23 +373,16 @@ void icmpv6rpl_timer_DAO_cb(opentimer_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DAO_task() {
-   
-   // update the delayDAO
-   icmpv6rpl_vars.delayDAO = (icmpv6rpl_vars.delayDAO+1)%5;
-   
-   // check whether we need to send DAO
-   if (icmpv6rpl_vars.delayDAO==0) {
-      
-      // send DAO
-      sendDAO();
-      
-      // arm the DAO timer with this new value
-      opentimers_setPeriod(
-         icmpv6rpl_vars.timerIdDAO,
-         TIME_MS,
-         icmpv6rpl_vars.daoPeriod
-      );
-   }
+    
+   // send DAO
+   sendDAO();
+  
+   // arm the DAO timer with this new value
+   opentimers_setPeriod(
+      icmpv6rpl_vars.timerIdDAO,
+      TIME_MS,
+      icmpv6rpl_vars.daoPeriod
+   );
 }
 
 /**
@@ -563,7 +549,7 @@ void sendDAO() {
 }
 
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
-    icmpv6rpl_vars.dioPeriod = dioPeriod/5; // delayDIO will skip 4 times in 5 dio period
+    icmpv6rpl_vars.dioPeriod = dioPeriod;
     opentimers_setPeriod(
         icmpv6rpl_vars.timerIdDIO,
         TIME_MS,
@@ -572,7 +558,7 @@ void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
 }
 
 void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
-    icmpv6rpl_vars.daoPeriod = daoPeriod/5; // delayDAO will skip 4 times in 5 dao period
+    icmpv6rpl_vars.daoPeriod = daoPeriod;
     opentimers_setPeriod(
         icmpv6rpl_vars.timerIdDAO,
         TIME_MS,
