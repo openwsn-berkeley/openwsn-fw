@@ -268,9 +268,6 @@ void icmpv6rpl_timer_DIO_task() {
       // send DIO
       sendDIO();
       
-      // pick a new pseudo-random periodDIO
-//      icmpv6rpl_vars.periodDIO = TIMER_DIO_TIMEOUT+(openrandom_get16b()&0xff);
-      
       // arm the DIO timer with this new value
       opentimers_setPeriod(
          icmpv6rpl_vars.timerIdDIO,
@@ -392,9 +389,6 @@ void icmpv6rpl_timer_DAO_task() {
       
       // send DAO
       sendDAO();
-      
-      // pick a new pseudo-random periodDAO
-//      icmpv6rpl_vars.periodDAO = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
       
       // arm the DAO timer with this new value
       opentimers_setPeriod(
