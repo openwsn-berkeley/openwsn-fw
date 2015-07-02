@@ -50,6 +50,8 @@ if env['goldenImage']=='sniffer':
 else:
     if env['goldenImage']=='root':
         env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_ROOT')
+    else:
+        env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_NONE')
         
 
 if   env['toolchain']=='mspgcc':
