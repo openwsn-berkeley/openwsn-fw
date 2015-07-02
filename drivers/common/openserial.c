@@ -169,7 +169,7 @@ owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channe
    DISABLE_INTERRUPTS();
    openserial_vars.outputBufFilled  = TRUE;
    outputHdlcOpen();
-   outputHdlcWrite(SERFRAME_MOTE2PC_PACKET);
+   outputHdlcWrite(SERFRAME_MOTE2PC_SNIFFED_PACKET);
    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
    outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
    for (i=0;i<length;i++){

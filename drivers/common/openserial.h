@@ -48,7 +48,7 @@ enum {
 #define SERFRAME_MOTE2PC_ERROR              ((uint8_t)'E')
 #define SERFRAME_MOTE2PC_CRITICAL           ((uint8_t)'C')
 #define SERFRAME_MOTE2PC_REQUEST            ((uint8_t)'R')
-#define SERFRAME_MOTE2PC_PACKET             ((uint8_t)'P')
+#define SERFRAME_MOTE2PC_SNIFFED_PACKET     ((uint8_t)'P')
 
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT            ((uint8_t)'R')
