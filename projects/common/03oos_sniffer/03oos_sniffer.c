@@ -166,7 +166,7 @@ void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod) {return;}
 void neighbors_setMyDAGrank(uint16_t rank) {return;}
 void sixtop_setKaPeriod(uint16_t kaPeriod) {return;}
 void ieee154e_setIsSecurityEnabled(bool isEnabled) {return;}
-void schedule_setCustomFrameLength(uint16_t frameLength) {return;}
+void schedule_setFrameLength(uint16_t frameLength) {return;}
 void icmpv6rpl_writeDODAGid(uint8_t* dodagid) {return;}
 void ieee154e_setIsAckEnabled(bool isEnabled) {return;}
 void ieee154e_getAsn(uint8_t* array) {return;}
