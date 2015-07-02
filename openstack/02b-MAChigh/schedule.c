@@ -35,7 +35,7 @@ void schedule_init() {
    }
    schedule_vars.backoffExponent = MINBE-1;
    schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
-   schedule_vars.customFrameLength = SUPERFRAME_LENGTH;
+   schedule_vars.customFrameLength = SLOTFRAME_LENGTH;
    
    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    if (idmanager_getIsDAGroot()==TRUE) {
