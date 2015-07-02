@@ -4,8 +4,8 @@
 \author Tengfei Chang <tengfei.chang@eecs.berkeley.edu>, June 2015.
 */
 
-#ifndef __openwsn_H
-#define __openwsn_H
+#ifndef __03OOS_SNIFFER_H
+#define __03OOS_SNIFFER_H
 
 #include "opendefs.h"
 

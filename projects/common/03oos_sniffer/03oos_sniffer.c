@@ -94,6 +94,7 @@ int mote_main(void) {
 
 //=========================== interface =======================================
 void sniffer_setListeningChannel(uint8_t channel){
+    
     while(app_vars.flag != APP_FLAG_IDLE);
     radio_rfOff();
     radio_rfOn();
@@ -106,6 +107,7 @@ void sniffer_setListeningChannel(uint8_t channel){
 //=========================== callbacks =======================================
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
+    
    app_vars.flag |= APP_FLAG_START_FRAME;
    // led
    leds_error_on();
@@ -135,6 +137,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 }
 
 void cb_timer(void) {
+    
    app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
    if (app_vars.outputOrInput == 1) {
        openserial_stop();
@@ -149,10 +152,13 @@ void cb_timer(void) {
 
 // ================================ task =======================================
 void task_uploadPacket(){
+    
     openserial_printPacket(&(app_vars.packet[0]),app_vars.packet_len,app_vars.channel);
 }
 // ================================= stubbing ==================================
+
 void openbridge_triggerData(){return;}
+
 void sixtop_setEBPeriod(uint8_t ebPeriod){return;}
 void ieee154e_setSingleChannel(uint8_t channel){return;}
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod) {return;}
