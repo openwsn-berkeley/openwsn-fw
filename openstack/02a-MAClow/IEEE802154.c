@@ -141,7 +141,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    // destpan -- se page 41 of 15.4-2011 std. DEST PANID only sent as it is equal to SRC PANID
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
    
-   //dsn is suppressed
+   //dsn
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+   *((uint8_t*)(msg->payload)) = sequenceNumber;
 
    //fcf (2nd byte)
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
@@ -163,7 +165,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    //poipoi xv IE list present
    temp_8b             |= ielistpresent                   << IEEE154_FCF_IELIST_PRESENT;
    temp_8b             |= IEEE154_FRAMEVERSION_2012       << IEEE154_FCF_FRAME_VERSION;
-   temp_8b             |= IEEE154_DSN_SUPPRESSION_YES     << IEEE154_FCF_DSN_SUPPRESSION;
+   temp_8b             |= IEEE154_DSN_SUPPRESSION_NO      << IEEE154_FCF_DSN_SUPPRESSION;
      
    *((uint8_t*)(msg->payload)) = temp_8b;
    //fcf (1st byte)
@@ -177,7 +179,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    } else {
       temp_8b          |= IEEE154_ACK_YES_ACK_REQ         << IEEE154_FCF_ACK_REQ;
    }
-   temp_8b             |= IEEE154_PANID_COMPRESSED      << IEEE154_FCF_INTRAPAN;
+   temp_8b             |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
    *((uint8_t*)(msg->payload)) = temp_8b;
 }
 
