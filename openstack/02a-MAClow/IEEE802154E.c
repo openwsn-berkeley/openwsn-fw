@@ -2082,7 +2082,6 @@ different channel offsets in the same slot.
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
-    // comment the following line out to disable channel hopping
     if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
         return ieee154e_vars.singleChannel; // single channel
     } else {
