@@ -70,9 +70,9 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dioDestination.type = ADDR_128B;
    memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_multicast));
    
-   icmpv6rpl_vars.periodDIO                 = TIMER_DIO_TIMEOUT+(openrandom_get16b()&0xff);
+   icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT+(openrandom_get16b()&0xff);
    icmpv6rpl_vars.timerIdDIO                = opentimers_start(
-                                                icmpv6rpl_vars.periodDIO,
+                                                icmpv6rpl_vars.dioPeriod,
                                                 TIMER_PERIODIC,
                                                 TIME_MS,
                                                 icmpv6rpl_timer_DIO_cb
@@ -117,9 +117,9 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dao_target.flags  = 0;
    icmpv6rpl_vars.dao_target.prefixLength = 0;
    
-   icmpv6rpl_vars.periodDAO                 = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
+   icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
    icmpv6rpl_vars.timerIdDAO                = opentimers_start(
-                                                icmpv6rpl_vars.periodDAO,
+                                                icmpv6rpl_vars.daoPeriod,
                                                 TIMER_PERIODIC,
                                                 TIME_MS,
                                                 icmpv6rpl_timer_DAO_cb
@@ -272,7 +272,7 @@ void icmpv6rpl_timer_DIO_task() {
       opentimers_setPeriod(
          icmpv6rpl_vars.timerIdDIO,
          TIME_MS,
-         icmpv6rpl_vars.periodDIO
+         icmpv6rpl_vars.dioPeriod
       );
    }
 }
@@ -394,7 +394,7 @@ void icmpv6rpl_timer_DAO_task() {
       opentimers_setPeriod(
          icmpv6rpl_vars.timerIdDAO,
          TIME_MS,
-         icmpv6rpl_vars.periodDAO
+         icmpv6rpl_vars.daoPeriod
       );
    }
 }
@@ -563,19 +563,19 @@ void sendDAO() {
 }
 
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
-    icmpv6rpl_vars.periodDIO = dioPeriod/5; // delayDIO will skip 4 times in 5 dio period
+    icmpv6rpl_vars.dioPeriod = dioPeriod/5; // delayDIO will skip 4 times in 5 dio period
     opentimers_setPeriod(
         icmpv6rpl_vars.timerIdDIO,
         TIME_MS,
-        icmpv6rpl_vars.periodDIO
+        icmpv6rpl_vars.dioPeriod
      );
 }
 
 void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
-    icmpv6rpl_vars.periodDAO = daoPeriod/5; // delayDAO will skip 4 times in 5 dao period
+    icmpv6rpl_vars.daoPeriod = daoPeriod/5; // delayDAO will skip 4 times in 5 dao period
     opentimers_setPeriod(
         icmpv6rpl_vars.timerIdDAO,
         TIME_MS,
-        icmpv6rpl_vars.periodDAO
+        icmpv6rpl_vars.daoPeriod
      );
 }
