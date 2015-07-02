@@ -536,7 +536,7 @@ void openserial_goldenImageCommands(){
            }
            break;
        case COMMAND_SET_FRAMELENGTH: // two bytes
-           schedule_setCustomFrameLength(comandParam_16);
+           schedule_setFrameLength(comandParam_16);
            break;
        case COMMAND_SET_ACK_STATUS:
            if (comandParam_8 == 1) {

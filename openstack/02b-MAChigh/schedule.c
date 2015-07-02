@@ -35,7 +35,6 @@ void schedule_init() {
    }
    schedule_vars.backoffExponent = MINBE-1;
    schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
-   schedule_vars.customFrameLength = SLOTFRAME_LENGTH;
    
    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    if (idmanager_getIsDAGroot()==TRUE) {
@@ -66,7 +65,12 @@ void schedule_startDAGroot() {
    
    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    // set frame length, handle and number (default 1 by now)
-   schedule_setFrameLength(schedule_vars.customFrameLength);
+   if (schedule_vars.frameLength == 0) {
+       // slotframe length is not set, set it to default length
+       schedule_setFrameLength(SLOTFRAME_LENGTH);
+   } else {
+       // slotframe elgnth is set, nothing to do here
+   }
    schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
    schedule_setFrameNumber(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER);
 
@@ -176,15 +180,6 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
    if (newFrameLength <= MAXACTIVESLOTS) {
       schedule_vars.maxActiveSlots = newFrameLength;
    }
-   ENABLE_INTERRUPTS();
-}
-
-void schedule_setCustomFrameLength(frameLength_t newFrameLength) {
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   schedule_vars.customFrameLength = newFrameLength;
-   
    ENABLE_INTERRUPTS();
 }
 

@@ -126,7 +126,6 @@ typedef struct {
    uint8_t          backoffExponent;
    uint8_t          backoff;
    uint8_t          debugPrintRow;
-   frameLength_t    customFrameLength;
 } schedule_vars_t;
 
 //=========================== prototypes ======================================
@@ -139,7 +138,6 @@ bool               debugPrint_backoff(void);
 
 // from 6top
 void               schedule_setFrameLength(frameLength_t newFrameLength);
-void               schedule_setCustomFrameLength(frameLength_t newFrameLength);
 void               schedule_setFrameHandle(uint8_t frameHandle);
 void               schedule_setFrameNumber(uint8_t frameNumber);
 owerror_t          schedule_addActiveSlot(
