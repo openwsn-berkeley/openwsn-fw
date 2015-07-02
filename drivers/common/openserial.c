@@ -449,7 +449,9 @@ void openserial_goldenImageCommands(){
    uint8_t  input_buffer[7];
    uint8_t  numDataBytes;
    uint8_t  version;
+#ifndef GOLDEN_IMAGE_NONE
    uint8_t  type;
+#endif
    uint8_t  commandId;
    uint8_t  commandLen;
    uint8_t  comandParam_8;
@@ -459,7 +461,9 @@ void openserial_goldenImageCommands(){
    //copying the buffer
    openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
    version = openserial_vars.inputBuf[1];
+#ifndef GOLDEN_IMAGE_NONE
    type    = openserial_vars.inputBuf[2];
+#endif
    if (version != GOLDEN_IMAGE_VERSION) {
       // the version of command is wrong
       // log this info and return
