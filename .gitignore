@@ -12,6 +12,7 @@ settings
 *.pyd
 *.pyc
 /build
+/images
 /.sconsign.dblite
 *.map
 *.lst

@@ -24,6 +24,12 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_MINOR     9
 #define OPENWSN_VERSION_PATCH     0
 
+// golden image version and type
+#define GOLDEN_IMAGE_VERSION      1
+// define golden image type: only one can be used
+#define GD_TYPE_ROOT         1 // dagroot
+#define GD_TYPE_SNIFFER      2 // sniffer
+
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -236,7 +242,8 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
-   ERR_SECURITY                        = 0x3a, // security error on frameType {0}, code location {1}
+   ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
+   ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
 };
 
 //=========================== typedef =========================================
@@ -302,6 +309,7 @@ typedef struct {
    bool          l2_IEListPresent;               //did have IE field?
    bool          l2_payloadIEpresent;            // did I have payload IE field
    bool          l2_joinPriorityPresent;
+   int16_t       l2_timeCorrection;              // record the timeCorrection and print out at endOfslot
    //layer-2 security
    uint8_t       l2_securityLevel;               //the security level specified for the current frame
    uint8_t       l2_keyIdMode;                   //the key Identifier mode specified for the current frame

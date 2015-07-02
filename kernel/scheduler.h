@@ -27,7 +27,8 @@ typedef enum {
    // tasks trigger by other interrupts
    TASKPRIO_BUTTON                = 0x09,
    TASKPRIO_SIXTOP_TIMEOUT        = 0x0a,
-   TASKPRIO_MAX                   = 0x0b,
+   TASKPRIO_SNIFFER               = 0x0b,
+   TASKPRIO_MAX                   = 0x0c,
 } task_prio_t;
 
 #define TASK_LIST_DEPTH           10

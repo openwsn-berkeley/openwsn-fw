@@ -15,6 +15,11 @@
 
 //=========================== debug define ====================================
 
+//=========================== static ==========================================
+static const uint8_t chTemplate_default[] = {
+   5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
+};
+
 //=========================== define ==========================================
 
 #define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
@@ -22,7 +27,7 @@
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define EBTIMEOUT                  30 // in seconds: sending EB every 30 seconds
+#define EBPERIOD                    30 // in seconds: sending EB every 30 seconds
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -133,11 +138,18 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
+#ifdef GOLDEN_IMAGE_ROOT
+   TsTxOffset                =   70,                  //  2120us
+   TsLongGT                  =   36,                  //  1100us
+   TsTxAckDelay              =   33,                  //  1000us
+   TsShortGT                 =    7,                  //   500us
+#else
    TsTxOffset                =  131,                  //  4000us
    TsLongGT                  =   43,                  //  1300us
    TsTxAckDelay              =  151,                  //  4606us
    TsShortGT                 =   16,                  //   500us
-   TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
+#endif
+   TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
@@ -147,9 +159,15 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
+#ifdef GOLDEN_IMAGE_ROOT
+   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
+   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =   80,                  //  2400us (measured 1000us)
+#else
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
+#endif
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
@@ -213,6 +231,8 @@ typedef struct {
    // channel hopping
    uint8_t                   freq;                    // frequency of the current slot
    uint8_t                   asnOffset;               // offset inside the frame
+   uint8_t                   singleChannel;           // the single channel used for transmission
+   uint8_t                   chTemplate[16];          // storing the template of hopping sequence
    // template ID
    uint8_t                   tsTemplateId;            // timeslot template id
    uint8_t                   chTemplateId;            // channel hopping tempalte id
@@ -221,6 +241,9 @@ typedef struct {
    PORT_RADIOTIMER_WIDTH     radioOnTics;             // how many tics within the slot the radio is on
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
    
+   //control
+   bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
+   bool                      isSecurityEnabled;       // whether security is applied
    // time correction
    int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
 } ieee154e_vars_t;
@@ -252,6 +275,10 @@ void               ieee154e_init(void);
 PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
+void               ieee154e_setIsAckEnabled(bool isEnabled);
+void               ieee154e_setSingleChannel(uint8_t channel);
+void               ieee154e_setIsSecurityEnabled(bool isEnabled);
+
 uint16_t           ieee154e_getTimeCorrection(void);
 // events
 void               ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);

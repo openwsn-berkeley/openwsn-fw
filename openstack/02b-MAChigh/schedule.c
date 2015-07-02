@@ -65,7 +65,12 @@ void schedule_startDAGroot() {
    
    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    // set frame length, handle and number (default 1 by now)
-   schedule_setFrameLength(SUPERFRAME_LENGTH);
+   if (schedule_vars.frameLength == 0) {
+       // slotframe length is not set, set it to default length
+       schedule_setFrameLength(SLOTFRAME_LENGTH);
+   } else {
+       // slotframe elgnth is set, nothing to do here
+   }
    schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
    schedule_setFrameNumber(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER);
 

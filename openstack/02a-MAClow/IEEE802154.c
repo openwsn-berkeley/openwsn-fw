@@ -48,7 +48,6 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    uint8_t ielistpresent = IEEE154_IELIST_NO;
-   uint8_t frameVersion;
    bool    securityEnabled;
    int16_t timeCorrection;
    header_IE_ht header_desc;
@@ -82,7 +81,6 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                msg->payload[1] = (Header_Payload_TerminationIE >> 8) & 0xFF;
            } else {
                // no header IE present, no payload IE, no termination IE
-               frameVersion = IEEE154_FRAMEVERSION_2006;
            }
        } else {
            // no payload, termination IE is omitted. check whether timeCorrection IE

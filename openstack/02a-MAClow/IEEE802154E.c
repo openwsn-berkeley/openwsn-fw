@@ -112,6 +112,16 @@ void ieee154e_init() {
    memset(&ieee154e_vars,0,sizeof(ieee154e_vars_t));
    memset(&ieee154e_dbg,0,sizeof(ieee154e_dbg_t));
    
+   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
+   ieee154e_vars.isAckEnabled      = TRUE;
+   ieee154e_vars.isSecurityEnabled = FALSE;
+   // default hopping template
+   memcpy(
+       &(ieee154e_vars.chTemplate[0]),
+       chTemplate_default,
+       sizeof(ieee154e_vars.chTemplate)
+   );
+   
    if (idmanager_getIsDAGroot()==TRUE) {
       changeIsSync(TRUE);
    } else {
@@ -185,8 +195,10 @@ void isr_ieee154e_newSlot() {
          activity_synchronize_newSlot();
       }
    } else {
+#ifdef ADAPTIVE_SYNC
      // adaptive synchronization
       adaptive_sync_countCompensationTimeout();
+#endif
       activity_ti1ORri1();
    }
    ieee154e_dbg.num_newSlot++;
@@ -641,6 +653,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
    uint16_t              sublen;
    // flag used for understanding if the slotoffset should be inferred from both ASN and slotframe length
    bool                  f_asn2slotoffset;
+   uint8_t               i; // used for find the index in channel hopping template
    
    ptr=0;
    
@@ -754,7 +767,12 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             infer the asnOffset based on the fact that
             ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
             */
-            ieee154e_vars.asnOffset = ieee154e_vars.freq - 11 - schedule_getChannelOffset();
+            for (i=0;i<16;i++){
+                if ((ieee154e_vars.freq - 11)==ieee154e_vars.chTemplate[i]){
+                    break;
+                }
+            }
+            ieee154e_vars.asnOffset = i - schedule_getChannelOffset();
          }
          break;
          
@@ -915,9 +933,10 @@ port_INLINE void activity_ti1ORri1() {
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
          }
+#ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
          adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
-         
+#endif
          break;
       case CELLTYPE_MORESERIALRX:
          // do nothing (not even endSlot())
@@ -1478,8 +1497,11 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          break;
       }
       
+      // record the timeCorrection and print out at end of slot
+      ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
+      
       // check if ack requested
-      if (ieee802514_header.ackRequested==1) {
+      if (ieee802514_header.ackRequested==1 && ieee154e_vars.isAckEnabled == TRUE) {
          // arm rt5
          radiotimer_schedule(DURATION_rt5);
       } else {
@@ -1844,6 +1866,25 @@ port_INLINE void ieee154e_syncSlotOffset() {
    ieee154e_vars.slotOffset       = (slotOffset_t) slotOffset;
 }
 
+void ieee154e_setIsAckEnabled(bool isEnabled){
+    ieee154e_vars.isAckEnabled = isEnabled;
+}
+
+void ieee154e_setSingleChannel(uint8_t channel){
+    if (
+        (channel < 11 || channel > 26) &&
+         channel != 0   // channel == 0 means channel hopping is enabled
+    ) {
+        // log wrong channel, should be  : (0, or 11~26)
+        return;
+    }
+    ieee154e_vars.singleChannel = channel;
+}
+
+void ieee154e_setIsSecurityEnabled(bool isEnabled){
+    ieee154e_vars.isSecurityEnabled = isEnabled;
+}
+
 // timeslot template handling
 port_INLINE void timeslotTemplateIDStoreFromEB(uint8_t id){
     ieee154e_vars.tsTemplateId = id;
@@ -1853,7 +1894,6 @@ port_INLINE void timeslotTemplateIDStoreFromEB(uint8_t id){
 port_INLINE void channelhoppingTemplateIDStoreFromEB(uint8_t id){
     ieee154e_vars.chTemplateId = id;
 }
-
 //======= synchronization
 
 void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
@@ -1881,10 +1921,10 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
-   
+#ifdef ADAPTIVE_SYNC
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
-   
+#endif
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    
@@ -1924,10 +1964,10 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
-   
+#ifdef ADAPTIVE_SYNC
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection((-timeCorrection),ieee154e_vars.ackReceived->l2_nextORpreviousHop);
-   
+#endif
    // log a large timeCorrection
    if (
          ieee154e_vars.isSync==TRUE &&
@@ -1940,6 +1980,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
                             (errorparameter_t)timeCorrection,
                             (errorparameter_t)1);
    }
+
    // update the stats
    ieee154e_stats.numSyncAck++;
    updateStats(timeCorrection);
@@ -1986,7 +2027,11 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_SIXTOP so sixtop can knows it's for it
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;
-
+#ifdef GOLDEN_IMAGE_ROOT
+   openserial_printInfo(COMPONENT_IEEE802154E,ERR_PACKET_SYNC,
+                   (errorparameter_t)packetReceived->l2_asn.bytes0and1,
+                   (errorparameter_t)packetReceived->l2_timeCorrection);
+#endif
    // post RES's Receive task
    scheduler_push_task(task_sixtopNotifReceive,TASKPRIO_SIXTOP_NOTIF_RX);
    // wake up the scheduler
@@ -2037,9 +2082,13 @@ different channel offsets in the same slot.
 \returns The calculated frequency channel, an integer between 11 and 26.
 */
 port_INLINE uint8_t calculateFrequency(uint8_t channelOffset) {
-   // comment the following line out to disable channel hopping
-   return SYNCHRONIZING_CHANNEL; // single channel
-   //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
+    if (ieee154e_vars.singleChannel >= 11 && ieee154e_vars.singleChannel <= 26 ) {
+        return ieee154e_vars.singleChannel; // single channel
+    } else {
+        // channel hopping enabled, use the channel depending on hopping template
+        return 11 + ieee154e_vars.chTemplate[(ieee154e_vars.asnOffset+channelOffset)%16];
+    }
+    //return 11+(ieee154e_vars.asnOffset+channelOffset)%16; //channel hopping
 }
 
 /**

@@ -70,9 +70,9 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dioDestination.type = ADDR_128B;
    memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_multicast));
    
-   icmpv6rpl_vars.periodDIO                 = TIMER_DIO_TIMEOUT+(openrandom_get16b()&0xff);
+   icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT+(openrandom_get16b()&0xff);
    icmpv6rpl_vars.timerIdDIO                = opentimers_start(
-                                                icmpv6rpl_vars.periodDIO,
+                                                icmpv6rpl_vars.dioPeriod,
                                                 TIMER_PERIODIC,
                                                 TIME_MS,
                                                 icmpv6rpl_timer_DIO_cb
@@ -117,9 +117,9 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dao_target.flags  = 0;
    icmpv6rpl_vars.dao_target.prefixLength = 0;
    
-   icmpv6rpl_vars.periodDAO                 = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
+   icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
    icmpv6rpl_vars.timerIdDAO                = opentimers_start(
-                                                icmpv6rpl_vars.periodDAO,
+                                                icmpv6rpl_vars.daoPeriod,
                                                 TIMER_PERIODIC,
                                                 TIME_MS,
                                                 icmpv6rpl_timer_DAO_cb
@@ -258,26 +258,16 @@ void icmpv6rpl_timer_DIO_cb(opentimer_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DIO_task() {
-   
-   // update the delayDIO
-   icmpv6rpl_vars.delayDIO = (icmpv6rpl_vars.delayDIO+1)%5;
-   
-   // check whether we need to send DIO
-   if (icmpv6rpl_vars.delayDIO==0) {
       
-      // send DIO
-      sendDIO();
-      
-      // pick a new pseudo-random periodDIO
-      icmpv6rpl_vars.periodDIO = TIMER_DIO_TIMEOUT+(openrandom_get16b()&0xff);
-      
-      // arm the DIO timer with this new value
-      opentimers_setPeriod(
-         icmpv6rpl_vars.timerIdDIO,
-         TIME_MS,
-         icmpv6rpl_vars.periodDIO
-      );
-   }
+    // send DIO
+    sendDIO();
+    
+    // arm the DIO timer with this new value
+    opentimers_setPeriod(
+       icmpv6rpl_vars.timerIdDIO,
+       TIME_MS,
+       icmpv6rpl_vars.dioPeriod
+    );
 }
 
 /**
@@ -383,26 +373,16 @@ void icmpv6rpl_timer_DAO_cb(opentimer_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DAO_task() {
-   
-   // update the delayDAO
-   icmpv6rpl_vars.delayDAO = (icmpv6rpl_vars.delayDAO+1)%5;
-   
-   // check whether we need to send DAO
-   if (icmpv6rpl_vars.delayDAO==0) {
-      
-      // send DAO
-      sendDAO();
-      
-      // pick a new pseudo-random periodDAO
-      icmpv6rpl_vars.periodDAO = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
-      
-      // arm the DAO timer with this new value
-      opentimers_setPeriod(
-         icmpv6rpl_vars.timerIdDAO,
-         TIME_MS,
-         icmpv6rpl_vars.periodDAO
-      );
-   }
+    
+   // send DAO
+   sendDAO();
+  
+   // arm the DAO timer with this new value
+   opentimers_setPeriod(
+      icmpv6rpl_vars.timerIdDAO,
+      TIME_MS,
+      icmpv6rpl_vars.daoPeriod
+   );
 }
 
 /**
@@ -566,4 +546,22 @@ void sendDAO() {
    } else {
       openqueue_freePacketBuffer(msg);
    }
+}
+
+void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
+    icmpv6rpl_vars.dioPeriod = dioPeriod;
+    opentimers_setPeriod(
+        icmpv6rpl_vars.timerIdDIO,
+        TIME_MS,
+        icmpv6rpl_vars.dioPeriod
+     );
+}
+
+void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
+    icmpv6rpl_vars.daoPeriod = daoPeriod;
+    opentimers_setPeriod(
+        icmpv6rpl_vars.timerIdDAO,
+        TIME_MS,
+        icmpv6rpl_vars.daoPeriod
+     );
 }
