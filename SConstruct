@@ -135,7 +135,7 @@ command_line_options = {
     'noadaptivesync':   ['0','1'],
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
     'l2_security':      ['0','1'],
-    'goldenImage':      ['none','root','sniffer']
+    'goldenImage':      ['none','root','sniffer'],
 }
 
 def validate_option(key, value, env):
@@ -280,6 +280,7 @@ command_line_vars.AddVariables(
         validate_option,                                   # validator
         int,                                               # converter
     ),
+    # create an golden image for interop testing
     (
         'goldenImage',                                     # key
         '',                                                # help
