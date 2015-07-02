@@ -157,7 +157,7 @@ void task_uploadPacket(){
 }
 // ================================= stubbing ==================================
 
-void openbridge_triggerData(){return;}
+void openbridge_triggerData(void){return;}
 
 void sixtop_setEBPeriod(uint8_t ebPeriod){return;}
 void ieee154e_setSingleChannel(uint8_t channel){return;}
@@ -170,8 +170,8 @@ void schedule_setFrameLength(uint16_t frameLength) {return;}
 void icmpv6rpl_writeDODAGid(uint8_t* dodagid) {return;}
 void ieee154e_setIsAckEnabled(bool isEnabled) {return;}
 void ieee154e_getAsn(uint8_t* array) {return;}
-void neighbors_updateMyDAGrankAndNeighborPreference() {return;}
-void schedule_startDAGroot() {return;}
+void neighbors_updateMyDAGrankAndNeighborPreference(void) {return;}
+void schedule_startDAGroot(void) {return;}
 
 bool debugPrint_asn(void)       {return TRUE;}
 bool debugPrint_isSync(void)    {return TRUE;}
