@@ -48,7 +48,6 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               open_addr_t*      nextHop) {
    uint8_t temp_8b;
    uint8_t ielistpresent = IEEE154_IELIST_NO;
-   uint8_t frameVersion;
    bool    securityEnabled;
    int16_t timeCorrection;
    header_IE_ht header_desc;
