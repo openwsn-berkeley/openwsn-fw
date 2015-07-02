@@ -27,6 +27,10 @@ openserial_vars_t openserial_vars;
 
 //=========================== prototypes ======================================
 
+#ifdef GOLDEN_IMAGE_SNIFFER
+extern void sniffer_setListeningChannel(uint8_t channel);
+#endif
+
 owerror_t openserial_printInfoErrorCritical(
    char             severity,
    uint8_t          calling_component,
@@ -39,7 +43,7 @@ void openserial_board_reset_cb(
    opentimer_id_t id
 );
 
-void openserial_goldenImageCommands();
+void openserial_goldenImageCommands(void);
 
 // HDLC output
 void outputHdlcOpen(void);
@@ -445,7 +449,7 @@ void openserial_stop() {
    ENABLE_INTERRUPTS();
 }
 
-void openserial_goldenImageCommands(){
+void openserial_goldenImageCommands(void){
    uint8_t  input_buffer[7];
    uint8_t  numDataBytes;
    uint8_t  version;

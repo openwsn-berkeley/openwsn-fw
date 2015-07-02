@@ -6,6 +6,8 @@
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "scheduler.h"
+#include "IEEE802154E.h"
+#include "idmanager.h"
 
 //=========================== variables =======================================
 
