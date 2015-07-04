@@ -38,7 +38,7 @@ void neighbors_init() {
    
    // set myDAGrank
    if (idmanager_getIsDAGroot()==TRUE) {
-      neighbors_vars.myDAGrank=0;
+      neighbors_vars.myDAGrank=MINHOPRANKINCREASE;
    } else {
       neighbors_vars.myDAGrank=DEFAULTDAGRANK;
    }
@@ -513,10 +513,8 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    
    // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
    if ((idmanager_getIsDAGroot())==TRUE) {
-       if (neighbors_vars.myDAGrank == MAXDAGRANK) {
-           // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here 
-           neighbors_vars.myDAGrank=MINHOPRANKINCREASE;   
-       }
+       // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here 
+       neighbors_vars.myDAGrank=MINHOPRANKINCREASE;
        return;
    }
    
