@@ -580,8 +580,12 @@ void registerNewNeighbor(open_addr_t* address,
                          asn_t*       asnTimestamp,
                          bool         joinPrioPresent,
                          uint8_t      joinPrio) {
-   uint8_t  i,j;
-   bool     iHaveAPreferedParent;
+   uint8_t     i,j;
+   bool        iHaveAPreferedParent;
+   bool        f_isUsedRow;
+   bool        f_isUnstableNeighborAvailable;
+   dagrank_t   maxDAGrank;
+   
    // filter errors
    if (address->type!=ADDR_64B) {
       openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
@@ -590,16 +594,48 @@ void registerNewNeighbor(open_addr_t* address,
       return;
    }
    
-   i = 0;
-   while (i<MAXNUMNEIGHBORS) {
-      if (neighbors_vars.neighbors[i].used==FALSE) {
+   i = MAXNUMNEIGHBORS;
+   f_isUsedRow = TRUE;
+   f_isUnstableNeighborAvailable = FALSE;
+   maxDAGrank = 0;
+   for (j=0;j<MAXNUMNEIGHBORS;j++) {
+      if (neighbors_vars.neighbors[j].used == FALSE) {
+         i = j;
+         f_isUsedRow = FALSE;
          break;
+      } else {
+         if (neighbors_vars.neighbors[j].stableNeighbor == FALSE) {
+            if (f_isUnstableNeighborAvailable == FALSE) {
+               f_isUnstableNeighborAvailable = TRUE;
+               maxDAGrank = 0;
+            }
+            if (
+               (neighbors_vars.neighbors[j].DAGrank>maxDAGrank)
+               ||
+               (maxDAGrank == 0)
+            ) {
+               i = j;
+               maxDAGrank = neighbors_vars.neighbors[j].DAGrank;
+            }
+         } else {
+            if (f_isUnstableNeighborAvailable == FALSE) {
+               if (
+                  (neighbors_vars.neighbors[j].DAGrank > neighbors_vars.myDAGrank)
+                  &&
+                  (neighbors_vars.neighbors[j].DAGrank > maxDAGrank)
+               ) {
+                  i = j;
+                  maxDAGrank = neighbors_vars.neighbors[j].DAGrank;
+               }
+            }
+         }
       }
-      i++;
    }
    
    if (i<MAXNUMNEIGHBORS) {
-      
+      if (f_isUsedRow) {
+         removeNeighbor(i);
+      }
       // add this neighbor
       neighbors_vars.neighbors[i].used                      = TRUE;
       neighbors_vars.neighbors[i].parentPreference          = 0;
