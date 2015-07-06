@@ -454,9 +454,9 @@ void sendDAO() {
    //getting only preferred parent as transit
    numTransitParents=0;
    neighbors_getPreferredParentEui64(&address);
-   packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
+   packetfunctions_writeAddress(msg,address.type,&address,OW_BIG_ENDIAN);
    prefix=idmanager_getMyID(ADDR_PREFIX);
-   packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
+   packetfunctions_writeAddress(msg,ADDR_PREFIX,prefix,OW_BIG_ENDIAN);
    // update transit info fields
    // from rfc6550 p.55 -- Variable, depending on whether or not the DODAG ParentAddress subfield is present.
    // poipoi xv: it is not very clear if this includes all fields in the header. or as target info 2 bytes are removed.
@@ -486,9 +486,9 @@ void sendDAO() {
          
          // write it's address in DAO RFC6550 page 80 check point 1.
          neighbors_getNeighbor(&address,ADDR_64B,nbrIdx); 
-         packetfunctions_writeAddress(msg,&address,OW_BIG_ENDIAN);
+         packetfunctions_writeAddress(msg,ADDR_64B,&address,OW_BIG_ENDIAN);
          prefix=idmanager_getMyID(ADDR_PREFIX);
-         packetfunctions_writeAddress(msg,prefix,OW_BIG_ENDIAN);
+         packetfunctions_writeAddress(msg,ADDR_PREFIX,prefix,OW_BIG_ENDIAN);
         
          // update target info fields 
          // from rfc6550 p.55 -- Variable, length of the option in octets excluding the Type and Length fields.

@@ -49,6 +49,9 @@ void idmanager_init() {
    // my64bID
    idmanager_vars.my64bID.type         = ADDR_64B;
    eui64_get(idmanager_vars.my64bID.addr_64b);
+   idmanager_vars.my64bIID.type        = ADDR_64BIID;
+   eui64_get(idmanager_vars.my64bIID.addr_64bIID);
+   idmanager_vars.my64bIID.addr_64b[0] ^= 0x02;//flip u/l bit ¨C bit 6
    
    // my16bID
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
@@ -84,6 +87,9 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
      case ADDR_64B:
         res= &idmanager_vars.my64bID;
         break;
+     case ADDR_64BIID:
+        res= &idmanager_vars.my64bIID;
+        break;
      case ADDR_PANID:
         res= &idmanager_vars.myPANID;
         break;
@@ -91,6 +97,7 @@ open_addr_t* idmanager_getMyID(uint8_t type) {
         res= &idmanager_vars.myPrefix;
         break;
      case ADDR_128B:
+     case ADDR_128BIID:
         // you don't ask for my full address, rather for prefix, then 64b
      default:
         openserial_printCritical(COMPONENT_IDMANAGER,ERR_WRONG_ADDR_TYPE,

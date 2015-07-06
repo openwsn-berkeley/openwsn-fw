@@ -117,7 +117,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    }
 
    // previousHop address (always 64-bit)
-   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
+   packetfunctions_writeAddress(msg,ADDR_64B,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
    // nextHop address
    if (packetfunctions_isBroadcastMulticast(nextHop)) {
       //broadcast address is always 16-bit
@@ -129,7 +129,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       switch (nextHop->type) {
          case ADDR_16B:
          case ADDR_64B:
-            packetfunctions_writeAddress(msg,nextHop,OW_LITTLE_ENDIAN);
+            packetfunctions_writeAddress(msg,ADDR_64B,nextHop,OW_LITTLE_ENDIAN);
             break;
          default:
             openserial_printCritical(COMPONENT_IEEE802154,ERR_WRONG_ADDR_TYPE,
@@ -139,7 +139,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
       
    }
    // destpan -- se page 41 of 15.4-2011 std. DEST PANID only sent as it is equal to SRC PANID
-   packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
+   packetfunctions_writeAddress(msg,ADDR_PANID,idmanager_getMyID(ADDR_PANID),OW_LITTLE_ENDIAN);
    
    //dsn
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));

@@ -57,6 +57,8 @@ enum {
    ADDR_PANID                          = 4,
    ADDR_PREFIX                         = 5,
    ADDR_ANYCAST                        = 6,
+   ADDR_64BIID                         = 7,
+   ADDR_128BIID                        = 8,
 };
 
 enum {
@@ -269,6 +271,7 @@ typedef struct {                                 // always written big endian, i
    union {
       uint8_t addr_16b[2];
       uint8_t addr_64b[8];
+      uint8_t addr_64bIID[8];
       uint8_t addr_128b[16];
       uint8_t panid[2];
       uint8_t prefix[8];

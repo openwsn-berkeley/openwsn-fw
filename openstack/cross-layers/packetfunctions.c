@@ -174,10 +174,12 @@ bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2)
          address_length = 2;
          break;
       case ADDR_64B:
+      case ADDR_64BIID:
       case ADDR_PREFIX:
          address_length = 8;
          break;
       case ADDR_128B:
+      case ADDR_128BIID:
       case ADDR_ANYCAST:
          address_length = 16;
          break;
@@ -207,10 +209,12 @@ void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* wr
          address_length = 2;
          break;
       case ADDR_64B:
+      case ADDR_64BIID:
       case ADDR_PREFIX:
          address_length = 8;
          break;
       case ADDR_128B:
+      case ADDR_128BIID:
          address_length = 16;
          break;
       default:
@@ -227,9 +231,26 @@ void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* wr
          writeToAddress->addr_128b[i]   = *(payload+i);
       }
    }
+   
+   if (type == ADDR_64BIID) {
+      writeToAddress->type = ADDR_64B;
+      if (littleEndian) {
+         writeToAddress->addr_128b[7] ^= 0x02;
+      } else {
+         writeToAddress->addr_128b[0] ^= 0x02;
+      }
+   }
+   if (type == ADDR_128BIID) {
+      writeToAddress->type = ADDR_128B;
+      if (littleEndian) {
+         writeToAddress->addr_128b[15] ^= 0x02;
+      } else {
+         writeToAddress->addr_128b[0] ^= 0x02;
+      }
+   }
 }
 
-void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, bool littleEndian) {
+void packetfunctions_writeAddress(OpenQueueEntry_t* msg, uint8_t type, open_addr_t* address, bool littleEndian) {
    uint8_t i;
    uint8_t address_length;
    
@@ -239,10 +260,12 @@ void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, b
          address_length = 2;
          break;
       case ADDR_64B:
+      case ADDR_64BIID:
       case ADDR_PREFIX:
          address_length = 8;
          break;
       case ADDR_128B:
+      case ADDR_128BIID:
          address_length = 16;
          break;
       default:
@@ -256,9 +279,19 @@ void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, b
       msg->payload      -= sizeof(uint8_t);
       msg->length       += sizeof(uint8_t);
       if (littleEndian) {
-         *((uint8_t*)(msg->payload)) = address->addr_128b[i];
+         *((uint8_t*)(msg->payload))  = address->addr_128b[i];
+         // flip u/l bit
+         if ( (type == ADDR_64BIID && i == 0)  || \
+              (type == ADDR_128BIID && i == 8)
+         ) {
+             *((uint8_t*)(msg->payload)) ^= 0x02;
+         }
       } else {
          *((uint8_t*)(msg->payload)) = address->addr_128b[address_length-1-i];
+         // flip u/l bit
+         if ((type == ADDR_64BIID || type == ADDR_128BIID) && i == 7) {
+             *((uint8_t*)(msg->payload)) ^= 0x02;
+         }
       }
    }
 }

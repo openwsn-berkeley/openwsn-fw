@@ -37,6 +37,7 @@ typedef struct {
    open_addr_t   myPANID;
    open_addr_t   my16bID;
    open_addr_t   my64bID;
+   open_addr_t   my64bIID;
    open_addr_t   myPrefix;
 } idmanager_vars_t;
 

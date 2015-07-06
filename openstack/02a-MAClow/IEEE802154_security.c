@@ -235,7 +235,7 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
          break;
       case IEEE154_ASH_KEYIDMODE_EXPLICIT_64: //keySource with 64b address
          temp_keySource = &msg->l2_keySource;
-         packetfunctions_writeAddress(msg,temp_keySource,OW_LITTLE_ENDIAN);
+         packetfunctions_writeAddress(msg,temp_keySource->type,temp_keySource,OW_LITTLE_ENDIAN);
          break;
       default://error
          openserial_printError(COMPONENT_SECURITY,ERR_SECURITY,
