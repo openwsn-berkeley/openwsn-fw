@@ -510,6 +510,7 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint32_t  tentativeDAGrank; // 32-bit since is used to sum
    uint8_t   prefParentIdx;
    bool      prefParentFound;
+   uint32_t  rankIncreaseIntermediary; // stores intermediary results of rankIncrease calculation
    
    // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
    if ((idmanager_getIsDAGroot())==TRUE) {
@@ -539,7 +540,9 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
             rankIncrease = DEFAULTLINKCOST*2*MINHOPRANKINCREASE;
          } else {
             //6TiSCH minimal draft using OF0 for rank computation
-            rankIncrease = (uint16_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*2*MINHOPRANKINCREASE);
+            rankIncreaseIntermediary = (((uint32_t)neighbors_vars.neighbors[i].numTx) << 10);
+            rankIncreaseIntermediary = (rankIncreaseIntermediary * 2 * MINHOPRANKINCREASE) / ((uint32_t)neighbors_vars.neighbors[i].numTxACK);
+            rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
          }
          
          tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
