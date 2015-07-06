@@ -243,9 +243,9 @@ void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* wr
    if (type == ADDR_128BIID) {
       writeToAddress->type = ADDR_128B;
       if (littleEndian) {
-         writeToAddress->addr_128b[15] ^= 0x02;
+         writeToAddress->addr_128b[7] ^= 0x02;
       } else {
-         writeToAddress->addr_128b[0] ^= 0x02;
+         writeToAddress->addr_128b[8] ^= 0x02;
       }
    }
 }
