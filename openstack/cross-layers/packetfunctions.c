@@ -416,6 +416,8 @@ bool packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
 void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_ptr) {
    uint8_t temp_checksum[2];
    uint8_t little_helper[2];
+   open_addr_t temp_prefix;
+   open_addr_t temp_addr;
    
    // initialize running checksum
    temp_checksum[0]  = 0;
@@ -424,11 +426,27 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
    //===== IPv6 pseudo header
    
    // source address (prefix and EUI64)
-   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_PREFIX))->prefix,8);
-   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64B))->addr_64b,8);
+   temp_prefix.type = ADDR_PREFIX;
+   temp_prefix.prefix[0] = 0xfe;
+   temp_prefix.prefix[1] = 0x80;
+   temp_prefix.prefix[2] = 0x00;
+   temp_prefix.prefix[3] = 0x00;
+   temp_prefix.prefix[4] = 0x00;
+   temp_prefix.prefix[5] = 0x00;
+   temp_prefix.prefix[6] = 0x00;
+   temp_prefix.prefix[7] = 0x00;
+   onesComplementSum(temp_checksum,temp_addr.prefix,8);
+   onesComplementSum(temp_checksum,(idmanager_getMyID(ADDR_64BIID))->addr_64bIID,8);
    
    // destination address
-   onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
+   if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE) {
+       onesComplementSum(temp_checksum,temp_addr.prefix,8);
+       packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_prefix, &temp_addr);
+       temp_addr.addr_64b[0] ^= 0x02;
+       onesComplementSum(temp_checksum,temp_addr.addr_64b,8);
+   } else {
+       onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
+   }
    
    // length
    little_helper[0] = 0;
