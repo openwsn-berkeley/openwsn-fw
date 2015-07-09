@@ -932,6 +932,10 @@ port_INLINE void activity_ti1ORri1() {
          //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
+            // advance the schedule
+            schedule_advanceSlot();
+            // find the next one
+            ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
          }
 #ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
