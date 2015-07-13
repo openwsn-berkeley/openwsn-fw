@@ -325,6 +325,8 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
          IEEE802154_security_getFrameCounter(l2_frameCounter,
                                             msg->l2_FrameCounter);
       } //otherwise the frame counter is not in the frame
+   } else { // minimal processing for efficiency
+      key = msg->l2_frameType == IEEE154_TYPE_BEACON ? ieee802154_security_vars.Key_1 : ieee802154_security_vars.Key_2;
    }
 
    // First 8 bytes of the nonce are always the source address of the frame
@@ -576,6 +578,8 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
       }
 
       key = keyDescriptor->key;
+   } else { // minimal processing for efficiency
+      key = msg->l2_frameType == IEEE154_TYPE_BEACON ? ieee802154_security_vars.Key_1 : ieee802154_security_vars.Key_2;
    }
 
    // First 8 bytes of the nonce are always the source address of the frame
