@@ -576,7 +576,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
                break;
             }
          }
-         else if (IEEE802154_SECURITY.incomingFrame(ieee154e_vars.dataReceived) != E_SUCCESS) {
+         else { // discard other frames as we cannot decrypt without being synced
             break;
          }
       } // checked if unsecured frame should pass during header retrieval
