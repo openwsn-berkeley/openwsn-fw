@@ -285,12 +285,14 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    uint8_t i;
    uint8_t j;
    uint8_t nonce[13];
-   uint8_t key[16];
+   uint8_t *key;
    owerror_t outStatus;
    uint8_t* a;
    uint8_t len_a;
    uint8_t* m;
    uint8_t len_m;
+   uint8_t vectASN[5];
+   macFrameCounter_t l2_frameCounter;
 
    //the frame counter is carried in the frame, otherwise 1;
    frameCounterSuppression = IEEE154_ASH_FRAMECOUNTER_SUPPRESSED;
@@ -310,14 +312,10 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
       return E_FAIL;
    }
 
-   for (j=0;j<16;j++){
-      key[j] = keyDescriptor->key[j];
-   }
+   key = keyDescriptor->key;
 
-   uint8_t vectASN[5];
-   macFrameCounter_t l2_frameCounter;
-   ieee154e_getAsn(vectASN);//gets asn from mac layer.
    if (frameCounterSuppression == IEEE154_ASH_FRAMECOUNTER_PRESENT){//the frame Counter is carried in the frame
+      ieee154e_getAsn(vectASN);//gets asn from mac layer.
       //save the frame counter of the current frame
       l2_frameCounter.bytes0and1 = vectASN[0]+256*vectASN[1];
       l2_frameCounter.bytes2and3 = vectASN[2]+256*vectASN[3];
@@ -327,15 +325,11 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
                                          msg->l2_FrameCounter);
    } //otherwise the frame counter is not in the frame
 
-   //nonce creation
-   memset(&nonce[0], 0, 13);
-   //first 8 bytes of the nonce are always the source address of the frame
+   // First 8 bytes of the nonce are always the source address of the frame
    memcpy(&nonce[0],idmanager_getMyID(ADDR_64B)->addr_64b,8);
 
-   //Frame Counter (ASN)
-   for (i=0;i<5;i++){
-      nonce[8+i] = vectASN[i];
-   }
+   // Fill the ASN part of the nonce
+   ieee154e_getAsn(&nonce[8]);
 
    //identify data to be authenticated and data to be encrypted
    switch (msg->l2_securityLevel) {
