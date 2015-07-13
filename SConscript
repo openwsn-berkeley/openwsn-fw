@@ -200,7 +200,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3']:
+    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3','openmotestm']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='OpenMote-CC2538':
@@ -238,7 +238,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
         
-    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3']:
+    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3','openmotestm']:
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
