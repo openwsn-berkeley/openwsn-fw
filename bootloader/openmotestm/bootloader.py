@@ -146,12 +146,12 @@ class CommandInterface(object):
     def cmdWriteMemory(self, addr, data):
         assert(len(data) <= 256)
         if self.cmdGeneric(0x31):
-            self.mdebug( "*** Write memory command")
+            # self.mdebug( "*** Write memory command")
             self.sp.write(self._encode_addr(addr))
             self._wait_for_ask("0x31 address failed")
             #map(lambda c: hex(ord(c)), data)
             lng = (len(data)-1) & 0xFF
-            self.mdebug( "    %s bytes to write" % [lng+1]);
+            # self.mdebug( "    %s bytes to write" % [lng+1]);
             self.sp.write(chr(lng)) # len really
             crc = 0xFF
             for c in data:
@@ -159,7 +159,7 @@ class CommandInterface(object):
                 self.sp.write(chr(c))
             self.sp.write(chr(crc))
             self._wait_for_ask("0x31 programming failed")
-            self.mdebug( "    Write memory done")
+            # self.mdebug( "    Write memory done")
         else:
             raise CmdException("Write memory (0x31) failed")
 
@@ -176,8 +176,11 @@ class CommandInterface(object):
                 self.sp.write(chr(0x00))
             else:
                 # Sectors erase
+                # see page 21-24 of AN3155 document at
+                # http://www.st.com/st-web-ui/static/active/en/resource/technical/document/application_note/CD00264342.pdf
                 self.sp.write(chr((len(sectors)-1) & 0xFF))
-                crc = 0xFF
+                # checksum: xor(N,N+1 bytes)
+                crc = len(sectors)-1
                 for c in sectors:
                     crc = crc ^ c
                     self.sp.write(chr(c))
@@ -266,11 +269,13 @@ class CommandInterface(object):
         offs = 0
         while lng > 256:
             self.mdebug( "Write %(len)d bytes at 0x%(addr)X" % {'addr': addr, 'len': 256})
+            sys.stdout.flush()
             self.cmdWriteMemory(addr, data[offs:offs+256])
             offs = offs + 256
             addr = addr + 256
             lng = lng - 256
         self.mdebug( "Write %(len)d bytes at 0x%(addr)X" % {'addr': addr, 'len': 256})
+        sys.stdout.flush()
         self.cmdWriteMemory(addr, data[offs:offs+lng] + ([0xFF] * (256-lng)) )
 
     def __init__(self) :
