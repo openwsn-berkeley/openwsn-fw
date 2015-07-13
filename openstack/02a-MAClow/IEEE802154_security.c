@@ -282,8 +282,6 @@ void IEEE802154_security_prependAuxiliarySecurityHeader(OpenQueueEntry_t* msg){
 owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    uint8_t frameCounterSuppression;
    m_keyDescriptor* keyDescriptor;
-   uint8_t i;
-   uint8_t j;
    uint8_t nonce[13];
    uint8_t *key;
    owerror_t outStatus;
@@ -328,7 +326,7 @@ owerror_t IEEE802154_security_outgoingFrameSecurity(OpenQueueEntry_t*   msg){
    // First 8 bytes of the nonce are always the source address of the frame
    memcpy(&nonce[0],idmanager_getMyID(ADDR_64B)->addr_64b,8);
 
-   // Fill the ASN part of the nonce
+   // Fill last 5 bytes with the ASN part of the nonce
    ieee154e_getAsn(&nonce[8]);
 
    //identify data to be authenticated and data to be encrypted
@@ -504,14 +502,12 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
    m_keyDescriptor*           keyDescriptor;
    m_securityLevelDescriptor* securityLevelDescriptor;
    uint8_t nonce[13];
-   uint8_t i;
-   uint8_t myASN[5];
    owerror_t outStatus;
    uint8_t* a;
    uint8_t len_a;
    uint8_t* c;
    uint8_t len_c;
-
+   uint8_t *key;
    //key descriptor lookup procedure
    keyDescriptor = IEEE802154_security_keyDescriptorLookup(msg->l2_keyIdMode,
                                                           &msg->l2_keySource,
@@ -573,16 +569,12 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
      return E_FAIL;
    }
 
-   //create nonce
-   memset(&nonce[0], 0, 13);
-   //first 8 bytes of the nonce are always the source address of the frame
-   memcpy(&nonce[0],msg->l2_nextORpreviousHop.addr_64b,8);
+   key = keyDescriptor->key;
 
-   //Frame Counter (ASN)
-   ieee154e_getAsn(myASN);
-   for (i=0;i<5;i++){
-      nonce[8+i] = myASN[i];
-   }
+   // First 8 bytes of the nonce are always the source address of the frame
+   memcpy(&nonce[0],msg->l2_nextORpreviousHop.addr_64b, 8);
+   // Fill last 5 bytes with ASN part of the nonce
+   ieee154e_getAsn(&nonce[8]);
 
    //identify data to be authenticated and data to be decrypted
    switch (msg->l2_securityLevel) {
@@ -625,7 +617,7 @@ owerror_t IEEE802154_security_incomingFrame(OpenQueueEntry_t* msg){
                                           &len_c,
                                           nonce,
                                           2,
-                                          keyDescriptor->key,
+                                          key,
                                           msg->l2_authenticationLength);
 
    //verify if any error occurs
