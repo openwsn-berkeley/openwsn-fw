@@ -339,8 +339,8 @@ port_INLINE uint8_t processIE_prependScheduleIE(
          packetfunctions_reserveHeaderSize(pkt,5); 
          pkt->payload[0] = (uint8_t)(cellList[i].tsNum  & 0x00FF);
          pkt->payload[1] = (uint8_t)((cellList[i].tsNum & 0xFF00)>>8);
-         pkt->payload[0] = (uint8_t)(cellList[i].choffset  & 0x00FF);
-         pkt->payload[1] = (uint8_t)((cellList[i].choffset & 0xFF00)>>8);
+         pkt->payload[2] = (uint8_t)(cellList[i].choffset  & 0x00FF);
+         pkt->payload[3] = (uint8_t)((cellList[i].choffset & 0xFF00)>>8);
          pkt->payload[4] = cellList[i].linkoptions;
          len += 5;
          numOfCells++;

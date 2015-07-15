@@ -960,11 +960,11 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          if (error == E_SUCCESS && numOfCells > 0){
              for (i=0;i<numOfCells;i++){
                //TimeSlot 2B
-               cellList[i].tsNum       = (*(ptr))<<8;
-               cellList[i].tsNum      |= *(ptr+1);
+               cellList[i].tsNum       = *(ptr);
+               cellList[i].tsNum      |= (*(ptr+1))<<8;
                //Ch.Offset 2B
-               cellList[i].choffset    = (*(ptr+2))<<8;
-               cellList[i].choffset   |= *(ptr+3);
+               cellList[i].choffset    = *(ptr+2);
+               cellList[i].choffset   |= (*(ptr+3))<<8;
                //LinkOption bitmap 1B
                cellList[i].linkoptions = *(ptr+4);
                ptr += 5;
@@ -994,11 +994,11 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          if(error == E_SUCCESS && numOfCells > 0){
             for (i=0;i<numOfCells;i++){
                //TimeSlot 2B
-               cellList[i].tsNum       = (*(ptr))<<8;
-               cellList[i].tsNum      |= *(ptr+1);
+               cellList[i].tsNum       = *(ptr);
+               cellList[i].tsNum      |= (*(ptr+1))<<8;
                //Ch.Offset 2B
-               cellList[i].choffset    = (*(ptr+2))<<8;
-               cellList[i].choffset   |= *(ptr+3);
+               cellList[i].choffset    = *(ptr+2);
+               cellList[i].choffset   |= (*(ptr+3))<<8;
                //LinkOption bitmap 1B
                cellList[i].linkoptions = *(ptr+4);
                ptr += 5;
