@@ -1557,8 +1557,9 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->creator = COMPONENT_IEEE802154E;
    ieee154e_vars.ackToSend->owner   = COMPONENT_IEEE802154E;
    
-   // calculate the time timeCorrection (this is the time when the packet arrive w.r.t the time it should be.
-   ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
+   // calculate the time timeCorrection (this is the time the sender is off w.r.t to this node. A negative number means
+   // the sender is too late.
+   ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
    
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
@@ -1957,7 +1958,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    
    // calculate new period
    currentPeriod                  =  radio_getTimerPeriod();
-   newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod-timeCorrection);
+   newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod+timeCorrection);
 
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
