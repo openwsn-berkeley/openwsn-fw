@@ -232,6 +232,7 @@ typedef struct {
    uint8_t                   freq;                    // frequency of the current slot
    uint8_t                   asnOffset;               // offset inside the frame
    uint8_t                   singleChannel;           // the single channel used for transmission
+   bool                      singleChannelChanged;    // detect id singleChannelChanged
    uint8_t                   chTemplate[16];          // storing the template of hopping sequence
    // template ID
    uint8_t                   tsTemplateId;            // timeslot template id
