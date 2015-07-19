@@ -44,7 +44,8 @@ void schedule_init() {
    // serial RX slot(s)
    start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
+   running_slotOffset = start_slotOffset;
+   if (NUMSERIALRX != 0) {
       schedule_addActiveSlot(
          running_slotOffset,                    // slot offset
          CELLTYPE_SERIALRX,                     // type of slot
@@ -177,8 +178,14 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
    DISABLE_INTERRUPTS();
    
    schedule_vars.frameLength = newFrameLength;
-   if (newFrameLength <= MAXACTIVESLOTS) {
-      schedule_vars.maxActiveSlots = newFrameLength;
+   if (NUMSERIALRX != 0) {
+      if (newFrameLength <= MAXACTIVESLOTS-1+NUMSERIALRX) {
+         schedule_vars.maxActiveSlots = newFrameLength+1-NUMSERIALRX;
+      }
+   } else {
+      if (newFrameLength <= MAXACTIVESLOTS) {
+         schedule_vars.maxActiveSlots = newFrameLength;
+      }
    }
    ENABLE_INTERRUPTS();
 }
