@@ -182,7 +182,7 @@ void IEEE802154_security_init(void) {
    ieee802154_security_vars.MacDeviceTable.DeviceDescriptorEntry[1].deviceAddress = ieee802154_security_vars.m_macDefaultKeySource;
    ieee802154_security_vars.MacKeyTable.KeyDescriptorElement[1].DeviceTable = &ieee802154_security_vars.MacDeviceTable;
 
-   ieee802154_security_vars.minimal = 0; // full security processing from 15.4 std
+   ieee802154_security_vars.minimal = IEEE802154_SECURITY_MINIMAL_PROC;
 }
 
 //=========================== public ==========================================
