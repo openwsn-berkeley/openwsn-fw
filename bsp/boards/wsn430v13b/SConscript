@@ -14,7 +14,6 @@ cc1101 = localEnv.SConscript(
     os.path.join('#','bsp','chips','cc1101','SConscript'),
     variant_dir    = 'cc1101',
     exports        = {'env': env},
-    duplicate   = 0,
 )
 
 source = [

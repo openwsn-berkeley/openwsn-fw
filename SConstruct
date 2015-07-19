@@ -78,6 +78,11 @@ project:
     forcetopology  Force the topology to the one indicated in the
                    openstack/02a-MAClow/topology.c file.
     noadaptivesync Do not use adaptive synchronization.
+    cryptoengine   Select appropriate crypto engine implementation
+                   (dummy_crypto_engine, firmware_crypto_engine, 
+                   board_crypto_engine).
+    l2_security   Use hop-by-hop encryption and authentication.
+    goldenImage   sniffer, root or none(default)
     
     Common variables:
     verbose        Print each complete compile/link command.
@@ -131,6 +136,9 @@ command_line_options = {
     'forcetopology':    ['0','1'],
     'debug':            ['0','1'],
     'noadaptivesync':   ['0','1'],
+    'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
+    'l2_security':      ['0','1'],
+    'goldenImage':      ['none','root','sniffer'],
 }
 
 def validate_option(key, value, env):
@@ -248,6 +256,13 @@ command_line_vars.AddVariables(
         int,                                               # converter
     ),
     (
+        'cryptoengine',                                    # key
+        '',                                                # help
+        command_line_options['cryptoengine'][0],           # default
+        validate_option,                                   # validator
+        None,                                              # converter
+    ),
+    (
         'debug',                                           # key
         '',                                                # help
         command_line_options['debug'][0],                  # default
@@ -260,6 +275,21 @@ command_line_vars.AddVariables(
         command_line_options['noadaptivesync'][0],         # default
         validate_option,                                   # validator
         int,                                               # converter
+    ),
+    (
+        'l2_security',                                     # key
+        '',                                                # help
+        command_line_options['l2_security'][0],            # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    # create an golden image for interop testing
+    (
+        'goldenImage',                                     # key
+        '',                                                # help
+        command_line_options['goldenImage'][0],            # default
+        validate_option,                                   # validator
+        None,                                              # converter
     ),
     (
         'apps',                                            # key
@@ -297,11 +327,11 @@ Default(env.Command('default', None, default))
 #============================ verbose =========================================
 
 if not env['verbose']:
-   env[    'CCCOMSTR']  = "Compiling $TARGET"
+   env[    'CCCOMSTR']  = "Compiling          $TARGET"
    env[  'SHCCCOMSTR']  = "Compiling (shared) $TARGET"
-   env[    'ARCOMSTR']  = "Archiving $TARGET"
-   env['RANLIBCOMSTR']  = "Indexing  $TARGET"
-   env[  'LINKCOMSTR']  = "Linking   $TARGET"
+   env[    'ARCOMSTR']  = "Archiving          $TARGET"
+   env['RANLIBCOMSTR']  = "Indexing           $TARGET"
+   env[  'LINKCOMSTR']  = "Linking            $TARGET"
    env['SHLINKCOMSTR']  = "Linking (shared)   $TARGET"
 
 #============================ load SConscript's ===============================

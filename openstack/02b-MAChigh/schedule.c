@@ -4,6 +4,7 @@
 #include "openrandom.h"
 #include "packetfunctions.h"
 #include "sixtop.h"
+#include "idmanager.h"
 
 //=========================== variables =======================================
 
@@ -23,60 +24,68 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 \post Call this function before calling any other function in this module.
 */
 void schedule_init() {
-   uint8_t         i;
+   slotOffset_t    start_slotOffset;
    slotOffset_t    running_slotOffset;
    open_addr_t     temp_neighbor;
 
    // reset local variables
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
-   for (i=0;i<MAXACTIVESLOTS;i++) {
-      schedule_resetEntry(&schedule_vars.scheduleBuf[i]);
+   for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
+      schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
    }
    schedule_vars.backoffExponent = MINBE-1;
-
-   // set frame length
-   schedule_setFrameLength(SUPERFRAME_LENGTH);
+   schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
    
-   // start at slot 0
-   running_slotOffset = 0;
-   
-   // advertisement slot(s)
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   for (i=0;i<NUMADVSLOTS;i++) {
-      schedule_addActiveSlot(
-         running_slotOffset,      // slot offset
-         CELLTYPE_ADV,            // type of slot
-         FALSE,                   // shared?
-         0,                       // channel offset
-         &temp_neighbor           // neighbor
-      );
-      running_slotOffset++;
-   } 
-   
-   // shared TXRX anycast slot(s)
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   for (i=0;i<NUMSHAREDTXRX;i++) {
-      schedule_addActiveSlot(
-         running_slotOffset,      // slot offset
-         CELLTYPE_TXRX,           // type of slot
-         TRUE,                    // shared?
-         0,                       // channel offset
-         &temp_neighbor           // neighbor
-      );
-      running_slotOffset++;
+   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+   if (idmanager_getIsDAGroot()==TRUE) {
+      schedule_startDAGroot();
    }
    
    // serial RX slot(s)
+   start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   schedule_addActiveSlot(
-      running_slotOffset,         // slot offset
-      CELLTYPE_SERIALRX,          // type of slot
-      FALSE,                      // shared?
-      0,                          // channel offset
-      &temp_neighbor              // neighbor
-   );
-   running_slotOffset++;
+   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
+      schedule_addActiveSlot(
+         running_slotOffset,                    // slot offset
+         CELLTYPE_SERIALRX,                     // type of slot
+         FALSE,                                 // shared?
+         0,                                     // channel offset
+         &temp_neighbor                         // neighbor
+      );
+   }
+}
+
+/**
+\brief Starting the DAGroot schedule propagation.
+*/
+void schedule_startDAGroot() {
+   slotOffset_t    start_slotOffset;
+   slotOffset_t    running_slotOffset;
+   open_addr_t     temp_neighbor;
+   
+   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+   // set frame length, handle and number (default 1 by now)
+   if (schedule_vars.frameLength == 0) {
+       // slotframe length is not set, set it to default length
+       schedule_setFrameLength(SLOTFRAME_LENGTH);
+   } else {
+       // slotframe elgnth is set, nothing to do here
+   }
+   schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
+   schedule_setFrameNumber(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER);
+
+   // shared TXRX anycast slot(s)
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+   temp_neighbor.type             = ADDR_ANYCAST;
+   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
+      schedule_addActiveSlot(
+         running_slotOffset,                 // slot offset
+         CELLTYPE_TXRX,                      // type of slot
+         TRUE,                               // shared?
+         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
+         &temp_neighbor                      // neighbor
+      );
+   }
 }
 
 /**
@@ -91,7 +100,7 @@ bool debugPrint_schedule() {
    debugScheduleEntry_t temp;
    
    // increment the row just printed
-   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%MAXACTIVESLOTS;
+   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%schedule_vars.maxActiveSlots;
    
    // gather status data
    temp.row                            = schedule_vars.debugPrintRow;
@@ -168,6 +177,38 @@ void schedule_setFrameLength(frameLength_t newFrameLength) {
    DISABLE_INTERRUPTS();
    
    schedule_vars.frameLength = newFrameLength;
+   if (newFrameLength <= MAXACTIVESLOTS) {
+      schedule_vars.maxActiveSlots = newFrameLength;
+   }
+   ENABLE_INTERRUPTS();
+}
+
+/**
+\brief Set frame handle.
+
+\param frameHandle The new frame handle.
+*/
+void schedule_setFrameHandle(uint8_t frameHandle) {
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   schedule_vars.frameHandle = frameHandle;
+   
+   ENABLE_INTERRUPTS();
+}
+
+/**
+\brief Set frame number.
+
+\param frameNumber The new frame number.
+*/
+void schedule_setFrameNumber(uint8_t frameNumber) {
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   schedule_vars.frameNumber = frameNumber;
    
    ENABLE_INTERRUPTS();
 }
@@ -189,7 +230,7 @@ void  schedule_getSlotInfo(
   
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
-   while (slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+   while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
        //check that this entry for that neighbour and timeslot is not already scheduled.
        if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
                //it exists so this is an update.
@@ -204,6 +245,15 @@ void  schedule_getSlotInfo(
    info->link_type                 = CELLTYPE_OFF;
    info->shared                    = FALSE;
    info->channelOffset             = 0;//set to zero if not set.                          
+}
+
+/**
+\brief Get the maximum number of active slots.
+
+\param[out] maximum number of active slots
+*/
+uint16_t  schedule_getMaxActiveSlots() {
+   return schedule_vars.maxActiveSlots;
 }
 
 /**
@@ -234,13 +284,13 @@ owerror_t schedule_addActiveSlot(
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (
          slotContainer->type!=CELLTYPE_OFF &&
-         slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]
+         slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]
       ) {
       slotContainer++;
    }
    
    // abort it schedule overflow
-   if (slotContainer>&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+   if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       ENABLE_INTERRUPTS();
       openserial_printCritical(
          COMPONENT_SCHEDULE,ERR_SCHEDULE_OVERFLOWN,
@@ -318,7 +368,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
    
    // find the schedule entry
    slotContainer = &schedule_vars.scheduleBuf[0];
-   while (slotContainer<=&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+   while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       if (
             slotContainer->slotOffset==slotOffset
             &&
@@ -330,7 +380,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
    }
    
    // abort it could not find
-   if (slotContainer>&schedule_vars.scheduleBuf[MAXACTIVESLOTS-1]) {
+   if (slotContainer>&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
       ENABLE_INTERRUPTS();
       openserial_printCritical(
          COMPONENT_SCHEDULE,ERR_FREEING_ERROR,
@@ -390,7 +440,8 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
       if(slotOffset == scheduleWalker->slotOffset){
-         return FALSE;
+          ENABLE_INTERRUPTS();
+          return FALSE;
       }
       scheduleWalker = scheduleWalker->next;
    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
@@ -398,6 +449,32 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    ENABLE_INTERRUPTS();
    
    return TRUE;
+}
+
+scheduleEntry_t* schedule_statistic_poorLinkQuality(){
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(
+         scheduleWalker->numTx > MIN_NUMTX_FOR_PDR                     &&\
+         PDR_THRESHOLD > 100*scheduleWalker->numTxACK/scheduleWalker->numTx
+      ){
+         break;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   if (scheduleWalker == schedule_vars.currentScheduleEntry){
+       ENABLE_INTERRUPTS();
+       return NULL;
+   } else {
+       ENABLE_INTERRUPTS();
+       return scheduleWalker;
+   }
 }
 
 //=== from IEEE802154E: reading the schedule and updating statistics
@@ -461,6 +538,41 @@ frameLength_t schedule_getFrameLength() {
    return returnVal;
 }
 
+/**
+\brief Get the frame handle.
+
+\returns The frame handle.
+*/
+uint8_t schedule_getFrameHandle() {
+   uint8_t returnVal;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   returnVal = schedule_vars.frameHandle;
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
+
+/**
+\brief Get the frame number.
+
+\returns The frame number.
+*/
+uint8_t schedule_getFrameNumber() {
+   uint8_t returnVal;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   returnVal = schedule_vars.frameNumber;
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
 /**
 \brief Get the type of the current schedule entry.
 

@@ -10,7 +10,7 @@
     <debug>1</debug>
     <settings>
       <name>C-SPY</name>
-      <archiveVersion>4</archiveVersion>
+      <archiveVersion>5</archiveVersion>
       <data>
         <version>26</version>
         <version>27</version>
@@ -58,8 +58,7 @@
         </option>
         <option>
           <name>DdfFileName</name>
-          <state>$TOOLKIT_DIR$\config\MSP430F1611.ddf</state>
-          <state>$TOOLKIT_DIR$\config\debugger\MSP430F1611.ddf</state>
+          <state>$TOOLKIT_DIR$\config\debugger\msp430f1611.ddf</state>
         </option>
         <option>
           <name>ProcTMS</name>
@@ -155,8 +154,13 @@
       <name>430FET</name>
       <archiveVersion>1</archiveVersion>
       <data>
+<<<<<<< .mine
         <version>25</version>
         <version>27</version>
+=======
+        <version>29</version>
+
+>>>>>>> .theirs
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -238,8 +242,13 @@
         </option>
         <option>
           <name>FetConnection</name>
+<<<<<<< .mine
           <version>2</version>
           <version>3</version>
+=======
+          <version>4</version>
+
+>>>>>>> .theirs
           <state>0</state>
         </option>
         <option>
@@ -355,10 +364,25 @@
           <name>eraseTypeSlave</name>
           <state>0</state>
         </option>
+<<<<<<< .mine
         <option>
           <name>SimPspConfigFile</name>
           <state>$TOOLKIT_DIR$\CONFIG\test.psp.config</state>
         </option>
+
+
+
+
+=======
+        <option>
+          <name>DataSampleBpReservation</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>cycleCounterLevel</name>
+          <state>0</state>
+        </option>
+>>>>>>> .theirs
       </data>
     </settings>
     <debuggerPlugins>
@@ -1120,7 +1144,7 @@
     </settings>
     <debuggerPlugins>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\Lcd\lcd.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\lcd\lcd.ewplugin</file>
         <loadFlag>1</loadFlag>
       </plugin>
       <plugin>
@@ -1139,10 +1163,6 @@
       </plugin>
       <plugin>
         <file>$TOOLKIT_DIR$\plugins\rtos\OpenRTOS\OpenRTOSPlugin.ewplugin</file>
-        <loadFlag>0</loadFlag>
-      </plugin>
-      <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\PowerPac\PowerPacRTOS.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>

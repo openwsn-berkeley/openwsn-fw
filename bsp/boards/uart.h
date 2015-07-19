@@ -38,6 +38,9 @@ void    uart_disableInterrupts(void);
 void    uart_clearRxInterrupts(void);
 void    uart_clearTxInterrupts(void);
 void    uart_writeByte(uint8_t byteToWrite);
+#ifdef FASTSIM
+void    uart_writeCircularBuffer_FASTSIM(uint8_t* buffer, uint8_t* outputBufIdxR, uint8_t* outputBufIdxW);
+#endif
 uint8_t uart_readByte(void);
 
 // interrupt handlers

@@ -10,7 +10,7 @@
 
 #include "opentimers.h"
 #include "opendefs.h"
-
+#include "processIE.h"
 //=========================== define ==========================================
 
 enum sixtop_CommandID_num{
@@ -38,9 +38,17 @@ typedef enum {
    SIX_REMOVEREQUEST_RECEIVED          = 0x0a    // I received the remove link request command
 } six2six_state_t;
 
+// before sixtop protocol is called, sixtop handler must be set
+typedef enum {
+   SIX_HANDLER_NONE                    = 0x00, // when complete reservation, handler must be set to none
+   SIX_HANDLER_MAINTAIN                = 0x01, // the handler is maintenance process
+   SIX_HANDLER_OTF                     = 0x02  // the handler is otf
+} six2six_handler_t;
+
 //=========================== typedef =========================================
 
-#define SIX2SIX_TIMEOUT_MS 2000
+#define SIX2SIX_TIMEOUT_MS 4000
+#define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
 
 //=========================== module variables ================================
 
@@ -53,8 +61,10 @@ typedef struct {
    opentimer_id_t       maintenanceTimerId;
    opentimer_id_t       timeoutTimerId;          // TimeOut timer id
    uint16_t             kaPeriod;                // period of sending KA
+   uint16_t             ebPeriod;                // period of sending EB
    six2six_state_t      six2six_state;
    uint8_t              commandID;
+   six2six_handler_t    handler;
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================
@@ -62,9 +72,14 @@ typedef struct {
 // admin
 void      sixtop_init(void);
 void      sixtop_setKaPeriod(uint16_t kaPeriod);
+void      sixtop_setEBPeriod(uint8_t ebPeriod);
+void      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
 void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells);
 void      sixtop_removeCell(open_addr_t*  neighbor);
+void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
+// maintaining
+void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);
 // from upper layer
 owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer

@@ -8,6 +8,7 @@ localEnv = env.Clone()
 sources_h = [
     'board.h',
     'bsp_timer.h',
+    'crypto_engine.h',
     'debugpins.h',
     'eui64.h',
     'leds.h',
@@ -35,14 +36,12 @@ board = localEnv.SConscript(
     os.path.join('#','bsp','boards',localEnv['board'],'SConscript'),
     variant_dir = localEnv['board'],
     exports     = {'env': env},
-    duplicate   = 0,
 )
 
 common = localEnv.SConscript(
     os.path.join('#','bsp','boards','common','SConscript'),
     variant_dir = 'common',
     exports     = {'env': env},
-    duplicate   = 0,
 )
 
 source = [board, common]

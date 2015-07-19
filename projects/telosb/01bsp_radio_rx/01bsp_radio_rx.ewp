@@ -10,9 +10,9 @@
     <debug>1</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>14</archiveVersion>
+      <archiveVersion>17</archiveVersion>
       <data>
-        <version>32</version>
+        <version>33</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -58,11 +58,11 @@
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.h</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430fn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\DLIB\dl430fn.r43</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430fn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -216,6 +216,15 @@
         <option>
           <name>GLockIpe</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>Math variant</name>
+          <version>0</version>
+          <state>0</state>
+        </option>
+        <option>
+          <name>Math description</name>
+          <state></state>
         </option>
       </data>
     </settings>
@@ -704,6 +713,7 @@
       <data>
         <extensions></extensions>
         <cmdline></cmdline>
+        <hasPrio>0</hasPrio>
       </data>
     </settings>
     <settings>
@@ -723,7 +733,7 @@
       <name>XLINK</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>27</version>
+        <version>29</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -798,7 +808,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnk430F1611.xcl</state>
+          <state>$TOOLKIT_DIR$\config\linker\lnk430f1611.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -1019,6 +1029,46 @@
           <name>XlinkIPE</name>
           <state>1</state>
         </option>
+        <option>
+          <name>XlinkLogEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogInputFiles</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogModuleSelection</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogPrintfScanf</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogSegmentSelection</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogStackDepth</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkStackUsageEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkControlFiles</name>
+          <state></state>
+        </option>
+        <option>
+          <name>XlinkCallGraphFileEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkCallGraphFileName</name>
+          <state>$LIST_DIR$\$PROJ_FNAME$.call_graph.cgx</state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -1086,9 +1136,9 @@
     <debug>0</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>14</archiveVersion>
+      <archiveVersion>17</archiveVersion>
       <data>
-        <version>32</version>
+        <version>33</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1292,6 +1342,15 @@
         <option>
           <name>GLockIpe</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>Math variant</name>
+          <version>0</version>
+          <state>0</state>
+        </option>
+        <option>
+          <name>Math description</name>
+          <state></state>
         </option>
       </data>
     </settings>
@@ -1776,6 +1835,7 @@
       <data>
         <extensions></extensions>
         <cmdline></cmdline>
+        <hasPrio>0</hasPrio>
       </data>
     </settings>
     <settings>
@@ -1795,7 +1855,7 @@
       <name>XLINK</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>27</version>
+        <version>29</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -2091,6 +2151,46 @@
           <name>XlinkIPE</name>
           <state>1</state>
         </option>
+        <option>
+          <name>XlinkLogEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogInputFiles</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogModuleSelection</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogPrintfScanf</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogSegmentSelection</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogStackDepth</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkStackUsageEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkControlFiles</name>
+          <state></state>
+        </option>
+        <option>
+          <name>XlinkCallGraphFileEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkCallGraphFileName</name>
+          <state>$LIST_DIR$\$PROJ_FNAME$.call_graph.cgx</state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -2174,7 +2274,16 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420_crypto.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\cc2420_crypto.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\telosb\debugpins.c</name>

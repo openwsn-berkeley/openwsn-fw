@@ -6,7 +6,7 @@
  */
 
 #include "gpio.h"
-#include "source/i2c.h"
+#include "source/i2c_lib.h"
 #include "ioc.h"
 #include "sys_ctrl.h"
 

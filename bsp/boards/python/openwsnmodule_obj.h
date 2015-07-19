@@ -15,6 +15,7 @@
 #include "opentimers_obj.h"
 #include "scheduler_obj.h"
 #include "IEEE802154E_obj.h"
+#include "IEEE802154_security_obj.h"
 #include "adaptive_sync_obj.h"
 #include "neighbors_obj.h"
 #include "processIE_obj.h"
@@ -39,6 +40,27 @@
 //#include "tohlone_obj.h"
 //#include "tohlone_obj.h"
 #include "uecho_obj.h"
+
+//=========================== prototypes ======================================
+
+// radio
+void radio_intr_startOfFrame(OpenMote* self, uint16_t capturedTime);
+void radio_intr_endOfFrame(OpenMote* self, uint16_t capturedTime);
+
+// radiotimer
+void radiotimer_intr_compare(OpenMote* self);
+void radiotimer_intr_overflow(OpenMote* self);
+
+// uart
+void uart_intr_tx(OpenMote* self);
+void uart_intr_rx(OpenMote* self);
+void uart_writeBufferByLen_FASTSIM(OpenMote* self, uint8_t* buffer, uint8_t len);
+
+// supply
+void supply_on(OpenMote* self);
+void supply_off(OpenMote* self);
+
+//=========================== enums ===========================================
 
 // notifications sent from the C mote to the Python BSP
 enum {
@@ -145,6 +167,8 @@ enum {
    MOTE_NOTIF_LAST
 };
 
+//=========================== typedef =========================================
+
 typedef void (*uart_tx_cbt)(OpenMote* self);
 typedef void (*uart_rx_cbt)(OpenMote* self);
 
@@ -173,6 +197,8 @@ typedef struct {
    radiotimer_compare_cbt    compare_cb;
 } radiotimer_icb_t;
 
+//=========================== struct ==========================================
+
 /**
 \brief Memory footprint of an OpenMote instance.
 */
@@ -198,6 +224,7 @@ struct OpenMote {
    schedule_vars_t      schedule_vars;
    // l2a
    adaptive_sync_vars_t adaptive_sync_vars;
+   ieee802154_security_vars_t ieee802154_security_vars;
    ieee154e_vars_t      ieee154e_vars;
    ieee154e_stats_t     ieee154e_stats;
    ieee154e_dbg_t       ieee154e_dbg;

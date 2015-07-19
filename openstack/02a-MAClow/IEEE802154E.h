@@ -15,6 +15,11 @@
 
 //=========================== debug define ====================================
 
+//=========================== static ==========================================
+static const uint8_t chTemplate_default[] = {
+   5,6,12,7,15,4,14,11,8,0,1,2,13,3,9,10
+};
+
 //=========================== define ==========================================
 
 #define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
@@ -22,7 +27,7 @@
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
 #define US_PER_TICK                 30 // number of us per 32kHz clock tick
-#define ADVTIMEOUT                  30 // in seconds: sending ADV every 30 seconds
+#define EBPERIOD                    30 // in seconds: sending EB every 30 seconds
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
@@ -31,46 +36,49 @@
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
-#define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME             (1<<1)
-#define IEEE802154E_DESC_TYPE_LONG                         0x01
-#define IEEE802154E_DESC_TYPE_SHORT                        0x00
+#define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME             (1<<11)
+#define IEEE802154E_PAYLOAD_DESC_TYPE_MLME                 (1<<15)
+#define IEEE802154E_DESC_TYPE_LONG                         (1<<15)
+#define IEEE802154E_DESC_TYPE_SHORT                        (0<<15)
 
-#define IEEE802154E_DESC_TYPE_HEADER_IE                    0x00
-#define IEEE802154E_DESC_TYPE_PAYLOAD_IE                   0x01
+#define IEEE802154E_DESC_TYPE_HEADER_IE                    0x0000
+#define IEEE802154E_DESC_TYPE_PAYLOAD_IE                   0x8000
 //len field on PAYLOAD/HEADER DESC
-#define IEEE802154E_DESC_LEN_HEADER_IE_MASK                0xFE00
-#define IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK               0xFFE0
-
-#define IEEE802154E_DESC_LEN_HEADER_IE_SHIFT               9
-#define IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT              5
+#define IEEE802154E_DESC_LEN_HEADER_IE_MASK                0x007F
+#define IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK               0x07FF
 
 //groupID/elementID field on PAYLOAD/HEADER DESC
-#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK          0x01FE
-#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK           0x001E
+#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK          0x7F80
+#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK           0x7800
 
-#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT         1
-#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT          1
+#define IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT         7
+#define IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT          11
+
+//type field on PAYLOAD/HEADER DESC
+#define IEEE802154E_DESC_TYPE_IE_MASK                      0x8000
+
+#define IEEE802154E_DESC_TYPE_IE_SHIFT                     15
 
 //MLME Sub IE LONG page 83
-#define IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK             0xFFE0
-#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK           0x001E
+#define IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK             0x07FF
+#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK           0x7800
 
-#define IEEE802154E_DESC_LEN_LONG_MLME_IE_SHIFT            5
-#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT          1
+#define IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT          11
 
 //MLME Sub IE SHORT page 82
-#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK            0xFF00
-#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK          0x00FE
+#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK            0x00FF
+#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK          0x7F00
 
-#define IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT           8
-#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT         1
+#define IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT         8
 
 #define IEEE802154E_MLME_SYNC_IE_SUBID                     0x1A
-#define IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT               1
+#define IEEE802154E_MLME_SYNC_IE_SUBID_SHIFT               8
 #define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID           0x1B
-#define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID_SHIFT     1
+#define IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID_SHIFT     8
 #define IEEE802154E_MLME_TIMESLOT_IE_SUBID                 0x1c
-#define IEEE802154E_MLME_TIMESLOT_IE_SUBID_SHIFT           1
+#define IEEE802154E_MLME_TIMESLOT_IE_SUBID_SHIFT           8
+#define IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID           0x09
+#define IEEE802154E_MLME_CHANNELHOPPING_IE_SUBID_SHIFT     11
 
 #define IEEE802154E_MLME_IE_GROUPID                        0x01
 #define IEEE802154E_ACK_NACK_TIMECORRECTION_ELEMENTID      0x1E
@@ -121,17 +129,27 @@ typedef enum {
    S_RXPROC                  = 0x19,   // processing received data
 } ieee154e_state_t;
 
+#define  TIMESLOT_TEMPLATE_ID         0x00
+#define  CHANNELHOPPING_TEMPLATE_ID   0x00
+
 // Atomic durations
 // expressed in 32kHz ticks:
 //    - ticks = duration_in_seconds * 32768
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
+#ifdef GOLDEN_IMAGE_ROOT
+   TsTxOffset                =   70,                  //  2120us
+   TsLongGT                  =   36,                  //  1100us
+   TsTxAckDelay              =   33,                  //  1000us
+   TsShortGT                 =    7,                  //   500us
+#else
    TsTxOffset                =  131,                  //  4000us
    TsLongGT                  =   43,                  //  1300us
    TsTxAckDelay              =  151,                  //  4606us
    TsShortGT                 =   16,                  //   500us
-   TsSlotDuration            =  PORT_TsSlotDuration,  // 15000us
+#endif
+   TsSlotDuration            =  PORT_TsSlotDuration,  // 10000us
    // execution speed related
    maxTxDataPrepare          =  PORT_maxTxDataPrepare,
    maxRxAckPrepare           =  PORT_maxRxAckPrepare,
@@ -141,17 +159,23 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
+#ifdef GOLDEN_IMAGE_ROOT
+   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
+   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+   wdAckDuration             =   80,                  //  2400us (measured 1000us)
+#else
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
+#endif
 };
 
-//shift of bytes in the linkOption bitmap
+//shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
 enum ieee154e_linkOption_enum {
-   FLAG_TX_S                 = 7,
-   FLAG_RX_S                 = 6,
-   FLAG_SHARED_S             = 5,
-   FLAG_TIMEKEEPING_S        = 4,   
+   FLAG_TX_S                 = 0,
+   FLAG_RX_S                 = 1,
+   FLAG_SHARED_S             = 2,
+   FLAG_TIMEKEEPING_S        = 3,   
 };
 
 // FSM timer durations (combinations of atomic durations)
@@ -182,7 +206,7 @@ typedef struct {
 } IEEE802154E_ACK_ht;
 
 // includes payload header IE short + MLME short Header + Sync IE
-#define ADV_PAYLOAD_LENGTH sizeof(payload_IE_ht) + \
+#define EB_PAYLOAD_LENGTH sizeof(payload_IE_ht) + \
                            sizeof(mlme_IE_ht)     + \
                            sizeof(sync_IE_ht)
 
@@ -195,6 +219,7 @@ typedef struct {
    slotOffset_t              nextActiveSlotOffset;    // next active slot offset
    PORT_RADIOTIMER_WIDTH     deSyncTimeout;           // how many slots left before looses sync
    bool                      isSync;                  // TRUE iff mote is synchronized to network
+   OpenQueueEntry_t          localCopyForTransmission;// copy of the frame used for current TX
    // as shown on the chronogram
    ieee154e_state_t          state;                   // state of the FSM
    OpenQueueEntry_t*         dataToSend;              // pointer to the data to send
@@ -206,10 +231,21 @@ typedef struct {
    // channel hopping
    uint8_t                   freq;                    // frequency of the current slot
    uint8_t                   asnOffset;               // offset inside the frame
+   uint8_t                   singleChannel;           // the single channel used for transmission
+   uint8_t                   chTemplate[16];          // storing the template of hopping sequence
+   // template ID
+   uint8_t                   tsTemplateId;            // timeslot template id
+   uint8_t                   chTemplateId;            // channel hopping tempalte id
    
    PORT_RADIOTIMER_WIDTH     radioOnInit;             // when within the slot the radio turns on
    PORT_RADIOTIMER_WIDTH     radioOnTics;             // how many tics within the slot the radio is on
    bool                      radioOnThisSlot;         // to control if the radio has been turned on in a slot.
+   
+   //control
+   bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
+   bool                      isSecurityEnabled;       // whether security is applied
+   // time correction
+   int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
 } ieee154e_vars_t;
 
 BEGIN_PACK
@@ -239,6 +275,11 @@ void               ieee154e_init(void);
 PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
+void               ieee154e_setIsAckEnabled(bool isEnabled);
+void               ieee154e_setSingleChannel(uint8_t channel);
+void               ieee154e_setIsSecurityEnabled(bool isEnabled);
+
+uint16_t           ieee154e_getTimeCorrection(void);
 // events
 void               ieee154e_startOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
