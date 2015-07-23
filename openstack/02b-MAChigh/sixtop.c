@@ -17,7 +17,7 @@
 #include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
-
+#include "pid.h"
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -176,6 +176,8 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    
    memset(cellList,0,sizeof(cellList));
    
+   printf("sixtop_status %d \n",sixtop_vars.six2six_state);
+   
    // filter parameters
    if(sixtop_vars.six2six_state!=SIX_IDLE){
       return;
@@ -188,7 +190,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
        // sxitop handler must not be NONE
        return;
    }
-   
+
    // generate candidate cell list
    outcome = sixtop_candidateAddCellList(
       &type,
@@ -214,6 +216,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    
    // update state
    sixtop_vars.six2six_state  = SIX_SENDING_ADDREQUEST;
+   printf("sixtop_status %d \n",sixtop_vars.six2six_state);
    
    // take ownership
    pkt->creator = COMPONENT_SIXTOP_RES;
@@ -233,7 +236,11 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
        if (sixtop_vars.handler == SIX_HANDLER_OTF) {
            scheduleID_subId = MLME_IE_SUBID_SCHEDULE;
        } else {
-           // any other handler
+           if (sixtop_vars.handler == SIX_HANDLER_PID) {
+              scheduleID_subId = MLME_IE_SUBID_PID;
+           } else {
+               // other component
+           }
        }
    }
    len += processIE_prependScheduleIE(pkt,type,frameID,flag,cellList,scheduleID_subId);
@@ -257,6 +264,8 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
       SIX2SIX_TIMEOUT_MS
    );
    opentimers_restart(sixtop_vars.timeoutTimerId);
+   
+   printf("sixtop_status %d \n",sixtop_vars.six2six_state);
 }
 
 void sixtop_removeCell(open_addr_t* neighbor){
@@ -325,7 +334,11 @@ void sixtop_removeCell(open_addr_t* neighbor){
        if (sixtop_vars.handler == SIX_HANDLER_OTF) {
            scheduleIE_subId = MLME_IE_SUBID_SCHEDULE;
        } else {
-           // if there are anyother handler
+           if (sixtop_vars.handler == SIX_HANDLER_PID) {
+               scheduleIE_subId = MLME_IE_SUBID_PID;
+           } else {
+              // if there are anyother handler
+           }
        }
        
    }
@@ -341,6 +354,8 @@ void sixtop_removeCell(open_addr_t* neighbor){
    
    // update state
    sixtop_vars.six2six_state = SIX_WAIT_REMOVEREQUEST_SENDDONE;
+   
+   printf("sixtop_status %d \n",sixtop_vars.six2six_state);
    
    // arm timeout
    opentimers_setPeriod(
@@ -636,6 +651,29 @@ void task_sixtopNotifReceive() {
          );
          break;
    }
+}
+
+void sixtop_notifyNewSlotframe(void) {
+    scheduler_push_task(sixtop_checkSchedule,TASKPRIO_SIXTOP);
+}
+
+void sixtop_checkSchedule() {
+    int16_t numOfCells;
+    open_addr_t neighborAddress;
+    memset(&neighborAddress,0,sizeof(open_addr_t));
+    if (neighbors_getPreferredParentEui64(&neighborAddress)==FALSE) {
+        return;
+    }
+    //compute cells needed 
+    numOfCells = pid_compute();
+    sixtop_vars.handler = SIX_HANDLER_PID;
+    //reserve cells
+    if (numOfCells > 0) {
+        sixtop_addCells(&neighborAddress,numOfCells);
+        printf("*** +%d *** on node %d\n",numOfCells,idmanager_getMyID(ADDR_64B)->addr_64b[7]);
+    } else {
+        sixtop_removeCell(&neighborAddress);
+    }
 }
 
 //======= debugging
@@ -955,6 +993,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    switch (sixtop_vars.six2six_state) {
       case SIX_WAIT_ADDREQUEST_SENDDONE:
          sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
+         printf("Res request sending done!\n");
          break;
       case SIX_WAIT_ADDRESPONSE_SENDDONE:
          if (error == E_SUCCESS && numOfCells > 0){
@@ -985,7 +1024,11 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                 otf_notif_addedCell();
                 sixtop_vars.handler = SIX_HANDLER_NONE;
              } else {
-                 //other handlers
+                 if (sixtop_vars.handler == SIX_HANDLER_PID) {
+                     sixtop_vars.handler = SIX_HANDLER_NONE;
+                 } else {
+                    //other handlers
+                 }
              }
          }
          
@@ -1072,7 +1115,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
    //now determine sub elements if any
    switch(gr_elem_id){
       //this is the only groupID that we parse. See page 82.  
-      case IEEE802154E_MLME_IE_GROUPID:
+      case IEEE802154E_MLME_IE_GROUPID:  
         //IE content can be any of the sub-IEs. Parse and see which
         do{
            //read sub IE header
@@ -1096,6 +1139,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
               subid = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>
                  IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
            }
+           printf("subId = %d!\n",subid);
            switch(subid){
               case MLME_IE_SUBID_OPCODE:
               processIE_retrieveOpcodeIE(pkt,&ptr,&opcode_ie);
@@ -1107,13 +1151,19 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
               break;
               case MLME_IE_SUBID_SCHEDULE:
               case MLME_IE_SUBID_SCHEDULE_MT:
+              case MLME_IE_SUBID_PID:
+              printf("****** received schedule IE ******\n");
               if (subid == MLME_IE_SUBID_SCHEDULE_MT) {
                   sixtop_vars.handler = SIX_HANDLER_MAINTAIN;
               } else {
                   if (subid == MLME_IE_SUBID_SCHEDULE) {
                       sixtop_vars.handler = SIX_HANDLER_OTF;
                   } else {
-                      // other cases if have
+                      if (subid == MLME_IE_SUBID_PID) {
+                          sixtop_vars.handler = SIX_HANDLER_PID;
+                      } else {
+                          // other cases if have
+                      }
                   }
               }
               processIE_retrieveScheduleIE(pkt,&ptr,&schedule_ie);
@@ -1185,7 +1235,7 @@ void sixtop_notifyReceiveLinkRequest(
    bandwidth_IE_ht* bandwidth_ie, 
    schedule_IE_ht* schedule_ie,
    open_addr_t* addr){
-   
+   printf("sixtop_status %d \n",sixtop_vars.six2six_state);
    uint8_t bw,numOfcells,frameID;
    bool scheduleCellSuccess;
   
@@ -1243,6 +1293,7 @@ void sixtop_linkResponse(
     
    // changing state to resLinkRespone command
    sixtop_vars.six2six_state = SIX_SENDING_ADDRESPONSE;
+   printf("sixtop_status %d \n",sixtop_vars.six2six_state);
     
    // declare ownership over that packet
    sixtopPkt->creator = COMPONENT_SIXTOP_RES;
@@ -1256,7 +1307,11 @@ void sixtop_linkResponse(
        if (sixtop_vars.handler == SIX_HANDLER_OTF) {
            scheduleID_subId = MLME_IE_SUBID_SCHEDULE;
        } else {
-           // any other handler
+           if (sixtop_vars.handler == SIX_HANDLER_PID) {
+               scheduleID_subId = MLME_IE_SUBID_PID;
+           } else {
+               // any other handler
+           }
        }
    }
    // set SubFrameAndLinkIE
@@ -1285,6 +1340,8 @@ void sixtop_linkResponse(
    sixtop_send(sixtopPkt);
   
    sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE_SENDDONE;
+   
+   printf("sixtop_status %d \n",sixtop_vars.six2six_state);
 }
 
 void sixtop_notifyReceiveLinkResponse(
@@ -1297,6 +1354,8 @@ void sixtop_notifyReceiveLinkResponse(
    frameID = schedule_ie->frameID;
    numOfcells = schedule_ie->numberOfcells;
    bw = bandwidth_ie->numOfLinks;
+   
+   printf("sixtop_status %d \n",sixtop_vars.six2six_state);
   
    if(bw == 0){
       // link request failed
@@ -1323,6 +1382,7 @@ void sixtop_notifyReceiveLinkResponse(
    leds_debug_off();
    sixtop_vars.six2six_state = SIX_IDLE;
    sixtop_vars.handler = SIX_HANDLER_NONE;
+   printf("sixtop_status %d \n",sixtop_vars.six2six_state);
   
    opentimers_stop(sixtop_vars.timeoutTimerId);
 }
@@ -1350,7 +1410,11 @@ void sixtop_notifyReceiveRemoveLinkRequest(
            // if sixtop remove request handler is 
            sixtop_vars.handler = SIX_HANDLER_NONE;
        } else {
-           // if any other handlers exist
+           if (sixtop_vars.handler == SIX_HANDLER_PID) {
+               sixtop_vars.handler = SIX_HANDLER_NONE;
+           } else {
+               // if any other handlers exist
+           }
        }
    }
    

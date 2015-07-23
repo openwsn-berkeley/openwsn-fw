@@ -498,7 +498,11 @@ void schedule_advanceSlot() {
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+   if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
+       ) {
+       // one slotframe has elapsed
+      sixtop_notifyNewSlotframe();
+   }   
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    
    ENABLE_INTERRUPTS();
@@ -569,6 +573,31 @@ uint8_t schedule_getFrameNumber() {
    
    returnVal = schedule_vars.frameNumber;
    
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
+
+/**
+\brief Get the number of active slot.
+
+\returns The number of active slot.
+*/
+uint8_t schedule_getNumOfActiveSlot() {
+   uint8_t returnVal = 0;
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(scheduleWalker->type == CELLTYPE_TX){
+          returnVal += 1;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+
    ENABLE_INTERRUPTS();
    
    return returnVal;

@@ -4,6 +4,7 @@
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
 #include "ieee802154_security_driver.h"
+#include "neighbors.h"
 
 //=========================== variables =======================================
 
@@ -152,6 +153,28 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
       }
    }
    ENABLE_INTERRUPTS();
+}
+
+uint16_t openqueue_getNumOfPakcetToParent(){
+   uint8_t i;
+   uint8_t returnVal = 0;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++){
+      if (
+          // do not count the packet received
+          openqueue_vars.queue[i].creator != COMPONENT_IEEE802154E && \
+          openqueue_vars.queue[i].creator != COMPONENT_NULL && \
+          // only the count pakcet ready to be sent
+          openqueue_vars.queue[i].owner == COMPONENT_SIXTOP_TO_IEEE802154E && \
+          openqueue_vars.queue[i].l2_nextORpreviousHop.type ==  ADDR_64B && \
+          neighbors_isPreferredParent(&(openqueue_vars.queue[i].l2_nextORpreviousHop))
+      ) {
+         returnVal += 1;
+      }
+   }
+   ENABLE_INTERRUPTS();
+   return returnVal;
 }
 
 //======= called by RES

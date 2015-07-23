@@ -27,7 +27,7 @@ The superframe repears over time and can be arbitrarly long.
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 #define NUMSERIALRX          1
-#define NUMSLOTSOFF          1
+#define NUMSLOTSOFF          3
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -171,6 +171,7 @@ slotOffset_t       schedule_getNextActiveSlotOffset(void);
 frameLength_t      schedule_getFrameLength(void);
 uint8_t            schedule_getFrameHandle(void);
 uint8_t            schedule_getFrameNumber(void);
+uint8_t            schedule_getNumOfActiveSlot();
 cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset(void);

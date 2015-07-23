@@ -42,7 +42,8 @@ typedef enum {
 typedef enum {
    SIX_HANDLER_NONE                    = 0x00, // when complete reservation, handler must be set to none
    SIX_HANDLER_MAINTAIN                = 0x01, // the handler is maintenance process
-   SIX_HANDLER_OTF                     = 0x02  // the handler is otf
+   SIX_HANDLER_OTF                     = 0x02, // the handler is otf
+   SIX_HANDLER_PID                     = 0x03  // the handler is PID scheduling algorithm 
 } six2six_handler_t;
 
 //=========================== typedef =========================================
@@ -85,6 +86,9 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer
 void      task_sixtopNotifSendDone(void);
 void      task_sixtopNotifReceive(void);
+// interface with pid
+void      sixtop_notifyNewSlotframe(void);
+void      sixtop_checkSchedule();
 // debugging
 bool      debugPrint_myDAGrank(void);
 bool      debugPrint_kaPeriod(void);

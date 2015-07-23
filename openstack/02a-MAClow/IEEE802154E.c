@@ -845,8 +845,6 @@ port_INLINE void activity_ti1ORri1() {
    }
    
    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
-      // this is the next active slot
-      
       // advance the schedule
       schedule_advanceSlot();
       
