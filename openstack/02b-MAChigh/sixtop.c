@@ -706,7 +706,7 @@ owerror_t sixtop_send_internal(
       ) {
       msg->l2_retriesLeft = 1;
    } else {
-      msg->l2_retriesLeft = TXRETRIES;
+      msg->l2_retriesLeft = TXRETRIES + 1;
    }
    // record this packet's dsn (for matching the ACK)
    msg->l2_dsn = sixtop_vars.dsn++;
