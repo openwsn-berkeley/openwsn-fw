@@ -1367,7 +1367,7 @@ bool sixtop_candidateAddCellList(
       uint8_t*     flag,
       cellInfo_ht* cellList
    ){
-   uint8_t i;
+   frameLength_t i;
    uint8_t counter;
    uint8_t numCandCells;
    
