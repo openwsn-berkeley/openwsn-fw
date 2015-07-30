@@ -162,8 +162,7 @@ uint8_t          processIE_prependScheduleIE(
    uint8_t              type,
    uint8_t              frameID,
    uint8_t              flag,
-   cellInfo_ht*         cellList,
-   uint8_t              subId 
+   cellInfo_ht*         cellList
 );
 
 //===== retrieve IEs
