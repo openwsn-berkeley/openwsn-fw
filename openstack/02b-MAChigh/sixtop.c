@@ -1367,7 +1367,7 @@ bool sixtop_candidateAddCellList(
       uint8_t*     flag,
       cellInfo_ht* cellList
    ){
-   uint8_t i;
+   frameLength_t i;
    uint8_t counter;
    uint8_t numCandCells;
    
@@ -1377,7 +1377,7 @@ bool sixtop_candidateAddCellList(
    
    numCandCells=0;
    for(counter=0;counter<SCHEDULEIEMAXNUMCELLS;counter++){
-      i = (openrandom_get16b()&0x07)+ (openrandom_get16b()&0x03);
+      i = openrandom_get16b()%schedule_getFrameLength();
       if(schedule_isSlotOffsetAvailable(i)==TRUE){
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = 0;
