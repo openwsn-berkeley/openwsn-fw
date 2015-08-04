@@ -446,6 +446,27 @@ port_INLINE void activity_synchronize_newSlot() {
       radio_rxNow();
    }
    
+   // if I'm already in S_SYNCLISTEN, while not synchronized,
+   // but the synchronizing channel has been changed,
+   // change the synchronizing channel
+   if ((ieee154e_vars.state==S_SYNCLISTEN) && (ieee154e_vars.singleChannelChanged == TRUE)) {
+      // turn off the radio (in case it wasn't yet)
+      radio_rfOff();
+      
+      // update record of current channel
+      ieee154e_vars.freq = calculateFrequency(ieee154e_vars.singleChannel);
+      
+      // configure the radio to listen to the default synchronizing channel
+      radio_setFrequency(ieee154e_vars.freq);
+      
+      // switch on the radio in Rx mode.
+      radio_rxEnable();
+      ieee154e_vars.radioOnInit=radio_getTimerValue();
+      ieee154e_vars.radioOnThisSlot=TRUE;
+      radio_rxNow();
+      ieee154e_vars.singleChannelChanged = FALSE;
+   }
+   
    // increment ASN (used only to schedule serial activity)
    incrementAsnOffset();
    
@@ -1878,6 +1899,7 @@ void ieee154e_setSingleChannel(uint8_t channel){
         return;
     }
     ieee154e_vars.singleChannel = channel;
+    ieee154e_vars.singleChannelChanged = TRUE;
 }
 
 void ieee154e_setIsSecurityEnabled(bool isEnabled){
