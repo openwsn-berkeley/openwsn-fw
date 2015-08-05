@@ -48,7 +48,7 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-#define SIX2SIX_TIMEOUT_MS 15000
+#define SIX2SIX_TIMEOUT_MS 10000
 #define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
 //#define SIXTOP_DEBUGINFO
 

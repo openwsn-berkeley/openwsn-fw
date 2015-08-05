@@ -216,14 +216,6 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (toNeighbor->type==ADDR_64B) {
-      // looking for a packet created by COMPONENT_SIXTOP_RES first
-      for (i=0;i<QUEUELENGTH;i++) {
-         if (openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES &&
-            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E) {
-            ENABLE_INTERRUPTS();
-            return &openqueue_vars.queue[i];
-         }
-      }
       // a neighbor is specified, look for a packet unicast to that neigbhbor
       for (i=0;i<QUEUELENGTH;i++) {
          if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
@@ -232,7 +224,15 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
             return &openqueue_vars.queue[i];
          }
       }
-   } else if (toNeighbor->type==ADDR_ANYCAST) {
+   } else if (toNeighbor->type==ADDR_ANYCAST) { 
+      // looking for a packet created by COMPONENT_SIXTOP_RES first
+      for (i=0;i<QUEUELENGTH;i++) {
+         if (openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES &&
+            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E) {
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+         }
+      }
       // anycast case: look for a packet which is either not created by RES
       // or an KA (created by RES, but not broadcast)
       for (i=0;i<QUEUELENGTH;i++) {
@@ -242,7 +242,8 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
                    openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
                    packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
                 )
-             )
+             ) && 
+             openqueue_vars.queue[i].creator!=COMPONENT_CSTORM
             ) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];

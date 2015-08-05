@@ -624,10 +624,12 @@ void sixtop_checkSchedule() {
     }
     if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
         ieee154e_getAsn(asn);
-        printf(" ==== Slotframe %d ====\n",(asn[0]+256*asn[1])/schedule_getFrameLength());
-        printf("Number of Tx Cells %d Number of Packets %d\n",schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent());
+//        printf(" ==== Slotframe %d ====\n",(asn[0]+256*asn[1])/schedule_getFrameLength());
+//        printf("Number of Tx Cells %d Number of Packets %d\n",schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent());
+        // slotframe, numOfslot(Tx), numOfpacketInQueue
+        printf("%d, %d, %d\n",(asn[0]+256*asn[1])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent());
         // printf out the status of schedule
-        debugprint_schedule_slotOffset_numOfTx_numOfTxAck();
+//        debugprint_schedule_slotOffset_numOfTx_numOfTxAck();
     }
     //compute cells needed 
     numOfCells = pid_compute();

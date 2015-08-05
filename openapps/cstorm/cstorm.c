@@ -48,11 +48,12 @@ void cstorm_init(void) {
    cstorm_vars.desc.discoverable          = TRUE;
    cstorm_vars.desc.callbackRx            = &cstorm_receive;
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
+   cstorm_vars.busySending                = FALSE;
    opencoap_register(&cstorm_vars.desc);
    
    //start a periodic timer
    //comment : not running by default
-   cstorm_vars.period           = 8000; 
+   cstorm_vars.period           = 1000; 
    
    cstorm_vars.timerId                    = opentimers_start(
       cstorm_vars.period,
@@ -161,6 +162,10 @@ void cstorm_task_cb() {
       return;
    }
    
+   if(cstorm_vars.busySending == TRUE) {
+       return;
+   }
+   
    // if you get here, send a packet
    
    // get a packet
@@ -222,13 +227,17 @@ void cstorm_task_cb() {
       &cstorm_vars.desc
    );
    
+   cstorm_vars.busySending = TRUE;
+   
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
+      cstorm_vars.busySending = FALSE;
    }
 }
 
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
+   cstorm_vars.busySending = FALSE;
 }
 
