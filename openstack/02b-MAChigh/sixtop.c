@@ -179,7 +179,9 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    if(sixtop_vars.six2six_state!=SIX_IDLE){
       return;
    }
+#ifdef SIXTOP_DEBUGINFO
    printf("SIX_IDLE %d\n",sixtop_vars.six2six_state);
+#endif
    if (neighbor==NULL){
       return;
    }
@@ -209,8 +211,9 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    
    // update state
    sixtop_vars.six2six_state  = SIX_SENDING_ADDREQUEST;
+#ifdef SIXTOP_DEBUGINFO
    printf("SIX_SENDING_ADDREQUEST %d\n",sixtop_vars.six2six_state);
-   
+#endif
    // take ownership
    pkt->creator = COMPONENT_SIXTOP_RES;
    pkt->owner   = COMPONENT_SIXTOP_RES;
@@ -244,8 +247,9 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
       SIX2SIX_TIMEOUT_MS
    );
    opentimers_restart(sixtop_vars.timeoutTimerId);
-   
+#ifdef SIXTOP_DEBUGINFO
    printf("SIX_WAIT_ADDREQUEST_SENDDONE %d\n",sixtop_vars.six2six_state);
+#endif
 }
 
 void sixtop_removeCell(open_addr_t* neighbor){
@@ -319,9 +323,9 @@ void sixtop_removeCell(open_addr_t* neighbor){
    
    // update state
    sixtop_vars.six2six_state = SIX_WAIT_REMOVEREQUEST_SENDDONE;
-   
+#ifdef SIXTOP_DEBUGINFO
    printf("SIX_WAIT_REMOVEREQUEST_SENDDONE %d\n",sixtop_vars.six2six_state);
-   
+#endif
    // arm timeout
    opentimers_setPeriod(
       sixtop_vars.timeoutTimerId,
@@ -613,15 +617,23 @@ void sixtop_notifyNewSlotframe(void) {
 void sixtop_checkSchedule() {
     int16_t numOfCells;
     open_addr_t neighborAddress;
+    uint8_t asn[5];
     memset(&neighborAddress,0,sizeof(open_addr_t));
     if (neighbors_getPreferredParentEui64(&neighborAddress)==FALSE) {
         return;
+    }
+    if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
+        ieee154e_getAsn(asn);
+        printf("==== slotframe %d ====\n",(asn[0]+256*asn[1])/schedule_getFrameLength());
+        printf("Number of Tx Cells %d\n",schedule_getNumOfActiveSlot());
+        // printf out the status of schedule
+        debugprint_schedule_slotOffset_numOfTx_numOfTxAck();
     }
     //compute cells needed 
     numOfCells = pid_compute();
     //reserve cells
     if (numOfCells > 0) {
-        printf("*** +%d *** on node %d\n",numOfCells,idmanager_getMyID(ADDR_64B)->addr_64b[7]);
+//        printf("*** +%d *** on node %d\n",numOfCells,idmanager_getMyID(ADDR_64B)->addr_64b[7]);
         sixtop_addCells(&neighborAddress,numOfCells);
     } else {
         sixtop_removeCell(&neighborAddress);
@@ -987,7 +999,9 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             );
          }
          sixtop_vars.six2six_state = SIX_IDLE;
+#ifdef SIXTOP_DEBUGINFO
          printf("SIX_IDLE %d",sixtop_vars.six2six_state);
+#endif
          opentimers_stop(sixtop_vars.timeoutTimerId);
          leds_debug_off();
          if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
@@ -1146,7 +1160,9 @@ void sixtop_notifyReceiveLinkRequest(
    bandwidth_IE_ht* bandwidth_ie, 
    schedule_IE_ht* schedule_ie,
    open_addr_t* addr){
+#ifdef SIXTOP_DEBUGINFO
    printf("SIXTOP_LINKREQUEST_RECEIVED \n");
+#endif
    uint8_t bw,numOfcells,frameID;
    bool scheduleCellSuccess;
   
@@ -1203,8 +1219,9 @@ void sixtop_linkResponse(
     
    // changing state to resLinkRespone command
    sixtop_vars.six2six_state = SIX_SENDING_ADDRESPONSE;
+#ifdef SIXTOP_DEBUGINFO
    printf("SIX_SENDING_ADDRESPONSE %d\n",sixtop_vars.six2six_state);
-    
+#endif
    // declare ownership over that packet
    sixtopPkt->creator = COMPONENT_SIXTOP_RES;
    sixtopPkt->owner   = COMPONENT_SIXTOP_RES;
@@ -1235,8 +1252,9 @@ void sixtop_linkResponse(
    sixtop_send(sixtopPkt);
   
    sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE_SENDDONE;
-   
+#ifdef SIXTOP_DEBUGINFO
    printf("SIX_WAIT_ADDRESPONSE_SENDDONE %d \n",sixtop_vars.six2six_state);
+#endif
 }
 
 void sixtop_notifyReceiveLinkResponse(
@@ -1249,9 +1267,9 @@ void sixtop_notifyReceiveLinkResponse(
    frameID = schedule_ie->frameID;
    numOfcells = schedule_ie->numberOfcells;
    bw = bandwidth_ie->numOfLinks;
-   
+#ifdef SIXTOP_DEBUGINFO
    printf("SIXTOP_RECEIVED_LINKRESPONSE\n");
-  
+#endif
    if(bw == 0){
       // link request failed
       // todo- should inform some one
@@ -1277,8 +1295,9 @@ void sixtop_notifyReceiveLinkResponse(
    leds_debug_off();
    sixtop_vars.six2six_state = SIX_IDLE;
    sixtop_vars.handler = SIX_HANDLER_NONE;
+#ifdef SIXTOP_DEBUGINFO
    printf("SIX_IDLE %d \n",sixtop_vars.six2six_state);
-  
+#endif
    opentimers_stop(sixtop_vars.timeoutTimerId);
 }
 
