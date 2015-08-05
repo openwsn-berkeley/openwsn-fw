@@ -172,6 +172,7 @@ frameLength_t      schedule_getFrameLength(void);
 uint8_t            schedule_getFrameHandle(void);
 uint8_t            schedule_getFrameNumber(void);
 uint8_t            schedule_getNumOfActiveSlot();
+void               debugprint_schedule_slotOffset_numOfTx_numOfTxAck();
 cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset(void);

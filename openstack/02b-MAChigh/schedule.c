@@ -602,6 +602,26 @@ uint8_t schedule_getNumOfActiveSlot() {
    
    return returnVal;
 }
+
+/**
+\brief print relative schedule.
+*/
+void debugprint_schedule_slotOffset_numOfTx_numOfTxAck() {
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(scheduleWalker->type == CELLTYPE_TX){
+          printf("slotOffset %d numOfTx %d numOfTxAck %d\n",scheduleWalker->slotOffset,scheduleWalker->numTx,scheduleWalker->numTxACK);
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+
+   ENABLE_INTERRUPTS();
+}
 /**
 \brief Get the type of the current schedule entry.
 
