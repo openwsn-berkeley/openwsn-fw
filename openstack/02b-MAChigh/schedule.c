@@ -614,7 +614,9 @@ void debugprint_schedule_slotOffset_numOfTx_numOfTxAck() {
    
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
-      if(scheduleWalker->type == CELLTYPE_TX){
+      if(scheduleWalker->type == CELLTYPE_TX || \
+         scheduleWalker->type == CELLTYPE_RX || \
+         scheduleWalker->type == CELLTYPE_TXRX){
           printf("slotOffset %d numOfTx %d numOfTxAck %d\n",scheduleWalker->slotOffset,scheduleWalker->numTx,scheduleWalker->numTxACK);
       }
       scheduleWalker = scheduleWalker->next;

@@ -52,7 +52,7 @@ void cstorm_init(void) {
    
    //start a periodic timer
    //comment : not running by default
-   cstorm_vars.period           = 3000; 
+   cstorm_vars.period           = 8000; 
    
    cstorm_vars.timerId                    = opentimers_start(
       cstorm_vars.period,

@@ -216,6 +216,14 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (toNeighbor->type==ADDR_64B) {
+      // looking for a packet created by COMPONENT_SIXTOP_RES first
+      for (i=0;i<QUEUELENGTH;i++) {
+         if (openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES &&
+            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E) {
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+         }
+      }
       // a neighbor is specified, look for a packet unicast to that neigbhbor
       for (i=0;i<QUEUELENGTH;i++) {
          if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&

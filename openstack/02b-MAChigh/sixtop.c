@@ -622,10 +622,10 @@ void sixtop_checkSchedule() {
     if (neighbors_getPreferredParentEui64(&neighborAddress)==FALSE) {
         return;
     }
-    if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
+    if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
         ieee154e_getAsn(asn);
-        printf("==== slotframe %d ====\n",(asn[0]+256*asn[1])/schedule_getFrameLength());
-        printf("Number of Tx Cells %d\n",schedule_getNumOfActiveSlot());
+        printf(" ==== Slotframe %d ====\n",(asn[0]+256*asn[1])/schedule_getFrameLength());
+        printf("Number of Tx Cells %d Number of Packets %d\n",schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent());
         // printf out the status of schedule
         debugprint_schedule_slotOffset_numOfTx_numOfTxAck();
     }
@@ -1000,7 +1000,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          }
          sixtop_vars.six2six_state = SIX_IDLE;
 #ifdef SIXTOP_DEBUGINFO
-         printf("SIX_IDLE %d",sixtop_vars.six2six_state);
+         printf("SIX_IDLE %d\n",sixtop_vars.six2six_state);
 #endif
          opentimers_stop(sixtop_vars.timeoutTimerId);
          leds_debug_off();
