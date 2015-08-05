@@ -162,9 +162,9 @@ void cstorm_task_cb() {
       return;
    }
    
-   if(cstorm_vars.busySending == TRUE) {
-       return;
-   }
+//   if(cstorm_vars.busySending == TRUE) {
+//       return;
+//   }
    
    // if you get here, send a packet
    

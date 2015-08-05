@@ -163,12 +163,9 @@ uint16_t openqueue_getNumOfPakcetToParent(){
    for (i=0;i<QUEUELENGTH;i++){
       if (
           // do not count the packet received
-          openqueue_vars.queue[i].creator != COMPONENT_IEEE802154E && \
-          openqueue_vars.queue[i].creator != COMPONENT_NULL && \
+          openqueue_vars.queue[i].creator == COMPONENT_CSTORM && \
           // only the count pakcet ready to be sent
-          openqueue_vars.queue[i].owner == COMPONENT_SIXTOP_TO_IEEE802154E && \
-          openqueue_vars.queue[i].l2_nextORpreviousHop.type ==  ADDR_64B && \
-          neighbors_isPreferredParent(&(openqueue_vars.queue[i].l2_nextORpreviousHop))
+          openqueue_vars.queue[i].owner == COMPONENT_SIXTOP_TO_IEEE802154E
       ) {
          returnVal += 1;
       }
