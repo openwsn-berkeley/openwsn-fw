@@ -619,7 +619,10 @@ void sixtop_checkSchedule() {
     open_addr_t neighborAddress;
     uint8_t asn[5];
     memset(&neighborAddress,0,sizeof(open_addr_t));
-    if (neighbors_getPreferredParentEui64(&neighborAddress)==FALSE) {
+    if (
+        neighbors_getPreferredParentEui64(&neighborAddress)==FALSE || \
+        idmanager_getIsDAGroot()
+    ) {
         return;
     }
     //compute cells needed 
@@ -630,7 +633,9 @@ void sixtop_checkSchedule() {
         // slotframe, numOfslot(Tx), numOfpacketInQueue
         printf("%d, %d, %d\n",(asn[0]+256*asn[1])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),pid_result);
 //        debugprint_schedule_slotOffset_numOfTx_numOfTxAck();
+        printf(" calling pid \n");
     }
+    
     //reserve cells
     if (pid_result > TARGET_RANGE) {
         sixtop_addCells(&neighborAddress,1);
@@ -936,6 +941,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
    sixtop_vars.six2six_state = SIX_IDLE;
    sixtop_vars.handler = SIX_HANDLER_NONE;
    opentimers_stop(sixtop_vars.timeoutTimerId);
+   printf("Sixtop Timeout!\n");
 }
 
 void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
@@ -951,6 +957,8 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
   
    if(error == E_FAIL) {
       sixtop_vars.six2six_state = SIX_IDLE;
+      printf("sendone false!\n");
+      opentimers_stop(sixtop_vars.timeoutTimerId);
       openqueue_freePacketBuffer(msg);
       return;
    }
