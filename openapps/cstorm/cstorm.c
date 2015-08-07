@@ -53,7 +53,7 @@ void cstorm_init(void) {
    
    //start a periodic timer
    //comment : not running by default
-   cstorm_vars.period           = 500; 
+   cstorm_vars.period           = 500 + openrandom_get16b()%1500; 
    
    cstorm_vars.timerId                    = opentimers_start(
       cstorm_vars.period,
@@ -239,5 +239,12 @@ void cstorm_task_cb() {
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
    cstorm_vars.busySending = FALSE;
+   // generate next packet with random interval
+   cstorm_vars.period = 500 + openrandom_get16b()%1500; 
+   opentimers_setPeriod(
+      cstorm_vars.timerId,
+      TIME_MS,
+      cstorm_vars.period
+   );
 }
 

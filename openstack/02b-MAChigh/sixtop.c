@@ -635,7 +635,7 @@ void sixtop_checkSchedule() {
     if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
         ieee154e_getAsn(asn);
         // slotframe, numOfslot(Tx), numOfpacketInQueue
-        printf("%d, %d, %d\n",(asn[0]+256*asn[1])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),pid_result);
+        printf("%d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),pid_result);
 //        debugprint_schedule_slotOffset_numOfTx_numOfTxAck();
     }
 #ifdef PID_CELL_USAGE
