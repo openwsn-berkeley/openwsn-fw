@@ -651,7 +651,7 @@ void sixtop_checkSchedule() {
     }
 #else
     //reserve cells
-    if (pid_result > 0) {
+    if (pid_result > 1) {
         sixtop_addCells(&neighborAddress,1);
     } else {
         if (pid_result < 0){
