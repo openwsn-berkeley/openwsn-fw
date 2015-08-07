@@ -625,8 +625,12 @@ void sixtop_checkSchedule() {
     ) {
         return;
     }
+#ifdef PID_CELL_USAGE
     //compute cells needed 
     pid_result = pid_compute_usageOfCell();
+#else
+    pid_result = pid_compute_packetInQueue();
+#endif
     // debug info
     if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
         ieee154e_getAsn(asn);
@@ -634,17 +638,29 @@ void sixtop_checkSchedule() {
         printf("%d, %d, %d\n",(asn[0]+256*asn[1])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),pid_result);
 //        debugprint_schedule_slotOffset_numOfTx_numOfTxAck();
     }
-    
+#ifdef PID_CELL_USAGE
     //reserve cells
-    if (pid_result > TARGET_RANGE) {
+    if (pid_result > TARGET_USAGE_RANGE) {
         sixtop_addCells(&neighborAddress,1);
     } else {
-        if (pid_result < -TARGET_RANGE){
+        if (pid_result < -TARGET_USAGE_RANGE){
          sixtop_removeCell(&neighborAddress);   
         } else {
             // I am in the target range{-TARGET_RANGE, TARGET_RANGE}, nothing to do
         }
     }
+#else
+    //reserve cells
+    if (pid_result > TARGET_PACKET_RANGE) {
+        sixtop_addCells(&neighborAddress,1);
+    } else {
+        if (pid_result < -TARGET_PACKET_RANGE){
+         sixtop_removeCell(&neighborAddress);   
+        } else {
+            // I am in the target range{-TARGET_RANGE, TARGET_RANGE}, nothing to do
+        }
+    }
+#endif
 }
 
 //======= debugging

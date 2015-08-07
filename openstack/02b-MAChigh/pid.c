@@ -9,9 +9,9 @@
 //=========================== define ==========================================
 
 #define PID_ACCURACY                10000 //  each factor = K / PID_ACCURACY   
-#define PID_PROPORTIONAL_GAIN_VALUE  6000 //  Kp = PID_PROPORTIONAL_GAIN_VALUE / PID_ACCURACY
-#define PID_INTEGRAL_GAIN_VALUE        20 //  Ki = PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY
-#define PID_DERIVATIVE_GAIN_VALUE     -20 //  Kd = PID_DERIVATIVE_GAIN_VALUE / PID_ACCURACY
+#define PID_PROPORTIONAL_GAIN_VALUE 10000 //  Kp = PID_PROPORTIONAL_GAIN_VALUE / PID_ACCURACY
+#define PID_INTEGRAL_GAIN_VALUE         1 //  Ki = PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY
+#define PID_DERIVATIVE_GAIN_VALUE       1 //  Kd = PID_DERIVATIVE_GAIN_VALUE / PID_ACCURACY
 
 //=========================== variables =======================================
 
@@ -28,7 +28,7 @@ void pid_init() {
     memset(&pid_vars,0,sizeof(pid_vars_t));
 }
 
-int16_t pid_compute() {
+int16_t pid_compute_packetInQueue() {
     uint8_t i;
     int16_t returnVal;
     // what we desired is no packet in the queue buffer (0) 
