@@ -87,6 +87,7 @@ typedef struct {
    uint8_t         numRx;
    uint8_t         numTx;
    uint8_t         numTxACK;
+   uint8_t         numUsage;
    asn_t           lastUsedAsn;
    void*           next;
 } scheduleEntry_t;
@@ -164,6 +165,8 @@ bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 // return the slot info which has a poor quality
 scheduleEntry_t*  schedule_statistic_poorLinkQuality(void);
 
+int16_t            schedule_getCellUsage();
+
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
 void               schedule_advanceSlot(void);
@@ -183,6 +186,7 @@ void               schedule_indicateTx(
                         asn_t*    asnTimestamp,
                         bool      succesfullTx
                    );
+void               schedule_updateNumUsage();
 
 /**
 \}

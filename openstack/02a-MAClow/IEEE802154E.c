@@ -910,6 +910,8 @@ port_INLINE void activity_ti1ORri1() {
                changeToRX=TRUE;
             }
          } else {
+            // I have packet to send, update the numUsage of current slot
+            schedule_updateNumUsage();
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner

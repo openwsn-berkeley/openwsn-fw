@@ -477,6 +477,35 @@ scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    }
 }
 
+int16_t schedule_getCellUsage() {
+   int16_t usage_percentage = 0;
+   int16_t numUsage = 0;
+   uint8_t numOfActiveSlot = 0;
+   
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(CELLTYPE_TX == scheduleWalker->type){
+          numOfActiveSlot += 1;
+          numUsage += (int16_t)scheduleWalker->numUsage;
+          scheduleWalker->numUsage = 0;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   if (numOfActiveSlot != 0) {
+      usage_percentage = (int16_t)(100*numUsage/(int16_t)numOfActiveSlot);
+   }
+   
+   ENABLE_INTERRUPTS();
+   
+   return usage_percentage;
+}
+
 //=== from IEEE802154E: reading the schedule and updating statistics
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
@@ -788,6 +817,15 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
          schedule_vars.backoff         = openrandom_get16b()%(1<<schedule_vars.backoffExponent);
       }
    }
+   
+   ENABLE_INTERRUPTS();
+}
+                          
+void schedule_updateNumUsage() {
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   schedule_vars.currentScheduleEntry->numUsage++;
    
    ENABLE_INTERRUPTS();
 }

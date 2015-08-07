@@ -615,30 +615,31 @@ void sixtop_notifyNewSlotframe(void) {
 }
 
 void sixtop_checkSchedule() {
-    int16_t numOfCells;
+    int16_t pid_result;
     open_addr_t neighborAddress;
     uint8_t asn[5];
     memset(&neighborAddress,0,sizeof(open_addr_t));
     if (neighbors_getPreferredParentEui64(&neighborAddress)==FALSE) {
         return;
     }
+    //compute cells needed 
+    pid_result = pid_compute_usageOfCell();
+    // debug info
     if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
         ieee154e_getAsn(asn);
-//        printf(" ==== Slotframe %d ====\n",(asn[0]+256*asn[1])/schedule_getFrameLength());
-//        printf("Number of Tx Cells %d Number of Packets %d\n",schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent());
         // slotframe, numOfslot(Tx), numOfpacketInQueue
-        printf("%d, %d, %d\n",(asn[0]+256*asn[1])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent());
-        // printf out the status of schedule
+        printf("%d, %d, %d\n",(asn[0]+256*asn[1])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),pid_result);
 //        debugprint_schedule_slotOffset_numOfTx_numOfTxAck();
     }
-    //compute cells needed 
-    numOfCells = pid_compute();
     //reserve cells
-    if (numOfCells > 0) {
-//        printf("*** +%d *** on node %d\n",numOfCells,idmanager_getMyID(ADDR_64B)->addr_64b[7]);
-        sixtop_addCells(&neighborAddress,numOfCells);
+    if (pid_result > TARGET_RANGE) {
+        sixtop_addCells(&neighborAddress,1);
     } else {
-        sixtop_removeCell(&neighborAddress);
+        if (pid_result < -TARGET_RANGE){
+         sixtop_removeCell(&neighborAddress);   
+        } else {
+            // I am in the target range{-TARGET_RANGE, TARGET_RANGE}, nothing to do
+        }
     }
 }
 

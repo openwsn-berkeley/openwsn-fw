@@ -18,6 +18,11 @@
 #define PID_INTEGRAL_GAIN_VALUE     0 //5.0
 #define PID_DERIVATIVE_GAIN_VALUE   0 //3.0
 
+#define TARGET_CELL_USAGE 80       // unit: percentage. x% cell are used for transmission 
+#define TARGET_RANGE      5        // uint: percentage. +/- 5% fluctuation is allowed
+
+#define TARGET_PACKET_IN_QUEUE 0   // ideal number of packet in queue
+ 
 //=========================== typedef =========================================
 
 //=========================== module variables ================================
@@ -37,6 +42,7 @@ void pid_init();
 
 // notification from sixtop
 int16_t pid_compute();
+int16_t pid_compute_usageOfCell();
 
 void pid_setNeighbor(open_addr_t* address);
 
