@@ -10,8 +10,8 @@
 
 #define PID_ACCURACY                10000 //  each factor = K / PID_ACCURACY   
 #define PID_PROPORTIONAL_GAIN_VALUE 10000 //  Kp = PID_PROPORTIONAL_GAIN_VALUE / PID_ACCURACY
-#define PID_INTEGRAL_GAIN_VALUE         1 //  Ki = PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY
-#define PID_DERIVATIVE_GAIN_VALUE       1 //  Kd = PID_DERIVATIVE_GAIN_VALUE / PID_ACCURACY
+#define PID_INTEGRAL_GAIN_VALUE        20 //  Ki = PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY
+#define PID_DERIVATIVE_GAIN_VALUE    -100 //  Kd = PID_DERIVATIVE_GAIN_VALUE / PID_ACCURACY
 
 //=========================== variables =======================================
 
