@@ -165,7 +165,7 @@ bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 // return the slot info which has a poor quality
 scheduleEntry_t*  schedule_statistic_poorLinkQuality(void);
 
-int16_t            schedule_getCellUsage();
+uint8_t            schedule_getCellUsage();
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);

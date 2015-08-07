@@ -477,9 +477,9 @@ scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    }
 }
 
-int16_t schedule_getCellUsage() {
-   int16_t usage_percentage = 0;
-   int16_t numUsage = 0;
+uint8_t schedule_getCellUsage() {
+   uint16_t usage_percentage = 0;
+   uint8_t numUsage = 0;
    uint8_t numOfActiveSlot = 0;
    
    scheduleEntry_t* scheduleWalker;
@@ -491,14 +491,17 @@ int16_t schedule_getCellUsage() {
    do {
       if(CELLTYPE_TX == scheduleWalker->type){
           numOfActiveSlot += 1;
-          numUsage += (int16_t)scheduleWalker->numUsage;
+          numUsage += scheduleWalker->numUsage;
           scheduleWalker->numUsage = 0;
       }
       scheduleWalker = scheduleWalker->next;
    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
    
    if (numOfActiveSlot != 0) {
-      usage_percentage = (int16_t)(100*numUsage/(int16_t)numOfActiveSlot);
+      usage_percentage = 100*numUsage/(int16_t)numOfActiveSlot;
+   } else {
+      // if no active slot, set usage to 100%
+      usage_percentage = 100;
    }
    
    ENABLE_INTERRUPTS();
