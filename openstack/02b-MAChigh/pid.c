@@ -6,6 +6,13 @@
 #include "schedule.h"
 #include "openqueue.h"
 
+//=========================== define ==========================================
+
+#define PID_ACCURACY                10000 //  each factor = K / PID_ACCURACY   
+#define PID_PROPORTIONAL_GAIN_VALUE  6000 //  Kp = PID_PROPORTIONAL_GAIN_VALUE / PID_ACCURACY
+#define PID_INTEGRAL_GAIN_VALUE        20 //  Ki = PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY
+#define PID_DERIVATIVE_GAIN_VALUE     -20 //  Kd = PID_DERIVATIVE_GAIN_VALUE / PID_ACCURACY
+
 //=========================== variables =======================================
 
 pid_vars_t pid_vars;
@@ -51,9 +58,12 @@ int16_t pid_compute_usageOfCell() {
     }
     pid_vars.errorHistory[0] = pid_vars.prevError * schedule_getFrameLength(); // multiple slotframe for integral calculation
     // calculate the pid
-    returnVal  = PID_PROPORTIONAL_GAIN_VALUE * pid_vars.prevError;
-    returnVal += PID_INTEGRAL_GAIN_VALUE     * pid_integralOperation();
-    returnVal += PID_DERIVATIVE_GAIN_VALUE   * (pid_vars.errorHistory[0]-pid_vars.errorHistory[1])/schedule_getFrameLength();
+    // Kp = PID_PROPORTIONAL_GAIN_VALUE/PID_ACCURACY
+    returnVal  = pid_vars.prevError * PID_PROPORTIONAL_GAIN_VALUE / PID_ACCURACY; 
+    // Ki = PID_INTEGRAL_GAIN_VALUE/PID_ACCURACY
+    returnVal += pid_integralOperation() * PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY; 
+    // Kd = PID_DERIVATIVE_GAIN_VALUE/PID_ACCURACY
+    returnVal += ((pid_vars.errorHistory[0]-pid_vars.errorHistory[1])/schedule_getFrameLength()) * PID_DERIVATIVE_GAIN_VALUE / PID_ACCURACY; 
     
     return returnVal;
 }

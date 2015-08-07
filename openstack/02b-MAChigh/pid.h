@@ -11,18 +11,14 @@
 #include "opendefs.h"
 
 //=========================== define ==========================================
-
+ 
 #define PID_NUM_INTEGRAL_HISTORY    10
 
-#define PID_PROPORTIONAL_GAIN_VALUE 1 //4.0
-#define PID_INTEGRAL_GAIN_VALUE     0 //5.0
-#define PID_DERIVATIVE_GAIN_VALUE   0 //3.0
-
-#define TARGET_CELL_USAGE 80       // unit: percentage. x% cell are used for transmission 
+#define TARGET_CELL_USAGE 90       // unit: percentage. x% cell are used for transmission 
 #define TARGET_RANGE      5        // uint: percentage. +/- 5% fluctuation is allowed
 
 #define TARGET_PACKET_IN_QUEUE 0   // ideal number of packet in queue
- 
+
 //=========================== typedef =========================================
 
 //=========================== module variables ================================
