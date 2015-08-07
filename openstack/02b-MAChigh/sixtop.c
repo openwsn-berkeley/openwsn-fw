@@ -651,13 +651,13 @@ void sixtop_checkSchedule() {
     }
 #else
     //reserve cells
-    if (pid_result > TARGET_PACKET_RANGE) {
+    if (pid_result > 0) {
         sixtop_addCells(&neighborAddress,1);
     } else {
-        if (pid_result < -TARGET_PACKET_RANGE){
+        if (pid_result < 0){
          sixtop_removeCell(&neighborAddress);   
         } else {
-            // I am in the target range{-TARGET_RANGE, TARGET_RANGE}, nothing to do
+            // hit the target, nothing to do
         }
     }
 #endif
