@@ -165,7 +165,8 @@ bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 // return the slot info which has a poor quality
 scheduleEntry_t*  schedule_statistic_poorLinkQuality(void);
 
-uint8_t            schedule_getCellUsage();
+uint8_t            schedule_getCellUsage(void);
+uint8_t            schedule_getSentPacket(void);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
@@ -174,7 +175,7 @@ slotOffset_t       schedule_getNextActiveSlotOffset(void);
 frameLength_t      schedule_getFrameLength(void);
 uint8_t            schedule_getFrameHandle(void);
 uint8_t            schedule_getFrameNumber(void);
-uint8_t            schedule_getNumOfActiveSlot();
+uint8_t            schedule_getNumOfActiveSlot(void);
 cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 channelOffset_t    schedule_getChannelOffset(void);

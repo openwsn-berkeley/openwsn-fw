@@ -509,6 +509,28 @@ uint8_t schedule_getCellUsage() {
    return usage_percentage;
 }
 
+uint8_t schedule_getSentPacket() {
+   uint8_t numUsage = 0;
+   
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(CELLTYPE_TX == scheduleWalker->type){
+          numUsage += scheduleWalker->numUsage;
+          scheduleWalker->numUsage = 0;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   ENABLE_INTERRUPTS();
+   
+   return numUsage;
+}
+
 //=== from IEEE802154E: reading the schedule and updating statistics
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {

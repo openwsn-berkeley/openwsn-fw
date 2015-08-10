@@ -640,7 +640,7 @@ void sixtop_checkSchedule() {
         printf("%d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),cstorm_getPeriod());
 #else
         // slotframe, numOfslot(Tx), numOfpacketInQueue, sent packet, cstorm traffic
-        printf("%d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),schedule_getCellUsage(),cstorm_getPeriod());
+        printf("%d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),schedule_getSentPacket(),cstorm_getPeriod());
 #endif
     }
 #ifdef PID_CELL_USAGE
