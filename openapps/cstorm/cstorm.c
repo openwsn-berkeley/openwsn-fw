@@ -63,6 +63,10 @@ void cstorm_init(void) {
    
 }
 
+uint16_t cstorm_getPeriod() {
+    return cstorm_vars.period;
+}
+
 //=========================== private =========================================
 
 owerror_t cstorm_receive(

@@ -26,6 +26,7 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void cstorm_init(void);
+uint16_t cstorm_getPeriod();
 
 /**
 \}
