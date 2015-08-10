@@ -18,6 +18,7 @@
 #include "idmanager.h"
 #include "schedule.h"
 #include "pid.h"
+#include "cstorm.h"
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -634,8 +635,13 @@ void sixtop_checkSchedule() {
     // debug info
     if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
         ieee154e_getAsn(asn);
-        // slotframe, numOfslot(Tx), numOfpacketInQueue
-        printf("%d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),pid_result);
+#ifdef PID_CELL_USAGE
+        // slotframe, numOfslot(Tx), numOfpacketInQueue, cstorm traffic
+        printf("%d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),cstorm_getPeriod());
+#else
+        // slotframe, numOfslot(Tx), numOfpacketInQueue, sent packet, cstorm traffic
+        printf("%d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),schedule_getCellUsage(),cstorm_getPeriod());
+#endif
     }
 #ifdef PID_CELL_USAGE
     //reserve cells
