@@ -637,7 +637,7 @@ void sixtop_checkSchedule() {
         ieee154e_getAsn(asn);
 #ifdef PID_CELL_USAGE
         // slotframe, numOfslot(Tx), numOfpacketInQueue, cstorm traffic
-        printf("%d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),cstorm_getPeriod());
+        printf("%d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),cstorm_getPeriod());
 #else
         // slotframe, numOfslot(Tx), numOfpacketInQueue, sent packet, cstorm traffic
         printf("%d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),schedule_getSentPacket(),cstorm_getPeriod());
