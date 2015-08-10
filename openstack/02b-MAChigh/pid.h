@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
  
-#define PID_NUM_INTEGRAL_HISTORY    10
+#define PID_NUM_INTEGRAL_HISTORY    25
 
 #define TARGET_CELL_USAGE      90        // unit: percentage. x% cell are used for transmission 
 #define TARGET_USAGE_RANGE      5        // uint: percentage. +/- 5% fluctuation is allowed
