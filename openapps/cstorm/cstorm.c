@@ -10,6 +10,7 @@
 //#include "ADC_Channel.h"
 #include "IEEE802154E.h"
 #include "idmanager.h"
+#include "schedule.h"
 
 //=========================== defines =========================================
 
@@ -19,6 +20,9 @@ static const uint8_t dst_addr[]   = {
    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
+
+#define PACKET_PER_SLOTFRAME  3
+#define SLOTDURATION_MS      15 // 15ms per slot
 
 //=========================== variables =======================================
 
@@ -53,8 +57,8 @@ void cstorm_init(void) {
    
    //start a periodic timer
    //comment : not running by default
-   cstorm_vars.period           = 500; 
-//   cstorm_vars.period           = 500 + openrandom_get16b()%1500; 
+   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / PACKET_PER_SLOTFRAME; 
+//   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / (1+openrandom_get16b()%6); 
    cstorm_vars.timerId                    = opentimers_start(
       cstorm_vars.period,
       TIMER_PERIODIC,TIME_MS,
@@ -244,7 +248,7 @@ void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
    cstorm_vars.busySending = FALSE;
    // generate next packet with random interval
-//   cstorm_vars.period = 500 + openrandom_get16b()%1500; 
+//   cstorm_vars.period = SLOTFRAME_LENGTH * SLOTDURATION_MS / (1+openrandom_get16b()%6); 
 //   opentimers_setPeriod(
 //      cstorm_vars.timerId,
 //      TIME_MS,
