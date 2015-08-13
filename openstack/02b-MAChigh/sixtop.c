@@ -613,9 +613,19 @@ void task_sixtopNotifReceive() {
 void sixtop_notifyNewSlotframe(void) {
     scheduler_push_task(sixtop_checkSchedule,TASKPRIO_SIXTOP);
 }
+static uint8_t slotframe_count = 0;
 
 void sixtop_checkSchedule() {
-    int16_t pid_result;
+    //once every  slotframes
+	if (((slotframe_count)%1)!=0){
+		slotframe_count++;
+		printf("skip slotframe");
+		return;
+	}
+
+	slotframe_count++;
+
+	int16_t pid_result;
     open_addr_t neighborAddress;
     uint8_t asn[5];
     memset(&neighborAddress,0,sizeof(open_addr_t));
@@ -635,7 +645,7 @@ void sixtop_checkSchedule() {
     if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
         ieee154e_getAsn(asn);
         // slotframe, numOfslot(Tx), numOfpacketInQueue
-        printf("%d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),pid_result);
+        printf("%d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),pid_result,openqueue_getNumOfPakcetToParent());
 //        debugprint_schedule_slotOffset_numOfTx_numOfTxAck();
     }
 #ifdef PID_CELL_USAGE
