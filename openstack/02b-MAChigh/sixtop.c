@@ -614,9 +614,19 @@ void task_sixtopNotifReceive() {
 void sixtop_notifyNewSlotframe(void) {
     scheduler_push_task(sixtop_checkSchedule,TASKPRIO_SIXTOP);
 }
+static uint8_t slotframe_count = 0;
 
 void sixtop_checkSchedule() {
-    int16_t pid_result;
+    //once every  slotframes
+	if (((slotframe_count)%1)!=0){
+		slotframe_count++;
+		printf("skip slotframe");
+		return;
+	}
+
+	slotframe_count++;
+
+	int16_t pid_result;
     open_addr_t neighborAddress;
     uint8_t asn[5];
     memset(&neighborAddress,0,sizeof(open_addr_t));
