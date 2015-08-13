@@ -21,7 +21,7 @@ static const uint8_t dst_addr[]   = {
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
 
-#define PACKET_PER_SLOTFRAME  3
+#define PACKET_PER_SLOTFRAME  2
 #define SLOTDURATION_MS      15 // 15ms per slot
 
 //=========================== variables =======================================
@@ -247,12 +247,24 @@ void cstorm_task_cb() {
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
    cstorm_vars.busySending = FALSE;
+
+}
+
+void cstorm_generateNewTraffic() {
+//   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / PACKET_PER_SLOTFRAME; 
    // generate next packet with random interval
-//   cstorm_vars.period = SLOTFRAME_LENGTH * SLOTDURATION_MS / (1+openrandom_get16b()%6); 
-//   opentimers_setPeriod(
-//      cstorm_vars.timerId,
-//      TIME_MS,
-//      cstorm_vars.period
-//   );
+   cstorm_vars.period = SLOTFRAME_LENGTH * SLOTDURATION_MS / (4+openrandom_get16b()%5); 
+   // set cstorm packet generating timer
+   opentimers_setPeriod(
+      cstorm_vars.timerId,
+      TIME_MS,
+      cstorm_vars.period
+   );
+   opentimers_restart(cstorm_vars.timerId);
+}
+
+void cstorm_stop() {
+   cstorm_vars.period = 0xffff;
+   opentimers_stop(cstorm_vars.timerId);
 }
 

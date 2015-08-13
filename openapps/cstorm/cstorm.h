@@ -27,6 +27,8 @@ typedef struct {
 
 void cstorm_init(void);
 uint16_t cstorm_getPeriod();
+void cstorm_generateNewTraffic();
+void cstorm_stop();
 
 /**
 \}
