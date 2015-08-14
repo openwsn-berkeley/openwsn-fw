@@ -679,7 +679,7 @@ void sixtop_checkSchedule() {
             if (pid_result < -3) {
                 sixtop_removeCell(&neighborAddress,3);   
             } else {
-                sixtop_removeCell(&neighborAddress,pid_result);
+                sixtop_removeCell(&neighborAddress,(-pid_result));
             }
         } else {
             // hit the target, nothing to do
