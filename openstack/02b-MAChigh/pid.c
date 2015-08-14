@@ -41,7 +41,7 @@ int16_t pid_compute_packetInQueue() {
     uint8_t i;
     int16_t returnVal;
     // what we desired is no packet in the queue buffer (0) 
-    pid_vars.prevError = openqueue_getNumOfPakcetToParent()-TARGET_PACKET_IN_QUEUE;
+    pid_vars.prevError = openqueue_getNumOfPakcetToParent()-TARGET_PACKET_IN_QUEUE-schedule_getNumOfActiveSlot();
     // udpate the history, elment zero is the newest one
     for (i=0;i<PID_NUM_INTEGRAL_HISTORY-1;i++) {
         pid_vars.errorHistory[PID_NUM_INTEGRAL_HISTORY-i-1] = pid_vars.errorHistory[PID_NUM_INTEGRAL_HISTORY-i-2];
