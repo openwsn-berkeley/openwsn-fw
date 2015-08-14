@@ -92,7 +92,8 @@ bool          sixtop_candidateRemoveCellList(
    uint8_t*             frameID,
    uint8_t*             flag,
    cellInfo_ht*         cellList,
-   open_addr_t*         neighbor
+   open_addr_t*         neighbor,
+   uint16_t             numOfCells
 );
 void          sixtop_addCellsByState(
    uint8_t              slotframeID,
@@ -253,7 +254,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
 #endif
 }
 
-void sixtop_removeCell(open_addr_t* neighbor){
+void sixtop_removeCell(open_addr_t* neighbor,uint16_t numCells){
    OpenQueueEntry_t* pkt;
    bool              outcome;
    uint8_t           len;
@@ -278,7 +279,8 @@ void sixtop_removeCell(open_addr_t* neighbor){
       &frameID,
       &flag, 
       cellList, 
-      neighbor
+      neighbor,
+      numCells
    );
    if(outcome == FALSE){
       return;
@@ -659,7 +661,7 @@ void sixtop_checkSchedule() {
         sixtop_addCells(&neighborAddress,1);
     } else {
         if (pid_result < -TARGET_USAGE_RANGE){
-         sixtop_removeCell(&neighborAddress);   
+         sixtop_removeCell(&neighborAddress,1);   
         } else {
             // I am in the target range{-TARGET_RANGE, TARGET_RANGE}, nothing to do
         }
@@ -674,7 +676,11 @@ void sixtop_checkSchedule() {
         }
     } else {
         if (pid_result < 0){
-         sixtop_removeCell(&neighborAddress);   
+            if (pid_result < -3) {
+                sixtop_removeCell(&neighborAddress,3);   
+            } else {
+                sixtop_removeCell(&neighborAddress,pid_result);
+            }
         } else {
             // hit the target, nothing to do
         }
@@ -1420,29 +1426,35 @@ bool sixtop_candidateRemoveCellList(
       uint8_t*     frameID,
       uint8_t*     flag,
       cellInfo_ht* cellList,
-      open_addr_t* neighbor
+      open_addr_t* neighbor,
+      uint16_t     numOfCells
    ){
    frameLength_t        i;
-   uint8_t              numCandCells;
+   uint8_t              numCandidateCells;
    slotinfo_element_t   info;
    
    *type           = 1;
    *frameID        = schedule_getFrameHandle();
    *flag           = 1;
   
-   numCandCells    = 0;
+   numCandidateCells    = 0;
    for(i=0;i<schedule_getFrameLength();i++){
       schedule_getSlotInfo(i,neighbor,&info);
       if(info.link_type == CELLTYPE_TX){
-         cellList[numCandCells].tsNum       = i;
-         cellList[numCandCells].choffset    = info.channelOffset;
-         cellList[numCandCells].linkoptions = CELLTYPE_TX;
-         numCandCells++;
-         break; // only delete one cell
+         cellList[numCandidateCells].tsNum       = i;
+         cellList[numCandidateCells].choffset    = info.channelOffset;
+         cellList[numCandidateCells].linkoptions = CELLTYPE_TX;
+         numCandidateCells++;
+         if (numCandidateCells == numOfCells || \
+             numCandidateCells == SCHEDULEIEMAXNUMCELLS
+         ) {
+            break;
+         }
       }
    }
    
-   if(numCandCells==0){
+   
+   if(numCandidateCells==0){
       return FALSE;
    }else{
       return TRUE;

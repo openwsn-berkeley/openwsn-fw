@@ -57,6 +57,7 @@ void otf_removeCell_task(void) {
    sixtop_setHandler(SIX_HANDLER_OTF);
    // call sixtop
    sixtop_removeCell(
-      &neighbor
+      &neighbor,
+      1
    );
 }
