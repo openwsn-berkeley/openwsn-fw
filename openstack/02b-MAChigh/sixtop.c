@@ -1233,6 +1233,7 @@ void sixtop_notifyReceiveLinkRequest(
                                             schedule_ie->cellList, 
                                             bw) == FALSE){
       scheduleCellSuccess = FALSE;
+      memset(schedule_ie,0,sizeof(schedule_IE_ht));
    } else {
       scheduleCellSuccess = TRUE;
    }
@@ -1328,7 +1329,6 @@ void sixtop_notifyReceiveLinkResponse(
    if(bw == 0){
       // link request failed
       // todo- should inform some one
-      return;
    } else {
       // need to check whether the links are available to be scheduled.
       if(bw != numOfcells                                                ||
@@ -1398,6 +1398,7 @@ bool sixtop_candidateAddCellList(
    frameLength_t i;
    uint8_t counter;
    uint8_t numCandCells;
+   uint8_t j;
    
    *type = 1;
    *frameID = schedule_getFrameHandle();
@@ -1407,6 +1408,16 @@ bool sixtop_candidateAddCellList(
    for(counter=0;counter<SCHEDULEIEMAXNUMCELLS;counter++){
       i = openrandom_get16b()%schedule_getFrameLength();
       if(schedule_isSlotOffsetAvailable(i)==TRUE){
+         // check whether the new cell is already in cellList
+         for (j=0;j<numCandCells;j++) {
+             if (i == cellList[j].tsNum) {
+                 break;
+             }
+         }
+         if (j<numCandCells) {
+             // slot i is already in cellList
+             break;
+         }
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = 0;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
