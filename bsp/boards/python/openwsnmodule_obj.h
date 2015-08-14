@@ -20,7 +20,6 @@
 #include "neighbors_obj.h"
 #include "processIE_obj.h"
 #include "sixtop_obj.h"
-#include "pid_obj.h"
 #include "schedule_obj.h"
 #include "icmpv6echo_obj.h"
 #include "icmpv6rpl_obj.h"
@@ -221,7 +220,6 @@ struct OpenMote {
    // l3
    // l2b
    sixtop_vars_t        sixtop_vars;
-   pid_vars_t           pid_vars;
    neighbors_vars_t     neighbors_vars;
    schedule_vars_t      schedule_vars;
    // l2a
