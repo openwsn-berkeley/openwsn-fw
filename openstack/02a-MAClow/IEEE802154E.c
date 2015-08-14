@@ -94,6 +94,7 @@ void     changeState(ieee154e_state_t newstate);
 void     endSlot(void);
 bool     debugPrint_asn(void);
 bool     debugPrint_isSync(void);
+void     ieee154e_sendEB(void);
 // interrupts
 void     isr_ieee154e_newSlot(void);
 void     isr_ieee154e_timer(void);
@@ -784,7 +785,7 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             if (schedule_syncSlotOffset(ieee154e_vars.slotOffset)==TRUE) {
                ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
             } else {
-               ieee154e_vars.isSpouriousEB = TRUE;
+               ieee154e_vars.isUnscheduledEB = TRUE;
                ieee154e_vars.nextActiveSlotOffset = schedule_getClosestActiveSlotOffset(ieee154e_vars.slotOffset);
             }
          }
@@ -821,7 +822,7 @@ port_INLINE void activity_ti1ORri1() {
    incrementAsnOffset();
    
    // by default a spouriousEB will not be sent
-   ieee154e_vars.isSpouriousEB = FALSE;
+   ieee154e_vars.isUnscheduledEB = FALSE;
    
    // wiggle debug pins
    debugpins_slot_toggle();
@@ -876,20 +877,8 @@ port_INLINE void activity_ti1ORri1() {
       // check if I can send an EB
       ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
       if (ieee154e_vars.dataToSend != NULL) {
-         ieee154e_vars.isSpouriousEB = TRUE;
-         // change state
-         changeState(S_TXDATAOFFSET);
-         // change owner
-         ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
-         //copy synch IE  -- should be Little endian???
-         // fill in the ASN field of the EB
-         ieee154e_getAsn(sync_IE.asn);
-         sync_IE.join_priority = (neighbors_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
-         memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
-         // record that I attempt to transmit this packet
-         ieee154e_vars.dataToSend->l2_numTxAttempts++;
-         // arm tt1
-         radiotimer_schedule(DURATION_tt1);
+         ieee154e_vars.isUnscheduledEB = TRUE;
+         ieee154e_sendEB();
       } else {
          // abort the slot
          endSlot();
@@ -927,21 +916,18 @@ port_INLINE void activity_ti1ORri1() {
                changeToRX=TRUE;
             }
          } else {
-            // change state
-            changeState(S_TXDATAOFFSET);
-            // change owner
-            ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
             if (couldSendEB==TRUE) {        // I will be sending an EB
-               //copy synch IE  -- should be Little endian???
-               // fill in the ASN field of the EB
-               ieee154e_getAsn(sync_IE.asn);
-               sync_IE.join_priority = (neighbors_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
-               memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
+               ieee154e_sendEB();
+            } else {
+               // change state
+               changeState(S_TXDATAOFFSET);
+               // change owner
+               ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+               // record that I attempt to transmit this packet
+               ieee154e_vars.dataToSend->l2_numTxAttempts++;
+               // arm tt1
+               radiotimer_schedule(DURATION_tt1);
             }
-            // record that I attempt to transmit this packet
-            ieee154e_vars.dataToSend->l2_numTxAttempts++;
-            // arm tt1
-            radiotimer_schedule(DURATION_tt1);
             break;
          }
       case CELLTYPE_RX:
@@ -1012,7 +998,7 @@ port_INLINE void activity_ti2() {
    packetfunctions_reserveFooterSize(&ieee154e_vars.localCopyForTransmission, 2);
    
    // calculate the frequency to transmit on
-   if (ieee154e_vars.isSpouriousEB == TRUE) {
+   if (ieee154e_vars.isUnscheduledEB == TRUE) {
       ieee154e_vars.freq = calculateFrequency(SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET); 
    } else {
       ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
@@ -1119,7 +1105,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // arm tt5
       radiotimer_schedule(DURATION_tt5);
    } else {
-      if (ieee154e_vars.isSpouriousEB == FALSE) {
+      if (ieee154e_vars.isUnscheduledEB == FALSE) {
          // indicate succesful Tx to schedule to keep statistics
          schedule_indicateTx(&ieee154e_vars.asn,TRUE);
       }
@@ -2067,7 +2053,7 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
 void notif_receive(OpenQueueEntry_t* packetReceived) {
    // record the current ASN
    memcpy(&packetReceived->l2_asn, &ieee154e_vars.asn, sizeof(asn_t));
-   if (ieee154e_vars.isSpouriousEB == FALSE) {
+   if (ieee154e_vars.isUnscheduledEB == FALSE) {
       // indicate reception to the schedule, to keep statistics
       schedule_indicateRx(&packetReceived->l2_asn);
    }
@@ -2282,4 +2268,22 @@ void endSlot() {
 
 bool ieee154e_isSynch(){
    return ieee154e_vars.isSync;
+}
+
+void ieee154e_sendEB() {
+   sync_IE_ht  sync_IE;
+   
+   // change state
+   changeState(S_TXDATAOFFSET);
+   // change owner
+   ieee154e_vars.dataToSend->owner = COMPONENT_IEEE802154E;
+   //copy synch IE  -- should be Little endian???
+   // fill in the ASN field of the EB
+   ieee154e_getAsn(sync_IE.asn);
+   sync_IE.join_priority = (neighbors_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
+   memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
+   // record that I attempt to transmit this packet
+   ieee154e_vars.dataToSend->l2_numTxAttempts++;
+   // arm tt1
+   radiotimer_schedule(DURATION_tt1);
 }

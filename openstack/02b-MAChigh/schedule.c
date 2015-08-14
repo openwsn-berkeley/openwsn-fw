@@ -280,6 +280,15 @@ owerror_t schedule_addActiveSlot(
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    
+   if (
+         (channelOffset == SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET)
+         &&
+         ((type == CELLTYPE_TX) || (type == CELLTYPE_RX))
+      ) {
+      ENABLE_INTERRUPTS();
+      return E_FAIL;
+   }
+   
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (
