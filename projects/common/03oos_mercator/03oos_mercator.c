@@ -134,7 +134,7 @@ typedef struct {
    
    //=== RF
    // tx
-   uint8_t         rfbuftx[RF_BUF_LEN];
+   uint8_t         txpk_buf[RF_BUF_LEN];
    uint16_t        txpk_numpk;
    uint8_t         txpk_len;
    uint8_t         txpk_totalnumpk;
@@ -173,7 +173,7 @@ void isr_openserial_rx_mod(void);
 uint16_t htons(uint16_t val);
 
 void cb_endFrame(uint16_t timestamp);
-void cb_sendPacket(void);
+void cb_sendPacket(opentimer_id_t id);
 void cb_finishTx(void);
 
 //=========================== initialization ==================================
@@ -307,15 +307,14 @@ void serial_rx_REQ_IDLE(void) {
    }
    if (mercator_vars.status == ST_TX){
       opentimers_stop(mercator_vars.sendTimerId);
-   } else if (mercator_vars.status == ST_RX){
-      leds_radio_off();
    }
+   leds_radio_off();
    radio_rfOff();
    mercator_vars.status = ST_IDLE;
 }
 
 void serial_rx_REQ_TX(void) {
-   uint16_t pkctr;
+   uint16_t   pkctr;
    REQ_TX_ht* req;
 
    if (mercator_vars.uartbufrxfill!=sizeof(REQ_TX_ht)){
@@ -323,28 +322,39 @@ void serial_rx_REQ_TX(void) {
       mercator_vars.serialNumRxWrongLength++;
       return;
    }
-   mercator_vars.status = ST_TX;
-   mercator_vars.numnotifications = 0;
+   
+   mercator_vars.status             = ST_TX;
+   
+   mercator_vars.numnotifications   = 0;
 
-   req = (REQ_TX_ht*)mercator_vars.uartbufrx;
-
+   req = (REQ_TX_ht*)&mercator_vars.uartbufrx[0];
+   
+   // poipoi
+   req->frequency  = 20;
+   req->txpower    = 0;
+   req->transctr   = 0xaa;
+   req->txnumpk    = 0x0500;
+   req->txifdur    = htons(1000);
+   req->txlength   = 100;
+   req->txfillbyte = 0xbb;
+   
    mercator_vars.txpk_numpk         = 0;
    mercator_vars.txpk_len           = req->txlength;
    mercator_vars.txpk_totalnumpk    = htons(req->txnumpk);
-
-   //prepare packet
-   memcpy(mercator_vars.rfbuftx, mercator_vars.mac, 8);
-   memcpy(&mercator_vars.rfbuftx[8], &req->transctr, 1);
+   
+   // prepare packet
+   memcpy(&mercator_vars.txpk_buf[0],  mercator_vars.mac, 8);
+   memcpy(&mercator_vars.txpk_buf[8],  &req->transctr, 1);
    pkctr = htons(mercator_vars.txpk_numpk);
-   memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
-   memset(mercator_vars.rfbuftx + 11, req->txfillbyte, mercator_vars.txpk_len - 11);
-
+   memcpy(&mercator_vars.txpk_buf[9],  &pkctr, 2);
+   memset(&mercator_vars.txpk_buf[11], req->txfillbyte, mercator_vars.txpk_len-11);
+   
    // prepare radio
    radio_rfOn();
    radio_setFrequency(req->frequency);
    
    // TODO set TX Power
-
+   
    // init opentimers to send packets periodically
    mercator_vars.sendTimerId  = opentimers_start(
       htons(req->txifdur),
@@ -368,8 +378,7 @@ void serial_rx_REQ_RX(void) {
    mercator_vars.rxpk_transctr = req->transctr;
    mercator_vars.rxpk_txfillbyte = req->txfillbyte;
    memcpy(mercator_vars.rxpk_srcmac, req->srcmac, 8);
-
-
+   
    // reset notifications counter
    mercator_vars.numnotifications = 0;
 
@@ -403,7 +412,7 @@ void isr_openserial_tx_mod(void) {
    uint16_t finalCrc;
    
    // led
-   leds_sync_on();
+   leds_error_on();
    
    // write next byte, if any
    if (mercator_vars.uartbuftxfill>0) {
@@ -440,7 +449,7 @@ void isr_openserial_tx_mod(void) {
    }
    
    // led
-   leds_sync_off();
+   leds_error_off();
 }
 
 void inputHdlcWriteMod(uint8_t b) {
@@ -545,8 +554,6 @@ void isr_openserial_rx_mod(void) {
 
 //=========================== callbacks =======================================
 
-
-
 //=========================== callbacks =======================================
 
 //===== radiotimer
@@ -609,19 +616,23 @@ void cb_endFrame(uint16_t timestamp) {
    }
 }
 
-void cb_sendPacket(void){
+void cb_sendPacket(opentimer_id_t id) {
    IND_TXDONE_ht* resp;
    uint16_t pkctr;
-   // send packet
-   leds_error_on();
-
-   radio_loadPacket(mercator_vars.rfbuftx, mercator_vars.txpk_len);
+   
+   // radio LED on
+   leds_radio_on();
+   
+   radio_loadPacket(mercator_vars.txpk_buf,mercator_vars.txpk_len);
    radio_txEnable();
    radio_txNow();
 
-   leds_error_off();
-
-   if (mercator_vars.txpk_numpk == mercator_vars.txpk_totalnumpk) {
+   // radio LED off
+   leds_radio_off();
+   
+   leds_sync_toggle();//poipoi
+   
+   if (mercator_vars.txpk_numpk>=mercator_vars.txpk_totalnumpk-1) {
       opentimers_stop(mercator_vars.sendTimerId);
 
       // finishing TX
@@ -644,6 +655,6 @@ void cb_sendPacket(void){
    // update pkctr
    mercator_vars.txpk_numpk++;
    pkctr = htons(mercator_vars.txpk_numpk);
-   memcpy(mercator_vars.rfbuftx + 9, &pkctr, 2);
+   memcpy(mercator_vars.txpk_buf + 9, &pkctr, 2);
    return;
 }

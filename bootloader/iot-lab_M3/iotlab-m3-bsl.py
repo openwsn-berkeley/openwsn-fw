@@ -4,15 +4,15 @@ import getopt
 import os.path
 from subprocess import call
 
-currentDir = os.path.dirname(os.path.realpath(__file__))
+currentDir         = os.path.dirname(os.path.realpath(__file__))
 
-OOCD_TARGET='stm32f1x'
-OOCD_ITF=os.path.join(currentDir, 'iotlab-m3.cfg')
+OOCD_TARGET        = 'stm32f1x'
+OOCD_ITF           = os.path.join(currentDir, 'iotlab-m3.cfg')
 
-OOCD_PORT = '123'
-GDB_PORT = '3' + OOCD_PORT
-TELNET_PORT = '4' + OOCD_PORT
-TCL_PORT = '5' + OOCD_PORT
+OOCD_PORT          = '123'
+GDB_PORT           = '3' + OOCD_PORT
+TELNET_PORT        = '4' + OOCD_PORT
+TCL_PORT           = '5' + OOCD_PORT
 
 if os.name=='nt':
    extension = '.exe'
@@ -24,7 +24,6 @@ def usage():
 Examples:
     ./%s example/main -p /dev/ttyUSB0 
     """ % (sys.argv[0], sys.argv[0]))
-
 
 # from http://stackoverflow.com/questions/377017/test-if-executable-exists-in-python
 def which(program):
@@ -58,10 +57,11 @@ except getopt.GetoptError as err:
    print str(err) # will print something like "option -a not recognized"
    usage()
    sys.exit(2)
-binary = None
-port = '0'
+
+binary   = None
+port     = '0'
 for o, a in opts:
-   if o in ("-h", "--help"):
+   if   o in ("-h", "--help"):
       usage()
       sys.exit()
    elif o in ("-i", "--input"):
@@ -81,17 +81,21 @@ except:
 if os.name=='nt':
    binary = '{' + binary + '}'
 
-call([OPENOCD,
-   '-f', os.path.join(currentDir, OOCD_ITF),
-   '-f', os.path.join('target', OOCD_TARGET) + '.cfg',
-   '-c', 'gdb_port ' + GDB_PORT,
-   '-c', 'telnet_port ' + TELNET_PORT,
-   '-c', 'tcl_port ' + TCL_PORT,
-   '-c', 'init',
-   '-c', 'targets',
-   '-c', 'reset halt',
-   '-c', 'reset init', 
-   '-c', 'flash write_image erase ' + binary,
-   '-c', 'verify_image ' + binary,
-   '-c', 'reset run',
-   '-c', 'shutdown'])
+call(
+    [
+        OPENOCD,
+        '-f', os.path.join(currentDir, OOCD_ITF),
+        '-f', os.path.join('target', OOCD_TARGET) + '.cfg',
+        '-c', 'gdb_port ' + GDB_PORT,
+        '-c', 'telnet_port ' + TELNET_PORT,
+        '-c', 'tcl_port ' + TCL_PORT,
+        '-c', 'init',
+        '-c', 'targets',
+        '-c', 'reset halt',
+        '-c', 'reset init', 
+        '-c', 'flash write_image erase ' + binary,
+        '-c', 'verify_image ' + binary,
+        '-c', 'reset run',
+        '-c', 'shutdown'
+    ]
+)

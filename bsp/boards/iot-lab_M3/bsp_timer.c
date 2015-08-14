@@ -22,7 +22,7 @@ typedef struct {
    PORT_TIMER_WIDTH last_compare_value;
 } bsp_timer_vars_t;
 
-volatile bsp_timer_vars_t bsp_timer_vars;
+bsp_timer_vars_t bsp_timer_vars;
 
 //=========================== prototypes ======================================
 

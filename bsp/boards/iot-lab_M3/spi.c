@@ -37,7 +37,7 @@ typedef struct {
 #endif
 } spi_vars_t;
 
-volatile spi_vars_t spi_vars;
+spi_vars_t spi_vars;
 
 //=========================== prototypes ======================================
 inline static void RESET_CLR(void) { GPIOC->BRR = 1<<1; }

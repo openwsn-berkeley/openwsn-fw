@@ -18,7 +18,7 @@ typedef struct {
    rtc_timer_alarm_cbt    alarm_cb;
 } rtc_timer_vars_t;
 
-volatile rtc_timer_vars_t rtc_timer_vars;
+rtc_timer_vars_t rtc_timer_vars;
 
 //=========================== prototypes ======================================
 

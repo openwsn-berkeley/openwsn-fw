@@ -8,7 +8,6 @@ On openmoteSTM32, we use RTC for the radiotimer module.
 */
 
 #include "stdint.h"
-
 #include "stm32f10x_lib.h"
 #include "leds.h"
 #include "radiotimer.h"
@@ -33,7 +32,7 @@ typedef struct {
    uint16_t                  currentSlotPeriod;
 } radiotimer_vars_t;
 
-volatile radiotimer_vars_t radiotimer_vars;
+radiotimer_vars_t radiotimer_vars;
 
 //=========================== prototypes ======================================
 
