@@ -649,10 +649,10 @@ void sixtop_checkSchedule() {
         ieee154e_getAsn(asn);
 #ifdef PID_CELL_USAGE
         // slotframe, numOfslot(Tx), numOfpacketInQueue, cstorm traffic
-        printf("%d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),cstorm_getPeriod());
+        printf("%d, %d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),cstorm_getPeriod(),pid_result);
 #else
-        // slotframe, numOfslot(Tx), numOfpacketInQueue, sent packet, cstorm traffic
-        printf("%d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),schedule_getSentPacket(),cstorm_getPeriod());
+        // slotframe, numOfslot(Tx), numOfpacketInQueue, sent packet, cstorm traffic, pid_error
+        printf("%d, %d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),schedule_getSentPacket(),cstorm_getPeriod(),pid_result);
 #endif
     }
 #ifdef PID_CELL_USAGE
@@ -669,15 +669,15 @@ void sixtop_checkSchedule() {
 #else
     //reserve cells
     if (pid_result > 1) {
-        if (pid_result > 3) {
-            sixtop_addCells(&neighborAddress,3);
+        if (pid_result > SCHEDULEIEMAXNUMCELLS) {
+            sixtop_addCells(&neighborAddress,SCHEDULEIEMAXNUMCELLS);
         } else {
             sixtop_addCells(&neighborAddress,pid_result);
         }
     } else {
         if (pid_result < 0){
-            if (pid_result < -3) {
-                sixtop_removeCell(&neighborAddress,3);   
+            if (pid_result < -SCHEDULEIEMAXNUMCELLS) {
+                sixtop_removeCell(&neighborAddress,SCHEDULEIEMAXNUMCELLS);   
             } else {
                 sixtop_removeCell(&neighborAddress,(-pid_result));
             }
