@@ -901,7 +901,7 @@ port_INLINE void activity_ti1ORri1() {
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+            if (ieee154e_vars.dataToSend==NULL) {
                couldSendEB=TRUE;
                // look for an EB packet in the queue
                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
@@ -917,6 +917,9 @@ port_INLINE void activity_ti1ORri1() {
             }
          } else {
             if (couldSendEB==TRUE) {        // I will be sending an EB
+               if (cellType==CELLTYPE_TX) {
+                  ieee154e_vars.isUnscheduledEB = TRUE;
+               }
                ieee154e_sendEB();
             } else {
                // change state
