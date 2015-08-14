@@ -667,7 +667,11 @@ void sixtop_checkSchedule() {
 #else
     //reserve cells
     if (pid_result > 1) {
-        sixtop_addCells(&neighborAddress,1);
+        if (pid_result > 3) {
+            sixtop_addCells(&neighborAddress,3);
+        } else {
+            sixtop_addCells(&neighborAddress,pid_result);
+        }
     } else {
         if (pid_result < 0){
          sixtop_removeCell(&neighborAddress);   
