@@ -687,7 +687,10 @@ void sixtop_checkSchedule() {
     }
 #endif
     // update the cstorm traffic generating rate
-    if (((asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength())%10 == 0) {
+    if (((asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength())%50 == 1 || \
+        ((asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength())%50 == 2 || \
+        ((asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength())%50 == 3
+        ) {
         cstorm_generateNewTraffic();
     } else {
         cstorm_stop();

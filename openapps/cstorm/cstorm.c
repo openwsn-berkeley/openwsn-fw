@@ -253,7 +253,7 @@ void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 void cstorm_generateNewTraffic() {
 //   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / PACKET_PER_SLOTFRAME; 
    // generate next packet with random interval
-   cstorm_vars.period = SLOTFRAME_LENGTH * SLOTDURATION_MS / (1+openrandom_get16b()%8); 
+   cstorm_vars.period = SLOTFRAME_LENGTH * SLOTDURATION_MS / (3+openrandom_get16b()%3); 
    // set cstorm packet generating timer
    opentimers_setPeriod(
       cstorm_vars.timerId,
