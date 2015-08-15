@@ -15,7 +15,7 @@
 #define TARGET_CELL_USAGE      90        // unit: percentage. x% cell are used for transmission 
 #define TARGET_USAGE_RANGE      5        // uint: percentage. +/- 5% fluctuation is allowed
 
-#define TARGET_PACKET_IN_QUEUE  1        // ideal number of packet in queue
+#define TARGET_PACKET_IN_QUEUE  0        // ideal number of packet in queue
 
 //#define PID_CELL_USAGE  // using packet to do pid calculation
 

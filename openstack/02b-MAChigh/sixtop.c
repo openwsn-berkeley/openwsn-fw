@@ -668,7 +668,7 @@ void sixtop_checkSchedule() {
     }
 #else
     //reserve cells
-    if (pid_result > 1) {
+    if (pid_result > 0) {
         if (pid_result > SCHEDULEIEMAXNUMCELLS) {
             sixtop_addCells(&neighborAddress,SCHEDULEIEMAXNUMCELLS);
         } else {

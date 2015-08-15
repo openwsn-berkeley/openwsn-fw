@@ -6,7 +6,7 @@
 //=========================== define ==========================================
 
 // maximum of cells in a Schedule IE
-#define SCHEDULEIEMAXNUMCELLS 3
+#define SCHEDULEIEMAXNUMCELLS 10
 
 // subIE shift
 #define MLME_IE_SUBID_SHIFT            8

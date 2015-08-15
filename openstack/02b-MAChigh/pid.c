@@ -9,11 +9,11 @@
 //=========================== define ==========================================
 
 #define PID_ACCURACY                10000 //  each factor = K / PID_ACCURACY   
-#define PID_PROPORTIONAL_GAIN_VALUE 10000 //  Kp = PID_PROPORTIONAL_GAIN_VALUE / PID_ACCURACY
-#define PID_INTEGRAL_GAIN_VALUE         0 //  Ki = PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY
+#define PID_PROPORTIONAL_GAIN_VALUE  8000 //  Kp = PID_PROPORTIONAL_GAIN_VALUE / PID_ACCURACY
+#define PID_INTEGRAL_GAIN_VALUE         8 //  Ki = PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY
 #define PID_DERIVATIVE_GAIN_VALUE       0 //  Kd = PID_DERIVATIVE_GAIN_VALUE / PID_ACCURACY
 
-#define PID_NUM_INTEGRAL_HISTORY    25
+#define PID_NUM_INTEGRAL_HISTORY    10
 
 //=========================== variables =======================================
 
