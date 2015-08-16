@@ -18,8 +18,6 @@ void idmanager_init() {
    
    // reset local variables
    memset(&idmanager_vars, 0, sizeof(idmanager_vars_t));
-   // this is used to not wakeup in non-activeslot
-   idmanager_vars.slotSkip             = FALSE;
    
    // isDAGroot
 #ifdef DAGROOT
@@ -73,16 +71,6 @@ void idmanager_setIsDAGroot(bool newRole) {
    neighbors_updateMyDAGrankAndNeighborPreference();
    schedule_startDAGroot();
    ENABLE_INTERRUPTS();
-}
-
-bool idmanager_getIsSlotSkip() {
-   bool res;
-   INTERRUPT_DECLARATION();
-   
-   DISABLE_INTERRUPTS();
-   res=idmanager_vars.slotSkip;
-   ENABLE_INTERRUPTS();
-   return res;
 }
 
 open_addr_t* idmanager_getMyID(uint8_t type) {
@@ -206,7 +194,6 @@ void idmanager_triggerAboutRoot() {
    switch (input_buffer[0]) {
      case ACTION_YES:
         idmanager_setIsDAGroot(TRUE);
-        idmanager_vars.slotSkip = FALSE;
         break;
      case ACTION_NO:
         idmanager_setIsDAGroot(FALSE);
@@ -214,7 +201,6 @@ void idmanager_triggerAboutRoot() {
      case ACTION_TOGGLE:
         if (idmanager_getIsDAGroot()) {
            idmanager_setIsDAGroot(FALSE);
-           idmanager_vars.slotSkip = FALSE;
         } else {
            idmanager_setIsDAGroot(TRUE);
         }

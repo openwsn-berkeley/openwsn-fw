@@ -870,7 +870,7 @@ port_INLINE void activity_ti1ORri1() {
       
       // find the next one
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-      if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
+      if (idmanager_getIsDAGroot()==FALSE) {
           if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
               numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
           } else {
