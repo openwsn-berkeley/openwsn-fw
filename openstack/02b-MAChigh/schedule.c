@@ -538,7 +538,7 @@ slotOffset_t schedule_getNextActiveSlotOffset() {
 }
 
 /**
-\brief return slotOffset of closest active slot
+\brief return slotOffset of future closest active slot; called by ieee154e_processIEs
 */
 slotOffset_t schedule_getClosestActiveSlotOffset(slotOffset_t targetSlotOffset) {
    scheduleEntry_t*  previousSlotWalker;
