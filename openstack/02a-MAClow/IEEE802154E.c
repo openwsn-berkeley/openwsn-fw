@@ -1923,24 +1923,21 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    PORT_SIGNED_INT_WIDTH timeCorrection;
    PORT_RADIOTIMER_WIDTH newPeriod;
    PORT_RADIOTIMER_WIDTH currentValue;
-   PORT_RADIOTIMER_WIDTH currentPeriod;
    
    // record the current timer value and period
    currentValue                   =  radio_getTimerValue();
-   currentPeriod                  =  radio_getTimerPeriod();
    
    // calculate new period
    timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
-
-   newPeriod                      =  TsSlotDuration;
    
-   // detect whether I'm too close to the edge of the slot, in that case,
-   // skip a slot and increase the temporary slot length to be 2 slots long
-   if (currentValue<timeReceived || currentPeriod-currentValue<RESYNCHRONIZATIONGUARD) {
-      newPeriod                  +=  TsSlotDuration;
-      incrementAsnOffset();
+   // detect whether I'm too close to the edge of the slot
+   if (currentValue<timeReceived) {
+      // if here, timeCorrection will be for sure positive
+      // this condition can be triggered only when the mote has received the first EB
+      newPeriod = (PORT_RADIOTIMER_WIDTH)timeCorrection;
+   } else {
+      newPeriod = (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)TsSlotDuration + timeCorrection);
    }
-   newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)newPeriod+timeCorrection);
    
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
