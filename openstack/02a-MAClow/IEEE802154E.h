@@ -245,7 +245,9 @@ typedef struct {
    //control
    bool                      isAckEnabled;            // whether reply for ack, used for synchronization test
    bool                      isSecurityEnabled;       // whether security is applied
-   bool                      isUnscheduledEB;           // whether a cell is being used for sending a spourious EB
+   bool                      isUnscheduledEB;         // whether a cell is being used for sending an unscheduled EB
+   uint16_t                  numSkippedSlots;         // number of slots skipped 
+   bool                      serialInputOutput;       // start Inputting (1) or Outputting (0) on the serial
    // time correction
    int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
 } ieee154e_vars_t;

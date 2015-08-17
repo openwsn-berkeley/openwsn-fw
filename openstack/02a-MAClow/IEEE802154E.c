@@ -16,6 +16,7 @@
 #include "sixtop.h"
 #include "adaptive_sync.h"
 #include "processIE.h"
+#include "openrandom.h"
 
 //=========================== variables =======================================
 
@@ -811,15 +812,19 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
 //======= TX
 
 port_INLINE void activity_ti1ORri1() {
-   cellType_t  cellType;
-   open_addr_t neighbor;
-   uint8_t     i;
-   bool        changeToRX=FALSE;
-   bool        couldSendEB=FALSE;
-   uint16_t    numOfSleepSlots;     
-
+   cellType_t        cellType;
+   open_addr_t       neighbor;
+   OpenQueueEntry_t* availableEB;
+   bool              f_wakeUpForUnscheduledTask;
+   
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
+   
+   // stop serial activity
+   openserial_stop();
+   
+   // next off cell will be used for outputting the serial if they have been inputting and viceversa
+   ieee154e_vars.serialInputOutput ^= TRUE;
    
    // by default a spouriousEB will not be sent
    ieee154e_vars.isUnscheduledEB = FALSE;
@@ -862,42 +867,50 @@ port_INLINE void activity_ti1ORri1() {
       return;
    }
    
+   // check if an EB is available in the queue
+   availableEB = openqueue_macGetEBPacket();
+   f_wakeUpForUnscheduledTask = FALSE;
    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
-      // this is the next active slot
-      
+      // This is the next active slot
       // advance the schedule
       schedule_advanceSlot();
-      
       // find the next one
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
-      if (idmanager_getIsDAGroot()==FALSE) {
-          if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-              numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
-          } else {
-              numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
-          }
-          
-          radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
-           
-          //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
-          for (i=0;i<numOfSleepSlots-1;i++){
-             incrementAsnOffset();
-          }
-      }
    } else {
-      // this is NOT the next active slot
-      // stop using serial
-      openserial_stop();
-      // check if I can send an EB
-      ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-      if (ieee154e_vars.dataToSend != NULL) {
+      // Being here means that:
+      // 1. this mote is not a DAGroot and an EB was present into the queue 
+      //    during the previous active slot; in that slot another packet was 
+      //    available to be sent, so the EB should still be present into the queue
+      // 2. the mote just joined the network and the slotskip optimization has
+      //    not been enabled yet
+      // 3. this mote is DAGroot, so the slotskip optimization is not enabled
+      // This is NOT the next active slot
+      f_wakeUpForUnscheduledTask = TRUE;
+      // Check if an EB is in the queue
+      if (availableEB != NULL) {
+         // yes, it is (case 1 and possibly 3)
+         ieee154e_vars.dataToSend = availableEB;
          ieee154e_vars.isUnscheduledEB = TRUE;
          ieee154e_sendEB();
-      } else {
+      }
+   }
+   
+   // compute the number of slots to be skipped (if this mote is not DAGroot)
+   ieee154e_vars.numSkippedSlots = 0;
+   if (idmanager_getIsDAGroot()==FALSE) {
+      if (ieee154e_vars.nextActiveSlotOffset <= ieee154e_vars.slotOffset) {
+         ieee154e_vars.numSkippedSlots += schedule_getFrameLength();
+      }
+      ieee154e_vars.numSkippedSlots += 
+               ieee154e_vars.nextActiveSlotOffset - ieee154e_vars.slotOffset - 1;
+   }
+   
+   // if the mote was waken up for unscheduled tasks, this function terminates here
+   if (f_wakeUpForUnscheduledTask) {
+      if (availableEB == NULL) {
+         // no unscheduled EB (case 2 and possibly 3)
          // abort the slot
          endSlot();
-         //start outputing serial
-         openserial_startOutput();
       }
       return;
    }
@@ -907,8 +920,6 @@ port_INLINE void activity_ti1ORri1() {
    switch (cellType) {
       case CELLTYPE_TXRX:
       case CELLTYPE_TX:
-         // stop using serial
-         openserial_stop();
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
          // check whether we can send
@@ -916,21 +927,29 @@ port_INLINE void activity_ti1ORri1() {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
             if (ieee154e_vars.dataToSend==NULL) {
-               couldSendEB=TRUE;
-               // look for an EB packet in the queue
-               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+               ieee154e_vars.dataToSend = availableEB;
+            } else {
+               // being here means that I will transmit any packet but not EBs
+               if (availableEB != NULL) {
+                  // compute a random timeslot among the next OFF timeslots for sending the EB
+                  if (ieee154e_vars.numSkippedSlots > 0) {
+                     ieee154e_vars.numSkippedSlots = openrandom_get16b() % ieee154e_vars.numSkippedSlots;
+                  }
+               }
+               // setting availableEB to NULL, so that it can be used as "bool" variable in what follows
+               availableEB = NULL;
             }
          }
          if (ieee154e_vars.dataToSend==NULL) {
             if (cellType==CELLTYPE_TX) {
                // abort
                endSlot();
+               // break here if cellType is TX
                break;
-            } else {
-               changeToRX=TRUE;
             }
+            // being here means that this cell is TXRX, the clause CELLTYPE_RX will be executed
          } else {
-            if (couldSendEB==TRUE) {        // I will be sending an EB
+            if (availableEB != NULL) {        // I will be sending an EB
                if (cellType==CELLTYPE_TX) {
                   ieee154e_vars.isUnscheduledEB = TRUE;
                }
@@ -948,41 +967,12 @@ port_INLINE void activity_ti1ORri1() {
             break;
          }
       case CELLTYPE_RX:
-         if (changeToRX==FALSE) {
-            // stop using serial
-            openserial_stop();
-         }
          // change state
          changeState(S_RXDATAOFFSET);
          // arm rt1
          radiotimer_schedule(DURATION_rt1);
          break;
-      case CELLTYPE_SERIALRX:
-         // stop using serial
-         openserial_stop();
-         // abort the slot
-         endSlot();
-         //start inputting serial data
-         openserial_startInput();
-         //this is to emulate a set of serial input slots without having the slotted structure.
-
-         radio_setTimerPeriod(TsSlotDuration*(NUMSERIALRX));
-         
-         //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
-         for (i=0;i<NUMSERIALRX-1;i++){
-            incrementAsnOffset();
-         }
-#ifdef ADAPTIVE_SYNC
-         // deal with the case when schedule multi slots
-         adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
-#endif
-         break;
-      case CELLTYPE_MORESERIALRX:
-         // do nothing (not even endSlot())
-         break;
       default:
-         // stop using serial
-         openserial_stop();
          // log the error
          openserial_printCritical(COMPONENT_IEEE802154E,ERR_WRONG_CELLTYPE,
                                (errorparameter_t)cellType,
@@ -2202,7 +2192,9 @@ function should already have been done. If this is not the case, this function
 will do that for you, but assume that something went wrong.
 */
 void endSlot() {
-  
+   PORT_RADIOTIMER_WIDTH currentPeriod;
+   uint8_t i;
+   
    // turn off the radio
    radio_rfOff();
    // compute the duty cycle if radio has been turned on
@@ -2278,9 +2270,31 @@ void endSlot() {
       ieee154e_vars.ackReceived = NULL;
    }
    
+   // Let the mote wake up after numSkippedSlots timeslots
+   // get current timer period
+   currentPeriod = radio_getTimerPeriod();
+   // set timer period
+   radio_setTimerPeriod(currentPeriod+TsSlotDuration*ieee154e_vars.numSkippedSlots);
+   //increase ASN by numSkippedSlots timeslots
+   for (i=0;i<ieee154e_vars.numSkippedSlots;i++){
+      incrementAsnOffset();
+   }
+#ifdef ADAPTIVE_SYNC
+   // deal with the case when schedule multi slots
+   adaptive_sync_countCompensationTimeout_compoundSlots(ieee154e_vars.numSkippedSlots);
+#endif
+   // reset numSkippedSlots
+   ieee154e_vars.numSkippedSlots = 0;
    
    // change state
    changeState(S_SLEEP);
+   
+   // start serial activity
+   if (ieee154e_vars.serialInputOutput==TRUE) {
+      openserial_startInput();
+   } else {
+      openserial_startOutput();
+   }
 }
 
 bool ieee154e_isSynch(){

@@ -697,7 +697,15 @@ void isr_openserial_tx() {
             openserial_vars.outputBufFilled = FALSE;
          }
          if (openserial_vars.outputBufFilled) {
+#ifdef FASTSIM
+            uart_writeCircularBuffer_FASTSIM(
+               openserial_vars.outputBuf,
+               &openserial_vars.outputBufIdxR,
+               &openserial_vars.outputBufIdxW
+            );
+#else
             uart_writeByte(openserial_vars.outputBuf[openserial_vars.outputBufIdxR++]);
+#endif
          }
          break;
       case MODE_OFF:

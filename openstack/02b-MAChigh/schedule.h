@@ -39,7 +39,7 @@ in that table; a slot is "active" when it is not of type CELLTYPE_OFF.
 Set this number to the exact number of active slots you are planning on having
 in your schedule, so not to waste RAM.
 */
-#define MAXACTIVESLOTS       (SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+NUMSERIALRX+NUMSLOTSOFF)
+#define MAXACTIVESLOTS       (SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+NUMSLOTSOFF)
 
 /**
 \brief Minimum backoff exponent.

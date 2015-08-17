@@ -24,10 +24,8 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 \post Call this function before calling any other function in this module.
 */
 void schedule_init() {
-   slotOffset_t    start_slotOffset;
    slotOffset_t    running_slotOffset;
-   open_addr_t     temp_neighbor;
-
+   
    // reset local variables
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
    for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
@@ -36,22 +34,8 @@ void schedule_init() {
    schedule_vars.backoffExponent = MINBE-1;
    schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
    
-   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    if (idmanager_getIsDAGroot()==TRUE) {
       schedule_startDAGroot();
-   }
-   
-   // serial RX slot(s)
-   start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
-      schedule_addActiveSlot(
-         running_slotOffset,                    // slot offset
-         CELLTYPE_SERIALRX,                     // type of slot
-         FALSE,                                 // shared?
-         0,                                     // channel offset
-         &temp_neighbor                         // neighbor
-      );
    }
 }
 
@@ -467,6 +451,10 @@ scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    DISABLE_INTERRUPTS();
    
    scheduleWalker = schedule_vars.currentScheduleEntry;
+   if (scheduleWalker == NULL) {
+      ENABLE_INTERRUPTS();
+      return NULL;
+   }
    do {
       if(
          scheduleWalker->numTx > MIN_NUMTX_FOR_PDR                     &&\
@@ -567,6 +555,8 @@ slotOffset_t schedule_getClosestActiveSlotOffset(slotOffset_t targetSlotOffset) 
                   (targetSlotOffset < nextSlotWalker->slotOffset) &&
                   (nextSlotWalker->slotOffset < previousSlotWalker->slotOffset)
             )
+            ||
+            (nextSlotWalker == previousSlotWalker)
       ) {
          break;
       }
