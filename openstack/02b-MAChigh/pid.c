@@ -49,7 +49,7 @@ int16_t pid_compute_packetInQueue() {
     pid_vars.errorHistory[0] = pid_vars.prevError * schedule_getFrameLength(); // multiple slotframe for integral calculation
     // calculate the pid
     returnVal  = pid_vars.prevError * PID_PROPORTIONAL_GAIN_VALUE / PID_ACCURACY;
-    returnVal += pid_integralOperation() * PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY;
+    returnVal += (pid_integralOperation()/schedule_getFrameLength()) * PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY;
     returnVal += ((pid_vars.errorHistory[0]-pid_vars.errorHistory[1])/schedule_getFrameLength()) * PID_DERIVATIVE_GAIN_VALUE / PID_ACCURACY;
     
     return returnVal;
@@ -70,7 +70,7 @@ int16_t pid_compute_usageOfCell() {
     // Kp = PID_PROPORTIONAL_GAIN_VALUE/PID_ACCURACY
     returnVal  = pid_vars.prevError * PID_PROPORTIONAL_GAIN_VALUE / PID_ACCURACY; 
     // Ki = PID_INTEGRAL_GAIN_VALUE/PID_ACCURACY
-    returnVal += pid_integralOperation() * PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY; 
+    returnVal += (pid_integralOperation()/schedule_getFrameLength()) * PID_INTEGRAL_GAIN_VALUE / PID_ACCURACY; 
     // Kd = PID_DERIVATIVE_GAIN_VALUE/PID_ACCURACY
     returnVal += ((pid_vars.errorHistory[0]-pid_vars.errorHistory[1])/schedule_getFrameLength()) * PID_DERIVATIVE_GAIN_VALUE / PID_ACCURACY; 
     
