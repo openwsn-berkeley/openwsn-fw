@@ -10,6 +10,7 @@
 //#include "ADC_Channel.h"
 #include "IEEE802154E.h"
 #include "idmanager.h"
+#include "schedule.h"
 
 //=========================== defines =========================================
 
@@ -19,6 +20,9 @@ static const uint8_t dst_addr[]   = {
    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
+
+#define PACKET_PER_SLOTFRAME  3
+#define SLOTDURATION_MS      15 // 15ms per slot
 
 //=========================== variables =======================================
 
@@ -31,7 +35,7 @@ owerror_t cstorm_receive(
    coap_header_iht*  coap_header,
    coap_option_iht*  coap_options
 );
-void cstorm_timer_cb(void);
+void cstorm_timer_cb(opentimer_id_t id);
 void cstorm_task_cb(void);
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 
@@ -48,22 +52,23 @@ void cstorm_init(void) {
    cstorm_vars.desc.discoverable          = TRUE;
    cstorm_vars.desc.callbackRx            = &cstorm_receive;
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
+   cstorm_vars.busySending                = FALSE;
    opencoap_register(&cstorm_vars.desc);
    
-   /*
    //start a periodic timer
    //comment : not running by default
-   cstorm_vars.period           = 6553; 
-   
+   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / PACKET_PER_SLOTFRAME; 
+//   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / (1+openrandom_get16b()%6); 
    cstorm_vars.timerId                    = opentimers_start(
       cstorm_vars.period,
       TIMER_PERIODIC,TIME_MS,
       cstorm_timer_cb
    );
    
-   //stop 
-   //opentimers_stop(cstorm_vars.timerId);
-   */
+}
+
+uint16_t cstorm_getPeriod() {
+    return cstorm_vars.period;
 }
 
 //=========================== private =========================================
@@ -141,7 +146,7 @@ owerror_t cstorm_receive(
 \note timer fired, but we don't want to execute task in ISR mode instead, push
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
-void cstorm_timer_cb(){
+void cstorm_timer_cb(opentimer_id_t id){
    scheduler_push_task(cstorm_task_cb,TASKPRIO_COAP);
 }
 
@@ -164,6 +169,10 @@ void cstorm_task_cb() {
       opentimers_stop(cstorm_vars.timerId);
       return;
    }
+   
+//   if(cstorm_vars.busySending == TRUE) {
+//       return;
+//   }
    
    // if you get here, send a packet
    
@@ -226,13 +235,36 @@ void cstorm_task_cb() {
       &cstorm_vars.desc
    );
    
+   cstorm_vars.busySending = TRUE;
+   
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
+      cstorm_vars.busySending = FALSE;
    }
 }
 
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
+   cstorm_vars.busySending = FALSE;
+
+}
+
+void cstorm_generateNewTraffic() {
+//   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / PACKET_PER_SLOTFRAME; 
+   // generate next packet with random interval
+   cstorm_vars.period = SLOTFRAME_LENGTH * SLOTDURATION_MS / (3+openrandom_get16b()%3); 
+   // set cstorm packet generating timer
+   opentimers_setPeriod(
+      cstorm_vars.timerId,
+      TIME_MS,
+      cstorm_vars.period
+   );
+   opentimers_restart(cstorm_vars.timerId);
+}
+
+void cstorm_stop() {
+   cstorm_vars.period = 0xffff;
+   opentimers_stop(cstorm_vars.timerId);
 }
 

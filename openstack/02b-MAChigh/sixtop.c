@@ -17,7 +17,8 @@
 #include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
-
+#include "pid.h"
+#include "cstorm.h"
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -91,7 +92,8 @@ bool          sixtop_candidateRemoveCellList(
    uint8_t*             frameID,
    uint8_t*             flag,
    cellInfo_ht*         cellList,
-   open_addr_t*         neighbor
+   open_addr_t*         neighbor,
+   uint16_t             numOfCells
 );
 void          sixtop_addCellsByState(
    uint8_t              slotframeID,
@@ -179,15 +181,13 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    if(sixtop_vars.six2six_state!=SIX_IDLE){
       return;
    }
+#ifdef SIXTOP_DEBUGINFO
+   printf("SIX_IDLE %d\n",sixtop_vars.six2six_state);
+#endif
    if (neighbor==NULL){
       return;
    }
-   
-   if (sixtop_vars.handler == SIX_HANDLER_NONE) {
-       // sxitop handler must not be NONE
-       return;
-   }
-   
+
    // generate candidate cell list
    outcome = sixtop_candidateAddCellList(
       &type,
@@ -213,7 +213,9 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    
    // update state
    sixtop_vars.six2six_state  = SIX_SENDING_ADDREQUEST;
-   
+#ifdef SIXTOP_DEBUGINFO
+   printf("SIX_SENDING_ADDREQUEST %d\n",sixtop_vars.six2six_state);
+#endif
    // take ownership
    pkt->creator = COMPONENT_SIXTOP_RES;
    pkt->owner   = COMPONENT_SIXTOP_RES;
@@ -247,9 +249,12 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
       SIX2SIX_TIMEOUT_MS
    );
    opentimers_restart(sixtop_vars.timeoutTimerId);
+#ifdef SIXTOP_DEBUGINFO
+   printf("SIX_WAIT_ADDREQUEST_SENDDONE %d\n",sixtop_vars.six2six_state);
+#endif
 }
 
-void sixtop_removeCell(open_addr_t* neighbor){
+void sixtop_removeCell(open_addr_t* neighbor,uint16_t numCells){
    OpenQueueEntry_t* pkt;
    bool              outcome;
    uint8_t           len;
@@ -274,7 +279,8 @@ void sixtop_removeCell(open_addr_t* neighbor){
       &frameID,
       &flag, 
       cellList, 
-      neighbor
+      neighbor,
+      numCells
    );
    if(outcome == FALSE){
       return;
@@ -320,7 +326,9 @@ void sixtop_removeCell(open_addr_t* neighbor){
    
    // update state
    sixtop_vars.six2six_state = SIX_WAIT_REMOVEREQUEST_SENDDONE;
-   
+#ifdef SIXTOP_DEBUGINFO
+   printf("SIX_WAIT_REMOVEREQUEST_SENDDONE %d\n",sixtop_vars.six2six_state);
+#endif
    // arm timeout
    opentimers_setPeriod(
       sixtop_vars.timeoutTimerId,
@@ -603,6 +611,90 @@ void task_sixtopNotifReceive() {
          );
          break;
    }
+}
+
+void sixtop_notifyNewSlotframe(void) {
+    scheduler_push_task(sixtop_checkSchedule,TASKPRIO_SIXTOP);
+}
+static uint8_t slotframe_count = 0;
+
+void sixtop_checkSchedule() {
+    //once every  slotframes
+	if (((slotframe_count)%1)!=0){
+		slotframe_count++;
+		printf("skip slotframe");
+		return;
+	}
+
+	slotframe_count++;
+
+	int16_t pid_result;
+    open_addr_t neighborAddress;
+    uint8_t asn[5];
+    memset(&neighborAddress,0,sizeof(open_addr_t));
+    if (
+        neighbors_getPreferredParentEui64(&neighborAddress)==FALSE || \
+        idmanager_getIsDAGroot()
+    ) {
+        return;
+    }
+#ifdef PID_CELL_USAGE
+    //compute cells needed 
+    pid_result = pid_compute_usageOfCell();
+#else
+    pid_result = pid_compute_packetInQueue();
+#endif
+    // debug info
+    if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
+        ieee154e_getAsn(asn);
+#ifdef PID_CELL_USAGE
+        // slotframe, numOfslot(Tx), numOfpacketInQueue, cstorm traffic
+        printf("%d, %d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),cstorm_getPeriod(),pid_result);
+#else
+        // slotframe, numOfslot(Tx), numOfpacketInQueue, sent packet, cstorm traffic, pid_error
+        printf("%d, %d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),schedule_getSentPacket(),cstorm_getPeriod(),pid_result);
+#endif
+    }
+#ifdef PID_CELL_USAGE
+    //reserve cells
+    if (pid_result > TARGET_USAGE_RANGE) {
+        sixtop_addCells(&neighborAddress,1);
+    } else {
+        if (pid_result < -TARGET_USAGE_RANGE){
+         sixtop_removeCell(&neighborAddress,1);   
+        } else {
+            // I am in the target range{-TARGET_RANGE, TARGET_RANGE}, nothing to do
+        }
+    }
+#else
+    //reserve cells
+    if (pid_result > 0) {
+        if (pid_result > SCHEDULEIEMAXNUMCELLS) {
+            sixtop_addCells(&neighborAddress,SCHEDULEIEMAXNUMCELLS);
+        } else {
+            sixtop_addCells(&neighborAddress,pid_result);
+        }
+    } else {
+        if (pid_result < 0){
+            if (pid_result < -SCHEDULEIEMAXNUMCELLS) {
+                sixtop_removeCell(&neighborAddress,SCHEDULEIEMAXNUMCELLS);   
+            } else {
+                sixtop_removeCell(&neighborAddress,(-pid_result));
+            }
+        } else {
+            // hit the target, nothing to do
+        }
+    }
+#endif
+    // update the cstorm traffic generating rate
+    if (((asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength())%50 == 1 || \
+        ((asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength())%50 == 2 || \
+        ((asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength())%50 == 3
+        ) {
+        cstorm_generateNewTraffic();
+    } else {
+        cstorm_stop();
+    }
 }
 
 //======= debugging
@@ -913,6 +1005,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
   
    if(error == E_FAIL) {
       sixtop_vars.six2six_state = SIX_IDLE;
+      opentimers_stop(sixtop_vars.timeoutTimerId);
       openqueue_freePacketBuffer(msg);
       return;
    }
@@ -964,6 +1057,9 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             );
          }
          sixtop_vars.six2six_state = SIX_IDLE;
+#ifdef SIXTOP_DEBUGINFO
+         printf("SIX_IDLE %d\n",sixtop_vars.six2six_state);
+#endif
          opentimers_stop(sixtop_vars.timeoutTimerId);
          leds_debug_off();
          if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
@@ -1019,7 +1115,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
    //now determine sub elements if any
    switch(gr_elem_id){
       //this is the only groupID that we parse. See page 82.  
-      case IEEE802154E_MLME_IE_GROUPID:
+      case IEEE802154E_MLME_IE_GROUPID:  
         //IE content can be any of the sub-IEs. Parse and see which
         do{
            //read sub IE header
@@ -1122,7 +1218,9 @@ void sixtop_notifyReceiveLinkRequest(
    bandwidth_IE_ht* bandwidth_ie, 
    schedule_IE_ht* schedule_ie,
    open_addr_t* addr){
-   
+#ifdef SIXTOP_DEBUGINFO
+   printf("SIXTOP_LINKREQUEST_RECEIVED \n");
+#endif
    uint8_t bw,numOfcells,frameID;
    bool scheduleCellSuccess;
   
@@ -1138,6 +1236,7 @@ void sixtop_notifyReceiveLinkRequest(
                                             schedule_ie->cellList, 
                                             bw) == FALSE){
       scheduleCellSuccess = FALSE;
+      memset(schedule_ie,0,sizeof(schedule_IE_ht));
    } else {
       scheduleCellSuccess = TRUE;
    }
@@ -1179,7 +1278,9 @@ void sixtop_linkResponse(
     
    // changing state to resLinkRespone command
    sixtop_vars.six2six_state = SIX_SENDING_ADDRESPONSE;
-    
+#ifdef SIXTOP_DEBUGINFO
+   printf("SIX_SENDING_ADDRESPONSE %d\n",sixtop_vars.six2six_state);
+#endif
    // declare ownership over that packet
    sixtopPkt->creator = COMPONENT_SIXTOP_RES;
    sixtopPkt->owner   = COMPONENT_SIXTOP_RES;
@@ -1210,6 +1311,9 @@ void sixtop_linkResponse(
    sixtop_send(sixtopPkt);
   
    sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE_SENDDONE;
+#ifdef SIXTOP_DEBUGINFO
+   printf("SIX_WAIT_ADDRESPONSE_SENDDONE %d \n",sixtop_vars.six2six_state);
+#endif
 }
 
 void sixtop_notifyReceiveLinkResponse(
@@ -1222,11 +1326,12 @@ void sixtop_notifyReceiveLinkResponse(
    frameID = schedule_ie->frameID;
    numOfcells = schedule_ie->numberOfcells;
    bw = bandwidth_ie->numOfLinks;
-  
+#ifdef SIXTOP_DEBUGINFO
+   printf("SIXTOP_RECEIVED_LINKRESPONSE\n");
+#endif
    if(bw == 0){
       // link request failed
       // todo- should inform some one
-      return;
    } else {
       // need to check whether the links are available to be scheduled.
       if(bw != numOfcells                                                ||
@@ -1248,7 +1353,9 @@ void sixtop_notifyReceiveLinkResponse(
    leds_debug_off();
    sixtop_vars.six2six_state = SIX_IDLE;
    sixtop_vars.handler = SIX_HANDLER_NONE;
-  
+#ifdef SIXTOP_DEBUGINFO
+   printf("SIX_IDLE %d \n",sixtop_vars.six2six_state);
+#endif
    opentimers_stop(sixtop_vars.timeoutTimerId);
 }
 
@@ -1267,12 +1374,11 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    
    sixtop_removeCellsByState(frameID,numOfCells,cellList,addr);
    
-   if (sixtop_vars.handler == SIX_HANDLER_OTF) {
-     // notify OTF
-     otf_notif_removedCell();
+   if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
+       // if sixtop remove request handler is 
+       sixtop_vars.handler = SIX_HANDLER_NONE;
    } else {
-       if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
-           // if sixtop remove request handler is 
+       if (sixtop_vars.handler == SIX_HANDLER_PID) {
            sixtop_vars.handler = SIX_HANDLER_NONE;
        } else {
            // if any other handlers exist
@@ -1295,6 +1401,7 @@ bool sixtop_candidateAddCellList(
    frameLength_t i;
    uint8_t counter;
    uint8_t numCandCells;
+   uint8_t j;
    
    *type = 1;
    *frameID = schedule_getFrameHandle();
@@ -1304,6 +1411,16 @@ bool sixtop_candidateAddCellList(
    for(counter=0;counter<SCHEDULEIEMAXNUMCELLS;counter++){
       i = openrandom_get16b()%schedule_getFrameLength();
       if(schedule_isSlotOffsetAvailable(i)==TRUE){
+         // check whether the new cell is already in cellList
+         for (j=0;j<numCandCells;j++) {
+             if (i == cellList[j].tsNum) {
+                 break;
+             }
+         }
+         if (j<numCandCells) {
+             // slot i is already in cellList
+             break;
+         }
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = 0;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
@@ -1323,29 +1440,35 @@ bool sixtop_candidateRemoveCellList(
       uint8_t*     frameID,
       uint8_t*     flag,
       cellInfo_ht* cellList,
-      open_addr_t* neighbor
+      open_addr_t* neighbor,
+      uint16_t     numOfCells
    ){
-   uint8_t              i;
-   uint8_t              numCandCells;
+   frameLength_t        i;
+   uint8_t              numCandidateCells;
    slotinfo_element_t   info;
    
    *type           = 1;
    *frameID        = schedule_getFrameHandle();
    *flag           = 1;
   
-   numCandCells    = 0;
-   for(i=0;i<schedule_getMaxActiveSlots();i++){
+   numCandidateCells    = 0;
+   for(i=0;i<schedule_getFrameLength();i++){
       schedule_getSlotInfo(i,neighbor,&info);
       if(info.link_type == CELLTYPE_TX){
-         cellList[numCandCells].tsNum       = i;
-         cellList[numCandCells].choffset    = info.channelOffset;
-         cellList[numCandCells].linkoptions = CELLTYPE_TX;
-         numCandCells++;
-         break; // only delete one cell
+         cellList[numCandidateCells].tsNum       = i;
+         cellList[numCandidateCells].choffset    = info.channelOffset;
+         cellList[numCandidateCells].linkoptions = CELLTYPE_TX;
+         numCandidateCells++;
+         if (numCandidateCells == numOfCells || \
+             numCandidateCells == SCHEDULEIEMAXNUMCELLS
+         ) {
+            break;
+         }
       }
    }
    
-   if(numCandCells==0){
+   
+   if(numCandidateCells==0){
       return FALSE;
    }else{
       return TRUE;

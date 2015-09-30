@@ -42,13 +42,15 @@ typedef enum {
 typedef enum {
    SIX_HANDLER_NONE                    = 0x00, // when complete reservation, handler must be set to none
    SIX_HANDLER_MAINTAIN                = 0x01, // the handler is maintenance process
-   SIX_HANDLER_OTF                     = 0x02  // the handler is otf
+   SIX_HANDLER_OTF                     = 0x02, // the handler is otf
+   SIX_HANDLER_PID                     = 0x03  // the handler is PID scheduling algorithm 
 } six2six_handler_t;
 
 //=========================== typedef =========================================
 
-#define SIX2SIX_TIMEOUT_MS 4000
+#define SIX2SIX_TIMEOUT_MS 10000
 #define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
+//#define SIXTOP_DEBUGINFO
 
 //=========================== module variables ================================
 
@@ -76,7 +78,7 @@ void      sixtop_setEBPeriod(uint8_t ebPeriod);
 void      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
 void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells);
-void      sixtop_removeCell(open_addr_t*  neighbor);
+void      sixtop_removeCell(open_addr_t*  neighbor, uint16_t numCells);
 void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 // maintaining
 void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);
@@ -85,6 +87,9 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg);
 // from lower layer
 void      task_sixtopNotifSendDone(void);
 void      task_sixtopNotifReceive(void);
+// interface with pid
+void      sixtop_notifyNewSlotframe(void);
+void      sixtop_checkSchedule();
 // debugging
 bool      debugPrint_myDAGrank(void);
 bool      debugPrint_kaPeriod(void);

@@ -866,8 +866,6 @@ port_INLINE void activity_ti1ORri1() {
    }
    
    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
-      // this is the next active slot
-      
       // advance the schedule
       schedule_advanceSlot();
       
@@ -912,6 +910,8 @@ port_INLINE void activity_ti1ORri1() {
                changeToRX=TRUE;
             }
          } else {
+            // I have packet to send, update the numUsage of current slot
+            schedule_updateNumUsage();
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner

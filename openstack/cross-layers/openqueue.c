@@ -4,6 +4,7 @@
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
 #include "ieee802154_security_driver.h"
+#include "neighbors.h"
 
 //=========================== variables =======================================
 
@@ -154,6 +155,30 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
    ENABLE_INTERRUPTS();
 }
 
+uint16_t openqueue_getNumOfPakcetToParent(){
+   uint8_t i;
+   uint8_t returnVal = 0;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++){
+      if (
+          // do not count the packet received
+          (
+          openqueue_vars.queue[i].creator == COMPONENT_CSTORM || \
+          openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES
+          ) && \
+          // only the count pakcet ready to be sent
+          openqueue_vars.queue[i].owner == COMPONENT_SIXTOP_TO_IEEE802154E && \
+          openqueue_vars.queue[i].l2_nextORpreviousHop.type ==  ADDR_64B && \
+          neighbors_isPreferredParent(&(openqueue_vars.queue[i].l2_nextORpreviousHop))
+      ) {
+         returnVal += 1;
+      }
+   }
+   ENABLE_INTERRUPTS();
+   return returnVal;
+}
+
 //======= called by RES
 
 OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
@@ -201,7 +226,15 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
             return &openqueue_vars.queue[i];
          }
       }
-   } else if (toNeighbor->type==ADDR_ANYCAST) {
+   } else if (toNeighbor->type==ADDR_ANYCAST) { 
+      // looking for a packet created by COMPONENT_SIXTOP_RES first
+      for (i=0;i<QUEUELENGTH;i++) {
+         if (openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES &&
+            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E) {
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+         }
+      }
       // anycast case: look for a packet which is either not created by RES
       // or an KA (created by RES, but not broadcast)
       for (i=0;i<QUEUELENGTH;i++) {
@@ -211,7 +244,8 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
                    openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
                    packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
                 )
-             )
+             ) && 
+             openqueue_vars.queue[i].creator!=COMPONENT_CSTORM
             ) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];

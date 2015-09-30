@@ -2308,6 +2308,12 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\pid.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\pid.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.c</name>
       </file>
       <file>
