@@ -531,6 +531,54 @@ uint8_t schedule_getSentPacket() {
    return numUsage;
 }
 
+void schedule_getScheduledSlots(
+    uint16_t* slotsInSchedule,
+    cellType_t type
+) {
+   uint8_t i;
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   i = 0;
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(i == sizeof(slotsInSchedule)/sizeof(uint16_t)) {
+          break;
+      }
+      if(type == scheduleWalker->type){
+          slotsInSchedule[i] = scheduleWalker->slotOffset;
+          i++;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   ENABLE_INTERRUPTS();
+}
+
+//=== from otf
+uint8_t schedule_getNumOfSlotsByType(cellType_t type){
+   uint8_t returnVal;
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   returnVal = 0;
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(type == scheduleWalker->type){
+          returnVal += 1;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
+
 //=== from IEEE802154E: reading the schedule and updating statistics
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
@@ -555,7 +603,8 @@ void schedule_advanceSlot() {
    if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
        ) {
        // one slotframe has elapsed
-      sixtop_notifyNewSlotframe();
+//      sixtop_notifyNewSlotframe();
+       otf_notifyNewSlotframe();
    }   
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    

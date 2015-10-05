@@ -167,6 +167,13 @@ scheduleEntry_t*  schedule_statistic_poorLinkQuality(void);
 
 uint8_t            schedule_getCellUsage(void);
 uint8_t            schedule_getSentPacket(void);
+void               schedule_getScheduledSlots(
+    uint16_t* slotsInSchedule,
+    cellType_t type
+);
+
+// from otf
+uint8_t            schedule_getNumOfSlotsByType(cellType_t type);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);

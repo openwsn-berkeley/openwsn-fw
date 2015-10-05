@@ -122,12 +122,12 @@ void icmpv6rpl_init() {
    
    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
    daoPeriod                                = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
-   icmpv6rpl_vars.timerIdDAO                = opentimers_start(
-                                                daoPeriod,
-                                                TIMER_PERIODIC,
-                                                TIME_MS,
-                                                icmpv6rpl_timer_DAO_cb
-                                             );
+//   icmpv6rpl_vars.timerIdDAO                = opentimers_start(
+//                                                daoPeriod,
+//                                                TIMER_PERIODIC,
+//                                                TIME_MS,
+//                                                icmpv6rpl_timer_DAO_cb
+//                                             );
    
 }
 

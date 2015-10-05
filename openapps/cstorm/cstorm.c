@@ -21,7 +21,7 @@ static const uint8_t dst_addr[]   = {
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
 
-#define PACKET_PER_SLOTFRAME  3
+#define PACKET_PER_SLOTFRAME  1
 #define SLOTDURATION_MS      15 // 15ms per slot
 
 //=========================== variables =======================================
@@ -56,8 +56,7 @@ void cstorm_init(void) {
    opencoap_register(&cstorm_vars.desc);
    
    //start a periodic timer
-   //comment : not running by default
-   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / PACKET_PER_SLOTFRAME; 
+   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / PACKET_PER_SLOTFRAME;
 //   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / (1+openrandom_get16b()%6); 
    cstorm_vars.timerId                    = opentimers_start(
       cstorm_vars.period,

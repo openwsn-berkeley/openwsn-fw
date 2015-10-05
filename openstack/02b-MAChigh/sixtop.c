@@ -18,7 +18,12 @@
 #include "idmanager.h"
 #include "schedule.h"
 #include "pid.h"
+#include "llds.h"
 #include "cstorm.h"
+//=========================== defination ======================================
+
+#define LLDS
+
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -187,7 +192,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    if (neighbor==NULL){
       return;
    }
-
+#ifndef LLDS
    // generate candidate cell list
    outcome = sixtop_candidateAddCellList(
       &type,
@@ -195,6 +200,14 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
       &flag,
       cellList
    );
+#else
+   outcome = llds_candidateAddCellList(
+      &type,
+      &frameID,
+      &flag,
+      cellList           
+   );
+#endif
    if (outcome == FALSE) {
      return;
    }
@@ -272,7 +285,7 @@ void sixtop_removeCell(open_addr_t* neighbor,uint16_t numCells){
    if (neighbor==NULL){
       return;
    }
-   
+#ifndef LLDS
    // generate candidate cell list
    outcome = sixtop_candidateRemoveCellList(
       &type, 
@@ -282,6 +295,16 @@ void sixtop_removeCell(open_addr_t* neighbor,uint16_t numCells){
       neighbor,
       numCells
    );
+#else 
+   outcome = llds_candidateRemoveCellList(
+      &type, 
+      &frameID,
+      &flag, 
+      cellList, 
+      neighbor,
+      numCells
+   );
+#endif
    if(outcome == FALSE){
       return;
    }
