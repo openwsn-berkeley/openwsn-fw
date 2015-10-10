@@ -64,6 +64,14 @@ void cstorm_init(void) {
       cstorm_timer_cb
    );
    
+   if (
+       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x06 && \
+       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x07 && \
+       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x08 && \
+       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x09  
+   ) {
+       opentimers_stop(cstorm_vars.timerId);
+   }
 }
 
 uint16_t cstorm_getPeriod() {
@@ -153,7 +161,7 @@ void cstorm_task_cb() {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
    uint8_t              numOptions;
-   
+   uint8_t              asn[5];
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
    
@@ -195,6 +203,11 @@ void cstorm_task_cb() {
    // add payload
    packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
    memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
+   
+   // add asn for calculate latency
+   ieee154e_getAsn(asn);
+   packetfunctions_reserveHeaderSize(pkt,5);
+   memcpy(&pkt->payload[0],asn,5);
    
    //set the TKL byte as a counter of Options
    //TODO: This is not conform with RFC7252, but yes with current dissector WS v1.10.6
