@@ -9,6 +9,7 @@
 //=========================== define ==========================================
 
 #define MAX_SCHEDULED_SLOT 10
+#define MAXTRIES 5
 
 //=========================== variables =======================================
 
@@ -36,6 +37,11 @@ bool llds_generateLowLantencySlots_remove(
      open_addr_t* neighbor,
      uint16_t numOfCells
 );
+
+// private
+bool llds_isSlotAvialable(uint16_t slot);
+
+// helper
 void array_sort(uint16_t * array);
 void stack_push(cellInfo_ht* cellList,uint16_t slot);
 
@@ -148,28 +154,69 @@ bool llds_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
         // to be the first slots available after packet generated
         for (j=1;j<MAX_SCHEDULED_SLOT;j++){
             if (slotsList[j] == 0xffff) {
-                // this is the end of slotsList
-                llds_vars.sd[j-1].slotoffset = slotsList[0]+1;
-                llds_vars.sd[j-1].distance   = slotframe_length+slotsList[0]-slotsList[j-1];
-                break;
+                i = slotsList[0]+1;
+                while(schedule_isSlotOffsetAvailable(i)==FALSE || \
+                    llds_isSlotAvialable(i)==FALSE){
+                    i++;
+                    if (j!=1){
+                        if (i==slotsList[1]){
+                            break;
+                        }
+                    } else {
+                        if (i==SLOTFRAME_LENGTH){
+                            i = SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS + NUMSERIALRX;
+                        }
+                        if (i==slotsList[0]){
+                            break;
+                        }
+                    }
+                }
+                if ((j==1 && i!=slotsList[0]) || (j!=1 && i!=slotsList[1])){
+                    llds_vars.sd[numCandCells].slotoffset = i;
+                    llds_vars.sd[numCandCells].distance   = slotframe_length+slotsList[0]-slotsList[j-1];
+                    numCandCells++;
+                    // this is the end of slotsList, break
+                    break;
+                }
             } else {
-                if (
-                    j!=MAX_SCHEDULED_SLOT-1 &&\
-                    slotsList[j+1] == slotsList[j]+1
-                ) { // the following slot is used as RX, choose 
-                    // the third one after slotsList[j]
-                    llds_vars.sd[j-1].slotoffset = slotsList[j]+3;
-                    llds_vars.sd[j-1].distance   = slotsList[j]-slotsList[j-1];
-                } else {
-                    llds_vars.sd[j-1].slotoffset = slotsList[j]+1;
-                    llds_vars.sd[j-1].distance   = slotsList[j]-slotsList[j-1];
+                i = slotsList[j]+1;
+                while(schedule_isSlotOffsetAvailable(i)==FALSE || \
+                      llds_isSlotAvialable(i)==FALSE){
+                    i++;
+                    if (j+1 != MAX_SCHEDULED_SLOT){
+                        if (i==slotsList[j+1]){
+                            break;
+                        }
+                    } else {
+                        if (i==SLOTFRAME_LENGTH){
+                            i = SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS + NUMSERIALRX;
+                        }
+                        if (i==slotsList[0]){
+                            break;
+                        }
+                    }
+                }
+                if (i!=slotsList[j+1] && i!=slotsList[0]){
+                    llds_vars.sd[numCandCells].slotoffset = i;
+                    llds_vars.sd[numCandCells].distance   = slotsList[j]-slotsList[j-1];
+                    numCandCells++;
                 }
             }
         }
         if (j==MAX_SCHEDULED_SLOT){
-            // this is the end of slotsList
-            llds_vars.sd[j-1].distance   = slotframe_length+slotsList[0]-slotsList[j-1];
-            llds_vars.sd[j-1].slotoffset = slotsList[0]+1;
+            i = slotsList[0]+1;
+            while(schedule_isSlotOffsetAvailable(i)==FALSE || \
+                llds_isSlotAvialable(i)==FALSE){
+                i++;
+                if (i==slotsList[1]){
+                    break;
+                }
+            }
+            if (i!=slotsList[1]){
+                llds_vars.sd[numCandCells].slotoffset = i;
+                llds_vars.sd[numCandCells].distance   = slotframe_length+slotsList[0]-slotsList[j-1];
+                numCandCells++;
+            }
         }
         
         // order the candidate slot by distance
@@ -304,6 +351,24 @@ bool llds_generateLowLantencySlots_remove(
         }
     }
 }
+
+//=================================== private ==================================
+bool llds_isSlotAvialable(uint16_t slot){
+    uint8_t i;
+    bool returnVal;
+    
+    returnVal = TRUE;
+    for (i=0;i<MAX_SCHEDULED_SLOT;i++){
+        if (llds_vars.sd[i].distance != 0){
+            if (slot == llds_vars.sd[i].slotoffset){
+                returnVal = FALSE;
+                break;
+            }
+        }
+    }
+    return returnVal;
+}
+
 //=================================== helper ===================================
 void array_sort(uint16_t * array){
     uint16_t i,j; 
