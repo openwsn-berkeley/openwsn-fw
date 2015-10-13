@@ -21,6 +21,7 @@ typedef struct {
    opentimer_id_t       timerId;
    uint16_t             period;   ///< inter-packet period (in ms)
    bool                 busySending;
+   uint8_t              packetId[2];
 } cstorm_vars_t;
 
 //=========================== prototypes ======================================

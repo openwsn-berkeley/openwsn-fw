@@ -2043,10 +2043,25 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
 }
 
 void notif_receive(OpenQueueEntry_t* packetReceived) {
+   uint8_t len;
+   len = packetReceived->length;
    // record the current ASN
    memcpy(&packetReceived->l2_asn, &ieee154e_vars.asn, sizeof(asn_t));
    // indicate reception to the schedule, to keep statistics
    schedule_indicateRx(&packetReceived->l2_asn);
+   if (schedule_getType() == CELLTYPE_RX){
+       if (
+           idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02 || \
+           idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x03 || \
+           idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x04 || \
+           idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x05  
+       ) {
+           printf("Mote: %d, received packet %d at ASN: %d\n",
+               idmanager_getMyID(ADDR_64B)->addr_64b[7],
+               packetReceived->payload[len-9]*256+packetReceived->payload[len-8],
+               ieee154e_vars.asn.bytes2and3*65536+ieee154e_vars.asn.bytes0and1);
+       }
+   }
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_SIXTOP so sixtop can knows it's for it
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;

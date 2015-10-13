@@ -53,6 +53,8 @@ void cstorm_init(void) {
    cstorm_vars.desc.callbackRx            = &cstorm_receive;
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
    cstorm_vars.busySending                = FALSE;
+   cstorm_vars.packetId[0]                = 0;
+   cstorm_vars.packetId[1]                = 0;
    opencoap_register(&cstorm_vars.desc);
    
    //start a periodic timer
@@ -204,10 +206,23 @@ void cstorm_task_cb() {
    packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
    memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
    
+   cstorm_vars.packetId[1]++;
+   if (cstorm_vars.packetId[1]==0){
+       cstorm_vars.packetId[0]++;
+   }
+   packetfunctions_reserveHeaderSize(pkt,2);
+   pkt->payload[0] = cstorm_vars.packetId[0];
+   pkt->payload[1] = cstorm_vars.packetId[1];
+   
    // add asn for calculate latency
    ieee154e_getAsn(asn);
    packetfunctions_reserveHeaderSize(pkt,5);
    memcpy(&pkt->payload[0],asn,5);
+   
+   printf("Mote: %d, generates packet %d at ASN: %d\n",
+          idmanager_getMyID(ADDR_64B)->addr_64b[7],
+          cstorm_vars.packetId[0]*256+cstorm_vars.packetId[1],
+          ((((asn[4]*256)+asn[3])*256+asn[2])*256+asn[1])*256+asn[0]);
    
    //set the TKL byte as a counter of Options
    //TODO: This is not conform with RFC7252, but yes with current dissector WS v1.10.6
