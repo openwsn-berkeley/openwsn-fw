@@ -24,10 +24,8 @@ void schedule_resetEntry(scheduleEntry_t* pScheduleEntry);
 \post Call this function before calling any other function in this module.
 */
 void schedule_init() {
-   slotOffset_t    start_slotOffset;
    slotOffset_t    running_slotOffset;
-   open_addr_t     temp_neighbor;
-
+   
    // reset local variables
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
    for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
@@ -36,22 +34,8 @@ void schedule_init() {
    schedule_vars.backoffExponent = MINBE-1;
    schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
    
-   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    if (idmanager_getIsDAGroot()==TRUE) {
       schedule_startDAGroot();
-   }
-   
-   // serial RX slot(s)
-   start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
-      schedule_addActiveSlot(
-         running_slotOffset,                    // slot offset
-         CELLTYPE_SERIALRX,                     // type of slot
-         FALSE,                                 // shared?
-         0,                                     // channel offset
-         &temp_neighbor                         // neighbor
-      );
    }
 }
 
@@ -280,6 +264,15 @@ owerror_t schedule_addActiveSlot(
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    
+   if (
+         (channelOffset == SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET)
+         &&
+         ((type == CELLTYPE_TX) || (type == CELLTYPE_RX))
+      ) {
+      ENABLE_INTERRUPTS();
+      return E_FAIL;
+   }
+   
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (
@@ -458,6 +451,10 @@ scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    DISABLE_INTERRUPTS();
    
    scheduleWalker = schedule_vars.currentScheduleEntry;
+   if (scheduleWalker == NULL) {
+      ENABLE_INTERRUPTS();
+      return NULL;
+   }
    do {
       if(
          scheduleWalker->numTx > MIN_NUMTX_FOR_PDR                     &&\
@@ -479,16 +476,24 @@ scheduleEntry_t* schedule_statistic_poorLinkQuality(){
 
 //=== from IEEE802154E: reading the schedule and updating statistics
 
-void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
+bool schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
+   scheduleEntry_t* previousScheduleEntry;
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    
+   previousScheduleEntry = schedule_vars.currentScheduleEntry;
+   
    while (schedule_vars.currentScheduleEntry->slotOffset!=targetSlotOffset) {
-      schedule_advanceSlot();
+      schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
+      if (schedule_vars.currentScheduleEntry == previousScheduleEntry) {
+         ENABLE_INTERRUPTS();
+         return FALSE;
+      }
    }
    
    ENABLE_INTERRUPTS();
+   return TRUE;
 }
 
 /**
@@ -508,12 +513,57 @@ void schedule_advanceSlot() {
 \brief return slotOffset of next active slot
 */
 slotOffset_t schedule_getNextActiveSlotOffset() {
-   slotOffset_t res;   
+   slotOffset_t res;
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    
    res = ((scheduleEntry_t*)(schedule_vars.currentScheduleEntry->next))->slotOffset;
+   
+   ENABLE_INTERRUPTS();
+   
+   return res;
+}
+
+/**
+\brief return slotOffset of future closest active slot; called by ieee154e_processIEs
+*/
+slotOffset_t schedule_getClosestActiveSlotOffset(slotOffset_t targetSlotOffset) {
+   scheduleEntry_t*  previousSlotWalker;
+   scheduleEntry_t*  nextSlotWalker;
+   slotOffset_t      res;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   // find position in schedule
+   previousSlotWalker                    = schedule_vars.currentScheduleEntry;
+   while (1) {
+      nextSlotWalker                     = previousSlotWalker->next;
+      if (
+            (
+                  (previousSlotWalker->slotOffset <= targetSlotOffset) &&
+                  (targetSlotOffset < nextSlotWalker->slotOffset)
+            )
+            ||
+            (
+                  (previousSlotWalker->slotOffset <= targetSlotOffset) &&
+                  (nextSlotWalker->slotOffset < previousSlotWalker->slotOffset)
+            )
+            ||
+            (
+                  (targetSlotOffset < nextSlotWalker->slotOffset) &&
+                  (nextSlotWalker->slotOffset < previousSlotWalker->slotOffset)
+            )
+            ||
+            (nextSlotWalker == previousSlotWalker)
+      ) {
+         break;
+      }
+      previousSlotWalker = nextSlotWalker;
+   }
+   
+   res = nextSlotWalker->slotOffset;
    
    ENABLE_INTERRUPTS();
    
