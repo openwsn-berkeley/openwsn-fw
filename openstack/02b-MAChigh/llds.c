@@ -310,13 +310,13 @@ bool llds_generateLowLantencySlots_remove(
                 break;
             }
             for (j=0;j<MAX_SCHEDULED_SLOT;j++){
-                if (txSlotsList[j]<rxSlotsList[i]){
-                    if (slotframe_length+txSlotsList[j]-rxSlotsList[i]<minDistance[i]){
-                        minDistance[i] = slotframe_length+txSlotsList[j]-rxSlotsList[i];
+                if (txSlotsList[i]<rxSlotsList[j]){
+                    if (slotframe_length+txSlotsList[i]-rxSlotsList[j]<minDistance[i]){
+                        minDistance[i] = slotframe_length+txSlotsList[i]-rxSlotsList[j];
                     }
                 } else {
-                    if (txSlotsList[j]-rxSlotsList[i]<minDistance[i]){
-                        minDistance[i] = txSlotsList[j]-rxSlotsList[i];
+                    if (txSlotsList[i]-rxSlotsList[j]<minDistance[i]){
+                        minDistance[i] = txSlotsList[i]-rxSlotsList[j];
                     }
                 }
             }
