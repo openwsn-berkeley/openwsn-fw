@@ -22,7 +22,8 @@
 #include "cstorm.h"
 //=========================== defination ======================================
 
-#define LLDS
+//#define LLDS
+#define ADAPTIVE_REALLOCATION
 
 //=========================== variables =======================================
 
@@ -843,7 +844,11 @@ void timer_sixtop_management_fired(void) {
          break;
       case 2:
          // called every EBPERIOD seconds
+#ifndef ADAPTIVE_REALLOCATION
          entry = schedule_statistic_poorLinkQuality();
+#else
+         entry = schedule_adaptive_reallocation(); 
+#endif
          if (
              entry       != NULL                        && \
              entry->type != CELLTYPE_OFF                && \

@@ -5,6 +5,13 @@
 #include "packetfunctions.h"
 #include "sixtop.h"
 #include "idmanager.h"
+#include "cstorm.h"
+#include "otf.h"
+
+//=========================== define ==========================================
+
+#define TRAFFIC_PERIOD          10000  //in ms
+#define REALLOCATION_THRESHOLD  10     //percent of traffic : e.g. 10 => 10%
 
 //=========================== variables =======================================
 
@@ -474,6 +481,96 @@ scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    } else {
        ENABLE_INTERRUPTS();
        return scheduleWalker;
+   }
+}
+
+scheduleEntry_t* schedule_adaptive_reallocation(){
+   scheduleEntry_t* scheduleWalker;
+   scheduleEntry_t* entryToBeReAllocated;
+   uint16_t         trafficLoad; // number of packet to be sent in TRAFFIC_PERIOD
+   uint16_t         costSixtop;
+   uint16_t         costNoReAllocation = 0;
+   uint16_t         costAdaptiveReAllocation = 0;
+   
+   uint16_t         numTx    = 0;
+   uint16_t         numTxACK = 0;
+   
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   // calculate the number of packet to be sent in TRAFFIC_PERIOD
+   trafficLoad              = TRAFFIC_PERIOD/cstorm_getPeriod();
+   
+   // calculate the cost of sixtop re-allocation procedures
+   numTx    = 0;
+   numTxACK = 0;
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+       if (
+           // sixtop command sent only on shared cells
+           scheduleWalker->type == CELLTYPE_TXRX
+       ) {
+           numTx    += scheduleWalker->numTx;
+           numTxACK += scheduleWalker->numTxACK;
+       }
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   if (numTx > MIN_NUMTX_FOR_PDR){
+       costSixtop = 3*numTx/numTxACK;
+   } else {
+       // consider 100% pdr at the start of network
+       costSixtop = 3;
+   }
+   
+   // calculate the cost if keeping cells in the schedule without re-allocation
+   numTx    = 0;
+   numTxACK = 0;
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+       if (
+           scheduleWalker->type == CELLTYPE_TX
+       ) {
+           numTx    += scheduleWalker->numTx;
+           numTxACK += scheduleWalker->numTxACK;
+       }
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   if (numTx > MIN_NUMTX_FOR_PDR){
+       costNoReAllocation = trafficLoad*numTx/numTxACK;
+   } else {
+       // consider 100% pdr at the start of network
+       costNoReAllocation = trafficLoad;
+   }
+   
+   // calculate the smallest cost if cell is re-llocated
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   costAdaptiveReAllocation = 0;
+   do {
+       if (
+           scheduleWalker->type == CELLTYPE_TX
+       ) {
+           if (
+               costAdaptiveReAllocation == 0 ||\
+               costAdaptiveReAllocation >
+                   trafficLoad*(numTx-scheduleWalker->numTx)/
+                   (numTxACK-scheduleWalker->numTxACK)
+           ){
+               entryToBeReAllocated = scheduleWalker;
+               costAdaptiveReAllocation = trafficLoad*(numTx-scheduleWalker->numTx)/
+                   (numTxACK-scheduleWalker->numTxACK);
+           }
+       }
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   // re-allocate the cell found above if it can decrease the cost
+   if ( costAdaptiveReAllocation != 0 &&                         \
+        costNoReAllocation-costAdaptiveReAllocation-costSixtop > \
+           REALLOCATION_THRESHOLD*trafficLoad/100
+   ){
+       ENABLE_INTERRUPTS();
+       return entryToBeReAllocated;
+   } else {
+       ENABLE_INTERRUPTS();
+       return NULL;
    }
 }
 
