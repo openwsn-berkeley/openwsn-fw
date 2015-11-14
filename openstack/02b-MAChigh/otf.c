@@ -11,6 +11,7 @@
 
 #define OTFTHRESHLOW      0 
 #define OTFTHRESHHIGH     0
+//#define OTF_DEBUG
 
 //=========================== prototypes ======================================
 
@@ -109,24 +110,29 @@ void otf_bandwidthEstimate_task(void){
         // those motes has stopped to generate packets
         bw_self = 0; 
     }    
-    
+#ifdef OTF_DEBUG
     printf("OTF: Mote %d ",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     printf("OTF: outgoing = %d, incoming = %d, self = %d\n",
            bw_outgoing,bw_incoming,bw_self);
+#endif
     
     if (bw_outgoing < bw_incoming+bw_self){
         sixtop_addCells(
             &neighbor,
             bw_incoming+bw_self-bw_outgoing
         );
+#ifdef OTF_DEBUG
         printf("OTF: RESEVER\n");
+#endif
     } else {
         if (bw_outgoing > bw_incoming+bw_self){
             sixtop_removeCell(
                 &neighbor,
                 bw_outgoing-bw_incoming-bw_self
             );
+#ifdef OTF_DEBUG
             printf("OTF: REMOVE\n");
+#endif
         } else {
             // the bandwidth is able to statisfied the traffic
             // nothing to do

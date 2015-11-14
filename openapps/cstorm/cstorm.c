@@ -66,14 +66,14 @@ void cstorm_init(void) {
       cstorm_timer_cb
    );
    
-   if (
-       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x06 && \
-       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x07 && \
-       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x08 && \
-       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x09  
-   ) {
-       opentimers_stop(cstorm_vars.timerId);
-   }
+//   if (
+//       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x06 && \
+//       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x07 && \
+//       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x08 && \
+//       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x09  
+//   ) {
+//       opentimers_stop(cstorm_vars.timerId);
+//   }
 }
 
 uint16_t cstorm_getPeriod() {
@@ -219,10 +219,10 @@ void cstorm_task_cb() {
    packetfunctions_reserveHeaderSize(pkt,5);
    memcpy(&pkt->payload[0],asn,5);
    
-   printf("Mote: %d, generates packet %d at ASN: %d\n",
-          idmanager_getMyID(ADDR_64B)->addr_64b[7],
-          cstorm_vars.packetId[0]*256+cstorm_vars.packetId[1],
-          ((((asn[4]*256)+asn[3])*256+asn[2])*256+asn[1])*256+asn[0]);
+//   printf("Mote: %d, generates packet %d at ASN: %d\n",
+//          idmanager_getMyID(ADDR_64B)->addr_64b[7],
+//          cstorm_vars.packetId[0]*256+cstorm_vars.packetId[1],
+//          ((((asn[4]*256)+asn[3])*256+asn[2])*256+asn[1])*256+asn[0]);
    
    //set the TKL byte as a counter of Options
    //TODO: This is not conform with RFC7252, but yes with current dissector WS v1.10.6

@@ -2056,10 +2056,10 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
            idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x04 || \
            idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x05  
        ) {
-           printf("Mote: %d, received packet %d at ASN: %d\n",
-               idmanager_getMyID(ADDR_64B)->addr_64b[7],
-               packetReceived->payload[len-9]*256+packetReceived->payload[len-8],
-               ieee154e_vars.asn.bytes2and3*65536+ieee154e_vars.asn.bytes0and1);
+//           printf("Mote: %d, received packet %d at ASN: %d\n",
+//               idmanager_getMyID(ADDR_64B)->addr_64b[7],
+//               packetReceived->payload[len-9]*256+packetReceived->payload[len-8],
+//               ieee154e_vars.asn.bytes2and3*65536+ieee154e_vars.asn.bytes0and1);
        }
    }
    // associate this packet with the virtual component
