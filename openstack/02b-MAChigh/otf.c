@@ -9,9 +9,8 @@
 
 //=========================== variables =======================================
 
-#define OTFTHRESHLOW      0 
-#define OTFTHRESHHIGH     0
-//#define OTF_DEBUG
+#define SF0THRESH      3 
+//#define SF0_DEBUG
 
 //=========================== prototypes ======================================
 
@@ -78,9 +77,9 @@ void otf_bandwidthEstimate_task(void){
     open_addr_t neighbor;
     bool    foundNeighbor;
     
-    uint8_t bw_outgoing;
-    uint8_t bw_incoming;
-    uint8_t bw_self;
+    int8_t bw_outgoing;
+    int8_t bw_incoming;
+    int8_t bw_self;
    
     // do not reserve cell proactively if I was dagroot
     if (idmanager_getIsDAGroot()){
@@ -101,36 +100,36 @@ void otf_bandwidthEstimate_task(void){
     // number of packet generated per second (slotframe duration 15ms*101=1515ms)
     bw_self     = 1515/cstorm_getPeriod();
     
-    if (
-        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x06 && \
-        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x07 && \
-        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x08 && \
-        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x09  
-    ) {
-        // those motes has stopped to generate packets
-        bw_self = 0; 
-    }    
-#ifdef OTF_DEBUG
+//    if (
+//        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x06 && \
+//        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x07 && \
+//        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x08 && \
+//        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x09  
+//    ) {
+//        // those motes has stopped to generate packets
+//        bw_self = 0; 
+//    }    
+#ifdef SF0_DEBUG
     printf("OTF: Mote %d ",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     printf("OTF: outgoing = %d, incoming = %d, self = %d\n",
            bw_outgoing,bw_incoming,bw_self);
 #endif
     
-    if (bw_outgoing < bw_incoming+bw_self){
+    if (bw_outgoing <= bw_incoming+bw_self){
         sixtop_addCells(
             &neighbor,
-            bw_incoming+bw_self-bw_outgoing
+            bw_incoming+bw_self-bw_outgoing+2
         );
-#ifdef OTF_DEBUG
+#ifdef SF0_DEBUG
         printf("OTF: RESEVER\n");
 #endif
     } else {
-        if (bw_outgoing > bw_incoming+bw_self){
+        if ((bw_outgoing-SF0THRESH) > bw_incoming+bw_self){
             sixtop_removeCell(
                 &neighbor,
                 bw_outgoing-bw_incoming-bw_self
             );
-#ifdef OTF_DEBUG
+#ifdef SF0_DEBUG
             printf("OTF: REMOVE\n");
 #endif
         } else {
