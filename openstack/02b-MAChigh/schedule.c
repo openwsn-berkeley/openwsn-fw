@@ -565,11 +565,12 @@ scheduleEntry_t* schedule_adaptive_reallocation(){
            numTxACK += scheduleWalker->numTxACK;
        }
    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
-   if (numTx > MIN_NUMTX_FOR_PDR){
+   if (numTx > MIN_NUMTX_FOR_PDR && numTxACK>0){
        costNoReAllocation = trafficLoad*numTx/numTxACK;
    } else {
-       // consider 100% pdr at the start of network
-       costNoReAllocation = trafficLoad;
+       // do not calculate re-allocation cost if there are only few tx
+       ENABLE_INTERRUPTS();
+       return NULL;
    }
    
    // calculate the smallest cost if cell is re-llocated
@@ -580,10 +581,15 @@ scheduleEntry_t* schedule_adaptive_reallocation(){
            scheduleWalker->type == CELLTYPE_TX
        ) {
            if (
-               costAdaptiveReAllocation == 0 ||\
-               costAdaptiveReAllocation >
-                   trafficLoad*(numTx-scheduleWalker->numTx)/
-                   (numTxACK-scheduleWalker->numTxACK)
+               // must be more than one cell existed
+               numTx-scheduleWalker->numTx != 0      && \
+               numTxACK-scheduleWalker->numTxACK > 0 && \
+               (        
+                  costAdaptiveReAllocation == 0 ||\
+                  costAdaptiveReAllocation >
+                    trafficLoad*(numTx-scheduleWalker->numTx)/
+                    (numTxACK-scheduleWalker->numTxACK)
+               )
            ){
                entryToBeReAllocated = scheduleWalker;
                costAdaptiveReAllocation = trafficLoad*(numTx-scheduleWalker->numTx)/
