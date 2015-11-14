@@ -86,7 +86,9 @@ typedef struct {
    open_addr_t     neighbor;
    uint8_t         numRx;
    uint8_t         numTx;
+   uint16_t        numTxTotal;
    uint8_t         numTxACK;
+   uint16_t        numTxACKTotal;
    uint8_t         numUsage;
    asn_t           lastUsedAsn;
    void*           next;
@@ -136,6 +138,7 @@ void               schedule_init(void);
 void               schedule_startDAGroot(void);
 bool               debugPrint_schedule(void);
 bool               debugPrint_backoff(void);
+void               debugPrint_myConcern(void);
 
 // from 6top
 void               schedule_setFrameLength(frameLength_t newFrameLength);

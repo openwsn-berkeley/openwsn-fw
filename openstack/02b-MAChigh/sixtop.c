@@ -847,6 +847,7 @@ void timer_sixtop_management_fired(void) {
 #ifndef ADAPTIVE_REALLOCATION
          entry = schedule_statistic_poorLinkQuality();
 #else
+         debugPrint_myConcern();
          entry = schedule_adaptive_reallocation(); 
 #endif
          if (

@@ -171,6 +171,37 @@ bool debugPrint_backoff() {
    return TRUE;
 }
 
+void debugPrint_myConcern(){
+    // 1 byte(length), 2 bytes(id), 5bytes(each cell info)*number of cells
+    uint8_t buffer[1+2+5*(SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS+NUMSLOTSOFF)];
+    uint8_t len = 0;
+    scheduleEntry_t* scheduleWalker;
+    // reserve one byte for length
+    len +=1;
+    // record id
+    buffer[len]   = idmanager_getMyID(ADDR_16B)->addr_16b[0];
+    buffer[len+1] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
+    len += 2;
+    // record slotoffset and their PDR (numTxTotal and numTxACKTotal)
+    scheduleWalker = schedule_vars.currentScheduleEntry;
+    do {
+        if (
+            // sixtop command sent only on shared cells
+            scheduleWalker->type == CELLTYPE_TXRX || \
+            scheduleWalker->type == CELLTYPE_TX
+        ) {
+            buffer[len]   = (uint8_t)scheduleWalker->slotOffset    & 0xFF;
+            buffer[len+1] = (scheduleWalker->numTxTotal >> 8)      & 0xFF;
+            buffer[len+2] = (uint8_t)scheduleWalker->numTxTotal    & 0xFF;
+            buffer[len+3] = (scheduleWalker->numTxACKTotal >> 8)   & 0xFF;
+            buffer[len+4] = (uint8_t)scheduleWalker->numTxACKTotal & 0xFF;
+            len += 5;
+        }
+    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+    buffer[0] = len;
+    openserial_printStatus(12,&buffer[0],len);
+}
+
 //=== from 6top (writing the schedule)
 
 /**
@@ -944,8 +975,10 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
       schedule_vars.currentScheduleEntry->numTxACK/=2;
    }
    schedule_vars.currentScheduleEntry->numTx++;
+   schedule_vars.currentScheduleEntry->numTxTotal++;
    if (succesfullTx==TRUE) {
       schedule_vars.currentScheduleEntry->numTxACK++;
+      schedule_vars.currentScheduleEntry->numTxACKTotal++;
    }
 
    // update last used timestamp
@@ -993,7 +1026,7 @@ void schedule_resetEntry(scheduleEntry_t* e) {
 
    e->neighbor.type          = ADDR_NONE;
    memset(&e->neighbor.addr_64b[0], 0x00, sizeof(e->neighbor.addr_64b));
-
+   // do not reset the numTxTotal and numTxACKTotal
    e->numRx                  = 0;
    e->numTx                  = 0;
    e->numTxACK               = 0;
