@@ -646,7 +646,7 @@ void sixtop_checkSchedule() {
     //once every  slotframes
 	if (((slotframe_count)%1)!=0){
 		slotframe_count++;
-		printf("skip slotframe");
+//		printf("skip slotframe");
 		return;
 	}
 
@@ -676,7 +676,7 @@ void sixtop_checkSchedule() {
         printf("%d, %d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),cstorm_getPeriod(),pid_result);
 #else
         // slotframe, numOfslot(Tx), numOfpacketInQueue, sent packet, cstorm traffic, pid_error
-        printf("%d, %d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),schedule_getSentPacket(),cstorm_getPeriod(),pid_result);
+//        printf("%d, %d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),schedule_getSentPacket(),cstorm_getPeriod(),pid_result);
 #endif
     }
 #ifdef PID_CELL_USAGE

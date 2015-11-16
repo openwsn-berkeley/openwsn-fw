@@ -16,6 +16,7 @@ defaultApps   = [
     'uecho',
     'uinject',
     'rrt',
+    'cstorm',
 ]
 if localEnv['board']=='python':
     defaultApps  += [
