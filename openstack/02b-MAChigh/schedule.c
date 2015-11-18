@@ -197,6 +197,7 @@ void debugPrint_myConcern(){
             buffer[len+4] = (uint8_t)scheduleWalker->numTxACKTotal & 0xFF;
             len += 5;
         }
+        scheduleWalker = scheduleWalker->next;
     }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
     buffer[0] = len;
     openserial_printStatus(12,&buffer[0],len);
