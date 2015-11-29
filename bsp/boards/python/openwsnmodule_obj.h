@@ -28,6 +28,7 @@
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
+#include "watchdog_obj.h"
 // applications
 #include "c6t_obj.h"
 #include "cexample_obj.h"
@@ -231,6 +232,7 @@ struct OpenMote {
    // cross-layer
    idmanager_vars_t     idmanager_vars;
    openqueue_vars_t     openqueue_vars;
+   watchdog_vars_t      watchdog_vars;
    // drivers
    opentimers_vars_t    opentimers_vars;
    random_vars_t        random_vars;

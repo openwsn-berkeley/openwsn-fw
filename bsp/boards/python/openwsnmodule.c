@@ -69,6 +69,7 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* ieee154e_dbg;
    PyObject* idmanager_vars;
    PyObject* openqueue_vars;
+   PyObject* watchdog_vars;
    PyObject* opentimers_vars;
    PyObject* random_vars;
    PyObject* openserial_vars;
@@ -179,6 +180,11 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    random_vars = PyDict_New();
    // TODO
    PyDict_SetItemString(returnVal, "random_vars", random_vars);
+   
+   // random_vars
+   watchdog_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "watchdog_vars", watchdog_vars);
    
    // openserial_vars
    openserial_vars = PyDict_New();
