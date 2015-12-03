@@ -9,13 +9,9 @@
 
 openqueue_vars_t openqueue_vars;
 
-bigqueue_vars_t bigqueue_vars;
-
 //=========================== prototypes ======================================
 
 void openqueue_reset_entry(OpenQueueEntry_t* entry);
-
-void bigqueue_reset_entry(BigQueueEntry_t* entry);
 
 //=========================== public ==========================================
 
@@ -28,9 +24,6 @@ void openqueue_init() {
    uint8_t i;
    for (i=0;i<QUEUELENGTH;i++){
       openqueue_reset_entry(&(openqueue_vars.queue[i]));
-   }
-   for (i=0;i<BIGQUEUELENGTH;i++){
-      bigqueue_reset_entry(&(bigqueue_vars.queue[i]));
    }
 }
 
@@ -93,31 +86,6 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    return NULL;
 }
 
-owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
-   uint8_t i;
-
-   for (i=0;i<QUEUELENGTH;i++) {
-      if (&openqueue_vars.queue[i]==pkt) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
-            // log the error
-            openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
-                                  (errorparameter_t)0,
-                                  (errorparameter_t)0);
-         }
-	 if (pkt->big) {
-	    if ( ! ((BigQueueEntry_t*)(pkt->big))->in_use ) 
-               openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
-                                  (errorparameter_t)0,
-				  (errorparameter_t)0);
-	    ((BigQueueEntry_t*)(pkt->big))->in_use=FALSE;
-	 }
-         openqueue_reset_entry(&(openqueue_vars.queue[i]));
-         return E_SUCCESS;
-      }
-   }
-
-   return E_FAIL;
-}
 
 /**
 \brief Free a previously-allocated packet buffer.
@@ -128,18 +96,28 @@ owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
 \returns E_FAIL when the module could not find the specified packet buffer.
 */
 owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
-   owerror_t error;
+   uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   error = openqueue_freePacketBuffer_atomic(pkt);
-   ENABLE_INTERRUPTS();
-
+   for (i=0;i<QUEUELENGTH;i++) {
+      if (&openqueue_vars.queue[i]==pkt) {
+         if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
+            // log the error
+            openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
+                                  (errorparameter_t)0,
+                                  (errorparameter_t)0);
+         }
+         openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         ENABLE_INTERRUPTS();
+         return E_SUCCESS;
+      }
+   }
    // log the error
-   if ( error == E_FAIL )
-      openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_ERROR,
+   openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_ERROR,
                          (errorparameter_t)0,
                          (errorparameter_t)0);
-   return error;
+   ENABLE_INTERRUPTS();
+   return E_FAIL;
 }
 
 /**
@@ -174,33 +152,6 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
       }
    }
    ENABLE_INTERRUPTS();
-}
-
-OpenQueueEntry_t* openqueue_toBigPacket(OpenQueueEntry_t* pkt) {
-   uint8_t  i;
-   uint8_t* payload;
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-
-   printf("FRAG: Invocado toBigPackect\n");
-   for (i=0;i<BIGQUEUELENGTH;i++) {
-      if (! bigqueue_vars.queue[i].in_use) {
-         bigqueue_vars.queue[i].in_use = TRUE;
-	 payload  = ((uint8_t*)&(bigqueue_vars.queue[i].buffer));
-         payload += BIG_PACKET_SIZE; // end of buffer
-         payload -= pkt->length; // - IEEE802154_SECURITY_TAG_LEN; Is footer needed here ?
-	 memcpy(payload, pkt->payload, pkt->length);
-	 pkt->payload    = payload;
-	 pkt->l4_payload = payload - pkt->length + pkt->l4_length;
-	 pkt->big = (uint8_t*)&(bigqueue_vars.queue[i]);
-
-         ENABLE_INTERRUPTS();
-         return pkt;
-      }
-   }
-
-   ENABLE_INTERRUPTS();
-   return NULL;
 }
 
 //======= called by RES
@@ -295,7 +246,6 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->owner                        = COMPONENT_NULL;
    entry->payload                      = &(entry->packet[127 - IEEE802154_SECURITY_TAG_LEN]); // Footer is longer if security is used
    entry->length                       = 0;
-   entry->big                          = NULL;
    //l4
    entry->l4_protocol                  = IANA_UNDEFINED;
    //l3
@@ -309,8 +259,4 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_payloadIEpresent          = 0;
    //l2-security
    entry->l2_securityLevel             = 0;
-}
-
-void bigqueue_reset_entry(BigQueueEntry_t* entry) {
-   entry->in_use = FALSE;
 }

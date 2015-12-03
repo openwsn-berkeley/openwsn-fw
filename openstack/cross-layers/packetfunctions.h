@@ -35,8 +35,8 @@ void     packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t
 void     packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, bool littleEndian);
 
 // reserving/tossing headers and footers
-void     packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_length);
-void     packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint16_t header_length);
+void     packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_length);
+void     packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length);
 void     packetfunctions_reserveFooterSize(OpenQueueEntry_t* pkt, uint8_t header_length);
 void     packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length);
 
