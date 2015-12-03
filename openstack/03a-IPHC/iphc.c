@@ -8,6 +8,7 @@
 #include "neighbors.h"
 #include "openbridge.h"
 #include "icmpv6rpl.h"
+#include "fragment.h"
 
 //=========================== variables =======================================
 
@@ -200,7 +201,8 @@ owerror_t iphc_sendFromForwarding(
             )==E_FAIL) {
       return E_FAIL;
    }
-   return sixtop_send(msg);
+   //return sixtop_send(msg);
+   return fragment_prependHeader(msg);
 }
 
 //send from bridge: 6LoWPAN header already added by OpenLBR, send as is
@@ -213,7 +215,8 @@ owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
                             (errorparameter_t)0);
       return E_FAIL;
    }
-   return sixtop_send(msg);
+   //return sixtop_send(msg);
+   return fragment_prependHeader(msg);
 }
 
 void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {

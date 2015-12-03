@@ -28,6 +28,7 @@
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
 #include "openrandom_obj.h"
+#include "fragment_obj.h"
 // applications
 #include "c6t_obj.h"
 #include "cexample_obj.h"
@@ -40,6 +41,7 @@
 //#include "tohlone_obj.h"
 //#include "tohlone_obj.h"
 #include "uecho_obj.h"
+#include "fragtest_obj.h"
 
 //=========================== prototypes ======================================
 
@@ -218,6 +220,8 @@ struct OpenMote {
    opencoap_vars_t      opencoap_vars;
    tcp_vars_t           tcp_vars;
    // l3
+   fragmentqueue_vars_t fragmentqueue_vars;
+   fragment_timers_t    fragment_timers;
    // l2b
    sixtop_vars_t        sixtop_vars;
    neighbors_vars_t     neighbors_vars;
@@ -231,6 +235,7 @@ struct OpenMote {
    // cross-layer
    idmanager_vars_t     idmanager_vars;
    openqueue_vars_t     openqueue_vars;
+   bigqueue_vars_t      bigqueue_vars;
    // drivers
    opentimers_vars_t    opentimers_vars;
    random_vars_t        random_vars;
@@ -247,6 +252,7 @@ struct OpenMote {
    cwellknown_vars_t    cwellknown_vars;
    rrt_vars_t           rrt_vars;
    //tohlone_vars_t       tohlone_vars;
+   fragtest_vars_t      fragtest_vars;
 };
 
 #endif

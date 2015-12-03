@@ -95,6 +95,7 @@ enum {
    WKP_UDP_ECHO                        =     7,
    WKP_UDP_INJECT                      =  2000,
    WKP_UDP_RINGMASTER                  = 15000,
+   WKP_UDP_FRAGTEST                    = 25000,
 };
 
 //status elements
@@ -143,32 +144,34 @@ enum {
    COMPONENT_SCHEDULE                  = 0x0e,
    COMPONENT_SIXTOP_RES                = 0x0f,
    //IPHC
-   COMPONENT_OPENBRIDGE                = 0x10,
-   COMPONENT_IPHC                      = 0x11,
+   COMPONENT_FRAGMENT                  = 0x10,
+   COMPONENT_OPENBRIDGE                = 0x11,
+   COMPONENT_IPHC                      = 0x12,
    //IPv6
-   COMPONENT_FORWARDING                = 0x12,
-   COMPONENT_ICMPv6                    = 0x13,
-   COMPONENT_ICMPv6ECHO                = 0x14,
-   COMPONENT_ICMPv6ROUTER              = 0x15,
-   COMPONENT_ICMPv6RPL                 = 0x16,
+   COMPONENT_FORWARDING                = 0x13,
+   COMPONENT_ICMPv6                    = 0x14,
+   COMPONENT_ICMPv6ECHO                = 0x15,
+   COMPONENT_ICMPv6ROUTER              = 0x16,
+   COMPONENT_ICMPv6RPL                 = 0x17,
    //TRAN
-   COMPONENT_OPENTCP                   = 0x17,
-   COMPONENT_OPENUDP                   = 0x18,
-   COMPONENT_OPENCOAP                  = 0x19,
+   COMPONENT_OPENTCP                   = 0x18,
+   COMPONENT_OPENUDP                   = 0x19,
+   COMPONENT_OPENCOAP                  = 0x1a,
    // applications
-   COMPONENT_C6T                       = 0x1a,
-   COMPONENT_CEXAMPLE                  = 0x1b,
-   COMPONENT_CINFO                     = 0x1c,
-   COMPONENT_CLEDS                     = 0x1d,
-   COMPONENT_CSENSORS                  = 0x1e,
-   COMPONENT_CSTORM                    = 0x1f,
-   COMPONENT_CWELLKNOWN                = 0x20,
-   COMPONENT_TECHO                     = 0x21,
-   COMPONENT_TOHLONE                   = 0x22,
-   COMPONENT_UECHO                     = 0x23,
-   COMPONENT_UINJECT                   = 0x24,
-   COMPONENT_RRT                       = 0x25,
-   COMPONENT_SECURITY                  = 0x26,
+   COMPONENT_C6T                       = 0x1b,
+   COMPONENT_CEXAMPLE                  = 0x1c,
+   COMPONENT_CINFO                     = 0x1d,
+   COMPONENT_CLEDS                     = 0x1e,
+   COMPONENT_CSENSORS                  = 0x1f,
+   COMPONENT_CSTORM                    = 0x20,
+   COMPONENT_CWELLKNOWN                = 0x21,
+   COMPONENT_TECHO                     = 0x22,
+   COMPONENT_TOHLONE                   = 0x23,
+   COMPONENT_UECHO                     = 0x24,
+   COMPONENT_UINJECT                   = 0x25,
+   COMPONENT_RRT                       = 0x26,
+   COMPONENT_SECURITY                  = 0x27,
+   COMPONENT_FRAGTEST                  = 0x28,
 };
 
 /**
@@ -244,6 +247,11 @@ enum {
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
    ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
    ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
+   ERR_FRAG_RESERVING                  = 0x3c, // trying to get an used fragment
+   ERR_FREEING_BIG                     = 0x3d, // trying to free an unused big packet
+   ERR_NO_FREE_FRAGMENT_BUFFER         = 0x2c, // no free fragment buffer
+   ERR_INPUTBUFFER_OVERLAPS            = 0x2d, // incoming fragment overlaps with previously received one
+   ERR_EXPIRED_TIMER                   = 0x2e, // fragment timer expired
 };
 
 //=========================== typedef =========================================
@@ -281,14 +289,14 @@ typedef struct {
    uint8_t       creator;                        // the component which called getFreePacketBuffer()
    uint8_t       owner;                          // the component which currently owns the entry
    uint8_t*      payload;                        // pointer to the start of the payload within 'packet'
-   uint8_t       length;                         // length in bytes of the payload
+   uint16_t      length;                         // length in bytes of the payload
    //l4
    uint8_t       l4_protocol;                    // l4 protocol to be used
    bool          l4_protocol_compressed;         // is the l4 protocol header compressed?
    uint16_t      l4_sourcePortORicmpv6Type;      // l4 source port
    uint16_t      l4_destination_port;            // l4 destination port
    uint8_t*      l4_payload;                     // pointer to the start of the payload of l4 (used for retransmits)
-   uint8_t       l4_length;                      // length of the payload of l4 (used for retransmits)
+   uint16_t      l4_length;                      // length of the payload of l4 (used for retransmits)
    //l3
    open_addr_t   l3_destinationAdd;              // 128b IPv6 destination (down stack) 
    open_addr_t   l3_sourceAdd;                   // 128b IPv6 source address 
@@ -323,6 +331,7 @@ typedef struct {
    int8_t        l1_rssi;                        // RSSI of received packet
    uint8_t       l1_lqi;                         // LQI of received packet
    bool          l1_crc;                         // did received packet pass CRC check?
+   uint8_t*      big;                            // pointer to a big packet buffer struct, if used
    //the packet
    uint8_t       packet[1+1+125+2+1];            // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
 } OpenQueueEntry_t;
