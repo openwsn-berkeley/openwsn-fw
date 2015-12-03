@@ -17,6 +17,7 @@
 #include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
+#include "fragment.h"
 
 //=========================== variables =======================================
 
@@ -525,7 +526,8 @@ void task_sixtopNotifSendDone() {
       
       default:
          // send the rest up the stack
-         iphc_sendDone(msg,msg->l2_sendDoneError);
+         //iphc_sendDone(msg,msg->l2_sendDoneError);
+         fragment_sendDone(msg,msg->l2_sendDoneError);
          break;
    }
 }
@@ -584,7 +586,8 @@ void task_sixtopNotifReceive() {
       case IEEE154_TYPE_CMD:
          if (msg->length>0) {
             // send to upper layer
-            iphc_receive(msg);
+            //iphc_receive(msg);
+	    fragment_retrieveHeader(msg);
          } else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);

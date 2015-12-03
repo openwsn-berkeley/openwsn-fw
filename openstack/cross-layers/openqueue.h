@@ -15,6 +15,9 @@
 
 #define QUEUELENGTH  10
 
+#define BIG_PACKET_SIZE 1280
+#define BIGQUEUELENGTH     3
+
 //=========================== typedef =========================================
 
 typedef struct {
@@ -22,11 +25,20 @@ typedef struct {
    uint8_t  owner;
 } debugOpenQueueEntry_t;
 
+typedef struct {
+   bool     in_use;
+   uint8_t  buffer[BIG_PACKET_SIZE];
+} BigQueueEntry_t;
+
 //=========================== module variables ================================
 
 typedef struct {
    OpenQueueEntry_t queue[QUEUELENGTH];
 } openqueue_vars_t;
+
+typedef struct {
+   BigQueueEntry_t queue[BIGQUEUELENGTH];
+} bigqueue_vars_t;
 
 //=========================== prototypes ======================================
 
@@ -38,6 +50,8 @@ OpenQueueEntry_t*  openqueue_getFreePacketBuffer(uint8_t creator);
 owerror_t         openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 void               openqueue_removeAllOwnedBy(uint8_t owner);
+
+OpenQueueEntry_t* openqueue_toBigPacket(OpenQueueEntry_t* pkt);
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);

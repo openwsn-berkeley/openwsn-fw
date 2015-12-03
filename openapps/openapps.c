@@ -19,6 +19,7 @@
 // UDP
 #include "uecho.h"
 #include "uinject.h"
+#include "fragtest.h"
 
 //=========================== variables =======================================
 
@@ -42,4 +43,5 @@ void openapps_init(void) {
    // UDP
    uecho_init();
    //uinject_init();
+   fragtest_init();
 }
