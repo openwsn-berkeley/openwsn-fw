@@ -269,17 +269,15 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_le
    bool error;
 
    error = pkt->big ?
-	   pkt->length > BIG_PACKET_SIZE :
+	   pkt->length + header_length > BIG_PACKET_SIZE :
 	   (uint8_t*)(pkt->payload)-header_length < (uint8_t*)(pkt->packet);
    // Check if is needed to reserve a big packet.
    // Layer 2 does not need support for large packets as messages
    // are fragmented.
    // This one tries to acquire a big buffer if needed on layer 3
    // and up.
-   if ( (pkt->owner > COMPONENT_FRAGMENT) && (pkt->big == NULL) ) {
-      if ( error )
-         error = ( openqueue_toBigPacket(pkt) == NULL );
-   }
+   if ( error && (pkt->owner > COMPONENT_FRAGMENT) && (pkt->big == NULL) )
+      error = ( openqueue_toBigPacket(pkt, 0) == NULL );
 
    pkt->payload -= header_length;
    pkt->length  += header_length;

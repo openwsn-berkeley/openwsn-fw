@@ -51,7 +51,7 @@ owerror_t         openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 void               openqueue_removeAllOwnedBy(uint8_t owner);
 
-OpenQueueEntry_t* openqueue_toBigPacket(OpenQueueEntry_t* pkt);
+OpenQueueEntry_t* openqueue_toBigPacket(OpenQueueEntry_t* pkt, uint16_t start);
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);

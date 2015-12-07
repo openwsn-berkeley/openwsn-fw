@@ -176,7 +176,7 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
    ENABLE_INTERRUPTS();
 }
 
-OpenQueueEntry_t* openqueue_toBigPacket(OpenQueueEntry_t* pkt) {
+OpenQueueEntry_t* openqueue_toBigPacket(OpenQueueEntry_t* pkt, uint16_t start) {
    uint8_t  i;
    uint8_t* payload;
    INTERRUPT_DECLARATION();
@@ -185,13 +185,14 @@ OpenQueueEntry_t* openqueue_toBigPacket(OpenQueueEntry_t* pkt) {
    for (i=0;i<BIGQUEUELENGTH;i++) {
       if (! bigqueue_vars.queue[i].in_use) {
          bigqueue_vars.queue[i].in_use = TRUE;
-	 payload  = ((uint8_t*)&(bigqueue_vars.queue[i].buffer));
+         payload  = ((uint8_t*)&(bigqueue_vars.queue[i].buffer));
          payload += BIG_PACKET_SIZE; // end of buffer
-         payload -= pkt->length; // - IEEE802154_SECURITY_TAG_LEN; Is footer needed here ?
-	 memcpy(payload, pkt->payload, pkt->length);
-	 pkt->payload    = payload;
-	 pkt->l4_payload = payload - pkt->length + pkt->l4_length;
-	 pkt->big = (uint8_t*)&(bigqueue_vars.queue[i]);
+         payload -= start > 0 ? start : pkt->length;
+	 // - IEEE802154_SECURITY_TAG_LEN; Is footer needed here ?
+         memcpy(payload, pkt->payload, pkt->length);
+         pkt->payload    = payload;
+         pkt->l4_payload = payload - pkt->length + pkt->l4_length;
+         pkt->big = (uint8_t*)&(bigqueue_vars.queue[i]);
 
          ENABLE_INTERRUPTS();
          return pkt;

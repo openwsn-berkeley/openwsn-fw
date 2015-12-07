@@ -12,6 +12,7 @@
 #include "opentcp.h"
 #include "debugpins.h"
 #include "scheduler.h"
+#include "fragment.h"
 
 //=========================== variables =======================================
 
@@ -204,6 +205,7 @@ void forwarding_receive(
    ) {
    uint8_t flags;
    uint16_t senderRank;
+   FragmentQueueEntry_t* buffer;
    
    // take ownership
    msg->owner                     = COMPONENT_FORWARDING;
@@ -244,31 +246,19 @@ void forwarding_receive(
           packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
       }
           
-      // indicate received packet to upper layer
-      switch(msg->l4_protocol) {
-         case IANA_TCP:
-            opentcp_receive(msg);
-            break;
-         case IANA_UDP:
-            openudp_receive(msg);
-            break;
-         case IANA_ICMPv6:
-            icmpv6_receive(msg);
-            break;
-         default:
-            
-            // log error
-            openserial_printError(
-               COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
-               (errorparameter_t)msg->l4_protocol,
-               (errorparameter_t)1
-            );
-            
-            // free packet
-            openqueue_freePacketBuffer(msg);
-      }
+      // If this message is a FRAG1, message must be assembled
+      // prior to move it to upper layer.
+      if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
+         fragment_assignAction(buffer, FRAGMENT_ACTION_ASSEMBLE);
+      else
+         forwarding_toUpperLayer(msg);
+
    } else {
       // this packet is not for me: relay
+   if ( fragment_searchBufferFromMsg(msg) ) {
+      printf("FRAG: relaying\n");
+      return;
+   } 
       
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
@@ -324,6 +314,10 @@ void forwarding_receive(
          }
       } else {
          // source routing header present
+   if ( fragment_searchBufferFromMsg(msg) ) {
+      printf("FRAG: relaying\n");
+      return;
+   } 
          
          if (forwarding_send_internal_SourceRouting(msg,ipv6_outer_header,ipv6_inner_header)==E_FAIL) {
             
@@ -339,6 +333,34 @@ void forwarding_receive(
          }
       }
    }
+}
+
+// indicate reception to upper layer
+owerror_t forwarding_toUpperLayer(OpenQueueEntry_t* msg) {
+   switch(msg->l4_protocol) {
+      case IANA_TCP:
+         opentcp_receive(msg);
+         break;
+      case IANA_UDP:
+         openudp_receive(msg);
+         break;
+      case IANA_ICMPv6:
+         icmpv6_receive(msg);
+         break;
+      default:
+         // log error
+         openserial_printError(
+            COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
+            (errorparameter_t)msg->l4_protocol,
+            (errorparameter_t)1
+         );
+         //not sure that this is correct as iphc will free it?
+         openqueue_freePacketBuffer(msg);
+         return E_FAIL;
+   }
+   
+   // stop executing here (successful)
+   return E_SUCCESS;
 }
 
 //=========================== private =========================================
@@ -491,31 +513,7 @@ owerror_t forwarding_send_internal_SourceRouting(
       // toss iphc inner header
       packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
       
-      // indicate reception to upper layer
-      switch(msg->l4_protocol) {
-         case IANA_TCP:
-            opentcp_receive(msg);
-            break;
-         case IANA_UDP:
-            openudp_receive(msg);
-            break;
-         case IANA_ICMPv6:
-            icmpv6_receive(msg);
-            break;
-         default:
-            openserial_printError(
-               COMPONENT_FORWARDING,
-               ERR_WRONG_TRAN_PROTOCOL,
-               (errorparameter_t)msg->l4_protocol,
-               (errorparameter_t)1
-            );
-            //not sure that this is correct as iphc will free it?
-            openqueue_freePacketBuffer(msg);
-            return E_FAIL;
-      }
-      
-      // stop executing here (successful)
-      return E_SUCCESS;
+      return forwarding_toUpperLayer(msg);
    
    } else {
       // this is not the last hop

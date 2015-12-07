@@ -14,11 +14,16 @@
 //=========================== variables =======================================
 
 fragtest_vars_t fragtest_vars;
-
+/*
 static const uint8_t fragtest_dst_addr[]   = {
    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
+*/
+static const uint8_t fragtest_dst_addr[]   = {
+   0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x14, 0x15, 0x92, 0xcc, 0x00, 0x00, 0x00, 0x02
+};
 
 //=========================== prototypes ======================================
 
@@ -33,7 +38,7 @@ void fragtest_init() {
    memset(&fragtest_vars,0,sizeof(fragtest_vars_t));
    
    // start periodic timer
-   fragtest_vars.timerId                    = opentimers_start(
+   fragtest_vars.timerId = opentimers_start(
       FRAGTEST_PERIOD_MS,
       TIMER_PERIODIC,TIME_MS,
       fragtest_timer_cb
@@ -45,14 +50,21 @@ void fragtest_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 }
 
 void fragtest_receive(OpenQueueEntry_t* pkt) {
-   
+   uint16_t i;
+   uint16_t aux;
+
+   for ( i = 0; i < pkt->length; i++ )
+      if (pkt->payload[i] != i % 10 )
+	 break;
+   printf("FRAG: Incoming message - %dB read from %d\n", i, pkt->length);
+   aux = pkt->length;
    openqueue_freePacketBuffer(pkt);
    
    openserial_printError(
       COMPONENT_FRAGTEST,
       ERR_RCVD_ECHO_REPLY,
-      (errorparameter_t)0,
-      (errorparameter_t)0
+      (errorparameter_t)aux,
+      (errorparameter_t)i
    );
 }
 
@@ -76,7 +88,12 @@ void fragtest_task_cb() {
    if (ieee154e_isSynch() == FALSE) return;
    
    // don't run on dagroot
-   if (idmanager_getIsDAGroot()) {
+   //if (idmanager_getIsDAGroot()) {
+   //   opentimers_stop(fragtest_vars.timerId);
+   //   return;
+   //}
+   // run on dagroot
+   if (! idmanager_getIsDAGroot()) {
       opentimers_stop(fragtest_vars.timerId);
       return;
    }
@@ -109,6 +126,7 @@ void fragtest_task_cb() {
    for ( i = 0; i < counter; i++ )
       pkt->payload[i] = i % 10;
    
+   printf("FRAG: (%u) Sending %d octets\n", (unsigned int)self, counter);
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }

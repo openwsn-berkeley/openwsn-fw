@@ -43,12 +43,17 @@ typedef enum fragment_states {
    FRAGMENT_FAIL       // error on Tx, waiting for fragments on sending
 } FragmentState;
 
+typedef enum fragment_actions {
+   FRAGMENT_ACTION_ASSEMBLE  // message for me, moving to upper layer
+} FragmentAction;
+
 #define FRAGMENT_TIMEOUT_MS     60000
 #define FRAGMENT_TX_MAX_PACKETS     2
 
 //=========================== typedef =========================================
 
-typedef void (*fragment_action)(uint8_t buf);
+typedef struct FragmentQueueEntry FragmentQueueEntry_t; 
+typedef void (*fragment_process)(OpenMote*, FragmentQueueEntry_t*);
 
 typedef struct {
    opentimer_id_t    timer;
@@ -62,7 +67,7 @@ typedef struct {
    OpenQueueEntry_t* fragment;
 } FragmentOffsetEntry_t;
 
-typedef struct FragmentQueueEntry_t {
+typedef struct FragmentQueueEntry {
    FragmentState         in_use;        // Record state
    OpenQueueEntry_t*     msg;           // Initial fragment message
    uint16_t              datagram_size; // RFC 4944 Section 5.3
@@ -70,10 +75,10 @@ typedef struct FragmentQueueEntry_t {
    open_addr_t           dst;           // i802.15.4 addresses or originator
    open_addr_t           src;           // and destination mesh addresses
    opentimer_id_t        timerId;
-   fragment_action       action;
+   fragment_process      action;        // function to process fragments
    uint8_t               number;        // number of fragments in list
    uint8_t               processed;     // number of assembled or sent
-   uint8_t               sending;       // number on sending
+   uint8_t               sending;       // number on sending or fragment offset
    FragmentOffsetEntry_t list[FRAGMENT_MAX_FRAGMENTS];
 } FragmentQueueEntry_t;
 
@@ -91,6 +96,8 @@ owerror_t fragment_prependHeader(OpenQueueEntry_t* msg);
 void fragment_retrieveHeader(OpenQueueEntry_t* msg);
 void fragment_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 FragmentQueueEntry_t* fragment_indexBuffer(uint8_t id);
+FragmentQueueEntry_t* fragment_searchBufferFromMsg(OpenQueueEntry_t* msg);
+void fragment_assignAction(FragmentQueueEntry_t* buffer, FragmentAction action);
 
 /**
 \}

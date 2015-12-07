@@ -80,15 +80,17 @@ owerror_t iphc_sendFromForwarding(
    // by default, the "next header" field is carried inline
    nh=IPHC_NH_INLINE;
    
+// I am testing fragmentation sending from DAGroot
+// I will UNComment it when openbridge working
    // error checking
-   if (idmanager_getIsDAGroot()==TRUE &&
+/*   if (idmanager_getIsDAGroot()==TRUE &&
       packetfunctions_isAllRoutersMulticast(&(msg->l3_destinationAdd))==FALSE) {
       openserial_printCritical(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       return E_FAIL;
    }
-   
+*/   
    //discard the packet.. hop limit reached.
    if (ipv6_outer_header->hop_limit==0) {
       openserial_printError(COMPONENT_IPHC,ERR_HOP_LIMIT_REACHED,
@@ -267,6 +269,10 @@ void iphc_receive(OpenQueueEntry_t* msg) {
          &rpl_option
       );
    } else {
+      if ( fragment_searchBufferFromMsg(msg) ) {
+         printf("FRAG: In openbridge\n");
+	 return;
+      }
       openbridge_receive(msg);                   //out to the OpenVisualizer
    }
 }
