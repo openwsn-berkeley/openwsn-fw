@@ -44,6 +44,8 @@ typedef enum fragment_states {
 } FragmentState;
 
 typedef enum fragment_actions {
+   FRAGMENT_ACTION_NONE,
+   FRAGMENT_ACTION_CANCEL,   // cancel message: really needed?
    FRAGMENT_ACTION_ASSEMBLE  // message for me, moving to upper layer
 } FragmentAction;
 
@@ -51,9 +53,6 @@ typedef enum fragment_actions {
 #define FRAGMENT_TX_MAX_PACKETS     2
 
 //=========================== typedef =========================================
-
-typedef struct FragmentQueueEntry FragmentQueueEntry_t; 
-typedef void (*fragment_process)(OpenMote*, FragmentQueueEntry_t*);
 
 typedef struct {
    opentimer_id_t    timer;
@@ -75,7 +74,7 @@ typedef struct FragmentQueueEntry {
    open_addr_t           dst;           // i802.15.4 addresses or originator
    open_addr_t           src;           // and destination mesh addresses
    opentimer_id_t        timerId;
-   fragment_process      action;        // function to process fragments
+   FragmentAction        action;        // action to process fragments
    uint8_t               number;        // number of fragments in list
    uint8_t               processed;     // number of assembled or sent
    uint8_t               sending;       // number on sending or fragment offset

@@ -49,6 +49,7 @@ void fragment_disableTimer(FragmentQueueEntry_t* buffer);
 void fragment_activateTimer(FragmentQueueEntry_t* buffer);
 
 // action functions
+void fragment_action(FragmentQueueEntry_t* buffer);
 void fragment_cancel(FragmentQueueEntry_t* buffer);
 void fragment_assemble(FragmentQueueEntry_t* buffer);
 
@@ -353,8 +354,8 @@ void fragment_retrieveHeader(OpenQueueEntry_t* msg) {
       buffer->msg = msg;
       iphc_receive(msg);
    // Initial fragment processed: process this one
-   } else if (buffer->action)
-      buffer->action(self, buffer);
+   } else if (buffer->action != FRAGMENT_ACTION_NONE)
+      fragment_action(buffer);
 }
 
 void fragment_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
@@ -412,13 +413,9 @@ FragmentQueueEntry_t* fragment_searchBufferFromMsg(OpenQueueEntry_t* msg) {
 }
 
 void fragment_assignAction(FragmentQueueEntry_t* buffer, FragmentAction action) {
-   switch (action) {
-      case FRAGMENT_ACTION_ASSEMBLE:
-         buffer->action = fragment_assemble;
-	 break;
-   }
+   buffer->action = action;
 
-   buffer->action(self, buffer);
+   fragment_action(buffer);
 }
 
 //=========================== private =========================================
@@ -784,7 +781,7 @@ owerror_t fragment_restartBuffer(FragmentQueueEntry_t* buffer) {
       buffer->msg->length   = 0;
       buffer->sending       = 0;
       buffer->processed     = 0;
-      buffer->action        = NULL;
+      buffer->action        = FRAGMENT_ACTION_NONE;
    }
    ENABLE_INTERRUPTS();
    return E_SUCCESS;
@@ -798,7 +795,7 @@ void fragment_resetBuffer(FragmentQueueEntry_t* buffer) {
 
    fragment_disableTimer(buffer);
    buffer->msg           = NULL;
-   buffer->action        = NULL;
+   buffer->action        = FRAGMENT_ACTION_NONE;
    buffer->datagram_size = 0;
    buffer->number        = 0;
    buffer->processed     = 0;
@@ -858,6 +855,17 @@ uint8_t fragment_bufferIndex(FragmentQueueEntry_t* buffer) {
 }
 
 // action functions
+void fragment_action(FragmentQueueEntry_t* buffer) {
+   switch (buffer->action) {
+      case FRAGMENT_ACTION_CANCEL:
+         fragment_cancel(buffer);
+	 break;
+      case FRAGMENT_ACTION_ASSEMBLE:
+         fragment_assemble(buffer);
+	 break;
+   }
+}
+
 void fragment_cancel(FragmentQueueEntry_t* buffer) {
    uint8_t  i;
    uint16_t received;
@@ -901,7 +909,8 @@ void fragment_assemble(FragmentQueueEntry_t* buffer) {
          openserial_printError(COMPONENT_FRAGMENT, ERR_NO_FREE_PACKET_BUFFER,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
-	 buffer->action = fragment_cancel;
+	 // will wait for timer expiration on final version?
+	 buffer->action = FRAGMENT_ACTION_CANCEL;
 	 return;
       }
       buffer->msg->length = received;
