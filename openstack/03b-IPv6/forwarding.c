@@ -255,10 +255,6 @@ void forwarding_receive(
 
    } else {
       // this packet is not for me: relay
-   if ( fragment_searchBufferFromMsg(msg) ) {
-      printf("FRAG: relaying\n");
-      return;
-   } 
       
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
@@ -314,10 +310,6 @@ void forwarding_receive(
          }
       } else {
          // source routing header present
-   if ( fragment_searchBufferFromMsg(msg) ) {
-      printf("FRAG: relaying\n");
-      return;
-   } 
          
          if (forwarding_send_internal_SourceRouting(msg,ipv6_outer_header,ipv6_inner_header)==E_FAIL) {
             
@@ -330,6 +322,9 @@ void forwarding_receive(
                (errorparameter_t)0,
                (errorparameter_t)0
             );
+
+            if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
+               fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
          }
       }
    }
@@ -529,7 +524,8 @@ owerror_t forwarding_send_internal_SourceRouting(
             (errorparameter_t)0,
             (errorparameter_t)0
          );
-         openqueue_freePacketBuffer(msg);
+         if ( fragment_searchBufferFromMsg(msg) == NULL )
+            openqueue_freePacketBuffer(msg);
          return E_FAIL;
       
       } else {
@@ -630,7 +626,8 @@ owerror_t forwarding_send_internal_SourceRouting(
                   (errorparameter_t)1,
                   (errorparameter_t)0
                );
-               openqueue_freePacketBuffer(msg);
+               if ( fragment_searchBufferFromMsg(msg) == NULL )
+                  openqueue_freePacketBuffer(msg);
                return E_FAIL;
          }
       }

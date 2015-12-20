@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
 
-#define FRAGMENT_MAX_SIZE 1280 // 1280 = IPv6 required
+#define FRAGMENT_MAX_SIZE LARGE_PACKET_SIZE
 #define MIN_PAYLOAD 81         // Min 6LowPAN payload
 #define FRAGMENT_MAX_FRAGMENTS (FRAGMENT_MAX_SIZE/MIN_PAYLOAD +1)
 
@@ -27,30 +27,35 @@ enum LOWPAN_DISPATCH_enums {
 typedef enum fragment_states {
    FRAGMENT_NONE,      // fresh fragment
                        // free Fragment entry
-   FRAGMENT_ASSIGNED,  // assigned for an incoming or outgoing fragment
+   FRAGMENT_ASSIGNED,  // assigned for an outgoing fragment
+   // incoming values
+   FRAGMENT_RECEIVED,  // received message fragment
+   FRAGMENT_PROCESSED, // payload processed but not freed
+   FRAGMENT_FINISHED,  // fragment resources freed
    // outgoing values
    FRAGMENT_RESERVING, // trying to acquire a OpenQueue packet
    FRAGMENT_RESERVED,  // payload copied to OpenQueue packet
-                       // Fragment entry in use
+                       // message fragment ready to forward
+                       // message fragment ready to be sent
    FRAGMENT_SENDING,   // packet attempted to be sent (on layer 2)
-   FRAGMENT_SENT,      // fragment sent
-   // incoming values
-   FRAGMENT_PROCESSED, // payload processed but not freed
-   FRAGMENT_FINISHED,  // fragment resources freed
+   FRAGMENT_SENT,      // message fragment sent
    // Fragment Entry value
    FRAGMENT_RX,        // incoming message
    FRAGMENT_TX,        // outgoing message
+   FRAGMENT_FW,        // forwarding message
    FRAGMENT_FAIL       // error on Tx, waiting for fragments on sending
 } FragmentState;
 
 typedef enum fragment_actions {
    FRAGMENT_ACTION_NONE,
-   FRAGMENT_ACTION_CANCEL,   // cancel message: really needed?
-   FRAGMENT_ACTION_ASSEMBLE  // message for me, moving to upper layer
+   FRAGMENT_ACTION_CANCEL,    // cancel message
+   FRAGMENT_ACTION_ASSEMBLE,  // message for me, moving to upper layer
+   FRAGMENT_ACTION_FORWARD,   // message to be forwarded
+   FRAGMENT_ACTION_OPENBRIDGE // to openbridge
 } FragmentAction;
 
 #define FRAGMENT_TIMEOUT_MS     60000
-#define FRAGMENT_TX_MAX_PACKETS     2
+#define FRAGMENT_TX_MAX_PACKETS     1
 
 //=========================== typedef =========================================
 
@@ -71,13 +76,17 @@ typedef struct FragmentQueueEntry {
    OpenQueueEntry_t*     msg;           // Initial fragment message
    uint16_t              datagram_size; // RFC 4944 Section 5.3
    uint16_t              datagram_tag;
+   uint16_t              new_size;      // forwarded msg size & tag
+   uint16_t              new_tag;
    open_addr_t           dst;           // i802.15.4 addresses or originator
    open_addr_t           src;           // and destination mesh addresses
    opentimer_id_t        timerId;
    FragmentAction        action;        // action to process fragments
    uint8_t               number;        // number of fragments in list
-   uint8_t               processed;     // number of assembled or sent
-   uint8_t               sending;       // number on sending or fragment offset
+   uint8_t               processed;     // number of assembled or ready to forward
+   uint8_t               sending;       // number on sending
+   uint8_t               sent;          // number of sent
+   uint8_t               offset;        // fragment offset
    FragmentOffsetEntry_t list[FRAGMENT_MAX_FRAGMENTS];
 } FragmentQueueEntry_t;
 

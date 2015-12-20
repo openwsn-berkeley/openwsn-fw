@@ -30,7 +30,7 @@ void openqueue_init() {
       openqueue_reset_entry(&(openqueue_vars.queue[i]));
    }
    for (i=0;i<BIGQUEUELENGTH;i++){
-      bigqueue_reset_entry(&(bigqueue_vars.queue[i]));
+      bigqueue_vars.queue[i].in_use = FALSE;
    }
 }
 
@@ -95,6 +95,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 
 owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
    uint8_t i;
+   uint8_t j;
 
    for (i=0;i<QUEUELENGTH;i++) {
       if (&openqueue_vars.queue[i]==pkt) {
@@ -104,13 +105,16 @@ owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
                                   (errorparameter_t)0,
                                   (errorparameter_t)0);
          }
-	 if (pkt->big) {
-	    if ( ! ((BigQueueEntry_t*)(pkt->big))->in_use ) 
-               openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
+	 if ( pkt->big )
+            for (j=0;j<BIGQUEUELENGTH;j++)
+               if ( (uint8_t*)&(bigqueue_vars.queue[j]) == pkt->big ) {
+
+                  if ( ! bigqueue_vars.queue[j].in_use ) 
+                     openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
                                   (errorparameter_t)0,
 				  (errorparameter_t)0);
-	    ((BigQueueEntry_t*)(pkt->big))->in_use=FALSE;
-	 }
+                  bigqueue_vars.queue[j].in_use = FALSE;
+               }
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
          return E_SUCCESS;
       }
@@ -153,6 +157,11 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].creator==creator) {
+         FragmentQueueEntry_t* buffer;
+
+         if ( (buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]))) != NULL )
+            fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
+	 else
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
       }
    }
@@ -170,6 +179,11 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].owner==owner) {
+         FragmentQueueEntry_t* buffer;
+
+         if ( (buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]))) != NULL )
+            fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
+	 else
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
       }
    }
@@ -309,8 +323,4 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_payloadIEpresent          = 0;
    //l2-security
    entry->l2_securityLevel             = 0;
-}
-
-void bigqueue_reset_entry(BigQueueEntry_t* entry) {
-   entry->in_use = FALSE;
 }

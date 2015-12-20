@@ -18,6 +18,7 @@ void icmpv6_init() {
 owerror_t icmpv6_send(OpenQueueEntry_t* msg) {
    msg->owner       = COMPONENT_ICMPv6;
    msg->l4_protocol = IANA_ICMPv6;
+   msg->l4_length   = msg->length;
    return forwarding_send(msg);
 }
 

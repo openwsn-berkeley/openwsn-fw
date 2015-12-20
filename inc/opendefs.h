@@ -42,6 +42,8 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define LENGTH_ADDR64b  8
 #define LENGTH_ADDR128b 16
 
+#define LENGTH_IPV6_MTU   1280 // RFC 2460
+#define LARGE_PACKET_SIZE LENGTH_IPV6_MTU 
 
 enum {
    E_SUCCESS                           = 0,

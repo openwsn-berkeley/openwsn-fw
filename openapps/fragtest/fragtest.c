@@ -24,6 +24,10 @@ static const uint8_t fragtest_dst_addr[]   = {
    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x14, 0x15, 0x92, 0xcc, 0x00, 0x00, 0x00, 0x02
 };
+static const uint8_t fragtest_org_addr[]   = {
+   0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+   0x14, 0x15, 0x92, 0xcc, 0x00, 0x00, 0x00, 0x04
+};
 
 //=========================== prototypes ======================================
 
@@ -46,6 +50,8 @@ void fragtest_init() {
 }
 
 void fragtest_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
+   if ( error == E_FAIL )
+      printf("FRAG: Error on transmission\n");
    openqueue_freePacketBuffer(msg);
 }
 
@@ -83,20 +89,21 @@ void fragtest_task_cb() {
    OpenQueueEntry_t*    pkt;
    uint16_t             counter;
    uint16_t             i;
+   open_addr_t          origin;
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
    
    // don't run on dagroot
-   //if (idmanager_getIsDAGroot()) {
-   //   opentimers_stop(fragtest_vars.timerId);
-   //   return;
-   //}
-   // run on dagroot
-   if (! idmanager_getIsDAGroot()) {
+   if (idmanager_getIsDAGroot()) {
       opentimers_stop(fragtest_vars.timerId);
       return;
    }
+   // run on dagroot
+/*   if (! idmanager_getIsDAGroot()) {
+      opentimers_stop(fragtest_vars.timerId);
+      return;
+   }*/
    
    // if you get here, send a packet
    
@@ -119,15 +126,28 @@ void fragtest_task_cb() {
    pkt->l4_sourcePortORicmpv6Type     = WKP_UDP_FRAGTEST;
    pkt->l3_destinationAdd.type        = ADDR_128B;
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],fragtest_dst_addr,16);
+   origin.type = ADDR_128B;
+   memcpy(&origin.addr_128b[0], fragtest_org_addr, 16);
    
+   // Don't run on destination
+/*   if ( idmanager_isMyAddress(&(pkt->l3_destinationAdd)) ) {
+      printf("FRAG: Yo soy (%lu)\n", (unsigned long int)self);
+      openqueue_freePacketBuffer(pkt);
+      opentimers_stop(fragtest_vars.timerId);
+      return;
+   }*/
+   // Just run on origin
+   if ( ! idmanager_isMyAddress(&origin) ) {
+      openqueue_freePacketBuffer(pkt);
+      opentimers_stop(fragtest_vars.timerId);
+      return;
+   }
    counter = openrandom_get16b() % FRAGMENT_MAX_SIZE;
-   if ( counter < 128 ) counter += 128;
    packetfunctions_reserveHeaderSize(pkt,counter * sizeof(uint8_t));
    for ( i = 0; i < counter; i++ )
       pkt->payload[i] = i % 10;
    
-   printf("FRAG: (%u) Sending %d octets\n", (unsigned int)self, counter);
-   if ((openudp_send(pkt))==E_FAIL) {
+   printf("FRAG: Sending %d octets\n", counter);
+   if ((openudp_send(pkt))==E_FAIL)
       openqueue_freePacketBuffer(pkt);
-   }
 }
