@@ -306,7 +306,10 @@ void forwarding_receive(
                   PCKTFORWARD 
                )==E_FAIL
             ) {
-            openqueue_freePacketBuffer(msg);
+            if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
+               fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
+	    else
+               openqueue_freePacketBuffer(msg);
          }
       } else {
          // source routing header present

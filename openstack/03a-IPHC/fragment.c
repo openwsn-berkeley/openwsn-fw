@@ -516,7 +516,7 @@ void fragment_finishPkt(FragmentQueueEntry_t*  buffer,
          error = E_FAIL;
       // Free Buffer and relay:
       // wait for pending fragments
-      if ( fwend || buffer->sending == 0 ) {
+      if ( buffer->in_use == FRAGMENT_TX && buffer->sending == 0 || fwend ) {
          pkt = buffer->msg;
 	 if ( buffer->in_use == FRAGMENT_FW )
             pkt->creator = COMPONENT_FORWARDING;
@@ -1035,7 +1035,7 @@ void fragment_openbridge(FragmentQueueEntry_t* buffer) {
             buffer->processed++;
             buffer->list[i].state = FRAGMENT_FINISHED;
 	 }
-      if ( received < 125 ) { // re-use
+      if ( received < 120 ) { // re-use
          memmove(&(buffer->msg->packet[127]) - received,
                    buffer->msg->payload, received);
 	 buffer->msg->payload = &(buffer->msg->packet[127]) - received;
