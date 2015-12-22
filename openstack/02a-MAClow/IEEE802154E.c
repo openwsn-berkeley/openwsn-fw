@@ -446,6 +446,27 @@ port_INLINE void activity_synchronize_newSlot() {
       radio_rxNow();
    }
    
+   // if I'm already in S_SYNCLISTEN, while not synchronized,
+   // but the synchronizing channel has been changed,
+   // change the synchronizing channel
+   if ((ieee154e_vars.state==S_SYNCLISTEN) && (ieee154e_vars.singleChannelChanged == TRUE)) {
+      // turn off the radio (in case it wasn't yet)
+      radio_rfOff();
+      
+      // update record of current channel
+      ieee154e_vars.freq = calculateFrequency(ieee154e_vars.singleChannel);
+      
+      // configure the radio to listen to the default synchronizing channel
+      radio_setFrequency(ieee154e_vars.freq);
+      
+      // switch on the radio in Rx mode.
+      radio_rxEnable();
+      ieee154e_vars.radioOnInit=radio_getTimerValue();
+      ieee154e_vars.radioOnThisSlot=TRUE;
+      radio_rxNow();
+      ieee154e_vars.singleChannelChanged = FALSE;
+   }
+   
    // increment ASN (used only to schedule serial activity)
    incrementAsnOffset();
    
@@ -932,6 +953,10 @@ port_INLINE void activity_ti1ORri1() {
          //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
+            // advance the schedule
+            schedule_advanceSlot();
+            // find the next one
+            ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
          }
 #ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
@@ -1498,7 +1523,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       }
       
       // record the timeCorrection and print out at end of slot
-      ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
+      ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
       
       // check if ack requested
       if (ieee802514_header.ackRequested==1 && ieee154e_vars.isAckEnabled == TRUE) {
@@ -1557,8 +1582,9 @@ port_INLINE void activity_ri6() {
    ieee154e_vars.ackToSend->creator = COMPONENT_IEEE802154E;
    ieee154e_vars.ackToSend->owner   = COMPONENT_IEEE802154E;
    
-   // calculate the time timeCorrection (this is the time when the packet arrive w.r.t the time it should be.
-   ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
+   // calculate the time timeCorrection (this is the time the sender is off w.r.t to this node. A negative number means
+   // the sender is too late.
+   ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
    
    // prepend the IEEE802.15.4 header to the ACK
    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
@@ -1879,6 +1905,7 @@ void ieee154e_setSingleChannel(uint8_t channel){
         return;
     }
     ieee154e_vars.singleChannel = channel;
+    ieee154e_vars.singleChannelChanged = TRUE;
 }
 
 void ieee154e_setIsSecurityEnabled(bool isEnabled){
@@ -1957,7 +1984,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
    
    // calculate new period
    currentPeriod                  =  radio_getTimerPeriod();
-   newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod-timeCorrection);
+   newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)currentPeriod+timeCorrection);
 
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
