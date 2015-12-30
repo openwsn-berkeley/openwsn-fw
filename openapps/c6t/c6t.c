@@ -120,7 +120,8 @@ owerror_t c6t_receive(
          sixtop_setHandler(SIX_HANDLER_OTF);
          // call sixtop
          sixtop_removeCell(
-            &neighbor
+            &neighbor,
+            1
          );
          
          // set the CoAP header

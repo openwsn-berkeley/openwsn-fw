@@ -35,7 +35,13 @@ typedef enum {
    SIX_SENDING_REMOVEREQUEST           = 0x08,   // generating resLinkRespone command packet
    SIX_WAIT_REMOVEREQUEST_SENDDONE     = 0x09,   // waiting for SendDone confirmation
    // REMOVE: destinations
-   SIX_REMOVEREQUEST_RECEIVED          = 0x0a    // I received the remove link request command
+   SIX_REMOVEREQUEST_RECEIVED          = 0x0a,   // I received the remove link request command
+   // LIST: source
+   SIX_WAIT_LISTRESPONSE               = 0x0b,
+   SIX_LISTRESPONSE_RECEIVED           = 0x0c,
+   // COUNT: source
+   SIX_WAIT_COUNTRESPONSE              = 0x0d,
+   SIX_COUNTRESPONSE_RECEIVED          = 0x0e
 } six2six_state_t;
 
 // before sixtop protocol is called, sixtop handler must be set
@@ -76,8 +82,11 @@ void      sixtop_setEBPeriod(uint8_t ebPeriod);
 void      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
 void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells);
-void      sixtop_removeCell(open_addr_t*  neighbor);
+void      sixtop_removeCell(open_addr_t*  neighbor, uint16_t numCells);
 void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
+void      sixtop_countRequest(open_addr_t* neighbor);
+void      sixtop_listRequest(open_addr_t* neighbor);
+void      sixtop_clearRequest(open_addr_t* neighbor);
 // maintaining
 void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);
 // from upper layer

@@ -220,104 +220,13 @@ port_INLINE uint8_t processIE_prependChannelHoppingIE(OpenQueueEntry_t* pkt){
    return len;
 }
 
-port_INLINE uint8_t processIE_prependOpcodeIE(
-      OpenQueueEntry_t* pkt,
-      uint8_t           uResCommandID
-   ){
-   uint8_t    len;
-   mlme_IE_ht mlme_subHeader;
-  
-   len = 0;
-   
-   //===== command ID
-   
-   // reserve space
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   
-   // write header
-   *((uint8_t*)(pkt->payload)) = uResCommandID;
-   
-   len += 1;  
-  
-   //===== MLME IE header
-   
-   // reserve space
-   packetfunctions_reserveHeaderSize(pkt, sizeof(mlme_IE_ht));
-   
-   // prepare header
-   mlme_subHeader.length_subID_type  = len;
-   mlme_subHeader.length_subID_type |= 
-      MLME_IE_SUBID_OPCODE << MLME_IE_SUBID_SHIFT|
-      IEEE802154E_DESC_TYPE_SHORT;
-   
-   // copy header
-   pkt->payload[0] = mlme_subHeader.length_subID_type        & 0xFF;
-   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
-   
-   len += 2;
-  
-   return len;
-}
-
-port_INLINE uint8_t processIE_prependBandwidthIE(
-      OpenQueueEntry_t* pkt, 
-      uint8_t           numOfLinks, 
-      uint8_t           slotframeID
-   ){
-   
-   uint8_t    len;
-   mlme_IE_ht mlme_subHeader;
-   
-   len = 0;
-   
-   //===== number of cells
-   
-   // reserve space
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   
-   // write header
-   *((uint8_t*)(pkt->payload)) = numOfLinks;
-   
-   len += 1;
-   
-   //===== number of cells
-   
-   // reserve space
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   
-   // write header
-   *((uint8_t*)(pkt->payload)) = slotframeID;
-   
-   len += 1;
-   
-   //===== MLME IE header
-   
-   // reserve space
-   packetfunctions_reserveHeaderSize(pkt, sizeof(mlme_IE_ht));
-   
-   // prepare header
-   mlme_subHeader.length_subID_type  = len;
-   mlme_subHeader.length_subID_type |= 
-      (MLME_IE_SUBID_BANDWIDTH << 
-         MLME_IE_SUBID_SHIFT) |
-      IEEE802154E_DESC_TYPE_SHORT;
-   
-   // copy header
-   pkt->payload[0] = mlme_subHeader.length_subID_type        & 0xFF;
-   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
-   
-   len += 2;
-  
-   return len;
-}
-
-port_INLINE uint8_t processIE_prependScheduleIE(
-      OpenQueueEntry_t* pkt,
-      uint8_t           type,
-      uint8_t           frameID,
-      uint8_t           flag,
-      cellInfo_ht*      cellList
-   ){
+port_INLINE uint8_t processIE_prepend_sixAddORDeleteRequest(
+   OpenQueueEntry_t*    pkt,
+   uint8_t              numCells,
+   uint8_t              container,
+   cellInfo_ht*         cellList,
+   uint8_t              addORDelete
+       ) {
    uint8_t    i;
    uint8_t    len;
    uint8_t    temp8b;
@@ -335,13 +244,12 @@ port_INLINE uint8_t processIE_prependScheduleIE(
          // - [2B] slotOffset
          // - [2B] channelOffset
          // - [1B] link_type
-         packetfunctions_reserveHeaderSize(pkt,5); 
+         packetfunctions_reserveHeaderSize(pkt,4); 
          pkt->payload[0] = (uint8_t)(cellList[i].tsNum  & 0x00FF);
          pkt->payload[1] = (uint8_t)((cellList[i].tsNum & 0xFF00)>>8);
          pkt->payload[2] = (uint8_t)(cellList[i].choffset  & 0x00FF);
          pkt->payload[3] = (uint8_t)((cellList[i].choffset & 0xFF00)>>8);
-         pkt->payload[4] = cellList[i].linkoptions;
-         len += 5;
+         len += 4;
          numOfCells++;
       }
    }
@@ -350,61 +258,116 @@ port_INLINE uint8_t processIE_prependScheduleIE(
    pkt->l2_scheduleIE_numOfCells  = numOfCells;
    pkt->l2_scheduleIE_cellObjects = pkt->payload;
    
-   //===== number of cells
-   
-   // reserve space
+   //===== container
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   
-   // prepare header
-   temp8b  = numOfCells;
-   temp8b |= flag << 7;
-   
-   // copy header
-   *((uint8_t*)(pkt->payload)) = temp8b;
-   
+   *((uint8_t*)(pkt->payload)) = container;
    len += 1;
    
-   //===== slotframeID
+   //===== SFID
    
    // reserve space
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   
-   // prepare header
-   temp8b = frameID;
-   
-   // copy header
-   *((uint8_t*)(pkt->payload)) = temp8b;
-   
+   *((uint8_t*)(pkt->payload)) = SFID_SF0;
    len += 1;
   
-   // record the frameID 
-   pkt->l2_scheduleIE_frameID = frameID;
+   //===== version & code
+   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+   temp8b  = IANA_6TOP_6P_VERSION;
+   temp8b |= addORDelete << 4;
+   *((uint8_t*)(pkt->payload)) = temp8b;
+   len += 1;
    
-   //===== length
+   //===== MLME IE header
+   
+   // reserve space
+   packetfunctions_reserveHeaderSize(pkt, sizeof(mlme_IE_ht));
+   
+   // prepare header
+   mlme_subHeader.length_subID_type  = len;
+   mlme_subHeader.length_subID_type |= 
+      (MLME_IE_SUBID_SCHEDULE << MLME_IE_SUBID_SHIFT) | 
+      IEEE802154E_DESC_TYPE_SHORT;
+   
+   // copy header
+   pkt->payload[0] = mlme_subHeader.length_subID_type       & 0xFF;
+   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8)& 0xFF;
+   
+   len+=2;
+  
+   return len;
+}
+port_INLINE uint8_t processIE_prepend_sixCountRequest(
+   OpenQueueEntry_t*    pkt,
+   uint8_t              numCells,
+   uint8_t              container,
+   cellInfo_ht*         cellList
+);
+port_INLINE uint8_t processIE_prepend_sixListRequest(
+   OpenQueueEntry_t*    pkt,
+   uint8_t              numCells,
+   uint8_t              container,
+   cellInfo_ht*         cellList
+);
+port_INLINE uint8_t processIE_prepend_sixClearRequest(
+   OpenQueueEntry_t*    pkt,
+   uint8_t              numCells,
+   uint8_t              container,
+   cellInfo_ht*         cellList
+);
+port_INLINE uint8_t processIE_prepend_sixResponse(
+     OpenQueueEntry_t*    pkt,
+     uint8_t              code,
+     cellInfo_ht*         cellList
+       ){
+    uint8_t    i;
+    uint8_t    len;
+    uint8_t    temp8b;
+    uint8_t    numOfCells;
+    mlme_IE_ht mlme_subHeader;
+  
+    len        = 0;
+    numOfCells = 0;
+   
+    switch(code){
+    case IANA_6TOP_RC_SUCCESS:
+        //====== celllist
+        for(i=0;i<SCHEDULEIEMAXNUMCELLS;i++) {
+            if(cellList[i].linkoptions != CELLTYPE_OFF){
+                // cellobjects:
+                // - [2B] slotOffset
+                // - [2B] channelOffset
+                // - [1B] link_type
+                packetfunctions_reserveHeaderSize(pkt,4); 
+                pkt->payload[0] = (uint8_t)(cellList[i].tsNum  & 0x00FF);
+                pkt->payload[1] = (uint8_t)((cellList[i].tsNum & 0xFF00)>>8);
+                pkt->payload[2] = (uint8_t)(cellList[i].choffset  & 0x00FF);
+                pkt->payload[3] = (uint8_t)((cellList[i].choffset & 0xFF00)>>8);
+                len += 4;
+                numOfCells++;
+            }
+        }
+         
+        // record the position of cellObjects
+        pkt->l2_scheduleIE_numOfCells  = numOfCells;
+        pkt->l2_scheduleIE_cellObjects = pkt->payload;
+        break;
+   case IANA_6TOP_RC_ERR:
+       break;
+       
+   }
+   
+   //===== SFID
    
    // reserve space
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   
-   // prepare header
-   temp8b = len;
-   
-   // copy header
-   *((uint8_t*)(pkt->payload)) = temp8b;
-   
-   // length
+   *((uint8_t*)(pkt->payload)) = SFID_SF0;
    len += 1;
   
-   //===== type
-   
-   // reserve space
+   //===== version & code
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   
-   // prepare header
-   temp8b = type;
-   
-   // copy header
+   temp8b  = IANA_6TOP_6P_VERSION;
+   temp8b |= code << 4;
    *((uint8_t*)(pkt->payload)) = temp8b;
-   
    len += 1;
    
    //===== MLME IE header
@@ -512,99 +475,83 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
    *ptr=localptr;
 } 
 
-port_INLINE void processIE_retrieveOpcodeIE(
+port_INLINE void processIE_retrieve_sixAddORDeleteRequest(
       OpenQueueEntry_t* pkt,
-      uint8_t*          ptr,
-      opcode_IE_ht*     opcodeInfo
-   ){
-   uint8_t localptr;
-   
-   localptr=*ptr; 
-   
-   opcodeInfo->opcode = *((uint8_t*)(pkt->payload)+localptr);
-   localptr++;
-  
-   *ptr=localptr; 
-} 
-
-port_INLINE void processIE_retrieveBandwidthIE(
-      OpenQueueEntry_t* pkt,
-      uint8_t *         ptr,
-      bandwidth_IE_ht*  bandwidthInfo
-   ){
-   uint8_t localptr;
-   
-   localptr=*ptr; 
-   
-   // [1B] slotframeID
-   bandwidthInfo->slotframeID = *((uint8_t*)(pkt->payload)+localptr);
-   localptr++;
-   
-   // [1B] number of cells
-   bandwidthInfo->numOfLinks = *((uint8_t*)(pkt->payload)+localptr);
-   localptr++;
-   
-   *ptr=localptr; 
+      uint8_t*          frameID,
+      uint8_t*          numOfCells,
+      uint8_t           length,
+      cellInfo_ht*      cellList
+    ){
+    uint8_t i=0;
+    uint8_t container;
+    uint8_t localptr = 0;
+    
+    // [1B] num of cells
+    *numOfCells = *((uint8_t*)(pkt->payload)+localptr);
+    localptr++;
+    
+    // [1B] container
+    container = *((uint8_t*)(pkt->payload)+localptr);
+    *frameID = container;
+    localptr++;
+    
+    while(localptr<length){
+        cellList[i].tsNum  = *((uint8_t*)(pkt->payload)+localptr);
+        localptr++;
+        cellList[i].tsNum |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+        localptr++;
+        cellList[i].choffset = *((uint8_t*)(pkt->payload)+localptr);
+        localptr++;
+        cellList[i].choffset |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+        localptr++;
+        // mark with linkoptions as ocuppied
+        cellList[i].linkoptions = CELLTYPE_TX;
+        i++;
+    }
 }
 
-port_INLINE void processIE_retrieveScheduleIE(
-      OpenQueueEntry_t* pkt,
-      uint8_t*          ptr,
-      schedule_IE_ht*   scheduleInfo
-   ){
-   uint8_t i;
-   uint8_t temp8b;
-   uint8_t localptr;
-  
-   localptr=*ptr;
-   
-   // [1B] type
-   scheduleInfo->type             = *((uint8_t*)(pkt->payload)+localptr);
-   localptr++;
-   
-   // [1B] length
-   scheduleInfo->length           = *((uint8_t*)(pkt->payload)+localptr);
-   localptr++;
-   
-   // [1B] frameID
-   scheduleInfo->frameID          = *((uint8_t*)(pkt->payload)+localptr);
-   localptr++;
-   
-   // [1B] number of cell and flag
-   temp8b = *((uint8_t*)(pkt->payload)+localptr);
-   scheduleInfo->numberOfcells    = temp8b & 0x7F;
-   scheduleInfo->flag             = (temp8b >> 7) ? TRUE : FALSE;
-   localptr++;
-  
-   if(scheduleInfo->numberOfcells > SCHEDULEIEMAXNUMCELLS) {
-      //log error
-      return;
-   }
-   
-   for (i=0;i<scheduleInfo->numberOfcells;i++){
-      
-      // [2B] TimeSlot
-      scheduleInfo->cellList[i].tsNum = 
-         *((uint8_t*)(pkt->payload)+localptr);
-      localptr++;
-      
-      scheduleInfo->cellList[i].tsNum  |= 
-         (*((uint8_t*)(pkt->payload)+localptr))<<8;
-      localptr++;
-      
-      // [2B] Ch.Offset
-      scheduleInfo->cellList[i].choffset = 
-         *((uint8_t*)(pkt->payload)+localptr);
-      localptr++;
-      
-      scheduleInfo->cellList[i].choffset  |= 
-         (*((uint8_t*)(pkt->payload)+localptr))<<8;
-      localptr++;
-      
-      // [1B] LinkOption bitmap
-      scheduleInfo->cellList[i].linkoptions = 
-         *((uint8_t*)(pkt->payload)+localptr);
-      localptr++;
-   }
-   *ptr=localptr; 
+port_INLINE void processIE_retrieve_sixCelllist(
+    OpenQueueEntry_t*   pkt,
+    uint8_t*            frameID,
+    uint8_t*            numOfCells,
+    uint8_t             code,
+    uint8_t             length,
+    cellInfo_ht*        cellList
+    ){
+    uint8_t i=0;
+    uint8_t localptr = 0;
+    
+    *frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+    
+    if (code == IANA_6TOP_RC_SUCCESS){
+        while(localptr<length){
+            cellList[i].tsNum  = *((uint8_t*)(pkt->payload)+localptr);
+            localptr++;
+            cellList[i].tsNum |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+            localptr++;
+            cellList[i].choffset = *((uint8_t*)(pkt->payload)+localptr);
+            localptr++;
+            cellList[i].choffset |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+            localptr++;
+            // mark with linkoptions as ocuppied
+            cellList[i].linkoptions = CELLTYPE_TX;
+            i++;
+        }
+        *numOfCells = i;
+    }
+}
+
+port_INLINE void processIE_retrieve_sixCount(
+    OpenQueueEntry_t*   pkt,
+    uint8_t             code,
+    uint8_t             length,
+    uint16_t*            count
+        ){
+    uint8_t localptr = 0;
+    if (code == IANA_6TOP_RC_SUCCESS){
+        *count  = *((uint8_t*)(pkt->payload)+localptr);
+        localptr++;
+        *count |= (*((uint8_t*)(pkt->payload)+localptr))<<8;
+        localptr++;
+    }
 }
