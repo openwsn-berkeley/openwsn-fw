@@ -91,7 +91,8 @@ owerror_t c6t_receive(
          
          sixtop_setHandler(SIX_HANDLER_OTF);
          // call sixtop
-         sixtop_addCells(
+         sixtop_request(
+            IANA_6TOP_CMD_ADD,
             &neighbor,
             1
          );
@@ -119,7 +120,8 @@ owerror_t c6t_receive(
          
          sixtop_setHandler(SIX_HANDLER_OTF);
          // call sixtop
-         sixtop_removeCell(
+         sixtop_request(
+            IANA_6TOP_CMD_DELETE,
             &neighbor,
             1
          );

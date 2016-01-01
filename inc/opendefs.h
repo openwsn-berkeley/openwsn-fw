@@ -301,9 +301,11 @@ typedef struct {
    uint8_t       l2_numTxAttempts;               // number Tx attempts
    asn_t         l2_asn;                         // at what ASN the packet was Tx'ed or Rx'ed
    uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
-   uint8_t*      l2_scheduleIE_cellObjects;      // pointer to the start of cell Objects in scheduleIE
-   uint8_t       l2_scheduleIE_numOfCells;       // number of cells were going to be scheduled or removed.
-   uint8_t       l2_scheduleIE_frameID;          // frameID in scheduleIE
+   uint8_t*      l2_sixtop_cellObjects;          // pointer to the start of cell Objects in 6P
+   uint8_t       l2_sixtop_numOfCells;           // number of cells were going to be scheduled or removed.
+   uint8_t       l2_sixtop_frameID;              // frameID in 6P
+   uint8_t       l2_sixtop_requestCommand;       // request Command in 6P
+   uint8_t       l2_sixtop_returnCode;           // return code in 6P
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_IEListPresent;               //did have IE field?

@@ -22,28 +22,6 @@
 #define MLME_IE_SUBID_TRACKID          0x43
 #define MLME_IE_SUBID_SCHEDULE         0x44
 
-// 6P version 
-#define IANA_6TOP_6P_VERSION   0 
-// 6P subID
-#define IANA_6TOP_SUBIE_ID     0
-// 6P command Id
-#define IANA_6TOP_CMD_ADD      0x00 // CMD_ADD      | add one or more cells     
-#define IANA_6TOP_CMD_DELETE   0x01 // CMD_DELETE   | delete one or more cells  
-#define IANA_6TOP_CMD_COUNT    0x02 // CMD_COUNT    | count scheduled cells     
-#define IANA_6TOP_CMD_LIST     0x03 // CMD_LIST     | list the scheduled cells  
-#define IANA_6TOP_CMD_CLEAR    0x04 // CMD_CLEAR    | clear all cells
-// 6P return code
-#define IANA_6TOP_RC_SUCCESS   0x05 // RC_SUCCESS  | operation succeeded      
-#define IANA_6TOP_RC_VER_ERR   0x06 // RC_VER_ERR  | unsupported 6P version   
-#define IANA_6TOP_RC_SFID_ERR  0x07 // RC_SFID_ERR | unsupported SFID         
-#define IANA_6TOP_RC_BUSY      0x08 // RC_BUSY     | handling previous request
-#define IANA_6TOP_RC_RESET     0x09 // RC_RESET    | abort 6P transaction     
-#define IANA_6TOP_RC_ERR       0x0a // RC_ERR      | operation failed         
-
-
-// SF ID
-#define SFID_SF0  0
-
 // ========================== typedef =========================================
 
 BEGIN_PACK
@@ -159,46 +137,28 @@ void             processIE_prependMLMEIE(
 //===== prepend IEs
 
 uint8_t          processIE_prependSyncIE(
-   OpenQueueEntry_t*    pkt
+    OpenQueueEntry_t*    pkt
 );
 uint8_t          processIE_prependSlotframeLinkIE(
-   OpenQueueEntry_t*    pkt
+    OpenQueueEntry_t*    pkt
 );
 uint8_t          processIE_prependTSCHTimeslotIE(
-   OpenQueueEntry_t*    pkt
+    OpenQueueEntry_t*    pkt
 );
 uint8_t          processIE_prependChannelHoppingIE(
-   OpenQueueEntry_t*    pkt
+    OpenQueueEntry_t*    pkt
 );
-uint8_t processIE_prepend_sixAddORDeleteRequest(
-   OpenQueueEntry_t*    pkt,
-   uint8_t              numCells,
-   uint8_t              container,
-   cellInfo_ht*         cellList,
-   uint8_t              addORDelete
+uint8_t          processIE_prepend_sixSubIEHeader(
+    OpenQueueEntry_t*    pkt,
+    uint8_t len
 );
-uint8_t          processIE_prepend_sixCountRequest(
-   OpenQueueEntry_t*    pkt,
-   uint8_t              numCells,
-   uint8_t              container,
-   cellInfo_ht*         cellList
+uint8_t           processIE_prepend_sixGeneralMessage(
+    OpenQueueEntry_t*    pkt,
+    uint8_t code
 );
-uint8_t          processIE_prepend_sixListRequest(
-   OpenQueueEntry_t*    pkt,
-   uint8_t              numCells,
-   uint8_t              container,
-   cellInfo_ht*         cellList
-);
-uint8_t          processIE_prepend_sixClearRequest(
-   OpenQueueEntry_t*    pkt,
-   uint8_t              numCells,
-   uint8_t              container,
-   cellInfo_ht*         cellList
-);
-uint8_t          processIE_prepend_sixResponse(
-   OpenQueueEntry_t*    pkt,
-   uint8_t              code,
-   cellInfo_ht*         cellList
+uint8_t           processIE_prepend_sixCelllist(
+    OpenQueueEntry_t*    pkt,
+    cellInfo_ht*         cellList
 );
 
 //===== retrieve IEs
@@ -207,26 +167,11 @@ void             processIE_retrieveSlotframeLinkIE(
    OpenQueueEntry_t*    pkt,
    uint8_t * ptr
 ); 
-void             processIE_retrieve_sixAddORDeleteRequest(
-    OpenQueueEntry_t*   pkt,
-    uint8_t*            frameID,
-    uint8_t*            numOfCells,
-    uint8_t             length,
-    cellInfo_ht*        cellList
-);
 void            processIE_retrieve_sixCelllist(
     OpenQueueEntry_t*   pkt,
-    uint8_t*            frameID,
-    uint8_t*            numOfCells,    
-    uint8_t             code,
+    uint8_t             ptr,
     uint8_t             length,
     cellInfo_ht*        cellList
-);
-void            processIE_retrieve_sixCount(
-    OpenQueueEntry_t*   pkt,
-    uint8_t             code,
-    uint8_t             length,
-    uint16_t*            count
 );
 
 #endif

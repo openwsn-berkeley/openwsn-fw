@@ -477,6 +477,50 @@ scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    }
 }
 
+uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* neighbor){
+    uint16_t         count = 0;
+    scheduleEntry_t* scheduleWalker;
+   
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    if (frameID != SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE){
+        return 0;
+    }
+   
+    scheduleWalker = schedule_vars.currentScheduleEntry;
+    do {
+       if(
+          packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor) &&
+          type == scheduleWalker->type
+       ){
+           count++;
+       }
+       scheduleWalker = scheduleWalker->next;
+    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+    ENABLE_INTERRUPTS();
+    return count;
+}
+void schedule_removeAllCells(
+    uint8_t        slotframeID,
+    open_addr_t*   previousHop
+    ){
+    
+    // remove all entries in schedule with previousHop address
+    
+    // update the nextActivateSlot, currentScheduleEntry ....
+    
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    ENABLE_INTERRUPTS();
+}
+
+scheduleEntry_t* schedule_getCurrentScheduleEntry(){
+    return schedule_vars.currentScheduleEntry;
+}
+
 //=== from IEEE802154E: reading the schedule and updating statistics
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
