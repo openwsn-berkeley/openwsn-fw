@@ -232,7 +232,7 @@ port_INLINE uint8_t processIE_prepend_sixSubIEHeader(
     // prepare header
     mlme_subHeader.length_subID_type  = len;
     mlme_subHeader.length_subID_type |= 
-        (MLME_IE_SUBID_SCHEDULE << MLME_IE_SUBID_SHIFT) | 
+        (IANA_6TOP_SUBIE_ID << MLME_IE_SUBID_SHIFT) | 
         IEEE802154E_DESC_TYPE_SHORT;
    
     // copy header

@@ -91,9 +91,15 @@ void          sixtop_removeCellsByState(
    open_addr_t*         previousHop
 );
 bool          sixtop_areAvailableCellsToBeScheduled(
-   uint8_t              frameID, 
-   uint8_t              numOfCells, 
-   cellInfo_ht*         cellList
+    uint8_t              frameID, 
+    uint8_t              numOfCells, 
+    cellInfo_ht*         cellList
+);
+bool sixtop_areAvailableCellsToBeRemoved(      
+    uint8_t      frameID, 
+    uint8_t      numOfCells, 
+    cellInfo_ht* cellList,
+    open_addr_t* neighbor
 );
 
 //=========================== public ==========================================
@@ -887,6 +893,8 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                         cellList[i].choffset    = *(ptr+2);
                         cellList[i].choffset   |= (*(ptr+3))<<8;
                         ptr += 4;
+                        // mark with linkoptions as ocuppied
+                        cellList[i].linkoptions = CELLTYPE_TX;
                     }
                     if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
                          sixtop_addCellsByState(
@@ -1041,10 +1049,6 @@ void sixtop_notifyReceiveCommand(
     uint8_t           container;
     
     memset(cellList,0,sizeof(cellList));
-    if (sixtop_vars.handler == SIX_HANDLER_NONE) {
-        // sxitop handler must not be NONE
-        return;
-    }
     
     // get a free packet buffer
     response_pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
@@ -1068,8 +1072,7 @@ void sixtop_notifyReceiveCommand(
     );
     
     //===== if the version or sfID are correct
-    
-    if (version != IANA_6TOP_6P_VERSION || sfId != IANA_6TOP_SUBIE_ID){
+    if (version != IANA_6TOP_6P_VERSION || sfId != SFID_SF0){
         if (version != IANA_6TOP_6P_VERSION){
             code = IANA_6TOP_RC_VER_ERR;
         } else {
@@ -1099,7 +1102,14 @@ void sixtop_notifyReceiveCommand(
                     frameID = container;
                     processIE_retrieve_sixCelllist(pkt,ptr+2,length-2,cellList);
                     if (
-                        sixtop_areAvailableCellsToBeScheduled(frameID,numOfCells,cellList)
+                        (
+                          commandIdORcode == IANA_6TOP_CMD_ADD &&
+                          sixtop_areAvailableCellsToBeScheduled(frameID,numOfCells,cellList)
+                        ) ||
+                       (
+                          commandIdORcode == IANA_6TOP_CMD_DELETE &&
+                          sixtop_areAvailableCellsToBeRemoved(frameID,numOfCells,cellList,&(pkt->l2_nextORpreviousHop))
+                       )
                     ){
                         code = IANA_6TOP_RC_SUCCESS;
                         len += processIE_prepend_sixCelllist(response_pkt,cellList);
@@ -1142,7 +1152,7 @@ void sixtop_notifyReceiveCommand(
             len += processIE_prepend_sixSubIEHeader(response_pkt,len);
             processIE_prependMLMEIE(response_pkt,len);
             // indicate IEs present
-            pkt->l2_payloadIEpresent = TRUE;
+            response_pkt->l2_payloadIEpresent = TRUE;
             // send packet
             sixtop_send(response_pkt);
             // update state
@@ -1154,7 +1164,7 @@ void sixtop_notifyReceiveCommand(
                 switch(sixtop_vars.six2six_state){
                 case SIX_WAIT_ADDRESPONSE:
                 case SIX_WAIT_DELETERESPONSE:
-                    processIE_retrieve_sixCelllist(pkt,ptr+2,length-2,cellList);
+                    processIE_retrieve_sixCelllist(pkt,ptr,length,cellList);
                     // always default frameID
                     frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
                     if (sixtop_vars.six2six_state == SIX_WAIT_ADDRESPONSE){
@@ -1268,14 +1278,16 @@ bool sixtop_candidateRemoveCellList(
    *frameID        = schedule_getFrameHandle();
   
    numCandCells    = 0;
-   for(i=0;i<schedule_getMaxActiveSlots();i++){
+   for(i=0;i<schedule_getFrameLength();i++){
       schedule_getSlotInfo(i,neighbor,&info);
       if(info.link_type == CELLTYPE_TX){
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = info.channelOffset;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
          numCandCells++;
-         break; // only delete one cell
+         if (numCandCells==SCHEDULEIEMAXNUMCELLS){
+            break; // only delete one cell
+         }
       }
    }
    
@@ -1303,7 +1315,6 @@ void sixtop_addCellsByState(
          switch(state) {
             case SIX_WAIT_RESPONSE_SENDDONE:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-               
                //add a RX link
                schedule_addActiveSlot(
                   cellList[i].tsNum,
@@ -1389,6 +1400,52 @@ bool sixtop_areAvailableCellsToBeScheduled(
          // local schedule can't statisfy the bandwidth of cell request
          available = FALSE;
       }
+   }
+   
+   return available;
+}
+
+bool sixtop_areAvailableCellsToBeRemoved(      
+        uint8_t      frameID, 
+        uint8_t      numOfCells, 
+        cellInfo_ht* cellList,
+        open_addr_t* neighbor
+    ){
+   uint8_t              i;
+   uint8_t              bw;
+   bool                 available;
+   slotinfo_element_t   info;
+   
+   i          = 0;
+   bw         = numOfCells;
+   available  = FALSE;
+  
+   if(bw == 0 || bw>SCHEDULEIEMAXNUMCELLS){
+      // log wrong parameter error TODO
+      available = FALSE;
+   } else {
+      do {
+          schedule_getSlotInfo(cellList[i].tsNum,neighbor,&info);
+          if(info.link_type == CELLTYPE_RX){
+              bw--;
+          } else {
+              cellList[i].linkoptions = CELLTYPE_OFF;
+          }
+          i++;
+        }while(i<SCHEDULEIEMAXNUMCELLS && bw>0);
+      
+        if(bw==0){
+            //the rest link will not be scheduled, mark them as off type
+            while(i<SCHEDULEIEMAXNUMCELLS){
+                cellList[i].linkoptions = CELLTYPE_OFF;
+                i++;
+            }
+            // local schedule can statisfy the bandwidth of cell request. 
+            available = TRUE;
+        } else {
+            // local schedule can't statisfy the bandwidth of cell request
+            available = FALSE;
+        }
    }
    
    return available;
