@@ -203,6 +203,7 @@ owerror_t iphc_sendFromForwarding(
       return E_FAIL;
    }
 
+   // check if we are forwarding a fragmented message
    if ( ((buffer = fragment_searchBufferFromMsg(msg)) != NULL)
      && (msg->creator == COMPONENT_FORWARDING) ) {
       fragment_assignAction(buffer, FRAGMENT_ACTION_FORWARD);
@@ -221,8 +222,8 @@ owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
                             (errorparameter_t)0);
       return E_FAIL;
    }
-   //return sixtop_send(msg);
-   return fragment_prependHeader(msg);
+   return sixtop_send(msg);
+   //return fragment_prependHeader(msg);
 }
 
 void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {

@@ -16,7 +16,7 @@
 #define MIN_PAYLOAD 81         // Min 6LowPAN payload
 #define FRAGMENT_MAX_FRAGMENTS (FRAGMENT_MAX_SIZE/MIN_PAYLOAD +1)
 
-#define FRAGQLENGTH 5
+#define FRAGQLENGTH 15
 
 #define LOWPAN_DISPATCH    5
 enum LOWPAN_DISPATCH_enums {
@@ -26,24 +26,26 @@ enum LOWPAN_DISPATCH_enums {
 
 typedef enum fragment_states {
    FRAGMENT_NONE,      // fresh fragment
-                       // free Fragment entry
-   FRAGMENT_ASSIGNED,  // assigned for an outgoing fragment
+                       // free Fragment entry: first state
    // incoming values
    FRAGMENT_RECEIVED,  // received message fragment
    FRAGMENT_PROCESSED, // payload processed but not freed
-   FRAGMENT_FINISHED,  // fragment resources freed
+// FRAGMENT_FINISHED,  // fragment resources freed
    // outgoing values
+   FRAGMENT_ASSIGNED,  // assigned for an outgoing fragment
    FRAGMENT_RESERVING, // trying to acquire a OpenQueue packet
    FRAGMENT_RESERVED,  // payload copied to OpenQueue packet
-                       // message fragment ready to forward
+                       // message fragment ready to be forwarded
                        // message fragment ready to be sent
    FRAGMENT_SENDING,   // packet attempted to be sent (on layer 2)
-   FRAGMENT_SENT,      // message fragment sent
+   FRAGMENT_FINISHED,  // message fragment sent
+                       // no attached packet: last state
    // Fragment Entry value
    FRAGMENT_RX,        // incoming message
    FRAGMENT_TX,        // outgoing message
    FRAGMENT_FW,        // forwarding message
-   FRAGMENT_FAIL       // error on Tx, waiting for fragments on sending
+   FRAGMENT_FAIL,      // error on Tx, waiting for fragments on sending
+   FRAGMENT_FAIL_FW
 } FragmentState;
 
 typedef enum fragment_actions {

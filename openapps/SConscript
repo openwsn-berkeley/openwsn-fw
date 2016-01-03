@@ -33,6 +33,7 @@ defaultAppsInit   = [
     'techo',
     'uecho',
     'rrt',
+    'fragtest',
 ]
 
 # additional apps the user wants to build

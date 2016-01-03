@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
 
-#define FRAGTEST_PERIOD_MS 70000
+#define FRAGTEST_PERIOD_MS 500000
 
 //=========================== typedef =========================================
 
@@ -20,7 +20,6 @@
 
 typedef struct {
    opentimer_id_t       timerId;  ///< periodic timer which triggers transmission
-   uint16_t             counter;  ///< incrementing counter which is written into the packet
 } fragtest_vars_t;
 
 //=========================== prototypes ======================================

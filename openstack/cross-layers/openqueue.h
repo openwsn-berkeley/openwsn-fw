@@ -13,10 +13,10 @@
 
 //=========================== define ==========================================
 
-#define QUEUELENGTH  20
+#define QUEUELENGTH  30
 
 #define BIG_PACKET_SIZE LARGE_PACKET_SIZE
-#define BIGQUEUELENGTH  4
+#define BIGQUEUELENGTH  10
 
 //=========================== typedef =========================================
 

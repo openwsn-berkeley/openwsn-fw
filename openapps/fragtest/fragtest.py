@@ -8,7 +8,7 @@ socket_handler.bind(('',25000))
 while True:
     
     # wait for a request
-    request,dist_addr = socket_handler.recvfrom(1280)
+    request,dist_addr = socket_handler.recvfrom(1500)
     
     hisAddress = dist_addr[0]
     hisPort    = dist_addr[1]

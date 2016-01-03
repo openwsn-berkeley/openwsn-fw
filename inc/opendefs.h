@@ -146,9 +146,9 @@ enum {
    COMPONENT_SCHEDULE                  = 0x0e,
    COMPONENT_SIXTOP_RES                = 0x0f,
    //IPHC
-   COMPONENT_FRAGMENT                  = 0x10,
-   COMPONENT_OPENBRIDGE                = 0x11,
-   COMPONENT_IPHC                      = 0x12,
+   COMPONENT_OPENBRIDGE                = 0x10, // to be sure openbridge does
+   COMPONENT_FRAGMENT                  = 0x11, // not fragment: only upper
+   COMPONENT_IPHC                      = 0x12, // modules are able to do it
    //IPv6
    COMPONENT_FORWARDING                = 0x13,
    COMPONENT_ICMPv6                    = 0x14,
@@ -235,7 +235,7 @@ enum {
    ERR_UNEXPECTED_SENDDONE             = 0x2b, // sendDone for packet I didn't send
    ERR_NO_FREE_PACKET_BUFFER           = 0x2c, // no free packet buffer (code location {0})
    ERR_FREEING_UNUSED                  = 0x2d, // freeing unused memory
-   ERR_FREEING_ERROR                   = 0x2e, // freeing memory unsupported memory
+   ERR_FREEING_ERROR                   = 0x2e, // freeing memory unsupported memory {0}
    ERR_UNSUPPORTED_COMMAND             = 0x2f, // unsupported command {0}
    ERR_MSG_UNKNOWN_TYPE                = 0x30, // unknown message type {0}
    ERR_WRONG_ADDR_TYPE                 = 0x31, // wrong address type {0} (code location {1})
@@ -249,6 +249,7 @@ enum {
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
    ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
    ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
+   // fragmentation
    ERR_FRAG_RESERVING                  = 0x3c, // trying to get an used fragment
    ERR_FREEING_BIG                     = 0x3d, // trying to free an unused big packet
    ERR_NO_FREE_FRAGMENT_BUFFER         = 0x2c, // no free fragment buffer
