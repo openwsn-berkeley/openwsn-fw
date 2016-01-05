@@ -63,6 +63,7 @@ void openbridge_triggerData() {
       }        
       //send
       if ((iphc_sendFromBridge(pkt))==E_FAIL) {
+         fragment_checkOpenBridge(pkt, E_FAIL);
          openqueue_freePacketBuffer(pkt);
       }
    }
@@ -75,6 +76,7 @@ void openbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }
+   fragment_checkOpenBridge(msg, error);
    openqueue_freePacketBuffer(msg);
 }
 

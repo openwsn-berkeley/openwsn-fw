@@ -7,6 +7,7 @@
 #include "fragment.h"
 #include "forwarding.h"
 #include "openbridge.h"
+#include "openserial.h"
 
 //=========================== variables =======================================
 
@@ -40,6 +41,7 @@ owerror_t fragment_freeBuffer(FragmentQueueEntry_t* buffer);
 void fragment_resetBuffer(FragmentQueueEntry_t* buffer);
 owerror_t fragment_restartBuffer(FragmentQueueEntry_t* buffer);
 uint8_t fragment_bufferIndex(FragmentQueueEntry_t* buffer);
+void fragment_cancelToBridge(FragmentQueueEntry_t* buffer);
 
 bool fragment_completeRX(FragmentQueueEntry_t* buffer);
 // timer
@@ -271,7 +273,7 @@ void fragment_retrieveHeader(OpenQueueEntry_t* msg) {
    }
 
 /*
- * Is is possible? A message fragmented on just one fragment.
+ * Is it possible? A message fragmented on just one fragment.
  *
    if (!fragn && size == buffer->datagram_size) {
       fragment_freeBuffer(buffer);
@@ -292,13 +294,14 @@ void fragment_retrieveHeader(OpenQueueEntry_t* msg) {
          // Current fragment overlaps previous one
 	 // RFC 4944: If a link fragment that overlaps another fragment
 	 // is received ... buffer SHALL be discarded.
+	 if ( buffer->action == FRAGMENT_ACTION_OPENBRIDGE )
+            fragment_cancelToBridge(buffer);
 	 fragment_restartBuffer(buffer);
          /* TO DO * Signal openbridge messages to discard */
          // log error
          openserial_printError(COMPONENT_FRAGMENT, ERR_INPUTBUFFER_OVERLAPS,
                                 (errorparameter_t)0,
 				(errorparameter_t)0);
-	 break;
       }
    }
    buffer->list[buffer->number].fragment_offset = offset;
@@ -346,7 +349,6 @@ void fragment_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
              if (fragmentqueue_vars.queue[i].list[j].fragment==msg) {
                 buffer   = &(fragmentqueue_vars.queue[i]);
 		fragment = &(buffer->list[j]);
-		break;
              }
    if ( buffer != NULL && buffer->in_use != FRAGMENT_NONE )
       buffer->sending--;
@@ -382,6 +384,35 @@ void fragment_assignAction(FragmentQueueEntry_t* buffer, FragmentAction action) 
    buffer->action = action;
 
    fragment_action(buffer);
+}
+
+/**
+\brief Check if this message from OpenBridge is a fragment and send a
+       notification to OpenVisualizer.
+*/
+void fragment_checkOpenBridge(OpenQueueEntry_t *msg, owerror_t error) {
+   uint8_t  dispatch, i;
+   uint8_t  chain[5];
+   uint16_t tag;
+
+   // discard L2 info
+   packetfunctions_tossHeader(msg, fragment_askL2HeaderSize(msg));
+   // check
+   dispatch = (msg->payload[0] >> LOWPAN_DISPATCH) & 0x07;
+   if ( dispatch != LOWPAN_DISPATCH_FRAG1
+     && dispatch != LOWPAN_DISPATCH_FRAGN )
+      return;
+
+   // send notification
+   tag      = fragment_getTag(msg);
+   chain[0] = error == E_SUCCESS
+              ? FRAGMENT_MOTE2PC_SENDDONE
+              : FRAGMENT_MOTE2PC_FAIL;
+   chain[1] = FRAGMENT_MOTE2PC_TOMESH;
+   chain[2] = (tag & 0xFF00) >> 8;
+   chain[3] = tag & 0x00FF;
+
+   openserial_printBridge(&(chain[0]), 4);
 }
 
 //=========================== private =========================================
@@ -612,7 +643,7 @@ void fragment_tryToSend(FragmentQueueEntry_t* buffer) {
 
 // buffer must exist because it is freed only when finishPkt is called
 //   printf("FRAG (%lu): tryTo reserved: %d", (unsigned long int) self, reserved);
-   if ( buffer )
+//   if ( buffer )
 //      printf(" - buffer: %d - bnumber: %d - bsent: %d - bsending: %d - complete: %s", buffer->in_use, buffer->number, buffer->sent, buffer->sending, fragment_completeRX(buffer) ? "SI" : "NO");
 //   printf(" - free: %d", fragment_bufferCountFree());
    
@@ -861,6 +892,11 @@ void fragment_timeout_timer_cb(opentimer_id_t id) {
    DISABLE_INTERRUPTS();
    for (i=0;i<FRAGQLENGTH;i++)
       if (fragmentqueue_vars.queue[i].timerId==id) {
+         if ( fragmentqueue_vars.queue[i].action == FRAGMENT_ACTION_OPENBRIDGE ) {
+            ENABLE_INTERRUPTS();
+            fragment_cancelToBridge(&(fragmentqueue_vars.queue[i]));
+            DISABLE_INTERRUPTS();
+	 }
          fragmentqueue_vars.queue[i].action = FRAGMENT_ACTION_CANCEL;
          ENABLE_INTERRUPTS();
          fragment_action(&(fragmentqueue_vars.queue[i]));
@@ -890,6 +926,20 @@ uint8_t fragment_bufferIndex(FragmentQueueEntry_t* buffer) {
 
    // Never must be reached
    return -1;
+}
+
+void fragment_cancelToBridge(FragmentQueueEntry_t* buffer) {
+   uint8_t chain[14], i;
+
+   chain[0] = FRAGMENT_MOTE2PC_FAIL;
+   chain[1] = FRAGMENT_MOTE2PC_FROMMESH;
+   chain[2] = (buffer->datagram_tag & 0xFF00) >> 8;
+   chain[3] = buffer->datagram_tag & 0x00FF;
+   chain[4] = (buffer->datagram_size & 0x0700) >> 8;
+   chain[5] = buffer->datagram_size & 0x00FF;
+   memcpy(&(chain[6]),buffer->src.addr_64b,LENGTH_ADDR64b);
+
+   openserial_printBridge(&(chain[0]), 14);
 }
 
 // action functions
@@ -959,7 +1009,6 @@ void fragment_assemble(FragmentQueueEntry_t* buffer) {
             received = buffer->datagram_size - buffer->offset;
             buffer->processed++;
             buffer->list[i].state = FRAGMENT_FINISHED;
-	    break;
 	 }
       if ( received >= 125 ) { // ask for a large packet
          ENABLE_INTERRUPTS();
@@ -973,11 +1022,12 @@ void fragment_assemble(FragmentQueueEntry_t* buffer) {
          }
       } else { // re-use packet
          memmove(&(buffer->msg->packet[127]) - received,
-                   buffer->msg->payload, received);
+                   buffer->msg->payload, buffer->msg->length);
 	 buffer->msg->payload = &(buffer->msg->packet[127]) - received;
-	 buffer->sending = 0;
       }
       buffer->msg->length = received;
+      buffer->sending     = 0;
+      buffer->sent        = 0;
    }
 
    received = 0;
@@ -1031,7 +1081,6 @@ void fragment_forward(FragmentQueueEntry_t* buffer) {
             fragment_setSize(msg, buffer->new_size);
             msg->payload[0] |= (LOWPAN_DISPATCH_FRAG1 << LOWPAN_DISPATCH);
             buffer->list[i].state = FRAGMENT_RESERVED;
-	    break;
 	 }
    } 
    for (i=0; i<buffer->number; i++) {

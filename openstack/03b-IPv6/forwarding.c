@@ -446,16 +446,17 @@ owerror_t forwarding_send_internal_SourceRouting(
       ipv6_header_iht*  ipv6_outer_header,
       ipv6_header_iht*  ipv6_inner_header
    ) {
-   uint8_t              local_CmprE;
-   uint8_t              local_CmprI;
-   uint8_t              numAddr;
-   uint8_t              hlen;
-   uint8_t              addressposition;
-   uint8_t*             runningPointer;
-   uint8_t              octetsAddressSize;
-   open_addr_t*         prefix;
-   rpl_routing_ht*      rpl_routing_hdr;
-   rpl_option_ht        rpl_option;
+   uint8_t               local_CmprE;
+   uint8_t               local_CmprI;
+   uint8_t               numAddr;
+   uint8_t               hlen;
+   uint8_t               addressposition;
+   uint8_t*              runningPointer;
+   uint8_t               octetsAddressSize;
+   open_addr_t*          prefix;
+   rpl_routing_ht*       rpl_routing_hdr;
+   rpl_option_ht         rpl_option;
+   FragmentQueueEntry_t* buffer;
    
    // reset hop-by-hop option
    memset(&rpl_option,0,sizeof(rpl_option_ht));
@@ -511,7 +512,13 @@ owerror_t forwarding_send_internal_SourceRouting(
       // toss iphc inner header
       packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
       
-      return forwarding_toUpperLayer(msg);
+      // If this message is a FRAG1, message must be assembled
+      // prior to move it to upper layer.
+      if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL ) {
+         fragment_assignAction(buffer, FRAGMENT_ACTION_ASSEMBLE);
+	 return E_SUCCESS;
+      } else
+         return forwarding_toUpperLayer(msg);
    
    } else {
       // this is not the last hop

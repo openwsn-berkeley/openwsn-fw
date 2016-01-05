@@ -56,6 +56,31 @@ typedef enum fragment_actions {
    FRAGMENT_ACTION_OPENBRIDGE // to openbridge
 } FragmentAction;
 
+// SERFRAME_MOTE2PC_BRIDGE
+// To add to https://openwsn.atlassian.net/wiki/display/OW/Serial+Format
+// This type of frame is used by the DAGroot mote to inform about
+// fragmented messages on openbridge. The payload is parsed by the
+// OpenVisualizer and dispatch the corresponding message to Fragment.
+// The format of this frame is:
+// type of command (1B), type of message (1B), identifier (arbitrary)
+// There exists two types of commands
+// - 'F'- management is done here and it represents an error on communication
+//   (duplicate fragment, time expiration or E_FAIL on transmission): discard
+//   this message on openVisualizer
+// - 'C' - inform to openVisualizer that last message has been sent
+//   and a new one can be moved to the Mesh as only FRAGMENT_TX_MAX_PACKETS
+//   are allowed simuoultaneously
+// The type of message identifies its direction: fromMesh ('F') or
+// toMesh ('T') :
+// The identifier refers to the message:
+// - tag (2B) + size (2b) + source (8B) when fromMesh
+// - tag (2B) when toMesh
+
+#define FRAGMENT_MOTE2PC_FAIL     ((uint8_t)'F')
+#define FRAGMENT_MOTE2PC_SENDDONE ((uint8_t)'S')
+#define FRAGMENT_MOTE2PC_FROMMESH ((uint8_t)'F')
+#define FRAGMENT_MOTE2PC_TOMESH   ((uint8_t)'T')
+
 #define FRAGMENT_TIMEOUT_MS     60000
 #define FRAGMENT_TX_MAX_PACKETS     1
 
@@ -108,6 +133,7 @@ void fragment_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 FragmentQueueEntry_t* fragment_indexBuffer(uint8_t id);
 FragmentQueueEntry_t* fragment_searchBufferFromMsg(OpenQueueEntry_t* msg);
 void fragment_assignAction(FragmentQueueEntry_t* buffer, FragmentAction action);
+void fragment_checkOpenBridge(OpenQueueEntry_t *msg, owerror_t error);
 
 /**
 \}
