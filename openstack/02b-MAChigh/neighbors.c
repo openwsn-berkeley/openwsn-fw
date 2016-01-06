@@ -38,7 +38,7 @@ void neighbors_init() {
    
    // set myDAGrank
    if (idmanager_getIsDAGroot()==TRUE) {
-      neighbors_vars.myDAGrank=0;
+      neighbors_vars.myDAGrank=MINHOPRANKINCREASE;
    } else {
       neighbors_vars.myDAGrank=DEFAULTDAGRANK;
    }
@@ -435,12 +435,16 @@ The fields which are updated are:
 */
 void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
    uint8_t          i;
+   uint8_t          temp_8b;
   
    // take ownership over the packet
    msg->owner = COMPONENT_NEIGHBORS;
    
    // update rank of that neighbor in table
    neighbors_vars.dio = (icmpv6rpl_dio_ht*)(msg->payload);
+   // retrieve rank
+   temp_8b            = *(msg->payload+2);
+   neighbors_vars.dio->rank = (temp_8b << 8) + *(msg->payload+3);
    if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
@@ -483,6 +487,12 @@ void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t ind
    }
 }
 
+//===== setters
+
+void neighbors_setMyDAGrank(dagrank_t rank){
+    neighbors_vars.myDAGrank = rank;
+}
+
 //===== managing routing info
 
 /**
@@ -500,11 +510,13 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
    uint32_t  tentativeDAGrank; // 32-bit since is used to sum
    uint8_t   prefParentIdx;
    bool      prefParentFound;
+   uint32_t  rankIncreaseIntermediary; // stores intermediary results of rankIncrease calculation
    
-   // if I'm a DAGroot, my DAGrank is always 0
+   // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
    if ((idmanager_getIsDAGroot())==TRUE) {
-      neighbors_vars.myDAGrank=0;
-      return;
+       // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here 
+       neighbors_vars.myDAGrank=MINHOPRANKINCREASE;
+       return;
    }
    
    // reset my DAG rank to max value. May be lowered below.
@@ -526,7 +538,9 @@ void neighbors_updateMyDAGrankAndNeighborPreference() {
             rankIncrease = DEFAULTLINKCOST*2*MINHOPRANKINCREASE;
          } else {
             //6TiSCH minimal draft using OF0 for rank computation
-            rankIncrease = (uint16_t)((((float)neighbors_vars.neighbors[i].numTx)/((float)neighbors_vars.neighbors[i].numTxACK))*2*MINHOPRANKINCREASE);
+            rankIncreaseIntermediary = (((uint32_t)neighbors_vars.neighbors[i].numTx) << 10);
+            rankIncreaseIntermediary = (rankIncreaseIntermediary * 2 * MINHOPRANKINCREASE) / ((uint32_t)neighbors_vars.neighbors[i].numTxACK);
+            rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
          }
          
          tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;

@@ -13,11 +13,9 @@ localEnv = env.Clone()
 cc2420 = localEnv.SConscript(
     os.path.join('#','bsp','chips','cc2420','SConscript'),
     variant_dir = 'cc2420',
-    exports = {'env': env},
-    duplicate   = 0,
+    exports     = {'env': env},
 )
 
-target = 'libbsp'
 source = [
     'board.c',
     'bsp_timer.c',
@@ -27,12 +25,8 @@ source = [
     'radiotimer.c',
     'spi.c',
     'uart.c',
-    cc2420,
 ]
 
-libbsp = localEnv.Library(
-    target=target,
-    source=source,
-)
+board  = localEnv.Object(source=source) + cc2420
 
-Alias('libbsp', libbsp)
+Return('board')

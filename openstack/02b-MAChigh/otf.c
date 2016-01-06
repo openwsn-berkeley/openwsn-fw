@@ -74,6 +74,7 @@ void otf_addCell_task(void) {
       return;
    }
    
+   sixtop_setHandler(SIX_HANDLER_OTF);
    // call sixtop
    sixtop_addCells(
       &neighbor,
@@ -91,6 +92,7 @@ void otf_removeCell_task(void) {
       return;
    }
    
+   sixtop_setHandler(SIX_HANDLER_OTF);
    // call sixtop
    sixtop_removeCell(
       &neighbor

@@ -22,13 +22,14 @@ enum IEEE802154_fcf_enums {
    IEEE154_FCF_DEST_ADDR_MODE          = 2,
    IEEE154_FCF_FRAME_VERSION           = 4,
    IEEE154_FCF_SRC_ADDR_MODE           = 6,
+   IEEE154_FCF_DSN_SUPPRESSION         = 0,
 };
 
 
 enum IEEE802154_fcf_frameversion_enums {
    IEEE154_FRAMEVERSION_2003           = 0, //ieee154-2003
    IEEE154_FRAMEVERSION_2006           = 1, //ieee154-2006
-   IEEE154_FRAMEVERSION                = 2, //ieee154
+   IEEE154_FRAMEVERSION_2012           = 2, //ieee154e-2012
 };
 
 enum IEEE802154_fcf_type_enums {
@@ -47,6 +48,11 @@ enum IEEE802154_fcf_sec_enums {
 enum IEEE802154_fcf_ielist_enums {
    IEEE154_IELIST_NO                   = 0,
    IEEE154_IELIST_YES                  = 1,
+};
+
+enum IEEE802154_fcf_dsn_enums {
+   IEEE154_DSN_SUPPRESSION_NO          = 0,
+   IEEE154_DSN_SUPPRESSION_YES         = 1,
 };
 
 enum IEEE802154_fcf_pending_enums {
@@ -70,6 +76,41 @@ enum IEEE802154_fcf_addr_mode_enums {
    IEEE154_ADDR_EXT                    = 3,
 };
 
+enum IEEE802154_ash_scf_enums { // Security Control Field
+   IEEE154_ASH_SCF_SECURITY_LEVEL         = 0,
+   IEEE154_ASH_SCF_KEY_IDENTIFIER_MODE    = 3,
+   IEEE154_ASH_SCF_FRAME_CNT_MODE         = 5,
+   IEEE154_ASH_SCF_FRAME_CNT_SIZE         = 6,
+};
+
+enum IEEE802154_ash_slf_enums { // Security Level Field
+   IEEE154_ASH_SLF_TYPE_NOSEC             = 0,
+   IEEE154_ASH_SLF_TYPE_MIC_32            = 1,
+   IEEE154_ASH_SLF_TYPE_MIC_64            = 2,
+   IEEE154_ASH_SLF_TYPE_MIC_128           = 3,
+   IEEE154_ASH_SLF_TYPE_ENC               = 4,
+   IEEE154_ASH_SLF_TYPE_ENC_MIC_32        = 5,
+   IEEE154_ASH_SLF_TYPE_ENC_MIC_64        = 6,
+   IEEE154_ASH_SLF_TYPE_ENC_MIC_128       = 7,
+};
+
+enum IEEE802154_ash_keyIdMode_enums { // Key Identifier Mode Field
+   IEEE154_ASH_KEYIDMODE_IMPLICIT         = 0,
+   IEEE154_ASH_KEYIDMODE_DEFAULTKEYSOURCE = 1,
+   IEEE154_ASH_KEYIDMODE_EXPLICIT_16      = 2,
+   IEEE154_ASH_KEYIDMODE_EXPLICIT_64      = 3,
+};
+
+enum IEEE802154_ash_FrameCounterSuppression_enums { // Frame Counter Suppression Field
+	IEEE154_ASH_FRAMECOUNTER_PRESENT    = 0,
+	IEEE154_ASH_FRAMECOUNTER_SUPPRESSED = 1,
+};
+
+enum IEEE802154_ash_FrameCounterSize_enums { // Frame Counter Size Field
+	IEEE154_ASH_FRAMECOUNTER_COUNTER    = 0,
+	IEEE154_ASH_FRAMECOUNTER_ASN        = 1,
+};
+
 //=========================== typedef =========================================
 
 typedef struct {
@@ -83,9 +124,11 @@ typedef struct {
    bool        ieListPresent;
    uint8_t     frameVersion;
    uint8_t     dsn;
+   bool        dsn_suppressed;
    open_addr_t panid;
    open_addr_t dest;
    open_addr_t src;
+   int16_t     timeCorrection;
 } ieee802154_header_iht; //iht for "internal header type"
 
 //=========================== variables =======================================
@@ -96,9 +139,7 @@ typedef struct {
 
 void ieee802154_prependHeader(OpenQueueEntry_t* msg,
                               uint8_t           frameType,
-                              uint8_t           ielistpresent,
-                              uint8_t           frameversion,
-                              bool              securityEnabled,
+                              bool              payloadIEPresent,
                               uint8_t           sequenceNumber,
                               open_addr_t*      nextHop);
 

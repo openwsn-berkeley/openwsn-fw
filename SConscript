@@ -18,6 +18,7 @@ if env['board']!='python':
         CPPPATH = [
             os.path.join('#','inc'),
             os.path.join('#','bsp','boards'),
+            os.path.join('#','bsp','boards','common'),
             os.path.join('#','bsp','chips'),
             os.path.join('#','drivers','common'),
             os.path.join('#','kernel'),
@@ -40,6 +41,18 @@ if env['forcetopology']==1:
     env.Append(CPPDEFINES    = 'FORCETOPOLOGY')
 if env['noadaptivesync']==1:
     env.Append(CPPDEFINES    = 'NOADAPTIVESYNC')
+if env['cryptoengine']:
+    env.Append(CPPDEFINES    = {'CRYPTO_ENGINE_SCONS' : env['cryptoengine']})
+if env['l2_security']==1:
+    env.Append(CPPDEFINES    = 'L2_SECURITY_ACTIVE')
+if env['goldenImage']=='sniffer':
+    env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_SNIFFER')
+else:
+    if env['goldenImage']=='root':
+        env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_ROOT')
+    else:
+        env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_NONE')
+        
 
 if   env['toolchain']=='mspgcc':
     
@@ -187,7 +200,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3']:
+    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='OpenMote-CC2538':
@@ -225,9 +238,9 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
         
-    elif env['board']=='iot-lab_M3':
+    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3']:
         
-         # compiler (C)
+        # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         if os.name=='nt':
             env.Append(CCFLAGS   = '-DHSE_VALUE=((uint32_t)16000000)')
@@ -263,9 +276,9 @@ elif env['toolchain']=='armgcc':
         env.Append(LINKFLAGS     = '-mthumb')
         env.Append(LINKFLAGS     = '-mthumb-interwork')
         env.Append(LINKFLAGS     = '-nostartfiles')
-        env.Append(LINKFLAGS     = '-Tbsp/boards/iot-lab_M3/stm32_flash.ld')
-        env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','startup.o'))
-        env.Append(LINKFLAGS     = os.path.join('build','iot-lab_M3_armgcc','bsp','boards','iot-lab_M3','configure','stm32f10x_it.o'))
+        env.Append(LINKFLAGS     = '-Tbsp/boards/'+env['board']+'/stm32_flash.ld')
+        env.Append(LINKFLAGS     = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'startup.o'))
+        env.Append(LINKFLAGS     = os.path.join('build',env['board']+'_armgcc','bsp','boards',env['board'],'configure','stm32f10x_it.o'))
         # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
@@ -303,6 +316,9 @@ elif env['toolchain']=='armgcc':
     env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
     
 elif env['toolchain']=='gcc':
+    
+    # compiler (C)
+    env.Append(CCFLAGS       = '-Wall')
     
     if env['board'] not in ['python']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
@@ -352,9 +368,9 @@ else:
 
 def jtagUploadFunc(location):
     if env['toolchain']=='armgcc':
-        if env['board'] in ['iot-lab_M3']:
+        if env['board'] in ['iot-lab_M3','iot-lab_A8-M3']:
             return Builder(
-                action      = os.path.join('bsp','boards','iot-lab_M3','tools','flash.sh') + " $SOURCE",
+                action      = os.path.join('bsp','boards',env['board'],'tools','flash.sh') + " $SOURCE",
                 suffix      = '.phonyupload',
                 src_suffix  = '.ihex',
             )
@@ -429,6 +445,95 @@ def telosb_bootload(target, source, env):
     for t in bootloadThreads:
         countingSem.acquire()
 
+class OpenMoteCC2538_bootloadThread(threading.Thread):
+    def __init__(self,comPort,hexFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.hexFile         = hexFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'OpenMoteCC2538_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+os.path.join('bootloader','OpenMote-CC2538','cc2538-bsl.py')+' -e -w -b 115200 -p {0} --bsl {1}'.format(self.comPort,self.hexFile),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def OpenMoteCC2538_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        bootloadThreads += [
+            OpenMoteCC2538_bootloadThread(
+                comPort      = comPort,
+                #hexFile      = os.path.split(source[0].path)[1].split('.')[0]+'.bin',
+                hexFile      = source[0].path.split('.')[0]+'.bin',
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+
+class IotLabM3_bootloadThread(threading.Thread):
+    def __init__(self,comPort,binaryFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.binaryFile      = binaryFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'IotLabM3_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+ os.path.join('bootloader','iot-lab_M3','iotlab-m3-bsl.py' + ' -i {0} -p {1}'.format(self.binaryFile, self.comPort)),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def IotLabM3_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        if os.name=='nt':
+            suffix = '.exe'
+        else:
+            suffix = ''
+        bootloadThreads += [
+            IotLabM3_bootloadThread(
+                comPort      = comPort,
+                binaryFile   = source[0].path.split('.')[0]+suffix,
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+
 # bootload
 def BootloadFunc():
     if   env['board']=='telosb':
@@ -437,6 +542,18 @@ def BootloadFunc():
             suffix      = '.phonyupload',
             src_suffix  = '.ihex',
         )
+    elif env['board']=='OpenMote-CC2538':
+        return Builder(
+            action      = OpenMoteCC2538_bootload,
+            suffix      = '.phonyupload',
+            src_suffix  = '.bin',
+        )
+    elif env['board']=='iot-lab_M3':
+         return Builder(
+            action      = IotLabM3_bootload,
+            suffix      = '.phonyupload',
+            src_suffix  = ''
+         )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
 if env['bootload']:
@@ -463,7 +580,7 @@ def buildLibs(projectDir):
     libs_dict = {
         '00std': [                                                              ],
         '01bsp': [                                                      'libbsp'],
-        '02drv': [                                         'libdrivers','libbsp'],
+        '02drv': [                             'libkernel','libdrivers','libbsp'],
         '03oos': ['libopenstack','libopenapps','libkernel','libdrivers','libbsp'], # this order needed for mspgcc
     }
     
@@ -501,39 +618,43 @@ def sconscript_scanner(localEnv):
     - projects\common\
     - projects\<board>\
     '''
+    
     # list subdirectories
-    subdirs = [name for name in os.listdir('.') if os.path.isdir(os.path.join('.', name)) ]
+    PATH_TO_PROJECTS = os.path.join('..','..','..','..','projects',os.path.split(os.getcwd())[-1])
+    allsubdirs     = os.listdir(os.path.join(PATH_TO_PROJECTS))
+    subdirs        = [name for name in allsubdirs if os.path.isdir(os.path.join(PATH_TO_PROJECTS,name)) ]
     
     # parse dirs and build targets
     for projectDir in subdirs:
         
-        src_dir     = os.path.join(os.getcwd(),projectDir)
-        variant_dir = os.path.join(env['VARDIR'],'projects',projectDir),
+        src_dir         = os.path.join(PATH_TO_PROJECTS,projectDir)
+        variant_dir     = os.path.join(env['VARDIR'],'projects',projectDir)
         
-        added      = False
-        targetName = projectDir[2:]
+        added           = False
+        targetName      = projectDir[2:]
         
-        if   (
-                ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
+        if  (
+                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
                 (localEnv['toolchain']!='iar-proj') and 
                 (localEnv['board']!='python')
-             ):
+            ):
             
             localEnv.VariantDir(
-                variant_dir = variant_dir,
                 src_dir     = src_dir,
-                duplicate   = 0,
+                variant_dir = variant_dir,
             )
-    
+            
             target =  projectDir
-            source = [os.path.join(projectDir,'{0}.c'.format(projectDir))]
+            source = [
+                os.path.join(projectDir,'{0}.c'.format(projectDir)),
+            ]
             libs   = buildLibs(projectDir)
             
             buildIncludePath(projectDir,localEnv)
             
             # In Linux, you cannot have the same target name as the name of the
             # directory name.
-            target=target+"_prog"
+            target = target+"_prog"
             
             exe = localEnv.Program(
                 target  = target,
@@ -546,26 +667,33 @@ def sconscript_scanner(localEnv):
             added = True
         
         elif (
-                ('{0}.c'.format(projectDir) in os.listdir(projectDir)) and
+                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
                 (localEnv['board']=='python')
-             ):
+            ):
             
             # build the artifacts in a separate directory
             localEnv.VariantDir(
-                variant_dir = variant_dir,
                 src_dir     = src_dir,
-                duplicate   = 1,
+                variant_dir = variant_dir,
             )
             
             # build both the application's and the Python module's main files
             sources_c = [
                 os.path.join(projectDir,'{0}.c'.format(projectDir)),
-                os.path.join('#','bsp','boards','python','openwsnmodule.c'),
+                os.path.join(projectDir,'openwsnmodule.c'),
             ]
+            
+            localEnv.Command(
+                os.path.join(projectDir,'openwsnmodule.c'),
+                os.path.join('#','bsp','boards','python','openwsnmodule.c'),
+                [
+                    Copy('$TARGET', '$SOURCE')
+                ]
+            )
             
             # objectify those two files
             for s in sources_c:
-                temp = localEnv.Objectify(
+                localEnv.Objectify(
                     target = localEnv.ObjectifiedFilename(s),
                     source = s,
                 )
@@ -608,14 +736,13 @@ def sconscript_scanner(localEnv):
             added = True
             
         elif (
-                ('{0}.ewp'.format(projectDir) in os.listdir(projectDir)) and
+                ('{0}.ewp'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
                 (localEnv['toolchain']=='iar-proj')
              ):
             
             VariantDir(
-                variant_dir = variant_dir,
                 src_dir     = src_dir,
-                duplicate   = 0,
+                variant_dir = variant_dir,
             )
             
             source = [os.path.join(projectDir,'{0}.ewp'.format(projectDir))]
@@ -647,28 +774,16 @@ buildEnv.SConscript(
     os.path.join(incDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = incVarDir,
-    duplicate   = 0,
-)
-
-# bspheader
-bspHDir         = os.path.join('#','bsp','boards')
-bspHVarDir      = os.path.join(buildEnv['VARDIR'],'bsp','boards')
-buildEnv.SConscript(
-    os.path.join(bspHDir,'SConscript'),
-    exports     = {'env': buildEnv},
-    variant_dir = bspHVarDir,
-    duplicate   = 0,
 )
 
 # bsp
-bspDir          = os.path.join('#','bsp','boards',buildEnv['BSP'])
-bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp','boards',buildEnv['BSP'])
+bspDir          = os.path.join('#','bsp','boards')
+bspVarDir       = os.path.join(buildEnv['VARDIR'],'bsp','boards')
 buildEnv.Append(CPPPATH = [bspDir])
 buildEnv.SConscript(
     os.path.join(bspDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = bspVarDir,
-    duplicate   = 0,
 )
 buildEnv.Clean('libbsp', Dir(bspVarDir).abspath)
 buildEnv.Append(LIBPATH = [bspVarDir])
@@ -680,7 +795,6 @@ buildEnv.SConscript(
     os.path.join(kernelHDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = kernelHVarDir,
-    duplicate   = 0,
 )
 
 # kernel
@@ -690,7 +804,6 @@ buildEnv.SConscript(
     os.path.join(kernelDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = kernelVarDir,
-    duplicate   = 0,
 )
 buildEnv.Clean('libkernel', Dir(kernelVarDir).abspath)
 buildEnv.Append(LIBPATH = [kernelVarDir])
@@ -702,7 +815,6 @@ buildEnv.SConscript(
     os.path.join(driversDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = driversVarDir,
-    duplicate   = 0,
 )
 buildEnv.Clean('libdrivers', Dir(driversVarDir).abspath)
 buildEnv.Append(LIBPATH = [driversVarDir])
@@ -714,7 +826,6 @@ buildEnv.SConscript(
     os.path.join(openstackDir,'SConscript'),
     exports     = {'env': buildEnv},
     variant_dir = openstackVarDir,
-    duplicate   = 0,
 )
 buildEnv.Clean('libopenstack', Dir(openstackVarDir).abspath)
 buildEnv.Append(LIBPATH = [openstackVarDir])
@@ -726,14 +837,15 @@ buildEnv.SConscript(
     os.path.join(openappsDir,'SConscript'),
     exports        = {'env': buildEnv},
     variant_dir    = openappsVarDir,
-    duplicate   = 0,
 )
 buildEnv.Clean('libopenapps', Dir(openappsVarDir).abspath)
 buildEnv.Append(LIBPATH = [openappsVarDir])
 
 # projects
+projectsDir        = os.path.join('#','projects')
+projectsVarDir     = os.path.join(buildEnv['VARDIR'],'projects')
 buildEnv.SConscript(
-    os.path.join('#','projects','SConscript'),
-    exports     = {'env': buildEnv},
-    #variant_dir = os.path.join(env['VARDIR'],'projects'),
+    os.path.join(projectsDir,'SConscript'),
+    exports        = {'env': buildEnv},
+    variant_dir    = projectsVarDir,
 )

@@ -43,6 +43,7 @@ void c6t_init() {
    c6t_vars.desc.path1len            = 0;
    c6t_vars.desc.path1val            = NULL;
    c6t_vars.desc.componentID         = COMPONENT_C6T;
+   c6t_vars.desc.discoverable        = TRUE;
    c6t_vars.desc.callbackRx          = &c6t_receive;
    c6t_vars.desc.callbackSendDone    = &c6t_sendDone;
    
@@ -88,6 +89,7 @@ owerror_t c6t_receive(
             break;
          }
          
+         sixtop_setHandler(SIX_HANDLER_OTF);
          // call sixtop
          sixtop_addCells(
             &neighbor,
@@ -115,6 +117,7 @@ owerror_t c6t_receive(
             break;
          }
          
+         sixtop_setHandler(SIX_HANDLER_OTF);
          // call sixtop
          sixtop_removeCell(
             &neighbor

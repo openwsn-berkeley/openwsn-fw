@@ -137,6 +137,7 @@ struct coap_resource_desc_t {
    uint8_t               path1len;
    uint8_t*              path1val;
    uint8_t               componentID;
+   bool                  discoverable;
    callbackRx_cbt        callbackRx;
    callbackSendDone_cbt  callbackSendDone;
    coap_header_iht       last_request;
@@ -160,7 +161,7 @@ void          opencoap_receive(OpenQueueEntry_t* msg);
 void          opencoap_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 
 // from CoAP resources
-void          opencoap_writeLinks(OpenQueueEntry_t* msg);
+void          opencoap_writeLinks(OpenQueueEntry_t* msg, uint8_t componentID);
 void          opencoap_register(coap_resource_desc_t* desc);
 owerror_t     opencoap_send(
     OpenQueueEntry_t*     msg,

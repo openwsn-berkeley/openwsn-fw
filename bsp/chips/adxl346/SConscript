@@ -1,0 +1,8 @@
+Import('env')
+
+localEnv = env.Clone()
+
+source = ['adxl346.c']
+adxl346  = localEnv.Object(source=source)
+
+Return('adxl346')

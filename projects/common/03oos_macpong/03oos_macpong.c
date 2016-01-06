@@ -31,7 +31,7 @@ macpong_vars_t macpong_vars;
 
 //=========================== prototypes ======================================
 
-void macpong_initSend(void);
+void macpong_initSend(opentimer_id_t id);
 void macpong_send(uint8_t payloadCtr);
 
 //=========================== initialization ==================================
@@ -40,20 +40,20 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    openstack_init();
-   if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0xbb) {
+   if (idmanager_getMyID(ADDR_64B)->addr_64b[7]==0x03) {
       idmanager_setIsDAGroot(TRUE);
    }
    scheduler_start();
    return 0; // this line should never be reached
 }
 
-void macpong_initSend(void) {
+void macpong_initSend(opentimer_id_t id) {
    if (idmanager_getIsDAGroot()==TRUE) {
       return;
    }
    if (ieee154e_isSynch()==TRUE && neighbors_getNumNeighbors()==1) {
       // send packet
-      //poipoimacpong_send(0);   
+      macpong_send(0);   
       // cancel timer
       opentimers_stop(macpong_vars.timerId);
    }
@@ -127,6 +127,9 @@ void icmpv6router_trigger(void)   { return; }
 void icmpv6rpl_init(void)         { return; }
 void icmpv6rpl_trigger(void)      { return; }
 void icmpv6rpl_writeDODAGid(uint8_t* dodagid) { return; }
+
+void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod) { return; }
+void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod) { return; }
 
 void opentcp_init(void)           { return; }
 

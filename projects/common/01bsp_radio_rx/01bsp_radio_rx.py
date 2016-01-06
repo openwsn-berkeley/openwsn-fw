@@ -1,7 +1,10 @@
 import sys
-import serial
 import struct
 import socket
+try:
+   import serial
+except ImportError:
+   pass
 
 banner  = []
 banner += [""]

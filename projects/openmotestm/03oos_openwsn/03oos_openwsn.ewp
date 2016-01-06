@@ -324,6 +324,9 @@
           <state>$PROJ_DIR$\..\..\..\openapps\techo\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\tohlone\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\uecho\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2016,6 +2019,9 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\debugpins.c</name>
         </file>
         <file>
+          <name>$PROJ_DIR$\..\..\..\bsp\boards\common\dummy_crypto_engine.c</name>
+        </file>
+        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\eui64.c</name>
         </file>
         <file>
@@ -2171,12 +2177,30 @@
       </file>
     </group>
     <group>
+      <name>cstorm</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cstorm\cstorm.h</name>
+      </file>
+    </group>
+    <group>
       <name>cwellknown</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cwellknown\cwellknown.h</name>
+      </file>
+    </group>
+    <group>
+      <name>rrt</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\rrt\rrt.h</name>
       </file>
     </group>
     <group>
@@ -2212,6 +2236,15 @@
         <name>$PROJ_DIR$\..\..\..\openapps\uecho\uecho.h</name>
       </file>
     </group>
+    <group>
+      <name>uinject</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.h</name>
+      </file>
+    </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\openapps\openapps.c</name>
     </file>
@@ -2231,6 +2264,21 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_dummy_security.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_dummy_security.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154_security.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\ieee802154_security_driver.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02a-MAClow\IEEE802154E.c</name>

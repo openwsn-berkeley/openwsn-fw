@@ -14,10 +14,8 @@ rf231 = localEnv.SConscript(
     os.path.join('#','bsp','chips','at86rf231','SConscript'),
     variant_dir = 'rf231',
     exports     = {'env': env},
-    duplicate   = 0,
 )
 
-target = 'libbsp'
 source = [
     'board.c',
     'bsp_timer.c',
@@ -28,12 +26,8 @@ source = [
     'spi.c',
     'uart.c',
     'i2c.c',
-    rf231,
 ]
 
-libbsp = localEnv.Library(
-    target=target,
-    source=source,
-)
+board  = localEnv.Object(source=source) + rf231
 
-Alias('libbsp', libbsp)
+Return('board')

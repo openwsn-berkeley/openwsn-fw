@@ -14,6 +14,7 @@
 #include "leds.h"
 #include "processIE.h"
 #include "IEEE802154.h"
+#include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
 
@@ -26,13 +27,12 @@ sixtop_vars_t sixtop_vars;
 // send internal
 owerror_t     sixtop_send_internal(
    OpenQueueEntry_t*    msg,
-   uint8_t              iePresent,
-   uint8_t              frameVersion
+   bool                 payloadIEPresent
 );
 
 // timer interrupt callbacks
-void          sixtop_maintenance_timer_cb(void);
-void          sixtop_timeout_timer_cb(void);
+void          sixtop_maintenance_timer_cb(opentimer_id_t id);
+void          sixtop_timeout_timer_cb(opentimer_id_t id);
 
 //=== EB/KA task
 
@@ -123,6 +123,7 @@ void sixtop_init() {
    sixtop_vars.dsn                = 0;
    sixtop_vars.mgtTaskCounter     = 0;
    sixtop_vars.kaPeriod           = MAXKAPERIOD;
+   sixtop_vars.ebPeriod           = EBPERIOD;
    
    sixtop_vars.maintenanceTimerId = opentimers_start(
       sixtop_vars.periodMaintenance,
@@ -147,6 +148,18 @@ void sixtop_setKaPeriod(uint16_t kaPeriod) {
    } 
 }
 
+void sixtop_setEBPeriod(uint8_t ebPeriod) {
+   if(ebPeriod < SIXTOP_MINIMAL_EBPERIOD) {
+      sixtop_vars.ebPeriod = SIXTOP_MINIMAL_EBPERIOD;
+   } else {
+      sixtop_vars.ebPeriod = ebPeriod;
+   } 
+}
+
+void sixtop_setHandler(six2six_handler_t handler) {
+    sixtop_vars.handler = handler;
+}
+
 //======= scheduling
 
 void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
@@ -158,7 +171,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    bool              outcome;
    cellInfo_ht       cellList[SCHEDULEIEMAXNUMCELLS];
    
-   frameID    = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+   frameID    = schedule_getFrameHandle();
    
    memset(cellList,0,sizeof(cellList));
    
@@ -168,6 +181,11 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    }
    if (neighbor==NULL){
       return;
+   }
+   
+   if (sixtop_vars.handler == SIX_HANDLER_NONE) {
+       // sxitop handler must not be NONE
+       return;
    }
    
    // generate candidate cell list
@@ -208,13 +226,13 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    
    // create packet
    len  = 0;
-   len += processIE_prependSheduleIE(pkt,type,frameID,flag,cellList);
+   len += processIE_prependScheduleIE(pkt,type,frameID,flag,cellList);
    len += processIE_prependBandwidthIE(pkt,numCells,frameID);
    len += processIE_prependOpcodeIE(pkt,SIXTOP_SOFT_CELL_REQ);
    processIE_prependMLMEIE(pkt,len);
    
    // indicate IEs present
-   pkt->l2_IEListPresent = IEEE154_IELIST_YES;
+   pkt->l2_payloadIEpresent = TRUE;
    
    // send packet
    sixtop_send(pkt);
@@ -290,12 +308,12 @@ void sixtop_removeCell(open_addr_t* neighbor){
    
    // create packet
    len  = 0;
-   len += processIE_prependSheduleIE(pkt,type,frameID, flag,cellList);
+   len += processIE_prependScheduleIE(pkt,type,frameID, flag,cellList);
    len += processIE_prependOpcodeIE(pkt,SIXTOP_REMOVE_SOFT_CELL_REQUEST);
    processIE_prependMLMEIE(pkt,len);
  
    // indicate IEs present
-   pkt->l2_IEListPresent = IEEE154_IELIST_YES;
+   pkt->l2_payloadIEpresent = TRUE;
    
    // send packet
    sixtop_send(pkt);
@@ -312,6 +330,104 @@ void sixtop_removeCell(open_addr_t* neighbor){
    opentimers_restart(sixtop_vars.timeoutTimerId);
 }
 
+void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
+   OpenQueueEntry_t* pkt;
+   uint8_t           len;
+   uint8_t           type;
+   uint8_t           frameID;
+   uint8_t           flag;
+   cellInfo_ht       cellList[SCHEDULEIEMAXNUMCELLS];
+   
+   memset(cellList,0,sizeof(cellList));
+   
+   // filter parameters
+   if (sixtop_vars.six2six_state!=SIX_IDLE){
+      return;
+   }
+   if (neighbor==NULL){
+      return;
+   }
+   if (sixtop_vars.handler == SIX_HANDLER_NONE) {
+       // sixtop handler must not be NONE
+       return;
+   }
+   
+   // set cell list. only the first one
+   type           = 1;
+   frameID        = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+   flag           = 1;
+   memcpy(&(cellList[0]),cellInfo,sizeof(cellInfo_ht));
+   
+   
+   // get a free packet buffer
+   pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
+   if(pkt==NULL) {
+      openserial_printError(
+         COMPONENT_SIXTOP_RES,
+         ERR_NO_FREE_PACKET_BUFFER,
+         (errorparameter_t)0,
+         (errorparameter_t)0
+      );
+      return;
+   }
+   
+   // update state
+   sixtop_vars.six2six_state = SIX_SENDING_REMOVEREQUEST;
+   
+   // declare ownership over that packet
+   pkt->creator = COMPONENT_SIXTOP_RES;
+   pkt->owner   = COMPONENT_SIXTOP_RES;
+      
+   memcpy(
+      &(pkt->l2_nextORpreviousHop),
+      neighbor,
+      sizeof(open_addr_t)
+   );
+ 
+   
+   // create packet
+   len  = 0;
+   len += processIE_prependScheduleIE(pkt,type,frameID, flag,cellList);
+   len += processIE_prependOpcodeIE(pkt,SIXTOP_REMOVE_SOFT_CELL_REQUEST);
+   processIE_prependMLMEIE(pkt,len);
+ 
+   // indicate IEs present
+   pkt->l2_payloadIEpresent = TRUE;
+   
+   // send packet
+   sixtop_send(pkt);
+   
+   // update state
+   sixtop_vars.six2six_state = SIX_WAIT_REMOVEREQUEST_SENDDONE;
+   
+   // arm timeout
+   opentimers_setPeriod(
+      sixtop_vars.timeoutTimerId,
+      TIME_MS,
+      SIX2SIX_TIMEOUT_MS
+   );
+   opentimers_restart(sixtop_vars.timeoutTimerId);
+
+}
+
+//======= maintaning 
+void sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor){
+    slotinfo_element_t info;
+    cellInfo_ht linkInfo;
+    schedule_getSlotInfo(slotOffset,neighbor,&info);
+    if(info.link_type != CELLTYPE_OFF){
+        linkInfo.tsNum       = slotOffset;
+        linkInfo.choffset    = info.channelOffset;
+        linkInfo.linkoptions = info.link_type;
+        sixtop_vars.handler  = SIX_HANDLER_MAINTAIN;
+        sixtop_removeCellByInfo(neighbor, &linkInfo);
+    } else {
+        //should log this error
+        
+        return;
+    }
+}
+
 //======= from upper layer
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
@@ -319,18 +435,22 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    // set metadata
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-   
-   if (msg->l2_IEListPresent == IEEE154_IELIST_NO) {
+
+
+   // set l2-security attributes
+   msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   msg->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE; 
+   msg->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+
+   if (msg->l2_payloadIEpresent == FALSE) {
       return sixtop_send_internal(
          msg,
-         IEEE154_IELIST_NO,
-         IEEE154_FRAMEVERSION_2006
+         FALSE
       );
    } else {
       return sixtop_send_internal(
          msg,
-         IEEE154_IELIST_YES,
-         IEEE154_FRAMEVERSION
+         TRUE
       );
    }
 }
@@ -377,9 +497,9 @@ void task_sixtopNotifSendDone() {
       
       case COMPONENT_SIXTOP:
          if (msg->l2_frameType==IEEE154_TYPE_BEACON) {
-            // this is a ADV
+            // this is a EB
             
-            // not busy sending ADV anymore
+            // not busy sending EB anymore
             sixtop_vars.busySendingEB = FALSE;
          } else {
             // this is a KA
@@ -432,8 +552,8 @@ void task_sixtopNotifReceive() {
    // process the header IEs
    lenIE=0;
    if(
-         msg->l2_frameType==IEEE154_TYPE_DATA            &&
-         msg->l2_IEListPresent==IEEE154_IELIST_YES       &&
+         msg->l2_frameType              == IEEE154_TYPE_DATA  &&
+         msg->l2_payloadIEpresent       == TRUE               &&
          sixtop_processIEs(msg, &lenIE) == FALSE
       ) {
       // free the packet's RAM memory
@@ -545,8 +665,7 @@ IEEE802154E will handle the packet.
 */
 owerror_t sixtop_send_internal(
    OpenQueueEntry_t* msg, 
-   uint8_t iePresent, 
-   uint8_t frameVersion) {
+   bool    payloadIEPresent) {
 
    // assign a number of retries
    if (
@@ -554,7 +673,7 @@ owerror_t sixtop_send_internal(
       ) {
       msg->l2_retriesLeft = 1;
    } else {
-      msg->l2_retriesLeft = TXRETRIES;
+      msg->l2_retriesLeft = TXRETRIES + 1;
    }
    // record this packet's dsn (for matching the ACK)
    msg->l2_dsn = sixtop_vars.dsn++;
@@ -562,19 +681,13 @@ owerror_t sixtop_send_internal(
    msg->l2_numTxAttempts = 0;
    // transmit with the default TX power
    msg->l1_txPower = TX_POWER;
-   // record the location, in the packet, where the l2 payload starts
-   msg->l2_payload = msg->payload;
    // add a IEEE802.15.4 header
    ieee802154_prependHeader(msg,
                             msg->l2_frameType,
-                            iePresent,
-                            frameVersion,
-                            IEEE154_SEC_NO_SECURITY,
+                            payloadIEPresent,
                             msg->l2_dsn,
                             &(msg->l2_nextORpreviousHop)
                             );
-   // reserve space for 2-byte CRC
-   packetfunctions_reserveFooterSize(msg,2);
    // change owner to IEEE802154E fetches it from queue
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
    return E_SUCCESS;
@@ -582,11 +695,11 @@ owerror_t sixtop_send_internal(
 
 // timer interrupt callbacks
 
-void sixtop_maintenance_timer_cb() {
+void sixtop_maintenance_timer_cb(opentimer_id_t id) {
    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
 }
 
-void sixtop_timeout_timer_cb() {
+void sixtop_timeout_timer_cb(opentimer_id_t id) {
    scheduler_push_task(timer_sixtop_six2six_timeout_fired,TASKPRIO_SIXTOP_TIMEOUT);
 }
 
@@ -601,44 +714,55 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
-   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%ADVTIMEOUT;
+   scheduleEntry_t* entry;
+   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
    
    switch (sixtop_vars.mgtTaskCounter) {
       case 0:
-         // called every ADVTIMEOUT seconds
+         // called every EBPERIOD seconds
          sixtop_sendEB();
          break;
       case 1:
-         // called every ADVTIMEOUT seconds
+         // called every EBPERIOD seconds
          neighbors_removeOld();
          break;
+      case 2:
+         // called every EBPERIOD seconds
+         entry = schedule_statistic_poorLinkQuality();
+         if (
+             entry       != NULL                        && \
+             entry->type != CELLTYPE_OFF                && \
+             entry->type != CELLTYPE_TXRX               
+         ){
+             sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
+         }
       default:
-         // called every second, except twice every ADVTIMEOUT seconds
+         // called every second, except third times every EBPERIOD seconds
          sixtop_sendKA();
          break;
    }
 }
 
 /**
-\brief Send an advertisement.
+\brief Send an EB.
 
 This is one of the MAC management tasks. This function inlines in the
 timers_res_fired() function, but is declared as a separate function for better
 readability of the code.
 */
 port_INLINE void sixtop_sendEB() {
-   OpenQueueEntry_t* adv;
+   OpenQueueEntry_t* eb;
    uint8_t len;
    
    len = 0;
    
-   if (ieee154e_isSynch()==FALSE) {
-      // I'm not sync'ed
+   if ((ieee154e_isSynch()==FALSE) || (neighbors_getMyDAGrank()==DEFAULTDAGRANK)){
+      // I'm not sync'ed or I did not acquire a DAGrank
       
-      // delete packets genereted by this module (ADV and KA) from openqueue
+      // delete packets genereted by this module (EB and KA) from openqueue
       openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
       
-      // I'm now busy sending an ADV
+      // I'm now busy sending an EB
       sixtop_vars.busySendingEB = FALSE;
       
       // stop here
@@ -646,14 +770,15 @@ port_INLINE void sixtop_sendEB() {
    }
    
    if (sixtop_vars.busySendingEB==TRUE) {
-      // don't continue if I'm still sending a previous ADV
+      // don't continue if I'm still sending a previous EB
+      return;
    }
    
-   // if I get here, I will send an ADV
+   // if I get here, I will send an EB
    
    // get a free packet buffer
-   adv = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
-   if (adv==NULL) {
+   eb = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
+   if (eb==NULL) {
       openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
@@ -661,30 +786,37 @@ port_INLINE void sixtop_sendEB() {
    }
    
    // declare ownership over that packet
-   adv->creator = COMPONENT_SIXTOP;
-   adv->owner   = COMPONENT_SIXTOP;
+   eb->creator = COMPONENT_SIXTOP;
+   eb->owner   = COMPONENT_SIXTOP;
    
-   // reserve space for ADV-specific header
+   // reserve space for EB-specific header
    // reserving for IEs.
-   len += processIE_prependSlotframeLinkIE(adv);
-   len += processIE_prependSyncIE(adv);
+   len += processIE_prependSlotframeLinkIE(eb);
+   len += processIE_prependChannelHoppingIE(eb);
+   len += processIE_prependTSCHTimeslotIE(eb);
+   len += processIE_prependSyncIE(eb);
    
    //add IE header 
-   processIE_prependMLMEIE(adv,len);
+   processIE_prependMLMEIE(eb,len);
   
    // some l2 information about this packet
-   adv->l2_frameType                     = IEEE154_TYPE_BEACON;
-   adv->l2_nextORpreviousHop.type        = ADDR_16B;
-   adv->l2_nextORpreviousHop.addr_16b[0] = 0xff;
-   adv->l2_nextORpreviousHop.addr_16b[1] = 0xff;
+   eb->l2_frameType                     = IEEE154_TYPE_BEACON;
+   eb->l2_nextORpreviousHop.type        = ADDR_16B;
+   eb->l2_nextORpreviousHop.addr_16b[0] = 0xff;
+   eb->l2_nextORpreviousHop.addr_16b[1] = 0xff;
    
    //I has an IE in my payload
-   adv->l2_IEListPresent = IEEE154_IELIST_YES;
-   
+   eb->l2_payloadIEpresent = TRUE;
+
+   // set l2-security attributes
+   eb->l2_securityLevel   = IEEE802154_SECURITY_LEVEL_BEACON;
+   eb->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   eb->l2_keyIndex        = IEEE802154_SECURITY_K1_KEY_INDEX;
+
    // put in queue for MAC to handle
-   sixtop_send_internal(adv,IEEE154_IELIST_YES,IEEE154_FRAMEVERSION);
+   sixtop_send_internal(eb,eb->l2_payloadIEpresent);
    
-   // I'm now busy sending an ADV
+   // I'm now busy sending an EB
    sixtop_vars.busySendingEB = TRUE;
 }
 
@@ -702,7 +834,7 @@ port_INLINE void sixtop_sendKA() {
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed
       
-      // delete packets genereted by this module (ADV and KA) from openqueue
+      // delete packets genereted by this module (EB and KA) from openqueue
       openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
       
       // I'm now busy sending a KA
@@ -742,8 +874,13 @@ port_INLINE void sixtop_sendKA() {
    kaPkt->l2_frameType = IEEE154_TYPE_DATA;
    memcpy(&(kaPkt->l2_nextORpreviousHop),kaNeighAddr,sizeof(open_addr_t));
    
+   // set l2-security attributes
+   kaPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   kaPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   kaPkt->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+
    // put in queue for MAC to handle
-   sixtop_send_internal(kaPkt,IEEE154_IELIST_NO,IEEE154_FRAMEVERSION_2006);
+   sixtop_send_internal(kaPkt,FALSE);
    
    // I'm now busy sending a KA
    sixtop_vars.busySendingKA = TRUE;
@@ -759,6 +896,8 @@ port_INLINE void sixtop_sendKA() {
 void timer_sixtop_six2six_timeout_fired(void) {
    // timeout timer fired, reset the state of sixtop to idle
    sixtop_vars.six2six_state = SIX_IDLE;
+   sixtop_vars.handler = SIX_HANDLER_NONE;
+   opentimers_stop(sixtop_vars.timeoutTimerId);
 }
 
 void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
@@ -783,22 +922,36 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
          break;
       case SIX_WAIT_ADDRESPONSE_SENDDONE:
-         
+         if (error == E_SUCCESS && numOfCells > 0){
+             for (i=0;i<numOfCells;i++){
+               //TimeSlot 2B
+               cellList[i].tsNum       = *(ptr);
+               cellList[i].tsNum      |= (*(ptr+1))<<8;
+               //Ch.Offset 2B
+               cellList[i].choffset    = *(ptr+2);
+               cellList[i].choffset   |= (*(ptr+3))<<8;
+               //LinkOption bitmap 1B
+               cellList[i].linkoptions = *(ptr+4);
+               ptr += 5;
+             }
+             sixtop_addCellsByState(
+                 msg->l2_scheduleIE_frameID,
+                 numOfCells,
+                 cellList,
+                 &(msg->l2_nextORpreviousHop),
+                 sixtop_vars.six2six_state);
+         }
          sixtop_vars.six2six_state = SIX_IDLE;
-         
-         // notify OTF
-         otf_notif_addedCell();
-         
          break;
       case SIX_WAIT_REMOVEREQUEST_SENDDONE:
          if(error == E_SUCCESS && numOfCells > 0){
             for (i=0;i<numOfCells;i++){
                //TimeSlot 2B
-               cellList[i].tsNum       = (*(ptr))<<8;
-               cellList[i].tsNum      |= *(ptr+1);
+               cellList[i].tsNum       = *(ptr);
+               cellList[i].tsNum      |= (*(ptr+1))<<8;
                //Ch.Offset 2B
-               cellList[i].choffset    = (*(ptr+2))<<8;
-               cellList[i].choffset   |= *(ptr+3);
+               cellList[i].choffset    = *(ptr+2);
+               cellList[i].choffset   |= (*(ptr+3))<<8;
                //LinkOption bitmap 1B
                cellList[i].linkoptions = *(ptr+4);
                ptr += 5;
@@ -811,7 +964,12 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             );
          }
          sixtop_vars.six2six_state = SIX_IDLE;
+         opentimers_stop(sixtop_vars.timeoutTimerId);
          leds_debug_off();
+         if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
+             sixtop_addCells(&(msg->l2_nextORpreviousHop),1);
+             sixtop_vars.handler = SIX_HANDLER_NONE;
+         }
          break;
       default:
          //log error
@@ -838,7 +996,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
    //candidate IE header  if type ==0 header IE if type==1 payload IE
    temp_8b = *((uint8_t*)(pkt->payload)+ptr);
    ptr++;
-   temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<< 8);
+   temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
    ptr++;
    *lenIE = ptr;
    if(
@@ -846,17 +1004,13 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
       IEEE802154E_DESC_TYPE_PAYLOAD_IE
    ){
    //payload IE - last bit is 1
-      len = 
-         (temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK) >> 
-         IEEE802154E_DESC_LEN_PAYLOAD_IE_SHIFT;
+      len = temp_16b & IEEE802154E_DESC_LEN_PAYLOAD_IE_MASK;
       gr_elem_id = 
          (temp_16b & IEEE802154E_DESC_GROUPID_PAYLOAD_IE_MASK)>>
          IEEE802154E_DESC_GROUPID_PAYLOAD_IE_SHIFT;
    }else {
    //header IE - last bit is 0
-      len = 
-         (temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK)>>
-         IEEE802154E_DESC_LEN_HEADER_IE_SHIFT;
+      len = temp_16b & IEEE802154E_DESC_LEN_HEADER_IE_MASK;
       gr_elem_id = (temp_16b & IEEE802154E_DESC_ELEMENTID_HEADER_IE_MASK)>>
          IEEE802154E_DESC_ELEMENTID_HEADER_IE_SHIFT; 
    }
@@ -871,7 +1025,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
            //read sub IE header
            temp_8b = *((uint8_t*)(pkt->payload)+ptr);
            ptr = ptr + 1;
-           temp_16b = temp_8b  +(*((uint8_t*)(pkt->payload)+ptr) << 8);
+           temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
            ptr = ptr + 1;
            len = len - 2; //remove header fields len
            if(
@@ -879,17 +1033,13 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
               IEEE802154E_DESC_TYPE_LONG
               ){
               //long sub-IE - last bit is 1
-              sublen =
-                 (temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK)>>
-                 IEEE802154E_DESC_LEN_LONG_MLME_IE_SHIFT;
+              sublen = temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK;
               subid= 
                  (temp_16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>
                  IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT; 
            } else {
               //short IE - last bit is 0
-              sublen = 
-                 (temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK)>>
-                 IEEE802154E_DESC_LEN_SHORT_MLME_IE_SHIFT;
+              sublen = temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK;
               subid = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>
                  IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
            }
@@ -903,7 +1053,7 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
               case MLME_IE_SUBID_TRACKID:
               break;
               case MLME_IE_SUBID_SCHEDULE:
-              processIE_retrieveSheduleIE(pkt,&ptr,&schedule_ie);
+              processIE_retrieveScheduleIE(pkt,&ptr,&schedule_ie);
               break;
           default:
              return FALSE;
@@ -939,7 +1089,6 @@ void sixtop_notifyReceiveCommand(
    bandwidth_IE_ht* bandwidth_ie, 
    schedule_IE_ht* schedule_ie,
    open_addr_t* addr){
-   
    switch(opcode_ie->opcode){
       case SIXTOP_SOFT_CELL_REQ:
          if(sixtop_vars.six2six_state == SIX_IDLE)
@@ -990,10 +1139,6 @@ void sixtop_notifyReceiveLinkRequest(
                                             bw) == FALSE){
       scheduleCellSuccess = FALSE;
    } else {
-      sixtop_addCellsByState(
-         frameID,
-         bw,
-         schedule_ie->cellList,addr,sixtop_vars.six2six_state);
       scheduleCellSuccess = TRUE;
    }
   
@@ -1040,9 +1185,8 @@ void sixtop_linkResponse(
    sixtopPkt->owner   = COMPONENT_SIXTOP_RES;
     
    memcpy(&(sixtopPkt->l2_nextORpreviousHop),tempNeighbor,sizeof(open_addr_t));
-    
    // set SubFrameAndLinkIE
-   len += processIE_prependSheduleIE(sixtopPkt,
+   len += processIE_prependScheduleIE(sixtopPkt,
                                                   type,
                                                   frameID,
                                                   flag,
@@ -1061,7 +1205,7 @@ void sixtop_linkResponse(
    processIE_prependMLMEIE(sixtopPkt,len);
     
    //I has an IE in my payload
-   sixtopPkt->l2_IEListPresent = IEEE154_IELIST_YES;
+   sixtopPkt->l2_payloadIEpresent = TRUE;
   
    sixtop_send(sixtopPkt);
   
@@ -1103,6 +1247,7 @@ void sixtop_notifyReceiveLinkResponse(
    }
    leds_debug_off();
    sixtop_vars.six2six_state = SIX_IDLE;
+   sixtop_vars.handler = SIX_HANDLER_NONE;
   
    opentimers_stop(sixtop_vars.timeoutTimerId);
 }
@@ -1122,8 +1267,17 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    
    sixtop_removeCellsByState(frameID,numOfCells,cellList,addr);
    
-   // notify OTF
-   otf_notif_removedCell();
+   if (sixtop_vars.handler == SIX_HANDLER_OTF) {
+     // notify OTF
+     otf_notif_removedCell();
+   } else {
+       if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
+           // if sixtop remove request handler is 
+           sixtop_vars.handler = SIX_HANDLER_NONE;
+       } else {
+           // if any other handlers exist
+       }
+   }
    
    sixtop_vars.six2six_state = SIX_IDLE;
 
@@ -1138,23 +1292,22 @@ bool sixtop_candidateAddCellList(
       uint8_t*     flag,
       cellInfo_ht* cellList
    ){
-   uint8_t i;
+   frameLength_t i;
+   uint8_t counter;
    uint8_t numCandCells;
    
    *type = 1;
-   *frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+   *frameID = schedule_getFrameHandle();
    *flag = 1; // the cells listed in cellList are available to be schedule.
    
    numCandCells=0;
-   for(i=0;i<MAXACTIVESLOTS;i++){
+   for(counter=0;counter<SCHEDULEIEMAXNUMCELLS;counter++){
+      i = openrandom_get16b()%schedule_getFrameLength();
       if(schedule_isSlotOffsetAvailable(i)==TRUE){
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = 0;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
          numCandCells++;
-         if(numCandCells==SCHEDULEIEMAXNUMCELLS){
-            break;
-         }
       }
    }
    
@@ -1177,11 +1330,11 @@ bool sixtop_candidateRemoveCellList(
    slotinfo_element_t   info;
    
    *type           = 1;
-   *frameID        = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+   *frameID        = schedule_getFrameHandle();
    *flag           = 1;
   
    numCandCells    = 0;
-   for(i=0;i<MAXACTIVESLOTS;i++){
+   for(i=0;i<schedule_getMaxActiveSlots();i++){
       schedule_getSlotInfo(i,neighbor,&info);
       if(info.link_type == CELLTYPE_TX){
          cellList[numCandCells].tsNum       = i;
@@ -1217,7 +1370,7 @@ void sixtop_addCellsByState(
       //only schedule when the request side wants to schedule a tx cell
       if(cellList[i].linkoptions == CELLTYPE_TX){
          switch(state) {
-            case SIX_ADDREQUEST_RECEIVED:
+            case SIX_WAIT_ADDRESPONSE_SENDDONE:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
                
                //add a RX link

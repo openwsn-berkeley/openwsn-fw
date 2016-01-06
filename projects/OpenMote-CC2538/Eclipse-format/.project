@@ -30,14 +30,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/OpenMote-CC2538</locationURI>
 		</link>
 		<link>
-			<name>common</name>
+			<name>drivers_common</name>
 			<type>2</type>
 			<locationURI>PARENT-3-PROJECT_LOC/drivers/common</locationURI>
-		</link>
-		<link>
-			<name>drivers</name>
-			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/drivers/OpenMote-CC2538</locationURI>
 		</link>
 		<link>
 			<name>inc</name>
@@ -105,6 +100,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/radiotimer.h</locationURI>
 		</link>
 		<link>
+			<name>OpenMote-CC2538/sensors.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/sensors.h</locationURI>
+		</link>
+		<link>
 			<name>OpenMote-CC2538/toolchain_defs.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/toolchain_defs.h</locationURI>
@@ -113,6 +113,21 @@
 			<name>OpenMote-CC2538/uart.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/bsp/boards/uart.h</locationURI>
+		</link>
+		<link>
+			<name>drivers_OpenMote-CC2538/adxl346</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/chips/adxl346</locationURI>
+		</link>
+		<link>
+			<name>drivers_OpenMote-CC2538/max44009</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/chips/max44009</locationURI>
+		</link>
+		<link>
+			<name>drivers_OpenMote-CC2538/sht21</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/bsp/chips/sht21</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

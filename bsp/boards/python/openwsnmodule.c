@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include "openwsnmodule.h"
 
+#include "bsp_timer.h"
+
 //=========================== OpenMote Class ==================================
 
 //===== members
@@ -358,7 +360,7 @@ static PyMemberDef OpenMote_members[] = {
 static PyTypeObject openwsn_OpenMoteType = {
    PyObject_HEAD_INIT(NULL)
    0,                                  // ob_size
-   "openwsn_generic.OpenMote",         // tp_name
+   "REPLACE_BY_PROJ_NAME.OpenMote",    // tp_name
    sizeof(OpenMote),                   // tp_basicsize
    0,                                  // tp_itemsize
    0,                                  // tp_dealloc
@@ -401,8 +403,6 @@ static PyTypeObject openwsn_OpenMoteType = {
 
 //===== members
 
-static PyObject* my_callback  = NULL;
-
 //===== methods
 
 //===== admin
@@ -415,7 +415,7 @@ static PyMethodDef openwsn_methods[] = {
 #define PyMODINIT_FUNC void
 #endif
 
-PyMODINIT_FUNC initopenwsn_generic(void) {
+PyMODINIT_FUNC initREPLACE_BY_PROJ_NAME(void) {
    PyObject* openwsn_module;
    
    // populate "new" method for OpenMote object
@@ -426,7 +426,7 @@ PyMODINIT_FUNC initopenwsn_generic(void) {
    
    // initialize the openwsn module
    openwsn_module = Py_InitModule3(
-      "openwsn_generic",
+      "REPLACE_BY_PROJ_NAME",
       openwsn_methods,
       "Module which declares the OpenMote class."
    );

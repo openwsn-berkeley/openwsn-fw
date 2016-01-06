@@ -6,7 +6,7 @@ localEnv      = env.Clone()
 
 #===== retrieve the list of apps to build
 
-# apps which should always be present
+# apps which should always be built
 defaultApps   = [
     'c6t',
     'cexample',
@@ -15,6 +15,7 @@ defaultApps   = [
     'cwellknown',
     'techo',
     'uecho',
+    'uinject',
     'rrt',
 ]
 if localEnv['board']=='python':
@@ -22,6 +23,17 @@ if localEnv['board']=='python':
         'cexample',
         'cstorm',
     ]
+
+# apps which should always be present
+defaultAppsInit   = [
+    'c6t',
+    'cinfo',
+    'cleds',
+    'cwellknown',
+    'techo',
+    'uecho',
+    'rrt',
+]
 
 # additional apps the user wants to build
 if localEnv['apps']:
@@ -31,6 +43,7 @@ else:
 
 # union of default and additional apps (without duplicates)
 apps = sorted(list(set(defaultApps+userApps)))
+appsInit = sorted(list(set(defaultAppsInit+userApps)))
 
 #===== rule to create a (temporary) openapps_dyn.c file
 
@@ -44,17 +57,11 @@ def dynify(env,target,source):
     
     #=== create file
     
-    dynfile = '''
-    #include "opendefs.h"
-    {HEADERS_FILES}
-
-    void openapps_init(void) {{
-    {INIT_FUNCTIONS}
-    }}
-    '''.format(
-        HEADERS_FILES  = '\n'.join(['#include "{0}.h"'.format(a) for a in apps]),
-        INIT_FUNCTIONS = '\n'.join(['   {0}_init();'.format(a) for a in apps]),
-    )
+    dynfile  = '#include "opendefs.h"\n\n'
+    dynfile += '{HEADERS_FILES}'.format(HEADERS_FILES  = '\n'.join(['#include "{0}.h"'.format(a) for a in apps]))
+    dynfile += '\n\nvoid openapps_init(void) {\n'
+    dynfile += '{INIT_FUNCTIONS}'''.format(INIT_FUNCTIONS = '\n'.join(['   {0}_init();'.format(a) for a in appsInit]))
+    dynfile += '\n}'
     
     # this is a workaround for the fact that leds_init() is called leds__init()
     # which itself it due to possible confusion in the objecticication process
