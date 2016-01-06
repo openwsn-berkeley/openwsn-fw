@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Debug
 settings
 *.dep
@@ -17,3 +18,35 @@ settings
 *.map
 *.lst
 *~
+=======
+Debug
+settings
+*.dep
+*.sfr
+*.o
+*.exe
+*.ihex
+*.a43
+*.bin
+*.so
+*.a
+*.pyd
+*.pyc
+path.txt
+/build
+/.sconsign.dblite
+/firmware/openos/bsp/boards/python/*.def
+.directory
+/firmware/openos/projects/common/03oos_openwsn_prog
+/firmware/openos/projects/common/03oos_openwsn/03oos_openwsn_obj.*
+/firmware/openos/projects/common/oos_openwsn.*
+/firmware/openos/bsp/boards/python/openwsnmodule_obj.c
+/firmware/openos/bsp/boards/python/openwsnmodule_obj.os
+/firmware/openos/projects/python_vs13/oos_openwsn.sdf
+*.map
+*.lst
+/firmware/openos/projects/wsn430v14/03oos_mercator/*.ewd
+*~
+bsp
+*.os
+>>>>>>> parent of 9daa2b1... minor
