@@ -412,8 +412,10 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
    onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
    
    // length
-   little_helper[0] = 0;
-   little_helper[1] = msg->length;
+//   little_helper[0] = 0;
+//   little_helper[1] = msg->length;
+   little_helper[0] = (msg->length & 0xFF00) >> 8;
+   little_helper[1] =  msg->length & 0x00FF;
    onesComplementSum(temp_checksum,little_helper,2);
    
    // next header
