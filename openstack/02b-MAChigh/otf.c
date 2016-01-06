@@ -3,17 +3,6 @@
 #include "neighbors.h"
 #include "sixtop.h"
 #include "scheduler.h"
-#include "openqueue.h"
-#include "openrandom.h"
-#include "scheduler.h"
-#include "opentimers.h"
-#include "IEEE802154E.h"
-#include "schedule.h"
-#include "openserial.h"
-#include "openrandom.h"
-#include "packetfunctions.h"
-#include "sixtop.h"
-
 
 //=========================== variables =======================================
 
@@ -34,33 +23,6 @@ void otf_notif_addedCell(void) {
 void otf_notif_removedCell(void) {
    scheduler_push_task(otf_removeCell_task,TASKPRIO_OTF);
 }
-
-/**
- \brief a packet is pushed to the lower layer, updates the otf statistics
-\param[in]     msg             The packet pushed.
-\param[in]     flow_label      The flowlabel to add in the 6LoWPAN header.
-\param[in]     fw_SendOrfw_Rcv The packet is originating from this mote
-*/
-owerror_t otf_stat_tx(
-                        OpenQueueEntry_t*      msg,
-                        uint32_t*              flow_label,
-                        uint8_t                fw_SendOrfw_Rcv
-){
-
-
-   //debug (with the inserted slot/channel offset)
-   openserial_printInfo(COMPONENT_OTF,
-                        ERR_OTF_NEWPK,
-                        (errorparameter_t)0,
-                        (owerror_t)0);
-
-   return E_SUCCESS;
-
-}
-
-
-
-
 
 //=========================== private =========================================
 

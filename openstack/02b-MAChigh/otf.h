@@ -24,15 +24,6 @@ void      otf_init(void);
 void      otf_notif_addedCell(void);
 void      otf_notif_removedCell(void);
 
-//statistics update
-owerror_t otf_stat_tx(
-                      OpenQueueEntry_t*      msg,
-                      uint32_t*              flow_label,
-                      uint8_t                fw_SendOrfw_Rcv
-                      );
-
-
-
 /**
 \}
 \}

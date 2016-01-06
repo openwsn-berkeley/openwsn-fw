@@ -128,7 +128,8 @@ void cexample_task_cb() {
    pkt->payload[0]                = (COAP_OPTION_NUM_CONTENTFORMAT - COAP_OPTION_NUM_URIPATH) << 4
                                     | 1;
    pkt->payload[1]                = COAP_MEDTYPE_APPOCTETSTREAM;
-   // location-path option
+
+    // location-path option
    packetfunctions_reserveHeaderSize(pkt,sizeof(cexample_path0)-1);
    memcpy(&pkt->payload[0],cexample_path0,sizeof(cexample_path0)-1);
    packetfunctions_reserveHeaderSize(pkt,1);
