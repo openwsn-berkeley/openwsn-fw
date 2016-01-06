@@ -381,6 +381,8 @@ FragmentQueueEntry_t* fragment_searchBufferFromMsg(OpenQueueEntry_t* msg) {
 }
 
 void fragment_assignAction(FragmentQueueEntry_t* buffer, FragmentAction action) {
+   if ( buffer->action == FRAGMENT_ACTION_OPENBRIDGE )
+      fragment_cancelToBridge(buffer);
    buffer->action = action;
 
    fragment_action(buffer);
@@ -391,7 +393,7 @@ void fragment_assignAction(FragmentQueueEntry_t* buffer, FragmentAction action) 
        notification to OpenVisualizer.
 */
 void fragment_checkOpenBridge(OpenQueueEntry_t *msg, owerror_t error) {
-   uint8_t  dispatch, i;
+   uint8_t  dispatch;
    uint8_t  chain[5];
    uint16_t tag;
 
@@ -413,6 +415,29 @@ void fragment_checkOpenBridge(OpenQueueEntry_t *msg, owerror_t error) {
    chain[3] = tag & 0x00FF;
 
    openserial_printBridge(&(chain[0]), 4);
+}
+
+/**
+\brief RFC 4944
+       Upon detection of a IEEE 802.15.4 Disassociation event, fragment
+       recipients MUST discard all link fragments of all partially
+       reassembled payload datagrams, and fragment senders MUST discard all
+       not yet transmitted link fragments of all partially transmitted
+       payload (e.g., IPv6) datagrams.
+*/
+void fragment_deleteNeighbor(open_addr_t* neighbor)
+{
+   uint8_t i;
+
+   for (i=0;i<FRAGQLENGTH;i++)
+      if ( fragmentqueue_vars.queue[i].in_use != FRAGMENT_NONE 
+       && (packetfunctions_sameAddress(neighbor,
+		                       &fragmentqueue_vars.queue[i].src)
+       ||  packetfunctions_sameAddress(neighbor,
+                                       &fragmentqueue_vars.queue[i].dst)) ) {
+         fragment_assignAction(&(fragmentqueue_vars.queue[i]),
+			       FRAGMENT_ACTION_CANCEL);
+      }
 }
 
 //=========================== private =========================================
@@ -929,7 +954,7 @@ uint8_t fragment_bufferIndex(FragmentQueueEntry_t* buffer) {
 }
 
 void fragment_cancelToBridge(FragmentQueueEntry_t* buffer) {
-   uint8_t chain[14], i;
+   uint8_t chain[14];
 
    chain[0] = FRAGMENT_MOTE2PC_FAIL;
    chain[1] = FRAGMENT_MOTE2PC_FROMMESH;

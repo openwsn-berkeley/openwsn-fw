@@ -134,6 +134,7 @@ FragmentQueueEntry_t* fragment_indexBuffer(uint8_t id);
 FragmentQueueEntry_t* fragment_searchBufferFromMsg(OpenQueueEntry_t* msg);
 void fragment_assignAction(FragmentQueueEntry_t* buffer, FragmentAction action);
 void fragment_checkOpenBridge(OpenQueueEntry_t *msg, owerror_t error);
+void fragment_deleteNeighbor(open_addr_t* neighbor);
 
 /**
 \}

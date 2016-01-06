@@ -89,7 +89,7 @@ void fragtest_task_cb() {
    OpenQueueEntry_t*    pkt;
    uint16_t             counter;
    uint16_t             i;
-   open_addr_t          origin;
+//   open_addr_t          origin;
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
