@@ -16,6 +16,7 @@
 #include <stdint.h>               // needed for uin8_t, uint16_t
 #include "toolchain_defs.h"
 #include "board_info.h"
+#include <stdio.h>
 
 //=========================== define ==========================================
 
@@ -275,6 +276,14 @@ typedef struct {                                 // always written big endian, i
    };
 } open_addr_t;
 END_PACK
+
+BEGIN_PACK
+typedef struct{
+   open_addr_t owner;
+   uint16_t    instance;
+} track_t;
+END_PACK
+
 
 typedef struct {
    //admin

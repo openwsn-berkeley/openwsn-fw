@@ -8,6 +8,8 @@
 #define __OPENSERIAL_H
 
 #include "opendefs.h"
+#include "schedule.h"
+
 
 /**
 \addtogroup drivers
@@ -49,12 +51,35 @@ enum {
 #define SERFRAME_MOTE2PC_CRITICAL           ((uint8_t)'C')
 #define SERFRAME_MOTE2PC_REQUEST            ((uint8_t)'R')
 #define SERFRAME_MOTE2PC_SNIFFED_PACKET     ((uint8_t)'P')
+#define SERFRAME_MOTE2PC_STAT               ((uint8_t)'T')
+#define SERFRAME_MOTE2PC_PRINTF             ((uint8_t)'F')
+
 
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT            ((uint8_t)'R')
 #define SERFRAME_PC2MOTE_DATA               ((uint8_t)'D')
 #define SERFRAME_PC2MOTE_TRIGGERSERIALECHO  ((uint8_t)'S')
 #define SERFRAME_PC2MOTE_COMMAND_GD         ((uint8_t)'G')
+
+
+
+enum{
+   SERTYPE_DATA_GENERATION    = 0x01,
+   SERTYPE_DATA_RX            = 0x02,
+   SERTYPE_PKT_TX             = 0x03,
+   SERTYPE_PKT_RX             = 0x04,
+   SERTYPE_CELL_ADD           = 0x05,
+   SERTYPE_CELL_REMOVE        = 0x06,
+   SERTYPE_ACK_TX             = 0x07,
+   SERTYPE_ACK_RX             = 0x08,
+   SERTYPE_PKT_TIMEOUT        = 0x09,
+   SERTYPE_PKT_ERROR          = 0x0a,
+   SERTYPE_PKT_BUFFEROVERFLOW = 0x0b,
+   SERTYPE_DIOTX              = 0x0c,
+   SERTYPE_DAOTX              = 0x0d,
+   SERTYPE_NODESTATE          = 0x0e,
+};
+
 
 //=========================== typedef =========================================
 
@@ -71,6 +96,92 @@ enum {
    COMMAND_SET_ACK_STATUS        =  9,
    COMMAND_MAX                   = 10,
 };
+
+
+
+
+BEGIN_PACK
+typedef struct{
+   uint16_t    track_instance;
+   uint8_t     track_owner[8];
+   uint8_t     slotOffset;
+   uint8_t     type;
+   uint8_t     shared;
+   uint8_t     channelOffset;
+   uint8_t     neighbor[8];
+} evtCellAdd_t;
+END_PACK
+
+BEGIN_PACK
+typedef struct{
+   uint16_t    track_instance;
+   uint8_t     track_owner[8];
+   uint8_t     slotOffset;
+   uint8_t     type;
+   uint8_t     shared;
+   uint8_t     channelOffset;
+   uint8_t     neighbor[8];
+} evtCellRem_t;
+END_PACK
+
+BEGIN_PACK
+typedef struct{
+   uint16_t    track_instance;
+   uint8_t     track_owner[8];
+   uint32_t    seqnum;
+   uint8_t     l3Source[8];
+   uint8_t     l3Dest[8];
+} evtPktData_t;
+END_PACK
+
+BEGIN_PACK
+typedef struct{
+   uint16_t    track_instance;
+   uint8_t     track_owner[8];
+   uint8_t     length;
+   uint8_t     frame_type;
+   slotOffset_t slotOffset;
+   uint8_t     frequency;
+   uint8_t     l2Dest[8];
+   uint8_t     txPower;
+   uint8_t     numTxAttempts;
+   uint8_t     l4_protocol;
+   uint16_t    l4_sourcePortORicmpv6Type;
+   uint16_t    l4_destination_port;
+   uint8_t     l3Source[16];
+   uint8_t     l3Dest[16];
+} evtPktTx_t;
+END_PACK
+
+BEGIN_PACK
+typedef struct{
+   uint16_t    track_instance;
+   uint8_t     track_owner[8];
+   uint8_t     length;
+   uint8_t     frame_type;
+   slotOffset_t slotOffset;
+   uint8_t     frequency;
+   uint8_t     l2Src[8];
+   uint8_t     rssi;
+   uint8_t     lqi;
+   uint8_t     crc;
+} evtPktRx_t;
+END_PACK
+
+BEGIN_PACK
+typedef struct{
+   uint8_t     parent[8];     //parent (=next hop) when the DAO was transmitted
+}evtDaOTx_t;
+END_PACK
+
+BEGIN_PACK
+typedef struct{
+   uint32_t    numTicsOn;
+   uint32_t    numTicsTotal;
+   uint8_t     numDeSync;
+}evtState;
+END_PACK
+
 
 //=========================== module variables ================================
 
@@ -98,6 +209,8 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void    openserial_init(void);
+owerror_t openserial_printStat(uint8_t type, uint8_t calling_component, uint8_t *buffer, uint8_t length);
+owerror_t openserial_printf(uint8_t calling_component, char* buffer, uint8_t length);
 owerror_t openserial_printStatus(uint8_t statusElement, uint8_t* buffer, uint8_t length);
 owerror_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
@@ -121,6 +234,29 @@ void    openserial_echo(uint8_t* but, uint8_t bufLen);
 // interrupt handlers
 void    isr_openserial_rx(void);
 void    isr_openserial_tx(void);
+
+
+//statistics to openvisualizer
+void  openserial_statCelladd(scheduleEntry_t* slotContainer);
+void  openserial_statCellremove(scheduleEntry_t* slotContainer);
+void  openserial_statAckTx(void);
+void  openserial_statAckRx(void);
+void  openserial_statRx(OpenQueueEntry_t* msg);
+void  openserial_statTx(OpenQueueEntry_t* msg);
+void  openserial_statPktTimeout(OpenQueueEntry_t* msg);
+void  openserial_statPktBufferOverflow(OpenQueueEntry_t* msg);
+void  openserial_statDataGen(uint32_t seqnum, track_t *track, open_addr_t *src, open_addr_t *dest);
+void  openserial_statDataRx(uint32_t seqnum, track_t *track, open_addr_t *src, open_addr_t *dest);
+void  openserial_statDIOtx(void);
+void  openserial_statDAOtx(uint8_t *parent);
+
+// -- tools
+//append a uint8_t at the end of a string
+char *openserial_ncat_uint32_t(char *str, uint32_t val, uint8_t length);
+char *openserial_ncat_uint8_t_hex(char *str, uint8_t val, uint8_t length);
+
+
+
 
 /**
 \}

@@ -91,6 +91,77 @@ void openserial_init() {
                      isr_openserial_rx);
 }
 
+
+
+owerror_t openserial_printStat(uint8_t type, uint8_t calling_component, uint8_t *buffer, uint8_t length) {
+#ifdef OPENSERIAL_STAT
+   uint8_t  asn[5];
+   uint8_t  i;
+
+   INTERRUPT_DECLARATION();
+
+   // retrieve ASN
+   ieee154e_getAsn(asn);// byte01,byte23,byte4
+
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_STAT);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   outputHdlcWrite(calling_component);
+   outputHdlcWrite(asn[0]);
+   outputHdlcWrite(asn[1]);
+   outputHdlcWrite(asn[2]);
+   outputHdlcWrite(asn[3]);
+   outputHdlcWrite(asn[4]);
+   outputHdlcWrite(type);
+   for (i=0;i<length;i++){
+      outputHdlcWrite(buffer[i]);
+   }
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+
+#endif
+
+   return E_SUCCESS;
+}
+
+owerror_t openserial_printf(uint8_t calling_component, char* buffer, uint8_t length) {
+#ifdef OPENSERIAL_PRINTF
+   uint8_t  i;
+   uint8_t  asn[5];
+
+   INTERRUPT_DECLARATION();
+
+   ieee154e_getAsn(asn);// byte01,byte23,byte4
+
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_PRINTF);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   outputHdlcWrite(calling_component);
+   outputHdlcWrite(asn[0]);
+   outputHdlcWrite(asn[1]);
+   outputHdlcWrite(asn[2]);
+   outputHdlcWrite(asn[3]);
+   outputHdlcWrite(asn[4]);
+
+   for (i=0;i<length;i++){
+      outputHdlcWrite(buffer[i]);
+   }
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+
+#endif
+   return E_SUCCESS;
+}
+
+
+
+
 owerror_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint8_t length) {
    uint8_t i;
    INTERRUPT_DECLARATION();
@@ -324,6 +395,14 @@ void openserial_startOutput() {
    debugPrintCounter = openserial_vars.debugPrintCounter;
    ENABLE_INTERRUPTS();
    
+
+   char str[150];
+   sprintf(str, "SERIAL ");
+   openserial_ncat_uint32_t(str, (uint32_t)debugPrintCounter, 150);
+   openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+
+
+
    // print debug information
    switch (debugPrintCounter) {
       case STATUS_ISSYNC:
@@ -376,6 +455,11 @@ void openserial_startOutput() {
          ENABLE_INTERRUPTS();
    }
    
+
+   sprintf(str, "SERIAL FIN ");
+   openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+
+
    // flush buffer
    uart_clearTxInterrupts();
    uart_clearRxInterrupts();          // clear possible pending interrupts
@@ -802,3 +886,348 @@ void openserial_echo(uint8_t* buf, uint8_t bufLen){
     openserial_vars.inputBufFill = 0;
     ENABLE_INTERRUPTS();
 }
+
+
+
+//========= SERIAL FOR STATS ======
+
+
+
+
+
+//a cell was inserted in the schedule
+void openserial_statCelladd(scheduleEntry_t* slotContainer){
+
+   #ifdef OPENSERIAL_STAT
+
+   evtCellAdd_t evt;
+ //  evt.track_instance   = slotContainer->track.instance;
+ //  memcpy(evt.track_owner, slotContainer->track.owner.addr_64b, 8);
+   evt.slotOffset      = slotContainer->slotOffset;
+   evt.type            = slotContainer->type;
+   evt.shared          = slotContainer->shared;
+   evt.channelOffset   = slotContainer->channelOffset;
+   memcpy(evt.neighbor,      slotContainer->neighbor.addr_64b, 8);
+   openserial_printStat(SERTYPE_CELL_ADD, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evt));
+   #endif
+}
+
+//a cell was removed in the schedule
+void openserial_statCellremove(scheduleEntry_t* slotContainer){
+
+   #ifdef OPENSERIAL_STAT
+
+   evtCellRem_t evt;
+   evt.track_instance   = slotContainer->track.instance;
+   memcpy(evt.track_owner, slotContainer->track.owner.addr_64b, 8);
+   evt.slotOffset      = slotContainer->slotOffset;
+   evt.type            = slotContainer->type;
+   evt.shared          = slotContainer->shared;
+   evt.channelOffset   = slotContainer->channelOffset;
+   memcpy(evt.neighbor,      slotContainer->neighbor.addr_64b, 8);
+   openserial_printStat(SERTYPE_CELL_REMOVE, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evt));
+
+   #endif
+}
+
+
+//a ack was txed
+void openserial_statAckTx(){
+
+   #ifdef OPENSERIAL_STAT
+
+   openserial_printStat(SERTYPE_ACK_TX, COMPONENT_IEEE802154E, NULL, 0);
+
+   #endif
+}
+
+//a ack was received
+void openserial_statAckRx(){
+
+    #ifdef OPENSERIAL_STAT
+
+   openserial_printStat(SERTYPE_ACK_RX, COMPONENT_IEEE802154E, NULL, 0);
+
+   #endif
+}
+
+
+
+
+//-------- FOR PKTS ------
+
+//info for a transmitted packet
+void openserial_fillPktTx(evtPktTx_t *evt, OpenQueueEntry_t* msg){
+   evt->length           = msg->length;
+   evt->txPower          = msg->l1_txPower;
+//   evt->track_instance   = msg->l2_track.instance;
+   evt->numTxAttempts    = msg->l2_numTxAttempts;
+   evt->l4_protocol      = msg->l4_protocol;
+   evt->frame_type       = msg->l2_frameType;
+ //  evt->slotOffset       = schedule_getSlotOffset();   //TODO
+ //  evt->frequency        = calculateFrequency(schedule_getChannelOffset()); //TODO
+   evt->l4_sourcePortORicmpv6Type = msg->l4_sourcePortORicmpv6Type;
+   evt->l4_destination_port       = msg->l4_destination_port;
+
+//   memcpy(evt->track_owner, msg->l2_track.owner.addr_64b, 8);
+   memcpy(evt->l2Dest,      msg->l2_nextORpreviousHop.addr_64b, 8);
+   memcpy(evt->l3Source,    msg->l3_sourceAdd.addr_128b, 16);
+   memcpy(evt->l3Dest,      msg->l3_destinationAdd.addr_128b, 16);
+}
+
+//info for a received packet
+void openserial_fillPktRx(evtPktRx_t *evt, OpenQueueEntry_t* msg){
+   evt->length           = msg->length;
+   evt->rssi             = msg->l1_rssi;
+   evt->lqi              = msg->l1_lqi;
+   evt->crc              = msg->l1_crc;
+//   evt->track_instance   = msg->l2_track.instance;     //TODO
+   evt->frame_type       = msg->l2_frameType;
+//   evt->slotOffset       = schedule_getSlotOffset();
+//   evt->frequency        = calculateFrequency(schedule_getChannelOffset());
+//   memcpy(evt->track_owner, msg->l2_track.owner.addr_64b, 8);
+   memcpy(evt->l2Src, msg->l2_nextORpreviousHop.addr_64b, 8);
+
+}
+
+
+
+//push an event to track received frames
+void openserial_statRx(OpenQueueEntry_t* msg){
+
+   #ifdef OPENSERIAL_STAT
+      evtPktRx_t evt;
+      openserial_fillPktRx(&evt, msg);
+      openserial_printStat(SERTYPE_PKT_RX, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evtPktRx_t));
+  #endif
+}
+
+//push an event to track transmitted frames
+void openserial_statTx(OpenQueueEntry_t* msg){
+
+   #ifdef OPENSERIAL_STAT
+      evtPktTx_t evt;
+      openserial_fillPktTx(&evt, msg);
+      openserial_printStat(SERTYPE_PKT_TX, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evtPktTx_t));
+   #endif
+
+}
+
+
+//a ack has timeouted in openqueue
+void openserial_statPktTimeout(OpenQueueEntry_t* msg){
+
+   #ifdef OPENSERIAL_STAT
+      evtPktTx_t evt;
+      openserial_fillPktTx(&evt, msg);
+      openserial_printStat(SERTYPE_PKT_TIMEOUT, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evtPktTx_t));
+   #endif
+}
+
+
+
+//not enough space in openqueue for this data packet
+void openserial_statPktBufferOverflow(OpenQueueEntry_t* msg){
+
+   #ifdef OPENSERIAL_STAT
+      evtPktRx_t evt;
+      openserial_fillPktRx(&evt, msg);
+      openserial_printStat(SERTYPE_PKT_BUFFEROVERFLOW, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evtPktRx_t));
+   #endif
+}
+
+
+//push an event to track an erroneous frame
+void openserial_statPktError(OpenQueueEntry_t* msg){
+
+   #ifdef OPENSERIAL_STAT
+      evtPktTx_t evt;
+      openserial_fillPktTx(&evt, msg);
+      openserial_printStat(SERTYPE_PKT_ERROR, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evtPktTx_t));
+   #endif
+}
+
+
+//push an event to track generated frames
+void openserial_statDataGen(uint32_t seqnum, track_t *track, open_addr_t *src, open_addr_t *dest){
+//TODO
+   #ifdef OPENSERIAL_STAT
+      evtPktData_t          dataGen;
+/*
+      //wrong arguments
+        if (src->type != ADDR_64B){
+            openserial_printError(COMPONENT_OPENSERIAL, ERR_WRONG_ADDR_TYPE, src->type, 5);
+            return;
+         }
+        if (dest->type != ADDR_64B){
+            openserial_printError(COMPONENT_OPENSERIAL, ERR_WRONG_ADDR_TYPE, dest->type, 6);
+            return;
+         }
+
+      //info
+      dataGen.seqnum          = seqnum ;
+      dataGen.track_instance  = track->instance;
+      memcpy(dataGen.track_owner, track->owner.addr_64b, 8);
+      memcpy(dataGen.l3Source, src->addr_64b, 8);
+      memcpy(dataGen.l3Dest, dest->addr_64b, 8);
+*/
+
+      openserial_printStat(SERTYPE_DATA_GENERATION, COMPONENT_CEXAMPLE, (uint8_t*)&dataGen, sizeof(dataGen));
+   #endif
+
+}
+
+
+//push an event to track generated frames
+void openserial_statDataRx(uint32_t seqnum, track_t *track, open_addr_t *src, open_addr_t *dest){
+
+   #ifdef OPENSERIAL_STAT
+      evtPktData_t          dataRx;
+
+      //wrong arguments
+      if (src->type != ADDR_64B){
+          openserial_printError(COMPONENT_OPENSERIAL, ERR_WRONG_ADDR_TYPE, src->type, 7);
+          return;
+       }
+      if (dest->type != ADDR_64B){
+          openserial_printError(COMPONENT_OPENSERIAL, ERR_WRONG_ADDR_TYPE, dest->type, 8);
+          return;
+       }
+
+      //info
+      dataRx.seqnum          = seqnum ;
+      dataRx.track_instance  = track->instance;
+      memcpy(dataRx.track_owner, track->owner.addr_64b, 8);
+      memcpy(dataRx.l3Source, src->addr_64b, 8);
+      memcpy(dataRx.l3Dest, dest->addr_64b, 8);
+
+      openserial_printStat(SERTYPE_DATA_RX, COMPONENT_CEXAMPLE, (uint8_t*)&dataRx, sizeof(dataRx));
+   #endif
+
+}
+
+
+//push an event to track DIO transmissions
+void openserial_statDIOtx(){
+
+   #ifdef OPENSERIAL_STAT
+       openserial_printStat(SERTYPE_DIOTX, COMPONENT_ICMPv6RPL, NULL, 0);
+   #endif
+
+}
+
+//push an event to track DAO transmissions
+void openserial_statDAOtx(uint8_t *parent){
+
+   #ifdef OPENSERIAL_STAT
+      evtDaOTx_t          evt;
+      //info
+      memcpy(evt.parent, parent, 8);
+
+      openserial_printStat(SERTYPE_DAOTX, COMPONENT_ICMPv6RPL, (uint8_t*)&evt, sizeof(evt));
+   #endif
+
+}
+
+
+
+/***********************************************
+ *    FUNCTION TOOLS
+ **********************************************/
+
+
+
+//append a uint8_t at the end of a string
+char *openserial_ncat_uint8_t(char *str, uint8_t val, uint8_t length){
+   uint8_t l = strlen(str);
+
+   if (l + 3 > length)
+      return(str);
+
+   uint8_t a, b, c;
+
+   a = val / 100;
+   b = (val - a * 100)/10;
+   c = val - a * 100 - b * 10;
+
+   str[l] = '0' + a;
+   str[l+1] = '0' + b;
+   str[l+2] = '0' + c;
+   str[l+3] = '\0';
+   return(str);
+}
+
+
+//append a uint32_t at the end of a string (without the non significant zeros)
+char *openserial_ncat_uint32_t(char *str, uint32_t val, uint8_t length){
+   uint8_t l = strlen(str);
+
+   if (l + 10 > length) //at most 10 digits
+      return(str);
+
+   uint8_t  digit, shift, i;
+   uint32_t power;
+   bool     nonzero = FALSE;
+
+
+   power = 1000000000;
+   shift = 0;           // to avoid non significant zeros
+   for(i=0; i<10; i++){
+      digit = val / power;
+      if (digit != 0 || i == 9 || nonzero){
+         nonzero = TRUE;
+         str[l + shift] = '0' + digit;
+         shift++;
+      }
+      val = val - power * digit;
+      power = power / 10;
+   }
+   str[l+shift] = '\0';
+
+
+   return(str);
+}
+
+
+
+
+//append a uint32_t at the end of a string (without the non significant zeros)
+char *openserial_ncat_uint8_t_hex(char *str, uint8_t val, uint8_t length){
+   uint8_t  l = strlen(str);
+   uint8_t  c, shift;
+
+   if (l + 2 > length) //at most 2 digits
+      return(str);
+
+
+   shift = 0;
+
+   //first digit
+   c = (val & 0xf0)  >> 4;
+
+
+   if (c < 10)
+      str[l+shift] = '0' + c;
+   else if (c < 16)
+      str[l+shift] = (uint8_t)'a' + c  - 10;
+   else
+      str[l+shift] = 'z';
+   shift++;
+
+
+   //second digit
+   c = val & 0x0f;
+   if (c < 10)
+      str[l+shift] = '0' + c;
+   else if (c < 16)
+      str[l+shift] = 'a' + c  - 9;
+   else
+      str[l+shift] = 'z';
+   shift++;
+
+
+   str[l+shift] = '\0';
+
+   return(str);
+}
+
