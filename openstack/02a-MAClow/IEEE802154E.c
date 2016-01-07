@@ -409,8 +409,22 @@ status information about several modules in the OpenWSN stack.
 \returns TRUE if this function printed something, FALSE otherwise.
 */
 bool debugPrint_macStats() {
+   ieee154e_stats.isSync = ieee154e_vars.isSync;
+
    // send current stats over serial
    openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
+
+   //TODO: state energy, etc.
+   //periodical stats about the node  to push in the logs
+  /* if (0 && (period_nodestate++ % PERIOD_NODESTATE_UPDATE) == 0){
+        evtState evt;
+        evt.numTicsOn     = ieee154e_stats.numTicsOn;
+        evt.numTicsTotal  = ieee154e_stats.numTicsTotal;
+        evt.numDeSync     = ieee154e_stats.numDeSync;
+        openserial_printStat(SERTYPE_NODESTATE, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evt));
+      }
+      */
+
    return TRUE;
 }
 

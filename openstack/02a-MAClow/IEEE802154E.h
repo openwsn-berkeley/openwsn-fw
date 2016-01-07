@@ -256,6 +256,7 @@ typedef struct {
    int16_t                   minCorrection;           // minimum time correction
    int16_t                   maxCorrection;           // maximum time correction
    uint8_t                   numDeSync;               // number of times a desync happened
+   uint8_t                   isSync;                  // is this node synchronized?
    uint32_t                  numTicsOn;               // mac dutyCycle
    uint32_t                  numTicsTotal;            // total tics for which the dutycycle is computed
 } ieee154e_stats_t;
