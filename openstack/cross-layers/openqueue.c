@@ -138,6 +138,17 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
 }
 
 /**
+\brief Free this packet entry (called by components for which a packet has been enqueued for a too long time (e.g.))
+
+\param the entry to remove in the queue
+*/
+
+void openqueue_removeEntry(OpenQueueEntry_t* entry){
+   openqueue_reset_entry(entry);
+}
+
+
+/**
 \brief Free all the packet buffers owned by a specific module.
 
 \param owner The identifier of the component, taken in COMPONENT_*.

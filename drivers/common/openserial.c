@@ -395,14 +395,6 @@ void openserial_startOutput() {
    debugPrintCounter = openserial_vars.debugPrintCounter;
    ENABLE_INTERRUPTS();
    
-
-   char str[150];
-   sprintf(str, "SERIAL ");
-   openserial_ncat_uint32_t(str, (uint32_t)debugPrintCounter, 150);
-   openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
-
-
-
    // print debug information
    switch (debugPrintCounter) {
       case STATUS_ISSYNC:
@@ -455,10 +447,6 @@ void openserial_startOutput() {
          ENABLE_INTERRUPTS();
    }
    
-
-   sprintf(str, "SERIAL FIN ");
-   openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
-
 
    // flush buffer
    uart_clearTxInterrupts();
@@ -918,8 +906,8 @@ void openserial_statCellremove(scheduleEntry_t* slotContainer){
    #ifdef OPENSERIAL_STAT
 
    evtCellRem_t evt;
-   evt.track_instance   = slotContainer->track.instance;
-   memcpy(evt.track_owner, slotContainer->track.owner.addr_64b, 8);
+ //TODO  evt.track_instance   = slotContainer->track.instance;
+ //  memcpy(evt.track_owner, slotContainer->track.owner.addr_64b, 8);
    evt.slotOffset      = slotContainer->slotOffset;
    evt.type            = slotContainer->type;
    evt.shared          = slotContainer->shared;

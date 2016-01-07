@@ -25,6 +25,13 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_MINOR     9
 #define OPENWSN_VERSION_PATCH     0
 
+
+//DEBUG / STAT
+#define OPENSERIAL_PRINTF
+#define OPENSERIAL_STAT
+
+
+
 // golden image version and type
 #define GOLDEN_IMAGE_VERSION      1
 // define golden image type: only one can be used

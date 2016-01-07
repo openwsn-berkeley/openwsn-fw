@@ -14,7 +14,7 @@
 
 #define TIMER_DIO_TIMEOUT         10000
 #define TIMER_DAO_TIMEOUT         5000
-//60000
+//#define TIMER_DAO_TIMEOUT         60000
 
 // Non-Storing Mode of Operation (1)
 #define MOP_DIO_A                 0<<5
@@ -139,7 +139,9 @@ END_PACK
 
 typedef struct {
    // admin
-   bool                      busySending;             ///< currently sending DIO/DAO.
+   //bool                      busySending;             ///< currently sending DIO/DAO. //obsolete, manages now separately DIO and DAO!
+   OpenQueueEntry_t*         lastDIO_tx;              // last DIO we transmitted
+   OpenQueueEntry_t*         lastDAO_tx;              // last DAO we transmitted
    uint8_t                   fDodagidWritten;         ///< is DODAGID already written to DIO/DAO?
    // DIO-related
    icmpv6rpl_dio_ht          dio;                     ///< pre-populated DIO packet.
