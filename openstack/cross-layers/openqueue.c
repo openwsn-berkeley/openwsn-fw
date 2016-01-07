@@ -556,10 +556,10 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_retriesLeft               = 0;
    entry->l2_IEListPresent             = 0;
    entry->l2_payloadIEpresent          = 0;
-   //bzero(&(entry->l2_track), sizeof(track_t));
-   //entry->l2_track.owner.type          = ADDR_NONE;
-   //entry->l2_track.instance            = TRACK_BESTEFFORT;
- //  bzero(entry->timeout.byte, sizeof(timeout_t));
+//TODO   bzero(&(entry->l2_track), sizeof(track_t));
+//   entry->l2_track.owner.type          = ADDR_NONE;
+ //  entry->l2_track.instance            = TRACK_BESTEFFORT;
+   bzero(entry->timeout.byte, sizeof(timeout_t));
    //l2-security
    entry->l2_securityLevel             = 0;
 }
