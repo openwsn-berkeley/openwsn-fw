@@ -177,6 +177,8 @@ enum {
    COMPONENT_UINJECT                   = 0x24,
    COMPONENT_RRT                       = 0x25,
    COMPONENT_SECURITY                  = 0x26,
+   //Fabrice
+   COMPONENT_OTF                       = 0x27
 };
 
 /**
@@ -252,6 +254,32 @@ enum {
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
    ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
    ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
+   //NEW FABRICE
+   ERR_OTF_INSUFFICIENT                = 0x3c, // otf does not have enough cells (trackInstance {0}, nbCells to add {1})
+   ERR_UNKNOWN_NEIGHBOR                = 0x3d, // Unknown neighbor {0}{1} (4 last bytes)
+   ERR_SIXTOP_WRONG_PARAM              = 0x3e, // sixtop expects another parameter in its request (bw {0}, nbcells {1})
+   ERR_SIXTOP_WRONG_STATE              = 0x3f, // sixtop current state {0}, location {1}
+   ERR_SIXTOP_TIMEOUT                  = 0x40, // a timeout has been fired. We have to flush 6top packets (we have the state {0})
+   ERR_OPENQUEUE_TIMEOUT               = 0x41, // a packet has been removed from the queue (owner {0], creator {1})
+   ERR_BAD_TRACKID                     = 0x42, // the best effort track cannot have an owner (here type {0} and addr {1})
+   ERR_OPENQUEUE_OVERSIZE              = 0x43, // not enough space in openqueue for non prioritar packets
+   ERR_IEEE154_BADCRC                  = 0x44, // received frame with invalid CRC
+   ERR_IEEE154_INVALIDHEADER           = 0x45, // invalid IEEE 802.15.4e headers
+   ERR_OPENSERIAL_BUFFER_OVERFLOW      = 0x46, // buffer overflow for output in openserial (indexWrite {0}, location {1})
+   ERR_OPENQUEUE_BUFFER_OVERFLOW       = 0x47, // buffer overflow: too many packets (space left {0}, reserved for management {1})
+   ERR_SIXTOP_TOOMANY_CELLS            = 0x48, // too many cells to reserve in the sixtop request (asked {0}, max {1})
+   ERR_OPENQUEUE_DESYNC                = 0x49, // a packet cannot be allocated for component {0} when the node is not synchronized
+   ERR_INVALID_COMPONENT               = 0x4a, // The component {0} cannot trigger this command (location {1})
+   ERR_SIXTOP_NOCELL                   = 0x4b, // Sixtop cannot remove any cell to the parent {0}{1} (none existing)
+   ERR_GENERIC                         = 0x4c, // generic error {0} {1}
+   ERR_UNKNOWN                         = 0x5d, // unknown error, location {0}, arg {1}
+};
+
+
+enum{
+   TRACK_BESTEFFORT                   = 0,   // for best effort traffic
+   TRACK_IMCPv6RPL                    = 1,   // for RPL unicast traffic (DAO)
+   TRACK_CEXAMPLE                     = 2    // for Cexample (application traffic)
 };
 
 //=========================== typedef =========================================
