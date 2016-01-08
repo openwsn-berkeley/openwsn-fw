@@ -287,11 +287,11 @@ void forwarding_receive(
       
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
-      
+
       //timeout when a packet is forwarded
-      #ifdef TIMEOUT_FORWARDING
-            openqueue_set_timeout(msg, QUEUE_TIMEOUT_DEFAULT);
-      #endif
+#ifdef TIMEOUT_FORWARDING
+      openqueue_set_timeout(msg, QUEUE_TIMEOUT_DEFAULT);
+#endif
 
 
       if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
@@ -372,7 +372,7 @@ void forwarding_receive(
 */
 void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
    uint8_t         i;
-   open_addr_t     temp_prefix64btoWrite;
+   //open_addr_t     temp_prefix64btoWrite;
    
    if (packetfunctions_isBroadcastMulticast(destination128b)) {
       // IP destination is broadcast, send to 0xffffffffffffffff
@@ -380,10 +380,13 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
       for (i=0;i<8;i++) {
          addressToWrite64b->addr_64b[i] = 0xff;
       }
-   } else if (neighbors_isStableNeighbor(destination128b)) {
-      // IP destination is 1-hop neighbor, send directly
-      packetfunctions_ip128bToMac64b(destination128b,&temp_prefix64btoWrite,addressToWrite64b);
-   } else {
+   }
+   //TODO Fabrice: we don't have to bypass a next hop selected by the other laeyers (RPL)
+   //else if (neighbors_isStableNeighbor(destination128b)) {
+   //   // IP destination is 1-hop neighbor, send directly
+   //   packetfunctions_ip128bToMac64b(destination128b,&temp_prefix64btoWrite,addressToWrite64b);
+   //}
+   else {
       // destination is remote, send to preferred parent
       neighbors_getPreferredParentEui64(addressToWrite64b);
    }
@@ -406,19 +409,19 @@ owerror_t forwarding_send_internal_RoutingTable(
       rpl_option_ht*         rpl_option,
       uint32_t*              flow_label,
       uint8_t                fw_SendOrfw_Rcv
-   ) {
-   
+) {
+
    //limits the number of packets to enqueue coming from outside (reserve space for 6top, and management)
- #ifdef FORWARDING_LIMIT_QUEUE
-    if (openqueue_overflow())
-       openserial_printError(
-          COMPONENT_FORWARDING,
-          ERR_OPENQUEUE_OVERSIZE,
-          (errorparameter_t)0,
-          (errorparameter_t)0
-       );
-       return E_FAIL;
- #endif
+#ifdef FORWARDING_LIMIT_QUEUE
+   if (openqueue_overflow())
+      openserial_printError(
+            COMPONENT_FORWARDING,
+            ERR_OPENQUEUE_OVERSIZE,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+      );
+   return E_FAIL;
+#endif
 
 
    // retrieve the next hop from the routing table
