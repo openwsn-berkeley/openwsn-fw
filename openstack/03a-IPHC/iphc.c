@@ -79,14 +79,19 @@ owerror_t iphc_sendFromForwarding(
    // by default, the "next header" field is carried inline
    nh=IPHC_NH_INLINE;
    
+
    // error checking
-   if (idmanager_getIsDAGroot()==TRUE &&
+   //TODO-Fabrice: no, the CoAP app may be implemented on the DAGroot
+
+/*   if (idmanager_getIsDAGroot()==TRUE &&
       packetfunctions_isAllRoutersMulticast(&(msg->l3_destinationAdd))==FALSE) {
       openserial_printCritical(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       return E_FAIL;
    }
+  */
+
    
    //discard the packet.. hop limit reached.
    if (ipv6_outer_header->hop_limit==0) {
@@ -103,8 +108,10 @@ owerror_t iphc_sendFromForwarding(
    packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);
    //XV -poipoi we want to check if the source address prefix is the same as destination prefix
    if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {   
-   //dest and src on same prefix
-      if (neighbors_isStableNeighbor(&(msg->l3_destinationAdd))) {
+
+      //TODO Fabrice: thisi is not beause a neighbor is stable that we must bypass the next hop configured by the other layers!
+      //dest and src on same prefix
+      if (0 || neighbors_isStableNeighbor(&(msg->l3_destinationAdd))) {
          //if direct neighbors, MAC nextHop and IP destination indicate same node
          //the source can be ME or another who I am relaying from. If its me then SAM is elided,
          //if not SAM is 64b address 
@@ -226,46 +233,55 @@ void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 }
 
 void iphc_receive(OpenQueueEntry_t* msg) {
+
+
    ipv6_header_iht      ipv6_outer_header;
    ipv6_header_iht      ipv6_inner_header;
    ipv6_hopbyhop_iht    ipv6_hop_header;
    rpl_option_ht        rpl_option;
-   
+
    msg->owner      = COMPONENT_IPHC;
-   
+
    // then regular header
    iphc_retrieveIPv6Header(msg,&ipv6_outer_header,&ipv6_inner_header);
-   
-   if (idmanager_getIsDAGroot()==FALSE ||
-      packetfunctions_isBroadcastMulticast(&(ipv6_outer_header.dest))) {
-      packetfunctions_tossHeader(msg,ipv6_outer_header.header_length);
-      
-      if (ipv6_outer_header.next_header==IANA_IPv6HOPOPT) {
-         // retrieve hop-by-hop header (includes RPL option)
-         iphc_retrieveIPv6HopByHopHeader(
+
+
+   //DAGROOT -> openbridge for debug (to openvizualizer)
+   if (idmanager_getIsDAGroot()){
+      openbridge_receive(msg);
+
+#ifndef IPHC_FORWARD_UPPER
+      openqueue_freePacketBuffer(msg);
+      return;
+#endif
+   }
+
+   //ipv6 headers
+   packetfunctions_tossHeader(msg,ipv6_outer_header.header_length);
+
+   if (ipv6_outer_header.next_header==IANA_IPv6HOPOPT) {
+      // retrieve hop-by-hop header (includes RPL option)
+      iphc_retrieveIPv6HopByHopHeader(
             msg,
             &ipv6_hop_header,
             &rpl_option
-         );
-         
-         // toss the headers
-         packetfunctions_tossHeader(
+      );
+
+      // toss the headers
+      packetfunctions_tossHeader(
             msg,
             IPv6HOP_HDR_LEN+ipv6_hop_header.HdrExtLen
-         );
-      }
-      
-      // send up the stack
-      forwarding_receive(
+      );
+   }
+
+   // send up the stack
+   forwarding_receive(
          msg,
          &ipv6_outer_header,
          &ipv6_inner_header,
          &ipv6_hop_header,
          &rpl_option
-      );
-   } else {
-      openbridge_receive(msg);                   //out to the OpenVisualizer
-   }
+   );
 }
 
 //=========================== private =========================================

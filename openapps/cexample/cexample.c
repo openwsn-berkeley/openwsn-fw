@@ -106,11 +106,6 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
    packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd), &prefix, &src_64b);
    openserial_statDataRx(seqnum, &(msg->l2_track), &src_64b, &dest_64b);
 
-   char str[150];
-   sprintf(str, "CEXAMPLE received");
-   openserial_printf(COMPONENT_CEXAMPLE, str, strlen(str));
-
-
    //nothing to respond
    return E_SUCCESS;
 }
@@ -169,7 +164,6 @@ void cexample_task_cb() {
          (errorparameter_t)0
       );
 
-      openqueue_freePacketBuffer(pkt);
       return;
    }
    // take ownership over that packet

@@ -267,12 +267,24 @@ void forwarding_receive(
             // free packet
             openqueue_freePacketBuffer(msg);
       }
+   }
+   //a DAGroot does not forward packets: this is already done via openbridge
+   else if (idmanager_getIsDAGroot()){
+      openqueue_freePacketBuffer(msg);
+      return;
+
    } else {
       // this packet is not for me: relay
       
       // change the creator of the packet
       msg->creator = COMPONENT_FORWARDING;
       
+      //timeout when a packet is forwarded
+      #ifdef TIMEOUT_FORWARDING
+            openqueue_set_timeout(msg, QUEUE_TIMEOUT_DEFAULT);
+      #endif
+
+
       if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
          // no source routing header present
          //check if flow label rpl header
@@ -387,6 +399,19 @@ owerror_t forwarding_send_internal_RoutingTable(
       uint8_t                fw_SendOrfw_Rcv
    ) {
    
+   //limits the number of packets to enqueue coming from outside (reserve space for 6top, and management)
+ #ifdef FORWARDING_LIMIT_QUEUE
+    if (openqueue_overflow())
+       openserial_printError(
+          COMPONENT_FORWARDING,
+          ERR_OPENQUEUE_OVERSIZE,
+          (errorparameter_t)0,
+          (errorparameter_t)0
+       );
+       return E_FAIL;
+ #endif
+
+
    // retrieve the next hop from the routing table
    forwarding_getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
    if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {

@@ -81,20 +81,32 @@ void openbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 \brief Receive a frame at the openbridge, which sends it out over serial.
 */
 void openbridge_receive(OpenQueueEntry_t* msg) {
-   
+   //local copy of the original payload
+   uint8_t* payload;
+   uint8_t  packet[130];
+   uint8_t  length;
+
+   //save the current packet to recover the original one after having pushed it to openserial
+   payload  = msg->payload;
+   length   = msg->length;
+   memcpy(packet, msg->packet, sizeof(msg->packet));
+
    // prepend previous hop
    packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
    memcpy(msg->payload,msg->l2_nextORpreviousHop.addr_64b,LENGTH_ADDR64b);
-   
+
    // prepend next hop (me)
    packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
    memcpy(msg->payload,idmanager_getMyID(ADDR_64B)->addr_64b,LENGTH_ADDR64b);
-   
+
    // send packet over serial (will be memcopied into serial buffer)
    openserial_printData((uint8_t*)(msg->payload),msg->length);
-   
-   // free packet
-   openqueue_freePacketBuffer(msg);
+
+   //recover the original payload after having pushed the data to openbridge
+   msg->payload   = payload;
+   msg->length    = length;
+   memcpy(msg->packet, packet, sizeof(msg->packet));
+
 }
 
 //=========================== private =========================================

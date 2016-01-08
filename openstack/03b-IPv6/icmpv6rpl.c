@@ -16,7 +16,7 @@
 
 
 #define _DEBUG_DAO_
-#define _DEBUG_DIO_
+//#define _DEBUG_DIO_
 
 //=========================== variables =======================================
 
@@ -248,13 +248,13 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
    switch (icmpv6code) {
       
       case IANA_ICMPv6_RPL_DIO:
+         // update neighbor table
+         neighbors_indicateRxDIO(msg);
+
          if (idmanager_getIsDAGroot()==TRUE) {
             // stop here if I'm in the DAG root
             break; // break, don't return
          }
-         
-         // update neighbor table
-         neighbors_indicateRxDIO(msg);
          
          // write DODAGID in DIO and DAO
          icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
@@ -271,10 +271,24 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
          break;
       
       case IANA_ICMPv6_RPL_DAO:
+
+#ifdef _DEBUG_DAO_
+         ;
+         char str[150];
+         sprintf(str, "DAO received from the source ");
+         openserial_ncat_uint8_t_hex(str, (uint8_t)msg->l3_sourceAdd.addr_128b[14], 150);
+         strncat(str, "-", 150);
+         openserial_ncat_uint8_t_hex(str, (uint8_t)msg->l3_sourceAdd.addr_128b[15], 150);
+         openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+#endif
+
          // this should never happen
-         openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
+         if (!idmanager_getIsDAGroot())
+            openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
                                (errorparameter_t)0,
                                (errorparameter_t)0);
+
+
          break;
       
       default:
