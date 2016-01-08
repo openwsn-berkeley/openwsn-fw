@@ -88,6 +88,11 @@ void      task_sixtopNotifReceive(void);
 // debugging
 bool      debugPrint_myDAGrank(void);
 bool      debugPrint_kaPeriod(void);
+//track helpers for the best effort track
+bool      sixtop_is_trackequal(track_t track1, track_t track2);
+bool      sixtop_is_trackbesteffort(track_t track);
+track_t   sixtop_get_trackbesteffort(void);
+
 
 /**
 \}

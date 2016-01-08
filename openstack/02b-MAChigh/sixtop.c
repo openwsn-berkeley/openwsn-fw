@@ -1468,3 +1468,43 @@ bool sixtop_areAvailableCellsToBeScheduled(
    
    return available;
 }
+
+
+
+//======= helper functions
+
+
+//are these track equal?
+bool sixtop_is_trackequal(track_t track1, track_t track2){
+   return (packetfunctions_sameAddress(&(track1.owner), &(track2.owner))
+         && track1.instance == track2.instance);
+}
+
+//is this the best effort track?
+bool sixtop_is_trackbesteffort(track_t track){
+
+   //error
+     if (track.instance == TRACK_BESTEFFORT && track.owner.type != ADDR_NONE){
+        openserial_printError(
+                     COMPONENT_OTF,
+                     ERR_BAD_TRACKID,
+                     (errorparameter_t)(uint16_t)(track.owner.type),
+                     (errorparameter_t)track.owner.addr_64b[7]
+                  );
+     }
+
+
+   return (track.instance == TRACK_BESTEFFORT);
+}
+
+
+//return the best effort track
+track_t sixtop_get_trackbesteffort(void){
+   track_t track;
+
+   bzero(&(track.owner), sizeof(track.owner));
+   track.instance  = TRACK_BESTEFFORT;
+
+   return(track);
+}
+
