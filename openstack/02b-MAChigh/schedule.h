@@ -87,6 +87,7 @@ typedef struct {
    uint8_t         numRx;
    uint8_t         numTx;
    uint8_t         numTxACK;
+   track_t         track;
    asn_t           lastUsedAsn;
    void*           next;
 } scheduleEntry_t;
@@ -102,6 +103,8 @@ typedef struct {
    uint8_t         numRx;
    uint8_t         numTx;
    uint8_t         numTxACK;
+   uint16_t        trackInstance;
+   open_addr_t     trackOwner;
    asn_t           lastUsedAsn;
 } debugScheduleEntry_t;
 END_PACK
@@ -173,6 +176,8 @@ uint8_t            schedule_getFrameHandle(void);
 uint8_t            schedule_getFrameNumber(void);
 cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
+uint8_t            schedule_getNbCellsWithTrack(track_t track, open_addr_t *nextHop);
+void               schedule_getTrack(track_t *track);
 channelOffset_t    schedule_getChannelOffset(void);
 bool               schedule_getOkToSend(void);
 void               schedule_resetBackoff(void);

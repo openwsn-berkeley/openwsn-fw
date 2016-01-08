@@ -120,13 +120,22 @@ bool debugPrint_schedule() {
    temp.numRx                          = \
       schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
    temp.numTx                          = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
    temp.numTxACK                       = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+   temp.trackInstance                  = \
+         (uint16_t)schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].track.instance;
    memcpy(
-      &temp.lastUsedAsn,
-      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
-      sizeof(asn_t)
+         &temp.trackOwner,
+         &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].track.owner,
+         sizeof(open_addr_t)
+   );
+
+
+   memcpy(
+         &temp.lastUsedAsn,
+         &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
+         sizeof(asn_t)
    );
    
    // send status data over serial port
@@ -605,6 +614,52 @@ void schedule_getNeighbor(open_addr_t* addrToWrite) {
    
    ENABLE_INTERRUPTS();
 }
+
+
+/**
+\brief Get the number of cells with a particular track in the schedule
+
+\returns The number of cells with this track
+*/
+uint8_t schedule_getNbCellsWithTrack(track_t track, open_addr_t *nextHop){
+   uint8_t  returnVal = 0;
+   uint8_t  i;
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+   // count the nb of usable cells (in tx) for this track
+   // linked with this neighbor (or anycast)
+   for (i=0;i<MAXACTIVESLOTS;i++) {
+      if (sixtop_is_trackequal(schedule_vars.scheduleBuf[i].track, track) &&
+            (schedule_vars.scheduleBuf[i].type == CELLTYPE_TX
+                  ||
+            schedule_vars.scheduleBuf[i].type == CELLTYPE_TXRX) &&
+            (packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor), nextHop)
+                  ||
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_ANYCAST)
+            )
+         returnVal++;
+   }
+
+   ENABLE_INTERRUPTS();
+
+   return returnVal;
+}
+
+/**
+\brief Get the track of the current schedule entry.
+
+\returns The channel offset of the current schedule entry.
+*/
+void schedule_getTrack(track_t *track) {
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   memcpy(track, &(schedule_vars.currentScheduleEntry->track), sizeof(track_t));
+   ENABLE_INTERRUPTS();
+}
+
+
 
 /**
 \brief Get the channel offset of the current schedule entry.
