@@ -161,6 +161,13 @@ uint8_t icmpv6rpl_getRPLIntanceID(){
    return icmpv6rpl_vars.dao.rplinstanceId;
 }
 
+
+uint8_t  *icmpv6rpl_getRPLDODAGID(void){
+   return &(icmpv6rpl_vars.dio.DODAGID[0]);
+}
+
+
+
 /**
 \brief Called when DIO/DAO was sent.
 

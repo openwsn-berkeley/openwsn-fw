@@ -358,13 +358,15 @@ typedef struct {
    uint8_t*      l2_scheduleIE_cellObjects;      // pointer to the start of cell Objects in scheduleIE
    uint8_t       l2_scheduleIE_numOfCells;       // number of cells were going to be scheduled or removed.
    uint8_t       l2_scheduleIE_frameID;          // frameID in scheduleIE
+   track_t       l2_bandwidthIE_track;           // track in bandwidthIE
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_IEListPresent;               //did have IE field?
    bool          l2_payloadIEpresent;            // did I have payload IE field
    bool          l2_joinPriorityPresent;
    int16_t       l2_timeCorrection;              // record the timeCorrection and print out at endOfslot
-   //layer-2 security
+   track_t       l2_track;                     //the track associated with this packet
+    //layer-2 security
    uint8_t       l2_securityLevel;               //the security level specified for the current frame
    uint8_t       l2_keyIdMode;                   //the key Identifier mode specified for the current frame
    uint8_t       l2_keyIndex;                    //the key Index specified for the current frame

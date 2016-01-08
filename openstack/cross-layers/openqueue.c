@@ -62,8 +62,6 @@ bool debugPrint_queue() {
          openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[2] +
          openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[3] *256;
 
- /* TODO
-  *
 
   output.trackInstance                  = \
          (uint16_t)openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.instance;
@@ -72,7 +70,6 @@ bool debugPrint_queue() {
          &(openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.owner),
          sizeof(open_addr_t)
    );
-*/
 
    openserial_printStatus(
          STATUS_QUEUE,
@@ -392,8 +389,7 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
 \param id of the track.
 \returns the number of packets with track
 */
-/*TODO
- *
+
  uint8_t openqueue_count_track(track_t track) {
    uint8_t i;
    uint8_t resVal = 0;
@@ -401,14 +397,15 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
    for (i=0;i<QUEUELENGTH;i++){
       if(
             sixtop_is_trackequal(openqueue_vars.queue[i].l2_track, track)
-            && openqueue_vars.queue[i].creator != COMPONENT_NULL
+            &&
+            openqueue_vars.queue[i].creator != COMPONENT_NULL
             )
          resVal++;
    }
    return(resVal);
 }
 
-*/
+
 //======= called by RES
 
 OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
@@ -556,9 +553,8 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_retriesLeft               = 0;
    entry->l2_IEListPresent             = 0;
    entry->l2_payloadIEpresent          = 0;
-//TODO   bzero(&(entry->l2_track), sizeof(track_t));
-//   entry->l2_track.owner.type          = ADDR_NONE;
- //  entry->l2_track.instance            = TRACK_BESTEFFORT;
+   entry->l2_track.owner.type          = ADDR_NONE;
+   entry->l2_track.instance            = TRACK_BESTEFFORT;
    bzero(entry->timeout.byte, sizeof(timeout_t));
    //l2-security
    entry->l2_securityLevel             = 0;
