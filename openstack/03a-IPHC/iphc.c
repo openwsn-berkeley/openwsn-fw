@@ -102,7 +102,7 @@ owerror_t iphc_sendFromForwarding(
    //xv poipoi -- get the src prefix as well
    packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);
    //XV -poipoi we want to check if the source address prefix is the same as destination prefix
-   if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {   
+   if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {
       sam = IPHC_SAM_64B;    // always present in ipinip 6loRH
       p_src = &temp_src_mac64b;
       dam = IPHC_DAM_ELIDED;
@@ -151,35 +151,55 @@ owerror_t iphc_sendFromForwarding(
    }
    //then IPinIP 6LoRH
    
-   //IPinIP 6LoRH will be added at here.For me I use the 8bytes address as encapsulate address, 
-   //the destination address is elided, so length = 1+8=9, type = 6, hoplim is default
+   //IPinIP 6LoRH will be added at here.
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
 
    if (packetfunctions_sameAddress(&(ipv6_inner_header->src),(open_addr_t*)dagroot)==FALSE){
        if (sam == IPHC_SAM_64B){
-          *((uint8_t*)(msg->payload)) = CRITICAL_6LORH | 9;
-          packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-          *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
+          // encapsulate address
+          packetfunctions_writeAddress(msg, &temp_src_mac64b,OW_BIG_ENDIAN);
+          // hoplim
           packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
           *((uint8_t*)(msg->payload)) = ipv6_outer_header->hop_limit;
-          packetfunctions_writeAddress(msg, (idmanager_getMyID(ADDR_64B)),OW_BIG_ENDIAN);
+          // type
+          packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+          *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
+          
+          packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+          *((uint8_t*)(msg->payload)) = CRITICAL_6LORH | 9;
+
+
+          
        } else {
            if (sam == IPHC_SAM_128B){
-               *((uint8_t*)(msg->payload)) = CRITICAL_6LORH | 17;
-               packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-               *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
+               // encapsulate address
+               packetfunctions_writeAddress(msg, &(ipv6_inner_header->src),OW_BIG_ENDIAN);
+               // hoplim
                packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
                *((uint8_t*)(msg->payload)) = ipv6_outer_header->hop_limit;
-               packetfunctions_writeAddress(msg, &(ipv6_inner_header->src),OW_BIG_ENDIAN);
+               // type
+               packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+               *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
+               // 
+               packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+               *((uint8_t*)(msg->payload)) = CRITICAL_6LORH | 17;
            }
        }
    } else {
-       *((uint8_t*)(msg->payload)) = CRITICAL_6LORH | 1;
-       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-       *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
+       // hop limit
        packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
        *((uint8_t*)(msg->payload)) = ipv6_outer_header->hop_limit;
+       // type
+       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+       *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
+       // 
+       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+       *((uint8_t*)(msg->payload)) = CRITICAL_6LORH | 1;
    }
+   // add page number
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+   *((uint8_t*)(msg->payload)) = PAGE_DISPATCH_NO_1;
+   
    return sixtop_send(msg);
 }
 
@@ -911,24 +931,26 @@ void iphc_prependIPv6HopByHopHeader(
    ){
    uint8_t temp_8b;
    
-   temp_8b = CRITICAL_6LORH | rpl_option->flags;
-   // RPL option
-   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-   *((uint8_t*)(msg->payload)) = temp_8b;
-   
-   if (rpl_option->rplInstanceID != 0){
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload)) = rpl_option->rplInstanceID;
-   }
-  
-   if (rpl_option->senderRank & 0x00FF == 0){
-      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload)) = rpl_option->senderRank;
-   } else {
+   if (rpl_option->flags & K_FLAG > 0){
       packetfunctions_reserveHeaderSize(msg,sizeof(uint16_t));
       msg->payload[0] = (uint8_t)((rpl_option->senderRank&0xFF00)>>8);
       msg->payload[1] = (uint8_t)(rpl_option->senderRank&0x00FF);
+   } else {
+      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+      *((uint8_t*)(msg->payload)) = rpl_option->senderRank; 
    }
+   
+   if (rpl_option->flags & I_FLAG > 0){
+      packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+      *((uint8_t*)(msg->payload)) = rpl_option->rplInstanceID;  
+   }
+   
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+   *((uint8_t*)(msg->payload)) = RPI_6LOTH_TYPE;
+       
+   temp_8b = CRITICAL_6LORH | rpl_option->flags; 
+   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+   *((uint8_t*)(msg->payload)) = temp_8b;
 }
 
 /**

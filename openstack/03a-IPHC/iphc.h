@@ -145,6 +145,10 @@ enum SIZE_6LORH_RH3_enums{
     RH3_6LOTH_SIXE_MASK      = 0x1C,
 };
 
+enum PAGE_DISPATCH_enums{
+    PAGE_DISPATCH_NO_1       = 0xF1,
+};
+
 //=========================== typedef =========================================
 
 typedef struct {
