@@ -80,6 +80,12 @@ project:
                    board_crypto_engine).
     l2_security   Use hop-by-hop encryption and authentication.
     goldenImage   sniffer, root or none(default)
+    distribshared  Shared cells are not contiguous
+    tracks         Use tracks to reserve bandwidth for each application
+    rplmetric      Metric to use with RPL (1=ETX,2=Custom,3=MinHop,4=RSSI)
+    cex_period     Period for cexample to generate data packets
+    schedalgo      Algorithm to schedule the cells for 6top (1= random,
+                   2=random_contiguous)
     
     Common variables:
     verbose        Print each complete compile/link command.
@@ -136,6 +142,12 @@ command_line_options = {
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
     'l2_security':      ['0','1'],
     'goldenImage':      ['none','root','sniffer'],
+    'distribshared':    ['0','1'],
+    'tracks':           ['0','1'],
+    'rplmetric':        ['1','2','3','4'],
+    'cex_period':       ['5000'],         #by default, 5 seconds
+    'schedalgo':        ['1','2'],        #by default, random
+
 }
 
 def validate_option(key, value, env):
@@ -287,6 +299,41 @@ command_line_vars.AddVariables(
         command_line_options['goldenImage'][0],            # default
         validate_option,                                   # validator
         None,                                              # converter
+    ),                                  
+    (
+        'distribshared',                                   # key
+        '',                                                # help
+        command_line_options['distribshared'][0],          # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'tracks',                                          # key
+        '',                                                # help
+        command_line_options['tracks'][0],                 # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'rplmetric',                                       # key
+        '',                                                # help
+        command_line_options['rplmetric'][0],              # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'cex_period',                                      # key
+        '',                                                # help
+        command_line_options['cex_period'][0],             # default
+        None,                                              # validator
+        int,                                               # converter
+    ),
+    (
+        'schedalgo',                                       # key
+        '',                                                # help
+        command_line_options['schedalgo'][0],              # default
+        validate_option,                                   # validator
+        int,                                               # converter
     ),
     (
         'apps',                                            # key
