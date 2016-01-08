@@ -534,6 +534,43 @@ OpenQueueEntry_t* openqueue_macGetEBPacket() {
    return NULL;
 }
 
+//make a local copy of the entry to push it to openbridge
+OpenQueueEntry_t* openqueue_copy_for_openbridge(OpenQueueEntry_t* pkt){
+
+   memcpy(&(openqueue_vars.openbridge), pkt, sizeof(OpenQueueEntry_t));
+   return(&(openqueue_vars.openbridge));
+}
+
+
+
+//not enough space for non prioritar packets
+bool openqueue_overflow_for_data(void){
+   uint8_t  nb = 0;
+   uint8_t  i;
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++)
+      if (openqueue_vars.queue[i].creator == COMPONENT_NULL)
+         nb++;
+   ENABLE_INTERRUPTS();
+
+   //for debug
+ /*  if (nb <= QUEUELENGTH_RESERVED)
+      openserial_printError(
+               COMPONENT_OPENQUEUE,
+               ERR_OPENQUEUE_BUFFER_OVERFLOW,
+               (errorparameter_t)nb,
+               (errorparameter_t)QUEUELENGTH_RESERVED
+            );
+*/
+   return(nb <= QUEUELENGTH_RESERVED);
+}
+
+
+
+
+
 //=========================== private =========================================
 
 void openqueue_reset_entry(OpenQueueEntry_t* entry) {

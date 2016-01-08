@@ -61,6 +61,10 @@ OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor);//, track_t *track);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(void);
+//called by openbridge
+OpenQueueEntry_t* openqueue_copy_for_openbridge(OpenQueueEntry_t* pkt);
+//management
+bool              openqueue_overflow_for_data(void);
 
 /**
 \}
