@@ -40,8 +40,7 @@ void sendDAO(void);
 */
 void icmpv6rpl_init() {
    uint8_t         dodagid[16];
-   uint32_t        dioPeriod;
-   uint32_t        daoPeriod;
+
    
    // retrieve my prefix and EUI64
    memcpy(&dodagid[0],idmanager_getMyID(ADDR_PREFIX)->prefix,8); // prefix
@@ -80,10 +79,9 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dioDestination.type = ADDR_128B;
    memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_multicast));
    
-   icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
-   dioPeriod                                = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
+   icmpv6rpl_vars.dioPeriod                 = (TIMER_DIO_TIMEOUT+(openrandom_get16b()&0xff));
    icmpv6rpl_vars.timerIdDIO                = opentimers_start(
-                                                dioPeriod,
+                                                icmpv6rpl_vars.dioPeriod,
                                                 TIMER_PERIODIC,
                                                 TIME_MS,
                                                 icmpv6rpl_timer_DIO_cb
@@ -128,10 +126,9 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dao_target.flags  = 0;
    icmpv6rpl_vars.dao_target.prefixLength = 0;
    
-   icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
-   daoPeriod                                = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
+   icmpv6rpl_vars.daoPeriod                 = (TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff));
    icmpv6rpl_vars.timerIdDAO                = opentimers_start(
-                                                daoPeriod,
+                                                icmpv6rpl_vars.daoPeriod,
                                                 TIMER_PERIODIC,
                                                 TIME_MS,
                                                 icmpv6rpl_timer_DAO_cb
@@ -189,37 +186,37 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }
-   
+
 
    // The DIO / DAO was pushed to the MAC layer
-     if (msg == icmpv6rpl_vars.lastDIO_tx){
-  #ifdef _DEBUG_DIO_
-        sprintf(str, "RPL - DIO transmitted");
-        openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
-  #endif
+   if (msg == icmpv6rpl_vars.lastDIO_tx){
+#ifdef _DEBUG_DIO_
+      sprintf(str, "RPL - DIO transmitted");
+      openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+#endif
 
-        //for stats
-        openserial_statDIOtx();
+      //for stats
+      openserial_statDIOtx();
 
-        icmpv6rpl_vars.lastDIO_tx = NULL;
-     }
-     if (msg == icmpv6rpl_vars.lastDAO_tx){
+      icmpv6rpl_vars.lastDIO_tx = NULL;
+   }
+   if (msg == icmpv6rpl_vars.lastDAO_tx){
 
-  #ifdef _DEBUG_DAO_
-        sprintf(str, "RPL - DAO transmitted via ");
-        openserial_ncat_uint8_t_hex(str, (uint8_t)msg->l2_nextORpreviousHop.addr_64b[6], 150);
-        openserial_ncat_uint8_t_hex(str, (uint8_t)msg->l2_nextORpreviousHop.addr_64b[7], 150);
-        strncat(str, " to ", 150);
-        openserial_ncat_uint8_t_hex(str, (uint8_t)msg->l3_destinationAdd.addr_128b[14], 150);
-        openserial_ncat_uint8_t_hex(str, (uint8_t)msg->l3_destinationAdd.addr_128b[15], 150);
-        openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
-  #endif
+#ifdef _DEBUG_DAO_
+      sprintf(str, "RPL - DAO transmitted via ");
+      openserial_ncat_uint8_t_hex(str, (uint8_t)msg->l2_nextORpreviousHop.addr_64b[6], 150);
+      openserial_ncat_uint8_t_hex(str, (uint8_t)msg->l2_nextORpreviousHop.addr_64b[7], 150);
+      strncat(str, " to ", 150);
+      openserial_ncat_uint8_t_hex(str, (uint8_t)msg->l3_destinationAdd.addr_128b[14], 150);
+      openserial_ncat_uint8_t_hex(str, (uint8_t)msg->l3_destinationAdd.addr_128b[15], 150);
+      openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+#endif
 
-        //for stats
-        openserial_statDAOtx(msg->l2_nextORpreviousHop.addr_64b);
+      //for stats
+      openserial_statDAOtx(msg->l2_nextORpreviousHop.addr_64b);
 
-        icmpv6rpl_vars.lastDAO_tx = NULL;
-     }
+      icmpv6rpl_vars.lastDAO_tx = NULL;
+   }
 
    // free packet
    openqueue_freePacketBuffer(msg);
@@ -324,16 +321,27 @@ void icmpv6rpl_timer_DIO_cb(opentimer_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DIO_task() {
-   uint32_t        dioPeriod;
+
    // send DIO
    sendDIO();
-   
+
+   // pick a new pseudo-random dioPeriod
+   uint16_t   jitter = openrandom_get16b();
+   uint16_t   bool = openrandom_get16b() & 0x0001;
+
+   while(jitter > TIMER_DIO_TIMEOUT * TIMER_DIO_JITTER)
+      jitter -= TIMER_DIO_TIMEOUT * TIMER_DIO_JITTER;
+   if (bool > 0)
+      icmpv6rpl_vars.dioPeriod = (TIMER_DIO_TIMEOUT - jitter);
+   else
+      icmpv6rpl_vars.dioPeriod = (TIMER_DIO_TIMEOUT + jitter);
+
+
    // arm the DIO timer with this new value
-   dioPeriod = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
    opentimers_setPeriod(
-      icmpv6rpl_vars.timerIdDIO,
-      TIME_MS,
-      dioPeriod
+         icmpv6rpl_vars.timerIdDIO,
+         TIME_MS,
+         icmpv6rpl_vars.dioPeriod
    );
 }
 
@@ -470,17 +478,25 @@ void icmpv6rpl_timer_DAO_cb(opentimer_id_t id) {
 \note This function is executed in task context, called by the scheduler.
 */
 void icmpv6rpl_timer_DAO_task() {
-   uint32_t        daoPeriod;
-   
+
+   // pick a new pseudo-random daoPeriod
+   uint16_t   jitter = openrandom_get16b();
+   uint16_t   bool = openrandom_get16b() & 0x0001;
+   while(jitter > TIMER_DAO_TIMEOUT * TIMER_DAO_JITTER)
+      jitter -= TIMER_DAO_TIMEOUT * TIMER_DAO_JITTER;
+   if (bool > 0)
+      icmpv6rpl_vars.daoPeriod = (TIMER_DAO_TIMEOUT - jitter);
+   else
+      icmpv6rpl_vars.daoPeriod = (TIMER_DAO_TIMEOUT + jitter);
+
    // send DAO
    sendDAO();
-   
+
    // arm the DAO timer with this new value
-   daoPeriod = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
    opentimers_setPeriod(
-      icmpv6rpl_vars.timerIdDAO,
-      TIME_MS,
-      daoPeriod
+         icmpv6rpl_vars.timerIdDAO,
+         TIME_MS,
+         icmpv6rpl_vars.daoPeriod
    );
 }
 
