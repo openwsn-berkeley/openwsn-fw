@@ -75,7 +75,6 @@ owerror_t iphc_sendFromForwarding(
    uint8_t      dam;
    uint8_t      nh;
    uint8_t      next_header;
-   uint8_t      tf=IPHC_TF_ELIDED;
    //option header
   
    // take ownership over the packet
@@ -567,7 +566,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
         extention_header_length = 0;
         rh3_index = 0;
         temp_8b = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length);
-        while (temp_8b & 0xE0 == CRITICAL_6LORH){
+        while ((temp_8b&0xE0) == CRITICAL_6LORH){
             lorh_type = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length+1);
             if(lorh_type<5){
                 if (rh3_index == MAXNUM_RH3){
@@ -653,7 +652,7 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
     uint8_t page;
     uint8_t temp_8b;
     
-    if (msg->payload[0]&0xF0 == 0xF0){
+    if ((msg->payload[0]&0xF0) == 0xF0){
         page = msg->payload[0]&0x0F; 
         ipv6_header->header_length += sizeof(uint8_t);
     } else {
@@ -866,7 +865,7 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
         // we are in 6LoRH now
         if (page == 1){
             temp_8b = *(uint8_t*)(msg->payload+ipv6_header->header_length+previousLen);
-            if (temp_8b & 0xE0 == ELECTIVE_6LoRH){
+            if ((temp_8b & 0xE0) == ELECTIVE_6LoRH){
                 // this is an elective 6LoRH
                 ipv6_header->header_length += 1;
                 temp_8b = *(uint8_t*)(msg->payload+ipv6_header->header_length+previousLen);
@@ -931,7 +930,7 @@ void iphc_prependIPv6HopByHopHeader(
    ){
    uint8_t temp_8b;
    
-   if (rpl_option->flags & K_FLAG > 0){
+   if ((rpl_option->flags & K_FLAG) > 0){
       packetfunctions_reserveHeaderSize(msg,sizeof(uint16_t));
       msg->payload[0] = (uint8_t)((rpl_option->senderRank&0xFF00)>>8);
       msg->payload[1] = (uint8_t)(rpl_option->senderRank&0x00FF);
@@ -940,7 +939,7 @@ void iphc_prependIPv6HopByHopHeader(
       *((uint8_t*)(msg->payload)) = rpl_option->senderRank; 
    }
    
-   if (rpl_option->flags & I_FLAG > 0){
+   if ((rpl_option->flags & I_FLAG) > 0){
       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
       *((uint8_t*)(msg->payload)) = rpl_option->rplInstanceID;  
    }
@@ -975,18 +974,18 @@ void iphc_retrieveIPv6HopByHopHeader(
    temp_8b = *((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen);
    hopbyhop_header->headerlen    += sizeof(uint8_t);
    
-   if (temp_8b & FORMAT_6LORH_MASK == CRITICAL_6LORH){
+   if ((temp_8b & FORMAT_6LORH_MASK) == CRITICAL_6LORH){
        // this is 6LoRH RPI, update the headerlen to include type byte
        hopbyhop_header->headerlen    += sizeof(uint8_t);
        // get the O, R, F I and K value
        rpl_option->flags = (uint8_t)(temp_8b & FLAG_MASK);
-       if (temp_8b & I_FLAG==0){
+       if ((temp_8b & I_FLAG)==0){
            rpl_option->rplInstanceID = *((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen);
            hopbyhop_header->headerlen    += sizeof(uint8_t);
            hopbyhop_header->HdrExtLen    += 1;
        }
        
-       if (temp_8b & K_FLAG==0){
+       if ((temp_8b & K_FLAG)==0){
            rpl_option->senderRank = *((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen);
            rpl_option->senderRank = ((rpl_option->senderRank)<<8)+*((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen+1);
            hopbyhop_header->headerlen    += sizeof(uint16_t);

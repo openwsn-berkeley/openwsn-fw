@@ -1216,7 +1216,7 @@ uint8_t sixtop_getCelllist(
         return 0;
     }
     
-    memset(cellList,0,sizeof(cellList));
+    memset(cellList,0,SCHEDULEIEMAXNUMCELLS*sizeof(cellInfo_ht));
    
     scheduleWalker = schedule_getCurrentScheduleEntry();
     currentEntry   = scheduleWalker;
