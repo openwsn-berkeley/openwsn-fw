@@ -20,9 +20,12 @@ enum {
 };
 
 enum {
-   O_FLAG          = 0x80,
-   R_FLAG          = 0x40,
-   F_FLAG          = 0x20,
+   O_FLAG          = 0x10,
+   R_FLAG          = 0x08,
+   F_FLAG          = 0x04,
+   I_FLAG          = 0x02,
+   K_FLAG          = 0x01,
+   FLAG_MASK       = 0x1C,
 };
 
 //=========================== typedef =========================================

@@ -64,6 +64,16 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    open_addr_t*         myadd64;
    uint32_t             flow_label = 0;
    
+   open_addr_t          temp_dest_prefix;
+   open_addr_t          temp_dest_mac64b;
+   open_addr_t*         p_dest;
+   open_addr_t*         p_src;  
+   open_addr_t          temp_src_prefix;
+   open_addr_t          temp_src_mac64b; 
+   uint8_t              sam;
+   uint8_t              m;
+   uint8_t              dam;
+   
    // take ownership over the packet
    msg->owner                = COMPONENT_FORWARDING;
    
@@ -93,40 +103,55 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
       0x00              // flags
    );
 
+   packetfunctions_ip128bToMac64b(&(msg->l3_destinationAdd),&temp_dest_prefix,&temp_dest_mac64b);
+   //xv poipoi -- get the src prefix as well
+   packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);
+   //XV -poipoi we want to check if the source address prefix is the same as destination prefix
+   if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {
+         // same prefix use 64B address
+         sam = IPHC_SAM_ELIDED;
+         dam = IPHC_DAM_64B;
+         p_dest = &temp_dest_mac64b;      
+         p_src  = NULL; 
+   } else {
+     //not the same prefix. so the packet travels to another network
+     //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
+     if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
+          sam = IPHC_SAM_ELIDED;
+          dam = IPHC_DAM_128B;
+          p_dest = &(msg->l3_destinationAdd);
+          p_src = NULL;
+     } else {
+         // this is DIO, source address elided, multicast bit is set
+          sam = IPHC_SAM_ELIDED;
+          m   = IPHC_M_YES;
+          dam = IPHC_DAM_ELIDED;
+          p_dest = &(msg->l3_destinationAdd);
+          p_src = &(msg->l3_sourceAdd);
+     }
+   }
 
+   
    // inner header is required only when the destination address is NOT broadcast address
    if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd)) == FALSE) {
        //IPHC inner header and NHC IPv6 header will be added at here
-       iphc_prependIPv6Header(
-          msg,
-          IPHC_TF_ELIDED,
-          flow_label,
-          // we should pass the parameter "msg->l4_protocol_compressed" here.
-          // but since currectly the upper layers doesn't set the l4_protocol_compressed
-          // parameter and the OPENQUEUE COMPONEN didn't reset this value either. So using 
-          // "msg->l4_protocol_compressed" here may cause wrong result. 
-          // Using IPHC_NH_INLINE instead temporarily. This should be fixed later.
-          IPHC_NH_INLINE, 
-          msg->l4_protocol,
-          IPHC_HLIM_64,
-          ipv6_outer_header.hop_limit,
-          IPHC_CID_NO,
-          IPHC_SAC_STATELESS,
-          IPHC_SAM_64B,
-          IPHC_M_NO,
-          IPHC_DAC_STATELESS,
-          IPHC_DAM_ELIDED,
-          &(msg->l3_destinationAdd),
-          &(msg->l3_sourceAdd),            
-          PCKTSEND
-       );
-       // preprend NHC ipv6 next header
-       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-       *((uint8_t*)(msg->payload)) = (uint8_t)(NHC_IPv6EXT_ID + \
-                                     (uint8_t)(NHC_EID_IPv6_VAL << 1) + \
-                                     (uint8_t)(NHC_NH_INLINE));
-       //   msg->l4_protocol                         = *((uint8_t*)(msg->payload));
-       // for IPHC outer header its next header is option hopByhop header OR NHC ipv6.
+        iphc_prependIPv6Header(msg,
+                    IPHC_TF_ELIDED,
+                    flow_label, // value_flowlabel
+                    IPHC_NH_INLINE,
+                    msg->l4_protocol, 
+                    IPHC_HLIM_64,
+                    ipv6_outer_header.hop_limit,
+                    IPHC_CID_NO,
+                    IPHC_SAC_STATELESS,
+                    sam,
+                    m,
+                    IPHC_DAC_STATELESS,
+                    dam,
+                    p_dest,
+                    p_src,            
+                    PCKTSEND  
+                    );
        // both of them are compressed
        ipv6_outer_header.next_header_compressed = TRUE;
    }
@@ -222,22 +247,20 @@ void forwarding_receive(
    }
    
    // populate packets metadata with L3 information
-   memcpy(&(msg->l3_destinationAdd),&ipv6_outer_header->dest,sizeof(open_addr_t));
+   memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest,sizeof(open_addr_t));
    memcpy(&(msg->l3_sourceAdd),     &ipv6_outer_header->src, sizeof(open_addr_t));
 
    if (
          (
-            idmanager_isMyAddress(&ipv6_outer_header->dest)
+            idmanager_isMyAddress(&(msg->l3_destinationAdd))
             ||
-            packetfunctions_isBroadcastMulticast(&ipv6_outer_header->dest)
+            packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))
          )
          &&
          ipv6_outer_header->next_header!=IANA_IPv6ROUTE
-      ) {
+   ) {
       // this packet is for me, no source routing header.
-      // toss ipv6 NHC header
-      if (packetfunctions_isBroadcastMulticast(&ipv6_outer_header->dest)==FALSE) {
-          packetfunctions_tossHeader(msg,sizeof(uint8_t));
+      if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE) {
           msg->l4_protocol = ipv6_inner_header->next_header;
           msg->l4_protocol_compressed = ipv6_inner_header->next_header_compressed;
           // toss iphc inner header
@@ -426,216 +449,156 @@ owerror_t forwarding_send_internal_SourceRouting(
       ipv6_header_iht*  ipv6_outer_header,
       ipv6_header_iht*  ipv6_inner_header
    ) {
-   uint8_t              local_CmprE;
-   uint8_t              local_CmprI;
-   uint8_t              numAddr;
-   uint8_t              hlen;
-   uint8_t              addressposition;
-   uint8_t*             runningPointer;
-   uint8_t              octetsAddressSize;
-   open_addr_t*         prefix;
-   rpl_routing_ht*      rpl_routing_hdr;
+   uint8_t              temp_8b;
+   uint8_t              size;
+   uint8_t              sizeUnit;
+   uint8_t              hlen = 0;
+   open_addr_t*         nexthop;
    rpl_option_ht        rpl_option;
    
-   // reset hop-by-hop option
    memset(&rpl_option,0,sizeof(rpl_option_ht));
-   
-   // get my prefix
-   prefix               = idmanager_getMyID(ADDR_PREFIX);
-   
-   // cast packet to RPL routing header
-   rpl_routing_hdr      = (rpl_routing_ht*)(msg->payload);
-   
-   // point behind the RPL routing header
-   runningPointer       = (msg->payload)+sizeof(rpl_routing_ht);
-   
-   // retrieve CmprE and CmprI
-   
-   // CmprE 4-bit unsigned integer. Number of prefix octets
-   // from the last segment (i.e., segment n) that are
-   // elided. For example, an SRH carrying a full IPv6
-   // address in Addressesn sets CmprE to 0.
-   
-   local_CmprE          = rpl_routing_hdr->CmprICmprE & 0x0f;
-   local_CmprI          = rpl_routing_hdr->CmprICmprE & 0xf0;
-   local_CmprI          = local_CmprI>>4;
-   
-   // since NH is set,  The Length field contained in a compressed IPv6 Extension Header
-   // indicates the number of octets that pertain to the (compressed)
-   // extension header following the Length field. this changes
-   // the Length field definition in [RFC2460] from indicating the header
-   // size in 8-octet units, not including the first 8 octets.  Changing
-   // the Length field to be in units of octets removes wasteful internal
-   // fragmentation.
-//   numAddr              = (((rpl_routing_hdr->HdrExtLen*8)-rpl_routing_hdr->PadRes-(16-local_CmprE))/(16-local_CmprI))+1;
-   numAddr               = ((rpl_routing_hdr->HdrExtLen-6-(16-local_CmprE))/(16-local_CmprI))+1;
-   
-   if (rpl_routing_hdr->SegmentsLeft==0){
-      // no more segments left, this is the last hop
-      
-      // push packet up the stack
-      msg->l4_protocol  = rpl_routing_hdr->nextHeader;
-      hlen              = rpl_routing_hdr->HdrExtLen; //in units
-      
-      // toss RPL routing header
-      packetfunctions_tossHeader(msg,sizeof(rpl_routing_ht));
-      
-      // toss source route addresses
-      packetfunctions_tossHeader(msg,hlen-6); //total hlen - 6(type, cmprE+cmprI,pad,reserved)
+   nexthop = NULL;
 
-      
-      // toss ipv6 NHC header
-      packetfunctions_tossHeader(msg,sizeof(uint8_t));
-      msg->l4_protocol = ipv6_inner_header->next_header;
-      msg->l4_protocol_compressed = ipv6_inner_header->next_header_compressed;
-      // toss iphc inner header
-      packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
-      
-      // indicate reception to upper layer
-      switch(msg->l4_protocol) {
-         case IANA_TCP:
-            opentcp_receive(msg);
-            break;
-         case IANA_UDP:
-            openudp_receive(msg);
-            break;
-         case IANA_ICMPv6:
-            icmpv6_receive(msg);
-            break;
-         default:
-            openserial_printError(
-               COMPONENT_FORWARDING,
-               ERR_WRONG_TRAN_PROTOCOL,
-               (errorparameter_t)msg->l4_protocol,
-               (errorparameter_t)1
-            );
-            //not sure that this is correct as iphc will free it?
-            openqueue_freePacketBuffer(msg);
-            return E_FAIL;
-      }
-      
-      // stop executing here (successful)
-      return E_SUCCESS;
+   temp_8b = *((uint8_t*)(msg->payload)+ hlen);
+   size = temp_8b & RH3_6LOTH_SIXE_MASK;
+   hlen += 1;
    
+   temp_8b = *((uint8_t*)(msg->payload)+ hlen);
+   hlen += 1;
+   memcpy(nexthop,&(ipv6_inner_header->dest),sizeof(open_addr_t));
+   switch(temp_8b){
+   case 0:
+       sizeUnit = 1;
+       switch(nexthop->type){
+       case ADDR_64B:  
+           nexthop->addr_64b[7]=*((uint8_t*)(msg->payload)+ hlen);
+           break;
+       case ADDR_128B:
+           nexthop->addr_128b[15]=*((uint8_t*)(msg->payload)+ hlen);
+           break;
+       default:
+           // log error
+           printf("Wrong nexthop type %d \n",nexthop->type);
+       } 
+       break;
+   case 1:
+       sizeUnit = 2;
+       switch(nexthop->type){
+       case ADDR_64B:  
+           memcpy(&(nexthop->addr_64b[6]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           break;
+       case ADDR_128B:
+           memcpy(&(nexthop->addr_128b[14]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           break;
+       default:
+           // log error
+           printf("Wrong nexthop type %d \n",nexthop->type);
+       }
+       break;
+   case 2:
+       sizeUnit = 4;
+       switch(nexthop->type){
+       case ADDR_64B:  
+           memcpy(&(nexthop->addr_64b[4]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           break;
+       case ADDR_128B:
+           memcpy(&(nexthop->addr_128b[12]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           break;
+       default:
+           // log error
+           printf("Wrong nexthop type %d \n",nexthop->type);
+       }
+       break;
+   case 3:
+       sizeUnit = 8;
+       switch(nexthop->type){
+       case ADDR_64B:  
+           memcpy(&(nexthop->addr_64b[0]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           break;
+       case ADDR_128B:
+           memcpy(&(nexthop->addr_128b[8]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           break;
+       default:
+           // log error
+           printf("Wrong nexthop type %d \n",nexthop->type);
+       }
+       break;
+   case 4:
+       sizeUnit = 16;
+       packetfunctions_readAddress(((uint8_t*)(msg->payload+hlen)),ADDR_128B,nexthop,OW_BIG_ENDIAN);
+       break;
+   }
+   hlen += sizeUnit;
+   if (packetfunctions_sameAddress(nexthop,idmanager_getMyID(nexthop->type))){
+       size--;
+       if (size!=0){
+           *((uint8_t*)(msg->payload+hlen-2)) = CRITICAL_6LORH | size;
+           *((uint8_t*)(msg->payload+hlen-1)) = temp_8b;
+           packetfunctions_tossHeader(msg,sizeUnit);
+           
+           switch(nexthop->type){
+           case ADDR_64B:
+               memcpy(&(nexthop->addr_64b[8-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+               memcpy(&msg->l2_nextORpreviousHop,nexthop,sizeof(open_addr_t));
+               break;
+           case ADDR_128B:
+               memcpy(&(nexthop->addr_64b[16-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+               memcpy(&msg->l2_nextORpreviousHop,nexthop,sizeof(open_addr_t));
+               msg->l2_nextORpreviousHop.type = ADDR_64B;
+               break;
+           }
+       } else{
+           packetfunctions_tossHeader(msg,hlen);
+           hlen = 0;
+           temp_8b = *(uint8_t*)(msg->payload);
+           hlen += 1;
+           if(temp_8b & FORMAT_6LORH_MASK == CRITICAL_6LORH){
+               size = temp_8b & RH3_6LOTH_SIXE_MASK;
+               temp_8b = *(uint8_t*)(msg->payload+hlen);
+               hlen += 1;
+               if(temp_8b <= RH3_6LOTH_TYPE_4){
+                   // there is another RH3 6LoRH
+                   switch(temp_8b){
+                   case 0:
+                       sizeUnit=1;
+                       break;
+                   case 1:
+                       sizeUnit=2;
+                       break;
+                   case 2:
+                       sizeUnit=4;
+                       break;
+                   case 3:
+                       sizeUnit=8;
+                       break;
+                   case 4:
+                       sizeUnit=16;
+                       break;
+                   }
+                   switch(nexthop->type){
+                   case ADDR_64B:
+                       memcpy(&(nexthop->addr_64b[8-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+                       memcpy(&msg->l2_nextORpreviousHop,nexthop,sizeof(open_addr_t));
+                       break;
+                   case ADDR_128B:
+                       memcpy(&(nexthop->addr_64b[16-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+                       memcpy(&msg->l2_nextORpreviousHop,nexthop,sizeof(open_addr_t));
+                       msg->l2_nextORpreviousHop.type = ADDR_64B;
+                       break;
+                   }
+               } else{
+                   // some other 6lorh
+               }
+           } else {
+               // there is no RH3 anymore, next hop is destination
+               packetfunctions_ip128bToMac64b(&ipv6_inner_header->dest,nexthop,&msg->l2_nextORpreviousHop);
+           }
+       }
+       memcpy(&msg->l3_destinationAdd,&ipv6_inner_header->dest,sizeof(open_addr_t));
+       memcpy(&msg->l3_sourceAdd,&ipv6_outer_header->src,sizeof(open_addr_t));
    } else {
-      // this is not the last hop
-      
-      if (rpl_routing_hdr->SegmentsLeft>numAddr) {
-         // error code: there are more segments left than space in source route
-         
-         // TODO: send ICMPv6 packet (code 0) to originator
-         
-         openserial_printError(
-            COMPONENT_FORWARDING,
-            ERR_NO_NEXTHOP,
-            (errorparameter_t)0,
-            (errorparameter_t)0
-         );
-         openqueue_freePacketBuffer(msg);
-         return E_FAIL;
-      
-      } else {
-         
-         // decrement number of segments left
-         rpl_routing_hdr->SegmentsLeft--;
-         
-         // find next hop address in source route, start from 0
-          addressposition    = numAddr-(rpl_routing_hdr->SegmentsLeft)-1;
-//         addressposition     = rpl_routing_hdr->SegmentsLeft;
-         
-         // how many octets have the address?
-         if (rpl_routing_hdr->SegmentsLeft > 0){
-            // max addr length - number of prefix octets that are elided in the internal route elements
-            octetsAddressSize = LENGTH_ADDR128b - local_CmprI;
-         } else {
-            // max addr length - number of prefix octets that are elided in the last route elements
-            octetsAddressSize = LENGTH_ADDR128b - local_CmprE;
-         }
-         
-         switch(octetsAddressSize) {
-            
-            case LENGTH_ADDR16b:
-               
-               // write previous hop
-               msg->l2_nextORpreviousHop.type    = ADDR_16B;
-               memcpy(
-                  &(msg->l2_nextORpreviousHop.addr_16b),
-                  runningPointer+((addressposition)*octetsAddressSize),
-                  octetsAddressSize
-               );
-               
-               // write next hop
-               msg->l3_destinationAdd.type       = ADDR_16B;
-               memcpy(
-                  &(msg->l3_destinationAdd.addr_16b),
-                  runningPointer+((addressposition)*octetsAddressSize),
-                  octetsAddressSize
-               );
-               
-               break;
-            
-            case LENGTH_ADDR64b:
-               
-               // write previous hop
-               msg->l2_nextORpreviousHop.type    = ADDR_64B;
-               memcpy(
-                  &(msg->l2_nextORpreviousHop.addr_64b),
-                  runningPointer+((addressposition)*octetsAddressSize),
-                  octetsAddressSize
-               );
-               
-               //this is 128b address as send from forwarding function
-               //takes care of reducing it if needed.
-               
-               //write next hop
-               msg->l3_destinationAdd.type       = ADDR_128B;
-               memcpy(
-                  &(msg->l3_destinationAdd.addr_128b[0]),
-                  prefix->prefix,
-                  LENGTH_ADDR64b
-               );
-               
-               memcpy(
-                  &(msg->l3_destinationAdd.addr_128b[8]),
-                  runningPointer+((addressposition)*octetsAddressSize),
-                  octetsAddressSize
-               );
-               
-               break;
-            
-            case LENGTH_ADDR128b:
-               
-               // write previous hop
-               msg->l2_nextORpreviousHop.type    = ADDR_128B;
-               memcpy(
-                  &(msg->l2_nextORpreviousHop.addr_128b),
-                  runningPointer+((addressposition)*octetsAddressSize),
-                  octetsAddressSize
-               );
-               
-               // write next hop
-               msg->l3_destinationAdd.type       = ADDR_128B;
-               memcpy(
-                  &(msg->l3_destinationAdd.addr_128b),
-                  runningPointer+((addressposition)*octetsAddressSize),
-                  octetsAddressSize
-               );
-               
-               break;
-            
-            default:
-               // any other value is not supported by now
-               
-               openserial_printError(
-                  COMPONENT_FORWARDING,
-                  ERR_INVALID_PARAM,
-                  (errorparameter_t)1,
-                  (errorparameter_t)0
-               );
-               openqueue_freePacketBuffer(msg);
-               return E_FAIL;
-         }
-      }
+       // log error
+       printf("wrong address in RH3!\n");
    }
    
    // send to next lower layer
@@ -657,16 +620,23 @@ owerror_t forwarding_send_internal_SourceRouting(
 \param[in]  flags      The flags to indicate in the RPL option.
 */
 void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
-   // set the RPL hop-by-hop header
-   rpl_option->optionType         = RPL_HOPBYHOP_HEADER_OPTION_TYPE;
+    uint8_t I,K;
+    rpl_option->optionType         = RPL_HOPBYHOP_HEADER_OPTION_TYPE;
+    rpl_option->rplInstanceID      = icmpv6rpl_getRPLIntanceID();
+    rpl_option->senderRank         = neighbors_getMyDAGrank();
    
-   // 8-bit field indicating the length of the option, in
-   // octets, excluding the Option Type and Opt Data Len fields.
-   // 4-bytes, flags+instanceID+senderrank - no sub-tlvs
-   rpl_option->optionLen          = 0x04; 
-   
-   rpl_option->flags              = flags;
-   rpl_option->rplInstanceID      = icmpv6rpl_getRPLIntanceID();
-   rpl_option->senderRank         = neighbors_getMyDAGrank();
+    if (rpl_option->rplInstanceID == 0){
+       I = 1;
+    } else {
+       I = 0;
+    }
+    
+    if (rpl_option->senderRank & 0x00FF == 0){
+        K = 1;
+    } else {
+        K = 0;
+    }
+    
+    rpl_option->flags              = flags | (I<<1) | K;
 }
 
