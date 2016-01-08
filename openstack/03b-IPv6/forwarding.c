@@ -67,6 +67,15 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    // take ownership over the packet
    msg->owner                = COMPONENT_FORWARDING;
    
+   //too many packets in the buffer? We should drop this one to save data for management packets (e.g. sixtop)
+   if(openqueue_overflow_for_data()){
+      openserial_statPktBufferOverflow(msg);
+
+      // openqueue_freePacketBuffer(msg);
+      return(E_FAIL);
+   }
+
+
    // retrieve my prefix and EUI64
    myprefix                  = idmanager_getMyID(ADDR_PREFIX);
    myadd64                   = idmanager_getMyID(ADDR_64B);
