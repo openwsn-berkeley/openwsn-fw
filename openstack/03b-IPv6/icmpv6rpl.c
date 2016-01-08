@@ -172,9 +172,6 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    char str[150];
 #endif
 
-   sprintf(str, "RPL - ICMPv6RPL");
-   openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
-
    
    // take ownership over that packet
    msg->owner = COMPONENT_ICMPv6RPL;
