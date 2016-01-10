@@ -585,7 +585,12 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
             lorh_type = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length+1);
             if(lorh_type<5){
                 if (rh3_index == MAXNUM_RH3){
-                    printf("Too many RH3 6LoRH!\n ");
+                    openserial_printError(
+                        COMPONENT_IPHC,
+                        ERR_6LOWPAN_UNSUPPORTED,
+                        (errorparameter_t)13,
+                        (errorparameter_t)(rh3_index)
+                    );
                     return;
                 }
                 ipv6_outer_header->next_header     = IANA_IPv6ROUTE;
@@ -636,7 +641,12 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                                extention_header_length);
                } else{
                    //log wrong inf
-                   printf("wrong 6loRH type %d\n",lorh_type);
+                   openserial_printError(
+                        COMPONENT_IPHC,
+                        ERR_6LOWPAN_UNSUPPORTED,
+                        (errorparameter_t)14,
+                        (errorparameter_t)(lorh_type)
+                   );
                }
            }
        }
@@ -901,7 +911,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
                     ipv6_header->header_length += 1;
                     // destination address maybe is the first address in RH3 6LoRH OR dest adress in IPHC, reset first
                     // update destination address if necessary after the processing
-                    memset(&(ipv6_header->dest),0,sizeof(open_addr_t));
+                    ipv6_header->dest.type = ADDR_NONE;
+                    memset(&(ipv6_header->dest.addr_128b[0]),0,16);
                     if (ipinip_length == 1){
                         // source address is root
                         memset(&(ipv6_header->src),0,sizeof(open_addr_t));
@@ -931,7 +942,6 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
                                 (errorparameter_t)12,
                                 (errorparameter_t)(ipinip_length-1)
                              );
-                             printf("address length error %d !\n",ipv6_header->header_length-1);
                         }
                     }
                 }
@@ -944,7 +954,6 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
                     (errorparameter_t)11,
                     (errorparameter_t)(temp_8b & 0xE0)
                  );
-                printf("Wrong format type of 6LoRH %x !\n",temp_8b & 0xE0);
             }
         }
     }

@@ -77,6 +77,8 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    // take ownership over the packet
    msg->owner                = COMPONENT_FORWARDING;
    
+   m   = IPHC_M_NO;
+   
    // retrieve my prefix and EUI64
    myprefix                  = idmanager_getMyID(ADDR_PREFIX);
    myadd64                   = idmanager_getMyID(ADDR_64B);
@@ -247,11 +249,7 @@ void forwarding_receive(
    }
    
    // populate packets metadata with L3 information
-   if (packetfunctions_isBroadcastMulticast(&(ipv6_outer_header->dest))==FALSE){
-       memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest,sizeof(open_addr_t));
-   } else {
-       memcpy(&(msg->l3_destinationAdd),&ipv6_outer_header->dest, sizeof(open_addr_t));
-   }
+   memcpy(&(msg->l3_destinationAdd),&ipv6_outer_header->dest, sizeof(open_addr_t));
    memcpy(&(msg->l3_sourceAdd),     &ipv6_outer_header->src, sizeof(open_addr_t));
    
    if (
