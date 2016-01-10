@@ -142,7 +142,7 @@ enum TYPE_6LORH_enums{
 };
 
 enum SIZE_6LORH_RH3_enums{
-    RH3_6LOTH_SIXE_MASK      = 0x1C,
+    RH3_6LOTH_SIZE_MASK      = 0x1F,
 };
 
 enum PAGE_DISPATCH_enums{

@@ -455,145 +455,165 @@ owerror_t forwarding_send_internal_SourceRouting(
    uint8_t              size;
    uint8_t              sizeUnit;
    uint8_t              hlen = 0;
-   open_addr_t*         nexthop;
+   open_addr_t          nexthop;
+   open_addr_t          temp_prefix;
+   open_addr_t          temp_addr64;
    rpl_option_ht        rpl_option;
+   uint8_t              i;
    
    memset(&rpl_option,0,sizeof(rpl_option_ht));
-   nexthop = NULL;
+   for (i=0;i<msg->length;i++){
+       printf("%x ",msg->payload[i]);
+   }
+   printf("\n");
+   
 
    temp_8b = *((uint8_t*)(msg->payload)+ hlen);
-   size = temp_8b & RH3_6LOTH_SIXE_MASK;
+   size = temp_8b & RH3_6LOTH_SIZE_MASK;
    hlen += 1;
    
    temp_8b = *((uint8_t*)(msg->payload)+ hlen);
    hlen += 1;
-   memcpy(nexthop,&(ipv6_inner_header->dest),sizeof(open_addr_t));
+   nexthop.type = ADDR_128B;
+   memcpy(&(nexthop.addr_128b[0]),&(ipv6_inner_header->dest.addr_128b[0]),16);
+   printf("dest type %d\n",nexthop.type);
    switch(temp_8b){
    case 0:
        sizeUnit = 1;
-       switch(nexthop->type){
+       switch(nexthop.type){
        case ADDR_64B:  
-           nexthop->addr_64b[7]=*((uint8_t*)(msg->payload)+ hlen);
+           nexthop.addr_64b[7]=*((uint8_t*)(msg->payload)+ hlen);
            break;
        case ADDR_128B:
-           nexthop->addr_128b[15]=*((uint8_t*)(msg->payload)+ hlen);
+           nexthop.addr_128b[15]=*((uint8_t*)(msg->payload)+ hlen);
            break;
        default:
            // log error
-           printf("Wrong nexthop type %d \n",nexthop->type);
+           printf("Wrong nexthop type %d \n",nexthop.type);
        } 
        break;
    case 1:
        sizeUnit = 2;
-       switch(nexthop->type){
+       switch(nexthop.type){
        case ADDR_64B:  
-           memcpy(&(nexthop->addr_64b[6]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           memcpy(&(nexthop.addr_64b[6]),(uint8_t*)(msg->payload+hlen),sizeUnit);
            break;
        case ADDR_128B:
-           memcpy(&(nexthop->addr_128b[14]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           memcpy(&(nexthop.addr_128b[14]),(uint8_t*)(msg->payload+hlen),sizeUnit);
            break;
        default:
            // log error
-           printf("Wrong nexthop type %d \n",nexthop->type);
+           printf("Wrong nexthop type %d \n",nexthop.type);
        }
        break;
    case 2:
        sizeUnit = 4;
-       switch(nexthop->type){
+       switch(nexthop.type){
        case ADDR_64B:  
-           memcpy(&(nexthop->addr_64b[4]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           memcpy(&(nexthop.addr_64b[4]),(uint8_t*)(msg->payload+hlen),sizeUnit);
            break;
        case ADDR_128B:
-           memcpy(&(nexthop->addr_128b[12]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           memcpy(&(nexthop.addr_128b[12]),(uint8_t*)(msg->payload+hlen),sizeUnit);
            break;
        default:
            // log error
-           printf("Wrong nexthop type %d \n",nexthop->type);
+           printf("Wrong nexthop type %d \n",nexthop.type);
        }
        break;
    case 3:
        sizeUnit = 8;
-       switch(nexthop->type){
+       switch(nexthop.type){
        case ADDR_64B:  
-           memcpy(&(nexthop->addr_64b[0]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           memcpy(&(nexthop.addr_64b[0]),(uint8_t*)(msg->payload+hlen),sizeUnit);
            break;
        case ADDR_128B:
-           memcpy(&(nexthop->addr_128b[8]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+           memcpy(&(nexthop.addr_128b[8]),(uint8_t*)(msg->payload+hlen),sizeUnit);
            break;
        default:
            // log error
-           printf("Wrong nexthop type %d \n",nexthop->type);
+           printf("Wrong nexthop type %d \n",nexthop.type);
        }
        break;
    case 4:
        sizeUnit = 16;
-       packetfunctions_readAddress(((uint8_t*)(msg->payload+hlen)),ADDR_128B,nexthop,OW_BIG_ENDIAN);
+       packetfunctions_readAddress(((uint8_t*)(msg->payload+hlen)),ADDR_128B,&nexthop,OW_BIG_ENDIAN);
        break;
    }
+   printf("Test size%d \n",size);
    hlen += sizeUnit;
-   if (packetfunctions_sameAddress(nexthop,idmanager_getMyID(nexthop->type))){
+   packetfunctions_ip128bToMac64b(&nexthop,&temp_prefix,&temp_addr64);
+   if (packetfunctions_sameAddress(&temp_prefix,idmanager_getMyID(ADDR_PREFIX)) &&
+       packetfunctions_sameAddress(&temp_addr64,idmanager_getMyID(ADDR_64B))
+   ){
        size--;
        if (size!=0){
            *((uint8_t*)(msg->payload+hlen-2)) = CRITICAL_6LORH | size;
            *((uint8_t*)(msg->payload+hlen-1)) = temp_8b;
            packetfunctions_tossHeader(msg,sizeUnit);
            
-           switch(nexthop->type){
+           switch(nexthop.type){
            case ADDR_64B:
-               memcpy(&(nexthop->addr_64b[8-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
-               memcpy(&msg->l2_nextORpreviousHop,nexthop,sizeof(open_addr_t));
+               memcpy(&(nexthop.addr_64b[8-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+               memcpy(&msg->l2_nextORpreviousHop,&nexthop,sizeof(open_addr_t));
                break;
            case ADDR_128B:
-               memcpy(&(nexthop->addr_64b[16-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
-               memcpy(&msg->l2_nextORpreviousHop,nexthop,sizeof(open_addr_t));
+               memcpy(&(nexthop.addr_64b[16-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+               memcpy(&msg->l2_nextORpreviousHop,&nexthop,sizeof(open_addr_t));
                msg->l2_nextORpreviousHop.type = ADDR_64B;
                break;
            }
        } else{
+           for (i=0;i<msg->length;i++){
+              printf("%x ",msg->payload[i]);
+           }
+           printf("\n");
            packetfunctions_tossHeader(msg,hlen);
            hlen = 0;
            temp_8b = *(uint8_t*)(msg->payload);
            hlen += 1;
-           if((temp_8b & FORMAT_6LORH_MASK) == CRITICAL_6LORH){
-               size = temp_8b & RH3_6LOTH_SIXE_MASK;
+           if(
+              ((temp_8b & FORMAT_6LORH_MASK) == CRITICAL_6LORH) && 
+              (*(uint8_t*)(msg->payload+hlen)) < 0x05
+           ){
+               size = temp_8b & RH3_6LOTH_SIZE_MASK;
                temp_8b = *(uint8_t*)(msg->payload+hlen);
                hlen += 1;
-               if(temp_8b <= RH3_6LOTH_TYPE_4){
-                   // there is another RH3 6LoRH
-                   switch(temp_8b){
-                   case 0:
-                       sizeUnit=1;
-                       break;
-                   case 1:
-                       sizeUnit=2;
-                       break;
-                   case 2:
-                       sizeUnit=4;
-                       break;
-                   case 3:
-                       sizeUnit=8;
-                       break;
-                   case 4:
-                       sizeUnit=16;
-                       break;
-                   }
-                   switch(nexthop->type){
-                   case ADDR_64B:
-                       memcpy(&(nexthop->addr_64b[8-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
-                       memcpy(&msg->l2_nextORpreviousHop,nexthop,sizeof(open_addr_t));
-                       break;
-                   case ADDR_128B:
-                       memcpy(&(nexthop->addr_64b[16-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
-                       memcpy(&msg->l2_nextORpreviousHop,nexthop,sizeof(open_addr_t));
-                       msg->l2_nextORpreviousHop.type = ADDR_64B;
-                       break;
-                   }
-               } else{
-                   // some other 6lorh
+               // there is another RH3 6LoRH
+               switch(temp_8b){
+               case 0:
+                   sizeUnit=1;
+                   break;
+               case 1:
+                   sizeUnit=2;
+                   break;
+               case 2:
+                   sizeUnit=4;
+                   break;
+               case 3:
+                   sizeUnit=8;
+                   break;
+               case 4:
+                   sizeUnit=16;
+                   break;
+               }
+               switch(nexthop.type){
+               case ADDR_64B:
+                   memcpy(&(nexthop.addr_64b[8-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+                   memcpy(&msg->l2_nextORpreviousHop,&nexthop,sizeof(open_addr_t));
+                   break;
+               case ADDR_128B:
+                   memcpy(&(nexthop.addr_64b[16-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+                   memcpy(&msg->l2_nextORpreviousHop,&nexthop,sizeof(open_addr_t));
+                   msg->l2_nextORpreviousHop.type = ADDR_64B;
+                   break;
                }
            } else {
                // there is no RH3 anymore, next hop is destination
-               packetfunctions_ip128bToMac64b(&ipv6_inner_header->dest,nexthop,&msg->l2_nextORpreviousHop);
+               packetfunctions_ip128bToMac64b(&ipv6_inner_header->dest,&temp_prefix,&msg->l2_nextORpreviousHop);
+               for (i=0;i<msg->length;i++){
+                   printf("%x ",msg->payload[i]);
+               }
+               printf("\n");
            }
        }
        memcpy(&msg->l3_destinationAdd,&ipv6_inner_header->dest,sizeof(open_addr_t));
