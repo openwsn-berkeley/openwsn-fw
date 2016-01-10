@@ -134,7 +134,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    
    // inner header is required only when the destination address is NOT broadcast address
    if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd)) == FALSE) {
-       //IPHC inner header and NHC IPv6 header will be added at here
+        //IPHC inner header and NHC IPv6 header will be added at here
         iphc_prependIPv6Header(msg,
                     IPHC_TF_ELIDED,
                     flow_label, // value_flowlabel
@@ -247,9 +247,13 @@ void forwarding_receive(
    }
    
    // populate packets metadata with L3 information
-   memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest,sizeof(open_addr_t));
+   if (packetfunctions_isBroadcastMulticast(&(ipv6_outer_header->dest))==FALSE){
+       memcpy(&(msg->l3_destinationAdd),&ipv6_inner_header->dest,sizeof(open_addr_t));
+   } else {
+       memcpy(&(msg->l3_destinationAdd),&ipv6_outer_header->dest, sizeof(open_addr_t));
+   }
    memcpy(&(msg->l3_sourceAdd),     &ipv6_outer_header->src, sizeof(open_addr_t));
-
+   
    if (
          (
             idmanager_isMyAddress(&(msg->l3_destinationAdd))
@@ -552,7 +556,7 @@ owerror_t forwarding_send_internal_SourceRouting(
            hlen = 0;
            temp_8b = *(uint8_t*)(msg->payload);
            hlen += 1;
-           if(temp_8b & FORMAT_6LORH_MASK == CRITICAL_6LORH){
+           if((temp_8b & FORMAT_6LORH_MASK) == CRITICAL_6LORH){
                size = temp_8b & RH3_6LOTH_SIXE_MASK;
                temp_8b = *(uint8_t*)(msg->payload+hlen);
                hlen += 1;
@@ -631,12 +635,12 @@ void forwarding_createRplOption(rpl_option_ht* rpl_option, uint8_t flags) {
        I = 0;
     }
     
-    if (rpl_option->senderRank & 0x00FF == 0){
+    if ((rpl_option->senderRank & 0x00FF) == 0){
         K = 1;
     } else {
         K = 0;
     }
     
-    rpl_option->flags              = flags | (I<<1) | K;
+    rpl_option->flags              = (flags & ~I_FLAG & ~K_FLAG) | (I<<1) | K;
 }
 

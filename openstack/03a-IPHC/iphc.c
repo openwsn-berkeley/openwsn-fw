@@ -151,54 +151,69 @@ owerror_t iphc_sendFromForwarding(
    //then IPinIP 6LoRH
    
    //IPinIP 6LoRH will be added at here.
-   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-
-   if (packetfunctions_sameAddress(&(ipv6_inner_header->src),(open_addr_t*)dagroot)==FALSE){
-       if (sam == IPHC_SAM_64B){
-          // encapsulate address
-          packetfunctions_writeAddress(msg, &temp_src_mac64b,OW_BIG_ENDIAN);
-          // hoplim
-          packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-          *((uint8_t*)(msg->payload)) = ipv6_outer_header->hop_limit;
-          // type
-          packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-          *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
-          
-          packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-          *((uint8_t*)(msg->payload)) = CRITICAL_6LORH | 9;
-
-
-          
-       } else {
-           if (sam == IPHC_SAM_128B){
-               // encapsulate address
-               packetfunctions_writeAddress(msg, &(ipv6_inner_header->src),OW_BIG_ENDIAN);
-               // hoplim
-               packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-               *((uint8_t*)(msg->payload)) = ipv6_outer_header->hop_limit;
-               // type
-               packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-               *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
-               // 
-               packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-               *((uint8_t*)(msg->payload)) = CRITICAL_6LORH | 17;
+   if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
+       if (packetfunctions_sameAddress(&(ipv6_inner_header->src),(open_addr_t*)dagroot)==FALSE){
+           if (sam == IPHC_SAM_64B){
+              // encapsulate address
+              packetfunctions_writeAddress(msg, &temp_src_mac64b,OW_BIG_ENDIAN);
+              // hoplim
+              packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+              *((uint8_t*)(msg->payload)) = ipv6_outer_header->hop_limit;
+              // type
+              packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+              *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
+              
+              packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+              *((uint8_t*)(msg->payload)) = ELECTIVE_6LoRH | 9;
+           } else {
+               if (sam == IPHC_SAM_128B){
+                   // encapsulate address
+                   packetfunctions_writeAddress(msg, &(ipv6_inner_header->src),OW_BIG_ENDIAN);
+                   // hoplim
+                   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+                   *((uint8_t*)(msg->payload)) = ipv6_outer_header->hop_limit;
+                   // type
+                   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+                   *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
+                   // 
+                   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+                   *((uint8_t*)(msg->payload)) = ELECTIVE_6LoRH | 17;
+               }
            }
+       } else {
+           // hop limit
+           packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+           *((uint8_t*)(msg->payload)) = ipv6_outer_header->hop_limit;
+           // type
+           packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+           *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
+           // 
+           packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+           *((uint8_t*)(msg->payload)) = ELECTIVE_6LoRH | 1;
        }
+       // add page number
+       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
+       *((uint8_t*)(msg->payload)) = PAGE_DISPATCH_NO_1;
    } else {
-       // hop limit
-       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-       *((uint8_t*)(msg->payload)) = ipv6_outer_header->hop_limit;
-       // type
-       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-       *((uint8_t*)(msg->payload)) = IPECAP_6LOTH_TYPE;
-       // 
-       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-       *((uint8_t*)(msg->payload)) = CRITICAL_6LORH | 1;
+       //IPHC inner header and NHC IPv6 header will be added at here
+        iphc_prependIPv6Header(msg,
+                    IPHC_TF_ELIDED,
+                    *flow_label, // value_flowlabel
+                    IPHC_NH_INLINE,
+                    msg->l4_protocol, 
+                    IPHC_HLIM_64,
+                    ipv6_outer_header->hop_limit,
+                    IPHC_CID_NO,
+                    IPHC_SAC_STATELESS,
+                    sam,
+                    m,
+                    IPHC_DAC_STATELESS,
+                    dam,
+                    p_dest,
+                    p_src,            
+                    PCKTSEND  
+                    );
    }
-   // add page number
-   packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-   *((uint8_t*)(msg->payload)) = PAGE_DISPATCH_NO_1;
-   
    return sixtop_send(msg);
 }
 
@@ -236,7 +251,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
    memset(&ipv6_inner_header,0,sizeof(ipv6_header_iht));
    // then regular header
    iphc_retrieveIPv6Header(msg,&ipv6_outer_header,&ipv6_inner_header);
-   
+
    if (idmanager_getIsDAGroot()==FALSE ||
       packetfunctions_isBroadcastMulticast(&(ipv6_outer_header.dest))) {
       packetfunctions_tossHeader(msg,ipv6_outer_header.header_length);
@@ -599,7 +614,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                                ipv6_outer_header->header_length + \
                                extention_header_length);
             } else {
-                if (lorh_type<9){
+                if (lorh_type==5){
                    ipv6_outer_header->next_header     = IANA_IPv6HOPOPT;
                    ipv6_outer_header->hopByhop_option = (uint8_t*)(msg->payload) + \
                                    ipv6_outer_header->header_length + \
@@ -633,6 +648,12 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                              msg,
                              ipv6_inner_header,
                              extention_header_length + ipv6_outer_header->header_length);
+       
+       if (ipv6_outer_header->dest.type == ADDR_NONE){
+           // the destination address is in IPHC
+          ipv6_outer_header->dest.type=ADDR_128B;
+          memcpy(&(ipv6_outer_header->dest.addr_128b[0]), &(ipv6_inner_header->dest.addr_128b[0]), 16);
+       }
    }
 }
 
@@ -651,9 +672,12 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
        
     uint8_t page;
     uint8_t temp_8b;
+    uint8_t ipinip_length;
     
-    if ((msg->payload[0]&0xF0) == 0xF0){
-        page = msg->payload[0]&0x0F; 
+    temp_8b = *((uint8_t*)(msg->payload)+ipv6_header->header_length+previousLen);
+    
+    if ((temp_8b&0xF0) == 0xF0){
+        page = temp_8b&0x0F; 
         ipv6_header->header_length += sizeof(uint8_t);
     } else {
         page = 0;
@@ -867,22 +891,27 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
             temp_8b = *(uint8_t*)(msg->payload+ipv6_header->header_length+previousLen);
             if ((temp_8b & 0xE0) == ELECTIVE_6LoRH){
                 // this is an elective 6LoRH
+                ipinip_length = temp_8b & 0x1F;
                 ipv6_header->header_length += 1;
                 temp_8b = *(uint8_t*)(msg->payload+ipv6_header->header_length+previousLen);
                 if (temp_8b == 0x06){
                     // this is IpinIP 6LoRH
-                    if (ipv6_header->header_length == 1){
+                    ipv6_header->header_length += 1;
+                    ipv6_header->hop_limit = *(uint8_t*)(msg->payload+ipv6_header->header_length+previousLen);
+                    ipv6_header->header_length += 1;
+                    // destination address maybe is the first address in RH3 6LoRH OR dest adress in IPHC, reset first
+                    // update destination address if necessary after the processing
+                    memset(&(ipv6_header->dest),0,sizeof(open_addr_t));
+                    if (ipinip_length == 1){
                         // source address is root
                         memset(&(ipv6_header->src),0,sizeof(open_addr_t));
                         ipv6_header->src.type = ADDR_128B;
                         ipv6_header->src.addr_128b[0]  = 0xbb;
                         ipv6_header->src.addr_128b[1]  = 0xbb;
                         ipv6_header->src.addr_128b[15] = 0x01;
-                        ipv6_header->header_length += 16*sizeof(uint8_t);
                         // destination address is the first address in RH3 6LoRH OR dest adress in IPHC
-                        memset(&(ipv6_header->dest),0,sizeof(open_addr_t));
                     } else{
-                        switch(ipv6_header->header_length-1){
+                        switch(ipinip_length-1){
                         case 16:
                              // this is source address 
                              packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length+previousLen)),ADDR_128B,&ipv6_header->src,OW_BIG_ENDIAN);
@@ -896,6 +925,12 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
                              break;
                         default:
                              // do not support other length yet and destination address will be in RH3 or IPHC
+                             openserial_printError(
+                                COMPONENT_IPHC,
+                                ERR_6LOWPAN_UNSUPPORTED,
+                                (errorparameter_t)12,
+                                (errorparameter_t)(ipinip_length-1)
+                             );
                              printf("address length error %d !\n",ipv6_header->header_length-1);
                         }
                     }
@@ -903,7 +938,13 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
 
             } else {
                 // there is no critical format 6LoRH as a ip header
-                printf("Wrong format type of 6LoRH %d !\n",temp_8b & 0xE0);
+                openserial_printError(
+                    COMPONENT_IPHC,
+                    ERR_6LOWPAN_UNSUPPORTED,
+                    (errorparameter_t)11,
+                    (errorparameter_t)(temp_8b & 0xE0)
+                 );
+                printf("Wrong format type of 6LoRH %x !\n",temp_8b & 0xE0);
             }
         }
     }
@@ -930,16 +971,16 @@ void iphc_prependIPv6HopByHopHeader(
    ){
    uint8_t temp_8b;
    
-   if ((rpl_option->flags & K_FLAG) > 0){
+   if ((rpl_option->flags & K_FLAG) == 0){
       packetfunctions_reserveHeaderSize(msg,sizeof(uint16_t));
       msg->payload[0] = (uint8_t)((rpl_option->senderRank&0xFF00)>>8);
       msg->payload[1] = (uint8_t)(rpl_option->senderRank&0x00FF);
    } else {
       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
-      *((uint8_t*)(msg->payload)) = rpl_option->senderRank; 
+      *((uint8_t*)(msg->payload)) = (uint8_t)((rpl_option->senderRank&0xFF00)>>8);
    }
    
-   if ((rpl_option->flags & I_FLAG) > 0){
+   if ((rpl_option->flags & I_FLAG) == 0){
       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
       *((uint8_t*)(msg->payload)) = rpl_option->rplInstanceID;  
    }
@@ -970,6 +1011,7 @@ void iphc_retrieveIPv6HopByHopHeader(
    
    // initialize the header length (will increment at each field)
    hopbyhop_header->headerlen     = 0;
+   hopbyhop_header->HdrExtLen     = 0;
    
    temp_8b = *((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen);
    hopbyhop_header->headerlen    += sizeof(uint8_t);
@@ -983,6 +1025,9 @@ void iphc_retrieveIPv6HopByHopHeader(
            rpl_option->rplInstanceID = *((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen);
            hopbyhop_header->headerlen    += sizeof(uint8_t);
            hopbyhop_header->HdrExtLen    += 1;
+       } else {
+           // Global RPLInstanceID
+           rpl_option->rplInstanceID = 0;
        }
        
        if ((temp_8b & K_FLAG)==0){
