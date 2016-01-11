@@ -131,6 +131,11 @@ enum FORMAT_6LORH_enums {
     ELECTIVE_6LoRH           = 0xa0,        
 };
 
+enum IPINIP_LEN_6LORH_enums {
+    IPINIP_LEN_6LORH_MASK    = 0x1F, 
+    IPINIP_TYPE_6LORH        = 0x06,
+};
+
 enum TYPE_6LORH_enums{
     RH3_6LOTH_TYPE_0         = 0x00, 
     RH3_6LOTH_TYPE_1         = 0x01,
@@ -147,6 +152,8 @@ enum SIZE_6LORH_RH3_enums{
 
 enum PAGE_DISPATCH_enums{
     PAGE_DISPATCH_NO_1       = 0xF1,
+    PAGE_DISPATCH_TAG        = 0xF0,
+    PAGE_DISPATCH_NUM        = 0x0F,
 };
 
 //=========================== typedef =========================================

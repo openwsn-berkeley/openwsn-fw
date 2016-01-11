@@ -581,7 +581,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
         extention_header_length = 0;
         rh3_index = 0;
         temp_8b = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length);
-        while ((temp_8b&0xE0) == CRITICAL_6LORH){
+        while ((temp_8b&FORMAT_6LORH_MASK) == CRITICAL_6LORH){
             lorh_type = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length+1);
             if(lorh_type<5){
                 if (rh3_index == MAXNUM_RH3){
@@ -597,7 +597,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                 ipv6_outer_header->routing_header[rh3_index] = (uint8_t*)(msg->payload) + \
                                 ipv6_outer_header->header_length + \
                                 extention_header_length;
-                size = temp_8b & 0x1F;
+                size = temp_8b & RH3_6LOTH_SIZE_MASK;
                 switch(lorh_type){
                 case 0:
                     extention_header_length += 2+ 1*size;
@@ -624,7 +624,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                    ipv6_outer_header->hopByhop_option = (uint8_t*)(msg->payload) + \
                                    ipv6_outer_header->header_length + \
                                    extention_header_length;
-                   switch(temp_8b & 0x03){
+                   switch(temp_8b & (I_FLAG | K_FLAG)){
                    case 0:
                        extention_header_length += 2+3;
                        break;
@@ -686,8 +686,8 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
     
     temp_8b = *((uint8_t*)(msg->payload)+ipv6_header->header_length+previousLen);
     
-    if ((temp_8b&0xF0) == 0xF0){
-        page = temp_8b&0x0F; 
+    if ((temp_8b&PAGE_DISPATCH_TAG) == PAGE_DISPATCH_TAG){
+        page = temp_8b&PAGE_DISPATCH_NUM; 
         ipv6_header->header_length += sizeof(uint8_t);
     } else {
         page = 0;
@@ -899,12 +899,12 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
         // we are in 6LoRH now
         if (page == 1){
             temp_8b = *(uint8_t*)(msg->payload+ipv6_header->header_length+previousLen);
-            if ((temp_8b & 0xE0) == ELECTIVE_6LoRH){
+            if ((temp_8b & FORMAT_6LORH_MASK) == ELECTIVE_6LoRH){
                 // this is an elective 6LoRH
-                ipinip_length = temp_8b & 0x1F;
+                ipinip_length = temp_8b & IPINIP_LEN_6LORH_MASK;
                 ipv6_header->header_length += 1;
                 temp_8b = *(uint8_t*)(msg->payload+ipv6_header->header_length+previousLen);
-                if (temp_8b == 0x06){
+                if (temp_8b == IPINIP_TYPE_6LORH){
                     // this is IpinIP 6LoRH
                     ipv6_header->header_length += 1;
                     ipv6_header->hop_limit = *(uint8_t*)(msg->payload+ipv6_header->header_length+previousLen);
@@ -952,7 +952,7 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
                     COMPONENT_IPHC,
                     ERR_6LOWPAN_UNSUPPORTED,
                     (errorparameter_t)11,
-                    (errorparameter_t)(temp_8b & 0xE0)
+                    (errorparameter_t)(temp_8b & FORMAT_6LORH_MASK)
                  );
             }
         }
