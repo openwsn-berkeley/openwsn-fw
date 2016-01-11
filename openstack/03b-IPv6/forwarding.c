@@ -459,14 +459,8 @@ owerror_t forwarding_send_internal_SourceRouting(
    open_addr_t          temp_prefix;
    open_addr_t          temp_addr64;
    rpl_option_ht        rpl_option;
-   uint8_t              i;
    
    memset(&rpl_option,0,sizeof(rpl_option_ht));
-   for (i=0;i<msg->length;i++){
-       printf("%x ",msg->payload[i]);
-   }
-   printf("\n");
-   
 
    temp_8b = *((uint8_t*)(msg->payload)+ hlen);
    size = temp_8b & RH3_6LOTH_SIZE_MASK;
@@ -476,7 +470,6 @@ owerror_t forwarding_send_internal_SourceRouting(
    hlen += 1;
    nexthop.type = ADDR_128B;
    memcpy(&(nexthop.addr_128b[0]),&(ipv6_inner_header->dest.addr_128b[0]),16);
-   printf("dest type %d\n",nexthop.type);
    switch(temp_8b){
    case 0:
        sizeUnit = 1;
@@ -489,7 +482,12 @@ owerror_t forwarding_send_internal_SourceRouting(
            break;
        default:
            // log error
-           printf("Wrong nexthop type %d \n",nexthop.type);
+           openserial_printError(
+                COMPONENT_IPHC,
+                ERR_6LOWPAN_UNSUPPORTED,
+                (errorparameter_t)15,
+                (errorparameter_t)(temp_8b)
+           );
        } 
        break;
    case 1:
@@ -503,7 +501,12 @@ owerror_t forwarding_send_internal_SourceRouting(
            break;
        default:
            // log error
-           printf("Wrong nexthop type %d \n",nexthop.type);
+           openserial_printError(
+                COMPONENT_IPHC,
+                ERR_6LOWPAN_UNSUPPORTED,
+                (errorparameter_t)15,
+                (errorparameter_t)(temp_8b)
+           );
        }
        break;
    case 2:
@@ -517,7 +520,12 @@ owerror_t forwarding_send_internal_SourceRouting(
            break;
        default:
            // log error
-           printf("Wrong nexthop type %d \n",nexthop.type);
+           openserial_printError(
+                COMPONENT_IPHC,
+                ERR_6LOWPAN_UNSUPPORTED,
+                (errorparameter_t)15,
+                (errorparameter_t)(temp_8b)
+           );
        }
        break;
    case 3:
@@ -531,7 +539,12 @@ owerror_t forwarding_send_internal_SourceRouting(
            break;
        default:
            // log error
-           printf("Wrong nexthop type %d \n",nexthop.type);
+           openserial_printError(
+                COMPONENT_IPHC,
+                ERR_6LOWPAN_UNSUPPORTED,
+                (errorparameter_t)15,
+                (errorparameter_t)(temp_8b)
+           );
        }
        break;
    case 4:
@@ -539,7 +552,6 @@ owerror_t forwarding_send_internal_SourceRouting(
        packetfunctions_readAddress(((uint8_t*)(msg->payload+hlen)),ADDR_128B,&nexthop,OW_BIG_ENDIAN);
        break;
    }
-   printf("Test size%d \n",size);
    hlen += sizeUnit;
    packetfunctions_ip128bToMac64b(&nexthop,&temp_prefix,&temp_addr64);
    if (packetfunctions_sameAddress(&temp_prefix,idmanager_getMyID(ADDR_PREFIX)) &&
@@ -562,14 +574,7 @@ owerror_t forwarding_send_internal_SourceRouting(
            packetfunctions_reserveHeaderSize(msg,2);
            msg->payload[0] = CRITICAL_6LORH | size;
            msg->payload[1] = temp_8b;
-           for (i=0;i<msg->length;i++){
-              printf("%x ",msg->payload[i]);
-           }
        } else{
-           for (i=0;i<msg->length;i++){
-              printf("%x ",msg->payload[i]);
-           }
-           printf("\n");
            packetfunctions_tossHeader(msg,hlen);
            hlen = 0;
            temp_8b = *(uint8_t*)(msg->payload);
@@ -613,17 +618,18 @@ owerror_t forwarding_send_internal_SourceRouting(
            } else {
                // there is no RH3 anymore, next hop is destination
                packetfunctions_ip128bToMac64b(&ipv6_inner_header->dest,&temp_prefix,&msg->l2_nextORpreviousHop);
-               for (i=0;i<msg->length;i++){
-                   printf("%x ",msg->payload[i]);
-               }
-               printf("\n");
            }
        }
        memcpy(&msg->l3_destinationAdd,&ipv6_inner_header->dest,sizeof(open_addr_t));
        memcpy(&msg->l3_sourceAdd,&ipv6_outer_header->src,sizeof(open_addr_t));
    } else {
        // log error
-       printf("wrong address in RH3!\n");
+       openserial_printError(
+            COMPONENT_IPHC,
+            ERR_6LOWPAN_UNSUPPORTED,
+            (errorparameter_t)16,
+            (errorparameter_t)(temp_addr64.addr_64b[7])
+       );
    }
    
    // send to next lower layer
