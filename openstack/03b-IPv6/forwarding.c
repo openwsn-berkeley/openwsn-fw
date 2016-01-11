@@ -547,20 +547,23 @@ owerror_t forwarding_send_internal_SourceRouting(
    ){
        size--;
        if (size!=0){
-           *((uint8_t*)(msg->payload+hlen-2)) = CRITICAL_6LORH | size;
-           *((uint8_t*)(msg->payload+hlen-1)) = temp_8b;
-           packetfunctions_tossHeader(msg,sizeUnit);
-           
            switch(nexthop.type){
            case ADDR_64B:
                memcpy(&(nexthop.addr_64b[8-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
                memcpy(&msg->l2_nextORpreviousHop,&nexthop,sizeof(open_addr_t));
                break;
            case ADDR_128B:
-               memcpy(&(nexthop.addr_64b[16-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+               memcpy(&(nexthop.addr_128b[16-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
                memcpy(&msg->l2_nextORpreviousHop,&nexthop,sizeof(open_addr_t));
-               msg->l2_nextORpreviousHop.type = ADDR_64B;
+               packetfunctions_ip128bToMac64b(&nexthop,&temp_prefix,&msg->l2_nextORpreviousHop);
                break;
+           }
+           packetfunctions_tossHeader(msg,hlen);
+           packetfunctions_reserveHeaderSize(msg,2);
+           msg->payload[0] = CRITICAL_6LORH | size;
+           msg->payload[1] = temp_8b;
+           for (i=0;i<msg->length;i++){
+              printf("%x ",msg->payload[i]);
            }
        } else{
            for (i=0;i<msg->length;i++){
@@ -602,9 +605,9 @@ owerror_t forwarding_send_internal_SourceRouting(
                    memcpy(&msg->l2_nextORpreviousHop,&nexthop,sizeof(open_addr_t));
                    break;
                case ADDR_128B:
-                   memcpy(&(nexthop.addr_64b[16-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
+                   memcpy(&(nexthop.addr_128b[16-sizeUnit]),(uint8_t*)(msg->payload+hlen),sizeUnit);
                    memcpy(&msg->l2_nextORpreviousHop,&nexthop,sizeof(open_addr_t));
-                   msg->l2_nextORpreviousHop.type = ADDR_64B;
+                   packetfunctions_ip128bToMac64b(&nexthop,&temp_prefix,&msg->l2_nextORpreviousHop);
                    break;
                }
            } else {
