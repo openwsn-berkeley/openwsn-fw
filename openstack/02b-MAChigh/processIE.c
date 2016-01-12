@@ -262,14 +262,28 @@ port_INLINE uint8_t processIE_prependOpcodeIE(
 port_INLINE uint8_t processIE_prependBandwidthIE(
       OpenQueueEntry_t* pkt, 
       uint8_t           numOfLinks, 
-      uint8_t           slotframeID
+      uint8_t           slotframeID,
+      track_t           track
    ){
    
+
    uint8_t    len;
    mlme_IE_ht mlme_subHeader;
    
    len = 0;
    
+   //===== track
+
+   // owner address (64 bits = 8 bytes)
+   packetfunctions_reserveHeaderSize(pkt, 8);
+   memcpy(pkt->payload, &(track.owner.addr_64b), 8);
+   len += 8;
+
+   // instance
+   packetfunctions_reserveHeaderSize(pkt, sizeof(uint16_t));
+   memcpy(pkt->payload, &(track.instance), sizeof(uint16_t));
+   len += sizeof(uint16_t);
+
    //===== number of cells
    
    // reserve space
@@ -311,6 +325,129 @@ port_INLINE uint8_t processIE_prependBandwidthIE(
    return len;
 }
 
+port_INLINE uint8_t processIE_prependBlacklistIE(
+      OpenQueueEntry_t* pkt,
+      uint8_t           type,
+      uint8_t           frameID,
+      uint8_t           flag,
+      cellInfo_ht*      cellList
+   ){
+   uint8_t    i;
+   uint8_t    len;
+   uint8_t    temp8b;
+   uint8_t    numOfCells;
+   mlme_IE_ht mlme_subHeader;
+
+   len        = 0;
+   numOfCells = 0;
+
+   //===== cell list
+
+   for(i=0;i<SCHEDULEIEMAXNUMCELLS;i++) {
+      if(cellList[i].linkoptions != CELLTYPE_BUSY){
+         // cellobjects:
+         // - [2B] slotOffset
+         // - [2B] channelOffset
+         // - [1B] link_type
+         packetfunctions_reserveHeaderSize(pkt,5);
+         pkt->payload[0] = (uint8_t)(cellList[i].tsNum  & 0x00FF);
+         pkt->payload[1] = (uint8_t)((cellList[i].tsNum & 0xFF00)>>8);
+         pkt->payload[2] = (uint8_t)(cellList[i].choffset  & 0x00FF);
+         pkt->payload[3] = (uint8_t)((cellList[i].choffset & 0xFF00)>>8);
+         pkt->payload[4] = cellList[i].linkoptions;
+         len += 5;
+         numOfCells++;
+      }
+   }
+
+   // record the position of cellObjects
+   pkt->l2_scheduleIE_numOfCells  = numOfCells;
+   pkt->l2_scheduleIE_cellObjects = pkt->payload;
+
+   char str[150];
+   sprintf(str, "LinkRep prepared: nbCellsBusy ");
+   openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
+
+   //===== number of cells
+
+   // reserve space
+   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+
+   // prepare header
+   temp8b  = numOfCells;
+   temp8b |= flag << 7;
+
+   // copy header
+   *((uint8_t*)(pkt->payload)) = temp8b;
+
+   len += 1;
+
+   //===== slotframeID
+
+   // reserve space
+   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+
+   // prepare header
+   temp8b = frameID;
+
+   // copy header
+   *((uint8_t*)(pkt->payload)) = temp8b;
+
+   len += 1;
+
+   // record the frameID
+   pkt->l2_scheduleIE_frameID = frameID;
+
+   //===== length
+
+   // reserve space
+   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+
+   // prepare header
+   temp8b = len;
+
+   // copy header
+   *((uint8_t*)(pkt->payload)) = temp8b;
+
+   // length
+   len += 1;
+
+   //===== type
+
+   // reserve space
+   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+
+   // prepare header
+   temp8b = type;
+
+   // copy header
+   *((uint8_t*)(pkt->payload)) = temp8b;
+
+   len += 1;
+
+   //===== MLME IE header
+
+   // reserve space
+   packetfunctions_reserveHeaderSize(pkt, sizeof(mlme_IE_ht));
+
+   // prepare header
+   mlme_subHeader.length_subID_type  = len;
+   mlme_subHeader.length_subID_type |=
+      (MLME_IE_SUBID_SCHEDULE << MLME_IE_SUBID_SHIFT) |
+      IEEE802154E_DESC_TYPE_SHORT;
+
+   // copy header
+   pkt->payload[0] = mlme_subHeader.length_subID_type       & 0xFF;
+   pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8)& 0xFF;
+
+   len+=2;
+
+   return len;
+}
+
+
 port_INLINE uint8_t processIE_prependScheduleIE(
       OpenQueueEntry_t* pkt,
       uint8_t           type,
@@ -330,7 +467,7 @@ port_INLINE uint8_t processIE_prependScheduleIE(
    //===== cell list
    
    for(i=0;i<SCHEDULEIEMAXNUMCELLS;i++) {
-      if(cellList[i].linkoptions != CELLTYPE_OFF){
+      if(cellList[i].linkoptions != CELLTYPE_OFF && cellList[i].linkoptions != CELLTYPE_BUSY){
          // cellobjects:
          // - [2B] slotOffset
          // - [2B] channelOffset
@@ -501,7 +638,8 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
                CELLTYPE_TXRX,                      // type of slot
                TRUE,                               // shared?
                linkInfo.choffset,                  // channel offset
-               &temp_neighbor                      // neighbor
+               &temp_neighbor,                     // neighbor
+               sixtop_get_trackbesteffort()        // with the best effort track (shared cells)
             );
          }
       }
@@ -544,6 +682,15 @@ port_INLINE void processIE_retrieveBandwidthIE(
    bandwidthInfo->numOfLinks = *((uint8_t*)(pkt->payload)+localptr);
    localptr++;
    
+   // [2B] track instance
+   memcpy(&(bandwidthInfo->track.instance), (pkt->payload)+localptr, sizeof(uint16_t));
+   localptr += sizeof(uint16_t);
+
+   // [8B] track owner
+   memcpy(&(bandwidthInfo->track.owner.addr_64b), (pkt->payload)+localptr, 8);
+   bandwidthInfo->track.owner.type = ADDR_64B;
+   localptr += 8;
+
    *ptr=localptr; 
 }
 

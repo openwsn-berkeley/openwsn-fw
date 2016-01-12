@@ -93,7 +93,8 @@ owerror_t c6t_receive(
          // call sixtop
          sixtop_addCells(
             &neighbor,
-            1
+            1,
+            sixtop_get_trackbesteffort()
          );
          
          // set the CoAP header

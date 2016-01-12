@@ -40,9 +40,12 @@ void otf_addCell_task(void) {
    // call sixtop
    sixtop_addCells(
       &neighbor,
-      1
+      1,
+      sixtop_get_trackbesteffort()
    );
 }
+
+//TODO: handle tracks when monitoring the OTF requetss to do
 
 void otf_removeCell_task(void) {
    open_addr_t          neighbor;
@@ -59,4 +62,17 @@ void otf_removeCell_task(void) {
    sixtop_removeCell(
       &neighbor
    );
+}
+
+//a packet is pushed to the MAC layer -> OTF notification
+void otf_notif_transmit(OpenQueueEntry_t* msg){
+
+ //  if (!sixtop_isIdle())
+      return;
+
+#ifdef TRACK_ACTIVE
+#ifdef OTF_AGRESSIVE
+   otf_reserve_agressive_for(msg);
+#endif
+#endif
 }

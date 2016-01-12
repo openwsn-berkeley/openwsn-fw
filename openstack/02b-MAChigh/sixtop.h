@@ -47,8 +47,14 @@ typedef enum {
 
 //=========================== typedef =========================================
 
+#define SIXTOP_NBCELLS_INREQ     3     //nb cells in the 6top IE (request / reply)
+
 #define SIX2SIX_TIMEOUT_MS 4000
 #define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
+
+//TODO: fix a correct timeout
+//#define SIX2SIX_TIMEOUT_MS ((uint32_t)(1 + MAXBE / NUMSHAREDTXRX) * TXRETRIES * SUPERFRAME_LENGTH * TsSlotDuration * PORT_TICS_PER_MS / 1000)
+
 
 //=========================== module variables ================================
 
@@ -75,7 +81,7 @@ void      sixtop_setKaPeriod(uint16_t kaPeriod);
 void      sixtop_setEBPeriod(uint8_t ebPeriod);
 void      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
-void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells);
+void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track);
 void      sixtop_removeCell(open_addr_t*  neighbor);
 void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 // maintaining
@@ -92,6 +98,7 @@ bool      debugPrint_kaPeriod(void);
 bool      sixtop_is_trackequal(track_t track1, track_t track2);
 bool      sixtop_is_trackbesteffort(track_t track);
 track_t   sixtop_get_trackbesteffort(void);
+
 
 
 /**

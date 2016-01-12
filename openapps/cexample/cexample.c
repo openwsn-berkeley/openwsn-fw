@@ -66,6 +66,8 @@ void cexample_init() {
 #else
    bzero(&(cexample_vars.track.owner), sizeof(open_addr_t));
    cexample_vars.track.instance            = (uint16_t)0;
+
+   //cexample_vars.track = sixtop_get_trackbesteffort()
 #endif
 
    opencoap_register(&cexample_vars.desc);

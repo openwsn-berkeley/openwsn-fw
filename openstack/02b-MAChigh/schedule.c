@@ -5,6 +5,8 @@
 #include "packetfunctions.h"
 #include "sixtop.h"
 #include "idmanager.h"
+#include "IEEE802154E.h"
+#include "sixtop.h"
 
 //=========================== variables =======================================
 
@@ -50,7 +52,8 @@ void schedule_init() {
          CELLTYPE_SERIALRX,                     // type of slot
          FALSE,                                 // shared?
          0,                                     // channel offset
-         &temp_neighbor                         // neighbor
+         &temp_neighbor,                        // neighbor
+         sixtop_get_trackbesteffort()           //for best effort traffic
       );
    }
 }
@@ -62,7 +65,8 @@ void schedule_startDAGroot() {
    slotOffset_t    start_slotOffset;
    slotOffset_t    running_slotOffset;
    open_addr_t     temp_neighbor;
-   
+
+
    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    // set frame length, handle and number (default 1 by now)
    if (schedule_vars.frameLength == 0) {
@@ -83,7 +87,8 @@ void schedule_startDAGroot() {
          CELLTYPE_TXRX,                      // type of slot
          TRUE,                               // shared?
          SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
-         &temp_neighbor                      // neighbor
+         &temp_neighbor,                     // neighbor
+         sixtop_get_trackbesteffort()        //for best effort traffic
       );
    }
 }
@@ -280,7 +285,8 @@ owerror_t schedule_addActiveSlot(
       cellType_t      type,
       bool            shared,
       channelOffset_t channelOffset,
-      open_addr_t*    neighbor
+      open_addr_t*    neighbor,
+      track_t         track
    ) {
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
@@ -314,8 +320,18 @@ owerror_t schedule_addActiveSlot(
    slotContainer->type                      = type;
    slotContainer->shared                    = shared;
    slotContainer->channelOffset             = channelOffset;
+   slotContainer->track                     = track;
    memcpy(&slotContainer->neighbor,neighbor,sizeof(open_addr_t));
    
+   //ASN = now
+   // TODO: required?
+   uint8_t array[5];
+   ieee154e_getAsn(array);
+   slotContainer->lastUsedAsn.bytes0and1  = ((uint16_t)array[1] << 8) | (uint16_t)array[0];
+   slotContainer->lastUsedAsn.bytes2and3  = ((uint16_t)array[3] << 8) | (uint16_t)array[2];
+   slotContainer->lastUsedAsn.byte4       = array[4];
+
+
    // insert in circular list
    if (schedule_vars.currentScheduleEntry==NULL) {
       // this is the first active slot added
@@ -358,6 +374,10 @@ owerror_t schedule_addActiveSlot(
    }
    
    ENABLE_INTERRUPTS();
+
+   //notification through the serial line
+   openserial_statCelladd(slotContainer);
+
    return E_SUCCESS;
 }
 
@@ -399,6 +419,9 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
       return E_FAIL;
    }
    
+   //notification of openvisualizer
+   openserial_statCellremove(slotContainer);
+
    // remove from linked list
    if (slotContainer->next==slotContainer) {
       // this is the last active slot
@@ -817,4 +840,6 @@ void schedule_resetEntry(scheduleEntry_t* e) {
    e->lastUsedAsn.bytes2and3 = 0;
    e->lastUsedAsn.byte4      = 0;
    e->next                   = NULL;
+
+   e->track = sixtop_get_trackbesteffort();
 }

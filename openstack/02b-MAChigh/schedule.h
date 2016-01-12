@@ -10,6 +10,7 @@
 
 #include "opendefs.h"
 
+
 //=========================== define ==========================================
 
 /**
@@ -75,7 +76,8 @@ typedef enum {
    CELLTYPE_RX               = 2,
    CELLTYPE_TXRX             = 3,
    CELLTYPE_SERIALRX         = 4,
-   CELLTYPE_MORESERIALRX     = 5
+   CELLTYPE_MORESERIALRX     = 5,
+   CELLTYPE_BUSY             = 6
 } cellType_t;
 
 typedef struct {
@@ -148,7 +150,8 @@ owerror_t          schedule_addActiveSlot(
    cellType_t           type,
    bool                 shared,
    uint8_t              channelOffset,
-   open_addr_t*         neighbor
+   open_addr_t*         neighbor,
+   track_t              track
 );
 
 void               schedule_getSlotInfo(

@@ -535,12 +535,13 @@ OpenQueueEntry_t* openqueue_macGetEBPacket() {
 }
 
 //make a local copy of the entry to push it to openbridge
+/*
 OpenQueueEntry_t* openqueue_copy_for_openbridge(OpenQueueEntry_t* pkt){
 
    memcpy(&(openqueue_vars.openbridge), pkt, sizeof(OpenQueueEntry_t));
    return(&(openqueue_vars.openbridge));
 }
-
+*/
 
 
 //not enough space for non prioritar packets

@@ -21,6 +21,8 @@
 #define MLME_IE_SUBID_BANDWIDTH        0x42
 #define MLME_IE_SUBID_TRACKID          0x43
 #define MLME_IE_SUBID_SCHEDULE         0x44
+#define MLME_IE_SUBID_BLACKLIST        0x45
+
 // ========================== typedef =========================================
 
 BEGIN_PACK
@@ -106,6 +108,7 @@ http://tools.ietf.org/html/draft-wang-6tisch-6top-sublayer-01#section-4.1.1.6
 typedef struct{
    uint8_t         slotframeID;
    uint8_t         numOfLinks;
+   track_t         track;
 } bandwidth_IE_ht;
 
 /**
@@ -154,9 +157,17 @@ uint8_t          processIE_prependOpcodeIE(
 uint8_t          processIE_prependBandwidthIE(
    OpenQueueEntry_t*    pkt,
    uint8_t              numOfLinks, 
-   uint8_t              slotframeID
+   uint8_t              slotframeID,
+   track_t              track
 );
 uint8_t          processIE_prependScheduleIE(
+   OpenQueueEntry_t*    pkt,
+   uint8_t              type,
+   uint8_t              frameID,
+   uint8_t              flag,
+   cellInfo_ht*         cellList
+);
+uint8_t          processIE_prependBlacklistIE(
    OpenQueueEntry_t*    pkt,
    uint8_t              type,
    uint8_t              frameID,
