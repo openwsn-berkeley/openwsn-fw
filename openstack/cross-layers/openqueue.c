@@ -439,7 +439,7 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
 }
 
 //======= called by IEEE80215E
-
+/*
 OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    uint8_t i;
    INTERRUPT_DECLARATION();
@@ -473,8 +473,8 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    ENABLE_INTERRUPTS();
    return NULL;
 }
+*/
 
-/*
 OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *track) {
    uint8_t i;
    INTERRUPT_DECLARATION();
@@ -516,7 +516,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *t
    ENABLE_INTERRUPTS();
    return NULL;
 }
-*/
+
 
 OpenQueueEntry_t* openqueue_macGetEBPacket() {
    uint8_t i;

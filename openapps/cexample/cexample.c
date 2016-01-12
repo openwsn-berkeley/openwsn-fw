@@ -60,14 +60,17 @@ void cexample_init() {
 
 
 #ifdef TRACK_ACTIVE
+   openserial_printCritical(
+            COMPONENT_CEXAMPLE, ERR_GENERIC,
+            (errorparameter_t)20,
+            (errorparameter_t)0
+         );
+
    //I am the owner of this track (8 bytes address)
    memcpy(&(cexample_vars.track.owner), idmanager_getMyID(ADDR_64B), sizeof(open_addr_t));
    cexample_vars.track.instance            = (uint16_t)TRACK_CEXAMPLE;
 #else
-   bzero(&(cexample_vars.track.owner), sizeof(open_addr_t));
-   cexample_vars.track.instance            = (uint16_t)0;
-
-   //cexample_vars.track = sixtop_get_trackbesteffort()
+    cexample_vars.track = sixtop_get_trackbesteffort()
 #endif
 
    opencoap_register(&cexample_vars.desc);

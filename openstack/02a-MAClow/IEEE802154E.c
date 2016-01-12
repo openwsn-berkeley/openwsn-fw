@@ -837,6 +837,7 @@ port_INLINE void activity_ti1ORri1() {
    sync_IE_ht  sync_IE;
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
+   track_t     track;
 
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -910,7 +911,8 @@ port_INLINE void activity_ti1ORri1() {
          // check whether we can send
          if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
-            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
+            schedule_getTrack(&track);
+            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
             if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
                couldSendEB=TRUE;
                // look for an EB packet in the queue
