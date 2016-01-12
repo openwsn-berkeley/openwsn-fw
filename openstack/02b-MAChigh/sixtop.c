@@ -187,11 +187,6 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track){
    );
 
 
-   //TODO
-   return;
-
-
-
    frameID    = schedule_getFrameHandle();
 
    memset(cellList,0,sizeof(cellList));
@@ -1186,6 +1181,18 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          sixtop_vars.six2six_state = SIX_IDLE;
          break;
       case SIX_WAIT_REMOVEREQUEST_SENDDONE:
+         ;
+         track_t  track = sixtop_get_trackbesteffort();
+
+#ifdef _DEBUG_SIXTOP_
+            char  str[150];
+            sprintf(str, "LinkRem tx: to ");
+            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+            openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
+
+
          if(error == E_SUCCESS && numOfCells > 0){
             for (i=0;i<numOfCells;i++){
                //TimeSlot 2B
@@ -1198,6 +1205,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                cellList[i].linkoptions = *(ptr+4);
                ptr += 5;
             }
+
+            //saves the value to reallocate a new cell while preserving the track
+            track = sixtop_getTrackCellsByState(msg->l2_scheduleIE_frameID, numOfCells, cellList, &(msg->l2_nextORpreviousHop));
+
             sixtop_removeCellsByState(
                msg->l2_scheduleIE_frameID,
                numOfCells,
@@ -1209,9 +1220,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          opentimers_stop(sixtop_vars.timeoutTimerId);
          leds_debug_off();
 
-         //TODO: what is the objective of this part?
+         //This cell was considered buggy by sixtop -> it must reallocate a new one after having removed it
          if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
-             sixtop_addCells(&(msg->l2_nextORpreviousHop),1,sixtop_get_trackbesteffort());
+
+             sixtop_addCells(&(msg->l2_nextORpreviousHop), 1, track);
              sixtop_vars.handler = SIX_HANDLER_NONE;
          }
          break;
@@ -1791,6 +1803,47 @@ void sixtop_addCellsByState(
          }
       }
    }
+}
+
+
+// searches for the track associated to this neighbor / slotinfos
+track_t sixtop_getTrackCellsByState(
+      uint8_t      slotframeID,
+      uint8_t      numOfLink,
+      cellInfo_ht* cellList,
+      open_addr_t* previousHop
+   ){
+   uint8_t              i;
+   slotinfo_element_t   info;
+   bool                 found = FALSE;
+   track_t              track = sixtop_get_trackbesteffort();
+
+   for(i=0;i<numOfLink;i++){
+      if(cellList[i].linkoptions == CELLTYPE_TX){
+
+         schedule_getSlotInfo(
+            cellList[i].tsNum,
+            previousHop,
+            &info
+         );
+
+         //all these cells MUST have the same track
+         if (found){
+            if (!sixtop_is_trackequal(track, info.track))
+               openserial_printError(
+                     COMPONENT_SIXTOP,
+                     ERR_SIXTOP_MULTIPLE_TRACKS,
+                     (errorparameter_t)0,
+                     (errorparameter_t)0
+               );
+         }
+         else{
+            track = info.track;
+            found = TRUE;
+         }
+      }
+   }
+   return(track);
 }
 
 void sixtop_removeCellsByState(

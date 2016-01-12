@@ -245,12 +245,14 @@ void  schedule_getSlotInfo(
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
-       //check that this entry for that neighbour and timeslot is not already scheduled.
+
+       // search for the corresponding node and slotoffset
        if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
                //it exists so this is an update.
                info->link_type                 = slotContainer->type;
-               info->shared                    =slotContainer->shared;
+               info->shared                    = slotContainer->shared;
                info->channelOffset             = slotContainer->channelOffset;
+               info->track                     = slotContainer->track;
                return; //as this is an update. No need to re-insert as it is in the same position on the list.
         }
         slotContainer++;
@@ -258,7 +260,8 @@ void  schedule_getSlotInfo(
    //return cell type off.
    info->link_type                 = CELLTYPE_OFF;
    info->shared                    = FALSE;
-   info->channelOffset             = 0;//set to zero if not set.                          
+   info->channelOffset             = 0;//set to zero if not set.
+   info->track                     = sixtop_get_trackbesteffort();
 }
 
 /**
@@ -675,7 +678,7 @@ uint8_t schedule_getNbCellsWithTrack(track_t track, open_addr_t *nextHop){
 
 \returns The channel offset of the current schedule entry.
 */
-void schedule_getTrack(track_t *track) {
+void schedule_getTrackCurrent(track_t *track) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    memcpy(track, &(schedule_vars.currentScheduleEntry->track), sizeof(track_t));

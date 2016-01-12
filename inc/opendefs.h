@@ -271,11 +271,12 @@ enum {
    ERR_OPENSERIAL_BUFFER_OVERFLOW      = 0x46, // buffer overflow for output in openserial (indexWrite {0}, location {1})
    ERR_OPENQUEUE_BUFFER_OVERFLOW       = 0x47, // buffer overflow: too many packets (space left {0}, reserved for management {1})
    ERR_SIXTOP_TOOMANY_CELLS            = 0x48, // too many cells to reserve in the sixtop request (asked {0}, max {1})
-   ERR_OPENQUEUE_DESYNC                = 0x49, // a packet cannot be allocated for component {0} when the node is not synchronized
-   ERR_INVALID_COMPONENT               = 0x4a, // The component {0} cannot trigger this command (location {1})
-   ERR_SIXTOP_NOCELL                   = 0x4b, // Sixtop cannot remove any cell to the parent {0}{1} (none existing)
-   ERR_GENERIC                         = 0x4c, // generic error {0} {1}
-   ERR_UNKNOWN                         = 0x5d, // unknown error, location {0}, arg {1}
+   ERR_SIXTOP_MULTIPLE_TRACKS          = 0x49, // the cells from the same LinkRem are associated with different tracks
+   ERR_OPENQUEUE_DESYNC                = 0x4a, // a packet cannot be allocated for component {0} when the node is not synchronized
+   ERR_INVALID_COMPONENT               = 0x4b, // The component {0} cannot trigger this command (location {1})
+   ERR_SIXTOP_NOCELL                   = 0x4d, // Sixtop cannot remove any cell to the parent {0}{1} (none existing)
+   ERR_GENERIC                         = 0x50, // generic error {0} {1}
+   ERR_UNKNOWN                         = 0x51, // unknown error, location {0}, arg {1}
 };
 
 

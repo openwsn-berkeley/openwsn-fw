@@ -117,6 +117,7 @@ typedef struct {
   bool             shared;
   slotOffset_t     slotOffset;
   channelOffset_t  channelOffset;
+  track_t          track;
 }slotinfo_element_t;
 
 //=========================== variables =======================================
@@ -180,7 +181,7 @@ uint8_t            schedule_getFrameNumber(void);
 cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
 uint8_t            schedule_getNbCellsWithTrack(track_t track, open_addr_t *nextHop);
-void               schedule_getTrack(track_t *track);
+void               schedule_getTrackCurrent(track_t *track);
 channelOffset_t    schedule_getChannelOffset(void);
 bool               schedule_getOkToSend(void);
 void               schedule_resetBackoff(void);
