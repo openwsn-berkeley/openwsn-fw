@@ -156,13 +156,15 @@ void cexample_task_cb() {
    // create a CoAP packet
    pkt = openqueue_getFreePacketBuffer_with_timeout(COMPONENT_CEXAMPLE, cexample_timeout);
    if (pkt==NULL) {
-      openserial_printError(
+     /* TODO - reactivate for normal usage
+      *
+      * openserial_printError(
          COMPONENT_CEXAMPLE,
          ERR_NO_FREE_PACKET_BUFFER,
          (errorparameter_t)0,
          (errorparameter_t)0
       );
-
+*/
       return;
    }
    // take ownership over that packet

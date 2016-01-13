@@ -583,8 +583,16 @@ void sendDAO() {
    msg->l4_sourcePortORicmpv6Type           = IANA_ICMPv6_RPL;
 
    
- //TODO choose a proper trackid
-//   sixtop_set_trackbesteffort(&(msg->l2_track));
+   // set track for DAO
+#ifdef TRACK_ACTIVE
+   memcpy(msg->l2_track.owner.addr_64b, &(icmpv6rpl_vars.dio.DODAGID[8]), 8);
+   msg->l2_track.owner.type = ADDR_64B;
+   msg->l2_track.instance            = (uint16_t)TRACK_IMCPv6RPL;
+#else
+   bzero(&(msg->l2_track.owner), sizeof(msg->l2_track));
+   msg->l2_track.owner.type = ADDR_64B;
+   msg->l2_track.instance            = (uint16_t)0;
+#endif
 
 
 

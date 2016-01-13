@@ -575,13 +575,15 @@ bool openqueue_overflow_for_data(void){
    ENABLE_INTERRUPTS();
 
    //for debug
-   if (nb <= QUEUELENGTH_RESERVED)
+   //TODO - restablish for a normal usage
+  /*if (nb <= QUEUELENGTH_RESERVED)
       openserial_printError(
                COMPONENT_OPENQUEUE,
                ERR_OPENQUEUE_BUFFER_OVERFLOW,
                (errorparameter_t)nb,
                (errorparameter_t)QUEUELENGTH_RESERVED
             );
+*/
 
    return(nb <= QUEUELENGTH_RESERVED);
 }

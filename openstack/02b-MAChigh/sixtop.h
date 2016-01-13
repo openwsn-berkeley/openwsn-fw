@@ -11,6 +11,8 @@
 #include "opentimers.h"
 #include "opendefs.h"
 #include "processIE.h"
+
+
 //=========================== define ==========================================
 
 enum sixtop_CommandID_num{
@@ -49,11 +51,11 @@ typedef enum {
 
 #define SIXTOP_NBCELLS_INREQ     3     //nb cells in the 6top IE (request / reply)
 
-#define SIX2SIX_TIMEOUT_MS 4000
 #define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
 
 //TODO: fix a correct timeout
-//#define SIX2SIX_TIMEOUT_MS ((uint32_t)(1 + MAXBE / NUMSHAREDTXRX) * TXRETRIES * SUPERFRAME_LENGTH * TsSlotDuration * PORT_TICS_PER_MS / 1000)
+#define SIX2SIX_TIMEOUT_MS ((uint32_t)(1 + MAXBE / SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS) * TXRETRIES * SLOTFRAME_LENGTH * TsSlotDuration * PORT_TICS_PER_MS / 1000)
+//#define SIX2SIX_TIMEOUT_MS 4000
 
 
 //=========================== module variables ================================
