@@ -45,37 +45,43 @@ status information about several modules in the OpenWSN stack.
 */
 bool debugPrint_queue() {
    debugOpenQueueEntry_t output;
+   uint8_t  row;
 
-   openqueue_vars.debugPrintRow         = (openqueue_vars.debugPrintRow+1)%QUEUELENGTH;
-
-   output.row     = openqueue_vars.debugPrintRow;
-   output.creator = openqueue_vars.queue[openqueue_vars.debugPrintRow].creator;
-   output.owner   = openqueue_vars.queue[openqueue_vars.debugPrintRow].owner;
+   //push several rows at the same time
+   for(row=0; row<NBROWS_OPENSERIALSTATUS; row++){
 
 
-   //ASN to push (in ASN format)
-   output.timeout.byte4 = openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[4];
-   output.timeout.bytes0and1 =
-         openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[0] +
-         openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[1] * 256;
-   output.timeout.bytes2and3 =
-         openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[2] +
-         openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[3] *256;
+      openqueue_vars.debugPrintRow         = (openqueue_vars.debugPrintRow+1)%QUEUELENGTH;
+
+      output.row     = openqueue_vars.debugPrintRow;
+      output.creator = openqueue_vars.queue[openqueue_vars.debugPrintRow].creator;
+      output.owner   = openqueue_vars.queue[openqueue_vars.debugPrintRow].owner;
 
 
-  output.trackInstance                  = \
-         (uint16_t)openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.instance;
-   memcpy(
-         &output.trackOwner,
-         &(openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.owner),
-         sizeof(open_addr_t)
-   );
+      //ASN to push (in ASN format)
+      output.timeout.byte4 = openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[4];
+      output.timeout.bytes0and1 =
+            openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[0] +
+            openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[1] * 256;
+      output.timeout.bytes2and3 =
+            openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[2] +
+            openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[3] *256;
 
-   openserial_printStatus(
-         STATUS_QUEUE,
-         (uint8_t*)&output,
-         sizeof(debugOpenQueueEntry_t));
 
+      output.trackInstance                  = \
+            (uint16_t)openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.instance;
+      memcpy(
+            &output.trackOwner,
+            &(openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.owner),
+            sizeof(open_addr_t)
+      );
+
+      openserial_printStatus(
+            STATUS_QUEUE,
+            (uint8_t*)&output,
+            sizeof(debugOpenQueueEntry_t));
+
+   }
    return TRUE;
 }
 
@@ -206,8 +212,8 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    
    // walk through queue and find free entry
    for (i=0;i<QUEUELENGTH;i++) {
-      if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
-         //bzero(openqueue_vars.queue[i].timeout.byte, sizeof(timeout_t));
+      if (openqueue_vars.queue[i].owner == COMPONENT_NULL) {
+         bzero(openqueue_vars.queue[i].timeout.byte, sizeof(timeout_t));
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
          ENABLE_INTERRUPTS(); 
@@ -221,32 +227,17 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 
 //======= called by any component
 
+
+
 /**
-\brief Request a new (free) packet buffer, specifying a timeout (in ms)
+\brief Fix a timeout (in ms) for a packet
 
-\note Once a packet has been allocated, it is up to the creator of the packet
-      to free it using the openqueue_freePacketBuffer() function.
+\param entry A pointer to the entry to configure.
+\param duration_ms The timer after which this packet should be removed from the queue, even it it was not transmitted.
 
-\returns A pointer to the queue entry when it could be allocated, or NULL when
-         it could not be allocated (buffer full or not synchronized).
 */
-OpenQueueEntry_t* openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, const uint16_t duration_ms) {
 
-   // a new entry in the queue
-   OpenQueueEntry_t* entry;
-   entry = openqueue_getFreePacketBuffer(creator);
-
-   //openqueue_set_timeout(entry, duration_ms);
-   return(entry);
-}
-
-
-
-
-//set a timeout for this entry
 void openqueue_set_timeout(OpenQueueEntry_t* entry, const uint16_t duration_ms){
-  return;
-  /*
    timeout_t     now;
    uint8_t       remainder, i;
    uint64_t      diff;
@@ -272,7 +263,6 @@ void openqueue_set_timeout(OpenQueueEntry_t* entry, const uint16_t duration_ms){
       diff -= (uint64_t)duration_asn.byte[4] << (8*i);
    }
 
-
    //translates the duration into an ASN
    ieee154e_getAsn(now.byte);
    remainder = 0;
@@ -284,11 +274,31 @@ void openqueue_set_timeout(OpenQueueEntry_t* entry, const uint16_t duration_ms){
          remainder = 0;
    }
 
-
    ENABLE_INTERRUPTS();
    return;
-   */
 }
+
+
+
+/**
+\brief Request a new (free) packet buffer, specifying a timeout (in ms)
+
+\note Once a packet has been allocated, it is up to the creator of the packet
+      to free it using the openqueue_freePacketBuffer() function.
+
+\returns A pointer to the queue entry when it could be allocated, or NULL when
+         it could not be allocated (buffer full or not synchronized).
+*/
+OpenQueueEntry_t* openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, const uint16_t duration_ms) {
+
+   // a new entry in the queue
+   OpenQueueEntry_t* entry;
+   entry = openqueue_getFreePacketBuffer(creator);
+
+   openqueue_set_timeout(entry, duration_ms);
+   return(entry);
+}
+
 
 
 
@@ -534,6 +544,14 @@ OpenQueueEntry_t* openqueue_macGetEBPacket() {
    return NULL;
 }
 
+
+//returns the i^th packet of the queue (called by OTF to walk enough resource is allocated for the present queue)
+OpenQueueEntry_t* openqueue_getPacket(uint8_t i) {
+   return (&(openqueue_vars.queue[i]));
+}
+
+
+
 //make a local copy of the entry to push it to openbridge
 /*
 OpenQueueEntry_t* openqueue_copy_for_openbridge(OpenQueueEntry_t* pkt){
@@ -557,14 +575,14 @@ bool openqueue_overflow_for_data(void){
    ENABLE_INTERRUPTS();
 
    //for debug
- /*  if (nb <= QUEUELENGTH_RESERVED)
+   if (nb <= QUEUELENGTH_RESERVED)
       openserial_printError(
                COMPONENT_OPENQUEUE,
                ERR_OPENQUEUE_BUFFER_OVERFLOW,
                (errorparameter_t)nb,
                (errorparameter_t)QUEUELENGTH_RESERVED
             );
-*/
+
    return(nb <= QUEUELENGTH_RESERVED);
 }
 

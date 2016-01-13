@@ -163,6 +163,10 @@ void               schedule_getSlotInfo(
 
 uint16_t           schedule_getMaxActiveSlots(void);
 
+//returns the i^th entry in the schedule
+scheduleEntry_t *schedule_getCell(uint8_t i);
+
+
 owerror_t          schedule_removeActiveSlot(
    slotOffset_t         slotOffset,
    open_addr_t*         neighbor

@@ -105,6 +105,8 @@ void          neighbors_indicateRxDIO(OpenQueueEntry_t* msg);
 
 // get addresses
 void          neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index);
+//returns the whole entry concerning a neighbor
+neighborRow_t *neighbors_getNeighborInfo(open_addr_t* address);
 // managing routing info
 void          neighbors_updateMyDAGrankAndNeighborPreference(void);
 // maintenance

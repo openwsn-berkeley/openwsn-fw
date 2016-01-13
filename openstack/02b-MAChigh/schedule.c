@@ -265,6 +265,19 @@ void  schedule_getSlotInfo(
 }
 
 /**
+\brief Get the i^th slots.
+
+\param[pos] position of the slot
+*/
+scheduleEntry_t *schedule_getCell(uint8_t pos){
+
+   if (pos < schedule_getMaxActiveSlots())
+      return(&(schedule_vars.scheduleBuf[pos]));
+
+   return(NULL);
+}
+
+/**
 \brief Get the maximum number of active slots.
 
 \param[out] maximum number of active slots

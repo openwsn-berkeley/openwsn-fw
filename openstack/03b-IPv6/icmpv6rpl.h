@@ -13,7 +13,7 @@
 //=========================== define ==========================================
 
 #define TIMER_DIO_TIMEOUT         10000
-#define TIMER_DAO_TIMEOUT         5000
+#define TIMER_DAO_TIMEOUT         60000
 #define TIMER_DIO_JITTER          0.20      //DIO period \in [(1 - JITTER) * PERIOD , (1 + JITTER) PERIOD ]
 #define TIMER_DAO_JITTER          0.20      //DAO period \in [(1 - JITTER) * PERIOD , (1 + JITTER) PERIOD ]
 

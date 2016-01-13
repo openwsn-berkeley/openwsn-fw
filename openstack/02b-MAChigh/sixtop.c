@@ -18,6 +18,11 @@
 #include "idmanager.h"
 #include "schedule.h"
 
+
+
+#define _DEBUG_SIXTOP_
+
+
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -169,6 +174,11 @@ void sixtop_setHandler(six2six_handler_t handler) {
 
 //======= scheduling
 
+//is sixtop idle (i.e. no on-going negotiation)
+bool sixtop_isIdle(){
+   return(sixtop_vars.six2six_state == SIX_IDLE);
+}
+
 void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track){
    OpenQueueEntry_t* pkt;
    uint8_t           len;
@@ -178,14 +188,6 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track){
    bool              outcome;
    cellInfo_ht       cellList[SCHEDULEIEMAXNUMCELLS];
    
-
-   openserial_printError(
-         COMPONENT_SIXTOP,
-         ERR_GENERIC,
-         (errorparameter_t)10,
-         (errorparameter_t)11
-   );
-
 
    frameID    = schedule_getFrameHandle();
 
@@ -210,7 +212,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track){
       );
       return;
    }
-   if (numCells > SIXTOP_NBCELLS_INREQ){
+   if (numCells > (uint16_t)SIXTOP_NBCELLS_INREQ){
       openserial_printError(
             COMPONENT_SIXTOP_RES,
             ERR_SIXTOP_TOOMANY_CELLS,
@@ -222,6 +224,12 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track){
 
    
    if (sixtop_vars.handler == SIX_HANDLER_NONE) {
+      openserial_printCritical(
+            COMPONENT_SIXTOP_RES, ERR_SIXTOP_WRONG_HANDLER,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+      );
+
        // sxitop handler must not be NONE
        return;
    }
@@ -313,8 +321,8 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track){
       strncat(str, ", slot ", 150);
       openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
    }
-   strncat(str, ", timeout ", 150);
-   openserial_ncat_uint32_t(str, (uint32_t)sixtop_vars.timeout_sixtop_value, 150);
+  // strncat(str, ", timeout ", 150);
+  // openserial_ncat_uint32_t(str, (uint32_t)sixtop_vars.timeout_sixtop_value, 150);
    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
@@ -441,8 +449,14 @@ void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
       return;
    }
    if (sixtop_vars.handler == SIX_HANDLER_NONE) {
-       // sixtop handler must not be NONE
-       return;
+      openserial_printCritical(
+            COMPONENT_SIXTOP, ERR_SIXTOP_WRONG_HANDLER,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+      );
+
+      // sixtop handler must not be NONE
+      return;
    }
    
    // set cell list. only the first one
@@ -1076,6 +1090,13 @@ port_INLINE void sixtop_sendKA() {
 //======= six2six task
 
 void timer_sixtop_six2six_timeout_fired(void) {
+   openserial_printInfo(
+      COMPONENT_SIXTOP,
+      ERR_SIXTOP_TIMEOUT,
+      (errorparameter_t)0,
+      (errorparameter_t)0
+   );
+
    // timeout timer fired, reset the state of sixtop to idle
    sixtop_vars.six2six_state = SIX_IDLE;
    sixtop_vars.handler = SIX_HANDLER_NONE;
@@ -1222,7 +1243,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
 
          //This cell was considered buggy by sixtop -> it must reallocate a new one after having removed it
          if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
-
              sixtop_addCells(&(msg->l2_nextORpreviousHop), 1, track);
              sixtop_vars.handler = SIX_HANDLER_NONE;
          }
@@ -1352,6 +1372,12 @@ void sixtop_notifyReceiveCommand(
    schedule_IE_ht*   schedule_ie,
    schedule_IE_ht*   blacklist_ie,
    open_addr_t*      addr){
+#ifdef _DEBUG_SIXTOP_
+    char    str[150];
+    uint8_t i;
+#endif
+
+
    switch(opcode_ie->opcode){
       case SIXTOP_SOFT_CELL_REQ:
 #ifdef _DEBUG_SIXTOP_
@@ -1591,9 +1617,10 @@ void sixtop_notifyReceiveLinkResponse(
       memset(&temp_neighbor,0,sizeof(temp_neighbor));
       temp_neighbor.type             = ADDR_ANYCAST;
 
-
+#ifdef _DEBUG_SIXTOP_
       char str[150];
       sprintf(str, "LinkRep blacklist -");
+#endif
 
       //these cells are not available and should be discarded for the next requests
       for(i = 0;i<SCHEDULEIEMAXNUMCELLS;i++){
@@ -1607,15 +1634,17 @@ void sixtop_notifyReceiveLinkResponse(
                   track
             );
 
-         strncat(str, " slot=", 150);
+#ifdef _DEBUG_SIXTOP_
+        strncat(str, " slot=", 150);
          openserial_ncat_uint32_t(str, (uint32_t)blacklist_ie->cellList[i].tsNum, 150);
          strncat(str, " & choff=", 150);
          openserial_ncat_uint32_t(str, (uint32_t)blacklist_ie->cellList[i].choffset, 150);
          strncat(str, ", ", 150);
-
+#endif
       }
-
+#ifdef _DEBUG_SIXTOP_
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
 
       //return;
    } else {
@@ -1873,6 +1902,9 @@ bool sixtop_areAvailableCellsToBeScheduled(
    uint8_t i;
    uint8_t bw;
    bool    available;
+#ifdef _DEBUG_SIXTOP_
+   char str[150];
+#endif
    
    i          = 0;
    bw         = bandwidth;

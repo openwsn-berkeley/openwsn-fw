@@ -81,6 +81,7 @@ void      sixtop_setKaPeriod(uint16_t kaPeriod);
 void      sixtop_setEBPeriod(uint8_t ebPeriod);
 void      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
+bool      sixtop_isIdle(void);
 void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track);
 void      sixtop_removeCell(open_addr_t*  neighbor);
 void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);

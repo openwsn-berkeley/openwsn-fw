@@ -13,11 +13,14 @@
 
 //=========================== define ==========================================
 
-#define QUEUELENGTH  15
-#define QUEUELENGTH_RESERVED  4     //DAO + DIO + 2 * SIXTOP
+//Max number of packets in the queue
+#define QUEUELENGTH           15
+//DAO + DIO + 2 * SIXTOP
+#define QUEUELENGTH_RESERVED  4
+// By default, a packet should be removed after this timeout (we can consider safely it failed)
 #define QUEUE_TIMEOUT_DEFAULT (SIX2SIX_TIMEOUT_MS * 5)
-
-
+// Number of rows to send simultaneously to openserial
+#define NBROWS_OPENSERIALSTATUS   QUEUELENGTH
 
 //=========================== typedef =========================================
 
@@ -58,6 +61,8 @@ uint8_t            openqueue_count_track(track_t track);
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
+//called by otf to verify the queue
+OpenQueueEntry_t*    openqueue_getPacket(uint8_t pos);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *track);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(void);

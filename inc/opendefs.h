@@ -33,6 +33,15 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 //DAGROOT: forwards the packet to both the serial line + the upper layers
 #define IPHC_FORWARD_UPPER          1
 
+//OTF
+#define OTF_AGRESSIVE
+
+//tracks are handled by 6top
+#define SIXTOP_REMOVE_OBSOLETE_PARENTS    // when a node is removed from the parent list, its associated cells are removed
+#define SIXTOP_REMOVE_UNUSED_CELLS        // a cell is removed when it is not used for XXX time
+#define SIXTOP_CELL_TIMEOUT_RX         25000
+#define SIXTOP_CELL_TIMEOUT_TX         20000
+
 
 
 // golden image version and type
@@ -262,21 +271,22 @@ enum {
    ERR_UNKNOWN_NEIGHBOR                = 0x3d, // Unknown neighbor {0}{1} (4 last bytes)
    ERR_SIXTOP_WRONG_PARAM              = 0x3e, // sixtop expects another parameter in its request (bw {0}, nbcells {1})
    ERR_SIXTOP_WRONG_STATE              = 0x3f, // sixtop current state {0}, location {1}
-   ERR_SIXTOP_TIMEOUT                  = 0x40, // a timeout has been fired. We have to flush 6top packets (we have the state {0})
-   ERR_OPENQUEUE_TIMEOUT               = 0x41, // a packet has been removed from the queue (owner {0], creator {1})
-   ERR_BAD_TRACKID                     = 0x42, // the best effort track cannot have an owner (here type {0} and addr {1})
-   ERR_OPENQUEUE_OVERSIZE              = 0x43, // not enough space in openqueue for non prioritar packets
-   ERR_IEEE154_BADCRC                  = 0x44, // received frame with invalid CRC
-   ERR_IEEE154_INVALIDHEADER           = 0x45, // invalid IEEE 802.15.4e headers
-   ERR_OPENSERIAL_BUFFER_OVERFLOW      = 0x46, // buffer overflow for output in openserial (indexWrite {0}, location {1})
-   ERR_OPENQUEUE_BUFFER_OVERFLOW       = 0x47, // buffer overflow: too many packets (space left {0}, reserved for management {1})
-   ERR_SIXTOP_TOOMANY_CELLS            = 0x48, // too many cells to reserve in the sixtop request (asked {0}, max {1})
-   ERR_SIXTOP_MULTIPLE_TRACKS          = 0x49, // the cells from the same LinkRem are associated with different tracks
-   ERR_OPENQUEUE_DESYNC                = 0x4a, // a packet cannot be allocated for component {0} when the node is not synchronized
-   ERR_INVALID_COMPONENT               = 0x4b, // The component {0} cannot trigger this command (location {1})
+   ERR_SIXTOP_WRONG_HANDLER            = 0x40, // sixtop requires a non null handler
+   ERR_SIXTOP_TIMEOUT                  = 0x41, // a timeout has been fired. We have to flush 6top packets (we have the state {0})
+   ERR_OPENQUEUE_TIMEOUT               = 0x42, // a packet has been removed from the queue (owner {0], creator {1})
+   ERR_BAD_TRACKID                     = 0x43, // the best effort track cannot have an owner (here type {0} and addr {1})
+   ERR_OPENQUEUE_OVERSIZE              = 0x44, // not enough space in openqueue for non prioritar packets
+   ERR_IEEE154_BADCRC                  = 0x45, // received frame with invalid CRC
+   ERR_IEEE154_INVALIDHEADER           = 0x46, // invalid IEEE 802.15.4e headers
+   ERR_OPENSERIAL_BUFFER_OVERFLOW      = 0x47, // buffer overflow for output in openserial (indexWrite {0}, location {1})
+   ERR_OPENQUEUE_BUFFER_OVERFLOW       = 0x48, // buffer overflow: too many packets (space left {0}, reserved for management {1})
+   ERR_SIXTOP_TOOMANY_CELLS            = 0x49, // too many cells to reserve in the sixtop request (asked {0}, max {1})
+   ERR_SIXTOP_MULTIPLE_TRACKS          = 0x4a, // the cells from the same LinkRem are associated with different tracks
+   ERR_OPENQUEUE_DESYNC                = 0x4b, // a packet cannot be allocated for component {0} when the node is not synchronized
+   ERR_INVALID_COMPONENT               = 0x4c, // The component {0} cannot trigger this command (location {1})
    ERR_SIXTOP_NOCELL                   = 0x4d, // Sixtop cannot remove any cell to the parent {0}{1} (none existing)
-   ERR_GENERIC                         = 0x50, // generic error {0} {1}
-   ERR_UNKNOWN                         = 0x51, // unknown error, location {0}, arg {1}
+   ERR_GENERIC                         = 0x4e, // generic error {0} {1}
+   ERR_UNKNOWN                         = 0x4f, // unknown error, location {0}, arg {1}
 };
 
 

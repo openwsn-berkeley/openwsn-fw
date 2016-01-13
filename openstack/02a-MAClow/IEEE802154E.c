@@ -488,6 +488,8 @@ port_INLINE void activity_synchronize_newSlot() {
    // take turns every 8 slots sending and receiving
    if        ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0000) {
       openserial_stop();
+      //remove timeouted entries in openqueue
+      openqueue_timeout_drop();
       openserial_startOutput();
    } else if ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0008) {
       openserial_stop();
@@ -894,6 +896,8 @@ port_INLINE void activity_ti1ORri1() {
       openserial_stop();
       // abort the slot
       endSlot();
+      //remove timeouted entries in openqueue
+      openqueue_timeout_drop();
       //start outputing serial
       openserial_startOutput();
       return;

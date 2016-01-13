@@ -68,7 +68,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    msg->owner                = COMPONENT_FORWARDING;
    
    //too many packets in the buffer? We should drop this one to save data for management packets (e.g. sixtop)
-   if(openqueue_overflow_for_data()){
+   if((msg->creator != COMPONENT_ICMPv6RPL) && (openqueue_overflow_for_data())){
       openserial_statPktBufferOverflow(msg);
 
       // openqueue_freePacketBuffer(msg);
