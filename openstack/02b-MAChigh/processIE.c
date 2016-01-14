@@ -321,7 +321,10 @@ port_INLINE uint8_t processIE_prependBandwidthIE(
    pkt->payload[1] = (mlme_subHeader.length_subID_type >> 8) & 0xFF;
    
    len += 2;
-  
+
+   //record the track info
+   memcpy(&(pkt->l2_bandwidthIE_track), &track, sizeof(track_t));
+
    return len;
 }
 
