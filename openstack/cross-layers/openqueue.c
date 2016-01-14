@@ -48,7 +48,7 @@ bool debugPrint_queue() {
    uint8_t  row;
 
    //push several rows at the same time
-   for(row=0; row<NBROWS_OPENSERIALSTATUS; row++){
+   for(row=0; row<QUEUE_NBROWS_OPENSERIALSTATUS; row++){
 
 
       openqueue_vars.debugPrintRow         = (openqueue_vars.debugPrintRow+1)%QUEUELENGTH;

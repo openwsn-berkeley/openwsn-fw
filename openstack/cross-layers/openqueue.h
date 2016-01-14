@@ -20,7 +20,7 @@
 // By default, a packet should be removed after this timeout (we can consider safely it failed)
 #define QUEUE_TIMEOUT_DEFAULT (SIX2SIX_TIMEOUT_MS * 5)
 // Number of rows to send simultaneously to openserial
-#define NBROWS_OPENSERIALSTATUS   5
+#define QUEUE_NBROWS_OPENSERIALSTATUS   5
 
 //=========================== typedef =========================================
 
