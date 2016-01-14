@@ -584,6 +584,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+         openserial_statRx(ieee154e_vars.dataReceived);
+
          // break from the do-while loop and execute abort code below
          break;
       }
@@ -655,6 +657,38 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
                             (errorparameter_t)ieee154e_vars.slotOffset,
                             (errorparameter_t)0);
       
+      //to print some parameters value to openvizualizer
+      char str[150];
+
+#ifdef TRACK_ACTIVE
+      sprintf(str, "TRACK=1");
+#else
+      sprintf(str, "TRACK=0");
+#endif
+      openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+
+#ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
+      sprintf(str, "DISTCELLS=1");
+#else
+      sprintf(str, "DISTCELLS=0");
+#endif
+      openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+
+      sprintf(str, "RPLMETRIC=");
+      openserial_ncat_uint32_t(str, (uint32_t)RPL_METRIC, 150);
+      openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+
+      sprintf(str, "SCHEDALGO=");
+      openserial_ncat_uint32_t(str, (uint32_t)SCHEDULING_ALGO, 150);
+      openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+
+      sprintf(str, "CEX_PERIOD=");
+      openserial_ncat_uint32_t(str, (uint32_t)CEXAMPLE_PERIOD, 150);
+      openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+
+      //packet received (serial line)
+      openserial_statRx(ieee154e_vars.dataReceived);
+
       // send received EB up the stack so RES can update statistics (synchronizing)
       notif_receive(ieee154e_vars.dataReceived);
       
@@ -1035,7 +1069,10 @@ port_INLINE void activity_ti2() {
    ieee154e_vars.radioOnThisSlot=TRUE;
    // arm tt2
    radiotimer_schedule(DURATION_tt2);
-   
+
+   //info through the serial line when a frame is transmitted
+   openserial_statTx(ieee154e_vars.dataToSend);
+
    // change state
    changeState(S_TXDATAREADY);
 }
@@ -1286,6 +1323,8 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
    
       // break if invalid CRC
       if (ieee154e_vars.ackReceived->l1_crc==FALSE) {
+         openserial_statRx(ieee154e_vars.ackReceived);
+
          // break from the do-while loop and execute the clean-up code below
          break;
       }
@@ -1333,6 +1372,9 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       // inform upper layer
       notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
       ieee154e_vars.dataToSend = NULL;
+
+      //we received an ack
+      openserial_statAckRx();
       
       // in any case, execute the clean-up code below (processing of ACK done)
    } while (0);
@@ -1489,6 +1531,8 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       
       // if CRC doesn't check, stop
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+         openserial_statRx(ieee154e_vars.dataReceived);
+
          // jump to the error code below this do-while loop
          break;
       }
@@ -1541,6 +1585,9 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          break;
       }
       
+      //packet received (serial line)
+      openserial_statRx(ieee154e_vars.dataReceived);
+
       // record the timeCorrection and print out at end of slot
       ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
       
@@ -1729,6 +1776,9 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    if (idmanager_getIsDAGroot()==FALSE && neighbors_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
       synchronizePacket(ieee154e_vars.syncCapturedTime);
    }
+
+   //ack transmitted
+   openserial_statAckTx();
    
    // inform upper layer of reception (after ACK sent)
    notif_receive(ieee154e_vars.dataReceived);
@@ -2250,6 +2300,9 @@ void endSlot() {
    
    // clean up dataReceived
    if (ieee154e_vars.dataReceived!=NULL) {
+      //stat: packet received (serial line)
+      openserial_statRx(ieee154e_vars.dataReceived);
+
       // assume something went wrong. If everything went well, dataReceived
       // would have been set to NULL in ri9.
       // indicate  "received packet" to upper layer since we don't want to loose packets
