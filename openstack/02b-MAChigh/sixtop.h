@@ -14,8 +14,6 @@
 //=========================== define ==========================================
 // 6P version 
 #define IANA_6TOP_6P_VERSION   0x01 
-// 6P subID
-#define IANA_6TOP_SUBIE_ID     0x01
 // 6P command Id
 #define IANA_6TOP_CMD_NONE     0x00
 #define IANA_6TOP_CMD_ADD      0x01 // CMD_ADD      | add one or more cells     

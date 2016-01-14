@@ -22,6 +22,9 @@
 #define MLME_IE_SUBID_TRACKID          0x43
 #define MLME_IE_SUBID_SCHEDULE         0x44
 
+#define IANA_6TOP_SUBIE_ID             0x00
+#define SIXTOP_IE_GROUPID              0x02
+
 // ========================== typedef =========================================
 
 BEGIN_PACK
@@ -133,7 +136,10 @@ void             processIE_prependMLMEIE(
    OpenQueueEntry_t*    pkt,
    uint8_t              len
 );
-
+void             processIE_prepend_sixtopIE(
+   OpenQueueEntry_t*    pkt, 
+   uint8_t              len
+);
 //===== prepend IEs
 
 uint8_t          processIE_prependSyncIE(
@@ -155,6 +161,9 @@ uint8_t          processIE_prepend_sixSubIEHeader(
 uint8_t           processIE_prepend_sixGeneralMessage(
     OpenQueueEntry_t*    pkt,
     uint8_t code
+);
+uint8_t           processIE_prepend_sixSubID(
+    OpenQueueEntry_t*    pkt
 );
 uint8_t           processIE_prepend_sixCelllist(
     OpenQueueEntry_t*    pkt,

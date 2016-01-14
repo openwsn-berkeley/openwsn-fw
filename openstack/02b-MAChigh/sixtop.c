@@ -235,8 +235,8 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
     }
     
     len += processIE_prepend_sixGeneralMessage(pkt,code);
-    len += processIE_prepend_sixSubIEHeader(pkt,len);
-    processIE_prependMLMEIE(pkt,len);
+    len += processIE_prepend_sixSubID(pkt);
+    processIE_prepend_sixtopIE(pkt,len);
    
     // indicate IEs present
     pkt->l2_payloadIEpresent = TRUE;
@@ -334,8 +334,8 @@ void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
     len+=1;
     
     len += processIE_prepend_sixGeneralMessage(pkt,IANA_6TOP_CMD_DELETE);
-    len += processIE_prepend_sixSubIEHeader(pkt,len);
-    processIE_prependMLMEIE(pkt,len);
+    len += processIE_prepend_sixSubID(pkt);
+    processIE_prepend_sixtopIE(pkt,len);
    
     // indicate IEs present
     pkt->l2_payloadIEpresent = TRUE;
@@ -1018,6 +1018,27 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
             len = len - sublen;
         } while(len>0);
         break;
+    case SIXTOP_IE_GROUPID:
+        subid = *((uint8_t*)(pkt->payload)+ptr);
+        ptr += 1;
+        sublen = len - 1;
+        switch(subid){
+            case IANA_6TOP_SUBIE_ID:
+                temp_8b = *((uint8_t*)(pkt->payload)+ptr);
+                ptr = ptr + 1;
+                // get 6P version and command ID
+                version   = temp_8b & 0x0f;
+                commandIdORcode = (temp_8b >> 4) & 0x0f;
+                // get sf_id
+                sfId = *((uint8_t*)(pkt->payload)+ptr);
+                ptr = ptr + 1;
+                sixtop_notifyReceiveCommand(version,commandIdORcode,sfId,ptr,sublen-2,pkt);
+                ptr += sublen-2;
+                break;
+            default:
+                return FALSE;
+        }
+        break;
     default:
         *lenIE = 0;//no header or not recognized.
         return FALSE;
@@ -1149,8 +1170,8 @@ void sixtop_notifyReceiveCommand(
             response_pkt->l2_sixtop_frameID        = frameID;
             
             len += processIE_prepend_sixGeneralMessage(response_pkt,code);
-            len += processIE_prepend_sixSubIEHeader(response_pkt,len);
-            processIE_prependMLMEIE(response_pkt,len);
+            len += processIE_prepend_sixSubID(response_pkt);
+            processIE_prepend_sixtopIE(response_pkt,len);
             // indicate IEs present
             response_pkt->l2_payloadIEpresent = TRUE;
             // send packet

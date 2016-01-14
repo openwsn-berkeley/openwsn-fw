@@ -41,6 +41,9 @@ static const uint8_t chTemplate_default[] = {
 #define IEEE802154E_DESC_TYPE_LONG                         (1<<15)
 #define IEEE802154E_DESC_TYPE_SHORT                        (0<<15)
 
+#define IANA_6TOP_IE_GROUP_ID                              (2<<11)
+#define IANA_6TOP_IE_GROUP_ID_TYPE                         (1<<15)
+
 #define IEEE802154E_DESC_TYPE_HEADER_IE                    0x0000
 #define IEEE802154E_DESC_TYPE_PAYLOAD_IE                   0x8000
 //len field on PAYLOAD/HEADER DESC

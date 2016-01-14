@@ -37,6 +37,28 @@ port_INLINE void processIE_prependMLMEIE(
    pkt->payload[1] = (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
 }
 
+port_INLINE void processIE_prepend_sixtopIE(
+      OpenQueueEntry_t* pkt, 
+      uint8_t           len
+   ){
+   payload_IE_ht payload_IE_desc;
+   
+   // reserve space
+   packetfunctions_reserveHeaderSize(
+      pkt, 
+      sizeof(payload_IE_ht)
+   );
+   
+   // prepare header
+   payload_IE_desc.length_groupid_type = len;
+   payload_IE_desc.length_groupid_type |= 
+      (IANA_6TOP_IE_GROUP_ID  | IANA_6TOP_IE_GROUP_ID_TYPE); 
+   
+   // copy header
+   pkt->payload[0] = payload_IE_desc.length_groupid_type        & 0xFF;
+   pkt->payload[1] = (payload_IE_desc.length_groupid_type >> 8) & 0xFF;
+}
+
 //===== prepend IEs
 
 port_INLINE uint8_t processIE_prependSyncIE(OpenQueueEntry_t* pkt){
@@ -265,6 +287,18 @@ port_INLINE uint8_t processIE_prepend_sixGeneralMessage(
    
     return len;
 }
+
+port_INLINE uint8_t processIE_prepend_sixSubID(OpenQueueEntry_t*    pkt){
+    uint8_t    len = 0;
+   
+    //===== SFID
+    packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+    *((uint8_t*)(pkt->payload)) = IANA_6TOP_SUBIE_ID;
+    len += 1;
+    
+    return len;
+}
+
 port_INLINE uint8_t processIE_prepend_sixCelllist(
     OpenQueueEntry_t*    pkt,
     cellInfo_ht*         cellList
