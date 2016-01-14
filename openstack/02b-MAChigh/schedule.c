@@ -709,7 +709,7 @@ void schedule_getTrackCurrent(track_t *track) {
 
 \returns The channel offset of the current schedule entry.
 */
-channelOffset_t schedule_getChannelOffset() {
+channelOffset_t schedule_getChannelOffset(void) {
    channelOffset_t returnVal;
    
    INTERRUPT_DECLARATION();
@@ -721,6 +721,26 @@ channelOffset_t schedule_getChannelOffset() {
    
    return returnVal;
 }
+
+
+/**
+\brief Get the slot offset of the current schedule entry.
+
+\returns The slot offset of the current schedule entry.
+*/
+slotOffset_t schedule_getSlotOffset(void) {
+   slotOffset_t returnVal;
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+   returnVal = schedule_vars.currentScheduleEntry->slotOffset;
+
+   ENABLE_INTERRUPTS();
+
+   return returnVal;
+}
+
 
 /**
 \brief Check whether I can send on this slot.

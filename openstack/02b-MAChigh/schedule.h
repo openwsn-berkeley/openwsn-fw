@@ -30,7 +30,8 @@ The superframe repears over time and can be arbitrarly long.
 #define NUMSERIALRX          1
 #define NUMSLOTSOFF          50
 
-#define SCHEDULE_NBROWS_OPENSERIALSTATUS  5    //Nb of rows to push at the same time to openserial
+#define SCHEDULE_NBROWS_OPENSERIALSTATUS  1   //Nb of rows to push at the same time to openserial
+
 /**
 \brief Maximum number of active slots in a superframe.
 
@@ -161,6 +162,9 @@ void               schedule_getSlotInfo(
    open_addr_t*         neighbor,
    slotinfo_element_t*  info
 );
+channelOffset_t schedule_getChannelOffset(void);
+slotOffset_t    schedule_getSlotOffset(void);
+
 
 uint16_t           schedule_getMaxActiveSlots(void);
 

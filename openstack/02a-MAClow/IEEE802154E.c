@@ -89,7 +89,6 @@ void     notif_receive(OpenQueueEntry_t* packetReceived);
 void     resetStats(void);
 void     updateStats(PORT_SIGNED_INT_WIDTH timeCorrection);
 // misc
-uint8_t  calculateFrequency(uint8_t channelOffset);
 void     changeState(ieee154e_state_t newstate);
 void     endSlot(void);
 bool     debugPrint_asn(void);
