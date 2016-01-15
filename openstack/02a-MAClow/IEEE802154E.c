@@ -659,30 +659,21 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       //to print some parameters value to openvizualizer
       char str[150];
-      sprintf("PARAMS");
-
+      sprintf(str, "PARAMS");
 #ifdef TRACK_ACTIVE
       strncat(str, ":TRACK=1", 150);
 #else
       strncat(str, ":TRACK=0", 150);
 #endif
-//      openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
-
 #ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
       strncat(str, ":DCELLS=1", 150);
 #else
       sprintf(str, ":DCELLS=0", 150);
 #endif
-//      openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
-
       strncat(str, ":RPLMET=", 150);
       openserial_ncat_uint32_t(str, (uint32_t)RPL_METRIC, 150);
-//      openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
-
       strncat(str, ":SCHEDALGO=", 150);
       openserial_ncat_uint32_t(str, (uint32_t)SCHEDULING_ALGO, 150);
-//      openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
-
       strncat(str, ":CEXPER=", 150);
       openserial_ncat_uint32_t(str, (uint32_t)CEXAMPLE_PERIOD, 150);
       openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));

@@ -62,12 +62,12 @@ void schedule_init() {
 \brief Starting the DAGroot schedule propagation.
 */
 void schedule_startDAGroot() {
-   slotOffset_t    start_slotOffset;
-   slotOffset_t    running_slotOffset;
+//   slotOffset_t    start_slotOffset;
+   slotOffset_t    running_slotOffset, slotOffset;
    open_addr_t     temp_neighbor;
 
 
-   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+  // start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    // set frame length, handle and number (default 1 by now)
    if (schedule_vars.frameLength == 0) {
        // slotframe length is not set, set it to default length
@@ -81,14 +81,23 @@ void schedule_startDAGroot() {
    // shared TXRX anycast slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
-   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
+
+   //inserts SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS shared cells
+   for (running_slotOffset=0;running_slotOffset<SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
+
+#ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
+      slotOffset = running_slotOffset + SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+#else
+      slotOffset = running_slotOffset + SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+#endif
+
       schedule_addActiveSlot(
-         running_slotOffset,                 // slot offset
-         CELLTYPE_TXRX,                      // type of slot
-         TRUE,                               // shared?
-         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
-         &temp_neighbor,                     // neighbor
-         sixtop_get_trackbesteffort()        //for best effort traffic
+            slotOffset,                 // slot offset
+            CELLTYPE_TXRX,                      // type of slot
+            TRUE,                               // shared?
+            SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
+            &temp_neighbor,                     // neighbor
+            sixtop_get_trackbesteffort()        //for best effort traffic
       );
    }
 }
