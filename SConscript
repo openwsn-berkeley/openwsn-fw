@@ -54,6 +54,8 @@ else:
         env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_NONE')
 if env['tracks']==1:
     env.Append(CPPDEFINES    = 'TRACK_ACTIVE')
+if env['distribshared']==1:
+    env.Append(CPPDEFINES    = 'SCHEDULE_SHAREDCELLS_DISTRIBUTED')
 if env['rplmetric']>=1:
     env.Append(CPPDEFINES    = {'RPL_METRIC':env['rplmetric']})
 if env['cex_period']>=1:
