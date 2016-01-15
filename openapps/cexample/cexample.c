@@ -152,19 +152,14 @@ void cexample_task_cb() {
    packetfunctions_ip128bToMac64b(&dest_128b, &prefix, &dest_64b);
    openserial_statDataGen(cexample_vars.seqnum, &(cexample_vars.track), idmanager_getMyID(ADDR_64B), &dest_64b);
 
+   // don't run if not synch
+   if (ieee154e_isSynch() == FALSE)
+      return;
+
 
    // create a CoAP packet
    pkt = openqueue_getFreePacketBuffer_with_timeout(COMPONENT_CEXAMPLE, cexample_timeout);
    if (pkt==NULL) {
-     /* TODO - reactivate for normal usage
-      *
-      * openserial_printError(
-         COMPONENT_CEXAMPLE,
-         ERR_NO_FREE_PACKET_BUFFER,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
-*/
       return;
    }
    // take ownership over that packet
