@@ -450,7 +450,7 @@ void openserial_stop() {
 }
 
 void openserial_goldenImageCommands(void){
-   uint8_t  input_buffer[7];
+   uint8_t  input_buffer[10];
    uint8_t  numDataBytes;
    uint8_t  version;
 #ifndef GOLDEN_IMAGE_NONE
@@ -460,6 +460,13 @@ void openserial_goldenImageCommands(void){
    uint8_t  commandLen;
    uint8_t  comandParam_8;
    uint16_t comandParam_16;
+   cellInfo_ht cellList[SCHEDULEIEMAXNUMCELLS];
+   uint8_t  i;
+   
+   open_addr_t neighbor;
+   bool        foundNeighbor;
+   
+   memset(cellList,0,sizeof(cellList));
    
    numDataBytes = openserial_getNumDataBytes();
    //copying the buffer
@@ -489,7 +496,7 @@ void openserial_goldenImageCommands(void){
    commandId  = openserial_vars.inputBuf[3];
    commandLen = openserial_vars.inputBuf[4];
    
-   if (commandLen>2 || commandLen == 0) {
+   if (commandLen>3) {
        // the max command Len is 2, except ping commands
        return;
    } else {
@@ -558,6 +565,42 @@ void openserial_goldenImageCommands(void){
                }
            }
            break;
+        case COMMAND_SET_6P_ADD:
+        case COMMAND_SET_6P_DELETE:
+        case COMMAND_SET_6P_COUNT:
+        case COMMAND_SET_6P_LIST:
+        case COMMAND_SET_6P_CLEAR:
+            // get preferred parent
+            foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+            if (foundNeighbor==FALSE) {
+                break;
+            }
+             
+            sixtop_setHandler(SIX_HANDLER_OTF);
+            if ( 
+                (
+                  commandId != COMMAND_SET_6P_ADD &&
+                  commandId != COMMAND_SET_6P_DELETE
+                ) ||
+                (
+                    ( 
+                      commandId == COMMAND_SET_6P_ADD ||
+                      commandId == COMMAND_SET_6P_DELETE
+                    ) && 
+                    commandLen == 0
+                ) 
+            ){
+                // randommly select cell
+                sixtop_request(commandId-9,&neighbor,1);
+            } else {
+                for (i=0;i<commandLen;i++){
+                    cellList[i].tsNum           = openserial_vars.inputBuf[5+i];
+                    cellList[i].choffset        = 0;
+                    cellList[i].linkoptions     = CELLTYPE_TX;
+                }
+                sixtop_addORremoveCellByInfo(commandId-9,&neighbor,cellList);
+            }
+            break;
        default:
            // wrong command ID
            break;

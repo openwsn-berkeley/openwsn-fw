@@ -272,7 +272,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
     opentimers_restart(sixtop_vars.timeoutTimerId);
 }
 
-void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
+void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht* cellInfo){
     OpenQueueEntry_t* pkt;
     uint8_t           len;
     uint8_t           frameID;
@@ -333,7 +333,7 @@ void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
     *((uint8_t*)(pkt->payload)) = 1;
     len+=1;
     
-    len += processIE_prepend_sixGeneralMessage(pkt,IANA_6TOP_CMD_DELETE);
+    len += processIE_prepend_sixGeneralMessage(pkt,code);
     len += processIE_prepend_sixSubID(pkt);
     processIE_prepend_sixtopIE(pkt,len);
    
@@ -343,8 +343,15 @@ void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
     // send packet
     sixtop_send(pkt);
    
-   // update state
-   sixtop_vars.six2six_state = SIX_WAIT_DELETEREQUEST_SENDDONE;
+    //update states
+    switch(code){
+    case IANA_6TOP_CMD_ADD:
+        sixtop_vars.six2six_state = SIX_WAIT_ADDREQUEST_SENDDONE;
+        break;
+    case IANA_6TOP_CMD_DELETE:
+        sixtop_vars.six2six_state = SIX_WAIT_DELETEREQUEST_SENDDONE;
+        break;
+    }
    
    // arm timeout
    opentimers_setPeriod(
@@ -365,7 +372,7 @@ void sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor){
         linkInfo.choffset    = info.channelOffset;
         linkInfo.linkoptions = info.link_type;
         sixtop_vars.handler  = SIX_HANDLER_MAINTAIN;
-        sixtop_removeCellByInfo(neighbor, &linkInfo);
+        sixtop_addORremoveCellByInfo(IANA_6TOP_CMD_DELETE,neighbor, &linkInfo);
     } else {
         //should log this error
         
@@ -478,7 +485,6 @@ void task_sixtopNotifSendDone() {
 void task_sixtopNotifReceive() {
     OpenQueueEntry_t* msg;
     uint16_t          lenIE;
-   
     // get received packet from openqueue
     msg = openqueue_sixtopGetReceivedPacket();
     if (msg==NULL) {
@@ -1148,6 +1154,7 @@ void sixtop_notifyReceiveCommand(
                     packetfunctions_reserveHeaderSize(response_pkt,2);
                     response_pkt->payload[0] = count      & 0xFF;
                     response_pkt->payload[1] = (count>>8) & 0xFF;
+                    len = 2;
                     break;
                 case IANA_6TOP_CMD_LIST:
                     container  = *((uint8_t*)(pkt->payload)+ptr);
@@ -1202,8 +1209,23 @@ void sixtop_notifyReceiveCommand(
                     }
                     break;
                 case SIX_WAIT_COUNTRESPONSE:
+                    count  = *((uint8_t*)(pkt->payload)+ptr);
+                    ptr += 1;
+                    count |= (*((uint8_t*)(pkt->payload)+ptr))<<8;
+#ifdef GOLDEN_IMAGE_ROOT
+                openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_COUNT,
+                           (errorparameter_t)count,
+                           (errorparameter_t)sixtop_vars.six2six_state);
+#endif
+                    break;
                 case SIX_WAIT_LISTRESPONSE:
-                    // To be done...
+                    processIE_retrieve_sixCelllist(pkt,ptr,length,cellList);
+#ifdef GOLDEN_IMAGE_ROOT
+                // print out first two cells in the list
+                openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_LIST,
+                           (errorparameter_t)cellList[0].tsNum,
+                           (errorparameter_t)cellList[1].tsNum);
+#endif
                     break;
                 case SIX_WAIT_CLEARRESPONSE:
                     frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
@@ -1216,6 +1238,11 @@ void sixtop_notifyReceiveCommand(
             } else {
                 // TBD...
             }
+#ifdef GOLDEN_IMAGE_ROOT
+           openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
+                           (errorparameter_t)commandIdORcode,
+                           (errorparameter_t)sixtop_vars.six2six_state);
+#endif
             sixtop_vars.six2six_state = SIX_IDLE;
         }
     }

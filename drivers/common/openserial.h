@@ -69,7 +69,12 @@ enum {
    COMMAND_SET_SECURITY_STATUS   =  7,
    COMMAND_SET_FRAMELENGTH       =  8,
    COMMAND_SET_ACK_STATUS        =  9,
-   COMMAND_MAX                   = 10,
+   COMMAND_SET_6P_ADD            = 10,
+   COMMAND_SET_6P_DELETE         = 11,
+   COMMAND_SET_6P_COUNT          = 12,
+   COMMAND_SET_6P_LIST           = 13,
+   COMMAND_SET_6P_CLEAR          = 14,
+   COMMAND_MAX                   = 15,
 };
 
 //=========================== module variables ================================
