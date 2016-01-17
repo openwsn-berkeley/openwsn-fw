@@ -296,7 +296,7 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
     // set cell list (only first one is to be removed)
     frameID        = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
     container      = frameID;
-    memcpy(&(cellList[0]),cellInfo,sizeof(cellInfo_ht));
+    memcpy(&(cellList[0]),cellInfo,sizeof(cellList));
    
    
     // get a free packet buffer

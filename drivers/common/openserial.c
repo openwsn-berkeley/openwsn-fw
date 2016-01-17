@@ -532,9 +532,6 @@ void openserial_goldenImageCommands(void){
        case COMMAND_SET_DAOPERIOD: // two bytes, in mili-seconds
            icmpv6rpl_setDAOPeriod(comandParam_16);
            break;
-       case COMMAND_PING_MOTE:
-           // this should not happen
-           break;
        case COMMAND_SET_DAGRANK: // two bytes
            neighbors_setMyDAGrank(comandParam_16);
            break;
@@ -591,14 +588,14 @@ void openserial_goldenImageCommands(void){
                 ) 
             ){
                 // randommly select cell
-                sixtop_request(commandId-9,&neighbor,1);
+                sixtop_request(commandId-8,&neighbor,1);
             } else {
                 for (i=0;i<commandLen;i++){
                     cellList[i].tsNum           = openserial_vars.inputBuf[5+i];
                     cellList[i].choffset        = 0;
                     cellList[i].linkoptions     = CELLTYPE_TX;
                 }
-                sixtop_addORremoveCellByInfo(commandId-9,&neighbor,cellList);
+                sixtop_addORremoveCellByInfo(commandId-8,&neighbor,cellList);
             }
             break;
        default:
