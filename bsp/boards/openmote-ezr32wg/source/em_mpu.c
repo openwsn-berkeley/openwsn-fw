@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_mpu.c
  * @brief Memory Protection Unit (MPU) Peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,19 +17,21 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
+
 #include "em_mpu.h"
+#if defined(__MPU_PRESENT) && (__MPU_PRESENT == 1)
 #include "em_assert.h"
 
 
@@ -100,15 +101,15 @@ void MPU_ConfigureRegion(const MPU_RegionInit_TypeDef *init)
     EFM_ASSERT(init->tex <= 0x7);
 
     MPU->RBAR = init->baseAddress;
-    MPU->RASR = ((init->disableExec ? 1 : 0) << MPU_RASR_XN_Pos)   |
-                (init->accessPermission      << MPU_RASR_AP_Pos)   |
-                (init->tex                   << MPU_RASR_TEX_Pos)  |
-                ((init->shareable   ? 1 : 0) << MPU_RASR_S_Pos)    |
-                ((init->cacheable   ? 1 : 0) << MPU_RASR_C_Pos)    |
-                ((init->bufferable  ? 1 : 0) << MPU_RASR_B_Pos)    |
-                (init->srd                   << MPU_RASR_SRD_Pos)  |
-                (init->size                  << MPU_RASR_SIZE_Pos) |
-                (1                           << MPU_RASR_ENABLE_Pos);
+    MPU->RASR = ((init->disableExec ? 1 : 0)   << MPU_RASR_XN_Pos)
+                | (init->accessPermission      << MPU_RASR_AP_Pos)
+                | (init->tex                   << MPU_RASR_TEX_Pos)
+                | ((init->shareable   ? 1 : 0) << MPU_RASR_S_Pos)
+                | ((init->cacheable   ? 1 : 0) << MPU_RASR_C_Pos)
+                | ((init->bufferable  ? 1 : 0) << MPU_RASR_B_Pos)
+                | (init->srd                   << MPU_RASR_SRD_Pos)
+                | (init->size                  << MPU_RASR_SIZE_Pos)
+                | (1                           << MPU_RASR_ENABLE_Pos);
   }
   else
   {
@@ -120,3 +121,4 @@ void MPU_ConfigureRegion(const MPU_RegionInit_TypeDef *init)
 
 /** @} (end addtogroup CMU) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(__MPU_PRESENT) && (__MPU_PRESENT == 1) */

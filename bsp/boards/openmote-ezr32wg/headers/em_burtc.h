@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_burtc.h
  * @brief Backup Real Time Counter (BURTC) peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,28 +17,28 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_BURTC_H
-#define __EM_BURTC_H
 
-#include <stdbool.h>
+#ifndef __SILICON_LABS_EM_BURTC_H__
+#define __SILICON_LABS_EM_BURTC_H__
+
 #include "em_device.h"
-
 #if defined(BURTC_PRESENT)
 
+#include <stdbool.h>
 #include "em_assert.h"
-#include "em_bitband.h"
+#include "em_bus.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,14 +58,15 @@ extern "C" {
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
 
-#define burtcClkDiv_1      1
-#define burtcClkDiv_2      2
-#define burtcClkDiv_4      4
-#define burtcClkDiv_8      8
-#define burtcClkDiv_16     16
-#define burtcClkDiv_32     32
-#define burtcClkDiv_64     64
-#define burtcClkDiv_128    128
+/** BURTC clock divisors. These values are valid for the BURTC prescaler. */
+#define burtcClkDiv_1      1     /**< Divide clock by 1. */
+#define burtcClkDiv_2      2     /**< Divide clock by 2. */
+#define burtcClkDiv_4      4     /**< Divide clock by 4. */
+#define burtcClkDiv_8      8     /**< Divide clock by 8. */
+#define burtcClkDiv_16     16    /**< Divide clock by 16. */
+#define burtcClkDiv_32     32    /**< Divide clock by 32. */
+#define burtcClkDiv_64     64    /**< Divide clock by 64. */
+#define burtcClkDiv_128    128   /**< Divide clock by 128. */
 
 /*******************************************************************************
  ********************************   ENUMS   ************************************
@@ -115,7 +115,7 @@ typedef enum
 /** BURTC initialization structure. */
 typedef struct
 {
-  bool                 enable;       /** Enable BURTC after initialization (starts counter) */
+  bool                 enable;       /**< Enable BURTC after initialization (starts counter) */
 
   BURTC_Mode_TypeDef   mode;         /**< Configure energy mode operation */
   bool                 debugRun;     /**< If true, counter will keep running under debug halt */
@@ -131,17 +131,18 @@ typedef struct
 } BURTC_Init_TypeDef;
 
 /** Default configuration for BURTC init structure */
-#define BURTC_INIT_DEFAULT \
-  { true,                  \
-    burtcModeEM2,          \
-    false,                 \
-    burtcClkSelULFRCO,     \
-    burtcClkDiv_1,         \
-    0,                     \
-    true,                  \
-    false,                 \
-    burtcLPDisable,        \
-  }
+#define BURTC_INIT_DEFAULT  \
+{                           \
+  true,                     \
+  burtcModeEM2,             \
+  false,                    \
+  burtcClkSelULFRCO,        \
+  burtcClkDiv_1,            \
+  0,                        \
+  true,                     \
+  false,                    \
+  burtcLPDisable,           \
+}
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -284,15 +285,17 @@ __STATIC_INLINE void BURTC_StatusClear(void)
 __STATIC_INLINE void BURTC_Enable(bool enable)
 {
   /* Note! If mode is disabled, BURTC counter will not start */
-  EFM_ASSERT(((enable == true) && ((BURTC->CTRL & _BURTC_CTRL_MODE_MASK) != BURTC_CTRL_MODE_DISABLE))
+  EFM_ASSERT(((enable == true)
+              && ((BURTC->CTRL & _BURTC_CTRL_MODE_MASK)
+                  != BURTC_CTRL_MODE_DISABLE))
              || (enable == false));
-  if( enable )
+  if (enable)
   {
-    BITBAND_Peripheral(&BURTC->CTRL, _BURTC_CTRL_RSTEN_SHIFT, 0);
+    BUS_RegBitWrite(&BURTC->CTRL, _BURTC_CTRL_RSTEN_SHIFT, 0);
   }
   else
   {
-    BITBAND_Peripheral(&BURTC->CTRL, _BURTC_CTRL_RSTEN_SHIFT, 1);
+    BUS_RegBitWrite(&BURTC->CTRL, _BURTC_CTRL_RSTEN_SHIFT, 1);
   }
 }
 
@@ -327,7 +330,7 @@ __STATIC_INLINE uint32_t BURTC_TimestampGet(void)
  ******************************************************************************/
 __STATIC_INLINE void BURTC_FreezeEnable(bool enable)
 {
-  BITBAND_Peripheral(&BURTC->FREEZE, _BURTC_FREEZE_REGFREEZE_SHIFT, enable);
+  BUS_RegBitWrite(&BURTC->FREEZE, _BURTC_FREEZE_REGFREEZE_SHIFT, enable);
 }
 
 
@@ -341,7 +344,7 @@ __STATIC_INLINE void BURTC_FreezeEnable(bool enable)
  ******************************************************************************/
 __STATIC_INLINE void BURTC_Powerdown(bool enable)
 {
-  BITBAND_Peripheral(&BURTC->POWERDOWN, _BURTC_POWERDOWN_RAM_SHIFT, enable);
+  BUS_RegBitWrite(&BURTC->POWERDOWN, _BURTC_POWERDOWN_RAM_SHIFT, enable);
 }
 
 
@@ -402,6 +405,7 @@ void BURTC_Init(const BURTC_Init_TypeDef *burtcInit);
 void BURTC_CounterReset(void);
 void BURTC_CompareSet(unsigned int comp, uint32_t value);
 uint32_t BURTC_CompareGet(unsigned int comp);
+uint32_t BURTC_ClockFreqGet(void);
 
 
 /** @} (end addtogroup BURTC) */
@@ -412,5 +416,4 @@ uint32_t BURTC_CompareGet(unsigned int comp);
 #endif
 
 #endif /* BURTC_PRESENT */
-
-#endif /* __EM_BURTC_H */
+#endif /* __SILICON_LABS_EM_BURTC_H__ */

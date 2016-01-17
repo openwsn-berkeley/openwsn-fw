@@ -30,11 +30,14 @@ sht21 = localEnv.SConscript(
 
 source   = \
     Glob('*.c') + \
-    Glob('source/*.c')
+    Glob('source/*.c')+ \
+    Glob('GCC/*.c')
 
 localEnv.Append(
     CPPPATH =  [
-        os.path.join('#','bsp','boards','OpenMote-CC2538','headers'),
+        os.path.join('#','bsp','boards','openmote-ezr32wg','headers'),
+        os.path.join('#','bsp','boards','openmote-ezr32wg','Include'),
+        os.path.join('#','bsp','boards','openmote-ezr32wg','GCC'),
         os.path.join('#','bsp','chips','adxl346'),
         os.path.join('#','bsp','chips','max44009'),
         os.path.join('#','bsp','chips','sht21'),

@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_i2c.h
  * @brief Inter-intergrated circuit (I2C) peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,23 +17,26 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_I2C_H
-#define __EM_I2C_H
+
+#ifndef __SILICON_LABS_EM_I2C_H__
+#define __SILICON_LABS_EM_I2C_H__
+
+#include "em_device.h"
+#if defined(I2C_COUNT) && (I2C_COUNT > 0)
 
 #include <stdbool.h>
-#include "em_device.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -63,8 +65,21 @@ extern "C" {
  *   worst case value of Tlow or Thigh as base.
  *
  *   1/(Tlow + Thigh + 1us + 0.3us) = 1/(4.7 + 4.7 + 1.3)us = 93458Hz
+ * @note
+ *   Due to chip characteristics, the max value is somewhat reduced.
  */
-#define I2C_FREQ_STANDARD_MAX    93500
+#if defined(_EFM32_GECKO_FAMILY) || defined(_EFM32_TINY_FAMILY) \
+    || defined(_EFM32_ZERO_FAMILY) || defined(_EFM32_HAPPY_FAMILY)
+#define I2C_FREQ_STANDARD_MAX    93000
+#elif defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#define I2C_FREQ_STANDARD_MAX    92000
+#elif defined(_SILICON_LABS_32B_PLATFORM_2)
+// None of the chips on this platform has been characterized on this parameter.
+// Use same value as on Wonder until further notice.
+#define I2C_FREQ_STANDARD_MAX    92000
+#else
+#error "Unknown device family."
+#endif
 
 /**
  * @brief
@@ -76,7 +91,7 @@ extern "C" {
  *
  *   1/(Tlow + Thigh + 0.3us + 0.3us) = 1/(1.3 + 0.65 + 0.6)us = 392157Hz
  */
-#define I2C_FREQ_FAST_MAX        392500
+#define I2C_FREQ_FAST_MAX        392157
 
 
 /**
@@ -84,12 +99,12 @@ extern "C" {
  *   Fast mode+ max frequency assuming using 11:6 ratio for Nlow:Nhigh.
  * @details
  *   From I2C specification: Min Tlow = 0.5us, min Thigh = 0.26us,
- *   max Trise=0.012us, max Tfall=0.12us. Since ratio is 11:6, have to use
+ *   max Trise=0.12us, max Tfall=0.12us. Since ratio is 11:6, have to use
  *   worst case value of Tlow or (11/6)xThigh as base.
  *
  *   1/(Tlow + Thigh + 0.12us + 0.12us) = 1/(0.5 + 0.273 + 0.24)us = 987167Hz
  */
-#define I2C_FREQ_FASTPLUS_MAX    987500
+#define I2C_FREQ_FASTPLUS_MAX    987167
 
 
 /**
@@ -204,14 +219,15 @@ typedef struct
 } I2C_Init_TypeDef;
 
 /** Suggested default config for I2C init structure. */
-#define I2C_INIT_DEFAULT                                                    \
-  { true,                    /* Enable when init done */                    \
-    true,                    /* Set to master mode */                       \
-    0,                       /* Use currently configured reference clock */ \
-    I2C_FREQ_STANDARD_MAX,   /* Set to standard rate assuring being */      \
-                             /* within I2C spec */                          \
-    i2cClockHLRStandard      /* Set to use 4:4 low/high duty cycle */       \
-  }
+#define I2C_INIT_DEFAULT                                                  \
+{                                                                         \
+  true,                    /* Enable when init done */                    \
+  true,                    /* Set to master mode */                       \
+  0,                       /* Use currently configured reference clock */ \
+  I2C_FREQ_STANDARD_MAX,   /* Set to standard rate assuring being */      \
+                           /* within I2C spec */                          \
+  i2cClockHLRStandard      /* Set to use 4:4 low/high duty cycle */       \
+}
 
 
 /**
@@ -270,9 +286,9 @@ typedef struct
 
 uint32_t I2C_BusFreqGet(I2C_TypeDef *i2c);
 void I2C_BusFreqSet(I2C_TypeDef *i2c,
-                    uint32_t refFreq,
-                    uint32_t freq,
-                    I2C_ClockHLR_TypeDef type);
+                    uint32_t freqRef,
+                    uint32_t freqScl,
+                    I2C_ClockHLR_TypeDef i2cMode);
 void I2C_Enable(I2C_TypeDef *i2c, bool enable);
 void I2C_Init(I2C_TypeDef *i2c, const I2C_Init_TypeDef *init);
 
@@ -348,7 +364,33 @@ __STATIC_INLINE void I2C_IntEnable(I2C_TypeDef *i2c, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE uint32_t I2C_IntGet(I2C_TypeDef *i2c)
 {
-  return(i2c->IF);
+  return i2c->IF;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *   Get enabled and pending I2C interrupt flags.
+ *   Useful for handling more interrupt sources in the same interrupt handler.
+ *
+ * @note
+ *   Interrupt flags are not cleared by the use of this function.
+ *
+ * @param[in] i2c
+ *   Pointer to I2C peripheral register block.
+ *
+ * @return
+ *   Pending and enabled I2C interrupt sources
+ *   The return value is the bitwise AND of
+ *   - the enabled interrupt sources in I2Cn_IEN and
+ *   - the pending interrupt flags I2Cn_IF
+ ******************************************************************************/
+__STATIC_INLINE uint32_t I2C_IntGetEnabled(I2C_TypeDef *i2c)
+{
+  uint32_t ien;
+
+  ien = i2c->IEN;
+  return i2c->IF & ien;
 }
 
 
@@ -389,7 +431,7 @@ void I2C_Reset(I2C_TypeDef *i2c);
  ******************************************************************************/
 __STATIC_INLINE uint8_t I2C_SlaveAddressGet(I2C_TypeDef *i2c)
 {
-  return((uint8_t)(i2c->SADDR));
+  return ((uint8_t)(i2c->SADDR));
 }
 
 
@@ -441,7 +483,7 @@ __STATIC_INLINE void I2C_SlaveAddressSet(I2C_TypeDef *i2c, uint8_t addr)
  ******************************************************************************/
 __STATIC_INLINE uint8_t I2C_SlaveAddressMaskGet(I2C_TypeDef *i2c)
 {
-  return((uint8_t)(i2c->SADDRMASK));
+  return ((uint8_t)(i2c->SADDRMASK));
 }
 
 
@@ -485,4 +527,5 @@ I2C_TransferReturn_TypeDef I2C_TransferInit(I2C_TypeDef *i2c,
 }
 #endif
 
-#endif /* __EM_I2C_H */
+#endif /* defined(I2C_COUNT) && (I2C_COUNT > 0) */
+#endif /* __SILICON_LABS_EM_I2C_H__ */

@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_msc.c
  * @brief Flash controller (MSC) Peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,53 +17,57 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
+
 #include "em_msc.h"
+#if defined( MSC_COUNT ) && ( MSC_COUNT > 0 )
+
 #include "em_system.h"
-#if defined (_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#include "em_int.h"
+#if defined( _MSC_TIMEBASE_MASK )
 #include "em_cmu.h"
 #endif
 #include "em_assert.h"
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-#define WORDS_PER_DATA_PHASE (FLASH_SIZE<(512*1024) ? 1 : 2)
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+
+#if defined( MSC_WRITECTRL_WDOUBLE )
+#define WORDS_PER_DATA_PHASE (FLASH_SIZE < (512 * 1024) ? 1 : 2)
 #else
-  /* _EFM32_GECKO_FAMILY || _EFM32_TINY_FAMILY */
 #define WORDS_PER_DATA_PHASE (1)
 #endif
 
+typedef enum {
+  mscWriteIntSafe,
+  mscWriteFast,
+} MSC_WriteStrategy_Typedef;
 
-#ifdef __CC_ARM  /* MDK-ARM compiler */
-msc_Return_TypeDef MscLoadData(uint32_t *data, int num);
-msc_Return_TypeDef MscLoadAddress(uint32_t *address);
-#endif /* __CC_ARM */
+MSC_FUNC_PREFIX static MSC_Status_TypeDef
+  MSC_WriteWordI(uint32_t *address,
+                 void const *data,
+                 uint32_t numBytes,
+                 MSC_WriteStrategy_Typedef writeStrategy) MSC_FUNC_POSTFIX;
 
-#ifdef __ICCARM__ /* IAR compiler */
-__ramfunc msc_Return_TypeDef MscLoadData(uint32_t *data, int num);
-__ramfunc msc_Return_TypeDef MscLoadAddress(uint32_t *address);
-#endif /* __ICCARM__ */
+MSC_FUNC_PREFIX __STATIC_INLINE MSC_Status_TypeDef
+  MSC_LoadWriteData(uint32_t* data,
+                    uint32_t numWords,
+                    MSC_WriteStrategy_Typedef writeStrategy) MSC_FUNC_POSTFIX;
 
-#ifdef __GNUC__  /* GCC based compilers */
-#ifdef __CROSSWORKS_ARM  /* Rowley Crossworks */
-msc_Return_TypeDef MscLoadData(uint32_t *data, int num) __attribute__ ((section(".fast")));
-msc_Return_TypeDef MscLoadAddress(uint32_t *address) __attribute__ ((section(".fast")));
-#else /* Sourcery G++ */
-msc_Return_TypeDef MscLoadData(uint32_t *data, int num) __attribute__ ((section(".ram")));
-msc_Return_TypeDef MscLoadAddress(uint32_t *address) __attribute__ ((section(".ram")));
-#endif /* __CROSSWORKS_ARM */
-#endif /* __GNUC__ */
+MSC_FUNC_PREFIX __STATIC_INLINE MSC_Status_TypeDef
+  MSC_LoadVerifyAddress(uint32_t* address) MSC_FUNC_POSTFIX;
 
+/** @endcond */
 
 /***************************************************************************//**
  * @addtogroup EM_Library
@@ -87,10 +90,17 @@ msc_Return_TypeDef MscLoadAddress(uint32_t *address) __attribute__ ((section(".r
  * @note
  *   IMPORTANT: This function must be called before flash operations when
  *   AUXHFRCO clock has been changed from default 14MHz band.
+ * @note
+ *   This function calls SystemCoreClockGet in order to set the global variable
+ *   SystemCoreClock which is used in subseqent calls of MSC_WriteWord to make
+ *   sure the frequency is sufficiently high for flash operations. If the clock
+ *   frequency is changed then software is responsible for calling MSC_Init or
+ *   SystemCoreClockGet in order to set the SystemCoreClock variable to the
+ *   correct value.
  ******************************************************************************/
 void MSC_Init(void)
 {
-#if defined (_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined( _MSC_TIMEBASE_MASK )
   uint32_t freq, cycles;
 #endif
   /* Unlock the MSC */
@@ -98,7 +108,14 @@ void MSC_Init(void)
   /* Disable writing to the flash */
   MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
 
-#if defined (_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+  /* Call SystemCoreClockGet in order to set the global variable SystemCoreClock
+     which is used in MSC_LoadWriteData to make sure the frequency is
+     sufficiently high. If the clock frequency is changed then software is
+     responsible for calling MSC_Init or SystemCoreClockGet in order to set the
+     SystemCoreClock variable to the correct value. */
+  SystemCoreClockGet();
+
+#if defined( _MSC_TIMEBASE_MASK )
   /* Configure MSC->TIMEBASE according to selected frequency */
   freq = CMU_ClockFreqGet(cmuClock_AUX);
 
@@ -109,10 +126,10 @@ void MSC_Init(void)
     cycles = (freq / 1000000) + 1;
 
     /* Configure clock cycles for flash timing */
-    MSC->TIMEBASE = (MSC->TIMEBASE & ~(_MSC_TIMEBASE_BASE_MASK |
-                                       _MSC_TIMEBASE_PERIOD_MASK)) |
-                    MSC_TIMEBASE_PERIOD_1US |
-                    (cycles << _MSC_TIMEBASE_BASE_SHIFT);
+    MSC->TIMEBASE = (MSC->TIMEBASE & ~(_MSC_TIMEBASE_BASE_MASK
+                                       | _MSC_TIMEBASE_PERIOD_MASK))
+                    | MSC_TIMEBASE_PERIOD_1US
+                    | (cycles << _MSC_TIMEBASE_BASE_SHIFT);
   }
   else
   {
@@ -121,10 +138,10 @@ void MSC_Init(void)
     cycles = (freq / 1000000) + 1;
 
     /* Configure clock cycles for flash timing */
-    MSC->TIMEBASE = (MSC->TIMEBASE & ~(_MSC_TIMEBASE_BASE_MASK |
-                                       _MSC_TIMEBASE_PERIOD_MASK)) |
-                    MSC_TIMEBASE_PERIOD_5US |
-                    (cycles << _MSC_TIMEBASE_BASE_SHIFT);
+    MSC->TIMEBASE = (MSC->TIMEBASE & ~(_MSC_TIMEBASE_BASE_MASK
+                                       | _MSC_TIMEBASE_PERIOD_MASK))
+                    | MSC_TIMEBASE_PERIOD_5US
+                    | (cycles << _MSC_TIMEBASE_BASE_SHIFT);
   }
 #endif
 }
@@ -142,48 +159,112 @@ void MSC_Deinit(void)
 }
 
 
+#if !defined( _EFM32_GECKO_FAMILY )
+/***************************************************************************//**
+ * @brief
+ *   Set MSC code execution configuration
+ *
+ * @param[in] execConfig
+ *   Code execution configuration
+ ******************************************************************************/
+void MSC_ExecConfigSet(MSC_ExecConfig_TypeDef *execConfig)
+{
+  uint32_t mscReadCtrl;
+
+  mscReadCtrl = MSC->READCTRL & ~(0
+#if defined( MSC_READCTRL_SCBTP )
+                                  | MSC_READCTRL_SCBTP
+#endif
+#if defined( MSC_READCTRL_USEHPROT )
+                                  | MSC_READCTRL_USEHPROT
+#endif
+#if defined( MSC_READCTRL_PREFETCH )
+                                  | MSC_READCTRL_PREFETCH
+#endif
+#if defined( MSC_READCTRL_ICCDIS )
+                                  | MSC_READCTRL_ICCDIS
+#endif
+#if defined( MSC_READCTRL_AIDIS )
+                                  | MSC_READCTRL_AIDIS
+#endif
+#if defined( MSC_READCTRL_IFCDIS )
+                                  | MSC_READCTRL_IFCDIS
+#endif
+                                  );
+  mscReadCtrl |= (0
+#if defined( MSC_READCTRL_SCBTP )
+                 | (execConfig->scbtEn ? MSC_READCTRL_SCBTP : 0)
+#endif
+#if defined( MSC_READCTRL_USEHPROT )
+                 | (execConfig->useHprot ? MSC_READCTRL_USEHPROT : 0)
+#endif
+#if defined( MSC_READCTRL_PREFETCH )
+                 | (execConfig->prefetchEn ? MSC_READCTRL_PREFETCH : 0)
+#endif
+#if defined( MSC_READCTRL_ICCDIS )
+                 | (execConfig->iccDis ? MSC_READCTRL_ICCDIS : 0)
+#endif
+#if defined( MSC_READCTRL_AIDIS )
+                 | (execConfig->aiDis ? MSC_READCTRL_AIDIS : 0)
+#endif
+#if defined( MSC_READCTRL_IFCDIS )
+                 | (execConfig->ifcDis ? MSC_READCTRL_IFCDIS : 0)
+#endif
+                 );
+  MSC->READCTRL = mscReadCtrl;
+}
+#endif
+
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
 /***************************************************************************//**
  * @brief
- *   Perform address phase of FLASH write cycle.
+ *   Perform address phase of Flash write cycle.
  * @details
  *   This function performs the address phase of a Flash write operation by
  *   writing the given flash address to the ADDRB register and issuing the
  *   LADDRIM command to load the address.
- * @note
- *   This function MUST be executed from RAM. Failure to execute this portion
- *   of the code in RAM will result in a hardfault. For IAR, Rowley and
- *   Codesourcery this will be achieved automatically. For Keil uVision 4 you
- *   must define a section called "ram_code" and place this manually in your
- *   project's scatter file.
  * @param[in] address
  *   Address in flash memory. Must be aligned at a 4 byte boundary.
  * @return
- *   Returns the status of the address load operation, #msc_Return_TypeDef
+ *   Returns the status of the address load operation, #MSC_Status_TypeDef
  * @verbatim
  *   mscReturnOk - Operation completed successfully.
  *   mscReturnInvalidAddr - Operation tried to erase a non-flash area.
  *   mscReturnLocked - Operation tried to erase a locked area of the flash.
  * @endverbatim
  ******************************************************************************/
-#ifdef __CC_ARM  /* MDK-ARM compiler */
+#if !defined(EM_MSC_RUN_FROM_FLASH)
+#if defined(__CC_ARM)  /* MDK-ARM compiler */
 #pragma arm section code="ram_code"
-#endif /* __CC_ARM */
-#if defined(__ICCARM__)
+#elif defined(__ICCARM__)
 /* Suppress warnings originating from use of EFM_ASSERT():              */
 /* "Call to a non __ramfunc function from within a __ramfunc function"  */
 /* "Possible rom access from within a __ramfunc function"               */
 #pragma diag_suppress=Ta022
 #pragma diag_suppress=Ta023
+__ramfunc
 #endif
-
-msc_Return_TypeDef MscLoadAddress(uint32_t* address)
+#endif /* !EM_MSC_RUN_FROM_FLASH */
+__STATIC_INLINE MSC_Status_TypeDef MSC_LoadVerifyAddress(uint32_t* address)
 {
   uint32_t status;
+  uint32_t timeOut;
 
+  /* Wait for the MSC to become ready. */
+  timeOut = MSC_PROGRAM_TIMEOUT;
+  while ((MSC->STATUS & MSC_STATUS_BUSY) && (timeOut != 0))
+  {
+    timeOut--;
+  }
+
+  /* Check for timeout */
+  if (timeOut == 0)
+  {
+    return mscReturnTimeOut;
+  }
   /* Load address */
-  MSC->ADDRB    = (uint32_t) (address);
+  MSC->ADDRB    = (uint32_t)address;
   MSC->WRITECMD = MSC_WRITECMD_LADDRIM;
 
   status = MSC->STATUS;
@@ -198,240 +279,258 @@ msc_Return_TypeDef MscLoadAddress(uint32_t* address)
   }
   return mscReturnOk;
 }
-
 #if defined(__ICCARM__)
 #pragma diag_default=Ta022
 #pragma diag_default=Ta023
-#endif
-#ifdef __CC_ARM  /* MDK-ARM compiler */
+#elif defined(__CC_ARM)  /* MDK-ARM compiler */
 #pragma arm section code
 #endif /* __CC_ARM */
 
 
-
 /***************************************************************************//**
  * @brief
- *   Perform data phase of FLASH write cycle.
+ *   Perform a Flash data write phase.
  * @details
  *   This function performs the data phase of a Flash write operation by loading
  *   the given number of 32-bit words to the WDATA register.
- * @note
- *   This function MUST be executed from RAM. Failure to execute this portion
- *   of the code in RAM will result in a hardfault. For IAR, Rowley and
- *   Codesourcery this will be achieved automatically. For Keil uVision 4 you
- *   must define a section called "ram_code" and place this manually in your
- *   project's scatter file.
  * @param[in] data
  *   Pointer to the first data word to load.
- * @param[in] num
+ * @param[in] numWords
  *   Number of data words (32-bit) to load.
+ * @param[in] writeStrategy
+ *   Write strategy to apply.
  * @return
- *   Returns the status of the data load operation, #msc_Return_TypeDef
+ *   Returns the status of the data load operation
  * @verbatim
  *   mscReturnOk - Operation completed successfully.
  *   mscReturnTimeOut - Operation timed out waiting for flash operation
  *                      to complete.
  * @endverbatim
  ******************************************************************************/
-#ifdef __CC_ARM  /* MDK-ARM compiler */
+#if !defined(EM_MSC_RUN_FROM_FLASH)
+#if defined(__CC_ARM)  /* MDK-ARM compiler */
 #pragma arm section code="ram_code"
-#endif /* __CC_ARM */
-#if defined(__ICCARM__)
+#elif defined(__ICCARM__)
 /* Suppress warnings originating from use of EFM_ASSERT():              */
 /* "Call to a non __ramfunc function from within a __ramfunc function"  */
 /* "Possible rom access from within a __ramfunc function"               */
 #pragma diag_suppress=Ta022
 #pragma diag_suppress=Ta023
+__ramfunc
 #endif
-
-msc_Return_TypeDef MscLoadData(uint32_t* data, int num) 
-{                         
-  int      timeOut  = MSC_PROGRAM_TIMEOUT;
-  int      i;
-  
-  /* Wait for the MSC to be ready for a new data word. 
-   * Due to the timing of this function, the MSC should
-   * already by ready */
-  timeOut = MSC_PROGRAM_TIMEOUT;
-  while (((MSC->STATUS & MSC_STATUS_WDATAREADY) == 0) && (timeOut != 0))
-  {
-    timeOut--;
-  }
-  
-  /* Check for timeout */
-  if (timeOut == 0)
-    return mscReturnTimeOut;
-
-  /* Load 'num' 32-bit words into write data register. */
-  for (i=0; i<num; i++, data++)
-    MSC->WDATA = *data;
-
-  /* Trigger write once */
-  MSC->WRITECMD = MSC_WRITECMD_WRITEONCE;
-
-  /* Wait for the write to complete */
-  timeOut = MSC_PROGRAM_TIMEOUT;
-  while ((MSC->STATUS & MSC_STATUS_BUSY) && (timeOut != 0))
-  {
-    timeOut--;
-  }
-
-  /* Check for timeout */
-  if (timeOut == 0) return mscReturnTimeOut;
-
-  return mscReturnOk;
-}
-#if defined(__ICCARM__)
-#pragma diag_default=Ta022
-#pragma diag_default=Ta023
-#endif
-#ifdef __CC_ARM  /* MDK-ARM compiler */
-#pragma arm section code
-#endif /* __CC_ARM */
-
-/** @endcond */
-
-
-/***************************************************************************//**
- * @brief
- *   Erases a page in flash memory.
- * @note
- *   This function MUST be executed from RAM. Failure to execute this portion
- *   of the code in RAM will result in a hardfault. For IAR, Rowley and
- *   Codesourcery this will be achieved automatically. For Keil uVision 4 you
- *   must define a section called "ram_code" and place this manually in your
- *   project's scatter file.
- * @param[in] startAddress
- *   Pointer to the flash page to erase. Must be aligned to beginning of page
- *   boundary.
- * @return
- *   Returns the status of erase operation, #msc_Return_TypeDef
- * @verbatim
- *   mscReturnOk - Operation completed successfully.
- *   mscReturnInvalidAddr - Operation tried to erase a non-flash area.
- *   mscReturnLocked - Operation tried to erase a locked area of the flash.
- *   mscReturnTimeOut - Operation timed out waiting for flash operation
- *       to complete.
- * @endverbatim
- ******************************************************************************/
-#ifdef __CC_ARM  /* MDK-ARM compiler */
-#pragma arm section code="ram_code"
-#endif /* __CC_ARM */
-#if defined(__ICCARM__)
-/* Suppress warnings originating from use of EFM_ASSERT():              */
-/* "Call to a non __ramfunc function from within a __ramfunc function"  */
-/* "Possible rom access from within a __ramfunc function"               */
-#pragma diag_suppress=Ta022
-#pragma diag_suppress=Ta023
-#endif
-msc_Return_TypeDef MSC_ErasePage(uint32_t *startAddress)
+#endif /* !EM_MSC_RUN_FROM_FLASH */
+__STATIC_INLINE MSC_Status_TypeDef
+  MSC_LoadWriteData(uint32_t* data,
+                    uint32_t numWords,
+                    MSC_WriteStrategy_Typedef writeStrategy)
 {
-  int      timeOut  = MSC_PROGRAM_TIMEOUT;
+  uint32_t timeOut;
+  uint32_t wordIndex;
+  uint32_t wordsPerDataPhase;
+  MSC_Status_TypeDef retval = mscReturnOk;
 
-  /* Address must be aligned to pages */
-  EFM_ASSERT((((uint32_t) startAddress) & (FLASH_PAGE_SIZE - 1)) == 0);
-
-  /* Enable writing to the MSC */
-  MSC->WRITECTRL |= MSC_WRITECTRL_WREN;
-
-  /* Load address */
-  MSC->ADDRB    = (uint32_t) startAddress;
-  MSC->WRITECMD = MSC_WRITECMD_LADDRIM;
-
-  /* Check for invalid address */
-  if (MSC->STATUS & MSC_STATUS_INVADDR)
+#if defined(_MSC_WRITECTRL_LPWRITE_MASK) && defined(_MSC_WRITECTRL_WDOUBLE_MASK)
+  /* If LPWRITE (Low Power Write) is NOT enabled, set WDOUBLE (Write Double word) */
+  if (!(MSC->WRITECTRL & MSC_WRITECTRL_LPWRITE))
   {
-    /* Disable writing to the MSC */
-    MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
-    return mscReturnInvalidAddr;
+    /* If the number of words to be written are odd, we need to align by writing
+       a single word first, before setting the WDOUBLE bit. */
+    if (numWords & 0x1)
+    {
+      /* Wait for the MSC to become ready for the next word. */
+      timeOut = MSC_PROGRAM_TIMEOUT;
+      while ((!(MSC->STATUS & MSC_STATUS_WDATAREADY)) && (timeOut != 0))
+      {
+        timeOut--;
+      }
+      /* Check for timeout */
+      if (timeOut == 0)
+      {
+        return mscReturnTimeOut;
+      }
+      /* Clear double word option, in order to write the initial single word. */
+      MSC->WRITECTRL &= ~MSC_WRITECTRL_WDOUBLE;
+      /* Write first data word. */
+      MSC->WDATA = *data++;
+      MSC->WRITECMD = MSC_WRITECMD_WRITEONCE;
+
+      /* Wait for the operation to finish. It may be required to change the WDOUBLE
+         config after the initial write. It should not be changed while BUSY. */
+      timeOut = MSC_PROGRAM_TIMEOUT;
+      while((MSC->STATUS & MSC_STATUS_BUSY) && (timeOut != 0))
+      {
+        timeOut--;
+      }
+      /* Check for timeout */
+      if (timeOut == 0)
+      {
+        return mscReturnTimeOut;
+      }
+      /* Subtract this initial odd word for the write loop below */
+      numWords -= 1;
+      retval = mscReturnOk;
+    }
+    /* Now we can set the double word option in order to write two words per
+       data phase. */
+    MSC->WRITECTRL |= MSC_WRITECTRL_WDOUBLE;
+    wordsPerDataPhase = 2;
+  }
+  else
+#endif /* defined( _MSC_WRITECTRL_LPWRITE_MASK ) && defined( _MSC_WRITECTRL_WDOUBLE_MASK ) */
+  {
+    wordsPerDataPhase = 1;
   }
 
-  /* Check for write protected page */
-  if (MSC->STATUS & MSC_STATUS_LOCKED)
+  /* Write the rest as double word write if wordsPerDataPhase == 2 */
+  if (numWords > 0)
   {
-    /* Disable writing to the MSC */
-    MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
-    return mscReturnLocked;
+    /**** Write strategy: mscWriteIntSafe ****/
+    if (writeStrategy == mscWriteIntSafe)
+    {
+      /* Requires a system core clock at 1MHz or higher */
+      EFM_ASSERT(SystemCoreClockGet() >= 1000000);
+      wordIndex = 0;
+      while(wordIndex < numWords)
+      {
+        MSC->WDATA = *data++;
+        wordIndex++;
+        if (wordsPerDataPhase == 2)
+        {
+          while (!(MSC->STATUS & MSC_STATUS_WDATAREADY));
+          MSC->WDATA = *data++;
+          wordIndex++;
+        }
+        MSC->WRITECMD = MSC_WRITECMD_WRITEONCE;
+
+        /* Wait for the transaction to finish. */
+        timeOut = MSC_PROGRAM_TIMEOUT;
+        while ((MSC->STATUS & MSC_STATUS_BUSY) && (timeOut != 0))
+        {
+          timeOut--;
+        }
+        /* Check for timeout */
+        if (timeOut == 0)
+        {
+          retval = mscReturnTimeOut;
+          break;
+        }
+#if defined( _EFM32_GECKO_FAMILY )
+        MSC->ADDRB += 4;
+        MSC->WRITECMD = MSC_WRITECMD_LADDRIM;
+#endif
+      }
+    }
+
+    /**** Write strategy: mscWriteFast ****/
+    else
+    {
+#if defined( _EFM32_GECKO_FAMILY )
+      /* Gecko does not have auto-increment of ADDR. */
+      EFM_ASSERT(0);
+#else
+      /* Requires a system core clock at 14MHz or higher */
+      EFM_ASSERT(SystemCoreClockGet() >= 14000000);
+
+      wordIndex = 0;
+      INT_Disable();
+      while(wordIndex < numWords)
+      {
+        /* Wait for the MSC to be ready for the next word. */
+        while (!(MSC->STATUS & MSC_STATUS_WDATAREADY))
+        {
+          /* If the write to MSC->WDATA below missed the 30us timeout and the
+             following MSC_WRITECMD_WRITETRIG command arrived while
+             MSC_STATUS_BUSY is 1, then the MSC_WRITECMD_WRITETRIG could be ignored by
+             the MSC. In this case, MSC_STATUS_WORDTIMEOUT is set to 1
+             and MSC_STATUS_BUSY is 0. A new trigger is therefore needed here to
+             complete write of data in MSC->WDATA.
+             If WDATAREADY became high since entry into this loop, exit and continue
+             to the next WDATA write.
+          */
+          if ((MSC->STATUS & (MSC_STATUS_WORDTIMEOUT
+                              | MSC_STATUS_BUSY
+                              | MSC_STATUS_WDATAREADY))
+              == MSC_STATUS_WORDTIMEOUT)
+          {
+            MSC->WRITECMD = MSC_WRITECMD_WRITETRIG;
+          }
+        }
+        MSC->WDATA = *data;
+        if ((wordsPerDataPhase == 1)
+            || ((wordsPerDataPhase == 2) && (wordIndex & 0x1)))
+        {
+          MSC->WRITECMD = MSC_WRITECMD_WRITETRIG;
+        }
+        data++;
+        wordIndex++;
+      }
+      INT_Enable();
+
+      /* Wait for the transaction to finish. */
+      timeOut = MSC_PROGRAM_TIMEOUT;
+      while ((MSC->STATUS & MSC_STATUS_BUSY) && (timeOut != 0))
+      {
+        timeOut--;
+      }
+      /* Check for timeout */
+      if (timeOut == 0)
+      {
+        retval = mscReturnTimeOut;
+      }
+#endif
+    } /* writeStrategy */
   }
 
-  /* Send erase page command */
-  MSC->WRITECMD = MSC_WRITECMD_ERASEPAGE;
+#if defined( _MSC_WRITECTRL_WDOUBLE_MASK )
+  /* Clear double word option, which should not be left on when returning. */
+  MSC->WRITECTRL &= ~MSC_WRITECTRL_WDOUBLE;
+#endif
 
-  /* Wait for the erase to complete */
-  while ((MSC->STATUS & MSC_STATUS_BUSY) && (timeOut != 0))
-  {
-    timeOut--;
-  }
-
-  if (timeOut == 0)
-  {
-    /* Disable writing to the MSC */
-    MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
-    return mscReturnTimeOut;
-  }
-
-  /* Disable writing to the MSC */
-  MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
-  return mscReturnOk;
+  return retval;
 }
 #if defined(__ICCARM__)
 #pragma diag_default=Ta022
 #pragma diag_default=Ta023
-#endif
-#ifdef __CC_ARM  /* MDK-ARM compiler */
+#elif defined(__CC_ARM)  /* MDK-ARM compiler */
 #pragma arm section code
 #endif /* __CC_ARM */
 
 
-
 /***************************************************************************//**
  * @brief
- *   Writes a single word to flash memory. Data to write must be aligned to
- *   words and contain a number of bytes that is divisable by four.
- * @note
- *   The flash must be erased prior to writing a new word.
- *   This function must be run from RAM. Failure to execute this portion
- *   of the code in RAM will result in a hardfault. For IAR, Rowley and
- *   Codesourcery this will be achieved automatically. For Keil uVision 4 you
- *   must define a section called "ram_code" and place this manually in your
- *   project's scatter file.
- *
+ *   Internal flash write function with select write strategy parameter
  * @param[in] address
- *   Pointer to the flash word to write to. Must be aligned to words.
+ *   Write address
  * @param[in] data
- *   Data to write to flash.
- * @param[in] numBytes
- *   Number of bytes to write from flash. NB: Must be divisable by four.
+ *   Pointer to the first data word to load.
+ * @param[in] numWords
+ *   Number of data words (32-bit) to load.
+ * @param[in] writeStrategy
+ *   Write strategy to apply.
  * @return
- *   Returns the status of the write operation, #msc_Return_TypeDef
- * @verbatim
- *   flashReturnOk - Operation completed successfully.
- *   flashReturnInvalidAddr - Operation tried to erase a non-flash area.
- *   flashReturnLocked - Operation tried to erase a locked area of the flash.
- *   flashReturnTimeOut - Operation timed out waiting for flash operation
- *       to complete.
- * @endverbatim
+ *   Returns the status of the data load operation
  ******************************************************************************/
-#ifdef __CC_ARM  /* MDK-ARM compiler */
+#if !defined(EM_MSC_RUN_FROM_FLASH)
+#if defined(__CC_ARM)  /* MDK-ARM compiler */
 #pragma arm section code="ram_code"
-#endif /* __CC_ARM */
-#if defined(__ICCARM__)
+#elif defined(__ICCARM__)
 /* Suppress warnings originating from use of EFM_ASSERT():              */
 /* "Call to a non __ramfunc function from within a __ramfunc function"  */
 /* "Possible rom access from within a __ramfunc function"               */
 #pragma diag_suppress=Ta022
 #pragma diag_suppress=Ta023
 #endif
-
-msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numBytes)
+#endif /* !EM_MSC_RUN_FROM_FLASH */
+static MSC_Status_TypeDef MSC_WriteWordI(uint32_t *address,
+                                         void const *data,
+                                         uint32_t numBytes,
+                                         MSC_WriteStrategy_Typedef writeStrategy)
 {
-  int wordCount;
-  int numWords;
-#if defined(_EFM32_TINY_FAMILY) || defined (_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-  int pageWords;
+  uint32_t wordCount;
+  uint32_t numWords;
+  uint32_t pageWords;
   uint32_t* pData;
-#endif
-  msc_Return_TypeDef retval = mscReturnOk;
+  MSC_Status_TypeDef retval = mscReturnOk;
 
   /* Check alignment (Must be aligned to words) */
   EFM_ASSERT(((uint32_t) address & 0x3) == 0);
@@ -444,121 +543,273 @@ msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numByt
 
   /* Convert bytes to words */
   numWords = numBytes >> 2;
-
-#if (defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)) && (2==WORDS_PER_DATA_PHASE)
-
-  /* For the Giant and Wonder families we want to use the double word write
-   * feature in order to improve the speed. The devices with flash size
-   * larger than 512KiBytes support double word write cycles. The address is
-   * loaded by the software for the first word, and automatically incremented
-   * by the hardware for the second word. However this will not work across a
-   * page boundary, so we need to align the address of double word write
-   * cycles to an even address.
-   */
-  
-  if ((((uint32_t) address) % FLASH_PAGE_SIZE + numBytes)
-      > FLASH_PAGE_SIZE)
-  {
-    if (((uint32_t) address) & 0x7)
-    {
-      MSC->WRITECTRL &= ~MSC_WRITECTRL_WDOUBLE;
-      retval = MscLoadAddress(address);
-      if (mscReturnOk != retval) goto msc_write_word_exit;
-      retval = MscLoadData((uint32_t *) data, 1);
-      if (mscReturnOk != retval) goto msc_write_word_exit;
-      data = (void *) ((uint32_t) data + sizeof(uint32_t));
-      address++;
-      numWords--;
-    }
-  }
-  
-  /* If there is an odd number of words remaining to be written,
-   * we write the last word now because this has to be written
-   * as a single word and will simplify the for() loop below writing
-   * double words. */
-  
-  if (numWords & 0x1)
-  {
-    MSC->WRITECTRL &= ~MSC_WRITECTRL_WDOUBLE;
-    retval = MscLoadAddress(address + numWords - 1);
-    if (mscReturnOk != retval) goto msc_write_word_exit;
-    retval = MscLoadData(((uint32_t *) data) + numWords - 1, 1);
-    if (mscReturnOk != retval) goto msc_write_word_exit;
-    numWords--;
-  }
-  
-  MSC->WRITECTRL |= MSC_WRITECTRL_WDOUBLE;
-
-#endif /* (defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)) && (2==WORDS_PER_DATA_PHASE) */
-
-#if defined(_EFM32_TINY_FAMILY) || defined (_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-
-  pData = (uint32_t*) data;
+  EFM_ASSERT(numWords > 0);
 
   /* The following loop splits the data into chunks corresponding to flash pages.
      The address is loaded only once per page, because the hardware automatically
      increments the address internally for each data load inside a page. */
-  for (wordCount = 0; wordCount < numWords; )
+  for (wordCount = 0, pData = (uint32_t *)data; wordCount < numWords; )
   {
     /* First we load address. The address is auto-incremented within a page.
        Therefore the address phase is only needed once for each page. */
-    retval = MscLoadAddress(address + wordCount);
-    if (mscReturnOk != retval) goto msc_write_word_exit;
-
+    retval = MSC_LoadVerifyAddress(address + wordCount);
+    if (mscReturnOk != retval)
+    {
+      return retval;
+    }
     /* Compute the number of words to write to the current page. */
     pageWords =
-      (FLASH_PAGE_SIZE - ((uint32_t) (address + wordCount)) % FLASH_PAGE_SIZE) /
-      sizeof(uint32_t);
-    if (pageWords > numWords-wordCount)
-      pageWords = numWords-wordCount;
-    wordCount += pageWords;
-
-    /* Now program the data in this page. */
-    for (; pageWords; pData+=WORDS_PER_DATA_PHASE, pageWords-=WORDS_PER_DATA_PHASE)
+      (FLASH_PAGE_SIZE -
+       (((uint32_t) (address + wordCount)) & (FLASH_PAGE_SIZE - 1)))
+      / sizeof(uint32_t);
+    if (pageWords > numWords - wordCount)
     {
-      retval = MscLoadData(pData, WORDS_PER_DATA_PHASE);
-      if (mscReturnOk != retval)
-        goto msc_write_word_exit;
+      pageWords = numWords - wordCount;
     }
-  }
-
-#else /* _EFM32_GECKO_FAMILY  */
-
-  for (wordCount = 0; wordCount < numWords; wordCount++)
-  {
-    retval = MscLoadAddress(address + wordCount);
+    /* Now write the data in the current page. */
+    retval = MSC_LoadWriteData(pData, pageWords, writeStrategy);
     if (mscReturnOk != retval)
-      goto msc_write_word_exit;
-    retval = MscLoadData(((uint32_t *) data) + wordCount, 1);
-    if (mscReturnOk != retval)
-      goto msc_write_word_exit;
+    {
+      break;
+    }
+    wordCount += pageWords;
+    pData += pageWords;
   }
-
-#endif
-
- msc_write_word_exit:
 
   /* Disable writing to the MSC */
   MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
 
-#if (defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)) && (2==WORDS_PER_DATA_PHASE)
+#if defined( _MSC_WRITECTRL_WDOUBLE_MASK )
+#if ( WORDS_PER_DATA_PHASE == 2 )
   /* Turn off double word write cycle support. */
   MSC->WRITECTRL &= ~MSC_WRITECTRL_WDOUBLE;
+#endif
 #endif
 
   return retval;
 }
-
 #if defined(__ICCARM__)
 #pragma diag_default=Ta022
 #pragma diag_default=Ta023
+#elif defined(__CC_ARM)  /* MDK-ARM compiler */
+#pragma arm section code
+#endif /* __CC_ARM */
+
+/** @endcond */
+
+
+/***************************************************************************//**
+ * @brief
+ *   Erases a page in flash memory.
+ * @note
+ *   It is recommended to run this code from RAM. On the Gecko family, it is required
+ *   to run this function from RAM.
+ *
+ *   For IAR, Rowley, SimplicityStudio, Atollic and armgcc this will be achieved
+ *   automatically by using attributes in the function proctype. For Keil uVision you
+ *   must define a section called "ram_code" and place this manually in your
+ *   project's scatter file.
+ *
+ * @param[in] startAddress
+ *   Pointer to the flash page to erase. Must be aligned to beginning of page
+ *   boundary.
+ * @return
+ *   Returns the status of erase operation, #MSC_Status_TypeDef
+ * @verbatim
+ *   mscReturnOk - Operation completed successfully.
+ *   mscReturnInvalidAddr - Operation tried to erase a non-flash area.
+ *   mscReturnLocked - Operation tried to erase a locked area of the flash.
+ *   mscReturnTimeOut - Operation timed out waiting for flash operation
+ *       to complete.
+ * @endverbatim
+ ******************************************************************************/
+#if !defined(EM_MSC_RUN_FROM_FLASH)
+#if defined(__CC_ARM)  /* MDK-ARM compiler */
+#pragma arm section code="ram_code"
+#elif defined(__ICCARM__)
+/* Suppress warnings originating from use of EFM_ASSERT():              */
+/* "Call to a non __ramfunc function from within a __ramfunc function"  */
+/* "Possible rom access from within a __ramfunc function"               */
+#pragma diag_suppress=Ta022
+#pragma diag_suppress=Ta023
 #endif
-#ifdef __CC_ARM  /* MDK-ARM compiler */
+#endif /* !EM_MSC_RUN_FROM_FLASH */
+MSC_Status_TypeDef MSC_ErasePage(uint32_t *startAddress)
+{
+  uint32_t timeOut = MSC_PROGRAM_TIMEOUT;
+
+  /* Address must be aligned to pages */
+  EFM_ASSERT((((uint32_t) startAddress) & (FLASH_PAGE_SIZE - 1)) == 0);
+
+  /* Enable writing to the MSC */
+  MSC->WRITECTRL |= MSC_WRITECTRL_WREN;
+
+  /* Load address */
+  MSC->ADDRB    = (uint32_t)startAddress;
+  MSC->WRITECMD = MSC_WRITECMD_LADDRIM;
+
+  /* Check for invalid address */
+  if (MSC->STATUS & MSC_STATUS_INVADDR)
+  {
+    /* Disable writing to the MSC */
+    MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
+    return mscReturnInvalidAddr;
+  }
+  /* Check for write protected page */
+  if (MSC->STATUS & MSC_STATUS_LOCKED)
+  {
+    /* Disable writing to the MSC */
+    MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
+    return mscReturnLocked;
+  }
+  /* Send erase page command */
+  MSC->WRITECMD = MSC_WRITECMD_ERASEPAGE;
+
+  /* Wait for the erase to complete */
+  while ((MSC->STATUS & MSC_STATUS_BUSY) && (timeOut != 0))
+  {
+    timeOut--;
+  }
+  if (timeOut == 0)
+  {
+    /* Disable writing to the MSC */
+    MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
+    return mscReturnTimeOut;
+  }
+  /* Disable writing to the MSC */
+  MSC->WRITECTRL &= ~MSC_WRITECTRL_WREN;
+  return mscReturnOk;
+}
+#if defined(__ICCARM__)
+#pragma diag_default=Ta022
+#pragma diag_default=Ta023
+#elif defined(__CC_ARM)  /* MDK-ARM compiler */
 #pragma arm section code
 #endif /* __CC_ARM */
 
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+/***************************************************************************//**
+ * @brief
+ *   Writes data to flash memory. This function is interrupt safe, but slower than
+ *   MSC_WriteWordFast(), which writes to flash with interrupts disabled.
+ *   Write data must be aligned to words and contain a number of bytes that is
+ *   divisable by four.
+ * @note
+ *   It is recommended to erase the flash page before performing a write.
+ *
+ *   It is recommended to run this code from RAM. On the Gecko family, it is required
+ *   to run this function from RAM.
+ *
+ *   For IAR, Rowley, SimplicityStudio, Atollic and armgcc this will be achieved
+ *   automatically by using attributes in the function proctype. For Keil uVision you
+ *   must define a section called "ram_code" and place this manually in your
+ *   project's scatter file.
+ *
+ *   This function requires a ystem core clock at 1MHz or higher.
+ *
+ * @param[in] address
+ *   Pointer to the flash word to write to. Must be aligned to words.
+ * @param[in] data
+ *   Data to write to flash.
+ * @param[in] numBytes
+ *   Number of bytes to write from flash. NB: Must be divisable by four.
+ * @return
+ *   Returns the status of the write operation
+ * @verbatim
+ *   flashReturnOk - Operation completed successfully.
+ *   flashReturnInvalidAddr - Operation tried to erase a non-flash area.
+ *   flashReturnLocked - Operation tried to erase a locked area of the flash.
+ *   flashReturnTimeOut - Operation timed out waiting for flash operation
+ *       to complete. Or the MSC timed out waiting for the software to write
+ *       the next word into the DWORD register.
+ * @endverbatim
+ ******************************************************************************/
+#if !defined(EM_MSC_RUN_FROM_FLASH)
+#if defined(__CC_ARM)  /* MDK-ARM compiler */
+#pragma arm section code="ram_code"
+#elif defined(__ICCARM__)
+/* Suppress warnings originating from use of EFM_ASSERT():              */
+/* "Call to a non __ramfunc function from within a __ramfunc function"  */
+/* "Possible rom access from within a __ramfunc function"               */
+#pragma diag_suppress=Ta022
+#pragma diag_suppress=Ta023
+#endif
+#endif /* !EM_MSC_RUN_FROM_FLASH */
+MSC_Status_TypeDef MSC_WriteWord(uint32_t *address,
+                                  void const *data,
+                                  uint32_t numBytes)
+{
+  return MSC_WriteWordI(address, data, numBytes, mscWriteIntSafe);
+}
+#if defined(__ICCARM__)
+#pragma diag_default=Ta022
+#pragma diag_default=Ta023
+#elif defined(__CC_ARM)  /* MDK-ARM compiler */
+#pragma arm section code
+#endif /* __CC_ARM */
+
+
+#if !defined( _EFM32_GECKO_FAMILY )
+/***************************************************************************//**
+ * @brief
+ *   Writes data to flash memory. This function is faster than MSC_WriteWord(),
+ *   but it disables interrupts. Write data must be aligned to words and contain
+ *   a number of bytes that is divisable by four.
+ * @note
+ *   It is recommended to erase the flash page before performing a write.
+
+ *   It is recommended to run this code from RAM. On the Gecko family, it is required
+ *   to run this function from RAM.
+ *
+ *   For IAR, Rowley, SimplicityStudio, Atollic and armgcc this will be achieved
+ *   automatically by using attributes in the function proctype. For Keil uVision you
+ *   must define a section called "ram_code" and place this manually in your
+ *   project's scatter file.
+ *
+ * @param[in] address
+ *   Pointer to the flash word to write to. Must be aligned to words.
+ * @param[in] data
+ *   Data to write to flash.
+ * @param[in] numBytes
+ *   Number of bytes to write from flash. NB: Must be divisable by four.
+ * @return
+ *   Returns the status of the write operation
+ * @verbatim
+ *   flashReturnOk - Operation completed successfully.
+ *   flashReturnInvalidAddr - Operation tried to erase a non-flash area.
+ *   flashReturnLocked - Operation tried to erase a locked area of the flash.
+ *   flashReturnTimeOut - Operation timed out waiting for flash operation
+ *       to complete. Or the MSC timed out waiting for the software to write
+ *       the next word into the DWORD register.
+ * @endverbatim
+ ******************************************************************************/
+#if !defined(EM_MSC_RUN_FROM_FLASH)
+#if defined(__CC_ARM)  /* MDK-ARM compiler */
+#pragma arm section code="ram_code"
+#elif defined(__ICCARM__)
+/* Suppress warnings originating from use of EFM_ASSERT():              */
+/* "Call to a non __ramfunc function from within a __ramfunc function"  */
+/* "Possible rom access from within a __ramfunc function"               */
+#pragma diag_suppress=Ta022
+#pragma diag_suppress=Ta023
+#endif
+#endif /* !EM_MSC_RUN_FROM_FLASH */
+MSC_Status_TypeDef MSC_WriteWordFast(uint32_t *address,
+                                  void const *data,
+                                  uint32_t numBytes)
+{
+  return MSC_WriteWordI(address, data, numBytes, mscWriteFast);
+}
+#if defined(__ICCARM__)
+#pragma diag_default=Ta022
+#pragma diag_default=Ta023
+#elif defined(__CC_ARM)  /* MDK-ARM compiler */
+#pragma arm section code
+#endif /* __CC_ARM */
+#endif
+
+
+#if defined( _MSC_MASSLOCK_MASK )
 /***************************************************************************//**
  * @brief
  *   Erase entire flash in one operation
@@ -568,10 +819,12 @@ msc_Return_TypeDef MSC_WriteWord(uint32_t *address, void const *data, int numByt
  *   lost. The lock bit, MLW will prevent this operation from executing and
  *   might prevent successful mass erase.
  ******************************************************************************/
-#ifdef __CC_ARM  /* MDK-ARM compiler */
+#if !defined(EM_MSC_RUN_FROM_FLASH)
+#if defined(__CC_ARM)  /* MDK-ARM compiler */
 #pragma arm section code="ram_code"
 #endif /* __CC_ARM */
-msc_Return_TypeDef MSC_MassErase(void)
+#endif /* !EM_MSC_RUN_FROM_FLASH */
+MSC_Status_TypeDef MSC_MassErase(void)
 {
   /* Enable writing to the MSC */
   MSC->WRITECTRL |= MSC_WRITECTRL_WREN;
@@ -583,18 +836,14 @@ msc_Return_TypeDef MSC_MassErase(void)
   MSC->WRITECMD = MSC_WRITECMD_ERASEMAIN0;
 
   /* Waiting for erase to complete */
-  while ((MSC->STATUS & MSC_STATUS_BUSY))
-  {
-  }
+  while ((MSC->STATUS & MSC_STATUS_BUSY));
 
-#if FLASH_SIZE >= (512 * 1024)
+#if ((FLASH_SIZE >= (512 * 1024)) && defined( _MSC_WRITECMD_ERASEMAIN1_MASK ))
   /* Erase second 512K block */
   MSC->WRITECMD = MSC_WRITECMD_ERASEMAIN1;
 
   /* Waiting for erase to complete */
-  while ((MSC->STATUS & MSC_STATUS_BUSY))
-  {
-  }
+  while ((MSC->STATUS & MSC_STATUS_BUSY));
 #endif
 
   /* Restore mass erase lock */
@@ -603,10 +852,11 @@ msc_Return_TypeDef MSC_MassErase(void)
   /* This will only successfully return if calling function is also in SRAM */
   return mscReturnOk;
 }
-#ifdef __CC_ARM  /* MDK-ARM compiler */
+#if defined(__CC_ARM)  /* MDK-ARM compiler */
 #pragma arm section code
 #endif /* __CC_ARM */
 #endif
 
 /** @} (end addtogroup MSC) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(MSC_COUNT) && (MSC_COUNT > 0) */

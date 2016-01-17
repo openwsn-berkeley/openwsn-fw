@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_part.h
  * @brief Verify that part specific main header files are supported and included
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,23 +17,25 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_PART_H
-#define __EM_PART_H
 
-/* This file is kept for backwards compability. */
+#ifndef __SILICON_LABS_EM_PART_H__
+#define __SILICON_LABS_EM_PART_H__
+
+/* This file is kept for backwards compatibility. */
+#warning "Using em_part.h is deprecated. Please use em_device.h instead."
 
 #include "em_device.h"
 
-#endif /* __EM_PART_H */
+#endif /* __SILICON_LABS_EM_PART_H__ */

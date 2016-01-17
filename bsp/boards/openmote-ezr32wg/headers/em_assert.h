@@ -1,29 +1,28 @@
 /***************************************************************************//**
- * @file
- * @brief EFM32 peripheral API "assert" implementation.
- * @author Energy Micro AS
- * @version 3.20.0
+ * @file em_assert.h
+ * @brief Emlib peripheral API "assert" implementation.
+ * @version 4.2.1
  *
  * @details
- * By default, EFM32 library assert usage is not included in order to reduce
- * footprint and processing overhead. Further, EFM32 assert usage is decoupled
+ * By default, emlib library assert usage is not included in order to reduce
+ * footprint and processing overhead. Further, emlib assert usage is decoupled
  * from ISO C assert handling (NDEBUG usage), to allow a user to use ISO C
- * assert without including EFM32 assert statements.
+ * assert without including emlib assert statements.
  *
- * Below are available defines for controlling EFM32 assert inclusion. The defines
+ * Below are available defines for controlling emlib assert inclusion. The defines
  * are typically defined for a project to be used by the preprocessor.
  *
- * @li If DEBUG_EFM is defined, the internal EFM32 library assert handling will
+ * @li If DEBUG_EFM is defined, the internal emlib library assert handling will
  * be used, which may be a quite rudimentary implementation.
  *
- * @li If DEBUG_EFM_USER is defined instead, the user must provide its own EFM32
+ * @li If DEBUG_EFM_USER is defined instead, the user must provide their own
  * assert handling routine (assertEFM()).
  *
- * As indicated above, if none of the above defines are used, EFM32 assert
+ * As indicated above, if none of the above defines are used, emlib assert
  * statements are not compiled.
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -36,20 +35,21 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_ASSERT_H
-#define __EM_ASSERT_H
+
+#ifndef __SILICON_LABS_EM_ASSERT_H__
+#define __SILICON_LABS_EM_ASSERT_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -66,7 +66,7 @@ void assertEFM(const char *file, int line);
 
 #else
 
-#define EFM_ASSERT(expr)    ((void)0)
+#define EFM_ASSERT(expr)    ((void)(expr))
 
 #endif /* defined(DEBUG_EFM) || defined(DEBUG_EFM_USER) */
 
@@ -76,4 +76,4 @@ void assertEFM(const char *file, int line);
 }
 #endif
 
-#endif /* __EM_ASSERT_H */
+#endif /* __SILICON_LABS_EM_ASSERT_H__ */

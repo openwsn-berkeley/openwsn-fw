@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_dbg.h
  * @brief Debug (DBG) API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,23 +17,27 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_DBG_H
-#define __EM_DBG_H
+
+
+#ifndef __SILICON_LABS_EM_DBG_H__
+#define __SILICON_LABS_EM_DBG_H__
 
 #include <stdbool.h>
 #include "em_device.h"
+
+#if defined( CoreDebug_DHCSR_C_DEBUGEN_Msk )
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,6 +57,7 @@ extern "C" {
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
 
+#if defined( GPIO_ROUTE_SWCLKPEN ) || defined( GPIO_ROUTEPEN_SWCLKTCKPEN )
 /***************************************************************************//**
  * @brief
  *   Check if a debugger is connected (and debug session activated)
@@ -68,16 +72,14 @@ extern "C" {
  ******************************************************************************/
 __STATIC_INLINE bool DBG_Connected(void)
 {
-  if (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk)
-  {
-    return true;
-  }
-
-  return false;
+  return (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) ? true : false;
 }
+#endif
 
 
+#if defined( GPIO_ROUTE_SWOPEN ) || defined( GPIO_ROUTEPEN_SWVPEN )
 void DBG_SWOEnable(unsigned int location);
+#endif
 
 /** @} (end addtogroup DBG) */
 /** @} (end addtogroup EM_Library) */
@@ -86,4 +88,6 @@ void DBG_SWOEnable(unsigned int location);
 }
 #endif
 
-#endif /* __EM_DBG_H */
+#endif /* defined( CoreDebug_DHCSR_C_DEBUGEN_Msk ) */
+
+#endif /* __SILICON_LABS_EM_DBG_H__ */

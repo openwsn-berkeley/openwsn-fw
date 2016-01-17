@@ -6,6 +6,7 @@
  */
 
 #include "toolchain_defs.h"
+#include "board_info.h"
 
 
 //=========================== define ==========================================
@@ -22,7 +23,7 @@ void i2c_init(void) {
 }
 
 bool i2c_read_byte(uint8_t address, uint8_t* byte) {
-    return true;
+    return TRUE;
 }
 
 uint32_t i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
@@ -31,7 +32,7 @@ uint32_t i2c_read_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {
 
 bool i2c_write_byte(uint8_t address, uint8_t byte) {   
 
-    return true;
+    return TRUE;
 }
 
 uint32_t i2c_write_bytes(uint8_t address, uint8_t* buffer, uint32_t length) {

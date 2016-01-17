@@ -62,7 +62,7 @@ void bsp_timer_reset() {
 	// reset compare
 
 	// reset timer
-    bsp_timer_vars.initiated=false;
+    bsp_timer_vars.initiated=FALSE;
 	// record last timer compare value
 	bsp_timer_vars.last_compare_value = 0;
 }
@@ -90,8 +90,8 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 
 	if (!bsp_timer_vars.initiated){
 		//as the timer runs forever the first time it is turned on has a weired value
-		bsp_timer_vars.last_compare_value=SleepModeTimerCountGet();
-		bsp_timer_vars.initiated=true;
+		bsp_timer_vars.last_compare_value=0; //SleepModeTimerCountGet();
+		bsp_timer_vars.initiated=TRUE;
 	}
 
 	temp_last_compare_value = bsp_timer_vars.last_compare_value;
@@ -99,7 +99,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 	newCompareValue = bsp_timer_vars.last_compare_value + delayTicks + 1;
 	bsp_timer_vars.last_compare_value = newCompareValue;
 
-	current = SleepModeTimerCountGet();
+	current = 0;//SleepModeTimerCountGet();
 
 	if (delayTicks < current - temp_last_compare_value) {
 

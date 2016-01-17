@@ -1,12 +1,11 @@
 /***************************************************************************//**
- * @file
+ * @file em_usart.h
  * @brief Universal synchronous/asynchronous receiver/transmitter (USART/UART)
  *   peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -19,23 +18,27 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_USART_H
-#define __EM_USART_H
+
+
+#ifndef __SILICON_LABS_EM_USART_H__
+#define __SILICON_LABS_EM_USART_H__
+
+#include "em_device.h"
+#if defined(USART_COUNT) && (USART_COUNT > 0)
 
 #include <stdbool.h>
-#include "em_device.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -158,17 +161,25 @@ typedef enum
 /** PRS channel selection for IrDA mode. */
 typedef enum
 {
-  usartIrDAPrsCh0 = USART_IRCTRL_IRPRSSEL_PRSCH0, /**< PRS channel 0 */
-  usartIrDAPrsCh1 = USART_IRCTRL_IRPRSSEL_PRSCH1, /**< PRS channel 1 */
-  usartIrDAPrsCh2 = USART_IRCTRL_IRPRSSEL_PRSCH2, /**< PRS channel 2 */
-  usartIrDAPrsCh3 = USART_IRCTRL_IRPRSSEL_PRSCH3, /**< PRS channel 3 */
-  usartIrDAPrsCh4 = USART_IRCTRL_IRPRSSEL_PRSCH4, /**< PRS channel 4 */
-  usartIrDAPrsCh5 = USART_IRCTRL_IRPRSSEL_PRSCH5, /**< PRS channel 5 */
-  usartIrDAPrsCh6 = USART_IRCTRL_IRPRSSEL_PRSCH6, /**< PRS channel 6 */
-  usartIrDAPrsCh7 = USART_IRCTRL_IRPRSSEL_PRSCH7  /**< PRS channel 7 */
+  usartIrDAPrsCh0 = USART_IRCTRL_IRPRSSEL_PRSCH0,       /**< PRS channel 0 */
+  usartIrDAPrsCh1 = USART_IRCTRL_IRPRSSEL_PRSCH1,       /**< PRS channel 1 */
+  usartIrDAPrsCh2 = USART_IRCTRL_IRPRSSEL_PRSCH2,       /**< PRS channel 2 */
+  usartIrDAPrsCh3 = USART_IRCTRL_IRPRSSEL_PRSCH3,       /**< PRS channel 3 */
+#if defined(USART_IRCTRL_IRPRSSEL_PRSCH4)
+  usartIrDAPrsCh4 = USART_IRCTRL_IRPRSSEL_PRSCH4,       /**< PRS channel 4 */
+#endif
+#if defined(USART_IRCTRL_IRPRSSEL_PRSCH5)
+  usartIrDAPrsCh5 = USART_IRCTRL_IRPRSSEL_PRSCH5,       /**< PRS channel 5 */
+#endif
+#if defined(USART_IRCTRL_IRPRSSEL_PRSCH6)
+  usartIrDAPrsCh6 = USART_IRCTRL_IRPRSSEL_PRSCH6,       /**< PRS channel 6 */
+#endif
+#if defined(USART_IRCTRL_IRPRSSEL_PRSCH7)
+  usartIrDAPrsCh7 = USART_IRCTRL_IRPRSSEL_PRSCH7,       /**< PRS channel 7 */
+#endif
 } USART_IrDAPrsSel_Typedef;
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(_USART_I2SCTRL_MASK)
 /** I2S format selection. */
 typedef enum
 {
@@ -188,7 +199,9 @@ typedef enum
   usartI2sJustifyLeft  = USART_I2SCTRL_JUSTIFY_LEFT,  /**< Data is left-justified within the frame  */
   usartI2sJustifyRight = USART_I2SCTRL_JUSTIFY_RIGHT  /**< Data is right-justified within the frame */
 } USART_I2sJustify_TypeDef;
+#endif
 
+#if defined(_USART_INPUT_MASK)
 /** USART Rx input PRS selection. */
 typedef enum
 {
@@ -196,26 +209,23 @@ typedef enum
   usartPrsRxCh1  = USART_INPUT_RXPRSSEL_PRSCH1,    /**< PRSCH1  selected as USART_INPUT */
   usartPrsRxCh2  = USART_INPUT_RXPRSSEL_PRSCH2,    /**< PRSCH2  selected as USART_INPUT */
   usartPrsRxCh3  = USART_INPUT_RXPRSSEL_PRSCH3,    /**< PRSCH3  selected as USART_INPUT */
+
+#if defined(USART_INPUT_RXPRSSEL_PRSCH7)
   usartPrsRxCh4  = USART_INPUT_RXPRSSEL_PRSCH4,    /**< PRSCH4  selected as USART_INPUT */
   usartPrsRxCh5  = USART_INPUT_RXPRSSEL_PRSCH5,    /**< PRSCH5  selected as USART_INPUT */
   usartPrsRxCh6  = USART_INPUT_RXPRSSEL_PRSCH6,    /**< PRSCH6  selected as USART_INPUT */
-
-#if defined(_EFM32_TINY_FAMILY)
-  usartPrsRxCh7  = USART_INPUT_RXPRSSEL_PRSCH7     /**< PRSCH7  selected as USART_INPUT */
-
-#elif defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
   usartPrsRxCh7  = USART_INPUT_RXPRSSEL_PRSCH7,    /**< PRSCH7  selected as USART_INPUT */
+#endif
+
+#if defined(USART_INPUT_RXPRSSEL_PRSCH11)
   usartPrsRxCh8  = USART_INPUT_RXPRSSEL_PRSCH8,    /**< PRSCH8  selected as USART_INPUT */
   usartPrsRxCh9  = USART_INPUT_RXPRSSEL_PRSCH9,    /**< PRSCH9  selected as USART_INPUT */
   usartPrsRxCh10 = USART_INPUT_RXPRSSEL_PRSCH10,   /**< PRSCH10 selected as USART_INPUT */
   usartPrsRxCh11 = USART_INPUT_RXPRSSEL_PRSCH11    /**< PRSCH11 selected as USART_INPUT */
-#else
-#error Unknown EFM32 family.
 #endif
 } USART_PrsRxCh_TypeDef;
 #endif
 
-#if defined (_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
 /** USART PRS Transmit Trigger Channels */
 typedef enum
 {
@@ -223,12 +233,14 @@ typedef enum
   usartPrsTriggerCh1 = USART_TRIGCTRL_TSEL_PRSCH1, /**< PRSCH0 selected as USART Trigger */
   usartPrsTriggerCh2 = USART_TRIGCTRL_TSEL_PRSCH2, /**< PRSCH0 selected as USART Trigger */
   usartPrsTriggerCh3 = USART_TRIGCTRL_TSEL_PRSCH3, /**< PRSCH0 selected as USART Trigger */
+
+#if defined(USART_TRIGCTRL_TSEL_PRSCH7)
   usartPrsTriggerCh4 = USART_TRIGCTRL_TSEL_PRSCH4, /**< PRSCH0 selected as USART Trigger */
   usartPrsTriggerCh5 = USART_TRIGCTRL_TSEL_PRSCH5, /**< PRSCH0 selected as USART Trigger */
   usartPrsTriggerCh6 = USART_TRIGCTRL_TSEL_PRSCH6, /**< PRSCH0 selected as USART Trigger */
   usartPrsTriggerCh7 = USART_TRIGCTRL_TSEL_PRSCH7, /**< PRSCH0 selected as USART Trigger */
-} USART_PrsTriggerCh_TypeDef;
 #endif
+} USART_PrsTriggerCh_TypeDef;
 
 /*******************************************************************************
  *******************************   STRUCTS   ***********************************
@@ -262,7 +274,7 @@ typedef struct
   /** Number of stopbits to use. */
   USART_Stopbits_TypeDef stopbits;
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(USART_INPUT_RXPRS) && defined(USART_CTRL_MVDIS)
   /** Majority Vote Disable for 16x, 8x and 6x oversampling modes. */
   bool                   mvdis;
 
@@ -272,13 +284,20 @@ typedef struct
   /** Select PRS channel for USART Rx. (Only valid if prsRxEnable is true). */
   USART_PrsRxCh_TypeDef  prsRxCh;
 #endif
+#if defined(_USART_TIMING_CSHOLD_MASK)
+  /** Auto CS enabling */
+  bool autoCsEnable;
+  /** Auto CS hold time in baud cycles */
+  uint8_t autoCsHold;
+  /** Auto CS setup time in baud cycles */
+  uint8_t autoCsSetup;
+#endif
 } USART_InitAsync_TypeDef;
 
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
 /** USART PRS trigger enable */
 typedef struct
 {
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(USART_TRIGCTRL_AUTOTXTEN)
   /** Enable AUTOTX */
   bool autoTxTriggerEnable;
 #endif
@@ -289,32 +308,68 @@ typedef struct
   /** PRS channel to be used to trigger auto transmission */
   USART_PrsTriggerCh_TypeDef prsTriggerChannel;
 } USART_PrsTriggerInit_TypeDef;
-#endif
 
 /** Default config for USART async init structure. */
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-#define USART_INITASYNC_DEFAULT                                                              \
-  { usartEnable,      /* Enable RX/TX when init completed. */                                \
-    0,                /* Use current configured reference clock for configuring baudrate. */ \
-    115200,           /* 115200 bits/s. */                                                   \
-    usartOVS16,       /* 16x oversampling. */                                                \
-    usartDatabits8,   /* 8 databits. */                                                      \
-    usartNoParity,    /* No parity. */                                                       \
-    usartStopbits1,   /* 1 stopbit. */                                                       \
-    false,            /* Do not disable majority vote. */                                    \
-    false,            /* Not USART PRS input mode. */                                        \
-    usartPrsRxCh0     /* PRS channel 0. */                                                   \
-  }
+#if defined(_USART_TIMING_CSHOLD_MASK) && defined(USART_CTRL_MVDIS)
+#define USART_INITASYNC_DEFAULT                                                            \
+{                                                                                          \
+  usartEnable,      /* Enable RX/TX when init completed. */                                \
+  0,                /* Use current configured reference clock for configuring baudrate. */ \
+  115200,           /* 115200 bits/s. */                                                   \
+  usartOVS16,       /* 16x oversampling. */                                                \
+  usartDatabits8,   /* 8 databits. */                                                      \
+  usartNoParity,    /* No parity. */                                                       \
+  usartStopbits1,   /* 1 stopbit. */                                                       \
+  false,            /* Do not disable majority vote. */                                    \
+  false,            /* Not USART PRS input mode. */                                        \
+  usartPrsRxCh0,    /* PRS channel 0. */                                                   \
+  false,            /* Auto CS functionality enable/disable switch */                      \
+  0,                /* Auto CS Hold cycles */                                              \
+  0                 /* Auto CS Setup cycles */                                             \
+}
+#elif defined(USART_INPUT_RXPRS) && defined(USART_CTRL_MVDIS)
+#define USART_INITASYNC_DEFAULT                                                            \
+{                                                                                          \
+  usartEnable,      /* Enable RX/TX when init completed. */                                \
+  0,                /* Use current configured reference clock for configuring baudrate. */ \
+  115200,           /* 115200 bits/s. */                                                   \
+  usartOVS16,       /* 16x oversampling. */                                                \
+  usartDatabits8,   /* 8 databits. */                                                      \
+  usartNoParity,    /* No parity. */                                                       \
+  usartStopbits1,   /* 1 stopbit. */                                                       \
+  false,            /* Do not disable majority vote. */                                    \
+  false,            /* Not USART PRS input mode. */                                        \
+  usartPrsRxCh0     /* PRS channel 0. */                                                   \
+}
 #else
-#define USART_INITASYNC_DEFAULT                                                              \
-  { usartEnable,      /* Enable RX/TX when init completed. */                                \
-    0,                /* Use current configured reference clock for configuring baudrate. */ \
-    115200,           /* 115200 bits/s. */                                                   \
-    usartOVS16,       /* 16x oversampling. */                                                \
-    usartDatabits8,   /* 8 databits. */                                                      \
-    usartNoParity,    /* No parity. */                                                       \
-    usartStopbits1    /* 1 stopbit. */                                                       \
-  }
+#define USART_INITASYNC_DEFAULT                                                            \
+{                                                                                          \
+  usartEnable,      /* Enable RX/TX when init completed. */                                \
+  0,                /* Use current configured reference clock for configuring baudrate. */ \
+  115200,           /* 115200 bits/s. */                                                   \
+  usartOVS16,       /* 16x oversampling. */                                                \
+  usartDatabits8,   /* 8 databits. */                                                      \
+  usartNoParity,    /* No parity. */                                                       \
+  usartStopbits1    /* 1 stopbit. */                                                       \
+}
+#endif
+
+/** Default config for USART PRS triggering structure. */
+#if defined(USART_TRIGCTRL_AUTOTXTEN)
+#define USART_INITPRSTRIGGER_DEFAULT                                                       \
+{                                                                                          \
+  false,              /* Do not enable autoTX triggering. */                               \
+  false,              /* Do not enable receive triggering. */                              \
+  false,              /* Do not enable transmit triggering. */                             \
+  usartPrsTriggerCh0  /* Set default channel to zero. */                                   \
+}
+#else
+#define USART_INITPRSTRIGGER_DEFAULT                                                       \
+{                                                                                          \
+  false,              /* Do not enable receive triggering. */                              \
+  false,              /* Do not enable transmit triggering. */                             \
+  usartPrsTriggerCh0  /* Set default channel to zero. */                                   \
+}
 #endif
 
 /** Synchronous mode init structure. */
@@ -344,7 +399,7 @@ typedef struct
   /** Clock polarity/phase mode. */
   USART_ClockMode_TypeDef clockMode;
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(USART_INPUT_RXPRS) && defined(USART_TRIGCTRL_AUTOTXTEN)
   /** Enable USART Rx via PRS. */
   bool                    prsRxEnable;
 
@@ -355,32 +410,59 @@ typedef struct
    *  If TX is empty, underflows are generated. */
   bool                    autoTx;
 #endif
+#if defined(_USART_TIMING_CSHOLD_MASK)
+  /** Auto CS enabling */
+  bool autoCsEnable;
+  /** Auto CS hold time in baud cycles */
+  uint8_t autoCsHold;
+  /** Auto CS setup time in baud cycles */
+  uint8_t autoCsSetup;
+#endif
 } USART_InitSync_TypeDef;
 
 /** Default config for USART sync init structure. */
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-#define USART_INITSYNC_DEFAULT                                                                \
-  { usartEnable,       /* Enable RX/TX when init completed. */                                \
-    0,                 /* Use current configured reference clock for configuring baudrate. */ \
-    1000000,           /* 1 Mbits/s. */                                                       \
-    usartDatabits8,    /* 8 databits. */                                                      \
-    true,              /* Master mode. */                                                     \
-    false,             /* Send least significant bit first. */                                \
-    usartClockMode0,   /* Clock idle low, sample on rising edge. */                           \
-    false,             /* Not USART PRS input mode. */                                        \
-    usartPrsRxCh0,     /* PRS channel 0. */                                                   \
-    false              /* No AUTOTX mode. */                                                  \
-  }
+#if defined(_USART_TIMING_CSHOLD_MASK)
+#define USART_INITSYNC_DEFAULT                                                              \
+{                                                                                           \
+  usartEnable,       /* Enable RX/TX when init completed. */                                \
+  0,                 /* Use current configured reference clock for configuring baudrate. */ \
+  1000000,           /* 1 Mbits/s. */                                                       \
+  usartDatabits8,    /* 8 databits. */                                                      \
+  true,              /* Master mode. */                                                     \
+  false,             /* Send least significant bit first. */                                \
+  usartClockMode0,   /* Clock idle low, sample on rising edge. */                           \
+  false,             /* Not USART PRS input mode. */                                        \
+  usartPrsRxCh0,     /* PRS channel 0. */                                                   \
+  false,             /* No AUTOTX mode. */                                                  \
+  false,             /* No AUTOCS mode */                                                   \
+  0,                 /* Auto CS Hold cycles */                                              \
+  0                  /* Auto CS Setup cycles */                                             \
+}
+#elif defined(USART_INPUT_RXPRS) && defined(USART_TRIGCTRL_AUTOTXTEN)
+#define USART_INITSYNC_DEFAULT                                                              \
+{                                                                                           \
+  usartEnable,       /* Enable RX/TX when init completed. */                                \
+  0,                 /* Use current configured reference clock for configuring baudrate. */ \
+  1000000,           /* 1 Mbits/s. */                                                       \
+  usartDatabits8,    /* 8 databits. */                                                      \
+  true,              /* Master mode. */                                                     \
+  false,             /* Send least significant bit first. */                                \
+  usartClockMode0,   /* Clock idle low, sample on rising edge. */                           \
+  false,             /* Not USART PRS input mode. */                                        \
+  usartPrsRxCh0,     /* PRS channel 0. */                                                   \
+  false              /* No AUTOTX mode. */                                                  \
+}
 #else
-#define USART_INITSYNC_DEFAULT                                                                \
-  { usartEnable,       /* Enable RX/TX when init completed. */                                \
-    0,                 /* Use current configured reference clock for configuring baudrate. */ \
-    1000000,           /* 1 Mbits/s. */                                                       \
-    usartDatabits8,    /* 8 databits. */                                                      \
-    true,              /* Master mode. */                                                     \
-    false,             /* Send least significant bit first. */                                \
-    usartClockMode0    /* Clock idle low, sample on rising edge. */                           \
-  }
+#define USART_INITSYNC_DEFAULT                                                              \
+{                                                                                           \
+  usartEnable,       /* Enable RX/TX when init completed. */                                \
+  0,                 /* Use current configured reference clock for configuring baudrate. */ \
+  1000000,           /* 1 Mbits/s. */                                                       \
+  usartDatabits8,    /* 8 databits. */                                                      \
+  true,              /* Master mode. */                                                     \
+  false,             /* Send least significant bit first. */                                \
+  usartClockMode0    /* Clock idle low, sample on rising edge. */                           \
+}
 #endif
 
 
@@ -411,25 +493,26 @@ typedef struct
 
 
 /** Default config for IrDA mode init structure. */
-#define USART_INITIRDA_DEFAULT                                                                \
-  {                                                                                           \
-    { usartEnable,     /* Enable RX/TX when init completed. */                                \
-      0,               /* Use current configured reference clock for configuring baudrate. */ \
-      115200,          /* 115200 bits/s. */                                                   \
-      usartOVS16,      /* 16x oversampling. */                                                \
-      usartDatabits8,  /* 8 databits. */                                                      \
-      usartEvenParity, /* Even parity. */                                                     \
-      usartStopbits1   /* 1 stopbit. */                                                       \
-    },                                                                                        \
-    false,             /* Rx invert disabled. */                                              \
-    false,             /* Filtering disabled. */                                              \
-    usartIrDAPwTHREE,  /* Pulse width is set to ONE. */                                       \
-    false,             /* Routing to PRS is disabled. */                                      \
-    usartIrDAPrsCh0    /* PRS channel 0. */                                                   \
-  }
+#define USART_INITIRDA_DEFAULT                                                              \
+{                                                                                           \
+  {                                                                                         \
+    usartEnable,     /* Enable RX/TX when init completed. */                                \
+    0,               /* Use current configured reference clock for configuring baudrate. */ \
+    115200,          /* 115200 bits/s. */                                                   \
+    usartOVS16,      /* 16x oversampling. */                                                \
+    usartDatabits8,  /* 8 databits. */                                                      \
+    usartEvenParity, /* Even parity. */                                                     \
+    usartStopbits1   /* 1 stopbit. */                                                       \
+  },                                                                                        \
+  false,             /* Rx invert disabled. */                                              \
+  false,             /* Filtering disabled. */                                              \
+  usartIrDAPwTHREE,  /* Pulse width is set to ONE. */                                       \
+  false,             /* Routing to PRS is disabled. */                                      \
+  usartIrDAPrsCh0    /* PRS channel 0. */                                                   \
+}
 
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(_USART_I2SCTRL_MASK)
 /** I2S mode init structure. Inherited from synchronous mode init structure */
 typedef struct
 {
@@ -456,25 +539,26 @@ typedef struct
 
 
 /** Default config for I2S mode init structure. */
-#define USART_INITI2S_DEFAULT                                                                    \
-  {                                                                                              \
-    { usartEnableTx,      /* Enable TX when init completed. */                                   \
-      0,                  /* Use current configured reference clock for configuring baudrate. */ \
-      1000000,            /* Baudrate 1M bits/s. */                                              \
-      usartDatabits16,    /* 16 databits. */                                                     \
-      true,               /* Operate as I2S master. */                                           \
-      true,               /* Most significant bit first. */                                      \
-      usartClockMode0,    /* Clock idle low, sample on rising edge. */                           \
-      false,              /* Don't enable USARTRx via PRS. */                                    \
-      usartPrsRxCh0,      /* PRS channel selection (dummy). */                                   \
-      false               /* Disable AUTOTX mode. */                                             \
-    },                                                                                           \
-    usartI2sFormatW16D16, /* 16-bit word, 16-bit data */                                         \
-    true,                 /* Delay on I2S data. */                                               \
-    false,                /* No DMA split. */                                                    \
-    usartI2sJustifyLeft,  /* Data is left-justified within the frame */                          \
-    false                 /* Stereo mode. */                                                     \
-  }
+#define USART_INITI2S_DEFAULT                                                                  \
+{                                                                                              \
+  {                                                                                            \
+    usartEnableTx,      /* Enable TX when init completed. */                                   \
+    0,                  /* Use current configured reference clock for configuring baudrate. */ \
+    1000000,            /* Baudrate 1M bits/s. */                                              \
+    usartDatabits16,    /* 16 databits. */                                                     \
+    true,               /* Operate as I2S master. */                                           \
+    true,               /* Most significant bit first. */                                      \
+    usartClockMode0,    /* Clock idle low, sample on rising edge. */                           \
+    false,              /* Don't enable USARTRx via PRS. */                                    \
+    usartPrsRxCh0,      /* PRS channel selection (dummy). */                                   \
+    false               /* Disable AUTOTX mode. */                                             \
+  },                                                                                           \
+  usartI2sFormatW16D16, /* 16-bit word, 16-bit data */                                         \
+  true,                 /* Delay on I2S data. */                                               \
+  false,                /* No DMA split. */                                                    \
+  usartI2sJustifyLeft,  /* Data is left-justified within the frame */                          \
+  false                 /* Stereo mode. */                                                     \
+}
 #endif
 
 /*******************************************************************************
@@ -497,12 +581,14 @@ void USART_Enable(USART_TypeDef *usart, USART_Enable_TypeDef enable);
 
 void USART_InitAsync(USART_TypeDef *usart, const USART_InitAsync_TypeDef *init);
 void USART_InitSync(USART_TypeDef *usart, const USART_InitSync_TypeDef *init);
+#if defined(USART0) || ((USART_COUNT == 1) && defined(USART1))
 void USART_InitIrDA(const USART_InitIrDA_TypeDef *init);
-
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-void USART_InitI2s(USART_TypeDef *usart, USART_InitI2s_TypeDef *init);
-void USART_InitPrsTrigger(USART_TypeDef *usart, const USART_PrsTriggerInit_TypeDef *init);
 #endif
+
+#if defined(_USART_I2SCTRL_MASK)
+void USART_InitI2s(USART_TypeDef *usart, USART_InitI2s_TypeDef *init);
+#endif
+void USART_InitPrsTrigger(USART_TypeDef *usart, const USART_PrsTriggerInit_TypeDef *init);
 
 
 /***************************************************************************//**
@@ -535,7 +621,7 @@ __STATIC_INLINE void USART_IntClear(USART_TypeDef *usart, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void USART_IntDisable(USART_TypeDef *usart, uint32_t flags)
 {
-  usart->IEN &= ~(flags);
+  usart->IEN &= ~flags;
 }
 
 
@@ -602,14 +688,14 @@ __STATIC_INLINE uint32_t USART_IntGet(USART_TypeDef *usart)
  ******************************************************************************/
 __STATIC_INLINE uint32_t USART_IntGetEnabled(USART_TypeDef *usart)
 {
-  uint32_t tmp;
+  uint32_t ien;
 
   /* Store USARTx->IEN in temporary variable in order to define explicit order
    * of volatile accesses. */
-  tmp = usart->IEN;
+  ien = usart->IEN;
 
   /* Bitwise AND of pending and enabled interrupts */
-  return usart->IF & tmp;
+  return usart->IF & ien;
 }
 
 
@@ -641,7 +727,7 @@ __STATIC_INLINE void USART_IntSet(USART_TypeDef *usart, uint32_t flags)
  *  STATUS register value.
  *
  ******************************************************************************/
-static __INLINE uint32_t USART_StatusGet(USART_TypeDef *usart)
+__STATIC_INLINE uint32_t USART_StatusGet(USART_TypeDef *usart)
 {
   return usart->STATUS;
 }
@@ -651,6 +737,150 @@ uint8_t USART_Rx(USART_TypeDef *usart);
 uint16_t USART_RxDouble(USART_TypeDef *usart);
 uint32_t USART_RxDoubleExt(USART_TypeDef *usart);
 uint16_t USART_RxExt(USART_TypeDef *usart);
+
+
+/***************************************************************************//**
+ * @brief
+ *   Receive one 4-8 bit frame, (or part of 10-16 bit frame).
+ *
+ * @details
+ *   This function is used to quickly receive one 4-8 bits frame by reading the
+ *   RXDATA register directly, without checking the STATUS register for the
+ *   RXDATAV flag. This can be useful from the RXDATAV interrupt handler,
+ *   i.e. waiting is superfluous, in order to quickly read the received data.
+ *   Please refer to @ref USART_RxDataXGet() for reception of 9 bit frames.
+ *
+ * @note
+ *   Since this function does not check whether the RXDATA register actually
+ *   holds valid data, it should only be used in situations when it is certain
+ *   that there is valid data, ensured by some external program routine, e.g.
+ *   like when handling an RXDATAV interrupt. The @ref USART_Rx() is normally a
+ *   better choice if the validity of the RXDATA register is not certain.
+ *
+ * @note
+ *   Notice that possible parity/stop bits in asynchronous mode are not
+ *   considered part of specified frame bit length.
+ *
+ * @param[in] usart
+ *   Pointer to USART/UART peripheral register block.
+ *
+ * @return
+ *   Data received.
+ ******************************************************************************/
+__STATIC_INLINE uint8_t USART_RxDataGet(USART_TypeDef *usart)
+{
+  return (uint8_t)usart->RXDATA;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *   Receive two 4-8 bit frames, or one 10-16 bit frame.
+ *
+ * @details
+ *   This function is used to quickly receive one 10-16 bits frame or two 4-8
+ *   bit frames by reading the RXDOUBLE register directly, without checking
+ *   the STATUS register for the RXDATAV flag. This can be useful from the
+ *   RXDATAV interrupt handler, i.e. waiting is superfluous, in order to
+ *   quickly read the received data.
+ *   This function is normally used to receive one frame when operating with
+ *   frame length 10-16 bits. Please refer to @ref USART_RxDoubleXGet()
+ *   for reception of two 9 bit frames.
+ *
+ * @note
+ *   Since this function does not check whether the RXDOUBLE register actually
+ *   holds valid data, it should only be used in situations when it is certain
+ *   that there is valid data, ensured by some external program routine, e.g.
+ *   like when handling an RXDATAV interrupt. The @ref USART_RxDouble() is
+ *   normally a better choice if the validity of the RXDOUBLE register is not
+ *   certain.
+ *
+ * @note
+ *   Notice that possible parity/stop bits in asynchronous mode are not
+ *   considered part of specified frame bit length.
+ *
+ * @param[in] usart
+ *   Pointer to USART/UART peripheral register block.
+ *
+ * @return
+ *   Data received.
+ ******************************************************************************/
+__STATIC_INLINE uint16_t USART_RxDoubleGet(USART_TypeDef *usart)
+{
+  return (uint16_t)usart->RXDOUBLE;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *   Receive two 4-9 bit frames, or one 10-16 bit frame with extended
+ *   information.
+ *
+ * @details
+ *   This function is used to quickly receive one 10-16 bits frame or two 4-9
+ *   bit frames by reading the RXDOUBLEX register directly, without checking
+ *   the STATUS register for the RXDATAV flag. This can be useful from the
+ *   RXDATAV interrupt handler, i.e. waiting is superfluous, in order to
+ *   quickly read the received data.
+ *
+ * @note
+ *   Since this function does not check whether the RXDOUBLEX register actually
+ *   holds valid data, it should only be used in situations when it is certain
+ *   that there is valid data, ensured by some external program routine, e.g.
+ *   like when handling an RXDATAV interrupt. The @ref USART_RxDoubleExt() is
+ *   normally a better choice if the validity of the RXDOUBLEX register is not
+ *   certain.
+ *
+ * @note
+ *   Notice that possible parity/stop bits in asynchronous mode are not
+ *   considered part of specified frame bit length.
+ *
+ * @param[in] usart
+ *   Pointer to USART/UART peripheral register block.
+ *
+ * @return
+ *   Data received.
+ ******************************************************************************/
+__STATIC_INLINE uint32_t USART_RxDoubleXGet(USART_TypeDef *usart)
+{
+  return usart->RXDOUBLEX;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *   Receive one 4-9 bit frame, (or part of 10-16 bit frame) with extended
+ *   information.
+ *
+ * @details
+ *   This function is used to quickly receive one 4-9 bit frame, (or part of
+ *   10-16 bit frame) with extended information by reading the RXDATAX register
+ *   directly, without checking the STATUS register for the RXDATAV flag. This
+ *   can be useful from the RXDATAV interrupt handler, i.e. waiting is
+ *   superfluous, in order to quickly read the received data.
+ *
+ * @note
+ *   Since this function does not check whether the RXDATAX register actually
+ *   holds valid data, it should only be used in situations when it is certain
+ *   that there is valid data, ensured by some external program routine, e.g.
+ *   like when handling an RXDATAV interrupt. The @ref USART_RxExt() is normally
+ *   a better choice if the validity of the RXDATAX register is not certain.
+ *
+ * @note
+ *   Notice that possible parity/stop bits in asynchronous mode are not
+ *   considered part of specified frame bit length.
+ *
+ * @param[in] usart
+ *   Pointer to USART/UART peripheral register block.
+ *
+ * @return
+ *   Data received.
+ ******************************************************************************/
+__STATIC_INLINE uint16_t USART_RxDataXGet(USART_TypeDef *usart)
+{
+  return (uint16_t)usart->RXDATAX;
+}
+
 uint8_t USART_SpiTransfer(USART_TypeDef *usart, uint8_t data);
 void USART_Tx(USART_TypeDef *usart, uint8_t data);
 void USART_TxDouble(USART_TypeDef *usart, uint16_t data);
@@ -665,4 +895,5 @@ void USART_TxExt(USART_TypeDef *usart, uint16_t data);
 }
 #endif
 
-#endif /* __EM_USART_H */
+#endif /* defined(USART_COUNT) && (USART_COUNT > 0) */
+#endif /* __SILICON_LABS_EM_USART_H__ */

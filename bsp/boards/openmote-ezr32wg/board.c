@@ -15,17 +15,14 @@
 #include "radio.h"
 #include "i2c.h"
 #include "sensors.h"
+#include "headers/em_cmu.h"
+#include "headers/em_chip.h"
+
 
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
 
-void antenna_init(void);
-void antenna_internal(void);
-void antenna_external(void);
-
-static void clock_init(void);
-static void gpio_init(void);
 static void button_init(void);
 
 
@@ -40,13 +37,9 @@ int main(void) {
 //=========================== public ==========================================
 
 void board_init(void) {
-   gpio_init();
-   clock_init();
+   CHIP_Init();
 
-   board_timer_init();
 
-   antenna_init();
-   antenna_external();
 
    leds_init();
    debugpins_init();
@@ -73,38 +66,9 @@ void board_reset(void) {
 
 }
 
-/**
- * Configures the antenna using a RF switch
- * INT is the internal antenna (chip) configured through ANT1_SEL (V1)
- * EXT is the external antenna (connector) configured through ANT2_SEL (V2)
- */
-void antenna_init(void) {
-
-}
-
-/**
- * Selects the external (connector) antenna
- */
-void antenna_external(void) {
-
-}
-
-/**
- * Selects the internal (chip) antenna
- */
-void antenna_internal(void) {
-
-}
 
 //=========================== private =========================================
 
-static void gpio_init(void) {
-
-}
-
-static void clock_init(void) {
-
-}
 
 /**
  * Configures the user button as input source

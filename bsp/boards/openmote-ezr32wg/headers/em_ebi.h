@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_ebi.h
  * @brief External Bus Iterface (EBI) peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,28 +17,28 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_EBI_H
-#define __EM_EBI_H
+
+#ifndef __SILICON_LABS_EM_EBI_H__
+#define __SILICON_LABS_EM_EBI_H__
 
 #include "em_device.h"
-
 #if defined(EBI_COUNT) && (EBI_COUNT > 0)
-#include "em_assert.h"
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "em_assert.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,9 +58,9 @@ extern "C" {
  * @verbatim
  *
  * ---------               ---------
- * |  EBI  |  /|       |\  | Ext.  |
- * |       | / --------- \ | Async |
- * |(EFM32)| \ --------- / | Device|
+ * |       |  /|       |\  | Ext.  |
+ * |  EBI  | / --------- \ | Async |
+ * |       | \ --------- / | Device|
  * |       |  \|       |/  |       |
  * ---------               ---------
  *         Parallel interface
@@ -388,61 +387,63 @@ typedef struct
 
 /** Default config for EBI init structures */
 #if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-#define EBI_INIT_DEFAULT                                 \
-  {   ebiModeD8A8,      /* 8 bit address, 8 bit data */  \
-      ebiActiveLow,     /* ARDY polarity */              \
-      ebiActiveLow,     /* ALE polarity */               \
-      ebiActiveLow,     /* WE polarity */                \
-      ebiActiveLow,     /* RE polarity */                \
-      ebiActiveLow,     /* CS polarity */                \
-      ebiActiveLow,     /* BL polarity */                \
-      false,            /* enable BL */                  \
-      false,            /* enable NOIDLE */              \
-      false,            /* enable ARDY */                \
-      false,            /* don't disable ARDY timeout */ \
-      EBI_BANK0,        /* enable bank 0 */              \
-      EBI_CS0,          /* enable chip select 0 */       \
-      0,                /* addr setup cycles */          \
-      1,                /* addr hold cycles */           \
-      false,            /* do not enable half cycle ALE strobe */ \
-      0,                /* read setup cycles */          \
-      0,                /* read strobe cycles */         \
-      0,                /* read hold cycles */           \
-      false,            /* disable page mode */          \
-      false,            /* disable prefetch */           \
-      false,            /* do not enable half cycle REn strobe */ \
-      0,                /* write setup cycles */         \
-      0,                /* write strobe cycles */        \
-      1,                /* write hold cycles */          \
-      false,            /* do not disable the write buffer */ \
-      false,            /* do not enable halc cycle WEn strobe */ \
-      ebiALowA0,        /* ALB - Low bound, address lines */ \
-      ebiAHighA0,       /* APEN - High bound, address lines */   \
-      ebiLocation0,     /* Use Location 0 */             \
-      true,             /* enable EBI */                 \
-  }
+#define EBI_INIT_DEFAULT                                      \
+{                                                             \
+  ebiModeD8A8,      /* 8 bit address, 8 bit data */           \
+  ebiActiveLow,     /* ARDY polarity */                       \
+  ebiActiveLow,     /* ALE polarity */                        \
+  ebiActiveLow,     /* WE polarity */                         \
+  ebiActiveLow,     /* RE polarity */                         \
+  ebiActiveLow,     /* CS polarity */                         \
+  ebiActiveLow,     /* BL polarity */                         \
+  false,            /* enable BL */                           \
+  false,            /* enable NOIDLE */                       \
+  false,            /* enable ARDY */                         \
+  false,            /* don't disable ARDY timeout */          \
+  EBI_BANK0,        /* enable bank 0 */                       \
+  EBI_CS0,          /* enable chip select 0 */                \
+  0,                /* addr setup cycles */                   \
+  1,                /* addr hold cycles */                    \
+  false,            /* do not enable half cycle ALE strobe */ \
+  0,                /* read setup cycles */                   \
+  0,                /* read strobe cycles */                  \
+  0,                /* read hold cycles */                    \
+  false,            /* disable page mode */                   \
+  false,            /* disable prefetch */                    \
+  false,            /* do not enable half cycle REn strobe */ \
+  0,                /* write setup cycles */                  \
+  0,                /* write strobe cycles */                 \
+  1,                /* write hold cycles */                   \
+  false,            /* do not disable the write buffer */     \
+  false,            /* do not enable halc cycle WEn strobe */ \
+  ebiALowA0,        /* ALB - Low bound, address lines */      \
+  ebiAHighA0,       /* APEN - High bound, address lines */    \
+  ebiLocation0,     /* Use Location 0 */                      \
+  true,             /* enable EBI */                          \
+}
 #else
-#define EBI_INIT_DEFAULT                                 \
-  { ebiModeD8A8,        /* 8 bit address, 8 bit data */  \
-    ebiActiveLow,       /* ARDY polarity */              \
-    ebiActiveLow,       /* ALE polarity */               \
-    ebiActiveLow,       /* WE polarity */                \
-    ebiActiveLow,       /* RE polarity */                \
-    ebiActiveLow,       /* CS polarity */                \
-    false,              /* enable ARDY */                \
-    false,              /* don't disable ARDY timeout */ \
-    EBI_BANK0,          /* enable bank 0 */              \
-    EBI_CS0,            /* enable chip select 0 */       \
-    0,                  /* addr setup cycles */          \
-    1,                  /* addr hold cycles */           \
-    0,                  /* read setup cycles */          \
-    0,                  /* read strobe cycles */         \
-    0,                  /* read hold cycles */           \
-    0,                  /* write setup cycles */         \
-    0,                  /* write strobe cycles */        \
-    1,                  /* write hold cycles */          \
-    true,               /* enable EBI */                 \
-  }
+#define EBI_INIT_DEFAULT                               \
+{                                                      \
+  ebiModeD8A8,        /* 8 bit address, 8 bit data */  \
+  ebiActiveLow,       /* ARDY polarity */              \
+  ebiActiveLow,       /* ALE polarity */               \
+  ebiActiveLow,       /* WE polarity */                \
+  ebiActiveLow,       /* RE polarity */                \
+  ebiActiveLow,       /* CS polarity */                \
+  false,              /* enable ARDY */                \
+  false,              /* don't disable ARDY timeout */ \
+  EBI_BANK0,          /* enable bank 0 */              \
+  EBI_CS0,            /* enable chip select 0 */       \
+  0,                  /* addr setup cycles */          \
+  1,                  /* addr hold cycles */           \
+  0,                  /* read setup cycles */          \
+  0,                  /* read strobe cycles */         \
+  0,                  /* read hold cycles */           \
+  0,                  /* write setup cycles */         \
+  0,                  /* write strobe cycles */        \
+  1,                  /* write hold cycles */          \
+  true,               /* enable EBI */                 \
+}
 #endif
 
 #if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
@@ -504,34 +505,36 @@ typedef struct
   int                            holdCycles;
 } EBI_TFTInit_TypeDef;
 
-#define EBI_TFTINIT_DEFAULT                                                           \
-  { ebiTFTBank0,                /* Select EBI Bank 0 */                               \
-    ebiTFTWidthHalfWord,        /* Select 2-byte increments */                        \
-    ebiTFTColorSrcMem,          /* Use memory as source for mask/blending */          \
-    ebiTFTInterleaveUnlimited,  /* Unlimited interleaved accesses */                  \
-    ebiTFTFrameBufTriggerVSync, /* VSYNC as frame buffer update trigger */            \
-    false,                      /* Drive DCLK from negative edge of internal clock */ \
-    ebiTFTMBDisabled,           /* No masking and alpha blending enabled */           \
-    ebiTFTDDModeExternal,       /* Drive from external memory */                      \
-    ebiActiveLow,               /* CS Active Low polarity */                          \
-    ebiActiveLow,               /* DCLK Active Low polarity */                        \
-    ebiActiveLow,               /* DATAEN Active Low polarity */                      \
-    ebiActiveLow,               /* HSYNC Active Low polarity */                       \
-    ebiActiveLow,               /* VSYNC Active Low polarity */                       \
-    320,                        /* Horizontal size in pixels */                       \
-    1,                          /* Horizontal Front Porch */                          \
-    29,                         /* Horizontal Back Porch */                           \
-    2,                          /* Horizontal Synchronization Pulse Width */          \
-    240,                        /* Vertical size in pixels */                         \
-    1,                          /* Vertical Front Porch */                            \
-    4,                          /* Vertical Back Porch */                             \
-    2,                          /* Vertical Synchronization Pulse Width */            \
-    0x0000,                     /* Address offset to EBI memory base */               \
-    5,                          /* DCLK Period */                                     \
-    2,                          /* DCLK Start */                                      \
-    1,                          /* DCLK Setup cycles */                               \
-    1,                          /* DCLK Hold cycles */                                \
-  }
+/** Default configuration for EBI TFT init structure */
+#define EBI_TFTINIT_DEFAULT                                                         \
+{                                                                                   \
+  ebiTFTBank0,                /* Select EBI Bank 0 */                               \
+  ebiTFTWidthHalfWord,        /* Select 2-byte increments */                        \
+  ebiTFTColorSrcMem,          /* Use memory as source for mask/blending */          \
+  ebiTFTInterleaveUnlimited,  /* Unlimited interleaved accesses */                  \
+  ebiTFTFrameBufTriggerVSync, /* VSYNC as frame buffer update trigger */            \
+  false,                      /* Drive DCLK from negative edge of internal clock */ \
+  ebiTFTMBDisabled,           /* No masking and alpha blending enabled */           \
+  ebiTFTDDModeExternal,       /* Drive from external memory */                      \
+  ebiActiveLow,               /* CS Active Low polarity */                          \
+  ebiActiveLow,               /* DCLK Active Low polarity */                        \
+  ebiActiveLow,               /* DATAEN Active Low polarity */                      \
+  ebiActiveLow,               /* HSYNC Active Low polarity */                       \
+  ebiActiveLow,               /* VSYNC Active Low polarity */                       \
+  320,                        /* Horizontal size in pixels */                       \
+  1,                          /* Horizontal Front Porch */                          \
+  29,                         /* Horizontal Back Porch */                           \
+  2,                          /* Horizontal Synchronization Pulse Width */          \
+  240,                        /* Vertical size in pixels */                         \
+  1,                          /* Vertical Front Porch */                            \
+  4,                          /* Vertical Back Porch */                             \
+  2,                          /* Vertical Synchronization Pulse Width */            \
+  0x0000,                     /* Address offset to EBI memory base */               \
+  5,                          /* DCLK Period */                                     \
+  2,                          /* DCLK Start */                                      \
+  1,                          /* DCLK Setup cycles */                               \
+  1,                          /* DCLK Hold cycles */                                \
+}
 
 #endif
 /*******************************************************************************
@@ -564,7 +567,6 @@ void EBI_BankAddressTimingConfig(uint32_t bank, bool halfALE);
 
 void EBI_BankPolaritySet(uint32_t bank, EBI_Line_TypeDef line, EBI_Polarity_TypeDef polarity);
 void EBI_BankByteLaneEnable(uint32_t bank, bool enable);
-void EBI_BankPage(uint32_t bank, bool enable);
 void EBI_AltMapEnable(bool enable);
 
 /***************************************************************************//**
@@ -619,8 +621,8 @@ __STATIC_INLINE void EBI_TFTPixelSet(int pixel, uint32_t color)
 /***************************************************************************//**
  * @brief Masking and Blending Mode Set
  *
- * @param[in] alpha
- *   8-bit value indicating blending factor
+ * @param[in] maskBlend
+ *   Masking and alpha blending mode
  ******************************************************************************/
 __STATIC_INLINE void EBI_TFTMaskBlendMode(EBI_TFTMaskBlend_TypeDef maskBlend)
 {
@@ -675,8 +677,13 @@ __STATIC_INLINE uint32_t EBI_TFTHCount(void)
 
 /***************************************************************************//**
  * @brief Set Frame Buffer Trigger
+ *
+ * @details
  *   Frame buffer pointer will be updated either on each horizontal line (hsync)
- *   or vertical update (vsync)(
+ *   or vertical update (vsync).
+ *
+ * @param[in] sync
+ *   Trigger update of frame buffer pointer on vertical or horisontal sync.
  ******************************************************************************/
 __STATIC_INLINE void EBI_TFTFBTriggerSet(EBI_TFTFrameBufTrigger_TypeDef sync)
 {
@@ -715,7 +722,7 @@ __STATIC_INLINE void EBI_IntClear(uint32_t flags)
 
 /***************************************************************************//**
  * @brief
- *   Set one or more pending EBI interrupts from SW.
+ *   Set one or more pending EBI interrupts.
  *
  * @param[in] flags
  *   EBI interrupt sources to set to pending. Use a logical OR combination of
@@ -729,7 +736,7 @@ __STATIC_INLINE void EBI_IntSet(uint32_t flags)
 
 /***************************************************************************//**
  * @brief
- *   Disable one or more EBI interrupts
+ *   Disable one or more EBI interrupts.
  *
  * @param[in] flags
  *   EBI interrupt sources to disable. Use logical OR combination of valid
@@ -743,7 +750,7 @@ __STATIC_INLINE void EBI_IntDisable(uint32_t flags)
 
 /***************************************************************************//**
  * @brief
- *   Enable one or more EBI interrupts
+ *   Enable one or more EBI interrupts.
  *
  * @param[in] flags
  *   EBI interrupt sources to enable. Use logical OR combination of valid
@@ -757,7 +764,7 @@ __STATIC_INLINE void EBI_IntEnable(uint32_t flags)
 
 /***************************************************************************//**
  * @brief
- *   Get pending EBI interrupt flags
+ *   Get pending EBI interrupt flags.
  *
  * @note
  *   The event bits are not cleared by the use of this function
@@ -768,7 +775,30 @@ __STATIC_INLINE void EBI_IntEnable(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE uint32_t EBI_IntGet(void)
 {
-  return(EBI->IF);
+  return EBI->IF;
+}
+
+
+/***************************************************************************//**
+ * @brief
+ *   Get enabled and pending EBI interrupt flags.
+ *   Useful for handling more interrupt sources in the same interrupt handler.
+ *
+ * @note
+ *   Interrupt flags are not cleared by the use of this function.
+ *
+ * @return
+ *   Pending and enabled EBI interrupt sources
+ *   The return value is the bitwise AND of
+ *   - the enabled interrupt sources in EBI_IEN and
+ *   - the pending interrupt flags EBI_IF
+ ******************************************************************************/
+__STATIC_INLINE uint32_t EBI_IntGetEnabled(void)
+{
+  uint32_t ien;
+
+  ien = EBI->IEN;
+  return EBI->IF & ien;
 }
 
 
@@ -811,4 +841,4 @@ void EBI_PolaritySet(EBI_Line_TypeDef line, EBI_Polarity_TypeDef polarity);
 
 #endif /* defined(EBI_COUNT) && (EBI_COUNT > 0) */
 
-#endif /* __EM_EBI_H */
+#endif /* __SILICON_LABS_EM_EBI_H__ */

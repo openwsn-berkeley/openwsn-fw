@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_rmu.h
  * @brief Reset Management Unit (RMU) peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,23 +17,27 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_RMU_H
-#define __EM_RMU_H
+
+#ifndef __SILICON_LABS_EM_RMU_H__
+#define __SILICON_LABS_EM_RMU_H__
+
+#include "em_device.h"
+#if defined(RMU_COUNT) && (RMU_COUNT > 0)
+#include "em_assert.h"
 
 #include <stdbool.h>
-#include "em_device.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,15 +57,43 @@ extern "C" {
  ********************************   ENUMS   ************************************
  ******************************************************************************/
 
+/** RMU reset modes */
+typedef enum
+{
+#if defined(_RMU_CTRL_PINRMODE_MASK)
+  rmuResetModeDisabled = _RMU_CTRL_PINRMODE_DISABLED,
+  rmuResetModeLimited  = _RMU_CTRL_PINRMODE_LIMITED,
+  rmuResetModeExtended = _RMU_CTRL_PINRMODE_EXTENDED,
+  rmuResetModeFull     = _RMU_CTRL_PINRMODE_FULL,
+#else
+  rmuResetModeClear    = 0,
+  rmuResetModeSet      = 1,
+#endif
+} RMU_ResetMode_TypeDef;
+
 /** RMU controlled peripheral reset control and reset source control */
 typedef enum
 {
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-  /** Reset control over Backup Power Domain */
-  rmuResetBU = _RMU_CTRL_BURSTEN_SHIFT,
+#if defined(RMU_CTRL_BURSTEN)
+  rmuResetBU = _RMU_CTRL_BURSTEN_MASK,              /**< Reset control over Backup Power domain select */
 #endif
-  /** Allow Cortex-M3 lock up signal */
-  rmuResetLockUp = _RMU_CTRL_LOCKUPRDIS_SHIFT
+#if defined(RMU_CTRL_LOCKUPRDIS)
+  rmuResetLockUp = _RMU_CTRL_LOCKUPRDIS_MASK,       /**< Cortex lockup reset select */
+#elif defined(_RMU_CTRL_LOCKUPRMODE_MASK)
+  rmuResetLockUp = _RMU_CTRL_LOCKUPRMODE_MASK,      /**< Cortex lockup reset select */
+#endif
+#if defined(_RMU_CTRL_WDOGRMODE_MASK)
+  rmuResetWdog = _RMU_CTRL_WDOGRMODE_MASK,          /**< WDOG reset select */
+#endif
+#if defined(_RMU_CTRL_LOCKUPRMODE_MASK)
+  rmuResetCoreLockup = _RMU_CTRL_LOCKUPRMODE_MASK,  /**< Cortex lockup reset select */
+#endif
+#if defined(_RMU_CTRL_SYSRMODE_MASK)
+  rmuResetSys = _RMU_CTRL_SYSRMODE_MASK,            /**< SYSRESET select */
+#endif
+#if defined(_RMU_CTRL_PINRMODE_MASK)
+  rmuResetPin = _RMU_CTRL_PINRMODE_MASK,            /**< Pin reset select */
+#endif
 } RMU_Reset_TypeDef;
 
 /*******************************************************************************
@@ -72,9 +103,41 @@ typedef enum
 /** RMU_LockupResetDisable kept for backwards compatibility */
 #define RMU_LockupResetDisable(A) RMU_ResetControl(rmuResetLockUp, A)
 
-void RMU_ResetControl(RMU_Reset_TypeDef reset, bool enable);
+void RMU_ResetControl(RMU_Reset_TypeDef reset, RMU_ResetMode_TypeDef mode);
 void RMU_ResetCauseClear(void);
 uint32_t RMU_ResetCauseGet(void);
+
+#if defined(_RMU_CTRL_RESETSTATE_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Set user reset state. This state is reset only by a Power-on-reset and a
+ *   pin reset.
+ *
+ * @param[in] userState User state to set
+ ******************************************************************************/
+__STATIC_INLINE void RMU_UserResetStateSet(uint32_t userState)
+{
+  EFM_ASSERT(!(userState
+               & ~(_RMU_CTRL_RESETSTATE_MASK >> _RMU_CTRL_RESETSTATE_SHIFT)));
+  RMU->CTRL = (RMU->CTRL & ~_RMU_CTRL_RESETSTATE_MASK)
+              | (userState << _RMU_CTRL_RESETSTATE_SHIFT);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Get user reset state. This state is reset only by a Power-on-reset and a
+ *   pin reset.
+ *
+ * @return
+ *   Reset surviving user state
+ ******************************************************************************/
+__STATIC_INLINE uint32_t RMU_UserResetStateGet(void)
+{
+  uint32_t userState = (RMU->CTRL & _RMU_CTRL_RESETSTATE_MASK)
+                       >> _RMU_CTRL_RESETSTATE_SHIFT;
+  return userState;
+}
+#endif
 
 /** @} (end addtogroup RMU) */
 /** @} (end addtogroup EM_Library) */
@@ -83,4 +146,5 @@ uint32_t RMU_ResetCauseGet(void);
 }
 #endif
 
-#endif /* __EM_RMU_H */
+#endif /* defined(RMU_COUNT) && (RMU_COUNT > 0) */
+#endif /* __SILICON_LABS_EM_RMU_H__ */

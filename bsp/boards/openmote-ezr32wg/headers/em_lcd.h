@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_lcd.h
  * @brief Liquid Crystal Display (LCD) peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,20 +17,21 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_LCD_H
-#define __EM_LCD_H
+
+#ifndef __SILICON_LABS_EM_LCD_H__
+#define __SILICON_LABS_EM_LCD_H__
 
 #include "em_device.h"
 
@@ -68,7 +68,7 @@ typedef enum
   lcdMuxTriplex    = LCD_DISPCTRL_MUX_TRIPLEX,
   /** Quadruplex / 1/4 Duty cycle (segments can be multiplexed with LCD_COM[0:3]) */
   lcdMuxQuadruplex = LCD_DISPCTRL_MUX_QUADRUPLEX,
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(LCD_DISPCTRL_MUXE_MUXE)
   /** Sextaplex / 1/6 Duty cycle (segments can be multiplexed with LCD_COM[0:5]) */
   lcdMuxSextaplex  = LCD_DISPCTRL_MUXE_MUXE | LCD_DISPCTRL_MUX_DUPLEX,
   /** Octaplex / 1/6 Duty cycle (segments can be multiplexed with LCD_COM[0:5]) */
@@ -85,7 +85,7 @@ typedef enum
   lcdBiasOneHalf   = LCD_DISPCTRL_BIAS_ONEHALF,
   /** 1/3 Bias (4 levels) */
   lcdBiasOneThird  = LCD_DISPCTRL_BIAS_ONETHIRD,
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(LCD_DISPCTRL_BIAS_ONEFOURTH)
   /** 1/4 Bias (5 levels) */
   lcdBiasOneFourth = LCD_DISPCTRL_BIAS_ONEFOURTH,
 #endif
@@ -159,11 +159,10 @@ typedef enum
   lcdSegment16_19 = (1 << 4),
   /** Select segment lines 20 to 23 */
   lcdSegment20_23 = (1 << 5),
-#if defined(_EFM32_TINY_FAMILY)
+#if defined(_LCD_SEGD0L_MASK) && (_LCD_SEGD0L_MASK == 0x00FFFFFFUL)
   /** Select all segment lines */
   lcdSegmentAll   = (0x003f)
-#endif
-#if defined(_EFM32_GECKO_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#elif defined(_LCD_SEGD0H_MASK) && (_LCD_SEGD0H_MASK == 0x000000FFUL)
   /** Select segment lines 24 to 27 */
   lcdSegment24_27 = (1 << 6),
   /** Select segment lines 28 to 31 */
@@ -228,7 +227,7 @@ typedef struct
   LCD_AnimShift_TypeDef BShift;
   /** A and B Logical Operation to use for mixing and outputting resulting segments */
   LCD_AnimLogic_TypeDef animLogic;
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(LCD_BACTRL_ALOC)
   /** Number of first segment to animate. Options are 0 or 8 for Giant/Leopard. End is startSeg+7 */
   int                   startSeg;
 #endif
@@ -264,13 +263,14 @@ typedef struct
 
 /** Default config for LCD init structure, enables 160 segments  */
 #define LCD_INIT_DEFAULT \
-  { true,                \
-    lcdMuxQuadruplex,    \
-    lcdBiasOneThird,     \
-    lcdWaveLowPower,     \
-    lcdVLCDSelVDD,       \
-    lcdConConfVLCD       \
-  }
+{                        \
+  true,                  \
+  lcdMuxQuadruplex,      \
+  lcdBiasOneThird,       \
+  lcdWaveLowPower,       \
+  lcdVLCDSelVDD,         \
+  lcdConConfVLCD         \
+}
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -285,35 +285,15 @@ void LCD_AnimInit(const LCD_AnimInit_TypeDef *animInit);
 void LCD_SegmentRangeEnable(LCD_SegmentRange_TypeDef segment, bool enable);
 void LCD_SegmentSet(int com, int bit, bool enable);
 void LCD_SegmentSetLow(int com, uint32_t mask, uint32_t bits);
-#if defined(_EFM32_GECKO_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(_LCD_SEGD0H_MASK)
 void LCD_SegmentSetHigh(int com, uint32_t mask, uint32_t bits);
 #endif
 void LCD_ContrastSet(int level);
 void LCD_VBoostSet(LCD_VBoostLevel_TypeDef vboost);
 
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(LCD_CTRL_DSC)
 void LCD_BiasSegmentSet(int segment, int biasLevel);
 void LCD_BiasComSet(int com, int biasLevel);
-#endif
-
-__STATIC_INLINE void LCD_Enable(bool enable);
-__STATIC_INLINE void LCD_AnimEnable(bool enable);
-__STATIC_INLINE void LCD_BlinkEnable(bool enable);
-__STATIC_INLINE void LCD_BlankEnable(bool enable);
-__STATIC_INLINE void LCD_FrameCountEnable(bool enable);
-__STATIC_INLINE int LCD_AnimState(void);
-__STATIC_INLINE int LCD_BlinkState(void);
-__STATIC_INLINE void LCD_FreezeEnable(bool enable);
-__STATIC_INLINE uint32_t LCD_SyncBusyGet(void);
-__STATIC_INLINE void LCD_SyncBusyDelay(uint32_t flags);
-__STATIC_INLINE uint32_t LCD_IntGet(void);
-__STATIC_INLINE uint32_t LCD_IntGetEnabled(void);
-__STATIC_INLINE void LCD_IntSet(uint32_t flags);
-__STATIC_INLINE void LCD_IntEnable(uint32_t flags);
-__STATIC_INLINE void LCD_IntDisable(uint32_t flags);
-__STATIC_INLINE void LCD_IntClear(uint32_t flags);
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-__STATIC_INLINE void LCD_DSCEnable(bool enable);
 #endif
 
 /***************************************************************************//**
@@ -333,7 +313,7 @@ __STATIC_INLINE void LCD_Enable(bool enable)
   }
   else
   {
-    LCD->CTRL &= ~(LCD_CTRL_EN);
+    LCD->CTRL &= ~LCD_CTRL_EN;
   }
 }
 
@@ -353,7 +333,7 @@ __STATIC_INLINE void LCD_AnimEnable(bool enable)
   }
   else
   {
-    LCD->BACTRL &= ~(LCD_BACTRL_AEN);
+    LCD->BACTRL &= ~LCD_BACTRL_AEN;
   }
 }
 
@@ -373,7 +353,7 @@ __STATIC_INLINE void LCD_BlinkEnable(bool enable)
   }
   else
   {
-    LCD->BACTRL &= ~(LCD_BACTRL_BLINKEN);
+    LCD->BACTRL &= ~LCD_BACTRL_BLINKEN;
   }
 }
 
@@ -393,7 +373,7 @@ __STATIC_INLINE void LCD_BlankEnable(bool enable)
   }
   else
   {
-    LCD->BACTRL &= ~(LCD_BACTRL_BLANK);
+    LCD->BACTRL &= ~LCD_BACTRL_BLANK;
   }
 }
 
@@ -413,7 +393,7 @@ __STATIC_INLINE void LCD_FrameCountEnable(bool enable)
   }
   else
   {
-    LCD->BACTRL &= ~(LCD_BACTRL_FCEN);
+    LCD->BACTRL &= ~LCD_BACTRL_FCEN;
   }
 }
 
@@ -474,7 +454,7 @@ __STATIC_INLINE void LCD_FreezeEnable(bool enable)
  ******************************************************************************/
 __STATIC_INLINE uint32_t LCD_SyncBusyGet(void)
 {
-  return(LCD->SYNCBUSY);
+  return LCD->SYNCBUSY;
 }
 
 
@@ -502,7 +482,7 @@ __STATIC_INLINE void LCD_SyncBusyDelay(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE uint32_t LCD_IntGet(void)
 {
-  return(LCD->IF);
+  return LCD->IF;
 }
 
 
@@ -526,14 +506,14 @@ __STATIC_INLINE uint32_t LCD_IntGet(void)
  ******************************************************************************/
 __STATIC_INLINE uint32_t LCD_IntGetEnabled(void)
 {
-  uint32_t tmp = 0U;
+  uint32_t ien;
 
   /* Store LCD->IEN in temporary variable in order to define explicit order
    * of volatile accesses. */
-  tmp = LCD->IEN;
+  ien = LCD->IEN;
 
   /* Bitwise AND of pending and enabled interrupts */
-  return LCD->IF & tmp;
+  return LCD->IF & ien;
 }
 
 
@@ -578,7 +558,7 @@ __STATIC_INLINE void LCD_IntEnable(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void LCD_IntDisable(uint32_t flags)
 {
-  LCD->IEN &= ~(flags);
+  LCD->IEN &= ~flags;
 }
 
 
@@ -597,7 +577,7 @@ __STATIC_INLINE void LCD_IntClear(uint32_t flags)
 }
 
 
-#if defined(_EFM32_TINY_FAMILY) || defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(LCD_CTRL_DSC)
 /***************************************************************************//**
  * @brief
  *   Enable or disable LCD Direct Segment Control
@@ -615,7 +595,7 @@ __STATIC_INLINE void LCD_DSCEnable(bool enable)
   }
   else
   {
-    LCD->CTRL &= ~(LCD_CTRL_DSC);
+    LCD->CTRL &= ~LCD_CTRL_DSC;
   }
 }
 #endif
@@ -629,4 +609,4 @@ __STATIC_INLINE void LCD_DSCEnable(bool enable)
 
 #endif /* defined(LCD_COUNT) && (LCD_COUNT > 0) */
 
-#endif /* __EM_LCD_H */
+#endif /* __SILICON_LABS_EM_LCD_H__ */

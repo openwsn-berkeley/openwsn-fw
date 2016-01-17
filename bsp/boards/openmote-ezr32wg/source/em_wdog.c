@@ -1,12 +1,11 @@
 /***************************************************************************//**
- * @file
+ * @file em_wdog.c
  * @brief Watchdog (WDOG) peripheral API
  *   devices.
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -19,20 +18,30 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
+
 #include "em_wdog.h"
-#include "em_bitband.h"
+#if defined(WDOG_COUNT) && (WDOG_COUNT > 0)
+
+#if defined(WDOG0)
+#define WDOG WDOG0
+#if (WDOG_COUNT > 1)
+#warning "Multiple watchdogs not supported"
+#endif
+#endif
+
+#include "em_bus.h"
 
 /***************************************************************************//**
  * @addtogroup EM_Library
@@ -72,7 +81,7 @@ void WDOG_Enable(bool enable)
     while (WDOG->SYNCBUSY & WDOG_SYNCBUSY_CTRL)
       ;
   }
-  BITBAND_Peripheral(&(WDOG->CTRL), _WDOG_CTRL_EN_SHIFT, (unsigned int)enable);
+  BUS_RegBitWrite(&(WDOG->CTRL), _WDOG_CTRL_EN_SHIFT, enable);
 }
 
 
@@ -87,12 +96,24 @@ void WDOG_Enable(bool enable)
  ******************************************************************************/
 void WDOG_Feed(void)
 {
+  /* The watchdog should not be fed while it is disabled */
+  if ( !(WDOG->CTRL & WDOG_CTRL_EN) )
+  {
+    return;
+  }
+
   /* If a previous clearing is being synchronized to LF domain, then there */
   /* is no point in waiting for it to complete before clearing over again. */
   /* This avoids stalling the core in the typical use case where some idle loop */
   /* keeps clearing the watchdog. */
   if (WDOG->SYNCBUSY & WDOG_SYNCBUSY_CMD)
+  {
     return;
+  }
+  /* Before writing to the WDOG_CMD register we also need to make sure that
+   * any previous write to WDOG_CTRL is complete. */
+  while ( WDOG->SYNCBUSY & WDOG_SYNCBUSY_CTRL )
+    ;
 
   WDOG->CMD = WDOG_CMD_CLEAR;
 }
@@ -151,8 +172,8 @@ void WDOG_Init(const WDOG_Init_TypeDef *init)
     setting |= WDOG_CTRL_SWOSCBLOCK;
   }
 
-  setting |= ((uint32_t)(init->clkSel) << _WDOG_CTRL_CLKSEL_SHIFT) |
-             ((uint32_t)(init->perSel) << _WDOG_CTRL_PERSEL_SHIFT);
+  setting |= ((uint32_t)(init->clkSel)   << _WDOG_CTRL_CLKSEL_SHIFT)
+             | ((uint32_t)(init->perSel) << _WDOG_CTRL_PERSEL_SHIFT);
 
   /* Wait for any pending previous write operation to have been completed in */
   /* low frequency domain */
@@ -170,7 +191,7 @@ void WDOG_Init(const WDOG_Init_TypeDef *init)
     }
     else
     {
-      BITBAND_Peripheral(&(WDOG->CTRL), _WDOG_CTRL_LOCK_SHIFT, 1);
+      BUS_RegBitWrite(&(WDOG->CTRL), _WDOG_CTRL_LOCK_SHIFT, 1);
     }
   }
 }
@@ -202,9 +223,10 @@ void WDOG_Lock(void)
     ;
 
   /* Disable writing to the control register */
-  BITBAND_Peripheral(&(WDOG->CTRL), _WDOG_CTRL_LOCK_SHIFT, 1);
+  BUS_RegBitWrite(&(WDOG->CTRL), _WDOG_CTRL_LOCK_SHIFT, 1);
 }
 
 
 /** @} (end addtogroup WDOG) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(WDOG_COUNT) && (WDOG_COUNT > 0) */

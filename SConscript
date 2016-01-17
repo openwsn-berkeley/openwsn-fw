@@ -247,20 +247,32 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-Wa,-adhlns=${TARGET.base}.lst')
         env.Append(CCFLAGS       = '-c')
         env.Append(CCFLAGS       = '-fmessage-length=0')
-        env.Append(CCFLAGS       = '-mcpu=cortex-m3')
+        env.Append(CCFLAGS       = '-mcpu=cortex-m4')
         env.Append(CCFLAGS       = '-mthumb')
-        env.Append(CCFLAGS       = '-g3')
+        env.Append(CCFLAGS       = '-g')
+        env.Append(CCFLAGS       = '-std=gnu99')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
         env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        env.Append(CCFLAGS       = '-ffunction-sections')
+        env.Append(CCFLAGS       = '-fdata-sections')
+        env.Append(CCFLAGS       = '-mfpu=fpv4-sp-d16')
+        env.Append(CCFLAGS       = '-mfloat-abi=softfp')
+        env.Append(CCFLAGS       = '-DEZR32WG330F256R63=1')
+            
         # assembler
         env.Replace(AS           = 'arm-none-eabi-as')
-        env.Append(ASFLAGS       = '-ggdb -g3 -mcpu=cortex-m3 -mlittle-endian')
+        env.Append(ASFLAGS       = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -c -x assembler-with-cpp ')
+        env.Append(ASFLAGS       = '-DEZR32WG330F256R63=1')
         # linker
-        env.Append(LINKFLAGS     = '-Tbsp/boards/openmote-ezr32wg/ezr32wg.lds')
-        env.Append(LINKFLAGS     = '-nostartfiles')
-        env.Append(LINKFLAGS     = '-Wl,-Map,${TARGET.base}.map')
-        env.Append(LINKFLAGS     = '-mcpu=cortex-m3')
-        env.Append(LINKFLAGS     = '-mthumb')
-        env.Append(LINKFLAGS     = '-g3')
+        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/openmote-ezr32wg/GCC/ezr32wg.ld')
+        env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
+        env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
+        
+
+        env.Append(LINKFLAGS     = '-mfpu=fpv4-sp-d16 -mfloat-abi=softfp --specs=nano.specs')
+        env.Append(LINKFLAGS     = '-lgcc -lc -lnosys')
+
         # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')

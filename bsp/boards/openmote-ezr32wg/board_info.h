@@ -11,6 +11,8 @@
 
 #include <stdint.h>
 #include <string.h>
+#include "Include/ezr32wg230f256r63.h"
+#include "opendefs.h"
 
 //=========================== defines =========================================
 

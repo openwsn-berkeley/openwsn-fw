@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_bitband.h
  * @brief Bitband Peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,22 +17,23 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_BITBAND_H
-#define __EM_BITBAND_H
 
-#include "em_device.h"
+#ifndef __SILICON_LABS_EM_BITBAND_H__
+#define __SILICON_LABS_EM_BITBAND_H__
+
+#include "em_bus.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,7 +46,7 @@ extern "C" {
 
 /***************************************************************************//**
  * @addtogroup BITBAND
- * @brief BITBAND Peripheral API
+ * @brief BITBAND Peripheral API (deprecated - use em_bus.h)
  * @{
  ******************************************************************************/
 
@@ -59,21 +59,16 @@ extern "C" {
  *   modification. Please refer to the reference manual for further details
  *   about bit-banding.
  *
+ * @note
+ *   This function is only atomic on cores which fully support bitbanding.
+ *
  * @param[in] addr Peripheral address location to modify bit in.
  *
  * @param[in] bit Bit position to modify, 0-31.
  *
  * @param[in] val Value to set bit to, 0 or 1.
  ******************************************************************************/
-__STATIC_INLINE void BITBAND_Peripheral(volatile uint32_t *addr,
-                                        uint32_t bit,
-                                        uint32_t val)
-{
-  uint32_t tmp =
-    BITBAND_PER_BASE + (((uint32_t)addr - PER_MEM_BASE) * 32) + (bit * 4);
-
-  *((volatile uint32_t *)tmp) = (uint32_t)val;
-}
+#define BITBAND_Peripheral(addr, bit, val) BUS_RegBitWrite(addr, bit, val)
 
 
 /***************************************************************************//**
@@ -92,14 +87,7 @@ __STATIC_INLINE void BITBAND_Peripheral(volatile uint32_t *addr,
  *
  * @return           Value of the requested bit.
  ******************************************************************************/
-__STATIC_INLINE uint32_t BITBAND_PeripheralRead(volatile uint32_t *addr,
-                                                uint32_t bit)
-{
-  uint32_t tmp =
-    BITBAND_PER_BASE + (((uint32_t)addr - PER_MEM_BASE) * 32) + (bit * 4);
-
-  return *((volatile uint32_t *)tmp);
-}
+#define BITBAND_PeripheralRead(addr, bit) BUS_RegBitRead(addr, bit)
 
 
 /***************************************************************************//**
@@ -111,19 +99,16 @@ __STATIC_INLINE uint32_t BITBAND_PeripheralRead(volatile uint32_t *addr,
  *   modification. Please refer to the reference manual for further details
  *   about bit-banding.
  *
+ * @note
+ *   This function is only atomic on cores which fully support bitbanding.
+ *
  * @param[in] addr SRAM address location to modify bit in.
  *
  * @param[in] bit Bit position to modify, 0-31.
  *
  * @param[in] val Value to set bit to, 0 or 1.
  ******************************************************************************/
-__STATIC_INLINE void BITBAND_SRAM(uint32_t *addr, uint32_t bit, uint32_t val)
-{
-  uint32_t tmp =
-    BITBAND_RAM_BASE + (((uint32_t)addr - RAM_MEM_BASE) * 32) + (bit * 4);
-
-  *((volatile uint32_t *)tmp) = (uint32_t)val;
-}
+#define BITBAND_SRAM(addr, bit, val) BUS_RamBitWrite(addr, bit, val)
 
 
 /***************************************************************************//**
@@ -142,14 +127,7 @@ __STATIC_INLINE void BITBAND_SRAM(uint32_t *addr, uint32_t bit, uint32_t val)
  *
  * @return            Value of the requested bit.
  ******************************************************************************/
-__STATIC_INLINE uint32_t BITBAND_SRAMRead(uint32_t *addr, uint32_t bit)
-{
-  uint32_t tmp =
-    BITBAND_RAM_BASE + (((uint32_t)addr - RAM_MEM_BASE) * 32) + (bit * 4);
-
-  return *((volatile uint32_t *)tmp);
-}
-
+#define BITBAND_SRAMRead(addr, bit) BUS_RamBitRead(addr, bit)
 
 /** @} (end addtogroup BITBAND) */
 /** @} (end addtogroup EM_Library) */
@@ -158,4 +136,4 @@ __STATIC_INLINE uint32_t BITBAND_SRAMRead(uint32_t *addr, uint32_t bit)
 }
 #endif
 
-#endif /* __EM_BITBAND_H */
+#endif /* __SILICON_LABS_EM_BITBAND_H__ */

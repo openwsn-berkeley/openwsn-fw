@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_timer.c
  * @brief Timer/counter (TIMER) Peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,19 +17,22 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
+
 #include "em_timer.h"
+#if defined(TIMER_COUNT) && (TIMER_COUNT > 0)
+
 #include "em_assert.h"
 
 /***************************************************************************//**
@@ -49,65 +51,10 @@
  * @{
  ******************************************************************************/
 
-/*******************************************************************************
- *******************************   DEFINES   ***********************************
- ******************************************************************************/
-
-/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
-
-
-/** Validation of TIMER register block pointer reference for assert statements. */
-#if (TIMER_COUNT == 1)
-#define TIMER_REF_VALID(ref)    ((ref) == TIMER0)
-#elif (TIMER_COUNT == 2)
-#define TIMER_REF_VALID(ref)    (((ref) == TIMER0) || ((ref) == TIMER1))
-#elif (TIMER_COUNT == 3)
-#define TIMER_REF_VALID(ref)    (((ref) == TIMER0) || \
-                                 ((ref) == TIMER1) || \
-                                 ((ref) == TIMER2))
-#elif (TIMER_COUNT == 4)
-#define TIMER_REF_VALID(ref)    (((ref) == TIMER0) || \
-                                 ((ref) == TIMER1) || \
-                                 ((ref) == TIMER2) || \
-                                 ((ref) == TIMER3))
-#else
-#error Undefined number of timers.
-#endif
-
-/** Validation of TIMER compare/capture channel number */
-#define TIMER_CH_VALID(ch)    ((ch) < 3)
-
-/** @endcond */
-
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
-
-/***************************************************************************//**
- * @brief
- *   Start/stop TIMER.
- *
- * @param[in] timer
- *   Pointer to TIMER peripheral register block.
- *
- * @param[in] enable
- *   true to enable counting, false to disable.
- ******************************************************************************/
-void TIMER_Enable(TIMER_TypeDef *timer, bool enable)
-{
-  EFM_ASSERT(TIMER_REF_VALID(timer));
-
-  if (enable)
-  {
-    timer->CMD = TIMER_CMD_START;
-  }
-  else
-  {
-    timer->CMD = TIMER_CMD_STOP;
-  }
-}
-
 
 /***************************************************************************//**
  * @brief
@@ -139,22 +86,21 @@ void TIMER_Init(TIMER_TypeDef *timer, const TIMER_Init_TypeDef *init)
   /* Reset counter */
   timer->CNT = _TIMER_CNT_RESETVALUE;
 
-  timer->CTRL =
-    ((uint32_t)(init->prescale) << _TIMER_CTRL_PRESC_SHIFT) |
-    ((uint32_t)(init->clkSel) << _TIMER_CTRL_CLKSEL_SHIFT) |
-    ((uint32_t)(init->fallAction) << _TIMER_CTRL_FALLA_SHIFT) |
-    ((uint32_t)(init->riseAction) << _TIMER_CTRL_RISEA_SHIFT) |
-    ((uint32_t)(init->mode) << _TIMER_CTRL_MODE_SHIFT) |
-    (init->debugRun               ?   TIMER_CTRL_DEBUGRUN  : 0) |
-    (init->dmaClrAct              ?   TIMER_CTRL_DMACLRACT : 0) |
-    (init->quadModeX4             ?   TIMER_CTRL_QDM_X4    : 0) |
-    (init->oneShot                ?   TIMER_CTRL_OSMEN     : 0) |
+  timer->CTRL = ((uint32_t)(init->prescale)     << _TIMER_CTRL_PRESC_SHIFT)
+                | ((uint32_t)(init->clkSel)     << _TIMER_CTRL_CLKSEL_SHIFT)
+                | ((uint32_t)(init->fallAction) << _TIMER_CTRL_FALLA_SHIFT)
+                | ((uint32_t)(init->riseAction) << _TIMER_CTRL_RISEA_SHIFT)
+                | ((uint32_t)(init->mode)       << _TIMER_CTRL_MODE_SHIFT)
+                | (init->debugRun               ?   TIMER_CTRL_DEBUGRUN  : 0)
+                | (init->dmaClrAct              ?   TIMER_CTRL_DMACLRACT : 0)
+                | (init->quadModeX4             ?   TIMER_CTRL_QDM_X4    : 0)
+                | (init->oneShot                ?   TIMER_CTRL_OSMEN     : 0)
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_TINY_FAMILY) || defined(_EFM32_WONDER_FAMILY)
-    (init->count2x                ?   TIMER_CTRL_X2CNT     : 0) |
-    (init->ati                    ?   TIMER_CTRL_ATI       : 0) |
+#if defined(TIMER_CTRL_X2CNT) && defined(TIMER_CTRL_ATI)
+                | (init->count2x                ?   TIMER_CTRL_X2CNT     : 0)
+                | (init->ati                    ?   TIMER_CTRL_ATI       : 0)
 #endif
-    (init->sync                   ?   TIMER_CTRL_SYNC      : 0);
+                | (init->sync                   ?   TIMER_CTRL_SYNC      : 0);
 
   /* Start timer if specified to be enabled (dosn't hurt if already started) */
   if (init->enable)
@@ -189,43 +135,74 @@ void TIMER_InitCC(TIMER_TypeDef *timer,
   EFM_ASSERT(TIMER_CH_VALID(ch));
 
   timer->CC[ch].CTRL =
-    ((uint32_t)(init->eventCtrl) << _TIMER_CC_CTRL_ICEVCTRL_SHIFT) |
-    ((uint32_t)(init->edge) << _TIMER_CC_CTRL_ICEDGE_SHIFT) |
-    ((uint32_t)(init->prsSel) << _TIMER_CC_CTRL_PRSSEL_SHIFT) |
-    ((uint32_t)(init->cufoa) << _TIMER_CC_CTRL_CUFOA_SHIFT) |
-    ((uint32_t)(init->cofoa) << _TIMER_CC_CTRL_COFOA_SHIFT) |
-    ((uint32_t)(init->cmoa) << _TIMER_CC_CTRL_CMOA_SHIFT) |
-    ((uint32_t)(init->mode) << _TIMER_CC_CTRL_MODE_SHIFT) |
-    (init->filter                ?   TIMER_CC_CTRL_FILT_ENABLE : 0) |
-    (init->prsInput              ?   TIMER_CC_CTRL_INSEL_PRS   : 0) |
-    (init->coist                 ?   TIMER_CC_CTRL_COIST       : 0) |
-    (init->outInvert             ?   TIMER_CC_CTRL_OUTINV      : 0);
+    ((uint32_t)(init->eventCtrl) << _TIMER_CC_CTRL_ICEVCTRL_SHIFT)
+    | ((uint32_t)(init->edge)    << _TIMER_CC_CTRL_ICEDGE_SHIFT)
+    | ((uint32_t)(init->prsSel)  << _TIMER_CC_CTRL_PRSSEL_SHIFT)
+    | ((uint32_t)(init->cufoa)   << _TIMER_CC_CTRL_CUFOA_SHIFT)
+    | ((uint32_t)(init->cofoa)   << _TIMER_CC_CTRL_COFOA_SHIFT)
+    | ((uint32_t)(init->cmoa)    << _TIMER_CC_CTRL_CMOA_SHIFT)
+    | ((uint32_t)(init->mode)    << _TIMER_CC_CTRL_MODE_SHIFT)
+    | (init->filter              ?   TIMER_CC_CTRL_FILT_ENABLE : 0)
+    | (init->prsInput            ?   TIMER_CC_CTRL_INSEL_PRS   : 0)
+    | (init->coist               ?   TIMER_CC_CTRL_COIST       : 0)
+    | (init->outInvert           ?   TIMER_CC_CTRL_OUTINV      : 0);
 }
 
-#ifdef TIMER_DTLOCK_LOCKKEY_LOCK
+
+#if defined(_TIMER_DTCTRL_MASK)
 /***************************************************************************//**
  * @brief
- *   Lock the TIMER in order to protect some of its registers against unintended
- *   modification.
- *
- * @details
- *   Please refer to the reference manual for TIMER registers that will be
- *   locked.
- *
- * @note
- *   If locking the TIMER registers, they must be unlocked prior to using any
- *   TIMER API functions modifying TIMER registers protected by the lock.
+ *   Initialize the TIMER DTI unit.
  *
  * @param[in] timer
  *   Pointer to TIMER peripheral register block.
+ *
+ * @param[in] init
+ *   Pointer to TIMER DTI initialization structure.
  ******************************************************************************/
-void TIMER_Lock(TIMER_TypeDef *timer)
+void TIMER_InitDTI(TIMER_TypeDef *timer, const TIMER_InitDTI_TypeDef *init)
 {
-  EFM_ASSERT(TIMER_REF_VALID(timer));
+  EFM_ASSERT(TIMER0 == timer);
 
-  timer->DTLOCK = TIMER_DTLOCK_LOCKKEY_LOCK;
+  /* Make sure the DTI unit is disabled while initializing. */
+  TIMER_EnableDTI (timer, false);
+
+  /* Setup the DTCTRL register.
+     The enable bit will be set at the end of the function if specified. */
+  timer->DTCTRL =
+    (init->autoRestart              ?   TIMER_DTCTRL_DTDAS   : 0)
+    | (init->activeLowOut           ?   TIMER_DTCTRL_DTIPOL  : 0)
+    | (init->invertComplementaryOut ?   TIMER_DTCTRL_DTCINV  : 0)
+    | (init->enablePrsSource        ?   TIMER_DTCTRL_DTPRSEN : 0)
+    | ((uint32_t)(init->prsSel)     << _TIMER_DTCTRL_DTPRSSEL_SHIFT);
+
+  /* Setup the DTTIME register. */
+  timer->DTTIME =
+    ((uint32_t)(init->prescale)   << _TIMER_DTTIME_DTPRESC_SHIFT)
+    | ((uint32_t)(init->riseTime) << _TIMER_DTTIME_DTRISET_SHIFT)
+    | ((uint32_t)(init->fallTime) << _TIMER_DTTIME_DTFALLT_SHIFT);
+
+  /* Setup the DTFC register. */
+  timer->DTFC =
+    (init->enableFaultSourceCoreLockup      ?   TIMER_DTFC_DTLOCKUPFEN : 0)
+    | (init->enableFaultSourceDebugger      ?   TIMER_DTFC_DTDBGFEN    : 0)
+    | (init->enableFaultSourcePrsSel0       ?   TIMER_DTFC_DTPRS0FEN   : 0)
+    | (init->enableFaultSourcePrsSel1       ?   TIMER_DTFC_DTPRS1FEN   : 0)
+    | ((uint32_t)(init->faultAction)        << _TIMER_DTFC_DTFA_SHIFT)
+    | ((uint32_t)(init->faultSourcePrsSel0) << _TIMER_DTFC_DTPRS0FSEL_SHIFT)
+    | ((uint32_t)(init->faultSourcePrsSel1) << _TIMER_DTFC_DTPRS1FSEL_SHIFT);
+
+  /* Setup the DTOGEN register. */
+  timer->DTOGEN = init->outputsEnableMask;
+
+  /* Clear any previous DTI faults.  */
+  TIMER_ClearDTIFault(timer, TIMER_GetDTIFault(timer));
+
+  /* Enable/disable before returning. */
+  TIMER_EnableDTI (timer, init->enable);
 }
 #endif
+
 
 /***************************************************************************//**
  * @brief
@@ -265,7 +242,7 @@ void TIMER_Reset(TIMER_TypeDef *timer)
 
   /* Reset dead time insertion module, no effect on timers without DTI */
 
-#ifdef TIMER_DTLOCK_LOCKKEY_UNLOCK
+#if defined(TIMER_DTLOCK_LOCKKEY_UNLOCK)
   /* Unlock DTI registers first in case locked */
   timer->DTLOCK = TIMER_DTLOCK_LOCKKEY_UNLOCK;
 
@@ -278,22 +255,6 @@ void TIMER_Reset(TIMER_TypeDef *timer)
 }
 
 
-#ifdef TIMER_DTLOCK_LOCKKEY_UNLOCK
-/***************************************************************************//**
- * @brief
- *   Unlock the TIMER so that writing to locked registers again is possible.
- *
- * @param[in] timer
- *   Pointer to TIMER peripheral register block.
- ******************************************************************************/
-void TIMER_Unlock(TIMER_TypeDef *timer)
-{
-  EFM_ASSERT(TIMER_REF_VALID(timer));
-
-  timer->DTLOCK = TIMER_DTLOCK_LOCKKEY_UNLOCK;
-}
-#endif
-
-
 /** @} (end addtogroup TIMER) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(TIMER_COUNT) && (TIMER_COUNT > 0) */

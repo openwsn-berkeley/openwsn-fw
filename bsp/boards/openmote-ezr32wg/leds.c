@@ -8,8 +8,16 @@
 #include "stdint.h"
 #include "leds.h"
 #include "board.h"
+#include "board_info.h"
+#include "em_device.h"
+#include "em_cmu.h"
+#include "em_gpio.h"
 
 //=========================== defines =========================================
+#define LEDS_PORT_ERROR 0
+#define LEDS_PORT_DEBUG 1
+#define LEDS_PORT_SYNC 2
+#define LEDS_PORT_RADIO 3
 
 //=========================== variables =======================================
 
@@ -18,13 +26,28 @@
 //=========================== public ==========================================
 
 void leds_init() {
+
+	CMU_ClockEnable(cmuClock_HFPER, true);
+	CMU_ClockEnable(cmuClock_GPIO, true);
+
+	//set the led pins to output.
+	GPIO_PinModeSet(gpioPortF, LEDS_PORT_ERROR, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortF, LEDS_PORT_DEBUG, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortF, LEDS_PORT_SYNC, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortF, LEDS_PORT_RADIO, gpioModePushPull, 0);
+
 }
 
 // red
 void leds_error_on() {
+	 GPIO_PinOutSet(gpioPortF, LEDS_PORT_ERROR);
 }
+
 void leds_error_off() {
+	 GPIO_PinOutClear(gpioPortF, LEDS_PORT_ERROR);
+
 }
+
 void leds_error_toggle() {
 }
 uint8_t leds_error_isOn() {

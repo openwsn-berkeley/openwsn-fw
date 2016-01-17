@@ -1,11 +1,10 @@
 /**************************************************************************//**
- * @file
+ * @file em_opamp.h
  * @brief Operational Amplifier (OPAMP) peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  ******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,20 +17,21 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_OPAMP_H
-#define __EM_OPAMP_H
+
+#ifndef __SILICON_LABS_EM_OPAMP_H__
+#define __SILICON_LABS_EM_OPAMP_H__
 
 #include "em_device.h"
 #if defined(OPAMP_PRESENT) && (OPAMP_COUNT == 1)
@@ -137,7 +137,33 @@ typedef struct
   OPAMP_OutMode_TypeDef  outMode;             /**< Output terminal connection.                   */
   OPAMP_ResSel_TypeDef   resSel;              /**< Select R2/R1 resistor ratio.                  */
   OPAMP_ResInMux_TypeDef resInMux;            /**< Select input source for resistor ladder.      */
-  uint32_t               outPen;              /**< Select alternate output terminal connections. */
+  uint32_t               outPen;              /**< Alternate output enable bit mask. This value
+                                                 should consist of one or more of the
+                                                 DAC_OPA[opa#]MUX_OUTPEN_OUT[output#] flags
+                                                 (defined in \<part_name\>_dac.h) OR'ed together.
+                                                 @n @n
+                                                 For OPA0:
+                                                 @li DAC_OPA0MUX_OUTPEN_OUT0
+                                                 @li DAC_OPA0MUX_OUTPEN_OUT1
+                                                 @li DAC_OPA0MUX_OUTPEN_OUT2
+                                                 @li DAC_OPA0MUX_OUTPEN_OUT3
+                                                 @li DAC_OPA0MUX_OUTPEN_OUT4
+
+                                                 For OPA1:
+                                                 @li DAC_OPA1MUX_OUTPEN_OUT0
+                                                 @li DAC_OPA1MUX_OUTPEN_OUT1
+                                                 @li DAC_OPA1MUX_OUTPEN_OUT2
+                                                 @li DAC_OPA1MUX_OUTPEN_OUT3
+                                                 @li DAC_OPA1MUX_OUTPEN_OUT4
+
+                                                 For OPA2:
+                                                 @li DAC_OPA2MUX_OUTPEN_OUT0
+                                                 @li DAC_OPA2MUX_OUTPEN_OUT1
+
+                                                 E.g: @n
+                                                 init.outPen = DAC_OPA0MUX_OUTPEN_OUT0 |
+                                                 DAC_OPA0MUX_OUTPEN_OUT2 |
+                                                 DAC_OPA0MUX_OUTPEN_OUT4;                        */
   uint32_t               bias;                /**< Set OPAMP bias current.                       */
   bool                   halfBias;            /**< Divide OPAMP bias current by 2.               */
   bool                   lpfPosPadDisable;    /**< Disable low pass filter on positive pad.      */
@@ -151,379 +177,379 @@ typedef struct
   uint32_t               offset;              /**< Opamp offset value when @ref defaultOffset is false.*/
 } OPAMP_Init_TypeDef;
 
-/** Configuration of OPA0/1 in unity gain voltage follower mode.       */
-#define OPA_INIT_UNITY_GAIN                                                       \
-  {                                                                               \
-    opaNegSelUnityGain,             /* Unity gain.                             */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeMain,                 /* Main output enabled.                    */ \
-    opaResSelDefault,               /* Resistor ladder is not used.            */ \
-    opaResInMuxDisable,             /* Resistor ladder disabled.               */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    false,                          /* No nextout output enabled.              */ \
-    false,                          /* Neg pad disabled.                       */ \
-    true,                           /* Pos pad enabled, used as signal input.  */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA0/1 in unity gain voltage follower mode. */
+#define OPA_INIT_UNITY_GAIN                                                     \
+{                                                                               \
+  opaNegSelUnityGain,             /* Unity gain.                             */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeMain,                 /* Main output enabled.                    */ \
+  opaResSelDefault,               /* Resistor ladder is not used.            */ \
+  opaResInMuxDisable,             /* Resistor ladder disabled.               */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  false,                          /* No nextout output enabled.              */ \
+  false,                          /* Neg pad disabled.                       */ \
+  true,                           /* Pos pad enabled, used as signal input.  */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA2 in unity gain voltage follower mode.         */
-#define OPA_INIT_UNITY_GAIN_OPA2                                                  \
-  {                                                                               \
-    opaNegSelUnityGain,             /* Unity gain.                             */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeMain,                 /* Main output enabled.                    */ \
-    opaResSelDefault,               /* Resistor ladder is not used.            */ \
-    opaResInMuxDisable,             /* Resistor ladder disabled.               */ \
-    DAC_OPA0MUX_OUTPEN_OUT0,        /* Alternate output 0 enabled.             */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    false,                          /* No nextout output enabled.              */ \
-    false,                          /* Neg pad disabled.                       */ \
-    true,                           /* Pos pad enabled, used as signal input.  */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA2 in unity gain voltage follower mode. */
+#define OPA_INIT_UNITY_GAIN_OPA2                                                \
+{                                                                               \
+  opaNegSelUnityGain,             /* Unity gain.                             */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeMain,                 /* Main output enabled.                    */ \
+  opaResSelDefault,               /* Resistor ladder is not used.            */ \
+  opaResInMuxDisable,             /* Resistor ladder disabled.               */ \
+  DAC_OPA0MUX_OUTPEN_OUT0,        /* Alternate output 0 enabled.             */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  false,                          /* No nextout output enabled.              */ \
+  false,                          /* Neg pad disabled.                       */ \
+  true,                           /* Pos pad enabled, used as signal input.  */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
 /** Configuration of OPA0/1 in non-inverting amplifier mode.           */
-#define OPA_INIT_NON_INVERTING                                                    \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeMain,                 /* Main output enabled.                    */ \
-    opaResSelR2eq0_33R1,            /* R2 = 1/3 R1                             */ \
-    opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    false,                          /* No nextout output enabled.              */ \
-    true,                           /* Neg pad enabled, used as signal ground. */ \
-    true,                           /* Pos pad enabled, used as signal input.  */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+#define OPA_INIT_NON_INVERTING                                                  \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeMain,                 /* Main output enabled.                    */ \
+  opaResSelR2eq0_33R1,            /* R2 = 1/3 R1                             */ \
+  opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  false,                          /* No nextout output enabled.              */ \
+  true,                           /* Neg pad enabled, used as signal ground. */ \
+  true,                           /* Pos pad enabled, used as signal input.  */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA2 in non-inverting amplifier mode.             */
-#define OPA_INIT_NON_INVERTING_OPA2                                               \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeMain,                 /* Main output enabled.                    */ \
-    opaResSelR2eq0_33R1,            /* R2 = 1/3 R1                             */ \
-    opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
-    DAC_OPA0MUX_OUTPEN_OUT0,        /* Alternate output 0 enabled.             */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    false,                          /* No nextout output enabled.              */ \
-    true,                           /* Neg pad enabled, used as signal ground. */ \
-    true,                           /* Pos pad enabled, used as signal input.  */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA2 in non-inverting amplifier mode. */
+#define OPA_INIT_NON_INVERTING_OPA2                                             \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeMain,                 /* Main output enabled.                    */ \
+  opaResSelR2eq0_33R1,            /* R2 = 1/3 R1                             */ \
+  opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
+  DAC_OPA0MUX_OUTPEN_OUT0,        /* Alternate output 0 enabled.             */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  false,                          /* No nextout output enabled.              */ \
+  true,                           /* Neg pad enabled, used as signal ground. */ \
+  true,                           /* Pos pad enabled, used as signal input.  */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA0/1 in inverting amplifier mode.               */
-#define OPA_INIT_INVERTING                                                        \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeMain,                 /* Main output enabled.                    */ \
-    opaResSelR2eqR1,                /* R2 = R1                                 */ \
-    opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    false,                          /* No nextout output enabled.              */ \
-    true,                           /* Neg pad enabled, used as signal input.  */ \
-    true,                           /* Pos pad enabled, used as signal ground. */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA0/1 in inverting amplifier mode. */
+#define OPA_INIT_INVERTING                                                      \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeMain,                 /* Main output enabled.                    */ \
+  opaResSelR2eqR1,                /* R2 = R1                                 */ \
+  opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  false,                          /* No nextout output enabled.              */ \
+  true,                           /* Neg pad enabled, used as signal input.  */ \
+  true,                           /* Pos pad enabled, used as signal ground. */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA2 in inverting amplifier mode.                 */
-#define OPA_INIT_INVERTING_OPA2                                                   \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeMain,                 /* Main output enabled.                    */ \
-    opaResSelR2eqR1,                /* R2 = R1                                 */ \
-    opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
-    DAC_OPA0MUX_OUTPEN_OUT0,        /* Alternate output 0 enabled.             */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    false,                          /* No nextout output enabled.              */ \
-    true,                           /* Neg pad enabled, used as signal input.  */ \
-    true,                           /* Pos pad enabled, used as signal ground. */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA2 in inverting amplifier mode. */
+#define OPA_INIT_INVERTING_OPA2                                                 \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeMain,                 /* Main output enabled.                    */ \
+  opaResSelR2eqR1,                /* R2 = R1                                 */ \
+  opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
+  DAC_OPA0MUX_OUTPEN_OUT0,        /* Alternate output 0 enabled.             */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  false,                          /* No nextout output enabled.              */ \
+  true,                           /* Neg pad enabled, used as signal input.  */ \
+  true,                           /* Pos pad enabled, used as signal ground. */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA0 in cascaded non-inverting amplifier mode.    */
-#define OPA_INIT_CASCADED_NON_INVERTING_OPA0                                      \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeAll,                  /* Both main and alternate outputs.        */ \
-    opaResSelR2eq0_33R1,            /* R2 = 1/3 R1                             */ \
-    opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    true,                           /* Pass output to next stage (OPA1).       */ \
-    true,                           /* Neg pad enabled, used as signal ground. */ \
-    true,                           /* Pos pad enabled, used as signal input.  */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA0 in cascaded non-inverting amplifier mode. */
+#define OPA_INIT_CASCADED_NON_INVERTING_OPA0                                    \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeAll,                  /* Both main and alternate outputs.        */ \
+  opaResSelR2eq0_33R1,            /* R2 = 1/3 R1                             */ \
+  opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  true,                           /* Pass output to next stage (OPA1).       */ \
+  true,                           /* Neg pad enabled, used as signal ground. */ \
+  true,                           /* Pos pad enabled, used as signal input.  */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA1 in cascaded non-inverting amplifier mode.    */
-#define OPA_INIT_CASCADED_NON_INVERTING_OPA1                                      \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelOpaIn,                 /* Pos input from OPA0 output.             */ \
-    opaOutModeAll,                  /* Both main and alternate outputs.        */ \
-    opaResSelR2eq0_33R1,            /* R2 = 1/3 R1                             */ \
-    opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    true,                           /* Pass output to next stage (OPA2).       */ \
-    true,                           /* Neg pad enabled, used as signal ground. */ \
-    false,                          /* Pos pad disabled.                       */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA1 in cascaded non-inverting amplifier mode. */
+#define OPA_INIT_CASCADED_NON_INVERTING_OPA1                                    \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelOpaIn,                 /* Pos input from OPA0 output.             */ \
+  opaOutModeAll,                  /* Both main and alternate outputs.        */ \
+  opaResSelR2eq0_33R1,            /* R2 = 1/3 R1                             */ \
+  opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  true,                           /* Pass output to next stage (OPA2).       */ \
+  true,                           /* Neg pad enabled, used as signal ground. */ \
+  false,                          /* Pos pad disabled.                       */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA2 in cascaded non-inverting amplifier mode.    */
-#define OPA_INIT_CASCADED_NON_INVERTING_OPA2                                      \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelOpaIn,                 /* Pos input from OPA1 output.             */ \
-    opaOutModeMain,                 /* Main output enabled.                    */ \
-    opaResSelR2eq0_33R1,            /* R2 = 1/3 R1                             */ \
-    opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
-    DAC_OPA0MUX_OUTPEN_OUT0,        /* Alternate output 0 enabled.             */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    false,                          /* No nextout output enabled.              */ \
-    true,                           /* Neg pad enabled, used as signal ground. */ \
-    false,                          /* Pos pad disabled.                       */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA2 in cascaded non-inverting amplifier mode. */
+#define OPA_INIT_CASCADED_NON_INVERTING_OPA2                                    \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelOpaIn,                 /* Pos input from OPA1 output.             */ \
+  opaOutModeMain,                 /* Main output enabled.                    */ \
+  opaResSelR2eq0_33R1,            /* R2 = 1/3 R1                             */ \
+  opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
+  DAC_OPA0MUX_OUTPEN_OUT0,        /* Alternate output 0 enabled.             */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  false,                          /* No nextout output enabled.              */ \
+  true,                           /* Neg pad enabled, used as signal ground. */ \
+  false,                          /* Pos pad disabled.                       */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA0 in cascaded inverting amplifier mode.        */
-#define OPA_INIT_CASCADED_INVERTING_OPA0                                          \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeAll,                  /* Both main and alternate outputs.        */ \
-    opaResSelR2eqR1,                /* R2 = R1                                 */ \
-    opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    true,                           /* Pass output to next stage (OPA1).       */ \
-    true,                           /* Neg pad enabled, used as signal input.  */ \
-    true,                           /* Pos pad enabled, used as signal ground. */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA0 in cascaded inverting amplifier mode. */
+#define OPA_INIT_CASCADED_INVERTING_OPA0                                        \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeAll,                  /* Both main and alternate outputs.        */ \
+  opaResSelR2eqR1,                /* R2 = R1                                 */ \
+  opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  true,                           /* Pass output to next stage (OPA1).       */ \
+  true,                           /* Neg pad enabled, used as signal input.  */ \
+  true,                           /* Pos pad enabled, used as signal ground. */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA1 in cascaded inverting amplifier mode.        */
-#define OPA_INIT_CASCADED_INVERTING_OPA1                                          \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeAll,                  /* Both main and alternate outputs.        */ \
-    opaResSelR2eqR1,                /* R2 = R1                                 */ \
-    opaResInMuxOpaIn,               /* Resistor ladder input from OPA0.        */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    true,                           /* Pass output to next stage (OPA2).       */ \
-    false,                          /* Neg pad disabled.                       */ \
-    true,                           /* Pos pad enabled, used as signal ground. */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA1 in cascaded inverting amplifier mode. */
+#define OPA_INIT_CASCADED_INVERTING_OPA1                                        \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeAll,                  /* Both main and alternate outputs.        */ \
+  opaResSelR2eqR1,                /* R2 = R1                                 */ \
+  opaResInMuxOpaIn,               /* Resistor ladder input from OPA0.        */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  true,                           /* Pass output to next stage (OPA2).       */ \
+  false,                          /* Neg pad disabled.                       */ \
+  true,                           /* Pos pad enabled, used as signal ground. */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA2 in cascaded inverting amplifier mode.        */
-#define OPA_INIT_CASCADED_INVERTING_OPA2                                          \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeMain,                 /* Main output enabled.                    */ \
-    opaResSelR2eqR1,                /* R2 = R1                                 */ \
-    opaResInMuxOpaIn,               /* Resistor ladder input from OPA1.        */ \
-    DAC_OPA0MUX_OUTPEN_OUT0,        /* Alternate output 0 enabled.             */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    false,                          /* No nextout output enabled.              */ \
-    false,                          /* Neg pad disabled.                       */ \
-    true,                           /* Pos pad enabled, used as signal ground. */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA2 in cascaded inverting amplifier mode. */
+#define OPA_INIT_CASCADED_INVERTING_OPA2                                        \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeMain,                 /* Main output enabled.                    */ \
+  opaResSelR2eqR1,                /* R2 = R1                                 */ \
+  opaResInMuxOpaIn,               /* Resistor ladder input from OPA1.        */ \
+  DAC_OPA0MUX_OUTPEN_OUT0,        /* Alternate output 0 enabled.             */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  false,                          /* No nextout output enabled.              */ \
+  false,                          /* Neg pad disabled.                       */ \
+  true,                           /* Pos pad enabled, used as signal ground. */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA0 in two-opamp differential driver mode.       */
-#define OPA_INIT_DIFF_DRIVER_OPA0                                                 \
-  {                                                                               \
-    opaNegSelUnityGain,             /* Unity gain.                             */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeAll,                  /* Both main and alternate outputs.        */ \
-    opaResSelDefault,               /* Resistor ladder is not used.            */ \
-    opaResInMuxDisable,             /* Resistor ladder disabled.               */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    true,                           /* Pass output to next stage (OPA1).       */ \
-    false,                          /* Neg pad disabled.                       */ \
-    true,                           /* Pos pad enabled, used as signal input.  */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA0 in two-opamp differential driver mode. */
+#define OPA_INIT_DIFF_DRIVER_OPA0                                               \
+{                                                                               \
+  opaNegSelUnityGain,             /* Unity gain.                             */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeAll,                  /* Both main and alternate outputs.        */ \
+  opaResSelDefault,               /* Resistor ladder is not used.            */ \
+  opaResInMuxDisable,             /* Resistor ladder disabled.               */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  true,                           /* Pass output to next stage (OPA1).       */ \
+  false,                          /* Neg pad disabled.                       */ \
+  true,                           /* Pos pad enabled, used as signal input.  */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA1 in two-opamp differential driver mode.       */
-#define OPA_INIT_DIFF_DRIVER_OPA1                                                 \
-  {                                                                               \
-    opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeMain,                 /* Main output enabled.                    */ \
-    opaResSelR2eqR1,                /* R2 = R1                                 */ \
-    opaResInMuxOpaIn,               /* Resistor ladder input from OPA0.        */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    false,                          /* No nextout output enabled.              */ \
-    false,                          /* Neg pad disabled.                       */ \
-    true,                           /* Pos pad enabled, used as signal ground. */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA1 in two-opamp differential driver mode. */
+#define OPA_INIT_DIFF_DRIVER_OPA1                                               \
+{                                                                               \
+  opaNegSelResTap,                /* Neg input from resistor ladder tap.     */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeMain,                 /* Main output enabled.                    */ \
+  opaResSelR2eqR1,                /* R2 = R1                                 */ \
+  opaResInMuxOpaIn,               /* Resistor ladder input from OPA0.        */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  false,                          /* No nextout output enabled.              */ \
+  false,                          /* Neg pad disabled.                       */ \
+  true,                           /* Pos pad enabled, used as signal ground. */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA0 in three-opamp differential receiver mode.   */
-#define OPA_INIT_DIFF_RECEIVER_OPA0                                               \
-  {                                                                               \
-    opaNegSelUnityGain,             /* Unity gain.                             */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeAll,                  /* Both main and alternate outputs.        */ \
-    opaResSelR2eqR1,                /* R2 = R1                                 */ \
-    opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    true,                           /* Pass output to next stage (OPA2).       */ \
-    true,                           /* Neg pad enabled, used as signal ground. */ \
-    true,                           /* Pos pad enabled, used as signal input.  */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA0 in three-opamp differential receiver mode. */
+#define OPA_INIT_DIFF_RECEIVER_OPA0                                             \
+{                                                                               \
+  opaNegSelUnityGain,             /* Unity gain.                             */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeAll,                  /* Both main and alternate outputs.        */ \
+  opaResSelR2eqR1,                /* R2 = R1                                 */ \
+  opaResInMuxNegPad,              /* Resistor ladder input from neg pad.     */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  true,                           /* Pass output to next stage (OPA2).       */ \
+  true,                           /* Neg pad enabled, used as signal ground. */ \
+  true,                           /* Pos pad enabled, used as signal input.  */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA1 in three-opamp differential receiver mode.   */
-#define OPA_INIT_DIFF_RECEIVER_OPA1                                               \
-  {                                                                               \
-    opaNegSelUnityGain,             /* Unity gain.                             */ \
-    opaPosSelPosPad,                /* Pos input from pad.                     */ \
-    opaOutModeAll,                  /* Both main and alternate outputs.        */ \
-    opaResSelDefault,               /* Resistor ladder is not used.            */ \
-    opaResInMuxDisable,             /* Disable resistor ladder.                */ \
-    0,                              /* No alternate outputs enabled.           */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    true,                           /* Pass output to next stage (OPA2).       */ \
-    false,                          /* Neg pad disabled.                       */ \
-    true,                           /* Pos pad enabled, used as signal input.  */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA1 in three-opamp differential receiver mode. */
+#define OPA_INIT_DIFF_RECEIVER_OPA1                                             \
+{                                                                               \
+  opaNegSelUnityGain,             /* Unity gain.                             */ \
+  opaPosSelPosPad,                /* Pos input from pad.                     */ \
+  opaOutModeAll,                  /* Both main and alternate outputs.        */ \
+  opaResSelDefault,               /* Resistor ladder is not used.            */ \
+  opaResInMuxDisable,             /* Disable resistor ladder.                */ \
+  0,                              /* No alternate outputs enabled.           */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  true,                           /* Pass output to next stage (OPA2).       */ \
+  false,                          /* Neg pad disabled.                       */ \
+  true,                           /* Pos pad enabled, used as signal input.  */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
-/** Configuration of OPA2 in three-opamp differential receiver mode.   */
-#define OPA_INIT_DIFF_RECEIVER_OPA2                                               \
-  {                                                                               \
-    opaNegSelResTap,                /* Input from resistor ladder tap.         */ \
-    opaPosSelResTapOpa0,            /* Input from OPA0 resistor ladder tap.    */ \
-    opaOutModeMain,                 /* Main output enabled.                    */ \
-    opaResSelR2eqR1,                /* R2 = R1                                 */ \
-    opaResInMuxOpaIn,               /* Resistor ladder input from OPA1.        */ \
-    DAC_OPA0MUX_OUTPEN_OUT0,        /* Enable alternate output 0.              */ \
-    _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.             */       \
-    _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.        */       \
-    false,                          /* No low pass filter on pos pad.          */ \
-    false,                          /* No low pass filter on neg pad.          */ \
-    false,                          /* No nextout output enabled.              */ \
-    false,                          /* Neg pad disabled.                       */ \
-    false,                          /* Pos pad disabled.                       */ \
-    false,                          /* No shorting of inputs.                  */ \
-    false,                          /* Rail-to-rail input enabled.             */ \
-    true,                           /* Use factory calibrated opamp offset.    */ \
-    0                               /* Opamp offset value (not used).          */ \
-  }
+/** Configuration of OPA2 in three-opamp differential receiver mode. */
+#define OPA_INIT_DIFF_RECEIVER_OPA2                                             \
+{                                                                               \
+  opaNegSelResTap,                /* Input from resistor ladder tap.         */ \
+  opaPosSelResTapOpa0,            /* Input from OPA0 resistor ladder tap.    */ \
+  opaOutModeMain,                 /* Main output enabled.                    */ \
+  opaResSelR2eqR1,                /* R2 = R1                                 */ \
+  opaResInMuxOpaIn,               /* Resistor ladder input from OPA1.        */ \
+  DAC_OPA0MUX_OUTPEN_OUT0,        /* Enable alternate output 0.              */ \
+  _DAC_BIASPROG_BIASPROG_DEFAULT, /* Default bias setting.                   */ \
+  _DAC_BIASPROG_HALFBIAS_DEFAULT, /* Default half-bias setting.              */ \
+  false,                          /* No low pass filter on pos pad.          */ \
+  false,                          /* No low pass filter on neg pad.          */ \
+  false,                          /* No nextout output enabled.              */ \
+  false,                          /* Neg pad disabled.                       */ \
+  false,                          /* Pos pad disabled.                       */ \
+  false,                          /* No shorting of inputs.                  */ \
+  false,                          /* Rail-to-rail input enabled.             */ \
+  true,                           /* Use factory calibrated opamp offset.    */ \
+  0                               /* Opamp offset value (not used).          */ \
+}
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -540,4 +566,4 @@ void      OPAMP_Enable(DAC_TypeDef *dac, OPAMP_TypeDef opa, const OPAMP_Init_Typ
 #endif
 
 #endif /* defined( OPAMP_PRESENT ) && ( OPAMP_COUNT == 1 ) */
-#endif /* __EM_DAC_H */
+#endif /* __SILICON_LABS_EM_OPAMP_H__ */

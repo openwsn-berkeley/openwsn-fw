@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_wdog.h
  * @brief Watchdog (WDOG) peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,23 +17,27 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_WDOG_H
-#define __EM_WDOG_H
+
+
+#ifndef __SILICON_LABS_EM_WDOG_H__
+#define __SILICON_LABS_EM_WDOG_H__
+
+#include "em_device.h"
+#if defined(WDOG_COUNT) && (WDOG_COUNT > 0)
 
 #include <stdbool.h>
-#include "em_device.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -119,17 +122,18 @@ typedef struct
 } WDOG_Init_TypeDef;
 
 /** Suggested default config for WDOG init structure. */
-#define WDOG_INIT_DEFAULT                                                                        \
-  { true,               /* Start watchdog when init done */                                      \
-    false,              /* WDOG not counting during debug halt */                                \
-    false,              /* WDOG not counting when in EM2 */                                      \
-    false,              /* WDOG not counting when in EM3 */                                      \
-    false,              /* EM4 can be entered */                                                 \
-    false,              /* Do not block disabling LFRCO/LFXO in CMU */                           \
-    false,              /* Do not lock WDOG configuration (if locked, reset needed to unlock) */ \
-    wdogClkSelULFRCO,   /* Select 1kHZ WDOG oscillator */                                        \
-    wdogPeriod_256k     /* Set longest possible timeout period */                                \
-  }
+#define WDOG_INIT_DEFAULT                                                                      \
+{                                                                                              \
+  true,               /* Start watchdog when init done */                                      \
+  false,              /* WDOG not counting during debug halt */                                \
+  false,              /* WDOG not counting when in EM2 */                                      \
+  false,              /* WDOG not counting when in EM3 */                                      \
+  false,              /* EM4 can be entered */                                                 \
+  false,              /* Do not block disabling LFRCO/LFXO in CMU */                           \
+  false,              /* Do not lock WDOG configuration (if locked, reset needed to unlock) */ \
+  wdogClkSelULFRCO,   /* Select 1kHZ WDOG oscillator */                                        \
+  wdogPeriod_256k     /* Set longest possible timeout period */                                \
+}
 
 
 /*******************************************************************************
@@ -148,4 +152,5 @@ void WDOG_Lock(void);
 }
 #endif
 
-#endif /* __EM_WDOG_H */
+#endif /* defined(WDOG_COUNT) && (WDOG_COUNT > 0) */
+#endif /* __SILICON_LABS_EM_WDOG_H__ */

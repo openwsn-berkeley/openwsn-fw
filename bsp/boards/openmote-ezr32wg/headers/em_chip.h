@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_chip.h
  * @brief Chip Initialization API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,20 +17,21 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
-#ifndef __EM_CHIP_H
-#define __EM_CHIP_H
+
+#ifndef __SILICON_LABS_EM_CHIP_H__
+#define __SILICON_LABS_EM_CHIP_H__
 
 #include "em_device.h"
 #include "em_system.h"
@@ -55,7 +55,7 @@ extern "C" {
  * @brief
  *   Chip initialization routine for revision errata workarounds
  *
- * This init function will configure the EFM32 device to a state where it is
+ * This init function will configure the device to a state where it is
  * as similar as later revisions as possible, to improve software compatibility
  * with newer parts. See the device specific errata for details.
  *****************************************************************************/
@@ -153,18 +153,32 @@ __STATIC_INLINE void CHIP_Init(void)
   }
 #endif
 
-#if defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY)
+#if defined(_EFM32_GIANT_FAMILY)
   uint32_t                    rev;
   SYSTEM_ChipRevision_TypeDef chipRev;
 
   rev = *(volatile uint32_t *)(0x0FE081FC);
   SYSTEM_ChipRevisionGet(&chipRev);
 
-  if (((rev >> 24) == 16) && (chipRev.minor == 3))
+  if (((rev >> 24) > 15) && (chipRev.minor == 3))
   {
     /* This fixes an issue with the LFXO on high temperatures. */
     *(volatile uint32_t*)0x400C80C0 =
                       ( *(volatile uint32_t*)0x400C80C0 & ~(1<<6) ) | (1<<4);
+  }
+#endif
+
+#if defined(_EFM32_HAPPY_FAMILY)
+  uint32_t rev;
+  rev = *(volatile uint32_t *)(0x0FE081FC);
+
+  if ((rev >> 24) <= 129)
+  {
+    /* This fixes a mistaken internal connection between PC0 and PC4 */
+    /* This disables an internal pulldown on PC4 */
+    *(volatile uint32_t*)(0x400C6018) = (1 << 26) | (5 << 0);
+    /* This disables an internal LDO test signal driving PC4 */
+    *(volatile uint32_t*)(0x400C80E4) &= ~(1 << 24);
   }
 #endif
 }
@@ -176,4 +190,4 @@ __STATIC_INLINE void CHIP_Init(void)
 }
 #endif
 
-#endif /* __EM_CHIP_H */
+#endif /* __SILICON_LABS_EM_CHIP_H__ */

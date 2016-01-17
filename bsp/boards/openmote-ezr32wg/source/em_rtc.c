@@ -1,11 +1,10 @@
 /***************************************************************************//**
- * @file
+ * @file em_rtc.c
  * @brief Real Time Counter (RTC) Peripheral API
- * @author Energy Micro AS
- * @version 3.20.0
+ * @version 4.2.1
  *******************************************************************************
  * @section License
- * <b>(C) Copyright 2012 Energy Micro AS, http://www.energymicro.com</b>
+ * <b>(C) Copyright 2015 Silicon Labs, http://www.silabs.com</b>
  *******************************************************************************
  *
  * Permission is granted to anyone to use this software for any purpose,
@@ -18,21 +17,24 @@
  *    misrepresented as being the original software.
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Energy Micro AS has no
- * obligation to support this Software. Energy Micro AS is providing the
+ * DISCLAIMER OF WARRANTY/LIMITATION OF REMEDIES: Silicon Labs has no
+ * obligation to support this Software. Silicon Labs is providing the
  * Software "AS IS", with no express or implied warranties of any kind,
  * including, but not limited to, any implied warranties of merchantability
  * or fitness for any particular purpose or warranties against infringement
  * of any proprietary rights of a third party.
  *
- * Energy Micro AS will not be liable for any consequential, incidental, or
+ * Silicon Labs will not be liable for any consequential, incidental, or
  * special damages, or any other relief, or for any claim by any third party,
  * arising from your use of this Software.
  *
  ******************************************************************************/
+
 #include "em_rtc.h"
+#if defined(RTC_COUNT) && (RTC_COUNT > 0)
+
 #include "em_assert.h"
-#include "em_bitband.h"
+#include "em_bus.h"
 
 /***************************************************************************//**
  * @addtogroup EM_Library
@@ -79,7 +81,7 @@
  *   Bitmask corresponding to SYNCBUSY register defined bits, indicating
  *   registers that must complete any ongoing synchronization.
  ******************************************************************************/
-__STATIC_INLINE void RTC_Sync(uint32_t mask)
+__STATIC_INLINE void regSync(uint32_t mask)
 {
   /* Avoid deadlock if modifying the same register twice when freeze mode is */
   /* activated. */
@@ -118,18 +120,18 @@ uint32_t RTC_CompareGet(unsigned int comp)
   /* Initialize selected compare value */
   switch (comp)
   {
-  case 0:
-    ret = RTC->COMP0;
-    break;
+    case 0:
+      ret = RTC->COMP0;
+      break;
 
-  case 1:
-    ret = RTC->COMP1;
-    break;
+    case 1:
+      ret = RTC->COMP1;
+      break;
 
-  default:
-    /* Unknown compare register selected */
-    ret = 0;
-    break;
+    default:
+      /* Unknown compare register selected */
+      ret = 0;
+      break;
   }
 
   return ret;
@@ -145,7 +147,7 @@ uint32_t RTC_CompareGet(unsigned int comp)
  *   low frequency domain. If the same register is modified before a previous
  *   update has completed, this function will stall until the previous
  *   synchronization has completed. This only applies to the Gecko Family, see
- *   comment in the RTC_Sync() internal function call.
+ *   comment in the regSync() internal function call.
  *
  * @param[in] comp
  *   Compare register to set, either 0 or 1
@@ -160,33 +162,34 @@ void RTC_CompareSet(unsigned int comp, uint32_t value)
   uint32_t          syncbusy;
 #endif
 
-  EFM_ASSERT(RTC_COMP_REG_VALID(comp) &&
-             ((value & ~(_RTC_COMP0_COMP0_MASK >> _RTC_COMP0_COMP0_SHIFT)) == 0));
+  EFM_ASSERT(RTC_COMP_REG_VALID(comp)
+             && ((value & ~(_RTC_COMP0_COMP0_MASK
+                            >> _RTC_COMP0_COMP0_SHIFT)) == 0));
 
   /* Initialize selected compare value */
   switch (comp)
   {
-  case 0:
-    compReg = &(RTC->COMP0);
+    case 0:
+      compReg = &(RTC->COMP0);
 #if defined(_EFM32_GECKO_FAMILY)
-    syncbusy = RTC_SYNCBUSY_COMP0;
+      syncbusy = RTC_SYNCBUSY_COMP0;
 #endif
-    break;
+      break;
 
-  case 1:
-    compReg = &(RTC->COMP1);
+    case 1:
+      compReg = &(RTC->COMP1);
 #if defined(_EFM32_GECKO_FAMILY)
-    syncbusy = RTC_SYNCBUSY_COMP1;
+      syncbusy = RTC_SYNCBUSY_COMP1;
 #endif
-    break;
+      break;
 
-  default:
-    /* Unknown compare register selected, abort */
-    return;
+    default:
+      /* Unknown compare register selected, abort */
+      return;
   }
 #if defined(_EFM32_GECKO_FAMILY)
   /* LF register about to be modified require sync. busy check */
-  RTC_Sync(syncbusy);
+  regSync(syncbusy);
 #endif
 
   *compReg = value;
@@ -202,7 +205,7 @@ void RTC_CompareSet(unsigned int comp, uint32_t value)
  *   requires synchronization into the low frequency domain. If this register is
  *   modified before a previous update to the same register has completed, this
  *   function will stall until the previous synchronization has completed. This
- *   only applies to the Gecko Family, see comment in the RTC_Sync() internal
+ *   only applies to the Gecko Family, see comment in the regSync() internal
  *   function call.
  *
  * @param[in] enable
@@ -212,10 +215,17 @@ void RTC_Enable(bool enable)
 {
 #if defined(_EFM32_GECKO_FAMILY)
   /* LF register about to be modified require sync. busy check */
-  RTC_Sync(RTC_SYNCBUSY_CTRL);
+  regSync(RTC_SYNCBUSY_CTRL);
 #endif
 
-  BITBAND_Peripheral(&(RTC->CTRL), _RTC_CTRL_EN_SHIFT, (unsigned int) enable);
+  BUS_RegBitWrite(&(RTC->CTRL), _RTC_CTRL_EN_SHIFT, enable);
+
+#if defined(_EFM32_GECKO_FAMILY)
+  /* Wait for CTRL to be updated before returning, because calling code may
+     depend upon that the CTRL register is updated after this function has
+     returned. */
+  regSync(RTC_SYNCBUSY_CTRL);
+#endif
 }
 
 
@@ -283,7 +293,7 @@ void RTC_FreezeEnable(bool enable)
  *   synchronization into the low frequency domain. If this register is
  *   modified before a previous update to the same register has completed, this
  *   function will stall until the previous synchronization has completed. This
- *   only applies to the Gecko Family, see comment in the RTC_Sync() internal
+ *   only applies to the Gecko Family, see comment in the regSync() internal
  *   function call.
  *
  * @param[in] init
@@ -318,7 +328,7 @@ void RTC_Init(const RTC_Init_TypeDef *init)
 
 #if defined(_EFM32_GECKO_FAMILY)
   /* LF register about to be modified require sync. busy check */
-  RTC_Sync(RTC_SYNCBUSY_CTRL);
+  regSync(RTC_SYNCBUSY_CTRL);
 #endif
 
   RTC->CTRL = tmp;
@@ -339,6 +349,13 @@ void RTC_Reset(void)
   RTC->COMP1  = _RTC_COMP1_RESETVALUE;
   RTC->IEN    = _RTC_IEN_RESETVALUE;
   RTC->IFC    = _RTC_IFC_RESETVALUE;
+
+#if defined(_EFM32_GECKO_FAMILY)
+  /* Wait for CTRL, COMP0 and COMP1 to be updated before returning, because the
+     calling code may depend upon that the register values are updated after
+     this function has returned. */
+  regSync(RTC_SYNCBUSY_CTRL | RTC_SYNCBUSY_COMP0 | RTC_SYNCBUSY_COMP1);
+#endif
 }
 
 
@@ -357,3 +374,4 @@ void RTC_CounterReset(void)
 
 /** @} (end addtogroup RTC) */
 /** @} (end addtogroup EM_Library) */
+#endif /* defined(RTC_COUNT) && (RTC_COUNT > 0) */
