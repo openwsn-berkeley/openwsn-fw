@@ -1170,6 +1170,9 @@ void sixtop_notifyReceiveCommand(
                 case IANA_6TOP_CMD_CLEAR:
                     container  = *((uint8_t*)(pkt->payload)+ptr);
                     frameID = container;
+                    schedule_removeAllCells(frameID,
+                                            &(pkt->l2_nextORpreviousHop));
+                    code = IANA_6TOP_RC_SUCCESS;
                     break;
                 }
             }
@@ -1228,9 +1231,7 @@ void sixtop_notifyReceiveCommand(
 #endif
                     break;
                 case SIX_WAIT_CLEARRESPONSE:
-                    frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
-                    schedule_removeAllCells(frameID,
-                      &(pkt->l2_nextORpreviousHop));
+                  
                     break;
                 default:
                     code = IANA_6TOP_RC_ERR;

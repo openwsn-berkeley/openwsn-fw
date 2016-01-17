@@ -506,15 +506,17 @@ void schedule_removeAllCells(
     uint8_t        slotframeID,
     open_addr_t*   previousHop
     ){
+    uint8_t i;
     
     // remove all entries in schedule with previousHop address
-    
-    // update the nextActivateSlot, currentScheduleEntry ....
-    
-    INTERRUPT_DECLARATION();
-    DISABLE_INTERRUPTS();
-    
-    ENABLE_INTERRUPTS();
+    for(i=0;i<MAXACTIVESLOTS;i++){
+        if (packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),previousHop)){
+           schedule_removeActiveSlot(
+              schedule_vars.scheduleBuf[i].slotOffset,
+              previousHop
+           );
+        }
+    }
 }
 
 scheduleEntry_t* schedule_getCurrentScheduleEntry(){
