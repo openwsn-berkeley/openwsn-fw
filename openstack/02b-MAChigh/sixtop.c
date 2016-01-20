@@ -1262,6 +1262,7 @@ uint8_t sixtop_getCelllist(
     DISABLE_INTERRUPTS();
     
     if (frameID != SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE){
+        ENABLE_INTERRUPTS();
         return 0;
     }
     
