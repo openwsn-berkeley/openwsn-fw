@@ -111,18 +111,18 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
    //XV -poipoi we want to check if the source address prefix is the same as destination prefix
    if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {
          // same prefix use 64B address
-         sam = IPHC_SAM_ELIDED;
+         sam = IPHC_SAM_64B;
          dam = IPHC_DAM_64B;
          p_dest = &temp_dest_mac64b;      
-         p_src  = NULL; 
+         p_src  = &temp_src_mac64b; 
    } else {
      //not the same prefix. so the packet travels to another network
      //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
      if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
-          sam = IPHC_SAM_ELIDED;
+          sam = IPHC_SAM_128B;
           dam = IPHC_DAM_128B;
           p_dest = &(msg->l3_destinationAdd);
-          p_src = NULL;
+          p_src = &(msg->l3_sourceAdd);
      } else {
          // this is DIO, source address elided, multicast bit is set
           sam = IPHC_SAM_ELIDED;
