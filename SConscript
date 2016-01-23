@@ -259,20 +259,22 @@ elif env['toolchain']=='armgcc':
         env.Append(CCFLAGS       = '-mfpu=fpv4-sp-d16')
         env.Append(CCFLAGS       = '-mfloat-abi=softfp')
         env.Append(CCFLAGS       = '-DEZR32WG330F256R63=1')
-            
+
         # assembler
         env.Replace(AS           = 'arm-none-eabi-as')
         env.Append(ASFLAGS       = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -c -x assembler-with-cpp ')
         env.Append(ASFLAGS       = '-DEZR32WG330F256R63=1')
+        
         # linker
         env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/openmote-ezr32wg/GCC/ezr32wg.ld')
         env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
         env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
         
-
-        env.Append(LINKFLAGS     = '-mfpu=fpv4-sp-d16 -mfloat-abi=softfp --specs=nano.specs')
-        env.Append(LINKFLAGS     = '-lgcc -lc -lnosys')
-
+        env.Append(LINKFLAGS     = '-mfpu=fpv4-sp-d16 -mfloat-abi=softfp  --specs=nosys.specs')
+        #--specs=nano.specs
+        #env.Append(LINKFLAGS     = '-lgcc -lc -lnosys')
+        env.Append(LINKFLAGS     = '-Wl,--start-group -lgcc -lc -lg -lm -lnosys -Wl,--end-group')
+        
         # object manipulation
         env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
         env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')

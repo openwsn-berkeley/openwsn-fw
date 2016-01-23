@@ -13,11 +13,26 @@
 #include "uart.h"
 #include "board.h"
 #include "debugpins.h"
+#include "em_usart.h"
+#include "em_cmu.h"
+#include "em_gpio.h"
 
 //=========================== defines =========================================
 
-#define PIN_UART_RXD            GPIO_PIN_0 // PA0 is UART RX
-#define PIN_UART_TXD            GPIO_PIN_1 // PA1 is UART TX
+#define UART_IRQ_NAME    USART1_RX_IRQHandler         /* USART IRQ Handler */
+#define UART_CLK         cmuClock_USART1              /* HFPER Clock */
+#define UART_IRQn        USART1_RX_IRQn               /* IRQ number */
+#define UART_UART        USART1                       /* UART instance */
+#define UART_TX          USART_Tx                     /* Set TX to USART_Tx */
+#define UART_RX          USART_Rx                     /* Set RX to USART_Rx */
+#define UART_LOCATION    USART_ROUTE_LOCATION_LOC2    /* Location of of the USART I/O pins */
+#define UART_TXPORT      gpioPortD                    /* USART transmission port */
+#define UART_TXPIN       7                            /* USART transmission pin */
+#define UART_RXPORT      gpioPortD                    /* USART reception port */
+#define UART_RXPIN       6                            /* USART reception pin */
+#define UART_USART       1                            /* Includes em_usart.h */
+#define UART_PERIPHERAL_ENABLE()
+
 
 //=========================== variables =======================================
 
@@ -37,36 +52,113 @@ static void uart_isr_private(void);
 void uart_init() { 
    // reset local variables
    memset(&uart_vars,0,sizeof(uart_vars_t));
-   
-   // Disable UART function
+   /* Enable peripheral clocks */
+   CMU_ClockEnable(cmuClock_HFPER, TRUE);
+   /* Configure GPIO pins */
+   CMU_ClockEnable(cmuClock_GPIO, TRUE);
 
-   // Disable all UART module interrupts
+   /* To avoid false start, configure output as high */
+   GPIO_PinModeSet(UART_TXPORT, UART_TXPIN, gpioModePushPull, 1);
+   GPIO_PinModeSet(UART_RXPORT, UART_RXPIN, gpioModeInput, 0);
 
-   // Set IO clock as UART clock source
+  #if defined(UART_USART)
+    USART_TypeDef           *usart = UART_UART;
+    USART_InitAsync_TypeDef init   = USART_INITASYNC_DEFAULT;
 
-   // Map UART signals to the correct GPIO pins and configure them as
-   // hardware controlled. GPIO-A pin 0 and 1
+    /* Enable DK RS232/UART switch */
+    UART_PERIPHERAL_ENABLE();
 
+    CMU_ClockEnable(UART_CLK, TRUE);
 
-   // Configure the UART for 115,200, 8-N-1 operation.
-   // This function uses SysCtrlClockGet() to get the system clock
-   // frequency.  This could be also be a variable or hard coded value
-   // instead of a function call.
+    /* Configure USART for basic async operation */
+    init.enable = usartDisable;
+    USART_InitAsync(usart, &init);
 
+    /* Enable pins at correct UART/USART location. */
+    #if defined( USART_ROUTEPEN_RXPEN )
+    usart->ROUTEPEN = USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_TXPEN;
+    usart->ROUTELOC0 = ( usart->ROUTELOC0 &
+                         ~( _USART_ROUTELOC0_TXLOC_MASK
+                            | _USART_ROUTELOC0_RXLOC_MASK ) )
+                       | ( UART_TX_LOCATION << _USART_ROUTELOC0_TXLOC_SHIFT )
+                       | ( UART_RX_LOCATION << _USART_ROUTELOC0_RXLOC_SHIFT );
+    #else
+    usart->ROUTE = USART_ROUTE_RXPEN | USART_ROUTE_TXPEN | UART_LOCATION;
+    #endif
 
-   // Enable UART hardware
+    /* Clear previous RX interrupts */
+    USART_IntClear(UART_UART, USART_IF_RXDATAV);
+    NVIC_ClearPendingIRQ(UART_IRQn);
 
+    /* Enable RX interrupts */
+    USART_IntEnable(UART_UART, USART_IF_RXDATAV);
+    NVIC_EnableIRQ(UART_IRQn);
 
-   // Disable FIFO as we only one 1byte buffer
+    /* Finally enable it */
+    USART_Enable(usart, usartEnable);
 
+  #else
+    //low energy UART
+    LEUART_TypeDef      *leuart = UART_UART;
+    LEUART_Init_TypeDef init    = LEUART_INIT_DEFAULT;
 
-   // Raise interrupt at end of tx (not by fifo)
+    /* Enable DK LEUART/RS232 switch */
+    UART_PERIPHERAL_ENABLE();
 
+    /* Enable CORE LE clock in order to access LE modules */
+    CMU_ClockEnable(cmuClock_CORELE, TRUE);
 
-   // Register isr in the nvic and enable isr at the nvic
+  #if defined(UART_VCOM)
+    /* Select HFXO/2 for LEUARTs (and wait for it to stabilize) */
+  #if defined(_CMU_LFCLKSEL_LFB_HFCORECLKLEDIV2)
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_CORELEDIV2);
+  #else
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
+  #endif
+  #else
+    /* Select LFXO for LEUARTs (and wait for it to stabilize) */
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
+  #endif
 
+    CMU_ClockEnable(UART_CLK, true);
 
-   // Enable the UART0 interrupt
+    /* Do not prescale clock */
+    CMU_ClockDivSet(UART_CLK, cmuClkDiv_1);
+
+    /* Configure LEUART */
+    init.enable = leuartDisable;
+  #if defined(UART_VCOM)
+    init.baudrate = 115200;
+  #endif
+    LEUART_Init(leuart, &init);
+    /* Enable pins at default location */
+    #if defined( LEUART_ROUTEPEN_RXPEN )
+    leuart->ROUTEPEN = USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_TXPEN;
+    leuart->ROUTELOC0 = ( leuart->ROUTELOC0 &
+                         ~( _LEUART_ROUTELOC0_TXLOC_MASK
+                            | _LEUART_ROUTELOC0_RXLOC_MASK ) )
+                       | ( UART_TX_LOCATION << _LEUART_ROUTELOC0_TXLOC_SHIFT )
+                       | ( UART_RX_LOCATION << _LEUART_ROUTELOC0_RXLOC_SHIFT );
+    #else
+    leuart->ROUTE = LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN | UART_LOCATION;
+    #endif
+
+    /* Clear previous RX interrupts */
+    LEUART_IntClear(UART_UART, LEUART_IF_RXDATAV);
+    NVIC_ClearPendingIRQ(UART_IRQn);
+
+    /* Enable RX interrupts */
+    LEUART_IntEnable(UART_UART, LEUART_IF_RXDATAV);
+    NVIC_EnableIRQ(UART_IRQn);
+
+    /* Finally enable it */
+    LEUART_Enable(leuart, leuartEnable);
+  #endif
+
+  #if !defined(__CROSSWORKS_ARM) && defined(__GNUC__)
+    setvbuf(stdout, NULL, _IONBF, 0);   /*Set unbuffered mode for stdout (newlib)*/
+  #endif
+
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {

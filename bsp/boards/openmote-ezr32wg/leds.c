@@ -27,8 +27,8 @@
 
 void leds_init() {
 	//enable clock for this peripheral
-	CMU_ClockEnable(cmuClock_HFPER, true);
-	CMU_ClockEnable(cmuClock_GPIO, true);
+	CMU_ClockEnable(cmuClock_HFPER, TRUE);
+	CMU_ClockEnable(cmuClock_GPIO, TRUE);
 
 	//set the led pins to output.
 	GPIO_PinModeSet(gpioPortF, LEDS_PORT_ERROR, gpioModePushPull, 0);
