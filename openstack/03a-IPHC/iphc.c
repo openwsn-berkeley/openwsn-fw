@@ -63,15 +63,10 @@ owerror_t iphc_sendFromForwarding(
     uint8_t           fw_SendOrfw_Rcv
     ) {
     open_addr_t  temp_dest_prefix;
-    open_addr_t  temp_dest_mac64b;
-    open_addr_t* p_dest;
-    open_addr_t* p_src;  
+    open_addr_t  temp_dest_mac64b; 
     open_addr_t  temp_src_prefix;
     open_addr_t  temp_src_mac64b; 
     uint8_t      sam;
-    uint8_t      m;
-    uint8_t      dam;
-    uint8_t      nh;
     // take ownership over the packet
     msg->owner = COMPONENT_IPHC;
    
@@ -98,25 +93,15 @@ owerror_t iphc_sendFromForwarding(
     //XV -poipoi we want to check if the source address prefix is the same as destination prefix
     if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {
         sam = IPHC_SAM_64B;    // no ipinip 6loRH if in the same prefix
-        p_src = &temp_src_mac64b;
-        dam = IPHC_DAM_64B;
-        p_dest = &temp_dest_mac64b;     
     } else {
         //not the same prefix. so the packet travels to another network
         //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
         if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
             // ip in ip will be presented
             sam = IPHC_SAM_128B;
-            dam = IPHC_DAM_128B; //in the IPHC (inner header)
-            p_dest = &(msg->l3_destinationAdd);
-            p_src  = &(msg->l3_sourceAdd);
         } else {
             // this is DIO, source address elided, multicast bit is set
             sam = IPHC_SAM_ELIDED;
-            m   = IPHC_M_YES;
-            dam = IPHC_DAM_ELIDED;
-            p_dest = &(msg->l3_destinationAdd);
-            p_src = &(msg->l3_sourceAdd);
         }
     }
     // decrement the packet's hop limit
@@ -509,9 +494,9 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
     uint8_t         rh3_index;
     uint8_t         page;
     uint8_t         ipinip_length;
-    uint8_t         i;
    
     uint8_t         extention_header_length;
+    rh3_index                        = 0;
     ipv6_outer_header->header_length = 0;
     ipv6_inner_header->header_length = 0;
 
@@ -525,7 +510,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
     
     if ((temp_8b&PAGE_DISPATCH_TAG) == PAGE_DISPATCH_TAG){
         page = temp_8b&PAGE_DISPATCH_NUM; 
-        ipv6_header->header_length += sizeof(uint8_t);
+        ipv6_outer_header->header_length += sizeof(uint8_t);
     } else {
         page = 0;
     }
@@ -559,14 +544,14 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                       switch(ipinip_length-1){
                       case 16:
                            // this is source address 
-                           packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length+previousLen)),ADDR_128B,&ipv6_header->src,OW_BIG_ENDIAN);
-                           ipv6_header->header_length += 16*sizeof(uint8_t);
+                           packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_outer_header->header_length)),ADDR_128B,&ipv6_outer_header->src,OW_BIG_ENDIAN);
+                           ipv6_outer_header->header_length += 16*sizeof(uint8_t);
                            break;
                       case 8:
                            // this is source address 
-                           packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_header->header_length+previousLen)),ADDR_64B,temp_addr_64b,OW_BIG_ENDIAN);
-                           ipv6_header->header_length += 8*sizeof(uint8_t);
-                           packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),temp_addr_64b,&ipv6_header->src);
+                           packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_outer_header->header_length)),ADDR_64B,&temp_addr_64b,OW_BIG_ENDIAN);
+                           ipv6_outer_header->header_length += 8*sizeof(uint8_t);
+                           packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&temp_addr_64b,&ipv6_outer_header->src);
                            break;
                       default:
                            // do not support other length yet and destination address will be in RH3 or IPHC
@@ -595,7 +580,6 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
     //======================= 3. IPv6 extention header =========================
     if(page==1){
         extention_header_length = 0;
-        rh3_index = 0;
         temp_8b = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length);
         while ((temp_8b&FORMAT_6LORH_MASK) == CRITICAL_6LORH){
             lorh_type = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length+1);
@@ -1057,11 +1041,11 @@ uint8_t iphc_retrieveIPv6HopByHopHeader(
        }
        // check FLAG K to get senderRannk
        if ((temp_8b & K_FLAG)==0){
-           rpl_option->senderRank = *((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen);
-           rpl_option->senderRank = ((rpl_option->senderRank)<<8)+*((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen+1);
+           rpl_option->senderRank = *((uint8_t*)(msg->payload)+length);
+           rpl_option->senderRank = ((rpl_option->senderRank)<<8)+*((uint8_t*)(msg->payload)+length+1);
            length += sizeof(uint16_t);
        } else{
-           rpl_option->senderRank = *((uint8_t*)(msg->payload)+ hopbyhop_header->headerlen);
+           rpl_option->senderRank = *((uint8_t*)(msg->payload)+length);
            rpl_option->senderRank = rpl_option->senderRank*256;
            length  += sizeof(uint8_t);
        }
@@ -1070,7 +1054,7 @@ uint8_t iphc_retrieveIPv6HopByHopHeader(
           COMPONENT_IPHC,
           ERR_6LOWPAN_UNSUPPORTED,
           (errorparameter_t)14,
-          (errorparameter_t)hopbyhop_header->nextHeader
+          (errorparameter_t)type
        );
    }
    return length;

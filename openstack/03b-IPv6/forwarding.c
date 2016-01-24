@@ -32,7 +32,8 @@ owerror_t forwarding_send_internal_RoutingTable(
 owerror_t forwarding_send_internal_SourceRouting(
    OpenQueueEntry_t*    msg,
    ipv6_header_iht*     ipv6_outer_header,
-   ipv6_header_iht*     ipv6_inner_header
+   ipv6_header_iht*     ipv6_inner_header,
+   rpl_option_ht*       rpl_option
 );
 void      forwarding_createRplOption(
    rpl_option_ht*       rpl_option,
@@ -318,7 +319,14 @@ void forwarding_receive(
             }
         } else {
             // source routing header present
-            if (forwarding_send_internal_SourceRouting(msg,ipv6_outer_header,ipv6_inner_header)==E_FAIL) {
+            if (
+                forwarding_send_internal_SourceRouting(
+                    msg,
+                    ipv6_outer_header,
+                    ipv6_inner_header,
+                    rpl_option
+                )==E_FAIL
+            ) {
                 // log error
                 openserial_printError(
                     COMPONENT_FORWARDING,
@@ -414,12 +422,12 @@ http://tools.ietf.org/html/rfc6554#page-9.
 owerror_t forwarding_send_internal_SourceRouting(
     OpenQueueEntry_t* msg,
     ipv6_header_iht*  ipv6_outer_header,
-    ipv6_header_iht*  ipv6_inner_header
+    ipv6_header_iht*  ipv6_inner_header,
+    rpl_option_ht*    rpl_option
     ) {
     uint8_t              temp_8b;
     uint8_t              type;
     uint8_t              size;
-    uint8_t              sizeUnit;
     uint8_t              hlen;
     open_addr_t          firstAddr;
     open_addr_t          temp_prefix;
@@ -433,7 +441,7 @@ owerror_t forwarding_send_internal_SourceRouting(
     temp_8b = *((uint8_t*)(msg->payload)+hlen);
     type    = *((uint8_t*)(msg->payload)+hlen+1);
     
-    if (temp_8b & RH3_6LOTH_SIZE_MASK == 0 && type<=RH3_6LOTH_TYPE_4){
+    if ((temp_8b & RH3_6LOTH_SIZE_MASK) == 0 && type<=RH3_6LOTH_TYPE_4){
         hlen += 2;
         // get the first hop in first RH3
         firstAddr.type = ADDR_128B;
@@ -447,7 +455,7 @@ owerror_t forwarding_send_internal_SourceRouting(
             temp_8b = *((uint8_t*)(msg->payload)+hlen);
             type    = *((uint8_t*)(msg->payload)+hlen+1);
             if (
-                temp_8b & FORMAT_6LORH_MASK == CRITICAL_6LORH &&
+                (temp_8b & FORMAT_6LORH_MASK) == CRITICAL_6LORH &&
                 type<=RH3_6LOTH_TYPE_4
             ) {
                 hlen += 2;
@@ -464,7 +472,7 @@ owerror_t forwarding_send_internal_SourceRouting(
                     break;
                 case 2:
                     // add this address to firstAddr
-                    memcpy(&firstfAddr.addr_128b[12],&msg->payload[0],4);
+                    memcpy(&firstAddr.addr_128b[12],&msg->payload[0],4);
                     hlen += 4;
                     break;
                 case 3:
@@ -482,7 +490,7 @@ owerror_t forwarding_send_internal_SourceRouting(
                     );
                 }
                 packetfunctions_tossHeader(msg,hlen);
-                size = temp8_b & RH3_6LOTH_SIZE_MASK;
+                size = temp_8b & RH3_6LOTH_SIZE_MASK;
                 if (size >0){
                     size -= 1;
                     // add header for the second RH3
@@ -531,7 +539,7 @@ owerror_t forwarding_send_internal_SourceRouting(
         msg,
         ipv6_outer_header,
         ipv6_inner_header,
-        &rpl_option,
+        rpl_option,
         &ipv6_outer_header->flow_label,
         PCKTFORWARD
     );
