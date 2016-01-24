@@ -207,7 +207,7 @@ Described in http://tools.ietf.org/html/rfc6553#section-3
 BEGIN_PACK
 typedef struct {
    uint8_t    optionType;
-   uint8_t    flags;         ///< 000ORF00
+   uint8_t    flags;         ///< 000ORFIK
    uint8_t    rplInstanceID; ///< instanceid
    uint16_t   senderRank;    ///< RPL rank of the sender of the packet
 } rpl_option_ht;
