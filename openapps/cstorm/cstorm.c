@@ -11,6 +11,7 @@
 #include "IEEE802154E.h"
 #include "idmanager.h"
 #include "schedule.h"
+#include "idmanager.h"
 
 //=========================== defines =========================================
 
@@ -23,7 +24,7 @@ static const uint8_t dst_addr[]   = {
 
 #define PACKET_PER_SLOTFRAME  3
 #define SLOTDURATION_MS      15 // 15ms per slot
-
+#define LAST_HOP_MOTE        7 //the last hop mote id
 //=========================== variables =======================================
 
 cstorm_vars_t cstorm_vars;
@@ -43,6 +44,7 @@ void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 
 void cstorm_init(void) {
    
+
    // register to OpenCoAP module
    cstorm_vars.desc.path0len              = sizeof(cstorm_path0)-1;
    cstorm_vars.desc.path0val              = (uint8_t*)(&cstorm_path0);
@@ -65,6 +67,9 @@ void cstorm_init(void) {
       cstorm_timer_cb
    );
    
+   if (idmanager_getMyID(ADDR_64B)->addr_64b[7]!=LAST_HOP_MOTE) {
+	   cstorm_stop();
+   } //only start cstorm at node 3.
 }
 
 uint16_t cstorm_getPeriod() {
@@ -251,6 +256,9 @@ void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 }
 
 void cstorm_generateNewTraffic() {
+	if (idmanager_getMyID(ADDR_64B)->addr_64b[7]!=LAST_HOP_MOTE) {
+		  return;
+	}
 //   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / PACKET_PER_SLOTFRAME; 
    // generate next packet with random interval
    cstorm_vars.period = SLOTFRAME_LENGTH * SLOTDURATION_MS / (3+openrandom_get16b()%3); 

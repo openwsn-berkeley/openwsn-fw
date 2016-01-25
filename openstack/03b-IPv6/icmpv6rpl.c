@@ -118,13 +118,13 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dao_target.prefixLength = 0;
    
    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT+(openrandom_get16b()&0xff);
-   icmpv6rpl_vars.timerIdDAO                = opentimers_start(
+/*icmpv6rpl_vars.timerIdDAO                = opentimers_start(
                                                 icmpv6rpl_vars.daoPeriod,
                                                 TIMER_PERIODIC,
                                                 TIME_MS,
                                                 icmpv6rpl_timer_DAO_cb
                                              );
-   
+  */
 }
 
 void  icmpv6rpl_writeDODAGid(uint8_t* dodagid) {

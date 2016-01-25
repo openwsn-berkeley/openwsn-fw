@@ -631,6 +631,9 @@ void sixtop_checkSchedule() {
 	int16_t pid_result;
     open_addr_t neighborAddress;
     uint8_t asn[5];
+    uint32_t  ticsOn;
+    uint32_t  ticsTotal;
+
     memset(&neighborAddress,0,sizeof(open_addr_t));
     if (
         neighbors_getPreferredParentEui64(&neighborAddress)==FALSE || \
@@ -645,14 +648,16 @@ void sixtop_checkSchedule() {
     pid_result = pid_compute_packetInQueue();
 #endif
     // debug info
-    if(idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02) {
+    if(idmanager_getMyID(ADDR_64B)->addr_64b[7] >= 0x02) {
         ieee154e_getAsn(asn);
+        ieee154e_getStats(&ticsOn, &ticsTotal);
+
 #ifdef PID_CELL_USAGE
-        // slotframe, numOfslot(Tx), numOfpacketInQueue, cstorm traffic
-        printf("%d, %d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),cstorm_getPeriod(),pid_result);
+        //moteid, slotframe, numOfslot(Tx), numOfpacketInQueue, cstorm traffic
+        printf("%d, %d, %d, %d, %d, %d, %d, %d, %d, %f\n",idmanager_getMyID(ADDR_64B)->addr_64b[7],(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),cstorm_getPeriod(),pid_result,ticsOn,ticsTotal, float(ticsOn)/float(ticsTotal));
 #else
-        // slotframe, numOfslot(Tx), numOfpacketInQueue, sent packet, cstorm traffic, pid_error
-        printf("%d, %d, %d, %d, %d, %d\n",(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),schedule_getSentPacket(),cstorm_getPeriod(),pid_result);
+        //moteid, slotframe, numOfslot(Tx), numOfpacketInQueue, sent packet, cstorm traffic, pid_error
+        printf("%d, %d, %d, %d, %d, %d, %d, %d, %d, %f\n",idmanager_getMyID(ADDR_64B)->addr_64b[7],(asn[0]+256*asn[1]+65536*asn[2])/schedule_getFrameLength(),schedule_getNumOfActiveSlot(),openqueue_getNumOfPakcetToParent(),schedule_getSentPacket(),cstorm_getPeriod(),pid_result,ticsOn,ticsTotal,(float)ticsOn/(float)ticsTotal);
 #endif
     }
 #ifdef PID_CELL_USAGE

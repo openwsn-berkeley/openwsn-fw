@@ -276,6 +276,8 @@ void               ieee154e_init(void);
 PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
+
+void               ieee154e_getStats(uint32_t * ticsOn, uint32_t * ticsTotal);
 void               ieee154e_setIsAckEnabled(bool isEnabled);
 void               ieee154e_setSingleChannel(uint8_t channel);
 void               ieee154e_setIsSecurityEnabled(bool isEnabled);

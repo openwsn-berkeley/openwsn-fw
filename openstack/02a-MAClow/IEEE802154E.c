@@ -1811,6 +1811,12 @@ port_INLINE void ieee154e_getAsn(uint8_t* array) {
    array[4]         =  ieee154e_vars.asn.byte4;
 }
 
+port_INLINE void ieee154e_getStats(uint32_t * ticsOn, uint32_t * ticsTotal){
+   *ticsOn = ieee154e_stats.numTicsOn;
+   *ticsTotal = ieee154e_stats.numTicsTotal;
+}
+
+
 port_INLINE uint16_t ieee154e_getTimeCorrection() {
     int16_t returnVal;
     

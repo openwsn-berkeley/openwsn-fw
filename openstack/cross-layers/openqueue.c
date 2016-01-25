@@ -165,7 +165,8 @@ uint16_t openqueue_getNumOfPakcetToParent(){
           // do not count the packet received
           (
           openqueue_vars.queue[i].creator == COMPONENT_CSTORM || \
-          openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES
+          openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES || \
+          openqueue_vars.queue[i].creator == COMPONENT_FORWARDING
           ) && \
           // only the count pakcet ready to be sent
           openqueue_vars.queue[i].owner == COMPONENT_SIXTOP_TO_IEEE802154E && \
