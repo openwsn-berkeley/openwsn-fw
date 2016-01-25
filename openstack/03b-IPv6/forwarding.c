@@ -427,111 +427,202 @@ owerror_t forwarding_send_internal_SourceRouting(
     ) {
     uint8_t              temp_8b;
     uint8_t              type;
+    uint8_t              next_type;
     uint8_t              size;
+    uint8_t              next_size;
     uint8_t              hlen;
     open_addr_t          firstAddr;
+    open_addr_t          nextAddr;
     open_addr_t          temp_prefix;
     open_addr_t          temp_addr64;
     
     memcpy(&msg->l3_destinationAdd,&ipv6_inner_header->dest,sizeof(open_addr_t));
-    memcpy(&msg->l3_sourceAdd,&ipv6_outer_header->src,sizeof(open_addr_t));
+    memcpy(&msg->l3_sourceAdd,&ipv6_inner_header->src,sizeof(open_addr_t));
+    // initial first Address by compression reference
+    firstAddr.type = ADDR_128B;
+    if (ipv6_outer_header->src.type != ADDR_NONE){
+        if (rpl_option->rplInstanceID == 0){
+            icmpv6rpl_getRPLDODAGid(&firstAddr.addr_128b[0]);
+        }
+    } else {
+        memcpy(&firstAddr,&ipv6_outer_header->src,sizeof(open_addr_t));
+    }
+    
     
     hlen = 0;
     
     temp_8b = *((uint8_t*)(msg->payload)+hlen);
     type    = *((uint8_t*)(msg->payload)+hlen+1);
     
-    if ((temp_8b & RH3_6LOTH_SIZE_MASK) == 0 && type<=RH3_6LOTH_TYPE_4){
+    hlen += 2;
+    // get the first address
+    switch(type){
+    case RH3_6LOTH_TYPE_0:
+        memcpy(&firstAddr.addr_128b[15],msg->payload+hlen,1);
+        hlen += 1;
+        break;
+    case RH3_6LOTH_TYPE_1:
+        memcpy(&firstAddr.addr_128b[14],msg->payload+hlen,2);
         hlen += 2;
-        // get the first hop in first RH3
-        firstAddr.type = ADDR_128B;
-        memcpy(&firstAddr.addr_128b[0],&msg->payload[0],16);
+        break;
+    case RH3_6LOTH_TYPE_2:
+        memcpy(&firstAddr.addr_128b[12],msg->payload+hlen,4);
+        hlen += 4;
+        break;
+    case RH3_6LOTH_TYPE_3:
+        memcpy(&firstAddr.addr_128b[8],msg->payload+hlen,8);
+        hlen += 8;
+        break;
+    case RH3_6LOTH_TYPE_4:
+        memcpy(&firstAddr.addr_128b[0],msg->payload+hlen,16);
         hlen += 16;
-        packetfunctions_ip128bToMac64b(&firstAddr,&temp_prefix,&temp_addr64);
-        if (
-            packetfunctions_sameAddress(&temp_prefix,idmanager_getMyID(ADDR_PREFIX)) &&
-            packetfunctions_sameAddress(&temp_addr64,idmanager_getMyID(ADDR_64B))
-        ){
-            temp_8b = *((uint8_t*)(msg->payload)+hlen);
-            type    = *((uint8_t*)(msg->payload)+hlen+1);
+        break;
+    }
+    
+    packetfunctions_ip128bToMac64b(&firstAddr,&temp_prefix,&temp_addr64);
+    if (
+        packetfunctions_sameAddress(&temp_prefix,idmanager_getMyID(ADDR_PREFIX)) &&
+        packetfunctions_sameAddress(&temp_addr64,idmanager_getMyID(ADDR_64B))
+    ){
+        size = temp_8b & RH3_6LOTH_SIZE_MASK;
+        if (size > 0){
+            // there are at least 2 entries in the header, 
+            // the router removes the first entry and decrements the Size (by 1) 
+            size -= 1;
+            packetfunctions_tossHeader(msg,hlen);
+            packetfunctions_reserveHeaderSize(msg,2);
+            msg->payload[0] = CRITICAL_6LORH | size;
+            msg->payload[1] = type;
+            // get next hop
+            memcpy(&nextAddr,&firstAddr,sizeof(open_addr_t));
+            switch(type){
+            case RH3_6LOTH_TYPE_0:
+                memcpy(&nextAddr.addr_128b[15],msg->payload+2,1);
+                break;
+            case RH3_6LOTH_TYPE_1:
+                memcpy(&nextAddr.addr_128b[14],msg->payload+2,2);
+                break;
+            case RH3_6LOTH_TYPE_2:
+                memcpy(&nextAddr.addr_128b[12],msg->payload+2,4);
+                break;
+            case RH3_6LOTH_TYPE_3:
+                memcpy(&nextAddr.addr_128b[8],msg->payload+2,8);
+                break;
+            case RH3_6LOTH_TYPE_4:
+                memcpy(&nextAddr.addr_128b[0],msg->payload+2,16);
+                break;
+            }
+            packetfunctions_ip128bToMac64b(
+                &nextAddr,
+                &temp_prefix,
+                &msg->l2_nextORpreviousHop
+            );
+        } else {
+            temp_8b   = *((uint8_t*)(msg->payload)+hlen);
+            next_type = *((uint8_t*)(msg->payload)+hlen+1);
             if (
                 (temp_8b & FORMAT_6LORH_MASK) == CRITICAL_6LORH &&
-                type<=RH3_6LOTH_TYPE_4
+                next_type<=RH3_6LOTH_TYPE_4
             ) {
-                hlen += 2;
-                switch(type){
-                case 0:
-                    // add this address to firstAddr
-                    memcpy(&firstAddr.addr_128b[15],&msg->payload[0],1);
-                    hlen += 1;
-                    break;
-                case 1:
-                    // add this address to firstAddr
-                    memcpy(&firstAddr.addr_128b[14],&msg->payload[0],2);
+                // there is another RH3-6LoRH following, check the type
+                if (next_type >= type){
+                    packetfunctions_tossHeader(msg,hlen);
+                    // get next hop
+                    memcpy(&nextAddr,&firstAddr,sizeof(open_addr_t));
+                    switch(next_type){
+                    case RH3_6LOTH_TYPE_0:
+                        memcpy(&nextAddr.addr_128b[15],msg->payload+2,1);
+                        break;
+                    case RH3_6LOTH_TYPE_1:
+                        memcpy(&nextAddr.addr_128b[14],msg->payload+2,2);
+                        break;
+                    case RH3_6LOTH_TYPE_2:
+                        memcpy(&nextAddr.addr_128b[12],msg->payload+2,4);
+                        break;
+                    case RH3_6LOTH_TYPE_3:
+                        memcpy(&nextAddr.addr_128b[8],msg->payload+2,8);
+                        break;
+                    case RH3_6LOTH_TYPE_4:
+                        memcpy(&nextAddr.addr_128b[0],msg->payload+2,16);
+                        break;
+                    }
+                    packetfunctions_ip128bToMac64b(
+                        &nextAddr,
+                        &temp_prefix,
+                        &msg->l2_nextORpreviousHop
+                    );
+                } else {
                     hlen += 2;
-                    break;
-                case 2:
-                    // add this address to firstAddr
-                    memcpy(&firstAddr.addr_128b[12],&msg->payload[0],4);
-                    hlen += 4;
-                    break;
-                case 3:
-                    // add this address to firstAddr
-                    memcpy(&firstAddr.addr_128b[8],&msg->payload[0],8);
-                    hlen += 8;
-                    break;
-                default:
-                    // wrong type
-                    openserial_printError(
-                        COMPONENT_IPHC,
-                        ERR_6LOWPAN_UNSUPPORTED,
-                        (errorparameter_t)17,
-                        (errorparameter_t)(type)
+                    switch(next_type){
+                    case RH3_6LOTH_TYPE_0:
+                        memcpy(&firstAddr.addr_128b[15],msg->payload+hlen,1);
+                        hlen += 1;
+                        break;
+                    case RH3_6LOTH_TYPE_1:
+                        memcpy(&firstAddr.addr_128b[14],msg->payload+hlen,2);
+                        hlen += 2;
+                        break;
+                    case RH3_6LOTH_TYPE_2:
+                        memcpy(&firstAddr.addr_128b[12],msg->payload+hlen,4);
+                        hlen += 4;
+                        break;
+                    case RH3_6LOTH_TYPE_3:
+                        memcpy(&firstAddr.addr_128b[8],msg->payload+hlen,8);
+                        hlen += 8;
+                        break;
+                    }
+                    next_size = temp_8b & RH3_6LOTH_SIZE_MASK;
+                    packetfunctions_tossHeader(msg,hlen);
+                    if (next_size>0){
+                        next_size -= 1;
+                        packetfunctions_reserveHeaderSize(msg,2);
+                        msg->payload[0] = CRITICAL_6LORH | next_size;
+                        msg->payload[1] = next_type;
+                    }
+                    // add first address
+                    switch(type){
+                    case RH3_6LOTH_TYPE_0:
+                        packetfunctions_reserveHeaderSize(msg,1);
+                        msg->payload[0] = firstAddr.addr_128b[15];
+                        break;
+                    case RH3_6LOTH_TYPE_1:
+                        packetfunctions_reserveHeaderSize(msg,2);
+                        memcpy(&msg->payload[0],&firstAddr.addr_128b[14],2);
+                        break;
+                    case RH3_6LOTH_TYPE_2:
+                        packetfunctions_reserveHeaderSize(msg,4);
+                        memcpy(&msg->payload[0],&firstAddr.addr_128b[12],4);
+                        break;
+                    case RH3_6LOTH_TYPE_3:
+                        packetfunctions_reserveHeaderSize(msg,8);
+                        memcpy(&msg->payload[0],&firstAddr.addr_128b[8],8);
+                        break;
+                    case RH3_6LOTH_TYPE_4:
+                        packetfunctions_reserveHeaderSize(msg,16);
+                        memcpy(&msg->payload[0],&firstAddr.addr_128b[0],16);
+                        break;
+                    }
+                    packetfunctions_reserveHeaderSize(msg,2);
+                    msg->payload[0] = CRITICAL_6LORH | 0;
+                    msg->payload[1] = type;
+                    packetfunctions_ip128bToMac64b(
+                        &firstAddr,
+                        &temp_prefix,
+                        &msg->l2_nextORpreviousHop
                     );
                 }
-                packetfunctions_tossHeader(msg,hlen);
-                size = temp_8b & RH3_6LOTH_SIZE_MASK;
-                if (size >0){
-                    size -= 1;
-                    // add header for the second RH3
-                    packetfunctions_reserveHeaderSize(msg,2);
-                    msg->payload[0] = CRITICAL_6LORH | size;
-                    msg->payload[1] = type;
-                }
-                // add the first RH3, type is 4, size is 0
-                packetfunctions_reserveHeaderSize(msg,2);
-                msg->payload[0] = CRITICAL_6LORH | 0;
-                msg->payload[1] = RH3_6LOTH_TYPE_4;
-                packetfunctions_ip128bToMac64b(
-                    &firstAddr,
-                    &temp_prefix,
-                    &msg->l2_nextORpreviousHop
-                );
             } else {
-                // this is the last hop before dest
+                // there is no next RH3-6loRH, remove current one
                 packetfunctions_tossHeader(msg,hlen);
-                packetfunctions_ip128bToMac64b(
-                    &msg->l3_destinationAdd,
-                    &temp_prefix,
-                    &msg->l2_nextORpreviousHop
-                );
             }
-        } else {
-            // log error
-            openserial_printError(
-                COMPONENT_IPHC,
-                ERR_6LOWPAN_UNSUPPORTED,
-                (errorparameter_t)16,
-                (errorparameter_t)(temp_addr64.addr_64b[7])
-            );
         }
     } else {
-        // should no happen
+        // log error
         openserial_printError(
             COMPONENT_IPHC,
             ERR_6LOWPAN_UNSUPPORTED,
-            (errorparameter_t)15,
-            (errorparameter_t)(temp_8b)
+            (errorparameter_t)16,
+            (errorparameter_t)(temp_addr64.addr_64b[7])
         );
     }
     // send to next lower layer
