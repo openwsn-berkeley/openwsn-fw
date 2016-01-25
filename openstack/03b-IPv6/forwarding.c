@@ -97,7 +97,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     // sent from upper layer. This is done here as send_internal() is used by
     // forwarding of packets as well which carry a hlim. This value is required
     // to be set to a value as the following function can decrement it.
-    ipv6_outer_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
+    ipv6_inner_header.hop_limit     = IPHC_DEFAULT_HOP_LIMIT;
 
     // create the RPL hop-by-hop option
 
