@@ -124,6 +124,10 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
             dam = IPHC_DAM_128B;
             p_dest = &(msg->l3_destinationAdd);
             p_src = &(msg->l3_sourceAdd);
+            
+            ipv6_outer_header.src.type = ADDR_128B;
+            memcpy(&ipv6_outer_header.src,p_src,sizeof(open_addr_t));
+            ipv6_outer_header.hop_limit = IPHC_DEFAULT_HOP_LIMIT;
         } else {
            // this is DIO, source address elided, multicast bit is set
             sam = IPHC_SAM_ELIDED;
@@ -247,7 +251,7 @@ void forwarding_receive(
         )
         &&
         ipv6_outer_header->next_header!=IANA_IPv6ROUTE
-    ) { 
+    ) {
         if (ipv6_outer_header->src.type != ADDR_NONE){
             packetfunctions_tossHeader(msg,ipv6_outer_header->header_length);
         }
@@ -398,6 +402,10 @@ owerror_t forwarding_send_internal_RoutingTable(
          (errorparameter_t)0
       );
       return E_FAIL;
+   }
+   
+   if (ipv6_outer_header->src.type != ADDR_NONE){
+      packetfunctions_tossHeader(msg,ipv6_outer_header->header_length);
    }
    
    // send to next lower layer
@@ -653,6 +661,7 @@ owerror_t forwarding_send_internal_SourceRouting(
         RH3_length = ipv6_outer_header->hopByhop_option-msg->payload;
         memcpy(&RH3_copy[0],msg->payload,RH3_length);
         packetfunctions_tossHeader(msg,RH3_length);
+        
         // retrieve hop-by-hop header (includes RPL option)
         rpi_length = iphc_retrieveIPv6HopByHopHeader(
                           msg,
@@ -667,7 +676,7 @@ owerror_t forwarding_send_internal_SourceRouting(
       
         flags = rpl_option->flags;
         senderRank = rpl_option->senderRank;
-        if ((flags & O_FLAG)!=1){
+        if ((flags & O_FLAG)!=O_FLAG){
             // wrong direction
             // log error
             openserial_printError(

@@ -129,7 +129,16 @@ owerror_t iphc_sendFromForwarding(
         // same network, IPinIP is elided
     } else {
         if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
-            if (packetfunctions_sameAddress(&(msg->l3_sourceAdd),(open_addr_t*)dagroot)){
+            if (
+                (
+                  ipv6_outer_header->src.type == ADDR_NONE &&
+                  packetfunctions_sameAddress(&(msg->l3_sourceAdd),(open_addr_t*)dagroot)
+                ) || 
+                (
+                  ipv6_outer_header->src.type != ADDR_NONE &&
+                  packetfunctions_sameAddress(&(ipv6_outer_header->src),(open_addr_t*)dagroot)
+                 )
+            ){
                 // hop limit
                 packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
                 *((uint8_t*)(msg->payload)) = ipv6_outer_header->hop_limit;
@@ -552,9 +561,9 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
     //======================= 2. IPv6 extention header =========================
     if(page==1){
         extention_header_length = 0;
-        temp_8b = *((uint8_t*)(msg->payload)+*page_length);
+        temp_8b = *((uint8_t*)(msg->payload)+*page_length+extention_header_length);
         while ((temp_8b&FORMAT_6LORH_MASK) == CRITICAL_6LORH){
-            lorh_type = *((uint8_t*)(msg->payload)+*page_length+1);
+            lorh_type = *((uint8_t*)(msg->payload)+*page_length+extention_header_length+1);
             if(lorh_type<=RH3_6LOTH_TYPE_4){
                 if (rh3_index == MAXNUM_RH3){
                     openserial_printError(
@@ -597,7 +606,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                                extention_header_length);
             } else {
                 if (lorh_type==5){
-                    if (ipv6_outer_header->routing_header == NULL){ 
+                    if (ipv6_outer_header->routing_header[0] == NULL){
                         ipv6_outer_header->next_header = IANA_IPv6HOPOPT;
                     }
                     ipv6_outer_header->hopByhop_option = (uint8_t*)(msg->payload) + \
@@ -633,16 +642,16 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
     // ====================== 3. 6LoRH IPinIP ==================================
     // ip header is always at the beginning if not being elided
     if (page == 1){
-          temp_8b = *(uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length);
+          temp_8b = *(uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length+extention_header_length);
           if ((temp_8b & FORMAT_6LORH_MASK) == ELECTIVE_6LoRH){
               // this is an elective 6LoRH
               ipinip_length = temp_8b & IPINIP_LEN_6LORH_MASK;
               ipv6_outer_header->header_length += 1;
-              temp_8b = *(uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length);
+              temp_8b = *(uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length+extention_header_length);
               if (temp_8b == IPINIP_TYPE_6LORH){
                   // this is IpinIP 6LoRH
                   ipv6_outer_header->header_length += 1;
-                  ipv6_outer_header->hop_limit = *(uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length);
+                  ipv6_outer_header->hop_limit = *(uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length+extention_header_length);
                   ipv6_outer_header->header_length += 1;
                   // destination address maybe is the first address in RH3 6LoRH OR dest adress in IPHC, reset first
                   // update destination address if necessary after the processing
@@ -660,12 +669,12 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                       switch(ipinip_length-1){
                       case 16:
                            // this is source address 
-                           packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length)),ADDR_128B,&ipv6_outer_header->src,OW_BIG_ENDIAN);
+                           packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length+extention_header_length)),ADDR_128B,&ipv6_outer_header->src,OW_BIG_ENDIAN);
                            ipv6_outer_header->header_length += 16*sizeof(uint8_t);
                            break;
                       case 8:
                            // this is source address 
-                           packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length)),ADDR_64B,&temp_addr_64b,OW_BIG_ENDIAN);
+                           packetfunctions_readAddress(((uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length+extention_header_length)),ADDR_64B,&temp_addr_64b,OW_BIG_ENDIAN);
                            ipv6_outer_header->header_length += 8*sizeof(uint8_t);
                            packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),&temp_addr_64b,&ipv6_outer_header->src);
                            break;
