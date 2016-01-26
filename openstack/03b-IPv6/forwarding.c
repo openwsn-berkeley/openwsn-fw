@@ -247,7 +247,10 @@ void forwarding_receive(
         )
         &&
         ipv6_outer_header->next_header!=IANA_IPv6ROUTE
-    ) {
+    ) { 
+        if (ipv6_outer_header->src.type != ADDR_NONE){
+            packetfunctions_tossHeader(msg,ipv6_outer_header->header_length);
+        }
         // this packet is for me, no source routing header // toss iphc inner header
         packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
         // indicate received packet to upper layer
@@ -404,6 +407,8 @@ owerror_t forwarding_send_internal_RoutingTable(
       ipv6_inner_header,
       rpl_option,
       flow_label,
+      NULL,  // no rh3
+      0,
       fw_SendOrfw_Rcv
    );
 }
@@ -436,6 +441,15 @@ owerror_t forwarding_send_internal_SourceRouting(
     open_addr_t          temp_prefix;
     open_addr_t          temp_addr64;
     
+    uint8_t              rpi_length;
+    uint8_t              flags;
+    uint16_t             senderRank;
+    
+    uint8_t              RH3_copy[127];
+    uint8_t              RH3_length;
+    
+    memset(&RH3_copy[0],0,127);
+    RH3_length = 0;
     memcpy(&msg->l3_destinationAdd,&ipv6_inner_header->dest,sizeof(open_addr_t));
     memcpy(&msg->l3_sourceAdd,&ipv6_inner_header->src,sizeof(open_addr_t));
     
@@ -630,6 +644,58 @@ owerror_t forwarding_send_internal_SourceRouting(
             (errorparameter_t)(temp_addr64.addr_64b[7])
         );
     }
+    // copy RH3s before toss them
+    if (
+        ipv6_outer_header->src.type != ADDR_NONE &&
+        ipv6_outer_header->hopByhop_option != NULL
+    ){
+        // check the length of RH3s
+        RH3_length = ipv6_outer_header->hopByhop_option-msg->payload;
+        memcpy(&RH3_copy[0],msg->payload,RH3_length);
+        packetfunctions_tossHeader(msg,RH3_length);
+        // retrieve hop-by-hop header (includes RPL option)
+        rpi_length = iphc_retrieveIPv6HopByHopHeader(
+                          msg,
+                          rpl_option
+                     );
+     
+        // toss the headers
+        packetfunctions_tossHeader(
+            msg,
+            rpi_length
+        );
+      
+        flags = rpl_option->flags;
+        senderRank = rpl_option->senderRank;
+        if ((flags & O_FLAG)!=1){
+            // wrong direction
+            // log error
+            openserial_printError(
+                COMPONENT_FORWARDING,
+                ERR_WRONG_DIRECTION,
+                (errorparameter_t)flags,
+                (errorparameter_t)senderRank
+            );
+        }
+        if (senderRank > neighbors_getMyDAGrank()){
+            // loop detected
+            // set flag
+            rpl_option->flags |= R_FLAG;
+            // log error
+            openserial_printError(
+                COMPONENT_FORWARDING,
+                ERR_LOOP_DETECTED,
+                (errorparameter_t) senderRank,
+                (errorparameter_t) neighbors_getMyDAGrank()
+            );
+        }
+        forwarding_createRplOption(rpl_option, rpl_option->flags);
+        // toss the IP in IP 6LoRH
+        packetfunctions_tossHeader(msg, ipv6_outer_header->header_length);
+    } else {
+        RH3_length = 0;
+    }
+    
     // send to next lower layer
     return iphc_sendFromForwarding(
         msg,
@@ -637,6 +703,8 @@ owerror_t forwarding_send_internal_SourceRouting(
         ipv6_inner_header,
         rpl_option,
         &ipv6_outer_header->flow_label,
+        &RH3_copy[0],
+        RH3_length,
         PCKTFORWARD
     );
 }

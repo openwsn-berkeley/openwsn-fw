@@ -61,6 +61,8 @@ owerror_t iphc_sendFromForwarding(
     ipv6_header_iht*  ipv6_inner_header,
     rpl_option_ht*    rpl_option,
     uint32_t*         flow_label,
+    uint8_t*          rh3_copy,
+    uint8_t           rh3_length,
     uint8_t           fw_SendOrfw_Rcv
     ) {
     open_addr_t  temp_dest_prefix;
@@ -165,6 +167,12 @@ owerror_t iphc_sendFromForwarding(
         packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE
     ){
         iphc_prependIPv6HopByHopHeader(msg, msg->l4_protocol, rpl_option);
+    }
+    
+    // copy RH3s back if length > 0
+    if (rh3_length > 0){
+        packetfunctions_reserveHeaderSize(msg,rh3_length);
+        memcpy(&msg->payload[0],&rh3_copy[0],rh3_length);
     }
     
     // if there are 6LoRH in the packet, add page dispatch no.1
@@ -558,7 +566,9 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                     return;
                 }
                 if (rh3_index==0){
-                    ipv6_outer_header->next_header = IANA_IPv6ROUTE;
+                    if (ipv6_outer_header->hopByhop_option == NULL){
+                        ipv6_outer_header->next_header = IANA_IPv6ROUTE;
+                    }
                     ipv6_outer_header->routing_header[rh3_index] = (uint8_t*)(msg->payload) + \
                                     *page_length + \
                                     extention_header_length;
@@ -587,23 +597,25 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                                extention_header_length);
             } else {
                 if (lorh_type==5){
-                   ipv6_outer_header->next_header = IANA_IPv6HOPOPT;
-                   ipv6_outer_header->hopByhop_option = (uint8_t*)(msg->payload) + \
+                    if (ipv6_outer_header->routing_header == NULL){ 
+                        ipv6_outer_header->next_header = IANA_IPv6HOPOPT;
+                    }
+                    ipv6_outer_header->hopByhop_option = (uint8_t*)(msg->payload) + \
                                    *page_length + \
                                    extention_header_length;
-                   switch(temp_8b & (I_FLAG | K_FLAG)){
-                   case 0:
-                       extention_header_length += 2+3;
-                       break;
-                   case 1:
-                   case 2:
-                       extention_header_length += 2+2;
-                       break;
-                   case 3:
-                       extention_header_length += 2+1;
-                       break;
-                   }
-                   temp_8b = *(uint8_t*)((msg->payload) + \
+                    switch(temp_8b & (I_FLAG | K_FLAG)){
+                    case 0:
+                        extention_header_length += 2+3;
+                        break;
+                    case 1:
+                    case 2:
+                        extention_header_length += 2+2;
+                        break;
+                    case 3:
+                        extention_header_length += 2+1;
+                        break;
+                    }
+                    temp_8b = *(uint8_t*)((msg->payload) + \
                                *page_length + \
                                extention_header_length);
                } else{

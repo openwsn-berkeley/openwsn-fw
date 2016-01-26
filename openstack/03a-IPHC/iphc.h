@@ -224,6 +224,8 @@ owerror_t     iphc_sendFromForwarding(
    ipv6_header_iht*     ipv6_inner_header, 
    rpl_option_ht*       rpl_option, 
    uint32_t*            flow_label,
+   uint8_t*             rh3_copy,
+   uint8_t              rh3_length,
    uint8_t              fw_SendOrfw_Rcv
 );
 owerror_t     iphc_sendFromBridge(OpenQueueEntry_t *msg);
