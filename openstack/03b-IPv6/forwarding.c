@@ -438,6 +438,7 @@ owerror_t forwarding_send_internal_SourceRouting(
     
     memcpy(&msg->l3_destinationAdd,&ipv6_inner_header->dest,sizeof(open_addr_t));
     memcpy(&msg->l3_sourceAdd,&ipv6_inner_header->src,sizeof(open_addr_t));
+    
     // initial first Address by compression reference
     firstAddr.type = ADDR_128B;
     if (ipv6_outer_header->src.type != ADDR_NONE){
@@ -445,9 +446,8 @@ owerror_t forwarding_send_internal_SourceRouting(
             icmpv6rpl_getRPLDODAGid(&firstAddr.addr_128b[0]);
         }
     } else {
-        memcpy(&firstAddr,&ipv6_outer_header->src,sizeof(open_addr_t));
+        memcpy(&firstAddr,&ipv6_inner_header->src,sizeof(open_addr_t));
     }
-    
     
     hlen = 0;
     
@@ -614,6 +614,11 @@ owerror_t forwarding_send_internal_SourceRouting(
             } else {
                 // there is no next RH3-6loRH, remove current one
                 packetfunctions_tossHeader(msg,hlen);
+                packetfunctions_ip128bToMac64b(
+                    &msg->l3_destinationAdd,
+                    &temp_prefix,
+                    &msg->l2_nextORpreviousHop
+                );
             }
         }
     } else {

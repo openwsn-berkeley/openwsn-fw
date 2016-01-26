@@ -164,6 +164,13 @@ owerror_t iphc_sendFromForwarding(
         packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE
     ){
         iphc_prependIPv6HopByHopHeader(msg, msg->l4_protocol, rpl_option);
+    }
+    
+    // if there are 6LoRH in the packet, add page dispatch no.1
+    if (
+        (*((uint8_t*)(msg->payload)) & FORMAT_6LORH_MASK) == CRITICAL_6LORH ||
+        (*((uint8_t*)(msg->payload)) & FORMAT_6LORH_MASK) == ELECTIVE_6LoRH
+    ){
         packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
         *((uint8_t*)(msg->payload)) = PAGE_DISPATCH_NO_1;
     }
@@ -536,7 +543,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
         temp_8b = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length);
         while ((temp_8b&FORMAT_6LORH_MASK) == CRITICAL_6LORH){
             lorh_type = *((uint8_t*)(msg->payload)+ipv6_outer_header->header_length+1);
-            if(lorh_type<5){
+            if(lorh_type<=RH3_6LOTH_TYPE_4){
                 if (rh3_index == MAXNUM_RH3){
                     openserial_printError(
                         COMPONENT_IPHC,
