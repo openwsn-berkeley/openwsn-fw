@@ -598,6 +598,9 @@ void openserial_goldenImageCommands(void){
                 sixtop_addORremoveCellByInfo(commandId-8,&neighbor,cellList);
             }
             break;
+       case COMMAND_SET_SLOTDURATION:
+            ieee154e_setSlotDuration(comandParam_16);
+            break;
        default:
            // wrong command ID
            break;

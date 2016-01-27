@@ -73,7 +73,8 @@ enum {
    COMMAND_SET_6P_COUNT          = 11,
    COMMAND_SET_6P_LIST           = 12,
    COMMAND_SET_6P_CLEAR          = 13,
-   COMMAND_MAX                   = 14,
+   COMMAND_SET_SLOTDURATION      = 14,
+   COMMAND_MAX                   = 15,
 };
 
 //=========================== module variables ================================

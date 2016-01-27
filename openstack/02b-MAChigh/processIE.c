@@ -181,14 +181,29 @@ port_INLINE uint8_t processIE_prependTSCHTimeslotIE(OpenQueueEntry_t* pkt){
    uint8_t    len;
    mlme_IE_ht mlme_subHeader;
    
-   len = 0;
-
-   // reserve space for timeslot template ID
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-   // write header
-   *((uint8_t*)(pkt->payload)) = TIMESLOT_TEMPLATE_ID;
+   uint16_t    duration;
    
-   len+=1;
+   len = 0;
+   duration = ieee154e_getSlotDuration();
+   
+   if (duration==328){
+       // reserve space for timeslot template ID
+       packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+       // write header
+       *((uint8_t*)(pkt->payload)) = TIMESLOT_TEMPLATE_ID;
+       len+=1;
+   } else {
+       // reserve space for timeslot template ID
+       packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+       // write header
+       pkt->payload[0] = (uint8_t)(duration & 0x00ff);
+       pkt->payload[1] = (uint8_t)((duration>>8) & 0x00ff);
+       // reserve space for timeslot template ID
+       packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+       // write header
+       *((uint8_t*)(pkt->payload)) = 1;
+       len+=3;
+   }
    
    //===== MLME IE header
    

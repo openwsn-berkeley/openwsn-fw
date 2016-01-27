@@ -145,7 +145,7 @@ enum ieee154e_atomicdurations_enum {
    TsTxOffset                =   70,                  //  2120us
    TsLongGT                  =   36,                  //  1100us
    TsTxAckDelay              =   33,                  //  1000us
-   TsShortGT                 =    7,                  //   500us
+   TsShortGT                 =    9,                  //   500us, The standardlized value for this is 400/2=200us(7ticks). Currectly 7 doesn't work for short packet, change it back to 7 when found the problem.
 #else
    TsTxOffset                =  131,                  //  4000us
    TsLongGT                  =   43,                  //  1300us
@@ -250,6 +250,8 @@ typedef struct {
    bool                      isSecurityEnabled;       // whether security is applied
    // time correction
    int16_t                   timeCorrection;          // store the timeCorrection, prepend and retrieve it inside of frame header
+   
+   uint16_t                  slotDuration;            // 
 } ieee154e_vars_t;
 
 BEGIN_PACK
@@ -282,6 +284,8 @@ void               ieee154e_getAsn(uint8_t* array);
 void               ieee154e_setIsAckEnabled(bool isEnabled);
 void               ieee154e_setSingleChannel(uint8_t channel);
 void               ieee154e_setIsSecurityEnabled(bool isEnabled);
+void               ieee154e_setSlotDuration(uint16_t duration);
+uint16_t           ieee154e_getSlotDuration();
 
 uint16_t           ieee154e_getTimeCorrection(void);
 // events
