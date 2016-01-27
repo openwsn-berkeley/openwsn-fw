@@ -925,6 +925,8 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         }
         
         sixtop_vars.six2six_state = SIX_IDLE;
+        sixtop_vars.handler = SIX_HANDLER_NONE;
+        opentimers_stop(sixtop_vars.timeoutTimerId);
        
         if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
             sixtop_request(
@@ -1188,6 +1190,13 @@ void sixtop_notifyReceiveCommand(
             sixtop_send(response_pkt);
             // update state
             sixtop_vars.six2six_state = SIX_WAIT_RESPONSE_SENDDONE;
+            // arm timeout
+            opentimers_setPeriod(
+                sixtop_vars.timeoutTimerId,
+                TIME_MS,
+                SIX2SIX_TIMEOUT_MS
+            );
+            opentimers_restart(sixtop_vars.timeoutTimerId);
         } else {
             //------ if this is a return code
             // if the code is SUCCESS
@@ -1245,6 +1254,8 @@ void sixtop_notifyReceiveCommand(
                            (errorparameter_t)sixtop_vars.six2six_state);
 #endif
             sixtop_vars.six2six_state = SIX_IDLE;
+            sixtop_vars.handler = SIX_HANDLER_NONE;
+            opentimers_stop(sixtop_vars.timeoutTimerId);
         }
     }
 }
