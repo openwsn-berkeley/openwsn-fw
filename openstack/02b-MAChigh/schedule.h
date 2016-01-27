@@ -27,7 +27,7 @@ The superframe repears over time and can be arbitrarly long.
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 #define NUMSERIALRX          3
-#define NUMSLOTSOFF          1
+#define NUMSLOTSOFF          3
 
 /**
 \brief Maximum number of active slots in a superframe.
