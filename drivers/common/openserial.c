@@ -115,133 +115,127 @@ void openserial_init() {
 }
 
 
-
-owerror_t openserial_printStat(uint8_t type, uint8_t calling_component, uint8_t *buffer, uint8_t length) {
-#ifdef OPENSERIAL_STAT
-   uint8_t  asn[5];
-   uint8_t  i;
-   uint8_t  bufindex;
+owerror_t openserial_push_output_buffer(char *buffer_out, uint8_t buffer_out_length){
+   uint8_t  buf_id;              //the buffer to use
+   uint8_t  buffer_out_index;    //to walk in the buffer to push
 
    INTERRUPT_DECLARATION();
+
+    DISABLE_INTERRUPTS();
+    buf_id = openserial_get_output_buffer(buffer_out_length);
+    if (buf_id >= OPENSERIAL_OUTPUT_NBBUFFERS){
+       //leds_error_toggle();
+       ENABLE_INTERRUPTS();
+       return(E_FAIL);
+    }
+
+    //write the buffer
+    openserial_vars.outputBufFilled[buf_id] = TRUE;
+    outputHdlcOpen(buf_id);
+    for (buffer_out_index=0; buffer_out_index<buffer_out_length; buffer_out_index++){
+       outputHdlcWrite(buf_id, buffer_out[buffer_out_index]);
+    }
+    outputHdlcClose(buf_id);
+
+    ENABLE_INTERRUPTS();
+
+    return E_SUCCESS;
+}
+
+
+
+owerror_t openserial_printStat(uint8_t type, uint8_t calling_component, uint8_t *buffer_in, uint8_t buffer_in_length) {
+#ifndef OPENSERIAL_STAT
+   return(E_SUCCESS);
+#endif
+
+   char     buffer_out[256];     //the message to send
+   uint8_t  buffer_out_length = 0;   //its length
+   uint8_t  asn[5];
+
+   //prepare the headers and the content
+   ieee154e_getAsn(asn);// byte01,byte23,byte4
+   buffer_out[buffer_out_length++] = SERFRAME_MOTE2PC_STAT;
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[0];
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
+   buffer_out[buffer_out_length++] = calling_component;
+   buffer_out[buffer_out_length++] = asn[0];
+   buffer_out[buffer_out_length++] = asn[1];
+   buffer_out[buffer_out_length++] = asn[2];
+   buffer_out[buffer_out_length++] = asn[3];
+   buffer_out[buffer_out_length++] = asn[4];
+   buffer_out[buffer_out_length++] = type;
+
+   //copy the "payload"
+   memcpy(&(buffer_out[buffer_out_length]), buffer_in, buffer_in_length);
+   buffer_out_length += buffer_in_length;
+
 
 #ifdef _DEBUG_OPENSERIAL_
    caller = PRINTSTAT;
 #endif
 
-
-   // retrieve ASN
-   ieee154e_getAsn(asn);// byte01,byte23,byte4
-
-   DISABLE_INTERRUPTS();
-   bufindex = openserial_get_output_buffer(length + 12);
-   if (bufindex >= OPENSERIAL_OUTPUT_NBBUFFERS){
-      //leds_error_toggle();
-      ENABLE_INTERRUPTS();
-      return(E_FAIL);
-   }
-   openserial_vars.outputBufFilled[bufindex] = TRUE;
-
-   outputHdlcOpen(bufindex);
-   outputHdlcWrite(bufindex, SERFRAME_MOTE2PC_STAT);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   outputHdlcWrite(bufindex, calling_component);
-   outputHdlcWrite(bufindex, asn[0]);
-   outputHdlcWrite(bufindex, asn[1]);
-   outputHdlcWrite(bufindex, asn[2]);
-   outputHdlcWrite(bufindex, asn[3]);
-   outputHdlcWrite(bufindex, asn[4]);
-   outputHdlcWrite(bufindex, type);
-   for (i=0;i<length;i++){
-      outputHdlcWrite(bufindex, buffer[i]);
-   }
-   outputHdlcClose(bufindex);
-   ENABLE_INTERRUPTS();
-
-#endif
-
-   return E_SUCCESS;
+   //push the buffer
+   return(openserial_push_output_buffer(buffer_out, buffer_out_length));
 }
 
-owerror_t openserial_printf(uint8_t calling_component, char* buffer, uint8_t length) {
-#ifdef OPENSERIAL_PRINTF
-   uint8_t  i;
-   uint8_t  asn[5];
-   uint8_t  bufindex;
 
-   INTERRUPT_DECLARATION();
+owerror_t openserial_printf(uint8_t calling_component, char* buffer_in, uint8_t buffer_in_length) {
+#ifndef OPENSERIAL_PRINTF
+   return(E_SUCCESS);
+#endif
+
+   char     buffer_out[256];     //the message to send
+   uint8_t  buffer_out_length = 0;   //its length
+  uint8_t  asn[5];
+
+   //prepare the headers  and the content
+   ieee154e_getAsn(asn);// byte01,byte23,byte4
+   buffer_out[buffer_out_length++] = SERFRAME_MOTE2PC_PRINTF;
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[0];
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
+   buffer_out[buffer_out_length++] = calling_component;
+   buffer_out[buffer_out_length++] = asn[0];
+   buffer_out[buffer_out_length++] = asn[1];
+   buffer_out[buffer_out_length++] = asn[2];
+   buffer_out[buffer_out_length++] = asn[3];
+   buffer_out[buffer_out_length++] = asn[4];
+
+   //copy the "payload"
+    memcpy(&(buffer_out[buffer_out_length]), buffer_in, buffer_in_length);
+    buffer_out_length += buffer_in_length;
 
 #ifdef _DEBUG_OPENSERIAL_
    caller = PRINTF;
 #endif
 
-   ieee154e_getAsn(asn);// byte01,byte23,byte4
-
-   DISABLE_INTERRUPTS();
-   bufindex = openserial_get_output_buffer(length + 12);
-   if (bufindex >= OPENSERIAL_OUTPUT_NBBUFFERS){
-      //leds_error_toggle();
-      ENABLE_INTERRUPTS();
-      return(E_FAIL);
-   }
-   openserial_vars.outputBufFilled[bufindex] = TRUE;
-
-   outputHdlcOpen(bufindex);
-   outputHdlcWrite(bufindex, SERFRAME_MOTE2PC_PRINTF);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   outputHdlcWrite(bufindex, calling_component);
-   outputHdlcWrite(bufindex, asn[0]);
-   outputHdlcWrite(bufindex, asn[1]);
-   outputHdlcWrite(bufindex, asn[2]);
-   outputHdlcWrite(bufindex, asn[3]);
-   outputHdlcWrite(bufindex, asn[4]);
-
-   for (i=0;i<length;i++){
-      outputHdlcWrite(bufindex, buffer[i]);
-   }
-   outputHdlcClose(bufindex);
-   ENABLE_INTERRUPTS();
-
-#endif
-   return E_SUCCESS;
+   //push the buffer
+   return(openserial_push_output_buffer(buffer_out, buffer_out_length));
 }
 
 
 
 
-owerror_t openserial_printStatus(uint8_t statusElement,uint8_t* buffer, uint8_t length) {
-   uint8_t i;
-   uint8_t  bufindex;
+owerror_t openserial_printStatus(uint8_t statusElement, uint8_t* buffer_in, uint8_t buffer_in_length) {
+   char     buffer_out[256];     //the message to send
+   uint8_t  buffer_out_length = 0;   //its length
 
-   INTERRUPT_DECLARATION();
-   
-   DISABLE_INTERRUPTS();
+   //prepare the headers  and the content
+   buffer_out[buffer_out_length++] = SERFRAME_MOTE2PC_STATUS;
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[0];
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
+   buffer_out[buffer_out_length++] = statusElement;
+
+   //copy the "payload"
+    memcpy(&(buffer_out[buffer_out_length]), buffer_in, buffer_in_length);
+    buffer_out_length += buffer_in_length;
 
 #ifdef _DEBUG_OPENSERIAL_
    caller = PRINTSTATUS;
 #endif
 
-   bufindex = openserial_get_output_buffer(length + 12);
-   if (bufindex >= OPENSERIAL_OUTPUT_NBBUFFERS){
-      //leds_error_toggle();
-      ENABLE_INTERRUPTS();
-      return(E_FAIL);
-   }
-   openserial_vars.outputBufFilled[bufindex] = TRUE;
-
-   outputHdlcOpen(bufindex);
-   outputHdlcWrite(bufindex, SERFRAME_MOTE2PC_STATUS);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   outputHdlcWrite(bufindex, statusElement);
-   for (i=0;i<length;i++){
-      outputHdlcWrite(bufindex, buffer[i]);
-   }
-   outputHdlcClose(bufindex);
-   ENABLE_INTERRUPTS();
-   
-   return E_SUCCESS;
+   //push the buffer
+   return(openserial_push_output_buffer(buffer_out, buffer_out_length));
 }
 
 owerror_t openserial_printInfoErrorCritical(
@@ -251,111 +245,77 @@ owerror_t openserial_printInfoErrorCritical(
       errorparameter_t arg1,
       errorparameter_t arg2
    ) {
-   uint8_t bufindex;
+   char     buffer_out[256];     //the message to send
+   uint8_t  buffer_out_length = 0;   //its length
 
-   INTERRUPT_DECLARATION();
-
-   DISABLE_INTERRUPTS();
+   //prepare the headers  and the content
+   buffer_out[buffer_out_length++] = severity;
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[0];
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
+   buffer_out[buffer_out_length++] = calling_component;
+   buffer_out[buffer_out_length++] = error_code;
+   buffer_out[buffer_out_length++] = (uint8_t)((arg1 & 0xff00)>>8);
+   buffer_out[buffer_out_length++] = (uint8_t) (arg1 & 0x00ff);
+   buffer_out[buffer_out_length++] = (uint8_t)((arg2 & 0xff00)>>8);
+   buffer_out[buffer_out_length++] = (uint8_t) (arg2 & 0x00ff);
 
 #ifdef _DEBUG_OPENSERIAL_
    caller = PRINTERRORCRIT;
 #endif
 
-   bufindex = openserial_get_output_buffer(9);
-   if (bufindex >= OPENSERIAL_OUTPUT_NBBUFFERS){
-      //leds_error_toggle();
-      ENABLE_INTERRUPTS();
-      return(E_FAIL);
-   }
-   openserial_vars.outputBufFilled[bufindex] = TRUE;
-
-   outputHdlcOpen(bufindex);
-   outputHdlcWrite(bufindex, severity);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   outputHdlcWrite(bufindex, calling_component);
-   outputHdlcWrite(bufindex, error_code);
-   outputHdlcWrite(bufindex, (uint8_t)((arg1 & 0xff00)>>8));
-   outputHdlcWrite(bufindex, (uint8_t) (arg1 & 0x00ff));
-   outputHdlcWrite(bufindex, (uint8_t)((arg2 & 0xff00)>>8));
-   outputHdlcWrite(bufindex, (uint8_t) (arg2 & 0x00ff));
-   outputHdlcClose(bufindex);
-   ENABLE_INTERRUPTS();
-   
-   return E_SUCCESS;
+   //push the buffer
+   return(openserial_push_output_buffer(buffer_out, buffer_out_length));
 }
 
-owerror_t openserial_printData(uint8_t* buffer, uint8_t length) {
-   uint8_t  i;
+
+owerror_t openserial_printData(uint8_t* buffer_in, uint8_t buffer_in_length) {
+   char     buffer_out[256];     //the message to send
+   uint8_t  buffer_out_length = 0;   //its length
    uint8_t  asn[5];
-   INTERRUPT_DECLARATION();
-   uint8_t  bufindex;
    
-   // retrieve ASN
+   //prepare the headers  and the content
    ieee154e_getAsn(asn);// byte01,byte23,byte4
-   
-   DISABLE_INTERRUPTS();
+   buffer_out[buffer_out_length++] = SERFRAME_MOTE2PC_DATA;
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[0];
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
+   buffer_out[buffer_out_length++] = asn[0];
+   buffer_out[buffer_out_length++] = asn[1];
+   buffer_out[buffer_out_length++] = asn[2];
+   buffer_out[buffer_out_length++] = asn[3];
+   buffer_out[buffer_out_length++] = asn[4];
+
+   //copy the "payload"
+   memcpy(&(buffer_out[buffer_out_length]), buffer_in, buffer_in_length);
+   buffer_out_length += buffer_in_length;
+
 #ifdef _DEBUG_OPENSERIAL_
    caller = PRINTDATA;
 #endif
 
-   bufindex = openserial_get_output_buffer(8);
-   if (bufindex >= OPENSERIAL_OUTPUT_NBBUFFERS){
-      //leds_error_toggle();
-      ENABLE_INTERRUPTS();
-      return(E_FAIL);
-   }
-   openserial_vars.outputBufFilled[bufindex] = TRUE;
-
-   outputHdlcOpen(bufindex);
-   outputHdlcWrite(bufindex, SERFRAME_MOTE2PC_DATA);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   outputHdlcWrite(bufindex, asn[0]);
-   outputHdlcWrite(bufindex, asn[1]);
-   outputHdlcWrite(bufindex, asn[2]);
-   outputHdlcWrite(bufindex, asn[3]);
-   outputHdlcWrite(bufindex, asn[4]);
-   for (i=0;i<length;i++){
-      outputHdlcWrite(bufindex, buffer[i]);
-   }
-   outputHdlcClose(bufindex);
-   ENABLE_INTERRUPTS();
-   
-   return E_SUCCESS;
+   //push the buffer
+   return(openserial_push_output_buffer(buffer_out, buffer_out_length));
 }
 
-owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channel) {
-   uint8_t  i;
-   uint8_t  bufindex;
+owerror_t openserial_printPacket(uint8_t* buffer_in, uint8_t buffer_in_length, uint8_t channel) {
+   char     buffer_out[256];     //the message to send
+   uint8_t  buffer_out_length = 0;   //its length
 
-   INTERRUPT_DECLARATION();
-   
-   DISABLE_INTERRUPTS();
+   //prepare the headers  and the content
+   buffer_out[buffer_out_length++] = SERFRAME_MOTE2PC_SNIFFED_PACKET;
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[0];
+   buffer_out[buffer_out_length++] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
+
+   //copy the "payload"
+   memcpy(&(buffer_out[buffer_out_length]), buffer_in, buffer_in_length);
+   buffer_out_length += buffer_in_length;
+   buffer_out[buffer_out_length++] = channel;
+
 #ifdef _DEBUG_OPENSERIAL_
    caller = PRINTPACKET;
 #endif
-   bufindex = openserial_get_output_buffer(length + 12);
-   if (bufindex >= OPENSERIAL_OUTPUT_NBBUFFERS){
-      //leds_error_toggle();
-      ENABLE_INTERRUPTS();
-      return(E_FAIL);
-   }
-   openserial_vars.outputBufFilled[bufindex] = TRUE;
 
-   outputHdlcOpen(bufindex);
-   outputHdlcWrite(bufindex, SERFRAME_MOTE2PC_SNIFFED_PACKET);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   outputHdlcWrite(bufindex, idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   for (i=0;i<length;i++){
-      outputHdlcWrite(bufindex, buffer[i]);
-   }
-   outputHdlcWrite(bufindex, channel);
-   outputHdlcClose(bufindex);
-   
-   ENABLE_INTERRUPTS();
-   
-   return E_SUCCESS;
+   //push the buffer
+   return(openserial_push_output_buffer(buffer_out, buffer_out_length));
 }
 
 owerror_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
@@ -801,8 +761,8 @@ uint8_t openserial_get_output_buffer(uint8_t length){
    else
       length_filled = (uint8_t)256 - openserial_vars.outputBufIdxR[bufindex] + openserial_vars.outputBufIdxW[bufindex];
 
-   //do we have enough space? (pessimistic case: 40% of the chars are escaped + flags (end/start))
-   if (((uint32_t)length * 2) + 2 + length_filled  > (uint32_t)SERIAL_OUTPUT_BUFFER_SIZE){
+   //do we have enough space? (pessimistic case: 50% of the chars are escaped + flags (end/start))
+   if (((uint32_t)length * 1.5) + 2 + length_filled  > (uint32_t)SERIAL_OUTPUT_BUFFER_SIZE){
 
       //the next buffer is also filled -> not anymore space
       if (openserial_vars.outputCurrentR == ((openserial_vars.outputCurrentW + 1) % SERIAL_OUTPUT_BUFFER_SIZE))
