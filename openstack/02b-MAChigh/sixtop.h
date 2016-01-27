@@ -89,6 +89,7 @@ typedef struct {
    six2six_state_t      six2six_state;
    uint8_t              commandID;
    six2six_handler_t    handler;
+   bool                 isResponseEnabled;
 } sixtop_vars_t;
 
 //=========================== prototypes ======================================
@@ -111,6 +112,8 @@ void      task_sixtopNotifReceive(void);
 // debugging
 bool      debugPrint_myDAGrank(void);
 bool      debugPrint_kaPeriod(void);
+// control
+void      sixtop_setIsResponseEnabled(bool isEnabled);
 
 /**
 \}

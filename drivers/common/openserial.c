@@ -601,6 +601,18 @@ void openserial_goldenImageCommands(void){
        case COMMAND_SET_SLOTDURATION:
             ieee154e_setSlotDuration(comandParam_16);
             break;
+       case COMMAND_SET_6PRESPONSE_STATUS:
+            if (comandParam_8 ==1) {
+               sixtop_setIsResponseEnabled(TRUE);
+            } else {
+                if (comandParam_8 == 0) {
+                    sixtop_setIsResponseEnabled(FALSE);
+                } else {
+                    // security only can be 1 or 0 
+                    break;
+                }
+            }
+            break;
        default:
            // wrong command ID
            break;

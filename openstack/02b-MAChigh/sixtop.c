@@ -113,6 +113,7 @@ void sixtop_init() {
    sixtop_vars.mgtTaskCounter     = 0;
    sixtop_vars.kaPeriod           = MAXKAPERIOD;
    sixtop_vars.ebPeriod           = EBPERIOD;
+   sixtop_vars.isResponseEnabled  = TRUE;
    
    sixtop_vars.maintenanceTimerId = opentimers_start(
       sixtop_vars.periodMaintenance,
@@ -595,6 +596,10 @@ bool debugPrint_kaPeriod() {
        sizeof(output)
    );
    return TRUE;
+}
+
+void sixtop_setIsResponseEnabled(bool isEnabled){
+    sixtop_vars.isResponseEnabled = isEnabled;
 }
 
 //=========================== private =========================================
@@ -1186,8 +1191,10 @@ void sixtop_notifyReceiveCommand(
             processIE_prepend_sixtopIE(response_pkt,len);
             // indicate IEs present
             response_pkt->l2_payloadIEpresent = TRUE;
-            // send packet
-            sixtop_send(response_pkt);
+            if (sixtop_vars.isResponseEnabled){
+                // send packet
+                sixtop_send(response_pkt);
+            }
             // update state
             sixtop_vars.six2six_state = SIX_WAIT_RESPONSE_SENDDONE;
             // arm timeout
