@@ -25,7 +25,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_PATCH     0
 
 // golden image version and type
-#define GOLDEN_IMAGE_VERSION      1
+#define GOLDEN_IMAGE_VERSION      2
 // define golden image type: only one can be used
 #define GD_TYPE_ROOT         1 // dagroot
 #define GD_TYPE_SNIFFER      2 // sniffer
@@ -244,6 +244,9 @@ enum {
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
    ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
    ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
+   ERR_SIXTOP_RETURNCODE               = 0x3c, // sixtop return code {0} at sixtop state {1}
+   ERR_SIXTOP_COUNT                    = 0x3d, // there are {0} cells to request mote
+   ERR_SIXTOP_LIST                     = 0x3e, // the cells reserved to request mote contains slot {0} and slot {1}
 };
 
 //=========================== typedef =========================================
@@ -301,9 +304,11 @@ typedef struct {
    uint8_t       l2_numTxAttempts;               // number Tx attempts
    asn_t         l2_asn;                         // at what ASN the packet was Tx'ed or Rx'ed
    uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
-   uint8_t*      l2_scheduleIE_cellObjects;      // pointer to the start of cell Objects in scheduleIE
-   uint8_t       l2_scheduleIE_numOfCells;       // number of cells were going to be scheduled or removed.
-   uint8_t       l2_scheduleIE_frameID;          // frameID in scheduleIE
+   uint8_t*      l2_sixtop_cellObjects;          // pointer to the start of cell Objects in 6P
+   uint8_t       l2_sixtop_numOfCells;           // number of cells were going to be scheduled or removed.
+   uint8_t       l2_sixtop_frameID;              // frameID in 6P
+   uint8_t       l2_sixtop_requestCommand;       // request Command in 6P
+   uint8_t       l2_sixtop_returnCode;           // return code in 6P
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_IEListPresent;               //did have IE field?
