@@ -109,6 +109,10 @@ uint8_t otf_reserve_agressive_for(OpenQueueEntry_t* msg){
    nbCells_curr   = schedule_getNbCellsWithTrack(msg->l2_track, &(msg->l2_nextORpreviousHop));
    nbCells_req    = openqueue_count_track(msg->l2_track);
 
+   //the current allocation is correct
+   if (nbCells_curr >= nbCells_req)
+      return(0);
+
 #ifdef _DEBUG_OTF_
    char str[150];
    sprintf(str, "OTF required=");
@@ -121,14 +125,9 @@ uint8_t otf_reserve_agressive_for(OpenQueueEntry_t* msg){
    openserial_ncat_uint32_t(str, (uint32_t)msg->l2_track.instance, 150);
    strncat(str, ", track owner=", 150);
    openserial_ncat_uint8_t_hex(str, msg->l2_track.owner.addr_64b[6], 150);
-//   strncat(str, "-", 150);
    openserial_ncat_uint8_t_hex(str, msg->l2_track.owner.addr_64b[7], 150);
    openserial_printf(COMPONENT_OTF, str, strlen(str));
 #endif
-
-   //the current allocation is correct
-   if (nbCells_curr >= nbCells_req)
-      return(0);
 
    //request to sixtop
    nbCells_toadd = nbCells_req - nbCells_curr;
