@@ -279,8 +279,8 @@ enum {
    ERR_OPENQUEUE_OVERSIZE              = 0x44, // not enough space in openqueue for non prioritar packets
    ERR_IEEE154_BADCRC                  = 0x45, // received frame with invalid CRC
    ERR_IEEE154_INVALIDHEADER           = 0x46, // invalid IEEE 802.15.4e headers
-   ERR_OPENSERIAL_BUFFER_OVERFLOW      = 0x47, // buffer overflow for output in openserial (indexWrite {0}, location {1})
-   ERR_OPENQUEUE_BUFFER_OVERFLOW       = 0x48, // buffer overflow: too many packets (space left {0}, reserved for management {1})
+   ERR_OPENSERIAL_BUFFER_OVERFLOW      = 0x47, // output buffer overflow in openserial (available space {0}, towrite {1})
+   ERR_OPENQUEUE_BUFFER_OVERFLOW       = 0x48, // openqueue overflow: too many packets (space left {0}, reserved for management {1})
    ERR_SIXTOP_TOOMANY_CELLS            = 0x49, // too many cells to reserve in the sixtop request (asked {0}, max {1})
    ERR_SIXTOP_MULTIPLE_TRACKS          = 0x4a, // the cells from the same LinkRem are associated with different tracks
    ERR_OPENQUEUE_DESYNC                = 0x4b, // a packet cannot be allocated for component {0} when the node is not synchronized

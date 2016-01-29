@@ -23,7 +23,8 @@
 
 
 
-#define _DEBUG_OPENSERIAL_
+//#define _DEBUG_OPENSERIAL_
+
 
 #ifdef _DEBUG_OPENSERIAL_
 uint8_t caller;
@@ -36,6 +37,11 @@ enum{
    PRINTDATA      = 5,
    PRINTPACKET    = 6
 };
+
+//to debug buffer overflows
+uint16_t  _size_remain = 0;
+uint16_t  _size_towrite = 0;
+
 #endif
 
 //=========================== variables =======================================
@@ -63,7 +69,7 @@ void openserial_board_reset_cb(
 void openserial_goldenImageCommands(void);
 
 // HDLC output
-uint8_t openserial_get_output_buffer(uint8_t length);
+uint8_t openserial_get_output_buffer(char *buffer, uint8_t length);
 void outputHdlcOpen(uint8_t bufindex);
 void outputHdlcWrite(uint8_t bufindex, uint8_t b);
 void outputHdlcClose(uint8_t bufindex);
@@ -122,7 +128,7 @@ owerror_t openserial_push_output_buffer(char *buffer_out, uint8_t buffer_out_len
    INTERRUPT_DECLARATION();
 
     DISABLE_INTERRUPTS();
-    buf_id = openserial_get_output_buffer(buffer_out_length);
+    buf_id = openserial_get_output_buffer(buffer_out, buffer_out_length);
     if (buf_id >= OPENSERIAL_OUTPUT_NBBUFFERS){
        //leds_error_toggle();
        ENABLE_INTERRUPTS();
@@ -231,7 +237,7 @@ owerror_t openserial_printStatus(uint8_t statusElement, uint8_t* buffer_in, uint
     buffer_out_length += buffer_in_length;
 
 #ifdef _DEBUG_OPENSERIAL_
-   caller = PRINTSTATUS;
+   caller = 10 + statusElement;
 #endif
 
    //push the buffer
@@ -747,25 +753,41 @@ bool debugPrint_outBufferIndexes() {
 */
 
 //
-uint8_t openserial_get_output_buffer(uint8_t length){
-   uint32_t length_filled;
+uint8_t openserial_get_output_buffer(char *buffer, uint8_t length){
+//   uint32_t length_filled;
    uint8_t  bufindex;
+   uint8_t  i;
+   uint8_t  length_escaped = 0;
 
+#ifndef _DEBUG_OPENSERIAL_
+   uint16_t _size_remain = 0;
+#endif
+
+
+   //compute the size of the buffer (with escape characters)
+   for(i=0; i<length; i++)
+      if (buffer[i]==HDLC_FLAG || buffer[i]==HDLC_ESCAPE)
+         length_escaped += 2;
+      else
+         length_escaped += 1;
+   length_escaped += 2;      // start frame delimiters (HDLC)
+   length_escaped += 2;      // CRC (2B)
 
    //consider the current bufferindex
    bufindex = openserial_vars.outputCurrentW;
 
-   //the R pointer inside the current buffer MUST be before the W pointer (R=read by the other side of the serial line, W=currently written by our module)
-   if (openserial_vars.outputBufIdxW[bufindex] > openserial_vars.outputBufIdxR[bufindex])
-      length_filled = openserial_vars.outputBufIdxW[bufindex] - openserial_vars.outputBufIdxR[bufindex];
+   //number of remainig cells from W to R
+   //W=currently written by our module, R=Currently pushed (read by the serial line)
+   if (openserial_vars.outputBufIdxW[bufindex] < openserial_vars.outputBufIdxR[bufindex])
+      _size_remain = openserial_vars.outputBufIdxR[bufindex] - openserial_vars.outputBufIdxW[bufindex];
    else
-      length_filled = (uint8_t)256 - openserial_vars.outputBufIdxR[bufindex] + openserial_vars.outputBufIdxW[bufindex];
+      _size_remain = 255 - openserial_vars.outputBufIdxR[bufindex] + openserial_vars.outputBufIdxW[bufindex]  + 1;
 
-   //do we have enough space? (pessimistic case: 50% of the chars are escaped + flags (end/start))
-   if (((uint32_t)length * 1.5) + 2 + length_filled  > (uint32_t)SERIAL_OUTPUT_BUFFER_SIZE){
+   //do we have enough space?
+   if (_size_remain < length_escaped){
 
       //the next buffer is also filled -> not anymore space
-      if (openserial_vars.outputCurrentR == ((openserial_vars.outputCurrentW + 1) % SERIAL_OUTPUT_BUFFER_SIZE))
+      if ((openserial_vars.outputCurrentR == ((openserial_vars.outputCurrentW + 1) % SERIAL_OUTPUT_BUFFER_SIZE)) || (length_escaped > SERIAL_OUTPUT_BUFFER_SIZE))
          return(-1);
 
       //else, get the next buffer in the cycle
@@ -774,8 +796,14 @@ uint8_t openserial_get_output_buffer(uint8_t length){
       else
          (openserial_vars.outputCurrentW)++;
 
-
+#ifdef _DEBUG_OPENSERIAL_
+      _size_remain = SERIAL_OUTPUT_BUFFER_SIZE;
+#endif
    }
+
+#ifdef _DEBUG_OPENSERIAL_
+      _size_towrite = length_escaped;
+#endif
 
    return(openserial_vars.outputCurrentW);
 }
@@ -797,20 +825,25 @@ port_INLINE void outputHdlcOpen(uint8_t bufindex) {
 port_INLINE void outputHdlcWrite(uint8_t bufindex, uint8_t b) {
 
    //buffer overflow: the last cell overwrites the first one!
-   if (openserial_vars.outputBufIdxW[bufindex] + 1 == openserial_vars.outputBufIdxR[bufindex]){
+   if (((uint8_t) openserial_vars.outputBufIdxW[bufindex] + 1) == openserial_vars.outputBufIdxR[bufindex]){
+
 
 #ifdef _DEBUG_OPENSERIAL_
       openserial_printCritical(COMPONENT_OPENSERIAL, ERR_OPENSERIAL_BUFFER_OVERFLOW,
-            (errorparameter_t)openserial_vars.outputBufIdxW[bufindex],
-            (errorparameter_t)caller);
+              (errorparameter_t)_size_remain,
+              (errorparameter_t)_size_towrite);
+
+      openserial_printCritical(COMPONENT_OPENSERIAL, ERR_GENERIC,
+            (errorparameter_t)caller,
+            (errorparameter_t)0);
 #else
       openserial_printCritical(COMPONENT_OPENSERIAL, ERR_OPENSERIAL_BUFFER_OVERFLOW,
-            (errorparameter_t)openserial_vars.outputBufIdxW[bufindex],
-            (errorparameter_t)0);
+                (errorparameter_t)0,
+                (errorparameter_t)255);
+
 #endif
 
       return;
-
    }
    
    // iterate through CRC calculator
