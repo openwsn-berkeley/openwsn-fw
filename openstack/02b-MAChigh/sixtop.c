@@ -39,6 +39,9 @@ owerror_t     sixtop_send_internal(
 void          sixtop_maintenance_timer_cb(opentimer_id_t id);
 void          sixtop_timeout_timer_cb(opentimer_id_t id);
 
+// state change
+void           sixtop_setState(six2six_state_t state);
+
 //=== EB/KA task
 
 void          timer_sixtop_management_fired(void);
@@ -142,14 +145,14 @@ void sixtop_init() {
       sixtop_maintenance_timer_cb
    );
    
-   //TODO: handle differntly the timeouts?
-
+/*
    sixtop_vars.timeoutTimerId     = opentimers_start(
       SIX2SIX_TIMEOUT_MS,
       TIMER_ONESHOT,
       TIME_MS,
       sixtop_timeout_timer_cb
    );
+   */
 }
 
 void sixtop_setKaPeriod(uint16_t kaPeriod) {
@@ -291,15 +294,17 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track){
    sixtop_send(pkt);
    
    // update state
-   sixtop_vars.six2six_state = SIX_WAIT_ADDREQUEST_SENDDONE;
+   sixtop_setState(SIX_WAIT_ADDREQUEST_SENDDONE);
    
    // arm timeout
-   opentimers_setPeriod(
+/*   opentimers_setPeriod(
       sixtop_vars.timeoutTimerId,
       TIME_MS,
       SIX2SIX_TIMEOUT_MS
    );
    opentimers_restart(sixtop_vars.timeoutTimerId);
+*/
+
 
 #ifdef _DEBUG_SIXTOP_
    uint8_t  i;
@@ -373,7 +378,7 @@ void sixtop_removeCell(open_addr_t* neighbor){
    }
    
    // update state
-   sixtop_vars.six2six_state = SIX_SENDING_REMOVEREQUEST;
+   sixtop_setState(SIX_SENDING_REMOVEREQUEST);
    
    // declare ownership over that packet
    pkt->creator = COMPONENT_SIXTOP_RES;
@@ -420,8 +425,8 @@ void sixtop_removeCell(open_addr_t* neighbor){
    sixtop_send(pkt);
    
    // update state
-   sixtop_vars.six2six_state = SIX_WAIT_REMOVEREQUEST_SENDDONE;
-   
+   sixtop_setState(SIX_WAIT_REMOVEREQUEST_SENDDONE);
+ /*
    // arm timeout
    opentimers_setPeriod(
       sixtop_vars.timeoutTimerId,
@@ -429,6 +434,7 @@ void sixtop_removeCell(open_addr_t* neighbor){
       SIX2SIX_TIMEOUT_MS
    );
    opentimers_restart(sixtop_vars.timeoutTimerId);
+*/
 }
 
 void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
@@ -479,7 +485,7 @@ void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
    }
    
    // update state
-   sixtop_vars.six2six_state = SIX_SENDING_REMOVEREQUEST;
+   sixtop_setState(SIX_SENDING_REMOVEREQUEST);
    
    // declare ownership over that packet
    pkt->creator = COMPONENT_SIXTOP_RES;
@@ -527,16 +533,16 @@ void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
    sixtop_send(pkt);
    
    // update state
-   sixtop_vars.six2six_state = SIX_WAIT_REMOVEREQUEST_SENDDONE;
+   sixtop_setState(SIX_WAIT_REMOVEREQUEST_SENDDONE);
    
    // arm timeout
-   opentimers_setPeriod(
+ /*  opentimers_setPeriod(
       sixtop_vars.timeoutTimerId,
       TIME_MS,
       SIX2SIX_TIMEOUT_MS
    );
    opentimers_restart(sixtop_vars.timeoutTimerId);
-
+*/
 }
 
 //======= maintaning 
@@ -1089,6 +1095,49 @@ port_INLINE void sixtop_sendKA() {
 
 //======= six2six task
 
+
+//changes the current sixtop state
+void sixtop_setState(six2six_state_t state){
+   uint8_t  previously_idle = (sixtop_vars.six2six_state == SIX_IDLE);
+
+   sixtop_vars.six2six_state = state;
+   uint16_t  timeout_sixtop_value;    // to change the timeout value (jitter)
+
+   //schedule a timer: back to the idle state after a timeout
+   if (state != SIX_IDLE){
+
+      //stops the previous timer
+      if (!previously_idle)
+      opentimers_stop(sixtop_vars.timeoutTimerId);
+
+      //and starts a new one (randomized to avoid all the nodes regenerate one request simultaneously)
+      timeout_sixtop_value = openrandom_get16b();    //65536 at most
+      while (timeout_sixtop_value > SIX2SIX_TIMEOUT_MS * 1.5){
+         timeout_sixtop_value -= SIX2SIX_TIMEOUT_MS / 2;
+      }
+      sixtop_vars.timeoutTimerId     = opentimers_start(
+            timeout_sixtop_value,
+            TIMER_ONESHOT,
+            TIME_MS,
+            sixtop_timeout_timer_cb
+      );
+
+   }
+
+   //otf callback when we come back to the idle state
+   if (state == SIX_IDLE){
+      opentimers_stop(sixtop_vars.timeoutTimerId);
+      sixtop_vars.handler = SIX_HANDLER_NONE;
+      otf_update_schedule();
+   }
+
+}
+
+
+
+
+
+
 void timer_sixtop_six2six_timeout_fired(void) {
    openserial_printInfo(
       COMPONENT_SIXTOP,
@@ -1098,9 +1147,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
    );
 
    // timeout timer fired, reset the state of sixtop to idle
-   sixtop_vars.six2six_state = SIX_IDLE;
-   sixtop_vars.handler = SIX_HANDLER_NONE;
-   opentimers_stop(sixtop_vars.timeoutTimerId);
+   sixtop_setState(SIX_IDLE);
 }
 
 void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
@@ -1115,7 +1162,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    msg->owner = COMPONENT_SIXTOP_RES;
   
    if(error == E_FAIL) {
-      sixtop_vars.six2six_state = SIX_IDLE;
+      sixtop_setState(SIX_IDLE);
       openqueue_freePacketBuffer(msg);
       return;
    }
@@ -1130,7 +1177,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
-            sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
+            sixtop_setState(SIX_WAIT_ADDRESPONSE);
          }
          else{
 #ifdef _DEBUG_SIXTOP_
@@ -1140,7 +1187,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
-            sixtop_vars.six2six_state = SIX_IDLE;
+            sixtop_setState(SIX_IDLE);
         }
 
          break;
@@ -1199,7 +1246,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
 #endif
          }
 
-         sixtop_vars.six2six_state = SIX_IDLE;
+         sixtop_setState(SIX_IDLE);
          break;
       case SIX_WAIT_REMOVEREQUEST_SENDDONE:
          ;
@@ -1237,8 +1284,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                &(msg->l2_nextORpreviousHop)
             );
          }
-         sixtop_vars.six2six_state = SIX_IDLE;
-         opentimers_stop(sixtop_vars.timeoutTimerId);
+         sixtop_setState(SIX_IDLE);
          leds_debug_off();
 
          //This cell was considered buggy by sixtop -> it must reallocate a new one after having removed it
@@ -1402,7 +1448,7 @@ void sixtop_notifyReceiveCommand(
 
          if(sixtop_vars.six2six_state == SIX_IDLE)
          {
-            sixtop_vars.six2six_state = SIX_ADDREQUEST_RECEIVED;
+            sixtop_setState(SIX_ADDREQUEST_RECEIVED);
             //received uResCommand is reserve link request
             sixtop_notifyReceiveLinkRequest(bandwidth_ie,schedule_ie,addr);
          }
@@ -1444,7 +1490,7 @@ void sixtop_notifyReceiveCommand(
 #endif
 
 
-            sixtop_vars.six2six_state = SIX_ADDRESPONSE_RECEIVED;
+            sixtop_setState(SIX_ADDRESPONSE_RECEIVED);
            //received uResCommand is reserve link response
            sixtop_notifyReceiveLinkResponse(bandwidth_ie, schedule_ie, blacklist_ie, addr);
          }
@@ -1465,7 +1511,7 @@ void sixtop_notifyReceiveCommand(
             }
             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
-            sixtop_vars.six2six_state = SIX_REMOVEREQUEST_RECEIVED;
+            sixtop_setState(SIX_REMOVEREQUEST_RECEIVED);
           //received uResComand is remove link request
              sixtop_notifyReceiveRemoveLinkRequest(schedule_ie,addr);
         }
@@ -1546,7 +1592,7 @@ void sixtop_linkResponse(
     }
     
    // changing state to resLinkRespone command
-   sixtop_vars.six2six_state = SIX_SENDING_ADDRESPONSE;
+   sixtop_setState(SIX_SENDING_ADDRESPONSE);
     
    // declare ownership over that packet
    sixtopPkt->creator = COMPONENT_SIXTOP_RES;
@@ -1586,7 +1632,7 @@ void sixtop_linkResponse(
   
    sixtop_send(sixtopPkt);
   
-   sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE_SENDDONE;
+   sixtop_setState(SIX_WAIT_ADDRESPONSE_SENDDONE);
 }
 
 void sixtop_notifyReceiveLinkResponse(
@@ -1667,10 +1713,7 @@ void sixtop_notifyReceiveLinkResponse(
       }
    }
    leds_debug_off();
-   sixtop_vars.six2six_state = SIX_IDLE;
-   sixtop_vars.handler = SIX_HANDLER_NONE;
-  
-   opentimers_stop(sixtop_vars.timeoutTimerId);
+   sixtop_setState(SIX_IDLE);
 }
 
 void sixtop_notifyReceiveRemoveLinkRequest(
@@ -1700,7 +1743,7 @@ void sixtop_notifyReceiveRemoveLinkRequest(
        }
    }
    
-   sixtop_vars.six2six_state = SIX_IDLE;
+   sixtop_setState(SIX_IDLE);
 
    leds_debug_off();
 }
