@@ -23,7 +23,7 @@
 
 
 
-//#define _DEBUG_OPENSERIAL_
+#define _DEBUG_OPENSERIAL_
 
 
 #ifdef _DEBUG_OPENSERIAL_
@@ -781,7 +781,7 @@ uint8_t openserial_get_output_buffer(char *buffer, uint8_t length){
    if (openserial_vars.outputBufIdxW[bufindex] < openserial_vars.outputBufIdxR[bufindex])
       _size_remain = openserial_vars.outputBufIdxR[bufindex] - openserial_vars.outputBufIdxW[bufindex];
    else
-      _size_remain = 255 - openserial_vars.outputBufIdxR[bufindex] + openserial_vars.outputBufIdxW[bufindex]  + 1;
+      _size_remain = 255 - openserial_vars.outputBufIdxW[bufindex] + openserial_vars.outputBufIdxR[bufindex];
 
    //do we have enough space?
    if (_size_remain < length_escaped){
@@ -826,6 +826,7 @@ port_INLINE void outputHdlcWrite(uint8_t bufindex, uint8_t b) {
 
    //buffer overflow: the last cell overwrites the first one!
    if (((uint8_t) openserial_vars.outputBufIdxW[bufindex] + 1) == openserial_vars.outputBufIdxR[bufindex]){
+
 
 
 #ifdef _DEBUG_OPENSERIAL_
