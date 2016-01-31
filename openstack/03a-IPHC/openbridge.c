@@ -25,7 +25,8 @@ void openbridge_triggerData() {
    //this is a temporal workaround as we are never supposed to get chunks of data
    //longer than input buffer size.. I assume that HDLC will solve that.
    // MAC header is 13B + 8 next hop so we cannot accept packets that are longer than 118B
-   if (numDataBytes>(136 - 10/*21*/) || numDataBytes<8){
+   // large packets are now fragmented
+   if (/*numDataBytes>(136 - 10 *21* ) ||*/ numDataBytes<8){
    //to prevent too short or too long serial frames to kill the stack  
        openserial_printError(COMPONENT_OPENBRIDGE,ERR_INPUTBUFFER_LENGTH,
                    (errorparameter_t)numDataBytes,
@@ -62,6 +63,7 @@ void openbridge_triggerData() {
       }        
       //send
       if ((iphc_sendFromBridge(pkt))==E_FAIL) {
+         fragment_checkOpenBridge(pkt, E_FAIL);
          openqueue_freePacketBuffer(pkt);
       }
    }
@@ -74,6 +76,7 @@ void openbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
                             (errorparameter_t)0,
                             (errorparameter_t)0);
    }
+   fragment_checkOpenBridge(msg, error);
    openqueue_freePacketBuffer(msg);
 }
 

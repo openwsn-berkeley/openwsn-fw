@@ -12,6 +12,7 @@
 #include "opentcp.h"
 #include "debugpins.h"
 #include "scheduler.h"
+#include "fragment.h"
 
 //=========================== variables =======================================
 
@@ -204,6 +205,7 @@ void forwarding_receive(
    ) {
    uint8_t flags;
    uint16_t senderRank;
+   FragmentQueueEntry_t* buffer;
    
    // take ownership
    msg->owner                     = COMPONENT_FORWARDING;
@@ -244,29 +246,13 @@ void forwarding_receive(
           packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
       }
           
-      // indicate received packet to upper layer
-      switch(msg->l4_protocol) {
-         case IANA_TCP:
-            opentcp_receive(msg);
-            break;
-         case IANA_UDP:
-            openudp_receive(msg);
-            break;
-         case IANA_ICMPv6:
-            icmpv6_receive(msg);
-            break;
-         default:
-            
-            // log error
-            openserial_printError(
-               COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
-               (errorparameter_t)msg->l4_protocol,
-               (errorparameter_t)1
-            );
-            
-            // free packet
-            openqueue_freePacketBuffer(msg);
-      }
+      // If this message is a FRAG1, message must be assembled
+      // prior to move it to upper layer.
+      if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
+         fragment_assignAction(buffer, FRAGMENT_ACTION_ASSEMBLE);
+      else
+         forwarding_toUpperLayer(msg);
+
    } else {
       // this packet is not for me: relay
       
@@ -320,7 +306,10 @@ void forwarding_receive(
                   PCKTFORWARD 
                )==E_FAIL
             ) {
-            openqueue_freePacketBuffer(msg);
+            if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
+               fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
+	    else
+               openqueue_freePacketBuffer(msg);
          }
       } else {
          // source routing header present
@@ -336,9 +325,40 @@ void forwarding_receive(
                (errorparameter_t)0,
                (errorparameter_t)0
             );
+
+            if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
+               fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
          }
       }
    }
+}
+
+// indicate reception to upper layer
+owerror_t forwarding_toUpperLayer(OpenQueueEntry_t* msg) {
+   switch(msg->l4_protocol) {
+      case IANA_TCP:
+         opentcp_receive(msg);
+         break;
+      case IANA_UDP:
+         openudp_receive(msg);
+         break;
+      case IANA_ICMPv6:
+         icmpv6_receive(msg);
+         break;
+      default:
+         // log error
+         openserial_printError(
+            COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
+            (errorparameter_t)msg->l4_protocol,
+            (errorparameter_t)1
+         );
+         //not sure that this is correct as iphc will free it?
+         openqueue_freePacketBuffer(msg);
+         return E_FAIL;
+   }
+   
+   // stop executing here (successful)
+   return E_SUCCESS;
 }
 
 //=========================== private =========================================
@@ -426,16 +446,17 @@ owerror_t forwarding_send_internal_SourceRouting(
       ipv6_header_iht*  ipv6_outer_header,
       ipv6_header_iht*  ipv6_inner_header
    ) {
-   uint8_t              local_CmprE;
-   uint8_t              local_CmprI;
-   uint8_t              numAddr;
-   uint8_t              hlen;
-   uint8_t              addressposition;
-   uint8_t*             runningPointer;
-   uint8_t              octetsAddressSize;
-   open_addr_t*         prefix;
-   rpl_routing_ht*      rpl_routing_hdr;
-   rpl_option_ht        rpl_option;
+   uint8_t               local_CmprE;
+   uint8_t               local_CmprI;
+   uint8_t               numAddr;
+   uint8_t               hlen;
+   uint8_t               addressposition;
+   uint8_t*              runningPointer;
+   uint8_t               octetsAddressSize;
+   open_addr_t*          prefix;
+   rpl_routing_ht*       rpl_routing_hdr;
+   rpl_option_ht         rpl_option;
+   FragmentQueueEntry_t* buffer;
    
    // reset hop-by-hop option
    memset(&rpl_option,0,sizeof(rpl_option_ht));
@@ -491,31 +512,13 @@ owerror_t forwarding_send_internal_SourceRouting(
       // toss iphc inner header
       packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
       
-      // indicate reception to upper layer
-      switch(msg->l4_protocol) {
-         case IANA_TCP:
-            opentcp_receive(msg);
-            break;
-         case IANA_UDP:
-            openudp_receive(msg);
-            break;
-         case IANA_ICMPv6:
-            icmpv6_receive(msg);
-            break;
-         default:
-            openserial_printError(
-               COMPONENT_FORWARDING,
-               ERR_WRONG_TRAN_PROTOCOL,
-               (errorparameter_t)msg->l4_protocol,
-               (errorparameter_t)1
-            );
-            //not sure that this is correct as iphc will free it?
-            openqueue_freePacketBuffer(msg);
-            return E_FAIL;
-      }
-      
-      // stop executing here (successful)
-      return E_SUCCESS;
+      // If this message is a FRAG1, message must be assembled
+      // prior to move it to upper layer.
+      if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL ) {
+         fragment_assignAction(buffer, FRAGMENT_ACTION_ASSEMBLE);
+	 return E_SUCCESS;
+      } else
+         return forwarding_toUpperLayer(msg);
    
    } else {
       // this is not the last hop
@@ -531,7 +534,8 @@ owerror_t forwarding_send_internal_SourceRouting(
             (errorparameter_t)0,
             (errorparameter_t)0
          );
-         openqueue_freePacketBuffer(msg);
+         if ( fragment_searchBufferFromMsg(msg) == NULL )
+            openqueue_freePacketBuffer(msg);
          return E_FAIL;
       
       } else {
@@ -632,7 +636,8 @@ owerror_t forwarding_send_internal_SourceRouting(
                   (errorparameter_t)1,
                   (errorparameter_t)0
                );
-               openqueue_freePacketBuffer(msg);
+               if ( fragment_searchBufferFromMsg(msg) == NULL )
+                  openqueue_freePacketBuffer(msg);
                return E_FAIL;
          }
       }

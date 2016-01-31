@@ -265,20 +265,34 @@ void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, b
 
 //======= reserving/tossing headers
 
-void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_length) {
+void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_length) {
+   bool error;
+
+   error = pkt->big ?
+	   pkt->length + header_length > BIG_PACKET_SIZE :
+	   (uint8_t*)(pkt->payload)-header_length < (uint8_t*)(pkt->packet);
+   // Check if is needed to reserve a big packet.
+   // Layer 2 does not need support for large packets as messages
+   // are fragmented.
+   // This one tries to acquire a big buffer if needed on layer 3
+   // and up.
+   if ( error && (pkt->owner > COMPONENT_FRAGMENT) && (pkt->big == NULL) )
+      error = ( openqueue_toBigPacket(pkt, 0) == NULL );
+
    pkt->payload -= header_length;
    pkt->length  += header_length;
-   if ( (uint8_t*)(pkt->payload) < (uint8_t*)(pkt->packet) ) {
+   if ( error )
       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)0,
                             (errorparameter_t)pkt->length);
-   }
 }
 
-void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length) {
+void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint16_t header_length) {
    pkt->payload += header_length;
    pkt->length  -= header_length;
-   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+126) ) {
+   if ( pkt->big ?
+        pkt->length < 0 :
+        (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+126) ) {
       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)1,
                             (errorparameter_t)pkt->length);
@@ -335,7 +349,7 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* sr
 void packetfunctions_calculateCRC(OpenQueueEntry_t* msg) {
    uint16_t crc;
    uint8_t  i;
-   uint8_t  count;
+   uint16_t count;
    crc = 0;
    for (count=1;count<msg->length-2;count++) {
       crc = crc ^ (uint8_t)*(msg->payload+count);
@@ -355,7 +369,7 @@ void packetfunctions_calculateCRC(OpenQueueEntry_t* msg) {
 bool packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
    uint16_t crc;
    uint8_t  i;
-   uint8_t  count;
+   uint16_t count;
    crc = 0;
    for (count=0;count<msg->length-2;count++) {
       crc = crc ^ (uint8_t)*(msg->payload+count);
@@ -398,8 +412,10 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
    onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
    
    // length
-   little_helper[0] = 0;
-   little_helper[1] = msg->length;
+//   little_helper[0] = 0;
+//   little_helper[1] = msg->length;
+   little_helper[0] = (msg->length & 0xFF00) >> 8;
+   little_helper[1] =  msg->length & 0x00FF;
    onesComplementSum(temp_checksum,little_helper,2);
    
    // next header
