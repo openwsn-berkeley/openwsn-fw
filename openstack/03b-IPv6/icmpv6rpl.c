@@ -202,7 +202,9 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
    
    // handle message
    switch (icmpv6code) {
-      
+      case IANA_ICMPv6_RPL_DIS:
+         icmpv6rpl_timer_DIO_task();
+         break;
       case IANA_ICMPv6_RPL_DIO:
          if (idmanager_getIsDAGroot()==TRUE) {
             // stop here if I'm in the DAG root
@@ -232,10 +234,9 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          break;
-      
       default:
          // this should never happen
-         openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_MSG_UNKNOWN_TYPE,
+         openserial_printError(COMPONENT_ICMPv6RPL,ERR_MSG_UNKNOWN_TYPE,
                                (errorparameter_t)icmpv6code,
                                (errorparameter_t)0);
          break;
