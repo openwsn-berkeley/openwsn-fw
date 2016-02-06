@@ -106,16 +106,12 @@ typedef struct FragmentQueueEntry {
    uint8_t             creator;       // the message creator component
    uint16_t            datagram_size; // RFC 4944 Section 5.3
    uint16_t            datagram_tag;
-   uint16_t            new_size;      // forwarded msg size & tag
-   uint16_t            new_tag;
    open_addr_t         dst;           // i802.15.4 addresses or originator
    open_addr_t         src;           // and destination mesh addresses
    opentimer_id_t      timerId;
    FragmentAction      action;        // action to process fragments
    uint8_t             number;        // number of fragments in list
    uint8_t             processed;     // number of assembled or ready to forward
-   uint8_t             sending;       // number on sending
-   uint8_t             sent;          // number of sent
    uint8_t             offset;        // fragment offset
    FragmentOtherData_t other;
 } FragmentQueueEntry_t;

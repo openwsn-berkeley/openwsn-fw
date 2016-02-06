@@ -135,7 +135,6 @@ owerror_t fragment_prependHeader(OpenQueueEntry_t* msg) {
    } else
       buffer->other.data.payload = msg->payload;
    buffer->other.data.max_fragment_size = (max_fragment + FRAGMENT_FRAG1_HL - FRAGMENT_FRAGN_HL) & 0xF8;
-   buffer->other.data.actual_sent       = 0;
    buffer->other.data.size              = actual_frag_size;
    buffer->other.data.fragn             = FALSE;
 
@@ -665,8 +664,6 @@ owerror_t fragment_restartBuffer(FragmentQueueEntry_t* buffer) {
    }
    buffer->number           = 0;
    buffer->processed        = 0;
-   buffer->sending          = 0; // if message must be forwarded
-   buffer->sent             = 0;
    buffer->action           = FRAGMENT_ACTION_NONE;
    ENABLE_INTERRUPTS();
    return E_SUCCESS;
