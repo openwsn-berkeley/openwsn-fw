@@ -25,7 +25,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_PATCH     0
 
 // golden image version and type
-#define GOLDEN_IMAGE_VERSION      1
+#define GOLDEN_IMAGE_VERSION      2
 // define golden image type: only one can be used
 #define GD_TYPE_ROOT         1 // dagroot
 #define GD_TYPE_SNIFFER      2 // sniffer
@@ -43,7 +43,14 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define LENGTH_ADDR128b 16
 
 #define LENGTH_IPV6_MTU   1280 // RFC 2460
-#define LARGE_PACKET_SIZE LENGTH_IPV6_MTU 
+#define LARGE_PACKET_SIZE LENGTH_IPV6_MTU
+
+// frame sizes
+#define FRAME_DATA_DATA  125
+#define FRAME_DATA_CRC   2
+#define FRAME_DATA_PLOAD (FRAME_DATA_DATA+FRAME_DATA_CRC)
+#define FRAME_DATA_OTHER (1+1+1) // 1B spi address, 1B length, 1B LQI
+#define FRAME_DATA_TOTAL (FRAME_DATA_PLOAD+FRAME_DATA_OTHER)
 
 enum {
    E_SUCCESS                           = 0,
@@ -97,7 +104,6 @@ enum {
    WKP_UDP_ECHO                        =     7,
    WKP_UDP_INJECT                      =  2000,
    WKP_UDP_RINGMASTER                  = 15000,
-   WKP_UDP_FRAGTEST                    = 25000,
 };
 
 //status elements
@@ -173,7 +179,6 @@ enum {
    COMPONENT_UINJECT                   = 0x25,
    COMPONENT_RRT                       = 0x26,
    COMPONENT_SECURITY                  = 0x27,
-   COMPONENT_FRAGTEST                  = 0x28,
 };
 
 /**
@@ -189,7 +194,7 @@ enum {
    ERR_RCVD_ECHO_REPLY                 = 0x02, // received an echo reply
    ERR_GETDATA_ASKS_TOO_FEW_BYTES      = 0x03, // getData asks for too few bytes, maxNumBytes={0}, fill level={1}
    ERR_INPUT_BUFFER_OVERFLOW           = 0x04, // the input buffer has overflown
-   ERR_COMMAND_NOT_ALLOWED             = 0x05, // the command is not allowed, command = {0} 
+   ERR_COMMAND_NOT_ALLOWED             = 0x05, // the command is not allowerd, command = {0} 
    // l4
    ERR_WRONG_TRAN_PROTOCOL             = 0x06, // unknown transport protocol {0} (code location {1})
    ERR_WRONG_TCP_STATE                 = 0x07, // wrong TCP state {0} (code location {1})
@@ -235,7 +240,7 @@ enum {
    ERR_UNEXPECTED_SENDDONE             = 0x2b, // sendDone for packet I didn't send
    ERR_NO_FREE_PACKET_BUFFER           = 0x2c, // no free packet buffer (code location {0})
    ERR_FREEING_UNUSED                  = 0x2d, // freeing unused memory
-   ERR_FREEING_ERROR                   = 0x2e, // freeing memory unsupported memory {0}
+   ERR_FREEING_ERROR                   = 0x2e, // freeing memory unsupported memory
    ERR_UNSUPPORTED_COMMAND             = 0x2f, // unsupported command {0}
    ERR_MSG_UNKNOWN_TYPE                = 0x30, // unknown message type {0}
    ERR_WRONG_ADDR_TYPE                 = 0x31, // wrong address type {0} (code location {1})
@@ -249,12 +254,15 @@ enum {
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
    ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
    ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
+   ERR_SIXTOP_RETURNCODE               = 0x3c, // sixtop return code {0} at sixtop state {1}
+   ERR_SIXTOP_COUNT                    = 0x3d, // there are {0} cells to request mote
+   ERR_SIXTOP_LIST                     = 0x3e, // the cells reserved to request mote contains slot {0} and slot {1}
    // fragmentation
-   ERR_FRAG_RESERVING                  = 0x3c, // trying to get an used fragment
-   ERR_FREEING_BIG                     = 0x3d, // trying to free an unused big packet
-   ERR_NO_FREE_FRAGMENT_BUFFER         = 0x2c, // no free fragment buffer
-   ERR_INPUTBUFFER_OVERLAPS            = 0x2d, // incoming fragment overlaps with previously received one
-   ERR_EXPIRED_TIMER                   = 0x2e, // fragment timer expired
+   ERR_FRAG_RESERVING                  = 0x3f, // trying to get an used fragment
+   ERR_FREEING_BIG                     = 0x40, // trying to free an unused big packet
+   ERR_NO_FREE_FRAGMENT_BUFFER         = 0x41, // no free fragment buffer
+   ERR_INPUTBUFFER_OVERLAPS            = 0x42, // incoming fragment overlaps with previously received one
+   ERR_EXPIRED_TIMER                   = 0x43, // fragment timer expired
 };
 
 //=========================== typedef =========================================
@@ -312,9 +320,11 @@ typedef struct {
    uint8_t       l2_numTxAttempts;               // number Tx attempts
    asn_t         l2_asn;                         // at what ASN the packet was Tx'ed or Rx'ed
    uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
-   uint8_t*      l2_scheduleIE_cellObjects;      // pointer to the start of cell Objects in scheduleIE
-   uint8_t       l2_scheduleIE_numOfCells;       // number of cells were going to be scheduled or removed.
-   uint8_t       l2_scheduleIE_frameID;          // frameID in scheduleIE
+   uint8_t*      l2_sixtop_cellObjects;          // pointer to the start of cell Objects in 6P
+   uint8_t       l2_sixtop_numOfCells;           // number of cells were going to be scheduled or removed.
+   uint8_t       l2_sixtop_frameID;              // frameID in 6P
+   uint8_t       l2_sixtop_requestCommand;       // request Command in 6P
+   uint8_t       l2_sixtop_returnCode;           // return code in 6P
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_IEListPresent;               //did have IE field?
@@ -336,7 +346,7 @@ typedef struct {
    bool          l1_crc;                         // did received packet pass CRC check?
    uint8_t*      big;                            // pointer to a big packet buffer struct, if used
    //the packet
-   uint8_t       packet[1+1+125+2+1];            // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
+   uint8_t       packet[FRAME_DATA_TOTAL];       // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
 } OpenQueueEntry_t;
 
 //=========================== variables =======================================

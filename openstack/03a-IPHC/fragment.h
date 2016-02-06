@@ -9,20 +9,19 @@
 */
 
 #include "opendefs.h"
+#include "ieee802154_security_driver.h"
 
 //=========================== define ==========================================
-
-#define FRAGMENT_MAX_SIZE LARGE_PACKET_SIZE
+ 
 #define MIN_PAYLOAD 81         // Min 6LowPAN payload
-#define FRAGMENT_MAX_FRAGMENTS (FRAGMENT_MAX_SIZE/MIN_PAYLOAD +1)
+#define FRAGMENT_MAX_FRAGMENTS (LARGE_PACKET_SIZE/MIN_PAYLOAD +1)
+#define FRAGMENT_DATA_UTIL     (FRAME_DATA_DATA - IEEE802154_SECURITY_TAG_LEN)
+#define FRAGMENT_DATA_INIT     (FRAME_DATA_PLOAD - IEEE802154_SECURITY_TAG_LEN)
 
-#define FRAGQLENGTH 15
+#define FRAGQLENGTH 7
 
-#define LOWPAN_DISPATCH    5
-enum LOWPAN_DISPATCH_enums {
-   LOWPAN_DISPATCH_FRAG1 = 6,
-   LOWPAN_DISPATCH_FRAGN = 7
-};
+#define FRAGMENT_FRAG1_HL 4 // Fragment header length
+#define FRAGMENT_FRAGN_HL 5
 
 typedef enum fragment_states {
    FRAGMENT_NONE,      // fresh fragment
@@ -30,22 +29,13 @@ typedef enum fragment_states {
    // incoming values
    FRAGMENT_RECEIVED,  // received message fragment
    FRAGMENT_PROCESSED, // payload processed but not freed
-// FRAGMENT_FINISHED,  // fragment resources freed
-   // outgoing values
-   FRAGMENT_ASSIGNED,  // assigned for an outgoing fragment
-   FRAGMENT_RESERVING, // trying to acquire a OpenQueue packet
-   FRAGMENT_RESERVED,  // payload copied to OpenQueue packet
-                       // message fragment ready to be forwarded
-                       // message fragment ready to be sent
-   FRAGMENT_SENDING,   // packet attempted to be sent (on layer 2)
    FRAGMENT_FINISHED,  // message fragment sent
                        // no attached packet: last state
    // Fragment Entry value
+   FRAGMENT_RESERVED,  // reserved fragment for RX or TX
    FRAGMENT_RX,        // incoming message
    FRAGMENT_TX,        // outgoing message
    FRAGMENT_FW,        // forwarding message
-   FRAGMENT_FAIL,      // error on Tx, waiting for fragments on sending
-   FRAGMENT_FAIL_FW
 } FragmentState;
 
 typedef enum fragment_actions {
@@ -86,11 +76,7 @@ typedef enum fragment_actions {
 
 //=========================== typedef =========================================
 
-typedef struct {
-   opentimer_id_t    timer;
-   OpenQueueEntry_t* pkt;
-} fragment_timers_t[FRAGMENT_TX_MAX_PACKETS];
-
+// Data to track forwarding and incoming fragmented messages
 typedef struct {
    uint8_t           fragment_offset;
    uint8_t           fragment_size;
@@ -98,23 +84,40 @@ typedef struct {
    OpenQueueEntry_t* fragment;
 } FragmentOffsetEntry_t;
 
-typedef struct FragmentQueueEntry {
-   FragmentState         in_use;        // Record state
-   OpenQueueEntry_t*     msg;           // Initial fragment message
-   uint16_t              datagram_size; // RFC 4944 Section 5.3
-   uint16_t              datagram_tag;
-   uint16_t              new_size;      // forwarded msg size & tag
-   uint16_t              new_tag;
-   open_addr_t           dst;           // i802.15.4 addresses or originator
-   open_addr_t           src;           // and destination mesh addresses
-   opentimer_id_t        timerId;
-   FragmentAction        action;        // action to process fragments
-   uint8_t               number;        // number of fragments in list
-   uint8_t               processed;     // number of assembled or ready to forward
-   uint8_t               sending;       // number on sending
-   uint8_t               sent;          // number of sent
-   uint8_t               offset;        // fragment offset
+typedef union {
+   // Data to track outgoing fragmented messages
+   struct {
+      // to fragment not big packets: it is too large; actually only 8B
+      // are needed but implementation is simplier when copying message
+      // to this buffer and making "big" points it
+      uint8_t  excess[FRAME_DATA_DATA];
+      uint8_t* payload;           // message payload
+      uint8_t  max_fragment_size;
+      uint16_t actual_sent;       // data sent
+      uint8_t  size;              // next fragment size
+      bool     fragn;             // True if not first fragment
+   } data;
    FragmentOffsetEntry_t list[FRAGMENT_MAX_FRAGMENTS];
+} FragmentOtherData_t;
+
+typedef struct FragmentQueueEntry {
+   FragmentState       in_use;        // Record state
+   OpenQueueEntry_t*   msg;           // Initial fragment message
+   uint8_t             creator;       // the message creator component
+   uint16_t            datagram_size; // RFC 4944 Section 5.3
+   uint16_t            datagram_tag;
+   uint16_t            new_size;      // forwarded msg size & tag
+   uint16_t            new_tag;
+   open_addr_t         dst;           // i802.15.4 addresses or originator
+   open_addr_t         src;           // and destination mesh addresses
+   opentimer_id_t      timerId;
+   FragmentAction      action;        // action to process fragments
+   uint8_t             number;        // number of fragments in list
+   uint8_t             processed;     // number of assembled or ready to forward
+   uint8_t             sending;       // number on sending
+   uint8_t             sent;          // number of sent
+   uint8_t             offset;        // fragment offset
+   FragmentOtherData_t other;
 } FragmentQueueEntry_t;
 
 typedef struct {
@@ -128,9 +131,8 @@ typedef struct {
 
 void fragment_init(void);
 owerror_t fragment_prependHeader(OpenQueueEntry_t* msg);
-void fragment_retrieveHeader(OpenQueueEntry_t* msg);
+bool fragment_retrieveHeader(OpenQueueEntry_t* msg);
 void fragment_sendDone(OpenQueueEntry_t *msg, owerror_t error);
-FragmentQueueEntry_t* fragment_indexBuffer(uint8_t id);
 FragmentQueueEntry_t* fragment_searchBufferFromMsg(OpenQueueEntry_t* msg);
 void fragment_assignAction(FragmentQueueEntry_t* buffer, FragmentAction action);
 void fragment_checkOpenBridge(OpenQueueEntry_t *msg, owerror_t error);

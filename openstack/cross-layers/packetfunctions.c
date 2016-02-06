@@ -269,7 +269,7 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_le
    bool error;
 
    error = pkt->big ?
-	   pkt->length + header_length > BIG_PACKET_SIZE :
+	   pkt->length + header_length > LARGE_PACKET_SIZE :
 	   (uint8_t*)(pkt->payload)-header_length < (uint8_t*)(pkt->packet);
    // Check if is needed to reserve a big packet.
    // Layer 2 does not need support for large packets as messages
@@ -335,7 +335,7 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* sr
    dst->l2_ASNpayload = dst->payload + (src->l2_ASNpayload - src->payload);
 
    // update l2_scheduleIE_cellObjects pointer
-   dst->l2_scheduleIE_cellObjects = dst->payload + (src->l2_scheduleIE_cellObjects - src->payload);
+   dst->l2_sixtop_cellObjects = dst->payload + (src->l2_sixtop_cellObjects - src->payload);
 
    // update l2_payload pointer
    dst->l2_payload = dst->payload + (src->l2_payload - src->payload);
@@ -412,8 +412,6 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
    onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
    
    // length
-//   little_helper[0] = 0;
-//   little_helper[1] = msg->length;
    little_helper[0] = (msg->length & 0xFF00) >> 8;
    little_helper[1] =  msg->length & 0x00FF;
    onesComplementSum(temp_checksum,little_helper,2);

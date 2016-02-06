@@ -15,8 +15,6 @@ bigqueue_vars_t bigqueue_vars;
 
 void openqueue_reset_entry(OpenQueueEntry_t* entry);
 
-void bigqueue_reset_entry(BigQueueEntry_t* entry);
-
 //=========================== public ==========================================
 
 //======= admin
@@ -104,19 +102,18 @@ owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
             openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
                                   (errorparameter_t)0,
                                   (errorparameter_t)0);
-         }
-	 if ( pkt->big )
-            for (j=0;j<BIGQUEUELENGTH;j++)
-               if ( (uint8_t*)&(bigqueue_vars.queue[j]) == pkt->big ) {
-
-                  if ( ! bigqueue_vars.queue[j].in_use ) 
-                     openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
+          }
+	  if ( pkt->big )
+	for (j=0;j<BIGQUEUELENGTH;j++)
+           if ( (uint8_t*)&(bigqueue_vars.queue[j]) == pkt->big ) {
+              if ( ! bigqueue_vars.queue[j].in_use ) 
+                 openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
                                   (errorparameter_t)0,
-				  (errorparameter_t)0);
-                  bigqueue_vars.queue[j].in_use = FALSE;
-               }
-         openqueue_reset_entry(&(openqueue_vars.queue[i]));
-         return E_SUCCESS;
+                                  (errorparameter_t)0);
+              bigqueue_vars.queue[j].in_use = FALSE;
+           }
+           openqueue_reset_entry(&(openqueue_vars.queue[i]));
+           return E_SUCCESS;
       }
    }
 
@@ -132,18 +129,39 @@ owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
 \returns E_FAIL when the module could not find the specified packet buffer.
 */
 owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
-   owerror_t error;
+   uint8_t i;
+   uint8_t j;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   error = openqueue_freePacketBuffer_atomic(pkt);
-   ENABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++) {
+      if (&openqueue_vars.queue[i]==pkt) {
+         if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
+            // log the error
+            openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
+                                  (errorparameter_t)0,
+                                  (errorparameter_t)0);
+         }
+	 if (pkt->big)
+            for (j=0;j<BIGQUEUELENGTH;j++)
+               if ( (uint8_t*)&(bigqueue_vars.queue[j]) == pkt->big ) {
+                  if ( ! bigqueue_vars.queue[j].in_use )
+                     openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
+                                  (errorparameter_t)0,
+				  (errorparameter_t)0);
+		     bigqueue_vars.queue[j].in_use = FALSE;
+		  }
 
+         openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         ENABLE_INTERRUPTS();
+         return E_SUCCESS;
+      }
+   }
    // log the error
-   if ( error == E_FAIL )
-      openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_ERROR,
+   openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_ERROR,
                          (errorparameter_t)0,
                          (errorparameter_t)0);
-   return error;
+   ENABLE_INTERRUPTS();
+   return E_FAIL;
 }
 
 /**
@@ -159,10 +177,11 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
       if (openqueue_vars.queue[i].creator==creator) {
          FragmentQueueEntry_t* buffer;
 
-         if ( (buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]))) != NULL ) {
+	 if ( (buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]))) != NULL ) {
             fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
-	 } else
-            openqueue_reset_entry(&(openqueue_vars.queue[i]));
+	 } else {
+         openqueue_reset_entry(&(openqueue_vars.queue[i]));
+	 }
       }
    }
    ENABLE_INTERRUPTS();
@@ -181,35 +200,46 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
       if (openqueue_vars.queue[i].owner==owner) {
          FragmentQueueEntry_t* buffer;
 
-         if ( (buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]))) != NULL ) {
+	 if ( (buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]))) != NULL ) {
             fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
-	 } else
-            openqueue_reset_entry(&(openqueue_vars.queue[i]));
+	 } else {
+         openqueue_reset_entry(&(openqueue_vars.queue[i]));
+	 }
       }
    }
    ENABLE_INTERRUPTS();
 }
 
+/**
+\brief Assign a big packet buffer to an OpenQueueEntry
+
+\param pkt   The OpenQueueEntry struct
+\param start The start position to copy contents to the new buffer. If
+             zero is specified, start = pkt->length.
+
+\returns pkt  If buffer assigned
+\returns NULL If no availble buffer
+*/
 OpenQueueEntry_t* openqueue_toBigPacket(OpenQueueEntry_t* pkt, uint16_t start) {
    uint8_t  i;
    uint8_t* payload;
    INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
 
+   DISABLE_INTERRUPTS();
    for (i=0;i<BIGQUEUELENGTH;i++) {
       if (! bigqueue_vars.queue[i].in_use) {
          bigqueue_vars.queue[i].in_use = TRUE;
-         payload  = ((uint8_t*)&(bigqueue_vars.queue[i].buffer));
-         payload += BIG_PACKET_SIZE; // end of buffer
-         payload -= start > 0 ? start : pkt->length;
-	 // - IEEE802154_SECURITY_TAG_LEN; Is footer needed here ?
-         memcpy(payload, pkt->payload, pkt->length);
-         pkt->payload    = payload;
-         pkt->l4_payload = payload - pkt->length + pkt->l4_length;
-         pkt->big = (uint8_t*)&(bigqueue_vars.queue[i]);
+	 ENABLE_INTERRUPTS();
 
-         ENABLE_INTERRUPTS();
-         return pkt;
+	 payload  = ((uint8_t*)&(bigqueue_vars.queue[i].buffer));
+	 payload += LARGE_PACKET_SIZE; // end of buffer
+	 payload -= start > 0 ? start : pkt->length;
+	 memcpy(payload, pkt->payload, pkt->length);
+	 pkt->payload    = payload;
+	 pkt->l4_payload = payload - pkt->length + pkt->l4_length;
+	 pkt->big        = (uint8_t*)&(bigqueue_vars.queue[i]);
+
+	 return pkt;
       }
    }
 
@@ -307,7 +337,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //admin
    entry->creator                      = COMPONENT_NULL;
    entry->owner                        = COMPONENT_NULL;
-   entry->payload                      = &(entry->packet[127 - IEEE802154_SECURITY_TAG_LEN]); // Footer is longer if security is used
+   entry->payload                      = &(entry->packet[FRAME_DATA_PLOAD - IEEE802154_SECURITY_TAG_LEN]); // Footer is longer if security is used
    entry->length                       = 0;
    entry->big                          = NULL;
    //l4
