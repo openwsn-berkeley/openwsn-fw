@@ -111,7 +111,6 @@ typedef struct FragmentQueueEntry {
    opentimer_id_t      timerId;
    FragmentAction      action;        // action to process fragments
    uint8_t             number;        // number of fragments in list
-   uint8_t             processed;     // number of assembled or ready to forward
    uint8_t             offset;        // fragment offset
    FragmentOtherData_t other;
 } FragmentQueueEntry_t;

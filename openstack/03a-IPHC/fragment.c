@@ -55,6 +55,7 @@ void fragment_openbridge(FragmentQueueEntry_t* buffer);
 
 owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt);
 
+uint8_t fragment_bufferCountFree(void);
 //=========================== public ==========================================
 
 /**
@@ -226,7 +227,6 @@ bool fragment_retrieveHeader(OpenQueueEntry_t* msg) {
    if (!fragn && size == buffer->datagram_size) {
       fragment_freeBuffer(buffer);
       packetfunctions_tossHeader(msg, 4);
-      msg->payload[0] |= IPHC_DISPATCH_IPHC << IPHC_DISPATCH
       return FALSE;
    }
 */
@@ -265,6 +265,13 @@ bool fragment_retrieveHeader(OpenQueueEntry_t* msg) {
    else if ( fragment_completeRX(buffer) )
       fragment_disableTimer(buffer);
 
+   // if message cannot be allocated
+   if ( !fragn && buffer->datagram_size > LARGE_PACKET_SIZE ) {
+      buffer->action = FRAGMENT_ACTION_CANCEL;
+      buffer->msg = NULL;
+      fragn = TRUE;
+   }
+
    // Initial fragment
    if (! fragn) {
       buffer->msg = msg;
@@ -277,7 +284,7 @@ bool fragment_retrieveHeader(OpenQueueEntry_t* msg) {
 }
 
 void fragment_sendDone(OpenQueueEntry_t *msg, owerror_t error) {
-   FragmentQueueEntry_t* buffer = NULL;
+   FragmentQueueEntry_t* buffer;
 
    msg->owner = COMPONENT_FRAGMENT;
 
@@ -476,8 +483,8 @@ void fragment_finishSend(FragmentQueueEntry_t* buffer, owerror_t error)
    pkt->creator = buffer->creator;
    if ( pkt->big == &(buffer->other.data.excess[0]) )
       pkt->big = NULL;
-   fragment_resetBuffer(buffer);
-   forwarding_sendDone(pkt, error);
+   fragment_freeBuffer(buffer);
+   iphc_sendDone(pkt, error);
 }
 
 void fragment_setSize(OpenQueueEntry_t* msg, uint16_t size) {
@@ -550,7 +557,7 @@ FragmentQueueEntry_t* fragment_searchBuffer(OpenQueueEntry_t* msg, bool in) {
 
    // Adreesses are only based on IEEE 802.15.4 as
    // MESH is not implemented
-   src = in ? &(msg->l2_nextORpreviousHop)  : idmanager_getMyID(ADDR_64B);
+   src = in ? &(msg->l2_nextORpreviousHop) : idmanager_getMyID(ADDR_64B);
    dst = in ? idmanager_getMyID(ADDR_64B) : &(msg->l2_nextORpreviousHop);
 
    DISABLE_INTERRUPTS();
@@ -624,7 +631,6 @@ void fragment_resetBuffer(FragmentQueueEntry_t* buffer) {
    buffer->action        = FRAGMENT_ACTION_NONE;
    buffer->datagram_size = 0;
    buffer->number        = 0;
-   buffer->processed     = 0;
    for ( i = 0; i < FRAGMENT_MAX_FRAGMENTS; i++ ) {
        buffer->other.list[i].state = FRAGMENT_NONE;
        buffer->other.list[i].fragment = NULL;
@@ -663,7 +669,6 @@ owerror_t fragment_restartBuffer(FragmentQueueEntry_t* buffer) {
       buffer->msg->length   = 0;
    }
    buffer->number           = 0;
-   buffer->processed        = 0;
    buffer->action           = FRAGMENT_ACTION_NONE;
    ENABLE_INTERRUPTS();
    return E_SUCCESS;
@@ -678,6 +683,9 @@ void fragment_disableTimer(FragmentQueueEntry_t* buffer) {
 
 void fragment_timeout_timer_cb(opentimer_id_t id) {
    uint8_t               i;
+   uint8_t               j;
+   FragmentQueueEntry_t* buffer;
+   OpenQueueEntry_t*     msg;
    INTERRUPT_DECLARATION();
 
    openserial_printError(COMPONENT_FRAGMENT, ERR_EXPIRED_TIMER,
@@ -686,19 +694,35 @@ void fragment_timeout_timer_cb(opentimer_id_t id) {
    DISABLE_INTERRUPTS();
    for (i=0;i<FRAGQLENGTH;i++)
       if (fragmentqueue_vars.queue[i].timerId==id) {
-         if ( fragmentqueue_vars.queue[i].action == FRAGMENT_ACTION_OPENBRIDGE ) {
+	 buffer = &(fragmentqueue_vars.queue[i]);
+         if ( buffer->action == FRAGMENT_ACTION_OPENBRIDGE ) {
+	    buffer->action = FRAGMENT_ACTION_CANCEL;
             ENABLE_INTERRUPTS();
-            fragment_cancelToBridge(&(fragmentqueue_vars.queue[i]));
+            fragment_cancelToBridge(buffer);
             DISABLE_INTERRUPTS();
 	 }
-         ENABLE_INTERRUPTS();
-         fragment_assignAction(&(fragmentqueue_vars.queue[i]), FRAGMENT_ACTION_CANCEL);
-         if ( fragmentqueue_vars.queue[i].in_use == FRAGMENT_RX )
-            fragment_resetBuffer(&(fragmentqueue_vars.queue[i]));
-         else if ( fragmentqueue_vars.queue[i].in_use != FRAGMENT_NONE )
-            // Notify error to upper layer when forwarding
-            fragment_finishSend(&(fragmentqueue_vars.queue[i]), E_FAIL);
-	 return;
+         buffer->action = FRAGMENT_ACTION_CANCEL;
+         for (j = 0; j < buffer->number
+		  && buffer->other.list[j].state != FRAGMENT_FINISHED;
+	      j++ ) {
+            msg = buffer->other.list[j].fragment;
+            if ( buffer->msg && buffer->msg == msg
+                             && buffer->in_use != FRAGMENT_FW )
+               msg = NULL;
+	    buffer->other.list[j].state = FRAGMENT_FINISHED;
+	    buffer->other.list[j].fragment = NULL;
+	    if ( msg )
+               openqueue_freePacketBuffer_atomic(msg);
+	 }
+	 msg = NULL;
+         if ( buffer->in_use == FRAGMENT_FW )
+            msg = buffer->msg;
+         fragment_resetBuffer(buffer);
+	 ENABLE_INTERRUPTS();
+         // Notify error to upper layer when forwarding
+	 if ( msg )
+            forwarding_sendDone(msg, E_FAIL);
+         return;
       }
    ENABLE_INTERRUPTS();
 }
@@ -772,15 +796,11 @@ void fragment_doCancel(FragmentQueueEntry_t* buffer) {
 }
 
 void fragment_cancel(FragmentQueueEntry_t* buffer, uint8_t frag) {
-   uint8_t           i;
-   uint16_t          received;
    OpenQueueEntry_t* msg;
    INTERRUPT_DECLARATION();
 
-
    if ( buffer->in_use != FRAGMENT_TX ) {
       DISABLE_INTERRUPTS();
-      buffer->processed++;
       msg = buffer->other.list[frag].fragment;
       if ( msg == buffer->msg && buffer->in_use != FRAGMENT_FW ) // FRAG1
          msg = NULL;
@@ -791,17 +811,9 @@ void fragment_cancel(FragmentQueueEntry_t* buffer, uint8_t frag) {
          openqueue_freePacketBuffer(msg);
    }
 
-   received = 0;
-   DISABLE_INTERRUPTS();
-   for (i=0; i<buffer->number; i++) {
-      if (buffer->other.list[i].state == FRAGMENT_FINISHED)
-         received += buffer->other.list[i].fragment_size;
-   }
-   ENABLE_INTERRUPTS();
-
-   if (received == buffer->datagram_size) {
+   if ( fragment_completeRX(buffer) ) {
       if ( buffer->in_use != FRAGMENT_FW )
-         fragment_resetBuffer(buffer);
+         fragment_freeBuffer(buffer);
       else // Notify error to upper layer when forwarding
          fragment_finishSend(buffer, E_FAIL);
    }
@@ -824,7 +836,6 @@ void fragment_doAssemble(FragmentQueueEntry_t* buffer, FragmentAction action) {
    buffer->offset = buffer->other.list[frag1].fragment_size
                   - buffer->msg->length;
    received = buffer->datagram_size - buffer->offset;
-   buffer->processed++;
    buffer->other.list[frag1].state = FRAGMENT_FINISHED;
 
    if ( received >= FRAGMENT_DATA_UTIL ) { // ask for a large packet
@@ -842,9 +853,8 @@ void fragment_doAssemble(FragmentQueueEntry_t* buffer, FragmentAction action) {
                 buffer->msg->payload, buffer->msg->length);
       buffer->msg->payload = &(buffer->msg->packet[FRAME_DATA_PLOAD]) - received;
    }
-   buffer->msg->length    = received;
+   buffer->msg->length = received;
    if ( action == FRAGMENT_ACTION_FORWARD )
-      // trick: assume all first fragment is IPHC
       buffer->msg->l4_length = received - buffer->other.list[frag1].fragment_size;
 
    // Process pending fragments, if any
@@ -855,8 +865,6 @@ void fragment_doAssemble(FragmentQueueEntry_t* buffer, FragmentAction action) {
 }
 
 void fragment_assemble(FragmentQueueEntry_t* buffer, uint8_t frag) {
-   uint8_t           i;
-   uint16_t          received;
    FragmentState     state;
    OpenQueueEntry_t* msg;
    INTERRUPT_DECLARATION();
@@ -869,21 +877,13 @@ void fragment_assemble(FragmentQueueEntry_t* buffer, uint8_t frag) {
           buffer->other.list[frag].fragment->payload,
           buffer->other.list[frag].fragment_size);
 // buffer->other.list[i].state = FRAGMENT_PROCESSED;
-   buffer->processed++;
    msg = buffer->other.list[frag].fragment;
    buffer->other.list[frag].fragment = NULL;
    buffer->other.list[frag].state = FRAGMENT_FINISHED 
    ENABLE_INTERRUPTS();
    openqueue_freePacketBuffer(msg);
 
-   received = 0;
-   DISABLE_INTERRUPTS();
-   for (i=0; i<buffer->number; i++) {
-      if (buffer->other.list[i].state == FRAGMENT_FINISHED)
-         received += buffer->other.list[i].fragment_size;
-   }
-   ENABLE_INTERRUPTS();
-   if (received == buffer->datagram_size) {
+   if ( fragment_completeRX(buffer) ) {
       msg   = buffer->msg;
       state = buffer->in_use;
       fragment_freeBuffer(buffer);
@@ -909,9 +909,8 @@ void fragment_openbridge(FragmentQueueEntry_t* buffer) {
       if (buffer->other.list[i].state == FRAGMENT_RECEIVED) {
          msg = buffer->other.list[i].fragment;
          // check fragment kind
-	 if ( buffer->processed == 0 && msg == buffer->msg ) {
+	 if ( msg == buffer->msg ) {
             buffer->msg = NULL;
-            buffer->processed++;
 	    length = FRAGMENT_FRAG1_HL;
 	 } else
             length = FRAGMENT_FRAGN_HL;
@@ -922,12 +921,12 @@ void fragment_openbridge(FragmentQueueEntry_t* buffer) {
 //      }
 //      if (buffer->other.list[i].state == FRAGMENT_PROCESSED) {
 //         msg = buffer->other.list[i].fragment;
+	 // msg will have been freed by openbridge
+	 buffer->other.list[i].fragment = NULL;
+	 buffer->other.list[i].state = FRAGMENT_FINISHED;
          ENABLE_INTERRUPTS();
 	 openbridge_receive(msg);
          DISABLE_INTERRUPTS();
-	 // msg has been freed yet by openbridge
-	 buffer->other.list[i].fragment = NULL;
-	 buffer->other.list[i].state = FRAGMENT_FINISHED;
       }
       if (buffer->other.list[i].state == FRAGMENT_FINISHED)
          received += buffer->other.list[i].fragment_size;
@@ -972,3 +971,16 @@ uint8_t fragment_askL2HeaderSize(OpenQueueEntry_t* msg) {
    return hsize;
 }
 
+uint8_t fragment_bufferCountFree(void) {
+	   uint8_t i;
+	      uint8_t count;
+
+	         count = 0;
+		    for (i=0;i<FRAGQLENGTH;i++)
+			    /*      if ( fragmentqueue_vars.queue[i].in_use  != FRAGMENT_NONE 
+			     *              && fragmentqueue_vars.queue[i].timerId == TOO_MANY_TIMERS_ERROR )*/
+			          if ( fragmentqueue_vars.queue[i].in_use == FRAGMENT_NONE )
+					           count++;
+
+		       return count;
+}
