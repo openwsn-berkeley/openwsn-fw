@@ -903,6 +903,7 @@ void fragment_openbridge(FragmentQueueEntry_t* buffer) {
    OpenQueueEntry_t* msg;
    INTERRUPT_DECLARATION();
 
+   received = 0;
    DISABLE_INTERRUPTS();
    for (i=0; i<buffer->number; i++) {
       if (buffer->other.list[i].state == FRAGMENT_RECEIVED) {
