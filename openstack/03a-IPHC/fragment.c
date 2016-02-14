@@ -921,11 +921,6 @@ void fragment_doAssemble(FragmentQueueEntry_t* buffer, FragmentAction action) {
    buffer->msg->length = received;
    received = buffer->number;
    ENABLE_INTERRUPTS();
-=======
-   buffer->msg->length = received;
-   if ( action == FRAGMENT_ACTION_FORWARD )
-      buffer->msg->l4_length = received - buffer->other.list[frag1].fragment_size;
->>>>>>> 5dfb36458e95155a4a0fde0de0d3a1048bca76f1
 
    // Process pending fragments, if any
    if ( received > 1 )
