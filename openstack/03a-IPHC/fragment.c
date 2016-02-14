@@ -422,7 +422,7 @@ bool fragment_completeRX(FragmentQueueEntry_t* buffer, FragmentState state) {
 
    received = 0;
    for ( i = 0; i < buffer->number; i++ )
-      if ( state == buffer->other.list[i].state )
+      if ( state >= buffer->other.list[i].state )
          received += buffer->other.list[i].fragment_size;
 
    complete = received == buffer->datagram_size;
@@ -434,8 +434,7 @@ bool fragment_completeRX(FragmentQueueEntry_t* buffer, FragmentState state) {
 
 \note  Message can get this point in the form of large packet (assumed it must
        be fragmented) or of normal packet but do not fit into a single frame.
-       If message does not need to be fragmented if calls sixtop_send, as usual.
-       If it must be fragmented, initializes fragmentation data and starts
+       As it must be fragmented, initializes fragmentation data and starts
        fragmentation sending process yielding control to fragment_tryToSend.
 
 \param buffer A fragmentation buffer containing the packet to send.
@@ -483,6 +482,7 @@ void fragment_tryToSend(FragmentQueueEntry_t* buffer) {
    uint8_t           actual_frag_size;
    uint16_t          tag;
    uint16_t          size;
+   bool              fragn;
    INTERRUPT_DECLARATION();
 
    DISABLE_INTERRUPTS();
@@ -499,13 +499,14 @@ void fragment_tryToSend(FragmentQueueEntry_t* buffer) {
    pkt              = buffer->msg;
    tag              = buffer->datagram_tag;
    size             = buffer->datagram_size;
+   fragn            = buffer->other.data.fragn;
    ENABLE_INTERRUPTS();
    pkt->payload     = &(pkt->packet[FRAGMENT_DATA_INIT - actual_frag_size]);
    memcpy(pkt->payload,
           buffer->other.data.payload + actual_sent,
           actual_frag_size * sizeof(uint8_t));
    pkt->length      = actual_frag_size;
-   if ( buffer->other.data.fragn ) { // offset
+   if ( fragn ) { // offset
       packetfunctions_reserveHeaderSize(pkt, sizeof(uint8_t));
       fragment_setOffset(pkt, actual_sent>>3);
    }
@@ -513,11 +514,11 @@ void fragment_tryToSend(FragmentQueueEntry_t* buffer) {
    fragment_setTag(pkt, tag);
    packetfunctions_reserveHeaderSize(pkt, 2 * sizeof(uint8_t));
    fragment_setSize(pkt, size);
-   if ( buffer->other.data.fragn )
+   if ( fragn )
       pkt->payload[0] |= (IPHC_DISPATCH_FRAGN << IPHC_FRAGMENT);
    else {
       pkt->payload[0] |= (IPHC_DISPATCH_FRAG1 << IPHC_FRAGMENT);
-      buffer->other.data.fragn = TRUE;
+      fragn = TRUE;
    }
 
    // update data for next fragment
@@ -529,6 +530,7 @@ void fragment_tryToSend(FragmentQueueEntry_t* buffer) {
       actual_frag_size = buffer->datagram_size - actual_sent;
    buffer->other.data.actual_sent = actual_sent;
    buffer->other.data.size        = actual_frag_size;
+   buffer->other.data.fragn       = fragn;
    ENABLE_INTERRUPTS();
 
    // try to send fragment
@@ -541,6 +543,13 @@ void fragment_finishSend(FragmentQueueEntry_t* buffer, owerror_t error)
 {
    OpenQueueEntry_t* pkt;
    INTERRUPT_DECLARATION();
+
+   if ( buffer == NULL || buffer->in_use == FRAGMENT_NONE ) {
+      openserial_printError(COMPONENT_FRAGMENT,ERR_FREEING_ERROR,
+                            (errorparameter_t)0,
+			    (errorparameter_t)0);
+      return;
+   }
 
    DISABLE_INTERRUPTS();
    pkt = buffer->msg;
@@ -599,7 +608,7 @@ FragmentQueueEntry_t* fragment_getFreeBuffer(void) {
 
    // Just happened once on heavy load but...
    // All fragment buffers are occupied with no available timers
-   // Try to free possible expired ones
+   // Try to free possible not functional ones
    check = FRAGQLENGTH;
    for ( i = 0; i < FRAGQLENGTH; i++ )
       if ( (fragmentqueue_vars.queue[i].in_use == FRAGMENT_RX
@@ -616,6 +625,7 @@ FragmentQueueEntry_t* fragment_getFreeBuffer(void) {
       fragmentqueue_vars.queue[check].in_use = FRAGMENT_RESERVED;
       return &(fragmentqueue_vars.queue[check]);
    }
+
    return NULL;
 }
 
@@ -764,7 +774,8 @@ void fragment_activateTimer(FragmentQueueEntry_t* buffer) {
 }
 
 void fragment_disableTimer(FragmentQueueEntry_t* buffer) {
-   if (buffer!=NULL && buffer->timerId!=FRAGMENT_NOTIMER) {
+   if (buffer!=NULL && buffer->timerId!=FRAGMENT_NOTIMER
+                    && buffer->timerId!=TOO_MANY_TIMERS_ERROR ) {
       opentimers_stop(buffer->timerId); 
       buffer->timerId=FRAGMENT_NOTIMER;
    }
