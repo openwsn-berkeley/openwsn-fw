@@ -18,7 +18,7 @@
 #define FRAGMENT_DATA_UTIL     (FRAME_DATA_DATA - IEEE802154_SECURITY_TAG_LEN)
 #define FRAGMENT_DATA_INIT     (FRAME_DATA_PLOAD - IEEE802154_SECURITY_TAG_LEN)
 
-#define FRAGQLENGTH 7
+#define FRAGQLENGTH 5
 
 #define FRAGMENT_FRAG1_HL 4 // Fragment header length
 #define FRAGMENT_FRAGN_HL 5
@@ -72,7 +72,7 @@ typedef enum fragment_actions {
 #define FRAGMENT_MOTE2PC_TOMESH   ((uint8_t)'T')
 
 #define FRAGMENT_TIMEOUT_MS     60000
-#define FRAGMENT_TX_MAX_PACKETS     1
+#define FRAGMENT_NOTIMER        TOO_MANY_TIMERS_ERROR-1
 
 //=========================== typedef =========================================
 
@@ -111,8 +111,7 @@ typedef struct FragmentQueueEntry {
    opentimer_id_t      timerId;
    FragmentAction      action;        // action to process fragments
    uint8_t             number;        // number of fragments in list
-   uint8_t             processed;     // number of assembled or ready to forward
-   uint8_t             offset;        // fragment offset
+   int8_t              offset;        // fragment offset
    FragmentOtherData_t other;
 } FragmentQueueEntry_t;
 

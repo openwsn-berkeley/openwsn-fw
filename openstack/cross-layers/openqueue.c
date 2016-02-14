@@ -174,14 +174,21 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){
+      FragmentQueueEntry_t* buffer;
+      buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]));
       if (openqueue_vars.queue[i].creator==creator) {
-         FragmentQueueEntry_t* buffer;
 
-	 if ( (buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]))) != NULL ) {
+	 if ( buffer != NULL ) {
+            DISABLE_INTERRUPTS();
             fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
+            ENABLE_INTERRUPTS();
 	 } else {
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
 	 }
+      } else if ( buffer != NULL && buffer->creator == creator ) {
+         DISABLE_INTERRUPTS();
+         fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
+         ENABLE_INTERRUPTS();
       }
    }
    ENABLE_INTERRUPTS();
@@ -201,7 +208,9 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
          FragmentQueueEntry_t* buffer;
 
 	 if ( (buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]))) != NULL ) {
+            DISABLE_INTERRUPTS();
             fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
+            ENABLE_INTERRUPTS();
 	 } else {
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
 	 }
