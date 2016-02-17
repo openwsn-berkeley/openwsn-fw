@@ -1,4 +1,4 @@
-#include "llds.h"
+#include "llsf.h"
 #include "neighbors.h"
 #include "sixtop.h"
 #include "scheduler.h"
@@ -20,17 +20,17 @@ typedef struct {
 
 typedef struct {
     slot_distance_t sd[MAX_SCHEDULED_SLOT];
-} llds_vars_t;
+} llsf_vars_t;
 
-llds_vars_t llds_vars;
+llsf_vars_t llsf_vars;
 
 //=========================== prototypes ======================================
 
-bool llds_generateLowLantencySlots_add(
+bool llsf_generateLowLantencySlots_add(
      uint16_t * slotsList,
      cellInfo_ht* cellList
 );
-bool llds_generateLowLantencySlots_remove(
+bool llsf_generateLowLantencySlots_remove(
      uint16_t * txSlotsList,
      uint16_t * rxSlotsList,
      cellInfo_ht* cellList,
@@ -39,7 +39,7 @@ bool llds_generateLowLantencySlots_remove(
 );
 
 // private
-bool llds_isSlotAvialable(uint16_t slot);
+bool llsf_isSlotAvialable(uint16_t slot);
 
 // helper
 void array_sort(uint16_t * array);
@@ -48,11 +48,11 @@ void stack_push(cellInfo_ht* cellList,uint16_t slot);
 //=========================== public ==========================================
 
 // admin
-void llds_init() {
-    memset(&llds_vars,0,sizeof(llds_vars_t));
+void llsf_init() {
+    memset(&llsf_vars,0,sizeof(llsf_vars_t));
 }
 
-bool llds_candidateAddCellList(
+bool llsf_candidateAddCellList(
       uint8_t*     type,
       uint8_t*     frameID,
       uint8_t*     flag,
@@ -68,11 +68,11 @@ bool llds_candidateAddCellList(
     memset(&rxSlotsInSchedule[0],0xff,sizeof(rxSlotsInSchedule));
     // get list of slot for receiving
     schedule_getScheduledSlots(&rxSlotsInSchedule[0],CELLTYPE_RX); 
-    returnVal = llds_generateLowLantencySlots_add(&rxSlotsInSchedule[0],cellList);
+    returnVal = llsf_generateLowLantencySlots_add(&rxSlotsInSchedule[0],cellList);
     return returnVal;
 }
     
-bool llds_candidateRemoveCellList(
+bool llsf_candidateRemoveCellList(
      uint8_t*             type,
      uint8_t*             frameID,
      uint8_t*             flag,
@@ -93,7 +93,7 @@ bool llds_candidateRemoveCellList(
     // get list of slot for receiving and transmitting 
     schedule_getScheduledSlots(&txSlotsInSchedule[0],CELLTYPE_TX);
     schedule_getScheduledSlots(&rxSlotsInSchedule[0],CELLTYPE_RX);
-    returnVal = llds_generateLowLantencySlots_remove(
+    returnVal = llsf_generateLowLantencySlots_remove(
                     txSlotsInSchedule,
                     rxSlotsInSchedule,
                     cellList,
@@ -102,7 +102,7 @@ bool llds_candidateRemoveCellList(
     return returnVal;
 }
 //================================== private ===================================
-bool llds_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellList){
+bool llsf_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellList){
     uint8_t numCandCells;
     uint16_t i,j;
     frameLength_t slotframe_length;
@@ -116,7 +116,7 @@ bool llds_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
     
     numCandCells=0;
     if (slotsList[0] == 0xffff) { // no dedicated cell was scheduled
-        printf("LLDS: random select\n");
+        printf("LLSF: random select\n");
         for (counter=0;counter<SCHEDULEIEMAXNUMCELLS;counter++){
             i  = openrandom_get16b() % (slotframe_length \
                                        -SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS \
@@ -145,7 +145,7 @@ bool llds_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
            return TRUE;
         }
     } else {
-        printf("LLDS: Low Lantecy select\n");
+        printf("LLSF: Low Lantecy select\n");
         // there are dedicated cells in schedule, 
         // choose the one with lowest lantency (max in distance)
         
@@ -156,7 +156,7 @@ bool llds_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
             if (slotsList[j] == 0xffff) {
                 i = slotsList[0]+1;
                 while(schedule_isSlotOffsetAvailable(i)==FALSE || \
-                    llds_isSlotAvialable(i)==FALSE){
+                    llsf_isSlotAvialable(i)==FALSE){
                     i++;
                     if (j!=1){
                         if (i==slotsList[1]){
@@ -172,8 +172,8 @@ bool llds_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
                     }
                 }
                 if ((j==1 && i!=slotsList[0]) || (j!=1 && i!=slotsList[1])){
-                    llds_vars.sd[numCandCells].slotoffset = i;
-                    llds_vars.sd[numCandCells].distance   = slotframe_length+slotsList[0]-slotsList[j-1];
+                    llsf_vars.sd[numCandCells].slotoffset = i;
+                    llsf_vars.sd[numCandCells].distance   = slotframe_length+slotsList[0]-slotsList[j-1];
                     numCandCells++;
                     // this is the end of slotsList, break
                     break;
@@ -181,7 +181,7 @@ bool llds_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
             } else {
                 i = slotsList[j]+1;
                 while(schedule_isSlotOffsetAvailable(i)==FALSE || \
-                      llds_isSlotAvialable(i)==FALSE){
+                      llsf_isSlotAvialable(i)==FALSE){
                     i++;
                     if (j+1 != MAX_SCHEDULED_SLOT){
                         if (i==slotsList[j+1]){
@@ -197,8 +197,8 @@ bool llds_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
                     }
                 }
                 if (i!=slotsList[j+1] && i!=slotsList[0]){
-                    llds_vars.sd[numCandCells].slotoffset = i;
-                    llds_vars.sd[numCandCells].distance   = slotsList[j]-slotsList[j-1];
+                    llsf_vars.sd[numCandCells].slotoffset = i;
+                    llsf_vars.sd[numCandCells].distance   = slotsList[j]-slotsList[j-1];
                     numCandCells++;
                 }
             }
@@ -206,49 +206,49 @@ bool llds_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
         if (j==MAX_SCHEDULED_SLOT){
             i = slotsList[0]+1;
             while(schedule_isSlotOffsetAvailable(i)==FALSE || \
-                llds_isSlotAvialable(i)==FALSE){
+                llsf_isSlotAvialable(i)==FALSE){
                 i++;
                 if (i==slotsList[1]){
                     break;
                 }
             }
             if (i!=slotsList[1]){
-                llds_vars.sd[numCandCells].slotoffset = i;
-                llds_vars.sd[numCandCells].distance   = slotframe_length+slotsList[0]-slotsList[j-1];
+                llsf_vars.sd[numCandCells].slotoffset = i;
+                llsf_vars.sd[numCandCells].distance   = slotframe_length+slotsList[0]-slotsList[j-1];
                 numCandCells++;
             }
         }
         
         // order the candidate slot by distance
         for (i=0;i<MAX_SCHEDULED_SLOT;i++){
-            if (llds_vars.sd[i].distance == 0){
+            if (llsf_vars.sd[i].distance == 0){
                 // no cells
                 break;
             }
             for (j=1;j<MAX_SCHEDULED_SLOT-i;j++) {
-                if (llds_vars.sd[j].distance>llds_vars.sd[j-1].distance){
-                    memcpy(&temp,&llds_vars.sd[j-1],sizeof(slot_distance_t));
-                    memcpy(&llds_vars.sd[j-1],&llds_vars.sd[j],sizeof(slot_distance_t));
-                    memcpy(&llds_vars.sd[j],&temp,sizeof(slot_distance_t));
+                if (llsf_vars.sd[j].distance>llsf_vars.sd[j-1].distance){
+                    memcpy(&temp,&llsf_vars.sd[j-1],sizeof(slot_distance_t));
+                    memcpy(&llsf_vars.sd[j-1],&llsf_vars.sd[j],sizeof(slot_distance_t));
+                    memcpy(&llsf_vars.sd[j],&temp,sizeof(slot_distance_t));
                 }
             }
         }
         // move candidate slot to cellList
         for (i=0;i<MAX_SCHEDULED_SLOT;i++){
-            if (llds_vars.sd[i].distance == 0){
+            if (llsf_vars.sd[i].distance == 0){
                 break;
             }
-            cellList[i].tsNum = llds_vars.sd[i].slotoffset;
+            cellList[i].tsNum = llsf_vars.sd[i].slotoffset;
             cellList[i].choffset = 0;
             cellList[i].linkoptions = CELLTYPE_TX;
         }
         
-        printf("LLDS : rxSlotList\n");
+        printf("LLSF : rxSlotList\n");
         for (i=0;i<MAX_SCHEDULED_SLOT;i++){
             printf("%d ",slotsList[i]);
         }
         printf("\n");
-        printf("LLDS: cellList\n");
+        printf("LLSF: cellList\n");
         for (i=0;i<SCHEDULEIEMAXNUMCELLS;i++){
             printf("%d ",cellList[i].tsNum);
         }
@@ -257,7 +257,7 @@ bool llds_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
     }
 }
 
-bool llds_generateLowLantencySlots_remove(
+bool llsf_generateLowLantencySlots_remove(
      uint16_t * txSlotsList, 
      uint16_t * rxSlotsList, 
      cellInfo_ht* cellList,
@@ -353,14 +353,14 @@ bool llds_generateLowLantencySlots_remove(
 }
 
 //=================================== private ==================================
-bool llds_isSlotAvialable(uint16_t slot){
+bool llsf_isSlotAvialable(uint16_t slot){
     uint8_t i;
     bool returnVal;
     
     returnVal = TRUE;
     for (i=0;i<MAX_SCHEDULED_SLOT;i++){
-        if (llds_vars.sd[i].distance != 0){
-            if (slot == llds_vars.sd[i].slotoffset){
+        if (llsf_vars.sd[i].distance != 0){
+            if (slot == llsf_vars.sd[i].slotoffset){
                 returnVal = FALSE;
                 break;
             }

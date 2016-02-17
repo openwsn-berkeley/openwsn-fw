@@ -18,11 +18,11 @@
 #include "idmanager.h"
 #include "schedule.h"
 #include "pid.h"
-#include "llds.h"
+#include "llsf.h"
 #include "cstorm.h"
 //=========================== defination ======================================
 
-//#define LLDS
+//#define LLSF
 #define ADAPTIVE_REALLOCATION
 
 //=========================== variables =======================================
@@ -193,7 +193,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
    if (neighbor==NULL){
       return;
    }
-#ifndef LLDS
+#ifndef LLSF
    // generate candidate cell list
    outcome = sixtop_candidateAddCellList(
       &type,
@@ -202,7 +202,7 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells){
       cellList
    );
 #else
-   outcome = llds_candidateAddCellList(
+   outcome = llsf_candidateAddCellList(
       &type,
       &frameID,
       &flag,
@@ -286,7 +286,7 @@ void sixtop_removeCell(open_addr_t* neighbor,uint16_t numCells){
    if (neighbor==NULL){
       return;
    }
-#ifndef LLDS
+#ifndef LLSF
    // generate candidate cell list
    outcome = sixtop_candidateRemoveCellList(
       &type, 
@@ -297,7 +297,7 @@ void sixtop_removeCell(open_addr_t* neighbor,uint16_t numCells){
       numCells
    );
 #else 
-   outcome = llds_candidateRemoveCellList(
+   outcome = llsf_candidateRemoveCellList(
       &type, 
       &frameID,
       &flag, 

@@ -1,10 +1,10 @@
-#ifndef __LLDS_H
-#define __LLDS_H
+#ifndef __LLSF_H
+#define __LLSF_H
 
 /**
 \addtogroup MAChigh
 \{
-\addtogroup llds
+\addtogroup llsf
 \{
 */
 
@@ -20,17 +20,17 @@
 //=========================== prototypes ======================================
 
 // admin
-void llds_init(void);
+void llsf_init(void);
 
 // notification from sixtop
-bool llds_candidateAddCellList(
+bool llsf_candidateAddCellList(
    uint8_t*             type,
    uint8_t*             frameID,
    uint8_t*             flag,
    cellInfo_ht*         cellList
 );
 
-bool llds_candidateRemoveCellList(
+bool llsf_candidateRemoveCellList(
    uint8_t*             type,
    uint8_t*             frameID,
    uint8_t*             flag,
