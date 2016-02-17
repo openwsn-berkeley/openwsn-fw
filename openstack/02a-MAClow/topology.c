@@ -4,6 +4,15 @@
 
 //=========================== defines =========================================
 
+#define FORCETOPOLOGY
+
+#define TOPOLOGY_MOTE1 0x01
+#define TOPOLOGY_MOTE2 0x02
+#define TOPOLOGY_MOTE3 0x03
+#define TOPOLOGY_MOTE4 0x04
+#define TOPOLOGY_MOTE5 0x05
+#define TOPOLOGY_MOTE6 0x06
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -51,102 +60,55 @@ topology.
 \return FALSE if the packet should be silently dropped.
 */
 bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
-#ifdef FORCETOPOLOGY
    bool returnVal;
-   
-   returnVal=FALSE;
+#ifdef FORCETOPOLOGY
    switch (idmanager_getMyID(ADDR_64B)->addr_64b[7]) {
-      case 0x4c:
-         if (
-               ieee802514_header->src.addr_64b[7]==0x00 ||
-               ieee802514_header->src.addr_64b[7]==0x60
-            ) {
+      case TOPOLOGY_MOTE1:
+         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE2) {
             returnVal=TRUE;
+         } else {
+            returnVal=FALSE;
          }
          break;
-      case 0x60:
-         if (
-               ieee802514_header->src.addr_64b[7]==0x4c ||
-               ieee802514_header->src.addr_64b[7]==0x97 ||
-               ieee802514_header->src.addr_64b[7]==0xc8
-            ) {
+      case TOPOLOGY_MOTE2:
+         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE1 ||
+             ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE3) {
             returnVal=TRUE;
+         } else {
+            returnVal=FALSE;
          }
          break;
-      case 0xc8:
-         if (
-               ieee802514_header->src.addr_64b[7]==0x60 ||
-               ieee802514_header->src.addr_64b[7]==0x6f ||
-               ieee802514_header->src.addr_64b[7]==0x50
-            ) {
+      case TOPOLOGY_MOTE3:
+         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE2 ||
+             ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE4) {
             returnVal=TRUE;
+         } else {
+            returnVal=FALSE;
          }
          break;
-      case 0x50:
-         if (
-               ieee802514_header->src.addr_64b[7]==0xc8
-            ) {
+      case TOPOLOGY_MOTE4:
+         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE3 ||
+             ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE5) {
             returnVal=TRUE;
+         } else {
+            returnVal=FALSE;
          }
          break;
-      case 0x6f:
-         if (
-               ieee802514_header->src.addr_64b[7]==0x85 ||
-               ieee802514_header->src.addr_64b[7]==0x97 ||
-               ieee802514_header->src.addr_64b[7]==0xc8
-            ) {
+      case TOPOLOGY_MOTE5:
+         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE4 ||
+             ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE6) {
             returnVal=TRUE;
+         } else {
+            returnVal=FALSE;
          }
          break;
-      case 0x85:
-         if (
-               ieee802514_header->src.addr_64b[7]==0x5c ||
-               ieee802514_header->src.addr_64b[7]==0x97 ||
-               ieee802514_header->src.addr_64b[7]==0x6f
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case 0xa8:
-         if (
-               ieee802514_header->src.addr_64b[7]==0x5c ||
-               ieee802514_header->src.addr_64b[7]==0x97 ||
-               ieee802514_header->src.addr_64b[7]==0x00
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case 0x00:
-         if (
-               ieee802514_header->src.addr_64b[7]==0x4c ||
-               ieee802514_header->src.addr_64b[7]==0xa8
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case 0x97:
-         if (
-               ieee802514_header->src.addr_64b[7]==0xa8 ||
-               ieee802514_header->src.addr_64b[7]==0x85 ||
-               ieee802514_header->src.addr_64b[7]==0x6f ||
-               ieee802514_header->src.addr_64b[7]==0x60
-            ) {
-            returnVal=TRUE;
-         }
-         break;
-      case 0x5c:
-         if (
-               ieee802514_header->src.addr_64b[7]==0x85 ||
-               ieee802514_header->src.addr_64b[7]==0xa8
-            ) {
-            returnVal=TRUE;
-         }
-         break;
+      default:
+         returnVal=TRUE;
    }
-   return returnVal;
 #else
-   return TRUE;
+   returnVal = TRUE;
 #endif
+   return returnVal;
 }
 
 //=========================== private =========================================
