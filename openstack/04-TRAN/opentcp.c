@@ -8,7 +8,7 @@
 #include "scheduler.h"
 #include "opentimers.h"
 // applications
-#include "techo.h"
+//#include "techo.h"
 
 //=========================== variables =======================================
 
@@ -116,9 +116,6 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          openqueue_freePacketBuffer(msg);
          tcp_change_state(TCP_STATE_ESTABLISHED);
          switch(tcp_vars.myPort) {
-            case WKP_TCP_ECHO:
-               techo_connectDone(E_SUCCESS);
-               break;
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                      (errorparameter_t)tcp_vars.myPort,
@@ -135,9 +132,6 @@ void opentcp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          openqueue_freePacketBuffer(msg);
          tcp_change_state(TCP_STATE_ESTABLISHED);
          switch(tcp_vars.myPort) {
-            case WKP_TCP_ECHO:
-               techo_receive(tcp_vars.dataReceived);
-               break;
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                      (errorparameter_t)tcp_vars.myPort,
@@ -231,9 +225,6 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
    switch (tcp_vars.state) {
       case TCP_STATE_CLOSED:                                      //[receive] establishement
          switch(msg->l4_destination_port) {
-            case WKP_TCP_ECHO:
-               shouldIlisten = techo_shouldIlisten();
-               break;
             default:
                openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                      (errorparameter_t)msg->l4_sourcePortORicmpv6Type,
@@ -404,9 +395,6 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
          if (containsControlBits(msg,TCP_ACK_YES,TCP_RST_NO,TCP_SYN_NO,TCP_FIN_NO)) {
             //I receive ACK, data message sent
             switch(tcp_vars.myPort) {
-               case WKP_TCP_ECHO:
-                  techo_sendDone(tcp_vars.dataToSend,E_SUCCESS);
-                  break;
                default:
                   openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                         (errorparameter_t)tcp_vars.myPort,
@@ -418,9 +406,6 @@ void opentcp_receive(OpenQueueEntry_t* msg) {
          } else if (containsControlBits(msg,TCP_ACK_WHATEVER,TCP_RST_NO,TCP_SYN_NO,TCP_FIN_YES)) {
             //I receive FIN[+ACK], I send ACK
             switch(tcp_vars.myPort) {
-               case WKP_TCP_ECHO:
-                  techo_sendDone(tcp_vars.dataToSend,E_SUCCESS);
-                  break;
                default:
                   openserial_printError(COMPONENT_OPENTCP,ERR_UNSUPPORTED_PORT_NUMBER,
                                         (errorparameter_t)tcp_vars.myPort,

@@ -6,9 +6,9 @@
 #include "openqueue.h"
 // applications
 #include "opencoap.h"
-#include "uecho.h"
-#include "uinject.h"
-#include "rrt.h"
+//#include "uecho.h"
+//#include "uinject.h"
+//#include "rrt.h"
 
 //=========================== variables =======================================
 
@@ -37,16 +37,6 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    switch(msg->l4_sourcePortORicmpv6Type) {
       case WKP_UDP_COAP:
          opencoap_sendDone(msg,error);
-         break;
-      case WKP_UDP_ECHO:
-         uecho_sendDone(msg,error);
-         break;
-      case WKP_UDP_INJECT:
-         uinject_sendDone(msg,error);
-         break;
-      case WKP_UDP_RINGMASTER:
-	 //udpprint_sendDone(msg, error);
-         rrt_sendDone(msg, error);
          break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,
@@ -103,19 +93,6 @@ void openudp_receive(OpenQueueEntry_t* msg) {
    switch(msg->l4_destination_port) {
       case WKP_UDP_COAP:
          opencoap_receive(msg);
-         break;
-      case WKP_UDP_RINGMASTER:
-         if (msg->l4_payload[0] > 90) {
-            rrt_sendCoAPMsg('B', NULL);
-         }
-
-         openqueue_freePacketBuffer(msg);
-         break;
-      case WKP_UDP_ECHO:
-         uecho_receive(msg);
-         break;
-      case WKP_UDP_INJECT:
-         uinject_receive(msg);
          break;
       default:
          openserial_printError(COMPONENT_OPENUDP,ERR_UNSUPPORTED_PORT_NUMBER,

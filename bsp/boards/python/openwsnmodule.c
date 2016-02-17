@@ -63,7 +63,7 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* neighbors_vars;
    PyObject* sixtop_vars;
    PyObject* pid_vars;
-   PyObject* llds_vars;
+   PyObject* llsf_vars;
    PyObject* schedule_vars;
    PyObject* schedule_dbg;
    PyObject* ieee154e_vars;
@@ -142,10 +142,10 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    // TODO
    PyDict_SetItemString(returnVal, "pid_vars", pid_vars);
    
-   // llds_vars
-   llds_vars = PyDict_New();
+   // llsf_vars
+   llsf_vars = PyDict_New();
    // TODO
-   PyDict_SetItemString(returnVal, "llds_vars", llds_vars);
+   PyDict_SetItemString(returnVal, "llsf_vars", llsf_vars);
    
    // schedule_vars
    schedule_vars = PyDict_New();
