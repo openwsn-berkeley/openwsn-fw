@@ -22,8 +22,8 @@
 #include "cstorm.h"
 //=========================== defination ======================================
 
-//#define LLSF
-#define ADAPTIVE_REALLOCATION
+#define LLSF
+//#define ADAPTIVE_REALLOCATION
 
 //=========================== variables =======================================
 

@@ -100,15 +100,12 @@ void otf_bandwidthEstimate_task(void){
     // number of packet generated per second (slotframe duration 15ms*101=1515ms)
     bw_self     = 1515/cstorm_getPeriod();
     
-//    if (
-//        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x06 && \
-//        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x07 && \
-//        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x08 && \
-//        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x09  
-//    ) {
-//        // those motes has stopped to generate packets
-//        bw_self = 0; 
-//    }    
+    if (
+        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x06
+    ) {
+        // those motes has stopped to generate packets
+        bw_self = 0; 
+    }
 #ifdef SF0_DEBUG
     printf("OTF: Mote %d ",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
     printf("OTF: outgoing = %d, incoming = %d, self = %d\n",
