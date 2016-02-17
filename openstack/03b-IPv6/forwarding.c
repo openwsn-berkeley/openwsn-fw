@@ -263,7 +263,19 @@ void forwarding_receive(
 	// If this message is a FRAG1, message must be assembled
 	// prior to move it to upper layer.
 	if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
-            fragment_assignAction(buffer, FRAGMENT_ACTION_ASSEMBLE);
+           switch(msg->l4_protocol) {
+           case IANA_TCP: case IANA_UDP: case IANA_ICMPv6:
+              fragment_assignAction(buffer, FRAGMENT_ACTION_ASSEMBLE);
+	      break;
+           default:
+              // log error
+              openserial_printError(
+                  COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
+                  (errorparameter_t)msg->l4_protocol,
+                  (errorparameter_t)1
+              );
+	      fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
+           }
 	else
 	    forwarding_toUpperLayer(msg);
 
@@ -354,7 +366,7 @@ owerror_t forwarding_toUpperLayer(OpenQueueEntry_t* msg) {
 	    openserial_printError(
                COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
 	       (errorparameter_t)msg->l4_protocol,
-	       (errorparameter_t)1
+	       (errorparameter_t)2
 	    );
 	    // not sure that this is correct as iphc will free it?
 	    openqueue_freePacketBuffer(msg);
