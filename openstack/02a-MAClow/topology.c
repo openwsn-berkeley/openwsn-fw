@@ -101,6 +101,12 @@ bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
          } else {
             returnVal=FALSE;
          }
+      case TOPOLOGY_MOTE6:
+         if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE5) {
+            returnVal=TRUE;
+         } else {
+            returnVal=FALSE;
+         }
          break;
       default:
          returnVal=TRUE;

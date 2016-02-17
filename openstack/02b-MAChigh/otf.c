@@ -112,7 +112,7 @@ void otf_bandwidthEstimate_task(void){
            bw_outgoing,bw_incoming,bw_self);
 #endif
     
-    if (bw_outgoing <= bw_incoming+bw_self){
+    if (bw_outgoing < bw_incoming+bw_self){
         sixtop_addCells(
             &neighbor,
             bw_incoming+bw_self-bw_outgoing+2
