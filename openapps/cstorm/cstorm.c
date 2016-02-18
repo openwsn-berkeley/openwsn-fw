@@ -21,7 +21,7 @@ static const uint8_t dst_addr[]   = {
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
 
-#define PACKET_PER_SLOTFRAME  5
+#define PACKET_PER_SLOTFRAME  1
 #define SLOTDURATION_MS      15 // 15ms per slot
 
 //=========================== variables =======================================

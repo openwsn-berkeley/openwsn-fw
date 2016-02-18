@@ -4,7 +4,7 @@
 
 //=========================== defines =========================================
 
-#define FORCETOPOLOGY
+//#define FORCETOPOLOGY
 
 #define TOPOLOGY_MOTE1 0x01
 #define TOPOLOGY_MOTE2 0x02
