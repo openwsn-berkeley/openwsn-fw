@@ -91,35 +91,6 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    return NULL;
 }
 
-owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
-   uint8_t i;
-   uint8_t j;
-
-   for (i=0;i<QUEUELENGTH;i++) {
-      if (&openqueue_vars.queue[i]==pkt) {
-         if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
-            // log the error
-            openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
-                                  (errorparameter_t)0,
-                                  (errorparameter_t)0);
-          }
-	  if ( pkt->big )
-	for (j=0;j<BIGQUEUELENGTH;j++)
-           if ( (uint8_t*)&(bigqueue_vars.queue[j]) == pkt->big ) {
-              if ( ! bigqueue_vars.queue[j].in_use ) 
-                 openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
-                                  (errorparameter_t)0,
-                                  (errorparameter_t)0);
-              bigqueue_vars.queue[j].in_use = FALSE;
-           }
-           openqueue_reset_entry(&(openqueue_vars.queue[i]));
-           return E_SUCCESS;
-      }
-   }
-
-   return E_FAIL;
-}
-
 /**
 \brief Free a previously-allocated packet buffer.
 
@@ -148,8 +119,9 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
                      openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
                                   (errorparameter_t)0,
 				  (errorparameter_t)0);
-		     bigqueue_vars.queue[j].in_use = FALSE;
-		  }
+                  bigqueue_vars.queue[j].in_use = FALSE;
+		  break;
+	       }
 
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
          ENABLE_INTERRUPTS();
@@ -164,6 +136,36 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    return E_FAIL;
 }
 
+owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
+   uint8_t i;
+   uint8_t j;
+
+   for (i=0;i<QUEUELENGTH;i++) {
+      if (&openqueue_vars.queue[i]==pkt) {
+         if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
+            // log the error
+            openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
+                                  (errorparameter_t)0,
+                                  (errorparameter_t)0);
+         }
+	 if ( pkt->big )
+	 for (j=0;j<BIGQUEUELENGTH;j++)
+            if ( (uint8_t*)&(bigqueue_vars.queue[j]) == pkt->big ) {
+               if ( ! bigqueue_vars.queue[j].in_use ) 
+                  openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
+                                  (errorparameter_t)0,
+                                  (errorparameter_t)0);
+               bigqueue_vars.queue[j].in_use = FALSE;
+	       break;
+            }
+         openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         return E_SUCCESS;
+      }
+   }
+
+   return E_FAIL;
+}
+
 /**
 \brief Free all the packet buffers created by a specific module.
 
@@ -174,21 +176,11 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){
-      FragmentQueueEntry_t* buffer;
-      buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]));
-      if (openqueue_vars.queue[i].creator==creator) {
-
-	 if ( buffer != NULL ) {
-            DISABLE_INTERRUPTS();
-            fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
-            ENABLE_INTERRUPTS();
-	 } else {
+      if (openqueue_vars.queue[i].creator==creator ) {
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
-	 }
-      } else if ( buffer != NULL && buffer->creator == creator ) {
-         DISABLE_INTERRUPTS();
-         fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
-         ENABLE_INTERRUPTS();
+      } else if (openqueue_vars.queue[i].creator==COMPONENT_FRAGMENT) {
+         fragment_removeCreatedBy(&(openqueue_vars.queue[i]));
+         openqueue_freePacketBuffer_atomic(&(openqueue_vars.queue[i]));
       }
    }
    ENABLE_INTERRUPTS();
@@ -196,6 +188,9 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
 
 /**
 \brief Free all the packet buffers owned by a specific module.
+
+\note  As it is only used by opentcp, there is no need for fragmentation
+       support
 
 \param owner The identifier of the component, taken in COMPONENT_*.
 */
@@ -205,15 +200,7 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].owner==owner) {
-         FragmentQueueEntry_t* buffer;
-
-	 if ( (buffer = fragment_searchBufferFromMsg(&(openqueue_vars.queue[i]))) != NULL ) {
-            DISABLE_INTERRUPTS();
-            fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
-            ENABLE_INTERRUPTS();
-	 } else {
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
-	 }
       }
    }
    ENABLE_INTERRUPTS();
@@ -351,6 +338,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->big                          = NULL;
    //l4
    entry->l4_protocol                  = IANA_UNDEFINED;
+   entry->l4_length                    = 0;
    //l3
    entry->l3_destinationAdd.type       = ADDR_NONE;
    entry->l3_sourceAdd.type            = ADDR_NONE;

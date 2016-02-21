@@ -40,10 +40,11 @@ typedef enum fragment_states {
 
 typedef enum fragment_actions {
    FRAGMENT_ACTION_NONE,
-   FRAGMENT_ACTION_CANCEL,    // cancel message
-   FRAGMENT_ACTION_ASSEMBLE,  // message for me, moving to upper layer
-   FRAGMENT_ACTION_FORWARD,   // message to be forwarded
-   FRAGMENT_ACTION_OPENBRIDGE // to openbridge
+   FRAGMENT_ACTION_CANCEL,       // cancel message
+   FRAGMENT_ACTION_ASSEMBLE,     // message for me, moving to upper layer
+   FRAGMENT_ACTION_FORWARD,      // message to be forwarded
+   FRAGMENT_ACTION_OPENBRIDGE,   // to openbridge
+   FRAGMENT_ACTION_TIMEREXPIRED, // timer has expired
 } FragmentAction;
 
 // SERFRAME_MOTE2PC_BRIDGE
@@ -56,20 +57,24 @@ typedef enum fragment_actions {
 // There exists two types of commands
 // - 'F'- management is done here and it represents an error on communication
 //   (duplicate fragment, time expiration or E_FAIL on transmission): discard
-//   this message on openVisualizer
+//   this message on openVisualizer. It is used too to remove messages when
+//   neighbor is missed
 // - 'C' - inform to openVisualizer that last message has been sent
-//   and a new one can be moved to the Mesh as only FRAGMENT_TX_MAX_PACKETS
-//   are allowed simuoultaneously
-// The type of message identifies its direction: fromMesh ('F') or
-// toMesh ('T') :
+//   and a new one can be moved to the Mesh
+// The type of message identifies its direction:
+// - 'F' - fromMesh: incoming message to openbridge
+// - 'T' - toMesh: outgoing messages to continue sending
+// - 'N' - neighbor: outgoing destination is not a neighbor for more time
 // The identifier refers to the message:
-// - tag (2B) + size (2b) + source (8B) when fromMesh
+// - tag (2B) + size (2B) + source (8B) when fromMesh
 // - tag (2B) when toMesh
+// - destination (8B) when neihbor
 
 #define FRAGMENT_MOTE2PC_FAIL     ((uint8_t)'F')
 #define FRAGMENT_MOTE2PC_SENDDONE ((uint8_t)'S')
 #define FRAGMENT_MOTE2PC_FROMMESH ((uint8_t)'F')
 #define FRAGMENT_MOTE2PC_TOMESH   ((uint8_t)'T')
+#define FRAGMENT_MOTE2PC_NEIGHBOR ((uint8_t)'N')
 
 #define FRAGMENT_TIMEOUT_MS     60000
 #define FRAGMENT_NOTIMER        TOO_MANY_TIMERS_ERROR-1
@@ -129,6 +134,7 @@ owerror_t fragment_prependHeader(OpenQueueEntry_t* msg);
 bool fragment_retrieveHeader(OpenQueueEntry_t* msg);
 void fragment_sendDone(OpenQueueEntry_t *msg, owerror_t error);
 FragmentQueueEntry_t* fragment_searchBufferFromMsg(OpenQueueEntry_t* msg);
+void fragment_removeCreatedBy(OpenQueueEntry_t* msg);
 void fragment_assignAction(FragmentQueueEntry_t* buffer, FragmentAction action);
 void fragment_checkOpenBridge(OpenQueueEntry_t *msg, owerror_t error);
 void fragment_deleteNeighbor(open_addr_t* neighbor);
