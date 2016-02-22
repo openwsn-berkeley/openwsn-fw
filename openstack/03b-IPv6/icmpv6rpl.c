@@ -152,6 +152,10 @@ void  icmpv6rpl_writeDODAGid(uint8_t* dodagid) {
 uint8_t icmpv6rpl_getRPLIntanceID(){
    return icmpv6rpl_vars.dao.rplinstanceId;
 }
+                                                
+void    icmpv6rpl_getRPLDODAGid(uint8_t* address_128b){
+    memcpy(address_128b,icmpv6rpl_vars.dao.DODAGID,16);
+}
 
 /**
 \brief Called when DIO/DAO was sent.
@@ -198,7 +202,9 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
    
    // handle message
    switch (icmpv6code) {
-      
+      case IANA_ICMPv6_RPL_DIS:
+         icmpv6rpl_timer_DIO_task();
+         break;
       case IANA_ICMPv6_RPL_DIO:
          if (idmanager_getIsDAGroot()==TRUE) {
             // stop here if I'm in the DAG root
@@ -228,10 +234,9 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
                                (errorparameter_t)0,
                                (errorparameter_t)0);
          break;
-      
       default:
          // this should never happen
-         openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_MSG_UNKNOWN_TYPE,
+         openserial_printError(COMPONENT_ICMPv6RPL,ERR_MSG_UNKNOWN_TYPE,
                                (errorparameter_t)icmpv6code,
                                (errorparameter_t)0);
          break;
