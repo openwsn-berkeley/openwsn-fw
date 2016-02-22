@@ -56,6 +56,7 @@ int mote_main(void) {
    
    // initialize the board
    board_init();
+   BSP_LedsInit();
    
    // setup UART
    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
@@ -77,6 +78,7 @@ int mote_main(void) {
       uart_writeByte(stringToSend[app_vars.uart_lastTxByteIndex]);
       while(app_vars.uartDone==0);
    }
+   return 0;
 }
 
 //=========================== callbacks =======================================

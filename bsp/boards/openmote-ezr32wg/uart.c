@@ -167,28 +167,30 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
 }
 
 void uart_enableInterrupts(){
-
+	USART_IntEnable(UART_UART, USART_IF_RXDATAV);
+	USART_IntEnable(UART_UART, USART_IF_TXBL);
 }
 
 void uart_disableInterrupts(){
-
+	USART_IntDisable(UART_UART, USART_IF_RXDATAV);
+	USART_IntDisable(UART_UART, USART_IF_TXBL);
 }
 
 void uart_clearRxInterrupts(){
-
+	USART_IntClear(UART_UART, USART_IF_RXDATAV);
 }
 
 void uart_clearTxInterrupts(){
-
+	USART_IntClear(UART_UART, USART_IF_TXBL);
 }
 
 void  uart_writeByte(uint8_t byteToWrite){
-
+	USART_Tx(UART_UART, byteToWrite);
 }
 
 uint8_t uart_readByte(){
 	 int32_t i32Char = 0;
-
+	 i32Char = USART_Rx(UART_UART);
 	 return (uint8_t)(i32Char & 0xFF);
 }
 
