@@ -12,6 +12,9 @@
 #include "03oos_sniffer.h"
 #include "openserial.h"
 #include "idmanager.h"
+#include "sixtop.h"
+#include "processIE.h"
+#include "neighbors.h"
 
 //=========================== defines =========================================
 
@@ -160,17 +163,23 @@ void task_uploadPacket(){
 void openbridge_triggerData(void){return;}
 
 void sixtop_setEBPeriod(uint8_t ebPeriod){return;}
+void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht* cellInfo){return;}
+void sixtop_request(uint8_t code,open_addr_t* neighbor, uint8_t numCells){return;}
+void sixtop_setHandler(six2six_handler_t handler){return;}
+void sixtop_setIsResponseEnabled(bool isEnabled){return;}
 void ieee154e_setSingleChannel(uint8_t channel){return;}
 void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod) {return;}
 void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod) {return;}
 void neighbors_setMyDAGrank(uint16_t rank) {return;}
 void sixtop_setKaPeriod(uint16_t kaPeriod) {return;}
 void ieee154e_setIsSecurityEnabled(bool isEnabled) {return;}
+void ieee154e_setSlotDuration(uint16_t duration) {return;}
 void schedule_setFrameLength(uint16_t frameLength) {return;}
 void icmpv6rpl_writeDODAGid(uint8_t* dodagid) {return;}
 void ieee154e_setIsAckEnabled(bool isEnabled) {return;}
 void ieee154e_getAsn(uint8_t* array) {return;}
 void neighbors_updateMyDAGrankAndNeighborPreference(void) {return;}
+bool neighbors_getPreferredParentEui64(open_addr_t* neighbor){return TRUE;}
 void schedule_startDAGroot(void) {return;}
 
 bool debugPrint_asn(void)       {return TRUE;}

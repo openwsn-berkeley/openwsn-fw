@@ -26,8 +26,8 @@ The superframe repears over time and can be arbitrarly long.
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
-#define NUMSERIALRX          1
-#define NUMSLOTSOFF          1
+#define NUMSERIALRX          3
+#define NUMSLOTSOFF          3
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -163,6 +163,16 @@ owerror_t          schedule_removeActiveSlot(
 bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 // return the slot info which has a poor quality
 scheduleEntry_t*  schedule_statistic_poorLinkQuality(void);
+uint16_t          schedule_getCellsCounts(
+    uint8_t frameID,
+    cellType_t type,
+    open_addr_t* neighbor
+);
+void              schedule_removeAllCells(
+   uint8_t        slotframeID,
+   open_addr_t*   previousHop
+);
+scheduleEntry_t*  schedule_getCurrentScheduleEntry();
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);

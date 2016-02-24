@@ -20,9 +20,12 @@ enum {
 };
 
 enum {
-   O_FLAG          = 0x80,
-   R_FLAG          = 0x40,
-   F_FLAG          = 0x20,
+   O_FLAG          = 0x10,
+   R_FLAG          = 0x08,
+   F_FLAG          = 0x04,
+   I_FLAG          = 0x02,
+   K_FLAG          = 0x01,
+   FLAG_MASK       = 0x1F,
 };
 
 //=========================== typedef =========================================
@@ -55,7 +58,6 @@ void      forwarding_receive(
    OpenQueueEntry_t*    msg,
    ipv6_header_iht*     ipv6_outer_header,
    ipv6_header_iht*     ipv6_inner_header,
-   ipv6_hopbyhop_iht*   ipv6_hop_header,
    rpl_option_ht*       rpl_option
 );
 

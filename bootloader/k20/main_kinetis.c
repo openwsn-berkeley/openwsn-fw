@@ -850,6 +850,7 @@ void IRQ_ISR_PORTA(void)
 	#if (!(defined MCU_MK20D5)) || (!(defined _USB_BATT_CHG_APP_H_))
 void IRQ_ISR_PORTC(void)
 	{
+		int test_portc = 0;
 		#if defined(MCU_MK20D5)
 			NVICICPR1 |= (uint32_t)(1 << ((42)%32));
 			NVICISER1 |= (uint32_t)(1 << ((42)%32));		
@@ -860,10 +861,11 @@ void IRQ_ISR_PORTC(void)
 			
 		DisableInterrupts;
 	#if(defined MCU_MK20D5) || (defined MCU_MK20D7) || (defined MCU_MK40D7)
-		if(PORTC_ISFR & (1<<1))
+		test_portc = (PORTC_ISFR & (1<<1));
 	#else
-		if(PORTC_ISFR & (1<<5))
+		test_portc = (PORTC_ISFR & (1<<5));
 	#endif	
+        if(test_portc)
 		{
 			kbi_stat |= 0x02; 				/* Update the kbi state */
 			
@@ -876,10 +878,11 @@ void IRQ_ISR_PORTC(void)
 		}
 		
 	#if(defined MCU_MK20D5) || (defined MCU_MK20D7) || (defined MCU_MK40D7)
-		if(PORTC_ISFR & (1<<2))
+		test_portc = (PORTC_ISFR & (1<<2));
 	#else
-		if(PORTC_ISFR & (1<<13))
+		test_portc = (PORTC_ISFR & (1<<13));
 	#endif	
+	    if(test_portc)
 		{
 			kbi_stat |= 0x08;				/* Update the kbi state */
 			
