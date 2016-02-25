@@ -214,6 +214,12 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
          // update neighbor table
          neighbors_indicateRxDIO(msg);
          
+         memcpy(
+            &(icmpv6rpl_vars.dio),
+            (icmpv6rpl_dio_ht*)(msg->payload),
+            sizeof(icmpv6rpl_dio_ht)
+         );
+         
          // write DODAGID in DIO and DAO
          icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
          
