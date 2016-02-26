@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import sys
 import struct
 import socket
@@ -17,63 +20,47 @@ banner += [""]
 banner  = '\n'.join(banner)
 print banner
 
-DEFAULT_IOTLAB     = True
-DEFAULT_MOTENAME   = 'wsn430-35'
-DEFAULT_SERIALPORT = 'COM10'
 
-#============================ configuration ===================================
+def mote_connect(motename=None , serialport= None, baudrate='115200'):
+    try:
+        if (motename):
+            mote = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+            mote.connect((motename,20000))
+        else:
+            mote = serial.Serial(serialport, baudrate)
+        return mote
+    except Exception as err:
+        print "{0}".format(err)
+        raw_input('Press Enter to close.')
+        sys.exit(1)
+    
 
-iotlab        = None
-motename      = None
-serialport    = None
+#============================ configuration and connection ===================================
 
-# iotlab
+iotlab_serialport = False
+motename = 'wsn430-35'
+serialport = 'COM10'
+mote = None
 
-t = raw_input('running IoT-lAB? (Y|N): '.format(DEFAULT_IOTLAB))
-if   not t.strip():
-    iotlab         = DEFAULT_IOTLAB
-elif t.strip() in ['1','yes','y','Y']:
-    iotlab         = True
+t = raw_input('Are you running on IoT-LAB nodes ? (Y|N): ')
+if  (not t.strip() or t.strip() in ['1','yes','y','Y']):
+    t = raw_input('Enter mote name ? (e.g. {0}): '.format(motename))
+    if t.strip():
+        motename = t.strip()
+    archi = motename.split('-')
+    assert len(archi) == 2
+    assert archi[0] in ['wsn430', 'a8', 'm3'] 
+    if (archi[0] != 'a8'):
+        iotlab_serialport = True
+        mote = mote_connect(motename=motename)
+    else:
+        mote = mote_connect(serialport='/dev/ttyA8_M3', baudrate='500000')
+    
 else:
-    iotlab         = False
-
-# motename
-
-if iotlab:
-    t = raw_input('motename? (e.g. {0}): '.format(DEFAULT_MOTENAME))
-    if   not t.strip():
-        motename   = DEFAULT_MOTENAME
-    else:
-        motename   = t.strip()
-
-# serialport
-
-if not iotlab:
-    t = raw_input('name of serial port (e.g. {0}): '.format(DEFAULT_SERIALPORT))
-    if   not t.strip():
-        serialport = DEFAULT_SERIALPORT
-    else:
+    t = raw_input('Enter serial port name (e.g. {0}): '.format(serialport))    
+    if t.strip():
         serialport = t.strip()
-
-#============================ connect =========================================
-
-if iotlab:
-    assert motename
-    try:
-        mote = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        mote.connect((motename,20000))
-    except Exception as err:
-        print 'could not connect to {0}, reason: {1}'.format(motename,err)
-        raw_input('Press Enter to close.')
-        sys.exit(1)
-else:
-    assert serialport
-    try:
-        mote = serial.Serial(serialport,115200)
-    except Exception as err:
-        print 'could not open {0}, reason: {1}'.format(serialport,err)
-        raw_input('Press Enter to close.')
-        sys.exit(1)
+    mote = mote_connect(serialport=serialport)
 
 #============================ read ============================================
 
@@ -81,7 +68,7 @@ rawFrame = []
 
 while True:
     
-    if iotlab:
+    if iotlab_serialport:
         bytes = mote.recv(1024)
         rawFrame += [ord(b) for b in bytes]
     else:
