@@ -634,13 +634,15 @@ FragmentQueueEntry_t* fragment_getFreeBuffer(void) {
          ENABLE_INTERRUPTS();
 	 fragment_timeout_timer_cb(FRAGMENT_NOTIMER-i);
          DISABLE_INTERRUPTS();
-	 check = i;
+	 if ( check == FRAGQLENGTH
+           && fragmentqueue_vars.queue[i].in_use != FRAGMENT_RESERVED ) {
+            fragmentqueue_vars.queue[i].in_use = FRAGMENT_RESERVED;
+            check = i;
+	 }
       }
 
-   if ( check < FRAGQLENGTH) {
-      fragmentqueue_vars.queue[check].in_use = FRAGMENT_RESERVED;
+   if ( check < FRAGQLENGTH)
       return &(fragmentqueue_vars.queue[check]);
-   }
 
    return NULL;
 }
@@ -969,7 +971,7 @@ void fragment_assemble(FragmentQueueEntry_t* buffer, uint8_t frag) {
          buffer->in_use = FRAGMENT_TX;
          ENABLE_INTERRUPTS();
          fragment_startSend(buffer);
-      } else { // forwarding
+      } else { // not forwarding
          msg = buffer->msg;
          fragment_resetBuffer(buffer);
          ENABLE_INTERRUPTS();

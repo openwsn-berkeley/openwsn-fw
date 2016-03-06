@@ -13,7 +13,7 @@
 
 //=========================== define ==========================================
 
-#define QUEUELENGTH  15
+#define QUEUELENGTH  26 // 10 + FRAGMENT_MAX_FRAGMENTS
 
 #define BIGQUEUELENGTH  5
 
