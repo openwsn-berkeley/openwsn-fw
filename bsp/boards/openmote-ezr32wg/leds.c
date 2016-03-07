@@ -14,10 +14,10 @@
 #include "em_gpio.h"
 
 //=========================== defines =========================================
-#define LEDS_PORT_ERROR 0
-#define LEDS_PORT_DEBUG 1
-#define LEDS_PORT_SYNC 2
-#define LEDS_PORT_RADIO 3
+#define LEDS_PORT_ERROR 6
+#define LEDS_PORT_DEBUG 6
+#define LEDS_PORT_SYNC 7
+#define LEDS_PORT_RADIO 7
 
 //=========================== variables =======================================
 

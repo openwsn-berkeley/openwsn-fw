@@ -56,7 +56,7 @@ int mote_main(void) {
    
    // initialize the board
    board_init();
-   BSP_LedsInit();
+   //BSP_LedsInit();
    
    // setup UART
    uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
@@ -66,6 +66,8 @@ int mote_main(void) {
    bsp_timer_set_callback(cb_compare);
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    
+   leds_error_toggle();
+
    while(1) {
       
       // wait for timer to elapse
