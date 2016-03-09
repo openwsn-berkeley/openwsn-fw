@@ -14,6 +14,7 @@
 
 #define IPHC_DEFAULT_HOP_LIMIT    65
 #define IPv6HOP_HDR_LEN           2  // tengfei: should be 2
+#define MAXNUM_RH3                3
 
 enum IPHC_enums {
    IPHC_DISPATCH             = 5,
@@ -56,6 +57,8 @@ enum NHC_enums {
    NHC_EID_HOP_VAL           = 0x00,
    NHC_EID_ROUTING_VAL       = 0x01,
    NHC_EID_IPv6_VAL          = 0x07,
+   // next header is iphc
+   NHC_IPHC_ID               = 0xe7,
 };
 
 enum NHC_NH_enums {
@@ -122,6 +125,37 @@ enum IPHC_OUTER_INNER_enums {
     IPHC_INNER               = 1,
 };
 
+enum FORMAT_6LORH_enums {
+    FORMAT_6LORH_MASK        = 0xE0,
+    CRITICAL_6LORH           = 0x80,
+    ELECTIVE_6LoRH           = 0xa0,        
+};
+
+enum IPINIP_LEN_6LORH_enums {
+    IPINIP_LEN_6LORH_MASK    = 0x1F, 
+    IPINIP_TYPE_6LORH        = 0x06,
+};
+
+enum TYPE_6LORH_enums{
+    RH3_6LOTH_TYPE_0         = 0x00, 
+    RH3_6LOTH_TYPE_1         = 0x01,
+    RH3_6LOTH_TYPE_2         = 0x02,
+    RH3_6LOTH_TYPE_3         = 0x03,
+    RH3_6LOTH_TYPE_4         = 0x04,
+    RPI_6LOTH_TYPE           = 0x05,
+    IPECAP_6LOTH_TYPE        = 0x06,
+};
+
+enum SIZE_6LORH_RH3_enums{
+    RH3_6LOTH_SIZE_MASK      = 0x1F,
+};
+
+enum PAGE_DISPATCH_enums{
+    PAGE_DISPATCH_NO_1       = 0xF1,
+    PAGE_DISPATCH_TAG        = 0xF0,
+    PAGE_DISPATCH_NUM        = 0x0F,
+};
+
 //=========================== typedef =========================================
 
 typedef struct {
@@ -129,7 +163,7 @@ typedef struct {
    uint32_t    flow_label;
    bool        next_header_compressed;
    uint8_t     next_header;
-   uint8_t*    routing_header;
+   uint8_t*    routing_header[MAXNUM_RH3];
    uint8_t*    hopByhop_option;
    uint8_t     hop_limit;
    open_addr_t src;
@@ -172,9 +206,8 @@ Described in http://tools.ietf.org/html/rfc6553#section-3
 */
 BEGIN_PACK
 typedef struct {
-   uint8_t    optionType;    ///< RPL_HOPBYHOP_HEADER_OPTION_TYPE
-   uint8_t    optionLen;     ///< 8-bit field indicating the length of the option, in octets, excluding the Option Type and Opt Data Len fields.
-   uint8_t    flags;         ///< ORF00000
+   uint8_t    optionType;
+   uint8_t    flags;         ///< 000ORFIK
    uint8_t    rplInstanceID; ///< instanceid
    uint16_t   senderRank;    ///< RPL rank of the sender of the packet
 } rpl_option_ht;
@@ -191,6 +224,8 @@ owerror_t     iphc_sendFromForwarding(
    ipv6_header_iht*     ipv6_inner_header, 
    rpl_option_ht*       rpl_option, 
    uint32_t*            flow_label,
+   uint8_t*             rh3_copy,
+   uint8_t              rh3_length,
    uint8_t              fw_SendOrfw_Rcv
 );
 owerror_t     iphc_sendFromBridge(OpenQueueEntry_t *msg);

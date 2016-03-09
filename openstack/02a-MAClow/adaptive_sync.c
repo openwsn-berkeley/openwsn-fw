@@ -173,7 +173,7 @@ Once compensationTimeout == 0, extend or shorten current slot length for one tic
 void adaptive_sync_countCompensationTimeout() {
    uint16_t newSlotDuration;
    
-   newSlotDuration  = TsSlotDuration;
+   newSlotDuration  = ieee154e_getSlotDuration();
    
    // if clockState is not set yet, don't compensate.
    if (adaptive_sync_vars.clockState == S_NONE) {
@@ -215,7 +215,7 @@ void adaptive_sync_countCompensationTimeout_compoundSlots(uint16_t compoundSlots
    uint8_t  compensateTicks;
    uint16_t newSlotDuration;
    
-   newSlotDuration  = TsSlotDuration*(compoundSlots+1);
+   newSlotDuration  = ieee154e_getSlotDuration()*(compoundSlots+1);
    
    // if clockState is not set yet, don't compensate.
    if(adaptive_sync_vars.clockState == S_NONE) {

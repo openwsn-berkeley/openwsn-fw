@@ -115,6 +115,7 @@ void ieee154e_init() {
    ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
+   ieee154e_vars.slotDuration      = TsSlotDuration;
    // default hopping template
    memcpy(
        &(ieee154e_vars.chTemplate[0]),
@@ -140,7 +141,7 @@ void ieee154e_init() {
    radio_setStartFrameCb(ieee154e_startOfFrame);
    radio_setEndFrameCb(ieee154e_endOfFrame);
    // have the radio start its timer
-   radio_startTimer(TsSlotDuration);
+   radio_startTimer(ieee154e_vars.slotDuration);
 }
 
 //=========================== public ==========================================
@@ -184,7 +185,7 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
 This function executes in ISR mode, when the new slot timer fires.
 */
 void isr_ieee154e_newSlot() {
-   radio_setTimerPeriod(TsSlotDuration);
+   radio_setTimerPeriod(ieee154e_vars.slotDuration);
    if (ieee154e_vars.isSync==FALSE) {
       if (idmanager_getIsDAGroot()==TRUE) {
          changeIsSync(TRUE);
@@ -444,6 +445,27 @@ port_INLINE void activity_synchronize_newSlot() {
       ieee154e_vars.radioOnInit=radio_getTimerValue();
       ieee154e_vars.radioOnThisSlot=TRUE;
       radio_rxNow();
+   }
+   
+   // if I'm already in S_SYNCLISTEN, while not synchronized,
+   // but the synchronizing channel has been changed,
+   // change the synchronizing channel
+   if ((ieee154e_vars.state==S_SYNCLISTEN) && (ieee154e_vars.singleChannelChanged == TRUE)) {
+      // turn off the radio (in case it wasn't yet)
+      radio_rfOff();
+      
+      // update record of current channel
+      ieee154e_vars.freq = calculateFrequency(ieee154e_vars.singleChannel);
+      
+      // configure the radio to listen to the default synchronizing channel
+      radio_setFrequency(ieee154e_vars.freq);
+      
+      // switch on the radio in Rx mode.
+      radio_rxEnable();
+      ieee154e_vars.radioOnInit=radio_getTimerValue();
+      ieee154e_vars.radioOnThisSlot=TRUE;
+      radio_rxNow();
+      ieee154e_vars.singleChannelChanged = FALSE;
    }
    
    // increment ASN (used only to schedule serial activity)
@@ -740,6 +762,12 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                       // timelsot template ID
                       timeslotTemplateIDStoreFromEB(*((uint8_t*)(pkt->payload)+ptr));
                       ptr = ptr + 1;
+                      if (ieee154e_vars.tsTemplateId != TIMESLOT_TEMPLATE_ID){
+                          ieee154e_vars.slotDuration = *((uint8_t*)(pkt->payload)+ptr);
+                          ptr = ptr + 1;
+                          ieee154e_vars.slotDuration |= ((*((uint8_t*)(pkt->payload)+ptr))<<8) & 0xff00;
+                          ptr = ptr + 1;
+                      }
                   }
                   break;
                   
@@ -942,11 +970,15 @@ port_INLINE void activity_ti1ORri1() {
          openserial_startInput();
          //this is to emulate a set of serial input slots without having the slotted structure.
 
-         radio_setTimerPeriod(TsSlotDuration*(NUMSERIALRX));
+         radio_setTimerPeriod(ieee154e_vars.slotDuration*(NUMSERIALRX));
          
          //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
+            // advance the schedule
+            schedule_advanceSlot();
+            // find the next one
+            ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
          }
 #ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
@@ -1895,10 +1927,19 @@ void ieee154e_setSingleChannel(uint8_t channel){
         return;
     }
     ieee154e_vars.singleChannel = channel;
+    ieee154e_vars.singleChannelChanged = TRUE;
 }
 
 void ieee154e_setIsSecurityEnabled(bool isEnabled){
     ieee154e_vars.isSecurityEnabled = isEnabled;
+}
+
+void ieee154e_setSlotDuration(uint16_t duration){
+    ieee154e_vars.slotDuration = duration;
+}
+
+uint16_t ieee154e_getSlotDuration(){
+    return ieee154e_vars.slotDuration;
 }
 
 // timeslot template handling
@@ -1925,12 +1966,12 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    // calculate new period
    timeCorrection                 =  (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)timeReceived-(PORT_SIGNED_INT_WIDTH)TsTxOffset);
 
-   newPeriod                      =  TsSlotDuration;
+   newPeriod                      =  ieee154e_vars.slotDuration;
    
    // detect whether I'm too close to the edge of the slot, in that case,
    // skip a slot and increase the temporary slot length to be 2 slots long
    if (currentValue<timeReceived || currentPeriod-currentValue<RESYNCHRONIZATIONGUARD) {
-      newPeriod                  +=  TsSlotDuration;
+      newPeriod                  +=  ieee154e_vars.slotDuration;
       incrementAsnOffset();
    }
    newPeriod                      =  (PORT_RADIOTIMER_WIDTH)((PORT_SIGNED_INT_WIDTH)newPeriod+timeCorrection);
@@ -2044,9 +2085,9 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    // COMPONENT_IEEE802154E_TO_SIXTOP so sixtop can knows it's for it
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;
 #ifdef GOLDEN_IMAGE_ROOT
-   openserial_printInfo(COMPONENT_IEEE802154E,ERR_PACKET_SYNC,
-                   (errorparameter_t)packetReceived->l2_asn.bytes0and1,
-                   (errorparameter_t)packetReceived->l2_timeCorrection);
+//   openserial_printInfo(COMPONENT_IEEE802154E,ERR_PACKET_SYNC,
+//                   (errorparameter_t)packetReceived->l2_asn.bytes0and1,
+//                   (errorparameter_t)packetReceived->l2_timeCorrection);
 #endif
    // post RES's Receive task
    scheduler_push_task(task_sixtopNotifReceive,TASKPRIO_SIXTOP_NOTIF_RX);

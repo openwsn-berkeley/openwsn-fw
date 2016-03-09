@@ -29,7 +29,7 @@ sht21 = localEnv.SConscript(
 )
 
 source   = \
-    Glob('*.c') + \
+    [file for file in Glob('*.c') if file.name.find('iar')==-1] + \
     Glob('source/*.c')
 
 localEnv.Append(
