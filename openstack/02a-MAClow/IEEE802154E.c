@@ -890,7 +890,7 @@ port_INLINE void activity_ti1ORri1() {
           
           radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
            
-          //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
+          //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
           for (i=0;i<numOfSleepSlots-1;i++){
              incrementAsnOffset();
           }
@@ -980,6 +980,22 @@ port_INLINE void activity_ti1ORri1() {
             // find the next one
             ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
          }
+         // skip following off slots
+         if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
+             if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
+                 numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
+             } else {
+                 numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1; 
+             }
+             
+             radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
+              
+             //only increase ASN by numOfSleepSlots-NUMSERIALRX
+             for (i=0;i<numOfSleepSlots-NUMSERIALRX;i++){
+                incrementAsnOffset();
+             }
+         }
+         
 #ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
          adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
