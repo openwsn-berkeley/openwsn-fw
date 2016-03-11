@@ -210,13 +210,15 @@ void idmanager_triggerAboutRoot() {
         break;
      case ACTION_NO:
         idmanager_setIsDAGroot(FALSE);
+        idmanager_vars.slotSkip = TRUE;
         break;
      case ACTION_TOGGLE:
         if (idmanager_getIsDAGroot()) {
            idmanager_setIsDAGroot(FALSE);
-           idmanager_vars.slotSkip = FALSE;
+           idmanager_vars.slotSkip = TRUE;
         } else {
            idmanager_setIsDAGroot(TRUE);
+           idmanager_vars.slotSkip = FALSE;
         }
         break;
    }
