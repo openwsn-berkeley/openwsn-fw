@@ -519,7 +519,6 @@ void fragment_tryToSend(FragmentQueueEntry_t* buffer) {
    actual_sent = buffer->other.data.actual_sent;
    // check if message has been sent
    if ( actual_sent == buffer->datagram_size ) {
-      ENABLE_INTERRUPTS();
       fragment_finishSend(buffer, E_SUCCESS);
       return;
    }
