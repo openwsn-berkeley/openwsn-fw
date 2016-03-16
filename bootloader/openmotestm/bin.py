@@ -54,19 +54,20 @@ class BootLoaderJobs():
     # this function will download the target file to the device at 0x8000000 and verify.
     def downloadJob(self,binFile):
         status = False # True instead of success, False instead of Failed
-        print "1. Erase memory first. Erasing..."
+        print "Erasing..."
         self.cmd.cmdEraseMemory(WRPxPages)
-        print "2. Erase Done. Waiting for writing..."
         data = map(lambda c: ord(c), file(binFile, 'rb').read())
+        print "Starting to write {0}KB data into flash...".format(len(data)>>10)
         self.cmd.writeMemory(self.address, data)
-        print "3. EndOfWrite. Waiting for verifying..."
+        print "Writing complete."
+        print "Verifying the data..."
         verify = self.cmd.readMemory(self.address, len(data))
         if(data == verify):
-            print "4. Verification OK"
-            print "Download on port " + self.port + " successfully! :)"
+            print "The data is OK."
+            print "Download on port " + self.port + " successfully!"
             status = True
         else:
-            print "4. Verification FAILED"
+            print "Verifying failded."
             print str(len(data)) + ' vs ' + str(len(verify))
             for i in xrange(0, len(data)):
                 if data[i] != verify[i]:
