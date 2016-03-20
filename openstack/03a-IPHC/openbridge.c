@@ -54,6 +54,7 @@ void openbridge_triggerData() {
       //payload
       packetfunctions_reserveHeaderSize(pkt,numDataBytes-8);
       memcpy(pkt->payload,&(input_buffer[8]),numDataBytes-8);
+      pkt->ob_payload = pkt->payload;
       
       //this is to catch the too short packet. remove it after fw-103 is solved.
       if (numDataBytes<16){

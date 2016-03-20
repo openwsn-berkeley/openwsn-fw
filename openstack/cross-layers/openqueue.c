@@ -106,6 +106,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (&openqueue_vars.queue[i]==pkt) {
+	      uint8_t owner = pkt->owner;
          if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
             // log the error
             openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
@@ -114,7 +115,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
          }
 	 if (pkt->big)
             for (j=0;j<BIGQUEUELENGTH;j++)
-               if ( (uint8_t*)&(bigqueue_vars.queue[j]) == pkt->big ) {
+               if ( &(bigqueue_vars.queue[j]) == pkt->big ) {
                   if ( ! bigqueue_vars.queue[j].in_use )
                      openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
                                   (errorparameter_t)0,
@@ -142,6 +143,7 @@ owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
 
    for (i=0;i<QUEUELENGTH;i++) {
       if (&openqueue_vars.queue[i]==pkt) {
+	      uint8_t owner = pkt->owner;
          if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
             // log the error
             openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
@@ -150,7 +152,7 @@ owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
          }
 	 if ( pkt->big )
 	 for (j=0;j<BIGQUEUELENGTH;j++)
-            if ( (uint8_t*)&(bigqueue_vars.queue[j]) == pkt->big ) {
+            if ( &(bigqueue_vars.queue[j]) == pkt->big ) {
                if ( ! bigqueue_vars.queue[j].in_use ) 
                   openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
                                   (errorparameter_t)0,
@@ -227,13 +229,13 @@ OpenQueueEntry_t* openqueue_toBigPacket(OpenQueueEntry_t* pkt, uint16_t start) {
          bigqueue_vars.queue[i].in_use = TRUE;
 	 ENABLE_INTERRUPTS();
 
-	 payload  = ((uint8_t*)&(bigqueue_vars.queue[i].buffer));
+	 payload  = (uint8_t*)&(bigqueue_vars.queue[i].buffer);
 	 payload += LARGE_PACKET_SIZE; // end of buffer
 	 payload -= start > 0 ? start : pkt->length;
 	 memcpy(payload, pkt->payload, pkt->length);
 	 pkt->payload    = payload;
 	 pkt->l4_payload = payload - pkt->length + pkt->l4_length;
-	 pkt->big        = (uint8_t*)&(bigqueue_vars.queue[i]);
+	 pkt->big        = &(bigqueue_vars.queue[i]);
 
 	 return pkt;
       }

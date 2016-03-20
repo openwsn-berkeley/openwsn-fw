@@ -310,6 +310,7 @@ typedef struct {
    uint8_t*      l4_payload;                     // pointer to the start of the payload of l4 (used for retransmits)
    uint16_t      l4_length;                      // length of the payload of l4 (used for retransmits)
    //l3
+   uint8_t*      ob_payload;                     // pointer to the start of the payload of openbridge (used for fragmentation to determine tag) 
    open_addr_t   l3_destinationAdd;              // 128b IPv6 destination (down stack) 
    open_addr_t   l3_sourceAdd;                   // 128b IPv6 source address 
    //l2
@@ -345,7 +346,7 @@ typedef struct {
    int8_t        l1_rssi;                        // RSSI of received packet
    uint8_t       l1_lqi;                         // LQI of received packet
    bool          l1_crc;                         // did received packet pass CRC check?
-   uint8_t*      big;                            // pointer to a big packet buffer struct, if used
+   void*         big;                            // pointer to a big packet buffer struct, if used
    //the packet
    uint8_t       packet[FRAME_DATA_TOTAL];       // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
 } OpenQueueEntry_t;

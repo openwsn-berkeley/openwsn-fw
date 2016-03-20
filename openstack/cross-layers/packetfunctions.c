@@ -277,7 +277,7 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_le
    // This one tries to acquire a big buffer if needed on layer 3
    // and up.
    if ( error && (pkt->owner > COMPONENT_FRAGMENT) && (pkt->big == NULL) )
-      error = ( openqueue_toBigPacket(pkt, 0) == NULL );
+      error = openqueue_toBigPacket(pkt, 0) == NULL;
 
    pkt->payload -= header_length;
    pkt->length  += header_length;
