@@ -89,7 +89,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 	PORT_TIMER_WIDTH temp_last_compare_value;
 
 	if (!bsp_timer_vars.initiated){
-		//as the timer runs forever the first time it is turned on has a weired value
+		//as the timer runs forever the first time it is turned on has a weird value
 		bsp_timer_vars.last_compare_value=0; //SleepModeTimerCountGet();
 		bsp_timer_vars.initiated=TRUE;
 	}

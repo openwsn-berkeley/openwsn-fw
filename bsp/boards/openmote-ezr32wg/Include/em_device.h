@@ -44,7 +44,10 @@
 #ifndef EM_DEVICE_H
 #define EM_DEVICE_H
 
-#if defined(EZR32WG230F128R55)
+#if defined(EZR32WG330F256R60)
+#include "ezr32wg330f256r60.h"
+
+#elif defined(EZR32WG230F128R55)
 #include "ezr32wg230f128r55.h"
 
 #elif defined(EZR32WG230F128R60)
@@ -130,9 +133,6 @@
 
 #elif defined(EZR32WG330F256R55)
 #include "ezr32wg330f256r55.h"
-
-#elif defined(EZR32WG330F256R60)
-#include "ezr32wg330f256r60.h"
 
 #elif defined(EZR32WG330F256R61)
 #include "ezr32wg330f256r61.h"

@@ -25,7 +25,7 @@ TeraTerm):
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD     0xffff // 0xffff@32kHz = 2s
+#define BSP_TIMER_PERIOD     0xffffffff // 0xffff@32kHz = 2s
 uint8_t stringToSend[]       = "Hello, World!\r\n";
 
 //=========================== variables =======================================
@@ -67,7 +67,11 @@ int mote_main(void) {
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
    
    leds_error_toggle();
-
+   uart_writeByte(stringToSend[app_vars.uart_lastTxByteIndex]);
+   app_vars.uart_lastTxByteIndex++;
+   uart_writeByte(stringToSend[app_vars.uart_lastTxByteIndex]);
+   app_vars.uart_lastTxByteIndex++;
+   uart_writeByte(stringToSend[app_vars.uart_lastTxByteIndex]);
    while(1) {
       
       // wait for timer to elapse

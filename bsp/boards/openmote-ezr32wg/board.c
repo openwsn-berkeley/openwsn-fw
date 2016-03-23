@@ -39,8 +39,6 @@ int main(void) {
 void board_init(void) {
    CHIP_Init();
 
-
-
    leds_init();
    debugpins_init();
    button_init();
@@ -63,7 +61,7 @@ void board_sleep(void) {
  * Resets the board
  */
 void board_reset(void) {
-
+	NVIC_SystemReset();
 }
 
 
