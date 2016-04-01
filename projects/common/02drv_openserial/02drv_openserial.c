@@ -93,31 +93,23 @@ void ieee154e_getAsn(uint8_t* array) {
    array[4]   = 0x04;
 }
 
-void idmanager_triggerAboutRoot(void) {
-}
-void openbridge_triggerData(void) {
-}
-void tcpinject_trigger(void) {
-}
-void udpinject_trigger(void) {
-}
-void icmpv6echo_trigger(void) {
-}
-
-void sixtop_setEBPeriod(void){
-}
-
+void idmanager_triggerAboutRoot(void) {}
+void openbridge_triggerData(void) {}
+void tcpinject_trigger(void) {}
+void udpinject_trigger(void) {}
+void icmpv6echo_trigger(void) {}
+void icmpv6rpl_setDIOPeriod(void){}
+void icmpv6rpl_setDAOPeriod(void){}
+void sixtop_setEBPeriod(void){}
 void sixtop_setKaPeriod(void){}
 void sixtop_setHandler(void){}
 void sixtop_request(void){}
 void sixtop_addORremoveCellByInfo(void){}
 void sixtop_setIsResponseEnabled(void){}
-void icmpv6rpl_setDIOPeriod(void){}
-void icmpv6rpl_setDAOPeriod(void){}
 void neighbors_setMyDAGrank(void){}
 void neighbors_getPreferredParentEui64(void){}
-void ieee154e_setSlotDuration(void){}
 void schedule_setFrameLength(void){}
+void ieee154e_setSlotDuration(void){}
 void ieee154e_setIsSecurityEnabled(void){}
 void ieee154e_setIsAckEnabled(void){}
 
