@@ -22,7 +22,7 @@ it elapses:
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD   13000// 13672  //32678 @32kHz = 1s  13671
+#define BSP_TIMER_PERIOD     32768 // @32kHz = 1s
 
 //=========================== variables =======================================
 
@@ -42,7 +42,6 @@ void cb_compare(void);
 \brief The program starts executing here.
 */
 int mote_main(void) {  
-
    // initialize board
    board_init();
    
@@ -57,7 +56,7 @@ int mote_main(void) {
 //=========================== callbacks =======================================
 
 void cb_compare(void) {
-
+   
    // toggle pin
    debugpins_frame_toggle();
    
