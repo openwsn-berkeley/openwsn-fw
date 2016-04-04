@@ -200,7 +200,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['openmote-ezr32wg','OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3']:
+    if env['board'] not in ['siliconlab-ezr32wg','openmote-ezr32wg','OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='OpenMote-CC2538':
@@ -267,6 +267,54 @@ elif env['toolchain']=='armgcc':
         
         # linker
         env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/openmote-ezr32wg/GCC/ezr32wg.ld')
+        env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
+        env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
+        
+        env.Append(LINKFLAGS     = '-mfpu=fpv4-sp-d16 -mfloat-abi=softfp  --specs=nosys.specs')
+        #--specs=nano.specs
+        #env.Append(LINKFLAGS     = '-lgcc -lc -lnosys')
+        env.Append(LINKFLAGS     = '-Wl,--start-group -lgcc -lc -lg -lm -lnosys -Wl,--end-group')
+        
+        # object manipulation
+        env.Replace(OBJCOPY      = 'arm-none-eabi-objcopy')
+        env.Replace(OBJDUMP      = 'arm-none-eabi-objdump')
+        # archiver
+        env.Replace(AR           = 'arm-none-eabi-ar')
+        env.Append(ARFLAGS       = '')
+        env.Replace(RANLIB       = 'arm-none-eabi-ranlib')
+        env.Append(RANLIBFLAGS   = '')
+        # misc
+        env.Replace(NM           = 'arm-none-eabi-nm')
+        env.Replace(SIZE         = 'arm-none-eabi-size')
+        
+    elif env['board']=='siliconlab-ezr32wg':
+        # compiler (C)
+        env.Replace(CC           = 'arm-none-eabi-gcc')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wa,-adhlns=${TARGET.base}.lst')
+        env.Append(CCFLAGS       = '-c')
+        env.Append(CCFLAGS       = '-fmessage-length=0')
+        env.Append(CCFLAGS       = '-mcpu=cortex-m4')
+        env.Append(CCFLAGS       = '-mthumb')
+        env.Append(CCFLAGS       = '-g')
+        env.Append(CCFLAGS       = '-std=gnu99')
+        env.Append(CCFLAGS       = '-O0')
+        env.Append(CCFLAGS       = '-Wall')
+        env.Append(CCFLAGS       = '-Wstrict-prototypes')
+        env.Append(CCFLAGS       = '-ffunction-sections')
+        env.Append(CCFLAGS       = '-fdata-sections')
+        env.Append(CCFLAGS       = '-mfpu=fpv4-sp-d16')
+        env.Append(CCFLAGS       = '-mfloat-abi=softfp')
+        env.Append(CCFLAGS       = '-DEZR32WG330F256R60=1')
+
+        # assembler
+        env.Replace(AS           = 'arm-none-eabi-as')
+        env.Append(ASFLAGS       = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -c -x assembler-with-cpp ')
+        env.Append(ASFLAGS       = '-DEZR32WG330F256R60=1')
+        
+        # linker
+        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/siliconlab-ezr32wg/GCC/ezr32wg.ld')
         env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
         env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
         
