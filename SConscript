@@ -200,7 +200,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['siliconlab-ezr32wg','OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3']:
+    if env['board'] not in ['siliconlab-ezr32wg','OpenMote-CC2538','openmotestm','iot-lab_M3','iot-lab_A8-M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='OpenMote-CC2538':
@@ -286,7 +286,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
 
-    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3']:
+    elif env['board'] in ['openmotestm','iot-lab_M3', 'iot-lab_A8-M3']:
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -536,6 +536,48 @@ def OpenMoteCC2538_bootload(target, source, env):
     for t in bootloadThreads:
         countingSem.acquire()
 
+class openmotestm_bootloadThread(threading.Thread):
+    def __init__(self,comPort,binaryFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.binaryFile      = binaryFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'openmotestm_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+ os.path.join('bootloader','openmotestm','bin.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def openmotestm_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        bootloadThreads += [
+            openmotestm_bootloadThread(
+                comPort      = comPort,
+                binaryFile   = source[0].path.split('.')[0]+'.bin',
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+        
 class IotLabM3_bootloadThread(threading.Thread):
     def __init__(self,comPort,binaryFile,countingSem):
         
@@ -581,7 +623,7 @@ def IotLabM3_bootload(target, source, env):
     # wait for threads to finish
     for t in bootloadThreads:
         countingSem.acquire()
-
+        
 # bootload
 def BootloadFunc():
     if   env['board']=='telosb':
@@ -601,6 +643,12 @@ def BootloadFunc():
             action      = IotLabM3_bootload,
             suffix      = '.phonyupload',
             src_suffix  = ''
+         )
+    elif env['board']=='openmotestm':
+         return Builder(
+            action      = openmotestm_bootload,
+            suffix      = '.phonyupload',
+            src_suffix  = '.bin'
          )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))
