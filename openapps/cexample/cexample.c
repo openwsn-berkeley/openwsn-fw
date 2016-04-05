@@ -64,7 +64,7 @@ void cexample_init() {
    memcpy(&(cexample_vars.track.owner), idmanager_getMyID(ADDR_64B), sizeof(open_addr_t));
    cexample_vars.track.instance            = (uint16_t)TRACK_CEXAMPLE;
 #else
-    cexample_vars.track = sixtop_get_trackbesteffort()
+    cexample_vars.track = sixtop_get_trackbesteffort();
 #endif
 
    opencoap_register(&cexample_vars.desc);
