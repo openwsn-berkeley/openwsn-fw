@@ -200,7 +200,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['siliconlab-ezr32wg','OpenMote-CC2538','openmotestm','iot-lab_M3','iot-lab_A8-M3']:
+    if env['board'] not in ['silabs-ezr32wg','OpenMote-CC2538','openmotestm','iot-lab_M3','iot-lab_A8-M3']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='OpenMote-CC2538':
@@ -238,7 +238,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
         
-    elif env['board']=='siliconlab-ezr32wg':
+    elif env['board']=='silabs-ezr32wg':
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
         env.Append(CCFLAGS       = '-O0')
@@ -265,7 +265,7 @@ elif env['toolchain']=='armgcc':
         env.Append(ASFLAGS       = '-DEZR32WG330F256R60=1')
         
         # linker
-        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/siliconlab-ezr32wg/GCC/ezr32wg.ld')
+        env.Append(LINKFLAGS     = '-g -gdwarf-2 -mcpu=cortex-m4 -mthumb -Tbsp/boards/silabs-ezr32wg/GCC/ezr32wg.ld')
         env.Append(LINKFLAGS     = '-Xlinker --gc-sections -Xlinker')
         env.Append(LINKFLAGS     = '-Map=${TARGET.base}.map')
         
