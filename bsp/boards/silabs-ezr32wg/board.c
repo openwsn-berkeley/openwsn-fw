@@ -13,8 +13,6 @@
 #include "debugpins.h"
 #include "uart.h"
 #include "radio.h"
-#include "i2c.h"
-#include "sensors.h"
 #include "headers/em_cmu.h"
 #include "headers/em_chip.h"
 
@@ -46,8 +44,6 @@ void board_init(void) {
    radiotimer_init();
    uart_init();
    radio_init();
-   i2c_init();
-   sensors_init();
 }
 
 /**
