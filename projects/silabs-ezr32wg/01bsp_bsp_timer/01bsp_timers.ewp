@@ -609,15 +609,15 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>3</version>
-          <state>3</state>
+          <state>0</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>01bsp_uart.bin</state>
+          <state>01bsp_timers.srec</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -625,7 +625,7 @@
         </option>
         <option>
           <name>OOCObjCopyEnable</name>
-          <state>1</state>
+          <state>0</state>
         </option>
       </data>
     </settings>
@@ -672,7 +672,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>01bsp_uart.out</state>
+          <state>01bsp_timers.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -1047,7 +1047,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>7.50.3.10745</state>
+          <state></state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -1059,7 +1059,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>Default	None</state>
+          <state></state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -1093,7 +1093,7 @@
         </option>
         <option>
           <name>RTConfigPath2</name>
-          <state>$TOOLKIT_DIR$\INC\c\DLib_Config_Normal.h</state>
+          <state></state>
         </option>
         <option>
           <name>GBECoreSlave</name>
@@ -1119,7 +1119,7 @@
         </option>
         <option>
           <name>GFPUDeviceSlave</name>
-          <state>Default	None</state>
+          <state>-</state>
         </option>
         <option>
           <name>FPU2</name>
@@ -1264,7 +1264,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>$FILE_BNAME$.o</state>
+          <state></state>
         </option>
         <option>
           <name>CCLibConfigHeader</name>
@@ -1309,7 +1309,7 @@
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>3</state>
+          <state>1</state>
         </option>
         <option>
           <name>CompilerMisraRules98</name>
@@ -1522,7 +1522,7 @@
         </option>
         <option>
           <name>AOutputFile</name>
-          <state>$FILE_BNAME$.o</state>
+          <state></state>
         </option>
         <option>
           <name>AMultibyteSupport</name>
@@ -1631,7 +1631,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>01bsp_uart.out</state>
+          <state>###Unitialized###</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -1934,13 +1934,13 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_uart\01bsp_uart.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_bsp_timer\01bsp_bsp_timer.c</name>
     </file>
   </group>
   <group>
     <name>bsp</name>
     <group>
-      <name>boards</name>
+      <name>board</name>
       <group>
         <name>silabs-ezr32wg</name>
         <group>
@@ -2063,7 +2063,7 @@
             <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\system_ezr32wg.c</name>
           </file>
           <file>
-            <name>$EW_DIR$\arm\src\lib\write.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\write.c</name>
           </file>
         </group>
         <file>

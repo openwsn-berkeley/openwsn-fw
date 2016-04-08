@@ -181,8 +181,7 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state>EZR32WG330F256R60</state>
-          <state>DEBUG_EFM</state>
+          <state></state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -311,12 +310,7 @@
         </option>
         <option>
           <name>CCIncludePath2</name>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg</state>
-          <state>$PROJ_DIR$\..\..\..\inc</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\headers</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\Include</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\source</state>
+          <state></state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -336,7 +330,7 @@
         </option>
         <option>
           <name>CCOptLevel</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCOptStrategy</name>
@@ -345,7 +339,7 @@
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CompilerMisraRules98</name>
@@ -578,12 +572,7 @@
         </option>
         <option>
           <name>AUserIncludes</name>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg</state>
-          <state>$PROJ_DIR$\..\..\..\inc</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\headers</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\Include</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\source</state>
+          <state></state>
         </option>
         <option>
           <name>AExtraOptionsCheckV2</name>
@@ -609,15 +598,15 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>3</version>
-          <state>3</state>
+          <state>0</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>01bsp_uart.bin</state>
+          <state></state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -625,7 +614,7 @@
         </option>
         <option>
           <name>OOCObjCopyEnable</name>
-          <state>1</state>
+          <state>0</state>
         </option>
       </data>
     </settings>
@@ -672,7 +661,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>01bsp_uart.out</state>
+          <state>01bsp_debugpins.out</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -736,7 +725,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$TOOLKIT_DIR$\config\linker\SiliconLaboratories\EZR32WG330F256Rxx.icf</state>
+          <state>lnk0t.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -796,7 +785,7 @@
         </option>
         <option>
           <name>IlinkProgramEntryLabel</name>
-          <state>__iar_program_start</state>
+          <state></state>
         </option>
         <option>
           <name>DoFill</name>
@@ -1047,7 +1036,7 @@
         </option>
         <option>
           <name>OGLastSavedByProductVersion</name>
-          <state>7.50.3.10745</state>
+          <state></state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -1059,7 +1048,7 @@
         </option>
         <option>
           <name>OGChipSelectEditMenu</name>
-          <state>Default	None</state>
+          <state></state>
         </option>
         <option>
           <name>GenLowLevelInterface</name>
@@ -1093,7 +1082,7 @@
         </option>
         <option>
           <name>RTConfigPath2</name>
-          <state>$TOOLKIT_DIR$\INC\c\DLib_Config_Normal.h</state>
+          <state></state>
         </option>
         <option>
           <name>GBECoreSlave</name>
@@ -1119,7 +1108,7 @@
         </option>
         <option>
           <name>GFPUDeviceSlave</name>
-          <state>Default	None</state>
+          <state>-</state>
         </option>
         <option>
           <name>FPU2</name>
@@ -1264,7 +1253,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state>$FILE_BNAME$.o</state>
+          <state></state>
         </option>
         <option>
           <name>CCLibConfigHeader</name>
@@ -1309,7 +1298,7 @@
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>3</state>
+          <state>1</state>
         </option>
         <option>
           <name>CompilerMisraRules98</name>
@@ -1522,7 +1511,7 @@
         </option>
         <option>
           <name>AOutputFile</name>
-          <state>$FILE_BNAME$.o</state>
+          <state></state>
         </option>
         <option>
           <name>AMultibyteSupport</name>
@@ -1631,7 +1620,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>01bsp_uart.out</state>
+          <state>###Unitialized###</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -1934,13 +1923,13 @@
   <group>
     <name>application</name>
     <file>
-      <name>$PROJ_DIR$\..\..\common\01bsp_uart\01bsp_uart.c</name>
+      <name>$PROJ_DIR$\..\..\common\01bsp_debugpins\01bsp_debugpins.c</name>
     </file>
   </group>
   <group>
     <name>bsp</name>
     <group>
-      <name>boards</name>
+      <name>board</name>
       <group>
         <name>silabs-ezr32wg</name>
         <group>
@@ -2060,10 +2049,10 @@
             <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\source\em_wdog.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\system_ezr32wg.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\source\system_ezr32wg.c</name>
           </file>
           <file>
-            <name>$EW_DIR$\arm\src\lib\write.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\source\write.c</name>
           </file>
         </group>
         <file>
