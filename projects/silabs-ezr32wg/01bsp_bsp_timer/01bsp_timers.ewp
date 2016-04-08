@@ -2060,10 +2060,10 @@
             <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\source\em_wdog.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\system_ezr32wg.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\source\system_ezr32wg.c</name>
           </file>
           <file>
-            <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\write.c</name>
+            <name>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\source\write.c</name>
           </file>
         </group>
         <file>

@@ -181,7 +181,8 @@
         <debug>1</debug>
         <option>
           <name>CCDefines</name>
-          <state></state>
+          <state>EZR32WG330F256R60</state>
+          <state>DEBUG_EFM</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -310,7 +311,12 @@
         </option>
         <option>
           <name>CCIncludePath2</name>
-          <state></state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg</state>
+          <state>$PROJ_DIR$\..\..\..\inc</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\headers</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\Include</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\source</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -572,7 +578,12 @@
         </option>
         <option>
           <name>AUserIncludes</name>
-          <state></state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg</state>
+          <state>$PROJ_DIR$\..\..\..\inc</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\headers</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\Include</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\silabs-ezr32wg\source</state>
         </option>
         <option>
           <name>AExtraOptionsCheckV2</name>
@@ -725,7 +736,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>lnk0t.icf</state>
+          <state>$TOOLKIT_DIR$\config\linker\SiliconLaboratories\EZR32WG330F256Rxx.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -785,7 +796,7 @@
         </option>
         <option>
           <name>IlinkProgramEntryLabel</name>
-          <state></state>
+          <state>__iar_program_start</state>
         </option>
         <option>
           <name>DoFill</name>

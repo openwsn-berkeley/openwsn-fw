@@ -10,6 +10,7 @@
 #include "board.h"
 #include "debugpins.h"
 #include "em_cmu.h"
+#include "em_emu.h"
 #include "em_gpio.h"
 #include "em_timer.h"
 
@@ -22,9 +23,9 @@
 typedef struct {
 	bsp_timer_cbt cb;
 	PORT_TIMER_WIDTH last_compare_value;
-	bool initiated;
-	uint32_t tooclose;
-	uint32_t diff;
+	//bool initiated;
+	//uint32_t tooclose;
+	//uint32_t diff;
 } bsp_timer_vars_t;
 
 bsp_timer_vars_t bsp_timer_vars;
@@ -51,11 +52,11 @@ void bsp_timer_init() {
 	/* Enable clock for TIMER0 module */
 	CMU_ClockEnable(cmuClock_TIMER0, true);
 
-	/* Set CC0 location 3 pin (PD1) as output */
-	GPIO_PinModeSet(gpioPortD, 1, gpioModePushPull, 0);
+	/* Set CC1 location 3 pin (PD2) as output */
+	GPIO_PinModeSet(gpioPortD, 2, gpioModePushPull, 0);
 
 	/*enable timer0*/
-	TIMER_IntEnable(TIMER0, TIMER_IEN_CC0);
+	TIMER_IntEnable(TIMER0, TIMER_IEN_CC1);
 
 	  /* Select CC channel parameters */
 	   TIMER_InitCC_TypeDef timerCCInit =
@@ -71,18 +72,21 @@ void bsp_timer_init() {
 	   };
 
 	/* Configure CC channel 0 */
-	TIMER_InitCC(TIMER0, 0, &timerCCInit);
+	TIMER_InitCC(TIMER0, 1, &timerCCInit);
 
-	/* Route CC0 to location 3 (PD1) and enable pin */
-	TIMER0->ROUTE |= (TIMER_ROUTE_CC0PEN | TIMER_ROUTE_LOCATION_LOC3);
+	/* Route CC1 to location 3 (PD2) and enable pin */
+	TIMER0->ROUTE |= (TIMER_ROUTE_CC1PEN | TIMER_ROUTE_LOCATION_LOC3);
 
 	/* Set Top Value */
 	TIMER_TopSet(TIMER0, TOP);
+        
+        /* Set Compare Value */
+        //  TIMER_CompareSet(TIMER0, 1, 13672); 
 
 	/* Select timer parameters */
 	TIMER_Init_TypeDef timerInit =
 	{
-	  .enable     = true,
+	  .enable     = false,
 	  .debugRun   = false,
 	  .prescale   = timerPrescale1024,
 	  .clkSel     = timerClkSelHFPerClk,
@@ -119,7 +123,7 @@ void bsp_timer_set_callback(bsp_timer_cbt cb) {
  */
 void bsp_timer_reset() {
 	// reset compare
-	TIMER_CompareSet(TIMER0, 0, 0);
+	TIMER_CompareSet(TIMER0, 1, 0);
 
 	//enalbe compare interrupt
 	// reset timer
@@ -137,13 +141,14 @@ void bsp_timer_reset() {
 void TIMER0_IRQHandler(void)
 {
 
- TIMER_IntClear(TIMER0, TIMER_IFC_CC0);
- debugpins_isr_toggle();
+ TIMER_IntClear(TIMER0, TIMER_IFC_CC1);
+ 
+ //debugpins_isr_toggle();
 
  /* Toggle LED ON/OFF */
  //GPIO_PinOutToggle(5, 7);
- bsp_timer_isr();
-
+ //bsp_timer_isr();
+ bsp_timer_isr_private();
 }
 
 /**
@@ -164,7 +169,7 @@ void TIMER0_IRQHandler(void)
  last compare event.
  */
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
-	PORT_TIMER_WIDTH newCompareValue, current;
+	PORT_TIMER_WIDTH newCompareValue;
 	PORT_TIMER_WIDTH temp_last_compare_value;
 
 	//if (!bsp_timer_vars.initiated){
@@ -174,19 +179,21 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 //	}
 
 	/*enable timer0, if not enabled*/
-	//TIMER_IntEnable(TIMER0, TIMER_IEN_CC0);
+	//TIMER_IntEnable(TIMER0, TIMER_IEN_CC1);
 
 
 	temp_last_compare_value = bsp_timer_vars.last_compare_value;
 
-	newCompareValue = bsp_timer_vars.last_compare_value + delayTicks + 1;
+	newCompareValue = bsp_timer_vars.last_compare_value + delayTicks;
 	bsp_timer_vars.last_compare_value = newCompareValue;
 
 
-	if (delayTicks < TIMER_CounterGet(TIMER0) - temp_last_compare_value) {
+	if (delayTicks < (TIMER_CounterGet(TIMER0) - temp_last_compare_value)) {
 
-		bsp_timer_vars.last_compare_value = TIMER_CounterGet(TIMER0);
-		TIMER0->IFS |= TIMER_IFS_CC0;
+		//bsp_timer_vars.last_compare_value = TIMER_CounterGet(TIMER0);
+               
+                TIMER_IntSet(TIMER0, TIMER_IFS_CC1);
+		//TIMER0->IFS |= TIMER_IFS_CC1;
 		// we're already too late, schedule the ISR right now manually
 		// setting the interrupt flag triggers an interrupt
 		//bsp_timer_vars.tooclose++;
@@ -198,11 +205,13 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 	} else {
 		// this is the normal case, have timer expire at newCompareValue
 		//SleepModeTimerCompareSet(newCompareValue);
-		//TIMER_IntClear(TIMER0, TIMER_IFC_CC0);
-		TIMER_CompareSet(TIMER0, 0, newCompareValue);
-
+		//TIMER_IntClear(TIMER0, TIMER_IFC_CC1);
+		TIMER_CompareSet(TIMER0, 1, newCompareValue);
+                TIMER_IntClear(TIMER0, TIMER_IFC_CC1);
+                TIMER_Enable(TIMER0, true);
+                
 		/*enable timer0*/
-		//TIMER_IntEnable(TIMER0, TIMER_IEN_CC0);
+		//TIMER_IntEnable(TIMER0, TIMER_IEN_CC1);
 
 	}
 
@@ -217,8 +226,9 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 void bsp_timer_cancel_schedule() {
 	// Disable the Timer0B interrupt.
 	//IntDisable(INT_SMTIM);
-	TIMER_CompareSet(TIMER0, 0, 0);
-	TIMER_IntDisable(TIMER0, TIMER_IEN_CC0);
+	//TIMER_CompareSet(TIMER0, 1, 0);
+	TIMER_IntDisable(TIMER0, TIMER_IEN_CC1);
+        TIMER_Enable(TIMER0, false);
 }
 
 /**
@@ -227,14 +237,14 @@ void bsp_timer_cancel_schedule() {
  \returns The current value of the timer's counter.
  */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
-	return 0; //SleepModeTimerCountGet();
+	return TIMER_CounterGet(TIMER0); //SleepModeTimerCountGet();
 }
 
 //=========================== private =========================================
 
 void bsp_timer_isr_private(void) {
 	debugpins_isr_set();
-	TIMER_IntDisable(TIMER0, TIMER_IEN_CC0);
+	//TIMER_IntDisable(TIMER0, TIMER_IEN_CC1);
 	bsp_timer_isr();
 	debugpins_isr_clr();
 }

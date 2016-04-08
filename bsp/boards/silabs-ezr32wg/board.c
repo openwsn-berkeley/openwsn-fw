@@ -13,9 +13,9 @@
 #include "debugpins.h"
 #include "uart.h"
 #include "radio.h"
-#include "headers/em_cmu.h"
-#include "headers/em_chip.h"
-
+#include "em_cmu.h"
+#include "em_chip.h"
+#include "em_emu.h"
 
 //=========================== variables =======================================
 
@@ -50,7 +50,7 @@ void board_init(void) {
  * Puts the board to sleep
  */
 void board_sleep(void) {
-
+    //EMU_EnterEM1();
 }
 
 /**

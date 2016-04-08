@@ -15,12 +15,12 @@
 //=========================== defines =========================================
 
 // Board PINS defines
-#define GPIO_PORT_SLOT 0
-#define GPIO_PORT_FRAME 2
-#define GPIO_PORT_ISR 1
-#define GPIO_PORT_TASK 3
+#define GPIO_PORT_SLOT 6
+#define GPIO_PORT_FRAME 7
+#define GPIO_PORT_ISR 0
+#define GPIO_PORT_TASK 1
 #define GPIO_PORT_FSM 11
-#define GPIO_PORT_RADIO 4
+#define GPIO_PORT_RADIO 3
 
 //=========================== variables =======================================
 
@@ -34,38 +34,38 @@ void debugpins_init() {
 	CMU_ClockEnable(cmuClock_GPIO, true);
 
 	//set the led pins to output.
-	GPIO_PinModeSet(gpioPortE, GPIO_PORT_SLOT, gpioModePushPull, 0);
-	GPIO_PinModeSet(gpioPortD, GPIO_PORT_FRAME, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortC, GPIO_PORT_SLOT, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortC, GPIO_PORT_FRAME, gpioModePushPull, 0);
 	GPIO_PinModeSet(gpioPortE, GPIO_PORT_ISR, gpioModePushPull, 0);
-	GPIO_PinModeSet(gpioPortD, GPIO_PORT_TASK, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortE, GPIO_PORT_TASK, gpioModePushPull, 0);
 	GPIO_PinModeSet(gpioPortB, GPIO_PORT_FSM, gpioModePushPull, 0);
-	GPIO_PinModeSet(gpioPortD, GPIO_PORT_RADIO, gpioModePushPull, 0);
+	GPIO_PinModeSet(gpioPortF, GPIO_PORT_RADIO, gpioModePushPull, 0);
 }
 
 // PD1
 void debugpins_frame_toggle() {
-	GPIO_PinOutToggle(gpioPortD, GPIO_PORT_FRAME);
+	GPIO_PinOutToggle(gpioPortC, GPIO_PORT_FRAME);
 }
 
 void debugpins_frame_clr() {
-	GPIO_PinOutClear(gpioPortD, GPIO_PORT_FRAME);
+	GPIO_PinOutClear(gpioPortC, GPIO_PORT_FRAME);
 }
 
 void debugpins_frame_set() {
-	GPIO_PinOutSet(gpioPortD, GPIO_PORT_FRAME);
+	GPIO_PinOutSet(gpioPortC, GPIO_PORT_FRAME);
 }
 
 // PD3
 void debugpins_slot_toggle() {
-	GPIO_PinOutToggle(gpioPortE, GPIO_PORT_SLOT);
+	GPIO_PinOutToggle(gpioPortC, GPIO_PORT_SLOT);
 }
 
 void debugpins_slot_clr() {
-	GPIO_PinOutClear(gpioPortE, GPIO_PORT_SLOT);
+	GPIO_PinOutClear(gpioPortC, GPIO_PORT_SLOT);
 }
 
 void debugpins_slot_set() {
-	GPIO_PinOutSet(gpioPortE, GPIO_PORT_SLOT);
+	GPIO_PinOutSet(gpioPortC, GPIO_PORT_SLOT);
 }
 
 // PD2
@@ -83,15 +83,15 @@ void debugpins_fsm_set() {
 
 // PD1
 void debugpins_task_toggle() {
-	GPIO_PinOutToggle(gpioPortD, GPIO_PORT_TASK);
+	GPIO_PinOutToggle(gpioPortE, GPIO_PORT_TASK);
 }
 
 void debugpins_task_clr() {
-	GPIO_PinOutClear(gpioPortD, GPIO_PORT_TASK);
+	GPIO_PinOutClear(gpioPortE, GPIO_PORT_TASK);
 }
 
 void debugpins_task_set() {
-	GPIO_PinOutSet(gpioPortD, GPIO_PORT_TASK);
+	GPIO_PinOutSet(gpioPortE, GPIO_PORT_TASK);
 }
 
 // PA5
@@ -109,17 +109,17 @@ void debugpins_isr_set() {
 
 // PD0
 void debugpins_radio_toggle() {
-	GPIO_PinOutToggle(gpioPortD, GPIO_PORT_RADIO);
+	GPIO_PinOutToggle(gpioPortF, GPIO_PORT_RADIO);
 
 }
 
 void debugpins_radio_clr() {
-	GPIO_PinOutClear(gpioPortD, GPIO_PORT_RADIO);
+	GPIO_PinOutClear(gpioPortF, GPIO_PORT_RADIO);
 
 }
 
 void debugpins_radio_set() {
-	GPIO_PinOutSet(gpioPortD, GPIO_PORT_RADIO);
+	GPIO_PinOutSet(gpioPortF, GPIO_PORT_RADIO);
 }
 
 //------------ private ------------//
