@@ -12,6 +12,7 @@
 //-- cross-layer
 #include "idmanager.h"
 #include "openqueue.h"
+#include "openmemory.h"
 #include "openrandom.h"
 #include "opentimers.h"
 //-- 02a-TSCH
@@ -55,6 +56,7 @@ void openstack_init(void) {
    //-- cross-layer
    idmanager_init();    // call first since initializes EUI64 and isDAGroot
    openqueue_init();
+   openmemory_init();
    openrandom_init();
    opentimers_init();
    //-- 02a-TSCH

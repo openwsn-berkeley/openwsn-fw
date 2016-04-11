@@ -13,9 +13,7 @@
 
 //=========================== define ==========================================
 
-#define QUEUELENGTH  26 // 10 + FRAGMENT_MAX_FRAGMENTS
-
-#define BIGQUEUELENGTH  5
+#define QUEUELENGTH  10
 
 //=========================== typedef =========================================
 
@@ -24,20 +22,11 @@ typedef struct {
    uint8_t  owner;
 } debugOpenQueueEntry_t;
 
-typedef struct {
-   bool     in_use;
-   uint8_t  buffer[LARGE_PACKET_SIZE];
-} BigQueueEntry_t;
-
 //=========================== module variables ================================
 
 typedef struct {
    OpenQueueEntry_t queue[QUEUELENGTH];
 } openqueue_vars_t;
-
-typedef struct {
-   BigQueueEntry_t queue[BIGQUEUELENGTH];
-} bigqueue_vars_t;
 
 //=========================== prototypes ======================================
 
@@ -50,7 +39,6 @@ owerror_t          openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeAllCreatedBy(uint8_t creator);
 void               openqueue_removeAllOwnedBy(uint8_t owner);
 
-OpenQueueEntry_t*  openqueue_toBigPacket(OpenQueueEntry_t* pkt, uint16_t start);
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);

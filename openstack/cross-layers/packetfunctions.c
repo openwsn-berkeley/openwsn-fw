@@ -266,18 +266,28 @@ void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, b
 //======= reserving/tossing headers
 
 void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_length) {
-   bool error;
+   bool     error;
+   uint16_t size;
+   uint8_t* auxPayload;
 
-   error = pkt->big ?
-	   pkt->length + header_length > LARGE_PACKET_SIZE :
-	   (uint8_t*)(pkt->payload)-header_length < (uint8_t*)(pkt->packet);
-   // Check if is needed to reserve a big packet.
-   // Layer 2 does not need support for large packets as messages
-   // are fragmented.
-   // This one tries to acquire a big buffer if needed on layer 3
-   // and up.
-   if ( error && (pkt->owner > COMPONENT_FRAGMENT) && (pkt->big == NULL) )
-      error = openqueue_toBigPacket(pkt, 0) == NULL;
+   size = pkt->length + header_length;
+   if ( size > LARGE_PACKET_SIZE )
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+                            (errorparameter_t)4,
+                            (errorparameter_t)size);
+
+   error = FALSE;
+   if ((uint8_t*)(pkt->payload-header_length) < (uint8_t*)(pkt->packet)) {
+      size = header_length + pkt->length // new msg size + frame bytes
+	   + FRAME_DATA_CRC + IEEE802154_SECURITY_TAG_LEN;
+      auxPayload = openmemory_increaseMemory(pkt->payload, size);
+      if ( auxPayload != NULL && auxPayload != pkt->payload ) {
+         pkt->payload    = auxPayload;
+         pkt->l4_payload = auxPayload - pkt->length + pkt->l4_length;
+	 pkt->packet     = openmemory_firstSegmentAddr(auxPayload);
+      }
+      error = auxPayload == NULL;
+   }
 
    pkt->payload -= header_length;
    pkt->length  += header_length;
@@ -290,9 +300,7 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_le
 void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint16_t header_length) {
    pkt->payload += header_length;
    pkt->length  -= header_length;
-   if ( pkt->big ?
-        pkt->length < 0 :
-        (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+126) ) {
+   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(openmemory_lastSegmentAddr(pkt->packet)+126) ) {
       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)1,
                             (errorparameter_t)pkt->length);
@@ -322,8 +330,15 @@ void packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length) {
 // updating pointers to the new memory location. Used to make a local copy of
 // the frame before transmission (where it can possibly be encrypted). 
 void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* src) {
+   uint8_t* aux;
+
+   // preserve destination packet
+   aux = dst->packet;
+
    // make a copy of the frame
    memcpy(dst, src, sizeof(OpenQueueEntry_t));
+   dst->packet = aux;
+   memcpy(dst->packet, src->packet, sizeof(uint8_t) * FRAME_DATA_TOTAL);
 
    // Calculate where payload starts in the buffer
    dst->payload = &dst->packet[src->payload - src->packet]; // update pointers

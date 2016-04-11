@@ -262,7 +262,9 @@ void forwarding_receive(
 
 	// If this message is a FRAG1, message must be assembled
 	// prior to move it to upper layer.
-	if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
+	if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL ) {
+           //msg->l4_payload = msg->payload;
+           //msg->l4_length  = msg->length;
            switch(msg->l4_protocol) {
            case IANA_TCP: case IANA_UDP: case IANA_ICMPv6:
               fragment_assignAction(buffer, FRAGMENT_ACTION_ASSEMBLE);
@@ -276,7 +278,7 @@ void forwarding_receive(
               );
 	      fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
            }
-	else
+	} else
 	    forwarding_toUpperLayer(msg);
 
     } else {
@@ -284,6 +286,9 @@ void forwarding_receive(
       
         // change the creator of the packet
         msg->creator = COMPONENT_FORWARDING;
+
+        msg->l4_payload = msg->payload + ipv6_inner_header->header_length + ipv6_outer_header->header_length;
+        msg->l4_length  = msg->length  + ipv6_inner_header->header_length + ipv6_outer_header->header_length;
       
         if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
             flags = rpl_option->flags;

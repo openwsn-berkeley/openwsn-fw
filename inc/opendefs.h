@@ -45,12 +45,15 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define LENGTH_IPV6_MTU   1280 // RFC 2460
 #define LARGE_PACKET_SIZE LENGTH_IPV6_MTU
 
-// frame sizes
+// memory sizes
 #define FRAME_DATA_DATA  125
 #define FRAME_DATA_CRC   2
 #define FRAME_DATA_PLOAD (FRAME_DATA_DATA+FRAME_DATA_CRC)
 #define FRAME_DATA_OTHER (1+1+1) // 1B spi address, 1B length, 1B LQI
 #define FRAME_DATA_TOTAL (FRAME_DATA_PLOAD+FRAME_DATA_OTHER)
+
+// number of possible frames
+#define FRAME_DATA_SEGMENTS 50 // 50*130 = 6500B ~ 6,35KB
 
 enum {
    E_SUCCESS                           = 0,
@@ -130,56 +133,57 @@ enum {
    COMPONENT_OPENWSN                   = 0x01,
    //cross-layers
    COMPONENT_IDMANAGER                 = 0x02,
-   COMPONENT_OPENQUEUE                 = 0x03,
-   COMPONENT_OPENSERIAL                = 0x04,
-   COMPONENT_PACKETFUNCTIONS           = 0x05,
-   COMPONENT_RANDOM                    = 0x06,
+   COMPONENT_OPENMEMORY                = 0x03,
+   COMPONENT_OPENQUEUE                 = 0x04,
+   COMPONENT_OPENSERIAL                = 0x05,
+   COMPONENT_PACKETFUNCTIONS           = 0x06,
+   COMPONENT_RANDOM                    = 0x07,
    //PHY
-   COMPONENT_RADIO                     = 0x07,
+   COMPONENT_RADIO                     = 0x08,
    //MAClow
-   COMPONENT_IEEE802154                = 0x08,
-   COMPONENT_IEEE802154E               = 0x09,
+   COMPONENT_IEEE802154                = 0x09,
+   COMPONENT_IEEE802154E               = 0x0a,
    
    // all components with higher component id than COMPONENT_IEEE802154E
    // won't be able to get free packets from the queue 
    // when the mote is not synch
    
    //MAClow<->MAChigh ("virtual components")
-   COMPONENT_SIXTOP_TO_IEEE802154E     = 0x0a,
-   COMPONENT_IEEE802154E_TO_SIXTOP     = 0x0b,
+   COMPONENT_SIXTOP_TO_IEEE802154E     = 0x0b,
+   COMPONENT_IEEE802154E_TO_SIXTOP     = 0x0c,
    //MAChigh
-   COMPONENT_SIXTOP                    = 0x0c,
-   COMPONENT_NEIGHBORS                 = 0x0d,
-   COMPONENT_SCHEDULE                  = 0x0e,
-   COMPONENT_SIXTOP_RES                = 0x0f,
+   COMPONENT_SIXTOP                    = 0x0d,
+   COMPONENT_NEIGHBORS                 = 0x0e,
+   COMPONENT_SCHEDULE                  = 0x0f,
+   COMPONENT_SIXTOP_RES                = 0x10,
    //IPHC
-   COMPONENT_OPENBRIDGE                = 0x10, // to be sure openbridge does
-   COMPONENT_FRAGMENT                  = 0x11, // not fragment: only upper
-   COMPONENT_IPHC                      = 0x12, // modules are able to do it
+   COMPONENT_OPENBRIDGE                = 0x11,
+   COMPONENT_FRAGMENT                  = 0x12,
+   COMPONENT_IPHC                      = 0x13,
    //IPv6
-   COMPONENT_FORWARDING                = 0x13,
-   COMPONENT_ICMPv6                    = 0x14,
-   COMPONENT_ICMPv6ECHO                = 0x15,
-   COMPONENT_ICMPv6ROUTER              = 0x16,
-   COMPONENT_ICMPv6RPL                 = 0x17,
+   COMPONENT_FORWARDING                = 0x14,
+   COMPONENT_ICMPv6                    = 0x15,
+   COMPONENT_ICMPv6ECHO                = 0x16,
+   COMPONENT_ICMPv6ROUTER              = 0x17,
+   COMPONENT_ICMPv6RPL                 = 0x18,
    //TRAN
-   COMPONENT_OPENTCP                   = 0x18,
-   COMPONENT_OPENUDP                   = 0x19,
-   COMPONENT_OPENCOAP                  = 0x1a,
+   COMPONENT_OPENTCP                   = 0x19,
+   COMPONENT_OPENUDP                   = 0x1a,
+   COMPONENT_OPENCOAP                  = 0x1b,
    // applications
-   COMPONENT_C6T                       = 0x1b,
-   COMPONENT_CEXAMPLE                  = 0x1c,
-   COMPONENT_CINFO                     = 0x1d,
-   COMPONENT_CLEDS                     = 0x1e,
-   COMPONENT_CSENSORS                  = 0x1f,
-   COMPONENT_CSTORM                    = 0x20,
-   COMPONENT_CWELLKNOWN                = 0x21,
-   COMPONENT_TECHO                     = 0x22,
-   COMPONENT_TOHLONE                   = 0x23,
-   COMPONENT_UECHO                     = 0x24,
-   COMPONENT_UINJECT                   = 0x25,
-   COMPONENT_RRT                       = 0x26,
-   COMPONENT_SECURITY                  = 0x27,
+   COMPONENT_C6T                       = 0x1c,
+   COMPONENT_CEXAMPLE                  = 0x1d,
+   COMPONENT_CINFO                     = 0x1e,
+   COMPONENT_CLEDS                     = 0x1f,
+   COMPONENT_CSENSORS                  = 0x20,
+   COMPONENT_CSTORM                    = 0x21,
+   COMPONENT_CWELLKNOWN                = 0x22,
+   COMPONENT_TECHO                     = 0x23,
+   COMPONENT_TOHLONE                   = 0x24,
+   COMPONENT_UECHO                     = 0x25,
+   COMPONENT_UINJECT                   = 0x26,
+   COMPONENT_RRT                       = 0x27,
+   COMPONENT_SECURITY                  = 0x28,
 };
 
 /**
@@ -260,10 +264,9 @@ enum {
    ERR_SIXTOP_LIST                     = 0x3e, // the cells reserved to request mote contains slot {0} and slot {1}
    // fragmentation
    ERR_FRAG_RESERVING                  = 0x3f, // trying to get an used fragment
-   ERR_FREEING_BIG                     = 0x40, // trying to free an unused big packet
-   ERR_NO_FREE_FRAGMENT_BUFFER         = 0x41, // no free fragment buffer
-   ERR_INPUTBUFFER_OVERLAPS            = 0x42, // incoming fragment overlaps with previously received one
-   ERR_EXPIRED_TIMER                   = 0x43, // fragment timer expired
+   ERR_NO_FREE_FRAGMENT_BUFFER         = 0x40, // no free fragment buffer at {0}
+   ERR_EXPIRED_TIMER                   = 0x41, // fragment timer expired
+   ERR_MEMORY_OVERLAPS                 = 0x42, // a memory area or fragment overlaps
 };
 
 //=========================== typedef =========================================
@@ -346,9 +349,8 @@ typedef struct {
    int8_t        l1_rssi;                        // RSSI of received packet
    uint8_t       l1_lqi;                         // LQI of received packet
    bool          l1_crc;                         // did received packet pass CRC check?
-   void*         big;                            // pointer to a big packet buffer struct, if used
    //the packet
-   uint8_t       packet[FRAME_DATA_TOTAL];       // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
+   uint8_t*      packet;                         // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
 } OpenQueueEntry_t;
 
 //=========================== variables =======================================

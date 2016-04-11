@@ -27,6 +27,7 @@
 #include "opentcp_obj.h"
 #include "idmanager_obj.h"
 #include "openqueue_obj.h"
+#include "openmemory_obj.h"
 #include "openrandom_obj.h"
 #include "fragment_obj.h"
 // applications
@@ -233,7 +234,7 @@ struct OpenMote {
    // cross-layer
    idmanager_vars_t     idmanager_vars;
    openqueue_vars_t     openqueue_vars;
-   bigqueue_vars_t      bigqueue_vars;
+   openmemory_vars_t    openmemory_vars;
    // drivers
    opentimers_vars_t    opentimers_vars;
    random_vars_t        random_vars;

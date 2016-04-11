@@ -1,5 +1,6 @@
 #include "opendefs.h"
 #include "openqueue.h"
+#include "openmemory.h"
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
@@ -8,8 +9,6 @@
 //=========================== variables =======================================
 
 openqueue_vars_t openqueue_vars;
-
-bigqueue_vars_t bigqueue_vars;
 
 //=========================== prototypes ======================================
 
@@ -25,10 +24,8 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry);
 void openqueue_init() {
    uint8_t i;
    for (i=0;i<QUEUELENGTH;i++){
+      openqueue_vars.queue[i].packet = NULL;
       openqueue_reset_entry(&(openqueue_vars.queue[i]));
-   }
-   for (i=0;i<BIGQUEUELENGTH;i++){
-      bigqueue_vars.queue[i].in_use = FALSE;
    }
 }
 
@@ -81,6 +78,14 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    // walk through queue and find free entry
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
+         uint8_t* packet;
+
+         if ( (packet = openmemory_getMemory(0)) == NULL ) {
+            ENABLE_INTERRUPTS();
+	    return NULL;
+	 }
+         openqueue_vars.queue[i].packet=packet;
+         openqueue_vars.queue[i].payload=&(packet[FRAME_DATA_PLOAD - IEEE802154_SECURITY_TAG_LEN]);
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
          ENABLE_INTERRUPTS(); 
@@ -101,29 +106,21 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 */
 owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    uint8_t i;
-   uint8_t j;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (&openqueue_vars.queue[i]==pkt) {
-	      uint8_t owner = pkt->owner;
          if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
             // log the error
             openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
                                   (errorparameter_t)0,
                                   (errorparameter_t)0);
          }
-	 if (pkt->big)
-            for (j=0;j<BIGQUEUELENGTH;j++)
-               if ( &(bigqueue_vars.queue[j]) == pkt->big ) {
-                  if ( ! bigqueue_vars.queue[j].in_use )
-                     openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
-                                  (errorparameter_t)0,
-				  (errorparameter_t)0);
-                  bigqueue_vars.queue[j].in_use = FALSE;
-		  break;
-	       }
 
+         if (pkt->packet!=NULL) {
+            openmemory_freeMemory(pkt->packet);
+            pkt->packet = NULL;
+         }
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
          ENABLE_INTERRUPTS();
          return E_SUCCESS;
@@ -139,27 +136,20 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
 
 owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
    uint8_t i;
-   uint8_t j;
 
    for (i=0;i<QUEUELENGTH;i++) {
       if (&openqueue_vars.queue[i]==pkt) {
-	      uint8_t owner = pkt->owner;
          if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
             // log the error
             openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
                                   (errorparameter_t)0,
                                   (errorparameter_t)0);
          }
-	 if ( pkt->big )
-	 for (j=0;j<BIGQUEUELENGTH;j++)
-            if ( &(bigqueue_vars.queue[j]) == pkt->big ) {
-               if ( ! bigqueue_vars.queue[j].in_use ) 
-                  openserial_printError(COMPONENT_OPENQUEUE,ERR_FREEING_BIG,
-                                  (errorparameter_t)0,
-                                  (errorparameter_t)0);
-               bigqueue_vars.queue[j].in_use = FALSE;
-	       break;
-            }
+
+         if (pkt->packet!=NULL) {
+            openmemory_freeMemory(pkt->packet);
+            pkt->packet = NULL;
+         }
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
          return E_SUCCESS;
       }
@@ -206,43 +196,6 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
       }
    }
    ENABLE_INTERRUPTS();
-}
-
-/**
-\brief Assign a big packet buffer to an OpenQueueEntry
-
-\param pkt   The OpenQueueEntry struct
-\param start The start position to copy contents to the new buffer. If
-             zero is specified, start = pkt->length.
-
-\returns pkt  If buffer assigned
-\returns NULL If no availble buffer
-*/
-OpenQueueEntry_t* openqueue_toBigPacket(OpenQueueEntry_t* pkt, uint16_t start) {
-   uint8_t  i;
-   uint8_t* payload;
-   INTERRUPT_DECLARATION();
-
-   DISABLE_INTERRUPTS();
-   for (i=0;i<BIGQUEUELENGTH;i++) {
-      if (! bigqueue_vars.queue[i].in_use) {
-         bigqueue_vars.queue[i].in_use = TRUE;
-	 ENABLE_INTERRUPTS();
-
-	 payload  = (uint8_t*)&(bigqueue_vars.queue[i].buffer);
-	 payload += LARGE_PACKET_SIZE; // end of buffer
-	 payload -= start > 0 ? start : pkt->length;
-	 memcpy(payload, pkt->payload, pkt->length);
-	 pkt->payload    = payload;
-	 pkt->l4_payload = payload - pkt->length + pkt->l4_length;
-	 pkt->big        = &(bigqueue_vars.queue[i]);
-
-	 return pkt;
-      }
-   }
-
-   ENABLE_INTERRUPTS();
-   return NULL;
 }
 
 //======= called by RES
@@ -335,9 +288,8 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //admin
    entry->creator                      = COMPONENT_NULL;
    entry->owner                        = COMPONENT_NULL;
-   entry->payload                      = &(entry->packet[FRAME_DATA_PLOAD - IEEE802154_SECURITY_TAG_LEN]); // Footer is longer if security is used
+   entry->payload                      = NULL;
    entry->length                       = 0;
-   entry->big                          = NULL;
    //l4
    entry->l4_protocol                  = IANA_UNDEFINED;
    entry->l4_length                    = 0;

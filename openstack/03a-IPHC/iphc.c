@@ -284,7 +284,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
       if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
          fragment_assignAction(buffer, FRAGMENT_ACTION_OPENBRIDGE);
       else
-         openbridge_receive(msg);                   //out to the OpenVisualizer
+         openbridge_receive(msg, TRUE);           //out to the OpenVisualizer
    }
 }
 

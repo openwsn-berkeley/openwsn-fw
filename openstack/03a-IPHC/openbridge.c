@@ -84,7 +84,7 @@ void openbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
 /**
 \brief Receive a frame at the openbridge, which sends it out over serial.
 */
-void openbridge_receive(OpenQueueEntry_t* msg) {
+void openbridge_receive(OpenQueueEntry_t* msg, bool freeMsg) {
    
    // prepend previous hop
    packetfunctions_reserveHeaderSize(msg,LENGTH_ADDR64b);
@@ -98,7 +98,8 @@ void openbridge_receive(OpenQueueEntry_t* msg) {
    openserial_printData((uint8_t*)(msg->payload),msg->length);
    
    // free packet
-   openqueue_freePacketBuffer(msg);
+   if ( freeMsg )
+      openqueue_freePacketBuffer(msg);
 }
 
 //=========================== private =========================================

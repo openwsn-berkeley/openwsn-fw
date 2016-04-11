@@ -28,14 +28,14 @@ typedef enum fragment_states {
                        // free Fragment entry: first state
    // incoming values
    FRAGMENT_RECEIVED,  // received message fragment
-   FRAGMENT_PROCESSED, // payload processed but not freed
+   FRAGMENT_PROCESSED, // payload processed but not freed (unused now)
    FRAGMENT_FINISHED,  // message fragment sent
                        // no attached packet: last state
    // Fragment Entry value
    FRAGMENT_RESERVED,  // reserved fragment for RX or TX
-   FRAGMENT_RX,        // incoming message
    FRAGMENT_TX,        // outgoing message
-   FRAGMENT_FW,        // forwarding message
+   FRAGMENT_RX,        // incoming message
+   FRAGMENT_FW,        // forwarding message (FW is a RX message)
 } FragmentState;
 
 typedef enum fragment_actions {
@@ -86,17 +86,12 @@ typedef struct {
    uint8_t           fragment_offset;
    uint8_t           fragment_size;
    FragmentState     state;
-   OpenQueueEntry_t* fragment;
+   uint8_t*          fragment; // msg->payload (not for FRAG1);
 } FragmentOffsetEntry_t;
 
 typedef union {
    // Data to track outgoing fragmented messages
    struct {
-      // to fragment not big packets: it is too large; actually only 8B
-      // are needed but implementation is simplier when copying message
-      // to this buffer and making "big" points it
-      uint8_t  excess[FRAME_DATA_DATA];
-      uint8_t* payload;           // message payload
       uint8_t  max_fragment_size;
       uint16_t actual_sent;       // data sent
       uint8_t  size;              // next fragment size
@@ -118,6 +113,7 @@ typedef struct FragmentQueueEntry {
    uint8_t             number;        // number of fragments in list
    int8_t              offset;        // fragment offset
    FragmentOtherData_t other;
+   uint8_t*            payload;       // message payload
 } FragmentQueueEntry_t;
 
 typedef struct {

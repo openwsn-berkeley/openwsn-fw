@@ -124,6 +124,7 @@ void ieee154e_init() {
        chTemplate_default,
        sizeof(ieee154e_vars.chTemplate)
    );
+   ieee154e_vars.localCopyForTransmission.packet = &ieee154e_vars.localPacket[0];
    
    if (idmanager_getIsDAGroot()==TRUE) {
       changeIsSync(TRUE);
