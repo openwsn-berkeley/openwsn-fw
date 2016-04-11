@@ -14,7 +14,8 @@
 #include "em_gpio.h"
 #include "em_timer.h"
 
-#define TOP 65535
+//#define TOP 65535
+
 
 //=========================== defines =========================================
 
@@ -23,9 +24,7 @@
 typedef struct {
 	bsp_timer_cbt cb;
 	PORT_TIMER_WIDTH last_compare_value;
-	//bool initiated;
-	//uint32_t tooclose;
-	//uint32_t diff;
+
 } bsp_timer_vars_t;
 
 bsp_timer_vars_t bsp_timer_vars;
@@ -41,7 +40,7 @@ void bsp_timer_isr_private(void);
  any compare registers, so no interrupt will fire.
  */
 void bsp_timer_init() {
-
+        
 	// clear local variables
 	memset(&bsp_timer_vars, 0, sizeof(bsp_timer_vars_t));
 
@@ -78,7 +77,7 @@ void bsp_timer_init() {
 	TIMER0->ROUTE |= (TIMER_ROUTE_CC1PEN | TIMER_ROUTE_LOCATION_LOC3);
 
 	/* Set Top Value */
-	TIMER_TopSet(TIMER0, TOP);
+//	TIMER_TopSet(TIMER0, TOP);
         
         /* Set Compare Value */
         //  TIMER_CompareSet(TIMER0, 1, 13672); 
@@ -86,7 +85,7 @@ void bsp_timer_init() {
 	/* Select timer parameters */
 	TIMER_Init_TypeDef timerInit =
 	{
-	  .enable     = false,
+	  .enable     = true,
 	  .debugRun   = false,
 	  .prescale   = timerPrescale1024,
 	  .clkSel     = timerClkSelHFPerClk,
@@ -171,7 +170,7 @@ void TIMER0_IRQHandler(void)
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 	PORT_TIMER_WIDTH newCompareValue;
 	PORT_TIMER_WIDTH temp_last_compare_value;
-
+       // uint16_t compare_last_value;
 	//if (!bsp_timer_vars.initiated){
 		//as the timer runs forever the first time it is turned on has a weird value
 	//	bsp_timer_vars.last_compare_value=0; //SleepModeTimerCountGet();
@@ -186,38 +185,17 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 
 	newCompareValue = bsp_timer_vars.last_compare_value + delayTicks;
 	bsp_timer_vars.last_compare_value = newCompareValue;
-
-
+        //compare_last_value = uint16_t
+        
 	if (delayTicks < (TIMER_CounterGet(TIMER0) - temp_last_compare_value)) {
-
-		//bsp_timer_vars.last_compare_value = TIMER_CounterGet(TIMER0);
                
                 TIMER_IntSet(TIMER0, TIMER_IFS_CC1);
-		//TIMER0->IFS |= TIMER_IFS_CC1;
-		// we're already too late, schedule the ISR right now manually
-		// setting the interrupt flag triggers an interrupt
-		//bsp_timer_vars.tooclose++;
-		//bsp_timer_vars.diff=(current - temp_last_compare_value);
-
-		//set the interrupt
-		//IntPendSet(INT_SMTIM);
 
 	} else {
 		// this is the normal case, have timer expire at newCompareValue
-		//SleepModeTimerCompareSet(newCompareValue);
-		//TIMER_IntClear(TIMER0, TIMER_IFC_CC1);
 		TIMER_CompareSet(TIMER0, 1, newCompareValue);
-                TIMER_IntClear(TIMER0, TIMER_IFC_CC1);
-                TIMER_Enable(TIMER0, true);
-                
-		/*enable timer0*/
-		//TIMER_IntEnable(TIMER0, TIMER_IEN_CC1);
-
 	}
 
-	/*enable timer0, if not enabled*/
-	//TIMER_IntEnable(TIMER0, TIMER_IEN_CC0);//enable interrupt
-	//IntEnable(INT_SMTIM);
 }
 
 /**
