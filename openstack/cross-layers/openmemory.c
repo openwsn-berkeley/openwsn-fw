@@ -87,7 +87,7 @@ uint8_t*  openmemory_getMemory(uint16_t size)
             j++;
 	 if ( j == nsegments ) {
             openmemory_vars.memory.map[i] = nsegments;
-            openmemory_vars.used += nsegments;
+//            openmemory_vars.used += nsegments;
 	    return &openmemory_vars.memory.buffer[(i-j+1) * FRAME_DATA_TOTAL];
 	 } else
             i -= j; // advance to next occupied segment
