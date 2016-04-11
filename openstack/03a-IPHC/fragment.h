@@ -97,7 +97,7 @@ typedef union {
       uint8_t  size;              // next fragment size
       bool     fragn;             // True if not first fragment
    } data;
-   FragmentOffsetEntry_t list[FRAGMENT_MAX_FRAGMENTS];
+   FragmentOffsetEntry_t* list;
 } FragmentOtherData_t;
 
 typedef struct FragmentQueueEntry {

@@ -227,13 +227,12 @@ bool fragment_retrieveHeader(OpenQueueEntry_t* msg) {
    tempFO.fragment_offset = offset;
    DISABLE_INTERRUPTS();
    for (i=0;i<buffer->number;i++) {
-      if (BUFFER_EQUAL(buffer->other.list[i],tempFO)) {
+      if ( BUFFER_EQUAL(buffer->other.list[i],tempFO) ) {
          ENABLE_INTERRUPTS();
          // Duplicated fragment
 	 openqueue_freePacketBuffer(msg);
 	 return TRUE;
-      } else if (BUFFER_OVERLAP(buffer->other.list[i],tempFO)
-		      || openrandom_get16b() > 0xFFF0 ) {
+      } else if ( BUFFER_OVERLAP(buffer->other.list[i],tempFO) ) {
          uint16_t    tag;
          uint16_t    size;
          open_addr_t addr;
@@ -422,7 +421,6 @@ void fragment_deleteNeighbor(open_addr_t* neighbor)
    uint8_t i;
    uint8_t chain[10];
 
-   printf("%2d: DELETE NEIGHBOR %2d\n", idmanager_getMyID(ADDR_64B)->addr_64b[7], neighbor->addr_64b[7]);
    for (i=0;i<FRAGQLENGTH;i++)
       if ( fragmentqueue_vars.queue[i].in_use != FRAGMENT_NONE 
        && (packetfunctions_sameAddress(neighbor,
@@ -526,7 +524,6 @@ owerror_t fragment_startSend(FragmentQueueEntry_t* buffer) {
       return  sixtop_send(msg);
    }
 
-   printf("%2d: Start sending %4d packet %lu\n", idmanager_getMyID(ADDR_64B)->addr_64b[7], msg->length, (unsigned long int)msg->packet);
    buffer->creator       = msg->creator;
    msg->creator          = COMPONENT_FRAGMENT;
    buffer->datagram_tag  = fragment_getNewTag();
@@ -740,6 +737,14 @@ FragmentQueueEntry_t* fragment_searchBuffer(OpenQueueEntry_t* msg, bool in) {
       memcpy(&(buffer->dst), dst, sizeof(open_addr_t));
       memcpy(&(buffer->src), src, sizeof(open_addr_t));
       buffer->in_use = in ? FRAGMENT_RX : FRAGMENT_TX;
+      if ( in ) {
+         size = size / MIN_PAYLOAD + 1;
+         buffer->other.list = (FragmentOffsetEntry_t*)openmemory_getMemory(size * sizeof(FragmentOffsetEntry_t));
+         for ( i = 0; i < size; i++ ) {
+            buffer->other.list[i].state = FRAGMENT_NONE;
+            buffer->other.list[i].fragment = NULL;
+         }
+      }
       ENABLE_INTERRUPTS();
       return buffer;
    }
@@ -778,7 +783,6 @@ owerror_t fragment_freeBuffer(FragmentQueueEntry_t* buffer) {
 \brief Initializes buffer contents in atomic context
 */
 void fragment_resetBuffer(FragmentQueueEntry_t* buffer) {
-   uint8_t i;
 
    fragment_disableTimer(buffer);
    buffer->msg           = NULL;
@@ -786,10 +790,8 @@ void fragment_resetBuffer(FragmentQueueEntry_t* buffer) {
    buffer->action        = FRAGMENT_ACTION_NONE;
    buffer->datagram_size = 0;
    buffer->number        = 0;
-   for ( i = 0; i < FRAGMENT_MAX_FRAGMENTS; i++ ) {
-       buffer->other.list[i].state = FRAGMENT_NONE;
-       buffer->other.list[i].fragment = NULL;
-   }
+   if ( buffer->in_use >= FRAGMENT_RX )
+      openmemory_freeMemory((uint8_t*)buffer->other.list);
 
    buffer->in_use = FRAGMENT_NONE;
 }
@@ -1050,6 +1052,7 @@ void fragment_assemble(FragmentQueueEntry_t* buffer, uint8_t frag) {
 
    if ( fragment_completeRX(buffer, FRAGMENT_FINISHED) ) {
       if ( buffer->in_use == FRAGMENT_FW ) {
+         openmemory_freeMemory((uint8_t*)buffer->other.list);
          buffer->in_use = FRAGMENT_TX;
          ENABLE_INTERRUPTS();
          fragment_startSend(buffer);
