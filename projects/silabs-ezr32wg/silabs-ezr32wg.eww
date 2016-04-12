@@ -8,6 +8,9 @@
     <path>$WS_DIR$\01bsp_leds\01bsp_leds.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\01bsp_radio\01bsp_radio.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_bsp_timer\01bsp_timers.ewp</path>
   </project>
   <project>

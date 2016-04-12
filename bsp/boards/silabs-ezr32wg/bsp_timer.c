@@ -24,6 +24,7 @@
 typedef struct {
 	bsp_timer_cbt cb;
 	PORT_TIMER_WIDTH last_compare_value;
+        bool initiated;
 
 } bsp_timer_vars_t;
 
@@ -100,6 +101,7 @@ void bsp_timer_init() {
 
 	/* Configure timer */
 	TIMER_Init(TIMER0, &timerInit);
+        bsp_timer_vars.initiated = false;
 
 }
 
@@ -121,15 +123,12 @@ void bsp_timer_set_callback(bsp_timer_cbt cb) {
  counter, and cancels a possible pending compare event.
  */
 void bsp_timer_reset() {
-	// reset compare
-	TIMER_CompareSet(TIMER0, 1, 0);
-
-	//enalbe compare interrupt
-	// reset timer
-    //bsp_timer_vars.initiated=FALSE;
+	//reset compare
+	
+	bsp_timer_vars.initiated=FALSE;
 	TIMER_IntClear(TIMER0, TIMER_IFC_CC0);
 	TIMER_CounterSet(TIMER0, 0);
-
+        bsp_timer_vars.initiated=false;
 	// record last timer compare value
 	bsp_timer_vars.last_compare_value = 0;
 }
@@ -170,16 +169,12 @@ void TIMER0_IRQHandler(void)
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 	PORT_TIMER_WIDTH newCompareValue;
 	PORT_TIMER_WIDTH temp_last_compare_value;
-       // uint16_t compare_last_value;
-	//if (!bsp_timer_vars.initiated){
+        
+	if (!bsp_timer_vars.initiated){
 		//as the timer runs forever the first time it is turned on has a weird value
-	//	bsp_timer_vars.last_compare_value=0; //SleepModeTimerCountGet();
-	//	bsp_timer_vars.initiated=TRUE;
-//	}
-
-	/*enable timer0, if not enabled*/
-	//TIMER_IntEnable(TIMER0, TIMER_IEN_CC1);
-
+		bsp_timer_vars.last_compare_value=0; //SleepModeTimerCountGet();
+		bsp_timer_vars.initiated=TRUE;
+	}
 
 	temp_last_compare_value = bsp_timer_vars.last_compare_value;
 
