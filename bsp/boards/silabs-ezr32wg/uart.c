@@ -117,7 +117,7 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
     uart_vars.rxCb = rxCb;
     NVIC_EnableIRQ(UART_TX_IRQn);
     NVIC_EnableIRQ(UART_RX_IRQn);
-    //NVIC_uart();
+    
     
 }
 
@@ -166,7 +166,6 @@ void UART_IRQ_TX(void){
          debugpins_isr_set();
          uart_clearTxInterrupts();
          uart_tx_isr();
-         
          debugpins_isr_clr();
 }
 

@@ -12,7 +12,8 @@
 #include "em_cmu.h"
 #include "em_emu.h"
 #include "em_gpio.h"
-#include "em_timer.h"
+#include "em_letimer.h"
+#include "em_chip.h"
 
 //#define TOP 65535
 
@@ -45,65 +46,50 @@ void bsp_timer_init() {
 	// clear local variables
 	memset(&bsp_timer_vars, 0, sizeof(bsp_timer_vars_t));
 
-	// enable peripheral Sleeptimer
-	/* Enable clock for GPIO module */
-	CMU_ClockEnable(cmuClock_GPIO, true);
-
+	CMU_ClockSelectSet(cmuClock_LFA, cmuSelect_LFXO);
+        CMU_ClockEnable(cmuClock_CORELE, true);
+        // enable peripheral Sleeptimer
+	
 	/* Enable clock for TIMER0 module */
-	CMU_ClockEnable(cmuClock_TIMER0, true);
-
+	CMU_ClockEnable(cmuClock_LETIMER0, true);
+  
+        /* Enable clock for GPIO module */
+	CMU_ClockEnable(cmuClock_GPIO, true);
+        
 	/* Set CC1 location 3 pin (PD2) as output */
-	GPIO_PinModeSet(gpioPortD, 2, gpioModePushPull, 0);
+	//GPIO_PinModeSet(gpioPortD, 2, gpioModePushPull, 0);
+        GPIO_PinModeSet(gpioPortD, 6, gpioModePushPull, 0);
+        GPIO_PinModeSet(gpioPortD, 7, gpioModePushPull, 0);
 
 	/*enable timer0*/
-	TIMER_IntEnable(TIMER0, TIMER_IEN_CC1);
+	//TIMER_IntEnable(TIMER0, TIMER_IEN_CC1);
 
-	  /* Select CC channel parameters */
-	   TIMER_InitCC_TypeDef timerCCInit =
-	   {
-	     .cufoa      = timerOutputActionNone,
-	     .cofoa      = timerOutputActionNone,
-	     .cmoa       = timerOutputActionToggle,
-	     .mode       = timerCCModeCompare,
-	     .filter     = true,
-	     .prsInput   = false,
-	     .coist      = false,
-	     .outInvert  = false,
-	   };
-
-	/* Configure CC channel 0 */
-	TIMER_InitCC(TIMER0, 1, &timerCCInit);
-
-	/* Route CC1 to location 3 (PD2) and enable pin */
-	TIMER0->ROUTE |= (TIMER_ROUTE_CC1PEN | TIMER_ROUTE_LOCATION_LOC3);
-
-	/* Set Top Value */
-//	TIMER_TopSet(TIMER0, TOP);
-        
-        /* Set Compare Value */
-        //  TIMER_CompareSet(TIMER0, 1, 13672); 
-
-	/* Select timer parameters */
-	TIMER_Init_TypeDef timerInit =
-	{
-	  .enable     = true,
-	  .debugRun   = false,
-	  .prescale   = timerPrescale1024,
-	  .clkSel     = timerClkSelHFPerClk,
-	  .fallAction = timerInputActionNone,
-	  .riseAction = timerInputActionNone,
-	  .mode       = timerModeUp,
-	  .dmaClrAct  = false,
-	  .quadModeX4 = false,
-	  .oneShot    = false,
-	  .sync       = false,
-	};
-
-	/* Configure timer */
-	TIMER_Init(TIMER0, &timerInit);
-        bsp_timer_vars.initiated = false;
-
+	     const LETIMER_Init_TypeDef letimerInit = 
+  {
+  .enable         = true,                   /* Start counting when init completed. */
+  .debugRun       = true,                  /* Counter shall not keep running during debug halt. */
+  .rtcComp0Enable = false,                  /* Don't start counting on RTC COMP0 match. */
+  .rtcComp1Enable = false,                  /* Don't start counting on RTC COMP1 match. */
+  .comp0Top       = false,                   /* Load COMP0 register into CNT when counter underflows. COMP0 is used as TOP */
+  .bufTop         = false,                  /* Don't load COMP1 into COMP0 when REP0 reaches 0. */
+  .out0Pol        = 0,                      /* Idle value for output 0. */
+  .out1Pol        = 0,                      /* Idle value for output 1. */
+  .ufoa0          = letimerUFOANone,      
+  .ufoa1          = letimerUFOANone,      
+  .repMode        = letimerRepeatFree       /* Count until stopped */
+  };
+  
+  /* Initialize LETIMER */
+  LETIMER_Init(LETIMER0, &letimerInit); 
+  LETIMER0->REP0 = 1 ;
+  LETIMER0->REP1 = 1 ;
+  
+  bsp_timer_vars.initiated = false;
+  
+  LETIMER_IntEnable(LETIMER0, LETIMER_IF_COMP1);  
+  //LETIMER_IntEnable(LETIMER0, LETIMER_IF_COMP0);  
 }
+
 
 /**
  \brief Register a callback.
@@ -113,7 +99,7 @@ void bsp_timer_init() {
 void bsp_timer_set_callback(bsp_timer_cbt cb) {
 	bsp_timer_vars.cb = cb;
 	/* Enable TIMER0 interrupt vector in NVIC */
-	NVIC_EnableIRQ(TIMER0_IRQn);
+	NVIC_EnableIRQ(LETIMER0_IRQn);
 }
 
 /**
@@ -126,8 +112,8 @@ void bsp_timer_reset() {
 	//reset compare
 	
 	bsp_timer_vars.initiated=FALSE;
-	TIMER_IntClear(TIMER0, TIMER_IFC_CC0);
-	TIMER_CounterSet(TIMER0, 0);
+	LETIMER_IntClear(LETIMER0, LETIMER_IFC_COMP1);
+	//LETIMER_CounterSet(TIMER0, 0);
         bsp_timer_vars.initiated=false;
 	// record last timer compare value
 	bsp_timer_vars.last_compare_value = 0;
@@ -136,17 +122,11 @@ void bsp_timer_reset() {
 * @brief TIMER0_IRQHandler
 * Interrupt Service Routine TIMER0 Interrupt Line
 *****************************************************************************/
-void TIMER0_IRQHandler(void)
+void LETIMER0_IRQHandler(void)
 {
-
- TIMER_IntClear(TIMER0, TIMER_IFC_CC1);
- 
- //debugpins_isr_toggle();
-
- /* Toggle LED ON/OFF */
- //GPIO_PinOutToggle(5, 7);
- //bsp_timer_isr();
- bsp_timer_isr_private();
+    LETIMER_IntClear(LETIMER0, LETIMER_IF_COMP1);
+    
+    bsp_timer_isr_private();
 }
 
 /**
@@ -177,18 +157,19 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
 	}
 
 	temp_last_compare_value = bsp_timer_vars.last_compare_value;
-
-	newCompareValue = bsp_timer_vars.last_compare_value + delayTicks;
+        
+        /* Since the CNT is goes from FF to 0, the future would be lastcomparevalue - delayTicks*/
+	newCompareValue = bsp_timer_vars.last_compare_value - delayTicks;
 	bsp_timer_vars.last_compare_value = newCompareValue;
         //compare_last_value = uint16_t
         
-	if (delayTicks < (TIMER_CounterGet(TIMER0) - temp_last_compare_value)) {
+	if (delayTicks < (temp_last_compare_value - bsp_timer_get_currentValue())) {
                
-                TIMER_IntSet(TIMER0, TIMER_IFS_CC1);
+                LETIMER_IntSet(LETIMER0, LETIMER_IFS_COMP1);
 
 	} else {
 		// this is the normal case, have timer expire at newCompareValue
-		TIMER_CompareSet(TIMER0, 1, newCompareValue);
+		LETIMER_CompareSet(LETIMER0, 1, newCompareValue);
 	}
 
 }
@@ -200,8 +181,9 @@ void bsp_timer_cancel_schedule() {
 	// Disable the Timer0B interrupt.
 	//IntDisable(INT_SMTIM);
 	//TIMER_CompareSet(TIMER0, 1, 0);
-	TIMER_IntDisable(TIMER0, TIMER_IEN_CC1);
-        TIMER_Enable(TIMER0, false);
+        LETIMER_IntDisable(LETIMER0, LETIMER_IEN_COMP1);
+	// LETIMER0->IEN = ~LETIMER_IEN_COMP1;
+        LETIMER_Enable(LETIMER0, false);
 }
 
 /**
@@ -210,7 +192,7 @@ void bsp_timer_cancel_schedule() {
  \returns The current value of the timer's counter.
  */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
-	return TIMER_CounterGet(TIMER0); //SleepModeTimerCountGet();
+	return LETIMER_CounterGet(LETIMER0); //SleepModeTimerCountGet();
 }
 
 //=========================== private =========================================
