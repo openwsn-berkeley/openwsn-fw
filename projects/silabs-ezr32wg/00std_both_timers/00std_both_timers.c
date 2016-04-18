@@ -134,7 +134,13 @@ int main(void)
 {  
   /* Align different chip revisions */
  // CHIP_Init();
-
+// CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
+ CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
+ 
+ //CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+ //CMU_ClockDivSet(cmuClock_CORE, cmuClkDiv_8);
+ 
+ 
   /* Initialize LETIMER */
   LETIMER_setup();
   
