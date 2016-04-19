@@ -15,8 +15,6 @@
 #include "em_letimer.h"
 #include "em_chip.h"
 
-//#define TOP 65535
-
 
 //=========================== defines =========================================
 
@@ -61,8 +59,6 @@ void bsp_timer_init() {
         GPIO_PinModeSet(gpioPortD, 6, gpioModePushPull, 0);
         GPIO_PinModeSet(gpioPortD, 7, gpioModePushPull, 0);
 
-	/*enable timer0*/
-	//TIMER_IntEnable(TIMER0, TIMER_IEN_CC1);
 
 	     const LETIMER_Init_TypeDef letimerInit = 
   {
@@ -79,15 +75,15 @@ void bsp_timer_init() {
   .repMode        = letimerRepeatFree       /* Count until stopped */
   };
   
-  /* Initialize LETIMER */
-  LETIMER_Init(LETIMER0, &letimerInit); 
-  LETIMER0->REP0 = 1 ;
-  LETIMER0->REP1 = 1 ;
+      /* Initialize LETIMER */
+      LETIMER_Init(LETIMER0, &letimerInit); 
+      LETIMER0->REP0 = 1 ;
+      LETIMER0->REP1 = 1 ;
   
-  bsp_timer_vars.initiated = false;
+      bsp_timer_vars.initiated = false;
   
-  LETIMER_IntEnable(LETIMER0, LETIMER_IF_COMP1);  
-  //LETIMER_IntEnable(LETIMER0, LETIMER_IF_COMP0);  
+      /*enable timer0*/
+      LETIMER_IntEnable(LETIMER0, LETIMER_IF_COMP1);  
 }
 
 
@@ -113,7 +109,6 @@ void bsp_timer_reset() {
 	
 	bsp_timer_vars.initiated=FALSE;
 	LETIMER_IntClear(LETIMER0, LETIMER_IFC_COMP1);
-	//LETIMER_CounterSet(TIMER0, 0);
         bsp_timer_vars.initiated=false;
 	// record last timer compare value
 	bsp_timer_vars.last_compare_value = 0;
@@ -161,7 +156,6 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
         /* Since the CNT is goes from FF to 0, the future would be lastcomparevalue - delayTicks*/
 	newCompareValue = bsp_timer_vars.last_compare_value - delayTicks;
 	bsp_timer_vars.last_compare_value = newCompareValue;
-        //compare_last_value = uint16_t
         
 	if (delayTicks < (temp_last_compare_value - bsp_timer_get_currentValue())) {
                
@@ -178,11 +172,8 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
  \brief Cancel a running compare.
  */
 void bsp_timer_cancel_schedule() {
-	// Disable the Timer0B interrupt.
-	//IntDisable(INT_SMTIM);
-	//TIMER_CompareSet(TIMER0, 1, 0);
+
         LETIMER_IntDisable(LETIMER0, LETIMER_IEN_COMP1);
-	// LETIMER0->IEN = ~LETIMER_IEN_COMP1;
         LETIMER_Enable(LETIMER0, false);
 }
 
@@ -199,7 +190,6 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 
 void bsp_timer_isr_private(void) {
 	debugpins_isr_set();
-	//TIMER_IntDisable(TIMER0, TIMER_IEN_CC1);
 	bsp_timer_isr();
 	debugpins_isr_clr();
 }
