@@ -47,14 +47,10 @@ void radiotimer_init() {
    rtcInit.comp0Top = true;      /* Clear counter on compare match */
    rtcInit.debugRun = false;     /* Counter shall keep running during debug halt. */
 
-   /* Enabling Interrupt from RTC */
-   // RTC_IntEnable(RTC_IFC_COMP0);
-   // RTC_IntEnable(RTC_IFC_COMP1);
-  
-   //RTC_IntEnable(RTC_IEN_COMP1);
-
    /* Initialize the RTC */
    RTC_Init(&rtcInit);
+   /* Enable the RTC Interrupt */
+   NVIC_EnableIRQ(RTC_IRQn);
 }
 
 void radiotimer_setOverflowCb(radiotimer_compare_cbt cb) {
@@ -78,7 +74,6 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    RTC_IntEnable(RTC_IEN_COMP0);
    radiotimer_vars.currentSlotPeriod = period;
    RTC_Enable(true);
-   NVIC_EnableIRQ(RTC_IRQn);
    
 }
 
