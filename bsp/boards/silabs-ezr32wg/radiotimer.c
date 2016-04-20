@@ -19,6 +19,7 @@
 typedef struct {
    radiotimer_compare_cbt    overflow_cb;
    radiotimer_compare_cbt    compare_cb;
+   PORT_RADIOTIMER_WIDTH     currentSlotPeriod;
 } radiotimer_vars_t;
 
 radiotimer_vars_t radiotimer_vars;
@@ -46,15 +47,11 @@ void radiotimer_init() {
    rtcInit.comp0Top = true;      /* Clear counter on compare match */
    rtcInit.debugRun = false;     /* Counter shall keep running during debug halt. */
 
-   /* Setting the compare value of the RTC */
-   //RTC_CompareSet(0, 361);
-   //RTC_CompareSet(1, 22);
-
    /* Enabling Interrupt from RTC */
    // RTC_IntEnable(RTC_IFC_COMP0);
    // RTC_IntEnable(RTC_IFC_COMP1);
-   NVIC_EnableIRQ(RTC_IRQn);
-   RTC_IntEnable(RTC_IEN_COMP1);
+  
+   //RTC_IntEnable(RTC_IEN_COMP1);
 
    /* Initialize the RTC */
    RTC_Init(&rtcInit);
@@ -79,7 +76,9 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
 void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    RTC_CompareSet(0, period);
    RTC_IntEnable(RTC_IEN_COMP0);
+   radiotimer_vars.currentSlotPeriod = period;
    RTC_Enable(true);
+   NVIC_EnableIRQ(RTC_IRQn);
    
 }
 
@@ -100,7 +99,7 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
 
 PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 	PORT_RADIOTIMER_WIDTH period=0;
-
+         
 
     return period;
 }
@@ -109,13 +108,23 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
 	//select ovf cmp1 register in the selector so it can be modified
-        
+        RTC_IntDisable(RTC_IEN_COMP1);
+        RTC_IntDisable(RTC_IEN_COMP0);
         RTC_CompareSet(1, offset);
+        RTC_IntClear(RTC_IFC_COMP1 + RTC_IFC_COMP0);
+        RTC_IntEnable(RTC_IEN_COMP1);
+        RTC_IntEnable(RTC_IEN_COMP0);
         
 }
 
 void radiotimer_cancel() {
-        RTC_CounterReset();
+        RTC_IntDisable(RTC_IEN_COMP0);
+        RTC_IntDisable(RTC_IEN_COMP1);
+        //RTC_CompareSet(0, radiotimer_vars.currentSlotPeriod);
+        RTC_IntClear(RTC_IFC_COMP0 + RTC_IFC_COMP1);
+        RTC_IntEnable(RTC_IEN_COMP0);
+        RTC_IntEnable(RTC_IEN_COMP1);
+        
 
 }
 
@@ -165,7 +174,7 @@ kick_scheduler_t radiotimer_isr() {
   if (radiotimer_vars.overflow_cb!=NULL) {
                             
             //Set the RTC time counter to 0
-            //RTC_SetCounter(0x00000000);
+            RTC->CNT = 0x000000;
             // call the callback
             radiotimer_vars.overflow_cb();
             // kick the OS
