@@ -63,7 +63,7 @@ void bsp_timer_init() {
 	     const LETIMER_Init_TypeDef letimerInit = 
   {
   .enable         = true,                   /* Start counting when init completed. */
-  .debugRun       = true,                  /* Counter shall not keep running during debug halt. */
+  .debugRun       = false,                  /* Counter shall not keep running during debug halt. */
   .rtcComp0Enable = false,                  /* Don't start counting on RTC COMP0 match. */
   .rtcComp1Enable = false,                  /* Don't start counting on RTC COMP1 match. */
   .comp0Top       = false,                   /* Load COMP0 register into CNT when counter underflows. COMP0 is used as TOP */
@@ -83,7 +83,9 @@ void bsp_timer_init() {
       bsp_timer_vars.initiated = false;
   
       /*enable timer0*/
-      LETIMER_IntEnable(LETIMER0, LETIMER_IF_COMP1);  
+      LETIMER_IntEnable(LETIMER0, LETIMER_IF_COMP1);
+      /* Enable TIMER0 interrupt vector in NVIC */
+      NVIC_EnableIRQ(LETIMER0_IRQn);
 }
 
 
@@ -94,8 +96,7 @@ void bsp_timer_init() {
  */
 void bsp_timer_set_callback(bsp_timer_cbt cb) {
 	bsp_timer_vars.cb = cb;
-	/* Enable TIMER0 interrupt vector in NVIC */
-	NVIC_EnableIRQ(LETIMER0_IRQn);
+	
 }
 
 /**

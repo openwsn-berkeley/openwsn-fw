@@ -169,7 +169,7 @@ kick_scheduler_t radiotimer_isr() {
   if (radiotimer_vars.overflow_cb!=NULL) {
                             
             //Set the RTC time counter to 0
-            RTC->CNT = 0x000000;
+            //RTC->CNT = 0x000000;
             // call the callback
             radiotimer_vars.overflow_cb();
             // kick the OS
