@@ -649,7 +649,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
     		case ELECTIVE_6LoRH :
     			// this is an elective 6LoRH
     			lorh_length = temp_8b & IPINIP_LEN_6LORH_MASK;
-    			lorh_type = *(uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length+extention_header_length);
+    			lorh_type = *(uint8_t*)(msg->payload+ipv6_outer_header->header_length+*page_length+extention_header_length+1);
     			if (lorh_type == IPINIP_TYPE_6LORH){
         			ipv6_outer_header->header_length += 1;
     				// this is IpinIP 6LoRH
