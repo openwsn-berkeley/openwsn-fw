@@ -12,8 +12,7 @@
 
 //=========================== variables =======================================
 
-static const uint8_t dagroot[]   = {0x03,
-   0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+static const uint8_t dagroot_mac64b[]   = {0x02,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
 
@@ -70,7 +69,8 @@ owerror_t iphc_sendFromForwarding(
     open_addr_t  temp_dest_prefix;
     open_addr_t  temp_dest_mac64b; 
     open_addr_t  temp_src_prefix;
-    open_addr_t  temp_src_mac64b; 
+    open_addr_t  temp_src_mac64b;
+    open_addr_t  temp_dagroot_ip128b;
     uint8_t      sam;
     // take ownership over the packet
     msg->owner = COMPONENT_IPHC;
@@ -131,14 +131,16 @@ owerror_t iphc_sendFromForwarding(
         // same network, IPinIP is elided
     } else {
         if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
+          memset(&(temp_dagroot_ip128b),0,sizeof(open_addr_t));
+          packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),(open_addr_t*)dagroot_mac64b,&(temp_dagroot_ip128b));
             if (
                 (
                   ipv6_outer_header->src.type == ADDR_NONE &&
-                  packetfunctions_sameAddress(&(msg->l3_sourceAdd),(open_addr_t*)dagroot)
+                  packetfunctions_sameAddress(&(msg->l3_sourceAdd),&(temp_dagroot_ip128b))
                 ) || 
                 (
                   ipv6_outer_header->src.type != ADDR_NONE &&
-                  packetfunctions_sameAddress(&(ipv6_outer_header->src),(open_addr_t*)dagroot)
+                  packetfunctions_sameAddress(&(ipv6_outer_header->src),&(temp_dagroot_ip128b))
                  )
             ){
                 // hop limit
@@ -681,10 +683,7 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
                   if (ipinip_length == 1){
                       // source address is root
                       memset(&(ipv6_outer_header->src),0,sizeof(open_addr_t));
-                      ipv6_outer_header->src.type = ADDR_128B;
-                      ipv6_outer_header->src.addr_128b[0]  = 0xbb;
-                      ipv6_outer_header->src.addr_128b[1]  = 0xbb;
-                      ipv6_outer_header->src.addr_128b[15] = 0x01;
+                      packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),(open_addr_t*)dagroot_mac64b,&(ipv6_outer_header->src));
                       // destination address is the first address in RH3 6LoRH OR dest adress in IPHC
                   } else{
                       switch(ipinip_length-1){
@@ -989,10 +988,7 @@ uint8_t iphc_retrieveIphcHeader(open_addr_t* temp_addr_16b,
                     if (ipinip_length == 1){
                         // source address is root
                         memset(&(ipv6_header->src),0,sizeof(open_addr_t));
-                        ipv6_header->src.type = ADDR_128B;
-                        ipv6_header->src.addr_128b[0]  = 0xbb;
-                        ipv6_header->src.addr_128b[1]  = 0xbb;
-                        ipv6_header->src.addr_128b[15] = 0x01;
+                        packetfunctions_mac64bToIp128b(idmanager_getMyID(ADDR_PREFIX),(open_addr_t*)dagroot_mac64b,&(ipv6_header->src));
                         // destination address is the first address in RH3 6LoRH OR dest adress in IPHC
                     } else{
                         switch(ipinip_length-1){
