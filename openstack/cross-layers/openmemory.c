@@ -77,7 +77,7 @@ uint8_t*  openmemory_getMemory(uint16_t size)
 
    nsegments = size / FRAME_DATA_TOTAL + 1;
 
-   for ( i = FRAME_DATA_SEGMENTS - 1; i >= 0; )
+   for ( i = FRAME_DATA_SEGMENTS - 1; i >= 0; ) {
    // search for free space
       if ( openmemory_vars.memory.map[i] == 0 ) {
 	 j = 0;
@@ -87,12 +87,14 @@ uint8_t*  openmemory_getMemory(uint16_t size)
             j++;
 	 if ( j == nsegments ) {
             openmemory_vars.memory.map[i] = nsegments;
-//            openmemory_vars.used += nsegments;
+            openmemory_vars.used += nsegments;
 	    return &openmemory_vars.memory.buffer[(i-j+1) * FRAME_DATA_TOTAL];
 	 } else
             i -= j; // advance to next occupied segment
-      } else // go to next segment
+      } else { // go to next segment
          i -= openmemory_vars.memory.map[i];
+      }
+   }
 
    // There is no available segment
    return NULL;
@@ -113,11 +115,12 @@ owerror_t openmemory_freeMemory(uint8_t* address)
    uint8_t* first;
    uint8_t* last;
 
-   if ( ! openmemory_segmentAddr(address, &first, &last) )
+   if ( ! openmemory_segmentAddr(address, &first, &last) ) {
       return E_FAIL;
+   }
 
    end = (last - &openmemory_vars.memory.buffer[0]) / FRAME_DATA_TOTAL;
-//   openmemory_vars.used -= openmemory_vars.memory.map[end];
+   openmemory_vars.used -= openmemory_vars.memory.map[end];
    openmemory_vars.memory.map[end] = 0;
 //   memset(first, 0, (size_t)(last-first)+1);
    return E_SUCCESS;
@@ -148,23 +151,26 @@ uint8_t* openmemory_increaseMemory(uint8_t* address, uint16_t size)
    uint8_t* last;
    uint8_t* new;
 
-   if ( ! openmemory_segmentAddr(address, &first, &last) )
+   if ( ! openmemory_segmentAddr(address, &first, &last) ) {
       return NULL;
+   }
 
    end  = (last - &openmemory_vars.memory.buffer[0]) / FRAME_DATA_TOTAL;
    old_segments = openmemory_vars.memory.map[end];
    new_segments = size / FRAME_DATA_TOTAL + 1;
 
-   if ( old_segments == new_segments )
+   if ( old_segments == new_segments ) {
       return address;
+   }
 
    // Try to allocate it in previous segments
    j = old_segments;
    while ( new_segments > j && end - j >= 0
-        && openmemory_vars.memory.map[end-j] == 0 )
+        && openmemory_vars.memory.map[end-j] == 0 ) {
       j++;
+   }
    if ( j == new_segments ) {
-//      openmemory_vars.used += new_segments - old_segments;
+      openmemory_vars.used += new_segments - old_segments;
       openmemory_vars.memory.map[end] = new_segments;
       return address;
    }
@@ -180,7 +186,7 @@ uint8_t* openmemory_increaseMemory(uint8_t* address, uint16_t size)
       openmemory_segmentAddr(new, &aux, &newlast);
       new = newlast - nsize;
       memcpy(new, address, nsize+1);
-//      openmemory_vars.used += new_segments - old_segments;
+      openmemory_vars.used += new_segments - old_segments;
       openmemory_vars.memory.map[end] = 0; // freeing old area
 //      memset(first, 0, (size_t)(last-first)+1);
    }
@@ -203,8 +209,9 @@ uint8_t*  openmemory_firstSegmentAddr(uint8_t* address)
    uint8_t* first;
    uint8_t* last;
 
-   if ( ! openmemory_segmentAddr(address, &first, &last) )
+   if ( ! openmemory_segmentAddr(address, &first, &last) ) {
       return NULL;
+   }
 
    return first;
 }
@@ -224,8 +231,9 @@ uint8_t*  openmemory_lastSegmentAddr(uint8_t* address)
    uint8_t* first;
    uint8_t* last;
 
-   if ( ! openmemory_segmentAddr(address, &first, &last) )
+   if ( ! openmemory_segmentAddr(address, &first, &last) ) {
       return NULL;
+   }
 
    return last - FRAME_DATA_TOTAL + 1;
 }
@@ -246,14 +254,17 @@ bool openmemory_sameMemoryArea(uint8_t* addr1, uint8_t* addr2)
    uint8_t* first;
    uint8_t* last;
 
-   if ( addr1 == NULL || addr2 == NULL )
+   if ( addr1 == NULL || addr2 == NULL ) {
       return FALSE;
+   }
 
-   if ( ! openmemory_segmentAddr(addr1, &first, &last) )
+   if ( ! openmemory_segmentAddr(addr1, &first, &last) ) {
       return FALSE;
+   }
 
-   if ( first <= addr2 && addr2 <= last )
+   if ( first <= addr2 && addr2 <= last ) {
       return TRUE;
+   }
 
    return FALSE;
 }
@@ -283,9 +294,9 @@ bool openmemory_segmentAddr(uint8_t* address, uint8_t** first, uint8_t** last)
    for ( i = start; i < FRAME_DATA_SEGMENTS
                  && openmemory_vars.memory.map[i] == 0; i++ )
       ;
-   if ( i >= FRAME_DATA_SEGMENTS )
+   if ( i >= FRAME_DATA_SEGMENTS ) {
       return FALSE;
-   else if ( start < i )
+   } else if ( start < i ) {
       // It is memory overlapping?
       for ( j = i - openmemory_vars.memory.map[i] + 1; j < start; j++ )
          if ( j < i && openmemory_vars.memory.map[j] != 0 ) {
@@ -295,6 +306,7 @@ bool openmemory_segmentAddr(uint8_t* address, uint8_t** first, uint8_t** last)
 			    (errorparameter_t)0);
             return FALSE;
 	 }
+   }
    start = i - openmemory_vars.memory.map[i] + 1;
    init  = &openmemory_vars.memory.buffer[start * FRAME_DATA_TOTAL];
    end   = &openmemory_vars.memory.buffer[i * FRAME_DATA_TOTAL];

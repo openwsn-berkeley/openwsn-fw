@@ -31,7 +31,7 @@ typedef struct {
 
 typedef struct {
    OpenMemoryEntry_t memory;
-//   uint8_t           used;
+   uint8_t           used;
 } openmemory_vars_t;
 
 //=========================== prototypes ======================================

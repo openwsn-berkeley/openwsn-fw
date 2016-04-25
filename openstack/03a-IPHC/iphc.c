@@ -236,8 +236,9 @@ void iphc_receive(OpenQueueEntry_t* msg) {
     uint8_t              rpi_length;
    
     // Do not continue if msg is a FRAGN type
-    if ( fragment_retrieveHeader(msg) )
+    if ( fragment_retrieveHeader(msg) ) {
         return;
+    }
 
     msg->owner      = COMPONENT_IPHC;
    
@@ -281,10 +282,11 @@ void iphc_receive(OpenQueueEntry_t* msg) {
    } else {
       FragmentQueueEntry_t* buffer;
 
-      if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
+      if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL ) {
          fragment_assignAction(buffer, FRAGMENT_ACTION_OPENBRIDGE);
-      else
+      } else {
          openbridge_receive(msg, TRUE);           //out to the OpenVisualizer
+      }
    }
 }
 

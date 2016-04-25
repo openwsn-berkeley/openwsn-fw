@@ -265,8 +265,9 @@ enum {
    // fragmentation
    ERR_FRAG_RESERVING                  = 0x3f, // trying to get an used fragment
    ERR_NO_FREE_FRAGMENT_BUFFER         = 0x40, // no free fragment buffer at {0}
-   ERR_EXPIRED_TIMER                   = 0x41, // fragment timer expired
-   ERR_MEMORY_OVERLAPS                 = 0x42, // a memory area or fragment overlaps
+   ERR_FRAGMENT_OVERLAPS               = 0x41, // a fragment overlaps with a previously received one
+   ERR_EXPIRED_TIMER                   = 0x42, // fragment timer expired
+   ERR_MEMORY_OVERLAPS                 = 0x43, // a memory area overlaps
 };
 
 //=========================== typedef =========================================

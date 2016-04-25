@@ -271,10 +271,11 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_le
    uint8_t* auxPayload;
 
    size = pkt->length + header_length;
-   if ( size > LARGE_PACKET_SIZE )
+   if ( size > LARGE_PACKET_SIZE ) {
       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)4,
                             (errorparameter_t)size);
+   }
 
    error = FALSE;
    if ((uint8_t*)(pkt->payload-header_length) < (uint8_t*)(pkt->packet)) {
@@ -291,10 +292,11 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_le
 
    pkt->payload -= header_length;
    pkt->length  += header_length;
-   if ( error )
+   if ( error ) {
       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)0,
                             (errorparameter_t)pkt->length);
+   }
 }
 
 void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint16_t header_length) {

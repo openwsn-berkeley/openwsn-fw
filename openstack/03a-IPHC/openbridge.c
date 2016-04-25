@@ -98,8 +98,9 @@ void openbridge_receive(OpenQueueEntry_t* msg, bool freeMsg) {
    openserial_printData((uint8_t*)(msg->payload),msg->length);
    
    // free packet
-   if ( freeMsg )
+   if ( freeMsg ) {
       openqueue_freePacketBuffer(msg);
+   }
 }
 
 //=========================== private =========================================
