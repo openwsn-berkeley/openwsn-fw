@@ -38,6 +38,7 @@ typedef struct {
    open_addr_t   my16bID;
    open_addr_t   my64bID;
    open_addr_t   myPrefix;
+   bool          slotSkip;
 } idmanager_vars_t;
 
 //=========================== prototypes ======================================
@@ -45,6 +46,7 @@ typedef struct {
 void         idmanager_init(void);
 bool         idmanager_getIsDAGroot(void);
 void         idmanager_setIsDAGroot(bool newRole);
+bool         idmanager_getIsSlotSkip(void);
 open_addr_t* idmanager_getMyID(uint8_t type);
 owerror_t    idmanager_setMyID(open_addr_t* newID);
 bool         idmanager_isMyAddress(open_addr_t* addr);
