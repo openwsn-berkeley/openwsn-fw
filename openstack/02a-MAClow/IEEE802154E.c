@@ -835,6 +835,7 @@ port_INLINE void activity_ti1ORri1() {
    sync_IE_ht  sync_IE;
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
+   uint16_t    numOfSleepSlots;     
 
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -885,6 +886,20 @@ port_INLINE void activity_ti1ORri1() {
       
       // find the next one
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+      if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
+          if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
+              numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
+          } else {
+              numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
+          }
+          
+          radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
+           
+          //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
+          for (i=0;i<numOfSleepSlots-1;i++){
+             incrementAsnOffset();
+          }
+      }
    } else {
       // this is NOT the next active slot, abort
       // stop using serial
@@ -966,6 +981,22 @@ port_INLINE void activity_ti1ORri1() {
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
          }
+         // skip following off slots
+         if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
+             if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
+                 numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
+             } else {
+                 numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1; 
+             }
+             
+             radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
+              
+             //only increase ASN by numOfSleepSlots-NUMSERIALRX
+             for (i=0;i<numOfSleepSlots-NUMSERIALRX;i++){
+                incrementAsnOffset();
+             }
+         }
+         
 #ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
          adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
