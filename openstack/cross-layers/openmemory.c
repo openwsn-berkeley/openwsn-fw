@@ -53,7 +53,7 @@ void openmemory_init() {
       openmemory_vars.memory.map[i] = 0;
    }
 //   memset(&openmemory_vars.memory.buffer[0], 0, REAL_MEMORY_SIZE);
-//   openmemory_vars.used = 0;
+   openmemory_vars.used = 0;
 }
 
 /**
@@ -83,14 +83,16 @@ uint8_t*  openmemory_getMemory(uint16_t size)
 	 j = 0;
 	 // check if there exist enough segments
          while ( nsegments > j && i-j >= 0
-              && openmemory_vars.memory.map[i-j] == 0 )
+              && openmemory_vars.memory.map[i-j] == 0 ) {
             j++;
+	 }
 	 if ( j == nsegments ) {
             openmemory_vars.memory.map[i] = nsegments;
             openmemory_vars.used += nsegments;
 	    return &openmemory_vars.memory.buffer[(i-j+1) * FRAME_DATA_TOTAL];
-	 } else
+	 } else {
             i -= j; // advance to next occupied segment
+	 }
       } else { // go to next segment
          i -= openmemory_vars.memory.map[i];
       }
@@ -223,7 +225,7 @@ uint8_t*  openmemory_firstSegmentAddr(uint8_t* address)
  *                memory area.
  *
  * \returns A pointer to the start of a memory area, if successful.
- * \returns NULL when memory does not belong to a previsouly-allocated
+ * \returns NULL when memory does not belong to a previously-allocated
  *               memory area
  */
 uint8_t*  openmemory_lastSegmentAddr(uint8_t* address)
