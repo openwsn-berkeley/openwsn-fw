@@ -980,6 +980,10 @@ port_INLINE void activity_ti1ORri1() {
          //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
          for (i=0;i<NUMSERIALRX-1;i++){
             incrementAsnOffset();
+            // advance the schedule
+            schedule_advanceSlot();
+            // find the next one
+            ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
          }
          // skip following off slots
          if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
