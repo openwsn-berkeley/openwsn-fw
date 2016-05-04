@@ -2,7 +2,13 @@
 
 <workspace>
   <project>
+    <path>$WS_DIR$\00standAlone_radio\00standAlone_radio.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\00std_both_timers\00std_both_timers.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\00std_radio\00std_radio.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\00std_radiotimer\00std_radiotimer.ewp</path>

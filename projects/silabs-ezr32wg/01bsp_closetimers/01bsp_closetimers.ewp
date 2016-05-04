@@ -649,7 +649,7 @@
       <name>ILINK</name>
       <archiveVersion>0</archiveVersion>
       <data>
-        <version>17</version>
+        <version>16</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -666,7 +666,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>01bsp_closetimers.out</state>
+          <state>###Unitialized###</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -932,10 +932,6 @@
         <option>
           <name>IlinkThreadsSlave</name>
           <state>1</state>
-        </option>
-        <option>
-          <name>IlinkLogCallGraph</name>
-          <state>0</state>
         </option>
       </data>
     </settings>
@@ -1608,7 +1604,7 @@
       <name>ILINK</name>
       <archiveVersion>0</archiveVersion>
       <data>
-        <version>17</version>
+        <version>16</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1891,10 +1887,6 @@
         <option>
           <name>IlinkThreadsSlave</name>
           <state>1</state>
-        </option>
-        <option>
-          <name>IlinkLogCallGraph</name>
-          <state>0</state>
         </option>
       </data>
     </settings>

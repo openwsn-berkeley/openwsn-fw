@@ -21,7 +21,7 @@
 
 //=========================== defines =========================================
 
-	#define UART_IRQ_RX    USART1_RX_IRQHandler         /* USART IRQ Handler */
+	#define UART_IRQ_RX      USART1_RX_IRQHandler         /* USART IRQ Handler */
         #define UART_IRQ_TX      USART1_TX_IRQHandler         /* USART TX IRQ Handler*/          
 	#define UART_CLK         cmuClock_USART1              /* HFPER Clock */
 	#define UART_RX_IRQn     USART1_RX_IRQn               /* IRQ number */

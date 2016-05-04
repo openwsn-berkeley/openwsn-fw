@@ -655,7 +655,7 @@
       <name>ILINK</name>
       <archiveVersion>0</archiveVersion>
       <data>
-        <version>17</version>
+        <version>16</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -672,7 +672,7 @@
         </option>
         <option>
           <name>IlinkOutputFile</name>
-          <state>01bsp_timers.out</state>
+          <state>###Unitialized###</state>
         </option>
         <option>
           <name>IlinkDebugInfoEnable</name>
@@ -736,7 +736,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$TOOLKIT_DIR$\config\linker\SiliconLaboratories\EZR32WG330F256Rxx.icf</state>
+          <state>lnk0t.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -796,7 +796,7 @@
         </option>
         <option>
           <name>IlinkProgramEntryLabel</name>
-          <state>__iar_program_start</state>
+          <state></state>
         </option>
         <option>
           <name>DoFill</name>
@@ -938,10 +938,6 @@
         <option>
           <name>IlinkThreadsSlave</name>
           <state>1</state>
-        </option>
-        <option>
-          <name>IlinkLogCallGraph</name>
-          <state>0</state>
         </option>
       </data>
     </settings>
@@ -1614,7 +1610,7 @@
       <name>ILINK</name>
       <archiveVersion>0</archiveVersion>
       <data>
-        <version>17</version>
+        <version>16</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1897,10 +1893,6 @@
         <option>
           <name>IlinkThreadsSlave</name>
           <state>1</state>
-        </option>
-        <option>
-          <name>IlinkLogCallGraph</name>
-          <state>0</state>
         </option>
       </data>
     </settings>
