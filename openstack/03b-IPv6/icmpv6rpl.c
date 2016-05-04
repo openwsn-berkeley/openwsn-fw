@@ -236,9 +236,9 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
       
       case IANA_ICMPv6_RPL_DAO:
          // this should never happen
-//         openserial_printCritical(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
-//                               (errorparameter_t)0,
-//                               (errorparameter_t)0);
+         openserial_printError(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
+                               (errorparameter_t)0,
+                               (errorparameter_t)0);
          break;
       default:
          // this should never happen
