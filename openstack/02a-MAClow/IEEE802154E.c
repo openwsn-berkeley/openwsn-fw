@@ -756,7 +756,6 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
                case IEEE802154E_MLME_SLOTFRAME_LINK_IE_SUBID:
                   if ((idmanager_getIsDAGroot()==FALSE) && (ieee154e_isSynch()==FALSE)) {
                      processIE_retrieveSlotframeLinkIE(pkt,&ptr);
-                     schedule_setSlotInstalled();
                   }
                   break;
                

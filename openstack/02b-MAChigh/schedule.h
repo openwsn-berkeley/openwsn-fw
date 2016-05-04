@@ -126,7 +126,6 @@ typedef struct {
    uint8_t          backoffExponent;
    uint8_t          backoff;
    uint8_t          debugPrintRow;
-   bool             slotInstalled
 } schedule_vars_t;
 
 //=========================== prototypes ======================================
@@ -192,7 +191,6 @@ void               schedule_indicateTx(
                         asn_t*    asnTimestamp,
                         bool      succesfullTx
                    );
-void               schedule_setSlotInstalled(void);
 
 /**
 \}
