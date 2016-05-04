@@ -689,7 +689,13 @@ void iphc_retrieveIPv6Header(OpenQueueEntry_t* msg, ipv6_header_iht* ipv6_outer_
     					}
     				}
     			} else {
-    				//unknown elective packet, do not do anything here
+    				//unknown elective packet, print error and skip it
+    				openserial_printError(
+    						COMPONENT_IPHC,
+    				        ERR_6LOWPAN_UNSUPPORTED,
+    				        (errorparameter_t)13,
+    				        (errorparameter_t)(rh3_index)
+    				);
     				extention_header_length += 2 + lorh_length;
     				ipv6_outer_header->rhe_length += 2 + lorh_length;
     			}
