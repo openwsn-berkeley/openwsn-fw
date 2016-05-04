@@ -63,28 +63,31 @@ void schedule_startDAGroot() {
    slotOffset_t    running_slotOffset;
    open_addr_t     temp_neighbor;
    
-   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
-   // set frame length, handle and number (default 1 by now)
-   if (schedule_vars.frameLength == 0) {
-       // slotframe length is not set, set it to default length
-       schedule_setFrameLength(SLOTFRAME_LENGTH);
-   } else {
-       // slotframe elgnth is set, nothing to do here
-   }
-   schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
-   schedule_setFrameNumber(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER);
+   if (schedule_vars.slotInstalled == FALSE){
+       start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+       // set frame length, handle and number (default 1 by now)
+       if (schedule_vars.frameLength == 0) {
+           // slotframe length is not set, set it to default length
+           schedule_setFrameLength(SLOTFRAME_LENGTH);
+       } else {
+           // slotframe elgnth is set, nothing to do here
+       }
+       schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
+       schedule_setFrameNumber(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER);
 
-   // shared TXRX anycast slot(s)
-   memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   temp_neighbor.type             = ADDR_ANYCAST;
-   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
-      schedule_addActiveSlot(
-         running_slotOffset,                 // slot offset
-         CELLTYPE_TXRX,                      // type of slot
-         TRUE,                               // shared?
-         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
-         &temp_neighbor                      // neighbor
-      );
+       // shared TXRX anycast slot(s)
+       memset(&temp_neighbor,0,sizeof(temp_neighbor));
+       temp_neighbor.type             = ADDR_ANYCAST;
+       for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
+          schedule_addActiveSlot(
+             running_slotOffset,                 // slot offset
+             CELLTYPE_TXRX,                      // type of slot
+             TRUE,                               // shared?
+             SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
+             &temp_neighbor                      // neighbor
+          );
+       }
+       schedule_vars.slotInstalled = TRUE;
    }
 }
 
@@ -786,6 +789,10 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
    }
    
    ENABLE_INTERRUPTS();
+}
+
+void schedule_setSlotInstalled(){
+    schedule_vars.slotInstalled=TRUE;
 }
 
 //=========================== private =========================================
