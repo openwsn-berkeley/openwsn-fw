@@ -232,6 +232,7 @@ void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* wr
 void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, bool littleEndian) {
    uint8_t i;
    uint8_t address_length;
+   uint8_t *payload;
    
    switch (address->type) {
       case ADDR_16B:
@@ -252,13 +253,14 @@ void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, b
          return;
    }
    
+   payload = msg->payload;
+   packetfunctions_reserveHeaderSize(msg, address_length);
    for (i=0;i<address_length;i++) {
-      msg->payload      -= sizeof(uint8_t);
-      msg->length       += sizeof(uint8_t);
+      payload -= sizeof(uint8_t);
       if (littleEndian) {
-         *((uint8_t*)(msg->payload)) = address->addr_128b[i];
+         *((uint8_t*)(payload)) = address->addr_128b[i];
       } else {
-         *((uint8_t*)(msg->payload)) = address->addr_128b[address_length-1-i];
+         *((uint8_t*)(payload)) = address->addr_128b[address_length-1-i];
       }
    }
 }
@@ -270,7 +272,7 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_le
    uint16_t size;
    uint8_t* auxPayload;
 
-   size = pkt->length + header_length;
+   size = pkt->length + header_length; // new msg length
    if ( size > LARGE_PACKET_SIZE ) {
       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)4,
@@ -279,8 +281,7 @@ void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_le
 
    error = FALSE;
    if ((uint8_t*)(pkt->payload-header_length) < (uint8_t*)(pkt->packet)) {
-      size = header_length + pkt->length // new msg size + frame bytes
-	   + FRAME_DATA_CRC + IEEE802154_SECURITY_TAG_LEN;
+      size += FRAME_DATA_CRC + IEEE802154_SECURITY_TAG_LEN;
       auxPayload = openmemory_increaseMemory(pkt->payload, size);
       if ( auxPayload != NULL && auxPayload != pkt->payload ) {
          pkt->payload    = auxPayload;

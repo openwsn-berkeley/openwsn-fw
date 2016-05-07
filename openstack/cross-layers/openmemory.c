@@ -75,7 +75,7 @@ uint8_t*  openmemory_getMemory(uint16_t size)
    uint8_t i;
    uint8_t j;
 
-   nsegments = size / FRAME_DATA_TOTAL + 1;
+   nsegments = (size == 0 ? 0 : size - 1) / FRAME_DATA_TOTAL + 1;
 
    for ( i = FRAME_DATA_SEGMENTS - 1; i >= 0; ) {
    // search for free space
@@ -159,7 +159,7 @@ uint8_t* openmemory_increaseMemory(uint8_t* address, uint16_t size)
 
    end  = (last - &openmemory_vars.memory.buffer[0]) / FRAME_DATA_TOTAL;
    old_segments = openmemory_vars.memory.map[end];
-   new_segments = size / FRAME_DATA_TOTAL + 1;
+   new_segments = (size == 0 ? 0 : size - 1) / FRAME_DATA_TOTAL + 1;
 
    if ( old_segments == new_segments ) {
       return address;
