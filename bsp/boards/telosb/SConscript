@@ -16,6 +16,12 @@ cc2420 = localEnv.SConscript(
     exports     = {'env': env},
 )
 
+sht11 = localEnv.SConscript(
+    os.path.join('#','bsp','chips','sht11','SConscript'),
+    variant_dir = 'sht11',
+    exports     = {'env': env},
+)
+
 source = [
     'board.c',
     'bsp_timer.c',
@@ -26,14 +32,17 @@ source = [
     'spi.c',
     'uart.c',
     'board_crypto_engine.c',
+	'adc_sensor.c',
+	'sensors.c'	
 ]
 
 localEnv.Append(
         CPPPATH =  [
             os.path.join('#','bsp','chips','cc2420'),
+			os.path.join('#','bsp','chips','sht11'),			
         ],
 )
 
-board  = localEnv.Object(source=source) + cc2420
+board  = localEnv.Object(source=source) + cc2420 + sht11
 
 Return('board')

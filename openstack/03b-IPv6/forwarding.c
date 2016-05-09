@@ -252,8 +252,8 @@ void forwarding_receive(
         &&
         ipv6_outer_header->next_header!=IANA_IPv6ROUTE
     ) {
-        if (ipv6_outer_header->src.type != ADDR_NONE){
-            packetfunctions_tossHeader(msg,ipv6_outer_header->header_length);
+        if (ipv6_outer_header->src.type != ADDR_NONE || ipv6_outer_header->rhe_length){
+            packetfunctions_tossHeader(msg,ipv6_outer_header->header_length + ipv6_outer_header->rhe_length);
         }
         // this packet is for me, no source routing header // toss iphc inner header
         packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
@@ -453,11 +453,16 @@ owerror_t forwarding_send_internal_SourceRouting(
     uint8_t              flags;
     uint16_t             senderRank;
     
-    uint8_t              RH3_copy[127];
-    uint8_t              RH3_length;
+    uint8_t              RH_copy[127];
+    uint8_t              RH_length;
     
-    memset(&RH3_copy[0],0,127);
+    uint8_t				 RH3_length;
+
+    uint8_t sizeRH=0;
+
+    memset(&RH_copy[0],0,127);
     RH3_length = 0;
+    RH_length = 0;
     memcpy(&msg->l3_destinationAdd,&ipv6_inner_header->dest,sizeof(open_addr_t));
     memcpy(&msg->l3_sourceAdd,&ipv6_inner_header->src,sizeof(open_addr_t));
     
@@ -476,7 +481,18 @@ owerror_t forwarding_send_internal_SourceRouting(
     temp_8b = *((uint8_t*)(msg->payload)+hlen);
     type    = *((uint8_t*)(msg->payload)+hlen+1);
     
+    //copy and toss any unknown 6LoRHE
+    while((temp_8b&FORMAT_6LORH_MASK) == ELECTIVE_6LoRH){
+        sizeRH = temp_8b & IPINIP_LEN_6LORH_MASK;
+    	memcpy(&RH_copy[RH_length], msg->payload, sizeRH+2);
+    	packetfunctions_tossHeader(msg, sizeRH+2);
+    	RH_length += 2 + sizeRH;
+        temp_8b = *((uint8_t*)(msg->payload)+hlen);
+        type    = *((uint8_t*)(msg->payload)+hlen+1);
+    }
+
     hlen += 2;
+
     // get the first address
     switch(type){
     case RH3_6LOTH_TYPE_0:
@@ -658,9 +674,10 @@ owerror_t forwarding_send_internal_SourceRouting(
         ipv6_outer_header->hopByhop_option != NULL
     ){
         // check the length of RH3s
-        RH3_length = ipv6_outer_header->hopByhop_option-msg->payload;
-        memcpy(&RH3_copy[0],msg->payload,RH3_length);
+        RH3_length += ipv6_outer_header->hopByhop_option-msg->payload;
+        memcpy(&RH_copy[RH_length],msg->payload,RH3_length);
         packetfunctions_tossHeader(msg,RH3_length);
+        RH_length += RH3_length;
         
         // retrieve hop-by-hop header (includes RPL option)
         rpi_length = iphc_retrieveIPv6HopByHopHeader(
@@ -712,8 +729,8 @@ owerror_t forwarding_send_internal_SourceRouting(
         ipv6_inner_header,
         rpl_option,
         &ipv6_outer_header->flow_label,
-        &RH3_copy[0],
-        RH3_length,
+        &RH_copy[0],
+        RH_length,
         PCKTFORWARD
     );
 }

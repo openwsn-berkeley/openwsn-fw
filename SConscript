@@ -508,7 +508,7 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('bootloader','OpenMote-CC2538','cc2538-bsl.py')+' -e -w -b 115200 -p {0} --bsl {1}'.format(self.comPort,self.hexFile),
+            'python '+os.path.join('bootloader','OpenMote-CC2538','cc2538-bsl.py')+' -e -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -525,7 +525,7 @@ def OpenMoteCC2538_bootload(target, source, env):
             OpenMoteCC2538_bootloadThread(
                 comPort      = comPort,
                 #hexFile      = os.path.split(source[0].path)[1].split('.')[0]+'.bin',
-                hexFile      = source[0].path.split('.')[0]+'.bin',
+                hexFile      = source[0].path.split('.')[0]+'.ihex',
                 countingSem  = countingSem,
             )
         ]
