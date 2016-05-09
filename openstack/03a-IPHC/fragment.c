@@ -4,6 +4,7 @@
 #include "packetfunctions.h"
 #include "sixtop.h"
 #include "iphc.h"
+#include "idmanager.h"
 #include "fragment.h"
 #include "forwarding.h"
 #include "openbridge.h"
@@ -1186,22 +1187,23 @@ void fragment_openbridge(FragmentQueueEntry_t* buffer, uint8_t frag) {
    }
 }
 
+uint8_t askAddressSize(open_addr_t* addr) {
+   switch (addr->type) {
+      case ADDR_16B: case ADDR_PANID:
+         return 2;
+  case ADDR_64B: case ADDR_PREFIX:
+     return 8;
+  case ADDR_128B:
+     return 16;
+  default:
+     return 0;
+   }
+}
+
+
 // Determines L2 header size
 uint8_t fragment_askL2HeaderSize(OpenQueueEntry_t* msg) {
    uint8_t hsize;
-
-   uint8_t askAddressSize(open_addr_t* addr) {
-      switch (addr->type) {
-         case ADDR_16B: case ADDR_PANID:
-            return 2;
-	 case ADDR_64B: case ADDR_PREFIX:
-	    return 8;
-	 case ADDR_128B:
-	    return 16;
-	 default:
-	    return 0;
-      }
-   }
 
    // Begin
    hsize = askAddressSize(idmanager_getMyID(ADDR_64B));

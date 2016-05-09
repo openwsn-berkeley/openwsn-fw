@@ -1,6 +1,7 @@
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "idmanager.h"
+#include "ieee802154_security_driver.h"
 
 //=========================== variables =======================================
 
@@ -139,7 +140,7 @@ bool packetfunctions_isAllRoutersMulticast(open_addr_t* address) {
 
 bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
    if (
-      address->type          == ADDR_128B &&
+      address->type          == ADDR_128B && IEEE802154_SECURITY_TAG_LEN &&
       address->addr_128b[0]  == 0xff &&
       address->addr_128b[1]  == 0x02 &&
       address->addr_128b[2]  == 0x00 &&

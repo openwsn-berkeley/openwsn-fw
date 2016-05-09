@@ -1,5 +1,7 @@
 #include "opendefs.h"
 #include "openqueue.h"
+#include "fragment.h"
+
 #include "openmemory.h"
 #include "openserial.h"
 #include "packetfunctions.h"

@@ -9,6 +9,7 @@
 */
 
 #include "opendefs.h"
+#include "opentimers.h"
 #include "ieee802154_security_driver.h"
 
 //=========================== define ==========================================
