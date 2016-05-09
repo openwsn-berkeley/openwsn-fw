@@ -341,6 +341,16 @@ owerror_t schedule_addActiveSlot(
          ) {
             break;
          }
+         if (previousSlotWalker->slotOffset == slotContainer->slotOffset) {
+            // slot is already in schedule
+            openserial_printError(
+               COMPONENT_SCHEDULE,ERR_SCHEDULE_ADDDUPLICATESLOT,
+               (errorparameter_t)slotContainer->slotOffset,
+               (errorparameter_t)0
+            );
+            ENABLE_INTERRUPTS();
+            return E_FAIL;
+         }
          previousSlotWalker                 = nextSlotWalker;
       }
       // insert between previousSlotWalker and nextSlotWalker

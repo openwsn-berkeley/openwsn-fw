@@ -192,7 +192,7 @@ enum {
    ERR_TCP_RESET                       = 0x08, // TCP reset while in state {0} (code location {1})
    ERR_UNSUPPORTED_PORT_NUMBER         = 0x09, // unsupported port number {0} (code location {1})
    // l3
-   ERR_UNEXPECTED_DAO                  = 0x0a, // unexpected DAO (code location {0})
+   ERR_UNEXPECTED_DAO                  = 0x0a, // unexpected DAO (code location {0}). A change maybe happened on dagroot node.
    ERR_UNSUPPORTED_ICMPV6_TYPE         = 0x0b, // unsupported ICMPv6 type {0} (code location {1})
    ERR_6LOWPAN_UNSUPPORTED             = 0x0c, // unsupported 6LoWPAN parameter {1} at location {0}
    ERR_NO_NEXTHOP                      = 0x0d, // no next hop
@@ -248,6 +248,7 @@ enum {
    ERR_SIXTOP_RETURNCODE               = 0x3c, // sixtop return code {0} at sixtop state {1}
    ERR_SIXTOP_COUNT                    = 0x3d, // there are {0} cells to request mote
    ERR_SIXTOP_LIST                     = 0x3e, // the cells reserved to request mote contains slot {0} and slot {1}
+   ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x3f, // the slot {0} to be added is already in schedule
 };
 
 //=========================== typedef =========================================
