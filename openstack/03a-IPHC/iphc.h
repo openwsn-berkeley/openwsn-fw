@@ -166,6 +166,7 @@ typedef struct {
    uint8_t*    routing_header[MAXNUM_RH3];
    uint8_t*    hopByhop_option;
    uint8_t     hop_limit;
+   uint8_t	   rhe_length;
    open_addr_t src;
    open_addr_t dest;
    uint8_t     header_length;          ///< Counter for internal use
