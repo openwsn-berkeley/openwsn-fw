@@ -349,7 +349,7 @@ owerror_t schedule_addActiveSlot(
                (errorparameter_t)0
             );
             ENABLE_INTERRUPTS();
-            return E_SUCCESS;
+            return E_FAIL;
          }
          previousSlotWalker                 = nextSlotWalker;
       }
