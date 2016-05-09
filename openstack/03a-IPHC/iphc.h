@@ -27,10 +27,13 @@ enum IPHC_enums {
    IPHC_M                    = 3,
    IPHC_DAC                  = 2,
    IPHC_DAM                  = 0,
+   IPHC_FRAGMENT             = 3,
 };
 
 enum IPHC_DISPATCH_enums {
    IPHC_DISPATCH_IPHC        = 3,
+   IPHC_DISPATCH_FRAG1       = 0x18, // 11000
+   IPHC_DISPATCH_FRAGN       = 0x1C, // 11100
 };
 
 enum IPHC_TF_enums {

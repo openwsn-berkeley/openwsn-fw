@@ -1,5 +1,8 @@
 #include "opendefs.h"
 #include "openqueue.h"
+#include "fragment.h"
+
+#include "openmemory.h"
 #include "openserial.h"
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
@@ -23,6 +26,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry);
 void openqueue_init() {
    uint8_t i;
    for (i=0;i<QUEUELENGTH;i++){
+      openqueue_vars.queue[i].packet = NULL;
       openqueue_reset_entry(&(openqueue_vars.queue[i]));
    }
 }
@@ -76,6 +80,14 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    // walk through queue and find free entry
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
+         uint8_t* packet;
+
+         if ( (packet = openmemory_getMemory(0)) == NULL ) {
+            ENABLE_INTERRUPTS();
+	    return NULL;
+	 }
+         openqueue_vars.queue[i].packet=packet;
+         openqueue_vars.queue[i].payload=&(packet[FRAME_DATA_PLOAD - IEEE802154_SECURITY_TAG_LEN]);
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
          ENABLE_INTERRUPTS(); 
@@ -85,7 +97,6 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    ENABLE_INTERRUPTS();
    return NULL;
 }
-
 
 /**
 \brief Free a previously-allocated packet buffer.
@@ -107,6 +118,11 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
                                   (errorparameter_t)0,
                                   (errorparameter_t)0);
          }
+
+         if (pkt->packet!=NULL) {
+            openmemory_freeMemory(pkt->packet);
+            pkt->packet = NULL;
+         }
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
          ENABLE_INTERRUPTS();
          return E_SUCCESS;
@@ -120,6 +136,30 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    return E_FAIL;
 }
 
+owerror_t openqueue_freePacketBuffer_atomic(OpenQueueEntry_t* pkt) {
+   uint8_t i;
+
+   for (i=0;i<QUEUELENGTH;i++) {
+      if (&openqueue_vars.queue[i]==pkt) {
+         if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
+            // log the error
+            openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
+                                  (errorparameter_t)0,
+                                  (errorparameter_t)0);
+         }
+
+         if (pkt->packet!=NULL) {
+            openmemory_freeMemory(pkt->packet);
+            pkt->packet = NULL;
+         }
+         openqueue_reset_entry(&(openqueue_vars.queue[i]));
+         return E_SUCCESS;
+      }
+   }
+
+   return E_FAIL;
+}
+
 /**
 \brief Free all the packet buffers created by a specific module.
 
@@ -130,8 +170,11 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){
-      if (openqueue_vars.queue[i].creator==creator) {
+      if (openqueue_vars.queue[i].creator==creator ) {
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
+      } else if (openqueue_vars.queue[i].creator==COMPONENT_FRAGMENT) {
+         fragment_removeCreatedBy(&(openqueue_vars.queue[i]));
+         openqueue_freePacketBuffer_atomic(&(openqueue_vars.queue[i]));
       }
    }
    ENABLE_INTERRUPTS();
@@ -139,6 +182,9 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
 
 /**
 \brief Free all the packet buffers owned by a specific module.
+
+\note  As it is only used by opentcp, there is no need for fragmentation
+       support
 
 \param owner The identifier of the component, taken in COMPONENT_*.
 */
@@ -244,10 +290,11 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //admin
    entry->creator                      = COMPONENT_NULL;
    entry->owner                        = COMPONENT_NULL;
-   entry->payload                      = &(entry->packet[127 - IEEE802154_SECURITY_TAG_LEN]); // Footer is longer if security is used
+   entry->payload                      = NULL;
    entry->length                       = 0;
    //l4
    entry->l4_protocol                  = IANA_UNDEFINED;
+   entry->l4_length                    = 0;
    //l3
    entry->l3_destinationAdd.type       = ADDR_NONE;
    entry->l3_sourceAdd.type            = ADDR_NONE;

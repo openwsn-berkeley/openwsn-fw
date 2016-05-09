@@ -60,6 +60,7 @@ void      forwarding_receive(
    ipv6_header_iht*     ipv6_inner_header,
    rpl_option_ht*       rpl_option
 );
+owerror_t forwarding_toUpperLayer(OpenQueueEntry_t* msg);
 
 /**
 \}

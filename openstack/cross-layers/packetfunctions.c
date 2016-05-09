@@ -1,6 +1,7 @@
 #include "packetfunctions.h"
 #include "openserial.h"
 #include "idmanager.h"
+#include "ieee802154_security_driver.h"
 
 //=========================== variables =======================================
 
@@ -139,7 +140,7 @@ bool packetfunctions_isAllRoutersMulticast(open_addr_t* address) {
 
 bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
    if (
-      address->type          == ADDR_128B &&
+      address->type          == ADDR_128B && IEEE802154_SECURITY_TAG_LEN &&
       address->addr_128b[0]  == 0xff &&
       address->addr_128b[1]  == 0x02 &&
       address->addr_128b[2]  == 0x00 &&
@@ -232,6 +233,7 @@ void packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* wr
 void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, bool littleEndian) {
    uint8_t i;
    uint8_t address_length;
+   uint8_t *payload;
    
    switch (address->type) {
       case ADDR_16B:
@@ -252,33 +254,57 @@ void packetfunctions_writeAddress(OpenQueueEntry_t* msg, open_addr_t* address, b
          return;
    }
    
+   payload = msg->payload;
+   packetfunctions_reserveHeaderSize(msg, address_length);
    for (i=0;i<address_length;i++) {
-      msg->payload      -= sizeof(uint8_t);
-      msg->length       += sizeof(uint8_t);
+      payload -= sizeof(uint8_t);
       if (littleEndian) {
-         *((uint8_t*)(msg->payload)) = address->addr_128b[i];
+         *((uint8_t*)(payload)) = address->addr_128b[i];
       } else {
-         *((uint8_t*)(msg->payload)) = address->addr_128b[address_length-1-i];
+         *((uint8_t*)(payload)) = address->addr_128b[address_length-1-i];
       }
    }
 }
 
 //======= reserving/tossing headers
 
-void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint8_t header_length) {
+void packetfunctions_reserveHeaderSize(OpenQueueEntry_t* pkt, uint16_t header_length) {
+   bool     error;
+   uint16_t size;
+   uint8_t* auxPayload;
+
+   size = pkt->length + header_length; // new msg length
+   if ( size > LARGE_PACKET_SIZE ) {
+      openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
+                            (errorparameter_t)4,
+                            (errorparameter_t)size);
+   }
+
+   error = FALSE;
+   if ((uint8_t*)(pkt->payload-header_length) < (uint8_t*)(pkt->packet)) {
+      size += FRAME_DATA_CRC + IEEE802154_SECURITY_TAG_LEN;
+      auxPayload = openmemory_increaseMemory(pkt->payload, size);
+      if ( auxPayload != NULL && auxPayload != pkt->payload ) {
+         pkt->payload    = auxPayload;
+         pkt->l4_payload = auxPayload - pkt->length + pkt->l4_length;
+	 pkt->packet     = openmemory_firstSegmentAddr(auxPayload);
+      }
+      error = auxPayload == NULL;
+   }
+
    pkt->payload -= header_length;
    pkt->length  += header_length;
-   if ( (uint8_t*)(pkt->payload) < (uint8_t*)(pkt->packet) ) {
+   if ( error ) {
       openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)0,
                             (errorparameter_t)pkt->length);
    }
 }
 
-void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint8_t header_length) {
+void packetfunctions_tossHeader(OpenQueueEntry_t* pkt, uint16_t header_length) {
    pkt->payload += header_length;
    pkt->length  -= header_length;
-   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(pkt->packet+126) ) {
+   if ( (uint8_t*)(pkt->payload) > (uint8_t*)(openmemory_lastSegmentAddr(pkt->packet)+126) ) {
       openserial_printError(COMPONENT_PACKETFUNCTIONS,ERR_HEADER_TOO_LONG,
                             (errorparameter_t)1,
                             (errorparameter_t)pkt->length);
@@ -308,8 +334,15 @@ void packetfunctions_tossFooter(OpenQueueEntry_t* pkt, uint8_t header_length) {
 // updating pointers to the new memory location. Used to make a local copy of
 // the frame before transmission (where it can possibly be encrypted). 
 void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* src) {
+   uint8_t* aux;
+
+   // preserve destination packet
+   aux = dst->packet;
+
    // make a copy of the frame
    memcpy(dst, src, sizeof(OpenQueueEntry_t));
+   dst->packet = aux;
+   memcpy(dst->packet, src->packet, sizeof(uint8_t) * FRAME_DATA_TOTAL);
 
    // Calculate where payload starts in the buffer
    dst->payload = &dst->packet[src->payload - src->packet]; // update pointers
@@ -335,7 +368,7 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* sr
 void packetfunctions_calculateCRC(OpenQueueEntry_t* msg) {
    uint16_t crc;
    uint8_t  i;
-   uint8_t  count;
+   uint16_t count;
    crc = 0;
    for (count=1;count<msg->length-2;count++) {
       crc = crc ^ (uint8_t)*(msg->payload+count);
@@ -355,7 +388,7 @@ void packetfunctions_calculateCRC(OpenQueueEntry_t* msg) {
 bool packetfunctions_checkCRC(OpenQueueEntry_t* msg) {
    uint16_t crc;
    uint8_t  i;
-   uint8_t  count;
+   uint16_t count;
    crc = 0;
    for (count=0;count<msg->length-2;count++) {
       crc = crc ^ (uint8_t)*(msg->payload+count);
@@ -398,8 +431,8 @@ void packetfunctions_calculateChecksum(OpenQueueEntry_t* msg, uint8_t* checksum_
    onesComplementSum(temp_checksum,msg->l3_destinationAdd.addr_128b,16);
    
    // length
-   little_helper[0] = 0;
-   little_helper[1] = msg->length;
+   little_helper[0] = (msg->length & 0xFF00) >> 8;
+   little_helper[1] =  msg->length & 0x00FF;
    onesComplementSum(temp_checksum,little_helper,2);
    
    // next header

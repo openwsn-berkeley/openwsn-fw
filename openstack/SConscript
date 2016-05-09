@@ -23,6 +23,7 @@ sources_c = [
     #=== 03a-IPHC
     os.path.join('03a-IPHC','iphc.c'),
     os.path.join('03a-IPHC','openbridge.c'),
+    os.path.join('03a-IPHC','fragment.c'),
     #=== 03b-IPv6
     os.path.join('03b-IPv6','forwarding.c'),
     os.path.join('03b-IPv6','icmpv6.c'),
@@ -35,6 +36,7 @@ sources_c = [
     #=== cross-layers
     os.path.join('cross-layers','idmanager.c'),
     os.path.join('cross-layers','openqueue.c'),
+    os.path.join('cross-layers','openmemory.c'),
     os.path.join('cross-layers','openrandom.c'),
     os.path.join('cross-layers','packetfunctions.c'),
 ]
@@ -57,6 +59,7 @@ sources_h = [
     #=== 03a-IPHC
     os.path.join('03a-IPHC','iphc.h'),
     os.path.join('03a-IPHC','openbridge.h'),
+    os.path.join('03a-IPHC','fragment.h'),
     #=== 03b-IPv6
     os.path.join('03b-IPv6','forwarding.h'),
     os.path.join('03b-IPv6','icmpv6.h'),
@@ -69,6 +72,7 @@ sources_h = [
     #=== cross-layers
     os.path.join('cross-layers','idmanager.h'),
     os.path.join('cross-layers','openqueue.h'),
+    os.path.join('cross-layers','openmemory.h'),
     os.path.join('cross-layers','openrandom.h'),
     os.path.join('cross-layers','packetfunctions.h'),
 ]

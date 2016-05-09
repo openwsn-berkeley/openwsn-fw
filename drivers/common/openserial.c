@@ -187,6 +187,25 @@ owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channe
    return E_SUCCESS;
 }
 
+owerror_t openserial_printBridge(uint8_t* buffer, uint8_t length) {
+   uint8_t  i;
+   INTERRUPT_DECLARATION();
+   
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+   outputHdlcWrite(SERFRAME_MOTE2PC_BRIDGE);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   for (i=0;i<length;i++){
+      outputHdlcWrite(buffer[i]);
+   }
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+   
+   return E_SUCCESS;
+}
+
 owerror_t openserial_printInfo(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg1,
                               errorparameter_t arg2) {

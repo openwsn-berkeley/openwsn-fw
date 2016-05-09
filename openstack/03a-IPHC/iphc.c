@@ -8,6 +8,7 @@
 #include "neighbors.h"
 #include "openbridge.h"
 #include "icmpv6rpl.h"
+#include "fragment.h"
 
 //=========================== variables =======================================
 
@@ -64,6 +65,7 @@ owerror_t iphc_sendFromForwarding(
     uint8_t           rh3_length,
     uint8_t           fw_SendOrfw_Rcv
     ) {
+    FragmentQueueEntry_t* buffer;
     open_addr_t  temp_dest_prefix;
     open_addr_t  temp_dest_mac64b; 
     open_addr_t  temp_src_prefix;
@@ -195,7 +197,13 @@ owerror_t iphc_sendFromForwarding(
         *((uint8_t*)(msg->payload)) = PAGE_DISPATCH_NO_1;
     }
     
-    return sixtop_send(msg);
+    // check if we are forwarding a fragmented message
+    if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL ) {
+//      && (msg->creator == COMPONENT_FORWARDING) ) {
+        fragment_assignAction(buffer, FRAGMENT_ACTION_FORWARD);
+	return E_SUCCESS;
+    } else
+        return fragment_prependHeader(msg);
 }
 
 //send from bridge: 6LoWPAN header already added by OpenLBR, send as is
@@ -213,7 +221,9 @@ owerror_t iphc_sendFromBridge(OpenQueueEntry_t *msg) {
 
 void iphc_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    msg->owner = COMPONENT_IPHC;
-   if (msg->creator==COMPONENT_OPENBRIDGE) {
+   if (msg->creator==COMPONENT_FRAGMENT) {
+      fragment_sendDone(msg,error);
+   } else if (msg->creator==COMPONENT_OPENBRIDGE) {
       openbridge_sendDone(msg,error);
    } else {
       forwarding_sendDone(msg,error);
@@ -227,6 +237,11 @@ void iphc_receive(OpenQueueEntry_t* msg) {
     rpl_option_ht        rpl_option;
     uint8_t              rpi_length;
    
+    // Do not continue if msg is a FRAGN type
+    if ( fragment_retrieveHeader(msg) ) {
+        return;
+    }
+
     msg->owner      = COMPONENT_IPHC;
    
     memset(&ipv6_outer_header,0,sizeof(ipv6_header_iht));
@@ -267,7 +282,13 @@ void iphc_receive(OpenQueueEntry_t* msg) {
             &rpl_option
         );
    } else {
-      openbridge_receive(msg);                   //out to the OpenVisualizer
+      FragmentQueueEntry_t* buffer;
+
+      if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL ) {
+         fragment_assignAction(buffer, FRAGMENT_ACTION_OPENBRIDGE);
+      } else {
+         openbridge_receive(msg, TRUE);           //out to the OpenVisualizer
+      }
    }
 }
 

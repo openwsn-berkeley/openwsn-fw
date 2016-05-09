@@ -12,6 +12,7 @@
 #include "opentcp.h"
 #include "debugpins.h"
 #include "scheduler.h"
+#include "fragment.h"
 
 //=========================== variables =======================================
 
@@ -230,6 +231,7 @@ void forwarding_receive(
     ) {
     uint8_t flags;
     uint16_t senderRank;
+    FragmentQueueEntry_t* buffer;
    
     // take ownership
     msg->owner                     = COMPONENT_FORWARDING;
@@ -257,33 +259,36 @@ void forwarding_receive(
         }
         // this packet is for me, no source routing header // toss iphc inner header
         packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
-        // indicate received packet to upper layer
-        switch(msg->l4_protocol) {
-        case IANA_TCP:
-            opentcp_receive(msg);
-            break;
-        case IANA_UDP:
-            openudp_receive(msg);
-            break;
-        case IANA_ICMPv6:
-            icmpv6_receive(msg);
-            break;
-        default:
-            // log error
-            openserial_printError(
-                COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
-                (errorparameter_t)msg->l4_protocol,
-                (errorparameter_t)1
-            );
-            
-            // free packet
-            openqueue_freePacketBuffer(msg);
-        }
+
+	// If this message is a FRAG1, message must be assembled
+	// prior to move it to upper layer.
+	if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL ) {
+           //msg->l4_payload = msg->payload;
+           //msg->l4_length  = msg->length;
+           switch(msg->l4_protocol) {
+           case IANA_TCP: case IANA_UDP: case IANA_ICMPv6:
+              fragment_assignAction(buffer, FRAGMENT_ACTION_ASSEMBLE);
+	      break;
+           default:
+              // log error
+              openserial_printError(
+                  COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
+                  (errorparameter_t)msg->l4_protocol,
+                  (errorparameter_t)1
+              );
+	      fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
+           }
+	} else
+	    forwarding_toUpperLayer(msg);
+
     } else {
         // this packet is not for me: relay
       
         // change the creator of the packet
         msg->creator = COMPONENT_FORWARDING;
+
+        msg->l4_payload = msg->payload + ipv6_inner_header->header_length + ipv6_outer_header->header_length;
+        msg->l4_length  = msg->length  + ipv6_inner_header->header_length + ipv6_outer_header->header_length;
       
         if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
             flags = rpl_option->flags;
@@ -322,7 +327,10 @@ void forwarding_receive(
                     PCKTFORWARD 
                 )==E_FAIL
             ) {
-                openqueue_freePacketBuffer(msg);
+                if ( (buffer = fragment_searchBufferFromMsg(msg)) != NULL )
+		    fragment_assignAction(buffer, FRAGMENT_ACTION_CANCEL);
+		else
+                    openqueue_freePacketBuffer(msg);
             }
         } else {
             // source routing header present
@@ -346,6 +354,33 @@ void forwarding_receive(
     }
 }
 
+// indicate reception to upper layer
+owerror_t forwarding_toUpperLayer(OpenQueueEntry_t* msg) {
+    switch(msg->l4_protocol) {
+        case IANA_TCP:
+            opentcp_receive(msg);
+	    break;
+        case IANA_UDP:
+	    openudp_receive(msg);
+	    break;
+        case IANA_ICMPv6:
+	    icmpv6_receive(msg);
+	    break;
+        default:
+	    // log error
+	    openserial_printError(
+               COMPONENT_FORWARDING,ERR_WRONG_TRAN_PROTOCOL,
+	       (errorparameter_t)msg->l4_protocol,
+	       (errorparameter_t)2
+	    );
+	    // not sure that this is correct as iphc will free it?
+	    openqueue_freePacketBuffer(msg);
+	    return E_FAIL;
+    }
+
+    // stop executing here (successful)
+    return E_SUCCESS;
+}
 //=========================== private =========================================
 
 /**

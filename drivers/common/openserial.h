@@ -49,6 +49,7 @@ enum {
 #define SERFRAME_MOTE2PC_CRITICAL           ((uint8_t)'C')
 #define SERFRAME_MOTE2PC_REQUEST            ((uint8_t)'R')
 #define SERFRAME_MOTE2PC_SNIFFED_PACKET     ((uint8_t)'P')
+#define SERFRAME_MOTE2PC_BRIDGE             ((uint8_t)'B')
 
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT            ((uint8_t)'R')
@@ -116,6 +117,7 @@ owerror_t openserial_printCritical(uint8_t calling_component, uint8_t error_code
                               errorparameter_t arg2);
 owerror_t openserial_printData(uint8_t* buffer, uint8_t length);
 owerror_t openserial_printPacket(uint8_t* buffer, uint8_t length, uint8_t channel);
+owerror_t openserial_printBridge(uint8_t* buffer, uint8_t length);
 uint8_t openserial_getNumDataBytes(void);
 uint8_t openserial_getInputBuffer(uint8_t* bufferToWrite, uint8_t maxNumBytes);
 void    openserial_startInput(void);

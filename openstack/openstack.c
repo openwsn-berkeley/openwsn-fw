@@ -12,6 +12,7 @@
 //-- cross-layer
 #include "idmanager.h"
 #include "openqueue.h"
+#include "openmemory.h"
 #include "openrandom.h"
 #include "opentimers.h"
 //-- 02a-TSCH
@@ -25,6 +26,7 @@
 //-- 03a-IPHC
 #include "openbridge.h"
 #include "iphc.h"
+#include "fragment.h"
 //-- 03b-IPv6
 #include "forwarding.h"
 #include "icmpv6.h"
@@ -54,6 +56,7 @@ void openstack_init(void) {
    //-- cross-layer
    idmanager_init();    // call first since initializes EUI64 and isDAGroot
    openqueue_init();
+   openmemory_init();
    openrandom_init();
    opentimers_init();
    //-- 02a-TSCH
@@ -67,6 +70,7 @@ void openstack_init(void) {
    //-- 03a-IPHC
    openbridge_init();
    iphc_init();
+   fragment_init();
    //-- 03b-IPv6
    forwarding_init();
    icmpv6_init();

@@ -5,6 +5,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "IEEE802154E.h"
+#include "fragment.h"
 
 //=========================== variables =======================================
 
@@ -673,6 +674,7 @@ bool isNeighbor(open_addr_t* neighbor) {
 }
 
 void removeNeighbor(uint8_t neighborIndex) {
+   fragment_deleteNeighbor(&(neighbors_vars.neighbors[neighborIndex].addr_64b));
    neighbors_vars.neighbors[neighborIndex].used                      = FALSE;
    neighbors_vars.neighbors[neighborIndex].parentPreference          = 0;
    neighbors_vars.neighbors[neighborIndex].stableNeighbor            = FALSE;
