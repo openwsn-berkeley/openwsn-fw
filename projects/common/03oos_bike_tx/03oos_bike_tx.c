@@ -75,6 +75,7 @@ int mote_main(void) {
     openrandom_init();
     idmanager_init();
 
+    // Get EUI64
     app_vars.address = idmanager_getMyID(ADDR_64B);
 
     // add radio callback functions
@@ -87,56 +88,61 @@ int mote_main(void) {
     radio_setFrequency(CHANNEL);
     radio_rfOff();
 
-    // start periodic overflow
-
-    //random packet rate
-    app_vars.packet_period = openrandom_get16b()%TIMER_PERIOD +TIMER_PERIOD ;
+    // random packet rate
+    app_vars.packet_period = openrandom_get16b() % TIMER_PERIOD + TIMER_PERIOD ;
     radiotimer_start(app_vars.packet_period);
 
     while(1) {
-
-        // wait for timer to elapse
+        // Wait for timer to elapse
         app_vars.txpk_txNow = 0;
         while (app_vars.txpk_txNow==0) {
             board_sleep();
         }
 
-        // led
-        //leds_error_toggle();
+        // Mote type (0xBB = Bike, 0xCC = Motorike, 0xDD = Car)
+        app_vars.txpk_buf[0] = 0xBB;
 
-        //eui64
-        memcpy(&app_vars.txpk_buf[0],&app_vars.address->addr_64b[0],8);
+        // EUI64 as identifier
+        memcpy(&app_vars.txpk_buf[1], &app_vars.address->addr_64b[0], 8);
 
-        // packet counter
+        // Packet counter
         app_vars.packet_counter++;
 
-        if (app_vars.packet_counter%0xffffffff ==0){
-            //detecting rollover
+		// Detecting rollover with lollipop counter
+        if (app_vars.packet_counter % 0xffffffff == 0){
             app_vars.rollover++;
-            //lollipop counter
             app_vars.packet_counter = 256;
         }
 
-        app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
-        app_vars.txpk_buf[8]        = (app_vars.packet_counter>>8)%0xFF;
-        app_vars.txpk_buf[9]        = (app_vars.packet_counter)%0xFF;;
-        app_vars.txpk_buf[10]        = app_vars.rollover;
+        // Fill in packet counter and rollover counter
+        app_vars.txpk_len      = sizeof(app_vars.txpk_buf);
+        app_vars.txpk_buf[9]   = (app_vars.packet_counter >> 8) % 0xFF;
+        app_vars.txpk_buf[10]  = (app_vars.packet_counter >> 0) % 0xFF;;
+        app_vars.txpk_buf[11]  = app_vars.rollover;
 
-        for (i=11;i<app_vars.txpk_len;i++) {
-            //filling with bullshit
+        // Epoch set to zero as this is a bike
+        app_vars.txpk_buf[12] = 0x00;
+        app_vars.txpk_buf[13] = 0x00;
+        app_vars.txpk_buf[14] = 0x00;
+        app_vars.txpk_buf[15] = 0x00;
+
+        // Fill remaining of packet
+        for (i = 16; i < app_vars.txpk_len; i++) {
             app_vars.txpk_buf[i] = i;
         }
 
-        // send packet
+        // Send packet
         radio_rfOn();
         radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
         radio_txEnable();
         radio_txNow();
 
-        app_vars.waitPacketEnd=1;
-        //waiting for the radio to finsih until going deep sleep.
+        // Radio is asynchronous
+        // Wait until the packet is complete to go to deep sleep
+        app_vars.waitPacketEnd = 1;
         while (app_vars.waitPacketEnd);
-        //stop the radio
+        
+        // Stop the radio once the packet is compete
         radio_rfOff();
     }
 }
@@ -144,7 +150,6 @@ int mote_main(void) {
 //=========================== callbacks =======================================
 
 void cb_radioTimerOverflows(void) {
-
     // update debug vals
     app_dbg.num_radioTimerOverflows++;
 
@@ -154,21 +159,14 @@ void cb_radioTimerOverflows(void) {
 }
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
-
     // update debug vals
     app_dbg.num_startFrame++;
-
-    // led
- //   leds_sync_on();
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
-
     // update debug vals
     app_dbg.num_endFrame++;
 
-    // led
-   // leds_sync_off();
     //the radio has finished.
-    app_vars.waitPacketEnd=0;
+    app_vars.waitPacketEnd = 0;
 }

@@ -4,60 +4,10 @@
 Since the bsp modules for different platforms have the same declaration, you
 can use this project with any platform.
 
-This application places the mote in receive mode, and prints, over the serial
-port, all information about the received packet. The frame printed over the
-serial port for each received packet is formatted as follows:
-- [1B] the length of the packet, an unsigned integer
-- [1B] the first byte of the packet, an unsigned integer
-- [1B] the receive signal strength of tehe packet, an signed integer
-- [1B] the link quality indicator, an unsigned integer
-- [1B] whether the receive packet passed CRC (1) or not (0)
-- [3B] closing flags, each of value 0xff
-
-You can run the 01bsp_radio_rx.py script to listen to your mote and parse those 
-serial frames. The application can connect directly to the mote's serial port,
-or to its TCP port when running on the IoT-LAB platform.
-
-Example when running locally:
-----------------------------
-
- ___                 _ _ _  ___  _ _
-| . | ___  ___ ._ _ | | | |/ __>| \ |
-| | || . \/ ._>| ' || | | |\__ \|   |
-`___'|  _/\___.|_|_||__/_/ <___/|_\_|
-     |_|                  openwsn.org
-
-running IoT-lAB? (Y|N): N
-name of serial port (e.g. COM10): COM25
-len=127 num=176 rssi=-43  lqi=107 crc=1
-len=127 num=177 rssi=-43  lqi=107 crc=1
-len=127 num=178 rssi=-43  lqi=106 crc=1
-len=127 num=179 rssi=-43  lqi=107 crc=1
-len=127 num=180 rssi=-43  lqi=108 crc=1
-len=127 num=181 rssi=-43  lqi=107 crc=1
-len=127 num=182 rssi=-43  lqi=107 crc=1
-len=127 num=183 rssi=-43  lqi=107 crc=1
-
-
-Example when running on the IoT-LAB platform:
---------------------------------------------
-
- ___                 _ _ _  ___  _ _
-| . | ___  ___ ._ _ | | | |/ __>| \ |
-| | || . \/ ._>| ' || | | |\__ \|   |
-`___'|  _/\___.|_|_||__/_/ <___/|_\_|
-     |_|                  openwsn.org
-
-running IoT-lAB? (Y|N): Y
-motename? (e.g. wsn430-35): wsn430-35
-len=17  num=84  rssi=-80  lqi=107 crc=1
-len=17  num=84  rssi=-81  lqi=107 crc=1
-len=17  num=84  rssi=-80  lqi=107 crc=1
-len=17  num=84  rssi=-81  lqi=105 crc=1
-len=17  num=84  rssi=-80  lqi=108 crc=1
-len=17  num=84  rssi=-81  lqi=108 crc=1
-
-
+The board running this program will send a packet on channel CHANNEL every
+TIMER_PERIOD ticks. The packet contains LENGTH_PACKET bytes. The first byte
+is the packet number, which increments for each transmitted packet. The
+remainder of the packet contains an incrementing bytes.
 
 \author Xavier Vilajosana <xvilajosana@uoc.edu>, May 2016.
 \author Pere Tuset <peretuset@uoc.edu>, May 2016.
@@ -73,6 +23,7 @@ len=17  num=84  rssi=-81  lqi=108 crc=1
 #include "leds.h"
 #include "bsp_timer.h"
 #include "idmanager.h"
+#include "openhdlc.h"
 
 //=========================== defines =========================================
 
@@ -92,6 +43,10 @@ typedef struct {
 app_dbg_t app_dbg;
 
 typedef struct {
+   // tx packet
+   uint8_t               txpk_txNow;
+   uint8_t               txpk_buf[LENGTH_PACKET];
+   uint8_t               txpk_len;
    // rx packet
    volatile   uint8_t    rxpk_done;
               uint8_t    rxpk_buf[LENGTH_PACKET];
@@ -100,6 +55,11 @@ typedef struct {
               int8_t     rxpk_rssi;
               uint8_t    rxpk_lqi;
               bool       rxpk_crc;
+   // packet counter
+   uint16_t              packet_counter;
+   uint8_t               rollover;
+   open_addr_t*          address;
+   uint8_t               waitPacketEnd;
    // uart
               uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
               uint8_t    uart_lastTxByte;
@@ -110,9 +70,10 @@ app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
+void create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length);
+
 // radiotimer
 void cb_radioTimerOverflows(void);
-void cb_radioTimerCompare(void);
 // radio
 void cb_startFrame(PORT_TIMER_WIDTH timestamp);
 void cb_endFrame(PORT_TIMER_WIDTH timestamp);
@@ -126,67 +87,65 @@ void cb_uartRxCb(void);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-   
    // clear local variables
    memset(&app_vars,0,sizeof(app_vars_t));
    
    // initialize board
    board_init();
-   
-   // add callback functions radio
+   openrandom_init();
+   idmanager_init();
+
+   // Get EUI64
+   app_vars.address = idmanager_getMyID(ADDR_64B);
+
+   // Add radio callback functions
    radio_setOverflowCb(cb_radioTimerOverflows);
-   radio_setCompareCb(cb_radioTimerCompare);
    radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
-   
-   // setup UART
-   uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
-   
-   // prepare radio
+
+   // Prepare radio
    radio_rfOn();
    radio_setFrequency(CHANNEL);
-   
-   // switch in RX
-   radio_rxEnable();
+   radio_rfOff();
    
    while (1) {
-      
-      // sleep while waiting for at least one of the rxpk_done to be set
+      // Try to receive packet
       app_vars.rxpk_done = 0;
-      while (app_vars.rxpk_done==0) {
-         board_sleep();
+      radio_rfOn();
+      radio_rxEnable();
+      radio_rxNow();
+      while (app_vars.rxpk_done == 0);
+
+      // CRC should be valid and packet length should be 100 bytes
+      if (app_vars.rxpk_crc == true && app_vars.rxpk_len == 100) {
+
+         // Check that the packet comes from a bike/motorbike/car
+         if (app_vars.rxpk_buf[0] == 0xBB ||
+             app_vars.rxpk_buf[0] == 0xCC ||
+             app_vars.rxpk_buf[0] == 0xDD) {
+
+            // Append the RSSI and LQI
+            app_vars.rxpk_buf[app_vars.rxpk_len++] = app_vars.rxpk_rssi;
+            app_vars.rxpk_buf[app_vars.rxpk_len++] = app_vars.rxpk_lqi;
+
+            // Create HDLC packet by copying all the bytes
+            create_hdlc_frame(app_vars.uart_txFrame, app_vars.rxpk_buf, app_vars.rxpk_len); 
+
+            // Send HDLC frame over UART
+            uart_clearTxInterrupts();
+            uart_clearRxInterrupts();
+            uart_enableInterrupts();
+
+            app_vars.uart_lastTxByte = 0;
+            uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
+
+            // Busy wait to finish
+            while (app_vars.uart_done == 0);
+
+            // Disable UART interrupts
+            uart_disableInterrupts();
+         }
       }
-      
-      // if I get here, I just received a packet
-      
-      //===== send notification over serial port
-      
-      // led
-      leds_error_on();
-      
-      // format frame to send over serial port
-      app_vars.uart_txFrame[0] = app_vars.rxpk_len;  // packet length
-      app_vars.uart_txFrame[1] = app_vars.rxpk_num;  // packet number
-      app_vars.uart_txFrame[2] = app_vars.rxpk_rssi; // RSSI
-      app_vars.uart_txFrame[3] = app_vars.rxpk_lqi;  // LQI
-      app_vars.uart_txFrame[4] = app_vars.rxpk_crc;  // CRC
-      app_vars.uart_txFrame[5] = 0xff;               // closing flag
-      app_vars.uart_txFrame[6] = 0xff;               // closing flag
-      app_vars.uart_txFrame[7] = 0xff;               // closing flag
-      
-      app_vars.uart_done          = 0;
-      app_vars.uart_lastTxByte    = 0;
-      
-      // send app_vars.uart_txFrame over UART
-      uart_clearTxInterrupts();
-      uart_clearRxInterrupts();
-      uart_enableInterrupts();
-      uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
-      while (app_vars.uart_done==0); // busy wait to finish
-      uart_disableInterrupts();
-      
-      // led
-      leds_error_off();
    }
 }
 
@@ -195,35 +154,19 @@ int mote_main(void) {
 //===== radiotimer
 
 void cb_radioTimerOverflows(void) {
-   
    // update debug stats
    app_dbg.num_radioTimerOverflows++;
-}
-
-void cb_radioTimerCompare(void) {
-   
-   // update debug stats
-   app_dbg.num_radioTimerCompare++;
 }
 
 //===== radio
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
-   
    // update debug stats
    app_dbg.num_startFrame++;
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
-   
-   // update debug stats
-   app_dbg.num_endFrame++;
-   // indicate I just received a packet
-   app_vars.rxpk_done = 1;
-   
-   leds_sync_on();
-
-   // get packet from radio
+   // Get packet from radio
    radio_getReceivedFrame(
       app_vars.rxpk_buf,
       &app_vars.rxpk_len,
@@ -232,35 +175,73 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
       &app_vars.rxpk_lqi,
       &app_vars.rxpk_crc
    );
-   
-   // read the packet number
-   app_vars.rxpk_num = app_vars.rxpk_buf[0];
-   
-   // led
-   leds_sync_off();
+
+   // Indicate I just received a packet
+   app_vars.rxpk_done = 1;
 }
 
 //===== uart
 
 void cb_uartTxDone(void) {
-   
+   // Clear the UART interrupt
    uart_clearTxInterrupts();
    
-   // prepare to send the next byte
+   // Prepare to send the next byte
    app_vars.uart_lastTxByte++;
    
-   if (app_vars.uart_lastTxByte<sizeof(app_vars.uart_txFrame)) {
+   // Check 
+   if (app_vars.uart_lastTxByte < sizeof(app_vars.uart_txFrame)) {
       uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
    } else {
-      app_vars.uart_done=1;
+      app_vars.uart_done = 1;
    }
 }
 
 void cb_uartRxCb(void) {
-   
-   //  uint8_t byte;
    uart_clearRxInterrupts();
    
    // toggle LED
    leds_debug_toggle();
 }
+
+//===== hdlc
+
+void create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length) {
+   uint16_t crc, byte;
+   uint16_t i = 0;
+   uint16_t j = 0;
+
+   // Initialize the value of the CRC
+   crc = HDLC_CRCINIT;
+   
+   // write the opening HDLC flag
+   buffer[j++] = HDLC_FLAG;
+
+   // Iterate over all data to create the HDLC frame
+   while (length > 0) {
+      byte = data[i++];
+      
+      // Iterate the CRC
+      crcIteration(crc, byte);
+
+      // Add byte to buffer
+      if (byte == HDLC_FLAG || byte == HDLC_ESCAPE) {
+         buffer[j++] = HDLC_ESCAPE;
+         byte = byte ^ HDLC_ESCAPE_MASK;
+      }
+   
+      // Increment buffer pointer
+      buffer[j++] = byte;
+      length--;
+   }
+    
+   // Finalize the calculation of the CRC
+   crc = ~crc;
+   
+   // Write the CRC value
+   buffer[j++] = (crc >> 0) & 0xFF;
+   buffer[j++] = (crc >> 0) & 0xFF;
+   
+   // Write the closing HDLC flag
+   buffer[j++] = HDLC_FLAG;
+}  
