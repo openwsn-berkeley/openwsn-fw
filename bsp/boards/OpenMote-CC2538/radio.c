@@ -393,7 +393,8 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
    
    *pRssi     = ((int8_t)(HWREG(RFCORE_SFR_RFDATA)) - RSSI_OFFSET);
    crc_corr   = HWREG(RFCORE_SFR_RFDATA);
-   *pCrc      = crc_corr & CRC_BIT_MASK;
+   *pCrc      = (crc_corr & CRC_BIT_MASK);
+   *pLqi      = crc_corr & LQI_BIT_MASK;
    *pLenRead  = len;
    
    //flush it

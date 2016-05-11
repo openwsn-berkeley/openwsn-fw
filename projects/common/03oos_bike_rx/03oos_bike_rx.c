@@ -63,6 +63,7 @@ typedef struct {
    // uart
               uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
               uint8_t    uart_lastTxByte;
+              uint8_t    uart_counter;
    volatile   uint8_t    uart_done;
 } app_vars_t;
 
@@ -70,7 +71,7 @@ app_vars_t app_vars;
 
 //=========================== prototypes ======================================
 
-void create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length);
+uint16_t create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length);
 
 // radiotimer
 void cb_radioTimerOverflows(void);
@@ -94,6 +95,9 @@ int mote_main(void) {
    board_init();
    openrandom_init();
    idmanager_init();
+
+   // setup UART
+   uart_setCallbacks(cb_uartTxDone,cb_uartRxCb);
 
    // Get EUI64
    app_vars.address = idmanager_getMyID(ADDR_64B);
@@ -125,18 +129,21 @@ int mote_main(void) {
              app_vars.rxpk_buf[0] == 0xDD) {
 
             // Append the RSSI and LQI
-            app_vars.rxpk_buf[app_vars.rxpk_len++] = app_vars.rxpk_rssi;
-            app_vars.rxpk_buf[app_vars.rxpk_len++] = app_vars.rxpk_lqi;
+            app_vars.rxpk_buf[16] = app_vars.rxpk_rssi;
+            app_vars.rxpk_buf[17] = app_vars.rxpk_lqi;
+            app_vars.rxpk_len = 18;
 
             // Create HDLC packet by copying all the bytes
-            create_hdlc_frame(app_vars.uart_txFrame, app_vars.rxpk_buf, app_vars.rxpk_len); 
+            app_vars.uart_counter = create_hdlc_frame(app_vars.uart_txFrame, app_vars.rxpk_buf, app_vars.rxpk_len); 
 
             // Send HDLC frame over UART
             uart_clearTxInterrupts();
             uart_clearRxInterrupts();
             uart_enableInterrupts();
 
+            app_vars.uart_done = 0;
             app_vars.uart_lastTxByte = 0;
+
             uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
 
             // Busy wait to finish
@@ -161,11 +168,14 @@ void cb_radioTimerOverflows(void) {
 //===== radio
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
+   leds_error_on();
    // update debug stats
    app_dbg.num_startFrame++;
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
+   leds_error_off();
+
    // Get packet from radio
    radio_getReceivedFrame(
       app_vars.rxpk_buf,
@@ -189,8 +199,8 @@ void cb_uartTxDone(void) {
    // Prepare to send the next byte
    app_vars.uart_lastTxByte++;
    
-   // Check 
-   if (app_vars.uart_lastTxByte < sizeof(app_vars.uart_txFrame)) {
+   // Transmit the UART bytes
+   if (app_vars.uart_lastTxByte < app_vars.uart_counter) {
       uart_writeByte(app_vars.uart_txFrame[app_vars.uart_lastTxByte]);
    } else {
       app_vars.uart_done = 1;
@@ -206,7 +216,8 @@ void cb_uartRxCb(void) {
 
 //===== hdlc
 
-void create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length) {
+uint16_t create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length) {
+   uint16_t counter = 0;
    uint16_t crc, byte;
    uint16_t i = 0;
    uint16_t j = 0;
@@ -216,32 +227,38 @@ void create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length) {
    
    // write the opening HDLC flag
    buffer[j++] = HDLC_FLAG;
+   counter++;
 
    // Iterate over all data to create the HDLC frame
    while (length > 0) {
       byte = data[i++];
       
       // Iterate the CRC
-      crcIteration(crc, byte);
+      crc = crcIteration(crc, byte);
 
       // Add byte to buffer
       if (byte == HDLC_FLAG || byte == HDLC_ESCAPE) {
          buffer[j++] = HDLC_ESCAPE;
          byte = byte ^ HDLC_ESCAPE_MASK;
+         counter++;
       }
    
       // Increment buffer pointer
       buffer[j++] = byte;
       length--;
+      counter++;
    }
     
    // Finalize the calculation of the CRC
    crc = ~crc;
    
    // Write the CRC value
-   buffer[j++] = (crc >> 0) & 0xFF;
+   buffer[j++] = (crc >> 8) & 0xFF;
    buffer[j++] = (crc >> 0) & 0xFF;
    
    // Write the closing HDLC flag
    buffer[j++] = HDLC_FLAG;
+   counter += 3;
+
+   return counter;
 }  

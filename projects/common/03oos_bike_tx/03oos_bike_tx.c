@@ -100,6 +100,7 @@ int mote_main(void) {
         }
 
         // Mote type (0xBB = Bike, 0xCC = Motorike, 0xDD = Car)
+        app_vars.txpk_len    = sizeof(app_vars.txpk_buf);
         app_vars.txpk_buf[0] = 0xBB;
 
         // EUI64 as identifier
@@ -115,7 +116,6 @@ int mote_main(void) {
         }
 
         // Fill in packet counter and rollover counter
-        app_vars.txpk_len      = sizeof(app_vars.txpk_buf);
         app_vars.txpk_buf[9]   = (app_vars.packet_counter >> 8) % 0xFF;
         app_vars.txpk_buf[10]  = (app_vars.packet_counter >> 0) % 0xFF;;
         app_vars.txpk_buf[11]  = app_vars.rollover;
