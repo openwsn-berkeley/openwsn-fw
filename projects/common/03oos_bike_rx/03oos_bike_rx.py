@@ -5,7 +5,9 @@ import sys
 import struct
 import socket
 import sched, time
+from threading import Timer
 import calendar
+import OpenHdlc
 
 try:
    import serial
@@ -14,6 +16,7 @@ except ImportError:
 
 
 class BikeCoordinator():
+    hdlc = OpenHdlc()
 
     s = sched.scheduler(time.time, time.sleep)
 
@@ -39,9 +42,9 @@ class BikeCoordinator():
 
         #============================ configuration and connection ===================================
 
-        mote = self.mote_connect(serialport="\dev\ttyUSB0", baudrate='115200')
+        #mote = self.mote_connect(serialport="\dev\ttyUSB0", baudrate='115200')
 
-        #self.startPeriodicEpochTransmission(self)
+        self.startPeriodicEpochTransmission()
         #self.startReceiving(self, mote):
 
     def mote_connect(self, motename=None , serialport= None, baudrate='115200'):
@@ -63,6 +66,7 @@ class BikeCoordinator():
         rawFrame = []
 
         while True:
+
             byte  = mote.read(1)
             rawFrame += [ord(byte)]
 
@@ -85,14 +89,22 @@ class BikeCoordinator():
 
 
     def startPeriodicEpochTransmission(self):
-        self.s = sched.scheduler(time.time, time.sleep)
-        s.enter(10, 1, writeEpoch, ())
 
+        #self.s = sched.scheduler(time.time, time.sleep)
+        #self.s.enter(10, 1, self.writeEpoch, ())
+        Timer(1, self.writeEpoch, ()).start()
 
     def writeEpoch(self):
+
         time_read = calendar.timegm(time.gmtime())
         print time_read
 
+
+        #self.s.enter(10, 1, self.writeEpoch, ())
+        Timer(1, self.writeEpoch, ()).start()
+
+
+#============================ main ============================================
 
 
 
