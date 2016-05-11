@@ -17,3 +17,8 @@ settings
 *.map
 *.lst
 *~
+*.config
+*.creator
+*.files
+*.includes
+*.creator.user
