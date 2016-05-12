@@ -15,7 +15,7 @@ except ImportError:
    pass
 
 
-class BikeCoordinator():
+class ConnectivityCoordinator():
     hdlc = OpenHdlc()
 
     s = sched.scheduler(time.time, time.sleep)
@@ -30,7 +30,7 @@ class BikeCoordinator():
         banner += ["     |_|                  openwsn.org"]
         banner += [""]
         banner  = '\n'.join(banner)
-        print 'Creating Bike Coordinator\n'
+        print 'Creating Connectivity Coordinator\n'
         print banner
 
 
@@ -111,5 +111,5 @@ class BikeCoordinator():
 #============================ main ============================================
 
 if __name__=="__main__":
-    bike = BikeCoordinator()
-    bike.startWorking()
+    conn = Connectivity()
+    conn.startWorking()
