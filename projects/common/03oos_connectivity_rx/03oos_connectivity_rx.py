@@ -23,6 +23,8 @@ class ConnectivityCoordinator():
         self.inputBuf    = ''
         self.busyReceiving = False
 
+        self.f = open('connecitivity'+str(calendar.timegm(time.gmtime())), 'w')
+
         banner  = []
         banner += [""]
         banner += [" ___                 _ _ _  ___  _ _ "]
@@ -94,6 +96,7 @@ class ConnectivityCoordinator():
                     (type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi) = struct.unpack('>BBBBBBBBBHBIBB',self.inputBuf)
                     #TODO print the buffer into a file
                     print type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi
+                    f.write(type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi)
 
             self.lastRxByte = byte
 
