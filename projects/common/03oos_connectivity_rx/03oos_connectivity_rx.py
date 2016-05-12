@@ -17,14 +17,12 @@ except ImportError:
 
 class ConnectivityCoordinator():
 
-
-    s = sched.scheduler(time.time, time.sleep)
-
     def __init__(self):
         self.hdlc = h.OpenHdlc()
         self.lastRxByte  = self.hdlc.HDLC_FLAG
         self.inputBuf    = ''
         self.busyReceiving = False
+
         banner  = []
         banner += [""]
         banner += [" ___                 _ _ _  ___  _ _ "]
@@ -39,26 +37,26 @@ class ConnectivityCoordinator():
 
 
     def startWorking(self):
-        mote = None
+        self.mote = None
         time_read = calendar.timegm(time.gmtime())
         print time_read
         #connect to the serial port
 
         #============================ configuration and connection ===================================
 
-        #mote = self.mote_connect(serialport="\dev\ttyUSB0", baudrate='115200')
+        self.mote_connect(serialport="/dev/ttyUSB1", baudrate='115200')
 
         self.startPeriodicEpochTransmission()
-        #self.startReceiving(self, mote):
+        self.startReceiving()
 
     def mote_connect(self, motename=None , serialport= None, baudrate='115200'):
         try:
             if (motename):
-                mote = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-                mote.connect((motename,20000))
+                self.mote = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+                self.mote.connect((motename,20000))
             else:
-                mote = serial.Serial(serialport, baudrate)
-            return mote
+                self.mote = serial.Serial(serialport, baudrate)
+
         except Exception as err:
             print "{0}".format(err)
             raw_input('Press Enter to close.')
@@ -66,10 +64,10 @@ class ConnectivityCoordinator():
 
 #============================ read ============================================
 
-    def startReceiving(self, mote):
+    def startReceiving(self):
 
         while True:
-            byte  = mote.read(1)
+            byte  = self.mote.read(1)
             if ((not self.busyReceiving)
                 and self.lastRxByte==self.hdlc.HDLC_FLAG
                 and byte!=self.hdlc.HDLC_FLAG ):
@@ -77,7 +75,6 @@ class ConnectivityCoordinator():
                 self.busyReceiving       = True
                 self.inputBuf            = self.hdlc.HDLC_FLAG
                 self.inputBuf           += byte
-                #TODO
 
             elif ( self.busyReceiving and byte!=self.hdlc.HDLC_FLAG):
             #check middle of frame
@@ -88,12 +85,17 @@ class ConnectivityCoordinator():
                 self.busyReceiving = False
                 self.inputBuf += byte
                 tempBuf = self.inputBuf
-                self.inputBuf = self.hdlc.dehdlcify(self.inputBuf)
+                print ",".join(hex(ord(c)) for c in tempBuf)
+                try:
+                    self.inputBuf = self.hdlc.dehdlcify(self.inputBuf)
+                except h.HdlcException as err:
+                    print err
+                else:
+                    (type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi) = struct.unpack('>BBBBBBBBBHBIBB',self.inputBuf)
+                    #TODO print the buffer into a file
+                    print type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi
 
             self.lastRxByte = byte
-            #TODO print the buffer into a file
-
-
 
     def startPeriodicEpochTransmission(self):
 
@@ -106,6 +108,8 @@ class ConnectivityCoordinator():
         time_read = calendar.timegm(time.gmtime())
         print time_read
 
+        #write it unsigned int *4bytes* big endian >
+        self.mote.write(struct.pack('>I', time_read));
 
         #self.s.enter(10, 1, self.writeEpoch, ())
         Timer(1, self.writeEpoch, ()).start()
