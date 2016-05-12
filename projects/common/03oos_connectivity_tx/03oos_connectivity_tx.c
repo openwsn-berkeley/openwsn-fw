@@ -13,6 +13,8 @@ remainder of the packet contains an incrementing bytes.
 \author Pere Tuset <peretuset@uoc.edu>, May 2016.
 */
 
+//=========================== includes ========================================
+
 #include "stdint.h"
 #include "string.h"
 #include "board.h"
@@ -54,14 +56,11 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 
 //=========================== main ============================================
 
-/**
-\brief The program starts executing here.
-*/
 int mote_main(void) {
-    // clear local variables
+    // Clear local variables
     memset(&app_vars,0,sizeof(app_vars_t));
 
-    // initialize board
+    // Initialize board
     board_init();
     openrandom_init();
     idmanager_init();
@@ -100,14 +99,16 @@ int mote_main(void) {
 void prepare_radio_tx_frame(void) {
 	uint8_t i;
 
-   // Mote type (0xAA = Bike, 0x55 = Motorike / Car)
-	app_vars.txpk_len    = sizeof(app_vars.txpk_buf);
+    // Upate packet length
+    app_vars.txpk_len = sizeof(app_vars.txpk_buf);
+
+    // Mote type (0xAA = Bike, 0x55 = Motorike / Car)
 	app_vars.txpk_buf[0] = 0xAA;
 
-	// EUI64 as identifier
+	// Copy EUI64 as identifier
 	memcpy(&app_vars.txpk_buf[1], &app_vars.address->addr_64b[0], 8);
 
-	// Packet counter
+	// Increment packet counter
 	app_vars.packet_counter++;
 
 	// Detecting rollover with lollipop counter
@@ -117,9 +118,9 @@ void prepare_radio_tx_frame(void) {
 	}
 
 	// Fill in packet counter and rollover counter
-	app_vars.txpk_buf[9]   = (app_vars.packet_counter >> 8) % 0xFF;
-	app_vars.txpk_buf[10]  = (app_vars.packet_counter >> 0) % 0xFF;;
-	app_vars.txpk_buf[11]  = app_vars.rollover;
+	app_vars.txpk_buf[9]  = (app_vars.packet_counter >> 8) % 0xFF;
+	app_vars.txpk_buf[10] = (app_vars.packet_counter >> 0) % 0xFF;;
+	app_vars.txpk_buf[11] = app_vars.rollover;
 
 	// Epoch set to zero as this is a bike
 	app_vars.txpk_buf[12] = 0x00;
@@ -134,11 +135,15 @@ void prepare_radio_tx_frame(void) {
 }
 
 void radio_tx_frame(void) {
-	// Send packet
-	radio_rfOn();
-	radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
-	radio_txEnable();
-	radio_txNow();
+   // Enable radio
+   radio_rfOn();
+
+   // Load packet to radio
+   radio_loadPacket(app_vars.txpk_buf, app_vars.txpk_len);
+
+   // Transmit radio frame
+   radio_txEnable();
+   radio_txNow();
 
 	// Radio is asynchronous
 	// Wait until the packet is complete to go to deep sleep
@@ -152,7 +157,7 @@ void radio_tx_frame(void) {
 //=========================== callbacks =======================================
 
 void cb_radioTimerOverflows(void) {
-    // ready to send next packet
+    // Ready to send next packet
     app_vars.txpk_txNow = true;
 }
 

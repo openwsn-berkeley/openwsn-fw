@@ -13,6 +13,8 @@ remainder of the packet contains an incrementing bytes.
 \author Pere Tuset <peretuset@uoc.edu>, May 2016.
 */
 
+//=========================== includes ========================================
+
 #include "stdint.h"
 #include "string.h"
 #include "board.h"
@@ -36,22 +38,22 @@ remainder of the packet contains an incrementing bytes.
 
 typedef struct {
    // rx packet
-   volatile   bool       rxpk_isRx;
-   volatile   bool       rxpk_busy;
-   volatile   bool       rxpk_done;
-              uint8_t    rxpk_buf[LENGTH_PACKET];
-              uint8_t    rxpk_len;
-              uint8_t    rxpk_num;
-              int8_t     rxpk_rssi;
-              uint8_t    rxpk_lqi;
-              bool       rxpk_crc;
+   volatile bool         rxpk_isRx;
+   volatile bool         rxpk_busy;
+   volatile bool         rxpk_done;
+            uint8_t      rxpk_buf[LENGTH_PACKET];
+            uint8_t      rxpk_len;
+            uint8_t      rxpk_num;
+            int8_t       rxpk_rssi;
+            uint8_t      rxpk_lqi;
+            bool         rxpk_crc;
    
    // tx packet
-   volatile   bool       txpk_isTx;
-   volatile   bool       txpk_busy;
-   volatile   bool       txpk_done;
-              uint8_t    txpk_buf[LENGTH_PACKET];
-              uint8_t    txpk_len;
+   volatile bool         txpk_isTx;
+   volatile bool         txpk_busy;
+   volatile bool         txpk_done;
+            uint8_t      txpk_buf[LENGTH_PACKET];
+            uint8_t      txpk_len;
    
    // packet counter
    uint16_t              packet_counter;
@@ -69,19 +71,19 @@ typedef struct {
    uint8_t               timestamp_3;
    
    // uart tx
-              uint8_t    uart_txFrame[LENGTH_SERIAL_FRAME];
-              uint8_t    uart_txLastByte;
-              uint8_t    uart_txCounter;
-   volatile   uint8_t    uart_txDone;
+            uint8_t      uart_txFrame[LENGTH_SERIAL_FRAME];
+            uint8_t      uart_txLastByte;
+            uint8_t      uart_txCounter;
+   volatile uint8_t      uart_txDone;
    
    // uart rx
-              uint8_t    uart_rxFrame[LENGTH_SERIAL_FRAME];
-              bool       uart_rxReceiving;
-              bool       uart_rxEscaping;
-              uint16_t   uart_rxCrc;
-              uint8_t    uart_rxLastByte;
-              uint8_t    uart_rxCounter;
-   volatile   uint8_t    uart_rxDone;
+            uint8_t      uart_rxFrame[LENGTH_SERIAL_FRAME];
+            bool         uart_rxReceiving;
+            bool         uart_rxEscaping;
+            uint16_t     uart_rxCrc;
+            uint8_t      uart_rxLastByte;
+            uint8_t      uart_rxCounter;
+   volatile uint8_t      uart_rxDone;
 } app_vars_t;
 
 app_vars_t app_vars;
@@ -109,12 +111,9 @@ void cb_uartRxCb(void);
 
 //=========================== main ============================================
 
-/**
-\brief The program starts executing here.
-*/
 int mote_main(void) {
    // Clear local variables
-   memset(&app_vars,0,sizeof(app_vars_t));
+   memset(&app_vars, 0, sizeof(app_vars_t));
 
    // Init the time stamp to a known value
    app_vars.timestamp_0 = 0xBA;
@@ -192,14 +191,14 @@ bool radio_try_rx_frame(void) {
    while (app_vars.rxpk_isRx == true);
 
    // Return if we have received a valid frame
-   return (app_vars.rxpk_done && app_vars.rxpk_crc);
+   return (app_vars.rxpk_done & app_vars.rxpk_crc);
 }
 
 void radio_rx_process(void) {
    // Packet length should be 100 bytes and
    // comes from either a bike or motorbike/car
-   if (app_vars.rxpk_len == 100 &&
-      (app_vars.rxpk_buf[0] == 0xAA || app_vars.rxpk_buf[0] == 0x55)) {
+   if ((app_vars.rxpk_len == 100) &&
+      ((app_vars.rxpk_buf[0] == 0xAA) || (app_vars.rxpk_buf[0] == 0x55))) {
       
       // Move RSSI and LQI to discard other data
       app_vars.rxpk_buf[16] = app_vars.rxpk_rssi;
@@ -360,7 +359,7 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
 //===== uart
 
 void cb_uartTxDone(void) {
-   // Clear the UART interrupt
+   // Clear the UART TX interrupt
    uart_clearTxInterrupts();
    
    // Prepare to send the next byte
@@ -378,7 +377,7 @@ void cb_uartRxCb(void) {
    uint8_t byte;
    bool status;
 
-   // Clear the UART interrupt
+   // Clear the UART RX interrupt
    uart_clearRxInterrupts();
 
    // Get byte from the UART
@@ -469,7 +468,7 @@ bool append_hdlc_frame(uint8_t byte) {
          if (app_vars.uart_rxCrc == HDLC_CRCGOOD) {
             // Remove the CRC from the input buffer
             app_vars.uart_rxCounter -= 2;
-         } else {          
+         } else {
             // Drop the incoming framee
             app_vars.uart_rxCounter = 0;
          }
