@@ -7,7 +7,7 @@ import socket
 import sched, time
 from threading import Timer
 import calendar
-import OpenHdlc
+import OpenHdlc as h
 
 try:
    import serial
@@ -16,11 +16,15 @@ except ImportError:
 
 
 class ConnectivityCoordinator():
-    hdlc = OpenHdlc()
+
 
     s = sched.scheduler(time.time, time.sleep)
 
     def __init__(self):
+        self.hdlc = h.OpenHdlc()
+        self.lastRxByte  = self.hdlc.HDLC_FLAG
+        self.inputBuf    = ''
+        self.busyReceiving = False
         banner  = []
         banner += [""]
         banner += [" ___                 _ _ _  ___  _ _ "]
@@ -63,29 +67,32 @@ class ConnectivityCoordinator():
 #============================ read ============================================
 
     def startReceiving(self, mote):
-        rawFrame = []
 
         while True:
-
             byte  = mote.read(1)
-            rawFrame += [ord(byte)]
+            if ((not self.busyReceiving)
+                and self.lastRxByte==self.hdlc.HDLC_FLAG
+                and byte!=self.hdlc.HDLC_FLAG ):
+            #check start of frame
+                self.busyReceiving       = True
+                self.inputBuf            = self.hdlc.HDLC_FLAG
+                self.inputBuf           += byte
+                #TODO
 
-            if rawFrame[-3:]==[0xff]*3 and len(rawFrame)>=8:
+            elif ( self.busyReceiving and byte!=self.hdlc.HDLC_FLAG):
+            #check middle of frame
+                self.inputBuf += byte
 
-                (rxpk_len,rxpk_num,rxpk_rssi,rxpk_lqi,rxpk_crc) = struct.unpack('>BBbBB', ''.join([chr(b) for b in rawFrame[-8:-3]]))
+            elif (self.busyReceiving and byte==self.hdlc.HDLC_FLAG):
+            # end of frame
+                self.busyReceiving = False
+                self.inputBuf += byte
+                tempBuf = self.inputBuf
+                self.inputBuf = self.hdlc.dehdlcify(self.inputBuf)
 
-                print 'len={0:<3} num={1:<3} rssi={2:<4} lqi={3:<3} crc={4}'.format(
-                    rxpk_len,
-                    rxpk_num,
-                    rxpk_rssi,
-                    rxpk_lqi,
-                    rxpk_crc
-                )
+            self.lastRxByte = byte
+            #TODO print the buffer into a file
 
-                if rxpk_len>127:
-                    print "ERROR: frame too long.\a"
-
-                rawFrame = []
 
 
     def startPeriodicEpochTransmission(self):
@@ -111,5 +118,5 @@ class ConnectivityCoordinator():
 #============================ main ============================================
 
 if __name__=="__main__":
-    conn = Connectivity()
+    conn = ConnectivityCoordinator()
     conn.startWorking()

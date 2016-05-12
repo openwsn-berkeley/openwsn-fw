@@ -8,7 +8,7 @@ HDLC framing module.
 class HdlcException(Exception):
     pass
 
-class OpenHdlc(object):
+class OpenHdlc():
     
     HDLC_FLAG              = '\x7e'
     HDLC_FLAG_ESCAPED      = '\x5e'
@@ -54,6 +54,9 @@ class OpenHdlc(object):
     
     #============================ public ======================================
     
+    def __init__(self):
+         pass
+
     def hdlcify(self,inBuf):
         '''
         Build an hdlc frame.
