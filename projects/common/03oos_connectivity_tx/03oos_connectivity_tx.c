@@ -90,6 +90,10 @@ int mote_main(void) {
         while (app_vars.txpk_txNow == false) {
             board_sleep();
         }
+
+        // Prepare and transmit the frame
+        prepare_radio_tx_frame();
+        radio_tx_frame();
     }
 }
 
