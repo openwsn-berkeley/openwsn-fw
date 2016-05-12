@@ -24,36 +24,29 @@ remainder of the packet contains an incrementing bytes.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   98+LENGTH_CRC // maximum length is 100 bytes
-#define CHANNEL         26             // 26 = 2.405GHz
-#define TIMER_PERIOD    (32768)     // (32768>>1) = 500ms @ 32kHz
+#define LENGTH_PACKET   ( 98 + LENGTH_CRC)
+#define RADIO_CHANNEL   ( 26 )
+#define TIMER_PERIOD    ( 32768 )
 
 //=========================== variables =======================================
 
 typedef struct {
-    uint8_t              num_radioTimerCompare;
-    uint8_t              num_radioTimerOverflows;
-    uint8_t              num_startFrame;
-    uint8_t              num_endFrame;
-} app_dbg_t;
-
-app_dbg_t app_dbg;
-
-typedef struct {
-    uint8_t               txpk_txNow;
+    bool                  txpk_txNow;
     uint8_t               txpk_buf[LENGTH_PACKET];
     uint8_t               txpk_len;
-    //uint8_t              txpk_num;
     uint16_t              packet_counter;
     uint8_t               rollover;
     open_addr_t*          address;
-    uint8_t               waitPacketEnd;
+    bool                  waitPacketEnd;
     PORT_RADIOTIMER_WIDTH packet_period;
 } app_vars_t;
 
 app_vars_t app_vars;
 
 //=========================== prototypes ======================================
+
+void prepare_radio_tx_frame(void);
+void radio_tx_frame(void);
 
 void cb_radioTimerOverflows(void);
 void cb_startFrame(PORT_TIMER_WIDTH timestamp);
@@ -65,8 +58,6 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 \brief The program starts executing here.
 */
 int mote_main(void) {
-    uint8_t  i;
-
     // clear local variables
     memset(&app_vars,0,sizeof(app_vars_t));
 
@@ -78,95 +69,93 @@ int mote_main(void) {
     // Get EUI64
     app_vars.address = idmanager_getMyID(ADDR_64B);
 
-    // add radio callback functions
+    // Add radio callback functions
     radio_setOverflowCb(cb_radioTimerOverflows);
     radio_setStartFrameCb(cb_startFrame);
     radio_setEndFrameCb(cb_endFrame);
 
-    // prepare radio
+    // Prepare radio
     radio_rfOn();
-    radio_setFrequency(CHANNEL);
+    radio_setFrequency(RADIO_CHANNEL);
     radio_rfOff();
 
-    // random packet rate
-    app_vars.packet_period = openrandom_get16b() % TIMER_PERIOD + TIMER_PERIOD ;
+    // Random packet transmission rate
+    app_vars.packet_period = openrandom_get16b() % TIMER_PERIOD + TIMER_PERIOD;
     radiotimer_start(app_vars.packet_period);
 
-    while(1) {
+    // Forever and ever!
+    while (true) {
         // Wait for timer to elapse
-        app_vars.txpk_txNow = 0;
-        while (app_vars.txpk_txNow==0) {
+        app_vars.txpk_txNow = false;
+        while (app_vars.txpk_txNow == false) {
             board_sleep();
         }
-
-        // Mote type (0xBB = Bike, 0xCC = Motorike, 0xDD = Car)
-        app_vars.txpk_len    = sizeof(app_vars.txpk_buf);
-        app_vars.txpk_buf[0] = 0xBB;
-
-        // EUI64 as identifier
-        memcpy(&app_vars.txpk_buf[1], &app_vars.address->addr_64b[0], 8);
-
-        // Packet counter
-        app_vars.packet_counter++;
-
-		// Detecting rollover with lollipop counter
-        if (app_vars.packet_counter % 0xffffffff == 0){
-            app_vars.rollover++;
-            app_vars.packet_counter = 256;
-        }
-
-        // Fill in packet counter and rollover counter
-        app_vars.txpk_buf[9]   = (app_vars.packet_counter >> 8) % 0xFF;
-        app_vars.txpk_buf[10]  = (app_vars.packet_counter >> 0) % 0xFF;;
-        app_vars.txpk_buf[11]  = app_vars.rollover;
-
-        // Epoch set to zero as this is a bike
-        app_vars.txpk_buf[12] = 0x00;
-        app_vars.txpk_buf[13] = 0x00;
-        app_vars.txpk_buf[14] = 0x00;
-        app_vars.txpk_buf[15] = 0x00;
-
-        // Fill remaining of packet
-        for (i = 16; i < app_vars.txpk_len; i++) {
-            app_vars.txpk_buf[i] = i;
-        }
-
-        // Send packet
-        radio_rfOn();
-        radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
-        radio_txEnable();
-        radio_txNow();
-
-        // Radio is asynchronous
-        // Wait until the packet is complete to go to deep sleep
-        app_vars.waitPacketEnd = 1;
-        while (app_vars.waitPacketEnd);
-        
-        // Stop the radio once the packet is compete
-        radio_rfOff();
     }
+}
+
+void prepare_radio_tx_frame(void) {
+	uint8_t i;
+
+   // Mote type (0xAA = Bike, 0x55 = Motorike / Car)
+	app_vars.txpk_len    = sizeof(app_vars.txpk_buf);
+	app_vars.txpk_buf[0] = 0xAA;
+
+	// EUI64 as identifier
+	memcpy(&app_vars.txpk_buf[1], &app_vars.address->addr_64b[0], 8);
+
+	// Packet counter
+	app_vars.packet_counter++;
+
+	// Detecting rollover with lollipop counter
+	if (app_vars.packet_counter % 0xFFFFFFFF == 0){
+		app_vars.rollover++;
+		app_vars.packet_counter = 256;
+	}
+
+	// Fill in packet counter and rollover counter
+	app_vars.txpk_buf[9]   = (app_vars.packet_counter >> 8) % 0xFF;
+	app_vars.txpk_buf[10]  = (app_vars.packet_counter >> 0) % 0xFF;;
+	app_vars.txpk_buf[11]  = app_vars.rollover;
+
+	// Epoch set to zero as this is a bike
+	app_vars.txpk_buf[12] = 0x00;
+	app_vars.txpk_buf[13] = 0x00;
+	app_vars.txpk_buf[14] = 0x00;
+	app_vars.txpk_buf[15] = 0x00;
+
+	// Fill remaining of packet
+	for (i = 16; i < app_vars.txpk_len; i++) {
+		app_vars.txpk_buf[i] = i;
+	}
+}
+
+void radio_tx_frame(void) {
+	// Send packet
+	radio_rfOn();
+	radio_loadPacket(app_vars.txpk_buf,app_vars.txpk_len);
+	radio_txEnable();
+	radio_txNow();
+
+	// Radio is asynchronous
+	// Wait until the packet is complete to go to deep sleep
+	app_vars.waitPacketEnd = true;
+	while (app_vars.waitPacketEnd == true);
+
+	// Stop the radio once the packet is compete
+	radio_rfOff();
 }
 
 //=========================== callbacks =======================================
 
 void cb_radioTimerOverflows(void) {
-    // update debug vals
-    app_dbg.num_radioTimerOverflows++;
-
     // ready to send next packet
-    app_vars.txpk_txNow = 1;
-
+    app_vars.txpk_txNow = true;
 }
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
-    // update debug vals
-    app_dbg.num_startFrame++;
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
-    // update debug vals
-    app_dbg.num_endFrame++;
-
-    //the radio has finished.
-    app_vars.waitPacketEnd = 0;
+    // The radio has finished
+    app_vars.waitPacketEnd = false;
 }
