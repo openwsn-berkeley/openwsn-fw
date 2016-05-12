@@ -74,7 +74,7 @@ class OpenHdlc():
         crc        = 0xffff-crc
         
         # append CRC
-        outBuf     = outBuf + chr(crc & 0xff) + chr((crc & 0xff00) >> 8)
+        outBuf     = outBuf + chr(crc & 0x00ff) + chr((crc & 0xff00) >> 8)
         
         # stuff bytes
         outBuf     = outBuf.replace(self.HDLC_ESCAPE, self.HDLC_ESCAPE+self.HDLC_ESCAPE_ESCAPED)
@@ -113,7 +113,7 @@ class OpenHdlc():
             crc    = self._crcIteration(crc,b)
         if crc!=self.HDLC_CRCGOOD:
            raise HdlcException('wrong CRC')
-        
+
         # remove CRC
         outBuf     = outBuf[:-2] # remove CRC
 

@@ -286,8 +286,6 @@ void radio_tx_frame(void) {
 //===== radiotimer
 
 void cb_radioTimerOverflows(void) {
-   leds_debug_toggle();
-
    // If radio is receiving but no packet so far
    if ((app_vars.rxpk_isRx == true) && 
        (app_vars.rxpk_busy == false)) {
@@ -410,9 +408,6 @@ uint16_t create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length) {
    // Iterate over all data to create the HDLC frame
    while (length > 0) {
       byte = data[i++];
-      
-      // Iterate the CRC
-      crc = crcIteration(crc, byte);
 
       // Add byte to buffer
       if (byte == HDLC_FLAG || byte == HDLC_ESCAPE) {
@@ -420,6 +415,9 @@ uint16_t create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length) {
          byte = byte ^ HDLC_ESCAPE_MASK;
          counter++;
       }
+
+      // Iterate the CRC
+      crc = crcIteration(crc, byte);
    
       // Increment buffer pointer
       buffer[j++] = byte;
@@ -431,8 +429,8 @@ uint16_t create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length) {
    crc = ~crc;
    
    // Write the CRC value
-   buffer[j++] = (crc >> 8) & 0xFF;
    buffer[j++] = (crc >> 0) & 0xFF;
+   buffer[j++] = (crc >> 8) & 0xFF;
    
    // Write the closing HDLC flag
    buffer[j++] = HDLC_FLAG;
@@ -442,34 +440,43 @@ uint16_t create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length) {
 }  
 
 bool append_hdlc_frame(uint8_t byte) {
+   bool frameStatus = false;
+
    // Start of HDLC frame
-   if (app_vars.uart_rxReceiving == false  && app_vars.uart_rxLastByte == HDLC_FLAG && byte != HDLC_FLAG) {
+   if ((app_vars.uart_rxReceiving == false) &&
+       (app_vars.uart_rxLastByte == HDLC_FLAG) && 
+       (byte != HDLC_FLAG)) {
       // I'm now receiving
       app_vars.uart_rxReceiving = true;
       
       // Reset the input buffer index
       app_vars.uart_rxCounter = 0;
 
-      // initialize the value of the CRC
+      // Unitialize the value of the CRC
       app_vars.uart_rxCrc = HDLC_CRCINIT;
       
-      // add the byte just received
+      // Add the byte just received
       process_hdlc_byte(byte);
    }
    
    // Middle of HDLC frame, append received byte
-   else if (app_vars.uart_rxReceiving == true && byte != HDLC_FLAG) {
+   else if ((app_vars.uart_rxReceiving == true) &&
+            (byte != HDLC_FLAG)) {
+      // Add the byte just received
       process_hdlc_byte(byte);
    }
    
    // End of HDLC frame, process it
-   else if (app_vars.uart_rxReceiving == true && byte == HDLC_FLAG) {
+   else if ((app_vars.uart_rxReceiving == true) &&
+            (byte == HDLC_FLAG)) {
          // Verify the validity of the HDLC frame using CRC
          if (app_vars.uart_rxCrc == HDLC_CRCGOOD) {
+            // We have received a frame, process it!
+            frameStatus = true;
             // Remove the CRC from the input buffer
             app_vars.uart_rxCounter -= 2;
          } else {
-            // Drop the incoming framee
+            // Drop the incoming frame
             app_vars.uart_rxCounter = 0;
          }
          
@@ -480,7 +487,7 @@ bool append_hdlc_frame(uint8_t byte) {
    // Remember the last received byte
    app_vars.uart_rxLastByte = byte;
 
-   return app_vars.uart_rxReceiving;
+   return frameStatus;
 }
 
 void process_hdlc_byte(uint8_t byte) {
@@ -504,7 +511,7 @@ void process_hdlc_byte(uint8_t byte) {
 void process_hdlc_frame(void) {
    // We try to receive a timestamp, 
    // which should be 5 bytes and start with 0xEE
-   if ((app_vars.uart_rxCounter == 5) &&
+   if ((app_vars.uart_rxCounter == 5) && 
        (app_vars.uart_rxFrame[0] == 0xEE)) {
       // Update the timestamp value
       app_vars.timestamp_0 = app_vars.uart_rxFrame[1];

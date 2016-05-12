@@ -46,18 +46,14 @@ class ConnectivityCoordinator():
 
         #============================ configuration and connection ===================================
 
-        self.mote_connect(serialport="/dev/ttyUSB1", baudrate='115200')
+        self.mote_connect(serialport="/dev/ttyUSB0", baudrate='115200')
 
         self.startPeriodicEpochTransmission()
         self.startReceiving()
 
-    def mote_connect(self, motename=None , serialport= None, baudrate='115200'):
+    def mote_connect(self, serialport = None, baudrate = '115200'):
         try:
-            if (motename):
-                self.mote = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-                self.mote.connect((motename,20000))
-            else:
-                self.mote = serial.Serial(serialport, baudrate)
+            self.mote = serial.Serial(serialport, baudrate)
 
         except Exception as err:
             print "{0}".format(err)
@@ -67,23 +63,26 @@ class ConnectivityCoordinator():
 #============================ read ============================================
 
     def startReceiving(self):
-
         while True:
+            # read byte from serial
             byte  = self.mote.read(1)
-            if ((not self.busyReceiving)
-                and self.lastRxByte==self.hdlc.HDLC_FLAG
-                and byte!=self.hdlc.HDLC_FLAG ):
-            #check start of frame
-                self.busyReceiving       = True
-                self.inputBuf            = self.hdlc.HDLC_FLAG
-                self.inputBuf           += byte
 
-            elif ( self.busyReceiving and byte!=self.hdlc.HDLC_FLAG):
-            #check middle of frame
+            # Check start of frame
+            if ((not self.busyReceiving)and
+                (self.lastRxByte == self.hdlc.HDLC_FLAG) and
+                (byte != self.hdlc.HDLC_FLAG)):
+            
+                self.busyReceiving = True
+                self.inputBuf      = self.hdlc.HDLC_FLAG
+                self.inputBuf     += byte
+
+            # Check middle of frame
+            elif (self.busyReceiving and byte != self.hdlc.HDLC_FLAG):
                 self.inputBuf += byte
 
-            elif (self.busyReceiving and byte==self.hdlc.HDLC_FLAG):
-            # end of frame
+            # Check end of frame
+            elif ((self.busyReceiving) and
+                  (byte == self.hdlc.HDLC_FLAG)):
                 self.busyReceiving = False
                 self.inputBuf += byte
                 tempBuf = self.inputBuf
@@ -111,12 +110,16 @@ class ConnectivityCoordinator():
         Timer(1, self.writeEpoch, ()).start()
 
     def writeEpoch(self):
-
         time_read = calendar.timegm(time.gmtime())
-        print time_read
+        
+        data = [0xEE] + [(time_read >> (8 * i)) & 0xFF for i in range(3,-1,-1)]
+        frame = ''.join([chr(b) for b in data])
+        
+
+        output = self.hdlc.hdlcify(frame)
 
         #write it unsigned int *4bytes* big endian >
-        self.mote.write(struct.pack('>I', time_read));
+        self.mote.write(output);
 
         #self.s.enter(10, 1, self.writeEpoch, ())
         Timer(1, self.writeEpoch, ()).start()
