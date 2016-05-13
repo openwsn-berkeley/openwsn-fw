@@ -88,6 +88,10 @@ void board_init(void) {
    radio_init();
    i2c_init();
    sensors_init();
+
+   SysCtrlPeripheralReset(SYS_CTRL_PERIPH_AES);
+   SysCtrlPeripheralEnable(SYS_CTRL_PERIPH_AES);
+
 }
 
 /**

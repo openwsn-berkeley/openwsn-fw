@@ -20,6 +20,7 @@ remainder of the packet contains an incrementing bytes.
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
+#include "aes.h"
 #include "uart.h"
 #include "openrandom.h"
 #include "leds.h"
@@ -33,6 +34,7 @@ remainder of the packet contains an incrementing bytes.
 #define RADIO_CHANNEL        ( 26 )
 #define LENGTH_SERIAL_FRAME  ( 64 )
 #define TIMER_PERIOD         ( 32768 )
+#define DEFAULT_KEY_AREA KEY_AREA_0
 
 //=========================== variables =======================================
 
@@ -42,6 +44,7 @@ typedef struct {
    volatile bool         rxpk_busy;
    volatile bool         rxpk_done;
             uint8_t      rxpk_buf[LENGTH_PACKET];
+            uint8_t      rxpk_buf_aes[LENGTH_PACKET];
             uint8_t      rxpk_len;
             uint8_t      rxpk_num;
             int8_t       rxpk_rssi;
@@ -53,6 +56,7 @@ typedef struct {
    volatile bool         txpk_busy;
    volatile bool         txpk_done;
             uint8_t      txpk_buf[LENGTH_PACKET];
+            uint8_t      txpk_buf_aes[LENGTH_PACKET];
             uint8_t      txpk_len;
    
    // packet counter
@@ -84,9 +88,16 @@ typedef struct {
             uint8_t      uart_rxLastByte;
             uint8_t      uart_rxCounter;
    volatile uint8_t      uart_rxDone;
+            uint8_t      key[16]; //security key
+            uint8_t      key_location;
+
 } app_vars_t;
 
 app_vars_t app_vars;
+
+
+uint8_t load_crypto_key(uint8_t key[16], uint8_t* /* out */ key_location);
+uint8_t aes_process(uint8_t* buffer, uint8_t encrypt);
 
 //=========================== prototypes ======================================
 
@@ -116,6 +127,24 @@ void cb_uartRxCb(void);
 int mote_main(void) {
    // Clear local variables
    memset(&app_vars, 0, sizeof(app_vars_t));
+   memset(&app_vars.key[0], 0, 16);
+   // Love_Biking_2016 = 4c 6f 76 65 5f 42 69 6b 69 6e 67 5f 32 30 31 36
+   app_vars.key[0] = 0x4c;
+   app_vars.key[1] = 0x6f;
+   app_vars.key[2] = 0x76;
+   app_vars.key[3] = 0x65;
+   app_vars.key[4] = 0x5f;
+   app_vars.key[5] = 0x42;
+   app_vars.key[6] = 0x69;
+   app_vars.key[7] = 0x6b;
+   app_vars.key[8] = 0x69;
+   app_vars.key[9] = 0x6e;
+   app_vars.key[10] = 0x67;
+   app_vars.key[11] = 0x5f;
+   app_vars.key[12] = 0x32;
+   app_vars.key[13] = 030;
+   app_vars.key[14] = 0x31;
+   app_vars.key[15] = 0x36;
 
    // Init the time stamp to a known value
    app_vars.timestamp_0 = 0xBA;
@@ -148,6 +177,9 @@ int mote_main(void) {
    radio_rfOn();
    radio_setFrequency(RADIO_CHANNEL);
    radio_rfOff();
+
+
+   load_crypto_key(app_vars.key,&app_vars.key_location);
 
    // Random packet transmission rate
    app_vars.packet_period = openrandom_get16b() % TIMER_PERIOD + TIMER_PERIOD;
@@ -261,11 +293,18 @@ void prepare_radio_tx_frame(void) {
 }
 
 void radio_tx_frame(void) {
+
    // Enable radio
    radio_rfOn();
 
+   //copy the buffer
+   memcpy(app_vars.txpk_buf_aes, app_vars.txpk_buf, sizeof(app_vars.txpk_buf));
+
+   //encrypt the packet
+   aes_process(app_vars.txpk_buf_aes,1);
+
    // Load packet to radio
-   radio_loadPacket(app_vars.txpk_buf, app_vars.txpk_len);
+   radio_loadPacket(app_vars.txpk_buf_aes, app_vars.txpk_len);
 
    // Transmit radio frame
    radio_txEnable();
@@ -327,13 +366,17 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
        (app_vars.rxpk_busy == true)) {
       // Get packet out from radio
       radio_getReceivedFrame(
-         app_vars.rxpk_buf,
+         app_vars.rxpk_buf_aes,
          &app_vars.rxpk_len,
-         sizeof(app_vars.rxpk_buf),
+         sizeof(app_vars.rxpk_buf_aes),
          &app_vars.rxpk_rssi,
          &app_vars.rxpk_lqi,
          &app_vars.rxpk_crc
       );
+
+      //dencrypt the packet
+      aes_process(app_vars.rxpk_buf_aes,0);
+      memcpy(app_vars.rxpk_buf,app_vars.rxpk_buf_aes, sizeof(app_vars.rxpk_buf_aes));
 
       // Indicate we just received a packet
       app_vars.rxpk_isRx = false;
@@ -541,3 +584,37 @@ void process_hdlc_frame(void) {
       app_vars.timestamp_3 = app_vars.uart_rxFrame[4];
    }
 }
+
+
+
+
+//============ AES private =============
+
+
+/**
+\brief On success, returns by reference the location in key RAM where the
+   new/existing key is stored.
+*/
+uint8_t load_crypto_key(uint8_t key[16], uint8_t* /* out */ key_location) {
+    // Load the key in key RAM
+    if(AESLoadKey(key, DEFAULT_KEY_AREA) != AES_SUCCESS) {
+        return E_FAIL;
+    }
+    *key_location = DEFAULT_KEY_AREA;
+    return E_SUCCESS;
+}
+
+uint8_t aes_process(uint8_t* buffer, uint8_t encrypt) {
+    if(AESECBStart(buffer, buffer, DEFAULT_KEY_AREA, encrypt, 0) == AES_SUCCESS) {
+        do {
+            ASM_NOP;
+        } while(AESECBCheckResult() == 0);
+
+        if(AESECBGetResult() == AES_SUCCESS) {
+            return E_SUCCESS;
+        }
+    }
+    return E_FAIL;
+}
+
+
