@@ -128,7 +128,7 @@ class ConnectivityCoordinator():
                         #TODO print the buffer into a file
                         print hex(type),hex(addr0),hex(addr1),hex(addr2),hex(addr3),hex(addr4),hex(addr5),hex(addr6),hex(addr7),seqNum,wraps,tsrecieved,rssi,lqi
                         self.f.write("{0},{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8},{9},{10},{11},{12},{13}\n".format(hex(type),hex(addr0),hex(addr1),hex(addr2),hex(addr3),hex(addr4),hex(addr5),hex(addr6),hex(addr7),seqNum,wraps,tsrecieved,rssi,lqi))
-
+                        self.f.flush()
                     else:
                         print "wrong length {0}".format(len(self.inputBuf))
 
