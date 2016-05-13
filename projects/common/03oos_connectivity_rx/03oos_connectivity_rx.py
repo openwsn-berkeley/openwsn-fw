@@ -74,7 +74,7 @@ class ConnectivityCoordinator():
 
         #============================ configuration and connection ===================================
 
-        self.mote_connect(serialport="/dev/ttyUSB0", baudrate='115200')
+        self.mote_connect(serialport=self.serialPort, baudrate='115200')
 
         self.startPeriodicEpochTransmission()
         self.startReceiving()
