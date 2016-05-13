@@ -27,7 +27,7 @@ remainder of the packet contains an incrementing bytes.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   ( 98 + LENGTH_CRC)
+#define LENGTH_PACKET   ( 94 + LENGTH_CRC)
 #define RADIO_CHANNEL   ( 26 )
 #define TIMER_PERIOD    ( 32768 )
 #define DEFAULT_KEY_AREA KEY_AREA_0
@@ -61,7 +61,8 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp);
 void cb_endFrame(PORT_TIMER_WIDTH timestamp);
 
 uint8_t load_crypto_key(uint8_t key[16], uint8_t* /* out */ key_location);
-uint8_t aes_process(uint8_t* buffer, uint8_t encrypt);
+uint8_t aes_process_block(uint8_t* buffer, uint8_t encrypt);
+uint8_t aes_process_frame(uint8_t* bufferIn, uint8_t len, uint8_t encrypt);
 
 
 //=========================== main ============================================
@@ -161,7 +162,7 @@ void prepare_radio_tx_frame(void) {
 
     // Fill remaining of packet
     for (i = 16; i < app_vars.txpk_len; i++) {
-        app_vars.txpk_buf[i] = i;
+        app_vars.txpk_buf[i] = (openrandom_get16b()>>8)^app_vars.txpk_buf[i%16] * i;
     }
 }
 
@@ -173,7 +174,7 @@ void radio_tx_frame(void) {
     memcpy(app_vars.txpk_buf_aes, app_vars.txpk_buf, sizeof(app_vars.txpk_buf));
 
     //encrypt the packet
-    aes_process(app_vars.txpk_buf_aes,1);
+    aes_process_frame(app_vars.txpk_buf_aes,LENGTH_PACKET,1);
     // Load packet to radio
     radio_loadPacket(app_vars.txpk_buf_aes, app_vars.txpk_len);
 
@@ -222,7 +223,7 @@ uint8_t load_crypto_key(uint8_t key[16], uint8_t* /* out */ key_location) {
     return E_SUCCESS;
 }
 
-uint8_t aes_process(uint8_t* buffer, uint8_t encrypt) {
+uint8_t aes_process_block(uint8_t* buffer, uint8_t encrypt) {
     if(AESECBStart(buffer, buffer, DEFAULT_KEY_AREA, encrypt, 0) == AES_SUCCESS) {
         do {
             ASM_NOP;
@@ -234,3 +235,24 @@ uint8_t aes_process(uint8_t* buffer, uint8_t encrypt) {
     }
     return E_FAIL;
 }
+
+
+
+uint8_t aes_process_frame(uint8_t* bufferIn,uint8_t len, uint8_t encrypt) {
+
+    uint8_t n;
+    uint8_t nb;
+    uint8_t status;
+    status=E_FAIL;
+
+    //number blocks
+    nb = len >> 4;
+    //for each block encrypt or decrypt
+    for (n = 0; n < nb; n++) {
+       status = aes_process_block(&bufferIn[16 * n],encrypt);
+       if (status==E_FAIL) break;
+    }
+
+    return status;
+}
+
