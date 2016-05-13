@@ -175,7 +175,6 @@ void scheduler_push_task(task_cbt cb, task_prio_t prio) {
  */
 static void vAppTask(void* pvParameters) {
 	taskList_item_t* pThisTask = NULL;
-	xSemaphoreTake(rtos_sched_v.xAppSem, portMAX_DELAY); //take it for the first time so it blocks right after.
 	while (1) {
 		xSemaphoreTake(rtos_sched_v.xAppSem, portMAX_DELAY);
 		debugpins_fsm_toggle();
@@ -189,7 +188,6 @@ static void vAppTask(void* pvParameters) {
  */
 static void vSendDoneTask(void* pvParameters) {
 	taskList_item_t* pThisTask = NULL;
-	xSemaphoreTake(rtos_sched_v.xSendDoneSem, portMAX_DELAY); //take it for the first time so it blocks right after.
 	while (1) {
 		xSemaphoreTake(rtos_sched_v.xSendDoneSem, portMAX_DELAY);
 		debugpins_radio_toggle();
@@ -204,7 +202,6 @@ static void vSendDoneTask(void* pvParameters) {
  */
 static void vRxTask(void* pvParameters) {
 	taskList_item_t* pThisTask = NULL;
-	xSemaphoreTake(rtos_sched_v.xRxSem, portMAX_DELAY); //take it for the first time so it blocks right after.
 	while (1) {
 		xSemaphoreTake(rtos_sched_v.xRxSem, portMAX_DELAY);
 
