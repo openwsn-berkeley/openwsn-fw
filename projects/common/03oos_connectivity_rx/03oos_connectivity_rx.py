@@ -21,7 +21,7 @@ class ConnectivityCoordinator():
     def __init__(self,argv):
 
         self.serialPort ="/dev/ttyUSB0"
-        self.outputfile = 'connecitivity'
+        self.outputfile = 'connectivity'
 
         self.parseParams(argv)
 
@@ -50,9 +50,10 @@ class ConnectivityCoordinator():
 
     def parseParams(self,args):
          try:
-             opts, args = getopt.getopt(args,"hp:o:",["serial=","ofile="])
-         except getopt.GetoptError:
-             print '03oos_connectivity_rx.py -p <serial_port> -f <outputfile>'
+             opts, args = getopt.getopt(args,"p:f:",["serial=","ofile="])
+         except getopt.GetoptError as err:
+             print err
+             print 'Wrong params. Use: 03oos_connectivity_rx.py -p <serial_port> -f <outputfile>'
              sys.exit(2)
          for opt, arg in opts:
              if opt == '-h':
@@ -60,7 +61,7 @@ class ConnectivityCoordinator():
                 sys.exit()
              elif opt in ("-p", "--serial"):
                 self.serialPort = arg
-             elif opt in ("-o", "--ofile"):
+             elif opt in ("-f", "--ofile"):
                 self.outputfile = arg
          print 'Serial port is "', self.serialPort
          print 'Output file is "', self.outputfile
