@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import getopt
 import struct
 import socket
 import sched, time
@@ -17,13 +18,23 @@ except ImportError:
 
 class ConnectivityCoordinator():
 
-    def __init__(self):
+    def __init__(self,argv):
+
+        self.serialPort ="/dev/ttyUSB0"
+        self.outputfile = 'connecitivity'
+
+        self.parseParams(argv)
+
         self.hdlc = h.OpenHdlc()
         self.lastRxByte  = self.hdlc.HDLC_FLAG
         self.inputBuf    = ''
         self.busyReceiving = False
 
-        self.f = open('connecitivity'+str(calendar.timegm(time.gmtime())), 'w')
+
+        port = self.serialPort.split("/")
+        print port[2]
+        print "****************"
+        self.f = open(self.outputfile+str(calendar.timegm(time.gmtime()))+port[2]+".csv", 'w')
 
         banner  = []
         banner += [""]
@@ -37,6 +48,22 @@ class ConnectivityCoordinator():
         print 'Creating Connectivity Coordinator\n'
         print banner
 
+    def parseParams(self,args):
+         try:
+             opts, args = getopt.getopt(args,"hp:o:",["serial=","ofile="])
+         except getopt.GetoptError:
+             print '03oos_connectivity_rx.py -p <serial_port> -f <outputfile>'
+             sys.exit(2)
+         for opt, arg in opts:
+             if opt == '-h':
+                print '03oos_connectivity_rx.py -p <serial_port> -f <outputfile>'
+                sys.exit()
+             elif opt in ("-p", "--serial"):
+                self.serialPort = arg
+             elif opt in ("-o", "--ofile"):
+                self.outputfile = arg
+         print 'Serial port is "', self.serialPort
+         print 'Output file is "', self.outputfile
 
     def startWorking(self):
         self.mote = None
@@ -134,5 +161,5 @@ class ConnectivityCoordinator():
 #============================ main ============================================
 
 if __name__=="__main__":
-    conn = ConnectivityCoordinator()
+    conn = ConnectivityCoordinator(sys.argv[1:])
     conn.startWorking()
