@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import getopt
 import struct
 import socket
 import sched, time
@@ -17,13 +18,23 @@ except ImportError:
 
 class ConnectivityCoordinator():
 
-    def __init__(self):
+    def __init__(self,argv):
+
+        self.serialPort ="/dev/ttyUSB0"
+        self.outputfile = 'connectivity'
+
+        self.parseParams(argv)
+
         self.hdlc = h.OpenHdlc()
         self.lastRxByte  = self.hdlc.HDLC_FLAG
         self.inputBuf    = ''
         self.busyReceiving = False
 
-        self.f = open('connecitivity'+str(calendar.timegm(time.gmtime())), 'w')
+
+        port = self.serialPort.split("/")
+        print port[2]
+        print "****************"
+        self.f = open(self.outputfile+str(calendar.timegm(time.gmtime()))+port[2]+".csv", 'w')
 
         banner  = []
         banner += [""]
@@ -37,6 +48,23 @@ class ConnectivityCoordinator():
         print 'Creating Connectivity Coordinator\n'
         print banner
 
+    def parseParams(self,args):
+         try:
+             opts, args = getopt.getopt(args,"p:f:",["serial=","ofile="])
+         except getopt.GetoptError as err:
+             print err
+             print 'Wrong params. Use: 03oos_connectivity_rx.py -p <serial_port> -f <outputfile>'
+             sys.exit(2)
+         for opt, arg in opts:
+             if opt == '-h':
+                print '03oos_connectivity_rx.py -p <serial_port> -f <outputfile>'
+                sys.exit()
+             elif opt in ("-p", "--serial"):
+                self.serialPort = arg
+             elif opt in ("-f", "--ofile"):
+                self.outputfile = arg
+         print 'Serial port is "', self.serialPort
+         print 'Output file is "', self.outputfile
 
     def startWorking(self):
         self.mote = None
@@ -94,10 +122,12 @@ class ConnectivityCoordinator():
                     print err
                 else:
                     if (len(self.inputBuf) == 18):
-                        (type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi) = struct.unpack('>BBBBBBBBBHBIBB',self.inputBuf)
+                        #0xaa,0x0,0x12,0x4b,0x0,0x6,0xd:0x98,0x13,0x2,0xf9,0x0,0x0,0x0,0x0,0x0,0xe6,0x6c,0x65,0xec,0x7e
+
+                        (type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi) = struct.unpack('>BBBBBBBBBHBIbB',self.inputBuf)
                         #TODO print the buffer into a file
-                        print type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi
-                        self.f.write("{0},{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8},{9},{10},{11},{12},{13}\n".format(type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi))
+                        print hex(type),hex(addr0),hex(addr1),hex(addr2),hex(addr3),hex(addr4),hex(addr5),hex(addr6),hex(addr7),seqNum,wraps,tsrecieved,rssi,lqi
+                        self.f.write("{0},{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8},{9},{10},{11},{12},{13}\n".format(hex(type),hex(addr0),hex(addr1),hex(addr2),hex(addr3),hex(addr4),hex(addr5),hex(addr6),hex(addr7),seqNum,wraps,tsrecieved,rssi,lqi))
 
                     else:
                         print "wrong length {0}".format(len(self.inputBuf))
@@ -133,5 +163,5 @@ class ConnectivityCoordinator():
 #============================ main ============================================
 
 if __name__=="__main__":
-    conn = ConnectivityCoordinator()
+    conn = ConnectivityCoordinator(sys.argv[1:])
     conn.startWorking()
