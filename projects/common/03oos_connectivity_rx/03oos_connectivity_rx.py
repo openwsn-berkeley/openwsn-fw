@@ -93,10 +93,12 @@ class ConnectivityCoordinator():
                     print err
                 else:
                     if (len(self.inputBuf) == 18):
-                        (type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi) = struct.unpack('>BBBBBBBBBHBIBB',self.inputBuf)
+                        #0xaa,0x0,0x12,0x4b,0x0,0x6,0xd:0x98,0x13,0x2,0xf9,0x0,0x0,0x0,0x0,0x0,0xe6,0x6c,0x65,0xec,0x7e
+
+                        (type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi) = struct.unpack('>BBBBBBBBBHBIbB',self.inputBuf)
                         #TODO print the buffer into a file
-                        print type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi
-                        self.f.write("{0},{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8},{9},{10},{11},{12},{13}\n".format(type,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7,seqNum,wraps,tsrecieved,rssi,lqi))
+                        print hex(type),hex(addr0),hex(addr1),hex(addr2),hex(addr3),hex(addr4),hex(addr5),hex(addr6),hex(addr7),seqNum,wraps,tsrecieved,rssi,lqi
+                        self.f.write("{0},{1}:{2}:{3}:{4}:{5}:{6}:{7}:{8},{9},{10},{11},{12},{13}\n".format(hex(type),hex(addr0),hex(addr1),hex(addr2),hex(addr3),hex(addr4),hex(addr5),hex(addr6),hex(addr7),seqNum,wraps,tsrecieved,rssi,lqi))
 
                     else:
                         print "wrong length {0}".format(len(self.inputBuf))
