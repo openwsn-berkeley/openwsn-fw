@@ -96,6 +96,8 @@ void prepare_radio_tx_frame(void);
 void radio_tx_frame(void);
 
 uint16_t create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length);
+uint16_t append_hdlc_byte(uint8_t* buffer, uint8_t byte, uint16_t* crc);
+
 bool append_hdlc_frame(uint8_t byte);
 void process_hdlc_byte(uint8_t byte);
 void process_hdlc_frame(void);
@@ -304,8 +306,6 @@ void cb_radioTimerOverflows(void) {
 //===== radio
 
 void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
-   leds_error_on();
-
    // Radio is receiving
    if (app_vars.rxpk_isRx == true) {
       // Now, the radio is busy receiving a packet,
@@ -322,8 +322,6 @@ void cb_startFrame(PORT_TIMER_WIDTH timestamp) {
 }
 
 void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
-   leds_error_off();
-
    // Radio is receiving and busy
    if ((app_vars.rxpk_isRx == true) && 
        (app_vars.rxpk_busy == true)) {
@@ -397,6 +395,7 @@ uint16_t create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length) {
    uint16_t crc, byte;
    uint16_t i = 0;
    uint16_t j = 0;
+   uint16_t r;
 
    // Initialize the value of the CRC
    crc = HDLC_CRCINIT;
@@ -409,35 +408,57 @@ uint16_t create_hdlc_frame(uint8_t* buffer, uint8_t* data, uint16_t length) {
    while (length > 0) {
       byte = data[i++];
 
-      // Add byte to buffer
-      if (byte == HDLC_FLAG || byte == HDLC_ESCAPE) {
-         buffer[j++] = HDLC_ESCAPE;
-         byte = byte ^ HDLC_ESCAPE_MASK;
-         counter++;
-      }
+      r = append_hdlc_byte(&buffer[j], byte, &crc);
+      counter += r;
+      j += r;
 
-      // Iterate the CRC
-      crc = crcIteration(crc, byte);
-   
-      // Increment buffer pointer
-      buffer[j++] = byte;
       length--;
-      counter++;
    }
     
    // Finalize the calculation of the CRC
    crc = ~crc;
    
    // Write the CRC value
-   buffer[j++] = (crc >> 0) & 0xFF;
-   buffer[j++] = (crc >> 8) & 0xFF;
+   byte = (crc >> 0) & 0xFF;
+   r = append_hdlc_byte(&buffer[j], byte, NULL);
+   counter += r;
+   j += r;
+
+   byte = (crc >> 8) & 0xFF;
+   r = append_hdlc_byte(&buffer[j], byte, NULL);
+   counter += r;
+   j += r;
    
    // Write the closing HDLC flag
    buffer[j++] = HDLC_FLAG;
-   counter += 3;
+   counter++;
 
    return counter;
 }  
+
+uint16_t append_hdlc_byte(uint8_t* buffer, uint8_t byte, uint16_t* crc) {
+   uint16_t counter = 0;
+
+   // Iterate the CRC
+   if (crc != NULL) {
+      uint16_t crc_ = *crc;
+      crc_ = crcIteration(crc_, byte);
+      *crc = crc_;
+   }
+
+   // Add HDLC escape character to buffer
+   if (byte == HDLC_FLAG || byte == HDLC_ESCAPE) {
+      *buffer++ = HDLC_ESCAPE;
+      byte = byte ^ HDLC_ESCAPE_MASK;
+      counter++;
+   }
+
+   // Add byte to buffer
+   *buffer++ = byte;
+   counter++;
+
+   return counter;
+}
 
 bool append_hdlc_frame(uint8_t byte) {
    bool frameStatus = false;

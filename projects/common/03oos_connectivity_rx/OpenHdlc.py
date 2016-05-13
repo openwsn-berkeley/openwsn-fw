@@ -91,36 +91,36 @@ class OpenHdlc():
         
         :returns: the extracted frame, or -1 if wrong checksum
         '''
-        assert inBuf[ 0]==self.HDLC_FLAG
-        assert inBuf[-1]==self.HDLC_FLAG
+        assert inBuf[ 0] == self.HDLC_FLAG
+        assert inBuf[-1] == self.HDLC_FLAG
         
         # make copy of input
-        outBuf     = inBuf[:]
+        outBuf = inBuf[:]
 
         # remove flags
-        outBuf     = outBuf[1:-1]
+        outBuf = outBuf[1:-1]
 
         # unstuff
-        outBuf     = outBuf.replace(self.HDLC_ESCAPE+self.HDLC_FLAG_ESCAPED,   self.HDLC_FLAG)
-        outBuf     = outBuf.replace(self.HDLC_ESCAPE+self.HDLC_ESCAPE_ESCAPED, self.HDLC_ESCAPE)
+        outBuf = outBuf.replace(self.HDLC_ESCAPE + self.HDLC_FLAG_ESCAPED,   self.HDLC_FLAG)
+        outBuf = outBuf.replace(self.HDLC_ESCAPE + self.HDLC_ESCAPE_ESCAPED, self.HDLC_ESCAPE)
 
-        if len(outBuf)<2:
+        if len(outBuf) < 2:
             raise HdlcException('packet too short')
         
         # check CRC
-        crc        = self.HDLC_CRCINIT
+        crc = self.HDLC_CRCINIT
         for b in outBuf:
-            crc    = self._crcIteration(crc,b)
-        if crc!=self.HDLC_CRCGOOD:
-           raise HdlcException('wrong CRC')
+            crc = self._crcIteration(crc,b)
+        if crc != self.HDLC_CRCGOOD:
+            raise HdlcException('wrong CRC')
 
         # remove CRC
-        outBuf     = outBuf[:-2] # remove CRC
+        outBuf = outBuf[:-2]
 
         return outBuf
 
     #============================ private =====================================
     
     def _crcIteration(self,crc,b):
-        return (crc>>8)^self.FCS16TAB[((crc^(ord(b))) & 0xff)]
+        return (crc >> 8) ^ self.FCS16TAB[((crc^(ord(b))) & 0xff)]
     

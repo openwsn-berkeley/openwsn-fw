@@ -68,7 +68,7 @@ class ConnectivityCoordinator():
             byte  = self.mote.read(1)
 
             # Check start of frame
-            if ((not self.busyReceiving)and
+            if ((not self.busyReceiving) and
                 (self.lastRxByte == self.hdlc.HDLC_FLAG) and
                 (byte != self.hdlc.HDLC_FLAG)):
             
@@ -77,7 +77,8 @@ class ConnectivityCoordinator():
                 self.inputBuf     += byte
 
             # Check middle of frame
-            elif (self.busyReceiving and byte != self.hdlc.HDLC_FLAG):
+            elif ((self.busyReceiving) and 
+                  (byte != self.hdlc.HDLC_FLAG)):
                 self.inputBuf += byte
 
             # Check end of frame
