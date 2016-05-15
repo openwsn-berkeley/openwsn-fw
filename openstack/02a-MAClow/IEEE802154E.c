@@ -132,8 +132,7 @@ void ieee154e_init() {
    }
    
    resetStats();
-   ieee154e_stats.numDeSync                  = 0;
-   ieee154e_vars.numOfSkipSlots              = 0;   
+   ieee154e_stats.numDeSync                 = 0;
    
    // switch radio on
    radio_rfOn();
@@ -833,7 +832,9 @@ port_INLINE void activity_ti1ORri1() {
    sync_IE_ht  sync_IE;
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
-
+   uint16_t    numOfSleepSlots;     
+   frameLength_t frameLength;
+   
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
    
@@ -841,31 +842,31 @@ port_INLINE void activity_ti1ORri1() {
    debugpins_slot_toggle();
    if (ieee154e_vars.slotOffset==0) {
       debugpins_frame_toggle();
-   }
    
-   // desynchronize if needed
-   if (idmanager_getIsDAGroot()==FALSE) {
-	 if(ieee154e_vars.deSyncTimeout > ieee154e_vars.numOfSkipSlots){
-	   ieee154e_vars.deSyncTimeout -= ieee154e_vars.numOfSkipSlots;
-	 }
-	 else{
-         // Reset skip slots
-         ieee154e_vars.numOfSkipSlots = 0;
+      // desynchronize if needed
+      if (idmanager_getIsDAGroot()==FALSE) {
+         frameLength = schedule_getFrameLength();
          
-         // declare myself desynchronized
-         changeIsSync(FALSE);
-        
-         // log the error
-         openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
-                               (errorparameter_t)ieee154e_vars.slotOffset,
-                               (errorparameter_t)0);
-            
-         // update the statistics
-         ieee154e_stats.numDeSync++;
-            
-         // abort
-         endSlot();
-         return;
+         if(ieee154e_vars.deSyncTimeout > frameLength){
+            ieee154e_vars.deSyncTimeout -= frameLength;
+         }
+         else{
+           
+            // declare myself desynchronized
+            changeIsSync(FALSE);
+           
+            // log the error
+            openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
+                                  (errorparameter_t)ieee154e_vars.slotOffset,
+                                  (errorparameter_t)0);
+               
+            // update the statistics
+            ieee154e_stats.numDeSync++;
+               
+            // abort
+            endSlot();
+            return;
+         }
       }
    }
    
@@ -890,15 +891,15 @@ port_INLINE void activity_ti1ORri1() {
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
       if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
           if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-              ieee154e_vars.numOfSkipSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
+              numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
           } else {
-              ieee154e_vars.numOfSkipSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
+              numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
           }
           
-          radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSkipSlots));
+          radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
            
           //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
-          for (i=0;i<ieee154e_vars.numOfSkipSlots-1;i++){
+          for (i=0;i<numOfSleepSlots-1;i++){
              incrementAsnOffset();
           }
       }
@@ -990,15 +991,15 @@ port_INLINE void activity_ti1ORri1() {
          // skip following off slots
          if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
              if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-                 ieee154e_vars.numOfSkipSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
+                 numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
              } else {
-                 ieee154e_vars.numOfSkipSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1; 
+                 numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1; 
              }
              
-             radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSkipSlots));
+             radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
               
              //only increase ASN by numOfSleepSlots-NUMSERIALRX
-             for (i=0;i<ieee154e_vars.numOfSkipSlots-NUMSERIALRX;i++){
+             for (i=0;i<numOfSleepSlots-NUMSERIALRX;i++){
                 incrementAsnOffset();
              }
          }
@@ -2005,6 +2006,7 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
 #endif
+   
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    
@@ -2041,7 +2043,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
-   
+
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
 #ifdef ADAPTIVE_SYNC
