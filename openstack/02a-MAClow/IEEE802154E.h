@@ -221,6 +221,7 @@ typedef struct {
    slotOffset_t              slotOffset;              // current slot offset
    slotOffset_t              nextActiveSlotOffset;    // next active slot offset
    PORT_RADIOTIMER_WIDTH     deSyncTimeout;           // how many slots left before looses sync
+   PORT_RADIOTIMER_WIDTH     numOfSkipSlots;          // how many slots the mote will skip till next active slot
    bool                      isSync;                  // TRUE iff mote is synchronized to network
    OpenQueueEntry_t          localCopyForTransmission;// copy of the frame used for current TX
    // as shown on the chronogram

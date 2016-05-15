@@ -132,7 +132,8 @@ void ieee154e_init() {
    }
    
    resetStats();
-   ieee154e_stats.numDeSync                 = 0;
+   ieee154e_stats.numDeSync                  = 0;
+   ieee154e_vars.numOfSkipSlots              = 0;   
    
    // switch radio on
    radio_rfOn();
@@ -832,7 +833,6 @@ port_INLINE void activity_ti1ORri1() {
    sync_IE_ht  sync_IE;
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
-   uint16_t    numOfSleepSlots;     
 
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -845,8 +845,13 @@ port_INLINE void activity_ti1ORri1() {
    
    // desynchronize if needed
    if (idmanager_getIsDAGroot()==FALSE) {
-      ieee154e_vars.deSyncTimeout--;
-      if (ieee154e_vars.deSyncTimeout==0) {
+	 if(ieee154e_vars.deSyncTimeout > ieee154e_vars.numOfSkipSlots){
+	   ieee154e_vars.deSyncTimeout -= ieee154e_vars.numOfSkipSlots;
+	 }
+	 else{
+         // Reset skip slots
+         ieee154e_vars.numOfSkipSlots = 0;
+         
          // declare myself desynchronized
          changeIsSync(FALSE);
         
@@ -885,15 +890,15 @@ port_INLINE void activity_ti1ORri1() {
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
       if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
           if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-              numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
+              ieee154e_vars.numOfSkipSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
           } else {
-              numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
+              ieee154e_vars.numOfSkipSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
           }
           
-          radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
+          radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSkipSlots));
            
           //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
-          for (i=0;i<numOfSleepSlots-1;i++){
+          for (i=0;i<ieee154e_vars.numOfSkipSlots-1;i++){
              incrementAsnOffset();
           }
       }
@@ -985,15 +990,15 @@ port_INLINE void activity_ti1ORri1() {
          // skip following off slots
          if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
              if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-                 numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
+                 ieee154e_vars.numOfSkipSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
              } else {
-                 numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1; 
+                 ieee154e_vars.numOfSkipSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1; 
              }
              
-             radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
+             radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSkipSlots));
               
              //only increase ASN by numOfSleepSlots-NUMSERIALRX
-             for (i=0;i<numOfSleepSlots-NUMSERIALRX;i++){
+             for (i=0;i<ieee154e_vars.numOfSkipSlots-NUMSERIALRX;i++){
                 incrementAsnOffset();
              }
          }
