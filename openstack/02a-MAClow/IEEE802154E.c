@@ -826,14 +826,14 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
 //======= TX
 
 port_INLINE void activity_ti1ORri1() {
-   cellType_t  cellType;
-   open_addr_t neighbor;
-   uint8_t     i;
-   sync_IE_ht  sync_IE;
-   bool        changeToRX=FALSE;
-   bool        couldSendEB=FALSE;
-   uint16_t    numOfSleepSlots;     
-   frameLength_t frameLength;
+   cellType_t     cellType;
+   open_addr_t    neighbor;
+   uint8_t        i;
+   sync_IE_ht     sync_IE;
+   bool           changeToRX=FALSE;
+   bool           couldSendEB=FALSE;
+   uint16_t       numOfSleepSlots;     
+   frameLength_t  frameLength;
    
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -2006,7 +2006,6 @@ void synchronizePacket(PORT_RADIOTIMER_WIDTH timeReceived) {
    // indicate time correction to adaptive sync module
    adaptive_sync_indicateTimeCorrection(timeCorrection,ieee154e_vars.dataReceived->l2_nextORpreviousHop);
 #endif
-   
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
    
