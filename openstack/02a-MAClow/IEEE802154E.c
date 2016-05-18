@@ -668,7 +668,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
 #ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
       strncat(str, ":DCELLS=1", 150);
 #else
-      sprintf(str, ":DCELLS=0", 150);
+      sprintf(str, ":DCELLS=0");
 #endif
       strncat(str, ":RPLMET=", 150);
       openserial_ncat_uint32_t(str, (uint32_t)RPL_METRIC, 150);
