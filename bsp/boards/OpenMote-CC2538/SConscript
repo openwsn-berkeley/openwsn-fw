@@ -28,6 +28,12 @@ sht21 = localEnv.SConscript(
     exports     = {'env': env},
 )
 
+cc1200 = localEnv.SConscript(
+    os.path.join('#','bsp','chips','cc1200','SConscript'),
+    variant_dir = 'cc1200',
+    exports     = {'env': env},
+)
+
 source   = \
     [file for file in Glob('*.c') if file.name.find('iar')==-1] + \
     Glob('source/*.c')
@@ -38,9 +44,10 @@ localEnv.Append(
         os.path.join('#','bsp','chips','adxl346'),
         os.path.join('#','bsp','chips','max44009'),
         os.path.join('#','bsp','chips','sht21'),
+        os.path.join('#','bsp','chips','cc1200')
     ],
 )
 
-board  = localEnv.Object(source=source) + adxl346 + max44009 + sht21
+board  = localEnv.Object(source=source) + adxl346 + max44009 + sht21 + cc1200
 
 Return('board')
