@@ -101,7 +101,9 @@ void uinject_task_cb() {
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],uinject_dst_addr,16);
    
    packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
-   *((uint16_t*)&pkt->payload[0]) = uinject_vars.counter++;
+   pkt->payload[1] = (uint8_t)((uinject_vars.counter & 0xff00)>>8);
+   pkt->payload[0] = (uint8_t)(uinject_vars.counter & 0x00ff);
+   uinject_vars.counter++;
    
    packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
    ieee154e_getAsn(asnArray);
