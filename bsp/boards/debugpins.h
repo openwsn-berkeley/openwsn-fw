@@ -46,6 +46,8 @@ void debugpins_radio_toggle(void);
 void debugpins_radio_clr(void);
 void debugpins_radio_set(void);
 
+void bspDBpinToggle(uint32_t base, uint8_t ui8Pin);
+
 #ifdef OPENSIM
 void debugpins_ka_clr(void);
 void debugpins_ka_set(void);

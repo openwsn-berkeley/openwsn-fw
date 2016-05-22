@@ -679,7 +679,7 @@ void schedule_getScheduledSlots(
    i = 0;
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
-      if(i == sizeof(slotsInSchedule)/sizeof(uint16_t)) {
+      if(i == 10) {
           break;
       }
       if(type == scheduleWalker->type){
@@ -688,7 +688,6 @@ void schedule_getScheduledSlots(
       }
       scheduleWalker = scheduleWalker->next;
    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
-   
    ENABLE_INTERRUPTS();
 }
 

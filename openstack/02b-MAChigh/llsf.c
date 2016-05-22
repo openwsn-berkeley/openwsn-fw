@@ -10,6 +10,7 @@
 
 #define MAX_SCHEDULED_SLOT 10
 #define MAXTRIES 5
+//#define LLSF_DEBUG
 
 //=========================== variables =======================================
 
@@ -116,7 +117,9 @@ bool llsf_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
     
     numCandCells=0;
     if (slotsList[0] == 0xffff) { // no dedicated cell was scheduled
+#ifdef LLSF_DEBUG
         printf("LLSF: random select\n");
+#endif
         for (counter=0;counter<SCHEDULEIEMAXNUMCELLS;counter++){
             i  = openrandom_get16b() % (slotframe_length \
                                        -SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS \
@@ -145,7 +148,9 @@ bool llsf_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
            return TRUE;
         }
     } else {
+#ifdef LLSF_DEBUG
         printf("LLSF: Low Lantecy select\n");
+#endif
         // there are dedicated cells in schedule, 
         // choose the one with lowest lantency (max in distance)
         
@@ -242,7 +247,7 @@ bool llsf_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
             cellList[i].choffset = 0;
             cellList[i].linkoptions = CELLTYPE_TX;
         }
-        
+#ifdef LLSF_DEBUG
         printf("LLSF : rxSlotList\n");
         for (i=0;i<MAX_SCHEDULED_SLOT;i++){
             printf("%d ",slotsList[i]);
@@ -253,6 +258,7 @@ bool llsf_generateLowLantencySlots_add(uint16_t * slotsList, cellInfo_ht* cellLi
             printf("%d ",cellList[i].tsNum);
         }
         printf("\n");
+#endif
         return TRUE;
     }
 }

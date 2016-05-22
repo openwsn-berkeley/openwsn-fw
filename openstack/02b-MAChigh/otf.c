@@ -98,7 +98,7 @@ void otf_bandwidthEstimate_task(void){
     bw_outgoing = schedule_getNumOfSlotsByType(CELLTYPE_TX);
     bw_incoming = schedule_getNumOfSlotsByType(CELLTYPE_RX);
     // number of packet generated per second (slotframe duration 15ms*101=1515ms)
-    bw_self     = 1515/cstorm_getPeriod();
+    bw_self     = 15*SLOTFRAME_LENGTH/cstorm_getPeriod();
     
     if (
         idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x06
@@ -113,10 +113,17 @@ void otf_bandwidthEstimate_task(void){
 #endif
     
     if (bw_outgoing < bw_incoming+bw_self){
+      if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x06){
         sixtop_addCells(
             &neighbor,
             bw_incoming+bw_self-bw_outgoing+2
         );
+      }else {
+        sixtop_addCells(
+            &neighbor,
+            bw_incoming+bw_self-bw_outgoing
+        );
+      }
 #ifdef SF0_DEBUG
         printf("OTF: RESEVER\n");
 #endif
