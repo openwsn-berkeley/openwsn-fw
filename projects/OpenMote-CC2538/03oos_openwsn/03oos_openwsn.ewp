@@ -2491,6 +2491,12 @@
     <group>
       <name>02b-MAChigh</name>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\llsf.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\llsf.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.c</name>
       </file>
       <file>
