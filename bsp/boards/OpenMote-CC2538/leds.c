@@ -26,6 +26,8 @@
                                  BSP_LED_3 | \
                                  BSP_LED_4)     //!< Bitmask of all LEDs
 
+//#define LEDS_DEBUG_ON
+
 //=========================== defines =========================================
 
 //=========================== variables =======================================
@@ -45,13 +47,19 @@ void leds_init() {
 
 // red
 void    leds_error_on() {
+#ifdef LEDS_DEBUG_ON
 	bspLedSet(BSP_LED_1);
+#endif
 }
 void    leds_error_off() {
+#ifdef LEDS_DEBUG_ON
 	bspLedClear(BSP_LED_1);
+#endif
 }
 void    leds_error_toggle() {
+#ifdef LEDS_DEBUG_ON
 	bspLedToggle(BSP_LED_1);
+#endif
 }
 uint8_t leds_error_isOn() {
 	  uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_1);
@@ -60,13 +68,17 @@ uint8_t leds_error_isOn() {
 
 // orange
 void    leds_sync_on() {
+#ifdef LEDS_DEBUG_ON
 	bspLedSet(BSP_LED_2);
+#endif
 }
 void    leds_sync_off() {
 	bspLedClear(BSP_LED_2);
 }
 void    leds_sync_toggle() {
+#ifdef LEDS_DEBUG_ON
 	bspLedToggle(BSP_LED_2);
+#endif
 }
 uint8_t leds_sync_isOn() {
 	uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_2);
@@ -75,13 +87,17 @@ uint8_t leds_sync_isOn() {
 
 // green
 void    leds_radio_on() {
+#ifdef LEDS_DEBUG_ON
 	bspLedSet(BSP_LED_4);
+#endif
 }
 void    leds_radio_off() {
 	bspLedClear(BSP_LED_4);
 }
 void    leds_radio_toggle() {
+#ifdef LEDS_DEBUG_ON
 	bspLedToggle(BSP_LED_4);
+#endif
 }
 uint8_t leds_radio_isOn() {
 	uint32_t ui32Toggle = GPIOPinRead(BSP_LED_BASE, BSP_LED_4);
