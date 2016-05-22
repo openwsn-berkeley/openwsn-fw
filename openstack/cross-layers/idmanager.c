@@ -33,7 +33,7 @@ void idmanager_init() {
    
    // myPrefix
    idmanager_vars.myPrefix.type        = ADDR_PREFIX;
-#ifdef DAGROOT
+//#ifdef DAGROOT
    idmanager_vars.myPrefix.prefix[0]   = 0xbb;
    idmanager_vars.myPrefix.prefix[1]   = 0xbb;
    idmanager_vars.myPrefix.prefix[2]   = 0x00;
@@ -42,9 +42,9 @@ void idmanager_init() {
    idmanager_vars.myPrefix.prefix[5]   = 0x00;
    idmanager_vars.myPrefix.prefix[6]   = 0x00;
    idmanager_vars.myPrefix.prefix[7]   = 0x00;
-#else
-   memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
-#endif
+//#else
+//   memset(&idmanager_vars.myPrefix.prefix[0], 0x00, sizeof(idmanager_vars.myPrefix.prefix));
+//#endif
    
    // my64bID
    idmanager_vars.my64bID.type         = ADDR_64B;
@@ -52,6 +52,10 @@ void idmanager_init() {
    
    // my16bID
    packetfunctions_mac64bToMac16b(&idmanager_vars.my64bID,&idmanager_vars.my16bID);
+   
+   if (idmanager_vars.my64bID.addr_64b[7] == 0x44){
+      idmanager_vars.isDAGroot            = TRUE;
+   }
 }
 
 bool idmanager_getIsDAGroot() {

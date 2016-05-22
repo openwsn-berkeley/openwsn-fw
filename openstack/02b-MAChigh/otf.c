@@ -9,6 +9,7 @@
 
 //=========================== variables =======================================
 
+#define SOURCE_MOTE 0xcb
 #define SF0THRESH      3 
 //#define SF0_DEBUG
 
@@ -101,7 +102,7 @@ void otf_bandwidthEstimate_task(void){
     bw_self     = 15*SLOTFRAME_LENGTH/cstorm_getPeriod();
     
     if (
-        idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x06
+        idmanager_getMyID(ADDR_64B)->addr_64b[7] != SOURCE_MOTE
     ) {
         // those motes has stopped to generate packets
         bw_self = 0; 
@@ -113,7 +114,7 @@ void otf_bandwidthEstimate_task(void){
 #endif
     
     if (bw_outgoing < bw_incoming+bw_self){
-      if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x06){
+      if (idmanager_getMyID(ADDR_64B)->addr_64b[7] == SOURCE_MOTE){
         sixtop_addCells(
             &neighbor,
             bw_incoming+bw_self-bw_outgoing+2

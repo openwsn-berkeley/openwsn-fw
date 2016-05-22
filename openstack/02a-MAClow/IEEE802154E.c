@@ -2044,6 +2044,7 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
 
 void notif_receive(OpenQueueEntry_t* packetReceived) {
    uint8_t len;
+   uint16_t packetId;
    len = packetReceived->length;
    // record the current ASN
    memcpy(&packetReceived->l2_asn, &ieee154e_vars.asn, sizeof(asn_t));
@@ -2051,21 +2052,24 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    schedule_indicateRx(&packetReceived->l2_asn);
    
    if (schedule_getType() == CELLTYPE_RX){
-       bspDBpinToggle(0x400D9000, 0x00000010);
-       leds_debug_toggle();
-       /*
+       
        if (
-           idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02 || \
-           idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x03 || \
-           idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x04 || \
-           idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x05  
+           idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0xcb
        ) {
-           printf("Mote: %d, received packet %d at ASN: %d\n",
-               idmanager_getMyID(ADDR_64B)->addr_64b[7],
-               packetReceived->payload[len-9]*256+packetReceived->payload[len-8],
-               ieee154e_vars.asn.bytes2and3*65536+ieee154e_vars.asn.bytes0and1);
+           packetId = packetReceived->payload[len-9]*256+packetReceived->payload[len-8];
+           if (packetId%2 == 0) {
+              GPIOPinWrite(0x400D9000, 0x00000010,0);
+              leds_debug_on();
+           } else {
+              GPIOPinWrite(0x400D9000, 0x00000010,0x00000010);
+              leds_debug_off();
+           }
+//           printf("Mote: %d, received packet %d at ASN: %d\n",
+//               idmanager_getMyID(ADDR_64B)->addr_64b[7],
+//               packetReceived->payload[len-9]*256+packetReceived->payload[len-8],
+//               ieee154e_vars.asn.bytes2and3*65536+ieee154e_vars.asn.bytes0and1);
        }
-       */
+       
    }
    
    // associate this packet with the virtual component

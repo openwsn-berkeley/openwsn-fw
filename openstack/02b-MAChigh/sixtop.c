@@ -25,6 +25,13 @@
 #define LLSF
 //#define ADAPTIVE_REALLOCATION
 
+#define TOPOLOGY_MOTE1 0x44
+#define TOPOLOGY_MOTE2 0x64
+#define TOPOLOGY_MOTE3 0x1a
+#define TOPOLOGY_MOTE4 0xd1
+#define TOPOLOGY_MOTE5 0x43
+#define TOPOLOGY_MOTE6 0xcb
+
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -614,7 +621,13 @@ void task_sixtopNotifReceive() {
       case IEEE154_TYPE_BEACON:
       case IEEE154_TYPE_DATA:
       case IEEE154_TYPE_CMD:
-         if (msg->length>0) {
+         // drop the packet if there is no cell for sending uplayer packet
+         if (msg->length>0 &&
+           (
+            schedule_getNumOfSlotsByType(CELLTYPE_TX)>0 ||
+            idmanager_getIsDAGroot()==TRUE
+           )
+         ) {
             // send to upper layer
             iphc_receive(msg);
          } else {

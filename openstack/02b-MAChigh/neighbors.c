@@ -6,6 +6,13 @@
 #include "openserial.h"
 #include "IEEE802154E.h"
 
+
+#define TOPOLOGY_MOTE1 0x44
+#define TOPOLOGY_MOTE2 0x64
+#define TOPOLOGY_MOTE3 0x1a
+#define TOPOLOGY_MOTE4 0xd1
+#define TOPOLOGY_MOTE5 0x43
+#define TOPOLOGY_MOTE6 0xcb
 //=========================== variables =======================================
 
 neighbors_vars_t neighbors_vars;
@@ -327,41 +334,41 @@ void neighbors_indicateRx(open_addr_t* l2_src,
          
          // this is not a new neighbor
          newNeighbor = FALSE;
-         
-         // update numRx, rssi, asn
-         neighbors_vars.neighbors[i].numRx++;
-         neighbors_vars.neighbors[i].rssi=rssi;
-         memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
-         //update jp
-         if (joinPrioPresent==TRUE){
-            neighbors_vars.neighbors[i].joinPrio=joinPrio;
-         }
-         
-         // update stableNeighbor, switchStabilityCounter
-         if (neighbors_vars.neighbors[i].stableNeighbor==FALSE) {
-            if (neighbors_vars.neighbors[i].rssi>BADNEIGHBORMAXRSSI) {
-               neighbors_vars.neighbors[i].switchStabilityCounter++;
-               if (neighbors_vars.neighbors[i].switchStabilityCounter>=SWITCHSTABILITYTHRESHOLD) {
-                  neighbors_vars.neighbors[i].switchStabilityCounter=0;
-                  neighbors_vars.neighbors[i].stableNeighbor=TRUE;
-               }
-            } else {
-               neighbors_vars.neighbors[i].switchStabilityCounter=0;
-            }
-         } else if (neighbors_vars.neighbors[i].stableNeighbor==TRUE) {
-            if (neighbors_vars.neighbors[i].rssi<GOODNEIGHBORMINRSSI) {
-               neighbors_vars.neighbors[i].switchStabilityCounter++;
-               if (neighbors_vars.neighbors[i].switchStabilityCounter>=SWITCHSTABILITYTHRESHOLD) {
-                  neighbors_vars.neighbors[i].switchStabilityCounter=0;
-                   neighbors_vars.neighbors[i].stableNeighbor=FALSE;
-               }
-            } else {
-               neighbors_vars.neighbors[i].switchStabilityCounter=0;
-            }
-         }
-         
-         // stop looping
-         break;
+       
+//         // update numRx, rssi, asn
+//         neighbors_vars.neighbors[i].numRx++;
+//         neighbors_vars.neighbors[i].rssi=rssi;
+//         memcpy(&neighbors_vars.neighbors[i].asn,asnTs,sizeof(asn_t));
+//         //update jp
+//         if (joinPrioPresent==TRUE){
+//            neighbors_vars.neighbors[i].joinPrio=joinPrio;
+//         }
+//         
+//         // update stableNeighbor, switchStabilityCounter
+//         if (neighbors_vars.neighbors[i].stableNeighbor==FALSE) {
+//            if (neighbors_vars.neighbors[i].rssi>BADNEIGHBORMAXRSSI) {
+//               neighbors_vars.neighbors[i].switchStabilityCounter++;
+//               if (neighbors_vars.neighbors[i].switchStabilityCounter>=SWITCHSTABILITYTHRESHOLD) {
+//                  neighbors_vars.neighbors[i].switchStabilityCounter=0;
+//                  neighbors_vars.neighbors[i].stableNeighbor=TRUE;
+//               }
+//            } else {
+//               neighbors_vars.neighbors[i].switchStabilityCounter=0;
+//            }
+//         } else if (neighbors_vars.neighbors[i].stableNeighbor==TRUE) {
+//            if (neighbors_vars.neighbors[i].rssi<GOODNEIGHBORMINRSSI) {
+//               neighbors_vars.neighbors[i].switchStabilityCounter++;
+//               if (neighbors_vars.neighbors[i].switchStabilityCounter>=SWITCHSTABILITYTHRESHOLD) {
+//                  neighbors_vars.neighbors[i].switchStabilityCounter=0;
+//                   neighbors_vars.neighbors[i].stableNeighbor=FALSE;
+//               }
+//            } else {
+//               neighbors_vars.neighbors[i].switchStabilityCounter=0;
+//            }
+//         }
+//         
+//         // stop looping
+//         break;
       }
    }
    
@@ -369,6 +376,7 @@ void neighbors_indicateRx(open_addr_t* l2_src,
    if (newNeighbor==TRUE) {
       registerNewNeighbor(l2_src, rssi, asnTs, joinPrioPresent,joinPrio);
    }
+   
 }
 
 /**
@@ -648,6 +656,55 @@ void registerNewNeighbor(open_addr_t* address,
             if (iHaveAPreferedParent==FALSE && idmanager_getIsDAGroot()==FALSE) {      
                neighbors_vars.neighbors[i].parentPreference     = MAXPREFERENCE;
             }
+            
+             // assign a rank
+             switch (neighbors_vars.neighbors[i].addr_64b.addr_64b[7]) {
+                case TOPOLOGY_MOTE1:
+                   neighbors_vars.neighbors[i].DAGrank = 256;
+                   break;
+                case TOPOLOGY_MOTE2:
+                   neighbors_vars.neighbors[i].DAGrank = 512;
+                   break;
+                case TOPOLOGY_MOTE3:
+                   neighbors_vars.neighbors[i].DAGrank = 768;
+                   break;
+                case TOPOLOGY_MOTE4:
+                   neighbors_vars.neighbors[i].DAGrank = 1024;
+                   break;
+                case TOPOLOGY_MOTE5:
+                   neighbors_vars.neighbors[i].DAGrank = 1280;
+                   break;
+                case TOPOLOGY_MOTE6:
+                   neighbors_vars.neighbors[i].DAGrank = 1536;
+                   break;
+                default:
+                   neighbors_vars.neighbors[i].DAGrank = MAXDAGRANK;
+             }
+             
+              switch (idmanager_getMyID(ADDR_64B)->addr_64b[7]) {
+                case TOPOLOGY_MOTE1:
+                   neighbors_vars.myDAGrank = 256;
+                   break;
+                case TOPOLOGY_MOTE2:
+                   neighbors_vars.myDAGrank = 512;
+                   break;
+                case TOPOLOGY_MOTE3:
+                   neighbors_vars.myDAGrank = 768;
+                   break;
+                case TOPOLOGY_MOTE4:
+                   neighbors_vars.myDAGrank = 1024;
+                   break;
+                case TOPOLOGY_MOTE5:
+                   neighbors_vars.myDAGrank = 1280;
+                   break;
+                case TOPOLOGY_MOTE6:
+                   neighbors_vars.myDAGrank = 1536;
+                   break;
+                default:
+                  neighbors_vars.myDAGrank = MAXDAGRANK;
+                  break;
+             }
+            
             break;
          }
          i++;

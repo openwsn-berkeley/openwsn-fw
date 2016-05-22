@@ -26,6 +26,8 @@ static const uint8_t dst_addr[]   = {
 #define PACKET_PER_SLOTFRAME  1
 #define SLOTDURATION_MS      15 // 15ms per slot
 
+#define SOURCE_MOTE 0xcb
+
 //=========================== variables =======================================
 
 cstorm_vars_t cstorm_vars;
@@ -63,13 +65,13 @@ void cstorm_init(void) {
    cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / PACKET_PER_SLOTFRAME;
 //   cstorm_vars.period           = SLOTFRAME_LENGTH * SLOTDURATION_MS / (1+openrandom_get16b()%6); 
    cstorm_vars.timerId                    = opentimers_start(
-      cstorm_vars.period - 0xff + (openrandom_get16b()&0x01ff),
+      cstorm_vars.period + (openrandom_get16b()&0x07ff),
       TIMER_PERIODIC,TIME_MS,
       cstorm_timer_cb
    );
    
    if (
-       idmanager_getMyID(ADDR_64B)->addr_64b[7] != 0x06
+       idmanager_getMyID(ADDR_64B)->addr_64b[7] != SOURCE_MOTE
    ) {
        opentimers_stop(cstorm_vars.timerId);
    }
@@ -159,7 +161,7 @@ void cstorm_timer_cb(opentimer_id_t id){
    opentimers_setPeriod(
       cstorm_vars.timerId,
       TIME_MS,
-      cstorm_vars.period - 0xff + (openrandom_get16b()&0x01ff)
+      cstorm_vars.period + (openrandom_get16b()&0x07ff)
    );
    opentimers_restart(cstorm_vars.timerId);
 }
@@ -169,6 +171,7 @@ void cstorm_task_cb() {
    owerror_t            outcome;
    uint8_t              numOptions;
    uint8_t              asn[5];
+   uint16_t             packetId;
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
    
@@ -184,9 +187,9 @@ void cstorm_task_cb() {
       return;
    }
    
-//   if(cstorm_vars.busySending == TRUE) {
-//       return;
-//   }
+   if(cstorm_vars.busySending == TRUE) {
+       return;
+   }
    
    // if you get here, send a packet
    
@@ -274,8 +277,14 @@ void cstorm_task_cb() {
       openqueue_freePacketBuffer(pkt);
       cstorm_vars.busySending = FALSE;
    } else {
-       bspDBpinToggle(0x400D9000, 0x00000010);
-       leds_debug_toggle();
+       packetId = cstorm_vars.packetId[0]*256+cstorm_vars.packetId[1];
+       if (packetId%2 == 0) {
+//          GPIOPinWrite(0x400D9000, 0x00000010,0);
+          leds_debug_on();
+       } else {
+//          GPIOPinWrite(0x400D9000, 0x00000010,0x00000010);
+          leds_debug_off();
+       }
    }
 }
 
