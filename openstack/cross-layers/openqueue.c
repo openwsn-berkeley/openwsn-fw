@@ -245,7 +245,8 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
                    packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
                 )
              ) && 
-             openqueue_vars.queue[i].creator!=COMPONENT_CSTORM
+             openqueue_vars.queue[i].creator!=COMPONENT_CSTORM && 
+             openqueue_vars.queue[i].creator!=COMPONENT_FORWARDING
             ) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
