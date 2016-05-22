@@ -6,12 +6,12 @@
 
 //#define FORCETOPOLOGY
 
-#define TOPOLOGY_MOTE1 0x01
-#define TOPOLOGY_MOTE2 0x02
-#define TOPOLOGY_MOTE3 0x03
-#define TOPOLOGY_MOTE4 0x04
-#define TOPOLOGY_MOTE5 0x05
-#define TOPOLOGY_MOTE6 0x06
+#define TOPOLOGY_MOTE1 0x44
+#define TOPOLOGY_MOTE2 0x64
+#define TOPOLOGY_MOTE3 0x1a
+#define TOPOLOGY_MOTE4 0xd1
+#define TOPOLOGY_MOTE5 0x43
+#define TOPOLOGY_MOTE6 0xcb
 
 //=========================== variables =======================================
 
