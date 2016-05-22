@@ -4,7 +4,7 @@
 
 //=========================== defines =========================================
 
-//#define FORCETOPOLOGY
+#define FORCETOPOLOGY
 
 #define TOPOLOGY_MOTE1 0x44
 #define TOPOLOGY_MOTE2 0x64
@@ -101,6 +101,7 @@ bool topology_isAcceptablePacket(ieee802154_header_iht* ieee802514_header) {
          } else {
             returnVal=FALSE;
          }
+         break;
       case TOPOLOGY_MOTE6:
          if (ieee802514_header->src.addr_64b[7]==TOPOLOGY_MOTE5) {
             returnVal=TRUE;
