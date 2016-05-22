@@ -2049,8 +2049,11 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    memcpy(&packetReceived->l2_asn, &ieee154e_vars.asn, sizeof(asn_t));
    // indicate reception to the schedule, to keep statistics
    schedule_indicateRx(&packetReceived->l2_asn);
-   /*
+   
    if (schedule_getType() == CELLTYPE_RX){
+       bspDBpinToggle(0x400D9000, 0x00000010);
+       leds_debug_toggle();
+       /*
        if (
            idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x02 || \
            idmanager_getMyID(ADDR_64B)->addr_64b[7] == 0x03 || \
@@ -2062,9 +2065,9 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
                packetReceived->payload[len-9]*256+packetReceived->payload[len-8],
                ieee154e_vars.asn.bytes2and3*65536+ieee154e_vars.asn.bytes0and1);
        }
+       */
    }
-   */
-   bspDBpinToggle(0x400D9000, 0x00000010);
+   
    // associate this packet with the virtual component
    // COMPONENT_IEEE802154E_TO_SIXTOP so sixtop can knows it's for it
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;

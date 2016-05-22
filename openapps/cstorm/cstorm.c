@@ -11,6 +11,8 @@
 #include "IEEE802154E.h"
 #include "idmanager.h"
 #include "schedule.h"
+#include "leds.h"
+#include "debugpins.h"
 
 //=========================== defines =========================================
 
@@ -271,6 +273,9 @@ void cstorm_task_cb() {
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
       cstorm_vars.busySending = FALSE;
+   } else {
+       bspDBpinToggle(0x400D9000, 0x00000010);
+       leds_debug_toggle();
    }
 }
 
