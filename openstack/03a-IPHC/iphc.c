@@ -43,10 +43,6 @@ void iphc_prependIPv6HopByHopHeader(
    uint8_t              nextheader,
    rpl_option_ht*       rpl_option
 );
-uint8_t iphc_retrieveIPv6HopByHopHeader(
-   OpenQueueEntry_t*    msg,
-   rpl_option_ht*       rpl_option
-);
 
 //=========================== public ==========================================
 
