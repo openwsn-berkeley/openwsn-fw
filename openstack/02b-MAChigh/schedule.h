@@ -27,7 +27,19 @@ The superframe repears over time and can be arbitrarly long.
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 #define NUMSERIALRX          3
-#define NUMSLOTSOFF          3 // the max number of cells that the mote can added into schedule, except 6TISCH_ACTIVE_CELLS and NUMSERIALRX. Initially those cells are off.
+
+/*
+  NUMSLOTSOFF is the max number of cells that the mote can add into schedule, 
+  besides 6TISCH_ACTIVE_CELLS and NUMSERIALRX Cell. Initially those cells are 
+  off. The value of NUMSLOTSOFF can be changed but the value should satisfy:
+ 
+        MAXACTIVESLOTS < SLOTFRAME_LENGTH 
+        
+  This would make sure number of slots are available (SLOTFRAME_LENGTH-MAXACTIVESLOTS) 
+  for seiral port to tranmit data to dagroot. 
+*/
+
+#define NUMSLOTSOFF          3
 
 /**
 \brief Maximum number of active slots in a superframe.
