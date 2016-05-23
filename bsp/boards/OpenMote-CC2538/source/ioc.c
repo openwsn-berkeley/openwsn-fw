@@ -47,9 +47,10 @@
 #include <headers/hw_gpio.h>
 #include <headers/hw_ioc.h>
 #include <headers/hw_memmap.h>
-#include "debug.h"
-#include "ioc.h"
-#include "gpio.h"
+
+#include <source/debug.h>
+#include <source/ioc.h>
+#include <source/gpio.h>
 
 //*****************************************************************************
 //

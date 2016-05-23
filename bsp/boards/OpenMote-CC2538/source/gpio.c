@@ -48,10 +48,11 @@
 #include <headers/hw_ints.h>
 #include <headers/hw_memmap.h>
 #include <headers/hw_sys_ctrl.h>
-#include "debug.h"
-#include "gpio.h"
-#include "interrupt.h"
-#include "ioc.h"
+
+#include <source/debug.h>
+#include <source/gpio.h>
+#include <source/interrupt.h>
+#include <source/ioc.h>
 
 //*****************************************************************************
 //

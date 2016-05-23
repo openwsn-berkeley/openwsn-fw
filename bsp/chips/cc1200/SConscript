@@ -7,7 +7,7 @@ Import('env')
 
 localEnv = env.Clone()
 
-source = ['radio.c']
+source = ['cc1200.c']
 cc1200 = localEnv.Object(
    source=source,
 )

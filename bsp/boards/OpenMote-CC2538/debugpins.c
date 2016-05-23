@@ -7,15 +7,16 @@
 
 #include <headers/hw_memmap.h>
 #include <headers/hw_types.h>
+#include <source/gpio.h>
 
 #include "debugpins.h"
-#include "gpio.h"
 #include "board.h"
+#include "gpio.h"
 
 //=========================== defines =========================================
-// Board dbPINS defines
-#define BSP_PINA_BASE           GPIO_A_BASE
-#define BSP_PIND_BASE           GPIO_D_BASE
+
+#define BSP_PINA_PORT           GPIO_A_PORT
+#define BSP_PIND_PORT           GPIO_D_PORT
 
 #define BSP_PINA_4              GPIO_PIN_4      //!< PA4 -- frame -RF1.5
 #define BSP_PINA_5              GPIO_PIN_5      //!< PA5 -- isr   -RF1.11
@@ -29,100 +30,86 @@
 
 //=========================== prototypes ======================================
 
-void bspDBpinToggle(uint32_t base,uint8_t ui8Pin);
 
 //=========================== public ==========================================
 
-void debugpins_init() {
-   GPIOPinTypeGPIOOutput(BSP_PINA_BASE, BSP_PINA_4 | BSP_PINA_5);
-   GPIOPinTypeGPIOOutput(BSP_PIND_BASE, BSP_PIND_3 | BSP_PIND_2 | BSP_PIND_1 | BSP_PIND_0);
+void debugpins_init(void) {
+  gpio_config_output(BSP_PINA_PORT, (BSP_PINA_4 | BSP_PINA_5));
+  gpio_config_output(BSP_PIND_PORT, (BSP_PIND_3 | BSP_PIND_2 | BSP_PIND_1 | BSP_PIND_0));
 
-   GPIOPinWrite(BSP_PINA_BASE, (BSP_PINA_4 | BSP_PINA_5), 0x00);
-   GPIOPinWrite(BSP_PIND_BASE, (BSP_PIND_3 | BSP_PIND_2 | BSP_PIND_1 | BSP_PIND_0), 0);
+  gpio_off(BSP_PINA_PORT, (BSP_PINA_4 | BSP_PINA_5));
+  gpio_off(BSP_PIND_PORT, (BSP_PIND_3 | BSP_PIND_2 | BSP_PIND_1 | BSP_PIND_0));
 }
 
 // PA4
-void debugpins_frame_toggle() {
-   bspDBpinToggle(BSP_PINA_BASE, BSP_PINA_4);
-}
-void debugpins_frame_clr() {
-    GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_4, 0);
-}
-void debugpins_frame_set() {
-   GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_4, BSP_PINA_4);
+void debugpins_frame_toggle(void) {
+  gpio_toggle(BSP_PINA_PORT, BSP_PINA_4);
 }
 
-// PD3
-void debugpins_slot_toggle() {
-	bspDBpinToggle(BSP_PIND_BASE, BSP_PIND_3);
-}
-void debugpins_slot_clr() {
-	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_3, 0);
-}
-void debugpins_slot_set() {
-	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_3, BSP_PIND_3);
+void debugpins_frame_clr(void) {
+  gpio_off(BSP_PINA_PORT, BSP_PINA_4);
 }
 
-// PD2
-void debugpins_fsm_toggle() {
-	bspDBpinToggle(BSP_PIND_BASE, BSP_PIND_2);
-}
-void debugpins_fsm_clr() {
-	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_2, 0);
-}
-void debugpins_fsm_set() {
-	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_2, BSP_PIND_2);
+void debugpins_frame_set(void) {
+  gpio_on(BSP_PINA_PORT, BSP_PINA_4);
 }
 
-// PD1
-void debugpins_task_toggle() {
-	bspDBpinToggle(BSP_PIND_BASE,BSP_PIND_1);
-}
-void debugpins_task_clr() {
-	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_1, 0);
-}
-void debugpins_task_set() {
-	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_1, BSP_PIND_1);
+void debugpins_slot_toggle(void) {
+	gpio_toggle(BSP_PIND_PORT, BSP_PIND_3);
 }
 
-// PA5
-void debugpins_isr_toggle() {
-	bspDBpinToggle(BSP_PINA_BASE, BSP_PINA_5);
-}
-void debugpins_isr_clr() {
-	GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_5, 0);
-}
-void debugpins_isr_set() {
-	GPIOPinWrite(BSP_PINA_BASE, BSP_PINA_5, BSP_PINA_5);
+void debugpins_slot_clr(void) {
+	gpio_off(BSP_PIND_PORT, BSP_PIND_3);
 }
 
-// PD0
-void debugpins_radio_toggle() {
-	bspDBpinToggle(BSP_PIND_BASE, BSP_PIND_0);
-}
-void debugpins_radio_clr() {
-	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_0, 0);
-}
-void debugpins_radio_set() {
-	GPIOPinWrite(BSP_PIND_BASE, BSP_PIND_0, BSP_PIND_0);
+void debugpins_slot_set(void) {
+	gpio_on(BSP_PIND_PORT, BSP_PIND_3);
 }
 
-//------------ private ------------//
+void debugpins_fsm_toggle(void) {
+	gpio_toggle(BSP_PIND_PORT, BSP_PIND_2);
+}
 
-void bspDBpinToggle(uint32_t base, uint8_t ui8Pin)
-{
-    //
-    // Get current pin values of selected bits
-    //
-    uint32_t ui32Toggle = GPIOPinRead(base, ui8Pin);
+void debugpins_fsm_clr(void) {
+	gpio_off(BSP_PIND_PORT, BSP_PIND_2);
+}
 
-    //
-    // Invert selected bits
-    //
-    ui32Toggle = (~ui32Toggle) & ui8Pin;
+void debugpins_fsm_set(void) {
+	gpio_on(BSP_PIND_PORT, BSP_PIND_2);
+}
 
-    //
-    // Set GPIO
-    //
-    GPIOPinWrite(base, ui8Pin, ui32Toggle);
+void debugpins_task_toggle(void) {
+	gpio_toggle(BSP_PIND_PORT,BSP_PIND_1);
+}
+
+void debugpins_task_clr(void) {
+	gpio_off(BSP_PIND_PORT, BSP_PIND_1);
+}
+
+void debugpins_task_set(void) {
+	gpio_on(BSP_PIND_PORT, BSP_PIND_1);
+}
+
+void debugpins_isr_toggle(void) {
+	gpio_toggle(BSP_PINA_PORT, BSP_PINA_5);
+}
+
+void debugpins_isr_clr(void) {
+	gpio_off(BSP_PINA_PORT, BSP_PINA_5);
+}
+
+void debugpins_isr_set(void) {
+	gpio_on(BSP_PINA_PORT, BSP_PINA_5);
+}
+
+void debugpins_radio_toggle(void) {
+	gpio_toggle(BSP_PIND_PORT, BSP_PIND_0);
+}
+
+void debugpins_radio_clr(void) {
+	gpio_off(BSP_PIND_PORT, BSP_PIND_0);
+}
+
+void debugpins_radio_set(void) {
+	gpio_on(BSP_PIND_PORT, BSP_PIND_0);
 }

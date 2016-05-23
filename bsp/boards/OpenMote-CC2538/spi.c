@@ -5,22 +5,24 @@
  * Description: CC2538-specific definition of the "spi" bsp module.
  */
 
+#include <stdint.h>
+#include <stdio.h>
+#include <string.h>
+
 #include <headers/hw_ints.h>
 #include <headers/hw_ioc.h>
 #include <headers/hw_memmap.h>
 #include <headers/hw_types.h>
 #include <headers/hw_ssi.h>
-#include <source/ssi.h>
 
-#include "stdint.h"
-#include "stdio.h"
-#include "string.h"
+#include <source/ssi.h>
+#include <source/gpio.h>
+#include <source/interrupt.h>
+#include <source/sys_ctrl.h>
+#include <source/ioc.h>
+
 #include "spi.h"
-#include "interrupt.h"
-#include "sys_ctrl.h"
-#include "gpio.h"
 #include "board.h"
-#include "ioc.h"
 #include "debugpins.h"
 
 //=========================== defines =========================================

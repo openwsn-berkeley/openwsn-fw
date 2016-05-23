@@ -3,10 +3,12 @@
    \author Nicola Accettura <nicola.accettura@eecs.berkeley.edu>, March 2015.
 */
 
-#include "adc_sensor.h"
-#include "adc.h"
 #include <headers/hw_cctest.h>
 #include <headers/hw_rfcore_xreg.h>
+
+#include <source/adc.h>
+
+#include "adc_sensor.h"
 
 //=========================== defines =========================================
 

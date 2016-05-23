@@ -10,6 +10,7 @@
 #include "radio.h"
 #include "cc1200.h"
 #include "cc1200_regs.h"
+#include "cc1200_arch.h"
 #include "spi.h"
 #include "debugpins.h"
 #include "radiotimer.h"
@@ -41,6 +42,9 @@ void radio_spiReadRxFifo (                cc1200_status_t* statusRead, uint8_t* 
 void radio_init(void) {
   // clear variables
   memset(&radio_vars, 0, sizeof(radio_vars_t));
+
+  // Initialize the arch driver
+  cc1200_arch_init();
 }
 
 void radio_setOverflowCb(radiotimer_compare_cbt cb) {
@@ -139,3 +143,15 @@ void radio_spiReadRxFifo(cc1200_status_t* statusRead,
 }
 
 //====================== callbacks =======================
+
+void cc1200_gpio0_interrupt(void) {
+
+}
+
+void cc1200_gpio2_interrupt(void) {
+  
+}
+
+void cc1200_gpio3_interrupt(void) {
+  
+}

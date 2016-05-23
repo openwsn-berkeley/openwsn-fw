@@ -5,17 +5,17 @@
  * Description:CC2538-specific definition of the "i2c" bsp module.
  */
 
-#include "gpio.h"
-#include "source/i2c_lib.h"
-#include "ioc.h"
-#include "sys_ctrl.h"
+#include <headers/hw_gpio.h>
+#include <headers/hw_i2cm.h>
+#include <headers/hw_ioc.h>
+#include <headers/hw_memmap.h>
+#include <headers/hw_sys_ctrl.h>
+#include <headers/hw_types.h>
 
-#include "headers/hw_gpio.h"
-#include "headers/hw_i2cm.h"
-#include "headers/hw_ioc.h"
-#include "headers/hw_memmap.h"
-#include "headers/hw_sys_ctrl.h"
-#include "headers/hw_types.h"
+#include <source/gpio.h>
+#include <source/i2c_lib.h>
+#include <source/ioc.h>
+#include <source/sys_ctrl.h>
 
 //=========================== define ==========================================
 

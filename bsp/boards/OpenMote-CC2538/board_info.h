@@ -12,8 +12,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "cpu.h"
-#include "interrupt.h"
+#include <source/cpu.h>
+#include <source/interrupt.h>
 
 //=========================== defines =========================================
 

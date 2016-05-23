@@ -5,22 +5,22 @@
  * Description: Register definitions for the Texas Instruments CC1200 radio chip.
  */
 
-#ifndef __CC1200_H
-#define __CC1200_H
+#ifndef __CC1200_ARCH_H
+#define __CC1200_ARCH_H
 
 //=========================== defines =========================================
 
-typedef struct {
-} cc1200_status_t;
+#include "cc1200.h"
 
 //=========================== variables =======================================
 
 
 //=========================== prototypes ======================================
 
-void cc1200_gpio0_interrupt(void);
-void cc1200_gpio2_interrupt(void);
-void cc1200_gpio3_interrupt(void);
+void cc1200_arch_init(void);
+
+void cc1200_arch_spi_select(void);
+void cc1200_arch_spi_deselect(void);
 
 //=========================== public ==========================================
 
@@ -32,5 +32,6 @@ void cc1200_gpio3_interrupt(void);
 
 
 //=========================== interrupt handlers ==============================
+
 
 #endif

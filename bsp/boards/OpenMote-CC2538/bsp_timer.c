@@ -5,16 +5,18 @@
  * Description: CC2538-specific definition of the "bsp_timer" bsp module.
  */
 
+#include <string.h>
+
 #include <headers/hw_ints.h>
 #include <headers/hw_memmap.h>
 #include <headers/hw_smwdthrosc.h>
 
-#include "string.h"
+#include <source/debug.h>
+#include <source/interrupt.h>
+#include <source/sleepmode.h>
+
 #include "bsp_timer.h"
 #include "board.h"
-#include "debug.h"
-#include "interrupt.h"
-#include "sleepmode.h"
 #include "debugpins.h"
 
 //=========================== defines =========================================

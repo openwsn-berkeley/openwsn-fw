@@ -11,30 +11,33 @@
 #include <headers/hw_sys_ctrl.h>
 #include <headers/hw_types.h>
 
+#include <source/ioc.h>
+#include <source/gpio.h>
+#include <source/gptimer.h>
+#include <source/sys_ctrl.h>
+#include <source/interrupt.h>
+#include <source/flash.h> 
+
 #include "board.h"
 #include "leds.h"
-#include "ioc.h"
 #include "gpio.h"
-#include "gptimer.h"
-#include "sys_ctrl.h"
-#include "interrupt.h"
 #include "bsp_timer.h"
 #include "radiotimer.h"
 #include "debugpins.h"
 #include "uart.h"
 #include "radio.h"
-#include "flash.h"
 #include "i2c.h"
 #include "sensors.h"
 
 //=========================== variables =======================================
 
-#define BSP_ANTENNA_BASE                ( GPIO_D_BASE )
+#define BSP_ANTENNA_PORT                ( GPIO_D_PORT )
 #define BSP_ANTENNA_INT                 ( GPIO_PIN_5 )
 #define BSP_ANTENNA_EXT                 ( GPIO_PIN_4 )
 
-#define BSP_BUTTON_BASE                 ( GPIO_C_BASE )
+#define BSP_BUTTON_PORT                 ( GPIO_C_PORT )
 #define BSP_BUTTON_USER                 ( GPIO_PIN_3 )
+#define BSP_BUTTON_EDGE                 ( GPIO_FALLING_EDGE )
 
 #define CC2538_FLASH_ADDRESS            ( 0x0027F800 )
 
@@ -48,17 +51,15 @@ void board_timer_init(void);
 uint32_t board_timer_get(void);
 bool board_timer_expired(uint32_t future);
 
-
 static void clock_init(void);
-static void gpio_init(void);
+
 static void button_init(void);
+static void button_handler(void);
 
 static void SysCtrlDeepSleepSetting(void);
 static void SysCtrlSleepSetting(void);
 static void SysCtrlRunSetting(void);
 static void SysCtrlWakeupSetting(void);
-
-static void GPIO_C_Handler(void);
 
 //=========================== main ============================================
 
@@ -71,31 +72,31 @@ int main(void) {
 //=========================== public ==========================================
 
 void board_init(void) {
-   gpio_init();
-   clock_init();
+  clock_init();
+  gpio_init();
 
-   board_timer_init();
+  board_timer_init();
 
-   antenna_init();
-   antenna_external();
+  antenna_init();
+  antenna_external();
 
-   leds_init();
-   debugpins_init();
-   button_init();
-   bsp_timer_init();
-   radiotimer_init();
-   uart_init();
-   radio_init();
-   i2c_init();
-   sensors_init();
+  leds_init();
+  debugpins_init();
+  button_init();
+  bsp_timer_init();
+  radiotimer_init();
+  uart_init();
+  radio_init();
+  i2c_init();
+  sensors_init();
 }
 
 /**
  * Puts the board to sleep
  */
 void board_sleep(void) {
-    SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
-    SysCtrlSleep();
+  SysCtrlPowerModeSet(SYS_CTRL_PM_NOACTION);
+  SysCtrlSleep();
 }
 
 /**
@@ -107,7 +108,7 @@ void board_timer_init(void) {
 	TimerConfigure(GPTIMER2_BASE, GPTIMER_CFG_PERIODIC_UP);
 	
 	// Enable the timer
-    TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
+  TimerEnable(GPTIMER2_BASE, GPTIMER_BOTH);
 }
 
 /**
@@ -115,11 +116,11 @@ void board_timer_init(void) {
  * The timer is divided by 32, whichs gives a 1 microsecond ticks
  */
 uint32_t board_timer_get(void) {
-    uint32_t current;
-    
-    current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
-    
-    return current;
+  uint32_t current;
+  
+  current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
+  
+  return current;
 }
 
 /**
@@ -127,18 +128,18 @@ uint32_t board_timer_get(void) {
  * The timer is divided by 32, whichs gives a 1 microsecond ticks
  */
 bool board_timer_expired(uint32_t future) {
-    uint32_t current;
-    int32_t remaining;
+  uint32_t current;
+  int32_t remaining;
 
-    current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
+  current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
 
-    remaining = (int32_t) (future - current);
-    
-    if (remaining > 0) {
-        return false;
-    } else {
-        return true;
-    }
+  remaining = (int32_t) (future - current);
+  
+  if (remaining > 0) {
+    return false;
+  } else {
+    return true;
+  }
 }
 
 /**
@@ -154,101 +155,112 @@ void board_reset(void) {
  * EXT is the external antenna (connector) configured through ANT2_SEL (V2)
  */
 void antenna_init(void) {
-    /* Configure the ANT1 and ANT2 GPIO as output */
-    GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_INT);
-    GPIOPinTypeGPIOOutput(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT);
+  /* Configure the ANT1 and ANT2 GPIO as output */
+  gpio_config_output(BSP_ANTENNA_PORT, BSP_ANTENNA_INT);
+  gpio_config_output(BSP_ANTENNA_PORT, BSP_ANTENNA_EXT);
 
-    /* By default the chip antenna is selected as the default */
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_INT, BSP_ANTENNA_INT);
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT, ~BSP_ANTENNA_EXT);
+  /* By default the chip antenna is selected as the default */
+  gpio_on(BSP_ANTENNA_PORT, BSP_ANTENNA_INT);
+  gpio_off(BSP_ANTENNA_PORT, BSP_ANTENNA_EXT);
 }
 
 /**
  * Selects the external (connector) antenna
  */
 void antenna_external(void) {
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT, BSP_ANTENNA_EXT);
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_INT, ~BSP_ANTENNA_INT);
+  gpio_on(BSP_ANTENNA_PORT, BSP_ANTENNA_EXT);
+  gpio_off(BSP_ANTENNA_PORT, BSP_ANTENNA_INT);
 }
 
 /**
  * Selects the internal (chip) antenna
  */
 void antenna_internal(void) {
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_EXT, ~BSP_ANTENNA_EXT);
-    GPIOPinWrite(BSP_ANTENNA_BASE, BSP_ANTENNA_INT, BSP_ANTENNA_INT);
+  gpio_off(BSP_ANTENNA_PORT, BSP_ANTENNA_EXT);
+  gpio_on(BSP_ANTENNA_PORT, BSP_ANTENNA_INT);
 }
 
 //=========================== private =========================================
 
-static void gpio_init(void) {
-    /* Set GPIOs as output */
-    GPIOPinTypeGPIOOutput(GPIO_A_BASE, 0xFF);
-    GPIOPinTypeGPIOOutput(GPIO_B_BASE, 0xFF);
-    GPIOPinTypeGPIOOutput(GPIO_C_BASE, 0xFF);
-    GPIOPinTypeGPIOOutput(GPIO_D_BASE, 0xFF);
-
-    /* Initialize GPIOs to low */
-    GPIOPinWrite(GPIO_A_BASE, 0xFF, 0x00);
-    GPIOPinWrite(GPIO_B_BASE, 0xFF, 0x00);
-    GPIOPinWrite(GPIO_C_BASE, 0xFF, 0x00);
-    GPIOPinWrite(GPIO_D_BASE, 0xFF, 0x00);
-}
-
 static void clock_init(void) {
-    /* Disable global interrupts */
-    bool bIntDisabled = IntMasterDisable();
+  /* Disable global interrupts */
+  bool bIntDisabled = IntMasterDisable();
 
-    /* Configure the 32 kHz pins, PD6 and PD7, for crystal operation */
-    /* By default they are configured as GPIOs */
-    GPIODirModeSet(GPIO_D_BASE, 0x40, GPIO_DIR_MODE_IN);
-    GPIODirModeSet(GPIO_D_BASE, 0x80, GPIO_DIR_MODE_IN);
-    IOCPadConfigSet(GPIO_D_BASE, 0x40, IOC_OVERRIDE_ANA);
-    IOCPadConfigSet(GPIO_D_BASE, 0x80, IOC_OVERRIDE_ANA);
+  /* Set GPIOs as output */
+  GPIOPinTypeGPIOOutput(GPIO_A_BASE, 0xFF);
+  GPIOPinTypeGPIOOutput(GPIO_B_BASE, 0xFF);
+  GPIOPinTypeGPIOOutput(GPIO_C_BASE, 0xFF);
+  GPIOPinTypeGPIOOutput(GPIO_D_BASE, 0xFF);
 
-    /* Set the real-time clock to use the 32 kHz external crystal */
-    /* Set the system clock to use the external 32 MHz crystal */
-    /* Set the system clock to 32 MHz */
-    SysCtrlClockSet(true, false, SYS_CTRL_SYSDIV_32MHZ);
+  /* Initialize GPIOs to low */
+  GPIOPinWrite(GPIO_A_BASE, 0xFF, 0x00);
+  GPIOPinWrite(GPIO_B_BASE, 0xFF, 0x00);
+  GPIOPinWrite(GPIO_C_BASE, 0xFF, 0x00);
+  GPIOPinWrite(GPIO_D_BASE, 0xFF, 0x00);
 
-    /* Set the IO clock to operate at 16 MHz */
-    /* This way peripherals can run while the system clock is gated */
-    SysCtrlIOClockSet(SYS_CTRL_SYSDIV_16MHZ);
+  /* Configure the 32 kHz pins, PD6 and PD7, for crystal operation */
+  /* By default they are configured as GPIOs */
+  GPIODirModeSet(GPIO_D_BASE, 0x40, GPIO_DIR_MODE_IN);
+  GPIODirModeSet(GPIO_D_BASE, 0x80, GPIO_DIR_MODE_IN);
+  IOCPadConfigSet(GPIO_D_BASE, 0x40, IOC_OVERRIDE_ANA);
+  IOCPadConfigSet(GPIO_D_BASE, 0x80, IOC_OVERRIDE_ANA);
 
-    /* Wait until the selected clock configuration is stable */
-    while (!((HWREG(SYS_CTRL_CLOCK_STA)) & (SYS_CTRL_CLOCK_STA_XOSC_STB)));
+  /* Set the real-time clock to use the 32 kHz external crystal */
+  /* Set the system clock to use the external 32 MHz crystal */
+  /* Set the system clock to 32 MHz */
+  SysCtrlClockSet(true, false, SYS_CTRL_SYSDIV_32MHZ);
 
-    /* Define what peripherals run in each mode */
-    SysCtrlRunSetting();
-    SysCtrlSleepSetting();
-    SysCtrlDeepSleepSetting();
-    SysCtrlWakeupSetting();
+  /* Set the IO clock to operate at 16 MHz */
+  /* This way peripherals can run while the system clock is gated */
+  SysCtrlIOClockSet(SYS_CTRL_SYSDIV_16MHZ);
 
-    /* Re-enable interrupt if initially enabled */
-    if (!bIntDisabled) {
-        IntMasterEnable();
-    }
+  /* Wait until the selected clock configuration is stable */
+  while (!((HWREG(SYS_CTRL_CLOCK_STA)) & (SYS_CTRL_CLOCK_STA_XOSC_STB)));
+
+  /* Define what peripherals run in each mode */
+  SysCtrlRunSetting();
+  SysCtrlSleepSetting();
+  SysCtrlDeepSleepSetting();
+  SysCtrlWakeupSetting();
+
+  /* Re-enable interrupt if initially enabled */
+  if (!bIntDisabled) {
+    IntMasterEnable();
+  }
 }
 
 /**
  * Configures the user button as input source
  */
 static void button_init(void) {
-    volatile uint32_t i;
+  volatile uint32_t i;
 
-    /* Delay to avoid pin floating problems */
-    for (i = 0xFFFF; i != 0; i--);
+  /* The button is an input GPIO on falling edge */
+  gpio_config_input(BSP_BUTTON_PORT, BSP_BUTTON_USER, BSP_BUTTON_EDGE);
 
-    /* The button is an input GPIO on falling edge */
-    GPIOPinTypeGPIOInput(BSP_BUTTON_BASE, BSP_BUTTON_USER);
-    GPIOIntTypeSet(BSP_BUTTON_BASE, BSP_BUTTON_USER, GPIO_FALLING_EDGE);
+  /* Delay to avoid pin floating problems */
+  for (i = 0xFFFFF; i != 0; i--);
 
-    /* Register the interrupt */
-    GPIOPortIntRegister(BSP_BUTTON_BASE, GPIO_C_Handler);
+  /* Register the interrupt */
+  gpio_register_callback(BSP_BUTTON_PORT, BSP_BUTTON_USER, &button_handler);
 
-    /* Clear and enable the interrupt */
-    GPIOPinIntClear(BSP_BUTTON_BASE, BSP_BUTTON_USER);
-    GPIOPinIntEnable(BSP_BUTTON_BASE, BSP_BUTTON_USER);
+  /* Clear and enable the interrupt */
+  gpio_enable_interrupt(BSP_BUTTON_PORT, BSP_BUTTON_USER);
+}
+
+/**
+ * GPIO_C interrupt handler. User button is GPIO_C_3
+ * Erases a Flash sector to trigger the bootloader backdoor
+ */
+static void button_handler(void) {
+  /* Disable the interrupts */
+  IntMasterDisable();
+
+  /* Eras the CCA flash page */
+  FlashMainPageErase(CC2538_FLASH_ADDRESS);
+
+  /* Reset the board */
+  SysCtrlReset();
 }
 
 static void SysCtrlRunSetting(void) {
@@ -327,18 +339,3 @@ static void SysCtrlWakeupSetting(void) {
 }
 
 //=========================== interrupt handlers ==============================
-
-/**
- * GPIO_C interrupt handler. User button is GPIO_C_3
- * Erases a Flash sector to trigger the bootloader backdoor
- */
-static void GPIO_C_Handler(void) {
-    /* Disable the interrupts */
-    IntMasterDisable();
-
-    /* Eras the CCA flash page */
-    FlashMainPageErase(CC2538_FLASH_ADDRESS);
-
-    /* Reset the board */
-    SysCtrlReset();
-}
