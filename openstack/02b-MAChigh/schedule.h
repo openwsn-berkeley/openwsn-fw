@@ -21,14 +21,14 @@ The superframe repears over time and can be arbitrarly long.
 #define SLOTFRAME_LENGTH    101 //should be 101
 
 //draft-ietf-6tisch-minimal-06
-#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      5
+#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      15
 #define SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET                        0
 #define SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET                     0
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 #define NUMSERIALRX          1
-#define NUMSLOTSOFF          50
+#define NUMSLOTSOFF          70
 
 #define SCHEDULE_NBROWS_OPENSERIALSTATUS  1   //Nb of rows to push at the same time to openserial
 
@@ -64,7 +64,7 @@ See MINBE for an explanation of backoff.
 \brief a threshold used for triggering the maintaining process.uint: percent
 */
 #define PDR_THRESHOLD      80 // 80 means 80%
-#define MIN_NUMTX_FOR_PDR  50 // don't calculate PDR when numTx is lower than this value 
+#define MIN_NUMTX_FOR_PDR  10 // don't calculate PDR when numTx is lower than this value
 
 //=========================== typedef =========================================
 
