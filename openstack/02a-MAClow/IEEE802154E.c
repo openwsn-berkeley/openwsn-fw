@@ -118,6 +118,8 @@ void ieee154e_init() {
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
    ieee154e_vars.slotDuration      = TsSlotDuration;
+   ieee154e_vars.numOfSleepSlots   = 1;
+   
    // default hopping template
    memcpy(
        &(ieee154e_vars.chTemplate[0]),
@@ -832,7 +834,6 @@ port_INLINE void activity_ti1ORri1() {
    sync_IE_ht  sync_IE;
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
-   uint16_t    numOfSleepSlots;     
 
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -845,22 +846,27 @@ port_INLINE void activity_ti1ORri1() {
    
    // desynchronize if needed
    if (idmanager_getIsDAGroot()==FALSE) {
-      ieee154e_vars.deSyncTimeout--;
-      if (ieee154e_vars.deSyncTimeout==0) {
-         // declare myself desynchronized
-         changeIsSync(FALSE);
-        
-         // log the error
-         openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
-                               (errorparameter_t)ieee154e_vars.slotOffset,
-                               (errorparameter_t)0);
+      if(ieee154e_vars.deSyncTimeout > ieee154e_vars.numOfSleepSlots){
+         ieee154e_vars.deSyncTimeout -= ieee154e_vars.numOfSleepSlots;
+      }
+      else{
+            // Reset sleep slots
+            ieee154e_vars.numOfSleepSlots = 1;
             
-         // update the statistics
-         ieee154e_stats.numDeSync++;
-            
-         // abort
-         endSlot();
-         return;
+            // declare myself desynchronized
+            changeIsSync(FALSE);
+           
+            // log the error
+            openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,
+                                  (errorparameter_t)ieee154e_vars.slotOffset,
+                                  (errorparameter_t)0);
+               
+            // update the statistics
+            ieee154e_stats.numDeSync++;
+               
+            // abort
+            endSlot();
+            return;
       }
    }
    
@@ -874,6 +880,9 @@ port_INLINE void activity_ti1ORri1() {
       endSlot();
       return;
    }
+
+   // Reset sleep slots
+   ieee154e_vars.numOfSleepSlots = 1;
    
    if (ieee154e_vars.slotOffset==ieee154e_vars.nextActiveSlotOffset) {
       // this is the next active slot
@@ -885,18 +894,18 @@ port_INLINE void activity_ti1ORri1() {
       ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
       if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
           if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-              numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
+               ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset;
           } else {
-              numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
+               ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset; 
           }
           
-          radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
+          radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
            
           //increase ASN by numOfSleepSlots-1 slots as at this slot is already incremented by 1
-          for (i=0;i<numOfSleepSlots-1;i++){
+          for (i=0;i<ieee154e_vars.numOfSleepSlots-1;i++){
              incrementAsnOffset();
           }
-      }
+      }       
    } else {
       // this is NOT the next active slot, abort
       // stop using serial
@@ -972,7 +981,8 @@ port_INLINE void activity_ti1ORri1() {
          openserial_startInput();
          //this is to emulate a set of serial input slots without having the slotted structure.
 
-         radio_setTimerPeriod(ieee154e_vars.slotDuration*(NUMSERIALRX));
+         //skip the serial rx slots
+         ieee154e_vars.numOfSleepSlots = NUMSERIALRX;
          
          //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
          for (i=0;i<NUMSERIALRX-1;i++){
@@ -982,21 +992,21 @@ port_INLINE void activity_ti1ORri1() {
             // find the next one
             ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
          }
-         // skip following off slots
+         // possibly skip additional slots if enabled
          if (idmanager_getIsSlotSkip() && idmanager_getIsDAGroot()==FALSE) {
              if (ieee154e_vars.nextActiveSlotOffset>ieee154e_vars.slotOffset) {
-                 numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
+                 ieee154e_vars.numOfSleepSlots = ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1;
              } else {
-                 numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1; 
+                 ieee154e_vars.numOfSleepSlots = schedule_getFrameLength()+ieee154e_vars.nextActiveSlotOffset-ieee154e_vars.slotOffset+NUMSERIALRX-1; 
              }
-             
-             radio_setTimerPeriod(TsSlotDuration*(numOfSleepSlots));
               
              //only increase ASN by numOfSleepSlots-NUMSERIALRX
-             for (i=0;i<numOfSleepSlots-NUMSERIALRX;i++){
+             for (i=0;i<ieee154e_vars.numOfSleepSlots-NUMSERIALRX;i++){
                 incrementAsnOffset();
              }
          }
+         // set the timer based on calcualted number of slots to skip
+         radio_setTimerPeriod(TsSlotDuration*(ieee154e_vars.numOfSleepSlots));
          
 #ifdef ADAPTIVE_SYNC
          // deal with the case when schedule multi slots
@@ -2036,7 +2046,7 @@ void synchronizeAck(PORT_SIGNED_INT_WIDTH timeCorrection) {
 
    // resynchronize by applying the new period
    radio_setTimerPeriod(newPeriod);
-   
+
    // reset the de-synchronization timeout
    ieee154e_vars.deSyncTimeout    = DESYNCTIMEOUT;
 #ifdef ADAPTIVE_SYNC
