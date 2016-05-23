@@ -5,6 +5,7 @@ import subprocess
 import platform
 import distutils.sysconfig
 import sconsUtils
+from tools import qtcreator as q
 
 Import('env')
 
@@ -52,9 +53,8 @@ else:
         env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_ROOT')
     else:
         env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_NONE')
-        
 
-if   env['toolchain']=='mspgcc':
+if env['toolchain']=='mspgcc':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
@@ -362,6 +362,12 @@ elif env['toolchain']=='gcc':
 
 else:
     raise SystemError('unexpected toolchain {0}'.format(env['toolchain']))
+
+if env['ide']=='qtcreator':
+    print env['board']
+    q.QtCreatorManager().initialize(env['board'])
+else:
+    print env['ide']
     
     
 #============================ upload over JTAG ================================

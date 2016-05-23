@@ -232,7 +232,13 @@ class QtCreatorManager():
          
         print 'Board is "', self.platform
         
-    
+    def initialize(self,pt):
+        self.platform=pt
+        self.change_dir()
+       
+        self.qtcreator_prepare()
+        self.qtcreator_run()
+     
     # Main function
     def start(self,args):
         
