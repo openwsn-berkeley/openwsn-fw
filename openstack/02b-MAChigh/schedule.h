@@ -172,7 +172,7 @@ void              schedule_removeAllCells(
    uint8_t        slotframeID,
    open_addr_t*   previousHop
 );
-scheduleEntry_t*  schedule_getCurrentScheduleEntry();
+scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
