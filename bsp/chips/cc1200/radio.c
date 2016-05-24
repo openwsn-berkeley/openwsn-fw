@@ -99,17 +99,17 @@ void radio_rfOff(void) {
 //==== TX
 
 void radio_loadPacket(uint8_t* packet, uint8_t len) {
-
+    cc1200_load_packet(packet, len);
 }
 
 void radio_txNow(void) {
-
+    cc1200_transmit();
 }
 
 //==== RX
 
 void radio_rxEnable(void) {
-
+    cc1200_receive();
 }
 
 void radio_rxNow(void) {

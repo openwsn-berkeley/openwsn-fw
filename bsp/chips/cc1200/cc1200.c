@@ -130,6 +130,58 @@ void cc1200_configure(void) {
                                    cc1200_rf_cfg.size_of_register_settings);
 }
 
+void cc1200_set_power(int8_t power) {
+
+    cc1200_arch_spi_select();
+
+
+    cc1200_arch_spi_deselect();
+}
+
+void cc1200_set_frequency(uint8_t frequency) {
+
+    cc1200_arch_spi_select();
+
+
+    cc1200_arch_spi_deselect();
+}
+
+void cc1200_set_channel(uint8_t channel) {
+
+    cc1200_arch_spi_select();
+
+
+    cc1200_arch_spi_deselect();
+}
+
+void cc1200_load_packet(void) {
+    cc1200_arch_spi_select();
+
+
+    cc1200_arch_spi_deselect();
+}
+
+void cc1200_transmit(void) {
+    cc1200_arch_spi_select();
+
+
+    cc1200_arch_spi_deselect();
+}
+
+void cc1200_receive(void) {
+    cc1200_arch_spi_select();
+
+
+    cc1200_arch_spi_deselect();
+}
+
+void cc1200_get_packet(void) {
+    cc1200_arch_spi_select();
+
+
+    cc1200_arch_spi_deselect();
+}
+
 //====================== private =========================
 
 /**

@@ -43,6 +43,18 @@ void gpio_init(void) {
   // Initialize the gpio callbacks
   memset(gpio_callbacks, 0, sizeof(gpio_callbacks));
 
+  /* Set GPIOs as output */
+  GPIOPinTypeGPIOOutput(GPIO_A_BASE, 0xFF);
+  GPIOPinTypeGPIOOutput(GPIO_B_BASE, 0xFF);
+  GPIOPinTypeGPIOOutput(GPIO_C_BASE, 0xFF);
+  GPIOPinTypeGPIOOutput(GPIO_D_BASE, 0xFF);
+
+  /* Initialize GPIOs to low */
+  GPIOPinWrite(GPIO_A_BASE, 0xFF, 0x00);
+  GPIOPinWrite(GPIO_B_BASE, 0xFF, 0x00);
+  GPIOPinWrite(GPIO_C_BASE, 0xFF, 0x00);
+  GPIOPinWrite(GPIO_D_BASE, 0xFF, 0x00);
+
   // Register the GPIO interrupt handlers
   GPIOPortIntRegister(GPIO_A_BASE, gpio_a_interrupt);
   GPIOPortIntRegister(GPIO_B_BASE, gpio_b_interrupt);

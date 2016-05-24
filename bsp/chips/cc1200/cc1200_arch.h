@@ -25,6 +25,8 @@ void cc1200_arch_init(void);
 void cc1200_arch_spi_select(void);
 void cc1200_arch_spi_deselect(void);
 
+void cc1200_arch_clock_delay(uint32_t microseconds);
+
 uint8_t cc1200_arch_spi_rw_byte(uint8_t byte);
 void cc1200_arch_spi_rw(uint8_t* read, const uint8_t* write, uint16_t length);
 

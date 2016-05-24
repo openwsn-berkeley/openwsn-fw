@@ -44,6 +44,16 @@ void cc1200_idle(void);
 void cc1200_reset(void);
 void cc1200_configure(void);
 
+void cc1200_set_power(int8_t power);
+void cc1200_set_frequency(uint8_t freqyency);
+void cc1200_set_channel(uint8_t channel);
+
+void cc1200_load_packet(void);
+void cc1200_transmit(void);
+
+void cc1200_receive(void);
+void cc1200_get_packet(void);
+
 void cc1200_gpio0_interrupt(void);
 void cc1200_gpio2_interrupt(void);
 void cc1200_gpio3_interrupt(void);
