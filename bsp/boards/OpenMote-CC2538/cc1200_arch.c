@@ -128,7 +128,13 @@ void cc1200_arch_clock_delay(uint32_t microseconds) {
 }
 
 uint8_t cc1200_arch_spi_rw_byte(uint8_t byte) {
-    return 0;
+  uint8_t spi_tx_buffer[1];
+  uint8_t spi_rx_buffer[1];
+  spi_tx_buffer[0] = byte;
+  
+  spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer), SPI_FIRSTBYTE, spi_rx_buffer, sizeof(spi_rx_buffer), SPI_FIRST, SPI_LAST);
+  
+  return 0;
 }
 
 void cc1200_arch_spi_rw(uint8_t* read, const uint8_t* write, uint16_t length) {
