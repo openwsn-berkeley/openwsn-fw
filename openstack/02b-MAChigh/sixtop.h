@@ -102,6 +102,7 @@ bool      debugPrint_kaPeriod(void);
 bool      sixtop_is_trackequal(track_t track1, track_t track2);
 bool      sixtop_is_trackbesteffort(track_t track);
 track_t   sixtop_get_trackbesteffort(void);
+track_t   sixtop_get_trackcommon(void);
 
 
 

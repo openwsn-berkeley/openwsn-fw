@@ -67,7 +67,7 @@ void otf_addCell_task(void) {
    );
 }
 
-//TODO: handle tracks when monitoring the OTF requetss to do
+//TODO: handle tracks when monitoring the OTF requests to do
 
 void otf_removeCell_task(void) {
    open_addr_t          neighbor;
@@ -294,7 +294,7 @@ void otf_update_schedule(void){
    if (!sixtop_isIdle())
       return;
 
-#ifdef TRACK_ACTIVE
+#if (TRACK_MGMT == TRACK_ALLCOMMON)
 
 #ifdef OTF_AGRESSIVE
    otf_update_agressive();
@@ -311,7 +311,7 @@ void otf_notif_transmit(OpenQueueEntry_t* msg){
    if (!sixtop_isIdle())
       return;
 
-#ifdef TRACK_ACTIVE
+#if (TRACK_MGMT >= TRACK_ALLCOMMON)
 #ifdef OTF_AGRESSIVE
    otf_reserve_agressive_for(msg);
 #endif
@@ -337,7 +337,7 @@ void otf_notif_remove_parent(open_addr_t *parent){
    }
 
 
-#ifdef TRACK_ACTIVE
+#if (TRACK_MGMT >= TRACK_ALLCOMMON)
 #ifdef _DEBUG_OTF_
    char str[150];
    sprintf(str, "remove cells to old parent ");

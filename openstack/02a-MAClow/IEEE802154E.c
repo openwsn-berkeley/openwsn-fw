@@ -660,11 +660,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       //to print some parameters value to openvizualizer
       char str[150];
       sprintf(str, "PARAMS");
-#ifdef TRACK_ACTIVE
-      strncat(str, ":TRACK=1", 150);
-#else
-      strncat(str, ":TRACK=0", 150);
-#endif
+      strncat(str, ":TRACKS=", 150);
+      openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT, 150);
 #ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
       strncat(str, ":DCELLS=1", 150);
 #else

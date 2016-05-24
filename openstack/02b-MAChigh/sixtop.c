@@ -2042,4 +2042,13 @@ track_t sixtop_get_trackbesteffort(void){
 }
 
 
+//return the common track (uses dedicated cells toward the parent, but NO traffic isolation)
+track_t sixtop_get_trackcommon(void){
+   track_t track;
+
+   bzero(&(track.owner), sizeof(track.owner));
+   track.owner.type  = ADDR_64B;
+   track.instance    = (uint16_t)TRACK_ALLCOMMON;
+   return(track);
+}
 

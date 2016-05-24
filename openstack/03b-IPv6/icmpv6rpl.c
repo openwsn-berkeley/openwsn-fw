@@ -584,17 +584,33 @@ void sendDAO() {
 
    
    // set track for DAO
-#ifdef TRACK_ACTIVE
-   memcpy(msg->l2_track.owner.addr_64b, &(icmpv6rpl_vars.dio.DODAGID[8]), 8);
-   msg->l2_track.owner.type = ADDR_64B;
-   msg->l2_track.instance            = (uint16_t)TRACK_IMCPv6RPL;
-#else
-   bzero(&(msg->l2_track.owner), sizeof(msg->l2_track));
-   msg->l2_track.owner.type = ADDR_64B;
-   msg->l2_track.instance            = (uint16_t)0;
-#endif
+   switch(TRACK_MGMT){
+      case TRACK_MGMT_NO:
+         msg->l2_track = sixtop_get_trackbesteffort();
+         break;
 
+      case TRACK_MGMT_SHARED:
+         msg->l2_track = sixtop_get_trackcommon();
+         break;
 
+      case TRACK_MGMT_ISOLATION:
+         memcpy(msg->l2_track.owner.addr_64b, &(icmpv6rpl_vars.dio.DODAGID[8]), 8);
+         msg->l2_track.owner.type = ADDR_64B;
+         msg->l2_track.instance   = (uint16_t)TRACK_IMCPv6RPL;
+         break;
+
+      default:
+         sprintf(str, "Unrecognized TRACK_MGMT mode - RPL BUG ");
+         openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT, 150);
+         strncat(str, " / ", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT_NO, 150);
+         strncat(str, " / ", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT_SHARED, 150);
+         strncat(str, " / ", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT_ISOLATION, 150);
+         openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+         break;
+   }
 
    // set DAO destination
    msg->l3_destinationAdd.type=ADDR_128B;

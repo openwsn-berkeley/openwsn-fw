@@ -47,6 +47,7 @@ void    cexample_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 //=========================== public ==========================================
 
 void cexample_init() {
+   char str[150];
    
    // prepare the resource descriptor for the /ex path
    cexample_vars.desc.path0len             = sizeof(cexample_path0) - 1;
@@ -58,14 +59,34 @@ void cexample_init() {
    cexample_vars.desc.callbackSendDone     = &cexample_sendDone;
    cexample_vars.seqnum                    = ((uint32_t)openrandom_get16b() <<16) | ((uint32_t)openrandom_get16b());
 
+   //the track depends on the mode of the application
+   switch(TRACK_MGMT){
+      case TRACK_MGMT_NO:
+         cexample_vars.track = sixtop_get_trackbesteffort();
+         break;
 
-#ifdef TRACK_ACTIVE
-   //I am the owner of this track (8 bytes address)
-   memcpy(&(cexample_vars.track.owner), idmanager_getMyID(ADDR_64B), sizeof(open_addr_t));
-   cexample_vars.track.instance            = (uint16_t)TRACK_CEXAMPLE;
-#else
-    cexample_vars.track = sixtop_get_trackbesteffort();
-#endif
+      case TRACK_MGMT_SHARED:
+         cexample_vars.track = sixtop_get_trackcommon();
+       break;
+
+      case TRACK_MGMT_ISOLATION:
+            //I am the owner of this track (8 bytes address)
+         memcpy(&(cexample_vars.track.owner), idmanager_getMyID(ADDR_64B), sizeof(open_addr_t));
+         cexample_vars.track.instance            = (uint16_t)TRACK_CEXAMPLE;
+         break;
+
+      default:
+         sprintf(str, "Unrecognized TRACK_MGMT mode - CEXAMPLE BUG ");
+         openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT, 150);
+         strncat(str, " / ", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT_NO, 150);
+         strncat(str, " / ", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT_SHARED, 150);
+         strncat(str, " / ", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT_ISOLATION, 150);
+         openserial_printf(COMPONENT_CEXAMPLE, str, strlen(str));
+         break;
+   }
 
    opencoap_register(&cexample_vars.desc);
 
