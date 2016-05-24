@@ -8,15 +8,41 @@
 #ifndef __CC1200_H
 #define __CC1200_H
 
+#include <stdint.h>
+#include <stdbool.h>
+
 //=========================== defines =========================================
+
+typedef struct {
+  uint16_t address;
+  uint8_t value;
+} cc1200_register_settings_t;
+
+typedef struct {
+  const cc1200_register_settings_t* register_settings;
+  uint16_t size_of_register_settings;
+  uint32_t chan_center_freq0;
+  uint16_t chan_spacing;
+  uint8_t min_channel;
+  uint8_t max_channel;
+  int8_t min_txpower;
+  int8_t max_txpower;
+  int8_t cca_threshold;
+} cc1200_rf_cfg_t;
 
 typedef struct {
 } cc1200_status_t;
 
 //=========================== variables =======================================
 
-
 //=========================== prototypes ======================================
+
+void cc1200_init(void);
+bool cc1200_on(void);
+bool cc1200_off(void);
+void cc1200_idle(void);
+void cc1200_reset(void);
+void cc1200_configure(void);
 
 void cc1200_gpio0_interrupt(void);
 void cc1200_gpio2_interrupt(void);
