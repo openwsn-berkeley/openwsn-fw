@@ -132,13 +132,41 @@ uint8_t cc1200_arch_spi_rw_byte(uint8_t byte) {
   uint8_t spi_rx_buffer[1];
   spi_tx_buffer[0] = byte;
   
-  spi_txrx(spi_tx_buffer, sizeof(spi_tx_buffer), SPI_FIRSTBYTE, spi_rx_buffer, sizeof(spi_rx_buffer), SPI_FIRST, SPI_LAST);
+  spi_txrx(spi_tx_buffer, 
+          sizeof(spi_tx_buffer),
+          SPI_BUFFER, 
+          spi_rx_buffer, 
+          sizeof(spi_rx_buffer), 
+          SPI_FIRST, 
+          SPI_LAST);
   
-  return 0;
+  return spi_rx_buffer;
 }
 
 void cc1200_arch_spi_rw(uint8_t* read, const uint8_t* write, uint16_t length) {
+  uint8_t spi_tx_buffer[length];
+  uint8_t spi_rx_buffer[length];
+  
+  if (read == NULL){
 
+    spi_txrx(write,
+            length,
+            SPI_BUFFER,
+            (uint8_t*)spi_rx_buffer,
+            sizeof(spi_rx_buffer),
+            SPI_FIRST,
+            SPI_NOTLAST);
+
+  }
+  else if (write == NULL){
+    spi_txrx((uint8_t*)spi_tx_buffer,
+            sizeof(spi_rx_buffer),
+            SPI_BUFFER,
+            read,
+            length,
+            SPI_FIRST,
+            SPI_NOTLAST);
+  } 
 }
 
 //=========================== private =========================================
