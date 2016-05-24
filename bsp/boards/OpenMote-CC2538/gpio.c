@@ -29,13 +29,15 @@ static gpio_callback_t gpio_callbacks[32];
 
 //=========================== prototypes ======================================
 
+static uint32_t gpio_get_base(uint8_t port);
+
+static void gpio_notify_callback(uint8_t port, uint8_t mask);
+
+static void gpio_interrupt(uint8_t port);
 static void gpio_a_interrupt(void);
 static void gpio_b_interrupt(void);
 static void gpio_c_interrupt(void);
 static void gpio_d_interrupt(void);
-
-static uint32_t gpio_get_base(uint8_t port);
-static void gpio_notify_callback(uint8_t port, uint8_t mask);
 
 //=========================== public ==========================================
 
@@ -137,7 +139,6 @@ bool gpio_read(uint8_t port, uint8_t pin) {
 
 //=========================== private =========================================
 
-
 uint32_t gpio_get_base(uint8_t port) {
   uint32_t base;
   switch (port) {
@@ -176,70 +177,39 @@ void gpio_notify_callback(uint8_t port, uint8_t mask) {
 
 //=========================== callbacks =======================================
 
-
 //=========================== interrupt handlers ==============================
 
-
-void gpio_a_interrupt(void) {
+static void gpio_interrupt(uint8_t port) {
+  uint32_t base;
   uint8_t pin_status;
   uint8_t pow_status;
   uint8_t status;
 
-  pin_status = (uint8_t) GPIOPinIntStatus(GPIO_A_BASE, true);
-  pow_status = (uint8_t) GPIOPowIntStatus(GPIO_A_BASE, true);
+  base = gpio_get_base(port);
 
-  GPIOPinIntClear(GPIO_A_BASE, pin_status);
-  GPIOPowIntClear(GPIO_A_BASE, pow_status);
+  pin_status = (uint8_t) GPIOPinIntStatus(base, true);
+  pow_status = (uint8_t) GPIOPowIntStatus(base, true);
+
+  GPIOPinIntClear(base, pin_status);
+  GPIOPowIntClear(base, pow_status);
 
   status = pin_status | pow_status;
 
-  gpio_notify_callback(GPIO_A_PORT, status);
+  gpio_notify_callback(port, status);
 }
 
-void gpio_b_interrupt(void) {
-  uint8_t pin_status;
-  uint8_t pow_status;
-  uint8_t status;
-
-  pin_status = (uint8_t) GPIOPinIntStatus(GPIO_B_BASE, true);
-  pow_status = (uint8_t) GPIOPowIntStatus(GPIO_B_BASE, true);
-
-  GPIOPinIntClear(GPIO_B_BASE, pin_status);
-  GPIOPowIntClear(GPIO_B_BASE, pow_status);
-
-  status = pin_status | pow_status;
-
-  gpio_notify_callback(GPIO_B_PORT, status);
+static void gpio_a_interrupt(void) {
+  gpio_interrupt(GPIO_A_PORT);
 }
 
-void gpio_c_interrupt(void) {
-  uint8_t pin_status;
-  uint8_t pow_status;
-  uint8_t status;
-
-  pin_status = (uint8_t) GPIOPinIntStatus(GPIO_C_BASE, true);
-  pow_status = (uint8_t) GPIOPowIntStatus(GPIO_C_BASE, true);
-
-  GPIOPinIntClear(GPIO_C_BASE, pin_status);
-  GPIOPowIntClear(GPIO_C_BASE, pow_status);
-
-  status = pin_status | pow_status;
-
-  gpio_notify_callback(GPIO_C_PORT, status);
+static void gpio_b_interrupt(void) {
+  gpio_interrupt(GPIO_B_PORT);
 }
 
-void gpio_d_interrupt(void) {
-  uint8_t pin_status;
-  uint8_t pow_status;
-  uint8_t status;
+static void gpio_c_interrupt(void) {
+  gpio_interrupt(GPIO_C_PORT);
+}
 
-  pin_status = (uint8_t) GPIOPinIntStatus(GPIO_D_BASE, true);
-  pow_status = (uint8_t) GPIOPowIntStatus(GPIO_D_BASE, true);
-
-  GPIOPinIntClear(GPIO_D_BASE, pin_status);
-  GPIOPowIntClear(GPIO_D_BASE, pow_status);
-
-  status = pin_status | pow_status;
-
-  gpio_notify_callback(GPIO_D_PORT, status);
+static void gpio_d_interrupt(void) {
+  gpio_interrupt(GPIO_D_PORT);
 }
