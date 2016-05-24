@@ -47,9 +47,10 @@
 #include <headers/hw_gptimer.h>
 #include <headers/hw_ints.h>
 #include <headers/hw_memmap.h>
-#include "debug.h"
-#include "interrupt.h"
-#include "gptimer.h"
+
+#include <source/debug.h>
+#include <source/interrupt.h>
+#include <source/gptimer.h>
 
 //*****************************************************************************
 //

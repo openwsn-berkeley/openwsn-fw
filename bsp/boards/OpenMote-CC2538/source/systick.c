@@ -46,9 +46,10 @@
 
 #include <headers/hw_ints.h>
 #include <headers/hw_nvic.h>
-#include "debug.h"
-#include "interrupt.h"
-#include "systick.h"
+
+#include <source/debug.h>
+#include <source/interrupt.h>
+#include <source/systick.h>
 
 //*****************************************************************************
 //

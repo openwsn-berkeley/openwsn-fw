@@ -49,9 +49,10 @@
 #include <headers/hw_ints.h>
 #include <headers/hw_memmap.h>
 #include <headers/hw_sys_ctrl.h>
-#include "debug.h"
-#include "i2c_lib.h"
-#include "interrupt.h"
+
+#include <source/debug.h>
+#include <source/i2c.h>
+#include <source/interrupt.h>
 
 //*****************************************************************************
 //

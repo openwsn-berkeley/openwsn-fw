@@ -14,7 +14,7 @@
 #include <headers/hw_memmap.h>
 #include <headers/hw_types.h>
 
-#include <source/uarthal.h>
+#include <source/uart.h>
 #include <source/interrupt.h>
 #include <source/sys_ctrl.h>
 #include <source/gpio.h>

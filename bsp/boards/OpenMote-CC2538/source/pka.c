@@ -48,10 +48,11 @@
 #include <headers/hw_memmap.h>
 #include <headers/hw_pka.h>
 #include <headers/hw_types.h>
-#include "interrupt.h"
-#include "pka.h"
-#include "sys_ctrl.h"
-#include "debug.h"
+
+#include <source/interrupt.h>
+#include <source/pka.h>
+#include <source/sys_ctrl.h>
+#include <source/debug.h>
 
 //*****************************************************************************
 //

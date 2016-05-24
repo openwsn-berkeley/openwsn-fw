@@ -1,5 +1,5 @@
 /******************************************************************************
-*  Filename:       uarthal.h
+*  Filename:       uart.h
 *  Revised:        $Date: 2013-04-16 12:01:40 +0200 (Tue, 16 Apr 2013) $
 *  Revision:       $Revision: 9777 $
 *
@@ -37,8 +37,8 @@
 *
 ******************************************************************************/
 
-#ifndef __UARTHAL_H__
-#define __UARTHAL_H__
+#ifndef __UART_H__
+#define __UART_H__
 
 //*****************************************************************************
 //
@@ -216,4 +216,4 @@ extern void UART9BitAddrSend(uint32_t ui32Base, uint8_t ui8Addr);
 }
 #endif
 
-#endif //  __UARTHAL_H__
+#endif //  __UART_H__

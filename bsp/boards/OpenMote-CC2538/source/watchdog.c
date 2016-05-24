@@ -47,9 +47,10 @@
 #include <headers/hw_ints.h>
 #include <headers/hw_memmap.h>
 #include <headers/hw_smwdthrosc.h>
-#include "debug.h"
-#include "interrupt.h"
-#include "watchdog.h"
+
+#include <source/debug.h>
+#include <source/interrupt.h>
+#include <source/watchdog.h>
 
 //*****************************************************************************
 //

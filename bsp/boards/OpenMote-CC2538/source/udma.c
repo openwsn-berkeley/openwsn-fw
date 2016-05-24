@@ -47,9 +47,10 @@
 #include <headers/hw_sys_ctrl.h>
 #include <headers/hw_udma.h>
 #include <headers/hw_udmachctl.h>
-#include "debug.h"
-#include "interrupt.h"
-#include "udma.h"
+
+#include <source/debug.h>
+#include <source/interrupt.h>
+#include <source/udma.h>
 
 //*****************************************************************************
 //

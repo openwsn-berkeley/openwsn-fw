@@ -13,7 +13,7 @@
 #include <headers/hw_types.h>
 
 #include <source/gpio.h>
-#include <source/i2c_lib.h>
+#include <source/i2c.h>
 #include <source/ioc.h>
 #include <source/sys_ctrl.h>
 

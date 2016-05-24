@@ -48,11 +48,11 @@
 #include <headers/hw_ints.h>
 #include <headers/hw_nvic.h>
 #include <headers/hw_sys_ctrl.h>
-#include "cpu.h"
-#include "debug.h"
-#include "interrupt.h"
-#include "sys_ctrl.h"
 
+#include <source/cpu.h>
+#include <source/debug.h>
+#include <source/interrupt.h>
+#include <source/sys_ctrl.h>
 
 //*****************************************************************************
 //

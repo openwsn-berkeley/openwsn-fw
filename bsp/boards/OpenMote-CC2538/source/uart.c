@@ -48,9 +48,10 @@
 #include <headers/hw_memmap.h>
 #include <headers/hw_sys_ctrl.h>
 #include <headers/hw_uart.h>
-#include "debug.h"
-#include "interrupt.h"
-#include "uarthal.h"
+
+#include <source/debug.h>
+#include <source/interrupt.h>
+#include <source/uart.h>
 
 //*****************************************************************************
 //

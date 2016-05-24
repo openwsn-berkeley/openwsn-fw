@@ -44,8 +44,9 @@
 //
 //*****************************************************************************
 
-#include "aes.h"
-#include "sha256.h"
+#include <source/aes.h>
+#include <source/sha256.h>
+
 #include <string.h>
 
 static uint8_t SHA256HashResume(tSHA256State * psMd, uint8_t *ui8In, uint8_t *ui8Out);
