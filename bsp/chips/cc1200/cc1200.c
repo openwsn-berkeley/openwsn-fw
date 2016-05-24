@@ -117,7 +117,7 @@ void cc1200_reset(void) {
   cc1200_arch_spi_select();
 
   cc1200_arch_spi_rw_byte(CC1200_SRES);
-  // clock_delay(100);
+  cc1200_arch_clock_delay(150);
 
   cc1200_arch_spi_deselect();
 }

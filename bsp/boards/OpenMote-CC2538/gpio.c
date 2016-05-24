@@ -139,7 +139,7 @@ bool gpio_read(uint8_t port, uint8_t pin) {
 
 //=========================== private =========================================
 
-uint32_t gpio_get_base(uint8_t port) {
+static uint32_t gpio_get_base(uint8_t port) {
   uint32_t base;
   switch (port) {
     case GPIO_A_PORT:
@@ -161,7 +161,7 @@ uint32_t gpio_get_base(uint8_t port) {
   return base;
 }
 
-void gpio_notify_callback(uint8_t port, uint8_t mask) {
+static void gpio_notify_callback(uint8_t port, uint8_t mask) {
   gpio_callback_t* callback;
   uint8_t i;
 
