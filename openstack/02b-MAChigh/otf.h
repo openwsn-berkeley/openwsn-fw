@@ -23,7 +23,8 @@ void      otf_init(void);
 // notification from sixtop
 void      otf_notif_addedCell(void);
 void      otf_notif_removedCell(void);
-
+// notification from schedule
+void      otf_notifyNewSlotframe(void);
 /**
 \}
 \}

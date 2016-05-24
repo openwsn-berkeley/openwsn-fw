@@ -534,6 +534,28 @@ scheduleEntry_t* schedule_getCurrentScheduleEntry(){
     return schedule_vars.currentScheduleEntry;
 }
 
+//=== from otf
+uint8_t schedule_getNumOfSlotsByType(cellType_t type){
+   uint8_t returnVal;
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   returnVal = 0;
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(type == scheduleWalker->type){
+          returnVal += 1;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
+
 //=== from IEEE802154E: reading the schedule and updating statistics
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
@@ -555,7 +577,11 @@ void schedule_advanceSlot() {
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+   if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
+       ) {
+       // one slotframe has elapsed
+       otf_notifyNewSlotframe();
+   }   
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    
    ENABLE_INTERRUPTS();

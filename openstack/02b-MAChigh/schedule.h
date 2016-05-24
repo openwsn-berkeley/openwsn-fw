@@ -185,6 +185,7 @@ void              schedule_removeAllCells(
    open_addr_t*   previousHop
 );
 scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
+uint8_t           schedule_getNumOfSlotsByType(cellType_t type);
 
 // from IEEE802154E
 void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
