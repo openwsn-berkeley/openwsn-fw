@@ -16,7 +16,7 @@
 #include <source/gptimer.h>
 #include <source/sys_ctrl.h>
 #include <source/interrupt.h>
-#include <source/flash.h> 
+#include <source/flash.h>
 
 #include "clock.h"
 
@@ -43,7 +43,7 @@ void clock_init(void) {
 
   /* Set the IO clock to operate at 16 MHz */
   /* This way peripherals can run while the system clock is gated */
-  SysCtrlIOClockSet(SYS_CTRL_SYSDIV_16MHZ);
+  SysCtrlIOClockSet(SYS_CTRL_SYSDIV_32MHZ);
 
   /* Wait until the selected clock configuration is stable */
   while (!((HWREG(SYS_CTRL_CLOCK_STA)) & (SYS_CTRL_CLOCK_STA_XOSC_STB)));
@@ -60,9 +60,9 @@ void clock_init(void) {
  */
 uint32_t clock_get(void) {
   uint32_t current;
-  
+
   current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
-  
+
   return current;
 }
 
@@ -77,7 +77,7 @@ bool clock_expired(uint32_t future) {
   current = TimerValueGet(GPTIMER2_BASE, GPTIMER_A) >> 5;
 
   remaining = (int32_t) (future - current);
-  
+
   if (remaining > 0) {
     return false;
   } else {

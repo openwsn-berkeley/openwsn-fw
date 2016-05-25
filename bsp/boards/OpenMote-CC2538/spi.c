@@ -46,9 +46,6 @@
 #define SPI_CLK_PIN             ( GPIO_PIN_2 )
 #define SPI_CLK_IOC             ( IOC_MUX_OUT_SEL_SSI0_CLKOUT )
 
-#define SPI_nCS_BASE            ( GPIO_A_BASE )
-#define SPI_nCS_PIN             ( GPIO_PIN_3 )
-
 //=========================== variables =======================================
 
 typedef struct {
@@ -64,12 +61,9 @@ spi_vars_t spi_vars;
 
 //=========================== prototypes ======================================
 
-static void select(void);
-static void deselect(void);
-
 //=========================== public ==========================================
 
-void spi_init(void) {   
+void spi_init(void) {
   // Enable peripheral except in deep sleep modes (e.g. LPM1, LPM2, LPM3)
   SysCtrlPeripheralEnable(SPI_PERIPHERAL);
   SysCtrlPeripheralSleepEnable(SPI_PERIPHERAL);
@@ -90,15 +84,6 @@ void spi_init(void) {
   GPIOPinTypeSSI(SPI_MISO_BASE, SPI_MISO_PIN);
   GPIOPinTypeSSI(SPI_MOSI_BASE, SPI_MOSI_PIN);
   GPIOPinTypeSSI(SPI_CLK_BASE, SPI_CLK_PIN);
-
-  // Set the nCS pin as output low
-  GPIOPinTypeGPIOOutput(SPI_nCS_BASE, SPI_nCS_PIN);
-  if (SPI_PROTOCOL == SSI_FRF_MOTO_MODE_0 ||
-    SPI_PROTOCOL == SSI_FRF_MOTO_MODE_1) {
-    GPIOPinWrite(SPI_nCS_BASE, SPI_nCS_PIN, SPI_nCS_PIN);
-  } else {
-    GPIOPinWrite(SPI_nCS_BASE, SPI_nCS_PIN, 0);
-  }
 
   // Configure the SPI0 clock
   SSIConfigSetExpClk(SPI_BASE, SysCtrlIOClockGet(), SPI_PROTOCOL, \
@@ -130,9 +115,6 @@ void spi_txrx(uint8_t*     bufTx,
   // SPI is now busy
   spi_vars.busy = 1;
 
-  // Select the SPI device
-  select();
-
   // Wait until all bytes are transmitted
   while (spi_vars.txBytesLeft > 0) {
     // Push a byte
@@ -147,8 +129,8 @@ void spi_txrx(uint8_t*     bufTx,
 
     // Save the byte in the buffer, but
     // skip the first one since it's nonsense
-    if (spi_vars.numTxedBytes > 0) {
-      *spi_vars.pNextRxByte++ = data;  
+    if (spi_vars.numTxedBytes > 0 || lenbufTx == 1) {
+      *spi_vars.pNextRxByte++ = data;
     }
 
     // one byte less to go
@@ -156,32 +138,11 @@ void spi_txrx(uint8_t*     bufTx,
     spi_vars.txBytesLeft--;
   }
 
-  // Unselect the SPI device
-  deselect();
-
   // SPI is not busy anymore
   spi_vars.busy = 0;
 }
 
 //=========================== private =========================================
-
-static void select(void) {
-  if (SPI_PROTOCOL == SSI_FRF_MOTO_MODE_0 ||
-      SPI_PROTOCOL == SSI_FRF_MOTO_MODE_1) {
-    GPIOPinWrite(SPI_nCS_BASE, SPI_nCS_PIN, 0);
-  } else {
-    GPIOPinWrite(SPI_nCS_BASE, SPI_nCS_PIN, SPI_nCS_PIN);
-  }
-}
-
-static void deselect(void) {
-  if (SPI_PROTOCOL == SSI_FRF_MOTO_MODE_0 ||
-      SPI_PROTOCOL == SSI_FRF_MOTO_MODE_1) {
-    GPIOPinWrite(SPI_nCS_BASE, SPI_nCS_PIN, SPI_nCS_PIN);
-  } else {
-    GPIOPinWrite(SPI_nCS_BASE, SPI_nCS_PIN, 0);
-  }
-}
 
 //=========================== interrupt handlers ==============================
 

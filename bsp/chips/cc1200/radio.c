@@ -17,13 +17,6 @@
 
 //=========================== variables =======================================
 
-typedef struct {
-   cc1200_status_t radioStatusByte;
-   radio_state_t   state;
-} radio_vars_t;
-
-radio_vars_t radio_vars;
-
 //=========================== prototypes ======================================
 
 void radio_spiStrobe     (uint8_t strobe, cc1200_status_t* statusRead);
@@ -37,10 +30,8 @@ void radio_spiReadRxFifo (                cc1200_status_t* statusRead, uint8_t* 
 //==== admin
 
 void radio_init(void) {
-  // Clear variables
-  memset(&radio_vars, 0, sizeof(radio_vars_t));
-
   cc1200_init();
+
 }
 
 void radio_setOverflowCb(radiotimer_compare_cbt cb) {

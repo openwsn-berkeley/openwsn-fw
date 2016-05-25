@@ -7,7 +7,7 @@ Import('env')
 
 localEnv = env.Clone()
 
-source = ['cc1200.c']
+source = ['cc1200.c', 'cc1200_conf.c']
 cc1200 = localEnv.Object(
    source=source,
 )

@@ -28,6 +28,7 @@
 #include "radio.h"
 #include "i2c.h"
 #include "sensors.h"
+#include "spi.h"
 
 #include "antenna.h"
 #include "button.h"
@@ -71,6 +72,7 @@ void board_init(void) {
   uart_init();
   radio_init();
   i2c_init();
+  spi_init();
   sensors_init();
 }
 

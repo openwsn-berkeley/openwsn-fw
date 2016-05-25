@@ -17,6 +17,7 @@
 #include "gpio.h"
 #include "board.h"
 #include "clock.h"
+#include "spi.h"
 
 #include "cc1200_arch.h"
 
@@ -34,7 +35,11 @@
 #define CC1200_GPIO3_PORT                 ( GPIO_D_PORT )
 #define CC1200_GPIO3_PIN                  ( GPIO_PIN_0 )
 
+#define CC1200_SPI_BUFFER_LENGTH    	  ( 128 )
+
 //=========================== variables =======================================
+
+static uint8_t cc1200_spi_buffer[CC1200_SPI_BUFFER_LENGTH];
 
 //=========================== prototypes ======================================
 
@@ -43,7 +48,7 @@
 void cc1200_arch_init(void) {
   /* Configure the SPI chip select pin */
   gpio_config_output(CC1200_SPI_CS_PORT, CC1200_SPI_CS_PIN);
-  gpio_off(CC1200_SPI_CS_PORT, CC1200_SPI_CS_PIN);
+  gpio_on(CC1200_SPI_CS_PORT, CC1200_SPI_CS_PIN);
 }
 
 void cc1200_arch_gpio0_setup(bool rising) {
@@ -110,11 +115,11 @@ bool cc1200_arch_gpio3_read(void) {
 }
 
 void cc1200_arch_spi_select(void) {
-  gpio_on(CC1200_SPI_CS_PORT, CC1200_SPI_CS_PIN);
+  gpio_off(CC1200_SPI_CS_PORT, CC1200_SPI_CS_PIN);
 }
 
 void cc1200_arch_spi_deselect(void) {
-  gpio_off(CC1200_SPI_CS_PORT, CC1200_SPI_CS_PIN);
+  gpio_on(CC1200_SPI_CS_PORT, CC1200_SPI_CS_PIN);
 }
 
 void cc1200_arch_clock_delay(uint32_t microseconds) {
@@ -128,45 +133,44 @@ void cc1200_arch_clock_delay(uint32_t microseconds) {
 }
 
 uint8_t cc1200_arch_spi_rw_byte(uint8_t byte) {
-  uint8_t spi_tx_buffer[1];
-  uint8_t spi_rx_buffer[1];
-  spi_tx_buffer[0] = byte;
-  
-  spi_txrx(spi_tx_buffer, 
-          sizeof(spi_tx_buffer),
-          SPI_BUFFER, 
-          spi_rx_buffer, 
-          sizeof(spi_rx_buffer), 
-          SPI_FIRST, 
-          SPI_LAST);
-  
-  return spi_rx_buffer;
+  uint8_t result;
+
+  spi_txrx(&byte, 1,
+           SPI_BUFFER,
+           &result, 1,
+           SPI_FIRST,
+           SPI_LAST);
+
+  return result;
 }
 
-void cc1200_arch_spi_rw(uint8_t* read, const uint8_t* write, uint16_t length) {
-  uint8_t spi_tx_buffer[length];
-  uint8_t spi_rx_buffer[length];
-  
-  if (read == NULL){
-
+void cc1200_arch_spi_rw(uint8_t* read, uint8_t* write, uint16_t length) {
+  if (read == NULL) {
     spi_txrx(write,
-            length,
-            SPI_BUFFER,
-            (uint8_t*)spi_rx_buffer,
-            sizeof(spi_rx_buffer),
-            SPI_FIRST,
-            SPI_NOTLAST);
+             length,
+             SPI_BUFFER,
+             cc1200_spi_buffer,
+             sizeof(cc1200_spi_buffer),
+             SPI_FIRST,
+             SPI_NOTLAST);
 
+  } else if (write == NULL) {
+    spi_txrx(cc1200_spi_buffer,
+             sizeof(cc1200_spi_buffer),
+             SPI_BUFFER,
+             read,
+             length,
+             SPI_FIRST,
+             SPI_NOTLAST);
+  } else {
+    spi_txrx(write,
+             length,
+             SPI_BUFFER,
+             read,
+             length,
+             SPI_FIRST,
+             SPI_NOTLAST);
   }
-  else if (write == NULL){
-    spi_txrx((uint8_t*)spi_tx_buffer,
-            sizeof(spi_rx_buffer),
-            SPI_BUFFER,
-            read,
-            length,
-            SPI_FIRST,
-            SPI_NOTLAST);
-  } 
 }
 
 //=========================== private =========================================
