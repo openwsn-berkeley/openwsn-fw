@@ -7,8 +7,7 @@ monitor flash breakpoints = 1
 monitor flash download = 1
 monitor reset
 load
-monitor reset
-monitor halt
 break main
 continue
+
 
