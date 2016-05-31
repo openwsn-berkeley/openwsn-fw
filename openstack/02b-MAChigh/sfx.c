@@ -4,6 +4,7 @@
 #include "sixtop.h"
 #include "scheduler.h"
 #include "schedule.h"
+#include "openqueue.h"
 
 //=========================== definition ======================================
 
@@ -30,7 +31,7 @@ void sfx_removeCell_task(void);
 //=========================== public ==========================================
 
 void sfx_init(void) {
-    sfx_vars.periodMaintenance = CELL_USAGE_CALCULATION_WINDOWS;
+    sfx_vars.periodMaintenance = 0;
 }
 
 void sfx_notif_addedCell(void) {
@@ -86,6 +87,12 @@ void sfx_notifyNewSlotframe(void){
    bool                 foundNeighbor;
    uint16_t             numberOfCells;
    uint16_t             cellUsage;
+   OpenQueueEntry_t*    entry;
+   
+   if (sfx_vars.periodMaintenance>0){
+      sfx_vars.periodMaintenance -= 1;
+      return;
+   }
    
    // get preferred parent
    foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
@@ -98,13 +105,18 @@ void sfx_notifyNewSlotframe(void){
    cellUsage = schedule_getTotalCellUsageStatus();
    
    if (numberOfCells==0){
-       sixtop_setHandler(SIX_HANDLER_SFX);
-       // call sixtop
-       sixtop_request(
-          IANA_6TOP_CMD_ADD,
-          &neighbor,
-          1
-       );
+       entry = openqueue_getIpPacket();
+       if (entry!=NULL ){
+           sixtop_setHandler(SIX_HANDLER_SFX);
+           // call sixtop
+           sixtop_request(
+              IANA_6TOP_CMD_ADD,
+              &neighbor,
+              1
+           );
+       }
+       sfx_vars.periodMaintenance = CELL_USAGE_CALCULATION_WINDOWS;
+       return;
    }
    
    

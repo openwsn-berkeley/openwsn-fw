@@ -196,26 +196,59 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
       // a neighbor is specified, look for a packet unicast to that neigbhbor
       for (i=0;i<QUEUELENGTH;i++) {
          if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
+            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)&&
+            openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP_RES
+          ) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
       }
    } else if (toNeighbor->type==ADDR_ANYCAST) {
-      // anycast case: look for a packet which is either not created by RES
-      // or an KA (created by RES, but not broadcast)
+      // anycast case: look for a packet which is created by sixtop or DIO
       for (i=0;i<QUEUELENGTH;i++) {
          if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-             ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
-                (
+             (  // 6p packet
+                openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES
+                 ||
+                (  // KA
                    openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
                    packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
                 )
+                 ||
+                (  // DIO
+                   openqueue_vars.queue[i].creator==COMPONENT_ICMPv6RPL &&
+                   packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==TRUE
+                )
              )
-            ) {
+         ) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
+      }
+   }
+   ENABLE_INTERRUPTS();
+   return NULL;
+}
+
+OpenQueueEntry_t* openqueue_getIpPacket(){
+   uint8_t i;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++){
+      if (openqueue_vars.queue[i].creator==COMPONENT_CSTORM) {
+         ENABLE_INTERRUPTS();
+         return &openqueue_vars.queue[i];
+      } else {
+        if (openqueue_vars.queue[i].creator==COMPONENT_FORWARDING){
+           ENABLE_INTERRUPTS();
+           return &openqueue_vars.queue[i];
+        } else {
+           if (openqueue_vars.queue[i].creator==COMPONENT_ICMPv6RPL){
+              if (packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE)
+              ENABLE_INTERRUPTS();
+              return &openqueue_vars.queue[i];
+           }
+        }
       }
    }
    ENABLE_INTERRUPTS();
