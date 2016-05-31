@@ -20,6 +20,8 @@ static const uint8_t dst_addr[]   = {
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
 
+#define CSTORM_PERIOD 30000 // ms
+
 //=========================== variables =======================================
 
 cstorm_vars_t cstorm_vars;
@@ -31,7 +33,7 @@ owerror_t cstorm_receive(
    coap_header_iht*  coap_header,
    coap_option_iht*  coap_options
 );
-void cstorm_timer_cb(void);
+void cstorm_timer_cb(opentimer_id_t id);
 void cstorm_task_cb(void);
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 
@@ -50,12 +52,11 @@ void cstorm_init(void) {
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
    opencoap_register(&cstorm_vars.desc);
    
-   /*
    //start a periodic timer
    //comment : not running by default
-   cstorm_vars.period           = 6553; 
+   cstorm_vars.period           = CSTORM_PERIOD - 0x80 + (openrandom_get16b()&0xff); 
    
-   cstorm_vars.timerId                    = opentimers_start(
+   cstorm_vars.timerId          = opentimers_start(
       cstorm_vars.period,
       TIMER_PERIODIC,TIME_MS,
       cstorm_timer_cb
@@ -63,7 +64,7 @@ void cstorm_init(void) {
    
    //stop 
    //opentimers_stop(cstorm_vars.timerId);
-   */
+   
 }
 
 //=========================== private =========================================
@@ -141,8 +142,14 @@ owerror_t cstorm_receive(
 \note timer fired, but we don't want to execute task in ISR mode instead, push
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
-void cstorm_timer_cb(){
+void cstorm_timer_cb(opentimer_id_t id){
    scheduler_push_task(cstorm_task_cb,TASKPRIO_COAP);
+   cstorm_vars.period = CSTORM_PERIOD - 0x80 + (openrandom_get16b()&0xff); 
+   opentimers_setPeriod(
+      cstorm_vars.timerId,
+      TIME_MS,
+      cstorm_vars.period
+   );
 }
 
 void cstorm_task_cb() {
