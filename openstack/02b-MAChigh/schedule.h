@@ -100,6 +100,8 @@ typedef struct {
    uint8_t         numTx;
    uint8_t         numTxACK;
    asn_t           lastUsedAsn;
+   uint16_t        usageBitMap;
+   uint8_t         bitMapIndex;
    void*           next;
 } scheduleEntry_t;
 
@@ -173,6 +175,8 @@ owerror_t          schedule_removeActiveSlot(
    open_addr_t*         neighbor
 );
 bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
+uint8_t            schedule_getUsageStatus(scheduleEntry_t* entry);
+
 // return the slot info which has a poor quality
 scheduleEntry_t*  schedule_statistic_poorLinkQuality(void);
 uint16_t          schedule_getCellsCounts(
@@ -203,6 +207,8 @@ void               schedule_indicateTx(
                         asn_t*    asnTimestamp,
                         bool      succesfullTx
                    );
+
+void               schedule_updateCellUsageBitMap(bool hasPacketToSend);
 
 /**
 \}

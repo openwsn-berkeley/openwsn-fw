@@ -6,6 +6,10 @@
 #include "sixtop.h"
 #include "idmanager.h"
 
+//=========================== definition ======================================
+
+#define CELL_USAGE_CALCULATION_WINDOWS  5
+
 //=========================== variables =======================================
 
 schedule_vars_t schedule_vars;
@@ -461,6 +465,20 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
+uint8_t schedule_getUsageStatus(scheduleEntry_t* entry){
+    uint8_t  count;
+    uint16_t bm;
+    
+    count = 0;
+    bm = entry->usageBitMap;
+    
+    while (bm>0){
+        count = count+1;
+        bm    = bm & (bm-1);
+    }
+    return count;
+}
+
 scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    scheduleEntry_t* scheduleWalker;
    
@@ -798,6 +816,17 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
    ENABLE_INTERRUPTS();
 }
 
+void schedule_updateCellUsageBitMap(bool hasPacketToSend){
+    
+    schedule_vars.currentScheduleEntry->bitMapIndex += 1;
+    if (schedule_vars.currentScheduleEntry->bitMapIndex == CELL_USAGE_CALCULATION_WINDOWS){
+        schedule_vars.currentScheduleEntry->bitMapIndex = 0;
+    }
+    schedule_vars.currentScheduleEntry->usageBitMap = (
+         (uint8_t)hasPacketToSend << schedule_vars.currentScheduleEntry->bitMapIndex
+    ) | schedule_vars.currentScheduleEntry->usageBitMap;
+}
+
 //=========================== private =========================================
 
 /**
@@ -818,5 +847,9 @@ void schedule_resetEntry(scheduleEntry_t* e) {
    e->lastUsedAsn.bytes0and1 = 0;
    e->lastUsedAsn.bytes2and3 = 0;
    e->lastUsedAsn.byte4      = 0;
+   
+   e->usageBitMap            = 0;
+   e->bitMapIndex            = 0;
+   
    e->next                   = NULL;
 }

@@ -936,6 +936,16 @@ port_INLINE void activity_ti1ORri1() {
                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
             }
          }
+         
+         // udpate cell usgae bitmap, set as true if I have packet to send on Tx cell
+         if (cellType==CELLTYPE_TX){
+             if (ieee154e_vars.dataToSend==NULL) {
+                 schedule_updateCellUsageBitMap(FALSE);
+             } else {
+                 schedule_updateCellUsageBitMap(TRUE);
+             }
+         }
+         
          if (ieee154e_vars.dataToSend==NULL) {
             if (cellType==CELLTYPE_TX) {
                // abort
