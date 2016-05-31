@@ -262,7 +262,7 @@ enum {
    ERR_INPUTBUFFER_LENGTH              = 0x34, // input length problem, length={0}
    ERR_BOOTED                          = 0x35, // booted
    ERR_INVALIDSERIALFRAME              = 0x36, // invalid serial frame
-   ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet frome radio, length {1} (code location {0})
+   ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet from radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
    ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
@@ -297,11 +297,6 @@ enum{
    TRACK_MGMT_SHARED       = 1,  // all the applications use the same track (with dedicated cells)
    TRACK_MGMT_ISOLATION    = 2   // each application may have its own dedicated track
 };
-
-//Traffic isolation is the default behavior
-#ifndef TRACK_MGMT
-   #define TRACK_MGMT TRACK_MGMT_ISOLATION
-#endif
 
 
 //the different track instances (reserved ids)

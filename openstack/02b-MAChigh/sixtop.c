@@ -1147,6 +1147,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
    );
 
    // timeout timer fired, reset the state of sixtop to idle
+   openqueue_removeAllCreatedBy(COMPONENT_SIXTOP_RES);
    sixtop_setState(SIX_IDLE);
 }
 
@@ -1612,13 +1613,13 @@ void sixtop_linkResponse(
       bw = 0;
 
       // set SubFrameAndLinkIE
-      len += processIE_prependBlacklistIE(
+      /*len += processIE_prependBlacklistIE(
             sixtopPkt,
             type,
             frameID,
             flag,
             cellList);
-
+*/
    }
    //add BandwidthIE
    len += processIE_prependBandwidthIE(sixtopPkt,bw,frameID, track);
@@ -1681,7 +1682,7 @@ void sixtop_notifyReceiveLinkResponse(
             );
 
 #ifdef _DEBUG_SIXTOP_
-        strncat(str, " slot=", 150);
+         strncat(str, " slot=", 150);
          openserial_ncat_uint32_t(str, (uint32_t)blacklist_ie->cellList[i].tsNum, 150);
          strncat(str, " & choff=", 150);
          openserial_ncat_uint32_t(str, (uint32_t)blacklist_ie->cellList[i].choffset, 150);

@@ -66,6 +66,13 @@ See MINBE for an explanation of backoff.
 #define PDR_THRESHOLD      80 // 80 means 80%
 #define MIN_NUMTX_FOR_PDR  10 // don't calculate PDR when numTx is lower than this value
 
+
+
+/**
+\brief to distribute uniformly the shared cells instead of placing all of them at the beginning of the slotframe (should be configured via scons)
+*/
+//#define  SCHEDULE_SHAREDCELLS_DISTRIBUTED
+
 //=========================== typedef =========================================
 
 typedef uint8_t    channelOffset_t;

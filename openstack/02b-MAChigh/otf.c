@@ -290,11 +290,20 @@ void otf_remove_unused_cells(void){
 
 //updates the schedule
 void otf_update_schedule(void){
+/*
+
+   char str[150];
+   sprintf(str, "OTF updateSchedule, ");
+   strncat(str, "isIdle=", 150);
+   openserial_ncat_uint32_t(str, (uint32_t)sixtop_isIdle(), 150);
+   openserial_printf(COMPONENT_OTF, str, strlen(str));
+*/
+
    //I MUST be idle
    if (!sixtop_isIdle())
       return;
 
-#if (TRACK_MGMT == TRACK_ALLCOMMON)
+#if (TRACK_MGMT > TRACK_MGMT_NO)
 
 #ifdef OTF_AGRESSIVE
    otf_update_agressive();
@@ -311,7 +320,7 @@ void otf_notif_transmit(OpenQueueEntry_t* msg){
    if (!sixtop_isIdle())
       return;
 
-#if (TRACK_MGMT >= TRACK_ALLCOMMON)
+#if (TRACK_MGMT > TRACK_MGMT_NO)
 #ifdef OTF_AGRESSIVE
    otf_reserve_agressive_for(msg);
 #endif
@@ -337,7 +346,7 @@ void otf_notif_remove_parent(open_addr_t *parent){
    }
 
 
-#if (TRACK_MGMT >= TRACK_ALLCOMMON)
+#if (TRACK_MGMT > TRACK_MGMT_NO)
 #ifdef _DEBUG_OTF_
    char str[150];
    sprintf(str, "remove cells to old parent ");
