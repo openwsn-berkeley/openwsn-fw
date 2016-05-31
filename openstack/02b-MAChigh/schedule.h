@@ -176,7 +176,7 @@ owerror_t          schedule_removeActiveSlot(
 );
 bool               schedule_isSlotOffsetAvailable(uint16_t slotOffset);
 uint8_t            schedule_getUsageStatus(scheduleEntry_t* entry);
-uint16_t           schedule_getTotalCellUsageStatus();
+uint16_t           schedule_getTotalCellUsageStatus(cellType_t type, open_addr_t* neighbor);
 // return the slot info which has a poor quality
 scheduleEntry_t*  schedule_statistic_poorLinkQuality(void);
 uint16_t          schedule_getCellsCounts(

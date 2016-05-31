@@ -107,9 +107,11 @@ void sfx_notifyNewSlotframe(void){
       return;
    }
    
-   numberOfCells = schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
-            CELLTYPE_TX,&neighbor);
-   cellUsage = schedule_getTotalCellUsageStatus();
+   numberOfCells = schedule_getCellsCounts(
+            SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+            CELLTYPE_TX,
+            &neighbor);
+   cellUsage = schedule_getTotalCellUsageStatus(CELLTYPE_TX,&neighbor);
    
    if (numberOfCells==0){
        entry = openqueue_getIpPacket();
@@ -144,16 +146,20 @@ void sfx_notifyNewSlotframe(void){
        );
    } else {
      if (cellUsage/numberOfCells<=SFX_DELETE_THRESHOLD){
+         if (numberOfCells>1){
 #ifdef SFX_DEBUG
-         printf("remove one\n");
+             printf("remove one\n");
 #endif
-         sixtop_setHandler(SIX_HANDLER_SFX);
-         // call sixtop
-         sixtop_request(
-            IANA_6TOP_CMD_DELETE,
-            &neighbor,
-            1
-         );
+             sixtop_setHandler(SIX_HANDLER_SFX);
+             // call sixtop
+             sixtop_request(
+                IANA_6TOP_CMD_DELETE,
+                &neighbor,
+                1
+             );
+         } else {
+           // at least one dedicate slot for sixtop
+         }
      } else {
         // nothing happens
      }

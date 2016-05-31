@@ -927,7 +927,7 @@ port_INLINE void activity_ti1ORri1() {
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
          // check whether we can send
-         if (schedule_getOkToSend()) {
+         if (schedule_getOkToSend() || cellType==CELLTYPE_TX) {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
             if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {

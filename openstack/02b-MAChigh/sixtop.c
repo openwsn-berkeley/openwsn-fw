@@ -959,6 +959,17 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             );
             sixtop_request(IANA_6TOP_CMD_ADD,&(msg->l2_nextORpreviousHop),1);
             sixtop_vars.handler = SIX_HANDLER_NONE;
+        } else {
+            if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_RX,&(msg->l2_nextORpreviousHop))>0 &&
+                schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&(msg->l2_nextORpreviousHop))==0
+            ){
+               sixtop_vars.handler = SIX_HANDLER_SFX;
+               sixtop_request(
+                  IANA_6TOP_CMD_ADD,
+                  &(msg->l2_nextORpreviousHop),
+                  1
+               );
+            }
         }
         break;
     default:

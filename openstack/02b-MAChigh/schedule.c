@@ -478,7 +478,7 @@ uint8_t schedule_getUsageStatus(scheduleEntry_t* entry){
     return count;
 }
 
-uint16_t schedule_getTotalCellUsageStatus(){
+uint16_t schedule_getTotalCellUsageStatus(cellType_t type, open_addr_t* neighbor){
    uint16_t usageCount = 0;
    uint16_t debugCount = 0;
    scheduleEntry_t* scheduleWalker;
@@ -488,11 +488,14 @@ uint16_t schedule_getTotalCellUsageStatus(){
    
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
-      if(scheduleWalker->type == CELLTYPE_TX){
+       if(
+          packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor) &&
+          type == scheduleWalker->type
+       ){
           debugCount  = schedule_getUsageStatus(scheduleWalker);
           usageCount += schedule_getUsageStatus(scheduleWalker);
-      }
-      scheduleWalker = scheduleWalker->next;
+       }
+       scheduleWalker = scheduleWalker->next;
    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
    
    ENABLE_INTERRUPTS();
@@ -591,14 +594,31 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 \brief advance to next active slot
 */
 void schedule_advanceSlot() {
-   
+   scheduleEntry_t* scheduleWalker; 
+  
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
        ) {
        // one slotframe has elapsed
+        scheduleWalker = schedule_vars.currentScheduleEntry;
+        do {
+            if (
+                scheduleWalker->type == CELLTYPE_TX ||
+                scheduleWalker->type == CELLTYPE_RX
+            ){      
+                printf("Mote %d Neighbor %d Slot %d Type %d Usage %d\n",
+                       idmanager_getMyID(ADDR_16B)->addr_16b[1],
+                       scheduleWalker->neighbor.addr_64b[7],
+                       scheduleWalker->slotOffset,
+                       scheduleWalker->type,
+                       schedule_getUsageStatus(scheduleWalker)
+                );
+            }
+            scheduleWalker = scheduleWalker->next;
+        }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
        sfx_notifyNewSlotframe();
-   } 
+   }
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    
    ENABLE_INTERRUPTS();
@@ -857,7 +877,12 @@ void schedule_updateCellUsageBitMap(bool hasPacketToSend){
     }
 #ifdef SCHEDULE_DEBUG
     if(idmanager_getIsDAGroot()==FALSE){
-        printf ("slot %d usage %d\n",schedule_vars.currentScheduleEntry->slotOffset,schedule_getUsageStatus(schedule_vars.currentScheduleEntry));
+        printf ("mote %d slot %d neighbor %d usage %d\n",
+          idmanager_getMyID(ADDR_16B)->addr_16b[1],
+          schedule_vars.currentScheduleEntry->slotOffset,
+          schedule_vars.currentScheduleEntry->neighbor.addr_64b[7],
+          schedule_getUsageStatus(schedule_vars.currentScheduleEntry)
+        );
     }
 #endif
 }
