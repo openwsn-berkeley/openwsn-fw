@@ -5,8 +5,11 @@
 #include "scheduler.h"
 #include "schedule.h"
 #include "openqueue.h"
+#include "idmanager.h"
 
 //=========================== definition ======================================
+
+#define SFX_DEBUG
 
 // the threshold here is a relative ratio to CELL_USAGE_CALCULATION_WINDOWS (schedule.c)
 // those value must be less than CELL_USAGE_CALCULATION_WINDOWS. If the cell usage is 
@@ -107,6 +110,9 @@ void sfx_notifyNewSlotframe(void){
    if (numberOfCells==0){
        entry = openqueue_getIpPacket();
        if (entry!=NULL ){
+#ifdef SFX_DEBUG
+           printf("no cell and I have packet\n");
+#endif
            sixtop_setHandler(SIX_HANDLER_SFX);
            // call sixtop
            sixtop_request(
@@ -122,6 +128,9 @@ void sfx_notifyNewSlotframe(void){
    
    // cell usage scheduling, bandwith estimation algorithm
    if (cellUsage/numberOfCells>=SFX_ADD_THRESHOLD){
+#ifdef SFX_DEBUG
+       printf("reserve one\n");
+#endif
        sixtop_setHandler(SIX_HANDLER_SFX);
        // call sixtop
        sixtop_request(
@@ -131,6 +140,9 @@ void sfx_notifyNewSlotframe(void){
        );
    } else {
      if (cellUsage/numberOfCells<=SFX_DELETE_THRESHOLD){
+#ifdef SFX_DEBUG
+         printf("remove one\n");
+#endif
          sixtop_setHandler(SIX_HANDLER_SFX);
          // call sixtop
          sixtop_request(

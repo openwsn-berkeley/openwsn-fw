@@ -8,7 +8,7 @@
 #include "sfx.h"
 
 //=========================== definition ======================================
-
+#define SCHEDULE_DEBUG
 //=========================== variables =======================================
 
 schedule_vars_t schedule_vars;
@@ -480,6 +480,7 @@ uint8_t schedule_getUsageStatus(scheduleEntry_t* entry){
 
 uint16_t schedule_getTotalCellUsageStatus(){
    uint16_t usageCount = 0;
+   uint16_t debugCount = 0;
    scheduleEntry_t* scheduleWalker;
    
    INTERRUPT_DECLARATION();
@@ -488,6 +489,7 @@ uint16_t schedule_getTotalCellUsageStatus(){
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
       if(scheduleWalker->type == CELLTYPE_TX){
+          debugCount  = schedule_getUsageStatus(scheduleWalker);
           usageCount += schedule_getUsageStatus(scheduleWalker);
       }
       scheduleWalker = scheduleWalker->next;
@@ -840,14 +842,24 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
 }
 
 void schedule_updateCellUsageBitMap(bool hasPacketToSend){
-    
+    uint16_t temp;  
+  
     schedule_vars.currentScheduleEntry->bitMapIndex += 1;
     if (schedule_vars.currentScheduleEntry->bitMapIndex == CELL_USAGE_CALCULATION_WINDOWS){
         schedule_vars.currentScheduleEntry->bitMapIndex = 0;
     }
-    schedule_vars.currentScheduleEntry->usageBitMap = (
-         (uint8_t)hasPacketToSend << schedule_vars.currentScheduleEntry->bitMapIndex
-    ) | schedule_vars.currentScheduleEntry->usageBitMap;
+    
+    temp = (uint16_t)1 << schedule_vars.currentScheduleEntry->bitMapIndex;
+    if (hasPacketToSend) {
+        schedule_vars.currentScheduleEntry->usageBitMap |= temp;
+    } else {
+        schedule_vars.currentScheduleEntry->usageBitMap &= ~temp;
+    }
+#ifdef SCHEDULE_DEBUG
+    if(idmanager_getIsDAGroot()==FALSE){
+        printf ("slot %d usage %d\n",schedule_vars.currentScheduleEntry->slotOffset,schedule_getUsageStatus(schedule_vars.currentScheduleEntry));
+    }
+#endif
 }
 
 //=========================== private =========================================
