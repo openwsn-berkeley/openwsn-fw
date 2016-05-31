@@ -143,10 +143,10 @@ command_line_options = {
     'l2_security':      ['0','1'],
     'goldenImage':      ['none','root','sniffer'],
     'distribshared':    ['0','1'],
-    'tracks':           ['0','1','2'],	  #0=only TXRX, 1=one single track, 2=traffic isolation
-    'rplmetric':        ['1','2','3','4'],
-    'cex_period':       ['5000'],         #by default, 5 seconds
-    'schedalgo':        ['1','2'],        #by default, random
+    'tracks':           ['0','1','2'],	 	# 0=only TXRX, 1=one single track, 2=traffic isolation (default behavior)
+    'rplmetric':        ['1'],			# 1=ETX (default)
+    'cex_period':       ['5000'],         	# by default, 5 seconds
+    'schedalgo':        ['1'],        		# 1=random (default)
 
 }
 
@@ -303,14 +303,14 @@ command_line_vars.AddVariables(
     (
         'distribshared',                                   # key
         '',                                                # help
-        command_line_options['distribshared'][0],          # default
+        command_line_options['distribshared'][1],          # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
     (
         'tracks',                                          # key
         '',                                                # help
-        command_line_options['tracks'][0],                 # default
+        command_line_options['tracks'][2],                 # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
