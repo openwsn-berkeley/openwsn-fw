@@ -2515,6 +2515,12 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sfx.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sfx.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
       </file>
       <file>

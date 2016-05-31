@@ -17,6 +17,7 @@ sources_c = [
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
     os.path.join('02b-MAChigh','otf.c'),
+    os.path.join('02b-MAChigh','sfx.c'),
     os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
     os.path.join('02b-MAChigh','sixtop.c'),
@@ -51,6 +52,7 @@ sources_h = [
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
     os.path.join('02b-MAChigh','otf.h'),
+    os.path.join('02b-MAChigh','sfx.h'),
     os.path.join('02b-MAChigh','processIE.h'),
     os.path.join('02b-MAChigh','schedule.h'),
     os.path.join('02b-MAChigh','sixtop.h'),
