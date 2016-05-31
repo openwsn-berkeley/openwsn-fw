@@ -92,6 +92,10 @@ void sfx_notifyNewSlotframe(void){
    uint16_t             cellUsage;
    OpenQueueEntry_t*    entry;
    
+   if (idmanager_getIsDAGroot()){
+      return;
+   }
+   
    if (sfx_vars.periodMaintenance>0){
       sfx_vars.periodMaintenance -= 1;
       return;
