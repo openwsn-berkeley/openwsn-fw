@@ -15,7 +15,7 @@
 
 
 
-#define _DEBUG_DAO_
+//#define _DEBUG_DAO_
 //#define _DEBUG_DIO_
 
 //=========================== variables =======================================
@@ -590,16 +590,25 @@ void sendDAO() {
          break;
 
       case TRACK_MGMT_SHARED:
-         msg->l2_track = sixtop_get_trackcommon();
+         msg->l2_track = sixtop_get_trackbesteffort();
+//         msg->l2_track = sixtop_get_trackcommon();
          break;
 
       case TRACK_MGMT_ISOLATION:
-         memcpy(msg->l2_track.owner.addr_64b, &(icmpv6rpl_vars.dio.DODAGID[8]), 8);
+         msg->l2_track = sixtop_get_trackbesteffort();
+
+ /*        memcpy(msg->l2_track.owner.addr_64b, &(icmpv6rpl_vars.dio.DODAGID[8]), 8);
          msg->l2_track.owner.type = ADDR_64B;
          msg->l2_track.instance   = (uint16_t)TRACK_IMCPv6RPL;
+   */
          break;
 
       default:
+
+#if !defined(_DEBUG_DAO_) && !defined(_DEBUG_DIO_)
+   ;
+   char str[150];
+#endif
          sprintf(str, "Unrecognized TRACK_MGMT mode - RPL BUG ");
          openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT, 150);
          strncat(str, " / ", 150);
