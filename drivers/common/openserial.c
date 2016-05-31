@@ -341,6 +341,10 @@ owerror_t openserial_printError(uint8_t calling_component, uint8_t error_code,
                               errorparameter_t arg2) {
    // blink error LED, this is serious
    switch(error_code){
+      case ERR_INVALIDPACKETFROMRADIO:
+            return(E_SUCCESS);
+         break;
+
       case ERR_LARGE_TIMECORRECTION:
       case ERR_WRONG_STATE_IN_ENDFRAME_SYNC:
       case ERR_WRONG_STATE_IN_STARTSLOT:
