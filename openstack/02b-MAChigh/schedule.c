@@ -5,10 +5,9 @@
 #include "packetfunctions.h"
 #include "sixtop.h"
 #include "idmanager.h"
+#include "sfx.h"
 
 //=========================== definition ======================================
-
-#define CELL_USAGE_CALCULATION_WINDOWS  5
 
 //=========================== variables =======================================
 
@@ -479,6 +478,26 @@ uint8_t schedule_getUsageStatus(scheduleEntry_t* entry){
     return count;
 }
 
+uint16_t schedule_getTotalCellUsageStatus(){
+   uint16_t usageCount = 0;
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(scheduleWalker->type == CELLTYPE_TX){
+          usageCount += schedule_getUsageStatus(scheduleWalker);
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   ENABLE_INTERRUPTS();
+   
+   return usageCount;
+}
+
 scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    scheduleEntry_t* scheduleWalker;
    
@@ -573,7 +592,11 @@ void schedule_advanceSlot() {
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+   if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
+       ) {
+       // one slotframe has elapsed
+       sfx_notifyNewSlotframe();
+   } 
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    
    ENABLE_INTERRUPTS();

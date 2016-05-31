@@ -3,8 +3,24 @@
 #include "neighbors.h"
 #include "sixtop.h"
 #include "scheduler.h"
+#include "schedule.h"
+
+//=========================== definition ======================================
+
+// the threshold here is a relative ratio to CELL_USAGE_CALCULATION_WINDOWS (schedule.c)
+// those value must be less than CELL_USAGE_CALCULATION_WINDOWS. If the cell usage is 
+// less than 
+//          SFX_DELETE_THRESHOLD/CELL_USAGE_CALCULATION_WINDOWS
+// remove a slot. If cell usage is more than 
+//          SFX_ADD_THRESHOLD/CELL_USAGE_CALCULATION_WINDOWS
+// add a lost. Else, nothing happens.
+#define SFX_ADD_THRESHOLD          3 
+#define SFX_TARGET                 2
+#define SFX_DELETE_THRESHOLD       1
 
 //=========================== variables =======================================
+
+sfx_vars_t sfx_vars;
 
 //=========================== prototypes ======================================
 
@@ -14,6 +30,7 @@ void sfx_removeCell_task(void);
 //=========================== public ==========================================
 
 void sfx_init(void) {
+    sfx_vars.periodMaintenance = CELL_USAGE_CALCULATION_WINDOWS;
 }
 
 void sfx_notif_addedCell(void) {
@@ -36,7 +53,7 @@ void sfx_addCell_task(void) {
       return;
    }
    
-   sixtop_setHandler(SIX_HANDLER_OTF);
+   sixtop_setHandler(SIX_HANDLER_SFX);
    // call sixtop
    sixtop_request(
       IANA_6TOP_CMD_ADD,
@@ -55,11 +72,62 @@ void sfx_removeCell_task(void) {
       return;
    }
    
-   sixtop_setHandler(SIX_HANDLER_OTF);
+   sixtop_setHandler(SIX_HANDLER_SFX);
    // call sixtop
    sixtop_request(
       IANA_6TOP_CMD_DELETE,
       &neighbor,
       1
    );
+}
+
+void sfx_notifyNewSlotframe(void){
+   open_addr_t          neighbor; 
+   bool                 foundNeighbor;
+   uint16_t             numberOfCells;
+   uint16_t             cellUsage;
+   
+   // get preferred parent
+   foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+   if (foundNeighbor==FALSE) {
+      return;
+   }
+   
+   numberOfCells = schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+            CELLTYPE_TX,&neighbor);
+   cellUsage = schedule_getTotalCellUsageStatus();
+   
+   if (numberOfCells==0){
+       sixtop_setHandler(SIX_HANDLER_SFX);
+       // call sixtop
+       sixtop_request(
+          IANA_6TOP_CMD_ADD,
+          &neighbor,
+          1
+       );
+   }
+   
+   
+   // cell usage scheduling, bandwith estimation algorithm
+   if (cellUsage/numberOfCells>=SFX_ADD_THRESHOLD){
+       sixtop_setHandler(SIX_HANDLER_SFX);
+       // call sixtop
+       sixtop_request(
+          IANA_6TOP_CMD_ADD,
+          &neighbor,
+          1
+       );
+   } else {
+     if (cellUsage/numberOfCells<=SFX_DELETE_THRESHOLD){
+         sixtop_setHandler(SIX_HANDLER_SFX);
+         // call sixtop
+         sixtop_request(
+            IANA_6TOP_CMD_DELETE,
+            &neighbor,
+            1
+         );
+     } else {
+        // nothing happens
+     }
+   }
 }
