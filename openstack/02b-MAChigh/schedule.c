@@ -8,7 +8,7 @@
 #include "sfx.h"
 
 //=========================== definition ======================================
-#define SCHEDULE_DEBUG
+//#define SCHEDULE_DEBUG
 //=========================== variables =======================================
 
 schedule_vars_t schedule_vars;
@@ -607,6 +607,7 @@ void schedule_advanceSlot() {
                 scheduleWalker->type == CELLTYPE_TX ||
                 scheduleWalker->type == CELLTYPE_RX
             ){      
+#ifdef SCHEDULE_DEBUG
                 printf("Mote %d Neighbor %d Slot %d Type %d Usage %d\n",
                        idmanager_getMyID(ADDR_16B)->addr_16b[1],
                        scheduleWalker->neighbor.addr_64b[7],
@@ -614,6 +615,7 @@ void schedule_advanceSlot() {
                        scheduleWalker->type,
                        schedule_getUsageStatus(scheduleWalker)
                 );
+#endif
             }
             scheduleWalker = scheduleWalker->next;
         }while(scheduleWalker!=schedule_vars.currentScheduleEntry);

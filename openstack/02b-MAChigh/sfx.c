@@ -117,7 +117,7 @@ void sfx_notifyNewSlotframe(void){
        entry = openqueue_getIpPacket();
        if (entry!=NULL ){
 #ifdef SFX_DEBUG
-           printf("no cell and I have packet\n");
+           printf("mote %d no cell and I have packet\n",,idmanager_getMyID(ADDR_16B)->addr_16b[1]);
 #endif
            sixtop_setHandler(SIX_HANDLER_SFX);
            // call sixtop
@@ -135,20 +135,20 @@ void sfx_notifyNewSlotframe(void){
    // cell usage scheduling, bandwith estimation algorithm
    if (cellUsage/numberOfCells>=SFX_ADD_THRESHOLD){
 #ifdef SFX_DEBUG
-       printf("reserve one\n");
+       printf("mote %d reserve one\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
 #endif
        sixtop_setHandler(SIX_HANDLER_SFX);
        // call sixtop
        sixtop_request(
           IANA_6TOP_CMD_ADD,
           &neighbor,
-          1
+          cellUsage/SFX_TARGET-numberOfCells+1
        );
    } else {
-     if (cellUsage/numberOfCells<=SFX_DELETE_THRESHOLD){
+     if (cellUsage/numberOfCells<SFX_DELETE_THRESHOLD){
          if (numberOfCells>1){
 #ifdef SFX_DEBUG
-             printf("remove one\n");
+             printf("mote %d remove one\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
 #endif
              sixtop_setHandler(SIX_HANDLER_SFX);
              // call sixtop

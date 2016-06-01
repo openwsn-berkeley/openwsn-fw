@@ -167,6 +167,9 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
    
     // filter parameters
     if(sixtop_vars.six2six_state!=SIX_IDLE){
+#ifdef SIXTOP_DEBUG
+        printf("sixtop doesn't initialize!\n");
+#endif
         return;
     }
     if (neighbor==NULL){

@@ -17,6 +17,10 @@
 #include "adaptive_sync.h"
 #include "processIE.h"
 
+//=========================== definition =====================================
+
+#define IEEE802154E
+
 //=========================== variables =======================================
 
 ieee154e_vars_t    ieee154e_vars;
@@ -2110,6 +2114,12 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
    packetSent->owner              = COMPONENT_IEEE802154E_TO_SIXTOP;
    // post RES's sendDone task
    scheduler_push_task(task_sixtopNotifSendDone,TASKPRIO_SIXTOP_NOTIF_TXDONE);
+#ifdef IEEE802154E
+   if (schedule_getCurrentScheduleEntry()->type==CELLTYPE_TX){
+       printf("mote %d packet sent created by %d error %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1],packetSent->creator,error);
+   }
+#endif
+   
    // wake up the scheduler
    SCHEDULER_WAKEUP();
 }
