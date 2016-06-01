@@ -52,6 +52,7 @@ enum {
 
 // frames sent PC->mote
 #define SERFRAME_PC2MOTE_SETROOT            ((uint8_t)'R')
+#define SERFRAME_PC2MOTE_RESET				((uint8_t)'Q')
 #define SERFRAME_PC2MOTE_DATA               ((uint8_t)'D')
 #define SERFRAME_PC2MOTE_TRIGGERSERIALECHO  ((uint8_t)'S')
 #define SERFRAME_PC2MOTE_COMMAND_GD         ((uint8_t)'G')

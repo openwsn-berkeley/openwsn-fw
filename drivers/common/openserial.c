@@ -420,6 +420,13 @@ void openserial_stop() {
          case SERFRAME_PC2MOTE_SETROOT:
             idmanager_triggerAboutRoot();
             break;
+         case SERFRAME_PC2MOTE_RESET:
+        	board_reset();
+            //reset serial buffer here just in case
+            DISABLE_INTERRUPTS();
+            openserial_vars.inputBufFill = 0;
+            ENABLE_INTERRUPTS();
+            break;
          case SERFRAME_PC2MOTE_DATA:
             openbridge_triggerData();
             break;
