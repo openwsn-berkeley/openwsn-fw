@@ -230,8 +230,13 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
                 )
              )
          ) {
-            ENABLE_INTERRUPTS();
-            return &openqueue_vars.queue[i];
+            if (openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES && schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&openqueue_vars.queue[i].l2_nextORpreviousHop)>0){
+                // skip sixtop res packet to be sent on collision-free cells if I have  
+                continue;
+            } else {
+                ENABLE_INTERRUPTS();
+                return &openqueue_vars.queue[i];
+            }
          }
       }
    }

@@ -117,7 +117,7 @@ void sfx_notifyNewSlotframe(void){
        entry = openqueue_getIpPacket();
        if (entry!=NULL ){
 #ifdef SFX_DEBUG
-           printf("mote %d no cell and I have packet\n",,idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+           printf("mote %d no cell and I have packet\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
 #endif
            sixtop_setHandler(SIX_HANDLER_SFX);
            // call sixtop
