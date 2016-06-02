@@ -144,7 +144,7 @@ void prepare_radio_tx_frame(void) {
     app_vars.packet_counter++;
 
     // Detecting rollover with lollipop counter
-    if (app_vars.packet_counter % 0xFFFFFFFF == 0){
+    if (app_vars.packet_counter % 0xFFFF == 0){
         app_vars.rollover++;
         app_vars.packet_counter = 256;
     }
