@@ -9,7 +9,7 @@
 
 //=========================== definition ======================================
 
-#define SFX_DEBUG
+//#define SFX_DEBUG
 
 // the threshold here is a relative ratio to CELL_USAGE_CALCULATION_WINDOWS (schedule.c)
 // those value must be less than CELL_USAGE_CALCULATION_WINDOWS. If the cell usage is 
@@ -146,7 +146,7 @@ void sfx_notifyNewSlotframe(void){
        );
    } else {
      if (cellUsage/numberOfCells<SFX_DELETE_THRESHOLD){
-         if (numberOfCells>1){
+         if (numberOfCells>2){
 #ifdef SFX_DEBUG
              printf("mote %d remove one\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
 #endif
@@ -158,7 +158,7 @@ void sfx_notifyNewSlotframe(void){
                 1
              );
          } else {
-           // at least one dedicate slot for sixtop
+           // at least 2 collision free slot for sixtop
          }
      } else {
         // nothing happens

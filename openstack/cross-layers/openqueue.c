@@ -5,6 +5,11 @@
 #include "IEEE802154E.h"
 #include "ieee802154_security_driver.h"
 
+
+//=========================== defination =====================================
+
+#define OPENQUEUE_DEBUG
+
 //=========================== variables =======================================
 
 openqueue_vars_t openqueue_vars;
@@ -78,6 +83,11 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
+#ifdef OPENQUEUE_DEBUG
+          if (openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES){
+                printf("mote %d a buffer is occupied by sixtop res\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+          }
+#endif
          ENABLE_INTERRUPTS(); 
          return &openqueue_vars.queue[i];
       }
@@ -101,6 +111,11 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (&openqueue_vars.queue[i]==pkt) {
+#ifdef OPENQUEUE_DEBUG
+          if (openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES){
+                printf("mote %d release a sixtop res buffer\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+          }
+#endif
          if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
             // log the error
             openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
