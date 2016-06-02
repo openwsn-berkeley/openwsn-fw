@@ -146,7 +146,7 @@ void sfx_notifyNewSlotframe(void){
        );
    } else {
      if (cellUsage/numberOfCells<SFX_DELETE_THRESHOLD){
-         if (numberOfCells>2){
+         if (numberOfCells>1){
 #ifdef SFX_DEBUG
              printf("mote %d remove one\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
 #endif
