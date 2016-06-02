@@ -20,7 +20,7 @@
 
 //=========================== define ==========================================
 
-#define SIXTOP_DEBUG
+//#define SIXTOP_DEBUG
 
 //=========================== variables =======================================
 
@@ -745,6 +745,9 @@ readability of the code.
 port_INLINE void sixtop_sendEB() {
    OpenQueueEntry_t* eb;
    uint8_t len;
+   open_addr_t neighbor; 
+   bool foundNeighbor=FALSE;
+   uint8_t numberOfCells;
    
    len = 0;
    
@@ -759,6 +762,25 @@ port_INLINE void sixtop_sendEB() {
       
       // stop here
       return;
+   }
+   
+   if (idmanager_getIsDAGroot()==FALSE){
+       // sendEB only I have setup my schedule with my parent
+       foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+       if (foundNeighbor==FALSE) {
+          return;
+       }
+       
+       numberOfCells = schedule_getCellsCounts(
+                SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+                CELLTYPE_RX,
+                &neighbor);
+       
+       if (numberOfCells==0){
+          // I'm now busy sending an EB
+          sixtop_vars.busySendingEB = FALSE;
+          return;
+       }
    }
    
    if (sixtop_vars.busySendingEB==TRUE) {
