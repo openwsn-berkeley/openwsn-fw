@@ -146,7 +146,7 @@ command_line_options = {
     'tracks':           ['0','1','2'],	 	# 0=only TXRX, 1=one single track, 2=traffic isolation (default behavior)
     'rplmetric':        ['1'],			# 1=ETX (default)
     'cex_period':       ['5000'],         	# by default, 5 seconds
-    'schedalgo':        ['1'],        		# 1=random (default)
+    'schedalgo':        ['0','1','2'],        		# 1=random (default)
 
 }
 
