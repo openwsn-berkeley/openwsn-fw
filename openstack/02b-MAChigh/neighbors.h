@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
 
-#define MAXNUMNEIGHBORS           30
+#define MAXNUMNEIGHBORS           40
 #define MAXPREFERENCE             2
 #define BADNEIGHBORMAXRSSI        -80 //dBm
 #define GOODNEIGHBORMINRSSI       -90 //dBm
