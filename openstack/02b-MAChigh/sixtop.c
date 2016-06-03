@@ -1229,6 +1229,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
 #endif
+
              sixtop_addCellsByState(
                  msg->l2_scheduleIE_frameID,
                  numOfCells,
@@ -1245,6 +1246,15 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
+
+            //it seems if sometimes succeeds even if we don't have an ack ???
+            sixtop_addCellsByState(
+                             msg->l2_scheduleIE_frameID,
+                             numOfCells,
+                             msg->l2_bandwidthIE_track,
+                             cellList,
+                             &(msg->l2_nextORpreviousHop),
+                             sixtop_vars.six2six_state);
          }
 
          sixtop_setState(SIX_IDLE);
