@@ -1155,13 +1155,17 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    uint8_t i,numOfCells;
    uint8_t* ptr;
    cellInfo_ht cellList[SCHEDULEIEMAXNUMCELLS];
-   
+
+#ifdef _DEBUG_SIXTOP_
+   char  str[150];
+#endif
+
    memset(cellList,0,SCHEDULEIEMAXNUMCELLS*sizeof(cellInfo_ht));
-  
+
    ptr = msg->l2_scheduleIE_cellObjects;
    numOfCells = msg->l2_scheduleIE_numOfCells;
    msg->owner = COMPONENT_SIXTOP_RES;
-  
+
    if(error == E_FAIL) {
       sixtop_setState(SIX_IDLE);
       openqueue_freePacketBuffer(msg);
@@ -1169,45 +1173,44 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    }
 
    switch (sixtop_vars.six2six_state) {
-      case SIX_WAIT_ADDREQUEST_SENDDONE:
-         if (error != E_FAIL){
+   case SIX_WAIT_ADDREQUEST_SENDDONE:
+      if (error != E_FAIL){
 #ifdef _DEBUG_SIXTOP_
-            char  str[150];
-            sprintf(str, "LinkReq txed: to ");
-            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
-            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
-            openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+         sprintf(str, "LinkReq txed: to ");
+         openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+         openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+         openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
-            sixtop_setState(SIX_WAIT_ADDRESPONSE);
+         sixtop_setState(SIX_WAIT_ADDRESPONSE);
+      }
+      else{
+#ifdef _DEBUG_SIXTOP_
+         sprintf(str, "LinkReq tx failed: to ");
+         openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+         openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+         openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
+         sixtop_setState(SIX_IDLE);
+      }
+
+      break;
+   case SIX_WAIT_ADDRESPONSE_SENDDONE:
+
+      if (error == E_SUCCESS && numOfCells > 0){
+         for (i=0;i<numOfCells;i++){
+            //TimeSlot 2B
+            cellList[i].tsNum       = *(ptr);
+            cellList[i].tsNum      |= (*(ptr+1))<<8;
+            //Ch.Offset 2B
+            cellList[i].choffset    = *(ptr+2);
+            cellList[i].choffset   |= (*(ptr+3))<<8;
+            //LinkOption bitmap 1B
+            cellList[i].linkoptions = *(ptr+4);
+            ptr += 5;
          }
-         else{
-#ifdef _DEBUG_SIXTOP_
-            char  str[150];
-            sprintf(str, "LinkReq tx failed: to ");
-            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
-            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
-            openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-#endif
-            sixtop_setState(SIX_IDLE);
-        }
 
-         break;
-      case SIX_WAIT_ADDRESPONSE_SENDDONE:
-         if (error == E_SUCCESS && numOfCells > 0){
-             for (i=0;i<numOfCells;i++){
-               //TimeSlot 2B
-               cellList[i].tsNum       = *(ptr);
-               cellList[i].tsNum      |= (*(ptr+1))<<8;
-               //Ch.Offset 2B
-               cellList[i].choffset    = *(ptr+2);
-               cellList[i].choffset   |= (*(ptr+3))<<8;
-               //LinkOption bitmap 1B
-               cellList[i].linkoptions = *(ptr+4);
-               ptr += 5;
-             }
 
 #ifdef _DEBUG_SIXTOP_
-         char  str[150];
          sprintf(str, "LinkRep txed: to ");
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
@@ -1227,81 +1230,80 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
          }
          openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
 #endif
 
-             sixtop_addCellsByState(
-                 msg->l2_scheduleIE_frameID,
-                 numOfCells,
-                 msg->l2_bandwidthIE_track,
-                 cellList,
-                 &(msg->l2_nextORpreviousHop),
-                 sixtop_vars.six2six_state);
-         }
-         else{
+         sixtop_addCellsByState(
+               msg->l2_scheduleIE_frameID,
+               numOfCells,
+               msg->l2_bandwidthIE_track,
+               cellList,
+               &(msg->l2_nextORpreviousHop),
+               sixtop_vars.six2six_state);
+      }
+      else{
 #ifdef _DEBUG_SIXTOP_
-            char  str[150];
-            sprintf(str, "LinkRep tx failed: to ");
-            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
-            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
-            openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+         sprintf(str, "LinkRep tx failed: to ");
+         openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+         openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+         openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
          sixtop_setState(SIX_IDLE);
-         break;
-      case SIX_WAIT_REMOVEREQUEST_SENDDONE:
-         ;
-         track_t  track = sixtop_get_trackbesteffort();
+      }
+      break;
+   case SIX_WAIT_REMOVEREQUEST_SENDDONE:
+      ;
+      track_t  track = sixtop_get_trackbesteffort();
 
 #ifdef _DEBUG_SIXTOP_
-            char  str[150];
-            sprintf(str, "LinkRem tx: to ");
-            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
-            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
-            openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+      sprintf(str, "LinkRem tx: to ");
+      openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+      openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
 
-         if(error == E_SUCCESS && numOfCells > 0){
-            for (i=0;i<numOfCells;i++){
-               //TimeSlot 2B
-               cellList[i].tsNum       = *(ptr);
-               cellList[i].tsNum      |= (*(ptr+1))<<8;
-               //Ch.Offset 2B
-               cellList[i].choffset    = *(ptr+2);
-               cellList[i].choffset   |= (*(ptr+3))<<8;
-               //LinkOption bitmap 1B
-               cellList[i].linkoptions = *(ptr+4);
-               ptr += 5;
-            }
+      if(error == E_SUCCESS && numOfCells > 0){
+         for (i=0;i<numOfCells;i++){
+            //TimeSlot 2B
+            cellList[i].tsNum       = *(ptr);
+            cellList[i].tsNum      |= (*(ptr+1))<<8;
+            //Ch.Offset 2B
+            cellList[i].choffset    = *(ptr+2);
+            cellList[i].choffset   |= (*(ptr+3))<<8;
+            //LinkOption bitmap 1B
+            cellList[i].linkoptions = *(ptr+4);
+            ptr += 5;
+         }
 
-            //saves the value to reallocate a new cell while preserving the track
-            track = sixtop_getTrackCellsByState(msg->l2_scheduleIE_frameID, numOfCells, cellList, &(msg->l2_nextORpreviousHop));
+         //saves the value to reallocate a new cell while preserving the track
+         track = sixtop_getTrackCellsByState(msg->l2_scheduleIE_frameID, numOfCells, cellList, &(msg->l2_nextORpreviousHop));
 
-            sixtop_removeCellsByState(
+         sixtop_removeCellsByState(
                msg->l2_scheduleIE_frameID,
                numOfCells,
                cellList,
                &(msg->l2_nextORpreviousHop)
-            );
-         }
-         sixtop_setState(SIX_IDLE);
-         leds_debug_off();
+         );
+      }
+      sixtop_setState(SIX_IDLE);
+      leds_debug_off();
 
-         //This cell was considered buggy by sixtop -> it must reallocate a new one after having removed it
-         if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
-             sixtop_addCells(&(msg->l2_nextORpreviousHop), 1, track);
-             sixtop_vars.handler = SIX_HANDLER_NONE;
-         }
-         break;
-      default:
-         //log error
-         break;
+      //This cell was considered buggy by sixtop -> it must reallocate a new one after having removed it
+      if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
+         sixtop_addCells(&(msg->l2_nextORpreviousHop), 1, track);
+         sixtop_vars.handler = SIX_HANDLER_NONE;
+      }
+      break;
+
+   default:
+      //log error
+      break;
    }
-  
+
    // discard reservation packets this component has created
    openqueue_freePacketBuffer(msg);
-}
+   }
 
 port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
    uint8_t ptr;
@@ -1771,6 +1773,17 @@ void sixtop_notifyReceiveRemoveLinkRequest(
 
 //======= helper functions
 
+//returns TRUE if slotnum is present in cellList
+bool sixtop_cellInList(cellInfo_ht* cellList, uint8_t numCandCells, frameLength_t slotnum){
+   uint8_t i;
+
+   for(i=0; i<numCandCells; i++)
+      if (cellList[i].tsNum == slotnum)
+         return(TRUE);
+   return(FALSE);
+}
+
+
 bool sixtop_candidateAddCellList(
       uint8_t*     type,
       uint8_t*     frameID,
@@ -1792,7 +1805,7 @@ bool sixtop_candidateAddCellList(
    numCandCells=0;
    for(counter=0;counter<SCHEDULEIEMAXNUMCELLS;counter++){
       i = openrandom_get16b() % schedule_getFrameLength();
-      if(schedule_isSlotOffsetAvailable(i)==TRUE){
+      if ((schedule_isSlotOffsetAvailable(i)==TRUE) && (!sixtop_cellInList(cellList, numCandCells, i))){
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = openrandom_get16b() % 16;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
