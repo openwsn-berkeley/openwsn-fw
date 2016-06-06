@@ -68,10 +68,6 @@ See MINBE for an explanation of backoff.
 
 
 
-/**
-\brief to distribute uniformly the shared cells instead of placing all of them at the beginning of the slotframe (should be configured via scons)
-*/
-//#define  SCHEDULE_SHAREDCELLS_DISTRIBUTED
 
 //=========================== typedef =========================================
 

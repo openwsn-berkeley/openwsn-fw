@@ -106,14 +106,14 @@ port_INLINE uint8_t processIE_prependSlotframeLinkIE(OpenQueueEntry_t* pkt){
    for (running_slotOffset=SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS-1; running_slotOffset < SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS ; running_slotOffset--) {
 
 #ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
-      slotOffset     = running_slotOffset + SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
-      channelOffset  = SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET;
+      slotOffset = running_slotOffset + running_slotOffset * schedule_getFrameLength() / SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;      // slot offset
 #else
       slotOffset     = running_slotOffset + SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
-      channelOffset  = SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET;
 #endif
+      channelOffset  = SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET;
 
-   //for (slotOffset=lastSlotOffset;slotOffset>SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;slotOffset--) {
+
+      //for (slotOffset=lastSlotOffset;slotOffset>SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;slotOffset--) {
       packetfunctions_reserveHeaderSize(pkt,5);
       pkt->payload[0]   = slotOffset        & 0xFF;
       pkt->payload[1]   = (slotOffset >> 8) & 0xFF;

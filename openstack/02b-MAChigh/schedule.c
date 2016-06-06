@@ -44,7 +44,11 @@ void schedule_init() {
    }
    
    // serial RX slot(s)
-   start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
+#ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
+   start_slotOffset += 1;  //skip the first shared TXRX
+#else
+   start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;   //skip all the shared TXRX
+#endif
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
       schedule_addActiveSlot(
@@ -86,7 +90,7 @@ void schedule_startDAGroot() {
    for (running_slotOffset=0;running_slotOffset<SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
 
 #ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
-      slotOffset = running_slotOffset + SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+      slotOffset = running_slotOffset + running_slotOffset * schedule_getFrameLength() / SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;      // slot offset
 #else
       slotOffset = running_slotOffset + SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
 #endif
