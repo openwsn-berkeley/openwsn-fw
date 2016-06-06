@@ -118,7 +118,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    // previousHop address (always 64-bit)
    packetfunctions_writeAddress(msg,idmanager_getMyID(ADDR_64B),OW_LITTLE_ENDIAN);
    // nextHop address
-   if (packetfunctions_isBroadcastMulticast(nextHop)) {
+   if (packetfunctions_isBroadcastMulticast_debug(nextHop,30)) {
       //broadcast address is always 16-bit
       packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
       *((uint8_t*)(msg->payload)) = 0xFF;
@@ -147,7 +147,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    //fcf (2nd byte)
    packetfunctions_reserveHeaderSize(msg,sizeof(uint8_t));
    temp_8b              = 0;
-   if (packetfunctions_isBroadcastMulticast(nextHop)) {
+   if (packetfunctions_isBroadcastMulticast_debug(nextHop, 31)) {
       temp_8b          |= IEEE154_ADDR_SHORT              << IEEE154_FCF_DEST_ADDR_MODE;
    } else {
       switch (nextHop->type) {
@@ -173,7 +173,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    temp_8b             |= frameType                       << IEEE154_FCF_FRAME_TYPE;
    temp_8b             |= securityEnabled                 << IEEE154_FCF_SECURITY_ENABLED;
    temp_8b             |= IEEE154_PENDING_NO_FRAMEPENDING << IEEE154_FCF_FRAME_PENDING;
-   if (frameType==IEEE154_TYPE_ACK || packetfunctions_isBroadcastMulticast(nextHop)) {
+   if (frameType==IEEE154_TYPE_ACK || packetfunctions_isBroadcastMulticast_debug(nextHop,31)) {
       temp_8b          |= IEEE154_ACK_NO_ACK_REQ          << IEEE154_FCF_ACK_REQ;
    } else {
       temp_8b          |= IEEE154_ACK_YES_ACK_REQ         << IEEE154_FCF_ACK_REQ;

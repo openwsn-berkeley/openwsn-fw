@@ -395,7 +395,7 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
                           asn_t*       asnTs) {
    uint8_t i;
    // don't run through this function if packet was sent to broadcast address
-   if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
+   if (packetfunctions_isBroadcastMulticast_debug(l2_dest , 40)==TRUE) {
       return;
    }
    

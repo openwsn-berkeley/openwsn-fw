@@ -20,7 +20,8 @@
 
 
 
-//#define _DEBUG_SIXTOP_
+#define _DEBUG_SIXTOP_
+//#define _DEBUG_SIXTOP_TIMEOUT_
 
 
 //=========================== variables =======================================
@@ -798,7 +799,7 @@ owerror_t sixtop_send_internal(
 
    // assign a number of retries
    if (
-      packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))==TRUE
+         packetfunctions_isBroadcastMulticast_debug(&(msg->l2_nextORpreviousHop), 61)==TRUE
       ) {
       msg->l2_retriesLeft = 1;
    } else {
@@ -1108,7 +1109,7 @@ void sixtop_setState(six2six_state_t state){
 
 
 void timer_sixtop_six2six_timeout_fired(void) {
-#ifdef OPENSERIAL_PRINTF
+#ifdef _DEBUG_SIXTOP_TIMEOUT_
    openserial_printInfo(
       COMPONENT_SIXTOP,
       ERR_SIXTOP_TIMEOUT,
@@ -1763,7 +1764,6 @@ bool sixtop_candidateAddCellList(
       track_t      track
    ){
    frameLength_t i;
-   uint8_t counter;
    uint8_t numCandCells;
    
 
@@ -1773,10 +1773,14 @@ bool sixtop_candidateAddCellList(
    *frameID = schedule_getFrameHandle();
    *flag = 1; // the cells listed in cellList are available to be schedule.
    
-   numCandCells=0;
-   for(counter=0;counter<SCHEDULEIEMAXNUMCELLS;counter++){
+
+   for(numCandCells=0;numCandCells<SCHEDULEIEMAXNUMCELLS;){
       i = openrandom_get16b() % schedule_getFrameLength();
       if ((schedule_isSlotOffsetAvailable(i)==TRUE) && (!sixtop_cellInList(cellList, numCandCells, i))){
+         if (i == 0)
+            schedule_print();
+
+
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = openrandom_get16b() % 16;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;

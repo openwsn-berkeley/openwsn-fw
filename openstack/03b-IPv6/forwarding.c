@@ -104,7 +104,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
 
 
    // inner header is required only when the destination address is NOT broadcast address
-   if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd)) == FALSE) {
+   if (packetfunctions_isBroadcastMulticast_debug(&(msg->l3_destinationAdd),81) == FALSE) {
        //IPHC inner header and NHC IPv6 header will be added at here
        iphc_prependIPv6Header(
           msg,
@@ -238,14 +238,14 @@ void forwarding_receive(
          (
             idmanager_isMyAddress(&ipv6_outer_header->dest)
             ||
-            packetfunctions_isBroadcastMulticast(&ipv6_outer_header->dest)
+            packetfunctions_isBroadcastMulticast_debug(&ipv6_outer_header->dest, 82)
          )
          &&
          ipv6_outer_header->next_header!=IANA_IPv6ROUTE
       ) {
       // this packet is for me, no source routing header.
       // toss ipv6 NHC header
-      if (packetfunctions_isBroadcastMulticast(&ipv6_outer_header->dest)==FALSE) {
+      if (packetfunctions_isBroadcastMulticast_debug(&ipv6_outer_header->dest, 83)==FALSE) {
           packetfunctions_tossHeader(msg,sizeof(uint8_t));
           msg->l4_protocol = ipv6_inner_header->next_header;
           msg->l4_protocol_compressed = ipv6_inner_header->next_header_compressed;
@@ -374,7 +374,7 @@ void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToW
    uint8_t         i;
    //open_addr_t     temp_prefix64btoWrite;
    
-   if (packetfunctions_isBroadcastMulticast(destination128b)) {
+   if (packetfunctions_isBroadcastMulticast_debug(destination128b, 84)) {
       // IP destination is broadcast, send to 0xffffffffffffffff
       addressToWrite64b->type = ADDR_64B;
       for (i=0;i<8;i++) {

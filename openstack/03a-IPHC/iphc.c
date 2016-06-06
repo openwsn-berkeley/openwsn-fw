@@ -139,7 +139,7 @@ owerror_t iphc_sendFromForwarding(
    } else {
      //not the same prefix. so the packet travels to another network
      //check if this is a source routing pkt. in case it is then the DAM is elided as it is in the SrcRouting header.
-     if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
+     if (packetfunctions_isBroadcastMulticast_debug(&(msg->l3_destinationAdd),50)==FALSE){
          if(ipv6_outer_header->next_header!=IANA_IPv6ROUTE){ 
           sam = IPHC_SAM_128B;
           dam = IPHC_DAM_128B;
@@ -170,7 +170,7 @@ owerror_t iphc_sendFromForwarding(
    // decrement the packet's hop limit
    ipv6_outer_header->hop_limit--;
    
-   if(packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE) {
+   if(packetfunctions_isBroadcastMulticast_debug(&(msg->l3_destinationAdd),51)==FALSE) {
        next_header=*((uint8_t*)(msg->payload)); // next_header is nhc ipv6 header
    } else {
        next_header=msg->l4_protocol;
@@ -178,8 +178,8 @@ owerror_t iphc_sendFromForwarding(
    
    //prepend Option hop by hop header except when src routing and dst is not 0xffff
    //-- this is a little trick as src routing is using an option header set to 0x00
-   if (rpl_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE 
-       && packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE
+   if (rpl_option->optionType==RPL_HOPBYHOP_HEADER_OPTION_TYPE
+       && packetfunctions_isBroadcastMulticast_debug(&(msg->l3_destinationAdd),52)==FALSE
        ){
       iphc_prependIPv6HopByHopHeader(msg, msg->l4_protocol, nh, rpl_option);
       //change nh to point to the newly added header

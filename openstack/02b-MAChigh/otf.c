@@ -8,7 +8,7 @@
 #include "IEEE802154E.h"
 
 
-#define _DEBUG_OTF_
+//#define _DEBUG_OTF_
 
 
 
@@ -137,7 +137,7 @@ uint8_t otf_reserve_agressive_for(OpenQueueEntry_t* msg){
       nbCells_toadd = SIXTOP_NBCELLS_INREQ;
 
    //debug
-#ifdef OPENSERIAL_PRINTF
+#ifdef DEBUG_OTF
    openserial_printError(
          COMPONENT_OTF,
          ERR_OTF_INSUFFICIENT,

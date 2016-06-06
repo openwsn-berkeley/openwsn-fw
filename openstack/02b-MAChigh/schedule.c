@@ -29,6 +29,7 @@ void schedule_init() {
    slotOffset_t    start_slotOffset;
    slotOffset_t    running_slotOffset;
    open_addr_t     temp_neighbor;
+   uint8_t         nbSerial;
 
    // reset local variables
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
@@ -50,7 +51,11 @@ void schedule_init() {
    start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;   //skip all the shared TXRX
 #endif
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
+   if (idmanager_getIsDAGroot()==TRUE)
+      nbSerial = 4 * NUMSERIALRX;
+   else
+      nbSerial = NUMSERIALRX;
+   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+nbSerial;running_slotOffset++) {
       schedule_addActiveSlot(
          running_slotOffset,                    // slot offset
          CELLTYPE_SERIALRX,                     // type of slot
@@ -494,6 +499,32 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
    
    return E_SUCCESS;
 }
+
+void schedule_print(void){
+
+   scheduleEntry_t* scheduleWalker;
+   char str[150];
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+
+   sprintf(str, "LinkRep - LIST: ");
+
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      strncat(str, " ,slot=", 150);
+      openserial_ncat_uint32_t(str, (uint32_t)scheduleWalker->slotOffset, 150);
+
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+
+   ENABLE_INTERRUPTS();
+
+   openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+
+}
+
 
 bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    

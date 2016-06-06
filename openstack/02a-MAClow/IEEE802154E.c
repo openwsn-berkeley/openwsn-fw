@@ -959,6 +959,7 @@ port_INLINE void activity_ti1ORri1() {
 
 
          }
+         //neither data packet nor EB to tx
          if (ieee154e_vars.dataToSend==NULL) {
             if (cellType==CELLTYPE_TX) {
                // abort
@@ -968,6 +969,9 @@ port_INLINE void activity_ti1ORri1() {
                changeToRX=TRUE;
             }
          } else {
+
+
+
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
@@ -1139,6 +1143,8 @@ port_INLINE void activity_tie3() {
 port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    bool listenForAck;
    
+   openserial_statTx(ieee154e_vars.dataToSend);
+
    // change state
    changeState(S_RXACKOFFSET);
    
@@ -1146,14 +1152,14 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    radiotimer_cancel();
    
    // turn off the radio
-    radio_rfOff();
+   radio_rfOff();
    ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
    
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
    
    // decides whether to listen for an ACK
-   if (packetfunctions_isBroadcastMulticast(&ieee154e_vars.dataToSend->l2_nextORpreviousHop)==TRUE) {
+   if (packetfunctions_isBroadcastMulticast_debug(&ieee154e_vars.dataToSend->l2_nextORpreviousHop, 27)==TRUE) {
       listenForAck = FALSE;
    } else {
       listenForAck = TRUE;
@@ -1228,6 +1234,11 @@ port_INLINE void activity_tie5() {
       // indicate tx fail if no more retries left
       notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
    } else {
+
+      openserial_printError(COMPONENT_IEEE802154E,ERR_GENERIC,
+                            (errorparameter_t)111,
+                            (errorparameter_t)ieee154e_vars.dataToSend->l2_retriesLeft);
+
       // return packet to the virtual COMPONENT_SIXTOP_TO_IEEE802154E component
       ieee154e_vars.dataToSend->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
    }
@@ -1817,7 +1828,7 @@ port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
           packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))     && \
           (
              idmanager_isMyAddress(&ieee802514_header->dest)                   ||
-             packetfunctions_isBroadcastMulticast(&ieee802514_header->dest)
+             packetfunctions_isBroadcastMulticast_debug(&ieee802514_header->dest, 28)
           );
 }
 
