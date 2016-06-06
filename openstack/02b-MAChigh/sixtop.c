@@ -1247,16 +1247,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
-            //it seems if sometimes succeeds even if we don't have an ack ???
-            sixtop_addCellsByState(
-                             msg->l2_scheduleIE_frameID,
-                             numOfCells,
-                             msg->l2_bandwidthIE_track,
-                             cellList,
-                             &(msg->l2_nextORpreviousHop),
-                             sixtop_vars.six2six_state);
-         }
-
          sixtop_setState(SIX_IDLE);
          break;
       case SIX_WAIT_REMOVEREQUEST_SENDDONE:
@@ -1465,7 +1455,7 @@ void sixtop_notifyReceiveCommand(
          }
          else{
 #ifdef _DEBUG_SIXTOP_
-               sprintf(str, "I am not idle, I drop the LinkReq");
+               sprintf(str, "LinkRep: I am not idle, I drop the LinkReq");
                openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
             #endif
          }
@@ -1553,11 +1543,21 @@ void sixtop_notifyReceiveLinkRequest(
                                             numOfcells,
                                             schedule_ie->cellList, 
                                             bw) == FALSE){
+#ifdef _DEBUG_SIXTOP_
+      char str[150];
+      sprintf(str, "LinkRep refused: from ");
+      openserial_ncat_uint8_t_hex(str, addr->addr_64b[6], 150);
+      openserial_ncat_uint8_t_hex(str, addr->addr_64b[7], 150);
+      strncat(str, ", not enough available cells ", 150);
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
+
       scheduleCellSuccess = FALSE;
 
-      //the linkrep will be refused -> notify the busy cells
+      //the linkrep will be refused -> mark the busy cells
       for(i=0;i<SCHEDULEIEMAXNUMCELLS;i++)
-         schedule_ie->cellList[i].linkoptions = CELLTYPE_BUSY;
+         if (!schedule_isSlotOffsetAvailable(schedule_ie->cellList[i].tsNum))
+            schedule_ie->cellList[i].linkoptions = CELLTYPE_BUSY;
 
 
    } else {
@@ -1601,6 +1601,14 @@ void sixtop_linkResponse(
                             (errorparameter_t)0);
       return;
     }
+
+#ifdef _DEBUG_SIXTOP_
+      char str[150];
+      sprintf(str, "LinkRep prepared to ");
+      openserial_ncat_uint8_t_hex(str, tempNeighbor->addr_64b[6], 150);
+      openserial_ncat_uint8_t_hex(str, tempNeighbor->addr_64b[7], 150);
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
     
    // changing state to resLinkRespone command
    sixtop_setState(SIX_SENDING_ADDRESPONSE);
@@ -1623,13 +1631,13 @@ void sixtop_linkResponse(
       bw = 0;
 
       // set SubFrameAndLinkIE
-      /*len += processIE_prependBlacklistIE(
+      len += processIE_prependBlacklistIE(
             sixtopPkt,
             type,
             frameID,
             flag,
             cellList);
-*/
+
    }
    //add BandwidthIE
    len += processIE_prependBandwidthIE(sixtopPkt,bw,frameID, track);
@@ -1674,10 +1682,11 @@ void sixtop_notifyReceiveLinkResponse(
       memset(&temp_neighbor,0,sizeof(temp_neighbor));
       temp_neighbor.type             = ADDR_ANYCAST;
 
-#ifdef _DEBUG_SIXTOP_
+/*#ifdef _DEBUG_SIXTOP_
       char str[150];
-      sprintf(str, "LinkRep blacklist -");
+      sprintf(str, "LinkRep rcvd => blacklisting -");
 #endif
+*/
 
       //these cells are not available and should be discarded for the next requests
       for(i = 0;i<SCHEDULEIEMAXNUMCELLS;i++){
@@ -1690,7 +1699,7 @@ void sixtop_notifyReceiveLinkResponse(
                   addr,
                   track
             );
-
+/*
 #ifdef _DEBUG_SIXTOP_
          strncat(str, " slot=", 150);
          openserial_ncat_uint32_t(str, (uint32_t)blacklist_ie->cellList[i].tsNum, 150);
@@ -1698,11 +1707,12 @@ void sixtop_notifyReceiveLinkResponse(
          openserial_ncat_uint32_t(str, (uint32_t)blacklist_ie->cellList[i].choffset, 150);
          strncat(str, ", ", 150);
 #endif
+ */
       }
-#ifdef _DEBUG_SIXTOP_
+/*#ifdef _DEBUG_SIXTOP_
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
-
+*/
       //return;
    } else {
       // need to check whether the links are available to be scheduled.
@@ -1781,10 +1791,10 @@ bool sixtop_candidateAddCellList(
    
    numCandCells=0;
    for(counter=0;counter<SCHEDULEIEMAXNUMCELLS;counter++){
-      i = openrandom_get16b()%schedule_getFrameLength();
+      i = openrandom_get16b() % schedule_getFrameLength();
       if(schedule_isSlotOffsetAvailable(i)==TRUE){
          cellList[numCandCells].tsNum       = i;
-         cellList[numCandCells].choffset    = 0;
+         cellList[numCandCells].choffset    = openrandom_get16b() % 16;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
          numCandCells++;
       }
@@ -1966,11 +1976,14 @@ bool sixtop_areAvailableCellsToBeScheduled(
   
    if(bw == 0 || bw>SCHEDULEIEMAXNUMCELLS || numOfCells>SCHEDULEIEMAXNUMCELLS){
       // log wrong parameter error TODO
-    
+      openserial_printError(COMPONENT_SIXTOP,ERR_GENERIC,
+                            (errorparameter_t)48,
+                            (errorparameter_t)463);
+
       available = FALSE;
    } else {
 #ifdef _DEBUG_SIXTOP_
-      sprintf(str, "SCHED: ");
+      sprintf(str, "LinkRep - SCHED: ");
 #endif
 
       do {

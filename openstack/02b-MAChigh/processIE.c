@@ -354,11 +354,14 @@ port_INLINE uint8_t processIE_prependBlacklistIE(
 
    len        = 0;
    numOfCells = 0;
+   char str[150];
 
    //===== cell list
+   sprintf(str, "LinkRep prepared - blacklist - ");
+
 
    for(i=0;i<SCHEDULEIEMAXNUMCELLS;i++) {
-      if(cellList[i].linkoptions != CELLTYPE_BUSY){
+      if(cellList[i].linkoptions == CELLTYPE_BUSY){
          // cellobjects:
          // - [2B] slotOffset
          // - [2B] channelOffset
@@ -371,17 +374,27 @@ port_INLINE uint8_t processIE_prependBlacklistIE(
          pkt->payload[4] = cellList[i].linkoptions;
          len += 5;
          numOfCells++;
+
+         strncat(str, ", slot=", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
+         strncat(str, "/ch=", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
+         strncat(str, "/status=", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)cellList[i].linkoptions, 150);
+
       }
+   }
+   if (numOfCells > 0){
+      strncat(str, ", NbCellsBusy=", 150);
+      openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
    }
 
    // record the position of cellObjects
    pkt->l2_scheduleIE_numOfCells  = numOfCells;
    pkt->l2_scheduleIE_cellObjects = pkt->payload;
 
-   char str[150];
-   sprintf(str, "LinkRep prepared: nbCellsBusy ");
-   openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
-   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
 
    //===== number of cells
