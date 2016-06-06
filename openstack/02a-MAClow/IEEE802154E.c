@@ -936,14 +936,27 @@ port_INLINE void activity_ti1ORri1() {
          ieee154e_vars.dataToSend = NULL;
          // check whether we can send
          if (schedule_getOkToSend()) {
-            schedule_getNeighbor(&neighbor);
-            schedule_getTrackCurrent(&track);
-            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
-            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
-               couldSendEB=TRUE;
-               // look for an EB packet in the queue
-               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+            //higher priority for EB packets
+           /* if (cellType==CELLTYPE_TXRX) {
+               if ((ieee154e_vars.dataToSend = openqueue_macGetEBPacket()) != NULL)
+                   couldSendEB=TRUE;
             }
+            //else, any accurate packet from the queue
+            if (ieee154e_vars.dataToSend == NULL){
+               schedule_getNeighbor(&neighbor);
+               schedule_getTrackCurrent(&track);
+               ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
+            }
+            */
+           schedule_getNeighbor(&neighbor);
+           ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
+           if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+              couldSendEB=TRUE;
+              // look for an EB packet in the queue
+              ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+           }
+
+
          }
          if (ieee154e_vars.dataToSend==NULL) {
             if (cellType==CELLTYPE_TX) {
