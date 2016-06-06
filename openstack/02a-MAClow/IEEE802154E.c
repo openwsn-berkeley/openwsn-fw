@@ -949,6 +949,7 @@ port_INLINE void activity_ti1ORri1() {
             }
             */
            schedule_getNeighbor(&neighbor);
+           schedule_getTrackCurrent(&track);
            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
               couldSendEB=TRUE;
