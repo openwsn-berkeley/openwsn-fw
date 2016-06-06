@@ -23,7 +23,7 @@
 
 
 
-#define _DEBUG_OPENSERIAL_
+//#define _DEBUG_OPENSERIAL_
 
 
 #ifdef _DEBUG_OPENSERIAL_

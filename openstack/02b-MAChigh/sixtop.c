@@ -145,14 +145,7 @@ void sixtop_init() {
       sixtop_maintenance_timer_cb
    );
    
-/*
-   sixtop_vars.timeoutTimerId     = opentimers_start(
-      SIX2SIX_TIMEOUT_MS,
-      TIMER_ONESHOT,
-      TIME_MS,
-      sixtop_timeout_timer_cb
-   );
-   */
+
 }
 
 void sixtop_setKaPeriod(uint16_t kaPeriod) {
@@ -296,14 +289,6 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track){
    // update state
    sixtop_setState(SIX_WAIT_ADDREQUEST_SENDDONE);
    
-   // arm timeout
-/*   opentimers_setPeriod(
-      sixtop_vars.timeoutTimerId,
-      TIME_MS,
-      SIX2SIX_TIMEOUT_MS
-   );
-   opentimers_restart(sixtop_vars.timeoutTimerId);
-*/
 
 
 #ifdef _DEBUG_SIXTOP_
@@ -426,15 +411,7 @@ void sixtop_removeCell(open_addr_t* neighbor){
    
    // update state
    sixtop_setState(SIX_WAIT_REMOVEREQUEST_SENDDONE);
- /*
-   // arm timeout
-   opentimers_setPeriod(
-      sixtop_vars.timeoutTimerId,
-      TIME_MS,
-      SIX2SIX_TIMEOUT_MS
-   );
-   opentimers_restart(sixtop_vars.timeoutTimerId);
-*/
+
 }
 
 void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
@@ -535,14 +512,6 @@ void sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo){
    // update state
    sixtop_setState(SIX_WAIT_REMOVEREQUEST_SENDDONE);
    
-   // arm timeout
- /*  opentimers_setPeriod(
-      sixtop_vars.timeoutTimerId,
-      TIME_MS,
-      SIX2SIX_TIMEOUT_MS
-   );
-   opentimers_restart(sixtop_vars.timeoutTimerId);
-*/
 }
 
 //======= maintaning 
@@ -1139,12 +1108,14 @@ void sixtop_setState(six2six_state_t state){
 
 
 void timer_sixtop_six2six_timeout_fired(void) {
+#ifdef OPENSERIAL_PRINTF
    openserial_printInfo(
       COMPONENT_SIXTOP,
       ERR_SIXTOP_TIMEOUT,
       (errorparameter_t)0,
       (errorparameter_t)0
    );
+#endif
 
    // timeout timer fired, reset the state of sixtop to idle
    openqueue_removeAllCreatedBy(COMPONENT_SIXTOP_RES);

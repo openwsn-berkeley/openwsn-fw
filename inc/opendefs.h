@@ -26,8 +26,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define OPENWSN_VERSION_PATCH     0
 
 
-//DEBUG / STAT
-#define OPENSERIAL_PRINTF
+// STAT
 #define OPENSERIAL_STAT
 
 //DAGROOT: forwards the packet to both the serial line + the upper layers

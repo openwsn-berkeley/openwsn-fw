@@ -137,12 +137,14 @@ uint8_t otf_reserve_agressive_for(OpenQueueEntry_t* msg){
       nbCells_toadd = SIXTOP_NBCELLS_INREQ;
 
    //debug
+#ifdef OPENSERIAL_PRINTF
    openserial_printError(
          COMPONENT_OTF,
          ERR_OTF_INSUFFICIENT,
          (errorparameter_t)(uint16_t)(msg->l2_track.instance),
          (errorparameter_t)nbCells_toadd
    );
+#endif
 
    //ask 6top the required number of cells
    sixtop_setHandler(SIX_HANDLER_OTF);

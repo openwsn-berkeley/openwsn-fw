@@ -86,6 +86,7 @@ project:
     cex_period     Period for cexample to generate data packets
     schedalgo      Algorithm to schedule the cells for 6top (1= random,
                    2=random_contiguous)
+    printf         Prints the string message for debug (0=inactive, 1=active)
     
     Common variables:
     verbose        Print each complete compile/link command.
@@ -143,10 +144,11 @@ command_line_options = {
     'l2_security':      ['0','1'],
     'goldenImage':      ['none','root','sniffer'],
     'distribshared':    ['0','1'],
-    'tracks':           ['0','1','2'],	 	# 0=only TXRX, 1=one single track, 2=traffic isolation (default behavior)
-    'rplmetric':        ['1'],			# 1=ETX (default)
-    'cex_period':       ['5000'],         	# by default, 5 seconds
-    'schedalgo':        ['0','1','2'],        		# 1=random (default)
+    'tracks':           ['0','1','2'],	  # 0=only TXRX, 1=one single track, 2=traffic isolation (default behavior)
+    'rplmetric':        ['0','1'],			  # 1=ETX (default)
+    'cex_period':       ['5000'],         # by default, 5 seconds
+    'schedalgo':        ['0','1','2'],    # 1=random (default)
+    'printf':           ['0','1'],        # 0=inactive (default), 1=active
 
 }
 
@@ -317,7 +319,7 @@ command_line_vars.AddVariables(
     (
         'rplmetric',                                       # key
         '',                                                # help
-        command_line_options['rplmetric'][0],              # default
+        command_line_options['rplmetric'][1],              # default
         validate_option,                                   # validator
         int,                                               # converter
     ),
@@ -330,6 +332,13 @@ command_line_vars.AddVariables(
     ),
     (
         'schedalgo',                                       # key
+        '',                                                # help
+        command_line_options['schedalgo'][1],              # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'printf',                                          # key
         '',                                                # help
         command_line_options['schedalgo'][0],              # default
         validate_option,                                   # validator
