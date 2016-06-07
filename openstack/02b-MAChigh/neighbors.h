@@ -12,6 +12,8 @@
 
 //=========================== define ==========================================
 
+#define RSSIThRESHOLD             15
+#define NEIGHBORSCONTROL          3
 #define MAXNUMNEIGHBORS           10
 #define MAXPREFERENCE             2
 #define BADNEIGHBORMAXRSSI        -80 //dBm
@@ -86,6 +88,7 @@ bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isPreferredParent(open_addr_t* address);
 bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
 bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
+bool          neighbors_isNeighbor(open_addr_t* address);
 
 // updating neighbor information
 void          neighbors_indicateRx(
@@ -109,6 +112,8 @@ void          neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8
 void          neighbors_updateMyDAGrankAndNeighborPreference(void);
 // maintenance
 void          neighbors_removeOld(void);
+// neighbor controle
+void          neighbor_removeNeighbor(open_addr_t* address);
 // debug
 bool          debugPrint_neighbors(void);
 

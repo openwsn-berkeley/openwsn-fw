@@ -923,6 +923,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                   
             } else{
                 if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_CLEAR){
+                    // the cell should be cleared when I received the request, following code is not required
                     schedule_removeAllCells(msg->l2_sixtop_frameID,
                                           &(msg->l2_nextORpreviousHop));
                 }
@@ -1145,8 +1146,17 @@ void sixtop_notifyReceiveCommand(
                           sixtop_areAvailableCellsToBeRemoved(frameID,numOfCells,cellList,&(pkt->l2_nextORpreviousHop))
                        )
                     ){
-                        code = IANA_6TOP_RC_SUCCESS;
-                        len += processIE_prepend_sixCelllist(response_pkt,cellList);
+                        if (neighbors_getNumNeighbors()<NEIGHBORSCONTROL || 
+                            (
+                             neighbors_getNumNeighbors()==NEIGHBORSCONTROL &&
+                             neighbors_isNeighbor(&(pkt->l2_nextORpreviousHop))
+                            )
+                        ) {
+                            code = IANA_6TOP_RC_SUCCESS;
+                            len += processIE_prepend_sixCelllist(response_pkt,cellList);
+                        } else {
+                            code = IANA_6TOP_RC_RESET;
+                        }
                     } else {
                         code = IANA_6TOP_RC_RESET;
                     }
@@ -1256,7 +1266,13 @@ void sixtop_notifyReceiveCommand(
                     code = IANA_6TOP_RC_ERR;
                 }
             } else {
-                // TBD...
+                if (commandIdORcode==IANA_6TOP_RC_RESET){
+                    // reject by this neighbor, remove it and update the preference neighbor
+                    neighbor_removeNeighbor(&(pkt->l2_nextORpreviousHop));
+                    neighbors_updateMyDAGrankAndNeighborPreference();
+                } else {
+                    // TBD...
+                }
             }
 #ifdef GOLDEN_IMAGE_ROOT
            openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
@@ -1264,6 +1280,9 @@ void sixtop_notifyReceiveCommand(
                            (errorparameter_t)sixtop_vars.six2six_state);
 #endif
             sixtop_vars.six2six_state = SIX_IDLE;
+            if (sixtop_vars.handler == SIX_HANDLER_NEIGHBOR_CONTROL ){
+                neighbor_removeNeighbor(&(pkt->l2_nextORpreviousHop));
+            }
             sixtop_vars.handler = SIX_HANDLER_NONE;
             opentimers_stop(sixtop_vars.timeoutTimerId);
         }

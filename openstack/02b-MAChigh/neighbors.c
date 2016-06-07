@@ -5,6 +5,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "IEEE802154E.h"
+#include "sixtop.h"
 
 //=========================== variables =======================================
 
@@ -287,6 +288,20 @@ bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
    }
    
    return returnVal;
+}
+
+bool neighbors_isNeighbor(open_addr_t* address){
+   uint8_t    i;
+   bool       returnVal = FALSE;
+   
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (packetfunctions_sameAddress(address,&neighbors_vars.neighbors[i].addr_64b)) {
+            returnVal = TRUE;
+            break;
+      }
+   }
+   
+   return returnVal; 
 }
 
 //===== updating neighbor information
@@ -579,6 +594,19 @@ void  neighbors_removeOld() {
    } 
 }
 
+//===== neighbor control
+
+void neighbor_removeNeighbor(open_addr_t* address){
+   uint8_t    i;
+   
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (packetfunctions_sameAddress(address,&neighbors_vars.neighbors[i].addr_64b)) {
+            removeNeighbor(i);
+            break;
+      }
+   }
+}
+
 //===== debug
 
 /**
@@ -607,6 +635,8 @@ void registerNewNeighbor(open_addr_t* address,
                          uint8_t      joinPrio) {
    uint8_t  i,j;
    bool     iHaveAPreferedParent;
+   int8_t   lowestRssi;
+   uint8_t  lowestRssiIndex;
    // filter errors
    if (address->type!=ADDR_64B) {
       openserial_printCritical(COMPONENT_NEIGHBORS,ERR_WRONG_ADDR_TYPE,
@@ -615,43 +645,100 @@ void registerNewNeighbor(open_addr_t* address,
       return;
    }
    // add this neighbor
-   if (isNeighbor(address)==FALSE) {
+   if (isNeighbor(address)==FALSE && neighbors_getNumNeighbors()<=NEIGHBORSCONTROL) {
       i=0;
-      while(i<MAXNUMNEIGHBORS) {
-         if (neighbors_vars.neighbors[i].used==FALSE) {
-            // add this neighbor
-            neighbors_vars.neighbors[i].used                   = TRUE;
-            neighbors_vars.neighbors[i].parentPreference       = 0;
-            // neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
-            // Note: all new neighbors are consider stable
-            neighbors_vars.neighbors[i].stableNeighbor         = TRUE;
-            neighbors_vars.neighbors[i].switchStabilityCounter = 0;
-            memcpy(&neighbors_vars.neighbors[i].addr_64b,address,sizeof(open_addr_t));
-            neighbors_vars.neighbors[i].DAGrank                = DEFAULTDAGRANK;
-            neighbors_vars.neighbors[i].rssi                   = rssi;
-            neighbors_vars.neighbors[i].numRx                  = 1;
-            neighbors_vars.neighbors[i].numTx                  = 0;
-            neighbors_vars.neighbors[i].numTxACK               = 0;
-            memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
-            //update jp
-            if (joinPrioPresent==TRUE){
-               neighbors_vars.neighbors[i].joinPrio=joinPrio;
-            }
+      if (neighbors_getNumNeighbors()==NEIGHBORSCONTROL){
+          lowestRssi = 0x00;
+          while (i<MAXNUMNEIGHBORS){
+              if (neighbors_vars.neighbors[i].used==FALSE) {
+                  if (neighbors_vars.neighbors[i].rssi<lowestRssi){
+                      lowestRssi = neighbors_vars.neighbors[i].rssi;
+                      lowestRssiIndex = i;
+                  }
+                  i++;
+              }
+          }
+          if (rssi > lowestRssi+RSSIThRESHOLD && 
+              rssi > BADNEIGHBORMAXRSSI && 
+              neighbors_vars.neighbors[lowestRssi].parentPreference!=MAXPREFERENCE  // donot replace current parent
+          ){
+              // replace the lowest Rssi neighbor (not a parent) by the new neighbor one 
             
-            // do I already have a preferred parent ? -- TODO change to use JP
-            iHaveAPreferedParent = FALSE;
-            for (j=0;j<MAXNUMNEIGHBORS;j++) {
-               if (neighbors_vars.neighbors[j].parentPreference==MAXPREFERENCE) {
-                  iHaveAPreferedParent = TRUE;
-               }
-            }
-            // if I have none, and I'm not DAGroot, the new neighbor is my preferred
-            if (iHaveAPreferedParent==FALSE && idmanager_getIsDAGroot()==FALSE) {      
-               neighbors_vars.neighbors[i].parentPreference     = MAXPREFERENCE;
-            }
-            break;
-         }
-         i++;
+              // checking whether I have collision free slot to that neighbor
+              if (
+                  schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&(neighbors_vars.neighbors[lowestRssiIndex].addr_64b))>0 ||
+                  schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_RX,&(neighbors_vars.neighbors[lowestRssiIndex].addr_64b))>0   
+              ) {
+                  // I have slots to the neighbor to lowestRssi neighbor, release them before removing from neighbor buffer
+                
+                  // mark as to be removed neighbor
+                  sixtop_setHandler(SIX_HANDLER_NEIGHBOR_CONTROL);
+                  
+                  sixtop_request(
+                      IANA_6TOP_CMD_CLEAR,
+                      &(neighbors_vars.neighbors[lowestRssiIndex].addr_64b),
+                      0 // not required for 6p CLEAR command
+                  );
+              } else {
+                  // remove the older neighbor and use the same buffer for new neighbor
+                  removeNeighbor(lowestRssiIndex);
+                  // add this neighbor
+                  neighbors_vars.neighbors[lowestRssiIndex].used                   = TRUE;
+                  neighbors_vars.neighbors[lowestRssiIndex].parentPreference       = 0;
+                  // neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
+                  // Note: all new neighbors are consider stable
+                  neighbors_vars.neighbors[lowestRssiIndex].stableNeighbor         = TRUE;
+                  neighbors_vars.neighbors[lowestRssiIndex].switchStabilityCounter = 0;
+                  memcpy(&neighbors_vars.neighbors[lowestRssiIndex].addr_64b,address,sizeof(open_addr_t));
+                  neighbors_vars.neighbors[lowestRssiIndex].DAGrank                = DEFAULTDAGRANK;
+                  neighbors_vars.neighbors[lowestRssiIndex].rssi                   = rssi;
+                  neighbors_vars.neighbors[lowestRssiIndex].numRx                  = 1;
+                  neighbors_vars.neighbors[lowestRssiIndex].numTx                  = 0;
+                  neighbors_vars.neighbors[lowestRssiIndex].numTxACK               = 0;
+                  memcpy(&neighbors_vars.neighbors[lowestRssiIndex].asn,asnTimestamp,sizeof(asn_t));
+                  //update jp
+                  if (joinPrioPresent==TRUE){
+                     neighbors_vars.neighbors[lowestRssiIndex].joinPrio=joinPrio;
+                  }
+              }
+          }
+      } else {
+          while(i<MAXNUMNEIGHBORS) {
+             if (neighbors_vars.neighbors[i].used==FALSE) {
+                // add this neighbor
+                neighbors_vars.neighbors[i].used                   = TRUE;
+                neighbors_vars.neighbors[i].parentPreference       = 0;
+                // neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
+                // Note: all new neighbors are consider stable
+                neighbors_vars.neighbors[i].stableNeighbor         = TRUE;
+                neighbors_vars.neighbors[i].switchStabilityCounter = 0;
+                memcpy(&neighbors_vars.neighbors[i].addr_64b,address,sizeof(open_addr_t));
+                neighbors_vars.neighbors[i].DAGrank                = DEFAULTDAGRANK;
+                neighbors_vars.neighbors[i].rssi                   = rssi;
+                neighbors_vars.neighbors[i].numRx                  = 1;
+                neighbors_vars.neighbors[i].numTx                  = 0;
+                neighbors_vars.neighbors[i].numTxACK               = 0;
+                memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
+                //update jp
+                if (joinPrioPresent==TRUE){
+                   neighbors_vars.neighbors[i].joinPrio=joinPrio;
+                }
+                
+                // do I already have a preferred parent ? -- TODO change to use JP
+                iHaveAPreferedParent = FALSE;
+                for (j=0;j<MAXNUMNEIGHBORS;j++) {
+                   if (neighbors_vars.neighbors[j].parentPreference==MAXPREFERENCE) {
+                      iHaveAPreferedParent = TRUE;
+                   }
+                }
+                // if I have none, and I'm not DAGroot, the new neighbor is my preferred
+                if (iHaveAPreferedParent==FALSE && idmanager_getIsDAGroot()==FALSE) {      
+                   neighbors_vars.neighbors[i].parentPreference     = MAXPREFERENCE;
+                }
+                break;
+             }
+             i++;
+          }
       }
       if (i==MAXNUMNEIGHBORS) {
          openserial_printError(COMPONENT_NEIGHBORS,ERR_NEIGHBORS_FULL,
