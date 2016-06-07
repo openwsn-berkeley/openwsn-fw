@@ -1149,7 +1149,7 @@ void sixtop_notifyReceiveCommand(
                         if (neighbors_getNumNeighbors()<NEIGHBORSCONTROL || 
                             (
                              neighbors_getNumNeighbors()==NEIGHBORSCONTROL &&
-                             neighbors_isNeighbor(&(pkt->l2_nextORpreviousHop))
+                             neighbors_isMyNeighbor(&(pkt->l2_nextORpreviousHop))
                             )
                         ) {
                             code = IANA_6TOP_RC_SUCCESS;
@@ -1268,7 +1268,7 @@ void sixtop_notifyReceiveCommand(
             } else {
                 if (commandIdORcode==IANA_6TOP_RC_RESET){
                     // reject by this neighbor, remove it and update the preference neighbor
-                    neighbor_removeNeighbor(&(pkt->l2_nextORpreviousHop));
+                    neighbors_removeByNeighbor(&(pkt->l2_nextORpreviousHop));
                     neighbors_updateMyDAGrankAndNeighborPreference();
                 } else {
                     // TBD...
@@ -1281,7 +1281,7 @@ void sixtop_notifyReceiveCommand(
 #endif
             sixtop_vars.six2six_state = SIX_IDLE;
             if (sixtop_vars.handler == SIX_HANDLER_NEIGHBOR_CONTROL ){
-                neighbor_removeNeighbor(&(pkt->l2_nextORpreviousHop));
+                neighbors_removeByNeighbor(&(pkt->l2_nextORpreviousHop));
             }
             sixtop_vars.handler = SIX_HANDLER_NONE;
             opentimers_stop(sixtop_vars.timeoutTimerId);

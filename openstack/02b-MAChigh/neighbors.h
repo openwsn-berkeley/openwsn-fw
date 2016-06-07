@@ -88,7 +88,7 @@ bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isPreferredParent(open_addr_t* address);
 bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
 bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
-bool          neighbors_isNeighbor(open_addr_t* address);
+bool          neighbors_isMyNeighbor(open_addr_t* address);
 
 // updating neighbor information
 void          neighbors_indicateRx(
@@ -113,7 +113,7 @@ void          neighbors_updateMyDAGrankAndNeighborPreference(void);
 // maintenance
 void          neighbors_removeOld(void);
 // neighbor controle
-void          neighbor_removeNeighbor(open_addr_t* address);
+void          neighbors_removeByNeighbor(open_addr_t* address);
 // debug
 bool          debugPrint_neighbors(void);
 

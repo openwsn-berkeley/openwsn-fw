@@ -290,10 +290,11 @@ bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
    return returnVal;
 }
 
-bool neighbors_isNeighbor(open_addr_t* address){
+bool neighbors_isMyNeighbor(open_addr_t* address){
    uint8_t    i;
-   bool       returnVal = FALSE;
+   bool       returnVal ;
    
+   returnVal = FALSE;  
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (packetfunctions_sameAddress(address,&neighbors_vars.neighbors[i].addr_64b)) {
             returnVal = TRUE;
@@ -596,11 +597,11 @@ void  neighbors_removeOld() {
 
 //===== neighbor control
 
-void neighbor_removeNeighbor(open_addr_t* address){
+void neighbors_removeByNeighbor(open_addr_t* address){
    uint8_t    i;
    
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (packetfunctions_sameAddress(address,&neighbors_vars.neighbors[i].addr_64b)) {
+      if (packetfunctions_sameAddress(address,&neighbors_vars.neighbors[i].addr_64b)==TRUE) {
             removeNeighbor(i);
             break;
       }
