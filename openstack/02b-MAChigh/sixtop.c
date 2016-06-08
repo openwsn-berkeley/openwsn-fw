@@ -555,8 +555,10 @@ void task_sixtopNotifReceive() {
             ){
                 // this is neighbor control command
                 if (*((uint8_t*)(msg->payload)+4)==0x00){
+                    printf("neighbor control received. this is %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
                     // reject by this neighbor, remove it and update the preference neighbor
-                    neighbors_removeByNeighbor(&(msg->l2_nextORpreviousHop));
+//                    neighbors_removeByNeighbor(&(msg->l2_nextORpreviousHop));
+                    neighbors_increaseNeighborLinkCost(&(msg->l2_nextORpreviousHop));
                     neighbors_updateMyDAGrankAndNeighborPreference();
                 } else {
                     printf("something worong at neighbor control command %d \n",*((uint8_t*)(msg->payload)+4));
@@ -567,6 +569,7 @@ void task_sixtopNotifReceive() {
                       // send to upper layer
                       iphc_receive(msg);
                   } else {
+                      printf("neighbor control to send. this is %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
                       // free the message first and inform the neighbor don't send to me
                       sixtop_sendNeighborControlCommand(&(msg->l2_nextORpreviousHop),0);
                       openqueue_freePacketBuffer(msg);
@@ -884,8 +887,6 @@ port_INLINE void sixtop_sendKA() {
 
 void sixtop_sendNeighborControlCommand(open_addr_t* neighborAddr,uint8_t command){
    OpenQueueEntry_t* ncPkt;
-   open_addr_t*      ncNeighAddr;
-   bool              foundNeighbor;
    
    if (ieee154e_isSynch()==FALSE) {
       // I'm not sync'ed
@@ -902,12 +903,6 @@ void sixtop_sendNeighborControlCommand(open_addr_t* neighborAddr,uint8_t command
    
    if (sixtop_vars.busySendingNC==TRUE) {
       // don't proceed if I'm still sending a KA
-      return;
-   }
-   
-   foundNeighbor = neighbors_getPreferredParentEui64(ncNeighAddr);
-   if (foundNeighbor==FALSE) {
-      // don't proceed if I have no neighbor I need to send a nc to
       return;
    }
    
@@ -928,7 +923,7 @@ void sixtop_sendNeighborControlCommand(open_addr_t* neighborAddr,uint8_t command
    
    // some l2 information about this packet
    ncPkt->l2_frameType = IEEE154_TYPE_DATA;
-   memcpy(&(ncPkt->l2_nextORpreviousHop),ncNeighAddr,sizeof(open_addr_t));
+   memcpy(&(ncPkt->l2_nextORpreviousHop),neighborAddr,sizeof(open_addr_t));
    
    // set l2-security attributes
    ncPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
@@ -1251,9 +1246,9 @@ void sixtop_notifyReceiveCommand(
                           sixtop_areAvailableCellsToBeRemoved(frameID,numOfCells,cellList,&(pkt->l2_nextORpreviousHop))
                        )
                     ){
-                        if (neighbors_getNumNeighbors()<NEIGHBORSCONTROL || 
+                        if (neighbors_getNumNeighborsNoBlocked()<NEIGHBORSCONTROL || 
                             (
-                             neighbors_getNumNeighbors()==NEIGHBORSCONTROL &&
+                             neighbors_getNumNeighborsNoBlocked()==NEIGHBORSCONTROL &&
                              neighbors_isMyNeighbor(&(pkt->l2_nextORpreviousHop))
                             )
                         ) {
@@ -1373,7 +1368,8 @@ void sixtop_notifyReceiveCommand(
             } else {
                 if (commandIdORcode==IANA_6TOP_RC_RESET){
                     // reject by this neighbor, remove it and update the preference neighbor
-                    neighbors_removeByNeighbor(&(pkt->l2_nextORpreviousHop));
+//                    neighbors_removeByNeighbor(&(pkt->l2_nextORpreviousHop));
+                    neighbors_increaseNeighborLinkCost(&(pkt->l2_nextORpreviousHop));
                     neighbors_updateMyDAGrankAndNeighborPreference();
                 } else {
                     // TBD...

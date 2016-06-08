@@ -42,6 +42,7 @@ typedef struct {
    uint8_t          numWraps;//number of times the tx counter wraps. can be removed if memory is a restriction. also check openvisualizer then.
    asn_t            asn;
    uint8_t          joinPrio;
+   bool             isBlocked;
 } neighborRow_t;
 END_PACK
 
@@ -114,6 +115,7 @@ void          neighbors_updateMyDAGrankAndNeighborPreference(void);
 void          neighbors_removeOld(void);
 // neighbor controle
 void          neighbors_removeByNeighbor(open_addr_t* address);
+void          neighbors_increaseNeighborLinkCost(open_addr_t* address);
 // debug
 bool          debugPrint_neighbors(void);
 

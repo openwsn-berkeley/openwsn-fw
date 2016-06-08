@@ -78,6 +78,21 @@ uint8_t neighbors_getNumNeighbors() {
    return returnVal;
 }
 
+uint8_t neighbors_getNumNeighborsNoBlocked() {
+   uint8_t i;
+   uint8_t returnVal;
+   
+   returnVal=0;
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (neighbors_vars.neighbors[i].used==TRUE && 
+          neighbors_vars.neighbors[i].isBlocked==FALSE
+      ) {
+         returnVal++;
+      }
+   }
+   return returnVal;
+}
+
 /**
 \brief Retrieve my preferred parent's EUI64 address.
 
@@ -612,6 +627,20 @@ void neighbors_removeByNeighbor(open_addr_t* address){
    }
 }
 
+void neighbors_increaseNeighborLinkCost(open_addr_t* address){
+   uint8_t    i;
+   
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (packetfunctions_sameAddress(address,&neighbors_vars.neighbors[i].addr_64b)==TRUE) {
+            // set the rank a little bit higher than default value
+            neighbors_vars.neighbors[i].numTxACK  = 1;
+            neighbors_vars.neighbors[i].numTx     = DEFAULTLINKCOST+1;
+            neighbors_vars.neighbors[i].isBlocked = TRUE;
+            break;
+      }
+   }
+}
+
 //===== debug
 
 /**
@@ -627,7 +656,7 @@ bool debugPrint_neighbors() {
    neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
    temp.row=neighbors_vars.debugRow;
    temp.neighborEntry=neighbors_vars.neighbors[neighbors_vars.debugRow];
-   openserial_printStatus(STATUS_NEIGHBORS,(uint8_t*)&temp,sizeof(debugNeighborEntry_t));
+   openserial_printStatus(STATUS_NEIGHBORS,(uint8_t*)&temp,sizeof(debugNeighborEntry_t)-1);
    return TRUE;
 }
 
@@ -650,9 +679,9 @@ void registerNewNeighbor(open_addr_t* address,
       return;
    }
    // add this neighbor
-   if (isNeighbor(address)==FALSE && neighbors_getNumNeighbors()<=NEIGHBORSCONTROL) {
+   if (isNeighbor(address)==FALSE && neighbors_getNumNeighborsNoBlocked()<=NEIGHBORSCONTROL) {
       i=0;
-      if (neighbors_getNumNeighbors()==NEIGHBORSCONTROL){
+      if (neighbors_getNumNeighborsNoBlocked()==NEIGHBORSCONTROL){
           lowestRssi = 0x00;
           k=0;
           while (k<MAXNUMNEIGHBORS){
