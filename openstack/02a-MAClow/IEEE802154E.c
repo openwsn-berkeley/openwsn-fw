@@ -934,12 +934,6 @@ port_INLINE void activity_ti1ORri1() {
            schedule_getTrackCurrent(&track);
            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
 
-           char str[150];
-             sprintf(str, "getPacket, creator ");
-             openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->creator, 150);
-             openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
-
-
            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
               couldSendEB=TRUE;
               // look for an EB packet in the queue
