@@ -933,6 +933,13 @@ port_INLINE void activity_ti1ORri1() {
            schedule_getNeighbor(&neighbor);
            schedule_getTrackCurrent(&track);
            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
+
+           char str[150];
+             sprintf(str, "getPacket, creator ");
+             openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->creator, 150);
+             openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
+
+
            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
               couldSendEB=TRUE;
               // look for an EB packet in the queue
@@ -1211,10 +1218,19 @@ port_INLINE void activity_tie5() {
    // indicate transmit failed to schedule to keep stats
    schedule_indicateTx(&ieee154e_vars.asn,FALSE);
    
+   if (ieee154e_vars.dataToSend->l2_retriesLeft == 0){
+      char str[150];
+      sprintf(str, "l2_retriesLeft - ");
+      openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->l2_retriesLeft, 150);
+      strncat(str, ", creator - ",150 );
+      openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->creator, 150);
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+   }
+
    // decrement transmits left counter
    ieee154e_vars.dataToSend->l2_retriesLeft--;
-   
-   if (ieee154e_vars.dataToSend->l2_retriesLeft==0) {
+
+   if (ieee154e_vars.dataToSend->l2_retriesLeft==0 || ieee154e_vars.dataToSend->l2_retriesLeft>TXRETRIES) {
       // indicate tx fail if no more retries left
       notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
    } else {
@@ -2276,10 +2292,20 @@ void endSlot() {
       // indicate Tx fail to schedule to update stats
       schedule_indicateTx(&ieee154e_vars.asn,FALSE);
       
+
+      if (ieee154e_vars.dataToSend->l2_retriesLeft == 0){
+         char str[150];
+         sprintf(str, "l2_retriesLeft - ");
+         openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->l2_retriesLeft, 150);
+         strncat(str, ", creator - ",150 );
+         openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->creator, 150);
+         openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+      }
+
       //decrement transmits left counter
       ieee154e_vars.dataToSend->l2_retriesLeft--;
       
-      if (ieee154e_vars.dataToSend->l2_retriesLeft==0) {
+      if (ieee154e_vars.dataToSend->l2_retriesLeft==0 || ieee154e_vars.dataToSend->l2_retriesLeft>TXRETRIES) {
          // indicate tx fail if no more retries left
          notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
       } else {

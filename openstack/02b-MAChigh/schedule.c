@@ -500,6 +500,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
    return E_SUCCESS;
 }
 
+/*
 void schedule_print(void){
 
    scheduleEntry_t* scheduleWalker;
@@ -524,6 +525,7 @@ void schedule_print(void){
    openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
 
 }
+*/
 
 
 bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){

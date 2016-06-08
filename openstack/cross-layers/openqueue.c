@@ -85,8 +85,6 @@ bool debugPrint_queue() {
    return TRUE;
 }
 
-
-
 //this represents an invalid timeout
 bool openqueue_timeout_is_zero(timeout_t value){
    uint8_t  i;
@@ -149,7 +147,6 @@ void openqueue_timeout_drop(void){
 
    uint8_t     i;
    timeout_t   now;
-
 
    //initialization
    ieee154e_getAsn(now.byte);
@@ -303,6 +300,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, co
 
 
 
+
 /**
 \brief Free a previously-allocated packet buffer.
 
@@ -312,6 +310,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, co
 \returns E_FAIL when the module could not find the specified packet buffer.
 */
 owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
+
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -338,6 +337,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
 
 
 
+
 /**
 \brief Free all the packet buffers created by a specific module.
 
@@ -345,6 +345,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
 */
 void openqueue_removeAllCreatedBy(uint8_t creator) {
    uint8_t i;
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){

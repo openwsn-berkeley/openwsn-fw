@@ -21,7 +21,7 @@
 
 
 #define _DEBUG_SIXTOP_
-//#define _DEBUG_SIXTOP_TIMEOUT_
+#define _DEBUG_SIXTOP_TIMEOUT_
 
 
 //=========================== variables =======================================
@@ -1777,10 +1777,6 @@ bool sixtop_candidateAddCellList(
    for(numCandCells=0;numCandCells<SCHEDULEIEMAXNUMCELLS;){
       i = openrandom_get16b() % schedule_getFrameLength();
       if ((schedule_isSlotOffsetAvailable(i)==TRUE) && (!sixtop_cellInList(cellList, numCandCells, i))){
-         if (i == 0)
-            schedule_print();
-
-
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = openrandom_get16b() % 16;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
