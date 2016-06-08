@@ -150,8 +150,8 @@ void prepare_radio_tx_frame(void) {
     }
 
     // Fill in packet counter and rollover counter
-    app_vars.txpk_buf[9]  = (app_vars.packet_counter >> 8) % 0xFF;
-    app_vars.txpk_buf[10] = (app_vars.packet_counter >> 0) % 0xFF;;
+    app_vars.txpk_buf[9]  = (app_vars.packet_counter >> 8) & 0xFF;
+    app_vars.txpk_buf[10] = (app_vars.packet_counter >> 0) & 0xFF;;
     app_vars.txpk_buf[11] = app_vars.rollover;
 
     // Epoch set to zero as this is a bike
