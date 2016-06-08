@@ -515,7 +515,17 @@ void openserial_startOutput(void) {
           if (debugPrint_params()==TRUE) {
              break;
           }
-      default:
+      // to refresh more frequently the status of the queue and the schedule (multiple rows)
+      case STATUS_SCHEDULEBIS:
+           if(debugPrint_schedule()==TRUE) {
+              break;
+           }
+      case STATUS_QUEUEBIS:
+         if(debugPrint_queue()==TRUE) {
+            break;
+         }
+
+          default:
          DISABLE_INTERRUPTS();
          openserial_vars.debugPrintCounter=0;
          ENABLE_INTERRUPTS();

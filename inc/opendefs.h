@@ -131,7 +131,9 @@ enum {
    STATUS_NEIGHBORS                    =  9,
    STATUS_KAPERIOD                     = 10,
    STATUS_PARAMS                       = 11,
-   STATUS_MAX                          = 12,
+   STATUS_SCHEDULEBIS                  = 12,
+   STATUS_QUEUEBIS                     = 13,
+   STATUS_MAX                          = 14,
 };
 
 //component identifiers
