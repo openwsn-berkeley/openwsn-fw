@@ -81,6 +81,7 @@ typedef struct {
    uint16_t             periodMaintenance;
    bool                 busySendingKA;           // TRUE when busy sending a keep-alive
    bool                 busySendingEB;           // TRUE when busy sending an enhanced beacon
+   bool                 busySendingNC;           // TRUE when busy sending an neighbor controll command
    uint8_t              dsn;                     // current data sequence number
    uint8_t              mgtTaskCounter;          // counter to determine what management task to do
    opentimer_id_t       maintenanceTimerId;

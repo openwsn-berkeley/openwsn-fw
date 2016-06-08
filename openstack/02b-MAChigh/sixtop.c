@@ -39,6 +39,10 @@ void          sixtop_timeout_timer_cb(opentimer_id_t id);
 void          timer_sixtop_management_fired(void);
 void          sixtop_sendEB(void);
 void          sixtop_sendKA(void);
+void          sixtop_sendNeighborControlCommand(
+    open_addr_t* neighborAddr,
+    uint8_t command
+);
 
 //=== six2six task
 
@@ -455,10 +459,16 @@ void task_sixtopNotifSendDone() {
             // not busy sending EB anymore
             sixtop_vars.busySendingEB = FALSE;
          } else {
-            // this is a KA
-            
-            // not busy sending KA anymore
-            sixtop_vars.busySendingKA = FALSE;
+           
+           if (msg->l2_neighborContol == TRUE){
+              sixtop_vars.busySendingNC = FALSE;
+              msg->l2_neighborContol = FALSE;
+           } else {
+                // this is a KA
+                
+                // not busy sending KA anymore
+                sixtop_vars.busySendingKA = FALSE;
+           }
          }
          // discard packets
          openqueue_freePacketBuffer(msg);
@@ -535,13 +545,38 @@ void task_sixtopNotifReceive() {
     case IEEE154_TYPE_DATA:
     case IEEE154_TYPE_CMD:
         if (msg->length>0) {
-            // send to upper layer
-            iphc_receive(msg);
+            // check whether this is neighbor control command
+            if (
+                msg->length == 5 &&
+                *((uint8_t*)(msg->payload)+0)==0xff &&
+                *((uint8_t*)(msg->payload)+1)==0xff &&
+                *((uint8_t*)(msg->payload)+2)==0xff &&
+                *((uint8_t*)(msg->payload)+3)==0xff
+            ){
+                // this is neighbor control command
+                if (*((uint8_t*)(msg->payload)+4)==0x00){
+                    // reject by this neighbor, remove it and update the preference neighbor
+                    neighbors_removeByNeighbor(&(msg->l2_nextORpreviousHop));
+                    neighbors_updateMyDAGrankAndNeighborPreference();
+                } else {
+                    printf("something worong at neighbor control command %d \n",*((uint8_t*)(msg->payload)+4));
+                }
+                openqueue_freePacketBuffer(msg);
+            } else {
+                  if (neighbors_isMyNeighbor(&(msg->l2_nextORpreviousHop))==TRUE){
+                      // send to upper layer
+                      iphc_receive(msg);
+                  } else {
+                      // free the message first and inform the neighbor don't send to me
+                      sixtop_sendNeighborControlCommand(&(msg->l2_nextORpreviousHop),0);
+                      openqueue_freePacketBuffer(msg);
+                  }
+            }
         } else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);
         }
-            break;
+        break;
     case IEEE154_TYPE_ACK:
     default:
         // free the packet's RAM memory
@@ -845,6 +880,76 @@ port_INLINE void sixtop_sendKA() {
    debugpins_ka_set();
    debugpins_ka_clr();
 #endif
+}
+
+void sixtop_sendNeighborControlCommand(open_addr_t* neighborAddr,uint8_t command){
+   OpenQueueEntry_t* ncPkt;
+   open_addr_t*      ncNeighAddr;
+   bool              foundNeighbor;
+   
+   if (ieee154e_isSynch()==FALSE) {
+      // I'm not sync'ed
+      
+      // delete packets genereted by this module (EB and KA) from openqueue
+      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
+      
+      // I'm now busy sending a KA
+      sixtop_vars.busySendingNC = FALSE;
+      
+      // stop here
+      return;
+   }
+   
+   if (sixtop_vars.busySendingNC==TRUE) {
+      // don't proceed if I'm still sending a KA
+      return;
+   }
+   
+   foundNeighbor = neighbors_getPreferredParentEui64(ncNeighAddr);
+   if (foundNeighbor==FALSE) {
+      // don't proceed if I have no neighbor I need to send a nc to
+      return;
+   }
+   
+   // if I get here, I will send a NC command
+   
+   // get a free packet buffer
+   ncPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
+   if (ncPkt==NULL) {
+      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
+                            (errorparameter_t)1,
+                            (errorparameter_t)0);
+      return;
+   }
+   
+   // declare ownership over that packet
+   ncPkt->creator = COMPONENT_SIXTOP;
+   ncPkt->owner   = COMPONENT_SIXTOP;
+   
+   // some l2 information about this packet
+   ncPkt->l2_frameType = IEEE154_TYPE_DATA;
+   memcpy(&(ncPkt->l2_nextORpreviousHop),ncNeighAddr,sizeof(open_addr_t));
+   
+   // set l2-security attributes
+   ncPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   ncPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   ncPkt->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+   ncPkt->l2_neighborContol  = TRUE;
+   
+   // add NC protocol
+   packetfunctions_reserveHeaderSize(ncPkt, 5);
+   ncPkt->payload[0] = 0xff;
+   ncPkt->payload[1] = 0xff;
+   ncPkt->payload[2] = 0xff;
+   ncPkt->payload[3] = 0xff;
+   ncPkt->payload[4] = command;
+
+   // put in queue for MAC to handle
+   sixtop_send_internal(ncPkt,FALSE);
+   
+   // I'm now busy sending a KA
+   sixtop_vars.busySendingNC = TRUE;
+
 }
 
 //======= six2six task

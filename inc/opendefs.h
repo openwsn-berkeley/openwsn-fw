@@ -317,6 +317,7 @@ typedef struct {
    bool          l2_payloadIEpresent;            // did I have payload IE field
    bool          l2_joinPriorityPresent;
    int16_t       l2_timeCorrection;              // record the timeCorrection and print out at endOfslot
+   bool          l2_neighborContol;              // am I sending neighbor control command
    //layer-2 security
    uint8_t       l2_securityLevel;               //the security level specified for the current frame
    uint8_t       l2_keyIdMode;                   //the key Identifier mode specified for the current frame
