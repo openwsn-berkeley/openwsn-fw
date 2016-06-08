@@ -656,24 +656,6 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
                             (errorparameter_t)ieee154e_vars.slotOffset,
                             (errorparameter_t)0);
-      
-      //to print some parameters value to openvizualizer
-      char str[150];
-      sprintf(str, "PARAMS");
-      strncat(str, ":TRACKS=", 150);
-      openserial_ncat_uint32_t(str, (uint32_t)TRACK_MGMT, 150);
-#ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
-      strncat(str, ":DCELLS=1", 150);
-#else
-      strncat(str, ":DCELLS=0", 150);
-#endif
-      strncat(str, ":RPLMET=", 150);
-      openserial_ncat_uint32_t(str, (uint32_t)RPL_METRIC, 150);
-      strncat(str, ":SCHEDALGO=", 150);
-      openserial_ncat_uint32_t(str, (uint32_t)SCHEDULING_ALGO, 150);
-      strncat(str, ":CEXPER=", 150);
-      openserial_ncat_uint32_t(str, (uint32_t)CEXAMPLE_PERIOD, 150);
-      openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
 
       //packet received (serial line)
       openserial_statRx(ieee154e_vars.dataReceived);
@@ -1145,6 +1127,13 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    
    openserial_statTx(ieee154e_vars.dataToSend);
 
+   // decides whether to listen for an ACK
+   if (packetfunctions_isBroadcastMulticast_debug(&ieee154e_vars.dataToSend->l2_nextORpreviousHop, 27)==TRUE) {
+      listenForAck = FALSE;
+   } else {
+      listenForAck = TRUE;
+   }
+
    // change state
    changeState(S_RXACKOFFSET);
    
@@ -1158,12 +1147,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
    
-   // decides whether to listen for an ACK
-   if (packetfunctions_isBroadcastMulticast_debug(&ieee154e_vars.dataToSend->l2_nextORpreviousHop, 27)==TRUE) {
-      listenForAck = FALSE;
-   } else {
-      listenForAck = TRUE;
-   }
+
    
    if (listenForAck==TRUE) {
       // arm tt5
@@ -1234,11 +1218,6 @@ port_INLINE void activity_tie5() {
       // indicate tx fail if no more retries left
       notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
    } else {
-
-      openserial_printError(COMPONENT_IEEE802154E,ERR_GENERIC,
-                            (errorparameter_t)111,
-                            (errorparameter_t)ieee154e_vars.dataToSend->l2_retriesLeft);
-
       // return packet to the virtual COMPONENT_SIXTOP_TO_IEEE802154E component
       ieee154e_vars.dataToSend->owner = COMPONENT_SIXTOP_TO_IEEE802154E;
    }

@@ -192,6 +192,17 @@ typedef struct{
 END_PACK
 
 
+BEGIN_PACK
+typedef struct {
+   uint8_t         track_mgmt;
+   uint8_t         distr_cells;
+   uint8_t         rpl_metric;
+   uint8_t         scheduling_algo;
+   uint32_t        cexample_period;
+} debugParamsEntry_t;
+END_PACK
+
+
 //=========================== module variables ================================
 
 typedef struct {
@@ -240,6 +251,7 @@ void    openserial_startInput(void);
 void    openserial_startOutput(void);
 void    openserial_stop(void);
 bool    debugPrint_outBufferIndexes(void);
+bool    debugPrint_params(void);
 void    openserial_echo(uint8_t* but, uint8_t bufLen);
 
 // interrupt handlers

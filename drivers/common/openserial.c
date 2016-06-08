@@ -508,9 +508,13 @@ void openserial_startOutput(void) {
             break;
          }
       case STATUS_KAPERIOD:
-         if (debugPrint_kaPeriod()==TRUE) {
-            break;
-         }
+          if (debugPrint_kaPeriod()==TRUE) {
+             break;
+          }
+      case STATUS_PARAMS:
+          if (debugPrint_params()==TRUE) {
+             break;
+          }
       default:
          DISABLE_INTERRUPTS();
          openserial_vars.debugPrintCounter=0;
@@ -744,6 +748,31 @@ bool debugPrint_outBufferIndexes() {
    openserial_printStatus(STATUS_OUTBUFFERINDEXES,(uint8_t*)temp_buffer,sizeof(temp_buffer));
    return TRUE;
 }
+
+
+/**
+ * \brief sends the current parameter values for this node
+ *
+ * debugPrint_* functions are used by the openserial module to continuously print
+status information about several modules in the OpenWSN stack.
+ *
+ */
+bool debugPrint_params(){
+   debugParamsEntry_t temp;
+
+   temp.track_mgmt        = TRACK_MGMT;
+#ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
+   temp.distr_cells       = 1;
+#else
+   temp.distr_cells       = 0;
+#endif
+   temp.rpl_metric        = RPL_METRIC;
+   temp.scheduling_algo   = SCHEDULING_ALGO;
+   temp.cexample_period   = CEXAMPLE_PERIOD;
+   openserial_printStatus(STATUS_PARAMS,(uint8_t*)(&temp),sizeof(temp));
+   return TRUE;
+}
+
 
 //=========================== private =========================================
 

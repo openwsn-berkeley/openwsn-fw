@@ -21,7 +21,7 @@
 
 
 #define _DEBUG_SIXTOP_
-//#define _DEBUG_SIXTOP_TIMEOUT_
+#define _DEBUG_SIXTOP_TIMEOUT_
 
 
 //=========================== variables =======================================
