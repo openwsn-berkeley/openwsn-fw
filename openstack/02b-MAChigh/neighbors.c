@@ -7,6 +7,10 @@
 #include "IEEE802154E.h"
 #include "sixtop.h"
 
+//=========================== defination ======================================
+
+#define NEIGHBORS_DEBUG
+
 //=========================== variables =======================================
 
 neighbors_vars_t neighbors_vars;
@@ -634,7 +638,7 @@ void registerNewNeighbor(open_addr_t* address,
                          asn_t*       asnTimestamp,
                          bool         joinPrioPresent,
                          uint8_t      joinPrio) {
-   uint8_t  i,j;
+   uint8_t  i,j,k;
    bool     iHaveAPreferedParent;
    int8_t   lowestRssi;
    uint8_t  lowestRssiIndex;
@@ -650,14 +654,15 @@ void registerNewNeighbor(open_addr_t* address,
       i=0;
       if (neighbors_getNumNeighbors()==NEIGHBORSCONTROL){
           lowestRssi = 0x00;
-          while (i<MAXNUMNEIGHBORS){
-              if (neighbors_vars.neighbors[i].used==FALSE) {
-                  if (neighbors_vars.neighbors[i].rssi<lowestRssi){
-                      lowestRssi = neighbors_vars.neighbors[i].rssi;
-                      lowestRssiIndex = i;
+          k=0;
+          while (k<MAXNUMNEIGHBORS){
+              if (neighbors_vars.neighbors[k].used==FALSE) {
+                  if (neighbors_vars.neighbors[k].rssi<lowestRssi){
+                      lowestRssi = neighbors_vars.neighbors[k].rssi;
+                      lowestRssiIndex = k;
                   }
-                  i++;
               }
+              k++;
           }
           if (rssi > lowestRssi+RSSIThRESHOLD && 
               rssi > BADNEIGHBORMAXRSSI && 
@@ -742,6 +747,12 @@ void registerNewNeighbor(open_addr_t* address,
           }
       }
       if (i==MAXNUMNEIGHBORS) {
+#ifdef NEIGHBORS_DEBUG
+        for (i=0;i<MAXNUMNEIGHBORS;i++){
+            printf("used %d I'm %d neighbor %d\n",neighbors_vars.neighbors[i].used,idmanager_getMyID(ADDR_16B)->addr_16b[1],neighbors_vars.neighbors[i].addr_64b.addr_64b[7]);
+        }
+        printf("\n");
+#endif
          openserial_printError(COMPONENT_NEIGHBORS,ERR_NEIGHBORS_FULL,
                                (errorparameter_t)MAXNUMNEIGHBORS,
                                (errorparameter_t)0);
