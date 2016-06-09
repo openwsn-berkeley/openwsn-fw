@@ -953,8 +953,6 @@ port_INLINE void activity_ti1ORri1() {
             }
          } else {
 
-
-
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
@@ -2347,4 +2345,11 @@ void endSlot() {
 
 bool ieee154e_isSynch(){
    return ieee154e_vars.isSync;
+}
+
+/*
+ * brief: is currently ieee154e transmitting a packet from the component creator?
+ */
+bool ieee154e_is_ongoing(uint8_t creator){
+   return(ieee154e_vars.dataToSend->creator == creator);
 }

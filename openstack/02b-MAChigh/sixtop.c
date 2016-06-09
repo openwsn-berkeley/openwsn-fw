@@ -1103,24 +1103,34 @@ void sixtop_setState(six2six_state_t state){
 
 }
 
-
-
-
-
-
+/*
+ * brief: the timer has been triggered. 6top has to come back to
+ * the idle state.
+ */
 void timer_sixtop_six2six_timeout_fired(void) {
 #ifdef _DEBUG_SIXTOP_TIMEOUT_
    openserial_printInfo(
       COMPONENT_SIXTOP,
       ERR_SIXTOP_TIMEOUT,
-      (errorparameter_t)0,
+      (errorparameter_t)sixtop_vars.six2six_state,
       (errorparameter_t)0
    );
 #endif
 
-   // timeout timer fired, reset the state of sixtop to idle
-   openqueue_removeAllCreatedBy(COMPONENT_SIXTOP_RES);
-   sixtop_setState(SIX_IDLE);
+   // timeout timer fired, reset the state of sixtop to idle (only if we don't have an on-going transmission for this component)
+   if (!ieee154e_is_ongoing(COMPONENT_SIXTOP_RES)) {
+      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP_RES);
+      sixtop_setState(SIX_IDLE);
+   }
+   //starts a new timer (duration = 2 cells) so that the on-going transmission will be terminated
+   else{
+      sixtop_vars.timeoutTimerId     = opentimers_start(
+            2* TsSlotDuration,
+            TIMER_ONESHOT,
+            TIME_MS,
+            sixtop_timeout_timer_cb
+      );
+   }
 }
 
 void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){

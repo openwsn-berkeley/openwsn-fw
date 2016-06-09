@@ -292,14 +292,14 @@ void otf_remove_unused_cells(void){
 
 //updates the schedule
 void otf_update_schedule(void){
-/*
+
 
    char str[150];
    sprintf(str, "OTF updateSchedule, ");
    strncat(str, "isIdle=", 150);
    openserial_ncat_uint32_t(str, (uint32_t)sixtop_isIdle(), 150);
    openserial_printf(COMPONENT_OTF, str, strlen(str));
-*/
+
 
    //I MUST be idle
    if (!sixtop_isIdle())

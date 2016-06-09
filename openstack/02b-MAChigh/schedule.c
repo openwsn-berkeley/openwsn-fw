@@ -500,33 +500,6 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
    return E_SUCCESS;
 }
 
-/*
-void schedule_print(void){
-
-   scheduleEntry_t* scheduleWalker;
-   char str[150];
-
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-
-
-   sprintf(str, "LinkRep - LIST: ");
-
-   scheduleWalker = schedule_vars.currentScheduleEntry;
-   do {
-      strncat(str, " ,slot=", 150);
-      openserial_ncat_uint32_t(str, (uint32_t)scheduleWalker->slotOffset, 150);
-
-      scheduleWalker = scheduleWalker->next;
-   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
-
-   ENABLE_INTERRUPTS();
-
-   openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
-
-}
-*/
-
 
 bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    

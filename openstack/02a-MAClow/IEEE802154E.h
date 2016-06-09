@@ -288,6 +288,7 @@ void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 // misc
 bool               debugPrint_asn(void);
 bool               debugPrint_isSync(void);
+bool               ieee154e_is_ongoing(uint8_t creator);
 bool               debugPrint_macStats(void);
 uint8_t            calculateFrequency(uint8_t channelOffset);
 /**

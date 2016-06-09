@@ -143,7 +143,6 @@ uint64_t openqueue_timeout_diff(timeout_t a, timeout_t b){
 
 //remove the packets which are timeouted in the queue
 void openqueue_timeout_drop(void){
-   return;
 
    uint8_t     i;
    timeout_t   now;
@@ -518,14 +517,6 @@ OpenQueueEntry_t* openqueue_getPacket(uint8_t i) {
 
 
 
-//make a local copy of the entry to push it to openbridge
-/*
-OpenQueueEntry_t* openqueue_copy_for_openbridge(OpenQueueEntry_t* pkt){
-
-   memcpy(&(openqueue_vars.openbridge), pkt, sizeof(OpenQueueEntry_t));
-   return(&(openqueue_vars.openbridge));
-}
-*/
 
 
 //not enough space for non prioritar packets
@@ -541,8 +532,7 @@ bool openqueue_overflow_for_data(void){
    ENABLE_INTERRUPTS();
 
    //for debug
-   //TODO - restablish for a normal usage
-  /*if (nb <= QUEUELENGTH_RESERVED)
+ /*  if(nb <= QUEUELENGTH_RESERVED)
       openserial_printError(
                COMPONENT_OPENQUEUE,
                ERR_OPENQUEUE_BUFFER_OVERFLOW,
@@ -550,10 +540,8 @@ bool openqueue_overflow_for_data(void){
                (errorparameter_t)QUEUELENGTH_RESERVED
             );
 */
-
    return(nb <= QUEUELENGTH_RESERVED);
 }
-
 
 
 
@@ -583,3 +571,17 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    //l2-security
    entry->l2_securityLevel             = 0;
 }
+
+
+
+
+
+
+//make a local copy of the entry to push it to openbridge
+/*
+OpenQueueEntry_t* openqueue_copy_for_openbridge(OpenQueueEntry_t* pkt){
+
+   memcpy(&(openqueue_vars.openbridge), pkt, sizeof(OpenQueueEntry_t));
+   return(&(openqueue_vars.openbridge));
+}
+*/
