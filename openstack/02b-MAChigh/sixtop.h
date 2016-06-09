@@ -49,7 +49,7 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-#define SIXTOP_NBCELLS_INREQ     3     //nb cells in the 6top IE (request / reply)
+#define SIXTOP_NBCELLS_INREQ     2     //nb cells in the 6top IE (request / reply)
 
 #define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
 
