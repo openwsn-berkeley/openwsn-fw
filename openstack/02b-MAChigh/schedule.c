@@ -51,10 +51,11 @@ void schedule_init() {
    start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;   //skip all the shared TXRX
 #endif
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   if (idmanager_getIsDAGroot()==TRUE)
+/*   if (idmanager_getIsDAGroot()==TRUE)
       nbSerial = 4 * NUMSERIALRX;
    else
-      nbSerial = NUMSERIALRX;
+*/
+   nbSerial = NUMSERIALRX;
    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+nbSerial;running_slotOffset++) {
       schedule_addActiveSlot(
          running_slotOffset,                    // slot offset
@@ -783,8 +784,18 @@ bool schedule_getOkToSend() {
       // non-shared slot: backoff does not apply
       
       returnVal = TRUE;
-   } else {
+   }
+   //the dagroot can only use the first shared cells (without backoff)
+   else if(idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset <= SLOTFRAME_LENGTH /2){
+      returnVal = TRUE;
+   }
+   //only the dagroot can use the first shared cells
+   else if (!idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset <= SLOTFRAME_LENGTH /2){
+      returnVal = FALSE;
+   }
+   else {
       // non-shared slot: check backoff before answering
+
       
       // decrement backoff
       if (schedule_vars.backoff>0) {

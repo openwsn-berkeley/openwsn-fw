@@ -252,7 +252,8 @@ void forwarding_receive(
           // toss iphc inner header
           packetfunctions_tossHeader(msg,ipv6_inner_header->header_length);
       }
-          
+
+
       // indicate received packet to upper layer
       switch(msg->l4_protocol) {
          case IANA_TCP:
