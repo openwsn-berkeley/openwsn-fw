@@ -1076,12 +1076,6 @@ void sixtop_setState(six2six_state_t state){
    sixtop_vars.six2six_state = state;
    uint16_t  timeout_sixtop_value;    // to change the timeout value (jitter)
 
- /*  char str[150];
-   sprintf(str, "Linkrep/LinkRep new state ");
-   openserial_ncat_uint32_t(str, (uint8_t)state, 150);
-   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-*/
-
    //schedule a timer: back to the idle state after a timeout
    if (state != SIX_IDLE){
 
@@ -1125,12 +1119,12 @@ void timer_sixtop_six2six_timeout_fired(void) {
       (errorparameter_t)0
    );
 #endif
-
+/*
    char str[150];
      sprintf(str, "Linkrep/LinkRep timeout ");
      openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.six2six_state, 150);
      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
+*/
 
    // timeout ftimer fired, reset the state of sixtop to idle (only if we don't have an on-going transmission for this component)
    if (!ieee154e_is_ongoing(COMPONENT_SIXTOP_RES)) {
@@ -1139,11 +1133,6 @@ void timer_sixtop_six2six_timeout_fired(void) {
    }
    //starts a new timer (duration = 2 cells) so that the on-going transmission will be terminated
    else{
-
-      char str[150];
-      sprintf(str, "LinkRep - postpone the timeout");
-      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
       sixtop_vars.timeoutTimerId     = opentimers_start(
             2* TsSlotDuration,
             TIMER_ONESHOT,

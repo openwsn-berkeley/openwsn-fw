@@ -785,6 +785,7 @@ bool schedule_getOkToSend() {
       
       returnVal = TRUE;
    }
+#ifdef SCHEDULE_PRIO_FOR_DAGROOT
    //the dagroot can only use the first shared cells (without backoff)
    else if(idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset <= SLOTFRAME_LENGTH /2){
       returnVal = TRUE;
@@ -793,10 +794,10 @@ bool schedule_getOkToSend() {
    else if (!idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset <= SLOTFRAME_LENGTH /2){
       returnVal = FALSE;
    }
+#endif
    else {
       // non-shared slot: check backoff before answering
 
-      
       // decrement backoff
       if (schedule_vars.backoff>0) {
          schedule_vars.backoff--;
