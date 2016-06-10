@@ -536,6 +536,11 @@ void task_sixtopNotifReceive() {
         msg->l2_joinPriorityPresent,
         msg->l2_joinPriority
     );
+    
+    if (msg->l2_isSendToMe==TRUE){
+        neighbors_control_cancelTimer(&(msg->l2_nextORpreviousHop));
+        msg->l2_isSendToMe = FALSE;
+    }
    
     // reset it to avoid race conditions with this var.
     msg->l2_joinPriorityPresent = FALSE; 

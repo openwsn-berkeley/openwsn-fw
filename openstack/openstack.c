@@ -24,6 +24,7 @@
 #include "neighbors.h"
 //-- 03a-IPHC
 #include "openbridge.h"
+#include "neighbors_control.h"
 #include "iphc.h"
 //-- 03b-IPv6
 #include "forwarding.h"
@@ -64,6 +65,7 @@ void openstack_init(void) {
    schedule_init();
    sixtop_init();
    neighbors_init();
+   neighbors_control_init();
    //-- 03a-IPHC
    openbridge_init();
    iphc_init();

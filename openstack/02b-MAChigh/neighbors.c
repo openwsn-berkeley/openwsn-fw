@@ -404,6 +404,7 @@ void neighbors_indicateRx(open_addr_t* l2_src,
    // register new neighbor
    if (newNeighbor==TRUE) {
       registerNewNeighbor(l2_src, rssi, asnTs, joinPrioPresent,joinPrio);
+      neighbors_control_startTimer(l2_src);
    }
 }
 
