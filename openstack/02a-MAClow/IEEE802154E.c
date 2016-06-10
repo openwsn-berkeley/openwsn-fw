@@ -583,7 +583,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
       
       // break if invalid CRC
-      if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+      if (ieee154e_vars.dataReceived->l1_crc==FALSE && IEEE802154E_LOG_CRC_FAILED) {
          openserial_statRx(ieee154e_vars.dataReceived);
 
          // break from the do-while loop and execute abort code below
@@ -917,26 +917,16 @@ port_INLINE void activity_ti1ORri1() {
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
          // check whether we can send
-         if (schedule_getOkToSend()) {
-            //higher priority for EB packets
-           /* if (cellType==CELLTYPE_TXRX) {
-               if ((ieee154e_vars.dataToSend = openqueue_macGetEBPacket()) != NULL)
-                   couldSendEB=TRUE;
-            }
-            //else, any accurate packet from the queue
-            if (ieee154e_vars.dataToSend == NULL){
-               schedule_getNeighbor(&neighbor);
-               schedule_getTrackCurrent(&track);
-               ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
-            }
-            */
-           schedule_getNeighbor(&neighbor);
-           schedule_getTrackCurrent(&track);
-           ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
 
-           if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
-              couldSendEB=TRUE;
-              // look for an EB packet in the queue
+         if (schedule_getOkToSend()) {
+
+            schedule_getNeighbor(&neighbor);
+            schedule_getTrackCurrent(&track);
+            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
+
+            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+               couldSendEB=TRUE;
+               // look for an EB packet in the queue
               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
            }
 
@@ -1123,8 +1113,6 @@ port_INLINE void activity_tie3() {
 
 port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    bool listenForAck;
-   
-   openserial_statTx(ieee154e_vars.dataToSend);
 
    // decides whether to listen for an ACK
    if (packetfunctions_isBroadcastMulticast_debug(&ieee154e_vars.dataToSend->l2_nextORpreviousHop, 27)==TRUE) {
@@ -1323,7 +1311,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       packetfunctions_tossFooter(   ieee154e_vars.ackReceived, LENGTH_CRC);
    
       // break if invalid CRC
-      if (ieee154e_vars.ackReceived->l1_crc==FALSE) {
+      if (ieee154e_vars.ackReceived->l1_crc==FALSE && IEEE802154E_LOG_CRC_FAILED) {
          openserial_statRx(ieee154e_vars.ackReceived);
 
          // break from the do-while loop and execute the clean-up code below
@@ -1531,7 +1519,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
       
       // if CRC doesn't check, stop
-      if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+      if (ieee154e_vars.dataReceived->l1_crc==FALSE && IEEE802154E_LOG_CRC_FAILED) {
          openserial_statRx(ieee154e_vars.dataReceived);
 
          // jump to the error code below this do-while loop
@@ -2291,7 +2279,7 @@ void endSlot() {
          openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->l2_retriesLeft, 150);
          strncat(str, ", creator - ",150 );
          openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->creator, 150);
-         openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+         openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
       }
 
       //decrement transmits left counter
@@ -2311,9 +2299,6 @@ void endSlot() {
    
    // clean up dataReceived
    if (ieee154e_vars.dataReceived!=NULL) {
-      //stat: packet received (serial line)
-      openserial_statRx(ieee154e_vars.dataReceived);
-
       // assume something went wrong. If everything went well, dataReceived
       // would have been set to NULL in ri9.
       // indicate  "received packet" to upper layer since we don't want to loose packets
