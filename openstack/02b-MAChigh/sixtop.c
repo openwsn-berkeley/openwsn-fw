@@ -3,6 +3,7 @@
 #include "openserial.h"
 #include "openqueue.h"
 #include "neighbors.h"
+#include "neighbors_control.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
 #include "otf.h"

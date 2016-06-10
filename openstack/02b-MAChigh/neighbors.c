@@ -6,6 +6,7 @@
 #include "openserial.h"
 #include "IEEE802154E.h"
 #include "sixtop.h"
+#include "neighbors_control.h"
 
 //=========================== defination ======================================
 
@@ -522,6 +523,19 @@ void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t ind
    }
 }
 
+uint8_t neighbors_getNeighborIndex(open_addr_t* address){
+    uint8_t i;
+    for (i=0;i<MAXNUMNEIGHBORS;i++){
+        if (
+            neighbors_vars.neighbors[i].used     == TRUE &&
+            packetfunctions_sameAddress(&(neighbors_vars.neighbors[i].addr_64b),address)
+        ){
+            break;
+        }
+    }
+    return i;
+}
+
 //===== setters
 
 void neighbors_setMyDAGrank(dagrank_t rank){
@@ -637,6 +651,27 @@ void neighbors_increaseNeighborLinkCost(open_addr_t* address){
             neighbors_vars.neighbors[i].numTx     = DEFAULTLINKCOST+1;
             neighbors_vars.neighbors[i].isBlocked = TRUE;
             break;
+      }
+   }
+}
+
+void neighbors_blockNeighbor(uint8_t index){
+  if (neighbors_vars.neighbors[index].used==TRUE){
+      neighbors_vars.neighbors[index].isBlocked = TRUE;
+  } else {
+      printf("this is an empty neighbor buffer!\n");
+  }
+}
+
+void neighbors_removeBlockedNeighbors(){
+   uint8_t    i;
+   
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (
+          neighbors_vars.neighbors[i].used      == TRUE &&
+          neighbors_vars.neighbors[i].isBlocked == TRUE
+      ) {
+            removeNeighbor(i);
       }
    }
 }
