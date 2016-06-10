@@ -22,6 +22,8 @@ static const uint8_t chTemplate_default[] = {
 
 //=========================== define ==========================================
 
+#define IEEE802154E_LOG_CRC_FAILED   0  //should we send to openvizualizer the packets with a bad CRC for debug / stats ?
+
 #define SYNCHRONIZING_CHANNEL        16 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
