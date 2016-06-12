@@ -132,7 +132,7 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyDict_SetItemString(returnVal, "neighbors_vars", neighbors_vars);
    
     // neighbors_control_vars
-   neighbors_vars = PyDict_New();
+   neighbors_control_vars = PyDict_New();
    // TODO
    PyDict_SetItemString(returnVal, "neighbors_control_vars", neighbors_control_vars);
    
