@@ -404,7 +404,6 @@ void neighbors_indicateRx(open_addr_t* l2_src,
    // register new neighbor
    if (newNeighbor==TRUE) {
       registerNewNeighbor(l2_src, rssi, asnTs, joinPrioPresent,joinPrio);
-      neighbors_control_startTimer(l2_src);
    }
 }
 
@@ -524,17 +523,22 @@ void  neighbors_getNeighbor(open_addr_t* address, uint8_t addr_type, uint8_t ind
    }
 }
 
-uint8_t neighbors_getNeighborIndex(open_addr_t* address){
+bool neighbors_getNeighborIndex(open_addr_t* address, uint8_t* index){
+    bool found;
     uint8_t i;
+    
+    found = FALSE;
     for (i=0;i<MAXNUMNEIGHBORS;i++){
         if (
             neighbors_vars.neighbors[i].used     == TRUE &&
             packetfunctions_sameAddress(&(neighbors_vars.neighbors[i].addr_64b),address)
         ){
+            found = TRUE;
+            *index = i;
             break;
         }
     }
-    return i;
+    return found;
 }
 
 //===== setters
@@ -672,6 +676,7 @@ void neighbors_removeBlockedNeighbors(){
           neighbors_vars.neighbors[i].used      == TRUE &&
           neighbors_vars.neighbors[i].isBlocked == TRUE
       ) {
+            neighbors_control_removeTimer(&(neighbors_vars.neighbors[i].addr_64b));
             removeNeighbor(i);
       }
    }
@@ -790,6 +795,9 @@ void registerNewNeighbor(open_addr_t* address,
                 neighbors_vars.neighbors[i].numTx                  = 0;
                 neighbors_vars.neighbors[i].numTxACK               = 0;
                 memcpy(&neighbors_vars.neighbors[i].asn,asnTimestamp,sizeof(asn_t));
+                
+                neighbors_control_startTimer(address);
+                
                 //update jp
                 if (joinPrioPresent==TRUE){
                    neighbors_vars.neighbors[i].joinPrio=joinPrio;

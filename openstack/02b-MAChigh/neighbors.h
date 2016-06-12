@@ -109,7 +109,7 @@ void          neighbors_indicateRxDIO(OpenQueueEntry_t* msg);
 
 // get addresses
 void          neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index);
-uint8_t       neighbors_getNeighborIndex(open_addr_t* address);
+bool          neighbors_getNeighborIndex(open_addr_t* address,uint8_t* index);
 // managing routing info
 void          neighbors_updateMyDAGrankAndNeighborPreference(void);
 // maintenance

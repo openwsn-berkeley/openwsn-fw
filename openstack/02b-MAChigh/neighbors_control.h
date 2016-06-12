@@ -15,14 +15,14 @@
 //=========================== define ==========================================
 
 #define NEIGHBORSCONTROL  3
-#define NEIGHBORSCONTROL_TIMERPERIOD        30000
+#define NEIGHBORSCONTROL_TIMERPERIOD        65535
 
 //=========================== typedef =========================================
 
 typedef struct {
   bool           used;  
   opentimer_id_t id;
-  open_addr_t*   neighbor;
+  open_addr_t   neighbor;
 }controlTimer_t;
 
 //=========================== module variables ================================
@@ -42,6 +42,7 @@ void      neighbors_control_startTimer(open_addr_t*   neighbor);
 void      neighbors_control_cancelTimer(open_addr_t*  neighbor);
 
 uint8_t   neighbors_control_getMyTimer(open_addr_t*   neighbor);
+void      neighbors_control_removeTimer(open_addr_t*   neighbor);
 
 /**
 \}
