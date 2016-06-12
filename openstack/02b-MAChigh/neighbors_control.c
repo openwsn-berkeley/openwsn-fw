@@ -139,6 +139,7 @@ void neighbors_control_timer_monitor_cb(opentimer_id_t id){
                 printf("Block neighbor %d !\n",neighbors_control_vars.timers[i].neighbor.addr_64b[7]);
 #endif
                 neighbors_blockNeighbor(index);
+                neighbors_updateMyDAGrankAndNeighborPreference();
             }
             break;
         }

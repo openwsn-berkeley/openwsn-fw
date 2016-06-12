@@ -10,7 +10,7 @@
 
 //=========================== defination ======================================
 
-#define NEIGHBORS_DEBUG
+//#define NEIGHBORS_DEBUG
 
 //=========================== variables =======================================
 
@@ -662,9 +662,13 @@ void neighbors_increaseNeighborLinkCost(open_addr_t* address){
 
 void neighbors_blockNeighbor(uint8_t index){
   if (neighbors_vars.neighbors[index].used==TRUE){
+      neighbors_vars.neighbors[index].numTxACK  = 1;
+      neighbors_vars.neighbors[index].numTx     = DEFAULTLINKCOST+1;
       neighbors_vars.neighbors[index].isBlocked = TRUE;
   } else {
+#ifdef NEIGHBORS_DEBUG
       printf("this is an empty neighbor buffer!\n");
+#endif
   }
 }
 
@@ -678,7 +682,13 @@ void neighbors_removeBlockedNeighbors(){
       ) {
             neighbors_control_removeTimer(&(neighbors_vars.neighbors[i].addr_64b));
             removeNeighbor(i);
+#ifdef NEIGHBORS_DEBUG
+            printf("neighbor = %d is removed\n",neighbors_vars.neighbors[i].addr_64b.addr_64b[7]);
+#endif
       }
+   }
+   if (neighbors_getNumNeighbors()==0){
+      neighbors_setMyDAGrank(DEFAULTDAGRANK);
    }
 }
 
@@ -860,6 +870,7 @@ void removeNeighbor(uint8_t neighborIndex) {
    neighbors_vars.neighbors[neighborIndex].asn.bytes0and1            = 0;
    neighbors_vars.neighbors[neighborIndex].asn.bytes2and3            = 0;
    neighbors_vars.neighbors[neighborIndex].asn.byte4                 = 0;
+   neighbors_vars.neighbors[neighborIndex].isBlocked                 = FALSE;
 }
 
 //=========================== helpers =========================================

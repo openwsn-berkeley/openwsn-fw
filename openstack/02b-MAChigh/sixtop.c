@@ -561,7 +561,9 @@ void task_sixtopNotifReceive() {
             ){
                 // this is neighbor control command
                 if (*((uint8_t*)(msg->payload)+4)==0x00){
+#ifdef SIXTOP_DEBUG
                     printf("neighbor control received. this is %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
                     // reject by this neighbor, remove it and update the preference neighbor
 //                    neighbors_removeByNeighbor(&(msg->l2_nextORpreviousHop));
                     neighbors_increaseNeighborLinkCost(&(msg->l2_nextORpreviousHop));
@@ -575,7 +577,9 @@ void task_sixtopNotifReceive() {
                       // send to upper layer
                       iphc_receive(msg);
                   } else {
+#ifdef SIXTOP_DEBUG
                       printf("neighbor control to send. this is %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
                       // free the message first and inform the neighbor don't send to me
                       sixtop_sendNeighborControlCommand(&(msg->l2_nextORpreviousHop),0);
                       openqueue_freePacketBuffer(msg);
