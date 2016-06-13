@@ -12,6 +12,7 @@
 
 //=========================== define ==========================================
 
+#define RSSIThRESHOLD             15
 #define MAXNUMNEIGHBORS           10
 #define MAXPREFERENCE             2
 #define BADNEIGHBORMAXRSSI        -80 //dBm
@@ -40,6 +41,7 @@ typedef struct {
    uint8_t          numWraps;//number of times the tx counter wraps. can be removed if memory is a restriction. also check openvisualizer then.
    asn_t            asn;
    uint8_t          joinPrio;
+   bool             isBlocked;
 } neighborRow_t;
 END_PACK
 
@@ -76,6 +78,7 @@ void          neighbors_init(void);
 // getters
 dagrank_t     neighbors_getMyDAGrank(void);
 uint8_t       neighbors_getNumNeighbors(void);
+uint8_t       neighbors_getNumNeighborsNoBlocked(void);
 bool          neighbors_getPreferredParentEui64(open_addr_t* addressToWrite);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
 // setters
@@ -86,6 +89,7 @@ bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isPreferredParent(open_addr_t* address);
 bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
 bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
+bool          neighbors_isMyNeighbor(open_addr_t* address);
 
 // updating neighbor information
 void          neighbors_indicateRx(
@@ -105,10 +109,16 @@ void          neighbors_indicateRxDIO(OpenQueueEntry_t* msg);
 
 // get addresses
 void          neighbors_getNeighbor(open_addr_t* address,uint8_t addr_type,uint8_t index);
+bool          neighbors_getNeighborIndex(open_addr_t* address,uint8_t* index);
 // managing routing info
 void          neighbors_updateMyDAGrankAndNeighborPreference(void);
 // maintenance
 void          neighbors_removeOld(void);
+// neighbor controle
+void          neighbors_removeByNeighbor(open_addr_t* address);
+void          neighbors_increaseNeighborLinkCost(open_addr_t* address);
+void          neighbors_blockNeighbor(uint8_t index);
+void          neighbors_removeBlockedNeighbors();
 // debug
 bool          debugPrint_neighbors(void);
 

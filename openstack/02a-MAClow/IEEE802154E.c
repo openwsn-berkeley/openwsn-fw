@@ -1765,6 +1765,7 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
       synchronizePacket(ieee154e_vars.syncCapturedTime);
    }
    
+   ieee154e_vars.dataReceived->l2_isSendToMe = TRUE;
    // inform upper layer of reception (after ACK sent)
    notif_receive(ieee154e_vars.dataReceived);
    

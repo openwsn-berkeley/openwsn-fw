@@ -3,6 +3,7 @@
 #include "openserial.h"
 #include "openqueue.h"
 #include "neighbors.h"
+#include "neighbors_control.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
 #include "otf.h"
@@ -39,6 +40,10 @@ void          sixtop_timeout_timer_cb(opentimer_id_t id);
 void          timer_sixtop_management_fired(void);
 void          sixtop_sendEB(void);
 void          sixtop_sendKA(void);
+void          sixtop_sendNeighborControlCommand(
+    open_addr_t* neighborAddr,
+    uint8_t command
+);
 
 //=== six2six task
 
@@ -455,10 +460,16 @@ void task_sixtopNotifSendDone() {
             // not busy sending EB anymore
             sixtop_vars.busySendingEB = FALSE;
          } else {
-            // this is a KA
-            
-            // not busy sending KA anymore
-            sixtop_vars.busySendingKA = FALSE;
+           
+           if (msg->l2_neighborContol == TRUE){
+              sixtop_vars.busySendingNC = FALSE;
+              msg->l2_neighborContol = FALSE;
+           } else {
+                // this is a KA
+                
+                // not busy sending KA anymore
+                sixtop_vars.busySendingKA = FALSE;
+           }
          }
          // discard packets
          openqueue_freePacketBuffer(msg);
@@ -525,6 +536,11 @@ void task_sixtopNotifReceive() {
         msg->l2_joinPriorityPresent,
         msg->l2_joinPriority
     );
+    
+    if (msg->l2_isSendToMe==TRUE){
+        neighbors_control_cancelTimer(&(msg->l2_nextORpreviousHop));
+        msg->l2_isSendToMe = FALSE;
+    }
    
     // reset it to avoid race conditions with this var.
     msg->l2_joinPriorityPresent = FALSE; 
@@ -535,13 +551,45 @@ void task_sixtopNotifReceive() {
     case IEEE154_TYPE_DATA:
     case IEEE154_TYPE_CMD:
         if (msg->length>0) {
-            // send to upper layer
-            iphc_receive(msg);
+            // check whether this is neighbor control command
+            if (
+                msg->length == 5 &&
+                *((uint8_t*)(msg->payload)+0)==0xff &&
+                *((uint8_t*)(msg->payload)+1)==0xff &&
+                *((uint8_t*)(msg->payload)+2)==0xff &&
+                *((uint8_t*)(msg->payload)+3)==0xff
+            ){
+                // this is neighbor control command
+                if (*((uint8_t*)(msg->payload)+4)==0x00){
+#ifdef SIXTOP_DEBUG
+                    printf("neighbor control received. this is %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
+                    // reject by this neighbor, remove it and update the preference neighbor
+//                    neighbors_removeByNeighbor(&(msg->l2_nextORpreviousHop));
+                    neighbors_increaseNeighborLinkCost(&(msg->l2_nextORpreviousHop));
+                    neighbors_updateMyDAGrankAndNeighborPreference();
+                } else {
+                    printf("something worong at neighbor control command %d \n",*((uint8_t*)(msg->payload)+4));
+                }
+                openqueue_freePacketBuffer(msg);
+            } else {
+                  if (neighbors_isMyNeighbor(&(msg->l2_nextORpreviousHop))==TRUE){
+                      // send to upper layer
+                      iphc_receive(msg);
+                  } else {
+#ifdef SIXTOP_DEBUG
+                      printf("neighbor control to send. this is %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
+                      // free the message first and inform the neighbor don't send to me
+                      sixtop_sendNeighborControlCommand(&(msg->l2_nextORpreviousHop),0);
+                      openqueue_freePacketBuffer(msg);
+                  }
+            }
         } else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);
         }
-            break;
+        break;
     case IEEE154_TYPE_ACK:
     default:
         // free the packet's RAM memory
@@ -847,6 +895,68 @@ port_INLINE void sixtop_sendKA() {
 #endif
 }
 
+void sixtop_sendNeighborControlCommand(open_addr_t* neighborAddr,uint8_t command){
+   OpenQueueEntry_t* ncPkt;
+   
+   if (ieee154e_isSynch()==FALSE) {
+      // I'm not sync'ed
+      
+      // delete packets genereted by this module (EB and KA) from openqueue
+      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
+      
+      // I'm now busy sending a KA
+      sixtop_vars.busySendingNC = FALSE;
+      
+      // stop here
+      return;
+   }
+   
+   if (sixtop_vars.busySendingNC==TRUE) {
+      // don't proceed if I'm still sending a KA
+      return;
+   }
+   
+   // if I get here, I will send a NC command
+   
+   // get a free packet buffer
+   ncPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
+   if (ncPkt==NULL) {
+      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
+                            (errorparameter_t)1,
+                            (errorparameter_t)0);
+      return;
+   }
+   
+   // declare ownership over that packet
+   ncPkt->creator = COMPONENT_SIXTOP;
+   ncPkt->owner   = COMPONENT_SIXTOP;
+   
+   // some l2 information about this packet
+   ncPkt->l2_frameType = IEEE154_TYPE_DATA;
+   memcpy(&(ncPkt->l2_nextORpreviousHop),neighborAddr,sizeof(open_addr_t));
+   
+   // set l2-security attributes
+   ncPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   ncPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   ncPkt->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+   ncPkt->l2_neighborContol  = TRUE;
+   
+   // add NC protocol
+   packetfunctions_reserveHeaderSize(ncPkt, 5);
+   ncPkt->payload[0] = 0xff;
+   ncPkt->payload[1] = 0xff;
+   ncPkt->payload[2] = 0xff;
+   ncPkt->payload[3] = 0xff;
+   ncPkt->payload[4] = command;
+
+   // put in queue for MAC to handle
+   sixtop_send_internal(ncPkt,FALSE);
+   
+   // I'm now busy sending a KA
+   sixtop_vars.busySendingNC = TRUE;
+
+}
+
 //======= six2six task
 
 void timer_sixtop_six2six_timeout_fired(void) {
@@ -923,6 +1033,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                   
             } else{
                 if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_CLEAR){
+                    // the cell should be cleared when I received the request, following code is not required
                     schedule_removeAllCells(msg->l2_sixtop_frameID,
                                           &(msg->l2_nextORpreviousHop));
                 }
@@ -1145,8 +1256,17 @@ void sixtop_notifyReceiveCommand(
                           sixtop_areAvailableCellsToBeRemoved(frameID,numOfCells,cellList,&(pkt->l2_nextORpreviousHop))
                        )
                     ){
-                        code = IANA_6TOP_RC_SUCCESS;
-                        len += processIE_prepend_sixCelllist(response_pkt,cellList);
+                        if (neighbors_getNumNeighborsNoBlocked()<NEIGHBORSCONTROL || 
+                            (
+                             neighbors_getNumNeighborsNoBlocked()==NEIGHBORSCONTROL &&
+                             neighbors_isMyNeighbor(&(pkt->l2_nextORpreviousHop))
+                            )
+                        ) {
+                            code = IANA_6TOP_RC_SUCCESS;
+                            len += processIE_prepend_sixCelllist(response_pkt,cellList);
+                        } else {
+                            code = IANA_6TOP_RC_RESET;
+                        }
                     } else {
                         code = IANA_6TOP_RC_RESET;
                     }
@@ -1256,7 +1376,14 @@ void sixtop_notifyReceiveCommand(
                     code = IANA_6TOP_RC_ERR;
                 }
             } else {
-                // TBD...
+                if (commandIdORcode==IANA_6TOP_RC_RESET){
+                    // reject by this neighbor, remove it and update the preference neighbor
+//                    neighbors_removeByNeighbor(&(pkt->l2_nextORpreviousHop));
+                    neighbors_increaseNeighborLinkCost(&(pkt->l2_nextORpreviousHop));
+                    neighbors_updateMyDAGrankAndNeighborPreference();
+                } else {
+                    // TBD...
+                }
             }
 #ifdef GOLDEN_IMAGE_ROOT
            openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
@@ -1264,6 +1391,9 @@ void sixtop_notifyReceiveCommand(
                            (errorparameter_t)sixtop_vars.six2six_state);
 #endif
             sixtop_vars.six2six_state = SIX_IDLE;
+            if (sixtop_vars.handler == SIX_HANDLER_NEIGHBOR_CONTROL ){
+                neighbors_removeByNeighbor(&(pkt->l2_nextORpreviousHop));
+            }
             sixtop_vars.handler = SIX_HANDLER_NONE;
             opentimers_stop(sixtop_vars.timeoutTimerId);
         }

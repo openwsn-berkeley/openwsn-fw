@@ -66,7 +66,8 @@ typedef enum {
 typedef enum {
     SIX_HANDLER_NONE                    = 0x00, // when complete reservation, handler must be set to none
     SIX_HANDLER_MAINTAIN                = 0x01, // the handler is maintenance process
-    SIX_HANDLER_OTF                     = 0x02  // the handler is otf
+    SIX_HANDLER_OTF                     = 0x02, // the handler is otf
+    SIX_HANDLER_NEIGHBOR_CONTROL        = 0x03  // neighbor control: to remove slots before removing from neighbor buffer
 } six2six_handler_t;
 
 //=========================== typedef =========================================
@@ -80,6 +81,7 @@ typedef struct {
    uint16_t             periodMaintenance;
    bool                 busySendingKA;           // TRUE when busy sending a keep-alive
    bool                 busySendingEB;           // TRUE when busy sending an enhanced beacon
+   bool                 busySendingNC;           // TRUE when busy sending an neighbor controll command
    uint8_t              dsn;                     // current data sequence number
    uint8_t              mgtTaskCounter;          // counter to determine what management task to do
    opentimer_id_t       maintenanceTimerId;
