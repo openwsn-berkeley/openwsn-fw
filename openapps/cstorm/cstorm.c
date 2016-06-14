@@ -158,7 +158,11 @@ void cstorm_task_cb() {
    uint8_t              numOptions;
    
    // don't run if not synch
-   if (ieee154e_isSynch() == FALSE) return;
+   if (ieee154e_isSynch() == FALSE) {
+       // I'm not busy sending a DIO/DAO
+       cstorm_vars.busySending  = FALSE;
+       return;
+   }
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
@@ -172,6 +176,12 @@ void cstorm_task_cb() {
       return;
    }
    
+   if (cstorm_vars.busySending == TRUE){
+      return;
+   }
+   
+   cstorm_vars.busySending = TRUE;
+   
    // if you get here, send a packet
    
    // get a packet
@@ -181,6 +191,7 @@ void cstorm_task_cb() {
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       openqueue_freePacketBuffer(pkt);
+      cstorm_vars.busySending = FALSE;
       return;
    }
    
@@ -241,5 +252,11 @@ void cstorm_task_cb() {
 
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
+      // I'm not busy sending anymore
+   cstorm_vars.busySending = FALSE;
+}
+
+void cstorm_setBusySending(bool value){
+   cstorm_vars.busySending = value;
 }
 

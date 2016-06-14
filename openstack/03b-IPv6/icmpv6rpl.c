@@ -11,6 +11,10 @@
 #include "opentimers.h"
 #include "IEEE802154E.h"
 
+//=========================== definition ======================================
+
+#define ICMPV6RPL_DEBUG
+
 //=========================== variables =======================================
 
 icmpv6rpl_vars_t             icmpv6rpl_vars;
@@ -305,6 +309,10 @@ void sendDIO() {
       return;
    }
    
+#ifdef ICMPV6RPL_DEBUG
+    printf("Mote %d dagrank %d busySending %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1],neighbors_getMyDAGrank(),icmpv6rpl_vars.busySending);
+#endif
+   
    // do not send DIO if I have the default DAG rank
    if (neighbors_getMyDAGrank()==DEFAULTDAGRANK) {
       return;
@@ -560,7 +568,8 @@ void sendDAO() {
    
    //===== send
    if (icmpv6_send(msg)==E_SUCCESS) {
-      icmpv6rpl_vars.busySending = TRUE;
+      // DAO is not really sent out even returning with E_SUCCESS
+//      icmpv6rpl_vars.busySending = TRUE;
    } else {
       openqueue_freePacketBuffer(msg);
    }
@@ -588,4 +597,8 @@ void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
        TIME_MS,
        daoPeriodRandom
    );
+}
+
+void     icmpv6rpl_setBusySending(bool value){
+    icmpv6rpl_vars.busySending = value;
 }

@@ -165,6 +165,7 @@ uint8_t  icmpv6rpl_getRPLIntanceID(void);
 void     icmpv6rpl_getRPLDODAGid(uint8_t* address_128b);
 void     icmpv6rpl_setDIOPeriod(uint16_t dioPeriod);
 void     icmpv6rpl_setDAOPeriod(uint16_t daoPeriod);
+void     icmpv6rpl_setBusySending(bool value);
 /**
 \}
 \}

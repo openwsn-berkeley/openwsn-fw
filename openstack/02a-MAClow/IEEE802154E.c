@@ -861,7 +861,7 @@ port_INLINE void activity_ti1ORri1() {
             changeIsSync(FALSE);
             
             // remvoe all neighbor and cells in schedule before desynchronization
-            neighbors_init();
+//            neighbors_init();
             schedule_init();
            
             // log the error

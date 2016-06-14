@@ -20,12 +20,13 @@ typedef struct {
    coap_resource_desc_t desc;
    opentimer_id_t       timerId;
    uint16_t             period;   ///< inter-packet period (in ms)
+   bool                 busySending;
 } cstorm_vars_t;
 
 //=========================== prototypes ======================================
 
 void cstorm_init(void);
-
+void cstorm_setBusySending(bool value);
 /**
 \}
 \}

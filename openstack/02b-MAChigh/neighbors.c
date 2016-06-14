@@ -675,19 +675,22 @@ void neighbors_blockNeighbor(uint8_t index){
 void neighbors_removeBlockedNeighbors(){
    uint8_t    i;
    
+   // 1. remove the neighbor from buffer
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (
           neighbors_vars.neighbors[i].used      == TRUE &&
           neighbors_vars.neighbors[i].isBlocked == TRUE
       ) {
             neighbors_control_removeTimer(&(neighbors_vars.neighbors[i].addr_64b));
+            openqueue_removeAllSentTo(&(neighbors_vars.neighbors[i].addr_64b));
             removeNeighbor(i);
 #ifdef NEIGHBORS_DEBUG
             printf("neighbor = %d is removed\n",neighbors_vars.neighbors[i].addr_64b.addr_64b[7]);
 #endif
       }
    }
-   if (neighbors_getNumNeighbors()==0){
+   //2. reset my rank if I didn't have neighbor
+   if (neighbors_getNumNeighbors()==0 && idmanager_getIsDAGroot()==FALSE){
       neighbors_setMyDAGrank(DEFAULTDAGRANK);
    }
 }
