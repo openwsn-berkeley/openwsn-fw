@@ -1259,7 +1259,7 @@ void sixtop_notifyReceiveCommand(
                         if (neighbors_getNumNeighborsNoBlocked()<NEIGHBORSCONTROL || 
                             (
                              neighbors_getNumNeighborsNoBlocked()==NEIGHBORSCONTROL &&
-                             neighbors_isMyNeighbor(&(pkt->l2_nextORpreviousHop))
+                             neighbors_isMyNonBlockedNeighbor(&(pkt->l2_nextORpreviousHop))
                             )
                         ) {
                             code = IANA_6TOP_RC_SUCCESS;
