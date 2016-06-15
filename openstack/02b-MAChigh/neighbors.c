@@ -658,6 +658,9 @@ void neighbors_increaseNeighborLinkCost(open_addr_t* address){
             break;
       }
    }
+  if (neighbors_getNumNeighborsNoBlocked()==0){
+      neighbors_removeBlockedNeighbors();
+  }
 }
 
 void neighbors_blockNeighbor(uint8_t index){

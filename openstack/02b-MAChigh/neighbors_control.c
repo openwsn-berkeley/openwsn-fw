@@ -29,13 +29,13 @@ void neighbors_control_init(void) {
     memset(&neighbors_control_vars,0,sizeof(neighbors_control_vars_t));
     neighbors_control_vars.periodMaintenance = NEIGHBORSCONTROL_TIMERPERIOD;
     
-    neighbors_control_vars.periodCleanBlockedNeighbor = BLOCKEDNEIGHBOR_CLEANUP_TIMER_PERIOD;
-    neighbors_control_vars.cleanTimerId = opentimers_start(
-                                    neighbors_control_vars.periodCleanBlockedNeighbor,
-                                    TIMER_PERIODIC,
-                                    TIME_MS,
-                                    neighbors_control_timer_cleanBlockedNeighbor_cb
-                                 );
+//    neighbors_control_vars.periodCleanBlockedNeighbor = BLOCKEDNEIGHBOR_CLEANUP_TIMER_PERIOD;
+//    neighbors_control_vars.cleanTimerId = opentimers_start(
+//                                    neighbors_control_vars.periodCleanBlockedNeighbor,
+//                                    TIMER_PERIODIC,
+//                                    TIME_MS,
+//                                    neighbors_control_timer_cleanBlockedNeighbor_cb
+//                                 );
 }
 
 void neighbors_control_startTimer(open_addr_t* neighbor){
@@ -138,7 +138,7 @@ void neighbors_control_timer_monitor_cb(opentimer_id_t id){
 #ifdef NEIGHBORS_CONTROL_DEBUG
                 printf("Block neighbor %d !\n",neighbors_control_vars.timers[i].neighbor.addr_64b[7]);
 #endif
-                neighbors_blockNeighbor(index);
+                neighbors_increaseNeighborLinkCost(&(neighbors_control_vars.timers[i].neighbor));
                 neighbors_updateMyDAGrankAndNeighborPreference();
             }
             break;
