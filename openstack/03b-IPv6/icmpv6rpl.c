@@ -291,6 +291,7 @@ void icmpv6rpl_timer_DIO_task() {
 */
 void sendDIO() {
    OpenQueueEntry_t*    msg;
+   open_addr_t          address;
    
    // stop if I'm not sync'ed
    if (ieee154e_isSynch()==FALSE) {
@@ -308,6 +309,12 @@ void sendDIO() {
    // do not send DIO if I have the default DAG rank
    if (neighbors_getMyDAGrank()==DEFAULTDAGRANK) {
       return;
+   }
+   
+   if (neighbors_getPreferredParentEui64(&address)==TRUE){
+     if (neighbors_getContactedWithNeighborAndNotBlocked(&address)==FALSE){
+        return;
+     }
    }
    
    // do not send DIO if I'm already busy sending

@@ -119,6 +119,7 @@ void          neighbors_removeByNeighbor(open_addr_t* address);
 void          neighbors_increaseNeighborLinkCost(open_addr_t* address);
 void          neighbors_blockNeighbor(uint8_t index);
 void          neighbors_removeBlockedNeighbors();
+bool          neighbors_getContactedWithNeighborAndNotBlocked(open_addr_t* address);
 // debug
 bool          debugPrint_neighbors(void);
 
