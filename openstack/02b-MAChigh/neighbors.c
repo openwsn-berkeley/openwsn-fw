@@ -658,6 +658,9 @@ void neighbors_increaseNeighborLinkCost(open_addr_t* address){
             break;
       }
    }
+  if (neighbors_getNumNeighborsNoBlocked()==0){
+      neighbors_removeBlockedNeighbors();
+  }
 }
 
 void neighbors_blockNeighbor(uint8_t index){
@@ -693,6 +696,22 @@ void neighbors_removeBlockedNeighbors(){
    if (neighbors_getNumNeighbors()==0 && idmanager_getIsDAGroot()==FALSE){
       neighbors_setMyDAGrank(DEFAULTDAGRANK);
    }
+}
+        
+bool neighbors_getContactedWithNeighborAndNotBlocked(open_addr_t* address){
+    uint8_t index;
+    bool returnVal;
+    
+    returnVal = FALSE;
+    if (neighbors_getNeighborIndex(address,&index)==TRUE){
+        if (
+            neighbors_vars.neighbors[index].isBlocked==FALSE &&
+            neighbors_vars.neighbors[index].numTxACK>0
+        ){
+            returnVal = TRUE;
+        }
+    }
+    return returnVal;
 }
 
 //===== debug
