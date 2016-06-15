@@ -54,7 +54,7 @@ extern "C" {
  * @{
  ******************************************************************************/
 
-void    ezradio_hal_GpioInit( GPIOINT_IrqCallbackPtr_t ezradioIrqCallback, bool enablePTI );
+//void    ezradio_hal_GpioInit( GPIOINT_IrqCallbackPtr_t ezradioIrqCallback, bool enablePTI );
 void    ezradio_hal_SpiInit( void );
 
 void    ezradio_hal_AssertShutdown  (void);

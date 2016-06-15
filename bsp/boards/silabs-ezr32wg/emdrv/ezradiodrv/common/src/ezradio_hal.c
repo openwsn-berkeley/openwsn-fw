@@ -46,11 +46,8 @@
 static SPIDRV_HandleData_t  ezradioSpiHandle;
 static SPIDRV_Handle_t      ezradioSpiHandlePtr = &ezradioSpiHandle;
 
-#if (defined _EZR32_HAPPY_FAMILY)
-static SPIDRV_Init_t        ezradioSpiInitData = SPIDRV_MASTER_USARTRF1;
-#else
 static SPIDRV_Init_t        ezradioSpiInitData = SPIDRV_MASTER_USARTRF0;
-#endif
+
 
 /// @endcond
 

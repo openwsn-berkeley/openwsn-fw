@@ -16,6 +16,7 @@
 #include "em_cmu.h"
 #include "em_chip.h"
 #include "em_emu.h"
+#include "spi.h"
 
 //=========================== variables =======================================
 
@@ -41,9 +42,10 @@ void board_init(void) {
    debugpins_init();
    button_init();
    bsp_timer_init();
-   radiotimer_init();
+   //radiotimer_init();
    uart_init();
    radio_init();
+   spi_init();
 }
 
 /**

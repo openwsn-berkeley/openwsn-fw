@@ -2,13 +2,7 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\00standAlone_radio\00standAlone_radio.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\00std_both_timers\00std_both_timers.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\00std_radio\00std_radio.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\00std_radiotimer\00std_radiotimer.ewp</path>
@@ -33,6 +27,9 @@
   </project>
   <project>
     <path>$WS_DIR$\01bsp_radiotimer\01bsp_radiotimer.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\01bsp_spi\01bsp_spi.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\01bsp_bsp_timer\01bsp_timers.ewp</path>
