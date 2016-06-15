@@ -89,7 +89,7 @@ bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isPreferredParent(open_addr_t* address);
 bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
 bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
-bool          neighbors_isMyNeighbor(open_addr_t* address);
+bool          neighbors_isMyNonBlockedNeighbor(open_addr_t* address);
 
 // updating neighbor information
 void          neighbors_indicateRx(

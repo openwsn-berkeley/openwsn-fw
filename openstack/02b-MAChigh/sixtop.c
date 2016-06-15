@@ -573,7 +573,7 @@ void task_sixtopNotifReceive() {
                 }
                 openqueue_freePacketBuffer(msg);
             } else {
-                  if (neighbors_isMyNeighbor(&(msg->l2_nextORpreviousHop))==TRUE){
+                  if (neighbors_isMyNonBlockedNeighbor(&(msg->l2_nextORpreviousHop))==TRUE){
                       // send to upper layer
                       iphc_receive(msg);
                   } else {
