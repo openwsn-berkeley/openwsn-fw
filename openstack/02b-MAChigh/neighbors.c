@@ -310,13 +310,16 @@ bool neighbors_isNeighborWithHigherDAGrank(uint8_t index) {
    return returnVal;
 }
 
-bool neighbors_isMyNeighbor(open_addr_t* address){
+bool neighbors_isMyNonBlockedNeighbor(open_addr_t* address){
    uint8_t    i;
    bool       returnVal ;
    
    returnVal = FALSE;  
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (packetfunctions_sameAddress(address,&neighbors_vars.neighbors[i].addr_64b)) {
+      if (
+          packetfunctions_sameAddress(address,&neighbors_vars.neighbors[i].addr_64b) &&
+          neighbors_vars.neighbors[i].isBlocked == FALSE
+      ) {
             returnVal = TRUE;
             break;
       }
@@ -360,6 +363,10 @@ void neighbors_indicateRx(open_addr_t* l2_src,
    newNeighbor = TRUE;
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (isThisRowMatching(l2_src,i)) {
+        
+         if (neighbors_vars.neighbors[i].isBlocked){
+            return;
+         }
          
          // this is not a new neighbor
          newNeighbor = FALSE;
@@ -484,6 +491,9 @@ void neighbors_indicateRxDIO(OpenQueueEntry_t* msg) {
    if (isNeighbor(&(msg->l2_nextORpreviousHop))==TRUE) {
       for (i=0;i<MAXNUMNEIGHBORS;i++) {
          if (isThisRowMatching(&(msg->l2_nextORpreviousHop),i)) {
+            if (neighbors_vars.neighbors[i].isBlocked == TRUE){
+                return;
+            }
             if (
                   neighbors_vars.dio->rank > neighbors_vars.neighbors[i].DAGrank &&
                   neighbors_vars.dio->rank - neighbors_vars.neighbors[i].DAGrank >(DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
@@ -654,6 +664,7 @@ void neighbors_increaseNeighborLinkCost(open_addr_t* address){
             // set the rank a little bit higher than default value
             neighbors_vars.neighbors[i].numTxACK  = 1;
             neighbors_vars.neighbors[i].numTx     = DEFAULTLINKCOST+1;
+            neighbors_vars.neighbors[i].DAGrank   = DEFAULTDAGRANK;
             neighbors_vars.neighbors[i].isBlocked = TRUE;
             break;
       }

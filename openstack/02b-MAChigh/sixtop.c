@@ -609,7 +609,7 @@ void task_sixtopNotifReceive() {
                 }
                 openqueue_freePacketBuffer(msg);
             } else {
-                  if (neighbors_isMyNeighbor(&(msg->l2_nextORpreviousHop))==TRUE){
+                  if (neighbors_isMyNonBlockedNeighbor(&(msg->l2_nextORpreviousHop))==TRUE){
                       // send to upper layer
                       iphc_receive(msg);
                   } else {
@@ -1356,7 +1356,7 @@ void sixtop_notifyReceiveCommand(
                         if (neighbors_getNumNeighborsNoBlocked()<NEIGHBORSCONTROL || 
                             (
                              neighbors_getNumNeighborsNoBlocked()==NEIGHBORSCONTROL &&
-                             neighbors_isMyNeighbor(&(pkt->l2_nextORpreviousHop))
+                             neighbors_isMyNonBlockedNeighbor(&(pkt->l2_nextORpreviousHop))
                             )
                         ) {
                             code = IANA_6TOP_RC_SUCCESS;
