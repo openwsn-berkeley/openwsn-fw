@@ -605,7 +605,9 @@ void task_sixtopNotifReceive() {
                     neighbors_increaseNeighborLinkCost(&(msg->l2_nextORpreviousHop));
                     neighbors_updateMyDAGrankAndNeighborPreference();
                 } else {
+#ifdef SIXTOP_DEBUG
                     printf("something worong at neighbor control command %d \n",*((uint8_t*)(msg->payload)+4));
+#endif
                 }
                 openqueue_freePacketBuffer(msg);
             } else {
