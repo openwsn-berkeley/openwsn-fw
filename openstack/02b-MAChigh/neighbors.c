@@ -116,7 +116,7 @@ bool neighbors_getPreferredParentEui64(open_addr_t* addressToWrite) {
    //===== step 1. Try to find preferred parent
    for (i=0; i<MAXNUMNEIGHBORS; i++) {
       if (neighbors_vars.neighbors[i].used==TRUE){
-         if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
+         if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE && neighbors_vars.neighbors[i].DAGrank!= MAXDAGRANK) {
             memcpy(addressToWrite,&(neighbors_vars.neighbors[i].addr_64b),sizeof(open_addr_t));
             addressToWrite->type=ADDR_64B;
             foundPreferred=TRUE;
