@@ -147,6 +147,8 @@ void openqueue_timeout_drop(void){
    uint8_t     i;
    timeout_t   now;
 
+   return;
+
    //initialization
    ieee154e_getAsn(now.byte);
 
@@ -166,7 +168,8 @@ void openqueue_timeout_drop(void){
                openserial_ncat_uint32_t(str, (uint32_t)i, 150);
                openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
 #endif
-               openqueue_reset_entry(&(openqueue_vars.queue[i]));
+
+                 openqueue_reset_entry(&(openqueue_vars.queue[i]));
 
             }
    }
@@ -565,8 +568,9 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
    entry->l2_retriesLeft               = 0;
    entry->l2_IEListPresent             = 0;
    entry->l2_payloadIEpresent          = 0;
-   entry->l2_track.owner.type          = ADDR_NONE;
-   entry->l2_track.instance            = TRACK_BESTEFFORT;
+   //entry->l2_track.owner.type          = ADDR_NONE;
+   //entry->l2_track.instance            = TRACK_BESTEFFORT;
+   bzero(&(entry->l2_track), sizeof(entry->l2_track));
    bzero(entry->timeout.byte, sizeof(timeout_t));
    //l2-security
    entry->l2_securityLevel             = 0;

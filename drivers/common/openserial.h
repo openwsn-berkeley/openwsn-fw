@@ -264,6 +264,7 @@ void  openserial_statCelladd(scheduleEntry_t* slotContainer);
 void  openserial_statCellremove(scheduleEntry_t* slotContainer);
 void  openserial_statAckTx(void);
 void  openserial_statAckRx(void);
+void  openserial_statRxCrcFalse(OpenQueueEntry_t* msg);
 void  openserial_statRx(OpenQueueEntry_t* msg);
 void  openserial_statTx(OpenQueueEntry_t* msg);
 void  openserial_statPktTimeout(OpenQueueEntry_t* msg);

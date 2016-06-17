@@ -1119,12 +1119,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
       (errorparameter_t)0
    );
 #endif
-/*
-   char str[150];
-     sprintf(str, "Linkrep/LinkRep timeout ");
-     openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.six2six_state, 150);
-     openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-*/
+
 
    // timeout ftimer fired, reset the state of sixtop to idle (only if we don't have an on-going transmission for this component)
    if (!ieee154e_is_ongoing(COMPONENT_SIXTOP_RES)) {

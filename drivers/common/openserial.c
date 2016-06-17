@@ -23,7 +23,9 @@
 
 
 
-//#define _DEBUG_OPENSERIAL_
+//#define _DEBUG_OPENSERIAL_              // debug variables to verify that openstat works properly
+//#define OPENSERIAL_STAT_FALSECRC_       // should we send to openvisualizer the CRC failed frames? // it consumes bandwidth through the serial line
+#define OPENSERIAL_STAT                   // push the statistics to openVisualizer
 
 
 #ifdef _DEBUG_OPENSERIAL_
@@ -1198,6 +1200,17 @@ void openserial_fillPktRx(evtPktRx_t *evt, OpenQueueEntry_t* msg){
 
 
 
+//push an event to track received frames (with a bad crc)
+void openserial_statRxCrcFalse(OpenQueueEntry_t* msg){
+
+   #if defined(OPENSERIAL_STAT) && defined(OPENSERIAL_STAT_FALSECRC_)
+      evtPktRx_t evt;
+      openserial_fillPktRx(&evt, msg);
+      openserial_printStat(SERTYPE_PKT_RX, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evtPktRx_t));
+  #endif
+}
+
+
 //push an event to track received frames
 void openserial_statRx(OpenQueueEntry_t* msg){
 
@@ -1214,7 +1227,7 @@ void openserial_statTx(OpenQueueEntry_t* msg){
    #ifdef OPENSERIAL_STAT
       evtPktTx_t evt;
       openserial_fillPktTx(&evt, msg);
-      openserial_printStat(SERTYPE_PKT_TX, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evtPktTx_t));
+      openserial_printStat(SERTYPE_PKT_TX, msg->creator, (uint8_t*)&evt, sizeof(evtPktTx_t));
    #endif
 
 }
@@ -1226,7 +1239,7 @@ void openserial_statPktTimeout(OpenQueueEntry_t* msg){
    #ifdef OPENSERIAL_STAT
       evtPktTx_t evt;
       openserial_fillPktTx(&evt, msg);
-      openserial_printStat(SERTYPE_PKT_TIMEOUT, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evtPktTx_t));
+      openserial_printStat(SERTYPE_PKT_TIMEOUT, msg->creator, (uint8_t*)&evt, sizeof(evtPktTx_t));
    #endif
 }
 
@@ -1238,7 +1251,7 @@ void openserial_statPktBufferOverflow(OpenQueueEntry_t* msg){
    #ifdef OPENSERIAL_STAT
       evtPktRx_t evt;
       openserial_fillPktRx(&evt, msg);
-      openserial_printStat(SERTYPE_PKT_BUFFEROVERFLOW, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evtPktRx_t));
+      openserial_printStat(SERTYPE_PKT_BUFFEROVERFLOW, msg->creator, (uint8_t*)&evt, sizeof(evtPktRx_t));
    #endif
 }
 

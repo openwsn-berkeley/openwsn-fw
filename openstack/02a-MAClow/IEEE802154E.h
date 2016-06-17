@@ -22,7 +22,6 @@ static const uint8_t chTemplate_default[] = {
 
 //=========================== define ==========================================
 
-#define IEEE802154E_LOG_CRC_FAILED   0  //should we send to openvizualizer the packets with a bad CRC for debug / stats ?
 
 #define SYNCHRONIZING_CHANNEL        16 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
@@ -291,6 +290,7 @@ void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 bool               debugPrint_asn(void);
 bool               debugPrint_isSync(void);
 bool               ieee154e_is_ongoing(uint8_t creator);
+OpenQueueEntry_t*  ieee154e_getOngoingTx(void);
 bool               debugPrint_macStats(void);
 uint8_t            calculateFrequency(uint8_t channelOffset);
 /**

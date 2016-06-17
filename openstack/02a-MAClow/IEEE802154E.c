@@ -583,8 +583,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
       
       // break if invalid CRC
-      if (ieee154e_vars.dataReceived->l1_crc==FALSE && IEEE802154E_LOG_CRC_FAILED) {
-         openserial_statRx(ieee154e_vars.dataReceived);
+      if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+         openserial_statRxCrcFalse(ieee154e_vars.dataReceived);
 
          // break from the do-while loop and execute abort code below
          break;
@@ -1311,8 +1311,8 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       packetfunctions_tossFooter(   ieee154e_vars.ackReceived, LENGTH_CRC);
    
       // break if invalid CRC
-      if (ieee154e_vars.ackReceived->l1_crc==FALSE && IEEE802154E_LOG_CRC_FAILED) {
-         openserial_statRx(ieee154e_vars.ackReceived);
+      if (ieee154e_vars.ackReceived->l1_crc==FALSE) {
+         openserial_statRxCrcFalse(ieee154e_vars.ackReceived);
 
          // break from the do-while loop and execute the clean-up code below
          break;
@@ -1519,8 +1519,8 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
       
       // if CRC doesn't check, stop
-      if (ieee154e_vars.dataReceived->l1_crc==FALSE && IEEE802154E_LOG_CRC_FAILED) {
-         openserial_statRx(ieee154e_vars.dataReceived);
+      if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+         openserial_statRxCrcFalse(ieee154e_vars.dataReceived);
 
          // jump to the error code below this do-while loop
          break;
@@ -2337,4 +2337,11 @@ bool ieee154e_isSynch(){
  */
 bool ieee154e_is_ongoing(uint8_t creator){
    return(ieee154e_vars.dataToSend->creator == creator);
+}
+
+/*
+ * brief: what is the packet currently transmitted (CANNOT be removed now from openqueue!)
+ */
+OpenQueueEntry_t* ieee154e_getOngoingTx(void){
+   return(ieee154e_vars.dataToSend);
 }
