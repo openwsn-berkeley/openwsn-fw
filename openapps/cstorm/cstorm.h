@@ -20,6 +20,7 @@ typedef struct {
    coap_resource_desc_t desc;
    opentimer_id_t       timerId;
    uint16_t             period;   ///< inter-packet period (in ms)
+   uint16_t             counter;
 } cstorm_vars_t;
 
 //=========================== prototypes ======================================

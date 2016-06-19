@@ -64,6 +64,7 @@ void cstorm_init(void) {
    //stop 
    //opentimers_stop(cstorm_vars.timerId);
    */
+   cstorm_vars.counter = 0;
 }
 
 //=========================== private =========================================
@@ -149,6 +150,7 @@ void cstorm_task_cb() {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
    uint8_t              numOptions;
+   uint8_t              asnArray[5];
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
@@ -187,6 +189,26 @@ void cstorm_task_cb() {
    // add payload
    packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
    memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
+   
+   // add mote ID
+   packetfunctions_reserveHeaderSize(pkt,2);
+   pkt->payload[0] = idmanager_getMyID(ADDR_16B)->addr_16b[0];
+   pkt->payload[1] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
+   
+   // add squence number
+   packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+   pkt->payload[1] = (uint8_t)((cstorm_vars.counter & 0xff00)>>8);
+   pkt->payload[0] = (uint8_t)(cstorm_vars.counter & 0x00ff);
+   cstorm_vars.counter++;
+   
+   // add inital ASN
+   packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
+   ieee154e_getAsn(asnArray);
+   pkt->payload[0] = asnArray[0];
+   pkt->payload[1] = asnArray[1];
+   pkt->payload[2] = asnArray[2];
+   pkt->payload[3] = asnArray[3];
+   pkt->payload[4] = asnArray[4];
    
    //set the TKL byte as a counter of Options
    //TODO: This is not conform with RFC7252, but yes with current dissector WS v1.10.6
