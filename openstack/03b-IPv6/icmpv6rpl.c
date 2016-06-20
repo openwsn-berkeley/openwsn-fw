@@ -590,6 +590,7 @@ void sendDAO() {
 //      icmpv6rpl_vars.busySending = TRUE;
    } else {
       openqueue_freePacketBuffer(msg);
+      icmpv6rpl_vars.busySending = FALSE;
    }
 }
 

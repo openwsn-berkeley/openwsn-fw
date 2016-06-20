@@ -14,7 +14,7 @@
 
 //=========================== define ==========================================
 
-#define NEIGHBORSCONTROL  3
+#define NEIGHBORSCONTROL  4
 #define NEIGHBORSCONTROL_TIMERPERIOD        35000
 
 //=========================== typedef =========================================

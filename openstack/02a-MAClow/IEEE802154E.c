@@ -861,8 +861,9 @@ port_INLINE void activity_ti1ORri1() {
             changeIsSync(FALSE);
             
             // remvoe all neighbor and cells in schedule before desynchronization
-//            neighbors_init();
+            neighbors_init();
             schedule_init();
+            openqueue_init();
            
             // log the error
             openserial_printError(COMPONENT_IEEE802154E,ERR_DESYNCHRONIZED,

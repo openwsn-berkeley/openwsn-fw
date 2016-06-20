@@ -57,11 +57,11 @@ void cstorm_init(void) {
    //comment : not running by default
    cstorm_vars.period           = CSTORM_PERIOD - 0x80 + (openrandom_get16b()&0xff); 
    
-   cstorm_vars.timerId          = opentimers_start(
-      cstorm_vars.period,
-      TIMER_PERIODIC,TIME_MS,
-      cstorm_timer_cb
-   );
+//   cstorm_vars.timerId          = opentimers_start(
+//      cstorm_vars.period,
+//      TIMER_PERIODIC,TIME_MS,
+//      cstorm_timer_cb
+//   );
    
    //stop 
    //opentimers_stop(cstorm_vars.timerId);
