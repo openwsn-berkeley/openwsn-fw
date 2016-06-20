@@ -451,6 +451,10 @@ void sendDAO() {
        return;
    }
    
+   if (neighbors_getPreferredParentEui64(&address)==FALSE){
+      return;
+   }
+   
    // dont' send a DAO if you're still busy sending the previous one
    if (icmpv6rpl_vars.busySending==TRUE) {
       return;

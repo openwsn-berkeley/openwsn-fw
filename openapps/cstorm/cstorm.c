@@ -157,6 +157,7 @@ void cstorm_task_cb() {
    owerror_t            outcome;
    uint8_t              numOptions;
    uint8_t              asnArray[5];
+   open_addr_t          address;
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) {
@@ -178,6 +179,10 @@ void cstorm_task_cb() {
    }
    
    if (cstorm_vars.busySending == TRUE){
+      return;
+   }
+   
+   if (neighbors_getPreferredParentEui64(&address)==FALSE){
       return;
    }
    
@@ -268,6 +273,7 @@ void cstorm_task_cb() {
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
+      cstorm_vars.busySending = FALSE;
    }
 }
 
