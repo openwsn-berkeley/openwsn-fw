@@ -455,6 +455,13 @@ void sendDAO() {
       return;
    }
    
+   if (schedule_getCellsCounts(
+            SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+            CELLTYPE_RX,
+            &address)==0){
+      return;
+   }
+   
    // dont' send a DAO if you're still busy sending the previous one
    if (icmpv6rpl_vars.busySending==TRUE) {
       return;

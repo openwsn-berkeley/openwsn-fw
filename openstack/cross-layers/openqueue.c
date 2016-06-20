@@ -179,12 +179,13 @@ void openqueue_removeAllSentTo(open_addr_t* toNeighbor){
    for (i=0;i<QUEUELENGTH;i++){
       if (packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
           if (openqueue_vars.queue[i].creator == COMPONENT_ICMPv6RPL){
+              openqueue_reset_entry(&(openqueue_vars.queue[i]));
               icmpv6rpl_setBusySending(FALSE);
-              openqueue_reset_entry(&(openqueue_vars.queue[i]));
-          }
-          if (openqueue_vars.queue[i].creator == COMPONENT_CSTORM){
-              cstorm_setBusySending(FALSE);
-              openqueue_reset_entry(&(openqueue_vars.queue[i]));
+          } else {
+              if (openqueue_vars.queue[i].creator == COMPONENT_CSTORM){
+                  openqueue_reset_entry(&(openqueue_vars.queue[i]));
+                  cstorm_setBusySending(FALSE);
+              }
           }
       }
    }

@@ -10,6 +10,7 @@
 //#include "ADC_Channel.h"
 #include "IEEE802154E.h"
 #include "idmanager.h"
+#include "schedule.h" 
 
 //=========================== defines =========================================
 
@@ -183,6 +184,13 @@ void cstorm_task_cb() {
    }
    
    if (neighbors_getPreferredParentEui64(&address)==FALSE){
+      return;
+   }
+   
+   if (schedule_getCellsCounts(
+            SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+            CELLTYPE_RX,
+            &address)==0){
       return;
    }
    
