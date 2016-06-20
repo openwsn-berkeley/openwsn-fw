@@ -131,7 +131,7 @@ bool neighbors_getPreferredParentEui64(open_addr_t* addressToWrite) {
    }
    
    //===== step 2. (backup) Promote neighbor with min rank to preferred parent
-   if (foundPreferred==FALSE && numNeighbors > 0){
+   if (foundPreferred==FALSE && numNeighbors > 0 && minRankIdx != MAXNUMNEIGHBORS+1){
       // promote neighbor
       neighbors_vars.neighbors[minRankIdx].parentPreference       = MAXPREFERENCE;
       neighbors_vars.neighbors[minRankIdx].stableNeighbor         = TRUE;
