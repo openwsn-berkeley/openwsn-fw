@@ -19,19 +19,21 @@
 //=========================== prototypes ======================================
 
 // admin
-void      otf_init(void);
-// notification from sixtop
-void      otf_notif_addedCell(void);
-void      otf_notif_removedCell(void);
+void     otf_init(void);
 
-//a packet is pushed to the MAC layer -> OTF notification
-void otf_notif_transmit(OpenQueueEntry_t* msg);
+
+// notification from sixtop
+void     otf_notif_addedCell(void);
+void     otf_notif_removedCell(void);
 
 //called to possibly update the schedule by OTF (e.g. sixtop has finished an allocation, has timeouted, etc.)
-void     otf_update_schedule(void);
+void     otf_verifSchedule(void);
+
+//a packet is pushed to the MAC layer -> OTF notification
+void     otf_notif_pktTx(OpenQueueEntry_t* msg);
 
 //the parent has changed, must now remove the corresponding cells
-void     otf_notif_remove_parent(open_addr_t *parent);
+void     otf_notif_parentRemoved(open_addr_t *parent);
 
 /**
 \}

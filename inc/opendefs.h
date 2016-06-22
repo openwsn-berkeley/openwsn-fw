@@ -290,12 +290,16 @@ enum {
 };
 
 
+
+
+
+
 //the track management mode
-enum{
-   TRACK_MGMT_NO           = 0,  // all the applications use the shared cells (TXRX, no dedicated cell, besteffort track)
-   TRACK_MGMT_SHARED       = 1,  // all the applications use the same track (with dedicated cells)
-   TRACK_MGMT_ISOLATION    = 2   // each application may have its own dedicated track
-};
+#define TRACK_MGMT_NO            0  // all the applications use the shared cells (TXRX, no dedicated cell, besteffort track)
+#define TRACK_MGMT_SHARED        1  // all the applications use the same track (with dedicated cells)
+#define TRACK_MGMT_ISOLATION     2  // each application may have its own dedicated track
+#define TRACK_MGMT_6P_ISOLATION  3   // one track for 6P requests + one dedicated track per application
+
 
 
 //the different track instances (reserved ids)
@@ -303,7 +307,8 @@ enum{
    TRACK_BESTEFFORT                   = 0,   // for best effort traffic
    TRACK_ALLCOMMON                    = 1,   // One single (shared) track rooted ah the DAGROOT
    TRACK_IMCPv6RPL                    = 2,   // one shared track rooted at the DAGROOT, specific for RPL unicast traffic (DAO)
-   TRACK_CEXAMPLE                     = 3    // for Cexample (application traffic)
+   TRACK_CEXAMPLE                     = 3,   // for Cexample (application traffic)
+   TRACK_PARENT_CONTROL               = 4    // to send the 6top requests toward the parent
 };
 
 //=========================== typedef =========================================

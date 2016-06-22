@@ -18,7 +18,7 @@
 
 The superframe repears over time and can be arbitrarly long.
 */
-#define SLOTFRAME_LENGTH    101 //should be 101
+#define SLOTFRAME_LENGTH    203 //should be 101
 
 //draft-ietf-6tisch-minimal-06
 #define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      5
@@ -28,7 +28,7 @@ The superframe repears over time and can be arbitrarly long.
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
 #define NUMSERIALRX          4
-#define NUMSLOTSOFF          70
+#define NUMSLOTSOFF          190
 
 #define SCHEDULE_NBROWS_OPENSERIALSTATUS  1   //Nb of rows to push at the same time to openserial
 

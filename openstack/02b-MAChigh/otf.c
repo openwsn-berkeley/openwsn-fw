@@ -6,9 +6,10 @@
 #include "openserial.h"
 #include "openqueue.h"
 #include "IEEE802154E.h"
+#include "idmanager.h"
 
 
-//#define _DEBUG_OTF_
+#define _DEBUG_OTF_
 
 
 
@@ -88,6 +89,57 @@ void otf_removeCell_task(void) {
 
 
 
+//======= 6P Cells
+
+
+
+//to reserve one cell toward my parent (for control packets) if none exists
+bool otf_reserveParentCells(void){
+   open_addr_t parent;
+   track_t     linkReqTrack;
+   uint8_t     nbCells;
+   char        str[150];
+
+   //Do I have a valid parent?
+   neighbors_getPreferredParentEui64(&parent);
+   if (parent.type == ADDR_NONE){
+      openserial_printCritical(
+               COMPONENT_OTF,ERR_UNKNOWN_NEIGHBOR,
+               (errorparameter_t)parent.addr_64b[6],
+               (errorparameter_t)parent.addr_64b[7]
+            );
+      return FALSE;
+   }
+
+   //the specific track for 6P Link Requests
+   memcpy(&(linkReqTrack.owner), &(parent), sizeof(linkReqTrack.owner));
+   linkReqTrack.instance = TRACK_PARENT_CONTROL;
+
+   //how many cells for TRACK_PARENT_CONTROL?
+   nbCells = schedule_getNbCellsWithTrack(linkReqTrack, &parent);
+
+   //ask 6top to reserve one new cell if none exists
+   if (nbCells == 0){
+      sixtop_setHandler(SIX_HANDLER_OTF);
+      sixtop_addCells(&(parent), 1, linkReqTrack);
+
+#ifdef _DEBUG_OTF_
+      sprintf(str, "OTF - TRACK_PARENT_CONTROL - Has to reserve one cell with the parent ");
+      openserial_ncat_uint8_t_hex(str, parent.addr_64b[6], 150);
+      openserial_ncat_uint8_t_hex(str, parent.addr_64b[7], 150);
+      openserial_printf(COMPONENT_OTF, str, strlen(str));
+#endif
+
+      return(TRUE);
+   }
+
+   return(FALSE);
+}
+
+
+
+//======= SF-Theo (Scheduling Function)
+// Convergence Condition: NBCells for one track >= Nb of packets in the queue for that track
 
 
 //asks 6top to reserve a cell if we don't have enough for this packet
@@ -118,10 +170,10 @@ uint8_t otf_reserve_agressive_for(OpenQueueEntry_t* msg){
    sprintf(str, "OTF required=");
    openserial_ncat_uint32_t(str, (uint32_t)nbCells_curr >= nbCells_req, 150);
    strncat(str, ", current=", 150);
-    openserial_ncat_uint32_t(str, (uint32_t)nbCells_curr, 150);
-    strncat(str, ", required=", 150);
-     openserial_ncat_uint32_t(str, (uint32_t)nbCells_req, 150);
-     strncat(str, ", track instance=", 150);
+   openserial_ncat_uint32_t(str, (uint32_t)nbCells_curr, 150);
+   strncat(str, ", required=", 150);
+   openserial_ncat_uint32_t(str, (uint32_t)nbCells_req, 150);
+   strncat(str, ", track instance=", 150);
    openserial_ncat_uint32_t(str, (uint32_t)msg->l2_track.instance, 150);
    strncat(str, ", track owner=", 150);
    openserial_ncat_uint8_t_hex(str, msg->l2_track.owner.addr_64b[6], 150);
@@ -157,7 +209,7 @@ uint8_t otf_reserve_agressive_for(OpenQueueEntry_t* msg){
 
 
 //aggressive allocation: walks in openqueue and verifies enough cells are schedules to empty the queue during the slotframe
-void otf_update_agressive(void){
+void otf_addCells_agressive(void){
 #ifdef OTF_AGRESSIVE
    uint8_t  i;
    OpenQueueEntry_t* msg;
@@ -179,7 +231,7 @@ void otf_update_agressive(void){
 }
 
 
-
+//======= TIMEOUTED (unused) Cells
 
 //verifies that all the neighbors in CELL_TX are my parents
 void otf_remove_obsolete_parents(void){
@@ -290,17 +342,51 @@ void otf_remove_unused_cells(void){
 }
 
 
-//updates the schedule
-void otf_update_schedule(void){
+
+
+
+//======= Periodic or Event-triggered Verifications in OTF
+
+
+//can a linkReq be generated or should we wait some conditions?
+bool otf_verifPossible(void){
+   open_addr_t parent;
 
    //I MUST be idle
    if (!sixtop_isIdle())
+      return FALSE;
+
+
+   //I am the DAGrooot -> nothing to prepare
+   if (idmanager_getIsDAGroot()==TRUE)
+      return (TRUE);
+
+   // I must have a valid parent
+   neighbors_getPreferredParentEui64(&parent);
+    if (parent.type == ADDR_NONE)
+      return FALSE;
+
+   // to reserve one cell for 6P toward my parent if none was allocated
+#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
+   if (otf_reserveParentCells())
+      return FALSE;
+
+   return TRUE;
+#endif
+}
+
+
+//updates the schedule
+void otf_verifSchedule(void){
+
+   //must some actions be triggered before reserving new cells?
+   if (!otf_verifPossible())
       return;
 
 #if (TRACK_MGMT > TRACK_MGMT_NO)
 
 #ifdef OTF_AGRESSIVE
-   otf_update_agressive();
+   otf_addCells_agressive();
 #endif
 
    otf_remove_obsolete_parents();
@@ -308,11 +394,15 @@ void otf_update_schedule(void){
 #endif
 }
 
-//a packet is pushed to the MAC layer -> OTF notification
-void otf_notif_transmit(OpenQueueEntry_t* msg){
 
-   if (!sixtop_isIdle())
+
+//a packet is pushed to the MAC layer -> OTF notification
+void otf_notif_pktTx(OpenQueueEntry_t* msg){
+
+   //must some actions be triggered before reserving new cells?
+   if (!otf_verifPossible())
       return;
+
 
 #if (TRACK_MGMT > TRACK_MGMT_NO)
 #ifdef OTF_AGRESSIVE
@@ -321,8 +411,11 @@ void otf_notif_transmit(OpenQueueEntry_t* msg){
 #endif
 }
 
+
+
+
 //the parent has changed, must now remove the corresponding cells
-void otf_notif_remove_parent(open_addr_t *parent){
+void otf_notif_parentRemoved(open_addr_t *parent){
 #ifndef SIXTOP_REMOVE_OBSOLETE_PARENTS
    return;
 #endif

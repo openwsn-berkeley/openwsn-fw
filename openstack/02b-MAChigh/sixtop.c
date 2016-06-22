@@ -285,6 +285,16 @@ void sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track){
    // indicate IEs present
    pkt->l2_payloadIEpresent = TRUE;
    
+   // set the track for the LinkRequest
+#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
+   if (track.instance != TRACK_PARENT_CONTROL){
+      open_addr_t parent;
+      neighbors_getPreferredParentEui64(&parent);
+      memcpy(&(pkt->l2_track.owner), &(parent), sizeof(parent));
+      pkt->l2_track.instance   = (uint16_t)TRACK_PARENT_CONTROL;
+   }
+#endif
+
    // send packet
    sixtop_send(pkt);
    
@@ -825,7 +835,7 @@ owerror_t sixtop_send_internal(
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
 
    //otf notification
-   otf_notif_transmit(msg);
+   otf_notif_pktTx(msg);
 
    return E_SUCCESS;
 }
@@ -1101,7 +1111,7 @@ void sixtop_setState(six2six_state_t state){
    if (state == SIX_IDLE){
       opentimers_stop(sixtop_vars.timeoutTimerId);
       sixtop_vars.handler = SIX_HANDLER_NONE;
-      otf_update_schedule();
+      otf_verifSchedule();
    }
 
 }
@@ -1630,6 +1640,14 @@ void sixtop_linkResponse(
    //I has an IE in my payload
    sixtopPkt->l2_payloadIEpresent = TRUE;
   
+   // set the track for the LinkRequest (I have a TRRX cell with this child (through which the LinkReq has been txed)
+#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
+   if (track.instance != TRACK_PARENT_CONTROL){
+      memcpy(&(sixtopPkt->l2_track.owner), idmanager_getMyID(ADDR_64B), sizeof(sixtopPkt->l2_track.owner));
+      sixtopPkt->l2_track.instance   = (uint16_t)TRACK_PARENT_CONTROL;
+   }
+#endif
+
    sixtop_send(sixtopPkt);
   
    sixtop_setState(SIX_WAIT_ADDRESPONSE_SENDDONE);
@@ -1738,7 +1756,6 @@ void sixtop_notifyReceiveRemoveLinkRequest(
      otf_notif_removedCell();
    } else {
        if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
-           // if sixtop remove request handler is 
            sixtop_vars.handler = SIX_HANDLER_NONE;
        } else {
            // if any other handlers exist
@@ -1843,6 +1860,7 @@ void sixtop_addCellsByState(
    uint8_t     i;
    uint8_t     j;
    open_addr_t temp_neighbor;
+   uint8_t     type;
   
    //set schedule according links
    
@@ -1854,10 +1872,15 @@ void sixtop_addCellsByState(
             case SIX_WAIT_ADDRESPONSE_SENDDONE:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
                
+               if (track.instance != TRACK_PARENT_CONTROL)
+                  type = CELLTYPE_RX;
+               else
+                  type = CELLTYPE_TXRX;
+
                //add a RX link
                schedule_addActiveSlot(
                   cellList[i].tsNum,
-                  CELLTYPE_RX,
+                  type,
                   FALSE,
                   cellList[i].choffset,
                   &temp_neighbor,
@@ -1867,10 +1890,16 @@ void sixtop_addCellsByState(
                break;
             case SIX_ADDRESPONSE_RECEIVED:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+
+               if (track.instance != TRACK_PARENT_CONTROL)
+                   type = CELLTYPE_TX;
+                else
+                   type = CELLTYPE_TXRX;
+
                //add a TX link
                schedule_addActiveSlot(
                   cellList[i].tsNum,
-                  CELLTYPE_TX,
+                  type,
                   FALSE,
                   cellList[i].choffset,
                   &temp_neighbor,

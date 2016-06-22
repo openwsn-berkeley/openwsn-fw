@@ -78,10 +78,11 @@ project:
     cryptoengine   Select appropriate crypto engine implementation
                    (dummy_crypto_engine, firmware_crypto_engine, 
                    board_crypto_engine).
-    l2_security   Use hop-by-hop encryption and authentication.
-    goldenImage   sniffer, root or none(default)
+    l2_security    Use hop-by-hop encryption and authentication.
+    goldenImage    sniffer, root or none(default)
     distribshared  Shared cells are not contiguous
-    tracks         Use tracks to reserve bandwidth for each application
+    tracks         Track Management Method (0=none,1=one shared for all the 
+                   flows,2=one per application,3=separated for 6P and data
     rplmetric      Metric to use with RPL (1=ETX,2=Custom,3=MinHop,4=RSSI)
     cex_period     Period for cexample to generate data packets
     schedalgo      Algorithm to schedule the cells for 6top (1= random,
@@ -144,8 +145,8 @@ command_line_options = {
     'l2_security':      ['0','1'],
     'goldenImage':      ['none','root','sniffer'],
     'distribshared':    ['0','1'],
-    'tracks':           ['0','1','2'],	  # 0=only TXRX, 1=one single track, 2=traffic isolation (default behavior)
-    'rplmetric':        ['0','1'],			  # 1=ETX (default)
+    'tracks':           ['0','1','2','3'],# 0=only TXRX, 1=one single track, 2=traffic isolation (default behavior), 3=traffic isolation+ dedicated track for LinkReqs
+    'rplmetric':        ['0','1'],		  # 1=ETX (default)
     'cex_period':       ['5000'],         # by default, 5 seconds
     'schedalgo':        ['0','1','2'],    # 1=random (default)
     'printf':           ['0','1'],        # 0=inactive (default), 1=active
