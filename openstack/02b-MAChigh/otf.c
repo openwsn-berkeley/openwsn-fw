@@ -371,8 +371,8 @@ bool otf_verifPossible(void){
    if (otf_reserveParentCells())
       return FALSE;
 
-   return TRUE;
 #endif
+   return TRUE;
 }
 
 
