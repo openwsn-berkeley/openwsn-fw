@@ -924,11 +924,12 @@ port_INLINE void activity_ti1ORri1() {
             schedule_getTrackCurrent(&track);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
 
-            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
+            // look for an EB packet in the queue
+            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX) && (track.instance == TRACK_BESTEFFORT)) {
                couldSendEB=TRUE;
-               // look for an EB packet in the queue
-              ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
            }
+
 
 
          }

@@ -9,7 +9,7 @@
 #include "idmanager.h"
 
 
-#define _DEBUG_OTF_
+//#define _DEBUG_OTF_
 
 
 
@@ -98,7 +98,6 @@ bool otf_reserveParentCells(void){
    open_addr_t parent;
    track_t     linkReqTrack;
    uint8_t     nbCells;
-   char        str[150];
 
    //Do I have a valid parent?
    neighbors_getPreferredParentEui64(&parent);
@@ -124,6 +123,7 @@ bool otf_reserveParentCells(void){
       sixtop_addCells(&(parent), 1, linkReqTrack);
 
 #ifdef _DEBUG_OTF_
+      char        str[150];
       sprintf(str, "OTF - TRACK_PARENT_CONTROL - Has to reserve one cell with the parent ");
       openserial_ncat_uint8_t_hex(str, parent.addr_64b[6], 150);
       openserial_ncat_uint8_t_hex(str, parent.addr_64b[7], 150);
