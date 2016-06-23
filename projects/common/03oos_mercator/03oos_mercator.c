@@ -137,7 +137,7 @@ typedef struct {
    uint8_t         rfbuftx[RF_BUF_LEN];
    uint16_t        txpk_numpk;
    uint8_t         txpk_len;
-   uint8_t         txpk_totalnumpk;
+   uint16_t        txpk_totalnumpk;
    uint8_t         mac[8];
    // rx
    uint8_t         rxpk_buf[RF_BUF_LEN];
@@ -173,7 +173,7 @@ void isr_openserial_rx_mod(void);
 uint16_t htons(uint16_t val);
 
 void cb_endFrame(uint16_t timestamp);
-void cb_sendPacket(void);
+void cb_sendPacket(opentimer_id_t id);
 void cb_finishTx(void);
 
 //=========================== initialization ==================================
@@ -609,13 +609,16 @@ void cb_endFrame(uint16_t timestamp) {
    }
 }
 
-void cb_sendPacket(void){
+void cb_sendPacket(opentimer_id_t id){
    IND_TXDONE_ht* resp;
    uint16_t pkctr;
+   uint8_t pkt[RF_BUF_LEN];
+
    // send packet
    leds_error_on();
 
-   radio_loadPacket(mercator_vars.rfbuftx, mercator_vars.txpk_len);
+   memcpy(pkt, mercator_vars.rfbuftx, mercator_vars.txpk_len);
+   radio_loadPacket(pkt, mercator_vars.txpk_len);
    radio_txEnable();
    radio_txNow();
 
