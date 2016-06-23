@@ -340,6 +340,7 @@ void serial_rx_REQ_TX(void) {
    // prepare radio
    radio_rfOn();
    radio_setFrequency(req->frequency);
+   radio_rfOff();
    
    // TODO set TX Power
 
@@ -610,13 +611,11 @@ void cb_endFrame(PORT_RADIOTIMER_WIDTH timestamp) {
 void cb_sendPacket(opentimer_id_t id){
    IND_TXDONE_ht* resp;
    uint16_t pkctr;
-   uint8_t pkt[RF_BUF_LEN];
 
    // send packet
    leds_error_on();
 
-   memcpy(pkt, mercator_vars.rfbuftx, mercator_vars.txpk_len);
-   radio_loadPacket(pkt, mercator_vars.txpk_len);
+   radio_loadPacket(mercator_vars.rfbuftx, mercator_vars.txpk_len);
    radio_txEnable();
    radio_txNow();
 
@@ -626,7 +625,6 @@ void cb_sendPacket(opentimer_id_t id){
       opentimers_stop(mercator_vars.sendTimerId);
 
       // finishing TX
-      radio_rfOff();
       mercator_vars.status = ST_TXDONE;
 
       // send IND_TXDONE
