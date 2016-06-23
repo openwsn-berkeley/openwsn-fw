@@ -186,8 +186,6 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    opentimers_init();
-   radio_init();
-   leds_init();
 
    // get mac
    eui64_get(mercator_vars.mac);
