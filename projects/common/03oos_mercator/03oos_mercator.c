@@ -172,7 +172,7 @@ void isr_openserial_rx_mod(void);
 
 uint16_t htons(uint16_t val);
 
-void cb_endFrame(uint16_t timestamp);
+void cb_endFrame(PORT_RADIOTIMER_WIDTH timestamp);
 void cb_sendPacket(opentimer_id_t id);
 void cb_finishTx(void);
 
@@ -549,7 +549,7 @@ void isr_openserial_rx_mod(void) {
 
 //===== radiotimer
 
-void cb_endFrame(uint16_t timestamp) {
+void cb_endFrame(PORT_RADIOTIMER_WIDTH timestamp) {
    // local vars
       uint8_t  srcmac[8];
       uint8_t  transctr;
