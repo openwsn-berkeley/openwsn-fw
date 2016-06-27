@@ -42,10 +42,10 @@ void board_init(void) {
    debugpins_init();
    button_init();
    bsp_timer_init();
-   //radiotimer_init();
+   radiotimer_init();
    uart_init();
    radio_init();
-   spi_init();
+   //spi_init();
 }
 
 /**
