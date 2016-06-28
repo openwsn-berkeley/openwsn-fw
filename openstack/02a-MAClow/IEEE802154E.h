@@ -223,6 +223,7 @@ typedef struct {
    PORT_RADIOTIMER_WIDTH     deSyncTimeout;           // how many slots left before looses sync
    bool                      isSync;                  // TRUE iff mote is synchronized to network
    OpenQueueEntry_t          localCopyForTransmission;// copy of the frame used for current TX
+   PORT_RADIOTIMER_WIDTH     numOfSleepSlots;         // number of slots to sleep between active slots
    // as shown on the chronogram
    ieee154e_state_t          state;                   // state of the FSM
    OpenQueueEntry_t*         dataToSend;              // pointer to the data to send
@@ -285,7 +286,7 @@ void               ieee154e_setIsAckEnabled(bool isEnabled);
 void               ieee154e_setSingleChannel(uint8_t channel);
 void               ieee154e_setIsSecurityEnabled(bool isEnabled);
 void               ieee154e_setSlotDuration(uint16_t duration);
-uint16_t           ieee154e_getSlotDuration();
+uint16_t           ieee154e_getSlotDuration(void);
 
 uint16_t           ieee154e_getTimeCorrection(void);
 // events

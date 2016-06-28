@@ -251,6 +251,10 @@ owerror_t iphc_prependIPv6Header(
    open_addr_t*         value_src,
    uint8_t              fw_SendOrfw_Rcv
 );
+uint8_t iphc_retrieveIPv6HopByHopHeader(
+   OpenQueueEntry_t*    msg,
+   rpl_option_ht*       rpl_option
+);
 
 /**
 \}

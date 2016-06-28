@@ -1206,6 +1206,9 @@ void sixtop_notifyReceiveCommand(
             opentimers_restart(sixtop_vars.timeoutTimerId);
         } else {
             //------ if this is a return code
+            // The response packet is not required, release it
+            openqueue_freePacketBuffer(response_pkt);
+          
             // if the code is SUCCESS
             if (commandIdORcode==IANA_6TOP_RC_SUCCESS){
                 switch(sixtop_vars.six2six_state){
