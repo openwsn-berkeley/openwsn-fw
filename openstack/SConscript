@@ -16,7 +16,7 @@ sources_c = [
     os.path.join('02a-MAClow','IEEE802154_dummy_security.c'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.c'),
-    os.path.join('02b-MAChigh','otf.c'),
+    os.path.join('02b-MAChigh','sf0.c'),
     os.path.join('02b-MAChigh','processIE.c'),
     os.path.join('02b-MAChigh','schedule.c'),
     os.path.join('02b-MAChigh','sixtop.c'),
@@ -50,7 +50,7 @@ sources_h = [
     os.path.join('02a-MAClow','IEEE802154_dummy_security.h'),
     #=== 02b-MAChigh
     os.path.join('02b-MAChigh','neighbors.h'),
-    os.path.join('02b-MAChigh','otf.h'),
+    os.path.join('02b-MAChigh','sf0.h'),
     os.path.join('02b-MAChigh','processIE.h'),
     os.path.join('02b-MAChigh','schedule.h'),
     os.path.join('02b-MAChigh','sixtop.h'),

@@ -5,7 +5,7 @@
 #include "neighbors.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
-#include "otf.h"
+#include "sf0.h"
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "scheduler.h"

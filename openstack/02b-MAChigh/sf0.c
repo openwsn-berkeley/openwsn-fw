@@ -1,9 +1,10 @@
 #include "opendefs.h"
-#include "otf.h"
+#include "sf0.h"
 #include "neighbors.h"
 #include "sixtop.h"
 #include "scheduler.h"
 #include "schedule.h"
+#include "idmanager.h"
 
 //=========================== variables =======================================
 
@@ -11,31 +12,31 @@
 
 //=========================== prototypes ======================================
 
-void otf_addCell_task(void);
-void otf_removeCell_task(void);
-void otf_bandwidthEstimate_task(void);
+void sf0_addCell_task(void);
+void sf0_removeCell_task(void);
+void sf0_bandwidthEstimate_task(void);
 
 //=========================== public ==========================================
 
-void otf_init(void) {
+void sf0_init(void) {
 }
 
-void otf_notif_addedCell(void) {
-   scheduler_push_task(otf_addCell_task,TASKPRIO_OTF);
+void sf0_notif_addedCell(void) {
+   scheduler_push_task(sf0_addCell_task,TASKPRIO_SF0);
 }
 
-void otf_notif_removedCell(void) {
-   scheduler_push_task(otf_removeCell_task,TASKPRIO_OTF);
+void sf0_notif_removedCell(void) {
+   scheduler_push_task(sf0_removeCell_task,TASKPRIO_SF0);
 }
 
 // this function is called once per slotframe. 
-void otf_notifyNewSlotframe(void) {
-   scheduler_push_task(otf_bandwidthEstimate_task,TASKPRIO_OTF);
+void sf0_notifyNewSlotframe(void) {
+   scheduler_push_task(sf0_bandwidthEstimate_task,TASKPRIO_SF0);
 }
 
 //=========================== private =========================================
 
-void otf_addCell_task(void) {
+void sf0_addCell_task(void) {
    open_addr_t          neighbor;
    bool                 foundNeighbor;
    
@@ -54,7 +55,7 @@ void otf_addCell_task(void) {
    );
 }
 
-void otf_removeCell_task(void) {
+void sf0_removeCell_task(void) {
    open_addr_t          neighbor;
    bool                 foundNeighbor;
    
@@ -73,7 +74,7 @@ void otf_removeCell_task(void) {
    );
 }
 
-void otf_bandwidthEstimate_task(void){
+void sf0_bandwidthEstimate_task(void){
     open_addr_t neighbor;
     bool    foundNeighbor;
     

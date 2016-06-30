@@ -1,10 +1,10 @@
-#ifndef __OTF_H
-#define __OTF_H
+#ifndef __SF0_H
+#define __SF0_H
 
 /**
 \addtogroup MAChigh
 \{
-\addtogroup otf
+\addtogroup sf0
 \{
 */
 
@@ -19,12 +19,12 @@
 //=========================== prototypes ======================================
 
 // admin
-void      otf_init(void);
+void      sf0_init(void);
 // notification from sixtop
-void      otf_notif_addedCell(void);
-void      otf_notif_removedCell(void);
+void      sf0_notif_addedCell(void);
+void      sf0_notif_removedCell(void);
 // notification from schedule
-void      otf_notifyNewSlotframe(void);
+void      sf0_notifyNewSlotframe(void);
 /**
 \}
 \}
