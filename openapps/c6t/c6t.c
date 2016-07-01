@@ -89,7 +89,7 @@ owerror_t c6t_receive(
             break;
          }
          
-         sixtop_setHandler(SIX_HANDLER_OTF);
+         sixtop_setHandler(SIX_HANDLER_SF0);
          // call sixtop
          sixtop_request(
             IANA_6TOP_CMD_ADD,
@@ -118,7 +118,7 @@ owerror_t c6t_receive(
             break;
          }
          
-         sixtop_setHandler(SIX_HANDLER_OTF);
+         sixtop_setHandler(SIX_HANDLER_SF0);
          // call sixtop
          sixtop_request(
             IANA_6TOP_CMD_DELETE,

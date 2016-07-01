@@ -114,6 +114,7 @@ void sixtop_init() {
    sixtop_vars.kaPeriod           = MAXKAPERIOD;
    sixtop_vars.ebPeriod           = EBPERIOD;
    sixtop_vars.isResponseEnabled  = TRUE;
+   sixtop_vars.handler            = SIX_HANDLER_NONE;
    
    sixtop_vars.maintenanceTimerId = opentimers_start(
       sixtop_vars.periodMaintenance,
@@ -1329,7 +1330,7 @@ bool sixtop_candidateAddCellList(
       }
    }
    
-   if (numCandCells<requiredCells) {
+   if (numCandCells<requiredCells || requiredCells==0) {
       return FALSE;
    } else {
       return TRUE;

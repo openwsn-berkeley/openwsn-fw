@@ -580,7 +580,7 @@ void openserial_goldenImageCommands(void){
                 break;
             }
              
-            sixtop_setHandler(SIX_HANDLER_OTF);
+            sixtop_setHandler(SIX_HANDLER_SF0);
             if ( 
                 (
                   commandId != COMMAND_SET_6P_ADD &&

@@ -46,7 +46,7 @@ void sf0_addCell_task(void) {
       return;
    }
    
-   sixtop_setHandler(SIX_HANDLER_OTF);
+   sixtop_setHandler(SIX_HANDLER_SF0);
    // call sixtop
    sixtop_request(
       IANA_6TOP_CMD_ADD,
@@ -65,7 +65,7 @@ void sf0_removeCell_task(void) {
       return;
    }
    
-   sixtop_setHandler(SIX_HANDLER_OTF);
+   sixtop_setHandler(SIX_HANDLER_SF0);
    // call sixtop
    sixtop_request(
       IANA_6TOP_CMD_DELETE,
@@ -93,7 +93,7 @@ void sf0_bandwidthEstimate_task(void){
        return;
     }
    
-    sixtop_setHandler(SIX_HANDLER_OTF);
+    sixtop_setHandler(SIX_HANDLER_SF0);
 
     // get bandwidth of outgoing, incoming and self.
     // Here we just calcuate the estimated bandwidth for 
@@ -102,7 +102,7 @@ void sf0_bandwidthEstimate_task(void){
     bw_incoming = schedule_getNumOfSlotsByType(CELLTYPE_RX);
     /* 
       get self required bandwith, you can design your
-      application and assign bw_swlf accordingly. 
+      application and assign bw_self accordingly. 
       for example:
           bw_self = application_getBandwdith(app_name);
       By default, it's set to zero.
@@ -113,19 +113,17 @@ void sf0_bandwidthEstimate_task(void){
     //         requiredCells  = bw_incoming + bw_self
     
     // when scheduledCells<requiredCells, add one or more cell
-    if (bw_outgoing < bw_incoming+bw_self){
-         if (bw_incoming+bw_self-bw_outgoing)
-         sixtop_setHandler(SIX_HANDLER_OTF);
-         // call sixtop
-         sixtop_request(
+    if (bw_outgoing <= bw_incoming+bw_self){
+        // call sixtop
+        sixtop_request(
             IANA_6TOP_CMD_ADD,
             &neighbor,
-            bw_incoming+bw_self-bw_outgoing
-         );
+            bw_incoming+bw_self-bw_outgoing+1
+        );
     } else {
         // when requiredCells<(scheduledCells-SF0THRESH), remove one or more cell
         if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESH)) {
-           sixtop_setHandler(SIX_HANDLER_OTF);
+           sixtop_setHandler(SIX_HANDLER_SF0);
            // call sixtop
            sixtop_request(
               IANA_6TOP_CMD_DELETE,
