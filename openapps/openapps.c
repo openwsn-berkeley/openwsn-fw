@@ -44,9 +44,9 @@ void openapps_init(void) {
    //uinject_init();
 }
 
-uint8_t openapps_getBandwidth(uint8_t* appname){
+uint8_t openapps_getBandwidth(uint8_t appId){
     uint8_t bandwidth_numOfCells = 0; // number of cells per slotframe
-    if (appname == "uinject"){
+    if (appId == COMPONENT_UINJECT){
         bandwidth_numOfCells += uinject_getBandwidth();
     } else {
         // add other app bandwidth here
