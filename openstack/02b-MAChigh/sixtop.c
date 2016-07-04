@@ -1250,21 +1250,20 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          sprintf(str, "LinkRep tx failed: to ");
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
-         openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+         strncat(str, ", slots: ", 150);
 #endif
 
          for (i=0;i<numOfCells;i++){
-
-            sprintf(str, "remove slot ");
+#ifdef _DEBUG_SIXTOP_
             openserial_ncat_uint32_t(str, cellList[i].tsNum, 150);
-            strncat(str, " with ", 150);
-            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
-            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
-            openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
+            strncat(str, ", ", 150);
+#endif
             schedule_removeActiveSlot(cellList[i].tsNum, &(msg->l2_nextORpreviousHop));
-
          }
+
+#ifdef _DEBUG_SIXTOP_
+         openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
       }
 
       sixtop_setState(SIX_IDLE);
