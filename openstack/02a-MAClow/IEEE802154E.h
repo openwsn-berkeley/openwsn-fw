@@ -276,6 +276,7 @@ typedef struct {
 void               ieee154e_init(void);
 // public
 PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
+void               notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error);     //a packet transmission failed/succeeded
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
 void               ieee154e_setIsAckEnabled(bool isEnabled);

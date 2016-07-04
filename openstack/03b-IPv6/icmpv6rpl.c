@@ -599,9 +599,7 @@ void sendDAO() {
 #endif
 
 #if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
-   open_addr_t parent;
-   neighbors_getPreferredParentEui64(&parent);
-   memcpy(&(msg->l2_track.owner), &(parent), sizeof(parent));
+   memcpy(&(msg->l2_track.owner), idmanager_getMyID(ADDR_64B), sizeof(msg->l2_track.owner));
    msg->l2_track.instance   = (uint16_t)TRACK_PARENT_CONTROL;
 #endif
 

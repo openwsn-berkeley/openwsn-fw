@@ -111,7 +111,7 @@ bool otf_reserveParentCells(void){
    }
 
    //the specific track for 6P Link Requests
-   memcpy(&(linkReqTrack.owner), &(parent), sizeof(linkReqTrack.owner));
+   memcpy(&(linkReqTrack.owner), idmanager_getMyID(ADDR_64B), sizeof(linkReqTrack.owner));
    linkReqTrack.instance = TRACK_PARENT_CONTROL;
 
    //how many cells for TRACK_PARENT_CONTROL?
@@ -311,6 +311,7 @@ void otf_remove_unused_cells(void){
          case CELLTYPE_RX:
 
             //ASN in nb of slots, timeout in ms, slotduration in us
+            //the cells from TRACK_PARENT_CONTROL CANNOT be removed by timeout
             if ((cell->track.instance != TRACK_PARENT_CONTROL) && (ieee154e_asnDiff(&(cell->lastUsedAsn)) > 1000 * timeout / TsSlotDuration)){
 
 #ifdef _DEBUG_OTF_

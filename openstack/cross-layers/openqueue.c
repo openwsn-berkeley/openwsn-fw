@@ -169,7 +169,8 @@ void openqueue_timeout_drop(void){
                openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
 #endif
 
-                 openqueue_reset_entry(&(openqueue_vars.queue[i]));
+               notif_sendDone(&(openqueue_vars.queue[i]), E_FAIL);
+               openqueue_reset_entry(&(openqueue_vars.queue[i]));
 
             }
    }
@@ -352,6 +353,8 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].creator == creator) {
+
+         notif_sendDone(&(openqueue_vars.queue[i]), E_FAIL);
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
 
 #ifdef _DEBUG_OQ_MEM_
