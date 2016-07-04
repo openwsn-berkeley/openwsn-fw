@@ -51,10 +51,6 @@ void schedule_init() {
    start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;   //skip all the shared TXRX
 #endif
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-/*   if (idmanager_getIsDAGroot()==TRUE)
-      nbSerial = 4 * NUMSERIALRX;
-   else
-*/
    nbSerial = NUMSERIALRX;
    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+nbSerial;running_slotOffset++) {
       schedule_addActiveSlot(

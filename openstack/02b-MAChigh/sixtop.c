@@ -1253,8 +1253,18 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
-         for (i=0;i<numOfCells;i++)
-            schedule_removeActiveSlot(cellList[i].choffset, &(msg->l2_nextORpreviousHop));
+         for (i=0;i<numOfCells;i++){
+
+            sprintf(str, "remove slot ");
+            openserial_ncat_uint32_t(str, cellList[i].tsNum, 150);
+            strncat(str, " with ", 150);
+            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+            openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
+            schedule_removeActiveSlot(cellList[i].tsNum, &(msg->l2_nextORpreviousHop));
+
+         }
       }
 
       sixtop_setState(SIX_IDLE);
