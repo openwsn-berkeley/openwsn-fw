@@ -9,6 +9,9 @@
 #include "IEEE802154E.h"
 #include "idmanager.h"
 
+#ifdef GOLDEN_IMAGE_ROOT
+#define SLOTDURATION 10  // ms
+#endif
 //=========================== variables =======================================
 
 uinject_vars_t uinject_vars;
@@ -116,4 +119,15 @@ void uinject_task_cb() {
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
    }
+}
+
+/**
+\brief calculate the number of cells required per slotframe
+*/
+uint8_t uinject_getBandwidth(){
+   uint8_t returnVal = 0;
+#ifdef GOLDEN_IMAGE_ROOT
+   returnVal = SLOTDURATION*schedule_getFrameLength()/UINJECT_PERIOD_MS+1;
+#endif
+   return returnVal;
 }
