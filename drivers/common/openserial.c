@@ -20,6 +20,7 @@
 #include "openhdlc.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
+#include "sf0.h"
 
 //=========================== variables =======================================
 
@@ -580,7 +581,7 @@ void openserial_goldenImageCommands(void){
                 break;
             }
              
-            sixtop_setHandler(SIX_HANDLER_OTF);
+            sixtop_setHandler(SIX_HANDLER_SF0);
             if ( 
                 (
                   commandId != COMMAND_SET_6P_ADD &&
@@ -619,6 +620,9 @@ void openserial_goldenImageCommands(void){
                     break;
                 }
             }
+            break;
+       case COMMAND_SET_SF0BANDWIDTH:
+            sf0_setSelfBandwidth(comandParam_8);
             break;
        default:
            // wrong command ID

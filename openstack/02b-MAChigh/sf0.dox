@@ -1,0 +1,10 @@
+/**
+\defgroup sf0 sf0
+
+\brief Implementation of 6TiSCH Scheduling Function.
+
+6p is defined in the following draft:
+- https://tools.ietf.org/html/draft-ietf-6tisch-6top-sf0-00
+
+\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, July 2014.
+*/
