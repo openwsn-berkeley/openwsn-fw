@@ -1155,24 +1155,12 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    char  str[150];
 #endif
 
-   sprintf(str, "LinkReq/LinkRep txed: state  ");
-   openserial_ncat_uint32_t(str, sixtop_vars.six2six_state, 150);
-   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
-
-
    memset(cellList,0,SCHEDULEIEMAXNUMCELLS*sizeof(cellInfo_ht));
 
    ptr = msg->l2_scheduleIE_cellObjects;
    numOfCells = msg->l2_scheduleIE_numOfCells;
    msg->owner = COMPONENT_SIXTOP_RES;
 
-  /* if(error == E_FAIL) {
-      sixtop_setState(SIX_IDLE);
-      openqueue_freePacketBuffer(msg);
-      return;
-   }
-*/
 
 
    switch (sixtop_vars.six2six_state) {
@@ -1214,7 +1202,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          cellList[i].linkoptions = *(ptr+4);
          ptr += 5;
       }
-
 
 #ifdef _DEBUG_SIXTOP_
       sprintf(str, "LinkRep txed: to ");
