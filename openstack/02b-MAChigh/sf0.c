@@ -109,7 +109,6 @@ void sf0_bandwidthEstimate_task(void){
       By default, it's set to zero.
     */
     bw_self = openapps_getBandwidth(COMPONENT_UINJECT);
-    printf("bw_self = %d\n",bw_self);
     
     // In SF0, scheduledCells = bw_outgoing
     //         requiredCells  = bw_incoming + bw_self

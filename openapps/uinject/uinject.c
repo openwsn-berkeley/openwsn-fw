@@ -129,7 +129,7 @@ void uinject_task_cb() {
 uint8_t uinject_getBandwidth(){
    uint8_t returnVal = 0;
 #ifdef GOLDEN_IMAGE_ROOT
-   returnVal = SLOTDURATION*schedule_getFrameLength()/UINJECT_PERIOD_MS+1;
+      returnVal = SLOTDURATION*schedule_getFrameLength()/uinject_vars.period+1;
 #endif
    return returnVal;
 }

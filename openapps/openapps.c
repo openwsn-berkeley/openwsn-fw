@@ -41,7 +41,9 @@ void openapps_init(void) {
    techo_init();
    // UDP
    uecho_init();
-   //uinject_init();
+#ifdef GOLDEN_IMAGE_ROOT
+   uinject_init();
+#endif
 }
 
 uint8_t openapps_getBandwidth(uint8_t appId){

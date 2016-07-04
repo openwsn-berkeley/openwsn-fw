@@ -20,6 +20,7 @@
 #include "openhdlc.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
+#include "uinject.h"
 
 //=========================== variables =======================================
 
