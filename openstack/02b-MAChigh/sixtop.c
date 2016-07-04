@@ -1190,8 +1190,8 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       }
 
       break;
-   case SIX_WAIT_ADDRESPONSE_SENDDONE:
-
+   //case SIX_WAIT_ADDRESPONSE_SENDDONE:
+   case SIX_IDLE:
       if (error == E_SUCCESS && numOfCells > 0){
          for (i=0;i<numOfCells;i++){
             //TimeSlot 2B
@@ -1650,7 +1650,9 @@ void sixtop_linkResponse(
 
    sixtop_send(sixtopPkt);
   
-   sixtop_setState(SIX_WAIT_ADDRESPONSE_SENDDONE);
+//   sixtop_setState(SIX_WAIT_ADDRESPONSE_SENDDONE);
+   sixtop_setState(SIX_IDLE);
+
 }
 
 void sixtop_notifyReceiveLinkResponse(
@@ -1869,7 +1871,8 @@ void sixtop_addCellsByState(
       //only schedule when the request side wants to schedule a tx cell
       if(cellList[i].linkoptions == CELLTYPE_TX){
          switch(state) {
-            case SIX_WAIT_ADDRESPONSE_SENDDONE:
+            //case SIX_WAIT_ADDRESPONSE_SENDDONE:
+            case SIX_IDLE:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
                
                if (track.instance != TRACK_PARENT_CONTROL)

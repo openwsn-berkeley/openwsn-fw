@@ -32,7 +32,7 @@ typedef enum {
    // ADD: destinations
    SIX_ADDREQUEST_RECEIVED             = 0x05,   // I received the link request command
    SIX_SENDING_ADDRESPONSE             = 0x06,   // generating resLinkRespone command packet
-   SIX_WAIT_ADDRESPONSE_SENDDONE       = 0x07,   // waiting for SendDone confirmation
+//   SIX_WAIT_ADDRESPONSE_SENDDONE       = 0x07,   // waiting for SendDone confirmation
    // REMOVE: source
    SIX_SENDING_REMOVEREQUEST           = 0x08,   // generating resLinkRespone command packet
    SIX_WAIT_REMOVEREQUEST_SENDDONE     = 0x09,   // waiting for SendDone confirmation
