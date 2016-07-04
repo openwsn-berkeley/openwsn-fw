@@ -9,7 +9,7 @@
 
 //=========================== definition =====================================
 
-#define SF0THRESH      1
+#define SF0THRESHOLD      2
 
 //=========================== variables =======================================
 
@@ -129,14 +129,14 @@ void sf0_bandwidthEstimate_task(void){
             bw_incoming+bw_self-bw_outgoing+1
         );
     } else {
-        // when requiredCells<(scheduledCells-SF0THRESH), remove one or more cell
-        if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESH)) {
+        // when requiredCells<(scheduledCells-SF0THRESHOLD), remove one or more cell
+        if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESHOLD)) {
            sixtop_setHandler(SIX_HANDLER_SF0);
            // call sixtop
            sixtop_request(
               IANA_6TOP_CMD_DELETE,
               &neighbor,
-              1
+              SF0THRESHOLD
            );
         } else {
             // the bandwidth is able to statisfied the traffic

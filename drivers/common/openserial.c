@@ -621,7 +621,7 @@ void openserial_goldenImageCommands(void){
                 }
             }
             break;
-       case COMMAND_SET_UINJECTPERIOD:
+       case COMMAND_SET_SF0BANDWIDTH:
             sf0_setSelfBandwidth(comandParam_8);
             break;
        default:
