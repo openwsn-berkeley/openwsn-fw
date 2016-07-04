@@ -354,7 +354,6 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
    for (i=0;i<QUEUELENGTH;i++){
       if (openqueue_vars.queue[i].creator == creator) {
 
-         notif_sendDone(&(openqueue_vars.queue[i]), E_FAIL);
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
 
 #ifdef _DEBUG_OQ_MEM_

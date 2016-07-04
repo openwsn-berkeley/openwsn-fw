@@ -1130,6 +1130,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
 
 
    // timeout timer fired, reset the state of sixtop to idle (only if we don't have an on-going transmission for this component)
+   // no need to call notif_sendDone() since the LinkReq/LinkRem did not modify a priori the schedule (only LlinkRep do)
    if (!ieee154e_is_ongoing(COMPONENT_SIXTOP_RES)) {
       openqueue_removeAllCreatedBy(COMPONENT_SIXTOP_RES);
       sixtop_setState(SIX_IDLE);
