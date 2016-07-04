@@ -40,18 +40,5 @@ void openapps_init(void) {
    // TCP
    techo_init();
    // UDP
-   uecho_init();
-#ifdef GOLDEN_IMAGE_ROOT
-   uinject_init();
-#endif
-}
-
-uint8_t openapps_getBandwidth(uint8_t appId){
-    uint8_t bandwidth_numOfCells = 0; // number of cells per slotframe
-    if (appId == COMPONENT_UINJECT){
-        bandwidth_numOfCells += uinject_getBandwidth();
-    } else {
-        // add other app bandwidth here
-    }
-    return bandwidth_numOfCells;
+//   uecho_init();
 }

@@ -11,6 +11,5 @@
 //=========================== prototypes ======================================
 
 void openapps_init(void);
-uint8_t openapps_getBandwidth(uint8_t appId);
 
 #endif

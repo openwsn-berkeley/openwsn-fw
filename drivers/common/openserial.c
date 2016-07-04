@@ -20,7 +20,7 @@
 #include "openhdlc.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
-#include "uinject.h"
+#include "sf0.h"
 
 //=========================== variables =======================================
 
@@ -622,7 +622,7 @@ void openserial_goldenImageCommands(void){
             }
             break;
        case COMMAND_SET_UINJECTPERIOD:
-            uinject_setSendingPeriod(comandParam_16);
+            sf0_setSelfBandwidth(comandParam_8);
             break;
        default:
            // wrong command ID

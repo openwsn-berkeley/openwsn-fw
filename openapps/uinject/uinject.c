@@ -122,25 +122,3 @@ void uinject_task_cb() {
       openqueue_freePacketBuffer(pkt);
    }
 }
-
-/**
-\brief calculate the number of cells required per slotframe
-*/
-uint8_t uinject_getBandwidth(){
-   uint8_t returnVal = 0;
-#ifdef GOLDEN_IMAGE_ROOT
-      returnVal = SLOTDURATION*schedule_getFrameLength()/uinject_vars.period+1;
-#endif
-   return returnVal;
-}
-
-void uinject_setSendingPeriod(uint16_t period){
-    uinject_vars.period = period;
-    // start periodic timer
-    opentimers_setPeriod(
-        uinject_vars.timerId,
-        TIMER_PERIODIC,
-        uinject_vars.period
-    );
-    opentimers_restart(uinject_vars.timerId);
-}

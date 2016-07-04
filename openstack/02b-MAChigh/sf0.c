@@ -7,9 +7,13 @@
 #include "idmanager.h"
 #include "openapps.h"
 
-//=========================== variables =======================================
+//=========================== definition =====================================
 
 #define SF0THRESH      1
+
+//=========================== variables =======================================
+
+sf0_vars_t sf0_vars;
 
 //=========================== prototypes ======================================
 
@@ -20,6 +24,8 @@ void sf0_bandwidthEstimate_task(void);
 //=========================== public ==========================================
 
 void sf0_init(void) {
+    memset(&sf0_vars,0,sizeof(sf0_vars_t));
+    sf0_vars.app_bandwidth = 0;  // number of packet being sent per slotframe
 }
 
 void sf0_notif_addedCell(void) {
@@ -108,7 +114,8 @@ void sf0_bandwidthEstimate_task(void){
           bw_self = application_getBandwdith(app_name);
       By default, it's set to zero.
     */
-    bw_self = openapps_getBandwidth(COMPONENT_UINJECT);
+//    bw_self = openapps_getBandwidth(COMPONENT_UINJECT);
+    bw_self = sf0_vars.app_bandwidth;
     
     // In SF0, scheduledCells = bw_outgoing
     //         requiredCells  = bw_incoming + bw_self
@@ -136,4 +143,8 @@ void sf0_bandwidthEstimate_task(void){
             // nothing to do
         }
     }
+}
+
+void sf0_setSelfBandwidth(uint8_t numPacketPerSlotFrame){
+    sf0_vars.app_bandwidth = numPacketPerSlotFrame;
 }
