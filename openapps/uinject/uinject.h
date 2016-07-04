@@ -21,6 +21,7 @@
 typedef struct {
    opentimer_id_t       timerId;  ///< periodic timer which triggers transmission
    uint16_t             counter;  ///< incrementing counter which is written into the packet
+   uint16_t              period;  ///< uinject packet sending period>
 } uinject_vars_t;
 
 //=========================== prototypes ======================================
@@ -28,6 +29,7 @@ typedef struct {
 void uinject_init(void);
 void uinject_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void uinject_receive(OpenQueueEntry_t* msg);
+void uinject_setSendingPeriod(uint16_t period);
 
 uint8_t uinject_getBandwidth();
 

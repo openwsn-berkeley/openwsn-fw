@@ -620,6 +620,9 @@ void openserial_goldenImageCommands(void){
                 }
             }
             break;
+       case COMMAND_SET_UINJECTPERIOD:
+            uinject_setSendingPeriod(comandParam_16);
+            break;
        default:
            // wrong command ID
            break;
