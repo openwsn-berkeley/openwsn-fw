@@ -26,7 +26,7 @@
 #define  PAYLOADLEN           40
 //#define  CEXAMPLE_PERIOD      10000
 
-const uint16_t cexample_timeout = QUEUE_TIMEOUT_DEFAULT; //3 * 15 * SUPERFRAME_LENGTH; //3 slotframes
+const uint32_t cexample_timeout = QUEUE_TIMEOUT_DEFAULT; //3 * 15 * SUPERFRAME_LENGTH; //3 slotframes
 const char cexample_path0[] = "cexample";
 
 //=========================== variables =======================================

@@ -59,7 +59,7 @@ does not use any backoff mechanism when a transmission fails.
 
 See MINBE for an explanation of backoff.
 */
-#define MAXBE                4
+#define MAXBE                2
 
 /**
 \brief a threshold used for triggering the maintaining process.uint: percent

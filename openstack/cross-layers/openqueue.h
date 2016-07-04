@@ -51,8 +51,8 @@ bool               debugPrint_queue(void);
 void               openqueue_timeout_drop(void);
 // called by any component
 OpenQueueEntry_t*  openqueue_getFreePacketBuffer(uint8_t creator);
-OpenQueueEntry_t*  openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, const uint16_t duration_ms);
-void               openqueue_set_timeout(OpenQueueEntry_t* entry, const uint16_t duration_ms);
+OpenQueueEntry_t*  openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, const uint32_t duration_ms);
+void               openqueue_set_timeout(OpenQueueEntry_t* entry, const uint32_t duration_ms);
 owerror_t          openqueue_freePacketBuffer(OpenQueueEntry_t* pkt);
 void               openqueue_removeEntry(OpenQueueEntry_t* entry);
 void               openqueue_removeAllCreatedBy(uint8_t creator);

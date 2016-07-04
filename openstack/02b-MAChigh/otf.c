@@ -311,7 +311,7 @@ void otf_remove_unused_cells(void){
          case CELLTYPE_RX:
 
             //ASN in nb of slots, timeout in ms, slotduration in us
-            if (ieee154e_asnDiff(&(cell->lastUsedAsn)) > 1000 * timeout / TsSlotDuration){
+            if ((cell->track.instance != TRACK_PARENT_CONTROL) && (ieee154e_asnDiff(&(cell->lastUsedAsn)) > 1000 * timeout / TsSlotDuration)){
 
 #ifdef _DEBUG_OTF_
                char str[150];

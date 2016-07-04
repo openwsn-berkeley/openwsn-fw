@@ -236,7 +236,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 
 */
 
-void openqueue_set_timeout(OpenQueueEntry_t* entry, const uint16_t duration_ms){
+void openqueue_set_timeout(OpenQueueEntry_t* entry, const uint32_t duration_ms){
    timeout_t     now;
    uint8_t       remainder, i;
    uint64_t      diff;
@@ -288,7 +288,7 @@ void openqueue_set_timeout(OpenQueueEntry_t* entry, const uint16_t duration_ms){
 \returns A pointer to the queue entry when it could be allocated, or NULL when
          it could not be allocated (buffer full or not synchronized).
 */
-OpenQueueEntry_t* openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, const uint16_t duration_ms) {
+OpenQueueEntry_t* openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, const uint32_t duration_ms) {
 
    // a new entry in the queue
    OpenQueueEntry_t* entry;

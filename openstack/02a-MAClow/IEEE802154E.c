@@ -929,9 +929,6 @@ port_INLINE void activity_ti1ORri1() {
                couldSendEB=TRUE;
                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
            }
-
-
-
          }
          //neither data packet nor EB to tx
          if (ieee154e_vars.dataToSend==NULL) {
