@@ -783,11 +783,11 @@ bool schedule_getOkToSend(OpenQueueEntry_t* msg) {
    }
 #ifdef SCHEDULE_PRIO_FOR_DAGROOT
    //the dagroot can only use the first shared cells (without backoff)
-   else if(idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset <= SLOTFRAME_LENGTH /2){
+   else if(idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset < SLOTFRAME_LENGTH /3){
       returnVal = TRUE;
    }
    //only the dagroot can use the first shared cells
-   else if (!idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset <= SLOTFRAME_LENGTH /2){
+   else if (!idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset < SLOTFRAME_LENGTH /3){
       returnVal = FALSE;
    }
 #endif
