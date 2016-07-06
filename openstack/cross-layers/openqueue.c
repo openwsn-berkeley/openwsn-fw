@@ -169,6 +169,10 @@ void openqueue_timeout_drop(void){
                openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
 #endif
 
+               char str[150];
+               sprintf(str, "PKT TIMEOUTED");
+               openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
+
                notif_sendDone(&(openqueue_vars.queue[i]), E_FAIL);
                openqueue_reset_entry(&(openqueue_vars.queue[i]));
 
@@ -457,6 +461,8 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
 
 OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *track) {
    uint8_t i;
+   OpenQueueEntry_t *entry = NULL;
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (toNeighbor->type==ADDR_64B) {
@@ -469,9 +475,8 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *t
                (packetfunctions_sameAddress(&(openqueue_vars.queue[i].l2_track.owner), &(track->owner)))
          ) {
 
-
-            ENABLE_INTERRUPTS();
-            return &openqueue_vars.queue[i];
+            if ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
+               entry = &openqueue_vars.queue[i];
          }
       }
    } else if (toNeighbor->type==ADDR_ANYCAST) {
@@ -488,13 +493,13 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *t
                )
               ) {
 
-            ENABLE_INTERRUPTS();
-            return &openqueue_vars.queue[i];
+            if ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
+               entry = &openqueue_vars.queue[i];
          }
       }
    }
    ENABLE_INTERRUPTS();
-   return NULL;
+   return entry;
 }
 
 
