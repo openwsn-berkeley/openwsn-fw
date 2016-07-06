@@ -49,13 +49,13 @@ typedef enum {
 
 //=========================== typedef =========================================
 
-#define SIXTOP_NBCELLS_INREQ     2     //nb cells in the 6top IE (request / reply)
+#define SIXTOP_NBCELLS_INREQ     1     //nb cells in the 6top IE (request / reply)
 
 #define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
 
 //TODO: fix a correct timeout
-#define SIX2SIX_TIMEOUT_MS ((uint32_t)(1 + MAXBE / SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS) * TXRETRIES * SLOTFRAME_LENGTH * TsSlotDuration * PORT_TICS_PER_MS / 1000)
-//#define SIX2SIX_TIMEOUT_MS 4000
+#define SIX2SIX_TIMEOUT_MS ((uint32_t)10 * (1 + MAXBE / SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS) * TXRETRIES * SLOTFRAME_LENGTH * TsSlotDuration * PORT_TICS_PER_MS / 1000)
+#define SIX2SIX_LINKREP_TIMEOUT_MS  (SIX2SIX_TIMEOUT_MS / 2)
 
 
 //=========================== module variables ================================

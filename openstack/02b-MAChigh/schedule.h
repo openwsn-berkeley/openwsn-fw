@@ -27,7 +27,7 @@ The superframe repears over time and can be arbitrarly long.
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
 
-#define NUMSERIALRX          4
+#define NUMSERIALRX          10
 #define NUMSLOTSOFF          190
 
 #define SCHEDULE_NBROWS_OPENSERIALSTATUS  1   //Nb of rows to push at the same time to openserial
@@ -52,14 +52,14 @@ Backoff is used only in slots that are marked as shared in the schedule. When
 not shared, the mote assumes that schedule is collision-free, and therefore
 does not use any backoff mechanism when a transmission fails.
 */
-#define MINBE                2
+#define MINBE                4
 
 /**
 \brief Maximum backoff exponent.
 
 See MINBE for an explanation of backoff.
 */
-#define MAXBE                2
+#define MAXBE                6
 
 /**
 \brief a threshold used for triggering the maintaining process.uint: percent
@@ -71,7 +71,7 @@ See MINBE for an explanation of backoff.
  \brief to authorize only the dagroot to transmit a frame during laf of the shared cells (to reduce the nb. of collision°
    A more appropriate mechanism has to be proposed to reduce the pressure (priority for LinkRep)
  */
-#define SCHEDULE_PRIO_FOR_DAGROOT
+//#define SCHEDULE_PRIO_FOR_DAGROOT
 
 
 //=========================== typedef =========================================

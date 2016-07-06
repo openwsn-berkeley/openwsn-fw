@@ -1092,7 +1092,8 @@ void sixtop_setState(six2six_state_t state){
          opentimers_stop(sixtop_vars.timeoutTimerId);
 
       //and starts a new one (randomized to avoid all the nodes regenerate one request simultaneously)
-      timeout_sixtop_value = openrandom_get16b();    //65536 at most
+      // timeout in [SIX2SIX_TIMEOUT_MS, SIX2SIX_TIMEOUT_MS*1.5]
+      timeout_sixtop_value = SIX2SIX_TIMEOUT_MS + openrandom_get16b();    //65536 at most
       while (timeout_sixtop_value > SIX2SIX_TIMEOUT_MS * 1.5){
          timeout_sixtop_value -= SIX2SIX_TIMEOUT_MS / 2;
       }
@@ -1124,7 +1125,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
       COMPONENT_SIXTOP,
       ERR_SIXTOP_TIMEOUT,
       (errorparameter_t)sixtop_vars.six2six_state,
-      (errorparameter_t)0
+      (errorparameter_t)opentimers_getPeriod(sixtop_vars.timeoutTimerId)
    );
 #endif
 
@@ -1472,7 +1473,7 @@ void sixtop_notifyReceiveCommand(
 
       //only accepts the requests when I am idle
       if(sixtop_vars.six2six_state == SIX_IDLE){
-         sixtop_setState(SIX_ADDREQUEST_RECEIVED);
+        // sixtop_setState(SIX_ADDREQUEST_RECEIVED);
          //received uResCommand is reserve link request
          sixtop_notifyReceiveLinkRequest(bandwidth_ie,schedule_ie,addr);
       }
@@ -1611,8 +1612,7 @@ void sixtop_linkResponse(
    cellList = schedule_ie->cellList;
   
    // get a free packet buffer
-   //sixtopPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
-   sixtopPkt = openqueue_getFreePacketBuffer_with_timeout(COMPONENT_SIXTOP_RES, SIX2SIX_TIMEOUT_MS);
+   sixtopPkt = openqueue_getFreePacketBuffer_with_timeout(COMPONENT_SIXTOP_RES, SIX2SIX_LINKREP_TIMEOUT_MS);
    if(sixtopPkt==NULL) {
       openserial_printError(COMPONENT_SIXTOP_RES,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
@@ -1621,7 +1621,7 @@ void sixtop_linkResponse(
     }
     
    // changing state to resLinkRespone command
-   sixtop_setState(SIX_SENDING_ADDRESPONSE);
+   //sixtop_setState(SIX_SENDING_ADDRESPONSE);
     
    // declare ownership over that packet
    sixtopPkt->creator = COMPONENT_SIXTOP_RES;
@@ -1669,7 +1669,7 @@ void sixtop_linkResponse(
 
    //TX and back to the idle state
    sixtop_send(sixtopPkt);
-   sixtop_setState(SIX_IDLE);
+   //sixtop_setState(SIX_IDLE);
 
    //adds the cells in the schedule
    //NB: if the LinkRep fails later, the cells will be removed from the schedule

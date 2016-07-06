@@ -272,7 +272,7 @@ enum {
    ERR_SIXTOP_WRONG_PARAM              = 0x3e, // sixtop expects another parameter in its request (bw {0}, nbcells {1})
    ERR_SIXTOP_WRONG_STATE              = 0x3f, // sixtop current state {0}, location {1}
    ERR_SIXTOP_WRONG_HANDLER            = 0x40, // sixtop requires a non null handler
-   ERR_SIXTOP_TIMEOUT                  = 0x41, // a timeout has been fired. We have to flush 6top packets (we have the state {0})
+   ERR_SIXTOP_TIMEOUT                  = 0x41, // a timeout has been fired. We have to flush 6top packets (we have the state {0}, timeout {1})
    ERR_OPENQUEUE_TIMEOUT               = 0x42, // a packet has been removed from the queue (owner {0], creator {1})
    ERR_BAD_TRACKID                     = 0x43, // the best effort track cannot have an owner (here type {0} and addr {1})
    ERR_OPENQUEUE_OVERSIZE              = 0x44, // not enough space in openqueue for non prioritar packets
