@@ -488,9 +488,9 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *t
                   (
                      openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
                      packetfunctions_isBroadcastMulticast_debug(&(openqueue_vars.queue[i].l2_nextORpreviousHop), 71)==FALSE
-                  ) &&
-                  ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
-                )
+                  )
+                ) &&
+                ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
               ) {
             entry = &(openqueue_vars.queue[i]);
          }
@@ -503,6 +503,7 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *t
 
 OpenQueueEntry_t* openqueue_macGetEBPacket() {
    uint8_t i;
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
