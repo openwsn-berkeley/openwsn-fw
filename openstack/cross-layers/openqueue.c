@@ -472,11 +472,10 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *t
          if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
                packetfunctions_sameAddress(toNeighbor, &openqueue_vars.queue[i].l2_nextORpreviousHop) &&
                (openqueue_vars.queue[i].l2_track.instance == track->instance) &&
-               (packetfunctions_sameAddress(&(openqueue_vars.queue[i].l2_track.owner), &(track->owner)))
+               (packetfunctions_sameAddress(&(openqueue_vars.queue[i].l2_track.owner), &(track->owner))) &&
+               ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
          ) {
-
-            if ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
-               entry = &openqueue_vars.queue[i];
+            entry = &(openqueue_vars.queue[i]);
          }
       }
    } else if (toNeighbor->type==ADDR_ANYCAST) {
@@ -489,12 +488,11 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *t
                   (
                      openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
                      packetfunctions_isBroadcastMulticast_debug(&(openqueue_vars.queue[i].l2_nextORpreviousHop), 71)==FALSE
-                  )
-               )
+                  ) &&
+                  ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
+                )
               ) {
-
-            if ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
-               entry = &openqueue_vars.queue[i];
+            entry = &(openqueue_vars.queue[i]);
          }
       }
    }

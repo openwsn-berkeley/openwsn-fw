@@ -1239,11 +1239,11 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          sprintf(str, "LinkRep tx failed: to ");
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
-         strncat(str, ", slots: ", 150);
 #endif
 
          for (i=0;i<numOfCells;i++){
 #ifdef _DEBUG_SIXTOP_
+            strncat(str, ", slot ", 150);
             openserial_ncat_uint32_t(str, cellList[i].tsNum, 150);
             strncat(str, ", ", 150);
 #endif

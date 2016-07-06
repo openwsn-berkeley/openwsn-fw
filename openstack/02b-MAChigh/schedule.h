@@ -68,10 +68,10 @@ See MINBE for an explanation of backoff.
 #define MIN_NUMTX_FOR_PDR  10 // don't calculate PDR when numTx is lower than this value
 
 /**
- \brief to authorize only the dagroot to transmit a frame during laf of the shared cells (to reduce the nb. of collision°
+ \brief to authorize only the dagroot to transmit a frame during half of the shared cells (to reduce the nb. of collisions)
    A more appropriate mechanism has to be proposed to reduce the pressure (priority for LinkRep)
  */
-//#define SCHEDULE_PRIO_FOR_DAGROOT
+#define SCHEDULE_PRIO_FOR_DAGROOT
 
 
 //=========================== typedef =========================================
