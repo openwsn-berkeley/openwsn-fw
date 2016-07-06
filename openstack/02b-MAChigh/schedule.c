@@ -770,7 +770,7 @@ Note that the backoff counter is global, not per slot.
 
 \returns TRUE if it is OK to send on this slot, FALSE otherwise.
 */
-bool schedule_getOkToSend() {
+bool schedule_getOkToSend(OpenQueueEntry_t* msg) {
    bool returnVal;
    
    INTERRUPT_DECLARATION();
@@ -789,6 +789,14 @@ bool schedule_getOkToSend() {
    //only the dagroot can use the first shared cells
    else if (!idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset <= SLOTFRAME_LENGTH /2){
       returnVal = FALSE;
+   }
+#endif
+#ifdef IHHOHJJH
+   packetfunctions_isBroadcastMulticast_debug(&(openqueue_vars.queue[i].l2_nextORpreviousHop),72);
+
+
+   else if(){
+
    }
 #endif
    else {

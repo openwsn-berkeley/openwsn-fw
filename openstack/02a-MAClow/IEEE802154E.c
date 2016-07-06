@@ -916,20 +916,27 @@ port_INLINE void activity_ti1ORri1() {
          openserial_stop();
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
-         // check whether we can send
 
-         if (schedule_getOkToSend()) {
+         //characteristics of the cell
+         schedule_getTrackCurrent(&track);
+         schedule_getNeighbor(&neighbor);
 
-            schedule_getNeighbor(&neighbor);
-            schedule_getTrackCurrent(&track);
-            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
-
-            // look for an EB packet in the queue
-            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX) && (track.instance == TRACK_BESTEFFORT)) {
-               couldSendEB=TRUE;
-               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-           }
+         // look for an EB packet in the queue
+         if ((cellType==CELLTYPE_TXRX) && (track.instance == TRACK_BESTEFFORT)) {
+            ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+            couldSendEB = TRUE;
          }
+
+         //Else, any compliant broadcast or unicast packet
+         if (ieee154e_vars.dataToSend == NULL){
+            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
+            couldSendEB = FALSE;
+         }
+
+         // check whether we can send (Backoff or dedicated cell, other conditions)
+         if (ieee154e_vars.dataToSend != NULL && !schedule_getOkToSend(ieee154e_vars.dataToSend))
+            ieee154e_vars.dataToSend = NULL;
+
          //neither data packet nor EB to tx
          if (ieee154e_vars.dataToSend==NULL) {
             if (cellType==CELLTYPE_TX) {
