@@ -52,6 +52,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    int16_t timeCorrection;
    header_IE_ht header_desc;
    bool    headerIEPresent = FALSE;
+   uint8_t destAddrMode;
    
    securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
 
@@ -149,13 +150,16 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    temp_8b              = 0;
    if (packetfunctions_isBroadcastMulticast(nextHop)) {
       temp_8b          |= IEEE154_ADDR_SHORT              << IEEE154_FCF_DEST_ADDR_MODE;
+      destAddrMode      = IEEE154_ADDR_SHORT;
    } else {
       switch (nextHop->type) {
          case ADDR_16B:
             temp_8b    |= IEEE154_ADDR_SHORT              << IEEE154_FCF_DEST_ADDR_MODE;
+            destAddrMode= IEEE154_ADDR_SHORT;
             break;
          case ADDR_64B:
             temp_8b    |= IEEE154_ADDR_EXT                << IEEE154_FCF_DEST_ADDR_MODE;
+            destAddrMode= IEEE154_ADDR_EXT;
             break;
          // no need for a default, since it would have been caught above.
       }
@@ -178,7 +182,15 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    } else {
       temp_8b          |= IEEE154_ACK_YES_ACK_REQ         << IEEE154_FCF_ACK_REQ;
    }
-   temp_8b             |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
+   if (destAddrMode == IEEE154_ADDR_SHORT) {
+       temp_8b         |= IEEE154_PANID_COMPRESSED        << IEEE154_FCF_INTRAPAN;
+   } else {
+       if (destAddrMode == IEEE154_ADDR_EXT) {
+           temp_8b     |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
+       } else {
+           // never happens 
+       }
+   }
    *((uint8_t*)(msg->payload)) = temp_8b;
 }
 
