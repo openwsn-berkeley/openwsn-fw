@@ -182,7 +182,7 @@ void ieee154e_getAsn(uint8_t* array) {return;}
 void neighbors_updateMyDAGrankAndNeighborPreference(void) {return;}
 bool neighbors_getPreferredParentEui64(open_addr_t* neighbor){return TRUE;}
 void schedule_startDAGroot(void) {return;}
-void sf0_setSelfBandwidth(uint8_t numPacketPerSlotFrame){return;}
+void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){return;}
 
 bool debugPrint_asn(void)       {return TRUE;}
 bool debugPrint_isSync(void)    {return TRUE;}

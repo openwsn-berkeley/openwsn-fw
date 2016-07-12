@@ -396,7 +396,7 @@ void openserial_stop() {
    
    DISABLE_INTERRUPTS();
    busyReceiving = openserial_vars.busyReceiving;
-   inputBufFill = openserial_vars.inputBufFill;
+   inputBufFill  = openserial_vars.inputBufFill;
    ENABLE_INTERRUPTS();
    
    // disable USCI_A1 TX & RX interrupt
@@ -405,9 +405,9 @@ void openserial_stop() {
    DISABLE_INTERRUPTS();
    openserial_vars.mode=MODE_OFF;
    ENABLE_INTERRUPTS();
-   //the inputBuffer has to be reset if it is not reset where the data is read.
-   //or the function openserial_getInputBuffer is called (which resets the buffer)
-   if (busyReceiving==TRUE){
+   // the inputBuffer has to be reset if it is not reset where the data is read.
+   // or the function openserial_getInputBuffer is called (which resets the buffer)
+   if (busyReceiving==TRUE) {
       openserial_printError(COMPONENT_OPENSERIAL,ERR_BUSY_RECEIVING,
                                   (errorparameter_t)0,
                                   (errorparameter_t)inputBufFill);
@@ -422,7 +422,7 @@ void openserial_stop() {
             idmanager_triggerAboutRoot();
             break;
          case SERFRAME_PC2MOTE_RESET:
-        	board_reset();
+            board_reset();
             //reset serial buffer here just in case
             DISABLE_INTERRUPTS();
             openserial_vars.inputBufFill = 0;
@@ -595,7 +595,7 @@ void openserial_goldenImageCommands(void){
                     commandLen == 0
                 ) 
             ){
-                // randommly select cell
+                // randomly select cell
                 sixtop_request(commandId-8,&neighbor,1);
             } else {
                 for (i=0;i<commandLen;i++){
@@ -621,8 +621,8 @@ void openserial_goldenImageCommands(void){
                 }
             }
             break;
-       case COMMAND_SET_SF0BANDWIDTH:
-            sf0_setSelfBandwidth(comandParam_8);
+       case COMMAND_SET_UINJECTPERIOD:
+            sf0_appPktPeriod(comandParam_8);
             break;
        default:
            // wrong command ID

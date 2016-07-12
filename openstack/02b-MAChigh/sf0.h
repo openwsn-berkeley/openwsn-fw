@@ -15,7 +15,7 @@
 //=========================== typedef =========================================
 
 typedef struct {
-   uint8_t app_bandwidth;
+   uint8_t numAppPacketsPerSlotFrame;
 } sf0_vars_t;
 
 //=========================== module variables ================================
@@ -29,7 +29,7 @@ void      sf0_notif_addedCell(void);
 void      sf0_notif_removedCell(void);
 // notification from schedule
 void      sf0_notifyNewSlotframe(void);
-void      sf0_setSelfBandwidth(uint8_t numPacketPerSlotframe);
+void      sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame);
 /**
 \}
 \}

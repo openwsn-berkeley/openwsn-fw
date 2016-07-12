@@ -25,7 +25,7 @@ void sf0_bandwidthEstimate_task(void);
 
 void sf0_init(void) {
     memset(&sf0_vars,0,sizeof(sf0_vars_t));
-    sf0_vars.app_bandwidth = 0;  // number of packet being sent per slotframe
+    sf0_vars.numAppPacketsPerSlotFrame = 0;
 }
 
 void sf0_notif_addedCell(void) {
@@ -82,14 +82,13 @@ void sf0_removeCell_task(void) {
 }
 
 void sf0_bandwidthEstimate_task(void){
-    open_addr_t neighbor;
-    bool    foundNeighbor;
+    open_addr_t    neighbor;
+    bool           foundNeighbor;
+    int8_t         bw_outgoing;
+    int8_t         bw_incoming;
+    int8_t         bw_self;
     
-    int8_t bw_outgoing;
-    int8_t bw_incoming;
-    int8_t bw_self;
-   
-    // do not reserve cell proactively if I was dagroot
+    // do not reserve cells if I'm a DAGroot
     if (idmanager_getIsDAGroot()){
         return;
     }
@@ -97,54 +96,54 @@ void sf0_bandwidthEstimate_task(void){
     // get preferred parent
     foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
     if (foundNeighbor==FALSE) {
-       return;
+        return;
     }
-   
+    
     sixtop_setHandler(SIX_HANDLER_SF0);
-
+    
     // get bandwidth of outgoing, incoming and self.
-    // Here we just calcuate the estimated bandwidth for 
+    // Here we just calculate the estimated bandwidth for 
     // the application sending on dedicate cells(TX or Rx).
     bw_outgoing = schedule_getNumOfSlotsByType(CELLTYPE_TX);
     bw_incoming = schedule_getNumOfSlotsByType(CELLTYPE_RX);
-    /* 
-      get self required bandwith, you can design your
-      application and assign bw_self accordingly. 
-      for example:
-          bw_self = application_getBandwdith(app_name);
-      By default, it's set to zero.
-    */
-//    bw_self = openapps_getBandwidth(COMPONENT_UINJECT);
-    bw_self = sf0_vars.app_bandwidth;
+    
+    // get self required bandwith, you can design your
+    // application and assign bw_self accordingly. 
+    // for example:
+    //    bw_self = application_getBandwdith(app_name);
+    // By default, it's set to zero.
+    // bw_self = openapps_getBandwidth(COMPONENT_UINJECT);
+    bw_self = sf0_vars.numAppPacketsPerSlotFrame;
     
     // In SF0, scheduledCells = bw_outgoing
     //         requiredCells  = bw_incoming + bw_self
-    
     // when scheduledCells<requiredCells, add one or more cell
+    
     if (bw_outgoing <= bw_incoming+bw_self){
-        // call sixtop
+        
+        // all cell(s)
         sixtop_request(
             IANA_6TOP_CMD_ADD,
             &neighbor,
             bw_incoming+bw_self-bw_outgoing+1
         );
     } else {
-        // when requiredCells<(scheduledCells-SF0THRESHOLD), remove one or more cell
+        
+        // remove cell(s)
         if ( (bw_incoming+bw_self) < (bw_outgoing-SF0THRESHOLD)) {
-           sixtop_setHandler(SIX_HANDLER_SF0);
-           // call sixtop
-           sixtop_request(
-              IANA_6TOP_CMD_DELETE,
-              &neighbor,
-              SF0THRESHOLD
-           );
+            sixtop_setHandler(SIX_HANDLER_SF0);
+            
+            sixtop_request(
+                IANA_6TOP_CMD_DELETE,
+                &neighbor,
+                SF0THRESHOLD
+            );
         } else {
-            // the bandwidth is able to statisfied the traffic
             // nothing to do
         }
     }
 }
 
-void sf0_setSelfBandwidth(uint8_t numPacketPerSlotFrame){
-    sf0_vars.app_bandwidth = numPacketPerSlotFrame;
+void sf0_appPktPeriod(uint8_t numAppPacketsPerSlotFrame){
+    sf0_vars.numAppPacketsPerSlotFrame = numAppPacketsPerSlotFrame;
 }
