@@ -609,7 +609,7 @@ void openserial_goldenImageCommands(void){
        case COMMAND_SET_SLOTDURATION:
             ieee154e_setSlotDuration(comandParam_16);
             break;
-       case COMMAND_SET_6PRESPONSE_STATUS:
+       case COMMAND_SET_6PRESPONSE:
             if (comandParam_8 ==1) {
                sixtop_setIsResponseEnabled(TRUE);
             } else {

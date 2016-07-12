@@ -75,7 +75,7 @@ enum {
    COMMAND_SET_6P_LIST           = 12,
    COMMAND_SET_6P_CLEAR          = 13,
    COMMAND_SET_SLOTDURATION      = 14,
-   COMMAND_SET_6PRESPONSE_STATUS = 15,
+   COMMAND_SET_6PRESPONSE        = 15,
    COMMAND_SET_UINJECTPERIOD     = 16,
    COMMAND_MAX                   = 17,
 };
