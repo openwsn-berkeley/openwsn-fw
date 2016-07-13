@@ -565,7 +565,7 @@ void openserial_executeCommands(void){
                 sixtop_request(commandId-8,&neighbor,1);
             } else {
                 for (i=0;i<commandLen;i++){
-                    cellList[i].tsNum           = openserial_vars.inputBuf[5+i];
+                    cellList[i].tsNum           = openserial_vars.inputBuf[3+i];
                     cellList[i].choffset        = 0;
                     cellList[i].linkoptions     = CELLTYPE_TX;
                 }
