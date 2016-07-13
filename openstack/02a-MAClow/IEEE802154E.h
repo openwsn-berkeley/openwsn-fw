@@ -168,6 +168,7 @@ enum ieee154e_atomicdurations_enum {
    wdAckDuration             =   80,                  //  2400us (measured 1000us)
 #else
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
+#endif
 };
 
 //shift of bytes in the linkOption bitmap: draft-ietf-6tisch-minimal-10.txt: page 6
