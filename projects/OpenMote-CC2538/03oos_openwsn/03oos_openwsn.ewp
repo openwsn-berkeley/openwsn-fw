@@ -317,6 +317,7 @@
           <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\cexample\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
