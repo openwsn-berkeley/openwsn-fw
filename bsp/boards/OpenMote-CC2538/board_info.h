@@ -58,7 +58,7 @@
 #define PORT_PIN_RADIO_RESET_LOW()     // nothing
 
 //===== IEEE802154E timing
-#ifdef GOLDEN_IMAGE_ROOT
+#ifdef SLOTDURATION_10MS
 // time-slot related
 #define PORT_TsSlotDuration                 328   // counter counts one extra count, see datasheet
 // execution speed related

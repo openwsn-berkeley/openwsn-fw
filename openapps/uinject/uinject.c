@@ -9,9 +9,6 @@
 #include "IEEE802154E.h"
 #include "idmanager.h"
 
-#ifdef GOLDEN_IMAGE_ROOT
-#define SLOTDURATION 10  // ms
-#endif
 //=========================== variables =======================================
 
 uinject_vars_t uinject_vars;

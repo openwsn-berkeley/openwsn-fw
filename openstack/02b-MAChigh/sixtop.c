@@ -1235,20 +1235,16 @@ void sixtop_notifyReceiveCommand(
                     count  = *((uint8_t*)(pkt->payload)+ptr);
                     ptr += 1;
                     count |= (*((uint8_t*)(pkt->payload)+ptr))<<8;
-#ifdef GOLDEN_IMAGE_ROOT
-                openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_COUNT,
+                    openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_COUNT,
                            (errorparameter_t)count,
                            (errorparameter_t)sixtop_vars.six2six_state);
-#endif
                     break;
                 case SIX_WAIT_LISTRESPONSE:
                     processIE_retrieve_sixCelllist(pkt,ptr,length,cellList);
-#ifdef GOLDEN_IMAGE_ROOT
-                // print out first two cells in the list
-                openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_LIST,
+                    // print out first two cells in the list
+                    openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_LIST,
                            (errorparameter_t)cellList[0].tsNum,
                            (errorparameter_t)cellList[1].tsNum);
-#endif
                     break;
                 case SIX_WAIT_CLEARRESPONSE:
                   
@@ -1259,11 +1255,9 @@ void sixtop_notifyReceiveCommand(
             } else {
                 // TBD...
             }
-#ifdef GOLDEN_IMAGE_ROOT
            openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
                            (errorparameter_t)commandIdORcode,
                            (errorparameter_t)sixtop_vars.six2six_state);
-#endif
             sixtop_vars.six2six_state = SIX_IDLE;
             sixtop_vars.handler = SIX_HANDLER_NONE;
             opentimers_stop(sixtop_vars.timeoutTimerId);
