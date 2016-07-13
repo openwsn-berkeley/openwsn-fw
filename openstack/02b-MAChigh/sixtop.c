@@ -1149,7 +1149,7 @@ void sixtop_notifyReceiveCommand(
                         code = IANA_6TOP_RC_SUCCESS;
                         len += processIE_prepend_sixCelllist(response_pkt,cellList);
                     } else {
-                        code = IANA_6TOP_RC_RESET;
+                        code = IANA_6TOP_RC_ERR;
                     }
                     break;
                 case IANA_6TOP_CMD_COUNT:
