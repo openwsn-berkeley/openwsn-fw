@@ -46,13 +46,6 @@ if env['cryptoengine']:
     env.Append(CPPDEFINES    = {'CRYPTO_ENGINE_SCONS' : env['cryptoengine']})
 if env['l2_security']==1:
     env.Append(CPPDEFINES    = 'L2_SECURITY_ACTIVE')
-if env['goldenImage']=='sniffer':
-    env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_SNIFFER')
-else:
-    if env['goldenImage']=='root':
-        env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_ROOT')
-    else:
-        env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_NONE')
 
 if env['toolchain']=='mspgcc':
     

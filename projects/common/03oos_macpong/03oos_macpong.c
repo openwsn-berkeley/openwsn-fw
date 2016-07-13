@@ -108,54 +108,46 @@ void iphc_receive(OpenQueueEntry_t* msg) {
    openqueue_freePacketBuffer(msg);
 }
 
+//===== sniffer
+
+void sniffer_setListeningChannel(uint8_t channel)       { return; }
+
 //===== L3
 
-void forwarding_init(void)        { return; }
-void openbridge_init(void)        { return; }
-void openbridge_triggerData(void) { return; }
+void forwarding_init(void)                              { return; }
+void openbridge_init(void)                              { return; }
+void openbridge_triggerData(void)                       { return; }
 
 //===== L4
 
-void icmpv6_init(void)            { return; }
-
-void icmpv6echo_init(void)        { return; }
-void icmpv6echo_trigger(void)     { return; }
-
-void icmpv6router_init(void)      { return; }
-void icmpv6router_trigger(void)   { return; }
-
-void icmpv6rpl_init(void)         { return; }
-void icmpv6rpl_trigger(void)      { return; }
-void icmpv6rpl_writeDODAGid(uint8_t* dodagid) { return; }
-
-void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod) { return; }
-void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod) { return; }
-
-void opentcp_init(void)           { return; }
-
-void openudp_init(void)           { return; }
-
-void opencoap_init(void)          { return; }
+void icmpv6_init(void)                                  { return; }
+void icmpv6echo_init(void)                              { return; }
+void icmpv6echo_trigger(void)                           { return; }
+void icmpv6router_init(void)                            { return; }
+void icmpv6router_trigger(void)                         { return; }
+void icmpv6rpl_init(void)                               { return; }
+void icmpv6rpl_trigger(void)                            { return; }
+void icmpv6rpl_writeDODAGid(uint8_t* dodagid)           { return; }
+void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod)         { return; }
+void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod)         { return; }
+void opentcp_init(void)                                 { return; }
+void openudp_init(void)                                 { return; }
+void opencoap_init(void)                                { return; }
 
 //===== L7
 
-void openapps_init(void)          { return; }
-
-void ohlone_init(void)            { return; }
-
-void tcpecho_init(void)           { return; }
-
-void tcpinject_init(void)         { return; }
-void tcpinject_trigger(void)      { return; }
-
-void tcpprint_init(void)          { return; }
-
-void c6t_init(void)               { return; }
-void cinfo_init(void)             { return; }
-void cleds__init(void)            { return; }
-void cwellknown_init(void)        { return; }
+void openapps_init(void)                                { return; }
+void ohlone_init(void)                                  { return; }
+void tcpecho_init(void)                                 { return; }
+void tcpinject_init(void)                               { return; }
+void tcpinject_trigger(void)                            { return; }
+void tcpprint_init(void)                                { return; }
+void c6t_init(void)                                     { return; }
+void cinfo_init(void)                                   { return; }
+void cleds__init(void)                                  { return; }
+void cwellknown_init(void)                              { return; }
    // TCP
-void techo_init(void)             { return; }
+void techo_init(void)                                   { return; }
    // UDP
-void uecho_init(void)             { return; }
+void uecho_init(void)                                   { return; }
 

@@ -141,7 +141,7 @@ typedef enum {
 //    - duration_in_seconds = ticks / 32768
 enum ieee154e_atomicdurations_enum {
    // time-slot related
-#ifdef GOLDEN_IMAGE_ROOT
+#ifdef SLOTDURATION_10MS
    TsTxOffset                =   70,                  //  2120us
    TsLongGT                  =   36,                  //  1100us
    TsTxAckDelay              =   33,                  //  1000us
@@ -162,13 +162,11 @@ enum ieee154e_atomicdurations_enum {
    delayTx                   =  PORT_delayTx,         // between GO signal and SFD
    delayRx                   =  PORT_delayRx,         // between GO signal and start listening
    // radio watchdog
-#ifdef GOLDEN_IMAGE_ROOT
    wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
    wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
+#ifdef SLOTDURATION_10MS
    wdAckDuration             =   80,                  //  2400us (measured 1000us)
 #else
-   wdRadioTx                 =   33,                  //  1000us (needs to be >delayTx)
-   wdDataDuration            =  164,                  //  5000us (measured 4280us with max payload)
    wdAckDuration             =   98,                  //  3000us (measured 1000us)
 #endif
 };
