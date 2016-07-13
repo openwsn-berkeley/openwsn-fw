@@ -40,7 +40,7 @@ void openserial_board_reset_cb(
    opentimer_id_t id
 );
 
-void openserial_goldenImageCommands(void);
+void openserial_executeCommands(void);
 
 // HDLC output
 void outputHdlcOpen(void);
@@ -433,7 +433,7 @@ void openserial_stop() {
             break;   
          case SERFRAME_PC2MOTE_COMMAND:
              // golden image command
-            openserial_goldenImageCommands();
+            openserial_executeCommands();
             break;
          default:
             openserial_printError(COMPONENT_OPENSERIAL,ERR_UNSUPPORTED_COMMAND,
@@ -453,11 +453,9 @@ void openserial_stop() {
    ENABLE_INTERRUPTS();
 }
 
-void openserial_goldenImageCommands(void){
+void openserial_executeCommands(void){
    uint8_t  input_buffer[10];
    uint8_t  numDataBytes;
-   uint8_t  version;
-   uint8_t  type;
    uint8_t  commandId;
    uint8_t  commandLen;
    uint8_t  comandParam_8;
@@ -473,22 +471,19 @@ void openserial_goldenImageCommands(void){
    numDataBytes = openserial_getNumDataBytes();
    //copying the buffer
    openserial_getInputBuffer(&(input_buffer[0]),numDataBytes);
-   version      = openserial_vars.inputBuf[1];
-   type         = openserial_vars.inputBuf[2];
-   
-   commandId  = openserial_vars.inputBuf[3];
-   commandLen = openserial_vars.inputBuf[4];
+   commandId  = openserial_vars.inputBuf[1];
+   commandLen = openserial_vars.inputBuf[2];
    
    if (commandLen>3) {
        // the max command Len is 2, except ping commands
        return;
    } else {
        if (commandLen == 1) {
-           comandParam_8 = openserial_vars.inputBuf[5];
+           comandParam_8 = openserial_vars.inputBuf[3];
        } else {
            // commandLen == 2
-           comandParam_16 = (openserial_vars.inputBuf[5]      & 0x00ff) | \
-                            ((openserial_vars.inputBuf[6]<<8) & 0xff00); 
+           comandParam_16 = (openserial_vars.inputBuf[3]      & 0x00ff) | \
+                            ((openserial_vars.inputBuf[4]<<8) & 0xff00); 
        }
    }
    

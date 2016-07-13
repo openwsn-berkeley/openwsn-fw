@@ -79,7 +79,6 @@ project:
                    (dummy_crypto_engine, firmware_crypto_engine, 
                    board_crypto_engine).
     l2_security   Use hop-by-hop encryption and authentication.
-    goldenImage   sniffer, root or none(default)
     ide           qtcreator
 
     Common variables:
@@ -136,7 +135,6 @@ command_line_options = {
     'noadaptivesync':   ['0','1'],
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
     'l2_security':      ['0','1'],
-    'goldenImage':      ['none','root','sniffer'],
     'ide':              ['none','qtcreator']
 }
 
@@ -281,14 +279,6 @@ command_line_vars.AddVariables(
         command_line_options['l2_security'][0],            # default
         validate_option,                                   # validator
         int,                                               # converter
-    ),
-    # create an golden image for interop testing
-    (
-        'goldenImage',                                     # key
-        '',                                                # help
-        command_line_options['goldenImage'][0],            # default
-        validate_option,                                   # validator
-        None,                                              # converter
     ),
     (
         'apps',                                            # key
