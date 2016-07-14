@@ -55,8 +55,8 @@ void board_init() {
   P11SEL |= 0x07;                           // P11.0,1,2 for debugging purposes.
   //P4DIR |= BIT0 | BIT1 | BIT2 | BIT3 ;
   // setup clock speed
-  UCSCTL0 = DCO3 | DCO1;              //  ~26.5 MHz , DCO3+DCO1 and DCORSEL_7
-  UCSCTL1 = DCORSEL_7 | DISMOD;     
+  UCSCTL0 = /*DCO3 |*/ DCO1;              //  ~26.5 MHz , DCO3+DCO1 and DCORSEL_7
+  UCSCTL1 = /*DCORSEL_7 |*/ DISMOD | DCORSEL_1 ;     
   UCSCTL2 = 0;
   UCSCTL3 = 0;
   UCSCTL4 =  SELM_3 | SELS_3 ;
@@ -76,17 +76,17 @@ void board_init() {
    leds_init();
   // uart_init();
   // spi_init();
-  // bsp_timer_init();
+   bsp_timer_init();
   // radio_init();
   // radiotimer_init();
    
    // enable interrupts
-   //__bis_SR_register(GIE);
+   __bis_SR_register(GIE);
 }
 
-//void board_sleep() {
-  // __bis_SR_register(GIE+LPM0_bits);             // sleep, but leave ACLK on
-//}
+void board_sleep() {
+   __bis_SR_register(GIE+LPM0_bits);             // sleep, but leave ACLK on
+}
 
 void board_reset() {
     WDTCTL = (WDTPW+0x1200) + WDTHOLD; // writing a wrong watchdog password to causes handler to reset
@@ -120,13 +120,13 @@ void board_reset() {
 
 // TIMERA1_VECTOR
 
-//ISR(TIMERA0) {
-//   debugpins_isr_set();
-//   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
-//      __bic_SR_register_on_exit(CPUOFF);
-//   }
-//   debugpins_isr_clr();
-//}
+ISR(TIMER0_A0) {
+   debugpins_isr_set();
+   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
+      __bic_SR_register_on_exit(CPUOFF);
+   }
+   debugpins_isr_clr();
+}
 
 // ADC12_VECTOR
 

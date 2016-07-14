@@ -54,7 +54,7 @@ int main(void)
   P11SEL |= 0x07;                           // P11.0,1,2 for debugging purposes.
   P4DIR |= BIT0 | BIT1 | BIT2 | BIT3 ;
   
-  UCSCTL0 = DCO3 | DCO1 /*| MOD0 */;              //  ~26.5 MHz , DCO3+DCO1 and DCORSEL_&
+  UCSCTL0 = DCO3 /*| DCO1 *//*| MOD0 */;              //  ~22 MHz , DCO3+DCO1 and DCORSEL_&
   UCSCTL1 = DCORSEL_7 | DISMOD;     
   UCSCTL2 = 0;
   UCSCTL3 = 0;
@@ -67,6 +67,7 @@ int main(void)
                                        // Clear XT2,XT1,DCO fault flags
     SFRIFG1 &= ~OFIFG;                      // Clear fault flags
   }while (SFRIFG1&OFIFG);
+
     
   while(1)
   {
