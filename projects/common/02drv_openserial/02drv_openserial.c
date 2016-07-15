@@ -112,6 +112,9 @@ void schedule_setFrameLength(void){}
 void ieee154e_setSlotDuration(void){}
 void ieee154e_setIsSecurityEnabled(void){}
 void ieee154e_setIsAckEnabled(void){}
+void ieee154e_setSingleChannel(void){}
+void sniffer_setListeningChannel(void){}
+void sf0_appPktPeriod(void){}
 
 bool debugPrint_isSync(void) {
    return FALSE;
