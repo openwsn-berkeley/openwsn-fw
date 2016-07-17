@@ -76,7 +76,7 @@ void macpong_send(uint8_t payloadCtr) {
    pkt->creator                   = COMPONENT_IPHC;
    pkt->owner                     = COMPONENT_IPHC;
    
-   neighbors_getNeighbor(&pkt->l2_nextORpreviousHop,ADDR_64B,0);
+   neighbors_getNeighborEui64(&pkt->l2_nextORpreviousHop,ADDR_64B,0);
    packetfunctions_reserveHeaderSize(pkt,LEN_PAYLOAD);
    ((uint8_t*)pkt->payload)[0]    = payloadCtr;
    for (i=1;i<LEN_PAYLOAD;i++){
