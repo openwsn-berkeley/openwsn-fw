@@ -605,7 +605,6 @@ void registerNewNeighbor(open_addr_t* address,
       while(i<MAXNUMNEIGHBORS) {
          if (neighbors_vars.neighbors[i].used==FALSE) {
             // add this neighbor
-            neighbors_vars.neighbors[i].id                     = i;
             neighbors_vars.neighbors[i].used                   = TRUE;
             // neighbors_vars.neighbors[i].stableNeighbor         = FALSE;
             // Note: all new neighbors are consider stable

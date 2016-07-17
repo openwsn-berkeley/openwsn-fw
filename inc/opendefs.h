@@ -332,9 +332,6 @@ typedef struct {
 
 BEGIN_PACK
 typedef struct {
-
-   uint8_t          id;
-
    bool             used;
    uint8_t          parentPreference;
    bool             stableNeighbor;
