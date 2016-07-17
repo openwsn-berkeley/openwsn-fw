@@ -1318,7 +1318,7 @@ bool sixtop_candidateAddCellList(
       i = openrandom_get16b()%schedule_getFrameLength();
       if(schedule_isSlotOffsetAvailable(i)==TRUE){
          cellList[numCandCells].tsNum       = i;
-         cellList[numCandCells].choffset    = 0;
+         cellList[numCandCells].choffset    = DEFAULT_CHANNEL_OFFSET;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
          numCandCells++;
       }
@@ -1389,7 +1389,7 @@ void sixtop_addCellsByState(
                   cellList[i].choffset,
                   &temp_neighbor
                );
-               
+
                break;
             case SIX_WAIT_ADDRESPONSE:
                memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
