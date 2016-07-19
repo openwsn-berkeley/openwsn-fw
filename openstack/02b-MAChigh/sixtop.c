@@ -21,7 +21,9 @@
 
 
 #define _DEBUG_SIXTOP_
-#define _DEBUG_SIXTOP_TIMEOUT_
+//#define _DEBUG_SIXTOP_TIMEOUT_
+//#define _DEBUG_EB_
+//#define _DEBUG_KA_
 
 
 //=========================== variables =======================================
@@ -139,6 +141,7 @@ void sixtop_init() {
    sixtop_vars.mgtTaskCounter     = 0;
    sixtop_vars.kaPeriod           = MAXKAPERIOD;
    sixtop_vars.ebPeriod           = EBPERIOD;
+   sixtop_vars.timeoutTimerId     = TOO_MANY_TIMERS_ERROR;
    
    sixtop_vars.maintenanceTimerId = opentimers_start(
       sixtop_vars.periodMaintenance,
@@ -147,6 +150,14 @@ void sixtop_init() {
       sixtop_maintenance_timer_cb
    );
    
+   char str[150];
+   sprintf(str, "TIMER INIT MAINTENANCE ");
+   openserial_ncat_uint32_t(str, (uint8_t) sixtop_vars.maintenanceTimerId, 150);
+   strncat(str, " TOOMANY", 150);
+   openserial_ncat_uint32_t(str, (uint8_t) TOO_MANY_TIMERS_ERROR, 150);
+   openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+
+
 
 }
 
@@ -862,6 +873,18 @@ void timer_sixtop_management_fired(void) {
    scheduleEntry_t* entry;
    sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
    
+#ifdef _DEBUG_EB_
+   char str[150];
+    sprintf(str, "EB verif, counter");
+    openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.mgtTaskCounter, 150);
+    strncat(str, " modulo ", 150);
+    openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.ebPeriod, 150);
+    strncat(str, " timer ", 150);
+    openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.maintenanceTimerId, 150);
+    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
+
+
    switch (sixtop_vars.mgtTaskCounter) {
       case 0:
          // called every EBPERIOD seconds
@@ -1009,11 +1032,22 @@ port_INLINE void sixtop_sendKA() {
       // I'm now busy sending a KA
       sixtop_vars.busySendingKA = FALSE;
       
+#ifdef _DEBUG_KA_
+      sprintf(str, "KA not sync'ed");
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
+
+
       // stop here
       return;
    }
    
    if (sixtop_vars.busySendingKA==TRUE) {
+#ifdef _DEBUG_KA_
+      sprintf(str, "KA busy");
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
+
       // don't proceed if I'm still sending a KA
       return;
    }
@@ -1021,7 +1055,7 @@ port_INLINE void sixtop_sendKA() {
    kaNeighAddr = neighbors_getKANeighbor(sixtop_vars.kaPeriod);
    if (kaNeighAddr==NULL) {
 #ifdef _DEBUG_KA_
-      sprintf(str, "KA nothing todo");
+      sprintf(str, "KA nothing to do");
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
@@ -1081,15 +1115,42 @@ port_INLINE void sixtop_sendKA() {
 void sixtop_setState(six2six_state_t state){
    uint8_t  previously_idle = (sixtop_vars.six2six_state == SIX_IDLE);
 
+
+   char str[150];
+
+   sprintf(str, "STATE=");
+   openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.six2six_state, 150);
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
+
+
    sixtop_vars.six2six_state = state;
    uint16_t  timeout_sixtop_value;    // to change the timeout value (jitter)
+
+
+
+
 
    //schedule a timer: back to the idle state after a timeout
    if (state != SIX_IDLE){
 
+      sprintf(str, "timeout STATE");
+      openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.timeoutTimerId, 150);
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
+
       //stops the previous timer
-      if (!previously_idle)
+      if (sixtop_vars.timeoutTimerId != TOO_MANY_TIMERS_ERROR){
+
+         sprintf(str, "TIMER STOP  ");
+         openserial_ncat_uint32_t(str, (uint8_t) sixtop_vars.timeoutTimerId, 150);
+         strncat(str, " TOOMANY", 150);
+         openserial_ncat_uint32_t(str, (uint8_t) TOO_MANY_TIMERS_ERROR, 150);
+         openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+
          opentimers_stop(sixtop_vars.timeoutTimerId);
+         sixtop_vars.timeoutTimerId = TOO_MANY_TIMERS_ERROR;
+      }
 
       //and starts a new one (randomized to avoid all the nodes regenerate one request simultaneously)
       // timeout in [SIX2SIX_TIMEOUT_MS, SIX2SIX_TIMEOUT_MS*1.5]
@@ -1104,11 +1165,21 @@ void sixtop_setState(six2six_state_t state){
             sixtop_timeout_timer_cb
       );
 
+      sprintf(str, "TIMER START  ");
+      openserial_ncat_uint32_t(str, (uint8_t) sixtop_vars.timeoutTimerId, 150);
+      strncat(str, " TOOMANY", 150);
+      openserial_ncat_uint32_t(str, (uint8_t) TOO_MANY_TIMERS_ERROR, 150);
+      openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+
+
+
+
    }
 
    //otf callback when we come back to the idle state
    if (state == SIX_IDLE){
       opentimers_stop(sixtop_vars.timeoutTimerId);
+      sixtop_vars.timeoutTimerId = TOO_MANY_TIMERS_ERROR;
       sixtop_vars.handler = SIX_HANDLER_NONE;
       otf_verifSchedule();
    }
