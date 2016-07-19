@@ -190,7 +190,7 @@ enum {
    COMPONENT_RRT                       = 0x25,
    COMPONENT_SECURITY                  = 0x26,
    //Fabrice
-   COMPONENT_OTF                       = 0x27
+   COMPONENT_OTF                       = 0x27,
 };
 
 /**

@@ -9,7 +9,7 @@
 #include "idmanager.h"
 
 
-//#define _DEBUG_OTF_
+#define _DEBUG_OTF_
 
 
 
@@ -96,7 +96,7 @@ void otf_removeCell_task(void) {
 //to reserve one cell toward my parent (for control packets) if none exists
 bool otf_reserveParentCells(void){
    open_addr_t parent;
-   track_t     linkReqTrack;
+   track_t     sixtopTrack;
    uint8_t     nbCells;
 
    //Do I have a valid parent?
@@ -111,16 +111,16 @@ bool otf_reserveParentCells(void){
    }
 
    //the specific track for 6P Link Requests
-   memcpy(&(linkReqTrack.owner), idmanager_getMyID(ADDR_64B), sizeof(linkReqTrack.owner));
-   linkReqTrack.instance = TRACK_PARENT_CONTROL;
+   memcpy(&(sixtopTrack.owner), idmanager_getMyID(ADDR_64B), sizeof(sixtopTrack.owner));
+   sixtopTrack.instance = TRACK_PARENT_CONTROL;
 
    //how many cells for TRACK_PARENT_CONTROL?
-   nbCells = schedule_getNbCellsWithTrack(linkReqTrack, &parent);
+   nbCells = schedule_getNbCellsWithTrack(sixtopTrack, &parent);
 
    //ask 6top to reserve one new cell if none exists
    if (nbCells == 0){
       sixtop_setHandler(SIX_HANDLER_OTF);
-      sixtop_addCells(&(parent), 1, linkReqTrack);
+      sixtop_addCells(&(parent), 1, sixtopTrack);
 
 #ifdef _DEBUG_OTF_
       char        str[150];

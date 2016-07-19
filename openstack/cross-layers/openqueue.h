@@ -31,7 +31,8 @@ typedef struct {
    asn_t       timeout;    //timeout MUST be transmitted in ASN format to openvizualizer
    uint16_t    trackInstance;
    open_addr_t trackOwner;
-   uint8_t     garbage;    //we MUST use an even nb. of bytes (else the compiler may have some uncompliant optimizations)
+   open_addr_t nextHop;
+  // uint8_t     garbage;    //we MUST use an even nb. of bytes (else the compiler may have some uncompliant optimizations)
  } debugOpenQueueEntry_t;
 
 //=========================== module variables ================================

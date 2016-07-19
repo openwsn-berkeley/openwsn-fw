@@ -68,13 +68,21 @@ bool debugPrint_queue() {
             openqueue_vars.queue[openqueue_vars.debugPrintRow].timeout.byte[3] *256;
 
 
+      //track (instance + owner)
       output.trackInstance                  = \
             (uint16_t)openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.instance;
       memcpy(
-            &output.trackOwner,
-            &(openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.owner),
-            sizeof(open_addr_t)
-      );
+                  &output.trackOwner,
+                  &(openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.owner),
+                  sizeof(open_addr_t)
+            );
+
+      //l2 next hop
+      memcpy(
+             &output.nextHop,
+             &(openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_nextORpreviousHop),
+             sizeof(open_addr_t)
+       );
 
       openserial_printStatus(
             STATUS_QUEUE,

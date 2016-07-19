@@ -149,16 +149,6 @@ void sixtop_init() {
       TIME_MS,
       sixtop_maintenance_timer_cb
    );
-   
-   char str[150];
-   sprintf(str, "TIMER INIT MAINTENANCE ");
-   openserial_ncat_uint32_t(str, (uint8_t) sixtop_vars.maintenanceTimerId, 150);
-   strncat(str, " TOOMANY", 150);
-   openserial_ncat_uint32_t(str, (uint8_t) TOO_MANY_TIMERS_ERROR, 150);
-   openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
-
-
-
 }
 
 void sixtop_setKaPeriod(uint16_t kaPeriod) {
@@ -872,18 +862,6 @@ The body of this function executes one of the MAC management task.
 void timer_sixtop_management_fired(void) {
    scheduleEntry_t* entry;
    sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
-   
-#ifdef _DEBUG_EB_
-   char str[150];
-    sprintf(str, "EB verif, counter");
-    openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.mgtTaskCounter, 150);
-    strncat(str, " modulo ", 150);
-    openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.ebPeriod, 150);
-    strncat(str, " timer ", 150);
-    openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.maintenanceTimerId, 150);
-    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-#endif
-
 
    switch (sixtop_vars.mgtTaskCounter) {
       case 0:
@@ -1113,41 +1091,15 @@ port_INLINE void sixtop_sendKA() {
 
 //changes the current sixtop state
 void sixtop_setState(six2six_state_t state){
-   uint8_t  previously_idle = (sixtop_vars.six2six_state == SIX_IDLE);
-
-
-   char str[150];
-
-   sprintf(str, "STATE=");
-   openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.six2six_state, 150);
-   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
-
-
    sixtop_vars.six2six_state = state;
    uint16_t  timeout_sixtop_value;    // to change the timeout value (jitter)
-
-
-
 
 
    //schedule a timer: back to the idle state after a timeout
    if (state != SIX_IDLE){
 
-      sprintf(str, "timeout STATE");
-      openserial_ncat_uint32_t(str, (uint8_t)sixtop_vars.timeoutTimerId, 150);
-      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
-
       //stops the previous timer
       if (sixtop_vars.timeoutTimerId != TOO_MANY_TIMERS_ERROR){
-
-         sprintf(str, "TIMER STOP  ");
-         openserial_ncat_uint32_t(str, (uint8_t) sixtop_vars.timeoutTimerId, 150);
-         strncat(str, " TOOMANY", 150);
-         openserial_ncat_uint32_t(str, (uint8_t) TOO_MANY_TIMERS_ERROR, 150);
-         openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
-
          opentimers_stop(sixtop_vars.timeoutTimerId);
          sixtop_vars.timeoutTimerId = TOO_MANY_TIMERS_ERROR;
       }
@@ -1164,16 +1116,6 @@ void sixtop_setState(six2six_state_t state){
             TIME_MS,
             sixtop_timeout_timer_cb
       );
-
-      sprintf(str, "TIMER START  ");
-      openserial_ncat_uint32_t(str, (uint8_t) sixtop_vars.timeoutTimerId, 150);
-      strncat(str, " TOOMANY", 150);
-      openserial_ncat_uint32_t(str, (uint8_t) TOO_MANY_TIMERS_ERROR, 150);
-      openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
-
-
-
-
    }
 
    //otf callback when we come back to the idle state
