@@ -7,6 +7,7 @@
 #include "openqueue.h"
 #include "IEEE802154E.h"
 #include "idmanager.h"
+#include "packetfunctions.h"
 
 
 #define _DEBUG_OTF_
@@ -247,30 +248,46 @@ void otf_remove_obsolete_parents(void){
    if (!sixtop_isIdle())
        return;
 
+   uint16_t nbSlots = schedule_getMaxActiveSlots();
+
    //for each cell in the schedule
-   for (i=0;i<MAXACTIVESLOTS;i++){
+   for (i=0;i<nbSlots;i++){
       cell = schedule_getCell(i);
 
       //if this cell is in TX mode, it must be toward my parent
       if (cell->type == CELLTYPE_TX) {
          neigh = neighbors_getNeighborInfo(&(cell->neighbor));
 
-         //it is not anymore a parent (or even not anymore a neighbor)
-         if (neigh == NULL || neigh->parentPreference < MAXPREFERENCE){
-
 #ifdef _DEBUG_OTF_
             char str[150];
             sprintf(str, "OTF LinkRem(oldParent)=");
-            openserial_ncat_uint8_t_hex(str, (uint8_t)cell->neighbor.addr_64b[6], 150);
-            openserial_ncat_uint8_t_hex(str, (uint8_t)cell->neighbor.addr_64b[7], 150);
+            openserial_ncat_uint8_t_hex(str, (uint8_t)(cell->neighbor.addr_64b[6]), 150);
+            openserial_ncat_uint8_t_hex(str, (uint8_t)(cell->neighbor.addr_64b[7]), 150);
             strncat(str, ",slotOffset=", 150);
             openserial_ncat_uint32_t(str, (uint32_t)cell->slotOffset, 150);
+            strncat(str, ",unfound=", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)(neigh == NULL), 150);
+            strncat(str, ",pref=", 150);
+            if (neigh == NULL)
+               openserial_ncat_uint32_t(str, (uint8_t)0, 150);
+            else
+               openserial_ncat_uint32_t(str, (uint8_t)(neigh->parentPreference), 150);
+            strncat(str, ",pos=", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)i, 150);
             openserial_printf(COMPONENT_OTF, str, strlen(str));
 #endif
 
-            sixtop_setHandler(SIX_HANDLER_OTF);
-            sixtop_removeCell(&(cell->neighbor));
-            break;
+
+
+         //it is not anymore a parent (or even not anymore a neighbor)
+         if ((neigh == NULL) || (neigh->parentPreference < MAXPREFERENCE)){
+
+            //silently removed (we changed our parent, we cannot notify it probably)
+            //these cells will be removed after a timeout from the receiver
+            schedule_removeActiveSlot(
+                  cell->slotOffset,
+                  &(cell->neighbor)
+            );
          }
       }
    }
@@ -309,10 +326,14 @@ void otf_remove_unused_cells(void){
       switch (cell->type){
          case CELLTYPE_TX:
          case CELLTYPE_RX:
+         case CELLTYPE_TXRX:
 
             //ASN in nb of slots, timeout in ms, slotduration in us
-            //the cells from TRACK_PARENT_CONTROL CANNOT be removed by timeout
-            if ((cell->track.instance != TRACK_PARENT_CONTROL) && (ieee154e_asnDiff(&(cell->lastUsedAsn)) > 1000 * timeout / TsSlotDuration)){
+            //TRACK_PARENT_CONTROL -> used for DAO. NOthing txed -> this parent has gone, rebooted, etc.
+            if (
+                  (ieee154e_asnDiff(&(cell->lastUsedAsn)) > 1000 * timeout / TsSlotDuration) &&
+                  (cell->neighbor.type == ADDR_64B)
+            ){
 
 #ifdef _DEBUG_OTF_
                char str[150];
@@ -321,6 +342,8 @@ void otf_remove_unused_cells(void){
                openserial_ncat_uint8_t_hex(str, (uint8_t)cell->neighbor.addr_64b[7], 150);
                strncat(str, ",slotOffset=", 150);
                openserial_ncat_uint32_t(str, (uint32_t)cell->slotOffset, 150);
+               strncat(str, ",pos=", 150);
+               openserial_ncat_uint32_t(str, (uint32_t)i, 150);
                openserial_printf(COMPONENT_OTF, str, strlen(str));
 #endif
 
@@ -404,6 +427,8 @@ void otf_notif_pktTx(OpenQueueEntry_t* msg){
    if (!otf_verifPossible())
       return;
 
+   //remove inconsistencies in the schedule
+   otf_verifSchedule();
 
 #if (TRACK_MGMT > TRACK_MGMT_NO)
 #ifdef OTF_AGRESSIVE

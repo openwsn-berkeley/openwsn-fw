@@ -695,8 +695,9 @@ void removeNeighbor(uint8_t neighborIndex) {
    //neighbors_vars.neighbors[neighborIndex].addr_16b.type           = ADDR_NONE; // to save RAM
    neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
    //neighbors_vars.neighbors[neighborIndex].addr_128b.type          = ADDR_NONE; // to save RAM
-   neighbors_vars.neighbors[neighborIndex].DAGrank                   = DEFAULTDAGRANK;
+   neighbors_vars.neighbors[neighborIndex].DAGrank                   = 0;
    neighbors_vars.neighbors[neighborIndex].rssi                      = 0;
+   neighbors_vars.neighbors[neighborIndex].joinPrio                  = 0;
    neighbors_vars.neighbors[neighborIndex].numRx                     = 0;
    neighbors_vars.neighbors[neighborIndex].numTx                     = 0;
    neighbors_vars.neighbors[neighborIndex].numTxACK                  = 0;
