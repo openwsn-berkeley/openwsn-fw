@@ -35,6 +35,7 @@ void schedule_init() {
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
    for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
       schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
+      schedule_vars.scheduleBuf[running_slotOffset].reinit = FALSE;       //init -> cannot be considered as a re-initialization
    }
    schedule_vars.backoffExponent = MINBE-1;
    schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
@@ -116,59 +117,72 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_schedule() {
+
+bool debugPrint_schedule_entry(uint8_t debugPrintRow){
    debugScheduleEntry_t temp;
-   uint8_t              row;
-   
-   for(row=0; row<SCHEDULE_NBROWS_OPENSERIALSTATUS; row++){
 
-      // increment the row just printed
+   temp.row                            = schedule_vars.debugPrintRow;
+   temp.slotOffset                     = \
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
+   temp.type                           = \
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
+   temp.shared                         = \
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
+   temp.channelOffset                  = \
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+   memcpy(
+         &temp.neighbor,
+         &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
+         sizeof(open_addr_t)
+   );
+   temp.numRx                          = \
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
+   temp.numTx                          = \
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
+   temp.numTxACK                       = \
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+   temp.trackInstance                  = \
+         (uint16_t)schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].track.instance;
+   memcpy(
+         &temp.trackOwner,
+         &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].track.owner,
+         sizeof(open_addr_t)
+   );
+
+   memcpy(
+         &temp.lastUsedAsn,
+         &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
+         sizeof(asn_t)
+   );
+
+   // send status data over serial port
+   openserial_printStatus(
+         STATUS_SCHEDULE,
+         (uint8_t*)&temp,
+         sizeof(debugScheduleEntry_t)
+   );
+   return TRUE;
+}
+
+uint16_t rowDebugMax = 0;
+bool debugPrint_schedule() {
+   uint8_t rowNbWritten = 0;
+
+   while (rowNbWritten < SCHEDULE_NBROWS_OPENSERIALSTATUS){
+
+      //this cell is not OFF and was not reinitialized recently
+      if (schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type != CELLTYPE_OFF && !schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].reinit){
+         debugPrint_schedule_entry(schedule_vars.debugPrintRow);
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].reinit = FALSE;
+
+         //nb of cells actually sent to openserial_printStatus
+         rowNbWritten++;
+      }
+
+      // increment the row just printed (or not)
       schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%schedule_vars.maxActiveSlots;
-
-      // gather status data
-      temp.row                            = schedule_vars.debugPrintRow;
-      temp.slotOffset                     = \
-            schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
-      temp.type                           = \
-            schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
-      temp.shared                         = \
-            schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
-      temp.channelOffset                  = \
-            schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
-      memcpy(
-            &temp.neighbor,
-            &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
-            sizeof(open_addr_t)
-      );
-      temp.numRx                          = \
-            schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
-      temp.numTx                          = \
-            schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
-      temp.numTxACK                       = \
-            schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
-      temp.trackInstance                  = \
-            (uint16_t)schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].track.instance;
-      memcpy(
-            &temp.trackOwner,
-            &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].track.owner,
-            sizeof(open_addr_t)
-      );
-
-
-      memcpy(
-            &temp.lastUsedAsn,
-            &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
-            sizeof(asn_t)
-      );
-
-      // send status data over serial port
-      openserial_printStatus(
-            STATUS_SCHEDULE,
-            (uint8_t*)&temp,
-            sizeof(debugScheduleEntry_t)
-      );
    }
-   
+
    return TRUE;
 }
 
@@ -915,6 +929,7 @@ void schedule_resetEntry(scheduleEntry_t* e) {
    e->lastUsedAsn.bytes2and3 = 0;
    e->lastUsedAsn.byte4      = 0;
    e->next                   = NULL;
+   e->reinit                 = TRUE;   //reintiialized
 
    e->track = sixtop_get_trackbesteffort();
 }

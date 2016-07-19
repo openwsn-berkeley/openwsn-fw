@@ -102,6 +102,7 @@ typedef struct {
    track_t         track;
    asn_t           lastUsedAsn;
    void*           next;
+   uint8_t         reinit;
 } scheduleEntry_t;
 
 BEGIN_PACK
