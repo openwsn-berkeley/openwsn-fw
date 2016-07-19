@@ -120,16 +120,35 @@ void openbridge_triggerData(void)                       { return; }
 
 //===== L4
 
-void icmpv6_init(void)                                  { return; }
-void icmpv6echo_init(void)                              { return; }
-void icmpv6echo_trigger(void)                           { return; }
-void icmpv6router_init(void)                            { return; }
-void icmpv6router_trigger(void)                         { return; }
-void icmpv6rpl_init(void)                               { return; }
-void icmpv6rpl_trigger(void)                            { return; }
-void icmpv6rpl_writeDODAGid(uint8_t* dodagid)           { return; }
-void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod)         { return; }
-void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod)         { return; }
+void icmpv6_init(void)                                               { return; }
+void icmpv6echo_init(void)                                           { return; }
+void icmpv6echo_trigger(void)                                        { return; }
+void icmpv6router_init(void)                                         { return; }
+void icmpv6router_trigger(void)                                      { return; }
+void icmpv6rpl_init(void)                                            { return; }
+void icmpv6rpl_trigger(void)                                         { return; }
+void icmpv6rpl_writeDODAGid(uint8_t* dodagid)                        { return; }
+void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod)                      { return; }
+void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod)                      { return; }
+bool icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr)            { 
+    return FALSE; 
+}
+bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite)  { 
+    return FALSE; 
+}
+bool icmpv6rpl_isPreferredParent(open_addr_t* address)               { 
+    return FALSE; 
+}
+dagrank_t icmpv6rpl_getMyDAGrank(void)                               { 
+    return 0; 
+}
+void icmpv6rpl_setMyDAGrank(dagrank_t rank)                          { return; }
+void icmpv6rpl_killPreferredParent(void)                             { return; }
+void icmpv6rpl_updateMyDAGrankAndParentSelection(void)               { return; }
+void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg)                  { return; }
+
+
+
 void opentcp_init(void)                                 { return; }
 void openudp_init(void)                                 { return; }
 void opencoap_init(void)                                { return; }
