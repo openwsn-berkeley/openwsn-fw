@@ -16,6 +16,7 @@
 #include "processIE.h"
 #include "neighbors.h"
 #include "sf0.h"
+#include "openrandom.h"
 
 //=========================== defines =========================================
 
@@ -73,6 +74,7 @@ int mote_main(void) {
    scheduler_init();
    openserial_init();
    idmanager_init();
+   openrandom_init();
  
    // add callback functions radio
    radio_setStartFrameCb(cb_startFrame);
