@@ -566,7 +566,7 @@ void openserial_executeCommands(void){
             } else {
                 for (i=0;i<commandLen;i++){
                     cellList[i].tsNum           = openserial_vars.inputBuf[3+i];
-                    cellList[i].choffset        = DEFAULT_CHANNEL_OFFSET;
+                    cellList[i].choffset        = openrandom_get16b()%16;
                     cellList[i].linkoptions     = CELLTYPE_TX;
                 }
                 sixtop_addORremoveCellByInfo(commandId-8,&neighbor,cellList);

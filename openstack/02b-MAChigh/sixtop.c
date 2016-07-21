@@ -1318,7 +1318,7 @@ bool sixtop_candidateAddCellList(
       i = openrandom_get16b()%schedule_getFrameLength();
       if(schedule_isSlotOffsetAvailable(i)==TRUE){
          cellList[numCandCells].tsNum       = i;
-         cellList[numCandCells].choffset    = DEFAULT_CHANNEL_OFFSET;
+         cellList[numCandCells].choffset    = openrandom_get16b()%16;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
          numCandCells++;
       }
