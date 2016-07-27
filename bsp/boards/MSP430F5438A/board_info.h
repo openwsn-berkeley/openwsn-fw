@@ -93,8 +93,8 @@ to this board.
 
 static const uint8_t rreg_uriquery[]        = "h=ucb";
 static const uint8_t infoBoardname[]        = "WSN430v13b";
-static const uint8_t infouCName[]           = "MSP430f1611";
-static const uint8_t infoRadioName[]        = "CC1101";
+static const uint8_t infouCName[]           = "MSP430f5438a";
+static const uint8_t infoRadioName[]        = "CC1200";
 
 //=========================== prototypes ======================================
 

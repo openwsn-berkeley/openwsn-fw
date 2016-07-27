@@ -24,7 +24,7 @@ void debugpins_init() {
    P6DIR |=  0x02;      // radio [P6.1] 
 }
 
-// P6.6
+// P6.5
 void debugpins_frame_toggle() {
    P6OUT ^=  0x20;
 }
@@ -57,7 +57,7 @@ void debugpins_fsm_set() {
    P6OUT |=  0x08;
 }
 
-// P6.6
+// P6.2
 void debugpins_task_toggle() {
    P6OUT ^=  0x04;
 }

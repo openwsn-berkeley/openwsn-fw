@@ -9,7 +9,7 @@
 // bsp modules
 #include "debugpins.h"
 #include "leds.h"
-//#include "uart.h"
+#include "uart.h"
 #include "spi.h"
 #include "bsp_timer.h"
 #include "radio.h"
@@ -55,8 +55,8 @@ void board_init() {
   P11SEL |= 0x07;                           // P11.0,1,2 for debugging purposes.
   //P4DIR |= BIT0 | BIT1 | BIT2 | BIT3 ;
   // setup clock speed
-  UCSCTL0 = /*DCO3 |*/ DCO1;              //  ~26.5 MHz , DCO3+DCO1 and DCORSEL_7
-  UCSCTL1 = /*DCORSEL_7 |*/ DISMOD | DCORSEL_1 ;     
+  UCSCTL0 = DCO3 | DCO1;              //  ~26.5 MHz , DCO3+DCO1 and DCORSEL_7
+  UCSCTL1 = DCORSEL_7 | DISMOD  ;     
   UCSCTL2 = 0;
   UCSCTL3 = 0;
   UCSCTL4 =  SELM_3 | SELS_3 ;
@@ -74,11 +74,11 @@ void board_init() {
    // initialize bsp modules
    debugpins_init();
    leds_init();
-  // uart_init();
-  // spi_init();
+   uart_init();
+   spi_init();
    bsp_timer_init();
   // radio_init();
-  // radiotimer_init();
+   radiotimer_init();
    
    // enable interrupts
    __bis_SR_register(GIE);
@@ -117,6 +117,50 @@ void board_reset() {
 //}
 
 // PORT1_VECTOR
+ISR(USCI_A1){
+    debugpins_isr_set();
+    switch(__even_in_range(UCA1IV,4))
+  {
+  case 0:break;                             // Vector 0 - no interrupt
+  case 2:                                   // Vector 2 - RXIFG
+    if (uart_rx_isr()==KICK_SCHEDULER) {
+      __bic_SR_register_on_exit(CPUOFF);
+      }
+    debugpins_isr_clr();
+    break;
+  case 4:                                  // Vector 4 - TXIFG
+    if (uart_tx_isr()==KICK_SCHEDULER) {
+      __bic_SR_register_on_exit(CPUOFF);
+      }
+    debugpins_isr_clr();
+    break;                             
+  default: break;
+  }
+        
+}
+
+// SPI
+ISR(USCI_A0){
+    debugpins_isr_set();
+    switch(__even_in_range(UCA0IV,4))
+  {
+  case 0:break;                             // Vector 0 - no interrupt
+  case 2:                                   // Vector 2 - RXIFG
+    if (uart_rx_isr()==KICK_SCHEDULER) {
+      __bic_SR_register_on_exit(CPUOFF);
+      }
+    debugpins_isr_clr();
+    break;
+  case 4:                                  // Vector 4 - TXIFG
+    if (uart_tx_isr()==KICK_SCHEDULER) {
+      __bic_SR_register_on_exit(CPUOFF);
+      }
+    debugpins_isr_clr();
+    break;                             
+  default: break;
+  }
+        
+}
 
 // TIMERA1_VECTOR
 
@@ -148,13 +192,13 @@ ISR(TIMER0_A0) {
 //   debugpins_isr_clr();
 //}
 
-//ISR(TIMERB1) {
-//   debugpins_isr_set();
-//   if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
-//      __bic_SR_register_on_exit(CPUOFF);
-//   }
-//   debugpins_isr_clr();
-//}
+ISR(TIMERB1) {
+   debugpins_isr_set();
+   if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
+      __bic_SR_register_on_exit(CPUOFF);
+   }
+   debugpins_isr_clr();
+}
 
 // TIMERB0_VECTOR
 

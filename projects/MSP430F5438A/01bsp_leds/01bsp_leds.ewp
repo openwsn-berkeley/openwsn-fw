@@ -58,7 +58,7 @@
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\lib\dlib\dl430fn.r43</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430xlsfn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -105,11 +105,11 @@
         </option>
         <option>
           <name>GStackSize2</name>
-          <state>80</state>
+          <state>160</state>
         </option>
         <option>
           <name>GHeapSize2</name>
-          <state>80</state>
+          <state>160</state>
         </option>
         <option>
           <name>RadioDataModelType</name>
@@ -808,7 +808,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\config\linker\lnk430.xcl</state>
+          <state>$TOOLKIT_DIR$\config\linker\lnk430f5438a.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -2268,6 +2268,12 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\board_info.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp_timer.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\debugpins.c</name>
     </file>
     <file>
@@ -2287,6 +2293,18 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\spi.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\uart.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
     </file>
   </group>
 </project>

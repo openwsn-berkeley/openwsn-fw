@@ -25,28 +25,16 @@ uart_vars_t uart_vars;
 
 void uart_init() {
    
-   P3SEL                    |=  0xc0;            // P3.6,7 = UART1TX/RX
+   //P3SEL                     =  0x30;            // P3.4,5 = = USCI_A0 TXD/RXD
+   P5SEL                       =  0xc0;            //P5.6,7 = USCI_A1
+  
+   UCA1CTL1                  |=  UCSWRST;           // **Put state machine in reset**
+   UCA1CTL1                  |=  UCSSEL_2;          // SMCLK
    
-   UCTL1                     =  SWRST;           // hold UART1 module in reset
-   UCTL1                    |=  CHAR;            // 8-bit character
-   
-   /*
-   //   9600 baud, clocked from 32kHz ACLK
-   UTCTL1                   |=  SSEL0;           // clocking from ACLK
-   UBR01                     =  0x03;            // 32768/9600 = 3.41
-   UBR11                     =  0x00;            //
-   UMCTL1                    =  0x4A;            // modulation
-   */
-   
-   // 115200 baud, clocked from 4.8MHz SMCLK
-   UTCTL1                   |=  SSEL1;           // clocking from SMCLK
-   UBR01                     =  41;              // 4.8MHz/115200 - 41.66
-   UBR11                     =  0x00;            //
-   UMCTL1                    =  0x4A;            // modulation
-   
-   
-   ME2                      |=  UTXE1 + URXE1;   // enable UART1 TX/RX
-   UCTL1                    &= ~SWRST;           // clear UART1 reset bit
+   UCA1BR0 = 0xe6;                                 // ~26.5MHz/115200 = 230 = 0xe6
+   UCA1BR1 = 0;
+   UCA1MCTL |= UCBRS_1 + UCBRF_0;
+   UCA1CTL1 &= ~UCSWRST;                          // **Initialize USCI state machine**
 
 }
 
@@ -56,27 +44,27 @@ void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
 }
 
 void    uart_enableInterrupts(){
-  IE2 |=  (URXIE1 | UTXIE1);  
+  UCA1IE |= UCRXIE | UCTXIE ;  
 }
 
 void    uart_disableInterrupts(){
-  IE2 &= ~(URXIE1 | UTXIE1);
+  UCA1IE &= ~(UCRXIE | UCTXIE);
 }
 
 void    uart_clearRxInterrupts(){
-  IFG2   &= ~URXIFG1;
+  UCA1IFG   &= ~UCRXIFG;
 }
 
 void    uart_clearTxInterrupts(){
-  IFG2   &= ~UTXIFG1;
+  UCA1IFG   &= ~UCTXIFG;
 }
 
 void    uart_writeByte(uint8_t byteToWrite){
-  U1TXBUF = byteToWrite;
+  UCA1TXBUF = byteToWrite;
 }
 
 uint8_t uart_readByte(){
-  return U1RXBUF;
+  return UCA1RXBUF;
 }
 
 //=========================== private =========================================

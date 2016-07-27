@@ -38,26 +38,27 @@ spi_vars_t spi_vars;
 
 void spi_init() {
    // clear variables
-   memset(&spi_vars,0,sizeof(spi_vars_t));
+   memset(&spi_vars,0,sizeof(spi_vars_t));  
    
-   // hold USART state machine in reset mode during configuration
-   U0CTL      =  SWRST;                          // [b0] SWRST=1: Enabled. USART logic held in reset state
+   UCB0CTL1   |=  UCSWRST ;                       // reset state
    
    // configure SPI-related pins
-   P3SEL     |=  0x02;                           // P3.1 in SIMO mode
-   P3DIR     |=  0x02;                           // P3.1 as output
-   P3SEL     |=  0x04;                           // P3.2 in SOMI mode
+   P3SEL     |= 0x01 | 0x02 | 0x04 | 0x08;                           // P3.0 Transmitter enabled, hold high
+   //P3DIR     |=  0x01;                           // P3.3 as output
+   //P3OUT     |=  0x01;
+//   P3SEL     |=  0x02;                           // P3.1 in SIMO mode
+//   P3DIR     |=  0x02;                           // P3.1 as output
+//   P3SEL     |=  0x04;                           // P3.2 in SOMI mode
+//   P3DIR     &= ~0x04;                           // P3.2 as input
+//   P3SEL     |=  0x08;                           // P3.3 in SCLK mode
+//   P3DIR     |=  0x08;                           // P3.3 as output   
    
-   //P3DIR     |=  0x04;                         // P3.2 as output
-   P3DIR     &= ~0x04;                           // ?? Shouldn't be P3.2 put as input ??? 
-
-   P3SEL     |=  0x08;                           // P3.3 in SCL mode
-   P3DIR     |=  0x08;                           // P3.3 as output 
-   P4OUT     |=  0x04;                           // P4.2 radio CS, hold high
-   P4DIR     |=  0x04;                           // P4.2 radio CS, output
+   // hold USART state machine in reset mode during configuration
+   //U0CTL      =  SWRST;                          // [b0] SWRST=1: Enabled. USART logic held in reset state
    
    // initialize USART registers
-   U0CTL     |=  CHAR | SYNC | MM ;              // [b7]          0: unused
+   UCB0CTL0  |= UCCKPH  | UCMSB | UCMST | UCSYNC | UCMODE_2  ;
+   //  UCB0CTL0  |=  CHAR | SYNC | MM ;          // [b7]          0: unused
                                                  // [b6]          0: unused
                                                  // [b5]      I2C=0: SPI mode (not I2C)   
                                                  // [b4]     CHAR=1: 8-bit data
@@ -66,21 +67,23 @@ void spi_init() {
                                                  // [b1]       MM=1: USART is master
                                                  // [b0]    SWRST=x: don't change
    
-   U0TCTL     =  CKPH | SSEL1 | STC | TXEPT;     // [b7]     CKPH=1: UCLK is delayed by one half cycle
+  // U0TCTL     =  CKPH | SSEL1 | STC | TXEPT;     // [b7]     CKPH=1: UCLK is delayed by one half cycle
                                                  // [b6]     CKPL=0: normal clock polarity
                                                  // [b5]    SSEL1=1:
                                                  // [b4]    SSEL0=0: SMCLK
                                                  // [b3]          0: unused
                                                  // [b2]          0: unused
                                                  // [b1]      STC=1: 3-pin SPI mode
-                                                 // [b0]    TXEPT=1: UxTXBUF and TX shift register are empty                                                 
+                                                 // [b0]    TXEPT=1: UxTXBUF and TX shift register are empty
    
-   U0BR1      =  0x00;
-   U0BR0      =  0x02;                           // U0BR = [U0BR1<<8|U0BR0] = 2
-   U0MCTL     =  0x00;                           // no modulation needed in SPI mode
+   UCB0CTL1     |=  UCSSEL__SMCLK;                        // SMCLK clock source
+   
+   UCB0BR1      =  0x00;
+   UCB0BR0      =  0xe6;                           // U0BR = [U0BR1<<8|U0BR0] = 230
+   //U0MCTL     =  0x00;                           // no modulation needed in SPI mode
       
    // enable USART module
-   ME1       |=  UTXE0 | URXE0;                  // [b7]    UTXE0=1: USART0 transmit enabled
+  // ME1       |=  UTXE0 | URXE0;                  // [b7]    UTXE0=1: USART0 transmit enabled
                                                  // [b6]    URXE0=1: USART0 receive enabled
                                                  // [b5]          x: don't touch!
                                                  // [b4]          x: don't touch!
@@ -90,11 +93,11 @@ void spi_init() {
                                                  // [b0]          x: don't touch!
    
    // clear USART state machine from reset, starting operation
-   U0CTL     &= ~SWRST;
+   UCB0CTL1     &= ~UCSWRST;
    
    // enable interrupts via the IEx SFRs
 #ifdef SPI_IN_INTERRUPT_MODE
-   IE1       |=  URXIE0;                         // we only enable the SPI RX interrupt
+   UCB0IE       |=  UCRXIE;                      // we only enable the SPI RX interrupt
                                                  // since TX and RX happen concurrently,
                                                  // i.e. an RX completion necessarily
                                                  // implies a TX completion.
@@ -134,15 +137,15 @@ void spi_txrx(uint8_t*     bufTx,
    spi_vars.busy             =  1;
    
    // lower CS signal to have slave listening
-   if (spi_vars.isFirst==SPI_FIRST) {
-      P4OUT                 &= ~0x04;
-   }
+//   if (spi_vars.isFirst==SPI_FIRST) {
+//      P3OUT                 &= ~0x01;
+//   }
    
 #ifdef SPI_IN_INTERRUPT_MODE
    // implementation 1. use a callback function when transaction finishes
    
    // write first byte to TX buffer
-   U0TXBUF                   = *spi_vars.pNextTxByte;
+   UCB0TXBUF                   = *spi_vars.pNextTxByte;
    
    // re-enable interrupts
    __enable_interrupt();
@@ -152,24 +155,26 @@ void spi_txrx(uint8_t*     bufTx,
    // send all bytes
    while (spi_vars.txBytesLeft>0) {
       // write next byte to TX buffer
-      U0TXBUF                = *spi_vars.pNextTxByte;
+      UCB0TXBUF                = *spi_vars.pNextTxByte;
       // busy wait on the interrupt flag
-      while ((IFG1 & URXIFG0)==0);
+     // while ((UCB0IFG & UCRXIFG)==0);
+      while ((UCB0IFG & UCRXIFG)==0);
+      
       // clear the interrupt flag
-      IFG1                  &= ~URXIFG0;
+      UCB0IFG                 &= ~UCRXIFG;
       // save the byte just received in the RX buffer
       switch (spi_vars.returnType) {
          case SPI_FIRSTBYTE:
             if (spi_vars.numTxedBytes==0) {
-               *spi_vars.pNextRxByte   = U0RXBUF;
+               *spi_vars.pNextRxByte   = UCB0RXBUF;
             }
             break;
          case SPI_BUFFER:
-            *spi_vars.pNextRxByte      = U0RXBUF;
+            *spi_vars.pNextRxByte      = UCB0RXBUF;
             spi_vars.pNextRxByte++;
             break;
          case SPI_LASTBYTE:
-            *spi_vars.pNextRxByte      = U0RXBUF;
+            *spi_vars.pNextRxByte      = UCB0RXBUF;
             break;
       }
       // one byte less to go
@@ -179,9 +184,9 @@ void spi_txrx(uint8_t*     bufTx,
    }
    
    // put CS signal high to signal end of transmission to slave
-   if (spi_vars.isLast==SPI_LAST) {
-      P4OUT                 |=  0x04;
-   }
+//   if (spi_vars.isLast==SPI_LAST) {
+//      P3OUT                 |=  0x01;
+//   }
    
    // SPI is not busy anymore
    spi_vars.busy             =  0;
@@ -198,15 +203,15 @@ kick_scheduler_t spi_isr() {
    switch (spi_vars.returnType) {
       case SPI_FIRSTBYTE:
          if (spi_vars.numTxedBytes==0) {
-            *spi_vars.pNextRxByte   = U0RXBUF;
+            *spi_vars.pNextRxByte   = UCA0RXBUF;
          }
          break;
       case SPI_BUFFER:
-         *spi_vars.pNextRxByte      = U0RXBUF;
+         *spi_vars.pNextRxByte      = UCA0RXBUF;
          spi_vars.pNextRxByte++;
          break;
       case SPI_LASTBYTE:
-         *spi_vars.pNextRxByte      = U0RXBUF;
+         *spi_vars.pNextRxByte      = UCA0RXBUF;
          break;
    }
    
@@ -217,11 +222,11 @@ kick_scheduler_t spi_isr() {
    
    if (spi_vars.txBytesLeft>0) {
       // write next byte to TX buffer
-      U0TXBUF                = *spi_vars.pNextTxByte;
+      UCA0TXBUF                = *spi_vars.pNextTxByte;
    } else {
       // put CS signal high to signal end of transmission to slave
       if (spi_vars.isLast==SPI_LAST) {
-         P4OUT                 |=  0x04;
+         P3OUT                 |=  0x01;
       }
       // SPI is not busy anymore
       spi_vars.busy             =  0;

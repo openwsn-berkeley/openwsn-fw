@@ -50,15 +50,15 @@
         </option>
         <option>
           <name>RTDescription</name>
-          <state></state>
+          <state>Use the normal configuration of the C/EC++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
         </option>
         <option>
           <name>RTConfigPath</name>
-          <state>xxx.h</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430xlsfn.h</state>
         </option>
         <option>
           <name>RTLibraryPath</name>
-          <state>xxx.r43</state>
+          <state>$TOOLKIT_DIR$\lib\dlib\dl430xlsfn.r43</state>
         </option>
         <option>
           <name>Input variant</name>
@@ -67,7 +67,7 @@
         </option>
         <option>
           <name>Input description</name>
-          <state></state>
+          <state>Automatic choice of formatter.</state>
         </option>
         <option>
           <name>Output variant</name>
@@ -76,7 +76,7 @@
         </option>
         <option>
           <name>Output description</name>
-          <state></state>
+          <state>Automatic choice of formatter.</state>
         </option>
         <option>
           <name>GRuntimeLibSelectSlave</name>
@@ -97,7 +97,7 @@
         </option>
         <option>
           <name>OGChipSelectMenu</name>
-          <state>MSP430	Generic MSP430 device</state>
+          <state>MSP430F5438A	MSP430F5438A</state>
         </option>
         <option>
           <name>GStackHeapOverride</name>
@@ -105,11 +105,11 @@
         </option>
         <option>
           <name>GStackSize2</name>
-          <state>###Uninitialized###</state>
+          <state>160</state>
         </option>
         <option>
           <name>GHeapSize2</name>
-          <state>###Uninitialized###</state>
+          <state>160</state>
         </option>
         <option>
           <name>RadioDataModelType</name>
@@ -117,7 +117,7 @@
         </option>
         <option>
           <name>GHeap20Size</name>
-          <state>###Uninitialized###</state>
+          <state>80</state>
         </option>
         <option>
           <name>GeneralMisraRules98</name>
@@ -224,7 +224,7 @@
         </option>
         <option>
           <name>Math description</name>
-          <state></state>
+          <state>Default variants of cos, sin, tan, log, log10, pow, and exp.</state>
         </option>
       </data>
     </settings>
@@ -350,7 +350,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state></state>
+          <state>$FILE_BNAME$.r43</state>
         </option>
         <option>
           <name>CCLibConfigHeader</name>
@@ -390,7 +390,11 @@
         </option>
         <option>
           <name>newCCIncludePaths</name>
-          <state></state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\bsp\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2246,6 +2250,12 @@
       <data/>
     </settings>
   </configuration>
+  <group>
+    <name>application</name>
+  </group>
+  <group>
+    <name>bsp</name>
+  </group>
 </project>
 
 

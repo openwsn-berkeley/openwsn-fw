@@ -41,7 +41,7 @@
         </option>
         <option>
           <name>DynDriver</name>
-          <state>SIM430</state>
+          <state>430FET</state>
         </option>
         <option>
           <name>dDllSlave</name>
@@ -195,7 +195,7 @@
         </option>
         <option>
           <name>TargetVoltage</name>
-          <state>###Uninitialized###</state>
+          <state>3.0</state>
         </option>
         <option>
           <name>AllowLockedFlashAccessP7</name>
@@ -264,7 +264,7 @@
         </option>
         <option>
           <name>GPassword</name>
-          <state>###Uninitialized###</state>
+          <state></state>
         </option>
         <option>
           <name>DebugLPM5</name>

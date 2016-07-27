@@ -34,7 +34,7 @@
 //   Built with CCE Version: 3.2.2 and IAR Embedded Workbench Version: 4.11B
 //******************************************************************************
 
-#include <msp430.h>
+#include <msp430f5438a.h>
 
 unsigned char MST_Data,SLV_Data;
 
