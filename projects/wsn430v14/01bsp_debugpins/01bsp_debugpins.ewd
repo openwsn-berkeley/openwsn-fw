@@ -10,7 +10,7 @@
     <debug>1</debug>
     <settings>
       <name>C-SPY</name>
-      <archiveVersion>4</archiveVersion>
+      <archiveVersion>5</archiveVersion>
       <data>
         <version>27</version>
         <wantNonLocal>1</wantNonLocal>
@@ -153,7 +153,7 @@
       <name>430FET</name>
       <archiveVersion>1</archiveVersion>
       <data>
-        <version>27</version>
+        <version>30</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -235,7 +235,7 @@
         </option>
         <option>
           <name>FetConnection</name>
-          <version>3</version>
+          <version>4</version>
           <state>0</state>
         </option>
         <option>
@@ -310,6 +310,18 @@
           <name>eraseTypeSlave</name>
           <state>0</state>
         </option>
+        <option>
+          <name>DataSampleBpReservation</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>cycleCounterLevel</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>variablewatch</name>
+          <state>0</state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -347,7 +359,7 @@
     </settings>
     <debuggerPlugins>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\Lcd\lcd.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\lcd\lcd.ewplugin</file>
         <loadFlag>1</loadFlag>
       </plugin>
       <plugin>
@@ -364,10 +376,6 @@
       </plugin>
       <plugin>
         <file>$TOOLKIT_DIR$\plugins\rtos\OpenRTOS\OpenRTOSPlugin.ewplugin</file>
-        <loadFlag>0</loadFlag>
-      </plugin>
-      <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\PowerPac\PowerPacRTOS.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>
@@ -416,7 +424,7 @@
     <debug>0</debug>
     <settings>
       <name>C-SPY</name>
-      <archiveVersion>4</archiveVersion>
+      <archiveVersion>5</archiveVersion>
       <data>
         <version>27</version>
         <wantNonLocal>1</wantNonLocal>
@@ -559,7 +567,7 @@
       <name>430FET</name>
       <archiveVersion>1</archiveVersion>
       <data>
-        <version>27</version>
+        <version>30</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -641,7 +649,7 @@
         </option>
         <option>
           <name>FetConnection</name>
-          <version>3</version>
+          <version>4</version>
           <state>0</state>
         </option>
         <option>
@@ -716,6 +724,18 @@
           <name>eraseTypeSlave</name>
           <state>0</state>
         </option>
+        <option>
+          <name>DataSampleBpReservation</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>cycleCounterLevel</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>variablewatch</name>
+          <state>0</state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -753,7 +773,7 @@
     </settings>
     <debuggerPlugins>
       <plugin>
-        <file>$TOOLKIT_DIR$\plugins\Lcd\lcd.ewplugin</file>
+        <file>$TOOLKIT_DIR$\plugins\lcd\lcd.ewplugin</file>
         <loadFlag>1</loadFlag>
       </plugin>
       <plugin>
@@ -770,10 +790,6 @@
       </plugin>
       <plugin>
         <file>$TOOLKIT_DIR$\plugins\rtos\OpenRTOS\OpenRTOSPlugin.ewplugin</file>
-        <loadFlag>0</loadFlag>
-      </plugin>
-      <plugin>
-        <file>$TOOLKIT_DIR$\plugins\rtos\PowerPac\PowerPacRTOS.ewplugin</file>
         <loadFlag>0</loadFlag>
       </plugin>
       <plugin>

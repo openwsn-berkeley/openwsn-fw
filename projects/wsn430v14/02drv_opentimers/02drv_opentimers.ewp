@@ -10,9 +10,9 @@
     <debug>1</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>14</archiveVersion>
+      <archiveVersion>18</archiveVersion>
       <data>
-        <version>32</version>
+        <version>33</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -216,6 +216,15 @@
         <option>
           <name>GLockIpe</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>Math variant</name>
+          <version>0</version>
+          <state>0</state>
+        </option>
+        <option>
+          <name>Math description</name>
+          <state></state>
         </option>
       </data>
     </settings>
@@ -706,6 +715,7 @@
       <data>
         <extensions></extensions>
         <cmdline></cmdline>
+        <hasPrio>0</hasPrio>
       </data>
     </settings>
     <settings>
@@ -725,7 +735,7 @@
       <name>XLINK</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>27</version>
+        <version>29</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>1</debug>
         <option>
@@ -743,7 +753,7 @@
         </option>
         <option>
           <name>FormatVariant</name>
-          <version>8</version>
+          <version>9</version>
           <state>2</state>
         </option>
         <option>
@@ -937,7 +947,7 @@
         </option>
         <option>
           <name>ExtraFormatVariant</name>
-          <version>8</version>
+          <version>9</version>
           <state>2</state>
         </option>
         <option>
@@ -1021,6 +1031,46 @@
           <name>XlinkIPE</name>
           <state>1</state>
         </option>
+        <option>
+          <name>XlinkLogEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogInputFiles</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogModuleSelection</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogPrintfScanf</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogSegmentSelection</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogStackDepth</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkStackUsageEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkControlFiles</name>
+          <state></state>
+        </option>
+        <option>
+          <name>XlinkCallGraphFileEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkCallGraphFileName</name>
+          <state>$LIST_DIR$\$PROJ_FNAME$.call_graph.cgx</state>
+        </option>
       </data>
     </settings>
     <settings>
@@ -1088,9 +1138,9 @@
     <debug>0</debug>
     <settings>
       <name>General</name>
-      <archiveVersion>14</archiveVersion>
+      <archiveVersion>18</archiveVersion>
       <data>
-        <version>32</version>
+        <version>33</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1294,6 +1344,15 @@
         <option>
           <name>GLockIpe</name>
           <state>0</state>
+        </option>
+        <option>
+          <name>Math variant</name>
+          <version>0</version>
+          <state>0</state>
+        </option>
+        <option>
+          <name>Math description</name>
+          <state></state>
         </option>
       </data>
     </settings>
@@ -1778,6 +1837,7 @@
       <data>
         <extensions></extensions>
         <cmdline></cmdline>
+        <hasPrio>0</hasPrio>
       </data>
     </settings>
     <settings>
@@ -1797,7 +1857,7 @@
       <name>XLINK</name>
       <archiveVersion>4</archiveVersion>
       <data>
-        <version>27</version>
+        <version>29</version>
         <wantNonLocal>1</wantNonLocal>
         <debug>0</debug>
         <option>
@@ -1815,7 +1875,7 @@
         </option>
         <option>
           <name>FormatVariant</name>
-          <version>8</version>
+          <version>9</version>
           <state>2</state>
         </option>
         <option>
@@ -2009,7 +2069,7 @@
         </option>
         <option>
           <name>ExtraFormatVariant</name>
-          <version>8</version>
+          <version>9</version>
           <state>2</state>
         </option>
         <option>
@@ -2092,6 +2152,46 @@
         <option>
           <name>XlinkIPE</name>
           <state>1</state>
+        </option>
+        <option>
+          <name>XlinkLogEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogInputFiles</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogModuleSelection</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogPrintfScanf</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogSegmentSelection</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkLogStackDepth</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkStackUsageEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkControlFiles</name>
+          <state></state>
+        </option>
+        <option>
+          <name>XlinkCallGraphFileEnable</name>
+          <state>0</state>
+        </option>
+        <option>
+          <name>XlinkCallGraphFileName</name>
+          <state>$LIST_DIR$\$PROJ_FNAME$.call_graph.cgx</state>
         </option>
       </data>
     </settings>

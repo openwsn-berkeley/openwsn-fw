@@ -42,57 +42,41 @@ void spi_init() {
    
    UCB0CTL1   |=  UCSWRST ;                       // reset state
    
-   // configure SPI-related pins
-   P3SEL     |= 0x01 | 0x02 | 0x04 | 0x08;                           // P3.0 Transmitter enabled, hold high
-   //P3DIR     |=  0x01;                           // P3.3 as output
-   //P3OUT     |=  0x01;
-//   P3SEL     |=  0x02;                           // P3.1 in SIMO mode
-//   P3DIR     |=  0x02;                           // P3.1 as output
-//   P3SEL     |=  0x04;                           // P3.2 in SOMI mode
-//   P3DIR     &= ~0x04;                           // P3.2 as input
-//   P3SEL     |=  0x08;                           // P3.3 in SCLK mode
-//   P3DIR     |=  0x08;                           // P3.3 as output   
+   // RF SPI0 CS as GPIO output high
+   //
+   P3SEL &= ~BIT0;
+   P3OUT |=  BIT0;
+   P3DIR |=  BIT0;
+   /* Configuration
+   * -  8-bit
+   * -  Master Mode
+   * -  3-pin
+   * -  synchronous mode
+   * -  MSB first
+   * -  Clock phase select = captured on first edge
+   * -  Inactive state is low
+   * -  SMCLK as clock source
+   * -  Spi clk is adjusted corresponding to systemClock as the highest rate
+   *    supported by the supported radios: this could be optimized and done
+   *    after chip detect.
+   */
+   UCB0CTL0  =  0x00+UCMST + UCSYNC + UCMODE_0 + UCMSB + UCCKPH;
+   UCB0CTL1 |=  UCSSEL_2;
+   UCB0BR1   =  0x00;
+   UCB0BR0   =  0x06;
+   /* Configure port and pins
+   * - MISO/MOSI/SCLK GPIO controlled by peripheral
+   * - CS_n GPIO controlled manually, set to 1
+   */
+   P3SEL    |=  BIT1 | BIT2 | BIT3 ;
+   P3SEL    &= ~BIT0 ;
+   P3OUT    |=  BIT0 | BIT2 ;/* Pullup on MISO */
    
-   // hold USART state machine in reset mode during configuration
-   //U0CTL      =  SWRST;                          // [b0] SWRST=1: Enabled. USART logic held in reset state
+   P3DIR    |=  BIT0;
+   /* In case not automatically set */
+   P3DIR    |= BIT1 | BIT3 ;
+   P3DIR    &= ~BIT2 ;
    
-   // initialize USART registers
-   UCB0CTL0  |= UCCKPH  | UCMSB | UCMST | UCSYNC | UCMODE_2  ;
-   //  UCB0CTL0  |=  CHAR | SYNC | MM ;          // [b7]          0: unused
-                                                 // [b6]          0: unused
-                                                 // [b5]      I2C=0: SPI mode (not I2C)   
-                                                 // [b4]     CHAR=1: 8-bit data
-                                                 // [b3]   LISTEN=0: Disabled
-                                                 // [b2]     SYNC=1: SPI mode (not UART)
-                                                 // [b1]       MM=1: USART is master
-                                                 // [b0]    SWRST=x: don't change
-   
-  // U0TCTL     =  CKPH | SSEL1 | STC | TXEPT;     // [b7]     CKPH=1: UCLK is delayed by one half cycle
-                                                 // [b6]     CKPL=0: normal clock polarity
-                                                 // [b5]    SSEL1=1:
-                                                 // [b4]    SSEL0=0: SMCLK
-                                                 // [b3]          0: unused
-                                                 // [b2]          0: unused
-                                                 // [b1]      STC=1: 3-pin SPI mode
-                                                 // [b0]    TXEPT=1: UxTXBUF and TX shift register are empty
-   
-   UCB0CTL1     |=  UCSSEL__SMCLK;                        // SMCLK clock source
-   
-   UCB0BR1      =  0x00;
-   UCB0BR0      =  0xe6;                           // U0BR = [U0BR1<<8|U0BR0] = 230
-   //U0MCTL     =  0x00;                           // no modulation needed in SPI mode
-      
-   // enable USART module
-  // ME1       |=  UTXE0 | URXE0;                  // [b7]    UTXE0=1: USART0 transmit enabled
-                                                 // [b6]    URXE0=1: USART0 receive enabled
-                                                 // [b5]          x: don't touch!
-                                                 // [b4]          x: don't touch!
-                                                 // [b3]          x: don't touch!
-                                                 // [b2]          x: don't touch!
-                                                 // [b1]          x: don't touch!
-                                                 // [b0]          x: don't touch!
-   
-   // clear USART state machine from reset, starting operation
    UCB0CTL1     &= ~UCSWRST;
    
    // enable interrupts via the IEx SFRs
@@ -158,7 +142,8 @@ void spi_txrx(uint8_t*     bufTx,
       UCB0TXBUF                = *spi_vars.pNextTxByte;
       // busy wait on the interrupt flag
      // while ((UCB0IFG & UCRXIFG)==0);
-      while ((UCB0IFG & UCRXIFG)==0);
+    //  *spi_vars.pNextRxByte      = UCB0RXBUF;
+    //  while ((UCB0IFG & UCRXIFG)==0);
       
       // clear the interrupt flag
       UCB0IFG                 &= ~UCRXIFG;
@@ -203,15 +188,15 @@ kick_scheduler_t spi_isr() {
    switch (spi_vars.returnType) {
       case SPI_FIRSTBYTE:
          if (spi_vars.numTxedBytes==0) {
-            *spi_vars.pNextRxByte   = UCA0RXBUF;
+            *spi_vars.pNextRxByte   = UCB0RXBUF;
          }
          break;
       case SPI_BUFFER:
-         *spi_vars.pNextRxByte      = UCA0RXBUF;
+         *spi_vars.pNextRxByte      = UCB0RXBUF;
          spi_vars.pNextRxByte++;
          break;
       case SPI_LASTBYTE:
-         *spi_vars.pNextRxByte      = UCA0RXBUF;
+         *spi_vars.pNextRxByte      = UCB0RXBUF;
          break;
    }
    
@@ -222,7 +207,7 @@ kick_scheduler_t spi_isr() {
    
    if (spi_vars.txBytesLeft>0) {
       // write next byte to TX buffer
-      UCA0TXBUF                = *spi_vars.pNextTxByte;
+      UCB0TXBUF                = *spi_vars.pNextTxByte;
    } else {
       // put CS signal high to signal end of transmission to slave
       if (spi_vars.isLast==SPI_LAST) {

@@ -7,6 +7,7 @@
 #include "msp430f5438a.h"
 #include "board.h"
 // bsp modules
+#include "bsp.h"
 #include "debugpins.h"
 #include "leds.h"
 #include "uart.h"
@@ -31,46 +32,16 @@ int main(void) {
 
 void board_init() {
    
-   
-   //DCOCTL    |=  DCO0 | DCO1 | DCO2;             // MCLK at ~8MHz
-   //BCSCTL1   |=  RSEL0 | RSEL1 | RSEL2;          // MCLK at ~8MHz
-                                                 // by default, ACLK from 32kHz XTAL which is running
-   // disable watchdog timer 
-   WDTCTL = WDTPW+WDTHOLD;                   // Stop WDT
-   __bis_SR_register(SCG0);                  // allows to unset the DCO flag error    
- // __bis_SR_register(SCG1);                // this switches off the smclk
- 
-  // Initialize LFXT1
-  P7SEL |= 0x03;                            // Select XT1
-  UCSCTL6 &= ~(XT1OFF);                     // XT1 On
-  UCSCTL6 |= XCAP_3;                        // Internal load cap
-    // Loop until XT1 fault flag is cleared
-  do
-  {
-    UCSCTL7 &= ~XT1LFOFFG;                  // Clear XT1 fault flags
-  }while (UCSCTL7&XT1LFOFFG);               // Test XT1 fault flag
-  
-  //P6DIR |= BIT1;                            // P6.1 output
-  P11DIR |= 0x07;                           // ACLK, MCLK, SMCLK set out to pins
-  P11SEL |= 0x07;                           // P11.0,1,2 for debugging purposes.
-  //P4DIR |= BIT0 | BIT1 | BIT2 | BIT3 ;
-  // setup clock speed
-  UCSCTL0 = DCO3 | DCO1;              //  ~26.5 MHz , DCO3+DCO1 and DCORSEL_7
-  UCSCTL1 = DCORSEL_7 | DISMOD  ;     
-  UCSCTL2 = 0;
-  UCSCTL3 = 0;
-  UCSCTL4 =  SELM_3 | SELS_3 ;
-  do
-  {
-    UCSCTL7 &= ~(XT2OFFG + XT1LFOFFG + XT1HFOFFG + DCOFFG );
-                                       // Clear XT2,XT1,DCO fault flags
-    SFRIFG1 &= ~OFIFG;                      // Clear fault flags
-  }while (SFRIFG1&OFIFG); 
-   
-   // initialize pins
-   //P4DIR     |=  0x20;                           // [P4.5] radio VREG:  output
-   //P4DIR     |=  0x40;                           // [P4.6] radio reset: output
-   
+  uint16_t ui16IntState;
+   // Stop watchdog timer (prevent timeout reset)
+   WDTCTL = WDTPW + WDTHOLD;
+   // Disable global interrupts
+   ui16IntState = __get_interrupt_state();
+   __disable_interrupt();
+   //  Set capacitor values for XT1, 32768 Hz
+   bspMcuStartXT1();
+   bspSysClockSpeedSet(BSP_SYS_CLK_25MHZ);
+   __set_interrupt_state(ui16IntState);
    // initialize bsp modules
    debugpins_init();
    leds_init();

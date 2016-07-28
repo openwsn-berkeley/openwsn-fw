@@ -2264,6 +2264,12 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\board_info.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp_timer.c</name>
     </file>
     <file>

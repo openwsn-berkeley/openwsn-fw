@@ -2272,10 +2272,25 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\board_info.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp_timer.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\debugpins.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\eui64.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\leds.c</name>
@@ -2291,6 +2306,18 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\spi.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\uart.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>
     </file>
   </group>
 </project>
