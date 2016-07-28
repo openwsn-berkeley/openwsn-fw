@@ -931,17 +931,22 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         }
         
         sixtop_vars.six2six_state = SIX_IDLE;
-        sixtop_vars.handler = SIX_HANDLER_NONE;
         opentimers_stop(sixtop_vars.timeoutTimerId);
        
-        if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
-            sixtop_request(
-                IANA_6TOP_CMD_DELETE,
-                &(msg->l2_nextORpreviousHop),
-                1
-            );
-            sixtop_request(IANA_6TOP_CMD_ADD,&(msg->l2_nextORpreviousHop),1);
-            sixtop_vars.handler = SIX_HANDLER_NONE;
+        if (
+            msg->l2_sixtop_returnCode     == IANA_6TOP_RC_SUCCESS && 
+            msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD
+        ){
+            if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
+                sixtop_request(
+                    IANA_6TOP_CMD_DELETE,
+                    &(msg->l2_nextORpreviousHop),
+                    1
+                );
+                sixtop_request(IANA_6TOP_CMD_ADD,&(msg->l2_nextORpreviousHop),1);
+            } else {
+                sixtop_vars.handler = SIX_HANDLER_NONE;
+            }
         }
         break;
     default:
