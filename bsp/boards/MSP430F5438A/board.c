@@ -111,27 +111,6 @@ ISR(USCI_A1){
 }
 
 // SPI
-ISR(USCI_A0){
-    debugpins_isr_set();
-    switch(__even_in_range(UCA0IV,4))
-  {
-  case 0:break;                             // Vector 0 - no interrupt
-  case 2:                                   // Vector 2 - RXIFG
-    if (uart_rx_isr()==KICK_SCHEDULER) {
-      __bic_SR_register_on_exit(CPUOFF);
-      }
-    debugpins_isr_clr();
-    break;
-  case 4:                                  // Vector 4 - TXIFG
-    if (uart_tx_isr()==KICK_SCHEDULER) {
-      __bic_SR_register_on_exit(CPUOFF);
-      }
-    debugpins_isr_clr();
-    break;                             
-  default: break;
-  }
-        
-}
 
 // TIMERA1_VECTOR
 

@@ -215,6 +215,59 @@ extern "C"
 //
 // TBD
 
+#define TRXEM_SPI_MOSI_PIN   BIT1
+#define TRXEM_SPI_MISO_PIN   BIT2
+#define TRXEM_SPI_SCLK_PIN   BIT3
+#define TRXEM_SPI_SC_N_PIN   BIT0
+
+#define TRXEM_PORT_SEL       P3SEL
+#define TRXEM_PORT_OUT       P3OUT
+#define TRXEM_PORT_DIR       P3DIR
+#define TRXEM_PORT_IN        P3IN
+
+///////////////////////////MACRO from IAR
+/*
+*  This macro is for use by other macros to form a fully valid C statement.
+*  Without this, the if/else conditionals could show unexpected behavior.
+*
+*  For example, use...
+*    #define SET_REGS()  st( ioreg1 = 0; ioreg2 = 0; )
+*  instead of ...
+*    #define SET_REGS()  { ioreg1 = 0; ioreg2 = 0; }
+*  or
+*    #define  SET_REGS()    ioreg1 = 0; ioreg2 = 0;
+*  The last macro would not behave as expected in the if/else construct.
+*  The second to last macro will cause a compiler error in certain uses
+*  of if/else construct
+*
+*  It is not necessary, or recommended, to use this macro where there is
+*  already a valid C statement.  For example, the following is redundant...
+*    #define CALL_FUNC()   st(  func();  )
+*  This should simply be...
+*    #define CALL_FUNC()   func()
+*
+* (The while condition below evaluates false without generating a
+*  constant-controlling-loop type of warning on most compilers.)
+*/
+#define st(x)      do { x } while (__LINE__ == -1)
+///////////////////////////////////
+/* Macros for Tranceivers(TRX) */
+#define TRXEM_SPI_BEGIN()              st( P3OUT &= ~TRXEM_SPI_SC_N_PIN; asm("NOP"); )
+#define TRXEM_SPI_TX(x)                st( UCB0IFG &= ~UCRXIFG; UCB0TXBUF= (x); )
+#define TRXEM_SPI_WAIT_DONE()          st( while(!(UCB0IFG & UCRXIFG)); )
+#define TRXEM_SPI_RX()                 UCB0RXBUF
+#define TRXEM_SPI_WAIT_MISO_LOW(x)     st( uint8 count = 200; \
+                                           while(TRXEM_PORT_IN & TRXEM_SPI_MISO_PIN) \
+                                           { \
+                                              __delay_cycles(5000); \
+                                              count--; \
+                                              if (count == 0) break; \
+                                           } \
+                                           if(count>0) (x) = 1; \
+                                           else (x) = 0; )
+
+#define TRXEM_SPI_END()                st( asm("NOP"); P3OUT |= TRXEM_SPI_SC_N_PIN; )
+
 
 /******************************************************************************
 * FUNCTION PROTOTYPES

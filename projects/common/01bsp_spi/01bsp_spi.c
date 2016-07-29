@@ -41,11 +41,12 @@ int mote_main(void) {
    board_init();
 
    // prepare buffer to send over SPI
-   app_vars.txBuf[0]     =  (0x80 | 0x1E);  // [b7]    Read/Write:    1    (read)
+   app_vars.txBuf[0]     =  (0x80 | 0x2F);  // [b7]    Read/Write:    1    (read)
                                             // [b6]    RAM/Register : 0    (register)
                                             // [b5-0]  address:       0x1E (Manufacturer ID, Lower 16 Bit)
-   app_vars.txBuf[1]     =  0x00;           // send a SNOP strobe just to get the reg value
+   app_vars.txBuf[1]     =  0x8F;           // send a SNOP strobe just to get the reg value
    app_vars.txBuf[2]     =  0x00;           // send a SNOP strobe just to get the reg value
+  // app_vars.txBuf[3]     =  0x00;
    
    // retrieve radio manufacturer ID over SPI
    while(1) {

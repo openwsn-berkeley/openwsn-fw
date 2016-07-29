@@ -7,6 +7,7 @@
 #include "msp430f5438a.h"
 #include "spi.h"
 #include "leds.h"
+#include "bsp.h"
 
 //=========================== defines =========================================
 
@@ -44,9 +45,9 @@ void spi_init() {
    
    // RF SPI0 CS as GPIO output high
    //
-   P3SEL &= ~BIT0;
-   P3OUT |=  BIT0;
-   P3DIR |=  BIT0;
+   P3SEL &= ~TRXEM_SPI_SC_N_PIN;
+   P3OUT |=  TRXEM_SPI_SC_N_PIN;
+   P3DIR |=  TRXEM_SPI_SC_N_PIN;
    /* Configuration
    * -  8-bit
    * -  Master Mode
@@ -68,14 +69,14 @@ void spi_init() {
    * - MISO/MOSI/SCLK GPIO controlled by peripheral
    * - CS_n GPIO controlled manually, set to 1
    */
-   P3SEL    |=  BIT1 | BIT2 | BIT3 ;
-   P3SEL    &= ~BIT0 ;
-   P3OUT    |=  BIT0 | BIT2 ;/* Pullup on MISO */
+   P3SEL    |=  TRXEM_SPI_MOSI_PIN | TRXEM_SPI_MISO_PIN | TRXEM_SPI_SCLK_PIN ;
+   P3SEL    &= ~TRXEM_SPI_SC_N_PIN ;
+   P3OUT    |=  TRXEM_SPI_SC_N_PIN | TRXEM_SPI_MISO_PIN ;/* Pullup on MISO */
    
-   P3DIR    |=  BIT0;
+   P3DIR    |=  TRXEM_SPI_SC_N_PIN;
    /* In case not automatically set */
-   P3DIR    |= BIT1 | BIT3 ;
-   P3DIR    &= ~BIT2 ;
+   P3DIR    |= TRXEM_SPI_MOSI_PIN | TRXEM_SPI_SCLK_PIN ;
+   P3DIR    &= ~TRXEM_SPI_MISO_PIN ;
    
    UCB0CTL1     &= ~UCSWRST;
    
@@ -121,9 +122,11 @@ void spi_txrx(uint8_t*     bufTx,
    spi_vars.busy             =  1;
    
    // lower CS signal to have slave listening
-//   if (spi_vars.isFirst==SPI_FIRST) {
-//      P3OUT                 &= ~0x01;
-//   }
+   /* Pull CS_N low and wait for SO to go low before communication starts */
+   if (spi_vars.isFirst==SPI_FIRST) {
+      TRXEM_SPI_BEGIN();
+      while(P3IN & TRXEM_SPI_MISO_PIN);
+  }
    
 #ifdef SPI_IN_INTERRUPT_MODE
    // implementation 1. use a callback function when transaction finishes
@@ -134,19 +137,13 @@ void spi_txrx(uint8_t*     bufTx,
    // re-enable interrupts
    __enable_interrupt();
 #else
-   // implementation 2. busy wait for each byte to be sent
    
    // send all bytes
    while (spi_vars.txBytesLeft>0) {
-      // write next byte to TX buffer
-      UCB0TXBUF                = *spi_vars.pNextTxByte;
-      // busy wait on the interrupt flag
-     // while ((UCB0IFG & UCRXIFG)==0);
-    //  *spi_vars.pNextRxByte      = UCB0RXBUF;
-    //  while ((UCB0IFG & UCRXIFG)==0);
       
-      // clear the interrupt flag
-      UCB0IFG                 &= ~UCRXIFG;
+     TRXEM_SPI_TX(*spi_vars.pNextTxByte);
+      // busy wait on the interrupt flag
+      while ((UCB0IFG & UCRXIFG)==0);
       // save the byte just received in the RX buffer
       switch (spi_vars.returnType) {
          case SPI_FIRSTBYTE:
@@ -169,9 +166,9 @@ void spi_txrx(uint8_t*     bufTx,
    }
    
    // put CS signal high to signal end of transmission to slave
-//   if (spi_vars.isLast==SPI_LAST) {
-//      P3OUT                 |=  0x01;
-//   }
+   if (spi_vars.isLast==SPI_LAST) {
+          TRXEM_SPI_END();
+   }
    
    // SPI is not busy anymore
    spi_vars.busy             =  0;
