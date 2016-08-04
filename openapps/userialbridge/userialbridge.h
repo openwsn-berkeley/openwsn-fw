@@ -12,16 +12,12 @@
 
 //=========================== define ==========================================
 
-#define USERIALBRIDGE_PERIOD_MS 30000
-
 //=========================== typedef =========================================
 
 //=========================== variables =======================================
 
 typedef struct {
-   opentimer_id_t       timerId;  ///< periodic timer which triggers transmission
    uint16_t             counter;  ///< incrementing counter which is written into the packet
-   uint16_t              period;  ///< userialbridge packet sending period>
 } userialbridge_vars_t;
 
 //=========================== prototypes ======================================
@@ -29,6 +25,7 @@ typedef struct {
 void userialbridge_init(void);
 void userialbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void userialbridge_receive(OpenQueueEntry_t* msg);
+void userialbridge_triggerData(uint8_t* buf, uint8_t bufLen);
 /**
 \}
 \}

@@ -20,7 +20,6 @@ static const uint8_t userialbridge_dst_addr[]   = {
 
 //=========================== prototypes ======================================
 
-void userialbridge_timer_cb(opentimer_id_t id);
 void userialbridge_task_cb(void);
 
 //=========================== public ==========================================
@@ -29,15 +28,6 @@ void userialbridge_init() {
    
    // clear local variables
    memset(&userialbridge_vars,0,sizeof(userialbridge_vars_t));
-   
-   userialbridge_vars.period = USERIALBRIDGE_PERIOD_MS;
-   
-   // start periodic timer
-   userialbridge_vars.timerId                    = opentimers_start(
-      userialbridge_vars.period,
-      TIMER_PERIODIC,TIME_MS,
-      userialbridge_timer_cb
-   );
 }
 
 void userialbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
@@ -58,13 +48,8 @@ void userialbridge_receive(OpenQueueEntry_t* pkt) {
 
 //=========================== private =========================================
 
-/**
-\note timer fired, but we don't want to execute task in ISR mode instead, push
-   task to scheduler with CoAP priority, and let scheduler take care of it.
-*/
-void userialbridge_timer_cb(opentimer_id_t id){
-   
-   scheduler_push_task(userialbridge_task_cb,TASKPRIO_COAP);
+void userialbridge_triggerData(uint8_t* buf, uint8_t bufLen) {
+    scheduler_push_task(userialbridge_task_cb,TASKPRIO_COAP);
 }
 
 void userialbridge_task_cb() {
@@ -73,12 +58,6 @@ void userialbridge_task_cb() {
    
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE) return;
-   
-   // don't run on dagroot
-   if (idmanager_getIsDAGroot()) {
-      opentimers_stop(userialbridge_vars.timerId);
-      return;
-   }
    
    // if you get here, send a packet
    

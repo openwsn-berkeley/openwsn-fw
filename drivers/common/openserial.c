@@ -21,6 +21,7 @@
 #include "schedule.h"
 #include "icmpv6rpl.h"
 #include "sf0.h"
+#include "userialbridge.h"
 
 //=========================== variables =======================================
 
@@ -430,7 +431,10 @@ void openserial_stop() {
          case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
             //echo function must reset input buffer after reading the data.
             openserial_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
-            break;   
+            break;
+         case SERFRAME_PC2MOTE_TRIGGERUSERIALBRIDGE:
+            userialbridge_triggerData(&openserial_vars.inputBuf[1],inputBufFill-1);
+            break;
          case SERFRAME_PC2MOTE_COMMAND:
              // golden image command
             openserial_executeCommands();

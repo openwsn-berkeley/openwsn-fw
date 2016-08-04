@@ -42,20 +42,21 @@ enum {
 };
 
 // frames sent mote->PC
-#define SERFRAME_MOTE2PC_DATA               ((uint8_t)'D')
-#define SERFRAME_MOTE2PC_STATUS             ((uint8_t)'S')
-#define SERFRAME_MOTE2PC_INFO               ((uint8_t)'I')
-#define SERFRAME_MOTE2PC_ERROR              ((uint8_t)'E')
-#define SERFRAME_MOTE2PC_CRITICAL           ((uint8_t)'C')
-#define SERFRAME_MOTE2PC_REQUEST            ((uint8_t)'R')
-#define SERFRAME_MOTE2PC_SNIFFED_PACKET     ((uint8_t)'P')
+#define SERFRAME_MOTE2PC_DATA                    ((uint8_t)'D')
+#define SERFRAME_MOTE2PC_STATUS                  ((uint8_t)'S')
+#define SERFRAME_MOTE2PC_INFO                    ((uint8_t)'I')
+#define SERFRAME_MOTE2PC_ERROR                   ((uint8_t)'E')
+#define SERFRAME_MOTE2PC_CRITICAL                ((uint8_t)'C')
+#define SERFRAME_MOTE2PC_REQUEST                 ((uint8_t)'R')
+#define SERFRAME_MOTE2PC_SNIFFED_PACKET          ((uint8_t)'P')
 
 // frames sent PC->mote
-#define SERFRAME_PC2MOTE_SETROOT            ((uint8_t)'R')
-#define SERFRAME_PC2MOTE_RESET              ((uint8_t)'Q')
-#define SERFRAME_PC2MOTE_DATA               ((uint8_t)'D')
-#define SERFRAME_PC2MOTE_TRIGGERSERIALECHO  ((uint8_t)'S')
-#define SERFRAME_PC2MOTE_COMMAND            ((uint8_t)'C')
+#define SERFRAME_PC2MOTE_SETROOT                 ((uint8_t)'R')
+#define SERFRAME_PC2MOTE_RESET                   ((uint8_t)'Q')
+#define SERFRAME_PC2MOTE_DATA                    ((uint8_t)'D')
+#define SERFRAME_PC2MOTE_TRIGGERSERIALECHO       ((uint8_t)'S')
+#define SERFRAME_PC2MOTE_COMMAND                 ((uint8_t)'C')
+#define SERFRAME_PC2MOTE_TRIGGERUSERIALBRIDGE    ((uint8_t)'B')
 
 //=========================== typedef =========================================
 
