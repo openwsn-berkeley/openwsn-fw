@@ -119,6 +119,7 @@ else:
             os.path.join('#','openapps','tohlone'),
             os.path.join('#','openapps','uecho'),
             os.path.join('#','openapps','uinject'),
+            os.path.join('#','openapps','userialbridge'),
         ],
     )
     
