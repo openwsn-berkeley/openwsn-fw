@@ -48,7 +48,7 @@ void board_init() {
    uart_init();
    spi_init();
    bsp_timer_init();
-  // radio_init();
+   radio_init();
    radiotimer_init();
    
    // enable interrupts
@@ -87,7 +87,7 @@ void board_reset() {
 //   debugpins_isr_clr();
 //}
 
-// PORT1_VECTOR
+
 ISR(USCI_A1){
     debugpins_isr_set();
     switch(__even_in_range(UCA1IV,4))
@@ -115,24 +115,36 @@ ISR(USCI_A1){
 // TIMERA1_VECTOR
 
 ISR(TIMER0_A0) {
-   debugpins_isr_set();
-   if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
-      __bic_SR_register_on_exit(CPUOFF);
-   }
-   debugpins_isr_clr();
+    debugpins_isr_set();
+    if (bsp_timer_isr()==KICK_SCHEDULER) {        // timer: 0
+       __bic_SR_register_on_exit(CPUOFF);
+    }
+    debugpins_isr_clr();
 }
 
 // ADC12_VECTOR
 
 // USART0TX_VECTOR
 
-//ISR(USART0RX) {
-//   debugpins_isr_set();
-//   if (spi_isr()==KICK_SCHEDULER) {              // SPI
-//      __bic_SR_register_on_exit(CPUOFF);
-//   }
-//   debugpins_isr_clr();
-//}
+// PORT1_VECTOR
+ISR(PORT1){
+    switch(__even_in_range(P1IV,16))
+   {
+   case 0:break;
+   case 2:break;
+   case 4:break;
+   case 6:break;
+   case 8:
+     P4OUT     &= ~BIT1;
+     break;
+   case 10:break;
+   case 12:break;
+   case 14:break;
+   case 16:
+     P4OUT     &= ~BIT2;
+     break;
+   }
+}
 
 // WDT_VECTOR
 
@@ -142,6 +154,8 @@ ISR(TIMER0_A0) {
 //   debugpins_isr_clr();
 //}
 
+// TIMERB0_VECTOR
+
 ISR(TIMERB1) {
    debugpins_isr_set();
    if (radiotimer_isr()==KICK_SCHEDULER) {       // radiotimer
@@ -149,8 +163,6 @@ ISR(TIMERB1) {
    }
    debugpins_isr_clr();
 }
-
-// TIMERB0_VECTOR
 
 // NMI_VECTOR
 

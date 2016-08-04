@@ -2284,6 +2284,12 @@
       <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\cc1200.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\cc1200.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\debugpins.c</name>
     </file>
     <file>
@@ -2294,6 +2300,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\radio.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\radiotimer.c</name>
