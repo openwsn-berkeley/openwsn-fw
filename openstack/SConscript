@@ -71,6 +71,8 @@ sources_h = [
     os.path.join('cross-layers','openqueue.h'),
     os.path.join('cross-layers','openrandom.h'),
     os.path.join('cross-layers','packetfunctions.h'),
+    #=== apps
+    os.path.join('#','openapps','userialbridge','userialbridge.h'),
 ]
 
 if localEnv['board']=='python':
