@@ -61,14 +61,6 @@ enum {
 
 //=========================== typedef =========================================
 
-typedef void (*openserial_cbt)(void);
-
-typedef struct _openserial_rsvpt {
-    uint8_t                       cmdId; ///< serial command (e.g. 'B')
-    openserial_cbt                cb;    ///< handler of that command
-    struct _openserial_rsvpt*     next;  ///< pointer to the next registered command
-} openserial_rsvpt;
-
 enum {
     COMMAND_SET_EBPERIOD          =  0,
     COMMAND_SET_CHANNEL           =  1,
@@ -90,7 +82,17 @@ enum {
     COMMAND_MAX                   = 17,
 };
 
-//=========================== module variables ================================
+//=========================== variables =======================================
+
+//=========================== prototypes ======================================
+
+typedef void (*openserial_cbt)(void);
+
+typedef struct _openserial_rsvpt {
+    uint8_t                       cmdId; ///< serial command (e.g. 'B')
+    openserial_cbt                cb;    ///< handler of that command
+    struct _openserial_rsvpt*     next;  ///< pointer to the next registered command
+} openserial_rsvpt;
 
 typedef struct {
     // admin
@@ -113,8 +115,6 @@ typedef struct {
     uint8_t             outputBufIdxR;
     uint8_t             outputBuf[SERIAL_OUTPUT_BUFFER_SIZE];
 } openserial_vars_t;
-
-//=========================== prototypes ======================================
 
 // admin
 void      openserial_init(void);
