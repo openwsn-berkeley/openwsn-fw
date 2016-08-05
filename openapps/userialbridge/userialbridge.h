@@ -14,10 +14,13 @@
 
 //=========================== typedef =========================================
 
+#define USERIALBRIDGE_MAXPAYLEN 8
+
 //=========================== variables =======================================
 
 typedef struct {
-   uint16_t             counter;  ///< incrementing counter which is written into the packet
+   uint8_t  txbuf[USERIALBRIDGE_MAXPAYLEN];
+   uint8_t  txbufLen;
 } userialbridge_vars_t;
 
 //=========================== prototypes ======================================

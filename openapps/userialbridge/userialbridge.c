@@ -49,6 +49,10 @@ void userialbridge_receive(OpenQueueEntry_t* pkt) {
 //=========================== private =========================================
 
 void userialbridge_triggerData(uint8_t* buf, uint8_t bufLen) {
+    
+    memcpy(&userialbridge_vars.txbuf[0],buf,bufLen);
+    userialbridge_vars.txbufLen = bufLen;
+    
     scheduler_push_task(userialbridge_task_cb,TASKPRIO_COAP);
 }
 
@@ -81,18 +85,8 @@ void userialbridge_task_cb() {
    pkt->l3_destinationAdd.type        = ADDR_128B;
    memcpy(&pkt->l3_destinationAdd.addr_128b[0],userialbridge_dst_addr,16);
    
-   packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
-   pkt->payload[1] = (uint8_t)((userialbridge_vars.counter & 0xff00)>>8);
-   pkt->payload[0] = (uint8_t)(userialbridge_vars.counter & 0x00ff);
-   userialbridge_vars.counter++;
-   
-   packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
-   ieee154e_getAsn(asnArray);
-   pkt->payload[0] = asnArray[0];
-   pkt->payload[1] = asnArray[1];
-   pkt->payload[2] = asnArray[2];
-   pkt->payload[3] = asnArray[3];
-   pkt->payload[4] = asnArray[4];
+   packetfunctions_reserveHeaderSize(pkt,userialbridge_vars.txbufLen);
+   memcpy(&pkt->payload[0],&userialbridge_vars.txbuf[0],userialbridge_vars.txbufLen);
    
    if ((openudp_send(pkt))==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
