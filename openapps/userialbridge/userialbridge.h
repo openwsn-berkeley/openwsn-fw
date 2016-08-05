@@ -28,7 +28,7 @@ typedef struct {
 void userialbridge_init(void);
 void userialbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 void userialbridge_receive(OpenQueueEntry_t* msg);
-void userialbridge_triggerData(uint8_t* buf, uint8_t bufLen);
+void userialbridge_triggerData(void);
 /**
 \}
 \}

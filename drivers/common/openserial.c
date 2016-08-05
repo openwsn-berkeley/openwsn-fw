@@ -433,7 +433,7 @@ void openserial_stop() {
             openserial_echo(&openserial_vars.inputBuf[1],inputBufFill-1);
             break;
          case SERFRAME_PC2MOTE_TRIGGERUSERIALBRIDGE:
-            userialbridge_triggerData(&openserial_vars.inputBuf[1],inputBufFill-1);
+            userialbridge_triggerData();
             break;
          case SERFRAME_PC2MOTE_COMMAND:
              // golden image command

@@ -48,7 +48,7 @@ void userialbridge_receive(OpenQueueEntry_t* pkt) {
 
 //=========================== private =========================================
 
-void userialbridge_triggerData(uint8_t* buf, uint8_t bufLen) {
+void userialbridge_triggerData(void) {
     
     userialbridge_vars.txbufLen = openserial_getInputBuffer(
         &userialbridge_vars.txbuf[0],
