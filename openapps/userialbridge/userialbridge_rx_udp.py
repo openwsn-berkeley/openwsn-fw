@@ -20,7 +20,7 @@ sock = socket.socket(
 )
 
 # bind socket
-sock.bind(('',2001))
+sock.bind(('',3001))
 
 while True:
     # read from socket
