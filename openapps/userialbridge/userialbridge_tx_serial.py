@@ -3,6 +3,7 @@ import threading
 import traceback
 import time
 import logging
+import socket
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
@@ -15,7 +16,7 @@ log.addHandler(ch)
 #============================ defines =========================================
 
 COMPORT = 'COM3'
-MODE    = 'periodic' # 'periodic' or 'udp'
+MODE    = 'udp' # 'periodic' or 'udp'
 
 #============================ classes =========================================
 
@@ -35,7 +36,8 @@ class PeriodicTransmitter(threading.Thread):
             log.debug('trigger sent {0}'.format(msgToSend))
 
 class UdpTransmitter(threading.Thread):
-    def __init__(self):
+    def __init__(self,moteProbe):
+        self.moteProbe = moteProbe
         threading.Thread.__init__(self)
         self.name = "UdpTransmitter"
         self.start()
@@ -46,9 +48,9 @@ class UdpTransmitter(threading.Thread):
         )
         sock.bind(('', 3000))
         while True:
-            (msgRx,addr) = sock.recvfrom(UDPBUFSIZE)
+            (msgRx,addr) = sock.recvfrom(1024)
             assert len(msgRx)==32
-            self.moteProbe.send(msgRx)
+            self.moteProbe.send('B'+msgRx)
 
 class MoteProbe(threading.Thread):
     
