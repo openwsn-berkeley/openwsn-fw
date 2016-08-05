@@ -22,7 +22,7 @@
 #include "schedule.h"
 #include "icmpv6rpl.h"
 #include "sf0.h"
-#include "userialbridge.h"
+//#include "userialbridge.h"
 
 //=========================== variables =======================================
 
@@ -441,7 +441,7 @@ void openserial_stop() {
                 openserial_handleEcho(&openserial_vars.inputBuf[1],inputBufFill-1);
                 break;
             case SERFRAME_PC2MOTE_TRIGGERUSERIALBRIDGE:
-                userialbridge_triggerData();
+                //userialbridge_triggerData();
                 break;
             case SERFRAME_PC2MOTE_COMMAND:
                 openserial_handleCommands();
