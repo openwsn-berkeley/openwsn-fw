@@ -25,9 +25,15 @@ void userialbridge_task_cb(void);
 //=========================== public ==========================================
 
 void userialbridge_init() {
-   
-   // clear local variables
-   memset(&userialbridge_vars,0,sizeof(userialbridge_vars_t));
+    
+    // clear local variables
+    memset(&userialbridge_vars,0,sizeof(userialbridge_vars_t));
+    
+    // register with openserial
+    userialbridge_vars.openserial_rsvp.cmdId = SERFRAME_PC2MOTE_TRIGGERUSERIALBRIDGE;
+    userialbridge_vars.openserial_rsvp.cb    = userialbridge_triggerData;
+    userialbridge_vars.openserial_rsvp.next  = NULL;
+    openserial_register(&userialbridge_vars.openserial_rsvp);
 }
 
 void userialbridge_sendDone(OpenQueueEntry_t* msg, owerror_t error) {

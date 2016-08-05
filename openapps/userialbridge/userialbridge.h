@@ -9,6 +9,7 @@
 */
 
 #include "opentimers.h"
+#include "openserial.h"
 
 //=========================== define ==========================================
 
@@ -19,8 +20,9 @@
 //=========================== variables =======================================
 
 typedef struct {
-   uint8_t  txbuf[USERIALBRIDGE_MAXPAYLEN];
-   uint8_t  txbufLen;
+   uint8_t              txbuf[USERIALBRIDGE_MAXPAYLEN];
+   uint8_t              txbufLen;
+   openserial_rsvpt     openserial_rsvp;
 } userialbridge_vars_t;
 
 //=========================== prototypes ======================================

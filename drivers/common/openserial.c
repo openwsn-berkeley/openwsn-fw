@@ -22,7 +22,6 @@
 #include "schedule.h"
 #include "icmpv6rpl.h"
 #include "sf0.h"
-//#include "userialbridge.h"
 
 //=========================== variables =======================================
 
@@ -97,6 +96,11 @@ void openserial_init() {
         isr_openserial_tx,
         isr_openserial_rx
     );
+}
+
+void openserial_register(openserial_rsvpt* rsvp) {
+    // FIXME: register multiple commands (linked list)
+    openserial_vars.registeredCmd = rsvp;
 }
 
 //===== printing
@@ -427,6 +431,8 @@ void openserial_stop() {
         DISABLE_INTERRUPTS();
         cmdByte = openserial_vars.inputBuf[0];
         ENABLE_INTERRUPTS();
+        // call hard-coded commands
+        // FIXME: needs to be replaced by registered commands only
         switch (cmdByte) {
             case SERFRAME_PC2MOTE_SETROOT:
                 idmanager_triggerAboutRoot();
@@ -440,20 +446,14 @@ void openserial_stop() {
             case SERFRAME_PC2MOTE_TRIGGERSERIALECHO:
                 openserial_handleEcho(&openserial_vars.inputBuf[1],inputBufFill-1);
                 break;
-            case SERFRAME_PC2MOTE_TRIGGERUSERIALBRIDGE:
-                //userialbridge_triggerData();
-                break;
             case SERFRAME_PC2MOTE_COMMAND:
                 openserial_handleCommands();
                 break;
-            default:
-                openserial_printError(
-                    COMPONENT_OPENSERIAL,
-                    ERR_UNSUPPORTED_COMMAND,
-                    (errorparameter_t)cmdByte,
-                    (errorparameter_t)0
-                );
-                break;
+        }
+        // call registered commands
+        if (openserial_vars.registeredCmd!=NULL && openserial_vars.registeredCmd->cmdId==cmdByte) {
+            
+            openserial_vars.registeredCmd->cb();
         }
     }
     
