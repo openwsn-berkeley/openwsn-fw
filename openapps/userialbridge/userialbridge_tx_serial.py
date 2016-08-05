@@ -4,33 +4,51 @@ import traceback
 import time
 import logging
 
-log = logging.getLogger('host')
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(message)s')
 ch.setFormatter(formatter)
 log.addHandler(ch)
 
 #============================ defines =========================================
 
 COMPORT = 'COM3'
+MODE    = 'periodic' # 'periodic' or 'udp'
 
 #============================ classes =========================================
 
-class Transmitter(threading.Thread):
+class PeriodicTransmitter(threading.Thread):
     def __init__(self,moteProbe):
         self.moteProbe = moteProbe
         self.counter   = 0
         threading.Thread.__init__(self)
+        self.name = "PeriodicTransmitter"
         self.start()
     def run(self):
         while True:
             time.sleep(1.000)
-            msgToSend = 'B'+chr(ord('a')+self.counter)*8
+            msgToSend = 'B'+chr(ord('a')+self.counter)*32
             self.moteProbe.send(msgToSend)
             self.counter = (self.counter+1)%26
-            log.info('trigger sent {0}'.format(msgToSend))
+            log.debug('trigger sent {0}'.format(msgToSend))
+
+class UdpTransmitter(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+        self.name = "UdpTransmitter"
+        self.start()
+    def run(self):
+        sock = socket.socket(
+            socket.AF_INET,       # IPv4
+            socket.SOCK_DGRAM,    # UDP
+        )
+        sock.bind(('', 3000))
+        while True:
+            (msgRx,addr) = sock.recvfrom(UDPBUFSIZE)
+            assert len(msgRx)==32
+            self.moteProbe.send(msgRx)
 
 class MoteProbe(threading.Thread):
     
@@ -155,7 +173,7 @@ class MoteProbe(threading.Thread):
                     outputToWrite  = self.dataToSend
                     outputBufHdlc  = self.hdlc.hdlcify(outputToWrite)
                     self.serial.write(outputBufHdlc)
-                    log.info('output: '+self.formatBuf(outputBufHdlc))
+                    log.info('TX: {0}...'.format(self.formatBuf(outputBufHdlc[:10])))
                     self.dataToSend = None
 
 class OpenHdlc(object):
@@ -276,7 +294,12 @@ class OpenHdlc(object):
 def main():
     # start the threads
     mp = MoteProbe(COMPORT)
-    t  = Transmitter(mp)
+    if   MODE=='periodic':
+        t  = PeriodicTransmitter(mp)
+    elif MODE=='udp':
+        t  = UdpTransmitter(mp)
+    else:
+        raise SystemError()
 
 if __name__=="__main__":
     main()
