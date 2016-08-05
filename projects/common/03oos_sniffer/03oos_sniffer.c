@@ -158,8 +158,11 @@ void cb_timer(void) {
 
 // ================================ task =======================================
 void task_uploadPacket(){
-    
-    openserial_printPacket(&(app_vars.packet[0]),app_vars.packet_len,app_vars.channel);
+    openserial_printSniffedPacket(
+        &(app_vars.packet[0]),
+        app_vars.packet_len,
+        app_vars.channel
+    );
 }
 // ================================= stubbing ==================================
 
