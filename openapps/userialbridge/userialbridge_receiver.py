@@ -3,22 +3,23 @@ Run this script on the computer with the Openvisualizer running.
 '''
 
 import socket
-import struct
 
 # open socket
-socket_handler = socket.socket(socket.AF_INET6,socket.SOCK_DGRAM)
-socket_handler.bind(('',2001))
+sock = socket.socket(
+    socket.AF_INET6,    # IPv6
+    socket.SOCK_DGRAM,  # UDP
+)
+
+# bind socket
+sock.bind(('',2001))
 
 while True:
+    # read from socket
+    (msgRx,addr) = sock.recvfrom(1024)
     
-    # wait for a request
-    request,dist_addr = socket_handler.recvfrom(1024)
-    
-    hisAddress     = dist_addr[0]
-    hisPort        = dist_addr[1]
-    
-    asn  = struct.unpack('<HHB',request[:5])
-    counter  = struct.unpack('<h',request[-2:])[0]
-    
-    print 'received "{0}" from [{1}]:{2}'.format(counter,hisAddress,hisPort)
+    # print
+    print 'received "{0}" from {1}'.format(
+       '-'.join(['%02x'%ord(b) for b in msgRx]),
+       addr
+    )
 
