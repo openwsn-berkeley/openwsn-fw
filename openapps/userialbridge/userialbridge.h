@@ -15,7 +15,7 @@
 
 //=========================== typedef =========================================
 
-#define USERIALBRIDGE_MAXPAYLEN 8
+#define USERIALBRIDGE_MAXPAYLEN 32
 
 //=========================== variables =======================================
 

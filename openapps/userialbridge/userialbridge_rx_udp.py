@@ -3,6 +3,15 @@ Run this script on the computer with the Openvisualizer running.
 '''
 
 import socket
+import logging
+
+log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s - %(message)s')
+ch.setFormatter(formatter)
+log.addHandler(ch)
 
 # open socket
 sock = socket.socket(
@@ -17,9 +26,9 @@ while True:
     # read from socket
     (msgRx,addr) = sock.recvfrom(1024)
     
-    # print
-    print 'received "{0}" from {1}'.format(
-       '-'.join(['%02x'%ord(b) for b in msgRx]),
-       addr
+    # log
+    log.info(
+        'RX {0}...'.format(
+           '-'.join(['%02x'%ord(b) for b in msgRx[:10]])
+        )
     )
-
