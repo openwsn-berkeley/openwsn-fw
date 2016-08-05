@@ -50,8 +50,10 @@ void userialbridge_receive(OpenQueueEntry_t* pkt) {
 
 void userialbridge_triggerData(uint8_t* buf, uint8_t bufLen) {
     
-    memcpy(&userialbridge_vars.txbuf[0],buf,bufLen);
-    userialbridge_vars.txbufLen = bufLen;
+    userialbridge_vars.txbufLen = openserial_getInputBuffer(
+        &userialbridge_vars.txbuf[0],
+        USERIALBRIDGE_MAXPAYLEN
+    );
     
     scheduler_push_task(userialbridge_task_cb,TASKPRIO_COAP);
 }
