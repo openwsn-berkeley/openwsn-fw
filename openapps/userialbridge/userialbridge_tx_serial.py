@@ -21,13 +21,16 @@ COMPORT = 'COM3'
 class Transmitter(threading.Thread):
     def __init__(self,moteProbe):
         self.moteProbe = moteProbe
+        self.counter   = 0
         threading.Thread.__init__(self)
         self.start()
     def run(self):
         while True:
             time.sleep(1.000)
-            log.info('trigger sent')
-            self.moteProbe.send('B')
+            msgToSend = 'B'+chr(ord('a')+self.counter)*8
+            self.moteProbe.send(msgToSend)
+            self.counter = (self.counter+1)%26
+            log.info('trigger sent {0}'.format(msgToSend))
 
 class MoteProbe(threading.Thread):
     
