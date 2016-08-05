@@ -4,11 +4,11 @@ import traceback
 import time
 import logging
 
-log = logging.getLogger('host')
+log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG)
 ch = logging.StreamHandler()
 ch.setLevel(logging.INFO)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(message)s')
 ch.setFormatter(formatter)
 log.addHandler(ch)
 
@@ -27,10 +27,10 @@ class Transmitter(threading.Thread):
     def run(self):
         while True:
             time.sleep(1.000)
-            msgToSend = 'B'+chr(ord('a')+self.counter)*8
+            msgToSend = 'B'+chr(ord('a')+self.counter)*32
             self.moteProbe.send(msgToSend)
             self.counter = (self.counter+1)%26
-            log.info('trigger sent {0}'.format(msgToSend))
+            log.debug('trigger sent {0}'.format(msgToSend))
 
 class MoteProbe(threading.Thread):
     
@@ -155,7 +155,7 @@ class MoteProbe(threading.Thread):
                     outputToWrite  = self.dataToSend
                     outputBufHdlc  = self.hdlc.hdlcify(outputToWrite)
                     self.serial.write(outputBufHdlc)
-                    log.info('output: '+self.formatBuf(outputBufHdlc))
+                    log.info('TX: {0}...'.format(self.formatBuf(outputBufHdlc[:10])))
                     self.dataToSend = None
 
 class OpenHdlc(object):
