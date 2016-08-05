@@ -8,6 +8,7 @@
 #include "opencoap.h"
 #include "uecho.h"
 #include "uinject.h"
+#include "userialbridge.h"
 #include "rrt.h"
 
 //=========================== variables =======================================
@@ -43,6 +44,9 @@ void openudp_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
          break;
       case WKP_UDP_INJECT:
          uinject_sendDone(msg,error);
+         break;
+      case WKP_UDP_SERIALBRIDGE:
+         userialbridge_sendDone(msg,error);
          break;
       case WKP_UDP_RINGMASTER:
 	 //udpprint_sendDone(msg, error);
