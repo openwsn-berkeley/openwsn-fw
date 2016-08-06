@@ -48,7 +48,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>01bsp_uart</OutputName>
+          <OutputName>01bsp_radiotimer</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -81,8 +81,8 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>1</RunUserProg2>
-            <UserProg1Name>fromelf --bin .\Objects\01bsp_uart.axf -o .\Objects\01bsp_uart.bin</UserProg1Name>
-            <UserProg2Name>fromelf -cvf .\Objects\01bsp_uart.axf -o .\Objects\disasm.txt</UserProg2Name>
+            <UserProg1Name>fromelf --bin .\Objects\01bsp_radiotimer.axf -o .\Objects\01bsp_radiotimer.bin</UserProg1Name>
+            <UserProg2Name>fromelf -cvf .\Objects\01bsp_radiotimer.axf -o .\Objects\disasm.txt</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
@@ -378,9 +378,19 @@
           <GroupName>application</GroupName>
           <Files>
             <File>
-              <FileName>01bsp_uart.c</FileName>
+              <FileName>01bsp_radiotimer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\common\01bsp_uart\01bsp_uart.c</FilePath>
+              <FilePath>..\..\common\01bsp_radiotimer\01bsp_radiotimer.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>startUp</GroupName>
+          <Files>
+            <File>
+              <FileName>cm0dsasm.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\cm0dsasm.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -428,11 +438,6 @@
           <GroupName>scum</GroupName>
           <Files>
             <File>
-              <FileName>cm0dsasm.s</FileName>
-              <FileType>2</FileType>
-              <FilePath>..\..\..\bsp\boards\scum\cm0dsasm.s</FilePath>
-            </File>
-            <File>
               <FileName>leds.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\bsp\boards\scum\leds.c</FilePath>
@@ -461,6 +466,16 @@
               <FileName>bsp_timer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\bsp\boards\scum\bsp_timer.c</FilePath>
+            </File>
+            <File>
+              <FileName>radiotimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\radiotimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>debugpins.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\debugpins.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -75,14 +75,14 @@ Reset_Handler   PROC
 
 UART_Handler    PROC
         EXPORT      UART_Handler
-        IMPORT      UART_ISR
+        IMPORT      uart_rx_isr
         
         PUSH        {R0,LR}
         
         MOVS        R0, #1 ;            ;MASK all interrupts
         MSR         PRIMASK, R0 ;       
         
-        BL          UART_ISR
+        BL          uart_rx_isr
 
                 
         MOVS        R0, #0              ;ENABLE all interrupts
