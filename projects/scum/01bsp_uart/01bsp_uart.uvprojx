@@ -462,6 +462,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\bsp\boards\scum\bsp_timer.c</FilePath>
             </File>
+            <File>
+              <FileName>radiotimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\radiotimer.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
