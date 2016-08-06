@@ -89,6 +89,7 @@ void bsp_timer_cancel_schedule() {
 \returns The current value of the timer's counter.
 */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
+    return;
 }
 
 //=========================== private =========================================

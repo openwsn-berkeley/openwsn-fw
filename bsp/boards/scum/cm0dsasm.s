@@ -40,14 +40,14 @@ __Vectors               DCD         __initial_sp
                         
                         ; External Interrupts
                                    
+                        DCD         UART_Handler
                         DCD         0
                         DCD         0
                         DCD         0
                         DCD         0
                         DCD         0
                         DCD         0
-                        DCD         0
-                        DCD         0
+                        DCD         RFTIMER_Handler
                         DCD         0
                         DCD         0
                         DCD         0
@@ -58,20 +58,58 @@ __Vectors               DCD         __initial_sp
                         DCD         0
               
                 AREA |.text|, CODE, READONLY
+                    
 ;Interrupt Handlers
 Reset_Handler   PROC
         GLOBAL Reset_Handler
         ENTRY
         
-        LDR     R1, =0xE000E100           ;Interrupt Set Enable Register
-        LDR     R0, =0xFF                 ;<- REMEMBER TO ENABLE THE INTERRUPTS!!
+        LDR     R1, =0xE000E100         ;Interrupt Set Enable Register
+        LDR     R0, =0xFF               ;<- REMEMBER TO ENABLE THE INTERRUPTS!!
         STR     R0, [R1]
         
         IMPORT  __main
-        LDR     R0, =__main               
-        BX      R0                        ;Branch to __main
+        LDR     R0, =__main             
+        BX      R0                      ;Branch to __main
                 ENDP
-             
+
+UART_Handler    PROC
+        EXPORT      UART_Handler
+        IMPORT      UART_ISR
+        
+        PUSH        {R0,LR}
+        
+        MOVS        R0, #1 ;            ;MASK all interrupts
+        MSR         PRIMASK, R0 ;       
+        
+        BL          UART_ISR
+
+                
+        MOVS        R0, #0              ;ENABLE all interrupts
+        MSR         PRIMASK, R0
+        
+        POP         {R0,PC}
+                ENDP
+                    
+RFTIMER_Handler PROC
+        EXPORT      RFTIMER_Handler
+        IMPORT      radiotimer_isr
+        
+        PUSH        {R0,LR}
+        
+        MOVS        R0, #1         ;MASK all interrupts
+        MSR         PRIMASK, R0 ; 
+        ;STR        R0,[R1]
+        
+        BL          radiotimer_isr
+        
+        MOVS        R0, #0          ;ENABLE all interrupts
+        MSR         PRIMASK, R0
+        
+        POP         {R0,PC}
+        
+                ENDP
+                    
 ; User Initial Stack & Heap
                 IF      :DEF:__MICROLIB
                 EXPORT  __initial_sp

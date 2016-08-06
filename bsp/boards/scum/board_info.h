@@ -15,35 +15,20 @@ to return the board's description.
 
 //=========================== defines =========================================
 
-#define INTERRUPT_DECLARATION(); //no declaration
+#define INTERRUPT_DECLARATION()
 
-#define DISABLE_INTERRUPTS()    NVIC_SETPRIMASK();
-#define ENABLE_INTERRUPTS()     NVIC_RESETPRIMASK();
+#define DISABLE_INTERRUPTS()
+#define ENABLE_INTERRUPTS()
 
 //===== timer
 
-#define PORT_TIMER_WIDTH                    uint16_t
-#define PORT_RADIOTIMER_WIDTH               uint16_t
+#define PORT_TIMER_WIDTH                    uint32_t
+#define PORT_RADIOTIMER_WIDTH               uint32_t
 
-#define PORT_SIGNED_INT_WIDTH               int16_t
+#define PORT_SIGNED_INT_WIDTH               int32_t
 #define PORT_TICS_PER_MS                    32
-#define SCHEDULER_WAKEUP()                  EXTI->SWIER |= EXTI_Line1;
-#define SCHEDULER_ENABLE_INTERRUPT()        //enable in board use EXTI_Line1
-
-// this is a workaround from the fact that the interrupt pin for the GINA radio
-// is not connected to a pin on the MSP which allows time capture.
-#define CAPTURE_TIME()  TACCTL2 |=  CCIS0;  \
-                        TACCTL2 &= ~CCIS0;
-
-//===== pinout
-
-// [P4.7] radio SLP_TR_CNTL
-#define PORT_PIN_RADIO_SLP_TR_CNTL_HIGH()     GPIOB->ODR |= 0X0002;
-#define PORT_PIN_RADIO_SLP_TR_CNTL_LOW()      GPIOB->ODR &= ~0X0002;
-// radio reset line
-// radio /RST
-#define PORT_PIN_RADIO_RESET_HIGH()       //GPIOC->ODR |= 0X0040;// nothing
-#define PORT_PIN_RADIO_RESET_LOW()        //GPIOC->ODR &= ~0X0040;// nothing
+#define SCHEDULER_WAKEUP()                  
+#define SCHEDULER_ENABLE_INTERRUPT()        
 
 //===== IEEE802154E timing
 
