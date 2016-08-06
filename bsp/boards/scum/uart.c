@@ -59,7 +59,3 @@ kick_scheduler_t uart_rx_isr() {
     uart_vars.rxCb();
     return DO_NOT_KICK_SCHEDULER;
 }
-
-void UART_ISR(){
-    uart_rx_isr();
-}
