@@ -60,9 +60,9 @@ This function does not stop the timer, it rather resets the value of the
 counter, and cancels a possible pending compare event.
 */
 void bsp_timer_reset() {
-    RFTIMER_REG__CONTROL                = 0x05;
+    RFTIMER_REG__COUNTER                = 0;
     // record last timer compare value
-    bsp_timer_vars.last_compare_value   =  0;
+    bsp_timer_vars.last_compare_value   = 0;
 }
 
 /**
@@ -93,7 +93,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
     
     if (delayTicks<RFTIMER_REG__COUNTER-temp_last_compare_value) {
         // we're already too late, schedule the ISR right now manually
-      
+        
         // setting the interrupt flag triggers an interrupt
         RFTIMER_REG__INT               |= (PORT_TIMER_WIDTH)1;
     } else {
