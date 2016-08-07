@@ -68,8 +68,8 @@ app_vars_t app_vars;
 
 void     cb_radioTimerOverflows(void);
 void     cb_radioTimerCompare(void);
-void     cb_startFrame(uint16_t timestamp);
-void     cb_endFrame(uint16_t timestamp);
+void     cb_startFrame(PORT_RADIOTIMER_WIDTH timestamp);
+void     cb_endFrame(PORT_RADIOTIMER_WIDTH timestamp);
 void     cb_timer(void);
 
 //=========================== main ============================================
@@ -232,7 +232,7 @@ void cb_radioTimerCompare(void) {
    app_dbg.num_radioTimerCompare++;
 }
 
-void cb_startFrame(uint16_t timestamp) {
+void cb_startFrame(PORT_RADIOTIMER_WIDTH timestamp) {
    // set flag
    app_vars.flags |= APP_FLAG_START_FRAME;
    
@@ -240,7 +240,7 @@ void cb_startFrame(uint16_t timestamp) {
    app_dbg.num_startFrame++;
 }
 
-void cb_endFrame(uint16_t timestamp) {
+void cb_endFrame(PORT_RADIOTIMER_WIDTH timestamp) {
    // set flag
    app_vars.flags |= APP_FLAG_END_FRAME;
    
