@@ -46,7 +46,7 @@ __Vectors               DCD         __initial_sp
                         DCD         0
                         DCD         0
                         DCD         0
-                        DCD         0
+                        DCD         RF_Handler
                         DCD         RFTIMER_Handler
                         DCD         0
                         DCD         0
@@ -89,6 +89,25 @@ UART_Handler    PROC
         MSR         PRIMASK, R0
         
         POP         {R0,PC}
+                ENDP
+                    
+RF_Handler      PROC
+        EXPORT      RF_Handler
+        IMPORT      radio_isr
+        
+        PUSH        {R0,LR}
+        
+        MOVS        R0, #1 ;         ;MASK all interrupts
+        MSR         PRIMASK, R0 ; 
+        ;STR        R0,[R1]    
+        
+        BL          radio_isr
+        
+        MOVS        R0, #0        ;ENABLE all interrupts
+        MSR         PRIMASK, R0
+        
+        POP         {R0,PC}
+        
                 ENDP
                     
 RFTIMER_Handler PROC

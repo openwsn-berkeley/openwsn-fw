@@ -30,6 +30,10 @@ to return the board's description.
 #define SCHEDULER_WAKEUP()                  
 #define SCHEDULER_ENABLE_INTERRUPT()        
 
+//===== radio
+
+#define PORT_PIN_RADIO_RESET_LOW()          RFCONTROLLER_REG__CONTROL = 0x10;
+
 //===== IEEE802154E timing
 
 //// time-slot related

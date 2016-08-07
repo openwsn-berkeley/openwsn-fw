@@ -37,10 +37,8 @@ void board_init() {
     leds_init();
     uart_init();
     bsp_timer_init();
-//    radio_init();
+    radio_init();
     radiotimer_init();
-
-    //turn sensors off, if this is a gina (not a basestation)
 //    eui64_get(eui);
 }
 

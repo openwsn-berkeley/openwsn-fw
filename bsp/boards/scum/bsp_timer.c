@@ -17,8 +17,8 @@ is empty by now.
 //=========================== variables =======================================
 
 typedef struct {
-   bsp_timer_cbt    cb;
-   PORT_TIMER_WIDTH last_compare_value;
+    bsp_timer_cbt    cb;
+    PORT_TIMER_WIDTH last_compare_value;
 } bsp_timer_vars_t;
 
 bsp_timer_vars_t bsp_timer_vars;
@@ -35,8 +35,13 @@ any compare registers, so no interrupt will fire.
 */
 void bsp_timer_init() {
    
-   // clear local variables
-   memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
+    // clear local variables
+    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
+    
+    // set period of radiotimer
+    RFTIMER_REG__MAX_COUNT          = 0xffffffff;
+    // enable timer and interrupt
+    RFTIMER_REG__CONTROL            = 0x07;
 }
 
 /**
@@ -45,7 +50,7 @@ void bsp_timer_init() {
 \param cb The function to be called when a compare event happens.
 */
 void bsp_timer_set_callback(bsp_timer_cbt cb) {
-   bsp_timer_vars.cb   = cb;
+    bsp_timer_vars.cb   = cb;
 }
 
 /**
@@ -55,6 +60,9 @@ This function does not stop the timer, it rather resets the value of the
 counter, and cancels a possible pending compare event.
 */
 void bsp_timer_reset() {
+    RFTIMER_REG__CONTROL                = 0x05;
+    // record last timer compare value
+    bsp_timer_vars.last_compare_value   =  0;
 }
 
 /**
@@ -75,12 +83,31 @@ propagate to subsequent timers.
                   last compare event.
 */
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
+    PORT_TIMER_WIDTH newCompareValue;
+    PORT_TIMER_WIDTH temp_last_compare_value;
+    
+    temp_last_compare_value             = bsp_timer_vars.last_compare_value;
+    
+    newCompareValue                     = bsp_timer_vars.last_compare_value+delayTicks+1;
+    bsp_timer_vars.last_compare_value   = newCompareValue;
+    
+    if (delayTicks<RFTIMER_REG__COUNTER-temp_last_compare_value) {
+        // we're already too late, schedule the ISR right now manually
+      
+        // setting the interrupt flag triggers an interrupt
+        RFTIMER_REG__INT               |= (PORT_TIMER_WIDTH)1;
+    } else {
+        // this is the normal case, have timer expire at newCompareValue
+        RFTIMER_REG__COMPARE0           = newCompareValue;
+        RFTIMER_REG__COMPARE0_CONTROL   = 0x03;
+    }
 }
 
 /**
 \brief Cancel a running compare.
 */
 void bsp_timer_cancel_schedule() {
+    RFTIMER_REG__COMPARE0_CONTROL   = 0x00;
 }
 
 /**
@@ -89,7 +116,7 @@ void bsp_timer_cancel_schedule() {
 \returns The current value of the timer's counter.
 */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
-    return;
+    return RFTIMER_REG__COUNTER;
 }
 
 //=========================== private =========================================
@@ -97,8 +124,10 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t bsp_timer_isr() {
-   // call the callback
-   bsp_timer_vars.cb();
-   // kick the OS
-   return KICK_SCHEDULER;
+    
+    // call the callback
+    bsp_timer_vars.cb();
+    
+    // kick the OS
+    return KICK_SCHEDULER;
 }

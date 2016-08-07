@@ -10,6 +10,7 @@
 #include "string.h"
 #include "radiotimer.h"
 #include "board.h"
+#include "bsp_timer.h"
 
 //=========================== variables =======================================
 
@@ -51,14 +52,13 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
 void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     // set period of radiotimer
     RFTIMER_REG__MAX_COUNT          = period;
-    RFTIMER_REG__COUNTER            = 1;
     // enable timer and interrupt
-    RFTIMER_REG__CONTROL            = 0x07;
+    RFTIMER_REG__CONTROL            = 0x03;
     
     // set compare timer counter 0 to perform an overflow interrupt
-    RFTIMER_REG__COMPARE0           = 0;
+    RFTIMER_REG__COMPARE1           = 0;
     // enable compare0 module and interrup
-    RFTIMER_REG__COMPARE0_CONTROL   = 0x03;
+    RFTIMER_REG__COMPARE1_CONTROL   = 0x03;
 }
 
 //===== direct access
@@ -68,7 +68,7 @@ PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
 }
 
 void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
-    RFTIMER_REG__MAX_COUNT           = period;
+    RFTIMER_REG__MAX_COUNT          = period;
 }
 
 PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
@@ -79,15 +79,15 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
     // offset when to fire
-    RFTIMER_REG__COMPARE1            = offset;
+    RFTIMER_REG__COMPARE2            = offset;
    
     // enable compare interrupt (this also cancels any pending interrupts)
-    RFTIMER_REG__COMPARE1_CONTROL    = 0x03;
+    RFTIMER_REG__COMPARE2_CONTROL    = 0x03;
 }
 
 void radiotimer_cancel() {
     // disable compare interrupt
-    RFTIMER_REG__COMPARE1_CONTROL = 0x00;
+    RFTIMER_REG__COMPARE2_CONTROL = 0x00;
 }
 
 //===== capture
@@ -101,9 +101,9 @@ PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t radiotimer_isr() {
-    unsigned int interrupt_flag = RFTIMER_REG__INT;
+    PORT_RADIOTIMER_WIDTH interrupt_flag = RFTIMER_REG__INT;
     switch (interrupt_flag & 0xffff) {
-        case 0x0002:
+        case 0x0004:
             if (radiotimer_vars.compare_cb!=NULL) {
                 // call the callback
                 radiotimer_vars.compare_cb();
@@ -112,7 +112,7 @@ kick_scheduler_t radiotimer_isr() {
                 return KICK_SCHEDULER;
             }
             break;
-        case 0x0001: // timer overflows
+        case 0x0002: // timer overflows
             if (radiotimer_vars.overflow_cb!=NULL) {
                 // call the callback
                 radiotimer_vars.overflow_cb();
@@ -120,6 +120,13 @@ kick_scheduler_t radiotimer_isr() {
                 // kick the OS
                 return KICK_SCHEDULER;
             }
+            break;
+        case 0x0001: // for bsp timer
+            // call the callback
+            bsp_timer_isr();
+            RFTIMER_REG__INT_CLEAR = interrupt_flag;
+            // kick the OS
+            return KICK_SCHEDULER;
             break;
         default:
             while(1);   // this should not happen
