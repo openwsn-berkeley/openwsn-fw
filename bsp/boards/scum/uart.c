@@ -42,6 +42,19 @@ void    uart_writeByte(uint8_t byteToWrite){
 }
 
 void    uart_enableInterrupts(){ 
+    
+}
+
+void    uart_disableInterrupts(){
+    
+}
+
+void    uart_clearRxInterrupts(){
+    
+}
+
+void    uart_clearTxInterrupts(){
+    
 }
 
 uint8_t uart_readByte(){
