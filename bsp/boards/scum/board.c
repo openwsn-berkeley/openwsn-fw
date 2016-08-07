@@ -33,13 +33,13 @@ void board_init() {
     uint8_t eui[8];
 
     // initialize bsp modules
-//    debugpins_init();
+    debugpins_init();
     leds_init();
     uart_init();
     bsp_timer_init();
     radio_init();
     radiotimer_init();
-//    eui64_get(eui);
+    eui64_get(eui);
 }
 
 void board_sleep() {
