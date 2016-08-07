@@ -64,22 +64,22 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
 //===== direct access
 
 PORT_RADIOTIMER_WIDTH radiotimer_getValue() {
-    return RFTIMER_REG__COUNTER;
+    return RFTIMER_REG__COUNTER*4/61;
 }
 
 void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
-    RFTIMER_REG__MAX_COUNT          = period;
+    RFTIMER_REG__MAX_COUNT          = period*61/4;
 }
 
 PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
-    return RFTIMER_REG__COUNTER;
+    return RFTIMER_REG__COUNTER*4/61;
 }
 
 //===== compare
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
     // offset when to fire
-    RFTIMER_REG__COMPARE2            = offset;
+    RFTIMER_REG__COMPARE2            = offset*61/4;
    
     // enable compare interrupt (this also cancels any pending interrupts)
     RFTIMER_REG__COMPARE2_CONTROL    = 0x03;
@@ -93,7 +93,7 @@ void radiotimer_cancel() {
 //===== capture
 
 PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
-    return RFTIMER_REG__COUNTER;
+    return RFTIMER_REG__COUNTER*4/61;
 }
 
 //=========================== private =========================================

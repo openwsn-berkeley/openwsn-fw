@@ -26,7 +26,7 @@ to return the board's description.
 #define PORT_RADIOTIMER_WIDTH               uint32_t
 
 #define PORT_SIGNED_INT_WIDTH               int32_t
-#define PORT_TICS_PER_MS                    500
+#define PORT_TICS_PER_MS                    32
 #define SCHEDULER_WAKEUP()                  
 #define SCHEDULER_ENABLE_INTERRUPT()        
 

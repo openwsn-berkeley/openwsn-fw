@@ -98,7 +98,7 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
         RFTIMER_REG__INT               |= (PORT_TIMER_WIDTH)1;
     } else {
         // this is the normal case, have timer expire at newCompareValue
-        RFTIMER_REG__COMPARE0           = newCompareValue;
+        RFTIMER_REG__COMPARE0           = newCompareValue*61/4;
         RFTIMER_REG__COMPARE0_CONTROL   = 0x03;
     }
 }
@@ -116,7 +116,7 @@ void bsp_timer_cancel_schedule() {
 \returns The current value of the timer's counter.
 */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
-    return RFTIMER_REG__COUNTER;
+    return RFTIMER_REG__COUNTER*4/61;
 }
 
 //=========================== private =========================================
