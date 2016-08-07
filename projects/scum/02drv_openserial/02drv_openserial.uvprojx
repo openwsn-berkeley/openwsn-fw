@@ -48,7 +48,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Objects\</OutputDirectory>
-          <OutputName>01bsp_uart</OutputName>
+          <OutputName>02drv_openserial</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>0</CreateHexFile>
@@ -81,8 +81,8 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>1</RunUserProg2>
-            <UserProg1Name>fromelf --bin .\Objects\01bsp_uart.axf -o .\Objects\01bsp_uart.bin</UserProg1Name>
-            <UserProg2Name>fromelf -cvf .\Objects\01bsp_uart.axf -o .\Objects\disasm.txt</UserProg2Name>
+            <UserProg1Name>fromelf --bin .\Objects\02drv_openserial.axf -o .\Objects\02drv_openserial.bin</UserProg1Name>
+            <UserProg2Name>fromelf -cvf .\Objects\02drv_openserial.axf -o .\Objects\disasm.txt</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
@@ -331,10 +331,10 @@
             <v6Lto>0</v6Lto>
             <v6WtE>0</v6WtE>
             <VariousControls>
-              <MiscControls></MiscControls>
+              <MiscControls>--gnu</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\bsp\boards;..\..\..\bsp\boards\scum</IncludePath>
+              <IncludePath>..\..\..\bsp\boards;..\..\..\bsp\boards\scum;..\..\..\drivers\common;..\..\..\inc;..\..\..\openstack\02a-MAClow;..\..\..\openstack\02b-MAChigh;..\..\..\openstack\03a-IPHC;..\..\..\openstack\03b-IPv6;..\..\..\openstack\04-TRAN;..\..\..\openstack\cross-layers</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -378,9 +378,9 @@
           <GroupName>application</GroupName>
           <Files>
             <File>
-              <FileName>01bsp_uart.c</FileName>
+              <FileName>02drv_openserial.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\common\01bsp_uart\01bsp_uart.c</FilePath>
+              <FilePath>..\..\common\02drv_openserial\02drv_openserial.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -421,6 +421,11 @@
               <FileName>uart.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\bsp\boards\uart.h</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_timer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\bsp_timer.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -466,6 +471,61 @@
               <FileName>radiotimer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\bsp\boards\scum\radiotimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>debugpins.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\debugpins.c</FilePath>
+            </File>
+            <File>
+              <FileName>radio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\radio.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>drivers</GroupName>
+          <Files>
+            <File>
+              <FileName>openserial.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\drivers\common\openserial.c</FilePath>
+            </File>
+            <File>
+              <FileName>openhdlc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\drivers\common\openhdlc.c</FilePath>
+            </File>
+            <File>
+              <FileName>opentimers.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\drivers\common\opentimers.c</FilePath>
+            </File>
+            <File>
+              <FileName>openhdlc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\drivers\common\openhdlc.h</FilePath>
+            </File>
+            <File>
+              <FileName>openserial.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\drivers\common\openserial.h</FilePath>
+            </File>
+            <File>
+              <FileName>opentimers.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\drivers\common\opentimers.h</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>inc</GroupName>
+          <Files>
+            <File>
+              <FileName>opendefs.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\inc\opendefs.h</FilePath>
             </File>
           </Files>
         </Group>
