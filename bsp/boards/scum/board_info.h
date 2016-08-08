@@ -45,8 +45,8 @@ to return the board's description.
 #define PORT_maxTxAckPrepare                30    //  900us (measured 323us+235) stm32
 
 // radio speed related
-#define PORT_delayTx                        24    //  549us (measured 315us+235) .....
-#define PORT_delayRx                        0     //    0us (can not measure)
+#define PORT_delayTx                        5     //  5ticks=152.5us@32768hz (datasheet value: 162us)
+#define PORT_delayRx                        0     //  0us (can not measure)
 
 //===== adaptive_sync accuracy
 
