@@ -432,6 +432,11 @@
               <FileType>5</FileType>
               <FilePath>..\..\..\bsp\boards\uart.h</FilePath>
             </File>
+            <File>
+              <FileName>bsp_timer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\bsp_timer.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -481,6 +486,11 @@
               <FileName>radio.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\..\bsp\boards\scum\radio.c</FilePath>
+            </File>
+            <File>
+              <FileName>eui64.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\eui64.c</FilePath>
             </File>
           </Files>
         </Group>
