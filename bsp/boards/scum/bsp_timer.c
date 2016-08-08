@@ -91,14 +91,13 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
     newCompareValue                     = bsp_timer_vars.last_compare_value+delayTicks+1;
     bsp_timer_vars.last_compare_value   = newCompareValue;
     
-    if (delayTicks<RFTIMER_REG__COUNTER-temp_last_compare_value) {
+    if (delayTicks<RFTIMER_REG__COUNTER*4/61-temp_last_compare_value) {
         // we're already too late, schedule the ISR right now manually
-        
-        // setting the interrupt flag triggers an interrupt
-        RFTIMER_REG__INT               |= (PORT_TIMER_WIDTH)1;
+        // not sure how to do this in scum, just miss this ISR for now
+
     } else {
         // this is the normal case, have timer expire at newCompareValue
-        RFTIMER_REG__COMPARE0           = newCompareValue*61/4;
+        RFTIMER_REG__COMPARE0           = (PORT_TIMER_WIDTH)(newCompareValue*61/4);
         RFTIMER_REG__COMPARE0_CONTROL   = 0x03;
     }
 }

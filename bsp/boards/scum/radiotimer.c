@@ -51,7 +51,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
 
 void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     // set period of radiotimer
-    RFTIMER_REG__MAX_COUNT          = period;
+    RFTIMER_REG__MAX_COUNT          = period*61/4;
     // enable timer and interrupt
     RFTIMER_REG__CONTROL            = 0x03;
     
@@ -102,8 +102,8 @@ PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 
 kick_scheduler_t radiotimer_isr() {
     PORT_RADIOTIMER_WIDTH interrupt_flag = RFTIMER_REG__INT;
-    switch (interrupt_flag & 0xffff) {
-        case 0x0004:
+    switch (interrupt_flag & 0xffffffff) {
+        case 0x00000004:
             if (radiotimer_vars.compare_cb!=NULL) {
                 // call the callback
                 radiotimer_vars.compare_cb();
@@ -112,7 +112,7 @@ kick_scheduler_t radiotimer_isr() {
                 return KICK_SCHEDULER;
             }
             break;
-        case 0x0002: // timer overflows
+        case 0x00000002: // timer overflows
             if (radiotimer_vars.overflow_cb!=NULL) {
                 // call the callback
                 radiotimer_vars.overflow_cb();
@@ -121,7 +121,7 @@ kick_scheduler_t radiotimer_isr() {
                 return KICK_SCHEDULER;
             }
             break;
-        case 0x0001: // for bsp timer
+        case 0x00000001: // for bsp timer
             // call the callback
             bsp_timer_isr();
             RFTIMER_REG__INT_CLEAR = interrupt_flag;
