@@ -60,7 +60,6 @@ This function does not stop the timer, it rather resets the value of the
 counter, and cancels a possible pending compare event.
 */
 void bsp_timer_reset() {
-    RFTIMER_REG__COUNTER                = 0;
     // record last timer compare value
     bsp_timer_vars.last_compare_value   = 0;
 }
