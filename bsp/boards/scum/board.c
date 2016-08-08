@@ -1,7 +1,7 @@
 /**
 \brief GINA-specific definition of the "board" bsp module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
+\author Tengfei Chang <tengfei.chang@inria.fr>, August 2016.
 */
 
 #include "memory_map.h"

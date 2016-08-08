@@ -1,7 +1,7 @@
 /**
-\brief AT86RF231-specific definition of the "radio" bsp module.
+\brief SCuM-specific definition of the "radio" bsp module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
+\author Tengfei Chang <tengfei.chang@inria.fr>, August 2016.
 */
 
 
