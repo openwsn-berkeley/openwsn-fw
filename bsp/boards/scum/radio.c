@@ -41,8 +41,8 @@ void radio_init() {
     // change state
     radio_vars.state                = RADIOSTATE_STOPPED;
     
-    // Enable all interrupts and pulses to radio timer
-    RFCONTROLLER_REG__INT_CONFIG    = 0x3FF;
+    // Enable all interrupts and pulses to radio timer: no loaddone interrupt
+    RFCONTROLLER_REG__INT_CONFIG    = 0x3FE;
     // Enable all errors
     RFCONTROLLER_REG__ERROR_CONFIG  = 0x1F;
     
@@ -135,7 +135,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
     RFCONTROLLER_REG__TX_PACK_LEN   = (PORT_TIMER_WIDTH)len;
     RFCONTROLLER_REG__CONTROL       = 0x01;
     
-    while(radio_vars.state != RADIOSTATE_PACKET_LOADED);
+    radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
 
 void radio_txEnable() {
@@ -214,15 +214,6 @@ kick_scheduler_t radio_isr() {
     PORT_TIMER_WIDTH irq_error  = RFCONTROLLER_REG__ERROR;
     
     capturedTime                = radiotimer_getCapturedTime();
-    
-    if (irq_status & 0x00000001){
-        // change state
-        radio_vars.state = RADIOSTATE_PACKET_LOADED;
-        // clear interruption bit
-        RFCONTROLLER_REG__INT_CLEAR = irq_status;
-        // kick the OS
-        return KICK_SCHEDULER;
-    };
     
     if (irq_status & 0x00000002 || irq_status & 0x00000008){
         // change state
