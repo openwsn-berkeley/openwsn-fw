@@ -17,8 +17,8 @@ to return the board's description.
 
 #define INTERRUPT_DECLARATION()
 
-#define DISABLE_INTERRUPTS()
-#define ENABLE_INTERRUPTS()
+#define DISABLE_INTERRUPTS()            __disable_irq();
+#define ENABLE_INTERRUPTS()             __enable_irq();
 
 //===== timer
 
