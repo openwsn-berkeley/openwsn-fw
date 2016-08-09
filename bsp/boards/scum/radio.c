@@ -21,8 +21,8 @@
 typedef struct {
     radiotimer_capture_cbt    startFrame_cb;
     radiotimer_capture_cbt    endFrame_cb;
-    radio_state_t             state; 
     uint8_t                   radio_rx_buffer[LENGTH_MAX_RX_BUFFER];
+    radio_state_t             state; 
 } radio_vars_t;
 
 radio_vars_t radio_vars;
@@ -127,13 +127,17 @@ void radio_rfOff() {
 //===== TX
 
 void radio_loadPacket(uint8_t* packet, uint8_t len) {
+    uint8_t i;
     // change state
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
 
     // load packet in TXFIFO
-    RFCONTROLLER_REG__TX_DATA_ADDR  = (char*)packet;
-    RFCONTROLLER_REG__TX_PACK_LEN   = (PORT_TIMER_WIDTH)len;
+    RFCONTROLLER_REG__TX_DATA_ADDR  = &(packet[0]);
+    RFCONTROLLER_REG__TX_PACK_LEN   = len;
     RFCONTROLLER_REG__CONTROL       = 0x01;
+    
+    // add some delay for loading
+    for (i=0;i<0xff;i++);
     
     radio_vars.state = RADIOSTATE_PACKET_LOADED;
 }
