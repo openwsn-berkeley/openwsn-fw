@@ -103,7 +103,7 @@ PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 kick_scheduler_t radiotimer_isr() {
     PORT_RADIOTIMER_WIDTH interrupt_flag = RFTIMER_REG__INT;
     switch (interrupt_flag & 0xffffffff) {
-        case 0x00000004:
+        case 0x00000004: // timer compare interrupt
             if (radiotimer_vars.compare_cb!=NULL) {
                 // call the callback
                 radiotimer_vars.compare_cb();
@@ -112,7 +112,7 @@ kick_scheduler_t radiotimer_isr() {
                 return KICK_SCHEDULER;
             }
             break;
-        case 0x00000002: // timer overflows
+        case 0x00000002: // timer overflows interrupt
             if (radiotimer_vars.overflow_cb!=NULL) {
                 // call the callback
                 radiotimer_vars.overflow_cb();
