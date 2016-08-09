@@ -1,3 +1,10 @@
+/**
+\brief SCuM board's addresses of the memory-mapped registers .
+
+\author Sahar Misha     <smesri@berkeley.edu>,      August 2016.
+\author Tengfei Chang   <tengfei.chang@inria.fr>    August 2016.
+*/
+
 //AHB Peripheral
 #define     AHB_BOOTLOAD_BASE           0x01000000
 #define     AHB_DATAMEM_BASE            0x20000000
