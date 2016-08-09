@@ -413,7 +413,7 @@ void CC1200_spiReadRam    (uint16_t addr,  cc1200_status_t* statusRead, uint8_t*
 
 
 static const registerSetting_t preferredSettings[] = {
-    {CC1200_IOCFG2,         0x13},
+    {CC1200_IOCFG2,         0x06}, //it was 0x13 before. 
     {CC1200_IOCFG0,         0x06},
     {CC1200_SYNC_CFG1,      0xA9},
     {CC1200_MODCFG_DEV_E,   0x0B},

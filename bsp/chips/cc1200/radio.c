@@ -16,6 +16,8 @@
 //=========================== variables =======================================
 
 typedef struct {
+   radiotimer_capture_cbt    startFrame_cb;
+   radiotimer_capture_cbt    endFrame_cb;
    cc1200_status_t radioStatusByte;
    radio_state_t   state;
 } radio_vars_t;
@@ -47,7 +49,7 @@ void radio_init(void) {
    P1IE |= (BIT3); // Enable interrupt for P1.3
    P1SEL &= (~BIT7); // Set P1.7 SEL as GPIO
    P1DIR &= (~BIT7); // Set P1.7 SEL as Input
-   P1IES |= (BIT7); // Falling Edge
+   P1IES &= (~BIT7); // Rising Edge //P1IES |= (BIT7); // Falling Edge
    P1IFG &= (~BIT7); // Clear interrupt flag for P1.7
    P1IE |= (BIT7); // Enable interrupt for P1.7
     // Write registers to radio
@@ -66,11 +68,11 @@ void radio_setCompareCb(radiotimer_compare_cbt cb) {
 }
 
 void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
-   radiotimer_setStartFrameCb(cb);
+   radio_vars.startFrame_cb  = cb;
 }
 
 void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
-   radiotimer_setEndFrameCb(cb);
+   radio_vars.endFrame_cb    = cb;
 }
 
 //===== reset
@@ -216,8 +218,9 @@ void radio_getReceivedFrame(
       uint8_t* lqi,
       bool*    crc
    ) {
-   
-   // read the received packet from the RXFIFO
+   //read FIFO length 
+   CC1200_spiReadReg(CC1200_NUM_RXBYTES, &radio_vars.radioStatusByte, lenRead);
+     // read the received packet from the RXFIFO
    CC1200_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
    
    // On reception, when MODEMCTRL0.AUTOCRC is set, the CC2420 replaces the
@@ -233,3 +236,52 @@ void radio_getReceivedFrame(
 //=========================== private =========================================
 
 //=========================== callbacks =======================================
+
+//=========================== interrupt handlers ==============================
+kick_scheduler_t radio_isr() {
+   PORT_TIMER_WIDTH capturedTime;
+   //uint8_t  irq_status;
+   // capture the time
+   capturedTime = radiotimer_getCapturedTime();
+    switch(__even_in_range(P1IV,16))
+   {
+   case 0:break;
+   case 2:break;
+   case 4:break;
+   case 6:break;
+   case 8:
+     P1IFG &= ~(BIT3);  //GPIO2 of the radio cc1200 falling edge
+     P4OUT ^= BIT0;
+     // change state
+      radio_vars.state = RADIOSTATE_TXRX_DONE;
+      if (radio_vars.endFrame_cb!=NULL) {
+         // call the callback
+         radio_vars.endFrame_cb(capturedTime);
+         // kick the OS
+         return KICK_SCHEDULER;
+      } else {
+         while(1);
+      }
+     break;
+   case 10:break;
+   case 12:break;
+   case 14:break;
+   case 16:
+     P1IFG &= ~(BIT7);   //GPIO0 of the radio cc1200 rising edge
+     P4OUT ^= BIT2;
+     // change state
+      radio_vars.state = RADIOSTATE_RECEIVING;
+      if (radio_vars.startFrame_cb!=NULL) {
+         // call the callback
+         radio_vars.startFrame_cb(capturedTime);
+         // kick the OS
+         return KICK_SCHEDULER;
+      } else {
+         while(1);
+      }
+
+     break;
+   }
+       
+   return DO_NOT_KICK_SCHEDULER;
+}

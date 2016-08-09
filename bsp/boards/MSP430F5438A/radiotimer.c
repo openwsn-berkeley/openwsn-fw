@@ -103,15 +103,7 @@ void radiotimer_cancel() {
 //===== capture
 
 inline PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
-   // this should never happpen!
-   
-   // we can not print from within the BSP. Instead:
-   // blink the error LED
-   leds_error_blink();
-   // reset the board
-   board_reset();
-   
-   return 0;// this line is never reached, but here to satisfy compiler
+   return TBR;
 }
 
 //=========================== private =========================================

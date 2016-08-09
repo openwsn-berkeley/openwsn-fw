@@ -57,7 +57,7 @@
         </option>
         <option>
           <name>DdfFileName</name>
-          <state></state>
+          <state>$TOOLKIT_DIR$\config\debugger\msp430f5438a.ddf</state>
         </option>
         <option>
           <name>ProcTMS</name>
@@ -195,7 +195,7 @@
         </option>
         <option>
           <name>TargetVoltage</name>
-          <state>3.0</state>
+          <state>3.3</state>
         </option>
         <option>
           <name>AllowLockedFlashAccessP7</name>
@@ -211,7 +211,7 @@
         </option>
         <option>
           <name>CRadioProtocolType</name>
-          <state>1</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCRadioModuleTypeSlave</name>
