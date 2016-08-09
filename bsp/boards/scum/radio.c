@@ -14,7 +14,44 @@
 
 //=========================== defines =========================================
 
-#define LENGTH_MAX_RX_BUFFER  128 //// 1B length, 125B data, 2B CRC
+#define LENGTH_MAX_RX_BUFFER    128 //// 1B length, 125B data, 2B CRC
+
+// ==== radio interruption bit configuration
+
+#define TX_LOAD_DONE_INT_EN     0x001
+#define TX_SFD_DONE_INT_EN      0x002
+#define TX_SEND_DONE_INT_EN     0x004
+#define RX_SFD_DONE_INT_EN      0x008
+#define RX_DONE_INT_EN          0x010
+
+// ==== radio error bit configuration
+
+#define TX_OVERFLOW_ERROR_EN    0x001
+#define TX_CUTOFF_ERROR_EN      0x002
+#define RX_OVERFLOW_ERROR_EN    0x004
+#define RX_CRC_ERROR_EN         0x008
+#define RX_CUTOFF_ERROR_EN      0x010
+
+// ==== radio control operation
+
+#define TX_LOAD                 0x01
+#define TX_SEND                 0x02
+#define RX_START                0x04
+#define RX_STOP                 0x08
+#define RX_RESET                0x10
+
+// ==== radio interruption flag
+
+#define TX_LOAD_DONE_INT        0x001
+#define TX_SFD_DONE_INT         0x002
+#define TX_SEND_DONE_INT        0x004
+#define RX_SFD_DONE_INT         0x008
+#define RX_DONE_INT             0x010
+
+// ==== default crc check result and rssi value
+
+#define DEFAULT_CRC_CHECK       0x01
+#define DEFAULT_RSSI            -91
 
 //=========================== variables =======================================
 
@@ -41,10 +78,18 @@ void radio_init() {
     // change state
     radio_vars.state                = RADIOSTATE_STOPPED;
     
-    // Enable all interrupts and pulses to radio timer: no loaddone interrupt
-    RFCONTROLLER_REG__INT_CONFIG    = 0x3FE;
+    // enable sfd done and send done interruptions of tranmission
+    // enable sfd done and receiving done interruptions of reception
+    RFCONTROLLER_REG__INT_CONFIG    = TX_SFD_DONE_INT_EN    |   \
+                                      TX_SEND_DONE_INT_EN   |   \
+                                      RX_SFD_DONE_INT_EN    |   \
+                                      RX_DONE_INT_EN;
     // Enable all errors
-    RFCONTROLLER_REG__ERROR_CONFIG  = 0x1F;
+    RFCONTROLLER_REG__ERROR_CONFIG  = TX_OVERFLOW_ERROR_EN  |   \
+                                      TX_CUTOFF_ERROR_EN    |   \
+                                      RX_OVERFLOW_ERROR_EN  |   \
+                                      RX_CRC_ERROR_EN       |   \
+                                      RX_CUTOFF_ERROR_EN;
     
     // change state
     radio_vars.state                = RADIOSTATE_RFOFF;
@@ -59,11 +104,11 @@ void radio_setCompareCb(radiotimer_compare_cbt cb) {
 }
 
 void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
-    radio_vars.startFrame_cb  = cb;
+    radio_vars.startFrame_cb    = cb;
 }
 
 void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
-    radio_vars.endFrame_cb    = cb;
+    radio_vars.endFrame_cb      = cb;
 }
 
 //===== reset
@@ -106,22 +151,22 @@ void radio_setFrequency(uint8_t frequency) {
 
 void radio_rfOn() {
     // clear reset pin
-    RFCONTROLLER_REG__CONTROL &= ~0x10;
+    RFCONTROLLER_REG__CONTROL   &= ~RX_RESET;
 }
 
 void radio_rfOff() {
     // change state
-    radio_vars.state = RADIOSTATE_TURNING_OFF;
+    radio_vars.state            = RADIOSTATE_TURNING_OFF;
 
     // turn SCuM radio off
-    RFCONTROLLER_REG__CONTROL = 0x08;
+    RFCONTROLLER_REG__CONTROL   = RX_STOP;
 
     // wiggle debug pin
     debugpins_radio_clr();
     leds_radio_off();
 
     // change state
-    radio_vars.state = RADIOSTATE_RFOFF;
+    radio_vars.state            = RADIOSTATE_RFOFF;
 }
 
 //===== TX
@@ -134,7 +179,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
     // load packet in TXFIFO
     RFCONTROLLER_REG__TX_DATA_ADDR  = &(packet[0]);
     RFCONTROLLER_REG__TX_PACK_LEN   = len;
-    RFCONTROLLER_REG__CONTROL       = 0x01;
+    RFCONTROLLER_REG__CONTROL       = TX_LOAD;
     
     // add some delay for loading
     for (i=0;i<0xff;i++);
@@ -159,7 +204,7 @@ void radio_txEnable() {
 void radio_txNow() {
 
     // change state
-    RFCONTROLLER_REG__CONTROL = 0x02;
+    RFCONTROLLER_REG__CONTROL = TX_SEND;
 }
 
 //===== RX
@@ -171,7 +216,7 @@ void radio_rxEnable() {
     
     DMA_REG__RF_RX_ADDR         = &(radio_vars.radio_rx_buffer[0]);
     // start to listen
-    RFCONTROLLER_REG__CONTROL   = 0x04;
+    RFCONTROLLER_REG__CONTROL   = RX_START;
     
     // wiggle debug pin
     debugpins_radio_set();
@@ -193,13 +238,13 @@ void radio_getReceivedFrame(uint8_t* pBufRead,
                                bool* pCrc) {
     
     //===== crc
-    *pCrc           = 1;
+    *pCrc           = DEFAULT_CRC_CHECK;
    
     //===== rssi
-    *pRssi          = -91;
+    *pRssi          = DEFAULT_RSSI;
     
     //===== length
-    *pLenRead = radio_vars.radio_rx_buffer[0];
+    *pLenRead       = radio_vars.radio_rx_buffer[0];
     
     //===== packet 
     memcpy(pBufRead,&(radio_vars.radio_rx_buffer[1]),*pLenRead);
@@ -219,12 +264,12 @@ kick_scheduler_t radio_isr() {
     
     capturedTime                = radiotimer_getCapturedTime();
     
-    if (irq_status & 0x00000002 || irq_status & 0x00000008){
+    if (irq_status & TX_SFD_DONE_INT || irq_status & RX_SFD_DONE_INT){
         // change state
-        if (irq_status & 0x00000002) {
+        if (irq_status & TX_SFD_DONE_INT) {
             radio_vars.state    = RADIOSTATE_TRANSMITTING;
         }
-        if (irq_status & 0x00000008) {
+        if (irq_status & RX_SFD_DONE_INT) {
             radio_vars.state    = RADIOSTATE_RECEIVING;
         }
         if (radio_vars.startFrame_cb!=NULL) {
@@ -237,7 +282,7 @@ kick_scheduler_t radio_isr() {
         }
     }
     
-    if (irq_status & 0x00000004 || irq_status & 0x00000010){
+    if (irq_status & TX_SEND_DONE_INT || irq_status & RX_DONE_INT){
         // change state
         radio_vars.state = RADIOSTATE_TXRX_DONE;
         if (radio_vars.endFrame_cb!=NULL) {
