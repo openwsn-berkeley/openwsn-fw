@@ -131,5 +131,6 @@ kick_scheduler_t radiotimer_isr() {
         default:
             while(1);   // this should not happen
     }
+    RFTIMER_REG__INT_CLEAR = interrupt_flag;
     return DO_NOT_KICK_SCHEDULER;
 }
