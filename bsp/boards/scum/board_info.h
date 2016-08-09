@@ -17,8 +17,8 @@ to return the board's description.
 
 #define INTERRUPT_DECLARATION()
 
-#define DISABLE_INTERRUPTS()            __disable_irq();
-#define ENABLE_INTERRUPTS()             __enable_irq();
+#define DISABLE_INTERRUPTS()                __disable_irq();
+#define ENABLE_INTERRUPTS()                 __enable_irq();
 
 //===== timer
 
@@ -37,20 +37,18 @@ to return the board's description.
 //===== IEEE802154E timing
 
 //// time-slot related
-#define PORT_TsSlotDuration                 491   // counter counts one extra count, see datasheet
-// execution speed related   (rcc configure need 235us)
-#define PORT_maxTxDataPrepare               66    // 2014us (measured 812us+235) stm32
-#define PORT_maxRxAckPrepare                20    //  900us (measured 171us+235) stm32
-#define PORT_maxRxDataPrepare               33    //  976us (measured 170us+235) stm32
-#define PORT_maxTxAckPrepare                30    //  900us (measured 323us+235) stm32
-
+#define PORT_TsSlotDuration                 491   // 491 ticks = 15ms   @32768Hz
+#define PORT_maxTxDataPrepare               66    // 66  ticks = 2013us @32768Hz
+#define PORT_maxRxAckPrepare                20    // 20  ticks = 610us  @32768Hz
+#define PORT_maxRxDataPrepare               33    // 33  ticks = 1006us @32768Hz
+#define PORT_maxTxAckPrepare                30    // 30  ticks = 915us  @32768Hz
 // radio speed related
-#define PORT_delayTx                        5     //  5ticks=152.5us@32768hz (datasheet value: 162us)
+#define PORT_delayTx                        5     //  5  ticks = 152us  @32768hz
 #define PORT_delayRx                        0     //  0us (can not measure)
 
 //===== adaptive_sync accuracy
 
-#define SYNC_ACCURACY                           2     // by ticks
+#define SYNC_ACCURACY                       2     // by ticks
 
 //=========================== typedef  ========================================
 
