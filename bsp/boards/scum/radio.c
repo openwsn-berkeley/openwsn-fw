@@ -14,7 +14,7 @@
 
 //=========================== defines =========================================
 
-#define LENGTH_MAX_RX_BUFFER  130 //// 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
+#define LENGTH_MAX_RX_BUFFER  128 //// 1B length, 125B data, 2B CRC
 
 //=========================== variables =======================================
 
