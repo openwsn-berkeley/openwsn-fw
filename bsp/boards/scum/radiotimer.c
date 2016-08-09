@@ -1,7 +1,7 @@
 /**
 \brief SCuM-specific definition of the "radiotimer" bsp module.
 
-\author Tengfei Chang <tengfei.chang@inria.fr>, Auguest 2016.
+\author Tengfei Chang <tengfei.chang@inria.fr>, August 2016.
 */
 
 #include "memory_map.h"

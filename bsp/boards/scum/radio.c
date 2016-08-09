@@ -265,11 +265,14 @@ kick_scheduler_t radio_isr() {
     capturedTime                = radiotimer_getCapturedTime();
     
     if (irq_status & TX_SFD_DONE_INT || irq_status & RX_SFD_DONE_INT){
-        // change state
+        // SFD is just sent or received, check the specific interruption and 
+        // change the radio state accordingly
         if (irq_status & TX_SFD_DONE_INT) {
+            // a SFD is just sent, update radio state
             radio_vars.state    = RADIOSTATE_TRANSMITTING;
         }
         if (irq_status & RX_SFD_DONE_INT) {
+            // a SFD is just received, update radio state
             radio_vars.state    = RADIOSTATE_RECEIVING;
         }
         if (radio_vars.startFrame_cb!=NULL) {
@@ -283,8 +286,9 @@ kick_scheduler_t radio_isr() {
     }
     
     if (irq_status & TX_SEND_DONE_INT || irq_status & RX_DONE_INT){
-        // change state
-        radio_vars.state = RADIOSTATE_TXRX_DONE;
+        // the packet transmission or reception is done,
+        // update the radio state
+        radio_vars.state        = RADIOSTATE_TXRX_DONE;
         if (radio_vars.endFrame_cb!=NULL) {
             // call the callback
             radio_vars.endFrame_cb(capturedTime);
@@ -298,8 +302,8 @@ kick_scheduler_t radio_isr() {
     }
     
     if (irq_error == 0) {
-        
-        // print out the error here. 
+        // error happens during the operation of radio. Print out the error here. 
+        // To Be Done. add error description deifinition for this type of errors.
         
         RFCONTROLLER_REG__ERROR_CLEAR = irq_error;
     }
