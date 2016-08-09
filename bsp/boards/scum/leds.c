@@ -20,7 +20,7 @@ void leds_init() {
     GPIO_REG__OUTPUT    &= ~0x0F;    // GPIO_REG__OUTPUT = 0bxxxx0000, all LEDs off
 }
 
-// red
+// 0 <H17>
 void    leds_error_on() {
     GPIO_REG__OUTPUT    |=  0x01;
 }
@@ -34,7 +34,7 @@ uint8_t leds_error_isOn() {
     return (uint8_t)(GPIO_REG__OUTPUT & 0x01);
 }
 
-// orange
+// 1 <K15>
 void    leds_radio_on() {
     GPIO_REG__OUTPUT    |=  0x02;
 }
@@ -48,7 +48,7 @@ uint8_t leds_radio_isOn() {
     return (uint8_t)(GPIO_REG__OUTPUT & 0x02)>>1;
 }
 
-// green
+// 2 <J13>
 void    leds_sync_on() {
     GPIO_REG__OUTPUT    |=  0x04;
 }
@@ -62,7 +62,7 @@ uint8_t leds_sync_isOn() {
     return (uint8_t)(GPIO_REG__OUTPUT & 0x04)>>2;
 }
 
-// yellow
+// 3 <N14>
 void    leds_debug_on() {
     GPIO_REG__OUTPUT    |=  0x08;
 }
