@@ -1,63 +1,59 @@
 Stack_Size      EQU     0x0800                            ; 4KB of STACK
-
                 AREA    STACK, NOINIT, READWRITE, ALIGN=4
 Stack_Mem       SPACE   Stack_Size
 __initial_sp    
 
-
 Heap_Size       EQU     0x0400                            ; 2KB of HEAP
-
                 AREA    HEAP, NOINIT, READWRITE, ALIGN=4
 __heap_base                
 Heap_Mem        SPACE   Heap_Size
 __heap_limit
-
 
 ; Vector Table Mapped to Address 0 at Reset
 
                     PRESERVE8
                     THUMB
 
-                        AREA        RESET, DATA, READONLY
-                        EXPORT      __Vectors
+                    AREA        RESET, DATA, READONLY
+                    EXPORT      __Vectors
                     
-__Vectors               DCD         __initial_sp
-                        DCD         Reset_Handler
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        
-                        ; External Interrupts
-                                   
-                        DCD         UART_Handler
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         RF_Handler
-                        DCD         RFTIMER_Handler
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-                        DCD         0
-              
-                AREA |.text|, CODE, READONLY
+__Vectors           DCD         __initial_sp
+                    DCD         Reset_Handler
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    
+                    ; External Interrupts
+                    
+                    DCD         UART_Handler
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         RF_Handler
+                    DCD         RFTIMER_Handler
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    DCD         0
+                    
+                    AREA |.text|, CODE, READONLY
                     
 ;Interrupt Handlers
 Reset_Handler   PROC
@@ -149,5 +145,4 @@ __user_initial_stackheap
 
                 ENDIF
 
-
-        END
+END
