@@ -1,5 +1,5 @@
 /**
-\brief GINA-specific definition of the "board" bsp module.
+\brief SCuM-specific definition of the "board" bsp module.
 
 \author Tengfei Chang <tengfei.chang@inria.fr>, August 2016.
 */
