@@ -101,16 +101,33 @@ uint16_t radio_getTimerPeriod(void) {
 //===== RF admin
 
 void radio_setFrequency(uint8_t frequency) {
-   
+    
    // change state
    radio_vars.state = RADIOSTATE_FREQUENCY_SET;
 }
 
-void radio_rfOn(void) {   
-   CC1200_spiStrobe(CC1200_SFSTXON, &radio_vars.radioStatusByte);
-   while (radio_vars.radioStatusByte.chip_rdyn==1) {
-      CC1200_spiStrobe(CC1200_SNOP, &radio_vars.radioStatusByte);
-   }
+void radio_rfOn(void) {
+  uint8_t marcState;
+  // Calibrate radio
+  CC1200_spiStrobe(CC1200_SCAL, &radio_vars.radioStatusByte);
+  // Wait for calibration to be done (radio back in IDLE state)
+  do {
+      CC1200_spiReadReg(CC1200_MARCSTATE, &radio_vars.radioStatusByte, &marcState);
+  } while (marcState != 0x41);
+   //CC1200_spiStrobe(CC1200_SFSTXON, &radio_vars.radioStatusByte);
+   //while (radio_vars.radioStatusByte.chip_rdyn==1) {
+    //  CC1200_spiStrobe(CC1200_SNOP, &radio_vars.radioStatusByte);
+   //}
+  //calibrate ROCos
+  CC1200_spiReadReg(CC1200_WOR_CFG0, &radio_vars.radioStatusByte, &marcState);
+  marcState = (marcState & 0xF9) | (0x02 << 1); 
+  // Write new register value
+  CC1200_spiWriteReg(CC1200_WOR_CFG0, &radio_vars.radioStatusByte, marcState);
+  // Strobe IDLE to calibrate the RCOSC
+  CC1200_spiStrobe(CC1200_SIDLE, &radio_vars.radioStatusByte);
+  // Disable RC calibration
+  marcState = (marcState & 0xF9) | (0x00 << 1);
+  CC1200_spiWriteReg(CC1200_WOR_CFG0, &radio_vars.radioStatusByte, marcState);
 }
 
 void radio_rfOff(void) {
@@ -170,18 +187,18 @@ void radio_rxEnable(void) {
    // change state
    radio_vars.state = RADIOSTATE_ENABLING_RX;
    
-   // put radio in reception mode
-   CC1200_spiStrobe(CC1200_SRX, &radio_vars.radioStatusByte);
-   CC1200_spiStrobe(CC1200_SFRX, &radio_vars.radioStatusByte);
+   //put radio in reception mode
+   CC1200_spiStrobe(CC1200_SWOR, &radio_vars.radioStatusByte);
+   //CC1200_spiStrobe(CC1200_SFRX, &radio_vars.radioStatusByte);
    
    // wiggle debug pin
    debugpins_radio_set();
    leds_radio_on();
    
    // busy wait until radio really listening
-   while (!radio_vars.radioStatusByte.state==1) {
-      CC1200_spiStrobe(CC1200_SNOP, &radio_vars.radioStatusByte);
-   }
+   //while (!radio_vars.radioStatusByte.state==1) {
+  //    CC1200_spiStrobe(CC1200_SNOP, &radio_vars.radioStatusByte);
+  // }
    
    // change state
    radio_vars.state = RADIOSTATE_LISTENING;

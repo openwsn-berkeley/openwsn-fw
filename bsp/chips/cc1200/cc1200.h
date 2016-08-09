@@ -144,8 +144,8 @@ typedef struct {
 //=========================== prototypes ======================================
 
 void CC1200_spiStrobe     (uint8_t strobe, cc1200_status_t* statusRead);
-void CC1200_spiWriteReg   (uint8_t reg,    cc1200_status_t* statusRead, uint8_t regValueToWrite);
-void CC1200_spiReadReg    (uint8_t reg,    cc1200_status_t* statusRead, uint8_t* regValueRead);
+void CC1200_spiWriteReg   (uint16_t reg,    cc1200_status_t* statusRead, uint8_t regValueToWrite);
+void CC1200_spiReadReg    (uint16_t reg,    cc1200_status_t* statusRead, uint8_t* regValueRead);
 void CC1200_spiWriteFifo  (                cc1200_status_t* statusRead, uint8_t* bufToWrite, uint8_t  lenToWrite, uint8_t addr);
 void CC1200_spiReadRxFifo (                cc1200_status_t* statusRead, uint8_t* bufRead,    uint8_t* lenRead, uint8_t maxBufLen);
 void CC1200_spiWriteRam   (uint16_t addr,  cc1200_status_t* statusRead, uint8_t* bufToWrite,  uint8_t len);

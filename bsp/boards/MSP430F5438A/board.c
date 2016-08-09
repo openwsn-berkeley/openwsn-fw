@@ -128,6 +128,7 @@ ISR(TIMER0_A0) {
 
 // PORT1_VECTOR
 ISR(PORT1){
+  debugpins_isr_set();
     switch(__even_in_range(P1IV,16))
    {
    case 0:break;
@@ -135,15 +136,18 @@ ISR(PORT1){
    case 4:break;
    case 6:break;
    case 8:
+     P1IFG &= ~(BIT3);
      P4OUT     &= ~BIT1;
      break;
    case 10:break;
    case 12:break;
    case 14:break;
    case 16:
+     P1IFG &= ~(BIT7);
      P4OUT     &= ~BIT2;
      break;
    }
+   debugpins_isr_clr();
 }
 
 // WDT_VECTOR

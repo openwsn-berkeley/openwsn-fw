@@ -48,8 +48,8 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
 
 void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
    // radio's SFD pin connected to P4.1
-   P4DIR   &= ~0x02; // input
-   P4SEL   |=  0x02; // in CCI1a/B mode
+   //P4DIR   &= ~0x02; // input
+   //P4SEL   |=  0x02; // in CCI1a/B mode
    
    // CCR0 contains period of counter
    // do not interrupt when counter reaches TBCCR0, but when it resets

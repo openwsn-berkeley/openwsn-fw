@@ -26,12 +26,18 @@ void CC1200_spiStrobe(uint8_t strobe, cc1200_status_t* statusRead) {
    );
 }
 
-void CC1200_spiWriteReg(uint8_t reg, cc1200_status_t* statusRead, uint8_t regValueToWrite) {
+void CC1200_spiWriteReg(uint16_t reg, cc1200_status_t* statusRead, uint8_t regValueToWrite) {
+   
+   uint8_t tempExt  = (uint8_t)(reg>>8);
+   uint8_t tempAddr = (uint8_t)(reg & 0x00FF);
+   
+     /* Decide what register space is accessed */  
+   if(!tempExt)
+   {
    uint8_t              spi_tx_buffer[2];
-   
-   spi_tx_buffer[0]     = (CC1200_FLAG_WRITE | reg);
+   spi_tx_buffer[0]     = (CC1200_FLAG_WRITE | tempAddr);
    spi_tx_buffer[1]     = regValueToWrite;
-   
+      
    spi_txrx(
       spi_tx_buffer,              // bufTx
       sizeof(spi_tx_buffer),      // lenbufTx
@@ -41,14 +47,57 @@ void CC1200_spiWriteReg(uint8_t reg, cc1200_status_t* statusRead, uint8_t regVal
       SPI_FIRST,                  // isFirst
       SPI_LAST                    // isLast
    );
+   }
+   else if (tempExt == 0x2F)
+   {
+   uint8_t              spi_tx_buffer[3];
+   spi_tx_buffer[0]     = (CC1200_FLAG_WRITE | tempExt);
+   spi_tx_buffer[1]     = tempAddr;
+   spi_tx_buffer[2]     = regValueToWrite;
+      
+   spi_txrx(
+      spi_tx_buffer,              // bufTx
+      sizeof(spi_tx_buffer),      // lenbufTx
+      SPI_FIRSTBYTE,              // returnType
+      (uint8_t*)statusRead,       // bufRx
+      1,                          // maxLenBufRx
+      SPI_FIRST,                  // isFirst
+      SPI_LAST                    // isLast
+   );   
+   }
+  
 }
 
-void CC1200_spiReadReg(uint8_t reg, cc1200_status_t* statusRead, uint8_t* regValueRead) {
+void CC1200_spiReadReg(uint16_t reg, cc1200_status_t* statusRead, uint8_t* regValueRead) {
+  
+   uint8_t tempExt  = (uint8_t)(reg>>8);
+   uint8_t tempAddr = (uint8_t)(reg & 0x00FF);
+   
+   if(!tempExt)
+   {
+   uint8_t              spi_tx_buffer[2];
+   uint8_t              spi_rx_buffer[2];
+   spi_tx_buffer[0]     = (CC1200_FLAG_READ | tempAddr);
+   spi_tx_buffer[1]     = 0x00;
+   
+   spi_txrx(
+      spi_tx_buffer,              // bufTx
+      sizeof(spi_tx_buffer),      // lenbufTx
+      SPI_BUFFER,                 // returnType
+      spi_rx_buffer,              // bufRx
+      sizeof(spi_rx_buffer),      // maxLenBufRx
+      SPI_FIRST,                  // isFirst
+      SPI_LAST                    // isLast
+   );
+   *statusRead          = *(cc1200_status_t*)&spi_rx_buffer[0];
+   *(regValueRead+0)    = spi_rx_buffer[1];
+   }
+   else if (tempExt == 0x2F)
+   {
    uint8_t              spi_tx_buffer[3];
    uint8_t              spi_rx_buffer[3];
-   
-   spi_tx_buffer[0]     = (CC1200_FLAG_READ | reg);
-   spi_tx_buffer[1]     = 0x00;
+   spi_tx_buffer[0]     = (CC1200_FLAG_READ | tempExt);
+   spi_tx_buffer[1]     = tempAddr;
    spi_tx_buffer[2]     = 0x00;
    
    spi_txrx(
@@ -60,10 +109,11 @@ void CC1200_spiReadReg(uint8_t reg, cc1200_status_t* statusRead, uint8_t* regVal
       SPI_FIRST,                  // isFirst
       SPI_LAST                    // isLast
    );
-   
    *statusRead          = *(cc1200_status_t*)&spi_rx_buffer[0];
    *(regValueRead+0)    = spi_rx_buffer[2];
    *(regValueRead+1)    = spi_rx_buffer[1];
+   }
+   
 }
 
 void CC1200_spiWriteFifo(cc1200_status_t* statusRead, uint8_t* bufToWrite, uint8_t len, uint8_t addr) {
