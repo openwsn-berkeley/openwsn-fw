@@ -482,6 +482,11 @@
               <FileType>1</FileType>
               <FilePath>..\..\..\bsp\boards\scum\radio.c</FilePath>
             </File>
+            <File>
+              <FileName>eui64.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\bsp\boards\scum\eui64.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
