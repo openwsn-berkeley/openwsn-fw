@@ -32,10 +32,17 @@ to return the board's description.
 
 // ==== SCuM RF timer specific 
 
-// since SCuM uses 500KHz, but the statck protocol is designed for 32KHz.
-// the following two marco are used to convert the couter value bewteen
-// two different frequency clocks. 500000/32768 is approximately 61/4.
-#define TIMER_COUTER_CONVERT_32K_TO_500K(value)    value*61/4
+/** 
+* since SCuM uses 500KHz, but the statck protocol is designed for 32KHz.
+* the following two marco are used to convert the couter value bewteen
+* two different frequency clocks. 500000/32768 is approximately 61/4.
+**/
+
+// this is called when require to WRITE the RFTIMER counter/compare registers,
+// where the value is going to be multiplied.
+#define TIMER_COUTER_CONVERT_32K_TO_500K(value)    value*61/4 
+// this is called when require to READ  the RFTIMER counter/compare registers,
+// where the value is going to be divided.
 #define TIMER_COUTER_CONVERT_500K_TO_32K(value)    value*4/61
 
 // ==== SCuM RF timer compare control bit
