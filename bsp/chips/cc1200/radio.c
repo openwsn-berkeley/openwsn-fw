@@ -219,7 +219,7 @@ void radio_getReceivedFrame(
       bool*    crc
    ) {
    //read FIFO length 
-   CC1200_spiReadReg(CC1200_NUM_RXBYTES, &radio_vars.radioStatusByte, lenRead);
+   //CC1200_spiReadReg(CC1200_NUM_RXBYTES, &radio_vars.radioStatusByte, lenRead);
      // read the received packet from the RXFIFO
    CC1200_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
    
