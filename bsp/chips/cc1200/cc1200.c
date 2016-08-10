@@ -155,29 +155,30 @@ void CC1200_spiReadRxFifo(cc1200_status_t* statusRead,
    // -  [0-125B] packet (excluding CRC)
    // - *[2B]     CRC
    uint8_t spi_tx_buffer[125];
-   uint8_t spi_rx_buffer[3];
+   //uint8_t spi_rx_buffer[127];
    
    spi_tx_buffer[0]     = (/*CC1200_FLAG_READ*/CC1200_FLAG_READ_BURST | CC1200_FIFO_ADDR);
+      //read FIFO length 
    
-  //  2 first bytes
+   // 2 first bytes
    spi_txrx(
       spi_tx_buffer,              // bufTx
-      2,                          // lenbufTx
+      *pLenRead,                   // lenbufTx
       SPI_BUFFER,                 // returnType
-      spi_rx_buffer,              // bufRx
-      sizeof(spi_rx_buffer),      // maxLenBufRx
+      pBufRead/*spi_rx_buffer*/,              // bufRx
+      127/*sizeof(spi_rx_buffer)*/,      // maxLenBufRx
       SPI_FIRST,                  // isFirst
-      SPI_NOTLAST                 // isLast
+      SPI_LAST/*SPI_NOTLAST*/                 // isLast
    );
    
-   *statusRead          = *(cc1200_status_t*)&spi_rx_buffer[0];
-   *pLenRead            = spi_rx_buffer[1];
+ //  *statusRead          = *(cc1200_status_t*)&spi_rx_buffer[0];
+ //  *pLenRead            = spi_rx_buffer[1];
    
-   if (*pLenRead>2 && *pLenRead<=127) {
+ //  if (*pLenRead>2 && *pLenRead<=127) {
       // valid length
       
       //read packet
-      spi_txrx(
+  /*    spi_txrx(
          spi_tx_buffer,           // bufTx
          *pLenRead,               // lenbufTx
          SPI_BUFFER,              // returnType
@@ -200,7 +201,7 @@ void CC1200_spiReadRxFifo(cc1200_status_t* statusRead,
          SPI_NOTFIRST,            // isFirst
          SPI_LAST                 // isLast
       );
-   }
+   } */
    /*
    A SFRX command strobe is required 
    after an RXFIFO overflow to enable 
