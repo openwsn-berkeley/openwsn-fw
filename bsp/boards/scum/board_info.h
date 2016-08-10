@@ -30,6 +30,23 @@ to return the board's description.
 #define SCHEDULER_WAKEUP()                  
 #define SCHEDULER_ENABLE_INTERRUPT()        
 
+// ==== SCuM RF timer specific 
+
+// since SCuM uses 500KHz, but the statck protocol is designed for 32KHz.
+// the following two marco are used to convert the couter value bewteen
+// two different frequency clocks. 500000/32768 is approximately 61/4.
+#define TIMER_COUTER_CONVERT_32K_TO_500K(value)    value*61/4
+#define TIMER_COUTER_CONVERT_500K_TO_32K(value)    value*4/61
+
+// ==== SCuM RF timer compare control bit
+
+#define RFTIMER_COMPARE_ENABLE              0x01
+#define RFTIMER_COMPARE_INTERRUPT_ENABLE    0x02
+#define RFTIMER_COMPARE_TX_LOAD_ENABLE      0x04
+#define RFIMER_COMPARE_TX_SEND_ENABLE       0x08
+#define RFTIMER_COMPARE_RX_START_ENABLE     0x10
+#define RFTIMER_COMPARE_RX_STOP_ENABLE      0x20
+
 //===== radio
 
 #define PORT_PIN_RADIO_RESET_LOW()          RFCONTROLLER_REG__CONTROL = 0x10;

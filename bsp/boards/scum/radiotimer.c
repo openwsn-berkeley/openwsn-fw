@@ -14,26 +14,11 @@
 
 //=========================== define =======================================
 
-// since SCuM uses 500KHz, but the statck protocol is designed for 32KHz.
-// the following two marco are used to convert the couter value bewteen
-// two different frequency clocks. 500000/32768 is approximately 61/4.
-#define TIMER_COUTER_CONVERT_32K_TO_500K(value)    value*61/4;
-#define TIMER_COUTER_CONVERT_500K_TO_32K(value)    value*4/61;
-
 // ==== radio timer control bit
 
 #define RADIOTIMER_ENABLE                       0x01
 #define RADIOTIMER_INTERRUPT_ENABLE             0x02
 #define RADIOTIMER_COUNT_RESET                  0x04
-
-// ==== radio timer compare control bit
-
-#define RADIOTIMER_COMPARE_ENABLE               0x01
-#define RADIOTIMER_COMPARE_INTERRUPT_ENABLE     0x02
-#define RADIOTIMER_COMPARE_TX_LOAD_ENABLE       0x04
-#define RADIOTIMER_COMPARE_TX_SEND_ENABLE       0x08
-#define RADIOTIMER_COMPARE_RX_START_ENABLE      0x10
-#define RADIOTIMER_COMPARE_RX_STOP_ENABLE       0x20
 
 // ==== radio timer interruption flag
 
@@ -102,8 +87,8 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     // set compare timer counter 0 to perform an overflow interrupt
     RFTIMER_REG__COMPARE1           = 0;
     // enable compare0 module and interrup
-    RFTIMER_REG__COMPARE1_CONTROL   = RADIOTIMER_COMPARE_ENABLE |   \
-                                      RADIOTIMER_COMPARE_INTERRUPT_ENABLE;
+    RFTIMER_REG__COMPARE1_CONTROL   = RFTIMER_COMPARE_ENABLE |   \
+                                      RFTIMER_COMPARE_INTERRUPT_ENABLE;
 }
 
 //===== direct access
@@ -124,11 +109,11 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
     // offset when to fire
-    RFTIMER_REG__COMPARE2            = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
+    RFTIMER_REG__COMPARE2           = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
    
     // enable compare interrupt (this also cancels any pending interrupts)
-    RFTIMER_REG__COMPARE2_CONTROL    = RADIOTIMER_COMPARE_ENABLE |   \
-                                      RADIOTIMER_COMPARE_INTERRUPT_ENABLE;
+    RFTIMER_REG__COMPARE2_CONTROL   = RFTIMER_COMPARE_ENABLE |   \
+                                      RFTIMER_COMPARE_INTERRUPT_ENABLE;
 }
 
 void radiotimer_cancel() {
