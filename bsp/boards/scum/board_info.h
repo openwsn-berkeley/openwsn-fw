@@ -33,8 +33,8 @@ to return the board's description.
 // ==== SCuM RF timer specific 
 
 /** 
-* since SCuM uses 500KHz, but the statck protocol is designed for 32KHz.
-* the following two marco are used to convert the couter value bewteen
+* since SCuM uses 500KHz, but the stack protocol is designed for 32KHz.
+* the following two marcos are used to convert the counter value bewteen
 * two different frequency clocks. 500000/32768 is approximately 61/4.
 **/
 
