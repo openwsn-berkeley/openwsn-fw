@@ -42,19 +42,23 @@ void    uart_writeByte(uint8_t byteToWrite){
 }
 
 void    uart_enableInterrupts(){ 
-    
+    // there is no interruption register for uart on SCuM. 
+    // the interruption is enabled by default, donot need to enable
 }
 
 void    uart_disableInterrupts(){
-    
+    // there is no interruption register for uart on SCuM. 
+    // the interruption is enabled by default, can't be disabled
 }
 
 void    uart_clearRxInterrupts(){
-    
+    // there is no interruption clear register for uart on SCuM. 
+    // not required to clear
 }
 
 void    uart_clearTxInterrupts(){
-    
+    // there is no interruption clear register for uart on SCuM. 
+    // not required to clear
 }
 
 uint8_t uart_readByte(){
