@@ -69,11 +69,11 @@ void radiotimer_setCompareCb(radiotimer_compare_cbt cb) {
 }
 
 void radiotimer_setStartFrameCb(radiotimer_capture_cbt cb) {
-    while(1);
+    // should never be called
 }
 
 void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
-    while(1);
+    // should never be called
 }
 
 void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
@@ -163,8 +163,7 @@ kick_scheduler_t radiotimer_isr() {
                 // kick the OS
                 return KICK_SCHEDULER;
             } else {
-                RFTIMER_REG__INT_CLEAR      = interrupt_flag;
-                while(1);   // this should not happen
+                // this should not happen
             }
         }
     }
