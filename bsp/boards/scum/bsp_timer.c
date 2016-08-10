@@ -88,16 +88,18 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
     temp_last_compare_value             = bsp_timer_vars.last_compare_value;
     
     newCompareValue                     = bsp_timer_vars.last_compare_value+delayTicks+1;
+    newCompareValue                    %= TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__MAX_COUNT);
     bsp_timer_vars.last_compare_value   = newCompareValue;
     
-    if (delayTicks<RFTIMER_REG__COUNTER*4/61-temp_last_compare_value) {
+    if (delayTicks<TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER)-temp_last_compare_value) {
         // we're already too late, schedule the ISR right now manually
         // not sure how to do this in scum, just miss this ISR for now
 
     } else {
         // this is the normal case, have timer expire at newCompareValue
-        RFTIMER_REG__COMPARE0           = (PORT_TIMER_WIDTH)(newCompareValue*61/4);
-        RFTIMER_REG__COMPARE0_CONTROL   = 0x03;
+        RFTIMER_REG__COMPARE0           = (PORT_TIMER_WIDTH)(TIMER_COUTER_CONVERT_32K_TO_500K(newCompareValue));
+        RFTIMER_REG__COMPARE0_CONTROL   = RFTIMER_COMPARE_ENABLE |   \
+                                          RFTIMER_COMPARE_INTERRUPT_ENABLE;
     }
 }
 
@@ -114,7 +116,7 @@ void bsp_timer_cancel_schedule() {
 \returns The current value of the timer's counter.
 */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
-    return RFTIMER_REG__COUNTER*4/61;
+    return TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__COUNTER);
 }
 
 //=========================== private =========================================
