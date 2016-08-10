@@ -18,8 +18,6 @@
 #define     APB_ANALOG_CFG_BASE         0x52000000
 #define     APB_GPIO_BASE               0x53000000
 
-
-
 //RFCONTRLLER Registers
 #define RFCONTROLLER_REG__CONTROL       *(unsigned int*)(AHB_RF_BASE + 0x00)
 #define RFCONTROLLER_REG__STATUS        *(unsigned int*)(AHB_RF_BASE + 0x04)
