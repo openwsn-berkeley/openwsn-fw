@@ -16,38 +16,6 @@
 
 #define LENGTH_MAX_RX_BUFFER    128 //// 1B length, 125B data, 2B CRC
 
-// ==== radio interruption bit configuration
-
-#define TX_LOAD_DONE_INT_EN     0x001
-#define TX_SFD_DONE_INT_EN      0x002
-#define TX_SEND_DONE_INT_EN     0x004
-#define RX_SFD_DONE_INT_EN      0x008
-#define RX_DONE_INT_EN          0x010
-
-// ==== radio error bit configuration
-
-#define TX_OVERFLOW_ERROR_EN    0x001
-#define TX_CUTOFF_ERROR_EN      0x002
-#define RX_OVERFLOW_ERROR_EN    0x004
-#define RX_CRC_ERROR_EN         0x008
-#define RX_CUTOFF_ERROR_EN      0x010
-
-// ==== radio control operation
-
-#define TX_LOAD                 0x01
-#define TX_SEND                 0x02
-#define RX_START                0x04
-#define RX_STOP                 0x08
-#define RX_RESET                0x10
-
-// ==== radio interruption flag
-
-#define TX_LOAD_DONE_INT        0x001
-#define TX_SFD_DONE_INT         0x002
-#define TX_SEND_DONE_INT        0x004
-#define RX_SFD_DONE_INT         0x008
-#define RX_DONE_INT             0x010
-
 // ==== default crc check result and rssi value
 
 #define DEFAULT_CRC_CHECK       0x01    // this is an arbitrary value for now

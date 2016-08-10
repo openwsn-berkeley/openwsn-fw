@@ -5,20 +5,23 @@
 \author Tengfei Chang       <tengfei.chang@inria.fr>    August 2016.
 */
 
-//AHB Peripheral
+// ========================== AHB Peripheral ==================================
+
 #define     AHB_BOOTLOAD_BASE           0x01000000
 #define     AHB_DATAMEM_BASE            0x20000000
 #define     AHB_RF_BASE                 0x40000000
 #define     AHB_DMA_BASE                0x41000000
 #define     AHB_RFTIMER_BASE            0x42000000
 
-//APB Peripheral
+// ========================== APB Peripheral ==================================
+
 #define     APB_ADC_BASE                0x50000000
 #define     APB_UART_BASE               0x51000000
 #define     APB_ANALOG_CFG_BASE         0x52000000
 #define     APB_GPIO_BASE               0x53000000
 
-//RFCONTRLLER Registers
+// ========================== RFCONTRLLER Registers ===========================
+
 #define RFCONTROLLER_REG__CONTROL       *(unsigned int*)(AHB_RF_BASE + 0x00)
 #define RFCONTROLLER_REG__STATUS        *(unsigned int*)(AHB_RF_BASE + 0x04)
 #define RFCONTROLLER_REG__TX_DATA_ADDR  *(char**)(AHB_RF_BASE + 0x08)
@@ -30,7 +33,40 @@
 #define RFCONTROLLER_REG__ERROR_CONFIG  *(unsigned int*)(AHB_RF_BASE + 0x20)
 #define RFCONTROLLER_REG__ERROR_CLEAR   *(unsigned int*)(AHB_RF_BASE + 0x24)
 
-//RFTIMER Registers
+// ==== RFCONTROLLER interruption bit configuration
+
+#define TX_LOAD_DONE_INT_EN     0x001
+#define TX_SFD_DONE_INT_EN      0x002
+#define TX_SEND_DONE_INT_EN     0x004
+#define RX_SFD_DONE_INT_EN      0x008
+#define RX_DONE_INT_EN          0x010
+
+// ==== RFCONTROLLER error bit configuration
+
+#define TX_OVERFLOW_ERROR_EN    0x001
+#define TX_CUTOFF_ERROR_EN      0x002
+#define RX_OVERFLOW_ERROR_EN    0x004
+#define RX_CRC_ERROR_EN         0x008
+#define RX_CUTOFF_ERROR_EN      0x010
+
+// ==== RFCONTROLLER control operation
+
+#define TX_LOAD                 0x01
+#define TX_SEND                 0x02
+#define RX_START                0x04
+#define RX_STOP                 0x08
+#define RX_RESET                0x10
+
+// ==== RFCONTROLLER interruption flag
+
+#define TX_LOAD_DONE_INT        0x001
+#define TX_SFD_DONE_INT         0x002
+#define TX_SEND_DONE_INT        0x004
+#define RX_SFD_DONE_INT         0x008
+#define RX_DONE_INT             0x010
+
+// ========================== RFTIMER Registers ===============================
+
 #define RFTIMER_REG__CONTROL            *(unsigned int*)(AHB_RFTIMER_BASE + 0x00)
 #define RFTIMER_REG__COUNTER            *(unsigned int*)(AHB_RFTIMER_BASE + 0x04)
 #define RFTIMER_REG__MAX_COUNT          *(unsigned int*)(AHB_RFTIMER_BASE + 0x08)
@@ -61,17 +97,55 @@
 #define RFTIMER_REG__INT                *(unsigned int*)(AHB_RFTIMER_BASE + 0x70)
 #define RFTIMER_REG__INT_CLEAR          *(unsigned int*)(AHB_RFTIMER_BASE + 0x74)
 
-//DMA Registers
+// ==== RFTIMER compare control bit
+
+#define RFTIMER_COMPARE_ENABLE              0x01
+#define RFTIMER_COMPARE_INTERRUPT_ENABLE    0x02
+#define RFTIMER_COMPARE_TX_LOAD_ENABLE      0x04
+#define RFTIMER_COMPARE_TX_SEND_ENABLE      0x08
+#define RFTIMER_COMPARE_RX_START_ENABLE     0x10
+#define RFTIMER_COMPARE_RX_STOP_ENABLE      0x20
+
+// ==== RFTIMER control bit
+
+#define RFTIMER_REG__CONTROL_ENABLE                     0x01
+#define RFTIMER_REG__CONTROL_INTERRUPT_ENABLE           0x02
+#define RFTIMER_REG__CONTROL_COUNT_RESET                0x04
+
+// ==== RFTIMER interruption flag
+
+#define RFTIMER_REG__INT_COMPARE0_INT                   0x0001
+#define RFTIMER_REG__INT_COMPARE1_INT                   0x0002
+#define RFTIMER_REG__INT_COMPARE2_INT                   0x0004
+#define RFTIMER_REG__INT_COMPARE3_INT                   0x0008
+#define RFTIMER_REG__INT_COMPARE4_INT                   0x0010
+#define RFTIMER_REG__INT_COMPARE5_INT                   0x0020
+#define RFTIMER_REG__INT_COMPARE6_INT                   0x0040
+#define RFTIMER_REG__INT_COMPARE7_INT                   0x0080
+#define RFTIMER_REG__INT_CAPTURE0_INT                   0x0100
+#define RFTIMER_REG__INT_CAPTURE1_INT                   0x0200
+#define RFTIMER_REG__INT_CAPTURE2_INT                   0x0400
+#define RFTIMER_REG__INT_CAPTURE3_INT                   0x0800
+#define RFTIMER_REG__INT_CAPTURE0_OVERFLOW_INT          0x1000
+#define RFTIMER_REG__INT_CAPTURE1_OVERFLOW_INT          0x2000
+#define RFTIMER_REG__INT_CAPTURE2_OVERFLOW_INT          0x4000
+#define RFTIMER_REG__INT_CAPTURE3_OVERFLOW_INT          0x8000
+
+// ========================== DMA Registers ===================================
+
 #define DMA_REG__RF_RX_ADDR             *(char**)(AHB_DMA_BASE + 0x14)
 
-//ADC Registers
+// ========================== ADC Registers ===================================
+
 #define ADC_REG__START                  *(unsigned int*)(APB_ADC_BASE + 0x000000)
 #define ADC_REG__DATA                   *(unsigned int*)(APB_ADC_BASE + 0x040000)
 
-//UART Registers
+// ========================== UART Registers ==================================
+
 #define UART_REG__TX_DATA               *(unsigned int*)(APB_UART_BASE)
 #define UART_REG__RX_DATA               *(unsigned int*)(APB_UART_BASE)
     
-//GPIO Registers
+// ========================== GPIO Registers ==================================
+
 #define GPIO_REG__INPUT                 *(unsigned int*)(APB_GPIO_BASE + 0x000000)
 #define GPIO_REG__OUTPUT                *(unsigned int*)(APB_GPIO_BASE + 0x040000)

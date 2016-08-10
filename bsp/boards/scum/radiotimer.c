@@ -14,31 +14,6 @@
 
 //=========================== define =======================================
 
-// ==== radio timer control bit
-
-#define RFTIMER_REG__CONTROL_ENABLE                     0x01
-#define RFTIMER_REG__CONTROL_INTERRUPT_ENABLE           0x02
-#define RFTIMER_REG__CONTROL_COUNT_RESET                0x04
-
-// ==== radio timer interruption flag
-
-#define RFTIMER_REG__INT_COMPARE0_INT                   0x0001
-#define RFTIMER_REG__INT_COMPARE1_INT                   0x0002
-#define RFTIMER_REG__INT_COMPARE2_INT                   0x0004
-#define RFTIMER_REG__INT_COMPARE3_INT                   0x0008
-#define RFTIMER_REG__INT_COMPARE4_INT                   0x0010
-#define RFTIMER_REG__INT_COMPARE5_INT                   0x0020
-#define RFTIMER_REG__INT_COMPARE6_INT                   0x0040
-#define RFTIMER_REG__INT_COMPARE7_INT                   0x0080
-#define RFTIMER_REG__INT_CAPTURE0_INT                   0x0100
-#define RFTIMER_REG__INT_CAPTURE1_INT                   0x0200
-#define RFTIMER_REG__INT_CAPTURE2_INT                   0x0400
-#define RFTIMER_REG__INT_CAPTURE3_INT                   0x0800
-#define RFTIMER_REG__INT_CAPTURE0_OVERFLOW_INT          0x1000
-#define RFTIMER_REG__INT_CAPTURE1_OVERFLOW_INT          0x2000
-#define RFTIMER_REG__INT_CAPTURE2_OVERFLOW_INT          0x4000
-#define RFTIMER_REG__INT_CAPTURE3_OVERFLOW_INT          0x8000
-
 //=========================== variables =======================================
 
 typedef struct {
