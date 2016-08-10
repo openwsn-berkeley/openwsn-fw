@@ -124,7 +124,7 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
     // offset when to fire
-    RFTIMER_REG__COMPARE2            = TIMER_COUTER_CONVERT_32K_TO_500K(offset);;
+    RFTIMER_REG__COMPARE2            = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
    
     // enable compare interrupt (this also cancels any pending interrupts)
     RFTIMER_REG__COMPARE2_CONTROL    = RADIOTIMER_COMPARE_ENABLE |   \
