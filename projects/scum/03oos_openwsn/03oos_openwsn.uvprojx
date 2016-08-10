@@ -334,7 +334,7 @@
               <MiscControls>--gnu</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\..\bsp\boards;..\..\..\bsp\boards\scum;..\..\..\drivers\common;..\..\..\inc;..\..\..\openstack\02a-MAClow;..\..\..\openstack\02b-MAChigh;..\..\..\openstack\03a-IPHC;..\..\..\openstack\03b-IPv6;..\..\..\openstack\04-TRAN;..\..\..\openstack\cross-layers;..\..\..\kernel;..\..\..\openapps;..\..\..\openstack;..\..\..\bsp\boards\common;..\..\..\openapps\c6t;..\..\..\openapps\uinject;..\..\..\openapps\techo;..\..\..\openapps\uecho;..\..\..\openapps\cinfo;..\..\..\openapps\cleds;..\..\..\openapps\rrt;..\..\..\openapps\cexample;..\..\..\openapps\cstorm;..\..\..\openapps\cwellknown</IncludePath>
+              <IncludePath>..\..\..\bsp\boards;..\..\..\bsp\boards\scum;..\..\..\drivers\common;..\..\..\inc;..\..\..\openstack\02a-MAClow;..\..\..\openstack\02b-MAChigh;..\..\..\openstack\03a-IPHC;..\..\..\openstack\03b-IPv6;..\..\..\openstack\04-TRAN;..\..\..\openstack\cross-layers;..\..\..\kernel;..\..\..\openapps;..\..\..\openstack;..\..\..\bsp\boards\common;..\..\..\openapps\c6t;..\..\..\openapps\uinject;..\..\..\openapps\techo;..\..\..\openapps\uecho;..\..\..\openapps\cinfo;..\..\..\openapps\cleds;..\..\..\openapps\rrt;..\..\..\openapps\cexample;..\..\..\openapps\cstorm;..\..\..\openapps\cwellknown;..\..\..\openapps\userialbridge</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
