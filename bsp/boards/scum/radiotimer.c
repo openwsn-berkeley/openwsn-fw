@@ -79,7 +79,7 @@ void radiotimer_setEndFrameCb(radiotimer_capture_cbt cb) {
 void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     
     // set period of radiotimer
-    RFTIMER_REG__MAX_COUNT          = TIMER_COUTER_CONVERT_32K_TO_500K(period);;
+    RFTIMER_REG__MAX_COUNT          = TIMER_COUTER_CONVERT_32K_TO_500K(period);
     // enable timer and interrupt
     RFTIMER_REG__CONTROL            = RADIOTIMER_ENABLE         |   \
                                       RADIOTIMER_INTERRUPT_ENABLE;
@@ -132,36 +132,42 @@ PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t radiotimer_isr() {
+    
+    PORT_RADIOTIMER_WIDTH counter        = RFTIMER_REG__COUNTER;
     PORT_RADIOTIMER_WIDTH interrupt_flag = RFTIMER_REG__INT;
-    switch (interrupt_flag & 0xffff) {
-        case RADIOTIMER_COMPARE2_INT: // timer compare interrupt
+    if (interrupt_flag & RADIOTIMER_COMPARE2_INT) {
+            // timer compare interrupt
             if (radiotimer_vars.compare_cb!=NULL) {
                 // call the callback
                 radiotimer_vars.compare_cb();
-                RFTIMER_REG__INT_CLEAR = interrupt_flag;
+                RFTIMER_REG__INT_CLEAR  = RADIOTIMER_COMPARE2_INT;
                 // kick the OS
                 return KICK_SCHEDULER;
             }
-            break;
-        case RADIOTIMER_COMPARE1_INT: // timer overflows interrupt
+    } else {
+        if (interrupt_flag & RADIOTIMER_COMPARE1_INT) {
+            // timer overflows interrupt
             if (radiotimer_vars.overflow_cb!=NULL) {
                 // call the callback
                 radiotimer_vars.overflow_cb();
-                RFTIMER_REG__INT_CLEAR = interrupt_flag;
+                RFTIMER_REG__INT_CLEAR  = RADIOTIMER_COMPARE1_INT;
                 // kick the OS
                 return KICK_SCHEDULER;
             }
-            break;
-        case RADIOTIMER_COMPARE0_INT: // for bsp timer
-            // call the callback
-            bsp_timer_isr();
-            RFTIMER_REG__INT_CLEAR = interrupt_flag;
-            // kick the OS
-            return KICK_SCHEDULER;
-            break;
-        default:
-            while(1);   // this should not happen
+        } else {
+            if (interrupt_flag & RADIOTIMER_COMPARE0_INT) {
+                // bsp timer interrupt is handled in radiotimer module
+                // call the callback
+                bsp_timer_isr();
+                RFTIMER_REG__INT_CLEAR      = RADIOTIMER_COMPARE0_INT;
+                // kick the OS
+                return KICK_SCHEDULER;
+            } else {
+                RFTIMER_REG__INT_CLEAR      = interrupt_flag;
+                while(1);   // this should not happen
+            }
+        }
     }
-    RFTIMER_REG__INT_CLEAR = interrupt_flag;
+    RFTIMER_REG__INT_CLEAR      = interrupt_flag;
     return DO_NOT_KICK_SCHEDULER;
 }
