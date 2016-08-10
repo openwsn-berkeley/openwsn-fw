@@ -16,28 +16,28 @@
 
 // ==== radio timer control bit
 
-#define RADIOTIMER_ENABLE                       0x01
-#define RADIOTIMER_INTERRUPT_ENABLE             0x02
-#define RADIOTIMER_COUNT_RESET                  0x04
+#define RFTIMER_REG__CONTROL_ENABLE                     0x01
+#define RFTIMER_REG__CONTROL_INTERRUPT_ENABLE           0x02
+#define RFTIMER_REG__CONTROL_COUNT_RESET                0x04
 
 // ==== radio timer interruption flag
 
-#define RADIOTIMER_COMPARE0_INT                 0x0001
-#define RADIOTIMER_COMPARE1_INT                 0x0002
-#define RADIOTIMER_COMPARE2_INT                 0x0004
-#define RADIOTIMER_COMPARE3_INT                 0x0008
-#define RADIOTIMER_COMPARE4_INT                 0x0010
-#define RADIOTIMER_COMPARE5_INT                 0x0020
-#define RADIOTIMER_COMPARE6_INT                 0x0040
-#define RADIOTIMER_COMPARE7_INT                 0x0080
-#define RADIOTIMER_CAPTURE0_INT                 0x0100
-#define RADIOTIMER_CAPTURE1_INT                 0x0200
-#define RADIOTIMER_CAPTURE2_INT                 0x0400
-#define RADIOTIMER_CAPTURE3_INT                 0x0800
-#define RADIOTIMER_CAPTURE0_OVERFLOW_INT        0x1000
-#define RADIOTIMER_CAPTURE1_OVERFLOW_INT        0x2000
-#define RADIOTIMER_CAPTURE2_OVERFLOW_INT        0x4000
-#define RADIOTIMER_CAPTURE3_OVERFLOW_INT        0x8000
+#define RFTIMER_REG__INT_COMPARE0_INT                   0x0001
+#define RFTIMER_REG__INT_COMPARE1_INT                   0x0002
+#define RFTIMER_REG__INT_COMPARE2_INT                   0x0004
+#define RFTIMER_REG__INT_COMPARE3_INT                   0x0008
+#define RFTIMER_REG__INT_COMPARE4_INT                   0x0010
+#define RFTIMER_REG__INT_COMPARE5_INT                   0x0020
+#define RFTIMER_REG__INT_COMPARE6_INT                   0x0040
+#define RFTIMER_REG__INT_COMPARE7_INT                   0x0080
+#define RFTIMER_REG__INT_CAPTURE0_INT                   0x0100
+#define RFTIMER_REG__INT_CAPTURE1_INT                   0x0200
+#define RFTIMER_REG__INT_CAPTURE2_INT                   0x0400
+#define RFTIMER_REG__INT_CAPTURE3_INT                   0x0800
+#define RFTIMER_REG__INT_CAPTURE0_OVERFLOW_INT          0x1000
+#define RFTIMER_REG__INT_CAPTURE1_OVERFLOW_INT          0x2000
+#define RFTIMER_REG__INT_CAPTURE2_OVERFLOW_INT          0x4000
+#define RFTIMER_REG__INT_CAPTURE3_OVERFLOW_INT          0x8000
 
 //=========================== variables =======================================
 
@@ -81,8 +81,8 @@ void radiotimer_start(PORT_RADIOTIMER_WIDTH period) {
     // set period of radiotimer
     RFTIMER_REG__MAX_COUNT          = TIMER_COUTER_CONVERT_32K_TO_500K(period);
     // enable timer and interrupt
-    RFTIMER_REG__CONTROL            = RADIOTIMER_ENABLE         |   \
-                                      RADIOTIMER_INTERRUPT_ENABLE;
+    RFTIMER_REG__CONTROL            = RFTIMER_REG__CONTROL_ENABLE         |   \
+                                      RFTIMER_REG__CONTROL_INTERRUPT_ENABLE;
     
     // set compare timer counter 0 to perform an overflow interrupt
     RFTIMER_REG__COMPARE1           = 0;
@@ -133,33 +133,32 @@ PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 
 kick_scheduler_t radiotimer_isr() {
     
-    PORT_RADIOTIMER_WIDTH counter        = RFTIMER_REG__COUNTER;
     PORT_RADIOTIMER_WIDTH interrupt_flag = RFTIMER_REG__INT;
-    if (interrupt_flag & RADIOTIMER_COMPARE2_INT) {
+    if (interrupt_flag & RFTIMER_REG__INT_COMPARE2_INT) {
             // timer compare interrupt
             if (radiotimer_vars.compare_cb!=NULL) {
                 // call the callback
                 radiotimer_vars.compare_cb();
-                RFTIMER_REG__INT_CLEAR  = RADIOTIMER_COMPARE2_INT;
+                RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE2_INT;
                 // kick the OS
                 return KICK_SCHEDULER;
             }
     } else {
-        if (interrupt_flag & RADIOTIMER_COMPARE1_INT) {
+        if (interrupt_flag & RFTIMER_REG__INT_COMPARE1_INT) {
             // timer overflows interrupt
             if (radiotimer_vars.overflow_cb!=NULL) {
                 // call the callback
                 radiotimer_vars.overflow_cb();
-                RFTIMER_REG__INT_CLEAR  = RADIOTIMER_COMPARE1_INT;
+                RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE1_INT;
                 // kick the OS
                 return KICK_SCHEDULER;
             }
         } else {
-            if (interrupt_flag & RADIOTIMER_COMPARE0_INT) {
+            if (interrupt_flag & RFTIMER_REG__INT_COMPARE0_INT) {
                 // bsp timer interrupt is handled in radiotimer module
                 // call the callback
                 bsp_timer_isr();
-                RFTIMER_REG__INT_CLEAR      = RADIOTIMER_COMPARE0_INT;
+                RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE0_INT;
                 // kick the OS
                 return KICK_SCHEDULER;
             } else {
