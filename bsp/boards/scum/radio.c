@@ -50,8 +50,8 @@
 
 // ==== default crc check result and rssi value
 
-#define DEFAULT_CRC_CHECK       0x01
-#define DEFAULT_RSSI            -91
+#define DEFAULT_CRC_CHECK       0x01    // this is an arbitrary value for now
+#define DEFAULT_RSSI            -91     // this is an arbitrary value for now
 
 //=========================== variables =======================================
 
