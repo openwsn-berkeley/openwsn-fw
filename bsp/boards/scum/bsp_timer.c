@@ -39,7 +39,7 @@ void bsp_timer_init() {
     memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
     
     // set period of radiotimer
-    RFTIMER_REG__MAX_COUNT          = 0xffffffff;
+    RFTIMER_REG__MAX_COUNT          = TIMER_COUTER_CONVERT_32K_TO_500K(PORT_TsSlotDuration);
     // enable timer and interrupt
     RFTIMER_REG__CONTROL            = 0x07;
 }
