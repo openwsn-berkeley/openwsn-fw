@@ -231,6 +231,10 @@ void radio_getReceivedFrame(
    *rssi -= 45;
    *crc   = ((*(bufRead+*lenRead-1))&0x80)>>7;
    *lqi   =  (*(bufRead+*lenRead-1))&0x7f;
+   
+   //put radio in reception mode
+   CC1200_spiStrobe(CC1200_SWOR, &radio_vars.radioStatusByte);
+   
 }
 
 //=========================== private =========================================
