@@ -188,9 +188,10 @@ scheduleEntry_t*  schedule_getCurrentScheduleEntry(void);
 uint8_t           schedule_getNumOfSlotsByType(cellType_t type);
 
 // from IEEE802154E
-void               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
+bool               schedule_syncSlotOffset(slotOffset_t targetSlotOffset);
 void               schedule_advanceSlot(void);
 slotOffset_t       schedule_getNextActiveSlotOffset(void);
+slotOffset_t       schedule_getClosestActiveSlotOffset(slotOffset_t targetSlotOffset);
 frameLength_t      schedule_getFrameLength(void);
 uint8_t            schedule_getFrameHandle(void);
 uint8_t            schedule_getFrameNumber(void);
