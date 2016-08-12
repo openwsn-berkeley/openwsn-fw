@@ -152,8 +152,10 @@ void radio_rfOff(void) {
 //===== TX
 
 void radio_loadPacket(uint8_t* packet, uint8_t len) {
-   // change state
-   radio_vars.state = RADIOSTATE_LOADING_PACKET;
+   
+    *packet = len;
+    // change state
+    radio_vars.state = RADIOSTATE_LOADING_PACKET;
    
    CC1200_spiStrobe( CC1200_SFTX, &radio_vars.radioStatusByte);
    CC1200_spiWriteFifo(&radio_vars.radioStatusByte, packet, len, CC1200_FIFO_ADDR);

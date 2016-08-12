@@ -1,7 +1,7 @@
 /**
 \brief Register definitions for the Texas Instruments CC1200 radio chip.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
+\author Jonathan Munoz <jonathan.munoz@inria.fr>, August 2016.
 */
 
 #ifndef __CC1200_H
@@ -435,6 +435,8 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_WOR_CFG0,       0x20},
     {CC1200_WOR_EVENT0_LSB, 0xC3},
     {CC1200_PKT_CFG2,       0x00},
+ //   {CC1200_PKT_CFG2,       0x20},
+ //   {CC1200_PKT_CFG1,       0x01},  //added by jmms
     {CC1200_PKT_CFG0,       0x20},
     {CC1200_RFEND_CFG0,     0x09},
     {CC1200_PKT_LEN,        0x7D},

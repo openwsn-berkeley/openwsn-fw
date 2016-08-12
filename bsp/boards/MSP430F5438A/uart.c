@@ -1,7 +1,7 @@
 /**
-\brief wsn430v13b-specific definition of the "uart" bsp module.
+\brief msp430f5438a-specific definition of the "uart" bsp module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, February 2012.
+\author Jonathan Munoz <jonathan.munoz@inria.fr>, August 2016.
 */
 
 #include "msp430f5438a.h"

@@ -1,9 +1,9 @@
 /**
-\brief WSN430v13b-specific definition of the "bsp_timer" bsp module.
+\brief msp430f5438a-specific definition of the "bsp_timer" bsp module.
 
-On WSN430v13b, we use timerA0 for the bsp_timer module.
+On msp430f5438a, we use timerA0 for the bsp_timer module.
 
-\author Thomas Watteyne <watteyne@eecs.berkeley.edu>, March 2012.
+\author Jonathan Munoz <jonathan.munoz@inria.fr>, August 2016.
 */
 
 #include "msp430f5438a.h"
