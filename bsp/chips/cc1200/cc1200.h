@@ -139,17 +139,17 @@ typedef struct {
 //=========================== buffer ==========================================
 
 /// [R/W] TX RX FIFO Byte Register
-#define CC1200_FIFO_ADDR        0x3f
+#define CC1200_FIFO_ADDR        0x3F
 
 //=========================== prototypes ======================================
 
-void CC1200_spiStrobe     (uint8_t strobe, cc1200_status_t* statusRead);
-void CC1200_spiWriteReg   (uint16_t reg,    cc1200_status_t* statusRead, uint8_t regValueToWrite);
-void CC1200_spiReadReg    (uint16_t reg,    cc1200_status_t* statusRead, uint8_t* regValueRead);
-void CC1200_spiWriteFifo  (                cc1200_status_t* statusRead, uint8_t* bufToWrite, uint8_t  lenToWrite, uint8_t addr);
-void CC1200_spiReadRxFifo (                cc1200_status_t* statusRead, uint8_t* bufRead,    uint8_t* lenRead, uint8_t maxBufLen);
-void CC1200_spiWriteRam   (uint16_t addr,  cc1200_status_t* statusRead, uint8_t* bufToWrite,  uint8_t len);
-void CC1200_spiReadRam    (uint16_t addr,  cc1200_status_t* statusRead, uint8_t* pBufRead,    uint8_t len);
+void cc1200_spiStrobe     (uint8_t strobe, cc1200_status_t* statusRead);
+void cc1200_spiWriteReg   (uint16_t reg,    cc1200_status_t* statusRead, uint8_t regValueToWrite);
+void cc1200_spiReadReg    (uint16_t reg,    cc1200_status_t* statusRead, uint8_t* regValueRead);
+void cc1200_spiWriteFifo  (                cc1200_status_t* statusRead, uint8_t* bufToWrite, uint8_t  lenToWrite, uint8_t addr);
+void cc1200_spiReadRxFifo (                cc1200_status_t* statusRead, uint8_t* bufRead,    uint8_t* lenRead, uint8_t maxBufLen);
+void cc1200_spiWriteRam   (uint16_t addr,  cc1200_status_t* statusRead, uint8_t* bufToWrite,  uint8_t len);
+void cc1200_spiReadRam    (uint16_t addr,  cc1200_status_t* statusRead, uint8_t* pBufRead,    uint8_t len);
 
 // ========================= register definitions ===========================
 /* configuration registers */
