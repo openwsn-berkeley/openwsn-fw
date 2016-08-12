@@ -99,12 +99,24 @@
 
 // ==== RFTIMER compare control bit
 
-#define RFTIMER_COMPARE_ENABLE              0x01
-#define RFTIMER_COMPARE_INTERRUPT_ENABLE    0x02
-#define RFTIMER_COMPARE_TX_LOAD_ENABLE      0x04
-#define RFTIMER_COMPARE_TX_SEND_ENABLE      0x08
-#define RFTIMER_COMPARE_RX_START_ENABLE     0x10
-#define RFTIMER_COMPARE_RX_STOP_ENABLE      0x20
+#define RFTIMER_COMPARE_ENABLE                          0x01
+#define RFTIMER_COMPARE_INTERRUPT_ENABLE                0x02
+#define RFTIMER_COMPARE_TX_LOAD_ENABLE                  0x04
+#define RFTIMER_COMPARE_TX_SEND_ENABLE                  0x08
+#define RFTIMER_COMPARE_RX_START_ENABLE                 0x10
+#define RFTIMER_COMPARE_RX_STOP_ENABLE                  0x20
+
+// ==== RFTIMER capture control bit
+
+#define RFTIMER_CAPTURE_INTERRUPT_ENABLE                0x001
+#define RFTIMER_CAPTURE_INPUT_SEL_SOFTWARE              0x002
+#define RFTIMER_CAPTURE_INPUT_SEL_TX_LOAD_DONE          0x004
+#define RFTIMER_CAPTURE_INPUT_SEL_TX_SFD_DONE           0x008
+#define RFTIMER_CAPTURE_INPUT_SEL_TX_SEND_DONE          0x010
+#define RFTIMER_CAPTURE_INPUT_SEL_RX_SFD_DONE           0x020
+#define RFTIMER_CAPTURE_INPUT_SEL_RX_DONE               0x040
+#define RFTIMER_CAPTURE_CAPTURE_NOW                     0x080
+#define RFTIMER_CAPTURE_CLEAR                           0x100
 
 // ==== RFTIMER control bit
 
