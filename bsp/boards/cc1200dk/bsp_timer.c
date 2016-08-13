@@ -1,5 +1,5 @@
 /**
-\brief msp430f5438a-specific definition of the "bsp_timer" bsp module.
+\brief cc1200dk-specific definition of the "bsp_timer" bsp module.
 
 On msp430f5438a, we use timerA0 for the bsp_timer module.
 

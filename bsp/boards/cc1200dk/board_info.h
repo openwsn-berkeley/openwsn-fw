@@ -1,5 +1,5 @@
 /**
-\brief WSN430v13b-specific board information bsp module.
+\brief cc1200dk-specific-specific board information bsp module.
 
 This module file defines board-related element, but which are applicable only
 to this board.

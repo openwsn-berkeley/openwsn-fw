@@ -1,5 +1,5 @@
 /**
-\brief msp430f5438a-specific definition of the "uart" bsp module.
+\brief cc1200dk-specific definition of the "uart" bsp module.
 
 \author Jonathan Munoz <jonathan.munoz@inria.fr>, August 2016.
 */
