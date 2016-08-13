@@ -21,7 +21,7 @@ remainder of the packet contains an incrementing bytes.
 
 //=========================== defines =========================================
 
-#define LENGTH_PACKET   30+LENGTH_CRC // maximum length is 127 bytes
+#define LENGTH_PACKET   124+LENGTH_CRC // maximum length is 127 bytes
 #define CHANNEL         11             // 11 = 2.405GHz
 #define TIMER_PERIOD    (32768>>1)     // (32768>>1) = 500ms @ 32kHz
 

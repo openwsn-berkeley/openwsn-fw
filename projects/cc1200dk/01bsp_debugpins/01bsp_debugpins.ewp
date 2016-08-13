@@ -391,9 +391,8 @@
         <option>
           <name>newCCIncludePaths</name>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\</state>
+          <state>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\chips\</state>
-          <state>$PROJ_DIR$\..\..\..\bsp\chips\cc2420\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\bsp\</state>
         </option>
         <option>
@@ -2263,58 +2262,64 @@
   <group>
     <name>bsp</name>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\board.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\board.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\board.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\board_info.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\board_info.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\bsp.c</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp.h</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\bsp.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\bsp_timer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\bsp_timer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\bsp_timer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\debugpins.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\cc1200.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\cc1200.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\debugpins.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\debugpins.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\eui64.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\leds.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\leds.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\leds.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\..\..\bsp\chips\cc1200\radio.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radio.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\radiotimer.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\radiotimer.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\radiotimer.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\spi.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\spi.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\spi.h</name>
     </file>
     <file>
-      <name>$PROJ_DIR$\..\..\..\bsp\boards\MSP430F5438A\uart.c</name>
+      <name>$PROJ_DIR$\..\..\..\bsp\boards\cc1200dk\uart.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\..\..\bsp\boards\uart.h</name>

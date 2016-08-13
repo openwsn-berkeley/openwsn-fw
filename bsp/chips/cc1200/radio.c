@@ -141,7 +141,7 @@ void radio_rfOff(void) {
 void radio_loadPacket(uint8_t* packet, uint8_t len) {
    
     *(packet+1) =  *packet; 
-    *packet = len;
+    *packet = len - 1;
     // change state
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
    
@@ -171,6 +171,8 @@ void radio_txNow(void) {
     radio_vars.state = RADIOSTATE_TRANSMITTING;
    
     cc1200_spiStrobe( CC1200_STX, &radio_vars.radioStatusByte);
+    cc1200_spiStrobe( CC1200_SNOP, &radio_vars.radioStatusByte);
+    while(radio_vars.state != RADIOSTATE_TXRX_DONE);
 }
 
 //===== RX
