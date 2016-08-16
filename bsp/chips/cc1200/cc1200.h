@@ -415,7 +415,11 @@ void cc1200_spiReadRam    (uint16_t addr,  cc1200_status_t* statusRead, uint8_t*
 static const registerSetting_t preferredSettings[] = {
     {CC1200_IOCFG2,         0x06}, //it was 0x13 before. 
     {CC1200_IOCFG0,         0x06},
-    {CC1200_SYNC_CFG1,      0xA9},
+    {CC1200_SYNC_CFG1,      0xE9},  // 0xA9 before. Now, dual sync search. 
+    {CC1200_SYNC3,          0x6E},  //jmms
+    {CC1200_SYNC2,          0x4E},  //jmms
+    {CC1200_SYNC1,          0x90},  //jmms
+    {CC1200_SYNC0,          0x4E},  //jmms
     {CC1200_MODCFG_DEV_E,   0x0B},
     {CC1200_PREAMBLE_CFG1,  0x30},
     {CC1200_PREAMBLE_CFG0,  0x8A},
@@ -434,9 +438,9 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_FS_CFG,         0x12},
     {CC1200_WOR_CFG0,       0x20},
     {CC1200_WOR_EVENT0_LSB, 0xC3},
-    {CC1200_PKT_CFG2,       0x00},
- //   {CC1200_PKT_CFG2,       0x20},
- //   {CC1200_PKT_CFG1,       0x01},  //added by jmms
+ //   {CC1200_PKT_CFG2,       0x00},
+    {CC1200_PKT_CFG2,       0x20},  //jmms
+    {CC1200_PKT_CFG1,       0x83},  //jmms  FEC_EN 1 CRC_CFG 1 (CRC16) APPEND_STATUS 1
     {CC1200_PKT_CFG0,       0x20},
     {CC1200_RFEND_CFG0,     0x09},
     {CC1200_PKT_LEN,        0x7D},
