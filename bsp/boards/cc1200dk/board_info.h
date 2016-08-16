@@ -91,10 +91,10 @@ to this board.
 
 // The variables below are used by CoAP's registration engine.
 
-static const uint8_t rreg_uriquery[]        = "h=ucb";
-static const uint8_t infoBoardname[]        = "WSN430v13b";
+static const uint8_t rreg_uriquery[]        = "h=TI";
+static const uint8_t infoBoardname[]        = "cc1200dk";
 static const uint8_t infouCName[]           = "MSP430f5438a";
-static const uint8_t infoRadioName[]        = "CC1200";
+static const uint8_t infoRadioName[]        = "cc1200";
 
 //=========================== prototypes ======================================
 

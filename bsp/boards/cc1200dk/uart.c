@@ -25,46 +25,43 @@ uart_vars_t uart_vars;
 
 void uart_init() {
    
-   //P3SEL                     =  0x30;            // P3.4,5 = = USCI_A0 TXD/RXD
-   P5SEL                       =  0xc0;            //P5.6,7 = USCI_A1
-  
-   UCA1CTL1                  |=  UCSWRST;           // **Put state machine in reset**
-   UCA1CTL1                  |=  UCSSEL_2;          // SMCLK
-   
-   UCA1BR0 = 0xd9;                                 // ~26.5MHz/115200 = 230 = 0xe6
-   UCA1BR1 = 0;
-   UCA1MCTL |= UCBRS_1 + UCBRF_0;
-   UCA1CTL1 &= ~UCSWRST;                          // **Initialize USCI state machine**
+    P5SEL                      =  0xc0;             //P5.6,7 = USCI_A1
+    UCA1CTL1                  |=  UCSWRST;           // **Put state machine in reset**
+    UCA1CTL1                  |=  UCSSEL_2;          // SMCLK
+    UCA1BR0 = 0xd9;                                  // ~25MHz/115200 = 217 = 0xd9
+    UCA1BR1 = 0;
+    UCA1MCTL |= UCBRS_1 + UCBRF_0;
+    UCA1CTL1 &= ~UCSWRST;                           // **Initialize USCI state machine**
 
 }
 
 void uart_setCallbacks(uart_tx_cbt txCb, uart_rx_cbt rxCb) {
-   uart_vars.txCb = txCb;
-   uart_vars.rxCb = rxCb;
+    uart_vars.txCb = txCb;
+    uart_vars.rxCb = rxCb;
 }
 
 void    uart_enableInterrupts(){
-  UCA1IE |= UCRXIE | UCTXIE ;  
+    UCA1IE |= UCRXIE | UCTXIE ;  
 }
 
 void    uart_disableInterrupts(){
-  UCA1IE &= ~(UCRXIE | UCTXIE);
+    UCA1IE &= ~(UCRXIE | UCTXIE);
 }
 
 void    uart_clearRxInterrupts(){
-  UCA1IFG   &= ~UCRXIFG;
+    UCA1IFG   &= ~UCRXIFG;
 }
 
 void    uart_clearTxInterrupts(){
-  UCA1IFG   &= ~UCTXIFG;
+    UCA1IFG   &= ~UCTXIFG;
 }
 
 void    uart_writeByte(uint8_t byteToWrite){
-  UCA1TXBUF = byteToWrite;
+    UCA1TXBUF = byteToWrite;
 }
 
 uint8_t uart_readByte(){
-  return UCA1RXBUF;
+    return UCA1RXBUF;
 }
 
 //=========================== private =========================================
@@ -72,13 +69,13 @@ uint8_t uart_readByte(){
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t uart_tx_isr() {
-   uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.txCb();
-   return DO_NOT_KICK_SCHEDULER;
+    uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
+    uart_vars.txCb();
+    return DO_NOT_KICK_SCHEDULER;
 }
 
 kick_scheduler_t uart_rx_isr() {
-   uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.rxCb();
-   return DO_NOT_KICK_SCHEDULER;
+    uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
+    uart_vars.rxCb();
+    return DO_NOT_KICK_SCHEDULER;
 }

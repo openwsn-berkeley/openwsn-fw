@@ -15,8 +15,8 @@ On msp430f5438a, we use timerA0 for the bsp_timer module.
 //=========================== variables =======================================
 
 typedef struct {
-   bsp_timer_cbt    cb;
-   PORT_TIMER_WIDTH last_compare_value;
+    bsp_timer_cbt    cb;
+    PORT_TIMER_WIDTH last_compare_value;
 } bsp_timer_vars_t;
 
 bsp_timer_vars_t bsp_timer_vars;
@@ -33,17 +33,11 @@ any compare registers, so no interrupt will fire.
 */
 void bsp_timer_init() {
    
-   // clear local variables
-   memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
+    // clear local variables
+    memset(&bsp_timer_vars,0,sizeof(bsp_timer_vars_t));
    
-   // set CCRA0 registers
-   //TACCR0               =  0;
-   //TACCTL0              =  0;
-   //start TimerA
-  // TA1CCTL0 = CCIE;
-   TA0CTL = TASSEL_1 + MC_2 + TACLR ;  // continuous mode, from ACLK
-   
-          
+    TA0CTL = TASSEL_1 + MC_2 + TACLR ;  // continuous mode, from ACLK
+         
 }
 
 /**
@@ -52,7 +46,7 @@ void bsp_timer_init() {
 \param cb The function to be called when a compare event happens.
 */
 void bsp_timer_set_callback(bsp_timer_cbt cb) {
-   bsp_timer_vars.cb   = cb;
+    bsp_timer_vars.cb   = cb;
 }
 
 /**
@@ -62,13 +56,13 @@ This function does not stop the timer, it rather resets the value of the
 counter, and cancels a possible pending compare event.
 */
 void bsp_timer_reset() {
-   // reset compare
-   TA0CCR0                =  0;
-   TA0CCTL0               =  0;
-   // reset timer
-   TA0R                   = 0;
-   // record last timer compare value
-   bsp_timer_vars.last_compare_value =  0;
+    // reset compare
+    TA0CCR0                =  0;
+    TA0CCTL0               =  0;
+    // reset timer
+    TA0R                   = 0;
+    // record last timer compare value
+    bsp_timer_vars.last_compare_value =  0;
 }
 
 /**
@@ -89,32 +83,31 @@ propagate to subsequent timers.
                   last compare event.
 */
 void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
-   PORT_TIMER_WIDTH newCompareValue;
-   PORT_TIMER_WIDTH temp_last_compare_value;
+    PORT_TIMER_WIDTH newCompareValue;
+    PORT_TIMER_WIDTH temp_last_compare_value;
    
-   temp_last_compare_value = bsp_timer_vars.last_compare_value;
+    temp_last_compare_value = bsp_timer_vars.last_compare_value;
    
-   newCompareValue      =  bsp_timer_vars.last_compare_value + delayTicks;
-   bsp_timer_vars.last_compare_value   =  newCompareValue;
+    newCompareValue      =  bsp_timer_vars.last_compare_value + delayTicks;
+    bsp_timer_vars.last_compare_value   =  newCompareValue;
    
-   if (delayTicks<TA0R-temp_last_compare_value) {
+    if (delayTicks<TA0R-temp_last_compare_value) {
       // we're already too late, schedule the ISR right now, manually
-      
       // setting the interrupt flag triggers an interrupt
-      TA0CCTL0          |=  CCIFG;
-   } else {
-      // this is the normal case, have timer expire at newCompareValue
-      TA0CCR0            =  newCompareValue;
-      TA0CCTL0          |=  CCIE;
-   }
+        TA0CCTL0          |=  CCIFG;
+    }else{
+        // this is the normal case, have timer expire at newCompareValue
+        TA0CCR0            =  newCompareValue;
+        TA0CCTL0          |=  CCIE;
+    }
 }
 
 /**
 \brief Cancel a running compare.
 */
 void bsp_timer_cancel_schedule() {
-   TA0CCR0               =  0;
-   TA0CCTL0             &= ~CCIE;
+    TA0CCR0               =  0;
+    TA0CCTL0             &= ~CCIE;
 }
 
 /**
@@ -123,7 +116,7 @@ void bsp_timer_cancel_schedule() {
 \returns The current value of the timer's counter.
 */
 PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
-   return TA0R ;
+    return TA0R ;
 }
 
 //=========================== private =========================================
@@ -131,8 +124,8 @@ PORT_TIMER_WIDTH bsp_timer_get_currentValue() {
 //=========================== interrup handlers ===============================
 
 kick_scheduler_t bsp_timer_isr() {
-   // call the callback
-   bsp_timer_vars.cb();
-   // kick the OS
-   return KICK_SCHEDULER;
+    // call the callback
+    bsp_timer_vars.cb();
+    // kick the OS
+    return KICK_SCHEDULER;
 }
