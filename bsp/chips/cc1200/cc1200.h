@@ -412,10 +412,10 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_IOCFG0,         0x06},
     {CC1200_SYNC_CFG1,      0xE5},  // 0xA9 before. Now, dual sync search. 
     {CC1200_SYNC_CFG0,      0x23},
-    {CC1200_SYNC3,          0x6E},  //jmms
-    {CC1200_SYNC2,          0x4E},  //jmms
-    {CC1200_SYNC1,          0x90},  //jmms
-    {CC1200_SYNC0,          0x4E},  //jmms
+    {CC1200_SYNC3,          0x6E},  
+    {CC1200_SYNC2,          0x4E},  
+    {CC1200_SYNC1,          0x90},  
+    {CC1200_SYNC0,          0x4E},  
     {CC1200_DEVIATION_M,    0x47},
     {CC1200_MODCFG_DEV_E,   0x0B},
     {CC1200_DCFILT_CFG,     0x56},
@@ -438,8 +438,8 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_WOR_CFG0,       0x20},
     {CC1200_WOR_EVENT0_LSB, 0x96},
  //   {CC1200_PKT_CFG2,       0x00},
-    {CC1200_PKT_CFG2,       0x24},  //jmms
-    {CC1200_PKT_CFG1,       0x03},  //jmms  NO FEC CRC_CFG 1 (CRC16) APPEND_STATUS 1
+    {CC1200_PKT_CFG2,       0x24}, 
+    {CC1200_PKT_CFG1,       0x03}, // NO FEC CRC_CFG 1 (CRC16) APPEND_STATUS 1
     {CC1200_PKT_CFG0,       0x20},
     {CC1200_RFEND_CFG0,     0x09},
     {CC1200_PKT_LEN,        0xFF},

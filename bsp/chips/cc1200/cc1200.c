@@ -148,29 +148,47 @@ void cc1200_spiReadRxFifo(cc1200_status_t* statusRead,
                          uint8_t*         pBufRead,
                          uint8_t*         pLenRead,
                          uint8_t          maxBufLen) {
-   // when reading the packet over SPI from the RX buffer, you get the following:
-   // - *[1B]     dummy byte because of SPI
-   // - *[1B]     length byte
-   // -  [0-125B] packet (excluding CRC)
-   // - *[2B]     CRC
-   uint8_t spi_tx_buffer[128];
-   //uint8_t spi_rx_buffer[127];
-   
-   spi_tx_buffer[0]     = (/*CC1200_FLAG_READ*/CC1200_FLAG_READ_BURST | CC1200_FIFO_ADDR);
+    // when reading the packet over SPI from the RX buffer, you get the following:
+    // - *[1B]     dummy byte because of SPI
+    // - *[1B]     length byte
+    // -  [0-125B] packet (excluding CRC)
+    // - *[2B]     CRC
+    uint8_t spi_tx_buffer[1];
+    uint8_t spi_rx_buffer[3];
+    uint8_t PHR[2];
+    uint16_t length;
      
-   //read FIFO 
-   spi_txrx(
-      spi_tx_buffer,              // bufTx
-      *pLenRead,                   // lenbufTx
-      SPI_BUFFER,                 // returnType
-      pBufRead/*spi_rx_buffer*/,              // bufRx
-      127/*sizeof(spi_rx_buffer)*/,      // maxLenBufRx
-      SPI_FIRST,                  // isFirst
-      SPI_LAST/*SPI_NOTLAST*/                 // isLast
-   );
+    spi_tx_buffer[0]     = (CC1200_FLAG_READ_BURST | CC1200_FIFO_ADDR);
+     
+    //read FIFO 
+    spi_txrx(
+        spi_tx_buffer,              // bufTx
+        3,//*pLenRead,                   // lenbufTx
+        SPI_BUFFER,                 // returnType
+        spi_rx_buffer,              // bufRx
+        3/*sizeof(spi_rx_buffer)*/,      // maxLenBufRx
+        SPI_FIRST,                  // isFirst
+        SPI_LAST/*SPI_NOTLAST*/                 // isLast
+    );
+    PHR[0] = spi_rx_buffer[1];
+    PHR[1] = spi_rx_buffer[2];
+    
+    length = PHR[0] + (PHR[1] & (0x07))*256; 
+    
+    spi_tx_buffer[0]     = (CC1200_FLAG_READ_BURST | CC1200_FIFO_ADDR);
+        //read FIFO 
+    spi_txrx(
+        spi_tx_buffer,              // bufTx
+        length,                   // lenbufTx
+        SPI_BUFFER,                 // returnType
+        pBufRead/*spi_rx_buffer*/,              // bufRx
+        length/*sizeof(spi_rx_buffer)*/,      // maxLenBufRx
+        SPI_FIRST,                  // isFirst
+        SPI_LAST/*SPI_NOTLAST*/                 // isLast
+    );
    
- //  *statusRead          = *(cc1200_status_t*)&spi_rx_buffer[0];
- //  *pLenRead            = spi_rx_buffer[1];
+    //  *statusRead          = *(cc1200_status_t*)&spi_rx_buffer[0];
+    //  *pLenRead            = spi_rx_buffer[1];
    
  //  if (*pLenRead>2 && *pLenRead<=127) {
       // valid length
