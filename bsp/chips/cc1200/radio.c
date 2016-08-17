@@ -138,18 +138,28 @@ void radio_rfOff(void) {
 
 //===== TX
 
-void radio_loadPacket(uint8_t* packet, uint8_t len) {
+void radio_loadPacket(uint8_t* packet, uint16_t len) {
+    //test 802.15.4g PHR. This has to be done by the MAC layer
+    uint8_t  PHR[2];  
+ 
+    if (len<2048){
+        PHR[0]      = len%256;
+        PHR[1]      = len/256;
+        PHR[1]     |= 0x10; //FCS set, size 2 bytes
+        PHR[1]     &= 0xf7; //no data whitening
+        *packet     = PHR[0];
+        *(packet+1) = PHR[1];
+        // change state
+        radio_vars.state = RADIOSTATE_LOADING_PACKET;
    
-    *(packet+1) =  *packet; 
-    *packet = len - 1;
-    // change state
-    radio_vars.state = RADIOSTATE_LOADING_PACKET;
-   
-    cc1200_spiStrobe( CC1200_SFTX, &radio_vars.radioStatusByte);
-    cc1200_spiWriteFifo(&radio_vars.radioStatusByte, packet, len, CC1200_FIFO_ADDR);
-    cc1200_spiReadReg(CC1200_NUM_TXBYTES, &radio_vars.radioStatusByte, &len);
-    // change state
-    radio_vars.state = RADIOSTATE_PACKET_LOADED;
+        cc1200_spiStrobe( CC1200_SFTX, &radio_vars.radioStatusByte);
+        cc1200_spiWriteFifo(&radio_vars.radioStatusByte, packet, len, CC1200_FIFO_ADDR);
+        //cc1200_spiReadReg(CC1200_NUM_TXBYTES, &radio_vars.radioStatusByte, &len);
+        // change state
+        radio_vars.state = RADIOSTATE_PACKET_LOADED;
+    }else{
+        //error, length cannot be greater than 2047 bytes
+    }
 }
 
 void radio_txEnable(void) {
@@ -180,7 +190,7 @@ void radio_txNow(void) {
 void radio_rxEnable(void) {
     uint8_t aux;
     // change state
-   radio_vars.state = RADIOSTATE_ENABLING_RX;
+    radio_vars.state = RADIOSTATE_ENABLING_RX;
    
     //calibrate ROCos
     cc1200_spiReadReg(CC1200_WOR_CFG0, &radio_vars.radioStatusByte, &aux);
@@ -217,11 +227,12 @@ void radio_getReceivedFrame(
     uint8_t* lqi,
     bool*    crc
     ) {
+      
     //read FIFO length 
     cc1200_spiReadReg(CC1200_NUM_RXBYTES, &radio_vars.radioStatusByte, lenRead);
-     // read the received packet from the RXFIFO
+    // read the received packet from the RXFIFO
     cc1200_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
-   
+
     // On reception, when MODEMCTRL0.AUTOCRC is set, the CC2420 replaces the
     // received CRC by:
     // - [1B] the rssi, a signed value. The actual value in dBm is that - 45.

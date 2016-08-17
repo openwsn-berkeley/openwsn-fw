@@ -347,12 +347,12 @@ void cc1200_spiReadRam    (uint16_t addr,  cc1200_status_t* statusRead, uint8_t*
 /* AES Workspace */
 /* AES Key */
 #define CC1200_AES_KEY                  0x2FE0     /*  AES_KEY    - Address for AES key input  */
-#define CC1200_AES_KEY15	        0x2FE0
-#define CC1200_AES_KEY14	        0x2FE1
-#define CC1200_AES_KEY13	        0x2FE2
-#define CC1200_AES_KEY12	        0x2FE3
-#define CC1200_AES_KEY11	        0x2FE4
-#define CC1200_AES_KEY10	        0x2FE5
+#define CC1200_AES_KEY15	            0x2FE0
+#define CC1200_AES_KEY14	            0x2FE1
+#define CC1200_AES_KEY13	            0x2FE2
+#define CC1200_AES_KEY12	            0x2FE3
+#define CC1200_AES_KEY11	            0x2FE4
+#define CC1200_AES_KEY10	            0x2FE5
 #define CC1200_AES_KEY9	                0x2FE6
 #define CC1200_AES_KEY8	                0x2FE7
 #define CC1200_AES_KEY7	                0x2FE8
@@ -366,22 +366,22 @@ void cc1200_spiReadRam    (uint16_t addr,  cc1200_status_t* statusRead, uint8_t*
 
 /* AES Buffer */
 #define CC1200_AES_BUFFER               0x2FF0     /*  AES_BUFFER - Address for AES Buffer     */ 
-#define CC1200_AES_BUFFER15		0x2FF0
-#define CC1200_AES_BUFFER14		0x2FF1
-#define CC1200_AES_BUFFER13		0x2FF2
-#define CC1200_AES_BUFFER12		0x2FF3
-#define CC1200_AES_BUFFER11		0x2FF4
-#define CC1200_AES_BUFFER10		0x2FF5
-#define CC1200_AES_BUFFER9		0x2FF6
-#define CC1200_AES_BUFFER8		0x2FF7
-#define CC1200_AES_BUFFER7		0x2FF8
-#define CC1200_AES_BUFFER6	        0x2FF9
-#define CC1200_AES_BUFFER5	        0x2FF10
-#define CC1200_AES_BUFFER4	        0x2FF11
-#define CC1200_AES_BUFFER3	        0x2FF12
-#define CC1200_AES_BUFFER2	        0x2FF13
-#define CC1200_AES_BUFFER1	        0x2FF14
-#define CC1200_AES_BUFFER0		0x2FF15
+#define CC1200_AES_BUFFER15		        0x2FF0
+#define CC1200_AES_BUFFER14		        0x2FF1
+#define CC1200_AES_BUFFER13		        0x2FF2
+#define CC1200_AES_BUFFER12		        0x2FF3
+#define CC1200_AES_BUFFER11		        0x2FF4
+#define CC1200_AES_BUFFER10		        0x2FF5
+#define CC1200_AES_BUFFER9		        0x2FF6
+#define CC1200_AES_BUFFER8		        0x2FF7
+#define CC1200_AES_BUFFER7		        0x2FF8
+#define CC1200_AES_BUFFER6	            0x2FF9
+#define CC1200_AES_BUFFER5	            0x2FF10
+#define CC1200_AES_BUFFER4	            0x2FF11
+#define CC1200_AES_BUFFER3	            0x2FF12
+#define CC1200_AES_BUFFER2	            0x2FF13
+#define CC1200_AES_BUFFER1	            0x2FF14
+#define CC1200_AES_BUFFER0		        0x2FF15
 
 /* Chip states returned in status byte */
 #define CC1200_STATE_IDLE               0x00
@@ -398,13 +398,8 @@ void cc1200_spiReadRam    (uint16_t addr,  cc1200_status_t* statusRead, uint8_t*
  */
 // RX filter BW = 104.166667
 // Address config = No address check
-// Packet length = 125
-// Symbol rate = 38.4
-// Carrier frequency = 867.999878
-// Bit rate = 38.4
 // Packet bit length = 0
 // Whitening = false
-// Manchester enable = false
 // Modulation format = 2-GFSK
 // Packet length mode = Variable
 // Device address = 0
@@ -415,36 +410,40 @@ void cc1200_spiReadRam    (uint16_t addr,  cc1200_status_t* statusRead, uint8_t*
 static const registerSetting_t preferredSettings[] = {
     {CC1200_IOCFG2,         0x06}, //it was 0x13 before. 
     {CC1200_IOCFG0,         0x06},
-    {CC1200_SYNC_CFG1,      0xE9},  // 0xA9 before. Now, dual sync search. 
+    {CC1200_SYNC_CFG1,      0xE5},  // 0xA9 before. Now, dual sync search. 
+    {CC1200_SYNC_CFG0,      0x23},
     {CC1200_SYNC3,          0x6E},  //jmms
     {CC1200_SYNC2,          0x4E},  //jmms
     {CC1200_SYNC1,          0x90},  //jmms
     {CC1200_SYNC0,          0x4E},  //jmms
+    {CC1200_DEVIATION_M,    0x47},
     {CC1200_MODCFG_DEV_E,   0x0B},
+    {CC1200_DCFILT_CFG,     0x56},
     {CC1200_PREAMBLE_CFG1,  0x30},
     {CC1200_PREAMBLE_CFG0,  0x8A},
     {CC1200_IQIC,           0xC8},
-    {CC1200_CHAN_BW,        0x10},
+    {CC1200_CHAN_BW,        0x84},
     {CC1200_MDMCFG1,        0x42},
     {CC1200_MDMCFG0,        0x05},
-    {CC1200_SYMBOL_RATE2,   0x8F},
-    {CC1200_SYMBOL_RATE1,   0x75},
-    {CC1200_SYMBOL_RATE0,   0x10},
+    {CC1200_SYMBOL_RATE2,   0x94},
+    {CC1200_SYMBOL_RATE1,   0x7A},
+    {CC1200_SYMBOL_RATE0,   0xE1},
     {CC1200_AGC_REF,        0x27},
-    {CC1200_AGC_CS_THR,     0xE4},
+    {CC1200_AGC_CS_THR,     0xF7},
     {CC1200_AGC_CFG1,       0x00},
     {CC1200_AGC_CFG0,       0x90},
+    {CC1200_FIFO_CFG,       0x00},
     {CC1200_SETTLING_CFG,   0x03},
     {CC1200_FS_CFG,         0x12},
     {CC1200_WOR_CFG0,       0x20},
-    {CC1200_WOR_EVENT0_LSB, 0xC3},
+    {CC1200_WOR_EVENT0_LSB, 0x96},
  //   {CC1200_PKT_CFG2,       0x00},
-    {CC1200_PKT_CFG2,       0x20},  //jmms
-    {CC1200_PKT_CFG1,       0x83},  //jmms  FEC_EN 1 CRC_CFG 1 (CRC16) APPEND_STATUS 1
+    {CC1200_PKT_CFG2,       0x24},  //jmms
+    {CC1200_PKT_CFG1,       0x03},  //jmms  NO FEC CRC_CFG 1 (CRC16) APPEND_STATUS 1
     {CC1200_PKT_CFG0,       0x20},
     {CC1200_RFEND_CFG0,     0x09},
-    {CC1200_PKT_LEN,        0x7D},
-    {CC1200_IF_MIX_CFG,     0x1C},
+    {CC1200_PKT_LEN,        0xFF},
+    {CC1200_IF_MIX_CFG,     0x18},
     {CC1200_TOC_CFG,        0x03},
     {CC1200_MDMCFG2,        0x02},
     {CC1200_FREQ2,          0x56},
@@ -452,19 +451,20 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_FREQ0,          0xCC},
     {CC1200_IF_ADC1,        0xEE},
     {CC1200_IF_ADC0,        0x10},
-    {CC1200_FS_DIG1,        0x07},
-    {CC1200_FS_DIG0,        0xAF},
+    {CC1200_FS_DIG1,        0x04},
+    {CC1200_FS_DIG0,        0x50},
     {CC1200_FS_CAL1,        0x40},
     {CC1200_FS_CAL0,        0x0E},
     {CC1200_FS_DIVTWO,      0x03},
     {CC1200_FS_DSM0,        0x33},
-    {CC1200_FS_DVC0,        0x17},
+    {CC1200_FS_DVC1,        0xF7},
+    {CC1200_FS_DVC0,        0x0F},
     {CC1200_FS_PFD,         0x00},
     {CC1200_FS_PRE,         0x6E},
     {CC1200_FS_REG_DIV_CML, 0x1C},
     {CC1200_FS_SPARE,       0xAC},
     {CC1200_FS_VCO0,        0xB5},
-    {CC1200_IFAMP,          0x09},
+    {CC1200_IFAMP,          0x05},
     {CC1200_XOSC5,          0x0E},
     {CC1200_XOSC1,          0x03},
 };

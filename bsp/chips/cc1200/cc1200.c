@@ -153,7 +153,7 @@ void cc1200_spiReadRxFifo(cc1200_status_t* statusRead,
    // - *[1B]     length byte
    // -  [0-125B] packet (excluding CRC)
    // - *[2B]     CRC
-   uint8_t spi_tx_buffer[125];
+   uint8_t spi_tx_buffer[128];
    //uint8_t spi_rx_buffer[127];
    
    spi_tx_buffer[0]     = (/*CC1200_FLAG_READ*/CC1200_FLAG_READ_BURST | CC1200_FIFO_ADDR);
