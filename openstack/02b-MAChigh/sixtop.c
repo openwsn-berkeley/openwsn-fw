@@ -416,7 +416,6 @@ void sixtop_removeCell(open_addr_t* neighbor){
 
 #endif
 
-
    // send packet
    sixtop_send(pkt);
    
@@ -1800,7 +1799,8 @@ void sixtop_notifyReceiveRemoveLinkRequest(
    if (sixtop_vars.handler == SIX_HANDLER_OTF) {
      // notify OTF
      otf_notif_removedCell();
-   } else {
+   }
+   else {
        if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN) {
            sixtop_vars.handler = SIX_HANDLER_NONE;
        } else {

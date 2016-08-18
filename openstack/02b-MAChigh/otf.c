@@ -35,7 +35,7 @@ void otf_notif_addedCell(void) {
          (errorparameter_t)10,
          (errorparameter_t)1);
 
-   //scheduler_push_task(otf_addCell_task,TASKPRIO_OTF);
+   scheduler_push_task(otf_addCell_task,TASKPRIO_OTF);
 }
 
 void otf_notif_removedCell(void) {
@@ -45,7 +45,7 @@ void otf_notif_removedCell(void) {
          (errorparameter_t)10,
          (errorparameter_t)2);
 
-   //scheduler_push_task(otf_removeCell_task,TASKPRIO_OTF);
+   scheduler_push_task(otf_removeCell_task,TASKPRIO_OTF);
 }
 
 //=========================== private =========================================
@@ -258,6 +258,9 @@ void otf_remove_obsolete_parents(void){
       if (cell->type == CELLTYPE_TX) {
          neigh = neighbors_getNeighborInfo(&(cell->neighbor));
 
+         //it is not anymore a parent (or even not anymore a neighbor)
+         if ((neigh == NULL) || (neigh->parentPreference < MAXPREFERENCE)){
+
 #ifdef _DEBUG_OTF_
             char str[150];
             sprintf(str, "OTF LinkRem(oldParent)=");
@@ -276,11 +279,6 @@ void otf_remove_obsolete_parents(void){
             openserial_ncat_uint32_t(str, (uint32_t)i, 150);
             openserial_printf(COMPONENT_OTF, str, strlen(str));
 #endif
-
-
-
-         //it is not anymore a parent (or even not anymore a neighbor)
-         if ((neigh == NULL) || (neigh->parentPreference < MAXPREFERENCE)){
 
             //silently removed (we changed our parent, we cannot notify it probably)
             //these cells will be removed after a timeout from the receiver
@@ -344,6 +342,8 @@ void otf_remove_unused_cells(void){
                openserial_ncat_uint32_t(str, (uint32_t)cell->slotOffset, 150);
                strncat(str, ",pos=", 150);
                openserial_ncat_uint32_t(str, (uint32_t)i, 150);
+               strncat(str, ",unused during=", 150);
+               openserial_ncat_uint32_t(str, (uint32_t)(ieee154e_asnDiff(&(cell->lastUsedAsn)) * TsSlotDuration), 150);
                openserial_printf(COMPONENT_OTF, str, strlen(str));
 #endif
 
