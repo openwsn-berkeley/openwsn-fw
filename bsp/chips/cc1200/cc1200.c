@@ -137,8 +137,8 @@ void cc1200_spiWriteFifo(cc1200_status_t* statusRead, uint8_t* bufToWrite, uint8
       bufToWrite,                 // bufTx
       len,                        // lenbufTx
       SPI_LASTBYTE,               // returnType
-      spi_rx_buffer,             // bufRx
-      sizeof(spi_rx_buffer),    // maxLenBufRx
+      spi_rx_buffer,              // bufRx
+      sizeof(spi_rx_buffer),      // maxLenBufRx
       SPI_NOTFIRST,               // isFirst
       SPI_LAST                    // isLast
    );
@@ -163,12 +163,12 @@ void cc1200_spiReadRxFifo(cc1200_status_t* statusRead,
     //read FIFO 
     spi_txrx(
         spi_tx_buffer,              // bufTx
-        3,//*pLenRead,                   // lenbufTx
+        3,                          // lenbufTx
         SPI_BUFFER,                 // returnType
         spi_rx_buffer,              // bufRx
-        3/*sizeof(spi_rx_buffer)*/,      // maxLenBufRx
+        3,                          // maxLenBufRx
         SPI_FIRST,                  // isFirst
-        SPI_LAST/*SPI_NOTLAST*/                 // isLast
+        SPI_LAST                   // isLast
     );
     PHR[0] = spi_rx_buffer[1];
     PHR[1] = spi_rx_buffer[2];
@@ -179,12 +179,12 @@ void cc1200_spiReadRxFifo(cc1200_status_t* statusRead,
         //read FIFO 
     spi_txrx(
         spi_tx_buffer,              // bufTx
-        length + 1,                   // lenbufTx
+        length + 1,                 // lenbufTx
         SPI_BUFFER,                 // returnType
-        pBufRead + 1/*spi_rx_buffer*/,              // bufRx
-        length,/*sizeof(spi_rx_buffer)*/      // maxLenBufRx
+        pBufRead + 1,               // bufRx
+        length,                     // maxLenBufRx
         SPI_FIRST,                  // isFirst
-        SPI_LAST/*SPI_NOTLAST*/                 // isLast
+        SPI_LAST                    // isLast
     );
     
     *pBufRead = PHR[0];

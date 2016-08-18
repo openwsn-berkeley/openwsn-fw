@@ -509,7 +509,7 @@ static const registerSetting_t preferredSettings[] = {
  */
 static const cc1200_register_settings_t cc1200_register_settings[] = {
   {CC1200_IOCFG2,            0x06},
-  {CC1200_IOCFG0,            0x06},  //jmms
+  {CC1200_IOCFG0,            0x06}, 
   {CC1200_SYNC3,             0x6E},
   {CC1200_SYNC2,             0x4E},
   {CC1200_SYNC1,             0x90},
