@@ -189,13 +189,7 @@ void cc1200_spiReadRxFifo(cc1200_status_t* statusRead,
     
     *pBufRead = PHR[0];
     *(pBufRead+1) = PHR[1];
-   
-    //  *statusRead          = *(cc1200_status_t*)&spi_rx_buffer[0];
-    //  *pLenRead            = spi_rx_buffer[1];
-   
- //  if (*pLenRead>2 && *pLenRead<=127) {
-      // valid length
-       
+         
   // cc1200_spiStrobe(CC1200_SFRX, statusRead); //flush rx fifo
 }
 

@@ -54,7 +54,7 @@ void radio_init(void) {
     P1IE |= (BIT7); // Enable interrupt for P1.7
     // Write registers to radio
     for(uint16_t i = 0;
-        i < (sizeof(/*cc1200_register_settings*/preferredSettings)/sizeof(registerSetting_t/*cc1200_register_settings_t*/)); i++) {
+        i < (sizeof(preferredSettings)/sizeof(registerSetting_t)); i++) {
         cc1200_spiWriteReg( preferredSettings[i].addr, &radio_vars.radioStatusByte, preferredSettings[i].data);
     };
 }
@@ -143,7 +143,6 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
     uint8_t  PHR[2];
     uint8_t aux;
     if (len<2048){
-        
         PHR[0]      = len/256;
         PHR[1]      = len%256;
         PHR[0]     |= 0x10; //FCS set, size 2 bytes
@@ -152,7 +151,6 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
         *(packet+1) = PHR[1];
         // change state
         radio_vars.state = RADIOSTATE_LOADING_PACKET;
-   
         cc1200_spiStrobe( CC1200_SFTX, &radio_vars.radioStatusByte);
         cc1200_spiWriteFifo(&radio_vars.radioStatusByte, packet, len, CC1200_FIFO_ADDR);
         cc1200_spiReadReg(CC1200_NUM_TXBYTES, &radio_vars.radioStatusByte, &aux);
@@ -207,12 +205,12 @@ void radio_rxEnable(void) {
     //put radio in reception mode
     cc1200_spiStrobe(CC1200_SWOR, &radio_vars.radioStatusByte); //sniffer mode
    
-   // wiggle debug pin
-   debugpins_radio_set();
-   leds_radio_on();
+    // wiggle debug pin
+    debugpins_radio_set();
+    leds_radio_on();
      
-   // change state
-   radio_vars.state = RADIOSTATE_LISTENING;
+    // change state
+    radio_vars.state = RADIOSTATE_LISTENING;
 }
 
 void radio_rxNow(void) {
