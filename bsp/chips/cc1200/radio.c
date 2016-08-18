@@ -54,7 +54,7 @@ void radio_init(void) {
     P1IE |= (BIT7); // Enable interrupt for P1.7
     // Write registers to radio
     for(uint16_t i = 0;
-        i < (sizeof(preferredSettings)/sizeof(registerSetting_t)); i++) {
+        i < (sizeof(/*cc1200_register_settings*/preferredSettings)/sizeof(registerSetting_t/*cc1200_register_settings_t*/)); i++) {
         cc1200_spiWriteReg( preferredSettings[i].addr, &radio_vars.radioStatusByte, preferredSettings[i].data);
     };
 }
@@ -140,13 +140,14 @@ void radio_rfOff(void) {
 
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
     //test 802.15.4g PHR. This has to be done by the MAC layer
-    uint8_t  PHR[2];  
- 
+    uint8_t  PHR[2];
+    uint8_t aux;
     if (len<2048){
-        PHR[0]      = len%256;
-        PHR[1]      = len/256;
-        PHR[1]     |= 0x10; //FCS set, size 2 bytes
-        PHR[1]     &= 0xf7; //no data whitening
+        
+        PHR[0]      = len/256;
+        PHR[1]      = len%256;
+        PHR[0]     |= 0x10; //FCS set, size 2 bytes
+        PHR[0]     &= 0xf7; //no data whitening
         *packet     = PHR[0];
         *(packet+1) = PHR[1];
         // change state
@@ -154,12 +155,14 @@ void radio_loadPacket(uint8_t* packet, uint16_t len) {
    
         cc1200_spiStrobe( CC1200_SFTX, &radio_vars.radioStatusByte);
         cc1200_spiWriteFifo(&radio_vars.radioStatusByte, packet, len, CC1200_FIFO_ADDR);
-        //cc1200_spiReadReg(CC1200_NUM_TXBYTES, &radio_vars.radioStatusByte, &len);
+        cc1200_spiReadReg(CC1200_NUM_TXBYTES, &radio_vars.radioStatusByte, &aux);
         // change state
         radio_vars.state = RADIOSTATE_PACKET_LOADED;
     }else{
-        //error, length cannot be greater than 2047 bytes
+    //error
     }
+    
+
 }
 
 void radio_txEnable(void) {
@@ -169,9 +172,7 @@ void radio_txEnable(void) {
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
-   
-    // I don't fully understand how the CC2420_STXCA the can be used here.
-   
+      
     // change state
     radio_vars.state = RADIOSTATE_TX_ENABLED;
 }
@@ -203,9 +204,8 @@ void radio_rxEnable(void) {
     aux = (aux & 0xF9) | (0x00 << 1);
     cc1200_spiWriteReg(CC1200_WOR_CFG0, &radio_vars.radioStatusByte, aux);
    
-   //put radio in reception mode
-   cc1200_spiStrobe(CC1200_SWOR, &radio_vars.radioStatusByte);
-   //CC1200_spiStrobe(CC1200_SFRX, &radio_vars.radioStatusByte);
+    //put radio in reception mode
+    cc1200_spiStrobe(CC1200_SWOR, &radio_vars.radioStatusByte); //sniffer mode
    
    // wiggle debug pin
    debugpins_radio_set();
@@ -227,21 +227,24 @@ void radio_getReceivedFrame(
     uint8_t* lqi,
     bool*    crc
     ) {
-      
+    uint8_t marcStatus1;
+    cc1200_spiReadReg( CC1200_MARC_STATUS1, &radio_vars.radioStatusByte, &marcStatus1);
+     
     //read FIFO length 
     cc1200_spiReadReg(CC1200_NUM_RXBYTES, &radio_vars.radioStatusByte, lenRead);
     // read the received packet from the RXFIFO
     cc1200_spiReadRxFifo(&radio_vars.radioStatusByte, bufRead, lenRead, maxBufLen);
-
-    // On reception, when MODEMCTRL0.AUTOCRC is set, the CC2420 replaces the
+    
+    //TODO
+    // On reception, the CC1200 replaces the
     // received CRC by:
-    // - [1B] the rssi, a signed value. The actual value in dBm is that - 45.
+    // - [1B] RSSI
     // - [1B] whether CRC checked (bit 7) and LQI (bit 6-0)
-    *rssi  =  *(bufRead+*lenRead-2);
-    *rssi -= 45;
-    *crc   = ((*(bufRead+*lenRead-1))&0x80)>>7;
-    *lqi   =  (*(bufRead+*lenRead-1))&0x7f;
-   
+    //*rssi  =  *(bufRead+*lenRead-1);
+    //*crc   = ((*(bufRead+*lenRead))&0x80)>>7;
+    //*lqi   =  (*(bufRead+*lenRead))&0x7f;
+    //clean RX FIFO  
+    cc1200_spiStrobe( CC1200_SFRX, &radio_vars.radioStatusByte);
     //put radio in reception mode
     cc1200_spiStrobe(CC1200_SWOR, &radio_vars.radioStatusByte);
 }

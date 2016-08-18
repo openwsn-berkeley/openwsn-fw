@@ -408,9 +408,9 @@ void cc1200_spiReadRam    (uint16_t addr,  cc1200_status_t* statusRead, uint8_t*
 
 
 static const registerSetting_t preferredSettings[] = {
-    {CC1200_IOCFG2,         0x06}, //it was 0x13 before. 
+    {CC1200_IOCFG2,         0x06},  
     {CC1200_IOCFG0,         0x06},
-    {CC1200_SYNC_CFG1,      0xE5},  // 0xA9 before. Now, dual sync search. 
+    {CC1200_SYNC_CFG1,      0xE5},  
     {CC1200_SYNC_CFG0,      0x23},
     {CC1200_SYNC3,          0x6E},  
     {CC1200_SYNC2,          0x4E},  
@@ -437,7 +437,6 @@ static const registerSetting_t preferredSettings[] = {
     {CC1200_FS_CFG,         0x12},
     {CC1200_WOR_CFG0,       0x20},
     {CC1200_WOR_EVENT0_LSB, 0x96},
- //   {CC1200_PKT_CFG2,       0x00},
     {CC1200_PKT_CFG2,       0x24}, 
     {CC1200_PKT_CFG1,       0x03}, // NO FEC CRC_CFG 1 (CRC16) APPEND_STATUS 1
     {CC1200_PKT_CFG0,       0x20},
@@ -510,6 +509,7 @@ static const registerSetting_t preferredSettings[] = {
  */
 static const cc1200_register_settings_t cc1200_register_settings[] = {
   {CC1200_IOCFG2,            0x06},
+  {CC1200_IOCFG0,            0x06},  //jmms
   {CC1200_SYNC3,             0x6E},
   {CC1200_SYNC2,             0x4E},
   {CC1200_SYNC1,             0x90},

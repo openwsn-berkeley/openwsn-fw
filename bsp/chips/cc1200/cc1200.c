@@ -173,61 +173,30 @@ void cc1200_spiReadRxFifo(cc1200_status_t* statusRead,
     PHR[0] = spi_rx_buffer[1];
     PHR[1] = spi_rx_buffer[2];
     
-    length = PHR[0] + (PHR[1] & (0x07))*256; 
+    length = PHR[1] + (PHR[0] & (0x07))*256; 
     
     spi_tx_buffer[0]     = (CC1200_FLAG_READ_BURST | CC1200_FIFO_ADDR);
         //read FIFO 
     spi_txrx(
         spi_tx_buffer,              // bufTx
-        length,                   // lenbufTx
+        length + 1,                   // lenbufTx
         SPI_BUFFER,                 // returnType
-        pBufRead/*spi_rx_buffer*/,              // bufRx
-        length/*sizeof(spi_rx_buffer)*/,      // maxLenBufRx
+        pBufRead + 1/*spi_rx_buffer*/,              // bufRx
+        length,/*sizeof(spi_rx_buffer)*/      // maxLenBufRx
         SPI_FIRST,                  // isFirst
         SPI_LAST/*SPI_NOTLAST*/                 // isLast
     );
+    
+    *pBufRead = PHR[0];
+    *(pBufRead+1) = PHR[1];
    
     //  *statusRead          = *(cc1200_status_t*)&spi_rx_buffer[0];
     //  *pLenRead            = spi_rx_buffer[1];
    
  //  if (*pLenRead>2 && *pLenRead<=127) {
       // valid length
-      
-      //read packet
-  /*    spi_txrx(
-         spi_tx_buffer,           // bufTx
-         *pLenRead,               // lenbufTx
-         SPI_BUFFER,              // returnType
-         pBufRead,                // bufRx
-         125,                     // maxLenBufRx
-         SPI_NOTFIRST,            // isFirst
-         SPI_LAST                 // isLast
-      );
-      
-   } else {
-      // invalid length
-      
-      // read a just byte to close spi
-      spi_txrx(
-         spi_tx_buffer,           // bufTx
-         1,                       // lenbufTx
-         SPI_BUFFER,              // returnType
-         spi_rx_buffer,           // bufRx
-         sizeof(spi_rx_buffer),   // maxLenBufRx
-         SPI_NOTFIRST,            // isFirst
-         SPI_LAST                 // isLast
-      );
-   } */
-   /*
-   A SFRX command strobe is required 
-   after an RXFIFO overflow to enable 
-   reception of new data. Note that the 
-   SFLUSHRX command strobe should be 
-   issued twice to ensure that the SFD pin 
-   goes back to its inactive state.
-   */
-   
-   cc1200_spiStrobe(CC1200_SFRX, statusRead);
+       
+  // cc1200_spiStrobe(CC1200_SFRX, statusRead); //flush rx fifo
 }
 
 const cc1200_rf_cfg_t cc1200_rf_cfg = {
