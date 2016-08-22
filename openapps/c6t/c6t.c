@@ -82,7 +82,7 @@ owerror_t c6t_receive(
          msg->length                   = 0;
          
          // get preferred parent
-         foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+         foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
          if (foundNeighbor==FALSE) {
             outcome                    = E_FAIL;
             coap_header->Code          = COAP_CODE_RESP_PRECONDFAILED;
@@ -111,7 +111,7 @@ owerror_t c6t_receive(
          msg->length                   = 0;
          
          // get preferred parent
-         foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+         foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
          if (foundNeighbor==FALSE) {
             outcome                    = E_FAIL;
             coap_header->Code          = COAP_CODE_RESP_PRECONDFAILED;

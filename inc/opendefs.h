@@ -36,6 +36,7 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 #define LENGTH_ADDR64b  8
 #define LENGTH_ADDR128b 16
 
+#define MAXNUMNEIGHBORS 10
 
 enum {
    E_SUCCESS                           = 0,
@@ -329,6 +330,26 @@ typedef struct {
    //the packet
    uint8_t       packet[1+1+125+2+1];            // 1B spi address, 1B length, 125B data, 2B CRC, 1B LQI
 } OpenQueueEntry_t;
+
+
+BEGIN_PACK
+typedef struct {
+   bool             used;
+   uint8_t          parentPreference;
+   bool             stableNeighbor;
+   uint8_t          switchStabilityCounter;
+   open_addr_t      addr_64b;
+   dagrank_t        DAGrank;
+   int8_t           rssi;
+   uint8_t          numRx;
+   uint8_t          numTx;
+   uint8_t          numTxACK;
+   uint8_t          numWraps;//number of times the tx counter wraps. can be removed if memory is a restriction. also check openvisualizer then.
+   asn_t            asn;
+   uint8_t          joinPrio;
+} neighborRow_t;
+END_PACK
+
 
 //=========================== variables =======================================
 

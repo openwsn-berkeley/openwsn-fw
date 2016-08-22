@@ -588,7 +588,7 @@ void openserial_handleCommands(void){
            icmpv6rpl_setDAOPeriod(comandParam_16);
            break;
        case COMMAND_SET_DAGRANK: // two bytes
-           neighbors_setMyDAGrank(comandParam_16);
+           icmpv6rpl_setMyDAGrank(comandParam_16);
            break;
        case COMMAND_SET_SECURITY_STATUS: // one byte
            if (comandParam_8 ==1) {
@@ -623,7 +623,7 @@ void openserial_handleCommands(void){
         case COMMAND_SET_6P_LIST:
         case COMMAND_SET_6P_CLEAR:
             // get preferred parent
-            foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+            foundNeighbor =icmpv6rpl_getPreferredParentEui64(&neighbor);
             if (foundNeighbor==FALSE) {
                 break;
             }
