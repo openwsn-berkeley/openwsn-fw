@@ -294,7 +294,10 @@ bool icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite) {
 bool icmpv6rpl_isPreferredParent(open_addr_t* address) {
    open_addr_t  temp;
    // do we currently have a parent?
-   if (icmpv6rpl_vars.haveParent==FALSE) return FALSE;
+   if (icmpv6rpl_vars.haveParent==FALSE) {
+      return FALSE;
+   }
+   
    //compare parent address to the one presented.
    switch (address->type) {
       case ADDR_64B:
@@ -347,7 +350,7 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
        // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here 
        if (icmpv6rpl_vars.myDAGrank!=MINHOPRANKINCREASE) { // test for change so as not to report unchanged value when root
            icmpv6rpl_vars.myDAGrank=MINHOPRANKINCREASE;
-       return;
+           return;
        }
    }
 
@@ -410,7 +413,6 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
       icmpv6rpl_vars.rankIncrease= prevRankIncrease;
       // no change to report on
    }
-return;
 }
 
 /**
@@ -447,7 +449,7 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
             if (
               (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&
               (icmpv6rpl_vars.incomingDio->rank - neighborRank) > (DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
-              ) {
+            ) {
                // the new DAGrank looks suspiciously high, only increment a bit
                neighbors_setNeighborRank(i,neighborRank + (DEFAULTLINKCOST*2*MINHOPRANKINCREASE));
                openserial_printError(COMPONENT_NEIGHBORS,ERR_LARGE_DAGRANK,

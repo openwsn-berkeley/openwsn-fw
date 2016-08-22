@@ -62,57 +62,6 @@ uint8_t neighbors_getNumNeighbors() {
 dagrank_t neighbors_getNeighborRank(uint8_t index) {
    return neighbors_vars.neighbors[index].DAGrank;
 }
-/** DB Nov 2015 : this code is left commented out here for reference while I'm debugging the same functionnality moved to icmpv6rpl
-\brief Retrieve my preferred parent's EUI64 address.
-
-\param[out] addressToWrite Where to write the preferred parent's address to.
-*/
-/**bool neighbors_getPreferredParentEui64(open_addr_t* addressToWrite) {
-   uint8_t   i;
-   bool      foundPreferred;
-   uint8_t   numNeighbors;
-   dagrank_t minRankVal;
-   uint8_t   minRankIdx;
-   
-   addressToWrite->type = ADDR_NONE;
-   
-   foundPreferred       = FALSE;
-   numNeighbors         = 0;
-   minRankVal           = MAXDAGRANK;
-   minRankIdx           = MAXNUMNEIGHBORS+1;
-   
-   //===== step 1. Try to find preferred parent
-   for (i=0; i<MAXNUMNEIGHBORS; i++) {
-      if (neighbors_vars.neighbors[i].used==TRUE){
-         if (neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
-            memcpy(addressToWrite,&(neighbors_vars.neighbors[i].addr_64b),sizeof(open_addr_t));
-            addressToWrite->type=ADDR_64B;
-            foundPreferred=TRUE;
-         }
-         // identify neighbor with lowest rank
-         if (neighbors_vars.neighbors[i].DAGrank < minRankVal) {
-            minRankVal=neighbors_vars.neighbors[i].DAGrank;
-            minRankIdx=i;
-         }
-         numNeighbors++;
-      }
-   }
-   
-   //===== step 2. (backup) Promote neighbor with min rank to preferred parent
-   if (foundPreferred==FALSE && numNeighbors > 0){
-      // promote neighbor
-      neighbors_vars.neighbors[minRankIdx].parentPreference       = MAXPREFERENCE;
-      neighbors_vars.neighbors[minRankIdx].stableNeighbor         = TRUE;
-      neighbors_vars.neighbors[minRankIdx].switchStabilityCounter = 0;
-      // return its address
-      memcpy(addressToWrite,&(neighbors_vars.neighbors[minRankIdx].addr_64b),sizeof(open_addr_t));
-      addressToWrite->type=ADDR_64B;
-      foundPreferred=TRUE;         
-   }
-   
-   return foundPreferred;
-}
-*/
 
 /**
 \brief Find neighbor to which to send KA.
@@ -197,34 +146,6 @@ bool neighbors_isStableNeighborByIndex(uint8_t index) {
    return (neighbors_vars.neighbors[index].stableNeighbor &&
            neighbors_vars.neighbors[index].used);
 }
-/**
-\brief Indicate whether some neighbor is a preferred neighbor.
-
-\param[in] address The EUI64 address of the neighbor.
-
-\returns TRUE if that neighbor is preferred, FALSE otherwise.
-*/
-/**bool neighbors_isPreferredParent(open_addr_t* address) {
-   uint8_t i;
-   bool    returnVal;
-   
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   
-   // by default, not preferred
-   returnVal = FALSE;
-   
-   // iterate through neighbor table
-   for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (isThisRowMatching(address,i) && neighbors_vars.neighbors[i].parentPreference==MAXPREFERENCE) {
-         returnVal  = TRUE;
-         break;
-      }
-   }
-   
-   ENABLE_INTERRUPTS();
-   return returnVal;
-}*/
 
 /**
 \brief Indicate whether some neighbor has a lower DAG rank that me.
@@ -468,78 +389,6 @@ uint16_t neighbors_getLinkMetric(uint8_t index) {
    return rankIncrease;
 }
 
-/** DB Nov 2015 : this code is left commented out here for reference while I'm debugging the same functionnality moved to icmpv6rpl
-\brief Update my DAG rank and neighbor preference.
-
-Call this function whenever some data is changed that could cause this mote's
-routing decisions to change. Examples are:
-- I received a DIO which updated by neighbor table. If this DIO indicated a
-  very low DAGrank, I may want to change by routing parent.
-- I became a DAGroot, so my DAGrank should be 0.
-*/
-/**void neighbors_updateMyDAGrankAndNeighborPreference() {
-   uint8_t   i;
-   uint16_t  rankIncrease;
-   uint16_t  previousDAGrank;
-   uint32_t  tentativeDAGrank; // 32-bit since is used to sum
-   uint8_t   prefParentIdx;
-   bool      prefParentFound;
-   uint32_t  rankIncreaseIntermediary; // stores intermediary results of rankIncrease calculation
-   
-   // if I'm a DAGroot, my DAGrank is always MINHOPRANKINCREASE
-   if ((idmanager_getIsDAGroot())==TRUE) {
-       // the dagrank is not set through setting command, set rank to MINHOPRANKINCREASE here 
-       neighbors_vars.myDAGrank=MINHOPRANKINCREASE;
-       return;
-   }
-   
-   // reset my DAG rank to max value. May be lowered below.
-   previousDAGrank = neighbors_vars.myDAGrank;
-   neighbors_vars.myDAGrank  = MAXDAGRANK;
-   
-   // by default, I haven't found a preferred parent
-   prefParentFound           = FALSE;
-   prefParentIdx             = 0;
-   
-   // loop through neighbor table, update myDAGrank
-   for (i=0;i<MAXNUMNEIGHBORS;i++) {
-      if (neighbors_vars.neighbors[i].used==TRUE) {
-         
-         // reset parent preference
-         neighbors_vars.neighbors[i].parentPreference=0;
-         
-         // calculate link cost to this neighbor
-         if (neighbors_vars.neighbors[i].numTxACK==0) {
-            rankIncrease = DEFAULTLINKCOST*2*MINHOPRANKINCREASE;
-         } else {
-            //6TiSCH minimal draft using OF0 for rank computation
-            rankIncreaseIntermediary = (((uint32_t)neighbors_vars.neighbors[i].numTx) << 10);
-            rankIncreaseIntermediary = (rankIncreaseIntermediary * 2 * MINHOPRANKINCREASE) / ((uint32_t)neighbors_vars.neighbors[i].numTxACK);
-            rankIncrease = (uint16_t)(rankIncreaseIntermediary >> 10);
-         }
-         
-         tentativeDAGrank = neighbors_vars.neighbors[i].DAGrank+rankIncrease;
-         if ( tentativeDAGrank<neighbors_vars.myDAGrank &&
-              tentativeDAGrank<MAXDAGRANK) {
-            // found better parent, lower my DAGrank
-            neighbors_vars.myDAGrank   = tentativeDAGrank;
-            prefParentFound            = TRUE;
-            prefParentIdx              = i;
-         }
-      }
-   } 
-   
-   // update preferred parent
-   if (prefParentFound) {
-      neighbors_vars.neighbors[prefParentIdx].parentPreference       = MAXPREFERENCE;
-      neighbors_vars.neighbors[prefParentIdx].stableNeighbor         = TRUE;
-      neighbors_vars.neighbors[prefParentIdx].switchStabilityCounter = 0;
-   }
-   if (neighbors_vars.myDAGrank!=previousDAGrank) {
-   }
-
-}
-*/
 //===== maintenance
 
 void  neighbors_removeOld() {
