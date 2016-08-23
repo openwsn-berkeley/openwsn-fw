@@ -70,6 +70,12 @@
   <project>
     <path>$WS_DIR$\03oos_macpong\03oos_macpong.ewp</path>
   </project>
+  <project>
+    <path>$WS_DIR$\03oos_mercator\03oos_mercator.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\03oos_openwsn\03oos_openwsn.ewp</path>
+  </project>
   <batchBuild>
     <batchDefinition>
       <name>all_debugs</name>
@@ -151,6 +157,26 @@
       </member>
       <member>
         <project>01bsp_bothtimers</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>03oos_openwsn</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>03oos_mercator</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>03oos_macpong</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>02drv_opentimers</project>
+        <configuration>Debug</configuration>
+      </member>
+      <member>
+        <project>02drv_openserial</project>
         <configuration>Debug</configuration>
       </member>
     </batchDefinition>
