@@ -106,8 +106,8 @@ void sixtop_setHandler(void){}
 void sixtop_request(void){}
 void sixtop_addORremoveCellByInfo(void){}
 void sixtop_setIsResponseEnabled(void){}
-void neighbors_setMyDAGrank(void){}
-void neighbors_getPreferredParentEui64(void){}
+void icmpv6rpl_setMyDAGrank(void){}
+void icmpv6rpl_getPreferredParentEui64(void){}
 void schedule_setFrameLength(void){}
 void ieee154e_setSlotDuration(void){}
 void ieee154e_setIsSecurityEnabled(void){}
