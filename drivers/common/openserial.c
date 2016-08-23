@@ -525,7 +525,6 @@ owerror_t openserial_printInfoErrorCritical(
 //===== command handlers
 
 void openserial_handleEcho(uint8_t* buf, uint8_t bufLen){
-    INTERRUPT_DECLARATION();
     
     // echo back what you received
     openserial_printData(

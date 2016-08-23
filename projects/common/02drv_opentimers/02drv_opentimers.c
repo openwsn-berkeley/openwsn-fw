@@ -91,3 +91,7 @@ void cb_timer1(opentimer_id_t id) {
 void cb_timer2(opentimer_id_t id) {
    leds_sync_toggle();
 }
+
+//=========================== stub functions ==================================
+
+void sniffer_setListeningChannel(void){}
