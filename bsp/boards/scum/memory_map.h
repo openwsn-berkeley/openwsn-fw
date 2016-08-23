@@ -35,11 +35,16 @@
 
 // ==== RFCONTROLLER interruption bit configuration
 
-#define TX_LOAD_DONE_INT_EN     0x001
-#define TX_SFD_DONE_INT_EN      0x002
-#define TX_SEND_DONE_INT_EN     0x004
-#define RX_SFD_DONE_INT_EN      0x008
-#define RX_DONE_INT_EN          0x010
+#define TX_LOAD_DONE_INT_EN             0x001
+#define TX_SFD_DONE_INT_EN              0x002
+#define TX_SEND_DONE_INT_EN             0x004
+#define RX_SFD_DONE_INT_EN              0x008
+#define RX_DONE_INT_EN                  0x010
+#define TX_LOAD_DONE_RFTIMER_PULSE_EN   0x020
+#define TX_SFD_DONE_RFTIMER_PULSE_EN    0x040
+#define TX_SEND_DONE_RFTIMER_PULSE_EN   0x080
+#define RX_SFD_DONE_RFTIMER_PULSE_EN    0x100
+#define RX_DONE_RFTIMER_PULSE_EN        0x200
 
 // ==== RFCONTROLLER error bit configuration
 
