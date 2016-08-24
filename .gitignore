@@ -17,3 +17,4 @@ settings
 *.map
 *.lst
 *~
+/projects/telosb/00std_button/path.txt
