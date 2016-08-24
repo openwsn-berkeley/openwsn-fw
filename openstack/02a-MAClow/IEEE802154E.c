@@ -953,7 +953,7 @@ port_INLINE void activity_ti1ORri1() {
                //copy synch IE  -- should be Little endian???
                // fill in the ASN field of the EB
                ieee154e_getAsn(sync_IE.asn);
-               sync_IE.join_priority = (neighbors_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
+               sync_IE.join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
                memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
             }
             // record that I attempt to transmit this packet
@@ -1353,7 +1353,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
          
       if (
             idmanager_getIsDAGroot()==FALSE &&
-            neighbors_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop))
+            icmpv6rpl_isPreferredParent(&(ieee154e_vars.ackReceived->l2_nextORpreviousHop))
          ) {
          synchronizeAck(ieee802514_header.timeCorrection);
       }
@@ -1581,7 +1581,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          radiotimer_schedule(DURATION_rt5);
       } else {
          // synchronize to the received packet iif I'm not a DAGroot and this is my preferred parent
-         if (idmanager_getIsDAGroot()==FALSE && neighbors_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
+         if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
             synchronizePacket(ieee154e_vars.syncCapturedTime);
          }
          // indicate reception to upper layer (no ACK asked)
@@ -1757,7 +1757,7 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee154e_vars.ackToSend = NULL;
    
    // synchronize to the received packet
-   if (idmanager_getIsDAGroot()==FALSE && neighbors_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
+   if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
       synchronizePacket(ieee154e_vars.syncCapturedTime);
    }
    

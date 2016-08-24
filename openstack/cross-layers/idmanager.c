@@ -70,7 +70,7 @@ void idmanager_setIsDAGroot(bool newRole) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    idmanager_vars.isDAGroot = newRole;
-   neighbors_updateMyDAGrankAndNeighborPreference();
+   icmpv6rpl_updateMyDAGrankAndParentSelection();
    schedule_startDAGroot();
    ENABLE_INTERRUPTS();
 }

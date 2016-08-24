@@ -38,8 +38,8 @@ static const uint8_t chTemplate_default[] = {
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
 #define IEEE802154E_PAYLOAD_DESC_GROUP_ID_MLME             (1<<11)
 #define IEEE802154E_PAYLOAD_DESC_TYPE_MLME                 (1<<15)
-#define IEEE802154E_DESC_TYPE_LONG                         (1<<15)
-#define IEEE802154E_DESC_TYPE_SHORT                        (0<<15)
+#define IEEE802154E_DESC_TYPE_LONG                         ((uint16_t)(1<<15))
+#define IEEE802154E_DESC_TYPE_SHORT                        ((uint16_t)(0<<15))
 
 #define IANA_6TOP_IE_GROUP_ID                              (2<<11)
 #define IANA_6TOP_IE_GROUP_ID_TYPE                         (1<<15)
