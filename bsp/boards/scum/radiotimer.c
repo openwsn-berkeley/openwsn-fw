@@ -112,9 +112,9 @@ kick_scheduler_t radiotimer_isr() {
     if (interrupt_flag & RFTIMER_REG__INT_COMPARE2_INT) {
             // timer compare interrupt
             if (radiotimer_vars.compare_cb!=NULL) {
-                // call the callback
-                radiotimer_vars.compare_cb();
+                // clear the interrupt bit and call the callback
                 RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE2_INT;
+                radiotimer_vars.compare_cb();
                 // kick the OS
                 return KICK_SCHEDULER;
             }
@@ -122,18 +122,18 @@ kick_scheduler_t radiotimer_isr() {
         if (interrupt_flag & RFTIMER_REG__INT_COMPARE1_INT) {
             // timer overflows interrupt
             if (radiotimer_vars.overflow_cb!=NULL) {
-                // call the callback
-                radiotimer_vars.overflow_cb();
+                // clear the interrupt bit and call the callback
                 RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE1_INT;
+                radiotimer_vars.overflow_cb();
                 // kick the OS
                 return KICK_SCHEDULER;
             }
         } else {
             if (interrupt_flag & RFTIMER_REG__INT_COMPARE0_INT) {
                 // bsp timer interrupt is handled in radiotimer module
-                // call the callback
-                bsp_timer_isr();
+                // clear the interrupt bit and call the callback
                 RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE0_INT;
+                bsp_timer_isr();
                 // kick the OS
                 return KICK_SCHEDULER;
             } else {
