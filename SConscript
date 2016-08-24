@@ -659,7 +659,7 @@ def populateTargetGroup(localEnv,targetName):
         if targetName.startswith(prefix):
             env['targets']['all_'+prefix].append(targetName)
 
-def sconscript_scanner(localEnv):
+def project_sconscript_scanner(localEnv):
     '''
     This function is called from the following directories:
     - projects\common\
@@ -787,7 +787,7 @@ def sconscript_scanner(localEnv):
                 (localEnv['toolchain']=='iar-proj')
              ):
             
-            VariantDir(
+            localEnv.VariantDir(
                 src_dir     = src_dir,
                 variant_dir = variant_dir,
             )
@@ -804,7 +804,7 @@ def sconscript_scanner(localEnv):
         if added:
             populateTargetGroup(localEnv,targetName)
 
-env.AddMethod(sconscript_scanner, 'SconscriptScanner')
+env.AddMethod(project_sconscript_scanner, 'ProjectSconscriptScanner')
 
 #============================ board ===========================================
 
