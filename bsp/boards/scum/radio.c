@@ -14,7 +14,7 @@
 
 //=========================== defines =========================================
 
-#define LENGTH_MAX_RX_BUFFER    128 //// 1B length, 125B data, 2B CRC
+#define MAXLENGTH_TRX_BUFFER    128 //// 1B length, 125B data, 2B CRC
 
 // ==== default crc check result and rssi value
 
@@ -26,7 +26,8 @@
 typedef struct {
     radiotimer_capture_cbt    startFrame_cb;
     radiotimer_capture_cbt    endFrame_cb;
-    uint8_t                   radio_rx_buffer[LENGTH_MAX_RX_BUFFER];
+    uint8_t                   radio_tx_buffer[MAXLENGTH_TRX_BUFFER] __attribute__ ((aligned (4)));
+    uint8_t                   radio_rx_buffer[MAXLENGTH_TRX_BUFFER] __attribute__ ((aligned (4)));
     radio_state_t             state; 
 } radio_vars_t;
 
@@ -143,9 +144,11 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
     uint8_t i;
     // change state
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
+    
+    memcpy(&radio_vars.radio_tx_buffer[0],packet,len);
 
     // load packet in TXFIFO
-    RFCONTROLLER_REG__TX_DATA_ADDR  = &(packet[0]);
+    RFCONTROLLER_REG__TX_DATA_ADDR  = &(radio_vars.radio_tx_buffer[0]);
     RFCONTROLLER_REG__TX_PACK_LEN   = len;
     RFCONTROLLER_REG__CONTROL       = TX_LOAD;
     
