@@ -137,7 +137,7 @@ typedef struct {
    uint8_t         rfbuftx[RF_BUF_LEN];
    uint16_t        txpk_numpk;
    uint8_t         txpk_len;
-   uint8_t         txpk_totalnumpk;
+   uint16_t        txpk_totalnumpk;
    uint8_t         mac[8];
    // rx
    uint8_t         rxpk_buf[RF_BUF_LEN];
@@ -172,8 +172,8 @@ void isr_openserial_rx_mod(void);
 
 uint16_t htons(uint16_t val);
 
-void cb_endFrame(uint16_t timestamp);
-void cb_sendPacket(void);
+void cb_endFrame(PORT_RADIOTIMER_WIDTH timestamp);
+void cb_sendPacket(opentimer_id_t id);
 void cb_finishTx(void);
 
 //=========================== initialization ==================================
@@ -186,8 +186,6 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    opentimers_init();
-   radio_init();
-   leds_init();
 
    // get mac
    eui64_get(mercator_vars.mac);
@@ -342,6 +340,7 @@ void serial_rx_REQ_TX(void) {
    // prepare radio
    radio_rfOn();
    radio_setFrequency(req->frequency);
+   radio_rfOff();
    
    // TODO set TX Power
 
@@ -551,7 +550,7 @@ void isr_openserial_rx_mod(void) {
 
 //===== radiotimer
 
-void cb_endFrame(uint16_t timestamp) {
+void cb_endFrame(PORT_RADIOTIMER_WIDTH timestamp) {
    // local vars
       uint8_t  srcmac[8];
       uint8_t  transctr;
@@ -609,9 +608,10 @@ void cb_endFrame(uint16_t timestamp) {
    }
 }
 
-void cb_sendPacket(void){
+void cb_sendPacket(opentimer_id_t id){
    IND_TXDONE_ht* resp;
    uint16_t pkctr;
+
    // send packet
    leds_error_on();
 
@@ -625,7 +625,6 @@ void cb_sendPacket(void){
       opentimers_stop(mercator_vars.sendTimerId);
 
       // finishing TX
-      radio_rfOff();
       mercator_vars.status = ST_TXDONE;
 
       // send IND_TXDONE
