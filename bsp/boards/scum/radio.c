@@ -80,6 +80,10 @@ void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
     radio_vars.endFrame_cb      = cb;
 }
 
+radio_state_t radio_getstate(){
+    return radio_vars.state;
+}
+
 //===== reset
 
 void radio_reset() {
@@ -140,22 +144,33 @@ void radio_rfOff() {
 
 //===== TX
 
-void radio_loadPacket(uint8_t* packet, uint8_t len) {
-    uint8_t i;
-    // change state
-    radio_vars.state = RADIOSTATE_LOADING_PACKET;
-    
+void radio_loadPacket_prepare(uint8_t* packet, uint8_t len){
     memcpy(&radio_vars.radio_tx_buffer[0],packet,len);
 
     // load packet in TXFIFO
     RFCONTROLLER_REG__TX_DATA_ADDR  = &(radio_vars.radio_tx_buffer[0]);
     RFCONTROLLER_REG__TX_PACK_LEN   = len;
+}
+
+void radio_loadPacket(uint8_t* packet, uint8_t len) {
+    uint8_t i;
+    // change state
+    radio_vars.state = RADIOSTATE_LOADING_PACKET;
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+#else
+    memcpy(&radio_vars.radio_tx_buffer[0],packet,len);
+
+    // load packet in TXFIFO
+    RFCONTROLLER_REG__TX_DATA_ADDR  = &(radio_vars.radio_tx_buffer[0]);
+    RFCONTROLLER_REG__TX_PACK_LEN   = len;
+
     RFCONTROLLER_REG__CONTROL       = TX_LOAD;
-    
+#endif
     // add some delay for loading
     for (i=0;i<0xff;i++);
     
     radio_vars.state = RADIOSTATE_PACKET_LOADED;
+
 }
 
 void radio_txEnable() {
@@ -180,21 +195,27 @@ void radio_txNow() {
 
 //===== RX
 
+void radio_rxPacket_prepare(void){
+    DMA_REG__RF_RX_ADDR         = &(radio_vars.radio_rx_buffer[0]);
+}
+
 void radio_rxEnable() {
     
     // change state
     radio_vars.state            = RADIOSTATE_ENABLING_RX;
-    
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+#else
     DMA_REG__RF_RX_ADDR         = &(radio_vars.radio_rx_buffer[0]);
     // start to listen
     RFCONTROLLER_REG__CONTROL   = RX_START;
-    
+#endif
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
     
     // change state
     radio_vars.state            = RADIOSTATE_LISTENING;
+
 }
 
 void radio_rxNow() {

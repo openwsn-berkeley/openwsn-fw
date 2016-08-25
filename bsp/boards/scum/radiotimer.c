@@ -81,6 +81,16 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 }
 
 //===== compare
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+void radiotimer_schedule(uint8_t interrupt_type,PORT_RADIOTIMER_WIDTH offset) {
+    
+}
+
+void radiotimer_cancel(uint8_t interrupt_type) {
+    // disable compare interrupt
+    RFTIMER_REG__COMPARE2_CONTROL = 0x00;
+}
+#else
 
 void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
     // offset when to fire
@@ -95,6 +105,7 @@ void radiotimer_cancel() {
     // disable compare interrupt
     RFTIMER_REG__COMPARE2_CONTROL = 0x00;
 }
+#endif
 
 //===== capture
 

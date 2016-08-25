@@ -65,6 +65,11 @@ to return the board's description.
 
 #define SYNC_ACCURACY                       2     // by ticks
 
+//===== SCuM speicification
+
+// #define SLOT_FSM_IMPLEMENTATION_SINGLE_COMPARE_TIMER_INTERRUPT
+#define SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+
 //=========================== typedef  ========================================
 
 //=========================== variables =======================================
