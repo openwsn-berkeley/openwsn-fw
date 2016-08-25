@@ -124,9 +124,32 @@ owerror_t openserial_printStat(uint8_t type, uint8_t calling_component, uint8_t*
    uint8_t  asn[5];
    uint8_t  i;
 
-   return E_SUCCESS;
-
    ieee154e_getAsn(asn);// byte01,byte23,byte4
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   openserial_vars.outputBufFilled  = TRUE;
+   outputHdlcOpen();
+
+   //prepare the headers  and the content
+   outputHdlcWrite(SERFRAME_MOTE2PC_STAT);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
+   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+   outputHdlcWrite(calling_component);
+   outputHdlcWrite(asn[0]);
+   outputHdlcWrite(asn[1]);
+   outputHdlcWrite(asn[2]);
+   outputHdlcWrite(asn[3]);
+   outputHdlcWrite(asn[4]);
+   outputHdlcWrite(type);
+   for (i=0;i<length;i++){
+      outputHdlcWrite(buffer[i]);
+   }
+   outputHdlcClose();
+   ENABLE_INTERRUPTS();
+
+   return E_SUCCESS;
+/*
 
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -145,20 +168,20 @@ owerror_t openserial_printStat(uint8_t type, uint8_t calling_component, uint8_t*
    outputHdlcWrite(asn[3]);
    outputHdlcWrite(asn[4]);
    outputHdlcWrite(type);
-   for (i=0;i<length;i++){
+    for (i=0;i<length;i++){
       outputHdlcWrite(buffer[i]);
    }
    outputHdlcClose();
    ENABLE_INTERRUPTS();
 
    return E_SUCCESS;
+   */
 }
 
 
 owerror_t openserial_printf(uint8_t calling_component, char* buffer, uint8_t length) {
    uint8_t  asn[5];
    uint8_t  i;
-
 
    ieee154e_getAsn(asn);// byte01,byte23,byte4
 
