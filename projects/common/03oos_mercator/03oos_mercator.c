@@ -173,7 +173,7 @@ void isr_openserial_rx_mod(void);
 uint16_t htons(uint16_t val);
 
 void cb_endFrame(uint16_t timestamp);
-void cb_sendPacket(void);
+void cb_sendPacket(opentimer_id_t id);
 void cb_finishTx(void);
 
 //=========================== initialization ==================================
@@ -609,7 +609,7 @@ void cb_endFrame(uint16_t timestamp) {
    }
 }
 
-void cb_sendPacket(void){
+void cb_sendPacket(opentimer_id_t id){
    IND_TXDONE_ht* resp;
    uint16_t pkctr;
    // send packet

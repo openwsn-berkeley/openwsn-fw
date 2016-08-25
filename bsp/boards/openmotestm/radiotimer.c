@@ -126,10 +126,13 @@ void radiotimer_setPeriod(PORT_RADIOTIMER_WIDTH period) {
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
     //need to disable radio also in case that a radio interrupt is happening when set Alarm value
     
+    DISABLE_INTERRUPTS();
     
     //Reset RTC Counter to begin a new slot
     RTC_SetAlarm(period);
     RTC_WaitForLastTask();
+    
+    ENABLE_INTERRUPTS();
     
     radiotimer_vars.currentSlotPeriod = period;
     
@@ -155,9 +158,13 @@ void radiotimer_schedule(PORT_RADIOTIMER_WIDTH offset) {
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
     //need to disable radio also in case that a radio interrupt is happening
     
+    DISABLE_INTERRUPTS();
+    
     // Set the RTC alarm(RTC timer will alarm at next state of slot)
     RTC_SetAlarm(offset);
     RTC_WaitForLastTask();
+    
+    ENABLE_INTERRUPTS();
     
     //set radiotimer irpstatus
     radiotimer_vars.overflowORcompare = RADIOTIMER_COMPARE;
@@ -170,9 +177,13 @@ void radiotimer_cancel() {
     RTC_ITConfig(RTC_IT_ALR, DISABLE);
     //need to disable radio also in case that a radio interrupt is happening
     
+    DISABLE_INTERRUPTS();
+    
     // set RTC alarm (slotlength) 
     RTC_SetAlarm(radiotimer_vars.currentSlotPeriod);
     RTC_WaitForLastTask();
+    
+    ENABLE_INTERRUPTS();
     
     //set radiotimer irpstatus
     radiotimer_vars.overflowORcompare = RADIOTIMER_OVERFLOW;
@@ -211,9 +222,14 @@ kick_scheduler_t radiotimer_isr() {
             //Wait until last write operation on RTC registers has finished
             RTC_WaitForLastTask();                            
             
+            DISABLE_INTERRUPTS();
+            
             //Set the RTC time counter to 0
             RTC_SetCounter(0x00000000);
             RTC_WaitForLastTask();
+            
+            ENABLE_INTERRUPTS();
+            
             RCC_Wakeup();
             // call the callback
             radiotimer_vars.overflow_cb();

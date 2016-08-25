@@ -7,6 +7,8 @@
 #include "idmanager.h"
 #include "IEEE802154E.h"
 #include "sixtop.h"
+#include "sf0.h"
+
 
 //=========================== variables =======================================
 
@@ -93,7 +95,7 @@ void schedule_startDAGroot() {
    for (running_slotOffset=0;running_slotOffset<SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
 
 #ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
-      slotOffset = running_slotOffset + running_slotOffset * schedule_getFrameLength() / SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;      // slot offset
+      slotOffset = running_slotOffset * schedule_getFrameLength() / SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;      // slot offset
 #else
       slotOffset = running_slotOffset + SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
 #endif
@@ -282,7 +284,7 @@ void  schedule_getSlotInfo(
    while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
 
        // search for the corresponding node and slotoffset
-       if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
+       if (packetfunctions_sameAddress_debug(neighbor,&(slotContainer->neighbor),COMPONENT_SCHEDULE)&& (slotContainer->slotOffset==slotOffset)){
                //it exists so this is an update.
                info->link_type                 = slotContainer->type;
                info->shared                    = slotContainer->shared;
@@ -417,6 +419,16 @@ owerror_t schedule_addActiveSlot(
          ) {
             break;
          }
+         if (previousSlotWalker->slotOffset == slotContainer->slotOffset) {
+            // slot is already in schedule
+            openserial_printError(
+               COMPONENT_SCHEDULE,ERR_SCHEDULE_ADDDUPLICATESLOT,
+               (errorparameter_t)slotContainer->slotOffset,
+               (errorparameter_t)0
+            );
+            ENABLE_INTERRUPTS();
+            return E_FAIL;
+         }
          previousSlotWalker                 = nextSlotWalker;
       }
       // insert between previousSlotWalker and nextSlotWalker
@@ -452,7 +464,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
       if (
             slotContainer->slotOffset==slotOffset
             &&
-            packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))
+            packetfunctions_sameAddress_debug(neighbor,&(slotContainer->neighbor),COMPONENT_SCHEDULE)
             ){
          break;
       }
@@ -561,6 +573,75 @@ scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    }
 }
 
+uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* neighbor){
+    uint16_t         count = 0;
+    scheduleEntry_t* scheduleWalker;
+   
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+    
+    if (frameID != SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE){
+        ENABLE_INTERRUPTS();
+        return 0;
+    }
+   
+    scheduleWalker = schedule_vars.currentScheduleEntry;
+    do {
+       if(
+          packetfunctions_sameAddress_debug(&(scheduleWalker->neighbor),neighbor,COMPONENT_SCHEDULE) &&
+          type == scheduleWalker->type
+       ){
+           count++;
+       }
+       scheduleWalker = scheduleWalker->next;
+    }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+    ENABLE_INTERRUPTS();
+    return count;
+}
+void schedule_removeAllCells(
+    uint8_t        slotframeID,
+    open_addr_t*   previousHop
+    ){
+    uint8_t i;
+    
+    // remove all entries in schedule with previousHop address
+    for(i=0;i<MAXACTIVESLOTS;i++){
+        if (packetfunctions_sameAddress_debug(&(schedule_vars.scheduleBuf[i].neighbor),previousHop,COMPONENT_SCHEDULE)){
+           schedule_removeActiveSlot(
+              schedule_vars.scheduleBuf[i].slotOffset,
+              previousHop
+           );
+        }
+    }
+}
+
+scheduleEntry_t* schedule_getCurrentScheduleEntry(){
+    return schedule_vars.currentScheduleEntry;
+}
+
+//=== from otf
+uint8_t schedule_getNumOfSlotsByType(cellType_t type){
+   uint8_t returnVal;
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   returnVal = 0;
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(type == scheduleWalker->type){
+          returnVal += 1;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   ENABLE_INTERRUPTS();
+   
+   return returnVal;
+}
+
 //=== from IEEE802154E: reading the schedule and updating statistics
 
 void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
@@ -582,7 +663,11 @@ void schedule_advanceSlot() {
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+   if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
+       ) {
+       // one slotframe has elapsed
+       sf0_notifyNewSlotframe();
+   }   
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    
    ENABLE_INTERRUPTS();
@@ -710,7 +795,7 @@ uint8_t schedule_getNbCellsWithTrack(track_t track, open_addr_t *nextHop){
             (schedule_vars.scheduleBuf[i].type == CELLTYPE_TX
                   ||
             schedule_vars.scheduleBuf[i].type == CELLTYPE_TXRX) &&
-            (packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor), nextHop)
+            (packetfunctions_sameAddress_debug(&(schedule_vars.scheduleBuf[i].neighbor), nextHop,COMPONENT_SCHEDULE)
                   ||
             schedule_vars.scheduleBuf[i].neighbor.type == ADDR_ANYCAST)
             )

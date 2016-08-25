@@ -197,6 +197,38 @@ bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
    return FALSE;
 }
 
+bool packetfunctions_sameAddress_debug(open_addr_t* address_1, open_addr_t* address_2, uint8_t component) {
+   uint8_t address_length;
+
+   if (address_1->type!=address_2->type) {
+      return FALSE;
+   }
+   switch (address_1->type) {
+      case ADDR_16B:
+      case ADDR_PANID:
+         address_length = 2;
+         break;
+      case ADDR_64B:
+      case ADDR_PREFIX:
+         address_length = 8;
+         break;
+      case ADDR_128B:
+      case ADDR_ANYCAST:
+         address_length = 16;
+         break;
+
+      default:
+         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+                               (errorparameter_t)address_1->type,
+                               (errorparameter_t)100+component);
+         return FALSE;
+   }
+   if (memcmp((void*)address_1->addr_128b,(void*)address_2->addr_128b,address_length)==0) {
+      return TRUE;
+   }
+   return FALSE;
+}
+
 bool packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2) {
    uint8_t address_length;
    
@@ -356,7 +388,7 @@ void packetfunctions_duplicatePacket(OpenQueueEntry_t* dst, OpenQueueEntry_t* sr
    dst->l2_ASNpayload = dst->payload + (src->l2_ASNpayload - src->payload);
 
    // update l2_scheduleIE_cellObjects pointer
-   dst->l2_scheduleIE_cellObjects = dst->payload + (src->l2_scheduleIE_cellObjects - src->payload);
+   dst->l2_sixtop_cellObjects = dst->payload + (src->l2_sixtop_cellObjects - src->payload);
 
    // update l2_payload pointer
    dst->l2_payload = dst->payload + (src->l2_payload - src->payload);

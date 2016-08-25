@@ -1,0 +1,8 @@
+Import('env')
+
+localEnv = env.Clone()
+
+source = ['sht11.c']
+sht11  = localEnv.Object(source=source)
+
+Return('sht11')

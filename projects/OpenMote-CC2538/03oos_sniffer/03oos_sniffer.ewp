@@ -2297,6 +2297,12 @@
         <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\idmanager.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openrandom.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\openrandom.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\cross-layers\packetfunctions.c</name>
       </file>
       <file>

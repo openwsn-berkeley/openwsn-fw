@@ -10,19 +10,6 @@
 
 //=========================== define ==========================================
 
-#define TerminationIE_Length           2
-// the header ternimation IE when payload IE follows header. 
-// length(b0~b6):0   ID(b7~b14):0x7E   type(b15): 0
-#define Header_PayloadIE_TerminationIE 0x3F00
-
-// the header ternimation IE when payload follows header.
-// length(b0~b6):0   ID(b7~b14):0x7F   type(b15): 0
-#define Header_Payload_TerminationIE   0x3F80
-
-// the payload ternimation IE when payload follows payloadIE.
-// length(b0~b10):0   ID(b11~b14):0x0F   type(b15): 1
-#define Payload_TerminationIE         0xF800
-
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -52,6 +39,7 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    int16_t timeCorrection;
    header_IE_ht header_desc;
    bool    headerIEPresent = FALSE;
+   uint8_t destAddrMode;
    
    securityEnabled = msg->l2_securityLevel == IEEE154_ASH_SLF_TYPE_NOSEC ? 0 : 1;
 
@@ -62,9 +50,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    if (payloadIEPresent == TRUE) {
        ielistpresent = IEEE154_IELIST_YES; 
        //add header termination IE (id=0x7e)
-       packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
-       msg->payload[0] = Header_PayloadIE_TerminationIE         & 0xFF;
-       msg->payload[1] = (Header_PayloadIE_TerminationIE  >> 8) & 0xFF;
+       packetfunctions_reserveHeaderSize(msg,TERMINATIONIE_LEN);
+       msg->payload[0] = HEADER_TERMINATION_1_IE         & 0xFF;
+       msg->payload[1] = (HEADER_TERMINATION_1_IE  >> 8) & 0xFF;
        
        
    } else {
@@ -76,9 +64,9 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
            // no need for termination IE.
            if (headerIEPresent == TRUE){
                ielistpresent = IEEE154_IELIST_YES;
-               packetfunctions_reserveHeaderSize(msg,TerminationIE_Length);
-               msg->payload[0] = Header_Payload_TerminationIE        & 0xFF;
-               msg->payload[1] = (Header_Payload_TerminationIE >> 8) & 0xFF;
+               packetfunctions_reserveHeaderSize(msg,TERMINATIONIE_LEN);
+               msg->payload[0] = HEADER_TERMINATION_2_IE        & 0xFF;
+               msg->payload[1] = (HEADER_TERMINATION_2_IE >> 8) & 0xFF;
            } else {
                // no header IE present, no payload IE, no termination IE
            }
@@ -149,13 +137,16 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    temp_8b              = 0;
    if (packetfunctions_isBroadcastMulticast_debug(nextHop, 31)) {
       temp_8b          |= IEEE154_ADDR_SHORT              << IEEE154_FCF_DEST_ADDR_MODE;
+      destAddrMode      = IEEE154_ADDR_SHORT;
    } else {
       switch (nextHop->type) {
          case ADDR_16B:
             temp_8b    |= IEEE154_ADDR_SHORT              << IEEE154_FCF_DEST_ADDR_MODE;
+            destAddrMode= IEEE154_ADDR_SHORT;
             break;
          case ADDR_64B:
             temp_8b    |= IEEE154_ADDR_EXT                << IEEE154_FCF_DEST_ADDR_MODE;
+            destAddrMode= IEEE154_ADDR_EXT;
             break;
          // no need for a default, since it would have been caught above.
       }
@@ -178,7 +169,15 @@ void ieee802154_prependHeader(OpenQueueEntry_t* msg,
    } else {
       temp_8b          |= IEEE154_ACK_YES_ACK_REQ         << IEEE154_FCF_ACK_REQ;
    }
-   temp_8b             |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
+   if (destAddrMode == IEEE154_ADDR_SHORT) {
+       temp_8b         |= IEEE154_PANID_COMPRESSED        << IEEE154_FCF_INTRAPAN;
+   } else {
+       if (destAddrMode == IEEE154_ADDR_EXT) {
+           temp_8b     |= IEEE154_PANID_UNCOMPRESSED      << IEEE154_FCF_INTRAPAN;
+       } else {
+           // never happens 
+       }
+   }
    *((uint8_t*)(msg->payload)) = temp_8b;
 }
 
@@ -343,12 +342,12 @@ void ieee802154_retrieveHeader(OpenQueueEntry_t*      msg,
            temp_16b = temp_8b | (*((uint8_t*)(msg->payload)+ieee802514_header->headerLength) << 8);
            ieee802514_header->headerLength += 1;
            // stop when I got a header termination IE
-           if (temp_16b == Header_PayloadIE_TerminationIE) {
+           if (temp_16b == HEADER_TERMINATION_1_IE) {
                // I have payloadIE following
                msg->l2_payloadIEpresent = TRUE;
                break;
            }
-           if (temp_16b == Header_Payload_TerminationIE) {
+           if (temp_16b == HEADER_TERMINATION_2_IE) {
                // I have payload following
                msg->l2_payloadIEpresent = FALSE;
                break;

@@ -42,6 +42,5 @@ void openapps_init(void) {
    // TCP
    techo_init();
    // UDP
-   uecho_init();
-   //uinject_init();
+//   uecho_init();
 }

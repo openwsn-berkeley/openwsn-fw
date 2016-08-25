@@ -25,7 +25,7 @@ typedef struct {
 static const uint8_t ipAddr_unistra[] = {0x7, 0xd1, 0x02, 0x94, 0x12, 0x5d, 0x03, 0xe9, \
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x9d};
 
-//clarinet.u-strasvbg.fr (2001:660:4701:1001::157)
+//clarinet.u-strasbg.fr (2001:660:4701:1001::157)
 
 
 //=========================== prototypes ======================================

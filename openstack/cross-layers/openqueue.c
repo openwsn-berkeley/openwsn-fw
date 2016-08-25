@@ -478,9 +478,14 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *t
       for (i=0;i<QUEUELENGTH;i++) {
 
          if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-               packetfunctions_sameAddress(toNeighbor, &openqueue_vars.queue[i].l2_nextORpreviousHop) &&
+               packetfunctions_sameAddress_debug(toNeighbor, &openqueue_vars.queue[i].l2_nextORpreviousHop,COMPONENT_OPENQUEUE) &&
                (openqueue_vars.queue[i].l2_track.instance == track->instance) &&
-               (packetfunctions_sameAddress(&(openqueue_vars.queue[i].l2_track.owner), &(track->owner))) &&
+               //either NULL track of the correct one
+               (
+                     (track->instance == TRACK_BESTEFFORT)
+                     ||
+                     (packetfunctions_sameAddress_debug(&(openqueue_vars.queue[i].l2_track.owner), &(track->owner),COMPONENT_OPENQUEUE))
+               )&&
                ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
          ) {
             entry = &(openqueue_vars.queue[i]);

@@ -24,5 +24,10 @@ path.txt
 /firmware/openos/projects/python_vs13/oos_openwsn.sdf
 *.map
 *.lst
+<<<<<<< HEAD
 /firmware/openos/projects/wsn430v14/03oos_mercator/*.ewd
 *~
+=======
+*~
+/projects/telosb/00std_button/path.txt
+>>>>>>> upstream/develop

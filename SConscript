@@ -5,6 +5,7 @@ import subprocess
 import platform
 import distutils.sysconfig
 import sconsUtils
+from tools import qtcreator as q
 
 Import('env')
 
@@ -45,28 +46,21 @@ if env['cryptoengine']:
     env.Append(CPPDEFINES    = {'CRYPTO_ENGINE_SCONS' : env['cryptoengine']})
 if env['l2_security']==1:
     env.Append(CPPDEFINES    = 'L2_SECURITY_ACTIVE')
-if env['goldenImage']=='sniffer':
-    env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_SNIFFER')
-else:
-    if env['goldenImage']=='root':
-        env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_ROOT')
-    else:
-        env.Append(CPPDEFINES    = 'GOLDEN_IMAGE_NONE')
-if env['tracks']:
+if env['tracks']>=0:
     env.Append(CPPDEFINES    = {'TRACK_MGMT':env['tracks']})
 if env['distribshared']==1:
     env.Append(CPPDEFINES    = 'SCHEDULE_SHAREDCELLS_DISTRIBUTED')
-if env['rplmetric']:
+if env['rplmetric']>=0:
     env.Append(CPPDEFINES    = {'RPL_METRIC':env['rplmetric']})
 if env['cex_period']>=1:
     env.Append(CPPDEFINES    = {'CEXAMPLE_PERIOD':env['cex_period']})
-#if env['schedalgo']:
+#if env['schedalgo']>=0:
     env.Append(CPPDEFINES    = {'SCHEDULING_ALGO':env['schedalgo']})
 if env['printf']==1:
     env.Append(CPPDEFINES    = 'OPENSERIAL_PRINTF')
         
 
-if   env['toolchain']=='mspgcc':
+if env['toolchain']=='mspgcc':
     
     if env['board'] not in ['telosb','wsn430v13b','wsn430v14','gina','z1']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
@@ -212,7 +206,7 @@ elif env['toolchain']=='iar-proj':
     
 elif env['toolchain']=='armgcc':
     
-    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3']:
+    if env['board'] not in ['OpenMote-CC2538','iot-lab_M3','iot-lab_A8-M3','openmotestm']:
         raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
     
     if   env['board']=='OpenMote-CC2538':
@@ -250,7 +244,7 @@ elif env['toolchain']=='armgcc':
         env.Replace(NM           = 'arm-none-eabi-nm')
         env.Replace(SIZE         = 'arm-none-eabi-size')
         
-    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3']:
+    elif env['board'] in ['iot-lab_M3', 'iot-lab_A8-M3','openmotestm']:
         
         # compiler (C)
         env.Replace(CC           = 'arm-none-eabi-gcc')
@@ -374,6 +368,12 @@ elif env['toolchain']=='gcc':
 
 else:
     raise SystemError('unexpected toolchain {0}'.format(env['toolchain']))
+
+if env['ide']=='qtcreator':
+    print env['board']
+    q.QtCreatorManager().initialize(env['board'])
+else:
+    print env['ide']
     
     
 #============================ upload over JTAG ================================
@@ -472,7 +472,7 @@ class OpenMoteCC2538_bootloadThread(threading.Thread):
     def run(self):
         print 'starting bootloading on {0}'.format(self.comPort)
         subprocess.call(
-            'python '+os.path.join('bootloader','OpenMote-CC2538','cc2538-bsl.py')+' -e -w -b 115200 -p {0} --bsl {1}'.format(self.comPort,self.hexFile),
+            'python '+os.path.join('bootloader','OpenMote-CC2538','cc2538-bsl.py')+' -e -w -b 400000 -p {0} {1}'.format(self.comPort,self.hexFile),
             shell=True
         )
         print 'done bootloading on {0}'.format(self.comPort)
@@ -489,7 +489,7 @@ def OpenMoteCC2538_bootload(target, source, env):
             OpenMoteCC2538_bootloadThread(
                 comPort      = comPort,
                 #hexFile      = os.path.split(source[0].path)[1].split('.')[0]+'.bin',
-                hexFile      = source[0].path.split('.')[0]+'.bin',
+                hexFile      = source[0].path.split('.')[0]+'.ihex',
                 countingSem  = countingSem,
             )
         ]
@@ -546,6 +546,48 @@ def IotLabM3_bootload(target, source, env):
     for t in bootloadThreads:
         countingSem.acquire()
 
+class openmotestm_bootloadThread(threading.Thread):
+    def __init__(self,comPort,binaryFile,countingSem):
+        
+        # store params
+        self.comPort         = comPort
+        self.binaryFile      = binaryFile
+        self.countingSem     = countingSem
+        
+        # initialize parent class
+        threading.Thread.__init__(self)
+        self.name            = 'openmotestm_bootloadThread_{0}'.format(self.comPort)
+    
+    def run(self):
+        print 'starting bootloading on {0}'.format(self.comPort)
+        subprocess.call(
+            'python '+ os.path.join('bootloader','openmotestm','bin.py' + ' -p {0} {1}'.format(self.comPort, self.binaryFile)),
+            shell=True
+        )
+        print 'done bootloading on {0}'.format(self.comPort)
+        
+        # indicate done
+        self.countingSem.release()
+        
+def openmotestm_bootload(target, source, env):
+    bootloadThreads = []
+    countingSem     = threading.Semaphore(0)
+    # create threads
+    for comPort in env['bootload'].split(','):
+        bootloadThreads += [
+            openmotestm_bootloadThread(
+                comPort      = comPort,
+                binaryFile   = source[0].path.split('.')[0]+'.bin',
+                countingSem  = countingSem,
+            )
+        ]
+    # start threads
+    for t in bootloadThreads:
+        t.start()
+    # wait for threads to finish
+    for t in bootloadThreads:
+        countingSem.acquire()
+        
 # bootload
 def BootloadFunc():
     if   env['board']=='telosb':
@@ -565,6 +607,12 @@ def BootloadFunc():
             action      = IotLabM3_bootload,
             suffix      = '.phonyupload',
             src_suffix  = ''
+         )
+    elif env['board']=='openmotestm':
+         return Builder(
+            action      = openmotestm_bootload,
+            suffix      = '.phonyupload',
+            src_suffix  = '.bin'
          )
     else:
         raise SystemError('bootloading on board={0} unsupported.'.format(env['board']))

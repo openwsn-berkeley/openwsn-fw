@@ -317,6 +317,7 @@
           <state>$PROJ_DIR$\..\..\..\openstack\cross-layers\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\c6t\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\cexample\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cinfo\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cleds\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\cwellknown\</state>
@@ -2497,12 +2498,6 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.c</name>
       </file>
       <file>
@@ -2513,6 +2508,12 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>

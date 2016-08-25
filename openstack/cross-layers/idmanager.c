@@ -18,6 +18,8 @@ void idmanager_init() {
    
    // reset local variables
    memset(&idmanager_vars, 0, sizeof(idmanager_vars_t));
+   // this is used to not wakeup in non-activeslot
+   idmanager_vars.slotSkip             = FALSE;
    
    // isDAGroot
 #ifdef DAGROOT
@@ -68,9 +70,19 @@ void idmanager_setIsDAGroot(bool newRole) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    idmanager_vars.isDAGroot = newRole;
-   neighbors_updateMyDAGrankAndNeighborPreference();
+   icmpv6rpl_updateMyDAGrankAndParentSelection();
    schedule_startDAGroot();
    ENABLE_INTERRUPTS();
+}
+
+bool idmanager_getIsSlotSkip() {
+   bool res;
+   INTERRUPT_DECLARATION();
+   
+   DISABLE_INTERRUPTS();
+   res=idmanager_vars.slotSkip;
+   ENABLE_INTERRUPTS();
+   return res;
 }
 
 open_addr_t* idmanager_getMyID(uint8_t type) {
@@ -140,11 +152,11 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
 
    switch (addr->type) {
      case ADDR_16B:
-        res= packetfunctions_sameAddress(addr,&idmanager_vars.my16bID);
+        res= packetfunctions_sameAddress_debug(addr,&idmanager_vars.my16bID,COMPONENT_IDMANAGER);
         ENABLE_INTERRUPTS();
         return res;
      case ADDR_64B:
-        res= packetfunctions_sameAddress(addr,&idmanager_vars.my64bID);
+        res= packetfunctions_sameAddress_debug(addr,&idmanager_vars.my64bID,COMPONENT_IDMANAGER);
         ENABLE_INTERRUPTS();
         return res;
      case ADDR_128B:
@@ -153,15 +165,15 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
         memcpy(&temp_my128bID.addr_128b[0],&idmanager_vars.myPrefix.prefix,8);
         memcpy(&temp_my128bID.addr_128b[8],&idmanager_vars.my64bID.addr_64b,8);
 
-        res= packetfunctions_sameAddress(addr,&temp_my128bID);
+        res= packetfunctions_sameAddress_debug(addr,&temp_my128bID,COMPONENT_IDMANAGER);
         ENABLE_INTERRUPTS();
         return res;
      case ADDR_PANID:
-        res= packetfunctions_sameAddress(addr,&idmanager_vars.myPANID);
+        res= packetfunctions_sameAddress_debug(addr,&idmanager_vars.myPANID,COMPONENT_IDMANAGER);
         ENABLE_INTERRUPTS();
         return res;
      case ADDR_PREFIX:
-        res= packetfunctions_sameAddress(addr,&idmanager_vars.myPrefix);
+        res= packetfunctions_sameAddress_debug(addr,&idmanager_vars.myPrefix,COMPONENT_IDMANAGER);
         ENABLE_INTERRUPTS();
         return res;
      default:
@@ -194,15 +206,19 @@ void idmanager_triggerAboutRoot() {
    switch (input_buffer[0]) {
      case ACTION_YES:
         idmanager_setIsDAGroot(TRUE);
+        idmanager_vars.slotSkip = FALSE;
         break;
      case ACTION_NO:
         idmanager_setIsDAGroot(FALSE);
+        idmanager_vars.slotSkip = TRUE;
         break;
      case ACTION_TOGGLE:
         if (idmanager_getIsDAGroot()) {
            idmanager_setIsDAGroot(FALSE);
+           idmanager_vars.slotSkip = TRUE;
         } else {
            idmanager_setIsDAGroot(TRUE);
+           idmanager_vars.slotSkip = FALSE;
         }
         break;
    }

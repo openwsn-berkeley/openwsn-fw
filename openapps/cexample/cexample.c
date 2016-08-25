@@ -160,7 +160,7 @@ void cexample_task_cb() {
    //stat for data packet generation
    open_addr_t dest_128b, dest_64b, prefix;
    dest_128b.type = ADDR_128B;
-   memcpy(&(dest_128b.addr_128b[0]), icmpv6rpl_getRPLDODAGID(), sizeof(dest_128b.addr_128b));
+   icmpv6rpl_getRPLDODAGid(&(dest_128b.addr_128b[0]));
    packetfunctions_ip128bToMac64b(&dest_128b, &prefix, &dest_64b);
    openserial_statDataGen(cexample_vars.seqnum, &(cexample_vars.track), idmanager_getMyID(ADDR_64B), &dest_64b);
 
@@ -210,9 +210,10 @@ void cexample_task_cb() {
    pkt->l2_track                  = cexample_vars.track;
    pkt->l4_destination_port       = WKP_UDP_COAP;
 
-   // set DAO destination
+   // set PKT destination
    pkt->l3_destinationAdd.type = ADDR_128B;
-   memcpy(pkt->l3_destinationAdd.addr_128b, icmpv6rpl_getRPLDODAGID(), sizeof(pkt->l3_destinationAdd.addr_128b));
+   icmpv6rpl_getRPLDODAGid(&(pkt->l3_destinationAdd.addr_128b[0]));
+
 
    // send
    outcome = opencoap_send(

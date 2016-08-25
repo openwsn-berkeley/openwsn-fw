@@ -79,7 +79,6 @@ project:
                    (dummy_crypto_engine, firmware_crypto_engine, 
                    board_crypto_engine).
     l2_security    Use hop-by-hop encryption and authentication.
-    goldenImage    sniffer, root or none(default)
     distribshared  Shared cells are not contiguous
     tracks         Track Management Method (0=none,1=one shared for all the 
                    flows,2=one per application,3=separated for 6P and data
@@ -89,6 +88,8 @@ project:
                    2=random_contiguous)
     printf         Prints the string message for debug (0=inactive, 1=active)
     
+    ide           qtcreator
+
     Common variables:
     verbose        Print each complete compile/link command.
                    0 (off), 1 (on)
@@ -143,14 +144,13 @@ command_line_options = {
     'noadaptivesync':   ['0','1'],
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
     'l2_security':      ['0','1'],
-    'goldenImage':      ['none','root','sniffer'],
     'distribshared':    ['0','1'],
     'tracks':           ['0','1','2','3'],# 0=only TXRX, 1=one single track, 2=traffic isolation (default behavior), 3=traffic isolation+ dedicated track for LinkReqs
     'rplmetric':        ['0','1'],		  # 1=ETX (default)
-    'cex_period':       ['5000'],         # by default, 5 seconds
+    'cex_period':       ['50000'],         # by default, 50 seconds
     'schedalgo':        ['0','1','2'],    # 1=random (default)
     'printf':           ['0','1'],        # 0=inactive (default), 1=active
-
+    'ide':              ['none','qtcreator']
 }
 
 def validate_option(key, value, env):
@@ -294,14 +294,6 @@ command_line_vars.AddVariables(
         command_line_options['l2_security'][0],            # default
         validate_option,                                   # validator
         int,                                               # converter
-    ),
-    # create an golden image for interop testing
-    (
-        'goldenImage',                                     # key
-        '',                                                # help
-        command_line_options['goldenImage'][0],            # default
-        validate_option,                                   # validator
-        None,                                              # converter
     ),                                  
     (
         'distribshared',                                   # key
@@ -350,6 +342,13 @@ command_line_vars.AddVariables(
         'comma-separated list of user applications',       # help
         '',                                                # default
         validate_apps,                                     # validator
+        None,                                              # converter
+    ),
+    (
+        'ide',                                            # key
+        'qtcreator by now',                               # help
+        command_line_options['ide'][0],                   # default
+        validate_option,                                   # validator
         None,                                              # converter
     ),
 )
