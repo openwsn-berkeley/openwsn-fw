@@ -1736,62 +1736,51 @@ void sixtop_addCellsByState(
       if(cellList[i].linkoptions != CELLTYPE_OFF){
          switch(state) {
 
-//  todo: cells inserted in the schedule when the linkRep is created, removed if it failed. Idle directly when resp_sent (concurrent rep)
-             //case SIX_WAIT_ADDRESPONSE_SENDDONE:
-   //         case SIX_IDLE:
+         case SIX_WAIT_RESPONSE_SENDDONE:
+            memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
 
-               //not yet implemented!!!
-
-             /*  memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-               
-               if (track.instance != TRACK_PARENT_CONTROL)
-                  type = CELLTYPE_RX;
-               else
-                  type = CELLTYPE_TXRX;
-*/
-
-     //       break;
-            case SIX_WAIT_RESPONSE_SENDDONE:
-               memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-
-               //add a RX link
-               schedule_addActiveSlot(
+            if (track.instance != TRACK_PARENT_CONTROL)
+               type = CELLTYPE_RX;
+            else
+               type = CELLTYPE_TXRX;
+            //add a RX link
+            schedule_addActiveSlot(
                   cellList[i].tsNum,
-                  CELLTYPE_RX,
+                  type,
                   FALSE,
                   cellList[i].choffset,
                   &temp_neighbor,
                   track
-               );
+            );
 
-               break;
-            case SIX_WAIT_ADDRESPONSE:
-               memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+            break;
+         case SIX_WAIT_ADDRESPONSE:
+            memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
 
-               if (track.instance != TRACK_PARENT_CONTROL)
-                   type = CELLTYPE_TX;
-                else
-                   type = CELLTYPE_TXRX;
+            if (track.instance != TRACK_PARENT_CONTROL)
+               type = CELLTYPE_TX;
+            else
+               type = CELLTYPE_TXRX;
 
-               //add a TX link
-               schedule_addActiveSlot(
+            //add a TX link
+            schedule_addActiveSlot(
                   cellList[i].tsNum,
-                  CELLTYPE_TX,
+                  type,
                   FALSE,
                   cellList[i].choffset,
                   &temp_neighbor,
                   track
-               );
-               break;
-            default:
+            );
+            break;
+         default:
 
-               openserial_printCritical(COMPONENT_SIXTOP,ERR_GENERIC,
-                                             (errorparameter_t)200,
-                                             (errorparameter_t)state);
+            openserial_printCritical(COMPONENT_SIXTOP,ERR_GENERIC,
+                  (errorparameter_t)200,
+                  (errorparameter_t)state);
 
 
-               //log error
-               break;
+            //log error
+            break;
          }
       }
    }
