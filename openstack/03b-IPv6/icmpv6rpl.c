@@ -15,7 +15,7 @@
 
 
 
-//#define _DEBUG_DAO_
+#define _DEBUG_DAO_
 //#define _DEBUG_DIO_
 
 //=========================== variables =======================================
@@ -435,6 +435,21 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
          // compute tentative cost of full path to root through this neighbor
          tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
          if (tentativeDAGrank > 65535) {tentativeDAGrank = 65535;}
+
+         open_addr_t      NeighborAddress;
+         neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i); // this neighbor entry is in use
+         char str[150];
+
+         sprintf(str, "RANK ");
+         openserial_ncat_uint8_t_hex(str, NeighborAddress.addr_64b[6], 150);
+         openserial_ncat_uint8_t_hex(str, NeighborAddress.addr_64b[7], 150);
+         strncat(str, ", rank=", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)rankIncrease, 150);
+         strncat(str, ", metric= ", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)rankIncrease, 150);
+         openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+
+
          // if not low enough to justify switch, pass (i.e. hysterisis)
          //if ((previousDAGrank<tentativeDAGrank) ||
          // next line is wrong, difference can be negative
@@ -500,11 +515,18 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    // quick fix: rank is two bytes in network order: need to swap bytes
    temp_8b            = *(msg->payload+2);
    icmpv6rpl_vars.incomingDio->rank = (temp_8b << 8) + *(msg->payload+3);
+
+
    // update rank of that neighbor in table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) { // this neighbor entry is in use
          if (packetfunctions_sameAddress_debug(&(msg->l2_nextORpreviousHop),&NeighborAddress, COMPONENT_ICMPv6RPL)) { // matching address
             neighborRank=neighbors_getNeighborRank(i);
+
+            openserial_printError(COMPONENT_ICMPv6RPL,ERR_GENERIC,
+                                           (errorparameter_t)NeighborAddress.addr_64b[7],
+                                           (errorparameter_t)neighborRank);
+
             if (
               (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&
               (icmpv6rpl_vars.incomingDio->rank - neighborRank) > (DEFAULTLINKCOST*2*MINHOPRANKINCREASE)
