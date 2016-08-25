@@ -233,7 +233,7 @@ void iphc_receive(OpenQueueEntry_t* msg) {
     
     //DAGROOT -> openbridge for debug (to openvizualizer)
     //TODO-Fabrice: forwrd to openbridge
- /*   if (idmanager_getIsDAGroot()){
+    if (idmanager_getIsDAGroot()){
        openbridge_receive(msg);
 
     #ifndef IPHC_FORWARD_UPPER
@@ -241,18 +241,18 @@ void iphc_receive(OpenQueueEntry_t* msg) {
        return;
     #endif
     }
-*/
 
 
     // then regular header
     iphc_retrieveIPv6Header(msg,&ipv6_outer_header,&ipv6_inner_header,&page_length);
     
     // if the address is broadcast address, the ipv6 header is the inner header
-    if (
+ /*   if (
         idmanager_getIsDAGroot()==FALSE ||
         packetfunctions_isBroadcastMulticast(&(ipv6_inner_header.dest))
     ) {
-        packetfunctions_tossHeader(msg,page_length);
+   */
+    packetfunctions_tossHeader(msg,page_length);
         if (
             ipv6_outer_header.next_header==IANA_IPv6HOPOPT &&
             ipv6_outer_header.hopByhop_option != NULL
@@ -278,12 +278,12 @@ void iphc_receive(OpenQueueEntry_t* msg) {
             &rpl_option
 
         );
-   }
+  // }
     //DAGROOT -> openbridge for debug (to openvizualizer)
     //TODO-Fabrice: forwrd to openbridge, not twice
-    else {
-      openbridge_receive(msg);                   //out to the OpenVisualizer
-   }
+   // else {
+   //   openbridge_receive(msg);                   //out to the OpenVisualizer
+  // }
 
 }
 
