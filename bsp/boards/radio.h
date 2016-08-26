@@ -49,30 +49,33 @@ typedef enum {
 //=========================== prototypes ======================================
 
 // admin
-void     radio_init(void);
-void     radio_setOverflowCb(radiotimer_compare_cbt cb);
-void     radio_setCompareCb(radiotimer_compare_cbt cb);
-void     radio_setStartFrameCb(radiotimer_capture_cbt cb);
-void     radio_setEndFrameCb(radiotimer_capture_cbt cb);
+void                radio_init(void);
+void                radio_setOverflowCb(radiotimer_compare_cbt cb);
+void                radio_setCompareCb(radiotimer_compare_cbt cb);
+void                radio_setStartFrameCb(radiotimer_capture_cbt cb);
+void                radio_setEndFrameCb(radiotimer_capture_cbt cb);
+radio_state_t       radio_getstate();
 // reset
-void     radio_reset(void);
+void                radio_reset(void);
 // timer
-void     radio_startTimer(PORT_TIMER_WIDTH period);
-PORT_TIMER_WIDTH radio_getTimerValue(void);
-void     radio_setTimerPeriod(PORT_TIMER_WIDTH period);
-PORT_TIMER_WIDTH radio_getTimerPeriod(void);
+void                radio_startTimer(PORT_TIMER_WIDTH period);
+PORT_TIMER_WIDTH    radio_getTimerValue(void);
+void                radio_setTimerPeriod(PORT_TIMER_WIDTH period);
+PORT_TIMER_WIDTH    radio_getTimerPeriod(void);
 // RF admin
-void     radio_setFrequency(uint8_t frequency);
-void     radio_rfOn(void);
-void     radio_rfOff(void);
+void                radio_setFrequency(uint8_t frequency);
+void                radio_rfOn(void);
+void                radio_rfOff(void);
 // TX
-void     radio_loadPacket(uint8_t* packet, uint8_t len);
-void     radio_txEnable(void);
-void     radio_txNow(void);
+void                radio_loadPacket_prepare(uint8_t* packet, uint8_t len);
+void                radio_loadPacket(uint8_t* packet, uint8_t len);
+void                radio_txEnable(void);
+void                radio_txNow(void);
 // RX
-void     radio_rxEnable(void);
-void     radio_rxNow(void);
-void     radio_getReceivedFrame(uint8_t* bufRead,
+void                radio_rxPacket_prepare(void);
+void                radio_rxEnable(void);
+void                radio_rxNow(void);
+void                radio_getReceivedFrame(uint8_t* bufRead,
                                 uint8_t* lenRead,
                                 uint8_t  maxBufLen,
                                  int8_t* rssi,
@@ -80,7 +83,7 @@ void     radio_getReceivedFrame(uint8_t* bufRead,
                                    bool* crc);
 
 // interrupt handlers
-kick_scheduler_t   radio_isr(void);
+kick_scheduler_t    radio_isr(void);
 
 /**
 \}
