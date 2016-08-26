@@ -48,7 +48,7 @@ void sf0_addCell_task(void) {
    bool                 foundNeighbor;
    
    // get preferred parent
-   foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+   foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
    if (foundNeighbor==FALSE) {
       return;
    }
@@ -67,7 +67,7 @@ void sf0_removeCell_task(void) {
    bool                 foundNeighbor;
    
    // get preferred parent
-   foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+   foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
    if (foundNeighbor==FALSE) {
       return;
    }
@@ -94,7 +94,7 @@ void sf0_bandwidthEstimate_task(void){
     }
     
     // get preferred parent
-    foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+    foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
     if (foundNeighbor==FALSE) {
         return;
     }
