@@ -32,24 +32,25 @@ if localEnv['board']=='python':
     
     Alias('objectifybspheaders', actions)
 
-board = localEnv.SConscript(
-    os.path.join('#','bsp','boards',localEnv['board'],'SConscript'),
-    variant_dir = localEnv['board'],
-    exports     = {'env': env},
-)
+if env['toolchain']!='iar-proj':
+    
+    board = localEnv.SConscript(
+        os.path.join('#','bsp','boards',localEnv['board'],'SConscript'),
+        variant_dir = localEnv['board'],
+        exports     = {'env': env},
+    )
 
-common = localEnv.SConscript(
-    os.path.join('#','bsp','boards','common','SConscript'),
-    variant_dir = 'common',
-    exports     = {'env': env},
-)
+    common = localEnv.SConscript(
+        os.path.join('#','bsp','boards','common','SConscript'),
+        variant_dir = 'common',
+        exports     = {'env': env},
+    )
 
-source = [board, common]
+    source = [board, common]
+    target = 'libbsp'
 
-target = 'libbsp'
-
-libbsp = localEnv.Library(
-    target=target,
-    source=source,
-)
-Alias('libbsp', libbsp)
+    libbsp = localEnv.Library(
+        target=target,
+        source=source,
+    )
+    Alias('libbsp', libbsp)

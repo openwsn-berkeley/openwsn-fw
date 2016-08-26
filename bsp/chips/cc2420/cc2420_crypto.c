@@ -49,7 +49,6 @@ static void reverse(uint8_t* in, uint8_t len);
 //=========================== public ==========================================
 
 owerror_t cc2420_crypto_aes_ecb_enc(uint8_t* buffer, uint8_t* key) {
-   cc2420_SECCTRL0_reg_t cc2420_SECCTRL0_reg;
    cc2420_status_t status;
    uint8_t key_index;
 

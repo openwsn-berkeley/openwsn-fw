@@ -176,8 +176,8 @@ elif env['toolchain']=='iar-proj':
     
     iarProjBuilderFunction = Builder(
         action = '"{0}" $SOURCE Debug'.format(
-                    os.path.join(iarEw430CommonBinDir,'IarBuild')
-                ),
+            os.path.join(iarEw430CommonBinDir,'IarBuild')
+        ),
         src_suffix  = '.ewp',
     )
     env.Append(BUILDERS = {'iarProjBuilder' : iarProjBuilderFunction})
@@ -659,7 +659,7 @@ def populateTargetGroup(localEnv,targetName):
         if targetName.startswith(prefix):
             env['targets']['all_'+prefix].append(targetName)
 
-def sconscript_scanner(localEnv):
+def project_finder(localEnv):
     '''
     This function is called from the following directories:
     - projects\common\
@@ -667,24 +667,31 @@ def sconscript_scanner(localEnv):
     '''
     
     # list subdirectories
-    PATH_TO_PROJECTS = os.path.join('..','..','..','..','projects',os.path.split(os.getcwd())[-1])
-    allsubdirs     = os.listdir(os.path.join(PATH_TO_PROJECTS))
-    subdirs        = [name for name in allsubdirs if os.path.isdir(os.path.join(PATH_TO_PROJECTS,name)) ]
+    
+    if env['toolchain']=='iar-proj':
+        # no VariantDir is used
+        PATH_TO_BOARD_PROJECTS    = os.getcwd()
+    else:
+        # VariantDir is used
+        PATH_TO_BOARD_PROJECTS    = os.path.join('..','..','..','..','projects',os.path.split(os.getcwd())[-1])
+    tempsubdirs                   = os.listdir(PATH_TO_BOARD_PROJECTS)
+    subdirs                       = [name for name in tempsubdirs if os.path.isdir(os.path.join(PATH_TO_BOARD_PROJECTS,name)) ]
     
     # parse dirs and build targets
     for projectDir in subdirs:
         
-        src_dir         = os.path.join(PATH_TO_PROJECTS,projectDir)
+        src_dir         = os.path.join(PATH_TO_BOARD_PROJECTS,projectDir)
         variant_dir     = os.path.join(env['VARDIR'],'projects',projectDir)
         
         added           = False
         targetName      = projectDir[2:]
         
         if  (
-                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
+                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS,projectDir))) and
                 (localEnv['toolchain']!='iar-proj') and 
                 (localEnv['board']!='python')
             ):
+            # "normal" case
             
             localEnv.VariantDir(
                 src_dir     = src_dir,
@@ -714,9 +721,10 @@ def sconscript_scanner(localEnv):
             added = True
         
         elif (
-                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
+                ('{0}.c'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS,projectDir))) and
                 (localEnv['board']=='python')
             ):
+            # Python case
             
             # build the artifacts in a separate directory
             localEnv.VariantDir(
@@ -783,17 +791,13 @@ def sconscript_scanner(localEnv):
             added = True
             
         elif (
-                ('{0}.ewp'.format(projectDir) in os.listdir(os.path.join(PATH_TO_PROJECTS,projectDir))) and
+                ('{0}.ewp'.format(projectDir) in os.listdir(os.path.join(PATH_TO_BOARD_PROJECTS,projectDir))) and
                 (localEnv['toolchain']=='iar-proj')
-             ):
+            ):
+            # iar-proj case
             
-            VariantDir(
-                src_dir     = src_dir,
-                variant_dir = variant_dir,
-            )
-            
-            source = [os.path.join(projectDir,'{0}.ewp'.format(projectDir))]
-        
+            source = [os.path.join(projectDir,'{0}.ewp'.format(projectDir)),]
+                        
             targetAction = localEnv.iarProjBuilder(
                 source  = source,
             )
@@ -804,7 +808,7 @@ def sconscript_scanner(localEnv):
         if added:
             populateTargetGroup(localEnv,targetName)
 
-env.AddMethod(sconscript_scanner, 'SconscriptScanner')
+env.AddMethod(project_finder, 'ProjectFinder')
 
 #============================ board ===========================================
 
@@ -890,7 +894,10 @@ buildEnv.Append(LIBPATH = [openappsVarDir])
 
 # projects
 projectsDir        = os.path.join('#','projects')
-projectsVarDir     = os.path.join(buildEnv['VARDIR'],'projects')
+if env['toolchain']=='iar-proj':
+    projectsVarDir = None
+else:
+    projectsVarDir = os.path.join(buildEnv['VARDIR'],'projects')
 buildEnv.SConscript(
     os.path.join(projectsDir,'SConscript'),
     exports        = {'env': buildEnv},
