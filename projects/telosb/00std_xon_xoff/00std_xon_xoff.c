@@ -29,6 +29,11 @@ int main(void) {
     DCOCTL          =  DCO0 | DCO1 | DCO2;       // MCLK at 8MHz
     BCSCTL1         =  RSEL0 | RSEL1 | RSEL2;    // MCLK at 8MHz
 
+    // debugpins
+    P2DIR |=  0x40;      // task  [P2.6] --> UART RX enabled
+    P6DIR |=  0x01;      // isr   [P6.0] --> UART TX interrupt
+    P6DIR |=  0x02;      // radio [P6.1] --> UART RX interrupt
+    
     // LEDs
     P5DIR          |=  0x70;                     // P5DIR = 0bx111xxxx for LEDs
     P5OUT          |=  0x70;                     // P5OUT = 0bx111xxxx, all LEDs off
@@ -72,9 +77,11 @@ int main(void) {
         if (fChangeState==0x01) {
             if (rxIsEnabled==0x01) {
                 P5OUT       &= ~0x20;            // green LED ON (clear bit)
+                P2OUT       |=  0x40;
                 U1TXBUF      = XON;              // send XON
             } else {
                 P5OUT       |=  0x20;            // green LED OFF (set bit)
+                P2OUT       &= ~0x40;
                 U1TXBUF      = XOFF;             // send XOFF
             }
             fChangeState=0x00;
@@ -94,12 +101,14 @@ int main(void) {
 
 #pragma vector = USART1TX_VECTOR
 __interrupt void USART1TX_ISR (void) {
+    P6OUT         ^=  0x01; 
     IFG2          &= ~UTXIFG1;                   // clear UART TX interrupt
     fSendNextByte  = 1;
 }
 
 #pragma vector = USART1RX_VECTOR
 __interrupt void USART1RX_ISR (void) {
+    P6OUT         ^=  0x02;
     IFG2          &= ~URXIFG1;                   // clear UART RX interrupt
     
     P5OUT          ^=  0x40;                     // toggle blue LED
