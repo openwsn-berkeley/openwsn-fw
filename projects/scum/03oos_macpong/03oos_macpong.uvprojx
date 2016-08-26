@@ -408,16 +408,6 @@
               <FilePath>..\..\..\bsp\boards\leds.h</FilePath>
             </File>
             <File>
-              <FileName>radio.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\bsp\boards\radio.h</FilePath>
-            </File>
-            <File>
-              <FileName>radiotimer.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\..\..\bsp\boards\radiotimer.h</FilePath>
-            </File>
-            <File>
               <FileName>uart.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\bsp\boards\uart.h</FilePath>
@@ -426,6 +416,16 @@
               <FileName>bsp_timer.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\..\bsp\boards\bsp_timer.h</FilePath>
+            </File>
+            <File>
+              <FileName>radio.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\radio.h</FilePath>
+            </File>
+            <File>
+              <FileName>radiotimer.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\bsp\boards\radiotimer.h</FilePath>
             </File>
           </Files>
         </Group>
