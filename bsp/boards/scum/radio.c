@@ -253,17 +253,27 @@ kick_scheduler_t radio_isr() {
     PORT_TIMER_WIDTH capturedTime;
     PORT_TIMER_WIDTH irq_status = RFCONTROLLER_REG__INT;
     PORT_TIMER_WIDTH irq_error  = RFCONTROLLER_REG__ERROR;
-    
+
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+#else
     capturedTime                = radiotimer_getCapturedTime();
-    
+#endif
     if (irq_status & TX_SFD_DONE_INT || irq_status & RX_SFD_DONE_INT){
         // SFD is just sent or received, check the specific interruption and 
         // change the radio state accordingly
         if (irq_status & TX_SFD_DONE_INT) {
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+            // get the capture Time from capture register
+            capturedTime = RFTIMER_REG__CAPTURE0;
+#endif
             // a SFD is just sent, update radio state
             radio_vars.state    = RADIOSTATE_TRANSMITTING;
         }
         if (irq_status & RX_SFD_DONE_INT) {
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+            // get the capture Time from capture register
+            capturedTime = RFTIMER_REG__CAPTURE1;
+#endif
             // a SFD is just received, update radio state
             radio_vars.state    = RADIOSTATE_RECEIVING;
         }
@@ -278,6 +288,16 @@ kick_scheduler_t radio_isr() {
     }
     
     if (irq_status & TX_SEND_DONE_INT || irq_status & RX_DONE_INT){
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+        if (irq_status & TX_SEND_DONE_INT) {
+            // get the capture Time from capture register
+            capturedTime = RFTIMER_REG__CAPTURE2;
+        }
+        if (irq_status & RX_DONE_INT) {
+            // get the capture Time from capture register
+            capturedTime = RFTIMER_REG__CAPTURE3;
+        }
+#endif
         // the packet transmission or reception is done,
         // update the radio state
         radio_vars.state        = RADIOSTATE_TXRX_DONE;

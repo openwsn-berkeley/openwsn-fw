@@ -83,12 +83,125 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 //===== compare
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 void radiotimer_schedule(uint8_t interrupt_type,PORT_RADIOTIMER_WIDTH offset) {
-    
+    switch(interrupt_type){
+        case LOAD_PACKET:
+            // offset when to fire
+            RFTIMER_REG__COMPARE3           = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
+            
+            // enable compare and tx load interrupt (this also cancels any pending interrupts)
+            RFTIMER_REG__COMPARE3_CONTROL   = RFTIMER_COMPARE_ENABLE |          \
+                                              RFTIMER_COMPARE_INTERRUPT_ENABLE |\
+                                              RFTIMER_COMPARE_TX_LOAD_ENABLE;
+            break;
+        case SEND_PACKET:
+            // offset when to fire
+            RFTIMER_REG__COMPARE4           = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
+            
+            // enable compare and tx send interrupt (this also cancels any pending interrupts)
+            RFTIMER_REG__COMPARE4_CONTROL   = RFTIMER_COMPARE_ENABLE |          \
+                                              RFTIMER_COMPARE_INTERRUPT_ENABLE |\
+                                              RFTIMER_COMPARE_TX_SEND_ENABLE;
+            break;
+        case RADIORX_ENABLE:
+            // offset when to fire
+            RFTIMER_REG__COMPARE5           = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
+            
+            // enable compare and rx start interrupt (this also cancels any pending interrupts)
+            RFTIMER_REG__COMPARE5_CONTROL   = RFTIMER_COMPARE_ENABLE |          \
+                                              RFTIMER_COMPARE_INTERRUPT_ENABLE |\
+                                              RFTIMER_COMPARE_RX_START_ENABLE;
+            break;
+        case NORMAL_TIMER:
+            // offset when to fire
+            RFTIMER_REG__COMPARE2           = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
+            
+            // enable compare interrupt (this also cancels any pending interrupts)
+            RFTIMER_REG__COMPARE2_CONTROL   = RFTIMER_COMPARE_ENABLE |          \
+                                              RFTIMER_COMPARE_INTERRUPT_ENABLE;
+            break;
+        default:
+            // should never happens
+            break;
+    }
 }
 
 void radiotimer_cancel(uint8_t interrupt_type) {
-    // disable compare interrupt
-    RFTIMER_REG__COMPARE2_CONTROL = 0x00;
+    
+    switch(interrupt_type){
+        case LOAD_PACKET:
+            // disable compare and tx load interrupt
+            RFTIMER_REG__COMPARE3_CONTROL   = 0x00;
+            break;
+        case SEND_PACKET:
+            // disable compare and tx send interrupt
+            RFTIMER_REG__COMPARE4_CONTROL   = 0x00;
+            break;
+        case RADIORX_ENABLE:
+            // disable compare and rx start interrupt
+            RFTIMER_REG__COMPARE5_CONTROL   = 0x00;
+            break;
+        case NORMAL_TIMER:
+            // disable compare interrupt
+            RFTIMER_REG__COMPARE2_CONTROL   = 0x00;
+            break;
+        case TX_SFD_DONE:
+            // disable tx SFD done capture interrupt
+            RFTIMER_REG__CAPTURE0_CONTROL   = 0x00;
+            break;
+        case RX_SFD_DONE:
+            // disable rx SFD done capture interrupt
+            RFTIMER_REG__CAPTURE1_CONTROL   = 0x00;
+            break;
+        case TX_SEND_DONE:
+            // disable tx SEND done capture interrupt
+            RFTIMER_REG__CAPTURE2_CONTROL   = 0x00;
+            break;
+        case RX_DONE:
+            // disable rx SEND done capture interrupt
+            RFTIMER_REG__CAPTURE3_CONTROL   = 0x00;
+            break;
+        case ALL_RADIOTIMER_INTERRUPT:
+            RFTIMER_REG__CAPTURE0_CONTROL   = 0x00;
+            RFTIMER_REG__CAPTURE1_CONTROL   = 0x00;
+            RFTIMER_REG__CAPTURE2_CONTROL   = 0x00;
+            RFTIMER_REG__CAPTURE3_CONTROL   = 0x00;
+            RFTIMER_REG__COMPARE2_CONTROL   = 0x00;
+            RFTIMER_REG__COMPARE3_CONTROL   = 0x00;
+            RFTIMER_REG__COMPARE4_CONTROL   = 0x00;
+            RFTIMER_REG__COMPARE5_CONTROL   = 0x00;
+            break;
+        default:
+            // should never happens
+            break;
+    }
+}
+
+void radiotimer_setCapture(uint8_t type){
+    switch(type){
+        case TX_SFD_DONE:
+            // capture tx SFD done event
+            RFTIMER_REG__CAPTURE0_CONTROL   = RFTIMER_CAPTURE_INTERRUPT_ENABLE |    \
+                                              RFTIMER_CAPTURE_INPUT_SEL_TX_SFD_DONE;
+            break;
+        case RX_SFD_DONE:
+            // capture rx SFD done event
+            RFTIMER_REG__CAPTURE1_CONTROL   = RFTIMER_CAPTURE_INTERRUPT_ENABLE |    \
+                                              RFTIMER_CAPTURE_INPUT_SEL_RX_SFD_DONE;
+            break;
+        case TX_SEND_DONE:
+            // capture tx SEND done event
+            RFTIMER_REG__CAPTURE2_CONTROL   = RFTIMER_CAPTURE_INTERRUPT_ENABLE |    \
+                                              RFTIMER_CAPTURE_INPUT_SEL_TX_SEND_DONE;
+            break;
+        case RX_DONE:
+            // capture rx SEND done event
+            RFTIMER_REG__CAPTURE3_CONTROL   = RFTIMER_CAPTURE_INTERRUPT_ENABLE |    \
+                                              RFTIMER_CAPTURE_INPUT_SEL_RX_DONE;
+            break;
+        default:
+            // should never happens
+            break;
+    }
 }
 #else
 
@@ -120,15 +233,34 @@ PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 kick_scheduler_t radiotimer_isr() {
     
     PORT_RADIOTIMER_WIDTH interrupt_flag = RFTIMER_REG__INT;
-    if (interrupt_flag & RFTIMER_REG__INT_COMPARE2_INT) {
-            // timer compare interrupt
-            if (radiotimer_vars.compare_cb!=NULL) {
-                // clear the interrupt bit and call the callback
-                RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE2_INT;
-                radiotimer_vars.compare_cb();
-                // kick the OS
-                return KICK_SCHEDULER;
+    if (
+        interrupt_flag & RFTIMER_REG__INT_COMPARE2_INT  ||
+        interrupt_flag & RFTIMER_REG__INT_COMPARE3_INT  ||
+        interrupt_flag & RFTIMER_REG__INT_COMPARE4_INT  ||
+        interrupt_flag & RFTIMER_REG__INT_COMPARE5_INT
+    ) {
+        // timer compare interrupt
+        if (radiotimer_vars.compare_cb!=NULL) {
+            // clear the responding interrupt bit in the order of: 
+            // [TxLoad interrupt->TxSend interrupt, RxStart interrupt ]->NormalTimer interrupt]
+            if (interrupt_flag & RFTIMER_REG__INT_COMPARE3_INT){
+                RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE3_INT;
+            } else {
+                if (interrupt_flag & RFTIMER_REG__INT_COMPARE4_INT){
+                    RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE4_INT;
+                } else {
+                    if (interrupt_flag & RFTIMER_REG__INT_COMPARE5_INT) {
+                        RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE5_INT;
+                    } else {
+                        RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE2_INT;
+                    }
+                }
             }
+            // call the callback
+            radiotimer_vars.compare_cb();
+            // kick the OS
+            return KICK_SCHEDULER;
+        }
     } else {
         if (interrupt_flag & RFTIMER_REG__INT_COMPARE1_INT) {
             // timer overflows interrupt
