@@ -10,8 +10,6 @@
 
 //=========================== defines =========================================
 
-#define DEBUGPINS_IN_USE
-
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -24,19 +22,13 @@ void leds_init() {
 
 // 0 <H17>
 void    leds_error_on() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    |=  0x01;
-#endif
 }
 void    leds_error_off() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    &= ~0x01;
-#endif
 }
 void    leds_error_toggle() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    ^=  0x01;
-#endif
 }
 uint8_t leds_error_isOn() {
     return (uint8_t)(GPIO_REG__OUTPUT & 0x01);
@@ -44,19 +36,13 @@ uint8_t leds_error_isOn() {
 
 // 1 <K15>
 void    leds_radio_on() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    |=  0x02;
-#endif
 }
 void    leds_radio_off() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    &= ~0x02;
-#endif
 }
 void    leds_radio_toggle() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    ^=  0x02;
-#endif
 }
 uint8_t leds_radio_isOn() {
     return (uint8_t)(GPIO_REG__OUTPUT & 0x02)>>1;
@@ -78,38 +64,26 @@ uint8_t leds_sync_isOn() {
 
 // 3 <N14>
 void    leds_debug_on() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    |=  0x08;
-#endif
 }
 void    leds_debug_off() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    &= ~0x08;
-#endif
 }
 void    leds_debug_toggle() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    ^=  0x08;
-#endif
 }
 uint8_t leds_debug_isOn() {
     return (uint8_t)(GPIO_REG__OUTPUT & 0x08)>>3;
 }
 
 void leds_all_on() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    |=  0x0F;
-#endif
 }
 void leds_all_off() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    &= ~0x0F;
-#endif
 }
 void leds_all_toggle() {
-#ifndef DEBUGPINS_IN_USE
     GPIO_REG__OUTPUT    ^=  0x0F;
-#endif
 }
 
 void leds_error_blink() {
