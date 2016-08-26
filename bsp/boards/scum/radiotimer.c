@@ -82,9 +82,9 @@ PORT_RADIOTIMER_WIDTH radiotimer_getPeriod() {
 
 //===== compare
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-void radiotimer_schedule(uint8_t interrupt_type,PORT_RADIOTIMER_WIDTH offset) {
-    switch(interrupt_type){
-        case LOAD_PACKET:
+void radiotimer_schedule(uint8_t type,PORT_RADIOTIMER_WIDTH offset) {
+    switch(type){
+        case ACTION_LOAD_PACKET:
             // offset when to fire
             RFTIMER_REG__COMPARE3           = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
             
@@ -93,7 +93,7 @@ void radiotimer_schedule(uint8_t interrupt_type,PORT_RADIOTIMER_WIDTH offset) {
                                               RFTIMER_COMPARE_INTERRUPT_ENABLE |\
                                               RFTIMER_COMPARE_TX_LOAD_ENABLE;
             break;
-        case SEND_PACKET:
+        case ACTION_SEND_PACKET:
             // offset when to fire
             RFTIMER_REG__COMPARE4           = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
             
@@ -102,7 +102,7 @@ void radiotimer_schedule(uint8_t interrupt_type,PORT_RADIOTIMER_WIDTH offset) {
                                               RFTIMER_COMPARE_INTERRUPT_ENABLE |\
                                               RFTIMER_COMPARE_TX_SEND_ENABLE;
             break;
-        case RADIORX_ENABLE:
+        case ACTION_RADIORX_ENABLE:
             // offset when to fire
             RFTIMER_REG__COMPARE5           = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
             
@@ -111,7 +111,7 @@ void radiotimer_schedule(uint8_t interrupt_type,PORT_RADIOTIMER_WIDTH offset) {
                                               RFTIMER_COMPARE_INTERRUPT_ENABLE |\
                                               RFTIMER_COMPARE_RX_START_ENABLE;
             break;
-        case NORMAL_TIMER:
+        case ACTION_NORMAL_TIMER:
             // offset when to fire
             RFTIMER_REG__COMPARE2           = TIMER_COUTER_CONVERT_32K_TO_500K(offset);
             
@@ -125,42 +125,42 @@ void radiotimer_schedule(uint8_t interrupt_type,PORT_RADIOTIMER_WIDTH offset) {
     }
 }
 
-void radiotimer_cancel(uint8_t interrupt_type) {
+void radiotimer_cancel(uint8_t type) {
     
-    switch(interrupt_type){
-        case LOAD_PACKET:
+    switch(type){
+        case ACTION_LOAD_PACKET:
             // disable compare and tx load interrupt
             RFTIMER_REG__COMPARE3_CONTROL   = 0x00;
             break;
-        case SEND_PACKET:
+        case ACTION_SEND_PACKET:
             // disable compare and tx send interrupt
             RFTIMER_REG__COMPARE4_CONTROL   = 0x00;
             break;
-        case RADIORX_ENABLE:
+        case ACTION_RADIORX_ENABLE:
             // disable compare and rx start interrupt
             RFTIMER_REG__COMPARE5_CONTROL   = 0x00;
             break;
-        case NORMAL_TIMER:
+        case ACTION_NORMAL_TIMER:
             // disable compare interrupt
             RFTIMER_REG__COMPARE2_CONTROL   = 0x00;
             break;
-        case TX_SFD_DONE:
+        case ACTION_TX_SFD_DONE:
             // disable tx SFD done capture interrupt
             RFTIMER_REG__CAPTURE0_CONTROL   = 0x00;
             break;
-        case RX_SFD_DONE:
+        case ACTION_RX_SFD_DONE:
             // disable rx SFD done capture interrupt
             RFTIMER_REG__CAPTURE1_CONTROL   = 0x00;
             break;
-        case TX_SEND_DONE:
+        case ACTION_TX_SEND_DONE:
             // disable tx SEND done capture interrupt
             RFTIMER_REG__CAPTURE2_CONTROL   = 0x00;
             break;
-        case RX_DONE:
+        case ACTION_RX_DONE:
             // disable rx SEND done capture interrupt
             RFTIMER_REG__CAPTURE3_CONTROL   = 0x00;
             break;
-        case ALL_RADIOTIMER_INTERRUPT:
+        case ACTION_ALL_RADIOTIMER_INTERRUPT:
             RFTIMER_REG__CAPTURE0_CONTROL   = 0x00;
             RFTIMER_REG__CAPTURE1_CONTROL   = 0x00;
             RFTIMER_REG__CAPTURE2_CONTROL   = 0x00;
@@ -178,22 +178,22 @@ void radiotimer_cancel(uint8_t interrupt_type) {
 
 void radiotimer_setCapture(uint8_t type){
     switch(type){
-        case TX_SFD_DONE:
+        case ACTION_TX_SFD_DONE:
             // capture tx SFD done event
             RFTIMER_REG__CAPTURE0_CONTROL   = RFTIMER_CAPTURE_INTERRUPT_ENABLE |    \
                                               RFTIMER_CAPTURE_INPUT_SEL_TX_SFD_DONE;
             break;
-        case RX_SFD_DONE:
+        case ACTION_RX_SFD_DONE:
             // capture rx SFD done event
             RFTIMER_REG__CAPTURE1_CONTROL   = RFTIMER_CAPTURE_INTERRUPT_ENABLE |    \
                                               RFTIMER_CAPTURE_INPUT_SEL_RX_SFD_DONE;
             break;
-        case TX_SEND_DONE:
+        case ACTION_TX_SEND_DONE:
             // capture tx SEND done event
             RFTIMER_REG__CAPTURE2_CONTROL   = RFTIMER_CAPTURE_INTERRUPT_ENABLE |    \
                                               RFTIMER_CAPTURE_INPUT_SEL_TX_SEND_DONE;
             break;
-        case RX_DONE:
+        case ACTION_RX_DONE:
             // capture rx SEND done event
             RFTIMER_REG__CAPTURE3_CONTROL   = RFTIMER_CAPTURE_INTERRUPT_ENABLE |    \
                                               RFTIMER_CAPTURE_INPUT_SEL_RX_DONE;

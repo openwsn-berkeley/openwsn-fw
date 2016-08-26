@@ -18,17 +18,18 @@
 //=========================== define ==========================================
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 
-#define LOAD_PACKET                     0x01
-#define SEND_PACKET                     0x02
-#define RADIORX_ENABLE                  0x03
-#define NORMAL_TIMER                    0x04
-
-#define TX_SFD_DONE                     0x05
-#define RX_SFD_DONE                     0x06
-#define TX_SEND_DONE                    0x07
-#define RX_DONE                         0x08
-
-#define ALL_RADIOTIMER_INTERRUPT        0x09
+enum radiotimer_action_enum {
+    // action items
+    ACTION_LOAD_PACKET                     = 0x01,
+    ACTION_SEND_PACKET                     = 0x02,
+    ACTION_RADIORX_ENABLE                  = 0x03,
+    ACTION_NORMAL_TIMER                    = 0x04,
+    ACTION_TX_SFD_DONE                     = 0x05,
+    ACTION_RX_SFD_DONE                     = 0x06,
+    ACTION_TX_SEND_DONE                    = 0x07,
+    ACTION_RX_DONE                         = 0x08,
+    ACTION_ALL_RADIOTIMER_INTERRUPT        = 0x09,
+};
 
 #else
 #endif

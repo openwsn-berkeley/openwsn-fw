@@ -960,7 +960,7 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // 1. schedule timer for loading packet
-            radiotimer_schedule(LOAD_PACKET,      DURATION_tt1);
+            radiotimer_schedule(ACTION_LOAD_PACKET,      DURATION_tt1);
             // prepare the packet for load packet action at DURATION_tt1
             // make a local copy of the frame
             packetfunctions_duplicatePacket(&ieee154e_vars.localCopyForTransmission, ieee154e_vars.dataToSend);
@@ -980,12 +980,12 @@ port_INLINE void activity_ti1ORri1() {
             radio_loadPacket_prepare(ieee154e_vars.localCopyForTransmission.payload,
                                      ieee154e_vars.localCopyForTransmission.length);
             // 2. schedule timer for sending packet
-            radiotimer_schedule(SEND_PACKET,  DURATION_tt2);
+            radiotimer_schedule(ACTION_SEND_PACKET,  DURATION_tt2);
             // 3. schedule timer radio tx watchdog
-            radiotimer_schedule(NORMAL_TIMER, DURATION_tt3);
+            radiotimer_schedule(ACTION_NORMAL_TIMER, DURATION_tt3);
             // 4. set capture interrupt for Tx SFD senddone and packet senddone
-            radiotimer_setCapture(TX_SFD_DONE);
-            radiotimer_setCapture(TX_SEND_DONE);
+            radiotimer_setCapture(ACTION_TX_SFD_DONE);
+            radiotimer_setCapture(ACTION_TX_SEND_DONE);
 #else
             // arm tt1
             radiotimer_schedule(DURATION_tt1);
@@ -1001,13 +1001,13 @@ port_INLINE void activity_ti1ORri1() {
          changeState(S_RXDATAOFFSET);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
          // arm rt1
-         radiotimer_schedule(RADIORX_ENABLE,DURATION_rt1);
+         radiotimer_schedule(ACTION_RADIORX_ENABLE,DURATION_rt1);
          radio_rxPacket_prepare();
          // 2. schedule timer for starting 
-         radiotimer_schedule(NORMAL_TIMER,DURATION_rt2);
+         radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt2);
          // 3.  set capture interrupt for Rx SFD done and receiving packet done
-         radiotimer_setCapture(RX_SFD_DONE);
-         radiotimer_setCapture(RX_DONE);
+         radiotimer_setCapture(ACTION_RX_SFD_DONE);
+         radiotimer_setCapture(ACTION_RX_DONE);
 #else
          // arm rt1
          radiotimer_schedule(DURATION_rt1);
@@ -1155,7 +1155,7 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
     changeState(S_TXDATA);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel tt3
-    radiotimer_cancel(NORMAL_TIMER);
+    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt3
     radiotimer_cancel();
@@ -1164,7 +1164,7 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
    ieee154e_vars.lastCapturedTime = capturedTime;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    // arm tt4
-   radiotimer_schedule(NORMAL_TIMER,DURATION_tt4);
+   radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt4);
 #else
    // arm tt4
    radiotimer_schedule(DURATION_tt4);
@@ -1188,7 +1188,7 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
     changeState(S_RXACKOFFSET);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel tt4
-    radiotimer_cancel(NORMAL_TIMER);
+    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt4
     radiotimer_cancel();
@@ -1211,14 +1211,14 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         // 1. schedule timer for enabling receiving
         // arm tt5
-        radiotimer_schedule(RADIORX_ENABLE,DURATION_tt5);
+        radiotimer_schedule(ACTION_RADIORX_ENABLE,DURATION_tt5);
         // set receiving buffer address (radio is NOT enabled at this moment)
         radio_rxPacket_prepare();
         // 2. schedule timer for starting receiving
-        radiotimer_schedule(NORMAL_TIMER,DURATION_tt6);
+        radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt6);
         // 3. set capture for receiving SFD and packet receiving done
-        radiotimer_setCapture(RX_SFD_DONE);
-        radiotimer_setCapture(RX_DONE);
+        radiotimer_setCapture(ACTION_RX_SFD_DONE);
+        radiotimer_setCapture(ACTION_RX_DONE);
 #else
         // arm tt5
         radiotimer_schedule(DURATION_tt5);
@@ -1277,7 +1277,7 @@ port_INLINE void activity_ti7() {
    radio_rxNow();
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    // arm tt7
-   radiotimer_schedule(NORMAL_TIMER,DURATION_tt7);
+   radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt7);
 #else
    // arm tt7
    radiotimer_schedule(DURATION_tt7);
@@ -1311,7 +1311,7 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
     changeState(S_RXACK);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel tt7
-    radiotimer_cancel(NORMAL_TIMER);
+    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt7
     radiotimer_cancel();
@@ -1320,7 +1320,7 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
     ieee154e_vars.lastCapturedTime = capturedTime;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // arm tt8
-    radiotimer_schedule(NORMAL_TIMER,DURATION_tt8);
+    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt8);
 #else
     // arm tt8
     radiotimer_schedule(DURATION_tt8);
@@ -1339,7 +1339,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
     changeState(S_TXPROC);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel tt8
-    radiotimer_cancel(NORMAL_TIMER);
+    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel tt8
     radiotimer_cancel();
@@ -1507,7 +1507,7 @@ port_INLINE void activity_ri3() {
     radio_rxNow();
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // arm rt3
-    radiotimer_schedule(NORMAL_TIMER,DURATION_rt3);
+    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt3);
 #else
     // arm rt3 
     radiotimer_schedule(DURATION_rt3);
@@ -1525,7 +1525,7 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
    changeState(S_RXDATA);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    // cancel rt3
-   radiotimer_cancel(NORMAL_TIMER);
+   radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
    // cancel rt3
    radiotimer_cancel();
@@ -1536,7 +1536,7 @@ port_INLINE void activity_ri4(PORT_RADIOTIMER_WIDTH capturedTime) {
    // record the captured time to sync
    ieee154e_vars.syncCapturedTime = capturedTime;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-   radiotimer_schedule(NORMAL_TIMER,DURATION_rt4);
+   radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt4);
 #else
    radiotimer_schedule(DURATION_rt4);
 #endif
@@ -1561,7 +1561,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
    changeState(S_TXACKOFFSET);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    // cancel rt4
-   radiotimer_cancel(NORMAL_TIMER);
+   radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
    // cancel rt4
    radiotimer_cancel();
@@ -1679,7 +1679,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       if (ieee802514_header.ackRequested==1 && ieee154e_vars.isAckEnabled == TRUE) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // 1. schedule timer for loading packet
-            radiotimer_schedule(LOAD_PACKET,DURATION_rt5);
+            radiotimer_schedule(ACTION_LOAD_PACKET,DURATION_rt5);
             // get a buffer to put the ack to send in
            ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
            if (ieee154e_vars.ackToSend==NULL) {
@@ -1734,12 +1734,12 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
             // set tx buffer address and length to prepare loading packet (packet is NOT loaded at this moment)
             radio_loadPacket_prepare(ieee154e_vars.ackToSend->payload,
                                     ieee154e_vars.ackToSend->length);
-            radiotimer_schedule(SEND_PACKET,DURATION_rt6);
+            radiotimer_schedule(ACTION_SEND_PACKET,DURATION_rt6);
             // 2. schedule timer for radio tx watchdog
-            radiotimer_schedule(NORMAL_TIMER,DURATION_rt7);
+            radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt7);
             // 3. set capture for SFD senddone and Tx send done
-            radiotimer_setCapture(TX_SFD_DONE);
-            radiotimer_setCapture(TX_SEND_DONE);
+            radiotimer_setCapture(ACTION_TX_SFD_DONE);
+            radiotimer_setCapture(ACTION_TX_SEND_DONE);
 #else
          // arm rt5
          radiotimer_schedule(DURATION_rt5);
@@ -1891,7 +1891,7 @@ port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
     changeState(S_TXACK);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // cancel rt7
-    radiotimer_cancel(NORMAL_TIMER);
+    radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
     // cancel rt7
     radiotimer_cancel();
@@ -1900,7 +1900,7 @@ port_INLINE void activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime) {
     ieee154e_vars.lastCapturedTime = capturedTime;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // arm rt8
-    radiotimer_schedule(NORMAL_TIMER,DURATION_rt8);
+    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_rt8);
 #else
     // arm rt8
     radiotimer_schedule(DURATION_rt8);
@@ -1922,7 +1922,7 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    changeState(S_RXPROC);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
    // cancel rt8
-   radiotimer_cancel(NORMAL_TIMER);
+   radiotimer_cancel(ACTION_NORMAL_TIMER);
 #else
    // cancel rt8
    radiotimer_cancel();
@@ -2420,7 +2420,7 @@ void endSlot() {
       ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
    }
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-   radiotimer_cancel(ALL_RADIOTIMER_INTERRUPT);
+   radiotimer_cancel(ACTION_ALL_RADIOTIMER_INTERRUPT);
 #else
    // clear any pending timer
    radiotimer_cancel();
