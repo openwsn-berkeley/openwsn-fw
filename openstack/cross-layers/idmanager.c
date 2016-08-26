@@ -152,11 +152,11 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
 
    switch (addr->type) {
      case ADDR_16B:
-        res= packetfunctions_sameAddress(addr,&idmanager_vars.my16bID);
+        res= packetfunctions_sameAddress_debug(addr,&idmanager_vars.my16bID,COMPONENT_IDMANAGER);
         ENABLE_INTERRUPTS();
         return res;
      case ADDR_64B:
-        res= packetfunctions_sameAddress(addr,&idmanager_vars.my64bID);
+        res= packetfunctions_sameAddress_debug(addr,&idmanager_vars.my64bID,COMPONENT_IDMANAGER);
         ENABLE_INTERRUPTS();
         return res;
      case ADDR_128B:
@@ -165,15 +165,15 @@ bool idmanager_isMyAddress(open_addr_t* addr) {
         memcpy(&temp_my128bID.addr_128b[0],&idmanager_vars.myPrefix.prefix,8);
         memcpy(&temp_my128bID.addr_128b[8],&idmanager_vars.my64bID.addr_64b,8);
 
-        res= packetfunctions_sameAddress(addr,&temp_my128bID);
+        res= packetfunctions_sameAddress_debug(addr,&temp_my128bID,COMPONENT_IDMANAGER);
         ENABLE_INTERRUPTS();
         return res;
      case ADDR_PANID:
-        res= packetfunctions_sameAddress(addr,&idmanager_vars.myPANID);
+        res= packetfunctions_sameAddress_debug(addr,&idmanager_vars.myPANID,COMPONENT_IDMANAGER);
         ENABLE_INTERRUPTS();
         return res;
      case ADDR_PREFIX:
-        res= packetfunctions_sameAddress(addr,&idmanager_vars.myPrefix);
+        res= packetfunctions_sameAddress_debug(addr,&idmanager_vars.myPrefix,COMPONENT_IDMANAGER);
         ENABLE_INTERRUPTS();
         return res;
      default:

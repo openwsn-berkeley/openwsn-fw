@@ -10,6 +10,7 @@
 
 #include "opendefs.h"
 
+
 //=========================== define ==========================================
 
 /**
@@ -17,14 +18,18 @@
 
 The superframe repears over time and can be arbitrarly long.
 */
-#define SLOTFRAME_LENGTH    11 //should be 101
+#define SLOTFRAME_LENGTH    203 //should be 101
 
 //draft-ietf-6tisch-minimal-06
-#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      1
+#define SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS                      5
 #define SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET                        0
 #define SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET                     0
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE          1 //id of slotframe
 #define SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER          1 //1 slotframe by default.
+
+
+#define SCHEDULE_NBROWS_OPENSERIALSTATUS  1   //Nb of rows to push at the same time to openserial
+
 
 #define NUMSERIALRX          3
 
@@ -39,7 +44,8 @@ The superframe repears over time and can be arbitrarly long.
   for seiral port to tranmit data to dagroot. 
 */
 
-#define NUMSLOTSOFF          5
+#define NUMSLOTSOFF          190
+
 
 /**
 \brief Maximum number of active slots in a superframe.
@@ -60,20 +66,27 @@ Backoff is used only in slots that are marked as shared in the schedule. When
 not shared, the mote assumes that schedule is collision-free, and therefore
 does not use any backoff mechanism when a transmission fails.
 */
-#define MINBE                2
+#define MINBE                4
 
 /**
 \brief Maximum backoff exponent.
 
 See MINBE for an explanation of backoff.
 */
-#define MAXBE                4
+#define MAXBE                6
 
 /**
 \brief a threshold used for triggering the maintaining process.uint: percent
 */
 #define PDR_THRESHOLD      80 // 80 means 80%
-#define MIN_NUMTX_FOR_PDR  50 // don't calculate PDR when numTx is lower than this value 
+#define MIN_NUMTX_FOR_PDR  10 // don't calculate PDR when numTx is lower than this value
+
+/**
+ \brief to authorize only the dagroot to transmit a frame during half of the shared cells (to reduce the nb. of collisions)
+   A more appropriate mechanism has to be proposed to reduce the pressure (priority for LinkRep)
+ */
+#define SCHEDULE_PRIO_FOR_DAGROOT
+
 
 //=========================== typedef =========================================
 
@@ -87,7 +100,8 @@ typedef enum {
    CELLTYPE_RX               = 2,
    CELLTYPE_TXRX             = 3,
    CELLTYPE_SERIALRX         = 4,
-   CELLTYPE_MORESERIALRX     = 5
+   CELLTYPE_MORESERIALRX     = 5,
+   CELLTYPE_BUSY             = 6
 } cellType_t;
 
 typedef struct {
@@ -99,8 +113,10 @@ typedef struct {
    uint8_t         numRx;
    uint8_t         numTx;
    uint8_t         numTxACK;
+   track_t         track;
    asn_t           lastUsedAsn;
    void*           next;
+   uint8_t         reinit;
 } scheduleEntry_t;
 
 BEGIN_PACK
@@ -114,6 +130,8 @@ typedef struct {
    uint8_t         numRx;
    uint8_t         numTx;
    uint8_t         numTxACK;
+   uint16_t        trackInstance;
+   open_addr_t     trackOwner;
    asn_t           lastUsedAsn;
 } debugScheduleEntry_t;
 END_PACK
@@ -124,6 +142,7 @@ typedef struct {
   bool             shared;
   slotOffset_t     slotOffset;
   channelOffset_t  channelOffset;
+  track_t          track;
 }slotinfo_element_t;
 
 //=========================== variables =======================================
@@ -157,7 +176,8 @@ owerror_t          schedule_addActiveSlot(
    cellType_t           type,
    bool                 shared,
    uint8_t              channelOffset,
-   open_addr_t*         neighbor
+   open_addr_t*         neighbor,
+   track_t              track
 );
 
 void               schedule_getSlotInfo(
@@ -165,8 +185,15 @@ void               schedule_getSlotInfo(
    open_addr_t*         neighbor,
    slotinfo_element_t*  info
 );
+channelOffset_t schedule_getChannelOffset(void);
+slotOffset_t    schedule_getSlotOffset(void);
+
 
 uint16_t           schedule_getMaxActiveSlots(void);
+
+//returns the i^th entry in the schedule
+scheduleEntry_t *schedule_getCell(uint8_t i);
+
 
 owerror_t          schedule_removeActiveSlot(
    slotOffset_t         slotOffset,
@@ -196,8 +223,10 @@ uint8_t            schedule_getFrameHandle(void);
 uint8_t            schedule_getFrameNumber(void);
 cellType_t         schedule_getType(void);
 void               schedule_getNeighbor(open_addr_t* addrToWrite);
+uint8_t            schedule_getNbCellsWithTrack(track_t track, open_addr_t *nextHop);
+void               schedule_getTrackCurrent(track_t *track);
 channelOffset_t    schedule_getChannelOffset(void);
-bool               schedule_getOkToSend(void);
+bool               schedule_getOkToSend(OpenQueueEntry_t* msg);
 void               schedule_resetBackoff(void);
 void               schedule_indicateRx(asn_t*   asnTimestamp);
 void               schedule_indicateTx(

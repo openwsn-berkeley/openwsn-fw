@@ -11,6 +11,9 @@
 #include "opentimers.h"
 #include "opendefs.h"
 #include "processIE.h"
+#include "IEEE802154E.h"
+
+
 //=========================== define ==========================================
 // 6P version 
 #define IANA_6TOP_6P_VERSION   0x01 
@@ -43,6 +46,25 @@ enum sixtop_CommandID_num{
 
 // states of the sixtop-to-sixtop state machine
 typedef enum {
+
+/*
+    SIX_IDLE                            = 0x00,   // ready for next event
+   // ADD: source
+   SIX_SENDING_ADDREQUEST              = 0x01,   // generating LinkRequest packet
+   SIX_WAIT_ADDREQUEST_SENDDONE        = 0x02,   // waiting for SendDone confirmation
+   SIX_WAIT_ADDRESPONSE                = 0x03,   // waiting for response from the neighbor
+   SIX_ADDRESPONSE_RECEIVED            = 0x04,   // I received the link response request command
+   // ADD: destinations
+   SIX_ADDREQUEST_RECEIVED             = 0x05,   // I received the link request command
+   SIX_SENDING_ADDRESPONSE             = 0x06,   // generating resLinkRespone command packet
+//   SIX_WAIT_ADDRESPONSE_SENDDONE       = 0x07,   // waiting for SendDone confirmation
+   // REMOVE: source
+   SIX_SENDING_REMOVEREQUEST           = 0x08,   // generating resLinkRespone command packet
+   SIX_WAIT_REMOVEREQUEST_SENDDONE     = 0x09,   // waiting for SendDone confirmation
+   // REMOVE: destinations
+   SIX_REMOVEREQUEST_RECEIVED          = 0x0a    // I received the remove link request command
+*/
+
     // ready for next event
     SIX_IDLE                            = 0x00,
     // sending
@@ -69,13 +91,20 @@ typedef enum {
 typedef enum {
     SIX_HANDLER_NONE                    = 0x00, // when complete reservation, handler must be set to none
     SIX_HANDLER_MAINTAIN                = 0x01, // the handler is maintenance process
-    SIX_HANDLER_SF0                     = 0x02  // the handler is otf
+    SIX_HANDLER_SF0                     = 0x02, //the handler is otf
+    SIX_HANDLER_SFLOC                   = 0x03  //SF-loc
 } six2six_handler_t;
 
 //=========================== typedef =========================================
 
-#define SIX2SIX_TIMEOUT_MS 4000
+#define SIXTOP_NBCELLS_INREQ     1     //nb cells in the 6top IE (request / reply)
+
 #define SIXTOP_MINIMAL_EBPERIOD 5 // minist period of sending EB
+
+//TODO: fix a correct timeout
+#define SIX2SIX_TIMEOUT_MS ((uint32_t)10 * (1 + MAXBE / SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS) * TXRETRIES * SLOTFRAME_LENGTH * TsSlotDuration * PORT_TICS_PER_MS / 1000)
+#define SIX2SIX_LINKREP_TIMEOUT_MS  (SIX2SIX_TIMEOUT_MS / 2)
+
 
 //=========================== module variables ================================
 
@@ -103,7 +132,12 @@ void      sixtop_setKaPeriod(uint16_t kaPeriod);
 void      sixtop_setEBPeriod(uint8_t ebPeriod);
 void      sixtop_setHandler(six2six_handler_t handler);
 // scheduling
-void      sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells);
+bool      sixtop_isIdle(void);
+//void      sixtop_addCells(open_addr_t* neighbor, uint16_t numCells, track_t track);
+//void      sixtop_removeCell(open_addr_t*  neighbor);
+//void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
+track_t   sixtop_getTrackCellsByState(uint8_t slotframeID, uint8_t numOfLink, cellInfo_ht* cellList, open_addr_t* previousHop);
+void      sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track);
 void      sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 // maintaining
 void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);
@@ -115,8 +149,16 @@ void      task_sixtopNotifReceive(void);
 // debugging
 bool      debugPrint_myDAGrank(void);
 bool      debugPrint_kaPeriod(void);
+
+//track helpers for the best effort track
+bool      sixtop_is_trackequal(track_t track1, track_t track2);
+bool      sixtop_is_trackbesteffort(track_t track);
+track_t   sixtop_get_trackbesteffort(void);
+track_t   sixtop_get_trackcommon(void);
+
 // control
 void      sixtop_setIsResponseEnabled(bool isEnabled);
+
 
 /**
 \}

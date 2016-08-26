@@ -26,9 +26,12 @@ void     packetfunctions_mac16bToMac64b(open_addr_t* mac16b, open_addr_t* mac64b
 
 // address recognition
 bool     packetfunctions_isBroadcastMulticast(open_addr_t* address);
+bool     packetfunctions_isBroadcastMulticast_debug(open_addr_t* address, uint8_t code);
 bool     packetfunctions_isAllRoutersMulticast(open_addr_t* address);
 bool     packetfunctions_isAllHostsMulticast(open_addr_t* address);
 bool     packetfunctions_sameAddress(open_addr_t* address_1, open_addr_t* address_2);
+bool packetfunctions_sameAddress_debug(open_addr_t* address_1, open_addr_t* address_2, uint8_t component);
+
 
 // read/write addresses to/from packets
 void     packetfunctions_readAddress(uint8_t* payload, uint8_t type, open_addr_t* writeToAddress, bool littleEndian);

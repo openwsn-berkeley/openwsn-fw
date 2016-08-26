@@ -135,10 +135,19 @@ opentimer_id_t opentimers_start(uint32_t duration, timer_type_t type, time_type_
    return id;
 }
 
+
 /**
 \brief Replace the period of a running timer.
  */
-void  opentimers_setPeriod(opentimer_id_t id,time_type_t timetype,uint32_t newDuration) {
+uint32_t  opentimers_getPeriod(opentimer_id_t id) {
+   return((opentimers_vars.timersBuf[id].period_ticks) / PORT_TICS_PER_MS);
+
+}
+
+/**
+\brief Replace the period of a running timer.
+ */
+void  opentimers_setPeriod(opentimer_id_t id, time_type_t timetype, uint32_t newDuration) {
    if        (timetype==TIME_MS) {
       opentimers_vars.timersBuf[id].period_ticks      = newDuration*PORT_TICS_PER_MS;
       opentimers_vars.timersBuf[id].wraps_remaining   = (newDuration*PORT_TICS_PER_MS/MAX_TICKS_IN_SINGLE_CLOCK);//65535=maxValue of uint16_t

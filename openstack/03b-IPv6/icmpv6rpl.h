@@ -14,6 +14,12 @@
 
 #define TIMER_DIO_TIMEOUT         10000
 #define TIMER_DAO_TIMEOUT         60000
+#define TIMER_DIO_JITTER          0.20      //DIO period \in [(1 - JITTER) * PERIOD , (1 + JITTER) PERIOD ]
+#define TIMER_DAO_JITTER          0.20      //DAO period \in [(1 - JITTER) * PERIOD , (1 + JITTER) PERIOD ]
+
+
+
+
 
 // Non-Storing Mode of Operation (1)
 #define MOP_DIO_A                 0<<5
@@ -138,14 +144,15 @@ END_PACK
 
 typedef struct {
    // admin
-   bool                      busySending;             ///< currently sending DIO/DAO.
+   //bool                      busySending;             ///< currently sending DIO/DAO. //obsolete, manages now separately DIO and DAO!
+   OpenQueueEntry_t*         lastDIO_tx;              // last DIO we transmitted
+   OpenQueueEntry_t*         lastDAO_tx;              // last DAO we transmitted
    uint8_t                   fDodagidWritten;         ///< is DODAGID already written to DIO/DAO?
    // DIO-related
    icmpv6rpl_dio_ht          dio;                     ///< pre-populated DIO packet.
    open_addr_t               dioDestination;          ///< IPv6 destination address for DIOs.
    uint32_t                  dioPeriod;               ///< duration, in ms, of a timerIdDIO timeout.
    opentimer_id_t            timerIdDIO;              ///< ID of the timer used to send DIOs.
-   uint8_t                   delayDIO;                ///< number of timerIdDIO events before actually sending a DIO.
    // DAO-related
    icmpv6rpl_dao_ht          dao;                     ///< pre-populated DAO packet.
    icmpv6rpl_dao_transit_ht  dao_transit;             ///< pre-populated DAO "Transit Info" option header.

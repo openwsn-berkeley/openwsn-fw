@@ -89,7 +89,6 @@ void     notif_receive(OpenQueueEntry_t* packetReceived);
 void     resetStats(void);
 void     updateStats(PORT_SIGNED_INT_WIDTH timeCorrection);
 // misc
-uint8_t  calculateFrequency(uint8_t channelOffset);
 void     changeState(ieee154e_state_t newstate);
 void     endSlot(void);
 bool     debugPrint_asn(void);
@@ -414,8 +413,22 @@ status information about several modules in the OpenWSN stack.
 \returns TRUE if this function printed something, FALSE otherwise.
 */
 bool debugPrint_macStats() {
+   ieee154e_stats.isSync = ieee154e_vars.isSync;
+
    // send current stats over serial
    openserial_printStatus(STATUS_MACSTATS,(uint8_t*)&ieee154e_stats,sizeof(ieee154e_stats_t));
+
+   //TODO: state energy, etc.
+   //periodical stats about the node  to push in the logs
+  /* if (0 && (period_nodestate++ % PERIOD_NODESTATE_UPDATE) == 0){
+        evtState evt;
+        evt.numTicsOn     = ieee154e_stats.numTicsOn;
+        evt.numTicsTotal  = ieee154e_stats.numTicsTotal;
+        evt.numDeSync     = ieee154e_stats.numDeSync;
+        openserial_printStat(SERTYPE_NODESTATE, COMPONENT_IEEE802154E, (uint8_t*)&evt, sizeof(evt));
+      }
+      */
+
    return TRUE;
 }
 
@@ -479,6 +492,8 @@ port_INLINE void activity_synchronize_newSlot() {
    // take turns every 8 slots sending and receiving
    if        ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0000) {
       openserial_stop();
+      //remove timeouted entries in openqueue
+      openqueue_timeout_drop();
       openserial_startOutput();
    } else if ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0008) {
       openserial_stop();
@@ -574,6 +589,8 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+         openserial_statRxCrcFalse(ieee154e_vars.dataReceived);
+
          // break from the do-while loop and execute abort code below
          break;
       }
@@ -618,7 +635,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
                ieee802514_header.valid==TRUE                                                       &&
                ieee802514_header.ieListPresent==TRUE                                               &&
                ieee802514_header.frameType==IEEE154_TYPE_BEACON                                    &&
-               packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) &&
+               packetfunctions_sameAddress_debug(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID),COMPONENT_IEEE802154E) &&
                ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE)
             )==FALSE) {
          // break from the do-while loop and execute the clean-up code below
@@ -644,7 +661,10 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
                             (errorparameter_t)ieee154e_vars.slotOffset,
                             (errorparameter_t)0);
-      
+
+      //packet received (serial line)
+      openserial_statRx(ieee154e_vars.dataReceived);
+
       // send received EB up the stack so RES can update statistics (synchronizing)
       notif_receive(ieee154e_vars.dataReceived);
       
@@ -834,6 +854,7 @@ port_INLINE void activity_ti1ORri1() {
    sync_IE_ht  sync_IE;
    bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
+   track_t     track;
 
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
@@ -912,6 +933,8 @@ port_INLINE void activity_ti1ORri1() {
       openserial_stop();
       // abort the slot
       endSlot();
+      //remove timeouted entries in openqueue
+      openqueue_timeout_drop();
       //start outputing serial
       openserial_startOutput();
       return;
@@ -926,16 +949,28 @@ port_INLINE void activity_ti1ORri1() {
          openserial_stop();
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
-         // check whether we can send
-         if (schedule_getOkToSend()) {
-            schedule_getNeighbor(&neighbor);
-            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
-            if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
-               couldSendEB=TRUE;
-               // look for an EB packet in the queue
-               ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
-            }
+
+         //characteristics of the cell
+         schedule_getTrackCurrent(&track);
+         schedule_getNeighbor(&neighbor);
+
+         // look for an EB packet in the queue
+         if ((cellType==CELLTYPE_TXRX) && (track.instance == TRACK_BESTEFFORT)) {
+            ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+            couldSendEB = TRUE;
          }
+
+         //Else, any compliant broadcast or unicast packet
+         if (ieee154e_vars.dataToSend == NULL){
+            ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
+            couldSendEB = FALSE;
+         }
+
+         // check whether we can send (Backoff or dedicated cell, other conditions)
+         if (ieee154e_vars.dataToSend != NULL && !schedule_getOkToSend(ieee154e_vars.dataToSend))
+            ieee154e_vars.dataToSend = NULL;
+
+         //neither data packet nor EB to tx
          if (ieee154e_vars.dataToSend==NULL) {
             if (cellType==CELLTYPE_TX) {
                // abort
@@ -945,6 +980,7 @@ port_INLINE void activity_ti1ORri1() {
                changeToRX=TRUE;
             }
          } else {
+
             // change state
             changeState(S_TXDATAOFFSET);
             // change owner
@@ -1066,7 +1102,10 @@ port_INLINE void activity_ti2() {
    ieee154e_vars.radioOnThisSlot=TRUE;
    // arm tt2
    radiotimer_schedule(DURATION_tt2);
-   
+
+   //info through the serial line when a frame is transmitted
+   openserial_statTx(ieee154e_vars.dataToSend);
+
    // change state
    changeState(S_TXDATAREADY);
 }
@@ -1129,7 +1168,14 @@ port_INLINE void activity_tie3() {
 
 port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    bool listenForAck;
-   
+
+   // decides whether to listen for an ACK
+   if (packetfunctions_isBroadcastMulticast_debug(&ieee154e_vars.dataToSend->l2_nextORpreviousHop, 27)==TRUE) {
+      listenForAck = FALSE;
+   } else {
+      listenForAck = TRUE;
+   }
+
    // change state
    changeState(S_RXACKOFFSET);
    
@@ -1137,18 +1183,13 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
    radiotimer_cancel();
    
    // turn off the radio
-    radio_rfOff();
+   radio_rfOff();
    ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
    
    // record the captured time
    ieee154e_vars.lastCapturedTime = capturedTime;
    
-   // decides whether to listen for an ACK
-   if (packetfunctions_isBroadcastMulticast(&ieee154e_vars.dataToSend->l2_nextORpreviousHop)==TRUE) {
-      listenForAck = FALSE;
-   } else {
-      listenForAck = TRUE;
-   }
+
    
    if (listenForAck==TRUE) {
       // arm tt5
@@ -1212,10 +1253,19 @@ port_INLINE void activity_tie5() {
    // indicate transmit failed to schedule to keep stats
    schedule_indicateTx(&ieee154e_vars.asn,FALSE);
    
+   if (ieee154e_vars.dataToSend->l2_retriesLeft == 0){
+      char str[150];
+      sprintf(str, "l2_retriesLeft - ");
+      openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->l2_retriesLeft, 150);
+      strncat(str, ", creator - ",150 );
+      openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->creator, 150);
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+   }
+
    // decrement transmits left counter
    ieee154e_vars.dataToSend->l2_retriesLeft--;
-   
-   if (ieee154e_vars.dataToSend->l2_retriesLeft==0) {
+
+   if (ieee154e_vars.dataToSend->l2_retriesLeft==0 || ieee154e_vars.dataToSend->l2_retriesLeft>TXRETRIES) {
       // indicate tx fail if no more retries left
       notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
    } else {
@@ -1305,10 +1355,10 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       // break if wrong length
       if (ieee154e_vars.ackReceived->length<LENGTH_CRC || ieee154e_vars.ackReceived->length>LENGTH_IEEE154_MAX) {
          // break from the do-while loop and execute the clean-up code below
-        openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
+         openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
                             (errorparameter_t)1,
                             ieee154e_vars.ackReceived->length);
-        
+
          break;
       }
       
@@ -1317,6 +1367,8 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
    
       // break if invalid CRC
       if (ieee154e_vars.ackReceived->l1_crc==FALSE) {
+         openserial_statRxCrcFalse(ieee154e_vars.ackReceived);
+
          // break from the do-while loop and execute the clean-up code below
          break;
       }
@@ -1364,6 +1416,9 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       // inform upper layer
       notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
       ieee154e_vars.dataToSend = NULL;
+
+      //we received an ack
+      openserial_statAckRx();
       
       // in any case, execute the clean-up code below (processing of ACK done)
    } while (0);
@@ -1509,7 +1564,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // break if wrong length
       if (ieee154e_vars.dataReceived->length<LENGTH_CRC || ieee154e_vars.dataReceived->length>LENGTH_IEEE154_MAX ) {
          // jump to the error code below this do-while loop
-        openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
+         openserial_printError(COMPONENT_IEEE802154E,ERR_INVALIDPACKETFROMRADIO,
                             (errorparameter_t)2,
                             ieee154e_vars.dataReceived->length);
          break;
@@ -1520,6 +1575,8 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       
       // if CRC doesn't check, stop
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
+         openserial_statRxCrcFalse(ieee154e_vars.dataReceived);
+
          // jump to the error code below this do-while loop
          break;
       }
@@ -1555,7 +1612,7 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       if ((ieee802514_header.valid==TRUE &&
           ieee802514_header.ieListPresent==TRUE && 
           ieee802514_header.frameType==IEEE154_TYPE_BEACON && // if it is not a beacon and have ie, the ie will be processed in sixtop
-          packetfunctions_sameAddress(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID)) && 
+          packetfunctions_sameAddress_debug(&ieee802514_header.panid,idmanager_getMyID(ADDR_PANID),COMPONENT_IEEE802154E) &&
           ieee154e_processIEs(ieee154e_vars.dataReceived,&lenIE))==FALSE) {
           //log  that the packet is not carrying IEs
       }
@@ -1572,6 +1629,9 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          break;
       }
       
+      //packet received (serial line)
+      openserial_statRx(ieee154e_vars.dataReceived);
+
       // record the timeCorrection and print out at end of slot
       ieee154e_vars.dataReceived->l2_timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
       
@@ -1760,6 +1820,9 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
       synchronizePacket(ieee154e_vars.syncCapturedTime);
    }
+
+   //ack transmitted
+   openserial_statAckTx();
    
    // inform upper layer of reception (after ACK sent)
    notif_receive(ieee154e_vars.dataReceived);
@@ -1792,10 +1855,10 @@ port_INLINE bool isValidRxFrame(ieee802154_header_iht* ieee802514_header) {
              ieee802514_header->frameType==IEEE154_TYPE_DATA                   ||
              ieee802514_header->frameType==IEEE154_TYPE_BEACON
           )                                                                                        && \
-          packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))     && \
+          packetfunctions_sameAddress_debug(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID),COMPONENT_IEEE802154E)     && \
           (
              idmanager_isMyAddress(&ieee802514_header->dest)                   ||
-             packetfunctions_isBroadcastMulticast(&ieee802514_header->dest)
+             packetfunctions_isBroadcastMulticast_debug(&ieee802514_header->dest, 28)
           );
 }
 
@@ -1816,20 +1879,13 @@ A packet is a valid ACK if it satisfies the following conditions:
 \returns TRUE if packet is a valid ACK, FALSE otherwise.
 */
 port_INLINE bool isValidAck(ieee802154_header_iht* ieee802514_header, OpenQueueEntry_t* packetSent) {
-   /*
-   return ieee802514_header->valid==TRUE                                                           && \
-          ieee802514_header->frameType==IEEE154_TYPE_ACK                                           && \
-          ieee802514_header->dsn==packetSent->l2_dsn                                               && \
-          packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))     && \
-          idmanager_isMyAddress(&ieee802514_header->dest)                                          && \
-          packetfunctions_sameAddress(&ieee802514_header->src,&packetSent->l2_nextORpreviousHop);
-   */
+
    // poipoi don't check for seq num
    return ieee802514_header->valid==TRUE                                                           && \
           ieee802514_header->frameType==IEEE154_TYPE_ACK                                           && \
-          packetfunctions_sameAddress(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID))     && \
+          packetfunctions_sameAddress_debug(&ieee802514_header->panid,idmanager_getMyID(ADDR_PANID),COMPONENT_IEEE802154E)     && \
           idmanager_isMyAddress(&ieee802514_header->dest)                                          && \
-          packetfunctions_sameAddress(&ieee802514_header->src,&packetSent->l2_nextORpreviousHop);
+          packetfunctions_sameAddress_debug(&ieee802514_header->src,&packetSent->l2_nextORpreviousHop,COMPONENT_IEEE802154E);
 }
 
 //======= ASN handling
@@ -1895,7 +1951,7 @@ bool isValidJoin(OpenQueueEntry_t* eb, ieee802154_header_iht *parsedHeader) {
             parsedHeader->valid==TRUE                                                       &&
             parsedHeader->ieListPresent==TRUE                                               &&
             parsedHeader->frameType==IEEE154_TYPE_BEACON                                    &&
-            packetfunctions_sameAddress(&parsedHeader->panid,idmanager_getMyID(ADDR_PANID)) &&
+            packetfunctions_sameAddress_debug(&parsedHeader->panid,idmanager_getMyID(ADDR_PANID),COMPONENT_IEEE802154E) &&
             ieee154e_processIEs(eb,&lenIE)
          )==FALSE) {
       return FALSE;
@@ -2267,10 +2323,20 @@ void endSlot() {
       // indicate Tx fail to schedule to update stats
       schedule_indicateTx(&ieee154e_vars.asn,FALSE);
       
+
+      if (ieee154e_vars.dataToSend->l2_retriesLeft == 0){
+         char str[150];
+         sprintf(str, "l2_retriesLeft - ");
+         openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->l2_retriesLeft, 150);
+         strncat(str, ", creator - ",150 );
+         openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend->creator, 150);
+         openserial_printf(COMPONENT_IEEE802154E, str, strlen(str));
+      }
+
       //decrement transmits left counter
       ieee154e_vars.dataToSend->l2_retriesLeft--;
       
-      if (ieee154e_vars.dataToSend->l2_retriesLeft==0) {
+      if (ieee154e_vars.dataToSend->l2_retriesLeft==0 || ieee154e_vars.dataToSend->l2_retriesLeft>TXRETRIES) {
          // indicate tx fail if no more retries left
          notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
       } else {
@@ -2315,4 +2381,18 @@ void endSlot() {
 
 bool ieee154e_isSynch(){
    return ieee154e_vars.isSync;
+}
+
+/*
+ * brief: is currently ieee154e transmitting a packet from the component creator?
+ */
+bool ieee154e_is_ongoing(uint8_t creator){
+   return(ieee154e_vars.dataToSend->creator == creator);
+}
+
+/*
+ * brief: what is the packet currently transmitted (CANNOT be removed now from openqueue!)
+ */
+OpenQueueEntry_t* ieee154e_getOngoingTx(void){
+   return(ieee154e_vars.dataToSend);
 }

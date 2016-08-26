@@ -5,7 +5,10 @@
 #include "packetfunctions.h"
 #include "sixtop.h"
 #include "idmanager.h"
+#include "IEEE802154E.h"
+#include "sixtop.h"
 #include "sf0.h"
+
 
 //=========================== variables =======================================
 
@@ -28,11 +31,13 @@ void schedule_init() {
    slotOffset_t    start_slotOffset;
    slotOffset_t    running_slotOffset;
    open_addr_t     temp_neighbor;
+   uint8_t         nbSerial;
 
    // reset local variables
    memset(&schedule_vars,0,sizeof(schedule_vars_t));
    for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
       schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
+      schedule_vars.scheduleBuf[running_slotOffset].reinit = FALSE;       //init -> cannot be considered as a re-initialization
    }
    schedule_vars.backoffExponent = MINBE-1;
    schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
@@ -43,15 +48,21 @@ void schedule_init() {
    }
    
    // serial RX slot(s)
-   start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
+#ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
+   start_slotOffset += 1;  //skip the first shared TXRX
+#else
+   start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;   //skip all the shared TXRX
+#endif
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
-   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
+   nbSerial = NUMSERIALRX;
+   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+nbSerial;running_slotOffset++) {
       schedule_addActiveSlot(
          running_slotOffset,                    // slot offset
          CELLTYPE_SERIALRX,                     // type of slot
          FALSE,                                 // shared?
          0,                                     // channel offset
-         &temp_neighbor                         // neighbor
+         &temp_neighbor,                        // neighbor
+         sixtop_get_trackbesteffort()           //for best effort traffic
       );
    }
 }
@@ -60,11 +71,12 @@ void schedule_init() {
 \brief Starting the DAGroot schedule propagation.
 */
 void schedule_startDAGroot() {
-   slotOffset_t    start_slotOffset;
-   slotOffset_t    running_slotOffset;
+//   slotOffset_t    start_slotOffset;
+   slotOffset_t    running_slotOffset, slotOffset;
    open_addr_t     temp_neighbor;
-   
-   start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+
+
+  // start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    // set frame length, handle and number (default 1 by now)
    if (schedule_vars.frameLength == 0) {
        // slotframe length is not set, set it to default length
@@ -78,13 +90,23 @@ void schedule_startDAGroot() {
    // shared TXRX anycast slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
-   for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
+
+   //inserts SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS shared cells
+   for (running_slotOffset=0;running_slotOffset<SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
+
+#ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
+      slotOffset = running_slotOffset * schedule_getFrameLength() / SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;      // slot offset
+#else
+      slotOffset = running_slotOffset + SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
+#endif
+
       schedule_addActiveSlot(
-         running_slotOffset,                 // slot offset
-         CELLTYPE_TXRX,                      // type of slot
-         TRUE,                               // shared?
-         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
-         &temp_neighbor                      // neighbor
+            slotOffset,                 // slot offset
+            CELLTYPE_TXRX,                      // type of slot
+            TRUE,                               // shared?
+            SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
+            &temp_neighbor,                     // neighbor
+            sixtop_get_trackbesteffort()        //for best effort traffic
       );
    }
 }
@@ -97,46 +119,74 @@ status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
 */
-bool debugPrint_schedule() {
+
+bool debugPrint_schedule_entry(uint8_t debugPrintRow){
    debugScheduleEntry_t temp;
-   
-   // increment the row just printed
-   schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%schedule_vars.maxActiveSlots;
-   
-   // gather status data
+
    temp.row                            = schedule_vars.debugPrintRow;
    temp.slotOffset                     = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].slotOffset;
    temp.type                           = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type;
    temp.shared                         = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].shared;
    temp.channelOffset                  = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].channelOffset;
    memcpy(
-      &temp.neighbor,
-      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
-      sizeof(open_addr_t)
+         &temp.neighbor,
+         &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].neighbor,
+         sizeof(open_addr_t)
    );
    temp.numRx                          = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numRx;
    temp.numTx                          = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTx;
    temp.numTxACK                       = \
-      schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].numTxACK;
+   temp.trackInstance                  = \
+         (uint16_t)schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].track.instance;
    memcpy(
-      &temp.lastUsedAsn,
-      &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
-      sizeof(asn_t)
+         &temp.trackOwner,
+         &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].track.owner,
+         sizeof(open_addr_t)
    );
-   
+
+   memcpy(
+         &temp.lastUsedAsn,
+         &schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].lastUsedAsn,
+         sizeof(asn_t)
+   );
+
    // send status data over serial port
    openserial_printStatus(
-      STATUS_SCHEDULE,
-      (uint8_t*)&temp,
-      sizeof(debugScheduleEntry_t)
+         STATUS_SCHEDULE,
+         (uint8_t*)&temp,
+         sizeof(debugScheduleEntry_t)
    );
-   
+   return TRUE;
+}
+
+uint16_t rowDebugMax = 0;
+bool debugPrint_schedule() {
+   uint8_t rowNbWritten = 0;
+
+   while (rowNbWritten < SCHEDULE_NBROWS_OPENSERIALSTATUS){
+
+      //this cell is not OFF and was not reinitialized recently
+     // if (1){
+      if (schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type != CELLTYPE_OFF && !schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].reinit){
+
+         debugPrint_schedule_entry(schedule_vars.debugPrintRow);
+         schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].reinit = FALSE;
+
+         //nb of cells actually sent to openserial_printStatus
+         rowNbWritten++;
+      }
+
+      // increment the row just printed (or not)
+      schedule_vars.debugPrintRow         = (schedule_vars.debugPrintRow+1)%schedule_vars.maxActiveSlots;
+   }
+
    return TRUE;
 }
 
@@ -232,12 +282,14 @@ void  schedule_getSlotInfo(
    // find an empty schedule entry container
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
-       //check that this entry for that neighbour and timeslot is not already scheduled.
-       if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
+
+       // search for the corresponding node and slotoffset
+       if (packetfunctions_sameAddress_debug(neighbor,&(slotContainer->neighbor),COMPONENT_SCHEDULE)&& (slotContainer->slotOffset==slotOffset)){
                //it exists so this is an update.
                info->link_type                 = slotContainer->type;
-               info->shared                    =slotContainer->shared;
+               info->shared                    = slotContainer->shared;
                info->channelOffset             = slotContainer->channelOffset;
+               info->track                     = slotContainer->track;
                return; //as this is an update. No need to re-insert as it is in the same position on the list.
         }
         slotContainer++;
@@ -245,7 +297,21 @@ void  schedule_getSlotInfo(
    //return cell type off.
    info->link_type                 = CELLTYPE_OFF;
    info->shared                    = FALSE;
-   info->channelOffset             = 0;//set to zero if not set.                          
+   info->channelOffset             = 0;//set to zero if not set.
+   info->track                     = sixtop_get_trackbesteffort();
+}
+
+/**
+\brief Get the i^th slots.
+
+\param[pos] position of the slot
+*/
+scheduleEntry_t *schedule_getCell(uint8_t pos){
+
+   if (pos < schedule_getMaxActiveSlots())
+      return(&(schedule_vars.scheduleBuf[pos]));
+
+   return(NULL);
 }
 
 /**
@@ -272,7 +338,8 @@ owerror_t schedule_addActiveSlot(
       cellType_t      type,
       bool            shared,
       channelOffset_t channelOffset,
-      open_addr_t*    neighbor
+      open_addr_t*    neighbor,
+      track_t         track
    ) {
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
@@ -306,8 +373,18 @@ owerror_t schedule_addActiveSlot(
    slotContainer->type                      = type;
    slotContainer->shared                    = shared;
    slotContainer->channelOffset             = channelOffset;
+   slotContainer->track                     = track;
    memcpy(&slotContainer->neighbor,neighbor,sizeof(open_addr_t));
    
+   //ASN = now
+   // TODO: required?
+   uint8_t array[5];
+   ieee154e_getAsn(array);
+   slotContainer->lastUsedAsn.bytes0and1  = ((uint16_t)array[1] << 8) | (uint16_t)array[0];
+   slotContainer->lastUsedAsn.bytes2and3  = ((uint16_t)array[3] << 8) | (uint16_t)array[2];
+   slotContainer->lastUsedAsn.byte4       = array[4];
+
+
    // insert in circular list
    if (schedule_vars.currentScheduleEntry==NULL) {
       // this is the first active slot added
@@ -360,6 +437,10 @@ owerror_t schedule_addActiveSlot(
    }
    
    ENABLE_INTERRUPTS();
+
+   //notification through the serial line
+   openserial_statCelladd(slotContainer);
+
    return E_SUCCESS;
 }
 
@@ -383,7 +464,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
       if (
             slotContainer->slotOffset==slotOffset
             &&
-            packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))
+            packetfunctions_sameAddress_debug(neighbor,&(slotContainer->neighbor),COMPONENT_SCHEDULE)
             ){
          break;
       }
@@ -401,6 +482,9 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
       return E_FAIL;
    }
    
+   //notification of openvisualizer
+   openserial_statCellremove(slotContainer);
+
    // remove from linked list
    if (slotContainer->next==slotContainer) {
       // this is the last active slot
@@ -440,6 +524,7 @@ owerror_t schedule_removeActiveSlot(slotOffset_t slotOffset, open_addr_t* neighb
    
    return E_SUCCESS;
 }
+
 
 bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    
@@ -503,7 +588,7 @@ uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* 
     scheduleWalker = schedule_vars.currentScheduleEntry;
     do {
        if(
-          packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor) &&
+          packetfunctions_sameAddress_debug(&(scheduleWalker->neighbor),neighbor,COMPONENT_SCHEDULE) &&
           type == scheduleWalker->type
        ){
            count++;
@@ -522,7 +607,7 @@ void schedule_removeAllCells(
     
     // remove all entries in schedule with previousHop address
     for(i=0;i<MAXACTIVESLOTS;i++){
-        if (packetfunctions_sameAddress(&(schedule_vars.scheduleBuf[i].neighbor),previousHop)){
+        if (packetfunctions_sameAddress_debug(&(schedule_vars.scheduleBuf[i].neighbor),previousHop,COMPONENT_SCHEDULE)){
            schedule_removeActiveSlot(
               schedule_vars.scheduleBuf[i].slotOffset,
               previousHop
@@ -690,12 +775,58 @@ void schedule_getNeighbor(open_addr_t* addrToWrite) {
    ENABLE_INTERRUPTS();
 }
 
+
+/**
+\brief Get the number of cells with a particular track in the schedule
+
+\returns The number of cells with this track
+*/
+uint8_t schedule_getNbCellsWithTrack(track_t track, open_addr_t *nextHop){
+   uint8_t  returnVal = 0;
+   uint8_t  i;
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+   // count the nb of usable cells (in tx) for this track
+   // linked with this neighbor (or anycast)
+   for (i=0;i<MAXACTIVESLOTS;i++) {
+      if (sixtop_is_trackequal(schedule_vars.scheduleBuf[i].track, track) &&
+            (schedule_vars.scheduleBuf[i].type == CELLTYPE_TX
+                  ||
+            schedule_vars.scheduleBuf[i].type == CELLTYPE_TXRX) &&
+            (packetfunctions_sameAddress_debug(&(schedule_vars.scheduleBuf[i].neighbor), nextHop,COMPONENT_SCHEDULE)
+                  ||
+            schedule_vars.scheduleBuf[i].neighbor.type == ADDR_ANYCAST)
+            )
+         returnVal++;
+   }
+
+   ENABLE_INTERRUPTS();
+
+   return returnVal;
+}
+
+/**
+\brief Get the track of the current schedule entry.
+
+\returns The channel offset of the current schedule entry.
+*/
+void schedule_getTrackCurrent(track_t *track) {
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   memcpy(track, &(schedule_vars.currentScheduleEntry->track), sizeof(track_t));
+   ENABLE_INTERRUPTS();
+}
+
+
+
 /**
 \brief Get the channel offset of the current schedule entry.
 
 \returns The channel offset of the current schedule entry.
 */
-channelOffset_t schedule_getChannelOffset() {
+channelOffset_t schedule_getChannelOffset(void) {
    channelOffset_t returnVal;
    
    INTERRUPT_DECLARATION();
@@ -707,6 +838,26 @@ channelOffset_t schedule_getChannelOffset() {
    
    return returnVal;
 }
+
+
+/**
+\brief Get the slot offset of the current schedule entry.
+
+\returns The slot offset of the current schedule entry.
+*/
+slotOffset_t schedule_getSlotOffset(void) {
+   slotOffset_t returnVal;
+
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+
+   returnVal = schedule_vars.currentScheduleEntry->slotOffset;
+
+   ENABLE_INTERRUPTS();
+
+   return returnVal;
+}
+
 
 /**
 \brief Check whether I can send on this slot.
@@ -720,7 +871,7 @@ Note that the backoff counter is global, not per slot.
 
 \returns TRUE if it is OK to send on this slot, FALSE otherwise.
 */
-bool schedule_getOkToSend() {
+bool schedule_getOkToSend(OpenQueueEntry_t* msg) {
    bool returnVal;
    
    INTERRUPT_DECLARATION();
@@ -730,9 +881,28 @@ bool schedule_getOkToSend() {
       // non-shared slot: backoff does not apply
       
       returnVal = TRUE;
-   } else {
+   }
+#ifdef SCHEDULE_PRIO_FOR_DAGROOT
+   //the dagroot can only use the first shared cells (without backoff)
+   else if(idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset < SLOTFRAME_LENGTH /3){
+      returnVal = TRUE;
+   }
+   //only the dagroot can use the first shared cells
+   else if (!idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset < SLOTFRAME_LENGTH /3){
+      returnVal = FALSE;
+   }
+#endif
+#ifdef IHHOHJJH
+   packetfunctions_isBroadcastMulticast_debug(&(openqueue_vars.queue[i].l2_nextORpreviousHop),72);
+
+
+   else if(){
+
+   }
+#endif
+   else {
       // non-shared slot: check backoff before answering
-      
+
       // decrement backoff
       if (schedule_vars.backoff>0) {
          schedule_vars.backoff--;
@@ -846,4 +1016,7 @@ void schedule_resetEntry(scheduleEntry_t* e) {
    e->lastUsedAsn.bytes2and3 = 0;
    e->lastUsedAsn.byte4      = 0;
    e->next                   = NULL;
+   e->reinit                 = TRUE;   //reintiialized
+
+   e->track = sixtop_get_trackbesteffort();
 }

@@ -294,7 +294,7 @@ void neighbors_indicateTx(open_addr_t* l2_dest,
                           asn_t*       asnTs) {
    uint8_t i;
    // don't run through this function if packet was sent to broadcast address
-   if (packetfunctions_isBroadcastMulticast(l2_dest)==TRUE) {
+   if (packetfunctions_isBroadcastMulticast_debug(l2_dest , 40)==TRUE) {
       return;
    }
    
@@ -349,6 +349,22 @@ bool  neighbors_getNeighborEui64(open_addr_t* address, uint8_t addr_type, uint8_
    }
    return ReturnVal;
 }
+
+
+//returns the whole entry concerning a neighbor
+neighborRow_t *neighbors_getNeighborInfo(open_addr_t* address){
+   uint8_t  i;
+
+   for (i=0;i<MAXNUMNEIGHBORS;i++)
+       if (neighbors_vars.neighbors[i].used==TRUE)
+          if (packetfunctions_sameAddress(&(neighbors_vars.neighbors[i].addr_64b), address))
+                return(&(neighbors_vars.neighbors[i]));
+
+   //unfound
+   return(NULL);
+}
+
+
 
 //===== setters
 
@@ -503,8 +519,9 @@ void removeNeighbor(uint8_t neighborIndex) {
    //neighbors_vars.neighbors[neighborIndex].addr_16b.type           = ADDR_NONE; // to save RAM
    neighbors_vars.neighbors[neighborIndex].addr_64b.type             = ADDR_NONE;
    //neighbors_vars.neighbors[neighborIndex].addr_128b.type          = ADDR_NONE; // to save RAM
-   neighbors_vars.neighbors[neighborIndex].DAGrank                   = DEFAULTDAGRANK;
+   neighbors_vars.neighbors[neighborIndex].DAGrank                   = 0;
    neighbors_vars.neighbors[neighborIndex].rssi                      = 0;
+   neighbors_vars.neighbors[neighborIndex].joinPrio                  = 0;
    neighbors_vars.neighbors[neighborIndex].numRx                     = 0;
    neighbors_vars.neighbors[neighborIndex].numTx                     = 0;
    neighbors_vars.neighbors[neighborIndex].numTxACK                  = 0;

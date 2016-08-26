@@ -68,8 +68,10 @@ owerror_t iphc_sendFromForwarding(
     uint8_t      sam;
     // take ownership over the packet
     msg->owner = COMPONENT_IPHC;
+
    
     // error checking
+//TODO-Fabrice: no, the CoAP app may be implemented on the DAGroot
     if (idmanager_getIsDAGroot()==TRUE &&
         packetfunctions_isAllRoutersMulticast(&(msg->l3_destinationAdd))==FALSE) {
         openserial_printCritical(COMPONENT_IPHC,ERR_BRIDGE_MISMATCH,
@@ -77,7 +79,7 @@ owerror_t iphc_sendFromForwarding(
                             (errorparameter_t)0);
         return E_FAIL;
     }
-   
+
     //discard the packet.. hop limit reached.
     if (ipv6_outer_header->src.type != ADDR_NONE){
         // there is IPinIP check hop limit in ip in ip encapsulation
@@ -106,7 +108,7 @@ owerror_t iphc_sendFromForwarding(
     //xv poipoi -- get the src prefix as well
     packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);
     //XV -poipoi we want to check if the source address prefix is the same as destination prefix
-    if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {
+    if (packetfunctions_sameAddress_debug(&temp_dest_prefix,&temp_src_prefix,COMPONENT_IPHC)) {
         sam = IPHC_SAM_64B;    // no ipinip 6loRH if in the same prefix
     } else {
         //not the same prefix. so the packet travels to another network
@@ -121,7 +123,7 @@ owerror_t iphc_sendFromForwarding(
     }
 
     //IPinIP 6LoRH will be added at here if necessary.
-    if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)){
+    if (packetfunctions_sameAddress_debug(&temp_dest_prefix,&temp_src_prefix,COMPONENT_IPHC)){
         // same network, IPinIP is elided
     } else {
         if (packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))==FALSE){
@@ -130,11 +132,11 @@ owerror_t iphc_sendFromForwarding(
             if (
                 (
                   ipv6_outer_header->src.type == ADDR_NONE &&
-                  packetfunctions_sameAddress(&(msg->l3_sourceAdd),&(temp_dagroot_ip128b))
+                  packetfunctions_sameAddress_debug(&(msg->l3_sourceAdd),&(temp_dagroot_ip128b),COMPONENT_IPHC)
                 ) || 
                 (
                   ipv6_outer_header->src.type != ADDR_NONE &&
-                  packetfunctions_sameAddress(&(ipv6_outer_header->src),&(temp_dagroot_ip128b))
+                  packetfunctions_sameAddress_debug(&(ipv6_outer_header->src),&(temp_dagroot_ip128b),COMPONENT_IPHC)
                  )
             ){
                 // hop limit
@@ -229,15 +231,28 @@ void iphc_receive(OpenQueueEntry_t* msg) {
     memset(&ipv6_inner_header,0,sizeof(ipv6_header_iht));
     memset(&rpl_option,0,sizeof(rpl_option_ht));
     
+    //DAGROOT -> openbridge for debug (to openvizualizer)
+    //TODO-Fabrice: forwrd to openbridge
+    if (idmanager_getIsDAGroot()){
+       openbridge_receive(msg);
+
+    #ifndef IPHC_FORWARD_UPPER
+       openqueue_freePacketBuffer(msg);
+       return;
+    #endif
+    }
+
+
     // then regular header
     iphc_retrieveIPv6Header(msg,&ipv6_outer_header,&ipv6_inner_header,&page_length);
     
     // if the address is broadcast address, the ipv6 header is the inner header
-    if (
+ /*   if (
         idmanager_getIsDAGroot()==FALSE ||
         packetfunctions_isBroadcastMulticast(&(ipv6_inner_header.dest))
     ) {
-        packetfunctions_tossHeader(msg,page_length);
+   */
+    packetfunctions_tossHeader(msg,page_length);
         if (
             ipv6_outer_header.next_header==IANA_IPv6HOPOPT &&
             ipv6_outer_header.hopByhop_option != NULL
@@ -261,10 +276,15 @@ void iphc_receive(OpenQueueEntry_t* msg) {
             &ipv6_outer_header,
             &ipv6_inner_header,
             &rpl_option
+
         );
-   } else {
-      openbridge_receive(msg);                   //out to the OpenVisualizer
-   }
+  // }
+    //DAGROOT -> openbridge for debug (to openvizualizer)
+    //TODO-Fabrice: forwrd to openbridge, not twice
+   // else {
+   //   openbridge_receive(msg);                   //out to the OpenVisualizer
+  // }
+
 }
 
 //=========================== private =========================================

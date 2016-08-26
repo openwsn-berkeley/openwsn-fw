@@ -37,6 +37,8 @@ void openapps_init(void) {
    cstorm_init();
    cwellknown_init();
    rrt_init();
+   //periodic coap application
+   cexample_init();
    // TCP
    techo_init();
    // UDP

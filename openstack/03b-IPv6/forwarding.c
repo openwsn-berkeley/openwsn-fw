@@ -13,6 +13,9 @@
 #include "debugpins.h"
 #include "scheduler.h"
 
+
+
+
 //=========================== variables =======================================
 
 //=========================== prototypes ======================================
@@ -110,7 +113,7 @@ owerror_t forwarding_send(OpenQueueEntry_t* msg) {
     //xv poipoi -- get the src prefix as well
     packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd),&temp_src_prefix,&temp_src_mac64b);
     //XV -poipoi we want to check if the source address prefix is the same as destination prefix
-    if (packetfunctions_sameAddress(&temp_dest_prefix,&temp_src_prefix)) {
+    if (packetfunctions_sameAddress_debug(&temp_dest_prefix,&temp_src_prefix,COMPONENT_FORWARDING)) {
          // same prefix use 64B address
          sam = IPHC_SAM_64B;
          dam = IPHC_DAM_64B;
@@ -247,6 +250,7 @@ void forwarding_receive(
         (
             idmanager_isMyAddress(&(msg->l3_destinationAdd))
             ||
+
             packetfunctions_isBroadcastMulticast(&(msg->l3_destinationAdd))
         )
         &&
@@ -278,13 +282,19 @@ void forwarding_receive(
             
             // free packet
             openqueue_freePacketBuffer(msg);
+
         }
     } else {
         // this packet is not for me: relay
       
         // change the creator of the packet
         msg->creator = COMPONENT_FORWARDING;
-      
+
+        //timeout when a packet is forwarded
+  #ifdef TIMEOUT_FORWARDING
+        openqueue_set_timeout(msg, QUEUE_TIMEOUT_DEFAULT);
+  #endif
+
         if (ipv6_outer_header->next_header!=IANA_IPv6ROUTE) {
             flags = rpl_option->flags;
             senderRank = rpl_option->senderRank;
@@ -356,18 +366,21 @@ void forwarding_receive(
 */
 void forwarding_getNextHop(open_addr_t* destination128b, open_addr_t* addressToWrite64b) {
    uint8_t         i;
-   open_addr_t     temp_prefix64btoWrite;
+   //open_addr_t     temp_prefix64btoWrite;
    
-   if (packetfunctions_isBroadcastMulticast(destination128b)) {
+   if (packetfunctions_isBroadcastMulticast_debug(destination128b, 84)) {
       // IP destination is broadcast, send to 0xffffffffffffffff
       addressToWrite64b->type = ADDR_64B;
       for (i=0;i<8;i++) {
          addressToWrite64b->addr_64b[i] = 0xff;
       }
-   } else if (neighbors_isStableNeighbor(destination128b)) {
-      // IP destination is 1-hop neighbor, send directly
-      packetfunctions_ip128bToMac64b(destination128b,&temp_prefix64btoWrite,addressToWrite64b);
-   } else {
+   }
+   //TODO Fabrice: we don't have to bypass a next hop selected by the other laeyers (RPL)
+   //else if (neighbors_isStableNeighbor(destination128b)) {
+   //   // IP destination is 1-hop neighbor, send directly
+   //   packetfunctions_ip128bToMac64b(destination128b,&temp_prefix64btoWrite,addressToWrite64b);
+   //}
+   else {
       // destination is remote, send to preferred parent
       icmpv6rpl_getPreferredParentEui64(addressToWrite64b);
    }
@@ -390,8 +403,21 @@ owerror_t forwarding_send_internal_RoutingTable(
       rpl_option_ht*         rpl_option,
       uint32_t*              flow_label,
       uint8_t                fw_SendOrfw_Rcv
-   ) {
-   
+) {
+
+   //limits the number of packets to enqueue coming from outside (reserve space for 6top, and management)
+#ifdef FORWARDING_LIMIT_QUEUE
+   if (openqueue_overflow())
+      openserial_printError(
+            COMPONENT_FORWARDING,
+            ERR_OPENQUEUE_OVERSIZE,
+            (errorparameter_t)0,
+            (errorparameter_t)0
+      );
+   return E_FAIL;
+#endif
+
+
    // retrieve the next hop from the routing table
    forwarding_getNextHop(&(msg->l3_destinationAdd),&(msg->l2_nextORpreviousHop));
    if (msg->l2_nextORpreviousHop.type==ADDR_NONE) {
@@ -519,8 +545,8 @@ owerror_t forwarding_send_internal_SourceRouting(
     
     packetfunctions_ip128bToMac64b(&firstAddr,&temp_prefix,&temp_addr64);
     if (
-        packetfunctions_sameAddress(&temp_prefix,idmanager_getMyID(ADDR_PREFIX)) &&
-        packetfunctions_sameAddress(&temp_addr64,idmanager_getMyID(ADDR_64B))
+        packetfunctions_sameAddress_debug(&temp_prefix,idmanager_getMyID(ADDR_PREFIX),COMPONENT_FORWARDING) &&
+        packetfunctions_sameAddress_debug(&temp_addr64,idmanager_getMyID(ADDR_64B),COMPONENT_FORWARDING)
     ){
         size = temp_8b & RH3_6LOTH_SIZE_MASK;
         if (size > 0){

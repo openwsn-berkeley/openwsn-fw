@@ -22,7 +22,8 @@ static const uint8_t chTemplate_default[] = {
 
 //=========================== define ==========================================
 
-#define SYNCHRONIZING_CHANNEL       20 // channel the mote listens on to synchronize
+
+#define SYNCHRONIZING_CHANNEL        16 // channel the mote listens on to synchronize
 #define TXRETRIES                    3 // number of MAC retries before declaring failed
 #define TX_POWER                    31 // 1=-25dBm, 31=0dBm (max value)
 #define RESYNCHRONIZATIONGUARD       5 // in 32kHz ticks. min distance to the end of the slot to successfully synchronize
@@ -30,7 +31,7 @@ static const uint8_t chTemplate_default[] = {
 #define EBPERIOD                    30 // in seconds: sending EB every 30 seconds
 #define MAXKAPERIOD               2000 // in slots: @15ms per slot -> ~30 seconds. Max value used by adaptive synchronization.
 #define DESYNCTIMEOUT             2333 // in slots: @15ms per slot -> ~35 seconds. A larger DESYNCTIMEOUT is needed if using a larger KATIMEOUT.
-#define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
+#define LIMITLARGETIMECORRECTION    10 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
 
@@ -260,6 +261,7 @@ typedef struct {
    int16_t                   minCorrection;           // minimum time correction
    int16_t                   maxCorrection;           // maximum time correction
    uint8_t                   numDeSync;               // number of times a desync happened
+   uint8_t                   isSync;                  // is this node synchronized?
    uint32_t                  numTicsOn;               // mac dutyCycle
    uint32_t                  numTicsTotal;            // total tics for which the dutycycle is computed
 } ieee154e_stats_t;
@@ -278,6 +280,7 @@ typedef struct {
 void               ieee154e_init(void);
 // public
 PORT_RADIOTIMER_WIDTH   ieee154e_asnDiff(asn_t* someASN);
+void               notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error);     //a packet transmission failed/succeeded
 bool               ieee154e_isSynch(void);
 void               ieee154e_getAsn(uint8_t* array);
 void               ieee154e_setIsAckEnabled(bool isEnabled);
@@ -293,8 +296,10 @@ void               ieee154e_endOfFrame(PORT_RADIOTIMER_WIDTH capturedTime);
 // misc
 bool               debugPrint_asn(void);
 bool               debugPrint_isSync(void);
+bool               ieee154e_is_ongoing(uint8_t creator);
+OpenQueueEntry_t*  ieee154e_getOngoingTx(void);
 bool               debugPrint_macStats(void);
-
+uint8_t            calculateFrequency(uint8_t channelOffset);
 /**
 \}
 \}

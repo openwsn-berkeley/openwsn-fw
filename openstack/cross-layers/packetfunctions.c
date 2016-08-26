@@ -79,6 +79,41 @@ void packetfunctions_mac16bToMac64b(open_addr_t* mac16b, open_addr_t* mac64btoWr
 
 //======= address recognition
 
+bool packetfunctions_isBroadcastMulticast_debug(open_addr_t* address, uint8_t code) {
+   uint8_t i;
+   uint8_t address_length;
+   //IPv6 multicast
+   if (address->type==ADDR_128B) {
+      if (address->addr_128b[0]==0xff) {
+         return TRUE;
+      } else {
+         return FALSE;
+      }
+   }
+   //15.4 broadcast
+   switch (address->type) {
+      case ADDR_16B:
+         address_length = 2;
+         break;
+      case ADDR_64B:
+         address_length = 8;
+         break;
+      default:
+         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+                               (errorparameter_t)address->type,
+                               (errorparameter_t)code);
+         return FALSE;
+   }
+   for (i=0;i<address_length;i++) {
+      if (address->addr_128b[i]!=0xFF) {
+         return FALSE;
+      }
+   }
+   return TRUE;
+}
+
+
+
 bool packetfunctions_isBroadcastMulticast(open_addr_t* address) {
    uint8_t i;
    uint8_t address_length;
@@ -157,6 +192,38 @@ bool packetfunctions_isAllHostsMulticast(open_addr_t* address) {
       address->addr_128b[14] == 0x00 &&
       address->addr_128b[15] == 0x01
    ) {
+      return TRUE;
+   }
+   return FALSE;
+}
+
+bool packetfunctions_sameAddress_debug(open_addr_t* address_1, open_addr_t* address_2, uint8_t component) {
+   uint8_t address_length;
+
+   if (address_1->type!=address_2->type) {
+      return FALSE;
+   }
+   switch (address_1->type) {
+      case ADDR_16B:
+      case ADDR_PANID:
+         address_length = 2;
+         break;
+      case ADDR_64B:
+      case ADDR_PREFIX:
+         address_length = 8;
+         break;
+      case ADDR_128B:
+      case ADDR_ANYCAST:
+         address_length = 16;
+         break;
+
+      default:
+         openserial_printCritical(COMPONENT_PACKETFUNCTIONS,ERR_WRONG_ADDR_TYPE,
+                               (errorparameter_t)address_1->type,
+                               (errorparameter_t)100+component);
+         return FALSE;
+   }
+   if (memcmp((void*)address_1->addr_128b,(void*)address_2->addr_128b,address_length)==0) {
       return TRUE;
    }
    return FALSE;

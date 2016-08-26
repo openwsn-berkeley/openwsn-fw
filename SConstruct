@@ -78,7 +78,16 @@ project:
     cryptoengine   Select appropriate crypto engine implementation
                    (dummy_crypto_engine, firmware_crypto_engine, 
                    board_crypto_engine).
-    l2_security   Use hop-by-hop encryption and authentication.
+    l2_security    Use hop-by-hop encryption and authentication.
+    distribshared  Shared cells are not contiguous
+    tracks         Track Management Method (0=none,1=one shared for all the 
+                   flows,2=one per application,3=separated for 6P and data
+    rplmetric      Metric to use with RPL (1=ETX,2=Custom,3=MinHop,4=RSSI)
+    cex_period     Period for cexample to generate data packets
+    schedalgo      Algorithm to schedule the cells for 6top (1= random,
+                   2=random_contiguous)
+    printf         Prints the string message for debug (0=inactive, 1=active)
+    
     ide           qtcreator
 
     Common variables:
@@ -135,6 +144,12 @@ command_line_options = {
     'noadaptivesync':   ['0','1'],
     'cryptoengine':     ['', 'dummy_crypto_engine', 'firmware_crypto_engine', 'board_crypto_engine'],
     'l2_security':      ['0','1'],
+    'distribshared':    ['0','1'],
+    'tracks':           ['0','1','2','3'],# 0=only TXRX, 1=one single track, 2=traffic isolation (default behavior), 3=traffic isolation+ dedicated track for LinkReqs
+    'rplmetric':        ['0','1'],		  # 1=ETX (default)
+    'cex_period':       ['50000'],         # by default, 50 seconds
+    'schedalgo':        ['0','1','2'],    # 1=random (default)
+    'printf':           ['0','1'],        # 0=inactive (default), 1=active
     'ide':              ['none','qtcreator']
 }
 
@@ -277,6 +292,48 @@ command_line_vars.AddVariables(
         'l2_security',                                     # key
         '',                                                # help
         command_line_options['l2_security'][0],            # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),                                  
+    (
+        'distribshared',                                   # key
+        '',                                                # help
+        command_line_options['distribshared'][1],          # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'tracks',                                          # key
+        '',                                                # help
+        command_line_options['tracks'][2],                 # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'rplmetric',                                       # key
+        '',                                                # help
+        command_line_options['rplmetric'][1],              # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'cex_period',                                      # key
+        '',                                                # help
+        command_line_options['cex_period'][0],             # default
+        None,                                              # validator
+        int,                                               # converter
+    ),
+    (
+        'schedalgo',                                       # key
+        '',                                                # help
+        command_line_options['schedalgo'][1],              # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'printf',                                          # key
+        '',                                                # help
+        command_line_options['schedalgo'][0],              # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

@@ -26,6 +26,8 @@ void uinject_task_cb(void);
 //=========================== public ==========================================
 
 void uinject_init() {
+   return;
+
    
    // clear local variables
    memset(&uinject_vars,0,sizeof(uinject_vars_t));

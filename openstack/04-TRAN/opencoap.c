@@ -258,6 +258,15 @@ void opencoap_receive(OpenQueueEntry_t* msg) {
    
    //=== step 4. send that packet back
    
+   //particular case: the dagroot does not reply to CoAP messages (openbrdge should do so, we just  have here a log purpose)
+ #ifdef OPENCOAP_DROPREP_DAGROOT
+    if (outcome == E_SUCCESS && idmanager_getIsDAGroot()){
+       openqueue_freePacketBuffer(msg);
+       return;
+    }
+ #endif
+
+
    // fill in packet metadata
    if (found==TRUE) {
       msg->creator                     = temp_desc->componentID;
