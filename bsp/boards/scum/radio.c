@@ -49,15 +49,19 @@ void radio_init() {
     
     // enable sfd done and send done interruptions of tranmission
     // enable sfd done and receiving done interruptions of reception
-    RFCONTROLLER_REG__INT_CONFIG    = TX_SFD_DONE_INT_EN    |   \
-                                      TX_SEND_DONE_INT_EN   |   \
-                                      RX_SFD_DONE_INT_EN    |   \
-                                      RX_DONE_INT_EN;
+    RFCONTROLLER_REG__INT_CONFIG    = TX_SFD_DONE_INT_EN            |   \
+                                      TX_SEND_DONE_INT_EN           |   \
+                                      RX_SFD_DONE_INT_EN            |   \
+                                      RX_DONE_INT_EN                |   \
+                                      TX_SFD_DONE_RFTIMER_PULSE_EN  |   \
+                                      TX_SEND_DONE_RFTIMER_PULSE_EN |   \
+                                      RX_SFD_DONE_RFTIMER_PULSE_EN  |   \
+                                      RX_DONE_RFTIMER_PULSE_EN;
     // Enable all errors
-    RFCONTROLLER_REG__ERROR_CONFIG  = TX_OVERFLOW_ERROR_EN  |   \
-                                      TX_CUTOFF_ERROR_EN    |   \
-                                      RX_OVERFLOW_ERROR_EN  |   \
-                                      RX_CRC_ERROR_EN       |   \
+    RFCONTROLLER_REG__ERROR_CONFIG  = TX_OVERFLOW_ERROR_EN          |   \
+                                      TX_CUTOFF_ERROR_EN            |   \
+                                      RX_OVERFLOW_ERROR_EN          |   \
+                                      RX_CRC_ERROR_EN               |   \
                                       RX_CUTOFF_ERROR_EN;
     
     // change state
@@ -287,10 +291,10 @@ kick_scheduler_t radio_isr() {
             radio_vars.state    = RADIOSTATE_RECEIVING;
         }
         if (radio_vars.startFrame_cb!=NULL) {
-            // call the callback
-            radio_vars.startFrame_cb(capturedTime);
             // clear interruption bit
             RFCONTROLLER_REG__INT_CLEAR = irq_status;
+            // call the callback
+            radio_vars.startFrame_cb(capturedTime);
             // kick the OS
             return KICK_SCHEDULER;
         }
@@ -311,10 +315,10 @@ kick_scheduler_t radio_isr() {
         // update the radio state
         radio_vars.state        = RADIOSTATE_TXRX_DONE;
         if (radio_vars.endFrame_cb!=NULL) {
-            // call the callback
-            radio_vars.endFrame_cb(capturedTime);
             // clear interruption bit
             RFCONTROLLER_REG__INT_CLEAR = irq_status;
+            // call the callback
+            radio_vars.endFrame_cb(capturedTime);
             // kick the OS
             return KICK_SCHEDULER;
         } else {

@@ -239,7 +239,7 @@ kick_scheduler_t radiotimer_isr() {
         interrupt_flag & RFTIMER_REG__INT_COMPARE4_INT  ||
         interrupt_flag & RFTIMER_REG__INT_COMPARE5_INT
     ) {
-        // timer compare interrupt
+        // Compare interrupt for scheduled timer
         if (radiotimer_vars.compare_cb!=NULL) {
             // clear the responding interrupt bit in the order of: 
             // [TxLoad interrupt->TxSend interrupt, RxStart interrupt ]->NormalTimer interrupt]
@@ -262,6 +262,7 @@ kick_scheduler_t radiotimer_isr() {
             return KICK_SCHEDULER;
         }
     } else {
+        // Compare interrupt for overflow timer ( fired at zero)
         if (interrupt_flag & RFTIMER_REG__INT_COMPARE1_INT) {
             // timer overflows interrupt
             if (radiotimer_vars.overflow_cb!=NULL) {
@@ -272,6 +273,7 @@ kick_scheduler_t radiotimer_isr() {
                 return KICK_SCHEDULER;
             }
         } else {
+            // Compare interrupt for bsp timer
             if (interrupt_flag & RFTIMER_REG__INT_COMPARE0_INT) {
                 // bsp timer interrupt is handled in radiotimer module
                 // clear the interrupt bit and call the callback
