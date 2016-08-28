@@ -1140,13 +1140,13 @@ port_INLINE void activity_ti3() {
 }
 
 port_INLINE void activity_tie2() {
-   // log the error
+    // log the error
    openserial_printError(COMPONENT_IEEE802154E,ERR_WDRADIO_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
                          (errorparameter_t)ieee154e_vars.slotOffset);
-   
-   // abort
-   endSlot();
+    
+    // abort
+    endSlot();
 }
 
 //start of frame interrupt
@@ -1160,25 +1160,25 @@ port_INLINE void activity_ti4(PORT_RADIOTIMER_WIDTH capturedTime) {
     // cancel tt3
     radiotimer_cancel();
 #endif
-   // record the captured time
-   ieee154e_vars.lastCapturedTime = capturedTime;
+    // record the captured time
+    ieee154e_vars.lastCapturedTime = capturedTime;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-   // arm tt4
-   radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt4);
+    // arm tt4
+    radiotimer_schedule(ACTION_NORMAL_TIMER,DURATION_tt4);
 #else
-   // arm tt4
-   radiotimer_schedule(DURATION_tt4);
+    // arm tt4
+    radiotimer_schedule(DURATION_tt4);
 #endif
 }
 
 port_INLINE void activity_tie3() {
-   // log the error
-   openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
+    // log the error
+    openserial_printError(COMPONENT_IEEE802154E,ERR_WDDATADURATION_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
                          (errorparameter_t)ieee154e_vars.slotOffset);
-   
-   // abort
-   endSlot();
+    
+    // abort
+    endSlot();
 }
 
 port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
@@ -1244,8 +1244,12 @@ port_INLINE void activity_ti6() {
     // configure the radio for that frequency
     radio_setFrequency(ieee154e_vars.freq);
     
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // enable the radio in Rx mode. The radio is not actively listening yet.
+    radio_rxEnable_scum();
+#else
     radio_rxEnable();
+#endif
     
     //caputre init of radio for duty cycle calculation
     ieee154e_vars.radioOnInit=radio_getTimerValue();
@@ -1475,9 +1479,12 @@ port_INLINE void activity_ri2() {
     
     // configure the radio for that frequency
     radio_setFrequency(ieee154e_vars.freq);
-    
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+    radio_rxEnable_scum();
+#else
     // enable the radio in Rx mode. The radio does not actively listen yet.
     radio_rxEnable();
+#endif
     ieee154e_vars.radioOnInit=radio_getTimerValue();
     ieee154e_vars.radioOnThisSlot=TRUE;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
