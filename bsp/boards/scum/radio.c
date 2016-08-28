@@ -203,12 +203,9 @@ void radio_rxEnable() {
     
     // change state
     radio_vars.state            = RADIOSTATE_ENABLING_RX;
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-#else
     DMA_REG__RF_RX_ADDR         = &(radio_vars.radio_rx_buffer[0]);
     // start to listen
     RFCONTROLLER_REG__CONTROL   = RX_START;
-#endif
     // wiggle debug pin
     debugpins_radio_set();
     leds_radio_on();
@@ -216,6 +213,18 @@ void radio_rxEnable() {
     // change state
     radio_vars.state            = RADIOSTATE_LISTENING;
 
+}
+
+void radio_rxEnable_scum(void){
+    // change state
+    radio_vars.state            = RADIOSTATE_ENABLING_RX;
+    
+    // wiggle debug pin
+    debugpins_radio_set();
+    leds_radio_on();
+    
+    // change state
+    radio_vars.state            = RADIOSTATE_LISTENING;
 }
 
 void radio_rxNow() {

@@ -74,6 +74,7 @@ void                radio_txNow(void);
 // RX
 void                radio_rxPacket_prepare(void);
 void                radio_rxEnable(void);
+void                radio_rxEnable_scum(void);
 void                radio_rxNow(void);
 void                radio_getReceivedFrame(uint8_t* bufRead,
                                 uint8_t* lenRead,
