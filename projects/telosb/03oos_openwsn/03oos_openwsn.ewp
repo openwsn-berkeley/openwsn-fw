@@ -67,20 +67,20 @@
         <option>
           <name>Input variant</name>
           <version>2</version>
-          <state>0</state>
+          <state>3</state>
         </option>
         <option>
           <name>Input description</name>
-          <state>Automatic choice of formatter.</state>
+          <state>No specifier n, no float or long long.</state>
         </option>
         <option>
           <name>Output variant</name>
           <version>2</version>
-          <state>0</state>
+          <state>3</state>
         </option>
         <option>
           <name>Output description</name>
-          <state>Automatic choice of formatter.</state>
+          <state>No specifier a or A.</state>
         </option>
         <option>
           <name>GRuntimeLibSelectSlave</name>
@@ -237,7 +237,7 @@
         <option>
           <name>CCAllowList</name>
           <version>1</version>
-          <state>10010</state>
+          <state>00000</state>
         </option>
         <option>
           <name>CCObjUseModuleName</name>
@@ -381,7 +381,7 @@
         </option>
         <option>
           <name>CCOptLevel</name>
-          <state>2</state>
+          <state>1</state>
         </option>
         <option>
           <name>CCOptStrategy</name>
@@ -390,7 +390,7 @@
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>2</state>
+          <state>1</state>
         </option>
         <option>
           <name>CInput</name>
@@ -730,7 +730,7 @@
         </option>
         <option>
           <name>XList</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>SegmentMap</name>
@@ -838,7 +838,7 @@
         </option>
         <option>
           <name>ModuleSummary</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>XlinkStackSize</name>
@@ -912,7 +912,7 @@
         </option>
         <option>
           <name>ListOutputFormat</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>BufferedTermOutput</name>
@@ -2525,6 +2525,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.c</name>
+        <excluded>
+          <configuration>Debug</configuration>
+        </excluded>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\04-TRAN\opentcp.h</name>

@@ -475,8 +475,8 @@ port_INLINE void activity_synchronize_newSlot() {
    // increment ASN (used only to schedule serial activity)
    incrementAsnOffset();
    
-   // trigger to debug stuff to be printed every 16 slots
-   if        ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0000) {
+   // trigger to debug stuff to be printed every 2 slots
+   if        ((ieee154e_vars.asn.bytes0and1&0x0001)==0x0000) {
       openserial_triggerDebugprint();
    }
 }
@@ -488,11 +488,11 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
       return;
    }
    
-   // change state
-   changeState(S_SYNCRX);
-   
    // inihibit serial activity
    openserial_inhibitStart();
+   
+   // change state
+   changeState(S_SYNCRX);
    
    // record the captured time 
    ieee154e_vars.lastCapturedTime = capturedTime;
@@ -662,6 +662,9 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
    
    // return to listening state
    changeState(S_SYNCLISTEN);
+   
+   // enable serial
+   openserial_inhibitStop();
 }
 
 port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
@@ -2307,6 +2310,9 @@ void endSlot() {
    
    // change state
    changeState(S_SLEEP);
+   
+   // resume serial activity
+   openserial_inhibitStop();
 }
 
 bool ieee154e_isSynch(){

@@ -32,7 +32,6 @@ to this board.
                                             debugpins_intdisabled_set();
    #define ENABLE_INTERRUPTS()              debugpins_intdisabled_clr(); \
                                             __set_interrupt_state(s);
-                                            
 #endif
 
 //===== timer

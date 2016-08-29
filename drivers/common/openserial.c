@@ -42,7 +42,7 @@ owerror_t openserial_printInfoErrorCritical(
 );
 
 // command handlers
-void openserial_handleRxFrame();
+void openserial_handleRxFrame(void);
 void openserial_handleEcho(uint8_t* but, uint8_t bufLen);
 void openserial_handleCommands(void);
 
@@ -527,6 +527,8 @@ void openserial_handleEcho(uint8_t* buf, uint8_t bufLen){
 }
 
 void openserial_handleCommands(void){
+    return;
+    /*
    uint8_t  input_buffer[10];
    uint8_t  numDataBytes;
    uint8_t  commandId;
@@ -667,6 +669,7 @@ void openserial_handleCommands(void){
            // wrong command ID
            break;
    }
+    */
 }
 
 //===== misc

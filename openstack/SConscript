@@ -30,7 +30,7 @@ sources_c = [
     os.path.join('03b-IPv6','icmpv6rpl.c'),
     #=== 04-TRAN
     os.path.join('04-TRAN','opencoap.c'),
-    os.path.join('04-TRAN','opentcp.c'),
+    #os.path.join('04-TRAN','opentcp.c'),
     os.path.join('04-TRAN','openudp.c'),
     #=== cross-layers
     os.path.join('cross-layers','idmanager.c'),
@@ -117,7 +117,7 @@ else:
             os.path.join('#','openapps','cstorm'),
             os.path.join('#','openapps','cwellknown'),
             os.path.join('#','openapps','rrt'),
-            os.path.join('#','openapps','techo'),
+            #os.path.join('#','openapps','techo'),
             os.path.join('#','openapps','tohlone'),
             os.path.join('#','openapps','uecho'),
             os.path.join('#','openapps','uinject'),

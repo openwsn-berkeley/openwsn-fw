@@ -19,6 +19,20 @@
 
 //=========================== prototypes ======================================
 
+
+//=========================== low-level init ==================================
+
+#if defined(__GNUC__) && (__GNUC__==4)  && (__GNUC_MINOR__<=5) && defined(__MSP430__)
+   
+#else
+    // tell IAR NOT to intialize all variables
+    // see https://www.iar.com/support/tech-notes/general/my-msp430-does-not-start-up/
+int __low_level_init(void) {
+    WDTCTL = WDTPW + WDTHOLD;
+    return 1;
+}
+#endif
+
 //=========================== main ============================================
 
 extern int mote_main(void);

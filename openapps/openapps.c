@@ -38,7 +38,7 @@ void openapps_init(void) {
    cwellknown_init();
    rrt_init();
    // TCP
-   techo_init();
+   //techo_init();
    // UDP
-//   uecho_init();
+   // uecho_init();
 }

@@ -144,7 +144,7 @@ owerror_t openserial_printSniffedPacket(
     uint8_t             length,
     uint8_t             channel
 );
-void openserial_triggerDebugprint();
+void openserial_triggerDebugprint(void);
 
 // receiving
 uint8_t   openserial_getInputBufferFillLevel(void);
