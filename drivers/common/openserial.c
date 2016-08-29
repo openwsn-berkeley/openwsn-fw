@@ -146,7 +146,6 @@ owerror_t openserial_printError(
 ) {
     // toggle error LED
     leds_error_toggle();
-    debugpins_frame_toggle();//poipoipoi
     
     return openserial_printInfoErrorCritical(
         SERFRAME_MOTE2PC_ERROR,
