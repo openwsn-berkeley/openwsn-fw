@@ -1114,6 +1114,10 @@ port_INLINE void activity_ti2() {
 #endif
     // change state
     changeState(S_TXDATAREADY);
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+    // update state in advance
+    changeState(S_TXDATADELAY);
+#endif
 }
 
 port_INLINE void activity_tie1() {
@@ -1127,15 +1131,15 @@ port_INLINE void activity_tie1() {
 }
 
 port_INLINE void activity_ti3() {
-   // change state
-   changeState(S_TXDATADELAY);
+    // change state
+    changeState(S_TXDATADELAY);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
-   // arm tt3
-   radiotimer_schedule(DURATION_tt3);
-
-   // give the 'go' to transmit
-   radio_txNow();
+    // arm tt3
+    radiotimer_schedule(DURATION_tt3);
+    
+    // give the 'go' to transmit
+    radio_txNow();
 #endif
 }
 
@@ -1332,8 +1336,12 @@ port_INLINE void activity_ti8(PORT_RADIOTIMER_WIDTH capturedTime) {
 }
 
 port_INLINE void activity_tie6() {
-   // abort
-   endSlot();
+    // log the error
+    openserial_printError(COMPONENT_IEEE802154E,ERR_WDACKDURATION_OVERFLOWS,
+                         (errorparameter_t)ieee154e_vars.state,
+                         (errorparameter_t)ieee154e_vars.slotOffset);
+    // abort
+    endSlot();
 }
 
 port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
@@ -1780,94 +1788,97 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
 }
 
 port_INLINE void activity_ri6() {
-   
-   // change state
-   changeState(S_TXACKPREPARE);
+    
+    // change state
+    changeState(S_TXACKPREPARE);
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
-   // get a buffer to put the ack to send in
-   ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
-   if (ieee154e_vars.ackToSend==NULL) {
-      // log the error
-      openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
+    // get a buffer to put the ack to send in
+    ieee154e_vars.ackToSend = openqueue_getFreePacketBuffer(COMPONENT_IEEE802154E);
+    if (ieee154e_vars.ackToSend==NULL) {
+        // log the error
+        openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      // indicate we received a packet anyway (we don't want to loose any)
-      notif_receive(ieee154e_vars.dataReceived);
-      // free local variable
-      ieee154e_vars.dataReceived = NULL;
-      // abort
-      endSlot();
-      return;
-   }
-   
-   // declare ownership over that packet
-   ieee154e_vars.ackToSend->creator = COMPONENT_IEEE802154E;
-   ieee154e_vars.ackToSend->owner   = COMPONENT_IEEE802154E;
-   
-   // calculate the time timeCorrection (this is the time the sender is off w.r.t to this node. A negative number means
-   // the sender is too late.
-   ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
-   
-   // prepend the IEEE802.15.4 header to the ACK
-   ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
-   ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
-
-   // To send ACK, we use the same security level (including NOSEC) and keys
-   // that were present in the DATA packet.
-   ieee154e_vars.ackToSend->l2_securityLevel = ieee154e_vars.dataReceived->l2_securityLevel;
-   ieee154e_vars.ackToSend->l2_keyIdMode     = ieee154e_vars.dataReceived->l2_keyIdMode;
-   ieee154e_vars.ackToSend->l2_keyIndex      = ieee154e_vars.dataReceived->l2_keyIndex;
-
-   ieee802154_prependHeader(ieee154e_vars.ackToSend,
+        // indicate we received a packet anyway (we don't want to loose any)
+        notif_receive(ieee154e_vars.dataReceived);
+        // free local variable
+        ieee154e_vars.dataReceived = NULL;
+        // abort
+        endSlot();
+        return;
+    }
+    
+    // declare ownership over that packet
+    ieee154e_vars.ackToSend->creator = COMPONENT_IEEE802154E;
+    ieee154e_vars.ackToSend->owner   = COMPONENT_IEEE802154E;
+    
+    // calculate the time timeCorrection (this is the time the sender is off w.r.t to this node. A negative number means
+    // the sender is too late.
+    ieee154e_vars.timeCorrection = (PORT_SIGNED_INT_WIDTH)((PORT_SIGNED_INT_WIDTH)TsTxOffset-(PORT_SIGNED_INT_WIDTH)ieee154e_vars.syncCapturedTime);
+    
+    // prepend the IEEE802.15.4 header to the ACK
+    ieee154e_vars.ackToSend->l2_frameType = IEEE154_TYPE_ACK;
+    ieee154e_vars.ackToSend->l2_dsn       = ieee154e_vars.dataReceived->l2_dsn;
+    
+    // To send ACK, we use the same security level (including NOSEC) and keys
+    // that were present in the DATA packet.
+    ieee154e_vars.ackToSend->l2_securityLevel = ieee154e_vars.dataReceived->l2_securityLevel;
+    ieee154e_vars.ackToSend->l2_keyIdMode     = ieee154e_vars.dataReceived->l2_keyIdMode;
+    ieee154e_vars.ackToSend->l2_keyIndex      = ieee154e_vars.dataReceived->l2_keyIndex;
+    
+    ieee802154_prependHeader(ieee154e_vars.ackToSend,
                             ieee154e_vars.ackToSend->l2_frameType,
                             FALSE,//no payloadIE in ack
                             ieee154e_vars.dataReceived->l2_dsn,
                             &(ieee154e_vars.dataReceived->l2_nextORpreviousHop)
                             );
-   
-   // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
-   if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
-      if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
-     	   openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
-     	   endSlot();
-     	   return;
-      }
-   }
+    
+    // if security is enabled, encrypt directly in OpenQueue as there are no retransmissions for ACKs
+    if (ieee154e_vars.ackToSend->l2_securityLevel != IEEE154_ASH_SLF_TYPE_NOSEC) {
+        if (IEEE802154_SECURITY.outgoingFrame(ieee154e_vars.ackToSend) != E_SUCCESS) {
+            openqueue_freePacketBuffer(ieee154e_vars.ackToSend);
+            endSlot();
+            return;
+        }
+    }
     // space for 2-byte CRC
    packetfunctions_reserveFooterSize(ieee154e_vars.ackToSend,2);
 #endif
     // calculate the frequency to transmit on
-   ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
-   
-   // configure the radio for that frequency
-   radio_setFrequency(ieee154e_vars.freq);
-   
-   // load the packet in the radio's Tx buffer
-   radio_loadPacket(ieee154e_vars.ackToSend->payload,
+    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
+    
+    // configure the radio for that frequency
+    radio_setFrequency(ieee154e_vars.freq);
+    
+    // load the packet in the radio's Tx buffer
+    radio_loadPacket(ieee154e_vars.ackToSend->payload,
                     ieee154e_vars.ackToSend->length);
-   
-   // enable the radio in Tx mode. This does not send that packet.
-   radio_txEnable();
-   ieee154e_vars.radioOnInit=radio_getTimerValue();
-   ieee154e_vars.radioOnThisSlot=TRUE;
+    
+    // enable the radio in Tx mode. This does not send that packet.
+    radio_txEnable();
+    ieee154e_vars.radioOnInit=radio_getTimerValue();
+    ieee154e_vars.radioOnThisSlot=TRUE;
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
 #else
-   // arm rt6
-   radiotimer_schedule(DURATION_rt6);
+    // arm rt6
+    radiotimer_schedule(DURATION_rt6);
 #endif
-   // change state
-   changeState(S_TXACKREADY);
+    // change state
+    changeState(S_TXACKREADY);
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
+    changeState(S_TXACKDELAY);
+#endif
 }
 
 port_INLINE void activity_rie4() {
-   // log the error
-   openserial_printError(COMPONENT_IEEE802154E,ERR_MAXTXACKPREPARE_OVERFLOWS,
+    // log the error
+    openserial_printError(COMPONENT_IEEE802154E,ERR_MAXTXACKPREPARE_OVERFLOWS,
                          (errorparameter_t)ieee154e_vars.state,
                          (errorparameter_t)ieee154e_vars.slotOffset);
    
-   // abort
-   endSlot();
+    // abort
+    endSlot();
 }
 
 port_INLINE void activity_ri7() {
