@@ -475,14 +475,9 @@ port_INLINE void activity_synchronize_newSlot() {
    // increment ASN (used only to schedule serial activity)
    incrementAsnOffset();
    
-   // to be able to receive and transmist serial even when not synchronized
-   // take turns every 8 slots sending and receiving
+   // trigger to debug stuff to be printed every 16 slots
    if        ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0000) {
-      openserial_stop();
-      openserial_startOutput();
-   } else if ((ieee154e_vars.asn.bytes0and1&0x000f)==0x0008) {
-      openserial_stop();
-      openserial_startInput();
+      openserial_triggerDebugprint();
    }
 }
 
@@ -496,8 +491,8 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
    // change state
    changeState(S_SYNCRX);
    
-   // stop the serial
-   openserial_stop();
+   // inihibit serial activity
+   openserial_inhibitStart();
    
    // record the captured time 
    ieee154e_vars.lastCapturedTime = capturedTime;
@@ -908,12 +903,13 @@ port_INLINE void activity_ti1ORri1() {
       }       
    } else {
       // this is NOT the next active slot, abort
-      // stop using serial
-      openserial_stop();
-      // abort the slot
+      
+       // abort the slot
       endSlot();
-      //start outputing serial
-      openserial_startOutput();
+      
+      // trigger debug prints
+      openserial_triggerDebugprint();
+      
       return;
    }
    
@@ -922,8 +918,8 @@ port_INLINE void activity_ti1ORri1() {
    switch (cellType) {
       case CELLTYPE_TXRX:
       case CELLTYPE_TX:
-         // stop using serial
-         openserial_stop();
+         // inhibit serial activity
+         openserial_inhibitStart();
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
          // check whether we can send
@@ -964,8 +960,8 @@ port_INLINE void activity_ti1ORri1() {
          }
       case CELLTYPE_RX:
          if (changeToRX==FALSE) {
-            // stop using serial
-            openserial_stop();
+            // inhibit serial activity
+            openserial_inhibitStart();
          }
          // change state
          changeState(S_RXDATAOFFSET);
@@ -973,15 +969,14 @@ port_INLINE void activity_ti1ORri1() {
          radiotimer_schedule(DURATION_rt1);
          break;
       case CELLTYPE_SERIALRX:
-         // stop using serial
-         openserial_stop();
          // abort the slot
          endSlot();
-         //start inputting serial data
-         openserial_startInput();
+         // enable serial
+         openserial_inhibitStop();
+         
          //this is to emulate a set of serial input slots without having the slotted structure.
 
-         //skip the serial rx slots
+         // skip the serial rx slots
          ieee154e_vars.numOfSleepSlots = NUMSERIALRX;
          
          //increase ASN by NUMSERIALRX-1 slots as at this slot is already incremented by 1
@@ -1017,8 +1012,8 @@ port_INLINE void activity_ti1ORri1() {
          // do nothing (not even endSlot())
          break;
       default:
-         // stop using serial
-         openserial_stop();
+         // inhibit serial activity
+         openserial_inhibitStart();
          // log the error
          openserial_printCritical(COMPONENT_IEEE802154E,ERR_WRONG_CELLTYPE,
                                (errorparameter_t)cellType,
@@ -2235,10 +2230,12 @@ void endSlot() {
   
    // turn off the radio
    radio_rfOff();
+   
    // compute the duty cycle if radio has been turned on
    if (ieee154e_vars.radioOnThisSlot==TRUE){  
       ieee154e_vars.radioOnTics+=(radio_getTimerValue()-ieee154e_vars.radioOnInit);
    }
+   
    // clear any pending timer
    radiotimer_cancel();
    
@@ -2246,7 +2243,7 @@ void endSlot() {
    ieee154e_vars.lastCapturedTime = 0;
    ieee154e_vars.syncCapturedTime = 0;
    
-   //computing duty cycle.
+   // computing duty cycle.
    ieee154e_stats.numTicsOn+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
    ieee154e_stats.numTicsTotal+=radio_getTimerPeriod();//increment total tics by timer period.
 
@@ -2254,8 +2251,8 @@ void endSlot() {
       ieee154e_stats.numTicsTotal = ieee154e_stats.numTicsTotal>>1;
       ieee154e_stats.numTicsOn    = ieee154e_stats.numTicsOn>>1;
    }
-
-   //clear vars for duty cycle on this slot   
+   
+   // clear vars for duty cycle on this slot   
    ieee154e_vars.radioOnTics=0;
    ieee154e_vars.radioOnThisSlot=FALSE;
    
@@ -2307,7 +2304,6 @@ void endSlot() {
       // reset local variable
       ieee154e_vars.ackReceived = NULL;
    }
-   
    
    // change state
    changeState(S_SLEEP);

@@ -19,15 +19,6 @@
 
 //=========================== prototypes ======================================
 
-// these are part of the TelosB port only, so not present in debugpins.h, only
-// in debugpins.c. We therefore need to extern them.
-extern void debugpins_isruarttx_toggle();
-extern void debugpins_isruarttx_clr();
-extern void debugpins_isruarttx_set();
-extern void debugpins_isruartrx_toggle();
-extern void debugpins_isruartrx_clr();
-extern void debugpins_isruartrx_set();
-
 //=========================== main ============================================
 
 extern int mote_main(void);

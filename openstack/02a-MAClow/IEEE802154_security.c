@@ -15,6 +15,7 @@
 #include "idmanager.h"
 #include "openserial.h"
 #include "IEEE802154_security.h"
+#include "debugpins.h"
 
 //=============================define==========================================
 

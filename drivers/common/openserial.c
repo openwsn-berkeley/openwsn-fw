@@ -30,6 +30,8 @@ openserial_vars_t openserial_vars;
 
 //=========================== prototypes ======================================
 
+extern void sniffer_setListeningChannel(uint8_t channel);
+
 // printing
 owerror_t openserial_printInfoErrorCritical(
     char             severity,
@@ -565,7 +567,7 @@ void openserial_handleCommands(void){
        case COMMAND_SET_CHANNEL:
            // set communication channel for protocol stack
            ieee154e_setSingleChannel(comandParam_8); // one byte
-           // set listenning channel for sniffer
+           // set listening channel for sniffer
            sniffer_setListeningChannel(comandParam_8); // one byte
            break;
        case COMMAND_SET_KAPERIOD: // two bytes, in slots
