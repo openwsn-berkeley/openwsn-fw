@@ -65,7 +65,7 @@ int mote_main(void) {
       debugpins_task_set();
       if (app_vars.timerFired==TRUE) {
          app_vars.timerFired = FALSE;
-         //poipoipoi openserial_triggerDebugprint();
+         openserial_triggerDebugprint();
          if (app_vars.fInhibit==TRUE) {
             debugpins_slot_clr();
             openserial_inhibitStart();
