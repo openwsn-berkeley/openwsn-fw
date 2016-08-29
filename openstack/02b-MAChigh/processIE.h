@@ -178,7 +178,8 @@ uint8_t           processIE_prepend_sixSubID(
 );
 uint8_t           processIE_prepend_sixCelllist(
     OpenQueueEntry_t*    pkt,
-    cellInfo_ht*         cellList
+    cellInfo_ht*         cellList,
+    track_t*             track
 );
 /*uint8_t          processIE_prependBlacklistIE(
    OpenQueueEntry_t*    pkt,
@@ -199,7 +200,8 @@ void            processIE_retrieve_sixCelllist(
     OpenQueueEntry_t*   pkt,
     uint8_t             ptr,
     uint8_t             length,
-    cellInfo_ht*        cellList
+    cellInfo_ht*        cellList,
+    track_t*            track
 );
 
 #endif

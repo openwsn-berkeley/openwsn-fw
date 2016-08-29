@@ -267,11 +267,11 @@ enum {
    ERR_INVALIDPACKETFROMRADIO          = 0x37, // invalid packet from radio, length {1} (code location {0})
    ERR_BUSY_RECEIVING                  = 0x38, // busy receiving when stop of serial activity, buffer input length {1} (code location {0})
    ERR_WRONG_CRC_INPUT                 = 0x39, // wrong CRC in input Buffer (input length {0})
-   ERR_PACKET_SYNC                     = 0x3a, // synchronized when received a packet
+   ERR_PACKET_SYNC                     = 0x3a, // frame received at asn {0} with timeCorrection of {1}
    ERR_SECURITY                        = 0x3b, // security error on frameType {0}, code location {1}
    ERR_SIXTOP_RETURNCODE               = 0x3c, // sixtop return code {0} at sixtop state {1}
-   ERR_SIXTOP_COUNT                    = 0x3d, // there are {0} cells to request mote
-   ERR_SIXTOP_LIST                     = 0x3e, // the cells reserved to request mote contains slot {0} and slot {1}
+   ERR_SIXTOP_COUNT                    = 0x3d, // 6P count command returns Number of scheduled cells: {0}
+   ERR_SIXTOP_LIST                     = 0x3e, // 6P List returns cells [({0},{1})]
    ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x3f, // the slot {0} to be added is already in schedule
    //NEW FABRICE
    ERR_OTF_INSUFFICIENT                = 0x40, // otf does not have enough cells (trackInstance {0}, nbCells to add {1})

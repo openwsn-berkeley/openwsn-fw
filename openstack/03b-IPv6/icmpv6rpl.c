@@ -15,7 +15,7 @@
 
 
 
-#define _DEBUG_DAO_
+//#define _DEBUG_DAO_
 //#define _DEBUG_DIO_
 
 //=========================== variables =======================================
@@ -258,7 +258,7 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
          break;
       case IANA_ICMPv6_RPL_DIO:
          // update neighbor table
-         icmpv6rpl_indicateRxDIO(msg);
+         //icmpv6rpl_indicateRxDIO(msg);
 
          if (idmanager_getIsDAGroot()==TRUE) {
             // stop here if I'm in the DAG root
@@ -270,7 +270,6 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
             (icmpv6rpl_dio_ht*)(msg->payload),
             sizeof(icmpv6rpl_dio_ht)
          );
-
          
          // write DODAGID in DIO and DAO
          icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
@@ -302,8 +301,8 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
 #endif
 
          // this should never happen
-         //         if (!idmanager_getIsDAGroot())
-         openserial_printError(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
+         if (!idmanager_getIsDAGroot())
+            openserial_printError(COMPONENT_ICMPv6RPL,ERR_UNEXPECTED_DAO,
                (errorparameter_t)0,
                (errorparameter_t)0);
 
@@ -423,6 +422,17 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
    
    // loop through neighbor table, update myDAGrank
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
+
+ /*     open_addr_t      NeighborAddress;
+      neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i); // this neighbor entry is in use
+      char str[150];
+      sprintf(str, "RANK neigh ");
+      openserial_ncat_uint8_t_hex(str, NeighborAddress.addr_64b[6], 150);
+      openserial_ncat_uint8_t_hex(str, NeighborAddress.addr_64b[7], 150);
+      strncat(str, ", stable= ", 150);
+      openserial_ncat_uint32_t(str, (uint32_t)neighbors_isStableNeighborByIndex(i), 150);
+*/
+
       if (neighbors_isStableNeighborByIndex(i)) { // in use and link is stable
          // get link cost to this neighbor
          rankIncrease=neighbors_getLinkMetric(i);
@@ -430,24 +440,17 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
          // TODO
          // get this neighbor's advertized rank
          neighborRank=neighbors_getNeighborRank(i);
+
+ /*        strncat(str, ", rank=", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)neighbors_getNeighborRank(i), 150);
+         strncat(str, ", metric= ", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)neighbors_getLinkMetric(i), 150);
+*/
          // if this neighbor has unknown/infinite rank, pass on it
          if (neighborRank==DEFAULTDAGRANK) continue;
          // compute tentative cost of full path to root through this neighbor
          tentativeDAGrank = (uint32_t)neighborRank+rankIncrease;
          if (tentativeDAGrank > 65535) {tentativeDAGrank = 65535;}
-
-         open_addr_t      NeighborAddress;
-         neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i); // this neighbor entry is in use
-         char str[150];
-
-         sprintf(str, "RANK ");
-         openserial_ncat_uint8_t_hex(str, NeighborAddress.addr_64b[6], 150);
-         openserial_ncat_uint8_t_hex(str, NeighborAddress.addr_64b[7], 150);
-         strncat(str, ", rank=", 150);
-         openserial_ncat_uint32_t(str, (uint32_t)rankIncrease, 150);
-         strncat(str, ", metric= ", 150);
-         openserial_ncat_uint32_t(str, (uint32_t)rankIncrease, 150);
-         openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
 
 
          // if not low enough to justify switch, pass (i.e. hysterisis)
@@ -462,7 +465,8 @@ void icmpv6rpl_updateMyDAGrankAndParentSelection() {
             icmpv6rpl_vars.ParentIndex  = i;
             icmpv6rpl_vars.rankIncrease = rankIncrease;
          }
-      }
+ //        openserial_printf(COMPONENT_ICMPv6RPL, str, strlen(str));
+    }
    } 
    
    if (foundBetterParent) {
@@ -510,22 +514,17 @@ void icmpv6rpl_indicateRxDIO(OpenQueueEntry_t* msg) {
    // take ownership over the packet
    msg->owner = COMPONENT_NEIGHBORS;
    
-   // save pointer to incoming DIO header in global structure for simplfying debug.
+   // save pointer to incoming DIO header in global structure for simplifying debug.
    icmpv6rpl_vars.incomingDio = (icmpv6rpl_dio_ht*)(msg->payload);
    // quick fix: rank is two bytes in network order: need to swap bytes
    temp_8b            = *(msg->payload+2);
    icmpv6rpl_vars.incomingDio->rank = (temp_8b << 8) + *(msg->payload+3);
-
 
    // update rank of that neighbor in table
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_getNeighborEui64(&NeighborAddress, ADDR_64B, i)) { // this neighbor entry is in use
          if (packetfunctions_sameAddress_debug(&(msg->l2_nextORpreviousHop),&NeighborAddress, COMPONENT_ICMPv6RPL)) { // matching address
             neighborRank=neighbors_getNeighborRank(i);
-
-            openserial_printError(COMPONENT_ICMPv6RPL,ERR_GENERIC,
-                                           (errorparameter_t)NeighborAddress.addr_64b[7],
-                                           (errorparameter_t)neighborRank);
 
             if (
               (icmpv6rpl_vars.incomingDio->rank > neighborRank) &&
@@ -681,7 +680,7 @@ void sendDIO() {
       &(icmpv6rpl_vars.dio),
       sizeof(icmpv6rpl_dio_ht)
    );
-   
+
    // reverse the rank bytes order in Big Endian
    *(msg->payload+2) = (icmpv6rpl_vars.dio.rank >> 8) & 0xFF;
    *(msg->payload+3) = icmpv6rpl_vars.dio.rank        & 0xFF;
