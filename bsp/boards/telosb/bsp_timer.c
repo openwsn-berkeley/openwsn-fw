@@ -103,8 +103,9 @@ void bsp_timer_scheduleIn(PORT_TIMER_WIDTH delayTicks) {
    } else {
       // this is the normal case, have timer expire at newCompareValue
       TACCR0            =  newCompareValue;
-      TACCTL0          |=  CCIE;
    }
+   // enable interrupts
+   TACCTL0             |=  CCIE;
 }
 
 /**
