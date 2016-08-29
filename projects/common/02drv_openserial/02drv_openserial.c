@@ -17,6 +17,7 @@ sure all is well.
 #include "stdio.h"
 // bsp modules required
 #include "board.h"
+#include "debugpins.h"
 #include "leds.h"
 #include "uart.h"
 #include "bsp_timer.h"
@@ -26,7 +27,7 @@ sure all is well.
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD (32768/10)
+#define BSP_TIMER_PERIOD 328           // 328@32kHz ~ 10ms
 
 //=========================== variables =======================================
 
@@ -59,6 +60,7 @@ int mote_main(void) {
    
    while(1) {
       board_sleep();
+      debugpins_slot_toggle();
       if (app_vars.timerFired==1) {
          app_vars.timerFired = 0;
          if (app_vars.outputting==1) {
