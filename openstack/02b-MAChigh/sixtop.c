@@ -5,7 +5,11 @@
 #include "neighbors.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
-#include "sf0.h"
+#if (SFMETHOD == SFMETHOD_SF0)
+    #include "sf0.h"
+#elif (SFMETHOD == SFMETHOD_SFLOC)
+    #include "sfloc.h"
+#endif
 #include "packetfunctions.h"
 #include "openrandom.h"
 #include "scheduler.h"
@@ -247,7 +251,9 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
    openserial_ncat_uint32_t(str, (uint32_t)SCHEDULEIEMAXNUMCELLS, 150);
    strncat(str, ", track ", 150);
    openserial_ncat_uint32_t(str, (uint32_t)track.instance, 150);
-
+   strncat(str, ", owner=", 150);
+   openserial_ncat_uint8_t_hex(str, (uint32_t)track.owner.addr_64b[6], 150);
+   openserial_ncat_uint8_t_hex(str, (uint32_t)track.owner.addr_64b[7], 150);
    for(i=0; i<SCHEDULEIEMAXNUMCELLS; i++){
       strncat(str, ", slot ", 150);
       openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
@@ -1432,7 +1438,11 @@ void sixtop_notifyReceiveCommand(
     );
     
     //===== if the version or sfID are correct
+#if (SFMETHOD == SFMETHOD_SF0)
     if (version != IANA_6TOP_6P_VERSION || sfId != SFID_SF0){
+#elif (SFMETHOD == SFMETHOD_SFLOC)
+        if (version != IANA_6TOP_6P_VERSION || sfId != SFID_SFLOC){
+#endif
         if (version != IANA_6TOP_6P_VERSION){
             code = IANA_6TOP_RC_VER_ERR;
         } else {
@@ -1508,6 +1518,7 @@ void sixtop_notifyReceiveCommand(
                        strncat(str, ", ch ", 150);
                        openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
                     }
+                    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
 

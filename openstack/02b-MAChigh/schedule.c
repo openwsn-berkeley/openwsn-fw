@@ -7,7 +7,11 @@
 #include "idmanager.h"
 #include "IEEE802154E.h"
 #include "sixtop.h"
-#include "sf0.h"
+#if (SFMETHOD == SFMETHOD_SF0)
+    #include "sf0.h"
+#elif (SFMETHOD == SFMETHOD_SFLOC)
+    #include "sfloc.h"
+#endif
 
 
 //=========================== variables =======================================
@@ -665,8 +669,12 @@ void schedule_advanceSlot() {
    DISABLE_INTERRUPTS();
    if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
        ) {
-       // one slotframe has elapsed
+#if (SFMETHOD == SFMETHOD_SF0)
        sf0_notifyNewSlotframe();
+#elif (SFMETHOD == SFMETHOD_SFLOC)
+       sfloc_notifyNewSlotframe();
+#endif
+
    }   
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    

@@ -298,7 +298,11 @@ port_INLINE uint8_t processIE_prepend_sixGeneralMessage(
    
     //===== SFID
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+#if (SFMETHOD == SFMETHOD_SF0)
     *((uint8_t*)(pkt->payload)) = SFID_SF0;
+#elif (SFMETHOD == SFMETHOD_SFLOC)
+    *((uint8_t*)(pkt->payload)) = SFID_SFLOC;
+#endif
     len += 1;
     
     pkt->l2_sixtop_returnCode = code;

@@ -33,7 +33,14 @@
 #define IANA_6TOP_RC_ERR       0x0b // RC_ERR      | operation failed         
 
 // SF ID
-#define SFID_SF0  0
+#if (SFMETHOD == SFMETHOD_SF0)
+    #define     SFID_SF0    0
+#elif (SFMETHOD == SFMETHOD_SFLOC)
+    #define     SFID_SFLOC  1
+#endif
+
+
+
 
 // Default Ch. ID
 #define DEFAULT_CHANNEL_OFFSET 2

@@ -21,8 +21,11 @@
 #include "openhdlc.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
-#include "sf0.h"
-
+#if (SFMETHOD == SFMETHOD_SF0)
+    #include "sf0.h"
+#elif (SFMETHOD == SFMETHOD_SFLOC)
+    #include "sfloc.h"
+#endif
 
 //#define _DEBUG_OPENSERIAL_              // debug variables to verify that openstat works properly
 //#define OPENSERIAL_STAT_FALSECRC_       // should we send to openvisualizer the CRC failed frames? // it consumes bandwidth through the serial line
@@ -776,12 +779,17 @@ void openserial_handleCommands(void){
             if (foundNeighbor==FALSE) {
                 break;
             }
-             
+
+#if (SFMETHOD == SFMETHOD_SF0)
             sixtop_setHandler(SIX_HANDLER_SF0);
+#elif (SFMETHOD == SFMETHOD_SFLOC)
+            sixtop_setHandler(SIX_HANDLER_SFLOC);
+#endif
+
             if ( 
-                (
-                  commandId != COMMAND_SET_6P_ADD &&
-                  commandId != COMMAND_SET_6P_DELETE
+                    (
+                            commandId != COMMAND_SET_6P_ADD &&
+                            commandId != COMMAND_SET_6P_DELETE
                 ) ||
                 (
                     ( 
@@ -818,7 +826,12 @@ void openserial_handleCommands(void){
             }
             break;
        case COMMAND_SET_UINJECTPERIOD:
-            sf0_appPktPeriod(comandParam_8);
+#if (SFMETHOD == SFMETHOD_SF0)
+           sf0_appPktPeriod(comandParam_8);
+#elif (SFMETHOD == SFMETHOD_SFLOC)
+           sfloc_appPktPeriod(comandParam_8);
+#endif
+
             break;
        default:
            // wrong command ID

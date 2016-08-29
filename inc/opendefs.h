@@ -313,8 +313,14 @@ enum{
    TRACK_IMCPv6RPL                    = 2,   // one shared track rooted at the DAGROOT, specific for RPL unicast traffic (DAO)
    TRACK_CEXAMPLE                     = 3,   // for Cexample (application traffic)
    TRACK_PARENT_CONTROL               = 4    // to send the 6top requests toward the parent
-
 };
+
+//Scheduling Functions
+enum{
+    SFMETHOD_SF0     = 1,    //SF0
+    SFMETHOD_SFLOC   = 2     //SFLoC
+};
+#define SFMETHOD   SFMETHOD_SF0
 
 //=========================== typedef =========================================
 
