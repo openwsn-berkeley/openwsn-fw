@@ -44,18 +44,18 @@ int main(void) {
     UCTL1           =  SWRST;                    // hold UART1 module in reset
     UCTL1          |=  CHAR;                     // 8-bit character
     
+    /*
     UTCTL1         |=  SSEL0;                    // clocking from SMCLK
     UBR01           =  0x03;                     // 32768/9600 = 3.41
     UBR11           =  0x00;                     //
     UMCTL1          =  0x4A;                     // modulation
+    */
     
-    /*
     UTCTL1         |=  SSEL1;                    // clocking from SMCLK
     UBR01           =  41;                       // 4.8MHz/115200 - 41.66
     UBR11           =  0x00;                     //
     UMCTL1          =  0x4A;                     // modulation
-    */
-
+    
     ME2            |=  UTXE1 + URXE1;            // enable UART1 TX/RX
     UCTL1          &= ~SWRST;                    // clear UART1 reset bit
 
@@ -63,7 +63,7 @@ int main(void) {
 
     // TimerA
     TACCTL0         =  CCIE;                     // capture/compare interrupt enable
-    TACCR0          =  16000;                    // 16000@32kHz ~ 500ms
+    TACCR0          =  328;                      // 328@32kHz ~ 10ms
     TACTL           =  MC_1+TASSEL_1;            // up mode, using ACLK
 
     __bis_SR_register(GIE);                      // enable interrupts

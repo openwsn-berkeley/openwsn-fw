@@ -22,7 +22,7 @@ class SerialRxThread(threading.Thread):
         self.lastRxByte           = None
         self.serial = serial.Serial(
             port                  = self.serialport,
-            baudrate              = 9600,
+            baudrate              = 115200,
             xonxoff               = True,
         )
         
