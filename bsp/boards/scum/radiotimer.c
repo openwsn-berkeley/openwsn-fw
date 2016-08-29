@@ -99,7 +99,6 @@ void radiotimer_schedule(uint8_t type,PORT_RADIOTIMER_WIDTH offset) {
             
             // enable compare and tx send interrupt (this also cancels any pending interrupts)
             RFTIMER_REG__COMPARE4_CONTROL   = RFTIMER_COMPARE_ENABLE |          \
-                                              RFTIMER_COMPARE_INTERRUPT_ENABLE |\
                                               RFTIMER_COMPARE_TX_SEND_ENABLE;
             break;
         case ACTION_RADIORX_ENABLE:
@@ -131,18 +130,22 @@ void radiotimer_cancel(uint8_t type) {
         case ACTION_LOAD_PACKET:
             // disable compare and tx load interrupt
             RFTIMER_REG__COMPARE3_CONTROL   = 0x00;
+            RFTIMER_REG__COMPARE3           = 0x00;
             break;
         case ACTION_SEND_PACKET:
             // disable compare and tx send interrupt
             RFTIMER_REG__COMPARE4_CONTROL   = 0x00;
+            RFTIMER_REG__COMPARE4           = 0x00;
             break;
         case ACTION_RADIORX_ENABLE:
             // disable compare and rx start interrupt
             RFTIMER_REG__COMPARE5_CONTROL   = 0x00;
+            RFTIMER_REG__COMPARE5           = 0x00;
             break;
         case ACTION_NORMAL_TIMER:
             // disable compare interrupt
             RFTIMER_REG__COMPARE2_CONTROL   = 0x00;
+            RFTIMER_REG__COMPARE2           = 0x00;
             break;
         case ACTION_TX_SFD_DONE:
             // disable tx SFD done capture interrupt
@@ -169,6 +172,10 @@ void radiotimer_cancel(uint8_t type) {
             RFTIMER_REG__COMPARE3_CONTROL   = 0x00;
             RFTIMER_REG__COMPARE4_CONTROL   = 0x00;
             RFTIMER_REG__COMPARE5_CONTROL   = 0x00;
+            RFTIMER_REG__COMPARE2           = 0x00;
+            RFTIMER_REG__COMPARE3           = 0x00;
+            RFTIMER_REG__COMPARE4           = 0x00;
+            RFTIMER_REG__COMPARE5           = 0x00;
             break;
         default:
             // should never happens
@@ -282,7 +289,25 @@ kick_scheduler_t radiotimer_isr() {
                 // kick the OS
                 return KICK_SCHEDULER;
             } else {
-                // this should not happen
+                if (interrupt_flag & RFTIMER_REG__INT_CAPTURE0_INT){
+                    RFTIMER_REG__INT_CLEAR = RFTIMER_REG__INT_CAPTURE0_INT;
+                } else {
+                    if (interrupt_flag & RFTIMER_REG__INT_CAPTURE1_INT) {
+                        RFTIMER_REG__INT_CLEAR = RFTIMER_REG__INT_CAPTURE1_INT;
+                    } else {
+                        if (interrupt_flag & RFTIMER_REG__INT_CAPTURE2_INT) {
+                            RFTIMER_REG__INT_CLEAR = RFTIMER_REG__INT_CAPTURE2_INT;
+                        } else {
+                            if (interrupt_flag & RFTIMER_REG__INT_CAPTURE3_INT) {
+                                RFTIMER_REG__INT_CLEAR = RFTIMER_REG__INT_CAPTURE3_INT;
+                            } else {
+                                // this should not happen
+                                RFTIMER_REG__INT_CLEAR      = interrupt_flag;
+                            }
+                        }
+                    }
+                }
+                return KICK_SCHEDULER;
             }
         }
     }
