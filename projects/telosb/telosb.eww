@@ -29,6 +29,9 @@
     <path>$WS_DIR$\00std_uart0\00std_uart0.ewp</path>
   </project>
   <project>
+    <path>$WS_DIR$\00std_xon_xoff\00std_xon_xoff.ewp</path>
+  </project>
+  <project>
     <path>$WS_DIR$\01bsp_bothtimers\01bsp_bothtimers.ewp</path>
   </project>
   <project>
