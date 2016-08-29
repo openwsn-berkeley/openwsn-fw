@@ -27,13 +27,13 @@ sure all is well.
 
 //=========================== defines =========================================
 
-#define BSP_TIMER_PERIOD 328           // 328@32kHz ~ 10ms
+#define BSP_TIMER_PERIOD 328          // 328@32kHz ~ 10ms
 
 //=========================== variables =======================================
 
 typedef struct {
-   uint8_t     timerFired;
-   uint8_t     outputting;
+   bool        timerFired;
+   bool        fInhibit;
    open_addr_t addr;
 } app_vars_t;
 
@@ -52,6 +52,8 @@ openserial takes different actions according to the initial character of the str
 */
 int mote_main(void) {
    
+   memset(&app_vars,0,sizeof(app_vars_t));
+   
    board_init();
    openserial_init();
    
@@ -60,24 +62,28 @@ int mote_main(void) {
    
    while(1) {
       board_sleep();
-      debugpins_slot_toggle();
-      if (app_vars.timerFired==1) {
-         app_vars.timerFired = 0;
-         if (app_vars.outputting==1) {
-            openserial_startInput();
-            app_vars.outputting = 0;
+      debugpins_task_set();
+      if (app_vars.timerFired==TRUE) {
+         app_vars.timerFired = FALSE;
+         //poipoipoi openserial_triggerDebugprint();
+         if (app_vars.fInhibit==TRUE) {
+            debugpins_slot_clr();
+            openserial_inhibitStart();
+            app_vars.fInhibit = FALSE;
          } else {
-            openserial_startOutput();
-            app_vars.outputting = 1;
+            debugpins_slot_set();
+            openserial_inhibitStop();
+            app_vars.fInhibit = TRUE;
          }
       }
+      debugpins_task_clr();
    }
 }
 
 //=========================== callbacks =======================================
 
 void cb_compare(void) {
-   app_vars.timerFired = 1;
+   app_vars.timerFired = TRUE;
    bsp_timer_scheduleIn(BSP_TIMER_PERIOD);
 }
 

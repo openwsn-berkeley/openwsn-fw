@@ -16,14 +16,15 @@
 //=========================== public ==========================================
 
 void debugpins_init() {
-   P6DIR |=  0x40;      // frame     [P6.6]
-   P6DIR |=  0x80;      // slot      [P6.7]
-   P2DIR |=  0x08;      // fsm       [P2.3]
-   P2DIR |=  0x40;      // task      [P2.6]
-   P6DIR |=  0x01;      // isr       [P6.0]
-   P3DIR |=  0x20;      // isruarttx [P3.5]
-   P3DIR |=  0x10;      // isruartrx [P3.4]
-   P6DIR |=  0x02;      // radio     [P6.1]
+   P6DIR |=  0x40;      // frame       [P6.6]
+   P6DIR |=  0x80;      // slot        [P6.7]
+   P2DIR |=  0x08;      // fsm         [P2.3]
+   P2DIR |=  0x40;      // task        [P2.6]
+   P6DIR |=  0x01;      // isr         [P6.0]
+   P3DIR |=  0x20;      // isruarttx   [P3.5]
+   P3DIR |=  0x10;      // isruartrx   [P3.4]
+   P6DIR |=  0x02;      // radio       [P6.1]
+   P6DIR |=  0x08;      // intdisabled [P6.3]
 }
 
 // P6.6
@@ -112,6 +113,17 @@ void debugpins_radio_clr() {
 }
 void debugpins_radio_set() {
    P6OUT |=  0x02;
+}
+
+// P6.3
+void debugpins_intdisabled_toggle() {
+   P6OUT ^=  0x08;
+}
+void debugpins_intdisabled_clr() {
+   P6OUT &= ~0x08;
+}
+void debugpins_intdisabled_set() {
+   P6OUT |=  0x08;
 }
 
 //=========================== private =========================================

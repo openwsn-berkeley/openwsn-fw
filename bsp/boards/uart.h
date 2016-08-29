@@ -17,6 +17,14 @@
  
 //=========================== define ==========================================
 
+#define XOFF            0x13
+#define XON             0x11
+#define XONXOFF_ESCAPE  0x12
+#define XONXOFF_MASK    0x10
+// XOFF            is transmitted as [XONXOFF_ESCAPE,           XOFF^XONXOFF_MASK]==[0x12,0x13^0x10]==[0x12,0x03]
+// XON             is transmitted as [XONXOFF_ESCAPE,            XON^XONXOFF_MASK]==[0x12,0x11^0x10]==[0x12,0x01]
+// XONXOFF_ESCAPE  is transmitted as [XONXOFF_ESCAPE, XONXOFF_ESCAPE^XONXOFF_MASK]==[0x12,0x12^0x10]==[0x12,0x02]
+
 //=========================== typedef =========================================
 
 typedef enum {
@@ -37,6 +45,7 @@ void    uart_enableInterrupts(void);
 void    uart_disableInterrupts(void);
 void    uart_clearRxInterrupts(void);
 void    uart_clearTxInterrupts(void);
+void    uart_setCTS(bool state);
 void    uart_writeByte(uint8_t byteToWrite);
 #ifdef FASTSIM
 void    uart_writeCircularBuffer_FASTSIM(uint8_t* buffer, uint8_t* outputBufIdxR, uint8_t* outputBufIdxW);

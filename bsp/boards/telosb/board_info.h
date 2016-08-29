@@ -28,8 +28,11 @@ to this board.
    // other
    #define INTERRUPT_DECLARATION()          __istate_t s;
    #define DISABLE_INTERRUPTS()             s = __get_interrupt_state(); \
-                                            __disable_interrupt();
-   #define ENABLE_INTERRUPTS()              __set_interrupt_state(s);
+                                            __disable_interrupt(); \
+                                            debugpins_intdisabled_set();
+   #define ENABLE_INTERRUPTS()              debugpins_intdisabled_clr(); \
+                                            __set_interrupt_state(s);
+                                            
 #endif
 
 //===== timer
