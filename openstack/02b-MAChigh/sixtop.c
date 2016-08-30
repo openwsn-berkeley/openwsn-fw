@@ -3,6 +3,7 @@
 #include "openserial.h"
 #include "openqueue.h"
 #include "neighbors.h"
+#include "neighbors_control.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
 #include "sf0.h"
@@ -17,6 +18,10 @@
 #include "IEEE802154_security.h"
 #include "idmanager.h"
 #include "schedule.h"
+
+//=========================== define ==========================================
+
+//#define SIXTOP_DEBUG
 
 //=========================== variables =======================================
 
@@ -39,6 +44,10 @@ void          sixtop_timeout_timer_cb(opentimer_id_t id);
 void          timer_sixtop_management_fired(void);
 void          sixtop_sendEB(void);
 void          sixtop_sendKA(void);
+void          sixtop_sendNeighborControlCommand(
+    open_addr_t* neighborAddr,
+    uint8_t command
+);
 
 //=== six2six task
 
@@ -164,6 +173,9 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
    
     // filter parameters
     if(sixtop_vars.six2six_state!=SIX_IDLE){
+#ifdef SIXTOP_DEBUG
+        printf("Mote %d sixtop wrong status code(%d)\n",idmanager_getMyID(ADDR_16B)->addr_16b[1],sixtop_vars.six2six_state);
+#endif
         return;
     }
     if (neighbor==NULL){
@@ -207,7 +219,9 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
    
     // update state
     sixtop_vars.six2six_state  = SIX_SENDING_REQUEST;
-   
+#ifdef SIXTOP_DEBUG
+    printf("Mote %d SIX_SENDING_REQUEST\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
     // take ownership
     pkt->creator = COMPONENT_SIXTOP_RES;
     pkt->owner   = COMPONENT_SIXTOP_RES;
@@ -264,7 +278,25 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
         sixtop_vars.six2six_state = SIX_WAIT_CLEARREQUEST_SENDDONE;
         break;
     }
-   
+#ifdef SIXTOP_DEBUG
+    switch(code){
+    case IANA_6TOP_CMD_ADD: 
+        printf("Mote %d SIX_WAIT_ADDREQUEST_SENDDONE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+        break;
+    case IANA_6TOP_CMD_DELETE:
+        printf("Mote %d SIX_WAIT_DELETEREQUEST_SENDDONE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+        break;
+    case IANA_6TOP_CMD_COUNT:
+        printf("Mote %d SIX_WAIT_COUNTREQUEST_SENDDONE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+        break;
+    case IANA_6TOP_CMD_LIST:
+        printf("Mote %d SIX_WAIT_LISTREQUEST_SENDDONE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+        break;
+    case IANA_6TOP_CMD_CLEAR:
+        printf("Mote %d SIX_WAIT_CLEARREQUEST_SENDDONE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+        break;
+    }
+#endif
     // arm timeout
     opentimers_setPeriod(
         sixtop_vars.timeoutTimerId,
@@ -312,10 +344,11 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
         );
         return;
     }
-   
     // update state
     sixtop_vars.six2six_state = SIX_SENDING_REQUEST;
-   
+#ifdef SIXTOP_DEBUG
+    printf("Mote %d SIX_SENDING_REQUEST\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
     // declare ownership over that packet
     pkt->creator = COMPONENT_SIXTOP_RES;
     pkt->owner   = COMPONENT_SIXTOP_RES;
@@ -354,7 +387,16 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
         sixtop_vars.six2six_state = SIX_WAIT_DELETEREQUEST_SENDDONE;
         break;
     }
-   
+#ifdef SIXTOP_DEBUG
+    switch(code){
+    case IANA_6TOP_CMD_ADD:
+        printf("Mote %d SIX_WAIT_ADDREQUEST_SENDDONE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+        break;
+    case IANA_6TOP_CMD_DELETE:
+        printf("Mote %d SIX_WAIT_DELETEREQUEST_SENDDONE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+        break;
+    }
+#endif
    // arm timeout
    opentimers_setPeriod(
       sixtop_vars.timeoutTimerId,
@@ -389,7 +431,6 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
    // set metadata
    msg->owner        = COMPONENT_SIXTOP;
    msg->l2_frameType = IEEE154_TYPE_DATA;
-
 
    // set l2-security attributes
    msg->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
@@ -456,10 +497,16 @@ void task_sixtopNotifSendDone() {
             // not busy sending EB anymore
             sixtop_vars.busySendingEB = FALSE;
          } else {
-            // this is a KA
-            
-            // not busy sending KA anymore
-            sixtop_vars.busySendingKA = FALSE;
+           
+           if (msg->l2_neighborContol == TRUE){
+              sixtop_vars.busySendingNC = FALSE;
+              msg->l2_neighborContol = FALSE;
+           } else {
+                // this is a KA
+                
+                // not busy sending KA anymore
+                sixtop_vars.busySendingKA = FALSE;
+           }
          }
          // discard packets
          openqueue_freePacketBuffer(msg);
@@ -526,6 +573,11 @@ void task_sixtopNotifReceive() {
         msg->l2_joinPriorityPresent,
         msg->l2_joinPriority
     );
+    
+    if (msg->l2_isSendToMe==TRUE){
+        neighbors_control_cancelTimer(&(msg->l2_nextORpreviousHop));
+        msg->l2_isSendToMe = FALSE;
+    }
    
     // reset it to avoid race conditions with this var.
     msg->l2_joinPriorityPresent = FALSE; 
@@ -536,13 +588,47 @@ void task_sixtopNotifReceive() {
     case IEEE154_TYPE_DATA:
     case IEEE154_TYPE_CMD:
         if (msg->length>0) {
-            // send to upper layer
-            iphc_receive(msg);
+            // check whether this is neighbor control command
+            if (
+                msg->length == 5 &&
+                *((uint8_t*)(msg->payload)+0)==0xff &&
+                *((uint8_t*)(msg->payload)+1)==0xff &&
+                *((uint8_t*)(msg->payload)+2)==0xff &&
+                *((uint8_t*)(msg->payload)+3)==0xff
+            ){
+                // this is neighbor control command
+                if (*((uint8_t*)(msg->payload)+4)==0x00){
+#ifdef SIXTOP_DEBUG
+                    printf("neighbor control received. this is %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
+                    // reject by this neighbor, remove it and update the preference neighbor
+//                    neighbors_removeByNeighbor(&(msg->l2_nextORpreviousHop));
+                    neighbors_increaseNeighborLinkCost(&(msg->l2_nextORpreviousHop));
+                    neighbors_updateMyDAGrankAndNeighborPreference();
+                } else {
+#ifdef SIXTOP_DEBUG
+                    printf("something worong at neighbor control command %d \n",*((uint8_t*)(msg->payload)+4));
+#endif
+                }
+                openqueue_freePacketBuffer(msg);
+            } else {
+                  if (neighbors_isMyNonBlockedNeighbor(&(msg->l2_nextORpreviousHop))==TRUE){
+                      // send to upper layer
+                      iphc_receive(msg);
+                  } else {
+#ifdef SIXTOP_DEBUG
+                      printf("neighbor control to send. this is %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
+                      // free the message first and inform the neighbor don't send to me
+                      sixtop_sendNeighborControlCommand(&(msg->l2_nextORpreviousHop),0);
+                      openqueue_freePacketBuffer(msg);
+                  }
+            }
         } else {
             // free up the RAM
             openqueue_freePacketBuffer(msg);
         }
-            break;
+        break;
     case IEEE154_TYPE_ACK:
     default:
         // free the packet's RAM memory
@@ -710,6 +796,9 @@ readability of the code.
 port_INLINE void sixtop_sendEB() {
    OpenQueueEntry_t* eb;
    uint8_t len;
+   open_addr_t neighbor; 
+   bool foundNeighbor=FALSE;
+   uint8_t numberOfCells;
    
    len = 0;
    
@@ -724,6 +813,25 @@ port_INLINE void sixtop_sendEB() {
       
       // stop here
       return;
+   }
+   
+   if (idmanager_getIsDAGroot()==FALSE){
+       // sendEB only I have setup my schedule with my parent
+       foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+       if (foundNeighbor==FALSE) {
+          return;
+       }
+       
+       numberOfCells = schedule_getCellsCounts(
+                SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+                CELLTYPE_RX,
+                &neighbor);
+       
+       if (numberOfCells==0){
+          // I'm now busy sending an EB
+          sixtop_vars.busySendingEB = FALSE;
+          return;
+       }
    }
    
    if (sixtop_vars.busySendingEB==TRUE) {
@@ -848,11 +956,76 @@ port_INLINE void sixtop_sendKA() {
 #endif
 }
 
+void sixtop_sendNeighborControlCommand(open_addr_t* neighborAddr,uint8_t command){
+   OpenQueueEntry_t* ncPkt;
+   
+   if (ieee154e_isSynch()==FALSE) {
+      // I'm not sync'ed
+      
+      // delete packets genereted by this module (EB and KA) from openqueue
+      openqueue_removeAllCreatedBy(COMPONENT_SIXTOP);
+      
+      // I'm now busy sending a KA
+      sixtop_vars.busySendingNC = FALSE;
+      
+      // stop here
+      return;
+   }
+   
+   if (sixtop_vars.busySendingNC==TRUE) {
+      // don't proceed if I'm still sending a KA
+      return;
+   }
+   
+   // if I get here, I will send a NC command
+   
+   // get a free packet buffer
+   ncPkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP);
+   if (ncPkt==NULL) {
+      openserial_printError(COMPONENT_SIXTOP,ERR_NO_FREE_PACKET_BUFFER,
+                            (errorparameter_t)1,
+                            (errorparameter_t)0);
+      return;
+   }
+   
+   // declare ownership over that packet
+   ncPkt->creator = COMPONENT_SIXTOP;
+   ncPkt->owner   = COMPONENT_SIXTOP;
+   
+   // some l2 information about this packet
+   ncPkt->l2_frameType = IEEE154_TYPE_DATA;
+   memcpy(&(ncPkt->l2_nextORpreviousHop),neighborAddr,sizeof(open_addr_t));
+   
+   // set l2-security attributes
+   ncPkt->l2_securityLevel   = IEEE802154_SECURITY_LEVEL;
+   ncPkt->l2_keyIdMode       = IEEE802154_SECURITY_KEYIDMODE;
+   ncPkt->l2_keyIndex        = IEEE802154_SECURITY_K2_KEY_INDEX;
+   ncPkt->l2_neighborContol  = TRUE;
+   
+   // add NC protocol
+   packetfunctions_reserveHeaderSize(ncPkt, 5);
+   ncPkt->payload[0] = 0xff;
+   ncPkt->payload[1] = 0xff;
+   ncPkt->payload[2] = 0xff;
+   ncPkt->payload[3] = 0xff;
+   ncPkt->payload[4] = command;
+
+   // put in queue for MAC to handle
+   sixtop_send_internal(ncPkt,FALSE);
+   
+   // I'm now busy sending a KA
+   sixtop_vars.busySendingNC = TRUE;
+
+}
+
 //======= six2six task
 
 void timer_sixtop_six2six_timeout_fired(void) {
    // timeout timer fired, reset the state of sixtop to idle
    sixtop_vars.six2six_state = SIX_IDLE;
+#ifdef SIXTOP_DEBUG
+    printf("Mote %d SIXTOP TIMEOUT!\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
    sixtop_vars.handler = SIX_HANDLER_NONE;
    opentimers_stop(sixtop_vars.timeoutTimerId);
 }
@@ -873,7 +1046,31 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       openqueue_freePacketBuffer(msg);
       return;
    }
-
+#ifdef SIXTOP_DEBUG
+     switch (sixtop_vars.six2six_state) {
+     case SIX_WAIT_ADDREQUEST_SENDDONE:
+         printf("Mote %d SIX_WAIT_ADDRESPONSE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+         break;
+     case SIX_WAIT_DELETEREQUEST_SENDDONE:
+         printf("Mote %d SIX_WAIT_DELETERESPONSE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+         break;
+     case SIX_WAIT_LISTREQUEST_SENDDONE:
+         printf("Mote %d SIX_WAIT_LISTRESPONSE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+         break;
+     case SIX_WAIT_COUNTREQUEST_SENDDONE:
+         printf("Mote %d SIX_WAIT_COUNTRESPONSE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+         break;
+     case SIX_WAIT_CLEARREQUEST_SENDDONE:
+         printf("Mote %d SIX_WAIT_CLEARRESPONSE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+         break;
+     case SIX_WAIT_RESPONSE_SENDDONE:
+         printf("Mote %d SIXTOP RES TO BE END\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+         break;
+     default:
+        // nothing
+       break;
+     }
+#endif
     switch (sixtop_vars.six2six_state) {
     case SIX_WAIT_ADDREQUEST_SENDDONE:
         sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
@@ -924,6 +1121,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                   
             } else{
                 if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_CLEAR){
+                    // the cell should be cleared when I received the request, following code is not required
                     schedule_removeAllCells(msg->l2_sixtop_frameID,
                                           &(msg->l2_nextORpreviousHop));
                 }
@@ -932,7 +1130,9 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         
         sixtop_vars.six2six_state = SIX_IDLE;
         opentimers_stop(sixtop_vars.timeoutTimerId);
-       
+#ifdef SIXTOP_DEBUG
+        printf("Mote %d SIXTOP RES TRANSCATION IS END\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
         if (
             msg->l2_sixtop_returnCode     == IANA_6TOP_RC_SUCCESS && 
             msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD
@@ -947,6 +1147,17 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
             } else {
                 sixtop_vars.handler = SIX_HANDLER_NONE;
             }
+        } else {
+            if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_RX,&(msg->l2_nextORpreviousHop))>0 &&
+                schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&(msg->l2_nextORpreviousHop))==0
+            ){
+               sixtop_vars.handler = SIX_HANDLER_SFX;
+               sixtop_request(
+                  IANA_6TOP_CMD_ADD,
+                  &(msg->l2_nextORpreviousHop),
+                  1
+               );
+            }
         }
         break;
     default:
@@ -954,7 +1165,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         sixtop_vars.six2six_state = SIX_IDLE;
         break;
     }
-  
     // discard reservation packets this component has created
     openqueue_freePacketBuffer(msg);
 }
@@ -1151,8 +1361,17 @@ void sixtop_notifyReceiveCommand(
                           sixtop_areAvailableCellsToBeRemoved(frameID,numOfCells,cellList,&(pkt->l2_nextORpreviousHop))
                        )
                     ){
-                        code = IANA_6TOP_RC_SUCCESS;
-                        len += processIE_prepend_sixCelllist(response_pkt,cellList);
+                        if (neighbors_getNumNeighborsNoBlocked()<NEIGHBORSCONTROL || 
+                            (
+                             neighbors_getNumNeighborsNoBlocked()==NEIGHBORSCONTROL &&
+                             neighbors_isMyNonBlockedNeighbor(&(pkt->l2_nextORpreviousHop))
+                            )
+                        ) {
+                            code = IANA_6TOP_RC_SUCCESS;
+                            len += processIE_prepend_sixCelllist(response_pkt,cellList);
+                        } else {
+                            code = IANA_6TOP_RC_RESET;
+                        }
                     } else {
                         code = IANA_6TOP_RC_ERR;
                     }
@@ -1203,6 +1422,9 @@ void sixtop_notifyReceiveCommand(
             }
             // update state
             sixtop_vars.six2six_state = SIX_WAIT_RESPONSE_SENDDONE;
+#ifdef SIXTOP_DEBUG
+        printf("Mote %d SIX_WAIT_RESPONSE_SENDDONE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
             // arm timeout
             opentimers_setPeriod(
                 sixtop_vars.timeoutTimerId,
@@ -1258,14 +1480,27 @@ void sixtop_notifyReceiveCommand(
                     code = IANA_6TOP_RC_ERR;
                 }
             } else {
-                // TBD...
+                if (commandIdORcode==IANA_6TOP_RC_RESET){
+                    // reject by this neighbor, remove it and update the preference neighbor
+//                    neighbors_removeByNeighbor(&(pkt->l2_nextORpreviousHop));
+                    neighbors_increaseNeighborLinkCost(&(pkt->l2_nextORpreviousHop));
+                    neighbors_updateMyDAGrankAndNeighborPreference();
+                } else {
+                    // TBD...
+                }
             }
            openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
                            (errorparameter_t)commandIdORcode,
                            (errorparameter_t)sixtop_vars.six2six_state);
             sixtop_vars.six2six_state = SIX_IDLE;
+            if (sixtop_vars.handler == SIX_HANDLER_NEIGHBOR_CONTROL ){
+                neighbors_removeByNeighbor(&(pkt->l2_nextORpreviousHop));
+            }
             sixtop_vars.handler = SIX_HANDLER_NONE;
             opentimers_stop(sixtop_vars.timeoutTimerId);
+#ifdef SIXTOP_DEBUG
+    printf("Mote %d SIXTOP TRANSCATION IS END\n\n\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+#endif
         }
     }
 }

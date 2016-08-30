@@ -18,8 +18,10 @@
 #include "IEEE802154_security_obj.h"
 #include "adaptive_sync_obj.h"
 #include "neighbors_obj.h"
+#include "neighbors_control_obj.h"
 #include "processIE_obj.h"
 #include "sixtop_obj.h"
+#include "sfx_obj.h"
 #include "sf0_obj.h"
 #include "schedule_obj.h"
 #include "icmpv6echo_obj.h"
@@ -222,8 +224,38 @@ struct OpenMote {
    // l2b
    sixtop_vars_t        sixtop_vars;
    neighbors_vars_t     neighbors_vars;
+   neighbors_control_vars_t neighbors_control_vars;
    schedule_vars_t      schedule_vars;
    sf0_vars_t           sf0_vars;
+   sfx_vars_t           sfx_vars;
+   // l2a
+   adaptive_sync_vars_t adaptive_sync_vars;
+   ieee802154_security_vars_t ieee802154_security_vars;
+   ieee154e_vars_t      ieee154e_vars;
+   ieee154e_stats_t     ieee154e_stats;
+   ieee154e_dbg_t       ieee154e_dbg;
+   // cross-layer
+   idmanager_vars_t     idmanager_vars;
+   openqueue_vars_t     openqueue_vars;
+   // drivers
+   opentimers_vars_t    opentimers_vars;
+   random_vars_t        random_vars;
+   openserial_vars_t    openserial_vars;
+   // kernel
+   scheduler_vars_t     scheduler_vars;
+   scheduler_dbg_t      scheduler_dbg;
+   //===== openapps
+   c6t_vars_t           c6t_vars;
+   cexample_vars_t      cexample_vars;
+   cinfo_vars_t         cinfo_vars;
+   cleds_vars_t         cleds_vars;
+   cstorm_vars_t        cstorm_vars;
+   cwellknown_vars_t    cwellknown_vars;
+   rrt_vars_t           rrt_vars;
+   //tohlone_vars_t       tohlone_vars;
+};
+
+#endif
    // l2a
    adaptive_sync_vars_t adaptive_sync_vars;
    ieee802154_security_vars_t ieee802154_security_vars;

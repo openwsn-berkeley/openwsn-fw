@@ -61,10 +61,12 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    PyObject* opencoap_vars;
    PyObject* tcp_vars;
    PyObject* neighbors_vars;
+   PyObject* neighbors_control_vars;
    PyObject* sixtop_vars;
    PyObject* sf0_vars;
    PyObject* schedule_vars;
    PyObject* schedule_dbg;
+   PyObject* sfx_vars;
    PyObject* ieee154e_vars;
    PyObject* ieee154e_stats;
    PyObject* ieee154e_dbg;
@@ -131,6 +133,11 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    // TODO
    PyDict_SetItemString(returnVal, "neighbors_vars", neighbors_vars);
    
+    // neighbors_control_vars
+   neighbors_control_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "neighbors_control_vars", neighbors_control_vars);
+   
    // sixtop_vars
    sixtop_vars = PyDict_New();
    // TODO
@@ -145,6 +152,11 @@ static PyObject* OpenMote_getState(OpenMote* self) {
    schedule_vars = PyDict_New();
    // TODO
    PyDict_SetItemString(returnVal, "schedule_vars", schedule_vars);
+   
+   // sfx_vars
+   sfx_vars = PyDict_New();
+   // TODO
+   PyDict_SetItemString(returnVal, "sfx_vars", sfx_vars);
    
    // schedule_dbg
    schedule_dbg = PyDict_New();
