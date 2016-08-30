@@ -298,9 +298,10 @@ port_INLINE uint8_t processIE_prepend_sixGeneralMessage(
    
     //===== SFID
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-#if (SFMETHOD == SFMETHOD_SF0)
+#ifdef SFMETHOD_SF0
     *((uint8_t*)(pkt->payload)) = SFID_SF0;
-#elif (SFMETHOD == SFMETHOD_SFLOC)
+#endif
+#ifdef SFMETHOD_SFLOC
     *((uint8_t*)(pkt->payload)) = SFID_SFLOC;
 #endif
     len += 1;
@@ -336,8 +337,7 @@ port_INLINE void processIE_retrieve_sixCelllist(
     OpenQueueEntry_t*   pkt,
     uint8_t             ptr,
     uint8_t             length,
-    cellInfo_ht*        cellList,
-    track_t*            track
+    cellInfo_ht*        cellList
     ){
     uint8_t i=0;
     uint8_t localptr = ptr;
@@ -363,8 +363,7 @@ port_INLINE void processIE_retrieve_sixCelllist(
 
 port_INLINE uint8_t processIE_prepend_sixCelllist(
         OpenQueueEntry_t*    pkt,
-        cellInfo_ht*         cellList,
-        track_t*             track
+        cellInfo_ht*         cellList
    ){
     uint8_t    i;
     uint8_t    len;

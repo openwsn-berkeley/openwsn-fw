@@ -21,9 +21,10 @@
 #include "openhdlc.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
-#if (SFMETHOD == SFMETHOD_SF0)
+#ifdef SFMETHOD_SF0
     #include "sf0.h"
-#elif (SFMETHOD == SFMETHOD_SFLOC)
+#endif
+#ifdef SFMETHOD_SFLOC
     #include "sfloc.h"
 #endif
 
@@ -152,33 +153,6 @@ owerror_t openserial_printStat(uint8_t type, uint8_t calling_component, uint8_t*
    ENABLE_INTERRUPTS();
 
    return E_SUCCESS;
-/*
-
-   INTERRUPT_DECLARATION();
-   DISABLE_INTERRUPTS();
-   openserial_vars.outputBufFilled  = TRUE;
-   outputHdlcOpen();
-
-   //prepare the headers  and the content
-   outputHdlcWrite(SERFRAME_MOTE2PC_STAT);
-   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[0]);
-   outputHdlcWrite(idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   outputHdlcWrite(calling_component);
-   outputHdlcWrite(asn[0]);
-   outputHdlcWrite(asn[1]);
-   outputHdlcWrite(asn[2]);
-   outputHdlcWrite(asn[3]);
-   outputHdlcWrite(asn[3]);
-   outputHdlcWrite(asn[4]);
-   outputHdlcWrite(type);
-    for (i=0;i<length;i++){
-      outputHdlcWrite(buffer[i]);
-   }
-   outputHdlcClose();
-   ENABLE_INTERRUPTS();
-
-   return E_SUCCESS;
-   */
 }
 
 
@@ -625,17 +599,32 @@ status information about several modules in the OpenWSN stack.
  *
  */
 bool debugPrint_params(){
-   debugParamsEntry_t temp;
+   debugParamsEntry_t   temp;
+
+
+
 
    temp.track_mgmt        = TRACK_MGMT;
+   temp.addr[0] = idmanager_getMyID(ADDR_16B)->addr_16b[0];
+   temp.addr[1] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
 #ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
-   temp.distr_cells       = 1;
+   temp.distr_cells       = TRUE;
 #else
-   temp.distr_cells       = 0;
+   temp.distr_cells       = FALSE;
 #endif
    temp.rpl_metric        = RPL_METRIC;
    temp.scheduling_algo   = SCHEDULING_ALGO;
    temp.cexample_period   = CEXAMPLE_PERIOD;
+#ifdef SFMETHOD_SF0
+   temp.sf0                = TRUE;
+#else
+   temp.sf0                = FALSE;
+#endif
+#ifdef SFMETHOD_SFLOC
+   temp.sfloc              = TRUE;
+#else
+   temp.sfloc              = FALSE;
+#endif
    openserial_printStatus(STATUS_PARAMS,(uint8_t*)(&temp),sizeof(temp));
    return TRUE;
 }
@@ -780,9 +769,10 @@ void openserial_handleCommands(void){
                 break;
             }
 
-#if (SFMETHOD == SFMETHOD_SF0)
+#ifdef SFMETHOD_SF0
             sixtop_setHandler(SIX_HANDLER_SF0);
-#elif (SFMETHOD == SFMETHOD_SFLOC)
+#endif
+#ifdef SFMETHOD_SFLOC
             sixtop_setHandler(SIX_HANDLER_SFLOC);
 #endif
 
@@ -799,8 +789,9 @@ void openserial_handleCommands(void){
                     commandLen == 0
                 ) 
             ){
+
                 // randomly select cell
-                sixtop_request(commandId-8,&neighbor,1, sixtop_get_trackbesteffort());
+                sixtop_request(commandId-8,&neighbor,1, sixtop_get_trackbesteffort(), 9);
             } else {
                 for (i=0;i<commandLen;i++){
                     cellList[i].tsNum           = openserial_vars.inputBuf[3+i];
@@ -826,9 +817,10 @@ void openserial_handleCommands(void){
             }
             break;
        case COMMAND_SET_UINJECTPERIOD:
-#if (SFMETHOD == SFMETHOD_SF0)
+#ifdef SFMETHOD_SF0
            sf0_appPktPeriod(comandParam_8);
-#elif (SFMETHOD == SFMETHOD_SFLOC)
+#endif
+#ifdef SFMETHOD_SFLOC
            sfloc_appPktPeriod(comandParam_8);
 #endif
 

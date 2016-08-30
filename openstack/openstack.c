@@ -22,9 +22,10 @@
 #include "schedule.h"
 #include "sixtop.h"
 #include "neighbors.h"
-#if (SFMETHOD == SFMETHOD_SF0)
+#ifdef SFMETHOD_SF0
     #include "sf0.h"
-#elif (SFMETHOD == SFMETHOD_SFLOC)
+#endif
+#ifdef SFMETHOD_SFLOC
     #include "sfloc.h"
 #endif
 //-- 03a-IPHC
@@ -69,9 +70,10 @@ void openstack_init(void) {
    schedule_init();
    sixtop_init();
    neighbors_init();
-#if (SFMETHOD == SFMETHOD_SF0)
+#ifdef SFMETHOD_SF0
     sf0_init();
-#elif (SFMETHOD == SFMETHOD_SFLOC)
+#endif
+#ifdef SFMETHOD_SFLOC
     sfloc_init();
 #endif
    //-- 03a-IPHC

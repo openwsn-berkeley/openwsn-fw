@@ -48,6 +48,9 @@ void      sfloc_notif_removedCell(void);
 // notification from schedule
 void      sfloc_notifyNewSlotframe(void);
 void      sfloc_appPktPeriod(uint8_t numAppPacketsPerSlotFrame);
+void      sfloc_verifSchedule(void);
+void      sfloc_notif_pktTx(OpenQueueEntry_t* msg);
+
 
 
 /**

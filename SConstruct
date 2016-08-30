@@ -86,6 +86,8 @@ project:
     cex_period     Period for cexample to generate data packets
     schedalgo      Algorithm to schedule the cells for 6top (1= random,
                    2=random_contiguous)
+    sf0            SF0 computes the amount of bandwidth and reserves cells
+    sfloc          SFloc allocates the cells when not enough outgoint cells exist
     printf         Prints the string message for debug (0=inactive, 1=active)
     
     ide           qtcreator
@@ -149,6 +151,8 @@ command_line_options = {
     'rplmetric':        ['0','1'],		  # 1=ETX (default)
     'cex_period':       ['50000'],         # by default, 50 seconds
     'schedalgo':        ['0','1','2'],    # 1=random (default)
+    'sf0':              ['0','1'],
+    'sfloc':            ['0','1'],
     'printf':           ['0','1'],        # 0=inactive (default), 1=active
     'ide':              ['none','qtcreator']
 }
@@ -327,6 +331,20 @@ command_line_vars.AddVariables(
         'schedalgo',                                       # key
         '',                                                # help
         command_line_options['schedalgo'][1],              # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'sf0',                                             # key
+        '',                                                # help
+        command_line_options['sf0'][1],                    # default
+        validate_option,                                   # validator
+        int,                                               # converter
+    ),
+    (
+        'sfloc',                                           # key
+        '',                                                # help
+        command_line_options['sfloc'][0],                  # default
         validate_option,                                   # validator
         int,                                               # converter
     ),

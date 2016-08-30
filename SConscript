@@ -56,6 +56,10 @@ if env['cex_period']>=1:
     env.Append(CPPDEFINES    = {'CEXAMPLE_PERIOD':env['cex_period']})
 #if env['schedalgo']>=0:
     env.Append(CPPDEFINES    = {'SCHEDULING_ALGO':env['schedalgo']})
+if env['sf0']==1:
+    env.Append(CPPDEFINES    = 'SFMETHOD_SF0')
+if env['sfloc']==1:
+    env.Append(CPPDEFINES    = 'SFMETHOD_SFLOC')
 if env['printf']==1:
     env.Append(CPPDEFINES    = 'OPENSERIAL_PRINTF')
         

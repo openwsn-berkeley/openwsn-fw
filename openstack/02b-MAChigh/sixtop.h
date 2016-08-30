@@ -33,9 +33,10 @@
 #define IANA_6TOP_RC_ERR       0x0b // RC_ERR      | operation failed         
 
 // SF ID
-#if (SFMETHOD == SFMETHOD_SF0)
+#ifdef SFMETHOD_SF0
     #define     SFID_SF0    0
-#elif (SFMETHOD == SFMETHOD_SFLOC)
+#endif
+#ifdef SFMETHOD_SFLOC
     #define     SFID_SFLOC  1
 #endif
 
@@ -53,25 +54,6 @@ enum sixtop_CommandID_num{
 
 // states of the sixtop-to-sixtop state machine
 typedef enum {
-
-/*
-    SIX_IDLE                            = 0x00,   // ready for next event
-   // ADD: source
-   SIX_SENDING_ADDREQUEST              = 0x01,   // generating LinkRequest packet
-   SIX_WAIT_ADDREQUEST_SENDDONE        = 0x02,   // waiting for SendDone confirmation
-   SIX_WAIT_ADDRESPONSE                = 0x03,   // waiting for response from the neighbor
-   SIX_ADDRESPONSE_RECEIVED            = 0x04,   // I received the link response request command
-   // ADD: destinations
-   SIX_ADDREQUEST_RECEIVED             = 0x05,   // I received the link request command
-   SIX_SENDING_ADDRESPONSE             = 0x06,   // generating resLinkRespone command packet
-//   SIX_WAIT_ADDRESPONSE_SENDDONE       = 0x07,   // waiting for SendDone confirmation
-   // REMOVE: source
-   SIX_SENDING_REMOVEREQUEST           = 0x08,   // generating resLinkRespone command packet
-   SIX_WAIT_REMOVEREQUEST_SENDDONE     = 0x09,   // waiting for SendDone confirmation
-   // REMOVE: destinations
-   SIX_REMOVEREQUEST_RECEIVED          = 0x0a    // I received the remove link request command
-*/
-
     // ready for next event
     SIX_IDLE                            = 0x00,
     // sending
@@ -144,7 +126,7 @@ bool      sixtop_isIdle(void);
 //void      sixtop_removeCell(open_addr_t*  neighbor);
 //void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 track_t   sixtop_getTrackCellsByState(uint8_t slotframeID, uint8_t numOfLink, cellInfo_ht* cellList, open_addr_t* previousHop);
-void      sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track);
+void      sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track, uint8_t location);
 void      sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 // maintaining
 void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);

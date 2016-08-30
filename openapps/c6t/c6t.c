@@ -11,6 +11,8 @@
 #include "idmanager.h"
 #include "openqueue.h"
 #include "neighbors.h"
+#include "openserial.h"
+
 
 //=========================== defines =========================================
 
@@ -89,13 +91,20 @@ owerror_t c6t_receive(
             break;
          }
          
+         openserial_printCritical(
+                          COMPONENT_C6T,ERR_GENERIC,
+                          (errorparameter_t)11,
+                          (errorparameter_t)1
+                       );
+
          sixtop_setHandler(SIX_HANDLER_SF0);
          // call sixtop
          sixtop_request(
             IANA_6TOP_CMD_ADD,
             &neighbor,
             1,
-            sixtop_get_trackbesteffort()
+            sixtop_get_trackbesteffort(),
+            9
          );
          
          // set the CoAP header
@@ -118,6 +127,11 @@ owerror_t c6t_receive(
             coap_header->Code          = COAP_CODE_RESP_PRECONDFAILED;
             break;
          }
+         openserial_printCritical(
+                          COMPONENT_C6T,ERR_GENERIC,
+                          (errorparameter_t)11,
+                          (errorparameter_t)2
+                       );
          
          sixtop_setHandler(SIX_HANDLER_SF0);
          // call sixtop
@@ -125,7 +139,8 @@ owerror_t c6t_receive(
             IANA_6TOP_CMD_DELETE,
             &neighbor,
             1,
-            sixtop_get_trackbesteffort()
+            sixtop_get_trackbesteffort(),
+            10
          );
          
          // set the CoAP header

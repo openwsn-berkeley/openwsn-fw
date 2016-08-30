@@ -193,7 +193,7 @@ enum {
    COMPONENT_SECURITY                  = 0x26,
    COMPONENT_USERIALBRIDGE             = 0x27,
    //Fabrice
-   COMPONENT_OTF                       = 0x28,
+   COMPONENT_SFLOC                     = 0x28,
 };
 
 /**
@@ -316,11 +316,14 @@ enum{
 };
 
 //Scheduling Functions
-enum{
-    SFMETHOD_SF0     = 1,    //SF0
-    SFMETHOD_SFLOC   = 2     //SFLoC
-};
-#define SFMETHOD   SFMETHOD_SF0
+#if (defined(SFMETHOD_SF0) && (defined(SFMETHOD_SFLOC)))
+    IMPOSSIBLE TO ACTIVATE BOTH SCHEDULING FUNCTIONS
+#endif
+#if (!defined(SFMETHOD_SF0) && (!defined(SFMETHOD_SFLOC)))
+    A SCHEDULING FUNCTION IS REQUIRED
+#endif
+
+
 
 //=========================== typedef =========================================
 
@@ -395,10 +398,6 @@ typedef struct {
    uint8_t       l2_numTxAttempts;               // number Tx attempts
    asn_t         l2_asn;                         // at what ASN the packet was Tx'ed or Rx'ed
    uint8_t*      l2_payload;                     // pointer to the start of the payload of l2 (used for MAC to fill in ASN in ADV)
-//   uint8_t*      l2_scheduleIE_cellObjects;      // pointer to the start of cell Objects in scheduleIE
-//   uint8_t       l2_scheduleIE_numOfCells;       // number of cells were going to be scheduled or removed.
-//   uint8_t       l2_scheduleIE_frameID;          // frameID in scheduleIE
-//   track_t       l2_bandwidthIE_track;           // track in bandwidthIE
    uint8_t*      l2_sixtop_cellObjects;          // pointer to the start of cell Objects in 6P
    uint8_t       l2_sixtop_numOfCells;           // number of cells were going to be scheduled or removed.
    uint8_t       l2_sixtop_frameID;              // frameID in 6P

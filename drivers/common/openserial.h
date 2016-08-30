@@ -190,11 +190,14 @@ END_PACK
 
 BEGIN_PACK
 typedef struct {
-   uint8_t         track_mgmt;
-   uint8_t         distr_cells;
-   uint8_t         rpl_metric;
-   uint8_t         scheduling_algo;
-   uint32_t        cexample_period;
+    uint8_t     addr[2];
+    uint8_t     track_mgmt;
+    uint8_t     distr_cells;
+    uint8_t     rpl_metric;
+    uint8_t     scheduling_algo;
+    uint32_t    cexample_period;
+    uint8_t     sf0;
+    uint8_t     sfloc;
 } debugParamsEntry_t;
 END_PACK
 
@@ -309,6 +312,7 @@ void  openserial_statDAOtx(uint8_t *parent);
 
 // -- tools
 //append a uint8_t at the end of a string
+char *openserial_ncat_uint8_t(char *str, uint8_t val, uint8_t length);
 char *openserial_ncat_uint32_t(char *str, uint32_t val, uint8_t length);
 char *openserial_ncat_uint8_t_hex(char *str, uint8_t val, uint8_t length);
 
