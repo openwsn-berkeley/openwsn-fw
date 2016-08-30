@@ -21,10 +21,10 @@
 #include "openhdlc.h"
 #include "schedule.h"
 #include "icmpv6rpl.h"
-#ifdef SFMETHOD_SF0
+#if (SFMETHOD == SFMETHOD_SF0)
     #include "sf0.h"
 #endif
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
     #include "sfloc.h"
 #endif
 
@@ -615,16 +615,7 @@ bool debugPrint_params(){
    temp.rpl_metric        = RPL_METRIC;
    temp.scheduling_algo   = SCHEDULING_ALGO;
    temp.cexample_period   = CEXAMPLE_PERIOD;
-#ifdef SFMETHOD_SF0
-   temp.sf0                = TRUE;
-#else
-   temp.sf0                = FALSE;
-#endif
-#ifdef SFMETHOD_SFLOC
-   temp.sfloc              = TRUE;
-#else
-   temp.sfloc              = FALSE;
-#endif
+   temp.sf                = SFMETHOD;
    openserial_printStatus(STATUS_PARAMS,(uint8_t*)(&temp),sizeof(temp));
    return TRUE;
 }
@@ -769,10 +760,10 @@ void openserial_handleCommands(void){
                 break;
             }
 
-#ifdef SFMETHOD_SF0
+#if (SFMETHOD == SFMETHOD_SF0)
             sixtop_setHandler(SIX_HANDLER_SF0);
 #endif
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
             sixtop_setHandler(SIX_HANDLER_SFLOC);
 #endif
 
@@ -817,10 +808,10 @@ void openserial_handleCommands(void){
             }
             break;
        case COMMAND_SET_UINJECTPERIOD:
-#ifdef SFMETHOD_SF0
+#if (SFMETHOD == SFMETHOD_SF0)
            sf0_appPktPeriod(comandParam_8);
 #endif
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
            sfloc_appPktPeriod(comandParam_8);
 #endif
 

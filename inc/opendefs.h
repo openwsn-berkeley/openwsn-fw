@@ -316,12 +316,8 @@ enum{
 };
 
 //Scheduling Functions
-#if (defined(SFMETHOD_SF0) && (defined(SFMETHOD_SFLOC)))
-    IMPOSSIBLE TO ACTIVATE BOTH SCHEDULING FUNCTIONS
-#endif
-#if (!defined(SFMETHOD_SF0) && (!defined(SFMETHOD_SFLOC)))
-    A SCHEDULING FUNCTION IS REQUIRED
-#endif
+#define SFMETHOD_SF0    1
+#define SFMETHOD_SFLOC  2
 
 
 

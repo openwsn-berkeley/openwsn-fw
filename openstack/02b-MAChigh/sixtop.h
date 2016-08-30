@@ -33,10 +33,10 @@
 #define IANA_6TOP_RC_ERR       0x0b // RC_ERR      | operation failed         
 
 // SF ID
-#ifdef SFMETHOD_SF0
+#if (SFMETHOD == SFMETHOD_SF0)
     #define     SFID_SF0    0
 #endif
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
     #define     SFID_SFLOC  1
 #endif
 

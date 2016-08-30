@@ -7,10 +7,10 @@
 #include "idmanager.h"
 #include "IEEE802154E.h"
 #include "sixtop.h"
-#ifdef SFMETHOD_SF0
+#if (SFMETHOD == SFMETHOD_SF0)
     #include "sf0.h"
 #endif
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
     #include "sfloc.h"
 #endif
 
@@ -670,10 +670,10 @@ void schedule_advanceSlot() {
    DISABLE_INTERRUPTS();
    if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
        ) {
-#ifdef SFMETHOD_SF0
+#if (SFMETHOD == SFMETHOD_SF0)
        sf0_notifyNewSlotframe();
 #endif
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
        sfloc_notifyNewSlotframe();
 #endif
 

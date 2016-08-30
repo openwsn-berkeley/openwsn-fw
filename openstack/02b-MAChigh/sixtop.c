@@ -5,10 +5,10 @@
 #include "neighbors.h"
 #include "IEEE802154E.h"
 #include "iphc.h"
-#ifdef SFMETHOD_SF0
+#if (SFMETHOD == SFMETHOD_SF0)
     #include "sf0.h"
 #endif
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
     #include "sfloc.h"
 #endif
 #include "packetfunctions.h"
@@ -790,10 +790,10 @@ owerror_t sixtop_send_internal(
    msg->owner  = COMPONENT_SIXTOP_TO_IEEE802154E;
 
    //SF notification
-#ifdef SFMETHOD_SF0
+#if (SFMETHOD == SFMETHOD_SF0)
    //nothing to do
 #endif
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
    sfloc_notif_pktTx(msg);
 #endif
 
@@ -1084,7 +1084,7 @@ void sixtop_setState(six2six_state_t state){
       opentimers_stop(sixtop_vars.timeoutTimerId);
       sixtop_vars.timeoutTimerId = TOO_MANY_TIMERS_ERROR;
       sixtop_vars.handler = SIX_HANDLER_NONE;
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
       sfloc_verifSchedule();
 #endif
    }
@@ -1457,10 +1457,10 @@ void sixtop_notifyReceiveCommand(
     
     //===== if the version or sfID are correct
 
-#ifdef SFMETHOD_SF0
+#if (SFMETHOD == SFMETHOD_SF0)
     if (version != IANA_6TOP_6P_VERSION || sfId != SFID_SF0){
 #endif
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
     if (version != IANA_6TOP_6P_VERSION || sfId != SFID_SFLOC){
 #endif
 

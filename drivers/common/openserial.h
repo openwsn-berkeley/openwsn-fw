@@ -196,8 +196,7 @@ typedef struct {
     uint8_t     rpl_metric;
     uint8_t     scheduling_algo;
     uint32_t    cexample_period;
-    uint8_t     sf0;
-    uint8_t     sfloc;
+    uint8_t     sf;
 } debugParamsEntry_t;
 END_PACK
 

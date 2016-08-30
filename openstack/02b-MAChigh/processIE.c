@@ -298,10 +298,10 @@ port_INLINE uint8_t processIE_prepend_sixGeneralMessage(
    
     //===== SFID
     packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
-#ifdef SFMETHOD_SF0
+#if (SFMETHOD == SFMETHOD_SF0)
     *((uint8_t*)(pkt->payload)) = SFID_SF0;
 #endif
-#ifdef SFMETHOD_SFLOC
+#if (SFMETHOD == SFMETHOD_SFLOC)
     *((uint8_t*)(pkt->payload)) = SFID_SFLOC;
 #endif
     len += 1;
