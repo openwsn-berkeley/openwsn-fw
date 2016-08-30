@@ -105,8 +105,7 @@ bool sfloc_reserveParentCells(void){
             IANA_6TOP_CMD_ADD,
             &parent,
             1,
-            sixtopTrack,           //SFLOC -> control track to exchange 6P transactions
-            3
+            sixtopTrack           //SFLOC -> control track to exchange 6P transactions
          );
 
 #ifdef _DEBUG_SFLOC_
@@ -344,8 +343,7 @@ void sfloc_remove_unused_cells(void){
                      IANA_6TOP_CMD_DELETE,
                      &(cell->neighbor),
                      1,
-                     sixtop_get_trackbesteffort(),           //SFLOC -> don't care of the track when a cell is REMOVED
-                     4
+                     sixtop_get_trackbesteffort()           //SFLOC -> don't care of the track when a cell is REMOVED
                   );
 
                //at most one request at a time

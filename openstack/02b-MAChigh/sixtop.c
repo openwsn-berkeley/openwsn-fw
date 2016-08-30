@@ -175,7 +175,7 @@ bool sixtop_isIdle(){
    return(sixtop_vars.six2six_state == SIX_IDLE);
 }
 
-void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track, uint8_t location){
+void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track){
     OpenQueueEntry_t* pkt;
     uint8_t           len;
     uint8_t           container;
@@ -184,12 +184,6 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
    
     memset(cellList,0,sizeof(cellList));
    
-    openserial_printError(
-                COMPONENT_SIXTOP_RES,
-                ERR_GENERIC,
-                (errorparameter_t)location,
-                (errorparameter_t)0
-            );
 
     //DEL commands CANNOT specify a track
     if (code == IANA_6TOP_CMD_DELETE && !sixtop_is_trackbesteffort(track)){
@@ -1267,15 +1261,13 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                     IANA_6TOP_CMD_DELETE,
                     &(msg->l2_nextORpreviousHop),
                     1,
-                    sixtop_get_trackbesteffort(),     //we don't care about the trackid for the suppression
-                    1
+                    sixtop_get_trackbesteffort()     //we don't care about the trackid for the suppression
                 );
                 sixtop_request(
                       IANA_6TOP_CMD_ADD,
                       &(msg->l2_nextORpreviousHop),
                       1,
-                      sixtop_get_trackbesteffort(),             //SIX_HANDLER_MAINTAIN should only be applied to the best effort track
-                      2
+                      sixtop_get_trackbesteffort()             //SIX_HANDLER_MAINTAIN should only be applied to the best effort track
                 );
             } else {
                 sixtop_vars.handler = SIX_HANDLER_NONE;

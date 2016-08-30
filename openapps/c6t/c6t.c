@@ -103,8 +103,7 @@ owerror_t c6t_receive(
             IANA_6TOP_CMD_ADD,
             &neighbor,
             1,
-            sixtop_get_trackbesteffort(),
-            9
+            sixtop_get_trackbesteffort()
          );
          
          // set the CoAP header
@@ -139,8 +138,7 @@ owerror_t c6t_receive(
             IANA_6TOP_CMD_DELETE,
             &neighbor,
             1,
-            sixtop_get_trackbesteffort(),
-            10
+            sixtop_get_trackbesteffort()
          );
          
          // set the CoAP header
