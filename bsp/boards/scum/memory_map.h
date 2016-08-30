@@ -35,35 +35,40 @@
 
 // ==== RFCONTROLLER interruption bit configuration
 
-#define TX_LOAD_DONE_INT_EN     0x001
-#define TX_SFD_DONE_INT_EN      0x002
-#define TX_SEND_DONE_INT_EN     0x004
-#define RX_SFD_DONE_INT_EN      0x008
-#define RX_DONE_INT_EN          0x010
+#define TX_LOAD_DONE_INT_EN             0x0001
+#define TX_SFD_DONE_INT_EN              0x0002
+#define TX_SEND_DONE_INT_EN             0x0004
+#define RX_SFD_DONE_INT_EN              0x0008
+#define RX_DONE_INT_EN                  0x0010
+#define TX_LOAD_DONE_RFTIMER_PULSE_EN   0x0020
+#define TX_SFD_DONE_RFTIMER_PULSE_EN    0x0040
+#define TX_SEND_DONE_RFTIMER_PULSE_EN   0x0080
+#define RX_SFD_DONE_RFTIMER_PULSE_EN    0x0100
+#define RX_DONE_RFTIMER_PULSE_EN        0x0200
 
 // ==== RFCONTROLLER error bit configuration
 
-#define TX_OVERFLOW_ERROR_EN    0x001
-#define TX_CUTOFF_ERROR_EN      0x002
-#define RX_OVERFLOW_ERROR_EN    0x004
-#define RX_CRC_ERROR_EN         0x008
-#define RX_CUTOFF_ERROR_EN      0x010
+#define TX_OVERFLOW_ERROR_EN            0x001
+#define TX_CUTOFF_ERROR_EN              0x002
+#define RX_OVERFLOW_ERROR_EN            0x004
+#define RX_CRC_ERROR_EN                 0x008
+#define RX_CUTOFF_ERROR_EN              0x010
 
 // ==== RFCONTROLLER control operation
 
-#define TX_LOAD                 0x01
-#define TX_SEND                 0x02
-#define RX_START                0x04
-#define RX_STOP                 0x08
-#define RX_RESET                0x10
+#define TX_LOAD                         0x01
+#define TX_SEND                         0x02
+#define RX_START                        0x04
+#define RX_STOP                         0x08
+#define RX_RESET                        0x10
 
 // ==== RFCONTROLLER interruption flag
 
-#define TX_LOAD_DONE_INT        0x001
-#define TX_SFD_DONE_INT         0x002
-#define TX_SEND_DONE_INT        0x004
-#define RX_SFD_DONE_INT         0x008
-#define RX_DONE_INT             0x010
+#define TX_LOAD_DONE_INT                0x01
+#define TX_SFD_DONE_INT                 0x02
+#define TX_SEND_DONE_INT                0x04
+#define RX_SFD_DONE_INT                 0x08
+#define RX_DONE_INT                     0x10
 
 // ========================== RFTIMER Registers ===============================
 
@@ -108,15 +113,14 @@
 
 // ==== RFTIMER capture control bit
 
-#define RFTIMER_CAPTURE_INTERRUPT_ENABLE                0x001
-#define RFTIMER_CAPTURE_INPUT_SEL_SOFTWARE              0x002
-#define RFTIMER_CAPTURE_INPUT_SEL_TX_LOAD_DONE          0x004
-#define RFTIMER_CAPTURE_INPUT_SEL_TX_SFD_DONE           0x008
-#define RFTIMER_CAPTURE_INPUT_SEL_TX_SEND_DONE          0x010
-#define RFTIMER_CAPTURE_INPUT_SEL_RX_SFD_DONE           0x020
-#define RFTIMER_CAPTURE_INPUT_SEL_RX_DONE               0x040
-#define RFTIMER_CAPTURE_CAPTURE_NOW                     0x080
-#define RFTIMER_CAPTURE_CLEAR                           0x100
+#define RFTIMER_CAPTURE_INTERRUPT_ENABLE                0x01
+#define RFTIMER_CAPTURE_INPUT_SEL_SOFTWARE              0x02
+#define RFTIMER_CAPTURE_INPUT_SEL_TX_LOAD_DONE          0x04
+#define RFTIMER_CAPTURE_INPUT_SEL_TX_SFD_DONE           0x08
+#define RFTIMER_CAPTURE_INPUT_SEL_TX_SEND_DONE          0x10
+#define RFTIMER_CAPTURE_INPUT_SEL_RX_SFD_DONE           0x20
+#define RFTIMER_CAPTURE_INPUT_SEL_RX_DONE               0x40
+#define RFTIMER_CAPTURE_NOW                             0x80
 
 // ==== RFTIMER control bit
 

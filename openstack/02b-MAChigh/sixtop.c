@@ -573,7 +573,7 @@ bool debugPrint_myDAGrank() {
    
    output = 0;
    
-   output = neighbors_getMyDAGrank();
+   output = icmpv6rpl_getMyDAGrank();
    openserial_printStatus(STATUS_DAGRANK,(uint8_t*)&output,sizeof(uint16_t));
    return TRUE;
 }
@@ -713,7 +713,7 @@ port_INLINE void sixtop_sendEB() {
    
    len = 0;
    
-   if ((ieee154e_isSynch()==FALSE) || (neighbors_getMyDAGrank()==DEFAULTDAGRANK)){
+   if ((ieee154e_isSynch()==FALSE) || (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK)){
       // I'm not sync'ed or I did not acquire a DAGrank
       
       // delete packets genereted by this module (EB and KA) from openqueue
