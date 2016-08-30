@@ -54,7 +54,6 @@ void                radio_setOverflowCb(radiotimer_compare_cbt cb);
 void                radio_setCompareCb(radiotimer_compare_cbt cb);
 void                radio_setStartFrameCb(radiotimer_capture_cbt cb);
 void                radio_setEndFrameCb(radiotimer_capture_cbt cb);
-radio_state_t       radio_getstate();
 // reset
 void                radio_reset(void);
 // timer

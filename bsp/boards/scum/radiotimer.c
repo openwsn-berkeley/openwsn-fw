@@ -11,6 +11,7 @@
 #include "radiotimer.h"
 #include "board.h"
 #include "bsp_timer.h"
+#include "debugpins.h"
 
 //=========================== define =======================================
 
@@ -238,33 +239,30 @@ PORT_RADIOTIMER_WIDTH radiotimer_getCapturedTime() {
 //=========================== interrupt handlers ==============================
 
 kick_scheduler_t radiotimer_isr() {
-    
     PORT_RADIOTIMER_WIDTH interrupt_flag = RFTIMER_REG__INT;
+    debugpins_isr_set();
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     if (
         interrupt_flag & RFTIMER_REG__INT_COMPARE2_INT  ||
         interrupt_flag & RFTIMER_REG__INT_COMPARE3_INT  ||
-        interrupt_flag & RFTIMER_REG__INT_COMPARE4_INT  ||
         interrupt_flag & RFTIMER_REG__INT_COMPARE5_INT
+        
     ) {
         // Compare interrupt for scheduled timer
         if (radiotimer_vars.compare_cb!=NULL) {
-            // clear the responding interrupt bit in the order of: 
-            // [TxLoad interrupt->TxSend interrupt, RxStart interrupt ]->NormalTimer interrupt]
-            if (interrupt_flag & RFTIMER_REG__INT_COMPARE3_INT){
+            // clear the responding interrupt bits
+            if (interrupt_flag & RFTIMER_REG__INT_COMPARE3_INT) {
                 RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE3_INT;
-            } else {
-                if (interrupt_flag & RFTIMER_REG__INT_COMPARE4_INT){
-                    RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE4_INT;
+            }else {
+                if (interrupt_flag & RFTIMER_REG__INT_COMPARE5_INT) {
+                    RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE5_INT;
                 } else {
-                    if (interrupt_flag & RFTIMER_REG__INT_COMPARE5_INT) {
-                        RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE5_INT;
-                    } else {
-                        RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE2_INT;
-                    }
+                    RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE2_INT;
                 }
             }
             // call the callback
             radiotimer_vars.compare_cb();
+            debugpins_isr_clr();
             // kick the OS
             return KICK_SCHEDULER;
         }
@@ -276,6 +274,7 @@ kick_scheduler_t radiotimer_isr() {
                 // clear the interrupt bit and call the callback
                 RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE1_INT;
                 radiotimer_vars.overflow_cb();
+                debugpins_isr_clr();
                 // kick the OS
                 return KICK_SCHEDULER;
             }
@@ -286,6 +285,7 @@ kick_scheduler_t radiotimer_isr() {
                 // clear the interrupt bit and call the callback
                 RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE0_INT;
                 bsp_timer_isr();
+                debugpins_isr_clr();
                 // kick the OS
                 return KICK_SCHEDULER;
             } else {
@@ -307,10 +307,51 @@ kick_scheduler_t radiotimer_isr() {
                         }
                     }
                 }
+                debugpins_isr_clr();
                 return KICK_SCHEDULER;
             }
         }
     }
+#else
+    if ( interrupt_flag & RFTIMER_REG__INT_COMPARE2_INT ) {
+        // Compare interrupt for scheduled timer
+        if (radiotimer_vars.compare_cb!=NULL) {
+            // call the callback
+            RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE2_INT;
+            radiotimer_vars.compare_cb();
+            debugpins_isr_clr();
+            // kick the OS
+            return KICK_SCHEDULER;
+        }
+    } else {
+        // Compare interrupt for overflow timer ( fired at zero)
+        if (interrupt_flag & RFTIMER_REG__INT_COMPARE1_INT) {
+            // timer overflows interrupt
+            if (radiotimer_vars.overflow_cb!=NULL) {
+                // clear the interrupt bit and call the callback
+                RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE1_INT;
+                radiotimer_vars.overflow_cb();
+                debugpins_isr_clr();
+                // kick the OS
+                return KICK_SCHEDULER;
+            }
+        } else {
+            // Compare interrupt for bsp timer
+            if (interrupt_flag & RFTIMER_REG__INT_COMPARE0_INT) {
+                // bsp timer interrupt is handled in radiotimer module
+                // clear the interrupt bit and call the callback
+                RFTIMER_REG__INT_CLEAR  = RFTIMER_REG__INT_COMPARE0_INT;
+                bsp_timer_isr();
+                debugpins_isr_clr();
+                // kick the OS
+                return KICK_SCHEDULER;
+            } else {
+                
+            }
+        }
+    }
+#endif
     RFTIMER_REG__INT_CLEAR      = interrupt_flag;
+    debugpins_isr_clr();
     return DO_NOT_KICK_SCHEDULER;
 }

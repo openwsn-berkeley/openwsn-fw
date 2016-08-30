@@ -46,7 +46,7 @@ void radio_init() {
     
     // change state
     radio_vars.state                = RADIOSTATE_STOPPED;
-    
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     // enable sfd done and send done interruptions of tranmission
     // enable sfd done and receiving done interruptions of reception
     RFCONTROLLER_REG__INT_CONFIG    = TX_SFD_DONE_INT_EN            |   \
@@ -57,6 +57,13 @@ void radio_init() {
                                       TX_SEND_DONE_RFTIMER_PULSE_EN |   \
                                       RX_SFD_DONE_RFTIMER_PULSE_EN  |   \
                                       RX_DONE_RFTIMER_PULSE_EN;
+#else
+    // enable sfd done and send done interruptions of tranmission
+    RFCONTROLLER_REG__INT_CONFIG    = TX_SFD_DONE_INT_EN            |   \
+                                      TX_SEND_DONE_INT_EN           |   \
+                                      RX_SFD_DONE_INT_EN            |   \
+                                      RX_DONE_INT_EN;
+#endif
     // Enable all errors
     RFCONTROLLER_REG__ERROR_CONFIG  = TX_OVERFLOW_ERROR_EN          |   \
                                       TX_CUTOFF_ERROR_EN            |   \
@@ -82,10 +89,6 @@ void radio_setStartFrameCb(radiotimer_capture_cbt cb) {
 
 void radio_setEndFrameCb(radiotimer_capture_cbt cb) {
     radio_vars.endFrame_cb      = cb;
-}
-
-radio_state_t radio_getstate(){
-    return radio_vars.state;
 }
 
 //===== reset
@@ -160,8 +163,7 @@ void radio_loadPacket(uint8_t* packet, uint8_t len) {
     uint8_t i;
     // change state
     radio_vars.state = RADIOSTATE_LOADING_PACKET;
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-#else
+#ifndef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     memcpy(&radio_vars.radio_tx_buffer[0],packet,len);
 
     // load packet in TXFIFO
@@ -267,8 +269,7 @@ kick_scheduler_t radio_isr() {
     PORT_TIMER_WIDTH irq_status = RFCONTROLLER_REG__INT;
     PORT_TIMER_WIDTH irq_error  = RFCONTROLLER_REG__ERROR;
 
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
-#else
+#ifndef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
     capturedTime                = radiotimer_getCapturedTime();
 #endif
     if (irq_status & TX_SFD_DONE_INT || irq_status & RX_SFD_DONE_INT){
@@ -277,48 +278,52 @@ kick_scheduler_t radio_isr() {
         if (irq_status & TX_SFD_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = RFTIMER_REG__CAPTURE0;
+            capturedTime = TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE0);
 #endif
+            RFCONTROLLER_REG__INT_CLEAR = TX_SFD_DONE_INT;
             // a SFD is just sent, update radio state
             radio_vars.state    = RADIOSTATE_TRANSMITTING;
         }
         if (irq_status & RX_SFD_DONE_INT) {
 #ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = RFTIMER_REG__CAPTURE1;
+            capturedTime = TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE1);
 #endif
+            RFCONTROLLER_REG__INT_CLEAR = RX_SFD_DONE_INT;
             // a SFD is just received, update radio state
             radio_vars.state    = RADIOSTATE_RECEIVING;
         }
         if (radio_vars.startFrame_cb!=NULL) {
-            // clear interruption bit
-            RFCONTROLLER_REG__INT_CLEAR = irq_status;
             // call the callback
             radio_vars.startFrame_cb(capturedTime);
+            debugpins_isr_clr();
             // kick the OS
             return KICK_SCHEDULER;
         }
     }
     
     if (irq_status & TX_SEND_DONE_INT || irq_status & RX_DONE_INT){
-#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
         if (irq_status & TX_SEND_DONE_INT) {
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = RFTIMER_REG__CAPTURE2;
+            capturedTime = TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE2);
+#endif
+            RFCONTROLLER_REG__INT_CLEAR = TX_SEND_DONE_INT;
         }
         if (irq_status & RX_DONE_INT) {
+#ifdef SLOT_FSM_IMPLEMENTATION_MULTIPLE_TIMER_INTERRUPT
             // get the capture Time from capture register
-            capturedTime = RFTIMER_REG__CAPTURE3;
-        }
+            capturedTime = TIMER_COUTER_CONVERT_500K_TO_32K(RFTIMER_REG__CAPTURE3);
 #endif
+            RFCONTROLLER_REG__INT_CLEAR = RX_DONE_INT;
+        }
         // the packet transmission or reception is done,
         // update the radio state
         radio_vars.state        = RADIOSTATE_TXRX_DONE;
         if (radio_vars.endFrame_cb!=NULL) {
-            // clear interruption bit
-            RFCONTROLLER_REG__INT_CLEAR = irq_status;
             // call the callback
             radio_vars.endFrame_cb(capturedTime);
+            debugpins_isr_clr();
             // kick the OS
             return KICK_SCHEDULER;
         } else {
@@ -329,9 +334,8 @@ kick_scheduler_t radio_isr() {
     if (irq_error == 0) {
         // error happens during the operation of radio. Print out the error here. 
         // To Be Done. add error description deifinition for this type of errors.
-        
         RFCONTROLLER_REG__ERROR_CLEAR = irq_error;
     }
-    
+    debugpins_isr_clr();
     return DO_NOT_KICK_SCHEDULER;
 }
