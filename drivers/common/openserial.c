@@ -602,11 +602,8 @@ bool debugPrint_params(){
    debugParamsEntry_t   temp;
 
 
-
-
+   memcpy(temp.addr, idmanager_getMyID(ADDR_64B), sizeof(temp.addr));
    temp.track_mgmt        = TRACK_MGMT;
-   temp.addr[0] = idmanager_getMyID(ADDR_16B)->addr_16b[0];
-   temp.addr[1] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
 #ifdef SCHEDULE_SHAREDCELLS_DISTRIBUTED
    temp.distr_cells       = TRUE;
 #else

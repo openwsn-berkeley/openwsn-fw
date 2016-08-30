@@ -190,7 +190,7 @@ END_PACK
 
 BEGIN_PACK
 typedef struct {
-    uint8_t     addr[2];
+    uint8_t     addr[8];
     uint8_t     track_mgmt;
     uint8_t     distr_cells;
     uint8_t     rpl_metric;
