@@ -12,6 +12,8 @@
 
 //=========================== define ==========================================
 
+#define RSSIThRESHOLD             15
+#define MAXNUMNEIGHBORS           10
 #define MAXPREFERENCE             2
 #define BADNEIGHBORMAXRSSI        -80 //dBm
 #define GOODNEIGHBORMINRSSI       -90 //dBm
@@ -58,6 +60,7 @@ void          neighbors_init(void);
 dagrank_t     neighbors_getNeighborRank(uint8_t index);
 uint8_t       neighbors_getNumNeighbors(void);
 uint16_t      neighbors_getLinkMetric(uint8_t index);
+uint8_t       neighbors_getNumNeighborsNoBlocked(void);
 open_addr_t*  neighbors_getKANeighbor(uint16_t kaPeriod);
 // setters
 void          neighbors_setNeighborRank(uint8_t index, dagrank_t rank);
@@ -67,6 +70,7 @@ bool          neighbors_isStableNeighbor(open_addr_t* address);
 bool          neighbors_isStableNeighborByIndex(uint8_t index);
 bool          neighbors_isNeighborWithLowerDAGrank(uint8_t index);
 bool          neighbors_isNeighborWithHigherDAGrank(uint8_t index);
+bool          neighbors_isMyNonBlockedNeighbor(open_addr_t* address);
 
 // updating neighbor information
 void          neighbors_indicateRx(
@@ -85,8 +89,16 @@ void          neighbors_indicateTx(
 
 // get addresses
 bool          neighbors_getNeighborEui64(open_addr_t* address,uint8_t addr_type,uint8_t index);
+bool          neighbors_getNeighborIndex(open_addr_t* address,uint8_t* index);
+// managing routing info
 // maintenance
 void          neighbors_removeOld(void);
+// neighbor controle
+void          neighbors_removeByNeighbor(open_addr_t* address);
+void          neighbors_increaseNeighborLinkCost(open_addr_t* address);
+void          neighbors_blockNeighbor(uint8_t index);
+void          neighbors_removeBlockedNeighbors();
+bool          neighbors_getContactedWithNeighborAndNotBlocked(open_addr_t* address);
 // debug
 bool          debugPrint_neighbors(void);
 

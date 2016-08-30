@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
 
-#define TIMER_DIO_TIMEOUT         10000
+#define TIMER_DIO_TIMEOUT         30000
 #define TIMER_DAO_TIMEOUT         60000
 
 // Non-Storing Mode of Operation (1)
@@ -172,6 +172,7 @@ uint8_t  icmpv6rpl_getRPLIntanceID(void);
 void     icmpv6rpl_getRPLDODAGid(uint8_t* address_128b);
 void     icmpv6rpl_setDIOPeriod(uint16_t dioPeriod);
 void     icmpv6rpl_setDAOPeriod(uint16_t daoPeriod);
+void     icmpv6rpl_setBusySending(bool value);
 bool     icmpv6rpl_getPreferredParentIndex(uint8_t* indexptr);           // new DB
 bool     icmpv6rpl_getPreferredParentEui64(open_addr_t* addressToWrite); // new DB
 bool     icmpv6rpl_isPreferredParent(open_addr_t* address);              // new DB

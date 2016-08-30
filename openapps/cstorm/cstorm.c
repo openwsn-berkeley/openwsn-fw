@@ -10,6 +10,7 @@
 //#include "ADC_Channel.h"
 #include "IEEE802154E.h"
 #include "idmanager.h"
+#include "schedule.h" 
 
 //=========================== defines =========================================
 
@@ -19,6 +20,8 @@ static const uint8_t dst_addr[]   = {
    0xbb, 0xbb, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01
 }; 
+
+#define CSTORM_PERIOD 30000 // ms
 
 //=========================== variables =======================================
 
@@ -31,7 +34,7 @@ owerror_t cstorm_receive(
    coap_header_iht*  coap_header,
    coap_option_iht*  coap_options
 );
-void cstorm_timer_cb(void);
+void cstorm_timer_cb(opentimer_id_t id);
 void cstorm_task_cb(void);
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error);
 
@@ -50,20 +53,19 @@ void cstorm_init(void) {
    cstorm_vars.desc.callbackSendDone      = &cstorm_sendDone;
    opencoap_register(&cstorm_vars.desc);
    
-   /*
    //start a periodic timer
    //comment : not running by default
-   cstorm_vars.period           = 6553; 
+   cstorm_vars.period           = CSTORM_PERIOD - 0x80 + (openrandom_get16b()&0xff); 
    
-   cstorm_vars.timerId                    = opentimers_start(
-      cstorm_vars.period,
-      TIMER_PERIODIC,TIME_MS,
-      cstorm_timer_cb
-   );
+//   cstorm_vars.timerId          = opentimers_start(
+//      cstorm_vars.period,
+//      TIMER_PERIODIC,TIME_MS,
+//      cstorm_timer_cb
+//   );
    
    //stop 
    //opentimers_stop(cstorm_vars.timerId);
-   */
+   cstorm_vars.counter = 0;
 }
 
 //=========================== private =========================================
@@ -141,17 +143,29 @@ owerror_t cstorm_receive(
 \note timer fired, but we don't want to execute task in ISR mode instead, push
    task to scheduler with CoAP priority, and let scheduler take care of it.
 */
-void cstorm_timer_cb(){
+void cstorm_timer_cb(opentimer_id_t id){
    scheduler_push_task(cstorm_task_cb,TASKPRIO_COAP);
+   cstorm_vars.period = CSTORM_PERIOD - 0x80 + (openrandom_get16b()&0xff); 
+   opentimers_setPeriod(
+      cstorm_vars.timerId,
+      TIME_MS,
+      cstorm_vars.period
+   );
 }
 
 void cstorm_task_cb() {
    OpenQueueEntry_t*    pkt;
    owerror_t            outcome;
    uint8_t              numOptions;
+   uint8_t              asnArray[5];
+   open_addr_t          address;
    
    // don't run if not synch
-   if (ieee154e_isSynch() == FALSE) return;
+   if (ieee154e_isSynch() == FALSE) {
+       // I'm not busy sending a DIO/DAO
+       cstorm_vars.busySending  = FALSE;
+       return;
+   }
    
    // don't run on dagroot
    if (idmanager_getIsDAGroot()) {
@@ -165,6 +179,23 @@ void cstorm_task_cb() {
       return;
    }
    
+   if (cstorm_vars.busySending == TRUE){
+      return;
+   }
+   
+   if (neighbors_getPreferredParentEui64(&address)==FALSE){
+      return;
+   }
+   
+   if (schedule_getCellsCounts(
+            SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+            CELLTYPE_RX,
+            &address)==0){
+      return;
+   }
+   
+   cstorm_vars.busySending = TRUE;
+   
    // if you get here, send a packet
    
    // get a packet
@@ -174,6 +205,7 @@ void cstorm_task_cb() {
                             (errorparameter_t)0,
                             (errorparameter_t)0);
       openqueue_freePacketBuffer(pkt);
+      cstorm_vars.busySending = FALSE;
       return;
    }
    
@@ -187,6 +219,26 @@ void cstorm_task_cb() {
    // add payload
    packetfunctions_reserveHeaderSize(pkt,sizeof(cstorm_payload)-1);
    memcpy(&pkt->payload[0],cstorm_payload,sizeof(cstorm_payload)-1);
+   
+   // add mote ID
+   packetfunctions_reserveHeaderSize(pkt,2);
+   pkt->payload[0] = idmanager_getMyID(ADDR_16B)->addr_16b[0];
+   pkt->payload[1] = idmanager_getMyID(ADDR_16B)->addr_16b[1];
+   
+   // add squence number
+   packetfunctions_reserveHeaderSize(pkt,sizeof(uint16_t));
+   pkt->payload[1] = (uint8_t)((cstorm_vars.counter & 0xff00)>>8);
+   pkt->payload[0] = (uint8_t)(cstorm_vars.counter & 0x00ff);
+   cstorm_vars.counter++;
+   
+   // add inital ASN
+   packetfunctions_reserveHeaderSize(pkt,sizeof(asn_t));
+   ieee154e_getAsn(asnArray);
+   pkt->payload[0] = asnArray[0];
+   pkt->payload[1] = asnArray[1];
+   pkt->payload[2] = asnArray[2];
+   pkt->payload[3] = asnArray[3];
+   pkt->payload[4] = asnArray[4];
    
    //set the TKL byte as a counter of Options
    //TODO: This is not conform with RFC7252, but yes with current dissector WS v1.10.6
@@ -229,10 +281,17 @@ void cstorm_task_cb() {
    // avoid overflowing the queue if fails
    if (outcome==E_FAIL) {
       openqueue_freePacketBuffer(pkt);
+      cstorm_vars.busySending = FALSE;
    }
 }
 
 void cstorm_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
    openqueue_freePacketBuffer(msg);
+      // I'm not busy sending anymore
+   cstorm_vars.busySending = FALSE;
+}
+
+void cstorm_setBusySending(bool value){
+   cstorm_vars.busySending = value;
 }
 

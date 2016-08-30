@@ -11,6 +11,10 @@
 #include "opentimers.h"
 #include "IEEE802154E.h"
 
+//=========================== definition ======================================
+
+//#define ICMPV6RPL_DEBUG
+
 //=========================== variables =======================================
 
 icmpv6rpl_vars_t             icmpv6rpl_vars;
@@ -513,6 +517,7 @@ void icmpv6rpl_timer_DIO_task() {
 */
 void sendDIO() {
    OpenQueueEntry_t*    msg;
+   open_addr_t          address;
    
    // stop if I'm not sync'ed
    if (ieee154e_isSynch()==FALSE) {
@@ -527,9 +532,19 @@ void sendDIO() {
       return;
    }
    
+#ifdef ICMPV6RPL_DEBUG
+    printf("Mote %d dagrank %d busySending %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1],neighbors_getMyDAGrank(),icmpv6rpl_vars.busySending);
+#endif
+   
    // do not send DIO if I have the default DAG rank
    if (icmpv6rpl_getMyDAGrank()==DEFAULTDAGRANK) {
       return;
+   }
+   
+   if (neighbors_getPreferredParentEui64(&address)==TRUE){
+     if (neighbors_getContactedWithNeighborAndNotBlocked(&address)==FALSE){
+        return;
+     }
    }
    
    // do not send DIO if I'm already busy sending
@@ -658,6 +673,17 @@ void sendDAO() {
        return;
    }
    
+   if (neighbors_getPreferredParentEui64(&address)==FALSE){
+      return;
+   }
+   
+   if (schedule_getCellsCounts(
+            SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+            CELLTYPE_RX,
+            &address)==0){
+      return;
+   }
+   
    // dont' send a DAO if you're still busy sending the previous one
    if (icmpv6rpl_vars.busySending==TRUE) {
       return;
@@ -782,9 +808,11 @@ void sendDAO() {
    
    //===== send
    if (icmpv6_send(msg)==E_SUCCESS) {
-      icmpv6rpl_vars.busySending = TRUE;
+      // DAO is not really sent out even returning with E_SUCCESS
+//      icmpv6rpl_vars.busySending = TRUE;
    } else {
       openqueue_freePacketBuffer(msg);
+      icmpv6rpl_vars.busySending = FALSE;
    }
 }
 
@@ -810,4 +838,8 @@ void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
        TIME_MS,
        daoPeriodRandom
    );
+}
+
+void     icmpv6rpl_setBusySending(bool value){
+    icmpv6rpl_vars.busySending = value;
 }

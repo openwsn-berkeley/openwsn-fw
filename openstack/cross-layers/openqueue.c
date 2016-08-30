@@ -4,6 +4,14 @@
 #include "packetfunctions.h"
 #include "IEEE802154E.h"
 #include "ieee802154_security_driver.h"
+#include "icmpv6rpl.h"
+#include "sixtop.h"
+#include "cstorm.h"
+
+
+//=========================== defination =====================================
+
+//#define OPENQUEUE_DEBUG
 
 //=========================== variables =======================================
 
@@ -78,6 +86,11 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
       if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
+#ifdef OPENQUEUE_DEBUG
+          if (openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES){
+                printf("mote %d a buffer is occupied by sixtop res\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+          }
+#endif
          ENABLE_INTERRUPTS(); 
          return &openqueue_vars.queue[i];
       }
@@ -101,6 +114,11 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (&openqueue_vars.queue[i]==pkt) {
+#ifdef OPENQUEUE_DEBUG
+          if (openqueue_vars.queue[i].creator == COMPONENT_SIXTOP_RES){
+                printf("mote %d release a sixtop res buffer\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
+          }
+#endif
          if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
             // log the error
             openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
@@ -154,6 +172,26 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
    ENABLE_INTERRUPTS();
 }
 
+void openqueue_removeAllSentTo(open_addr_t* toNeighbor){
+   uint8_t i;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++){
+      if (packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
+          if (openqueue_vars.queue[i].creator == COMPONENT_ICMPv6RPL){
+              openqueue_reset_entry(&(openqueue_vars.queue[i]));
+              icmpv6rpl_setBusySending(FALSE);
+          } else {
+              if (openqueue_vars.queue[i].creator == COMPONENT_CSTORM){
+                  openqueue_reset_entry(&(openqueue_vars.queue[i]));
+                  cstorm_setBusySending(FALSE);
+              }
+          }
+      }
+   }
+   ENABLE_INTERRUPTS();
+}
+
 //======= called by RES
 
 OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
@@ -193,29 +231,76 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (toNeighbor->type==ADDR_64B) {
+      // first to look the sixtop RES packet
+      for (i=0;i<QUEUELENGTH;i++) {
+         if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
+            openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES &&
+            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+         ){
+            ENABLE_INTERRUPTS();
+            return &openqueue_vars.queue[i];
+         }
+      }
       // a neighbor is specified, look for a packet unicast to that neigbhbor
       for (i=0;i<QUEUELENGTH;i++) {
          if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)) {
+            packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+          ) {
             ENABLE_INTERRUPTS();
             return &openqueue_vars.queue[i];
          }
       }
    } else if (toNeighbor->type==ADDR_ANYCAST) {
-      // anycast case: look for a packet which is either not created by RES
-      // or an KA (created by RES, but not broadcast)
+      // anycast case: look for a packet which is created by sixtop or DIO
       for (i=0;i<QUEUELENGTH;i++) {
          if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-             ( openqueue_vars.queue[i].creator!=COMPONENT_SIXTOP ||
-                (
+             (  // 6p packet
+                openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES
+                 ||
+                (  // KA
                    openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
                    packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
                 )
+                 ||
+                (  // DIO
+                   openqueue_vars.queue[i].creator==COMPONENT_ICMPv6RPL &&
+                   packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==TRUE
+                )
              )
-            ) {
-            ENABLE_INTERRUPTS();
-            return &openqueue_vars.queue[i];
+         ) {
+            if (openqueue_vars.queue[i].creator==COMPONENT_SIXTOP_RES && schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&openqueue_vars.queue[i].l2_nextORpreviousHop)>0){
+                // skip sixtop res packet to be sent on collision-free cells if I have  
+                continue;
+            } else {
+                ENABLE_INTERRUPTS();
+                return &openqueue_vars.queue[i];
+            }
          }
+      }
+   }
+   ENABLE_INTERRUPTS();
+   return NULL;
+}
+
+OpenQueueEntry_t* openqueue_getIpPacket(){
+   uint8_t i;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   for (i=0;i<QUEUELENGTH;i++){
+      if (openqueue_vars.queue[i].creator==COMPONENT_CSTORM) {
+         ENABLE_INTERRUPTS();
+         return &openqueue_vars.queue[i];
+      } else {
+        if (openqueue_vars.queue[i].creator==COMPONENT_FORWARDING){
+           ENABLE_INTERRUPTS();
+           return &openqueue_vars.queue[i];
+        } else {
+           if (openqueue_vars.queue[i].creator==COMPONENT_ICMPv6RPL){
+              if (packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE)
+              ENABLE_INTERRUPTS();
+              return &openqueue_vars.queue[i];
+           }
+        }
       }
    }
    ENABLE_INTERRUPTS();
