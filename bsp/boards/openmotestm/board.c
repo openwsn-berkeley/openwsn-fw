@@ -16,10 +16,13 @@
 #include "rcc.h"
 #include "nvic.h"
 #include "debugpins.h"
-#include "opentimers.h"
-#include "gpio.h"
 
 //=========================== variable ========================================
+
+//=========================== private =========================================
+
+//Configures the different GPIO ports as Analog Inputs.
+void GPIO_Config_ALL_AIN(void);
 
 //=========================== main ============================================
 
@@ -38,8 +41,6 @@ void board_init()
     
     //configure ALL GPIO to AIN to get lowest power
     GPIO_Config_ALL_AIN();
-    //configuration GPIO to measure the time from sleep to 72MHz
-    GPIO_Configuration();
     
     GPIO_InitTypeDef  GPIO_InitStructure;
   
@@ -92,12 +93,6 @@ void board_init()
 }
 
 void board_sleep() {
-  
-#ifdef DEBUG_RUN_MODE
-    // nothing need to do
-#endif
-  
-#ifdef DEBUG_SLEEP_MODE
     DBGMCU_Config(DBGMCU_SLEEP, ENABLE);
     // Enable PWR and BKP clock
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
@@ -105,28 +100,46 @@ void board_sleep() {
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM | RCC_AHBPeriph_FLITF, DISABLE);
     // enter sleep mode
     __WFI();
-#endif
-  
-#ifdef DEBUG_STOP_MODE
-    uint16_t sleepTime = radiotimer_getPeriod() - radiotimer_getCapturedTime();
-    
-    DBGMCU_Config(DBGMCU_STOP, ENABLE);
-    // Enable PWR and BKP clock
-    RCC_APB1PeriphClockCmd(RCC_APB1Periph_PWR | RCC_APB1Periph_BKP, ENABLE);
-    // Desable the SRAM and FLITF clock in Stop mode
-    RCC_AHBPeriphClockCmd(RCC_AHBPeriph_SRAM | RCC_AHBPeriph_FLITF, DISABLE);
-    // enter stop mode
-    PWR_EnterSTOPMode(PWR_Regulator_ON,PWR_STOPEntry_WFI);
-    
-    if(sleepTime > 0)
-    opentimers_sleepTimeCompesation(sleepTime);
-#endif
 }
 
 
 
 void board_reset(){
   NVIC_GenerateSystemReset();
+}
+
+// ========================== private =========================================
+
+/**
+  * @brief  Configures the different GPIO ports as Analog Inputs.
+  * @param  None
+  * @retval : None
+  */
+void GPIO_Config_ALL_AIN(void)
+{
+  GPIO_InitTypeDef GPIO_InitStructure;
+
+  /* Enable GPIOD and GPIOE clock */
+  RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_GPIOB 
+                         | RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD 
+                         | RCC_APB2Periph_AFIO, ENABLE);
+  
+    /* PA  */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+  GPIO_Init(GPIOA, &GPIO_InitStructure);
+      /* PB  */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+      /* PC  */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+  GPIO_Init(GPIOC, &GPIO_InitStructure);
+        /* PD  */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_All;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;
+  GPIO_Init(GPIOD, &GPIO_InitStructure);
 }
 
 

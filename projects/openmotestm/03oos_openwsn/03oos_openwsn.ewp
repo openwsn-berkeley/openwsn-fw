@@ -327,6 +327,8 @@
           <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\cexample\</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2031,12 +2033,6 @@
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\flash.h</name>
         </file>
         <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\gpio.c</name>
-        </file>
-        <file>
-          <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\gpio.h</name>
-        </file>
-        <file>
           <name>$PROJ_DIR$\..\..\..\bsp\boards\openmotestm\leds.c</name>
         </file>
         <file>
@@ -2159,6 +2155,15 @@
       </file>
     </group>
     <group>
+      <name>cexample</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cexample\cexample.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\cexample\cexample.h</name>
+      </file>
+    </group>
+    <group>
       <name>cinfo</name>
       <file>
         <name>$PROJ_DIR$\..\..\..\openapps\cinfo\cinfo.c</name>
@@ -2245,6 +2250,15 @@
         <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.h</name>
       </file>
     </group>
+    <group>
+      <name>userialbridge</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\userialbridge\userialbridge.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\userialbridge\userialbridge.h</name>
+      </file>
+    </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\openapps\openapps.c</name>
     </file>
@@ -2302,12 +2316,6 @@
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\neighbors.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\otf.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\processIE.c</name>
       </file>
       <file>
@@ -2318,6 +2326,12 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sixtop.c</name>
