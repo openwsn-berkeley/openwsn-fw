@@ -22,7 +22,6 @@
 #include "radiotimer.h"
 #include "spi.h"
 #include "radio.h"
-#include "rtc_timer.h"
 #include "uart.h"
 #include "debugpins.h"
 #include "rcc.h"

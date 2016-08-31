@@ -56,7 +56,6 @@ void RCC_Configuration(void)
 //when wakeup by alarm, configure rcc
 void RCC_Wakeup(void)
 {
-    GPIOC->ODR ^= 0X0010;
     //enable PLL
     RCC_PLLCmd(ENABLE);
 
@@ -70,5 +69,4 @@ void RCC_Wakeup(void)
     // Wait till PLL is used as system clock source 
     while(RCC_GetSYSCLKSource() != 0x08)
     {}
-    GPIOC->ODR ^= 0X0010;
 }
