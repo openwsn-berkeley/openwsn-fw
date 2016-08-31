@@ -24,7 +24,6 @@
 
 /// info for traffic generation
 #define  PAYLOADLEN           40
-//#define  CEXAMPLE_PERIOD      10000
 
 const uint32_t cexample_timeout = QUEUE_TIMEOUT_DEFAULT; //3 * 15 * SUPERFRAME_LENGTH; //3 slotframes
 const char cexample_path0[] = "cexample";
@@ -117,6 +116,10 @@ owerror_t cexample_receive(OpenQueueEntry_t* msg,
    packetfunctions_ip128bToMac64b(&(msg->l3_sourceAdd), &prefix, &src_64b);
    openserial_statDataRx(seqnum, &(msg->l2_track), &src_64b, &dest_64b);
 
+   char str[150];
+    sprintf(str, "DATAGEN RX");
+     openserial_printf(COMPONENT_CEXAMPLE, str, strlen(str));
+
    //nothing to respond
    return E_SUCCESS;
 }
@@ -163,6 +166,11 @@ void cexample_task_cb() {
    icmpv6rpl_getRPLDODAGid(&(dest_128b.addr_128b[0]));
    packetfunctions_ip128bToMac64b(&dest_128b, &prefix, &dest_64b);
    openserial_statDataGen(cexample_vars.seqnum, &(cexample_vars.track), idmanager_getMyID(ADDR_64B), &dest_64b);
+
+
+   char str[150];
+   sprintf(str, "DATAGEN TX");
+   openserial_printf(COMPONENT_CEXAMPLE, str, strlen(str));
 
    // don't run if not synch
    if (ieee154e_isSynch() == FALSE)
