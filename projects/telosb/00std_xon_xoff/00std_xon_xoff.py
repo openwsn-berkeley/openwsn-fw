@@ -5,6 +5,7 @@ import time
 #============================ defines =========================================
 
 SERIALPORT = 'COM4'
+BURSTSIZE  = 200
 
 #============================ classes =========================================
 
@@ -54,13 +55,15 @@ class SerialRxThread(threading.Thread):
         expectedRxByte = (lastRxByte+1) & 0xff
         if expectedRxByte in [self.XON,self.XOFF]:
             expectedRxByte += 1
+        if expectedRxByte>BURSTSIZE:
+            expectedRxByte = 0
         return expectedRxByte
 
 class SerialTxThread(threading.Thread):
     
     # 9600 chars/sec @50% DC -> 4800 chars per second -> 480 chars per 100ms
-    NUMBURSTBYTES      = 450
-    INTERBURSTDURATION = 0.100
+    NUMBURSTBYTES      = 500
+    INTERBURSTDURATION = 0.020
     
     def __init__(self,serial):
         
