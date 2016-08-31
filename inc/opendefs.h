@@ -30,8 +30,6 @@ static const uint8_t infoStackName[] = "OpenWSN ";
 //DAGROOT: forwards the packet to both the serial line + the upper layers
 #define IPHC_FORWARD_UPPER          1
 
-//OTF
-#define OTF_AGRESSIVE
 
 //tracks are handled by 6top
 #define SIXTOP_REMOVE_OBSOLETE_PARENTS    // when a node is removed from the parent list, its associated cells are removed
@@ -274,7 +272,7 @@ enum {
    ERR_SIXTOP_LIST                     = 0x3e, // 6P List returns cells [({0},{1})]
    ERR_SCHEDULE_ADDDUPLICATESLOT       = 0x3f, // the slot {0} to be added is already in schedule
    //NEW FABRICE
-   ERR_OTF_INSUFFICIENT                = 0x40, // otf does not have enough cells (trackInstance {0}, nbCells to add {1})
+   ERR_SFLOC_INSUFFICIENT              = 0x40, // sfloc does not have enough cells (trackInstance {0}, nbCells to add {1})
    ERR_UNKNOWN_NEIGHBOR                = 0x41, // Unknown neighbor {0}{1} (4 last bytes)
    ERR_SIXTOP_WRONG_PARAM              = 0x42, // sixtop expects another parameter in its request (bw {0}, nbcells {1})
    ERR_SIXTOP_WRONG_STATE              = 0x43, // sixtop current state {0}, location {1}

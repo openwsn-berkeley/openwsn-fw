@@ -8,7 +8,7 @@
 #include "openapps.h"
 #include "openserial.h"
 #include "neighbors.h"
-
+#include "openqueue.h"
 
 //=========================== definition =====================================
 
@@ -132,7 +132,6 @@ bool sfloc_reserveParentCells(void){
 //asks 6top to reserve a cell if we don't have enough for this packet
 //returns the number of cells asked to 6top
 uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
-#ifdef SFLOC_AGRESSIVE
    uint8_t nbCells_curr, nbCells_req, nbCells_toadd;
 
 
@@ -176,7 +175,7 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
       nbCells_toadd = SIXTOP_NBCELLS_INREQ;
 
    //debug
-#ifdef DEBUG_OTF
+#ifdef _DEBUG_SFLOC_
    openserial_printError(
          COMPONENT_SFLOC,
          ERR_SFLOC_INSUFFICIENT,
@@ -187,9 +186,8 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
 
    //ask 6top the required number of cells
    sixtop_setHandler(SIX_HANDLER_SFLOC);
-   sixtop_addCells(&(msg->l2_nextORpreviousHop), nbCells_toadd, msg->l2_track);
+   sixtop_request(IANA_6TOP_CMD_ADD, &(msg->l2_nextORpreviousHop), nbCells_toadd, msg->l2_track);
    return(nbCells_req - nbCells_curr);
-#endif
 
    return(0);
 }
@@ -197,7 +195,6 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
 
 //aggressive allocation: walks in openqueue and verifies enough cells are schedules to empty the queue during the slotframe
 void sfloc_addCells_agressive(void){
-#ifdef SFLOC_AGRESSIVE
    uint8_t  i;
    OpenQueueEntry_t* msg;
 
@@ -214,7 +211,6 @@ void sfloc_addCells_agressive(void){
           if(sfloc_reserve_agressive_for(msg) > 0)
              return;
   }
-#endif
 }
 
 
@@ -385,7 +381,6 @@ bool sfloc_verifPossible(void){
 #if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
    if (sfloc_reserveParentCells())
       return FALSE;
-
 #endif
    return TRUE;
 }
@@ -399,11 +394,7 @@ void sfloc_verifSchedule(void){
       return;
 
 #if (TRACK_MGMT > TRACK_MGMT_NO)
-
-#ifdef sfloc_AGRESSIVE
-   sfloc_addCells_agressive();
-#endif
-
+  sfloc_addCells_agressive();
    sfloc_remove_obsolete_parents();
    sfloc_remove_unused_cells();
 #endif
@@ -423,52 +414,12 @@ void sfloc_notif_pktTx(OpenQueueEntry_t* msg){
    sfloc_verifSchedule();
 
 #if (TRACK_MGMT > TRACK_MGMT_NO)
-#ifdef sfloc_AGRESSIVE
    sfloc_reserve_agressive_for(msg);
 #endif
-#endif
 }
 
 
 
-
-//the parent has changed, must now remove the corresponding cells
-void sfloc_notif_parentRemoved(open_addr_t *parent){
-#ifndef SIXTOP_REMOVE_OBSOLETE_PARENTS
-   return;
-#endif
-
-#ifdef _DEBUG_SFLOC_
-   char str[150];
-#endif
-
-
-   //cannot remove an old parent if we have an on-going 6top negotiation
-   if (!sixtop_isIdle()){
-#ifdef _DEBUG_SFLOC_
-       sprintf(str, "cannot remove cells to old parent ");
-       openserial_ncat_uint8_t_hex(str, (uint8_t)parent->addr_64b[6], 150);
-       openserial_ncat_uint8_t_hex(str, (uint8_t)parent->addr_64b[7], 150);
-       strncat(str, ": I am not idle", 150);
-       openserial_printf(COMPONENT_SFLOC, str, strlen(str));
-#endif
-
-      return;
-   }
-
-
-#if (TRACK_MGMT > TRACK_MGMT_NO)
-#ifdef _DEBUG_SFLOC_
-   sprintf(str, "remove cells to old parent ");
-   openserial_ncat_uint8_t_hex(str, (uint8_t)parent->addr_64b[6], 150);
-   openserial_ncat_uint8_t_hex(str, (uint8_t)parent->addr_64b[7], 150);
-   openserial_printf(COMPONENT_SFLOC, str, strlen(str));
-#endif
-
-   sixtop_setHandler(SIX_HANDLER_SFLOC);
-   sixtop_removeCell(parent);
-#endif
-}
 
 
 

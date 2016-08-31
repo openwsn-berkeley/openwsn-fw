@@ -206,7 +206,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
     }
    
     if (sixtop_vars.handler == SIX_HANDLER_NONE) {
-        // sxitop handler must not be NONE
+        // sixtop handler must not be NONE
         return;
     }
 
