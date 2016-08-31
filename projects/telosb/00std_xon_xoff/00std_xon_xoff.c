@@ -10,11 +10,12 @@ red LED:   successive RX'ed bytes aren't in sequence
 
 //=========================== defines =========================================
 
-#define XOFF       0x13
-#define XON        0x11
-#define BURSTSIZE  200
-#define SLOTSIZE   328  // 328@32kHz ~ 10010us
-#define EARLYRISE   16  //  16@32kHz ~   488us
+#define XOFF         0x13
+#define XON          0x11
+#define BURSTSIZE     200
+#define SLOTSIZE      328  // 328@32kHz ~ 10010us
+#define EARLYRISE      16  //  16@32kHz ~   488us
+#define DURATIONISR   300  // 300==892us (measured)
 
 //=========================== variables =======================================
 
@@ -80,7 +81,7 @@ int main(void) {
     IE2                          |=  UTXIE1 | URXIE1;           // enable UART1 TX/RX interrupts
     
     //=== TimerB
-    TBCCR0                        =  SLOTSIZE;                  // CCR0 contains period of counter
+    TBCCR0                        =  SLOTSIZE-1;                // CCR0 contains period of counter
     TBCCTL2                       =  CCIE;                      // CCR2 in compare mode
     TBCCR2                        =  SLOTSIZE-EARLYRISE;
     TBCTL                         =  TBIE+TBCLR;                // interrupt when counter resets
@@ -190,7 +191,7 @@ __interrupt void TIMERB1_ISR (void) {
         case 0x000e: // CCR0 fires (timer overflow)
             // make the ISR artificially long
             if (appvars.fInhibited==0x01) {
-                for (i=0;i<300;i++);
+                for (i=0;i<DURATIONISR;i++);
             }
             break;
     }
