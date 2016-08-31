@@ -148,7 +148,7 @@ command_line_options = {
     'distribshared':    ['0','1'],
     'tracks':           ['0','1','2','3'],  # 0=only TXRX, 1=one single track, 2=traffic isolation (default behavior), 3=traffic isolation+ dedicated track for LinkReqs
     'rplmetric':        ['0','1'],		    # 1=ETX (default)
-    'cex_period':       ['50000'],          # by default, 50 seconds
+    'cex_period':       ['5000'],          # by default, 5 seconds
     'schedalgo':        ['0','1','2'],      # 1=random (default)
     'sf':               ['1','2'],          # 1=SF0, 2=SFLOC
     'printf':           ['0','1'],          # 0=inactive (default), 1=active

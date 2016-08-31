@@ -14,7 +14,7 @@
 
 
 #define _DEBUG_SFLOC_       1
-#define sflocTHRESHOLD      2
+
 
 //=========================== variables =======================================
 
@@ -70,8 +70,6 @@ bool sfloc_reserveParentCells(void){
    uint8_t      nbCells;
    uint8_t      i;
 
-   //TODO
-   return FALSE;
 
 #if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
    return(FALSE);
@@ -134,7 +132,7 @@ bool sfloc_reserveParentCells(void){
 //asks 6top to reserve a cell if we don't have enough for this packet
 //returns the number of cells asked to 6top
 uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
-#ifdef sfloc_AGRESSIVE
+#ifdef SFLOC_AGRESSIVE
    uint8_t nbCells_curr, nbCells_req, nbCells_toadd;
 
 
@@ -181,7 +179,7 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
 #ifdef DEBUG_OTF
    openserial_printError(
          COMPONENT_SFLOC,
-         ERR_sfloc_INSUFFICIENT,
+         ERR_SFLOC_INSUFFICIENT,
          (errorparameter_t)(uint16_t)(msg->l2_track.instance),
          (errorparameter_t)nbCells_toadd
    );
@@ -199,7 +197,7 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
 
 //aggressive allocation: walks in openqueue and verifies enough cells are schedules to empty the queue during the slotframe
 void sfloc_addCells_agressive(void){
-#ifdef sfloc_AGRESSIVE
+#ifdef SFLOC_AGRESSIVE
    uint8_t  i;
    OpenQueueEntry_t* msg;
 
@@ -285,8 +283,6 @@ void sfloc_remove_unused_cells(void){
    return;
 #endif
 
-   //TODO
-   return;
 
    //no ongoing 6top transaction
    if (!sixtop_isIdle())
