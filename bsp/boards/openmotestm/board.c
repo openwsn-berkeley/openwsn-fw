@@ -16,7 +16,6 @@
 #include "rcc.h"
 #include "nvic.h"
 #include "debugpins.h"
-#include "opentimers.h"
 
 //=========================== variable ========================================
 
