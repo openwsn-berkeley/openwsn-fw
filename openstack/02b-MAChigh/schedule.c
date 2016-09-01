@@ -344,7 +344,7 @@ owerror_t schedule_addActiveSlot(
       bool            shared,
       channelOffset_t channelOffset,
       open_addr_t*    neighbor,
-      track_t         track
+      track_t        track
    ) {
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
@@ -378,7 +378,7 @@ owerror_t schedule_addActiveSlot(
    slotContainer->type                      = type;
    slotContainer->shared                    = shared;
    slotContainer->channelOffset             = channelOffset;
-   slotContainer->track                     = track;
+   memcpy(&slotContainer->track, &track, sizeof(track));
    memcpy(&slotContainer->neighbor,neighbor,sizeof(open_addr_t));
    
    //ASN = now

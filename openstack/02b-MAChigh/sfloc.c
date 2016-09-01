@@ -222,6 +222,8 @@ void sfloc_remove_obsolete_parents(void){
    neighborRow_t    *neigh;
    uint8_t          i;
 
+   return;
+
 #ifndef SIXTOP_REMOVE_OBSOLETE_PARENTS
    return;
 #endif

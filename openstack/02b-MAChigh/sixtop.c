@@ -289,14 +289,11 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
         *((uint8_t*)(pkt->payload)) = container;
         len+=1;
 
-        //test
-
         // reserve space for track
         packetfunctions_reserveHeaderSize(pkt,sizeof(track_t));
         // write header
         memcpy(pkt->payload, &track, sizeof(track_t));
         len+=sizeof(track_t);
-
 
         // reserve space for numCells
         packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
@@ -1513,6 +1510,20 @@ void sixtop_notifyReceiveCommand(
                     ){
                         code = IANA_6TOP_RC_SUCCESS;
                         len += processIE_prepend_sixCelllist(response_pkt,cellList);
+                        //track info for ADD command
+                        if (commandIdORcode == IANA_6TOP_CMD_ADD){
+
+                            // reserve space for track
+                            packetfunctions_reserveHeaderSize(response_pkt,sizeof(track_t));
+                            // write header
+                            memcpy(response_pkt->payload, &(pkt->l2_sixtop_track), sizeof(track_t));
+                            len+=sizeof(track_t);
+
+                            //save the track info
+                            memcpy(&(response_pkt->l2_sixtop_track), &(pkt->l2_sixtop_track), sizeof(track_t));
+
+
+                        }
                     } else {
                         code = IANA_6TOP_RC_ERR;
                     }
@@ -1600,23 +1611,47 @@ void sixtop_notifyReceiveCommand(
             if (commandIdORcode==IANA_6TOP_RC_SUCCESS){
                 switch(sixtop_vars.six2six_state){
                 case SIX_WAIT_ADDRESPONSE:
+                    ;
+                    uint8_t local_len=0;
+                    //get the track info
+                    memcpy(&(pkt->l2_sixtop_track), (pkt->payload)+ptr+local_len, sizeof(track_t));
+                    local_len += sizeof(track_t);
+
+                    //get the list of cells
+                    processIE_retrieve_sixCelllist(pkt,ptr+local_len,length-local_len,cellList);
+
+
+                    char      str[150];
+                    sprintf(str, "LinkRep rcvd from ");
+                    openserial_ncat_uint8_t_hex(str, pkt->l2_nextORpreviousHop.addr_64b[6], 150);
+                    openserial_ncat_uint8_t_hex(str, pkt->l2_nextORpreviousHop.addr_64b[7], 150);
+                    strncat(str, ", track=", 150);
+                    openserial_ncat_uint32_t(str, (uint32_t)pkt->l2_sixtop_track.instance, 150);
+                    strncat(str, ", owner=", 150);
+                    openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_sixtop_track.owner.addr_64b[6], 150);
+                    openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_sixtop_track.owner.addr_64b[7], 150);
+                    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
+                    // always default frameID
+                    frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
+                    sixtop_addCellsByState(frameID,
+                            cellList,
+                            pkt->l2_sixtop_track,
+                            &(pkt->l2_nextORpreviousHop),
+                            sixtop_vars.six2six_state
+                    );
+
+                     break;
+
+
                 case SIX_WAIT_DELETERESPONSE:
                     processIE_retrieve_sixCelllist(pkt,ptr,length,cellList);
                     // always default frameID
                     frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
-                    if (sixtop_vars.six2six_state == SIX_WAIT_ADDRESPONSE){
-                        sixtop_addCellsByState(frameID,
-                                              cellList,
-                                              sixtop_get_trackbesteffort(),
-                                              &(pkt->l2_nextORpreviousHop),
-                                              sixtop_vars.six2six_state
-                        );
-                    } else {
-                        sixtop_removeCellsByState(
+                    sixtop_removeCellsByState(
                               frameID,
                               cellList,
                               &(pkt->l2_nextORpreviousHop));
-                    }
                     break;
                 case SIX_WAIT_COUNTRESPONSE:
                     count  = *((uint8_t*)(pkt->payload)+ptr);
@@ -1780,12 +1815,28 @@ void sixtop_addCellsByState(
    open_addr_t temp_neighbor;
    uint8_t     type;
   
-   //set schedule according links
+
+
+   char str[150];
+   sprintf(str, "ADDCELL ");
+   strncat(str, ", track instance=", 150);
+   openserial_ncat_uint32_t(str, (uint32_t)track.instance, 150);
+   strncat(str, ", track owner=", 150);
+   openserial_ncat_uint8_t_hex(str, track.owner.addr_64b[6], 150);
+   openserial_ncat_uint8_t_hex(str, track.owner.addr_64b[7], 150);
+
    
+   //set schedule according links
    for(i = 0;i<SCHEDULEIEMAXNUMCELLS;i++){
       //only schedule when the request side wants to schedule a tx cell
       if(cellList[i].linkoptions != CELLTYPE_OFF){
          switch(state) {
+
+         strncat(str, ", slot=", 150);
+          openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
+          strncat(str, " ch=", 150);
+           openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
+
 
          case SIX_WAIT_RESPONSE_SENDDONE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
@@ -1835,6 +1886,8 @@ void sixtop_addCellsByState(
          }
       }
    }
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
 }
 
 
