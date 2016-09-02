@@ -255,7 +255,10 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
    uint8_t  i;
    char str[150];
 
-   sprintf(str, "LinkReq/Rem enqueued: to ");
+   if (code == IANA_6TOP_CMD_ADD)
+       sprintf(str, "LinkReq enqueued: to ");
+   else
+       sprintf(str, "LinkRem enqueued: to ");
    openserial_ncat_uint8_t_hex(str, neighbor->addr_64b[6], 150);
    openserial_ncat_uint8_t_hex(str, neighbor->addr_64b[7], 150);
    strncat(str, ", bw=", 150);
@@ -315,7 +318,8 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
    
     // indicate IEs present
     pkt->l2_payloadIEpresent = TRUE;
-   
+    pkt->l2_sixtop_requestCommand = code;
+
     // send packet
     sixtop_send(pkt);
     
@@ -1139,7 +1143,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    case SIX_WAIT_ADDREQUEST_SENDDONE:
       if (error != E_FAIL){
 #ifdef _DEBUG_SIXTOP_
-         sprintf(str, "LinkReq/Rem txed: to ");
+         if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
+            sprintf(str, "LinkReq txed: to ");
+         else
+             sprintf(str, "LinkRem txed: to ");
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
          openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
@@ -1148,7 +1155,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       }
       else{
 #ifdef _DEBUG_SIXTOP_
-         sprintf(str, "LinkReq tx failed: to ");
+          if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
+             sprintf(str, "LinkReq failed: to ");
+          else
+              sprintf(str, "LinkRem failed: to ");
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
          openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
@@ -1777,7 +1787,6 @@ bool sixtop_cellInList(cellInfo_ht* cellList, uint8_t numCandCells, frameLength_
 
 bool sixtop_candidateAddCellList(
       uint8_t*     frameID,
-//      uint8_t*     flag,
       cellInfo_ht* cellList,
       track_t      track,
       uint8_t      requiredCells
@@ -1819,6 +1828,7 @@ bool sixtop_candidateRemoveCellList(
    
    *frameID        = schedule_getFrameHandle();
   
+
    numCandCells    = 0;
    for(i=0;i<schedule_getFrameLength();i++){
       schedule_getSlotInfo(i,neighbor,&info);
@@ -1826,14 +1836,17 @@ bool sixtop_candidateRemoveCellList(
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = info.channelOffset;
          cellList[numCandCells].linkoptions = CELLTYPE_TX;
-         numCandCells++;
+       numCandCells++;
          if (numCandCells==SCHEDULEIEMAXNUMCELLS){
-            break; // only delete one cell
+            break;
          }
       }
    }
    
    if(numCandCells<requiredCells){
+      char str[150];
+      sprintf(str, "LinkRem creation failed");
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
       return FALSE;
    }else{
       return TRUE;
@@ -1870,10 +1883,9 @@ void sixtop_addCellsByState(
          switch(state) {
 
          strncat(str, ", slot=", 150);
-          openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
-          strncat(str, " ch=", 150);
-           openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
-
+         openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
+         strncat(str, " ch=", 150);
+         openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
 
          case SIX_IDLE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
@@ -1975,14 +1987,24 @@ void sixtop_removeCellsByState(
    ){
    uint8_t i;
    
+
+
+   char str[150];
+   sprintf(str, "DELCELL ");
+
    for(i=0;i<SCHEDULEIEMAXNUMCELLS;i++){   
       if(cellList[i].linkoptions != CELLTYPE_OFF){
+          strncat(str, ", slot=", 150);
+          openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
+
+
          schedule_removeActiveSlot(
             cellList[i].tsNum,
             previousHop
          );
       }
    }
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 }
 
 bool sixtop_areAvailableCellsToBeScheduled(

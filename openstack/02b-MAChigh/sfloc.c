@@ -277,7 +277,7 @@ void sfloc_remove_unused_cells(void){
 
    scheduleEntry_t  *cell;
    uint8_t           i;
-   uint16_t          timeout;
+   uint32_t          timeout;
 
    //for each cell in the schedule
    for (i=0;i<MAXACTIVESLOTS;i++){
@@ -286,11 +286,11 @@ void sfloc_remove_unused_cells(void){
       //different timeouts depending on the cell type (RX > TX to avoid inconsistencies)
       switch (cell->type){
          case CELLTYPE_TX:
-            timeout = SIXTOP_CELL_TIMEOUT_TX;       // 20 000 ms
+            timeout = SIXTOP_CELL_TIMEOUT_TX;       // 60s
             break;
          case CELLTYPE_TXRX:
          case CELLTYPE_RX:
-            timeout = SIXTOP_CELL_TIMEOUT_RX;       // 25 000 ms
+            timeout = SIXTOP_CELL_TIMEOUT_RX;       // 90s
             break;
          default:
             break;
@@ -304,7 +304,7 @@ void sfloc_remove_unused_cells(void){
             //ASN in nb of slots, timeout in ms, slotduration in us
             //TRACK_PARENT_CONTROL -> used for DAO. If nothing has been txed / rcvd -> Problem (Period DAO < Timeout)
             if (
-                  (ieee154e_asnDiff(&(cell->lastUsedAsn))*TSLOTDURATION_MS > timeout) &&
+                  ((uint32_t)ieee154e_asnDiff(&(cell->lastUsedAsn))*TSLOTDURATION_MS > timeout) &&
                   (cell->neighbor.type == ADDR_64B)
             ){
 
@@ -316,14 +316,8 @@ void sfloc_remove_unused_cells(void){
                openserial_ncat_uint8_t_hex(str, (uint8_t)cell->neighbor.addr_64b[7], 150);
                strncat(str, ",slotOffset=", 150);
                openserial_ncat_uint32_t(str, (uint32_t)cell->slotOffset, 150);
-               strncat(str, ",pos=", 150);
-               openserial_ncat_uint32_t(str, (uint32_t)i, 150);
                strncat(str, ", asnDiff=", 150);
                openserial_ncat_uint32_t(str, (uint32_t)(ieee154e_asnDiff(&(cell->lastUsedAsn))), 150);
-               strncat(str, ", ms=", 150);
-               openserial_ncat_uint32_t(str, (uint32_t)(ieee154e_asnDiff(&(cell->lastUsedAsn))*TSLOTDURATION_MS), 150);
-               strncat(str, ",timeout=", 150);
-               openserial_ncat_uint32_t(str, (uint32_t)timeout, 150);
                openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 #endif
 
@@ -344,8 +338,6 @@ void sfloc_remove_unused_cells(void){
             break;
 
       }
-
-   //TODO: remove also entries in the future -> means a reboot of the DAG and a resynchronization probably
    }
 
 }
