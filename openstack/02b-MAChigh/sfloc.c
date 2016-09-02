@@ -9,6 +9,7 @@
 #include "openserial.h"
 #include "neighbors.h"
 #include "openqueue.h"
+#include "packetfunctions.h"
 
 //=========================== definition =====================================
 
@@ -64,26 +65,25 @@ void sfloc_notifyNewSlotframe(void) {
 
 //to reserve one cell toward my parent (for control packets) if none exists
 //returns TRUE if a reservation was triggered, FALSE if nothing was required
-bool sfloc_reserveParentCells(void){
+bool sfloc_reserveParentCells_controlTrack(void){
    open_addr_t parent;
    track_t      sixtopTrack;
    uint8_t      nbCells;
    uint8_t      i;
 
-
-#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
+#if (TRACK_MGMT != TRACK_MGMT_6P_ISOLATION)
    return(FALSE);
 #endif
 
    //Do I have a valid parent?
    if (!icmpv6rpl_getPreferredParentIndex(&i)){
-        openserial_printCritical(
-                       COMPONENT_SFLOC,ERR_UNKNOWN_NEIGHBOR,
-                       (errorparameter_t)parent.addr_64b[6],
-                       (errorparameter_t)parent.addr_64b[7]
-                    );
-              return FALSE;
-    }
+       openserial_printCritical(
+               COMPONENT_SFLOC,ERR_UNKNOWN_NEIGHBOR,
+               (errorparameter_t)parent.addr_64b[6],
+               (errorparameter_t)parent.addr_64b[7]
+       );
+       return FALSE;
+   }
 
     //parent addr
     neighbors_getNeighborEui64(&parent, ADDR_64B, i);
@@ -108,7 +108,7 @@ bool sfloc_reserveParentCells(void){
 
 #ifdef _DEBUG_SFLOC_
       char        str[150];
-      sprintf(str, "OTF - TRACK_PARENT_CONTROL - Has to reserve one cell with the parent ");
+      sprintf(str, "SFLOC - TRACK_PARENT_CONTROL - Has to reserve one cell with the parent ");
       openserial_ncat_uint8_t_hex(str, parent.addr_64b[6], 150);
       openserial_ncat_uint8_t_hex(str, parent.addr_64b[7], 150);
       openserial_printf(COMPONENT_SFLOC, str, strlen(str));
@@ -135,7 +135,7 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
    uint8_t nbCells_curr, nbCells_req, nbCells_toadd;
 
 
-   //when 6top will have finished, otf will ask for bandwidth for this packet (if required)
+   //when 6top will have finished, sfloc will ask for bandwidth for this packet (if required)
    if (!sixtop_isIdle())
        return(0);
 
@@ -153,7 +153,7 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
 
 #ifdef _DEBUG_SFLOC_
    char str[150];
-   sprintf(str, "OTF required=");
+   sprintf(str, "SFLOC required=");
    openserial_ncat_uint32_t(str, (uint32_t)nbCells_curr >= nbCells_req, 150);
    strncat(str, ", current=", 150);
    openserial_ncat_uint32_t(str, (uint32_t)nbCells_curr, 150);
@@ -218,15 +218,16 @@ void sfloc_addCells_agressive(void){
 
 //verifies that all the neighbors in CELL_TX are my parents
 void sfloc_remove_obsolete_parents(void){
-   scheduleEntry_t  *cell;
-   neighborRow_t    *neigh;
-   uint8_t          i;
-
-   return;
-
 #ifndef SIXTOP_REMOVE_OBSOLETE_PARENTS
    return;
 #endif
+
+   scheduleEntry_t  *cell;
+   uint8_t          i;
+   open_addr_t      parent;
+
+   //parent address
+   icmpv6rpl_getPreferredParentEui64(&parent);
 
    //no ongoing 6top transaction
    if (!sixtop_isIdle())
@@ -239,38 +240,27 @@ void sfloc_remove_obsolete_parents(void){
       cell = schedule_getCell(i);
 
       //if this cell is in TX mode, it must be toward my parent
-      if (cell->type == CELLTYPE_TX) {
-         neigh = neighbors_getNeighborInfo(&(cell->neighbor));
-
-         //it is not anymore a parent (or even not anymore a neighbor)
-         if ((neigh == NULL) || (neigh->parentPreference < MAXPREFERENCE)){
+      if (cell->type == CELLTYPE_TX && !packetfunctions_sameAddress(&(cell->neighbor), &parent)) {
 
 #ifdef _DEBUG_SFLOC_
-            char str[150];
-            sprintf(str, "OTF LinkRem(oldParent)=");
-            openserial_ncat_uint8_t_hex(str, (uint8_t)(cell->neighbor.addr_64b[6]), 150);
-            openserial_ncat_uint8_t_hex(str, (uint8_t)(cell->neighbor.addr_64b[7]), 150);
-            strncat(str, ",slotOffset=", 150);
-            openserial_ncat_uint32_t(str, (uint32_t)cell->slotOffset, 150);
-            strncat(str, ",unfound=", 150);
-            openserial_ncat_uint32_t(str, (uint32_t)(neigh == NULL), 150);
-            strncat(str, ",pref=", 150);
-            if (neigh == NULL)
-               openserial_ncat_uint32_t(str, (uint8_t)0, 150);
-            else
-               openserial_ncat_uint32_t(str, (uint8_t)(neigh->parentPreference), 150);
-            strncat(str, ",pos=", 150);
-            openserial_ncat_uint32_t(str, (uint32_t)i, 150);
-            openserial_printf(COMPONENT_SFLOC, str, strlen(str));
+          char str[150];
+          sprintf(str, "SFLOC LinkRem(oldParent)=");
+          openserial_ncat_uint8_t_hex(str, (uint8_t)(cell->neighbor.addr_64b[6]), 150);
+          openserial_ncat_uint8_t_hex(str, (uint8_t)(cell->neighbor.addr_64b[7]), 150);
+          strncat(str, ",slotOffset=", 150);
+          openserial_ncat_uint32_t(str, (uint32_t)cell->slotOffset, 150);
+          strncat(str, ",pos=", 150);
+          openserial_ncat_uint32_t(str, (uint32_t)i, 150);
+          openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 #endif
 
-            //silently removed (we changed our parent, we cannot notify it probably)
-            //these cells will be removed after a timeout from the receiver
-            schedule_removeActiveSlot(
+          //silently removed (we changed our parent, we cannot notify it probably)
+          //these cells will be removed after a timeout from the receiver
+          schedule_removeActiveSlot(
                   cell->slotOffset,
                   &(cell->neighbor)
-            );
-         }
+          );
+
       }
    }
 }
@@ -320,7 +310,7 @@ void sfloc_remove_unused_cells(void){
 
 #ifdef _DEBUG_SFLOC_
                char str[150];
-               sprintf(str, "OTF LinkRem(unused)=");
+               sprintf(str, "SFLOC LinkRem(unused)=");
                openserial_ncat_uint8_t_hex(str, (uint8_t)cell->neighbor.addr_64b[6], 150);
                openserial_ncat_uint8_t_hex(str, (uint8_t)cell->neighbor.addr_64b[7], 150);
                strncat(str, ",slotOffset=", 150);
@@ -359,7 +349,7 @@ void sfloc_remove_unused_cells(void){
 
 
 
-//======= Periodic or Event-triggered Verifications in OTF
+//======= Periodic or Event-triggered Verifications in SFLOC
 
 
 //can a linkReq be generated or should we wait some conditions?
@@ -379,11 +369,13 @@ bool sfloc_verifPossible(void){
    if (!icmpv6rpl_getPreferredParentIndex(&i))
        return FALSE;
 
-   // to reserve one cell for 6P toward my parent if none was allocated
+   // to reserve one cell in the control_track for 6P toward my parent if none was allocated
 #if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
-   if (sfloc_reserveParentCells())
+   if (sfloc_reserveParentCells_controlTrack())
       return FALSE;
 #endif
+
+
    return TRUE;
 }
 
@@ -396,15 +388,15 @@ void sfloc_verifSchedule(void){
       return;
 
 #if (TRACK_MGMT > TRACK_MGMT_NO)
-  sfloc_addCells_agressive();
-   sfloc_remove_obsolete_parents();
-   sfloc_remove_unused_cells();
+   sfloc_addCells_agressive();              // insert new cells in the schedule if we have too many packets in the queue for a given track
+   sfloc_remove_obsolete_parents();         // do some cells exist toward an old parent?
+   sfloc_remove_unused_cells();             // remove the cells not used for a while
 #endif
 }
 
 
 
-//a packet is pushed to the MAC layer -> OTF notification
+//a packet is pushed to the MAC layer -> SFLOC notification
 void sfloc_notif_pktTx(OpenQueueEntry_t* msg){
 
 
