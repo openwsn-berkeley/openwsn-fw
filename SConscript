@@ -353,6 +353,62 @@ elif env['toolchain']=='gcc':
     # print sizes
     env.Append(BUILDERS = {'PrintSize' : dummyFunc})
 
+# Sven add
+elif env['toolchain']=='avr':
+    if env['board'] not in ['zigduino']:
+        raise SystemError('toolchain {0} can not be used for board {1}'.format(env['toolchain'],env['board']))
+
+    if env['board'] in ['zigduino']:
+	    # compiler
+	    env.Replace(CC           = 'avr-gcc')
+	    env.Append(CCFLAGS       = '-mmcu=atmega128rfa1')
+	    env.Append(CCFLAGS       = '-x c') #specifies language
+	    env.Append(CCFLAGS       = '-Wall') #turn on all warning flags
+	    env.Append(CCFLAGS       = '-Wextra') #turn on extra warning flags
+	    env.Append(CCFLAGS       = '-ggdb') #turn on debugging
+	    env.Append(CCFLAGS       = '-g3') #debugging with all extra info
+	    #env.Append(CCFLAGS       = '-Og') #optimizes but with debugging #OPT
+	    #env.Append(CCFLAGS       = '-Os') #optimizes but for size #OPT
+	    #env.Append(CCFLAGS       = '-ffunction-sections -fdata-sections') #OPT
+	    #env.Append(CCFLAGS       = '-Wl,--gc-sections') #OPT
+	    # assembler
+	    env.Replace(AS           = 'avr-as')
+	    env.Append(ASFLAGS       = '-mmcu=atmega128rfa1')
+	    env.Append(ASFLAGS       = '')
+	    # archiver
+	    env.Replace(AR           = 'avr-ar')
+	    #env.Append(ARFLAGS       = '-mmcu=atmega128rfa1')
+	    env.Append(ARFLAGS       = '')
+	    # linker
+	    env.Replace(LINK         = 'avr-gcc')        
+	    env.Append(LINKFLAGS     = '-mmcu=atmega128rfa1')
+	   # env.Append(LINKFLAGS       = '-ffunction-sections -fdata-sections') #OPT
+	    #env.Append(LINKFLAGS       = '-Wl,--gc-sections')	    #OPT
+	    env.Append(LINKFLAGS     = '')
+    
+    # convert ELF to iHex
+    elf2iHexFunc = Builder(
+       action = 'avr-objcopy --change-section-lma .eeprom=0 -O ihex $SOURCE $TARGET',
+       # because EEPROM's address 0 begins at the artificial linear address 0x810000
+       # we need to shift it back
+       suffix = '.ihex',
+    )
+    env.Append(BUILDERS = {'Elf2iHex' : elf2iHexFunc})
+    
+    # convert ELF to bin
+    elf2BinFunc = Builder(
+       action = 'avr-objcopy -O binary $SOURCE $TARGET',
+       suffix = '.bin',
+    )
+    env.Append(BUILDERS = {'Elf2iBin' : elf2BinFunc})
+    
+    # print sizes
+    printSizeFunc = Builder(
+        action = 'avr-size $SOURCE',
+        suffix = '.phonysize',
+    )
+    env.Append(BUILDERS = {'PrintSize' : printSizeFunc})
+
 else:
     raise SystemError('unexpected toolchain {0}'.format(env['toolchain']))
 
@@ -373,6 +429,31 @@ def jtagUploadFunc(location):
                 suffix      = '.phonyupload',
                 src_suffix  = '.ihex',
             )
+ # LOW: Transceiver osc as CLK (16Mhz when prescaler 0x0), maximum start-up delay
+ # HIGH: JTAG/OCD off, SPI on,  WatchDog override off (can be enabled at runtime), Bootsize 512b,
+ # start bootsector at 0xfe00 (word address!), save EEPROM on reflash, start at addr 0000
+ # EXT: BrownOut at 1.9V
+ # Last fuse fd -> f5 due to immutable bits, otherwise avrdude gives a verification error
+    elif env['toolchain']=='avr':
+        if env['board'] in ['zigduino']:
+        	if env['programmer'] in ['jtag3']:
+	            return Builder(
+	                action      = 'avrdude -c jtag3 -p m128rfa1  -B 1 -U flash:w:$SOURCE',
+	                #+	' -U lfuse:w:0xf7:m -U hfuse:w:0xd7:m -U efuse:w:0xf5:m', #if you need to do non-debug fuses
+	                #+	' -U lfuse:w:0xf7:m -U hfuse:w:0x17:m -U efuse:w:0xf5:m', #if you need to do debug fuses
+	                suffix      = '.phonyupload',
+	                src_suffix  = '.ihex',
+	            )
+	        elif env['programmer'] in ['atmelice']:
+	            return Builder(
+	                action      = 'avrdude -c atmelice -p m128rfa1  -B 1 -U flash:w:$SOURCE',
+	                #+	' -U lfuse:w:0xf7:m -U hfuse:w:0xd7:m -U efuse:w:0xf5:m', #if you need to do non-debug fuses
+	                #+	' -U lfuse:w:0xf7:m -U hfuse:w:0x17:m -U efuse:w:0xf5:m', #if you need to do debug fuses
+	                suffix      = '.phonyupload',
+	                src_suffix  = '.ihex',
+	            )
+	        else:
+				raise SystemError('programmer={0} unsupported.'.format(env['programmer']))
     else:
         if env['fet_version']==2:
             # MSP-FET430uif is running v2 Firmware
@@ -399,6 +480,39 @@ def jtagUploadFunc(location):
             raise SystemError('fet_version={0} unsupported.'.format(fet_version))
 if env['jtag']:
     env.Append(BUILDERS = {'JtagUpload' : jtagUploadFunc(env['jtag'])})
+
+#============================ upload over ISP ================================
+def ispUploadFunc(location):
+ # LOW: Transceiver osc as CLK (16Mhz when prescaler 0x0), maximum start-up delay
+ # HIGH: JTAG/OCD off, SPI on,  WatchDog override off (can be enabled at runtime), Bootsize 512b,
+ # start bootsector at 0xfe00 (word address!), save EEPROM on reflash, start at addr 0000
+ # EXT: BrownOut at 1.9V
+ # Last fuse fd -> f5 due to immutable bits, otherwise avrdude gives a verification error
+    if env['toolchain']=='avr':
+        if env['board'] in ['zigduino']:
+        	if env['programmer'] in ['jtag3']:
+	            return Builder(
+	                action      = 'avrdude -c jtag3isp -p m128rfa1  -B 1 -U flash:w:$SOURCE',
+	                #+	' -U lfuse:w:0xf7:m -U hfuse:w:0xd7:m -U efuse:w:0xf5:m', #if you need to do non-debug fuses
+	                #+	' -U lfuse:w:0xf7:m -U hfuse:w:0x17:m -U efuse:w:0xf5:m', #if you need to do debug fuses
+	                suffix      = '.phonyupload',
+	                src_suffix  = '.ihex',
+	            )
+	        elif env['programmer'] in ['atmelice']:
+	            return Builder(
+	                action      = 'avrdude -c atmelice_isp -p m128rfa1  -B 1 -U flash:w:$SOURCE',
+	                #+	' -U lfuse:w:0xf7:m -U hfuse:w:0xd7:m -U efuse:w:0xf5:m', #if you need to do non-debug fuses
+	                #+	' -U lfuse:w:0xf7:m -U hfuse:w:0x17:m -U efuse:w:0xf5:m', #if you need to do debug fuses
+	                suffix      = '.phonyupload',
+	                src_suffix  = '.ihex',
+	            )
+	        else:
+				raise SystemError('programmer={0} unsupported.'.format(env['programmer']))
+        else:
+            raise SystemError('board={0} unsupported.'.format(board))
+
+if env['isp']:
+    env.Append(BUILDERS = {'IspUpload' : ispUploadFunc(env['isp'])})
 
 #============================ bootload ========================================
 
@@ -616,6 +730,8 @@ def extras(env, source):
     returnVal += [env.Elf2iBin(source=source)]
     if   env['jtag']:
         returnVal += [env.JtagUpload(env.Elf2iHex(source))]
+    elif env['isp']:
+        returnVal += [env.IspUpload(env.Elf2iHex(source))]
     elif env['bootload']:
         returnVal += [env.Bootload(env.Elf2iHex(source))]
     return returnVal

@@ -17,6 +17,11 @@ settings
 *.map
 *.lst
 *~
+.cproject
+.pydevproject
+.settings/
+.project
+
 /projects/telosb/00std_button/path.txt
 /projects/telosb/00std_xon_xoff/path.txt
 /projects/telosb/03oos_openwsn/path.txt

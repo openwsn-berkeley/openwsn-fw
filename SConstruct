@@ -50,6 +50,9 @@ project:
                    for example 'COM5,COM6,COM7'.
     jtag           Location of the board to JTAG the binary to.
                    COMx for Windows, /dev entry for Linux
+    isp            Will upload binary over ISP.
+                   Location is irrelevant, just to what the uploader is connected to.
+    programmer	   Specifies the programmer used
     fet_version    Firmware version running on the MSP-FET430uif for jtag.
                    2, 3
     
@@ -112,6 +115,8 @@ command_line_options = {
         'agilefox',
         # misc.
         'python',
+        # sven add
+        'zigduino',
     ],
     'toolchain':   [
         'mspgcc',
@@ -119,10 +124,16 @@ command_line_options = {
         'iar-proj',
         'armgcc',
         'gcc',
+        #sven add
+        'avr',
     ],
     'kernel': [
         'openos',
         'freertos',
+    ],
+    'programmer': [
+        'jtag3',
+        'atmelice',
     ],
     'fet_version':      ['2','3'],
     'verbose':          ['0','1'],
@@ -190,7 +201,21 @@ command_line_vars.AddVariables(
         None,                                              # converter
     ),
     (
+        'programmer',                                      # key
+        '',                                                # help
+        command_line_options['programmer'][0],             # default
+        None,			                                   # validator
+        None,                                              # converter
+    ),
+    (
         'jtag',                                            # key
+        '',                                                # help
+        '',                                                # default
+        None,                                              # validator
+        None,                                              # converter
+    ),
+    (
+        'isp',                                            # key
         '',                                                # help
         '',                                                # default
         None,                                              # validator
