@@ -1135,6 +1135,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    msg->owner = COMPONENT_SIXTOP_RES;
 
    switch (sixtop_vars.six2six_state) {
+
    case SIX_WAIT_ADDREQUEST_SENDDONE:
       if (error != E_FAIL){
 #ifdef _DEBUG_SIXTOP_
@@ -1168,8 +1169,7 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    case SIX_WAIT_CLEARREQUEST_SENDDONE:
       sixtop_setState(SIX_WAIT_CLEARRESPONSE);
       break;
-   case SIX_WAIT_RESPONSE_SENDDONE:
-
+   case SIX_IDLE:
 
        if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS && error == E_SUCCESS){
            if (
@@ -1199,7 +1199,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                    strncat(str, ", owner=", 150);
                    openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[6], 150);
                    openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[7], 150);
-
                    strncat(str, ", nbcells ", 150);
                    openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
                    strncat(str, ", state ", 150);
@@ -1211,37 +1210,70 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
-                   if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
-                       sixtop_addCellsByState(
-                               msg->l2_sixtop_frameID,
-                               cellList,
-                               msg->l2_sixtop_track,
-                               &(msg->l2_nextORpreviousHop),
-                               sixtop_vars.six2six_state);
-                   } else {
+                   //DELETE COMMAND > we can now safely remove the cells in the schedule
+                   if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_DELETE) {
                        sixtop_removeCellsByState(
                                msg->l2_sixtop_frameID,
                                cellList,
                                &(msg->l2_nextORpreviousHop));
                    }
+                   //ADD COMMAND:
+                   if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
+                   //nothing to do -> the cells have already been inserted when the linkrep was prepared
+                   }
                }
 
-           } else{
-               if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_CLEAR){
-                   schedule_removeAllCells(msg->l2_sixtop_frameID,
+           }
+           //The ADD-REPLY tx has failed
+           else if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS && error == E_FAIL &&  msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
+               if (numOfCells>0){
+                   for (i=0;i<numOfCells;i++){
+                       //TimeSlot 2B
+                       cellList[i].tsNum       = *(ptr);
+                       cellList[i].tsNum      |= (*(ptr+1))<<8;
+                       //Ch.Offset 2B
+                       cellList[i].choffset    = *(ptr+2);
+                       cellList[i].choffset   |= (*(ptr+3))<<8;
+                       ptr += 4;
+                       // mark with linkoptions as ocuppied
+                       cellList[i].linkoptions = CELLTYPE_TX;
+                   }
+#ifdef _DEBUG_SIXTOP_
+                   sprintf(str, "LinkRep failed: to ");
+                   openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+                   openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+                   strncat(str, ", bw=", 150);
+                   openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
+                   strncat(str, ", track=", 150);
+                   openserial_ncat_uint32_t(str, (uint32_t)msg->l2_sixtop_track.instance, 150);
+                   strncat(str, ", owner=", 150);
+                   openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[6], 150);
+                   openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[7], 150);
+                   strncat(str, ", nbcells ", 150);
+                   openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
+                   strncat(str, ", state ", 150);
+                   openserial_ncat_uint32_t(str, (uint32_t)sixtop_vars.six2six_state, 150);
+                   for(i=0; i<numOfCells; i++){
+                       strncat(str, ", slot ", 150);
+                       openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
+                   }
+                   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
+
+                   sixtop_removeCellsByState(
+                           msg->l2_sixtop_frameID,
+                           cellList,
                            &(msg->l2_nextORpreviousHop));
                }
            }
+           //CLEAR COMMAND txed (or failed)
+           else if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_CLEAR){
+               schedule_removeAllCells(msg->l2_sixtop_frameID,
+                       &(msg->l2_nextORpreviousHop));
+           }
         }
 
-        //The request has failed
-        else{
-
-           //if failed - TODO!!!!
-        }
-        
-        sixtop_setState(SIX_IDLE);
-
+        //sixtop_setState(SIX_IDLE);
 
         if (
             msg->l2_sixtop_returnCode     == IANA_6TOP_RC_SUCCESS && 
@@ -1480,8 +1512,6 @@ void sixtop_notifyReceiveCommand(
             if (sixtop_vars.six2six_state != SIX_IDLE){
                 code = IANA_6TOP_RC_ERR;
             } else {
-                sixtop_setState(SIX_REQUEST_RECEIVED);
-
 
                 switch(commandIdORcode){
                 case IANA_6TOP_CMD_ADD:
@@ -1522,7 +1552,13 @@ void sixtop_notifyReceiveCommand(
                             //save the track info
                             memcpy(&(response_pkt->l2_sixtop_track), &(pkt->l2_sixtop_track), sizeof(track_t));
 
-
+                            //add the cells now in the schedule (will be remove if the tx failed)
+                            sixtop_addCellsByState(
+                                    pkt->l2_sixtop_frameID,
+                                    cellList,
+                                    pkt->l2_sixtop_track,
+                                    &(pkt->l2_nextORpreviousHop),
+                                    sixtop_vars.six2six_state);
                         }
                     } else {
                         code = IANA_6TOP_RC_ERR;
@@ -1552,6 +1588,8 @@ void sixtop_notifyReceiveCommand(
                     }
                     openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
+
+
 
 
                     break;
@@ -1599,9 +1637,8 @@ void sixtop_notifyReceiveCommand(
                 // send packet
                 sixtop_send(response_pkt);
             }
-            // update state
-            sixtop_setState(SIX_WAIT_RESPONSE_SENDDONE);
-
+            // Back to idle (concurrent replies may be present in the queue)
+            sixtop_setState(SIX_IDLE);
         } else {
             //------ if this is a return code
             // The response packet is not required, release it
@@ -1838,7 +1875,7 @@ void sixtop_addCellsByState(
            openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
 
 
-         case SIX_WAIT_RESPONSE_SENDDONE:
+         case SIX_IDLE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
 
             if (track.instance != TRACK_PARENT_CONTROL)
