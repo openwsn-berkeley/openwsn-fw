@@ -149,6 +149,7 @@ void ieee154e_init() {
 
 //=========================== public ==========================================
 
+
 /**
 /brief Difference between some older ASN and the current ASN.
 
@@ -164,7 +165,7 @@ PORT_RADIOTIMER_WIDTH ieee154e_asnDiff(asn_t* someASN) {
       ENABLE_INTERRUPTS();
       return (PORT_RADIOTIMER_WIDTH)0xFFFFFFFF;;
    }
-   
+
    diff = 0;
    if (ieee154e_vars.asn.bytes2and3 == someASN->bytes2and3) {
       ENABLE_INTERRUPTS();

@@ -1112,7 +1112,7 @@ void timer_sixtop_six2six_timeout_fired(void) {
    //starts a new timer (duration = 2 cells) so that the on-going transmission will be terminated
    else{
       sixtop_vars.timeoutTimerId     = opentimers_start(
-            2* TsSlotDuration,
+            2* TSLOTDURATION_MS,
             TIMER_ONESHOT,
             TIME_MS,
             sixtop_timeout_timer_cb

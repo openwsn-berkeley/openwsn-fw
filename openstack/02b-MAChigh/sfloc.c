@@ -271,7 +271,6 @@ void sfloc_remove_unused_cells(void){
    return;
 #endif
 
-
    //no ongoing 6top transaction
    if (!sixtop_isIdle())
       return;
@@ -287,10 +286,11 @@ void sfloc_remove_unused_cells(void){
       //different timeouts depending on the cell type (RX > TX to avoid inconsistencies)
       switch (cell->type){
          case CELLTYPE_TX:
-            timeout = SIXTOP_CELL_TIMEOUT_TX;
+            timeout = SIXTOP_CELL_TIMEOUT_TX;       // 20 000 ms
             break;
+         case CELLTYPE_TXRX:
          case CELLTYPE_RX:
-            timeout = SIXTOP_CELL_TIMEOUT_RX;
+            timeout = SIXTOP_CELL_TIMEOUT_RX;       // 25 000 ms
             break;
          default:
             break;
@@ -302,11 +302,12 @@ void sfloc_remove_unused_cells(void){
          case CELLTYPE_TXRX:
 
             //ASN in nb of slots, timeout in ms, slotduration in us
-            //TRACK_PARENT_CONTROL -> used for DAO. NOthing txed -> this parent has gone, rebooted, etc.
+            //TRACK_PARENT_CONTROL -> used for DAO. If nothing has been txed / rcvd -> Problem (Period DAO < Timeout)
             if (
-                  (ieee154e_asnDiff(&(cell->lastUsedAsn)) > 1000 * timeout / TsSlotDuration) &&
+                  (ieee154e_asnDiff(&(cell->lastUsedAsn))*TSLOTDURATION_MS > timeout) &&
                   (cell->neighbor.type == ADDR_64B)
             ){
+
 
 #ifdef _DEBUG_SFLOC_
                char str[150];
@@ -317,8 +318,12 @@ void sfloc_remove_unused_cells(void){
                openserial_ncat_uint32_t(str, (uint32_t)cell->slotOffset, 150);
                strncat(str, ",pos=", 150);
                openserial_ncat_uint32_t(str, (uint32_t)i, 150);
-               strncat(str, ",unused during=", 150);
-               openserial_ncat_uint32_t(str, (uint32_t)(ieee154e_asnDiff(&(cell->lastUsedAsn)) * TsSlotDuration), 150);
+               strncat(str, ", asnDiff=", 150);
+               openserial_ncat_uint32_t(str, (uint32_t)(ieee154e_asnDiff(&(cell->lastUsedAsn))), 150);
+               strncat(str, ", ms=", 150);
+               openserial_ncat_uint32_t(str, (uint32_t)(ieee154e_asnDiff(&(cell->lastUsedAsn))*TSLOTDURATION_MS), 150);
+               strncat(str, ",timeout=", 150);
+               openserial_ncat_uint32_t(str, (uint32_t)timeout, 150);
                openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 #endif
 

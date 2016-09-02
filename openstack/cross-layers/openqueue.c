@@ -264,9 +264,9 @@ void openqueue_set_timeout(OpenQueueEntry_t* entry, const uint32_t duration_ms){
       return;
    }
 
-   //*1000 since ms have to be converted in us
+   //diff in nb of slots
    //+1 to upper ceil the nb. of slots
-   diff = ((uint64_t) duration_ms) / (TsSlotDuration * PORT_TICS_PER_MS / 1000) + 1;
+   diff = (uint64_t) duration_ms / TSLOTDURATION_MS + 1;
 
    //offset in ASN format
    bzero(duration_asn.byte, sizeof(timeout_t));
