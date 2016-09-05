@@ -1832,11 +1832,11 @@ bool sixtop_candidateRemoveCellList(
    numCandCells    = 0;
    for(i=0;i<schedule_getFrameLength();i++){
       schedule_getSlotInfo(i,neighbor,&info);
-      if(info.link_type == CELLTYPE_TX){
+      if ((info.link_type == CELLTYPE_TX) || (info.link_type == CELLTYPE_TXRX)){
          cellList[numCandCells].tsNum       = i;
          cellList[numCandCells].choffset    = info.channelOffset;
-         cellList[numCandCells].linkoptions = CELLTYPE_TX;
-       numCandCells++;
+         cellList[numCandCells].linkoptions = info.link_type;
+         numCandCells++;
          if (numCandCells==SCHEDULEIEMAXNUMCELLS){
             break;
          }
@@ -1846,6 +1846,10 @@ bool sixtop_candidateRemoveCellList(
    if(numCandCells<requiredCells){
       char str[150];
       sprintf(str, "LinkRem creation failed");
+      strncat(str, ", required=", 150);
+      openserial_ncat_uint32_t(str, (uint32_t)requiredCells, 150);
+      strncat(str, ", actual=", 150);
+      openserial_ncat_uint32_t(str, (uint32_t)numCandCells, 150);
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
       return FALSE;
    }else{
