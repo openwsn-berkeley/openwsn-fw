@@ -179,7 +179,7 @@ bool debugPrint_schedule() {
 
       //this cell is not OFF and was not reinitialized recently
      // if (1){
-      if (schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type != CELLTYPE_OFF && !schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].reinit){
+      if (schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].type != CELLTYPE_OFF || schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].reinit){
 
          debugPrint_schedule_entry(schedule_vars.debugPrintRow);
          schedule_vars.scheduleBuf[schedule_vars.debugPrintRow].reinit = FALSE;
@@ -1026,7 +1026,7 @@ void schedule_resetEntry(scheduleEntry_t* e) {
    e->lastUsedAsn.bytes2and3 = 0;
    e->lastUsedAsn.byte4      = 0;
    e->next                   = NULL;
-   e->reinit                 = TRUE;   //reintiialized
+   e->reinit                 = TRUE;   //reinitialized
 
    e->track = sixtop_get_trackbesteffort();
 }
