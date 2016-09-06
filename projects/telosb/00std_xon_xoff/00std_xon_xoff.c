@@ -10,12 +10,12 @@ red LED:   successive RX'ed bytes aren't in sequence
 
 //=========================== defines =========================================
 
-#define XOFF         0x13
-#define XON          0x11
-#define BURSTSIZE     200
-#define SLOTSIZE      328  // 328@32kHz ~ 10010us
-#define EARLYRISE      16  //  16@32kHz ~   488us
-#define DURATIONISR   300  // 300==892us (measured)
+#define XOFF                  0x13
+#define XON                   0x11
+#define BURSTSIZE              200
+#define SLOTSIZE               328 // 328@32kHz ~ 10010us
+#define SERIALINHIBITGUARD      16 //  16@32kHz ~   488us
+#define DURATIONISR            300 // 300==892us (measured)
 
 //=========================== variables =======================================
 
@@ -83,7 +83,7 @@ int main(void) {
     //=== TimerB
     TBCCR0                        =  SLOTSIZE-1;                // CCR0 contains period of counter
     TBCCTL2                       =  CCIE;                      // CCR2 in compare mode
-    TBCCR2                        =  SLOTSIZE-EARLYRISE;
+    TBCCR2                        =  SLOTSIZE-SERIALINHIBITGUARD;
     TBCTL                         =  TBIE+TBCLR;                // interrupt when counter resets
     TBCTL                        |=  MC_1+TBSSEL_1;             // up mode, clocked from ACLK
     
