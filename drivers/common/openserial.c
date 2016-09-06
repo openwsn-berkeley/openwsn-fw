@@ -244,6 +244,11 @@ void openserial_triggerDebugprint() {
     ENABLE_INTERRUPTS();
     //>>>>>>>>>>>>>>>>>>>>>>>
     
+    if (openserial_vars.outputBufIdxW!=openserial_vars.outputBufIdxR) {
+        return;
+    }
+    // FIX: remove when openserial_triggerDebugprint called in a task...
+    
     debugPrintCounter++;
     if (debugPrintCounter==STATUS_MAX) {
        debugPrintCounter = 0;
