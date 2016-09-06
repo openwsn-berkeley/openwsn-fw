@@ -676,6 +676,14 @@ bool debugPrint_params(void){
    temp.cexample_period   = CEXAMPLE_PERIOD;
    temp.sf                = SFMETHOD;
    openserial_printStatus(STATUS_PARAMS,(uint8_t*)(&temp),sizeof(temp));
+
+
+#if ((SCHEDULING_ALGO != SCHEDULING_RANDOM) && (SCHEDULING_ALGO != SCHEDULING_RANDOM_CONTIGUOUS))
+   char str[150];
+   sprintf(str, "ERROR: the scheduling algo is incorrect");
+   openserial_printf(COMPONENT_OPENSERIAL, str, strlen(str));
+#endif
+
    return TRUE;
 }
 

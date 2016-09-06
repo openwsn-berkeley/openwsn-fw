@@ -1786,34 +1786,103 @@ bool sixtop_cellInList(cellInfo_ht* cellList, uint8_t numCandCells, frameLength_
 
 
 bool sixtop_candidateAddCellList(
-      uint8_t*     frameID,
-      cellInfo_ht* cellList,
-      track_t      track,
-      uint8_t      requiredCells
-   ){
-   frameLength_t i;
-   uint8_t numCandCells;
-   
+        uint8_t*     frameID,
+        cellInfo_ht* cellList,
+        track_t      track,
+        uint8_t      requiredCells
+){
+    uint8_t numCandCells;
+    *frameID = schedule_getFrameHandle();
+    uint8_t  slotnb = 0;
 
-   *frameID = schedule_getFrameHandle();
-   
 
-   for(numCandCells=0;numCandCells<SCHEDULEIEMAXNUMCELLS;){
-      i = openrandom_get16b() % schedule_getFrameLength();
-      if ((schedule_isSlotOffsetAvailable(i)==TRUE) && (!sixtop_cellInList(cellList, numCandCells, i))){
-         cellList[numCandCells].tsNum       = i;
-         cellList[numCandCells].choffset    = openrandom_get16b()%16;
-         cellList[numCandCells].linkoptions = CELLTYPE_TX;
-         numCandCells++;
-      }
-   }
-   
-   //BUG if we don't have SCHEDULEIEMAXNUMCELLS cells in the list: the receiver will read garbage unitialized data
-   if (numCandCells<SCHEDULEIEMAXNUMCELLS || requiredCells==0) {
-      return FALSE;
-   } else {
-      return TRUE;
-   }
+    //find the last incoming cell for this track
+#if SCHEDULING_ALGO == SCHEDULING_RANDOM_CONTIGUOUS
+    scheduleEntry_t *entry;
+    slotOffset_t    incomingCell_last = 0;
+    bool            tx_found = FALSE;
+
+    uint8_t i;
+    for(i=0;i<MAXACTIVESLOTS;i++)
+        if(schedule_isSlotOffsetAvailable(i)==TRUE) {
+            entry = schedule_getCell(i);
+
+            //RX cell if no TX was found
+            if ((!tx_found) && (entry->type == CELLTYPE_RX) && (sixtop_is_trackequal(entry->track, track)) && (entry->slotOffset > incomingCell_last))
+                incomingCell_last = entry->slotOffset;
+
+            //If a TX cell exists, searches for the last one
+            if ((entry->type == CELLTYPE_TX) && (sixtop_is_trackequal(entry->track, track)) && (entry->slotOffset > incomingCell_last)){
+                incomingCell_last = entry->slotOffset;
+                tx_found = TRUE;
+            }
+
+            //NB: the schedule is cylic (cell 0 is located *after* cell schedule_getFrameLength()
+            //This is *not* a problem since we will skip the busy cells in the next step
+        }
+    //start from this timeslot
+    if (incomingCell_last != 0)
+        slotnb = incomingCell_last;
+    else
+        slotnb = openrandom_get16b() % schedule_getFrameLength();
+
+#endif
+
+    //RAND: starts from any slotnb
+#if SCHEDULING_ALGO == SCHEDULING_RANDOM
+    slotnb = openrandom_get16b() % schedule_getFrameLength();
+#endif
+
+#ifdef _DEBUG_SIXTOP_
+    char str[150];
+    sprintf(str, "SELECT SCHED: ");
+#endif
+
+    for(numCandCells=0;numCandCells<SCHEDULEIEMAXNUMCELLS;){
+
+        //next slot number in the schedule
+        #if SCHEDULING_ALGO == SCHEDULING_RANDOM_CONTIGUOUS
+            slotnb = (slotnb + 1) % schedule_getFrameLength();
+        //random slot number
+        #elif SCHEDULING_ALGO == SCHEDULING_RANDOM
+            slotnb = openrandom_get16b() % schedule_getFrameLength();
+        #endif
+
+        if ((schedule_isSlotOffsetAvailable(slotnb)==TRUE) &&  (!sixtop_cellInList(cellList, numCandCells, slotnb))){
+            numCandCells++;
+
+            //LIFO (the cells with the largest priority must be placed last)
+            cellList[SCHEDULEIEMAXNUMCELLS-numCandCells].linkoptions = CELLTYPE_TX;
+            cellList[SCHEDULEIEMAXNUMCELLS-numCandCells].tsNum       = slotnb;
+#ifdef CHANNEL_RAND_DEDICATED_SLOTS
+            cellList[SCHEDULEIEMAXNUMCELLS-numCandCells].choffset    = openrandom_get16b() % CHANNELS_NB;
+#else
+            cellList[SCHEDULEIEMAXNUMCELLS-numCandCells].choffset    = 0;
+#endif
+
+#ifdef _DEBUG_SIXTOP_
+            openserial_ncat_uint32_t(str, (uint32_t)cellList[SCHEDULEIEMAXNUMCELLS-numCandCells].tsNum, 150);
+            strncat(str, "/", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)cellList[SCHEDULEIEMAXNUMCELLS-numCandCells].choffset, 150);
+            strncat(str, " | ", 150);
+#endif
+
+            //next cell to include in the linkreq
+            if(numCandCells==SCHEDULEIEMAXNUMCELLS){
+                break;
+            }
+        }
+    }
+#ifdef _DEBUG_SIXTOP_
+    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
+
+    //BUG if we don't have SCHEDULEIEMAXNUMCELLS cells in the list: the receiver will read garbage unitialized data
+    if (numCandCells<SCHEDULEIEMAXNUMCELLS || requiredCells==0) {
+        return FALSE;
+    } else {
+        return TRUE;
+    }
 }
 
 bool sixtop_candidateRemoveCellList(

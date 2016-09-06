@@ -320,6 +320,13 @@ enum{
 #define SFMETHOD_SF0    1
 #define SFMETHOD_SFLOC  2
 
+//Scheduling algo (cell allocation)
+#define SCHEDULING_RANDOM               1
+#define SCHEDULING_RANDOM_CONTIGUOUS    2
+
+//channel offset is determined randomly
+#define CHANNEL_RAND_DEDICATED_SLOTS
+#define CHANNELS_NB                     16
 
 
 //=========================== typedef =========================================

@@ -902,14 +902,6 @@ bool schedule_getOkToSend(OpenQueueEntry_t* msg) {
       returnVal = FALSE;
    }
 #endif
-#ifdef IHHOHJJH
-   packetfunctions_isBroadcastMulticast_debug(&(openqueue_vars.queue[i].l2_nextORpreviousHop),72);
-
-
-   else if(){
-
-   }
-#endif
    else {
       // non-shared slot: check backoff before answering
 

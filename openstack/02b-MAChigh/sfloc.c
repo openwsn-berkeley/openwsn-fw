@@ -278,9 +278,7 @@ void sfloc_remove_unused_cells(void){
    scheduleEntry_t  *cell;
    uint8_t           i;
    uint32_t          timeout;
-#ifdef _DEBUG_SFLOC_
-   char               str[150];
-#endif
+
 
    //for each cell in the schedule
    for (i=0;i<MAXACTIVESLOTS;i++){
@@ -312,7 +310,7 @@ void sfloc_remove_unused_cells(void){
             ){
 
 #ifdef _DEBUG_SFLOC_
- //              char str[150];
+               char str[150];
                sprintf(str, "SFLOC LinkRem(unused)=");
                openserial_ncat_uint8_t_hex(str, (uint8_t)cell->neighbor.addr_64b[6], 150);
                openserial_ncat_uint8_t_hex(str, (uint8_t)cell->neighbor.addr_64b[7], 150);
@@ -320,14 +318,13 @@ void sfloc_remove_unused_cells(void){
                openserial_ncat_uint32_t(str, (uint32_t)cell->slotOffset, 150);
                strncat(str, ", asnDiff=", 150);
                openserial_ncat_uint32_t(str, (uint32_t)(ieee154e_asnDiff(&(cell->lastUsedAsn))), 150);
-//               openserial_printf(COMPONENT_SFLOC, str, strlen(str));
+               openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 #endif
 
                //silently removed (RX cell)
                if (cell->type == CELLTYPE_RX){
                    schedule_removeActiveSlot(cell->slotOffset, &(cell->neighbor));
 
-                   strncat(str, ", silent remove", 150);
                }
                //sends a 6P request
                else {
@@ -338,8 +335,6 @@ void sfloc_remove_unused_cells(void){
                            1,
                            sixtop_get_trackbesteffort()           //SFLOC -> don't care of the track when a cell is REMOVED
                    );
-                   strncat(str, ", linkrem", 150);
-                   openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 
                    //at most one request at a time
                    return;
