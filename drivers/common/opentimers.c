@@ -201,28 +201,29 @@ void opentimers_timer_callback() {
    opentimer_id_t   id;
    PORT_TIMER_WIDTH min_timeout;
    bool             found;
-    
+   
    // step 1. Identify expired timers
    for(id=0; id<MAX_NUM_TIMERS; id++) {
       if (opentimers_vars.timersBuf[id].isrunning==TRUE) {
 
-         if(opentimers_vars.currentTimeout >= opentimers_vars.timersBuf[id].ticks_remaining) {
+         if (opentimers_vars.currentTimeout >= opentimers_vars.timersBuf[id].ticks_remaining) {
             // this timer has expired
-            //check to see if we have completed the whole timer, or we're just wrapping around the max 16bit value
-            if(opentimers_vars.timersBuf[id].wraps_remaining == 0){
+            
+            // check to see if we have completed the whole timer, or we're just wrapping around the max 16bit value
+            if (opentimers_vars.timersBuf[id].wraps_remaining == 0){
                // declare as so
                opentimers_vars.timersBuf[id].hasExpired  = TRUE;
-            }else{
+            } else {
                opentimers_vars.timersBuf[id].wraps_remaining--;
-               if(opentimers_vars.timersBuf[id].wraps_remaining == 0){
+               if (opentimers_vars.timersBuf[id].wraps_remaining == 0){
                   //if we have fully wrapped around, then set the remainring ticks to the modulus of the total ticks and the max clock value
                   opentimers_vars.timersBuf[id].ticks_remaining = (opentimers_vars.timersBuf[id].period_ticks) % MAX_TICKS_IN_SINGLE_CLOCK;
-               }else{
+               } else {
                   opentimers_vars.timersBuf[id].ticks_remaining = MAX_TICKS_IN_SINGLE_CLOCK;
                }
             }
          } else {
-            // this timer is not expired
+            // this timer has not expired
 
             // update its counter
             opentimers_vars.timersBuf[id].ticks_remaining -= opentimers_vars.currentTimeout;
@@ -240,18 +241,15 @@ void opentimers_timer_callback() {
 
          // reload the timer, if applicable
          if (opentimers_vars.timersBuf[id].type==TIMER_PERIODIC) {
-            opentimers_vars.timersBuf[id].wraps_remaining   = (opentimers_vars.timersBuf[id].period_ticks/MAX_TICKS_IN_SINGLE_CLOCK);//65535=maxValue of uint16_t
-            //if the number of ticks falls below a 16bit value, use it, otherwise set to max 16bit value
+            opentimers_vars.timersBuf[id].wraps_remaining = (opentimers_vars.timersBuf[id].period_ticks/MAX_TICKS_IN_SINGLE_CLOCK);
             if(opentimers_vars.timersBuf[id].wraps_remaining==0)                                                
-               opentimers_vars.timersBuf[id].ticks_remaining   = opentimers_vars.timersBuf[id].period_ticks;
+               opentimers_vars.timersBuf[id].ticks_remaining = opentimers_vars.timersBuf[id].period_ticks;
             else
                opentimers_vars.timersBuf[id].ticks_remaining = MAX_TICKS_IN_SINGLE_CLOCK;
-
          } else {
             opentimers_vars.timersBuf[id].isrunning   = FALSE;
          }
       }
-
    }
 
    // step 3. find the minimum remaining timeout among running timers
