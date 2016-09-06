@@ -283,9 +283,12 @@ void isr_ieee154e_timer() {
          break;
       default:
          // log the error
-         openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_TIMERFIRES,
-                               (errorparameter_t)ieee154e_vars.state,
-                               (errorparameter_t)ieee154e_vars.slotOffset);
+         openserial_printCritical(
+            COMPONENT_IEEE802154E,
+            ERR_WRONG_STATE_IN_TIMERFIRES,
+            (errorparameter_t)ieee154e_vars.state,
+            (errorparameter_t)ieee154e_vars.slotOffset
+         );
          // abort
          endSlot();
          break;
