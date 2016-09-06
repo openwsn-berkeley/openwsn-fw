@@ -11,7 +11,10 @@ COMPORT = 'COM3'
 #============================ helper ==========================================
 
 def buf2hex(buf):
-   return '-'.join(['%02x'%ord(b) for b in buf])
+    try:
+       return '-'.join(['%02x'%ord(b) for b in buf])
+    except:
+       return '-'.join(['%02x'%b      for b in buf])
 
 #============================ classes =========================================
 
@@ -120,7 +123,10 @@ class moteProbe(threading.Thread):
                                         self.sock.sendto(dataForMatlab, ('127.0.0.1', 3001))
                                         #print 'sent to Matlab: {0}'.format(dataForMatlab)
                                     else:
-                                        print 'dropped DATA frame of length {0}'.format(len(self.inputBuf))
+                                        print 'dropped DATA frame of length {0}: {1}'.format(len(self.inputBuf),buf2hex(self.inputBuf))
+                                
+                                elif self.inputBuf[0]==ord('E'):
+                                    print inputBuf
                                 
                         self.lastRxByte = rxByte
                     
