@@ -36,7 +36,7 @@ void schedule_init() {
       schedule_resetEntry(&schedule_vars.scheduleBuf[running_slotOffset]);
    }
    schedule_vars.backoffExponent = MINBE-1;
-   schedule_vars.maxActiveSlots = MAXACTIVESLOTS;
+   schedule_vars.maxActiveSlots  = MAXACTIVESLOTS;
    
    start_slotOffset = SCHEDULE_MINIMAL_6TISCH_SLOTOFFSET;
    if (idmanager_getIsDAGroot()==TRUE) {
@@ -71,7 +71,7 @@ void schedule_startDAGroot() {
        // slotframe length is not set, set it to default length
        schedule_setFrameLength(SLOTFRAME_LENGTH);
    } else {
-       // slotframe elgnth is set, nothing to do here
+       // slotframe length is set, nothing to do here
    }
    schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
    schedule_setFrameNumber(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER);
@@ -81,11 +81,11 @@ void schedule_startDAGroot() {
    temp_neighbor.type             = ADDR_ANYCAST;
    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
       schedule_addActiveSlot(
-         running_slotOffset,                 // slot offset
-         CELLTYPE_TXRX,                      // type of slot
-         TRUE,                               // shared?
-         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,    // channel offset
-         &temp_neighbor                      // neighbor
+         running_slotOffset,                     // slot offset
+         CELLTYPE_TXRX,                          // type of slot
+         TRUE,                                   // shared?
+         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,  // channel offset
+         &temp_neighbor                          // neighbor
       );
    }
 }
@@ -234,16 +234,16 @@ void  schedule_getSlotInfo(
    slotContainer = &schedule_vars.scheduleBuf[0];
    while (slotContainer<=&schedule_vars.scheduleBuf[schedule_vars.maxActiveSlots-1]) {
        //check that this entry for that neighbour and timeslot is not already scheduled.
-       if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor))&& (slotContainer->slotOffset==slotOffset)){
+       if (packetfunctions_sameAddress(neighbor,&(slotContainer->neighbor)) && (slotContainer->slotOffset==slotOffset)){
                //it exists so this is an update.
                info->link_type                 = slotContainer->type;
-               info->shared                    =slotContainer->shared;
+               info->shared                    = slotContainer->shared;
                info->channelOffset             = slotContainer->channelOffset;
                return; //as this is an update. No need to re-insert as it is in the same position on the list.
         }
         slotContainer++;
    }
-   //return cell type off.
+   // return cell type off
    info->link_type                 = CELLTYPE_OFF;
    info->shared                    = FALSE;
    info->channelOffset             = 0;//set to zero if not set.                          
@@ -470,6 +470,12 @@ scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    DISABLE_INTERRUPTS();
    
    scheduleWalker = schedule_vars.currentScheduleEntry;
+   
+   if (scheduleWalker==NULL) {
+       ENABLE_INTERRUPTS();
+       return NULL;
+   }
+   
    do {
       if(
          scheduleWalker->numTx > MIN_NUMTX_FOR_PDR                     &&\
@@ -515,6 +521,7 @@ uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* 
     ENABLE_INTERRUPTS();
     return count;
 }
+
 void schedule_removeAllCells(
     uint8_t        slotframeID,
     open_addr_t*   previousHop
@@ -658,6 +665,7 @@ uint8_t schedule_getFrameNumber() {
    
    return returnVal;
 }
+
 /**
 \brief Get the type of the current schedule entry.
 
