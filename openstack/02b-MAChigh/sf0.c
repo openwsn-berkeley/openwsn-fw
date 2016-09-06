@@ -38,7 +38,7 @@ void sf0_notif_removedCell(void) {
 
 // this function is called once per slotframe. 
 void sf0_notifyNewSlotframe(void) {
-   scheduler_push_task(sf0_bandwidthEstimate_task,TASKPRIO_SF0);
+   //scheduler_push_task(sf0_bandwidthEstimate_task,TASKPRIO_SF0); pendulum
 }
 
 //=========================== private =========================================

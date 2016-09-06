@@ -47,12 +47,27 @@ void schedule_init() {
    start_slotOffset += SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+NUMSERIALRX;running_slotOffset++) {
+      /* pendulum
       schedule_addActiveSlot(
          running_slotOffset,                    // slot offset
          CELLTYPE_SERIALRX,                     // type of slot
          FALSE,                                 // shared?
          0,                                     // channel offset
          &temp_neighbor                         // neighbor
+      );
+      */
+   }
+   
+   // only shared TXRX anycast slot (pendulum)
+   memset(&temp_neighbor,0,sizeof(temp_neighbor));
+   temp_neighbor.type             = ADDR_ANYCAST;
+   for (running_slotOffset=0;running_slotOffset<MAXACTIVESLOTS;running_slotOffset++) {
+      schedule_addActiveSlot(
+         running_slotOffset,                     // slot offset
+         CELLTYPE_TXRX,                          // type of slot
+         TRUE,                                   // shared?
+         SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,  // channel offset
+         &temp_neighbor                          // neighbor
       );
    }
 }
@@ -75,11 +90,12 @@ void schedule_startDAGroot() {
    }
    schedule_setFrameHandle(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE);
    schedule_setFrameNumber(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_NUMBER);
-
+   
    // shared TXRX anycast slot(s)
    memset(&temp_neighbor,0,sizeof(temp_neighbor));
    temp_neighbor.type             = ADDR_ANYCAST;
    for (running_slotOffset=start_slotOffset;running_slotOffset<start_slotOffset+SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS;running_slotOffset++) {
+      /* pendulum
       schedule_addActiveSlot(
          running_slotOffset,                     // slot offset
          CELLTYPE_TXRX,                          // type of slot
@@ -87,6 +103,7 @@ void schedule_startDAGroot() {
          SCHEDULE_MINIMAL_6TISCH_CHANNELOFFSET,  // channel offset
          &temp_neighbor                          // neighbor
       );
+      */
    }
 }
 

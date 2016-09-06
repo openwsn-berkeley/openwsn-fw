@@ -418,6 +418,7 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
             // shared TXRX anycast slot(s)
             memset(&temp_neighbor,0,sizeof(temp_neighbor));
             temp_neighbor.type             = ADDR_ANYCAST;
+            /* pendulum
             schedule_addActiveSlot(
                linkInfo.tsNum,                     // slot offset
                CELLTYPE_TXRX,                      // type of slot
@@ -425,6 +426,7 @@ port_INLINE void processIE_retrieveSlotframeLinkIE(
                linkInfo.choffset,                  // channel offset
                &temp_neighbor                      // neighbor
             );
+            */
          }
       }
       i++;
