@@ -835,9 +835,16 @@ void isr_openserial_tx() {
     }
 }
 
-// executed in ISR, called from scheduler.c
-void isr_openserial_rx() {
+/**
+\pre executed in ISR, called from scheduler.c
+
+\returns 1 if don't receiving frame, 0 if not
+*/
+uint8_t isr_openserial_rx() {
     uint8_t rxbyte;
+    uint8_t returnVal;
+    
+    returnVal = 0;
     
     // read byte just received
     rxbyte = uart_readByte();
@@ -897,8 +904,11 @@ void isr_openserial_rx() {
         } else {
             openserial_handleRxFrame();
             openserial_vars.inputBufFillLevel = 0;
+            returnVal = 1;
         }
     }
     
     openserial_vars.hdlcLastRxByte = rxbyte;
+    
+    return returnVal;
 }

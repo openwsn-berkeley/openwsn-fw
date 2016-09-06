@@ -32,8 +32,8 @@ typedef enum {
    UART_EVENT_OVERFLOW,
 } uart_event_t;
 
-typedef void (*uart_tx_cbt)(void);
-typedef void (*uart_rx_cbt)(void);
+typedef void    (*uart_tx_cbt)(void);
+typedef uint8_t (*uart_rx_cbt)(void);
 
 //=========================== variables =======================================
 

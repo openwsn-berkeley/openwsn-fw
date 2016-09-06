@@ -159,7 +159,7 @@ void      openserial_inhibitStop(void);
 bool      debugPrint_outBufferIndexes(void);
 
 // interrupt handlers
-void      isr_openserial_rx(void);
+uint8_t   isr_openserial_rx(void);
 void      isr_openserial_tx(void);
 
 /**

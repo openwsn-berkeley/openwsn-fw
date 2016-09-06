@@ -112,6 +112,5 @@ kick_scheduler_t uart_tx_isr() {
 
 kick_scheduler_t uart_rx_isr() {
    uart_clearRxInterrupts(); // TODO: do not clear, but disable when done
-   uart_vars.rxCb();
-   return DO_NOT_KICK_SCHEDULER;
+   return (kick_scheduler_t)uart_vars.rxCb();
 }
