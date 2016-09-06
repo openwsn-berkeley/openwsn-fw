@@ -2318,7 +2318,9 @@ void endSlot() {
    changeState(S_SLEEP);
    
    // arm serialInhibit timer
-   radiotimer_schedule(DURATION_si);
+   if (ieee154e_vars.isSync==TRUE) {
+       radiotimer_schedule(DURATION_si);
+   }
    
    // resume serial activity
    openserial_inhibitStop(); // end of slot
