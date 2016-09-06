@@ -33,6 +33,7 @@ static const uint8_t chTemplate_default[] = {
 #define LIMITLARGETIMECORRECTION     5 // threshold number of ticks to declare a timeCorrection "large"
 #define LENGTH_IEEE154_MAX         128 // max length of a valid radio packet  
 #define DUTY_CYCLE_WINDOW_LIMIT    (0xFFFFFFFF>>1) // limit of the dutycycle window
+#define SERIALINHIBITGUARD          32 // 32@32kHz ~ 1ms
 
 //15.4e information elements related
 #define IEEE802154E_PAYLOAD_DESC_LEN_SHIFT                 0x04
@@ -198,6 +199,8 @@ enum ieee154e_linkOption_enum {
 #define DURATION_rt6 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx
 #define DURATION_rt7 ieee154e_vars.lastCapturedTime+TsTxAckDelay-delayTx+wdRadioTx
 #define DURATION_rt8 ieee154e_vars.lastCapturedTime+wdAckDuration
+// serialInhibit
+#define DURATION_si  ieee154e_vars.lastCapturedTime+radio_getTimerPeriod()-SERIALINHIBITGUARD
 
 //=========================== typedef =========================================
 

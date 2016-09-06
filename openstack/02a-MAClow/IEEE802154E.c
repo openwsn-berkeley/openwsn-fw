@@ -60,6 +60,8 @@ void     activity_rie5(void);
 void     activity_ri8(PORT_RADIOTIMER_WIDTH capturedTime);
 void     activity_rie6(void);
 void     activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime);
+// inhibit serial
+void     activity_inhibitSerial(void);
 
 // frame validity check
 bool     isValidRxFrame(ieee802154_header_iht* ieee802514_header);
@@ -276,6 +278,9 @@ void isr_ieee154e_timer() {
       case S_TXACK:
          activity_rie6();
          break;
+      case S_SLEEP:
+         activity_inhibitSerial();
+         break;
       default:
          // log the error
          openserial_printError(COMPONENT_IEEE802154E,ERR_WRONG_STATE_IN_TIMERFIRES,
@@ -472,12 +477,10 @@ port_INLINE void activity_synchronize_newSlot() {
       ieee154e_vars.singleChannelChanged = FALSE;
    }
    
-   // increment ASN (used only to schedule serial activity)
-   incrementAsnOffset();
-   
-   // trigger to debug stuff to be printed every 2 slots
-   if        ((ieee154e_vars.asn.bytes0and1&0x0001)==0x0000) {
-      openserial_triggerDebugprint();
+   // increment dummy ASN to trigger debugprint every now and then
+   ieee154e_vars.asn.bytes0and1++;
+   if ( (ieee154e_vars.asn.bytes0and1&0x000f) ==0x0000) {
+       openserial_triggerDebugprint(); // FIXME: replace by task
    }
 }
 
@@ -488,8 +491,8 @@ port_INLINE void activity_synchronize_startOfFrame(PORT_RADIOTIMER_WIDTH capture
       return;
    }
    
-   // inihibit serial activity
-   openserial_inhibitStart();
+   // inhibit serial activity
+   openserial_inhibitStart(); // synchronize start of frame
    
    // change state
    changeState(S_SYNCRX);
@@ -664,7 +667,7 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
    changeState(S_SYNCLISTEN);
    
    // enable serial
-   openserial_inhibitStop();
+   openserial_inhibitStop(); // synchronize endOfFrame
 }
 
 port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
@@ -830,9 +833,8 @@ port_INLINE void activity_ti1ORri1() {
    open_addr_t neighbor;
    uint8_t     i;
    sync_IE_ht  sync_IE;
-   bool        changeToRX=FALSE;
    bool        couldSendEB=FALSE;
-
+   
    // increment ASN (do this first so debug pins are in sync)
    incrementAsnOffset();
    
@@ -907,11 +909,11 @@ port_INLINE void activity_ti1ORri1() {
    } else {
       // this is NOT the next active slot, abort
       
-       // abort the slot
-      endSlot();
-      
       // trigger debug prints
-      openserial_triggerDebugprint();
+      openserial_triggerDebugprint(); // FIXME: replace by task
+      
+      // abort the slot
+      endSlot();
       
       return;
    }
@@ -921,8 +923,6 @@ port_INLINE void activity_ti1ORri1() {
    switch (cellType) {
       case CELLTYPE_TXRX:
       case CELLTYPE_TX:
-         // inhibit serial activity
-         openserial_inhibitStart();
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
          // check whether we can send
@@ -940,8 +940,6 @@ port_INLINE void activity_ti1ORri1() {
                // abort
                endSlot();
                break;
-            } else {
-               changeToRX=TRUE;
             }
          } else {
             // change state
@@ -962,22 +960,14 @@ port_INLINE void activity_ti1ORri1() {
             break;
          }
       case CELLTYPE_RX:
-         if (changeToRX==FALSE) {
-            // inhibit serial activity
-            openserial_inhibitStart();
-         }
          // change state
          changeState(S_RXDATAOFFSET);
          // arm rt1
          radiotimer_schedule(DURATION_rt1);
          break;
       case CELLTYPE_SERIALRX:
-         // abort the slot
-         endSlot();
-         // enable serial
-         openserial_inhibitStop();
          
-         //this is to emulate a set of serial input slots without having the slotted structure.
+         // this is to emulate a set of serial input slots without having the slotted structure.
 
          // skip the serial rx slots
          ieee154e_vars.numOfSleepSlots = NUMSERIALRX;
@@ -1010,13 +1000,15 @@ port_INLINE void activity_ti1ORri1() {
          // deal with the case when schedule multi slots
          adaptive_sync_countCompensationTimeout_compoundSlots(NUMSERIALRX-1);
 #endif
+         // abort the slot
+         endSlot();
+         
          break;
       case CELLTYPE_MORESERIALRX:
          // do nothing (not even endSlot())
          break;
       default:
-         // inhibit serial activity
-         openserial_inhibitStart();
+         
          // log the error
          openserial_printCritical(COMPONENT_IEEE802154E,ERR_WRONG_CELLTYPE,
                                (errorparameter_t)cellType,
@@ -1769,6 +1761,18 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    endSlot();
 }
 
+/**
+\brief Inhibit the serial activity.
+
+This needs to happen 
+
+This function executes in ISR mode.
+*/
+port_INLINE void activity_inhibitSerial(void) {
+    // inhibit serial activity
+    openserial_inhibitStart(); // activity_inhibitSerial
+}
+
 //======= frame validity check
 
 /**
@@ -1846,12 +1850,11 @@ port_INLINE void incrementAsnOffset() {
    
    // increment the offsets
    frameLength = schedule_getFrameLength();
-   if (frameLength == 0) {
-      ieee154e_vars.slotOffset++;
-   } else {
-      ieee154e_vars.slotOffset  = (ieee154e_vars.slotOffset+1)%frameLength;
+   ieee154e_vars.slotOffset++;
+   if (ieee154e_vars.slotOffset>=frameLength) {
+      ieee154e_vars.slotOffset=0;
    }
-   ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)%16;
+   ieee154e_vars.asnOffset   = (ieee154e_vars.asnOffset+1)&0x0f;
 }
 
 //from upper layer that want to send the ASN to compute timing or latency
@@ -2246,7 +2249,7 @@ void endSlot() {
    ieee154e_vars.lastCapturedTime = 0;
    ieee154e_vars.syncCapturedTime = 0;
    
-   // computing duty cycle.
+   // compute duty cycle.
    ieee154e_stats.numTicsOn+=ieee154e_vars.radioOnTics;//accumulate and tics the radio is on for that window
    ieee154e_stats.numTicsTotal+=radio_getTimerPeriod();//increment total tics by timer period.
 
@@ -2311,8 +2314,11 @@ void endSlot() {
    // change state
    changeState(S_SLEEP);
    
+   // arm serialInhibit timer
+   radiotimer_schedule(DURATION_si);
+   
    // resume serial activity
-   openserial_inhibitStop();
+   openserial_inhibitStop(); // end of slot
 }
 
 bool ieee154e_isSynch(){
