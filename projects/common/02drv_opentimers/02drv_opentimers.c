@@ -1,14 +1,19 @@
 /**
-\brief This is a program which shows how to use the "opentimers "driver module.
+\brief This is a program which shows how to use the "opentimers" driver module.
 
 Since the driver modules for different platforms have the same declaration, you
 can use this project with any platform.
 
 This application allows you to verify the correct functioning of the opentimers
-drivers. It starts 3 periodic timers, with periods APP_DLY_TIMER0_ms,
-APP_DLY_TIMER1_ms and APP_DLY_TIMER2_ms. Each timer is attached an LED (error.
-radio and sync). When you run the application, you should see the LEDs
+drivers. It starts 3 periodic timers.
+Each timer is attached an LED (error, radio and sync). When you run the application, you should see the LEDs
 "counting".
+
+|    timer value    |  LED  | debugpin |
+|-------------------|-------|----------|
+| APP_DLY_TIMER0_ms | error |    frame |
+| APP_DLY_TIMER1_ms | radio |     slot |
+| APP_DLY_TIMER2_ms |  sync |      fsm |
 
 \author Thomas Watteyne <watteyne@eecs.berkeley.edu>, August 2014.
 */
@@ -18,24 +23,17 @@ radio and sync). When you run the application, you should see the LEDs
 // bsp modules required
 #include "board.h"
 #include "leds.h"
+#include "debugpins.h"
 // driver modules required
 #include "opentimers.h"
 
 //=========================== defines =========================================
 
-#define APP_DLY_TIMER0_ms   400
-#define APP_DLY_TIMER1_ms   800
-#define APP_DLY_TIMER2_ms  1600
+#define APP_DLY_TIMER0_ms   40
+#define APP_DLY_TIMER1_ms   80
+#define APP_DLY_TIMER2_ms  160
 
 //=========================== variables =======================================
-
-/*
-typedef struct {
-   
-} app_vars_t;
-
-app_vars_t app_vars;
-*/
 
 //=========================== prototypes ======================================
 
@@ -81,14 +79,17 @@ int mote_main(void) {
 //=========================== callbacks =======================================
 
 void cb_timer0(opentimer_id_t id) {
+    debugpins_frame_toggle();
    leds_error_toggle();
 }
 
 void cb_timer1(opentimer_id_t id) {
-   leds_radio_toggle();
+   debugpins_slot_toggle();
+   leds_radio_toggle();   
 }
 
 void cb_timer2(opentimer_id_t id) {
+   debugpins_fsm_toggle();
    leds_sync_toggle();
 }
 
