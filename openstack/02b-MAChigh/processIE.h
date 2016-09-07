@@ -174,8 +174,11 @@ uint8_t           processIE_prepend_sixCelllist(
     OpenQueueEntry_t*    pkt,
     cellInfo_ht*         cellList
 );
-
-//TODO Blacklist IE
+//only the prepend is specific since it includes only the BUSY cells (retrieve -> get them all)
+uint8_t           processIE_prepend_sixCellBlacklist(
+    OpenQueueEntry_t*    pkt,
+    cellInfo_ht*         cellList
+);
 
 //===== retrieve IEs
 

@@ -242,6 +242,7 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
         return;
     }
 
+
     // update state
     sixtop_setState(SIX_SENDING_REQUEST);
 
@@ -277,10 +278,21 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
       strncat(str, ", ch ", 150);
       openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
    }
+#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
+   if (track.instance != TRACK_PARENT_CONTROL)
+       strncat(str, ", via control track ", 150);
+#endif
    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
 #endif
    
+   // set the track for the LinkRequest (I have a TRRX cell with this child (through which the LinkReq has been txed)
+#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
+   if (track.instance != TRACK_PARENT_CONTROL)
+       pkt->l2_track = sixtop_get_trackcontrol();
+#endif
+
+
     // create packet
     len  = 0;
     if (code == IANA_6TOP_CMD_ADD || IANA_6TOP_CMD_DELETE){
@@ -1143,11 +1155,13 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
    case SIX_WAIT_ADDREQUEST_SENDDONE:
       if (error != E_FAIL){
 #ifdef _DEBUG_SIXTOP_
-         if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
+         if (!msg->l2_sixtop_blacklist && msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
             sprintf(str, "LinkReq txed: to ");
+         else if (msg->l2_sixtop_blacklist && msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
+              sprintf(str, "LinkBlackL txed: to ");
          else
-             sprintf(str, "LinkRem txed: to ");
-         openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+              sprintf(str, "LinkRem txed: to ");
+          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
          openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
@@ -1155,8 +1169,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       }
       else{
 #ifdef _DEBUG_SIXTOP_
-          if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
+          if (!msg->l2_sixtop_blacklist && msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
              sprintf(str, "LinkReq failed: to ");
+          else if (msg->l2_sixtop_blacklist && msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
+                sprintf(str, "LinkBlackL txed: to ");
           else
               sprintf(str, "LinkRem failed: to ");
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
@@ -1231,6 +1247,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                    if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
                    //nothing to do -> the cells have already been inserted when the linkrep was prepared
                    }
+                   //BLACKL COMMAND:
+                   if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
+                   //nothing to do -> just informative for the receiver
+                   }
                }
 
            }
@@ -1283,7 +1303,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
            }
         }
 
-        //sixtop_setState(SIX_IDLE);
 
         if (
             msg->l2_sixtop_returnCode     == IANA_6TOP_RC_SUCCESS && 
@@ -1471,6 +1490,7 @@ void sixtop_notifyReceiveCommand(
     uint8_t           len = 0;
     uint8_t           container;
     memset(cellList,0,sizeof(cellList));
+    uint8_t           blacklist = FALSE;
     
     // get a free packet buffer
     response_pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
@@ -1547,11 +1567,17 @@ void sixtop_notifyReceiveCommand(
                           commandIdORcode == IANA_6TOP_CMD_DELETE &&
                           sixtop_areAvailableCellsToBeRemoved(frameID,numOfCells,cellList,&(pkt->l2_nextORpreviousHop))
                        )
+
                     ){
                         code = IANA_6TOP_RC_SUCCESS;
                         len += processIE_prepend_sixCelllist(response_pkt,cellList);
                         //track info for ADD command
                         if (commandIdORcode == IANA_6TOP_CMD_ADD){
+
+                            //whitelist
+                            packetfunctions_reserveHeaderSize(response_pkt,sizeof(uint8_t));
+                            memcpy(response_pkt->payload, &blacklist, sizeof(uint8_t));
+                            len+=sizeof(uint8_t);
 
                             // reserve space for track
                             packetfunctions_reserveHeaderSize(response_pkt,sizeof(track_t));
@@ -1570,7 +1596,31 @@ void sixtop_notifyReceiveCommand(
                                     &(pkt->l2_nextORpreviousHop),
                                     sixtop_vars.six2six_state);
                         }
-                    } else {
+                    //not enough cells are available: sends the blacklisted list of busy cells
+                    } else if (commandIdORcode == IANA_6TOP_CMD_ADD){
+                        code = IANA_6TOP_RC_SUCCESS;
+
+                        //compute the blacklist and prepend
+                        len += processIE_prepend_sixCellBlacklist(response_pkt,cellList);
+                        blacklist = TRUE;
+
+                        //blacklist
+                        packetfunctions_reserveHeaderSize(response_pkt,sizeof(uint8_t));
+                        memcpy(response_pkt->payload, &blacklist, sizeof(uint8_t));
+                        len+=sizeof(uint8_t);
+
+                        // reserve space for track
+                        packetfunctions_reserveHeaderSize(response_pkt,sizeof(track_t));
+                        // write header
+                        memcpy(response_pkt->payload, &(pkt->l2_sixtop_track), sizeof(track_t));
+                        len+=sizeof(track_t);
+
+                        //save the track info
+                        memcpy(&(response_pkt->l2_sixtop_track), &(pkt->l2_sixtop_track), sizeof(track_t));
+
+                    }
+                    //failed
+                    else{
                         code = IANA_6TOP_RC_ERR;
                     }
 
@@ -1598,9 +1648,6 @@ void sixtop_notifyReceiveCommand(
                     }
                     openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
-
-
-
 
                     break;
                 case IANA_6TOP_CMD_COUNT:
@@ -1637,6 +1684,7 @@ void sixtop_notifyReceiveCommand(
             }
             response_pkt->l2_sixtop_requestCommand = commandIdORcode;
             response_pkt->l2_sixtop_frameID        = frameID;
+            response_pkt->l2_sixtop_blacklist      = blacklist;
 
             len += processIE_prepend_sixGeneralMessage(response_pkt,code);
             len += processIE_prepend_sixSubID(response_pkt);
@@ -1664,6 +1712,10 @@ void sixtop_notifyReceiveCommand(
                     memcpy(&(pkt->l2_sixtop_track), (pkt->payload)+ptr+local_len, sizeof(track_t));
                     local_len += sizeof(track_t);
 
+                    //blacklist
+                    pkt->l2_sixtop_blacklist = *(uint8_t*)((pkt->payload)+ptr+local_len);
+                    local_len += 1;
+
                     //get the list of cells
                     processIE_retrieve_sixCelllist(pkt,ptr+local_len,length-local_len,cellList);
 
@@ -1677,16 +1729,29 @@ void sixtop_notifyReceiveCommand(
                     strncat(str, ", owner=", 150);
                     openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_sixtop_track.owner.addr_64b[6], 150);
                     openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_sixtop_track.owner.addr_64b[7], 150);
+                    strncat(str, ", blacklist=", 150);
+                    openserial_ncat_uint8_t(str, (uint8_t)pkt->l2_sixtop_blacklist, 150);
                     openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
+
 
                     // always default frameID
                     frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
-                    sixtop_addCellsByState(frameID,
+                    if (!pkt->l2_sixtop_blacklist)
+                        sixtop_addCellsByState(frameID,
                             cellList,
                             pkt->l2_sixtop_track,
                             &(pkt->l2_nextORpreviousHop),
                             sixtop_vars.six2six_state
                     );
+                    else if (pkt->l2_sixtop_blacklist)
+                        openserial_printInfo(COMPONENT_SIXTOP,ERR_GENERIC,
+                               (errorparameter_t)222,
+                               (errorparameter_t)444);
+                    else
+                        openserial_printInfo(COMPONENT_SIXTOP,ERR_GENERIC,
+                                                       (errorparameter_t)111,
+                                                       (errorparameter_t)commandIdORcode);
 
                      break;
 
@@ -2106,7 +2171,7 @@ bool sixtop_areAvailableCellsToBeScheduled(
          if(schedule_isSlotOffsetAvailable(cellList[i].tsNum) == TRUE)
             bw--;
          else
-            cellList[i].linkoptions = CELLTYPE_OFF;
+            cellList[i].linkoptions = CELLTYPE_BUSY;
          i++;
       }while(i<SCHEDULEIEMAXNUMCELLS && bw>0);
       
@@ -2177,6 +2242,18 @@ track_t sixtop_get_trackcommon(void){
    track.instance    = (uint16_t)TRACK_ALLCOMMON;
    return(track);
 }
+
+//return the common track (uses dedicated cells toward the parent, but NO traffic isolation)
+track_t sixtop_get_trackcontrol(void){
+   track_t track;
+
+   bzero(&(track.owner), sizeof(track.owner));
+   memcpy(&(track.owner), idmanager_getMyID(ADDR_64B), sizeof(track.owner));
+   track.instance = TRACK_PARENT_CONTROL;
+   return(track);
+}
+
+
 
 
 bool sixtop_areAvailableCellsToBeRemoved(      

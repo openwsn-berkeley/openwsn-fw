@@ -359,6 +359,56 @@ port_INLINE void processIE_retrieve_sixCelllist(
 
 
 
+port_INLINE uint8_t processIE_prepend_sixCellBlacklist(
+        OpenQueueEntry_t*    pkt,
+        cellInfo_ht*         cellList
+   ){
+    uint8_t    i;
+    uint8_t    len;
+    uint8_t    numOfCells;
+
+    len        = 0;
+    numOfCells = 0;
+
+
+    char      str[150];
+    sprintf(str, "BLACKLIST ");
+
+
+
+    //===== cell list
+
+    for(i=0;i<SCHEDULEIEMAXNUMCELLS;i++) {
+        if(cellList[i].linkoptions == CELLTYPE_BUSY){
+            // cellobjects:
+            // - [2B] slotOffset
+            // - [2B] channelOffset
+            // - [1B] link_type
+            packetfunctions_reserveHeaderSize(pkt,4);
+            pkt->payload[0] = (uint8_t)(cellList[i].tsNum  & 0x00FF);
+            pkt->payload[1] = (uint8_t)((cellList[i].tsNum & 0xFF00)>>8);
+            pkt->payload[2] = (uint8_t)(cellList[i].choffset  & 0x00FF);
+            pkt->payload[3] = (uint8_t)((cellList[i].choffset & 0xFF00)>>8);
+            len += 4;
+            numOfCells++;
+
+            strncat(str, ", ", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
+            strncat(str, " / ", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
+
+        }
+    }
+    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
+
+    // record the position of cellObjects
+    pkt->l2_sixtop_numOfCells  = numOfCells;
+    pkt->l2_sixtop_cellObjects = pkt->payload;
+
+    return len;
+}
+
 
 
 port_INLINE uint8_t processIE_prepend_sixCelllist(
@@ -376,7 +426,7 @@ port_INLINE uint8_t processIE_prepend_sixCelllist(
     //===== cell list
    
     for(i=0;i<SCHEDULEIEMAXNUMCELLS;i++) {
-        if(cellList[i].linkoptions != CELLTYPE_OFF){
+        if(cellList[i].linkoptions != CELLTYPE_OFF && cellList[i].linkoptions != CELLTYPE_BUSY){
             // cellobjects:
             // - [2B] slotOffset
             // - [2B] channelOffset

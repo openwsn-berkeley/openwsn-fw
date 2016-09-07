@@ -90,8 +90,7 @@ bool sfloc_reserveParentCells_controlTrack(void){
 
 
    //the specific track for 6P Link Requests
-   memcpy(&(sixtopTrack.owner), idmanager_getMyID(ADDR_64B), sizeof(sixtopTrack.owner));
-   sixtopTrack.instance = TRACK_PARENT_CONTROL;
+   sixtopTrack = sixtop_get_trackcontrol();
 
    //how many cells for TRACK_PARENT_CONTROL?
    nbCells = schedule_getNbCellsWithTrack(sixtopTrack, &parent);

@@ -850,8 +850,7 @@ void sendDAO() {
 #endif
 
 #if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
-   memcpy(&(msg->l2_track.owner), idmanager_getMyID(ADDR_64B), sizeof(msg->l2_track.owner));
-   msg->l2_track.instance   = (uint16_t)TRACK_PARENT_CONTROL;
+   msg->l2_track = sixtop_get_trackcontrol();
 #endif
 
 #if (TRACK_MGMT != TRACK_MGMT_NO)  && (TRACK_MGMT != TRACK_MGMT_SHARED)  && (TRACK_MGMT != TRACK_MGMT_ISOLATION)  && (TRACK_MGMT != TRACK_MGMT_6P_ISOLATION)

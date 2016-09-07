@@ -303,7 +303,7 @@ enum {
 #define TRACK_MGMT_NO            0  // all the applications use the shared cells (TXRX, no dedicated cell, besteffort track)
 #define TRACK_MGMT_SHARED        1  // all the applications use the same track (with dedicated cells)
 #define TRACK_MGMT_ISOLATION     2  // each application may have its own dedicated track
-#define TRACK_MGMT_6P_ISOLATION  3   // one track for 6P requests + one dedicated track per application
+#define TRACK_MGMT_6P_ISOLATION  3   // one track for 6P requests and DAO + one dedicated track per application
 
 
 
@@ -408,6 +408,7 @@ typedef struct {
    uint8_t       l2_sixtop_requestCommand;       // request Command in 6P
    uint8_t       l2_sixtop_returnCode;           // return code in 6P
    track_t       l2_sixtop_track;                // track in bandwidthIE
+   uint8_t       l2_sixtop_blacklist;            // does the schedule correspond to a blacklist or a whitelist?
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_IEListPresent;               //did have IE field?

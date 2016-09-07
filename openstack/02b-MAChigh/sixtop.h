@@ -25,12 +25,12 @@
 #define IANA_6TOP_CMD_LIST     0x04 // CMD_LIST     | list the scheduled cells  
 #define IANA_6TOP_CMD_CLEAR    0x05 // CMD_CLEAR    | clear all cells
 // 6P return code
-#define IANA_6TOP_RC_SUCCESS   0x06 // RC_SUCCESS  | operation succeeded      
-#define IANA_6TOP_RC_VER_ERR   0x07 // RC_VER_ERR  | unsupported 6P version   
-#define IANA_6TOP_RC_SFID_ERR  0x08 // RC_SFID_ERR | unsupported SFID         
+#define IANA_6TOP_RC_SUCCESS   0x06 // RC_SUCCESS  | operation succeeded
+#define IANA_6TOP_RC_VER_ERR   0x07 // RC_VER_ERR  | unsupported 6P version
+#define IANA_6TOP_RC_SFID_ERR  0x08 // RC_SFID_ERR | unsupported SFID
 #define IANA_6TOP_RC_BUSY      0x09 // RC_BUSY     | handling previous request
-#define IANA_6TOP_RC_RESET     0x0a // RC_RESET    | abort 6P transaction     
-#define IANA_6TOP_RC_ERR       0x0b // RC_ERR      | operation failed         
+#define IANA_6TOP_RC_RESET     0x0a // RC_RESET    | abort 6P transaction
+#define IANA_6TOP_RC_ERR       0x0b // RC_ERR      | operation failed
 
 // SF ID
 #if (SFMETHOD == SFMETHOD_SF0)
@@ -69,12 +69,7 @@ typedef enum {
     SIX_WAIT_DELETERESPONSE             = 0x08,
     SIX_WAIT_COUNTRESPONSE              = 0x09,
     SIX_WAIT_LISTRESPONSE               = 0x0a,
-    SIX_WAIT_CLEARRESPONSE              = 0x0b,
-   
-    // response senddone
-    // no state for response handling (stateless, non blocking)
- //   SIX_REQUEST_RECEIVED                = 0x0c,
- //   SIX_WAIT_RESPONSE_SENDDONE          = 0x0d
+    SIX_WAIT_CLEARRESPONSE              = 0x0b
 } six2six_state_t;
 
 // before sixtop protocol is called, sixtop handler must be set
@@ -145,6 +140,7 @@ bool      sixtop_is_trackequal(track_t track1, track_t track2);
 bool      sixtop_is_trackbesteffort(track_t track);
 track_t   sixtop_get_trackbesteffort(void);
 track_t   sixtop_get_trackcommon(void);
+track_t   sixtop_get_trackcontrol(void);
 
 // control
 void      sixtop_setIsResponseEnabled(bool isEnabled);
