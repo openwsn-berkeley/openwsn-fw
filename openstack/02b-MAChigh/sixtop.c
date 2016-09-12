@@ -401,24 +401,6 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
    opentimers_restart(sixtop_vars.timeoutTimerId);
 }
 
-//======= maintaning 
-void sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor){
-    slotinfo_element_t info;
-    cellInfo_ht linkInfo;
-    schedule_getSlotInfo(slotOffset,neighbor,&info);
-    if(info.link_type != CELLTYPE_OFF){
-        linkInfo.tsNum       = slotOffset;
-        linkInfo.choffset    = info.channelOffset;
-        linkInfo.linkoptions = info.link_type;
-        sixtop_vars.handler  = SIX_HANDLER_MAINTAIN;
-        sixtop_addORremoveCellByInfo(IANA_6TOP_CMD_DELETE,neighbor, &linkInfo);
-    } else {
-        //should log this error
-        
-        return;
-    }
-}
-
 //======= from upper layer
 
 owerror_t sixtop_send(OpenQueueEntry_t *msg) {
@@ -719,16 +701,6 @@ void timer_sixtop_management_fired(void) {
          // called every EBPERIOD seconds
          neighbors_removeOld();
          break;
-      case 2:
-         // called every EBPERIOD seconds
-         entry = schedule_statistic_poorLinkQuality();
-         if (
-             entry       != NULL                        && \
-             entry->type != CELLTYPE_OFF                && \
-             entry->type != CELLTYPE_TXRX               
-         ){
-             sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
-         }
       default:
          // called every second, except third times every EBPERIOD seconds
          sixtop_sendKA();
@@ -998,32 +970,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
 #ifdef SIXTOP_DEBUG
         printf("Mote %d SIXTOP RES TRANSCATION IS END\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
 #endif
-        if (
-            msg->l2_sixtop_returnCode     == IANA_6TOP_RC_SUCCESS && 
-            msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD
-        ){
-            if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
-                sixtop_request(
-                    IANA_6TOP_CMD_DELETE,
-                    &(msg->l2_nextORpreviousHop),
-                    1
-                );
-                sixtop_request(IANA_6TOP_CMD_ADD,&(msg->l2_nextORpreviousHop),1);
-            } else {
-                sixtop_vars.handler = SIX_HANDLER_NONE;
-            }
-        } else {
-            if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_RX,&(msg->l2_nextORpreviousHop))>0 &&
-                schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&(msg->l2_nextORpreviousHop))==0
-            ){
-               sixtop_vars.handler = SIX_HANDLER_SFX;
-               sixtop_request(
-                  IANA_6TOP_CMD_ADD,
-                  &(msg->l2_nextORpreviousHop),
-                  1
-               );
-            }
-        }
         break;
     default:
         //log error

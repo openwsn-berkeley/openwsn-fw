@@ -68,9 +68,8 @@ typedef enum {
 // before sixtop protocol is called, sixtop handler must be set
 typedef enum {
     SIX_HANDLER_NONE                    = 0x00, // when complete reservation, handler must be set to none
-    SIX_HANDLER_MAINTAIN                = 0x01, // the handler is maintenance process
-    SIX_HANDLER_SF0                     = 0x02,  // the handler is otf
-    SIX_HANDLER_SFX                     = 0x03  // the handler is sfx
+    SIX_HANDLER_SF0                     = 0x01, // the handler is otf
+    SIX_HANDLER_SFX                     = 0x02  // the handler is sfx
 } six2six_handler_t;
 
 //=========================== typedef =========================================
