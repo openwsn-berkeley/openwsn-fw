@@ -6,7 +6,10 @@
 #include "sixtop.h"
 #include "idmanager.h"
 #include "sf0.h"
+#include "sfx.h"
 
+//=========================== definition ======================================
+//#define SCHEDULE_DEBUG
 //=========================== variables =======================================
 
 schedule_vars_t schedule_vars;
@@ -462,6 +465,45 @@ bool schedule_isSlotOffsetAvailable(uint16_t slotOffset){
    return TRUE;
 }
 
+uint8_t schedule_getUsageStatus(scheduleEntry_t* entry){
+    uint8_t  count;
+    uint16_t bm;
+    
+    count = 0;
+    bm = entry->usageBitMap;
+    
+    while (bm>0){
+        count = count+1;
+        bm    = bm & (bm-1);
+    }
+    return count;
+}
+
+uint16_t schedule_getTotalCellUsageStatus(cellType_t type, open_addr_t* neighbor){
+   uint16_t usageCount = 0;
+   uint16_t debugCount = 0;
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+       if(
+          packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor) &&
+          type == scheduleWalker->type
+       ){
+          debugCount  = schedule_getUsageStatus(scheduleWalker);
+          usageCount += schedule_getUsageStatus(scheduleWalker);
+       }
+       scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   ENABLE_INTERRUPTS();
+   
+   return usageCount;
+}
+
 scheduleEntry_t* schedule_statistic_poorLinkQuality(){
    scheduleEntry_t* scheduleWalker;
    
@@ -575,14 +617,33 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 \brief advance to next active slot
 */
 void schedule_advanceSlot() {
-   
+   scheduleEntry_t* scheduleWalker; 
+  
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
        ) {
        // one slotframe has elapsed
-       sf0_notifyNewSlotframe();
-   }   
+        scheduleWalker = schedule_vars.currentScheduleEntry;
+        do {
+            if (
+                scheduleWalker->type == CELLTYPE_TX ||
+                scheduleWalker->type == CELLTYPE_RX
+            ){      
+#ifdef SCHEDULE_DEBUG
+                printf("Mote %d Neighbor %d Slot %d Type %d Usage %d\n",
+                       idmanager_getMyID(ADDR_16B)->addr_16b[1],
+                       scheduleWalker->neighbor.addr_64b[7],
+                       scheduleWalker->slotOffset,
+                       scheduleWalker->type,
+                       schedule_getUsageStatus(scheduleWalker)
+                );
+#endif
+            }
+            scheduleWalker = scheduleWalker->next;
+        }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+       sfx_notifyNewSlotframe();
+   }
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
    
    ENABLE_INTERRUPTS();
@@ -825,6 +886,32 @@ void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
    ENABLE_INTERRUPTS();
 }
 
+void schedule_updateCellUsageBitMap(bool hasPacketToSend){
+    uint16_t temp;  
+  
+    schedule_vars.currentScheduleEntry->bitMapIndex += 1;
+    if (schedule_vars.currentScheduleEntry->bitMapIndex == CELL_USAGE_CALCULATION_WINDOWS){
+        schedule_vars.currentScheduleEntry->bitMapIndex = 0;
+    }
+    
+    temp = (uint16_t)1 << schedule_vars.currentScheduleEntry->bitMapIndex;
+    if (hasPacketToSend) {
+        schedule_vars.currentScheduleEntry->usageBitMap |= temp;
+    } else {
+        schedule_vars.currentScheduleEntry->usageBitMap &= ~temp;
+    }
+#ifdef SCHEDULE_DEBUG
+    if(idmanager_getIsDAGroot()==FALSE){
+        printf ("mote %d slot %d neighbor %d usage %d\n",
+          idmanager_getMyID(ADDR_16B)->addr_16b[1],
+          schedule_vars.currentScheduleEntry->slotOffset,
+          schedule_vars.currentScheduleEntry->neighbor.addr_64b[7],
+          schedule_getUsageStatus(schedule_vars.currentScheduleEntry)
+        );
+    }
+#endif
+}
+
 //=========================== private =========================================
 
 /**
@@ -845,5 +932,9 @@ void schedule_resetEntry(scheduleEntry_t* e) {
    e->lastUsedAsn.bytes0and1 = 0;
    e->lastUsedAsn.bytes2and3 = 0;
    e->lastUsedAsn.byte4      = 0;
+   
+   e->usageBitMap            = 0;
+   e->bitMapIndex            = 0;
+   
    e->next                   = NULL;
 }

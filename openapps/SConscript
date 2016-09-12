@@ -17,6 +17,7 @@ defaultApps   = [
     'uinject',
     'userialbridge',
     'rrt',
+    'cstorm',
 ]
 if localEnv['board']=='python':
     defaultApps  += [
