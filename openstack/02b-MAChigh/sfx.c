@@ -123,7 +123,7 @@ void sfx_cellUsageCalculation_task(){
             CELLTYPE_TXRX,
             NULL);
    cellUsage  = schedule_getTotalCellUsageStatus(CELLTYPE_TX,&neighbor);
-   cellUsage += schedule_getTotalCellUsageStatus(CELLTYPE_TX,NULL);
+   cellUsage += schedule_getTotalCellUsageStatus(CELLTYPE_TXRX,NULL);
    
    // cell usage scheduling, bandwith estimation algorithm
    if (cellUsage/numberOfCells>=SFX_ADD_THRESHOLD){
