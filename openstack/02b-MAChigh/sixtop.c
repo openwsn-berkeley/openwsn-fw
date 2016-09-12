@@ -767,7 +767,7 @@ port_INLINE void sixtop_sendEB() {
    
    if (idmanager_getIsDAGroot()==FALSE){
        // sendEB only I have setup my schedule with my parent
-       foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+       foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
        if (foundNeighbor==FALSE) {
           return;
        }

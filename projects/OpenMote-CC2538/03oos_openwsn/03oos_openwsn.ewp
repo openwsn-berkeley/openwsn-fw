@@ -327,6 +327,7 @@
           <state>$PROJ_DIR$\..\..\..\openapps\cstorm\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\rrt\</state>
           <state>$PROJ_DIR$\..\..\..\openapps\uinject\</state>
+          <state>$PROJ_DIR$\..\..\..\openapps\userialbridge\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\headers\</state>
           <state>$PROJ_DIR$\..\..\..\bsp\boards\OpenMote-CC2538\source\</state>
@@ -2438,6 +2439,15 @@
         <name>$PROJ_DIR$\..\..\..\openapps\uinject\uinject.h</name>
       </file>
     </group>
+    <group>
+      <name>userialbridge</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\userialbridge\userialbridge.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openapps\userialbridge\userialbridge.h</name>
+      </file>
+    </group>
     <file>
       <name>$PROJ_DIR$\..\..\..\openapps\openapps.c</name>
     </file>
@@ -2508,6 +2518,12 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\schedule.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sf0.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\..\..\openstack\02b-MAChigh\sfx.c</name>

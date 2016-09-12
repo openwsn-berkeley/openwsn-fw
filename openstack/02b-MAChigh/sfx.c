@@ -6,6 +6,7 @@
 #include "schedule.h"
 #include "openqueue.h"
 #include "idmanager.h"
+#include "icmpv6rpl.h"
 
 //=========================== definition ======================================
 
@@ -38,11 +39,11 @@ void sfx_init(void) {
 }
 
 void sfx_notif_addedCell(void) {
-   scheduler_push_task(sfx_addCell_task,TASKPRIO_OTF);
+   scheduler_push_task(sfx_addCell_task,TASKPRIO_SFX);
 }
 
 void sfx_notif_removedCell(void) {
-   scheduler_push_task(sfx_removeCell_task,TASKPRIO_OTF);
+   scheduler_push_task(sfx_removeCell_task,TASKPRIO_SFX);
 }
 
 //=========================== private =========================================
@@ -52,7 +53,7 @@ void sfx_addCell_task(void) {
    bool                 foundNeighbor;
    
    // get preferred parent
-   foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+   foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
    if (foundNeighbor==FALSE) {
       return;
    }
@@ -71,7 +72,7 @@ void sfx_removeCell_task(void) {
    bool                 foundNeighbor;
    
    // get preferred parent
-   foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+   foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
    if (foundNeighbor==FALSE) {
       return;
    }
@@ -102,7 +103,7 @@ void sfx_notifyNewSlotframe(void){
    }
    
    // get preferred parent
-   foundNeighbor = neighbors_getPreferredParentEui64(&neighbor);
+   foundNeighbor = icmpv6rpl_getPreferredParentEui64(&neighbor);
    if (foundNeighbor==FALSE) {
       return;
    }
