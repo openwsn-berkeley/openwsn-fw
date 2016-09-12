@@ -11,6 +11,7 @@ at most MAX_NUM_TIMERS timers.
 #include "opentimers.h"
 #include "bsp_timer.h"
 #include "leds.h"
+#include "scheduler.h"
 
 //=========================== define ==========================================
 
@@ -196,7 +197,7 @@ This function maps the expiration event to possibly multiple timers, calls the
 corresponding callback(s), and restarts the hardware timer with the next timer
 to expire.
  */
-void opentimers_timer_callback() {
+void opentimers_timer_callback_task() {
    
    opentimer_id_t   id;
    PORT_TIMER_WIDTH min_timeout;
@@ -277,6 +278,19 @@ void opentimers_timer_callback() {
       // no more timers pending
       opentimers_vars.running = FALSE;
    }
+}
+
+/**
+\brief Function called when the hardware timer expires.
+
+Executed in interrupt mode.
+
+This function maps the expiration event to possibly multiple timers, calls the
+corresponding callback(s), and restarts the hardware timer with the next timer
+to expire.
+ */
+void opentimers_timer_callback() {
+   scheduler_push_task(opentimers_timer_callback_task,TASKPRIO_OPENTIMERS);
 }
 
 void opentimers_sleepTimeCompesation(uint16_t sleepTime)
