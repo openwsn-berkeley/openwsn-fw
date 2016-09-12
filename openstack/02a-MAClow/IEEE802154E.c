@@ -118,7 +118,7 @@ void ieee154e_init() {
    
    // to easy debug, by default we use signle channel to communication
    // set singleChannel to 0 to enable channel hopping.
-   ieee154e_vars.singleChannel     = SYNCHRONIZING_CHANNEL;
+   ieee154e_vars.singleChannel     = 0;
    ieee154e_vars.isAckEnabled      = TRUE;
    ieee154e_vars.isSecurityEnabled = FALSE;
    ieee154e_vars.slotDuration      = TsSlotDuration;
