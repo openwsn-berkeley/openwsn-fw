@@ -12,7 +12,7 @@
 
 //=========================== define ==========================================
 
-#define CELL_USAGE_CALCULATION_WINDOWS  5
+#define CELL_USAGE_CALCULATION_WINDOWS  10
 
 //=========================== typedef =========================================
 

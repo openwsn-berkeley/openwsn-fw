@@ -942,7 +942,7 @@ port_INLINE void activity_ti1ORri1() {
          }
          
          // udpate cell usgae bitmap, set as true if I have packet to send on Tx cell
-         if (cellType==CELLTYPE_TX){
+         if (cellType==CELLTYPE_TX || CELLTYPE_TXRX){
              if (ieee154e_vars.dataToSend==NULL) {
                  schedule_updateCellUsageBitMap(FALSE);
              } else {

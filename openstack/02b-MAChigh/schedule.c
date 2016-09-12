@@ -481,7 +481,6 @@ uint8_t schedule_getUsageStatus(scheduleEntry_t* entry){
 
 uint16_t schedule_getTotalCellUsageStatus(cellType_t type, open_addr_t* neighbor){
    uint16_t usageCount = 0;
-   uint16_t debugCount = 0;
    scheduleEntry_t* scheduleWalker;
    
    INTERRUPT_DECLARATION();
@@ -490,10 +489,15 @@ uint16_t schedule_getTotalCellUsageStatus(cellType_t type, open_addr_t* neighbor
    scheduleWalker = schedule_vars.currentScheduleEntry;
    do {
        if(
-          packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor) &&
-          type == scheduleWalker->type
+          type == scheduleWalker->type &&
+          (
+              (
+                  type == CELLTYPE_TX &&
+                  packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor)
+              ) ||
+              type == CELLTYPE_TXRX
+          )
        ){
-          debugCount  = schedule_getUsageStatus(scheduleWalker);
           usageCount += schedule_getUsageStatus(scheduleWalker);
        }
        scheduleWalker = scheduleWalker->next;
@@ -519,8 +523,13 @@ uint16_t  schedule_getCellsCounts(uint8_t frameID,cellType_t type, open_addr_t* 
     scheduleWalker = schedule_vars.currentScheduleEntry;
     do {
        if(
-          packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor) &&
-          type == scheduleWalker->type
+          (type == scheduleWalker->type) &&
+          (
+              (
+                  type == CELLTYPE_TXRX ||
+                  (type == CELLTYPE_TX &&  packetfunctions_sameAddress(&(scheduleWalker->neighbor),neighbor))
+              )
+          )
        ){
            count++;
        }

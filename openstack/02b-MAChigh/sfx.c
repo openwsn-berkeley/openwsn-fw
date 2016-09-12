@@ -7,6 +7,7 @@
 #include "openqueue.h"
 #include "idmanager.h"
 #include "icmpv6rpl.h"
+#include "scheduler.h"
 
 //=========================== definition ======================================
 
@@ -19,9 +20,9 @@
 // remove a slot. If cell usage is more than 
 //          SFX_ADD_THRESHOLD/CELL_USAGE_CALCULATION_WINDOWS
 // add a lost. Else, nothing happens.
-#define SFX_ADD_THRESHOLD          3 
-#define SFX_TARGET                 2
-#define SFX_DELETE_THRESHOLD       1
+#define SFX_ADD_THRESHOLD          8    // 8 means 80% cell usage
+#define SFX_TARGET                 6    
+#define SFX_DELETE_THRESHOLD       4
 
 //=========================== variables =======================================
 
@@ -31,6 +32,7 @@ sfx_vars_t sfx_vars;
 
 void sfx_addCell_task(void);
 void sfx_removeCell_task(void);
+void sfx_cellUsageCalculation_task(void);
 
 //=========================== public ==========================================
 
@@ -87,11 +89,15 @@ void sfx_removeCell_task(void) {
 }
 
 void sfx_notifyNewSlotframe(void){
+    scheduler_push_task(sfx_cellUsageCalculation_task,TASKPRIO_SFX);
+}
+
+// ========================== private =========================================
+void sfx_cellUsageCalculation_task(){
    open_addr_t          neighbor; 
    bool                 foundNeighbor;
    uint16_t             numberOfCells;
    uint16_t             cellUsage;
-   OpenQueueEntry_t*    entry;
    
    if (idmanager_getIsDAGroot()){
       return;
@@ -108,27 +114,16 @@ void sfx_notifyNewSlotframe(void){
       return;
    }
    
-   numberOfCells = schedule_getCellsCounts(
+   numberOfCells  = schedule_getCellsCounts(
             SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
             CELLTYPE_TX,
             &neighbor);
-   cellUsage = schedule_getTotalCellUsageStatus(CELLTYPE_TX,&neighbor);
-   
-   if (numberOfCells==0){
-       entry = openqueue_getIpPacket();
-       if (entry!=NULL ){
-           sixtop_setHandler(SIX_HANDLER_SFX);
-           // call sixtop
-           sixtop_request(
-              IANA_6TOP_CMD_ADD,
-              &neighbor,
-              1
-           );
-       }
-       sfx_vars.periodMaintenance = CELL_USAGE_CALCULATION_WINDOWS;
-       return;
-   }
-   
+   numberOfCells += schedule_getCellsCounts(
+            SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+            CELLTYPE_TXRX,
+            NULL);
+   cellUsage  = schedule_getTotalCellUsageStatus(CELLTYPE_TX,&neighbor);
+   cellUsage += schedule_getTotalCellUsageStatus(CELLTYPE_TX,NULL);
    
    // cell usage scheduling, bandwith estimation algorithm
    if (cellUsage/numberOfCells>=SFX_ADD_THRESHOLD){
@@ -141,6 +136,7 @@ void sfx_notifyNewSlotframe(void){
        );
    } else {
      if (cellUsage/numberOfCells<SFX_DELETE_THRESHOLD){
+         // at least one shared cell has to be existed
          if (numberOfCells>1){
              sixtop_setHandler(SIX_HANDLER_SFX);
              // call sixtop
@@ -150,7 +146,7 @@ void sfx_notifyNewSlotframe(void){
                 1
              );
          } else {
-           // at least 2 collision free slot for sixtop
+           // do not delete shared cell
          }
      } else {
         // nothing happens
