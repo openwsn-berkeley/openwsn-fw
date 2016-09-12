@@ -185,7 +185,6 @@ void opentimers_restart(opentimer_id_t id) {
    opentimers_vars.timersBuf[id].isrunning=TRUE;
 }
 
-
 //=========================== private =========================================
 
 /**
