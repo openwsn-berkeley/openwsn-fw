@@ -617,7 +617,6 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 \brief advance to next active slot
 */
 void schedule_advanceSlot() {
-   scheduleEntry_t* scheduleWalker; 
   
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
