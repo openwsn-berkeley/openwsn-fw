@@ -444,9 +444,15 @@ status information about several modules in the OpenWSN stack.
 */
 bool debugPrint_neighbors() {
    debugNeighborEntry_t temp;
+   uint8_t  index;
+
    neighbors_vars.debugRow=(neighbors_vars.debugRow+1)%MAXNUMNEIGHBORS;
    temp.row=neighbors_vars.debugRow;
    temp.neighborEntry=neighbors_vars.neighbors[neighbors_vars.debugRow];
+   if (icmpv6rpl_getPreferredParentIndex(&index) && (index == temp.row))
+       temp.neighborEntry.parentPreference = TRUE;
+   else
+       temp.neighborEntry.parentPreference = FALSE;
    openserial_printStatus(STATUS_NEIGHBORS,(uint8_t*)&temp,sizeof(debugNeighborEntry_t));
    return TRUE;
 }
