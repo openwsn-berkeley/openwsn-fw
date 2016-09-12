@@ -592,6 +592,8 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 */
 void schedule_advanceSlot() {
   
+   scheduleEntry_t* scheduleWalker;
+  
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
