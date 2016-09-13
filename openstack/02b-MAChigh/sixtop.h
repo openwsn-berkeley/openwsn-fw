@@ -122,7 +122,7 @@ bool      sixtop_isIdle(void);
 //void      sixtop_removeCell(open_addr_t*  neighbor);
 //void      sixtop_removeCellByInfo(open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 track_t   sixtop_getTrackCellsByState(uint8_t slotframeID, uint8_t numOfLink, cellInfo_ht* cellList, open_addr_t* previousHop);
-void      sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track);
+void      sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track, scheduleEntry_t *cell);
 void      sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t*  neighbor,cellInfo_ht* cellInfo);
 // maintaining
 void      sixtop_maintaining(uint16_t slotOffset,open_addr_t* neighbor);

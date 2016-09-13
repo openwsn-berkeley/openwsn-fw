@@ -175,7 +175,7 @@ bool sixtop_isIdle(){
    return(sixtop_vars.six2six_state == SIX_IDLE);
 }
 
-void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track){
+void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track_t track, scheduleEntry_t *cell){
     OpenQueueEntry_t* pkt;
     uint8_t           len;
     uint8_t           container;
@@ -212,7 +212,38 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
 
    
     // generate candidate cell list
-    if (code == IANA_6TOP_CMD_ADD){
+
+    // CASE1: The cell to remove is specified
+    if((numCells == 1) && (cell != NULL)){
+        if (code == IANA_6TOP_CMD_DELETE){
+            frameID = schedule_getFrameHandle();
+            container  = frameID;
+            cellList[0].tsNum       = cell->slotOffset;
+            cellList[0].choffset    = cell->channelOffset;
+            cellList[0].linkoptions = cell->type;
+        }
+        else{
+            openserial_printError(
+                    COMPONENT_SIXTOP_RES,
+                    ERR_SIXTOP_WRONGPARAM,
+                    (errorparameter_t)code,
+                    (errorparameter_t)0
+            );
+            return;
+        }
+    }
+    else if ((numCells != 1) && (cell != NULL)){
+
+        openserial_printError(
+                           COMPONENT_SIXTOP_RES,
+                           ERR_SIXTOP_WRONGPARAM,
+                           (errorparameter_t)numCells,
+                           (errorparameter_t)2
+                       );
+        return;
+    }
+    // CASE2: ADD case
+    else if (code == IANA_6TOP_CMD_ADD){
         if (sixtop_candidateAddCellList(&frameID,cellList,track,numCells)==FALSE){
               return;
         } else{
@@ -220,7 +251,8 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
             container  = frameID;
         }
     }
-    if (code == IANA_6TOP_CMD_DELETE){
+    // CASE3: REMOVE Case
+    else if (code == IANA_6TOP_CMD_DELETE){
         if (sixtop_candidateRemoveCellList(&frameID,cellList,neighbor,numCells)==FALSE){
               return;
         } else{
@@ -1319,13 +1351,15 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
                     IANA_6TOP_CMD_DELETE,
                     &(msg->l2_nextORpreviousHop),
                     1,
-                    sixtop_get_trackbesteffort()     //we don't care about the trackid for the suppression
+                    sixtop_get_trackbesteffort(),       //we don't care about the trackid for the suppression
+                    NULL                                // any cells
                 );
                 sixtop_request(
                       IANA_6TOP_CMD_ADD,
                       &(msg->l2_nextORpreviousHop),
                       1,
-                      sixtop_get_trackbesteffort()             //SIX_HANDLER_MAINTAIN should only be applied to the best effort track
+                      sixtop_get_trackbesteffort(),        //SIX_HANDLER_MAINTAIN should only be applied to the best effort track
+                      NULL                                // any cells
                 );
             } else {
                 sixtop_vars.handler = SIX_HANDLER_NONE;
@@ -1585,7 +1619,7 @@ void sixtop_notifyReceiveCommand(
                             memcpy(response_pkt->payload, &(pkt->l2_sixtop_track), sizeof(track_t));
                             len+=sizeof(track_t);
 
-                            //save the track info
+                            //track info in the metadata
                             memcpy(&(response_pkt->l2_sixtop_track), &(pkt->l2_sixtop_track), sizeof(track_t));
 
                             //add the cells now in the schedule (will be remove if the tx failed)
@@ -1624,6 +1658,10 @@ void sixtop_notifyReceiveCommand(
                         code = IANA_6TOP_RC_ERR;
                     }
 
+                    //same track for the request and response
+                    memcpy(&(response_pkt->l2_track), &(pkt->l2_track), sizeof(track_t));
+
+
 #ifdef _DEBUG_SIXTOP_
                     char      str[150];
                     uint8_t   i;
@@ -1648,6 +1686,8 @@ void sixtop_notifyReceiveCommand(
                     }
                     openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
+
+
 
                     break;
                 case IANA_6TOP_CMD_COUNT:
@@ -1750,7 +1790,7 @@ void sixtop_notifyReceiveCommand(
                                (errorparameter_t)444);
                     else
                         openserial_printInfo(COMPONENT_SIXTOP,ERR_GENERIC,
-                                                       (errorparameter_t)111,
+                                                       (errorparameter_t)145,
                                                        (errorparameter_t)commandIdORcode);
 
                      break;

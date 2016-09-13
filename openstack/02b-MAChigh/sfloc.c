@@ -85,9 +85,12 @@ bool sfloc_reserveParentCells_controlTrack(void){
        return FALSE;
    }
 
-    //parent addr
-    neighbors_getNeighborEui64(&parent, ADDR_64B, i);
+   //DAGroot
+   if (idmanager_getIsDAGroot())
+       return FALSE;
 
+   //parent addr
+   neighbors_getNeighborEui64(&parent, ADDR_64B, i);
 
    //the specific track for 6P Link Requests
    sixtopTrack = sixtop_get_trackcontrol();
@@ -102,7 +105,8 @@ bool sfloc_reserveParentCells_controlTrack(void){
             IANA_6TOP_CMD_ADD,
             &parent,
             1,
-            sixtopTrack           //SFLOC -> control track to exchange 6P transactions
+            sixtopTrack,           //SFLOC -> control track to exchange 6P transactions
+            NULL                   // any cells
          );
 
 #ifdef _DEBUG_SFLOC_
@@ -152,8 +156,8 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
 
 #ifdef _DEBUG_SFLOC_
    char str[150];
-   sprintf(str, "SFLOC required=");
-   openserial_ncat_uint32_t(str, (uint32_t)nbCells_curr >= nbCells_req, 150);
+   sprintf(str, "SFLOC required?=");
+   openserial_ncat_uint32_t(str, (uint32_t)nbCells_curr < nbCells_req, 150);
    strncat(str, ", current=", 150);
    openserial_ncat_uint32_t(str, (uint32_t)nbCells_curr, 150);
    strncat(str, ", required=", 150);
@@ -183,9 +187,9 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
    );
 #endif
 
-   //ask 6top the required number of cells
+   //ask 6top the required number of cells (any slotOffset/ChannelOffset)
    sixtop_setHandler(SIX_HANDLER_SFLOC);
-   sixtop_request(IANA_6TOP_CMD_ADD, &(msg->l2_nextORpreviousHop), nbCells_toadd, msg->l2_track);
+   sixtop_request(IANA_6TOP_CMD_ADD, &(msg->l2_nextORpreviousHop), nbCells_toadd, msg->l2_track, NULL);
    return(nbCells_req - nbCells_curr);
 
    return(0);
@@ -217,7 +221,7 @@ void sfloc_addCells_agressive(void){
 
 //verifies that all the neighbors in CELL_TX are my parents
 void sfloc_remove_obsolete_parents(void){
-#ifndef SIXTOP_REMOVE_OBSOLETE_PARENTS
+#ifndef SFLOC_REMOVE_OBSOLETE_PARENTS
    return;
 #endif
 
@@ -266,7 +270,7 @@ void sfloc_remove_obsolete_parents(void){
 
 void sfloc_remove_unused_cells(void){
 
-#ifndef SIXTOP_REMOVE_UNUSED_CELLS
+#ifndef SFLOC_REMOVE_UNUSED_CELLS
    return;
 #endif
 
@@ -332,7 +336,8 @@ void sfloc_remove_unused_cells(void){
                            IANA_6TOP_CMD_DELETE,
                            &(cell->neighbor),
                            1,
-                           sixtop_get_trackbesteffort()           //SFLOC -> don't care of the track when a cell is REMOVED
+                           sixtop_get_trackbesteffort(),           //SFLOC -> don't care of the track when a cell is REMOVED
+                           cell
                    );
 
                    //at most one request at a time

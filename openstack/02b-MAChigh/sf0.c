@@ -62,8 +62,9 @@ void sf0_addCell_task(void) {
       IANA_6TOP_CMD_ADD,
       &neighbor,
       1,
-      sixtop_get_trackbesteffort()           //SF0 > only the best effort track
-   );
+      sixtop_get_trackbesteffort(),       //SF0 > only the best effort track
+      NULL                                // any cells
+  );
 }
 
 void sf0_removeCell_task(void) {
@@ -82,8 +83,9 @@ void sf0_removeCell_task(void) {
       IANA_6TOP_CMD_DELETE,
       &neighbor,
       1,
-      sixtop_get_trackbesteffort()           //SF0 > no track when a cell is *removed*
-   );
+      sixtop_get_trackbesteffort(),       //SF0 > no track when a cell is *removed*
+      NULL                                // any cells
+  );
 }
 
 void sf0_bandwidthEstimate_task(void){
@@ -131,7 +133,8 @@ void sf0_bandwidthEstimate_task(void){
             IANA_6TOP_CMD_ADD,
             &neighbor,
             bw_incoming+bw_self-bw_outgoing+1,
-            sixtop_get_trackbesteffort()           //SF0 > only the best effort track
+            sixtop_get_trackbesteffort(),       //SF0 > only the best effort track
+            NULL                                // any cells
         );
     } else {
         
@@ -143,8 +146,9 @@ void sf0_bandwidthEstimate_task(void){
                 IANA_6TOP_CMD_DELETE,
                 &neighbor,
                 SF0THRESHOLD,
-                sixtop_get_trackbesteffort()           //SF0 > only the best effort track
-            );
+                sixtop_get_trackbesteffort(),       //SF0 > only the best effort track
+                NULL                                // any cells
+           );
         } else {
             // nothing to do
         }

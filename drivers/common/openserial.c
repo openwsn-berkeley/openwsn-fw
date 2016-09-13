@@ -851,7 +851,7 @@ void openserial_handleCommands(void){
             ){
 
                 // randomly select cell
-                sixtop_request(commandId-8,&neighbor,1, sixtop_get_trackbesteffort());
+                sixtop_request(commandId-8,&neighbor,1, sixtop_get_trackbesteffort(), NULL);
             } else {
                 for (i=0;i<commandLen;i++){
                     cellList[i].tsNum           = openserial_vars.inputBuf[3+i];

@@ -10,7 +10,17 @@
 
 #include "opendefs.h"
 
+
 //=========================== define ==========================================
+
+
+//tracks are handled by 6top
+#define SFLOC_REMOVE_OBSOLETE_PARENTS    // when a node is removed from the parent list, its associated cells are removed
+#define SFLOC_REMOVE_UNUSED_CELLS        // a cell is removed when it is not used for a sufficient long time
+#define SFLOC_CELL_TIMEOUT_RX         (2.5 * TIMER_DAO_TIMEOUT)        //ms before a cell in RX is considered unused if nothing is received
+#define SFLOC_CELL_TIMEOUT_TX         (2 * TIMER_DAO_TIMEOUT)        //ms before a cell in TX is considered unused if nothing is transmitted
+
+
 
 //=========================== typedef =========================================
 

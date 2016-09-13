@@ -220,6 +220,8 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
      return NULL;
    }
    
+
+
    // if you get here, I will try to allocate a buffer for you
    
    // walk through queue and find free entry
@@ -229,10 +231,22 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
          openqueue_vars.queue[i].creator=creator;
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
          ENABLE_INTERRUPTS(); 
+
+         if (creator == COMPONENT_SIXTOP_RES){
+             char str[150];
+             sprintf(str, "PKT creation, pos=");
+             openserial_ncat_uint8_t(str, i, 150);
+             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+         }
+
          return &openqueue_vars.queue[i];
       }
    }
    ENABLE_INTERRUPTS();
+
+
+
+
    return NULL;
 }
 
