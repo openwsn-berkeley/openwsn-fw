@@ -587,7 +587,10 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       
       // toss CRC (2 last bytes)
       packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
-      
+
+      //track for this packet
+      schedule_getTrackCurrent(&(ieee154e_vars.dataReceived->l2_track));
+
       // break if invalid CRC
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
          openserial_statRxCrcFalse(ieee154e_vars.dataReceived);
@@ -662,6 +665,10 @@ port_INLINE void activity_synchronize_endOfFrame(PORT_RADIOTIMER_WIDTH capturedT
       openserial_printInfo(COMPONENT_IEEE802154E,ERR_SYNCHRONIZED,
                             (errorparameter_t)ieee154e_vars.slotOffset,
                             (errorparameter_t)0);
+
+
+      //track for this packet
+      schedule_getTrackCurrent(&(ieee154e_vars.dataReceived->l2_track));
 
       //packet received (serial line)
       openserial_statRx(ieee154e_vars.dataReceived);
@@ -1366,6 +1373,9 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       // toss CRC (2 last bytes)
       packetfunctions_tossFooter(   ieee154e_vars.ackReceived, LENGTH_CRC);
    
+      //track for this packet
+      schedule_getTrackCurrent(&(ieee154e_vars.ackReceived->l2_track));
+
       // break if invalid CRC
       if (ieee154e_vars.ackReceived->l1_crc==FALSE) {
          openserial_statRxCrcFalse(ieee154e_vars.ackReceived);
@@ -1574,6 +1584,10 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
       // toss CRC (2 last bytes)
       packetfunctions_tossFooter(   ieee154e_vars.dataReceived, LENGTH_CRC);
       
+
+      //track for this packet
+      schedule_getTrackCurrent(&(ieee154e_vars.dataReceived->l2_track));
+
       // if CRC doesn't check, stop
       if (ieee154e_vars.dataReceived->l1_crc==FALSE) {
          openserial_statRxCrcFalse(ieee154e_vars.dataReceived);
@@ -1629,6 +1643,9 @@ port_INLINE void activity_ri5(PORT_RADIOTIMER_WIDTH capturedTime) {
          // jump to the error code below this do-while loop
          break;
       }
+
+      //track for this packet
+      schedule_getTrackCurrent(&(ieee154e_vars.dataReceived->l2_track));
       
       //packet received (serial line)
       openserial_statRx(ieee154e_vars.dataReceived);

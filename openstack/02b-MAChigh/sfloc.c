@@ -142,13 +142,17 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
    if (!sixtop_isIdle())
        return(0);
 
-   // track 0 -> only periodical, no sixtop requests
+   // track 0 -> only periodical, no sixtop request
    if (msg->l2_track.instance == TRACK_BESTEFFORT)
       return(0);
 
    // requested and current allocations
    nbCells_curr   = schedule_getNbCellsWithTrack(msg->l2_track, &(msg->l2_nextORpreviousHop));
    nbCells_req    = openqueue_count_track(msg->l2_track);
+
+   //track control: only one cell is required
+   if (msg->l2_track.instance == TRACK_PARENT_CONTROL)
+       nbCells_req = 1;
 
    //the current allocation is correct
    if (nbCells_curr >= nbCells_req)

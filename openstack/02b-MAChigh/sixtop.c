@@ -310,20 +310,49 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
       strncat(str, ", ch ", 150);
       openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
    }
-#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
-   if (track.instance != TRACK_PARENT_CONTROL)
-       strncat(str, ", via control track ", 150);
 #endif
-   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
+
+#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
+   if ((track.instance != TRACK_PARENT_CONTROL) && (code == IANA_6TOP_CMD_ADD)){
+//       pkt->l2_track = sixtop_get_trackcontrol();
+
+       memcpy(&(pkt->l2_track.owner), idmanager_getMyID(ADDR_64B), sizeof(pkt->l2_track.owner));
+
+       pkt->l2_track.instance = TRACK_PARENT_CONTROL;
+#ifdef _DEBUG_SIXTOP_
+       strncat(str, ", via control track ", 150);
+       openserial_ncat_uint32_t(str, (uint32_t)pkt->l2_track.instance, 150);
+        strncat(str, ", owner=", 150);
+        openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_track.owner.addr_64b[6], 150);
+        openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_track.owner.addr_64b[7], 150);
 #endif
+
+
+   }
+   else if (code == IANA_6TOP_CMD_DELETE){
+       sixtop_get_trackcontrol_forAddr(neighbor, &(pkt->l2_track));
+
+#ifdef _DEBUG_SIXTOP_
+       strncat(str, ", via control child track ", 150);
+       openserial_ncat_uint32_t(str, (uint32_t)pkt->l2_track.instance, 150);
+       strncat(str, ", owner=", 150);
+       openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_track.owner.addr_64b[6], 150);
+       openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_track.owner.addr_64b[7], 150);
+#endif
+   }
+#endif
+#ifdef _DEBUG_SIXTOP_
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+#endif
+
    
    // set the track for the LinkRequest (I have a TRRX cell with this child (through which the LinkReq has been txed)
-#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
+/*#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
    if (track.instance != TRACK_PARENT_CONTROL)
        pkt->l2_track = sixtop_get_trackcontrol();
 #endif
-
+*/
 
     // create packet
     len  = 0;
@@ -1605,10 +1634,14 @@ void sixtop_notifyReceiveCommand(
                     ){
                         code = IANA_6TOP_RC_SUCCESS;
                         len += processIE_prepend_sixCelllist(response_pkt,cellList);
+
+                        //track info in the metadata
+                        memcpy(&(response_pkt->l2_sixtop_track), &(pkt->l2_sixtop_track), sizeof(track_t));
+
                         //track info for ADD command
                         if (commandIdORcode == IANA_6TOP_CMD_ADD){
 
-                            //whitelist
+                            //this is NOT a blacklist (i.e. success)
                             packetfunctions_reserveHeaderSize(response_pkt,sizeof(uint8_t));
                             memcpy(response_pkt->payload, &blacklist, sizeof(uint8_t));
                             len+=sizeof(uint8_t);
@@ -1618,9 +1651,6 @@ void sixtop_notifyReceiveCommand(
                             // write header
                             memcpy(response_pkt->payload, &(pkt->l2_sixtop_track), sizeof(track_t));
                             len+=sizeof(track_t);
-
-                            //track info in the metadata
-                            memcpy(&(response_pkt->l2_sixtop_track), &(pkt->l2_sixtop_track), sizeof(track_t));
 
                             //add the cells now in the schedule (will be remove if the tx failed)
                             sixtop_addCellsByState(
@@ -1638,7 +1668,7 @@ void sixtop_notifyReceiveCommand(
                         len += processIE_prepend_sixCellBlacklist(response_pkt,cellList);
                         blacklist = TRUE;
 
-                        //blacklist
+                        //cellList is a blacklist
                         packetfunctions_reserveHeaderSize(response_pkt,sizeof(uint8_t));
                         memcpy(response_pkt->payload, &blacklist, sizeof(uint8_t));
                         len+=sizeof(uint8_t);
@@ -1661,12 +1691,14 @@ void sixtop_notifyReceiveCommand(
                     //same track for the request and response
                     memcpy(&(response_pkt->l2_track), &(pkt->l2_track), sizeof(track_t));
 
-
 #ifdef _DEBUG_SIXTOP_
                     char      str[150];
                     uint8_t   i;
 
-                    sprintf(str, "LinkReq rcvd - LinkRep prepared: from ");
+                    if (commandIdORcode == IANA_6TOP_CMD_ADD)
+                        sprintf(str, "LinkReq rcvd - LinkRep prepared: from ");
+                    else
+                        sprintf(str, "LinkRem rcvd - LinkRep prepared: from ");
                     openserial_ncat_uint8_t_hex(str, pkt->l2_nextORpreviousHop.addr_64b[6], 150);
                     openserial_ncat_uint8_t_hex(str, pkt->l2_nextORpreviousHop.addr_64b[7], 150);
                     strncat(str, ", bw=", 150);
@@ -1684,6 +1716,8 @@ void sixtop_notifyReceiveCommand(
                        strncat(str, ", ch ", 150);
                        openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
                     }
+                    strncat(str, ", code ", 150);
+                    openserial_ncat_uint32_t(str, (uint32_t)code, 150);
                     openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
@@ -2287,12 +2321,27 @@ track_t sixtop_get_trackcommon(void){
 track_t sixtop_get_trackcontrol(void){
    track_t track;
 
-   bzero(&(track.owner), sizeof(track.owner));
    memcpy(&(track.owner), idmanager_getMyID(ADDR_64B), sizeof(track.owner));
    track.instance = TRACK_PARENT_CONTROL;
    return(track);
 }
 
+//return the common track with one specific neighbor
+track_t* sixtop_get_trackcontrol_forAddr(open_addr_t *neighbor, track_t *track){
+   uint8_t          i;
+   scheduleEntry_t  *entry;
+   uint16_t nbSlots = schedule_getMaxActiveSlots();
+
+    //for each cell in the schedule
+    for (i=0;i<nbSlots;i++){
+       entry = schedule_getCell(i);
+       if ((entry->track.instance == TRACK_PARENT_CONTROL) && (packetfunctions_sameAddress(&(entry->neighbor), neighbor))){
+           memcpy(track, &(entry->track), sizeof(track_t));
+           return(track);
+       }
+   }
+   return(NULL);
+}
 
 
 
