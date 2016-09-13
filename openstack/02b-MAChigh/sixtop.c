@@ -296,8 +296,6 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
    openserial_ncat_uint8_t_hex(str, neighbor->addr_64b[7], 150);
    strncat(str, ", bw=", 150);
    openserial_ncat_uint32_t(str, (uint32_t)numCells, 150);
-   strncat(str, ", nbcells ", 150);
-   openserial_ncat_uint32_t(str, (uint32_t)SCHEDULEIEMAXNUMCELLS, 150);
    strncat(str, ", track ", 150);
    openserial_ncat_uint32_t(str, (uint32_t)track.instance, 150);
    strncat(str, ", owner=", 150);
@@ -315,24 +313,19 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
 
 #if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
    if ((track.instance != TRACK_PARENT_CONTROL) && (code == IANA_6TOP_CMD_ADD)){
-//       pkt->l2_track = sixtop_get_trackcontrol();
-
        memcpy(&(pkt->l2_track.owner), idmanager_getMyID(ADDR_64B), sizeof(pkt->l2_track.owner));
-
        pkt->l2_track.instance = TRACK_PARENT_CONTROL;
 #ifdef _DEBUG_SIXTOP_
        strncat(str, ", via control track ", 150);
        openserial_ncat_uint32_t(str, (uint32_t)pkt->l2_track.instance, 150);
-        strncat(str, ", owner=", 150);
-        openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_track.owner.addr_64b[6], 150);
-        openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_track.owner.addr_64b[7], 150);
+       strncat(str, ", owner=", 150);
+       openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_track.owner.addr_64b[6], 150);
+       openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_track.owner.addr_64b[7], 150);
 #endif
-
 
    }
    else if (code == IANA_6TOP_CMD_DELETE){
        sixtop_get_trackcontrol_forAddr(neighbor, &(pkt->l2_track));
-
 #ifdef _DEBUG_SIXTOP_
        strncat(str, ", via control child track ", 150);
        openserial_ncat_uint32_t(str, (uint32_t)pkt->l2_track.instance, 150);
@@ -346,13 +339,6 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells, track
    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
-   
-   // set the track for the LinkRequest (I have a TRRX cell with this child (through which the LinkReq has been txed)
-/*#if (TRACK_MGMT == TRACK_MGMT_6P_ISOLATION)
-   if (track.instance != TRACK_PARENT_CONTROL)
-       pkt->l2_track = sixtop_get_trackcontrol();
-#endif
-*/
 
     // create packet
     len  = 0;
@@ -480,11 +466,18 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
 
     //Track for the AddCells command
     if (code == IANA_6TOP_CMD_ADD){
-        // reserve space for numCells
-        packetfunctions_reserveHeaderSize(pkt,sizeof(uint8_t));
+        // reserve space for track
+        packetfunctions_reserveHeaderSize(pkt,sizeof(track_t));
         // write header
-        *((uint8_t*)(pkt->payload)) = 10;
-        len+=1;
+        memcpy(pkt->payload, &(pkt->l2_sixtop_track), sizeof(track_t));
+        len+=sizeof(track_t);
+
+
+        openserial_printError(
+                COMPONENT_SIXTOP,
+                ERR_GENERIC,
+                (errorparameter_t)100,
+                (errorparameter_t)102);
     }
 
     // reserve space for numCells
@@ -623,6 +616,11 @@ void task_sixtopNotifSendDone() {
       );
    }
    
+   char str[150];
+   sprintf(str, "SENDONE COMPO ");
+   openserial_ncat_uint32_t(str, (uint32_t)msg->creator, 150);
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
    // send the packet to where it belongs
    switch (msg->creator) {
       
@@ -1129,7 +1127,6 @@ void sixtop_setState(six2six_state_t state){
    sixtop_vars.six2six_state = state;
    uint16_t  timeout_sixtop_value;    // to change the timeout value (jitter)
 
-
    //schedule a timer: back to the idle state after a timeout
    if (state != SIX_IDLE){
 
@@ -1205,6 +1202,16 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
 #ifdef _DEBUG_SIXTOP_
    char  str[150];
 #endif
+   sprintf(str, "sixtop_six2six_sendDone, state");
+   openserial_ncat_uint8_t(str, sixtop_vars.six2six_state, 150);
+   strncat(str, ",  - ", 150);
+   openserial_ncat_uint8_t(str, msg->l2_sixtop_returnCode, 150);
+   strncat(str, ",  - ", 150);
+   openserial_ncat_uint8_t(str, error, 150);
+   strncat(str, ",  - ", 150);
+   openserial_ncat_uint8_t(str, msg->l2_sixtop_requestCommand, 150);
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
 
    memset(cellList,0,SCHEDULEIEMAXNUMCELLS*sizeof(cellInfo_ht));
    ptr = msg->l2_sixtop_cellObjects;
@@ -1219,10 +1226,10 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
          if (!msg->l2_sixtop_blacklist && msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
             sprintf(str, "LinkReq txed: to ");
          else if (msg->l2_sixtop_blacklist && msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
-              sprintf(str, "LinkBlackL txed: to ");
+            sprintf(str, "LinkBlackL txed: to ");
          else
-              sprintf(str, "LinkRem txed: to ");
-          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+            sprintf(str, "LinkRem txed: to ");
+         openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
          openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
@@ -1230,12 +1237,12 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       }
       else{
 #ifdef _DEBUG_SIXTOP_
-          if (!msg->l2_sixtop_blacklist && msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
-             sprintf(str, "LinkReq failed: to ");
-          else if (msg->l2_sixtop_blacklist && msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
-                sprintf(str, "LinkBlackL txed: to ");
-          else
-              sprintf(str, "LinkRem failed: to ");
+         if (!msg->l2_sixtop_blacklist && msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
+            sprintf(str, "LinkReq failed: to ");
+         else if (msg->l2_sixtop_blacklist && msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD)
+            sprintf(str, "LinkBlackL txed: to ");
+         else
+            sprintf(str, "LinkRem failed: to ");
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
          openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
          openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
@@ -1258,156 +1265,160 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
       break;
    case SIX_IDLE:
 
-       if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS && error == E_SUCCESS){
-           if (
-                   msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD ||
-                   msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_DELETE
-           ){
-               if (numOfCells>0){
-                   for (i=0;i<numOfCells;i++){
-                       //TimeSlot 2B
-                       cellList[i].tsNum       = *(ptr);
-                       cellList[i].tsNum      |= (*(ptr+1))<<8;
-                       //Ch.Offset 2B
-                       cellList[i].choffset    = *(ptr+2);
-                       cellList[i].choffset   |= (*(ptr+3))<<8;
-                       ptr += 4;
-                       // mark with linkoptions as ocuppied
-                       cellList[i].linkoptions = CELLTYPE_TX;
-                   }
+      //------ SUCCESS - ADD/DEL
+      if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS && error == E_SUCCESS){
+         if (
+               msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD ||
+               msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_DELETE
+         ){
+            if (numOfCells>0){
+               for (i=0;i<numOfCells;i++){
+                  //TimeSlot 2B
+                  cellList[i].tsNum       = *(ptr);
+                  cellList[i].tsNum      |= (*(ptr+1))<<8;
+                  //Ch.Offset 2B
+                  cellList[i].choffset    = *(ptr+2);
+                  cellList[i].choffset   |= (*(ptr+3))<<8;
+                  ptr += 4;
+                  // mark with linkoptions as ocuppied
+                  cellList[i].linkoptions = CELLTYPE_TX;
+               }
 #ifdef _DEBUG_SIXTOP_
-                   sprintf(str, "LinkRep txed: to ");
-                   openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
-                   openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
-                   strncat(str, ", bw=", 150);
-                   openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
-                   strncat(str, ", track=", 150);
-                   openserial_ncat_uint32_t(str, (uint32_t)msg->l2_sixtop_track.instance, 150);
-                   strncat(str, ", owner=", 150);
-                   openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[6], 150);
-                   openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[7], 150);
-                   strncat(str, ", nbcells ", 150);
-                   openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
-                   strncat(str, ", state ", 150);
-                   openserial_ncat_uint32_t(str, (uint32_t)sixtop_vars.six2six_state, 150);
-                   for(i=0; i<numOfCells; i++){
-                       strncat(str, ", slot ", 150);
-                       openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
-                   }
-                   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+               sprintf(str, "LinkRep txed: to ");
+               openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+               openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+               strncat(str, ", bw=", 150);
+               openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
+               strncat(str, ", track=", 150);
+               openserial_ncat_uint32_t(str, (uint32_t)msg->l2_sixtop_track.instance, 150);
+               strncat(str, ", owner=", 150);
+               openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[6], 150);
+               openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[7], 150);
+               strncat(str, ", nbcells ", 150);
+               openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
+               strncat(str, ", state ", 150);
+               openserial_ncat_uint32_t(str, (uint32_t)sixtop_vars.six2six_state, 150);
+               for(i=0; i<numOfCells; i++){
+                  strncat(str, ", slot ", 150);
+                  openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
+               }
+               openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
-                   //DELETE COMMAND > we can now safely remove the cells in the schedule
-                   if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_DELETE) {
-                       sixtop_removeCellsByState(
-                               msg->l2_sixtop_frameID,
-                               cellList,
-                               &(msg->l2_nextORpreviousHop));
-                   }
-                   //ADD COMMAND:
-                   if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
-                   //nothing to do -> the cells have already been inserted when the linkrep was prepared
-                   }
-                   //BLACKL COMMAND:
-                   if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
-                   //nothing to do -> just informative for the receiver
-                   }
+               //DELETE COMMAND > we can now safely remove the cells in the schedule
+               if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_DELETE) {
+                  sixtop_removeCellsByState(
+                        msg->l2_sixtop_frameID,
+                        cellList,
+                        &(msg->l2_nextORpreviousHop));
                }
+               //ADD COMMAND:
+               if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
+                  //nothing to do -> the cells have already been inserted when the linkrep was prepared
+               }
+               //BLACKL COMMAND:
+               if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
+                  //nothing to do -> just informative for the receiver
+               }
+            }
 
-           }
-           //The ADD-REPLY tx has failed
-           else if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS && error == E_FAIL &&  msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
-               if (numOfCells>0){
-                   for (i=0;i<numOfCells;i++){
-                       //TimeSlot 2B
-                       cellList[i].tsNum       = *(ptr);
-                       cellList[i].tsNum      |= (*(ptr+1))<<8;
-                       //Ch.Offset 2B
-                       cellList[i].choffset    = *(ptr+2);
-                       cellList[i].choffset   |= (*(ptr+3))<<8;
-                       ptr += 4;
-                       // mark with linkoptions as ocuppied
-                       cellList[i].linkoptions = CELLTYPE_TX;
-                   }
+         }
+         //CLEAR COMMAND txed (or failed)
+         else if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_CLEAR){
+            schedule_removeAllCells(msg->l2_sixtop_frameID,
+                  &(msg->l2_nextORpreviousHop));
+         }
+      }
+
+      //------ FAILURE - ADD/DEL
+      if (msg->l2_sixtop_returnCode == IANA_6TOP_RC_SUCCESS && error == E_FAIL &&  msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD){
+
+         if (numOfCells>0){
+            for (i=0;i<numOfCells;i++){
+               //TimeSlot 2B
+               cellList[i].tsNum       = *(ptr);
+               cellList[i].tsNum      |= (*(ptr+1))<<8;
+               //Ch.Offset 2B
+               cellList[i].choffset    = *(ptr+2);
+               cellList[i].choffset   |= (*(ptr+3))<<8;
+               ptr += 4;
+               // mark with linkoptions as ocuppied
+               cellList[i].linkoptions = CELLTYPE_TX;
+            }
 #ifdef _DEBUG_SIXTOP_
-                   sprintf(str, "LinkRep failed: to ");
-                   openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
-                   openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
-                   strncat(str, ", bw=", 150);
-                   openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
-                   strncat(str, ", track=", 150);
-                   openserial_ncat_uint32_t(str, (uint32_t)msg->l2_sixtop_track.instance, 150);
-                   strncat(str, ", owner=", 150);
-                   openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[6], 150);
-                   openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[7], 150);
-                   strncat(str, ", nbcells ", 150);
-                   openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
-                   strncat(str, ", state ", 150);
-                   openserial_ncat_uint32_t(str, (uint32_t)sixtop_vars.six2six_state, 150);
-                   for(i=0; i<numOfCells; i++){
-                       strncat(str, ", slot ", 150);
-                       openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
-                   }
-                   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+            sprintf(str, "LinkRep failed: to ");
+            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[6], 150);
+            openserial_ncat_uint8_t_hex(str, msg->l2_nextORpreviousHop.addr_64b[7], 150);
+            strncat(str, ", bw=", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
+            strncat(str, ", track=", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)msg->l2_sixtop_track.instance, 150);
+            strncat(str, ", owner=", 150);
+            openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[6], 150);
+            openserial_ncat_uint8_t_hex(str, (uint32_t)msg->l2_sixtop_track.owner.addr_64b[7], 150);
+            strncat(str, ", nbcells ", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
+            strncat(str, ", state ", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)sixtop_vars.six2six_state, 150);
+            for(i=0; i<numOfCells; i++){
+               strncat(str, ", slot ", 150);
+               openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
+            }
+            openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 #endif
 
-                   sixtop_removeCellsByState(
-                           msg->l2_sixtop_frameID,
-                           cellList,
-                           &(msg->l2_nextORpreviousHop));
-               }
-           }
-           //CLEAR COMMAND txed (or failed)
-           else if (msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_CLEAR){
-               schedule_removeAllCells(msg->l2_sixtop_frameID,
-                       &(msg->l2_nextORpreviousHop));
-           }
-        }
+            sixtop_removeCellsByState(
+                  msg->l2_sixtop_frameID,
+                  cellList,
+                  &(msg->l2_nextORpreviousHop));
+         }
+      }
 
 
-        if (
+      // SUCESS & ADD & SIX_HANDLER_MAINTAIN
+      if (
             msg->l2_sixtop_returnCode     == IANA_6TOP_RC_SUCCESS && 
             msg->l2_sixtop_requestCommand == IANA_6TOP_CMD_ADD
-        ){
+      ){
 
-            if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
+         if (sixtop_vars.handler == SIX_HANDLER_MAINTAIN){
 
-               openserial_printCritical(COMPONENT_SIXTOP,ERR_GENERIC,
-                                             (errorparameter_t)122,
-                                             (errorparameter_t)100 + sixtop_vars.handler);
+            openserial_printCritical(COMPONENT_SIXTOP,ERR_GENERIC,
+                  (errorparameter_t)122,
+                  (errorparameter_t)100 + sixtop_vars.handler);
 
-               sixtop_request(
-                    IANA_6TOP_CMD_DELETE,
-                    &(msg->l2_nextORpreviousHop),
-                    1,
-                    sixtop_get_trackbesteffort(),       //we don't care about the trackid for the suppression
-                    NULL                                // any cells
-                );
-                sixtop_request(
-                      IANA_6TOP_CMD_ADD,
-                      &(msg->l2_nextORpreviousHop),
-                      1,
-                      sixtop_get_trackbesteffort(),        //SIX_HANDLER_MAINTAIN should only be applied to the best effort track
-                      NULL                                // any cells
-                );
-            } else {
-                sixtop_vars.handler = SIX_HANDLER_NONE;
-            }
-        }
-        break;
-    default:
-       openserial_printInfo(
-             COMPONENT_SIXTOP,
-             ERR_GENERIC,
-             (errorparameter_t)111,
-             (errorparameter_t)sixtop_vars.six2six_state
-       );
-       sixtop_setState(SIX_IDLE);
-       break;
+            sixtop_request(
+                  IANA_6TOP_CMD_DELETE,
+                  &(msg->l2_nextORpreviousHop),
+                  1,
+                  sixtop_get_trackbesteffort(),       //we don't care about the trackid for the suppression
+                  NULL                                // any cells
+            );
+            sixtop_request(
+                  IANA_6TOP_CMD_ADD,
+                  &(msg->l2_nextORpreviousHop),
+                  1,
+                  sixtop_get_trackbesteffort(),        //SIX_HANDLER_MAINTAIN should only be applied to the best effort track
+                  NULL                                // any cells
+            );
+         } else {
+            sixtop_vars.handler = SIX_HANDLER_NONE;
+         }
+      }
+      break;
+   default:
+      openserial_printInfo(
+            COMPONENT_SIXTOP,
+            ERR_GENERIC,
+            (errorparameter_t)111,
+            (errorparameter_t)sixtop_vars.six2six_state
+      );
+      sixtop_setState(SIX_IDLE);
+      break;
    }
-  
-    // discard reservation packets this component has created
-    openqueue_freePacketBuffer(msg);
+
+   // discard reservation packets this component has created
+   openqueue_freePacketBuffer(msg);
 }
 
 port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
@@ -1699,15 +1710,15 @@ void sixtop_notifyReceiveCommand(
                         sprintf(str, "LinkReq rcvd - LinkRep prepared: from ");
                     else
                         sprintf(str, "LinkRem rcvd - LinkRep prepared: from ");
-                    openserial_ncat_uint8_t_hex(str, pkt->l2_nextORpreviousHop.addr_64b[6], 150);
-                    openserial_ncat_uint8_t_hex(str, pkt->l2_nextORpreviousHop.addr_64b[7], 150);
+                    openserial_ncat_uint8_t_hex(str, response_pkt->l2_nextORpreviousHop.addr_64b[6], 150);
+                    openserial_ncat_uint8_t_hex(str, response_pkt->l2_nextORpreviousHop.addr_64b[7], 150);
                     strncat(str, ", bw=", 150);
                     openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
                     strncat(str, ", track=", 150);
-                    openserial_ncat_uint32_t(str, (uint32_t)pkt->l2_sixtop_track.instance, 150);
+                    openserial_ncat_uint32_t(str, (uint32_t)response_pkt->l2_sixtop_track.instance, 150);
                     strncat(str, ", owner=", 150);
-                    openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_sixtop_track.owner.addr_64b[6], 150);
-                    openserial_ncat_uint8_t_hex(str, (uint32_t)pkt->l2_sixtop_track.owner.addr_64b[7], 150);
+                    openserial_ncat_uint8_t_hex(str, (uint32_t)response_pkt->l2_sixtop_track.owner.addr_64b[6], 150);
+                    openserial_ncat_uint8_t_hex(str, (uint32_t)response_pkt->l2_sixtop_track.owner.addr_64b[7], 150);
                     strncat(str, ", nbcells ", 150);
                     openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
                     for(i=0; i<numOfCells; i++){
@@ -2073,9 +2084,10 @@ void sixtop_addCellsByState(
       open_addr_t* previousHop,
       uint8_t      state
    ){
-   uint8_t     i;
-   open_addr_t temp_neighbor;
-   uint8_t     type;
+   uint8_t      i;
+   open_addr_t  temp_neighbor;
+   uint8_t      type;
+   bool         shared;
   
 
 
@@ -2102,15 +2114,20 @@ void sixtop_addCellsByState(
          case SIX_IDLE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
 
-            if (track.instance != TRACK_PARENT_CONTROL)
+            if (track.instance != TRACK_PARENT_CONTROL){
                type = CELLTYPE_RX;
-            else
+               shared = FALSE;
+            }
+            else{
                type = CELLTYPE_TXRX;
+               shared = TRUE;
+            }
+
             //add a RX link
             schedule_addActiveSlot(
                   cellList[i].tsNum,
                   type,
-                  FALSE,
+                  shared,
                   cellList[i].choffset,
                   &temp_neighbor,
                   track
@@ -2120,16 +2137,20 @@ void sixtop_addCellsByState(
          case SIX_WAIT_ADDRESPONSE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
 
-            if (track.instance != TRACK_PARENT_CONTROL)
+            if (track.instance != TRACK_PARENT_CONTROL){
                type = CELLTYPE_TX;
-            else
+               shared = FALSE;
+            }
+            else{
                type = CELLTYPE_TXRX;
+               shared = FALSE;
+            }
 
             //add a TX link
             schedule_addActiveSlot(
                   cellList[i].tsNum,
                   type,
-                  FALSE,
+                  shared,
                   cellList[i].choffset,
                   &temp_neighbor,
                   track

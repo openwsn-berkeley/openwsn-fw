@@ -1470,10 +1470,12 @@ char *openserial_ncat_uint8_t(char *str, uint8_t val, uint8_t length){
    b = (val - a * 100)/10;
    c = val - a * 100 - b * 10;
 
-   str[l] = '0' + a;
-   str[l+1] = '0' + b;
-   str[l+2] = '0' + c;
-   str[l+3] = '\0';
+   if (a != 0)
+       str[l++] = '0' + a;
+   if (b != 0 || a != 0)
+       str[l++] = '0' + b;
+   str[l++] = '0' + c;
+   str[l++] = '\0';
    return(str);
 }
 

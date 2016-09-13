@@ -27,7 +27,7 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry);
 
 /**
 \brief Initialize this module.
-*/
+ */
 void openqueue_init() {
    uint8_t i;
    for (i=0;i<QUEUELENGTH;i++){
@@ -42,7 +42,7 @@ debugPrint_* functions are used by the openserial module to continuously print
 status information about several modules in the OpenWSN stack.
 
 \returns TRUE if this function printed something, FALSE otherwise.
-*/
+ */
 bool debugPrint_queue() {
    debugOpenQueueEntry_t output;
    uint8_t  row;
@@ -72,17 +72,17 @@ bool debugPrint_queue() {
       output.trackInstance                  = \
             (uint16_t)openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.instance;
       memcpy(
-                  &output.trackOwner,
-                  &(openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.owner),
-                  sizeof(open_addr_t)
-            );
+            &output.trackOwner,
+            &(openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_track.owner),
+            sizeof(open_addr_t)
+      );
 
       //l2 next hop
       memcpy(
-             &output.nextHop,
-             &(openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_nextORpreviousHop),
-             sizeof(open_addr_t)
-       );
+            &output.nextHop,
+            &(openqueue_vars.queue[openqueue_vars.debugPrintRow].l2_nextORpreviousHop),
+            sizeof(open_addr_t)
+      );
 
       openserial_printStatus(
             STATUS_QUEUE,
@@ -99,7 +99,7 @@ bool openqueue_timeout_is_zero(timeout_t value){
 
    for (i=0; i<5; i++)
       if (value.byte[i] != 0)
-      return FALSE;
+         return FALSE;
 
    return(TRUE);
 }
@@ -177,10 +177,6 @@ void openqueue_timeout_drop(void){
                openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
 #endif
 
-               char str[150];
-               sprintf(str, "PKT TIMEOUTED");
-               openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
-
                notif_sendDone(&(openqueue_vars.queue[i]), E_FAIL);
                openqueue_reset_entry(&(openqueue_vars.queue[i]));
 
@@ -208,22 +204,22 @@ get a new packet buffer to start creating a new packet.
 
 \returns A pointer to the queue entry when it could be allocated, or NULL when
          it could not be allocated (buffer full or not synchronized).
-*/
+ */
 OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
    // refuse to allocate if we're not in sync
    if (ieee154e_isSynch()==FALSE && creator > COMPONENT_IEEE802154E){
-     ENABLE_INTERRUPTS();
-     return NULL;
+      ENABLE_INTERRUPTS();
+      return NULL;
    }
-   
+
 
 
    // if you get here, I will try to allocate a buffer for you
-   
+
    // walk through queue and find free entry
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner == COMPONENT_NULL) {
@@ -232,12 +228,12 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
          ENABLE_INTERRUPTS(); 
 
-         if (creator == COMPONENT_SIXTOP_RES){
-             char str[150];
-             sprintf(str, "PKT creation, pos=");
-             openserial_ncat_uint8_t(str, i, 150);
-             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-         }
+//#ifdef _DEBUG_OQ_MEM_
+         char str[150];
+         sprintf(str, "PKT creation, pos=");
+         openserial_ncat_uint8_t(str, i, 150);
+         openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+//#endif
 
          return &openqueue_vars.queue[i];
       }
@@ -261,7 +257,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
 \param entry A pointer to the entry to configure.
 \param duration_ms The timer after which this packet should be removed from the queue, even it it was not transmitted.
 
-*/
+ */
 
 void openqueue_set_timeout(OpenQueueEntry_t* entry, const uint32_t duration_ms){
    timeout_t     now;
@@ -314,7 +310,7 @@ void openqueue_set_timeout(OpenQueueEntry_t* entry, const uint32_t duration_ms){
 
 \returns A pointer to the queue entry when it could be allocated, or NULL when
          it could not be allocated (buffer full or not synchronized).
-*/
+ */
 OpenQueueEntry_t* openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, const uint32_t duration_ms) {
 
    // a new entry in the queue
@@ -337,7 +333,7 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer_with_timeout(uint8_t creator, co
 
 \returns E_SUCCESS when the freeing was succeful.
 \returns E_FAIL when the module could not find the specified packet buffer.
-*/
+ */
 owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
 
    uint8_t i;
@@ -348,8 +344,8 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
          if (openqueue_vars.queue[i].owner==COMPONENT_NULL) {
             // log the error
             openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_UNUSED,
-                                  (errorparameter_t)0,
-                                  (errorparameter_t)0);
+                  (errorparameter_t)0,
+                  (errorparameter_t)0);
          }
          openqueue_reset_entry(&(openqueue_vars.queue[i]));
          ENABLE_INTERRUPTS();
@@ -358,8 +354,8 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
    }
    // log the error
    openserial_printCritical(COMPONENT_OPENQUEUE,ERR_FREEING_ERROR,
-                         (errorparameter_t)0,
-                         (errorparameter_t)0);
+         (errorparameter_t)0,
+         (errorparameter_t)0);
    ENABLE_INTERRUPTS();
    return E_FAIL;
 }
@@ -371,7 +367,7 @@ owerror_t openqueue_freePacketBuffer(OpenQueueEntry_t* pkt) {
 \brief Free all the packet buffers created by a specific module.
 
 \param creator The identifier of the component, taken in COMPONENT_*.
-*/
+ */
 void openqueue_removeAllCreatedBy(uint8_t creator) {
    uint8_t i;
 
@@ -400,7 +396,7 @@ void openqueue_removeAllCreatedBy(uint8_t creator) {
 \brief Free this packet entry (called by components for which a packet has been enqueued for a too long time (e.g.))
 
 \param the entry to remove in the queue
-*/
+ */
 
 void openqueue_removeEntry(OpenQueueEntry_t* entry){
    openqueue_reset_entry(entry);
@@ -411,7 +407,7 @@ void openqueue_removeEntry(OpenQueueEntry_t* entry){
 \brief Free all the packet buffers owned by a specific module.
 
 \param owner The identifier of the component, taken in COMPONENT_*.
-*/
+ */
 void openqueue_removeAllOwnedBy(uint8_t owner) {
    uint8_t i;
    INTERRUPT_DECLARATION();
@@ -429,9 +425,9 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
 
 \param id of the track.
 \returns the number of packets with track
-*/
+ */
 
- uint8_t openqueue_count_track(track_t track) {
+uint8_t openqueue_count_track(track_t track) {
    uint8_t i;
    uint8_t resVal = 0;
 
@@ -440,7 +436,7 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
             sixtop_is_trackequal(openqueue_vars.queue[i].l2_track, track)
             &&
             openqueue_vars.queue[i].creator != COMPONENT_NULL
-            )
+      )
          resVal++;
    }
    return(resVal);
@@ -455,7 +451,7 @@ OpenQueueEntry_t* openqueue_sixtopGetSentPacket() {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_SIXTOP &&
-          openqueue_vars.queue[i].creator!=COMPONENT_IEEE802154E) {
+            openqueue_vars.queue[i].creator!=COMPONENT_IEEE802154E) {
          ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
       }
@@ -470,7 +466,7 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_IEEE802154E_TO_SIXTOP &&
-          openqueue_vars.queue[i].creator==COMPONENT_IEEE802154E) {
+            openqueue_vars.queue[i].creator==COMPONENT_IEEE802154E) {
          ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
       }
@@ -481,15 +477,33 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
 
 //======= called by IEEE80215E
 
+//get the oldest packet which matches the track and neighbor info
 OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *track) {
    uint8_t i;
    OpenQueueEntry_t *entry = NULL;
+
 
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
    if (toNeighbor->type==ADDR_64B) {
       // a neighbor is specified, look for a packet unicast to that neigbhbor
       for (i=0;i<QUEUELENGTH;i++) {
+         /*
+           if (openqueue_vars.queue[i].owner != 0){
+               char str[150];
+               snprintf(str, 150, ":: ");
+               openserial_ncat_uint8_t(str, (uint8_t)i, 150);
+                strncat(str, " :: ", 150);
+                openserial_ncat_uint8_t(str, (uint8_t)(openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E), 150);
+                strncat(str, " - ", 150);
+                openserial_ncat_uint8_t(str, (uint8_t)(packetfunctions_sameAddress_debug(toNeighbor, &openqueue_vars.queue[i].l2_nextORpreviousHop,COMPONENT_OPENQUEUE)), 150);
+                strncat(str, " - ", 150);
+                openserial_ncat_uint8_t(str, (uint8_t)(openqueue_vars.queue[i].l2_track.instance == track->instance), 150);
+                strncat(str, " - ", 150);
+                openserial_ncat_uint8_t(str, (uint8_t)(packetfunctions_sameAddress_debug(&(openqueue_vars.queue[i].l2_track.owner), &(track->owner),COMPONENT_OPENQUEUE)), 150);
+                openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
+          }
+          */
 
          if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
                packetfunctions_sameAddress_debug(toNeighbor, &openqueue_vars.queue[i].l2_nextORpreviousHop,COMPONENT_OPENQUEUE) &&
@@ -499,8 +513,8 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *t
                      (track->instance == TRACK_BESTEFFORT)
                      ||
                      (packetfunctions_sameAddress_debug(&(openqueue_vars.queue[i].l2_track.owner), &(track->owner),COMPONENT_OPENQUEUE))
-               )&&
-               ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
+               )//&&
+               //((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
          ) {
             entry = &(openqueue_vars.queue[i]);
          }
@@ -512,13 +526,13 @@ OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor, track_t *t
          if ((openqueue_vars.queue[i].l2_track.instance == TRACK_BESTEFFORT) &&
                (openqueue_vars.queue[i].owner == COMPONENT_SIXTOP_TO_IEEE802154E) &&
                (openqueue_vars.queue[i].creator != COMPONENT_SIXTOP ||
-                  (
-                     openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
-                     packetfunctions_isBroadcastMulticast_debug(&(openqueue_vars.queue[i].l2_nextORpreviousHop), 71)==FALSE
-                  )
-                ) &&
-                ((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
-              ) {
+                     (
+                           openqueue_vars.queue[i].creator==COMPONENT_SIXTOP &&
+                           packetfunctions_isBroadcastMulticast_debug(&(openqueue_vars.queue[i].l2_nextORpreviousHop), 71)==FALSE
+                     )
+               )// &&
+               //((entry == NULL) || (openqueue_timeout_is_greater(entry->timeout, openqueue_vars.queue[i].timeout)))
+         ) {
             entry = &(openqueue_vars.queue[i]);
          }
       }
@@ -535,8 +549,8 @@ OpenQueueEntry_t* openqueue_macGetEBPacket() {
    DISABLE_INTERRUPTS();
    for (i=0;i<QUEUELENGTH;i++) {
       if (openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-          openqueue_vars.queue[i].creator==COMPONENT_SIXTOP              &&
-          packetfunctions_isBroadcastMulticast_debug(&(openqueue_vars.queue[i].l2_nextORpreviousHop),72)) {
+            openqueue_vars.queue[i].creator==COMPONENT_SIXTOP              &&
+            packetfunctions_isBroadcastMulticast_debug(&(openqueue_vars.queue[i].l2_nextORpreviousHop),72)) {
          ENABLE_INTERRUPTS();
          return &openqueue_vars.queue[i];
       }
@@ -568,14 +582,16 @@ bool openqueue_overflow_for_data(void){
    ENABLE_INTERRUPTS();
 
    //for debug
- /*  if(nb <= QUEUELENGTH_RESERVED)
+#ifdef _DEBUG_OQ_MEM_
+   if(nb <= QUEUELENGTH_RESERVED)
       openserial_printError(
-               COMPONENT_OPENQUEUE,
-               ERR_OPENQUEUE_BUFFER_OVERFLOW,
-               (errorparameter_t)nb,
-               (errorparameter_t)QUEUELENGTH_RESERVED
-            );
-*/
+            COMPONENT_OPENQUEUE,
+            ERR_OPENQUEUE_BUFFER_OVERFLOW,
+            (errorparameter_t)nb,
+            (errorparameter_t)QUEUELENGTH_RESERVED
+      );
+#endif
+
    return(nb <= QUEUELENGTH_RESERVED);
 }
 
@@ -584,7 +600,21 @@ bool openqueue_overflow_for_data(void){
 
 //=========================== private =========================================
 
+
 void openqueue_reset_entry(OpenQueueEntry_t* entry) {
+//#ifdef _DEBUG_OQ_MEM_
+   char str[150];
+   uint8_t i;
+   for (i=0;i<QUEUELENGTH;i++)
+      if (&(openqueue_vars.queue[i]) == entry)
+         break;
+
+   sprintf(str, "PKT destruction, pos=");
+   openserial_ncat_uint8_t(str, i, 150);
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+//#endif
+
+
    //admin
    entry->creator                      = COMPONENT_NULL;
    entry->owner                        = COMPONENT_NULL;
@@ -608,15 +638,3 @@ void openqueue_reset_entry(OpenQueueEntry_t* entry) {
 }
 
 
-
-
-
-
-//make a local copy of the entry to push it to openbridge
-/*
-OpenQueueEntry_t* openqueue_copy_for_openbridge(OpenQueueEntry_t* pkt){
-
-   memcpy(&(openqueue_vars.openbridge), pkt, sizeof(OpenQueueEntry_t));
-   return(&(openqueue_vars.openbridge));
-}
-*/
