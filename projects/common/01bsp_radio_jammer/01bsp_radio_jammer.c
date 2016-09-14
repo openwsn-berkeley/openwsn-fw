@@ -37,7 +37,7 @@ typedef struct {
    uint8_t              txpk_buf[LENGTH_PACKET];
    uint8_t              txpk_len;
    uint8_t              txpk_num;
-   uint16_t shift_reg;  // Galois shift register used to obtain a pseudo-random number
+   uint16_t             shift_reg;  // Galois shift register used to obtain a pseudo-random number
 } app_vars_t;
 
 app_vars_t app_vars;

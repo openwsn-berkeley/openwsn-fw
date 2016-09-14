@@ -32,6 +32,8 @@
 typedef struct {
    uart_tx_cbt txCb;
    uart_rx_cbt rxCb;
+   bool        fXonXoffEscaping;
+   uint8_t     xonXoffEscapedByte;
 } uart_vars_t;
 
 uart_vars_t uart_vars;
@@ -108,7 +110,13 @@ void uart_clearTxInterrupts(){
 }
 
 void  uart_writeByte(uint8_t byteToWrite){
-	UARTCharPut(UART0_BASE, byteToWrite);
+    if (byteToWrite==XON || byteToWrite==XOFF || byteToWrite==XONXOFF_ESCAPE) {
+        uart_vars.fXonXoffEscaping     = 0x01;
+        uart_vars.xonXoffEscapedByte   = byteToWrite;
+        UARTCharPut(UART0_BASE,XONXOFF_ESCAPE);
+    } else {
+        UARTCharPut(UART0_BASE,byteToWrite);
+    }
 }
 
 uint8_t uart_readByte(){
@@ -116,6 +124,15 @@ uint8_t uart_readByte(){
      i32Char = UARTCharGet(UART0_BASE);
 	 return (uint8_t)(i32Char & 0xFF);
 }
+
+void uart_setCTS(bool state){
+    if (state==0x01) {
+        UARTCharPut(UART0_BASE, XON);
+    } else {
+        UARTCharPut(UART0_BASE, XOFF);
+    }
+}
+
 
 //=========================== interrupt handlers ==============================
 
@@ -143,11 +160,16 @@ static void uart_isr_private(void){
 }
 
 kick_scheduler_t uart_tx_isr() {
-   uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
-   if (uart_vars.txCb != NULL) {
-       uart_vars.txCb();
-   }
-   return DO_NOT_KICK_SCHEDULER;
+    uart_clearTxInterrupts(); // TODO: do not clear, but disable when done
+    if (uart_vars.fXonXoffEscaping==0x01) {
+        uart_vars.fXonXoffEscaping = 0x00;
+        UARTCharPut(UART0_BASE,uart_vars.xonXoffEscapedByte^XONXOFF_MASK);
+    } else {
+        if (uart_vars.txCb != NULL) {
+            uart_vars.txCb();
+        }
+    }
+    return DO_NOT_KICK_SCHEDULER;
 }
 
 kick_scheduler_t uart_rx_isr() {
