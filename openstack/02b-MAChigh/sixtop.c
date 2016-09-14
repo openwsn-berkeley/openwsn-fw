@@ -615,11 +615,6 @@ void task_sixtopNotifSendDone() {
          &msg->l2_asn
       );
    }
-   
-   char str[150];
-   sprintf(str, "SENDONE COMPO ");
-   openserial_ncat_uint32_t(str, (uint32_t)msg->creator, 150);
-   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
    // send the packet to where it belongs
    switch (msg->creator) {
@@ -741,7 +736,7 @@ void task_sixtopNotifReceive() {
 
     // reset it to avoid race conditions with this var.
     msg->l2_joinPriorityPresent = FALSE; 
-   
+
     // send the packet up the stack, if it qualifies
     switch (msg->l2_frameType) {
     case IEEE154_TYPE_BEACON:
@@ -1125,7 +1120,7 @@ port_INLINE void sixtop_sendKA() {
 //changes the current sixtop state
 void sixtop_setState(six2six_state_t state){
    sixtop_vars.six2six_state = state;
-   uint16_t  timeout_sixtop_value;    // to change the timeout value (jitter)
+   uint32_t  timeout_sixtop_value;    // to change the timeout value (jitter)
 
    //schedule a timer: back to the idle state after a timeout
    if (state != SIX_IDLE){
@@ -1143,11 +1138,18 @@ void sixtop_setState(six2six_state_t state){
          timeout_sixtop_value -= SIX2SIX_TIMEOUT_MS / 2;
       }
       sixtop_vars.timeoutTimerId     = opentimers_start(
-            timeout_sixtop_value,
+            (uint16_t)timeout_sixtop_value,
             TIMER_ONESHOT,
             TIME_MS,
             sixtop_timeout_timer_cb
       );
+
+      char str[150];
+      sprintf(str, "LinkRep/LinkReq sixtop timeout ");
+      openserial_ncat_uint32_t(str, (uint32_t)timeout_sixtop_value, 150);
+      strncat(str, " / ", 150);
+      openserial_ncat_uint32_t(str, (uint32_t)SIX2SIX_TIMEOUT_MS, 150);
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
    }
 
    //otf callback when we come back to the idle state
@@ -1202,16 +1204,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
 #ifdef _DEBUG_SIXTOP_
    char  str[150];
 #endif
-   sprintf(str, "sixtop_six2six_sendDone, state");
-   openserial_ncat_uint8_t(str, sixtop_vars.six2six_state, 150);
-   strncat(str, ",  - ", 150);
-   openserial_ncat_uint8_t(str, msg->l2_sixtop_returnCode, 150);
-   strncat(str, ",  - ", 150);
-   openserial_ncat_uint8_t(str, error, 150);
-   strncat(str, ",  - ", 150);
-   openserial_ncat_uint8_t(str, msg->l2_sixtop_requestCommand, 150);
-   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
 
    memset(cellList,0,SCHEDULEIEMAXNUMCELLS*sizeof(cellInfo_ht));
    ptr = msg->l2_sixtop_cellObjects;
@@ -1567,7 +1559,8 @@ void sixtop_notifyReceiveCommand(
     uint8_t           blacklist = FALSE;
     
     // get a free packet buffer
-    response_pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
+    //timeout since we are stateless (teh packet MUST be dropped the queue after a while)
+    response_pkt = openqueue_getFreePacketBuffer_with_timeout(COMPONENT_SIXTOP_RES, SIX2SIX_LINKREP_TIMEOUT_MS);
     if (response_pkt==NULL) {
         openserial_printError(
             COMPONENT_SIXTOP_RES,
@@ -1692,8 +1685,7 @@ void sixtop_notifyReceiveCommand(
 
                         //save the track info
                         memcpy(&(response_pkt->l2_sixtop_track), &(pkt->l2_sixtop_track), sizeof(track_t));
-
-                    }
+                     }
                     //failed
                     else{
                         code = IANA_6TOP_RC_ERR;
@@ -1701,6 +1693,7 @@ void sixtop_notifyReceiveCommand(
 
                     //same track for the request and response
                     memcpy(&(response_pkt->l2_track), &(pkt->l2_track), sizeof(track_t));
+
 
 #ifdef _DEBUG_SIXTOP_
                     char      str[150];
@@ -1719,6 +1712,11 @@ void sixtop_notifyReceiveCommand(
                     strncat(str, ", owner=", 150);
                     openserial_ncat_uint8_t_hex(str, (uint32_t)response_pkt->l2_sixtop_track.owner.addr_64b[6], 150);
                     openserial_ncat_uint8_t_hex(str, (uint32_t)response_pkt->l2_sixtop_track.owner.addr_64b[7], 150);
+                    strncat(str, ", via track=", 150);
+                    openserial_ncat_uint32_t(str, (uint32_t)response_pkt->l2_track.instance, 150);
+                    strncat(str, ", owner=", 150);
+                    openserial_ncat_uint8_t_hex(str, (uint32_t)response_pkt->l2_track.owner.addr_64b[6], 150);
+                    openserial_ncat_uint8_t_hex(str, (uint32_t)response_pkt->l2_track.owner.addr_64b[7], 150);
                     strncat(str, ", nbcells ", 150);
                     openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
                     for(i=0; i<numOfCells; i++){
@@ -2143,7 +2141,7 @@ void sixtop_addCellsByState(
             }
             else{
                type = CELLTYPE_TXRX;
-               shared = FALSE;
+               shared = TRUE;
             }
 
             //add a TX link
