@@ -884,12 +884,15 @@ Note that the backoff counter is global, not per slot.
 bool schedule_getOkToSend(OpenQueueEntry_t* msg) {
    bool returnVal;
 
+   //TODO
+   /*
    char str[150];
    snprintf(str, 150, "BACKOFF ");
    openserial_ncat_uint8_t(str, (uint32_t)schedule_vars.backoff, 150);
    strncat(str, ", BE=", 150);
    openserial_ncat_uint8_t(str, (uint32_t)schedule_vars.backoffExponent, 150);
    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+*/
 
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -977,7 +980,8 @@ E_NACK = NOT ACKNOWLEDGED
 void schedule_indicateTx(asn_t* asnTimestamp, uint8_t code) {
 
   // if (schedule_vars.currentScheduleEntry->shared==TRUE){
-
+//TODO
+   /*
       char str[150];
       snprintf(str, 150, "FAILED");
       strncat(str, ", BE=", 150);
@@ -988,19 +992,21 @@ void schedule_indicateTx(asn_t* asnTimestamp, uint8_t code) {
       openserial_ncat_uint8_t(str, (uint32_t)schedule_vars.currentScheduleEntry->shared, 150);
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
    //}
-
+*/
 
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
 
-   // increment usage statistics
-   if (code != E_NACK && schedule_vars.currentScheduleEntry->numTx==0xFF) {
-      schedule_vars.currentScheduleEntry->numTx/=2;
-      schedule_vars.currentScheduleEntry->numTxACK/=2;
-   }
-   schedule_vars.currentScheduleEntry->numTx++;
-   if (code == E_SUCCESS) {
-      schedule_vars.currentScheduleEntry->numTxACK++;
+   // increment usage statistics (for acknowledgeable packets)
+   if (code != E_NACK){
+      if (schedule_vars.currentScheduleEntry->numTx==0xFF) {
+         schedule_vars.currentScheduleEntry->numTx/=2;
+         schedule_vars.currentScheduleEntry->numTxACK/=2;
+      }
+      schedule_vars.currentScheduleEntry->numTx++;
+      if (code == E_SUCCESS) {
+         schedule_vars.currentScheduleEntry->numTxACK++;
+      }
    }
 
    // update last used timestamp (only when the pkt tx is correct)

@@ -677,6 +677,13 @@ void task_sixtopNotifReceive() {
    OpenQueueEntry_t* msg;
    uint16_t          lenIE;
 
+   //TODO
+/*
+   char str[150];
+           sprintf(str, "RX pasrising");
+           openserial_printf(COMPONENT_SFLOC, str, strlen(str));
+*/
+
 
    // get received packet from openqueue
    msg = openqueue_sixtopGetReceivedPacket();
@@ -1144,12 +1151,15 @@ void sixtop_setState(six2six_state_t state){
             sixtop_timeout_timer_cb
       );
 
+      //TODO
+      /*
       char str[150];
       sprintf(str, "LinkRep/LinkReq sixtop timeout ");
       openserial_ncat_uint32_t(str, (uint32_t)timeout_sixtop_value, 150);
       strncat(str, " / ", 150);
       openserial_ncat_uint32_t(str, (uint32_t)SIX2SIX_TIMEOUT_MS, 150);
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+      */
    }
 
    //otf callback when we come back to the idle state

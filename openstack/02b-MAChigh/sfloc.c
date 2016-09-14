@@ -278,6 +278,8 @@ void sfloc_remove_unused_cells(void){
    return;
 #endif
 
+   return;
+
    //no ongoing 6top transaction
    if (!sixtop_isIdle())
       return;

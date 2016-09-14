@@ -974,8 +974,9 @@ port_INLINE void activity_ti1ORri1() {
             couldSendEB = FALSE;
          }
 
+         //TODO
          char str[150];
-         if (track.instance != 0){
+         if (0 && track.instance != 0){
 
             snprintf(str, 150, "PKT GET, neigh ");
             openserial_ncat_uint8_t_hex(str, neighbor.addr_64b[6], 150);
@@ -1007,15 +1008,17 @@ port_INLINE void activity_ti1ORri1() {
             if (cellType==CELLTYPE_TX) {
                // abort
                endSlot();
-               snprintf(str, 150, "PKT GET STOP ");
-               openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+               //TODO
+               //snprintf(str, 150, "PKT GET STOP ");
+               //openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
                break;
             } else {
                changeToRX=TRUE;
             }
          } else {
-            snprintf(str, 150, "PKT GET TX ");
-             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+            //TODO
+            //snprintf(str, 150, "PKT GET TX ");
+            //openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
             // change state
             changeState(S_TXDATAOFFSET);
@@ -1039,13 +1042,14 @@ port_INLINE void activity_ti1ORri1() {
             // stop using serial
             openserial_stop();
          }
-
+         //TODO
+         /*
                    snprintf(str, 150, "RX MODE");
                    scheduleEntry_t *entry = schedule_getCurrentScheduleEntry();
                    strncat(str, ", slot=", 150);
                    openserial_ncat_uint8_t(str, (uint32_t)entry->slotOffset, 150);
                    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
+*/
 
          // change state
          changeState(S_RXDATAOFFSET);
@@ -2367,7 +2371,7 @@ void endSlot() {
       
       // indicate Tx fail to schedule to update stats
       schedule_indicateTx(&ieee154e_vars.asn,E_FAIL);
-      
+
       //decrement transmits left counter
       ieee154e_vars.dataToSend->l2_retriesLeft--;
       
