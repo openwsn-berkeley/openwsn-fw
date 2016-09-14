@@ -993,50 +993,6 @@ port_INLINE bool sixtop_processIEs(OpenQueueEntry_t* pkt, uint16_t * lenIE) {
     *lenIE += len;
     //now determine sub elements if any
     switch(gr_elem_id){
-    //this is the only groupID that we parse. See page 82.  
-    case IEEE802154E_MLME_IE_GROUPID:
-        //IE content can be any of the sub-IEs. Parse and see which
-        do{
-            //read sub IE header
-            temp_8b = *((uint8_t*)(pkt->payload)+ptr);
-            ptr = ptr + 1;
-            temp_16b = temp_8b + ((*((uint8_t*)(pkt->payload)+ptr))<<8);
-            ptr = ptr + 1;
-            len = len - 2; //remove header fields len
-            if(
-                (temp_16b & IEEE802154E_DESC_TYPE_LONG) == 
-                IEEE802154E_DESC_TYPE_LONG
-            ){
-                //long sub-IE - last bit is 1
-                sublen = temp_16b & IEEE802154E_DESC_LEN_LONG_MLME_IE_MASK;
-                subid= 
-                    (temp_16b & IEEE802154E_DESC_SUBID_LONG_MLME_IE_MASK)>>
-                    IEEE802154E_DESC_SUBID_LONG_MLME_IE_SHIFT; 
-            } else {
-                //short IE - last bit is 0
-                sublen = temp_16b & IEEE802154E_DESC_LEN_SHORT_MLME_IE_MASK;
-                subid = (temp_16b & IEEE802154E_DESC_SUBID_SHORT_MLME_IE_MASK)>>
-                IEEE802154E_DESC_SUBID_SHORT_MLME_IE_SHIFT; 
-            }
-            switch(subid){
-            case IANA_6TOP_SUBIE_ID:
-                temp_8b = *((uint8_t*)(pkt->payload)+ptr);
-                ptr = ptr + 1;
-                // get 6P version and command ID
-                version   = temp_8b & 0x0f;
-                commandIdORcode = (temp_8b >> 4) & 0x0f;
-                // get sf_id
-                sfId = *((uint8_t*)(pkt->payload)+ptr);
-                ptr = ptr + 1;
-                sixtop_notifyReceiveCommand(version,commandIdORcode,sfId,ptr,sublen-2,pkt);
-                ptr += sublen-2;
-                break;
-            default:
-                return FALSE;
-            }
-            len = len - sublen;
-        } while(len>0);
-        break;
     case SIXTOP_IE_GROUPID:
         subid = *((uint8_t*)(pkt->payload)+ptr);
         ptr += 1;
