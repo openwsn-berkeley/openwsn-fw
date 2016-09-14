@@ -1062,7 +1062,7 @@ void sixtop_notifyReceiveCommand(
                         code = IANA_6TOP_RC_SUCCESS;
                         len += processIE_prepend_sixCelllist(response_pkt,cellList);
                     } else {
-                        code = IANA_6TOP_RC_ERR;
+                        code = IANA_6TOP_RC_RESET;
                     }
                     break;
                 case IANA_6TOP_CMD_COUNT:
@@ -1153,13 +1153,22 @@ void sixtop_notifyReceiveCommand(
                            (errorparameter_t)cellList[1].tsNum);
                     break;
                 case SIX_WAIT_CLEARRESPONSE:
-                  
+                    // TBD: delete all the cells tx / rx to the neighbor
                     break;
                 default:
-                    code = IANA_6TOP_RC_ERR;
+                    // record the wrong status
+                  break;
                 }
             } else {
-                // TBD...
+                if (commandIdORcode==IANA_6TOP_RC_ERR){
+                    // TBD: the neighbor is in a transaction, call sf0 to to make a decision (e.g. issue another 6p request with some delay)
+                } else {
+                    if (commandIdORcode==IANA_6TOP_RC_RESET){
+                        // TBD: the neighbor can't statisfy the 6p request, call sf0 to make a decision (e.g. issue another 6p request with different cell list)
+                    } else {
+                        // TBD...
+                    }
+                }
             }
            openserial_printInfo(COMPONENT_SIXTOP,ERR_SIXTOP_RETURNCODE,
                            (errorparameter_t)commandIdORcode,
