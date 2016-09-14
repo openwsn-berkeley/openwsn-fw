@@ -74,17 +74,19 @@ int mote_main(void) {
    radio_rfOn();
    radio_setFrequency(CHANNEL); 
    radio_rfOff();
+   //delay
+   //for (j=0;j<0xffff;j++);;
          
    while(1) {
 
       // led
-      leds_error_toggle();
+      leds_error_on();
       
       // prepare packet
       app_vars.txpk_num++;
       app_vars.txpk_len           = sizeof(app_vars.txpk_buf);
       app_vars.txpk_buf[0]        = app_vars.txpk_num;
-      for (i=1;i<app_vars.txpk_len;i++) {
+      for (i=1;i<app_vars.txpk_len-1;i++) {
 
          ran = getrandom16b();
 
@@ -103,6 +105,8 @@ int mote_main(void) {
       while (app_vars.txpk_txNow==0) {
          board_sleep();
       }
+      leds_error_off();
+      radio_rfOff();
    }
 }
 
