@@ -58,6 +58,7 @@ enum {
    E_SUCCESS                           = 0,
    E_FAIL                              = 1,
 };
+#define  E_NACK   2
 
 // types of addresses
 enum {
