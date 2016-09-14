@@ -539,9 +539,6 @@ void sendDIO() {
    
    // if you get here, all good to send a DIO
    
-   // I'm now busy sending
-   icmpv6rpl_vars.busySending = TRUE;
-   
    // reserve a free packet buffer for DIO
    msg = openqueue_getFreePacketBuffer(COMPONENT_ICMPv6RPL);
    if (msg==NULL) {
@@ -584,13 +581,12 @@ void sendDIO() {
    ((ICMPv6_ht*)(msg->payload))->code       = IANA_ICMPv6_RPL_DIO;
    packetfunctions_calculateChecksum(msg,(uint8_t*)&(((ICMPv6_ht*)(msg->payload))->checksum));//call last
    
-   //send
-   if (icmpv6_send(msg)!=E_SUCCESS) {
-      icmpv6rpl_vars.busySending = FALSE;
-      openqueue_freePacketBuffer(msg);
-   } else {
-      icmpv6rpl_vars.busySending = FALSE; 
-   }
+    //send
+    if (icmpv6_send(msg)==E_SUCCESS) {
+        icmpv6rpl_vars.busySending = TRUE; 
+    } else {
+        openqueue_freePacketBuffer(msg);
+    }
 }
 
 //===== DAO-related
