@@ -576,45 +576,8 @@ owerror_t sixtop_send(OpenQueueEntry_t *msg) {
 
 //======= from lower layer
 
-void task_sixtopNotifSendDone() {
-   OpenQueueEntry_t* msg;
-   
-#if defined(_DEBUG_EB_) || defined (_DEBUG_KA_)
-   char str[150];
-#endif
-
-
-   // get recently-sent packet from openqueue
-   msg = openqueue_sixtopGetSentPacket();
-   if (msg==NULL) {
-      openserial_printCritical(
-         COMPONENT_SIXTOP,
-         ERR_NO_SENT_PACKET,
-         (errorparameter_t)0,
-         (errorparameter_t)0
-      );
-      return;
-   }
-   
-   // take ownership
-   msg->owner = COMPONENT_SIXTOP;
-   
-   // update neighbor statistics
-   if (msg->l2_sendDoneError==E_SUCCESS) {
-      neighbors_indicateTx(
-         &(msg->l2_nextORpreviousHop),
-         msg->l2_numTxAttempts,
-         TRUE,
-         &msg->l2_asn
-      );
-   } else {
-      neighbors_indicateTx(
-         &(msg->l2_nextORpreviousHop),
-         msg->l2_numTxAttempts,
-         FALSE,
-         &msg->l2_asn
-      );
-   }
+//may be called via task_sixtopNotifSendDone or directly by openqueue_timeout_drop (at the end of a slot)
+void sixtop_NotifSendDispatch(OpenQueueEntry_t* msg){
 
    // send the packet to where it belongs
    switch (msg->creator) {
@@ -671,6 +634,48 @@ void task_sixtopNotifSendDone() {
          iphc_sendDone(msg,msg->l2_sendDoneError);
          break;
    }
+}
+
+void task_sixtopNotifSendDone() {
+   OpenQueueEntry_t* msg;
+
+#if defined(_DEBUG_EB_) || defined (_DEBUG_KA_)
+   char str[150];
+#endif
+
+
+   // get recently-sent packet from openqueue
+   msg = openqueue_sixtopGetSentPacket();
+   if (msg==NULL) {
+      openserial_printCritical(
+         COMPONENT_SIXTOP,
+         ERR_NO_SENT_PACKET,
+         (errorparameter_t)0,
+         (errorparameter_t)0
+      );
+      return;
+   }
+
+   // take ownership
+   msg->owner = COMPONENT_SIXTOP;
+
+   // update neighbor statistics
+   if (msg->l2_sendDoneError==E_SUCCESS) {
+      neighbors_indicateTx(
+         &(msg->l2_nextORpreviousHop),
+         msg->l2_numTxAttempts,
+         TRUE,
+         &msg->l2_asn
+      );
+   } else {
+      neighbors_indicateTx(
+         &(msg->l2_nextORpreviousHop),
+         msg->l2_numTxAttempts,
+         FALSE,
+         &msg->l2_asn
+      );
+   }
+   sixtop_NotifSendDispatch(msg);
 }
 
 void task_sixtopNotifReceive() {
@@ -1727,8 +1732,8 @@ void sixtop_notifyReceiveCommand(
                     strncat(str, ", owner=", 150);
                     openserial_ncat_uint8_t_hex(str, (uint32_t)response_pkt->l2_track.owner.addr_64b[6], 150);
                     openserial_ncat_uint8_t_hex(str, (uint32_t)response_pkt->l2_track.owner.addr_64b[7], 150);
-                    strncat(str, ", nbcells ", 150);
-                    openserial_ncat_uint32_t(str, (uint32_t)numOfCells, 150);
+                    strncat(str, ", pos ", 150);
+                    openserial_ncat_uint32_t(str, (uint32_t)openqueue_getPos(response_pkt), 150);
                     for(i=0; i<numOfCells; i++){
                        strncat(str, ", slot ", 150);
                        openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
@@ -2097,8 +2102,8 @@ void sixtop_addCellsByState(
    uint8_t      type;
    bool         shared;
   
-
-
+//TODO
+/*
    char str[150];
    sprintf(str, "ADDCELL ");
    strncat(str, ", track instance=", 150);
@@ -2106,18 +2111,18 @@ void sixtop_addCellsByState(
    strncat(str, ", track owner=", 150);
    openserial_ncat_uint8_t_hex(str, track.owner.addr_64b[6], 150);
    openserial_ncat_uint8_t_hex(str, track.owner.addr_64b[7], 150);
-
+*/
    
    //set schedule according links
    for(i = 0;i<SCHEDULEIEMAXNUMCELLS;i++){
       //only schedule when the request side wants to schedule a tx cell
-      if(cellList[i].linkoptions != CELLTYPE_OFF){
+      if(cellList[i].linkoptions != CELLTYPE_OFF && cellList[i].linkoptions != CELLTYPE_BUSY){
          switch(state) {
 
-         strncat(str, ", slot=", 150);
-         openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
-         strncat(str, " ch=", 150);
-         openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
+        // strncat(str, ", slot=", 150);
+        // openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
+        // strncat(str, " ch=", 150);
+        // openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
 
          case SIX_IDLE:
             memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
@@ -2176,7 +2181,7 @@ void sixtop_addCellsByState(
          }
       }
    }
-   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+   //openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
 }
 
@@ -2229,14 +2234,15 @@ void sixtop_removeCellsByState(
    uint8_t i;
    
 
-
+//TODO
+   /*
    char str[150];
    sprintf(str, "DELCELL ");
-
+*/
    for(i=0;i<SCHEDULEIEMAXNUMCELLS;i++){   
       if(cellList[i].linkoptions != CELLTYPE_OFF){
-          strncat(str, ", slot=", 150);
-          openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
+         // strncat(str, ", slot=", 150);
+         // openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
 
 
          schedule_removeActiveSlot(
@@ -2245,7 +2251,7 @@ void sixtop_removeCellsByState(
          );
       }
    }
-   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+   //openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 }
 
 bool sixtop_areAvailableCellsToBeScheduled(

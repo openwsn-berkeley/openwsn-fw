@@ -155,8 +155,6 @@ void openqueue_timeout_drop(void){
    uint8_t     i;
    timeout_t   now;
 
-   return;
-
    //initialization
    ieee154e_getAsn(now.byte);
 
@@ -177,8 +175,10 @@ void openqueue_timeout_drop(void){
                openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
 //#endif
 
-               notif_sendDone(&(openqueue_vars.queue[i]), E_FAIL);
-               openqueue_reset_entry(&(openqueue_vars.queue[i]));
+               //sixtop will desallocate the packet itself
+               openqueue_vars.queue[i].l2_sendDoneError = E_FAIL;
+               sixtop_NotifSendDispatch(&(openqueue_vars.queue[i]));
+               //openqueue_reset_entry(&(openqueue_vars.queue[i]));
 
             }
    }
