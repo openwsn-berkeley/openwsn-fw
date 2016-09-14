@@ -9,7 +9,7 @@
 #include "sfx.h"
 
 //=========================== definition ======================================
-//#define SCHEDULE_DEBUG
+
 //=========================== variables =======================================
 
 schedule_vars_t schedule_vars;
@@ -601,31 +601,12 @@ void schedule_syncSlotOffset(slotOffset_t targetSlotOffset) {
 */
 void schedule_advanceSlot() {
   
-   scheduleEntry_t* scheduleWalker;
-  
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   if (schedule_vars.currentScheduleEntry->slotOffset >= ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
-       ) {
-       // one slotframe has elapsed
-        scheduleWalker = schedule_vars.currentScheduleEntry;
-        do {
-            if (
-                scheduleWalker->type == CELLTYPE_TX ||
-                scheduleWalker->type == CELLTYPE_RX
-            ){      
-#ifdef SCHEDULE_DEBUG
-                printf("Mote %d Neighbor %d Slot %d Type %d Usage %d\n",
-                       idmanager_getMyID(ADDR_16B)->addr_16b[1],
-                       scheduleWalker->neighbor.addr_64b[7],
-                       scheduleWalker->slotOffset,
-                       scheduleWalker->type,
-                       schedule_getUsageStatus(scheduleWalker)
-                );
-#endif
-            }
-            scheduleWalker = scheduleWalker->next;
-        }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   if (
+     schedule_vars.currentScheduleEntry->slotOffset >= \
+     ((scheduleEntry_t*)schedule_vars.currentScheduleEntry->next)->slotOffset
+   ) {
        sfx_notifyNewSlotframe();
    }
    schedule_vars.currentScheduleEntry = schedule_vars.currentScheduleEntry->next;
@@ -884,16 +865,6 @@ void schedule_updateCellUsageBitMap(bool hasPacketToSend){
     } else {
         schedule_vars.currentScheduleEntry->usageBitMap &= ~temp;
     }
-#ifdef SCHEDULE_DEBUG
-    if(idmanager_getIsDAGroot()==FALSE){
-        printf ("mote %d slot %d neighbor %d usage %d\n",
-          idmanager_getMyID(ADDR_16B)->addr_16b[1],
-          schedule_vars.currentScheduleEntry->slotOffset,
-          schedule_vars.currentScheduleEntry->neighbor.addr_64b[7],
-          schedule_getUsageStatus(schedule_vars.currentScheduleEntry)
-        );
-    }
-#endif
 }
 
 //=========================== private =========================================

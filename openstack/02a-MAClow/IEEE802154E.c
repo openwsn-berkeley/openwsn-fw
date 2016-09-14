@@ -17,9 +17,7 @@
 #include "adaptive_sync.h"
 #include "processIE.h"
 
-//=========================== definition =====================================
-
-//#define IEEE802154E_DEBUG
+//=========================== definition ======================================
 
 //=========================== variables =======================================
 
@@ -1230,9 +1228,6 @@ port_INLINE void activity_tie5() {
    ieee154e_vars.dataToSend->l2_retriesLeft--;
    
    if (ieee154e_vars.dataToSend->l2_retriesLeft==0) {
-#ifdef IEEE802154E_DEBUG
-       printf("mote %d failed to send\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-#endif
       // indicate tx fail if no more retries left
       notif_sendDone(ieee154e_vars.dataToSend,E_FAIL);
    } else {
@@ -1636,11 +1631,6 @@ port_INLINE void activity_ri6() {
       openserial_printError(COMPONENT_IEEE802154E,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-#ifdef IEEE802154E_DEBUG
-      if (schedule_getCurrentScheduleEntry()->type==CELLTYPE_RX){
-          printf("mote %d failed to get buffer for ACK\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-      }
-#endif
       // indicate we received a packet anyway (we don't want to loose any)
       notif_receive(ieee154e_vars.dataReceived);
       // free local variable
@@ -1782,12 +1772,6 @@ port_INLINE void activity_ri9(PORT_RADIOTIMER_WIDTH capturedTime) {
    if (idmanager_getIsDAGroot()==FALSE && icmpv6rpl_isPreferredParent(&(ieee154e_vars.dataReceived->l2_nextORpreviousHop))) {
       synchronizePacket(ieee154e_vars.syncCapturedTime);
    }
-   
-#ifdef IEEE802154E_DEBUG
-   if (schedule_getCurrentScheduleEntry()->type==CELLTYPE_RX){
-       printf("mote %d goes well!\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-   }
-#endif
    // inform upper layer of reception (after ACK sent)
    notif_receive(ieee154e_vars.dataReceived);
    
@@ -2127,11 +2111,6 @@ void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
    packetSent->owner              = COMPONENT_IEEE802154E_TO_SIXTOP;
    // post RES's sendDone task
    scheduler_push_task(task_sixtopNotifSendDone,TASKPRIO_SIXTOP_NOTIF_TXDONE);
-#ifdef IEEE802154E_DEBUG
-   if (schedule_getCurrentScheduleEntry()->type==CELLTYPE_TX){
-       printf("mote %d at slot %d packet creator %d error %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1],ieee154e_vars.slotOffset,packetSent->creator,error);
-   }
-#endif
    
    // wake up the scheduler
    SCHEDULER_WAKEUP();
@@ -2147,11 +2126,6 @@ void notif_receive(OpenQueueEntry_t* packetReceived) {
    packetReceived->owner          = COMPONENT_IEEE802154E_TO_SIXTOP;
    // post RES's Receive task
    scheduler_push_task(task_sixtopNotifReceive,TASKPRIO_SIXTOP_NOTIF_RX);
-#ifdef IEEE802154E_DEBUG
-   if (schedule_getCurrentScheduleEntry()->type==CELLTYPE_RX){
-       printf("mote %d at slot %d packet creator %d \n",idmanager_getMyID(ADDR_16B)->addr_16b[1],ieee154e_vars.slotOffset,packetReceived->creator);
-   }
-#endif
    // wake up the scheduler
    SCHEDULER_WAKEUP();
 }
@@ -2325,10 +2299,6 @@ void endSlot() {
       // assume something went wrong. If everything went well, dataReceived
       // would have been set to NULL in ri9.
       // indicate  "received packet" to upper layer since we don't want to loose packets
-#ifdef IEEE802154E_DEBUG
-     if (schedule_getCurrentScheduleEntry()->type==CELLTYPE_TX || schedule_getCurrentScheduleEntry()->type==CELLTYPE_RX)
-       printf("something goes wrong on mote %d\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-#endif
       notif_receive(ieee154e_vars.dataReceived);
       // reset local variable
       ieee154e_vars.dataReceived = NULL;

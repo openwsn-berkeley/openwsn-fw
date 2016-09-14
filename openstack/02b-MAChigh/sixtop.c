@@ -20,8 +20,6 @@
 
 //=========================== define ==========================================
 
-//#define SIXTOP_DEBUG
-
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -168,9 +166,6 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
    
     // filter parameters
     if(sixtop_vars.six2six_state!=SIX_IDLE){
-#ifdef SIXTOP_DEBUG
-        printf("Mote %d sixtop wrong status code(%d)\n",idmanager_getMyID(ADDR_16B)->addr_16b[1],sixtop_vars.six2six_state);
-#endif
         return;
     }
     if (neighbor==NULL){
@@ -214,9 +209,6 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
    
     // update state
     sixtop_vars.six2six_state  = SIX_SENDING_REQUEST;
-#ifdef SIXTOP_DEBUG
-    printf("Mote %d SIX_SENDING_REQUEST\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-#endif
     // take ownership
     pkt->creator = COMPONENT_SIXTOP_RES;
     pkt->owner   = COMPONENT_SIXTOP_RES;
@@ -315,9 +307,6 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
     }
     // update state
     sixtop_vars.six2six_state = SIX_SENDING_REQUEST;
-#ifdef SIXTOP_DEBUG
-    printf("Mote %d SIX_SENDING_REQUEST\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-#endif
     // declare ownership over that packet
     pkt->creator = COMPONENT_SIXTOP_RES;
     pkt->owner   = COMPONENT_SIXTOP_RES;
@@ -646,7 +635,7 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
-   scheduleEntry_t* entry;
+   
    sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
    
    switch (sixtop_vars.mgtTaskCounter) {
@@ -818,54 +807,26 @@ port_INLINE void sixtop_sendKA() {
 void timer_sixtop_six2six_timeout_fired(void) {
    // timeout timer fired, reset the state of sixtop to idle
    sixtop_vars.six2six_state = SIX_IDLE;
-#ifdef SIXTOP_DEBUG
-    printf("Mote %d SIXTOP TIMEOUT!\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-#endif
    sixtop_vars.handler = SIX_HANDLER_NONE;
    opentimers_stop(sixtop_vars.timeoutTimerId);
 }
 
 void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
-   uint8_t i,numOfCells;
-   uint8_t* ptr;
-   cellInfo_ht cellList[SCHEDULEIEMAXNUMCELLS];
-   
-   memset(cellList,0,SCHEDULEIEMAXNUMCELLS*sizeof(cellInfo_ht));
+    uint8_t i,numOfCells;
+    uint8_t* ptr;
+    cellInfo_ht cellList[SCHEDULEIEMAXNUMCELLS];
+
+    memset(cellList,0,SCHEDULEIEMAXNUMCELLS*sizeof(cellInfo_ht));
+
+    ptr = msg->l2_sixtop_cellObjects;
+    numOfCells = msg->l2_sixtop_numOfCells;
+    msg->owner = COMPONENT_SIXTOP_RES;
   
-   ptr = msg->l2_sixtop_cellObjects;
-   numOfCells = msg->l2_sixtop_numOfCells;
-   msg->owner = COMPONENT_SIXTOP_RES;
-  
-   if(error == E_FAIL) {
+    if(error == E_FAIL) {
       sixtop_vars.six2six_state = SIX_IDLE;
       openqueue_freePacketBuffer(msg);
       return;
-   }
-#ifdef SIXTOP_DEBUG
-     switch (sixtop_vars.six2six_state) {
-     case SIX_WAIT_ADDREQUEST_SENDDONE:
-         printf("Mote %d SIX_WAIT_ADDRESPONSE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-         break;
-     case SIX_WAIT_DELETEREQUEST_SENDDONE:
-         printf("Mote %d SIX_WAIT_DELETERESPONSE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-         break;
-     case SIX_WAIT_LISTREQUEST_SENDDONE:
-         printf("Mote %d SIX_WAIT_LISTRESPONSE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-         break;
-     case SIX_WAIT_COUNTREQUEST_SENDDONE:
-         printf("Mote %d SIX_WAIT_COUNTRESPONSE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-         break;
-     case SIX_WAIT_CLEARREQUEST_SENDDONE:
-         printf("Mote %d SIX_WAIT_CLEARRESPONSE\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-         break;
-     case SIX_WAIT_RESPONSE_SENDDONE:
-         printf("Mote %d SIXTOP RES TO BE END\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-         break;
-     default:
-        // nothing
-       break;
-     }
-#endif
+    }
     switch (sixtop_vars.six2six_state) {
     case SIX_WAIT_ADDREQUEST_SENDDONE:
         sixtop_vars.six2six_state = SIX_WAIT_ADDRESPONSE;
@@ -924,9 +885,6 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         
         sixtop_vars.six2six_state = SIX_IDLE;
         opentimers_stop(sixtop_vars.timeoutTimerId);
-#ifdef SIXTOP_DEBUG
-        printf("Mote %d SIXTOP RES TRANSCATION IS END\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-#endif
         break;
     default:
         //log error
@@ -1209,9 +1167,6 @@ void sixtop_notifyReceiveCommand(
             sixtop_vars.six2six_state = SIX_IDLE;
             sixtop_vars.handler = SIX_HANDLER_NONE;
             opentimers_stop(sixtop_vars.timeoutTimerId);
-#ifdef SIXTOP_DEBUG
-    printf("Mote %d SIXTOP TRANSCATION IS END\n\n\n",idmanager_getMyID(ADDR_16B)->addr_16b[1]);
-#endif
         }
     }
 }
