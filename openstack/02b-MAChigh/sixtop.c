@@ -264,14 +264,6 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
         sixtop_vars.six2six_state = SIX_WAIT_CLEARREQUEST_SENDDONE;
         break;
     }
-   
-    // arm timeout
-    opentimers_setPeriod(
-        sixtop_vars.timeoutTimerId,
-        TIME_MS,
-        SIX2SIX_TIMEOUT_MS
-    );
-    opentimers_restart(sixtop_vars.timeoutTimerId);
 }
 
 void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht* cellInfo){
@@ -354,14 +346,6 @@ void sixtop_addORremoveCellByInfo(uint8_t code,open_addr_t* neighbor,cellInfo_ht
         sixtop_vars.six2six_state = SIX_WAIT_DELETEREQUEST_SENDDONE;
         break;
     }
-   
-   // arm timeout
-   opentimers_setPeriod(
-      sixtop_vars.timeoutTimerId,
-      TIME_MS,
-      SIX2SIX_TIMEOUT_MS
-   );
-   opentimers_restart(sixtop_vars.timeoutTimerId);
 }
 
 //======= maintaning 
@@ -955,6 +939,22 @@ void sixtop_six2six_sendDone(OpenQueueEntry_t* msg, owerror_t error){
         break;
     }
   
+    if (
+        sixtop_vars.six2six_state == SIX_WAIT_ADDRESPONSE        ||
+        sixtop_vars.six2six_state == SIX_WAIT_DELETERESPONSE     ||
+        sixtop_vars.six2six_state == SIX_WAIT_COUNTRESPONSE      ||
+        sixtop_vars.six2six_state == SIX_WAIT_LISTRESPONSE       ||
+        sixtop_vars.six2six_state == SIX_WAIT_CLEARRESPONSE
+    ){  
+        // start timeout timer if I am waiting for a response
+        opentimers_setPeriod(
+            sixtop_vars.timeoutTimerId,
+            TIME_MS,
+            SIX2SIX_TIMEOUT_MS
+        );
+        opentimers_restart(sixtop_vars.timeoutTimerId);
+    }
+   
     // discard reservation packets this component has created
     openqueue_freePacketBuffer(msg);
 }
@@ -1203,13 +1203,6 @@ void sixtop_notifyReceiveCommand(
             }
             // update state
             sixtop_vars.six2six_state = SIX_WAIT_RESPONSE_SENDDONE;
-            // arm timeout
-            opentimers_setPeriod(
-                sixtop_vars.timeoutTimerId,
-                TIME_MS,
-                SIX2SIX_TIMEOUT_MS
-            );
-            opentimers_restart(sixtop_vars.timeoutTimerId);
         } else {
             //------ if this is a return code
             // The response packet is not required, release it
