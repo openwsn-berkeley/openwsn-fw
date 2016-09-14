@@ -973,25 +973,32 @@ port_INLINE void activity_ti1ORri1() {
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor, &track);
             couldSendEB = FALSE;
          }
+
          char str[150];
-          snprintf(str, 150, "PKT GET, neigh ");
-          openserial_ncat_uint8_t_hex(str, neighbor.addr_64b[6], 150);
-          openserial_ncat_uint8_t_hex(str, neighbor.addr_64b[7], 150);
-          strncat(str, ", track=", 150);
-          openserial_ncat_uint32_t(str, (uint32_t)track.instance, 150);
-          strncat(str, ", owner=", 150);
-          openserial_ncat_uint8_t_hex(str, (uint32_t)track.owner.addr_64b[6], 150);
-          openserial_ncat_uint8_t_hex(str, (uint32_t)track.owner.addr_64b[7], 150);
-          strncat(str, ", pk ptr =", 150);
-          openserial_ncat_uint32_t(str, (uint32_t)ieee154e_vars.dataToSend, 150);
-          strncat(str, ", token=", 150);
-          openserial_ncat_uint8_t(str, (uint32_t)schedule_getOkToSend(ieee154e_vars.dataToSend), 150);
-          openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+         if (track.instance != 0){
+
+            snprintf(str, 150, "PKT GET, neigh ");
+            openserial_ncat_uint8_t_hex(str, neighbor.addr_64b[6], 150);
+            openserial_ncat_uint8_t_hex(str, neighbor.addr_64b[7], 150);
+            strncat(str, ", track=", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)track.instance, 150);
+            strncat(str, ", owner=", 150);
+            openserial_ncat_uint8_t_hex(str, (uint32_t)track.owner.addr_64b[6], 150);
+            openserial_ncat_uint8_t_hex(str, (uint32_t)track.owner.addr_64b[7], 150);
+            strncat(str, ", pPos =", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)openqueue_getPos(ieee154e_vars.dataToSend), 150);
+            strncat(str, ", token=", 150);
+            openserial_ncat_uint32_t(str, (uint32_t)schedule_getOkToSend(ieee154e_vars.dataToSend), 150);
+            scheduleEntry_t *entry = schedule_getCurrentScheduleEntry();
+            strncat(str, ", slot=", 150);
+            openserial_ncat_uint8_t(str, (uint32_t)entry->slotOffset, 150);
+            openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+         }
 
 
          // check whether we can send (Backoff or dedicated cell, other conditions)
          if (ieee154e_vars.dataToSend != NULL && !schedule_getOkToSend(ieee154e_vars.dataToSend))
-             ieee154e_vars.dataToSend = NULL;
+            ieee154e_vars.dataToSend = NULL;
 
 
 
@@ -1000,11 +1007,15 @@ port_INLINE void activity_ti1ORri1() {
             if (cellType==CELLTYPE_TX) {
                // abort
                endSlot();
+               snprintf(str, 150, "PKT GET STOP ");
+               openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
                break;
             } else {
                changeToRX=TRUE;
             }
          } else {
+            snprintf(str, 150, "PKT GET TX ");
+             openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
 
             // change state
             changeState(S_TXDATAOFFSET);
@@ -1028,6 +1039,14 @@ port_INLINE void activity_ti1ORri1() {
             // stop using serial
             openserial_stop();
          }
+
+                   snprintf(str, 150, "RX MODE");
+                   scheduleEntry_t *entry = schedule_getCurrentScheduleEntry();
+                   strncat(str, ", slot=", 150);
+                   openserial_ncat_uint8_t(str, (uint32_t)entry->slotOffset, 150);
+                   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
+
          // change state
          changeState(S_RXDATAOFFSET);
          // arm rt1
@@ -1221,8 +1240,8 @@ port_INLINE void activity_ti5(PORT_RADIOTIMER_WIDTH capturedTime) {
       radiotimer_schedule(DURATION_tt5);
    } else {
       // indicate succesful Tx to schedule to keep statistics
-      schedule_indicateTx(&ieee154e_vars.asn,TRUE);
-      // indicate to upper later the packet was sent successfully
+      schedule_indicateTx(&ieee154e_vars.asn, E_NACK);
+       // indicate to upper later the packet was sent successfully
       notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
       // reset local variable
       ieee154e_vars.dataToSend = NULL;
@@ -1276,7 +1295,7 @@ port_INLINE void activity_ti7() {
 
 port_INLINE void activity_tie5() {
    // indicate transmit failed to schedule to keep stats
-   schedule_indicateTx(&ieee154e_vars.asn,FALSE);
+   schedule_indicateTx(&ieee154e_vars.asn,E_FAIL);
 
    // decrement transmits left counter
    ieee154e_vars.dataToSend->l2_retriesLeft--;
@@ -1430,7 +1449,7 @@ port_INLINE void activity_ti9(PORT_RADIOTIMER_WIDTH capturedTime) {
       }
       
       // inform schedule of successful transmission
-      schedule_indicateTx(&ieee154e_vars.asn,TRUE);
+      schedule_indicateTx(&ieee154e_vars.asn,E_SUCCESS);
       
       // inform upper layer
       notif_sendDone(ieee154e_vars.dataToSend,E_SUCCESS);
@@ -2173,13 +2192,6 @@ void changeIsSync(bool newIsSync) {
 //======= notifying upper layer
 
 void notif_sendDone(OpenQueueEntry_t* packetSent, owerror_t error) {
-   if (packetSent->l2_retriesLeft == 0){
-
-      char str[150];
-      sprintf(str, "FAILED -- l2_retriesLeft = 0");
-      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-   }
-
    // record the outcome of the trasmission attempt
    packetSent->l2_sendDoneError   = error;
    // record the current ASN
@@ -2354,7 +2366,7 @@ void endSlot() {
       // getting here means transmit failed
       
       // indicate Tx fail to schedule to update stats
-      schedule_indicateTx(&ieee154e_vars.asn,FALSE);
+      schedule_indicateTx(&ieee154e_vars.asn,E_FAIL);
       
       //decrement transmits left counter
       ieee154e_vars.dataToSend->l2_retriesLeft--;
@@ -2397,6 +2409,8 @@ void endSlot() {
       ieee154e_vars.ackReceived = NULL;
    }
    
+   // cleanup openqueue (timeouted entries)
+   openqueue_timeout_drop();
    
    // change state
    changeState(S_SLEEP);
