@@ -319,7 +319,6 @@ void sfloc_remove_unused_cells(void){
 
                  //silently removed (RX cell)
                  if (cell->type == CELLTYPE_RX){
-                     schedule_removeActiveSlot(cell->slotOffset, &(cell->neighbor));
 #ifdef _DEBUG_SFLOC_
                      char str[150];
                      sprintf(str, "SFLOC LinkRem(silent)=");
@@ -331,9 +330,13 @@ void sfloc_remove_unused_cells(void){
                      openserial_ncat_uint32_t(str, (uint32_t)(ieee154e_asnDiff(&(cell->lastUsedAsn))), 150);
                      openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 #endif
+
+                     schedule_removeActiveSlot(cell->slotOffset, &(cell->neighbor));
                  }
                  //sends a 6P request
                  else {
+                    return;
+
 #ifdef _DEBUG_SFLOC_
                      char str[150];
                      sprintf(str, "SFLOC LinkRem(unused)=");
