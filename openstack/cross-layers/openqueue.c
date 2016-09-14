@@ -170,12 +170,12 @@ void openqueue_timeout_drop(void){
             if (openqueue_timeout_is_greater(now, openqueue_vars.queue[i].timeout)){
 
                openserial_statPktTimeout(&(openqueue_vars.queue[i]));
-#ifdef _DEBUG_OQ_MEM_
+//#ifdef _DEBUG_OQ_MEM_
                char str[150];
                sprintf(str, "rem(timeout), pos=");
                openserial_ncat_uint32_t(str, (uint32_t)i, 150);
                openserial_printf(COMPONENT_OPENQUEUE, str, strlen(str));
-#endif
+//#endif
 
                notif_sendDone(&(openqueue_vars.queue[i]), E_FAIL);
                openqueue_reset_entry(&(openqueue_vars.queue[i]));
@@ -228,12 +228,12 @@ OpenQueueEntry_t* openqueue_getFreePacketBuffer(uint8_t creator) {
          openqueue_vars.queue[i].owner=COMPONENT_OPENQUEUE;
          ENABLE_INTERRUPTS(); 
 
-//#ifdef _DEBUG_OQ_MEM_
+#ifdef _DEBUG_OQ_MEM_
          char str[150];
          sprintf(str, "PKT creation, pos=");
          openserial_ncat_uint8_t(str, i, 150);
          openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-//#endif
+#endif
 
          return &openqueue_vars.queue[i];
       }
@@ -424,7 +424,7 @@ void openqueue_removeAllOwnedBy(uint8_t owner) {
 \brief Count the number of packets in the queue with a specific track.
 
 \param id of the track.
-\returns the number of packets with track
+\returns the number of packets with this track (and ready to be txed)
  */
 
 uint8_t openqueue_count_track(track_t track) {
@@ -436,6 +436,8 @@ uint8_t openqueue_count_track(track_t track) {
             sixtop_is_trackequal(openqueue_vars.queue[i].l2_track, track)
             &&
             openqueue_vars.queue[i].creator != COMPONENT_NULL
+            &&
+            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E
       )
          resVal++;
    }
@@ -600,19 +602,22 @@ bool openqueue_overflow_for_data(void){
 
 //=========================== private =========================================
 
-
-void openqueue_reset_entry(OpenQueueEntry_t* entry) {
-//#ifdef _DEBUG_OQ_MEM_
-   char str[150];
+uint8_t openqueue_getPos(OpenQueueEntry_t* entry){
    uint8_t i;
    for (i=0;i<QUEUELENGTH;i++)
       if (&(openqueue_vars.queue[i]) == entry)
-         break;
+         return(i);
+   return(-1);
+}
+
+void openqueue_reset_entry(OpenQueueEntry_t* entry) {
+#ifdef _DEBUG_OQ_MEM_
+   char str[150];
 
    sprintf(str, "PKT destruction, pos=");
-   openserial_ncat_uint8_t(str, i, 150);
+   openserial_ncat_uint8_t(str, openqueue_getPos(entry), 150);
    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-//#endif
+#endif
 
 
    //admin
