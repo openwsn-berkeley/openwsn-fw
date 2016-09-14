@@ -66,14 +66,14 @@ Backoff is used only in slots that are marked as shared in the schedule. When
 not shared, the mote assumes that schedule is collision-free, and therefore
 does not use any backoff mechanism when a transmission fails.
 */
-#define MINBE                4
+#define MINBE                2
 
 /**
 \brief Maximum backoff exponent.
 
 See MINBE for an explanation of backoff.
 */
-#define MAXBE                6
+#define MAXBE                4
 
 /**
 \brief a threshold used for triggering the maintaining process.uint: percent
@@ -85,7 +85,7 @@ See MINBE for an explanation of backoff.
  \brief to authorize only the dagroot to transmit a frame during half of the shared cells (to reduce the nb. of collisions)
    A more appropriate mechanism has to be proposed to reduce the pressure (priority for LinkRep)
  */
-#define SCHEDULE_PRIO_FOR_DAGROOT
+//#define SCHEDULE_PRIO_FOR_DAGROOT
 
 
 //=========================== typedef =========================================
@@ -231,7 +231,7 @@ void               schedule_resetBackoff(void);
 void               schedule_indicateRx(asn_t*   asnTimestamp);
 void               schedule_indicateTx(
                         asn_t*    asnTimestamp,
-                        bool      succesfullTx
+                        uint8_t   code
                    );
 
 /**

@@ -883,33 +883,43 @@ Note that the backoff counter is global, not per slot.
 */
 bool schedule_getOkToSend(OpenQueueEntry_t* msg) {
    bool returnVal;
-   
+
+   char str[150];
+   snprintf(str, 150, "BACKOFF ");
+   openserial_ncat_uint8_t(str, (uint32_t)schedule_vars.backoff, 150);
+   strncat(str, ", BE=", 150);
+   openserial_ncat_uint8_t(str, (uint32_t)schedule_vars.backoffExponent, 150);
+   openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
+
+
    if (schedule_vars.currentScheduleEntry->shared==FALSE) {
       // non-shared slot: backoff does not apply
-      
+
       returnVal = TRUE;
    }
+
 #ifdef SCHEDULE_PRIO_FOR_DAGROOT
-   //the dagroot can only use the first shared cells (without backoff)
-   else if(idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset < SLOTFRAME_LENGTH /3){
+   //the dagroot can only use the first anycast shared cells (without backoff)
+   else if(idmanager_getIsDAGroot() && (schedule_vars.currentScheduleEntry->neighbor.type == ADDR_ANYCAST)  && schedule_vars.currentScheduleEntry->slotOffset < SLOTFRAME_LENGTH /3){
       returnVal = TRUE;
    }
-   //only the dagroot can use the first shared cells
-   else if (!idmanager_getIsDAGroot() && schedule_vars.currentScheduleEntry->slotOffset < SLOTFRAME_LENGTH /3){
+   else if (!idmanager_getIsDAGroot() && (schedule_vars.currentScheduleEntry->neighbor.type == ADDR_ANYCAST) && schedule_vars.currentScheduleEntry->slotOffset < SLOTFRAME_LENGTH /3){
       returnVal = FALSE;
    }
 #endif
    else {
+
       // non-shared slot: check backoff before answering
 
       // decrement backoff
       if (schedule_vars.backoff>0) {
          schedule_vars.backoff--;
       }
-      
+
       // only return TRUE if backoff hit 0
       if (schedule_vars.backoff==0) {
          returnVal = TRUE;
@@ -917,9 +927,9 @@ bool schedule_getOkToSend(OpenQueueEntry_t* msg) {
          returnVal = FALSE;
       }
    }
-   
+
    ENABLE_INTERRUPTS();
-   
+
    return returnVal;
 }
 
@@ -934,7 +944,8 @@ void schedule_resetBackoff() {
    // reset backoffExponent
    schedule_vars.backoffExponent = MINBE-1;
    // reset backoff
-   schedule_vars.backoff         = 0;
+   schedule_vars.backoff         = openrandom_get16b()%(1<<schedule_vars.backoffExponent);
+// schedule_vars.backoff         = 0;
    
    ENABLE_INTERRUPTS();
 }
@@ -958,41 +969,66 @@ void schedule_indicateRx(asn_t* asnTimestamp) {
 
 /**
 \brief Indicate the transmission of a packet.
+code:
+E_SUCCESS = SUCESS
+E_FAIL = FAILURE
+E_NACK = NOT ACKNOWLEDGED
 */
-void schedule_indicateTx(asn_t* asnTimestamp, bool succesfullTx) {
-   
+void schedule_indicateTx(asn_t* asnTimestamp, uint8_t code) {
+
+  // if (schedule_vars.currentScheduleEntry->shared==TRUE){
+
+      char str[150];
+      snprintf(str, 150, "FAILED");
+      strncat(str, ", BE=", 150);
+      openserial_ncat_uint8_t(str, (uint32_t)schedule_vars.backoffExponent, 150);
+      strncat(str, ", sx=", 150);
+      openserial_ncat_uint8_t(str, (uint32_t)code, 150);
+      strncat(str, ", sh=", 150);
+      openserial_ncat_uint8_t(str, (uint32_t)schedule_vars.currentScheduleEntry->shared, 150);
+      openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
+   //}
+
+
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
-   
+
    // increment usage statistics
-   if (schedule_vars.currentScheduleEntry->numTx==0xFF) {
+   if (code != E_NACK && schedule_vars.currentScheduleEntry->numTx==0xFF) {
       schedule_vars.currentScheduleEntry->numTx/=2;
       schedule_vars.currentScheduleEntry->numTxACK/=2;
    }
    schedule_vars.currentScheduleEntry->numTx++;
-   if (succesfullTx==TRUE) {
+   if (code == E_SUCCESS) {
       schedule_vars.currentScheduleEntry->numTxACK++;
    }
 
-   // update last used timestamp
-   memcpy(&schedule_vars.currentScheduleEntry->lastUsedAsn, asnTimestamp, sizeof(asn_t));
+   // update last used timestamp (only when the pkt tx is correct)
+   if (code == E_SUCCESS)
+      memcpy(&schedule_vars.currentScheduleEntry->lastUsedAsn, asnTimestamp, sizeof(asn_t));
+
 
    // update this backoff parameters for shared slots
    if (schedule_vars.currentScheduleEntry->shared==TRUE) {
-      if (succesfullTx==TRUE) {
+      //ack received
+      if (code ==  E_SUCCESS) {
          // reset backoffExponent
          schedule_vars.backoffExponent = MINBE-1;
-         // reset backoff
-         schedule_vars.backoff         = 0;
-      } else {
-         // increase the backoffExponent
-         if (schedule_vars.backoffExponent<MAXBE) {
-            schedule_vars.backoffExponent++;
-         }
-         // set the backoff to a random value in [0..2^BE]
-         schedule_vars.backoff         = openrandom_get16b()%(1<<schedule_vars.backoffExponent);
       }
-   }
+      //No ack recveived, ack required
+      else if (code ==  E_FAIL){
+
+         // increase the backoffExponent
+         if (schedule_vars.backoffExponent<MAXBE)
+            schedule_vars.backoffExponent++;
+      }
+      //no ack required-> nothing todo (the tx may or may not have been succesfull)
+      else{
+      }
+
+      //reset backoff for the next transmission
+      schedule_vars.backoff         = openrandom_get16b()%(1<<schedule_vars.backoffExponent);
+  }
    
    ENABLE_INTERRUPTS();
 }
