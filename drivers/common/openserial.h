@@ -162,11 +162,11 @@ typedef struct{
    uint8_t     l2Dest[8];
    uint8_t     txPower;
    uint8_t     numTxAttempts;
-   uint8_t     l4_protocol;
-   uint16_t    l4_sourcePortORicmpv6Type;
-   uint16_t    l4_destination_port;
-   uint8_t     l3Source[16];
-   uint8_t     l3Dest[16];
+//   uint8_t     l4_protocol;
+//   uint16_t    l4_sourcePortORicmpv6Type;
+//   uint16_t    l4_destination_port;
+//   uint8_t     l3Source[16];
+//   uint8_t     l3Dest[16];
 } evtPktTx_t;
 END_PACK
 
