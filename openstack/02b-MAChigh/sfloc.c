@@ -75,6 +75,10 @@ bool sfloc_reserveParentCells_controlTrack(void){
    return(FALSE);
 #endif
 
+   //when 6top will have finished, sfloc will ask for bandwidth for this packet (if required)
+   if (!sixtop_isIdle())
+      return(0);
+
    //Do I have a valid parent?
    if (!icmpv6rpl_getPreferredParentIndex(&i)){
        openserial_printCritical(
@@ -111,9 +115,10 @@ bool sfloc_reserveParentCells_controlTrack(void){
 
 #ifdef _DEBUG_SFLOC_
       char        str[150];
-      sprintf(str, "SFLOC - TRACK_PARENT_CONTROL - Has to reserve one cell with the parent ");
+      sprintf(str, "reservation triggered (control cell with the parent ");
       openserial_ncat_uint8_t_hex(str, parent.addr_64b[6], 150);
       openserial_ncat_uint8_t_hex(str, parent.addr_64b[7], 150);
+      strncat(str, ") ",150 );
       openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 #endif
 
@@ -160,9 +165,7 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
 
 #ifdef _DEBUG_SFLOC_
    char str[150];
-   sprintf(str, "SFLOC required?=");
-   openserial_ncat_uint32_t(str, (uint32_t)nbCells_curr < nbCells_req, 150);
-   strncat(str, ", current=", 150);
+   snprintf(str, 150, ", current=");
    openserial_ncat_uint32_t(str, (uint32_t)nbCells_curr, 150);
    strncat(str, ", required=", 150);
    openserial_ncat_uint32_t(str, (uint32_t)nbCells_req, 150);
