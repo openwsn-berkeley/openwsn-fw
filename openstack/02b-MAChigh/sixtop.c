@@ -1134,13 +1134,13 @@ port_INLINE void sixtop_sendKA() {
 //changes the current sixtop state
 void sixtop_setState(six2six_state_t state){
    //TODO
- char str[150];
+ /*char str[150];
    sprintf(str, "state ");
    openserial_ncat_uint8_t(str, sixtop_vars.six2six_state, 150);
    strncat(str, " > ", 150);
    openserial_ncat_uint32_t(str, (uint32_t)state, 150);
    openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
+*/
    uint32_t  timeout_sixtop_value;    // to change the timeout value (jitter)
 
 
@@ -1170,14 +1170,14 @@ void sixtop_setState(six2six_state_t state){
       );
 
       //TODO
-
+/*
       char str[150];
       sprintf(str, "LinkRep/LinkReq sixtop timeout ");
       openserial_ncat_uint32_t(str, (uint32_t)timeout_sixtop_value, 150);
       strncat(str, " / ", 150);
       openserial_ncat_uint32_t(str, (uint32_t)SIX2SIX_TIMEOUT_MS, 150);
       openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-
+*/
    }
 
    //otf callback when we come back to the idle state
@@ -1664,18 +1664,7 @@ void sixtop_notifyReceiveCommand(
             commandIdORcode == IANA_6TOP_CMD_LIST   ||
             commandIdORcode == IANA_6TOP_CMD_CLEAR
         ){
-           /*           // if I am already in a 6top transactions
-            if (sixtop_vars.six2six_state != SIX_IDLE){
-                code = IANA_6TOP_RC_ERR;
-#ifdef _DEBUG_SIXTOP_
-                char str[150];
-                snprintf(str, 150, "6P request rejected, I am not idle (state=");
-                openserial_ncat_uint32_t(str, (uint32_t)sixtop_vars.six2six_state, 150);
-                strncat(str, ")", 150);
-                openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
-#endif
 
-            } else {*/
 
            switch(commandIdORcode){
            case IANA_6TOP_CMD_ADD:
@@ -1729,7 +1718,7 @@ void sixtop_notifyReceiveCommand(
                           cellList,
                           pkt->l2_sixtop_track,
                           &(pkt->l2_nextORpreviousHop),
-                          FALSE);      //LinkReq direction
+                          TRUE);      //LinkRep direction
                  }
                  //not enough cells are available: sends the blacklisted list of busy cells
               } else if (commandIdORcode == IANA_6TOP_CMD_ADD){
@@ -1897,7 +1886,7 @@ void sixtop_notifyReceiveCommand(
                             cellList,
                             pkt->l2_sixtop_track,
                             &(pkt->l2_nextORpreviousHop),
-                            TRUE                            //LinkRep direction
+                            FALSE                            //LinkReq direction
                     );
                     else if (pkt->l2_sixtop_blacklist)
                         openserial_printInfo(COMPONENT_SIXTOP,ERR_GENERIC,
