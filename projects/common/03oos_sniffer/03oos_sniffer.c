@@ -7,7 +7,6 @@
 #include "board.h"
 #include "radio.h"
 #include "leds.h"
-#include "bsp_timer.h"
 #include "scheduler.h"
 #include "03oos_sniffer.h"
 #include "openserial.h"
@@ -23,7 +22,6 @@
 #define LENGTH_PACKET   125+LENGTH_CRC ///< maximum length is 127 bytes
 #define CHANNEL         20             ///< 20=2.450GHz
 #define ID              0x99           ///< byte sent in the packets
-#define TIMER_PERIOD    0x1fff         
 
 //=========================== variables =======================================
 
@@ -56,7 +54,6 @@ app_vars_t app_vars;
 
 void     cb_startFrame(PORT_TIMER_WIDTH timestamp);
 void     cb_endFrame(PORT_TIMER_WIDTH timestamp);
-void     cb_timer(void);
 void     task_uploadPacket(void);
 
 //=========================== main ============================================
@@ -79,10 +76,6 @@ int mote_main(void) {
    // add callback functions radio
    radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
-   
-   // start bsp timer
-   bsp_timer_set_callback(cb_timer);
-   bsp_timer_scheduleIn(TIMER_PERIOD);
    
    // prepare radio
    radio_rfOn();
@@ -142,19 +135,6 @@ void cb_endFrame(PORT_TIMER_WIDTH timestamp) {
    leds_error_off();
 }
 
-void cb_timer(void) {
-    
-   app_vars.outputOrInput = (app_vars.outputOrInput+1)%2;
-   if (app_vars.outputOrInput == 1) {
-       openserial_stop();
-       openserial_startOutput();
-   } else {
-       openserial_stop();
-       openserial_startInput();
-   }
-   // schedule again
-   bsp_timer_scheduleIn(TIMER_PERIOD);
-}
 
 // ================================ task =======================================
 void task_uploadPacket(){

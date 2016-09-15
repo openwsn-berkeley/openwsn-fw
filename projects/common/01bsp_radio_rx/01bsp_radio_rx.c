@@ -143,6 +143,7 @@ int mote_main(void) {
    
    // switch in RX
    radio_rxEnable();
+   radio_rxNow();
    
    while (1) {
       
