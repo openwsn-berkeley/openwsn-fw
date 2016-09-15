@@ -99,12 +99,12 @@ bool          sixtop_candidateRemoveCellList(
    open_addr_t*         neighbor,
    uint8_t              requiredCells
 );
-void          sixtop_addCellsByState(
+void          sixtop_addCellsByDirection(
    uint8_t              slotframeID,
    cellInfo_ht*         cellList,
    track_t              track,
    open_addr_t*         previousHop,
-   uint8_t              state
+   uint8_t              isLinkRep
 );
 void          sixtop_removeCellsByState(
    uint8_t              slotframeID,
@@ -901,7 +901,7 @@ has fired. This timer is set to fire every second, on average.
 The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
-   scheduleEntry_t* entry;
+ //  scheduleEntry_t* entry;
    sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
 
    switch (sixtop_vars.mgtTaskCounter) {
@@ -915,7 +915,7 @@ void timer_sixtop_management_fired(void) {
          break;
       case 2:
          // called every EBPERIOD seconds
-         entry = schedule_statistic_poorLinkQuality();
+       /*  entry = schedule_statistic_poorLinkQuality();
          if (
              entry       != NULL                        && \
              entry->type != CELLTYPE_OFF                && \
@@ -923,6 +923,7 @@ void timer_sixtop_management_fired(void) {
          ){
              sixtop_maintaining(entry->slotOffset,&(entry->neighbor));
          }
+         */
       default:
          // called every second, except third times every EBPERIOD seconds
          sixtop_sendKA();
@@ -1723,12 +1724,12 @@ void sixtop_notifyReceiveCommand(
                     len+=sizeof(track_t);
 
                     //add the cells now in the schedule (will be remove if the tx failed)
-                    sixtop_addCellsByState(
+                    sixtop_addCellsByDirection(
                           pkt->l2_sixtop_frameID,
                           cellList,
                           pkt->l2_sixtop_track,
                           &(pkt->l2_nextORpreviousHop),
-                          sixtop_vars.six2six_state);
+                          FALSE);      //LinkReq direction
                  }
                  //not enough cells are available: sends the blacklisted list of busy cells
               } else if (commandIdORcode == IANA_6TOP_CMD_ADD){
@@ -1892,11 +1893,11 @@ void sixtop_notifyReceiveCommand(
                     // always default frameID
                     frameID = SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE;
                     if (!pkt->l2_sixtop_blacklist)
-                        sixtop_addCellsByState(frameID,
+                        sixtop_addCellsByDirection(frameID,
                             cellList,
                             pkt->l2_sixtop_track,
                             &(pkt->l2_nextORpreviousHop),
-                            sixtop_vars.six2six_state
+                            TRUE                            //LinkRep direction
                     );
                     else if (pkt->l2_sixtop_blacklist)
                         openserial_printInfo(COMPONENT_SIXTOP,ERR_GENERIC,
@@ -2146,95 +2147,61 @@ bool sixtop_candidateRemoveCellList(
 }
 
 
-void sixtop_addCellsByState(
+void sixtop_addCellsByDirection(
       uint8_t      slotframeID,
       cellInfo_ht* cellList,
       track_t      track,
       open_addr_t* previousHop,
-      uint8_t      state
+      uint8_t      isLinkRep
    ){
    uint8_t      i;
    open_addr_t  temp_neighbor;
    uint8_t      type;
    bool         shared;
   
-//TODO
-/*
-   char str[150];
-   sprintf(str, "ADDCELL ");
-   strncat(str, ", track instance=", 150);
-   openserial_ncat_uint32_t(str, (uint32_t)track.instance, 150);
-   strncat(str, ", track owner=", 150);
-   openserial_ncat_uint8_t_hex(str, track.owner.addr_64b[6], 150);
-   openserial_ncat_uint8_t_hex(str, track.owner.addr_64b[7], 150);
-*/
+
    
    //set schedule according links
    for(i = 0;i<SCHEDULEIEMAXNUMCELLS;i++){
+
       //only schedule when the request side wants to schedule a tx cell
       if(cellList[i].linkoptions != CELLTYPE_OFF && cellList[i].linkoptions != CELLTYPE_BUSY){
-         switch(state) {
 
         // strncat(str, ", slot=", 150);
         // openserial_ncat_uint32_t(str, (uint32_t)cellList[i].tsNum, 150);
         // strncat(str, " ch=", 150);
         // openserial_ncat_uint32_t(str, (uint32_t)cellList[i].choffset, 150);
 
-         case SIX_IDLE:
-            memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
 
-            if (track.instance != TRACK_PARENT_CONTROL){
-               type = CELLTYPE_RX;
-               shared = FALSE;
-            }
-            else{
-               type = CELLTYPE_TXRX;
-               shared = TRUE;
-            }
-
-            //add a RX link
-            schedule_addActiveSlot(
-                  cellList[i].tsNum,
-                  type,
-                  shared,
-                  cellList[i].choffset,
-                  &temp_neighbor,
-                  track
-            );
-
-            break;
-         case SIX_WAIT_ADDRESPONSE:
-            memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
-
-            if (track.instance != TRACK_PARENT_CONTROL){
-               type = CELLTYPE_TX;
-               shared = FALSE;
-            }
-            else{
-               type = CELLTYPE_TXRX;
-               shared = TRUE;
-            }
-
-            //add a TX link
-            schedule_addActiveSlot(
-                  cellList[i].tsNum,
-                  type,
-                  shared,
-                  cellList[i].choffset,
-                  &temp_neighbor,
-                  track
-            );
-            break;
-         default:
-
-            openserial_printCritical(COMPONENT_SIXTOP,ERR_GENERIC,
-                  (errorparameter_t)200,
-                  (errorparameter_t)state);
-
-
-            //log error
-            break;
+         //LinkRep: receiver
+         if (isLinkRep && track.instance != TRACK_PARENT_CONTROL){
+            type = CELLTYPE_RX;
+            shared = FALSE;
          }
+         //LinkReq: transmitter
+         else if (!isLinkRep && track.instance != TRACK_PARENT_CONTROL){
+            type = CELLTYPE_TX;
+            shared = FALSE;
+         }
+         //Control track!
+         else{
+            type = CELLTYPE_TXRX;
+            shared = TRUE;
+         }
+
+
+         //the neighbor
+         memcpy(&temp_neighbor,previousHop,sizeof(open_addr_t));
+
+         //add the link
+         schedule_addActiveSlot(
+               cellList[i].tsNum,
+               type,
+               shared,
+               cellList[i].choffset,
+               &temp_neighbor,
+               track
+         );
       }
    }
    //openserial_printf(COMPONENT_SIXTOP, str, strlen(str));
@@ -2414,30 +2381,12 @@ track_t sixtop_get_trackcontrol(void){
    uint8_t        dodagid[16];
 
    icmpv6rpl_getRPLDODAGid(dodagid);
-   memcpy(&(track.owner), &(dodagid[8]), sizeof(track.owner));
-   // memcpy(&(track.owner), idmanager_getMyID(ADDR_64B), sizeof(track.owner));
+   track.owner.type = ADDR_64B;
+   memcpy(&(track.owner.addr_64b[0]), &(dodagid[8]), 8);
    track.instance = TRACK_PARENT_CONTROL;
    return(track);
 }
 
-/*
-//return the common track with one specific neighbor
-track_t* sixtop_get_trackcontrol_forAddr(open_addr_t *neighbor, track_t *track){
-   uint8_t          i;
-   scheduleEntry_t  *entry;
-   uint16_t nbSlots = schedule_getMaxActiveSlots();
-
-    //for each cell in the schedule
-    for (i=0;i<nbSlots;i++){
-       entry = schedule_getCell(i);
-       if ((entry->track.instance == TRACK_PARENT_CONTROL) && (packetfunctions_sameAddress(&(entry->neighbor), neighbor))){
-           memcpy(track, &(entry->track), sizeof(track_t));
-           return(track);
-       }
-   }
-   return(NULL);
-}
-*/
 
 
 bool sixtop_areAvailableCellsToBeRemoved(      

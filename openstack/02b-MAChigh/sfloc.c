@@ -243,6 +243,11 @@ void sfloc_remove_obsolete_parents(void){
    return;
 #endif
 
+   //TODO
+   return;
+
+
+
    scheduleEntry_t  *cell;
    uint8_t          i;
    open_addr_t      parent;
@@ -292,6 +297,7 @@ void sfloc_remove_unused_cells(void){
    return;
 #endif
 
+   //TODO
    return;
 
    //no ongoing 6top transaction

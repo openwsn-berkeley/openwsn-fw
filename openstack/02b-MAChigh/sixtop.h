@@ -142,8 +142,6 @@ bool      sixtop_is_trackbesteffort(track_t track);
 track_t   sixtop_get_trackbesteffort(void);
 track_t   sixtop_get_trackcommon(void);
 track_t   sixtop_get_trackcontrol(void);
-//return the common track with one specific neighbor
-//track_t * sixtop_get_trackcontrol_forAddr(open_addr_t *neigbor, track_t *track);
 
 
 // control
