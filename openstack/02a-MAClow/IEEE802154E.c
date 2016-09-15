@@ -1043,7 +1043,7 @@ port_INLINE void activity_ti1ORri1() {
             openserial_stop();
          }
          //TODO
-         /*
+/*
                    snprintf(str, 150, "RX MODE");
                    scheduleEntry_t *entry = schedule_getCurrentScheduleEntry();
                    strncat(str, ", slot=", 150);

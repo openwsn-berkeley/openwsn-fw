@@ -56,7 +56,7 @@ void sfloc_notif_removedCell(void) {
 
 // this function is called once per slotframe. 
 void sfloc_notifyNewSlotframe(void) {
-    scheduler_push_task(sfloc_verifSchedule,TASKPRIO_SF0);
+    //scheduler_push_task(sfloc_verifSchedule,TASKPRIO_SF0);
 }
 
 //=========================== private =========================================
@@ -151,6 +151,7 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
    if (msg->l2_track.instance == TRACK_BESTEFFORT)
       return(0);
 
+
    // requested and current allocations
    nbCells_curr   = schedule_getNbCellsWithTrack(msg->l2_track, &(msg->l2_nextORpreviousHop));
    nbCells_req    = openqueue_count_track(msg->l2_track);
@@ -177,6 +178,16 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
    openserial_printf(COMPONENT_SFLOC, str, strlen(str));
 #endif
 
+   if (msg->l2_track.instance == TRACK_PARENT_CONTROL){
+      openserial_printError(
+               COMPONENT_SFLOC,
+               ERR_GENERIC,
+               (errorparameter_t)23,
+               (errorparameter_t)46
+         );
+      return(0);
+   }
+
    //request to sixtop
    nbCells_toadd = nbCells_req - nbCells_curr;
 
@@ -199,7 +210,7 @@ uint8_t sfloc_reserve_agressive_for(OpenQueueEntry_t* msg){
    sixtop_request(IANA_6TOP_CMD_ADD, &(msg->l2_nextORpreviousHop), nbCells_toadd, msg->l2_track, NULL);
    return(nbCells_req - nbCells_curr);
 
-   return(0);
+
 }
 
 
@@ -431,7 +442,6 @@ void sfloc_verifSchedule(void){
 
 //a packet is pushed to the MAC layer -> SFLOC notification
 void sfloc_notif_pktTx(OpenQueueEntry_t* msg){
-
 
    //must some actions be triggered before reserving new cells?
    if (!sfloc_verifPossible())

@@ -404,6 +404,7 @@ typedef struct {
    uint8_t       l2_sixtop_returnCode;           // return code in 6P
    track_t       l2_sixtop_track;                // track in bandwidthIE
    uint8_t       l2_sixtop_blacklist;            // does the schedule correspond to a blacklist or a whitelist?
+   bool          l2_sixtop_reply;                // Is this is a reply (stateless) or a request (stateful)?
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_IEListPresent;               //did have IE field?
