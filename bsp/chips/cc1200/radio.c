@@ -140,13 +140,14 @@ void radio_rfOff(void) {
 
 void radio_loadPacket(uint8_t* packet, uint16_t len) {
     //test 802.15.4g PHR. This has to be done by the MAC layer
-    uint8_t  PHR[2];
-    uint8_t aux;
+    uint8_t PHR[2];
+    uint8_t aux;    
+
     if (len<2048){
         PHR[0]      = len/256;
         PHR[1]      = len%256;
         PHR[0]     |= 0x10; //FCS set, size 2 bytes
-        PHR[0]     &= 0xf7; //no data whitening
+        PHR[0]     &= 0x77; //no data whitening & no Mode Switch
         *packet     = PHR[0];
         *(packet+1) = PHR[1];
         // change state
