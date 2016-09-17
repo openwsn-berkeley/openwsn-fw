@@ -947,6 +947,42 @@ port_INLINE void activity_ti1ORri1() {
                  schedule_updateCellUsageBitMap(TRUE);
              }
          }
+         /*
+         // don't send DAO or replying packet on shared slot(TxRx slot), 
+         // but still record in as having packet to be sent (just done above).
+         // later sfx will reserve at least one cell for sending DAO, if there is no cell in schedule yet.
+         if (ieee154e_vars.dataToSend !=NULL) {
+             if (
+                 cellType==CELLTYPE_TXRX && 
+                 (  // rpl packet but not boardcast (DAO, not DIO)
+                    (
+                      ieee154e_vars.dataToSend->creator==COMPONENT_ICMPv6RPL &&
+                      packetfunctions_isBroadcastMulticast(&(ieee154e_vars.dataToSend->l2_nextORpreviousHop))==FALSE
+                    )||
+                    // packet requied to be replied
+                    ieee154e_vars.dataToSend->creator==COMPONENT_FORWARDING
+                 )
+             ) {
+                  // disselect the packet to change to Rx mode.
+                  ieee154e_vars.dataToSend=NULL;
+             }
+         }
+         */
+         
+         // send EB on shared slot 0, send others packet on shared slot 1
+         // this is caused EB has a highest sending rate for fast joining when ChannelHopping is enabled.
+         // seperate the EB traffic from others
+         if (ieee154e_vars.dataToSend!=NULL && couldSendEB==TRUE){
+             if (ieee154e_vars.slotOffset == 1){
+                 ieee154e_vars.dataToSend=NULL;
+                 // go to Rx mode next
+             }
+         } else {
+             if (ieee154e_vars.slotOffset == 0){
+                 ieee154e_vars.dataToSend=NULL;
+                 // go to Rx mode next
+             }
+         }
          
          if (ieee154e_vars.dataToSend==NULL) {
             if (cellType==CELLTYPE_TX) {

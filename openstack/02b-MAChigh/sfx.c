@@ -136,8 +136,8 @@ void sfx_cellUsageCalculation_task(){
        );
    } else {
      if (cellUsage/numberOfCells<SFX_DELETE_THRESHOLD){
-         // at least one shared cell has to be existed
-         if (numberOfCells>1){
+         // only delete non-shared slots if I have
+         if (numberOfCells>SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS){
              sixtop_setHandler(SIX_HANDLER_SFX);
              // call sixtop
              sixtop_request(
