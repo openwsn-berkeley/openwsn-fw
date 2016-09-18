@@ -929,7 +929,7 @@ port_INLINE void activity_ti1ORri1() {
          // assuming that there is nothing to send
          ieee154e_vars.dataToSend = NULL;
          // check whether we can send
-         if (schedule_getOkToSend() || cellType==CELLTYPE_TX) {
+         if (schedule_getOkToSend()) {
             schedule_getNeighbor(&neighbor);
             ieee154e_vars.dataToSend = openqueue_macGetDataPacket(&neighbor);
             if ((ieee154e_vars.dataToSend==NULL) && (cellType==CELLTYPE_TXRX)) {
@@ -937,16 +937,31 @@ port_INLINE void activity_ti1ORri1() {
                // look for an EB packet in the queue
                ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
             }
+            
+            // send EB on shared slot 0, send others packet on shared slot 1
+            // this is caused EB has a highest sending rate for fast joining when ChannelHopping is enabled.
+            // seperate the EB traffic from others
+            switch(ieee154e_vars.slotOffset){
+                case 0:
+                    // only send EB
+                    couldSendEB=TRUE;
+                    ieee154e_vars.dataToSend = openqueue_macGetEBPacket();
+                    break;
+                case 1:
+                    // only send DIO
+                    couldSendEB=FALSE;
+                    ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
+                    break;
+                case 2:
+                    // only send Unicast
+                    couldSendEB=FALSE;
+                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket();
+                    break;
+                default:
+                    break;
+            }
          }
          
-         // udpate cell usgae bitmap, set as true if I have packet to send on Tx cell
-         if (cellType==CELLTYPE_TX || CELLTYPE_TXRX){
-             if (ieee154e_vars.dataToSend==NULL) {
-                 schedule_updateCellUsageBitMap(FALSE);
-             } else {
-                 schedule_updateCellUsageBitMap(TRUE);
-             }
-         }
          /*
          // don't send DAO or replying packet on shared slot(TxRx slot), 
          // but still record in as having packet to be sent (just done above).
@@ -969,19 +984,11 @@ port_INLINE void activity_ti1ORri1() {
          }
          */
          
-         // send EB on shared slot 0, send others packet on shared slot 1
-         // this is caused EB has a highest sending rate for fast joining when ChannelHopping is enabled.
-         // seperate the EB traffic from others
-         if (ieee154e_vars.dataToSend!=NULL && couldSendEB==TRUE){
-             if (ieee154e_vars.slotOffset == 1){
-                 ieee154e_vars.dataToSend=NULL;
-                 // go to Rx mode next
-             }
+         // udpate cell usgae bitmap, set as true if I have packet to send
+         if (ieee154e_vars.dataToSend==NULL) {
+             schedule_updateCellUsageBitMap(FALSE);
          } else {
-             if (ieee154e_vars.slotOffset == 0){
-                 ieee154e_vars.dataToSend=NULL;
-                 // go to Rx mode next
-             }
+             schedule_updateCellUsageBitMap(TRUE);
          }
          
          if (ieee154e_vars.dataToSend==NULL) {
