@@ -55,7 +55,8 @@ void icmpv6rpl_init() {
 
    //=== admin
    
-   icmpv6rpl_vars.busySending               = FALSE;
+   icmpv6rpl_vars.busySendingDIO            = FALSE;
+   icmpv6rpl_vars.busySendingDAO            = FALSE;
    icmpv6rpl_vars.fDodagidWritten           = 0;
    
    //=== DIO
@@ -185,11 +186,15 @@ void icmpv6rpl_sendDone(OpenQueueEntry_t* msg, owerror_t error) {
                             (errorparameter_t)0);
    }
    
+   // I'm not busy sending DIO/DAO anymore
+   if (packetfunctions_isBroadcastMulticast(&(msg->l2_nextORpreviousHop))){
+        icmpv6rpl_vars.busySendingDIO = FALSE;
+   } else {
+        icmpv6rpl_vars.busySendingDAO = FALSE;
+   }
+   
    // free packet
    openqueue_freePacketBuffer(msg);
-   
-   // I'm not busy sending anymore
-   icmpv6rpl_vars.busySending = FALSE;
 }
 
 /**
@@ -521,7 +526,7 @@ void sendDIO() {
       openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
       
       // I'm not busy sending a DIO/DAO
-      icmpv6rpl_vars.busySending  = FALSE;
+      icmpv6rpl_vars.busySendingDIO  = FALSE;
       
       // stop here
       return;
@@ -533,7 +538,7 @@ void sendDIO() {
    }
    
    // do not send DIO if I'm already busy sending
-   if (icmpv6rpl_vars.busySending==TRUE) {
+   if (icmpv6rpl_vars.busySendingDIO==TRUE) {
       return;
    }
    
@@ -545,7 +550,6 @@ void sendDIO() {
       openserial_printError(COMPONENT_ICMPv6RPL,ERR_NO_FREE_PACKET_BUFFER,
                             (errorparameter_t)0,
                             (errorparameter_t)0);
-      icmpv6rpl_vars.busySending = FALSE;
       
       return;
    }
@@ -583,7 +587,7 @@ void sendDIO() {
    
     //send
     if (icmpv6_send(msg)==E_SUCCESS) {
-        icmpv6rpl_vars.busySending = TRUE; 
+        icmpv6rpl_vars.busySendingDIO = TRUE; 
     } else {
         openqueue_freePacketBuffer(msg);
     }
@@ -638,7 +642,7 @@ void sendDAO() {
       openqueue_removeAllCreatedBy(COMPONENT_ICMPv6RPL);
       
       // I'm not busy sending a DIO/DAO
-      icmpv6rpl_vars.busySending = FALSE;
+      icmpv6rpl_vars.busySendingDAO = FALSE;
       
       // stop here
       return;
@@ -655,7 +659,7 @@ void sendDAO() {
    }
    
    // dont' send a DAO if you're still busy sending the previous one
-   if (icmpv6rpl_vars.busySending==TRUE) {
+   if (icmpv6rpl_vars.busySendingDAO==TRUE) {
       return;
    }
    
@@ -778,7 +782,7 @@ void sendDAO() {
    
    //===== send
    if (icmpv6_send(msg)==E_SUCCESS) {
-      icmpv6rpl_vars.busySending = TRUE;
+      icmpv6rpl_vars.busySendingDAO = TRUE;
    } else {
       openqueue_freePacketBuffer(msg);
    }
