@@ -953,11 +953,20 @@ port_INLINE void activity_ti1ORri1() {
                     ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
                     break;
                 case 2:
-                    // only send Unicast
                     couldSendEB=FALSE;
-                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket();
+                    // only send Unicast
+                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
+                    // if I have Tx slot for the unicast packet, send it at that Tx slot
+                    if (ieee154e_vars.dataToSend!=NULL){
+                        if (schedule_getCellsCounts(SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,CELLTYPE_TX,&(ieee154e_vars.dataToSend->l2_nextORpreviousHop))>0){
+                            ieee154e_vars.dataToSend = NULL;
+                        }
+                    }
+                    
                     break;
                 default:
+                    couldSendEB=FALSE;
+                    ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
                     break;
             }
          }

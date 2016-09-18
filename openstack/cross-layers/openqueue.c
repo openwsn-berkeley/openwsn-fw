@@ -313,14 +313,20 @@ OpenQueueEntry_t*  openqueue_macGetDIOPacket(){
    return NULL;
 }
 
-OpenQueueEntry_t*  openqueue_macGetUnicastPacket(){
+OpenQueueEntry_t*  openqueue_macGetUnicastPacket(open_addr_t* toNeighbor){
    uint8_t i;
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
     for (i=0;i<QUEUELENGTH;i++) {
        if (
            openqueue_vars.queue[i].owner==COMPONENT_SIXTOP_TO_IEEE802154E &&
-           packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE
+           packetfunctions_isBroadcastMulticast(&(openqueue_vars.queue[i].l2_nextORpreviousHop))==FALSE &&
+           (
+               (
+                   toNeighbor->type==ADDR_64B &&
+                   packetfunctions_sameAddress(toNeighbor,&openqueue_vars.queue[i].l2_nextORpreviousHop)
+               ) || toNeighbor->type==ADDR_ANYCAST
+           )
        ){
           ENABLE_INTERRUPTS();
           return &openqueue_vars.queue[i];

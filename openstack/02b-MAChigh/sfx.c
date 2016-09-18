@@ -118,12 +118,23 @@ void sfx_cellUsageCalculation_task(){
             SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
             CELLTYPE_TX,
             &neighbor);
-   numberOfCells += schedule_getCellsCounts(
-            SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
-            CELLTYPE_TXRX,
-            NULL);
+//   numberOfCells += schedule_getCellsCounts(
+//            SCHEDULE_MINIMAL_6TISCH_DEFAULT_SLOTFRAME_HANDLE,
+//            CELLTYPE_TXRX,
+//            NULL);
    cellUsage  = schedule_getTotalCellUsageStatus(CELLTYPE_TX,&neighbor);
-   cellUsage += schedule_getTotalCellUsageStatus(CELLTYPE_TXRX,NULL);
+//   cellUsage += schedule_getTotalCellUsageStatus(CELLTYPE_TXRX,NULL);
+   
+   if(numberOfCells==0){
+       sixtop_setHandler(SIX_HANDLER_SFX);
+       // call sixtop
+       sixtop_request(
+          IANA_6TOP_CMD_ADD,
+          &neighbor,
+          1
+       );
+       return;
+   }
    
    // cell usage scheduling, bandwith estimation algorithm
    if (cellUsage/numberOfCells>=SFX_ADD_THRESHOLD){
@@ -136,8 +147,8 @@ void sfx_cellUsageCalculation_task(){
        );
    } else {
      if (cellUsage/numberOfCells<SFX_DELETE_THRESHOLD){
-         // only delete non-shared slots if I have
-         if (numberOfCells>SCHEDULE_MINIMAL_6TISCH_ACTIVE_CELLS){
+         // at least keep one cell
+         if (numberOfCells>1){
              sixtop_setHandler(SIX_HANDLER_SFX);
              // call sixtop
              sixtop_request(

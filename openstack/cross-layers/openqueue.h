@@ -46,7 +46,7 @@ OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(void);
 OpenQueueEntry_t*  openqueue_macGetDIOPacket(void);
-OpenQueueEntry_t*  openqueue_macGetUnicastPacket(void);
+OpenQueueEntry_t*  openqueue_macGetUnicastPacket(open_addr_t* toNeighbor);
 /**
 \}
 \}
