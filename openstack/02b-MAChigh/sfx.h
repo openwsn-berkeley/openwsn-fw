@@ -19,7 +19,7 @@
 //=========================== module variables ================================
 
 typedef struct {
-  uint8_t periodMaintenance;   // in slotframe
+  uint8_t backoff;   // in slotframe
 }sfx_vars_t;
 
 //=========================== prototypes ======================================
@@ -30,6 +30,8 @@ void      sfx_init(void);
 void      sfx_notif_addedCell(void);
 void      sfx_notif_removedCell(void);
 void      sfx_notifyNewSlotframe(void);
+
+void      sfx_setBackoff(uint8_t value);
 
 /**
 \}

@@ -37,7 +37,7 @@ void sfx_cellUsageCalculation_task(void);
 //=========================== public ==========================================
 
 void sfx_init(void) {
-    sfx_vars.periodMaintenance = 0;
+    sfx_vars.backoff = 0;
 }
 
 void sfx_notif_addedCell(void) {
@@ -92,6 +92,10 @@ void sfx_notifyNewSlotframe(void){
     scheduler_push_task(sfx_cellUsageCalculation_task,TASKPRIO_SFX);
 }
 
+void sfx_setBackoff(uint8_t value){
+    sfx_vars.backoff = value;
+}
+
 // ========================== private =========================================
 void sfx_cellUsageCalculation_task(){
    open_addr_t          neighbor; 
@@ -103,8 +107,8 @@ void sfx_cellUsageCalculation_task(){
       return;
    }
    
-   if (sfx_vars.periodMaintenance>0){
-      sfx_vars.periodMaintenance -= 1;
+   if (sfx_vars.backoff>0){
+      sfx_vars.backoff -= 1;
       return;
    }
    

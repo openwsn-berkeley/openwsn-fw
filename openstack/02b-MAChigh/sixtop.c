@@ -1162,6 +1162,8 @@ void sixtop_notifyReceiveCommand(
             } else {
                 if (commandIdORcode==IANA_6TOP_RC_ERR){
                     // TBD: the neighbor is in a transaction, call sf0 to to make a decision (e.g. issue another 6p request with some delay)
+                    // disable sfx for [0...2^4] slotframe long time
+                    sfx_setBackoff(openrandom_get16b()%(1<<4));
                 } else {
                     if (commandIdORcode==IANA_6TOP_RC_RESET){
                         // TBD: the neighbor can't statisfy the 6p request, call sf0 to make a decision (e.g. issue another 6p request with different cell list)
