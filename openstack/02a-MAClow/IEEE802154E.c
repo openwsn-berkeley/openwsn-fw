@@ -953,6 +953,8 @@ port_INLINE void activity_ti1ORri1() {
                     ieee154e_vars.dataToSend = openqueue_macGetDIOPacket();
                     break;
                 case 2:
+                case 3:
+                case 4:
                     couldSendEB=FALSE;
                     // only send Unicast
                     ieee154e_vars.dataToSend = openqueue_macGetUnicastPacket(&neighbor);
