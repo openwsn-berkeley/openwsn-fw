@@ -2315,13 +2315,15 @@ void endSlot() {
    // change state
    changeState(S_SLEEP);
    
-   // arm serialInhibit timer
+   // arm serialInhibit timer (if we are still BEFORE DURATION_si)
    if (ieee154e_vars.isSync==TRUE) {
        radiotimer_schedule(DURATION_si);
    }
    
-   // resume serial activity
-   openserial_inhibitStop(); // end of slot
+   // resume serial activity (if we are still BEFORE DURATION_si)
+   if (radio_getTimerValue()<DURATION_si) {
+      openserial_inhibitStop(); // end of slot
+   }
 }
 
 bool ieee154e_isSynch(){
