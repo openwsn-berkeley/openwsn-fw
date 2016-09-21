@@ -42,6 +42,7 @@ OpenQueueEntry_t*  openqueue_getIpPacket();
 // called by res
 OpenQueueEntry_t*  openqueue_sixtopGetSentPacket(void);
 OpenQueueEntry_t*  openqueue_sixtopGetReceivedPacket(void);
+uint8_t            openqueue_sixtopGetNumberOfPacketCreatedBy(uint8_t creator);
 // called by IEEE80215E
 OpenQueueEntry_t*  openqueue_macGetDataPacket(open_addr_t* toNeighbor);
 OpenQueueEntry_t*  openqueue_macGetEBPacket(void);

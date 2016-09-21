@@ -201,6 +201,21 @@ OpenQueueEntry_t* openqueue_sixtopGetReceivedPacket() {
    return NULL;
 }
 
+uint8_t  openqueue_sixtopGetNumberOfPacketCreatedBy(uint8_t creator){
+   uint8_t i;
+   uint8_t counter;
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   counter = 0;
+   for (i=0;i<QUEUELENGTH;i++) {
+      if (openqueue_vars.queue[i].creator==creator) {
+         counter += 1;
+      }
+   }
+   ENABLE_INTERRUPTS();
+   return counter;
+}
+
 //======= called by IEEE80215E
 
 OpenQueueEntry_t* openqueue_macGetDataPacket(open_addr_t* toNeighbor) {

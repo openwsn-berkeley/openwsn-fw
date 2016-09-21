@@ -20,6 +20,8 @@
 
 //=========================== define ==========================================
 
+#define MAX_6P_REQUEST 5
+
 //=========================== variables =======================================
 
 sixtop_vars_t sixtop_vars;
@@ -997,6 +999,11 @@ void sixtop_notifyReceiveCommand(
     uint8_t           container;
     
     memset(cellList,0,sizeof(cellList));
+    
+    if (openqueue_sixtopGetNumberOfPacketCreatedBy(COMPONENT_SIXTOP_RES)>=MAX_6P_REQUEST){
+        // only deal with max number of 6p request at same time
+        return;
+    }
     
     // get a free packet buffer
     response_pkt = openqueue_getFreePacketBuffer(COMPONENT_SIXTOP_RES);
