@@ -27,6 +27,8 @@
 
 openserial_vars_t openserial_vars;
 
+opentimer_id_t watchdog;
+
 //=========================== prototypes ======================================
 
 // printing
@@ -56,6 +58,10 @@ void outputHdlcClose(void);
 void inputHdlcOpen(void);
 void inputHdlcWrite(uint8_t b);
 void inputHdlcClose(void);
+
+// watchdog
+void watchdog_feed();
+void cb_watchdog_fired(opentimer_id_t id);
 
 //=========================== public ==========================================
 
@@ -724,6 +730,8 @@ port_INLINE void outputHdlcClose() {
 
     // write the closing HDLC flag
     openserial_vars.outputBuf[openserial_vars.outputBufIdxW++]       = HDLC_FLAG;
+    
+    watchdog_feed();
 }
 
 //===== hdlc (input)
@@ -775,6 +783,43 @@ port_INLINE void inputHdlcClose() {
         // drop the incoming fram
         openserial_vars.inputBufFill     = 0;
     }
+}
+
+//=========================== watchdog callback ===============================
+
+void watchdog_start(){
+    watchdog = opentimers_start(
+        10000,
+        TIMER_PERIODIC,
+        TIME_MS,
+        cb_watchdog_fired
+    );
+}
+
+void watchdog_feed(){
+    opentimers_setPeriod(watchdog,TIME_MS,10000);
+}
+
+void cb_watchdog_fired(opentimer_id_t id){
+    
+    // blink error LED, this is serious
+    leds_error_blink();
+    
+    // schedule for the mote to reboot in 10s
+    opentimers_start(
+        1000,
+        TIMER_ONESHOT,
+        TIME_MS,
+        openserial_board_reset_cb
+    );
+    
+    openserial_printInfoErrorCritical(
+        SERFRAME_MOTE2PC_CRITICAL,
+        COMPONENT_OPENWSN,
+        ERR_WATCHDOG_FIRED,
+        0,
+        0
+    );
 }
 
 //=========================== interrupt handlers ==============================

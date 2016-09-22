@@ -84,6 +84,9 @@ void openstack_init(void) {
    //===== applications
    openapps_init();
    
+   //==== watchdog
+   watchdog_start();
+   
    openserial_printInfo(
       COMPONENT_OPENWSN,ERR_BOOTED,
       (errorparameter_t)0,

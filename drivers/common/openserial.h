@@ -163,6 +163,9 @@ bool      debugPrint_outBufferIndexes(void);
 void      isr_openserial_rx(void);
 void      isr_openserial_tx(void);
 
+//watch dog
+void      watchdog_start();
+
 /**
 \}
 \}
