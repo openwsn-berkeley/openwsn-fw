@@ -558,8 +558,8 @@ uint8_t schedule_getNumOfSlotsByType(cellType_t type){
 }
 
 uint8_t schedule_getNumberOfFreeEntries(){
-  uint8_t i; 
-  uint8_t counter;
+   uint8_t i; 
+   uint8_t counter;
    
    INTERRUPT_DECLARATION();
    DISABLE_INTERRUPTS();
@@ -567,7 +567,7 @@ uint8_t schedule_getNumberOfFreeEntries(){
    counter = 0;
    for(i=0;i<MAXACTIVESLOTS;i++) {
       if(schedule_vars.scheduleBuf[i].type == CELLTYPE_OFF){
-          counter++;
+         counter++;
       }
    }
    
