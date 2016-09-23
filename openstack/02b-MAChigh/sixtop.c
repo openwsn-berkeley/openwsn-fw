@@ -175,6 +175,12 @@ void sixtop_request(uint8_t code, open_addr_t* neighbor, uint8_t numCells){
         return;
     }
    
+   if (schedule_getNumberOfFreeEntries() < numCells){
+      // no enough free buffer for adding more cells
+      return ;
+   }
+    
+   
     // generate candidate cell list
     if (code == IANA_6TOP_CMD_ADD){
         if (sixtop_candidateAddCellList(&frameID,cellList,numCells)==FALSE){
@@ -1110,7 +1116,7 @@ void sixtop_notifyReceiveCommand(
                         code = IANA_6TOP_RC_SUCCESS;
                         len += processIE_prepend_sixCelllist(response_pkt,cellList);
                     } else {
-                        code = IANA_6TOP_RC_ERR;
+                        code = IANA_6TOP_RC_RESET;
                     }
                     break;
                 case IANA_6TOP_CMD_COUNT:
@@ -1393,6 +1399,11 @@ bool sixtop_areAvailableCellsToBeScheduled(
    i          = 0;
    bw         = numOfCells;
    available  = FALSE;
+   
+   if (schedule_getNumberOfFreeEntries() < numOfCells){
+      // no enough free buffer for adding more cells
+      return FALSE;
+   }
   
    if(bw == 0 || bw>SCHEDULEIEMAXNUMCELLS){
       // log wrong parameter error TODO
