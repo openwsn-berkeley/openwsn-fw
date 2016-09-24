@@ -172,6 +172,8 @@ void isr_openserial_rx_mod(void);
 
 uint16_t htons(uint16_t val);
 
+   // initial radio
+void cb_startFrame(uint16_t timestamp);
 void cb_endFrame(uint16_t timestamp);
 void cb_sendPacket(opentimer_id_t id);
 void cb_finishTx(void);
@@ -186,13 +188,16 @@ int mote_main(void) {
    board_init();
    scheduler_init();
    opentimers_init();
-   radio_init();
-   leds_init();
 
+   leds_all_off();
+   radiotimer_start(0xffffff);
+   radiotimer_cancel();
+   
    // get mac
    eui64_get(mercator_vars.mac);
    
    // initial radio
+   radio_setStartFrameCb(cb_startFrame);
    radio_setEndFrameCb(cb_endFrame);
 
    // initial UART
@@ -551,6 +556,10 @@ void isr_openserial_rx_mod(void) {
 
 //===== radiotimer
 
+void cb_startFrame(uint16_t timestamp){
+    // nothing
+}
+
 void cb_endFrame(uint16_t timestamp) {
    // local vars
       uint8_t  srcmac[8];
@@ -559,6 +568,8 @@ void cb_endFrame(uint16_t timestamp) {
       uint8_t  txfillbyte;
          bool  is_expected = TRUE;
    IND_RX_ht*  resp;
+   
+   radio_rfOff();
    
    if (mercator_vars.status == ST_RX){
       
