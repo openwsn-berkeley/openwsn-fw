@@ -23,6 +23,8 @@
 #include "icmpv6rpl.h"
 #include "sf0.h"
 
+#define WATCHDOG_TIMEOUT 30000  // 30000 = 30seconds
+
 //=========================== variables =======================================
 
 openserial_vars_t openserial_vars;
@@ -789,7 +791,7 @@ port_INLINE void inputHdlcClose() {
 
 void watchdog_start(){
     watchdog = opentimers_start(
-        10000,
+        WATCHDOG_TIMEOUT,
         TIMER_PERIODIC,
         TIME_MS,
         cb_watchdog_fired
@@ -797,24 +799,11 @@ void watchdog_start(){
 }
 
 void watchdog_feed(){
-    opentimers_setPeriod(watchdog,TIME_MS,10000);
+    opentimers_setPeriod(watchdog,TIME_MS,WATCHDOG_TIMEOUT);
 }
 
 void cb_watchdog_fired(opentimer_id_t id){
-    
-    // blink error LED, this is serious
-    leds_error_blink();
-    
-    // schedule for the mote to reboot in 10s
-    opentimers_start(
-        1000,
-        TIMER_ONESHOT,
-        TIME_MS,
-        openserial_board_reset_cb
-    );
-    
-    openserial_printInfoErrorCritical(
-        SERFRAME_MOTE2PC_CRITICAL,
+    openserial_printCritical(
         COMPONENT_OPENWSN,
         ERR_WATCHDOG_FIRED,
         0,
