@@ -116,6 +116,6 @@ void board_enableHardFaultExceptionHandler(){
     //    bit9. stack alignment on exception entry 
     //    bit4. enables faulting
     //    bit3. unaligned access traps
-    SCB->CCR = 0x00000218;
+    SCB->CCR = 0x00000210;
 }
 
