@@ -790,13 +790,20 @@ port_INLINE bool ieee154e_processIEs(OpenQueueEntry_t* pkt, uint16_t* lenIE) {
             }
             
             len = len - sublen;
-         } while(len>0);
+         } while(len>1); // we add one byte to indicate the real frequence, so here loop when len>1, not len>0
          if (f_asn2slotoffset == TRUE) {
             // at this point, ASN and frame length are known
             // the current slotoffset can be inferred
             ieee154e_syncSlotOffset();
             schedule_syncSlotOffset(ieee154e_vars.slotOffset);
             ieee154e_vars.nextActiveSlotOffset = schedule_getNextActiveSlotOffset();
+            
+            // get real frequence
+            if (ieee154e_vars.slotOffset==0){
+                // use the real frequence which is indicated by next byte
+                ieee154e_vars.freq = *((uint8_t*)(pkt->payload)+*lenIE);
+            }
+            
             /* 
             infer the asnOffset based on the fact that
             ieee154e_vars.freq = 11 + (asnOffset + channelOffset)%16 
@@ -1021,6 +1028,7 @@ port_INLINE void activity_ti1ORri1() {
                ieee154e_getAsn(sync_IE.asn);
                sync_IE.join_priority = (icmpv6rpl_getMyDAGrank()/MINHOPRANKINCREASE)-1; //poipoi -- use dagrank(rank)-1
                memcpy(ieee154e_vars.dataToSend->l2_ASNpayload,&sync_IE,sizeof(sync_IE_ht));
+               *(ieee154e_vars.dataToSend->l2_realFrequence) = calculateFrequency(schedule_getChannelOffset());
             }
             // record that I attempt to transmit this packet
             ieee154e_vars.dataToSend->l2_numTxAttempts++;
@@ -1119,8 +1127,12 @@ port_INLINE void activity_ti2() {
    // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
-   // configure the radio for that frequency
-   radio_setFrequency(ieee154e_vars.freq);
+   if (ieee154e_vars.slotOffset !=0){
+     // configure the radio for that frequency
+     radio_setFrequency(ieee154e_vars.freq);
+   } else {
+     radio_setFrequency(SYNCHRONIZING_CHANNEL);
+   }
    
    // load the packet in the radio's Tx buffer
    radio_loadPacket(ieee154e_vars.localCopyForTransmission.payload,
@@ -1453,8 +1465,12 @@ port_INLINE void activity_ri2() {
    // calculate the frequency to transmit on
    ieee154e_vars.freq = calculateFrequency(schedule_getChannelOffset()); 
    
-   // configure the radio for that frequency
-   radio_setFrequency(ieee154e_vars.freq);
+   if (ieee154e_vars.slotOffset !=0){
+       // configure the radio for that frequency
+       radio_setFrequency(ieee154e_vars.freq);
+   } else {
+       radio_setFrequency(SYNCHRONIZING_CHANNEL);
+   }
    
    // enable the radio in Rx mode. The radio does not actively listen yet.
    radio_rxEnable();

@@ -508,6 +508,12 @@ void task_sixtopNotifReceive() {
     case IEEE154_TYPE_DATA:
     case IEEE154_TYPE_CMD:
         if (msg->length>0) {
+            if (msg->l2_frameType == IEEE154_TYPE_BEACON){
+                // I have one byte frequence field, no useful for upper layer
+                // free up the RAM
+                openqueue_freePacketBuffer(msg);
+                break;
+            }
             // send to upper layer
             iphc_receive(msg);
         } else {
@@ -707,6 +713,10 @@ port_INLINE void sixtop_sendEB() {
    // declare ownership over that packet
    eb->creator = COMPONENT_SIXTOP;
    eb->owner   = COMPONENT_SIXTOP;
+   
+   // reserve one byte to indicate the real frequence
+   packetfunctions_reserveHeaderSize(eb,1);
+   eb->l2_realFrequence = eb->payload;
    
    // reserve space for EB-specific header
    // reserving for IEs.

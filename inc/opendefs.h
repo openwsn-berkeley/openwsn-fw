@@ -309,6 +309,7 @@ typedef struct {
    uint8_t       l2_sixtop_frameID;              // frameID in 6P
    uint8_t       l2_sixtop_requestCommand;       // request Command in 6P
    uint8_t       l2_sixtop_returnCode;           // return code in 6P
+   uint8_t*      l2_realFrequence;               // pointer to the real frequence in EB
    uint8_t*      l2_ASNpayload;                  // pointer to the ASN in EB
    uint8_t       l2_joinPriority;                // the join priority received in EB
    bool          l2_IEListPresent;               //did have IE field?
