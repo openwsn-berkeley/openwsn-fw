@@ -117,6 +117,8 @@ typedef struct {
    uint8_t         numTx;
    uint8_t         numTxACK;
    asn_t           lastUsedAsn;
+   uint16_t        usageBitMap;
+   uint8_t         bitMapIndex;
 } debugScheduleEntry_t;
 END_PACK
 
