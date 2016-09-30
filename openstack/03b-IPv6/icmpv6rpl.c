@@ -527,6 +527,7 @@ void sendDIO() {
       
       // I'm not busy sending a DIO/DAO
       icmpv6rpl_vars.busySendingDIO  = FALSE;
+      icmpv6rpl_vars.busySendingDAO  = FALSE;
       
       // stop here
       return;
@@ -643,6 +644,7 @@ void sendDAO() {
       
       // I'm not busy sending a DIO/DAO
       icmpv6rpl_vars.busySendingDAO = FALSE;
+      icmpv6rpl_vars.busySendingDIO = FALSE;
       
       // stop here
       return;
