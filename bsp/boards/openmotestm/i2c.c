@@ -50,7 +50,7 @@ void i2c_init(void){
     GPIO_Init(I2C_GPIO, &GPIO_InitStruct);
     // Step 2: Initialize I2C
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
-    I2C_InitStruct.I2C_ClockSpeed = 100000;
+    I2C_InitStruct.I2C_ClockSpeed = 400000;
     I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
     I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;
     I2C_InitStruct.I2C_OwnAddress1 = 0x00;
@@ -77,9 +77,10 @@ uint8_t i2c_slave_present(uint8_t bus_num,uint8_t slave_address){
 }
 
 void i2c_read_byte(uint8_t slave_address, uint8_t register_address, uint8_t* byte){
+    while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY));
     i2c_start();
-    leds_error_toggle();
-    i2c_address_direction(slave_address << 1, I2C_Direction_Transmitter);
+    I2C_Cmd(I2Cx, DISABLE);
+    I2C_Cmd(I2Cx, ENABLE);    i2c_address_direction(slave_address << 1, I2C_Direction_Transmitter);
     i2c_transmit(register_address);
     i2c_start();
     i2c_address_direction(slave_address << 1, I2C_Direction_Receiver);
@@ -87,10 +88,21 @@ void i2c_read_byte(uint8_t slave_address, uint8_t register_address, uint8_t* byt
     i2c_stop();
 }
 
-uint32_t i2c_read_bytes(uint8_t slave_address, uint8_t register_address, uint8_t* buffer, uint32_t length){
-    uint32_t returnVal;
-    returnVal = 0;
-    return returnVal;
+void i2c_read_bytes(uint8_t slave_address, uint8_t register_address, uint8_t* buffer, uint8_t length){
+    uint8_t i;
+    I2C_Cmd(I2Cx, DISABLE);
+    I2C_Cmd(I2Cx, ENABLE);
+    while (I2C_GetFlagStatus(I2Cx, I2C_FLAG_BUSY));
+    i2c_start();
+    i2c_address_direction(slave_address << 1, I2C_Direction_Transmitter);
+    i2c_transmit(register_address);
+    i2c_start();
+    i2c_address_direction(slave_address << 1, I2C_Direction_Receiver);
+    for(i=0;i<length-1;i++){
+        *(buffer+i) = i2c_receive_ack();
+    }
+    *(buffer+i) = i2c_receive_nack();
+    i2c_stop();
 }
 
 void i2c_write_byte(uint8_t address, uint8_t byte){
@@ -102,10 +114,7 @@ void i2c_write_byte(uint8_t address, uint8_t byte){
     i2c_stop();
 }
 
-uint32_t i2c_write_bytes(uint8_t address, uint8_t* buffer, uint32_t length){
-    uint32_t returnVal;
-    returnVal = 0;
-    return returnVal;
+void i2c_write_bytes(uint8_t address, uint8_t* buffer, uint8_t length){
 }
 
 // interrupt handlers
