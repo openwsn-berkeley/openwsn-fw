@@ -282,6 +282,7 @@ owerror_t schedule_addActiveSlot(
       channelOffset_t channelOffset,
       open_addr_t*    neighbor
    ) {
+   uint8_t asn[5];
    scheduleEntry_t* slotContainer;
    scheduleEntry_t* previousSlotWalker;
    scheduleEntry_t* nextSlotWalker;
@@ -315,6 +316,12 @@ owerror_t schedule_addActiveSlot(
    slotContainer->shared                    = shared;
    slotContainer->channelOffset             = channelOffset;
    memcpy(&slotContainer->neighbor,neighbor,sizeof(open_addr_t));
+   
+   // fill that schedule entry with current asn
+   ieee154e_getAsn(&(asn[0]));
+   slotContainer->lastUsedAsn.bytes0and1 = 256*asn[1]+asn[0];
+   slotContainer->lastUsedAsn.bytes2and3 = 256*asn[3]+asn[2];
+   slotContainer->lastUsedAsn.byte4      = asn[4];
    
    // insert in circular list
    if (schedule_vars.currentScheduleEntry==NULL) {
