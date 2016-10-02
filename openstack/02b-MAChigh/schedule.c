@@ -7,7 +7,7 @@
 #include "idmanager.h"
 #include "sf0.h"
 #include "sfx.h"
-#include "ieee802154e.h"
+#include "IEEE802154E.h"
 
 //=========================== definition ======================================
 
