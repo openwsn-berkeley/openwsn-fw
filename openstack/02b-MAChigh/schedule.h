@@ -211,6 +211,7 @@ void               schedule_indicateTx(
                    );
 
 void               schedule_updateCellUsageBitMap(bool hasPacketToSend);
+void               schedule_housekeeping();
 
 /**
 \}

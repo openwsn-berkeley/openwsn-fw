@@ -661,6 +661,8 @@ void timer_sixtop_management_fired(void) {
          // called every EBPERIOD seconds
          neighbors_removeOld();
          break;
+      case 2: 
+         schedule_housekeeping();
       default:
          // called every second, except third times every EBPERIOD seconds
          sixtop_sendKA();

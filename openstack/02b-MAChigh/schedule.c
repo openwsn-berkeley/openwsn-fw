@@ -7,6 +7,7 @@
 #include "idmanager.h"
 #include "sf0.h"
 #include "sfx.h"
+#include "ieee802154e.h"
 
 //=========================== definition ======================================
 
@@ -888,6 +889,27 @@ void schedule_updateCellUsageBitMap(bool hasPacketToSend){
     } else {
         schedule_vars.currentScheduleEntry->usageBitMap &= ~temp;
     }
+}
+
+void schedule_housekeeping(){
+    uint8_t i; 
+    uint16_t   timeSinceHeard;
+    INTERRUPT_DECLARATION();
+    DISABLE_INTERRUPTS();
+
+    for(i=0;i<MAXACTIVESLOTS;i++) {
+        if(schedule_vars.scheduleBuf[i].type == CELLTYPE_RX){
+            timeSinceHeard = ieee154e_asnDiff(&schedule_vars.scheduleBuf[i].lastUsedAsn);
+            if (timeSinceHeard>DESYNCTIMEOUT){
+                schedule_removeActiveSlot(
+                    schedule_vars.scheduleBuf[i].slotOffset,
+                    &(schedule_vars.scheduleBuf[i].neighbor)
+                );
+            }
+        }
+    }
+   
+    ENABLE_INTERRUPTS();
 }
 
 //=========================== private =========================================
