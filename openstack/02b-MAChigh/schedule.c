@@ -894,7 +894,6 @@ void schedule_updateCellUsageBitMap(bool hasPacketToSend){
 void schedule_housekeeping(){
     uint8_t     i; 
     uint16_t    timeSinceHeard;
-    bool        hasParent;
     open_addr_t neighbor;
     
     
@@ -917,7 +916,7 @@ void schedule_housekeeping(){
         if(schedule_vars.scheduleBuf[i].type == CELLTYPE_TX){
             // remove Tx cell if it's scheduled to non-perferred parent
             if (icmpv6rpl_getPreferredParentEui64(&neighbor)==TRUE) {
-                if(packetfunctions_sameAddress(neighbor,&(schedule_vars.scheduleBuf[i].neighbor))==FALSE){
+                if(packetfunctions_sameAddress(&neighbor,&(schedule_vars.scheduleBuf[i].neighbor))==FALSE){
                     schedule_removeActiveSlot(
                         schedule_vars.scheduleBuf[i].slotOffset,
                         &(schedule_vars.scheduleBuf[i].neighbor)
@@ -927,8 +926,8 @@ void schedule_housekeeping(){
             }
             // remove Tx cell if its PDR is lower than 50% (at least have tried more than 5 times)
             if (
-                schedule_vars.scheduleBuf[i].numTx>5 && \
-                schedule_vars.scheduleBuf[i].numTxACK*10\schedule_vars.scheduleBuf[i].numTx<5
+                schedule_vars.scheduleBuf[i].numTx>5 &&
+                schedule_vars.scheduleBuf[i].numTxACK*10/schedule_vars.scheduleBuf[i].numTx<5
             ){
                 schedule_removeActiveSlot(
                     schedule_vars.scheduleBuf[i].slotOffset,
