@@ -899,8 +899,9 @@ void schedule_housekeeping(){
 
     for(i=0;i<MAXACTIVESLOTS;i++) {
         if(schedule_vars.scheduleBuf[i].type == CELLTYPE_RX){
-            timeSinceHeard = ieee154e_asnDiff(&schedule_vars.scheduleBuf[i].lastUsedAsn);
-            if (timeSinceHeard>DESYNCTIMEOUT){
+            timeSinceHeard = ieee154e_asnDiff(&(schedule_vars.scheduleBuf[i].lastUsedAsn));
+            // max interval of two packet on Rx, 2*DESYNCTIMEOUT
+            if (timeSinceHeard>2*DESYNCTIMEOUT){
                 schedule_removeActiveSlot(
                     schedule_vars.scheduleBuf[i].slotOffset,
                     &(schedule_vars.scheduleBuf[i].neighbor)

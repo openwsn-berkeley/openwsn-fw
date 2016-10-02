@@ -663,6 +663,7 @@ void timer_sixtop_management_fired(void) {
          break;
       case 2: 
          schedule_housekeeping();
+         break;
       default:
          // called every second, except third times every EBPERIOD seconds
          sixtop_sendKA();
