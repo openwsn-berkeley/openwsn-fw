@@ -892,12 +892,17 @@ void schedule_updateCellUsageBitMap(bool hasPacketToSend){
 }
 
 void schedule_housekeeping(){
-    uint8_t i; 
-    uint16_t   timeSinceHeard;
+    uint8_t     i; 
+    uint16_t    timeSinceHeard;
+    bool        hasParent;
+    open_addr_t neighbor;
+    
+    
     INTERRUPT_DECLARATION();
     DISABLE_INTERRUPTS();
 
     for(i=0;i<MAXACTIVESLOTS;i++) {
+        // remove Rx cell if haven't heard anything for a while longer than 2*DESYNCTIMEOUT
         if(schedule_vars.scheduleBuf[i].type == CELLTYPE_RX){
             timeSinceHeard = ieee154e_asnDiff(&(schedule_vars.scheduleBuf[i].lastUsedAsn));
             // max interval of two packet on Rx, 2*DESYNCTIMEOUT
@@ -906,6 +911,30 @@ void schedule_housekeeping(){
                     schedule_vars.scheduleBuf[i].slotOffset,
                     &(schedule_vars.scheduleBuf[i].neighbor)
                 );
+                break;
+            }
+        }
+        if(schedule_vars.scheduleBuf[i].type == CELLTYPE_TX){
+            // remove Tx cell if it's scheduled to non-perferred parent
+            if (icmpv6rpl_getPreferredParentEui64(&neighbor)==TRUE) {
+                if(packetfunctions_sameAddress(neighbor,&(schedule_vars.scheduleBuf[i].neighbor))==FALSE){
+                    schedule_removeActiveSlot(
+                        schedule_vars.scheduleBuf[i].slotOffset,
+                        &(schedule_vars.scheduleBuf[i].neighbor)
+                    );
+                    break;
+                }
+            }
+            // remove Tx cell if its PDR is lower than 50% (at least have tried more than 5 times)
+            if (
+                schedule_vars.scheduleBuf[i].numTx>5 && \
+                schedule_vars.scheduleBuf[i].numTxACK*10\schedule_vars.scheduleBuf[i].numTx<5
+            ){
+                schedule_removeActiveSlot(
+                    schedule_vars.scheduleBuf[i].slotOffset,
+                    &(schedule_vars.scheduleBuf[i].neighbor)
+                );
+                break;
             }
         }
     }
