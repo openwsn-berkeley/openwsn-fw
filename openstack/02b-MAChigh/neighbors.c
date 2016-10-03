@@ -395,7 +395,10 @@ void  neighbors_removeOld() {
    uint8_t    i, j;
    uint16_t   timeSinceHeard;
    bool       haveParent;
-   
+   uint8_t    neighborIndexWithHighestRank[3];
+   dagrank_t  lowestRank;
+   // first round
+   lowestRank = MAXDAGRANK;
    for (i=0;i<MAXNUMNEIGHBORS;i++) {
       if (neighbors_vars.neighbors[i].used==1) {
          timeSinceHeard = ieee154e_asnDiff(&neighbors_vars.neighbors[i].asn);
@@ -409,9 +412,77 @@ void  neighbors_removeOld() {
             else {
                 removeNeighbor(i);
             }
+         } else {
+            if (lowestRank>neighbors_vars.neighbors[i].DAGrank){
+                lowestRank = neighbors_vars.neighbors[i].DAGrank;
+                neighborIndexWithHighestRank[0] = i;
+            }
          }
       }
-   } 
+   }
+   
+   if (lowestRank==MAXDAGRANK){
+        return;
+   }
+   
+   // second round
+   lowestRank = MAXDAGRANK;
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (neighbors_vars.neighbors[i].used==1) {
+          if (
+              lowestRank>neighbors_vars.neighbors[i].DAGrank &&
+              i != neighborIndexWithHighestRank[0]
+          ){
+              lowestRank = neighbors_vars.neighbors[i].DAGrank;
+              neighborIndexWithHighestRank[1] = i;
+          }
+      }
+   }
+   
+   if (lowestRank==MAXDAGRANK){
+        return;
+   }
+   
+   // third round
+   lowestRank = MAXDAGRANK;
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (neighbors_vars.neighbors[i].used==1) {
+          if (
+              lowestRank>neighbors_vars.neighbors[i].DAGrank &&
+              i != neighborIndexWithHighestRank[0]           &&
+              i != neighborIndexWithHighestRank[1]
+          ){
+              lowestRank = neighbors_vars.neighbors[i].DAGrank;
+              neighborIndexWithHighestRank[2] = i;
+          }
+      }
+   }
+   
+   if (lowestRank==MAXDAGRANK){
+        return;
+   }
+   
+   // remove all neighbor with non-default rank and out of the lowest 3 rank neighbors
+   for (i=0;i<MAXNUMNEIGHBORS;i++) {
+      if (neighbors_vars.neighbors[i].used==1) {
+         if (
+             i!= neighborIndexWithHighestRank[0] &&
+             i!= neighborIndexWithHighestRank[1] &&
+             i!= neighborIndexWithHighestRank[2] &&
+             neighbors_vars.neighbors[i].DAGrank != MAXDAGRANK
+         ) {
+            haveParent = icmpv6rpl_getPreferredParentIndex(&j);
+            if (haveParent && (i==j)) { // this is our preferred parent, carefull!
+                icmpv6rpl_killPreferredParent();
+                removeNeighbor(i);
+                icmpv6rpl_updateMyDAGrankAndParentSelection();
+            }
+            else {
+                removeNeighbor(i);
+            }
+         }
+      }
+   }
 }
 
 //===== debug
