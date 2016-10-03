@@ -20,7 +20,14 @@
 
 //=========================== define ==========================================
 
-#define MAX_6P_REQUEST 5
+#define MAX_6P_REQUEST            5
+// in seconds: sixtop maintaince is called every 30 seconds
+#define MAINTENANCE_PERIOD       30
+// in miliseconds: sending EB every 10 seconds
+#define EBPERIOD              10000 
+// in miliseconds: EB will be sent with period of 
+// (EBPERIOD-EBPERIOD_RANDOM_RANG: EBPERIOD+EBPERIOD_RANDOM_RANG)
+#define EBPERIOD_RANDOM_RANG   5000
 
 //=========================== variables =======================================
 
@@ -37,9 +44,11 @@ owerror_t     sixtop_send_internal(
 // timer interrupt callbacks
 void          sixtop_maintenance_timer_cb(opentimer_id_t id);
 void          sixtop_timeout_timer_cb(opentimer_id_t id);
+void          sixtop_sendingEb_timer_cb(opentimer_id_t id);
 
 //=== EB/KA task
 
+void          timer_sixtop_sendEb_fired(void);
 void          timer_sixtop_management_fired(void);
 void          sixtop_sendEB(void);
 void          sixtop_sendKA(void);
@@ -119,6 +128,13 @@ void sixtop_init() {
    sixtop_vars.ebPeriod           = EBPERIOD;
    sixtop_vars.isResponseEnabled  = TRUE;
    sixtop_vars.handler            = SIX_HANDLER_NONE;
+   
+   sixtop_vars.ebSendingTimerId   = opentimers_start(
+      (EBPERIOD-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG))),
+      TIMER_PERIODIC,
+      TIME_MS,
+      sixtop_sendingEb_timer_cb
+   );
    
    sixtop_vars.maintenanceTimerId = opentimers_start(
       sixtop_vars.periodMaintenance,
@@ -427,6 +443,11 @@ void task_sixtopNotifSendDone() {
             
             // not busy sending EB anymore
             sixtop_vars.busySendingEB = FALSE;
+            opentimers_setPeriod(
+                sixtop_vars.ebSendingTimerId,
+                TIME_MS,
+                (EBPERIOD-EBPERIOD_RANDOM_RANG+(openrandom_get16b()%(2*EBPERIOD_RANDOM_RANG)))
+            );
          } else {
             // this is a KA
             
@@ -629,6 +650,9 @@ owerror_t sixtop_send_internal(
 }
 
 // timer interrupt callbacks
+void sixtop_sendingEb_timer_cb(opentimer_id_t id){
+   scheduler_push_task(timer_sixtop_sendEb_fired,TASKPRIO_SIXTOP);
+}
 
 void sixtop_maintenance_timer_cb(opentimer_id_t id) {
    scheduler_push_task(timer_sixtop_management_fired,TASKPRIO_SIXTOP);
@@ -640,6 +664,10 @@ void sixtop_timeout_timer_cb(opentimer_id_t id) {
 
 //======= EB/KA task
 
+void timer_sixtop_sendEb_fired(){
+    sixtop_sendEB();
+}
+
 /**
 \brief Timer handlers which triggers MAC management task.
 
@@ -650,18 +678,15 @@ The body of this function executes one of the MAC management task.
 */
 void timer_sixtop_management_fired(void) {
    
-   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%sixtop_vars.ebPeriod;
+   sixtop_vars.mgtTaskCounter = (sixtop_vars.mgtTaskCounter+1)%MAINTENANCE_PERIOD;
    
    switch (sixtop_vars.mgtTaskCounter) {
       case 0:
-         // called every EBPERIOD seconds
-         sixtop_sendEB();
-         break;
-      case 1:
-         // called every EBPERIOD seconds
+         // called every MAINTENANCE_PERIOD seconds
          neighbors_removeOld();
          break;
-      case 2: 
+      case 1: 
+         // called every MAINTENANCE_PERIOD seconds
          schedule_housekeeping();
          break;
       default:
