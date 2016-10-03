@@ -936,16 +936,36 @@ void schedule_housekeeping(){
                 schedule_vars.scheduleBuf[i].numTx>5 &&
                 schedule_vars.scheduleBuf[i].numTxACK*10/schedule_vars.scheduleBuf[i].numTx<5
             ){
-                schedule_removeActiveSlot(
-                    schedule_vars.scheduleBuf[i].slotOffset,
-                    &(schedule_vars.scheduleBuf[i].neighbor)
-                );
+                sixtop_setHandler(SIX_HANDLER_RELOCATION);
+                sixtop_request(IANA_6TOP_CMD_ADD,&(schedule_vars.scheduleBuf[i].neighbor),1);
                 break;
             }
         }
     }
    
     ENABLE_INTERRUPTS();
+}
+
+void schedule_getToBeRemovedCells(uint16_t* tsNum, uint16_t* choffset, uint8_t* linkoptions,open_addr_t* neighbor){
+   scheduleEntry_t* scheduleWalker;
+   
+   INTERRUPT_DECLARATION();
+   DISABLE_INTERRUPTS();
+   
+   *linkoptions = 0;
+   scheduleWalker = schedule_vars.currentScheduleEntry;
+   do {
+      if(TRUE == scheduleWalker->mark_toBeRemoved){
+          *tsNum        = scheduleWalker->slotOffset;
+          *choffset     = scheduleWalker->channelOffset;
+          *linkoptions  = scheduleWalker->type;
+          neighbor      = &(scheduleWalker->neighbor);
+          break;
+      }
+      scheduleWalker = scheduleWalker->next;
+   }while(scheduleWalker!=schedule_vars.currentScheduleEntry);
+   
+   ENABLE_INTERRUPTS();
 }
 
 //=========================== private =========================================

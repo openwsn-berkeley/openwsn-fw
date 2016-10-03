@@ -102,6 +102,7 @@ typedef struct {
    asn_t           lastUsedAsn;
    uint16_t        usageBitMap;
    uint8_t         bitMapIndex;
+   bool            mark_toBeRemoved;
    void*           next;
 } scheduleEntry_t;
 
@@ -212,6 +213,7 @@ void               schedule_indicateTx(
 
 void               schedule_updateCellUsageBitMap(bool hasPacketToSend);
 void               schedule_housekeeping();
+void               schedule_getToBeRemovedCells(uint16_t* tsNum,uint16_t* choffset,uint8_t* linkoptions,open_addr_t* neighbor);
 
 /**
 \}
