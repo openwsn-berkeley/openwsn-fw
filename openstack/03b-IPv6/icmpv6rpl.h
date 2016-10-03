@@ -12,8 +12,9 @@
 
 //=========================== define ==========================================
 
-#define TIMER_DIO_TIMEOUT         30000
+#define TIMER_DIO_TIMEOUT         10000
 #define TIMER_DAO_TIMEOUT         60000
+#define TIMER_RANDOM_RANGE         5000
 
 // Non-Storing Mode of Operation (1)
 #define MOP_DIO_A                 0<<5

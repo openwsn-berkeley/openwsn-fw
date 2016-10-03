@@ -84,7 +84,7 @@ void icmpv6rpl_init() {
    memcpy(&icmpv6rpl_vars.dioDestination.addr_128b[0],all_routers_multicast,sizeof(all_routers_multicast));
    
    icmpv6rpl_vars.dioPeriod                 = TIMER_DIO_TIMEOUT;
-   dioPeriod                                = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
+   dioPeriod                                = icmpv6rpl_vars.dioPeriod - TIMER_RANDOM_RANGE + (openrandom_get16b()%(2*TIMER_RANDOM_RANGE));
    icmpv6rpl_vars.timerIdDIO                = opentimers_start(
                                                 dioPeriod,
                                                 TIMER_PERIODIC,
@@ -132,7 +132,7 @@ void icmpv6rpl_init() {
    icmpv6rpl_vars.dao_target.prefixLength = 0;
    
    icmpv6rpl_vars.daoPeriod                 = TIMER_DAO_TIMEOUT;
-   daoPeriod                                = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
+   daoPeriod                                = icmpv6rpl_vars.daoPeriod - TIMER_RANDOM_RANGE + (openrandom_get16b()%(2*TIMER_RANDOM_RANGE));
    icmpv6rpl_vars.timerIdDAO                = opentimers_start(
                                                 daoPeriod,
                                                 TIMER_PERIODIC,
@@ -221,28 +221,25 @@ void icmpv6rpl_receive(OpenQueueEntry_t* msg) {
          icmpv6rpl_timer_DIO_task();
          break;
       case IANA_ICMPv6_RPL_DIO:
-         if (idmanager_getIsDAGroot()==TRUE) {
-            // stop here if I'm in the DAG root
-            break; // break, don't return
+         if (idmanager_getIsDAGroot()==FALSE) {
+             memcpy(
+                &(icmpv6rpl_vars.dio),
+                (icmpv6rpl_dio_ht*)(msg->payload),
+                sizeof(icmpv6rpl_dio_ht)
+             );
+             
+             // write DODAGID in DIO and DAO
+             icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
+             
+             // update my prefix // looks like we adopt the prefix from any DIO without a question about this node being our parent??
+             myPrefix.type = ADDR_PREFIX;
+             memcpy(
+                myPrefix.prefix,
+                &((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0],
+                sizeof(myPrefix.prefix)
+             );
+             idmanager_setMyID(&myPrefix);
          }
-                  
-         memcpy(
-            &(icmpv6rpl_vars.dio),
-            (icmpv6rpl_dio_ht*)(msg->payload),
-            sizeof(icmpv6rpl_dio_ht)
-         );
-         
-         // write DODAGID in DIO and DAO
-         icmpv6rpl_writeDODAGid(&(((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0]));
-         
-         // update my prefix // looks like we adopt the prefix from any DIO without a question about this node being our parent??
-         myPrefix.type = ADDR_PREFIX;
-         memcpy(
-            myPrefix.prefix,
-            &((icmpv6rpl_dio_ht*)(msg->payload))->DODAGID[0],
-            sizeof(myPrefix.prefix)
-         );
-         idmanager_setMyID(&myPrefix);
          
          // update routing info for that neighbor
          icmpv6rpl_indicateRxDIO(msg);
@@ -505,7 +502,7 @@ void icmpv6rpl_timer_DIO_task() {
    sendDIO();
    
    // arm the DIO timer with this new value
-   dioPeriod = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
+   dioPeriod = icmpv6rpl_vars.dioPeriod - TIMER_RANDOM_RANGE + (openrandom_get16b()%(2*TIMER_RANDOM_RANGE));
    opentimers_setPeriod(
       icmpv6rpl_vars.timerIdDIO,
       TIME_MS,
@@ -618,7 +615,7 @@ void icmpv6rpl_timer_DAO_task() {
    sendDAO();
    
    // arm the DAO timer with this new value
-   daoPeriod = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
+   daoPeriod = icmpv6rpl_vars.daoPeriod - TIMER_RANDOM_RANGE + (openrandom_get16b()%(2*TIMER_RANDOM_RANGE));
    opentimers_setPeriod(
       icmpv6rpl_vars.timerIdDAO,
       TIME_MS,
@@ -794,7 +791,7 @@ void icmpv6rpl_setDIOPeriod(uint16_t dioPeriod){
    uint32_t        dioPeriodRandom;
    
    icmpv6rpl_vars.dioPeriod = dioPeriod;
-   dioPeriodRandom = icmpv6rpl_vars.dioPeriod - 0x80 + (openrandom_get16b()&0xff);
+   dioPeriodRandom = icmpv6rpl_vars.dioPeriod - TIMER_RANDOM_RANGE + (openrandom_get16b()%(2*TIMER_RANDOM_RANGE));
    opentimers_setPeriod(
        icmpv6rpl_vars.timerIdDIO,
        TIME_MS,
@@ -806,7 +803,7 @@ void icmpv6rpl_setDAOPeriod(uint16_t daoPeriod){
    uint32_t        daoPeriodRandom;
    
    icmpv6rpl_vars.daoPeriod = daoPeriod;
-   daoPeriodRandom = icmpv6rpl_vars.daoPeriod - 0x80 + (openrandom_get16b()&0xff);
+   daoPeriodRandom = icmpv6rpl_vars.daoPeriod - TIMER_RANDOM_RANGE + (openrandom_get16b()%(2*TIMER_RANDOM_RANGE));
    opentimers_setPeriod(
        icmpv6rpl_vars.timerIdDAO,
        TIME_MS,
